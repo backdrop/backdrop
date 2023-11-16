@@ -8,33 +8,51 @@
  * Database configuration:
  *
  * Most sites can configure their database by entering the connection details
- * below. If using primary/secondary databases or multiple connections, see the
- * advanced database documentation at
- * https://docs.backdropcms.org/database-configuration
+ * below.
  *
- * If your server uses a different port for the database from the default of
- * '3306', you can add the 'port' key to the array.
+ * The array must contain:
+ *   'database' => 'database_name',
+ *   'username' => 'user',
+ *   'password' => 'pass',
+ *     -  On some local development systems, the database password may not be
+ *        set. If this is the case, set password to ''.
+ *   'host' => 'localhost',
  *
- * Example including port setting:
+ * It may also contain:
+ *   'driver' => 'mysql',
+ *     - By default, Backdrop sets this to 'mysql', which includes MariaDB. No
+ *       other database systems are supported by Backdrop CMS in core. See
+ *       https://docs.backdropcms.org/documentation/database-configuration#other-databases
+ *       for more information.
+ *   'port' => '3306',
+ *     - By default, Backdrop uses the standard MySQL port of '3306'. If your
+ *       server uses a different port, you can add it here.
+ *   'prefix' => '',
+ *     - By default, Backdrop set this to '' (i.e. no prefix). If you need to
+ *       share the Backdrop database with another installation then you can
+ *       include a prefix here to support that, for example 'backdrop_'.
+ *
+ * Example including port setting and prefix:
  * @code
  * $database = array(
- *   'driver' => 'mysql',
  *   'database' => 'database_name',
  *   'username' => 'user',
  *   'password' => 'pass',
  *   'host' => 'localhost',
  *   'port' => '3307',
- *   'prefix' => '',
+ *   'prefix' => 'backdrop_',
  * );
  * @endcode
+ *
+ * If using primary/secondary databases or multiple connections, see the
+ * advanced database documentation at
+ * https://docs.backdropcms.org/database-configuration
  */
 $database = array(
-  'driver' => 'mysql',
   'database' => 'database_name',
   'username' => 'user',
   'password' => 'pass',
   'host' => 'localhost',
-  'prefix' => '',
 );
 
 /**

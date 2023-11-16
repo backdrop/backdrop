@@ -883,14 +883,24 @@ function backdrop_settings_initialize() {
   // array.
   if (!empty($database) && is_array($database)) {
     $default_db_array = array(
-      'driver' => 'mysql',
       'database' => 'database_name',
       'username' => 'user',
       'password' => 'pass',
       'host' => 'localhost',
-      'prefix' => '',
     );
     if ($database != $default_db_array) {
+      // Add default prefix if not set in the array.
+      if (!isset($database['prefix'])) {
+        $database['prefix'] = '';
+      }
+      // Add default driver if not set in the array.
+      if (!isset($database['driver'])) {
+        $database['driver'] = 'mysql';
+      }
+      // Set port to NULL if not overridden in the array.
+      if (!isset($database['port'])) {
+        $database['port'] = NULL;
+      }
       $databases['default']['default'] = $database;
       $database_is_set = TRUE;
     }

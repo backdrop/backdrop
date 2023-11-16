@@ -473,15 +473,22 @@ abstract class DatabaseTasks {
           $db_settings = $modified_connection_info['default'];
           $settings['database'] = array(
             'value' => array(
-              'driver' => $db_settings['driver'],
               'database' => $db_settings['database'],
               'username' => $db_settings['username'],
               'password' => $db_settings['password'],
               'host' => $db_settings['host'],
-              'prefix' => $db_settings['prefix'],
             ),
             'required' => TRUE,
           );
+          // Include the driver if it is not 'mysql'.
+          if ($db_settings['driver'] != 'mysql') {
+            $settings['database']['driver'] = $db_settings['driver'];
+          }
+          // Include the prefix if one has been set.
+          if (!empty($db_settings['prefix'])) {
+            $settings['database']['prefix'] = $db_settings['prefix'];
+          }
+          // Include the port if the default has been overridden.
           if ($db_settings['port']) {
             $settings['database']['port'] = $db_settings['port'];
           }
@@ -733,7 +740,7 @@ function backdrop_rewrite_settings($settings = array()) {
           // If variable_name is 'database', we need to remove the next 7
           // lines as they are part of the default database array.
           if ($variable_name == 'database') {
-            $database_line_count = 7;
+            $database_line_count = 5;
           }
           // Write new value to settings.php in the following format:
           //    $'setting' = 'value'; // 'comment'
