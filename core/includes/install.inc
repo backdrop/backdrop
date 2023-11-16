@@ -472,12 +472,26 @@ abstract class DatabaseTasks {
           // Connection was successful, but settings.php needs to be updated.
           $db_settings = $modified_connection_info['default'];
           $settings['database'] = array(
-            'value' => $db_settings['driver'] . '://' . rawurlencode($db_settings['username']) . ':' . rawurlencode($db_settings['password']) . '@' . $db_settings['host'] . ($db_settings['port'] ? (':' . $db_settings['port']) : '') . '/' . rawurlencode($db_settings['database']),
+            'value' => array(
+              'database' => $db_settings['database'],
+              'username' => $db_settings['username'],
+              'password' => $db_settings['password'],
+              'host' => $db_settings['host'],
+            ),
             'required' => TRUE,
           );
-          $settings['database_prefix'] = array(
-            'value' => $db_settings['prefix']['default'],
-          );
+          // Include the driver if it is not 'mysql'.
+          if ($db_settings['driver'] != 'mysql') {
+            $settings['database']['driver'] = $db_settings['driver'];
+          }
+          // Include the prefix if one has been set.
+          if (!empty($db_settings['prefix'])) {
+            $settings['database']['prefix'] = $db_settings['prefix'];
+          }
+          // Include the port if the default has been overridden.
+          if ($db_settings['port']) {
+            $settings['database']['port'] = $db_settings['port'];
+          }
           backdrop_rewrite_settings($settings);
         }
         catch (Exception $e) {
@@ -709,6 +723,7 @@ function backdrop_rewrite_settings($settings = array()) {
 
   $buffer = NULL;
   $first = TRUE;
+  $database_line_count = 0;
   if ($fp = fopen($settings_file, 'r')) {
     // Step line by line through settings.php.
     while (!feof($fp)) {
@@ -722,6 +737,11 @@ function backdrop_rewrite_settings($settings = array()) {
         preg_match('/\$([^ =]*) /', $line, $variable);
         $variable_name = $variable[1];
         if (array_key_exists($variable_name, $settings)) {
+          // If variable_name is 'database', we need to remove the next 7
+          // lines as they are part of the default database array.
+          if ($variable_name == 'database') {
+            $database_line_count = 5;
+          }
           // Write new value to settings.php in the following format:
           //    $'setting' = 'value'; // 'comment'
           $setting = $settings[$variable_name];
@@ -736,7 +756,14 @@ function backdrop_rewrite_settings($settings = array()) {
         }
       }
       else {
-        $buffer .= $line;
+        if ($database_line_count) {
+          // If this is part of the default database array, decrement the
+          // counter and don't include the line.
+          --$database_line_count;
+        }
+        else {
+          $buffer .= $line;
+        }
       }
     }
     fclose($fp);
@@ -800,7 +827,7 @@ function backdrop_install_config_directories() {
   include $settings_file;
 
   $is_empty = empty($config_directories['active']);
-  $is_default = $config_directories['active'] === 'files/config_' . md5($database) . '/active';
+  $is_default = $config_directories['active'] === 'files/config_' . md5(implode(',', $database)) . '/active';
 
   // Add a randomized config directory name to settings.php, unless it was
   // manually defined in the existing already.

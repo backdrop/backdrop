@@ -7,13 +7,53 @@
 /**
  * Database configuration:
  *
- * Most sites can configure their database by entering the connection string
- * below. If using master/slave databases or multiple connections, see the
+ * Most sites can configure their database by entering the connection details
+ * below.
+ *
+ * The array must contain:
+ *   'database' => 'database_name',
+ *   'username' => 'user',
+ *   'password' => 'pass',
+ *     -  On some local development systems, the database password may not be
+ *        set. If this is the case, set password to ''.
+ *   'host' => 'localhost',
+ *
+ * It may also contain:
+ *   'driver' => 'mysql',
+ *     - By default, Backdrop sets this to 'mysql', which includes MariaDB. No
+ *       other database systems are supported by Backdrop CMS in core. See
+ *       https://docs.backdropcms.org/documentation/database-configuration#other-databases
+ *       for more information.
+ *   'port' => '3306',
+ *     - By default, Backdrop uses the standard MySQL port of '3306'. If your
+ *       server uses a different port, you can add it here.
+ *   'prefix' => '',
+ *     - By default, Backdrop set this to '' (i.e. no prefix). If you need to
+ *       share the Backdrop database with another installation then you can
+ *       include a prefix here to support that, for example 'backdrop_'.
+ *
+ * Example including port setting and prefix:
+ * @code
+ * $database = array(
+ *   'database' => 'database_name',
+ *   'username' => 'user',
+ *   'password' => 'pass',
+ *   'host' => 'localhost',
+ *   'port' => '3307',
+ *   'prefix' => 'backdrop_',
+ * );
+ * @endcode
+ *
+ * If using primary/secondary databases or multiple connections, see the
  * advanced database documentation at
- * https://api.backdropcms.org/database-configuration
+ * https://docs.backdropcms.org/database-configuration
  */
-$database = 'mysql://user:pass@localhost/database_name';
-$database_prefix = '';
+$database = array(
+  'database' => 'database_name',
+  'username' => 'user',
+  'password' => 'pass',
+  'host' => 'localhost',
+);
 
 /**
  * Site configuration files location.
@@ -34,8 +74,8 @@ $database_prefix = '';
  * $config_directories['staging'] = '/home/myusername/config/staging';
  * @endcode
  */
-$config_directories['active'] = 'files/config_' . md5($database) . '/active';
-$config_directories['staging'] = 'files/config_' . md5($database) . '/staging';
+$config_directories['active'] = 'files/config_' . md5(implode(',', $database)) . '/active';
+$config_directories['staging'] = 'files/config_' . md5(implode(',', $database)) . '/staging';
 
 /**
  * Skip the configuration staging directory cleanup

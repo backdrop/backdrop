@@ -854,21 +854,59 @@ function backdrop_settings_initialize() {
     require_once BACKDROP_ROOT . '/core/includes/drupal.inc';
   }
 
-  // Convert simplified database settings into the full databases array.
-  if (!empty($database) && $database !== 'mysql://user:pass@localhost/database_name') {
-    $database_parts = parse_url($database);
-    if (!$database_parts) {
-      trigger_error('The database setting could not be parsed. Please check the $database setting in settings.php.', E_USER_ERROR);
+  $database_is_set = FALSE;
+  // Database connection settings have been provided in the form of a connection
+  // string.
+  if (!empty($database) && is_string($database)) {
+    $default_db_string = 'mysql://user:pass@localhost/database_name';
+    if ($database !== $default_db_string) {
+      // Convert simplified database settings string into the full databases
+      // array.
+      $database_parts = parse_url($database);
+      if (!$database_parts) {
+        trigger_error('The database setting could not be parsed. Please check the $database setting in settings.php.', E_USER_ERROR);
+      }
+      $databases['default']['default'] = array(
+        'driver' => $database_parts['scheme'],
+        // Remove leading slash.
+        'database' => rawurldecode(substr($database_parts['path'], 1)),
+        'username' => isset($database_parts['user']) ? rawurldecode($database_parts['user']) : '',
+        'password' => isset($database_parts['pass']) ? rawurldecode($database_parts['pass']) : '',
+        'host' => $database_parts['host'],
+        'port' => isset($database_parts['port']) ? $database_parts['port'] : NULL,
+        'prefix' => !empty($database_prefix) ? $database_prefix : '',
+      );
+      $database_is_set = TRUE;
     }
-    $databases['default']['default'] = array(
-      'driver' => $database_parts['scheme'],
-      'database' => rawurldecode(substr($database_parts['path'], 1)), // Remove leading slash.
-      'username' => isset($database_parts['user']) ? rawurldecode($database_parts['user']) : '',
-      'password' => isset($database_parts['pass']) ? rawurldecode($database_parts['pass']) : '',
-      'host' => $database_parts['host'],
-      'port' => isset($database_parts['port']) ? $database_parts['port'] : NULL,
-      'prefix' => !empty($database_prefix) ? $database_prefix : '',
+  }
+  // Database connection settings have been provided in the form of a simplified
+  // array.
+  if (!empty($database) && is_array($database)) {
+    $default_db_array = array(
+      'database' => 'database_name',
+      'username' => 'user',
+      'password' => 'pass',
+      'host' => 'localhost',
     );
+    if ($database != $default_db_array) {
+      // Add default prefix if not set in the array.
+      if (!isset($database['prefix'])) {
+        $database['prefix'] = '';
+      }
+      // Add default driver if not set in the array.
+      if (!isset($database['driver'])) {
+        $database['driver'] = 'mysql';
+      }
+      // Set port to NULL if not overridden in the array.
+      if (!isset($database['port'])) {
+        $database['port'] = NULL;
+      }
+      $databases['default']['default'] = $database;
+      $database_is_set = TRUE;
+    }
+  }
+  if ($database_is_set) {
+    // Check that all required parts are included.
     $required_parts = array('driver', 'database', 'username', 'host');
     foreach ($required_parts as $key) {
       if (!$databases['default']['default'][$key]) {

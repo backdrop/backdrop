@@ -1074,12 +1074,26 @@ function install_settings_form_submit($form, &$form_state) {
   // Update global settings array and save.
   $db_settings = $form_state['storage']['database'];
   $settings['database'] = array(
-    'value' => $db_settings['driver'] . '://' . rawurlencode($db_settings['username']) . ':' . rawurlencode($db_settings['password']) . '@' . $db_settings['host'] . ($db_settings['port'] ? (':' . $db_settings['port']) : '') . '/' . rawurlencode($db_settings['database']),
+    'value' => array(
+      'database' => $db_settings['database'],
+      'username' => $db_settings['username'],
+      'password' => $db_settings['password'],
+      'host' => $db_settings['host'],
+    ),
     'required' => TRUE,
   );
-  $settings['database_prefix'] = array(
-    'value' => $db_settings['prefix'],
-  );
+  // Include the driver if it is not 'mysql'.
+  if ($db_settings['driver'] != 'mysql') {
+    $settings['database']['driver'] = $db_settings['driver'];
+  }
+  // Include the prefix if one has been set.
+  if (!empty($db_settings['prefix'])) {
+    $settings['database']['prefix'] = $db_settings['prefix'];
+  }
+  // Include the port if the default has been overridden.
+  if ($db_settings['port']) {
+    $settings['database']['port'] = $db_settings['port'];
+  }
   backdrop_rewrite_settings($settings);
 
   // Check if UTF-8 MB4 support exists in the database and add to settings.php.
