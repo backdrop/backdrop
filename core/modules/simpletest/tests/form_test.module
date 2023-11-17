@@ -179,6 +179,12 @@ function form_test_menu() {
     'page arguments' => array('form_test_checkboxes_radios'),
     'access callback' => TRUE,
   );
+  $items['form-test/checkboxes-radios-select-indentations'] = array(
+    'title' => t('Checkboxes, Radios and Select indentations'),
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('form_test_checkboxes_radios_select_indentations'),
+    'access callback' => TRUE,
+  );
   $items['form-test/email'] = array(
     'title' => 'Email fields',
     'page callback' => 'backdrop_get_form',
@@ -189,6 +195,12 @@ function form_test_menu() {
     'title' => 'HTML5 datetime fields',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('form_test_h5datetime'),
+    'access callback' => TRUE,
+  );
+  $items['form-test/no-access-h5date-h5time'] = array(
+    'title' => 'HTML5 no-access date and time fields',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('form_test_no_access_h5date_h5time'),
     'access callback' => TRUE,
   );
   $items['form-test/url'] = array(
@@ -1595,6 +1607,52 @@ function form_test_checkboxes_radios($form, &$form_state, $customize = FALSE) {
 }
 
 /**
+ * Form constructor to test indentations for radios, checkboxes and select.
+ */
+function form_test_checkboxes_radios_select_indentations($form, &$form_state) {
+  $form['checkboxes'] = array(
+    '#type' => 'checkboxes',
+    '#title' => 'Indented checkboxes',
+    '#options' => array(
+      0 => 'No indentation',
+      'foo' => 'One indentation',
+      3 => 'No indentation 2',
+      'bar' => 'Two indentations',
+    ),
+  );
+  $form['checkboxes']['foo']['#indentation'] = 1;
+  $form['checkboxes']['bar']['#indentation'] = 2;
+
+  $form['radios'] = array(
+    '#type' => 'radios',
+    '#title' => 'Indented radios',
+    '#options' => array(
+      0 => 'No indentation',
+      'foo' => 'One indentation',
+      3 => 'No indentation 2',
+      'bar' => 'Two indentations',
+    ),
+  );
+  $form['radios']['foo']['#indentation'] = 1;
+  $form['radios']['bar']['#indentation'] = 2;
+
+  $form['select'] = array(
+    '#type' => 'select',
+    '#title' => 'Indented select',
+    '#options' => array(
+      0 => 'No indentation',
+      'foo' => 'One indentation',
+      3 => 'No indentation 2',
+      'bar' => 'Two indentations',
+    ),
+  );
+  $form['select']['foo']['#indentation'] = 1;
+  $form['select']['bar']['#indentation'] = 2;
+
+  return $form;
+}
+
+/**
  * Form constructor for testing #type 'email' elements.
  *
  * @see form_test_email_submit()
@@ -1660,6 +1718,63 @@ function form_test_h5datetime($form, &$form_state) {
  * Form submission handler for form_test_h5datetime().
  */
 function form_test_h5datetime_submit($form, &$form_state) {
+  backdrop_json_output($form_state['values']);
+  exit();
+}
+
+/**
+ * Form constructor for disabled html_date and html_time elements.
+ *
+ * @see form_test_no_access_h5date_h5time_submit()
+ */
+function form_test_no_access_h5date_h5time($form, &$form_state) {
+  $form['no_access_h5date'] = array(
+    '#type' => 'html_date',
+    '#title' => 'Date',
+    '#description' => 'A date.',
+    '#default_value' => array(
+      'date' => '2023-01-01',
+    ),
+    '#access' => FALSE,
+  );
+  $form['no_access_h5time'] = array(
+    '#type' => 'html_time',
+    '#title' => 'Time',
+    '#description' => 'A time.',
+    '#default_value' => array(
+      'time' => '20:30',
+    ),
+    '#access' => FALSE,
+  );
+  $form['disabled_h5date'] = array(
+    '#type' => 'html_date',
+    '#title' => 'Date',
+    '#description' => 'A date.',
+    '#default_value' => array(
+      'date' => '2023-01-01',
+    ),
+    '#disabled' => TRUE,
+  );
+  $form['disabled_h5time'] = array(
+    '#type' => 'html_time',
+    '#title' => 'Time',
+    '#description' => 'A time.',
+    '#default_value' => array(
+      'time' => '20:30',
+    ),
+    '#disabled' => TRUE,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Submit',
+  );
+  return $form;
+}
+
+/**
+ * Form submission handler for form_test_disabled_h5datetime().
+ */
+function form_test_no_access_h5date_h5time_submit($form, &$form_state) {
   backdrop_json_output($form_state['values']);
   exit();
 }
@@ -2167,7 +2282,7 @@ function form_test_clicked_button($form, &$form_state) {
     '#type' => 'textfield',
   );
 
-  // Loop through each path argument, addding buttons based on the information
+  // Loop through each path argument, adding buttons based on the information
   // in the argument. For example, if the path is
   // form-test/clicked-button/s/i/rb, then 3 buttons are added: a 'submit', an
   // 'image_button', and a 'button' with #access=FALSE. This enables form.test
@@ -2413,7 +2528,7 @@ function form_test_system_config_form() {
     '#default_value' => $config->get('def'),
   );
 
-  // Test single-element overrrides
+  // Test single-element overrides.
   $sysconfig = config('system.core');
   $form['rss_description'] = array(
     '#type' => 'textfield',

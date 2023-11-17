@@ -512,7 +512,7 @@ function menu_get_item($path = NULL, $router_item = NULL) {
  */
 function menu_execute_active_handler($path = NULL, $deliver = TRUE, $route_handler = NULL) {
   $site_config = config('system.core');
-  
+
   // Check if site is offline.
   $site_status = _menu_site_status($path, TRUE);
 
@@ -593,7 +593,9 @@ function menu_default_route_handler($router_item) {
  *   An array of path arguments; for example, array('node', '5').
  *
  * @return
- *   Returns TRUE for success, FALSE if an object cannot be loaded.
+ *   Returns TRUE for success, FALSE if an object cannot be loaded, and NULL
+ *   if the $map contains the placeholders (e.g., '%node'), not arguments for
+ *   the load functions (e.g., '5').
  *   Names of object loading functions are placed in $item['load_functions'].
  *   Loaded objects are placed in $map[]; keys are the same as keys in the
  *   $item['load_functions'] array.
@@ -601,6 +603,12 @@ function menu_default_route_handler($router_item) {
  */
 function _menu_load_objects(&$item, &$map) {
   if ($load_functions = $item['load_functions']) {
+    // If the path map is the same as the router path, don't bother loading
+    // placeholders.
+    if (!empty($item['path']) && $item['path'] === implode('/', $map)) {
+      return NULL;
+    }
+
     // If someone calls this function twice, then unserialize will fail.
     if (!is_array($load_functions)) {
       $load_functions = unserialize($load_functions);
@@ -639,7 +647,7 @@ function _menu_load_objects(&$item, &$map) {
           $return = call_user_func_array($function, $args);
         }
         else {
-          $return = $function($value);
+          $return = (backdrop_substr($value, 0, 1) === '%') ? NULL : $function($value);
         }
         // If callback returned an error or there is no callback, trigger 404.
         if ($return === FALSE) {
@@ -3429,7 +3437,7 @@ function menu_link_save(&$item, $existing_item = array(), $parent_candidates = a
 function _menu_link_find_parent($menu_link, $parent_candidates = array()) {
   $parent = FALSE;
 
-  // This item is explicitely top-level, skip the rest of the parenting.
+  // This item is explicitly top-level, skip the rest of the parenting.
   if (isset($menu_link['plid']) && empty($menu_link['plid'])) {
     return $parent;
   }
@@ -3559,7 +3567,7 @@ function _menu_find_router_path($link_path) {
 }
 
 /**
- * Inserts, updates, or deletes an uncustomized menu link related to a module.
+ * Inserts, updates, or deletes an un-customized menu link related to a module.
  *
  * @param $module
  *   The name of the module.
@@ -3884,11 +3892,11 @@ function _menu_router_build($callbacks) {
             $item['theme arguments'] = $parent['theme arguments'];
           }
         }
-        // Same for load arguments: if a loader doesn't have any explict
+        // Same for load arguments: if a loader doesn't have any explicit
         // arguments, try to find arguments in the parent.
         if (!isset($item['load arguments'])) {
           foreach ($item['_load_functions'] as $k => $function) {
-            // This loader doesn't have any explict arguments...
+            // This loader doesn't have any explicit arguments...
             if (!is_array($function)) {
               // ... check the parent for a loader at the same position
               // using the same function name and defining arguments...
