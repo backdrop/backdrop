@@ -2263,6 +2263,50 @@ class FormCheckboxTestCase extends BackdropWebTestCase {
 }
 
 /**
+ * Test transition from old JS-based textarea resize to new CSS approach.
+ */
+class FormResizableTextareaTestCase extends BackdropWebTestCase {
+
+  protected $profile = 'testing';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp('form_test');
+    return TRUE;
+  }
+
+  /**
+   * Test that setting #resizable on form item results in correct CSS classes.
+   */
+  protected function testResizableTextarea() {
+    $this->backdropGet('form-test/textarea-resize');
+    // @see form_test_resizable_textarea().
+    $name_classes = array(
+      'text-true' => 'form-textarea resize-vertical',
+      'text-false' => 'form-textarea resize-none',
+      'text-vertical' => 'form-textarea resize-vertical',
+      'text-horizontal' => 'form-textarea resize-horizontal',
+      'text-none' => 'form-textarea resize-none',
+      'text-wrong' => 'form-textarea',
+    );
+
+    foreach ($name_classes as $name => $classes) {
+      $textarea = $this->xpath('//textarea[@name=:name]', array(
+        ':name' => $name,
+      ));
+      $class_attrib = (string) $textarea[0]->attributes()->class;
+      $this->assertEqual($class_attrib, $classes, format_string('Classes for item with name %name set to %classes', array(
+        '%name' => $name,
+        '%classes' => $classes,
+      )));
+    }
+  }
+
+}
+
+/**
  * Tests email element.
  */
 class FormEmailTestCase extends BackdropWebTestCase {
