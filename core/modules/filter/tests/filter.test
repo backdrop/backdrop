@@ -998,6 +998,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
     $tests = array(
       // Single line breaks should be changed to <br /> tags, while paragraphs
       // separated with double line breaks should be enclosed with <p></p> tags.
+      // cspell:disable
       "aaa\nbbb\n\nccc" => array(
         "<p>aaa<br />\nbbb</p>\n<p>ccc</p>" => TRUE,
       ),
@@ -1049,6 +1050,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
         "<p><iframe>aaa</iframe></p>" => FALSE,
       ),
     );
+    // cspell:enable
     $this->assertFilteredString($filter, $tests);
 
     // Very long string hitting PCRE limits.

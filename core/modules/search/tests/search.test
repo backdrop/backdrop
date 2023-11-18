@@ -1097,9 +1097,9 @@ class SearchSimplifyTestCase extends BackdropWebTestCase {
     // and the odd-numbered lines we need to split into shorter chunks and
     // verify that simplification doesn't lose any characters.
     $input = file_get_contents(BACKDROP_ROOT . '/core/modules/search/tests/UnicodeTest.txt');
-    $basestrings = explode(chr(10), $input);
+    $base_strings = explode(chr(10), $input);
     $strings = array();
-    foreach ($basestrings as $key => $string) {
+    foreach ($base_strings as $key => $string) {
       if ($key %2) {
         // Even line - should simplify down to a space.
         $simplified = search_simplify($string);
