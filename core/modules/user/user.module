@@ -1413,21 +1413,18 @@ function user_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_login'),
     'access callback' => 'user_is_anonymous',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
   );
 
   $items['user/register'] = array(
     'title' => 'Create new account',
     'page callback' => 'user_register_page',
     'access callback' => 'user_register_access',
-    'type' => MENU_LOCAL_TASK,
   );
 
   $items['user/password'] = array(
     'title' => 'Reset password',
     'page callback' => 'user_pass_page',
     'access callback' => TRUE,
-    'type' => MENU_LOCAL_TASK,
     'file' => 'user.pages.inc',
   );
 
@@ -1444,8 +1441,6 @@ function user_menu() {
     'title' => 'Log out',
     'access callback' => 'user_is_logged_in',
     'page callback' => 'user_logout',
-    'weight' => 10,
-    'menu_name' => 'user-menu',
     'file' => 'user.pages.inc',
   );
 
@@ -1800,6 +1795,26 @@ function user_login($form, &$form_state) {
     '#required' => TRUE,
     '#password_toggle' => TRUE,
   );
+
+  $links = array(
+    'reset' => array(
+      'title' => t('Reset password'),
+      'href' => 'user/password',
+    ),
+  );
+  if (config_get('system.core', 'user_register') != USER_REGISTER_ADMINISTRATORS_ONLY) {
+    $links['register'] = array(
+      'title' => t('Create new account'),
+      'href' => 'user/register',
+    );
+  }
+  $form['links'] = array(
+    '#markup' => theme('links', array(
+      'links' => $links,
+    )),
+    '#weight' => 101,
+  );
+
   $form['#validate'] = user_login_default_validators();
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Log in'));

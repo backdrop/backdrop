@@ -68,6 +68,19 @@ function user_pass() {
       '#suffix' => '</p>',
     );
   }
+
+  $form['links'] = array(
+    '#markup' => theme('links', array(
+      'links' => array(
+        'login' => array(
+          'title' => t('Log in'),
+          'href' => 'user/login',
+        ),
+      ),
+    )),
+    '#weight' => 101,
+  );
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Reset password'));
 
