@@ -79,9 +79,9 @@ class views_plugin_row_comment_view extends views_plugin_row {
     }
 
     // Load all comments.
-    $cresult = comment_load_multiple($cids);
+    $all_comments = comment_load_multiple($cids);
     $nids = array();
-    foreach ($cresult as $comment) {
+    foreach ($all_comments as $comment) {
       $comment->depth = count(explode('.', $comment->thread)) - 1;
       $this->comments[$comment->cid] = $comment;
       $nids[] = $comment->nid;

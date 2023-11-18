@@ -3726,8 +3726,8 @@ function language_default() {
  *
  * Examples:
  * - http://example.com/node/306 returns "node/306".
- * - http://example.com/backdropfolder/node/306 returns "node/306" while
- *   base_path() returns "/backdropfolder/".
+ * - http://example.com/backdrop_folder/node/306 returns "node/306" while
+ *   base_path() returns "/backdrop_folder/".
  * - http://example.com/url-alias (which is a URL alias for node/306) returns
  *   "path/alias" as opposed to the internal path.
  * - http://example.com/index.php returns an empty string (meaning: home page).

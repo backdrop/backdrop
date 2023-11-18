@@ -10,7 +10,11 @@ class TransliterationTest extends BackdropUnitTestCase {
     $random = $this->randomName(10);
     // Make some strings with two, three, and four-byte characters for testing.
     // Note that the 3-byte character is overridden by the 'kg' language.
+
+    // cspell:disable
     $two_byte = 'Ä Ö Ü Å Ø äöüåøhello';
+    // cspell:enable
+
     // This is a Cyrillic character that looks something like a u. See
     // http://www.unicode.org/charts/PDF/U0400.pdf
     $three_byte = html_entity_decode('&#x446;', ENT_NOQUOTES, 'UTF-8');
@@ -33,12 +37,18 @@ class TransliterationTest extends BackdropUnitTestCase {
       // directly from the data files.
       array('fr', $three_byte, 'c'),
       array('fr', $four_byte, 'wii'),
+
       // Test a language with no overrides.
+      // cspell:disable
       array('en', $two_byte, 'A O U A O aouaohello'),
+      // cspell:enable
+
       // Test language overrides provided by core.
+      // cspell:disable
       array('de', $two_byte, 'Ae Oe Ue A O aeoeueaohello'),
       array('de', $random, $random),
       array('da', $two_byte, 'A O U Aa Oe aouaaoehello'),
+      // cspell:enable
       array('da', $random, $random),
       array('kg', $three_byte, 'ts'),
 
@@ -47,10 +57,14 @@ class TransliterationTest extends BackdropUnitTestCase {
       array('en', 'foo' . $unknown_character . $unknown_character . $unknown_character . 'foo', 'foo???foo'),
 
       // Chinese characters.
+      // cspell:disable
       array('en', '一個簡單的句子', 'yigejiandandejuzi'),
+      // cspell:enable
 
       // Bulgarian characters.
+      // cspell:disable
       array('bg', 'първа статия', 'parva statiya'),
+      // cspell:enable
     );
 
     include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';
@@ -72,8 +86,10 @@ class TransliterationTest extends BackdropUnitTestCase {
       array('en', '_', NULL, NULL, $string, 'a_test_string_gap'),
       array('de', '_', NULL, NULL, $string, 'ae_test_string_gap'),
       array('en', '_', NULL, '[^a-zA-Z0-9_-]+', $string, 'a_test_string_-_gap_-'),
+      // cspell:disable
       array('en', '',  NULL, NULL, $string, 'ateststringgap'),
       array('en', '',  10,   NULL, $string, 'ateststrin'),
+      // cspell:enable
     );
     include_once BACKDROP_ROOT . '/core/modules/system/system.admin.inc';
     foreach ($cases as $case) {

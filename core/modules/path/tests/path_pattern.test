@@ -203,14 +203,18 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
     $config->save();
     backdrop_static_reset('path_clean_string');
 
+    // cspell:disable
     $input = 'ädd ä accènts thè';
+    // cspell:enable
     $expected = 'add-accents'; // "a" and "the" is stripped out.
     $output = path_clean_string($input);
     $this->assertEqual($output, $expected, format_string("path_clean_string('@input') expected '@expected', actual '@output'", array('@input' => $input, '@expected' => $expected, '@output' => $output)));
 
     // German transliteration: "Ä" -> "ae", "ü" -> "ue", "ö" -> "oe".
+    // cspell:disable
     $input = 'Ärger im Büro ist möglich';
     $expected = 'aerger-im-buero-ist-moeglich';
+    // cspell:enable
     $output = path_clean_string($input, array('langcode' => 'de'));
     $this->assertEqual($output, $expected, format_string("path_clean_string('@input') expected '@expected', actual '@output'", array(
       '@input' => $input,

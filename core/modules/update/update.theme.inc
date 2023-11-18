@@ -247,7 +247,7 @@ function theme_update_report($variables) {
       }
 
       if (!empty($project['base_themes'])) {
-        $base_section = '<div class="basethemes">';
+        $base_section = '<div class="base_themes">';
         asort($project['base_themes']);
         $base_themes = array();
         foreach ($project['base_themes'] as $base_key => $base_theme) {
@@ -262,8 +262,8 @@ function theme_update_report($variables) {
               $base_themes[] = backdrop_placeholder($base_theme);
           }
         }
-        $base_section .= t('Depends on: !basethemes', array('!basethemes' => implode(', ', $base_themes)));
-        $base_section .= "</div>\n";  // .basethemes div
+        $base_section .= t('Depends on: !base_themes', array('!base_themes' => implode(', ', $base_themes)));
+        $base_section .= "</div>\n";  // .base_themes div
       }
 
       if (!empty($project['sub_themes'])) {

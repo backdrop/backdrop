@@ -1792,14 +1792,14 @@ class SearchTokenizerTestCase extends BackdropWebTestCase {
 
     // Generate characters consisting of starts, midpoints, and ends.
     $chars = array();
-    $charcodes = array();
+    $char_codes = array();
     foreach ($starts as $key => $value) {
-      $charcodes[] = $starts[$key];
+      $char_codes[] = $starts[$key];
       $chars[] = $this->code2utf($starts[$key]);
       $mid = round(0.5 * ($starts[$key] + $ends[$key]));
-      $charcodes[] = $mid;
+      $char_codes[] = $mid;
       $chars[] = $this->code2utf($mid);
-      $charcodes[] = $ends[$key];
+      $char_codes[] = $ends[$key];
       $chars[] = $this->code2utf($ends[$key]);
     }
 

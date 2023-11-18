@@ -1049,30 +1049,30 @@ function _locale_export_string($str) {
   $stri = addcslashes($str, "\0..\37\\\"");
   $parts = array();
 
-  // Cut text into several lines
+  // Cut text into several lines.
   while ($stri != "") {
     $i = strpos($stri, "\\n");
     if ($i === FALSE) {
-      $curstr = $stri;
+      $current_string = $stri;
       $stri = "";
     }
     else {
-      $curstr = substr($stri, 0, $i + 2);
+      $current_string = substr($stri, 0, $i + 2);
       $stri = substr($stri, $i + 2);
     }
-    $curparts = explode("\n", _locale_export_wrap($curstr, 70));
-    $parts = array_merge($parts, $curparts);
+    $current_parts = explode("\n", _locale_export_wrap($current_string, 70));
+    $parts = array_merge($parts, $current_parts);
   }
 
-  // Multiline string
+  // Multiline string.
   if (count($parts) > 1) {
     return "\"\"\n\"" . implode("\"\n\"", $parts) . "\"\n";
   }
-  // Single line string
+  // Single line string.
   elseif (count($parts) == 1) {
     return "\"$parts[0]\"\n";
   }
-  // No translation
+  // No translation.
   else {
     return "\"\"\n";
   }

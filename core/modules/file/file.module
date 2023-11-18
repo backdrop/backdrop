@@ -1901,6 +1901,7 @@ function file_icon_path(File $file, $icon_directory = NULL) {
 function file_icon_map(File $file) {
   switch ($file->filemime) {
     // Word document types.
+    // cspell:disable
     case 'application/msword':
     case 'application/vnd.ms-word.document.macroEnabled.12':
     case 'application/vnd.oasis.opendocument.text':
@@ -1918,8 +1919,10 @@ function file_icon_map(File $file) {
     case 'application/x-kword':
     case 'application/x-kword-crypt':
       return 'x-office-document';
+    // cspell:enable
 
     // Spreadsheet document types.
+    // cspell:disable
     case 'application/vnd.ms-excel':
     case 'application/vnd.ms-excel.sheet.macroEnabled.12':
     case 'application/vnd.oasis.opendocument.spreadsheet':
@@ -1934,8 +1937,10 @@ function file_icon_map(File $file) {
     case 'application/x-kspread':
     case 'application/x-kspread-crypt':
       return 'x-office-spreadsheet';
+    // cspell:enable
 
     // Presentation document types.
+    // cspell:disable
     case 'application/vnd.ms-powerpoint':
     case 'application/vnd.ms-powerpoint.presentation.macroEnabled.12':
     case 'application/vnd.oasis.opendocument.presentation':
@@ -1946,8 +1951,10 @@ function file_icon_map(File $file) {
     case 'application/vnd.sun.xml.impress.template':
     case 'application/x-kpresenter':
       return 'x-office-presentation';
+    // cspell:enable
 
     // Compressed archive types.
+    // cspell:disable
     case 'application/zip':
     case 'application/x-zip':
     case 'application/stuffit':
@@ -1973,8 +1980,10 @@ function file_icon_map(File $file) {
     case 'application/x-tarz':
     case 'application/x-tgz':
       return 'package-x-generic';
+    // cspell:enable
 
     // Script file types.
+    // cspell:disable
     case 'application/ecmascript':
     case 'application/javascript':
     case 'application/mathematica':
@@ -1999,16 +2008,21 @@ function file_icon_map(File $file) {
     case 'text/x-sql':
     case 'text/x-tcl':
       return 'text-x-script';
+    // cspell:enable
 
     // HTML aliases.
+    // cspell:disable
     case 'application/xhtml+xml':
       return 'text-html';
+    // cspell:enable
 
     // Executable types.
+    // cspell:disable
     case 'application/x-macbinary':
     case 'application/x-ms-dos-executable':
     case 'application/x-pef-executable':
       return 'application-x-executable';
+    // cspell:enable
 
     default:
       return FALSE;

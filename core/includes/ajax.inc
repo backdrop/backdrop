@@ -65,7 +65,7 @@
  *
  * function ajax_example_simplest($form, &$form_state) {
  *   $form = array();
- *   $form['changethis'] = array(
+ *   $form['change_this'] = array(
  *     '#type' => 'select',
  *     '#options' => array(
  *       'one' => 'one',
@@ -83,8 +83,8 @@
  *     '#type' => 'textfield',
  *     '#title' => t("The default value will be changed"),
  *     '#description' => t("Say something about why you chose") . "'" .
- *       (!empty($form_state['values']['changethis'])
- *       ? $form_state['values']['changethis'] : t("Not changed yet")) . "'",
+ *       (!empty($form_state['values']['change_this'])
+ *       ? $form_state['values']['change_this'] : t("Not changed yet")) . "'",
  *     '#prefix' => '<div id="replace_textfield_div">',
  *     '#suffix' => '</div>',
  *   );
@@ -98,8 +98,8 @@
  * }
  * @endcode
  *
- * In the above example, the 'changethis' element is Ajax-enabled. The default
- * #ajax['event'] is 'change', so when the 'changethis' element changes,
+ * In the above example, the 'change_this' element is Ajax-enabled. The default
+ * #ajax['event'] is 'change', so when the 'change_this' element changes,
  * an Ajax call is made. The form is submitted and reprocessed, and then the
  * callback is called. In this case, the form has been automatically
  * built changing $form['replace_textfield']['#description'], so the callback

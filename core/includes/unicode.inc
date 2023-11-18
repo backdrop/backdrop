@@ -81,7 +81,7 @@ define('PREG_CLASS_UNICODE_WORD_BOUNDARY',
   '\x{E000}-\x{F8FF}\x{FB29}\x{FD3E}-\x{FD3F}\x{FDFC}-\x{FDFD}' .
   '\x{FE10}-\x{FE19}\x{FE30}-\x{FE6B}\x{FEFF}-\x{FF0F}\x{FF1A}-\x{FF20}' .
   '\x{FF3B}-\x{FF40}\x{FF5B}-\x{FF65}\x{FFE0}-\x{FFFD}');
-// cspell:enable
+  // cspell:enable
 
 /**
  * Wrapper around _unicode_check().

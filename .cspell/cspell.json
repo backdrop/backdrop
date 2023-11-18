@@ -13,15 +13,21 @@
   ],
   "dictionaries": [
     "backdrop",
+    "bash",
     "drupal",
     "css",
     "en-gb",
     "en-us",
+    "filetypes",
+    "fonts",
     "fullstack",
     "html",
     "lorem-ipsum",
     "php",
-    "sql"
+    "publicLicenses",
+    "softwareTerms",
+    "sql",
+    "typescript"
   ],
   "globRoot": "../",
   "ignorePaths": [
@@ -31,6 +37,7 @@
     "/core/includes/standard.inc",
     "/core/includes/transliteration/",
     "/core/misc/ckeditor/",
+    "/core/misc/html5.js",
     "/core/misc/jquery.js",
     "/core/misc/jquery-extend*",
     "/core/misc/jquery-html-prefilter*",

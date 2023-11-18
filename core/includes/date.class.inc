@@ -27,7 +27,7 @@ class BackdropDateTime extends DateTime {
    */
   public $originalTime;
 
-  protected static $allgranularity = array(
+  protected static $all_granularity = array(
     'year',
     'month',
     'day',
@@ -114,7 +114,7 @@ class BackdropDateTime extends DateTime {
     // The parse function will also set errors on the date parts.
     $successfully_parsed = FALSE;
     if (!empty($format)) {
-      $arg = self::$allgranularity;
+      $arg = self::$all_granularity;
       $element = array_pop($arg);
       while (!$this->parse($time, $tz, $format) && $element != 'year') {
         $element = array_pop($arg);
@@ -183,7 +183,7 @@ class BackdropDateTime extends DateTime {
     $other->setTimezone($use_tz);
     $val = $this2->toArray(TRUE);
     $otherval = $other->toArray();
-    foreach (self::$allgranularity as $g) {
+    foreach (self::$all_granularity as $g) {
       if ($other->hasGranularity($g) && !$this2->hasGranularity($g)) {
         // The other class has a property we don't; steal it.
         $this2->addGranularity($g);
@@ -293,7 +293,7 @@ class BackdropDateTime extends DateTime {
       // Just want to know if it has something valid means no lower
       // granularities without higher ones.
       $last = TRUE;
-      foreach (self::$allgranularity as $arg) {
+      foreach (self::$all_granularity as $arg) {
         if ($arg == 'timezone') {
           continue;
         }
@@ -422,7 +422,7 @@ class BackdropDateTime extends DateTime {
     else {
       // This PHP date_parse() method currently doesn't have resolution down to
       // seconds, so if there is some time, all will be set.
-      foreach (self::$allgranularity as $g) {
+      foreach (self::$all_granularity as $g) {
         if ((isset($temp[$g]) && is_numeric($temp[$g])) || ($g == 'timezone' && (isset($temp['zone_type']) && $temp['zone_type'] > 0))) {
           $this->granularity[] = $g;
         }

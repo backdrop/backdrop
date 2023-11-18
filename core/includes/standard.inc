@@ -303,6 +303,7 @@ function standard_country_list() {
  */
 function standard_language_list() {
   return array(
+    // cspell:disable
     'af' => array('Afrikaans', 'Afrikaans'),
     'am' => array('Amharic', 'አማርኛ'),
     'ar' => array('Arabic', /* Left-to-right marker "‭" */ 'العربية', LANGUAGE_RTL),
@@ -407,6 +408,7 @@ function standard_language_list() {
     'xx-lolspeak' => array('Lolspeak', 'Lolspeak'),
     'zh-hans' => array('Chinese, Simplified', '简体中文'),
     'zh-hant' => array('Chinese, Traditional', '繁體中文'),
+    // cspell:enable
   );
 }
 

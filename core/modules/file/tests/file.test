@@ -2769,7 +2769,7 @@ class FileAdminTestCase extends FileTestHelper {
     // Verify changing a filename changes the database value.
     $parts = explode('.', $file->uri);
     $extension = array_pop($parts);
-    $new_filename = 'changedme' . $extension;
+    $new_filename = 'changed-me' . $extension;
     $edit = array();
     $edit['filename'] = $new_filename;
     $this->backdropPost('file/' . $file->fid . '/manage', $edit, 'Save');

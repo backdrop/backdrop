@@ -1910,7 +1910,7 @@ function _filter_xss_split($m, $store = FALSE) {
 
   $slash = trim($matches[1]);
   $elem = &$matches[2];
-  $attrlist = &$matches[3];
+  $attribute_list = &$matches[3];
   $comment = &$matches[4];
 
   if ($comment) {
@@ -1931,11 +1931,11 @@ function _filter_xss_split($m, $store = FALSE) {
   }
 
   // Is there a closing XHTML slash at the end of the attributes?
-  $attrlist = preg_replace('%(\s?)/\s*$%', '\1', $attrlist, -1, $count);
+  $attribute_list = preg_replace('%(\s?)/\s*$%', '\1', $attribute_list, -1, $count);
   $xhtml_slash = $count ? ' /' : '';
 
   // Clean up attributes.
-  $attr2 = implode(' ', _filter_xss_attributes($attrlist));
+  $attr2 = implode(' ', _filter_xss_attributes($attribute_list));
   $attr2 = preg_replace('/[<>]/', '', $attr2);
   $attr2 = strlen($attr2) ? ' ' . $attr2 : '';
 
@@ -1949,10 +1949,10 @@ function _filter_xss_split($m, $store = FALSE) {
  *   Cleaned up version of the HTML attributes.
  */
 function _filter_xss_attributes($attr) {
-  $attrarr = array();
+  $attributes_array = array();
   $skip = FALSE;
   $mode = 0;
-  $attrname = '';
+  $attribute_name = '';
 
   while (strlen($attr) != 0) {
     // Was the last operation successful?
@@ -1962,13 +1962,13 @@ function _filter_xss_attributes($attr) {
       case 0:
         // Attribute name, href for instance.
         if (preg_match('/^([-a-zA-Z]+)/', $attr, $match)) {
-          $attrname = strtolower($match[1]);
+          $attribute_name = strtolower($match[1]);
           $skip = (
-            $attrname == 'style' ||
-            substr($attrname, 0, 2) == 'on' ||
-            substr($attrname, 0, 1) == '-' ||
+            $attribute_name == 'style' ||
+            substr($attribute_name, 0, 2) == 'on' ||
+            substr($attribute_name, 0, 1) == '-' ||
             // Ignore long attributes to avoid unnecessary processing overhead.
-            strlen($attrname) > 96
+            strlen($attribute_name) > 96
           );
           $working = $mode = 1;
           $attr = preg_replace('/^[-a-zA-Z]+/', '', $attr);
@@ -1986,7 +1986,7 @@ function _filter_xss_attributes($attr) {
         if (preg_match('/^\s+/', $attr)) {
           $working = 1; $mode = 0;
           if (!$skip) {
-            $attrarr[] = $attrname;
+            $attributes_array[] = $attribute_name;
           }
           $attr = preg_replace('/^\s+/', '', $attr);
         }
@@ -1997,7 +1997,7 @@ function _filter_xss_attributes($attr) {
         if (preg_match('/^"([^"]*)"(\s+|$)/', $attr, $match)) {
           // Prevent filtering for some attribute values, where performing
           // the filtering would cause valid and safe data to be mangled.
-          if (strpos($attrname, 'data-') === 0 || $attrname == 'alt' || $attrname == 'title') {
+          if (strpos($attribute_name, 'data-') === 0 || $attribute_name == 'alt' || $attribute_name == 'title') {
             $thisval = $match[1];
           }
           // Strip bad protocols from all other attributes, e.g. href, src.
@@ -2006,7 +2006,7 @@ function _filter_xss_attributes($attr) {
           }
 
           if (!$skip) {
-            $attrarr[] = "$attrname=\"$thisval\"";
+            $attributes_array[] = "$attribute_name=\"$thisval\"";
           }
           $working = 1;
           $mode = 0;
@@ -2018,7 +2018,7 @@ function _filter_xss_attributes($attr) {
           $thisval = filter_xss_bad_protocol($match[1]);
 
           if (!$skip) {
-            $attrarr[] = "$attrname='$thisval'";
+            $attributes_array[] = "$attribute_name='$thisval'";
           }
           $working = 1; $mode = 0;
           $attr = preg_replace("/^'[^']*'(\s+|$)/", '', $attr);
@@ -2029,7 +2029,7 @@ function _filter_xss_attributes($attr) {
           $thisval = filter_xss_bad_protocol($match[1]);
 
           if (!$skip) {
-            $attrarr[] = "$attrname=\"$thisval\"";
+            $attributes_array[] = "$attribute_name=\"$thisval\"";
           }
           $working = 1; $mode = 0;
           $attr = preg_replace("%^[^\s\"']+(\s+|$)%", '', $attr);
@@ -2056,9 +2056,9 @@ function _filter_xss_attributes($attr) {
 
   // The attribute list ends with a valueless attribute like "selected".
   if ($mode == 1 && !$skip) {
-    $attrarr[] = $attrname;
+    $attributes_array[] = $attribute_name;
   }
-  return $attrarr;
+  return $attributes_array;
 }
 
 /**
@@ -4066,10 +4066,10 @@ function backdrop_build_css_cache($css) {
     // starting with "ad*".
     $filename = 'css_' . backdrop_hash_base64($data) . '.css';
     // Create the css/ within the files folder.
-    $csspath = 'public://css';
-    $uri = $csspath . '/' . $filename;
+    $css_path = 'public://css';
+    $uri = $css_path . '/' . $filename;
     // Create the CSS file.
-    file_prepare_directory($csspath, FILE_CREATE_DIRECTORY);
+    file_prepare_directory($css_path, FILE_CREATE_DIRECTORY);
     if (!file_exists($uri) && !file_unmanaged_save_data($data, $uri, FILE_EXISTS_REPLACE)) {
       return FALSE;
     }
@@ -7453,7 +7453,7 @@ function element_get_visible_children(array $elements) {
  * @param $map
  *   An associative array whose keys are element property names and whose values
  *   are the HTML attribute names to set for corresponding the property; e.g.,
- *   array('#propertyname' => 'attributename'). If both names are identical
+ *   array('#property_name' => 'attribute_name'). If both names are identical
  *   except for the leading '#', then an attribute name value is sufficient and
  *   no property name needs to be specified.
  */

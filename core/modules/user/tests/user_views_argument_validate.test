@@ -79,7 +79,7 @@ class UserViewsArgumentValidate extends ViewsSqlTest {
     $this->assertFalse($view->argument['null']->validate_arg(32));
   }
 
-  function view_argument_validate_user($argtype) {
+  function view_argument_validate_user($argument_type) {
     $view = new view;
     $view->name = 'view_argument_validate_user';
     $view->description = '';
@@ -105,7 +105,7 @@ class UserViewsArgumentValidate extends ViewsSqlTest {
     $handler->display->display_options['arguments']['null']['style_plugin'] = 'default_summary';
     $handler->display->display_options['arguments']['null']['default_argument_type'] = 'fixed';
     $handler->display->display_options['arguments']['null']['validate']['type'] = 'user';
-    $handler->display->display_options['arguments']['null']['validate_options']['type'] = $argtype;
+    $handler->display->display_options['arguments']['null']['validate_options']['type'] = $argument_type;
     $handler->display->display_options['arguments']['null']['must_not_be'] = 0;
 
     return $view;

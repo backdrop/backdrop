@@ -4123,7 +4123,7 @@ function views_ui_config_item_form($form, &$form_state) {
 }
 
 /**
- * Submit handler for configing new item(s) to a view.
+ * Submit handler for configuring new item(s) to a view.
  */
 function views_ui_config_item_form_validate($form, &$form_state) {
   $form_state['handler']->options_validate($form['options'], $form_state);
@@ -4190,7 +4190,7 @@ function views_ui_config_item_form_submit_temporary($form, &$form_state) {
 }
 
 /**
- * Submit handler for configing new item(s) to a view.
+ * Submit handler for configuring new item(s) to a view.
  */
 function views_ui_config_item_form_submit($form, &$form_state) {
   // Run it through the handler's submit function.
@@ -4287,7 +4287,7 @@ function views_ui_config_item_group_form($type, &$form_state) {
 }
 
 /**
- * Submit handler for configing group settings on a view.
+ * Submit handler for configuring group settings on a view.
  */
 function views_ui_config_item_group_form_submit($form, &$form_state) {
   $item =& $form_state['handler']->options;
@@ -4391,14 +4391,14 @@ function views_ui_config_item_extra_form($form, &$form_state) {
 }
 
 /**
- * Validation handler for configing new item(s) to a view.
+ * Validation handler for configuring new item(s) to a view.
  */
 function views_ui_config_item_extra_form_validate($form, &$form_state) {
   $form_state['handler']->extra_options_validate($form['options'], $form_state);
 }
 
 /**
- * Submit handler for configing new item(s) to a view.
+ * Submit handler for configuring new item(s) to a view.
  */
 function views_ui_config_item_extra_form_submit($form, &$form_state) {
   // Run it through the handler's submit function.
@@ -4470,7 +4470,7 @@ function views_ui_config_style_form($form, &$form_state) {
 }
 
 /**
- * Submit handler for configing new item(s) to a view.
+ * Submit handler for configuring new item(s) to a view.
  */
 function views_ui_config_style_form_submit($form, &$form_state) {
   // Run it through the handler's submit function.

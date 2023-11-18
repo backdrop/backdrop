@@ -755,7 +755,7 @@ function _color_save_stylesheet($file, $style, &$paths) {
  *   Returns the original file path of the CSS file.
  */
 function _color_get_file_path($filename, $theme_name) {
-  static $basenames = array();
+  static $base_names = array();
 
   $themes = list_themes();
   $theme = $themes[$theme_name];
@@ -765,10 +765,10 @@ function _color_get_file_path($filename, $theme_name) {
   if (isset($theme->stylesheets)) {
     foreach ($theme->stylesheets as $group_name => $group) {
       foreach ($group as $file) {
-        if (!isset($basenames[$theme_name][$group_name][$file])) {
-          $basenames[$theme_name][$group_name][$file] = backdrop_basename($file);
+        if (!isset($base_names[$theme_name][$group_name][$file])) {
+          $base_names[$theme_name][$group_name][$file] = backdrop_basename($file);
         }
-        if ($basename === $basenames[$theme_name][$group_name][$file]) {
+        if ($basename === $base_names[$theme_name][$group_name][$file]) {
           return $file;
         }
       }

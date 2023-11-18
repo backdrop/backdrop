@@ -219,9 +219,9 @@ class date_views_plugin_pager extends views_plugin_pager {
           $q->add_orderby(NULL, $fieldsql, 'DESC', 'date');
           $this->set_argument_placeholders($this->view->date_info->placeholders, $datelimits[0], $argument->max_date, $q, $format);
 
-          $compiledquery = $q->query();
-          $compiledquery->range(0, 2);
-          $results = $compiledquery->execute()->fetchCol(0);
+          $compiled_query = $q->query();
+          $compiled_query->range(0, 2);
+          $results = $compiled_query->execute()->fetchCol(0);
 
           $prevdate = array_shift($results);
           $prevdatealt = array_shift($results);
@@ -230,9 +230,9 @@ class date_views_plugin_pager extends views_plugin_pager {
           $q->add_orderby(NULL, $fieldsql, 'ASC', 'date');
           $this->set_argument_placeholders($this->view->date_info->placeholders, $argument->min_date, $datelimits[1], $q, $format);
 
-          $compiledquery = $q->query();
-          $compiledquery->range(0, 2);
-          $results = $compiledquery->execute()->fetchCol(0);
+          $compiled_query = $q->query();
+          $compiled_query->range(0, 2);
+          $results = $compiled_query->execute()->fetchCol(0);
 
           $nextdate = array_shift($results);
           $nextdatealt = array_shift($results);

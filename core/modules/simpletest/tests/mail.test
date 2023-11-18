@@ -212,7 +212,9 @@ class BackdropHtmlToTextTestCase extends BackdropWebTestCase {
       '<script type="text/javascript">Backdrop</script>' => "Backdrop\n",
       // A couple of tests for Unicode characters.
       '<q>I <em>will</em> be back…</q>' => "I /will/ be back…\n",
+      // cspell:disable
       'FrançAIS is ÜBER-åwesome' => "FrançAIS is ÜBER-åwesome\n",
+      // cspell:enable
     );
 
     foreach ($tests as $html => $text) {

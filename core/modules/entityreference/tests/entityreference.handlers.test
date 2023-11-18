@@ -86,7 +86,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
       ),
       // Title purposefully starts with same characters as published1 and
       // published2 above but contains a slash.
-      'published_withslash' => array(
+      'published_with_slash' => array(
         'type' => 'post',
         'status' => 1,
         'title' => 'Node pub/lished1',
@@ -113,7 +113,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
           'post' => array(
             $nodes['published1']->nid => $node_labels['published1'],
             $nodes['published2']->nid => $node_labels['published2'],
-            $nodes['published_withslash']->nid => $node_labels['published_withslash'],
+            $nodes['published_with_slash']->nid => $node_labels['published_with_slash'],
           ),
         ),
       ),
@@ -151,7 +151,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
         ),
         'result' => array(),
       ),
-      // Searching for "Node pub/" should return only the published_withslash node
+      // Searching for "Node pub/" should return only the published_with_slash node
       // and not published1 and published2 from above.
       array(
         'arguments' => array(
@@ -159,7 +159,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
         ),
         'result' => array(
           'post' => array(
-            $nodes['published_withslash']->nid => $node_labels['published_withslash'],
+            $nodes['published_with_slash']->nid => $node_labels['published_with_slash'],
           ),
         ),
       ),
@@ -178,7 +178,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
           'post' => array(
             $nodes['published1']->nid => $node_labels['published1'],
             $nodes['published2']->nid => $node_labels['published2'],
-            $nodes['published_withslash']->nid => $node_labels['published_withslash'],
+            $nodes['published_with_slash']->nid => $node_labels['published_with_slash'],
             $nodes['unpublished']->nid => $node_labels['unpublished'],
           ),
         ),
