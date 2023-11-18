@@ -215,25 +215,25 @@ class UnicodeUnitTest extends BackdropUnitTestCase {
     // Each case is an array with input string, length to truncate to, and
     // expected return value.
 
-    // Test non-wordsafe, non-ellipsis cases.
-    $non_wordsafe_non_ellipsis_cases = array(
+    // Test non-word_safe, non-ellipsis cases.
+    $non_word_safe_non_ellipsis_cases = array(
       array('frànçAIS is über-åwesome', 24, 'frànçAIS is über-åwesome'),
       array('frànçAIS is über-åwesome', 23, 'frànçAIS is über-åwesom'),
       array('frànçAIS is über-åwesome', 17, 'frànçAIS is über-'),
       array('以呂波耳・ほへとち。リヌルヲ。', 6, '以呂波耳・ほ'),
     );
-    $this->runTruncateTests($non_wordsafe_non_ellipsis_cases, FALSE, FALSE);
+    $this->runTruncateTests($non_word_safe_non_ellipsis_cases, FALSE, FALSE);
 
-    // Test non-wordsafe, ellipsis cases.
-    $non_wordsafe_ellipsis_cases = array(
+    // Test non-word_safe, ellipsis cases.
+    $non_word_safe_ellipsis_cases = array(
       array('frànçAIS is über-åwesome', 24, 'frànçAIS is über-åwesome'),
       array('frànçAIS is über-åwesome', 23, 'frànçAIS is über-åweso…'),
       array('frànçAIS is über-åwesome', 17, 'frànçAIS is über…'),
     );
-    $this->runTruncateTests($non_wordsafe_ellipsis_cases, FALSE, TRUE);
+    $this->runTruncateTests($non_word_safe_ellipsis_cases, FALSE, TRUE);
 
-    // Test wordsafe, ellipsis cases.
-    $wordsafe_ellipsis_cases = array(
+    // Test word_safe, ellipsis cases.
+    $word_safe_ellipsis_cases = array(
       array('123', 1, '…'),
       array('123', 2, '1…'),
       array('123', 3, '123'),
@@ -272,7 +272,7 @@ class UnicodeUnitTest extends BackdropUnitTestCase {
       array('Help! Help! Help!', 3, 'He…'),
       array('Help! Help! Help!', 2, 'H…'),
     );
-    $this->runTruncateTests($wordsafe_ellipsis_cases, TRUE, TRUE);
+    $this->runTruncateTests($word_safe_ellipsis_cases, TRUE, TRUE);
   }
 
   /**
@@ -284,16 +284,16 @@ class UnicodeUnitTest extends BackdropUnitTestCase {
    * @param $cases
    *   Cases array. Each case is an array with the input string, length to
    *   truncate to, and expected output.
-   * @param $wordsafe
+   * @param $word_safe
    *   TRUE to use word-safe truncation, FALSE to not use word-safe truncation.
    * @param $ellipsis
    *   TRUE to append ... if the input is truncated, FALSE to not append ....
    */
-  function runTruncateTests($cases, $wordsafe, $ellipsis) {
+  function runTruncateTests($cases, $word_safe, $ellipsis) {
     foreach ($cases as $case) {
       list($input, $max_length, $expected) = $case;
-      $output = truncate_utf8($input, $max_length, $wordsafe, $ellipsis);
-      $this->assertEqual($output, $expected, format_string('%input truncate to %length characters with %wordsafe, %ellipsis is %expected (got %output)', array('%input' => $input, '%length' => $max_length, '%output' => $output, '%expected' => $expected, '%wordsafe' => ($wordsafe ? 'word-safe' : 'not word-safe'), '%ellipsis' => ($ellipsis ? 'ellipsis' : 'not ellipsis'))));
+      $output = truncate_utf8($input, $max_length, $word_safe, $ellipsis);
+      $this->assertEqual($output, $expected, format_string('%input truncate to %length characters with %word_safe, %ellipsis is %expected (got %output)', array('%input' => $input, '%length' => $max_length, '%output' => $output, '%expected' => $expected, '%word_safe' => ($word_safe ? 'word-safe' : 'not word-safe'), '%ellipsis' => ($ellipsis ? 'ellipsis' : 'not ellipsis'))));
     }
   }
 }

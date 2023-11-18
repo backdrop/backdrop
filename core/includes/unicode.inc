@@ -286,25 +286,25 @@ function backdrop_truncate_bytes($string, $len) {
  * @param $max_length
  *   An upper limit on the returned string length, including trailing ellipsis
  *   if $add_ellipsis is TRUE.
- * @param $wordsafe
+ * @param $word_safe
  *   If TRUE, attempt to truncate on a word boundary. Word boundaries are
  *   spaces, punctuation, and Unicode characters used as word boundaries in
  *   non-Latin languages; see PREG_CLASS_UNICODE_WORD_BOUNDARY for more
  *   information. If a word boundary cannot be found that would make the length
  *   of the returned string fall within length guidelines (see parameters
- *   $max_length and $min_wordsafe_length), word boundaries are ignored.
+ *   $max_length and $min_word_safe_length), word boundaries are ignored.
  * @param $add_ellipsis
  *   If TRUE, add t('...') to the end of the truncated string (defaults to
  *   FALSE). The string length will still fall within $max_length.
- * @param $min_wordsafe_length
- *   If $wordsafe is TRUE, the minimum acceptable length for truncation (before
- *   adding an ellipsis, if $add_ellipsis is TRUE). Has no effect if $wordsafe
+ * @param $min_word_safe_length
+ *   If $word_safe is TRUE, the minimum acceptable length for truncation (before
+ *   adding an ellipsis, if $add_ellipsis is TRUE). Has no effect if $word_safe
  *   is FALSE. This can be used to prevent having a very short resulting string
  *   that will not be understandable. For instance, if you are truncating the
  *   string "See myverylongurlexample.com for more information" to a word-safe
  *   return length of 20, the only available word boundary within 20 characters
  *   is after the word "See", which wouldn't leave a very informative string. If
- *   you had set $min_wordsafe_length to 10, though, the function would realise
+ *   you had set $min_word_safe_length to 10, though, the function would realize
  *   that "See" alone is too short, and would then just truncate ignoring word
  *   boundaries, giving you "See myverylongurl..." (assuming you had set
  *   $add_ellipses to TRUE).
@@ -312,10 +312,10 @@ function backdrop_truncate_bytes($string, $len) {
  * @return string
  *   The truncated string.
  */
-function truncate_utf8($string, $max_length, $wordsafe = FALSE, $add_ellipsis = FALSE, $min_wordsafe_length = 1) {
+function truncate_utf8($string, $max_length, $word_safe = FALSE, $add_ellipsis = FALSE, $min_word_safe_length = 1) {
   $ellipsis = '';
   $max_length = max($max_length, 0);
-  $min_wordsafe_length = max($min_wordsafe_length, 0);
+  $min_word_safe_length = max($min_word_safe_length, 0);
 
   if (backdrop_strlen($string) <= $max_length) {
     // No truncation needed, so don't add ellipsis, just return.
@@ -331,17 +331,17 @@ function truncate_utf8($string, $max_length, $wordsafe = FALSE, $add_ellipsis = 
     $max_length = max($max_length, 0);
   }
 
-  if ($max_length <= $min_wordsafe_length) {
+  if ($max_length <= $min_word_safe_length) {
     // Do not attempt word-safe if lengths are bad.
-    $wordsafe = FALSE;
+    $word_safe = FALSE;
   }
 
-  if ($wordsafe) {
+  if ($word_safe) {
     $matches = array();
-    // Find the last word boundary, if there is one within $min_wordsafe_length
-    // to $max_length characters. preg_match() is always greedy, so it will
-    // find the longest string possible.
-    $found = preg_match('/^(.{' . $min_wordsafe_length . ',' . $max_length . '})[' . PREG_CLASS_UNICODE_WORD_BOUNDARY . ']/u', $string, $matches);
+    // Find the last word boundary, if there is one within $min_word_safe_length
+    // to $max_length characters. preg_match() is always greedy, so it will find
+    // the longest string possible.
+    $found = preg_match('/^(.{' . $min_word_safe_length . ',' . $max_length . '})[' . PREG_CLASS_UNICODE_WORD_BOUNDARY . ']/u', $string, $matches);
     if ($found) {
       $string = $matches[1];
     }

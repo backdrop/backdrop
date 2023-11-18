@@ -442,7 +442,6 @@ somepath
 someplugin
 sometable
 Somethis
-sourcedir
 stackoverflow
 statiya
 stdobj
@@ -471,7 +470,6 @@ tablesorting
 tabletools
 tagname
 tarname
-targetdir
 tascript
 tést
 Teletubbies
@@ -483,6 +481,7 @@ testparam
 testviews
 textgroups
 textinput
+themeable
 thirdcolumn
 thisval
 timeentry
@@ -542,12 +541,13 @@ WCAG
 wday
 weba
 wesl
+whitespace
+whitespaces
 WINDIR
 withslash
 Wonderwoman
 wõrd
 wordlength
-wordsafe
 workkeys
 WQKCY
 WSOD
