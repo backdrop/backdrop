@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Provides integration with the CKEditor WYSIWYG editor.
+ * Provides integration with the CKEditor 4 WYSIWYG editor.
  */
 
 define('CKEDITOR_VERSION', '4.18.0');
@@ -29,7 +29,7 @@ function ckeditor_menu() {
  */
 function ckeditor_editor_info() {
   $editors['ckeditor'] = array(
-    'label' => t('CKEditor'),
+    'label' => t('CKEditor 4'),
     'library' => array('ckeditor', 'backdrop.ckeditor'),
     'default settings' => array(
       'toolbar' => array(
@@ -78,7 +78,7 @@ function ckeditor_library_info() {
   $module_path = backdrop_get_path('module', 'ckeditor');
 
   $libraries['backdrop.ckeditor.admin'] = array(
-    'title' => 'Administrative library for configuring CKEditor.',
+    'title' => 'Administrative library for configuring CKEditor 4.',
     'version' => BACKDROP_VERSION,
     'js' => array(
       $module_path . '/js/ckeditor.admin.js' => array(),
@@ -92,7 +92,7 @@ function ckeditor_library_info() {
     ),
   );
   $libraries['backdrop.ckeditor'] = array(
-    'title' => 'Backdrop behavior to enable CKEditor on textareas.',
+    'title' => 'Backdrop behavior to enable CKEditor 4 on textareas.',
     'version' => BACKDROP_VERSION,
     'js' => array(
       $module_path . '/js/ckeditor.js' => array(),
@@ -107,7 +107,7 @@ function ckeditor_library_info() {
     ),
   );
   $libraries['ckeditor'] = array(
-    'title' => 'Loads the main CKEditor library.',
+    'title' => 'Loads the main CKEditor 4 library.',
     'version' => CKEDITOR_VERSION,
     'js' => array(
       // CKEditor is both a large library and needs to be able to identify its
@@ -132,7 +132,7 @@ function ckeditor_theme() {
 }
 
 /**
- * Retrieves the full list of installed CKEditor plugins.
+ * Retrieves the full list of installed CKEditor 4 plugins.
  */
 function ckeditor_plugins() {
   $plugins = module_invoke_all('ckeditor_plugins');
@@ -555,7 +555,7 @@ function ckeditor_get_settings($format, $existing_settings) {
 }
 
 /**
- * Builds the ACF part of the CKEditor JS settings.
+ * Builds the ACF part of the CKEditor 4 JS settings.
  *
  * This ensures that CKEditor obeys the HTML restrictions defined by Backdrop's
  * filter system, by enabling CKEditor's Advanced Content Filter (ACF)
@@ -581,7 +581,7 @@ function ckeditor_get_acf_settings($format) {
   }
 
   /**
-   * Converts Backdrop-stored attribute values to CKEditor attribute lists.
+   * Converts Backdrop-stored attribute values to CKEditor 4 attribute lists.
    */
   $get_attribute_values = function($attribute_values, $allowed_values) {
     $values = array_keys(array_filter($attribute_values, function($value) use ($allowed_values) {
