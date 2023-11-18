@@ -184,7 +184,7 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
     $tests['this thing with that thing'] = 'thing-thing';
 
     // Test length truncation and duplicate separator removal.
-    $tests[' - Dave – Greg — Freso - Mike'] = 'dave-greg-freso-mike';
+    $tests[' - Dave – Jill — Mike - Maria'] = 'dave-jill-mike-maria';
 
     // Test that HTML tags are removed.
     $tests['This <span class="text">text</span> has <br /><a href="http://example.com"><strong>HTML tags</strong></a>.'] = 'text-has-html-tags';

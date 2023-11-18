@@ -240,7 +240,7 @@ class DiffEngine {
     // Skip trailing common lines.
     $xi = $n_from;
     $yi = $n_to;
-    for ($endskip = 0; --$xi > $skip && --$yi > $skip; $endskip++) {
+    for ($end_skip = 0; --$xi > $skip && --$yi > $skip; $end_skip++) {
       if ($from_lines[$xi] !== $to_lines[$yi]) {
         break;
       }
@@ -248,11 +248,11 @@ class DiffEngine {
     }
 
     // Ignore lines which do not exist in both files.
-    for ($xi = $skip; $xi < $n_from - $endskip; $xi++) {
+    for ($xi = $skip; $xi < $n_from - $end_skip; $xi++) {
       $xhash[$this->lineHash($from_lines[$xi])] = 1;
     }
 
-    for ($yi = $skip; $yi < $n_to - $endskip; $yi++) {
+    for ($yi = $skip; $yi < $n_to - $end_skip; $yi++) {
       $line = $to_lines[$yi];
       if (($this->ychanged[$yi] = empty($xhash[$this->lineHash($line)]))) {
         continue;
@@ -261,7 +261,7 @@ class DiffEngine {
       $this->yv[] = $line;
       $this->yind[] = $yi;
     }
-    for ($xi = $skip; $xi < $n_from - $endskip; $xi++) {
+    for ($xi = $skip; $xi < $n_from - $end_skip; $xi++) {
       $line = $from_lines[$xi];
       if (($this->xchanged[$xi] = empty($yhash[$this->lineHash($line)]))) {
         continue;

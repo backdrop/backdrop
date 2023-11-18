@@ -18,7 +18,7 @@ function simpletest_requirements($phase) {
 
   $has_curl = function_exists('curl_init');
   $has_hash = function_exists('hash_hmac');
-  $has_domdocument = method_exists('DOMDocument', 'loadHTML');
+  $has_dom_document = method_exists('DOMDocument', 'loadHTML');
   $open_basedir = ini_get('open_basedir');
 
   $requirements['curl'] = array(
@@ -40,13 +40,13 @@ function simpletest_requirements($phase) {
     );
   }
 
-  $requirements['php_domdocument'] = array(
+  $requirements['php_dom_document'] = array(
     'title' => $t('PHP DOMDocument class'),
-    'value' => $has_domdocument ? $t('Enabled') : $t('Not found'),
+    'value' => $has_dom_document ? $t('Enabled') : $t('Not found'),
   );
-  if (!$has_domdocument) {
-    $requirements['php_domdocument']['severity'] = REQUIREMENT_ERROR;
-    $requirements['php_domdocument']['description'] = $t('The testing framework requires the DOMDocument class to be available. Check the configure command at the <a href="@link-phpinfo">PHP info page</a>.', array('@link-phpinfo' => url('admin/reports/status/php')));
+  if (!$has_dom_document) {
+    $requirements['php_dom_document']['severity'] = REQUIREMENT_ERROR;
+    $requirements['php_dom_document']['description'] = $t('The testing framework requires the DOMDocument class to be available. Check the configure command at the <a href="@link-phpinfo">PHP info page</a>.', array('@link-phpinfo' => url('admin/reports/status/php')));
   }
 
   // SimpleTest currently needs 2 cURL options which are incompatible with

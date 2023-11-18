@@ -451,8 +451,8 @@ function backdrop_html_to_text($string, $allowed_tags = NULL) {
 
     // Process HTML tags (but don't output any literally).
     if ($tag) {
-      list($tagname) = explode(' ', strtolower($value), 2);
-      switch ($tagname) {
+      list($tag_name) = explode(' ', strtolower($value), 2);
+      switch ($tag_name) {
         // List counters
         case 'ul':
           array_unshift($lists, '*');
@@ -515,7 +515,7 @@ function backdrop_html_to_text($string, $allowed_tags = NULL) {
         case '/h2':
           $casing = NULL;
           // Pad the line with dashes.
-          $output = _backdrop_html_to_text_pad($output, ($tagname == '/h1') ? '=' : '-', ' ');
+          $output = _backdrop_html_to_text_pad($output, ($tag_name == '/h1') ? '=' : '-', ' ');
           array_pop($indent);
           $chunk = ''; // Ensure blank new-line.
           break;

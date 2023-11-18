@@ -2563,8 +2563,8 @@ function form_test_html_id($form, &$form_state) {
  * A form to test system_settings_form().
  */
 function form_test_system_config_form() {
-  $config = config('simpletest.testconfig');
-  $form['#config'] = 'simpletest.testconfig';
+  $config = config('simpletest.test_config');
+  $form['#config'] = 'simpletest.test_config';
   $form['abc'] = array(
     '#type' => 'textfield',
     '#title' => 'abc',
@@ -2586,11 +2586,11 @@ function form_test_system_config_form() {
   );
 
   // Test fieldsets of overrides.
-  $second_config = config('simpletest.secondconfig');
+  $second_config = config('simpletest.second_config');
   $form['second_settings'] = array(
     '#type' => 'fieldset',
     '#title' => 'Second Settings',
-    '#config' => 'simpletest.secondconfig',
+    '#config' => 'simpletest.second_config',
   );
   $form['second_settings']['ghi'] = array(
     '#type' => 'textfield',

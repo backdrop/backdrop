@@ -20,7 +20,7 @@ class FilterEditorLinkValidateTestCase extends BackdropWebTestCase {
     parent::setUp(
       'filter',
       'ckeditor',
-      'filter_formtest',
+      'filter_form_test',
       'language',
       'locale'
     );
@@ -117,7 +117,7 @@ class FilterEditorLinkValidateTestCase extends BackdropWebTestCase {
       $this->assertNoRaw('The URL <em class="placeholder">' . check_plain($url) . '</em> is not valid.', format_string('Valid URL %url passes validation', array(
         '%url' => $url,
       )));
-      // The filter_formtest helper module sets the value from $form_state as
+      // The filter_form_test helper module sets the value from $form_state as
       // message. It would be impossible to validate, what CKEditor inserts via
       // Javascript.
       $this->assertRaw('Output href is: ' . check_plain($altered_or_not), format_string('Expected output value @value found', array(

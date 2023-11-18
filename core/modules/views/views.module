@@ -1083,7 +1083,7 @@ function views_get_handler($table, $field, $key, $override = NULL) {
   if (isset($data['moved to'])) {
     $moved = array($data['moved to'], $field);
   }
-  // Support conversion on datafield level.
+  // Support conversion on data field level.
   if (isset($data[$field]['moved to'])) {
     $moved = $data[$field]['moved to'];
   }

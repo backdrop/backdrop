@@ -3953,7 +3953,7 @@ function system_retrieve_file($url, $destination = NULL, $managed = FALSE, $repl
   }
   $result = backdrop_http_request($url);
   if ($result->code != 200) {
-    backdrop_set_message(t('HTTP error @errorcode occurred when trying to fetch @remote.', array('@errorcode' => $result->code, '@remote' => $url)), 'error');
+    backdrop_set_message(t('HTTP error @error_code occurred when trying to fetch @remote.', array('@error_code' => $result->code, '@remote' => $url)), 'error');
     return FALSE;
   }
   $local = $managed ? file_save_data($result->data, $path, $replace) : file_unmanaged_save_data($result->data, $path, $replace);

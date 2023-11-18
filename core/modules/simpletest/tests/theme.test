@@ -652,10 +652,10 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
           '#details' => t('Detailed content'),
           '#attributes' => array(
             'id' => 'foobar-id',
-            'class' => array('fooclass'),
+            'class' => array('foo-class'),
           ),
         ),
-        'expected' => '<details id="foobar-id" class="fooclass"><summary><span>The summary</span></summary><div class="details-content-wrapper">Detailed content</div></details>',
+        'expected' => '<details id="foobar-id" class="foo-class"><summary><span>The summary</span></summary><div class="details-content-wrapper">Detailed content</div></details>',
       ),
       // Expanded 'details' with child element.
       array(

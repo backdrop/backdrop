@@ -651,13 +651,13 @@ function search_index($sid, $module, $text) {
   foreach ($split as $value) {
     if ($tag) {
       // Increase or decrease score per word based on tag
-      list($tagname) = explode(' ', $value, 2);
-      $tagname = backdrop_strtolower($tagname);
+      list($tag_name) = explode(' ', $value, 2);
+      $tag_name = backdrop_strtolower($tag_name);
       // Closing or opening tag?
-      if ($tagname[0] == '/') {
-        $tagname = substr($tagname, 1);
+      if ($tag_name[0] == '/') {
+        $tag_name = substr($tag_name, 1);
         // If we encounter unexpected tags, reset score to avoid incorrect boosting.
-        if (!count($tagstack) || $tagstack[0] != $tagname) {
+        if (!count($tagstack) || $tagstack[0] != $tag_name) {
           $tagstack = array();
           $score = 1;
         }
@@ -665,12 +665,12 @@ function search_index($sid, $module, $text) {
           // Remove from tag stack and decrement score
           $score = max(1, $score - $tags[array_shift($tagstack)]);
         }
-        if ($tagname == 'a') {
+        if ($tag_name == 'a') {
           $link = FALSE;
         }
       }
       else {
-        if (isset($tagstack[0]) && $tagstack[0] == $tagname) {
+        if (isset($tagstack[0]) && $tagstack[0] == $tag_name) {
           // None of the tags we look for make sense when nested identically.
           // If they are, it's probably broken HTML.
           $tagstack = array();
@@ -678,10 +678,10 @@ function search_index($sid, $module, $text) {
         }
         else {
           // Add to open tag stack and increment score
-          array_unshift($tagstack, $tagname);
-          $score += $tags[$tagname];
+          array_unshift($tagstack, $tag_name);
+          $score += $tags[$tag_name];
         }
-        if ($tagname == 'a') {
+        if ($tag_name == 'a') {
           // Check if link points to a node on this site
           if (preg_match($node_regexp, $value, $match)) {
             $path = backdrop_get_normal_path($match[1]);
@@ -1187,7 +1187,7 @@ function search_excerpt($keys, $text) {
   // If the sum of all fragments is too short, we look for second occurrences.
   $ranges = array();
   $included = array();
-  $foundkeys = array();
+  $found_keys = array();
   $length = 0;
   while ($length < 256 && count($workkeys)) {
     foreach ($workkeys as $k => $key) {
@@ -1216,7 +1216,7 @@ function search_excerpt($keys, $text) {
         if (!empty($info) && $info['where']) {
           $p = $info['where'];
           if ($info['keyword']) {
-            $foundkeys[] = $info['keyword'];
+            $found_keys[] = $info['keyword'];
           }
         }
       }
@@ -1290,8 +1290,8 @@ function search_excerpt($keys, $text) {
   $text = check_plain($text);
 
   // Slash-escape quotes in keys found in a derived form and merge with original keys.
-  array_walk($foundkeys, '_search_excerpt_replace');
-  $keys = array_merge($keys, $foundkeys);
+  array_walk($found_keys, '_search_excerpt_replace');
+  $keys = array_merge($keys, $found_keys);
 
   // Highlight keywords. Must be done at once to prevent conflicts ('strong' and '<strong>').
   $text = preg_replace('/' . $boundary . '(' . implode('|', $keys) . ')' . $boundary . '/iu', '<strong>\0</strong>', $text);

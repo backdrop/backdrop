@@ -201,11 +201,11 @@ function system_requirements($phase) {
     $class = 'DatabaseTasks_' . Database::getConnection()->driver();
     /* @var DatabaseTasks $tasks */
     $tasks = new $class();
-    $dbinfo = $t('!system version !version', array('!system' => $tasks->name(), '!version' => Database::getConnection()->version()));
+    $db_info = $t('!system version !version', array('!system' => $tasks->name(), '!version' => Database::getConnection()->version()));
     $requirements['database_system'] = array(
       'title' => $t('MySQL Database'),
       'severity' => REQUIREMENT_INFO,
-      'value' => $dbinfo,
+      'value' => $db_info,
     );
   }
 

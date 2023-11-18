@@ -2029,7 +2029,9 @@ class SearchNodeAccessTest extends BackdropWebTestCase {
    */
   function testPhraseSearchPunctuation() {
     $node = $this->backdropCreateNode(array('body' => array(LANGUAGE_NONE => array(array('value' => "The bunny's ears were fuzzy.")))));
+    // cspell:disable
     $node2 = $this->backdropCreateNode(array('body' => array(LANGUAGE_NONE => array(array('value' => 'Dignissim Aliquam &amp; Quieligo meus natu quae quia te. Damnum&copy; erat&mdash; neo pneum. Facilisi feugiat ibidem ratis.')))));
+    // cspell:enable
 
     // Update the search index.
     module_invoke_all('update_index');

@@ -207,17 +207,17 @@ class date_views_plugin_pager extends views_plugin_pager {
         if ($this->view->date_info->skip_empty_pages) {
           $q = clone $argument->query;
           $field = $argument->table_alias . '.' . $argument->real_field;
-          $fieldsql = $date_handler->sql_field($field);
-          $fieldsql = $date_handler->sql_format($format, $fieldsql);
+          $field_sql = $date_handler->sql_field($field);
+          $field_sql = $date_handler->sql_format($format, $field_sql);
           $q->clear_fields();
           $q->orderby = array();
           $q->set_distinct(TRUE, TRUE);
           // Date limits of this argument.
-          $datelimits = $argument->date_handler->arg_range($argument->limit[0] . '--' . $argument->limit[1]);
+          $date_limits = $argument->date_handler->arg_range($argument->limit[0] . '--' . $argument->limit[1]);
           // Find the first two dates between the minimum date
           // and the upper bound of the current value.
-          $q->add_orderby(NULL, $fieldsql, 'DESC', 'date');
-          $this->set_argument_placeholders($this->view->date_info->placeholders, $datelimits[0], $argument->max_date, $q, $format);
+          $q->add_orderby(NULL, $field_sql, 'DESC', 'date');
+          $this->set_argument_placeholders($this->view->date_info->placeholders, $date_limits[0], $argument->max_date, $q, $format);
 
           $compiled_query = $q->query();
           $compiled_query->range(0, 2);
@@ -227,8 +227,8 @@ class date_views_plugin_pager extends views_plugin_pager {
           $prevdatealt = array_shift($results);
           // Find the first two dates between the lower bound
           // of the current value and the maximum date.
-          $q->add_orderby(NULL, $fieldsql, 'ASC', 'date');
-          $this->set_argument_placeholders($this->view->date_info->placeholders, $argument->min_date, $datelimits[1], $q, $format);
+          $q->add_orderby(NULL, $field_sql, 'ASC', 'date');
+          $this->set_argument_placeholders($this->view->date_info->placeholders, $argument->min_date, $date_limits[1], $q, $format);
 
           $compiled_query = $q->query();
           $compiled_query->range(0, 2);

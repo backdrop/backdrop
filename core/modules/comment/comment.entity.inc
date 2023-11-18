@@ -281,20 +281,20 @@ class CommentStorageController extends EntityDatabaseStorageController {
         $thread = $comment->thread;
       }
       elseif ($comment->pid == 0) {
-        // This is a comment with no parent comment (depth 0): we start
-        // by retrieving the maximum thread level.
+        // This is a comment with no parent comment (depth 0): we start by
+        // retrieving the maximum thread level.
         $max = db_query('SELECT MAX(thread) FROM {comment} WHERE nid = :nid', array(':nid' => $comment->nid))->fetchField();
         // Strip the "/" from the end of the thread.
         $max = rtrim((string) $max, '/');
         // We need to get the value at the correct depth.
         $parts = explode('.', $max);
-        $firstsegment = $parts[0];
+        $first_segment = $parts[0];
         // Finally, build the thread field for this new comment.
-        $thread = comment_increment_alphadecimal($firstsegment) .'/';
+        $thread = comment_increment_alphadecimal($first_segment) .'/';
       }
       else {
-        // This is a comment with a parent comment, so increase the part of
-        // the thread value at the proper depth.
+        // This is a comment with a parent comment, so increase the part of the
+        // thread value at the proper depth.
 
         // Get the parent comment:
         $parent = comment_load($comment->pid);
@@ -327,8 +327,8 @@ class CommentStorageController extends EntityDatabaseStorageController {
       if (empty($comment->changed)) {
         $comment->changed = $comment->created;
       }
-      // We test the value with '===' because we need to modify anonymous
-      // users as well.
+      // We test the value with '===' because we need to modify anonymous users
+      // as well.
       if ($comment->uid === $user->uid && isset($user->name)) {
         $comment->name = $user->name;
       }

@@ -76,9 +76,11 @@ class PathTestCase extends BackdropWebTestCase {
     $pid = $this->getPID($edit['alias']);
 
     $previous = $edit['alias'];
+    // cspell:disable
     $edit['alias'] = "- ._~!$'\"()*@[]?&+%#,;=:" . // "Special" ASCII characters.
       "%23%25%26%2B%2F%3F" . // Characters that look like a percent-escaped string.
       "éøïвβ中國書۞"; // Characters from various non-ASCII alphabets.
+    // cspell:enable
     $this->backdropPost('admin/config/urls/path/edit/' . $pid, $edit, t('Save URL alias'));
 
     // Confirm that the alias works.
@@ -162,9 +164,11 @@ class PathTestCase extends BackdropWebTestCase {
     // Change alias to one containing "exotic" characters.
     $edit['path[auto]'] = FALSE;
     $previous = $edit['path[alias]'];
+    // cspell:disable
     $edit['path[alias]'] = "- ._~!$'\"()*@[]?&+%#,;=:" . // "Special" ASCII characters.
       "%23%25%26%2B%2F%3F" . // Characters that look like a percent-escaped string.
       "éøïвβ中國書۞"; // Characters from various non-ASCII alphabets.
+    // cspell:enable
     $this->backdropPost('node/' . $node1->nid . '/edit', $edit, t('Save'));
 
     // Confirm that the alias works.

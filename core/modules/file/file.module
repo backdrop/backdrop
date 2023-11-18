@@ -2773,37 +2773,34 @@ function file_get_type($file) {
  * @{
  * The file access system determines who can do what to which files.
  *
- * In determining access rights for a file, file_access() first checks
- * whether the user has the "bypass file access" permission. Such users have
+ * In determining access rights for a file, file_access() first checks whether
+ * the user has the "bypass file access" permission. Such users have
  * unrestricted access to all files. user 1 will always pass this check.
  *
  * Next, all implementations of hook_file_access() will be called. Each
  * implementation may explicitly allow, explicitly deny, or ignore the access
  * request. If at least one module says to deny the request, it will be
- * rejected.
- * If no modules deny the request and at least one says to allow it, the request
- * will be permitted.
+ * rejected. If no modules deny the request and at least one says to allow it,
+ * the request will be permitted.
  *
  * There is no access grant system for files.
  *
  * In file listings, the process above is followed except that
- * hook_file_access() is not called on each file for performance reasons
- * and for proper functioning of the pager system. When adding a filelisting to
- * your module, be sure to use a dynamic query created by db_select()
- * and add a tag of "file_access". This will allow modules dealing
- * with file access to ensure only files to which the user has access
- * are retrieved, through the use of hook_query_TAG_alter().
+ * hook_file_access() is not called on each file for performance reasons and for
+ * proper functioning of the pager system. When adding a file listing to your
+ * module, be sure to use a dynamic query created by db_select() and add a tag
+ * of "file_access". This will allow modules dealing with file access to ensure
+ * only files to which the user has access are retrieved, through the use of
+ * hook_query_TAG_alter().
  *
- * Note: Even a single module returning FILE_ACCESS_DENY from
- * hook_file_access() will block access to the file. Therefore,
- * implementers should take care to not deny access unless they really intend
- * to.
- * Unless a module wishes to actively deny access it should return
- * FILE_ACCESS_IGNORE (or simply return nothing)
- * to allow other modules to control access.
+ * Note: Even a single module returning FILE_ACCESS_DENY from hook_file_access()
+ * will block access to the file. Therefore, implementers should take care to
+ * not deny access unless they really intend to. Unless a module wishes to
+ * actively deny access, it should return FILE_ACCESS_IGNORE (or simply return
+ * nothing) to allow other modules to control access.
  *
- * Stream wrappers that are considered private should implement a 'private'
- * flag equal to TRUE in hook_stream_wrappers().
+ * Stream wrappers that are considered private should implement a 'private' flag
+ * equal to TRUE in hook_stream_wrappers().
  */
 
 /**
@@ -3050,7 +3047,7 @@ function _file_query_file_access_alter($query, $type) {
     // then add it to the query at the end.
     $file_conditions = db_and();
   }
-  foreach ($tables as $falias => $tableinfo) {
+  foreach ($tables as $file_alias => $tableinfo) {
     $table = $tableinfo['table'];
     if (!($table instanceof SelectQueryInterface) && $table == $base_table) {
       $subquery = db_select('file_managed', 'fm_access')->fields('fm_access', array('fid'));
@@ -3099,10 +3096,10 @@ function _file_query_file_access_alter($query, $type) {
       // Now handle entities.
       if ($type == 'entity') {
         // Set a common alias for entities.
-        $base_alias = $falias;
-        $field = ($falias == 'file_managed' ? 'fid' : 'entity_id');
+        $base_alias = $file_alias;
+        $field = ($file_alias == 'file_managed' ? 'fid' : 'entity_id');
       }
-      $subquery->where("$falias.$field = fm_access.fid");
+      $subquery->where("$file_alias.$field = fm_access.fid");
 
       // For an entity query, attach the subquery to entity conditions.
       if ($type == 'entity') {
@@ -3113,7 +3110,7 @@ function _file_query_file_access_alter($query, $type) {
         // Fix for https://drupal.org/node/2073085
         $db_or = db_or();
         $db_or->exists($subquery);
-        $db_or->isNull($falias . '.' . $field);
+        $db_or->isNull($file_alias . '.' . $field);
         $query->condition($db_or);
       }
       else {

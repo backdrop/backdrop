@@ -2497,12 +2497,12 @@ class SystemSettingsFormTest extends SystemConfigFormCase {
     $this->values = array(
       'abc' => array(
         '#value' => $this->randomString(),
-        '#config_name' => 'simpletest.testconfig',
+        '#config_name' => 'simpletest.test_config',
         '#config_key' => 'abc',
       ),
       'def' => array(
         '#value' => $this->randomString(),
-        '#config_name' => 'simpletest.testconfig',
+        '#config_name' => 'simpletest.test_config',
         '#config_key' => 'def',
       ),
       // Test single-element overrides.
@@ -2514,12 +2514,12 @@ class SystemSettingsFormTest extends SystemConfigFormCase {
       // Test fieldsets of overrides.
       'ghi' => array(
         '#value' => $this->randomString(),
-        '#config_name' => 'simpletest.secondconfig',
+        '#config_name' => 'simpletest.secondc_onfig',
         '#config_key' => 'ghi',
       ),
       'jkl' => array(
         '#value' => $this->randomString(),
-        '#config_name' => 'simpletest.secondconfig',
+        '#config_name' => 'simpletest.second_config',
         '#config_key' => 'jkl',
       ),
     );

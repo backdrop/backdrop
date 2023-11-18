@@ -1,0 +1,5 @@
+{
+    "_config_name": "simpletest.test_config",
+    "abc": "foo",
+    "def": "bar"
+}

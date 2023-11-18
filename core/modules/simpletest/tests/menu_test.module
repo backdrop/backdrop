@@ -72,9 +72,11 @@ function menu_test_menu() {
     'access arguments' => array('access content'),
   );
   // Path containing "exotic" characters.
+  // cspell:disable
   $path = "menu-test/ -._~!$'\"()*@[]?&+%#,;=:" . // "Special" ASCII characters.
     "%23%25%26%2B%2F%3F" . // Characters that look like a percent-escaped string.
     "éøïвβ中國書۞"; // Characters from various non-ASCII alphabets.
+  // cspell:enable
   $items[$path] = array(
     'title' => '"Exotic" path',
     'page callback' => 'menu_test_callback',

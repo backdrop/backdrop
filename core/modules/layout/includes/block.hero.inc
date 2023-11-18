@@ -117,9 +117,9 @@ class BlockHero extends BlockText {
       }
       // Store the filepath separately for use as inline background image.
       $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
-      $fileurl = file_create_url($file->uri);
-      $filepath = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $fileurl);
-      $form_state['values']['image_path'] = $filepath;
+      $file_url = file_create_url($file->uri);
+      $file_path = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $file_url);
+      $form_state['values']['image_path'] = $file_path;
       $this->settings['image'] = $form_state['values']['image'];
       $this->settings['image_path'] = $form_state['values']['image_path'];
     }

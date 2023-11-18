@@ -500,12 +500,14 @@ class CommonXssUnitTestCase extends BackdropUnitTestCase {
      // Ignore invalid multibyte sequence warning.
      $text = @check_plain("\xc2\"");
      $this->assertEqual($text, '', 'check_plain() rejects invalid sequence "\xc2\""');
-     $text = check_plain("Fooÿñ");
-     $this->assertEqual($text, "Fooÿñ", 'check_plain() accepts valid sequence "Fooÿñ"');
      $text = filter_xss("Foo\xC0barbaz");
      $this->assertEqual($text, '', 'filter_xss() rejects invalid sequence "Foo\xC0barbaz"');
+     // cspell:disable
+     $text = check_plain("Fooÿñ");
+     $this->assertEqual($text, "Fooÿñ", 'check_plain() accepts valid sequence "Fooÿñ"');
      $text = filter_xss("Fooÿñ");
      $this->assertEqual($text, "Fooÿñ", 'filter_xss() accepts valid sequence Fooÿñ');
+     // cspell:enable
   }
 
   /**
@@ -619,6 +621,7 @@ class CommonSizeUnitTestCase extends BackdropUnitTestCase {
       $size = 79691776,
       $string . ' == ' . $parsed_size . ' bytes'
     );
+    // cspell:disable-next-line
     $string = '76.24 Giggabyte'; // Misspelled text -> 76.24 GB
     $this->assertEqual(
       $parsed_size = parse_size($string),
