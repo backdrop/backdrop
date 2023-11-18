@@ -51,14 +51,13 @@ function views_ui_update_1001() {
  */
 function views_ui_update_1002() {
   $config = config('views_ui.settings');
-  // cspell:disable
+  // @todo Remove forbidden backwards compatibility words in Backdrop 2.x.
+  // cspell:disable-next-line
   $value = $config->get('views_ui_show_master_display');
-  // cspell:enable
   if (!is_null($value)) {
     $config->set('views_ui_show_default_display', $value);
-    // cspell:disable
+    // cspell:disable-next-line
     $config->clear('views_ui_show_master_display');
-    // cspell:enable
     $config->save();
   }
 }
