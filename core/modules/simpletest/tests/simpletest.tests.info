@@ -958,6 +958,12 @@ description = Tests form API checkbox handling of various combinations of #defau
 group = Form API
 file = form.test
 
+[FormResizableTextareaTestCase]
+name = Form API resizable textarea
+description = Tests transition from old JS-based textarea resize to new CSS approach.
+group = Form API
+file = form.test
+
 [FormEmailTestCase]
 name = Form API email
 description = Tests the form API email element.
