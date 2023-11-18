@@ -215,7 +215,7 @@ class UnicodeUnitTest extends BackdropUnitTestCase {
     // Each case is an array with input string, length to truncate to, and
     // expected return value.
 
-    // Test non-word_safe, non-ellipsis cases.
+    // Test non-word-safe, non-ellipsis cases.
     $non_word_safe_non_ellipsis_cases = array(
       array('frànçAIS is über-åwesome', 24, 'frànçAIS is über-åwesome'),
       array('frànçAIS is über-åwesome', 23, 'frànçAIS is über-åwesom'),
@@ -224,7 +224,7 @@ class UnicodeUnitTest extends BackdropUnitTestCase {
     );
     $this->runTruncateTests($non_word_safe_non_ellipsis_cases, FALSE, FALSE);
 
-    // Test non-word_safe, ellipsis cases.
+    // Test non-word-safe, ellipsis cases.
     $non_word_safe_ellipsis_cases = array(
       array('frànçAIS is über-åwesome', 24, 'frànçAIS is über-åwesome'),
       array('frànçAIS is über-åwesome', 23, 'frànçAIS is über-åweso…'),
@@ -232,7 +232,7 @@ class UnicodeUnitTest extends BackdropUnitTestCase {
     );
     $this->runTruncateTests($non_word_safe_ellipsis_cases, FALSE, TRUE);
 
-    // Test word_safe, ellipsis cases.
+    // Test word-safe, ellipsis cases.
     $word_safe_ellipsis_cases = array(
       array('123', 1, '…'),
       array('123', 2, '1…'),

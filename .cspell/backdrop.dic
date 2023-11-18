@@ -47,6 +47,7 @@ backdroptest
 backdropunlink
 barbaz
 Barepaths
+bartik
 basenames
 basethemes
 Bdcg
@@ -55,7 +56,6 @@ bitstring
 Blavet
 Boldt
 boxton
-Boxton
 Broeck
 buero
 bulkupdate
@@ -101,6 +101,7 @@ datastructure
 datatypes
 datelimits
 dbinfo
+dblog
 DDTHH
 derf
 devmajor
@@ -251,6 +252,7 @@ khoảng
 Konz
 kses
 lastsplit
+langcode
 lighttpd
 linkname
 linknid
@@ -348,6 +350,7 @@ nosuchindex
 nosuchscheme
 nosuchtable
 nosuchtag
+notag
 nothere
 notpromoted
 notpublished
@@ -431,6 +434,7 @@ shortnames
 showblocks
 sidebarborders
 siêu
+simpletest
 simpletests
 sioc
 sito
@@ -473,6 +477,7 @@ tarname
 tascript
 tést
 Teletubbies
+tempstore
 testconfig
 testfiles
 testimage
