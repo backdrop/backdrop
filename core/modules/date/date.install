@@ -89,7 +89,7 @@ function date_update_1000() {
 }
 
 /**
- * Remove legacy Date API, Date Views, and Date Popup configurations.
+ * Remove legacy Date API and Date Popup configurations.
  */
 function date_update_1001() {
   config('date_api.settings')->delete();

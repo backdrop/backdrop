@@ -354,7 +354,7 @@ function date_text_element_process($element, &$form_state, $form) {
 
   $element['#tree'] = TRUE;
   $element['#theme_wrappers'] = array('date_text');
-  $element['date']['#value'] = $element['#value']['date'];
+  $element['date']['#value'] = isset($element['#value']['date']) ? $element['#value']['date'] : '';
   $element['date']['#type'] = 'textfield';
   $element['date']['#weight'] = !empty($element['date']['#weight']) ? $element['date']['#weight'] : $element['#weight'];
   $element['date']['#attributes'] = array('class' => isset($element['#attributes']['class']) ? $element['#attributes']['class'] += array('date-date') : array('date-date'));
@@ -2218,21 +2218,21 @@ function _date_html5_get_attributes(array $date_limits, array $granularity) {
  * @return array
  *   The form elements for a single widget for this field.
  */
-function _date_default_field_widget_form($field, $instance, $langcode, $items, $delta, $base) {
+function _date_default_field_widget_form(array $field, array $instance, $langcode, array $items, $delta, array $base) {
   $element = $base;
 
   // If this is a new entity, populate the field with the right default values.
-  // This happens early so even fields later hidden with #access get those values.
-  // We should only add default values to new entities, to avoid over-writing
-  // a value that has already been set. This means we can't just check to see
-  // if $items is empty, because it might have been set that way on purpose.
+  // This happens early so even fields later hidden with #access get those
+  // values. We should only add default values to new entities, to avoid
+  // over-writing a value that has already been set. This means we can't just
+  // check to see if $items is empty, because it might have been set that way on
+  // purpose.
   // @see date_field_widget_properties_alter() where we flagged if this is a new entity.
-
-  // We check !isset($items[$delta]['value']) because entity translation may create
-  // a new translation entity for an existing entity and we don't want to clobber
-  // values that were already set in that case.
+  //
+  // We check !isset($items[$delta]['value']) because entity translation may
+  // create a new translation entity for an existing entity and we don't want to
+  // clobber values that were already set in that case.
   // @see http://drupal.org/node/1478848.
-
   $is_default = FALSE;
   if (!isset($items[$delta]['value'])) {
     if (!empty($instance['widget']['is_new'])) {
@@ -2308,13 +2308,13 @@ function _date_default_field_widget_form($field, $instance, $langcode, $items, $
  *   Array of default values for this field.
  * @param int $delta
  *   The order of this item in the array of subelements (0, 1, 2, etc).
- * @param array $base
+ * @param array $element
  *   A form element array containing basic properties for the widget.
  *
  * @return array
  *   The form elements for a single widget for this field.
  */
-function _date_html5_field_widget_form($field, $instance, $langcode, $items, $delta, $element) {
+function _date_html5_field_widget_form(array $field, array $instance, $langcode, array $items, $delta, array $element) {
   $field_settings = $field['settings'];
   $widget_settings = $instance['widget']['settings'];
 
