@@ -40,10 +40,10 @@ function entity_caching_test_entity_info() {
         'bundle' => 'type',
       ),
       'bundles' => array(
-        'do_cache' => array(
+        'docache' => array(
           'label' => 'Do Cache',
         ),
-        'no_cache' => array(
+        'nocache' => array(
           'label' => 'No Cache',
         ),
       ),

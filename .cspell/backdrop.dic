@@ -50,11 +50,14 @@ DDTHH
 diffutils
 dimanche
 divitis
+docache
 docwilmot
+doubleclick
 droppables
 drush
 dynsrc
 edik
+editbackdropimage
 elementtype
 enddate
 entityreference
@@ -221,6 +224,7 @@ niño
 nlead
 Nmedi
 noajax
+nocache
 nodeapi
 nongranularity
 nonmodal

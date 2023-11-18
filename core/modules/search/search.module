@@ -7,6 +7,7 @@
 /**
  * Matches all 'N' Unicode character classes (numbers)
  */
+// cspell:disable
 define('PREG_CLASS_NUMBERS',
   '\x{30}-\x{39}\x{b2}\x{b3}\x{b9}\x{bc}-\x{be}\x{660}-\x{669}\x{6f0}-\x{6f9}' .
   '\x{966}-\x{96f}\x{9e6}-\x{9ef}\x{9f4}-\x{9f9}\x{a66}-\x{a6f}\x{ae6}-\x{aef}' .
@@ -17,10 +18,12 @@ define('PREG_CLASS_NUMBERS',
   '\x{2460}-\x{249b}\x{24ea}-\x{24ff}\x{2776}-\x{2793}\x{3007}\x{3021}-\x{3029}' .
   '\x{3038}-\x{303a}\x{3192}-\x{3195}\x{3220}-\x{3229}\x{3251}-\x{325f}\x{3280}-' .
   '\x{3289}\x{32b1}-\x{32bf}\x{ff10}-\x{ff19}');
+// cspell:enable
 
 /**
  * Matches all 'P' Unicode character classes (punctuation)
  */
+// cspell:disable
 define('PREG_CLASS_PUNCTUATION',
   '\x{21}-\x{23}\x{25}-\x{2a}\x{2c}-\x{2f}\x{3a}\x{3b}\x{3f}\x{40}\x{5b}-\x{5d}' .
   '\x{5f}\x{7b}\x{7d}\x{a1}\x{ab}\x{b7}\x{bb}\x{bf}\x{37e}\x{387}\x{55a}-\x{55f}' .
@@ -37,6 +40,7 @@ define('PREG_CLASS_PUNCTUATION',
   '\x{fe6a}\x{fe6b}\x{ff01}-\x{ff03}\x{ff05}-\x{ff0a}\x{ff0c}-\x{ff0f}\x{ff1a}' .
   '\x{ff1b}\x{ff1f}\x{ff20}\x{ff3b}-\x{ff3d}\x{ff3f}\x{ff5b}\x{ff5d}\x{ff5f}-' .
   '\x{ff65}');
+// cspell:enable
 
 /**
  * Matches CJK (Chinese, Japanese, Korean) letter-like characters.
@@ -619,17 +623,17 @@ function search_index($sid, $module, $text) {
   $search_settings_config = config('search.settings');
   $minimum_word_size = $search_settings_config->get('search_minimum_word_size');
 
-  // Link matching
+  // Link matching.
   global $base_url;
   $node_regexp = '@href=[\'"]?(?:' . preg_quote($base_url, '@') . '/|' . preg_quote(base_path(), '@') . ')(?:\?q=)?/?((?![a-z]+:)[^\'">]+)[\'">]@i';
 
-  // Multipliers for scores of words inside certain HTML tags. The weights are stored
-  // in a variable so that modules can overwrite the default weights.
+  // Multipliers for scores of words inside certain HTML tags. The weights are
+  // stored in a variable so that modules can overwrite the default weights.
   // Note: 'a' must be included for link ranking to work.
   $tags = $search_settings_config->get('search_tag_weights');
 
-  // Strip off all ignored tags to speed up processing, but insert space before/after
-  // them to keep word boundaries.
+  // Strip off all ignored tags to speed up processing, but insert space
+  // before/after them to keep word boundaries.
   $text = str_replace(array('<', '>'), array(' <', '> '), $text);
   $text = strip_tags($text, '<' . implode('><', array_keys($tags)) . '>');
 
@@ -639,50 +643,51 @@ function search_index($sid, $module, $text) {
   // and begins and ends with a literal (inserting $null as required).
 
   $tag = FALSE; // Odd/even counter. Tag or no tag.
-  $link = FALSE; // State variable for link analyzer
-  $score = 1; // Starting score per word
-  $accum = ' '; // Accumulator for cleaned up data
-  $tagstack = array(); // Stack with open tags
-  $tagwords = 0; // Counter for consecutive words
-  $focus = 1; // Focus state
+  $link = FALSE; // State variable for link analyzer.
+  $score = 1; // Starting score per word.
+  $cleaned_up_data = ' '; // Accumulator for cleaned up data.
+  $tag_stack = array(); // Stack with open tags.
+  $tag_words = 0; // Counter for consecutive words.
+  $focus = 1; // Focus state.
 
-  $results = array(0 => array()); // Accumulator for words for index
+  $results = array(0 => array()); // Accumulator for words for index.
 
   foreach ($split as $value) {
     if ($tag) {
-      // Increase or decrease score per word based on tag
+      // Increase or decrease score per word based on tag.
       list($tag_name) = explode(' ', $value, 2);
       $tag_name = backdrop_strtolower($tag_name);
       // Closing or opening tag?
       if ($tag_name[0] == '/') {
         $tag_name = substr($tag_name, 1);
-        // If we encounter unexpected tags, reset score to avoid incorrect boosting.
-        if (!count($tagstack) || $tagstack[0] != $tag_name) {
-          $tagstack = array();
+        // If we encounter unexpected tags, reset score to avoid incorrect
+        // boosting.
+        if (!count($tag_stack) || $tag_stack[0] != $tag_name) {
+          $tag_stack = array();
           $score = 1;
         }
         else {
-          // Remove from tag stack and decrement score
-          $score = max(1, $score - $tags[array_shift($tagstack)]);
+          // Remove from tag stack and decrement score.
+          $score = max(1, $score - $tags[array_shift($tag_stack)]);
         }
         if ($tag_name == 'a') {
           $link = FALSE;
         }
       }
       else {
-        if (isset($tagstack[0]) && $tagstack[0] == $tag_name) {
+        if (isset($tag_stack[0]) && $tag_stack[0] == $tag_name) {
           // None of the tags we look for make sense when nested identically.
           // If they are, it's probably broken HTML.
-          $tagstack = array();
+          $tag_stack = array();
           $score = 1;
         }
         else {
-          // Add to open tag stack and increment score
-          array_unshift($tagstack, $tag_name);
+          // Add to open tag stack and increment score.
+          array_unshift($tag_stack, $tag_name);
           $score += $tags[$tag_name];
         }
         if ($tag_name == 'a') {
-          // Check if link points to a node on this site
+          // Check if link points to a node on this site.
           if (preg_match($node_regexp, $value, $match)) {
             $path = backdrop_get_normal_path($match[1]);
             if (preg_match('!(?:node|book)/(?:view/)?([0-9]+)!i', $path, $match)) {
@@ -697,22 +702,24 @@ function search_index($sid, $module, $text) {
         }
       }
       // A tag change occurred, reset counter.
-      $tagwords = 0;
+      $tag_words = 0;
     }
     else {
-      // Note: use of PREG_SPLIT_DELIM_CAPTURE above will introduce empty values
+      // Note: use of PREG_SPLIT_DELIM_CAPTURE above will introduce empty
+      // values.
       if ($value != '') {
         if ($link) {
-          // Check to see if the node link text is its URL. If so, we use the target node title instead.
+          // Check to see if the node link text is its URL. If so, we use the
+          // target node title instead.
           if (preg_match('!^https?://!i', $value)) {
             $value = $linktitle;
           }
         }
         $words = search_index_split($value);
         foreach ($words as $word) {
-          // Add word to accumulator
-          $accum .= $word . ' ';
-          // Check wordlength
+          // Add word to accumulator.
+          $cleaned_up_data .= $word . ' ';
+          // Check word length.
           if (is_numeric($word) || backdrop_strlen($word) >= $minimum_word_size) {
             // Links score mainly for the target.
             if ($link) {
@@ -723,20 +730,22 @@ function search_index($sid, $module, $text) {
               // Reduce score of the link caption in the source.
               $focus *= 0.2;
             }
-            // Fall-through
+            // Fall-through.
             if (!isset($results[0][$word])) {
               $results[0][$word] = 0;
             }
             $results[0][$word] += $score * $focus;
 
-            // Focus is a decaying value in terms of the amount of unique words up to this point.
-            // From 100 words and more, it decays, to e.g. 0.5 at 500 words and 0.3 at 1000 words.
+            // Focus is a decaying value in terms of the amount of unique words
+            // up to this point. From 100 words and more, it decays, to e.g. 0.5
+            // at 500 words and 0.3 at 1000 words.
             $focus = min(1, .01 + 3.5 / (2 + count($results[0]) * .015));
           }
-          $tagwords++;
-          // Too many words inside a single tag probably mean a tag was accidentally left open.
-          if (count($tagstack) && $tagwords >= 15) {
-            $tagstack = array();
+          $tag_words++;
+          // Too many words inside a single tag probably mean a tag was
+          // accidentally left open.
+          if (count($tag_stack) && $tag_words >= 15) {
+            $tag_stack = array();
             $score = 1;
           }
         }
@@ -747,17 +756,17 @@ function search_index($sid, $module, $text) {
 
   search_reindex($sid, $module, TRUE);
 
-  // Insert cleaned up data into dataset
+  // Insert cleaned up data into data set.
   db_insert('search_dataset')
     ->fields(array(
       'sid' => $sid,
       'type' => $module,
-      'data' => $accum,
+      'data' => $cleaned_up_data,
       'reindex' => 0,
     ))
     ->execute();
 
-  // Insert results into search index
+  // Insert results into search index.
   foreach ($results[0] as $word => $score) {
     // If a word already exists in the database, its score gets increased
     // appropriately. If not, we create a new record with the appropriate
@@ -816,7 +825,8 @@ function search_index($sid, $module, $text) {
       search_touch_node($nid);
     }
   }
-  // Any left-over links in $links no longer exist. Delete them and mark the nodes for reindexing.
+  // Any left-over links in $links no longer exist. Delete them and mark the
+  // nodes for reindexing.
   foreach ($links as $nid => $caption) {
     db_delete('search_node_links')
       ->condition('sid', $sid)
