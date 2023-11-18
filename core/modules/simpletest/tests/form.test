@@ -2514,7 +2514,7 @@ class SystemSettingsFormTest extends SystemConfigFormCase {
       // Test fieldsets of overrides.
       'ghi' => array(
         '#value' => $this->randomString(),
-        '#config_name' => 'simpletest.secondc_onfig',
+        '#config_name' => 'simpletest.second_config',
         '#config_key' => 'ghi',
       ),
       'jkl' => array(
