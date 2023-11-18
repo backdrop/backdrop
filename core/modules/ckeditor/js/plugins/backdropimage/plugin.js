@@ -155,12 +155,12 @@ CKEDITOR.plugins.add('backdropimage', {
 
           // If width and height are not set, load the image and populate.
           if (!(data.width || data.height) && !(data.width.length || data.height.length)) {
-            var imagetoSize = new Image();
-            imagetoSize.onload = function() {
+            var imageToSize = new Image();
+            imageToSize.onload = function() {
               widget.setData('width', this.width);
               widget.setData('height', this.height);
             };
-            imagetoSize.src = data.src;
+            imageToSize.src = data.src;
           }
 
           // Save the data to internal widget.

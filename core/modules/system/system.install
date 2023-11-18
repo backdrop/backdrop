@@ -54,7 +54,7 @@ function system_requirements($phase) {
   $phpversion = phpversion();
   if (function_exists('phpinfo')) {
     if ($phase == 'runtime') {
-      $php_value = $t('Version: !version (<a href="!infourl">PHP information</a>)', array('!version' => $phpversion, '!infourl' => url('admin/reports/status/php')));
+      $php_value = $t('Version: !version (<a href="!info_url">PHP information</a>)', array('!version' => $phpversion, '!info_url' => url('admin/reports/status/php')));
     }
     else {
       $php_value = $t('Version: !version', array('!version' => $phpversion));
@@ -222,7 +222,7 @@ function system_requirements($phase) {
     $requirements['jquery'] = array(
       'title' => $t('jQuery'),
       'severity' => REQUIREMENT_OK,
-      'value' => $t('jQuery version !jqv / jQuery UI version !jquiv', array('!jqv' => $jquery['version'], '!jquiv' => $jquery_ui['version'])),
+      'value' => $t('jQuery version !jquery_version / jQuery UI version !jquery_ui_version', array('!jqv' => $jquery['version'], '!jquery_ui_version' => $jquery_ui['version'])),
     );
   }
 

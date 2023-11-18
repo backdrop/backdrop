@@ -1377,8 +1377,8 @@ function search_simplify_excerpt_match($key, $text, $offset, $boundary) {
       // matching text.
       $length = strlen($window);
       for ($i = 1; $i <= $length; $i++) {
-        $keyfound = substr($text, $value[1], $i);
-        if ($simplified_key == search_simplify($keyfound)) {
+        $key_found = substr($text, $value[1], $i);
+        if ($simplified_key == search_simplify($key_found)) {
           break;
         }
       }
@@ -1386,7 +1386,7 @@ function search_simplify_excerpt_match($key, $text, $offset, $boundary) {
     }
   }
 
-  return $pos ? array('where' => $pos, 'keyword' => $keyfound) : FALSE;
+  return $pos ? array('where' => $pos, 'keyword' => $key_found) : FALSE;
 }
 
 /**

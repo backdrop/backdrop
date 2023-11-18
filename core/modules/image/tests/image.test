@@ -948,7 +948,7 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     // that would be used on the image field.
     $this->assertNoPattern('<div class="(.*?)field-name-' . strtr($field_name, '_', '-') . '(.*?)">', 'No image displayed when no image is attached and no default image specified.');
 
-    // Add a default image to the public imagefield instance.
+    // Add a default image to the public image field instance.
     $images = $this->backdropGetTestFiles('image');
     $edit = array(
       'files[field_settings_default_image_file]' => backdrop_realpath($images[0]->uri),

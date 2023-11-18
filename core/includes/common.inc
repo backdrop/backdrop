@@ -5650,10 +5650,10 @@ function backdrop_build_js_cache($files) {
     // starting with "ad*".
     $filename = 'js_' . backdrop_hash_base64($contents) . '.js';
     // Create the js/ within the files folder.
-    $jspath = 'public://js';
-    $uri = $jspath . '/' . $filename;
+    $js_path = 'public://js';
+    $uri = $js_path . '/' . $filename;
     // Create the JS file.
-    file_prepare_directory($jspath, FILE_CREATE_DIRECTORY);
+    file_prepare_directory($js_path, FILE_CREATE_DIRECTORY);
     if (!file_exists($uri) && !file_unmanaged_save_data($contents, $uri, FILE_EXISTS_REPLACE)) {
       return FALSE;
     }

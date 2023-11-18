@@ -647,22 +647,22 @@ function backdrop_substr($text, $start, $length = NULL) {
         }
       }
     }
-    $istart = $bytes;
+    $i_start = $bytes;
 
     // Find the ending byte offset.
     if ($length === NULL) {
-      $iend = $strlen;
+      $i_end = $strlen;
     }
     elseif ($length > 0) {
       // Count all the continuation bytes from the starting index until we have
       // found $length characters or reached the end of the string, then
       // backtrace one byte.
-      $iend = $istart - 1;
+      $i_end = $i_start - 1;
       $chars = -1;
       $last_real = FALSE;
-      while ($iend < $strlen - 1 && $chars < $length) {
-        $iend++;
-        $c = ord($text[$iend]);
+      while ($i_end < $strlen - 1 && $chars < $length) {
+        $i_end++;
+        $c = ord($text[$i_end]);
         $last_real = FALSE;
         if ($c < 0x80 || $c >= 0xC0) {
           $chars++;
@@ -672,24 +672,24 @@ function backdrop_substr($text, $start, $length = NULL) {
       // Backtrace one byte if the last character we found was a real character
       // and we don't need it.
       if ($last_real && $chars >= $length) {
-        $iend--;
+        $i_end--;
       }
     }
     elseif ($length < 0) {
       // Count all the continuation bytes from the end until we have found
       // abs($start) characters, then backtrace one byte.
       $length = abs($length);
-      $iend = $strlen; $chars = 0;
-      while ($iend > 0 && $chars < $length) {
-        $iend--;
-        $c = ord($text[$iend]);
+      $i_end = $strlen; $chars = 0;
+      while ($i_end > 0 && $chars < $length) {
+        $i_end--;
+        $c = ord($text[$i_end]);
         if ($c < 0x80 || $c >= 0xC0) {
           $chars++;
         }
       }
       // Backtrace one byte if we are not at the beginning of the string.
-      if ($iend > 0) {
-        $iend--;
+      if ($i_end > 0) {
+        $i_end--;
       }
     }
     else {
@@ -697,6 +697,6 @@ function backdrop_substr($text, $start, $length = NULL) {
       return '';
     }
 
-    return substr($text, $istart, max(0, $iend - $istart + 1));
+    return substr($text, $i_start, max(0, $i_end - $i_start + 1));
   }
 }
