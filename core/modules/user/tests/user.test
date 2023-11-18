@@ -1575,10 +1575,10 @@ class UserAdminTestCase extends BackdropWebTestCase {
     $this->assertEqual(trim($status_result[0]), 'Blocked', 'User C blocked');
 
     // Test unblocking of a user from /admin/people page and sending of activation mail
-    $editunblock = array();
-    $editunblock['action'] = 'user_unblock_user_action';
-    $editunblock[$user_c_checkbox] = TRUE;
-    $this->backdropPost('admin/people', $editunblock, t('Execute'), array('query' => array('order' => 'created', 'sort' => 'asc')));
+    $edit_unblock = array();
+    $edit_unblock['action'] = 'user_unblock_user_action';
+    $edit_unblock[$user_c_checkbox] = TRUE;
+    $this->backdropPost('admin/people', $edit_unblock, t('Execute'), array('query' => array('order' => 'created', 'sort' => 'asc')));
     $status_result = $this->xpath('//form[@id="views-form-user-admin-page"]//tr[last()]//td[position()=3]');
     $this->assertEqual(trim($status_result[0]), 'Active', 'User C unblocked');
     $this->assertMail("to", $user_c->mail, "Activation mail sent to user C");
