@@ -39,7 +39,7 @@ class BootstrapIPAddressTestCase extends BackdropWebTestCase {
   protected $untrusted_ip;
 
   function setUp() {
-    $this->oldserver = $_SERVER;
+    $this->old_server = $_SERVER;
 
     $this->remote_ip = '127.0.0.1';
     $this->proxy_ip = '127.0.0.2';
@@ -58,7 +58,7 @@ class BootstrapIPAddressTestCase extends BackdropWebTestCase {
   }
 
   function tearDown() {
-    $_SERVER = $this->oldserver;
+    $_SERVER = $this->old_server;
     backdrop_static_reset('ip_address');
     parent::tearDown();
   }

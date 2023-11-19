@@ -266,10 +266,10 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
       // Repeat this with a different file that we do not have access to and
       // make sure that access is denied.
       $file_no_access = array_shift($files);
-      $original_uri_noaccess = file_unmanaged_copy($file_no_access->uri, $scheme . '://', FILE_EXISTS_RENAME);
-      $generated_uri_noaccess = $scheme . '://styles/' . $this->style_name . '/' . $scheme . '/'. backdrop_basename($original_uri_noaccess);
-      $this->assertFalse(file_exists($generated_uri_noaccess), 'Generated file does not exist.');
-      $generate_url_noaccess = image_style_url($this->style_name, $original_uri_noaccess);
+      $original_uri_no_access = file_unmanaged_copy($file_no_access->uri, $scheme . '://', FILE_EXISTS_RENAME);
+      $generated_uri_no_access = $scheme . '://styles/' . $this->style_name . '/' . $scheme . '/'. backdrop_basename($original_uri_no_access);
+      $this->assertFalse(file_exists($generated_uri_no_access), 'Generated file does not exist.');
+      $generate_url_noaccess = image_style_url($this->style_name, $original_uri_no_access);
 
       $this->backdropGet($generate_url_noaccess);
       $this->assertResponse(403, 'Confirmed that access is denied for the private image style.');
