@@ -3248,7 +3248,8 @@ function _backdrop_bootstrap_sanitize_request() {
   // Remove dangerous keys from input data.
   $allowlist = settings_get('sanitize_input_allowlist', array());
   if (empty($allowlist)) {
-    // Backwards compatible setting support. @todo Remove in 2.x.
+    // @todo Remove forbidden backwards compatibility word in Backdrop 2.x.
+    // cspell:disable-next-line
     $allowlist = settings_get('sanitize_input_whitelist', array());
   }
   $log_sanitized_keys = settings_get('sanitize_input_logging');
