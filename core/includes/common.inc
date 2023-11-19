@@ -6294,7 +6294,7 @@ function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 
   $files = array();
 
   // Search for the directory in core.
-  $searchdir = array('core/' . $directory);
+  $search_dir = array('core/' . $directory);
 
   // For the case of searching for profiles, scan top-level directories.
   // Always search for contributed and custom extensions in the profile
@@ -6317,16 +6317,16 @@ function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 
   $profiles[] = $profile;
   foreach ($profiles as $profile) {
     if (file_exists("core/profiles/$profile/$directory")) {
-      $searchdir[] = "core/profiles/$profile/$directory";
+      $search_dir[] = "core/profiles/$profile/$directory";
     }
     if (file_exists("profiles/$profile/$directory")) {
-      $searchdir[] = "profiles/$profile/$directory";
+      $search_dir[] = "profiles/$profile/$directory";
     }
   }
 
-  $searchdir[] = $directory;
+  $search_dir[] = $directory;
   if ($config !== '.' && file_exists("$config/$directory")) {
-    $searchdir[] = "$config/$directory";
+    $search_dir[] = "$config/$directory";
   }
 
   // Do not check for system files in common special-purpose directories.
@@ -6347,7 +6347,7 @@ function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 
   if (!function_exists('file_scan_directory')) {
     require_once BACKDROP_ROOT . '/core/includes/file.inc';
   }
-  foreach ($searchdir as $dir) {
+  foreach ($search_dir as $dir) {
     $files_to_add = file_scan_directory($dir, $mask, array('key' => $key, 'min_depth' => $min_depth, 'nomask' => $no_mask));
 
     // Duplicate files found in later search directories take precedence over
@@ -8423,7 +8423,8 @@ function backdrop_write_record($table, &$record, $primary_keys = array()) {
  * Information stored in a module .info file:
  * - name: The real name of the module for display purposes.
  * - description: A brief description of the module.
- * - dependencies: An array of shortnames of other modules this module requires.
+ * - dependencies: An array of machine names of other modules this module
+ *   requires.
  * - package: The name of the package of modules this module belongs to.
  *
  * Information stored in a theme .info file:

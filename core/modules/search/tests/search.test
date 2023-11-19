@@ -1611,14 +1611,14 @@ class SearchConfigSettingsForm extends BackdropWebTestCase {
     // Check that node 2 is still in the index even after it was disabled.
     $result = db_select('search_index', 'i')
       ->extend('SearchQuery')
-      ->searchexpression($node2->title, 'node')
+      ->searchExpression($node2->title, 'node')
       ->execute();
     $this->assertEqual($result->rowCount(), 1, 'Node correctly still indexed after disabling its type.');
 
     // Check that node 3 is not in the index, as it was disabled before create.
     $result = db_select('search_index', 'i')
       ->extend('SearchQuery')
-      ->searchexpression($node3->title, 'node')
+      ->searchExpression($node3->title, 'node')
       ->execute();
     $this->assertEqual($result->rowCount(), 0, 'New nodes of disabled type are not added to search index.');
   }
@@ -2091,7 +2091,7 @@ class SearchSetLocaleTest extends BackdropWebTestCase {
     // query to the database, so an assertion is not necessary here.
     db_select('search_index', 'i')
       ->extend('SearchQuery')
-      ->searchexpression('tapir', 'node')
+      ->searchExpression('tapir', 'node')
       ->execute();
   }
 }

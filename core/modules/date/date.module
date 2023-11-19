@@ -14,8 +14,8 @@ require_once(__DIR__ . '/date.field.inc');
  */
 function date_default_format($type) {
   // Example input formats must show all possible date parts, so add seconds.
-  $shortformat = system_date_format_load('short');
-  $default_format = str_replace('i', 'i:s', $shortformat['pattern']);
+  $short_format = system_date_format_load('short');
+  $default_format = str_replace('i', 'i:s', $short_format['pattern']);
   return $default_format;
 }
 

@@ -651,7 +651,7 @@ class MenuLinksUnitTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Test automatic re-parenting of menu links.
+   * Test automatic reparenting of menu links.
    */
   function testMenuLinkReparenting($module = 'menu_test') {
     // Check the initial hierarchy.

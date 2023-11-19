@@ -2028,16 +2028,20 @@ function views_process_check_options($element, &$form_state) {
  * Provide a list of views object types used in a view.
  */
 function views_object_types() {
-  static $retval = NULL;
+  static $views_object_types = NULL;
 
   // Statically cache this so t() doesn't run lots of times.
-  if (!isset($retval)) {
-    $retval = array(
+  if (!isset($views_object_types)) {
+    $views_object_types = array(
       'field' => array(
-        'title' => t('Fields'), // title
-        'ltitle' => t('fields'), // lowercase title for mid-sentence
-        'stitle' => t('Field'), // singular title
-        'lstitle' => t('field'), // singular lowercase title for mid sentence
+        // Title.
+        'title' => t('Fields'),
+        // Lowercase title for mid-sentence.
+        'ltitle' => t('fields'),
+        // Singular title.
+        'stitle' => t('Field'),
+        // Singular lowercase title for mid sentence.
+        'lstitle' => t('field'),
         'plural' => 'fields',
       ),
       'argument' => array(
@@ -2095,7 +2099,7 @@ function views_object_types() {
     );
   }
 
-  return $retval;
+  return $views_object_types;
 }
 
 /**

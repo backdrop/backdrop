@@ -52,11 +52,11 @@ class DateThemeTestCase extends BackdropWebTestCase {
   public function testDateDisplayCombination() {
     // Start and end date on same day, with timezone.
     // We don't need a full entity, stdClass is sufficient here.
-    $stdobj = new stdClass();
-    $stdobj->date_id = '';
+    $mock_entity = new stdClass();
+    $mock_entity->date_id = '';
     $variables = array(
-      'entity' => $stdobj,
-      'entity_type' => 'stdobj',
+      'entity' => $mock_entity,
+      'entity_type' => 'mock_entity',
       'dates' => array(
         'value' => array(
           'formatted' => '2019-03-20 10:00',

@@ -3031,7 +3031,7 @@ function _file_query_file_access_alter($query, $type) {
   if ($type == 'entity') {
     // The original query looked something like:
     // @code
-    //  SELECT fid FROM sometable s
+    //  SELECT fid FROM some_table s
     //  WHERE ($file_access_conditions)
     // @endcode
     //

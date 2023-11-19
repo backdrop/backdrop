@@ -225,12 +225,12 @@ class views_handler_field_field extends views_handler_field {
 
 
       $fields = array();
-      $rkey = $this->definition['is revision'] ? 'FIELD_LOAD_REVISION' : 'FIELD_LOAD_CURRENT';
+      $revision_key = $this->definition['is revision'] ? 'FIELD_LOAD_REVISION' : 'FIELD_LOAD_CURRENT';
       // Go through the list and determine the actual column name from field api.
       foreach ($options as $column) {
         $name = $column;
-        if (isset($this->field_info['storage']['details']['sql'][$rkey][$this->table][$column])) {
-          $name = $this->field_info['storage']['details']['sql'][$rkey][$this->table][$column];
+        if (isset($this->field_info['storage']['details']['sql'][$revision_key][$this->table][$column])) {
+          $name = $this->field_info['storage']['details']['sql'][$revision_key][$this->table][$column];
         }
 
         $fields[$column] = $name;

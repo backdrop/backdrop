@@ -1416,10 +1416,10 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
     $subtab_layout_title = $this->randomName();
-    $subsubtab_layout_title = $this->randomName();
+    $sub_subtab_layout_title = $this->randomName();
     $edit = array(
       'menu[type]' => 'default tab',
-      'menu[title]' => $subsubtab_layout_title,
+      'menu[title]' => $sub_subtab_layout_title,
       'menu[weight]' => 0,
       'menu[parent][type]' => 'tab',
       'menu[parent][title]' => $subtab_layout_title,

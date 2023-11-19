@@ -1099,6 +1099,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
     $f = filter_xss("<\0scr\0ipt>alert(0)</script>");
     $this->assertNoNormalized($f, 'ipt', 'HTML tag stripping evasion -- breaking HTML with nulls.');
 
+    // cspell:disable-next-line
     $f = filter_xss("<scrscriptipt src=http://www.example.com/a.js>");
     $this->assertNoNormalized($f, 'script', 'HTML tag stripping evasion -- filter just removing "script".');
 

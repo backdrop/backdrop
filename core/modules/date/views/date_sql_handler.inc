@@ -628,8 +628,8 @@ class date_sql_handler {
     }
     $formats = array('display', 'sql');
     // Start with the site long date format and add seconds to it.
-    $shortformat = system_date_format_load('short');
-    $short = str_replace(':i', ':i:s', $shortformat['pattern']);
+    $short_format = system_date_format_load('short');
+    $short = str_replace(':i', ':i:s', $short_format['pattern']);
     switch ($granularity) {
       case 'year':
         $formats['display'] = 'Y';

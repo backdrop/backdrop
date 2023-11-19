@@ -3091,7 +3091,7 @@ function _menu_navigation_links_rebuild($menu) {
     ->orderBy('depth', 'DESC')
     ->execute();
   // Remove all such items. Starting from those with the greatest depth will
-  // minimize the amount of re-parenting done by menu_link_delete().
+  // minimize the amount of reparenting done by menu_link_delete().
   foreach ($result as $item) {
     _menu_delete_item($item, TRUE);
   }
@@ -3160,7 +3160,7 @@ function menu_delete_links($menu_name) {
   $links = menu_load_links($menu_name);
   foreach ($links as $link) {
     // To speed up the deletion process, we reset some link properties that
-    // would trigger re-parenting logic in _menu_delete_item() and
+    // would trigger reparenting logic in _menu_delete_item() and
     // _menu_update_parental_status().
     $link['has_children'] = FALSE;
     $link['plid'] = 0;
@@ -3419,11 +3419,10 @@ function menu_link_save(&$item, $existing_item = array(), $parent_candidates = a
  *
  * Because the parent of a given link might not exist anymore in the database,
  * we apply a set of heuristics to determine a proper parent:
- *
- *  - use the passed parent link if specified and existing.
- *  - else, use the first existing link down the previous link hierarchy
- *  - else, for system menu links (derived from hook_menu()), reparent
- *    based on the path hierarchy.
+ *  - Use the passed parent link if specified and existing.
+ *  - Else, use the first existing link down the previous link hierarchy.
+ *  - Else, for system menu links (derived from hook_menu()), reparent based on
+ *    the path hierarchy.
  *
  * @param $menu_link
  *   A menu link.

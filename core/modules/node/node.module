@@ -3094,7 +3094,7 @@ function _node_query_node_access_alter($query, $type) {
   if ($type == 'entity') {
     // The original query looked something like:
     // @code
-    //  SELECT nid FROM sometable s
+    //  SELECT nid FROM some_table s
     //  INNER JOIN node_access na ON na.nid = s.nid
     //  WHERE ($node_access_conditions)
     // @endcode

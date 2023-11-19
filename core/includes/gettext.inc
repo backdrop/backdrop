@@ -1046,19 +1046,19 @@ function _locale_export_po($language = NULL, $output = NULL) {
  * Prints a string on multiple lines.
  */
 function _locale_export_string($str) {
-  $stri = addcslashes($str, "\0..\37\\\"");
+  $string = addcslashes($str, "\0..\37\\\"");
   $parts = array();
 
   // Cut text into several lines.
-  while ($stri != "") {
-    $i = strpos($stri, "\\n");
+  while ($string != "") {
+    $i = strpos($string, "\\n");
     if ($i === FALSE) {
-      $current_string = $stri;
-      $stri = "";
+      $current_string = $string;
+      $string = "";
     }
     else {
-      $current_string = substr($stri, 0, $i + 2);
-      $stri = substr($stri, $i + 2);
+      $current_string = substr($string, 0, $i + 2);
+      $string = substr($string, $i + 2);
     }
     $current_parts = explode("\n", _locale_export_wrap($current_string, 70));
     $parts = array_merge($parts, $current_parts);

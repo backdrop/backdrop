@@ -27,10 +27,12 @@ function hook_language_init() {
 
   switch ($language->language) {
     case 'it':
+      // cspell:disable-next-line
       $settings['locale_custom_strings_en']['site_name'] = 'Il mio sito Backdrop';
       break;
 
     case 'fr':
+      // cspell:disable-next-line
       $settings['locale_custom_strings_en']['site_name'] = 'Mon site Backdrop';
       break;
   }

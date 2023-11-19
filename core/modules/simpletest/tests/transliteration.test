@@ -39,9 +39,8 @@ class TransliterationTest extends BackdropUnitTestCase {
       array('fr', $four_byte, 'wii'),
 
       // Test a language with no overrides.
-      // cspell:disable
+      // cspell:disable-next-line
       array('en', $two_byte, 'A O U A O aouaohello'),
-      // cspell:enable
 
       // Test language overrides provided by core.
       // cspell:disable
@@ -57,14 +56,12 @@ class TransliterationTest extends BackdropUnitTestCase {
       array('en', 'foo' . $unknown_character . $unknown_character . $unknown_character . 'foo', 'foo???foo'),
 
       // Chinese characters.
-      // cspell:disable
+      // cspell:disable-next-line
       array('en', '一個簡單的句子', 'yigejiandandejuzi'),
-      // cspell:enable
 
       // Bulgarian characters.
-      // cspell:disable
+      // cspell:disable-next-line
       array('bg', 'първа статия', 'parva statiya'),
-      // cspell:enable
     );
 
     include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';

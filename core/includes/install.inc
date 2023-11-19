@@ -1435,7 +1435,7 @@ function backdrop_check_module($module) {
  * a normal Backdrop module .info file. For example:
  * - name: The real name of the installation profile for display purposes.
  * - description: A brief description of the profile.
- * - dependencies: An array of shortnames of other modules that this install
+ * - dependencies: An array of machine names of other modules that this install
  *   profile requires.
  *
  * Additional, less commonly-used information that can appear in a profile.info

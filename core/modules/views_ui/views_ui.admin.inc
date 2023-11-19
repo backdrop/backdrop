@@ -2951,8 +2951,8 @@ function views_ui_ajax_form($js, $key, $view, $display_id = '') {
       $top[0] = $js;
 
       // Change view into a reference.
-      $stepview = $top[2];
-      $top[2] = &$stepview;
+      $step_view = $top[2];
+      $top[2] = &$step_view;
 
       $form_state = call_user_func_array('views_ui_build_form_state', $top);
       $form_state['input'] = array();

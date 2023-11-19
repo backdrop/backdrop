@@ -96,15 +96,15 @@ class FilterEditorLinkValidateTestCase extends BackdropWebTestCase {
     $valid_urls = array(
       // Should get altered.
       'node/1' => '/de/node/1',
-      // cspell:disable
+      // cspell:disable-next-line
       'ärger-im-büro' => '/de/%C3%A4rger-im-b%C3%BCro',
-      // cspell:enable
       '<front>?page=1#main-content' => '/de?page=1#main-content',
       // Should stay untouched.
       '/en/node/1' => '/en/node/1',
       '#main-content' => '#main-content',
       'http://domain.tld:8080/index.php?page=3&foo=bar' => 'http://domain.tld:8080/index.php?page=3&foo=bar',
       'http://user:pass@domain.tld/path' => 'http://user:pass@domain.tld/path',
+      // cspell:disable-next-line
       '/de/%C3%A4rger-im-b%C3%BCro' => '/de/%C3%A4rger-im-b%C3%BCro',
       '//domain.tld' => '//domain.tld',
       'mailto:boo@example.com' => 'mailto:boo@example.com',
