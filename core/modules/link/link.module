@@ -1081,7 +1081,7 @@ function link_cleanup_url($url, $protocol = 'http') {
  *
  * @return mixed
  *   Returns boolean FALSE if the URL is not valid. On success, returns one of
- *   the LINK_(linktype) constants.
+ *   the LINK_* link type constants.
  */
 function link_validate_url($text) {
   $allowed_protocols = settings_get('filter_allowed_protocols', array('http', 'https', 'ftp', 'news', 'nntp', 'telnet', 'mailto', 'irc', 'ssh', 'sftp', 'webcal'));

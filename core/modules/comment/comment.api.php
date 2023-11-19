@@ -52,7 +52,7 @@ function hook_comment_update($comment) {
  *  An array of comment objects indexed by cid.
  */
 function hook_comment_load($comments) {
-  $result = db_query('SELECT cid, foo FROM {mytable} WHERE cid IN (:cids)', array(':cids' => array_keys($comments)));
+  $result = db_query('SELECT cid, foo FROM {my_table} WHERE cid IN (:cids)', array(':cids' => array_keys($comments)));
   foreach ($result as $record) {
     $comments[$record->cid]->foo = $record->foo;
   }

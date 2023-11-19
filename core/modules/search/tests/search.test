@@ -954,16 +954,22 @@ class SearchExpressionInsertExtractTestCase extends BackdropUnitTestCase {
    * Tests search_expression_insert() and search_expression_extract().
    */
   function testInsertExtract() {
-    $base_expression = "mykeyword";
+    $base_expression = "my_keyword";
     // Build an array of option, value, what should be in the expression, what
     // should be retrieved from expression.
     $cases = array(
-      array('foo', 'bar', 'foo:bar', 'bar'), // Normal case.
-      array('foo', NULL, '', NULL), // Empty value: shouldn't insert.
-      array('foo', ' ', 'foo:', ''), // Space as value: should insert but retrieve empty string.
-      array('foo', '', 'foo:', ''), // Empty string as value: should insert but retrieve empty string.
-      array('foo', '0', 'foo:0', '0'), // String zero as value: should insert.
-      array('foo', 0, 'foo:0', '0'), // Numeric zero as value: should insert.
+      // Normal case.
+      array('foo', 'bar', 'foo:bar', 'bar'),
+      // Empty value: shouldn't insert.
+      array('foo', NULL, '', NULL),
+      // Space as value: should insert but retrieve empty string.
+      array('foo', ' ', 'foo:', ''),
+      // Empty string as value: should insert but retrieve empty string.
+      array('foo', '', 'foo:', ''),
+      // String zero as value: should insert.
+      array('foo', '0', 'foo:0', '0'),
+      // Numeric zero as value: should insert.
+      array('foo', 0, 'foo:0', '0'),
     );
 
     foreach ($cases as $index => $case) {
@@ -2029,9 +2035,8 @@ class SearchNodeAccessTest extends BackdropWebTestCase {
    */
   function testPhraseSearchPunctuation() {
     $node = $this->backdropCreateNode(array('body' => array(LANGUAGE_NONE => array(array('value' => "The bunny's ears were fuzzy.")))));
-    // cspell:disable
+    // cspell:disable-next-line
     $node2 = $this->backdropCreateNode(array('body' => array(LANGUAGE_NONE => array(array('value' => 'Dignissim Aliquam &amp; Quieligo meus natu quae quia te. Damnum&copy; erat&mdash; neo pneum. Facilisi feugiat ibidem ratis.')))));
-    // cspell:enable
 
     // Update the search index.
     module_invoke_all('update_index');

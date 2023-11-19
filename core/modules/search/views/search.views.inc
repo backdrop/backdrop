@@ -174,10 +174,10 @@ function template_preprocess_views_view_row_search(&$variables) {
   $node = node_build_content($node, FALSE, FALSE);
   $node->body = backdrop_render($node->content);
 
-  // Fetch comments for snippet
+  // Fetch comments for snippet.
   $node->body .= module_invoke('comment', 'nodeapi', $node, 'update index');
 
-  // Fetch terms for snippet
+  // Fetch terms for snippet.
   $node->body .= module_invoke('taxonomy', 'nodeapi', $node, 'update index');
 
   $variables['url'] = url('node/' . $nid);

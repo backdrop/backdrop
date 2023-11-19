@@ -46,7 +46,7 @@ function hook_user_load($users) {
  * @see user_delete_multiple()
  */
 function hook_user_predelete($account) {
-  db_delete('mytable')
+  db_delete('my_table')
     ->condition('uid', $account->uid)
     ->execute();
 }
@@ -227,7 +227,7 @@ function hook_user_presave($account) {
  * @see hook_user_update()
  */
 function hook_user_insert($account) {
-  db_insert('mytable')
+  db_insert('my_table')
     ->fields(array(
       'uid' => $account->uid,
       'created' => REQUEST_TIME,

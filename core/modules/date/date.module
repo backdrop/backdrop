@@ -277,7 +277,7 @@ function date_popup_library_info() {
  * @param string $langcode
  *   The language code used by this field.
  * @param array $item
- *   An entity field item, like $entity->myfield[0].
+ *   An entity field item, like $entity->my_field[0].
  * @param array $display
  *   The instance display settings.
  *

@@ -1122,8 +1122,8 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
     $f = filter_xss('<script src=http://www.example.com/ <');
     $this->assertNoNormalized($f, 'script', 'HTML tag stripping evasion -- opening instead of closing bracket.');
 
-    $f = filter_xss('<nosuchtag attribute="newScriptInjectionVector">');
-    $this->assertNoNormalized($f, 'nosuchtag', 'HTML tag stripping evasion -- unknown tag.');
+    $f = filter_xss('<no-such-tag attribute="newScriptInjectionVector">');
+    $this->assertNoNormalized($f, 'no-such-tag', 'HTML tag stripping evasion -- unknown tag.');
 
     $f = filter_xss('<?xml:namespace ns="urn:schemas-microsoft-com:time">');
     $this->assertTrue(stripos($f, '<?xml') === FALSE, 'HTML tag stripping evasion -- starting with a question sign (processing instructions).');
@@ -1157,6 +1157,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
     $this->assertNoNormalized($f, 'onmediaerror', 'HTML filter attributes removal evasion -- varying case.');
 
     // Works at least with IE6.
+    //  cspell:disable-next-line
     $f = filter_xss("<img o\0nfocus\0=alert(0)>", array('img'));
     $this->assertNoNormalized($f, 'focus', 'HTML filter attributes removal evasion -- breaking with nulls.');
 
@@ -1209,6 +1210,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
     $f = filter_xss('<img src="jav&#x0D;ascript:alert(0)">', array('img'));
     $this->assertNoNormalized($f, 'script', 'HTML scheme clearing evasion -- an encoded, embedded carriage return.');
 
+    // cspell:disable-net-line
     $f = filter_xss("<img src=\"\n\n\nj\na\nva\ns\ncript:alert(0)\">", array('img'));
     $this->assertNoNormalized($f, 'cript', 'HTML scheme clearing evasion -- broken into many lines.');
 
@@ -1223,8 +1225,8 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
     $f = filter_xss('<img src="vbscript:msgbox(0)">', array('img'));
     $this->assertNoNormalized($f, 'vbscript', 'HTML scheme clearing evasion -- another scheme.');
 
-    $f = filter_xss('<img src="nosuchscheme:notice(0)">', array('img'));
-    $this->assertNoNormalized($f, 'nosuchscheme', 'HTML scheme clearing evasion -- unknown scheme.');
+    $f = filter_xss('<img src="no-such-scheme:notice(0)">', array('img'));
+    $this->assertNoNormalized($f, 'no-such-scheme', 'HTML scheme clearing evasion -- unknown scheme.');
 
     // Netscape 4.x javascript entities.
     $f = filter_xss('<br size="&{alert(0)}">', array('br'));

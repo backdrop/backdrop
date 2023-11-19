@@ -1093,7 +1093,7 @@ function simpletest_script_clean_profile_cache_folders(){
 /**
  * Removed profile cached tables from the database.
  */
-function simpletest_script_prepare_profile_cache($profile, $skip_mysiam = FALSE){
+function simpletest_script_prepare_profile_cache($profile, $skip_my_siam = FALSE){
   try {
     backdrop_page_is_cacheable(FALSE);
     backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
@@ -1104,7 +1104,7 @@ function simpletest_script_prepare_profile_cache($profile, $skip_mysiam = FALSE)
     $test = new BackdropWebTestCaseCache();
     $test->setProfile($profile);
     if (!$test->isCached()) {
-      $test->prepareCache($skip_mysiam);
+      $test->prepareCache($skip_my_siam);
     }
   }
   catch (Exception $e) {

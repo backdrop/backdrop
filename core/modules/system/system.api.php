@@ -54,8 +54,8 @@ function hook_hook_info() {
 function hook_hook_info_alter(&$hooks) {
   // Our module wants to completely override the core tokens, so make
   // sure the core token hooks are not found.
-  $hooks['token_info']['group'] = 'mytokens';
-  $hooks['tokens']['group'] = 'mytokens';
+  $hooks['token_info']['group'] = 'my_tokens';
+  $hooks['tokens']['group'] = 'my_tokens';
 }
 
 /**
@@ -80,8 +80,8 @@ function hook_hook_info_alter(&$hooks) {
  */
 function hook_admin_paths() {
   $paths = array(
-    'mymodule/*/add' => TRUE,
-    'mymodule/*/edit' => TRUE,
+    'my_module/*/add' => TRUE,
+    'my_module/*/edit' => TRUE,
   );
   return $paths;
 }
@@ -2836,9 +2836,10 @@ function hook_install() {
  * updates should adhere to the
  * @link http://drupal.org/node/150215 Schema API. @endlink
  *
- * Implementations of this hook should be placed in a mymodule.install file in
- * the same directory as mymodule.module. Backdrop core's updates are implemented
- * using the system module as a name and stored in database/updates.inc.
+ * Implementations of this hook should be placed in a my_module.install file in
+ * the same directory as my_module.module. Backdrop core's updates are
+ * implemented using the system module as a name and stored in
+ * database/updates.inc.
  *
  * Implementations of hook_update_N() are named (module name)_update_(number).
  * The numbers are composed of three parts:
@@ -2860,14 +2861,14 @@ function hook_install() {
  * compatibility.
  *
  * Examples:
- * - mymodule_update_1000(): This is the required update for mymodule to run
+ * - mymodule_update_1000(): This is the required update for my_module to run
  *   with Backdrop core API 1.x when upgrading from Drupal core API 7.x.
  * - mymodule_update_1100(): This is the first update to get the database/config
- *   ready to run mymodule 1.x-1.*.
+ *   ready to run m_ymodule 1.x-1.*.
  * - mymodule_update_1200(): This is the first update to get the database/config
- *   ready to run mymodule 1.x-2.*. Users can directly update from Drupal 7.x to
- *   Backdrop 1.x-2.*, and they get all the 10xx and 12xx updates, but not the
- *   11xx updates, because those reside in the 1.x-1.x branch only.
+ *   ready to run my_module 1.x-2.*. Users can directly update from Drupal 7.x
+ *   to Backdrop 1.x-2.*, and they get all the 10xx and 12xx updates, but not
+ *   the 11xx updates, because those reside in the 1.x-1.x branch only.
  *
  * A good rule of thumb is to remove updates older than two major releases of
  * Backdrop. See hook_update_last_removed() to notify Backdrop about the
@@ -2880,12 +2881,12 @@ function hook_install() {
  *
  * Module functions not in the install file cannot be counted on to be available
  * from within a hook_update_N() function. In order to call a function from your
- * mymodule.module or an include file, you need to explicitly load that file
+ * my_module.module or an include file, you need to explicitly load that file
  * first.
  *
  * This is because if a module was previously enabled but is now disabled (and
  * has not been uninstalled), update hooks will still be called for that module
- * during system updates, but the mymodule.module file (and any other files
+ * during system updates, but the my_module.module file (and any other files
  * loaded by that one, including, for example, autoload information) will not
  * have been loaded.
  *
@@ -2925,11 +2926,12 @@ function hook_install() {
  * @see update_get_update_list()
  */
 function hook_update_N(&$sandbox) {
-  // For non-multipass updates the signature can be `function hook_update_N() {`
+  // For non-multipass updates the signature can be:
+  // "function hook_update_N() {"
 
   // Convert Drupal 7 variables to Backdrop config. Make sure these new config
-  // settings and their default values exist in `config/mymodule.settings.json`.
-  $config = config('mymodule.settings');
+  // settings and their default values exist in config/my_module.settings.json.
+  $config = config('my_module.settings');
   $config->set('one', update_variable_get('mymodule_one', '1.11'));
   $config->set('two', update_variable_get('mymodule_two', '2.22'));
   $config->save();
@@ -2937,11 +2939,11 @@ function hook_update_N(&$sandbox) {
   update_variable_del('mymodule_two');
 
   // Update existing config with a new setting. Make sure the new setting and
-  // its default value exists in `config/mymodule.settings.json`.
-  config_set('mymodule.settings', 'three', '3.33');
+  // its default value exists in `config/my_module.settings.json`.
+  config_set('my_module.settings', 'three', '3.33');
 
   // For most database updates, the following is sufficient.
-  db_add_field('mytable1', 'newcol', array('type' => 'int', 'not null' => TRUE, 'description' => 'My new integer column.'));
+  db_add_field('my_table1', 'new_column', array('type' => 'int', 'not null' => TRUE, 'description' => 'My new integer column.'));
 
   // However, for more complex operations that may take a long time, you may
   // hook into Batch API as in the following example.
@@ -2990,8 +2992,8 @@ function hook_update_N(&$sandbox) {
  * system to determine the appropriate order in which updates should be run, as
  * well as to search for missing dependencies.
  *
- * Implementations of this hook should be placed in a mymodule.install file in
- * the same directory as mymodule.module.
+ * Implementations of this hook should be placed in a my_module.install file in
+ * the same directory as my_module.module.
  *
  * @return
  *   A multidimensional array containing information about the module update
@@ -3030,12 +3032,12 @@ function hook_update_dependencies() {
 /**
  * Return a number which is no longer available as hook_update_N().
  *
- * If you remove some update functions from your mymodule.install file, you
+ * If you remove some update functions from your my_module.install file, you
  * should notify Backdrop of those missing functions. This way, Backdrop can
  * ensure that no update is accidentally skipped.
  *
- * Implementations of this hook should be placed in a mymodule.install file in
- * the same directory as mymodule.module.
+ * Implementations of this hook should be placed in a my_module.install file in
+ * the same directory as my_module.module.
  *
  * If upgrading from a Drupal 7 module where the last removed update was a
  * update function numbering in the 7xxx values, that update number should still
@@ -3050,7 +3052,7 @@ function hook_update_dependencies() {
  * @see hook_update_N()
  */
 function hook_update_last_removed() {
-  // We've removed the 1.x-1.x version of mymodule, including database updates.
+  // We've removed the 1.x-1.x version of my_module, including database updates.
   // For the 1.x-2.x version of the module, the next update function would be
   // mymodule_update_1200().
   return 1103;
@@ -3278,58 +3280,58 @@ function hook_install_tasks(&$install_state) {
   // Here, we define a variable to allow tasks to indicate that a particular,
   // processor-intensive batch process needs to be triggered later on in the
   // installation.
-  $myprofile_needs_batch_processing = state_get('myprofile_needs_batch_processing', FALSE);
+  $my_profile_needs_batch_processing = state_get('my_profile_needs_batch_processing', FALSE);
   $tasks = array(
     // This is an example of a task that defines a form which the user who is
     // installing the site will be asked to fill out. To implement this task,
-    // your profile would define a function named myprofile_data_import_form()
+    // your profile would define a function named my_profile_data_import_form()
     // as a normal form API callback function, with associated validation and
     // submit handlers. In the submit handler, in addition to saving whatever
     // other data you have collected from the user, you might also call
-    // state_set('myprofile_needs_batch_processing', TRUE) if the user has
+    // state_set('my_profile_needs_batch_processing', TRUE) if the user has
     // entered data which requires that batch processing will need to occur
     // later on.
-    'myprofile_data_import_form' => array(
+    'my_profile_data_import_form' => array(
       'display_name' => st('Data import options'),
       'type' => 'form',
     ),
     // Similarly, to implement this task, your profile would define a function
-    // named myprofile_settings_form() with associated validation and submit
+    // named my_profile_settings_form() with associated validation and submit
     // handlers. This form might be used to collect and save additional
     // information from the user that your profile needs. There are no extra
     // steps required for your profile to act as an "installation wizard"; you
     // can define as many tasks of type 'form' as you wish to execute, and the
     // forms will be presented to the user, one after another.
-    'myprofile_settings_form' => array(
+    'my_profile_settings_form' => array(
       'display_name' => st('Additional options'),
       'type' => 'form',
     ),
     // This is an example of a task that performs batch operations. To
     // implement this task, your profile would define a function named
-    // myprofile_batch_processing() which returns a batch API array definition
+    // my_profile_batch_processing() which returns a batch API array definition
     // that the installer will use to execute your batch operations. Due to the
-    // 'myprofile_needs_batch_processing' variable used here, this task will be
+    // 'my_profile_needs_batch_processing' variable used here, this task will be
     // hidden and skipped unless your profile set it to TRUE in one of the
     // previous tasks.
-    'myprofile_batch_processing' => array(
+    'my_profile_batch_processing' => array(
       'display_name' => st('Import additional data'),
-      'display' => $myprofile_needs_batch_processing,
+      'display' => $my_profile_needs_batch_processing,
       'type' => 'batch',
-      'run' => $myprofile_needs_batch_processing ? INSTALL_TASK_RUN_IF_NOT_COMPLETED : INSTALL_TASK_SKIP,
+      'run' => $my_profile_needs_batch_processing ? INSTALL_TASK_RUN_IF_NOT_COMPLETED : INSTALL_TASK_SKIP,
     ),
     // This is an example of a task that will not be displayed in the list that
     // the user sees. To implement this task, your profile would define a
-    // function named myprofile_final_site_setup(), in which additional,
+    // function named my_profile_final_site_setup(), in which additional,
     // automated site setup operations would be performed. Since this is the
     // last task defined by your profile, you should also use this function to
-    // call state_del('myprofile_needs_batch_processing') and clean up the
+    // call state_del('my_profile_needs_batch_processing') and clean up the
     // variable that was used above. If you want the user to pass to the final
     // Backdrop installation tasks uninterrupted, return no output from this
     // function. Otherwise, return themed output that the user will see (for
     // example, a confirmation page explaining that your profile's tasks are
-    // complete, with a link to reload the current page and therefore pass on
-    // to the final Backdrop installation tasks when the user is ready to do so).
-    'myprofile_final_site_setup' => array(
+    // complete, with a link to reload the current page and therefore pass on to
+    // the final Backdrop installation tasks when the user is ready to do so).
+    'my_profile_final_site_setup' => array(
     ),
   );
   return $tasks;
@@ -3343,8 +3345,8 @@ function hook_install_tasks(&$install_state) {
  * @param $options
  *   An associative array of additional URL options to pass to url().
  * @param $http_response_code
- *   The HTTP status code to use for the redirection. See backdrop_goto() for more
- *   information.
+ *   The HTTP status code to use for the redirection. See backdrop_goto() for
+ *   more information.
  */
 function hook_backdrop_goto_alter(&$path, &$options, &$http_response_code) {
   // A good addition to misery module.
@@ -3393,7 +3395,7 @@ function hook_html_head_alter(&$head_elements) {
 function hook_install_tasks_alter(&$tasks, $install_state) {
   // Replace the entire site configuration form provided by Backdrop core
   // with a custom callback function defined by this installation profile.
-  $tasks['install_configure_form']['function'] = 'myprofile_install_configure_form';
+  $tasks['install_configure_form']['function'] = 'my_profile_install_configure_form';
 }
 
 /**

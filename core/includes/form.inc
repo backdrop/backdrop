@@ -5076,7 +5076,7 @@ function _form_set_class(&$element, $class = array()) {
  *     array('my_function_2', array()),
  *   ),
  *   'finished' => 'my_finished_callback',
- *   'file' => 'path_to_file_containing_myfunctions',
+ *   'file' => 'path_to_file_containing_my_functions',
  * );
  * batch_set($batch);
  * // Only needed if not inside a form _submit handler.

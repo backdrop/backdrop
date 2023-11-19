@@ -119,9 +119,9 @@ CKEDITOR.plugins.add('backdroplink', {
             // Get the current selection.
             var selection = editor.getSelection();
             // Get the text of the current selection.
-            var oldtext = selection.getSelectedText();
+            var old_text = selection.getSelectedText();
             // And the replacement text.
-            var newtext = returnValues.attributes.text;
+            var new_text = returnValues.attributes.text;
             // Get the range of the selection.
             var range = selection.getRanges(1)[0];
 
@@ -129,7 +129,7 @@ CKEDITOR.plugins.add('backdroplink', {
             var element = selection.getStartElement();
             this.element = element;
             if (element.is('a')) {
-              this.element.setText(newtext);
+              this.element.setText(new_text);
             }
           }
 
@@ -138,8 +138,8 @@ CKEDITOR.plugins.add('backdroplink', {
             // Use link URL as text with a collapsed cursor.
             if (range.collapsed) {
               var text;
-              if (newtext) {
-                text = new CKEDITOR.dom.text(newtext);
+              if (new_text) {
+                text = new CKEDITOR.dom.text(new_text);
               }
               else {
                 // Use href as link text

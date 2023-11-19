@@ -31,7 +31,7 @@ if (in_array('--help', $_SERVER['argv']) || empty($_SERVER['argv'])) {
 Generate Backdrop password hashes from the shell.
 
 Usage:        {$script} [OPTIONS] "<plan-text password>"
-Example:      {$script} "mynewpassword"
+Example:      {$script} "myNewPassword"
 
 All arguments are long options.
 

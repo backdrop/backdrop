@@ -135,7 +135,7 @@
  *   try {
  *     $id = db_insert('example')
  *       ->fields(array(
- *         'field1' => 'mystring',
+ *         'field1' => 'my string',
  *         'field2' => 5,
  *       ))
  *       ->execute();

@@ -337,13 +337,13 @@ function admin_bar_merge_tree(array &$tree, array $tree_dynamic, array $expand_m
         // Create the cartesian product for all arguments and create new
         // menu items for each generated combination thereof.
         foreach (admin_bar_expand_args($arguments) as $replacements) {
-          $newpath = strtr($path_dynamic, $replacements);
+          $new_path = strtr($path_dynamic, $replacements);
           // Skip this item, if any placeholder could not be replaced.
           // Faster than trying to invoke _menu_translate().
-          if (strpos($newpath, '%') !== FALSE) {
+          if (strpos($new_path, '%') !== FALSE) {
             continue;
           }
-          $map = explode('/', $newpath);
+          $map = explode('/', $new_path);
           $item = admin_bar_translate($link, $map);
           // Skip this item, if the current user does not have access.
           if (empty($item)) {

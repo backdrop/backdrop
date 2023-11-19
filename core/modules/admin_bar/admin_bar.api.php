@@ -72,16 +72,16 @@ function hook_admin_bar_output_build(&$content) {
 
   // Add new top-level item to the menu.
   if (isset($content['menu']['menu'])) {
-    $content['menu']['menu']['myitem'] = array(
+    $content['menu']['menu']['my_item'] = array(
       '#title' => t('My item'),
       // #attributes are used for list items (LI).
-      '#attributes' => array('class' => array('mymodule-myitem')),
-      '#href' => 'mymodule/path',
+      '#attributes' => array('class' => array('my-module', 'my-item')),
+      '#href' => 'my_module/path',
       // #options are passed to l().
       '#options' => array(
         'query' => backdrop_get_destination(),
         // Apply a class on the link (anchor).
-        'attributes' => array('class' => array('myitem-link-anchor')),
+        'attributes' => array('class' => array('my-item', 'link-anchor')),
       ),
       // #weight controls the order of links in the resulting item list.
       '#weight' => 50,
@@ -89,7 +89,7 @@ function hook_admin_bar_output_build(&$content) {
   }
   // Add link to the icon menu to manually run cron.
   if (isset($content['icon'])) {
-    $content['icon']['myitem']['cron'] = array(
+    $content['icon']['my_item']['cron'] = array(
       '#title' => t('Run cron'),
       '#access' => user_access('administer site configuration'),
       '#href' => 'admin/reports/status/run-cron',

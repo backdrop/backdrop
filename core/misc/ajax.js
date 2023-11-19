@@ -182,7 +182,7 @@ Backdrop.ajax = function (base, element, element_settings) {
   // 1. /nojs/
   // 2. /nojs$ - The end of a URL string.
   // 3. /nojs? - Followed by a query (e.g. path/nojs?destination=foobar).
-  // 4. /nojs# - Followed by a fragment (e.g.: path/nojs#myfragment).
+  // 4. /nojs# - Followed by a fragment (e.g.: path/nojs#my_fragment).
   this.url = this.url.replace(/\/nojs(\/|$|\?|#)/g, '/ajax$1');
 
   // If the 'nojs' version of the URL is trusted, also trust the 'ajax' version.

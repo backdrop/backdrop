@@ -903,10 +903,10 @@ function hook_field_widget_form(&$form, &$form_state, $field, $instance, $langco
  * @see hook_field_widget_WIDGET_TYPE_form_alter()
  */
 function hook_field_widget_form_alter(&$element, &$form_state, $context) {
-  // Add a css class to widget form elements for all fields of type mytype.
-  if ($context['field']['type'] == 'mytype') {
+  // Add a css class to widget form elements for all fields of type my_type.
+  if ($context['field']['type'] == 'my_type') {
     // Be sure not to overwrite existing attributes.
-    $element['#attributes']['class'][] = 'myclass';
+    $element['#attributes']['class'][] = 'my-class';
   }
 }
 
@@ -1504,7 +1504,7 @@ function hook_field_attach_delete_revision($entity_type, $entity) {
 function hook_field_attach_purge($entity_type, $entity, $field, $instance) {
   // find the corresponding data in mymodule and purge it
   if ($entity_type == 'node' && $field->field_name == 'my_field_name') {
-    mymodule_remove_mydata($entity->nid);
+    mymodule_remove_my_data($entity->nid);
   }
 }
 

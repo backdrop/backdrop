@@ -89,6 +89,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
       'published_with_slash' => array(
         'type' => 'post',
         'status' => 1,
+        // cspell:disable-next-line
         'title' => 'Node pub/lished1',
         'uid' => 1,
       ),

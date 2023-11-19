@@ -180,7 +180,7 @@
  *   displays. One theoretical example is metatags for views.
  *
  * Plugins are registered by implementing hook_views_plugins() in your
- * modulename.views.inc file and returning an array of data. For examples please
+ * MODULENAME.views.inc file and returning an array of data. For examples please
  * look at views_views_plugins() in views/includes/plugins.inc as it has
  * examples for all of them.
  *

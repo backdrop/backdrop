@@ -1081,27 +1081,27 @@ function _locale_export_string($str) {
 /**
  * Wraps text for Portable Object (Template) files.
  */
-function _locale_export_wrap($str, $len) {
-  $words = explode(' ', $str);
+function _locale_export_wrap($string, $length) {
+  $words = explode(' ', $string);
   $return = array();
 
-  $cur = "";
-  $nstr = 1;
+  $current = "";
+  $new_string = TRUE;
   while (count($words)) {
     $word = array_shift($words);
-    if ($nstr) {
-      $cur = $word;
-      $nstr = 0;
+    if ($new_string) {
+      $current = $word;
+      $new_string = FALSE;
     }
-    elseif (strlen("$cur $word") > $len) {
-      $return[] = $cur . " ";
-      $cur = $word;
+    elseif (strlen("$current $word") > $length) {
+      $return[] = $current . " ";
+      $current = $word;
     }
     else {
-      $cur = "$cur $word";
+      $current = "$current $word";
     }
   }
-  $return[] = $cur;
+  $return[] = $current;
 
   return implode("\n", $return);
 }

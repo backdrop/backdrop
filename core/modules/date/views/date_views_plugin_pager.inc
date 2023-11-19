@@ -234,13 +234,13 @@ class date_views_plugin_pager extends views_plugin_pager {
           $compiled_query->range(0, 2);
           $results = $compiled_query->execute()->fetchCol(0);
 
-          $nextdate = array_shift($results);
-          $nextdatealt = array_shift($results);
+          $next_date = array_shift($results);
+          $next_date_alt = array_shift($results);
 
-          // Set the default value of the query to $prevfirst or $nextfirst
-          // when there is no value and $prevsecond or $nextsecond is set.
+          // Set the default value of the query to $prevfirst or $next_first
+          // when there is no value and $prevsecond or $next_second is set.
           if (empty($value)) {
-            // @Todo find out which of $prevdate or $nextdate is closest to the
+            // @Todo find out which of $prevdate or $next_date is closest to the
             // default argument date value and choose that one.
             if ($prevdate && $prevdatealt) {
               $this->set_argument_value($argument, $prevdate);
@@ -248,15 +248,15 @@ class date_views_plugin_pager extends views_plugin_pager {
               $prevdate = $prevdatealt;
               // If the first next date is the same as the first previous date,
               // move to the following next date.
-              if ($value == $nextdate) {
-                $nextdate = $nextdatealt;
-                $nextdatealt = NULL;
+              if ($value == $next_date) {
+                $next_date = $next_date_alt;
+                $next_date_alt = NULL;
               }
             }
-            elseif ($nextdate && $nextdatealt) {
-              $this->set_argument_value($argument, $nextdate);
-              $value = $nextdate;
-              $nextdate = $nextdatealt;
+            elseif ($next_date && $next_date_alt) {
+              $this->set_argument_value($argument, $next_date);
+              $value = $next_date;
+              $next_date = $next_date_alt;
               // If the first previous date is the same as the first next date,
               // move to the following previous date.
               if ($value == $prevdate) {
@@ -266,14 +266,14 @@ class date_views_plugin_pager extends views_plugin_pager {
             }
           }
           else {
-            // $prevdate and $nextdate are the same as $value, so move to
+            // $prevdate and $next_date are the same as $value, so move to
             // the next values.
             $prevdate = $prevdatealt;
-            $nextdate = $nextdatealt;
+            $next_date = $next_date_alt;
           }
 
           $this->view->date_info->prev_date = $prevdate ? new BackdropDateTime($prevdate, NULL, $format) : NULL;
-          $this->view->date_info->next_date = $nextdate ? new BackdropDateTime($nextdate, NULL, $format) : NULL;
+          $this->view->date_info->next_date = $next_date ? new BackdropDateTime($next_date, NULL, $format) : NULL;
         }
         else {
           $this->view->date_info->prev_date = clone($argument->min_date);

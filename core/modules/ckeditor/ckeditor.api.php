@@ -79,11 +79,11 @@
  * @see hook_ckeditor_PLUGIN_plugin_check()
  */
 function hook_ckeditor_plugins() {
-  $plugins['myplugin'] = array(
-    'path' => backdrop_get_path('module', 'mymodule') . '/js/myplugin',
+  $plugins['my_plugin'] = array(
+    'path' => backdrop_get_path('module', 'my_module') . '/js/my_plugin',
     'file' => 'plugin.js',
-    'css' => array(backdrop_get_path('module', 'mymodule') . '/css/myplugin.css'),
-    'enabled callback' => 'mymodule_myplugin_plugin_check',
+    'css' => array(backdrop_get_path('module', 'my_module') . '/css/my-plugin.css'),
+    'enabled callback' => 'my_module_my_plugin_plugin_check',
     'buttons' => array(
       'MyPlugin' => array(
         'label' => t('My custom button'),
@@ -113,7 +113,7 @@ function hook_ckeditor_plugins() {
  * @see hook_ckeditor_plugins()
  */
 function hook_ckeditor_plugins_alter(array &$plugins) {
-  $plugins['someplugin']['enabled callback'] = 'mymodule_someplugin_enabled_callback';
+  $plugins['some_plugin']['enabled callback'] = 'my_module_some_plugin_enabled_callback';
 }
 
 /**
@@ -143,7 +143,7 @@ function hook_ckeditor_plugins_alter(array &$plugins) {
  * @see _ckeditor_theme_css()
  */
 function hook_ckeditor_css_alter(array &$css, $format) {
-  $css[] = backdrop_get_path('module', 'mymodule') . '/css/mymodule-ckeditor.css';
+  $css[] = backdrop_get_path('module', 'my_module') . '/css/my-module-ckeditor.css';
 }
 
 /**
@@ -166,9 +166,9 @@ function hook_ckeditor_settings_alter(array &$settings, $format) {
       // If a particular button is enabled, then add extra settings.
       if (array_key_exists('MyPlugin', $button_group)) {
         // Pull settings from the format and pass to the JavaScript settings.
-        $settings['backdrop']['myplugin_settings'] = $format->editor_settings['myplugin_settings'];
+        $settings['backdrop']['my_plugin_settings'] = $format->editor_settings['my_plugin_settings'];
         // Translate a string for use by CKEditor.
-        $settings['backdrop']['myplugin_help'] = t('A translated string example that will be used by CKEditor.');
+        $settings['backdrop']['my_plugin_help'] = t('A translated string example that will be used by CKEditor.');
       }
     }
   }

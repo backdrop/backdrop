@@ -573,18 +573,18 @@ function search_expand_cjk($matches) {
  */
 function search_index_split($text) {
   $last = &backdrop_static(__FUNCTION__);
-  $lastsplit = &backdrop_static(__FUNCTION__ . ':lastsplit');
+  $last_split = &backdrop_static(__FUNCTION__ . ':last_split');
 
   if ($last == $text) {
-    return $lastsplit;
+    return $last_split;
   }
-  // Process words
+  // Process words.
   $text = search_simplify($text);
   $words = explode(' ', $text);
 
-  // Save last keyword result
+  // Save last keyword result.
   $last = $text;
-  $lastsplit = $words;
+  $last_split = $words;
 
   return $words;
 }
@@ -693,11 +693,11 @@ function search_index($sid, $module, $text) {
           if (preg_match($node_regexp, $value, $match)) {
             $path = backdrop_get_normal_path($match[1]);
             if (preg_match('!(?:node|book)/(?:view/)?([0-9]+)!i', $path, $match)) {
-              $linknid = $match[1];
-              if ($linknid > 0) {
-                $node = db_query('SELECT title, nid, vid FROM {node} WHERE nid = :nid', array(':nid' => $linknid), array('target' => 'replica'))->fetchObject();
+              $link_nid = $match[1];
+              if ($link_nid > 0) {
+                $node = db_query('SELECT title, nid, vid FROM {node} WHERE nid = :nid', array(':nid' => $link_nid), array('target' => 'replica'))->fetchObject();
                 $link = TRUE;
-                $linktitle = $node->title;
+                $link_title = $node->title;
               }
             }
           }
@@ -714,7 +714,7 @@ function search_index($sid, $module, $text) {
           // Check to see if the node link text is its URL. If so, we use the
           // target node title instead.
           if (preg_match('!^https?://!i', $value)) {
-            $value = $linktitle;
+            $value = $link_title;
           }
         }
         $words = search_index_split($value);
@@ -725,10 +725,10 @@ function search_index($sid, $module, $text) {
           if (is_numeric($word) || backdrop_strlen($word) >= $minimum_word_size) {
             // Links score mainly for the target.
             if ($link) {
-              if (!isset($results[$linknid])) {
-                $results[$linknid] = array();
+              if (!isset($results[$link_nid])) {
+                $results[$link_nid] = array();
               }
-              $results[$linknid][] = $word;
+              $results[$link_nid][] = $word;
               // Reduce score of the link caption in the source.
               $focus *= 0.2;
             }
@@ -1271,7 +1271,7 @@ function search_excerpt($keys, $text) {
   ksort($ranges);
 
   // Now we collapse overlapping text ranges into one. The sorting makes it O(n).
-  $newranges = array();
+  $new_ranges = array();
   foreach ($ranges as $from2 => $to2) {
     if (!isset($from1)) {
       $from1 = $from2;
@@ -1282,23 +1282,23 @@ function search_excerpt($keys, $text) {
       $to1 = max($to1, $to2);
     }
     else {
-      $newranges[$from1] = $to1;
+      $new_ranges[$from1] = $to1;
       $from1 = $from2;
       $to1 = $to2;
     }
   }
-  $newranges[$from1] = $to1;
+  $new_ranges[$from1] = $to1;
 
   // Fetch text
   $out = array();
-  foreach ($newranges as $from => $to) {
+  foreach ($new_ranges as $from => $to) {
     $out[] = substr($text, $from, $to - $from);
   }
 
   // Let translators have the ... separator text as one chunk.
   $dots = explode('!excerpt', t('... !excerpt ... !excerpt ...'));
 
-  $text = (isset($newranges[0]) ? '' : $dots[0]) . implode($dots[1], $out) . $dots[2];
+  $text = (isset($new_ranges[0]) ? '' : $dots[0]) . implode($dots[1], $out) . $dots[2];
   $text = check_plain($text);
 
   // Slash-escape quotes in keys found in a derived form and merge with original keys.

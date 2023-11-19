@@ -49,7 +49,7 @@
  * @see path_save()
  */
 function hook_path_insert($path) {
-  db_insert('mytable')
+  db_insert('my_table')
     ->fields(array(
       'alias' => $path['alias'],
       'pid' => $path['pid'],
@@ -70,7 +70,7 @@ function hook_path_insert($path) {
  * @see path_save()
  */
 function hook_path_update($path) {
-  db_update('mytable')
+  db_update('my_table')
     ->fields(array('alias' => $path['alias']))
     ->condition('pid', $path['pid'])
     ->execute();
@@ -89,7 +89,7 @@ function hook_path_update($path) {
  * @see path_delete()
  */
 function hook_path_delete($path) {
-  db_delete('mytable')
+  db_delete('my_table')
     ->condition('pid', $path['pid'])
     ->execute();
 }
@@ -179,7 +179,7 @@ function hook_path_info() {
 function hook_path_is_alias_reserved($alias, $source, $langcode) {
   // Check our module's list of paths and return TRUE if $alias matches any of
   // them.
-  return (bool) db_query("SELECT 1 FROM {mytable} WHERE path = :path", array(':path' => $alias))->fetchField();
+  return (bool) db_query("SELECT 1 FROM {my_table} WHERE path = :path", array(':path' => $alias))->fetchField();
 }
 
 /**

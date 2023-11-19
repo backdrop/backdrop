@@ -407,7 +407,7 @@ function hook_node_grants_alter(&$grants, $account, $op) {
  * @ingroup node_api_hooks
  */
 function hook_node_predelete(Node $node) {
-  db_delete('mytable')
+  db_delete('my_table')
     ->condition('nid', $node->nid)
     ->execute();
 }
@@ -442,7 +442,7 @@ function hook_node_delete(Node $node) {
  * @ingroup node_api_hooks
  */
 function hook_node_revision_delete(Node $node) {
-  db_delete('mytable')
+  db_delete('my_table')
     ->condition('vid', $node->vid)
     ->execute();
 }
@@ -469,7 +469,7 @@ function hook_node_revision_delete(Node $node) {
  * @ingroup node_api_hooks
  */
 function hook_node_insert(Node $node) {
-  db_insert('mytable')
+  db_insert('my_table')
     ->fields(array(
       'nid' => $node->nid,
       'extra' => $node->extra,
@@ -509,7 +509,7 @@ function hook_node_load($nodes, $types) {
   // Decide whether any of $types are relevant to our purposes.
   if (count(array_intersect($types_we_want_to_process, $types))) {
     // Gather our extra data for each of these nodes.
-    $result = db_query('SELECT nid, foo FROM {mytable} WHERE nid IN(:nids)', array(':nids' => array_keys($nodes)));
+    $result = db_query('SELECT nid, foo FROM {my_table} WHERE nid IN(:nids)', array(':nids' => array_keys($nodes)));
     // Add our extra data to the node objects.
     foreach ($result as $record) {
       $nodes[$record->nid]->foo = $record->foo;
@@ -664,7 +664,7 @@ function hook_node_presave(Node $node) {
  * @ingroup node_api_hooks
  */
 function hook_node_update(Node $node) {
-  db_update('mytable')
+  db_update('my_table')
     ->fields(array('extra' => $node->extra))
     ->condition('nid', $node->nid)
     ->execute();
@@ -991,7 +991,7 @@ function hook_node_type_delete($info) {
  * @ingroup node_api_hooks
  */
 function hook_delete(Node $node) {
-  db_delete('mytable')
+  db_delete('my_table')
     ->condition('nid', $node->nid)
     ->execute();
 }
@@ -1100,7 +1100,7 @@ function hook_form(Node $node, &$form_state) {
  * @ingroup node_api_hooks
  */
 function hook_insert(Node $node) {
-  db_insert('mytable')
+  db_insert('my_table')
     ->fields(array(
       'nid' => $node->nid,
       'extra' => $node->extra,
@@ -1139,7 +1139,7 @@ function hook_insert(Node $node) {
  * @ingroup node_api_hooks
  */
 function hook_load($nodes) {
-  $result = db_query('SELECT nid, foo FROM {mytable} WHERE nid IN (:nids)', array(':nids' => array_keys($nodes)));
+  $result = db_query('SELECT nid, foo FROM {my_table} WHERE nid IN (:nids)', array(':nids' => array_keys($nodes)));
   foreach ($result as $record) {
     $nodes[$record->nid]->foo = $record->foo;
   }
@@ -1164,7 +1164,7 @@ function hook_load($nodes) {
  * @ingroup node_api_hooks
  */
 function hook_update(Node $node) {
-  db_update('mytable')
+  db_update('my_table')
     ->fields(array('extra' => $node->extra))
     ->condition('nid', $node->nid)
     ->execute();
@@ -1246,8 +1246,8 @@ function hook_view(Node $node, $view_mode) {
     backdrop_set_breadcrumb($breadcrumb);
   }
 
-  $node->content['myfield'] = array(
-    '#markup' => theme('mymodule_myfield', $node->myfield),
+  $node->content['my_field'] = array(
+    '#markup' => theme('my_module_my_field', $node->my_field),
     '#weight' => 1,
   );
 

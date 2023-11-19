@@ -13,7 +13,7 @@ require_once __DIR__ . '/query.inc';
  *
  * A Backdrop schema definition is an array structure representing one or
  * more tables and their related keys and indexes. A schema is defined by
- * hook_schema(), which usually lives in a modulename.install file.
+ * hook_schema(), which usually lives in a MODULENAME.install file.
  *
  * By implementing hook_schema() and specifying the tables your module declares,
  * you can create and drop these tables on all supported database engines. You

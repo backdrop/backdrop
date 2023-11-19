@@ -2627,7 +2627,7 @@ class DatabaseTaggingTestCase extends DatabaseTestCase {
     $return = $query->getMetaData('test');
     $this->assertEqual($data, $return, 'Correct metadata returned.');
 
-    $return = $query->getMetaData('nothere');
+    $return = $query->getMetaData('bogus');
     $this->assertNull($return, 'Non-existent key returned NULL.');
   }
 }
@@ -2813,7 +2813,7 @@ class DatabaseRegressionTestCase extends DatabaseTestCase {
    */
   function testDBTableExists() {
     $this->assertIdentical(TRUE, db_table_exists('node'), 'Returns true for existent table.');
-    $this->assertIdentical(FALSE, db_table_exists('nosuchtable'), 'Returns false for nonexistent table.');
+    $this->assertIdentical(FALSE, db_table_exists('no_such_table'), 'Returns false for nonexistent table.');
   }
 
   /**
@@ -2821,7 +2821,7 @@ class DatabaseRegressionTestCase extends DatabaseTestCase {
    */
   function testDBFieldExists() {
     $this->assertIdentical(TRUE, db_field_exists('node', 'nid'), 'Returns true for existent column.');
-    $this->assertIdentical(FALSE, db_field_exists('node', 'nosuchcolumn'), 'Returns false for nonexistent column.');
+    $this->assertIdentical(FALSE, db_field_exists('node', 'no_such_column'), 'Returns false for nonexistent column.');
   }
 
   /**
@@ -2829,7 +2829,7 @@ class DatabaseRegressionTestCase extends DatabaseTestCase {
    */
   function testDBIndexExists() {
     $this->assertIdentical(TRUE, db_index_exists('node', 'node_created'), 'Returns true for existent index.');
-    $this->assertIdentical(FALSE, db_index_exists('node', 'nosuchindex'), 'Returns false for nonexistent index.');
+    $this->assertIdentical(FALSE, db_index_exists('node', 'no_such_index'), 'Returns false for nonexistent index.');
   }
 }
 

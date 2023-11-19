@@ -150,17 +150,17 @@ function hook_filter_info_alter(&$info) {
  * @see hook_editor_info_alter()
  */
 function hook_editor_info() {
-  $editors['myeditor'] = array(
+  $editors['my_editor'] = array(
     'label' => t('My Editor'),
-    'settings callback' => '_myeditor_settings',
+    'settings callback' => '_my_editor_settings',
     'default settings' => array(
       'enable_toolbar' => TRUE,
       'toolbar_buttons' => array('bold', 'italic', 'underline', 'link', 'image'),
       'resizeable' => TRUE,
     ),
-    'file' => 'myeditor.admin.inc',
-    'library' => array('mymodule', 'myeditor'),
-    'js settings callback' => '_myeditor_js_settings',
+    'file' => 'my_editor.admin.inc',
+    'library' => array('my_module', 'my_editor'),
+    'js settings callback' => '_my_editor_js_settings',
   );
   return $editors;
 }

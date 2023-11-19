@@ -19,7 +19,7 @@
  *   An array of taxonomy vocabulary entities.
  */
 function hook_taxonomy_vocabulary_load(array $vocabularies) {
-  $result = db_select('mytable', 'm')
+  $result = db_select('my_table', 'm')
     ->fields('m', array('vocabulary', 'foo'))
     ->condition('m.vocabulary', array_keys($vocabularies), 'IN')
     ->execute();
@@ -52,7 +52,7 @@ function hook_taxonomy_vocabulary_presave(TaxonomyVocabulary $vocabulary) {
  */
 function hook_taxonomy_vocabulary_insert(TaxonomyVocabulary $vocabulary) {
   if ($vocabulary->machine_name == 'my_vocabulary') {
-    db_insert('mytable')
+    db_insert('my_table')
       ->fields(array(
         'vocabulary' => $vocabulary->machine_name,
         'foo' => $vocabulary->foo,
@@ -70,7 +70,7 @@ function hook_taxonomy_vocabulary_insert(TaxonomyVocabulary $vocabulary) {
  *   A taxonomy vocabulary.
  */
 function hook_taxonomy_vocabulary_update(TaxonomyVocabulary $vocabulary) {
-  db_update('mytable')
+  db_update('my_table')
     ->fields(array('foo' => $vocabulary->foo))
     ->condition('vocabulary', $vocabulary->machine_name)
     ->execute();
@@ -90,7 +90,7 @@ function hook_taxonomy_vocabulary_update(TaxonomyVocabulary $vocabulary) {
  * @see taxonomy_vocabulary_delete()
  */
 function hook_taxonomy_vocabulary_predelete(TaxonomyVocabulary $vocabulary) {
-  db_delete('mytable')
+  db_delete('my_table')
     ->condition('vocabulary', $vocabulary->machine_name)
     ->execute();
 }
@@ -109,7 +109,7 @@ function hook_taxonomy_vocabulary_predelete(TaxonomyVocabulary $vocabulary) {
  * @see taxonomy_vocabulary_delete()
  */
 function hook_taxonomy_vocabulary_delete(TaxonomyVocabulary $vocabulary) {
-  db_delete('mytable')
+  db_delete('my_table')
     ->condition('vocabulary', $vocabulary->machine_name)
     ->execute();
 }
@@ -131,7 +131,7 @@ function hook_taxonomy_vocabulary_delete(TaxonomyVocabulary $vocabulary) {
  *   An array of taxonomy term entities, indexed by tid.
  */
 function hook_taxonomy_term_load(array $terms) {
-  $result = db_select('mytable', 'm')
+  $result = db_select('my_table', 'm')
     ->fields('m', array('tid', 'foo'))
     ->condition('m.tid', array_keys($terms), 'IN')
     ->execute();
@@ -163,7 +163,7 @@ function hook_taxonomy_term_presave(TaxonomyTerm $term) {
  *   A taxonomy term entity.
  */
 function hook_taxonomy_term_insert(TaxonomyTerm $term) {
-  db_insert('mytable')
+  db_insert('my_table')
     ->fields(array(
       'tid' => $term->tid,
       'foo' => $term->foo,
@@ -180,7 +180,7 @@ function hook_taxonomy_term_insert(TaxonomyTerm $term) {
  *   A taxonomy term entity.
  */
 function hook_taxonomy_term_update(TaxonomyTerm $term) {
-  db_update('mytable')
+  db_update('my_table')
     ->fields(array('foo' => $term->foo))
     ->condition('tid', $term->tid)
     ->execute();
@@ -214,7 +214,7 @@ function hook_taxonomy_term_predelete(TaxonomyTerm $term) {
  * @see taxonomy_term_delete()
  */
 function hook_taxonomy_term_delete(TaxonomyTerm $term) {
-  db_delete('mytable')
+  db_delete('my_table')
     ->condition('tid', $term->tid)
     ->execute();
 }
