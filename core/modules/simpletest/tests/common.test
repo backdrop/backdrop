@@ -1074,7 +1074,7 @@ class CommonBackdropHTTPRequestTestCase extends BackdropWebTestCase {
     $this->assertTitle(t('Home | @site-name', array('@site-name' => config_get_translated('system.core', 'site_name'))), 'Site title matches.');
 
     // Test that code and status message is returned.
-    $result = backdrop_http_request(url('pagedoesnotexist', array('absolute' => TRUE)));
+    $result = backdrop_http_request(url('page-does-not-exist', array('absolute' => TRUE)));
     $this->assertTrue(!empty($result->protocol),  'Result protocol is returned.');
     $this->assertEqual($result->code, '404', 'Result code is 404');
     $this->assertEqual($result->status_message, 'Not Found', 'Result status message is "Not Found"');

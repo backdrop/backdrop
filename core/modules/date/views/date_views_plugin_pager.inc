@@ -223,8 +223,8 @@ class date_views_plugin_pager extends views_plugin_pager {
           $compiled_query->range(0, 2);
           $results = $compiled_query->execute()->fetchCol(0);
 
-          $prevdate = array_shift($results);
-          $prevdatealt = array_shift($results);
+          $prev_date = array_shift($results);
+          $prev_date_alt = array_shift($results);
           // Find the first two dates between the lower bound
           // of the current value and the maximum date.
           $q->add_orderby(NULL, $field_sql, 'ASC', 'date');
@@ -237,15 +237,15 @@ class date_views_plugin_pager extends views_plugin_pager {
           $next_date = array_shift($results);
           $next_date_alt = array_shift($results);
 
-          // Set the default value of the query to $prevfirst or $next_first
-          // when there is no value and $prevsecond or $next_second is set.
+          // Set the default value of the query to $prev_first or $next_first
+          // when there is no value and $prev_second or $next_second is set.
           if (empty($value)) {
-            // @Todo find out which of $prevdate or $next_date is closest to the
+            // @Todo find out which of $prev_date or $next_date is closest to the
             // default argument date value and choose that one.
-            if ($prevdate && $prevdatealt) {
-              $this->set_argument_value($argument, $prevdate);
-              $value = $prevdate;
-              $prevdate = $prevdatealt;
+            if ($prev_date && $prev_date_alt) {
+              $this->set_argument_value($argument, $prev_date);
+              $value = $prev_date;
+              $prev_date = $prev_date_alt;
               // If the first next date is the same as the first previous date,
               // move to the following next date.
               if ($value == $next_date) {
@@ -259,20 +259,20 @@ class date_views_plugin_pager extends views_plugin_pager {
               $next_date = $next_date_alt;
               // If the first previous date is the same as the first next date,
               // move to the following previous date.
-              if ($value == $prevdate) {
-                $prevdate = $prevdatealt;
-                $prevdatealt = NULL;
+              if ($value == $prev_date) {
+                $prev_date = $prev_date_alt;
+                $prev_date_alt = NULL;
               }
             }
           }
           else {
-            // $prevdate and $next_date are the same as $value, so move to
+            // $prev_date and $next_date are the same as $value, so move to
             // the next values.
-            $prevdate = $prevdatealt;
+            $prev_date = $prev_date_alt;
             $next_date = $next_date_alt;
           }
 
-          $this->view->date_info->prev_date = $prevdate ? new BackdropDateTime($prevdate, NULL, $format) : NULL;
+          $this->view->date_info->prev_date = $prev_date ? new BackdropDateTime($prev_date, NULL, $format) : NULL;
           $this->view->date_info->next_date = $next_date ? new BackdropDateTime($next_date, NULL, $format) : NULL;
         }
         else {

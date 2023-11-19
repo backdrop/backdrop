@@ -229,14 +229,17 @@ function ckeditor_ckeditor_plugins() {
     ),
     'PasteText' => array(
       'label' => t('Paste Text'),
+      // cspell:disable-next-line
       'image_rtl' => $image_prefix . '/pastetext-rtl.png',
     ),
     'PasteFromWord' => array(
       'label' => t('Paste from Word'),
+      // cspell:disable-next-line
       'image_rtl' => $image_prefix . '/pastefromword-rtl.png',
     ),
     'ShowBlocks' => array(
       'label' => t('Show blocks'),
+      // cspell:disable-next-line
       'image_rtl' => $image_prefix . '/showblocks-rtl.png',
     ),
     'RemoveFormat' => array(

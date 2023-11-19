@@ -335,11 +335,11 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
    */
   protected function getGroupedOneOfTestView() {
     $view = new view();
-    $view->name = 'test_oneof';
+    $view->name = 'test_one_of';
     $view->description = '';
     $view->tag = 'default';
     $view->base_table = 'node';
-    $view->human_name = 'test_oneof';
+    $view->human_name = 'Test one-of';
     $view->core = 7;
     $view->api_version = '3.0';
     $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */

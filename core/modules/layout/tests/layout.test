@@ -410,6 +410,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     // Try injecting XSS into the classes.
     $xss = '"><svg onload="alert(\'XSS hole\')">';
     // The filtered string after running through backdrop_html_class().
+    // cspell:disable-next-line
     $filtered_xss = 'svg onloadalertXSS hole';
     $edit = array(
       'style_settings[classes]' => $xss,

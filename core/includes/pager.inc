@@ -274,7 +274,7 @@ function theme_pager($variables) {
 
 
 /**
- * @defgroup pagerpieces Pager pieces
+ * @defgroup pager_pieces Pager pieces
  * @{
  * Theme functions for customizing pager elements.
  *

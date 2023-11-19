@@ -575,16 +575,16 @@ function comment_new_page_count($num_comments, $new_replies, Node $node) {
   $node_type = node_type_get_type($node->type);
   $mode = $node_type->settings['comment_mode'];
   $comments_per_page = $node_type->settings['comment_per_page'];
-  $pagenum = NULL;
+  $page_number = NULL;
   $flat = $mode == COMMENT_MODE_FLAT ? TRUE : FALSE;
   if ($num_comments <= $comments_per_page) {
     // Only one page of comments.
-    $pageno = 0;
+    $page_count = 0;
   }
   elseif ($flat) {
     // Flat comments.
-    $count = $num_comments - $new_replies;
-    $pageno = $count / $comments_per_page;
+    $comment_count = $num_comments - $new_replies;
+    $page_count = $comment_count / $comments_per_page;
   }
   else {
     // Threaded comments: we build a query with a subquery to find the first
@@ -611,20 +611,20 @@ function comment_new_page_count($num_comments, $new_replies, Node $node) {
     $first_thread = substr($first_thread, 0, -1);
 
     // Find the number of the first comment of the first unread thread.
-    $count = db_query('SELECT COUNT(*) FROM {comment} WHERE nid = :nid AND status = :status AND SUBSTRING(thread, 1, (LENGTH(thread) - 1)) < :thread', array(
+    $comment_count = db_query('SELECT COUNT(*) FROM {comment} WHERE nid = :nid AND status = :status AND SUBSTRING(thread, 1, (LENGTH(thread) - 1)) < :thread', array(
       ':status' => COMMENT_PUBLISHED,
       ':nid' => $node->nid,
       ':thread' => $first_thread,
     ))->fetchField();
 
-    $pageno = $count / $comments_per_page;
+    $page_count = $comment_count / $comments_per_page;
   }
 
-  if ($pageno >= 1) {
-    $pagenum = array('page' => intval($pageno));
+  if ($page_count >= 1) {
+    $page_number = array('page' => intval($page_count));
   }
 
-  return $pagenum;
+  return $page_number;
 }
 
 /**

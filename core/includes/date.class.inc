@@ -178,23 +178,23 @@ class BackdropDateTime extends DateTime {
     // Figure out which timezone to use for combination.
     $use_tz = ($this->hasGranularity('timezone') || !$other->hasGranularity('timezone')) ? $this_tz : $other_tz;
 
-    $this2 = clone $this;
-    $this2->setTimezone($use_tz);
+    $this_clone = clone $this;
+    $this_clone->setTimezone($use_tz);
     $other->setTimezone($use_tz);
-    $val = $this2->toArray(TRUE);
-    $otherval = $other->toArray();
-    foreach (self::$all_granularity as $g) {
-      if ($other->hasGranularity($g) && !$this2->hasGranularity($g)) {
+    $val = $this_clone->toArray(TRUE);
+    $other_val = $other->toArray();
+    foreach (self::$all_granularity as $granularity) {
+      if ($other->hasGranularity($granularity) && !$this_clone->hasGranularity($granularity)) {
         // The other class has a property we don't; steal it.
-        $this2->addGranularity($g);
-        $val[$g] = $otherval[$g];
+        $this_clone->addGranularity($granularity);
+        $val[$granularity] = $other_val[$granularity];
       }
     }
     $other->setTimezone($other_tz);
 
-    $this2->setDate($val['year'], $val['month'], $val['day']);
-    $this2->setTime($val['hour'], $val['minute'], $val['second']);
-    return $this2;
+    $this_clone->setDate($val['year'], $val['month'], $val['day']);
+    $this_clone->setTime($val['hour'], $val['minute'], $val['second']);
+    return $this_clone;
   }
 
   /**

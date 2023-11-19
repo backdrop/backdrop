@@ -298,7 +298,7 @@ function hook_field_schema($field) {
  *   FIELD_LOAD_REVISION to load the version indicated by each entity.
  */
 function hook_field_load($entity_type, $entities, $field, $instances, $langcode, &$items, $age) {
-  // Sample code from text.module: precompute sanitized strings so they are
+  // Sample code from text.module: pre-compute sanitized strings so they are
   // stored in the field cache.
   foreach ($entities as $id => $entity) {
     foreach ($items[$id] as $delta => $item) {
