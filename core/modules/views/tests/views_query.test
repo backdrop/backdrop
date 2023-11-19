@@ -389,7 +389,7 @@ abstract class ViewsSqlTest extends ViewsTestCase {
     $view->base_table = 'views_test';
 
     // Set up the fields we need.
-    $display = $view->new_display('default', 'Master', 'default');
+    $display = $view->new_display('default', 'Default', 'default');
     $display->override_option('fields', array(
       'id' => array(
         'id' => 'id',
