@@ -264,7 +264,8 @@ class UnicodeUnitTest extends BackdropUnitTestCase {
       array('123 567 90', 10, '123 567 90'),
       array('123 567 901', 10, '123 567…'),
       array('Stop. Hammer-time.', 18, 'Stop. Hammer-time.'),
-      array('Stop. Hammer-time.', 17, 'Stop…'),
+      array('Stop. Hammer-time.', 17, 'Stop. Hammer…'),
+      array('Stop. Hammer-time.', 12, 'Stop…'),
       // cspell:disable
       array('frànçAIS is über-åwesome', 24, 'frànçAIS is über-åwesome'),
       array('frànçAIS is über-åwesome', 23, 'frànçAIS is über…'),
