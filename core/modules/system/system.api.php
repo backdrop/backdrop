@@ -2864,7 +2864,7 @@ function hook_install() {
  * - mymodule_update_1000(): This is the required update for my_module to run
  *   with Backdrop core API 1.x when upgrading from Drupal core API 7.x.
  * - mymodule_update_1100(): This is the first update to get the database/config
- *   ready to run m_ymodule 1.x-1.*.
+ *   ready to run my_module 1.x-1.*.
  * - mymodule_update_1200(): This is the first update to get the database/config
  *   ready to run my_module 1.x-2.*. Users can directly update from Drupal 7.x
  *   to Backdrop 1.x-2.*, and they get all the 10xx and 12xx updates, but not
