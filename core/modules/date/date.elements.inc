@@ -1251,8 +1251,9 @@ function date_popup_validate($element, &$form_state) {
   }
 
   // If the created date is valid, set it.
-  $value = date_is_date($date) ? $date->format(DATE_FORMAT_DATETIME) : NULL;
-  form_set_value($element, $value, $form_state);
+  if (date_is_date($date)) {
+    form_set_value($element, $date->format(DATE_FORMAT_DATETIME), $form_state);
+  }
 }
 
 /**
