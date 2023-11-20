@@ -1191,7 +1191,7 @@ function search_excerpt($keys, $text) {
 
   // Slash-escape quotes in the search keyword string.
   array_walk($keys, '_search_excerpt_replace');
-  $workkeys = $keys;
+  $work_keys = $keys;
 
   // Extract fragments around keywords.
   // First we collect ranges of text around each keyword, starting/ending
@@ -1201,10 +1201,10 @@ function search_excerpt($keys, $text) {
   $included = array();
   $found_keys = array();
   $length = 0;
-  while ($length < 256 && count($workkeys)) {
-    foreach ($workkeys as $k => $key) {
+  while ($length < 256 && count($work_keys)) {
+    foreach ($work_keys as $k => $key) {
       if (strlen($key) == 0) {
-        unset($workkeys[$k]);
+        unset($work_keys[$k]);
         unset($keys[$k]);
         continue;
       }
@@ -1247,15 +1247,15 @@ function search_excerpt($keys, $text) {
             $included[$key] = $p + 1;
           }
           else {
-            unset($workkeys[$k]);
+            unset($work_keys[$k]);
           }
         }
         else {
-          unset($workkeys[$k]);
+          unset($work_keys[$k]);
         }
       }
       else {
-        unset($workkeys[$k]);
+        unset($work_keys[$k]);
       }
     }
   }

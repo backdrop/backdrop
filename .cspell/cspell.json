@@ -44,6 +44,7 @@
   "ignorePaths": [
     "*.svg",
     "/.*/",
+    "/core/includes/diff.inc",
     "/core/includes/file.mimetypes.inc",
     "/core/includes/standard.inc",
     "/core/includes/transliteration/",

@@ -202,6 +202,7 @@ class FileTestCase extends BackdropWebTestCase {
     if (!isset($filepath)) {
       // Prefix with non-latin characters to ensure that all file-related
       // tests work with international filenames.
+      // cspell:disable-next-line
       $filepath = 'Файл для тестирования ' . $this->randomName();
     }
     if (!isset($scheme)) {
@@ -1016,8 +1017,9 @@ class FileUploadTransliterationTest extends FileTestCase {
     // containing upper-case variant characters.
     // cspell:disable
     $original_filename = 'üФайл Ä fàü.txt';
-    $transliterated_uri = 'temporary://ufail_a_fau.txt';
+    $transliterated_filename = 'ufail_a_fau.txt';
     // cspell:enable
+    $transliterated_uri = 'temporary://' . $transliterated_filename;
     $file = $this->createFile($original_filename, 'Sample text');
     $config = config('system.core');
 
@@ -1050,7 +1052,8 @@ class FileUploadTransliterationTest extends FileTestCase {
     $second_file = file_load($second_fid);
 
     debug($second_file);
-    $this->assertIdentical($second_file->filename, 'ufail_a_fau.txt', 'File display name transliterated and lowercased.');
+    // cspell:disable
+    $this->assertIdentical($second_file->filename, $transliterated_filename, 'File display name transliterated and lowercased.');
     $this->assertIdentical($second_file->uri, $transliterated_uri, 'File name has been transliterated and lowercased.');
     $this->assertTrue(file_exists($second_file->uri), 'Transliterated file exists at expected path.');
 
@@ -2379,6 +2382,7 @@ class FileSaveDataTest extends FileHookTestCase {
     $contents = $this->randomName(8);
 
     // Using filename with non-latin characters.
+    // cspell:disable-next-line
     $filename = 'Текстовый файл.txt';
 
     $result = file_save_data($contents, 'public://' . $filename);

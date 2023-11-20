@@ -951,8 +951,8 @@ function date_week_range($week, $year) {
   date_modify($min_date, '+' . strval(7 * ($week - 1)) . ' days');
 
   // Move backwards to the first day of the week.
-  $day_wday = date_format($min_date, 'w');
-  date_modify($min_date, '-' . strval((7 + $day_wday - $first_day) % 7) . ' days');
+  $day_of_the_week = date_format($min_date, 'w');
+  date_modify($min_date, '-' . strval((7 + $day_of_the_week - $first_day) % 7) . ' days');
 
   // Move forwards to the last day of the week.
   $max_date = clone($min_date);

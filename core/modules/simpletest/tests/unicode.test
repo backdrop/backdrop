@@ -62,39 +62,39 @@ class UnicodeUnitTest extends BackdropUnitTestCase {
   }
 
   function helperTestStrToLower() {
-    $testcase = array(
+    $test_case = array(
       'tHe QUIcK bRoWn' => 'the quick brown',
       // cspell:disable-next-line
       'FrançAIS is ÜBER-åwesome' => 'français is über-åwesome',
     );
     if ($this->extendedMode) {
       // cspell:disable-next-line
-      $testcase['ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΣὨ'] = 'αβγδεζηθικλμνξοσὠ';
+      $test_case['ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΣὨ'] = 'αβγδεζηθικλμνξοσὠ';
     }
 
-    foreach ($testcase as $input => $output) {
+    foreach ($test_case as $input => $output) {
       $this->assertEqual(backdrop_strtolower($input), $output, format_string('%input is lowercased as %output', array('%input' => $input, '%output' => $output)));
     }
   }
 
   function helperTestStrToUpper() {
-    $testcase = array(
+    $test_case = array(
       'tHe QUIcK bRoWn' => 'THE QUICK BROWN',
       // cspell:disable-next-line
       'FrançAIS is ÜBER-åwesome' => 'FRANÇAIS IS ÜBER-ÅWESOME',
     );
     if ($this->extendedMode) {
       // cspell:disable-next-line
-      $testcase['αβγδεζηθικλμνξοσὠ'] = 'ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΣὨ';
+      $test_case['αβγδεζηθικλμνξοσὠ'] = 'ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΣὨ';
     }
 
-    foreach ($testcase as $input => $output) {
+    foreach ($test_case as $input => $output) {
       $this->assertEqual(backdrop_strtoupper($input), $output, format_string('%input is uppercased as %output', array('%input' => $input, '%output' => $output)));
     }
   }
 
   function helperTestUcFirst() {
-    $testcase = array(
+    $test_case = array(
       // cspell:disable
       'tHe QUIcK bRoWn' => 'THe QUIcK bRoWn',
       'françAIS' => 'FrançAIS',
@@ -103,29 +103,30 @@ class UnicodeUnitTest extends BackdropUnitTestCase {
       // cspell:enable
     );
     if ($this->extendedMode) {
-      $testcase['σion'] = 'Σion';
+      // cspell:disable-next-line
+      $test_case['σion'] = 'Σion';
     }
 
-    foreach ($testcase as $input => $output) {
+    foreach ($test_case as $input => $output) {
       $this->assertEqual(backdrop_ucfirst($input), $output, format_string('%input is ucfirst-ed as %output', array('%input' => $input, '%output' => $output)));
     }
   }
 
   function helperTestStrLen() {
-    $testcase = array(
+    $test_case = array(
       // cspell:disable
       'tHe QUIcK bRoWn' => 15,
       'ÜBER-åwesome' => 12,
       // cspell:enable
     );
 
-    foreach ($testcase as $input => $output) {
+    foreach ($test_case as $input => $output) {
       $this->assertEqual(backdrop_strlen($input), $output, format_string('%input length is %output', array('%input' => $input, '%output' => $output)));
     }
   }
 
   function helperTestSubStr() {
-    $testcase = array(
+    $test_case = array(
       //     012345678901234567890123
       // cspell:disable
       array('frànçAIS is über-åwesome', 0, 0,
@@ -178,7 +179,7 @@ class UnicodeUnitTest extends BackdropUnitTestCase {
       // cspell:enable
     );
 
-    foreach ($testcase as $test) {
+    foreach ($test_case as $test) {
       list($input, $start, $length, $output) = $test;
       $result = backdrop_substr($input, $start, $length);
       $this->assertEqual($result, $output, format_string('%input substring at offset %offset for %length characters is %output (got %result)', array('%input' => $input, '%offset' => $start, '%length' => $length, '%output' => $output, '%result' => $result)));
@@ -189,7 +190,7 @@ class UnicodeUnitTest extends BackdropUnitTestCase {
    * Test decode_entities().
    */
   function testDecodeEntities() {
-    $testcase = array(
+    $test_case = array(
       'Backdrop' => 'Backdrop',
       '<script>' => '<script>',
       '&lt;script&gt;' => '<script>',
@@ -212,7 +213,7 @@ class UnicodeUnitTest extends BackdropUnitTestCase {
       '&#10172;' => '➼',
       '&euro;' => '€',
     );
-    foreach ($testcase as $input => $output) {
+    foreach ($test_case as $input => $output) {
       $this->assertEqual(decode_entities($input), $output, format_string('Make sure the decoded entity of @input is @output', array('@input' => $input, '@output' => $output)));
     }
   }

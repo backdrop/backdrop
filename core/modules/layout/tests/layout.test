@@ -1979,7 +1979,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
    * Test Hero blocks.
    */
   function testHeroBlocks() {
-    $hero_title_1 = 'Wonderwoman';
+    $hero_title_1 = 'Wonder Woman';
     $hero_content_1 = 'Youth is your greatest weapon, your greatest tool.';
     $hero_title_2 = 'Black Widow';
     $hero_content_2 = "Whatever it takes.";

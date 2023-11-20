@@ -1929,8 +1929,10 @@ EOF;
     $f = _filter_htmlcorrector('<p>test\n</p>\n');
     $this->assertEqual($f, '<p>test\n</p>\n', 'HTML corrector -- New-lines are accepted and kept as-is.');
 
+    // cspell:disable
     $f = _filter_htmlcorrector('<p>دروبال');
     $this->assertEqual($f, '<p>دروبال</p>', 'HTML corrector -- Encoding is correctly kept.');
+    // cspell:enable
 
     $f = _filter_htmlcorrector('<script type="text/javascript">alert("test")</script>');
     $this->assertEqual($f, '<script type="text/javascript">
