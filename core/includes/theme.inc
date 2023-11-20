@@ -2260,7 +2260,7 @@ function theme_table(array $variables) {
     $sections['tfoot'] = $variables['footer'];
   }
 
-  // The TBODY and TFOOT HTML tags have the same structure, and are built
+  // The tbody and tfoot HTML tags have the same structure, and are built
   // using the same procedure.
   foreach ($sections as $tag => $content) {
     $output .= "<$tag>\n";
