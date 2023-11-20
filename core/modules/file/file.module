@@ -2011,10 +2011,8 @@ function file_icon_map(File $file) {
     // cspell:enable
 
     // HTML aliases.
-    // cspell:disable
     case 'application/xhtml+xml':
       return 'text-html';
-    // cspell:enable
 
     // Executable types.
     // cspell:disable

@@ -695,9 +695,8 @@ function date_format_date($date, $type = 'medium', $format = '', $langcode = NUL
         break;
 
       default:
-        // cspell:disable
+        // cspell:disable-next-line
         if (strpos('BdcgGhHiIjLmnNosStTuUwWYyz', $c) !== FALSE) {
-        // cspell:enable
           $date_string .= $date->format($c);
         }
         else {

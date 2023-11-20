@@ -64,14 +64,12 @@ class UnicodeUnitTest extends BackdropUnitTestCase {
   function helperTestStrToLower() {
     $testcase = array(
       'tHe QUIcK bRoWn' => 'the quick brown',
-      // cspell:disable
+      // cspell:disable-next-line
       'FrançAIS is ÜBER-åwesome' => 'français is über-åwesome',
-      // cspell:enable
     );
     if ($this->extendedMode) {
-      // cspell:disable
+      // cspell:disable-next-line
       $testcase['ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΣὨ'] = 'αβγδεζηθικλμνξοσὠ';
-      // cspell:enable
     }
 
     foreach ($testcase as $input => $output) {
@@ -82,14 +80,12 @@ class UnicodeUnitTest extends BackdropUnitTestCase {
   function helperTestStrToUpper() {
     $testcase = array(
       'tHe QUIcK bRoWn' => 'THE QUICK BROWN',
-      // cspell:disable
+      // cspell:disable-next-line
       'FrançAIS is ÜBER-åwesome' => 'FRANÇAIS IS ÜBER-ÅWESOME',
-      // cspell:enable
     );
     if ($this->extendedMode) {
-      // cspell:disable
+      // cspell:disable-next-line
       $testcase['αβγδεζηθικλμνξοσὠ'] = 'ΑΒΓΔΕΖΗΘΙΚΛΜΝΞΟΣὨ';
-      // cspell:enable
     }
 
     foreach ($testcase as $input => $output) {

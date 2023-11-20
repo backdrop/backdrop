@@ -2059,7 +2059,7 @@ function _date_html5_get_form_value($value_orig, $type, $time_step, $timezone_db
     'date' => $datetime->format('Y-m-d'),
   );
   if ($type == 'html_datetime') {
-    $pattern = ($timestep > 1) ? 'H:i' : 'H:i:s';
+    $pattern = ($time_step > 1) ? 'H:i' : 'H:i:s';
     $value['time'] = $datetime->format($pattern);
   }
 
@@ -2089,13 +2089,13 @@ function _date_html5_get_default_value(array $field, array $instance, $langcode)
   $timezone_db = $values['timezone_db'];
   $timezone = $values['timezone'];
   $type = empty($granularity['hour']) ? 'html_date' : 'html_datetime';
-  $timestep = empty($granularity['second']) ? 60 : 1;
+  $time_step = empty($granularity['second']) ? 60 : 1;
 
   if (!empty($values['value'])) {
-    $default['start'] = _date_html5_get_form_value($values['value'], $type, $timestep, $timezone_db, $timezone);
+    $default['start'] = _date_html5_get_form_value($values['value'], $type, $time_step, $timezone_db, $timezone);
   }
   if (!empty($values['value2'])) {
-    $default['end'] = _date_html5_get_form_value($values['value2'], $type, $timestep, $timezone_db, $timezone);
+    $default['end'] = _date_html5_get_form_value($values['value2'], $type, $time_step, $timezone_db, $timezone);
   }
 
   return $default;
@@ -2322,7 +2322,7 @@ function _date_html5_field_widget_form(array $field, array $instance, $langcode,
   // date with or without time. Time eventually without seconds.
   $granularity = array_filter($field_settings['granularity']);
   $type = empty($granularity['hour']) ? 'html_date' : 'html_datetime';
-  $timestep = empty($granularity['second']) ? 60 : 1;
+  $time_step = empty($granularity['second']) ? 60 : 1;
 
   $date_limits = _date_html5_get_date_limits($widget_settings['limits']);
   $attributes = _date_html5_get_attributes($date_limits, $granularity);
@@ -2340,7 +2340,7 @@ function _date_html5_field_widget_form(array $field, array $instance, $langcode,
   }
 
   if (isset($items[$delta]['value'])) {
-    $value = _date_html5_get_form_value($items[$delta]['value'], $type, $timestep, $timezone_db, $timezone);
+    $value = _date_html5_get_form_value($items[$delta]['value'], $type, $time_step, $timezone_db, $timezone);
   } elseif ($delta == 0) {
     $value = $default['start'];
   }
@@ -2359,7 +2359,7 @@ function _date_html5_field_widget_form(array $field, array $instance, $langcode,
   if ($has_todate) {
     $value2 = '';
     if (isset($items[$delta]['value2'])) {
-      $value2 = _date_html5_get_form_value($items[$delta]['value2'], $type, $timestep, $timezone_db, $timezone);
+      $value2 = _date_html5_get_form_value($items[$delta]['value2'], $type, $time_step, $timezone_db, $timezone);
     } elseif ($delta == 0) {
       $value2 = $default['end'];
     }

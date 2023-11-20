@@ -876,7 +876,7 @@ function file_default_mimetype_mapping() {
       'weba' => 356,
       'webm' => 357,
       'vtt' => 358,
-      // cspell:disable
+      // cspell:enable
     ),
   );
 }

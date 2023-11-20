@@ -203,9 +203,8 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
     $config->save();
     backdrop_static_reset('path_clean_string');
 
-    // cspell:disable
+    // cspell:disable-next-line
     $input = 'ädd ä accènts thè';
-    // cspell:enable
     $expected = 'add-accents'; // "a" and "the" is stripped out.
     $output = path_clean_string($input);
     $this->assertEqual($output, $expected, format_string("path_clean_string('@input') expected '@expected', actual '@output'", array('@input' => $input, '@expected' => $expected, '@output' => $output)));

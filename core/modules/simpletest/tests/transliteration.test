@@ -11,9 +11,8 @@ class TransliterationTest extends BackdropUnitTestCase {
     // Make some strings with two, three, and four-byte characters for testing.
     // Note that the 3-byte character is overridden by the 'kg' language.
 
-    // cspell:disable
+    // cspell:disable-next-line
     $two_byte = 'Ä Ö Ü Å Ø äöüåøhello';
-    // cspell:enable
 
     // This is a Cyrillic character that looks something like a u. See
     // http://www.unicode.org/charts/PDF/U0400.pdf

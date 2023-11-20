@@ -1948,20 +1948,20 @@ function _filter_xss_split($m, $store = FALSE) {
  * @return
  *   Cleaned up version of the HTML attributes.
  */
-function _filter_xss_attributes($attr) {
+function _filter_xss_attributes($attributes) {
   $attributes_array = array();
   $skip = FALSE;
   $mode = 0;
   $attribute_name = '';
 
-  while (strlen($attr) != 0) {
+  while (strlen($attributes) != 0) {
     // Was the last operation successful?
     $working = 0;
 
     switch ($mode) {
       case 0:
         // Attribute name, href for instance.
-        if (preg_match('/^([-a-zA-Z]+)/', $attr, $match)) {
+        if (preg_match('/^([-a-zA-Z]+)/', $attributes, $match)) {
           $attribute_name = strtolower($match[1]);
           $skip = (
             $attribute_name == 'style' ||
@@ -1971,75 +1971,75 @@ function _filter_xss_attributes($attr) {
             strlen($attribute_name) > 96
           );
           $working = $mode = 1;
-          $attr = preg_replace('/^[-a-zA-Z]+/', '', $attr);
+          $attributes = preg_replace('/^[-a-zA-Z]+/', '', $attributes);
         }
         break;
 
       case 1:
         // Equals sign or valueless ("selected").
-        if (preg_match('/^\s*=\s*/', $attr)) {
+        if (preg_match('/^\s*=\s*/', $attributes)) {
           $working = 1; $mode = 2;
-          $attr = preg_replace('/^\s*=\s*/', '', $attr);
+          $attributes = preg_replace('/^\s*=\s*/', '', $attributes);
           break;
         }
 
-        if (preg_match('/^\s+/', $attr)) {
+        if (preg_match('/^\s+/', $attributes)) {
           $working = 1; $mode = 0;
           if (!$skip) {
             $attributes_array[] = $attribute_name;
           }
-          $attr = preg_replace('/^\s+/', '', $attr);
+          $attributes = preg_replace('/^\s+/', '', $attributes);
         }
         break;
 
       case 2:
         // Attribute value, a URL after href= for instance.
-        if (preg_match('/^"([^"]*)"(\s+|$)/', $attr, $match)) {
+        if (preg_match('/^"([^"]*)"(\s+|$)/', $attributes, $match)) {
           // Prevent filtering for some attribute values, where performing
           // the filtering would cause valid and safe data to be mangled.
           if (strpos($attribute_name, 'data-') === 0 || $attribute_name == 'alt' || $attribute_name == 'title') {
-            $thisval = $match[1];
+            $this_val = $match[1];
           }
           // Strip bad protocols from all other attributes, e.g. href, src.
           else {
-            $thisval = filter_xss_bad_protocol($match[1]);
+            $this_val = filter_xss_bad_protocol($match[1]);
           }
 
           if (!$skip) {
-            $attributes_array[] = "$attribute_name=\"$thisval\"";
+            $attributes_array[] = "$attribute_name=\"$this_val\"";
           }
           $working = 1;
           $mode = 0;
-          $attr = preg_replace('/^"[^"]*"(\s+|$)/', '', $attr);
+          $attributes = preg_replace('/^"[^"]*"(\s+|$)/', '', $attributes);
           break;
         }
 
-        if (preg_match("/^'([^']*)'(\s+|$)/", $attr, $match)) {
-          $thisval = filter_xss_bad_protocol($match[1]);
+        if (preg_match("/^'([^']*)'(\s+|$)/", $attributes, $match)) {
+          $this_val = filter_xss_bad_protocol($match[1]);
 
           if (!$skip) {
-            $attributes_array[] = "$attribute_name='$thisval'";
+            $attributes_array[] = "$attribute_name='$this_val'";
           }
           $working = 1; $mode = 0;
-          $attr = preg_replace("/^'[^']*'(\s+|$)/", '', $attr);
+          $attributes = preg_replace("/^'[^']*'(\s+|$)/", '', $attributes);
           break;
         }
 
-        if (preg_match("%^([^\s\"']+)(\s+|$)%", $attr, $match)) {
-          $thisval = filter_xss_bad_protocol($match[1]);
+        if (preg_match("%^([^\s\"']+)(\s+|$)%", $attributes, $match)) {
+          $this_val = filter_xss_bad_protocol($match[1]);
 
           if (!$skip) {
-            $attributes_array[] = "$attribute_name=\"$thisval\"";
+            $attributes_array[] = "$attribute_name=\"$this_val\"";
           }
           $working = 1; $mode = 0;
-          $attr = preg_replace("%^[^\s\"']+(\s+|$)%", '', $attr);
+          $attributes = preg_replace("%^[^\s\"']+(\s+|$)%", '', $attributes);
         }
         break;
     }
 
     if ($working == 0) {
       // Not well formed; remove and try again.
-      $attr = preg_replace('/
+      $attributes = preg_replace('/
         ^
         (
         "[^"]*("|$)     # - a string that starts with a double quote, up until the next double quote or the end of the string
@@ -2049,7 +2049,7 @@ function _filter_xss_attributes($attr) {
         \S              # - a non-whitespace character
         )*              # any number of the above three
         \s*             # any number of whitespaces
-        /x', '', $attr);
+        /x', '', $attributes);
       $mode = 0;
     }
   }
