@@ -467,8 +467,8 @@ class views_handler_field extends views_handler {
       '#type' => 'checkbox',
       '#title' => t('Create a label'),
       '#description' => t('Enable to create a label for this field.'),
-      '#indentation' => 1,
       '#default_value' => $label !== '',
+      '#indentation' => 1,
       '#weight' => -103,
     );
     $form['label'] = array(
