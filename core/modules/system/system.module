@@ -3920,9 +3920,11 @@ function system_image_toolkits() {
  * Get core SVG support.
  */
 function system_get_svg_support() {
-  // @todo: static? Check how often this would be called.
-  // @todo: Maybe this should be in image module.
-  $image_svg_support = config_get('system.core', 'image_svg_support');
+  static $image_svg_support = NULL;
+  if (is_null($image_svg_support)) {
+    $image_svg_config_value = config_get('system.core', 'image_svg_support');
+    $image_svg_support = ($image_svg_config_value === TRUE);
+  }
   return $image_svg_support;
 }
 

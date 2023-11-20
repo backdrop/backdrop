@@ -573,7 +573,7 @@ function image_get_svg_dimensions($uri) {
     $svg = simplexml_load_string($file_contents);
     foreach ($svg->attributes() as $attribute => $value) {
       if ($attribute === 'width' || $attribute === 'height') {
-        $svg_dimensions[$attribute] = (integer) $value;
+        $svg_dimensions[$attribute] = (int) $value;
       }
     }
   }
