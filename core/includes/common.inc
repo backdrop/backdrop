@@ -5740,7 +5740,6 @@ function backdrop_json_format($json) {
   watchdog_deprecated_function('common', __FUNCTION__);
   // This code adopted from
   // https://github.com/GerHobbelt/nicejson-php/blob/HEAD/nicejson.php.
-
   $result = '';
   $pos = 0; // Indentation level.
   $strlen = strlen($json);
