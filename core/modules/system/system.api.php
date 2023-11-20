@@ -1387,7 +1387,7 @@ function hook_init() {
  * The file which includes each toolkit's functions must be included in this
  * hook.
  *
- * The toolkit's functions must be named image_toolkitname_operation().
+ * The toolkit's functions must be named image_TOOLKIT_NAME_operation().
  * where the operation may be:
  *   - 'load': Required. See image_gd_load() for usage.
  *   - 'save': Required. See image_gd_save() for usage.
@@ -3179,7 +3179,7 @@ function hook_autoload_info_alter(&$class_registry) {
  * Any tasks you define here will be run, in order, after the installer has
  * finished the site configuration step but before it has moved on to the
  * final import of languages and the end of the installation. This is invoked
- * by install_tasks().  You can have any number of custom tasks to perform
+ * by install_tasks(). You can have any number of custom tasks to perform
  * during this phase.
  *
  * Each task you define here corresponds to a callback function which you must
@@ -3401,8 +3401,8 @@ function hook_install_tasks_alter(&$tasks, $install_state) {
 /**
  * Alter MIME type mappings used to determine MIME type from a file extension.
  *
- * This hook is run when file_mimetype_mapping() is called. It is used to
- * allow modules to add to or modify the default mapping from
+ * This hook is run when file_mimetype_mapping() is called. It is used to allow
+ * modules to add to or modify the default mapping from
  * file_default_mimetype_mapping().
  *
  * @param $mapping
@@ -3476,18 +3476,18 @@ function hook_action_info_alter(&$actions) {
 /**
  * Declare archivers to the system.
  *
- * An archiver is a class that is able to package and unpackage one or more files
- * into a single possibly compressed file.  Common examples of such files are
- * zip files and tar.gz files.  All archiver classes must implement
+ * An archiver is a class that is able to package and unpackage one or more
+ * files into a single possibly compressed file. Common examples of such files
+ * are zip files and tar.gz files. All archiver classes must implement
  * ArchiverInterface.
  *
- * Each entry should be keyed on a unique value, and specify three
- * additional keys:
+ * Each entry should be keyed on a unique value, and specify three additional
+ * keys:
  * - class: The name of the PHP class for this archiver.
  * - extensions: An array of file extensions that this archiver supports.
- * - weight: This optional key specifies the weight of this archiver.
- *   When mapping file extensions to archivers, the first archiver by
- *   weight found that supports the requested extension will be used.
+ * - weight: This optional key specifies the weight of this archiver. When
+ *   mapping file extensions to archivers, the first archiver by weight found
+ *   that supports the requested extension will be used.
  *
  * @see hook_archiver_info_alter()
  */
@@ -3514,16 +3514,17 @@ function hook_archiver_info_alter(&$info) {
 }
 
 /**
- * Alters the delivery callback used to send the result of the page callback to the browser.
+ * Alters the delivery callback used to send the result of the page callback to
+ * the browser.
  *
- * Called by backdrop_deliver_page() to allow modules to alter how the
- * page is delivered to the browser.
+ * Called by backdrop_deliver_page() to allow modules to alter how the page is
+ * delivered to the browser.
  *
- * This hook is intended for altering the delivery callback based on
- * information unrelated to the path of the page accessed. For example,
- * it can be used to set the delivery callback based on a HTTP request
- * header (as shown in the code sample). To specify a delivery callback
- * based on path information, use hook_menu() or hook_menu_alter().
+ * This hook is intended for altering the delivery callback based on information
+ * unrelated to the path of the page accessed. For example, it can be used to
+ * set the delivery callback based on a HTTP request header (as shown in the
+ * code sample). To specify a delivery callback based on path information, use
+ * hook_menu() or hook_menu_alter().
  *
  * This hook can also be used as an API function that can be used to explicitly
  * set the delivery callback from some other function. For example, for a module

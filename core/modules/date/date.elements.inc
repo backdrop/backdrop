@@ -2031,7 +2031,7 @@ function date_html5_element_validate(array $element, array &$form_state) {
  *   Original value from database.
  * @param string $type
  *   Form API type of the widget.
- * @param int $timestep
+ * @param int $time_step
  *   Step value for the form, 1 or 60.
  * @param string $timezone_db
  *   Timezone of the database value.
@@ -2040,7 +2040,7 @@ function date_html5_element_validate(array $element, array &$form_state) {
  *
  * @return array
  */
-function _date_html5_get_form_value($value_orig, $type, $timestep, $timezone_db, $timezone) {
+function _date_html5_get_form_value($value_orig, $type, $time_step, $timezone_db, $timezone) {
   $needs_conversion = ($timezone_db != $timezone);
   if (is_numeric($value_orig)) {
     $datetime = new DateTime('@' . $value_orig, new DateTimeZone('UTC'));

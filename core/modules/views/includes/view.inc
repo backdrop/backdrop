@@ -427,9 +427,9 @@ class view {
   }
 
   /**
-   * Whether or not AJAX should be used. If AJAX is used, paging,
-   * tablesorting and exposed filters will be fetched via an AJAX call
-   * rather than a page refresh.
+   * Whether or not AJAX should be used. If AJAX is used, paging, tablesort and
+   * exposed filters will be fetched via an AJAX call rather than a page
+   * refresh.
    */
   function set_use_ajax($use_ajax) {
     $this->use_ajax = $use_ajax;

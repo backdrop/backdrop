@@ -1197,6 +1197,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
     $f = filter_xss('<img src=&#x6A&#x61&#x76&#x61&#x73&#x63&#x72&#x69&#x70&#x74&#x3A&#x61&#x6C&#x65&#x72&#x74&#x28&#x30&#x29>', array('img'));
     $this->assertNoNormalized($f, 'javascript', 'HTML scheme clearing evasion -- UTF-8 hex encoding.');
 
+    // cspell:disable-next-line
     $f = filter_xss("<img src=\"jav\tascript:alert(0)\">", array('img'));
     $this->assertNoNormalized($f, 'script', 'HTML scheme clearing evasion -- an embedded tab.');
 

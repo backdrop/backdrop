@@ -9,11 +9,11 @@ require_once __DIR__ . '/query.inc';
 /**
  * Interface for extendable query objects.
  *
- * "Extenders" follow the "Decorator" OOP design pattern.  That is, they wrap
- * and "decorate" another object.  In our case, they implement the same interface
+ * "Extenders" follow the "Decorator" OOP design pattern. That is, they wrap
+ * and "decorate" another object.In our case, they implement the same interface
  * as select queries and wrap a select query, to which they delegate almost all
- * operations.  Subclasses of this class may implement additional methods or
- * override existing methods as appropriate.  Extenders may also wrap other
+ * operations. Subclasses of this class may implement additional methods or
+ * override existing methods as appropriate. Extenders may also wrap other
  * extender objects, allowing for arbitrarily complex "enhanced" queries.
  */
 interface QueryExtendableInterface {
@@ -31,10 +31,11 @@ interface QueryExtendableInterface {
    * values of this interface.
    *
    * @param $extender_name
-   *   The base name of the extending class.  The base name will be checked
-   *   against the current database connection to allow driver-specific subclasses
-   *   as well, using the same logic as the query objects themselves.  For example,
-   *   PagerDefault_mysql is the MySQL-specific override for PagerDefault.
+   *   The base name of the extending class. The base name will be checked
+   *   against the current database connection to allow driver-specific
+   *   subclasses as well, using the same logic as the query objects themselves.
+   *   For example, PagerDefault_mysql is the MySQL-specific override for
+   *   PagerDefault.
    * @return QueryExtendableInterface|SelectQueryInterface|TableSort|PagerDefault|SearchQuery
    *   The extender object, which now contains a reference to this object.
    */
@@ -69,9 +70,9 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
   /**
    * Returns a reference to the expressions array for this query.
    *
-   * Because this method returns by reference, alter hooks may edit the expressions
-   * array directly to make their changes. If just adding expressions, however, the
-   * use of addExpression() is preferred.
+   * Because this method returns by reference, alter hooks may edit the
+   * expressions array directly to make their changes. If just adding
+   * expressions, however, the use of addExpression() is preferred.
    *
    * Note that this method must be called by reference as well:
    *
@@ -158,7 +159,8 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
   public function &getUnion();
 
   /**
-   * Compiles and returns an associative array of the arguments for this prepared statement.
+   * Compiles and returns an associative array of the arguments for this
+   * prepared statement.
    *
    * @param $queryPlaceholder
    *   When collecting the arguments of a subquery, the main placeholder
@@ -193,8 +195,8 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * @param $alias
    *   The alias for this field. If not specified, one will be generated
    *   automatically based on the $table_alias and $field. The alias will be
-   *   checked for uniqueness, so the requested alias may not be the alias
-   *   that is assigned in all cases.
+   *   checked for uniqueness, so the requested alias may not be the alias that
+   *   is assigned in all cases.
    * @return
    *   The unique alias that was assigned for this field.
    */
@@ -216,8 +218,8 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    *   valid.
    * @param $fields
    *   An indexed array of fields present in the specified table that should be
-   *   included in this query. If not specified, $table_alias.* will be generated
-   *   without any aliases.
+   *   included in this query. If not specified, $table_alias.* will be
+   *   generated without any aliases.
    * @return SelectQueryInterface
    *   The called object.
    */
@@ -321,8 +323,8 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * @param $table
    *   The table against which to join.
    * @param $alias
-   *   The alias for the table. In most cases this should be the first letter
-   *   of the table, or the first letter of each "word" in the table.
+   *   The alias for the table. In most cases this should be the first letter of
+   *   the table, or the first letter of each "word" in the table.
    * @param $condition
    *   The condition on which to join this table. If the join requires values,
    *   this clause should use a named placeholder and the value or values to
@@ -342,18 +344,18 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * Join against another table in the database.
    *
    * This method does the "hard" work of queuing up a table to be joined against.
-   * In some cases, that may include dipping into the Schema API to find the necessary
-   * fields on which to join.
+   * In some cases, that may include dipping into the Schema API to find the
+   * necessary fields on which to join.
    *
    * @param $type
-   *   The type of join. Typically one one of INNER, LEFT OUTER, and RIGHT OUTER.
+   *   The type of join. Typically one one of INNER, LEFT OUTER, or RIGHT OUTER.
    * @param $table
    *   The table against which to join. May be a string or another SelectQuery
    *   object. If a query object is passed, it will be used as a subselect.
    * @param $alias
    *   The alias for the table. In most cases this should be the first letter
-   *   of the table, or the first letter of each "word" in the table. If omitted,
-   *   one will be dynamically generated.
+   *   of the table, or the first letter of each "word" in the table. If
+   *   omitted, one will be dynamically generated.
    * @param $condition
    *   The condition on which to join this table. If the join requires values,
    *   this clause should use a named placeholder and the value or values to
@@ -372,8 +374,8 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
   /**
    * Orders the result set by a given field.
    *
-   * If called multiple times, the query will order by each specified field in the
-   * order this method is called.
+   * If called multiple times, the query will order by each specified field in
+   * the order this method is called.
    *
    * If the query uses DISTINCT or GROUP BY conditions, fields or expressions
    * that are used for the order must be selected. Additionally, when ordering
@@ -394,8 +396,8 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    *
    * This may be stacked with other orderBy() calls. If so, the query will order
    * by each specified field, including this one, in the order called. Although
-   * this method may be called multiple times on the same query, doing so
-   * is not particularly useful.
+   * this method may be called multiple times on the same query, doing so is not
+   * particularly useful.
    *
    * Note: The method used by most drivers may not scale to very large result
    * sets. If you need to work with extremely large data sets, you may create
@@ -430,23 +432,20 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
   /**
    * Add another Select query to UNION to this one.
    *
-   * Union queries consist of two or more queries whose
-   * results are effectively concatenated together. Queries
-   * will be UNIONed in the order they are specified, with
-   * this object's query coming first. Duplicate columns will
-   * be discarded. All forms of UNION are supported, using
-   * the second '$type' argument.
+   * Union queries consist of two or more queries whose results are effectively
+   * concatenated together. Queries will be UNION'ed in the order they are
+   * specified, with this object's query coming first. Duplicate columns will be
+   * discarded. All forms of UNION are supported, using the second '$type'
+   * argument.
    *
-   * Note: All queries UNIONed together must have the same
-   * field structure, in the same order. It is up to the
-   * caller to ensure that they match properly. If they do
-   * not, an SQL syntax error will result.
+   * Note: All queries UNION'ed together must have the same field structure, in
+   * the same order. It is up to the caller to ensure that they match properly.
+   * If they do not, an SQL syntax error will result.
    *
    * @param $query
    *   The query to UNION to this query.
    * @param $type
-   *   The type of UNION to add to the query. Defaults to plain
-   *   UNION.
+   *   The type of UNION to add to the query. Defaults to plain UNION.
    * @return SelectQueryInterface
    *   The called object.
    */
@@ -490,20 +489,20 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * Helper function to build most common HAVING conditional clauses.
    *
    * This method can take a variable number of parameters. If called with two
-   * parameters, they are taken as $field and $value with $operator having a value
-   * of IN if $value is an array and = otherwise.
+   * parameters, they are taken as $field and $value with $operator having a
+   * value of IN if $value is an array and = otherwise.
    *
    * @param $field
    *   The name of the field to check. If you would like to add a more complex
    *   condition involving operators or functions, use having().
    * @param $value
-   *   The value to test the field against. In most cases, this is a scalar. For more
-   *   complex options, it is an array. The meaning of each element in the array is
-   *   dependent on the $operator.
+   *   The value to test the field against. In most cases, this is a scalar. For
+   *   more complex options, it is an array. The meaning of each element in the
+   *   array is dependent on the $operator.
    * @param $operator
-   *   The comparison operator, such as =, <, or >=. It also accepts more complex
-   *   options such as IN, LIKE, or BETWEEN. Defaults to IN if $value is an array
-   *   = otherwise.
+   *   The comparison operator, such as =, <, or >=. It also accepts more
+   *   complex options such as IN, LIKE, or BETWEEN. Defaults to IN if $value is
+   *   an array, = otherwise.
    * @return QueryConditionInterface
    *   The called object.
    */
@@ -512,7 +511,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
   /**
    * Clone magic method.
    *
-   * Select queries have dependent objects that must be deep-cloned.  The
+   * Select queries have dependent objects that must be deep-cloned. The
    * connection object itself, however, should not be cloned as that would
    * duplicate the connection itself.
    */
@@ -723,7 +722,7 @@ class SelectQueryExtender implements SelectQueryInterface {
    */
   public function execute() {
     // By calling preExecute() here, we force it to preprocess the extender
-    // object rather than just the base query object.  That means
+    // object rather than just the base query object. That means
     // hook_query_alter() gets access to the extended object.
     if (!$this->preExecute($this)) {
       return NULL;
@@ -832,26 +831,26 @@ class SelectQueryExtender implements SelectQueryInterface {
     $this->uniqueIdentifier = uniqid('', TRUE);
 
     // We need to deep-clone the query we're wrapping, which in turn may
-    // deep-clone other objects.  Exciting!
+    // deep-clone other objects. Exciting!
     $this->query = clone($this->query);
   }
 
   /**
    * Magic override for undefined methods.
    *
-   * If one extender extends another extender, then methods in the inner extender
-   * will not be exposed on the outer extender.  That's because we cannot know
-   * in advance what those methods will be, so we cannot provide wrapping
-   * implementations as we do above.  Instead, we use this slower catch-all method
-   * to handle any additional methods.
+   * If one extender extends another extender, then methods in the inner
+   * extender will not be exposed on the outer extender. That's because we
+   * cannot know in advance what those methods will be, so we cannot provide
+   * wrapping implementations as we do above. Instead, we use this slower
+   * catch-all method to handle any additional methods.
    */
   public function __call($method, $args) {
     $return = call_user_func_array(array($this->query, $method), $args);
 
     // Some methods will return the called object as part of a fluent interface.
-    // Others will return some useful value.  If it's a value, then the caller
-    // probably wants that value.  If it's the called object, then we instead
-    // return this object.  That way we don't "lose" an extender layer when
+    // Others will return some useful value. If it's a value, then the caller
+    // probably wants that value. If it's the called object, then we instead
+    // return this object. That way we don't "lose" an extender layer when
     // chaining methods together.
     if ($return instanceof SelectQueryInterface) {
       return $this;
@@ -884,9 +883,10 @@ class SelectQuery extends Query implements SelectQueryInterface {
   /**
    * The tables against which to JOIN.
    *
-   * This property is a nested array. Each entry is an array representing
-   * a single table against which to join. The structure of each entry is:
+   * This property is a nested array. Each entry is an array representing a
+   * single table against which to join. The structure of each entry is:
    *
+   * @code
    * array(
    *   'type' => $join_type (one of INNER, LEFT OUTER, RIGHT OUTER),
    *   'table' => $table,
@@ -895,9 +895,10 @@ class SelectQuery extends Query implements SelectQueryInterface {
    *   'arguments' => $array_of_arguments_for_placeholders_in_the condition.
    *   'all_fields' => TRUE to SELECT $alias.*, FALSE or NULL otherwise.
    * )
+   * @endcode
    *
-   * If $table is a string, it is taken as the name of a table. If it is
-   * a SelectQuery object, it is taken as a subquery.
+   * If $table is a string, it is taken as the name of a table. If it is a
+   * SelectQuery object, it is taken as a subquery.
    *
    * @var array
    */
@@ -906,8 +907,8 @@ class SelectQuery extends Query implements SelectQueryInterface {
   /**
    * The fields by which to order this query.
    *
-   * This is an associative array. The keys are the fields to order, and the value
-   * is the direction to order, either ASC or DESC.
+   * This is an associative array. The keys are the fields to order, and the
+   * value is the direction to order, either ASC or DESC.
    *
    * @var array
    */
@@ -935,7 +936,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
   protected $having;
 
   /**
-   * Whether or not this query should be DISTINCT
+   * Whether or not this query should be DISTINCT.
    *
    * @var boolean
    */
@@ -982,7 +983,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
   protected $alterMetaData = array();
 
   /**
-   * The FOR UPDATE status
+   * The FOR UPDATE status.
    */
   protected $forUpdate = FALSE;
 
@@ -1091,8 +1092,8 @@ class SelectQuery extends Query implements SelectQueryInterface {
       }
     }
 
-    // If there are any dependent queries to UNION,
-    // incorporate their arguments recursively.
+    // If there are any dependent queries to UNION, incorporate their arguments
+    // recursively.
     foreach ($this->union as $union) {
       $args += $union['query']->arguments();
     }
@@ -1427,8 +1428,8 @@ class SelectQuery extends Query implements SelectQueryInterface {
    * @return NULL|DatabaseStatementInterface|DatabaseStatementBase|DatabaseStatementPrefetch|stdClass[]
    */
   public function execute() {
-    // If validation fails return NULL.
-    // Note that validation routines in preExecute() may throw exceptions instead.
+    // If validation fails return NULL. Note that validation routines in
+    // preExecute() may throw exceptions instead.
     if (!$this->preExecute()) {
       return NULL;
     }
@@ -1459,7 +1460,8 @@ class SelectQuery extends Query implements SelectQueryInterface {
       $alias = $table_alias . '_' . $field;
     }
 
-    // If that is already used, just add a counter until we find an unused alias.
+    // If that is already used, just add a counter until we find an unused
+    // alias.
     $alias_candidate = $alias;
     $count = 2;
     while (!empty($this->fields[$alias_candidate])) {
@@ -1670,8 +1672,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
     if (!$count->distinct && !isset($having[0])) {
       // When not executing a distinct query, we can zero-out existing fields
       // and expressions that are not used by a GROUP BY or HAVING. Fields
-      // listed in a GROUP BY or HAVING clause need to be present in the
-      // query.
+      // listed in a GROUP BY or HAVING clause need to be present in the query.
       $fields =& $count->getFields();
       foreach (array_keys($fields) as $field) {
         if (empty($group_by[$field])) {
@@ -1686,8 +1687,8 @@ class SelectQuery extends Query implements SelectQueryInterface {
         }
       }
 
-      // Also remove 'all_fields' statements, which are expanded into tablename.*
-      // when the query is executed.
+      // Also remove 'all_fields' statements, which are expanded into
+      // tablename.* when the query is executed.
       foreach ($count->tables as $alias => &$table) {
         unset($table['all_fields']);
       }
@@ -1704,7 +1705,8 @@ class SelectQuery extends Query implements SelectQueryInterface {
 
     if ($count->distinct && !empty($group_by)) {
       // If the query is distinct and contains a GROUP BY, we need to remove the
-      // distinct because SQL99 does not support counting on distinct multiple fields.
+      // distinct because SQL99 does not support counting on distinct multiple
+      // fields.
       $count->distinct = FALSE;
     }
 
@@ -1715,9 +1717,9 @@ class SelectQuery extends Query implements SelectQueryInterface {
   }
 
   public function __toString() {
-    // For convenience, we compile the query ourselves if the caller forgot
-    // to do it. This allows constructs like "(string) $query" to work. When
-    // the query will be executed, it will be recompiled using the proper
+    // For convenience, we compile the query ourselves if the caller forgot to
+    // do it. This allows constructs like "(string) $query" to work. When the
+    // query will be executed, it will be recompiled using the proper
     // placeholder generator anyway.
     if (!$this->compiled()) {
       $this->compile($this->connection, $this);
@@ -1732,7 +1734,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
       $query .= 'DISTINCT ';
     }
 
-    // FIELDS and EXPRESSIONS
+    // FIELDS and EXPRESSIONS.
     $fields = array();
     foreach ($this->tables as $alias => $table) {
       if (!empty($table['all_fields'])) {
@@ -1740,7 +1742,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
       }
     }
     foreach ($this->fields as $alias => $field) {
-      // Always use the AS keyword for field aliases
+      // Always use the AS keyword for field aliases.
       $fields[] = (isset($field['table']) ? $this->connection->escapeTable($field['table']) . '.' : '') . $this->connection->escapeField($field['field']) . ' AS ' . $this->connection->escapeAlias($field['alias']);
     }
     foreach ($this->expressions as $alias => $expression) {
@@ -1749,7 +1751,9 @@ class SelectQuery extends Query implements SelectQueryInterface {
     $query .= implode(', ', $fields);
 
 
-    // FROM - We presume all queries have a FROM, as any query that doesn't won't need the query builder anyway.
+    // FROM.
+    // We presume all queries have a FROM, as any query that doesn't have one
+    // won't need the query builder anyway.
     $query .= "\nFROM ";
     foreach ($this->tables as $alias => $table) {
       $query .= "\n";
@@ -1757,7 +1761,8 @@ class SelectQuery extends Query implements SelectQueryInterface {
         $query .= $table['join type'] . ' JOIN ';
       }
 
-      // If the table is a subquery, compile it and integrate it into this query.
+      // If the table is a subquery, compile it and integrate it into this
+      // query.
       if ($table['table'] instanceof SelectQueryInterface) {
         // Run preparation steps on this sub-query before converting to string.
         $subquery = $table['table'];
@@ -1768,8 +1773,8 @@ class SelectQuery extends Query implements SelectQueryInterface {
         $table_string = '{' . $this->connection->escapeTable($table['table']) . '}';
       }
 
-      // Don't use the AS keyword for table aliases, as some
-      // databases don't support it (e.g., Oracle).
+      // Don't use the AS keyword for table aliases, as some databases don't
+      // support it (e.g., Oracle).
       $query .=  $table_string . ' ' . $this->connection->escapeTable($table['alias']);
 
       if (!empty($table['condition'])) {
@@ -1777,24 +1782,24 @@ class SelectQuery extends Query implements SelectQueryInterface {
       }
     }
 
-    // WHERE
+    // WHERE.
     if (count($this->where)) {
       // There is an implicit string cast on $this->condition.
       $query .= "\nWHERE " . $this->where;
     }
 
-    // GROUP BY
+    // GROUP BY.
     if ($this->group) {
       $query .= "\nGROUP BY " . implode(', ', $this->group);
     }
 
-    // HAVING
+    // HAVING.
     if (count($this->having)) {
       // There is an implicit string cast on $this->having.
       $query .= "\nHAVING " . $this->having;
     }
 
-    // ORDER BY
+    // ORDER BY.
     if ($this->order) {
       $query .= "\nORDER BY ";
       $fields = array();
@@ -1804,11 +1809,11 @@ class SelectQuery extends Query implements SelectQueryInterface {
       $query .= implode(', ', $fields);
     }
 
-    // RANGE
+    // RANGE.
     // There is no universal SQL standard for handling range or limit clauses.
     // Fortunately, all core-supported databases use the same range syntax.
-    // Databases that need a different syntax can override this method and
-    // do whatever alternate logic they need to.
+    // Databases that need a different syntax can override this method and do
+    // whatever alternate logic they need to.
     if (!empty($this->range)) {
       $query .= "\nLIMIT " . (int) $this->range['length'] . " OFFSET " . (int) $this->range['start'];
     }
@@ -1831,8 +1836,8 @@ class SelectQuery extends Query implements SelectQueryInterface {
   public function __clone() {
     parent::__clone();
 
-    // On cloning, also clone the dependent objects. However, we do not
-    // want to clone the database connection object as that would duplicate the
+    // On cloning, also clone the dependent objects. However, we do not want to
+    // clone the database connection object as that would duplicate the
     // connection itself.
 
     $this->where = clone($this->where);

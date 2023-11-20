@@ -1014,7 +1014,9 @@ class FileUploadTransliterationTest extends FileTestCase {
   function testTransliteration() {
     // Make a particularly troublesome file name, starting with an umlaut and
     // containing upper-case variant characters.
+    // cspell:disable-next-line
     $original_filename = 'üФайл Ä fàü.txt';
+    $transliterated_uri = 'temporary://ufail_a_fau.txt';
     $file = $this->createFile($original_filename, 'Sample text');
     $config = config('system.core');
 
@@ -1030,8 +1032,8 @@ class FileUploadTransliterationTest extends FileTestCase {
 
     // Check that characters were transliterated and the file exists.
     debug($first_file);
-    $this->assertIdentical($first_file->filename, $original_filename, 'File name not transliterated or modified to lowercase.');
-    $this->assertIdentical($first_file->uri, 'temporary://ufail_a_fau.txt', 'File name has been transliterated upon upload.');
+    $this->assertIdentical($first_file->filename, $original_filename, 'File name not transliterated or lowercased.');
+    $this->assertIdentical($first_file->uri, $transliterated_uri, 'File name has been transliterated upon upload.');
     $this->assertTrue(file_exists($first_file->uri), 'Transliterated file exists at expected path.');
 
     // Delete the file to prevent conflicts.
@@ -1047,8 +1049,8 @@ class FileUploadTransliterationTest extends FileTestCase {
     $second_file = file_load($second_fid);
 
     debug($second_file);
-    $this->assertIdentical($second_file->filename, 'ufail_a_fau.txt', 'File display name transliterated and converted to lowercase.');
-    $this->assertIdentical($second_file->uri, 'temporary://ufail_a_fau.txt', 'File name has been transliterated and lowercased.');
+    $this->assertIdentical($second_file->filename, 'ufail_a_fau.txt', 'File display name transliterated and lowercased.');
+    $this->assertIdentical($second_file->uri, $transliterated_uri, 'File name has been transliterated and lowercased.');
     $this->assertTrue(file_exists($second_file->uri), 'Transliterated file exists at expected path.');
 
     // Delete the file to prevent conflicts.
@@ -1062,7 +1064,7 @@ class FileUploadTransliterationTest extends FileTestCase {
     $non_transliterated_fid = db_query("SELECT MAX(fid) FROM {file_managed}")->fetchField();
     $non_transliterated_file = file_load($non_transliterated_fid);
 
-    $this->assertIdentical($non_transliterated_file->filename, $original_filename, 'File display name not transliterated or modified to lowercase.');
+    $this->assertIdentical($non_transliterated_file->filename, $original_filename, 'File display name not transliterated or lowercased.');
     $this->assertIdentical($non_transliterated_file->uri, 'temporary://' . $original_filename, 'File name has not been modified in any way.');
     $this->assertTrue(file_exists($non_transliterated_file->uri), 'Non-transliterated file exists at expected path.');
 
@@ -1087,7 +1089,7 @@ class FileUploadTransliterationTest extends FileTestCase {
 
     entity_get_controller('file')->resetCache();
     $now_transliterated_file = file_load($non_transliterated_fid);
-    $this->assertIdentical($now_transliterated_file->filename, $non_transliterated_file->filename, 'File display name not transliterated or modified to lowercase.');
+    $this->assertIdentical($now_transliterated_file->filename, $non_transliterated_file->filename, 'File display name not transliterated or lowercased.');
     $this->assertIdentical($now_transliterated_file->uri, 'temporary://uFail_A_fau.txt', 'File name transliterated after bulk updating.');
 
     // Revisit the page. No files should be available for transliteration.
@@ -1107,8 +1109,8 @@ class FileUploadTransliterationTest extends FileTestCase {
     // Reload and re-check the transliterated file is now lowercase.
     entity_get_controller('file')->resetCache();
     $now_transliterated_file = file_load($non_transliterated_fid);
-    $this->assertIdentical($now_transliterated_file->filename, $non_transliterated_file->filename, 'File display name not transliterated or modified to lowercase.');
-    $this->assertIdentical($now_transliterated_file->uri, 'temporary://ufail_a_fau.txt', 'File name transliterated and lower case after bulk updating.');
+    $this->assertIdentical($now_transliterated_file->filename, $non_transliterated_file->filename, 'File display name not transliterated or lowercased.');
+    $this->assertIdentical($now_transliterated_file->uri, $transliterated_uri, 'File name transliterated and lower case after bulk updating.');
   }
 }
 

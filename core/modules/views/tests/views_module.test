@@ -102,7 +102,7 @@ class ViewsModuleTest extends ViewsSqlTest {
   /**
    * Tests the views_get_handler method.
    */
-  function testviews_get_handler() {
+  function test_views_get_handler() {
     $types = array('field', 'area', 'filter');
     foreach ($types as $type) {
       $handler = views_get_handler($this->randomName(), $this->randomName(), $type);
