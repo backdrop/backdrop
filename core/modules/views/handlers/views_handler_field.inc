@@ -468,13 +468,13 @@ class views_handler_field extends views_handler {
       '#title' => t('Create a label'),
       '#description' => t('Enable to create a label for this field.'),
       '#default_value' => $label !== '',
-      '#indentation' => 1,
       '#weight' => -103,
     );
     $form['label'] = array(
       '#type' => 'textfield',
       '#title' => t('Label'),
       '#default_value' => $label,
+      '#indentation' => 1,
       '#states' => array(
         'visible' => array(
           ':input[name="options[custom_label]"]' => array('checked' => TRUE),
