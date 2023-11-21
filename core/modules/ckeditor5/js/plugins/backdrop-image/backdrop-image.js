@@ -176,7 +176,7 @@ class BackdropImage extends CKEditor5.core.Plugin {
       throw new Error('Missing backdropImage.uploadUrl configuration option.');
     }
     editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
-      return new BackdropImageUploadAdapter(loader, config);
+      return new BackdropImageUploadAdapter(loader, editor, config);
     };
 
     // Upon completing an uploaded file, save the returned File ID.
@@ -920,16 +920,25 @@ class BackdropImageUploadAdapter {
    *
    * @param {module:upload/filerepository~FileLoader} loader
    *   The file loader.
+   * @param {module:core/editor/editor~Editor} editor
+   *  The editor instance.
    * @param {module:upload/adapters/simpleuploadadapter~SimpleUploadConfig} options
    *   The upload options.
    */
-  constructor(loader, options) {
+  constructor(loader, editor, options) {
     /**
      * FileLoader instance to use during the upload.
      *
      * @member {module:upload/filerepository~FileLoader} #loader
      */
     this.loader = loader;
+
+    /**
+     * The configuration of the adapter.
+     *
+     * @member {module:core/editor/editor~Editor} #editor
+     */
+    this.editor = editor;
 
     /**
      * The configuration of the adapter.
@@ -996,20 +1005,36 @@ class BackdropImageUploadAdapter {
   _initListeners(resolve, reject, file) {
     const xhr = this.xhr;
     const loader = this.loader;
+    const editor = this.editor;
     const genericErrorText = `Couldn't upload file: ${file.name}.`;
+    const notification = editor.plugins.get('Notification');
 
     xhr.addEventListener('error', () => reject(genericErrorText));
     xhr.addEventListener('abort', () => reject());
     xhr.addEventListener('load', () => {
       const response = xhr.response;
 
-      if (!response || response.error) {
+      if (!response || !response.uploaded) {
         return reject(
           response && response.error && response.error.message
             ? response.error.message
             : genericErrorText,
         );
       }
+      // There still may be notifications on upload, like resized images.
+      if (response.error && response.error.message) {
+        // The warning from Backdrop may contain <em> tags for placeholders.
+        const markup = new DOMParser().parseFromString(response.error.message, 'text/html');
+
+        // Set a warning for remaining notifications. This currently renders
+        // as a window.alert() call, but may change to be better presented in
+        // future versions of CKEditor 5.
+        // See https://github.com/ckeditor/ckeditor5/issues/8934
+        notification.showWarning(markup.body.textContent, {
+          namespace: 'upload:image',
+        });
+      }
+
       // Resolve with the `urls` property and pass the response
       // to allow customizing the behavior of features relying on the upload
       // adapters.
