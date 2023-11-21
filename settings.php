@@ -8,7 +8,7 @@
  * Database configuration:
  *
  * Most sites can configure their database by entering the connection string
- * below. If using master/slave databases or multiple connections, see the
+ * below. If using primary/replica databases or multiple connections, see the
  * advanced database documentation at
  * https://api.backdropcms.org/database-configuration
  */
@@ -443,20 +443,25 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
 //$config['system.core']['file_temporary_path'] = '/tmp';
 
 /**
- * Add Permissions-Policy header to disable Google FLoC.
+ * File schemes whose paths should not be normalized.
  *
- * By default, Backdrop sends the 'Permissions-Policy: interest-cohort=()'
- * header, to disable Google's Federated Learning of Cohorts (FLoC) feature,
- * which was introduced in Chrome v89. For more information about FLoC, see:
- * https://en.wikipedia.org/wiki/Federated_Learning_of_Cohorts
+ * Normally, Backdrop normalizes '/./' and '/../' segments in file URIs in order
+ * to prevent unintended file access. For example, 'private://css/../image.png'
+ * is normalized to 'private://image.png' before checking access to the file.
  *
- * If you don't wish to disable FLoC in Chrome, you can uncomment the following
- * setting, and make sure its value is set to "FALSE".
+ * On Windows, Backdrop also replaces '\' with '/' in file URIs.
+ *
+ * If file URIs with one or more scheme should not be normalized like this, then
+ * list the schemes here. For example, if 'example://path/./filename.png' should
+ * not be normalized to 'example://path/filename.png', then add 'example' to
+ * this array. In this case, make sure that the module providing the 'example'
+ * scheme does not allow unintended file access when using '/../' to move up the
+ * directory tree.
  */
-//$config['system.core']['block_interest_cohort'] = FALSE;
+//$config['system.core']['file_not_normalized_schemes'] = array('example');
 
 /**
- * Additional public file schemes:
+ * Additional public file schemes.
  *
  * Public schemes are URI schemes that allow download access to all users for
  * all files within that scheme.

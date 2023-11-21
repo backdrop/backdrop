@@ -79,8 +79,8 @@ class ViewsUpgradeTestCase extends ViewsSqlTest {
     $view->api_version = 2;
     $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
-    /* Display: Master */
-    $handler = $view->new_display('default', 'Master', 'default');
+    /* Display: Default */
+    $handler = $view->new_display('default', 'Default', 'default');
 
     $handler->display->display_options['fields']['old_field_1']['id'] = 'old_field_1';
     $handler->display->display_options['fields']['old_field_1']['table'] = 'views_test';
@@ -99,8 +99,8 @@ class ViewsUpgradeTestCase extends ViewsSqlTest {
     $view->api_version = 2;
     $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
-    /* Display: Master */
-    $handler = $view->new_display('default', 'Master', 'default');
+    /* Display: Default */
+    $handler = $view->new_display('default', 'Default', 'default');
 
     $handler->display->display_options['fields']['old_field_2']['id'] = 'old_field_2';
     $handler->display->display_options['fields']['old_field_2']['table'] = 'views_test';
@@ -123,8 +123,8 @@ class ViewsUpgradeTestCase extends ViewsSqlTest {
     $view->api_version = 2;
     $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
-    /* Display: Master */
-    $handler = $view->new_display('default', 'Master', 'default');
+    /* Display: Default */
+    $handler = $view->new_display('default', 'Default', 'default');
 
     $handler->display->display_options['fields']['id']['id'] = 'id';
     $handler->display->display_options['fields']['id']['table'] = 'views_old_table';

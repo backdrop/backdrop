@@ -245,6 +245,17 @@ class AdminBarPermissionsTestCase extends AdminBarWebTestCase {
  * Tests appearance, localization, and escaping of dynamic links.
  */
 class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   function setUp() {
     parent::setUp(array('node'));
   }
@@ -362,6 +373,12 @@ class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
  * Tests appearance of different types of links.
  */
 class AdminBarLinkTypesTestCase extends AdminBarWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   function setUp() {
     parent::setUp();
 
@@ -404,6 +421,12 @@ class AdminBarLinkTypesTestCase extends AdminBarWebTestCase {
  * Tests customized menu links.
  */
 class AdminBarCustomizedTestCase extends AdminBarWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   function setUp() {
     parent::setUp(array('menu'));
 

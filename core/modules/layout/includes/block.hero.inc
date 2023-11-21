@@ -52,8 +52,10 @@ class BlockHero extends BlockText {
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
 
+    $supported_extensions = image_get_supported_extensions();
+
     $upload_validators = array(
-      'file_validate_extensions' => array('jpg jpeg png gif'),
+      'file_validate_extensions' => array(implode(' ', $supported_extensions)),
       'file_validate_image_resolution' => array('3200x1600', '1200x300'),
     );
     $upload_description = theme('file_upload_help', array(
