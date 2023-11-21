@@ -6,8 +6,12 @@ services:
     commands:
       init:
         # Install PHP 'zip' extension to allow installing Backdrop modules.
-        - apt update && apt install -y libzip-dev
+        - apt update && apt install -y libzip-dev php-pear
         - docker-php-ext-install zip
+        # Install https://github.com/runkit7/runkit7, to allow re-defining
+        # constants (among other things).
+        - pecl install runkit7
+        - docker-php-ext-enable runkit7
         # Enable Apache 'rewrite' module for clean URLs.
         - a2enmod rewrite
         # Link the document root to the expected path.
