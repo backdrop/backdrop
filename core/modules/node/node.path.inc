@@ -11,7 +11,8 @@ function node_path_info() {
   $info['node'] = array(
     'entity type' => 'node',
     'label' => t('Content'),
-    'pattern description' => t('Default URL alias pattern (applies to all content types with blank URL alias patterns below)'),
+    'pattern label' => t('Default URL alias pattern for content'),
+    'pattern description' => t('Fallback pattern for all content types without a specific URL alias pattern below.'),
     'pattern default' => 'content/[node:title]',
     'type delete callback' => 'node_path_type_delete_callback',
     'batch update callback' => 'node_path_bulk_update_batch_process',
@@ -28,15 +29,20 @@ function node_path_info() {
     )) + language_list();
   }
 
-  foreach (node_type_get_types() as $node_type_name => $node_type) {
-    if (count($languages) && !empty($node_type->settings['language'])) {
-      $info['node']['pattern items'][$node_type_name] = t('Default URL alias pattern for %node_type (applies to all %node_type content types with blank URL alias patterns below)', array('%node_type' => $node_type->name));
-      foreach ($languages as $langcode => $language) {
-        $info['node']['pattern items'][$node_type_name . '_' . $langcode] = t('URL alias pattern for all %node_type URLs in %language', array('%node_type' => $node_type->name, '%language' => $language->name));
+  $node_types = node_type_get_types();
+  if (count($node_types)) {
+    $info['node']['pattern items'] = array();
+    $info['node']['pattern items label'] = t('URL alias patterns for specific content types');
+    foreach ($node_types as $node_type_name => $node_type) {
+      if (count($languages) && !empty($node_type->settings['language'])) {
+        $info['node']['pattern items'][$node_type_name] = t('Default URL alias pattern for all content of type %node_type (any language)', array('%node_type' => $node_type->name));
+        foreach ($languages as $langcode => $language) {
+          $info['node']['pattern items'][$node_type_name . '_' . $langcode] = t('Content of type %node_type in %language', array('%node_type' => $node_type->name, '%language' => $language->name));
+        }
       }
-    }
-    else {
-      $info['node']['pattern items'][$node_type_name] = t('URL alias pattern for all %node_type URLs', array('%node_type' => $node_type->name));
+      else {
+        $info['node']['pattern items'][$node_type_name] = t('Content of type %node_type', array('%node_type' => $node_type->name));
+      }
     }
   }
 
