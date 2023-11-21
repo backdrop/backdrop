@@ -1,6 +1,6 @@
 type = module
-name = CKEditor
-description = WYSIWYG editing for rich text fields using CKEditor.
+name = CKEditor 4
+description = WYSIWYG editing for rich text fields using CKEditor 4.
 package = User Interface
 tags[] = Filters
 tags[] = Formats

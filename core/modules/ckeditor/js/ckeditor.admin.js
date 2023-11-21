@@ -47,36 +47,36 @@ Backdrop.behaviors.ckeditorAdmin = {
       $toolbarGroupToggle.shown = true;
       $toolbarGroupToggle.text(Backdrop.t('Show group labels'));
       $toolbarGroupToggle.insertBefore($activeToolbar);
-      $toolbarGroupToggle.bind('click.ckeditorToogleGroups', function(event) {
+      $toolbarGroupToggle.on('click.ckeditorToggleGroups', function(event) {
         adminToolbarToggleGroups.apply(event.target, [$toolbarGroupToggle]);
       });
 
       // Disable clicking on the individual buttons.
-      $toolbarAdmin.find('.ckeditor-button a').click(function(event) {
+      $toolbarAdmin.find('.ckeditor-button a').on('click', function(event) {
         return false;
       });
 
       // Add the handler for modifying group names.
-      $toolbarAdmin.bind('click.ckeditorRenameGroup', function(event) {
+      $toolbarAdmin.on('click.ckeditorRenameGroup', function(event) {
         if ($(event.target).is('.ckeditor-toolbar-group-name')) {
           adminToolbarRenameGroup.apply(event.target, [event]);
         }
       });
 
       // Add the handler for adding a new group.
-      $toolbarAdmin.bind('click.ckeditorAddGroup', function(event) {
+      $toolbarAdmin.on('click.ckeditorAddGroup', function(event) {
         if ($(event.target).is('a.ckeditor-group-add')) {
           adminToolbarAddGroup.apply(event.target, [event]);
         }
       });
 
       // Add the handler for adding/removing row buttons.
-      $toolbarAdmin.bind('click.ckeditorAddRow', function(event) {
+      $toolbarAdmin.on('click.ckeditorAddRow', function(event) {
         if ($(event.target).is('a.ckeditor-row-add')) {
           adminToolbarAddRow.apply(event.target, [event]);
         }
       });
-      $toolbarAdmin.bind('click.ckeditorAddRow', function(event) {
+      $toolbarAdmin.on('click.ckeditorAddRow', function(event) {
         if ($(event.target).is('a.ckeditor-row-remove')) {
           adminToolbarRemoveRow.apply(event.target, [event]);
         }
@@ -349,7 +349,7 @@ Backdrop.behaviors.ckeditorAdmin = {
 };
 
 /**
- * Respond to the events of the editor system. 
+ * Respond to the events of the editor system.
  *
  * This handles hiding/showing options based on the enabling, disabling, and
  * initial state of buttons.

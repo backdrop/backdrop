@@ -559,7 +559,7 @@ function file_settings_form($form, &$form_state) {
   );
   $form['file_replace_options'] = array(
     '#type' => 'fieldset',
-    '#title' => t('File replace optons'),
+    '#title' => t('File replace options'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#description' => t('Default settings for how to handle file name changes during replace.'),
@@ -709,7 +709,7 @@ function file_type_classify_confirm($form, $form_state) {
 
 /**
  * Submit handler for file type classification confirmation form.
- * 
+ *
  * @see file_type_classify_confirm()
  */
 function file_type_classify_confirm_submit($form, &$form_state) {

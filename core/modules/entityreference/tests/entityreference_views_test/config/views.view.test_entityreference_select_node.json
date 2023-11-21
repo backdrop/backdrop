@@ -1,0 +1,88 @@
+{
+  "_config_name": "views.view.test_entityreference_select_node",
+  "name": "test_entityreference_select_node",
+  "description": "",
+  "tag": "default",
+  "disabled": false,
+  "base_table": "node",
+  "human_name": "test_entityreference_select_node",
+  "core": null,
+  "display": {
+    "default": {
+      "display_title": "Default",
+      "display_plugin": "default",
+      "display_options": {
+        "query": {
+          "type": "views_query",
+          "options": []
+        },
+        "use_more_always": false,
+        "access": {
+          "type": "perm"
+        },
+        "cache": {
+          "type": "none"
+        },
+        "exposed_form": {
+          "type": "basic"
+        },
+        "pager": {
+          "type": "full"
+        },
+        "style_plugin": "default",
+        "row_plugin": "fields",
+        "fields": {
+          "title": {
+            "id": "title",
+            "table": "node",
+            "field": "title",
+            "label": "",
+            "alter": {
+              "word_boundary": false,
+              "ellipsis": false
+            }
+          }
+        },
+        "filters": {
+          "status": {
+            "id": "status",
+            "table": "node",
+            "field": "status",
+            "value": 1,
+            "group": 1,
+            "expose": {
+              "operator": false
+            }
+          }
+        }
+      }
+    },
+    "entityreference_1": {
+      "display_title": "Entity Reference",
+      "display_plugin": "entityreference",
+      "display_options": {
+        "query": {
+          "type": "views_query",
+          "options": []
+        },
+        "defaults": {
+          "title": false,
+          "style_plugin": false,
+          "style_options": false,
+          "row_plugin": false,
+          "row_options": false
+        },
+        "pager": {
+          "type": "some"
+        },
+        "style_plugin": "entityreference_style",
+        "style_options": {
+          "search_fields": {
+            "title": "title"
+          }
+        },
+        "row_plugin": "entityreference_fields"
+      }
+    }
+  }
+}
