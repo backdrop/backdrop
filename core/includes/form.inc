@@ -3006,7 +3006,11 @@ function theme_radio($variables) {
   $element['#attributes']['type'] = 'radio';
   element_set_attributes($element, array('id', 'name', '#return_value' => 'value'));
 
-  if (isset($element['#return_value']) && $element['#value'] !== FALSE && $element['#value'] == $element['#return_value']) {
+  // Use strcmp() to compare the values so that they both get cast to string. If
+  // the #options keys mixed numeric and string keys, unexpected things can
+  // happen because PHP will try to cast string values to integers if they're
+  // being compared to an integer.
+  if (isset($element['#return_value']) && $element['#value'] !== FALSE && !strcmp($element['#value'], $element['#return_value'])) {
     $element['#attributes']['checked'] = 'checked';
   }
   _form_set_class($element, array('form-radio'));
@@ -4633,12 +4637,18 @@ function form_validate_number(&$element, &$form_state) {
 
   // Ensure that the input is greater than the #min property, if set.
   if (isset($element['#min']) && $value < $element['#min']) {
-    form_error($element, t('The value for %name must be greater than or equal to %min.', array('%name' => $name, '%min' => $element['#min'])));
+    form_error($element, t('The value for %name must be greater than or equal to %min.', array(
+      '%name' => $name,
+      '%min' => $element['#min'],
+    )));
   }
 
   // Ensure that the input is less than the #max property, if set.
   if (isset($element['#max']) && $value > $element['#max']) {
-    form_error($element, t('The value for %name must be less than or equal to %max.', array('%name' => $name, '%max' => $element['#max'])));
+    form_error($element, t('The value for %name must be less than or equal to %max.', array(
+      '%name' => $name,
+      '%max' => $element['#max'],
+    )));
   }
 
   if (isset($element['#step']) && strtolower($element['#step']) != 'any') {
@@ -4652,7 +4662,11 @@ function form_validate_number(&$element, &$form_state) {
         form_error($element, t('The value for %name must be a whole number.', array('%name' => $name)));
       }
       else {
-        form_error($element, t('The value for %name must be a whole number of steps of size %step, starting from %offset.', array('%name' => $name, '%step' => $element['#step'], '%offset' => $offset)));
+        form_error($element, t('The value for %name must be a whole number of steps of size %step, starting from %offset.', array(
+          '%name' => $name,
+          '%step' => $element['#step'],
+          '%offset' => $offset,
+        )));
       }
     }
   }
