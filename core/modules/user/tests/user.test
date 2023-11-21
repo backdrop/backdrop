@@ -1377,9 +1377,12 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
     $this->assertText(t('The changes have been saved.'), 'Successful save message displayed.');
     backdrop_static_reset('user_roles');
     backdrop_static_reset('user_access');
+    // Check the role and user account both have the permission.
+    $this->assertTrue(user_role_has_permission($role_name, 'administer nodes'), 'Role now has "administer nodes" permission.');
     $this->assertTrue(user_access('administer nodes', $account), 'User now has "administer nodes" permission.');
 
     // Remove a permission.
+    $this->assertTrue(user_role_has_permission($role_name, 'access user profiles'), 'Role has "access user profiles" permission.');
     $this->assertTrue(user_access('access user profiles', $account), 'User has "access user profiles" permission.');
     $edit = array();
     $edit[$role_name . '[access user profiles]'] = FALSE;
@@ -1387,6 +1390,7 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
     $this->assertText(t('The changes have been saved.'), 'Successful save message displayed.');
     backdrop_static_reset('user_roles');
     backdrop_static_reset('user_access');
+    $this->assertFalse(user_role_has_permission($role_name, 'access user profiles'), 'Role no longer has "access user profiles" permission.');
     $this->assertFalse(user_access('access user profiles', $account), 'User no longer has "access user profiles" permission.');
   }
 

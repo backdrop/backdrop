@@ -396,7 +396,7 @@ function system_element_info() {
     '#input' => TRUE,
     '#cols' => 60,
     '#rows' => 5,
-    '#resizable' => TRUE,
+    '#resizable' => 'vertical',
     '#process' => array('ajax_process_form'),
     '#theme' => 'textarea',
     '#theme_wrappers' => array('form_element'),
@@ -1250,15 +1250,6 @@ function system_library_info() {
     ),
   );
 
-  // Backdrop's resizable textarea.
-  $libraries['backdrop.textarea'] = array(
-    'title' => 'Backdrop resizable textarea',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      'core/misc/textarea.js' => array('group' => JS_LIBRARY),
-    ),
-  );
-
   // Backdrop's autocomplete widget.
   $libraries['backdrop.autocomplete'] = array(
     'title' => 'Backdrop autocomplete',
@@ -1345,7 +1336,7 @@ function system_library_info() {
   $libraries['jquery'] = array(
     'title' => 'jQuery',
     'website' => 'http://jquery.com',
-    'version' => '3.7.0',
+    'version' => '3.7.1',
     'js' => array(
       'core/misc/jquery.js' => array('group' => JS_LIBRARY, 'weight' => -20),
     ),
@@ -1353,9 +1344,8 @@ function system_library_info() {
 
   // jQuery Once.
   $libraries['jquery.once'] = array(
-    'title' => 'jQuery Once',
-    'website' => 'http://plugins.jquery.com/project/once',
-    'version' => '1.2',
+    'title' => 'jQuery Once (Backdrop fork)',
+    'version' => '1.2.6',
     'js' => array(
       'core/misc/jquery.once.js' => array('group' => JS_LIBRARY, 'weight' => -19),
     ),
@@ -1365,7 +1355,7 @@ function system_library_info() {
   $libraries['jquery.form'] = array(
     'title' => 'jQuery Form Plugin',
     'website' => 'https://github.com/jquery-form/form',
-    'version' => '4.2.1',
+    'version' => '4.3.0',
     'js' => array(
       'core/misc/jquery.form.js' => array(),
     ),
@@ -1497,25 +1487,72 @@ function system_library_info() {
   $libraries['ui'] = array(
     'title' => 'jQuery UI: Core',
     'website' => 'http://jqueryui.com',
-    'version' => '1.13.0',
+    'version' => '1.13.2',
     'js' => array(
-      'core/misc/ui/jquery.ui.data.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.disable-selection.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.form.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.labels.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.scroll-parent.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.tabbable.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.unique-id.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.version.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.jquery-patch.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.focusable.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.form-reset-mixin.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.ie.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.keycode.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.scroll-parent.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.plugin.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.safe-active-element.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.safe-blur.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
+      'core/misc/ui/jquery.ui.data.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.disable-selection.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.form.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.labels.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.scroll-parent.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.tabbable.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.unique-id.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.version.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.jquery-patch.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.focusable.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.form-reset-mixin.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.ie.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.keycode.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.plugin.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.safe-active-element.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.safe-blur.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
     ),
     'css' => array(
       'core/misc/ui/jquery.ui.core.css' => array(),
@@ -1830,7 +1867,10 @@ function system_library_info() {
     'website' => 'http://jqueryui.com/widget/',
     'version' => $libraries['ui']['version'],
     'js' => array(
-      'core/misc/ui/jquery.ui.widget.min.js' => array('group' => JS_LIBRARY, 'weight' => -10),
+      'core/misc/ui/jquery.ui.widget.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -10,
+      ),
     ),
     'dependencies' => array(
       array('system', 'ui'),
@@ -1845,7 +1885,10 @@ function system_library_info() {
     'website' => 'https://github.com/jquery/jquery-color',
     'version' => '2.2.0',
     'js' => array(
-      'core/misc/jquery.color.js'  => array('group' => JS_LIBRARY, 'weight' => -9),
+      'core/misc/jquery.color.js'  => array(
+        'group' => JS_LIBRARY,
+        'weight' => -9,
+      ),
     ),
   );
 
@@ -1854,7 +1897,10 @@ function system_library_info() {
     'website' => 'http://jqueryui.com/effect/',
     'version' => $libraries['ui']['version'],
     'js' => array(
-      'core/misc/ui/jquery.ui.effect.min.js' => array('group' => JS_LIBRARY, 'weight' => -9),
+      'core/misc/ui/jquery.ui.effect.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -9,
+      ),
     ),
     'dependencies' => array(
       array('system', 'jquery.color'),
@@ -2029,8 +2075,8 @@ function system_library_info() {
   // Touch Punch for jQuery UI touch support.
   $libraries['ui.touch-punch'] = array(
     'title' => 'jQuery UI Touch Punch',
-    'website' => 'http://touchpunch.furf.com/',
-    'version' => '0.2.3',
+    'website' => 'https://github.com/RWAP/jquery-ui-touch-punch/',
+    'version' => '1.0.9',
     'js' => array(
       'core/misc/jquery.ui.touch-punch.js' => array(),
     ),
@@ -2382,26 +2428,33 @@ function system_init() {
   backdrop_add_css($path . '/css/system.theme.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
   backdrop_add_css($path . '/css/messages.theme.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
 
-  // Ignore slave database servers for this request.
+  // Ignore replica database servers for this request.
   //
   // In Backdrop's distributed database structure, new data is written to the
-  // master and then propagated to the slave servers.  This means there is a
-  // lag between when data is written to the master and when it is available on
-  // the slave. At these times, we will want to avoid using a slave server
+  // primary and then propagated to the replica servers. This means there is a
+  // lag between when data is written to the primary and when it is available on
+  // the replica. At these times, we will want to avoid using a replica server
   // temporarily. For example, if a user posts a new node then we want to
-  // disable the slave server for that user temporarily to allow the slave
+  // disable the replica server for that user temporarily to allow the replica
   // server to catch up. That way, that user will see their changes immediately
-  // while for other users we still get the benefits of having a slave server,
-  // just with slightly stale data.  Code that wants to disable the slave
-  // server should use the db_ignore_slave() function to set
-  // $_SESSION['ignore_slave_server'] to the timestamp after which the slave
+  // while for other users we still get the benefits of having a replica server,
+  // just with slightly stale data. Code that wants to disable the replica
+  // server should use the db_ignore_replica() function to set
+  // $_SESSION['ignore_replica_server'] to the timestamp after which the replica
   // can be re-enabled.
+
+  // @todo remove this backwards-compatible session variable wrapper in 2.0.
   if (isset($_SESSION['ignore_slave_server'])) {
-    if ($_SESSION['ignore_slave_server'] >= REQUEST_TIME) {
-      Database::ignoreTarget('default', 'slave');
+    $_SESSION['ignore_replica_server'] = $_SESSION['ignore_slave_server'];
+    unset($_SESSION['ignore_slave_server']);
+  }
+
+  if (isset($_SESSION['ignore_replica_server'])) {
+    if ($_SESSION['ignore_replica_server'] >= REQUEST_TIME) {
+      Database::ignoreTarget('default', 'replica');
     }
     else {
-      unset($_SESSION['ignore_slave_server']);
+      unset($_SESSION['ignore_replica_server']);
     }
   }
 
@@ -3140,6 +3193,12 @@ function _system_rebuild_theme_data() {
     $themes[$key]->filename = $theme->uri;
     $themes[$key]->info = backdrop_parse_info_file($theme->uri) + $defaults;
 
+    // Skip modules or layouts that have been placed in the wrong directory.
+    if (isset($themes[$key]->info['type']) && $themes[$key]->info['type'] != 'theme') {
+      unset($themes[$key]);
+      continue;
+    }
+
     // The "name" key is required, but to avoid a fatal error in the menu system
     // we set a reasonable default if it is not provided.
     $themes[$key]->info += array('name' => $key);
@@ -3183,7 +3242,7 @@ function _system_rebuild_theme_data() {
     }
   }
 
-  // Now that we've established all our master themes, go back and fill in data
+  // Now that we've established all our base themes, go back and fill in data
   // for subthemes.
   foreach ($sub_themes as $key) {
     $themes[$key]->base_themes = backdrop_find_base_themes($themes, $key);
@@ -4251,7 +4310,7 @@ function path_autocomplete($string = '') {
                 $found_match = TRUE;
                 $view_title = $display->display_options['title'];
               }
-              // Master title.
+              // Default title.
               elseif (!empty($view->display['default']->display_options['title']) && stripos($view->display['default']->display_options['title'], $string) !== FALSE) {
                 $found_match = TRUE;
                 $view_title = $view->display['default']->display_options['title'];

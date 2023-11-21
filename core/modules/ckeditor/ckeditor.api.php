@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Documentation for CKEditor module APIs.
+ * Documentation for CKEditor 4 module APIs.
  */
 
 /**
@@ -10,7 +10,7 @@
  */
 
 /**
- * Provides a list of CKEditor plugins.
+ * Provides a list of CKEditor 4 plugins.
  *
  * Each plugin for CKEditor must provide an array of properties containing
  * information about the plugin. At minimum, plugins must provide a path and
@@ -102,7 +102,7 @@ function hook_ckeditor_plugins() {
 }
 
 /**
- * Modify the list of available CKEditor plugins.
+ * Modify the list of available CKEditor 4 plugins.
  *
  * This hook may be used to modify plugin properties after they have been
  * specified by other modules.
@@ -117,7 +117,7 @@ function hook_ckeditor_plugins_alter(array &$plugins) {
 }
 
 /**
- * Modify the list of CSS files that will be added to a CKEditor instance.
+ * Modify the list of CSS files that will be added to a CKEditor 4 instance.
  *
  * Modules may use this hook to provide their own custom CSS file without
  * providing a CKEditor plugin. This list of CSS files is only used in the
@@ -147,7 +147,7 @@ function hook_ckeditor_css_alter(array &$css, $format) {
 }
 
 /**
- * Modify the raw CKEditor settings passed to the editor.
+ * Modify the raw CKEditor 4 settings passed to the editor.
  *
  * This hook can be useful if you have created a CKEditor plugin that needs
  * additional settings passed to it from Backdrop. In particular, because

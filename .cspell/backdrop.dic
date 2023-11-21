@@ -260,6 +260,7 @@ Lückenbüßer
 lueckenbuesser
 LXSS
 manytoone
+marzo
 maxadjustment
 maxdate
 menutoggle
@@ -271,6 +272,8 @@ microweights
 mimeheaders
 minadjustment
 mindate
+mlid
+mlids
 modif
 modulename
 moeglich
@@ -301,6 +304,8 @@ mytable
 mytokens
 mytype
 myusername
+myverylongurlexample
+myverylongurl
 natu
 nccc
 NCHUNKS
@@ -334,6 +339,7 @@ nosuchindex
 nosuchscheme
 nosuchtable
 nosuchtag
+nothere
 notpromoted
 notpublished
 nstr
@@ -425,6 +431,7 @@ somepath
 someplugin
 sometable
 Somethis
+sourcedir
 stackoverflow
 statiya
 stdobj
@@ -452,8 +459,10 @@ tablesorting
 tabletools
 tagname
 tarname
+targetdir
 tascript
 tést
+Teletubbies
 testconfig
 testfiles
 testimage
@@ -468,6 +477,7 @@ timeentry
 timestep
 titleslogan
 Título
+tnid
 tnids
 todate
 tookit's
@@ -520,16 +530,22 @@ WCAG
 wday
 weba
 wesl
+WINDIR
 withslash
 Wonderwoman
 wõrd
 wordlength
+wordsafe
 workkeys
+WQKCY
+WSOD
+xbeg
 xchanged
 xfff
 xhash
 xind
 xlarge
+xlen
 XLIM
 XOFF
 XOFFSET
@@ -545,10 +561,12 @@ xzread
 xzseek
 xztell
 xzwrite
+ybeg
 ychanged
 yhash
 yigejiandandejuzi
 yind
+ylen
 YLIM
 ymatches
 ymid
