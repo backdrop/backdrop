@@ -147,8 +147,8 @@ interface BackdropStreamWrapperInterface extends StreamWrapperInterface {
    *
    * This function should return a URL that can be embedded in a web page
    * and accessed from a browser. For example, the external URL of
-   * "youtube://xIpLd0WQKCY" might be
-   * "http://www.youtube.com/watch?v=xIpLd0WQKCY".
+   * "youtube://123aBc456xYz" might be
+   * "http://www.youtube.com/watch?v=123aBc456xYz".
    *
    * @return
    *   Returns a string containing a web accessible URL for the resource.

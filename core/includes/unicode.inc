@@ -304,7 +304,7 @@ function backdrop_truncate_bytes($string, $len) {
  *   string "See myverylongurlexample.com for more information" to a word-safe
  *   return length of 20, the only available word boundary within 20 characters
  *   is after the word "See", which wouldn't leave a very informative string. If
- *   you had set $min_wordsafe_length to 10, though, the function would realise
+ *   you had set $min_wordsafe_length to 10, though, the function would realize
  *   that "See" alone is too short, and would then just truncate ignoring word
  *   boundaries, giving you "See myverylongurl..." (assuming you had set
  *   $add_ellipses to TRUE).

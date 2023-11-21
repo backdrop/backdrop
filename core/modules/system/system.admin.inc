@@ -704,7 +704,7 @@ function system_modules($form, $form_state = array()) {
       '#theme' => 'system_modules_fieldset',
       '#header' => array(
         array('class' => array('checkbox')),
-        t('Name'),
+        array('data' => t('Name')),
         array('data' => t('Version'), 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
         array('data' => t('Description'), 'class' => array(RESPONSIVE_PRIORITY_LOW)),
         array('data' => t('Operations')),
@@ -812,7 +812,8 @@ function _system_modules_build_row($info, $extra) {
     $status_long .= t('This version is not compatible with Backdrop CMS !core_version.', array('!core_version' => BACKDROP_CORE_COMPATIBILITY)) . ' ';
   }
 
-  // Ensure this module is compatible with the currently installed version of PHP.
+  // Ensure this module is compatible with the currently installed version of
+  // PHP.
   if (version_compare(phpversion(), $info['php']) < 0) {
     $compatible = FALSE;
     $status_short .= t('Incompatible with this version of PHP') . ' ';
@@ -823,8 +824,8 @@ function _system_modules_build_row($info, $extra) {
     $status_long .= t('This module requires PHP version @php_required and is incompatible with PHP version !php_version.', array('@php_required' => $php_required, '!php_version' => phpversion())) . ' ';
   }
 
-  // If this module is compatible, present a checkbox indicating this module
-  // may be installed. Otherwise, show a big red X.
+  // If this module is compatible, present a checkbox indicating this module may
+  // be installed. Otherwise, show a big red X.
   if ($compatible) {
     $form['enable'] = array(
       '#type' => 'checkbox',
@@ -2281,7 +2282,8 @@ function system_urls_settings($form, &$form_state) {
 }
 
 /**
- * Menu callback: displays the site status report. Can also be used as a pure check.
+ * Menu callback: displays the site status report. Can also be used as a pure
+ * check.
  *
  * @param $check
  *   If true, only returns a boolean whether there are system status errors.

@@ -3725,27 +3725,70 @@ function form_process_details($element, &$form_state) {
  * renderable element, to surround it with a <details> tag and add attributes
  * such as classes or an HTML id.
  *
+ * Since version 1.26.2 the optional #toggle, #open_label and #close_label
+ * properties have been introduced. When #toggle is set to TRUE, the <details>
+ * element is styled with a "more"/"less" toggle button after the #summary text
+ * (instead of the triangle toggle placed before the #summary text, which is how
+ * browsers style <details> elements by default). Example implementations of
+ * such toggles can be found in the following pages in the Backdrop core admin
+ * UI:
+ * - the modules listing page (admin/modules).
+ * - the site status report page (admin/reports/status).
+ * - the permissions configuration page (admin/config/people/permissions).
+ *
  * @param array $variables
  *   An associative array containing:
  *   - element: An associative array containing the properties of the element.
- *     Properties used: #id, #attributes, #children, #summary, #details, #open.
+ *     Properties used:
+ *     - #summary
+ *     - #details
+ *     - #children
+ *     - #id
+ *     - #attributes: Any attributes to be added to the overall <details> HTML
+ *       tag.
+ *     - #summary_attributes: Any attributes to be added to the <summary> HTML
+ *       tag.
+ *     - #details_attributes: Any attributes to be added to the wrapper <div>
+ *       HTML tag around the content specified via the #details property. A
+ *       "details-content-wrapper" class attribute is added to this <div> by
+ *       default.
+ *     - #open: (bool) Set to TRUE to have the details element be expanded, or
+ *       FALSE to have it be collapsed by default.
+ *     - #toggle: (bool) If set to TRUE the details element will be rendered
+ *       with a "more"/"less" toggle button. Defaults to FALSE.
+ *     - #open_label: Customize the default "more" label of the toggle. Only
+ *       applicable if the #toggle property has been set to TRUE.
+ *     - #close_label: Customize the default "less" label of the toggle. Only
+ *       applicable if the #toggle property has been set to TRUE. Setting this
+ *       to NULL will use the same label for both open/closed states.
  *
  * @return string
  *   The rendered HTML output.
  *
+ * @since 1.26.2:
+ *   - Added support for separate #summary_attributes and #details_attributes
+ *     properties.
+ *   - #toggle property added to allow rendering the details element with a
+ *     more/less toggle button. Optional #open_label and #close_label properties
+ *     allow customizing the default "more"/"less" labels of the toggle.
  * @ingroup themeable
  */
 function theme_details($variables) {
   $element = $variables['element'];
-  // Ensure #attributes is set.
-  $element += array('#attributes' => array());
+  // Ensure certain basic/default properties are set.
+  $element += array(
+    '#attributes' => array(),
+    '#summary_attributes' => array(),
+    '#details_attributes' => array(),
+    '#toggle' => FALSE,
+  );
+  // Assign an HTML ID if one has been specified.
+  if (!array_key_exists('id', $element['#attributes']) && isset($element['#id'])) {
+    $element['#attributes']['id'] = $element['#id'];
+  }
 
   // Special handling for form elements.
   if (isset($element['#array_parents'])) {
-    // Assign an HTML ID.
-    if (!array_key_exists('id', $element['#attributes'])) {
-      $element['#attributes']['id'] = $element['#id'];
-    }
     // Add the form-wrapper class.
     if (empty($element['#attributes']['class'])) {
       $element['#attributes']['class'][] = 'form-wrapper';
@@ -3756,10 +3799,39 @@ function theme_details($variables) {
     $element['#attributes']['open'] = 'open';
   }
 
+  $summary_content = '<span>' . $element['#summary'] . '</span>';
+
+  // Custom labels for the open/close toggle.
+  $more_less_toggle = '';
+  if ($element['#toggle']) {
+    // Set default labels for the open/close toggle.
+    $element += array(
+      '#open_label' => t('more'),
+      '#close_label' => t('less'),
+    );
+
+    $element['#attributes']['class'][] = 'open-close-toggle';
+    // Remove keyboard focus from the summary element.
+    $element['#summary_attributes']['tabindex'] = -1;
+
+    $more_less_toggle_attributes = array(
+      'class' => array('open-close-button'),
+      'data-open-label' => $element['#open_label'],
+      'data-close-label' => $element['#close_label'] != NULL ? $element['#close_label'] : $element['#open_label'],
+      // Add keyboard focus to the open/close toggle. This is needed because
+      // focus normally only works out of the box for interactive elements (e.g.
+      // inputs, buttons, links, etc.).
+      'role' => 'button',
+      'tabindex' => 0,
+    );
+    $more_less_toggle = '<span ' . backdrop_attributes($more_less_toggle_attributes) . '></span>';
+  }
+
   $output = '<details' . backdrop_attributes($element['#attributes']) . '>';
-  $output .= '<summary><span>' . $element['#summary'] . '</span></summary>';
+  $output .= '<summary' . backdrop_attributes($element['#summary_attributes']) . '>' . $summary_content . $more_less_toggle . '</summary>';
   if (isset($element['#details']) && !empty($element['#details'])) {
-    $output .= '<div class="details-content-wrapper">' . $element['#details'] . '</div>';
+    $element['#details_attributes']['class'][] = 'details-content-wrapper';
+    $output .= '<div' . backdrop_attributes($element['#details_attributes']) . '>' . $element['#details'] . '</div>';
   }
   if (isset($element['#children']) && !empty($element['#children'])) {
     $output .= '<div class="details-child-wrapper">' . $element['#children'] . '</div>';

@@ -410,3 +410,82 @@ section,
 summary {
   display: block;
 }
+
+/**
+ * Special type of details elements, which use an open/close toggle with
+ * customizable labels ("more"/"less" for example).
+ */
+details.open-close-toggle {
+  background-color: transparent;
+  border: none;
+  cursor: text;
+  margin: 0;
+  padding: 0;
+}
+
+/* Remove the default details toggle icon added by browsers (triangle). */
+details.open-close-toggle > summary {
+  /* This must be combined with "display: none;" for ::marker below. */
+  list-style: none;
+  /* Prevent the summary text from triggering open/close of the details. */
+  pointer-events: none;
+}
+details.open-close-toggle summary::marker,
+details.open-close-toggle summary::-webkit-details-marker {
+  /* Required in order to remove the default toggle icon (see above). */
+  display: none;
+}
+
+details.open-close-toggle summary span.open-close-button {
+  background-color: white;
+  border: 1px solid #828188;
+  border-radius: 5px;
+  font-size: 80%;
+  margin: 0 5px;
+  padding: 0 3px;
+  /* Specifically trigger the opening/closing of the details via the toggle. */
+  pointer-events: auto;
+  /* Keep the custom toggle open/close label and the toggle icon together. */
+  white-space: nowrap;
+}
+details.open-close-toggle summary span.open-close-button:hover {
+  background-color: #f7f7f7;
+}
+/* Allow any links within the summary text to be clickable. */
+details.open-close-toggle summary a {
+  pointer-events: auto;
+}
+
+details.open-close-toggle summary > span.open-close-button::before,
+details.open-close-toggle summary > span.open-close-button::after {
+  color: #0074bd;
+  cursor: pointer;
+  padding: 0 2px;
+}
+details.open-close-toggle[open] summary .open-close-button::before {
+  content: attr(data-close-label);
+}
+details.open-close-toggle:not([open]) summary .open-close-button::before {
+  content: attr(data-open-label);
+}
+[dir="rtl"] details.open-close-toggle[open] summary .open-close-button::after {
+  content: attr(data-close-label);
+}
+[dir="rtl"] details.open-close-toggle:not([open]) summary .open-close-button::after {
+  content: attr(data-open-label);
+}
+
+/* The open/close icons next to the open/close toggle label. */
+details.open-close-toggle summary .open-close-button::after,
+[dir="rtl"] details.open-close-toggle summary .open-close-button::before {
+  content: '…';
+  display: inline-block;
+}
+details.open-close-toggle[open] summary .open-close-button::after,
+[dir="rtl"] details.open-close-toggle[open] summary .open-close-button::before {
+  content: '✕';
+}
+
+details.open-close-toggle .details-content-wrapper {
+  margin-top: 0.5em;
+}

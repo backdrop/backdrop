@@ -661,8 +661,9 @@ function filter_permission() {
       // viewing this will have access to that page.
       $format_name_replacement = l($format->name, 'admin/config/content/formats/' . $format->format);
       $perms[$permission] = array(
-        'title' => t("Use the !text_format text format", array('!text_format' => $format_name_replacement,)),
-        'description' => backdrop_placeholder(t('Warning: This permission may have security implications depending on how the text format is configured.')),
+        'title' => t('Use the !text_format text format', array('!text_format' => $format_name_replacement,)),
+        'restrict access' => TRUE,
+        'warning' => t('This permission may have security implications depending on how the text format is configured.'),
       );
     }
   }

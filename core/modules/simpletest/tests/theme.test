@@ -225,7 +225,7 @@ class ThemeTableUnitTest extends BackdropWebTestCase {
   /**
    * Tests that the 'footer' option works correctly.
    */
-  function testThemeTableFooter() {
+  public function testThemeTableFooter() {
     $footer = array(
       array(
         'data' => array(1),
@@ -652,10 +652,13 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
           '#details' => t('Detailed content'),
           '#attributes' => array(
             'id' => 'foobar-id',
-            'class' => array('fooclass'),
+            'class' => array('foo-class'),
+          ),
+          '#summary_attributes' => array(
+            'class' => array('bar-class'),
           ),
         ),
-        'expected' => '<details id="foobar-id" class="fooclass"><summary><span>The summary</span></summary><div class="details-content-wrapper">Detailed content</div></details>',
+        'expected' => '<details id="foobar-id" class="foo-class"><summary class="bar-class"><span>The summary</span></summary><div class="details-content-wrapper">Detailed content</div></details>',
       ),
       // Expanded 'details' with child element.
       array(

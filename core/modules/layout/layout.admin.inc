@@ -452,22 +452,33 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     'path_matches_text' => array('#markup' => $path_matches_text),
   );
   $path_matches_description = backdrop_render($path_matches);
-  $toggle = ' <a class="layout-placeholder-examples-toggle" href="#">' . t('Show examples') . '<span class="arrow"></span></a>';
-  $description_items = array(
+
+  $example_items = array(
     t('Content: <code>node/%</code>'),
     t('User accounts: <code>user/%</code>'),
     t('Taxonomy terms: <code>taxonomy/term/%</code>'),
     t('Comments: <code>comment/%</code>'),
   );
-  $description_list = '<div class="layout-placeholder-examples">' . t('Some common examples of placeholders include:') . theme('item_list', array('items' => $description_items)) . '</div>';
+  $placeholder_examples = t('Some common examples of placeholders include:') . theme('item_list', array('items' => $example_items));
+
+  $examples_description = array(
+    '#summary' => t('Use the percent symbol ("%") to indicate a placeholder in the path.'),
+    '#details' => $placeholder_examples,
+    '#open' => FALSE,
+    '#toggle' => TRUE,
+    '#open_label' => t('Show examples'),
+    '#close_label' => t('Hide examples'),
+    '#attributes' => array('class' => array('layout-placeholder-examples')),
+  );
+
   $form['path'] = array(
     '#title' => t('Path'),
-    '#field_prefix' => url('', array('absolute' => TRUE)),
     '#type' => 'textfield',
+    '#field_prefix' => url('', array('absolute' => TRUE)),
     '#default_value' => $layout->getPath(),
     '#required' => TRUE,
     '#access' => !$layout->isDefault(),
-    '#description' => $path_matches_description . t('Use the percent symbol ("%") to indicate a placeholder in the path.') . $toggle . $description_list,
+    '#description' => $path_matches_description . theme('details', array('element' => $examples_description)),
   );
 
   $form['path_update'] = array(
@@ -2449,7 +2460,7 @@ function layout_reorder_form($form, &$form_state) {
     '#href' => 'admin/structure/layouts',
     '#options' => array(
       'attributes' => array(
-        'class' => array('form-cancel')
+        'class' => array('form-cancel'),
       ),
     ),
   );
