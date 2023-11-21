@@ -66,6 +66,14 @@ class Block extends LayoutHandler {
   var $contexts = array();
 
   /**
+   * The Layout's title a block is used in.
+   *
+   * Only used on the block usage report page.
+   * @var string
+   */
+  public $layout_title;
+
+  /**
    * Create a new Block object.
    *
    * @param string $plugin_name
@@ -413,7 +421,7 @@ class Block extends LayoutHandler {
    * all. An empty array means that a block may provide children, but that there
    * are none currently.
    *
-   * return array|NULL
+   * @return array|null
    */
   function getChildren() {
     return NULL;

@@ -309,8 +309,17 @@ function config_export_single_form(array $form, array &$form_state, $config_grou
   $default_type = isset($form_state['values']['config_group']) ? $form_state['values']['config_group'] : $config_group;
   $config_names = array();
   if ($default_type) {
-    $config_names = $form_state['config_groups'][$default_type];
-    natsort($config_names);
+    // Prevent fatal errors if the key is not available in the select list.
+    if (isset($form_state['config_groups'][$default_type])) {
+      $config_names = $form_state['config_groups'][$default_type];
+      natsort($config_names);
+    }
+    else {
+      $config_names = array();
+      backdrop_set_message(t('Configuration group %type not available.', array(
+        '%type' => $default_type,
+      )), 'warning');
+    }
   }
   $form['config_name'] = array(
     '#title' => t('Configuration name'),
@@ -356,7 +365,7 @@ function config_export_single_form_update_type($form, &$form_state) {
   $form['export']['#value'] = '';
   $form['export']['#rows'] = 12;
 
-  // Because we need to replace both the configation name select and the
+  // Because we need to replace both the configuration name select and the
   // textarea, this requires using AJAX commands instead of a simple return.
   $commands = array();
   $commands[] = ajax_command_replace('#edit-config-type-wrapper', backdrop_render($form['config_name']));
