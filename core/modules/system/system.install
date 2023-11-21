@@ -2750,9 +2750,19 @@ function system_update_1042() {
  * Remove old Date configuration files.
  */
 function system_update_1043() {
-  config('date_views.settings')->delete();
   config('date_api.settings')->delete();
   config('date.settings')->delete();
+
+  $config = config('date_views.settings');
+  if ($config->isNew()) {
+    $config->set('date_views_month_format_with_year', update_variable_get('date_views_month_format_with_year', 'F Y'));
+    $config->set('date_views_month_format_without_year', update_variable_get('date_views_month_format_without_year', 'F'));
+    $config->set('date_views_day_format_with_year', update_variable_get('date_views_day_format_with_year', 'l, F j, Y'));
+    $config->set('date_views_day_format_without_year', update_variable_get('date_views_day_format_without_year', 'l, F j'));
+    $config->set('date_views_week_format_with_year', update_variable_get('date_views_week_format_with_year', 'F j, Y'));
+    $config->set('date_views_week_format_without_year', update_variable_get('date_views_week_format_without_year', 'F j'));
+    $config->save();
+  }
 
   // Remove variables from Drupal 7.
   update_variable_del('date_min_year');
@@ -3454,6 +3464,39 @@ function system_update_1091() {
   if (config_get('system.core', 'jquery_version') === NULL) {
     config_set('system.core', 'jquery_version', 'legacy');
   }
+}
+
+/**
+ * Removes the block_interest_cohort configuration added by
+ * system_update_1075().
+ *
+ * see https://github.com/backdrop/backdrop-issues/issues/6199
+ *
+ * For more information, see the change record at:
+ * https://docs.backdropcms.org/change-records/header-added-by-default-to-disable-floc
+ */
+function system_update_1092() {
+  config_clear('system.core', 'block_interest_cohort');
+}
+
+/**
+ * Set defaults for date_views if not already set.
+ */
+function system_update_1093() {
+  // Previously date_views settings were being removed before they could be
+  // migrated. If that's the case set some defaults here.
+  // @see https://github.com/backdrop/backdrop-issues/issues/6204
+  $config = config('date_views.settings');
+  if (!$config->isNew()) {
+    return;
+  }
+  $config->set('date_views_month_format_with_year', 'F Y');
+  $config->set('date_views_month_format_without_year', 'F');
+  $config->set('date_views_day_format_with_year', 'l, F j, Y');
+  $config->set('date_views_day_format_without_year', 'l, F j');
+  $config->set('date_views_week_format_with_year', 'F j, Y');
+  $config->set('date_views_week_format_without_year', 'F j');
+  $config->save();
 }
 
 /**
