@@ -1,7 +1,8 @@
 <?php
 /**
  * @file
- * Install, update and uninstall functions for the field_test_schema_alter module.
+ * Install, update and uninstall functions for the field_test_schema_alter
+ * module.
  */
 
 /**
