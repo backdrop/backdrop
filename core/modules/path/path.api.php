@@ -3,34 +3,32 @@
  * @file
  * Hooks provided by the Path module.
  *
- * Path module provides automatic URL aliasing by using tokens in path
- * patterns. Thus the simplest integration is just to provide tokens using
+ * Path module provides automatic URL aliasing by using tokens in path patterns.
+ * Thus the simplest integration is just to provide tokens using
  * hook_token_info() and hook_tokens().
  *
  * If you wish to provide automatic path creation for custom paths provided by
  * your module, there are a few steps involved.
  *
  * 1. hook_path_info()
- *    Provide information required by Path for the settings form as well as
- *    bulk generation. See the documentation for hook_path_info() for more
- *    details.
- *
+ *      Provide information required by Path for the settings form as well as
+ *      bulk generation. See the documentation for hook_path_info() for more
+ *      details.
  * 2. path_generate_entity_alias()
- *    At the appropriate time (usually when a new item is being created for
- *    which a generated alias is desired), call path_generate_entity_alias()
- *    with the appropriate parameters to generate the alias. Then save the
- *    alias with path_save_automatic_alias(). See the user, taxonomy, and node
- *    hook implementations for examples.
- *
+ *      At the appropriate time (usually when a new item is being created for
+ *      which a generated alias is desired), call path_generate_entity_alias()
+ *      with the appropriate parameters to generate the alias. Then save the
+ *      alias with path_save_automatic_alias(). See the user, taxonomy, and node
+ *      hook implementations for examples.
  * 3. path_delete_all_by_source()
- *    At the appropriate time (usually when an item is being deleted), call
- *    path_delete_all_by_source() to remove any aliases that were created for the
- *    content being removed. See the documentation for path_delete_all_by_source() for
- *    more details.
+ *      At the appropriate time (usually when an item is being deleted), call
+ *      path_delete_all_by_source() to remove any aliases that were created for
+ *      the content being removed. See the documentation for
+ *      path_delete_all_by_source() for more details.
  *
  * There are other integration points with Path module, namely alter hooks that
- * allow you to change the data used by Path at various points in the
- * process. See the below hook documentation for details.
+ * allow you to change the data used by Path at various points in the process.
+ * See the below hook documentation for details.
  */
 
 /**
@@ -103,8 +101,8 @@ function hook_path_delete($path) {
 /**
  * Provide information about the way your module's aliases will be built.
  *
- * The information you provide here is used to build the form
- * on search/path/patterns
+ * The information provided here is used to build the form on
+ * admin/config/urls/path/patterns.
  *
  * @return array
  *   A 2-level array of automatic path settings. Each item should have a unique
@@ -114,9 +112,11 @@ function hook_path_delete($path) {
  *       entities of this type will have a "path" property added to their
  *       objects upon loading.
  *   - label: Translated label for the settings group.
- *   - pattern description: The translated label for the default URL alias
- *       pattern (e.g. t('Default path pattern (applies to all content types
- *       with blank patterns)')
+ *   - pattern label: The translated label for the default URL alias pattern
+ *       (e.g. t('Default path pattern for content)').
+ *   - pattern description: The translated help text for the default URL alias
+ *       pattern (e.g. t('Fallback pattern for all content types without a
+ *       specific URL alias pattern below.)').
  *   - pattern default: Default URL alias pattern (e.g. 'content/[node:title]')
  *   - type delete callback: The name of the function that should be run for
  *       bulk deletion of entity bundle types.
@@ -124,8 +124,8 @@ function hook_path_delete($path) {
  *   - batch update callback: The name of function that should be ran for
  *       bulk update. See node_path_bulk_update_batch_process() for an example.
  *   - batch file: The name of the file with the bulk update function.
- *   - source prefix: The prefix for source URLs generated for this type of
- *       path (e.g nodes have a source prefix of "node/" and taxonomy terms have
+ *   - source prefix: The prefix for source URLs generated for this type of path
+ *       (e.g nodes have a source prefix of "node/" and taxonomy terms have
  *       a prefix of "taxonomy/term/". This is used when bulk deleting paths.
  *   - pattern items: Optional. An array of descriptions keyed by bundles.
  *
@@ -134,6 +134,8 @@ function hook_path_delete($path) {
  * @see path_entity_insert()
  * @see path_entity_update()
  * @see path_entity_delete()
+ *
+ * @since 1.26.2 the 'pattern label' key was added to the return array.
  */
 function hook_path_info() {
   // Aliases on files are not normally supported, this would add support for
@@ -141,7 +143,8 @@ function hook_path_info() {
   $info['file'] = array(
     'entity type' => 'file',
     'label' => t('File paths'),
-    'pattern description' => t('Default path pattern (applies to all file types with blank patterns below)'),
+    'pattern label' => t('Default path pattern for files'),
+    'pattern description' => t('Fallback pattern for all files without a specific URL alias pattern below.'),
     'pattern default' => 'files/[file:name]',
     'type delete callback' => 'node_path_type_delete_callback',
     'batch update callback' => 'file_entity_path_bulk_update_batch_process',
