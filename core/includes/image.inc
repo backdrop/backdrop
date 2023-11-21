@@ -123,7 +123,7 @@ function image_get_supported_extensions() {
   $function = 'image_' . $toolkit . '_supported_extensions';
   if (function_exists($function)) {
     $extensions = $function();
-    if (system_get_svg_support()) {
+    if (file_get_svg_support()) {
       $extensions[] = 'svg';
     }
     return $extensions;

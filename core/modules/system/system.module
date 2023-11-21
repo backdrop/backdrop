@@ -3917,18 +3917,6 @@ function system_image_toolkits() {
 }
 
 /**
- * Get core SVG support.
- */
-function system_get_svg_support() {
-  static $image_svg_support = NULL;
-  if (is_null($image_svg_support)) {
-    $image_svg_config_value = config_get('system.core', 'image_svg_support');
-    $image_svg_support = ($image_svg_config_value === TRUE);
-  }
-  return $image_svg_support;
-}
-
-/**
  * Attempts to get a file using backdrop_http_request and to store it locally.
  *
  * @param string $url
