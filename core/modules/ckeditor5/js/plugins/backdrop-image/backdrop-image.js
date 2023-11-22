@@ -318,6 +318,31 @@ function _getModelImageStyleFromDataAttribute(dataAttribute) {
 }
 
 /**
+ * Given width, height, and resizedWidth, return updated width and height.
+ *
+ * @param string width
+ *   The image attribute width in pixels, may contain a 'px' suffix.
+ * @param string height
+ *   The image attribute height in pixels, may contain a 'px' suffix.
+ * @param string resizedWidth
+ *   The displayed width after resizing, may contain a 'px' suffix.
+ * @returns {Array}
+ *   The calculated width and height based on the ratio from the resizedWidth.
+ * @private
+ */
+function _getResizedWidthHeight(width, height, resizedWidth) {
+  // Normalize each of the attributes.
+  width = Number(width.toString().replace('px', ''));
+  height = Number(height.toString().replace('px', ''));
+  resizedWidth = Number(resizedWidth.toString().replace('px', ''));
+
+  const ratio = width / resizedWidth;
+  const newWidth = resizedWidth.toString();
+  const newHeight = Math.round(height / ratio).toString();
+  return [newWidth, newHeight];
+}
+
+/**
  * Downcasts `caption` model to `data-caption` attribute with its content
  * downcasted to plain HTML.
  *
@@ -493,36 +518,13 @@ function modelImageWidthAndHeightToAttributes(editor) {
     // For a resized image, only the width event fires and the height derives
     // from the width.
     if (data.attributeKey === 'resizedWidth') {
-      const newWidth = Number(data.attributeNewValue.toString().replace('px', ''));
-      writer.setAttribute(
-        'width',
-        newWidth.toString(),
-        img,
-      );
-
-      // Remove the resized image class added by the CKEditor ImageResizeEditing
-      // plugin. This disables CKEditor's special treatment on resized images.
-      writer.removeClass('image_resized', img);
-
-      // Calculate the height from the width and aspect ratio if possible.
-      const originalWidth = Number(item.getAttribute('width').toString().replace('px', ''));
-      const originalHeight = Number(item.getAttribute('height').toString().replace('px', ''));
-      if (originalWidth && originalHeight) {
-        const ratio = originalHeight/originalWidth;
-        const newHeight = Math.round(ratio * newWidth);
-        writer.setAttribute(
-          'height',
-          newHeight.toString(),
-          img,
-        );
-      }
-      else {
-        writer.removeAttribute(
-          'height',
-          img
-        );
-      }
-
+      const resizedWidth = data.attributeNewValue;
+      const originalWidth = item.getAttribute('width');
+      const originalHeight = item.getAttribute('height');
+      const [newWidth, newHeight] = _getResizedWidthHeight(originalWidth, originalHeight, resizedWidth);
+      writer.removeAttribute('resizedWidth', img);
+      writer.setAttribute('width', newWidth, img);
+      writer.setAttribute('height', newHeight, img);
     }
   }
 
@@ -830,6 +832,15 @@ class BackdropImageCommand extends CKEditor5.core.Command {
         existingValues[attributeName] = imageElement.getAttribute(modelName);
       });
 
+      // Convert the 'resizedWidth' internal attribute to be the 'width'
+      // attribute. Also update 'height' to match.
+      const resizedWidth = imageElement.getAttribute('resizedWidth');
+      if (existingValues['width'] && existingValues['height'] && resizedWidth) {
+        const [newWidth, newHeight] = _getResizedWidthHeight(existingValues['width'], existingValues['height'], resizedWidth);
+        existingValues['width'] = newWidth;
+        existingValues['height'] = newHeight;
+      }
+
       // Alignment is stored as a CKEditor Image Style.
       const imageStyle = imageElement.getAttribute('imageStyle');
       const alignAttribute = _getDataAttributeFromModelImageStyle(imageStyle);
@@ -863,9 +874,15 @@ class BackdropImageCommand extends CKEditor5.core.Command {
 
       // For updating an existing element:
       if (imageElement) {
-        model.change(writer => {
+        model.change((writer) => {
+          writer.removeAttribute('resizedWidth', imageElement);
           writer.setAttributes(imageAttributes, imageElement);
         });
+
+        // If width/height are empty, set to their natural values.
+        if (imageAttributes['width'] === '' && imageAttributes['height'] === '') {
+          imageUtils.setImageNaturalSizeAttributes(imageElement);
+        }
 
         const imageCaption = ImageCaptionUtils.getCaptionFromImageModelElement(imageElement);
         // Remove an existing caption if disabled.
