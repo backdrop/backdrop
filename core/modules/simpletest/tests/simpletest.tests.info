@@ -1,4 +1,4 @@
-; This info file contains an enourmous number of tests. They are ordered by:
+; This info file contains an enormous number of tests. They are ordered by:
 ; 1) The main SimpleTest tests from the simpletest.test file.
 ; 2) The list of all *.test files in the /tests directory, alphabetically.
 ; 3) Within each *.test file, matching the declaration order of each class.
@@ -16,8 +16,8 @@ group = SimpleTest
 file = simpletest.test
 
 [SimpleTestMailCaptureTestCase]
-name = SimpleTest e-mail capturing
-description = Test the SimpleTest e-mail capturing logic, the assertMail assertion and the backdropGetMails function.
+name = SimpleTest email capturing
+description = Test the SimpleTest email capturing logic, the assertMail assertion and the backdropGetMails function.
 group = SimpleTest
 file = simpletest.test
 
@@ -410,12 +410,6 @@ file = common.test
 name = Query parsing using backdrop_get_query_array()
 description = Tests that backdrop_get_query_array() correctly parses query parameters.
 group = Common
-file = common.test
-
-[BlockInterestCohortTest]
-name = Block Interest Cohort
-description = Check Permissions-Policy header to disable Google FLoC.
-group = System
 file = common.test
 
 [FeedIconTest]
@@ -838,7 +832,7 @@ description = Tests stream wrapper functions.
 group = File API
 file = file.test
 
-[FileTranferTest]
+[FileTransferTest]
 name = FileTransfer unit tests
 description = Test that the jail is respected and that protocols using recursive file move operations work.
 group = System
@@ -961,6 +955,12 @@ file = form.test
 [FormCheckboxTestCase]
 name = Form API checkbox
 description = Tests form API checkbox handling of various combinations of #default_value and #return_value.
+group = Form API
+file = form.test
+
+[FormResizableTextareaTestCase]
+name = Form API resizable textarea
+description = Tests transition from old JS-based textarea resize to new CSS approach.
 group = Form API
 file = form.test
 

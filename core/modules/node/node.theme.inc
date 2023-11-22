@@ -246,9 +246,6 @@ function template_preprocess_node(&$variables) {
     }
   }
 
-  // Add article ARIA role.
-  $variables['attributes']['role'] = 'article';
-
   // Gather node classes.
   $variables['classes'][] = backdrop_html_class('node-' . $node->type);
   if ($variables['promote']) {
@@ -272,5 +269,9 @@ function template_preprocess_node(&$variables) {
 
   // Add an extra theme hook suggestion for node id.
   $variables['theme_hook_suggestions'][] = 'node__' . $node->nid;
-}
 
+  // Add a legacy theme hook suggestion for content block. @todo remove in 2.x.
+  if (strstr($variables['theme_hook_original'], 'node_block')) {
+    $variables['theme_hook_suggestions'][] = 'node__block_' . $node->nid;
+  }
+}

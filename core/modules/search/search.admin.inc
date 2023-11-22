@@ -5,27 +5,85 @@
  */
 
 /**
- * Menu callback: confirm wiping of the index.
+ * Menu callback: confirm rebuilding of the index.
  */
 function search_reindex_confirm() {
-  return confirm_form(array(),
-    t('Are you sure you want to invalidate the search index?'),
-    'admin/config/search/settings',
-    t('The search index is not cleared immediately but will be systematically updated. Search will continue to work but new content won\'t be indexed until all existing content has been re-indexed. This action cannot be undone.'),
-    t('Invalidate search index'),
-    t('Cancel'));
+
+  $index_stats = search_get_stats();
+
+  $form['#attributes'] = array(
+    'class' => array('confirmation'),
+  );
+
+  $form['index_type'] = array(
+    '#type' => 'radios',
+    '#title' => t('Items to index:'),
+    '#options' => array(
+      'total' => t('Re-index entire site (@total_items)', array('@total_items' => $index_stats['total'] . ' ' . format_plural($index_stats['total'], 'item', 'items'))),
+      'remaining' => t('Index only remaining items (@remaining)', array('@remaining' => $index_stats['remaining'] . ' ' . format_plural($index_stats['remaining'], 'item', 'items'))),
+    ),
+    '#default_value' => 'total',
+  );
+
+  $form['description'] = array(
+    '#type' => 'help',
+    '#markup' => t('This action will rebuild the search index. It may be a lengthy process.'),
+  );
+
+  $form['actions'] = array(
+    '#type' => 'actions',
+    'submit' => array(
+      '#type' => 'submit',
+      '#value' => t('Rebuild search index'),
+    ),
+    'cancel' => array(
+      '#type' => 'link',
+      '#title' => t('Cancel'),
+      '#href' => 'admin/config/search/settings',
+      '#options' => array(
+        'path' => 'admin/config/search/settings',
+      ),
+    ),
+  );
+
+  return $form;
 }
 
 /**
- * Handler for wipe confirmation
+ * Handler for rebuild confirmation
  */
 function search_reindex_confirm_submit(&$form, &$form_state) {
-  if ($form['confirm']) {
+  $config = config('search.settings');
+  $limit_per_pass = $config->get('search_cron_limit');
+
+  $index_stats = search_get_stats();
+
+  if ($form_state['values']['index_type'] == 'total') {
+    // Mark all content as needing to be re-indexed.
     search_reindex();
-    backdrop_set_message(t('The search index will be invalidated.'));
-    $form_state['redirect'] = 'admin/config/search/settings';
-    return;
   }
+
+  // Determine how many items need to be indexed.
+  $number_of_items = $index_stats[$form_state['values']['index_type']];
+
+  // Determine how many passes are needed to reindex.
+  $passes_needed = ceil($number_of_items / $limit_per_pass);
+  $search_active_modules = config_get('search.settings', 'search_active_modules');
+
+  // Create the batch if needed.
+  if ($passes_needed && isset($search_active_modules)) {
+    $batch = array(
+      'title' => t('Rebuilding search index'),
+      'operations' => array(
+        array('search_reindex_batch', array($passes_needed, $search_active_modules)),
+      ),
+      'progress_message' => '',
+      'finished' => 'search_reindex_batch_finished',
+    );
+    batch_set($batch);
+  }
+
+  $form_state['redirect'] = 'admin/config/search/settings';
 }
 
 /**
@@ -79,9 +137,27 @@ function search_admin_settings($form, &$form_state) {
     '#description' => t('Only one type of item will be searched by default. This selection will determine what appears at <a href="@search">@search</a>.', array('@search' => url('search', array('absolute' => TRUE)))),
   );
 
+  $form['pager'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Pager type'),
+  );
+  $pager_type = $config->get('search_pager_type');
+  $form['pager']['search_pager_type'] = array(
+    '#type' => 'radios',
+    '#title' => t('Pager type'),
+    '#title_display' => 'invisible',
+    '#options' => array(
+      'full' => t('Full pager'),
+      'mini' => t('Mini pager'),
+    ),
+    '#default_value' => isset($pager_type) ? $pager_type : 'full',
+  );
+  $form['pager']['search_pager_type']['full']['#description'] = t('Includes "Previous"/"Next" and "First"/"Last" links, as well as numbered links for each page of the search results.');
+  $form['pager']['search_pager_type']['mini']['#description'] = t('Shows only "Previous"/"Next" links, and indications of the current and total number of search results pages.');
+
   $form['logging'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Logging')
+    '#title' => t('Logging'),
   );
   $form['logging']['search_logging'] = array(
     '#type' => 'checkbox',
@@ -102,36 +178,28 @@ function search_admin_settings($form, &$form_state) {
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Save configuration')
+    '#value' => t('Save configuration'),
   );
 
   // Indexing settings:
   $form['indexing'] = array(
     '#type' => 'fieldset',
     '#title' => t('Indexing'),
-    '#description' => t('<p><em>The search index is not cleared immediately when invalidated, instead it will be systematically updated during cron runs. Searching will continue to work but new content won\'t be indexed until all existing content has been re-indexed.</em></p>'),
   );
 
   // Collect some stats
-  $remaining = 0;
-  $total = 0;
-  foreach ($config->get('search_active_modules') as $module) {
-    if ($status = module_invoke($module, 'search_status')) {
-      $remaining += $status['remaining'];
-      $total += $status['total'];
-    }
-  }
+  $index_stats = search_get_stats();
 
-  $count = format_plural($remaining, 'There is 1 item left to index.', 'There are @count items left to index.');
-  $percentage = ((int)min(100, 100 * ($total - $remaining) / max(1, $total))) . '%';
+  $count = format_plural($index_stats['remaining'], 'There is 1 item left to index.', 'There are @count items left to index.');
+  $percentage = ((int)min(100, 100 * ($index_stats['total'] - $index_stats['remaining']) / max(1, $index_stats['total']))) . '%';
   $status = '<p><strong>' . t('%percentage of the site has been indexed.', array('%percentage' => $percentage)) . ' ' . $count . '</strong></p>';
 
   $form['indexing']['status'] = array('#markup' => $status);
   $form['indexing']['wipe'] = array(
     '#type' => 'submit',
-    '#value' => t('Invalidate search index'),
+    '#value' => t('Rebuild search index'),
     '#submit' => array('search_admin_reindex_submit'),
-    '#attributes' => array('class' => array('button-danger')),
+    '#attributes' => array('class' => array('button-secondary')),
   );
 
   $items = backdrop_map_assoc(array(10, 20, 50, 100, 200, 500));
@@ -140,7 +208,7 @@ function search_admin_settings($form, &$form_state) {
     '#title' => t('Number of items to index during cron runs:'),
     '#default_value' => $config->get('search_cron_limit'),
     '#options' => $items,
-    '#description' => t('The maximum number of items indexed in each pass of a <a href="@cron">cron maintenance task</a>. If necessary, reduce this number to prevent timeouts and memory errors while indexing.', array('@cron' => url('admin/reports/status')))
+    '#description' => t('The maximum number of items indexed in each pass of a <a href="@cron">cron maintenance task</a>. If necessary, reduce this number to prevent timeouts and memory errors while indexing.', array('@cron' => url('admin/reports/status'))),
   );
 
   $form['indexing']['search_minimum_word_size'] = array(
@@ -161,13 +229,13 @@ function search_admin_settings($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Simple CJK handling'),
     '#default_value' => $config->get('search_overlap_cjk'),
-    '#description' => t('Whether to apply a simple Chinese/Japanese/Korean tokenizer based on overlapping sequences. Turn this off if you want to use an external preprocessor for this instead. Does not affect other languages. <strong>Changing this setting will invalidate the search index.</strong>')
+    '#description' => t('Whether to apply a simple Chinese/Japanese/Korean tokenizer based on overlapping sequences. Turn this off if you want to use an external preprocessor for this instead. Does not affect other languages. <strong>Changing this setting will invalidate the search index.</strong>'),
   );
 
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Save configuration')
+    '#value' => t('Save configuration'),
   );
 
   return $form;
@@ -202,6 +270,7 @@ function search_admin_settings_submit($form, &$form_state) {
   $config->set('search_cron_limit', $form_state['values']['search_cron_limit']);
   $config->set('search_default_module', $form_state['values']['search_default_module']);
   $config->set('search_logging', (bool) $form_state['values']['search_logging']);
+  $config->set('search_pager_type', $form_state['values']['search_pager_type']);
 
   // Check whether we are resetting the values.
   if ($form_state['triggering_element']['#value'] == t('Reset to defaults')) {

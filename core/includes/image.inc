@@ -22,9 +22,8 @@
  * software.
  *
  * Image toolkits are discovered based on the associated module's
- * hook_image_toolkits. Additionally the image toolkit include file must be
- * identified in the files array in the module.info file. The toolkit must then
- * be enabled using the admin/config/media/image-toolkit form.
+ * hook_image_toolkits. The toolkit must then be enabled using the
+ * admin/config/media/image-toolkit form.
  *
  * Only one toolkit may be selected at a time. If a module author wishes to call
  * a specific toolkit they can check that it is installed by calling
@@ -96,6 +95,33 @@ function image_toolkit_invoke($method, stdClass $image, array $params = array())
   }
   watchdog('image', 'The selected image handling toolkit %toolkit can not correctly process %function.', array('%toolkit' => $image->toolkit, '%function' => $function), WATCHDOG_ERROR);
   return FALSE;
+}
+
+/**
+ * Gets supported image extensions.
+ *
+ * Backdrop supports GIF, JPG, PNG, and WEBP file formats when supported by the
+ * GD toolkit, and may support others, depending on the currently used toolkit.
+ *
+ * @return array
+ *   Array of supported extensions.
+ *
+ * @since 1.25.0 Function added.
+ */
+function image_get_supported_extensions() {
+  $toolkit = image_get_toolkit();
+  $function = 'image_' . $toolkit . '_supported_extensions';
+  if (function_exists($function)) {
+    return $function();
+  }
+  watchdog('image', 'The selected image handling toolkit %toolkit should provide a %function callback.',
+    array(
+      '%toolkit' => $toolkit,
+      '%function' => $function),
+    WATCHDOG_ERROR
+  );
+  // Provide a fallback list of extensions.
+  return array('jpg', 'jpeg', 'gif', 'png');
 }
 
 /**

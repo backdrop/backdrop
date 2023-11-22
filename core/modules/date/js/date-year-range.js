@@ -133,7 +133,7 @@ Backdrop.dateYearRange.SelectListWithCustomOption.prototype.createDropdown = fun
 
   // When the user changes the selected option in the dropdown, perform
   // appropriate actions (such as showing or hiding the textfield).
-  $dropdown.bind('change', $.proxy(this.handleDropdownChange, this));
+  $dropdown.on('change', $.proxy(this.handleDropdownChange, this));
 
   // Set the initial value of the dropdown.
   this._setInitialDropdownValue($dropdown);

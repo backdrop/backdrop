@@ -273,6 +273,7 @@ function field_permission() {
         '@url' => '#module-node',
       )),
       'restrict access' => TRUE,
+      'warning' => t('Deleting fields can cause irreversible data loss.'),
     ),
   );
 }

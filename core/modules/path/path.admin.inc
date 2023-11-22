@@ -123,7 +123,8 @@ function path_admin_edit($path = array()) {
  * @see path_admin_form_delete_submit()
  */
 function path_admin_form($form, &$form_state, $path = array('source' => '', 'alias' => '', 'langcode' => LANGUAGE_NONE, 'pid' => NULL)) {
-  $clean_urls = config_get('system.core', 'clean_url');
+  $field_prefix = url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q=');
+
   $form['source'] = array(
     '#type' => 'textfield',
     '#title' => t('Existing system path'),
@@ -131,9 +132,8 @@ function path_admin_form($form, &$form_state, $path = array('source' => '', 'ali
     '#maxlength' => 255,
     '#size' => 45,
     '#description' => t('Specify the existing path you wish to alias. For example: <code>node/28</code> or <code>taxonomy/term/1</code>.'),
-    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . ($clean_urls ? '' : '?q='),
+    '#field_prefix' => $field_prefix,
     '#required' => TRUE,
-    '#autocomplete_path' => 'path-autocomplete',
   );
   $form['alias'] = array(
     '#type' => 'textfield',
@@ -142,7 +142,7 @@ function path_admin_form($form, &$form_state, $path = array('source' => '', 'ali
     '#maxlength' => 255,
     '#size' => 45,
     '#description' => t('Specify an alternative path where this page will appear. Do not include a trailing slash.'),
-    '#field_prefix' => url(NULL, array('absolute' => TRUE)) . ($clean_urls ? '' : '?q='),
+    '#field_prefix' => $field_prefix,
     '#required' => TRUE,
   );
 
@@ -157,7 +157,7 @@ function path_admin_form($form, &$form_state, $path = array('source' => '', 'ali
       '#empty_option' => t('- None -'),
       '#default_value' => $path['langcode'],
       '#weight' => -10,
-      '#description' => t('A path alias set for a specific language will always be used when displaying this page in that language, and takes precedence over path aliases set as <em>- None -</em>.'),
+      '#description' => t('A URL alias set for a specific language will always be used when displaying this page in that language, and takes precedence over URL aliases set as <em>- None -</em>.'),
     );
   }
   else {
@@ -258,7 +258,7 @@ function path_admin_form_submit($form, &$form_state) {
  * Form constructor for the path deletion form.
  *
  * @param $path
- *   The path alias that will be deleted.
+ *   The URL alias that will be deleted.
  *
  * @see path_admin_delete_confirm_submit()
  */
@@ -267,7 +267,7 @@ function path_admin_delete_confirm($form, &$form_state, $path) {
     $form_state['path'] = $path;
     return confirm_form(
       $form,
-      t('Are you sure you want to delete path alias %title?',
+      t('Are you sure you want to delete URL alias %title?',
       array('%title' => $path['alias'])),
       'admin/config/urls/path'
     );
@@ -347,17 +347,23 @@ function path_admin_filter_form_submit_reset($form, &$form_state) {
  * @ingroup forms
  */
 function path_patterns_form($form, $form_state) {
+  backdrop_add_js(backdrop_get_path('module', 'path') . '/js/path.admin.js');
   $config = config('path.settings');
 
   $form['help'] = array(
     '#type' => 'help',
-    '#markup' => t('URL patterns automatically alias new content based on wildcards called <em>tokens</em>. For example the URL <code>node/10</code> might be automatically aliased to <code>blog/my-first-post</code> using the pattern <code>blog/[node:title]</code>.'),
+    '#markup' => t('URL patterns automatically alias new content based on wildcards called <em>tokens</em>. For example, the URL <code>node/10</code> might be automatically aliased to <code>blog/my-first-post</code> by using the pattern <code>blog/[node:title]</code>.'),
   );
 
   $all_path_info = path_get_info();
   foreach ($all_path_info as $path_type => $path_info) {
-    $pattern_description = $path_info['pattern description'];
-    $group_header = t('!label URL alias patterns', array('!label' => $path_info['label']));
+    if (isset($path_info['pattern items'])) {
+      $group_header = t('!label URL alias patterns', array('!label' => $path_info['label']));
+    }
+    else {
+      $group_header = t('!label URL alias pattern', array('!label' => $path_info['label']));
+    }
+
     $token_types = array();
     if (isset($path_info['entity type'])) {
       $entity_type = entity_get_info($path_info['entity type']);
@@ -369,15 +375,15 @@ function path_patterns_form($form, $form_state) {
     $form[$path_type] = array(
       '#type' => 'fieldset',
       '#title' => $group_header,
-      '#collapsible' => TRUE,
-      '#collapsed' => FALSE,
+      '#collapsible' => FALSE,
     );
 
-    // Prompt for the default URL alias pattern for this path type.
+    // Set up the field for default URL alias pattern for this path type.
     $variable = $path_type . '_pattern';
     $form[$path_type][$variable] = array(
       '#type' => 'textfield',
-      '#title' => $pattern_description,
+      '#title' => isset($path_info['pattern items']) ? $path_info['pattern label'] : $group_header,
+      '#title_display' => isset($path_info['pattern items']) ? 'before' : 'invisible',
       '#default_value' => $config->get($variable),
       '#size' => 65,
       '#maxlength' => 1280,
@@ -387,33 +393,60 @@ function path_patterns_form($form, $form_state) {
       '#min_tokens' => 1,
       '#parents' => array($variable),
     );
+    if (isset($path_info['pattern description'])) {
+      $form[$path_type][$variable]['#description'] = $path_info['pattern description'];
+    }
 
-    // Set up specialized patterns for this path type (e.g. node types).
+    // Prepare the variables required for the "Browser available tokens" links.
+    $browse_token_variables = array(
+      'token_types' => $token_types,
+      'text' => t('Browse available tokens for @type', array('@type' => $path_info['label'])),
+    );
+
+    // Set up the fields for the specific URL patterns for this path type.
     if (isset($path_info['pattern items'])) {
+      $form[$path_type]['specific_patterns'] = array(
+        '#type' => 'fieldset',
+        '#title' => isset($path_info['pattern items label']) ? $path_info['pattern items label'] : t('Specific URL alias patterns'),
+        '#description' => t('If any of these specific patterns is left blank, the default above will be used.'),
+        '#collapsible' => TRUE,
+        '#attributes' => array('class' => array('specific-path-patterns')),
+      );
+
+      $specific_patterns = 0;
       foreach ($path_info['pattern items'] as $item_name => $item_label) {
         $variable = $path_type . '_' . $item_name . '_pattern';
-        $form[$path_type][$variable] = array(
+        $default_value = $config->get($variable);
+        $specific_patterns += (int) isset($default_value);
+        $form[$path_type]['specific_patterns'][$variable] = array(
           '#type' => 'textfield',
           '#title' => $item_label,
-          '#default_value' => $config->get($variable),
+          '#default_value' => $default_value,
           '#size' => 65,
           '#maxlength' => 1280,
           '#element_validate' => array('token_element_validate'),
           '#after_build' => array('token_element_validate'),
           '#token_types' => $token_types,
           '#min_tokens' => 1,
+          '#attributes' => array('class' => array('specific-pattern')),
           '#parents' => array($variable),
         );
       }
-    }
+      // In order to keep the form short, collapse the fieldset if no specific
+      // patterns have been previously configured for this path type.
+      $form[$path_type]['specific_patterns']['#collapsed'] = $specific_patterns === 0;
 
-    // Display the user documentation of placeholders supported by this path
-    // type as a description on the last pattern.
-    $variables = array(
-      'token_types' => $token_types,
-      'text' => t('Browse available tokens for @type.', array('@type' => $path_info['label'])),
-    );
-    $form[$path_type]['#description'] = '<p>' . t('Each of the fields below support tokens.') . ' ' . theme('token_tree_link', $variables) . '</p>';
+      // If this path type has specific alias pattern fields, then render the
+      // token support help text as description of the entire fieldset (instead
+      // of repeating it in each specific pattern field).
+      $form[$path_type]['#description'] = t('Each of the fields below supports tokens.') . ' ' . theme('token_tree_link', $browse_token_variables) . '.';
+    }
+    else {
+      // If the path type only has the default alias pattern field (one such
+      // type is user accounts), then render the token support help text as
+      // description in the default pattern field.
+      $form[$path_type][$variable]['#description'] = t('This field supports tokens.') . ' ' . theme('token_tree_link', $browse_token_variables) . '.';
+    }
   }
 
   $form['actions']['#type'] = 'actions';
@@ -611,7 +644,7 @@ function path_patterns_settings_form_validate($form, &$form_state) {
 }
 
 /**
- * Form builder; Bulk path alias update form.
+ * Form builder; Bulk URL alias update form.
  *
  * @see path_bulk_update_form_submit()
  * @ingroup forms
@@ -729,7 +762,7 @@ function theme_path_bulk_update_form($variables) {
 }
 
 /**
- * Form submit handler for path alias bulk update form.
+ * Form submit handler for URL alias bulk update form.
  *
  * @see path_bulk_update_form()
  * @see path_admin_bulk_delete_confirm()
@@ -751,7 +784,7 @@ function path_bulk_update_form_rebuild_submit($form, &$form_state) {
 }
 
 /**
- * Validate handler for path alias bulk generate form.
+ * Validate handler for URL alias bulk generate form.
  *
  * @see path_bulk_update_form()
  * @see path_bulk_update_form_generate_submit()
@@ -774,7 +807,7 @@ function path_bulk_update_form_validate($form, &$form_state) {
 }
 
 /**
- * Submit handler for path alias bulk generate form.
+ * Submit handler for URL alias bulk generate form.
  *
  * @see path_bulk_update_form()
  * @see path_bulk_update_form_rebuild_submit()
@@ -863,7 +896,7 @@ function path_bulk_update_batch_finished($success, $results, $operations) {
 }
 
 /**
- * Confirm form for path alias bulk deletion.
+ * Confirm form for URL alias bulk deletion.
  *
  * @see path_bulk_update_form()
  * @see path_bulk_update_form_rebuild_submit()
@@ -929,7 +962,7 @@ function path_bulk_update_form_bulk_delete_submit($form, &$form_state) {
     if ($count_base === count($all_path_info)) {
       db_delete('url_alias')
         ->execute();
-      backdrop_set_message(t('All of your path aliases have been deleted.'));
+      backdrop_set_message(t('All of your URL aliases have been deleted.'));
     }
     else {
       foreach ($values as $key => $value) {
