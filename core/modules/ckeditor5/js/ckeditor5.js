@@ -12,8 +12,8 @@
       // Set a title on the CKEditor instance that includes the text field's
       // label so that screen readers say something that is understandable
       // for end users.
-      var label = $('label[for=' + element.getAttribute('id') + ']').text();
-      var editorSettings = format.editorSettings;
+      const label = $('label[for=' + element.getAttribute('id') + ']').text();
+      const editorSettings = format.editorSettings;
       editorSettings.title = Backdrop.t("Rich Text Editor, !label field", {'!label': label});
 
       // CKEditor initializes itself in a read-only state if the 'disabled'
@@ -55,7 +55,7 @@
       // we convert the list of strings to match the expected variable name.
       editorSettings.plugins = [];
       editorSettings.pluginList.forEach(function(pluginItem) {
-        var [packageName,moduleName] = pluginItem.split('.');
+        const [packageName,moduleName] = pluginItem.split('.');
         if (typeof CKEditor5[packageName] != 'undefined') {
           editorSettings.plugins.push(CKEditor5[packageName][moduleName]);
         }
@@ -152,27 +152,27 @@
      * This dynamically loads jQuery UI (if necessary) using the Backdrop AJAX
      * framework, then opens a dialog at the specified Backdrop path.
      *
-     * @param editor
+     * @param {Editor} editor
      *   The CKEditor instance that is opening the dialog.
-     * @param string url
+     * @param {String} url
      *   The URL that contains the contents of the dialog.
-     * @param Object existingValues
+     * @param {Object} existingValues
      *   Existing values that will be sent via POST to the url for the dialog
      *   contents.
-     * @param Function saveCallback
+     * @param {Function} saveCallback
      *   A function to be called upon saving the dialog.
-     * @param Object dialogSettings
+     * @param {Object} dialogSettings
      *   An object containing settings to be passed to the jQuery UI.
      */
     openDialog: function (editor, url, existingValues, saveCallback, dialogSettings) {
       // Locate a suitable place to display our loading indicator.
-      var $toolbar = $(editor.ui.view.toolbar.element);
+      const $toolbar = $(editor.ui.view.toolbar.element);
 
       // Remove any previous loading indicator.
       $toolbar.find('.ckeditor5-dialog-loading').remove();
 
       // Add a consistent dialog class.
-      var classes = dialogSettings.dialogClass ? dialogSettings.dialogClass.split(' ') : [];
+      const classes = dialogSettings.dialogClass ? dialogSettings.dialogClass.split(' ') : [];
       classes.push('editor-dialog');
       dialogSettings.dialogClass = classes.join(' ');
       dialogSettings.autoResize = true;
@@ -181,7 +181,7 @@
 
       // Add a "Loading…" message, hide it underneath the CKEditor toolbar, create
       // a Backdrop.ajax instance to load the dialog and trigger it.
-      var $content = $('<div class="ck-reset_all-excluded ckeditor5-dialog-loading-wrapper" style="display: none;"><div class="ckeditor5-dialog-loading"><span class="ckeditor5-dialog-loading-link"><a>' + Backdrop.t('Loading...') + '</a></span></div></div>');
+      const $content = $('<div class="ck-reset_all-excluded ckeditor5-dialog-loading-wrapper" style="display: none;"><div class="ckeditor5-dialog-loading"><span class="ckeditor5-dialog-loading-link"><a>' + Backdrop.t('Loading...') + '</a></span></div></div>');
       $toolbar.append($content);
       new Backdrop.ajax('ckeditor5-dialog', $content.find('a').get(0), {
         accepts: 'application/vnd.backdrop-dialog',
@@ -217,9 +217,9 @@
      *   The vertical offset in pixels.
      */
     computeOffsetTop: function () {
-      var $offsets = $('[data-offset-top]');
-      var value, sum = 0;
-      for (var i = 0, il = $offsets.length; i < il; i++) {
+      const $offsets = $('[data-offset-top]');
+      let value, sum = 0;
+      for (let i = 0, il = $offsets.length; i < il; i++) {
         value = parseInt($offsets[i].getAttribute('data-offset-top'), 10);
         sum += !isNaN(value) ? value : 0;
       }
@@ -286,7 +286,7 @@
      *   The DOM element to which the editor was attached.
      * @param format
      *   The text format configuration with which the editor was attached.
-     * @param beforeAttachValue
+     * @param beforeAttachValues
      *   The element value before CKEditor was attached.
      *
      * @return {boolean}
@@ -342,7 +342,7 @@
   /**
    * Display a warning message that loading the editor may modify content.
    */
-  Backdrop.theme.prototype.ckeditor5ContentModifiedWarning = function (settings) {
+  Backdrop.theme.prototype.ckeditor5ContentModifiedWarning = function() {
     let warningMessage = '';
     warningMessage += '<div class="ckeditor5-content-modified-warning messages warning">';
     warningMessage += '<span class="ckeditor5-content-modified-message">' + Backdrop.t('Activating CKEditor 5 will reformat the content of this field. Review content carefully after activating.') + '</span> ';
