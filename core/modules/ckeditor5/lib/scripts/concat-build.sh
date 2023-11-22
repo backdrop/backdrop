@@ -27,3 +27,17 @@ npm install --save ckeditor5 \
 cp node_modules/ckeditor5/build/ckeditor5-dll.js .
 
 cat node_modules/@ckeditor/ckeditor5-*/build/*js >> ckeditor5-dll.js
+
+# Make a fresh translation directory.
+mkdir -p translations
+rm -rf translations/*
+
+# Exclude the unnecessary English po file.
+rm node_modules/@ckeditor/ckeditor5-core/lang/translations/en.po
+
+# Copy all available translations into concatenated files.
+LANGCODE_LIST=($(ls node_modules/@ckeditor/ckeditor5-core/lang/translations/ | sed 's/.po//'))
+for LANGCODE in "${LANGCODE_LIST[@]}"
+do
+  cat node_modules/@ckeditor/ckeditor5-*/build/translations/$LANGCODE.js >> translations/$LANGCODE.js
+done
