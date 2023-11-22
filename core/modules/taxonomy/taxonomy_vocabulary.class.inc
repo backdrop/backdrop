@@ -5,7 +5,7 @@
  * This class is responsible for saving and storing configuration files for
  * vocabularies.
  */
-class TaxonomyVocabulary {
+class TaxonomyVocabulary extends stdClass {
 
   /**
    * Human-readable of the vocabulary.
@@ -55,6 +55,11 @@ class TaxonomyVocabulary {
    */
   public $weight = 0;
 
+  /**
+   * @var TaxonomyVocabulary|null
+   */
+  public $original;
+
   function __construct($config = array()) {
     foreach ($config as $key => $value) {
       $this->$key = $value;
@@ -69,10 +74,17 @@ class TaxonomyVocabulary {
    *   vocabulary was updated.
    */
   function save() {
-    module_invoke_all('taxonomy_vocabulary_presave', $this);
-
     $config = config('taxonomy.vocabulary.' . $this->machine_name);
     $is_new = $config->isNew();
+
+    if (!$is_new) {
+      $data = $config->get();
+      $original = new TaxonomyVocabulary($data);
+      $this->original = $original;
+    }
+
+    module_invoke_all('taxonomy_vocabulary_presave', $this);
+
     $config->set('name', $this->name);
     $config->set('machine_name', $this->machine_name);
     $config->set('description', $this->description);

@@ -76,14 +76,14 @@ function number_field_instance_settings_form($field, $instance) {
     '#type' => 'textfield',
     '#title' => t('Minimum'),
     '#default_value' => $settings['min'],
-    '#description' => t('The minimum value that should be allowed in this field. Leave blank for no minimum.'),
+    '#description' => t('The minimum value that should be allowed in this field. Leave blank for the lowest possible value that can be saved to the database.'),
     '#element_validate' => array('form_validate_number'),
   );
   $form['max'] = array(
     '#type' => 'textfield',
     '#title' => t('Maximum'),
     '#default_value' => $settings['max'],
-    '#description' => t('The maximum value that should be allowed in this field. Leave blank for no maximum.'),
+    '#description' => t('The maximum value that should be allowed in this field. Leave blank for the highest possible value that can be saved to the database.'),
     '#element_validate' => array('form_validate_number'),
   );
   $form['prefix'] = array(
@@ -121,6 +121,60 @@ function number_field_instance_settings_form_validate($element, &$form_state, $f
       '%max' => $max['#title'],
       '%min' => $min['#title'],
     )));
+  }
+
+  // Consider the value limits of the database, prevent impossible settings.
+  $field_type = $form['#field']['type'];
+  if ($field_type == 'number_integer') {
+    // @see https://mariadb.com/kb/en/int/
+    $min_db_integer = -2147483647;
+    $max_db_integer = 2147483647;
+    $settings = $form_state['values']['instance']['settings'];
+
+    if (!empty($settings['min']) && $settings['min'] < $min_db_integer) {
+      form_error($min, t('%min is smaller than the smallest value the database can save. Choose a value equal to or higher than %db_min.', array(
+        '%min' => $settings['min'],
+        '%db_min' => $min_db_integer,
+      )));
+    }
+    if (!empty($settings['max']) && $settings['max'] > $max_db_integer) {
+      form_error($max, t('%max is greater than the largest value the database can save. Choose a value equal to or lower than %db_max.', array(
+        '%max' => $settings['max'],
+        '%db_max' => $max_db_integer,
+      )));
+    }
+  }
+  elseif ($field_type == 'number_decimal') {
+    // The field settings for precision and scale also dictate the possible
+    // min/max values for the field.
+    $precision = $form['#field']['settings']['precision'];
+    $scale = $form['#field']['settings']['scale'];
+    $settings = $form_state['values']['instance']['settings'];
+
+    if (!empty($settings['min'])) {
+      $min_value = abs($settings['min']);
+      $digits = explode('.', $min_value);
+
+      if (strlen($digits[0]) > $precision - $scale || (isset($digits[1]) && strlen($digits[1]) > $scale)) {
+        form_error($min, t('%min exceeds possible values for this field. Choose a number that conforms to precision %prec and scale %scale.', array(
+          '%min' => $settings['min'],
+          '%prec' => $precision,
+          '%scale' => $scale,
+        )));
+      }
+    }
+    if (!empty($settings['max'])) {
+      $max_value = abs($settings['max']);
+      $digits = explode('.', $max_value);
+
+      if (strlen($digits[0]) > $precision - $scale || (isset($digits[1]) && strlen($digits[1]) > $scale)) {
+        form_error($max, t('%max exceeds possible values for this field. Choose a number that conforms to precision %prec and scale %scale.', array(
+          '%max' => $settings['max'],
+          '%prec' => $precision,
+          '%scale' => $scale,
+        )));
+      }
+    }
   }
 }
 
@@ -341,12 +395,18 @@ function number_field_widget_form(&$form, &$form_state, $field, $instance, $lang
   $element += array(
     '#type' => 'number',
     '#default_value' => $value,
-    '#max' => 1000000,
   );
 
-  // Set the step for floating point and decimal numbers.
+  // Set default field values based on the number type.
   switch ($field['type']) {
     case 'number_decimal':
+      // Calculate the minimum and maximum value of the decimal field based on
+      // precision and scale settings.
+      $number_value = intval(('1e+' . ($field['settings']['precision'] - $field['settings']['scale'])) - 1);
+      $decimal_value = intval(('1e+' . $field['settings']['scale']) - 1);
+      $element['#min'] = (float) ('-' . $number_value . '.' . $decimal_value);
+      $element['#max'] = (float) ($number_value . '.' . $decimal_value);
+
       // Avoid small float as base in function pow() for better results
       // regarding floating point precision.
       $scale = (int) $field['settings']['scale'];
@@ -354,11 +414,17 @@ function number_field_widget_form(&$form, &$form_state, $field, $instance, $lang
       break;
 
     case 'number_float':
+      $element['#min'] = -3.402823466E+38;
+      $element['#max'] = 3.402823466E+38;
       $element['#step'] = 'any';
       break;
+
+    case 'number_integer':
+      $element['#min'] = '-2147483647';
+      $element['#max'] = '2147483647';
   }
 
-  // Set minimum and maximum.
+  // Override the default minimum and maximum settings if configured.
   if (is_numeric($instance['settings']['min'])) {
     $element['#min'] = $instance['settings']['min'];
   }

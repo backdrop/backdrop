@@ -107,8 +107,8 @@ function _backdrop_decode_exception($exception) {
       // We remove that call.
       array_shift($backtrace);
     }
-    if (isset($exception->query_string, $exception->args)) {
-      $message .= ": " . $exception->query_string . "; " . print_r($exception->args, TRUE);
+    if (isset($exception->errorInfo['query_string'], $exception->errorInfo['args'])) {
+      $message .= ": " . $exception->errorInfo['query_string'] . "; " . print_r($exception->errorInfo['args'], TRUE);
     }
   }
   $caller = _backdrop_get_last_caller($backtrace);
@@ -270,10 +270,10 @@ function _backdrop_log_error($error, $fatal = FALSE) {
  */
 function _backdrop_get_last_caller($backtrace) {
   // Errors that occur inside PHP internal functions do not generate
-  // information about file and line. Ignore black listed functions.
-  $blacklist = array('debug', '_backdrop_error_handler', '_backdrop_exception_handler');
+  // information about file and line. Ignore disallowed functions.
+  $denylist = array('debug', '_backdrop_error_handler', '_backdrop_exception_handler');
   while (($backtrace && !isset($backtrace[0]['line'])) ||
-         (isset($backtrace[1]['function']) && in_array($backtrace[1]['function'], $blacklist))) {
+         (isset($backtrace[1]['function']) && in_array($backtrace[1]['function'], $denylist))) {
     array_shift($backtrace);
   }
 

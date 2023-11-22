@@ -932,6 +932,23 @@ class BackdropPublicStreamWrapper extends BackdropLocalStreamWrapper {
     $path = str_replace('\\', '/', $this->getTarget());
     return $GLOBALS['base_url'] . '/' . self::getDirectoryPath() . '/' . backdrop_encode_path($path);
   }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getLocalPath($uri = NULL) {
+    $path = parent::getLocalPath($uri);
+
+    $private_path = config_get('system.core', 'file_private_path');
+    if ($private_path) {
+      $private_path = realpath($private_path);
+      if ($private_path && strpos($path, $private_path) === 0) {
+        return FALSE;
+      }
+    }
+
+    return $path;
+  }
 }
 
 /**

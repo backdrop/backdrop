@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Test module implementing a form that can be embedded in search results.
@@ -10,8 +9,8 @@
  */
 
 /**
-  * Implements hook_menu().
-  */
+ * Implements hook_menu().
+ */
 function search_embedded_form_menu() {
   $items['search_embedded_form'] = array(
     'title' => 'Search_Embed_Form',

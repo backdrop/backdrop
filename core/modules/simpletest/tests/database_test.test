@@ -11,7 +11,14 @@
  * rather than just a stdClass or array. This class is for testing that
  * functionality. (See testQueryFetchClass() below)
  */
-class FakeRecord { }
+class FakeRecord {
+
+  /**
+   * @var string
+   */
+  public $name;
+
+}
 
 /**
  * Base test class for databases.
@@ -183,22 +190,22 @@ class DatabaseConnectionTestCase extends DatabaseTestCase {
    * Test that connections return appropriate connection objects.
    */
   function testConnectionRouting() {
-    // Clone the master credentials to a slave connection.
+    // Clone the primary credentials to a replica connection.
     // Note this will result in two independent connection objects that happen
     // to point to the same place.
     $connection_info = Database::getConnectionInfo('default');
-    Database::addConnectionInfo('default', 'slave', $connection_info['default']);
+    Database::addConnectionInfo('default', 'replica', $connection_info['default']);
 
     $db1 = Database::getConnection('default', 'default');
-    $db2 = Database::getConnection('slave', 'default');
+    $db2 = Database::getConnection('replica', 'default');
 
     $this->assertNotNull($db1, 'default connection is a real connection object.');
-    $this->assertNotNull($db2, 'slave connection is a real connection object.');
+    $this->assertNotNull($db2, 'replica connection is a real connection object.');
     $this->assertNotIdentical($db1, $db2, 'Each target refers to a different connection.');
 
     // Try to open those targets another time, that should return the same objects.
     $db1b = Database::getConnection('default', 'default');
-    $db2b = Database::getConnection('slave', 'default');
+    $db2b = Database::getConnection('replica', 'default');
     $this->assertIdentical($db1, $db1b, 'A second call to getConnection() returns the same object.');
     $this->assertIdentical($db2, $db2b, 'A second call to getConnection() returns the same object.');
 
@@ -217,16 +224,16 @@ class DatabaseConnectionTestCase extends DatabaseTestCase {
    * Test that connections return appropriate connection objects.
    */
   function testConnectionRoutingOverride() {
-    // Clone the master credentials to a slave connection.
+    // Clone the primary credentials to a replica connection.
     // Note this will result in two independent connection objects that happen
     // to point to the same place.
     $connection_info = Database::getConnectionInfo('default');
-    Database::addConnectionInfo('default', 'slave', $connection_info['default']);
+    Database::addConnectionInfo('default', 'replica', $connection_info['default']);
 
-    Database::ignoreTarget('default', 'slave');
+    Database::ignoreTarget('default', 'replica');
 
     $db1 = Database::getConnection('default', 'default');
-    $db2 = Database::getConnection('slave', 'default');
+    $db2 = Database::getConnection('replica', 'default');
 
     $this->assertIdentical($db1, $db2, 'Both targets refer to the same connection.');
   }
@@ -261,14 +268,14 @@ class DatabaseConnectionTestCase extends DatabaseTestCase {
     $this->assertEqual($connection_info['default']['driver'], $connectionOptions['driver'], 'The default connection info driver matches the current connection options driver.');
     $this->assertEqual($connection_info['default']['database'], $connectionOptions['database'], 'The default connection info database matches the current connection options database.');
 
-    // Set up identical slave and confirm connection options are identical.
-    Database::addConnectionInfo('default', 'slave', $connection_info['default']);
-    $db2 = Database::getConnection('slave', 'default');
+    // Set up identical replica and confirm connection options are identical.
+    Database::addConnectionInfo('default', 'replica', $connection_info['default']);
+    $db2 = Database::getConnection('replica', 'default');
     $connectionOptions2 = $db2->getConnectionOptions();
 
     // Get a fresh copy of the default connection options.
     $connectionOptions = $db->getConnectionOptions();
-    $this->assertIdentical($connectionOptions, $connectionOptions2, 'The default and slave connection options are identical.');
+    $this->assertIdentical($connectionOptions, $connectionOptions2, 'The default and replica connection options are identical.');
 
     // Set up a new connection with different connection info.
     $test = $connection_info['default'];
@@ -299,6 +306,10 @@ class DatabaseSelectCloneTest extends DatabaseTestCase {
     $query->condition('id', $subquery, 'IN');
 
     $clone = clone $query;
+
+    // Cloned query should have a different unique identifier.
+    $this->assertNotEqual($query->uniqueIdentifier(), $clone->uniqueIdentifier());
+
     // Cloned query should not be altered by the following modification
     // happening on original query.
     $subquery->condition('age', 25, '>');
@@ -307,6 +318,33 @@ class DatabaseSelectCloneTest extends DatabaseTestCase {
     $query_result = $query->countQuery()->execute()->fetchField();
 
     // Make sure the cloned query has not been modified
+    $this->assertEqual(3, $clone_result, 'The cloned query returns the expected number of rows');
+    $this->assertEqual(2, $query_result, 'The query returns the expected number of rows');
+  }
+
+  /**
+   * Tests that nested SELECT queries are cloned properly.
+   */
+  public function testNestedQueryCloning() {
+    $sub_query = db_select('test', 't');
+    $sub_query->addField('t', 'id', 'id');
+    $sub_query->condition('age', 28, '<');
+
+    $query = db_select($sub_query, 't');
+
+    $clone = clone $query;
+
+    // Cloned query should have a different unique identifier.
+    $this->assertNotEqual($query->uniqueIdentifier(), $clone->uniqueIdentifier());
+
+    // Cloned query should not be altered by the following modification
+    // happening on original query.
+    $sub_query->condition('age', 25, '>');
+
+    $clone_result = $clone->countQuery()->execute()->fetchField();
+    $query_result = $query->countQuery()->execute()->fetchField();
+
+    // Make sure the cloned query has not been modified.
     $this->assertEqual(3, $clone_result, 'The cloned query returns the expected number of rows');
     $this->assertEqual(2, $query_result, 'The query returns the expected number of rows');
   }
@@ -433,7 +471,7 @@ class DatabaseFetch2TestCase extends DatabaseTestCase {
     $result = db_query('SELECT name FROM {test} WHERE age > :age', array(':age' => 25));
     $i = 0;
     foreach ($result as $record) {
-      $this->assertIdentical($record->name, $column[$i++], 'Column matches direct accesss.');
+      $this->assertIdentical($record->name, $column[$i++], 'Column matches direct access.');
     }
   }
 }
@@ -532,7 +570,7 @@ class DatabaseInsertTestCase extends DatabaseTestCase {
   /**
    * Test that we can specify fields without values and specify values later.
    */
-  function testInsertFieldOnlyDefinintion() {
+  function testInsertFieldOnlyDefinition() {
     // This is useful for importers, when we want to create a query and define
     // its fields once, then loop over a multi-insert execution.
     db_insert('test')
@@ -1515,7 +1553,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
 
   /**
    * Test that we can UNION multiple Select queries together. This is
-   * semantically equal to UNION DISTINCT, so we don't explicity test that.
+   * semantically equal to UNION DISTINCT, so we don't explicitly test that.
    */
   function testUnion() {
     $query_1 = db_select('test', 't')
@@ -1635,7 +1673,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
 }
 
 /**
- * Test case for subselects in a dynamic SELECT query.
+ * Test case for sub-selects in a dynamic SELECT query.
  */
 class DatabaseSelectSubqueryTestCase extends DatabaseTestCase {
   /**
@@ -2116,7 +2154,7 @@ class DatabaseSelectComplexTestCase extends DatabaseTestCase {
     $orderby = $query->getOrderBy();
     $this->assertEqual($orderby['name'], 'ASC', 'Query correctly sets ordering clause.');
     $orderby = $count->getOrderBy();
-    $this->assertFalse(isset($orderby['name']), 'Count query correctly unsets ordering caluse.');
+    $this->assertFalse(isset($orderby['name']), 'Count query correctly unsets ordering clause.');
 
     // Make sure that the count query works.
     $count = $count->execute()->fetchField();
@@ -2229,7 +2267,7 @@ class DatabaseSelectComplexTestCase2 extends DatabaseTestCase {
     $acct = $this->backdropCreateUser();
     $this->backdropLogin($acct);
 
-    $query = db_select('test_task', 'tt', array('target' => 'slave'));
+    $query = db_select('test_task', 'tt', array('target' => 'replica'));
     $query->addExpression('tt.pid + 1', 'abc');
     $query->condition('priority', 1, '>');
     $query->condition('priority', 100, '<');
@@ -2370,37 +2408,37 @@ class DatabaseSelectPagerDefaultTestCase extends DatabaseTestCase {
   }
 
   /**
-   * Confirm that every pager gets a valid non-overlaping element ID.
+   * Confirm that every pager gets a valid non-overlapping element ID.
    */
   function testElementNumbers() {
     $_GET['page'] = '3, 2, 1, 0';
 
-    $name = db_select('test', 't')->extend('PagerDefault')
-      ->element(2)
+    $query = db_select('test', 't')->extend('PagerDefault');
+    $query->element(2)
       ->fields('t', array('name'))
       ->orderBy('age')
-      ->limit(1)
-      ->execute()
-      ->fetchField();
+      ->limit(1);
+      $this->assertEqual(2, $query->getElement());
+      $name = $query->execute()->fetchField();
     $this->assertEqual($name, 'Paul', 'Pager query #1 with a specified element ID returned the correct results.');
 
     // Setting an element smaller than the previous one
     // should not overwrite the pager $maxElement with a smaller value.
-    $name = db_select('test', 't')->extend('PagerDefault')
-      ->element(1)
+    $query = db_select('test', 't')->extend('PagerDefault');
+    $query->element(1)
       ->fields('t', array('name'))
       ->orderBy('age')
-      ->limit(1)
-      ->execute()
-      ->fetchField();
+      ->limit(1);
+      $this->assertEqual(1, $query->getElement());
+      $name = $query->execute()->fetchField();
     $this->assertEqual($name, 'George', 'Pager query #2 with a specified element ID returned the correct results.');
 
-    $name = db_select('test', 't')->extend('PagerDefault')
-      ->fields('t', array('name'))
+    $query = db_select('test', 't')->extend('PagerDefault');
+    $query->fields('t', array('name'))
       ->orderBy('age')
-      ->limit(1)
-      ->execute()
-      ->fetchField();
+      ->limit(1);
+    $this->assertEqual(3, $query->getElement());
+    $name = $query->execute()->fetchField();
     $this->assertEqual($name, 'John', 'Pager query #3 with a generated element ID returned the correct results.');
 
     unset($_GET['page']);
@@ -2587,7 +2625,7 @@ class DatabaseTaggingTestCase extends DatabaseTestCase {
     $query->addMetaData('test', $data);
 
     $return = $query->getMetaData('test');
-    $this->assertEqual($data, $return, 'Corect metadata returned.');
+    $this->assertEqual($data, $return, 'Correct metadata returned.');
 
     $return = $query->getMetaData('nothere');
     $this->assertNull($return, 'Non-existent key returned NULL.');
@@ -2843,22 +2881,22 @@ class DatabaseLoggingTestCase extends DatabaseTestCase {
    * Test that we can log queries against multiple targets on the same connection.
    */
   function testEnableTargetLogging() {
-    // Clone the master credentials to a slave connection and to another fake
+    // Clone the primary credentials to a replica connection and to another fake
     // connection.
     $connection_info = Database::getConnectionInfo('default');
-    Database::addConnectionInfo('default', 'slave', $connection_info['default']);
+    Database::addConnectionInfo('default', 'replica', $connection_info['default']);
 
     Database::startLog('testing1');
 
     db_query('SELECT name FROM {test} WHERE age > :age', array(':age' => 25))->fetchCol();
 
-    db_query('SELECT age FROM {test} WHERE name = :name', array(':name' => 'Ringo'), array('target' => 'slave'));//->fetchCol();
+    db_query('SELECT age FROM {test} WHERE name = :name', array(':name' => 'Ringo'), array('target' => 'replica'));//->fetchCol();
 
     $queries1 = Database::getLog('testing1');
 
     $this->assertEqual(count($queries1), 2, 'Recorded queries from all targets.');
     $this->assertEqual($queries1[0]['target'], 'default', 'First query used default target.');
-    $this->assertEqual($queries1[1]['target'], 'slave', 'Second query used slave target.');
+    $this->assertEqual($queries1[1]['target'], 'replica', 'Second query used replica target.');
   }
 
   /**
@@ -2875,7 +2913,7 @@ class DatabaseLoggingTestCase extends DatabaseTestCase {
 
     // We use "fake" here as a target because any non-existent target will do.
     // However, because all of the tests in this class share a single page
-    // request there is likely to be a target of "slave" from one of the other
+    // request there is likely to be a target of "replica" from one of the other
     // unit tests, so we use a target here that we know with absolute certainty
     // does not exist.
     db_query('SELECT age FROM {test} WHERE name = :name', array(':name' => 'Ringo'), array('target' => 'fake'))->fetchCol();
@@ -2891,7 +2929,7 @@ class DatabaseLoggingTestCase extends DatabaseTestCase {
    * Test that we can log queries separately on different connections.
    */
   function testEnableMultiConnectionLogging() {
-    // Clone the master credentials to a fake connection.
+    // Clone the primary credentials to a fake connection.
     // That both connections point to the same physical database is irrelevant.
     $connection_info = Database::getConnectionInfo('default');
     Database::addConnectionInfo('test2', 'default', $connection_info['default']);
@@ -2903,7 +2941,7 @@ class DatabaseLoggingTestCase extends DatabaseTestCase {
 
     $old_key = db_set_active('test2');
 
-    db_query('SELECT age FROM {test} WHERE name = :name', array(':name' => 'Ringo'), array('target' => 'slave'))->fetchCol();
+    db_query('SELECT age FROM {test} WHERE name = :name', array(':name' => 'Ringo'), array('target' => 'replica'))->fetchCol();
 
     db_set_active($old_key);
 
@@ -3149,7 +3187,7 @@ class DatabaseInvalidDataTestCase extends DatabaseTestCase {
           'job' => 'Singer',
         ))
         ->execute();
-      $this->fail('Insert succeedded when it should not have.');
+      $this->fail('Insert succeeded when it should not have.');
     }
     catch (Exception $e) {
       // Check if the first record was inserted.
@@ -3877,6 +3915,16 @@ class ConnectionUnitTest extends BackdropUnitTestCase {
 
   protected $monitor;
   protected $originalCount;
+
+  /**
+   * @var string
+   */
+  protected $originalTarget;
+
+  /**
+   * @var bool
+   */
+  protected $skipTest;
 
   function setUp() {
     parent::setUp();
