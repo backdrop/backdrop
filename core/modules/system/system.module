@@ -2444,9 +2444,11 @@ function system_init() {
   // can be re-enabled.
 
   // @todo remove this backwards-compatible session variable wrapper in 2.0.
+  // cspell:disable
   if (isset($_SESSION['ignore_slave_server'])) {
     $_SESSION['ignore_replica_server'] = $_SESSION['ignore_slave_server'];
     unset($_SESSION['ignore_slave_server']);
+    // cspell:enable
   }
 
   if (isset($_SESSION['ignore_replica_server'])) {
@@ -3842,9 +3844,9 @@ function system_mail($key, &$message, $params) {
  *   If evaluates true, prepend an empty time zone option to the array.
  */
 function system_time_zones($blank = NULL) {
-  $zonelist = timezone_identifiers_list();
+  $zone_list = timezone_identifiers_list();
   $zones = $blank ? array('' => t('- None selected -')) : array();
-  foreach ($zonelist as $zone) {
+  foreach ($zone_list as $zone) {
     // Because many time zones exist in PHP only for backward compatibility
     // reasons and should not be used, the list is filtered by a regular
     // expression.

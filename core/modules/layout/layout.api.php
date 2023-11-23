@@ -700,8 +700,8 @@ function hook_block_view_alter(&$data, $block) {
     unset($data['content']['#contextual_links']);
   }
   // Add a theme wrapper function defined by the current module to all blocks
-  // provided by the "somemodule" module.
-  if (is_array($data['content']) && $block->module == 'somemodule') {
+  // provided by the "some_module" module.
+  if (is_array($data['content']) && $block->module == 'some_module') {
     $data['content']['#theme_wrappers'][] = 'mymodule_special_block';
   }
 }

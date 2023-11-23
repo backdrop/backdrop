@@ -1,6 +1,6 @@
 abcdefghijklmnopqrstuvwx
 abiword
-accènts
+accum
 acdb
 activemenu
 admintheme
@@ -179,6 +179,7 @@ ICAL
 IDNA
 ieid
 iend
+ignoretag
 iinet
 imagefield
 imageto
@@ -275,6 +276,7 @@ nextsecond
 nfocus
 nlead
 Nmedi
+noaccess
 noajax
 nocache
 nodeapi
@@ -391,6 +393,8 @@ tableresize
 tablesorting
 tabletools
 tagname
+tagstack
+tagwords
 tarname
 targetdir
 tascript
