@@ -3450,7 +3450,7 @@ class BackdropGetQueryArrayTestCase extends BackdropWebTestCase {
    * Tests that backdrop_get_query_array() correctly explodes query parameters.
    */
   public function testBackdropGetQueryArray() {
-    $url = "http://my.site.com/some_path?foo=/content/folder[@name='foo']/folder[@name='bar']";
+    $url = "http://my.site.com/some-path?foo=/content/folder[@name='foo']/folder[@name='bar']";
     $parsed = parse_url($url);
     $result = backdrop_get_query_array($parsed['query']);
     $this->assertEqual($result['foo'], "/content/folder[@name='foo']/folder[@name='bar']", 'backdrop_get_query_array() should only explode parameters on the first equals sign.');
