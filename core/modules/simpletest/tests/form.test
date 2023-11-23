@@ -1108,7 +1108,7 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
   /**
    * Test the whether the option checker gives an error on invalid tableselect values for checkboxes.
    */
-  function testMultipleTrueOptionchecker() {
+  function testMultipleTrueOptionChecker() {
 
     list($header, $options) = _form_test_tableselect_get_data();
 
@@ -1132,7 +1132,7 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
   /**
    * Test the whether the option checker gives an error on invalid tableselect values for radios.
    */
-  function testMultipleFalseOptionchecker() {
+  function testMultipleFalseOptionChecker() {
 
     list($header, $options) = _form_test_tableselect_get_data();
 
