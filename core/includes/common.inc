@@ -8423,8 +8423,8 @@ function backdrop_write_record($table, &$record, $primary_keys = array()) {
  * Information stored in a module .info file:
  * - name: The real name of the module for display purposes.
  * - description: A brief description of the module.
- * - dependencies: An array of machine names of other modules this module
- *     requires.
+ * - dependencies: An array of machine names of modules required by
+ *   this module.
  * - package: The name of the package of modules this module belongs to.
  *
  * Information stored in a theme .info file:
