@@ -372,6 +372,9 @@ function date_text_element_process($element, &$form_state, $form) {
   // Always remove the title from the parent element.
   $element['#title'] = NULL;
 
+  // Move the #required property from the parent to the child date element.
+  $element['date']['#required'] = !empty($element['#required']);
+
   // Keep the system from creating an error message for the sub-element.
   // We'll set our own message on the parent element.
   if (isset($element['#element_validate'])) {
