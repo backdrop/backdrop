@@ -13,10 +13,8 @@ based on CKEditor 4), this module provides matching functionality, including:
 * Drag and drop toolbar configuration.
 * Automatic configuration of text format HTML tags based on toolbar.
 
-This module is not ready for use on production websites. It may strip tags
-or otherwise corrupt content when editing existing content. This is not yet
-any kind of upgrade path from CKEditor 4 to 5, other than reconfiguring an
-editor to match the previous CKEditor 4 configuration.
+There is not yetany kind of upgrade path from CKEditor 4 to 5, other than
+reconfiguring an editor to match the previous CKEditor 4 configuration.
 
 Requirements
 ------------
