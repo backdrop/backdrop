@@ -821,6 +821,11 @@ class BackdropUnitTestCase extends BackdropTestCase {
   protected $originalModuleList;
 
   /**
+   * @var object
+   */
+  protected $originalLanguage;
+
+  /**
    * Constructor for BackdropUnitTestCase.
    */
   function __construct($test_id = NULL) {
@@ -1068,6 +1073,16 @@ class BackdropWebTestCase extends BackdropTestCase {
   public $public_files_directory;
   public $private_files_directory;
   public $temp_files_directory;
+
+  /**
+   * @var object
+   */
+  protected $originalLanguage;
+
+  /**
+   * @var object
+   */
+  protected $originalLanguageUrl;
 
   /**
    * Constructor for BackdropWebTestCase.
@@ -1706,6 +1721,14 @@ class BackdropWebTestCase extends BackdropTestCase {
       include_once BACKDROP_ROOT . '/core/includes/install.inc';
       backdrop_install_system();
 
+      // Set path variables.
+      $core_config = config('system.core');
+      $core_config->set('file_default_scheme', 'public');
+      $core_config->set('file_public_path', $this->public_files_directory);
+      $core_config->set('file_private_path', $this->private_files_directory);
+      $core_config->set('file_temporary_path', $this->temp_files_directory);
+      $core_config->save();
+
       // Ensure schema versions are recalculated.
       backdrop_static_reset('backdrop_get_schema_versions');
 
@@ -1721,14 +1744,16 @@ class BackdropWebTestCase extends BackdropTestCase {
         module_enable(array($this->profile), FALSE);
       }
     }
+    else {
+      // Set path variables. This must be done even when using a profile cache.
+      $core_config = config('system.core');
+      $core_config->set('file_default_scheme', 'public');
+      $core_config->set('file_public_path', $this->public_files_directory);
+      $core_config->set('file_private_path', $this->private_files_directory);
+      $core_config->set('file_temporary_path', $this->temp_files_directory);
+      $core_config->save();
+    }
 
-    // Set path variables.
-    $core_config = config('system.core');
-    $core_config->set('file_default_scheme', 'public');
-    $core_config->set('file_public_path', $this->public_files_directory);
-    $core_config->set('file_private_path', $this->private_files_directory);
-    $core_config->set('file_temporary_path', $this->temp_files_directory);
-    $core_config->save();
 
     // Set 'parent_profile' of simpletest to add the parent profile's
     // search path to the child site's search paths.
@@ -1846,8 +1871,8 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     $emailCount = count(state_get('test_email_collector', array()));
     if ($emailCount) {
-      $message = format_plural($emailCount, '1 e-mail was sent during this test.', '@count e-mails were sent during this test.');
-      $this->pass($message, t('E-mail'));
+      $message = format_plural($emailCount, '1 email was sent during this test.', '@count emails were sent during this test.');
+      $this->pass($message, t('Email'));
     }
 
     // Delete temporary files directory.
@@ -3101,12 +3126,12 @@ class BackdropWebTestCase extends BackdropTestCase {
   }
 
   /**
-   * Gets an array containing all e-mails sent during this test case.
+   * Gets an array containing all emails sent during this test case.
    *
    * @param $filter
-   *   An array containing key/value pairs used to filter the e-mails that are returned.
+   *   An array containing key/value pairs used to filter the emails that are returned.
    * @return
-   *   An array containing e-mail messages captured during the current test.
+   *   An array containing email messages captured during the current test.
    */
   protected function backdropGetMails($filter = array()) {
     $captured_emails = state_get('test_email_collector', array());
@@ -3875,7 +3900,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   }
 
   /**
-   * Asserts that the most recently sent e-mail message has the given value.
+   * Asserts that the most recently sent email message has the given value.
    *
    * The field in $name must have the content described in $value.
    *
@@ -3892,11 +3917,11 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected function assertMail($name, $value = '', $message = '') {
     $captured_emails = state_get('test_email_collector', array());
     $email = end($captured_emails);
-    return $this->assertTrue($email && isset($email[$name]) && $email[$name] == $value, $message, t('E-mail'));
+    return $this->assertTrue($email && isset($email[$name]) && $email[$name] == $value, $message, t('Email'));
   }
 
   /**
-   * Asserts that the most recently sent e-mail message has the string in it.
+   * Asserts that the most recently sent email message has the string in it.
    *
    * @param $field_name
    *   Name of field or message property to assert: subject, body, id, ...
@@ -3926,7 +3951,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   }
 
   /**
-   * Asserts that the most recently sent e-mail message has the pattern in it.
+   * Asserts that the most recently sent email message has the pattern in it.
    *
    * @param $field_name
    *   Name of field or message property to assert: subject, body, id, ...

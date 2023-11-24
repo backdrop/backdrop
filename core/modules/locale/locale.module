@@ -184,7 +184,7 @@ function locale_language_selector_form($user) {
     '#title' => t('Language'),
     '#default_value' => $user_preferred_language->langcode,
     '#options' => $language_options,
-    '#description' => $mode ? t("This account's default language for e-mails, and preferred language for site presentation.") : t("This account's default language for e-mails."),
+    '#description' => $mode ? t("This account's default language for emails, and preferred language for site presentation.") : t("This account's default language for emails."),
   );
   return $form;
 }
@@ -201,10 +201,11 @@ function locale_form_alter(&$form, &$form_state, $form_id) {
     // interface or editing a user account.
     if ($form_id == 'user_register_form' || $form_id == 'user_profile_form') {
       $selector = locale_language_selector_form($form['#user']);
+      $selector['locale']['#type'] = 'container';
+      $form['region_language'] += $selector;
       if ($form_id == 'user_register_form') {
-        $selector['locale']['#access'] = user_access('administer users');
+        $form['region_language']['locale']['#access'] = user_access('administer users');
       }
-      $form += $selector;
     }
   }
 }

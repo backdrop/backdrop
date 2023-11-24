@@ -60,7 +60,7 @@ class UserLoginTestBase extends BackdropWebTestCase {
       switch ($login_method) {
         case USER_LOGIN_EMAIL_ONLY:
           if (!$by_email) {
-            $this->assertRaw(t('The e-mail address %email is not valid.', array('%email' => $account->name)));
+            $this->assertRaw(t('The email address %email is not valid.', array('%email' => $account->name)));
           }
           else {
             $this->assertRaw(t('Sorry, no account with that email address found.'));
@@ -88,7 +88,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
   function testRegistrationWithEmailVerification() {
     $config = config('system.core');
 
-    // Require e-mail verification.
+    // Require email verification.
     $config->set('user_email_verification', TRUE);
     // Set registration to administrator only.
     $config->set('user_register', USER_REGISTER_ADMINISTRATORS_ONLY);
@@ -103,7 +103,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
     $edit['name'] = $name = $this->randomName();
     $edit['mail'] = $mail = $edit['name'] . '@example.com';
     $this->backdropPost('user/register', $edit, t('Create new account'));
-    $this->assertText(t('A welcome message with further instructions has been sent to your e-mail address.'), 'User registered successfully.');
+    $this->assertText(t('A welcome message with further instructions has been sent to your email address.'), 'User registered successfully.');
     $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
     $new_user = reset($accounts);
     $this->assertTrue($new_user->status, 'New account is active after registration.');
@@ -122,7 +122,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
   function testRegistrationWithoutEmailVerification() {
     $config = config('system.core');
 
-    // Don't require e-mail verification.
+    // Don't require email verification.
     $config->set('user_email_verification', FALSE)->save();
 
     // Allow registration by site visitors without administrator approval.
@@ -173,7 +173,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
   function testRegistrationEmailDuplicates() {
     $config = config('system.core');
 
-    // Don't require e-mail verification.
+    // Don't require email verification.
     $config->set('user_email_verification', FALSE)->save();
 
     // Allow registration by site visitors without administrator approval.
@@ -186,15 +186,15 @@ class UserRegistrationTestCase extends UserLoginTestBase {
     $edit['name'] = $this->randomName();
     $edit['mail'] = $duplicate_user->mail;
 
-    // Attempt to create a new account using an existing e-mail address.
+    // Attempt to create a new account using an existing email address.
     $this->backdropPost('user/register', $edit, t('Create new account'));
-    $this->assertRaw(t('The e-mail address %email is already registered.', array('%email' => $duplicate_user->mail)), 'Supplying an exact duplicate email address displays an error message');
+    $this->assertRaw(t('The email address %email is already registered.', array('%email' => $duplicate_user->mail)), 'Supplying an exact duplicate email address displays an error message');
 
     // Attempt to bypass duplicate email registration validation by adding spaces.
     $edit['mail'] = '   ' . $duplicate_user->mail . '   ';
 
     $this->backdropPost('user/register', $edit, t('Create new account'));
-    $this->assertRaw(t('The e-mail address %email is already registered.', array('%email' => $duplicate_user->mail)), 'Supplying a duplicate email address with added whitespace displays an error message');
+    $this->assertRaw(t('The email address %email is already registered.', array('%email' => $duplicate_user->mail)), 'Supplying a duplicate email address with added whitespace displays an error message');
   }
 
   function testRegistrationDefaultValues() {
@@ -203,7 +203,7 @@ class UserRegistrationTestCase extends UserLoginTestBase {
     // Allow registration by site visitors without administrator approval.
     $config_user_settings->set('user_register', USER_REGISTER_VISITORS)->save();
 
-    // Don't require e-mail verification.
+    // Don't require email verification.
     $config_user_settings->set('user_email_verification', FALSE)->save();
 
     // Set the default timezone to Brussels.
@@ -227,9 +227,10 @@ class UserRegistrationTestCase extends UserLoginTestBase {
     $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
     $new_user = reset($accounts);
     $this->assertEqual($new_user->name, $name, 'Username matches.');
-    $this->assertEqual($new_user->mail, $mail, 'E-mail address matches.');
+    $this->assertEqual($new_user->mail, $mail, 'Email address matches.');
     $this->assertEqual($new_user->signature, '', 'Correct signature field.');
     $this->assertTrue(($new_user->created > REQUEST_TIME - 20 ), 'Correct creation time.');
+    $this->assertEqual($new_user->changed, $new_user->created, 'Correct changed time.');
     $this->assertEqual($new_user->status, $config_user_settings->get('user_register') == USER_REGISTER_VISITORS ? 1 : 0, 'Correct status field.');
     $this->assertEqual($new_user->timezone, $config_system_date->get('default_timezone'), 'Correct time zone field.');
     $this->assertEqual($new_user->language, '', 'Correct language field.');
@@ -320,9 +321,9 @@ class UserRegistrationTestCase extends UserLoginTestBase {
       // Check user fields.
       $accounts = user_load_multiple(array(), array('name' => $name, 'mail' => $mail));
       $new_user = reset($accounts);
-      $this->assertEqual($new_user->test_user_field[LANGUAGE_NONE][0]['value'], $value, format_string('@js : The field value was correclty saved.', array('@js' => $js)));
-      $this->assertEqual($new_user->test_user_field[LANGUAGE_NONE][1]['value'], $value + 1, format_string('@js : The field value was correclty saved.', array('@js' => $js)));
-      $this->assertEqual($new_user->test_user_field[LANGUAGE_NONE][2]['value'], $value + 2, format_string('@js : The field value was correclty saved.', array('@js' => $js)));
+      $this->assertEqual($new_user->test_user_field[LANGUAGE_NONE][0]['value'], $value, format_string('@js : The field value was correctly saved.', array('@js' => $js)));
+      $this->assertEqual($new_user->test_user_field[LANGUAGE_NONE][1]['value'], $value + 1, format_string('@js : The field value was correctly saved.', array('@js' => $js)));
+      $this->assertEqual($new_user->test_user_field[LANGUAGE_NONE][2]['value'], $value + 2, format_string('@js : The field value was correctly saved.', array('@js' => $js)));
     }
   }
 
@@ -623,6 +624,12 @@ class UserLoginTestCase extends UserLoginTestBase {
  * Test cancelling a user.
  */
 class UserCancelTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   /**
    * Attempt to cancel account without permission.
    */
@@ -714,7 +721,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     // Confirm account cancellation.
     $timestamp = time();
     $this->backdropPost(NULL, NULL, t('Cancel account'));
-    $this->assertText(t('A confirmation request to cancel your account has been sent to your e-mail address.'), 'Account cancellation request mailed message displayed.');
+    $this->assertText(t('A confirmation request to cancel your account has been sent to your email address.'), 'Account cancellation request mailed message displayed.');
 
     // Attempt bogus account cancellation request confirmation.
     $bogus_timestamp = $timestamp + 60;
@@ -759,7 +766,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $timestamp = time();
 
     $this->backdropPost(NULL, NULL, t('Cancel account'));
-    $this->assertText(t('A confirmation request to cancel your account has been sent to your e-mail address.'), 'Account cancellation request mailed message displayed.');
+    $this->assertText(t('A confirmation request to cancel your account has been sent to your email address.'), 'Account cancellation request mailed message displayed.');
 
     // Confirm account cancellation request.
     $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid));
@@ -797,7 +804,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     // Confirm account cancellation.
     $timestamp = time();
     $this->backdropPost(NULL, NULL, t('Cancel account'));
-    $this->assertText(t('A confirmation request to cancel your account has been sent to your e-mail address.'), 'Account cancellation request mailed message displayed.');
+    $this->assertText(t('A confirmation request to cancel your account has been sent to your email address.'), 'Account cancellation request mailed message displayed.');
 
     // Confirm account cancellation request.
     $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid));
@@ -847,7 +854,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     // Confirm account cancellation.
     $timestamp = time();
     $this->backdropPost(NULL, NULL, t('Cancel account'));
-    $this->assertText(t('A confirmation request to cancel your account has been sent to your e-mail address.'), 'Account cancellation request mailed message displayed.');
+    $this->assertText(t('A confirmation request to cancel your account has been sent to your email address.'), 'Account cancellation request mailed message displayed.');
 
     // Confirm account cancellation request.
     $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid));
@@ -879,7 +886,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
 
     // Enable comment subjects on 'page' nodes
     $node_type = node_type_get_type('page');
-    $node_type->settings['comment_subject_field'] = TRUE;
+    $node_type->settings['comment_title_options'] = COMMENT_TITLE_CUSTOM;
     node_type_save($node_type);
 
     // Create a simple node.
@@ -916,7 +923,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     // Confirm account cancellation.
     $timestamp = time();
     $this->backdropPost(NULL, NULL, t('Cancel account'));
-    $this->assertText(t('A confirmation request to cancel your account has been sent to your e-mail address.'), 'Account cancellation request mailed message displayed.');
+    $this->assertText(t('A confirmation request to cancel your account has been sent to your email address.'), 'Account cancellation request mailed message displayed.');
 
     // Confirm account cancellation request.
     $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid));
@@ -1002,7 +1009,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $this->assertTrue($status, 'Users deleted and not found in the database.');
 
     // Ensure that admin account was not cancelled.
-    $this->assertText(t('A confirmation request to cancel your account has been sent to your e-mail address.'), 'Account cancellation request mailed message displayed.');
+    $this->assertText(t('A confirmation request to cancel your account has been sent to your email address.'), 'Account cancellation request mailed message displayed.');
     $admin_user = user_load($admin_user->uid);
     $this->assertTrue($admin_user->status == 1, 'Administrative user is found in the database and enabled.');
 
@@ -1044,7 +1051,8 @@ class UserPictureTestCase extends BackdropWebTestCase {
     // Try to upload a file that is not an image for the user picture.
     $not_an_image = current($this->backdropGetTestFiles('html'));
     $this->saveUserPicture($not_an_image);
-    $this->assertRaw(t('Only JPEG, PNG and GIF images are allowed.'), 'Non-image files are not accepted.');
+    $supported_extensions = image_get_supported_extensions();
+    $this->assertRaw(t('Only images with the following extensions are allowed: @formats.', array('@formats' => implode(', ', $supported_extensions))), 'Non-image files are not accepted.');
   }
 
   /**
@@ -1336,16 +1344,21 @@ class UserPictureTestCase extends BackdropWebTestCase {
 class UserPermissionsTestCase extends BackdropWebTestCase {
   protected $profile = 'minimal';
   protected $admin_user;
-  protected $role_name;
+  protected $editor_user;
+  protected $admin_role_name;
+  protected $editor_role_name;
 
   function setUp() {
     parent::setUp();
 
-    $this->admin_user = $this->backdropCreateUser(array('administer permissions', 'access user profiles', 'administer site configuration', 'administer account settings', 'administer modules'));
+    $this->admin_user = $this->backdropCreateUser(array('administer permissions', 'access user profiles', 'administer site configuration', 'administer account settings', 'administer content types', 'administer modules'));
+    $this->editor_user = $this->backdropCreateUser(array('access content'));
 
-    // Find the new role ID - it must be the maximum.
-    $roles = array_diff($this->admin_user->roles, array(BACKDROP_AUTHENTICATED_ROLE));
-    $this->role_name = reset($roles);
+    // Find the new role names.
+    $admin_roles = array_diff($this->admin_user->roles, array(BACKDROP_AUTHENTICATED_ROLE));
+    $this->admin_role_name = reset($admin_roles);
+    $editor_roles = array_diff($this->editor_user->roles, array(BACKDROP_AUTHENTICATED_ROLE));
+    $this->editor_role_name = reset($editor_roles);
   }
 
   /**
@@ -1353,7 +1366,7 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
    */
   function testUserPermissionChanges() {
     $this->backdropLogin($this->admin_user);
-    $role_name = $this->role_name;
+    $role_name = $this->admin_role_name;
     $account = $this->admin_user;
 
     // Add a permission.
@@ -1364,9 +1377,12 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
     $this->assertText(t('The changes have been saved.'), 'Successful save message displayed.');
     backdrop_static_reset('user_roles');
     backdrop_static_reset('user_access');
+    // Check the role and user account both have the permission.
+    $this->assertTrue(user_role_has_permission($role_name, 'administer nodes'), 'Role now has "administer nodes" permission.');
     $this->assertTrue(user_access('administer nodes', $account), 'User now has "administer nodes" permission.');
 
     // Remove a permission.
+    $this->assertTrue(user_role_has_permission($role_name, 'access user profiles'), 'Role has "access user profiles" permission.');
     $this->assertTrue(user_access('access user profiles', $account), 'User has "access user profiles" permission.');
     $edit = array();
     $edit[$role_name . '[access user profiles]'] = FALSE;
@@ -1374,6 +1390,7 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
     $this->assertText(t('The changes have been saved.'), 'Successful save message displayed.');
     backdrop_static_reset('user_roles');
     backdrop_static_reset('user_access');
+    $this->assertFalse(user_role_has_permission($role_name, 'access user profiles'), 'Role no longer has "access user profiles" permission.');
     $this->assertFalse(user_access('access user profiles', $account), 'User no longer has "access user profiles" permission.');
   }
 
@@ -1386,7 +1403,7 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
 
     // Set the user's role to be the administrator role.
     $edit = array();
-    $edit['user_admin_role'] = $this->role_name;
+    $edit['user_admin_role'] = $this->admin_role_name;
     $this->backdropPost('admin/config/people/roles', $edit, t('Save configuration'));
 
     // Enable book module and ensure the 'administer book outlines' permission
@@ -1399,10 +1416,85 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
   }
 
   /**
+   * Test assigning of permissions for the editor role.
+   */
+  function testEditorRole() {
+    $this->backdropLogin($this->admin_user);
+    $this->backdropGet('admin/config/people/roles');
+
+    // Before setting an admin role, check that no permissions are automatically
+    // assigned on new content types.
+    $this->backdropGet('admin/structure/types/add');
+    $this->assertRaw(t('No permissions assigned for this content type. Content of this type may not be able to be created, updated or deleted until permissions have been configured appropriately.'));
+    $this->assertNoFieldByXPath("//table[@id='permissions']//input[@checked]");
+
+    // Set both an admin role and editor role.
+    $edit = array();
+    $edit['user_admin_role'] = $this->admin_role_name;
+    $edit['user_editor_role'] = $this->editor_role_name;
+    $this->backdropPost('admin/config/people/roles', $edit, t('Save configuration'));
+
+    // Create a new content type and confirm the permissions are added.
+    $this->backdropGet('admin/structure/types/add');
+    $this->assertRaw(t('The %admin and %editor roles have been assigned permissions to create, edit, and delete content of this type.', array(
+      '%admin' => $this->admin_role_name,
+      '%editor' => $this->editor_role_name
+    )));
+    // Opposite of the above assertNoFieldByXPath(), confirm that there are at
+    // least some permission checkboxes checked.
+    $this->assertFieldByXPath("//table[@id='permissions']//input[@checked]");
+
+    $content_type_permissions = array(
+      'create content',
+      'edit own content',
+      'edit any content',
+      'delete own content',
+      'delete any content',
+    );
+    // In this case, both admin and editor checkboxes are checked.
+    $role_names = array(
+      $this->admin_role_name,
+      $this->editor_role_name,
+    );
+    foreach ($content_type_permissions as $type_permission) {
+      foreach ($role_names as $role_name) {
+        if (!($type_permission == 'delete any content' && $role_name == $this->editor_role_name)) {
+          $checkbox_id = backdrop_strtolower(str_replace(' ', '-', "edit $role_name $type_permission"));
+          $this->assertFieldChecked($checkbox_id);
+        }
+      }
+    }
+
+    // Save the form with no other changes.
+    $content_type_name = backdrop_strtolower($this->randomName());
+    $edit = array(
+      'name' => $content_type_name,
+      'type' => $content_type_name,
+    );
+    $this->backdropPost(NULL, $edit, t('Save content type'));
+
+    // Now check permissions were correctly assigned.
+    $user_accounts = array(
+      $this->admin_user,
+      $this->editor_user,
+    );
+    backdrop_static_reset('user_roles');
+    backdrop_static_reset('user_access');
+    foreach ($content_type_permissions as $type_permission) {
+      $permission_name = backdrop_strtolower(str_replace('content', "$content_type_name content", $type_permission));
+      foreach ($user_accounts as $user_account) {
+        if (!($type_permission == 'delete any content' && $user_account == $this->editor_user)) {
+          $this->assertTrue(user_access($permission_name, $user_account));
+        }
+      }
+    }
+  }
+
+  /**
    * Verify proper permission changes by user_role_change_permissions().
    */
   function testUserRoleChangePermissions() {
-    $role_name = $this->role_name;
+    $role_name = $this->admin_role_name;
     $account = $this->admin_user;
 
     // Verify current permissions.
@@ -1601,6 +1693,16 @@ class UserTimeZoneFunctionalTest extends BackdropWebTestCase {
  */
 class UserAutocompleteTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
+
+  /**
+   * @var User
+   */
+  protected $unprivileged_user;
+
+  /**
+   * @var User
+   */
+  protected $privileged_user;
 
   function setUp() {
     parent::setUp();
@@ -1826,12 +1928,12 @@ class UserCreateTestCase extends BackdropWebTestCase {
       $this->backdropPost('admin/people/create', $edit, t('Create new account'));
 
       if ($notify) {
-        $this->assertText(t('A welcome message with further instructions has been e-mailed to the new user @name.', array('@name' => $edit['name'])), 'User created');
-        $this->assertEqual(count($this->backdropGetMails()), 1, 'Notification e-mail sent');
+        $this->assertText(t('A welcome message with further instructions has been emailed to the new user @name.', array('@name' => $edit['name'])), 'User created');
+        $this->assertEqual(count($this->backdropGetMails()), 1, 'Notification email sent');
       }
       else {
-        $this->assertText(t('Created a new user account for @name. No e-mail has been sent.', array('@name' => $edit['name'])), 'User created');
-        $this->assertEqual(count($this->backdropGetMails()), 0, 'Notification e-mail not sent');
+        $this->assertText(t('Created a new user account for @name. No email has been sent.', array('@name' => $edit['name'])), 'User created');
+        $this->assertEqual(count($this->backdropGetMails()), 0, 'Notification email not sent');
       }
 
       $this->backdropGet('admin/people');
@@ -1851,7 +1953,7 @@ class UserCreateTestCase extends BackdropWebTestCase {
       'notify' => FALSE,
     );
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
-    $this->assertText(t('Created a new user account for @name. No e-mail has been sent.', array('@name' => $edit['name'])), 'User created with password 0');
+    $this->assertText(t('Created a new user account for @name. No email has been sent.', array('@name' => $edit['name'])), 'User created with password 0');
     $this->assertNoText('Password field is required');
   }
 
@@ -1884,7 +1986,7 @@ class UserCreateTestCase extends BackdropWebTestCase {
 
     $edit['pass'] = $email;
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
-    $this->assertRaw(t("The password cannot be the same as the e-mail."));
+    $this->assertRaw(t("The password cannot be the same as the email."));
 
     $edit['pass'] = '123abcdef';
     $this->backdropPost('admin/people/create', $edit, t('Create new account'));
@@ -1948,7 +2050,7 @@ class UserEditTestCase extends BackdropWebTestCase {
     $edit = array();
     $edit['mail'] = $this->randomName() . '@new.example.com';
     $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
-    $this->assertRaw(t("Your current password is missing or incorrect; it's required to change the %name.", array('%name' => t('E-mail address'))));
+    $this->assertRaw(t("Your current password is missing or incorrect; it's required to change the %name.", array('%name' => t('Email address'))));
 
     $edit['current_pass'] = $user1->pass_raw;
     $this->backdropPost("user/$user1->uid/edit", $edit, t('Save'));
@@ -2042,6 +2144,27 @@ class UserEditRebuildTestCase extends BackdropWebTestCase {
  * Test case for user signatures.
  */
 class UserSignatureTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var object
+   */
+  protected $full_html_format;
+
+  /**
+   * @var object
+   */
+  protected $filtered_html_format;
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   function setUp() {
     parent::setUp('comment');
 
@@ -2070,7 +2193,7 @@ class UserSignatureTestCase extends BackdropWebTestCase {
   function testUserSignature() {
     // Enable comment subjects on 'page' nodes
     $node_type = node_type_get_type('page');
-    $node_type->settings['comment_subject_field'] = TRUE;
+    $node_type->settings['comment_title_options'] = COMMENT_TITLE_CUSTOM;
     node_type_save($node_type);
 
     // Create a new node with comments on.
@@ -2179,9 +2302,14 @@ class UserEditedOwnAccountTestCase extends BackdropWebTestCase {
 class UserRoleAdminTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   function setUp() {
     parent::setUp();
-    $this->admin_user = $this->backdropCreateUser(array('administer permissions', 'administer users'));
+    $this->admin_user = $this->backdropCreateUser(array('administer permissions', 'administer users', 'assign roles'));
   }
 
   /**
@@ -2204,7 +2332,12 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
 
     // Test adding a role using the 'Save role' button.
     $role1_name = '123';
-    $edit = array('name' => $role1_name, 'label' => $role1_name);
+    $role1_description = 'Help text for 123 role.';
+    $edit = array(
+      'name' => $role1_name,
+      'label' => $role1_name,
+      'description' => $role1_description,
+    );
     $this->backdropPost('admin/config/people/roles/add', $edit, t('Save role'));
     $this->assertText(t('The 123 role has been added.'), 'The role has been added.');
     $this->assertUrl('admin/config/people/roles', array(), 'Redirected to correct URL after clicking the "Save role" button.');
@@ -2223,7 +2356,12 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
 
     // Test adding a role using the 'Save and set permissions' button.
     $role2_name = '456';
-    $edit = array('name' => $role2_name, 'label' => $role2_name);
+    $role2_description = 'Description for 456 role.';
+    $edit = array(
+      'name' => $role2_name,
+      'label' => $role2_name,
+      'description' => $role2_description,
+    );
     $this->backdropPost('admin/config/people/roles/add', $edit, t('Save and set permissions'));
     $this->assertText(t('The 456 role has been added.'), 'The role has been added.');
     $this->assertUrl('admin/config/people/permissions', array(), 'Redirected to correct URL after clicking the "Save and set permissions" button.');
@@ -2241,20 +2379,33 @@ class UserRoleAdminTestCase extends BackdropWebTestCase {
     // Test renaming an existing role.
     $old_label = $role1->label;
     $new_label = '789';
-    $edit = array('label' => $new_label);
+    $new_description = 'Help text for 789 role. <strong>Bold text.</strong>. <xss>Stripped tag</xss>.';
+    $edit = array(
+      'label' => $new_label,
+      'description' => $new_description,
+    );
     $this->backdropPost("admin/config/people/roles/configure/$role1_name", $edit, t('Save role'));
-    $this->assertText(t('The 123 role has been renamed to 789.'), 'The role has been renamed.');
+    $this->assertText(t('The 789 role has been saved.'), 'The role has been renamed.');
     $this->assertUrl('admin/config/people/roles', array(), 'Redirected to correct URL after clicking the renaming the role.');
     backdrop_static_reset('user_roles');
     $role1 = user_role_load($role1_name);
     $this->assertFalse($role1->label === $old_label, 'The role has had its label changed.');
     $this->assertTrue($role1->label === $new_label, 'The role has the new label.');
+    $this->assertTrue($role1->description === $new_description, 'The role has the new description (help text).');
+
+    // Confirm description (help text) is shown editing a user.
+    $this->backdropGet('user/' . $this->admin_user->uid . '/edit');
+    $this->assertRaw(filter_xss_admin($new_description));
 
     // Make sure that the system-defined roles can still be edited, to adjust
-    // their labels.
+    // their labels and descriptions.
     $this->backdropGet('admin/config/people/roles/configure/' . BACKDROP_ANONYMOUS_ROLE);
     $this->assertResponse(200, 'Access granted when trying to edit the built-in anonymous role.');
+    $this->assertText(t('Description'));
+    // Help text is hidden for the anonymous role, since it is never assigned.
+    $this->assertNoText(t('Help text'));
     $this->backdropGet('admin/config/people/roles/configure/' . BACKDROP_AUTHENTICATED_ROLE);
+    $this->assertText(t('Description'));
     $this->assertResponse(200, 'Access granted when trying to edit the built-in authenticated role.');
 
     // Create a default role for site administrators, with all available
@@ -2352,6 +2503,8 @@ class UserTokenReplaceTestCase extends BackdropWebTestCase {
     $tests['[user:last-login:short]'] = format_date($account->login, 'short', '', NULL, $language->langcode);
     $tests['[user:created]'] = format_date($account->created, 'medium', '', NULL, $language->langcode);
     $tests['[user:created:short]'] = format_date($account->created, 'short', '', NULL, $language->langcode);
+    $tests['[user:changed]'] = format_date($account->changed, 'medium', '', NULL, $language->langcode);
+    $tests['[user:changed:short]'] = format_date($account->changed, 'short', '', NULL, $language->langcode);
     $tests['[current-user:name]'] = check_plain(user_format_name($global_account));
 
     // Test to make sure that we generated something for each token.
@@ -2588,6 +2741,16 @@ class UserValidateCurrentPassCustomForm extends BackdropWebTestCase {
  */
 class UserEntityCallbacksTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
+
+  /**
+   * @var User
+   */
+  protected $account;
+
+  /**
+   * @var AnonymousUser
+   */
+  protected $anonymous;
 
   function setUp() {
     parent::setUp();

@@ -1,6 +1,6 @@
 /**
  * @file
- * Backdrop Link plugin.
+ * Backdrop CKEditor 4 Link plugin.
  */
 
 (function ($, Backdrop, CKEDITOR) {

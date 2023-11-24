@@ -68,6 +68,22 @@ define('COMMENT_NODE_CLOSED', 1);
 define('COMMENT_NODE_OPEN', 2);
 
 /**
+ * Auto generated comment titles.
+ */
+define('COMMENT_TITLE_AUTO', 'auto');
+
+/**
+ * Custom comment titles.
+ */
+define('COMMENT_TITLE_CUSTOM', 'custom');
+
+/**
+ * Hidden comment titles.
+ */
+define('COMMENT_TITLE_HIDDEN', 'hidden');
+
+
+/**
  * Implements hook_entity_info().
  */
 function comment_entity_info() {
@@ -135,7 +151,7 @@ function comment_field_extra_fields() {
   $return = array();
 
   foreach (node_type_get_types() as $type) {
-    if ($type->settings['comment_subject_field']) {
+    if ($type->settings['comment_title_options'] == COMMENT_TITLE_CUSTOM) {
       $return['comment']['comment_node_' . $type->type] = array(
         'form' => array(
           'author' => array(
@@ -314,7 +330,7 @@ function comment_node_type_load(&$types) {
       'comment_per_page' => 50,
       'comment_mode' => COMMENT_MODE_THREADED,
       'comment_anonymous' => COMMENT_ANONYMOUS_MAYNOT_CONTACT,
-      'comment_subject_field' => FALSE,
+      'comment_title_options' => COMMENT_TITLE_AUTO,
       'comment_user_picture' => TRUE,
       'comment_form_location' => COMMENT_FORM_BELOW,
       'comment_preview' => BACKDROP_OPTIONAL,
@@ -1079,7 +1095,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       ),
       '#weight' => 25,
     );
-    // Unlike coment_form_node_form_alter(), all of these settings are applied
+    // Unlike comment_form_node_form_alter(), all of these settings are applied
     // as defaults to all new nodes. Therefore, it would be wrong to use #states
     // to hide the other settings based on the primary comment setting.
     $form['comment']['comment_default'] = array(
@@ -1116,12 +1132,6 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
         COMMENT_ANONYMOUS_MUST_CONTACT => t('Anonymous posters must leave their contact information'),
       ),
       '#access' => user_access('post comments', backdrop_anonymous_user()),
-    );
-    $form['comment']['comment_subject_field'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Allow a custom title to be set for each comment'),
-      '#default_value' => $node_type->settings['comment_subject_field'],
-      '#description' => t('When disabled, the comment title will be automatically generated from the comment text.'),
     );
     if (config_get('system.core', 'user_pictures')) {
       $form['comment']['comment_user_picture'] = array(
@@ -1165,6 +1175,19 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#default_value' => $node_type->settings['comment_close_days'],
       '#field_suffix' => t('days'),
     );
+    $form['comment']['comment_title_options'] = array(
+      '#type' => 'radios',
+      '#title' => t('Comment titles'),
+      '#default_value' => $node_type->settings['comment_title_options'],
+      '#options' => array(
+        COMMENT_TITLE_CUSTOM => t('Visible, customizable'),
+        COMMENT_TITLE_AUTO => t('Visible, auto-generated'),
+        COMMENT_TITLE_HIDDEN => t('Hidden'),
+      ),
+    );
+    $form['comment']['comment_title_options'][COMMENT_TITLE_CUSTOM]['#description'] = t('A title field is provided, to allow customizing comment titles.');
+    $form['comment']['comment_title_options'][COMMENT_TITLE_AUTO]['#description'] = t('Comment titles are automatically generated from the comment body.');
+    $form['comment']['comment_title_options'][COMMENT_TITLE_HIDDEN]['#description'] = t('Note: this option might not be supported by some themes.');
   }
 }
 
@@ -1477,7 +1500,7 @@ function comment_config_create_validate(Config $staging_config, $all_changes) {
  *   (optional) The comment object, or NULL when using 'create' op.
  *
  * @return bool
- *   TRUE if the current user has acces to the comment, FALSE otherwise.
+ *   TRUE if the current user has access to the comment, FALSE otherwise.
  *
  * @since 1.13.0 The "create" $op option was added.
  * @since 1.13.0 The "edit" $op option is deprecated. Use "update" instead.
@@ -1644,7 +1667,7 @@ function comment_get_display_ordinal($cid, $node_type) {
 
   if ($mode == COMMENT_MODE_FLAT) {
     // For flat comments, cid is used for ordering comments due to
-    // unpredicatable behavior with timestamp, so we make the same assumption
+    // unpredictable behavior with timestamp, so we make the same assumption
     // here.
     $query->condition('c1.cid', $cid, '<');
   }
@@ -1819,10 +1842,10 @@ function comment_form($form, &$form_state, $comment) {
     );
   }
 
-  // Add author e-mail and homepage fields depending on the current user.
+  // Add author email and homepage fields depending on the current user.
   $form['author']['mail'] = array(
     '#type' => 'email',
-    '#title' => t('E-mail'),
+    '#title' => t('Email'),
     '#default_value' => $comment->mail,
     '#required' => (!$user->uid && $anonymous_contact == COMMENT_ANONYMOUS_MUST_CONTACT),
     '#maxlength' => 64,
@@ -1864,7 +1887,7 @@ function comment_form($form, &$form_state, $comment) {
     '#title' => t('Title'),
     '#maxlength' => 64,
     '#default_value' => $comment->subject,
-    '#access' => $node_type->settings['comment_subject_field'],
+    '#access' => $node_type->settings['comment_title_options'] == COMMENT_TITLE_CUSTOM,
     '#weight' => -1,
   );
 

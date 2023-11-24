@@ -204,14 +204,14 @@ function taxonomy_field_extra_fields() {
     $vocabulary = taxonomy_vocabulary_load($bundle);
     if (module_exists('language') && $vocabulary->language == TAXONOMY_LANGUAGE_ENABLED) {
       $return['taxonomy_term'][$bundle]['form'] += array(
-        'language' => array(
+        'langcode' => array(
           'label' => t('Language'),
           'description' => t('Term language'),
           'weight' => 0,
         ),
       );
       $return['taxonomy_term'][$bundle]['display'] += array(
-        'language' => array(
+        'langcode' => array(
           'label' => t('Language'),
           'description' => t('Term language'),
           'weight' => 0,
@@ -249,7 +249,7 @@ function taxonomy_select_nodes($tid, $pager = TRUE, $limit = FALSE, $order = arr
   }
   $query = db_select('taxonomy_index', 't');
   $query->addTag('node_access');
-  $query->condition('tid', $tid);
+  $query->condition('t.tid', $tid);
   if ($pager) {
     $count_query = clone $query;
     $count_query->addExpression('COUNT(t.nid)');
@@ -1110,6 +1110,8 @@ function taxonomy_autoload_info() {
     'TaxonomyTerm' => 'taxonomy.entity.inc',
     'TaxonomyTermController' => 'taxonomy.entity.inc',
     'TaxonomyVocabulary' => 'taxonomy_vocabulary.class.inc',
+    // Layout plugins.
+    'TaxonomyTermDepthLayoutAccess' => 'layout/taxonomy_term_depth_access.inc',
     // Views handlers.
     'views_handler_argument_taxonomy' => 'views/views_handler_argument_taxonomy.inc',
     'views_handler_argument_term_node_tid' => 'views/views_handler_argument_term_node_tid.inc',
@@ -1129,6 +1131,21 @@ function taxonomy_autoload_info() {
     'views_plugin_argument_validate_taxonomy_term' => 'views/views_plugin_argument_validate_taxonomy_term.inc',
     'views_plugin_argument_default_taxonomy_tid' => 'views/views_plugin_argument_default_taxonomy_tid.inc',
   );
+}
+
+/**
+ * Implements hook_layout_access_info().
+ */
+function taxonomy_layout_access_info() {
+  $info['taxonomy_term_depth'] = array(
+    'title' => t('Taxonomy term: Depth'),
+    'description' => t('Control access by how deep your term is nested.'),
+    'class' => 'TaxonomyTermDepthLayoutAccess',
+    'required contexts' => array(
+      'taxonomy_term' => 'taxonomy_term',
+    ),
+  );
+  return $info;
 }
 
 /**
@@ -1273,7 +1290,7 @@ function taxonomy_vocabulary_machine_name_load($machine_name) {
  *
  * @deprecated since 1.0.0
  * @see taxonomy_term_load_parents()
- * @see https://api.backdropcms.org/node/41635
+ * @see https://docs.backdropcms.org/node/41635
  */
 function taxonomy_get_parents($tid) {
   watchdog_deprecated_function('taxonomy', __FUNCTION__);
@@ -1287,7 +1304,7 @@ function taxonomy_get_parents($tid) {
  *
  * @deprecated since 1.0.0
  * @see taxonomy_term_load_parents_all()
- * @see https://api.backdropcms.org/node/41635
+ * @see https://docs.backdropcms.org/node/41635
  */
 function taxonomy_get_parents_all($tid) {
   watchdog_deprecated_function('taxonomy', __FUNCTION__);
@@ -1301,7 +1318,7 @@ function taxonomy_get_parents_all($tid) {
  *
  * @deprecated since 1.0.0
  * @see taxonomy_term_load_children()
- * @see https://api.backdropcms.org/node/41635
+ * @see https://docs.backdropcms.org/node/41635
  */
 function taxonomy_get_children($tid, $vid = 0) {
   watchdog_deprecated_function('taxonomy', __FUNCTION__);
@@ -1315,7 +1332,7 @@ function taxonomy_get_children($tid, $vid = 0) {
  *
  * @deprecated since 1.0.0
  * @see taxonomy_term_load_multiple_by_name()
- * @see https://api.backdropcms.org/node/41635
+ * @see https://docs.backdropcms.org/node/41635
  */
 function taxonomy_get_term_by_name($name, $vocabulary = NULL)  {
   watchdog_deprecated_function('taxonomy', __FUNCTION__);
@@ -1616,7 +1633,7 @@ function taxonomy_field_formatter_view($entity_type, $entity, $field, $instance,
 
     case 'taxonomy_term_reference_rendered':
       // To prevent infinite recursion caused by reference cycles, we store
-      // diplayed terms in a recursion queue.
+      // displayed terms in a recursion queue.
       $recursion_queue = &backdrop_static(__FUNCTION__, array());
 
       // If no 'referencing entity' is set, we are starting a new 'reference
@@ -1730,18 +1747,19 @@ function taxonomy_field_formatter_settings_summary($field, $instance, $view_mode
 /**
  * Returns the set of valid terms for a taxonomy field.
  *
- * @param $field
+ * @param array $field
  *   The field definition.
- * @return
+ *
+ * @return array
  *   The array of valid terms for this field, keyed by term id.
  */
-function taxonomy_allowed_values($field) {
+function taxonomy_allowed_values(array $field) {
   $options = array();
   foreach ($field['settings']['allowed_values'] as $tree) {
     if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
       if ($terms = taxonomy_get_tree($vocabulary->machine_name, $tree['parent'])) {
         foreach ($terms as $term) {
-          $options[$term->tid] = str_repeat('· ', $term->depth) . $term->name;
+          $options[$term->tid] = $term->name;
         }
       }
     }
@@ -1833,6 +1851,27 @@ function taxonomy_field_widget_form(&$form, &$form_state, $field, $instance, $la
   );
 
   return $element;
+}
+
+/**
+ * Implements hook_field_widget_form_alter().
+ */
+function taxonomy_field_widget_form_alter(&$element, &$form_state, $context) {
+  $field = $context['field'];
+  $widget_type = $context['instance']['widget']['type'];
+  if ($field['type'] == 'taxonomy_term_reference' && in_array($widget_type, array('options_buttons', 'options_select'))) {
+    foreach ($field['settings']['allowed_values'] as $tree) {
+      if ($vocabulary = taxonomy_vocabulary_load($tree['vocabulary'])) {
+        if ($terms = taxonomy_get_tree($vocabulary->machine_name, $tree['parent'])) {
+          foreach ($terms as $term) {
+            if (isset($element['#options'][$term->tid])) {
+              $element[$term->tid] = array('#indentation' => $term->depth);
+            }
+          }
+        }
+      }
+    }
+  }
 }
 
 /**
@@ -1972,7 +2011,7 @@ function taxonomy_language_delete($language) {
 /**
  * Implements hook_field_presave().
  *
- * Create any new terms defined in a freetagging vocabulary.
+ * Create any new terms defined in a free-tagging vocabulary.
  */
 function taxonomy_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
   foreach ($items as $delta => $item) {

@@ -49,7 +49,7 @@ function comment_uninstall() {
       'comment_per_page',
       'comment_form_location',
       'comment_preview',
-      'comment_subject_field',
+      'comment_title_options',
       'comment_user_picture',
       'comment_close_enabled',
       'comment_close_days'
@@ -208,7 +208,7 @@ function comment_schema() {
         'type' => 'varchar',
         'length' => 64,
         'not null' => FALSE,
-        'description' => "The comment author's e-mail address from the comment form, if user is anonymous, and the 'Anonymous users may/must leave their contact information' setting is turned on.",
+        'description' => "The comment author's email address from the comment form, if user is anonymous, and the 'Anonymous users may/must leave their contact information' setting is turned on.",
       ),
       'homepage' => array(
         'type' => 'varchar',
@@ -467,6 +467,48 @@ function comment_update_1007() {
       $config->set('permissions', $permissions);
       $config->save();
     }
+  }
+}
+
+/**
+ * Replace comment_subject_field setting with comment_title_options.
+ */
+function comment_update_1008() {
+  foreach (config_get_names_with_prefix('node.type.') as $config_name) {
+    $config = config($config_name);
+    $comment_title = $config->get('settings.comment_subject_field');
+
+    // If the old config value has already been removed, do nothing.
+    if (is_null($comment_title)) {
+      continue;
+    }
+
+    // If comment title was previously enabled, use the custom title option.
+    if ($comment_title) {
+      $config->set('settings.comment_title_options', 'custom');
+    }
+    else {
+      // Check to see if contrib module comment_hide_subject is installed and
+      // preserve the setting to hide comment titles entirely.
+      if (module_exists('comment_hide_subject')) {
+        $config->set('settings.comment_title_options', 'hidden');
+      }
+      // Otherwise, the previous behavior was to display an automatically
+      // generated title.
+      else {
+        $config->set('settings.comment_title_options', 'auto');
+      }
+    }
+    // Remove the previous setting.
+    $config->clear('settings.comment_subject_field');
+    $config->save();
+  }
+
+  // Now disable and uninstall comment_hide_subject contrib module if present.
+  if (module_exists('comment_hide_subject')) {
+    $path = backdrop_get_path('module', 'comment_hide_subject');
+    db_query("DELETE FROM {system} WHERE name = 'comment_hide_subject' AND type = 'module'");
+    backdrop_set_message(t('The contributed module <em>Comment Hide Subject</em> is located at %path. The module has been disabled and uninstalled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
   }
 }
 

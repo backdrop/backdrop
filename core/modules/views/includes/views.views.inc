@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provide views data and handlers that aren't tied to any other module.
@@ -119,7 +118,7 @@ function views_views_data() {
 
   $data['views']['fields_compare'] = array(
     'title' => t('Fields comparison'),
-    'help' => t('Compare database fields against eachother.'),
+    'help' => t('Compare database fields against each other.'),
     'filter' => array(
       'help' => t('Use fields comparison to filter the result of the view.'),
       'handler' => 'views_handler_filter_fields_compare',
@@ -138,13 +137,19 @@ function views_views_plugins() {
     'display' => array(
       // Default settings for all display plugins.
       'default' => array(
-        'title' => t('Master'),
+        'title' => t('Default'),
         'help' => t('Default settings for this view.'),
         'handler' => 'views_plugin_display_default',
         'theme' => 'views_view',
         'no ui' => TRUE,
         'no remove' => TRUE,
-        'js' => array('core/misc/form.js', 'core/misc/collapse.js', 'core/misc/textarea.js', 'core/misc/tabledrag.js', 'core/misc/autocomplete.js', 'core/misc/states.js'),
+        'js' => array(
+          'core/misc/form.js',
+          'core/misc/collapse.js',
+          'core/misc/tabledrag.js',
+          'core/misc/autocomplete.js',
+          'core/misc/states.js',
+        ),
         'use ajax' => TRUE,
         'use pager' => TRUE,
         'use more' => TRUE,

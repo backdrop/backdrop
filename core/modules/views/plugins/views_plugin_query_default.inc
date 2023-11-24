@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Defines the default query object.
@@ -142,17 +141,6 @@ class views_plugin_query_default extends views_plugin_query {
       'alias' => $base_table,
     );
 
-/**
- * -- we no longer want the base field to appear automatigically.
-    if ($base_field) {
-      $this->fields[$base_field] = array(
-        'table' => $base_table,
-        'field' => $base_field,
-        'alias' => $base_field,
-      );
-    }
- */
-
     $this->count_field = array(
       'table' => $base_table,
       'field' => $base_field,
@@ -167,13 +155,13 @@ class views_plugin_query_default extends views_plugin_query {
   /**
    * Set the view to be distinct.
    *
-   * There are either distinct per base field or distinct in the pure sql way,
+   * There are either distinct per base field or distinct in the pure SQL way,
    * based on $pure_distinct.
    *
    * @param bool $value
-   *   Should the view by distincted.
+   *   Whether or not the view is distinct.
    * @param bool $pure_distinct
-   *   Should only the sql keyword be added.
+   *   Whether just the SQL keyword should be added.
    */
   function set_distinct($value = TRUE, $pure_distinct = FALSE) {
     if (!(isset($this->no_distinct) && $value)) {
@@ -220,7 +208,7 @@ class views_plugin_query_default extends views_plugin_query {
       'default' => FALSE,
       'bool' => TRUE,
     );
-    $options['slave'] = array(
+    $options['replica'] = array(
       'default' => FALSE,
       'bool' => TRUE,
     );
@@ -264,11 +252,11 @@ class views_plugin_query_default extends views_plugin_query {
         ),
       ),
     );
-    $form['slave'] = array(
+    $form['replica'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Use Slave Server'),
-      '#description' => t('This will make the query attempt to connect to a slave server if available.  If no slave server is defined or available, it will fall back to the default server.'),
-      '#default_value' => !empty($this->options['slave']),
+      '#title' => t('Use replica server'),
+      '#description' => t('This will make the query attempt to connect to a replica server if available. If no replica server is defined or available, it will fall back to the default server.'),
+      '#default_value' => !empty($this->options['replica']),
     );
     $form['query_comment'] = array(
       '#type' => 'textfield',
@@ -290,7 +278,13 @@ class views_plugin_query_default extends views_plugin_query {
    */
   function options_submit(&$form, &$form_state) {
     $element = array('#parents' => array('query', 'options', 'query_tags'));
-    $value = explode(',', backdrop_array_get_nested_value($form_state['values'], $element['#parents']));
+    $value = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
+    // This method may be called more than once. When called for the first time,
+    // it receives a string from the form element. That string must be exploded
+    // into an array before setting the form value.
+    if (is_string($value)) {
+      $value = explode(',', $value);
+    }
     $value = array_filter(array_map('trim', $value));
     form_set_value($element, $value, $form_state);
   }
@@ -304,8 +298,8 @@ class views_plugin_query_default extends views_plugin_query {
    * they must join either to the primary table or to a pre-existing
    * relationship.
    *
-   * An example of a relationship would be a nodereference table.
-   * If you have a nodereference named 'book_parent' which links to a
+   * An example of a relationship would be an entity reference table.
+   * If you have a entity reference named 'book_parent' which links to a
    * parent node, you could set up a relationship 'node_book_parent'
    * to 'node'. Then, anything that links to 'node' can link to
    * 'node_book_parent' instead, thus allowing all properties of
@@ -656,7 +650,6 @@ class views_plugin_query_default extends views_plugin_query {
 
     // Have we been this way?
     if (isset($traced[$join->left_table])) {
-      // we looped. Broked.
       return FALSE;
     }
 
@@ -827,7 +820,7 @@ class views_plugin_query_default extends views_plugin_query {
   }
 
   /**
-   * Remove all fields that may've been added; primarily used for summary
+   * Remove all fields that may have been added; primarily used for summary
    * mode where we're changing the query because we didn't get data we needed.
    */
   function clear_fields() {
@@ -1283,9 +1276,9 @@ class views_plugin_query_default extends views_plugin_query {
       $key = $this->view->base_database;
     }
 
-    // Set the slave target if the slave option is set
-    if (!empty($this->options['slave'])) {
-      $target = 'slave';
+    // Set the replica target if the replica option is set
+    if (!empty($this->options['replica'])) {
+      $target = 'replica';
     }
 
     // Go ahead and build the query.
