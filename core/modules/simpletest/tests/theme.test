@@ -225,7 +225,7 @@ class ThemeTableUnitTest extends BackdropWebTestCase {
   /**
    * Tests that the 'footer' option works correctly.
    */
-  function testThemeTableFooter() {
+  protected function testThemeTableFooter() {
     $footer = array(
       array(
         'data' => array(1),
@@ -276,6 +276,16 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
     $variables['empty'] = 'No items found.';
     $expected = '<div class="item-list"><h3>Some title</h3>No items found.</div>';
     $this->assertThemeOutput('item_list', $variables, $expected, 'Empty %callback generates empty string with title.');
+
+    // Verify that additional attributes can be added to the wrapper div.
+    $attribute_name = $this->randomName();
+    $attribute_value = $this->randomName();
+    $another_css_class = $this->randomName();
+    $variables = array();
+    $variables['empty'] = 'No items found.';
+    $variables['wrapper_attributes'] = array($attribute_name => $attribute_value, 'class' => array($another_css_class));
+    $expected = '<div ' . $attribute_name . '="' . $attribute_value . '" class="' . $another_css_class . ' item-list">No items found.</div>';
+    $this->assertThemeOutput('item_list', $variables, $expected, 'Additional attributes added to the wrapper div.');
 
     // Verify nested item lists.
     $variables = array();
@@ -396,7 +406,7 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
    * @param $message
    *   (optional) An assertion message.
    */
-  protected function assertThemeOutput($callback, array $variables = array(), $expected, $message = '', $group = 'Other') {
+  protected function assertThemeOutput($callback, array $variables = array(), $expected = '', $message = '', $group = 'Other') {
     $output = theme($callback, $variables);
     $this->verbose('Variables:<pre>' .  check_plain(var_export($variables, TRUE)) . '</pre>'
       . '<hr />Result:<pre>' .  check_plain(var_export($output, TRUE)) . '</pre>'
