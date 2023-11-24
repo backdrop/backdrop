@@ -636,14 +636,15 @@ function node_field_extra_fields() {
  *   The machine-readable name of the node type to be deleted.
  */
 function node_type_delete($type) {
-  $info = node_type_get_type($type);
-  $config = config('node.type.' . $type);
-  $config->delete();
-  field_attach_delete_bundle('node', $type);
-  module_invoke_all('node_type_delete', $info);
+  if ($info = node_type_get_type($type)) {
+    $config = config('node.type.' . $type);
+    $config->delete();
+    field_attach_delete_bundle('node', $type);
+    module_invoke_all('node_type_delete', $info);
 
-  // Clear the node type cache.
-  node_type_cache_reset();
+    // Clear the node type cache.
+    node_type_cache_reset();
+  }
 }
 
 /**
@@ -754,7 +755,7 @@ function node_type_cache_reset() {
 /**
  * Sets the default values for a node type.
  *
- * The defaults are appropriate for a type defined through hook_node_info(),
+ * The defaults are appropriate for a type defined through node_type_save(),
  * since 'custom' is TRUE for types defined in the user interface, and FALSE
  * for types defined by modules. (The 'module' flag prevents types from being
  * deleted through the user interface.) Also, the default for 'locked' is TRUE,
@@ -762,7 +763,7 @@ function node_type_cache_reset() {
  *
  * @param $info
  *   (optional) An object or array containing values to override the defaults.
- *   See hook_node_info() for details on what the array elements mean. Defaults
+ *   See node_type_save() for details on what the array elements mean. Defaults
  *   to an empty array.
  *
  * @return
@@ -855,15 +856,16 @@ function node_invoke($node, $hook, $a2 = NULL, $a3 = NULL, $a4 = NULL) {
  * from the database. Nodes are loaded into memory and will not require database
  * access if loaded again during the same page request.
  *
- * @param $nids
- *   (optional) An array of node IDs.
- * @param $conditions
+ * @param array|false $nids
+ *   (optional) An array of node IDs or FALSE to load all the nodes. Using an
+ *   empty array (the default value), the function will return an empty array.
+ * @param array $conditions
  *   (deprecated) An associative array of conditions on the {node}
  *   table, where the keys are the database fields and the values are the
  *   values those fields must have. Instead, it is preferable to use
  *   EntityFieldQuery to retrieve a list of entity IDs loadable by
  *   this function.
- * @param $reset
+ * @param bool $reset
  *   (optional) Whether to reset the internal node_load() cache.
  *
  * @return Node[]
@@ -1389,7 +1391,7 @@ function node_search_admin_validate($element, &$form_state) {
  */
 function node_search_execute($keys = NULL, $conditions = NULL) {
   // Build matching conditions
-  $query = db_select('search_index', 'i', array('target' => 'slave'))->extend('SearchQuery')->extend('PagerDefault');
+  $query = db_select('search_index', 'i', array('target' => 'replica'))->extend('SearchQuery')->extend('PagerDefault');
   $query->join('node', 'n', 'n.nid = i.sid');
   $query
     ->condition('n.status', 1)
@@ -1541,6 +1543,26 @@ function node_user_predelete($account) {
 }
 
 /**
+ * Implements hook_user_update().
+ */
+function node_user_update($account) {
+  $orig = $account->original;
+  if ($account->name != $orig->name || $account->picture != $orig->picture || $account->data != $orig->data) {
+    $nids = db_select('node', 'n')
+      ->fields('n', array('nid'))
+      ->condition('uid', $account->uid)
+      ->execute()
+      ->fetchCol();
+
+    if (!empty($nids)) {
+      // Flush entity cache of nodes this user authored, to prevent outdated
+      // info (like old username) in cached data.
+      cache('entity_node')->deleteMultiple($nids);
+    }
+  }
+}
+
+/**
  * Access callback: Checks node revision access.
  *
  * @param Node $node
@@ -1661,39 +1683,78 @@ function node_layout_context_info() {
  *
  * When creating node preview pages, the path will be of the form
  * node/preview/<type>/<id>, where <type> is the node type and <id> is the
- * tempstore ID of the node begin previewed. But we want to display it using a
+ * tempstore ID of the node being previewed. But we want to display it using a
  * layout whose system path is node/%. So we choose those layouts and set the
  * context from the tempstore node.
+ *
+ * When viewing old node revisions, the path will be of the form
+ * node/<nid>/revisions/<vid>/view, where <nid> is the node ID and <vid> is the
+ * revision ID. As with previews, we want to display it using a layout whose
+ * system path is node/%.
  */
 function node_layout_load_by_router_item_alter(&$layouts, $router_item) {
   $map = $router_item['map'];
-  if (count($map) != 4 || $map[0] != 'node' || $map[1] != 'preview') {
-    return;
-  }
-  $path_is_preview = FALSE;
-  foreach (node_type_get_types() as $type_obj) {
-    if ($type_obj->type == $map[2]) {
-      $path_is_preview = TRUE;
-      break;
+
+  // Check for node previews.
+  if (count($map) == 4 && $map[0] == 'node' && $map[1] == 'preview') {
+    // Add any node/% path as a fallback and set the context to the appropriate
+    // node from the tempstore.
+    $path_is_preview = FALSE;
+    foreach (node_type_get_types() as $type_obj) {
+      if ($type_obj->type == $map[2]) {
+        $path_is_preview = TRUE;
+        break;
+      }
     }
-  }
-  if (!$path_is_preview) {
-    return;
-  }
-  $tempstore_id = $map[3];
-  $temp_node = node_get_node_tempstore($tempstore_id);
-  if ($temp_node) {
-    $node_layouts = layout_load_multiple_by_path('node/%', TRUE);
-    if ($node_layouts) {
-      $layouts = $node_layouts;
-      foreach ($layouts as $layout) {
-        foreach ($layout->getContexts() as $context) {
-          if (isset($context->position)) {
-            $context->setData($temp_node);
+    if (!$path_is_preview) {
+      return;
+    }
+    $tempstore_id = $map[3];
+    $temp_node = node_get_node_tempstore($tempstore_id);
+    if ($temp_node) {
+      $node_layouts = layout_load_multiple_by_path('node/%', TRUE);
+      if ($node_layouts) {
+        $layouts += $node_layouts;
+        foreach ($layouts as $layout) {
+          foreach ($layout->getContexts() as $context) {
+            if (isset($context->position)) {
+              $context->setData($temp_node);
+            }
           }
         }
       }
     }
+  }
+
+  // Check for node revisions.
+  if (count($map) == 5 && $map[0] == 'node' && $map[2] == 'revisions' && $map[4] == 'view') {
+    // Add any node/% path as a fallback and set the context to the appropriate
+    // node revision.
+    $rev_node = $map[1];
+    if ($rev_node) {
+      $node_layouts = layout_load_multiple_by_path('node/%', TRUE);
+      if ($node_layouts) {
+        $layouts += $node_layouts;
+        foreach ($layouts as $layout) {
+          foreach ($layout->getContexts() as $context) {
+            if (isset($context->position)) {
+              $context->setData($rev_node);
+            }
+          }
+        }
+      }
+    }
+  }
+  // If either default was passed in originally, move it to the end of the list.
+  if (isset($layouts['admin_default'])) {
+    $admin_default = $layouts['admin_default'];
+    unset($layouts['admin_default']);
+    $layouts['admin_default'] = $admin_default;
+  }
+  if (isset($layouts['default'])) {
+    $default = $layouts['default'];
+    unset($layouts['default']);
+    $layouts['default'] = $default;
   }
 }
 
@@ -2393,7 +2454,7 @@ function node_update_index() {
 
   // Index selected content types.
   $enabled_types = _node_search_get_types();
-  $result = db_query_range("SELECT n.nid FROM {node} n LEFT JOIN {search_dataset} d ON d.type = 'node' AND d.sid = n.nid WHERE (d.sid IS NULL OR d.reindex <> 0) AND n.type IN (:enabled_types) ORDER BY d.reindex ASC, n.nid ASC", 0, $limit, array(':enabled_types' => $enabled_types), array('target' => 'slave'));
+  $result = db_query_range("SELECT n.nid FROM {node} n LEFT JOIN {search_dataset} d ON d.type = 'node' AND d.sid = n.nid WHERE (d.sid IS NULL OR d.reindex <> 0) AND n.type IN (:enabled_types) ORDER BY d.reindex ASC, n.nid ASC", 0, $limit, array(':enabled_types' => $enabled_types), array('target' => 'replica'));
   $nids = $result->fetchCol();
   if (!$nids) {
     return;
@@ -2414,7 +2475,7 @@ function _node_index_node(Node $node) {
 
   // Save the changed time of the most recent indexed node, for the search
   // results half-life calculation.
-  state_set('node_cron_last', $node->changed);
+  state_set('node_cron_last', (int) $node->changed);
 
   // Render the node.
   $build = node_view($node, 'search_index');
@@ -3520,9 +3581,9 @@ function node_requirements($phase) {
     $value .= ' (' . l(t('Rebuild permissions'), 'admin/reports/status/rebuild') . ')';
 
     if ($needs_rebuild) {
-      $description = t('Node access permissions need to be rebuilt.');  
+      $description = t('Node access permissions need to be rebuilt.');
       $severity = REQUIREMENT_ERROR;
-    } 
+    }
     else {
       $description = t('If the site is experiencing problems with permissions to content, you may have to rebuild the permissions cache.');
       $severity = REQUIREMENT_OK;

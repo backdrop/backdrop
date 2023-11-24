@@ -158,7 +158,7 @@ function system_themes_page() {
       // Create the operations links.
       $query['theme'] = $theme->name;
       if (backdrop_theme_access($theme) && theme_has_settings($theme->name)) {
-        $theme->operations[] = array(
+        $theme->operations['settings'] = array(
           'title' => t('Settings'),
           'href' => 'admin/appearance/settings/' . $theme->name,
           'attributes' => array('title' => t('Settings for !theme theme', array('!theme' => $theme->info['name']))),
@@ -166,13 +166,13 @@ function system_themes_page() {
       }
       if (!empty($theme->status)) {
         if (!$theme->is_default) {
-          $theme->operations[] = array(
+          $theme->operations['disable'] = array(
             'title' => t('Disable'),
             'href' => 'admin/appearance/disable',
             'query' => $query,
             'attributes' => array('title' => t('Disable !theme theme', array('!theme' => $theme->info['name']))),
           );
-          $theme->operations[] = array(
+          $theme->operations['default'] = array(
             'title' => t('Set default'),
             'href' => 'admin/appearance/default',
             'query' => $query,
@@ -181,13 +181,13 @@ function system_themes_page() {
         }
       }
       else {
-        $theme->operations[] = array(
+        $theme->operations['enable'] = array(
           'title' => t('Enable'),
           'href' => 'admin/appearance/enable',
           'query' => $query,
           'attributes' => array('title' => t('Enable !theme theme', array('!theme' => $theme->info['name']))),
         );
-        $theme->operations[] = array(
+        $theme->operations['enable-default'] = array(
           'title' => t('Enable and set default'),
           'href' => 'admin/appearance/default',
           'query' => $query,
@@ -627,8 +627,12 @@ function system_modules($form, $form_state = array()) {
         $requires_name = $files[$requires]->info['name'];
 
         // Disable this module if it is incompatible with the dependency's version.
-        $version_string = preg_replace('/^' . preg_quote(BACKDROP_CORE_COMPATIBILITY, '/') . '-/', '', $files[$requires]->info['version']);
-        if ($incompatible_version = backdrop_check_incompatibility($v, $version_string)) {
+        $version_string = FALSE;
+        // Make sure the version string of the dependency is available.
+        if (!empty($files[$requires]->info['version'])) {
+          $version_string = preg_replace('/^' . preg_quote(BACKDROP_CORE_COMPATIBILITY, '/') . '-/', '', $files[$requires]->info['version']);
+        }
+        if ($version_string && $incompatible_version = backdrop_check_incompatibility($v, $version_string)) {
           $extra['requires'][$requires] = t('@module (<span class="admin-missing">incompatible with</span> version @version)', array(
             '@module' => $requires_name . ' ' . $incompatible_version,
             '@version' => $version_string,
@@ -789,7 +793,7 @@ function _system_modules_build_row($info, $extra) {
   if (!empty($info['project'])) {
     $form['#project'] = $info['project'];
   }
-  
+
   // Check the compatibilities.
   $compatible = TRUE;
   $status_short = '';
@@ -1042,7 +1046,7 @@ function system_modules_submit($form, &$form_state) {
     $parameter = $form_state['values']['search'];
     $form_state['redirect'] = array(
       'admin/modules',
-      array('query' => array('search' => $parameter))
+      array('query' => array('search' => $parameter)),
     );
   }
   else {
@@ -1640,7 +1644,7 @@ function system_logging_settings($form, &$form_state) {
     '#options' => array(
       WATCHDOG_EMERGENCY => t('Emergency'),
       WATCHDOG_ALERT => t('Alert'),
-      WATCHDOG_CRITICAL => t('Critial'),
+      WATCHDOG_CRITICAL => t('Critical'),
       WATCHDOG_ERROR => t('Error'),
       WATCHDOG_WARNING => t('Warning'),
       WATCHDOG_NOTICE => t('Notice'),
@@ -1776,6 +1780,36 @@ function system_performance_settings($form, &$form_state) {
 }
 
 /**
+ * Form builder; Configure jQuery settings.
+ *
+ * @ingroup forms
+ */
+function system_jquery_settings() {
+  $config = config('system.core');
+
+  $form['#config'] = 'system.core';
+
+  $options = array(
+    'default' => t('jQuery 3 (recommended)'),
+    'legacy' => t('jQuery 1 (legacy)'),
+  );
+  $form['jquery_version'] = array(
+    '#type' => 'radios',
+    '#title' => t('jQuery version'),
+    '#default_value' => $config->get('jquery_version'),
+    '#options' => $options,
+  );
+  $form['jquery_version']['default']['#description'] = t('The latest, default version of jQuery.');
+  $form['jquery_version']['legacy']['#description'] = t('Use the legacy version if any modules or themes are not working properly with the latest version.');
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => t('<a href="@url">More information about jQuery</a> can be found in the documentation.', array('@url' => url('https://docs.backdropcms.org/documentation/jquery'))),
+  );
+
+  return system_settings_form($form);
+}
+
+/**
  * Submit callback; clear system caches.
  *
  * @ingroup forms
@@ -1817,7 +1851,7 @@ function system_file_system_settings() {
     '#title' => t('Private file system path'),
     '#default_value' => $config->get('file_private_path'),
     '#maxlength' => 255,
-    '#description' => t('An existing local file system path for storing private files. It should be writable by Backdrop and not accessible over the web. See the online handbook for <a href="@handbook">more information about securing private files</a>.', array('@handbook' => 'https://backdropcms.org/user-guide/file-system')),
+    '#description' => t('An existing local file system path for storing private files. It should be writable by Backdrop and not accessible over the web. See the online handbook for <a href="@handbook">more information about securing private files</a>.', array('@handbook' => 'https://docs.backdropcms.org/documentation/managing-file-locations-and-access')),
     '#after_build' => array('system_check_directory'),
   );
 
@@ -2294,7 +2328,7 @@ function system_run_cron() {
  * Menu callback: return information about PHP.
  */
 function system_php() {
-  phpinfo();
+  phpinfo(~(INFO_VARIABLES | INFO_ENVIRONMENT));
   backdrop_exit();
 }
 
@@ -2840,4 +2874,3 @@ function system_transliterate_ajax_access() {
   $replace_token = isset($_GET['replace_token']) ? $_GET['replace_token'] : '';
   return backdrop_valid_token($replace_token, $replace_pattern);
 }
-

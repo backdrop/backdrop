@@ -83,6 +83,15 @@
   padding-right: 28px;
 }
 
+/* Back to Site arrow. */
+
+#admin-bar .dropdown li.admin-bar-icon > a.escape {
+  background-image: url("../images/chevron-disc-left--white-64.png");
+}
+[dir="rtl"] #admin-bar .dropdown li.admin-bar-icon > a.escape {
+  background-image: url("../images/chevron-disc-right--white-64.png");
+}
+
 /* Admin bar label. */
 #admin-bar #admin-bar-menu.dropdown li > span.menu {
   background: transparent url(../images/bars--white--64.png) 5% center no-repeat; /* LTR */
@@ -155,6 +164,19 @@
   background-position: 95% center;
   padding-left: 10px;
   padding-right: 28px;
+}
+
+/* Locale link in Admin bar */
+#admin-bar .dropdown .admin-bar-locale-links > span {
+  background: transparent url(../images/language--white--64.png) 95% center no-repeat;
+  background-size: 20px;
+  padding-right: 30px; /* LTR */
+}
+
+[dir="rtl"] #admin-bar .dropdown .admin-bar-locale-links > span {
+  background-position: 5% center;
+  padding-right: 10px;
+  padding-left: 30px;
 }
 
 /* Page link. */

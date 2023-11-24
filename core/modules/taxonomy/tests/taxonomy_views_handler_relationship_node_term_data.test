@@ -10,6 +10,22 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests the relationship_node_term_data handler.
  */
 class TaxonomyViewsHandlerRelationshipNodeTermDataTest extends ViewsSqlTest {
+
+  /**
+   * @var TaxonomyTerm
+   */
+  protected $term_1;
+
+  /**
+   * @var TaxonomyTerm
+   */
+  protected $term_2;
+
+  /**
+   * @var Node
+   */
+  protected $node;
+
   /**
    * Returns a new term with random properties in vocabulary $vid.
    */
@@ -50,8 +66,8 @@ class TaxonomyViewsHandlerRelationshipNodeTermDataTest extends ViewsSqlTest {
         'nid' => $this->node->nid,
       ),
     );
-    $this->column_map = array('nid' => 'nid');
-    $this->assertIdenticalResultset($view, $resultset, $this->column_map);
+    $column_map = array('nid' => 'nid');
+    $this->assertIdenticalResultset($view, $resultset, $column_map);
   }
 
   function view_taxonomy_node_term_data() {
@@ -65,8 +81,8 @@ class TaxonomyViewsHandlerRelationshipNodeTermDataTest extends ViewsSqlTest {
     $view->api_version = '3.0';
     $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
-    /* Display: Master */
-    $handler = $view->new_display('default', 'Master', 'default');
+    /* Display: Default */
+    $handler = $view->new_display('default', 'Default', 'default');
     $handler->display->display_options['access']['type'] = 'perm';
     $handler->display->display_options['cache']['type'] = 'none';
     $handler->display->display_options['query']['type'] = 'views_query';

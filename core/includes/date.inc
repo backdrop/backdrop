@@ -695,6 +695,7 @@ function date_format_date($date, $type = 'medium', $format = '', $langcode = NUL
         break;
 
       default:
+        // cspell:disable-next-line
         if (strpos('BdcgGhHiIjLmnNosStTuUwWYyz', $c) !== FALSE) {
           $date_string .= $date->format($c);
         }
@@ -1334,7 +1335,7 @@ function date_format_order($format) {
  *   An array like ('year', 'month', 'day', 'hour', 'minute', 'second');
  *
  * @return array
- *   A reduced set of granularitiy elements.
+ *   A reduced set of granularity elements.
  */
 function date_nongranularity($granularity) {
   $options = array(

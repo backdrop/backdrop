@@ -1498,8 +1498,8 @@ function field_ui_field_type_options() {
     $field_types = field_info_field_types();
     $field_type_options = array();
     foreach ($field_types as $name => $field_type) {
-      // Skip field types which have no widget types, or should not be add via
-      // uesr interface.
+      // Skip field types which have no widget types, or should not be added via
+      // the user interface.
       if (field_ui_widget_type_options($name) && empty($field_type['no_ui'])) {
         $options[$name] = $field_type['label'];
       }
