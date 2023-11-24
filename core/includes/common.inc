@@ -5740,7 +5740,6 @@ function backdrop_json_format($json) {
   watchdog_deprecated_function('common', __FUNCTION__);
   // This code adopted from
   // https://github.com/GerHobbelt/nicejson-php/blob/HEAD/nicejson.php.
-
   $result = '';
   $pos = 0; // Indentation level.
   $strlen = strlen($json);
@@ -7864,6 +7863,7 @@ function backdrop_common_theme() {
         'title' => '',
         'type' => 'ul',
         'attributes' => array(),
+        'wrapper_attributes' => array(),
         'empty' => NULL,
       ),
     ),
@@ -8423,7 +8423,8 @@ function backdrop_write_record($table, &$record, $primary_keys = array()) {
  * Information stored in a module .info file:
  * - name: The real name of the module for display purposes.
  * - description: A brief description of the module.
- * - dependencies: An array of shortnames of other modules this module requires.
+ * - dependencies: An array of machine names of modules required by
+ *   this module.
  * - package: The name of the package of modules this module belongs to.
  *
  * Information stored in a theme .info file:

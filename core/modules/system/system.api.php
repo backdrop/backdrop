@@ -1882,7 +1882,7 @@ function hook_watchdog(array $log_entry) {
     '@message'       => strip_tags($log_entry['message']),
   ));
 
-  backdrop_mail('emaillog', 'entry', $to, $language, $params);
+  backdrop_mail('email_log', 'entry', $to, $language, $params);
 }
 
 /**
