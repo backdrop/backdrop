@@ -192,7 +192,7 @@ function theme_filter_tips($variables) {
 
   $multiple = count($tips) > 1;
   if ($multiple) {
-    $output = '<h2>' . t('Text Formats') . '</h2>';
+    $output = '<h2>' . t('Text formats') . '</h2>';
   }
 
   if (count($tips)) {
