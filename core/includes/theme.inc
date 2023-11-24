@@ -133,22 +133,17 @@ function backdrop_theme_initialize() {
  *
  * @param stdClass $theme
  *   An object with the following information:
- *     filename
- *       The .info file for this theme. The 'path' to
- *       the theme will be in this file's directory. (Required)
- *     owner
- *       The path to the .theme file or the .engine file to load for
- *       the theme. (Required)
- *     stylesheet
- *       The primary stylesheet for the theme. (Optional)
- *     engine
- *       The name of theme engine to use. (Optional)
+ *   - filename: The .info file for this theme. The 'path' to the theme will be
+ *     in this file's directory.
+ *   - owner: The path to the .theme file or the .engine file to load for the
+ *     theme.
+ *   - stylesheet: (optional) The primary stylesheet for the theme.
+ *   - engine: (optional) The name of theme engine to use.
  * @param array $base_themes
- *    An optional array of objects that represent the 'base theme' if the
- *    theme is meant to be derivative of another theme. It requires
- *    the same information as the $theme object. It should be in
- *    'oldest first' order, meaning the top level of the chain will
- *    be first.
+ *   An optional array of objects that represent the 'base theme' if the theme
+ *   is meant to be derivative of another theme. It requires the same
+ *   information as the $theme object. It should be in 'oldest first' order,
+ *   meaning the top level of the chain will be first.
  * @param string $registry_callback
  *   The callback to invoke to set the theme registry.
  */
@@ -164,7 +159,7 @@ function _backdrop_theme_initialize($theme, $base_themes = array(), $registry_ca
   // theme stylesheets.
   $final_stylesheets = array();
 
-  // Grab stylesheets from base theme
+  // Grab stylesheets from base theme.
   foreach ($base_themes as $base) {
     if (!empty($base->stylesheets)) {
       foreach ($base->stylesheets as $media => $stylesheets) {
@@ -184,35 +179,53 @@ function _backdrop_theme_initialize($theme, $base_themes = array(), $registry_ca
     }
   }
 
-  // And now add the stylesheets properly
+  // And now add the stylesheets properly.
   foreach ($final_stylesheets as $media => $stylesheets) {
     foreach ($stylesheets as $stylesheet) {
       backdrop_add_css($stylesheet, array('group' => CSS_THEME, 'every_page' => TRUE, 'media' => $media));
     }
   }
 
-  // Do basically the same as the above for scripts
+  // Do basically the same as the above for scripts.
   $final_scripts = array();
 
-  // Grab scripts from base theme
+  // Grab scripts from base theme.
   foreach ($base_themes as $base) {
     if (!empty($base->scripts)) {
-      foreach ($base->scripts as $name => $script) {
-        $final_scripts[$name] = $script;
+      foreach ($base->scripts as $key => $value) {
+        if (is_string($value)) {
+          // Empty scope defaults to 'header'.
+          $final_scripts['header'][$key] = $value;
+        }
+        else {
+          foreach ($value as $name => $script) {
+            $final_scripts[$key][$name] = $script;
+          }
+        }
       }
     }
   }
 
   // Add scripts used by this theme.
   if (!empty($theme->scripts)) {
-    foreach ($theme->scripts as $name => $script) {
-      $final_scripts[$name] = $script;
+    foreach ($theme->scripts as $key => $value) {
+      if (is_string($value)) {
+        // Empty scope defaults to 'header'.
+        $final_scripts['header'][$key] = $value;
+      }
+      else {
+        foreach ($value as $name => $script) {
+          $final_scripts[$key][$name] = $script;
+        }
+      }
     }
   }
 
   // Add scripts used by this theme.
-  foreach ($final_scripts as $script) {
-    backdrop_add_js($script, array('group' => JS_THEME, 'every_page' => TRUE));
+  foreach ($final_scripts as $scope => $scripts) {
+    foreach ($scripts as $script) {
+      backdrop_add_js($script, array('group' => JS_THEME, 'every_page' => TRUE, 'scope' => $scope));
+    }
   }
 
   $theme_engine = NULL;
@@ -591,7 +604,8 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
 
       // Allow variable preprocessors for all theme hooks, whether the hook is
       // implemented as a template or as a function.
-      // Check for existing variable preprocessors. Ensure arrayness.
+      // Check for existing variable preprocessors and ensure they're in the
+      // expected format.
       if (!isset($info['preprocess functions']) || !is_array($info['preprocess functions'])) {
         $info['preprocess functions'] = array();
         $prefixes = array();
@@ -1485,6 +1499,9 @@ function theme_get_setting($setting_name, $theme = NULL) {
  *   TRUE if the theme has settings, FALSE otherwise.
  */
 function theme_has_settings($theme) {
+  if (config_get_names_with_prefix($theme . '.settings')) {
+    return TRUE;
+  }
   $themes = list_themes();
   $theme_info = $themes[$theme];
   if (!empty($theme_info->info['settings'])) {
@@ -1629,6 +1646,9 @@ function theme_enable($theme_list) {
       ->condition('type', 'theme')
       ->condition('name', $key)
       ->execute();
+
+    // Copy any default configuration data to the system config directory.
+    config_install_default_config($key);
   }
 
   list_themes(TRUE);
@@ -1662,6 +1682,8 @@ function theme_disable($theme_list) {
       ->condition('type', 'theme')
       ->condition('name', $key)
       ->execute();
+
+    config_uninstall_config($key);
   }
 
   list_themes(TRUE);
@@ -1715,7 +1737,7 @@ function template_preprocess_datetime(&$variables) {
  *     Defaults to a human-readable representation of the timestamp value or the
  *     datetime attribute value using format_date().
  *     When invoked as #theme or #theme_wrappers of a render element, the
- *     rendered #children are autoamtically taken over as 'text', unless #text
+ *     rendered #children are automatically taken over as 'text', unless #text
  *     is explicitly set.
  *   - attributes: (optional) An associative array of HTML attributes to apply
  *     to the <time> element. A datetime attribute in 'attributes' overrides the
@@ -1790,7 +1812,7 @@ function theme_status_messages($variables) {
 /**
  * Returns HTML for a link.
  *
- * This is a wrapper around l() to allow for more flexible link themeing.
+ * This is a wrapper around l() to allow for more flexible link theming.
  *
  * Where performance is more important than theme flexibility, Backdrop code that
  * outputs a link should call the l() function directly, as #theme 'link'
@@ -2027,7 +2049,7 @@ function theme_breadcrumb($variables) {
   $output = '';
   if (!empty($breadcrumb)) {
     $output .= '<nav class="breadcrumb" aria-label="' . t('Website Orientation') . '">';
-    $output .= '<ol><li>' . implode(' » </li><li>', $breadcrumb) . '</li></ol>';
+    $output .= '<ol><li>' . implode('<span class="breadcrumb-separator" aria-hidden="true"> » </span></li><li>', $breadcrumb) . '</li></ol>';
     $output .= '</nav>';
   }
   return $output;
@@ -2569,7 +2591,7 @@ function theme_progress_bar($variables) {
 }
 
 /**
- * Returns HTML for an indentation div; used for drag and drop tables.
+ * Returns HTML for an indentation div. Used for drag and drop tables.
  *
  * @param $variables
  *   An associative array containing:

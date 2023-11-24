@@ -1,5 +1,6 @@
 <?php
 /**
+ * @file
  * A PHP diff engine for phpwiki. (Taken from phpwiki-1.3.3)
  *
  * Copyright © 2000, 2001 Geoffrey T. Dairiki <dairiki@dairiki.org>
@@ -24,16 +25,13 @@
  * https://git.wikimedia.org/raw/mediawiki%2fcore.git/HEAD/includes%2fdiff%2fDairikiDiff.php
  * Code has been reformatted to match Backdrop standards, and MediaWiki-specific
  * profiling code has been removed.
- *
- * @file
- * @ingroup DifferenceEngine
- * @defgroup DifferenceEngine DifferenceEngine
  */
 
 /**
- * @private
- * @ingroup DifferenceEngine
+ * @defgroup DifferenceEngine
+ * @{
  */
+
 abstract class DiffOp {
   public $type;
   public $orig;
@@ -56,10 +54,6 @@ abstract class DiffOp {
   }
 }
 
-/**
- * @private
- * @ingroup DifferenceEngine
- */
 class DiffOpCopy extends DiffOp {
   public $type = 'copy';
 
@@ -79,10 +73,6 @@ class DiffOpCopy extends DiffOp {
   }
 }
 
-/**
- * @private
- * @ingroup DifferenceEngine
- */
 class DiffOpDelete extends DiffOp {
   public $type = 'delete';
 
@@ -99,10 +89,6 @@ class DiffOpDelete extends DiffOp {
   }
 }
 
-/**
- * @private
- * @ingroup DifferenceEngine
- */
 class DiffOpAdd extends DiffOp {
   public $type = 'add';
 
@@ -119,10 +105,6 @@ class DiffOpAdd extends DiffOp {
   }
 }
 
-/**
- * @private
- * @ingroup DifferenceEngine
- */
 class DiffOpChange extends DiffOp {
   public $type = 'change';
 
@@ -144,24 +126,22 @@ class DiffOpChange extends DiffOp {
  *
  * The algorithm used here is mostly lifted from the perl module
  * Algorithm::Diff (version 1.06) by Ned Konz, which is available at:
- *     http://www.perl.com/CPAN/authors/id/N/NE/NEDKONZ/Algorithm-Diff-1.06.zip
+ * http://www.perl.com/CPAN/authors/id/N/NE/NEDKONZ/Algorithm-Diff-1.06.zip
  *
  * More ideas are taken from:
- *     http://www.ics.uci.edu/~eppstein/161/960229.html
+ * http://www.ics.uci.edu/~eppstein/161/960229.html
  *
- * Some ideas are (and a bit of code) are from from analyze.c, from GNU
- * diffutils-2.7, which can be found at:
- *     ftp://gnudist.gnu.org/pub/gnu/diffutils/diffutils-2.7.tar.gz
+ * Some ideas (and a bit of code) are from analyze.c, from GNU diffutils-2.7,
+ * which can be found at:
+ * ftp://gnudist.gnu.org/pub/gnu/diffutils/diffutils-2.7.tar.gz
  *
- * closingly, some ideas (subdivision by NCHUNKS > 2, and some optimizations)
+ * Finally, some ideas (subdivision by NCHUNKS > 2, and some optimizations)
  * are my own.
  *
  * Line length limits for robustness added by Tim Starling, 2005-08-31
  * Alternative implementation added by Guy Van den Broeck, 2008-07-30
  *
  * @author Geoffrey T. Dairiki, Tim Starling, Guy Van den Broeck
- * @private
- * @ingroup DifferenceEngine
  */
 class DiffEngine {
   const MAX_XREF_LENGTH = 10000;
@@ -507,7 +487,7 @@ class DiffEngine {
       }
     }
     else {
-      // Use the partitions to split this problem into subproblems.
+      // Use the partitions to split this problem into sub-problems.
       reset($seps);
       $pt1 = $seps[0];
       while ($pt2 = next($seps)) {
@@ -650,8 +630,6 @@ class DiffEngine {
 
 /**
  * Class representing a 'diff' between two sequences of strings.
- * @private
- * @ingroup DifferenceEngine
  */
 class Diff {
   public $edits;
@@ -764,19 +742,14 @@ class Diff {
   }
 }
 
-/**
- * @private
- * @ingroup DifferenceEngine
- */
 class MappedDiff extends Diff {
   /**
    * Constructor.
    *
    * Computes diff between sequences of strings.
    *
-   * This can be used to compute things like
-   * case-insensitve diffs, or diffs which ignore
-   * changes in white-space.
+   * This can be used to compute things like case-insensitive diffs, or diffs
+   * which ignore changes in white-space.
    *
    * @param $from_lines array An array of strings.
    *   Typically these are lines from a file.
@@ -820,10 +793,6 @@ class MappedDiff extends Diff {
  * Additions by Axel Boldt follow, partly taken from diff.php, phpwiki-1.3.3
  */
 
-/**
- * @private
- * @ingroup DifferenceEngine
- */
 class HWLDFWordAccumulator {
   private $lines = array();
   private $line = '';
@@ -897,10 +866,6 @@ class HWLDFWordAccumulator {
   }
 }
 
-/**
- * @private
- * @ingroup DifferenceEngine
- */
 class WordLevelDiff extends MappedDiff {
   const MAX_LINE_LENGTH = 10000;
 
@@ -998,8 +963,6 @@ class WordLevelDiff extends MappedDiff {
  * This class formats the diff in classic diff format.
  * It is intended that this class be customized via inheritance,
  * to obtain fancier outputs.
- *
- * @ingroup DifferenceEngine
  */
 abstract class DiffFormatter {
   /** @var int Number of leading context "lines" to preserve.
@@ -1201,8 +1164,6 @@ abstract class DiffFormatter {
 
 /**
  * Backdrop diff formatter which returns diffs as an array.
- *
- * @ingroup DifferenceEngine
  */
 class BackdropDiffFormatter extends DiffFormatter {
 
@@ -1325,3 +1286,7 @@ class BackdropDiffFormatter extends DiffFormatter {
     }
   }
 }
+
+/**
+ * @} End of "defgroup DifferenceEngine".
+ */

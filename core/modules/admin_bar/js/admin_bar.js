@@ -267,7 +267,7 @@ Backdrop.adminBar.behaviors.hover = function (context, settings, $adminBar) {
   });
 
   // Close all menus if clicking outside the menu.
-  $(document).bind('click', function (e) {
+  $(document).on('click', function (e) {
     if ($(e.target).closest($adminBar).length === 0) {
       $adminBar.find('ul').removeClass('expanded');
     }
@@ -428,7 +428,7 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
   function resultsHandler(e) {
     var $this = $(this);
     var show = e.type === 'mouseenter' || e.type === 'focusin' || e.type === 'touchstart';
-    // Supress the normal click handling on first touch, only highlighting.
+    // Suppress the normal click handling on first touch, only highlighting.
     if (e.type === 'touchstart' && !$(this).hasClass('active-search-item')) {
       e.preventDefault();
     }
@@ -490,7 +490,7 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
   $adminBar.on('beforeResize', resetSearchDisplay);
   $adminBar.on('afterResize searchChanged', updateSearchDisplay);
   // Attach the search input event handler.
-  $input.bind('focus keyup search', keyupHandler);
+  $input.on('focus keyup search', keyupHandler);
 
   // Close search if clicking outside the menu.
   $(document).on('click', function (e) {
@@ -524,7 +524,7 @@ Backdrop.adminBar.behaviors.escapeAdmin = function (context, settings) {
   ) {
     sessionStorage.setItem(
       "escapeAdminPath",
-      settings.admin_bar.current_path
+      window.location
     );
   }
 
@@ -538,7 +538,7 @@ Backdrop.adminBar.behaviors.escapeAdmin = function (context, settings) {
     escapeAdminPath !== null
   ) {
     $toolbarEscape.addClass("escape");
-    $toolbarEscape.attr("href", settings.basePath + escapeAdminPath);
+    $toolbarEscape.attr("href", escapeAdminPath);
     $toolbarEscape.text(Backdrop.t("Back to site"));
   }
 };

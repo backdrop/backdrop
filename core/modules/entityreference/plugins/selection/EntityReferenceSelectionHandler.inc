@@ -18,7 +18,7 @@ interface EntityReferenceSelectionHandlerInterface {
   public static function getInstance($field, $instance = NULL, $entity_type = NULL, $entity = NULL);
 
   /**
-   * Return a list of referencable entities.
+   * Return a list of referenceable entities.
    *
    * @return
    *   A nested array of entities, the first level is keyed by the
@@ -28,7 +28,7 @@ interface EntityReferenceSelectionHandlerInterface {
   public function getReferencableEntities($match = NULL, $match_operator = 'CONTAINS', $limit = 0);
 
   /**
-   * Count entities that are referencable by a given field.
+   * Count entities that are referenceable by a given field.
    */
   public function countReferencableEntities($match = NULL, $match_operator = 'CONTAINS');
 

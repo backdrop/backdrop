@@ -63,6 +63,11 @@ function user_token_info() {
     'description' => t('The date the user account was created.'),
     'type' => 'date',
   );
+  $user['changed'] = array(
+    'name' => t('Changed'),
+    'description' => t('The date the user account was changed.'),
+    'type' => 'date',
+  );
   $user['url'] = array(
     'name' => t('URL'),
     'description' => t('The URL of the account profile page.'),
@@ -143,6 +148,11 @@ function user_tokens($type, $tokens, array $data = array(), array $options = arr
           $replacements[$original] = !empty($account->created) ? format_date($account->created, 'medium', '', NULL, $language_code) : t('not yet created');
           break;
 
+        case 'changed':
+          // In the case of user_presave the changed date may not yet be set.
+          $replacements[$original] = !empty($account->changed) ? format_date($account->changed, 'medium', '', NULL, $language_code) : t('not yet created');
+          break;
+
         // These tokens are default variations on the chained tokens handled below.
         case 'last-login':
           $replacements[$original] = !empty($account->login) ? format_date($account->login, 'medium', '', NULL, $language_code) : t('never');
@@ -179,6 +189,10 @@ function user_tokens($type, $tokens, array $data = array(), array $options = arr
 
     if ($registered_tokens = token_find_with_prefix($tokens, 'created')) {
       $replacements += token_generate('date', $registered_tokens, array('date' => $account->created), $options);
+    }
+
+    if ($changed_tokens = token_find_with_prefix($tokens, 'changed')) {
+      $replacements += token_generate('date', $changed_tokens, array('date' => $account->changed), $options);
     }
 
     if (!empty($account->picture) && $user_pictures && ($picture_tokens = token_find_with_prefix($tokens, 'picture'))) {
