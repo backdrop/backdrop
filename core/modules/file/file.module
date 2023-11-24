@@ -1901,6 +1901,7 @@ function file_icon_path(File $file, $icon_directory = NULL) {
 function file_icon_map(File $file) {
   switch ($file->filemime) {
     // Word document types.
+    // cspell:disable
     case 'application/msword':
     case 'application/vnd.ms-word.document.macroEnabled.12':
     case 'application/vnd.oasis.opendocument.text':
@@ -1917,9 +1918,11 @@ function file_icon_map(File $file) {
     case 'application/x-applix-word':
     case 'application/x-kword':
     case 'application/x-kword-crypt':
+    // cspell:enable
       return 'x-office-document';
 
     // Spreadsheet document types.
+    // cspell:disable
     case 'application/vnd.ms-excel':
     case 'application/vnd.ms-excel.sheet.macroEnabled.12':
     case 'application/vnd.oasis.opendocument.spreadsheet':
@@ -1933,9 +1936,11 @@ function file_icon_map(File $file) {
     case 'application/x-gnumeric':
     case 'application/x-kspread':
     case 'application/x-kspread-crypt':
+    // cspell:enable
       return 'x-office-spreadsheet';
 
     // Presentation document types.
+    // cspell:disable
     case 'application/vnd.ms-powerpoint':
     case 'application/vnd.ms-powerpoint.presentation.macroEnabled.12':
     case 'application/vnd.oasis.opendocument.presentation':
@@ -1945,9 +1950,11 @@ function file_icon_map(File $file) {
     case 'application/vnd.sun.xml.impress':
     case 'application/vnd.sun.xml.impress.template':
     case 'application/x-kpresenter':
+    // cspell:enable
       return 'x-office-presentation';
 
     // Compressed archive types.
+    // cspell:disable
     case 'application/zip':
     case 'application/x-zip':
     case 'application/stuffit':
@@ -1972,9 +1979,11 @@ function file_icon_map(File $file) {
     case 'application/x-tar':
     case 'application/x-tarz':
     case 'application/x-tgz':
+    // cspell:enable
       return 'package-x-generic';
 
     // Script file types.
+    // cspell:disable
     case 'application/ecmascript':
     case 'application/javascript':
     case 'application/mathematica':
@@ -1998,6 +2007,7 @@ function file_icon_map(File $file) {
     case 'text/x-python':
     case 'text/x-sql':
     case 'text/x-tcl':
+    // cspell:enable
       return 'text-x-script';
 
     // HTML aliases.
@@ -2005,9 +2015,11 @@ function file_icon_map(File $file) {
       return 'text-html';
 
     // Executable types.
+    // cspell:disable
     case 'application/x-macbinary':
     case 'application/x-ms-dos-executable':
     case 'application/x-pef-executable':
+    // cspell:enable
       return 'application-x-executable';
 
     default:
