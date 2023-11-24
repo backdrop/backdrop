@@ -1288,7 +1288,7 @@ function backdrop_http_request($url, array $options = array()) {
  *
  * @link http://www.w3.org/Protocols/rfc2616/rfc2616-sec6.html Status line definition @endlink
  *
- * @param string $respone
+ * @param string $response
  *   The response status line, e.g. 'HTTP/1.1 500 Internal Server Error'
  *
  * @return array
@@ -1396,12 +1396,12 @@ function fix_gpc_magic() {
  */
 
 /**
- * Verifies the syntax of the given e-mail address.
+ * Verifies the syntax of the given email address.
  *
  * See @link http://tools.ietf.org/html/rfc5321 RFC 5321 @endlink for details.
  *
  * @param $mail
- *   A string containing an e-mail address.
+ *   A string containing an email address.
  *
  * @return
  *   TRUE if the address is in a valid format.
@@ -1463,7 +1463,7 @@ function valid_url($url, $absolute = FALSE) {
  *   given step, integer or float.
  *
  * @return bool
- *   TRUE if no step mismatch has occured, or FALSE otherwise.
+ *   TRUE if no step mismatch has occurred, or FALSE otherwise.
  */
 function valid_number_step($value, $step, $offset = 0.0) {
   // Avoid division by zero.
@@ -2270,8 +2270,8 @@ function format_plural($count, $singular, $plural, array $args = array(), array 
 
   // Get the plural index through the gettext formula.
   $index = (function_exists('locale_get_plural')) ? locale_get_plural($count, isset($options['langcode']) ? $options['langcode'] : NULL) : -1;
-  // If the index cannot be computed, use the plural as a fallback (which
-  // allows for most flexiblity with the replaceable @count value).
+  // If the index cannot be computed, use the plural as a fallback (which allows
+  // for the most flexibility with the replaceable @count value).
   if ($index < 0) {
     return t($plural, $args, $options);
   }
@@ -2889,16 +2889,8 @@ function backdrop_attributes(array $attributes = array()) {
 function l($text, $path, array $options = array()) {
   global $language_url;
 
-  // Build a variables array to keep the structure of the alter consistent with
-  // theme_link().
-  $variables = array(
-    'text' => $text,
-    'path' => $path,
-    'options' => $options,
-  );
-
   // Merge in default options.
-  $variables['options'] += array(
+  $options += array(
     'attributes' => array(),
     'query' => array(),
     'html' => FALSE,
@@ -2908,23 +2900,35 @@ function l($text, $path, array $options = array()) {
   // Append active class.
   if (($path == $_GET['q'] || ($path == '<front>' && backdrop_is_front_page())) &&
       (empty($options['language']) || $options['language']->langcode == $language_url->langcode)) {
-    $variables['options']['attributes']['class'][] = 'active';
+    $options['attributes']['class'][] = 'active';
+    $options['attributes']['aria-current'] = 'page';
   }
 
   // Remove all HTML and PHP tags from a tooltip, calling expensive strip_tags()
   // only when a quick strpos() gives suspicion tags are present.
-  if (isset($variables['options']['attributes']['title']) && strpos($variables['options']['attributes']['title'], '<') !== FALSE) {
-    $variables['options']['attributes']['title'] = strip_tags($variables['options']['attributes']['title']);
+  if (isset($options['attributes']['title']) && strpos($options['attributes']['title'], '<') !== FALSE) {
+    $options['attributes']['title'] = strip_tags($options['attributes']['title']);
   }
 
   // Move attributes out of options. url() doesn't need them.
-  $attributes = backdrop_attributes($variables['options']['attributes']);
-  unset($variables['options']['attributes']);
+  $attributes = backdrop_attributes($options['attributes']);
+  unset($options['attributes']);
 
-  $url = check_plain(url($variables['path'], $variables['options']));
+  $url = url($path, $options);
+  $skip_js_paths = array(
+    'javascript:void()',
+    'javascript:void();',
+    'javascript:void(0)',
+    'javascript:void(0);',
+  );
+  if (!(is_null($path) || in_array(strtolower($path), $skip_js_paths))) {
+    $url = check_url($url);
+  }
 
   // Sanitize the link text if necessary.
-  $text = $variables['options']['html'] ? $variables['text'] : check_plain($variables['text']);
+  if (!$options['html']) {
+    $text = check_plain($text);
+  }
 
   return '<a href="' . $url . '"' . $attributes . '>' . $text . '</a>';
 }
@@ -3050,19 +3054,6 @@ function backdrop_deliver_html_page($page_callback_result) {
     backdrop_add_http_header('X-Frame-Options', $frame_options);
   }
 
-  if ($site_config->get('block_interest_cohort')) {
-    $permissions_policy = backdrop_get_http_header('Permissions-Policy');
-    if (is_null($permissions_policy)) {
-      backdrop_add_http_header('Permissions-Policy', 'interest-cohort=()');
-    }
-    else {
-      // Only add interest-cohort if the header does not contain it already.
-      if (strpos($permissions_policy, 'interest-cohort') === FALSE) {
-        backdrop_add_http_header('Permissions-Policy', 'interest-cohort=()', TRUE);
-      }
-    }
-  }
-
   // Menu status constants are integers; page content is a string or array.
   if (is_int($page_callback_result)) {
     // @todo: Break these up into separate functions?
@@ -3179,14 +3170,13 @@ function backdrop_page_footer() {
 
   // If we're not already in a background request, flush to the browser.
   if (!backdrop_is_background() && $_SERVER['REQUEST_METHOD'] !== 'HEAD') {
-     // End the request and send the response to the browser. This call has
-     // error suppression on it as some PHP versions may require it (PHP 5.3)
-     // but other PHP versions throw a warning (PHP 5.5).
-     @ob_end_flush();
-
     // Flushing for PHP-FPM based installations.
     if (function_exists('fastcgi_finish_request')) {
       fastcgi_finish_request();
+    }
+    // Flushing for LiteSpeed servers.
+    elseif (function_exists('litespeed_finish_request')) {
+      litespeed_finish_request();
     }
     // Flushing for Apache mod_php installations.
     else {
@@ -3399,8 +3389,9 @@ function backdrop_css_defaults($data = NULL) {
  * $options['preprocess'] should be only set to TRUE when a file is required for
  * all typical visitors and most pages of a site. It is critical that all
  * preprocessed files are added unconditionally on every page, even if the
- * files do not happen to be needed on a page. This is normally done by calling
- * backdrop_add_css() in a hook_init() implementation.
+ * files do not happen to be needed on a page. However, it is preferred that
+ * modules do not use this function, but declare CSS files intended for all
+ * pages in their .info file instead.
  *
  * Non-preprocessed files should only be added to the page when they are
  * actually needed.
@@ -3442,7 +3433,7 @@ function backdrop_css_defaults($data = NULL) {
  *     The group number serves as a weight: the markup for loading a stylesheet
  *     within a lower weight group is output to the page before the markup for
  *     loading a stylesheet within a higher weight group, so CSS within higher
- *     weight groups take precendence over CSS within lower weight groups.
+ *     weight groups take precedence over CSS within lower weight groups.
  *   - 'every_page': For optimal front-end performance when aggregation is
  *     enabled, this should be set to TRUE if the stylesheet is present on every
  *     page of the website for users for whom it is present at all. This
@@ -3871,7 +3862,7 @@ function backdrop_pre_render_styles($elements) {
   // Loop through each group.
   foreach ($elements['#groups'] as $group) {
     switch ($group['type']) {
-      // For file items, there are three possibilites.
+      // For file items, there are three possibilities.
       // - The group has been aggregated: in this case, output a LINK tag for
       //   the aggregate file.
       // - The group can be aggregated but has not been (most likely because
@@ -4175,7 +4166,7 @@ function backdrop_load_stylesheet($file, $optimize = NULL, $reset_basepath = TRU
     $content = backdrop_load_stylesheet_content($contents, $_optimize);
   }
 
-  // Restore the parent base path as the file and its childen are processed.
+  // Restore the parent base path as the file and its children are processed.
   $basepath = $parent_base_path;
   return $content;
 }
@@ -4528,8 +4519,9 @@ function backdrop_region_class($region) {
  * $options['preprocess'] should be only set to TRUE when a file is required for
  * all typical visitors and most pages of a site. It is critical that all
  * preprocessed files are added unconditionally on every page, even if the
- * files are not needed on a page. This is normally done by calling
- * backdrop_add_js() in a hook_init() implementation.
+ * files are not needed on a page. However, it is preferred that modules do not
+ * use this function, but declare JS files intended for all pages in their
+ * .info file instead.
  *
  * Non-preprocessed files should only be added to the page when they are
  * actually needed.
@@ -5323,6 +5315,12 @@ function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_c
  * - readwrite
  * - readonly
  *
+ * Note that the 'required' and 'optional' states only affect the display of the
+ * required indicator (i.e. the red asterisk). They *do not* affect validation
+ * in any way. If you need a form element to be required based on the state of
+ * another element, you must implement your own form validation to account for
+ * that.
+ *
  * When referencing select lists and radio buttons in remote conditions, a
  * 'value' condition must be used:
  * @code
@@ -5330,6 +5328,16 @@ function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_c
  *     // Show the settings if 'bar' has been selected for 'foo'.
  *     'visible' => array(
  *       ':input[name="foo"]' => array('value' => 'bar'),
+ *     ),
+ *   ),
+ * @endcode
+ *
+ * To specify what a value should NOT be, use '!value':
+ * @code
+ *   '#states' => array(
+ *     // Show the settings if 'bar' has NOT been selected for 'foo'.
+ *     'visible' => array(
+ *       ':input[name="foo"]' => array('!value' => 'bar'),
  *     ),
  *   ),
  * @endcode
@@ -5697,22 +5705,7 @@ function backdrop_clear_js_cache() {
  */
 function backdrop_json_encode($var, $pretty_print = FALSE) {
   if ($pretty_print) {
-    if (version_compare(PHP_VERSION, '5.4.0') >= 0) {
-      $string = json_encode($var, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-    }
-    else {
-      $string = json_encode($var);
-      // PHP 5.3 JSON_PRETTY_PRINT.
-      $string = backdrop_json_format($string);
-      // PHP 5.3 JSON_UNESCAPED_UNICODE.
-      $string = backdrop_json_decode_unicode($string);
-      // PHP 5.3 JSON_UNESCAPED_SLASHES.
-      $string = str_replace('\/', '/', $string);
-    }
-    // Collapse empty brackets, needed for PHP 5.3.x - PHP 5.4.27 to be
-    // consistent with PHP 5.4.28+.
-    $string = preg_replace('/\[\n[\s]+\]/m', '[]', $string);
-    return $string;
+    return json_encode($var, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
   }
   // The non-pretty JSON is HTML markup compatible, encoding <, >, ', &, and ".
   else {
@@ -5733,14 +5726,20 @@ function backdrop_json_decode($var) {
 /**
  * Format a string of JSON for older versions of PHP.
  *
+ * This function is no longer used directly in core. Use backdrop_json_encode()
+ * to format JSON.
+ *
  * @param $json
  *   A string of JSON text.
  * @return string
  *   A formatted string of JSON text.
+ *
+ * @deprecated since 1.22.0
  */
 function backdrop_json_format($json) {
+  watchdog_deprecated_function('common', __FUNCTION__);
   // This code adopted from
-  // https://github.com/GerHobbelt/nicejson-php/blob/master/nicejson.php.
+  // https://github.com/GerHobbelt/nicejson-php/blob/HEAD/nicejson.php.
 
   $result = '';
   $pos = 0; // Indentation level.
@@ -5801,8 +5800,14 @@ function backdrop_json_format($json) {
 
 /**
  * Decode Unicode characters in JSON strings.
+ *
+ * This function is no longer used directly in core. Use backdrop_json_encode()
+ * to format JSON.
+ *
+ * @deprecated since 1.22.0
  */
 function backdrop_json_decode_unicode($json) {
+  watchdog_deprecated_function('common', __FUNCTION__);
   // Convert escaped characters, such as \u00e9 to the unescaped version (é).
   // See http://stackoverflow.com/questions/2934563/how-to-decode-unicode-escape-sequences-like-u00ed-to-proper-utf-8-encoded-cha
   $decode_callback = function ($match) {
@@ -7766,20 +7771,37 @@ function backdrop_common_theme() {
       'template' => 'templates/page',
     ),
     'header' => array(
-      'variables' => array('logo' => NULL, 'site_name' => NULL, 'site_slogan' => NULL, 'menu' => NULL),
+      'variables' => array(
+        'logo' => NULL,
+        'site_name' => NULL,
+        'site_slogan' => NULL,
+        'menu' => NULL,
+      ),
       'template' => 'templates/header',
     ),
     'datetime' => array(
-      'variables' => array('timestamp' => NULL, 'text' => NULL, 'attributes' => array(), 'html' => FALSE),
+      'variables' => array(
+        'timestamp' => NULL,
+        'text' => NULL,
+        'attributes' => array(),
+        'html' => FALSE),
     ),
     'status_messages' => array(
       'variables' => array('display' => NULL, 'messages' => array()),
     ),
     'link' => array(
-      'variables' => array('text' => NULL, 'path' => NULL, 'options' => array()),
+      'variables' => array(
+        'text' => NULL,
+        'path' => NULL,
+        'options' => array(),
+      ),
     ),
     'links' => array(
-      'variables' => array('links' => array(), 'attributes' => array('class' => array('links')), 'heading' => array()),
+      'variables' => array(
+        'links' => array(),
+        'attributes' => array('class' => array('links')),
+        'heading' => array(),
+      ),
     ),
     'dropbutton_wrapper' => array(
       'variables' => array('children' => NULL),
@@ -7802,7 +7824,15 @@ function backdrop_common_theme() {
       // - http://dev.w3.org/html5/spec/Overview.html#alt
       // The title attribute is optional in all cases, so it is omitted by
       // default.
-      'variables' => array('uri' => NULL, 'path' => NULL, 'width' => NULL, 'height' => NULL, 'alt' => '', 'title' => NULL, 'attributes' => array()),
+      'variables' => array(
+        'uri' => NULL,
+        'path' => NULL,
+        'width' => NULL,
+        'height' => NULL,
+        'alt' => '',
+        'title' => NULL,
+        'attributes' => array(),
+      ),
     ),
     'breadcrumb' => array(
       'variables' => array('breadcrumb' => NULL),
@@ -7811,7 +7841,16 @@ function backdrop_common_theme() {
       'variables' => array('markup' => NULL),
     ),
     'table' => array(
-      'variables' => array('header' => NULL, 'footer' => NULL, 'rows' => NULL, 'attributes' => array(), 'caption' => NULL, 'colgroups' => array(), 'sticky' => TRUE, 'empty' => ''),
+      'variables' => array(
+        'header' => NULL,
+        'footer' => NULL,
+        'rows' => NULL,
+        'attributes' => array(),
+        'caption' => NULL,
+        'colgroups' => array(),
+        'sticky' => TRUE,
+        'empty' => '',
+      ),
     ),
     'tablesort_indicator' => array(
       'variables' => array('style' => NULL),
@@ -7820,7 +7859,13 @@ function backdrop_common_theme() {
       'variables' => array('type' => MARK_NEW),
     ),
     'item_list' => array(
-      'variables' => array('items' => array(), 'title' => '', 'type' => 'ul', 'attributes' => array(), 'empty' => NULL),
+      'variables' => array(
+        'items' => array(),
+        'title' => '',
+        'type' => 'ul',
+        'attributes' => array(),
+        'empty' => NULL,
+      ),
     ),
     'more_help_link' => array(
       'variables' => array('url' => NULL),
@@ -7842,14 +7887,28 @@ function backdrop_common_theme() {
     ),
     // From theme.maintenance.inc.
     'maintenance_page' => array(
-      'variables' => array('content' => NULL, 'sidebar' => NULL, 'footer' => NULL, 'show_messages' => TRUE),
+      'variables' => array(
+        'content' => NULL,
+        'sidebar' => NULL,
+        'footer' => NULL,
+        'show_messages' => TRUE,
+      ),
       'template' => 'templates/maintenance-page',
     ),
     'update_page' => array(
-      'variables' => array('content' => NULL, 'sidebar' => NULL, 'footer' => NULL, 'show_messages' => TRUE),
+      'variables' => array(
+        'content' => NULL,
+        'sidebar' => NULL,
+        'footer' => NULL,
+        'show_messages' => TRUE,
+      ),
     ),
     'install_page' => array(
-      'variables' => array('content' => NULL, 'sidebar' => NULL, 'footer' => NULL),
+      'variables' => array(
+        'content' => NULL,
+        'sidebar' => NULL,
+        'footer' => NULL,
+      ),
     ),
     'task_list' => array(
       'variables' => array('items' => NULL, 'active' => NULL),
@@ -7862,22 +7921,51 @@ function backdrop_common_theme() {
     ),
     // From pager.inc.
     'pager' => array(
-      'variables' => array('tags' => array(), 'element' => 0, 'parameters' => array(), 'quantity' => 9),
+      'variables' => array(
+        'tags' => array(),
+        'element' => 0,
+        'parameters' => array(),
+        'quantity' => 9,
+      ),
     ),
     'pager_first' => array(
-      'variables' => array('text' => NULL, 'element' => 0, 'parameters' => array()),
+      'variables' => array(
+        'text' => NULL,
+        'element' => 0,
+        'parameters' => array(),
+      ),
     ),
     'pager_previous' => array(
-      'variables' => array('text' => NULL, 'element' => 0, 'interval' => 1, 'parameters' => array()),
+      'variables' => array(
+        'text' => NULL,
+        'element' => 0,
+        'interval' => 1,
+        'parameters' => array(),
+      ),
     ),
     'pager_next' => array(
-      'variables' => array('text' => NULL, 'element' => 0, 'interval' => 1, 'parameters' => array()),
+      'variables' => array(
+        'text' => NULL,
+        'element' => 0,
+        'interval' => 1,
+        'parameters' => array(),
+      ),
     ),
     'pager_last' => array(
-      'variables' => array('text' => NULL, 'element' => 0, 'parameters' => array()),
+      'variables' => array(
+        'text' => NULL,
+        'element' => 0,
+        'parameters' => array(),
+      ),
     ),
     'pager_link' => array(
-      'variables' => array('text' => NULL, 'page_new' => NULL, 'element' => NULL, 'parameters' => array(), 'attributes' => array()),
+      'variables' => array(
+        'text' => NULL,
+        'page_new' => NULL,
+        'element' => NULL,
+        'parameters' => array(),
+        'attributes' => array(),
+      ),
     ),
     // From menu.inc.
     'menu_link' => array(
@@ -8701,13 +8789,16 @@ function backdrop_parse_dependency($dependency) {
 
         if (isset($matches['patch']) && ($matches['patch'] === '0' || $matches['patch'])) {
           if ($matches['patch'] == 'x' && $matches['minor'] !== 'x') {
-            // See comments above about "x" in minor. 
+            // See comments above about "x" in minor.
             // Same principle applies to patch in relation to minor.
             if ($op == '>' || $op == '<=') {
               $matches['minor']++;
             }
             if ($op == '=' || $op == '==') {
-              $value['versions'][] = array('op' => '<', 'version' => $matches['major'] . '.' . ($matches['minor'] + 1) . '.x');
+              $value['versions'][] = array(
+                'op' => '<',
+                'version' => $matches['major'] . '.' . ($matches['minor'] + 1) . '.x',
+              );
               $op = '>=';
             }
           }

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Administrative page for handling updates from one Backdrop version to another.
@@ -30,8 +29,8 @@ chdir(BACKDROP_ROOT);
 // The minimum version is specified explicitly, as BACKDROP_MINIMUM_PHP is not
 // yet available. It is defined in bootstrap.inc, but it is not possible to
 // load that file yet as it would cause a fatal error on older versions of PHP.
-if (version_compare(PHP_VERSION, '5.3.2') < 0) {
-  print 'Your PHP installation is too old. Backdrop CMS requires at least PHP 5.3.2. See the <a href="https://backdropcms.org/guide/requirements">System Requirements</a> page for more information.';
+if (version_compare(PHP_VERSION, '5.6.0') < 0) {
+  print 'Your PHP installation is too old. Backdrop CMS requires at least PHP 5.6.0. See the <a href="https://backdropcms.org/guide/requirements">System Requirements</a> page for more information.';
   exit;
 }
 
@@ -208,27 +207,28 @@ function update_results_page() {
   update_task_list();
   // Report end result.
   if (module_exists('dblog') && user_access('access site reports')) {
-    $log_message = ' All errors have been <a href="' . base_path() . '?q=admin/reports/dblog">logged</a>.';
+    $log_message = 'All errors have been <a href="' . base_path() . '?q=admin/reports/dblog">logged</a>.';
   }
   else {
-    $log_message = ' All errors have been logged.';
+    $log_message = 'All errors have been logged.';
   }
 
+  $output = '';
   if ($_SESSION['update_success']) {
-    $output = '<p>Updates were attempted. If you see no failures below, you may proceed happily back to your <a href="' . base_path() . '">site</a>. Otherwise, you may need to update your database manually.' . $log_message . '</p>';
+    $output = '<p>Updates were attempted. If you see no failures below, you may proceed happily back to your <a href="' . base_path() . '">site</a>. Otherwise, you may need to update your database manually.' . ' ' . $log_message . '</p>';
   }
   else {
     $updates_remaining = reset($_SESSION['updates_remaining']);
     list($module, $version) = array_pop($updates_remaining);
-    $output = '<p class="error">The update process was aborted prematurely while running <strong>update #' . $version . ' in ' . $module . '.module</strong>.' . $log_message;
+    $message = 'The update process was aborted prematurely while running <strong>update #' . $version . ' in ' . $module . '.module</strong>.' . ' ' . $log_message;
     if (module_exists('dblog')) {
-      $output .= ' You may need to check the <code>watchdog</code> database table manually.';
+      $message .= ' ' . 'You may need to check the <code>watchdog</code> database table manually.';
     }
-    $output .= '</p>';
+    backdrop_set_message($message, 'error');
   }
 
   if (settings_get('update_free_access')) {
-    $output .= "<p><strong>Reminder: Don't forget to set the <code>\$settings[&#39;update_free_access&#39;]</code> value in your <code>settings.php</code> file back to <code>FALSE</code>.</strong></p>";
+    backdrop_set_message("Reminder: Don't forget to set the <code>\$settings['update_free_access']</code> value in your <code>settings.php</code> file back to <code>FALSE</code>.", 'warning');
   }
 
   $output .= theme('links', array('links' => update_helpful_links()));
@@ -323,6 +323,10 @@ function update_info_page() {
   $output .= "<li>Install your new files into the appropriate location, as described in <a href=\"https://backdropcms.org/upgrade\">the handbook</a>.</li>\n";
   $output .= "</ol>\n";
   $output .= "<p>After performing the above steps proceed using the continue button.</p>\n";
+  $module_status_report = update_upgrade_check_dependencies();
+	if (!empty($module_status_report)) {
+    $output .= $module_status_report;
+  }
   $form_action = check_url(backdrop_current_script_url(array('op' => 'selection', 'token' => $token)));
   $output .= '<form method="post" action="' . $form_action . '">
   <div class="form-actions">
@@ -545,6 +549,7 @@ if (update_access_allowed()) {
       }
 
     case t('Apply pending updates'):
+      update_upgrade_enable_dependencies();
       if (isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'update')) {
         // Generate absolute URLs for the batch processing (using $base_root),
         // since the batch API will pass them to url() which does not handle

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of ViewsHandlerFilterDateTest.
@@ -13,8 +12,18 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
 class ViewsHandlerFilterDateTest extends ViewsSqlTest {
   protected $profile = 'testing';
 
-  function setUp() {
-    parent::setUp();
+  /**
+   * @var array
+   */
+  protected $nodes;
+
+  /**
+   * @var array
+   */
+  protected $map;
+
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
 
     // Add some basic test nodes.
     $this->nodes = array();
@@ -174,7 +183,7 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
     // Generate a definitive wrong value, which should be checked by validation.
     $edit['options[value][value]'] = $this->randomString() . '-------';
     $this->backdropPost(NULL, $edit, t('Apply'));
-    $this->assertText(t('Invalid date format.'), 'Make sure that validation is runned and the invalidate date format is identified.');
+    $this->assertText(t('Invalid date format.'), 'Make sure that validation is run and the invalidate date format is identified.');
   }
 
   function views_test_between() {
@@ -188,8 +197,8 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
     $view->api_version = '3.0';
     $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
-    /* Display: Master */
-    $handler = $view->new_display('default', 'Master', 'default');
+    /* Display: Default */
+    $handler = $view->new_display('default', 'Default', 'default');
     $handler->display->display_options['access']['type'] = 'none';
     $handler->display->display_options['cache']['type'] = 'none';
     $handler->display->display_options['query']['type'] = 'views_query';

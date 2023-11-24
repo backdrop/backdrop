@@ -171,7 +171,7 @@ function theme_filter_admin_format_filter_order($variables) {
  *       array(
  *         'Raw HTML' => array(
  *           0 => array(
- *             'tip' => 'Web page addresses and e-mail addresses turn into links automatically.',
+ *             'tip' => 'Web page addresses and email addresses turn into links automatically.',
  *             'id' => 'filter/2',
  *           ),
  *         ),
@@ -235,9 +235,6 @@ function theme_filter_format_editor_image_form($variables) {
 
   $output .= '<div class="editor-image-fields">';
   $output .= backdrop_render_children($form);
-  $output .= '</div>';
-
-  $output .= '<div class="editor-image-library">';
   $output .= '</div>';
 
   $output .= '</div>';
