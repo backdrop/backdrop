@@ -26,6 +26,9 @@
       // minHeight property is enforced by the BackdropBasicStyles plugin.
       editorSettings.minHeight = $(element).height() + 'px';
 
+      // The source element value is managed manually to apply code formatting.
+      editorSettings.updateSourceElementOnDestroy = false;
+
       editorSettings.licenseKey = '';
 
       // If filter_html is turned on, and the htmlSupport plugin is available,
@@ -70,6 +73,7 @@
         .then(editor => {
           Backdrop.ckeditor5.setEditorOffset(editor);
           Backdrop.ckeditor5.instances.set(editor.id, editor);
+          Backdrop.ckeditor5.watchEditorChanges(editor, element);
           element.ckeditor5AttachedEditor = editor;
           const valueModified = Backdrop.ckeditor5.checkValueModified(beforeAttachValue, editor.getData());
           if (valueModified && !Backdrop.ckeditor5.bypassContentWarning) {
@@ -121,12 +125,13 @@
     onChange: function (element, callback) {
       const editor = element.ckeditor5AttachedEditor;
       if (editor) {
+        const debouncedCallback = Backdrop.debounce(callback, 400);
         editor.model.document.on('change:data', function() {
-          Backdrop.debounce(callback, 400)(editor.getData());
+          debouncedCallback(editor.getData());
         });
       }
       return !!editor;
-    },
+    }
   };
 
   Backdrop.ckeditor5 = {
@@ -243,6 +248,27 @@
         'right': 0,
         'top': Backdrop.ckeditor5.computeOffsetTop()
       };
+    },
+
+    /**
+     * Binds an on change event to the editor to watch for value changes.
+     *
+     * Updating the source element regularly can prevent data-loss when a
+     * browser window is closed or reloaded.
+     *
+     * @param editor
+     *   The CKEditor 5 instance.
+     * @param {Element} element
+     *   The underlying textarea DOM element.
+     */
+    watchEditorChanges: function (editor, element) {
+      // Create a debounced callback that only fires intermittently, since
+      // editor changes can happen on every key up.
+      const updateValue = Backdrop.debounce(() => {
+        const newData = editor.getData();
+        element.value = Backdrop.ckeditor5.formatHtml(newData);
+      }, 1000);
+      editor.model.document.on('change:data', updateValue);
     },
 
     /**
