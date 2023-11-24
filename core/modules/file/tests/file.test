@@ -74,7 +74,10 @@ class FileTestHelper extends BackdropWebTestCase {
   protected function createFile($settings = array()) {
     // Populate defaults array.
     $settings += array(
-      'filepath' => 'Файлдлятестирования ' . $this->randomName(), // Prefix with non-latin characters to ensure that all file-related tests work with international filenames.
+      // Prefix with non-latin characters to ensure that all file-related tests
+      // work with international filenames.
+      // cspell:disable-next-line
+      'filepath' => 'Файлдлятестирования ' . $this->randomName(),
       'filemime' => 'text/plain',
       'uid' => 1,
       'timestamp' => REQUEST_TIME,
@@ -1668,6 +1671,7 @@ class FileTokenReplaceTestCase extends FileTestHelper {
 
     $test_file = $this->getTestFile('text');
     // Coping a file to test uploads with non-latin filenames.
+    //cspell:disable-next-line
     $filename = backdrop_dirname($test_file->uri) . '/текстовый файл.txt';
     $test_file = file_copy($test_file, $filename);
 
