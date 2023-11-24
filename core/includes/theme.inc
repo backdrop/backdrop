@@ -2402,7 +2402,7 @@ function theme_mark($variables) {
  *     string or render array.
  *
  * @since 1.21.0: added the "empty" variable.
- * @since 1.26.2: added the "wrapper_attributes" variable.
+ * @since 1.27.0: added the "wrapper_attributes" variable.
  */
 function theme_item_list($variables) {
   $items = $variables['items'];
