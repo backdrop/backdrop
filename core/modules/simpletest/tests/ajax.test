@@ -281,8 +281,8 @@ class AJAXCommandsTestCase extends AJAXTestCase {
     $commands = $this->backdropPostAJAX($form_path, $edit, array('op' => t("AJAX data command: Issue command.")));
     $expected = array(
       'command' => 'data',
-      'name' => 'testkey',
-      'value' => 'testvalue',
+      'name' => 'test_key',
+      'value' => 'test_value',
     );
     $this->assertCommand($commands, $expected, "'data' AJAX command issued with correct key and value");
 
