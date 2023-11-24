@@ -1255,7 +1255,7 @@ function path_to_theme() {
  *   An array of prefixes to test, in reverse order of importance.
  *
  * @return array
- *   An array of the functions found, suitable for returning from hook_theme. 
+ *   An array of the functions found, suitable for returning from hook_theme.
  *   Keyed by the theme hook and includes the function that implements it.
  */
 function backdrop_find_theme_functions($cache, $prefixes) {
