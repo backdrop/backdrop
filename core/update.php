@@ -445,8 +445,9 @@ function update_check_requirements($skip_warnings = FALSE) {
   if ($severity == REQUIREMENT_ERROR || ($severity == REQUIREMENT_WARNING && !$skip_warnings)) {
     backdrop_set_title('Requirements problem');
     $task_list = update_task_list('requirements');
-    $status_report = theme('status_report', array('requirements' => $requirements));
-    $status_report .= 'Check the messages and <a href="' . check_url(backdrop_requirements_url($severity)) . '">try again</a>.';
+    $status_report = 'Resolve the problems and <a href="' . check_url(backdrop_requirements_url($severity)) . '">try again</a>.';
+    $status_report .= '<br><br>';
+    $status_report .= theme('status_report', array('requirements' => $requirements, 'phase' => 'update'));
     print theme('update_page', array('content' => $status_report, 'sidebar' => $task_list));
     exit();
   }
