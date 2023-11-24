@@ -2529,11 +2529,11 @@ function form_test_system_config_form() {
   );
 
   // Test single-element overrides.
-  $sysconfig = config('system.core');
+  $system_config = config('system.core');
   $form['rss_description'] = array(
     '#type' => 'textfield',
     '#title' => 'xyz',
-    '#default_value' => $sysconfig->get('rss_description'),
+    '#default_value' => $system_config->get('rss_description'),
     '#config' => 'system.core',
   );
 

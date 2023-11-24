@@ -722,8 +722,8 @@ function form_load_include(&$form_state, $type, $module, $name = NULL) {
  * @code
  * // register a new user
  * $form_state = array();
- * $form_state['values']['name'] = 'robo-user';
- * $form_state['values']['mail'] = 'robouser@example.com';
+ * $form_state['values']['name'] = 'new-user';
+ * $form_state['values']['mail'] = 'new.user@example.com';
  * $form_state['values']['pass']['pass1'] = 'password';
  * $form_state['values']['pass']['pass2'] = 'password';
  * $form_state['values']['op'] = t('Create new account');

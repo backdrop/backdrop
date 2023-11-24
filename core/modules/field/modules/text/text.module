@@ -380,7 +380,7 @@ function text_field_formatter_view($entity_type, $entity, $field, $instance, $la
  *  The sanitized string.
  */
 function _text_sanitize($instance, $langcode, $item, $column) {
-  // If the value uses a cacheable text format, text_field_load() precomputes
+  // If the value uses a cacheable text format, text_field_load() pre-computes
   // the sanitized string.
   if (isset($item["safe_$column"])) {
     return $item["safe_$column"];
