@@ -3500,6 +3500,22 @@ function system_update_1093() {
 }
 
 /**
+ * Enable static caching of the "system.date" configuration file.
+ */
+function system_update_1094() {
+  $config = config('system.date');
+  $data = $config->get();
+  // Put the _config_static option at the top of the file.
+  unset($data['_config_name']);
+  $data = array_merge(array(
+    '_config_name' => 'system.date',
+    '_config_static' => TRUE,
+  ), $data);
+  $config->setData($data);
+  $config->save();
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

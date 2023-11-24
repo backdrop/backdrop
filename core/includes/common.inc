@@ -5739,8 +5739,7 @@ function backdrop_json_decode($var) {
 function backdrop_json_format($json) {
   watchdog_deprecated_function('common', __FUNCTION__);
   // This code adopted from
-  // https://github.com/GerHobbelt/nicejson-php/blob/master/nicejson.php.
-
+  // https://github.com/GerHobbelt/nicejson-php/blob/HEAD/nicejson.php.
   $result = '';
   $pos = 0; // Indentation level.
   $strlen = strlen($json);
@@ -7771,20 +7770,37 @@ function backdrop_common_theme() {
       'template' => 'templates/page',
     ),
     'header' => array(
-      'variables' => array('logo' => NULL, 'site_name' => NULL, 'site_slogan' => NULL, 'menu' => NULL),
+      'variables' => array(
+        'logo' => NULL,
+        'site_name' => NULL,
+        'site_slogan' => NULL,
+        'menu' => NULL,
+      ),
       'template' => 'templates/header',
     ),
     'datetime' => array(
-      'variables' => array('timestamp' => NULL, 'text' => NULL, 'attributes' => array(), 'html' => FALSE),
+      'variables' => array(
+        'timestamp' => NULL,
+        'text' => NULL,
+        'attributes' => array(),
+        'html' => FALSE),
     ),
     'status_messages' => array(
       'variables' => array('display' => NULL, 'messages' => array()),
     ),
     'link' => array(
-      'variables' => array('text' => NULL, 'path' => NULL, 'options' => array()),
+      'variables' => array(
+        'text' => NULL,
+        'path' => NULL,
+        'options' => array(),
+      ),
     ),
     'links' => array(
-      'variables' => array('links' => array(), 'attributes' => array('class' => array('links')), 'heading' => array()),
+      'variables' => array(
+        'links' => array(),
+        'attributes' => array('class' => array('links')),
+        'heading' => array(),
+      ),
     ),
     'dropbutton_wrapper' => array(
       'variables' => array('children' => NULL),
@@ -7807,7 +7823,15 @@ function backdrop_common_theme() {
       // - http://dev.w3.org/html5/spec/Overview.html#alt
       // The title attribute is optional in all cases, so it is omitted by
       // default.
-      'variables' => array('uri' => NULL, 'path' => NULL, 'width' => NULL, 'height' => NULL, 'alt' => '', 'title' => NULL, 'attributes' => array()),
+      'variables' => array(
+        'uri' => NULL,
+        'path' => NULL,
+        'width' => NULL,
+        'height' => NULL,
+        'alt' => '',
+        'title' => NULL,
+        'attributes' => array(),
+      ),
     ),
     'breadcrumb' => array(
       'variables' => array('breadcrumb' => NULL),
@@ -7816,7 +7840,16 @@ function backdrop_common_theme() {
       'variables' => array('markup' => NULL),
     ),
     'table' => array(
-      'variables' => array('header' => NULL, 'footer' => NULL, 'rows' => NULL, 'attributes' => array(), 'caption' => NULL, 'colgroups' => array(), 'sticky' => TRUE, 'empty' => ''),
+      'variables' => array(
+        'header' => NULL,
+        'footer' => NULL,
+        'rows' => NULL,
+        'attributes' => array(),
+        'caption' => NULL,
+        'colgroups' => array(),
+        'sticky' => TRUE,
+        'empty' => '',
+      ),
     ),
     'tablesort_indicator' => array(
       'variables' => array('style' => NULL),
@@ -7825,7 +7858,14 @@ function backdrop_common_theme() {
       'variables' => array('type' => MARK_NEW),
     ),
     'item_list' => array(
-      'variables' => array('items' => array(), 'title' => '', 'type' => 'ul', 'attributes' => array(), 'empty' => NULL),
+      'variables' => array(
+        'items' => array(),
+        'title' => '',
+        'type' => 'ul',
+        'attributes' => array(),
+        'wrapper_attributes' => array(),
+        'empty' => NULL,
+      ),
     ),
     'task_list' => array(
       'variables' => array(
@@ -7854,14 +7894,34 @@ function backdrop_common_theme() {
     ),
     // From theme.maintenance.inc.
     'maintenance_page' => array(
-      'variables' => array('content' => NULL, 'sidebar' => NULL, 'tasks' => NULL, 'footer' => NULL, 'show_messages' => TRUE),
+      'variables' => array(
+        'content' => NULL,
+        'sidebar' => NULL,
+        'tasks' => NULL,
+        'footer' => NULL,
+        'show_messages' => TRUE,
+      ),
       'template' => 'templates/maintenance-page',
     ),
     'update_page' => array(
-      'variables' => array('content' => NULL, 'sidebar' => NULL, 'tasks' => NULL, 'footer' => NULL, 'show_messages' => TRUE),
+      'variables' => array(
+        'content' => NULL,
+        'sidebar' => NULL,
+        'tasks' => NULL,
+        'footer' => NULL,
+        'show_messages' => TRUE,
+      ),
     ),
     'install_page' => array(
-      'variables' => array('content' => NULL, 'sidebar' => NULL, 'tasks' => NULL, 'footer' => NULL),
+      'variables' => array(
+        'content' => NULL,
+        'sidebar' => NULL,
+        'tasks' => NULL,
+        'footer' => NULL,
+      ),
+    ),
+    'task_list' => array(
+      'variables' => array('items' => NULL, 'active' => NULL),
     ),
     'authorize_message' => array(
       'variables' => array('message' => NULL, 'success' => TRUE),
@@ -7871,22 +7931,51 @@ function backdrop_common_theme() {
     ),
     // From pager.inc.
     'pager' => array(
-      'variables' => array('tags' => array(), 'element' => 0, 'parameters' => array(), 'quantity' => 9),
+      'variables' => array(
+        'tags' => array(),
+        'element' => 0,
+        'parameters' => array(),
+        'quantity' => 9,
+      ),
     ),
     'pager_first' => array(
-      'variables' => array('text' => NULL, 'element' => 0, 'parameters' => array()),
+      'variables' => array(
+        'text' => NULL,
+        'element' => 0,
+        'parameters' => array(),
+      ),
     ),
     'pager_previous' => array(
-      'variables' => array('text' => NULL, 'element' => 0, 'interval' => 1, 'parameters' => array()),
+      'variables' => array(
+        'text' => NULL,
+        'element' => 0,
+        'interval' => 1,
+        'parameters' => array(),
+      ),
     ),
     'pager_next' => array(
-      'variables' => array('text' => NULL, 'element' => 0, 'interval' => 1, 'parameters' => array()),
+      'variables' => array(
+        'text' => NULL,
+        'element' => 0,
+        'interval' => 1,
+        'parameters' => array(),
+      ),
     ),
     'pager_last' => array(
-      'variables' => array('text' => NULL, 'element' => 0, 'parameters' => array()),
+      'variables' => array(
+        'text' => NULL,
+        'element' => 0,
+        'parameters' => array(),
+      ),
     ),
     'pager_link' => array(
-      'variables' => array('text' => NULL, 'page_new' => NULL, 'element' => NULL, 'parameters' => array(), 'attributes' => array()),
+      'variables' => array(
+        'text' => NULL,
+        'page_new' => NULL,
+        'element' => NULL,
+        'parameters' => array(),
+        'attributes' => array(),
+      ),
     ),
     // From menu.inc.
     'menu_link' => array(
@@ -8344,7 +8433,8 @@ function backdrop_write_record($table, &$record, $primary_keys = array()) {
  * Information stored in a module .info file:
  * - name: The real name of the module for display purposes.
  * - description: A brief description of the module.
- * - dependencies: An array of shortnames of other modules this module requires.
+ * - dependencies: An array of machine names of modules required by
+ *   this module.
  * - package: The name of the package of modules this module belongs to.
  *
  * Information stored in a theme .info file:
