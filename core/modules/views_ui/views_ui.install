@@ -47,13 +47,16 @@ function views_ui_update_1001() {
 }
 
 /**
- * Rename the 'always show master' display setting to 'always show default'.
+ * Rename the setting that allows showing the default display.
  */
 function views_ui_update_1002() {
   $config = config('views_ui.settings');
+  // @todo Remove forbidden backwards compatibility words in Backdrop 2.x.
+  // cspell:disable-next-line
   $value = $config->get('views_ui_show_master_display');
   if (!is_null($value)) {
     $config->set('views_ui_show_default_display', $value);
+    // cspell:disable-next-line
     $config->clear('views_ui_show_master_display');
     $config->save();
   }
