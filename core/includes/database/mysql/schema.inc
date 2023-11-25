@@ -333,9 +333,9 @@ class DatabaseSchema_mysql extends DatabaseSchema {
       throw new DatabaseSchemaObjectExistsException(t("Cannot add field @table.@field: field already exists.", array('@field' => $field, '@table' => $table)));
     }
 
-    $fixnull = FALSE;
+    $fix_null = FALSE;
     if (!empty($spec['not null']) && !isset($spec['default'])) {
-      $fixnull = TRUE;
+      $fix_null = TRUE;
       $spec['not null'] = FALSE;
     }
     $query = 'ALTER TABLE {' . $table . '} ADD ';
@@ -349,7 +349,7 @@ class DatabaseSchema_mysql extends DatabaseSchema {
         ->fields(array($field => $spec['initial']))
         ->execute();
     }
-    if ($fixnull) {
+    if ($fix_null) {
       $spec['not null'] = TRUE;
       $this->changeField($table, $field, $field, $spec);
     }
