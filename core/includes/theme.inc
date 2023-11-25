@@ -2476,6 +2476,68 @@ function theme_item_list($variables) {
 }
 
 /**
+ * Returns HTML for a list of tasks to perform.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - title: The H2 title for the task list. Defaults to "Tasks list" if none
+ *     provided.
+ *   - items: An associative array of the tasks.
+ *   - active: The key for the currently active task.
+ *
+ * @ingroup themeable
+ */
+function theme_task_list($variables) {
+  $items = $variables['items'];
+  $active = $variables['active'];
+  $tasks_title = $variables['title'];
+
+  // $done = isset($items[$active]) || $active == NULL;
+  $current = 0;
+  $total = count($items);
+
+  $active_step = array_search($active, array_keys($items)) + 1;
+  foreach ($items as $item => $item_title) {
+    $step_number = array_search($item, array_keys($items)) + 1;
+    $status = $active_step - $step_number;
+
+    switch (TRUE) {
+      case $status > 0:
+        // Completed tasks.
+        $class = 'done';
+        $status = t('done');
+        break;
+      case $status == 0:
+        // Current task.
+        $class = 'active';
+        $status = t('active');
+        break;
+      case $status < 0:
+        // Incomplete tasks.
+        $class = 'pending';
+        $status = t('pending');
+        break;
+
+      // default:
+      //   ???
+      //   break;
+    }
+
+    $status = '<span class="element-invisible">(' . $status . ')</span>';
+    $items[$item] = array(
+      'data' => '<span class="task-item">' . $item_title . $status . '</span>',
+      'class' => array($class,),
+      // 'width' => 100 / $total . '%',
+    );
+  }
+
+  $output = '<h2 class="element-invisible">' . $tasks_title . '</h2>';
+  $output .= theme('item_list', array('items' => $items, 'type' => 'ol', 'attributes' => array('class' => array('task-list', 'steps'), 'data-tasks-count' => $total)));
+
+  return $output;
+}
+
+/**
  * Returns HTML for a help element.
  */
 function theme_help($variables) {

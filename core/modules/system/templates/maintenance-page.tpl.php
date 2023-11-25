@@ -44,6 +44,12 @@
       <?php endif; ?>
     </header>
 
+    <?php if ($tasks): ?>
+      <div id="tasks" class="tasks">
+        <?php print $tasks ?>
+      </div>
+    <?php endif; ?>
+
     <main role="main">
       <?php if (!empty($title)): ?>
         <h1><?php print $title; ?></h1>

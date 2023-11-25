@@ -7827,6 +7827,13 @@ function backdrop_common_theme() {
     'item_list' => array(
       'variables' => array('items' => array(), 'title' => '', 'type' => 'ul', 'attributes' => array(), 'empty' => NULL),
     ),
+    'task_list' => array(
+      'variables' => array(
+        'items' => NULL,
+        'active' => NULL,
+        'title' => t('Tasks list'),
+      ),
+    ),
     'more_help_link' => array(
       'variables' => array('url' => NULL),
     ),
@@ -7847,14 +7854,14 @@ function backdrop_common_theme() {
     ),
     // From theme.maintenance.inc.
     'maintenance_page' => array(
-      'variables' => array('content' => NULL, 'sidebar' => NULL, 'footer' => NULL, 'show_messages' => TRUE),
+      'variables' => array('content' => NULL, 'sidebar' => NULL, 'tasks' => NULL, 'footer' => NULL, 'show_messages' => TRUE),
       'template' => 'templates/maintenance-page',
     ),
     'update_page' => array(
-      'variables' => array('content' => NULL, 'sidebar' => NULL, 'footer' => NULL, 'show_messages' => TRUE),
+      'variables' => array('content' => NULL, 'sidebar' => NULL, 'tasks' => NULL, 'footer' => NULL, 'show_messages' => TRUE),
     ),
     'install_page' => array(
-      'variables' => array('content' => NULL, 'sidebar' => NULL, 'footer' => NULL),
+      'variables' => array('content' => NULL, 'sidebar' => NULL, 'tasks' => NULL, 'footer' => NULL),
     ),
     'task_list' => array(
       'variables' => array('items' => NULL, 'active' => NULL),

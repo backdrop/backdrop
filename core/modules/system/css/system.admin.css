@@ -455,3 +455,61 @@ table.screenshot {
   margin-left: 1em;
   margin-right: 0;
 }
+
+/**
+ * Task lists (used in install.php, update.php, the project installer etc.).
+ */
+.item-list .task-list {
+  list-style: none;
+  margin: 1em 0;
+  counter-reset: step;
+}
+
+
+/**
+ * Unfortunately, the CSS3 attr() only allows data-* attributes to be used to
+ * set the 'content' property of elements - not things like width/height. So we
+ * can't do something like this:
+ *
+ * ol.task-list li { width: attr(data-task-width) }
+ *
+ * (where data-task-width can be set in PHP based on the number of steps).
+ */
+.item-list .task-list[data-tasks-count="1"] li { width: 100%; }
+.item-list .task-list[data-tasks-count="2"] li { width: 50%; }
+.item-list .task-list[data-tasks-count="3"] li { width: 33.3%; }
+.item-list .task-list[data-tasks-count="4"] li { width: 24.9%; }
+.item-list .task-list[data-tasks-count="5"] li { width: 20%; }
+.item-list .task-list[data-tasks-count="6"] li { width: 16.5%; }
+.item-list .task-list[data-tasks-count="7"] li { width: 14.28571%; }
+.item-list .task-list[data-tasks-count="8"] li { width: 12.5%; }
+.item-list .task-list[data-tasks-count="9"] li { width: 11.11111%; }
+.item-list .task-list[data-tasks-count="10"] li { width: 10%; }
+
+.item-list .task-list li {
+  display: inline-block;
+  margin: 0;
+  position: relative;
+  vertical-align: top;
+}
+/* The step numbers. */
+.item-list .task-list li:before {
+  content: counter(step);
+  counter-increment: step;
+  position: relative;
+  z-index: +1;
+}
+/* Connecting line. */
+.item-list .task-list li:after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 3px;
+}
+/* Do not show a connecting line for the first item. */
+.item-list .task-list li:first-child:after {
+  content: none;
+}
+.item-list .task-list li.active {
+  font-weight: bold;
+}

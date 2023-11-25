@@ -1580,6 +1580,7 @@ body.maintenance-page .sidebar {
 [dir="rtl"] body.maintenance-page .sidebar {
   float: right;
 }
+body.maintenance-page .tasks,
 body.maintenance-page main {
   padding: 0 20px;
 }
@@ -1626,82 +1627,65 @@ body.maintenance-page #logo {
   max-width: 120px;
   margin: 0 auto;
 }
-ol.task-list {
-  margin: 0;
-  padding-left: 0; /* LTR */
-  padding-right: 17px;
-  padding-bottom: 1em;
-  font-size: .9em;
-  text-align: left; /* LTR */
-  list-style-type: none;
-  list-style-image: none;
 
+.installer-browser-install-tasks .item-list,
+.maintenance-page .tasks .item-list {
+  width: 100%;
 }
-[dir="rtl"] ol.task-list {
-  text-align: right;
-  padding-left: 17px;
-  padding-right: 0;
+
+.item-list .task-list li {
+  text-align: center;
+  word-break: break-word;
 }
-body.maintenance-page ol.task-list {
-  margin-top: 50px;
+
+.item-list .task-list li:before {
+  content: '' ;
+  display: block;
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  border: 2px solid #ddd;
+  text-align: center;
+  margin: 0 auto 10px auto;
+  border-radius: 50%;
+  background-color: white;
 }
-ol.task-list li {
-  padding: .75em;
-  color: #1a1a1a;
-  line-height: 20px;
-}
-ol.task-list li.active {
-  padding: .75em;
-  font-weight: normal;
-  color: #000;
-  background: #E8E6E5;
-  position: relative;
-}
-ol.task-list li.active:after {
-  left: 100%; /* LTR */
-  border: solid transparent;
-  border-color: rgba(255, 255, 255, 0);
-  border-left-color: #E8E6E5; /* LTR */
-  border-width: 21px;
-  content: " ";
-  height: 0;
-  width: 0;
-  position: absolute;
-  pointer-events: none;
-  top: 50%;
-  margin-top: -21px;
-  font-size: 0;
-  line-height: 0;
-}
-[dir="rtl"] ol.task-list li.active:after {
-  left: auto;
-  right: 100%;
-  border-left-color: transparent;
-  border-right-color: #E8E6E5;
-}
-ol.task-list .task-item {
-  display: inline-block;
-  position: relative;
-  vertical-align: middle;
-  margin: 0 0 0 2.5em; /* LTR */
-}
-[dir="rtl"] ol.task-list .task-item {
-  margin-right: 2.5em;
-  margin-left: 0;
-}
-ol.task-list .done:before {
-  content: ' ';
-  display: inline-block;
-  position: absolute;
-  width: 25px;
-  height: 25px;
-  border-radius: 15px;
+.item-list .task-list li.done:before {
   background: #CFDE56 url(../../../misc/icon-ok.png) no-repeat center center;
-  background-size: 60%;
+  background-size: 65%;
+  margin-bottom: 20px;
+  position: relative;
+  top: 5px;
 }
-
-.step-indicator {
-  display: none;
+.item-list .task-list li.active:before {
+/*  color: white;*/
+  background-color: #ddd;
+  width: 40px;
+  height: 40px;
+  line-height: 40px;
+}
+.item-list .task-list li.pending:before {
+  margin-bottom: 30px;
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  position: relative;
+  top: 10px;
+}
+.item-list .task-list li:after {
+  background-color: #ddd;
+  top: 20px;
+  left: -50%;
+}
+.item-list .task-list li.pending {
+  color: #999;
+}
+.item-list .task-list li.done:before,
+.item-list .task-list li.active:before {
+  border-color: #CFDE56;
+}
+.item-list .task-list li.done + li:after {
+  background-color: #CFDE56;
 }
 
 /* Shortcut styles */
@@ -1882,20 +1866,6 @@ div.add-or-remove-shortcuts {
   [dir="rtl"] body.maintenance-page #content {
     margin: 0;
     padding: 0;
-  }
-  body.maintenance-page ol.task-list {
-    display: none;
-  }
-  body.maintenance-page .step-indicator {
-    display: block;
-    font-size: 1em;
-    position: absolute;
-    top: .5em;
-    right: 0;
-  }
-  [dir="rtl"] body.maintenance-page .step-indicator {
-    left: 0;
-    right: auto;
   }
 }
 
