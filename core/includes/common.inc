@@ -5726,7 +5726,13 @@ function backdrop_json_encode($var, $pretty_print = FALSE) {
   // Only add the JSON_NUMERIC_CHECK flag if the variable is a number or a
   // numeric string.
   if (is_numeric($var)) {
-    // Do not add the flag if the variable starts with 0 or +.
+    // Do not add the flag in the following cases:
+    // - If the number starts with 0. The flag would cause any leading zeros to
+    //   be stripped, which is not desired in cases where leading zeros are
+    //   explicitly required (like phone numbers).
+    // - If the number starts with a +. The flag would cause the + sign to be
+    //   stripped, which is not desired in cases where it needs to be explicitly
+    //   denoted that the number is positive, or with country phone codes.
     if (mb_substr($var, 0, 1) != 0 && mb_substr($var, 0, 1) != '+') {
       $encode_flags[] = JSON_NUMERIC_CHECK;
     }
