@@ -390,7 +390,7 @@ function user_validate_name($name) {
                   '\x{FF01}-\x{FF60}' .     // Full-width latin.
                   '\x{FFF9}-\x{FFFD}' .     // Replacement characters.
                   '\x{0}-\x{1F}]/u',        // NULL byte and control characters.
-                  // cspell:enable
+                  // cspell:enable.
                   $name)) {
     return t('The username contains an illegal character.');
   }
