@@ -500,7 +500,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
       'filter_url_length' => $this->randomName(4),
     );
     $this->backdropPost('admin/config/content/formats/filtered_html/filter-settings/filter_url', $edit, t('Update'));
-    $this->assertNoRaw(t('The text format %format has been updated.', array('%format' => 'Filtered HTML')));
+    $this->assertNoRaw(t('The text format %format has been updated.', array('%format' => 'Basic')));
 
     // The form does save permitted value and it appears in the config json.
     $length = 88;
@@ -1923,8 +1923,10 @@ EOF;
     $f = _filter_htmlcorrector('<p>test\n</p>\n');
     $this->assertEqual($f, '<p>test\n</p>\n', 'HTML corrector -- New-lines are accepted and kept as-is.');
 
+    // cspell:disable
     $f = _filter_htmlcorrector('<p>دروبال');
     $this->assertEqual($f, '<p>دروبال</p>', 'HTML corrector -- Encoding is correctly kept.');
+    // cspell:enable
 
     $f = _filter_htmlcorrector('<script type="text/javascript">alert("test")</script>');
     $this->assertEqual($f, '<script type="text/javascript">
@@ -2275,7 +2277,7 @@ class FilterEditorAccessTestCase extends BackdropWebTestCase {
 
     $filtered_html_format = array(
       'format' => 'filtered_html',
-      'name' => 'Filtered HTML',
+      'name' => 'Basic',
       'weight' => 0,
       'editor' => 'ckeditor',
       'filters' => array(),
