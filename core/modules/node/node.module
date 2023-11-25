@@ -3112,7 +3112,7 @@ function _node_query_node_access_alter($query, $type) {
     // then add it to the query at the end.
     $node_conditions = db_and();
   }
-  foreach ($tables as $nalias => $tableinfo) {
+  foreach ($tables as $node_alias => $tableinfo) {
     $table = $tableinfo['table'];
     if (!($table instanceof SelectQueryInterface) && $table == $base_table) {
       // Set the subquery.
@@ -3140,10 +3140,10 @@ function _node_query_node_access_alter($query, $type) {
       // Now handle entities.
       if ($type == 'entity') {
         // Set a common alias for entities.
-        $base_alias = $nalias;
+        $base_alias = $node_alias;
         $field = 'entity_id';
       }
-      $subquery->where("$nalias.$field = na.nid");
+      $subquery->where("$node_alias.$field = na.nid");
 
       // For an entity query, attach the subquery to entity conditions.
       if (isset($node_conditions)) {

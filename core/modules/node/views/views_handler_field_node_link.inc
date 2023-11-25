@@ -30,6 +30,7 @@ class views_handler_field_node_link extends views_handler_field_entity {
       '#type' => 'textfield',
       '#title' => t('Text to display'),
       '#default_value' => $this->options['text'],
+      '#indentation' => 1,
       '#states' => array(
         'visible' => array(
           ':input[name="options[url]"]' => array('checked' => FALSE),

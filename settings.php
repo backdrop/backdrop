@@ -8,7 +8,7 @@
  * Database configuration:
  *
  * Most sites can configure their database by entering the connection string
- * below. If using master/slave databases or multiple connections, see the
+ * below. If using primary/replica databases or multiple connections, see the
  * advanced database documentation at
  * https://api.backdropcms.org/database-configuration
  */
