@@ -202,7 +202,7 @@ class FileTestCase extends BackdropWebTestCase {
     if (!isset($filepath)) {
       // Prefix with non-latin characters to ensure that all file-related
       // tests work with international filenames.
-      // cspell:disable-next-line
+      // cspell:disable-next-line.
       $filepath = 'Файл для тестирования ' . $this->randomName();
     }
     if (!isset($scheme)) {
@@ -1015,7 +1015,7 @@ class FileUploadTransliterationTest extends FileTestCase {
   function testTransliteration() {
     // Make a particularly troublesome file name, starting with an umlaut and
     // containing upper-case variant characters.
-    // cspell:disable-next-line
+    // cspell:disable-next-line.
     $original_filename = 'üФайл Ä fàü.txt';
     $file = $this->createFile($original_filename, 'Sample text');
     $config = config('system.core');

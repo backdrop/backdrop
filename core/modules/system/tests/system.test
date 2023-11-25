@@ -2341,7 +2341,7 @@ class RetrieveFileTestCase extends BackdropWebTestCase {
   function testFileRetrieving() {
     // Test 404 handling by trying to fetch a randomly named file.
     backdrop_mkdir($sourcedir = 'public://' . $this->randomName());
-    // cspell:disable-next-line
+    // cspell:disable-next-line.
     $filename = 'Файл для тестирования ' . $this->randomName();
     $url = file_create_url($sourcedir . '/' . $filename);
     $retrieved_file = system_retrieve_file($url);

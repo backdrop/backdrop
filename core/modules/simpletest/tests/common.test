@@ -494,12 +494,12 @@ class CommonXssUnitTestCase extends BackdropUnitTestCase {
      $this->assertEqual($text, '', 'check_plain() casts null to string');
      $text = check_plain(FALSE);
      $this->assertEqual($text, '', 'check_plain() casts boolean to string');
-     // cspell:disable
+     // cspell:disable.
      $text = filter_xss("Fooÿñ");
      $this->assertEqual($text, "Fooÿñ", 'filter_xss() accepts valid sequence Fooÿñ');
      $text = check_plain("Fooÿñ");
      $this->assertEqual($text, "Fooÿñ", 'check_plain() accepts valid sequence "Fooÿñ"');
-     // cspell:enable
+     // cspell:enable.
      $text = filter_xss("Foo\xC0barbaz");
      $this->assertEqual($text, '', 'filter_xss() rejects invalid sequence "Foo\xC0barbaz"');
      // Ignore invalid multibyte sequence warning.
@@ -2317,7 +2317,7 @@ class CommonValidUrlUnitTestCase extends BackdropUnitTestCase {
   function testValidAbsolute() {
     $url_schemes = array('http', 'https', 'ftp');
     $valid_absolute_urls = array(
-      // cspell:disable
+      // cspell:disable.
       'example.com',
       'www.example.com',
       'ex-ample.com',
@@ -2336,7 +2336,7 @@ class CommonValidUrlUnitTestCase extends BackdropUnitTestCase {
       'example.org/~,$\'*;',
       'caf%C3%A9.example.org',
       '[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:80/index.html',
-      // cspell:enable
+      // cspell:enable.
     );
 
     foreach ($url_schemes as $scheme) {
@@ -2354,11 +2354,11 @@ class CommonValidUrlUnitTestCase extends BackdropUnitTestCase {
   function testInvalidAbsolute() {
     $url_schemes = array('http', 'https', 'ftp');
     $invalid_absolute_urls = array(
-      // cspell:disable
+      // cspell:disable.
       '',
       'ex!ample.com',
       'ex%ample.com',
-      // cspell:enable
+      // cspell:enable.
     );
 
     foreach ($url_schemes as $scheme) {
@@ -2375,13 +2375,13 @@ class CommonValidUrlUnitTestCase extends BackdropUnitTestCase {
    */
   function testValidRelative() {
     $valid_relative_urls = array(
-      // cspell:disable
+      // cspell:disable.
       'paren(the)sis',
       'index.html#pagetop',
       'index.php?q=node',
       'index.php?q=node&param=false',
       'login.php?do=login&style=%23#pagetop',
-      // cspell:enable
+      // cspell:enable.
     );
 
     foreach (array('', '/') as $front) {
@@ -2398,11 +2398,11 @@ class CommonValidUrlUnitTestCase extends BackdropUnitTestCase {
    */
   function testInvalidRelative() {
     $invalid_relative_urls = array(
-      // cspell:disable
+      // cspell:disable.
       'ex^mple',
       'example<>',
       'ex%ample',
-      // cspell:enable
+      // cspell:enable.
     );
 
     foreach (array('', '/') as $front) {
@@ -3168,7 +3168,7 @@ class CommonJSONUnitTestCase extends BackdropUnitTestCase {
     $this->assertIdentical($source, $json_decoded, 'Encoding structured data to pretty-printed JSON and decoding back results in the original data.');
 
     // Unicode test strings.
-    // cspell:disable-next-line
+    // cspell:disable-next-line.
     $unicode_decoded = 'üéåâ';
     $unicode_encoded = '\u00fc\u00e9\u00e5\u00e2';
     $unicode_encoded_escaped = '\\\\u00fc\\\\u00e9\\\\u00e5\\\\u00e2';

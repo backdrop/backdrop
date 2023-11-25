@@ -400,11 +400,11 @@ class UserValidationTestCase extends BackdropUnitTestCase {
       'foo@example.com'        => array('Valid username', 'assertNull'),
       // Invalid domains are allowed in usernames.
       'foo@-example.com'       => array('Valid username', 'assertNull'),
-      // cspell:disable
+      // cspell:disable.
       'þòøÇßªř€'               => array('Valid username', 'assertNull'),
       // Runes.
       'ᚠᛇᚻ᛫ᛒᛦᚦ'                 => array('Valid UTF8 username', 'assertNull'),
-      // cspell:enable
+      // cspell:enable.
       // '+' symbol is allowed.
       'foo+bar'                => array('Valid username', 'assertNull'),
       ' foo'                   => array('Invalid username that starts with a space', 'assertNotNull'),
