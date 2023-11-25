@@ -700,8 +700,8 @@ function hook_block_view_alter(&$data, $block) {
     unset($data['content']['#contextual_links']);
   }
   // Add a theme wrapper function defined by the current module to all blocks
-  // provided by the "somemodule" module.
-  if (is_array($data['content']) && $block->module == 'somemodule') {
+  // provided by the "some_module" module.
+  if (is_array($data['content']) && $block->module == 'some_module') {
     $data['content']['#theme_wrappers'][] = 'mymodule_special_block';
   }
 }
@@ -735,10 +735,10 @@ function hook_block_view_alter(&$data, $block) {
  */
 function hook_block_view_MODULE_DELTA_alter(&$data, $block) {
   // This code will only run for a specific block. For example, if MODULE_DELTA
-  // in the function definition above is set to "mymodule_somedelta", the code
-  // will only run on the "somedelta" block provided by the "mymodule" module.
+  // in the function definition above is set to "mymodule_some_delta", the code
+  // will only run on the "some_delta" block provided by the "mymodule" module.
 
-  // Change the title of the "somedelta" block provided by the "mymodule"
+  // Change the title of the "some_delta" block provided by the "mymodule"
   // module.
   $data['title'] = t('New title of the block');
 }

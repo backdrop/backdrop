@@ -28,9 +28,6 @@
       // Try to match the textarea height on which we're replacing.
       format.editorSettings.height = $(element).height();
 
-      // Hide the resizable grippie while CKEditor is active.
-      $(element).siblings('.grippie').hide();
-
       return !!CKEDITOR.replace(element, format.editorSettings);
     },
 
@@ -63,8 +60,6 @@
         $(element).height(height);
       }
 
-      // Restore the resize grippie.
-      $(element).siblings('.grippie').show();
       return !!editor;
     },
 
