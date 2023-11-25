@@ -269,14 +269,14 @@ class SearchQuery extends SelectQueryExtender {
       if (is_array($key) && count($key)) {
         $simple_or = TRUE;
         $any = FALSE;
-        $queryor = db_or();
+        $query_or = db_or();
         foreach ($key as $or) {
           list($num_new_scores) = $this->parseWord($or);
           $any |= $num_new_scores;
-          $queryor->condition('d.data', "% $or %", 'LIKE');
+          $query_or->condition('d.data', "% $or %", 'LIKE');
         }
-        if (count($queryor)) {
-          $this->conditions->condition($queryor);
+        if (count($query_or)) {
+          $this->conditions->condition($query_or);
           // A group of OR keywords only needs to match once.
           $this->matches += ($any > 0);
         }
