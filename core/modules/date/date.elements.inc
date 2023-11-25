@@ -369,8 +369,13 @@ function date_text_element_process($element, &$form_state, $form) {
     $element['#date_title_printed'] = TRUE;
   }
 
-  // Always remove the title from the parent element.
+  // Remove the title from the overall element but put it on the date part so
+  // it is available for validation errors.
+  $element['#date_title'] = $element['#title'];
   $element['#title'] = NULL;
+
+  // Move the #required property from the parent to the child date element.
+  $element['date']['#required'] = !empty($element['#required']);
 
   // Keep the system from creating an error message for the sub-element.
   // We'll set our own message on the parent element.
@@ -1010,7 +1015,9 @@ function date_popup_element_process($element, &$form_state, $form) {
 
   }
 
-  // Remove the title from the overall element.
+  // Remove the title from the overall element but put it on the date part so
+  // it is available for validation errors.
+  $element['#date_title'] = $element['#title'];
   $element['#title'] = NULL;
 
   if (isset($element['#element_validate'])) {
@@ -1233,8 +1240,13 @@ function date_popup_validate($element, &$form_state) {
   $error_field = implode('][', $element['#parents']);
   if (empty($date) || !empty($date->errors)) {
     if (is_object($date) && !empty($date->errors)) {
-      $message = t('The value input for field %field is invalid:', array('%field' => $label));
-      $message .= count($date->errors) ? (' ' . implode('', $date->errors)) : ('<br />' . implode('<br />', $date->errors));
+      if (count($date->errors) === 1) {
+        $error_list = ' ' . reset($date->errors);
+      }
+      else {
+        $error_list = theme('item_list', array('items' => $date->errors));
+      }
+      $message = t('The value input for field %field is invalid:', array('%field' => $label)) . $error_list;
       form_set_error($error_field, $message);
       return;
     }
