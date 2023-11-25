@@ -199,15 +199,15 @@ function theme_filter_tips($variables) {
     if ($multiple) {
       $output .= '<div class="compose-tips">';
     }
-    foreach ($tips as $name => $tiplist) {
+    foreach ($tips as $name => $tip_list) {
       if ($multiple) {
         $output .= '<div class="filter-type filter-' . backdrop_html_class($name) . '">';
         $output .= '<h3>' . check_plain($name) . '</h3>';
       }
 
-      if (count($tiplist) > 0) {
+      if (count($tip_list) > 0) {
         $output .= '<ul class="tips">';
-        foreach ($tiplist as $tip) {
+        foreach ($tip_list as $tip) {
           $output .= '<li' . ($long ? ' id="filter-' . str_replace("/", "-", $tip['id']) . '">' : '>') . $tip['tip'] . '</li>';
         }
         $output .= '</ul>';
