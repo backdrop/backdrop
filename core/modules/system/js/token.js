@@ -24,7 +24,7 @@ Backdrop.behaviors.tokenInsert = {
     // works around .focus() not working with iframes, which is what CKEditor
     // fields use. See https://stackoverflow.com/a/28932220.
     $(document).on('focusout', function() {
-      // Using setTimout to let the event pass the run loop.
+      // Using setTimeout to let the event pass the run loop.
       setTimeout(function() {
         // See: http://api.jquery.com/focus-selector
         // ... If you are looking for the currently focused element,
