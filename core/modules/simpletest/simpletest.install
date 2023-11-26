@@ -25,7 +25,7 @@ function simpletest_requirements($phase) {
   if (!$has_curl) {
     $requirements['curl'] = array(
       'title' => $t('cURL'),
-      'value' => $t('Not found'),
+      'value' => $t('cURL not found'),
       'severity' => REQUIREMENT_ERROR,
       'description' => $t('The testing framework could not be installed because the PHP <a href="@curl_url">cURL</a> library is not available.', array('@curl_url' => 'http://php.net/manual/en/curl.setup.php')),
     );
