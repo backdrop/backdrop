@@ -5,7 +5,7 @@
  * This class is responsible for saving and storing configuration files for
  * vocabularies.
  */
-class TaxonomyVocabulary {
+class TaxonomyVocabulary extends stdClass {
 
   /**
    * Human-readable of the vocabulary.

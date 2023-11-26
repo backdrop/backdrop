@@ -14,7 +14,7 @@ Backdrop.behaviors.autocomplete = {
       var $input = $('#' + this.id.substr(0, this.id.length - 13))
         .attr('autocomplete', 'OFF')
         .attr('aria-autocomplete', 'list');
-      $($input[0].form).submit(Backdrop.autocompleteSubmit);
+      $($input[0].form).on('submit', Backdrop.autocompleteSubmit);
       $input.parent()
         .attr('role', 'application')
         .append($('<span class="element-invisible" aria-live="assertive"></span>')
@@ -47,9 +47,9 @@ Backdrop.jsAC = function ($input, db) {
   this.db = db;
 
   $input
-    .keydown(function (event) { return ac.onkeydown(this, event); })
-    .keyup(function (event) { ac.onkeyup(this, event); })
-    .blur(function () { ac.hidePopup(); ac.db.cancel(); });
+    .on('keydown', function (event) { return ac.onkeydown(this, event); })
+    .on('keyup', function (event) { ac.onkeyup(this, event); })
+    .on('blur', function () { ac.hidePopup(); ac.db.cancel(); });
 };
 
 /**
@@ -167,7 +167,7 @@ Backdrop.jsAC.prototype.unhighlight = function (node) {
  * Hides the autocomplete suggestions.
  */
 Backdrop.jsAC.prototype.hidePopup = function (keycode) {
-  // Select item if the right key or mousebutton was pressed.
+  // Select item if the right key or mouse button was pressed.
   if (this.selected && ((keycode && keycode !== 46 && keycode !== 8 && keycode !== 27) || !keycode)) {
     this.input.value = $(this.selected).data('autocompleteValue');
   }
