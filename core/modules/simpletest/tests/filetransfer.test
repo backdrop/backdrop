@@ -7,6 +7,11 @@ class FileTransferTest extends BackdropWebTestCase {
   protected $password = 'password';
   protected $port = '42';
 
+  /**
+   * @var TestFileTransfer
+   */
+  protected $testConnection;
+
   function setUp() {
     parent::setUp();
     $this->testConnection = TestFileTransfer::factory(BACKDROP_ROOT, array('hostname' => $this->hostname, 'username' => $this->username, 'password' => $this->password, 'port' => $this->port));
@@ -60,29 +65,30 @@ class FileTransferTest extends BackdropWebTestCase {
 
     // This convoluted piece of code is here because our testing framework does
     // not support expecting exceptions.
-    $gotit = FALSE;
+    $got_it = FALSE;
     try {
       $this->testConnection->copyDirectory($source, '/tmp');
     }
     catch (FileTransferException $e) {
-      $gotit = TRUE;
+      $got_it = TRUE;
     }
-    $this->assertTrue($gotit, 'Was not able to copy a directory outside of the jailed area.');
+    $this->assertTrue($got_it, 'Was not able to copy a directory outside of the jailed area.');
 
-    $gotit = TRUE;
+    $got_it = TRUE;
     try {
       $this->testConnection->copyDirectory($source, BACKDROP_ROOT . '/'. config_get('system.core', 'file_public_path'));
     }
     catch (FileTransferException $e) {
-      $gotit = FALSE;
+      $got_it = FALSE;
     }
-    $this->assertTrue($gotit, 'Was able to copy a directory inside of the jailed area');
+    $this->assertTrue($got_it, 'Was able to copy a directory inside of the jailed area');
   }
 }
 
 /**
  * Mock FileTransfer object for test case.
  */
+#[\AllowDynamicProperties]
 class TestFileTransfer extends FileTransfer {
   protected $host = NULL;
   protected $username = NULL;
@@ -103,10 +109,9 @@ class TestFileTransfer extends FileTransfer {
   }
 
   function connect() {
-    $parts = explode(':', $this->hostname);
-    $port = (count($parts) == 2) ? $parts[1] : $this->port;
-    $this->connection = new MockTestConnection();
-    $this->connection->connectionString = 'test://' . urlencode((string) $this->username) . ':' . urlencode((string) $this->password) . "@$this->host:$this->port/";
+    $connection = new MockTestConnection();
+    $connection->connectionString = 'test://' . urlencode((string) $this->username) . ':' . urlencode((string) $this->password) . "@$this->host:$this->port/";
+    $this->connection = $connection;
   }
 
   function copyFileJailed($source, $destination) {

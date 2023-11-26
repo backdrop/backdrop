@@ -9,6 +9,16 @@ class TextFieldTestCase extends BackdropWebTestCase {
   protected $admin_user;
   protected $web_user;
 
+  /**
+   * @var array
+   */
+  protected $field;
+
+  /**
+   * @var string
+   */
+  protected $field_name;
+
   function setUp() {
     parent::setUp('field_test');
 
@@ -76,11 +86,14 @@ class TextFieldTestCase extends BackdropWebTestCase {
   function _testTextfieldWidgets($field_type, $widget_type) {
     // Setup a field and instance
     $entity_type = 'test_entity';
-    $this->field_name = backdrop_strtolower($this->randomName());
-    $this->field = array('field_name' => $this->field_name, 'type' => $field_type);
+    $field_name = backdrop_strtolower($this->randomName());
+    $this->field = array(
+      'field_name' => $field_name,
+      'type' => $field_type,
+    );
     field_create_field($this->field);
     $this->instance = array(
-      'field_name' => $this->field_name,
+      'field_name' => $field_name,
       'entity_type' => 'test_entity',
       'bundle' => 'test_bundle',
       'label' => $this->randomName() . '_label',
@@ -101,13 +114,13 @@ class TextFieldTestCase extends BackdropWebTestCase {
 
     // Display creation form.
     $this->backdropGet('test-entity/add/test-bundle');
-    $this->assertFieldByName("{$this->field_name}[$langcode][0][value]", '', 'Widget is displayed');
-    $this->assertNoFieldByName("{$this->field_name}[$langcode][0][format]", '1', 'Format selector is not displayed');
+    $this->assertFieldByName("{$field_name}[$langcode][0][value]", '', 'Widget is displayed');
+    $this->assertNoFieldByName("{$field_name}[$langcode][0][format]", '1', 'Format selector is not displayed');
 
     // Submit with some value.
     $value = $this->randomName();
     $edit = array(
-      "{$this->field_name}[$langcode][0][value]" => $value,
+      "{$field_name}[$langcode][0][value]" => $value,
     );
     $this->backdropPost(NULL, $edit, t('Save'));
     preg_match('|test-entity/manage/(\d+)/edit|', $this->url, $match);
@@ -368,6 +381,12 @@ class TextFieldTestCase extends BackdropWebTestCase {
 }
 
 class TextSummaryTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $post_creator;
+
   function setUp() {
     parent::setUp();
     $this->post_creator = $this->backdropCreateUser(array('create post content', 'edit own post content'));
@@ -411,16 +430,16 @@ class TextSummaryTestCase extends BackdropWebTestCase {
     // Using no text format:
     $expected = array(
       "<p>\nHi\n</p>\n<p>\nfolks\n<br />\n!\n</p>",
-      "<",
-      "<p",
-      "<p>",
-      "<p>\n",
-      "<p>\nH",
-      "<p>\nHi",
-      "<p>\nHi\n",
-      "<p>\nHi\n<",
-      "<p>\nHi\n</",
-      "<p>\nHi\n</p",
+      "",
+      "<p></p>",
+      "<p></p>",
+      "<p>\n</p>",
+      "<p>\nH</p>",
+      "<p>\nHi</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
       "<p>\nHi\n</p>",
       "<p>\nHi\n</p>",
       "<p>\nHi\n</p>",
@@ -494,7 +513,7 @@ class TextSummaryTestCase extends BackdropWebTestCase {
 
     // Test text_summary() for different sizes.
     for ($i = 0; $i <= 37; $i++) {
-      $this->assertTextSummary($text, $expected[$i],    NULL, $i);
+      $this->assertTextSummary($text, $expected[$i], NULL, $i);
       $this->assertTextSummary($text, $expected_lb[$i], 'filtered_html', $i);
     }
   }
@@ -527,6 +546,22 @@ class TextSummaryTestCase extends BackdropWebTestCase {
 }
 
 class TextTranslationTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var object
+   */
+  protected $format;
+
+  /**
+   * @var User
+   */
+  protected $admin;
+
+  /**
+   * @var User
+   */
+  protected $translator;
+
   function setUp() {
     parent::setUp('locale', 'translation');
 
@@ -573,7 +608,7 @@ class TextTranslationTestCase extends BackdropWebTestCase {
       "body[$langcode][0][value]" => $body,
     );
 
-    // Translate the post in french.
+    // Translate the post in French.
     $this->backdropPost('node/add/post', $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($edit['title']);
     $this->backdropGet("node/$node->nid/translate");
@@ -597,7 +632,7 @@ class TextTranslationTestCase extends BackdropWebTestCase {
       $this->randomName(),
     );
 
-    // Create an post with the first body input format set to "Raw HTML"
+    // Create a post with the first body input format set to "Raw HTML"
     // (full_html).
     $title = $this->randomName();
     $edit = array(
@@ -608,7 +643,7 @@ class TextTranslationTestCase extends BackdropWebTestCase {
     $node = $this->backdropGetNodeByTitle($title);
 
     // Populate the body field: the first item gets the "Raw HTML" (full_html)
-    // input format, the second one "Filtered HTML".
+    // input format, the second one gets the "Basic" (filtered_html).
     $formats = array('full_html', 'filtered_html');
     $langcode = LANGUAGE_NONE;
     foreach ($body as $delta => $value) {

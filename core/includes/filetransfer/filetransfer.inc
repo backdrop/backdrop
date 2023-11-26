@@ -11,21 +11,76 @@
  * root.
  */
 abstract class FileTransfer {
+
+  /**
+   * The username for this file transfer.
+   *
+   * @var string
+   */
   protected $username;
+
+  /**
+   * The password for this file transfer.
+   *
+   * @var string
+   */
   protected $password;
+
+  /**
+   * The hostname for this file transfer.
+   *
+   * @var string
+   */
   protected $hostname = 'localhost';
+
+  /**
+   * The port for this file transfer.
+   *
+   * @var int
+   */
   protected $port;
 
   /**
-   * The constructor for the UpdateConnection class. This method is also called
-   * from the classes that extend this class and override this method.
+   * Full path to directory where file-transfer is restricted to.
+   *
+   * @var string
+   */
+  protected $jail;
+
+  /**
+   * Path to connection chroot.
+   *
+   * @var string|false|null
+   */
+  private $chrootPath;
+
+  /**
+   * The instantiated connection object.
+   *
+   * @var object|false|null
+   */
+  private $connectionHandle;
+
+  /**
+   * The constructor for the FileTransfer class.
+   *
+   * This method is also called from the classes that extend this class and
+   * override this method.
+   *
+   * @param string $jail
+   *   The full path where all file operations performed by this object will
+   *   be restricted to. This prevents the FileTransfer classes from being
+   *   able to touch other parts of the filesystem.
    */
   function __construct($jail) {
     $this->jail = $jail;
   }
 
   /**
+   * Defines a factory method for this class.
+   *
    * Classes that extend this class must override the factory() static method.
+   * They should return a new instance of the appropriate FileTransfer subclass.
    *
    * @param string $jail
    *   The full path where all file operations performed by this object will
@@ -36,7 +91,7 @@ abstract class FileTransfer {
    *   getSettingsForm() method uses any nested settings, the same structure
    *   will be assumed here.
    *
-   * @return FileTransfer
+   * @return object
    *   New instance of the appropriate FileTransfer subclass.
    *
    * @throws FileTransferException
@@ -51,19 +106,72 @@ abstract class FileTransfer {
    * If the connection isn't set to anything, this will call the connect() method
    * and set it to and return the result; afterwards, the connection will be
    * returned directly without using this method.
+   *
+   * @param string $name
+   *   The name of the variable to return.
+   *
+   * @return string|bool
+   *   The variable specified in $name.
    */
   function __get($name) {
     if ($name == 'connection') {
       $this->connect();
-      return $this->connection;
+      return $this->connectionHandle;
     }
 
     if ($name == 'chroot') {
       $this->setChroot();
-      return $this->chroot;
+      return $this->chrootPath;
     }
+  }
 
-    return NULL;
+  /**
+   * Implementation of the magic __set() method.
+   *
+   * @param string $name
+   *   The name of the variable to set.
+   *
+   * @param string|object|false|null $value
+   *   The value to be assigned to the variable.
+   */
+  public function __set($name, $value) {
+    if ($name == 'connection') {
+      $this->connectionHandle = $value;
+    }
+    elseif ($name == 'chroot') {
+      $this->chrootPath = $value;
+    }
+  }
+
+  /**
+   * Implementation of the magic __isset() method.
+   *
+   * @param string $name
+   *   The name of the variable to check.
+   */
+  public function __isset($name) {
+    if ($name == 'connection') {
+      return isset($this->connectionHandle);
+    }
+    if ($name == 'chroot') {
+      return isset($this->chrootPath);
+    }
+    return FALSE;
+  }
+
+  /**
+   * Implementation of the magic __unset() method.
+   *
+   * @param string $name
+   *   The name of the variable to unset.
+   */
+  public function __unset($name) {
+    if ($name == 'connection') {
+      unset($this->connectionHandle);
+    }
+    elseif ($name == 'chroot') {
+      unset($this->chrootPath);
+    }
   }
 
   /**
@@ -79,7 +187,7 @@ abstract class FileTransfer {
    * @param $destination
    *   The destination path.
    */
-  public final function copyDirectory($source, $destination) {
+  final public function copyDirectory($source, $destination) {
     $source = $this->sanitizePath($source);
     $destination = $this->fixRemotePath($destination);
     $this->checkPath($destination);
@@ -87,15 +195,20 @@ abstract class FileTransfer {
   }
 
   /**
-   * @see http://php.net/chmod
+   * Changes the permissions of the specified $path (file or directory).
    *
    * @param string $path
+   *   The file / directory to change the permissions of.
    * @param int $mode
+   *   The new file permission mode to be passed to chmod().
    * @param bool $recursive
+   *   Pass TRUE to recursively chmod the entire directory specified in $path.
    *
    * @throws FileTransferException
+   *
+   * @see http://php.net/chmod
    */
-  public final function chmod($path, $mode, $recursive = FALSE) {
+  final public function chmod($path, $mode, $recursive = FALSE) {
     if (!in_array('FileTransferChmodInterface', class_implements(get_class($this)))) {
       throw new FileTransferException('Unable to change file permissions');
     }
@@ -163,7 +276,6 @@ abstract class FileTransfer {
    *   A path to check against the jail.
    *
    * @throws FileTransferException
-   *
    */
   protected final function checkPath($path) {
     $full_jail = $this->chroot . $this->jail;
@@ -176,21 +288,26 @@ abstract class FileTransfer {
 
   /**
    * Returns a modified path suitable for passing to the server.
+   *
    * If a path is a windows path, makes it POSIX compliant by removing the drive letter.
    * If $this->chroot has a value, it is stripped from the path to allow for
    * chroot'd filetransfer systems.
    *
    * @param $path
+   *   The path to modify.
    * @param $strip_chroot
+   *   Whether to remove the path in $this->chroot.
    *
    * @return string
+   *   The modified path.
    */
   protected final function fixRemotePath($path, $strip_chroot = TRUE) {
     $path = $this->sanitizePath($path);
-    $path = preg_replace('|^([a-z]{1}):|i', '', $path); // Strip out windows driveletter if its there.
+    // Strip out Windows drive letter if it's there.
+    $path = preg_replace('|^([a-z]{1}):|i', '', $path);
     if ($strip_chroot) {
-      if ($this->chroot && strpos($path, $this->chroot) === 0) {
-        $path = ($path == $this->chroot) ? '' : substr($path, strlen($this->chroot));
+      if ($this->chrootPath && strpos($path, $this->chrootPath) === 0) {
+        $path = ($path == $this->chrootPath) ? '' : substr($path, strlen($this->chrootPath));
       }
     }
     return $path;
@@ -338,6 +455,9 @@ abstract class FileTransfer {
    *
    * Implementing classes can either extend this form with fields collecting the
    * specific information they need, or override it entirely.
+   *
+   * @return array
+   *   An array that contains a Form API definition.
    */
   public function getSettingsForm() {
     $form['username'] = array(

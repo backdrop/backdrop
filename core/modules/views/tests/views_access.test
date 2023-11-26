@@ -10,6 +10,32 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Basic test for pluggable access.
  */
 class ViewsAccessTest extends ViewsSqlTest {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
+  /**
+   * @var string
+   */
+  protected $web_role;
+
+  /**
+   * @var string
+   */
+  protected $normal_role;
+
+  /**
+   * @var User
+   */
+  protected $normal_user;
+
   protected function setUp(array $modules = array()) {
     parent::setUp($modules);
 
@@ -162,8 +188,8 @@ class ViewsAccessTest extends ViewsSqlTest {
     $view->api_version = 2;
     $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
-    /* Display: Master */
-    $handler = $view->new_display('default', 'Master', 'default');
+    /* Display: Default */
+    $handler = $view->new_display('default', 'Default', 'default');
     $handler->display->display_options['access']['type'] = 'none';
     $handler->display->display_options['cache']['type'] = 'none';
     $handler->display->display_options['exposed_form']['type'] = 'basic';
@@ -185,8 +211,8 @@ class ViewsAccessTest extends ViewsSqlTest {
     $view->api_version = 2;
     $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
-    /* Display: Master */
-    $handler = $view->new_display('default', 'Master', 'default');
+    /* Display: Default */
+    $handler = $view->new_display('default', 'Default', 'default');
     $handler->display->display_options['access']['type'] = 'perm';
     $handler->display->display_options['access']['perm'] = 'views_test test permission';
     $handler->display->display_options['cache']['type'] = 'none';
@@ -209,8 +235,8 @@ class ViewsAccessTest extends ViewsSqlTest {
     $view->api_version = 2;
     $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
-    /* Display: Master */
-    $handler = $view->new_display('default', 'Master', 'default');
+    /* Display: Default */
+    $handler = $view->new_display('default', 'Default', 'default');
     $handler->display->display_options['access']['type'] = 'role';
     $handler->display->display_options['access']['role'] = array(
       $this->normal_role => $this->normal_role,
@@ -235,8 +261,8 @@ class ViewsAccessTest extends ViewsSqlTest {
     $view->api_version = 2;
     $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
-    /* Display: Master */
-    $handler = $view->new_display('default', 'Master', 'default');
+    /* Display: Default */
+    $handler = $view->new_display('default', 'Default', 'default');
     $handler->display->display_options['access']['type'] = 'test_dynamic';
     $handler->display->display_options['cache']['type'] = 'none';
     $handler->display->display_options['exposed_form']['type'] = 'basic';
@@ -261,8 +287,8 @@ class ViewsAccessTest extends ViewsSqlTest {
     $view->api_version = 2;
     $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
-    /* Display: Master */
-    $handler = $view->new_display('default', 'Master', 'default');
+    /* Display: Default */
+    $handler = $view->new_display('default', 'Default', 'default');
     $handler->display->display_options['access']['type'] = 'test_static';
     $handler->display->display_options['cache']['type'] = 'none';
     $handler->display->display_options['exposed_form']['type'] = 'basic';

@@ -778,7 +778,10 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
     // Test the image linked to content formatter.
     $instance['display']['default']['settings']['image_link'] = 'content';
     field_update_instance($instance);
-    $default_output = l(theme('image', $image_info), 'node/' . $nid, array('html' => TRUE, 'attributes' => array('class' => 'active')));
+    $default_output = l(theme('image', $image_info), 'node/' . $nid, array('html' => TRUE, 'attributes' => array(
+      'class' => 'active',
+      'aria-current' => 'page',
+    )));
     $this->backdropGet('node/' . $nid);
     $this->assertRaw($default_output, t('Image linked to content formatter displaying correctly on full node view.'));
 
@@ -1168,7 +1171,7 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     $this->createImageField($field_name, 'post', array(), $instance_settings);
 
     $path = backdrop_get_path('module', 'image') . '/tests/images';
-    $filename = 'testimage.webp';
+    $filename = 'test-image.webp';
     $files = file_scan_directory($path, '/' . $filename . '/');
     $webp_image = reset($files);
     $nid = $this->uploadNodeImage($webp_image, $field_name, 'post');
