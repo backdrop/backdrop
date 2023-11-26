@@ -1171,7 +1171,7 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     $this->createImageField($field_name, 'post', array(), $instance_settings);
 
     $path = backdrop_get_path('module', 'image') . '/tests/images';
-    $filename = 'testimage.webp';
+    $filename = 'test-image.webp';
     $files = file_scan_directory($path, '/' . $filename . '/');
     $webp_image = reset($files);
     $nid = $this->uploadNodeImage($webp_image, $field_name, 'post');

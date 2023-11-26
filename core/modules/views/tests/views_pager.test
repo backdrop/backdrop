@@ -402,7 +402,7 @@ class ViewsPagerTest extends ViewsSqlTest {
   }
 
   /**
-   * Tests the minipager.
+   * Tests the mini pager.
    */
   public function testMiniPager() {
     // the functionality is the same as the normal pager, so i don't know what to test here.
