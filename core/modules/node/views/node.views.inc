@@ -760,7 +760,7 @@ function node_row_node_view_preprocess_node(&$variables) {
   }
 
   if (!empty($options['comments']) && user_access('access comments') && $node->comment) {
-    $variables['content']['comments'] = comment_node_page_additions($node);
+    $variables['comments'] = comment_node_page_additions($node);
   }
 }
 

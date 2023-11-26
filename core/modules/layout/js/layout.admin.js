@@ -61,7 +61,7 @@ Backdrop.behaviors.layoutConfigure = {
         $('input[data-layout-path-update]').triggerHandler('mousedown');
 
       // (Re)install placeholder examples toggle handler.
-      $('a.layout-placeholder-examples-toggle').click(examples_toggle_handler);
+      $('a.layout-placeholder-examples-toggle').on('click', examples_toggle_handler);
 
       };
       // Update contexts after a slight typing delay.
@@ -76,7 +76,7 @@ Backdrop.behaviors.layoutConfigure = {
     $form.find('.layout-placeholder-examples').hide();
 
     // Handle toggling the placeholder examples.
-    $('a.layout-placeholder-examples-toggle').click(examples_toggle_handler);
+    $('a.layout-placeholder-examples-toggle').on('click', examples_toggle_handler);
 
     // Convert AJAX buttons to links.
     var $linkButtons = $(context).find('.layout-link-button').once('link-button');
@@ -312,7 +312,7 @@ Backdrop.behaviors.layoutDisplayEditor = {
     } else {
       $('span.field-suffix').hide();
     }
-    $('input[name="reusable"]').change(function() {
+    $('input[name="reusable"]').on('change', function() {
       $('span.field-suffix').toggle();
     });
   },
@@ -393,7 +393,7 @@ Backdrop.behaviors.blockListFilterByText = {
       });
 
       // @todo Use autofocus attribute when possible.
-      $input.focus().on('keyup', filterBlockList);
+      $input.trigger('focus').on('keyup', filterBlockList);
     }
   }
 }

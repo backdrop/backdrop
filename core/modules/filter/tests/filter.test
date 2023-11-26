@@ -500,7 +500,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
       'filter_url_length' => $this->randomName(4),
     );
     $this->backdropPost('admin/config/content/formats/filtered_html/filter-settings/filter_url', $edit, t('Update'));
-    $this->assertNoRaw(t('The text format %format has been updated.', array('%format' => 'Filtered HTML')));
+    $this->assertNoRaw(t('The text format %format has been updated.', array('%format' => 'Basic')));
 
     // The form does save permitted value and it appears in the config json.
     $length = 88;
@@ -1559,7 +1559,7 @@ Unknown tag <x>containing x and www.example.com</x>? And a tag <pooh>beginning w
       '
 <p>Test &lt;br/&gt;: This is a www.example17.com example <strong>with</strong> various http://www.example18.com tags. *<br/>
  It is important www.example19.com to *<br/>test different URLs and http://www.example20.com in the same paragraph. *<br>
-HTML www.example21.com soup by person@example22.com can litererally http://www.example23.com contain *img*<img> anything. Just a www.example24.com with http://www.example25.com thrown in. www.example26.com from person@example27.com with extra http://www.example28.com.
+HTML www.example21.com soup by person@example22.com can literally http://www.example23.com contain *img*<img> anything. Just a www.example24.com with http://www.example25.com thrown in. www.example26.com from person@example27.com with extra http://www.example28.com.
 ' => array(
         'href="http://www.example17.com"' => TRUE,
         'href="http://www.example18.com"' => TRUE,
@@ -1923,8 +1923,10 @@ EOF;
     $f = _filter_htmlcorrector('<p>test\n</p>\n');
     $this->assertEqual($f, '<p>test\n</p>\n', 'HTML corrector -- New-lines are accepted and kept as-is.');
 
+    // cspell:disable
     $f = _filter_htmlcorrector('<p>دروبال');
     $this->assertEqual($f, '<p>دروبال</p>', 'HTML corrector -- Encoding is correctly kept.');
+    // cspell:enable
 
     $f = _filter_htmlcorrector('<script type="text/javascript">alert("test")</script>');
     $this->assertEqual($f, '<script type="text/javascript">
@@ -2275,7 +2277,7 @@ class FilterEditorAccessTestCase extends BackdropWebTestCase {
 
     $filtered_html_format = array(
       'format' => 'filtered_html',
-      'name' => 'Filtered HTML',
+      'name' => 'Basic',
       'weight' => 0,
       'editor' => 'ckeditor',
       'filters' => array(),
