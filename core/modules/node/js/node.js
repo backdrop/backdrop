@@ -49,13 +49,13 @@ Backdrop.behaviors.nodeFieldsetSummaries = {
         vals.push(Backdrop.t('Scheduled for @date', { '@date': date }));
       }
       else {
-        var statusLabel = $status.parent().find('label').text();
-        vals.push(Backdrop.checkPlain($.trim(statusLabel)));
+        var statusLabel = $status.parent().find('label').text().trim();
+        vals.push(Backdrop.checkPlain(statusLabel));
       }
 
       // Other checkboxes like Promoted and Sticky.
       $(context).find('input:checked').not($status).parent().each(function () {
-        vals.push(Backdrop.checkPlain($.trim($(this).text())));
+        vals.push(Backdrop.checkPlain($(this).text().trim()));
       });
 
       return vals.join(', ');

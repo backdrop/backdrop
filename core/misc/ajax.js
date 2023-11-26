@@ -258,7 +258,7 @@ Backdrop.ajax = function (base, element, element_settings) {
   }
 
   // Bind the ajaxSubmit function to the element event.
-  $(ajax.element).bind(element_settings.event, function (event) {
+  $(ajax.element).on(element_settings.event, function (event) {
     if (!Backdrop.settings.urlIsAjaxTrusted[ajax.url] && !Backdrop.urlIsLocal(ajax.url)) {
       throw new Error(Backdrop.t('The callback URL is not local and not trusted: !url', {'!url': ajax.url}));
     }
@@ -269,7 +269,7 @@ Backdrop.ajax = function (base, element, element_settings) {
   // can be triggered through keyboard input as well as e.g. a mousedown
   // action.
   if (element_settings.keypress) {
-    $(ajax.element).keypress(function (event) {
+    $(ajax.element).on('keypress', function (event) {
       return ajax.keypressResponse(this, event);
     });
   }
@@ -278,7 +278,7 @@ Backdrop.ajax = function (base, element, element_settings) {
   // For example, prevent the browser default action of a click, even if the
   // AJAX behavior binds to mousedown.
   if (element_settings.prevent) {
-    $(ajax.element).bind(element_settings.prevent, false);
+    $(ajax.element).on(element_settings.prevent, false);
   }
 };
 
