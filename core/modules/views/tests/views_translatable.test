@@ -46,7 +46,7 @@ class ViewsTranslatableTest extends ViewsSqlTest {
     // Reset the plugin data.
     views_fetch_plugin_data(NULL, NULL, TRUE);
     $this->strings = array(
-      'Master1',
+      'Default1',
       'Apply1',
       'Sort By1',
       'Asc1',
@@ -54,7 +54,7 @@ class ViewsTranslatableTest extends ViewsSqlTest {
       'more1',
       'Reset1',
       'Offset1',
-      'Master1',
+      'Default1',
       'title1',
       'Items per page1',
       'fieldlabel1',
@@ -123,7 +123,7 @@ class ViewsTranslatableTest extends ViewsSqlTest {
       $display->handler->unpack_translatables($translatables);
 
       $this->string_keys = array(
-        'Master1' => array('title'),
+        'Default1' => array('title'),
         'Apply1' => array('exposed_form', 'submit_button'),
         'Sort By1' => array('exposed_form', 'exposed_sorts_label'),
         'Asc1' => array('exposed_form', 'sort_asc_label'),
@@ -177,8 +177,8 @@ class ViewsTranslatableTest extends ViewsSqlTest {
     $view->api_version = '3.0-alpha1';
     $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
-    /* Display: Master */
-    $handler = $view->new_display('default', 'Master1', 'default');
+    /* Display: Default */
+    $handler = $view->new_display('default', 'Default1', 'default');
     $handler->display->display_options['title'] = 'title1';
     $handler->display->display_options['use_more_text'] = 'more1';
     $handler->display->display_options['access']['type'] = 'none';

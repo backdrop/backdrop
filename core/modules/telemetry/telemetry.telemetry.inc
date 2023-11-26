@@ -33,6 +33,11 @@ function telemetry_telemetry_info() {
     'description' => t('The profile that was used to install your site.'),
     'project' => 'backdrop',
   );
+  $info['multisite'] = array(
+    'label' => t('Multisite'),
+    'description' => t('Is this Backdrop installation set up as a multisite?'),
+    'project' => 'backdrop',
+  );
   return $info;
 }
 
@@ -62,5 +67,7 @@ function telemetry_telemetry_data($key) {
       }
     case 'install_profile':
       return backdrop_get_profile();
+    case 'multisite':
+      return conf_path() == '.' ? 'No' : 'Yes';
   }
 }
