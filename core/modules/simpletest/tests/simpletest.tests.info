@@ -412,12 +412,6 @@ description = Tests that backdrop_get_query_array() correctly parses query param
 group = Common
 file = common.test
 
-[BlockInterestCohortTest]
-name = Block Interest Cohort
-description = Check Permissions-Policy header to disable Google FLoC.
-group = System
-file = common.test
-
 [FeedIconTest]
 name = Feed icon
 description = Check escaping of theme_feed_icon().
@@ -961,6 +955,12 @@ file = form.test
 [FormCheckboxTestCase]
 name = Form API checkbox
 description = Tests form API checkbox handling of various combinations of #default_value and #return_value.
+group = Form API
+file = form.test
+
+[FormResizableTextareaTestCase]
+name = Form API resizable textarea
+description = Tests transition from old JS-based textarea resize to new CSS approach.
 group = Form API
 file = form.test
 

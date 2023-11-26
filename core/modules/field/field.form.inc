@@ -193,7 +193,7 @@ function field_multiple_value_form($field, $instance, $langcode, $items, &$form,
   }
 
   $title = check_plain($instance['label']);
-  $description = field_filter_xss($instance['description']);
+  $description = field_filter_xss(token_replace($instance['description']));
 
   $id_prefix = implode('-', array_merge($parents, array($field_name)));
   $wrapper_id = backdrop_html_id($id_prefix . '-add-more-wrapper');

@@ -158,7 +158,7 @@ function system_themes_page() {
       // Create the operations links.
       $query['theme'] = $theme->name;
       if (backdrop_theme_access($theme) && theme_has_settings($theme->name)) {
-        $theme->operations[] = array(
+        $theme->operations['settings'] = array(
           'title' => t('Settings'),
           'href' => 'admin/appearance/settings/' . $theme->name,
           'attributes' => array('title' => t('Settings for !theme theme', array('!theme' => $theme->info['name']))),
@@ -166,13 +166,13 @@ function system_themes_page() {
       }
       if (!empty($theme->status)) {
         if (!$theme->is_default) {
-          $theme->operations[] = array(
+          $theme->operations['disable'] = array(
             'title' => t('Disable'),
             'href' => 'admin/appearance/disable',
             'query' => $query,
             'attributes' => array('title' => t('Disable !theme theme', array('!theme' => $theme->info['name']))),
           );
-          $theme->operations[] = array(
+          $theme->operations['default'] = array(
             'title' => t('Set default'),
             'href' => 'admin/appearance/default',
             'query' => $query,
@@ -181,13 +181,13 @@ function system_themes_page() {
         }
       }
       else {
-        $theme->operations[] = array(
+        $theme->operations['enable'] = array(
           'title' => t('Enable'),
           'href' => 'admin/appearance/enable',
           'query' => $query,
           'attributes' => array('title' => t('Enable !theme theme', array('!theme' => $theme->info['name']))),
         );
-        $theme->operations[] = array(
+        $theme->operations['enable-default'] = array(
           'title' => t('Enable and set default'),
           'href' => 'admin/appearance/default',
           'query' => $query,
@@ -1851,7 +1851,7 @@ function system_file_system_settings() {
     '#title' => t('Private file system path'),
     '#default_value' => $config->get('file_private_path'),
     '#maxlength' => 255,
-    '#description' => t('An existing local file system path for storing private files. It should be writable by Backdrop and not accessible over the web. See the online handbook for <a href="@handbook">more information about securing private files</a>.', array('@handbook' => 'https://backdropcms.org/user-guide/file-system')),
+    '#description' => t('An existing local file system path for storing private files. It should be writable by Backdrop and not accessible over the web. See the online handbook for <a href="@handbook">more information about securing private files</a>.', array('@handbook' => 'https://docs.backdropcms.org/documentation/managing-file-locations-and-access')),
     '#after_build' => array('system_check_directory'),
   );
 

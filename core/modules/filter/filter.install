@@ -99,7 +99,7 @@ function filter_update_1002() {
     'core' => '1.7',
     'display' => array(
       'default' => array(
-        'display_title' => 'Master',
+        'display_title' => 'Default',
         'display_plugin' => 'default',
         'display_options' => array(
           'query' => array(
