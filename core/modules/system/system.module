@@ -396,7 +396,7 @@ function system_element_info() {
     '#input' => TRUE,
     '#cols' => 60,
     '#rows' => 5,
-    '#resizable' => TRUE,
+    '#resizable' => 'vertical',
     '#process' => array('ajax_process_form'),
     '#theme' => 'textarea',
     '#theme_wrappers' => array('form_element'),
@@ -1247,15 +1247,6 @@ function system_library_info() {
     'dependencies' => array(
       // collapse.js relies on backdropGetSummary in form.js
       array('system', 'backdrop.form'),
-    ),
-  );
-
-  // Backdrop's resizable textarea.
-  $libraries['backdrop.textarea'] = array(
-    'title' => 'Backdrop resizable textarea',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      'core/misc/textarea.js' => array('group' => JS_LIBRARY),
     ),
   );
 
@@ -2437,26 +2428,35 @@ function system_init() {
   backdrop_add_css($path . '/css/system.theme.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
   backdrop_add_css($path . '/css/messages.theme.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
 
-  // Ignore slave database servers for this request.
+  // Ignore replica database servers for this request.
   //
   // In Backdrop's distributed database structure, new data is written to the
-  // master and then propagated to the slave servers.  This means there is a
-  // lag between when data is written to the master and when it is available on
-  // the slave. At these times, we will want to avoid using a slave server
+  // primary and then propagated to the replica servers. This means there is a
+  // lag between when data is written to the primary and when it is available on
+  // the replica. At these times, we will want to avoid using a replica server
   // temporarily. For example, if a user posts a new node then we want to
-  // disable the slave server for that user temporarily to allow the slave
+  // disable the replica server for that user temporarily to allow the replica
   // server to catch up. That way, that user will see their changes immediately
-  // while for other users we still get the benefits of having a slave server,
-  // just with slightly stale data.  Code that wants to disable the slave
-  // server should use the db_ignore_slave() function to set
-  // $_SESSION['ignore_slave_server'] to the timestamp after which the slave
+  // while for other users we still get the benefits of having a replica server,
+  // just with slightly stale data. Code that wants to disable the replica
+  // server should use the db_ignore_replica() function to set
+  // $_SESSION['ignore_replica_server'] to the timestamp after which the replica
   // can be re-enabled.
+
+  // @todo remove this backwards-compatible session variable wrapper in 2.0.
+  // cspell:disable
   if (isset($_SESSION['ignore_slave_server'])) {
-    if ($_SESSION['ignore_slave_server'] >= REQUEST_TIME) {
-      Database::ignoreTarget('default', 'slave');
+    $_SESSION['ignore_replica_server'] = $_SESSION['ignore_slave_server'];
+    unset($_SESSION['ignore_slave_server']);
+    // cspell:enable
+  }
+
+  if (isset($_SESSION['ignore_replica_server'])) {
+    if ($_SESSION['ignore_replica_server'] >= REQUEST_TIME) {
+      Database::ignoreTarget('default', 'replica');
     }
     else {
-      unset($_SESSION['ignore_slave_server']);
+      unset($_SESSION['ignore_replica_server']);
     }
   }
 
@@ -2963,9 +2963,9 @@ function system_get_info($type, $name = NULL) {
     $type = 'module_enabled';
   }
   $list = system_list($type);
-  foreach ($list as $shortname => $item) {
+  foreach ($list as $short_name => $item) {
     if (!empty($item->status)) {
-      $info[$shortname] = $item->info;
+      $info[$short_name] = $item->info;
     }
   }
   if (isset($name)) {
@@ -3195,6 +3195,12 @@ function _system_rebuild_theme_data() {
     $themes[$key]->filename = $theme->uri;
     $themes[$key]->info = backdrop_parse_info_file($theme->uri) + $defaults;
 
+    // Skip modules or layouts that have been placed in the wrong directory.
+    if (isset($themes[$key]->info['type']) && $themes[$key]->info['type'] != 'theme') {
+      unset($themes[$key]);
+      continue;
+    }
+
     // The "name" key is required, but to avoid a fatal error in the menu system
     // we set a reasonable default if it is not provided.
     $themes[$key]->info += array('name' => $key);
@@ -3238,7 +3244,7 @@ function _system_rebuild_theme_data() {
     }
   }
 
-  // Now that we've established all our master themes, go back and fill in data
+  // Now that we've established all our base themes, go back and fill in data
   // for subthemes.
   foreach ($sub_themes as $key) {
     $themes[$key]->base_themes = backdrop_find_base_themes($themes, $key);
@@ -3637,7 +3643,7 @@ function system_jump_menu_submit($form, &$form_state) {
   }
 
   // If the path we are redirecting to starts with the base path (for example,
-  // "/somepath/node/1"), we need to strip the base path off before passing it
+  // "/some_path/node/1"), we need to strip the base path off before passing it
   // to $form_state['redirect'].
   $base_path = base_path();
   if (strpos($redirect, $base_path) === 0) {
@@ -3838,9 +3844,9 @@ function system_mail($key, &$message, $params) {
  *   If evaluates true, prepend an empty time zone option to the array.
  */
 function system_time_zones($blank = NULL) {
-  $zonelist = timezone_identifiers_list();
+  $zone_list = timezone_identifiers_list();
   $zones = $blank ? array('' => t('- None selected -')) : array();
-  foreach ($zonelist as $zone) {
+  foreach ($zone_list as $zone) {
     // Because many time zones exist in PHP only for backward compatibility
     // reasons and should not be used, the list is filtered by a regular
     // expression.
@@ -4306,7 +4312,7 @@ function path_autocomplete($string = '') {
                 $found_match = TRUE;
                 $view_title = $display->display_options['title'];
               }
-              // Master title.
+              // Default title.
               elseif (!empty($view->display['default']->display_options['title']) && stripos($view->display['default']->display_options['title'], $string) !== FALSE) {
                 $found_match = TRUE;
                 $view_title = $view->display['default']->display_options['title'];
