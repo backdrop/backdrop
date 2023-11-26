@@ -16,7 +16,7 @@ function simpletest_requirements($phase) {
   $requirements = array();
 
   // Only set a requirements message if cURL is disabled.
-  $has_culr = function_exists('curl_init');
+  $has_curl = function_exists('curl_init');
   if (!$has_curl) {
     $requirements['curl'] = array(
       'title' => t('cURL'),
