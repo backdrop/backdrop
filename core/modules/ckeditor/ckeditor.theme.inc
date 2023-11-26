@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Theme functions for CKEditor module.
+ * Theme functions for CKEditor 4 module.
  */
 
 /**
@@ -139,7 +139,7 @@ function template_preprocess_ckeditor_settings_toolbar(&$variables) {
 }
 
 /**
- * Displays the toolbar configuration for CKEditor.
+ * Displays the toolbar configuration for CKEditor 4.
  */
 function theme_ckeditor_settings_toolbar($variables) {
   $add_group = '<span class="ckeditor-group-add-wrapper"><a href="#" class="ckeditor-group-add">' . t('Add group') . '</a></span>';

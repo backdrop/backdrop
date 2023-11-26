@@ -39,9 +39,9 @@ class CKEditorTestCase extends BackdropWebTestCase {
     $this->backdropGet('admin/config/content/formats');
     $this->clickLink(t('Add text format'));
 
-    // Select CKEditor and refresh the page.
+    // Select CKEditor 4 and refresh the page.
     $this->backdropPost(NULL, array(
-      'name' => 'CKEditor',
+      'name' => 'CKEditor 4',
       'format' => 'ckeditor',
       'editor' => 'ckeditor',
       'roles[authenticated]' => TRUE,
@@ -83,7 +83,7 @@ class CKEditorTestCase extends BackdropWebTestCase {
     $this->assertRaw('ckeditor/js/ckeditor.js');
     $settings = $this->backdropGetSettings();
     $format_settings = $settings['filter']['formats']['ckeditor'];
-    $this->assertEqual($format_settings['editorSettings']['toolbar'], $toolbar[0], 'CKEditor toolbar settings saved and added correctly.');
+    $this->assertEqual($format_settings['editorSettings']['toolbar'], $toolbar[0], 'CKEditor 4 toolbar settings saved and added correctly.');
     $this->assertEqual($format_settings['editorSettings']['extraPlugins'], 'backdropimagecaption,backdropimage', 'Added custom plugins include custom image caption support.');
     $this->assertEqual($format_settings['editorSettings']['removePlugins'], 'image,tabletools,tableresize,contextmenu');
     $style_list = array(
