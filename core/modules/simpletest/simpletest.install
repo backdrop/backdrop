@@ -23,7 +23,7 @@ function simpletest_requirements($phase) {
       'title' => $t('cURL'),
       'value' => $t('cURL not found'),
       'severity' => REQUIREMENT_ERROR,
-      'description' => $t('The testing framework could not be installed because the PHP <a href="@curl_url">cURL</a> library is not available.', array('@curl_url' => 'http://php.net/manual/en/curl.setup.php')),
+      'description' => $t('The testing framework requires the PHP <a href="@curl_url">cURL</a> library.', array('@curl_url' => 'http://php.net/manual/en/curl.setup.php')),
     );
   }
 
@@ -34,7 +34,7 @@ function simpletest_requirements($phase) {
       'title' => $t('PHP hash extension'),
       'value' => $t('Not found'),
       'severity' => REQUIREMENT_ERROR,
-      'description' => $t('The testing framework could not be installed because the PHP <a href="@hash_url">hash</a> extension is disabled.', array('@hash_url' => 'http://php.net/manual/en/book.hash.php')),
+      'description' => $t('The testing framework requires the PHP <a href="@hash_url">hash</a> extension to be enabled.', array('@hash_url' => 'http://php.net/manual/en/book.hash.php')),
     );
   }
 
