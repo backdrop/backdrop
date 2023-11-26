@@ -589,6 +589,12 @@ function translation_path_get_translations($path) {
 function translation_language_switch_links_alter(array &$links, $type, $path) {
   $language_type = config_get('translation.settings', 'language_type');
 
+  // Retain query on language switcher links.
+  $query = backdrop_get_query_parameters();
+  foreach ($links as $langcode => $link) {
+    $links[$langcode]['query'] = $query;
+  }
+
   if ($type == $language_type && preg_match("!^node/(\d+)(/.+|)!", $path, $matches)) {
     $node = node_load((int) $matches[1]);
 
