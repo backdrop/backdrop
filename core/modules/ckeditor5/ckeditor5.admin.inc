@@ -119,6 +119,8 @@ function ckeditor5_settings_form(&$form, $form_state, $format) {
  * Additional validate handler for filter_admin_format_form().
  */
 function ckeditor5_settings_form_validate($form, &$form_state) {
+  // Get rid of submission values caused by vertical tabs.
+  unset($form_state['values']['editor_settings']['plugins']);
   $settings = $form_state['values']['editor_settings'];
   $toolbar_string = $settings['cketoolbar'];
   $result = json_decode($toolbar_string, TRUE);
