@@ -16,12 +16,8 @@ function simpletest_requirements($phase) {
   $requirements = array();
   $t = get_t();
 
-  $has_curl = function_exists('curl_init');
-  $has_hash = function_exists('hash_hmac');
-  $has_domdocument = method_exists('DOMDocument', 'loadHTML');
-  $open_basedir = ini_get('open_basedir');
-
   // Only set a requirements message if cURL is disabled.
+  $has_culr = function_exists('curl_init');
   if (!$has_curl) {
     $requirements['curl'] = array(
       'title' => $t('cURL'),
@@ -32,6 +28,7 @@ function simpletest_requirements($phase) {
   }
 
   // Only set a requirements message if hash is disabled.
+  $has_hash = function_exists('hash_hmac');
   if (!$has_hash) {
     $requirements['hash'] = array(
       'title' => $t('PHP hash extension'),
@@ -41,6 +38,7 @@ function simpletest_requirements($phase) {
     );
   }
 
+  $has_domdocument = method_exists('DOMDocument', 'loadHTML');
   $requirements['php_domdocument'] = array(
     'title' => $t('PHP DOMDocument class'),
     'value' => $has_domdocument ? $t('Enabled') : $t('Not found'),
@@ -50,9 +48,10 @@ function simpletest_requirements($phase) {
     $requirements['php_domdocument']['description'] = $t('The testing framework requires the DOMDocument class to be available. Check the configure command at the <a href="@link-phpinfo">PHP info page</a>.', array('@link-phpinfo' => url('admin/reports/status/php')));
   }
 
-  // SimpleTest currently needs 2 cURL options which are incompatible with
-  // having PHP's open_basedir restriction set.
+  // SimpleTest currently needs 2 cURL options that are incompatible with having
+  // PHP's open_basedir restriction set.
   // See http://drupal.org/node/674304.
+  $open_basedir = ini_get('open_basedir');
   $requirements['php_open_basedir'] = array(
     'title' => $t('PHP open_basedir restriction'),
     'value' => $open_basedir ? $t('Enabled') : $t('Disabled'),
