@@ -209,7 +209,10 @@ function system_requirements($phase) {
     );
   }
 
-  // Report cURL version or absence.
+  // Report cURL version or absence. Don't add severity, since core doesn't
+  // require cURL, but other modules might add their own requirements check if
+  // they need it.
+  // @see simpletest_requirements()
   if (function_exists('curl_init')) {
     $curl_version = curl_version();
     if (is_array($curl_version)) {
