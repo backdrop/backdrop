@@ -77,10 +77,6 @@
       "ignoreWords": ["NONEXISTINGFILENAME", "ufail"]
     },
     {
-      "filename": "/core/modules/simpletest/simpletest.install",
-      "ignoreWords": ["libssh"]
-    },
-    {
       "filename": "/core/themes/bartik/color/color.inc",
       "ignoreWords": ["Blackdrop"]
     }
