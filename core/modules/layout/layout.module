@@ -293,7 +293,9 @@ function layout_menu() {
     'title' => 'Configure page title',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('layout_title_settings_form', 4),
+    'type' => MENU_LOCAL_TASK,
     'file' => 'layout.admin.inc',
+    'weight' => 11,
   );
   $items['admin/structure/layouts/manage/%layout_tempstore/edit-title/editor/title'] += $base;
 
@@ -1131,14 +1133,15 @@ function layout_load_multiple($layout_names, $skip_menu_items = FALSE) {
  * them and/or set their contexts.
  *
  * @param array $router_item
- *   The fully built menu router item, e.g., what is returned by menu_get_item().
+ *   The fully built menu router item, e.g., what is returned by
+ *   menu_get_item().
  * @param bool $skip_menu_items
  *   Flag to skip the attempted loading of menu items for the loaded layouts.
  *
  * @return Layout[]
  *   An array of load Layout object instances.
  */
-function layout_load_multiple_by_router_item($router_item, $skip_menu_items = NULL) {
+function layout_load_multiple_by_router_item(array $router_item, $skip_menu_items = NULL) {
   $href = $router_item['href'];
   $layouts_by_item = &backdrop_static(__FUNCTION__, array());
 
@@ -1427,7 +1430,7 @@ function layout_provides_path($path) {
  *
  * @since 1.4.0
  */
-function layout_get_layout_by_path($path = NULL, $router_item = NULL, $is_layout_page = FALSE) {
+function layout_get_layout_by_path($path = NULL, array $router_item = NULL, $is_layout_page = FALSE) {
   if (!isset($router_item)) {
     $router_item = menu_get_item($path);
   }
