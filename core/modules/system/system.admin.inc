@@ -2310,6 +2310,176 @@ function system_status($check = FALSE) {
 }
 
 /**
+ * Menu callback: displays the debug info page.
+ */
+function system_debug_info() {
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => t('Ready to copy/paste information about your site. This includes items commonly requested for troubleshooting/support purposes.'),
+  );
+
+  $form['copy_to_clipboard'] = array(
+    '#type' => 'link',
+    '#title' => t('Copy to clipboard'),
+    '#href' => '',
+    '#attributes' => array('onclick' => 'alert("TO-DO: this does nothing yet"); return false;'),
+    '#suffix' => ' | ',
+  );
+  $form['download_txt'] = array(
+    '#type' => 'link',
+    '#title' => t('Download as text file'),
+    '#href' => '',
+    '#attributes' => array('onclick' => 'alert("TO-DO: this does nothing yet"); return false;'),
+  );
+
+  $debug_info = system_get_debug_info();
+  $debug_info_lines = count(explode(PHP_EOL, $debug_info));
+
+  $form['debug_info'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Debug report'),
+    '#value' => $debug_info,
+    // Expand the default length of the text field, to ensure that all the
+    // debug output is visible without having to scroll within the text field.
+    '#rows' => $debug_info_lines + 1,
+    // '#disabled' => TRUE,
+    '#attributes' => array('id' => 'debug-info-wrapper'),
+  );
+
+  return $form;
+}
+
+/**
+ * Compiles the various information for the debug info page.
+ *
+ * @see system_debug_info().
+ */
+function system_get_debug_info() {
+  global $language;
+  $language_is_rtl = $language->direction == LANGUAGE_RTL;
+
+  $debug_info_lines = array();
+  // A blank line. It needs to be 2 columns, otherwise vsprintf() complains.
+  $empty_line = array('', '');
+
+  // Main system info.
+  $system_info = array(
+    'Backdrop CMS:' => BACKDROP_VERSION,
+    t('Installation profile:') => backdrop_get_profile(),
+    t('PHP version:') => phpversion(),
+    t('Database server:') => Database::getConnection()->version(),
+    t('Web server:') => check_plain($_SERVER['SERVER_SOFTWARE']),
+  );
+
+  foreach ($system_info as $info => $value) {
+    // Add the $info string as the array key, so that we can easily count the
+    // length of each item later. This allows us to calculate the max length,
+    // which is then used to calculate the spacing between items and their
+    // value. The line itself is also an array of 2 values that are then used
+    // with vsprintf() to format the plain text output in 2 columns.
+    $debug_info_lines[$info] = array($info, $value);
+  }
+
+  $debug_info_lines[] = $empty_line;
+
+  $core_version = t('[core]');
+
+  // Theme info.
+  $config = config('system.core');
+  $themes = array(
+    'default_theme' => $config->get('theme_default'),
+    'admin_theme' => $config->get('admin_theme'),
+  );
+
+  // Get current list of themes.
+  $all_theme_data = system_rebuild_theme_data();
+  $content_theme = $config->get('node_admin_theme') ? $themes['admin_theme'] : $themes['default_theme'];
+  foreach ($themes as $theme_role => $theme) {
+    $theme_data = (array) $all_theme_data[$theme];
+    if (!empty($theme_data['base_themes']) && $base_themes = $theme_data['base_themes']) {
+      foreach ($base_themes as $base_theme => $base_theme_name) {
+        $base_theme_data = $all_theme_data[$base_theme];
+        $base_theme_version = strstr($base_theme_data->uri, 'core/themes/') ? $core_version : $base_theme_data->info['version'];
+        $theme_data['base_themes'][$base_theme] = $base_theme_name . ' (' . $base_theme . ') ' . $base_theme_version;
+      }
+    }
+
+    $content_theme_indicator = $content_theme == $theme_data['name'] ? '*' : '';
+    $theme_version = strstr($theme_data['uri'], 'core/themes/') ? $core_version : $theme_data['info']['version'];
+    $theme_data['debug_name'] = $theme_data['info']['name'] . $content_theme_indicator . ' (' . $theme_data['name'] . ') ' . $theme_version;
+    $theme_data['debug_label'] = $theme_role == 'default_theme' ? t('Default theme:') : t('Admin theme:');
+    $themes[$theme_role] = $theme_data;
+  }
+
+  $theme_info = array();
+  foreach ($themes as $theme_role => $theme_data) {
+    $debug_info_lines[$theme_data['debug_label']] = array($theme_data['debug_label'], $theme_data['debug_name']);
+    if (!empty($theme_data['base_themes']) && $base_themes = $theme_data['base_themes']) {
+      foreach ($base_themes as $base_theme => $base_theme_name) {
+        // @todo: See if we can use something like str_pad() instead of
+        // vsprintf() to format the text into columns, and if that works
+        // better with multi-byte characters like ⮑ (and ⮐ for RTL).
+        if ($language_is_rtl) {
+          $base_theme_indicator = ' ⮐ ';
+          $debug_info_lines[$theme_role . '-base_theme'] = array(t('base theme:') . $base_theme_indicator, $base_theme_name . $base_theme_indicator);
+        }
+        else {
+          $base_theme_indicator = ' ⮑ ';
+          $debug_info_lines[$theme_role . '-base_theme'] = array($base_theme_indicator . t('base theme:'), ' ' . $base_theme_indicator . $base_theme_name);
+        }
+      }
+    }
+  }
+
+  // Add a line with a note about the default content theme (explicitly 2
+  // columns per line, otherwise vsprintf() complains).
+  $default_content_theme = t('*used when editing or creating content');
+  $debug_info_lines['Default content theme'] = array('', $default_content_theme);
+
+  $debug_info_lines[] = $empty_line;
+
+
+  // Get the current list of all modules available on the site.
+  $modules = system_rebuild_module_data();
+  foreach ($modules as $module => $module_data) {
+    // Only include non-hidden and enabled modules in the output.
+    if (empty($module_data->info['hidden']) && $module_data->status) {
+      if (strstr($module_data->uri, 'core/modules/')) {
+        // Add any enabled core module in the output.
+        $debug_info_lines[$module] = array($module, $core_version);
+      }
+      else {
+        // Add any enabled non-core module.
+        $module_version = isset($module_data->info['version']) ? $module_data->info['version'] : '-';
+        $debug_info_lines[$module] = array($module, $module_version);
+      }
+    }
+  }
+
+  // Get the length of the longest key in the array (which will determine the
+  // max width of the first plain-text "column").
+  $longest_item_length = max(array_map('mb_strlen', array_keys($debug_info_lines)));
+
+  // Format the output so that the items and their values are listed as columns.
+  $min_spacing = 5;
+  $first_col_width = $longest_item_length + $min_spacing;
+
+  $output = '';
+  foreach ($debug_info_lines as $line => $columns) {
+    if ($language_is_rtl) {
+      $format = '%s %' . $first_col_width . 's';
+      $output .= vsprintf($format, array_reverse($columns)) . "\n";
+    }
+    else {
+      $format = '%-' . $first_col_width . 's %s';
+      $output .= vsprintf($format, $columns) . "\n";
+    }
+  }
+
+  return $output;
+}
+
+/**
  * Menu callback: run cron manually.
  */
 function system_run_cron() {

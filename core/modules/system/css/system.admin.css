@@ -1,4 +1,3 @@
-
 /**
  * @file
  * Styles for administration pages.
@@ -459,4 +458,18 @@ table.screenshot {
   float: right;
   margin-left: 1em;
   margin-right: 0;
+}
+
+/**
+ * CSS for the debug info page.
+ */
+#debug-info-wrapper {
+  cursor: text;
+  font: 1em monospace;
+  white-space: pre;
+}
+
+[dir="rtl"] #debug-info-wrapper {
+  text-align: right;
+  unicode-bidi: plaintext;
 }
