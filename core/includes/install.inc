@@ -1409,19 +1409,39 @@ function system_get_requirements() {
 function backdrop_check_module($module) {
   module_load_install($module);
   if (module_hook($module, 'requirements')) {
-    // Check requirements
+    // Check requirements.
     $requirements = module_invoke($module, 'requirements', 'install');
     if (is_array($requirements) && backdrop_requirements_severity($requirements) == REQUIREMENT_ERROR) {
-      // Print any error messages
+      // Compile a list of requirement errors.
+      $issues = array();
       foreach ($requirements as $requirement) {
+        // Only errors should block installation - warnings are ignored.
         if (isset($requirement['severity']) && $requirement['severity'] == REQUIREMENT_ERROR) {
-          $message = $requirement['description'];
-          if (isset($requirement['value']) && $requirement['value']) {
-            $message .= ' (' . t('Currently using !item !version', array('!item' => $requirement['title'], '!version' => $requirement['value'])) . ')';
+          $issue = '<strong>' . $requirement['title'] . '</strong>: ' . $requirement['value'];
+          // Unlike $requirement['title'] and $requirement['value'], which if
+          // omitted throw an "Undefined array key ..." error,
+          // $requirement['title'] is optional.
+          if (isset($requirement['description']) && $requirement['description']) {
+            // @todo Add $requirement['description'] as a more/less toggle once
+            // https://github.com/backdrop/backdrop-issues/issues/5090 lands.
+            $issue .= '<br>' . t('Details: @issue_details', array('@issue_details' => $requirement['description']));
           }
-          backdrop_set_message($message, 'error');
+          $issues[] = $issue;
         }
       }
+
+      $modules = system_rebuild_module_data();
+      $module_name = isset($modules[$module]->info['name']) ? $modules[$module]->info['name'] : $module;
+      $message = format_plural(count($issues),
+        'The %module module cannot be enabled due to the following issue: !issues',
+        'The %module module cannot be enabled due to the following issues: !issues',
+        array(
+          '%module' => $module_name,
+          '!issues' => theme('item_list', array('items' => $issues)),
+      ));
+
+      backdrop_set_message($message, 'error');
+
       return FALSE;
     }
   }
