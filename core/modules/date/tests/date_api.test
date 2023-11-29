@@ -15,8 +15,11 @@ class DateAPITestCase extends BackdropUnitTestCase {
     // Test date_format_date().
     $formatters = array_merge(range('a', 'z'), range('A', 'Z'));
     foreach ($formatters as $formatter) {
-      $date_format = date_format_date(date_now(), 'custom', $formatter);
-      $php_format = date_format(date_now(), $formatter);
+      // Ensure that the exact same "now" (down to the millisecond) is used by
+      // both date_format_date() and date_format() when comparing them later.
+      $now = date_now();
+      $date_format = date_format_date($now, 'custom', $formatter);
+      $php_format = date_format($now, $formatter);
       $this->assertEqual($date_format, $php_format, 'The "' . $formatter . '" formatter was expected to be formatted as "' . $php_format . '", but was formatted as "' . $date_format .'" by Backdrop\'s date_format_date().');
     }
 
@@ -155,20 +158,27 @@ class DateAPITestCase extends BackdropUnitTestCase {
       // Create date objects in the distant past.
       // @see https://www.drupal.org/node/2795489#comment-12127088
       if (version_compare(PHP_VERSION, '5.6.15', '>=')) {
-        $input = '1809-02-12 10:30';
+        // This date is after timezones were standardized in the United States.
+        // Chicago changed it's timezone offset on 19th Nov 1883.
+        // @see https://www.chicagomag.com/city-life/January-2018/How-Chicago-Gave-America-Its-Time-Zones
+        $input = '1883-11-19 10:30';
         $timezone = 'America/Chicago';
+        // Setting the date to something older than this gives different output
+        // in PHP versions > 7.3.1. @see https://3v4l.org/tvFJm
+
         $date = new BackdropDateTime($input, $timezone);
         $value = $date->format('c');
-        $expected = '1809-02-12T10:30:00-06:00';
+        $expected = '1883-11-19T10:30:00-06:00';
         $this->assertEqual($expected, $value, "Test new BackdropDateTime($input, $timezone): should be $expected, found $value.");
 
-        $input = array('year' => 1809, 'month' => 2, 'day' => 12);
+        $input = array('year' => 1883, 'month' => 11, 'day' => 19);
         $timezone = 'America/Chicago';
         $date = new BackdropDateTime($input, $timezone);
         $value = $date->format('c');
-        $expected = '1809-02-12T00:00:00-06:00';
-        $this->assertEqual($expected, $value, "Test new BackdropDateTime(array('year' => 1809, 'month' => 2, 'day' => 12), $timezone): should be $expected, found $value.");
+        $expected = '1883-11-19T00:00:00-06:00';
+        $this->assertEqual($expected, $value, "Test new BackdropDateTime(array('year' => 1883, 'month' => 11, 'day' => 19), $timezone): should be $expected, found $value.");
       }
+
       // Create date objects in the far future.
       $input = '2345-01-02 02:04';
       $timezone = 'UTC';
