@@ -17,7 +17,7 @@ class DateAPITestCase extends BackdropUnitTestCase {
     foreach ($formatters as $formatter) {
       $date_format = date_format_date(date_now(), 'custom', $formatter);
       $php_format = date_format(date_now(), $formatter);
-      $this->assertEqual($date_format, $php_format, 'Test that the "' . $formatter . '" formatter is formatted correctly by date_format_date()');
+      $this->assertEqual($date_format, $php_format, 'The "' . $formatter . '" formatter was expected to be formatted as "' . $php_format . '", but was formatted as "' . $date_format .'" by Backdrop\'s date_format_date().');
     }
 
     // Test the order of the weeks days for a calendar that starts on Monday and
