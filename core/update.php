@@ -75,6 +75,7 @@ function update_script_selection_form($form, &$form_state) {
   // Ensure system.module's updates appear first.
   $form['start']['system'] = array();
 
+  $module_list = '';
   $updates = update_get_update_list();
   $starting_updates = array();
   $incompatible_updates_exist = FALSE;
@@ -88,6 +89,7 @@ function update_script_selection_form($form, &$form_state) {
         '#suffix' => '</div>',
       );
       $incompatible_updates_exist = TRUE;
+      $module_list .= $module . ', ';
       continue;
     }
     if (!empty($update['pending'])) {
@@ -112,6 +114,7 @@ function update_script_selection_form($form, &$form_state) {
     if (!$data['allowed']) {
       $incompatible_updates_exist = TRUE;
       $incompatible_count++;
+      $module_list .= $data['module'] . ', ';
       $module_update_key = $data['module'] . '_updates';
       if (isset($form['start'][$module_update_key]['#items'][$data['number']])) {
         $text = $data['missing_dependencies'] ? 'This update will been skipped due to the following missing dependencies: <em>' . implode(', ', $data['missing_dependencies']) . '</em>' : "This update will be skipped due to an error in the module's code.";
@@ -124,7 +127,8 @@ function update_script_selection_form($form, &$form_state) {
 
   // Warn the user if any updates were incompatible.
   if ($incompatible_updates_exist) {
-    backdrop_set_message('Some of the pending updates cannot be applied because their dependencies were not met.', 'warning');
+    $message = t('Pending updates for the following modules cannot be applied because their dependencies were not met: @modules', array('@modules' => $module_list));
+    backdrop_set_message($message, 'warning');
   }
 
   if (empty($count)) {
