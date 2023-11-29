@@ -13,14 +13,50 @@ class DateAPITestCase extends BackdropUnitTestCase {
 
   public function testDateAPI() {
     // Test date_format_date().
-    $formatters = array_merge(range('a', 'z'), range('A', 'Z'));
+    $formatters = array(
+      'a',
+      'A',
+      'B',
+      'c',
+      'd',
+      'D',
+      'e',
+      'F',
+      'g',
+      'G',
+      'h',
+      'H',
+      'i',
+      'I',
+      'j',
+      'l',
+      'L',
+      'm',
+      'M',
+      'n',
+      'N',
+      'o',
+      'O',
+      'P',
+      'r',
+      'R',
+      's',
+      'S',
+      't',
+      'T',
+      'u',
+      'U',
+      'w',
+      'W',
+      'y',
+      'Y',
+      'z',
+      'Z',
+    );
     foreach ($formatters as $formatter) {
-      // Ensure that the exact same "now" (down to the millisecond) is used by
-      // both date_format_date() and date_format() when comparing them later.
-      $now = date_now();
-      $date_format = date_format_date($now, 'custom', $formatter);
-      $php_format = date_format($now, $formatter);
-      $this->assertEqual($date_format, $php_format, 'The "' . $formatter . '" formatter was expected to be formatted as "' . $php_format . '", but was formatted as "' . $date_format .'" by Backdrop\'s date_format_date().');
+      $date_format = date_format_date(date_now(), 'custom', $formatter);
+      $php_format = date_format(date_now(), $formatter);
+      $this->assertEqual($date_format, $php_format, 'Test that the "' . $formatter . '" formatter is formatted correctly by date_format_date()');
     }
 
     // Test the order of the weeks days for a calendar that starts on Monday and
@@ -161,6 +197,8 @@ class DateAPITestCase extends BackdropUnitTestCase {
         // This date is after timezones were standardized in the United States.
         // Chicago changed it's timezone offset on 19th Nov 1883.
         // @see https://www.chicagomag.com/city-life/January-2018/How-Chicago-Gave-America-Its-Time-Zones
+        // The goal here is to test dates older than 1901, so this will do - no
+        // need to go further back than this.
         $input = '1883-11-19 10:30';
         $timezone = 'America/Chicago';
         // Setting the date to something older than this gives different output
