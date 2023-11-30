@@ -1075,6 +1075,10 @@ function system_modules_uninstall($form, $form_state = NULL) {
   // Make sure the install API is available.
   include_once BACKDROP_ROOT . '/core/includes/install.inc';
 
+  $form['help'] = array(
+    '#markup' => t('Modules have to be disabled in tab List Modules before they can be uninstalled. Uninstalling module will entirely remove their settings and/or associated data.'),
+  );
+
   // Display the confirm form if any modules have been submitted.
   if (!empty($form_state['storage']) && $confirm_form = system_modules_uninstall_confirm_form($form_state['storage'])) {
     return $confirm_form;
