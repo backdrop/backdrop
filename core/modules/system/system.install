@@ -2980,6 +2980,7 @@ function system_update_1056() {
  */
 function system_update_1057() {
   $config = config('system.core');
+  // See watchdog_severity_levels() for possible values.
   $config->set('watchdog_enabled_severity_levels', array(
     WATCHDOG_EMERGENCY,
     WATCHDOG_ALERT,
@@ -2988,8 +2989,6 @@ function system_update_1057() {
     WATCHDOG_WARNING,
     WATCHDOG_NOTICE,
     WATCHDOG_INFO,
-    // WATCHDOG_DEBUG,
-    // WATCHDOG_DEPRECATED,
   ));
   $config->save();
 }
