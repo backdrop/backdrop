@@ -380,7 +380,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#options' => array(),
     '#wrapper_attributes' => array('class' => array('clearfix', 'layout-options')),
     '#required' => TRUE,
-    '#description' => t('If none of the above templates is suitable for your needs, you can search for more and add them to your site from the "Install new layout templates" tab above, or create your own custom layout in the "Layout templates" tab next to it.'),
+    '#description' => t('Select one of the above layout templates, <a href="@link">install</a> a new layout template, or <a href="@link2">build your own</a> layout template with custom regions (flexible layout template).', array('@link' => url('admin/structure/layouts/install'), '@link2' => url('admin/structure/layouts/settings/flexible-template/add'))),
   );
 
   // Get the list of layout template options. The list needs to be rebuilt (see
