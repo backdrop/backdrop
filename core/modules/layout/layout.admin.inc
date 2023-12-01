@@ -2459,9 +2459,7 @@ function layout_reorder_form($form, &$form_state) {
     '#title' => t('Cancel'),
     '#href' => 'admin/structure/layouts',
     '#options' => array(
-      'attributes' => array(
-        'class' => array('form-cancel')
-      ),
+      'attributes' => array('class' => array('form-cancel')),
     ),
   );
 
