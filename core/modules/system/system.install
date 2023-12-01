@@ -213,32 +213,25 @@ function system_requirements($phase) {
   // require cURL, but other modules might add their own requirements check if
   // they need it.
   // @see simpletest_requirements()
-  if (function_exists('curl_init')) {
-    $curl_version = curl_version();
-    if (is_array($curl_version)) {
-      $version_info = array();
-      if (!empty($curl_version['version'])) {
-        $version_info[] = $t('Version:') . ' ' . $curl_version['version'];
-      }
-      if (!empty($curl_version['ssl_version'])) {
-        $version_info[] = $t('SSL version:') . ' ' . $curl_version['ssl_version'];
-      }
-      if (!empty($curl_version['libssh_version'])) {
-        $version_info[] = $t('libssh version:') . ' ' . $curl_version['libssh_version'];
-      }
-      $curl_status = implode(', ', $version_info);
-    }
-    else {
-      $curl_status = $t('cURL version not available');
-    }
+  $curl_requirements = array(
+    'title' => $t('cURL'),
+  );
+  $curl_version = curl_version();
+  if ($curl_version === FALSE) {
+    $curl_requirements['value'] = $t('cURL not installed');
   }
   else {
-    $curl_status = $t('cURL not found.');
+    $curl_requirements['value'] = $t('Version: @version', array('@version' => $curl_version['version']));
+    $version_info = array();
+    if (!empty($curl_version['ssl_version'])) {
+      $version_info[] = $t('SSL version: @ssl_version', array('@ssl_version' => $curl_version['ssl_version']));
+    }
+    if (!empty($curl_version['libssh_version'])) {
+      $version_info[] = $t('libssh version: @libssh_version', array($curl_version['libssh_version']));
+    }
+    $curl_requirements['description'] = theme('item_list', array('items' => $version_info));
   }
-  $requirements['curl'] = array(
-    'title' => $t('cURL'),
-    'value' => $curl_status,
-  );
+  $requirements['curl'] = $curl_requirements;
 
   // Test database-specific multi-byte UTF-8 related requirements.
   $charset_requirements = _system_check_db_utf8mb4_requirements($phase);
