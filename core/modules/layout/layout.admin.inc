@@ -99,7 +99,7 @@ function layout_list_page() {
         'class' => array('layout-group'),
       );
     }
-    elseif ($path !=='') {
+    elseif ($path !== '') {
       $override_rows[] = array('data' => $row, 'class' => array('layout-group'));
     }
 
