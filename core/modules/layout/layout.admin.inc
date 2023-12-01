@@ -218,8 +218,8 @@ function layout_list_page() {
     '#type' => 'help',
     '#markup' => '<h2>' . t('Default layouts') . '</h2>' . t('Used as a fallback for all paths without a matching layout.'),
     '#weight' => 4,
-   );
-   $page['default_table'] = array(
+  );
+  $page['default_table'] = array(
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $default_rows,
