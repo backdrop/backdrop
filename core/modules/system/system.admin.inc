@@ -1077,7 +1077,7 @@ function system_modules_uninstall($form, $form_state = NULL) {
 
   $form['help'] = array(
     '#theme' => 'help',
-    '#markup' => t('Modules have to be disabled in <a href="@link">List Modules</a> tab before they can be uninstalled. Uninstalling modules will entirely remove their settings and/or associated data.', array('@link' => url('admin/modules'))),
+    '#markup' => t('Modules have to be disabled in the <a href="@link">List Modules</a> tab before they can be uninstalled. Uninstalling modules will entirely remove their settings and/or associated data.', array('@link' => url('admin/modules'))),
   );
 
   // Display the confirm form if any modules have been submitted.
