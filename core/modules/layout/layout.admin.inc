@@ -380,6 +380,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#options' => array(),
     '#wrapper_attributes' => array('class' => array('clearfix', 'layout-options')),
     '#required' => TRUE,
+    '#description' => t('If none of the above templates is suitable for your needs, you can search for more and add them to your site from the "Install new layout templates" tab above, or create your own custom layout in the "Layout templates" tab next to it.'),
   );
 
   // Get the list of layout template options. The list needs to be rebuilt (see
@@ -3283,6 +3284,11 @@ function layout_ajax_form_update($form, $form_state) {
  * Administrative form for layout settings.
  */
 function layout_settings_page($form, &$form_state) {
+  $form['help'] = array(
+    '#theme' => 'help',
+    '#markup' => t('Create your own custom regions with a flexible layout template.'),
+  );
+
   $header = array(
     'layout_template_info' => array('data' => t('Template')),
     'type' => array('data' => t('Type'), 'sort' => 'desc', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
