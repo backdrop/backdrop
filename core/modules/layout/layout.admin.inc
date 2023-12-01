@@ -200,8 +200,8 @@ function layout_list_page() {
     '#attributes' => array('class' => array('layout-list')),
     '#empty' => t('No layout pages have been created yet.'),
     '#weight' => 1,
-   );
-   $page['override'] = array(
+  );
+  $page['override'] = array(
     '#type' => 'help',
     '#markup' => '<h2>' . t('Layout overrides') . '</h2>' . t('These layouts will override existing pages on the site.'),
     '#weight' => 2,
