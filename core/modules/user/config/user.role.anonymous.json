@@ -2,8 +2,7 @@
     "_config_name": "user.role.anonymous",
     "name": "anonymous",
     "label": "Anonymous",
-    "admin_description": "Special role assigned to any site visitor that has not signed into the site.",
-    "description": "",
+    "description": "Special role assigned to any site visitor that has not signed into the site.",
     "weight": "0",
     "permissions": []
 }

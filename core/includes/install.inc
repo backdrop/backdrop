@@ -114,7 +114,7 @@ function backdrop_get_schema_versions($module) {
     // Narrow this down to functions ending with an integer, since all
     // hook_update_N() functions end this way, and there are other
     // possible functions which match '_update_'. We use preg_grep() here
-    // instead of foreaching through all defined functions, since the loop
+    // instead of iterating through all defined functions, since the loop
     // through all PHP functions can take significant page execution time
     // and this function is called on every administrative page via
     // system_requirements().
@@ -1435,7 +1435,7 @@ function backdrop_check_module($module) {
  * a normal Backdrop module .info file. For example:
  * - name: The real name of the installation profile for display purposes.
  * - description: A brief description of the profile.
- * - dependencies: An array of shortnames of other modules that this install
+ * - dependencies: An array of machine names of other modules that this install
  *   profile requires.
  *
  * Additional, less commonly-used information that can appear in a profile.info

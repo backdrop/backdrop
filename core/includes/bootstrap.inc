@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.24.x-dev');
+define('BACKDROP_VERSION', '1.27.x-dev');
 
 /**
  * Core API compatibility.
@@ -593,11 +593,14 @@ function conf_path($require_settings = TRUE, $reset = FALSE) {
  * which directory should be used based on the hostname. If not using multisite,
  * the path returned will be a single period (indicating the current directory).
  *
- * @param $http_host
+ * @param string $http_host
  *   The hostname and optional port number, e.g. "www.example.com" or
  *   "www.example.com:8080".
- * @param $script_name
+ * @param string $script_name
  *   The part of the url following the hostname, including the leading slash.
+ * @param bool $require_settings
+ *   Only configuration directories with an existing settings.php file
+ *   will be recognized. Defaults to TRUE.
  *
  * @return
  *   The relative path of the matching configuration directory.
@@ -1662,7 +1665,7 @@ function backdrop_send_headers($default_headers = array(), $only_default = FALSE
  * refers to the time of the request. If the user accesses Backdrop via a proxy
  * server, and the proxy already has a cached copy of the anonymous page with an
  * older Last-Modified date, the proxy may respond with 304 Not Modified, making
- * the client think that the anonymous and authenticated pageviews are
+ * the client think that the anonymous and authenticated page views are
  * identical.
  *
  * @return bool
@@ -2532,7 +2535,8 @@ function backdrop_set_title($title = NULL, $output = CHECK_PLAIN) {
  *   The number of random bytes to fetch and base64 encode.
  *
  * @return string
- *   The base64 encoded result will have a length of up to 4 * $byte_count.
+ *   The base64 encoded result will have a length of up to
+ *   ceil($byte_count * 4 / 3).
  */
 function backdrop_random_key($byte_count = 32) {
   return backdrop_base64_encode(backdrop_random_bytes($byte_count));
@@ -3244,7 +3248,8 @@ function _backdrop_bootstrap_sanitize_request() {
   // Remove dangerous keys from input data.
   $allowlist = settings_get('sanitize_input_allowlist', array());
   if (empty($allowlist)) {
-    // Backwards compatible setting support. @todo Remove in 2.x.
+    // @todo Remove forbidden backwards compatibility word in Backdrop 2.x.
+    // cspell:disable-next-line
     $allowlist = settings_get('sanitize_input_whitelist', array());
   }
   $log_sanitized_keys = settings_get('sanitize_input_logging');
@@ -3562,12 +3567,12 @@ function language_multilingual() {
  */
 function language_list($only_enabled = FALSE, $option_list = FALSE, $native_names = FALSE) {
   $languages = &backdrop_static(__FUNCTION__);
-  // Initialize master language list.
+  // Initialize primary language list.
   if (!isset($languages)) {
     // Initialize local language list caches.
     $languages = array('all' => array(), 'enabled' => array());
 
-    // Fill in master language list based on current configuration. This may be
+    // Fill in primary language list based on current configuration. This may be
     // in the event of an early bootstrap error, so fallback to defaults.
     try {
       $default_langcode = config_get('system.core', 'language_default');
@@ -3722,8 +3727,8 @@ function language_default() {
  *
  * Examples:
  * - http://example.com/node/306 returns "node/306".
- * - http://example.com/backdropfolder/node/306 returns "node/306" while
- *   base_path() returns "/backdropfolder/".
+ * - http://example.com/backdrop_folder/node/306 returns "node/306" while
+ *   base_path() returns "/backdrop_folder/".
  * - http://example.com/url-alias (which is a URL alias for node/306) returns
  *   "path/alias" as opposed to the internal path.
  * - http://example.com/index.php returns an empty string (meaning: home page).
@@ -4135,7 +4140,7 @@ function backdrop_autoload($class) {
  * static $foo = &backdrop_static(__FUNCTION__);
  * @endcode
  * However, the above line of code does not work, because PHP only allows static
- * variables to be initializied by literal values, and does not allow static
+ * variables to be initialized by literal values, and does not allow static
  * variables to be assigned to references.
  * - http://php.net/manual/language.variables.scope.php#language.variables.scope.static
  * - http://php.net/manual/language.variables.scope.php#language.variables.scope.references

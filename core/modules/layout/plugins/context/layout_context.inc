@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Class that holds information relating to a layouts context.
+ * Class that holds information relating to a layout's context.
  */
 abstract class LayoutContext extends LayoutHandler {
 
@@ -60,7 +60,7 @@ abstract class LayoutContext extends LayoutHandler {
   var $aliases = array();
 
   /**
-   * Indicator as to whether this context is required and cannot be removed.
+   * Indicator whether this context is required and cannot be removed.
    *
    * Required contexts typically are those provided by a menu path placeholder.
    * While these contexts are required to exist, they can be changed to a
@@ -74,7 +74,7 @@ abstract class LayoutContext extends LayoutHandler {
   var $required = FALSE;
 
   /**
-   * Indicator as to whether this context may not be changed to a different one.
+   * Indicator whether this context may not be changed to a different one.
    *
    * Locked contexts are those that are provided by a menu path and tied to a
    * particular context through hook_layout_context_info(). e.g. A layout at
@@ -140,7 +140,7 @@ abstract class LayoutContext extends LayoutHandler {
    * The storage state of the context.
    *
    * This represents whether this context is stored in configuration (TRUE) or
-   * if its generated on the fly (FALSE).
+   * if it's generated on the fly (FALSE).
    *
    * @var bool
    */
@@ -222,6 +222,8 @@ abstract class LayoutContext extends LayoutHandler {
    *
    * @param array $router_map
    *   A router item map array.
+   *
+   * @deprecated Please use setDataFromRouter() instead.
    */
   function setDataFromRouterMap($router_map) {
     if (isset($this->position) && !empty($router_map[$this->position])) {
@@ -229,7 +231,7 @@ abstract class LayoutContext extends LayoutHandler {
       // so via hook_layout_load_by_router_item_alter(), we don't need to do
       // any setting here. But if $this->data is not an object, then it is
       // either a raw string that must be converted to an object by a load
-      // callback or it is a string pass-through.
+      // callback, or it is a string pass-through.
       if (!is_object($this->data)) {
         // If clients replaced any layout with one whose placeholders are in a
         // new position, they need to have altered $context->position so that
@@ -256,6 +258,50 @@ abstract class LayoutContext extends LayoutHandler {
 
           $this->setData($context_data);
         }
+      }
+    }
+  }
+
+  /**
+   * Set the context data from the router item.
+   *
+   * @param array $router_item
+   *   A router item.
+   */
+  public function setDataFromRouter(array $router_item) {
+    $router_map = $router_item['map'];
+
+    if (isset($this->position) && !empty($router_map[$this->position])) {
+      // If the menu router set the data for a context object or a client did
+      // so via hook_layout_load_by_router_item_alter(), we don't need to do
+      // any setting here. But if $this->data is not an object, then it is
+      // either a raw string that must be converted to an object by a load
+      // callback, or it is a string pass-through.
+      if (!is_object($this->data)) {
+        // If clients replaced any layout with one whose placeholders are in a
+        // new position, they need to have altered $context->position so that
+        // it points to the right place in the router item to get the data
+        // object.
+        $context_data = $router_map[$this->position];
+        // If the router item contains the context object in the right
+        // position, then we can just set the data from that.
+        if (is_object($context_data)) {
+          $this->setData($context_data);
+        }
+        else {
+          // If the context data was not an object, then we can try to set
+          // it using the plugin's load callback. If there is no callback,
+          // then it must be a string pass-through, so we leave it as is.
+          $context_info = layout_get_context_info($this->plugin);
+          $this->setData($context_data);
+        }
+      }
+
+      // Set the raw argument in the context if router_original_map.
+      $router_original_map = $router_item['original_map'];
+
+      if (!empty($router_original_map[$this->position])) {
+        $this->argument = $router_original_map[$this->position];
       }
     }
   }
@@ -293,7 +339,6 @@ abstract class LayoutContext extends LayoutHandler {
    * Validate handler for the settings form for this context item.
    */
   function formValidate($form, &$form_state) {
-
   }
 
   /**
@@ -320,6 +365,7 @@ class LayoutContextBroken extends LayoutContext {
   function type() {
     return 'broken';
   }
+
   function label() {
     return t('Broken or missing context (@plugin)', array('@plugin' => $this->plugin));
   }
@@ -330,9 +376,11 @@ class LayoutContextBroken extends LayoutContext {
  */
 class LayoutOverridesPathContext extends LayoutContext {
   var $usageType = LayoutContext::USAGE_TYPE_SYSTEM;
+
   function type() {
     return 'overrides_path';
   }
+
   function label() {
     return t('Layout overrides path');
   }
@@ -345,16 +393,18 @@ class LayoutStringContext extends LayoutContext {
   function type() {
     return 'string';
   }
+
   function label() {
     return t('String pass-through');
   }
+
   /**
    * Return a summary for this context.
    */
-  function getAdminSummary($path = NULL) {
-      $argument_parts = explode('/', $path);
-      $argument_parts[$this->position] = '<strong>' . $argument_parts[$this->position] . '</strong>';
+  public function getAdminSummary($path = NULL) {
+    $argument_parts = explode('/', $path);
+    $argument_parts[$this->position] = '<strong>' . $argument_parts[$this->position] . '</strong>';
 
-      return t('Position @index:', array('@index' => $this->position + 1)) . ' ' . implode('/', $argument_parts);
+    return t('Position @index:', array('@index' => $this->position + 1)) . ' ' . implode('/', $argument_parts);
   }
 }

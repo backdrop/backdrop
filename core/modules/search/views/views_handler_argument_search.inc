@@ -12,14 +12,15 @@
 class views_handler_argument_search extends views_handler_argument {
 
   /**
-   * Take sure that parseSearchExpression is runned and everything is set up for it.
+   * Make sure that parseSearchExpression is run and everything is set up for
+   * it.
    *
    * @param $input
    *    The search phrase which was input by the user.
    */
   function query_parse_search_expression($input) {
     if (!isset($this->search_query)) {
-      $this->search_query = db_select('search_index', 'i', array('target' => 'slave'))->extend('viewsSearchQuery');
+      $this->search_query = db_select('search_index', 'i', array('target' => 'replica'))->extend('viewsSearchQuery');
       $this->search_query->searchExpression($input, $this->view->base_table);
       $this->search_query->publicParseSearchExpression();
     }
