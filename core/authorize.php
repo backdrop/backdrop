@@ -76,7 +76,21 @@ require_once BACKDROP_ROOT . '/core/includes/ajax.inc';
 // variables, however, so we have access to the class autoloader registry.
 backdrop_bootstrap(BACKDROP_BOOTSTRAP_SESSION);
 
-// This must go after backdrop_bootstrap(), which unsets globals!
+// This declaration must go after backdrop_bootstrap(), which unsets globals.
+
+/**
+ * Global variable that holds values from the variables table.
+ *
+ * @see variable_get()
+ * @see variable_set()
+ * @see variable_del()
+ * @see config_get()
+ * @see state_get()
+ *
+ * @deprecated since 1.0
+ *
+ * @var array
+ */
 global $conf;
 
 // We have to enable the user and system modules, even to check access and

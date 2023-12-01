@@ -52,7 +52,7 @@ class EntityLayoutContext extends LayoutContext {
       '#default_value' => $input,
       '#step' => 1,
       '#min' => 1,
-      // @todo: Backdrop doesnt yet have a comprehensive entity autocomplete
+      // @todo: Backdrop doesn't yet have a comprehensive entity autocomplete
       // function. We'd need to write a custom autocomplete function that
       // handles all entity types. This would be best as a core function
       // rather than just for this code.

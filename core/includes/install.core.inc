@@ -173,7 +173,7 @@ function install_state_defaults() {
     // established.
     'settings_verified' => FALSE,
     // Installation tasks can set this to TRUE to force the page request to
-    // end (even if there is no themable output), in the case of an interactive
+    // end (even if there is no themeable output), in the case of an interactive
     // installation. This is needed only rarely; for example, it would be used
     // by an installation task that prints JSON output rather than returning a
     // themed page. The most common example of this is during batch processing,
@@ -776,12 +776,14 @@ function install_verify_requirements(&$install_state) {
 
   // If there are errors, always display them. If there are only warnings, skip
   // them if the user has provided a URL parameter acknowledging the warnings
-  // and indicating a desire to continue anyway. See backdrop_requirements_url().
+  // and indicating a desire to continue anyway.
+  // @see backdrop_requirements_url().
   if ($severity == REQUIREMENT_ERROR || ($severity == REQUIREMENT_WARNING && empty($install_state['parameters']['continue']))) {
     if ($install_state['interactive']) {
       backdrop_set_title(st('Requirements problem'));
-      $status_report = theme('status_report', array('requirements' => $requirements));
-      $status_report .= st('Check the messages and <a href="!url">try again</a>.', array('!url' => check_url(backdrop_requirements_url($severity))));
+      $status_report = st('Resolve the problems and <a href="!url">try again</a>.', array('!url' => check_url(backdrop_requirements_url($severity))));
+      $status_report .= '<br><br>';
+      $status_report .= theme('status_report', array('requirements' => $requirements, 'phase' => 'install'));
       return $status_report;
     }
     else {
@@ -1715,7 +1717,7 @@ function install_finished(&$install_state) {
   $profile = backdrop_install_profile_distribution_name();
   $message = st('Thank you for installing @profile!', array('@profile' => $profile));
 
-  // Confirming that the Dashboard module is enabled. 
+  // Confirming that the Dashboard module is enabled.
   if (module_exists('dashboard')) {
     $message .= '<br>' . st('If you are new to @profile, then the <a href="@dashboard">Dashboard</a> may be a good place to start.', array('@profile' => $profile, '@dashboard' => url('admin/dashboard')));
   }
@@ -1980,7 +1982,7 @@ function install_configure_form_submit($form, &$form_state) {
     }
   }
 
-  // We precreated user 1 with placeholder values. Let's save the real values.
+  // We pre-created user 1 with placeholder values. Let's save the real values.
   $account = user_load(1);
   $account->init = $account->mail = $form_state['values']['account']['mail'];
   $account->roles = !empty($account->roles) ? $account->roles : array();

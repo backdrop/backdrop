@@ -163,7 +163,7 @@ function hook_cron_queue_info() {
  * Alter cron queue information before cron runs.
  *
  * Called by backdrop_cron_run() to allow modules to alter cron queue settings
- * before any jobs are processesed.
+ * before any jobs are processed.
  *
  * @param array $queues
  *   An array of cron queue information.
@@ -772,8 +772,6 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *     the default parent for 'admin/people/create' is 'admin/people').
  *   - tab_root: (optional) For local task menu items, the path of the closest
  *     non-tab item; same default as "tab_parent".
- *   - position: (optional) Position of the block ('left' or 'right') on the
- *     system administration page for this item.
  *   - type: (optional) A bitmask of flags describing properties of the menu
  *     item. Many shortcut bitmasks are provided as constants in menu.inc:
  *     - "MENU_NORMAL_ITEM": (default) Normal menu items show up in the menu
@@ -797,6 +795,8 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  * For a detailed usage example, see page_example.module.
  * For comprehensive documentation on the menu system, see
  * http://drupal.org/node/102338.
+ *
+ * @since 1.24.2 Support for the "position" key removed.
  */
 function hook_menu() {
   $items['example'] = array(
@@ -1862,7 +1862,7 @@ function hook_watchdog(array $log_entry) {
     '@message'       => strip_tags($log_entry['message']),
   ));
 
-  backdrop_mail('emaillog', 'entry', $to, $language, $params);
+  backdrop_mail('email_log', 'entry', $to, $language, $params);
 }
 
 /**
@@ -2858,9 +2858,16 @@ function hook_install() {
  * name, you should never renumber update functions. It may result in updates
  * being either skipped or run twice.
  *
- * Not all module functions are available from within a hook_update_N() function.
- * In order to call a function from your mymodule.module or an include file,
- * you need to explicitly load that file first.
+ * Module functions not in the install file cannot be counted on to be available
+ * from within a hook_update_N() function. In order to call a function from your
+ * mymodule.module or an include file, you need to explicitly load that file
+ * first.
+ *
+ * This is because if a module was previously enabled but is now disabled (and
+ * has not been uninstalled), update hooks will still be called for that module
+ * during system updates, but the mymodule.module file (and any other files
+ * loaded by that one, including, for example, autoload information) will not
+ * have been loaded.
  *
  * During database updates the schema of any module could be out of date. For
  * this reason, caution is needed when using any API function within an update
@@ -2882,9 +2889,9 @@ function hook_install() {
  *   Stores information for multipass updates. See above for more information.
  *
  * @throws BackdropUpdateException, PDOException
- *   In case of error, update hooks should throw an instance of BackdropUpdateException
- *   with a meaningful message for the user. If a database query fails for whatever
- *   reason, it will throw a PDOException.
+ *   In case of error, update hooks should throw an instance of
+ *   BackdropUpdateException with a meaningful message for the user. If a
+ *   database query fails for whatever reason, it will throw a PDOException.
  *
  * @return
  *   Optionally, update hooks may return a translated string that will be
@@ -3540,11 +3547,13 @@ function hook_page_delivery_callback_alter(&$callback) {
 function hook_system_themes_page_alter(&$theme_groups) {
   foreach ($theme_groups as $state => &$group) {
     foreach ($theme_groups[$state] as &$theme) {
-      // Add a foo link to each list of theme operations.
-      $theme->operations[] = array(
+      // Add a foo link to each list of theme operations. 'foo' is also added as
+      // an additional class to the operation link's <li> HTML tag.
+      $theme->operations['foo'] = array(
         'title' => t('Foo'),
         'href' => 'admin/appearance/foo',
-        'query' => array('theme' => $theme->name)
+        'query' => array('theme' => $theme->name),
+        'attributes' => array('title' => t('Perform operation foo')),
       );
     }
   }
