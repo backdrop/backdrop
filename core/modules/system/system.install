@@ -14,6 +14,21 @@ function system_requirements($phase) {
   // Ensure translations don't break during installation.
   $t = get_t();
 
+$requirements['thing_1'] = array(
+  'title' => $t('Testing issue 6317 (system.install)'),
+  'value' => $t('Value coming from system.install'),
+  // 'severity' => REQUIREMENT_INFO,
+  // 'weight' => -10,
+  'description' => $t('Description coming from system.install'),
+);
+$requirements['thing_2'] = array(
+  'title' => $t('Testing issue 6317 (system.install)'),
+  'value' => $t('Value coming from system.install'),
+  // 'severity' => REQUIREMENT_INFO,
+  // 'weight' => -10,
+  'description' => $t('Description coming from system.install'),
+);
+
   // Report Backdrop version
   if ($phase == 'runtime') {
     $requirements['backdrop'] = array(

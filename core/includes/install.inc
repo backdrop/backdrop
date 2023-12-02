@@ -1390,8 +1390,11 @@ function backdrop_requirements_severity(&$requirements) {
 function system_get_requirements() {
   backdrop_load_updates();
 
-  // Check run-time requirements and status information.
-  $requirements = module_invoke_all('requirements', 'runtime');
+  // Intentionally calling module_invoke_all_merge_deep() here instead of
+  // module_invoke_all().
+  // See https://github.com/backdrop/backdrop-issues/issues/6317.
+  $requirements = module_invoke_all_merge_deep('requirements', 'runtime');
+
   usort($requirements, '_system_sort_requirements');
 
   return $requirements;

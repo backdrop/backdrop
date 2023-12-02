@@ -24,6 +24,14 @@ function telemetry_requirements($phase) {
   // Ensure translations don't break during installation.
   $t = get_t();
 
+$requirements['thing_2'] = array(
+  'title' => $t('Testing issue 6317 (telemetry.install)'),
+  'value' => $t('Value coming from telemetry.install'),
+  // 'severity' => REQUIREMENT_INFO,
+  // 'weight' => -10,
+  'description' => $t('Description coming from telemetry.install'),
+);
+
   // Report Backdrop version
   if ($phase == 'runtime') {
     $items[] = l($t('View the Backdrop CMS data collection policy'), 'https://backdropcms.org/privacy');
