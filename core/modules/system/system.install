@@ -216,11 +216,11 @@ function system_requirements($phase) {
   $curl_requirements = array(
     'title' => $t('cURL'),
   );
-  $curl_version = curl_version();
-  if ($curl_version === FALSE) {
+  if (!function_exists('curl_version')) {
     $curl_requirements['value'] = $t('cURL not installed');
   }
   else {
+    $curl_version = curl_version();
     $curl_requirements['value'] = $t('Version: @version', array('@version' => $curl_version['version']));
     $version_info = array();
     if (!empty($curl_version['ssl_version'])) {
