@@ -227,7 +227,7 @@ function system_requirements($phase) {
       $version_info[] = $t('SSL version: @ssl_version', array('@ssl_version' => $curl_version['ssl_version']));
     }
     if (!empty($curl_version['libssh_version'])) {
-      $version_info[] = $t('libssh version: @libssh_version', array($curl_version['libssh_version']));
+      $version_info[] = $t('libssh version: @libssh_version', array('@libssh_version' => $curl_version['libssh_version']));
     }
     $curl_requirements['description'] = theme('item_list', array('items' => $version_info));
   }
