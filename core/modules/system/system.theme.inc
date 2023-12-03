@@ -243,22 +243,24 @@ function theme_system_modules_uninstall($variables) {
 
   // Display table.
   $rows = array();
-  foreach (element_children($form['modules']) as $module) {
-    if (!empty($form['modules'][$module]['#required_by'])) {
-      $disabled_message = format_plural(count($form['modules'][$module]['#required_by']),
-        'To uninstall @module, the following module must be uninstalled first: @required_modules',
-        'To uninstall @module, the following modules must be uninstalled first: @required_modules',
-        array('@module' => $form['modules'][$module]['#module_name'], '@required_modules' => implode(', ', $form['modules'][$module]['#required_by'])));
-      $disabled_message = '<div class="admin-requirements">' . $disabled_message . '</div>';
+  if (!empty($form['modules'])) {
+    foreach (element_children($form['modules']) as $module) {
+      if (!empty($form['modules'][$module]['#required_by'])) {
+        $disabled_message = format_plural(count($form['modules'][$module]['#required_by']),
+          'To uninstall @module, the following module must be uninstalled first: @required_modules',
+          'To uninstall @module, the following modules must be uninstalled first: @required_modules',
+          array('@module' => $form['modules'][$module]['#module_name'], '@required_modules' => implode(', ', $form['modules'][$module]['#required_by'])));
+        $disabled_message = '<div class="admin-requirements">' . $disabled_message . '</div>';
+      }
+      else {
+        $disabled_message = '';
+      }
+      $rows[] = array(
+        array('data' => backdrop_render($form['uninstall'][$module]), 'align' => 'center'),
+        '<strong><label for="' . $form['uninstall'][$module]['#id'] . '">' . backdrop_render($form['modules'][$module]['name']) . '</label></strong>',
+        array('data' => backdrop_render($form['modules'][$module]['description']) . $disabled_message, 'class' => array('description')),
+      );
     }
-    else {
-      $disabled_message = '';
-    }
-    $rows[] = array(
-      array('data' => backdrop_render($form['uninstall'][$module]), 'align' => 'center'),
-      '<strong><label for="' . $form['uninstall'][$module]['#id'] . '">' . backdrop_render($form['modules'][$module]['name']) . '</label></strong>',
-      array('data' => backdrop_render($form['modules'][$module]['description']) . $disabled_message, 'class' => array('description')),
-    );
   }
 
   $form['modules'] = array(
