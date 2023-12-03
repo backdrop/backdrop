@@ -5702,15 +5702,43 @@ function backdrop_clear_js_cache() {
  *
  * @see backdrop_json_decode()
  * @ingroup php_wrappers
+ * @since 1.27.0 the JSON_NUMERIC_CHECK is used, in order to properly encode
+ *   numeric values as numbers instead of strings.
  */
 function backdrop_json_encode($var, $pretty_print = FALSE) {
   if ($pretty_print) {
-    return json_encode($var, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+    $encode_flags = array(
+      JSON_PRETTY_PRINT,
+      JSON_UNESCAPED_UNICODE,
+      JSON_UNESCAPED_SLASHES,
+    );
   }
   // The non-pretty JSON is HTML markup compatible, encoding <, >, ', &, and ".
   else {
-    return json_encode($var, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT);
+    $encode_flags = array(
+      JSON_HEX_TAG,
+      JSON_HEX_APOS,
+      JSON_HEX_AMP,
+      JSON_HEX_QUOT,
+    );
   }
+
+  // Only add the JSON_NUMERIC_CHECK flag if the variable is a number or a
+  // numeric string.
+  if (is_numeric($var)) {
+    // Do not add the flag in the following cases:
+    // - If the number starts with 0. The flag would cause any leading zeros to
+    //   be stripped, which is not desired in cases where leading zeros are
+    //   explicitly required (like phone numbers).
+    // - If the number starts with a +. The flag would cause the + sign to be
+    //   stripped, which is not desired in cases where it needs to be explicitly
+    //   denoted that the number is positive, or with country phone codes.
+    if (mb_substr($var, 0, 1) != 0 && mb_substr($var, 0, 1) != '+') {
+      $encode_flags[] = JSON_NUMERIC_CHECK;
+    }
+  }
+
+  return json_encode($var, array_sum($encode_flags));
 }
 
 /**
