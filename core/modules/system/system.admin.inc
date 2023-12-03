@@ -1092,6 +1092,11 @@ function system_modules_uninstall($form, $form_state = NULL) {
   // Only build the rest of the form if there are any modules available to
   // uninstall.
   if (!empty($disabled_modules)) {
+    $form['help'] = array(
+      '#theme' => 'help',
+      '#markup' => t('Modules must be disabled in the <a href="@link">List modules</a> tab before they can be uninstalled. The modules listed below have been disabled and may be uninstalled. Uninstalling a module will permanently remove its settings and/or associated data, while leaving the module files in place in case it needs to be enabled again in the future.', array('@link' => url('admin/modules'))),
+    );
+
     $profile = backdrop_get_profile();
     uasort($disabled_modules, 'system_sort_modules_by_info_name');
     $form['uninstall'] = array('#tree' => TRUE);
@@ -1124,7 +1129,10 @@ function system_modules_uninstall($form, $form_state = NULL) {
     $form['#action'] = url('admin/modules/uninstall/confirm');
   }
   else {
-    $form['modules'] = array();
+    $form['help'] = array(
+      '#theme' => 'help',
+      '#markup' => t('Modules must be disabled in the <a href="@link">List modules</a> tab before they can be uninstalled. Uninstalling a module will permanently remove its settings and/or associated data, while leaving the module files in place in case it needs to be enabled again in the future.', array('@link' => url('admin/modules'))),
+    );
   }
 
   return $form;

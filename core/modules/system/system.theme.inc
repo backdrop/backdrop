@@ -261,10 +261,14 @@ function theme_system_modules_uninstall($variables) {
     );
   }
 
-  $output  = theme('table', array('header' => $header, 'rows' => $rows, 'empty' => t('No modules are available to uninstall.')));
-  $output .= backdrop_render_children($form);
+  $form['modules'] = array(
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $rows,
+    '#empty' => t('No modules are available to uninstall.'),
+  );
 
-  return $output;
+  return backdrop_render_children($form);
 }
 
 /**
