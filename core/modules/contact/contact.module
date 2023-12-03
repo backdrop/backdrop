@@ -13,10 +13,6 @@ function contact_theme() {
       'render element' => 'element',
       'file' => 'contact.theme.inc',
     ),
-    'contact_form_permissions' => array(
-      'render element' => 'form',
-      'function' => 'theme_user_admin_permissions',
-    ),
   );
 }
 

@@ -91,7 +91,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
     $edit['machine_name'] = $machine_name;
     $this->backdropPost(NULL, $edit, t('Save vocabulary'));
     $this->assertRaw(t('Created new vocabulary %name.', array('%name' => $edit['name'])), 'Vocabulary created successfully.');
-    $this->assertRaw(t('Add vocabulary'), 'Redirected to vocabulary listing page');
+    $this->assertRaw(t('Add term'), 'Redirected to the term listing page of the newly-created vocabulary');
 
     // Configure the vocabulary.
     $this->backdropGet('admin/structure/taxonomy');

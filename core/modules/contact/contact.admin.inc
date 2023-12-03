@@ -99,71 +99,16 @@ function contact_settings_form_submit($form, &$form_state) {
 }
 
 /**
- * Builds a matrix of contact permissions.
+ * Builds a matrix of contact-related permissions.
  *
- * @see node_type_form_permissions()
+ * @see contact_settings_form()
+ * @see user_build_form_permissions_grid()
  */
 function contact_form_permissions() {
-  // Retrieve role names for columns.
-  $roles = user_roles(FALSE, NULL, TRUE);
-  $admin_role = config_get('system.core', 'user_admin_role');
-
-  // Note that in contact_theme(), the 'contact_form_permissions' theme callback
-  // reuses theme_user_admin_permissions(), to make it identical to the user
-  // module permissions page.
-  $form['#theme'] = array('contact_form_permissions');
-
-  // Wrap the table in a form element to make margins match other form elements.
-  $form['#theme_wrappers'] = array('form_element');
-
-  $form['roles'] = array(
-    '#type' => 'value',
-    '#value' => $roles,
-  );
-
-  // Retrieve contact related permissions.
+  // Retrieve contact-related permissions.
   $permissions = contact_permission();
 
-  // Render role/permission overview:
-  $options = array();
-  $status = array();
-  foreach ($permissions as $perm => $perm_item) {
-    // Fill in default values for the permission.
-    $perm_item += array(
-      'description' => '',
-      'restrict access' => FALSE,
-      'warning' => '',
-    );
-    $options[$perm] = '';
-    $form['permission'][$perm] = array(
-      '#type' => 'item',
-      '#markup' => $perm_item['title'],
-      '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
-    );
-    foreach ($roles as $role_name => $role) {
-      // Builds arrays for checked boxes for each role.
-      if (in_array($perm, $role->permissions)) {
-        $status[$role_name][] = $perm;
-      }
-    }
-  }
-
-  // Have to build checkboxes here after checkbox arrays are built.
-  foreach ($roles as $role_name => $role) {
-    $form['checkboxes'][$role_name] = array(
-      '#type' => 'checkboxes',
-      '#options' => $options,
-      '#default_value' => isset($status[$role_name]) ? $status[$role_name] : array(),
-      '#attributes' => array('class' => array('role-' . $role_name)),
-    );
-    $form['role_names'][$role_name] = array(
-      '#markup' => check_plain($role->label),
-      '#description' => filter_xss_admin($role->description),
-      '#tree' => TRUE,
-    );
-  }
-
-  $form['#attached']['js'][] = backdrop_get_path('module', 'user') . '/js/user.permissions.js';
+  $form = user_build_form_permissions_grid($permissions, FALSE);
 
   return $form;
 }

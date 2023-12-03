@@ -106,10 +106,6 @@ function node_theme() {
     'node_recent_content' => array(
       'variables' => array('node' => NULL),
     ) + $base,
-    'node_type_form_permissions' => array(
-      'render element' => 'form',
-      'function' => 'theme_user_admin_permissions',
-    ),
   );
 }
 
@@ -2792,7 +2788,7 @@ function node_node_access($node, $op, $account) {
 }
 
 /**
- * Helper function to generate standard node permission list for a given type.
+ * Helper function to generate the standard permissions list for a node type.
  *
  * @param $type
  *   The machine-readable name of the node type.
@@ -2803,8 +2799,10 @@ function node_node_access($node, $op, $account) {
 function node_list_permissions($type) {
   $info = node_type_get_type($type);
 
-  // Build standard list of node permissions for this type.
-  $perms = array(
+  // Note: If these permissions ever need to be changed, then the respective
+  // placeholder permissions in node_type_form_permissions() will need to be
+  // updated as well (and the logic in node_type_form_submit()).
+  $permissions = array(
     "create $type content" => array(
       'title' => t('%type_name: Create new content', array('%type_name' => $info->name)),
     ),
@@ -2822,7 +2820,7 @@ function node_list_permissions($type) {
     ),
   );
 
-  return $perms;
+  return $permissions;
 }
 
 /**

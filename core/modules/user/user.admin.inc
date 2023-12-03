@@ -410,17 +410,6 @@ function user_login_settings($form, &$form_state) {
  * @see theme_user_admin_permissions()
  */
 function user_admin_permissions($form, $form_state, $role_name = NULL) {
-
-  // Retrieve role names for columns.
-  $roles = user_roles(FALSE, NULL, TRUE);
-  if (isset($roles[$role_name])) {
-    $roles = array($role_name => $roles[$role_name]);
-  }
-  $form['roles'] = array(
-    '#type' => 'value',
-    '#value' => $roles,
-  );
-
   // JS-only table filters.
   $form['filter'] = array(
     '#type' => 'container',
@@ -451,66 +440,42 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
     ),
   );
 
-  // Render role/permission overview:
-  $options = array();
-  $module_info = system_get_info('module');
-
-  // Get a list of all the modules implementing a hook_permission() and sort by
-  // display name.
+  // Get a list of all the modules implementing a hook_permission().
   $modules = array();
+  $module_info = system_get_info('module');
   foreach (module_implements('permission') as $module) {
     $modules[$module] = $module_info[$module]['name'];
   }
+  // Sort modules by their display name.
   asort($modules);
 
+  // Collect all permissions to be passed to user_build_form_permissions_grid().
+  $all_permissions = array();
+
+  // Create a list of all permissions, grouped by the modules that provide them.
   foreach ($modules as $module => $display_name) {
     if ($permissions = module_invoke($module, 'permission')) {
+      // Add module names as permission groupings, with appropriate HTML IDs.
       $form['permission'][] = array(
         '#markup' => $module_info[$module]['name'],
         '#id' => $module,
       );
       foreach ($permissions as $perm => $perm_item) {
-        // Fill in default values for the permission.
-        $perm_item += array(
-          'description' => '',
-          'restrict access' => FALSE,
-          'warning' => '',
-        );
-        $options[$perm] = '';
-        $form['permission'][$perm] = array(
-          '#type' => 'item',
-          '#markup' => $perm_item['title'],
-          '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
-        );
-        foreach ($roles as $role_name => $role) {
-          // Build arrays for checked boxes for each role.
-          if (in_array($perm, $role->permissions)) {
-            $status[$role_name][] = $perm;
-          }
-        }
+        $all_permissions[$perm] = $perm_item;
+        // Add a "placeholder" for each permission provided by this module.
+        $form['permission'][$perm] = array();
       }
     }
   }
 
-  // Build the checkboxes here after the role arrays are built.
-  foreach ($roles as $role_name => $role) {
-    $form['checkboxes'][$role_name] = array(
-      '#type' => 'checkboxes',
-      '#options' => $options,
-      '#default_value' => isset($status[$role_name]) ? $status[$role_name] : array(),
-      '#attributes' => array('class' => array('role-' . $role_name)),
-    );
-    $form['role_names'][$role_name] = array(
-      '#markup' => check_plain($role->label),
-      '#description' => filter_xss_admin($role->description),
-      '#tree' => TRUE,
-    );
-  }
+  // Replace the permission placeholders in the form array with actual
+  // permission checkboxes.
+  $form = array_replace_recursive($form, user_build_form_permissions_grid($all_permissions, FALSE, $role_name));
+
+  $form['#theme_wrappers'] = array('form');
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save permissions'));
-
-  $form['#attached']['js'][] = backdrop_get_path('module', 'user') . '/js/user.permissions.js';
 
   return $form;
 }
