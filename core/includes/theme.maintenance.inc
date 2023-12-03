@@ -105,53 +105,6 @@ function _theme_load_offline_registry($theme, $base_theme = NULL, $theme_engine 
 }
 
 /**
- * Returns HTML for a list of maintenance tasks to perform.
- *
- * @param $variables
- *   An associative array containing:
- *   - items: An associative array of maintenance tasks.
- *   - active: The key for the currently active maintenance task.
- *
- * @ingroup themeable
- */
-function theme_task_list($variables) {
-  $items = $variables['items'];
-  $active = $variables['active'];
-
-  $done = isset($items[$active]) || $active == NULL;
-  $total = count($items);
-  $count = 0;
-  $current = 0;
-  $list = '';
-
-  foreach ($items as $k => $item) {
-    $count++;
-    if ($active == $k) {
-      $class = 'active';
-      $status = '(' . t('active') . ')';
-      $done = FALSE;
-      $current = $count;
-    }
-    else {
-      $class = $done ? 'done' : '';
-      $status = $done ? '(' . t('done') . ')' : '';
-    }
-    $list .= '<li';
-    $list .= ($class ? ' class="' . $class . '"' : '') . '>';
-    $list .= '<span class="task-item">' . $item;
-    $list .= ($status ? '<span class="element-invisible">' . $status . '</span>' : '');
-    $list .= '</span>';
-    $list .= '</li>';
-  }
-
-  $output = '<h2 class="element-invisible">Installation tasks</h2>';
-  $output .= '<div class="step-indicator">' . t('Step !current of !total', array('!current' => $current, '!total' => $total)) . '</div>';
-  $output .= '<ol class="task-list">' . $list . '</ol>';
-
-  return $output;
-}
-
-/**
  * Returns HTML for the installation page.
  *
  * Note: this function is not themeable.

@@ -45,13 +45,6 @@
 }
 
 /**
- * Installation task list
- */
-.task-list li.active {
-  font-weight: bold;
-}
-
-/**
  * Installation clean URLs
  */
 #clean-url.install {

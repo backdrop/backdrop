@@ -805,7 +805,7 @@ function installer_browser_installation_enable_form_submit($form, &$form_state) 
 }
 
 /**
- * Get a task list to the sidebar area when installing projects.
+ * Add a task list at the top of the page when installing projects.
  *
  * This will need to be called from every page of the install process.
  *
@@ -822,11 +822,12 @@ function installer_browser_installation_task_list($active = NULL) {
     'install_dependencies' => t('Install dependencies'),
     'theme' => t('Enable themes'),
     'enable' => t('Enable modules'),
+    // The next couple of items have been added for testing purposes.
+    'another' => 'Another step',
+    'yet_another' => 'Yet another step'
   );
 
-  require_once BACKDROP_ROOT . '/core/includes/theme.maintenance.inc';
-
-  return theme('task_list', array('items' => $tasks, 'active' => $active));
+  return theme('task_list', array('title' => t('Installation tasks'), 'items' => $tasks, 'active' => $active));
 }
 
 /**

@@ -7867,6 +7867,13 @@ function backdrop_common_theme() {
         'empty' => NULL,
       ),
     ),
+    'task_list' => array(
+      'variables' => array(
+        'items' => NULL,
+        'active' => NULL,
+        'title' => t('Tasks list'),
+      ),
+    ),
     'more_help_link' => array(
       'variables' => array('url' => NULL),
     ),
@@ -7890,6 +7897,7 @@ function backdrop_common_theme() {
       'variables' => array(
         'content' => NULL,
         'sidebar' => NULL,
+        'tasks' => NULL,
         'footer' => NULL,
         'show_messages' => TRUE,
       ),
@@ -7899,6 +7907,7 @@ function backdrop_common_theme() {
       'variables' => array(
         'content' => NULL,
         'sidebar' => NULL,
+        'tasks' => NULL,
         'footer' => NULL,
         'show_messages' => TRUE,
       ),
@@ -7907,6 +7916,7 @@ function backdrop_common_theme() {
       'variables' => array(
         'content' => NULL,
         'sidebar' => NULL,
+        'tasks' => NULL,
         'footer' => NULL,
       ),
     ),
