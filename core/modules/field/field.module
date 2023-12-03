@@ -593,7 +593,7 @@ function field_config_update(Config $staging_config, Config $active_config) {
 }
 
 /**
- * Implements hook_config_update().
+ * Implements hook_config_delete().
  */
 function field_config_delete(Config $active_config) {
   // This should only be called on fields that have no data at all, as fields
