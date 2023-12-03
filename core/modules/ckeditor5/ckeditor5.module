@@ -375,12 +375,7 @@ function ckeditor5_ckeditor5_plugins() {
         'required_html' => array('<p class="indent1 indent2 indent3">'),
       ),
     ),
-    'plugin_dependencies' => array('indent.IndentBlock'),
-    'config' => array(
-      'indentBlock' => array(
-        'classes' => array('indent1', 'indent2', 'indent3'),
-      ),
-    ),
+    'plugin_dependencies' => array('list.DocumentList'),
   );
 
   // @see https://ckeditor.com/docs/ckeditor5/latest/features/lists/document-lists.html
