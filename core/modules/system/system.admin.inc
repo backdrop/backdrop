@@ -1093,7 +1093,7 @@ function system_modules_uninstall($form, $form_state = NULL) {
   // uninstall.
   if (!empty($disabled_modules)) {
     $form['help'] = array(
-      '#theme' => 'help',
+      '#type' => 'help',
       '#markup' => t('Modules must be disabled in the <a href="@link">List modules</a> tab before they can be uninstalled. The modules listed below have been disabled and may be uninstalled. Uninstalling a module will permanently remove its settings and/or associated data, while leaving the module files in place in case it needs to be enabled again in the future.', array('@link' => url('admin/modules'))),
     );
 
@@ -1130,7 +1130,7 @@ function system_modules_uninstall($form, $form_state = NULL) {
   }
   else {
     $form['help'] = array(
-      '#theme' => 'help',
+      '#type' => 'help',
       '#markup' => t('Modules must be disabled in the <a href="@link">List modules</a> tab before they can be uninstalled. Uninstalling a module will permanently remove its settings and/or associated data, while leaving the module files in place in case it needs to be enabled again in the future.', array('@link' => url('admin/modules'))),
     );
   }
