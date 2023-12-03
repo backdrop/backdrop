@@ -19,6 +19,10 @@ function simpletest_requirements($phase) {
   // Only set a requirements message if cURL is disabled.
   $has_curl = function_exists('curl_init');
   if (!$has_curl) {
+    // @todo: Consider consolidating this with core's $requirements['curl'] if
+    // hook_requirements_alter() is available or via other means.
+    // @see https://github.com/backdrop/backdrop-issues/issues/6241
+    // @see https://github.com/backdrop/backdrop-issues/issues/6317
     $requirements['simpletest_curl'] = array(
       'title' => $t('cURL'),
       'value' => $t('cURL not found'),
