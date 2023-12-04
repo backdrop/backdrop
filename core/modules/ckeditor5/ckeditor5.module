@@ -400,7 +400,7 @@ function ckeditor5_ckeditor5_plugins() {
         'properties' => array(
           'reversed' => TRUE,
           'startIndex' => TRUE,
-          'styles' => array('useAttribute' => TRUE),
+          'styles' => FALSE,
         ),
       ),
     ),
