@@ -1129,11 +1129,11 @@ function system_modules_uninstall($form, $form_state = NULL) {
     $form['#action'] = url('admin/modules/uninstall/confirm');
   }
   else {
-    $form['modules'] = array();
     $form['help'] = array(
       '#type' => 'help',
       '#markup' => t('Modules must be disabled in the <a href="@link">List modules</a> tab before they can be uninstalled. Uninstalling a module will permanently remove its settings and/or associated data, while leaving the module files in place in case it needs to be enabled again in the future.', array('@link' => url('admin/modules'))),
     );
+    $form['modules'] = array();
   }
 
   return $form;
