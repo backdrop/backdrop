@@ -1089,12 +1089,16 @@ function system_modules_uninstall($form, $form_state = NULL) {
     }
   }
 
+  $help_1 = t('Modules must be disabled in the <a href="@link">List modules</a> tab before they can be uninstalled.', array('@link' => url('admin/modules')));
+  $help_3 = t('Uninstalling a module will permanently remove its settings and/or associated data, while leaving the module files in place in case it needs to be enabled again in the future.');
+
   // Only build the rest of the form if there are any modules available to
   // uninstall.
   if (!empty($disabled_modules)) {
+    $help_2 = t('The modules listed below have been disabled and may be uninstalled.');
     $form['help'] = array(
       '#type' => 'help',
-      '#markup' => t('Modules must be disabled in the <a href="@link">List modules</a> tab before they can be uninstalled. The modules listed below have been disabled and may be uninstalled. Uninstalling a module will permanently remove its settings and/or associated data, while leaving the module files in place in case it needs to be enabled again in the future.', array('@link' => url('admin/modules'))),
+      '#markup' => $help_1 . ' ' . $help_2 . ' ' . $help_3,
     );
 
     $profile = backdrop_get_profile();
@@ -1131,7 +1135,7 @@ function system_modules_uninstall($form, $form_state = NULL) {
   else {
     $form['help'] = array(
       '#type' => 'help',
-      '#markup' => t('Modules must be disabled in the <a href="@link">List modules</a> tab before they can be uninstalled. Uninstalling a module will permanently remove its settings and/or associated data, while leaving the module files in place in case it needs to be enabled again in the future.', array('@link' => url('admin/modules'))),
+      '#markup' => $help_1 . ' ' . $help_3,
     );
     $form['modules'] = array();
   }
