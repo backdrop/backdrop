@@ -1652,17 +1652,7 @@ function system_logging_settings($form, &$form_state) {
   $form['watchdog_enabled_severity_levels'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Severity of messages to log'),
-    '#options' => array(
-      WATCHDOG_EMERGENCY => t('Emergency'),
-      WATCHDOG_ALERT => t('Alert'),
-      WATCHDOG_CRITICAL => t('Critical'),
-      WATCHDOG_ERROR => t('Error'),
-      WATCHDOG_WARNING => t('Warning'),
-      WATCHDOG_NOTICE => t('Notice'),
-      WATCHDOG_INFO => t('Info'),
-      WATCHDOG_DEBUG => t('Debug'),
-      WATCHDOG_DEPRECATED => t('Deprecated'),
-    ),
+    '#options' => watchdog_severity_levels(),
     '#default_value' => $site_config->get('watchdog_enabled_severity_levels'),
     '#description' => t('The <em>debug</em> and <em>deprecated</em> severity levels are recommended for developer environments, but not on production sites.'),
   );
