@@ -1090,7 +1090,7 @@ function system_modules_uninstall($form, $form_state = NULL) {
   }
 
   $help_1 = t('Modules must be disabled in the <a href="@link">List modules</a> tab before they can be uninstalled.', array('@link' => url('admin/modules')));
-  $help_3 = t('Uninstalling a module will permanently remove its settings and/or associated data, while leaving the module files in place. To remove a module permanently, delete its files from the /modules folder of your Backdrop installation.');
+  $help_3 = t('Uninstalling a module will permanently remove its settings and/or associated data, while leaving the module files in place. To remove a module permanently, delete its files from the <code>/modules</code> folder of your Backdrop installation.');
 
   // Only build the rest of the form if there are any modules available to
   // uninstall.
