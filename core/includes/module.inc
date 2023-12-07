@@ -306,50 +306,59 @@ function module_load_install($module) {
  *   module_load_include('inc', 'node', 'content_types');
  * @endcode
  *
- * Do not use this function to load an install file, use module_load_install()
- * instead. Do not use this function in a global context since it requires
- * Backdrop to be fully bootstrapped, use require_once BACKDROP_ROOT . '/path/file'
- * instead.
+ * This function may be deprecated in a future version of Backdrop. Use
+ * backdrop_include_file() instead.
  *
- * @param $type
+ * Old:
+ * @code
+ *   module_load_include('inc', 'node', 'node.admin');
+ * @endcode
+ * Preferred:
+ * @code
+ *   backdrop_include_file('module', 'node', 'node.admin.inc');
+ * @endcode
+ *
+ * Do not use this function to load a module's install file in any situation
+ * where the module might not be enabled. Instead use:
+ * @code
+ *   module_load_install()
+ * @endcode
+ * Do not use this function in a global context since it requires Backdrop to be
+ * fully bootstrapped; instead use:
+ * @code
+ *   require_once BACKDROP_ROOT . '/path/file'.
+ * @endcode
+ *
+ * @param string $type
  *   The include file's type (file extension).
- * @param $module
+ * @param string $module
  *   The module to which the include file belongs.
- * @param $name
+ * @param string $name
  *   (optional) The base file name (without the $type extension). If omitted,
  *   $module is used; i.e., resulting in "$module.$type" by default.
  *
- * @return
+ * @return string|bool
  *   The name of the included file, if successful; FALSE otherwise.
+ *
+ * @see backdrop_include_file()
  */
 function module_load_include($type, $module, $name = NULL) {
-  static $files = array();
-
   if (!isset($name)) {
     $name = $module;
   }
-
-  $key = $type . ':' . $module . ':' . $name;
-  if (isset($files[$key])) {
-    return $files[$key];
-  }
-
-  if (function_exists('backdrop_get_path')) {
-    $file = BACKDROP_ROOT . '/' . backdrop_get_path('module', $module) . "/$name.$type";
-    if (is_file($file)) {
-      require_once $file;
-      $files[$key] = $file;
-      return $file;
-    }
-    else {
-      $files[$key] = FALSE;
-    }
-  }
-  return FALSE;
+  return backdrop_include_file('module', $module, $name . '.' . $type);
 }
 
 /**
  * Loads an include file for each module enabled in the {system} table.
+ *
+ * This function may be deprecated in a future version of Backdrop.
+ *
+ * @param string $type
+ *   The include file's type (file extension).
+ * @param string $name
+ *   (optional) The base file name (without the $type extension). If omitted,
+ *   $module is used; i.e., resulting in "$module.$type" by default.
  */
 function module_load_all_includes($type, $name = NULL) {
   $modules = module_list();
@@ -382,7 +391,7 @@ function module_load_all_includes($type, $name = NULL) {
  * @param array $module_list
  *   An array of module names.
  * @param bool $enable_dependencies
- *   (optional)
+ *   (Optional)
  *   - If TRUE, dependency-checking is enabled. This means that any modules the
  *     passed-in module(s) depend on will be automatically added and enabled in
  *     the correct order. If any dependencies are unavailable, the passed-in
@@ -546,7 +555,7 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
  * @param array $module_list
  *   An array of module names.
  * @param bool $disable_dependents
- *   (optional)
+ *   (Optional)
  *   - If TRUE, dependency-checking is enabled. This means that any modules
  *     dependent on the passed-in module(s) will be automatically added and
  *     disabled in the correct order. Note that dependency-checking incurs a
