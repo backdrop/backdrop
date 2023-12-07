@@ -1089,18 +1089,19 @@ function system_modules_uninstall($form, $form_state = NULL) {
     }
   }
 
-  $help_1 = t('Modules must be disabled in the <a href="@link">List modules</a> tab before they can be uninstalled.', array('@link' => url('admin/modules')));
-  $help_3 = t('Uninstalling a module will permanently remove its settings and/or associated data, while leaving the module files in place. To remove a module permanently, delete its files from the <code>/modules</code> folder of your Backdrop installation.');
+  $help = t('Modules must be disabled in the <a href="@link">List modules</a> tab before they can be uninstalled.', array('@link' => url('admin/modules')));
+  if (!empty($disabled_modules)) {
+    $help .= ' ' . t('The modules listed below have been disabled and may be uninstalled.');
+  }
+  $help .= ' ' . t('Uninstalling a module will permanently remove its settings and/or associated data, while leaving the module files in place. To remove a module permanently, delete its files from the <code>/modules</code> folder of your Backdrop installation.');
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => $help,
+  );
 
   // Only build the rest of the form if there are any modules available to
   // uninstall.
   if (!empty($disabled_modules)) {
-    $help_2 = t('The modules listed below have been disabled and may be uninstalled.');
-    $form['help'] = array(
-      '#type' => 'help',
-      '#markup' => $help_1 . ' ' . $help_2 . ' ' . $help_3,
-    );
-
     $profile = backdrop_get_profile();
     uasort($disabled_modules, 'system_sort_modules_by_info_name');
     $form['uninstall'] = array('#tree' => TRUE);
@@ -1133,10 +1134,6 @@ function system_modules_uninstall($form, $form_state = NULL) {
     $form['#action'] = url('admin/modules/uninstall/confirm');
   }
   else {
-    $form['help'] = array(
-      '#type' => 'help',
-      '#markup' => $help_1 . ' ' . $help_3,
-    );
     $form['modules'] = array();
   }
 
