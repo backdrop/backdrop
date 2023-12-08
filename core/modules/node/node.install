@@ -2111,7 +2111,7 @@ function node_update_1022() {
 /**
  * Create the view replacement for recent content block.
  */
-function node_update_1022() {
+function node_update_1023() {
   $data = array(
     'name' => 'content_recent',
     'module' => 'node',

@@ -1,9 +1,7 @@
 {
-    "_config_name": "views.view.content_recent",
-    "name": "content_recent",
+    "_config_name": "views.view.recent_content",
+    "name": "recent_content",
     "description": "Recent content.",
-    "module": "node",
-    "storage": 2,
     "tag": "default",
     "disabled": false,
     "base_table": "node",
@@ -30,7 +28,7 @@
                 "pager": {
                     "type": "some",
                     "options": {
-                        "items_per_page": "10",
+                        "items_per_page": "3",
                         "offset": "0"
                     }
                 },
