@@ -199,7 +199,22 @@
                 "title": "Recent Content",
                 "use_more": 1,
                 "use_more_always": false,
-                "use_more_text": "more"
+                "use_more_text": "more",
+                "footer": {
+                    "area": {
+                        "id": "area",
+                        "table": "views",
+                        "field": "area",
+                        "relationship": "none",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "label": "",
+                        "empty": 0,
+                        "content": "<p><a href=\"admin/content\">More</a></p>\r\n",
+                        "format": "filtered_html",
+                        "tokenize": 0
+                    }
+                }
             }
         },
         "block": {
