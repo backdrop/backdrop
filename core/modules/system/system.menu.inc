@@ -147,11 +147,14 @@ function system_menu_block_form($config) {
       '!menu_settings' => $link,
     )),
   );
+  $toggle_text_default = system_menu_block_defaults($config['menu_name'])['toggle_text'];
   $form['toggle_text'] = array(
     '#type' => 'textfield',
     '#title' => t('Toggle button text'),
     '#default_value' => $config['toggle_text'],
-    '#description' => t('Text to display beside the toggle button. Default: <em>Menu</em>.'),
+    '#description' => t('Text to display beside the toggle button. Default: %toggle_text.', array(
+      '%toggle_text' => $toggle_text_default,
+    )),
     '#indentation' => 1,
     '#states' => array(
       'visible' => array(
