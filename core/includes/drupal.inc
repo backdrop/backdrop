@@ -2594,14 +2594,14 @@ function views_clean_css_identifier($identifier, $filter = array(' ' => '-', '/'
 /**
  * Finds the most recently changed nodes that are available to the current user.
  *
- * @param $number
+ * @param (int) $number
  *   (optional) The maximum number of nodes to find. Defaults to 10.
  *
- * @return
+ * @return array
  *   An array of node entities or an empty array if there are no recent nodes
  *   visible to the current user.
  */
-function node_get_recent($number = 10) {
+function node_get_recent($limit = 10) {
   $query = db_select('node', 'n');
 
   if (!user_access('bypass node access') && !user_access('view any unpublished content')) {
@@ -2611,7 +2611,7 @@ function node_get_recent($number = 10) {
     // Note: this query still ignores unpublished by type permissions.
     // See: https://github.com/backdrop/backdrop-issues/issues/146.
     $own_unpublished = db_query('SELECT nid FROM {node} WHERE uid = :uid AND status = :status',
-     array(':uid' => $GLOBALS['user']->uid, ':status' => NODE_NOT_PUBLISHED))->fetchCol();
+    array(':uid' => $GLOBALS['user']->uid, ':status' => NODE_NOT_PUBLISHED))->fetchCol();
     if (user_access('view own unpublished content') && $own_unpublished) {
       $query->condition(db_or()
         ->condition('n.status', NODE_PUBLISHED)
@@ -2626,7 +2626,7 @@ function node_get_recent($number = 10) {
   $nids = $query
     ->fields('n', array('nid'))
     ->orderBy('n.changed', 'DESC')
-    ->range(0, $number)
+    ->range(0, $limit)
     ->addTag('node_access')
     ->execute()
     ->fetchCol();

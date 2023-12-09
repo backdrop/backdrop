@@ -2,10 +2,12 @@
     "_config_name": "views.view.recent_content",
     "name": "recent_content",
     "description": "Recent content.",
-    "tag": "default",
+    "module": "node",
+    "storage": 4,
+    "tag": "",
     "disabled": false,
     "base_table": "node",
-    "human_name": "Recent content",
+    "human_name": "A list of recently published content",
     "core": "1.0",
     "display": {
         "default": {
@@ -28,7 +30,7 @@
                 "pager": {
                     "type": "some",
                     "options": {
-                        "items_per_page": "3",
+                        "items_per_page": "10",
                         "offset": "0"
                     }
                 },

@@ -2123,7 +2123,7 @@ function node_update_1023() {
     'core' => '1.0-dev',
     'display' => array(
       'default' => array(
-        'display_title' => 'Master',
+        'display_title' => 'Default',
         'display_plugin' => 'default',
         'display_options' => array(
           'query' => array(
@@ -2566,8 +2566,8 @@ function node_update_1023() {
     $config->save();
   }
 
-  // Upgrade recent content block to views
-  $layouts= config_get_names_with_prefix('layout');
+  // Upgrade recent content block to views.
+  $layouts = config_get_names_with_prefix('layout');
   foreach ($layouts as $layout_name) {
     $config = config($layout_name);
     $configs = $config->get();
@@ -2580,7 +2580,7 @@ function node_update_1023() {
         }
       }
     }
-  $config->save();
+    $config->save();
   }
 }
 
