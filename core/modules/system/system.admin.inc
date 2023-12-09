@@ -1089,6 +1089,16 @@ function system_modules_uninstall($form, $form_state = NULL) {
     }
   }
 
+  $help = t('Modules must be disabled in the <a href="@link">List modules</a> tab before they can be uninstalled.', array('@link' => url('admin/modules')));
+  if (!empty($disabled_modules)) {
+    $help .= ' ' . t('The modules listed below have been disabled and may be uninstalled.');
+  }
+  $help .= ' ' . t('Uninstalling a module will permanently remove its settings and/or associated data, while leaving the module files in place. To remove a module permanently, delete its files from the <code>/modules</code> folder of your Backdrop installation.');
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => $help,
+  );
+
   // Only build the rest of the form if there are any modules available to
   // uninstall.
   if (!empty($disabled_modules)) {
@@ -1583,7 +1593,10 @@ function system_cron_settings($form, &$form_state) {
 
   $form['cron_url'] = array(
     '#type' => 'help',
-    '#markup' => t('To run cron from outside the site, go to <a href="!cron">!cron</a>', array('!cron' => url($base_url . '/core/cron.php', array('external' => TRUE, 'query' => array('cron_key' => state_get('cron_key', 'backdrop')))))),
+    '#markup' => t('To run cron from outside the site, go to <a href="!cron">!cron</a>', array('!cron' => url($base_url . '/core/cron.php', array(
+      'external' => TRUE,
+      'query' => array('cron_key' => state_get('cron_key', 'backdrop')),
+    )))),
   );
 
   $form['cron'] = array(
