@@ -1,8 +1,7 @@
 services:
   php:
-    # Stable tugboatqa/php:8.3-apache not available yet.
     # See: https://github.com/TugboatQA/dockerfiles/blob/main/php/TAGS.md
-    image: tugboatqa/php:8.3-rc-apache
+    image: tugboatqa/php:8.3-apache
     default: true
     depends: mariadb
     commands:
