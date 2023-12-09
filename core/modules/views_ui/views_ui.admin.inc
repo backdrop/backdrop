@@ -1099,14 +1099,6 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     '#access' => empty($view->locked),
   );
 
-  if (empty($view->changed)) {
-    $form['actions']['#attributes'] = array(
-      'class' => array(
-        'js-hide',
-      ),
-    );
-  }
-
   $form['actions']['save'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
@@ -1114,11 +1106,18 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     '#validate' => array('views_ui_edit_view_form_validate'),
     '#submit' => array('views_ui_edit_view_form_submit'),
   );
+
   $form['actions']['cancel'] = array(
     '#type' => 'submit',
     '#value' => t('Cancel'),
     '#submit' => array('views_ui_edit_view_form_cancel'),
   );
+
+  if (empty($view->changed)) {
+    $form['actions']['save']['#attributes'] = array(
+      'class' => array('js-hide'),
+    );
+  }
 
   $form['displays'] = array(
     '#prefix' => '<h1 class="unit-title">' . t('Displays') . '</h1>' . "\n" . '<div class="views-displays">',
@@ -2149,6 +2148,8 @@ function views_ui_edit_view_form_submit($form, &$form_state) {
 function views_ui_edit_view_form_cancel($form, &$form_state) {
   // Remove this view from cache so configurations will be lost.
   tempstore_clear('views.view', $form_state['view']->name);
+  backdrop_set_message(t('Changes to the view %name have been discarded.', array('%name' => $form_state['view']->get_human_name())), 'info');
+  
   if (empty($form['view']->vid)) {
     // I seem to have to backdrop_goto here because I can't get fapi to
     // honor the redirect target. Not sure what I screwed up here.
