@@ -1048,7 +1048,7 @@ function system_modules_submit($form, &$form_state) {
       }
       $disabled_message = t('The following modules have been disabled. If they are no longer required, please <a href="!uninstall">uninstall them</a>.', array('!uninstall' => url('admin/modules/uninstall')));
       $disabled_message .= theme('item_list', array('items' => $disabled_modules));
-      backdrop_set_message($disabled_message, 'warning');
+      backdrop_set_message($disabled_message, 'info');
     }
   }
 
