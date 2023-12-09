@@ -25,7 +25,7 @@
   };
 
   Backdrop.ajax.prototype.commands.viewsShowButtons = function (ajax, response, status) {
-    $('div.views-edit-view div.form-actions input.button-primary').removeClass('js-hide');
+    $('div.views-edit-view div.form-actions input#edit-actions-save').removeClass('js-hide');
     $('div.views-edit-view div.view-changed.messages').removeClass('js-hide');
   };
 
