@@ -249,6 +249,11 @@ function system_menu_block_build(array $config) {
       $data['content']['#attached']['library'][] = array('system', 'backdrop.menus');
       if ($config['style'] === 'dropdown') {
         $data['content']['#attached']['library'][] = array('system', 'smartmenus');
+        foreach (element_children($data['content']) as $key) {
+          if (!empty($data['content'][$key]['#below'])) {
+            $data['content'][$key]['#below']['#wrapper_attributes']['class'][] = 'js-hide';
+          }
+        }
       }
     }
     if (!empty($config['toggle']) && $config['toggle'] == TRUE) {
