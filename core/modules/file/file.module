@@ -1899,6 +1899,7 @@ function file_icon_path(File $file, $icon_directory = NULL) {
  *   The generic icon MIME package expected for this file.
  */
 function file_icon_map(File $file) {
+  // cspell:disable
   switch ($file->filemime) {
     // Word document types.
     case 'application/msword':
@@ -2013,6 +2014,7 @@ function file_icon_map(File $file) {
     default:
       return FALSE;
   }
+  // cspell:enable
 }
 
 /**
