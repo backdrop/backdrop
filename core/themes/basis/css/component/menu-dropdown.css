@@ -78,6 +78,7 @@
     position: absolute;
     width: 12rem;
     top: 1em;
+    display: none;
   }
 
   .js .menu-dropdown li,
