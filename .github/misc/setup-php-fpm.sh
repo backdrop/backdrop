@@ -27,12 +27,7 @@ sudo systemctl restart apache2.service
 
 
 curl -sI 'http://127.0.0.1/info.php'
-sudo grep -r DirectoryIndex /etc/apache2
-sudo grep -r AccessFileName /etc/apache2
-
-cat /var/log/apache2/error.log
-
-echo 'access file'
+sudo grep -r SetHandler /etc/apache2
 
 grep '" 403' /var/log/apache2/other_vhosts_access.log
 
