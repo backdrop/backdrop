@@ -24,13 +24,8 @@ sudo systemctl restart php${1}-fpm.service
 sudo apt-get -q install libapache2-mod-fcgid
 sudo a2enmod rewrite proxy fcgid proxy_fcgi
 sudo systemctl restart apache2.service
-#
+# This prevents the "denied (filesystem path '/home/runner/work') because search
+# permissions are missing on a component of the path" problem.
 sudo chmod 751 /home/runner
-
-curl -sI 'http://127.0.0.1/info.php'
-sudo grep '" 403' /var/log/apache2/other_vhosts_access.log
-sudo cat /var/log/apache2/error.log
-
-sudo namei --modes /home/runner/work/backdrop/backdrop
 
 exit 0
