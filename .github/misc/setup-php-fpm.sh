@@ -19,8 +19,6 @@ sudo sed -i -e 's/user = www-data/user = runner/' \
   -e 's/pm.max_spare_servers = 3/pm.max_spare_servers = 4/' \
   /etc/php/*/fpm/pool.d/www.conf
 
-# Stop default php service.
-sudo systemctl stop php8.1-fpm.service
 # Let above changes take effect and setup Apache to work with php-fpm.
 sudo systemctl restart php${1}-fpm.service
 sudo apt-get -q install libapache2-mod-fcgid
@@ -28,6 +26,7 @@ sudo a2enmod rewrite proxy fcgid proxy_fcgi
 sudo systemctl restart apache2.service
 
 
-sudo ls -l /etc/apache2/conf-enabled
+ls -l /home/runner/work/backdrop/backdrop
+curl -sI 'http://localhost/info.php'
 
 exit 0
