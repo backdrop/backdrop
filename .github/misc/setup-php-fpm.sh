@@ -26,7 +26,14 @@ sudo a2enmod rewrite proxy fcgid proxy_fcgi
 sudo systemctl restart apache2.service
 
 
-curl -sI 'http://localhost/info.php'
-/usr/bin/php8.2 -f /home/runner/work/backdrop/backdrop/info.php
+curl -sI 'http://127.0.0.1/info.php'
+sudo grep -r DirectoryIndex /etc/apache2
+sudo grep -r AccessFileName /etc/apache2
+
+cat /var/log/apache2/error.log
+
+echo 'access file'
+
+grep '" 403' /var/log/apache2/other_vhosts_access.log
 
 exit 0
