@@ -23,8 +23,6 @@ sudo sed -i -e 's/user = www-data/user = runner/' \
 sudo systemctl restart php${1}-fpm.service
 sudo apt-get -q install libapache2-mod-fcgid
 sudo a2enmod rewrite proxy fcgid proxy_fcgi
-sudo systemctl start apache2.service
-
-sudo ls -l /etc/apache2/sites-enabled
+sudo systemctl restart apache2.service
 
 exit 0
