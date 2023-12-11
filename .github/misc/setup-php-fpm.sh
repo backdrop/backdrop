@@ -7,6 +7,10 @@ if [ $# -lt 1 ]; then
   echo 'Fatal: Parameter missing'
   exit 1
 fi
+# debug
+ls /etc/php/*/fpm
+sudo ls /etc/php/*/fpm
+ls /usr/local/php/
 
 # Configure php-fpm to run as user "runner". That makes moving files around
 # obsolete. Additionally tweak it for better performance, start and allow more
