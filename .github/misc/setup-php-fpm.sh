@@ -25,12 +25,8 @@ sudo apt-get -q install libapache2-mod-fcgid
 sudo a2enmod rewrite proxy fcgid proxy_fcgi
 sudo systemctl restart apache2.service
 
-sudo systemctl status apache2
-sudo apache2ctl -M
-
-ls -l /home/runner/work/backdrop/backdrop
-ls -l /run/php
 
 curl -sI 'http://localhost/info.php'
+/usr/bin/php8.2 -f /home/runner/work/backdrop/backdrop/info.php
 
 exit 0
