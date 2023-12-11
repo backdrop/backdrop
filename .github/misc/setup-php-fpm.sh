@@ -25,4 +25,9 @@ sudo apt-get -q install libapache2-mod-fcgid
 sudo a2enmod rewrite proxy fcgid proxy_fcgi
 sudo systemctl restart apache2.service
 
+
+ls -l /home/runner/work/backdrop/backdrop
+sudo ls -l /run/php
+sudo netstat -tapn
+
 exit 0
