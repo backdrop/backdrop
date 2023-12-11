@@ -23,8 +23,8 @@ sudo sed -i -e 's/user = www-data/user = runner/' \
 sudo systemctl restart php${1}-fpm.service
 sudo apt-get -q install libapache2-mod-fcgid
 sudo a2enmod rewrite proxy fcgid proxy_fcgi
-sudo a2disconf php8.1-fpm.conf
-sudo a2enconf php8.2-fpm.conf
+#sudo a2disconf php8.1-fpm.conf
+#sudo a2enconf php8.2-fpm.conf
 sudo systemctl restart apache2.service
 
 
