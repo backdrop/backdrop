@@ -391,6 +391,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#options' => array(),
     '#wrapper_attributes' => array('class' => array('clearfix', 'layout-options')),
     '#required' => TRUE,
+    '#description' => t('Select one of the above layout templates, <a href="@link">install</a> a new layout template, or <a href="@link2">build your own</a> layout template with custom regions (flexible layout template).', array('@link' => url('admin/structure/layouts/install'), '@link2' => url('admin/structure/layouts/settings/flexible-template/add'))),
   );
 
   // Get the list of layout template options. The list needs to be rebuilt (see
@@ -3292,6 +3293,11 @@ function layout_ajax_form_update($form, $form_state) {
  * Administrative form for layout settings.
  */
 function layout_settings_page($form, &$form_state) {
+  $form['help'] = array(
+    '#theme' => 'help',
+    '#markup' => t('Create your own custom regions with a flexible layout template.'),
+  );
+
   $header = array(
     'layout_template_info' => array('data' => t('Template')),
     'type' => array('data' => t('Type'), 'sort' => 'desc', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
