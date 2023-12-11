@@ -23,16 +23,13 @@ sudo sed -i -e 's/user = www-data/user = runner/' \
 sudo systemctl restart php${1}-fpm.service
 sudo apt-get -q install libapache2-mod-fcgid
 sudo a2enmod rewrite proxy fcgid proxy_fcgi
-#sudo a2disconf php8.1-fpm.conf
-#sudo a2enconf php8.2-fpm.conf
 sudo systemctl restart apache2.service
 
 
 curl -sI 'http://127.0.0.1/info.php'
-sudo grep -r SetHandler /etc/apache2
+sudo grep '" 403' /var/log/apache2/other_vhosts_access.log
+sudo cat /var/log/apache2/error.log
 
-grep '" 403' /var/log/apache2/other_vhosts_access.log
-
-cat /etc/apache2/conf-available/php8.2-fpm.conf
+sudo namei --modes /home/runner/work/backdrop/backdrop
 
 exit 0
