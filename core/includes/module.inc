@@ -963,26 +963,123 @@ function module_invoke($module, $hook) {
  *   done using array_merge_recursive().
  *
  * @see backdrop_alter()
+ * @see module_invoke_all_merge_deep()
  */
 function module_invoke_all($hook) {
+  // $caller_function = debug_backtrace(DEBUG_BACKTRACE_IGNORE_ARGS, 2)[1]['function'];
+
   $args = func_get_args();
-  // Remove $hook from the arguments.
+
+  // Workaround to figure out if this was called from
+  // module_invoke_all_merge_deep(). Intentionally not using debug_backtrace(),
+  // as that is known to have performance issues, and should only be used for
+  // debugging errors - not on production code.
+  $merge_deep = FALSE;
+  if ($args[0] == 'module_invoke_all_merge_deep') {
+    $merge_deep = TRUE;
+    // Remove the name of the module_invoke_all_merge_deep() function from the
+    // arguments. We only needed it in order to identify whether the caller is
+    // that function.
+    unset($args[0]);
+
+    // Remove $hook from the arguments. When this was called via 
+    // module_invoke_all_merge_deep(), the $hook is the second parameter.
+    $hook = $args[1];
+    unset($args[1]);
+  }
+
+  // Remove $hook from the arguments. When this was called directly and not via 
+  // module_invoke_all_merge_deep(), the $hook is the first parameter.
   unset($args[0]);
+
   $return = array();
+  $hook_implementations = array();
   foreach (module_implements($hook) as $module) {
     $function = $module . '_' . $hook;
     if (function_exists($function)) {
       $result = call_user_func_array($function, $args);
+
       if (isset($result) && is_array($result)) {
-        $return = array_merge_recursive($return, $result);
+        $hook_implementations[$module] = $result;
+        if ($merge_deep) {
+          $return = backdrop_array_merge_deep($return, $result);
+        }
+        else {
+          $return = array_merge_recursive($return, $result);
+        }
       }
       elseif (isset($result)) {
+        $hook_implementations[$module] = $result;
         $return[] = $result;
       }
     }
   }
 
+  if ($merge_deep) {
+    _module_invoke_all_detect_duplicates($hook_implementations, $hook);
+  }
+
   return $return;
+}
+
+/**
+ * Logs notices when duplicates have been found in hook implementations.
+ *
+ * @see module_invoke_all()
+ */
+function _module_invoke_all_detect_duplicates($hook_implementations, $hook) {
+  // Collect all duplicates in the various implementations of the hook.
+  $duplicates = array();
+  foreach ($hook_implementations as $module => $results) {
+    $other_modules = $hook_implementations;
+    unset($other_modules[$module]);
+
+    $result_keys = array_keys($results);
+    foreach ($result_keys as $result_key) {
+      foreach ($other_modules as $other_module => $other_module_results) {
+        $other_module_result_keys = array_keys($other_module_results);
+        if (in_array($result_key, $other_module_result_keys)) {
+          $duplicates[$result_key][] = $module . '_' . $hook . '()';
+        }
+      }
+    }
+  }
+
+  // Log a message about the duplicates.
+  foreach ($duplicates as $duplicate => $hooks) {
+    // @todo: change the wording of the log message to suggest considering
+    // implementing hook_requirements() in one of the modules and
+    // hook_requirements_alter() in the rest of the modules (once that's
+    // possible - see https://github.com/backdrop/backdrop-issues/issues/6241).
+    watchdog('hook implementation duplicates', '@duplicate found in multiple @hook implementations (the last hook implementation wins): @hooks', array(
+      '@duplicate' => $duplicate,
+      '@hook' => 'hook_' . $hook . '()',
+      '@hooks' => implode(', ', $hooks),
+    ));
+  }
+}
+
+/**
+ * Wrapper function that calls module_invoke_all().
+ *
+ * This function is used as a workaround to have module_invoke_all() use
+ * backdrop_array_merge_deep() instead of array_merge_recursive(), which can
+ * have surprising results in certain cases.
+ * See https://github.com/backdrop/backdrop-issues/issues/6317.
+ * 
+ * With the exception of the caveat mentioned above, this function should
+ * behave like module_invoke_all() in every other aspect.
+ *
+ * @see module_invoke_all()
+ */
+function module_invoke_all_merge_deep() {
+  $args = func_get_args();
+  // Add the name of this function as the first parameter passed to
+  // module_invoke_all() as a way to let that function know that it was called
+  // specifically by this function here. This is preferred to using
+  // debug_backtrace(), which is known to have performance issues.
+  array_unshift($args, __FUNCTION__);
+  return call_user_func_array('module_invoke_all', $args);
 }
 
 /**

@@ -435,8 +435,10 @@ function update_extra_requirements($requirements = NULL) {
  *   FALSE.
  */
 function update_check_requirements($skip_warnings = FALSE) {
-  // Check requirements of all loaded modules.
-  $requirements = module_invoke_all('requirements', 'update');
+  // Check requirements of all loaded modules. Intentionally calling
+  // module_invoke_all_merge_deep() here instead of module_invoke_all().
+  // See https://github.com/backdrop/backdrop-issues/issues/6317.
+  $requirements = module_invoke_all_merge_deep('requirements', 'update');
   $requirements += update_extra_requirements();
   $severity = backdrop_requirements_severity($requirements);
 
@@ -447,7 +449,10 @@ function update_check_requirements($skip_warnings = FALSE) {
     $task_list = update_task_list('requirements');
     $status_report = 'Resolve the problems and <a href="' . check_url(backdrop_requirements_url($severity)) . '">try again</a>.';
     $status_report .= '<br><br>';
-    $status_report .= theme('status_report', array('requirements' => $requirements, 'phase' => 'update'));
+    $status_report .= theme('status_report', array(
+      'requirements' => $requirements,
+      'phase' => 'update',
+    ));
     print theme('update_page', array('content' => $status_report, 'sidebar' => $task_list));
     exit();
   }

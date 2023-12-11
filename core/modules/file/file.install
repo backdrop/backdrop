@@ -228,6 +228,16 @@ function file_schema() {
  */
 function file_requirements($phase) {
   $requirements = array();
+  // Ensure translations don't break during installation.
+  $t = get_t();
+
+$requirements['thing_1'] = array(
+  'title' => $t('Testing issue 6317 (file.install)'),
+  'value' => $t('Value coming from file.install'),
+  // 'severity' => REQUIREMENT_INFO,
+  // 'weight' => -10,
+  'description' => $t('Description coming from file.install'),
+);
 
   if ($phase == 'runtime') {
     // Check the server's ability to indicate upload progress.
