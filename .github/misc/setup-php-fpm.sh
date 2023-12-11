@@ -24,7 +24,8 @@ sudo systemctl restart php${1}-fpm.service
 sudo apt-get -q install libapache2-mod-fcgid
 sudo a2enmod rewrite proxy fcgid proxy_fcgi
 sudo systemctl restart apache2.service
-
+#
+sudo chmod 751 /home/runner
 
 curl -sI 'http://127.0.0.1/info.php'
 sudo grep '" 403' /var/log/apache2/other_vhosts_access.log
