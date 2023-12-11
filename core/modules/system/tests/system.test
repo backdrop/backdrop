@@ -323,8 +323,24 @@ class HookRequirementsTestCase extends ModuleTestCase {
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
 
     // Makes sure the module was NOT installed.
-    $this->assertText(t('Requirements 1 Test failed requirements'), 'Modules status has been updated.');
+    $this->assertText(t('Requirements 1 Test failed requirements'), 'Error shown about module having failed requirements.');
     $this->assertModules(array('requirements1_test'), FALSE);
+  }
+
+  /**
+   * Assert that requirements data have been altered/deleted.
+   */
+  function testHookRequirementsAlter() {
+    // Install the requirements_alterable_test module. No need to do this via
+    // the UI for the purposes of this test, since we are testing only whether
+    // requirements data are updated properly via hook_requirements_alter().
+    module_enable(array('requirements_alterable_test'));
+
+    $requirements = system_get_requirements();
+    // @see requirements_alterable_test_requirements_alter()
+    $this->assertEqual($requirements['requirements_test_alterable']['title'], 'Requirements Test Alterable - Changed', 'Requirements title altered.');
+    $this->assertEqual($requirements['requirements_test_alterable']['severity'], REQUIREMENT_WARNING, 'Requirements severity altered.');
+    $this->assertFalse(isset($requirements['requirements_test_deletable']), 'Requirements entry deleted.');
   }
 }
 
@@ -444,7 +460,7 @@ class ModuleDependencyTestCase extends ModuleTestCase {
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
 
     // Makes sure the modules were NOT installed.
-    $this->assertText(t('Requirements 1 Test failed requirements'), 'Modules status has been updated.');
+    $this->assertText(t('Requirements 1 Test failed requirements'), 'Error shown about module having failed requirements.');
     $this->assertModules(array('requirements1_test'), FALSE);
     $this->assertModules(array('requirements2_test'), FALSE);
 

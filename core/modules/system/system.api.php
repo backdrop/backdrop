@@ -2519,6 +2519,29 @@ function hook_requirements($phase) {
 }
 
 /**
+ * Alters requirements data.
+ *
+ * Implementations of this hook are able to alter the title, value, description
+ * or the severity of the various requirements defined by hook_requirements()
+ * implementations or even remove such entries.
+ *
+ * @param array $requirements
+ *   The requirements data to be altered. Must be passed by reference.
+ *
+ * @see hook_requirements()
+ */
+function hook_requirements_alter(array &$requirements) {
+  // Change the title from 'PHP' to 'PHP version'.
+  $requirements['php']['title'] = t('PHP version');
+
+  // Decrease the 'update status' requirement severity from warning to info.
+  $requirements['update status']['severity'] = REQUIREMENT_INFO;
+
+  // Remove a requirements entry.
+  unset($requirements['foo']);
+}
+
+/**
  * Define the current version of the database schema.
  *
  * A Backdrop schema definition is an array structure representing one or more
