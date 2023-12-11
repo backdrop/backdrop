@@ -33,6 +33,6 @@ sudo grep -r SetHandler /etc/apache2
 
 grep '" 403' /var/log/apache2/other_vhosts_access.log
 
-cat /etc/apache2/conf-available/php8.1-fpm.conf
+cat /etc/apache2/conf-available/php8.2-fpm.conf
 
 exit 0
