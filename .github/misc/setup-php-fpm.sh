@@ -8,9 +8,8 @@ if [ $# -lt 1 ]; then
   exit 1
 fi
 # debug
-ls /etc/php/*/fpm
-sudo ls /etc/php/*/fpm
-ls /usr/local/php/
+ls /etc/php/*/fpm/pool.d
+sudo ls /etc/php/*/fpm/pool.d
 
 # Configure php-fpm to run as user "runner". That makes moving files around
 # obsolete. Additionally tweak it for better performance, start and allow more
