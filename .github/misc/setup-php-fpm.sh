@@ -25,4 +25,6 @@ sudo apt-get -q install libapache2-mod-fcgid
 sudo a2enmod rewrite proxy fcgid proxy_fcgi
 sudo systemctl start apache2.service
 
+sudo ls -l /etc/apache2/sites-enabled
+
 exit 0
