@@ -29,6 +29,22 @@ function contact_install() {
 }
 
 /**
+ * Implements hook_requirements(). For testing purposes only - DO NOT COMMIT THIS CHANGE!
+ */
+function contact_requirements($phase) {
+  $requirements = array(
+    'contact' => array(
+      'title' => t('What?! Another module fails?'),
+      'value' => t('Pfff!!!.'),
+      'severity' => REQUIREMENT_ERROR,
+      'description' => t('I won\'t have this I\'m telling you!'),
+    ),
+  );
+
+  return $requirements;
+}
+
+/**
  * @addtogroup updates-7.x-to-1.x
  * @{
  */

@@ -24,6 +24,27 @@ function book_uninstall() {
 }
 
 /**
+ * Implements hook_requirements(). For testing purposes only - DO NOT COMMIT THIS CHANGE!
+ */
+function book_requirements($phase) {
+  $requirements = array(
+    'book' => array(
+      'title' => t('Module requirement'),
+      'value' => t('This will always fail intentionally.'),
+      'severity' => REQUIREMENT_ERROR,
+      'description' => t('This module requires blah blah blah... You should do blah blah blah ...this is the description of the problem.'),
+    ),
+    'another' => array(
+      'title' => t('Another requirement'),
+      'value' => t('This will always fail intentionally as well.'),
+      'severity' => REQUIREMENT_ERROR,
+    ),
+  );
+
+  return $requirements;
+}
+
+/**
  * Creates the book content type.
  */
 function _book_install_type_create() {
