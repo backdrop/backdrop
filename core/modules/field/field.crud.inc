@@ -24,6 +24,7 @@
  *
  * @param array $field
  *   The field array to get the schema definition against.
+ *
  * @return array
  *   The field schema definition array.
  */
@@ -463,7 +464,7 @@ function field_delete_field($field_name) {
 /**
  * Creates an instance of a field, binding it to a bundle.
  *
- * @param $instance
+ * @param array $instance
  *   A field instance definition array. The field_name, entity_type and
  *   bundle properties are required. Other properties, if omitted,
  *   will be given the following default values:
@@ -489,12 +490,13 @@ function field_delete_field($field_name) {
  *     Display modes not present in the definition are left empty, and the field
  *     will not be displayed in this mode.
  *
- * @return
+ * @return array
  *   The $instance array with the id property filled in.
  *
  * @throws FieldException
  *
  * See: @link field Field API data structures @endlink.
+ * @see hook_field_schema_alter()
  */
 function field_create_instance($instance) {
   // Populate defaults.
