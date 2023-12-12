@@ -755,6 +755,16 @@ function ckeditor5_ckeditor5_plugins() {
     ),
   );
 
+  // See https://ckeditor.com/docs/ckeditor5/latest/features/show-blocks.html
+  $plugins['showBlocks.ShowBlocks'] = array(
+    'buttons' => array(
+      'showBlocks' => array(
+        'label' => t('Show blocks'),
+        'image' => $image_prefix . '/show-blocks.svg',
+      ),
+    ),
+  );
+
   return $plugins;
 }
 

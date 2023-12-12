@@ -22,7 +22,8 @@ npm install --save ckeditor5 \
   @ckeditor/ckeditor5-source-editing \
   @ckeditor/ckeditor5-special-characters \
   @ckeditor/ckeditor5-style \
-  @ckeditor/ckeditor5-table
+  @ckeditor/ckeditor5-table \
+  @ckeditor/ckeditor5-show-blocks
 
 cp node_modules/ckeditor5/build/ckeditor5-dll.js .
 
