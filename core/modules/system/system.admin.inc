@@ -1046,7 +1046,7 @@ function system_modules_submit($form, &$form_state) {
       foreach ($actions['disable'] as $module) {
         $disabled_modules[] = $files[$module]->info['name'];
       }
-      $disabled_message = t('After disabling modules, consider <a href="!uninstall">uninstalling them</a> if they are no longer needed. Uninstalling a module will permanently remove its settings and/or associated data.', array('!uninstall' => url('admin/modules/uninstall')));
+      $disabled_message = t('You have disabled some modules. If they are no longer needed you might want to <a href="!uninstall">uninstall them</a>.', array('!uninstall' => url('admin/modules/uninstall')));
       backdrop_set_message($disabled_message, 'info');
     }
   }
