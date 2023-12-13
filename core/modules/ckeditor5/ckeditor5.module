@@ -124,6 +124,16 @@ function ckeditor5_library_info() {
       $module_path . '/js/plugins/backdrop-link/backdrop-link.js' => array(),
     ),
   );
+  $libraries['backdrop.ckeditor5.maximize'] = array(
+    'title' => 'Provides a CKEditor 5 plugin to maximize the editor.',
+    'version' => $info['version'],
+    'js' => array(
+      $module_path . '/js/plugins/backdrop-maximize/backdrop-maximize.js' => array(),
+    ),
+    'css' => array(
+      $module_path . '/css/ckeditor5-maximize.css' => array(),
+    ),
+  );
 
   $libraries['ckeditor5'] = array(
     'title' => 'Loads the main CKEditor library.',
@@ -736,6 +746,19 @@ function ckeditor5_ckeditor5_plugins() {
       'image' => array(
         'toolbar' => array('|', 'backdropLinkImage', '|'),
       ),
+    ),
+  );
+
+  $plugins['backdropMaximize.Maximize'] = array(
+    'library' => array('ckeditor5', 'backdrop.ckeditor5.maximize'),
+    'buttons' => array(
+      'maximize' => array(
+        'label' => t('Maximize'),
+        'image' => $image_prefix . '/maximize.svg',
+      ),
+    ),
+    'config' => array(
+      'maximizeLabel' => t('Maximize'),
     ),
   );
 
