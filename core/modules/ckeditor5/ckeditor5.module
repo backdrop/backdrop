@@ -412,7 +412,13 @@ function ckeditor5_ckeditor5_plugins() {
         'required_html' => array('<ol>', '<li>'),
       ),
     ),
-    'plugin_dependencies' => array('list.DocumentListProperties'),
+    // Re-specify list.DocumentList as its own dependency to ensure it loads
+    // before list.DocumentListProperties, otherwise list properties will not
+    // show in the UI.
+    'plugin_dependencies' => array(
+      'list.DocumentList',
+      'list.DocumentListProperties',
+    ),
     'config' => array(
       'list' => array(
         'properties' => array(

@@ -95,6 +95,7 @@ class CKEditor5TestCase extends BackdropWebTestCase {
       'image.ImageInsertUI',
       'image.ImageUpload',
       'image.ImageResize',
+      'list.DocumentList',
       'list.DocumentListProperties',
       'alignment.Alignment',
       'basicStyles.Italic',
@@ -106,7 +107,6 @@ class CKEditor5TestCase extends BackdropWebTestCase {
       'autoformat.Autoformat',
       'htmlSupport.GeneralHtmlSupport',
       'backdropHtmlEngine.BackdropHtmlEngine',
-      'list.DocumentList',
       'blockQuote.BlockQuote',
       'backdropImage.BackdropImage',
     );
