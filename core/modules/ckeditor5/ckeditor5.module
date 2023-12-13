@@ -21,6 +21,14 @@ function ckeditor5_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'ckeditor5.pages.inc',
   );
+  $items['admin/config/content/formats/%filter_format/ckeditor5-upgrade'] = array(
+    'title' => 'Upgrade CKEditor 4 to CKEditor 5',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('ckeditor5_upgrade_form', 4),
+    'access arguments' => array('administer filters'),
+    'type' => MENU_IS_LOCAL_TASK | MENU_VISIBLE_IN_BREADCRUMB,
+    'file' => 'ckeditor5.upgrade.inc',
+  );
   return $items;
 }
 
@@ -1337,4 +1345,17 @@ function _ckeditor5_theme_css($theme = NULL) {
     }
   }
   return $css;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Modify the format configuration form to provide a link to upgrade CKEditor 4.
+ */
+function ckeditor5_form_filter_admin_format_form_alter(&$form, &$form_state) {
+  $editor_info = $form_state['editor_info'];
+  $format = $form_state['format'];
+  if ($editor_info && $editor_info['module'] === 'ckeditor' && empty($form_state['input'])) {
+    backdrop_set_message(t('This text format uses CKEditor 4, which is unsupported. It can be upgraded using the <a href="!url">CKEditor 5 upgrade page</a>.', array('!url' => url('admin/config/content/formats/' . $format->format . '/ckeditor5-upgrade'))), 'info');
+  }
 }

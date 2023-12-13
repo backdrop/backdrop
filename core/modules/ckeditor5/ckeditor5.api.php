@@ -163,6 +163,78 @@ function hook_ckeditor5_settings_alter(array &$settings, $format) {
 }
 
 /**
+ * Specify the button mapping used between CKEditor 4 and CKEditor 5 upgrades.
+ *
+ * Any module that provided custom buttons in CKEditor 4 should implement this
+ * hook to control what happens to that button during a CKEditor 5 text format
+ * upgrade.
+ *
+ * At the very least, it's probable that the capitalization of the button will
+ * change. CKEditor 4 buttons were usually Pascal-case (such as "RemoveFormat"),
+ * while CKEditor 5 buttons are usually camel-case (such as "removeFormat").
+ *
+ * @return array
+ *   An array of key-value pairs of strings.
+ *
+ * @see ckeditor5_upgrade_format()
+ * @see hook_ckeditor5_upgrade_button_mapping_alter()
+ */
+function hook_ckeditor5_upgrade_button_mapping() {
+  return array(
+    // The key is the CKEditor 4 button name, while the value is the CKEditor 5
+    // button name.
+    'Maximize' => 'maximize',
+    // A value of NULL will remove the button during the upgrade process.
+    'Cut' => NULL,
+    'Copy' => NULL,
+    'Paste' => NULL,
+  );
+}
+
+/**
+ * Modify the button mapping used between CKEditor 4 and CKEditor 5 upgrades.
+ *
+ * @param array $button_mapping
+ *   An array of key-value pairs of strings, indicating CKEditor 4 to 5 button
+ *   names. Modified by reference.
+ *
+ * @see ckeditor5_upgrade_format()
+ * @see hook_ckeditor5_upgrade_button_mapping()
+ */
+function hook_ckeditor5_upgrade_button_mapping_alter(&$button_mapping) {
+  // The key is the CKEditor 4 button name, while the value is the CKEditor 5
+  // button name.
+  $button_mapping['Maximize'] = 'maximize';
+
+  // A value of NULL will remove the button during the upgrade process.
+  $button_mapping['ShowBlocks'] = NULL;
+}
+
+/**
+ * Modify a text format when it is upgraded from CKEditor 4 to CKEditor 5.
+ *
+ * This can be used to modify CKEditor settings that have changed structure
+ * between CKEditor 4 and CKEditor 5.
+ *
+ * @param stdClass $format
+ *   The text format after it has been upgraded to CKEditor 5. This object is
+ *   modified by reference.
+ * @param stdClass $original_format
+ *   The text format before it was upgraded to CKEditor 5.
+ *
+ * @see ckeditor5_upgrade_format()
+ */
+function hook_ckeditor5_upgrade_format_alter(&$format, $original_format) {
+  if (isset($format->editor_settings['plugins']['my_plugin'])) {
+    // Remove the additional nesting that was present in CKEditor 4 config.
+    $format->editor_settings['my_plugin'] = $format->editor_settings['plugins']['my_plugin'];
+
+    // Be sure to remove any settings that have been converted.
+    unset($format->editor_settings['plugins']['my_plugin']);
+  }
+}
+
+/**
  * @} End of "addtogroup hooks".
  */
 

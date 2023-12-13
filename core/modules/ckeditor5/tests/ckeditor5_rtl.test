@@ -11,9 +11,10 @@ class CKEditor5RtlTestCase extends BackdropWebTestCase {
   /**
    * User object.
    *
-   * @var object
+   * @var User
    */
   protected $adminUser;
+
   /**
    * Profile name.
    *
@@ -25,7 +26,7 @@ class CKEditor5RtlTestCase extends BackdropWebTestCase {
    * Set up environment.
    */
   public function setUp() {
-    parent::setUp('ckeditor5', 'language', 'locale');
+    parent::setUp(array('ckeditor5', 'language', 'locale'));
     // Add RTL language.
     $arabic = (object) array(
       'langcode' => 'ar',

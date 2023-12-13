@@ -8,14 +8,21 @@
  * Functional tests for CKEditor5 module.
  */
 class CKEditor5TestCase extends BackdropWebTestCase {
-  protected $admin_user;
+  /**
+   * @var User
+   */
+  protected $adminUser;
+
+  /**
+   * @var string
+   */
   protected $profile = 'testing';
 
   /**
    * {@inheritdoc}
    */
   protected function setUp() {
-    parent::setUp('ckeditor5');
+    parent::setUp(array('ckeditor5'));
 
     // Create Article node type.
     $content_type = $this->backdropCreateContentType(array(
@@ -25,14 +32,14 @@ class CKEditor5TestCase extends BackdropWebTestCase {
     node_add_body_field($content_type);
 
     // Create and log in as the admin user.
-    $this->admin_user = $this->backdropCreateUser(array(
+    $this->adminUser = $this->backdropCreateUser(array(
       'administer filters',
       'access administration pages',
       'access content',
       'administer nodes',
       'create article content',
     ));
-    $this->backdropLogin($this->admin_user);
+    $this->backdropLogin($this->adminUser);
   }
 
   /**

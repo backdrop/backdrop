@@ -1,11 +1,11 @@
 <?php
 /**
  * @file
- * Admin page callbacks for the CKEditor module.
+ * Admin page callbacks for the CKEditor 5 module.
  */
 
 /**
- * Editor settings callback; Provide options for CKEditor module.
+ * Editor settings callback; Provide options for CKEditor 5 module.
  */
 function ckeditor5_settings_form(&$form, $form_state, $format) {
   $plugins = ckeditor5_plugins();
