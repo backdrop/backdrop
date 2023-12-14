@@ -63,6 +63,7 @@ define('CACHE_TEMPORARY', -1);
  * comment, "And it's also not a bug, as Windows just have less log levels,"
  * and "So the behavior you're seeing is perfectly normal."
  *
+ * @see https://en.wikipedia.org/wiki/Syslog#Severity_level
  * @see http://www.faqs.org/rfcs/rfc3164.html
  * @see http://bugs.php.net/bug.php?id=18090
  * @see http://php.net/manual/function.syslog.php
@@ -97,7 +98,7 @@ define('WATCHDOG_ERROR', 3);
 define('WATCHDOG_WARNING', 4);
 
 /**
- * Log message severity -- Normal but significant conditions.
+ * Log message severity -- Notice: normal but significant conditions.
  */
 define('WATCHDOG_NOTICE', 5);
 
@@ -112,7 +113,7 @@ define('WATCHDOG_INFO', 6);
 define('WATCHDOG_DEBUG', 7);
 
 /**
- * Log message severity -- Deprecated function / feature notices.
+ * Log message severity -- Deprecated function/feature notices.
  */
 define('WATCHDOG_DEPRECATED', 8);
 
@@ -2259,6 +2260,7 @@ function watchdog_severity_enabled($severity = WATCHDOG_NOTICE) {
   // This may be called before system.core, such as when running update.php or
   // the initial installation. As such we provide the defaults if needed.
   if (!isset($enabled_severity_levels)) {
+    // See watchdog_severity_levels() for possible values.
     $enabled_severity_levels = array(
       WATCHDOG_EMERGENCY,
       WATCHDOG_ALERT,
@@ -2267,8 +2269,6 @@ function watchdog_severity_enabled($severity = WATCHDOG_NOTICE) {
       WATCHDOG_WARNING,
       WATCHDOG_NOTICE,
       WATCHDOG_INFO,
-      // WATCHDOG_DEBUG,
-      // WATCHDOG_DEPRECATED,
     );
   }
 
@@ -3248,7 +3248,8 @@ function _backdrop_bootstrap_sanitize_request() {
   // Remove dangerous keys from input data.
   $allowlist = settings_get('sanitize_input_allowlist', array());
   if (empty($allowlist)) {
-    // Backwards compatible setting support. @todo Remove in 2.x.
+    // @todo Remove forbidden backwards compatibility word in Backdrop 2.x.
+    // cspell:disable-next-line
     $allowlist = settings_get('sanitize_input_whitelist', array());
   }
   $log_sanitized_keys = settings_get('sanitize_input_logging');
@@ -3726,8 +3727,8 @@ function language_default() {
  *
  * Examples:
  * - http://example.com/node/306 returns "node/306".
- * - http://example.com/backdropfolder/node/306 returns "node/306" while
- *   base_path() returns "/backdropfolder/".
+ * - http://example.com/backdrop_folder/node/306 returns "node/306" while
+ *   base_path() returns "/backdrop_folder/".
  * - http://example.com/url-alias (which is a URL alias for node/306) returns
  *   "path/alias" as opposed to the internal path.
  * - http://example.com/index.php returns an empty string (meaning: home page).

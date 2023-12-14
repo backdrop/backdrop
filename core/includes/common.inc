@@ -5739,8 +5739,7 @@ function backdrop_json_decode($var) {
 function backdrop_json_format($json) {
   watchdog_deprecated_function('common', __FUNCTION__);
   // This code adopted from
-  // https://github.com/GerHobbelt/nicejson-php/blob/master/nicejson.php.
-
+  // https://github.com/GerHobbelt/nicejson-php/blob/HEAD/nicejson.php.
   $result = '';
   $pos = 0; // Indentation level.
   $strlen = strlen($json);
@@ -7771,20 +7770,37 @@ function backdrop_common_theme() {
       'template' => 'templates/page',
     ),
     'header' => array(
-      'variables' => array('logo' => NULL, 'site_name' => NULL, 'site_slogan' => NULL, 'menu' => NULL),
+      'variables' => array(
+        'logo' => NULL,
+        'site_name' => NULL,
+        'site_slogan' => NULL,
+        'menu' => NULL,
+      ),
       'template' => 'templates/header',
     ),
     'datetime' => array(
-      'variables' => array('timestamp' => NULL, 'text' => NULL, 'attributes' => array(), 'html' => FALSE),
+      'variables' => array(
+        'timestamp' => NULL,
+        'text' => NULL,
+        'attributes' => array(),
+        'html' => FALSE),
     ),
     'status_messages' => array(
       'variables' => array('display' => NULL, 'messages' => array()),
     ),
     'link' => array(
-      'variables' => array('text' => NULL, 'path' => NULL, 'options' => array()),
+      'variables' => array(
+        'text' => NULL,
+        'path' => NULL,
+        'options' => array(),
+      ),
     ),
     'links' => array(
-      'variables' => array('links' => array(), 'attributes' => array('class' => array('links')), 'heading' => array()),
+      'variables' => array(
+        'links' => array(),
+        'attributes' => array('class' => array('links')),
+        'heading' => array(),
+      ),
     ),
     'dropbutton_wrapper' => array(
       'variables' => array('children' => NULL),
@@ -7807,7 +7823,15 @@ function backdrop_common_theme() {
       // - http://dev.w3.org/html5/spec/Overview.html#alt
       // The title attribute is optional in all cases, so it is omitted by
       // default.
-      'variables' => array('uri' => NULL, 'path' => NULL, 'width' => NULL, 'height' => NULL, 'alt' => '', 'title' => NULL, 'attributes' => array()),
+      'variables' => array(
+        'uri' => NULL,
+        'path' => NULL,
+        'width' => NULL,
+        'height' => NULL,
+        'alt' => '',
+        'title' => NULL,
+        'attributes' => array(),
+      ),
     ),
     'breadcrumb' => array(
       'variables' => array('breadcrumb' => NULL),
@@ -7816,7 +7840,16 @@ function backdrop_common_theme() {
       'variables' => array('markup' => NULL),
     ),
     'table' => array(
-      'variables' => array('header' => NULL, 'footer' => NULL, 'rows' => NULL, 'attributes' => array(), 'caption' => NULL, 'colgroups' => array(), 'sticky' => TRUE, 'empty' => ''),
+      'variables' => array(
+        'header' => NULL,
+        'footer' => NULL,
+        'rows' => NULL,
+        'attributes' => array(),
+        'caption' => NULL,
+        'colgroups' => array(),
+        'sticky' => TRUE,
+        'empty' => '',
+      ),
     ),
     'tablesort_indicator' => array(
       'variables' => array('style' => NULL),
@@ -7825,7 +7858,14 @@ function backdrop_common_theme() {
       'variables' => array('type' => MARK_NEW),
     ),
     'item_list' => array(
-      'variables' => array('items' => array(), 'title' => '', 'type' => 'ul', 'attributes' => array(), 'empty' => NULL),
+      'variables' => array(
+        'items' => array(),
+        'title' => '',
+        'type' => 'ul',
+        'attributes' => array(),
+        'wrapper_attributes' => array(),
+        'empty' => NULL,
+      ),
     ),
     'more_help_link' => array(
       'variables' => array('url' => NULL),
@@ -7847,14 +7887,28 @@ function backdrop_common_theme() {
     ),
     // From theme.maintenance.inc.
     'maintenance_page' => array(
-      'variables' => array('content' => NULL, 'sidebar' => NULL, 'footer' => NULL, 'show_messages' => TRUE),
+      'variables' => array(
+        'content' => NULL,
+        'sidebar' => NULL,
+        'footer' => NULL,
+        'show_messages' => TRUE,
+      ),
       'template' => 'templates/maintenance-page',
     ),
     'update_page' => array(
-      'variables' => array('content' => NULL, 'sidebar' => NULL, 'footer' => NULL, 'show_messages' => TRUE),
+      'variables' => array(
+        'content' => NULL,
+        'sidebar' => NULL,
+        'footer' => NULL,
+        'show_messages' => TRUE,
+      ),
     ),
     'install_page' => array(
-      'variables' => array('content' => NULL, 'sidebar' => NULL, 'footer' => NULL),
+      'variables' => array(
+        'content' => NULL,
+        'sidebar' => NULL,
+        'footer' => NULL,
+      ),
     ),
     'task_list' => array(
       'variables' => array('items' => NULL, 'active' => NULL),
@@ -7867,22 +7921,51 @@ function backdrop_common_theme() {
     ),
     // From pager.inc.
     'pager' => array(
-      'variables' => array('tags' => array(), 'element' => 0, 'parameters' => array(), 'quantity' => 9),
+      'variables' => array(
+        'tags' => array(),
+        'element' => 0,
+        'parameters' => array(),
+        'quantity' => 9,
+      ),
     ),
     'pager_first' => array(
-      'variables' => array('text' => NULL, 'element' => 0, 'parameters' => array()),
+      'variables' => array(
+        'text' => NULL,
+        'element' => 0,
+        'parameters' => array(),
+      ),
     ),
     'pager_previous' => array(
-      'variables' => array('text' => NULL, 'element' => 0, 'interval' => 1, 'parameters' => array()),
+      'variables' => array(
+        'text' => NULL,
+        'element' => 0,
+        'interval' => 1,
+        'parameters' => array(),
+      ),
     ),
     'pager_next' => array(
-      'variables' => array('text' => NULL, 'element' => 0, 'interval' => 1, 'parameters' => array()),
+      'variables' => array(
+        'text' => NULL,
+        'element' => 0,
+        'interval' => 1,
+        'parameters' => array(),
+      ),
     ),
     'pager_last' => array(
-      'variables' => array('text' => NULL, 'element' => 0, 'parameters' => array()),
+      'variables' => array(
+        'text' => NULL,
+        'element' => 0,
+        'parameters' => array(),
+      ),
     ),
     'pager_link' => array(
-      'variables' => array('text' => NULL, 'page_new' => NULL, 'element' => NULL, 'parameters' => array(), 'attributes' => array()),
+      'variables' => array(
+        'text' => NULL,
+        'page_new' => NULL,
+        'element' => NULL,
+        'parameters' => array(),
+        'attributes' => array(),
+      ),
     ),
     // From menu.inc.
     'menu_link' => array(
@@ -8340,7 +8423,8 @@ function backdrop_write_record($table, &$record, $primary_keys = array()) {
  * Information stored in a module .info file:
  * - name: The real name of the module for display purposes.
  * - description: A brief description of the module.
- * - dependencies: An array of shortnames of other modules this module requires.
+ * - dependencies: An array of machine names of modules required by
+ *   this module.
  * - package: The name of the package of modules this module belongs to.
  *
  * Information stored in a theme .info file:
@@ -8498,25 +8582,81 @@ function backdrop_parse_info_format($data, $process_sections = FALSE) {
 /**
  * Returns a list of severity levels, as defined in RFC 3164.
  *
- * @return
- *   Array of the possible severity levels for log messages.
+ * @param string $return
+ *   The type of data to return. Can be one of:
+ *   - all: The full array.
+ *   - name: The untranslated machine names.
+ *   - label: The translated human-readable names/labels.
+ *   - description: The level descriptions.
+ *   For backwards-compatibility, this defaults to 'label'.
  *
+ * @return array
+ *   An array of the possible severity levels for log messages. The array keys
+ *   are the named constants, while the values depend on the value of $return.
+ *
+ * @see https://en.wikipedia.org/wiki/Syslog#Severity_level
  * @see http://www.ietf.org/rfc/rfc3164.txt
  * @see watchdog()
  * @ingroup logging_severity_levels
  */
-function watchdog_severity_levels() {
-  return array(
-    WATCHDOG_EMERGENCY   => t('emergency'),
-    WATCHDOG_ALERT   => t('alert'),
-    WATCHDOG_CRITICAL    => t('critical'),
-    WATCHDOG_ERROR     => t('error'),
-    WATCHDOG_WARNING => t('warning'),
-    WATCHDOG_NOTICE  => t('notice'),
-    WATCHDOG_INFO    => t('info'),
-    WATCHDOG_DEBUG   => t('debug'),
-    WATCHDOG_DEPRECATED => t('deprecated'),
+function watchdog_severity_levels($return = 'label') {
+  $levels = array(
+    WATCHDOG_EMERGENCY => array(
+      'name' => 'emergency',
+      'label' => t('Emergency'),
+      'description' => t('System is unusable'),
+    ),
+    WATCHDOG_ALERT => array(
+      'name' => 'alert',
+      'label' => t('Alert'),
+      'description' => t('Action must be taken immediately'),
+    ),
+    WATCHDOG_CRITICAL => array(
+      'name' => 'critical',
+      'label' => t('Critical'),
+      'description' => t('Critical conditions'),
+    ),
+    WATCHDOG_ERROR => array(
+      'name' => 'error',
+      'label' => t('Error'),
+      'description' => t('Error conditions'),
+    ),
+    WATCHDOG_WARNING => array(
+      'name' => 'warning',
+      'label' => t('Warning'),
+      'description' => t('Warning conditions'),
+    ),
+    WATCHDOG_NOTICE => array(
+      'name' => 'notice',
+      'label' => t('Notice'),
+      'description' => t('Normal but significant conditions'),
+    ),
+    WATCHDOG_INFO => array(
+      'name' => 'info',
+      'label' => t('Info'),
+      'description' => t('Informational messages'),
+    ),
+    WATCHDOG_DEBUG => array(
+      'name' => 'debug',
+      'label' => t('Debug'),
+      'description' => t('Debug-level messages'),
+    ),
+    WATCHDOG_DEPRECATED => array(
+      'name' => 'deprecated',
+      'label' => t('Deprecated'),
+      'description' => t('Deprecated function/feature notices'),
+    ),
   );
+
+  switch ($return) {
+    case 'name':
+    case 'label':
+    case 'description':
+      return array_combine(array_keys($levels), array_column($levels, $return));
+    case 'all':
+    default:
+      return $levels;
+  }
 }
 
 
