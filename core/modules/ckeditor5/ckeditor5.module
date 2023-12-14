@@ -104,6 +104,16 @@ function ckeditor5_library_info() {
     _ckeditor5_get_plugin_libraries()
   );
 
+  // Collect a list of CSS files from the default theme to be added to the page
+  // along with CKEditor 5 instances.
+  $css = _ckeditor5_theme_css();
+  backdrop_alter('ckeditor5_css', $css);
+  foreach ($css as $file) {
+    $libraries['backdrop.ckeditor5']['css'][$file] = array(
+      'group' => CSS_THEME,
+    );
+  }
+
   $libraries['backdrop.ckeditor5.backdrop-basic-styles'] = array(
     'title' => 'CKEditor plugin to convert basic HTML tags to preferred tags.',
     'version' => $info['version'],
@@ -916,7 +926,6 @@ function ckeditor5_get_config($format) {
   // buttons (if any) so we can check if the plugin should be enabled implicitly
   // based on the toolbar.
   $plugin_info = ckeditor5_plugins();
-  $external_css = array();
   $all_buttons = array();
   $plugins = array();
   $pseudo_plugins = array();
@@ -967,19 +976,6 @@ function ckeditor5_get_config($format) {
     $toolbar[] = $button_name;
   }
 
-  // Collect a list of CSS files to be added to the editor instance.
-  $css = array(
-    backdrop_get_path('module', 'system') . '/css/system.css',
-    backdrop_get_path('module', 'ckeditor5') . '/css/ckeditor5-iframe.css',
-  );
-  $css = array_merge($css, $external_css, _ckeditor5_theme_css());
-  backdrop_alter('ckeditor5_css', $css, $format);
-
-  // Convert all paths to be relative to root.
-  foreach ($css as $key => $css_path) {
-    $css[$key] = base_path() . $css_path;
-  }
-
   // Remove duplicates from the plugin list (as happens with dependencies).
   $plugins = array_unique($plugins);
 
@@ -994,8 +990,6 @@ function ckeditor5_get_config($format) {
     // from an array of strings to variables references in the ckeditor5-dll.js
     // file. Exclude the pseudo-plugins that are configuration-only.
     'pluginList' => array_values(array_diff($plugins, $pseudo_plugins)),
-
-    // 'contentsCss' => array_values($css),
   );
 
   // Add default settings from plugins.
@@ -1318,11 +1312,24 @@ function _ckeditor5_get_plugin_libraries() {
 /**
  * Retrieves the default theme's CKEditor stylesheets defined in the .info file.
  *
- * Themes may specify iframe-specific CSS files for use with CKEditor by
- * including a "ckeditor5_stylesheets" key in the theme .info file.
+ * Themes may specify specific CSS files that will be applied to all pages that
+ * contain a CKEditor instance (even on administrative pages), by adding a
+ * "ckeditor5_stylesheets" key in the theme .info file.
  *
  * @code
- * ckeditor5_stylesheets[] = css/ckeditor5-iframe.css
+ * ckeditor5_stylesheets[] = css/ckeditor5-styles.css
+ * @endcode
+ *
+ * Note that unlike CKEditor 4 that used an iframe, CKEditor 5 includes the
+ * editor directly on the page. Styles added by this file may affect other
+ * parts of the page. To limit the effect of the CSS to just the CKEditor
+ * instance, all CSS selectors within this file should be prefixed with
+ * ".ck-content". For example:
+ *
+ * @code
+ * .ck-content blockquote {
+ *   border-left: 5px solid #ccc;
+ * }
  * @endcode
  *
  * @param string $theme
@@ -1331,7 +1338,7 @@ function _ckeditor5_get_plugin_libraries() {
  *   checked. Defaults to the current front-end theme.
  *
  * @return array
- *   An array of all CSS to be added by the theme within the CKEditor.
+ *   An array of all CSS to be added by the theme to the page.
  */
 function _ckeditor5_theme_css($theme = NULL) {
   $css = array();

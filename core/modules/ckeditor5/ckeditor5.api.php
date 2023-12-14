@@ -105,32 +105,40 @@ function hook_ckeditor5_plugins_alter(array &$plugins) {
 }
 
 /**
- * Modify the list of CSS files that will be added to a CKEditor instance.
+ * Modify the list of CSS files that will be added to a CKEditor 5 instance.
  *
  * Modules may use this hook to provide their own custom CSS file without
- * providing a CKEditor plugin. This list of CSS files is only used in the
- * iframe versions of CKEditor.
+ * providing a CKEditor plugin.
  *
- * Note that because this hook is only called for modules and the active theme,
- * front-end themes will not be able to use this hook to add their own CSS files
- * if a different admin theme is active. Instead, front-end themes and base
- * themes may specify CSS files to be used in iframe instances of CKEditor
+ * Because this hook is only called for modules and the active theme, front-end
+ * themes will not be able to use this hook to add their own CSS files if a
+ * different admin theme is active. Instead, front-end themes and base themes
+ * may specify CSS files to be added to the page with CKEditor 5 instances
  * through an entry in their .info file:
  *
  * @code
- * ckeditor5_stylesheets[] = css/ckeditor5-iframe.css
+ * ckeditor5_stylesheets[] = css/ckeditor5-styles.css
+ * @endcode
+ *
+ *  Note that unlike CKEditor 4 that used an iframe, CKEditor 5 includes the
+ *  editor directly on the page. Styles added through this hook may affect other
+ *  parts of the page. To limit the effect of the CSS to just the CKEditor
+ *  instance, all CSS selectors within this file should be prefixed with
+ *  ".ck-content". For example:
+ *
+ * @code
+ *  .ck-content blockquote {
+ *    border-left: 5px solid #ccc;
+ *  }
  * @endcode
  *
  * @param array $css
  *   An array of CSS files, passed by reference. This is a flat list of file
  *   paths relative to the Backdrop root.
- * @param object $format
- *   The corresponding text format object as returned by filter_format_load()
- *   for which the current text editor is being displayed.
  *
  * @see _ckeditor5_theme_css()
  */
-function hook_ckeditor5_css_alter(array &$css, $format) {
+function hook_ckeditor5_css_alter(array &$css) {
   $css[] = backdrop_get_path('module', 'mymodule') . '/css/mymodule-ckeditor5.css';
 }
 
