@@ -367,7 +367,7 @@ abstract class BackdropCacheArray implements ArrayAccess {
     $this->bin = $bin;
 
     if ($cached = cache($bin)->get($this->cid)) {
-     $this->storage = $cached->data;
+      $this->storage = $cached->data;
     }
   }
 
@@ -881,7 +881,7 @@ function backdrop_settings_initialize() {
 
   $is_https = backdrop_is_https();
 
-  // Load settings specified by the server, if present
+  // Load settings specified by the server, if present.
   if (isset($_SERVER['BACKDROP_SETTINGS'])) {
     $server_settings = @json_decode($_SERVER['BACKDROP_SETTINGS'], TRUE);
     if (!is_array($server_settings)) {
@@ -1031,7 +1031,10 @@ function backdrop_get_filename($type, $name, $filename = NULL) {
 
   // Profiles are a special case: they have a fixed location and naming.
   if ($type == 'profile') {
-    $profile_filenames = array("profiles/$name/$name.profile", "core/profiles/$name/$name.profile");
+    $profile_filenames = array(
+      "profiles/$name/$name.profile",
+      "core/profiles/$name/$name.profile",
+    );
     foreach ($profile_filenames as $profile_filename) {
       if (file_exists($profile_filename)) {
         $files[$type][$name] = $profile_filename;
@@ -1586,7 +1589,7 @@ function backdrop_get_http_header($name = NULL) {
  * @param string $name
  *   Optional. A header name with the preferred capitalization, e.g.
  *   Cache-Control or Content-Type.
- * @return
+ * @return string[]
  *   The array of all current preferred header names. Keyed by a lower-case
  *   string of each header name.
  */
@@ -2222,19 +2225,20 @@ function watchdog_exception($type, Exception $exception, $message = NULL, $varia
     return;
   }
 
-   // Use a default value if $message is not set.
-   if (empty($message)) {
-     // The exception message is run through check_plain() by _backdrop_decode_exception().
-     $message = '%type: !message in %function (line %line of %file).';
-   }
-   // $variables must be an array so that we can add the exception information.
-   if (!is_array($variables)) {
-     $variables = array();
-   }
+  // Use a default value if $message is not set.
+  if (empty($message)) {
+    // The exception message is run through check_plain() by
+    // _backdrop_decode_exception().
+    $message = '%type: !message in %function (line %line of %file).';
+  }
+  // $variables must be an array so that we can add the exception information.
+  if (!is_array($variables)) {
+    $variables = array();
+  }
 
-   require_once BACKDROP_ROOT . '/core/includes/errors.inc';
-   $variables += _backdrop_decode_exception($exception);
-   watchdog($type, $message, $variables, $severity, $link);
+  require_once BACKDROP_ROOT . '/core/includes/errors.inc';
+  $variables += _backdrop_decode_exception($exception);
+  watchdog($type, $message, $variables, $severity, $link);
 }
 
 /**
@@ -2328,7 +2332,7 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
     // The user object may not exist in all conditions, so 0 is substituted if needed.
     $user_uid = isset($user->uid) ? $user->uid : 0;
 
-    // Prepare the fields to be logged
+    // Prepare the fields to be logged.
     $log_entry = array(
       'type'        => $type,
       'message'     => $message,
@@ -2344,7 +2348,7 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
       'timestamp'   => time(),
     );
 
-    // Call the logging hooks to log/process the message
+    // Call the logging hooks to log/process the message.
     module_invoke_all('watchdog', $log_entry);
 
     // It is critical that the semaphore is only cleared here, in the parent
@@ -3011,6 +3015,7 @@ function _backdrop_exception_handler($exception) {
  */
 function _backdrop_bootstrap_configuration() {
   backdrop_environment_initialize();
+
   // Start a page timer:
   timer_start('page');
   // Initialize the configuration, including variables from settings.php.
@@ -3095,7 +3100,7 @@ function _backdrop_bootstrap_page_cache() {
       ob_start();
 
       // Calls to hook_boot() on page cache requests is deprecated, though they
-      // can still be enabled via settings.php
+      // can still be enabled via settings.php.
       if (settings_get('page_cache_invoke_hooks', FALSE)) {
         // Restore the metadata cached with the page for hook_boot().
         $_GET['q'] = $cache->data['path'];
@@ -3219,7 +3224,6 @@ function _backdrop_bootstrap_variables() {
       $GLOBALS['settings'] = array_merge($GLOBALS['settings'], $settings);
     }
   }
-
 
   // Load variables from the database, but do not overwrite variables set in settings.php.
   $conf = variable_initialize(isset($conf) ? $conf : array());
@@ -3367,7 +3371,7 @@ function backdrop_valid_test_ua() {
 
   if (isset($_SERVER['HTTP_USER_AGENT']) && preg_match("/^(simpletest\d+);(.+);(.+);(.+)$/", $_SERVER['HTTP_USER_AGENT'], $matches)) {
     list(, $prefix, $time, $salt, $hmac) = $matches;
-    $check_string =  $prefix . ';' . $time . ';' . $salt;
+    $check_string = $prefix . ';' . $time . ';' . $salt;
     // We use the salt from settings.php to make the HMAC key, since the
     // database is not yet initialized and we can't access any Backdrop
     // variables. The file properties add more entropy.
@@ -3623,7 +3627,10 @@ function language_list($only_enabled = FALSE, $option_list = FALSE, $native_name
     // backdrop_sort() needed for ordering, but common.inc may not be loaded
     // in very early bootstrap. Include only if returning an option list.
     require_once __DIR__ . '/common.inc';
-    backdrop_sort($this_list, array('weight' => SORT_NUMERIC, 'name' => SORT_STRING));
+    backdrop_sort($this_list, array(
+      'weight' => SORT_NUMERIC,
+      'name' => SORT_STRING,
+    ));
     foreach ($this_list as $language) {
       if ($native_names && isset($language->native)) {
         $label = $language->native;
@@ -3945,7 +3952,7 @@ class SchemaCache extends BackdropCacheArray {
    */
   protected function resolveCacheMiss($offset) {
     $complete_schema = backdrop_get_complete_schema();
-    $value = isset($complete_schema[$offset]) ? $complete_schema[$offset] :  NULL;
+    $value = isset($complete_schema[$offset]) ? $complete_schema[$offset] : NULL;
     $this->storage[$offset] = $value;
     $this->persist($offset);
     return $value;
@@ -4334,7 +4341,7 @@ function &backdrop_register_shutdown_function($callback = NULL) {
     }
     $args = func_get_args();
     array_shift($args);
-    // Save callback and arguments
+    // Save callback and arguments.
     $callbacks[] = array('callback' => $callback, 'arguments' => $args);
   }
   return $callbacks;
@@ -4435,7 +4442,7 @@ function backdrop_clear_opcode_cache($filepath) {
  * @param string $host
  *   The host to check against the patterns specified in settings.php.
  *
- * @return
+ * @return bool
  *   TRUE if the host can be trusted; FALSE otherwise.
  *
  * @since Backdrop 1.14.0
