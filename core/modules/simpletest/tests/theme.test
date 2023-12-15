@@ -343,7 +343,7 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
 
     // Verify that a list of links is properly rendered.
     $variables = array();
-    $variables['attributes'] = array('id' => 'somelinks');
+    $variables['attributes'] = array('id' => 'some-links');
     $variables['links'] = array(
       'a link' => array(
         'title' => 'A <link>',
@@ -359,7 +359,7 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
     );
 
     $expected_links = '';
-    $expected_links .= '<ul id="somelinks">';
+    $expected_links .= '<ul id="some-links">';
     $expected_links .= '<li class="a-link odd first"><a href="' . url('a/link') . '">' . check_plain('A <link>') . '</a></li>';
     $expected_links .= '<li class="plain-text even"><span>' . check_plain('Plain "text"') . '</span></li>';
     $expected_links .= '<li class="front-page odd last active"><a href="' . url('<front>') . '" class="active" aria-current="page">' . check_plain('Home page') . '</a></li>';
