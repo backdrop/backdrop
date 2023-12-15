@@ -33,20 +33,21 @@ class UserCompareLayoutAccess extends LayoutAccess {
         $labels[$key] = t('The logged-in user account');
       }
       elseif (is_numeric($source)) {
-        $message = 'The user account from the path (in position @position)';
-        $substitutions = array('@position' => $position = $source + 1);
-        $labels[$key] = t($message, $substitutions);
+        $substitutions = array('@position' => $source + 1);
+        $labels[$key] = t('The user account from the path (in position @position)', $substitutions);
       }
       else {
         $labels[$key] = t('A user account from the layout contexts');
       }
     }
 
-    $comparison = !empty($this->settings['equality']) ? 'is the same as' : 'is different from';
-    return t('@id2 @comp the Logged-in user account.', array(
-      '@id2' => $labels['user2'],
-      '@comp' => $comparison,
-    ));
+    $substitutions = array('@user' => $labels['user2']);
+    if (!empty($this->settings['equality'])) {
+      return t('@user is the same as the Logged-in user account.', $substitutions);
+    }
+    else {
+      return t('@user is different from the Logged-in user account.', $substitutions);
+    }
   }
 
   /**
@@ -62,7 +63,7 @@ class UserCompareLayoutAccess extends LayoutAccess {
 
     // The xor returns false if the two booleans are the same, and true if they
     // are not. For example: if we asked for equality and they are equal, return
-    // true. If we asked for INequality and they are equal, return false.
+    // true. If we asked for inequality and they are equal, return false.
     return ($account1->uid == $account2->uid) xor empty($this->settings['equality']);
   }
 
