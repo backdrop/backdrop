@@ -1597,7 +1597,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $result = config_get('layout.layout.' . $second_layout_name, 'name');
     $this->assertEqual($result, $second_layout_name, 'Config created for second layout.');
     $result = config_get('layout.menu_item.' . $second_layout_name, 'name');
-    $this->assertNULL($result, 'No config created for second layout menu item (reuses the existing one).');
+    $this->assertNull($result, 'No config created for second layout menu item (reuses the existing one).');
 
     // Delete the first layout and check that the menu item is transferred.
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/delete', array(), t('Delete layout'));
@@ -1620,7 +1620,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->assertNoLink(check_plain($layout_title), 'Menu item no longer present after deleting last layout.');
 
     $result = config_get('layout.menu_item.' . $second_layout_name, 'name');
-    $this->assertNULL($result, 'Config for second menu item has been deleted.');
+    $this->assertNull($result, 'Config for second menu item has been deleted.');
   }
 
   /**
@@ -2134,7 +2134,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $classes_1 = (string)$elements[0]['class'];
     $this->assertTrue(strstr($classes_1, 'block-hero-no-image'));
     // Block 1: Confirm that no background image is present.
-    $this->assertNULL($elements[0]['style'], 'No image present for 1st hero block.');
+    $this->assertNull($elements[0]['style'], 'No image present for 1st hero block.');
 
     // Block 2: no title present.
     $title_2 = $elements[1]->xpath('.//h2');
@@ -3590,7 +3590,7 @@ class LayoutPathTest extends BackdropWebTestCase {
     $layouts = layout_load_multiple_by_path('');
     $default_layout = $layouts['default'];
     $path = $default_layout->getPath(); // This will be NULL.
-    $this->assertNULL($path, 'Default layout path is NULL.');
+    $this->assertNull($path, 'Default layout path is NULL.');
 
     // Make sure path_is_admin() can handle a NULL path.
     backdrop_static_reset('path_is_admin');

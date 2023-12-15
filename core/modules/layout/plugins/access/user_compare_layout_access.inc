@@ -38,7 +38,7 @@ class UserCompareLayoutAccess extends LayoutAccess {
         $labels[$key] = t($message, $substitutions);
       }
       else {
-        $labels[$key] = t('An unknown user account');
+        $labels[$key] = t('A user account from the layout contexts');
       }
     }
 
@@ -78,7 +78,7 @@ class UserCompareLayoutAccess extends LayoutAccess {
     // Always assume the first context is the logged-in user account.
     $form['contexts']['user1'] = array(
       '#type' => 'value',
-      '#value' => 'current_user', 
+      '#value' => 'current_user',
     );
     // Remove logged-in user account from list of comparison options.
     if (isset($form['contexts']['user2']['#options']['current_user'])) {
