@@ -953,6 +953,9 @@ div.description,
   font-size: 0.923em;
   color: #666;
 }
+div.description.form-item-description {
+  margin: -1em 0 1em 0;
+}
 .password-strength {
   padding-top: 6px;
 }

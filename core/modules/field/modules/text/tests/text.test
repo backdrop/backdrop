@@ -430,16 +430,16 @@ class TextSummaryTestCase extends BackdropWebTestCase {
     // Using no text format:
     $expected = array(
       "<p>\nHi\n</p>\n<p>\nfolks\n<br />\n!\n</p>",
-      "<",
-      "<p",
-      "<p>",
-      "<p>\n",
-      "<p>\nH",
-      "<p>\nHi",
-      "<p>\nHi\n",
-      "<p>\nHi\n<",
-      "<p>\nHi\n</",
-      "<p>\nHi\n</p",
+      "",
+      "<p></p>",
+      "<p></p>",
+      "<p>\n</p>",
+      "<p>\nH</p>",
+      "<p>\nHi</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
+      "<p>\nHi\n</p>",
       "<p>\nHi\n</p>",
       "<p>\nHi\n</p>",
       "<p>\nHi\n</p>",
@@ -513,7 +513,7 @@ class TextSummaryTestCase extends BackdropWebTestCase {
 
     // Test text_summary() for different sizes.
     for ($i = 0; $i <= 37; $i++) {
-      $this->assertTextSummary($text, $expected[$i],    NULL, $i);
+      $this->assertTextSummary($text, $expected[$i], NULL, $i);
       $this->assertTextSummary($text, $expected_lb[$i], 'filtered_html', $i);
     }
   }
@@ -608,7 +608,7 @@ class TextTranslationTestCase extends BackdropWebTestCase {
       "body[$langcode][0][value]" => $body,
     );
 
-    // Translate the post in french.
+    // Translate the post in French.
     $this->backdropPost('node/add/post', $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($edit['title']);
     $this->backdropGet("node/$node->nid/translate");
@@ -632,7 +632,7 @@ class TextTranslationTestCase extends BackdropWebTestCase {
       $this->randomName(),
     );
 
-    // Create an post with the first body input format set to "Raw HTML"
+    // Create a post with the first body input format set to "Raw HTML"
     // (full_html).
     $title = $this->randomName();
     $edit = array(
@@ -643,7 +643,7 @@ class TextTranslationTestCase extends BackdropWebTestCase {
     $node = $this->backdropGetNodeByTitle($title);
 
     // Populate the body field: the first item gets the "Raw HTML" (full_html)
-    // input format, the second one "Filtered HTML".
+    // input format, the second one gets the "Basic" (filtered_html).
     $formats = array('full_html', 'filtered_html');
     $langcode = LANGUAGE_NONE;
     foreach ($body as $delta => $value) {

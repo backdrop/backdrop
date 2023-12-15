@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.26.x-dev');
+define('BACKDROP_VERSION', '1.27.x-dev');
 
 /**
  * Core API compatibility.
@@ -63,6 +63,7 @@ define('CACHE_TEMPORARY', -1);
  * comment, "And it's also not a bug, as Windows just have less log levels,"
  * and "So the behavior you're seeing is perfectly normal."
  *
+ * @see https://en.wikipedia.org/wiki/Syslog#Severity_level
  * @see http://www.faqs.org/rfcs/rfc3164.html
  * @see http://bugs.php.net/bug.php?id=18090
  * @see http://php.net/manual/function.syslog.php
@@ -97,7 +98,7 @@ define('WATCHDOG_ERROR', 3);
 define('WATCHDOG_WARNING', 4);
 
 /**
- * Log message severity -- Normal but significant conditions.
+ * Log message severity -- Notice: normal but significant conditions.
  */
 define('WATCHDOG_NOTICE', 5);
 
@@ -112,7 +113,7 @@ define('WATCHDOG_INFO', 6);
 define('WATCHDOG_DEBUG', 7);
 
 /**
- * Log message severity -- Deprecated function / feature notices.
+ * Log message severity -- Deprecated function/feature notices.
  */
 define('WATCHDOG_DEPRECATED', 8);
 
@@ -1030,7 +1031,10 @@ function backdrop_get_filename($type, $name, $filename = NULL) {
 
   // Profiles are a special case: they have a fixed location and naming.
   if ($type == 'profile') {
-    $profile_filenames = array("profiles/$name/$name.profile", "core/profiles/$name/$name.profile");
+    $profile_filenames = array(
+      "profiles/$name/$name.profile",
+      "core/profiles/$name/$name.profile",
+    );
     foreach ($profile_filenames as $profile_filename) {
       if (file_exists($profile_filename)) {
         $files[$type][$name] = $profile_filename;
@@ -1585,7 +1589,7 @@ function backdrop_get_http_header($name = NULL) {
  * @param string $name
  *   Optional. A header name with the preferred capitalization, e.g.
  *   Cache-Control or Content-Type.
- * @return
+ * @return string[]
  *   The array of all current preferred header names. Keyed by a lower-case
  *   string of each header name.
  */
@@ -1665,7 +1669,7 @@ function backdrop_send_headers($default_headers = array(), $only_default = FALSE
  * refers to the time of the request. If the user accesses Backdrop via a proxy
  * server, and the proxy already has a cached copy of the anonymous page with an
  * older Last-Modified date, the proxy may respond with 304 Not Modified, making
- * the client think that the anonymous and authenticated pageviews are
+ * the client think that the anonymous and authenticated page views are
  * identical.
  *
  * @return bool
@@ -2223,7 +2227,8 @@ function watchdog_exception($type, Exception $exception, $message = NULL, $varia
 
   // Use a default value if $message is not set.
   if (empty($message)) {
-    // The exception message is run through check_plain() by _backdrop_decode_exception().
+    // The exception message is run through check_plain() by
+    // _backdrop_decode_exception().
     $message = '%type: !message in %function (line %line of %file).';
   }
   // $variables must be an array so that we can add the exception information.
@@ -2259,6 +2264,7 @@ function watchdog_severity_enabled($severity = WATCHDOG_NOTICE) {
   // This may be called before system.core, such as when running update.php or
   // the initial installation. As such we provide the defaults if needed.
   if (!isset($enabled_severity_levels)) {
+    // See watchdog_severity_levels() for possible values.
     $enabled_severity_levels = array(
       WATCHDOG_EMERGENCY,
       WATCHDOG_ALERT,
@@ -2267,8 +2273,6 @@ function watchdog_severity_enabled($severity = WATCHDOG_NOTICE) {
       WATCHDOG_WARNING,
       WATCHDOG_NOTICE,
       WATCHDOG_INFO,
-      // WATCHDOG_DEBUG,
-      // WATCHDOG_DEPRECATED,
     );
   }
 
@@ -3257,7 +3261,8 @@ function _backdrop_bootstrap_sanitize_request() {
   // Remove dangerous keys from input data.
   $allowlist = settings_get('sanitize_input_allowlist', array());
   if (empty($allowlist)) {
-    // Backwards compatible setting support. @todo Remove in 2.x.
+    // @todo Remove forbidden backwards compatibility word in Backdrop 2.x.
+    // cspell:disable-next-line
     $allowlist = settings_get('sanitize_input_whitelist', array());
   }
   $log_sanitized_keys = settings_get('sanitize_input_logging');
@@ -3575,12 +3580,12 @@ function language_multilingual() {
  */
 function language_list($only_enabled = FALSE, $option_list = FALSE, $native_names = FALSE) {
   $languages = &backdrop_static(__FUNCTION__);
-  // Initialize master language list.
+  // Initialize primary language list.
   if (!isset($languages)) {
     // Initialize local language list caches.
     $languages = array('all' => array(), 'enabled' => array());
 
-    // Fill in master language list based on current configuration. This may be
+    // Fill in primary language list based on current configuration. This may be
     // in the event of an early bootstrap error, so fallback to defaults.
     try {
       $default_langcode = config_get('system.core', 'language_default');
@@ -3631,7 +3636,10 @@ function language_list($only_enabled = FALSE, $option_list = FALSE, $native_name
     // backdrop_sort() needed for ordering, but common.inc may not be loaded
     // in very early bootstrap. Include only if returning an option list.
     require_once __DIR__ . '/common.inc';
-    backdrop_sort($this_list, array('weight' => SORT_NUMERIC, 'name' => SORT_STRING));
+    backdrop_sort($this_list, array(
+      'weight' => SORT_NUMERIC,
+      'name' => SORT_STRING,
+    ));
     foreach ($this_list as $language) {
       if ($native_names && isset($language->native)) {
         $label = $language->native;
@@ -3735,8 +3743,8 @@ function language_default() {
  *
  * Examples:
  * - http://example.com/node/306 returns "node/306".
- * - http://example.com/backdropfolder/node/306 returns "node/306" while
- *   base_path() returns "/backdropfolder/".
+ * - http://example.com/backdrop_folder/node/306 returns "node/306" while
+ *   base_path() returns "/backdrop_folder/".
  * - http://example.com/url-alias (which is a URL alias for node/306) returns
  *   "path/alias" as opposed to the internal path.
  * - http://example.com/index.php returns an empty string (meaning: home page).
@@ -4443,7 +4451,7 @@ function backdrop_clear_opcode_cache($filepath) {
  * @param string $host
  *   The host to check against the patterns specified in settings.php.
  *
- * @return
+ * @return bool
  *   TRUE if the host can be trusted; FALSE otherwise.
  *
  * @since Backdrop 1.14.0

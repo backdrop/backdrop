@@ -627,7 +627,10 @@ abstract class DatabaseTasks {
       '#title' => st('Table prefix'),
       '#default_value' => '',
       '#size' => 45,
-      '#description' => st('If more than one application will be sharing this database, enter a table prefix such as %prefix for your @profile site here.', array('@profile' => backdrop_install_profile_distribution_name(), '%prefix' => $prefix)),
+      '#description' => st('If more than one application will be sharing this database, enter a table prefix such as %prefix for your @profile site here.', array(
+        '@profile' => backdrop_install_profile_distribution_name(),
+        '%prefix' => $prefix,
+      )),
       '#weight' => 10,
     );
 
@@ -1160,7 +1163,7 @@ function backdrop_verify_install_file($file, $mask = NULL, $type = 'file') {
  * @param $message
  *   (optional) Whether to output messages. Defaults to TRUE.
  *
- * @return
+ * @return bool
  *   TRUE/FALSE whether or not the directory was successfully created.
  */
 function backdrop_install_mkdir($file, $mask, $message = TRUE) {
@@ -1437,7 +1440,7 @@ function backdrop_check_module($module) {
  * a normal Backdrop module .info file. For example:
  * - name: The real name of the installation profile for display purposes.
  * - description: A brief description of the profile.
- * - dependencies: An array of shortnames of other modules that this install
+ * - dependencies: An array of machine names of other modules that this install
  *   profile requires.
  *
  * Additional, less commonly-used information that can appear in a profile.info
