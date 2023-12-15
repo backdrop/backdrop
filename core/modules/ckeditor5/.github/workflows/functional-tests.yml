@@ -1,0 +1,59 @@
+name: Functional Tests
+on: [pull_request]
+jobs:
+  simpletest:
+    name: Run Simpletest
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Setup env
+        run: |
+          echo "REPO_NAME=${PWD##*/}" >> $GITHUB_ENV
+          echo 'USE_PHP_V=8.2' >> $GITHUB_ENV
+
+      - name: Install MariaDB
+        uses: shogo82148/actions-setup-mysql@v1
+        with:
+          mysql-version: 'mariadb-10.5'
+          root-password: 'root'
+          auto-start: true
+
+      - name: Verify setup and create database
+        run: |
+          echo -e '[client]\nuser = root\npassword = root\nhost = 127.0.0.1' > ~/.my.cnf
+          mysql -e 'SELECT version()\G'
+          mysql -e 'CREATE DATABASE backdrop;'
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ env.USE_PHP_V }}
+          coverage: none
+
+      - name: Checkout Backdrop core
+        uses: actions/checkout@v3
+        with:
+          repository: backdrop/backdrop
+
+      - name: Checkout module
+        uses: actions/checkout@v3
+        with:
+          path: modules/${{ env.REPO_NAME }}
+
+      - name: Setup Apache
+        run: |
+          sudo cp -f modules/${{ env.REPO_NAME }}/.github/misc/default.conf /etc/apache2/sites-available/000-default.conf
+          sudo sed -i -e "s?_PWD?$PWD?g" -e "s/_PHP_V/${{ env.USE_PHP_V }}/g" /etc/apache2/sites-available/000-default.conf
+          sudo apt-get install libapache2-mod-fcgid
+          sudo a2enmod rewrite proxy fcgid proxy_fcgi
+          sudo systemctl start apache2.service
+          sudo sed -i -e 's/user = www-data/user = runner/' /etc/php/${{ env.USE_PHP_V }}/fpm/pool.d/www.conf
+          sudo sed -i -e 's/listen.owner = www-data/listen.owner = runner/' /etc/php/${{ env.USE_PHP_V }}/fpm/pool.d/www.conf
+          sudo systemctl restart php${{ env.USE_PHP_V }}-fpm.service
+
+      - name: Install Backdrop
+        run: |
+          cp modules/${{ env.REPO_NAME }}/.github/misc/settings.local.php .
+          core/scripts/install.sh --db-url=mysql://root:root@127.0.0.1/backdrop
+
+      - name: Run functional tests
+        run: core/scripts/run-tests.sh --force --directory=modules/${{ env.REPO_NAME }} --verbose --color --concurrency=3 --cache 2>&1
