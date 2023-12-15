@@ -629,7 +629,7 @@ abstract class DatabaseTasks {
       '#size' => 45,
       '#description' => st('If more than one application will be sharing this database, enter a table prefix such as %prefix for your @profile site here.', array(
         '@profile' => backdrop_install_profile_distribution_name(),
-        '%prefix' => $prefix
+        '%prefix' => $prefix,
       )),
       '#weight' => 10,
     );
@@ -845,8 +845,8 @@ function backdrop_install_config_directories() {
   }
   catch (\ConfigStorageException $e) {
     throw new Exception($e->getMessage() . ' ' . $t('To proceed with the installation, either create the directory and modify its permissions to make it writable, or adjust the permissions on the parent directory to allow the installer to create it automatically. For more information, see the <a href="@handbook_url">Installation Instructions</a> page.', array(
-        '@handbook_url' => 'https://backdropcms.org/installation',
-      )), 0, $e);
+      '@handbook_url' => 'https://backdropcms.org/installation',
+    )), 0, $e);
   }
 
   // Check that the active config is entirely empty, preventing installing over
@@ -1161,7 +1161,7 @@ function backdrop_verify_install_file($file, $mask = NULL, $type = 'file') {
  * @param $message
  *   (optional) Whether to output messages. Defaults to TRUE.
  *
- * @return boolean
+ * @return bool
  *   TRUE/FALSE whether or not the directory was successfully created.
  */
 function backdrop_install_mkdir($file, $mask, $message = TRUE) {

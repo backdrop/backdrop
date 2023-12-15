@@ -4442,7 +4442,7 @@ function backdrop_clear_opcode_cache($filepath) {
  * @param string $host
  *   The host to check against the patterns specified in settings.php.
  *
- * @return boolean
+ * @return bool
  *   TRUE if the host can be trusted; FALSE otherwise.
  *
  * @since Backdrop 1.14.0
