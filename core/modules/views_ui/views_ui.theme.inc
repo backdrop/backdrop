@@ -341,7 +341,9 @@ function theme_views_ui_rearrange_filter_form(&$variables) {
   // Set up tabledrag so that the weights are changed when rows are dragged.
   backdrop_add_tabledrag('views-rearrange-filters', 'order', 'sibling', 'weight');
   $output .= theme('table', array('rows' => $rows,
-    'attributes' => array('id' => 'views-rearrange-filters', 'class' => array('arrange')),
+    'attributes' => array('id' => 'views-rearrange-filters',
+      'class' => array('arrange')
+    ),
     'empty' => t('No fields available.'),
   ));
   $output .= '</div>';

@@ -107,7 +107,9 @@ function theme_image_style_list($variables) {
 
   $empty = t('There are currently no styles. <a href="!url">Add a new one</a>.', array('!url' => url('admin/config/media/image-styles/add')));
 
-  return theme('table', array('header' => $header, 'rows' => $rows, 'empty' => $empty));
+  return theme('table', array('header' => $header,
+    'rows' => $rows, 'empty' => $empty
+  ));
 }
 
 /**
