@@ -134,10 +134,6 @@ function theme_taxonomy_overview_terms($variables) {
     $row_position++;
   }
 
-  if (empty($rows)) {
-    $rows[] = array(array('data' => $form['#empty_text'], 'colspan' => '3'));
-  }
-
   $output = '';
 
   if (module_exists('language') && $form['#vocabulary']->language == TAXONOMY_LANGUAGE_ENABLED) {
@@ -154,7 +150,10 @@ function theme_taxonomy_overview_terms($variables) {
     $header[] = t('Weight');
   }
   $header[] = t('Operations');
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'taxonomy')));
+  $output .= theme('table', array('header' => $header,
+    'rows' => $rows, 'attributes' => array('id' => 'taxonomy'),
+    'empty' => $form['#empty_text'],
+  ));
   $output .= backdrop_render_children($form);
   $output .= theme('pager');
 
