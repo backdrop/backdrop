@@ -262,14 +262,17 @@ function system_requirements($phase) {
   if ($phase == 'runtime' && backdrop_is_apache()) {
 
     // Check/create .htaccess files for active and staging config directories.
-    foreach (array('active', 'staging') as $type) {
-      $config_directory = config_get_config_directory($type);
-      file_save_htaccess($config_directory);
+    $config_storage = settings_get('config_active_class', 'ConfigFileStorage');
+    if (is_a($config_storage, 'ConfigFileStorage')) {
+      foreach (array('active', 'staging') as $type) {
+        $config_directory = config_get_config_directory($type);
+        file_save_htaccess($config_directory);
 
-      $htaccess_files[$config_directory . '/.htaccess'] = array(
-        'title' => $t('%type config directory', array('%type' => backdrop_ucfirst($type))),
-        'directory' => $config_directory,
-      );
+        $htaccess_files[$config_directory . '/.htaccess'] = array(
+          'title' => $t('%type config directory', array('%type' => backdrop_ucfirst($type))),
+          'directory' => $config_directory,
+        );
+      }
     }
 
     // Try to write the .htaccess files first, to prevent false alarms in case

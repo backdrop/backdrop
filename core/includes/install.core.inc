@@ -569,7 +569,7 @@ function install_tasks($install_state) {
       'type' => 'form',
       'run' => $install_state['settings_verified'] ? INSTALL_TASK_SKIP : INSTALL_TASK_RUN_IF_NOT_COMPLETED,
     ),
-    'install_config_directories' => array(
+    'install_config_location' => array(
     ),
     'install_system_module' => array(
     ),
@@ -945,10 +945,11 @@ function install_hash_salt() {
 }
 
 /**
- * Installation task; Rewrite settings.php to include config directories.
+ * Installation task; Ensure config location is empty and writable, and (for
+ * config stored in files, rewrite settings.php to include config directories.
  */
-function install_config_directories(&$install_state) {
-  backdrop_install_config_directories();
+function install_config_location(&$install_state) {
+  backdrop_install_config_location();
 }
 
 /**
