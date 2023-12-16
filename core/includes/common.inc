@@ -1735,10 +1735,10 @@ function backdrop_strip_dangerous_protocols($uri) {
   // Iteratively remove any invalid protocol found.
   do {
     $before = $uri;
-    $colonpos = strpos($uri, ':');
-    if ($colonpos > 0) {
+    $colon_position = strpos($uri, ':');
+    if ($colon_position > 0) {
       // We found a colon, possibly a protocol. Verify.
-      $protocol = substr($uri, 0, $colonpos);
+      $protocol = substr($uri, 0, $colon_position);
       // If a colon is preceded by a slash, question mark or hash, it cannot
       // possibly be part of the URL scheme. This must be a relative URL, which
       // inherits the (safe) protocol of the base document.
@@ -1748,7 +1748,7 @@ function backdrop_strip_dangerous_protocols($uri) {
       // Check if this is a disallowed protocol. Per RFC2616, section 3.2.3
       // (URI Comparison) scheme comparison must be case-insensitive.
       if (!isset($allowed_protocols[strtolower($protocol)])) {
-        $uri = substr($uri, $colonpos + 1);
+        $uri = substr($uri, $colon_position + 1);
       }
     }
   } while ($before != $uri);
@@ -2754,7 +2754,7 @@ function url($path = NULL, array $options = array()) {
  */
 function url_is_external($path) {
   $path = (string) $path;
-  $colonpos = strpos($path, ':');
+  $colon_position = strpos($path, ':');
   // Some browsers treat \ as / so normalize to forward slashes.
   $path = str_replace('\\', '/', $path);
   // Avoid calling backdrop_strip_dangerous_protocols(). If the path starts with 2
@@ -2767,8 +2767,8 @@ function url_is_external($path) {
     || (preg_match('/^\p{C}/u', $path) !== 0)
     // If there is any slash (/), hash (#) or question_mark (?) before the colon
     // (:) occurrence - if any - as this would clearly mean it is not a URL.
-    || ($colonpos !== FALSE
-      && !preg_match('![/?#]!', substr($path, 0, $colonpos))
+    || ($colon_position !== FALSE
+      && !preg_match('![/?#]!', substr($path, 0, $colon_position))
       && backdrop_strip_dangerous_protocols($path) == $path);
 }
 
