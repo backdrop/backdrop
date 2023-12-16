@@ -2767,7 +2767,7 @@ class LayoutUpgradePathTest extends UpgradePathTestCase {
     $this->assertBlocks($blocks);
     $this->assertNoBlocks(array(
       'l-sidebar-section' => array(
-      'block-views-content-recent-block'
+        'block-views-content-recent-block',
       ),
     ));
 
