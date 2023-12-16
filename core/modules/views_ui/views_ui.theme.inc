@@ -342,7 +342,7 @@ function theme_views_ui_rearrange_filter_form(&$variables) {
   backdrop_add_tabledrag('views-rearrange-filters', 'order', 'sibling', 'weight');
   $output .= theme('table', array('rows' => $rows,
     'attributes' => array('id' => 'views-rearrange-filters',
-      'class' => array('arrange')
+      'class' => array('arrange'),
     ),
     'empty' => t('No fields available.'),
   ));
