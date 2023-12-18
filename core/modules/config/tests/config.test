@@ -165,6 +165,12 @@ class ConfigurationTest extends BackdropWebTestCase {
    * Tests that config directories are protected by .htaccess files.
    */
   public function testConfigHtaccess() {
+    // This test only run if using file-based config storage.
+    $storage = config_get_config_storage();
+    if (!is_a($storage, 'ConfigFileStorage')) {
+      $this->assert(TRUE, 'Config storage is not file-based, so .htaccess test skipped.');
+      return;
+    }
     // Check that the .htaccess file is present in config location.
     $active_dir = config_get_config_directory();
     $this->assertTrue(is_file($active_dir . '/.htaccess'), "Located the .htaccess file in the 'active' config directory.");

@@ -1584,8 +1584,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     $config_base_path = 'files/simpletest/' . $this->fileDirectoryName . '/config_';
     $config_directories['active'] = $config_base_path . 'active';
     $config_directories['staging'] = $config_base_path . 'staging';
-    config_get_config_storage('active')->initializeStorage();
-    config_get_config_storage('staging')->initializeStorage();
 
     // Log fatal errors.
     ini_set('log_errors', 1);
@@ -1707,6 +1705,11 @@ class BackdropWebTestCase extends BackdropTestCase {
       return FALSE;
     }
 
+    // Initialize config storage. The database storage needs to be done after
+    // switching the database prefix.
+    config_get_config_storage('active')->initializeStorage();
+    config_get_config_storage('staging')->initializeStorage();
+
     // Preset the 'install_profile' system variable, so the first call into
     // system_rebuild_module_data() (in backdrop_install_system()) will register
     // the test's profile as a module. Without this, the installation profile of
@@ -1753,7 +1756,6 @@ class BackdropWebTestCase extends BackdropTestCase {
       $core_config->set('file_temporary_path', $this->temp_files_directory);
       $core_config->save();
     }
-
 
     // Set 'parent_profile' of simpletest to add the parent profile's
     // search path to the child site's search paths.
