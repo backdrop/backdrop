@@ -17,53 +17,14 @@ jobs:
         database-versions: ['mariadb-10.3']
 
     steps:
-      - name: Prepare for database
-        run: |
-          # The database runs as user "runner".
-          sudo mkdir /dev/shm/mysql_tmp
-          sudo chown runner:runner /dev/shm/mysql_tmp
-
-      - name: Install database server
-        uses: shogo82148/actions-setup-mysql@v1
-        with:
-          mysql-version: ${{ matrix.database-versions }}
-          root-password: 'root'
-          my-cnf: |
-            datadir=/dev/shm/mysql
-            tmpdir=/dev/shm/mysql_tmp
-          auto-start: true
-
-      - name: Verify setup and create database
-        run: |
-          echo -e '[client]\nuser = root\npassword = root\nhost = 127.0.0.1' > ~/.my.cnf
-          mysql -e 'SELECT version()\G'
-          mysql -e 'CREATE DATABASE backdrop;'
-
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
+      - name: Set up webserver
+        uses: ./.github/actions/set-up-webserver
         with:
           php-version: ${{ matrix.php-versions }}
-          coverage: none
-          tools: none
-
-      - name: Disable mod_php if necessary
-        if: ${{ matrix.php-versions == '5.6' }}
-        run: if [ $(sudo apache2ctl -M | grep -c 'php.*module') -eq 1 ]; then sudo a2dismod php5.6; fi
-
-      - name: Setup webserver
-        run: |
-          # Set up apache with php-fpm.
-          sudo cp .github/misc/default.conf /etc/apache2/sites-available/000-default.conf
-          sudo sed -i -e "s/_PHP_VERSION_/${{ matrix.php-versions }}/" /etc/apache2/sites-available/000-default.conf
-          # Setup php-fpm, this script is by intention not executable by default.
-          chmod 700 .github/misc/setup-php-fpm.sh
-          ./.github/misc/setup-php-fpm.sh ${{ matrix.php-versions }}
-          # This should be a redirect to the installer:
-          echo 'Verify webserver setup'
-          curl -sI 'http://localhost/'
+          database-version: ${{ matrix.database-versions }}
 
       - name: Install Backdrop
         run: |
