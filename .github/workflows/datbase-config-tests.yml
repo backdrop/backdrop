@@ -35,4 +35,4 @@ jobs:
       - name: Run tests
         run: |
           # Run a subset of the total test suite for configuration management.
-          core/scripts/run-tests.sh --force --verbose --color --group Configuration --concurrency 7 2>&1
+          core/scripts/run-tests.sh --force --verbose --color --group Configuration 2>&1
