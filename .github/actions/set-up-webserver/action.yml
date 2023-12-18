@@ -48,21 +48,15 @@ runs:
       shell: bash
       run: if [ $(sudo apache2ctl -M | grep -c 'php.*module') -eq 1 ]; then sudo a2dismod php5.6; fi
 
-    - name: Setup webserver
+    - name: Finish webserver setup
       shell: bash
       run: |
         # Set up apache with php-fpm.
         sudo cp .github/misc/default.conf /etc/apache2/sites-available/000-default.conf
         sudo sed -i -e "s/_PHP_VERSION_/ ${{ inputs.php-version }}/" /etc/apache2/sites-available/000-default.conf
-        # Setup php-fpm, this script is by intention not executable by default.
+        # Setup php-fpm, this script is intentionally not executable by default.
         chmod 700 .github/misc/setup-php-fpm.sh
         ./.github/misc/setup-php-fpm.sh ${{ inputs.php-version }}
         # This should be a redirect to the installer:
         echo 'Verify webserver setup'
         curl -sI 'http://localhost/'
-
-    - name: Setup PHP
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: ${{ inputs.php-version }}
-        coverage: none
