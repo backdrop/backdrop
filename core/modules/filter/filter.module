@@ -869,6 +869,12 @@ function filter_get_editors() {
       $module_editors = module_invoke($module, 'editor_info');
       foreach ($module_editors as $editor_name => $editor) {
         $editor['module'] = $module;
+        // Populate optional defaults.
+        $editor += array(
+          'settings callback' => NULL,
+          'default settings' => array(),
+          'file' => NULL,
+        );
         $editors[$editor_name] = $editor;
       }
     }
@@ -1061,6 +1067,7 @@ function filter_get_filters() {
           $info[$name] += array(
             'description' => '',
             'weight' => 0,
+            'default settings' => array(),
           );
         }
         $filters = array_merge($filters, $info);
