@@ -1705,6 +1705,9 @@ class BackdropWebTestCase extends BackdropTestCase {
       return FALSE;
     }
 
+    // Copy over cached database tables if using a cache.
+    $use_cache = $this->useCache();
+
     // Initialize config storage. The database storage needs to be done after
     // switching the database prefix.
     config_get_config_storage('active')->initializeStorage();
@@ -1718,7 +1721,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     config_install_default_config('system');
     config_set('system.core', 'install_profile', $this->profile);
 
-    $use_cache = $this->useCache();
     if (!$use_cache) {
       // Perform the actual Backdrop installation.
       include_once BACKDROP_ROOT . '/core/includes/install.inc';
