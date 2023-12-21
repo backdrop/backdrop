@@ -1,6 +1,6 @@
 type = module
 name = CKEditor 4 (Deprecated)
-description = WYSIWYG editing for rich text fields using CKEditor 4.
+description = WYSIWYG editing for rich text fields using CKEditor 4. This module is no longer supported and sites should use CKEditor 5 module instead.
 package = User Interface
 tags[] = Filters
 tags[] = Formats
@@ -9,9 +9,3 @@ version = BACKDROP_VERSION
 backdrop = 1.x
 
 configure = admin/config/content/formats
-
-; This module is deprecated, so hide it from new installs. Existing sites that
-; have CKEditor 4 module enabled will continue to see it in the modules list,
-; but once it is disabled, it will be hidden. Temporarily removing this line
-; will allow the module to be enabled if needed.
-hidden = TRUE
