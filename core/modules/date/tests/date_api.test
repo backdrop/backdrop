@@ -12,51 +12,18 @@ class DateAPITestCase extends BackdropUnitTestCase {
   }
 
   public function testDateAPI() {
-    // Test date_format_date().
-    $formatters = array(
-      'a',
-      'A',
-      'B',
-      'c',
-      'd',
-      'D',
-      'e',
-      'F',
-      'g',
-      'G',
-      'h',
-      'H',
-      'i',
-      'I',
-      'j',
-      'l',
-      'L',
-      'm',
-      'M',
-      'n',
-      'N',
-      'o',
-      'O',
-      'P',
-      'r',
-      'R',
-      's',
-      'S',
-      't',
-      'T',
-      'u',
-      'U',
-      'w',
-      'W',
-      'y',
-      'Y',
-      'z',
-      'Z',
-    );
+    // Test date_format_date(). We are testing every possible lower- and
+    // upper-case English letter here, although it may not be a valid date
+    // formatter. As per https://www.php.net/manual/en/datetime.format.php, any
+    // unrecognized characters in the format string will be printed as-is.
+    $formatters = array_merge(range('a', 'z'), range('A', 'Z'));
     foreach ($formatters as $formatter) {
-      $date_format = date_format_date(date_now(), 'custom', $formatter);
-      $php_format = date_format(date_now(), $formatter);
-      $this->assertEqual($date_format, $php_format, 'Test that the "' . $formatter . '" formatter is formatted correctly by date_format_date()');
+      // Ensure that the exact same "now" (down to the millisecond) is used by
+      // both date_format_date() and date_format() when comparing them later.
+      $now = date_now();
+      $date_format = date_format_date($now, 'custom', $formatter);
+      $php_format = date_format($now, $formatter);
+      $this->assertEqual($date_format, $php_format, 'The "' . $formatter . '" formatter was expected to be formatted as "' . $php_format . '", but was formatted as "' . $date_format .'" by Backdrop\'s date_format_date().');
     }
 
     // Test the order of the weeks days for a calendar that starts on Monday and
