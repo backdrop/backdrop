@@ -19,7 +19,7 @@ function standard_install() {
     'format' => 'filtered_html',
     'name' => 'Basic',
     'weight' => 0,
-    'editor' => 'ckeditor',
+    'editor' => 'ckeditor5',
     'editor_settings' => array(
       'image_upload' => array(
         'status' => 1,
