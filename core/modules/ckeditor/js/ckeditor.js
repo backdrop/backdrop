@@ -3,7 +3,7 @@
   "use strict";
 
   /**
-   * Update CKEditor global settings the apply to all editors and the behavior
+   * Update CKEditor global settings that apply to all editors and the behavior
    * of CKEditor even when it's not explicitly attached. In particular, disable
    * automatically attaching to all contenteditable elements. This option can
    * conflict with CKEditor 5 and other text editors, which also use
