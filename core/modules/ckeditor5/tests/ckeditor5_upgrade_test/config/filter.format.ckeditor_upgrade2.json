@@ -1,0 +1,190 @@
+{
+    "_config_name": "filter.format.ckeditor_upgrade2",
+    "format": "ckeditor_upgrade2",
+    "name": "CKEditor Upgrade (Unfiltered HTML)",
+    "editor": "ckeditor",
+    "editor_settings": {
+        "toolbar": [
+            [
+                {
+                    "name": "Formatting",
+                    "items": [
+                        "Bold",
+                        "Italic",
+                        "Blockquote",
+                        "Styles",
+                        "Format"
+                    ]
+                },
+                {
+                    "name": "Lists",
+                    "items": [
+                        "BulletedList",
+                        "NumberedList"
+                    ]
+                },
+                {
+                    "name": "Alignment",
+                    "items": [
+                        "JustifyLeft",
+                        "JustifyCenter",
+                        "JustifyRight",
+                        "JustifyBlock"
+                    ]
+                },
+                {
+                    "name": "Linking",
+                    "items": [
+                        "BackdropLink",
+                        "BackdropUnlink"
+                    ]
+                },
+                {
+                    "name": "Media",
+                    "items": [
+                        "BackdropImage"
+                    ]
+                },
+                {
+                    "name": "Tools",
+                    "items": [
+                        "Source",
+                        "RemoveFormat",
+                        "Maximize"
+                    ]
+                }
+            ],
+            [
+                {
+                    "name": "Word",
+                    "items": [
+                        "PasteText",
+                        "PasteFromWord"
+                    ]
+                }
+            ],
+            [
+                {
+                    "name": "Additional Formatting",
+                    "items": [
+                        "Underline",
+                        "Strike",
+                        "-",
+                        "Superscript",
+                        "Subscript"
+                    ]
+                },
+                {
+                    "name": "Operations",
+                    "items": [
+                        "Undo",
+                        "Redo",
+                        "-",
+                        "Copy",
+                        "Cut",
+                        "Paste"
+                    ]
+                },
+                {
+                    "name": "Misc",
+                    "items": [
+                        "HorizontalRule",
+                        "ShowBlocks",
+                        "SpecialChar",
+                        "Table"
+                    ]
+                }
+            ]
+        ],
+        "image_upload": {
+            "status": 1,
+            "orientate": 1,
+            "scheme": "public",
+            "alt_required": 1,
+            "directory": "inline-images/test",
+            "max_size": "10MB",
+            "max_dimensions": {
+                "width": "800",
+                "height": "1024"
+            }
+        },
+        "file_upload": {
+            "status": 1,
+            "scheme": "public",
+            "directory": "inline-files/test",
+            "max_size": "12MB",
+            "file_extensions": "pdf docx"
+        },
+        "plugins": {
+            "style": {
+                "style_list": [
+                    {
+                        "name": "H3 Big",
+                        "element": "h3",
+                        "attributes": {
+                            "class": "big"
+                        }
+                    },
+                    {
+                        "name": "H3 Small",
+                        "element": "h3",
+                        "attributes": {
+                            "class": "small"
+                        }
+                    }
+                ]
+            }
+        }
+    },
+    "cache": true,
+    "status": 1,
+    "filters": {
+        "filter_image_caption": {
+            "status": 1,
+            "weight": 4,
+            "module": "filter",
+            "settings": []
+        },
+        "filter_autop": {
+            "status": 0,
+            "weight": 0,
+            "module": "filter",
+            "settings": []
+        },
+        "filter_url": {
+            "status": 0,
+            "weight": 0,
+            "module": "filter",
+            "settings": []
+        },
+        "filter_htmlcorrector": {
+            "status": 1,
+            "weight": 10,
+            "module": "filter",
+            "settings": []
+        },
+        "filter_html_escape": {
+            "status": 0,
+            "weight": -10,
+            "module": "filter",
+            "settings": []
+        },
+        "filter_image_align": {
+            "status": 1,
+            "weight": 5,
+            "module": "filter",
+            "settings": []
+        },
+        "filter_html": {
+            "status": 0,
+            "weight": -10,
+            "settings": [],
+            "module": "filter"
+        }
+    },
+    "roles": {
+        "anonymous": 0,
+        "authenticated": "authenticated"
+    },
+    "weight": 0
+}
