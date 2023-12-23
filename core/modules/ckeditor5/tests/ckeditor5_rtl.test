@@ -49,7 +49,7 @@ class CKEditor5RtlTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Test that the CKEditor admin form works correnctly with RTL languages.
+   * Test that the CKEditor admin form works correctly with RTL languages.
    */
   public function testRtlAdminIcons() {
     $arabic = language_load('ar');
@@ -64,13 +64,10 @@ class CKEditor5RtlTestCase extends BackdropWebTestCase {
     $js_settings = (string) $script_tag[0];
     // If something goes wrong, the icon src is only the base url.
     $icons = array(
-      'bold' => 'ckeditor\\\/images\\\/buttons\\\/bold.png',
-      'italic' => 'ckeditor\\\/images\\\/buttons\\\/italic.png',
-      'blockquote' => 'ckeditor\\\/images\\\/buttons\\\/blockquote.png',
-      'cut' => 'ckeditor\\\/images\\\/buttons\\\/cut.png',
-      'copy' => 'ckeditor\\\/images\\\/buttons\\\/copy.png',
-      'paste' => 'ckeditor\\\/images\\\/buttons\\\/paste.png',
-      'justifyblock' => 'ckeditor\\\/images\\\/buttons\\\/justifyblock.png',
+      'bulleted-list' => 'ckeditor5\\\/icons\\\/bulleted-list-rtl.svg',
+      'numbered-list' => 'ckeditor5\\\/icons\\\/numbered-list-rtl.svg',
+      'undo' => 'ckeditor5\\\/icons\\\/undo-rtl.svg',
+      'redo' => 'ckeditor5\\\/icons\\\/redo-rtl.svg',
     );
 
     foreach ($icons as $name => $icon) {
