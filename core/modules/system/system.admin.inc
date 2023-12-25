@@ -1039,6 +1039,16 @@ function system_modules_submit($form, &$form_state) {
   if ($pre_install_list != $post_install_list) {
     backdrop_flush_all_caches();
     backdrop_set_message(t('The configuration options have been saved.'));
+
+    // Display reminder about uninstalling disabled modules.
+    if (!empty($actions['disable'])) {
+      $disabled_modules = array();
+      foreach ($actions['disable'] as $module) {
+        $disabled_modules[] = $files[$module]->info['name'];
+      }
+      $disabled_message = t('You have disabled some modules. If they are no longer needed you might want to <a href="!uninstall">uninstall them</a>.', array('!uninstall' => url('admin/modules/uninstall')));
+      backdrop_set_message($disabled_message, 'info');
+    }
   }
 
   // Check if a previous search is present and preserve it on redirect.
@@ -1088,6 +1098,16 @@ function system_modules_uninstall($form, $form_state = NULL) {
       $disabled_modules[$name] = $module;
     }
   }
+
+  $help = t('Modules must be disabled in the <a href="@link">List modules</a> tab before they can be uninstalled.', array('@link' => url('admin/modules')));
+  if (!empty($disabled_modules)) {
+    $help .= ' ' . t('The modules listed below have been disabled and may be uninstalled.');
+  }
+  $help .= ' ' . t('Uninstalling a module will permanently remove its settings and/or associated data, while leaving the module files in place. To remove a module permanently, delete its files from the <code>/modules</code> folder of your Backdrop installation.');
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => $help,
+  );
 
   // Only build the rest of the form if there are any modules available to
   // uninstall.
@@ -1583,7 +1603,10 @@ function system_cron_settings($form, &$form_state) {
 
   $form['cron_url'] = array(
     '#type' => 'help',
-    '#markup' => t('To run cron from outside the site, go to <a href="!cron">!cron</a>', array('!cron' => url($base_url . '/core/cron.php', array('external' => TRUE, 'query' => array('cron_key' => state_get('cron_key', 'backdrop')))))),
+    '#markup' => t('To run cron from outside the site, go to <a href="!cron">!cron</a>', array('!cron' => url($base_url . '/core/cron.php', array(
+      'external' => TRUE,
+      'query' => array('cron_key' => state_get('cron_key', 'backdrop')),
+    )))),
   );
 
   $form['cron'] = array(
