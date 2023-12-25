@@ -1735,10 +1735,10 @@ function backdrop_strip_dangerous_protocols($uri) {
   // Iteratively remove any invalid protocol found.
   do {
     $before = $uri;
-    $colonpos = strpos($uri, ':');
-    if ($colonpos > 0) {
+    $colon_position = strpos($uri, ':');
+    if ($colon_position > 0) {
       // We found a colon, possibly a protocol. Verify.
-      $protocol = substr($uri, 0, $colonpos);
+      $protocol = substr($uri, 0, $colon_position);
       // If a colon is preceded by a slash, question mark or hash, it cannot
       // possibly be part of the URL scheme. This must be a relative URL, which
       // inherits the (safe) protocol of the base document.
@@ -1748,7 +1748,7 @@ function backdrop_strip_dangerous_protocols($uri) {
       // Check if this is a disallowed protocol. Per RFC2616, section 3.2.3
       // (URI Comparison) scheme comparison must be case-insensitive.
       if (!isset($allowed_protocols[strtolower($protocol)])) {
-        $uri = substr($uri, $colonpos + 1);
+        $uri = substr($uri, $colon_position + 1);
       }
     }
   } while ($before != $uri);
@@ -2754,7 +2754,7 @@ function url($path = NULL, array $options = array()) {
  */
 function url_is_external($path) {
   $path = (string) $path;
-  $colonpos = strpos($path, ':');
+  $colon_position = strpos($path, ':');
   // Some browsers treat \ as / so normalize to forward slashes.
   $path = str_replace('\\', '/', $path);
   // Avoid calling backdrop_strip_dangerous_protocols(). If the path starts with 2
@@ -2767,8 +2767,8 @@ function url_is_external($path) {
     || (preg_match('/^\p{C}/u', $path) !== 0)
     // If there is any slash (/), hash (#) or question_mark (?) before the colon
     // (:) occurrence - if any - as this would clearly mean it is not a URL.
-    || ($colonpos !== FALSE
-      && !preg_match('![/?#]!', substr($path, 0, $colonpos))
+    || ($colon_position !== FALSE
+      && !preg_match('![/?#]!', substr($path, 0, $colon_position))
       && backdrop_strip_dangerous_protocols($path) == $path);
 }
 
@@ -8582,25 +8582,81 @@ function backdrop_parse_info_format($data, $process_sections = FALSE) {
 /**
  * Returns a list of severity levels, as defined in RFC 3164.
  *
- * @return
- *   Array of the possible severity levels for log messages.
+ * @param string $return
+ *   The type of data to return. Can be one of:
+ *   - all: The full array.
+ *   - name: The untranslated machine names.
+ *   - label: The translated human-readable names/labels.
+ *   - description: The level descriptions.
+ *   For backwards-compatibility, this defaults to 'label'.
  *
+ * @return array
+ *   An array of the possible severity levels for log messages. The array keys
+ *   are the named constants, while the values depend on the value of $return.
+ *
+ * @see https://en.wikipedia.org/wiki/Syslog#Severity_level
  * @see http://www.ietf.org/rfc/rfc3164.txt
  * @see watchdog()
  * @ingroup logging_severity_levels
  */
-function watchdog_severity_levels() {
-  return array(
-    WATCHDOG_EMERGENCY   => t('emergency'),
-    WATCHDOG_ALERT   => t('alert'),
-    WATCHDOG_CRITICAL    => t('critical'),
-    WATCHDOG_ERROR     => t('error'),
-    WATCHDOG_WARNING => t('warning'),
-    WATCHDOG_NOTICE  => t('notice'),
-    WATCHDOG_INFO    => t('info'),
-    WATCHDOG_DEBUG   => t('debug'),
-    WATCHDOG_DEPRECATED => t('deprecated'),
+function watchdog_severity_levels($return = 'label') {
+  $levels = array(
+    WATCHDOG_EMERGENCY => array(
+      'name' => 'emergency',
+      'label' => t('Emergency'),
+      'description' => t('System is unusable'),
+    ),
+    WATCHDOG_ALERT => array(
+      'name' => 'alert',
+      'label' => t('Alert'),
+      'description' => t('Action must be taken immediately'),
+    ),
+    WATCHDOG_CRITICAL => array(
+      'name' => 'critical',
+      'label' => t('Critical'),
+      'description' => t('Critical conditions'),
+    ),
+    WATCHDOG_ERROR => array(
+      'name' => 'error',
+      'label' => t('Error'),
+      'description' => t('Error conditions'),
+    ),
+    WATCHDOG_WARNING => array(
+      'name' => 'warning',
+      'label' => t('Warning'),
+      'description' => t('Warning conditions'),
+    ),
+    WATCHDOG_NOTICE => array(
+      'name' => 'notice',
+      'label' => t('Notice'),
+      'description' => t('Normal but significant conditions'),
+    ),
+    WATCHDOG_INFO => array(
+      'name' => 'info',
+      'label' => t('Info'),
+      'description' => t('Informational messages'),
+    ),
+    WATCHDOG_DEBUG => array(
+      'name' => 'debug',
+      'label' => t('Debug'),
+      'description' => t('Debug-level messages'),
+    ),
+    WATCHDOG_DEPRECATED => array(
+      'name' => 'deprecated',
+      'label' => t('Deprecated'),
+      'description' => t('Deprecated function/feature notices'),
+    ),
   );
+
+  switch ($return) {
+    case 'name':
+    case 'label':
+    case 'description':
+      return array_combine(array_keys($levels), array_column($levels, $return));
+    case 'all':
+    default:
+      return $levels;
+  }
 }
 
 
