@@ -1597,7 +1597,6 @@ function date_combo_validate($element, &$form_state) {
   if (!is_array($element['#field_parents'])) {
     $element['#field_parents'] = array();
   }
-  $form_values = backdrop_array_get_nested_value($form_state['values'], $element['#field_parents']);
   $form_input = backdrop_array_get_nested_value($form_state['input'], $element['#field_parents']);
 
   // If the whole field is empty and that's OK, stop now.
@@ -1625,6 +1624,8 @@ function date_combo_validate($element, &$form_state) {
   $offset_field = 'offset';
   $offset_field2 = 'offset2';
 
+  $errors = array();
+
   // Check for empty 'Start date', which could either be an empty
   // value or an array of empty values, depending on the widget.
   $empty = TRUE;
@@ -1645,19 +1646,18 @@ function date_combo_validate($element, &$form_state) {
   // An 'End' date without a 'Start' date is a validation error.
   if ($empty && !empty($item[$to_field])) {
     if (!is_array($item[$to_field])) {
-      form_error($element, t("A start date is required if an end date is supplied for field %field #@delta.", array(
-        '@delta' => $field['cardinality'] ? intval($delta + 1) : '',
+      $errors[] = t("A start date is required if an end date is supplied.", array(
         '%field' => $instance['label'],
-      )));
+      ));
       $empty = FALSE;
     }
     else {
       foreach ($item[$to_field] as $key => $value) {
         if (!empty($value)) {
-          form_error($element, t("A start date is required if an end date is supplied for field %field #@delta.", array(
+          $errors[] = t("A start date is required if an end date is supplied for field %field #@delta.", array(
             '@delta' => $field['cardinality'] ? intval($delta + 1) : '',
             '%field' => $instance['label'],
-          )));
+          ));
           $empty = FALSE;
           break;
         }
@@ -1699,7 +1699,8 @@ function date_combo_validate($element, &$form_state) {
       form_set_value($element[$to_field], $to_date, $form_state);
       $errors[] = t('The end date must be greater than the start date.');
     }
-    else {
+
+    if (empty($errors)) {
       // Convert input dates back to their UTC values and re-format to ISO
       // or UNIX instead of the DATETIME format used in element processing.
       $item[$tz_field] = $timezone;
@@ -1749,14 +1750,14 @@ function date_combo_validate($element, &$form_state) {
   // Don't show further errors if errors are already flagged
   // because otherwise we'll show errors on the nested elements
   // more than once.
-  if (!form_get_errors() && !empty($errors)) {
+  if (!empty($errors)) {
     if (count($errors) === 1) {
       $error_list = ' ' . reset($errors);
     }
     else {
       $error_list = theme('item_list', array('items' => $errors));
     }
-    if ($field['cardinality']) {
+    if ($field['cardinality'] != 1) {
       form_error($element, t('There are errors in %field_name value #@delta:', array(
         '%field_name' => $instance['label'],
         '@delta' => $delta + 1,
