@@ -1,0 +1,8 @@
+type = module
+name = CKEditor 5 Upgrade
+description = Provides assisting code for testing a CKEditor 4 to CKEditor 5 upgrade.
+package = Testing
+backdrop = 1.x
+version = BACKDROP_VERSION
+dependencies[] = ckeditor5
+hidden = TRUE
