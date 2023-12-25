@@ -9,6 +9,7 @@
   position: absolute;
   width: 12em;
   top: 1em;
+  display: none;
 }
 
 .menu-dropdown li {
