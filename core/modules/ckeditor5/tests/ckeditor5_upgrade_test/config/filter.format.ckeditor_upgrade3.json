@@ -1,0 +1,134 @@
+{
+    "_config_name": "filter.format.ckeditor_upgrade3",
+    "format": "ckeditor_upgrade3",
+    "name": "CKEditor Upgrade (Alter Hooks)",
+    "editor": "ckeditor",
+    "editor_settings": {
+        "toolbar": [
+            [
+                {
+                    "name": "Formatting",
+                    "items": [
+                        "Bold",
+                        "Italic",
+                        "Blockquote",
+                        "Format"
+                    ]
+                },
+                {
+                    "name": "Lists",
+                    "items": [
+                        "BulletedList",
+                        "NumberedList"
+                    ]
+                },
+                {
+                    "name": "Alignment",
+                    "items": [
+                        "JustifyLeft",
+                        "JustifyCenter",
+                        "JustifyRight"
+                    ]
+                },
+                {
+                    "name": "Linking",
+                    "items": [
+                        "BackdropLink",
+                        "BackdropUnlink"
+                    ]
+                },
+                {
+                    "name": "Media",
+                    "items": [
+                        "BackdropImage"
+                    ]
+                },
+                {
+                    "name": "Tools",
+                    "items": [
+                        "Source",
+                        "Maximize",
+                        "TestButton"
+                    ]
+                }
+            ]
+        ],
+        "image_upload": {
+            "status": 0,
+            "orientate": 0,
+            "scheme": "public",
+            "alt_required": 0,
+            "directory": "inline-images",
+            "max_size": "",
+            "max_dimensions": {
+                "width": "",
+                "height": ""
+            }
+        },
+        "file_upload": {
+            "status": 0,
+            "scheme": "public",
+            "directory": "inline-files",
+            "max_size": "",
+            "file_extensions": "txt pdf"
+        },
+        "plugins": {
+            "style": {
+                "style_list": []
+            }
+        }
+    },
+    "cache": true,
+    "status": 1,
+    "filters": {
+        "filter_image_caption": {
+            "status": 0,
+            "weight": 4,
+            "module": "filter",
+            "settings": []
+        },
+        "filter_autop": {
+            "status": 0,
+            "weight": 0,
+            "module": "filter",
+            "settings": []
+        },
+        "filter_url": {
+            "status": 0,
+            "weight": 0,
+            "module": "filter",
+            "settings": []
+        },
+        "filter_htmlcorrector": {
+            "status": 0,
+            "weight": 10,
+            "module": "filter",
+            "settings": []
+        },
+        "filter_html_escape": {
+            "status": 0,
+            "weight": -10,
+            "module": "filter",
+            "settings": []
+        },
+        "filter_image_align": {
+            "status": 0,
+            "weight": 5,
+            "module": "filter",
+            "settings": []
+        },
+        "filter_html": {
+            "status": 1,
+            "weight": -10,
+            "settings": {
+                "allowed_html": "<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <h3> <h4> <h5> <p> <img> <figure> <figcaption>"
+            },
+            "module": "filter"
+        }
+    },
+    "roles": {
+        "anonymous": 0,
+        "authenticated": "authenticated"
+    },
+    "weight": 0
+}
