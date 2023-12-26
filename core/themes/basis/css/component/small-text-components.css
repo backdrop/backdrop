@@ -176,22 +176,15 @@ ul.links,
 }
 
 .links.inline li:after {
-  content: ',';
+  content: '|';
   position: static;
   display: inline;
   -webkit-transform: none;
   transform: none;
   border: 0;
+  padding: 0 0 0 0.6em;
 }
 
 .links.inline li:last-child:after {
-  content: '';
-}
-
-.links.inline .node-readmore {
-  display: block;
-}
-
-.links.inline .node-readmore:after {
   content: '';
 }
