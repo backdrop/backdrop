@@ -406,7 +406,6 @@ function _date_field_widget_settings_form($field, $instance) {
       '#options' => $options,
       '#default_value' => $settings['label_position'],
       '#title' => t('Position of date part labels'),
-      '#description' => $description,
     );
   }
   $form['advanced']['label_position']['above']['#description'] = t("Displays the label as individual titles above each date part (like 'Year', 'Month', or 'Day').");
