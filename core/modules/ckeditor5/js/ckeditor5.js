@@ -5,8 +5,7 @@
   Backdrop.editors.ckeditor5 = {
 
     attach: function (element, format) {
-      // Bail out if the editor already exists in the page; for example, when
-      // this attach method is called after an ajax request.
+      // Bail out if the editor has already been attached to the element.
       if (typeof element.ckeditor5AttachedEditor != 'undefined') {
         return;
       }
