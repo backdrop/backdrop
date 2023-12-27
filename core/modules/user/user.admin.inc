@@ -142,7 +142,13 @@ function user_admin_settings($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Require email verification when a visitor creates an account'),
     '#default_value' => $config->get('user_email_verification'),
-    '#description' => t('New users will be required to validate their email address prior to logging into the site, and will be assigned a system-generated password. With this setting disabled, users will be logged in immediately upon registering, and may select their own passwords during registration.')
+    '#description' => t('New users will be required to validate their email address prior to logging into the site, and will be assigned a system-generated password. With this setting disabled, users will be logged in immediately upon registering, and may select their own passwords during registration.'),
+    '#states' => array(
+      // Hide this checkbox when "Administrators only" is selected.
+      'invisible' => array(
+        'input[name="user_register"]' => array('value' => USER_REGISTER_ADMINISTRATORS_ONLY),
+      ),
+    ),
   );
   $form['registration_cancellation']['user_email_match'] = array(
     '#type' => 'checkbox',
