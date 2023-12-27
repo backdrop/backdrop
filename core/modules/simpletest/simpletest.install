@@ -13,33 +13,36 @@ define('SIMPLETEST_MINIMUM_PHP_MEMORY_LIMIT', '64M');
  * Implements hook_requirements().
  */
 function simpletest_requirements($phase) {
-  $requirements = array();
   $t = get_t();
+  $requirements = array();
 
+  // Only set a requirements message if cURL is disabled.
   $has_curl = function_exists('curl_init');
-  $has_hash = function_exists('hash_hmac');
-  $has_domdocument = method_exists('DOMDocument', 'loadHTML');
-  $open_basedir = ini_get('open_basedir');
-
-  $requirements['curl'] = array(
-    'title' => $t('cURL'),
-    'value' => $has_curl ? $t('Enabled') : $t('Not found'),
-  );
   if (!$has_curl) {
-    $requirements['curl']['severity'] = REQUIREMENT_ERROR;
-    $requirements['curl']['description'] = $t('The testing framework could not be installed because the PHP <a href="@curl_url">cURL</a> library is not available.', array('@curl_url' => 'http://php.net/manual/en/curl.setup.php'));
+    // @todo: Consider consolidating this with core's $requirements['curl'] if
+    // hook_requirements_alter() is available or via other means.
+    // @see https://github.com/backdrop/backdrop-issues/issues/6241
+    // @see https://github.com/backdrop/backdrop-issues/issues/6317
+    $requirements['simpletest_curl'] = array(
+      'title' => $t('cURL'),
+      'value' => $t('cURL not found'),
+      'severity' => REQUIREMENT_ERROR,
+      'description' => $t('The testing framework requires the PHP <a href="@curl_url">cURL</a> library.', array('@curl_url' => 'http://php.net/manual/en/curl.setup.php')),
+    );
   }
 
   // Only set a requirements message if hash is disabled.
+  $has_hash = function_exists('hash_hmac');
   if (!$has_hash) {
     $requirements['hash'] = array(
       'title' => $t('PHP hash extension'),
       'value' => $t('Not found'),
       'severity' => REQUIREMENT_ERROR,
-      'description' => $t('The testing framework could not be installed because the PHP <a href="@hash_url">hash</a> extension is disabled.', array('@hash_url' => 'http://php.net/manual/en/book.hash.php')),
+      'description' => $t('The testing framework requires the PHP <a href="@hash_url">hash</a> extension to be enabled.', array('@hash_url' => 'http://php.net/manual/en/book.hash.php')),
     );
   }
 
+  $has_domdocument = method_exists('DOMDocument', 'loadHTML');
   $requirements['php_domdocument'] = array(
     'title' => $t('PHP DOMDocument class'),
     'value' => $has_domdocument ? $t('Enabled') : $t('Not found'),
@@ -49,9 +52,10 @@ function simpletest_requirements($phase) {
     $requirements['php_domdocument']['description'] = $t('The testing framework requires the DOMDocument class to be available. Check the configure command at the <a href="@link-phpinfo">PHP info page</a>.', array('@link-phpinfo' => url('admin/reports/status/php')));
   }
 
-  // SimpleTest currently needs 2 cURL options which are incompatible with
-  // having PHP's open_basedir restriction set.
+  // SimpleTest currently needs 2 cURL options that are incompatible with having
+  // PHP's open_basedir restriction set.
   // See http://drupal.org/node/674304.
+  $open_basedir = ini_get('open_basedir');
   $requirements['php_open_basedir'] = array(
     'title' => $t('PHP open_basedir restriction'),
     'value' => $open_basedir ? $t('Enabled') : $t('Disabled'),
@@ -66,7 +70,11 @@ function simpletest_requirements($phase) {
   $memory_limit = ini_get('memory_limit');
   if (!backdrop_check_memory_limit(SIMPLETEST_MINIMUM_PHP_MEMORY_LIMIT, $memory_limit)) {
     $requirements['php_memory_limit']['severity'] = REQUIREMENT_ERROR;
-    $requirements['php_memory_limit']['description'] = $t('The testing framework requires the PHP memory limit to be at least %memory_minimum_limit. The current value is %memory_limit. <a href="@url">Follow these steps to continue</a>.', array('%memory_limit' => $memory_limit, '%memory_minimum_limit' => SIMPLETEST_MINIMUM_PHP_MEMORY_LIMIT, '@url' => 'http://drupal.org/node/207036'));
+    $requirements['php_memory_limit']['description'] = $t('The testing framework requires the PHP memory limit to be at least %memory_minimum_limit. The current value is %memory_limit. <a href="@url">Follow these steps to continue</a>.', array(
+      '%memory_limit' => $memory_limit,
+      '%memory_minimum_limit' => SIMPLETEST_MINIMUM_PHP_MEMORY_LIMIT,
+      '@url' => 'http://drupal.org/node/207036',
+    ));
   }
 
   return $requirements;
