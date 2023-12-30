@@ -473,29 +473,6 @@ function simpletest_test_get_by_class($class) {
 }
 
 /**
- * Implements hook_registry_files_alter().
- *
- * Add the test files for disabled modules so that we get a list containing
- * all the available tests.
- */
-function simpletest_registry_files_alter(&$files, $modules) {
-  foreach ($modules as $module) {
-    // Only add test files for disabled modules, as enabled modules should
-    // already include any test files they provide.
-    if (!$module->status) {
-      $dir = $module->dir;
-      if (!empty($module->info['files'])) {
-        foreach ($module->info['files'] as $file) {
-          if (substr($file, -5) == '.test') {
-            $files["$dir/$file"] = array('module' => $module->name, 'weight' => $module->weight);
-          }
-        }
-      }
-    }
-  }
-}
-
-/**
  * Gets a list of the installation profiles that are available.
  *
  * @return array
