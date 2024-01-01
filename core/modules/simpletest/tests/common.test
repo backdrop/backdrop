@@ -793,7 +793,6 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
     backdrop_add_css($css, array('type' => 'inline'));
     $styles = backdrop_get_css();
     $this->assertEqual(trim($styles), $css_preprocessed, 'Rendering preprocessed inline CSS adds it to the page.');
-
   }
 
   /**
@@ -862,7 +861,6 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
       $system_path . '/css/system.theme.css',
       backdrop_get_path('module', 'simpletest') . '/css/simpletest.css',
     );
-
 
     $styles = backdrop_get_css();
     // Stylesheet URL may be the href of a LINK tag or in an @import statement
@@ -1002,6 +1000,8 @@ class CommonCascadingStylesheetsUnitTestCase extends BackdropUnitTestCase {
    * - Proper URLs in imported files. (https://drupal.org/node/265719)
    * - Retain pseudo-selectors. (https://drupal.org/node/460448)
    * - Don't adjust data URIs. (https://drupal.org/node/2142441)
+   * - Support semicolons in import statements.
+   *   (https://github.com/backdrop/backdrop-issues/issues/6337)
    */
   function testLoadCssBasic() {
     // Array of files to test living in 'simpletest/files/css_test_files/'.
