@@ -498,7 +498,7 @@ function field_config_create_validate(Config $staging_config, $all_changes) {
 }
 
 /**
- * Implements hook_config_create_update().
+ * Implements hook_config_update_validate().
  */
 function field_config_update_validate(Config $staging_config, Config $active_config, $all_changes) {
   $config_name = $staging_config->getName();
