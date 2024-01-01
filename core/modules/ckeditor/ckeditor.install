@@ -13,13 +13,20 @@ function ckeditor_requirements($phase) {
 
   if ($phase == 'runtime') {
     $ckeditor_version = $t('Version: !version', array('!version' => CKEDITOR_VERSION));
-    $requirements['ckeditor_version'] = array(
-      'title' => $t('CKEditor 4'),
-      'value' => $ckeditor_version,
-      'description' => $t('CKEditor 4 reached its official end-of-life in June 2023. To start the upgrade to CKEditor 5, enable it from the <a href="!modules">modules page</a>. See the <a href="!documentation">documentation for more information on the upgrade process</a>.', array(
+    $description = $t('CKEditor 4 reached its official end-of-life in June 2023.');
+    if (!module_exists('ckeditor5')) {
+      $description .= ' ' . $t('To start the upgrade to CKEditor 5, enable it from the <a href="!modules">modules page</a>.', array(
         '!modules' => url('admin/modules', array('query' => array('search' => 'ckeditor'))),
-        '!documentation' => 'https://backdropcms.org/news/upgrade-from-ckeditor-4-to-5',
-      )),
+      ));
+    }
+    $description .= ' ' . $t('See the <a href="!documentation">documentation for more information on the upgrade process</a>.', array(
+      '!documentation' => 'https://backdropcms.org/news/upgrade-from-ckeditor-4-to-5',
+    ));
+
+    $requirements['ckeditor_version'] = array(
+      'title' => $t('CKEditor 4 (Deprecated)'),
+      'value' => $ckeditor_version,
+      'description' => $description,
       'severity' => REQUIREMENT_WARNING,
     );
   }
