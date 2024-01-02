@@ -55,6 +55,7 @@ function ckeditor5_enable() {
  * Updates the editor settings key from "cketoolbar" to just "toolbar".
  */
 function ckeditor5_update_1000() {
+  // cspell:ignore cketoolbar
   $config_names = config_get_names_with_prefix('filter.format');
   foreach ($config_names as $config_name) {
     $config = config($config_name);
