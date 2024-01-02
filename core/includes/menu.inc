@@ -1913,13 +1913,11 @@ function theme_menu_local_actions($variables) {
 function theme_menu_toggle($variables) {
   $output = '';
   if ($variables['enabled']) {
-    // Allow the user-entered menu toggle text to be translated.
-    $toggle_text = t(check_plain($variables['text']));
     $id = $variables['id'];
     $output  = '<input id="' . $id . '" class="menu-toggle-state element-invisible" type="checkbox" aria-controls="' . $id . '" />';
     $output .= '<label class="menu-toggle-button" for="' . $id . '">';
     $output .= '<span class="menu-toggle-button-icon"></span>';
-    $output .= (!empty($toggle_text)) ? '<span class="menu-toggle-button-text">' . $toggle_text . '</span>' : '';
+    $output .= (!empty($variables['text'])) ? '<span class="menu-toggle-button-text">' . check_plain($variables['text']) . '</span>' : '';
     $output .= '<span class="menu-toggle-assistive-text element-invisible">' . t('Toggle menu visibility') . '</span>';
     $output .= '</label>';
   }

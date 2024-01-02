@@ -279,7 +279,8 @@ function system_menu_block_build(array $config) {
       $data['content']['#prefix'] = theme('menu_toggle', array(
         'enabled' => $config['toggle'],
         'id' => $id,
-        'text' => trim($config['toggle_text']),
+        // Allow the user-entered menu toggle text to be translated.
+        'text' => t(trim($config['toggle_text'])),
       ));
       $data['content']['#attached']['library'][] = array(
         'system',
