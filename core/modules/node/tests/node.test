@@ -2551,14 +2551,12 @@ class NodeTitleTestCase extends BackdropWebTestCase {
     $this->assertLink($node->title);
     $this->clickLink($node->title);
     $this->assertResponse(200, 'Received 200 response from post with hidden_path.');
-
-
     // Test node title is NOT clickable for standard account.
     $this->backdropLogout();
     backdrop_flush_all_caches();
     $this->backdropGet('');
     $this->assertNoLink($node->title);
-    // Check for read more link also.
+    // Also ensure that there is no "read more" link.
     $this->assertNoLinkByHref(backdrop_get_path_alias('node/' . $node->nid));
   }
 }

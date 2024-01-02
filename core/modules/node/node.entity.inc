@@ -740,7 +740,7 @@ class NodeStorageController extends EntityDatabaseStorageController {
     );
     if ($view_mode == 'teaser') {
       $type = node_type_get_type($node);
-      // Don't add the read-more link to the node if the type has a hidden path.
+      // Don't add the "read more" link to the node if the type has a hidden path.
       if (!($type->settings['hidden_path'] && !user_access('view hidden paths'))) {
         $node_title_stripped = strip_tags($node->title);
         $links['node-readmore'] = array(
