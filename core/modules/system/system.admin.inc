@@ -158,7 +158,7 @@ function system_themes_page() {
       // Create the operations links.
       $query['theme'] = $theme->name;
       if (backdrop_theme_access($theme) && theme_has_settings($theme->name)) {
-        $theme->operations[] = array(
+        $theme->operations['settings'] = array(
           'title' => t('Settings'),
           'href' => 'admin/appearance/settings/' . $theme->name,
           'attributes' => array('title' => t('Settings for !theme theme', array('!theme' => $theme->info['name']))),
@@ -166,13 +166,13 @@ function system_themes_page() {
       }
       if (!empty($theme->status)) {
         if (!$theme->is_default) {
-          $theme->operations[] = array(
+          $theme->operations['disable'] = array(
             'title' => t('Disable'),
             'href' => 'admin/appearance/disable',
             'query' => $query,
             'attributes' => array('title' => t('Disable !theme theme', array('!theme' => $theme->info['name']))),
           );
-          $theme->operations[] = array(
+          $theme->operations['default'] = array(
             'title' => t('Set default'),
             'href' => 'admin/appearance/default',
             'query' => $query,
@@ -181,13 +181,13 @@ function system_themes_page() {
         }
       }
       else {
-        $theme->operations[] = array(
+        $theme->operations['enable'] = array(
           'title' => t('Enable'),
           'href' => 'admin/appearance/enable',
           'query' => $query,
           'attributes' => array('title' => t('Enable !theme theme', array('!theme' => $theme->info['name']))),
         );
-        $theme->operations[] = array(
+        $theme->operations['enable-default'] = array(
           'title' => t('Enable and set default'),
           'href' => 'admin/appearance/default',
           'query' => $query,
@@ -1039,6 +1039,16 @@ function system_modules_submit($form, &$form_state) {
   if ($pre_install_list != $post_install_list) {
     backdrop_flush_all_caches();
     backdrop_set_message(t('The configuration options have been saved.'));
+
+    // Display reminder about uninstalling disabled modules.
+    if (!empty($actions['disable'])) {
+      $disabled_modules = array();
+      foreach ($actions['disable'] as $module) {
+        $disabled_modules[] = $files[$module]->info['name'];
+      }
+      $disabled_message = t('You have disabled some modules. If they are no longer needed you might want to <a href="!uninstall">uninstall them</a>.', array('!uninstall' => url('admin/modules/uninstall')));
+      backdrop_set_message($disabled_message, 'info');
+    }
   }
 
   // Check if a previous search is present and preserve it on redirect.
@@ -1088,6 +1098,16 @@ function system_modules_uninstall($form, $form_state = NULL) {
       $disabled_modules[$name] = $module;
     }
   }
+
+  $help = t('Modules must be disabled in the <a href="@link">List modules</a> tab before they can be uninstalled.', array('@link' => url('admin/modules')));
+  if (!empty($disabled_modules)) {
+    $help .= ' ' . t('The modules listed below have been disabled and may be uninstalled.');
+  }
+  $help .= ' ' . t('Uninstalling a module will permanently remove its settings and/or associated data, while leaving the module files in place. To remove a module permanently, delete its files from the <code>/modules</code> folder of your Backdrop installation.');
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => $help,
+  );
 
   // Only build the rest of the form if there are any modules available to
   // uninstall.
@@ -1583,7 +1603,10 @@ function system_cron_settings($form, &$form_state) {
 
   $form['cron_url'] = array(
     '#type' => 'help',
-    '#markup' => t('To run cron from outside the site, go to <a href="!cron">!cron</a>', array('!cron' => url($base_url . '/core/cron.php', array('external' => TRUE, 'query' => array('cron_key' => state_get('cron_key', 'backdrop')))))),
+    '#markup' => t('To run cron from outside the site, go to <a href="!cron">!cron</a>', array('!cron' => url($base_url . '/core/cron.php', array(
+      'external' => TRUE,
+      'query' => array('cron_key' => state_get('cron_key', 'backdrop')),
+    )))),
   );
 
   $form['cron'] = array(
@@ -1641,17 +1664,7 @@ function system_logging_settings($form, &$form_state) {
   $form['watchdog_enabled_severity_levels'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Severity of messages to log'),
-    '#options' => array(
-      WATCHDOG_EMERGENCY => t('Emergency'),
-      WATCHDOG_ALERT => t('Alert'),
-      WATCHDOG_CRITICAL => t('Critical'),
-      WATCHDOG_ERROR => t('Error'),
-      WATCHDOG_WARNING => t('Warning'),
-      WATCHDOG_NOTICE => t('Notice'),
-      WATCHDOG_INFO => t('Info'),
-      WATCHDOG_DEBUG => t('Debug'),
-      WATCHDOG_DEPRECATED => t('Deprecated'),
-    ),
+    '#options' => watchdog_severity_levels(),
     '#default_value' => $site_config->get('watchdog_enabled_severity_levels'),
     '#description' => t('The <em>debug</em> and <em>deprecated</em> severity levels are recommended for developer environments, but not on production sites.'),
   );
@@ -1780,6 +1793,36 @@ function system_performance_settings($form, &$form_state) {
 }
 
 /**
+ * Form builder; Configure jQuery settings.
+ *
+ * @ingroup forms
+ */
+function system_jquery_settings() {
+  $config = config('system.core');
+
+  $form['#config'] = 'system.core';
+
+  $options = array(
+    'default' => t('jQuery 3 (recommended)'),
+    'legacy' => t('jQuery 1 (legacy)'),
+  );
+  $form['jquery_version'] = array(
+    '#type' => 'radios',
+    '#title' => t('jQuery version'),
+    '#default_value' => $config->get('jquery_version'),
+    '#options' => $options,
+  );
+  $form['jquery_version']['default']['#description'] = t('The latest, default version of jQuery.');
+  $form['jquery_version']['legacy']['#description'] = t('Use the legacy version if any modules or themes are not working properly with the latest version.');
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => t('<a href="@url">More information about jQuery</a> can be found in the documentation.', array('@url' => url('https://docs.backdropcms.org/documentation/jquery'))),
+  );
+
+  return system_settings_form($form);
+}
+
+/**
  * Submit callback; clear system caches.
  *
  * @ingroup forms
@@ -1821,7 +1864,7 @@ function system_file_system_settings() {
     '#title' => t('Private file system path'),
     '#default_value' => $config->get('file_private_path'),
     '#maxlength' => 255,
-    '#description' => t('An existing local file system path for storing private files. It should be writable by Backdrop and not accessible over the web. See the online handbook for <a href="@handbook">more information about securing private files</a>.', array('@handbook' => 'https://backdropcms.org/user-guide/file-system')),
+    '#description' => t('An existing local file system path for storing private files. It should be writable by Backdrop and not accessible over the web. See the online handbook for <a href="@handbook">more information about securing private files</a>.', array('@handbook' => 'https://docs.backdropcms.org/documentation/managing-file-locations-and-access')),
     '#after_build' => array('system_check_directory'),
   );
 
@@ -2298,7 +2341,7 @@ function system_run_cron() {
  * Menu callback: return information about PHP.
  */
 function system_php() {
-  phpinfo();
+  phpinfo(~(INFO_VARIABLES | INFO_ENVIRONMENT));
   backdrop_exit();
 }
 

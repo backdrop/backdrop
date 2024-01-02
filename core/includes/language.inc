@@ -246,8 +246,9 @@ function language_negotiation_get_any($provider_id) {
  * @param $path
  *   The internal path the switch links will be relative to.
  *
- * @return
- *   A keyed array of links ready to be themed.
+ * @return object|bool
+ *   FALSE if no links. Otherwise, an object containing a keyed array of links
+ *   ready to be themed, and the provider ID.
  */
 function language_negotiation_get_switch_links($type, $path) {
   $links = FALSE;

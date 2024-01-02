@@ -10,6 +10,8 @@
   position: relative;
   display: inline-block;
   text-indent: 28px;
+  min-width: 1.5rem;
+  min-height: 1.5rem;
   white-space: nowrap;
   overflow: hidden;
   cursor: pointer;

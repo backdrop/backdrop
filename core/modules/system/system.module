@@ -396,7 +396,7 @@ function system_element_info() {
     '#input' => TRUE,
     '#cols' => 60,
     '#rows' => 5,
-    '#resizable' => TRUE,
+    '#resizable' => 'vertical',
     '#process' => array('ajax_process_form'),
     '#theme' => 'textarea',
     '#theme_wrappers' => array('form_element'),
@@ -454,12 +454,14 @@ function system_element_info() {
     '#element_validate' => array('html_date_validate'),
     '#theme' => 'html_date',
     '#theme_wrappers' => array('form_element'),
+    '#value_callback' => 'html_date_or_time_value_callback',
   );
   $types['html_time'] = array(
     '#input' => TRUE,
     '#element_validate' => array('html_time_validate'),
     '#theme' => 'html_time',
     '#theme_wrappers' => array('form_element'),
+    '#value_callback' => 'html_date_or_time_value_callback',
   );
   $types['html_datetime'] = array(
     '#input' => TRUE,
@@ -637,7 +639,6 @@ function system_menu() {
   $items['admin/structure'] = array(
     'title' => 'Structure',
     'description' => 'Administer blocks, content types, menus, etc.',
-    'position' => 'right',
     'weight' => -2,
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -649,7 +650,6 @@ function system_menu() {
     'description' => 'Select and configure themes.',
     'page callback' => 'system_themes_page',
     'access arguments' => array('administer themes'),
-    'position' => 'left',
     'weight' => -4,
     'file' => 'system.admin.inc',
   );
@@ -743,7 +743,6 @@ function system_menu() {
   $items['admin/config/administration'] = array(
     'title' => 'Administration',
     'description' => 'Administration tools.',
-    'position' => 'left',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
@@ -752,7 +751,6 @@ function system_menu() {
   $items['admin/config/media'] = array(
     'title' => 'Media',
     'description' => 'Media tools.',
-    'position' => 'left',
     'weight' => -10,
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -790,7 +788,6 @@ function system_menu() {
   $items['admin/config/services'] = array(
     'title' => 'Web services',
     'description' => 'Tools related to web services.',
-    'position' => 'right',
     'weight' => 0,
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -809,7 +806,6 @@ function system_menu() {
   $items['admin/config/development'] = array(
     'title' => 'Development',
     'description' => 'Development tools.',
-    'position' => 'right',
     'weight' => -10,
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -842,6 +838,15 @@ function system_menu() {
     'file' => 'system.admin.inc',
     'weight' => -15,
   );
+  $items['admin/config/development/jquery'] = array(
+    'title' => 'jQuery',
+    'description' => 'Configure settings related to the jQuery version.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('system_jquery_settings'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'system.admin.inc',
+    'weight' => -10,
+  );
   $items['admin/config/development/utf8mb4-upgrade'] = array(
     'title' => 'Database 4 byte UTF-8 upgrade',
     'description' => 'Upgrades the database to support 4 byte UTF-8 characters such as emoji and mathematical symbols.',
@@ -856,7 +861,6 @@ function system_menu() {
   $items['admin/config/regional'] = array(
     'title' => 'Regional and language',
     'description' => 'Regional settings, localization and translation.',
-    'position' => 'left',
     'weight' => -5,
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -922,7 +926,6 @@ function system_menu() {
   $items['admin/config/search'] = array(
     'title' => 'Search',
     'description' => 'Local site search settings.',
-    'position' => 'left',
     'weight' => -10,
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -933,7 +936,6 @@ function system_menu() {
   $items['admin/config/system'] = array(
     'title' => 'System',
     'description' => 'General system related configuration.',
-    'position' => 'right',
     'weight' => -20,
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -962,7 +964,6 @@ function system_menu() {
   $items['admin/config/urls'] = array(
     'title' => 'URL handling',
     'description' => 'Settings related to URLs including URL aliases and URL redirects.',
-    'position' => 'right',
     'weight' => -20,
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -1011,7 +1012,6 @@ function system_menu() {
   $items['admin/config/content'] = array(
     'title' => 'Content authoring',
     'description' => 'Settings related to formatting and authoring content.',
-    'position' => 'left',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
@@ -1019,7 +1019,6 @@ function system_menu() {
   $items['admin/config/metadata'] = array(
     'title' => 'Metadata',
     'description' => 'Settings related to meta tags, and other data commonly used by search engines.',
-    'position' => 'left',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
@@ -1027,7 +1026,6 @@ function system_menu() {
   $items['admin/config/user-interface'] = array(
     'title' => 'User interface',
     'description' => 'Tools that enhance the user interface.',
-    'position' => 'right',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
@@ -1035,7 +1033,6 @@ function system_menu() {
   $items['admin/config/workflow'] = array(
     'title' => 'Workflow',
     'description' => 'Settings related to editorial workflow.',
-    'position' => 'right',
     'weight' => 5,
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -1049,7 +1046,6 @@ function system_menu() {
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access site reports'),
     'weight' => 5,
-    'position' => 'left',
     'file' => 'system.admin.inc',
   );
   $items['admin/reports/status'] = array(
@@ -1254,15 +1250,6 @@ function system_library_info() {
     ),
   );
 
-  // Backdrop's resizable textarea.
-  $libraries['backdrop.textarea'] = array(
-    'title' => 'Backdrop resizable textarea',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      'core/misc/textarea.js' => array('group' => JS_LIBRARY),
-    ),
-  );
-
   // Backdrop's autocomplete widget.
   $libraries['backdrop.autocomplete'] = array(
     'title' => 'Backdrop autocomplete',
@@ -1349,21 +1336,16 @@ function system_library_info() {
   $libraries['jquery'] = array(
     'title' => 'jQuery',
     'website' => 'http://jquery.com',
-    'version' => '1.12.4',
+    'version' => '3.7.1',
     'js' => array(
       'core/misc/jquery.js' => array('group' => JS_LIBRARY, 'weight' => -20),
-      // These include security fixes, so assign a weight that makes them load
-      // as soon after jquery.js is loaded as possible.
-      'core/misc/jquery-extend-3.4.0.js' => array('group' => JS_LIBRARY, 'weight' => -19),
-      'core/misc/jquery-html-prefilter-3.5.0.js' => array('group' => JS_LIBRARY, 'weight' => -19),
     ),
   );
 
   // jQuery Once.
   $libraries['jquery.once'] = array(
-    'title' => 'jQuery Once',
-    'website' => 'http://plugins.jquery.com/project/once',
-    'version' => '1.2',
+    'title' => 'jQuery Once (Backdrop fork)',
+    'version' => '1.2.6',
     'js' => array(
       'core/misc/jquery.once.js' => array('group' => JS_LIBRARY, 'weight' => -19),
     ),
@@ -1373,7 +1355,7 @@ function system_library_info() {
   $libraries['jquery.form'] = array(
     'title' => 'jQuery Form Plugin',
     'website' => 'https://github.com/jquery-form/form',
-    'version' => '4.2.1',
+    'version' => '4.3.0',
     'js' => array(
       'core/misc/jquery.form.js' => array(),
     ),
@@ -1443,20 +1425,6 @@ function system_library_info() {
     ),
   );
 
-  // HTML5 Shiv.
-  $libraries['html5shiv'] = array(
-    'title' => 'html5shiv',
-    'website' => 'http://code.google.com/p/html5shiv/',
-    'version' => '3.7.3',
-    'js' => array(
-      'core/misc/html5.js' => array(
-        'group' => JS_LIBRARY,
-        'weight' => -21,
-        'browsers' => array('IE' => 'lte IE 8', '!IE' => FALSE),
-      ),
-    ),
-  );
-
   // SmartMenus.
   $libraries['smartmenus'] = array(
     'title' => 'SmartMenus',
@@ -1505,25 +1473,72 @@ function system_library_info() {
   $libraries['ui'] = array(
     'title' => 'jQuery UI: Core',
     'website' => 'http://jqueryui.com',
-    'version' => '1.13.0',
+    'version' => '1.13.2',
     'js' => array(
-      'core/misc/ui/jquery.ui.data.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.disable-selection.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.form.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.labels.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.scroll-parent.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.tabbable.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.unique-id.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.version.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.jquery-patch.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.focusable.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.form-reset-mixin.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.ie.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.keycode.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.scroll-parent.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.plugin.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.safe-active-element.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.safe-blur.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
+      'core/misc/ui/jquery.ui.data.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.disable-selection.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.form.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.labels.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.scroll-parent.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.tabbable.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.unique-id.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.version.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.jquery-patch.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.focusable.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.form-reset-mixin.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.ie.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.keycode.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.plugin.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.safe-active-element.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.safe-blur.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
     ),
     'css' => array(
       'core/misc/ui/jquery.ui.core.css' => array(),
@@ -1838,7 +1853,10 @@ function system_library_info() {
     'website' => 'http://jqueryui.com/widget/',
     'version' => $libraries['ui']['version'],
     'js' => array(
-      'core/misc/ui/jquery.ui.widget.min.js' => array('group' => JS_LIBRARY, 'weight' => -10),
+      'core/misc/ui/jquery.ui.widget.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -10,
+      ),
     ),
     'dependencies' => array(
       array('system', 'ui'),
@@ -1853,7 +1871,10 @@ function system_library_info() {
     'website' => 'https://github.com/jquery/jquery-color',
     'version' => '2.2.0',
     'js' => array(
-      'core/misc/jquery.color.js'  => array('group' => JS_LIBRARY, 'weight' => -9),
+      'core/misc/jquery.color.js'  => array(
+        'group' => JS_LIBRARY,
+        'weight' => -9,
+      ),
     ),
   );
 
@@ -1862,7 +1883,10 @@ function system_library_info() {
     'website' => 'http://jqueryui.com/effect/',
     'version' => $libraries['ui']['version'],
     'js' => array(
-      'core/misc/ui/jquery.ui.effect.min.js' => array('group' => JS_LIBRARY, 'weight' => -9),
+      'core/misc/ui/jquery.ui.effect.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -9,
+      ),
     ),
     'dependencies' => array(
       array('system', 'jquery.color'),
@@ -2037,8 +2061,8 @@ function system_library_info() {
   // Touch Punch for jQuery UI touch support.
   $libraries['ui.touch-punch'] = array(
     'title' => 'jQuery UI Touch Punch',
-    'website' => 'http://touchpunch.furf.com/',
-    'version' => '0.2.3',
+    'website' => 'https://github.com/RWAP/jquery-ui-touch-punch/',
+    'version' => '1.0.9',
     'js' => array(
       'core/misc/jquery.ui.touch-punch.js' => array(),
     ),
@@ -2079,6 +2103,39 @@ function system_library_info() {
   );
 
   return $libraries;
+}
+
+/**
+ * Implements hook_library_info_alter().
+ */
+function system_library_info_alter(&$libraries, $module) {
+  // Immediately return if not modifying the system libraries.
+  if ($module !== 'system') {
+    return;
+  }
+  $config = config('system.core');
+
+  // Don't replace anything if default jQuery should be used.
+  if ($config->get('jquery_version') == 'legacy') {
+    $libraries['jquery']['version'] = '1.12.4';
+    $libraries['jquery']['js'] = array(
+      'core/misc/jquery.1.12.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -20,
+      ),
+      // These include security fixes, so assign a weight that makes them load
+      // as soon after jquery.js is loaded as possible.
+      'core/misc/jquery-extend-3.4.0.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -19,
+      ),
+      'core/misc/jquery-html-prefilter-3.5.0.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -19,
+      ),
+    );
+  }
+
 }
 
 /**
@@ -2357,26 +2414,35 @@ function system_init() {
   backdrop_add_css($path . '/css/system.theme.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
   backdrop_add_css($path . '/css/messages.theme.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
 
-  // Ignore slave database servers for this request.
+  // Ignore replica database servers for this request.
   //
   // In Backdrop's distributed database structure, new data is written to the
-  // master and then propagated to the slave servers.  This means there is a
-  // lag between when data is written to the master and when it is available on
-  // the slave. At these times, we will want to avoid using a slave server
+  // primary and then propagated to the replica servers. This means there is a
+  // lag between when data is written to the primary and when it is available on
+  // the replica. At these times, we will want to avoid using a replica server
   // temporarily. For example, if a user posts a new node then we want to
-  // disable the slave server for that user temporarily to allow the slave
+  // disable the replica server for that user temporarily to allow the replica
   // server to catch up. That way, that user will see their changes immediately
-  // while for other users we still get the benefits of having a slave server,
-  // just with slightly stale data.  Code that wants to disable the slave
-  // server should use the db_ignore_slave() function to set
-  // $_SESSION['ignore_slave_server'] to the timestamp after which the slave
+  // while for other users we still get the benefits of having a replica server,
+  // just with slightly stale data. Code that wants to disable the replica
+  // server should use the db_ignore_replica() function to set
+  // $_SESSION['ignore_replica_server'] to the timestamp after which the replica
   // can be re-enabled.
+
+  // @todo remove this backwards-compatible session variable wrapper in 2.0.
+  // cspell:disable
   if (isset($_SESSION['ignore_slave_server'])) {
-    if ($_SESSION['ignore_slave_server'] >= REQUEST_TIME) {
-      Database::ignoreTarget('default', 'slave');
+    $_SESSION['ignore_replica_server'] = $_SESSION['ignore_slave_server'];
+    unset($_SESSION['ignore_slave_server']);
+    // cspell:enable
+  }
+
+  if (isset($_SESSION['ignore_replica_server'])) {
+    if ($_SESSION['ignore_replica_server'] >= REQUEST_TIME) {
+      Database::ignoreTarget('default', 'replica');
     }
     else {
-      unset($_SESSION['ignore_slave_server']);
+      unset($_SESSION['ignore_replica_server']);
     }
   }
 
@@ -2883,9 +2949,9 @@ function system_get_info($type, $name = NULL) {
     $type = 'module_enabled';
   }
   $list = system_list($type);
-  foreach ($list as $shortname => $item) {
+  foreach ($list as $short_name => $item) {
     if (!empty($item->status)) {
-      $info[$shortname] = $item->info;
+      $info[$short_name] = $item->info;
     }
   }
   if (isset($name)) {
@@ -3115,6 +3181,12 @@ function _system_rebuild_theme_data() {
     $themes[$key]->filename = $theme->uri;
     $themes[$key]->info = backdrop_parse_info_file($theme->uri) + $defaults;
 
+    // Skip modules or layouts that have been placed in the wrong directory.
+    if (isset($themes[$key]->info['type']) && $themes[$key]->info['type'] != 'theme') {
+      unset($themes[$key]);
+      continue;
+    }
+
     // The "name" key is required, but to avoid a fatal error in the menu system
     // we set a reasonable default if it is not provided.
     $themes[$key]->info += array('name' => $key);
@@ -3158,7 +3230,7 @@ function _system_rebuild_theme_data() {
     }
   }
 
-  // Now that we've established all our master themes, go back and fill in data
+  // Now that we've established all our base themes, go back and fill in data
   // for subthemes.
   foreach ($sub_themes as $key) {
     $themes[$key]->base_themes = backdrop_find_base_themes($themes, $key);
@@ -3557,7 +3629,7 @@ function system_jump_menu_submit($form, &$form_state) {
   }
 
   // If the path we are redirecting to starts with the base path (for example,
-  // "/somepath/node/1"), we need to strip the base path off before passing it
+  // "/some_path/node/1"), we need to strip the base path off before passing it
   // to $form_state['redirect'].
   $base_path = base_path();
   if (strpos($redirect, $base_path) === 0) {
@@ -3758,9 +3830,9 @@ function system_mail($key, &$message, $params) {
  *   If evaluates true, prepend an empty time zone option to the array.
  */
 function system_time_zones($blank = NULL) {
-  $zonelist = timezone_identifiers_list();
+  $zone_list = timezone_identifiers_list();
   $zones = $blank ? array('' => t('- None selected -')) : array();
-  foreach ($zonelist as $zone) {
+  foreach ($zone_list as $zone) {
     // Because many time zones exist in PHP only for backward compatibility
     // reasons and should not be used, the list is filtered by a regular
     // expression.
@@ -3821,21 +3893,6 @@ function system_image_toolkits() {
       'available' => function_exists('image_gd_check_settings') && image_gd_check_settings(),
     ),
   );
-}
-
-/**
- * Implements hook_image_supported_extensions_alter().
- *
- * Add webp to supported file extensions if GD is the active image toolkit and
- * the GD version supports WebP.
- */
-function system_image_supported_extensions_alter(&$supported_extensions) {
-  if (config_get('system.core', 'image_toolkit') == 'gd' && defined('IMAGETYPE_WEBP')) {
-    $gd_info = gd_info();
-    if (isset($gd_info['WebP Support']) && $gd_info['WebP Support'] == TRUE) {
-      $supported_extensions[] = 'webp';
-    }
-  }
 }
 
 /**
@@ -4241,7 +4298,7 @@ function path_autocomplete($string = '') {
                 $found_match = TRUE;
                 $view_title = $display->display_options['title'];
               }
-              // Master title.
+              // Default title.
               elseif (!empty($view->display['default']->display_options['title']) && stripos($view->display['default']->display_options['title'], $string) !== FALSE) {
                 $found_match = TRUE;
                 $view_title = $view->display['default']->display_options['title'];
@@ -4385,6 +4442,33 @@ function system_admin_paths() {
  * Implements hook_file_download().
  */
 function system_file_download($uri) {
+  // If $uri is a path or belongs to a scheme that has . and .. segments removed
+  // in file_uri_normalize_dot_segments(), then do not allow such segments now.
+  $scheme = file_uri_scheme($uri);
+  if (file_stream_wrapper_valid_scheme($scheme)) {
+    $target = file_uri_target($uri);
+    if ($target !== FALSE) {
+      $skip_schemes = config_get('system.core', 'file_not_normalized_schemes');
+      if (!in_array($scheme, $skip_schemes)) {
+        // If $uri represents a local path, then replace DIRECTORY_SEPARATOR
+        // with '/'.
+        if (DIRECTORY_SEPARATOR !== '/') {
+          $class = file_stream_wrapper_get_class($scheme);
+          if (is_subclass_of($class, BackdropLocalStreamWrapper::class)) {
+            $uri = str_replace(DIRECTORY_SEPARATOR, '/', $uri);
+          }
+        }
+        $parts = explode('/', $uri);
+        foreach ($parts as $part) {
+          if ($part === '.' || $part === '..') {
+            // Deny path traversal.
+            return -1;
+          }
+        }
+      }
+    }
+  }
+
   $core_schemes = array('public', 'private', 'temporary');
   $additional_public_schemes = array_diff((array) config_get('system.core', 'file_additional_public_schemes'), $core_schemes);
   if ($additional_public_schemes) {
@@ -4514,7 +4598,7 @@ function system_settings_form_submit($form, &$form_state) {
   else {
     watchdog('form', 'Backdrop 2.0 and later will require forms using system_settings_form() to set $form[\'#config\'].', array(), WATCHDOG_DEPRECATED);
     if (!settings_get('backdrop_drupal_compatibility')) {
-      backdrop_set_message(t('Settings not saved: Drupal compatibility layer is disabled and this form has not been updated to use Backdrop configuration management.', 'error'));
+      backdrop_set_message(t('Settings not saved: Drupal compatibility layer is disabled and this form has not been updated to use Backdrop configuration management.'), 'error');
       return;
     }
 

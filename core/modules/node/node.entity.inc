@@ -444,8 +444,8 @@ class NodeStorageController extends EntityDatabaseStorageController {
       foreach ($entities as $id => $entity) {
         $this->invokeHook('delete', $entity);
       }
-      // Ignore slave server temporarily.
-      db_ignore_slave();
+      // Ignore replica server temporarily.
+      db_ignore_replica();
     }
     catch (Exception $e) {
       $transaction->rollback();
@@ -492,14 +492,16 @@ class NodeStorageController extends EntityDatabaseStorageController {
         $this->saveRevision($entity);
       }
 
-      // Reset general caches, but keep caches specific to certain entities.
-      $this->resetCache($op == 'update' ? array($entity->{$this->idKey}): array());
+      // Reset the persistent and static cache for this node.
+      if ($op == 'update') {
+        $this->resetCache(array($entity->{$this->idKey}));
+      }
 
       $this->postSave($entity, $op == 'update');
       $this->invokeHook($op, $entity);
 
-      // Ignore slave server temporarily.
-      db_ignore_slave();
+      // Ignore replica server temporarily.
+      db_ignore_replica();
       unset($entity->original);
 
       return $return;
