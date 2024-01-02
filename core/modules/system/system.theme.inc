@@ -248,23 +248,36 @@ function theme_system_modules_uninstall($variables) {
       $disabled_message = format_plural(count($form['modules'][$module]['#required_by']),
         'To uninstall @module, the following module must be uninstalled first: @required_modules',
         'To uninstall @module, the following modules must be uninstalled first: @required_modules',
-        array('@module' => $form['modules'][$module]['#module_name'], '@required_modules' => implode(', ', $form['modules'][$module]['#required_by'])));
+        array(
+          '@module' => $form['modules'][$module]['#module_name'],
+          '@required_modules' => implode(', ', $form['modules'][$module]['#required_by']),
+        ));
       $disabled_message = '<div class="admin-requirements">' . $disabled_message . '</div>';
     }
     else {
       $disabled_message = '';
     }
     $rows[] = array(
-      array('data' => backdrop_render($form['uninstall'][$module]), 'align' => 'center'),
+      array(
+        'data' => backdrop_render($form['uninstall'][$module]),
+        'align' => 'center',
+      ),
       '<strong><label for="' . $form['uninstall'][$module]['#id'] . '">' . backdrop_render($form['modules'][$module]['name']) . '</label></strong>',
-      array('data' => backdrop_render($form['modules'][$module]['description']) . $disabled_message, 'class' => array('description')),
+      array(
+        'data' => backdrop_render($form['modules'][$module]['description']) . $disabled_message,
+        'class' => array('description'),
+      ),
     );
   }
 
-  $output  = theme('table', array('header' => $header, 'rows' => $rows, 'empty' => t('No modules are available to uninstall.')));
-  $output .= backdrop_render_children($form);
+  $form['modules'] = array(
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $rows,
+    '#empty' => t('No modules are available to uninstall.'),
+  );
 
-  return $output;
+  return backdrop_render_children($form);
 }
 
 /**
@@ -285,11 +298,17 @@ function theme_system_modules_uninstall($variables) {
  *       - REQUIREMENT_OK: The requirement is satisfied.
  *       - REQUIREMENT_WARNING: The requirement failed with a warning.
  *       - REQUIREMENT_ERROR: The requirement failed with an error.
+ *   - phase: The current phase. Possible values are one of:
+ *     - install: When called from install.php.
+ *     - update: When called from update.php.
+ *     - runtime: Showing the normal status report page, or no phase specified.
  *
  * @ingroup themeable
+ * @since 1.26.2 support for the "phase" variable added.
  */
 function theme_status_report($variables) {
   $requirements = $variables['requirements'];
+  $phase = isset($variables['phase']) ? $variables['phase'] : 'runtime';
   backdrop_sort($requirements, array('title' => SORT_STRING));
 
   // Separate requirements by severity.
@@ -341,7 +360,7 @@ function theme_status_report($variables) {
   $system_status_report_table = array(
     'header' => array(),
     'rows' => array(),
-    'attributes' => array('class' => 'system-status-report'),
+    'attributes' => array('class' => array('system-status-report', 'phase-' . $phase)),
     'caption' => '',
     'colgroups' => array(),
     'sticky' => FALSE,
@@ -366,14 +385,27 @@ function theme_status_report($variables) {
       $details = '<div class="status-description">' . $requirement['description']. '</div>';
     }
 
-    $description = '<div class="status-summary">' . $requirement['value'] . $more . '</div>' . $details;
-
-    $row = array(
-      'data' => array(
+    // For the "Requirements problem" page of the installer, place the label and
+    // the description of each check/row in a single table cell.
+    if ($phase == 'install') {
+      $description = '<div class="status-summary status-value">' . $requirement['value'] . $more . '</div>' . $details;
+      $data = array(
+        array('data' => $severity['icon'], 'class' => 'report-icon'),
+        array('data' => $title . $description, 'class' => 'status-title'),
+      );
+    }
+    // For the site status report page, place the label and the description of
+    // each check in separate table cells in the same row.
+    else {
+      $description = '<div class="status-summary">' . $requirement['value'] . $more . '</div>' . $details;
+      $data = array(
         array('data' => $severity['icon'], 'class' => 'report-icon'),
         array('data' => $title, 'class' => 'status-title'),
         array('data' => $description, 'class' => array('status-value', 'priority-low')),
-      ),
+      );
+    }
+    $row = array(
+      'data' => $data,
       'class' => $severity['class'],
     );
 
