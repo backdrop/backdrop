@@ -40,7 +40,7 @@ function telemetry_telemetry_info() {
   );
   $info['ckeditor_module_version'] = array(
     'label' => t('CKEditor Module Version'),
-    'description' => t('The major version of CKEditor module that your site uses (either 4, 5, or both).'),
+    'description' => t('The CKEditor module version that your site uses (either 4, 5, both, or neither).'),
     'project' => 'backdrop',
   );
   return $info;
@@ -85,6 +85,9 @@ function telemetry_telemetry_data($key) {
       }
       elseif ($ckeditor5) {
         return 'CKEditor 5';
+      }
+      else {
+        return 'Neither';
       }
   }
 }
