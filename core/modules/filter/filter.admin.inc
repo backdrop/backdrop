@@ -204,6 +204,13 @@ function filter_admin_format_form($form, &$form_state, $format) {
   $editors = filter_get_editors();
   if (isset($form_state['editor_info'])) {
     $editor_info = $form_state['editor_info'];
+
+    // If the editor changed, update the format settings accordingly.
+    $current_editor = $form_state['values']['editor'];
+    if ($format->editor != $current_editor && isset($editors[$current_editor])) {
+      $format->editor = $current_editor;
+      $format->editor_settings = array();
+    }
   }
   else {
     $editor_info = ($format->editor && isset($editors[$format->editor])) ? $editors[$format->editor] : NULL;
@@ -254,7 +261,6 @@ function filter_admin_format_form($form, &$form_state, $format) {
   }
 
   // Associate an editor with this format.
-  $editor_info = $form_state['editor_info'];
   if ($editor_info) {
     // Load the associated editor callbacks file, if any.
     if (!empty($editor_info['file'])) {
@@ -354,7 +360,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
         'name' => $name,
         'status' => 0,
         'weight' => $filter_info['weight'],
-        'settings' => isset($filter_info['default settings']) ? $filter_info['default settings'] : array(),
+        'settings' => $filter_info['default settings'],
       );
     }
   }
