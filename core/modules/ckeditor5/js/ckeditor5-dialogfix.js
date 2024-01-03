@@ -11,7 +11,6 @@
       // All editor form elements, like buttons in balloon toolbars get the "ck"
       // class.
       if ($(event.target).hasClass('ck')) {
-        console.log('there I fixed it');
         return true;
       }
       return $(event.target).closest('.cke_dialog').length || this._super(event);
