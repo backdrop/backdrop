@@ -13,7 +13,7 @@
       if ($(event.target).hasClass('ck')) {
         return true;
       }
-      return $(event.target).closest('.cke_dialog').length || this._super(event);
+      return this._super(event);
     }
   });
 
