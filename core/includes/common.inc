@@ -1735,10 +1735,10 @@ function backdrop_strip_dangerous_protocols($uri) {
   // Iteratively remove any invalid protocol found.
   do {
     $before = $uri;
-    $colonpos = strpos($uri, ':');
-    if ($colonpos > 0) {
+    $colon_position = strpos($uri, ':');
+    if ($colon_position > 0) {
       // We found a colon, possibly a protocol. Verify.
-      $protocol = substr($uri, 0, $colonpos);
+      $protocol = substr($uri, 0, $colon_position);
       // If a colon is preceded by a slash, question mark or hash, it cannot
       // possibly be part of the URL scheme. This must be a relative URL, which
       // inherits the (safe) protocol of the base document.
@@ -1748,7 +1748,7 @@ function backdrop_strip_dangerous_protocols($uri) {
       // Check if this is a disallowed protocol. Per RFC2616, section 3.2.3
       // (URI Comparison) scheme comparison must be case-insensitive.
       if (!isset($allowed_protocols[strtolower($protocol)])) {
-        $uri = substr($uri, $colonpos + 1);
+        $uri = substr($uri, $colon_position + 1);
       }
     }
   } while ($before != $uri);
@@ -2754,7 +2754,7 @@ function url($path = NULL, array $options = array()) {
  */
 function url_is_external($path) {
   $path = (string) $path;
-  $colonpos = strpos($path, ':');
+  $colon_position = strpos($path, ':');
   // Some browsers treat \ as / so normalize to forward slashes.
   $path = str_replace('\\', '/', $path);
   // Avoid calling backdrop_strip_dangerous_protocols(). If the path starts with 2
@@ -2767,8 +2767,8 @@ function url_is_external($path) {
     || (preg_match('/^\p{C}/u', $path) !== 0)
     // If there is any slash (/), hash (#) or question_mark (?) before the colon
     // (:) occurrence - if any - as this would clearly mean it is not a URL.
-    || ($colonpos !== FALSE
-      && !preg_match('![/?#]!', substr($path, 0, $colonpos))
+    || ($colon_position !== FALSE
+      && !preg_match('![/?#]!', substr($path, 0, $colon_position))
       && backdrop_strip_dangerous_protocols($path) == $path);
 }
 
@@ -3475,10 +3475,12 @@ function backdrop_css_defaults($data = NULL) {
  *     styles will be aggregated and compressed. Defaults to TRUE.
  *   - 'browsers': An array containing information specifying which browsers
  *     should load the CSS item. See backdrop_pre_render_conditional_comments()
- *     for details.
+ *     for details. This option is deprecated and no longer has an effect.
  *
- * @return
+ * @return array
  *   An array of queued cascading stylesheets.
+ *
+ * @since 1.27.0 The 'browsers' option is deprecated.
  *
  * @see backdrop_get_css()
  */
@@ -4057,7 +4059,7 @@ function backdrop_build_css_cache($css) {
 
     // Per the W3C specification at http://www.w3.org/TR/REC-CSS2/cascade.html#at-import,
     // @import rules must proceed any other style, so we move those to the top.
-    $regexp = '/@import[^;]+;/i';
+    $regexp = '/@import[^;\'"]*(?:\'[^\']*\'|"[^"]*")[^;]*;/i';
     preg_match_all($regexp, $data, $matches);
     $data = preg_replace($regexp, '', $data);
     $data = implode('', $matches[0]) . $data;
@@ -4618,12 +4620,15 @@ function backdrop_region_class($region) {
  *     file will be aggregated. Defaults to TRUE.
  *   - browsers: An array containing information specifying which browsers
  *     should load the JavaScript item. See
- *     backdrop_pre_render_conditional_comments() for details.
+ *     backdrop_pre_render_conditional_comments() for details. This option is
+ *     deprecated and no longer has an effect.
  *
- * @return
+ * @return array
  *   The current array of JavaScript files, settings, and in-line code,
  *   including Backdrop defaults, anything previously added with calls to
  *   backdrop_add_js(), and this function call's additions.
+ *
+ * @since 1.27.0 The 'browsers' option is deprecated.
  *
  * @see backdrop_get_js()
  */
@@ -6378,33 +6383,24 @@ function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 
 }
 
 /**
- * Pre-render callback: Renders #browsers into #prefix and #suffix.
+ * Pre-render callback: Provides backwards-compatibility for #browsers property.
  *
  * @param $elements
- *   A render array with a '#browsers' property. The '#browsers' property can
- *   contain any or all of the following keys:
- *   - 'IE': If FALSE, the element is not rendered by Internet Explorer. If
- *     TRUE, the element is rendered by Internet Explorer. Can also be a string
- *     containing an expression for Internet Explorer to evaluate as part of a
- *     conditional comment. For example, this can be set to 'lt IE 7' for the
- *     element to be rendered in Internet Explorer 6, but not in Internet
- *     Explorer 7 or higher. Defaults to TRUE.
- *   - '!IE': If FALSE, the element is not rendered by browsers other than
- *     Internet Explorer. If TRUE, the element is rendered by those browsers.
- *     Defaults to TRUE.
- *   Examples:
- *   - To render an element in all browsers, '#browsers' can be left out or set
- *     to array('IE' => TRUE, '!IE' => TRUE).
- *   - To render an element in Internet Explorer only, '#browsers' can be set
- *     to array('!IE' => FALSE).
- *   - To render an element in Internet Explorer 6 only, '#browsers' can be set
- *     to array('IE' => 'lt IE 7', '!IE' => FALSE).
- *   - To render an element in Internet Explorer 8 and higher and in all other
- *     browsers, '#browsers' can be set to array('IE' => 'gte IE 8').
+ *   A render array with a '#browsers' property. This property formerly provided
+ *   the ability target IE vs. non-IE browsers. However, it no longer provides
+ *   this functionality as this has not been supported since IE10. Now if the
+ *   '#browsers' property is set it will do one of the following:
+ *   - '!IE': If TRUE, the element will be returned with no modifications.
+ *     If FALSE, the element will not be rendered at all.
+ *    - 'IE': Any value passed in this key will be ignored.
  *
- * @return
- *   The passed-in element with markup for conditional comments potentially
- *   added to '#prefix' and '#suffix'.
+ * @return array
+ *   A placeholder array for IE-specific files, or the unmodified element if
+ *   this element would render in any non-IE browser.
+ *
+ * @deprecated Since 1.27.0
+ *
+ * @since 1.27.0 Conditional comments are no longer rendered.
  */
 function backdrop_pre_render_conditional_comments($elements) {
   $browsers = isset($elements['#browsers']) ? $elements['#browsers'] : array();
@@ -6413,41 +6409,12 @@ function backdrop_pre_render_conditional_comments($elements) {
     '!IE' => TRUE,
   );
 
-  // If rendering in all browsers, no need for conditional comments.
-  if ($browsers['IE'] === TRUE && $browsers['!IE']) {
-    return $elements;
-  }
-
-  // Determine the conditional comment expression for Internet Explorer to
-  // evaluate.
-  if ($browsers['IE'] === TRUE) {
-    $expression = 'IE';
-  }
-  elseif ($browsers['IE'] === FALSE) {
-    $expression = '!IE';
-  }
-  else {
-    $expression = $browsers['IE'];
-  }
-
-  // Wrap the element's potentially existing #prefix and #suffix properties with
-  // conditional comment markup. The conditional comment expression is evaluated
-  // by Internet Explorer only. To control the rendering by other browsers,
-  // either the "downlevel-hidden" or "downlevel-revealed" technique must be
-  // used. See http://en.wikipedia.org/wiki/Conditional_comment for details.
-  $elements += array(
-    '#prefix' => '',
-    '#suffix' => '',
-  );
-  if (!$browsers['!IE']) {
-    // "downlevel-hidden".
-    $elements['#prefix'] = "\n<!--[if $expression]>\n" . $elements['#prefix'];
-    $elements['#suffix'] .= "<![endif]-->\n";
-  }
-  else {
-    // "downlevel-revealed".
-    $elements['#prefix'] = "\n<!--[if $expression]><!-->\n" . $elements['#prefix'];
-    $elements['#suffix'] .= "<!--<![endif]-->\n";
+  // If not allowed to output to non-IE browsers, suppress the element entirely.
+  if ($browsers['!IE'] === FALSE) {
+    return array(
+      '#type' => NULL,
+      '#value' => 'Element removed, the "browsers" property targeting only IE browsers is no longer supported.',
+    );
   }
 
   return $elements;
