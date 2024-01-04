@@ -175,7 +175,7 @@ function ckeditor5_library_info_alter(&$libraries, $module) {
   if ($module == 'system' && isset($libraries['ui.dialog'])) {
     // Override jquery.ui dialog _allowInteraction method to allow interaction
     // for editor form elements from within jquery dialogs.
-    $path = backdrop_get_path('module', 'ckeditor5') . '/js/ckeditor5-dialogfix.js';
+    $path = backdrop_get_path('module', 'ckeditor5') . '/js/ckeditor5-dialog-fix.js';
     $libraries['ui.dialog']['js'][$path] = array();
   }
 }
