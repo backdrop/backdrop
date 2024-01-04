@@ -50,3 +50,25 @@ function ckeditor5_enable() {
     )), 'info');
   }
 }
+
+/**
+ * Updates the editor settings key from "cketoolbar" to just "toolbar".
+ */
+function ckeditor5_update_1000() {
+  // cspell:ignore cketoolbar
+  $config_names = config_get_names_with_prefix('filter.format');
+  foreach ($config_names as $config_name) {
+    $config = config($config_name);
+    $data = $config->getData();
+    if (isset($data['editor']) && $data['editor'] === 'ckeditor5' && isset($data['editor_settings']['cketoolbar'])) {
+      $editor_settings = $data['editor_settings'];
+      $toolbar = $editor_settings['cketoolbar'];
+      unset($editor_settings['cketoolbar']);
+      $data['editor_settings'] = array_merge(array(
+        'toolbar' => $toolbar,
+      ), $editor_settings);
+      $config->setData($data);
+      $config->save();
+    }
+  }
+}
