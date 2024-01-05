@@ -1095,7 +1095,7 @@ textarea.form-textarea {
   color: #444b53;
   background: #fff;
   border-radius: 4px;
-  transition:border-color 0.25s ease-in-out;
+  transition: border-color 0.25s ease-in-out;
   will-change: border-color;
 }
 input.form-text,
