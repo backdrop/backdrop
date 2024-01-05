@@ -291,7 +291,6 @@ th.checkbox {
  * @see progress.js
  */
 .progress .filled {
-  -webkit-transition: width .4s;
   transition: width .4s;
   will-change: width;
 }

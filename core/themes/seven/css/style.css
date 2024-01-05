@@ -1095,10 +1095,7 @@ textarea.form-textarea {
   color: #444b53;
   background: #fff;
   border-radius: 4px;
-  -webkit-transition: border-color 0.25s ease-in-out;
-  -moz-transition: border-color 0.25s ease-in-out;
-  -ms-transition: border-color 0.25s ease-in-out;
-  -o-transition: border-color 0.25s ease-in-out;
+  transition:border-color 0.25s ease-in-out;
   will-change: border-color;
 }
 input.form-text,
@@ -1389,10 +1386,6 @@ div.filter-options select {
   border: 2px solid transparent;
   border-radius: 4px;
   min-height: 145px;
-  -webkit-transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
-  -moz-transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
-  -ms-transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
-  -o-transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
   transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
   will-change: border-color, background-color;
 }
@@ -1880,7 +1873,6 @@ div.add-or-remove-shortcuts {
   right: 0;
   bottom: 0;
   overflow: hidden;
-  -webkit-transition: width .4s;
   transition: width .4s;
   will-change: width;
   background-image: -webkit-gradient(linear, 0 0, 100% 100%,
@@ -1903,15 +1895,11 @@ div.add-or-remove-shortcuts {
   background-size: 50px 50px;
   padding: 0 1px;
   height: 2.5em;
-  -webkit-animation: animate-stripes 2s linear infinite;
-  -moz-animation: animate-stripes 2s linear infinite;
-  -webkit-transition: width 0.5s ease-out;
+  animation: animate-stripes 2s linear infinite;
   transition: width 0.5s ease-out;
 }
 [dir="rtl"] .progress .filled:after {
   animation-direction: reverse;
-  -webkit-animation-direction: reverse;
-  -moz-animation-direction: reverse;
 }
 
 /**

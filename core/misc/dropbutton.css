@@ -8,7 +8,6 @@
  */
 .dropbutton-wrapper,
 .dropbutton-wrapper div {
-  -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 .js .dropbutton-wrapper {

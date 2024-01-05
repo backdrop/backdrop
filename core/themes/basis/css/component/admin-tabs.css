@@ -370,7 +370,6 @@ ul.primary.responsive-tabs-dropdown li:last-child a {
 .responsive-tabs-mobile ul.primary,
 .expand-dropdown-tabs.responsive-tabs-mobile ul.primary {
   overflow: hidden;
-  -webkit-border-radius: 0 0 4px 4px;
   border-radius: 4px;
 }
 
@@ -396,6 +395,5 @@ ul.primary.responsive-tabs-dropdown li:last-child a {
 }
 
 .responsive-tabs-mobile ul.primary li a {
-  -webkit-border-radius: 0;
   border-radius: 0;
 }

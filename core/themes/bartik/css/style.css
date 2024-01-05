@@ -1268,7 +1268,6 @@ ul.action-links li a {
   padding: 8% 4%; /* All padding shrinks/grows according to available width. */
   min-height: 128px;
   font-size: 120%;
-  -webkit-transition: min-height 0.25s;
   transition: min-height 0.25s;
   will-change: min-height;
 }
