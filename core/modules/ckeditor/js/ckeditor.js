@@ -3,6 +3,24 @@
   "use strict";
 
   /**
+   * Update CKEditor global settings that apply to all editors and the behavior
+   * of CKEditor even when it's not explicitly attached. In particular, disable
+   * automatically attaching to all contenteditable elements. This option can
+   * conflict with CKEditor 5 and other text editors, which also use
+   * contenteditable.
+   *
+   * See https://ckeditor.com/docs/ckeditor4/latest/guide/dev_inline.html
+   */
+  // Disable looking for the default config.js file.
+  CKEDITOR.config.customConfig = false;
+  // Disable looking for the default styles.css file.
+  CKEDITOR.config.contentsCss = false;
+  // Disable looking for the default styles.js file.
+  CKEDITOR.config.stylesSet = false;
+  // Disable automatic attachment to contenteditable elements.
+  CKEDITOR.disableAutoInline = true;
+
+  /**
    * Backdrop editor behaviors for CKEditor 4.
    */
   Backdrop.editors.ckeditor = {
@@ -27,9 +45,6 @@
 
       // Try to match the textarea height on which we're replacing.
       format.editorSettings.height = $(element).height();
-
-      // Hide the resizable grippie while CKEditor is active.
-      $(element).siblings('.grippie').hide();
 
       return !!CKEDITOR.replace(element, format.editorSettings);
     },
@@ -63,8 +78,6 @@
         $(element).height(height);
       }
 
-      // Restore the resize grippie.
-      $(element).siblings('.grippie').show();
       return !!editor;
     },
 

@@ -8,7 +8,7 @@
  * Database configuration:
  *
  * Most sites can configure their database by entering the connection string
- * below. If using master/slave databases or multiple connections, see the
+ * below. If using primary/replica databases or multiple connections, see the
  * advanced database documentation at
  * https://api.backdropcms.org/database-configuration
  */
@@ -334,7 +334,7 @@ $settings['locale_custom_strings_en'][''] = array(
  */
 $settings['404_fast_paths_exclude'] = '/\/(?:styles)|(?:system\/files)\//';
 $settings['404_fast_paths'] = '/\.(?:txt|png|gif|jpe?g|css|js|ico|swf|flv|cgi|bat|pl|dll|exe|asp)$/i';
-$settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL "@path" was not found on this server.</p></body></html>';
+$settings['404_fast_html'] = '<!DOCTYPE html><html lang="en"><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL "@path" was not found on this server.</p></body></html>';
 
 /**
  * By default, fast 404s are returned as part of the normal page request
@@ -439,8 +439,8 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
  * such as views, content types, vocabularies, etc. may not work as expected.
  * Use any available API functions for complex systems instead.
  */
-//$config['system.core']['site_name'] = 'My Backdrop site';
-//$config['system.core']['file_temporary_path'] = '/tmp';
+// $config['system.core']['site_name'] = 'My Backdrop site';
+// $config['system.core']['file_temporary_path'] = '/tmp';
 
 /**
  * File schemes whose paths should not be normalized.
@@ -458,7 +458,7 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
  * scheme does not allow unintended file access when using '/../' to move up the
  * directory tree.
  */
-//$config['system.core']['file_not_normalized_schemes'] = array('example');
+// $config['system.core']['file_not_normalized_schemes'] = array('example');
 
 /**
  * Additional public file schemes.
@@ -481,7 +481,7 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
  * variable, the result of which is that system_file_download() grants public
  * access to all files within that scheme.
  */
-//$config['system.core']['file_additional_public_schemes'] = array('example');
+// $config['system.core']['file_additional_public_schemes'] = array('example');
 
 /**
  * Include a local settings file, if available.
