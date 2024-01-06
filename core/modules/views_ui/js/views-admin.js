@@ -197,7 +197,7 @@ Backdrop.viewsUi.AddItemForm = function ($form) {
 
 Backdrop.viewsUi.AddItemForm.prototype.handleCheck = function (event) {
   var $target = $(event.target);
-  var label = $.trim($target.next().text());
+  var label = $.trim($target.siblings("label").text());
   // Add/remove the checked item to the list.
   if ($target.is(':checked')) {
     this.$selected_div.css('display', 'block');
@@ -205,7 +205,7 @@ Backdrop.viewsUi.AddItemForm.prototype.handleCheck = function (event) {
   }
   else {
     var position = $.inArray(label, this.checkedItems);
-    // Delete the item from the list and take sure that the list doesn't have undefined items left.
+    // Delete the item from the list and make sure that the list doesn't have undefined items left.
     for (var i = 0; i < this.checkedItems.length; i++) {
       if (i == position) {
         this.checkedItems.splice(i, 1);
@@ -213,7 +213,7 @@ Backdrop.viewsUi.AddItemForm.prototype.handleCheck = function (event) {
         break;
       }
     }
-    // Hide it again if none item is selected.
+    // Hide it again if no item is selected.
     if (this.checkedItems.length == 0) {
       this.$selected_div.hide();
     }

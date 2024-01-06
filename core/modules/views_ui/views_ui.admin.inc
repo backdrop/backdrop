@@ -3836,7 +3836,10 @@ function views_ui_add_item_form($form, &$form_state) {
         $zebra_class = ($zebra % 2) ? 'odd' : 'even';
         $form['options']['name'][$key] = array(
           '#type' => 'checkbox',
-          '#title' => t('!group: !field', array('!group' => check_plain($option['group']), '!field' => check_plain($option['title']))),
+          '#title' => t('!field: !group', array(
+            '!field' => check_plain($option['title']),
+            '!group' => check_plain($option['group']),
+          )),
           '#description' => filter_xss_admin($option['help']),
           '#return_value' => $key,
           '#prefix' => "<div class='$zebra_class filterable-option'>",
