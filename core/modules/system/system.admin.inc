@@ -2462,7 +2462,7 @@ function system_date_time_formats() {
 /**
  * Allow users to add additional date formats.
  *
- * @param array $format
+ * @param array|null $format
  *   (optional) When present, provides the format being edited, otherwise a new
  *   format is being created.
  */
