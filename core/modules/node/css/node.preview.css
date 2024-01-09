@@ -33,8 +33,6 @@ a.node-preview-backlink {
   padding: 0 25px;
   margin-bottom: 0;
   margin-right: 1em;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
   border-radius: 4px;
   transition: background-color 0.6s ease 0s, color 0.6s ease 0s;
   clear: both;
@@ -51,8 +49,6 @@ input.node-preview-save-button.form-submit:hover {
 .node-preview-switch-button.form-submit {
   color: #828188;
   background: #fff;
-  -webkit-box-shadow: inset 0px 0px 0px 2px #97979e;
-  -moz-box-shadow: inset 0px 0px 0px 2px #97979e;
   box-shadow: inset 0px 0px 0px 2px #97979e;
 }
 .node-preview-display-mode.form-select {
@@ -62,8 +58,6 @@ input.node-preview-save-button.form-submit:hover {
   box-sizing: border-box;
   color: #444b53;
   background: #fff;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
   border-radius: 4px;
   will-change: border-color;
   height: 43px;
