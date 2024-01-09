@@ -361,15 +361,17 @@
         let $title;
         let $description;
         let $option;
+        let $group;
         const options = [];
         const length = $allOptions.length;
         for (let i = 0; i < length; i++) {
           $option = $($allOptions[i]);
           $title = $option.find('.title');
           $description = $option.find('.description');
+          $group = $option.find('.group');
           options[i] = {
             // Search on the lowercase version of the title text + description.
-            searchText: `${$title[0].textContent.toLowerCase()} ${$description[0].textContent.toLowerCase()}
+            searchText: `${$title[0].textContent.toLowerCase()} ${$description[0].textContent.toLowerCase()} ${$group[0].textContent.toLowerCase()}
             .toLowerCase()}`,
             // Maintain a reference to the jQuery object for each row, so we don't
             // have to create a new object inside the performance-sensitive keyup
