@@ -3813,7 +3813,12 @@ function views_ui_add_item_form($form, &$form_state) {
     foreach ($fields as $key => $field) {
       $group = preg_replace('/[^a-z0-9]/', '-', strtolower($field['group']));
       $groups[$group] = $field['group'];
-      $fields[$key]['#attributes'] = array('class' => array('views-filterable-option', $group));
+      $fields[$key]['#attributes'] = array(
+        'class' => array(
+          'views-filterable-option',
+          $group,
+        ),
+      );
       $fields[$key]['help'] = "<div class='description'>" . $field['help'] . "</div>";
       $fields[$key]['title'] = "<div class='title'>" . $field['title'] . "</div>";
       $fields[$key]['group'] = "<div class='group'>" . $field['group'] . "</div>";
@@ -3829,7 +3834,12 @@ function views_ui_add_item_form($form, &$form_state) {
             }
             $group = preg_replace('/[^a-z0-9]/', '-', strtolower($copy['group']));
             $fields[$key . '$' . $id] = $copy;
-            $fields[$key . '$' . $id]['#attributes'] = array('class' => array('views-filterable-option', $group));
+            $fields[$key . '$' . $id]['#attributes'] = array(
+              'class' => array(
+                'views-filterable-option',
+                $group,
+              ),
+            );
           }
         }
       }
@@ -3842,25 +3852,6 @@ function views_ui_add_item_form($form, &$form_state) {
       '#attributes' => array('id' => 'views-filterable-options'),
       '#js_select' => FALSE,
     );
-/*
-    // foreach ($fields as $group => $group_options) {
-      // $form['options']['name'][$group . '_start']['#markup'] = '<div class="views-filterable-group views-filterable-group-' . $group . '">';
-      $zebra = 0;
-      foreach ($fields as $key => $field) {
-        $zebra_class = ($zebra % 2) ? 'odd' : 'even';
-        $form['options']['name'][$key] = array(
-          '#type' => 'checkbox',
-          '#title' => t('!group: !field', array('!group' => check_plain($field['group']), '!field' => check_plain($field['title']))),
-          '#description' => filter_xss_admin($field['help']),
-          '#return_value' => $key,
-          '#prefix' => "<div class='$zebra_class filterable-option'>",
-          '#suffix' => '</div>',
-        );
-        $zebra++;
-      }
-      // $form['options']['name'][$group . '_end']['#markup'] = '</div>';
-    // }
-*/
     $form['options']['controls']['group']['#options'] = $groups;
   }
   else {
