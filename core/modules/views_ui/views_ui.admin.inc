@@ -3777,6 +3777,153 @@ function views_ui_add_item_form($form, &$form_state) {
 
   // Figure out all the base tables allowed based upon what the relationships provide.
   $base_tables = $view->get_base_tables();
+  $fields = views_fetch_fields(array_keys($base_tables), $type, $display->handler->use_group_by());
+
+  if (!empty($fields)) {
+    $form['options']['controls'] = array(
+      '#theme_wrappers' => array('container'),
+      '#id' => 'views-filterable-options-controls',
+      '#attributes' => array('class' => array('container-inline')),
+    );
+    $form['options']['controls']['options_search'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Search'),
+    );
+
+    $groups = array('all' => t('- All -'));
+    $form['options']['controls']['group'] = array(
+      '#type' => 'select',
+      '#title' => t('Filter'),
+      '#options' => array(),
+    );
+
+    $form['options']['name'] = array(
+      '#prefix' => '<div class="views-radio-box form-checkboxes views-filterable-options">',
+      '#suffix' => '</div>',
+      '#tree' => TRUE,
+      '#default_value' => 'all',
+    );
+
+    // Build the sortable table header.
+    $header = array(
+      'title' => array('data' => t('Title'), 'sort' => 'asc'),
+      'group' => array('data' => t('Category'), 'sort' => 'asc'),
+      'help' => array('data' => t('Description'))
+    );
+    foreach ($fields as $key => $field) {
+      $group = preg_replace('/[^a-z0-9]/', '-', strtolower($field['group']));
+      $groups[$group] = $field['group'];
+      $fields[$key]['#attributes'] = array('class' => array('views-filterable-option', $group));
+      $fields[$key]['help'] = "<div class='description'>" . $field['help'] . "</div>";
+      $fields[$key]['title'] = "<div class='title'>" . $field['title'] . "</div>";
+      $fields[$key]['group'] = "<div class='group'>" . $field['group'] . "</div>";
+      if (!empty($field['aliases']) && is_array($field['aliases'])) {
+        foreach ($field['aliases'] as $id => $alias) {
+          if (empty($alias['base']) || !empty($base_tables[$alias['base']])) {
+            $copy = $field;
+            $groups[$group] = $alias['group'];
+            $copy['group'] = "<div class='group'>" . $alias['group'] . "</div>";
+            $copy['title'] = "<div class='title'>" . $alias['title'] . "</div>";
+            if (isset($alias['help'])) {
+              $copy['help'] = "<div class='description'>" . $alias['help'] . "</div>";
+            }
+            $group = preg_replace('/[^a-z0-9]/', '-', strtolower($copy['group']));
+            $fields[$key . '$' . $id] = $copy;
+            $fields[$key . '$' . $id]['#attributes'] = array('class' => array('views-filterable-option', $group));
+          }
+        }
+      }
+    }
+    $form['options']['name']['fields'] = array(
+      '#type' => 'tableselect',
+      '#header' => $header,
+      '#options' => $fields,
+      '#empty' => t('No @types available', array('@types' => $ltitle)),
+      '#attributes' => array('id' => 'views-filterable-options'),
+      '#js_select' => FALSE,
+    );
+/*
+    // foreach ($fields as $group => $group_options) {
+      // $form['options']['name'][$group . '_start']['#markup'] = '<div class="views-filterable-group views-filterable-group-' . $group . '">';
+      $zebra = 0;
+      foreach ($fields as $key => $field) {
+        $zebra_class = ($zebra % 2) ? 'odd' : 'even';
+        $form['options']['name'][$key] = array(
+          '#type' => 'checkbox',
+          '#title' => t('!group: !field', array('!group' => check_plain($field['group']), '!field' => check_plain($field['title']))),
+          '#description' => filter_xss_admin($field['help']),
+          '#return_value' => $key,
+          '#prefix' => "<div class='$zebra_class filterable-option'>",
+          '#suffix' => '</div>',
+        );
+        $zebra++;
+      }
+      // $form['options']['name'][$group . '_end']['#markup'] = '</div>';
+    // }
+*/
+    $form['options']['controls']['group']['#options'] = $groups;
+  }
+  else {
+    $form['options']['markup'] = array(
+      '#markup' => '<div class="form-item">' . t('There are no @types available to add.', array('@types' =>  $ltitle)) . '</div>',
+    );
+  }
+  // Add a div to show the selected items
+  $form['selected'] = array(
+    '#type' => 'item',
+    '#markup' => '<div class="views-selected-options"></div>',
+    '#title' => t('Selected') . ':',
+    '#theme_wrappers' => array('form_element', 'views_container'),
+    '#attributes' => array(
+      'class' => array('container-inline', 'views-add-form-selected'),
+      'data-views-offset' => 'bottom',
+    ),
+  );
+  views_ui_standard_form_buttons($form, $form_state, 'views_ui_add_item_form', t('Add and configure @types', array('@types' => $ltitle)));
+
+  // Remove the default submit function.
+  $form['actions']['submit']['#submit'] = array_diff($form['actions']['submit']['#submit'], array('views_ui_standard_submit'));
+  $form['actions']['submit']['#submit'][] = 'views_ui_add_item_form_submit';
+
+  return $form;
+}
+/**
+ * Form to add_item items in the views UI.
+ */
+function orig_views_ui_add_item_form($form, &$form_state) {
+  $view = &$form_state['view'];
+  $display_id = $form_state['display_id'];
+  $type = $form_state['type'];
+
+  $form = array(
+    'options' => array(
+      '#theme_wrappers' => array('container'),
+      '#attributes' => array('class' => array('scroll'), 'data-backdrop-views-scroll' => TRUE),
+    ),
+  );
+
+  if (!$view->set_display($display_id)) {
+    views_ajax_error(t('Invalid display id @display', array('@display' => $display_id)));
+  }
+  $display = &$view->display[$display_id];
+
+  $types = views_object_types();
+  $ltitle = $types[$type]['ltitle'];
+  $section = $types[$type]['plural'];
+
+  if (!empty($types[$type]['type'])) {
+    $type = $types[$type]['type'];
+  }
+
+  $form['#title'] = t('Add @type', array('@type' => $ltitle));
+  $form['#section'] = $display_id . 'add-item';
+
+
+  // Add the display override dropdown.
+  views_ui_standard_display_dropdown($form, $form_state, $section);
+
+  // Figure out all the base tables allowed based upon what the relationships provide.
+  $base_tables = $view->get_base_tables();
   $options = views_fetch_fields(array_keys($base_tables), $type, $display->handler->use_group_by());
 
   if (!empty($options)) {
@@ -3836,10 +3983,7 @@ function views_ui_add_item_form($form, &$form_state) {
         $zebra_class = ($zebra % 2) ? 'odd' : 'even';
         $form['options']['name'][$key] = array(
           '#type' => 'checkbox',
-          '#title' => t('!field: !group', array(
-            '!field' => check_plain($option['title']),
-            '!group' => check_plain($option['group']),
-          )),
+          '#title' => t('!group: !field', array('!group' => check_plain($option['group']), '!field' => check_plain($option['title']))),
           '#description' => filter_xss_admin($option['help']),
           '#return_value' => $key,
           '#prefix' => "<div class='$zebra_class filterable-option'>",
