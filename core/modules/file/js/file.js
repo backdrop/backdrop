@@ -172,7 +172,7 @@ Backdrop.file = Backdrop.file || {
   /**
    * Provide events for files in the file browser dialog.
    */
-  dialogOpenEvent: function(e, dialoog, $element, settings) {
+  dialogOpenEvent: function(e, dialog, $element, settings) {
     var $browserContainer = $element.find(".file-browser");
     $browserContainer.once('file-browser').on('click', '[data-fid]', function () {
       var $selectedElement = $(this);

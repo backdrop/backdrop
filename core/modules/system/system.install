@@ -14,7 +14,7 @@ function system_requirements($phase) {
   // Ensure translations don't break during installation.
   $t = get_t();
 
-  // Report Backdrop version
+  // Report Backdrop version.
   if ($phase == 'runtime') {
     $requirements['backdrop'] = array(
       'title' => $t('Backdrop CMS'),
@@ -37,7 +37,7 @@ function system_requirements($phase) {
           '%profile' => $profile,
         )),
         'severity' => REQUIREMENT_INFO,
-        'weight' => -9
+        'weight' => -9,
       );
     }
   }
@@ -50,7 +50,7 @@ function system_requirements($phase) {
     'severity' => REQUIREMENT_INFO,
   );
 
-  // Test PHP version and show link to phpinfo() if it's available
+  // Test PHP version and show link to phpinfo() if it's available.
   $phpversion = phpversion();
   if (function_exists('phpinfo')) {
     if ($phase == 'runtime') {
@@ -61,7 +61,7 @@ function system_requirements($phase) {
     }
     $requirements['php'] = array(
       'title' => $t('PHP'),
-      'value' =>  $php_value,
+      'value' => $php_value,
       'severity' => REQUIREMENT_INFO,
     );
   }
@@ -222,11 +222,14 @@ function system_requirements($phase) {
     $requirements['jquery'] = array(
       'title' => $t('jQuery'),
       'severity' => REQUIREMENT_OK,
-      'value' => $t('jQuery version !jqv / jQuery UI version !jquiv', array('!jqv' => $jquery['version'], '!jquiv' => $jquery_ui['version'])),
+      'value' => $t('jQuery version !jqv / jQuery UI version !jquiv', array(
+        '!jqv' => $jquery['version'],
+        '!jquiv' => $jquery_ui['version'],
+      )),
     );
   }
 
-  // Test PHP memory_limit
+  // Test PHP memory_limit.
   $memory_limit = ini_get('memory_limit');
   $requirements['php_memory_limit'] = array(
     'title' => $t('PHP memory limit'),
@@ -296,7 +299,10 @@ function system_requirements($phase) {
           'title' => $info['title'],
           'value' => $t('Not fully protected'),
           'severity' => REQUIREMENT_ERROR,
-          'description' => $t('See <a href="@url" target="_blank">@url</a> for information about the recommended <code>.htaccess</code> file which should be added to the <code>%directory</code> directory to help protect against arbitrary code execution.', array('@url' => 'http://drupal.org/SA-CORE-2013-003', '%directory' => $info['directory'])),
+          'description' => $t('See <a href="@url" target="_blank">@url</a> for information about the recommended <code>.htaccess</code> file which should be added to the <code>%directory</code> directory to help protect against arbitrary code execution.', array(
+            '@url' => 'http://drupal.org/SA-CORE-2013-003',
+            '%directory' => $info['directory'],
+          )),
         );
       }
     }
@@ -330,7 +336,7 @@ function system_requirements($phase) {
     // Set summary and description based on values determined above.
     $summary = $t('Last run !time ago (<a href="@url">Run cron manually</a>)', array(
       '!time' => format_interval(REQUEST_TIME - $cron_last),
-      '@url' => url('admin/reports/status/run-cron')
+      '@url' => url('admin/reports/status/run-cron'),
     ));
     $description = '';
     if ($severity != REQUIREMENT_OK) {
@@ -436,7 +442,7 @@ function system_requirements($phase) {
     }
   }
 
-  // Verify the update.php access setting
+  // Verify the update.php access setting.
   if ($phase == 'runtime') {
     if (!empty($GLOBALS['settings']['update_free_access'])) {
       $requirements['update access'] = array(
@@ -504,7 +510,7 @@ function system_requirements($phase) {
     }
   }
 
-  // Test Unicode library
+  // Test Unicode library.
   include_once BACKDROP_ROOT . '/core/includes/unicode.inc';
   $requirements = array_merge($requirements, unicode_requirements());
 
@@ -514,7 +520,10 @@ function system_requirements($phase) {
       $requirements['update status'] = array(
         'value' => $t('Not enabled'),
         'severity' => REQUIREMENT_WARNING,
-        'description' => $t('Update notifications are not enabled. It is <strong>highly recommended</strong> that you enable the Update Manager module from the <a href="@module">module administration page</a> in order to stay up-to-date on new releases. For more information, <a href="@update" target="_blank">Update status handbook page</a>.', array('@update' => 'http://drupal.org/handbook/modules/update', '@module' => url('admin/modules'))),
+        'description' => $t('Update notifications are not enabled. It is <strong>highly recommended</strong> that you enable the Update Manager module from the <a href="@module">module administration page</a> in order to stay up-to-date on new releases. For more information, <a href="@update" target="_blank">Update status handbook page</a>.', array(
+          '@update' => 'http://drupal.org/handbook/modules/update',
+          '@module' => url('admin/modules'),
+        )),
       );
     }
     else {
@@ -1360,20 +1369,20 @@ function system_schema() {
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
-        'default' => ''
+        'default' => '',
       ),
       'value' => array(
         'description' => 'A value for the semaphore.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
-        'default' => ''
+        'default' => '',
       ),
       'expire' => array(
         'description' => 'A Unix timestamp with microseconds indicating when the semaphore should expire.',
         'type' => 'float',
         'size' => 'big',
-        'not null' => TRUE
+        'not null' => TRUE,
       ),
     ),
     'indexes' => array(
@@ -1636,7 +1645,7 @@ function system_schema() {
  * Returns latest required Drupal 7 schema version for upgrade to Backdrop CMS.
  */
 function system_update_last_removed() {
-  // Drupal 7.28
+  // Drupal 7.28.
   return 7078;
 }
 
@@ -2084,7 +2093,7 @@ function system_update_1020() {
       'label' => 'HTML Date',
       'pattern' => 'Y-m-d',
       'module' => 'system',
-      'hidden' => 1
+      'hidden' => 1,
     ),
     'html_time' => array(
       'label' => 'HTML Time',
@@ -2263,7 +2272,7 @@ function system_update_1025() {
         'default',
       ),
       'top' => array(
-        '55f542fe-0763-453b-ba3e-62677ea559e5'
+        '55f542fe-0763-453b-ba3e-62677ea559e5',
       ),
     ),
     'content' => array(
@@ -2312,7 +2321,7 @@ function system_update_1025() {
         'cd4d033d-3f67-4191-8655-85ee758877c0',
       ),
       'top' => array(
-        '09f11b4e-877e-45ab-9000-a4c6254faa04'
+        '09f11b4e-877e-45ab-9000-a4c6254faa04',
       ),
     ),
     'content' => array(
@@ -2750,9 +2759,19 @@ function system_update_1042() {
  * Remove old Date configuration files.
  */
 function system_update_1043() {
-  config('date_views.settings')->delete();
   config('date_api.settings')->delete();
   config('date.settings')->delete();
+
+  $config = config('date_views.settings');
+  if ($config->isNew()) {
+    $config->set('date_views_month_format_with_year', update_variable_get('date_views_month_format_with_year', 'F Y'));
+    $config->set('date_views_month_format_without_year', update_variable_get('date_views_month_format_without_year', 'F'));
+    $config->set('date_views_day_format_with_year', update_variable_get('date_views_day_format_with_year', 'l, F j, Y'));
+    $config->set('date_views_day_format_without_year', update_variable_get('date_views_day_format_without_year', 'l, F j'));
+    $config->set('date_views_week_format_with_year', update_variable_get('date_views_week_format_with_year', 'F j, Y'));
+    $config->set('date_views_week_format_without_year', update_variable_get('date_views_week_format_without_year', 'F j'));
+    $config->save();
+  }
 
   // Remove variables from Drupal 7.
   update_variable_del('date_min_year');
@@ -2895,8 +2914,8 @@ function system_update_1052() {
   if (module_exists('project_browser')) {
     $path = backdrop_get_path('module', 'project_browser');
     backdrop_set_message(t('Backdrop core now provides project browsing functions in core. A copy of Project Browser module has been located at %path. The module has been disabled, you can remove it safely from your installation.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
-    // Remove the entry for the Project Browser module in the system table. This will
-    // "disable" the module if present.
+    // Remove the entry for the Project Browser module in the system table. This
+    // will "disable" the module if present.
     db_query("DELETE FROM {system} WHERE name = 'project_browser' AND type = 'module'");
 
     // Delete any settings config file if present.
@@ -2970,6 +2989,7 @@ function system_update_1056() {
  */
 function system_update_1057() {
   $config = config('system.core');
+  // See watchdog_severity_levels() for possible values.
   $config->set('watchdog_enabled_severity_levels', array(
     WATCHDOG_EMERGENCY,
     WATCHDOG_ALERT,
@@ -2978,8 +2998,6 @@ function system_update_1057() {
     WATCHDOG_WARNING,
     WATCHDOG_NOTICE,
     WATCHDOG_INFO,
-    // WATCHDOG_DEBUG,
-    // WATCHDOG_DEPRECATED,
   ));
   $config->save();
 }
@@ -3467,6 +3485,42 @@ function system_update_1091() {
  */
 function system_update_1092() {
   config_clear('system.core', 'block_interest_cohort');
+}
+
+/**
+ * Set defaults for date_views if not already set.
+ */
+function system_update_1093() {
+  // Previously date_views settings were being removed before they could be
+  // migrated. If that's the case set some defaults here.
+  // @see https://github.com/backdrop/backdrop-issues/issues/6204
+  $config = config('date_views.settings');
+  if (!$config->isNew()) {
+    return;
+  }
+  $config->set('date_views_month_format_with_year', 'F Y');
+  $config->set('date_views_month_format_without_year', 'F');
+  $config->set('date_views_day_format_with_year', 'l, F j, Y');
+  $config->set('date_views_day_format_without_year', 'l, F j');
+  $config->set('date_views_week_format_with_year', 'F j, Y');
+  $config->set('date_views_week_format_without_year', 'F j');
+  $config->save();
+}
+
+/**
+ * Enable static caching of the "system.date" configuration file.
+ */
+function system_update_1094() {
+  $config = config('system.date');
+  $data = $config->get();
+  // Put the _config_static option at the top of the file.
+  unset($data['_config_name']);
+  $data = array_merge(array(
+    '_config_name' => 'system.date',
+    '_config_static' => TRUE,
+  ), $data);
+  $config->setData($data);
+  $config->save();
 }
 
 /**

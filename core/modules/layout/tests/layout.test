@@ -21,6 +21,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Create and login admin user.
     $this->admin_user = $this->backdropCreateUser(array(
+      'access user profiles',
       'access administration pages',
       'administer site configuration',
       'administer modules',
@@ -410,6 +411,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     // Try injecting XSS into the classes.
     $xss = '"><svg onload="alert(\'XSS hole\')">';
     // The filtered string after running through backdrop_html_class().
+    // cspell:disable-next-line
     $filtered_xss = 'svg onloadalertXSS hole';
     $edit = array(
       'style_settings[classes]' => $xss,
@@ -588,8 +590,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'bundles[page]' => TRUE,
     );
     $this->backdropPost(NULL, $edit, t('Add visibility condition'));
-    $this->backdropPost(Null, array(), t('Update block'));
-    $this->backdropPost(Null, array(), t('Save layout'));
+    $this->backdropPost(NULL, array(), t('Update block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node1->nid);
     $this->assertNoText(check_plain($block_title), 'Block not shown on post content.');
@@ -616,8 +618,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'bundles[page]' => FALSE,
     );
     $this->backdropPost(NULL, $edit, t('Save visibility condition'));
-    $this->backdropPost(Null, array(), t('Update block'));
-    $this->backdropPost(Null, array(), t('Save layout'));
+    $this->backdropPost(NULL, array(), t('Update block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node1->nid);
     $this->assertText(check_plain($block_title), 'Block shown on post content.');
@@ -637,7 +639,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Add visibility condition'));
     $this->backdropPost(NULL, array(), t('Update block'));
-    $this->backdropPost(Null, array(), t('Save layout'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
 
     // Create another post node and check the combination of conditions work.
     $second_post = $this->backdropCreateNode(array(
@@ -690,8 +692,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'entity_id' => $this->test_node1->nid,
     );
     $this->backdropPost(NULL, $edit, t('Add visibility condition'));
-    $this->backdropPost(Null, array(), t('Update block'));
-    $this->backdropPost(Null, array(), t('Save layout'));
+    $this->backdropPost(NULL, array(), t('Update block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node1->nid);
     $this->assertText(check_plain($block_title), 'Block shown and node ID matches.');
@@ -716,7 +718,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Add visibility condition'));
     $this->backdropPost(NULL, array(), t('Update block'));
-    $this->backdropPost(Null, array(), t('Save layout'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node1->nid);
     $this->assertNoText(check_plain($block_title), 'Block not shown when user ID does not match.');
@@ -732,6 +734,78 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     $this->backdropGet('node/' . $second_post->nid);
     $this->assertNoText(check_plain($block_title), 'Block not shown when user ID and node ID does not match.');
+  }
+
+  /**
+   * Tests user account comparison condition.
+   */
+  function testBlockUserCompareConditions() {
+    // Create a new layout overriding user/%.
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
+    $layout_url = 'user/%';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout_template' => 'moscone_flipped',
+      'path' => $layout_url,
+    );
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
+
+    // Add another testing block.
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Layout foo block'));
+    $block_title = $this->randomString();
+    $edit = array(
+      'title_display' => LAYOUT_TITLE_CUSTOM,
+      'title' => $block_title,
+    );
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $edit = array(
+      'condition' => 'user_compare',
+    );
+    $this->backdropPost(NULL, $edit, t('Load condition'));
+
+    // The user account comparison form has some customizations. Verify the
+    // fields show as expected.
+    $this->assertOption('edit-contexts-user2', '1', 'User account from path in position 2 selected as second comparison user account.');
+    $this->assertNoOption('edit-contexts-user2', 'current_user');
+
+    $edit = array(
+      'contexts[user2]' => '1',
+      'equality' => '1',
+    );
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, array(), t('Update block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $this->backdropGet('user/' . $this->admin_user->uid);
+    $this->assertText(check_plain($block_title), 'Block shown when user views own profile page.');
+
+    $this->backdropGet('user/' . $this->web_user->uid);
+    $this->assertNoText(check_plain($block_title), 'Block not shown when user views profile page of another user.');
+
+    // Get the block UUID.
+    layout_reset_caches();
+    $layout = layout_load($layout_name);
+    $block_uuid = end($layout->positions['sidebar']);
+
+    // Update the condition to do the opposite, where a block is only shown to
+    // a user viewing their own profile page.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure-block/editor/' . $block_uuid);
+    $this->backdropPost(NULL, array(), t('Configure'));
+    $edit = array(
+      'equality' => '0',
+    );
+    $this->backdropPost(NULL, $edit, t('Save visibility condition'));
+    $this->backdropPost(NULL, array(), t('Update block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $this->backdropGet('user/' . $this->admin_user->uid);
+    $this->assertNoText(check_plain($block_title), 'Block not shown when user views own profile page');
+
+    $this->backdropGet('user/' . $this->web_user->uid);
+    $this->assertText(check_plain($block_title), 'Block shown when user views profile page of another user.');
   }
 
   /**
@@ -1415,10 +1489,10 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
     $subtab_layout_title = $this->randomName();
-    $subsubtab_layout_title = $this->randomName();
+    $sub_subtab_layout_title = $this->randomName();
     $edit = array(
       'menu[type]' => 'default tab',
-      'menu[title]' => $subsubtab_layout_title,
+      'menu[title]' => $sub_subtab_layout_title,
       'menu[weight]' => 0,
       'menu[parent][type]' => 'tab',
       'menu[parent][title]' => $subtab_layout_title,
@@ -1978,7 +2052,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
    * Test Hero blocks.
    */
   function testHeroBlocks() {
-    $hero_title_1 = 'Wonderwoman';
+    $hero_title_1 = 'Wonder Woman';
     $hero_content_1 = 'Youth is your greatest weapon, your greatest tool.';
     $hero_title_2 = 'Black Widow';
     $hero_content_2 = "Whatever it takes.";
