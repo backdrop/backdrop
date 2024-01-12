@@ -27,6 +27,8 @@
  *
  * @return array
  *   The field schema definition array.
+ *
+ * @since 1.26.4 Function added.
  */
 function field_retrieve_schema($field) {
   // Make sure the installation API is available.

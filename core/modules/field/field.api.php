@@ -271,6 +271,8 @@ function hook_field_schema($field) {
  *   The field definition.
  *
  * @see field_retrieve_schema()
+ *
+ * @since 1.26.4 Hook added.
  */
 function hook_field_schema_alter(&$schema, $field) {
   if ($field['type'] == 'image') {
