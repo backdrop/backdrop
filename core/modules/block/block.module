@@ -254,6 +254,24 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     $edit['description'] = '';
   }
 
+  $reusable_block_notes = t('This block is reusable across different layouts.');
+  if (!$stand_alone) {
+    // Only show this bit of information in the 'Add block "Custom block"'
+    // dialog.
+    $reusable_block_notes .= ' ' . t('You may update its content either directly here, or via the !block_link page.', array('!block_link' => l(t('Custom blocks'), 'admin/structure/block')));
+  }
+  $reusable_block_notes .= ' <strong>' . t('Updating its content in one place will affect all places where this block is used!') . '</strong>';
+  // Mimicking an info message with a form item, in order to allow it to also be
+  // displayed within dialogs.
+  $form['reusable'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('messages', 'info')),
+  );
+  $form['reusable']['info'] = array(
+    '#markup' => $reusable_block_notes,
+    '#weight' => -99,
+  );
+
   $form['info'] = array(
     '#type' => 'textfield',
     '#title' => t('Admin label'),
@@ -287,7 +305,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     '#title' => t('Display title'),
     '#default_value' => $edit['title'],
     '#maxlength' => 255,
-    '#description' => t('The title of the block as shown to the user. This will affect all places where this block is used.'),
+    '#description' => t('Optional block title to be shown to site visitors.'),
   );
   $form['body'] = array(
     '#type' => 'text_format',
@@ -332,14 +350,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
         '[name=title_display]' => array('value' => LAYOUT_TITLE_DEFAULT),
       ),
     );
-    $form['reusable'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Make this block reusable'),
-      '#description' => t('This option may not be unchecked once enabled. You may configure or delete this reusable block from the !block_link page.', array('!block_link' => l(t('Custom blocks'), 'admin/structure/block'))),
-      '#weight' => 4,
-      '#default_value' => TRUE,
-      '#disabled' => TRUE,
-    );
+
     $form['info']['#weight'] = 5;
     $form['delta']['#weight'] = 6;
     $form['delta']['#machine_name']['source'] = array('block_settings', 'info');

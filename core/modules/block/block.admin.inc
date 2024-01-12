@@ -12,7 +12,7 @@ function block_admin_list() {
 
   $help_text = array(
     '#theme' => 'help',
-    '#markup' => t('These blocks are available to be placed in any layout in the <a href="@link">Layouts</a> page.', array('@link' => url('admin/structure/layouts'))),
+    '#markup' => t('These blocks are available to be placed in any layout in the <a href="@link">Layouts</a> page. <strong>Updating the content of these blocks in one place will affect all places where they are being used!</strong>', array('@link' => url('admin/structure/layouts'))),
   );
 
   $header = array(
@@ -71,7 +71,10 @@ function block_admin_list() {
     '#empty' => t('No custom blocks have been created yet.'),
   );
 
-  return array('help_text' => $help_text, 'block_admin_list' => $block_admin_list);
+  return array(
+    'help_text' => $help_text,
+    'block_admin_list' => $block_admin_list,
+  );
 }
 
 /**
@@ -275,7 +278,11 @@ function block_custom_block_delete($form, &$form_state, $delta) {
   $form['info'] = array('#type' => 'hidden', '#value' => $custom_block['info']);
   $form['delta'] = array('#type' => 'hidden', '#value' => $delta);
 
-  return confirm_form($form, t('Are you sure you want to delete the block %name?', array('%name' => $custom_block['info'])), 'admin/structure/block', '', t('Delete'), t('Cancel'));
+  backdrop_set_message('<strong>' . t('Deleting this reusable block will remove it from all layouts where it is being used!') . '</strong>', 'warning');
+  backdrop_set_message(t('This action cannot be undone!'), 'warning');
+  $question = t('Are you sure you want to delete the block %name?', array('%name' => $custom_block['info']));
+
+  return confirm_form($form, $question, 'admin/structure/block', '', t('Delete'), t('Cancel'));
 }
 
 /**

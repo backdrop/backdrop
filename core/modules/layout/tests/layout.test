@@ -2020,7 +2020,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $this->assertText(t('Admin label is required when making a block reusable.'));
     $edit['admin_label'] = 'My custom block label';
     $this->backdropPost(NULL, $edit, t('Update block'));
-    $this->assertText(t('An internal name is required when making a block reusable.'));
+    $this->assertText('An internal name is required when making a block reusable.');
     $edit['delta'] = 'my_custom_block';
     $this->backdropPost(NULL, $edit, t('Update block'));
 
@@ -2030,8 +2030,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
 
     // Check that the new block.module provided configuration form is now used.
     $this->backdropGet('admin/structure/layouts/manage/default/configure-block/editor/' . $first_block_uuid);
-    // The reusable checkbox should exist but be disabled.
-    $this->assertFieldByXPath('//input[@name="block_settings[reusable]"][@disabled="disabled"]');
+    $this->assertText('This block is reusable across different layouts');
 
     // Go to the home page and check that the converted block shows up.
     $this->backdropGet('<front>');

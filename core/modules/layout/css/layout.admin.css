@@ -106,10 +106,12 @@
   margin-top: 0.5em;
 }
 
-/* Toggle for the placeholder examples */
+/* Toggles for the placeholder examples and the reusable block notes */
+.reusable-block-notes-toggle,
 .layout-placeholder-examples-toggle {
   white-space: nowrap;
 }
+.reusable-block-notes-toggle .arrow,
 .layout-placeholder-examples-toggle .arrow {
   border-bottom-color: transparent;
   border-left-color: transparent;
@@ -123,6 +125,7 @@
   overflow: hidden;
   margin: 0.15em 0.3333em;
 }
+.reusable-block-notes-toggle .arrow.close,
 .layout-placeholder-examples-toggle .arrow.close {
   border-top-color: transparent;
   border-bottom-color: #0074bd;
