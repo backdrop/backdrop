@@ -5,9 +5,6 @@
  * Many of these styles are adapted directly from the default CKEditor theme
  * "moono".
  */
-.ck-editor {
-  white-space: normal;
-}
 .ckeditor5-active-toolbar-configuration,
 [dir="rtl"] .ckeditor5-active-toolbar-configuration {
   list-style: none;

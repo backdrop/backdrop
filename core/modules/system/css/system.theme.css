@@ -94,6 +94,9 @@ tr.even .form-item {
   margin-bottom: 0;
   white-space: nowrap;
 }
+.ck-editor {
+  white-space: normal;
+}
 .form-item .description {
   font-size: 0.85em;
 }
