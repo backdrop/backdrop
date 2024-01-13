@@ -623,7 +623,7 @@ function _date_field_settings_form($field, $instance, $has_data) {
   $form['cache_enabled'] = array(
     '#type' => 'checkbox',
     '#title' => t('Cache dates'),
-    '#description' => t('Create and cache date objects when date fields are being loaded, rather than when they are being displayed. This can help to improve performance.'),
+    '#description' => t('Create and cache date objects when date fields are loaded, rather than when they are displayed. This can help to improve performance.'),
     '#default_value' => !empty($settings['cache_enabled']),
     '#weight' => 10,
   );
