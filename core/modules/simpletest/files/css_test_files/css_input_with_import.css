@@ -1,6 +1,11 @@
 
 @import url("http://example.com/style.css");
 @import url("//example.com/style.css");
+
+/* Test import URLs with semi-colons. */
+/* See https://github.com/backdrop/backdrop-issues/issues/6337 */
+@import url("https://example.com/css2?family=Test-Font:ital,wght@0,400;0,500;1,400;1,500&display=swap");
+
 @import "import1.css";
 @import "import2.css";
 

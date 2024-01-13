@@ -4,7 +4,6 @@
  */
 
 table.stick-header {
-  -webkit-transform: translate(2px, 0);
   transform: translate(2px, 0);
 }
 
@@ -38,7 +37,6 @@ table.stick-header {
   margin: 0 0 0 -0.0625em; /* Nudge past the left border */
   padding: 0;
   background: #ebeff7;
-  -webkit-transform: translate(-100%, 0); /* LTR */
   transform: translate(-100%, 0); /* LTR */
 }
 
@@ -46,7 +44,6 @@ table.stick-header {
   left: auto;
   right: 0;
   margin-right: -0.0625em;
-  -webkit-transform: translate(100%, 0);
   transform: translate(100%, 0);
 }
 
@@ -74,7 +71,6 @@ tr.draggable .handle {
   height: 1.5em;
   margin: 0;
   padding: 0;
-  -webkit-transform: translate(-50%, -50%) scale(0.5, 0.5);
   transform: translate(-50%, -50%) scale(0.5, 0.5);
   background: #333333;
   text-decoration: none;
@@ -94,7 +90,6 @@ tr.draggable .handle .handle-inner:after {
 tr.draggable .handle:before {
   top: 0;
   left: 0;
-  -webkit-transform: translate(-0.25em, -0.375em);
   transform: translate(-0.25em, -0.375em);
   border: 0.375em solid transparent;
   border-bottom-color: #333333;
@@ -103,7 +98,6 @@ tr.draggable .handle:before {
 tr.draggable .handle:after {
   bottom: 0;
   left: 0;
-  -webkit-transform: translate(-0.25em, 0.375em);
   transform: translate(-0.25em, 0.375em);
   border: 0.375em solid transparent;
   border-top-color: #333333;
@@ -116,14 +110,12 @@ tr.draggable .handle .handle-inner {
   display: block;
   width: 1.5em;
   height: 0.25em;
-  -webkit-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
   background: #333333;
 }
 tr.draggable .handle .handle-inner:before {
   top: 0;
   right: 0;
-  -webkit-transform: translate(0.375em, -0.25em);
   transform: translate(0.375em, -0.25em);
   border: 0.375em solid transparent;
   border-left-color: #333333;
@@ -133,8 +125,7 @@ tr.draggable .handle .handle-inner:before {
 tr.draggable .handle .handle-inner:after {
   top: 0;
   left: 0;
-  -webkit-transform: translate(-0.375em, -0.25em);
-          transform: translate(-0.375em, -0.25em);
+  transform: translate(-0.375em, -0.25em);
   border: 0.375em solid transparent;
   border-right-color: #333333;
   border-left: 0;
