@@ -9,7 +9,6 @@
 }
 
 .l-header a {
-  -webkit-transition: background-color 0.25s ease-out;
   transition: background-color 0.25s ease-out;
 }
 
