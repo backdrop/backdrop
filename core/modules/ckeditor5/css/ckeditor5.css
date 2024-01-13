@@ -45,3 +45,7 @@
 .ck-content .image:not([class*="image-style-"]) {
   margin: .9em 0 !important;
 }
+
+.ck-editor {
+  white-space: normal;
+}
