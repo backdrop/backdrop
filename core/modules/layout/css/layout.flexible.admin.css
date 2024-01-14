@@ -42,7 +42,6 @@
   padding: 0;
   border: 1.25px solid #CCC;
   margin-bottom: 15px;
-  padding: 0;
   border-radius: 4px;
   box-shadow: 2px 2px 0 0 #d0d0d0;
   background-color: #f7f7f7;
@@ -54,7 +53,7 @@
 [dir="rtl"] .layout-flexible-template-configure-form .layout-flexible-add-row {
   margin-right: 20px;
 }
-  
+
 .flexible-icon {
   border: 2px solid #999;
   border-radius: 3px;
