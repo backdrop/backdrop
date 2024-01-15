@@ -743,7 +743,11 @@ function ckeditor5_ckeditor5_plugins() {
         'required_html' => array('<a href target class title rel data-file-id>'),
         // Include a dependency on ImageUtils to help detect linked images, even
         // if the backdropImage button is not enabled.
-        'plugin_dependencies' => array('link.Link', 'link.LinkUI', 'image.ImageUtils'),
+        'plugin_dependencies' => array(
+          'link.Link',
+          'link.LinkUI',
+          'image.ImageUtils',
+        ),
       ),
     ),
     'library' => array('ckeditor5', 'backdrop.ckeditor5.backdrop-link'),
