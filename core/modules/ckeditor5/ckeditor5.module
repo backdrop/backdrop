@@ -607,6 +607,7 @@ function ckeditor5_ckeditor5_plugins() {
           'image.ImageInsertUI',
           'image.ImageUpload',
           'image.ImageResize',
+          'image.ImageCaption',
         ),
         'required_html' => array(
           '<img src alt height width data-file-id>',
