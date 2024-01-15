@@ -1222,3 +1222,24 @@ div.warning:before {
 div.error:before {
   /* background-image: linear-gradient(transparent, transparent), url(../../../misc/message-error.svg); */
 }
+
+/** 
+ * CKEditor Styles
+ * These should also be in the css/ckeditor-iframe.css file
+ */
+
+span.red {
+  color: red;
+}
+
+span.blue {
+  color: blue;
+}
+
+span.green {
+  color: green;
+}
+
+span.yellow { 
+  color: yellow;
+}
