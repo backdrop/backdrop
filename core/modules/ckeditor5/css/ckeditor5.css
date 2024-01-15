@@ -46,6 +46,9 @@
   margin: .9em 0 !important;
 }
 
+/**
+ * Ensure wrapping within the editor is the default behavior.
+ */
 .ck-editor {
   white-space: normal;
 }
