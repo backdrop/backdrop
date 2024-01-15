@@ -543,6 +543,12 @@ function ckeditor5_ckeditor5_plugins() {
     ),
   );
 
+  // Paragraph is always enabled in Backdrop to ensure text can be added in case
+  // the Headings are not enabled.
+  $plugins['paragraph.Paragraph'] = array(
+    'enabled_callback' => TRUE,
+  );
+
   // @see https://ckeditor.com/docs/ckeditor5/latest/features/headings.html
   $plugins['heading.Heading'] = array(
     'buttons' => array(
