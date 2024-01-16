@@ -18,7 +18,7 @@ function ckeditor5_upgrade_test_ckeditor5_upgrade_button_mapping_alter(&$button_
 function ckeditor5_upgrade_test_ckeditor5_upgrade_format_alter(&$format, $original_format) {
   if (!empty($format->filters['filter_html']->status)) {
     $allowed_tags = $format->filters['filter_html']->settings['allowed_html'];
-    $toolbar = $format->editor_settings['cketoolbar'];
+    $toolbar = $format->editor_settings['toolbar'];
     // Add <test-tag> to the list of allowed tags if the test button is present.
     if (in_array('testButton', $toolbar) && strpos($allowed_tags, '<test-tag>') === FALSE) {
       $format->filters['filter_html']->settings['allowed_html'] = $allowed_tags . ' <test-tag>';

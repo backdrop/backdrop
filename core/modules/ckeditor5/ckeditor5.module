@@ -40,7 +40,7 @@ function ckeditor5_editor_info() {
     'label' => t('CKEditor 5'),
     'library' => array('ckeditor5', 'backdrop.ckeditor5'),
     'default settings' => array(
-      'cketoolbar' => array(
+      'toolbar' => array(
         'bold', 'italic', 'blockQuote', 'heading', '|',
         'bulletedList', 'numberedList', '|',
         'alignment:left', 'alignment:center', 'alignment:right', '|',
@@ -166,6 +166,19 @@ function ckeditor5_library_info() {
   );
 
   return $libraries;
+}
+
+/**
+ * Implements hook_library_info_alter().
+ */
+function ckeditor5_library_info_alter(&$libraries, $module) {
+  if ($module == 'system' && isset($libraries['ui.dialog'])) {
+    // Override jquery.ui dialog _allowInteraction method to allow interaction
+    // for editor form elements from within jquery dialogs.
+    // @see https://bugs.jqueryui.com/ticket/9087/
+    $path = backdrop_get_path('module', 'ckeditor5') . '/js/ckeditor5-dialog-fix.js';
+    $libraries['ui.dialog']['js'][$path] = array();
+  }
 }
 
 /**
@@ -530,6 +543,12 @@ function ckeditor5_ckeditor5_plugins() {
     ),
   );
 
+  // Paragraph is always enabled in Backdrop to ensure text can be added in case
+  // the Headings are not enabled.
+  $plugins['paragraph.Paragraph'] = array(
+    'enabled_callback' => TRUE,
+  );
+
   // @see https://ckeditor.com/docs/ckeditor5/latest/features/headings.html
   $plugins['heading.Heading'] = array(
     'buttons' => array(
@@ -594,6 +613,7 @@ function ckeditor5_ckeditor5_plugins() {
           'image.ImageInsertUI',
           'image.ImageUpload',
           'image.ImageResize',
+          'image.ImageCaptionUtils',
         ),
         'required_html' => array(
           '<img src alt height width data-file-id>',
@@ -728,7 +748,13 @@ function ckeditor5_ckeditor5_plugins() {
         // @todo: The id attribute is being flagged as disallowed by core's
         // blocking of on* attributes. It should be included here.
         'required_html' => array('<a href target class title rel data-file-id>'),
-        'plugin_dependencies' => array('link.Link', 'link.LinkUI'),
+        // Include a dependency on ImageUtils to help detect linked images, even
+        // if the backdropImage button is not enabled.
+        'plugin_dependencies' => array(
+          'link.Link',
+          'link.LinkUI',
+          'image.ImageUtils',
+        ),
       ),
     ),
     'library' => array('ckeditor5', 'backdrop.ckeditor5.backdrop-link'),
@@ -887,8 +913,8 @@ function _ckeditor5_image_alignment_plugin_check($format, $plugin_name) {
  *   TRUE if the image plugin is enabled, FALSE otherwise.
  */
 function _ckeditor5_link_image_plugin_check($format, $plugin_name) {
-  $link_enabled = in_array('backdropLink', $format->editor_settings['cketoolbar']);
-  $image_enabled = in_array('backdropImage', $format->editor_settings['cketoolbar']);
+  $link_enabled = in_array('backdropLink', $format->editor_settings['toolbar']);
+  $image_enabled = in_array('backdropImage', $format->editor_settings['toolbar']);
   return $link_enabled && $image_enabled;
 }
 
@@ -950,7 +976,7 @@ function ckeditor5_get_config($format) {
 
   // Record needed plugins based on use in the toolbar.
   $toolbar = array();
-  foreach ($format->editor_settings['cketoolbar'] as $button_name) {
+  foreach ($format->editor_settings['toolbar'] as $button_name) {
     // Sanity check that the button exists in our installation.
     if (isset($all_buttons[$button_name])) {
       // Add in the button parent's overall plugin and its dependencies.
