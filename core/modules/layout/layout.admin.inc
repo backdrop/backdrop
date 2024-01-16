@@ -2355,7 +2355,7 @@ function layout_reorder_form($form, &$form_state) {
 
   $form['help'] = array(
     '#type' => 'help',
-    '#markup' => t('When there are multiple layouts available for the same path, the first one that satisfies its visibility conditions is selected. Reorder the layouts on this path to affect which layout will be preferred.'),
+    '#markup' => t('When there are multiple layouts available for the same path, the first one that satisfies its visibility conditions is selected. Reorder the layouts on this path to affect which layout will be chosen.'),
   );
 
   $form['actions'] = array('#type' => 'actions');
