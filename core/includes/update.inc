@@ -157,8 +157,8 @@ function update_prepare_bootstrap() {
           'not null' => TRUE,
           'default' => '',
         );
-        $langcode_indexes = array('indexes' =>
-          array(
+        $langcode_indexes = array(
+          'indexes' => array(
             'alias_langcode_pid' => array('alias', 'langcode', 'pid'),
             'source_langcode_pid' => array('source', 'langcode', 'pid'),
           ),
@@ -450,7 +450,7 @@ function update_module_enable(array $modules) {
     // once the variable bootstrap is done.
     require_once BACKDROP_ROOT . '/core/includes/module.inc';
     system_list_reset();
-    //  @todo: figure out what to do about hook_install() and hook_enable().
+    // @todo: figure out what to do about hook_install() and hook_enable().
   }
 }
 

@@ -140,7 +140,12 @@ function field_ui_menu() {
             'weight' => 2,
             'file' => 'field_ui.admin.inc',
           ) + $access;
-
+          // Secondary tab for 'Manage display' overview.
+          $items["$path/display/overview"] = array(
+            'title' => 'Overview',
+            'type' => MENU_DEFAULT_LOCAL_TASK,
+            'weight' => -99,
+          ) + $access;
           // Display modes.
           // The same base $path for the menu item (with a placeholder) can be
           // used for all bundles of a given entity type; but depending on
@@ -148,17 +153,37 @@ function field_ui_menu() {
           // modes available for customization. So we define menu items for all
           // Display modes, and use an access callback to determine which ones
           // are actually visible for a given bundle.
-          $items["$path/display/%"] = array(
-            'page callback' => 'backdrop_get_form',
-            'page arguments' => array('field_ui_display_form', $entity_type, $bundle_arg, $view_mode_position),
-            // The access callback needs to check both the current 'custom
-            // display' setting for the Display mode, and the overall access
-            // rules for the bundle admin pages.
-            'access callback' => '_field_ui_view_mode_menu_access',
-            'access arguments' => array_merge(array($entity_type, $bundle_arg, $view_mode_position, $access['access callback']), $access['access arguments']),
-            'type' => MENU_LOCAL_TASK,
-            'file' => 'field_ui.admin.inc',
-          );
+          $view_modes = array(
+            'default' => array(
+              'label' => t('Default'),
+            ),
+          ) + $entity_info['view modes'];
+
+          foreach ($view_modes as $view_mode => $view_mode_info) {
+            $items["$path/display/$view_mode"] = array(
+              'title' => $view_mode_info['label'],
+              'page callback' => 'backdrop_get_form',
+              'page arguments' => array(
+                'field_ui_display_form',
+                $entity_type,
+                $bundle_arg,
+                $view_mode,
+              ),
+              // The access callback needs to check both the current 'custom
+              // display' setting for the view mode, and the overall access
+              // rules for the bundle admin pages.
+              'access callback' => '_field_ui_view_mode_menu_access',
+              'access arguments' => array_merge(
+                array(
+                  $entity_type,
+                  $bundle_arg,
+                  $view_mode,
+                  $access['access callback'],
+                ), $access['access arguments']),
+              'type' => MENU_LOCAL_TASK,
+              'file' => 'field_ui.admin.inc',
+            );
+          }
 
           // Display mode administration.
           $items["$path/display/add"] = array(

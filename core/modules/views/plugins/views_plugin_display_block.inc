@@ -20,7 +20,17 @@ class views_plugin_display_block extends views_plugin_display {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['block_description'] = array('default' => '', 'translatable' => TRUE);
+    $description = '';
+    if (isset($this->view)) {
+      if ($this->display->display_title == $this->definition['title']) {
+        $description = t('View: @view', array('@view' => t($this->view->get_human_name())));
+      }
+      else {
+        $description = t('View: @view (@display)', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
+      }
+    }
+
+    $options['block_description'] = array('default' => $description, 'translatable' => TRUE);
     $options['block_caching'] = array('default' => BACKDROP_NO_CACHE);
 
     $options['allow'] = array(
@@ -70,15 +80,12 @@ class views_plugin_display_block extends views_plugin_display {
    */
   function execute_hook_block_list($delta = 0, $edit = array()) {
     $delta = $this->view->name . '-' . $this->display->id;
-    $info = $this->get_option('block_description');
 
-    if (empty($info)) {
-      if ($this->display->display_title == $this->definition['title']) {
-        $info = t('View: @view', array('@view' => t($this->view->get_human_name())));
-      }
-      else {
-        $info = t('View: @view: @display', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
-      }
+    if (!empty($this->get_option('block_description'))) {
+      $info = $this->get_option('block_description');
+    }
+    else {
+      $info = t('View: @view (@display)', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
     }
 
     $required_contexts = array();
@@ -137,7 +144,12 @@ class views_plugin_display_block extends views_plugin_display {
 
     $block_description = strip_tags($this->get_option('block_description'));
     if (empty($block_description)) {
-      $block_description = t('None');
+      if ($this->display->display_title == $this->definition['title']) {
+        $block_description = t('View: @view', array('@view' => t($this->view->get_human_name())));
+      }
+      else {
+        $block_description = t('View: @view (@display)', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
+      }
     }
 
     $options['block_description'] = array(

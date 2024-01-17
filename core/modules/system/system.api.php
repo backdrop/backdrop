@@ -1813,17 +1813,8 @@ function hook_custom_theme() {
  *     occurred.
  *   - ip: The IP address where the request for the page came from.
  *   - timestamp: The UNIX timestamp of the date/time the event occurred.
- *   - severity: The severity of the message; one of the following values as
- *     defined in @link http://www.faqs.org/rfcs/rfc3164.html RFC 3164: @endlink
- *     - WATCHDOG_EMERGENCY: Emergency, system is unusable.
- *     - WATCHDOG_ALERT: Alert, action must be taken immediately.
- *     - WATCHDOG_CRITICAL: Critical conditions.
- *     - WATCHDOG_ERROR: Error conditions.
- *     - WATCHDOG_WARNING: Warning conditions.
- *     - WATCHDOG_NOTICE: Normal but significant conditions.
- *     - WATCHDOG_INFO: Informational messages.
- *     - WATCHDOG_DEBUG: Debug-level messages.
- *     - WATCHDOG_DEPRECATED: Deprecated use of a function or feature.
+ *   - severity: The severity of the message; see watchdog_severity_levels() for
+ *     possible values.
  *   - link: An optional link provided by the module that called the watchdog()
  *     function.
  *   - message: The text of the message to be logged. Variables in the message
@@ -1837,18 +1828,7 @@ function hook_custom_theme() {
 function hook_watchdog(array $log_entry) {
   global $base_url, $language;
 
-  $severity_list = array(
-    WATCHDOG_EMERGENCY  => t('Emergency'),
-    WATCHDOG_ALERT      => t('Alert'),
-    WATCHDOG_CRITICAL   => t('Critical'),
-    WATCHDOG_ERROR      => t('Error'),
-    WATCHDOG_WARNING    => t('Warning'),
-    WATCHDOG_NOTICE     => t('Notice'),
-    WATCHDOG_INFO       => t('Info'),
-    WATCHDOG_DEBUG      => t('Debug'),
-    WATCHDOG_DEPRECATED => t('Deprecated Use'),
-  );
-
+  $severity_list = watchdog_severity_levels();
   $to = 'someone@example.com';
   $params = array();
   $params['subject'] = t('[@site_name] @severity_desc: Alert from your web site', array(
@@ -1882,7 +1862,7 @@ function hook_watchdog(array $log_entry) {
     '@message'       => strip_tags($log_entry['message']),
   ));
 
-  backdrop_mail('emaillog', 'entry', $to, $language, $params);
+  backdrop_mail('email_log', 'entry', $to, $language, $params);
 }
 
 /**
@@ -2878,9 +2858,16 @@ function hook_install() {
  * name, you should never renumber update functions. It may result in updates
  * being either skipped or run twice.
  *
- * Not all module functions are available from within a hook_update_N() function.
- * In order to call a function from your mymodule.module or an include file,
- * you need to explicitly load that file first.
+ * Module functions not in the install file cannot be counted on to be available
+ * from within a hook_update_N() function. In order to call a function from your
+ * mymodule.module or an include file, you need to explicitly load that file
+ * first.
+ *
+ * This is because if a module was previously enabled but is now disabled (and
+ * has not been uninstalled), update hooks will still be called for that module
+ * during system updates, but the mymodule.module file (and any other files
+ * loaded by that one, including, for example, autoload information) will not
+ * have been loaded.
  *
  * During database updates the schema of any module could be out of date. For
  * this reason, caution is needed when using any API function within an update
@@ -2902,9 +2889,9 @@ function hook_install() {
  *   Stores information for multipass updates. See above for more information.
  *
  * @throws BackdropUpdateException, PDOException
- *   In case of error, update hooks should throw an instance of BackdropUpdateException
- *   with a meaningful message for the user. If a database query fails for whatever
- *   reason, it will throw a PDOException.
+ *   In case of error, update hooks should throw an instance of
+ *   BackdropUpdateException with a meaningful message for the user. If a
+ *   database query fails for whatever reason, it will throw a PDOException.
  *
  * @return
  *   Optionally, update hooks may return a translated string that will be
@@ -3560,11 +3547,13 @@ function hook_page_delivery_callback_alter(&$callback) {
 function hook_system_themes_page_alter(&$theme_groups) {
   foreach ($theme_groups as $state => &$group) {
     foreach ($theme_groups[$state] as &$theme) {
-      // Add a foo link to each list of theme operations.
-      $theme->operations[] = array(
+      // Add a foo link to each list of theme operations. 'foo' is also added as
+      // an additional class to the operation link's <li> HTML tag.
+      $theme->operations['foo'] = array(
         'title' => t('Foo'),
         'href' => 'admin/appearance/foo',
-        'query' => array('theme' => $theme->name)
+        'query' => array('theme' => $theme->name),
+        'attributes' => array('title' => t('Perform operation foo')),
       );
     }
   }

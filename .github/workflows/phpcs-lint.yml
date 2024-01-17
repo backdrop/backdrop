@@ -17,7 +17,7 @@ jobs:
       # The checkout action refuses to put it outside, so we have to do it in
       # two steps.
       - name: Checkout coding standard
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           repository: backdrop-ops/phpcs
           ref: 1.0.0-beta1
@@ -27,7 +27,7 @@ jobs:
         run: mv phpcs ..
 
       - name: Checkout code with full depth
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -41,9 +41,10 @@ jobs:
     name: Check spelling
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
       name: Checkout code
-    - uses: streetsidesoftware/cspell-action@v2
+    - uses: streetsidesoftware/cspell-action@v5
       name: Run CSpell
       with:
+        incremental_files_only: true
         config: '.cspell/cspell.json'

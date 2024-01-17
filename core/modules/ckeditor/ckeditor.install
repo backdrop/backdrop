@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Install, update and uninstall functions for CKEditor module.
+ * Install, update and uninstall functions for CKEditor 4 module.
  */
 
 /**
@@ -11,22 +11,24 @@ function ckeditor_requirements($phase) {
   $requirements = array();
   $t = get_t();
 
-  // Check if CKEditor is not enabled on any formats.
   if ($phase == 'runtime') {
-    $ckeditor_found = FALSE;
-    $formats = filter_formats();
-    foreach ($formats as $format) {
-      if (isset($format->editor) && $format->editor === 'ckeditor') {
-        $ckeditor_found = TRUE;
-      }
+    $ckeditor_version = $t('Version: !version', array('!version' => CKEDITOR_VERSION));
+    $description = $t('CKEditor 4 reached its official end-of-life in June 2023.');
+    if (!module_exists('ckeditor5')) {
+      $description .= ' ' . $t('To start the upgrade to CKEditor 5, enable it from the <a href="!modules">modules page</a>.', array(
+        '!modules' => url('admin/modules', array('query' => array('search' => 'ckeditor'))),
+      ));
     }
-    if (!$ckeditor_found) {
-      $requirements['ckeditor_not_enabled'] = array(
-        'title' => $t('CKEditor'),
-        'value' => $t('CKEditor is installed but not enabled on any formats. Visit the <a href="!url">text editors and formats configuration</a> to enable CKEditor on one or more formats.', array('!url' => url('admin/config/content/formats'))),
-        'severity' => REQUIREMENT_WARNING
-      );
-    }
+    $description .= ' ' . $t('See the <a href="!documentation">documentation for more information on the upgrade process</a>.', array(
+      '!documentation' => 'https://backdropcms.org/news/upgrade-from-ckeditor-4-to-5',
+    ));
+
+    $requirements['ckeditor_version'] = array(
+      'title' => $t('CKEditor 4 (Deprecated)'),
+      'value' => $ckeditor_version,
+      'description' => $description,
+      'severity' => REQUIREMENT_WARNING,
+    );
   }
 
   return $requirements;
