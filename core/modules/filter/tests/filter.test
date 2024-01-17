@@ -1062,6 +1062,14 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
         "<p>\n    indented line<br />\n    second indented line<br />\n</p>" => FALSE,
         "<p>\n    indented line\n    second indented line\n</p>" => FALSE,
       ),
+      // Check that manually added <br> tags at end of lines don't duplicate
+      // another <br /> tag after them. Line breaks are normalized from <br>
+      // to <br /> as part of this filter.
+      "<p>\n    line before break<br>\n    line after break</p>" => array(
+        "<p>\n    line before break<br />\n    line after break</p>"  => TRUE,
+        "<p>\n    line before break<br><br />\n    line after break</p>"  => FALSE,
+        "<p>\n    line before break<br /><br />\n    line after break</p>"  => FALSE,
+      ),
     );
     $this->assertFilteredString($filter, $tests);
 
