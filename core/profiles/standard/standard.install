@@ -543,6 +543,11 @@ function standard_install() {
     'administer nodes',
     'search content',
     'use advanced search',
+    'access file overview',
+    'create files',
+    'view own private files',
+    'view own files',
+    'view files',
     $filtered_html_permission,
   );
   user_role_grant_permissions('editor', $editor_permissions);
