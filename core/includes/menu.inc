@@ -2747,10 +2747,11 @@ function menu_get_active_breadcrumb() {
     // faster than rebuilding an entirely new active trail.
     backdrop_alter('menu_breadcrumb', $active_trail, $item);
 
-    // Don't show a link to the current page in the breadcrumb trail.
+    // Include a link to the current page in the breadcrumb trail, but make it
+    // invisible by default for backwards compatibility.
     $end = end($active_trail);
     if ($item['href'] == $end['href']) {
-      array_pop($active_trail);
+      $active_trail[$end['depth']]['options']['item_attributes']['class'] = 'element-invisible';
     }
 
     // Remove the tab root (parent) if the current path links to its parent.
