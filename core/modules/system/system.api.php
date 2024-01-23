@@ -1051,13 +1051,11 @@ function hook_menu_local_tasks_alter(&$data, $router_item, $root_path) {
  * @see menu_set_active_trail()
  */
 function hook_menu_breadcrumb_alter(&$active_trail, $item) {
-  // Always display a link to the current page by removing the element-invisible
-  // class. NOTE: This could also be done in the UI using the breadcrumb block
-  // settings.
+  // Remove the link to the current page.
   if (!backdrop_is_front_page()) {
     $end = end($active_trail);
     if ($item['href'] == $end['href']) {
-      $active_trail[$end['depth']]['options']['item_attributes']['class'] = '';
+      array_pop($active_trail);
     }
   }
 }
