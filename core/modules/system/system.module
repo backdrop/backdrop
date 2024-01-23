@@ -3402,7 +3402,7 @@ function system_breadcrumb_block($settings = array()) {
     // Recreate the last breadcrumb as an invisible link if block settings
     // don't ask for it, for backwards compatibility.
     array_pop($crumbs);
-    $crumbs[] = l(backdrop_get_title(), current_path(), array('attributes' => array('class' => array('element-invisible')));
+    $crumbs[] = l(backdrop_get_title(), current_path(), array('attributes' => array('class' => array('element-invisible'))));
   }
 
   return theme('breadcrumb', array('breadcrumb' => $crumbs));
