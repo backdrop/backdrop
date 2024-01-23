@@ -2751,7 +2751,7 @@ function menu_get_active_breadcrumb() {
     // invisible by default for backwards compatibility.
     $end = end($active_trail);
     if ($item['href'] == $end['href']) {
-      $active_trail[$end['depth']]['options']['item_attributes']['class'] = 'element-invisible';
+      $active_trail[$end['depth']]['localized_options']['attributes']['class'][] = 'element-invisible';
     }
 
     // Remove the tab root (parent) if the current path links to its parent.
