@@ -1,0 +1,25 @@
+name: PHP Lint
+on:
+  pull_request:
+    branches: [1.x]
+
+jobs:
+  phplint:
+    name: Check for syntax errors
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          tools: none
+          coverage: none
+
+      - name: Checkout code with full depth
+        uses: actions/checkout@v2
+        # Fetch depth is essential to get a git diff to origin.
+        with:
+          fetch-depth: 0
+
+      - name: Run lint
+        run: php .github/misc/phplinter.php
