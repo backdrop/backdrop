@@ -89,7 +89,7 @@ function layout_menu() {
 
   $items['admin/structure/layouts/list'] = array(
     'title' => 'List layouts',
-    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'type' => MENU_NORMAL_ITEM,
     'weight' => -10,
     'file' => 'layout.admin.inc',
   );
@@ -272,7 +272,7 @@ function layout_menu() {
     'file' => 'layout.admin.inc',
   );
   $items['admin/structure/layouts/manage/%layout_tempstore/configure'] += $base;
-
+// @note-to-self: menu items from here below may need to be replicated for Layout Paragraphs
   $items['admin/structure/layouts/manage/%layout_tempstore/add-block/%/%'] = array(
     'title' => 'Add block',
     'page callback' => 'layout_block_add_page',
@@ -2012,8 +2012,8 @@ function layout_clear_layout_tempstore($name, $type = 'layout') {
 /**
  * Menu loader callback to load a Layout cache object.
  */
-function layout_tempstore_load($layout_name) {
-  return layout_get_layout_tempstore($layout_name, 'layout');
+function layout_tempstore_load($layout_name, $type = 'layout') {
+  return layout_get_layout_tempstore($layout_name, $type);
 }
 
 /**
@@ -2026,8 +2026,8 @@ function layout_tempstore_menu_item_load($layout_name) {
 /**
  * Menu loader to load an individual block from a layout.
  */
-function layout_tempstore_block_load($layout_block_uuid, $layout_name) {
-  $layout = layout_tempstore_load($layout_name);
+function layout_tempstore_block_load($layout_block_uuid, $layout_name, $type = 'layout') {
+  $layout = layout_tempstore_load($layout_name, $type);
   $block = FALSE;
 
   if (isset($layout->in_progress['block']) && $layout->in_progress['block']->uuid === $layout_block_uuid) {
@@ -2281,13 +2281,25 @@ function layout_get_title_description(Layout $layout) {
 }
 
 /**
+ * Define flexible layout types and allow modules to alter the list to define
+ * new flexible layout types.
+ */
+function layout_flexible_types() {
+  $flexible_types = array(
+    'flexible' => t('Flexible Layouts'),
+  );
+  backdrop_alter('layout_flexible_types', $flexible_types);
+  return $flexible_types;
+}
+
+/**
  * Store changes to a flexible layout template in the temporary store.
  *
  * @param LayoutFlexibleTemplate $flexible_template
  *   The loaded flexible template object.
  */
 function layout_flexible_tempstore_set(LayoutFlexibleTemplate $flexible_template) {
-  tempstore_set('layout.flexible', $flexible_template->name, $flexible_template, 604800);
+  tempstore_set('layout.' . $flexible_template->type, $flexible_template->name, $flexible_template, 604800);
 }
 
 /**
@@ -2302,20 +2314,22 @@ function layout_flexible_tempstore_set(LayoutFlexibleTemplate $flexible_template
  * @return LayoutFlexibleTemplate
  *   The flexible template object.
  */
-function layout_flexible_tempstore_load($flexible_template_name = NULL) {
+function layout_flexible_tempstore_load($flexible_template_name = NULL, $type = 'flexible') {
   if (!$flexible_template_name) {
-    return new LayoutFlexibleTemplate();
+    $flexible_template = new LayoutFlexibleTemplate();
+    $flexible_template->type = $type;
+    return $flexible_template;
   }
 
-  $caches = &backdrop_static(__FUNCTION__, array());
-  if (!isset($caches[$flexible_template_name])) {
-    if (!$item = tempstore_get('layout.flexible', $flexible_template_name)) {
-      $item = layout_flexible_template_load($flexible_template_name);
+  $caches = &backdrop_static(__FUNCTION__ . '|' . $type, array());
+  if (!isset($caches[$flexible_template_name . '|' . $type])) {
+    if (!$item = tempstore_get('layout.' . $type, $flexible_template_name)) {
+      $item = layout_flexible_template_load($flexible_template_name, $type);
     }
-    $caches[$flexible_template_name] = $item;
+    $caches[$flexible_template_name . '|' . $type] = $item;
   }
 
-  return $caches[$flexible_template_name];
+  return $caches[$flexible_template_name . '|' . $type];
 }
 
 /**
@@ -2326,8 +2340,8 @@ function layout_flexible_tempstore_load($flexible_template_name = NULL) {
  *
  * @return LayoutFlexibleTemplate|false
  */
-function layout_flexible_template_load($flexible_template_name = NULL) {
-  $all_templates = layout_flexible_template_load_all();
+function layout_flexible_template_load($flexible_template_name = NULL, $type = 'flexible') {
+  $all_templates = layout_flexible_template_load_all($type);
   if (isset($all_templates[$flexible_template_name])) {
     return $all_templates[$flexible_template_name];
   }
@@ -2337,31 +2351,45 @@ function layout_flexible_template_load($flexible_template_name = NULL) {
 }
 
 /**
+ * Verify  that an individual flexible template exists.
+ *
+ * @param string $flexible_template_name
+ *  The machine name of the template to check.
+ *
+ * @return boolean
+ */
+function layout_flexible_template_exists($flexible_template_name = NULL) {
+  $type = 'flexible';
+  return !empty(layout_flexible_template_load($flexible_template_name, $type));
+}
+
+/**
  * Load all flexible templates.
  *
  * @return LayoutFlexibleTemplate[]
  */
-function layout_flexible_template_load_all() {
-  $templates = &backdrop_static(__FUNCTION__, array());
+function layout_flexible_template_load_all($type = 'flexible') {
+  $templates = &backdrop_static(__FUNCTION__ . '|' . $type, array());
 
   if (empty($templates)) {
-    $cache = cache()->get('layout:flexible:config');
+    $cache = cache()->get('layout:' . $type . ':config');
     if ($cache && $cache->data) {
       $configs = $cache->data;
     }
     else {
       $configs = array();
-      $config_names = config_get_names_with_prefix('layout.flexible.');
+      $config_names = config_get_names_with_prefix('layout.' . $type);
       foreach ($config_names as $config_file) {
         $config = config($config_file);
         $data = $config->get();
-        $configs[$data['name']] = $data;
+        $configs[$data['name'] . '|' . $type] = $data;
       }
 
-      cache()->set('layout:flexible:config', $configs);
+      cache()->set('layout:' . $type . ':config', $configs);
     }
 
-    foreach ($configs as $template_name => $config) {
+    foreach ($configs as $template_name_and_type => $config) {
+      $template_name = str_replace('|' . $type, '', $template_name_and_type);
       $templates[$template_name] = new LayoutFlexibleTemplate($config);
     }
   }
@@ -2429,11 +2457,11 @@ function layout_layout_presave($layout) {
 /**
  * Reset all caches provided by Layout module.
  */
-function layout_flexible_reset_caches() {
-  cache()->delete('layout:flexible:config');
+function layout_flexible_reset_caches($type = 'flexible') {
+  cache()->delete('layout:' . $type . ':config');
 
-  backdrop_static_reset('layout_flexible_template_load_all');
-  backdrop_static_reset('layout_flexible_tempstore_load');
+  backdrop_static_reset('layout_flexible_template_load_all' . '__' . $type);
+  backdrop_static_reset('layout_flexible_tempstore_load' . '__' . $type);
 }
 
 /**

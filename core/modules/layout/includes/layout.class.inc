@@ -26,6 +26,22 @@ class Layout {
   var $description;
 
   /**
+   * The type of layout.
+   *
+   * @var string
+   */
+  var $type = 'layout';
+
+  /**
+   * Whether or not this layout template is a full page layout. The default is
+   * TRUE, but other implementations of flexible templates can set this to
+   * FALSE to avoid receiving header and footer regions automatically.
+   *
+   * @var bool
+   */
+  var $is_full_page = TRUE;
+
+  /**
    * The module that originally provided this layout (if any).
    *
    * @var string
@@ -210,6 +226,10 @@ class Layout {
    *   An array of configuration data.
    */
   function __construct(array $config = array()) {
+    // Set default values in case they weren't set earlier.
+    $this->type = 'layout';
+    $this->is_full_page = TRUE;
+    // Set values from config. This will overwrite defaults if they were set.
     foreach ($config as $property => $property_value) {
       $this->{$property} = $property_value;
     }
@@ -330,9 +350,9 @@ class Layout {
     }
 
     if (isset($this->original_name) && $this->original_name != $this->name) {
-      config('layout.layout.' . $this->original_name)->delete();
+      config('layout.' . $this->type . '.' . $this->original_name)->delete();
     }
-    config('layout.layout.' . $this->name)
+    config('layout.' . $this->type . '.' . $this->name)
       ->setData($data)
       ->save();
 
@@ -403,7 +423,7 @@ class Layout {
    */
   function delete() {
     if ($this->storage === LAYOUT_STORAGE_NORMAL) {
-      config('layout.layout.' . $this->name)->delete();
+      config('layout.' . $this->type . '.' . $this->name)->delete();
       // Reassign the menu item to a still-enabled layout (if any).
       if ($this->menu_item && $this->menu_item->name === $this->name) {
         $this->menu_item->reassign();
@@ -422,8 +442,8 @@ class Layout {
   function revert() {
     if (!empty($this->module)) {
       // Restore the module-provided layout config.
-      config('layout.layout.' . $this->name)->delete();
-      config_install_default_config($this->module, 'layout.layout.' . $this->name);
+      config('layout.' . $this->type . '.' . $this->name)->delete();
+      config_install_default_config($this->module, 'layout.' . $this->type . '.' . $this->name);
 
       // Restore the module-provided menu settings if this layout provides the
       // active menu item.
@@ -929,7 +949,7 @@ class Layout {
         }
       }
     }
-    
+
     return empty(array_filter($context_counts));
   }
 

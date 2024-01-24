@@ -5,9 +5,10 @@
   "title": "Default Administrative Layout",
   "description": null,
   "module": "layout",
+  "type": "layout",
+  "layout_template": "boxton",
   "weight": 1,
   "storage": 4,
-  "layout_template": "boxton",
   "disabled": false,
   "settings": {
     "title": "",
@@ -22,10 +23,10 @@
       "default"
     ],
     "footer": [
-      
+
     ],
     "top": [
-      
+
     ]
   },
   "content": {
@@ -39,10 +40,10 @@
           "title": "",
           "style": "default",
           "block_settings": [
-            
+
           ],
           "contexts": [
-            
+
           ]
         },
         "uuid": "55f542fe-0763-453b-ba3e-62677ea559e5",
@@ -66,10 +67,10 @@
           "title": "",
           "style": "default",
           "block_settings": [
-            
+
           ],
           "contexts": [
-            
+
           ]
         },
         "uuid": "default",

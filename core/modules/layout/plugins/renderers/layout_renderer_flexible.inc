@@ -33,6 +33,13 @@ class LayoutRendererFlexible {
   var $admin = TRUE;
 
   /**
+   * TRUE if this renderer is a flexible renderer.
+   *
+   * @var bool
+   */
+  var $flexible = TRUE;
+
+  /**
    * Include rendered HTML prior to the layout.
    *
    * @var string

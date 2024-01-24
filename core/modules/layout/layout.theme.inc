@@ -284,55 +284,57 @@ function theme_layout_region_inner($variables) {
 function layout_preprocess_layout(&$variables) {
   $settings = $variables['layout']->settings;
 
-  // Check if any Title Component blocks have been placed. These will override
-  // the variables here.
-  $block_exists = _layout_page_component_blocks_exist($variables);
+  if ($variables['layout']->is_full_page) {
+    // Check if any Title Component blocks have been placed. These will override
+    // the variables here.
+    $block_exists = _layout_page_component_blocks_exist($variables);
 
-  $variables += array(
-    'action_links' => NULL,
-    'tabs' => NULL,
-    'messages' => NULL,
-    'title' => NULL,
-  );
+    $variables += array(
+      'action_links' => NULL,
+      'tabs' => NULL,
+      'messages' => NULL,
+      'title' => NULL,
+    );
 
-  if (!$variables['admin']) {
-    if (!isset($variables['title']) && !$block_exists['title']) {
-      if ($settings['title_display'] === LAYOUT_TITLE_NONE) {
-        $variables['title'] = NULL;
+    if (!$variables['admin']) {
+      if (!isset($variables['title']) && !$block_exists['title']) {
+        if ($settings['title_display'] === LAYOUT_TITLE_NONE) {
+          $variables['title'] = NULL;
+        }
+        else {
+          $variables['title'] = backdrop_get_title();
+        }
       }
-      else {
-        $variables['title'] = backdrop_get_title();
+
+      // Generate messages last in order to capture as many as possible for the
+      // current page.
+      if (!isset($variables['messages']) && !$block_exists['messages']) {
+        $variables['messages'] = theme('status_messages');
       }
     }
-
-    // Generate messages last in order to capture as many as possible for the
-    // current page.
-    if (!isset($variables['messages']) && !$block_exists['messages']) {
-      $variables['messages'] = theme('status_messages');
+    else {
+      $variables['title'] = isset($variables['content']['title']) ? $variables['content']['title'] : '';
     }
-  }
-  else {
-    $variables['title'] = isset($variables['content']['title']) ? $variables['content']['title'] : '';
-  }
 
-  if (!$variables['admin']) {
-    if (!$block_exists['action_links']) {
-      $variables['action_links'] = menu_local_actions();
-    }
-    if (!$block_exists['tabs']) {
-      $variables['tabs'] = menu_local_tabs();
+    if (!$variables['admin']) {
+      if (!$block_exists['action_links']) {
+        $variables['action_links'] = menu_local_actions();
+      }
+      if (!$block_exists['tabs']) {
+        $variables['tabs'] = menu_local_tabs();
+      }
     }
   }
 
   // Build HTML for displaying flexible templates.
   if (isset($variables['layout_info']['template']) && ($variables['layout_info']['template'] == 'layout--flexible')) {
-    if (is_a($variables['renderer'], 'LayoutRendererFlexible')) {
+    if (!empty($variables['renderer']->flexible)) {
       $variables['flexible_editor'] = TRUE;
-      $flexible_layout = layout_flexible_tempstore_load($variables['layout_info']['name']);
+      $flexible_layout = layout_flexible_tempstore_load($variables['layout_info']['name'], $variables['layout']->type);
     }
     else {
       $variables['flexible_editor'] = FALSE;
-      $flexible_layout = layout_flexible_template_load($variables['layout_info']['name']);
+      $flexible_layout = layout_flexible_template_load($variables['layout_info']['name'], $variables['layout']->type);
     }
     $variables['region_buttons'] = array();
     if (isset($variables['renderer']->region_buttons)) {

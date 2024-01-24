@@ -26,6 +26,28 @@ class LayoutFlexibleTemplate {
   var $description;
 
   /**
+   * The type of the layout template, which is set to 'flexible' (overriding
+   * the default of 'layout').
+   *
+   * @var string
+   */
+  var $type = 'flexible';
+
+  /**
+   * The preview image for the layout template.
+   *
+   * @var string
+   */
+   var $preview = '';
+
+  /**
+   * Whether this layout template is a full page layout.
+   *
+   * @var bool
+   */
+  var $is_full_page = TRUE;
+
+  /**
    * Configuration of the rows for this layout template.
    *
    * Each row contains the following values:
@@ -51,19 +73,24 @@ class LayoutFlexibleTemplate {
    *   An array of configuration data.
    */
   function __construct(array $config = array()) {
+    // Set default values, then override with any passed in values.
+    $this->type = 'flexible';
+    $this->is_full_page = TRUE;
     foreach ($config as $property => $property_value) {
       $this->{$property} = $property_value;
     }
 
     if (empty($this->rows)) {
       $uuid = new Uuid();
-      $this->rows[$uuid->generate()] = array(
-        'contains' => 'region_12',
-        'element' => 'header',
-        'classes' => '',
-        'container' => 'container',
-        'region_names' => array('region_0' => array('label' => t('Header'), 'name' => 'header', 'classes' => '')),
-      );
+      if ($this->is_full_page) {
+        $this->rows[$uuid->generate()] = array(
+          'contains' => 'region_12',
+          'element' => 'header',
+          'classes' => '',
+          'container' => 'container',
+          'region_names' => array('region_0' => array('label' => t('Header'), 'name' => 'header', 'classes' => '')),
+        );
+      }
       $this->rows[$uuid->generate()] = array(
         'contains' => 'region_12',
         'element' => '',
@@ -71,13 +98,15 @@ class LayoutFlexibleTemplate {
         'container' => 'container',
         'region_names' => array('region_0' => array('label' => t('Content'), 'name' => 'content', 'classes' => '')),
       );
-      $this->rows[$uuid->generate()] = array(
-        'contains' => 'region_12',
-        'element' => 'footer',
-        'classes' => '',
-        'container' => 'container',
-        'region_names' => array('region_0' => array('label' => t('Footer'), 'name' => 'footer', 'classes' => '')),
-      );
+      if ($this->is_full_page) {
+        $this->rows[$uuid->generate()] = array(
+          'contains' => 'region_12',
+          'element' => 'footer',
+          'classes' => '',
+          'container' => 'container',
+          'region_names' => array('region_0' => array('label' => t('Footer'), 'name' => 'footer', 'classes' => '')),
+        );
+      }
     }
   }
 
@@ -88,11 +117,14 @@ class LayoutFlexibleTemplate {
     $data = array(
       'name' => $this->name,
       'title' => $this->title,
+      'type' => $this->type,
+      'is_full_page' => $this->is_full_page,
       'description' => $this->description,
+      'preview' => $this->preview,
       'rows' => $this->rows,
     );
 
-    config('layout.flexible.' . $this->name)
+    config('layout.' . $this->type . '.' . $this->name)
       ->setData($data)
       ->save();
 
@@ -109,10 +141,10 @@ class LayoutFlexibleTemplate {
    * Delete this layout template.
    */
   function delete() {
-    config('layout.flexible.' . $this->name)->delete();
+    config('layout.' . $this->type . '.' . $this->name)->delete();
 
     layout_reset_caches();
-    layout_flexible_reset_caches();
+    layout_flexible_reset_caches($this->type);
     backdrop_theme_rebuild();
   }
 }

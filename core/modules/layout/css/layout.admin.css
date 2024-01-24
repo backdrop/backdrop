@@ -29,21 +29,34 @@
   }
 }
 
-.layout-list img {
+.layout-list img,
+.layout-list .layout-icon {
   display: none;
-  float: left; /* LTR */
+  float: left;
+  /* LTR */
   margin-right: 10px;
-  max-width: 37px;
-  height: auto;
 }
+
+.layout-icon {
+  object-fit: contain;
+  max-width: 50px;
+  max-height: 75px;
+  width: 50px;
+  height: 75px;
+}
+
 [dir="rtl"] .layout-list img {
   float: right; /* LTR */
   margin-right: 0;
   margin-left: 10px;
 }
+
 @media (min-width: 768px) {
-  .layout-list img {
+
+  .layout-list img,
+  .layout-list .layout-icon {
     display: inline;
+    color: rgb(102, 102, 102);
   }
 }
 
