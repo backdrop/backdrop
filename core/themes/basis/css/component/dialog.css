@@ -42,7 +42,6 @@
 .ui-dialog .ui-dialog-titlebar-close .ui-icon {
   top: 50%;
   left: 50%;
-  -webkit-transform: translate(-50%, -50%);
   transform: translate(-50%, -50%);
   width: 1em;
   height: 1em;
@@ -65,18 +64,12 @@
 }
 
 .ui-dialog .ui-dialog-titlebar-close .ui-icon:before {
-  -webkit-transform:
-    translate(0.5em, 0.125em)
-    rotate(45deg);
   transform:
     translate(0.5em, 0.125em)
     rotate(45deg);
 }
 
 .ui-dialog .ui-dialog-titlebar-close .ui-icon:after {
-  -webkit-transform:
-    translate(0.5em, 0.125em)
-    rotate(-45deg);
   transform:
     translate(0.5em, 0.125em)
     rotate(-45deg);

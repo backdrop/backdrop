@@ -379,9 +379,11 @@ class DatabaseConnection_mysql extends DatabaseConnection {
       $this->query("CREATE TABLE {backdrop_utf8mb4_test} (id VARCHAR(255), PRIMARY KEY(id(255))) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci ROW_FORMAT=DYNAMIC ENGINE=INNODB");
     }
     catch (Exception $e) {
+      $this->utf8mb4Supported = FALSE;
       return FALSE;
     }
     $this->query("DROP TABLE IF EXISTS {backdrop_utf8mb4_test}");
+    $this->utf8mb4Supported = TRUE;
     return TRUE;
   }
 }

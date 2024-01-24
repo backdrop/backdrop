@@ -143,12 +143,10 @@ div.messages.info:before {
   width: 15px;
 }
 .messages .dismiss:before {
-  -webkit-transform: rotate(-45deg);
   transform: rotate(-45deg);
 }
 .messages .dismiss:after {
   margin-top: -2px;
-  -webkit-transform: rotate(45deg);
   transform: rotate(45deg);
 }
 [dir="rtl"] .messages .dismiss {

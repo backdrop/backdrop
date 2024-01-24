@@ -88,7 +88,11 @@
 
   <?php print render($title_prefix); ?>
   <?php if (!$page && !empty($title)): ?>
-    <h2><a href="<?php print $node_url; ?>" rel="bookmark"><?php print $title; ?></a></h2>
+    <?php if (!empty($node_url)): ?>
+      <h2><a href="<?php print $node_url; ?>" rel="bookmark"><?php print $title; ?></a></h2>
+    <?php else: ?>
+      <h2><?php print $title; ?></h2>
+    <?php endif; ?>
   <?php endif; ?>
   <?php print render($title_suffix); ?>
 

@@ -1,0 +1,54 @@
+/**
+ * CSS needed when displaying a CKEditor instance.
+ */
+
+/**
+ * Hide the powered-by label from the lower right corner.
+ */
+.ck-powered-by {
+  display: none;
+}
+
+/**
+ * Set z-index of the sticky toolbar to be below the Backdrop admin bar.
+ */
+.ck.ck-sticky-panel .ck-sticky-panel__content_sticky {
+  z-index: 998 !important;
+}
+
+.ckeditor5-dialog-loading {
+  position: absolute;
+  top: 6px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+}
+
+.ckeditor5-dialog-loading-link {
+  position: relative;
+  top: 0;
+  display: inline-block;
+  border-radius: 5px;
+  border: 1px solid #B6B6B6;
+  border-top: none;
+  background: white;
+  padding: 3px 10px;
+  box-shadow: 0 0 6px -3px #000;
+  font-size: 14px;
+  user-select: none;
+}
+
+.ckeditor5-dialog-loading-link .ajax-throbber {
+  vertical-align: bottom;
+}
+
+.ck-content .image:not([class*="image-style-"]) {
+  margin: .9em 0 !important;
+}
+
+/**
+ * Ensure wrapping within the editor is the default behavior.
+ */
+.ck-editor {
+  white-space: normal;
+}

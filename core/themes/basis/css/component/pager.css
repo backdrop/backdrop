@@ -83,7 +83,6 @@ ul.pager {
   width: 0.5em;
   height: 0.5em;
   border: 0.125rem solid #ffffff;
-  -webkit-transform: translate(-50%, -50%) rotate(45deg);
   transform: translate(-50%, -50%) rotate(45deg);
 }
 
@@ -139,7 +138,6 @@ ul.pager {
   margin: -0.6em -1em;
   padding: 0.6em 1em;
   text-decoration: none;
-  -webkit-transition: background-color 0.2s;
   transition: background-color 0.2s;
   will-change: background-color;
   white-space: nowrap;

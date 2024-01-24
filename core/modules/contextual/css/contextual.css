@@ -33,7 +33,7 @@
   display: block;
 }
 
-/** Prevents interference with dismiss option on notifications. **/ 
+/** Prevents interference with dismiss option on notifications. **/
 .layout .l-messages {
     padding-top: 1em;
 }
@@ -49,7 +49,6 @@
   text-indent: 34px; /* LTR */
   width: 28px;
   overflow: hidden;
-  -moz-border-radius: 4px;
   border-radius: 4px;
 }
 [dir="rtl"] .contextual-links-trigger {
@@ -68,7 +67,6 @@
   border-bottom: none;
   position: relative;
   z-index: 1;
-  -moz-border-radius: 4px 4px 0 0;
   border-radius: 4px 4px 0 0;
 }
 .contextual-links-wrapper .contextual-links {
@@ -82,12 +80,10 @@
   text-align: left; /* LTR */
   top: 18px;
   white-space: nowrap;
-  -moz-border-radius: 4px 0 4px 4px; /* LTR */
   border-radius: 4px 0 4px 4px; /* LTR */
 }
 [dir="rtl"] .contextual-links-wrapper .contextual-links {
   text-align: right;
-  -moz-border-radius: 0 4px 4px 4px;
   border-radius: 0 4px 4px 4px;
   left: 0;
   right: auto;

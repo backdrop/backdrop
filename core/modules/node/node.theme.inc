@@ -264,7 +264,13 @@ function template_preprocess_node(&$variables) {
     $variables['classes'][] = 'node-by-anonymous';
   }
   elseif ($node->uid == $variables['user']->uid) {
-      $variables['classes'][] = 'node-by-viewer';
+    $variables['classes'][] = 'node-by-viewer';
+  }
+
+  // Remove the link to the node if this type has a hidden path.
+  if ($node_type->settings['hidden_path'] && !user_access('view hidden paths')) {
+    // Empty the $node_url variable so the node title won't be linked.
+    $variables['node_url'] = FALSE;
   }
 
   // Add an extra theme hook suggestion for node id.

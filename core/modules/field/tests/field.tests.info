@@ -28,6 +28,12 @@ description = Test field create, read, update, and delete.
 group = Field API
 file = field.test
 
+[FieldSchemaAlterTestCase]
+name = Field schema alteration tests
+description = Alter the schema for a given type of field.
+group = Field API
+file = field.test
+
 [FieldInstanceCrudTestCase]
 name = Field instance CRUD tests
 description = Create field entities by attaching fields to entities.

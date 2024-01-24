@@ -80,15 +80,12 @@ class views_plugin_display_block extends views_plugin_display {
    */
   function execute_hook_block_list($delta = 0, $edit = array()) {
     $delta = $this->view->name . '-' . $this->display->id;
-    $info = $this->get_option('block_description');
 
-    if (empty($info)) {
-      if ($this->display->display_title == $this->definition['title']) {
-        $info = t('View: @view', array('@view' => t($this->view->get_human_name())));
-      }
-      else {
-        $info = t('View: @view (@display)', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
-      }
+    if (!empty($this->get_option('block_description'))) {
+      $info = $this->get_option('block_description');
+    }
+    else {
+      $info = t('View: @view (@display)', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
     }
 
     $required_contexts = array();

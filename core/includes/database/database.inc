@@ -3177,5 +3177,5 @@ function db_ignore_slave() {
 function _db_is_replica($db_options) {
   // @todo Remove forbidden backwards compatibility word in Backdrop 2.x.
   // cspell:disable-next-line
-  return empty($db_options['target']) || $db_options['target'] == 'slave' || $options['target'] == 'replica';
+  return empty($db_options['target']) || $db_options['target'] == 'slave' || $db_options['target'] == 'replica';
 }

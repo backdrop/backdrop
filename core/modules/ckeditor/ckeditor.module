@@ -4,7 +4,7 @@
  * Provides integration with the CKEditor 4 WYSIWYG editor.
  */
 
-define('CKEDITOR_VERSION', '4.18.0');
+define('CKEDITOR_VERSION', '4.22.1');
 
 /**
  * Implements hook_menu().
@@ -520,6 +520,7 @@ function ckeditor_get_settings($format, $existing_settings) {
     'language' => $language->langcode,
     'resize_dir' => 'vertical',
     'disableNativeSpellChecker' => FALSE,
+    'versionCheck' => FALSE,
   );
 
   // Add the allowedContent setting, which ensures CKEditor only allows tags
@@ -541,6 +542,10 @@ function ckeditor_get_settings($format, $existing_settings) {
     $image_token = filter_editor_dialog_token($format, 'image');
     $settings['backdrop']['imageDialogUrl'] = url('editor/dialog/image/'. $format->format, array('query' => array('token' => $image_token, 'calling_path' => $_GET['q'])));
     $settings['imageUploadUrl'] = url('ckeditor/upload/image/'. $format->format, array('query' => array('token' => $image_token, 'calling_path' => $_GET['q'])));
+    // Use the same extension check as server side for paste uploads in the
+    // upload widget.
+    $supported_extensions = image_get_supported_extensions();
+    $settings['backdrop']['supportedTypesRegexp'] = 'image/(' . implode('|', $supported_extensions) . ')';
   }
   if (isset($external_plugins['backdropimagecaption'])) {
     $settings['backdrop']['captionFilterEnabled'] = !empty($format->filters['filter_image_caption']->status);

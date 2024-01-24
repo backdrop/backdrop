@@ -129,7 +129,6 @@ input.form-radio {
   color: #234600;
   background-color: #e6f2ba;
   padding: 0 0.4em;
-  -moz-border-radius: 3px;
   border-radius: 3px;
 }
 abbr.form-required,
@@ -292,7 +291,6 @@ th.checkbox {
  * @see progress.js
  */
 .progress .filled {
-  -webkit-transition: width .4s;
   transition: width .4s;
   will-change: width;
 }

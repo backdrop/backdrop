@@ -12,8 +12,6 @@ table.treetable span.indenter {
   -webkit-user-select: none;
 
   /* Force content-box box model for indenter (Bootstrap compatibility) */
-  -webkit-box-sizing: content-box;
-  -moz-box-sizing: content-box;
   box-sizing: content-box;
 
   width: 19px;
