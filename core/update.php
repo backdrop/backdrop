@@ -303,7 +303,6 @@ function update_info_page() {
 
   // Flush the theme cache so we can render this page correctly if the theme
   // registry been updated with new preprocess or template variables. 
-  system_rebuild_theme_data();
   backdrop_theme_rebuild();
 
   // Get database name
