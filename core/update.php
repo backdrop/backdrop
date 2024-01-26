@@ -300,6 +300,10 @@ function update_info_page() {
   if (db_table_exists('cache_update')) {
     cache('update')->flush();
   }
+  // Flush the theme cache so we can render this page correctly if themes have
+  // been updated.
+  system_rebuild_theme_data();
+  backdrop_theme_rebuild();
 
   // Get database name
   $db_name = $databases['default']['default']['database'];
