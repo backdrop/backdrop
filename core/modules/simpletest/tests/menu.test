@@ -1035,7 +1035,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     );
     $this->assertBreadcrumb("admin/structure/types/manage/$type/display", $trail);
     $trail_teaser = $trail + array(
-      "admin/structure/types/manage/$type/display/teaser" => t('Post: Teaser display'),
+      "admin/structure/types/manage/$type/display/teaser" => t('Teaser'),
     );
     $this->assertBreadcrumb("admin/structure/types/manage/$type/display/teaser", $trail_teaser);
     array_pop($trail);
@@ -1359,7 +1359,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
 
     $this->backdropLogin($this->admin_user);
     $trail += array(
-      'user/' . $this->admin_user->uid . '/edit' => $edit['link_title'],
+      'user/' . $this->admin_user->uid . '/edit' => t('Edit'),
     );
     $this->assertBreadcrumb('user/' . $this->admin_user->uid . '/edit', $trail, $link_admin_user['link_title'], $tree, FALSE);
 
@@ -1391,7 +1391,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $this->backdropLogin($this->admin_user);
     $trail += array(
       $link_admin_user['link_path'] => $link_admin_user['link_title'],
-      'user/' . $this->admin_user->uid . '/edit' => $edit['link_title'],
+      'user/' . $this->admin_user->uid . '/edit' => t('Edit'),
     );
     $this->assertBreadcrumb('user/' . $this->admin_user->uid . '/edit', $trail, $link_admin_user['link_title'], $tree, FALSE);
 
