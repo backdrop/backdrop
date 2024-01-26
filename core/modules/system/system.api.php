@@ -1813,17 +1813,8 @@ function hook_custom_theme() {
  *     occurred.
  *   - ip: The IP address where the request for the page came from.
  *   - timestamp: The UNIX timestamp of the date/time the event occurred.
- *   - severity: The severity of the message; one of the following values as
- *     defined in @link http://www.faqs.org/rfcs/rfc3164.html RFC 3164: @endlink
- *     - WATCHDOG_EMERGENCY: Emergency, system is unusable.
- *     - WATCHDOG_ALERT: Alert, action must be taken immediately.
- *     - WATCHDOG_CRITICAL: Critical conditions.
- *     - WATCHDOG_ERROR: Error conditions.
- *     - WATCHDOG_WARNING: Warning conditions.
- *     - WATCHDOG_NOTICE: Normal but significant conditions.
- *     - WATCHDOG_INFO: Informational messages.
- *     - WATCHDOG_DEBUG: Debug-level messages.
- *     - WATCHDOG_DEPRECATED: Deprecated use of a function or feature.
+ *   - severity: The severity of the message; see watchdog_severity_levels() for
+ *     possible values.
  *   - link: An optional link provided by the module that called the watchdog()
  *     function.
  *   - message: The text of the message to be logged. Variables in the message
@@ -1837,18 +1828,7 @@ function hook_custom_theme() {
 function hook_watchdog(array $log_entry) {
   global $base_url, $language;
 
-  $severity_list = array(
-    WATCHDOG_EMERGENCY  => t('Emergency'),
-    WATCHDOG_ALERT      => t('Alert'),
-    WATCHDOG_CRITICAL   => t('Critical'),
-    WATCHDOG_ERROR      => t('Error'),
-    WATCHDOG_WARNING    => t('Warning'),
-    WATCHDOG_NOTICE     => t('Notice'),
-    WATCHDOG_INFO       => t('Info'),
-    WATCHDOG_DEBUG      => t('Debug'),
-    WATCHDOG_DEPRECATED => t('Deprecated Use'),
-  );
-
+  $severity_list = watchdog_severity_levels();
   $to = 'someone@example.com';
   $params = array();
   $params['subject'] = t('[@site_name] @severity_desc: Alert from your web site', array(
@@ -1882,7 +1862,7 @@ function hook_watchdog(array $log_entry) {
     '@message'       => strip_tags($log_entry['message']),
   ));
 
-  backdrop_mail('emaillog', 'entry', $to, $language, $params);
+  backdrop_mail('email_log', 'entry', $to, $language, $params);
 }
 
 /**
@@ -3567,11 +3547,13 @@ function hook_page_delivery_callback_alter(&$callback) {
 function hook_system_themes_page_alter(&$theme_groups) {
   foreach ($theme_groups as $state => &$group) {
     foreach ($theme_groups[$state] as &$theme) {
-      // Add a foo link to each list of theme operations.
-      $theme->operations[] = array(
+      // Add a foo link to each list of theme operations. 'foo' is also added as
+      // an additional class to the operation link's <li> HTML tag.
+      $theme->operations['foo'] = array(
         'title' => t('Foo'),
         'href' => 'admin/appearance/foo',
-        'query' => array('theme' => $theme->name)
+        'query' => array('theme' => $theme->name),
+        'attributes' => array('title' => t('Perform operation foo')),
       );
     }
   }

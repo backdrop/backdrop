@@ -47,6 +47,7 @@ function theme_file_managed_file($variables) {
 function theme_file_link($variables) {
   $file = $variables['file'];
   $icon_directory = $variables['icon_directory'];
+  $attributes = $variables['attributes'];
 
   $url = file_create_url($file->uri);
 
@@ -77,12 +78,17 @@ function theme_file_link($variables) {
     'alt' => !empty($mime_name[$mimetype]) ? $mime_name[$mimetype] : t('File'),
   ));
 
-  // Set options as per anchor format described at
+  // Set "type" attribute per anchor format described at
   // http://microformats.org/wiki/file-format-examples
+  if (!isset($attributes['type'])) {
+    $attributes['type'] = $file->filemime . '; length=' . $file->filesize;
+  }
+
   $options = array(
     'attributes' => array(
       'type' => $file->filemime . '; length=' . $file->filesize,
     ),
+    'attributes' => $attributes,
   );
 
   // Use the description as the link text if available.
