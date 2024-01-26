@@ -302,7 +302,7 @@ function update_info_page() {
   }
 
   // Flush the theme cache so we can render this page correctly if the theme
-  // registry been updated with new preprocess or template variables. 
+  // registry been updated with new preprocess or template variables.
   backdrop_theme_rebuild();
 
   // Get database name
@@ -328,7 +328,7 @@ function update_info_page() {
   $output .= "</ol>\n";
   $output .= "<p>After performing the above steps proceed using the continue button.</p>\n";
   $module_status_report = update_upgrade_check_dependencies();
-	if (!empty($module_status_report)) {
+  if (!empty($module_status_report)) {
     $output .= $module_status_report;
   }
   $form_action = check_url(backdrop_current_script_url(array('op' => 'selection', 'token' => $token)));
