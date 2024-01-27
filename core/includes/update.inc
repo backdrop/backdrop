@@ -3,7 +3,7 @@
  * @file
  * Backdrop site update API.
  *
- * This file contains functions to perform database and/or config updates for a
+ * This file contains functions to perform database and config updates for a
  * Backdrop installation. It is included and used extensively by update.php.
  */
 
