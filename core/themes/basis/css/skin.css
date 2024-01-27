@@ -400,7 +400,6 @@ fieldset .fieldset-legend {
   }
 }
 
-
 /**
  * Footer styles
  */
@@ -518,6 +517,7 @@ button.form-submit,
   text-align: center;
   text-transform: uppercase;
   color: #333333;
+  cursor: pointer;
   letter-spacing: 0.025em;
   line-height: 2.875;
   background: #d5d5d5;
@@ -1036,7 +1036,6 @@ ul.secondary li a:active {
 
 .responsive-tabs-mobile ul.primary,
 .expand-dropdown-tabs.responsive-tabs-mobile ul.primary {
-  -webkit-border-radius: 0 0 4px 4px;
   border-radius: 4px;
 }
 
@@ -1213,16 +1212,13 @@ div.messages.info:before {
  * SVGs.
  */
 div.status:before {
-  /* background-image: -webkit-linear-gradient(transparent, transparent), url(../../../misc/message-ok.svg); */
   /* background-image: linear-gradient(transparent, transparent), url(../../../misc/message-ok.svg); */
 }
 
 div.warning:before {
-  /* background-image: -webkit-linear-gradient(transparent, transparent), url(../../../misc/message-warning.svg); */
   /* background-image: linear-gradient(transparent, transparent), url(../../../misc/message-warning.svg); */
 }
 
 div.error:before {
-  /* background-image: -webkit-linear-gradient(transparent, transparent), url(../../../misc/message-error.svg); */
   /* background-image: linear-gradient(transparent, transparent), url(../../../misc/message-error.svg); */
 }

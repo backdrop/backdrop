@@ -31,7 +31,7 @@ function installer_browser_page($type) {
 
   switch($type) {
     case 'layout':
-      backdrop_set_title(t('Install layouts'));
+      backdrop_set_title(t('Install layout templates'));
       break;
     case 'module':
       backdrop_set_title(t('Install modules'));
@@ -846,7 +846,6 @@ function installer_browser_get_install_list() {
  */
 function installer_browser_install_button_form($form, &$form_state) {
   $project_type = installer_browser_type_from_path();
-  $form['#attributes']['class'] = 'installer-browser-install-button-form';
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Install'),
@@ -948,7 +947,7 @@ function installer_browser_get_sort_widget($sort_options, $current_order, $curre
  * @param $full
  *   Set this to TRUE if you want to get all of the supported sort methods.
  *
- * return array
+ * @return array
  *   An array of all sort methods, keyed by method name, with each value an
  *   array with the following keys:
  *   - method: Same as the method name key.
@@ -1023,11 +1022,9 @@ function installer_browser_install_queue_callback($method, $op, $project_name) {
         backdrop_set_message(t('Error: The project was not found.'), 'error');
       }
       break;
-
     case 'remove':
       installer_browser_install_queue_remove($project_name);
       break;
-
     default:
       return MENU_NOT_FOUND;
   }

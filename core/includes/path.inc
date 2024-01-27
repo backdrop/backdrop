@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Functions to handle paths in Backdrop, including URL aliasing.
@@ -312,7 +311,7 @@ function backdrop_match_path($path, $patterns) {
     $patterns_quoted = preg_quote($patterns, '/');
     $regexps[$patterns] = '/^(' . preg_replace($to_replace, $replacements, $patterns_quoted) . ')$/';
   }
-  return (bool)preg_match($regexps[$patterns], $path);
+  return (bool) preg_match($regexps[$patterns], (string) $path);
 }
 
 /**
@@ -320,8 +319,8 @@ function backdrop_match_path($path, $patterns) {
  *
  * Examples:
  * - http://example.com/node/306 returns "node/306".
- * - http://example.com/backdropfolder/node/306 returns "node/306" while
- *   base_path() returns "/backdropfolder/".
+ * - http://example.com/backdrop_folder/node/306 returns "node/306" while
+ *   base_path() returns "/backdrop_folder/".
  * - http://example.com/url-alias (which is a URL alias for node/306) returns
  *   "node/306" as opposed to the URL alias.
  *

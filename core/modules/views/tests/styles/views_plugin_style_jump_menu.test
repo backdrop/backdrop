@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of viewsPluginStyleJumpMenuTest.
@@ -20,8 +19,13 @@ class ViewsPluginStyleJumpMenuTest extends ViewsSqlTest {
    */
   var $nodes;
 
-  public function setUp() {
-    parent::setUp();
+  /**
+   * @var array
+   */
+  protected $nodeTitles;
+
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
 
     $this->nodes = array();
     $this->nodes['page'][] = $this->backdropCreateNode(array('type' => 'page'));
@@ -71,8 +75,8 @@ class ViewsPluginStyleJumpMenuTest extends ViewsSqlTest {
     $view->api_version = '3.0';
     $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
-    /* Display: Master */
-    $handler = $view->new_display('default', 'Master', 'default');
+    /* Display: Default */
+    $handler = $view->new_display('default', 'Default', 'default');
     $handler->display->display_options['access']['type'] = 'perm';
     $handler->display->display_options['cache']['type'] = 'none';
     $handler->display->display_options['query']['type'] = 'views_query';

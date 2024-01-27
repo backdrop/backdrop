@@ -22,7 +22,7 @@
  *   - file-[type]: The current file type. For example, if the file is a
  *     "Image" file it would result in "file-image". Note that the machine
  *     name will often be in a short form of the human readable label.
- *   - file-[mimetype]: The current file's MIME type. For exampe, if the file
+ *   - file-[mimetype]: The current file's MIME type. For example, if the file
  *     is a PNG image, it would result in "file-image-png"
  * - $title_prefix (array): An array containing additional output populated by
  *   modules, intended to be displayed in front of the main title tag that

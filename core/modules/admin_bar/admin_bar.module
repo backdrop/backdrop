@@ -61,6 +61,12 @@ function admin_bar_theme() {
     'admin_bar_icon' => array(
       'variables' => array('src' => NULL, 'alt' => NULL),
     ) + $base,
+    'admin_bar_icon_page' => array(
+      'variables' => array('src' => NULL, 'alt' => NULL),
+    ) + $base,
+    'admin_bar_icon_locale' => array(
+      'variables' => array('src' => NULL, 'alt' => NULL),
+    ) + $base,
   );
 }
 
@@ -88,7 +94,9 @@ function admin_bar_menu_alter(&$items) {
  */
 function admin_bar_menu_link_insert($link) {
   // Flush all of our caches to pick up the link.
-  cache('admin_bar')->flush();
+  if ($link['menu_name'] == 'management') {
+    cache('admin_bar')->flush();
+  }
 }
 
 /**
@@ -96,7 +104,9 @@ function admin_bar_menu_link_insert($link) {
  */
 function admin_bar_menu_link_update($link) {
   // Flush all of our caches to pick up the link.
-  cache('admin_bar')->flush();
+  if ($link['menu_name'] == 'management') {
+    cache('admin_bar')->flush();
+  }
 }
 
 /**
@@ -104,6 +114,15 @@ function admin_bar_menu_link_update($link) {
  */
 function admin_bar_menu_link_delete($link) {
   // Flush all of our caches to pick up the link.
+  if ($link['menu_name'] == 'management') {
+    cache('admin_bar')->flush();
+  }
+}
+
+/**
+ * Implements hook_language_insert().
+ */
+function admin_bar_language_insert() {
   cache('admin_bar')->flush();
 }
 
@@ -241,6 +260,17 @@ function admin_bar_preprocess_page(&$variables) {
     $settings['position_fixed'] = $setting;
   }
 
+  // Send whether this is an admin page to JS for back to site functionality.
+  $settings['current_path_is_admin'] = FALSE;
+  $current_path = current_path();
+  if (path_is_admin($current_path)) {
+    $settings['current_path_is_admin'] = TRUE;
+  }
+
+  $components = $config->get('components');
+  if (in_array('admin_bar.back_to_site_link', $components)) {
+    $settings['back_to_site_link'] = TRUE;
+  }
   backdrop_add_js(array('admin_bar' => $settings), 'setting');
 }
 
@@ -377,9 +407,12 @@ function admin_bar_deliver($page_callback_result) {
 
 /**
  * Implements hook_admin_bar_replacements().
+ *
+ * @see admin_bar_links_page()
  */
 function admin_bar_admin_bar_replacements($complete) {
   $items = array();
+
   // If the complete menu is output, then it is uncached and will contain the
   // current counts already.
   if (!$complete) {
@@ -389,8 +422,97 @@ function admin_bar_admin_bar_replacements($complete) {
       // Replace the counters in the cached menu output with current counts.
       $items['.admin-bar-users a'] = $user_count;
     }
+    // Check whether the page links component is enabled.
+    if (in_array('admin_bar.page', $components)) {
+      $query = array('query' => array(
+        'destination' => current_path(),
+      ));
+
+      if (user_access('administer layouts')) {
+        $layout = layout_get_layout_by_path();
+        $items['#admin-bar-page-layout'] = l(t('Layout (@layout)', array('@layout' => $layout->title)), 'admin/structure/layouts/manage/' . $layout->name, $query);
+        $items['#admin-bar-page-layout'] .= theme('admin_bar_links', array('elements' => array(
+          array(
+            '#title' => t('Configure'),
+            '#href' => 'admin/structure/layouts/manage/' . $layout->name . '/configure',
+            '#options' => $query,
+          ),
+        )));
+      }
+      if (user_access('administer themes')) {
+        global $theme;
+        $theme_data = list_themes();
+        $theme_object = $theme_data[$theme];
+        $items['#admin-bar-page-theme'] = l(t('Theme (@theme)', array('@theme' => $theme_object->info['name'])), 'admin/appearance/settings/' . $theme_object->name, $query);
+      }
+    }
+    // Check whether the page links component is enabled.
+    if (in_array('admin_bar.locale', $components)) {
+      if (module_exists('locale') && language_multilingual()) {
+        if ($locale_links = admin_bar_locale_links()) {
+          // Theme the locale links but remove the <ul> element
+          // so we can swap out the list items for the current <ul> element.
+          $theme_locale_links = theme('admin_bar_links', array(
+            'elements' => $locale_links,
+          ));
+          $items['.admin-bar-locale-links>ul.dropdown'] = strip_tags($theme_locale_links, '<li><a><span>');
+        }
+      }
+    }
   }
+
   return $items;
+}
+
+/**
+ * Build Locale links.
+ *
+ */
+function admin_bar_locale_links() {
+  if (!module_exists('locale') || !language_multilingual()) {
+    return array();
+  }
+
+  global $language;
+  $language_default = $language;
+
+  $path = backdrop_is_front_page() ? '<front>' : $_GET['q'];
+  $language_links = language_negotiation_get_switch_links(LANGUAGE_TYPE_INTERFACE, $path);
+
+  if (!isset($language_links->links)) {
+    return array();
+  }
+
+  foreach ($language_links->links as $language_link) {
+    if ($language_link['language']->langcode == $language_default->langcode) {
+      continue;
+    }
+
+    if (!empty($language_link['href'])) {
+      $links[$language_link['language']->langcode] = array(
+        '#attributes' => array('class' => array('locale')),
+        '#title' => isset($language_link['language']->native) ? $language_link['language']->native : $language_link['language']->name,
+        '#href' => url($language_link['href'], array(
+          'language' => $language_link['language'],
+          'absolute' => TRUE,
+        )),
+        '#below' => array(),
+        '#original_link' => array(),
+      );
+    }
+    else {
+      $links[$language_link['language']->langcode] = array(
+        '#attributes' => array('class' => array('locale')),
+        '#title' => isset($language_link['language']->native) ? $language_link['language']->native : $language_link['language']->name,
+        '#type' => 'markup',
+        '#prefix' => '<span>',
+        '#markup' => (isset($language_link['language']->native) ? $language_link['language']->native : $language_link['language']->name) . ' (' . t('unavailable') . ')',
+        '#suffix' => '</span>',
+      );
+    }
+  }
+
+  return $links;
 }
 
 /**

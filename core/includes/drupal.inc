@@ -2061,7 +2061,7 @@ function drupal_check_module($module) {
 // Functions from mail.inc.
 
 /**
- * Composes and optionally sends an e-mail message.
+ * Composes and optionally sends an email message.
  *
  * @deprecated since 1.0.0
  * @see backdrop_mail()
@@ -2212,6 +2212,7 @@ function drupal_match_path($path, $patterns) {
  *
  * @deprecated since 1.0.0
  */
+// cspell:disable-next-line
 function drupal_path_alias_whitelist_rebuild($source = NULL) {
   watchdog_deprecated_function('drupal', __FUNCTION__);
   return array();
@@ -2224,6 +2225,7 @@ function drupal_path_alias_whitelist_rebuild($source = NULL) {
  */
 function drupal_path_alias_allowlist_rebuild($source = NULL) {
   watchdog_deprecated_function('drupal', __FUNCTION__);
+  // cspell:disable-next-line
   return drupal_path_alias_whitelist_rebuild();
 }
 
@@ -2501,32 +2503,32 @@ function drupal_var_export($var, $prefix = '') {
 
 /**
  * This function has been removed with the inclusion of support for HTML5 number
- * elements. See https://api.backdropcms.org/node/43955
+ * elements. See https://docs.backdropcms.org/node/43955
  *
  * @deprecated since 1.0.0
  */
 function element_validate_integer() {
-  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://api.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
+  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://docs.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
 }
 
 /**
  * This function has been removed with the inclusion of support for HTML5 number
- * elements. See https://api.backdropcms.org/node/43955
+ * elements. See https://docs.backdropcms.org/node/43955
  *
  * @deprecated since 1.0.0
  */
 function element_validate_integer_positive() {
-  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://api.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
+  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://docs.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
 }
 
 /**
  * This function has been removed with the inclusion of support for HTML5 number
- * elements. See https://api.backdropcms.org/node/43955
+ * elements. See https://docs.backdropcms.org/node/43955
  *
  * @deprecated since 1.0.0
  */
 function element_validate_number() {
-  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://api.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
+  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://docs.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
 }
 
 /**

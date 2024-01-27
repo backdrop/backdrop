@@ -1570,7 +1570,7 @@ function views_ui_edit_page_display_tabs($view, $display_id = NULL) {
  */
 function views_ui_show_default_display($view) {
   // Always show the default display for advanced users who prefer that mode.
-  $advanced_mode = config_get('views_ui.settings', 'show_master_display');
+  $advanced_mode = config_get('views_ui.settings', 'show_default_display');
   // For other users, show the default display only if there are no others, and
   // hide it if there's at least one "real" display.
   $additional_displays = (count($view->display) == 1);
@@ -1620,7 +1620,7 @@ function views_ui_get_display_tab_details($view, $display) {
   $plugin = views_fetch_plugin_data('display', $view->display[$display->id]->display_plugin);
   $is_display_deleted = !empty($display->deleted);
   $is_deletable = empty($plugin['no remove']);
-  // The master display cannot be cloned.
+  // The default display cannot be cloned.
   $is_default = $display->id == 'default';
   // @todo: Figure out why get_option doesn't work here.
   $is_enabled = $display->handler->get_option('enabled');
@@ -2503,7 +2503,7 @@ function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = 
   // Finally, we never want these cached -- our object cache does that for us.
   $form['#no_cache'] = TRUE;
 
-  // If this isn't an ajaxy form, then we want to set the title.
+  // If this isn't an AJAX form, then we want to set the title.
   if (!empty($form['#title'])) {
     backdrop_set_title($form['#title']);
   }
@@ -2929,7 +2929,7 @@ function views_ui_ajax_form($js, $key, $view, $display_id = '') {
   // Automatically remove the form cache if it is set and the key does
   // not match. This way navigating away from the form without hitting
   // update will work.
-  if (isset($view->form_cache) && $view->form_cache['key'] != $key) {
+  if (isset($view->form_cache) && $key !== 0 && $view->form_cache['key'] != $key) {
     unset($view->form_cache);
   }
 
@@ -3525,6 +3525,7 @@ function views_ui_rearrange_filter_form($form, &$form_state) {
       '#attributes' => array(
         'class' => array('warning-on-change'),
       ),
+      '#title_display' => 'before',
     );
 
     $form['remove_groups'][$id] = array(); // to prevent a notice
@@ -4494,31 +4495,43 @@ function views_ui_admin_settings_basic() {
   $form['#attached']['css'] = views_ui_get_admin_css();
   $config = config('views_ui.settings');
 
+  $form['wizard'] = array(
+    '#type' => 'fieldset',
+    '#title' => t("'Add view' wizard"),
+  );
+  $form['wizard']['wizard_default_display'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Display types to include by default'),
+    '#description' => t("These display types will be selected by default when a new view is created using the '!add_view' wizard.", array('!add_view' => l(t('Add View'), 'admin/structure/views/add'))),
+    '#options' => array(
+      'page' => t('Page'),
+      'block' => t('Block'),
+    ),
+    '#default_value' => $config->get('wizard_default_display'),
+  );
+
+  $form['basic'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Views UI settings'),
+  );
+  $form['basic']['show_default_display'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Always show the <em>Default</em> display'),
+    '#description' => t('Show the <em>Default</em> (i.e. default) display, which is otherwise hidden.'),
+    '#default_value' => $config->get('show_default_display'),
+  );
+  $form['basic']['display_embed'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow <em>embed</em> displays to be created via the UI'),
+    '#description' => t('Enables the <em>embed</em> type of display. Embed displays can be used in code via <a href="@api_link"><code>views_embed_view()</code></a>. Embedded displays will still work even if this setting is disabled.', array('@api_link' => url('https://docs.backdropcms.org/api/backdrop/core%21modules%21views%21views.module/function/views_embed_view'))),
+    '#default_value' => $config->get('display_embed'),
+  );
   $options = array();
   foreach (list_themes() as $name => $theme) {
     if ($theme->status) {
       $options[$name] = $theme->info['name'];
     }
   }
-
-  // This is not currently a fieldset but we may want it to be later, so this
-  // will make it easier to change if we do.
-  $form['basic'] = array();
-
-  $form['basic']['show_master_display'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Always show the <em>Master</em> display'),
-    '#description' => t('Show the <em>Master</em> (i.e. default) display, which is otherwise hidden.'),
-    '#default_value' => $config->get('show_master_display'),
-  );
-
-  $form['basic']['display_embed'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Allow <em>embed</em> displays to be created via the UI'),
-    '#description' => t('Enables the <em>embed</em> type of display. Embed displays can be used in code via <a href="@api_link"><code>views_embed_view()</code></a>. Embedded displays will still work even if this setting is disabled.', array('@api_link' => url('https://api.backdropcms.org/api/backdrop/core%21modules%21views%21views.module/function/views_embed_view'))),
-    '#default_value' => $config->get('display_embed'),
-  );
-
   $form['basic']['custom_theme'] = array(
     '#type' => 'select',
     '#title' => t('Custom admin theme for the Views UI'),
@@ -4526,7 +4539,6 @@ function views_ui_admin_settings_basic() {
     '#default_value' => $config->get('custom_theme'),
     '#description' => t('In some cases you might want to select a different admin theme for the Views UI.')
   );
-
   $form['basic']['exposed_filter_any_label'] = array(
     '#type' => 'select',
     '#title' => t('Label for "Any" value on non-required single-select exposed filters'),
@@ -4538,26 +4550,22 @@ function views_ui_admin_settings_basic() {
     '#type' => 'fieldset',
     '#title' => t('Live preview settings'),
   );
-
   $form['live_preview']['always_live_preview'] = array(
     '#type' => 'checkbox',
     '#title' => t('Automatically update preview on changes'),
     '#default_value' => $config->get('always_live_preview'),
   );
-
   $form['live_preview']['show_preview_information'] = array(
     '#type' => 'checkbox',
     '#title' => t('Show information and statistics about the view during live preview'),
     '#default_value' => $config->get('show_preview_information'),
   );
-
   // Set a common variable used for #states on the following elements.
   $preview_checked = array(
     'visible' => array(
       ':input[name="show_preview_information"]' => array('checked' => TRUE),
     ),
   );
-
   $form['live_preview']['show_sql_query_where'] = array(
     '#type' => 'radios',
     '#title' => t('Statistics location'),
@@ -4568,7 +4576,6 @@ function views_ui_admin_settings_basic() {
     '#default_value' => $config->get('show_sql_query_where'),
     '#states' => $preview_checked,
   );
-
   $form['live_preview']['show_sql_query'] = array(
     '#type' => 'checkbox',
     '#title' => t('Show the SQL query'),
@@ -4581,7 +4588,6 @@ function views_ui_admin_settings_basic() {
     '#default_value' => $config->get('show_performance_statistics'),
     '#states' => $preview_checked,
   );
-
   $form['live_preview']['show_additional_queries'] = array(
     '#type' => 'checkbox',
     '#title' => t('Show other queries run during render during live preview'),
@@ -4858,7 +4864,7 @@ function _views_sort_types($a, $b) {
  * @todo Remove this function once configuring the display title is possible.
  */
 function views_ui_get_display_label($view, $display_id, $check_changed = TRUE) {
-  $title = $display_id == 'default' ? t('Master') : $view->display[$display_id]->display_title;
+  $title = $display_id == 'default' ? t('Default') : $view->display[$display_id]->display_title;
   $title = views_ui_truncate($title, 25);
 
   if ($check_changed && !empty($view->changed_display[$display_id])) {

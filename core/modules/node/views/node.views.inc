@@ -172,7 +172,8 @@ function node_views_data() {
       'handler' => 'views_handler_filter_boolean_operator',
       'label' => t('Published'),
       'type' => 'yes-no',
-      'use equal' => TRUE, // Use status = 1 instead of status <> 0 in WHERE statment
+      // Use status = 1 instead of status <> 0 in WHERE statement.
+      'use equal' => TRUE,
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -452,6 +453,7 @@ function node_views_data() {
   // have a group defined will go into this field by default.
   $data['node_revisions']['moved to'] = 'node_revision';
   $data['node_revision']['table']['entity type'] = 'node';
+  $data['node_revision']['table']['revision'] = TRUE;
   $data['node_revision']['table']['group']  = t('Content revision');
   // Support the conversion of the field body
   $data['node_revisions']['body']['moved to'] = array('field_revision_data', 'body-revision_id');
@@ -759,7 +761,7 @@ function node_row_node_view_preprocess_node(&$variables) {
   }
 
   if (!empty($options['comments']) && user_access('access comments') && $node->comment) {
-    $variables['content']['comments'] = comment_node_page_additions($node);
+    $variables['comments'] = comment_node_page_additions($node);
   }
 }
 

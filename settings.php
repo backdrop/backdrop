@@ -8,7 +8,7 @@
  * Database configuration:
  *
  * Most sites can configure their database by entering the connection string
- * below. If using master/slave databases or multiple connections, see the
+ * below. If using primary/replica databases or multiple connections, see the
  * advanced database documentation at
  * https://api.backdropcms.org/database-configuration
  */
@@ -334,7 +334,7 @@ $settings['locale_custom_strings_en'][''] = array(
  */
 $settings['404_fast_paths_exclude'] = '/\/(?:styles)|(?:system\/files)\//';
 $settings['404_fast_paths'] = '/\.(?:txt|png|gif|jpe?g|css|js|ico|swf|flv|cgi|bat|pl|dll|exe|asp)$/i';
-$settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL "@path" was not found on this server.</p></body></html>';
+$settings['404_fast_html'] = '<!DOCTYPE html><html lang="en"><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL "@path" was not found on this server.</p></body></html>';
 
 /**
  * By default, fast 404s are returned as part of the normal page request
@@ -439,21 +439,49 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
  * such as views, content types, vocabularies, etc. may not work as expected.
  * Use any available API functions for complex systems instead.
  */
-//$config['system.core']['site_name'] = 'My Backdrop site';
-//$config['system.core']['file_temporary_path'] = '/tmp';
+// $config['system.core']['site_name'] = 'My Backdrop site';
+// $config['system.core']['file_temporary_path'] = '/tmp';
 
 /**
- * Add Permissions-Policy header to disable Google FLoC.
+ * File schemes whose paths should not be normalized.
  *
- * By default, Backdrop sends the 'Permissions-Policy: interest-cohort=()'
- * header, to disable Google's Federated Learning of Cohorts (FLoC) feature,
- * which was introduced in Chrome v89. For more information about FLoC, see:
- * https://en.wikipedia.org/wiki/Federated_Learning_of_Cohorts
+ * Normally, Backdrop normalizes '/./' and '/../' segments in file URIs in order
+ * to prevent unintended file access. For example, 'private://css/../image.png'
+ * is normalized to 'private://image.png' before checking access to the file.
  *
- * If you don't wish to disable FLoC in Chrome, you can uncomment the following
- * setting, and make sure its value is set to "FALSE".
+ * On Windows, Backdrop also replaces '\' with '/' in file URIs.
+ *
+ * If file URIs with one or more scheme should not be normalized like this, then
+ * list the schemes here. For example, if 'example://path/./filename.png' should
+ * not be normalized to 'example://path/filename.png', then add 'example' to
+ * this array. In this case, make sure that the module providing the 'example'
+ * scheme does not allow unintended file access when using '/../' to move up the
+ * directory tree.
  */
-//$config['system.core']['block_interest_cohort'] = FALSE;
+// $config['system.core']['file_not_normalized_schemes'] = array('example');
+
+/**
+ * Additional public file schemes.
+ *
+ * Public schemes are URI schemes that allow download access to all users for
+ * all files within that scheme.
+ *
+ * The "public" scheme is always public, and the "private" scheme is always
+ * private, but other schemes, such as "https", "s3", "example", or others,
+ * can be either public or private depending on the site. By default, they're
+ * private, and access to individual files is controlled via
+ * hook_file_download().
+ *
+ * Typically, if a scheme should be public, a module makes it public by
+ * implementing hook_file_download(), and granting access to all users for all
+ * files. This could be either the same module that provides the stream wrapper
+ * for the scheme, or a different module that decides to make the scheme
+ * public. However, in cases where a site needs to make a scheme public, but
+ * is unable to add code in a module to do so, the scheme may be added to this
+ * variable, the result of which is that system_file_download() grants public
+ * access to all files within that scheme.
+ */
+// $config['system.core']['file_additional_public_schemes'] = array('example');
 
 /**
  * Include a local settings file, if available.
@@ -463,7 +491,7 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
  * environment (staging, development, etc).
  *
  * Typically used to specify a different database connection information, to
- * disable caching, JavaScript/CSS compression, re-routing of outgoing e-mails,
+ * disable caching, JavaScript/CSS compression, re-routing of outgoing emails,
  * Google Analytics, and other things that should not happen on development and
  * testing sites.
  *

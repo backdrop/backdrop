@@ -165,7 +165,7 @@ function theme_system_modules_fieldset($variables) {
     // Add the first column: the checkbox.
     $row[] = array('class' => array('checkbox'), 'data' => backdrop_render($module['enable']));
 
-    // Add the second column: module label and expand/collapse functionalty.
+    // Add the second column: module label and expand/collapse functionality.
     $row[] = array('class' => array('module'), 'data' => '<label id="module-' . $key . '" for="' . $module['enable']['#id'] . '" class="module-name table-filter-text-source">' . backdrop_render($module['name']) . '</label>');
 
     // Add the third column: module version number.
@@ -177,6 +177,9 @@ function theme_system_modules_fieldset($variables) {
     }
     if ($required_by) {
       $requirements .= '<div class="admin-requirements">' . t('Required by:') . ' ' . implode(', ', $module['#required_by']) . '</div>';
+    }
+    if (isset($module['#project']) && $module['#project'] != 'backdrop') {
+      $requirements .= '<div class="admin-requirements project-links">' . t('Links:') . ' ' . l(t("BackdropCMS.org"), 'https://backdropcms.org/project/' . $module['#project']) . ', ' . l(t("GitHub"), 'https://github.com/backdrop-contrib/' . $module['#project']) . '</div>';
     }
     $requirements .= '<div class="admin-requirements table-filter-text-source">' . t('Tags:') . ' ' . backdrop_render($module['tags']) . '</div>';
     $requirements .= '</div>';
@@ -245,23 +248,36 @@ function theme_system_modules_uninstall($variables) {
       $disabled_message = format_plural(count($form['modules'][$module]['#required_by']),
         'To uninstall @module, the following module must be uninstalled first: @required_modules',
         'To uninstall @module, the following modules must be uninstalled first: @required_modules',
-        array('@module' => $form['modules'][$module]['#module_name'], '@required_modules' => implode(', ', $form['modules'][$module]['#required_by'])));
+        array(
+          '@module' => $form['modules'][$module]['#module_name'],
+          '@required_modules' => implode(', ', $form['modules'][$module]['#required_by']),
+        ));
       $disabled_message = '<div class="admin-requirements">' . $disabled_message . '</div>';
     }
     else {
       $disabled_message = '';
     }
     $rows[] = array(
-      array('data' => backdrop_render($form['uninstall'][$module]), 'align' => 'center'),
+      array(
+        'data' => backdrop_render($form['uninstall'][$module]),
+        'align' => 'center',
+      ),
       '<strong><label for="' . $form['uninstall'][$module]['#id'] . '">' . backdrop_render($form['modules'][$module]['name']) . '</label></strong>',
-      array('data' => backdrop_render($form['modules'][$module]['description']) . $disabled_message, 'class' => array('description')),
+      array(
+        'data' => backdrop_render($form['modules'][$module]['description']) . $disabled_message,
+        'class' => array('description'),
+      ),
     );
   }
 
-  $output  = theme('table', array('header' => $header, 'rows' => $rows, 'empty' => t('No modules are available to uninstall.')));
-  $output .= backdrop_render_children($form);
+  $form['modules'] = array(
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $rows,
+    '#empty' => t('No modules are available to uninstall.'),
+  );
 
-  return $output;
+  return backdrop_render_children($form);
 }
 
 /**
@@ -282,11 +298,17 @@ function theme_system_modules_uninstall($variables) {
  *       - REQUIREMENT_OK: The requirement is satisfied.
  *       - REQUIREMENT_WARNING: The requirement failed with a warning.
  *       - REQUIREMENT_ERROR: The requirement failed with an error.
+ *   - phase: The current phase. Possible values are one of:
+ *     - install: When called from install.php.
+ *     - update: When called from update.php.
+ *     - runtime: Showing the normal status report page, or no phase specified.
  *
  * @ingroup themeable
+ * @since 1.26.2 support for the "phase" variable added.
  */
 function theme_status_report($variables) {
   $requirements = $variables['requirements'];
+  $phase = isset($variables['phase']) ? $variables['phase'] : 'runtime';
   backdrop_sort($requirements, array('title' => SORT_STRING));
 
   // Separate requirements by severity.
@@ -338,7 +360,7 @@ function theme_status_report($variables) {
   $system_status_report_table = array(
     'header' => array(),
     'rows' => array(),
-    'attributes' => array('class' => 'system-status-report'),
+    'attributes' => array('class' => array('system-status-report', 'phase-' . $phase)),
     'caption' => '',
     'colgroups' => array(),
     'sticky' => FALSE,
@@ -363,14 +385,27 @@ function theme_status_report($variables) {
       $details = '<div class="status-description">' . $requirement['description']. '</div>';
     }
 
-    $description = '<div class="status-summary">' . $requirement['value'] . $more . '</div>' . $details;
-
-    $row = array(
-      'data' => array(
+    // For the "Requirements problem" page of the installer, place the label and
+    // the description of each check/row in a single table cell.
+    if ($phase == 'install') {
+      $description = '<div class="status-summary status-value">' . $requirement['value'] . $more . '</div>' . $details;
+      $data = array(
+        array('data' => $severity['icon'], 'class' => 'report-icon'),
+        array('data' => $title . $description, 'class' => 'status-title'),
+      );
+    }
+    // For the site status report page, place the label and the description of
+    // each check in separate table cells in the same row.
+    else {
+      $description = '<div class="status-summary">' . $requirement['value'] . $more . '</div>' . $details;
+      $data = array(
         array('data' => $severity['icon'], 'class' => 'report-icon'),
         array('data' => $title, 'class' => 'status-title'),
         array('data' => $description, 'class' => array('status-value', 'priority-low')),
-      ),
+      );
+    }
+    $row = array(
+      'data' => $data,
       'class' => $severity['class'],
     );
 
@@ -390,38 +425,25 @@ function theme_status_report($variables) {
  * @param $variables
  *   An associative array containing:
  *   - blocks: An array of blocks to display. Each array should include a
- *     'title', a 'description', a formatted 'content' and a 'position' which
- *     will control which container it will be in. This is usually 'left' or
- *     'right'.
+ *     'title', a 'description' and a formatted 'content'.
  *
  * @ingroup themeable
  */
 function theme_admin_page($variables) {
   $blocks = $variables['blocks'];
-
-  $stripe = 0;
   $container = array();
 
   foreach ($blocks as $block) {
     if ($block_output = theme('admin_block', array('block' => $block))) {
-      if (empty($block['position'])) {
-        // perform automatic striping.
-        $block['position'] = ++$stripe % 2 ? 'left' : 'right';
-      }
-      if (!isset($container[$block['position']])) {
-        $container[$block['position']] = '';
-      }
-      $container[$block['position']] .= $block_output;
+      $container[] = $block_output;
     }
   }
 
   if (!empty($container)) {
     $output = '<div class="admin clearfix">';
-      foreach ($container as $id => $data) {
-        $output .= '<div class="' . $id . ' clearfix">';
-        $output .= $data;
-        $output .= '</div>';
-      }
+    foreach ($container as $data) {
+      $output .= $data;
+    }
     $output .= '</div>';
   }
   else {
@@ -516,11 +538,7 @@ function theme_admin_block_content($variables) {
  */
 function theme_system_admin_index($variables) {
   $menu_items = $variables['menu_items'];
-
-  $stripe = 0;
-  $container = array('left' => '', 'right' => '');
-  $flip = array('left' => 'right', 'right' => 'left');
-  $position = 'left';
+  $blocks = array();
 
   // Iterate over all modules.
   foreach ($menu_items as $module => $block) {
@@ -535,21 +553,14 @@ function theme_system_admin_index($variables) {
       $block['show'] = TRUE;
 
       if ($block_output = theme('admin_block', array('block' => $block))) {
-        if (!isset($block['position'])) {
-          // Perform automatic striping.
-          $block['position'] = $position;
-          $position = $flip[$position];
-        }
-        $container[$block['position']] .= $block_output;
+        $blocks[] = $block_output;
       }
     }
   }
 
   $output = '<div class="admin clearfix">';
-  foreach ($container as $id => $data) {
-    $output .= '<div class="' . $id . ' clearfix">';
-    $output .= $data;
-    $output .= '</div>';
+  foreach ($blocks as $block) {
+    $output .= $block;
   }
   $output .= '</div>';
 

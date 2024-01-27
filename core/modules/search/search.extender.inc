@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Search query extender and helper functions.
@@ -184,7 +183,7 @@ class SearchQuery extends SelectQueryExtender {
    * We build two queries that match the dataset bodies.
    */
   protected function parseSearchExpression() {
-    // Matchs words optionally prefixed by a dash. A word in this case is
+    // Matches words optionally prefixed by a dash. A word in this case is
     // something between two spaces, optionally quoted.
     preg_match_all('/ (-?)("[^"]+"|[^" ]+)/i', ' ' .  $this->searchExpression , $keywords, PREG_SET_ORDER);
 
@@ -270,14 +269,14 @@ class SearchQuery extends SelectQueryExtender {
       if (is_array($key) && count($key)) {
         $simple_or = TRUE;
         $any = FALSE;
-        $queryor = db_or();
+        $query_or = db_or();
         foreach ($key as $or) {
           list($num_new_scores) = $this->parseWord($or);
           $any |= $num_new_scores;
-          $queryor->condition('d.data', "% $or %", 'LIKE');
+          $query_or->condition('d.data', "% $or %", 'LIKE');
         }
-        if (count($queryor)) {
-          $this->conditions->condition($queryor);
+        if (count($query_or)) {
+          $this->conditions->condition($query_or);
           // A group of OR keywords only needs to match once.
           $this->matches += ($any > 0);
         }
@@ -527,7 +526,7 @@ class SearchQuery extends SelectQueryExtender {
     $expressions = array();
 
     // Add the sid as the only field and count them as a subquery.
-    $count = db_select($inner->fields('i', array('sid')), NULL, array('target' => 'slave'));
+    $count = db_select($inner->fields('i', array('sid')), NULL, array('target' => 'replica'));
 
     // Add the COUNT() expression.
     $count->addExpression('COUNT(*)');

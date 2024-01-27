@@ -19,10 +19,6 @@ Backdrop.behaviors.fileUploadChange = {
     $(context).find('input[data-file-auto-upload]').once('auto-upload').on('change', Backdrop.file.autoUpload).each(function() {
       $(this).closest('.form-item').find('.file-upload-button').hide();
     });
-  },
-  detach: function (context, settings) {
-    $(context).find('input[data-file-extensions]').off('change', Backdrop.file.validateExtension);
-    $(context).find('input[data-file-auto-upload]').off('change', Backdrop.file.autoUpload);
   }
 };
 
@@ -31,12 +27,8 @@ Backdrop.behaviors.fileUploadChange = {
  */
 Backdrop.behaviors.fileButtons = {
   attach: function (context) {
-    $('input.form-submit', context).once('file-disable-fields').bind('mousedown', Backdrop.file.disableFields);
-    $('div.form-managed-file input.form-submit', context).once('file-progress-bar').bind('mousedown', Backdrop.file.progressBar);
-  },
-  detach: function (context) {
-    $('input.form-submit', context).unbind('mousedown', Backdrop.file.disableFields);
-    $('div.form-managed-file input.form-submit', context).unbind('mousedown', Backdrop.file.progressBar);
+    $('input.form-submit', context).once('file-disable-fields').on('mousedown', Backdrop.file.disableFields);
+    $('div.form-managed-file input.form-submit', context).once('file-progress-bar').on('mousedown', Backdrop.file.progressBar);
   }
 };
 
@@ -45,10 +37,10 @@ Backdrop.behaviors.fileButtons = {
  */
 Backdrop.behaviors.filePreviewLinks = {
   attach: function (context) {
-    $('div.form-managed-file .file a, .file-widget .file a', context).once('file-preview-link').bind('click', Backdrop.file.openInNewWindow);
+    $('.file-preview-link', context).once('file-preview-link').on('click', Backdrop.file.openInNewWindow);
   },
   detach: function (context){
-    $('div.form-managed-file .file a, .file-widget .file a', context).unbind('click', Backdrop.file.openInNewWindow);
+    $('.file-preview-link', context).off('click', Backdrop.file.openInNewWindow);
   }
 };
 
@@ -137,7 +129,7 @@ Backdrop.file = Backdrop.file || {
     // do not get enabled when we re-enable these fields at the end of behavior
     // processing. Re-enable in a setTimeout set to a relatively short amount
     // of time (1 second). All the other mousedown handlers (like Backdrop's
-    // Ajax behaviors) are excuted before any timeout functions are called, so
+    // AJAX behaviors) are executed before any timeout functions are called, so
     // we don't have to worry about the fields being re-enabled too soon.
     // @todo If the previous sentence is true, why not set the timeout to 0?
     var $fieldsToTemporarilyDisable = $('div.form-managed-file input.form-file').not($enabledFields).not(':disabled');
@@ -180,7 +172,7 @@ Backdrop.file = Backdrop.file || {
   /**
    * Provide events for files in the file browser dialog.
    */
-  dialogOpenEvent: function(e, dialoog, $element, settings) {
+  dialogOpenEvent: function(e, dialog, $element, settings) {
     var $browserContainer = $element.find(".file-browser");
     $browserContainer.once('file-browser').on('click', '[data-fid]', function () {
       var $selectedElement = $(this);
