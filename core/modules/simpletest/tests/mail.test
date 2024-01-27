@@ -212,6 +212,7 @@ class BackdropHtmlToTextTestCase extends BackdropWebTestCase {
       '<script type="text/javascript">Backdrop</script>' => "Backdrop\n",
       // A couple of tests for Unicode characters.
       '<q>I <em>will</em> be back…</q>' => "I /will/ be back…\n",
+      // cspell:disable-next-line
       'FrançAIS is ÜBER-åwesome' => "FrançAIS is ÜBER-åwesome\n",
     );
 
@@ -257,7 +258,7 @@ class BackdropHtmlToTextTestCase extends BackdropWebTestCase {
    * Tests that backdrop_wrap_mail() removes trailing whitespace before newlines.
    */
   function testBackdropHtmltoTextRemoveTrailingWhitespace() {
-    $text = "Hi there! \nHerp Derp";
+    $text = "Hi there! \nFoo Bar";
     $mail_lines = explode("\n", backdrop_wrap_mail($text));
     $this->assertNotEqual(" ", substr($mail_lines[0], -1), 'Trailing whitespace removed.');
   }
@@ -269,11 +270,11 @@ class BackdropHtmlToTextTestCase extends BackdropWebTestCase {
    * stuffed) line consisting of DASH DASH SP is neither fixed nor flowed."
    */
   function testBackdropHtmltoTextUsenetSignature() {
-    $text = "Hi there!\n-- \nHerp Derp";
+    $text = "Hi there!\n-- \nFoo Bar";
     $mail_lines = explode("\n", backdrop_wrap_mail($text));
     $this->assertEqual("-- ", $mail_lines[1], 'Trailing whitespace not removed for dash-dash-space signatures.');
 
-    $text = "Hi there!\n--  \nHerp Derp";
+    $text = "Hi there!\n--  \nFoo Bar";
     $mail_lines = explode("\n", backdrop_wrap_mail($text));
     $this->assertEqual("--", $mail_lines[1], 'Trailing whitespace removed for incorrect dash-dash-space signatures.');
   }

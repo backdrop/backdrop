@@ -1,0 +1,43 @@
+<?php
+/**
+ * @file
+ * Provides assisting code for testing a CKEditor 4 to CKEditor 5 upgrade.
+ */
+
+/**
+ * Implements hook_ckeditor5_upgrade_button_mapping_alter().
+ */
+function ckeditor5_upgrade_test_ckeditor5_upgrade_button_mapping_alter(&$button_mapping) {
+  // Map a test button (present in ckeditor_upgrade3 text format).
+  $button_mapping['TestButton'] = 'testButton';
+}
+
+/**
+ * Implements hook_ckeditor5_upgrade_format_alter().
+ */
+function ckeditor5_upgrade_test_ckeditor5_upgrade_format_alter(&$format, $original_format) {
+  if (!empty($format->filters['filter_html']->status)) {
+    $allowed_tags = $format->filters['filter_html']->settings['allowed_html'];
+    $toolbar = $format->editor_settings['toolbar'];
+    // Add <test-tag> to the list of allowed tags if the test button is present.
+    if (in_array('testButton', $toolbar) && strpos($allowed_tags, '<test-tag>') === FALSE) {
+      $format->filters['filter_html']->settings['allowed_html'] = $allowed_tags . ' <test-tag>';
+    }
+  }
+}
+
+/**
+ * Implements hook_ckeditor5_plugins().
+ */
+function ckeditor5_upgrade_test_ckeditor5_plugins() {
+  $plugins['upgradeTest.UpgradeTest'] = array(
+    'buttons' => array(
+      'testButton' => array(
+        'label' => 'Test Button',
+        'image_alternative' => '<span class="ckeditor5-upgrade-test">Test Button</span>',
+      ),
+    ),
+    'enabled_callback' => FALSE,
+  );
+  return $plugins;
+}

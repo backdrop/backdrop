@@ -64,8 +64,6 @@ ul.menu li.expanded {
   color: #ffffff;
   min-width: 20px;
   padding: 7px 10px;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
   border-radius: 4px;
 }
 .item-list .pager a {
@@ -74,8 +72,6 @@ ul.menu li.expanded {
   color: #444b53;
   min-width: 20px;
   padding: 7px 10px;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
   border-radius: 4px;
 }
 .item-list .pager a:hover {
@@ -109,8 +105,6 @@ ul.menu li.expanded {
   font-size: 0.94em;
   padding: 1px 10px 2px 10px; /* LTR */
   text-decoration: none;
-  -webkit-border-radius: 0 0 10px 10px;
-  -moz-border-radius: 0 0 10px 10px;
   border-radius: 0 0 10px 10px;
 }
 [dir="rtl"] #skip-link a,
@@ -196,8 +190,6 @@ ul.menu li.expanded {
   height: 55px;
   width: 80px;
   overflow: hidden;
-  -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;
   border-radius: 5px;
 }
 .header-menu ul.links li a:hover {
@@ -316,14 +308,10 @@ ul.primary li a:hover,
   background: #c5c5c3;
 }
 ul.primary li:first-child a {
-  -webkit-border-radius: 4px 0 0 0;
-  -moz-border-radius: 4px 0 0 0;
   border-radius: 4px 0 0 0;
 }
 .expand-dropdown-tabs-control,
 ul.primary li:last-child a {
-  -webkit-border-radius: 0 4px 0 0;
-  -moz-border-radius: 0 4px 0 0;
   border-radius: 0 4px 0 0;
 }
 @media (max-width: 450px) {
@@ -357,8 +345,6 @@ ul.secondary li {
 ul.secondary li a {
   display: block;
   border: 0;
-  -webkit-border-radius: 3px;
-  -moz-border-radius: 3px;
   border-radius: 3px;
   background: #ddd;
   color: #000;
@@ -410,8 +396,6 @@ ul.secondary li.active a.active {
   height: 100%;
   margin: 0 -20px;
   z-index: 0;
-  -webkit-box-sizing: content-box;
-  -moz-box-sizing: content-box;
   box-sizing: content-box;
   background-color: #f0f0f0;
 }
@@ -552,13 +536,9 @@ th {
   border: 0;
 }
 th:first-child {
-  -webkit-border-radius: 4px 0 0;
-  -moz-border-radius: 4px 0 0;
   border-radius: 4px 0 0;
 }
 th:last-child {
-  -webkit-border-radius: 0 4px 0 0;
-  -moz-border-radius: 0 4px 0 0;
   border-radius: 0 4px 0 0;
 }
 /**
@@ -834,8 +814,6 @@ form.views-exposed-form {
   border: 2px solid #d0d0d0;
   border-top: 0;
   background: hsla(0,0%,100%,0.95);
-  -webkit-border-radius: 0 0 4px 4px;
-  -moz-border-radius: 0 0 4px 4px;
   border-radius: 0 0 4px 4px;
   box-shadow: 0 2px 5px 0 hsla(0,0%,0%,0.15);
 }
@@ -987,8 +965,6 @@ a.button {
   padding: 0 25px;
   margin-bottom: 1em;
   margin-right: 1em; /* LTR */
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
   border-radius: 4px;
   transition: background-color 0.6s ease 0s, color 0.6s ease 0s;
 }
@@ -1023,8 +999,6 @@ input.form-submit:active {
   text-decoration: none;
   background-color: #CFDE56;
   border-color: #CFDE56;
-  -webkit-box-shadow: 0 0 5px rgb(220, 220, 220);
-  -moz-box-shadow: 0 0 5px rgb(220, 220, 220);
   box-shadow: 0 0 5px rgb(220, 220, 220);
 }
 input.button-primary,
@@ -1047,8 +1021,6 @@ input.button-secondary,
 button.button-secondary {
   color: #828188;
   background-color: white;
-  -webkit-box-shadow: inset 0px 0px 0px 2px #97979e;
-  -moz-box-shadow: inset 0px 0px 0px 2px #97979e;
   box-shadow: inset 0px 0px 0px 2px #97979e;
 }
 a.button-secondary:hover,
@@ -1064,15 +1036,11 @@ button.button-secondary:focus {
 .form-item input.form-submit {
   color: #0074bd;
   background-color: white;
-  -webkit-box-shadow: inset 0px 0px 0px 2px #cccccc;
-  -moz-box-shadow: inset 0px 0px 0px 2px #cccccc;
   box-shadow: inset 0px 0px 0px 2px #cccccc;
   text-transform: none;
 }
 .form-item input.form-submit:hover,
 .form-item input.form-submit:focus {
-  -webkit-box-shadow: inset 0px 0px 0px 2px #0074bd;
-  -moz-box-shadow: inset 0px 0px 0px 2px #0074bd;
   box-shadow: inset 0px 0px 0px 2px #0074bd;
 }
 
@@ -1081,8 +1049,6 @@ input.button-danger,
 button.button-danger {
   color: #e7251b;
   background-color: transparent;
-  -webkit-box-shadow: inset 0px 0px 0px 2px #e7251b;
-  -moz-box-shadow: inset 0px 0px 0px 2px #e7251b;
   box-shadow: inset 0px 0px 0px 2px #e7251b;
 }
 a.button-danger:hover,
@@ -1128,13 +1094,8 @@ textarea.form-textarea {
   font-weight: 400;
   color: #444b53;
   background: #fff;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
   border-radius: 4px;
-  -webkit-transition: border-color 0.25s ease-in-out;
-  -moz-transition: border-color 0.25s ease-in-out;
-  -ms-transition: border-color 0.25s ease-in-out;
-  -o-transition: border-color 0.25s ease-in-out;
+  transition: border-color 0.25s ease-in-out;
   will-change: border-color;
 }
 input.form-text,
@@ -1151,8 +1112,6 @@ select.form-select {
   box-sizing: border-box;
   color: #444b53;
   background: #fff;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
   border-radius: 4px;
   will-change: border-color;
   height: 43px;
@@ -1427,10 +1386,6 @@ div.filter-options select {
   border: 2px solid transparent;
   border-radius: 4px;
   min-height: 145px;
-  -webkit-transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
-  -moz-transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
-  -ms-transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
-  -o-transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
   transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
   will-change: border-color, background-color;
 }
@@ -1525,8 +1480,6 @@ div.admin-options div.form-item {
 table.system-status-report {
   border-collapse: separate;
   border: 2px solid #EAEAEA;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
   border-radius: 4px;
 }
 
@@ -1534,8 +1487,6 @@ table.system-status-report {
 table.update {
   border-collapse: separate;
   border: 2px solid #EAEAEA;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
   border-radius: 4px;
 }
 
@@ -1795,18 +1746,12 @@ div.add-or-remove-shortcuts {
 .ui-dialog {
   position: absolute;
   border: 1px solid #d0d0d0;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
   border-radius: 4px;
-  -webkit-box-shadow: 0 0 12px -8px #666;
-  -moz-box-shadow: 0 0 12px -8px #666;
   box-shadow: 0 0 12px -8px #666;
 }
 .ui-dialog-titlebar {
   border: 1px solid #d0d0d0;
   border-bottom: none;
-  -webkit-border-radius: 4px 4px 0 0;
-  -moz-border-radius: 4px 4px 0 0;
   border-radius: 4px 4px 0 0;
 }
 
@@ -1842,8 +1787,6 @@ div.add-or-remove-shortcuts {
     width: 75%;
     margin: 0 auto;
     max-width: 770px;
-    -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    -moz-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     overflow: auto;
   }
@@ -1930,7 +1873,6 @@ div.add-or-remove-shortcuts {
   right: 0;
   bottom: 0;
   overflow: hidden;
-  -webkit-transition: width .4s;
   transition: width .4s;
   will-change: width;
   background-image: -webkit-gradient(linear, 0 0, 100% 100%,
@@ -1953,15 +1895,11 @@ div.add-or-remove-shortcuts {
   background-size: 50px 50px;
   padding: 0 1px;
   height: 2.5em;
-  -webkit-animation: animate-stripes 2s linear infinite;
-  -moz-animation: animate-stripes 2s linear infinite;
-  -webkit-transition: width 0.5s ease-out;
+  animation: animate-stripes 2s linear infinite;
   transition: width 0.5s ease-out;
 }
 [dir="rtl"] .progress .filled:after {
   animation-direction: reverse;
-  -webkit-animation-direction: reverse;
-  -moz-animation-direction: reverse;
 }
 
 /**

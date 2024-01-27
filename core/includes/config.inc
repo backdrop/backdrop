@@ -599,7 +599,7 @@ class Config {
   /**
    * Check if a particular config key is overridden.
    *
-   * @param $key
+   * @param string $key
    *   A string that maps to a key within the configuration data.
    *
    * @return bool
@@ -708,9 +708,9 @@ class Config {
    *   The string that maps to a key with the configuration data.
    *
    *   A key may be overridden at any level, for example if
-   *   $key === 'foo.bar.key1', the matched value could be provided by an override
-   *   from 'foo.bar.key1', 'foo.bar', or 'foo'. In settings.php any of the
-   *   following would provide an overridden value for 'foo.bar.key1'.
+   *   $key === 'foo.bar.key1', the matched value could be provided by an
+   *   override from 'foo.bar.key1', 'foo.bar', or 'foo'. In settings.php any of
+   *   the following would provide an overridden value for 'foo.bar.key1':
    *
    *   @code
    *   // Exact match.
@@ -934,7 +934,7 @@ class Config {
    *
    * @see Config::getOverride()
    */
-  public function setOverrides($overrides) {
+  public function setOverrides(array $overrides) {
     $this->overrides = $overrides;
   }
 
@@ -1220,7 +1220,7 @@ interface ConfigStorageInterface {
    *   (optional) The prefix to search for. If omitted, all configuration
    *   objects that exist will be deleted.
    *
-   * @return boolean
+   * @return bool
    *   TRUE on success, FALSE otherwise.
    */
   public function deleteAll($prefix = '');
@@ -1338,7 +1338,10 @@ class ConfigFileStorage implements ConfigStorageInterface {
     }
     // If an error occurs, catch and rethrow with the file name in the message.
     catch (ConfigStorageException $e) {
-      throw new ConfigStorageReadException(format_string("The configuration file \"@filename\" is not properly formatted JSON.\n\nContents:\n<pre>@contents</pre>\n", array('@filename' => $name, '@contents' => $data)));
+      throw new ConfigStorageReadException(format_string("The configuration file \"@filename\" is not properly formatted JSON.\n\nContents:\n<pre>@contents</pre>\n", array(
+        '@filename' => $name,
+        '@contents' => $data,
+      )));
     }
     return $data;
   }

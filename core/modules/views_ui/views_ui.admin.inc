@@ -2929,7 +2929,7 @@ function views_ui_ajax_form($js, $key, $view, $display_id = '') {
   // Automatically remove the form cache if it is set and the key does
   // not match. This way navigating away from the form without hitting
   // update will work.
-  if (isset($view->form_cache) && $view->form_cache['key'] != $key) {
+  if (isset($view->form_cache) && $key !== 0 && $view->form_cache['key'] != $key) {
     unset($view->form_cache);
   }
 
