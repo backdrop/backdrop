@@ -456,7 +456,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#description' => t('The maximum depth for a link and all its children is fixed at !maxdepth. Some menu links may not be available as parents if selecting them would exceed this limit. <a href="!url">Configure this selector.</a>', array(
       '!maxdepth' => MENU_MAX_DEPTH,
       '!url' => url('admin/structure/menu/settings'),
-      )),
+    )),
     '#attributes' => array('class' => array('menu-title-select')),
     '#prefix' => '<div id="menu-parent-select-wrapper">',
     '#suffix' => '</div>',
