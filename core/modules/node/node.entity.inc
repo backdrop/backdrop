@@ -741,13 +741,17 @@ class NodeStorageController extends EntityDatabaseStorageController {
       '#attributes' => array('class' => array('links', 'inline')),
     );
     if ($view_mode == 'teaser') {
-      $node_title_stripped = strip_tags($node->title);
-      $links['node-readmore'] = array(
-        'title' => t('Read more<span class="element-invisible"> about @title</span>', array('@title' => $node_title_stripped)),
-        'href' => 'node/' . $node->nid,
-        'html' => TRUE,
-        'attributes' => array('rel' => 'tag', 'title' => $node_title_stripped),
-      );
+      $type = node_type_get_type($node);
+      // Don't add the "read more" link to the node if the type has a hidden path.
+      if (!($type->settings['hidden_path'] && !user_access('view hidden paths'))) {
+        $node_title_stripped = strip_tags($node->title);
+        $links['node-readmore'] = array(
+          'title' => t('Read more<span class="element-invisible"> about @title</span>', array('@title' => $node_title_stripped)),
+          'href' => 'node/' . $node->nid,
+          'html' => TRUE,
+          'attributes' => array('rel' => 'tag', 'title' => $node_title_stripped),
+        );
+      }
     }
     $node->content['links']['node'] = array(
       '#theme' => 'links__node__node',
