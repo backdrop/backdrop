@@ -310,7 +310,7 @@ function update_info_page() {
   update_task_list('info');
   backdrop_set_title('Backdrop site update');
   $token = backdrop_get_token('update');
-  $output = '<p>Use this utility to update your database whenever you install a new version of Backdrop CMS or one of the site\'s modules.</p>';
+  $output = '<p>Use this utility to update your site whenever you install a new version of Backdrop CMS or one of the site\'s modules.</p>';
   $output .= '<p>For more detailed information, see the <a href="https://backdropcms.org/upgrade">Upgrading Backdrop CMS</a> page. If you are unsure of what these terms mean, contact your hosting provider.</p>';
   $output .= '<p>Before running updates, the following steps are recommended.</p>';
   $output .= "<ol>\n";
