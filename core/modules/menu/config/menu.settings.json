@@ -1,5 +1,6 @@
 {
     "_config_name": "menu.settings",
     "menu_breakpoint": "default",
-    "menu_breakpoint_custom": ""
+    "menu_breakpoint_custom": "",
+    "menu_separate_menu_selector": false
 }
