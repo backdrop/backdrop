@@ -2234,74 +2234,12 @@ function node_get_recent($number = 10) {
  * @deprecated since 1.5.0
  */
 function node_feed($nids = FALSE, $channel = array()) {
-  global $base_url, $language_content;
-  $rss_config = config('system.core');
-
-  if ($nids === FALSE) {
-    $nids = db_select('node', 'n')
-      ->fields('n', array('nid', 'created'))
-      ->condition('n.promote', 1)
-      ->condition('n.status', 1)
-      ->orderBy('n.created', 'DESC')
-      ->range(0, $rss_config->get('rss_limit'))
-      ->addTag('node_access')
-      ->execute()
-      ->fetchCol();
-  }
-
-  $item_length = $rss_config->get('rss_viewmode');
-  $namespaces = array('xmlns:dc' => 'http://purl.org/dc/elements/1.1/');
-
-  // Load all nodes to be rendered.
-  $nodes = node_load_multiple($nids);
-  $items = '';
-  foreach ($nodes as $node) {
-    $item_text = '';
-
-    $node->link = url("node/$node->nid", array('absolute' => TRUE));
-    $node->rss_namespaces = array();
-    $account = user_load($node->uid);
-    $node->rss_elements = array(
-      array('key' => 'pubDate', 'value' => gmdate('r', $node->created)),
-      array('key' => 'dc:creator', 'value' => user_format_name($account)),
-      array('key' => 'guid', 'value' => $node->nid . ' at ' . $base_url, 'attributes' => array('isPermaLink' => 'false'))
-    );
-
-    // The node gets built and modules add to or modify $node->rss_elements
-    // and $node->rss_namespaces.
-    $build = node_view($node, 'rss');
-    unset($build['#theme']);
-
-    if (!empty($node->rss_namespaces)) {
-      $namespaces = array_merge($namespaces, $node->rss_namespaces);
-    }
-
-    if ($item_length != 'title') {
-      // We render node contents and force links to be last.
-      $build['links']['#weight'] = 1000;
-      $item_text .= backdrop_render($build);
-    }
-
-    $items .= format_rss_item($node->title, $node->link, $item_text, $node->rss_elements);
-  }
-
-  $channel_defaults = array(
-    'version'     => '2.0',
-    'title'       => config_get_translated('system.core', 'site_name'),
-    'link'        => $base_url,
-    'description' => $rss_config->get('rss_description'),
-    'language'    => $language_content->langcode
+  $deprecation_link = l(
+    'The node RSS feed previously provided by node_feed() is now provided by the "Feed" display of the "Promoted content" view',
+    'https://docs.backdropcms.org/change-records',
+    array('attributes' => array('target' => '_blank'))
   );
-  $channel_extras = array_diff_key($channel, $channel_defaults);
-  $channel = array_merge($channel_defaults, $channel);
-
-  $output = "<?xml version=\"1.0\" encoding=\"utf-8\"?>\n";
-  $output .= "<rss version=\"" . $channel["version"] . "\" xml:base=\"" . $base_url . "\" " . backdrop_attributes($namespaces) . ">\n";
-  $output .= format_rss_channel($channel['title'], $channel['link'], $channel['description'], $items, $channel['language'], $channel_extras);
-  $output .= "</rss>\n";
-
-  backdrop_add_http_header('Content-Type', 'application/rss+xml; charset=utf-8');
-  print $output;
+  watchdog_deprecated_function('node', __FUNCTION__, $deprecation_link);
 }
 
 /**
@@ -2345,64 +2283,27 @@ function node_view_multiple($nodes, $view_mode = 'teaser', $weight = 0, $langcod
 }
 
 /**
- * Menu callback; Generate a listing of promoted nodes.
- *
- * @return array
- *   An array in the format expected by backdrop_render().
+ * Menu callback; Renders the "Promoted" view via views_embed_view().
  *
  * @see node_menu()
+ * 
+ * @deprecated since 1.22.0
  */
 function node_page_default() {
-  // Check for custom <front> page
+  $deprecation_link = l(
+    'The node listing previously provided by node_page_default() is now provided by the "Promoted content" view',
+    'https://docs.backdropcms.org/change-records',
+    array('attributes' => array('target' => '_blank'))
+  );
+  watchdog_deprecated_function('node', __FUNCTION__, $deprecation_link);
+
+  // Check for custom <front> page.
   $front = config_get('system.core', 'site_frontpage');
   if ($front != 'node') {
     backdrop_goto('<front>', array(), '301');
   }
   else {
-    $site_config = config('system.core');
-    $select = db_select('node', 'n')
-      ->fields('n', array('nid', 'sticky', 'created'))
-      ->condition('n.promote', 1)
-      ->condition('n.status', 1)
-      ->orderBy('n.sticky', 'DESC')
-      ->orderBy('n.created', 'DESC')
-      ->extend('PagerDefault')
-      ->limit($site_config->get('default_nodes_main'))
-      ->addTag('node_access');
-
-    $nids = $select->execute()->fetchCol();
-
-    if (!empty($nids)) {
-      $nodes = node_load_multiple($nids);
-      $build = node_view_multiple($nodes);
-
-      // 'rss.xml' is a path, not a file, registered in node_menu().
-      backdrop_add_feed('rss.xml', $site_config->getTranslated('site_name') . ' ' . t('RSS'));
-      $build['pager'] = array(
-        '#theme' => 'pager',
-        '#weight' => 5,
-      );
-      backdrop_set_title('');
-    }
-    else {
-      backdrop_set_title(t('Welcome to @site-name', array('@site-name' => $site_config->getTranslated('site_name'))), PASS_THROUGH);
-
-      $default_message = '<p>' . t('No content has been promoted yet.') . '</p>';
-      $default_links = array();
-      if (_node_add_access()) {
-        $default_links[] = l(t('Add content'), 'node/add');
-      }
-      if (!empty($default_links)) {
-        $default_message .= theme('item_list', array('items' => $default_links));
-      }
-
-      $build['default_message'] = array(
-        '#markup' => $default_message,
-        '#prefix' => '<div id="first-time">',
-        '#suffix' => '</div>',
-      );
-    }
-    return $build;
+    views_embed_view('promoted');
   }
 }
 
