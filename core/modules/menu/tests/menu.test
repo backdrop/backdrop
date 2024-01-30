@@ -803,7 +803,7 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     // Assert that it is not possible to set the parent of the first node to itself or the second node.
     $this->assertNoOption('edit-menu-parent', 'main-menu:'. $item['mlid']);
     $this->assertNoOption('edit-menu-parent', 'main-menu:'. $child_item['mlid']);
-    // Assert that unallowed Management menu is not available in options.
+    // Assert that disallowed Management menu is not available in options.
     $this->assertNoOption('edit-menu-parent', 'management:0');
   }
 }
