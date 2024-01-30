@@ -56,7 +56,7 @@ function theme_user_signature($variables) {
  *
  * @param $variables
  *   An associative array containing:
- *   - account: The user object to format.
+ *   - account: Any object with 'name', 'uid', and 'picture' proprties.
  *   - name: The user's name, sanitized.
  *   - extra: Additional text to append to the user's name, sanitized.
  *   - link_path: The path or URL of the user's profile page, home page, or
@@ -261,11 +261,11 @@ function theme_user_admin_roles($variables) {
 }
 
 /**
- * Process variables for user-picture.tpl.php.
+ * Prepares variables for user_picture templates.
  *
- * The $variables array contains the following arguments:
- * - $account: A user, node or comment object with 'name', 'uid' and 'picture'
- *   fields.
+ * @param array $variables
+ *   An associative array containing:
+ *   - account: Any object with 'name', 'uid', and 'picture' proprties.
  *
  * @see user-picture.tpl.php
  */
@@ -311,7 +311,11 @@ function template_preprocess_user_picture(&$variables) {
 }
 
 /**
- * Preprocesses variables for theme_username().
+ * Prepares variables for username templates.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - account: Any object with 'name' and 'uid' proprties.
  *
  * Modules that make any changes to variables like 'name' or 'extra' must insure
  * that the final string is safe to include directly in the output by using
@@ -362,7 +366,7 @@ function template_preprocess_username(&$variables) {
 }
 
 /**
- * Process variables for user-profile.tpl.php.
+ * Prepares variables for user_profile templates.
  *
  * The $variables array contains the following arguments:
  * - $account
