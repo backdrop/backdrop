@@ -412,74 +412,46 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#description' => t('When displayed in a "hierarchical tree" menu style, children of expanded menu links will always be visible.'),
   );
 
-  $separate_menu = config_get('menu.settings', 'menu_separate_menu_selector');
   $menu_name = $item['menu_name'];
   $menus = menu_get_menus();
-  if ($separate_menu) {
-    $form['parent_menu'] = array(
-      '#type' => 'select',
-      '#title' => t('Menu'),
-      '#default_value' => $menu_name,
-      '#options' => $menus,
-      '#description' => t('Select the menu that this menu link should belong to.'),
-      '#attributes' => array('class' => array('parent-menu-select')),
-      '#ajax' => array(
-        'callback' => 'menu_parent_menu_callback',
-      ),
-    );
-    if (isset($form_state['values']['parent_menu'])) {
-      $menu_name = $form_state['values']['parent_menu'];
-    }
-    // Generate a list of possible parents (not including this link or
-    // descendants) from the selected menu.
-    $options = menu_parent_options(array($menu_name => $menus[$menu_name]), $item);
-    $options[array_keys($options)[0]] .= ' ' . t('(top level)');
+  $form['parent_menu'] = array(
+    '#type' => 'select',
+    '#title' => t('Menu'),
+    '#default_value' => $menu_name,
+    '#options' => $menus,
+    '#description' => t('Select the menu that this menu link should belong to.'),
+    '#attributes' => array('class' => array('menu-menu-select')),
+    '#ajax' => array('callback' => 'menu_parent_menu_callback'),
+  );
+  if (isset($form_state['values']['parent_menu'])) {
+    $menu_name = $form_state['values']['parent_menu'];
   }
-  else {
-    // Generate a list of possible parents (not including this link or
-    // descendants) from all menus.
-    $options = menu_parent_options($menus, $item);
-  }
+  // Generate a list of possible parents (not including this link or
+  // descendants) from the selected menu.
+  $options = menu_parent_options(array($menu_name => $menus[$menu_name]), $item);
+  $option_first_key = array_keys($options)[0];
+  $options[$option_first_key] .= ' ' . t('(top level)');
   $default = $item['menu_name'] . ':' . $item['plid'];
   if (!isset($options[$default])) {
-    $default = 'main-menu:0';
+    $default = $option_first_key;
   }
   $form['parent'] = array(
     '#type' => 'select',
     '#title' => t('Parent link'),
     '#default_value' => $default,
     '#options' => $options,
-    '#description' => t('The maximum depth for a link and all its children is fixed at !maxdepth. Some menu links may not be available as parents if selecting them would exceed this limit. <a href="!url">Configure this selector.</a>', array(
-      '!maxdepth' => MENU_MAX_DEPTH,
-      '!url' => url('admin/structure/menu/settings'),
-    )),
+    '#description' => t('The maximum depth for a link and all its children is fixed at !maxdepth. Some menu links may not be available as parents if selecting them would exceed this limit.', array('!maxdepth' => MENU_MAX_DEPTH)),
     '#attributes' => array('class' => array('menu-title-select')),
     '#prefix' => '<div id="menu-parent-select-wrapper">',
     '#suffix' => '</div>',
   );
-  // Get number of items in all possible parent menus, so the weight selector is
-  // sized appropriately.
-  if ($separate_menu) {
-    $menu_names = array($menu_name);
-  }
-  else {
-    $menu_names = array_keys($menus);
-  }
-  $menu_options = array();
-  foreach ($menu_names as $menu_name) {
-    if (isset($options[$menu_name . ':0'])) {
-      $menu_options[] = $menu_name;
-    }
-  }
-  // Make sure that we always have values in menu_options.
-  $menu_options = !empty($menu_options) ? $menu_options : $menu_names;
-
   $form['weight'] = array(
     '#type' => 'weight',
     '#title' => t('Weight'),
-    '#delta' => _menu_get_menu_weight_delta($menu_options),
+    '#delta' => _menu_get_menu_weight_delta($menu_name),
     '#default_value' => $item['weight'],
     '#description' => t('Optional. In the menu, the heavier links will sink and the lighter links will be positioned nearer the top.'),
+    '#attributes' => array('class' => array('menu-weight-select')),
     '#prefix' => '<div id="menu-parent-weight-wrapper">',
     '#suffix' => '</div>',
   );
@@ -838,14 +810,6 @@ function menu_settings_form($form, &$form_state) {
       ),
     ),
   );
-
-  $form['menu_separate_menu_selector'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Separate parent menu selector'),
-    '#description' => t('On the menu add/edit link form, use a separate selector for the parent link menu, which reduces the number of options in the parent link selector.'),
-    '#default_value' => $config->get('menu_separate_menu_selector'),
-  );
-
   $form['#submit'][] = 'menu_settings_form_submit';
 
   return system_settings_form($form);

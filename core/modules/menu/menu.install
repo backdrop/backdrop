@@ -166,13 +166,6 @@ function menu_update_1006() {
 }
 
 /**
- * Initialize the menu_separate_menu_selector config variable.
- */
-function menu_update_1007() {
-  config_set('menu.settings', 'menu_separate_menu_selector', FALSE);
-}
-
-/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
