@@ -433,11 +433,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     // Generate a list of possible parents (not including this link or
     // descendants) from the selected menu.
     $options = menu_parent_options(array($menu_name => $menus[$menu_name]), $item);
-    foreach ($options as $key => &$option) {
-      if (strpos($key, ':0') == strlen($key) - 2) {
-        $option .= ' ' . t('(top level)');
-      }
-    }
+    $options[array_keys($options)[0]] .= ' ' . t('(top level)');
   }
   else {
     // Generate a list of possible parents (not including this link or
