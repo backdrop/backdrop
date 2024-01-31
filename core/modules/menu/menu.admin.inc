@@ -429,31 +429,35 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
   // Generate a list of possible parents (not including this link or
   // descendants) from the selected menu.
   $options = menu_parent_options(array($menu_name => $menus[$menu_name]), $item);
-  $option_first_key = array_keys($options)[0];
+  $option_first_key = key($options);
   $options[$option_first_key] .= ' ' . t('(top level)');
   $default = $item['menu_name'] . ':' . $item['plid'];
   if (!isset($options[$default])) {
     $default = $option_first_key;
   }
-  $form['parent'] = array(
-    '#type' => 'select',
-    '#title' => t('Parent link'),
-    '#default_value' => $default,
-    '#options' => $options,
-    '#description' => t('The maximum depth for a link and all its children is fixed at !maxdepth. Some menu links may not be available as parents if selecting them would exceed this limit.', array('!maxdepth' => MENU_MAX_DEPTH)),
-    '#attributes' => array('class' => array('menu-title-select')),
-    '#prefix' => '<div id="menu-parent-select-wrapper">',
-    '#suffix' => '</div>',
+  $form['parent_wrapper'] = array(
+    '#type' => 'container',
+    '#id' => 'menu-parent-select-wrapper',
+    'parent' => array(
+      '#type' => 'select',
+      '#title' => t('Parent link'),
+      '#default_value' => $default,
+      '#options' => $options,
+      '#description' => t('The maximum depth for a link and all its children is fixed at !maxdepth. Some menu links may not be available as parents if selecting them would exceed this limit.', array('!maxdepth' => MENU_MAX_DEPTH)),
+      '#attributes' => array('class' => array('menu-title-select')),
+    ),
   );
-  $form['weight'] = array(
-    '#type' => 'weight',
-    '#title' => t('Weight'),
-    '#delta' => _menu_get_menu_weight_delta($menu_name),
-    '#default_value' => $item['weight'],
-    '#description' => t('Optional. In the menu, the heavier links will sink and the lighter links will be positioned nearer the top.'),
-    '#attributes' => array('class' => array('menu-weight-select')),
-    '#prefix' => '<div id="menu-parent-weight-wrapper">',
-    '#suffix' => '</div>',
+  $form['weight_wrapper'] = array(
+    '#type' => 'container',
+    '#id' => 'menu-parent-weight-wrapper',
+    'weight' => array(
+      '#type' => 'weight',
+      '#title' => t('Weight'),
+      '#delta' => _menu_get_menu_weight_delta($menu_name),
+      '#default_value' => $item['weight'],
+      '#description' => t('Optional. In the menu, the heavier links will sink and the lighter links will be positioned nearer the top.'),
+      '#attributes' => array('class' => array('menu-weight-select')),
+    ),
   );
 
   return $form;
@@ -465,8 +469,8 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
  */
 function menu_parent_menu_callback($form, $form_state) {
   $commands = array();
-  $commands[] = ajax_command_replace("#menu-parent-select-wrapper", backdrop_render($form['parent']));
-  $commands[] = ajax_command_replace("#menu-parent-weight-wrapper", backdrop_render($form['weight']));
+  $commands[] = ajax_command_replace("#menu-parent-select-wrapper", backdrop_render($form['parent_wrapper']));
+  $commands[] = ajax_command_replace("#menu-parent-weight-wrapper", backdrop_render($form['weight_wrapper']));
   return array('#type' => 'ajax', '#commands' => $commands);
 }
 
