@@ -39,8 +39,25 @@ Backdrop.behaviors.autosubmit = {
     // 'this' references the form element
     function triggerSubmit (e) {
       var $this = $(this);
+      let searchFieldID = '#' + $this.find('.autosubmit-processed').attr('id');
+      $('body').attr('data-needs-focus', searchFieldID);
       $this.find('.autosubmit-click').trigger('click');
     }
+
+    // Add back focus on form item inside a form that got replaced via AJAX.
+    // It's important to remove previous listeners, otherwise they stack up with
+    // every attach.
+    $(document).off('ajaxStop').on('ajaxStop', function () {
+      if (!$('body[data-needs-focus]').length) {
+        return;
+      }
+      let id = $('[data-needs-focus]').data().needsFocus;
+      let $textInput = $(id);
+      let pos = $textInput.val().length;
+      $textInput.focus();
+      $textInput[0].setSelectionRange(pos, pos);
+      $('body[data-needs-focus]').removeAttr('data-needs-focus');
+    });
 
     // the change event bubbles so we only need to bind it to the outer form
     $('form.autosubmit-full-form', context)
