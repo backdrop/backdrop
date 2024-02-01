@@ -3195,6 +3195,7 @@ function layout_ajax_form_save_dialog($form, $form_state) {
 
 function layout_ajax_form_save_title_dialog($form, $form_state) {
   $layout = $form_state['layout'];
+  $menu_item = $form_state['menu_item'];
 
   $commands = array();
   $commands[] = ajax_command_close_modal_dialog();
