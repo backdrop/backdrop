@@ -853,7 +853,9 @@ function menu_node_submit(Node $node, $form, $form_state) {
  * Adds menu options to the node type form.
  */
 function menu_form_node_type_form_alter(&$form, $form_state) {
-  $menu_options = menu_get_menus();
+  $menus = menu_get_menus();
+//dpm($menus,'$menus');
+
   $node_type = $form['#node_type'];
   $form['menu'] = array(
     '#type' => 'fieldset',
@@ -866,17 +868,94 @@ function menu_form_node_type_form_alter(&$form, $form_state) {
     '#group' => 'additional_settings',
     '#weight' => 15,
   );
+
+  $menu_default = isset($form_state['values']['menu_default']) ? $form_state['values']['menu_default'] : $node_type->settings['menu_default'];
   $form['menu']['menu_default'] = array(
     '#type' => 'checkbox',
     '#title' => t('Add a link into the menu for new content of this type'),
-    '#default_value' => $node_type->settings['menu_default'],
+    '#default_value' => $menu_default,
+    '#ajax' => array(
+      'callback' => 'menu_form_node_type_form_callback',
+      'wrapper' => 'menu-form-node-type-form-wrapper',
+    ),
   );
-  $form['menu']['menu_options'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('Menus where this content may be placed'),
-    '#default_value' => $node_type->settings['menu_options'],
-    '#options' => $menu_options,
+
+  $form['menu']['menu_form_node_type_form_wrapper'] = array(
+      '#type' => 'container',
+      '#id' => 'menu-form-node-type-form-wrapper',
   );
+
+  if ($menu_default) {
+
+    // CHOOSE WHICH MENUS TO PROVIDE ('menu_options')
+
+    $menu_options = isset($form_state['values']['menu_options']) ? $form_state['values']['menu_options'] : $node_type->settings['menu_options'];
+    $form['menu']['menu_form_node_type_form_wrapper']['menu_options'] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Menus where this content may be placed'),
+      '#options' => $menus,
+      '#default_value' => $menu_options,
+      '#ajax' => array('callback' => 'menu_menu_options_callback'),
+    );
+
+    // CHOOSE THE PARENT MENU OF THE DEFAULT ITEM ('parent_menu')
+
+    $parent_menu_options = array_intersect_key($menus, array_filter($menu_options));
+  //dpm($parent_menu_options,'$parent_menu_options');
+
+    // Get the current parent item and the menu it belongs to.
+    $menu_parent = isset($form_state['values']['menu_parent']) ? $form_state['values']['menu_parent'] : $node_type->settings['menu_parent'];
+  //dpm($menu_parent,'$menu_parent');
+
+    $menu_parent_menu = explode(':', $menu_parent)[0];
+  //dpm($menu_parent_menu,'$menu_parent_menu');
+
+    $parent_menu = isset($form_state['values']['parent_menu']) ? $form_state['values']['parent_menu'] : $menu_parent_menu;
+  //dpm($parent_menu,'$parent_menu');
+
+    // If $parent_menu is one of our options, then that's the default value for
+    // the menu selector; otherwise, it's the first item in the list of options.
+    if (!isset($parent_menu_options[$parent_menu])) {
+dpm('$parent_menu switched from ' . $parent_menu . ' to ' . key($parent_menu_options));
+      $parent_menu = key($parent_menu_options);
+    }
+  //dpm($parent_menu,'$parent_menu');
+
+    $form['menu']['menu_form_node_type_form_wrapper']['parent_menu'] = array(
+      '#type' => 'select',
+      '#title' => t('Default menu'),
+      '#options' => $parent_menu_options,
+      '#default_value' => $parent_menu,
+      '#ajax' => array('callback' => 'menu_menu_options_callback'),
+    );
+
+    // CHOOSE THE DEFAULT ITEM FROM THAT MENU ('menu_parent')
+
+    $menu_parent_options = menu_parent_options(array($parent_menu => $menus[$parent_menu]), array('mlid' => 0));
+    $option_first_key = key($menu_parent_options);
+    $menu_parent_options[$option_first_key] .= ' ' . t('(top level)');
+  //dpm($menu_parent_options,'$menu_parent_options');
+
+    // If $menu_parent is an item of $menu_parent_options, then it's the default
+    // value for the selector; otherwise it's the first item in the list of
+    // options.
+    if (!isset($menu_parent_options[$menu_parent])) {
+dpm('$menu_parent switched from ' . $menu_parent . ' to ' . $option_first_key);
+      $menu_parent = $option_first_key;
+    }
+  //dpm($menu_parent,'$menu_parent');
+
+    $form['menu']['menu_form_node_type_form_wrapper']['menu_parent'] = array(
+      '#type' => 'select',
+      '#title' => t('Default parent item'),
+      '#description' => t('Links to content will be placed below this item in the menu.'),
+      '#options' => $menu_parent_options,
+      '#default_value' => $menu_parent,
+      '#attributes' => array('class' => array('menu-title-select')),
+    );
+  }
+
+/*
   // To avoid an 'illegal option' error after saving the form we have to load
   // all available menu items.
   // Otherwise it is not possible to dynamically add options to the list.
@@ -890,14 +969,29 @@ function menu_form_node_type_form_alter(&$form, $form_state) {
     '#description' => t('Links to content will be placed below this item in the menu.'),
     '#attributes' => array('class' => array('menu-title-select')),
   );
+ */
 
+/*
   // Call Backdrop.menu_update_parent_list() to filter the list of
   // available default parent menu items based on the selected menus.
   backdrop_add_js(
     '(function ($) { Backdrop.menu_update_parent_list(); })(jQuery);',
     array('scope' => 'footer', 'type' => 'inline')
   );
+ */
+
 }
+
+/**
+ * Callback function to update default parent item.
+ */
+function menu_form_node_type_form_callback($form, $form_state) {
+  return $form['menu']['menu_form_node_type_form_wrapper'];
+}
+
+
+
+
 
 /**
  * Implements hook_node_type_load()
