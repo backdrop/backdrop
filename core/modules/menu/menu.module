@@ -341,22 +341,22 @@ function menu_delete($menu) {
  * Return a list of menu items that are valid possible parents for the given
  * menu item.
  *
- * @param $menus
+ * @param array $menus
  *   An array of menu names and titles, such as from menu_get_menus().
- * @param $item
+ * @param array $item
  *   The menu item or the node type for which to generate a list of parents. If
  *   $item['mlid'] == 0 then the complete tree is returned.
- * @param $type
+ * @param string $type
  *   The node type for which to generate a list of parents. If $item itself is a
  *   node type then $type is ignored.
- * @param $mark_top_level
+ * @param bool $mark_top_level
  *   If TRUE, append "(top level)" to the top-level menu link (which is the name
  *   of the menu).
  * @return
  *   An array of menu link titles keyed on the a string containing the menu name
  *   and mlid. The list excludes the given item and its children.
  */
-function menu_parent_options($menus, $item, $type = '', $mark_top_level = FALSE) {
+function menu_parent_options(array $menus, array $item, string $type = '', bool $mark_top_level = FALSE) {
   $available_menus = array();
   if (!is_array($item)) {
     // If $item is not an array then it is a node type.
