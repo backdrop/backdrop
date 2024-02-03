@@ -356,7 +356,7 @@ function menu_delete($menu) {
  *   An array of menu link titles keyed on the a string containing the menu name
  *   and mlid. The list excludes the given item and its children.
  */
-function menu_parent_options(array $menus, array $item, string $type = '', bool $mark_top_level = FALSE) {
+function menu_parent_options($menus, $item, $type = '', $mark_top_level = FALSE) {
   $available_menus = array();
   if (!is_array($item)) {
     // If $item is not an array then it is a node type.
