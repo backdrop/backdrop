@@ -1480,6 +1480,7 @@ class MenuTrailTestCase extends MenuWebTestCase {
 
     $breadcrumb = $home + array(
       'menu-test' => t('Menu test root'),
+      'menu-test/menu-trail' => t('Menu trail - Case 1'),
     );
     $tree = array(
       'menu-test' => t('Menu test root'),
@@ -1497,6 +1498,7 @@ class MenuTrailTestCase extends MenuWebTestCase {
 
     $breadcrumb = $config + array(
       'admin/config/development' => t('Development'),
+      'admin/config/development/menu-trail' => t('Menu trail - Case 2'),
     );
     $tree = $config_tree + array(
       'admin/config/development' => t('Development'),
@@ -1506,6 +1508,7 @@ class MenuTrailTestCase extends MenuWebTestCase {
     $override_breadcrumb = $config + array(
       'admin/config/system' => t('System'),
       'admin/config/system/site-information' => t('Site information'),
+      'admin/config/development/menu-trail' => t('Menu trail - Case 2'),
     );
     $override_tree = $config_tree + array(
       'admin/config/system' => t('System'),
@@ -1609,10 +1612,7 @@ class MenuTrailTestCase extends MenuWebTestCase {
       }
 
       // Check that the breadcrumb displayed on the final custom 403/404 page
-      // matches what we expect. (The last item of the active trail represents
-      // the current page, which is not supposed to appear in the breadcrumb,
-      // so we need to remove it from the array before checking.)
-      array_pop($expected_trail[$status_code]['final']);
+      // matches what we expect.
       $this->assertBreadcrumb(NULL, $expected_trail[$status_code]['final']);
     }
   }
