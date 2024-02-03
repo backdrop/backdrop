@@ -421,21 +421,27 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#options' => $menus,
     '#description' => t('Select the menu that this menu link should belong to.'),
     '#attributes' => array('class' => array('menu-menu-select')),
-    '#ajax' => array('callback' => 'menu_parent_menu_callback'),
+    '#ajax' => array(
+      'callback' => 'menu_parent_menu_callback',
+      'wrapper' => 'menu-parent-wrapper',
+    ),
+  );
+
+  $form['menu_parent_wrapper'] = array(
+    '#type' => 'container',
+    '#id' => 'menu-parent-wrapper',
   );
   if (isset($form_state['values']['parent_menu'])) {
     $menu_name = $form_state['values']['parent_menu'];
   }
   // Generate a list of possible parents (not including this link or
   // descendants) from the selected menu.
-  $options = menu_parent_options(array($menu_name => $menus[$menu_name]), $item);
-  $option_first_key = key($options);
-  $options[$option_first_key] .= ' ' . t('(top level)');
+  $options = menu_parent_options(array($menu_name => $menus[$menu_name]), $item, '', TRUE);
   $default = $item['menu_name'] . ':' . $item['plid'];
   if (!isset($options[$default])) {
-    $default = $option_first_key;
+    $default = key($options);
   }
-  $form['parent_wrapper'] = array(
+  $form['menu_parent_wrapper']['menu_parent_select_wrapper'] = array(
     '#type' => 'container',
     '#id' => 'menu-parent-select-wrapper',
     'parent' => array(
@@ -447,7 +453,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
       '#attributes' => array('class' => array('menu-title-select')),
     ),
   );
-  $form['weight_wrapper'] = array(
+  $form['menu_parent_wrapper']['menu_parent_weight_wrapper'] = array(
     '#type' => 'container',
     '#id' => 'menu-parent-weight-wrapper',
     'weight' => array(
@@ -468,10 +474,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
  * weights.
  */
 function menu_parent_menu_callback($form, $form_state) {
-  $commands = array();
-  $commands[] = ajax_command_replace("#menu-parent-select-wrapper", backdrop_render($form['parent_wrapper']));
-  $commands[] = ajax_command_replace("#menu-parent-weight-wrapper", backdrop_render($form['weight_wrapper']));
-  return array('#type' => 'ajax', '#commands' => $commands);
+  return $form['menu_parent_wrapper'];
 }
 
 /**

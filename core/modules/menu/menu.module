@@ -338,21 +338,25 @@ function menu_delete($menu) {
 }
 
 /**
- * Return a list of menu items that are valid possible parents for the given menu item.
+ * Return a list of menu items that are valid possible parents for the given
+ * menu item.
  *
  * @param $menus
  *   An array of menu names and titles, such as from menu_get_menus().
  * @param $item
- *   The menu item or the node type for which to generate a list of parents.
- *   If $item['mlid'] == 0 then the complete tree is returned.
+ *   The menu item or the node type for which to generate a list of parents. If
+ *   $item['mlid'] == 0 then the complete tree is returned.
  * @param $type
- *   The node type for which to generate a list of parents.
- *   If $item itself is a node type then $type is ignored.
+ *   The node type for which to generate a list of parents. If $item itself is a
+ *   node type then $type is ignored.
+ * @param $mark_top_level
+ *   If TRUE, append "(top level)" to the top-level menu link (which is the name
+ *   of the menu).
  * @return
  *   An array of menu link titles keyed on the a string containing the menu name
  *   and mlid. The list excludes the given item and its children.
  */
-function menu_parent_options($menus, $item, $type = '') {
+function menu_parent_options($menus, $item, $type = '', $mark_top_level = FALSE) {
   $available_menus = array();
   if (!is_array($item)) {
     // If $item is not an array then it is a node type.
@@ -372,7 +376,7 @@ function menu_parent_options($menus, $item, $type = '') {
     }
   }
 
-  return _menu_get_options($menus, $available_menus, $item);
+  return _menu_get_options($menus, $available_menus, $item, $mark_top_level);
 }
 
 /**
@@ -423,7 +427,7 @@ function menu_update_parent_options_ajax($form, $form_state) {
 /**
  * Helper function to get the items of the given menu.
  */
-function _menu_get_options($menus, $available_menus, $item) {
+function _menu_get_options($menus, $available_menus, $item, $mark_top_level = FALSE) {
   // If the item has children, there is an added limit to the depth of valid parents.
   if (isset($item['parent_depth_limit'])) {
     $limit = $item['parent_depth_limit'];
@@ -440,7 +444,7 @@ function _menu_get_options($menus, $available_menus, $item) {
   foreach ($menus as $menu_name => $title) {
     if (isset($available_menus[$menu_name])) {
       $tree = menu_tree_all_data($menu_name, NULL, NULL, $langcode);
-      $options[$menu_name . ':0'] = $title;
+      $options[$menu_name . ':0'] = $title . ($mark_top_level ? ' ' . t('(top level)') : '');
       _menu_parents_recurse($tree, $menu_name, '· ', $options, $item['mlid'], $limit);
     }
   }
