@@ -2631,7 +2631,7 @@ function system_block_view($delta = '', $settings = array()) {
       return $block;
     case 'powered-by':
       $block['subject'] = NULL;
-      $block['content'] = theme('system_powered_by');
+      $block['content'] = system_powered_by_block($settings);
       return $block;
     default:
       // All system menu blocks.
@@ -2660,6 +2660,22 @@ function system_block_configure($delta, $settings) {
       '#type' => 'checkbox',
       '#title' => t('Display the current page title as the last breadcrumb'),
       '#default_value' => !empty($settings['current']),
+    );
+    return $form;
+  }
+  elseif ($delta === 'powered-by') {
+    $settings += array(
+      'color' => 'black',
+    );
+
+    $form['color'] = array(
+      '#type' => 'select',
+      '#title' => t('Logo color'),
+      '#options' => array(
+        'black' => t('Black (for use on light backgrounds)'),
+        'white' => t('White (for use on dark backgrounds)'),
+      ),
+      '#default_value' => $settings['color'],
     );
     return $form;
   }
@@ -3403,6 +3419,21 @@ function system_breadcrumb_block($settings = array()) {
   }
 
   return theme('breadcrumb', array('breadcrumb' => $crumbs));
+}
+
+/**
+ * Output the content for the powered by block.
+ *
+ * @see system_block_view()
+ */
+function system_powered_by_block($settings = array()) {
+  $variables = array();
+
+  if (isset($settings['color'])) {
+    $variables['color'] = $settings['color'];
+  }
+
+  return theme('system_powered_by', $variables);
 }
 
 /**

@@ -9,8 +9,20 @@
  *
  * @ingroup themeable
  */
-function theme_system_powered_by() {
-  return '<span>' . t('Powered by <a href="@poweredby">Backdrop CMS</a>', array('@poweredby' => 'https://backdropcms.org')) . '</span>';
+function theme_system_powered_by($variables) {
+  $text = t('Powered by Backdrop CMS');
+  $link = l($text, 'https://backdropcms.org', array(
+    'attributes' => array(
+      'class' => array(
+        'logo',
+        'backdrop-mark',
+        isset($variables['color']) ? 'color-' . $variables['color'] : '',
+      ),
+      'title' => $text,
+    ),
+  ));
+
+  return '<span>' . $link . '</span>';
 }
 
 /**
