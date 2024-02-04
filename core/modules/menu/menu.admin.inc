@@ -436,7 +436,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
   }
   // Generate a list of possible parents (not including this link or
   // descendants) from the selected menu.
-  $options = menu_parent_options(array($menu_name => $menus[$menu_name]), $item, '', TRUE);
+  $options = menu_parent_options(array($menu_name => $menus[$menu_name]), $item);
   $default = $item['menu_name'] . ':' . $item['plid'];
   if (!isset($options[$default])) {
     $default = key($options);
