@@ -20,9 +20,11 @@ class views_plugin_pager_none extends views_plugin_pager {
 
   function summary_title() {
     if (!empty($this->options['offset'])) {
-      return t('All items, skip @skip', array('@skip' => $this->options['offset']));
+      return t('All results, skip @skip', array(
+        '@skip' => $this->options['offset'],
+      ));
     }
-    return t('All items');
+    return t('All results');
   }
 
   function option_definition() {
