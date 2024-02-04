@@ -1353,6 +1353,7 @@ function field_block_info() {
 /**
  * Helper function to build a list of fields that have been made available as
  * a block.
+ *
  * @return array
  *   An array with all entity fields with known instances.
  */
@@ -1396,6 +1397,105 @@ function field_get_block_list() {
   cache_set($cache_key, $types);
 
   return $types;
+}
+
+/**
+ * Helper function to retrieve the most commonly used label for a field.
+ *
+ * @param string $machine_name
+ *   The machine name for the field in question.
+ * @param sring $entity
+ *   The type of entity. For example: 'node' or 'user'.
+ * @param string $bundle
+ *   The entity bundle. For example: 'page' or 'post'.
+ *
+ * If only a machine name is provided, the result will be the most commonly used
+ * label across all instances of this field.
+ *
+ * If a machine name and entity type are provided, the result will be the most
+ * commonly used label across all instances of this field, on this type of
+ * entity.
+ *
+ * If a machine name, entity type, and bundle are provided, the result will be
+ * the only label used for this field instance.
+ *
+ * @return string
+ *   The most commonly used machine name.
+ */
+function field_get_label($machine_name = '', $entity = '', $bundle = '') {
+  if ($machine_name == '') {
+    return;
+  }
+
+  if ($entity != '' && $bundle != '') {
+    $field_info = field_info_instance();
+    return $field_info['label'];
+  }
+
+  $all_labels = field_get_labels($machine_name);
+  // Sort the labels from least common to most common.
+  asort($all_labels);
+  // Flip keys and values so array_pop can get us the key.
+  $labels_inverted = array_flip($all_labels);
+  // Pull the last (most commonly used) value.
+  $label = array_pop($labels_inverted);
+
+  return $label;
+}
+
+/**
+ * Helper function to retrieve all labels for a field.
+ *
+ * @param string $machine_name
+ *   The machine name for the field in question.
+ *
+ * @return array
+ *   An array keyed by label, where the value is the number of times that label
+ *   was used for the field. For example:
+ *     array('First choice' => 3, 'Top choice' => 1)
+ */
+function field_get_labels($machine_name) {
+  $labels = field_get_all_labels();
+  return $labels[$machine_name];
+}
+
+/**
+ * Helper function to retrieve all labels for a field.
+ *
+ * @return array
+ *   An array keyed by machine name of the field. Each value is an array keyed
+ *   by label, and the value is the number of times each label is used. For example:
+ *   array(
+ *     'field_one' => array('First choice' => 3, 'Top choice' => 1),
+ *     'field_two' => array('Second choice' => 3, 'Number two' => 1)
+ *   )
+ */
+function field_get_all_labels() {
+  $labels = &backdrop_static(__FUNCTION__);
+  if (!isset($labels)) {
+    foreach (field_info_fields() as $field_name => $field_info) {
+      foreach ($field_info['bundles'] as $entity_type => $bundles) {
+        foreach ($bundles as $bundle) {
+          $instance = field_info_instance($entity_type, $field_name, $bundle);
+          if (isset($labels[$instance['label']])) {
+            $count = $labels[$instance['label']];
+            $count++;
+          }
+          else {
+            $count = 1;
+          }
+          $labels[$field_name][$instance['label']] = $count;
+        }
+      }
+      if (isset($labels[$field_name])) {
+        // Reverse so the first one used comes last (this is helpful when all
+        // labels have the same frequency of use, but you want Body to show Body).
+        $labels[$field_name] = array_reverse($labels[$field_name]);
+      }
+    }
+  }
+
+  return $labels;
 }
 
 /**
