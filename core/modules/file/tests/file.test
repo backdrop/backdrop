@@ -1386,7 +1386,10 @@ class FileFieldDisplayTestCase extends FileTestHelper {
     // Check that the default formatter is displaying with the file name.
     $node = node_load($nid, NULL, TRUE);
     $node_file = (object) $node->{$field_name}[LANGUAGE_NONE][0];
-    $default_output = theme('file_link', array('file' => $node_file));
+    $default_output = theme('file_link', array(
+      'file' => $node_file,
+      'attributes' => array('class' => array('file-preview-link')),
+    ));
     $this->assertRaw($default_output, 'Default formatter displaying correctly on full node view.');
 
     // Turn the "display" option off and check that the file is no longer displayed.
