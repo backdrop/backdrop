@@ -3902,10 +3902,9 @@ function views_ui_add_item_form_submit($form, &$form_state) {
     $display->handler->set_override($section);
   }
 
-  if (!empty($form_state['values']['name']) && is_array($form_state['values']['name'])) {
-    $fields = (!empty($form_state['values']['name']['fields'])) ? $form_state['values']['name']['fields'] : $form_state['values']['name'];
+  if (!empty($form_state['values']['name']['fields']) && is_array($form_state['values']['name']['fields'])) {
     // Loop through each of the items that were checked and add them to the view.
-    foreach (array_keys(array_filter($fields)) as $field) {
+    foreach (array_keys(array_filter($form_state['values']['name']['fields'])) as $field) {
       list($table, $field) = explode('.', $field, 2);
 
       if ($cut = strpos($field, '$')) {

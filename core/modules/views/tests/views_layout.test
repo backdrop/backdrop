@@ -65,7 +65,7 @@ class ViewsLayoutsTest extends BackdropWebTestCase {
     $this->backdropGet('admin/structure/views/nojs/add-item/layout_context_test_ua/block/field');
 
     $fields = array(
-      'name[users.uid]' => 1,
+      'name[fields][users.uid]' => 1,
     );
 
     $this->backdropPost(NULL, $fields, t('Add and configure fields'));
@@ -73,7 +73,7 @@ class ViewsLayoutsTest extends BackdropWebTestCase {
 
     // Add Contextual Filter User ID to our view.
     $this->backdropGet('admin/structure/views/nojs/add-item/layout_context_test_ua/block/argument');
-    $this->backdropPost(NULL, array('name[users.uid]' => 1), t('Add and configure contextual filters'));
+    $this->backdropPost(NULL, array('name[fields][users.uid]' => 1), t('Add and configure contextual filters'));
     $this->backdropPost(NULL, NULL, t('Apply'));
 
     // Navigate to the Edit form of the Contextual filter input of our view.
