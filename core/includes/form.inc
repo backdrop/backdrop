@@ -3619,7 +3619,10 @@ function form_process_actions($element, &$form_state) {
 function form_process_button($element, &$form_state) {
   // We normally want to add backdrop.form so that the double submit protection
   // can be added to the site.
-  $element['#attached']['library'][] = array('system', 'backdrop.form');
+  if (settings_get('javascript_use_double_submit_protection', TRUE)) {
+    $element['#attached']['library'][] = array('system', 'backdrop.form');
+  }
+
   return $element;
 }
 

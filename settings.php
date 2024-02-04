@@ -484,6 +484,15 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
 // $config['system.core']['file_additional_public_schemes'] = array('example');
 
 /**
+ * Opt out of double submit protection.
+ *
+ * By default Backdrop will prevent consecutive form submissions of identical
+ * form values. Set this variable to FALSE in order to opt out of this
+ * prevention and revert to the original behaviour.
+ */
+// $settings['javascript_use_double_submit_protection'] = FALSE;
+
+/**
  * Include a local settings file, if available.
  *
  * To make local development easier, you can add a settings.local.php file that

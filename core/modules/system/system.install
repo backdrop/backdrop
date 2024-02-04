@@ -3524,6 +3524,15 @@ function system_update_1094() {
 }
 
 /**
+ * Remove the javascript_use_double_submit_protection variable.
+ *
+ * This now lives as a setting in the settings.php file.
+ */
+function system_update_1095() {
+  update_variable_del('javascript_use_double_submit_protection');
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
