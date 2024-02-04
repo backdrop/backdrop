@@ -2230,7 +2230,7 @@ function views_ui_edit_form_get_bucket($type, $view, $display) {
   }
 
   // Render the array of links
-  $build['actions'] = array(
+  $build['#actions'] = array(
     '#type' => 'operations',
     '#links' => $actions,
   );
