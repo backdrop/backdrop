@@ -19,6 +19,7 @@ Backdrop.behaviors.menuAdminFieldsetSummaries = {
   }
 };
 
+/*
 Backdrop.behaviors.menuChangeParentItems = {
   attach: function (context, settings) {
     $('fieldset#edit-menu input').each(function () {
@@ -29,10 +30,12 @@ Backdrop.behaviors.menuChangeParentItems = {
     });
   }
 };
+ */
 
 /**
  * Function to set the options of the menu parent item dropdown.
  */
+/*
 Backdrop.menu_update_parent_list = function () {
   var values = [];
 
@@ -70,5 +73,6 @@ Backdrop.menu_update_parent_list = function () {
     }
   });
 };
+ */
 
 })(jQuery);
