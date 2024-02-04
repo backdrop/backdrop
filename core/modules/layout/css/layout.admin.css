@@ -169,14 +169,14 @@
 }
 .layout-block-add-row.form-item {
   padding: 5px;
-  border-bottom: 1px solid #CCC;
+  border-bottom: 1px solid #ccc;
   margin: 0;
 }
 .layout-block-add-row.odd {
-  background-color: #F3F4EE;
+  background-color: #f3f4ee;
 }
 .layout-block-list-wrapper {
-  border: 1px solid #CCC;
+  border: 1px solid #ccc;
   border-bottom: none;
 }
 
@@ -192,7 +192,7 @@
   min-height: 70px;
   margin: 0 0 15px;
   padding: 8px 8px 16px 8px;
-  border: 1px dashed #CCC;
+  border: 1px dashed #9f9f9f;
   background: white;
   box-sizing: border-box;
 }
@@ -249,9 +249,15 @@
 }
 .layout-editor-block {
   margin: -1px 1px 15px -1px;
-  background: #FFF;
+  background: #fff;
+  border: solid 1px #9f9f9f;
   border-radius: 4px;
   box-shadow: 2px 2px 0 0 #d0d0d0;
+}
+.layout-editor-block:hover {
+  -webkit-box-shadow: 2px 2px 0 0 #ebebad;
+  -moz-box-shadow: 2px 2px 0 0 #ebebad;
+  box-shadow: 2px 2px 0 0 #ebebad;
 }
 .layout-editor-block:last-child {
   margin-bottom: 0;
@@ -261,6 +267,12 @@
   background: #e9e8e8;
   border-radius: 4px 4px 0 0;
   padding: 0.4em 0.5em;
+}
+.layout-editor-block:hover .layout-editor-block-title {
+  background: #ebebad;
+}
+.layout-editor-block:hover .layout-editor-block-content {
+  background: #ffff99;
 }
 .layout-editor-block-title .handle {
   background: url(../../../misc/draggable.png) no-repeat 6px 9px;
@@ -343,6 +355,7 @@
 .layout-content-form .page-title .layout-editor-block {
   box-shadow: none;
   background-color: #e9e8e8;
+  border-style: none;
   padding: 0.4em 1em;
 }
 .layout-content-form .page-title .layout-editor-block-title {
