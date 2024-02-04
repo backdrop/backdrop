@@ -1472,7 +1472,8 @@ function user_menu() {
     'title' => 'User accounts',
     'description' => 'Configure user accounts.',
     'weight' => -20,
-    'page callback' => 'system_admin_menu_block_page',
+    'page callback' => 'backdrop_goto',
+    'page arguments' => array('admin/config/people/settings'),
     'access arguments' => array('access administration pages'),
     'file' => 'system.admin.inc',
     'file path' => backdrop_get_path('module', 'system'),
@@ -1484,6 +1485,7 @@ function user_menu() {
     'page arguments' => array('user_admin_settings'),
     'access arguments' => array('administer account settings'),
     'file' => 'user.admin.inc',
+    'type' => MENU_LOCAL_TASK,
   );
 
   // Login settings.
@@ -1494,6 +1496,7 @@ function user_menu() {
     'page arguments' => array('user_login_settings'),
     'access arguments' => array('administer account settings'),
     'file' => 'user.admin.inc',
+    'type' => MENU_LOCAL_TASK,
   );
 
   // Permissions forms.
@@ -1504,6 +1507,7 @@ function user_menu() {
     'page arguments' => array('user_admin_permissions'),
     'access arguments' => array('administer permissions'),
     'file' => 'user.admin.inc',
+    'type' => MENU_LOCAL_TASK,
   );
 
   // Role forms.
@@ -1514,6 +1518,7 @@ function user_menu() {
     'page arguments' => array('user_admin_roles'),
     'access arguments' => array('administer permissions'),
     'file' => 'user.admin.inc',
+    'type' => MENU_LOCAL_TASK,
   );
   $items['admin/config/people/roles/add'] = array(
     'title' => 'Add role',
@@ -1552,7 +1557,7 @@ function user_menu() {
     'page arguments' => array('user_settings_email'),
     'access arguments' => array('administer account settings'),
     'file' => 'user.admin.inc',
-    'weight' => 10,
+    'type' => MENU_LOCAL_TASK,
   );
 
   $items['user/%user'] = array(
@@ -1606,6 +1611,7 @@ function user_menu() {
   );
   return $items;
 }
+
 /**
  * Implements hook_menu_alter().
  */
@@ -1613,7 +1619,7 @@ function user_menu_alter(&$items) {
   if (module_exists('field_ui')) {
     // Provide a parent menu item for managing fields.
     $items['admin/config/people/manage'] = $items['admin/config/people/manage/fields'];
-    $items['admin/config/people/manage']['type'] = MENU_NORMAL_ITEM;
+    $items['admin/config/people/manage']['type'] = MENU_LOCAL_TASK;
     $items['admin/config/people/manage']['weight'] = 1;
     $items['admin/config/people/manage']['description'] = 'Configure fields and display of fields on user accounts.';
 
