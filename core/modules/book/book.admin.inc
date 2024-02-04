@@ -283,9 +283,8 @@ function _book_admin_table_tree($tree, &$form) {
         '#size' => 40,
       ),
       'weight' => array(
-        '#type' => 'weight',
+        '#type' => 'number',
         '#default_value' => $data['link']['weight'],
-        '#delta' => max($delta, abs($data['link']['weight'])),
         '#title' => t('Weight for @title', array('@title' => $data['link']['title'])),
         '#title_display' => 'invisible',
       ),
