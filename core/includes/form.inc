@@ -720,14 +720,14 @@ function form_load_include(&$form_state, $type, $module, $name = NULL) {
  *   @endcode
  * For example:
  * @code
- * // register a new user
- * $form_state = array();
- * $form_state['values']['name'] = 'new-user';
- * $form_state['values']['mail'] = 'new.user@example.com';
- * $form_state['values']['pass']['pass1'] = 'password';
- * $form_state['values']['pass']['pass2'] = 'password';
- * $form_state['values']['op'] = t('Create new account');
- * backdrop_form_submit('user_register_form', $form_state);
+ *   // register a new user
+ *   $form_state = array();
+ *   $form_state['values']['name'] = 'new-user';
+ *   $form_state['values']['mail'] = 'new.user@example.com';
+ *   $form_state['values']['pass']['pass1'] = 'password';
+ *   $form_state['values']['pass']['pass2'] = 'password';
+ *   $form_state['values']['op'] = t('Create new account');
+ *   backdrop_form_submit('user_register_form', $form_state);
  * @endcode
  */
 function backdrop_form_submit($form_id, &$form_state) {
@@ -3619,7 +3619,10 @@ function form_process_actions($element, &$form_state) {
 function form_process_button($element, &$form_state) {
   // We normally want to add backdrop.form so that the double submit protection
   // can be added to the site.
-  $element['#attached']['library'][] = array('system', 'backdrop.form');
+  if (settings_get('javascript_use_double_submit_protection', TRUE)) {
+    $element['#attached']['library'][] = array('system', 'backdrop.form');
+  }
+
   return $element;
 }
 
