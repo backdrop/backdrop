@@ -189,6 +189,8 @@ function theme_update_page($variables) {
  *   - messages: An array of result messages.
  *
  * @ingroup themeable
+ *
+ * @deprecated since 1.12.0
  */
 function theme_authorize_report($variables) {
   $messages = $variables['messages'];
@@ -219,6 +221,8 @@ function theme_authorize_report($variables) {
  *   - success: A boolean indicating failure or success.
  *
  * @ingroup themeable
+ *
+ * @deprecated since 1.12.0
  */
 function theme_authorize_message($variables) {
   $message = $variables['message'];

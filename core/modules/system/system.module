@@ -2252,6 +2252,8 @@ function _system_themes_access($theme) {
  *   Optional string to use as the page title once redirected to authorize.php.
  * @return
  *   Nothing, this function just initializes variables in the user's session.
+ *
+ * @deprecated since 1.12.0
  */
 function system_authorized_init($callback, $file, $arguments = array(), $page_title = NULL) {
   // First, figure out what file transfer backends the site supports, and put
@@ -2280,6 +2282,8 @@ function system_authorized_init($callback, $file, $arguments = array(), $page_ti
  *   The full URL to authorize.php, using HTTPS if available.
  *
  * @see system_authorized_init()
+ *
+ * @deprecated since 1.12.0
  */
 function system_authorized_get_url(array $options = array()) {
   global $base_url;
@@ -2292,6 +2296,8 @@ function system_authorized_get_url(array $options = array()) {
 
 /**
  * Returns the URL for the authorize.php script when it is processing a batch.
+ *
+ * @deprecated since 1.12.0
  */
 function system_authorized_batch_processing_url() {
   return system_authorized_get_url(array('query' => array('batch' => '1')));
@@ -2301,6 +2307,8 @@ function system_authorized_batch_processing_url() {
  * Setup and invoke an operation using authorize.php.
  *
  * @see system_authorized_init()
+ *
+ * @deprecated since 1.12.0
  */
 function system_authorized_run($callback, $file, $arguments = array(), $page_title = NULL) {
   system_authorized_init($callback, $file, $arguments, $page_title);
@@ -2311,6 +2319,8 @@ function system_authorized_run($callback, $file, $arguments = array(), $page_tit
  * Use authorize.php to run batch_process().
  *
  * @see batch_process()
+ *
+ * @deprecated since 1.12.0
  */
 function system_authorized_batch_process($redirect_callback = 'backdrop_goto') {
   $finish_url = system_authorized_get_url();

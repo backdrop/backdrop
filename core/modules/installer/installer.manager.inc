@@ -326,7 +326,7 @@ function installer_manager_update_form_submit($form, &$form_state) {
   $operations = array();
   foreach ($projects as $project) {
     $operations[] = array(
-      'installer_manager_batch_project_get',
+      'installer_manager_download_update_batch',
       array(
         $project,
         $form_state['values']['project_downloads'][$project],
@@ -337,7 +337,7 @@ function installer_manager_update_form_submit($form, &$form_state) {
     'title' => t('Downloading updates'),
     'init_message' => t('Preparing to download selected updates'),
     'operations' => $operations,
-    'finished' => 'installer_manager_download_batch_finished',
+    'finished' => 'installer_manager_download_update_batch_finished',
     'file' => backdrop_get_path('module', 'installer') . '/installer.manager.inc',
   );
   batch_set($batch);
@@ -351,7 +351,7 @@ function installer_manager_update_form_submit($form, &$form_state) {
  * @param $results
  *   An associative array of results from the batch operation.
  */
-function installer_manager_download_batch_finished($success, $results) {
+function installer_manager_download_update_batch_finished($success, $results) {
   if (!empty($results['errors'])) {
     $error_list = array(
       'title' => t('Downloading updates failed:'),
@@ -393,6 +393,11 @@ function installer_manager_update_ready_form($form, &$form_state) {
     return $form;
   }
 
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => t('Updates have been downloaded. Continuing will overwrite the current copy of projects with the new version.'),
+  );
+
   $form['backup'] = array(
     '#prefix' => '<strong>',
     '#markup' => t('Back up your database and site before you continue. <a href="@backup_url">Learn how</a>.', array('@backup_url' => url('https://backdropcms.org/backups'))),
@@ -421,11 +426,9 @@ function installer_manager_update_ready_form($form, &$form_state) {
  * update, do so now. Otherwise, pull information about all the required updates
  * out of the SESSION, figure out what Updater class is needed for each one,
  * generate an array of update operations to perform, and hand it all off to
- * system_authorized_init(), then redirect to authorize.php.
+ * installer_manager_install_project().
  *
- * @see installer_authorize_run_update()
- * @see system_authorized_init()
- * @see system_authorized_get_url()
+ * @see installer_manager_install_project()
  */
 function installer_manager_update_ready_form_submit($form, &$form_state) {
   // Store maintenance_mode setting so we can restore it when done.
@@ -438,40 +441,31 @@ function installer_manager_update_ready_form_submit($form, &$form_state) {
     // Make sure the Updater registry is loaded.
     backdrop_get_updaters();
 
-    $updates = array();
     $directory = _installer_manager_extract_directory();
 
     $projects = $_SESSION['installer_manager_update_projects'];
     unset($_SESSION['installer_manager_update_projects']);
 
-    $project_realpath = NULL;
-    foreach ($projects as $project => $url) {
-      $project_location = $directory . '/' . $project;
-      $updater = Updater::factory($project_location);
-      $project_realpath = backdrop_realpath($project_location);
-      $updates[] = array(
-        'project' => $project,
-        'updater_name' => get_class($updater),
-        'local_url' => $project_realpath,
-      );
+    $result = array('success' => TRUE);
+    foreach ($projects as $project_name => $url) {
+      $project_location = $directory . '/' . $project_name;
+      $result = installer_manager_install_project($project_location, TRUE);
+      if (!$result['success']) {
+        backdrop_set_message($result['message'], 'error');
+        break;
+      }
     }
 
-    // If the owner of the last directory we extracted is the same as the
-    // owner of our configuration directory where we're trying to install the
-    // code, there's no need to prompt for FTP/SSH credentials. Instead, we
-    // instantiate a FileTransferLocal and invoke installer_authorize_run_update()
-    // directly.
-    if (fileowner($project_realpath) == fileowner(conf_path())) {
-      module_load_include('inc', 'installer', 'installer.authorize');
-      $filetransfer = new FileTransferLocal(BACKDROP_ROOT);
-      installer_authorize_run_update($filetransfer, $updates);
-    }
-    // Otherwise, go through the regular workflow to prompt for FTP/SSH
-    // credentials and invoke installer_authorize_run_update() indirectly with
-    // whatever FileTransfer object authorize.php creates for us.
-    else {
-      system_authorized_init('installer_authorize_run_update', backdrop_get_path('module', 'installer') . '/installer.authorize.inc', array($updates), t('Update manager'));
-      $form_state['redirect'] = system_authorized_get_url();
+    if ($result['success']) {
+      backdrop_set_message('All projects updated successfully.');
+      $project_type = $result['project']['type'];
+      $redirect = array(
+        'module' => 'admin/modules/update',
+        'theme' => 'admin/appearance/update',
+        'layout' => 'admin/structure/layouts/update',
+        'core' => 'admin/modules/update',
+      );
+      $form_state['redirect'] = $redirect[$project_type];
     }
   }
 }
@@ -602,7 +596,7 @@ function installer_manager_install_modal_callback($form, $form_state) {
  *   The update manager operation we're in the middle of. Can be either 'update'
  *   or 'install'. Use to provide operation-specific interface text.
  *
- * @return
+ * @return bool
  *   TRUE if the update manager should continue to the next step in the
  *   workflow, or FALSE if we've hit a fatal configuration and must halt the
  *   workflow.
@@ -755,19 +749,43 @@ function installer_manager_install_form_validate($form, &$form_state) {
  * Form submission handler for installer_manager_install_form().
  */
 function installer_manager_install_form_submit($form, &$form_state) {
+  // For a list of projects, add to the queue but don't immediately install.
   if (!empty($form_state['projects'])) {
     foreach ($form_state['projects'] as $project) {
       installer_browser_install_queue_add($project);
     }
     $form_state['redirect'] = 'admin/installer/install/select_versions';
   }
+  // For uploads or direct URLs, download and validate the archive and
+  // immediately proceed to place the archive on the server. The steps for
+  // choosing a version do not support custom archives.
   else {
-    $return = installer_manager_download_project($form_state['values']['project_url']);
-    if (empty($return['success'])) {
-      form_set_error('project_url', $return['message']);
+    // May be an NULL or a full URL.
+    $project_url = $form_state['values']['project_url'];
+    $return = installer_manager_download_project($project_url);
+    if ($return['success']) {
+      $return = installer_manager_install_project($return['project_location']);
     }
-    if (!empty($return['redirect'])) {
-      $form_state['redirect'] = $return['redirect'];
+
+    if ($return['success']) {
+      // Downloaded from a remote source.
+      if ($project_url) {
+        backdrop_set_message(t('The project archive containing %title has been downloaded.', array('%title' => $return['project']['title'])));
+      }
+      // Uploaded from the user's computer.
+      else {
+        backdrop_set_message(t('The project archive containing %title has been uploaded.', array('%title' => $return['project']['title'])));
+      }
+      $type = $return['project']['type'];
+      $paths = array(
+        'module' => 'admin/modules',
+        'theme' => 'admin/appearance',
+        'layout' => 'admin/structure/layouts',
+      );
+      $form_state['redirect'] = $paths[$type];
+    }
+    else {
+      form_set_error('project_url', $return['message']);
     }
   }
 }
@@ -779,26 +797,28 @@ function installer_manager_install_form_submit($form, &$form_state) {
  * uploads the file attached to the form, then attempts to extract the archive
  * into a temporary location and verify it. Instantiate the appropriate
  * Updater class for this project and make sure it is not already installed in
- * the live webroot. If everything is successful, setup an operation to run
- * via authorize.php which will copy the extracted files from the temporary
- * location into the live site.
+ * the live webroot.
  *
- * @param string $is_installer
- *   Whether the project is being installed via the Project Installer UI.
+ * @param string $project_url
+ *   The URL to a project archive. If not specified, uploads with the key
+ *   "project_upload" will be checked for an uploaded archive.
  *
  * @return array
  *   An associative array with keys:
- *   - 'success': whether the update was successful
- *   - 'message': an error or success message.
+ *   - 'success': Boolean indicating whether the download was successful.
+ *   - 'message': String containing any error messages.
+ *   - 'project_location': The local directory containing the expanded project.
  *
  * @see installer_manager_install_form_validate()
- * @see installer_authorize_run_install()
- * @see system_authorized_init()
- * @see system_authorized_get_url()
+ * @see installer_manager_install_project()
+ *
+ * @since 1.11.0 Removed second parameter $is_installer.
+ * @since 1.11.0 This now only downloads a project into the temporary directory,
+ *   to install the project, call installer_manager_install_project().
  */
-function installer_manager_download_project($url, $is_installer = FALSE) {
-  if ($url) {
-    $local_cache = installer_manager_file_get($url);
+function installer_manager_download_project($project_url) {
+  if ($project_url) {
+    $local_cache = installer_manager_file_get($project_url);
     if (!$local_cache) {
       return array(
         'success' => FALSE,
@@ -842,13 +862,12 @@ function installer_manager_download_project($url, $is_installer = FALSE) {
     );
   }
 
-
   // Unfortunately, we can only use the directory name to determine the project
   // name. Some archivers list the first file as the directory (i.e., MODULE/)
   // and others list an actual file (i.e., MODULE/README.MD).
-  $project = strtok($files[0], '/\\');
+  $project_name = strtok($files[0], '/\\');
 
-  $archive_errors = installer_manager_archive_verify($project, $local_cache, $directory);
+  $archive_errors = installer_manager_archive_verify($project_name, $local_cache, $directory);
   if (!empty($archive_errors)) {
     return array(
       'success' => FALSE,
@@ -856,10 +875,37 @@ function installer_manager_download_project($url, $is_installer = FALSE) {
     );
   }
 
-  // Make sure the Updater registry is loaded.
-  backdrop_get_updaters();
+  $project_location = $directory . '/' . $project_name;
 
-  $project_location = $directory . '/' . $project;
+  return array(
+    'success' => TRUE,
+    'project_location' => $project_location
+  );
+}
+
+/**
+ * Move a downloaded local copy of a project into its final location.
+ *
+ * @param string $project_location
+ *   A path to an expanded project directory, as returned by
+ *   installer_manager_download_project().
+ *
+ * @param bool $update
+ *   Specify TRUE if updating an existing project, or FALSE if installing a new
+ *   project.
+ *
+ * @return array
+ *   An array with the following keys:
+ *   - success: Boolean indicating the result.
+ *   - message: A string with any error messages.
+ *   - project: If successful, an array with the following keys:
+ *     - name: The project machine name.
+ *     - title: The project human-readable name.
+ *     - type: Either "module", "theme", "layout", or "core".
+ *
+ * @since 1.11.0
+ */
+function installer_manager_install_project($project_location, $update = FALSE) {
   try {
     $updater = Updater::factory($project_location);
   }
@@ -871,7 +917,9 @@ function installer_manager_download_project($url, $is_installer = FALSE) {
   }
 
   try {
+    $project_name = Updater::getProjectName($project_location);
     $project_title = Updater::getProjectTitle($project_location);
+    $project_type = Updater::getProjectType($project_location);
   }
   catch (Exception $e) {
     return array(
@@ -887,7 +935,7 @@ function installer_manager_download_project($url, $is_installer = FALSE) {
     );
   }
 
-  if ($updater->isInstalled()) {
+  if (!$update && $updater->isInstalled()) {
     return array(
       'success' => FALSE,
       'message' => t('%project is already installed.', array('%project' => $project_title)),
@@ -895,70 +943,44 @@ function installer_manager_download_project($url, $is_installer = FALSE) {
   }
 
   $project_realpath = backdrop_realpath($project_location);
-  $updater_name = get_class($updater);
 
   // If the permissions of the downloaded file match those of the settings.php
   // directory, go ahead and install the module directly.
   if (fileowner($project_realpath) == fileowner(conf_path()) || filegroup($project_realpath) == filegroup(conf_path())) {
-    module_load_include('inc', 'installer', 'installer.authorize');
     $filetransfer = new FileTransferLocal(BACKDROP_ROOT);
+    $updater = Updater::factory($project_realpath);
 
-    if ($is_installer) {
-      // Initialize some variables in the Batch API $context array.
-      /* @var Updater $updater */
-      $updater = new $updater_name($project_realpath);
-
-      try {
-        if ($updater->isInstalled()) {
-          // This is an update.
-          $updater->update($filetransfer);
-        }
-        else {
-          $updater->install($filetransfer);
-        }
+    try {
+      if ($updater->isInstalled()) {
+        // This is an update.
+        $updater->update($filetransfer);
       }
-      catch (UpdaterException $e) {
-        return array(
-          'success' => FALSE,
-          'message' => t('Error installing / updating. Error: @error', array('@error' => $e->getMessage())),
-        );
+      else {
+        $updater->install($filetransfer);
       }
     }
-    else {
-      // Start the batch process to install the module but suppress redirecting
-      // to authorize.php, return the redirect instead.
-      $redirect_callback = backdrop_is_ajax() ? FALSE : 'backdrop_goto';
-      installer_authorize_run_install($filetransfer, $project, $updater_name, $project_realpath, $redirect_callback);
-
-      // Assemble the authorize.php path and go to it to complete the batch.
-      $batch = &batch_get();
+    catch (UpdaterException $e) {
       return array(
-        'success' => TRUE,
-        'redirect' => array($batch['url'], array('query' => array('op' => 'start', 'id' => $batch['id']))),
+        'success' => FALSE,
+        'message' => t('Error installing / updating. Error: @error', array('@error' => $e->getMessage())),
       );
     }
   }
-  // If permissions differ, redirect to authorize.php to copy the file as a
-  // different system user.
+  // If permissions are not correct, direct to the status report for more info.
   else {
-    if ($is_installer) {
-      return array(
-        'success' => FALSE,
-        'message' => t('Permissions are not set up properly.'),
-      );
-    }
-    else {
-      $path = backdrop_get_path('module', 'installer') . '/installer.authorize.inc';
-      system_authorized_init('installer_authorize_run_install', $path, array($project, $updater_name, $project_realpath), t('Update manager'));
-      return array(
-        'success' => TRUE,
-        'redirect' => system_authorized_get_url(),
-      );
-    }
+    return array(
+      'success' => FALSE,
+      'message' => t('Permissions are not set up properly.'),
+    );
   }
 
   return array(
     'success' => TRUE,
+    'project' => array(
+      'name' => $project_name,
+      'title' => $project_title,
+      'type' => $project_type,
+    ),
   );
 }
 
@@ -1085,7 +1107,7 @@ function installer_manager_file_get($url) {
  *
  * @see installer_manager_download_page()
  */
-function installer_manager_batch_project_get($project, $url, &$context) {
+function installer_manager_download_update_batch($project, $url, &$context) {
   // This is here to show the user that we are in the process of downloading.
   if (!isset($context['sandbox']['started'])) {
     $context['sandbox']['started'] = TRUE;
@@ -1094,30 +1116,9 @@ function installer_manager_batch_project_get($project, $url, &$context) {
     return;
   }
 
-  // Actually try to download the file.
-  if (!($local_cache = installer_manager_file_get($url))) {
-    $context['results']['errors'][$project] = t('Failed to download %project from %url', array('%project' => $project, '%url' => $url));
-    return;
-  }
-
-  // Extract it.
-  $extract_directory = _installer_manager_extract_directory();
-  try {
-    installer_manager_archive_extract($local_cache, $extract_directory);
-  }
-  catch (Exception $e) {
-    $context['results']['errors'][$project] = $e->getMessage();
-    return;
-  }
-
-  // Verify it.
-  $archive_errors = installer_manager_archive_verify($project, $local_cache, $extract_directory);
-  if (!empty($archive_errors)) {
-    // We just need to make sure our array keys don't collide, so use the
-    // numeric keys from the $archive_errors array.
-    foreach ($archive_errors as $key => $error) {
-      $context['results']['errors']["$project-$key"] = $error;
-    }
+  $result = installer_manager_download_project($url);
+  if (!$result['success']) {
+    $context['results']['errors']["$project"] = $result['message'];
     return;
   }
 
@@ -1140,7 +1141,7 @@ function installer_manager_batch_project_get($project, $url, &$context) {
  * it. However, it is supported here because it is a common configuration on
  * shared hosting, and there is nothing Backdrop can do to prevent it.
  *
- * @return
+ * @return bool
  *   TRUE if local file transfers are allowed on this server, or FALSE if not.
  *
  * @see installer_manager_update_ready_form_submit()
