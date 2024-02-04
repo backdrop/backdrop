@@ -1093,7 +1093,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     );
     $this->assertBreadcrumb("node/$nid1/edit", $trail);
 
-    // Verify that breadcrumb on node listing page contains "Home" only.
+    // Verify that breadcrumb on the front page does not show up.
     $trail = array();
     $this->assertBreadcrumb('home', $trail);
 
@@ -1133,9 +1133,10 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
         "node/$nid2" => $node2->menu['link_title'],
       );
       $this->assertBreadcrumb("node/$nid2", $trail, $node2->title, $tree);
-      // The node itself should not be contained in the breadcrumb on the
-      // default local task, since there is no difference between both pages.
-      $this->assertBreadcrumb("node/$nid2/view", $trail, $node2->title, $tree);
+      // The current page title should only be contained once in the breadcrumb
+      // on the default local task, since there is no difference between both
+      // pages.
+      $this->assertBreadcrumb("node/$nid2/view", $trail, $node2->title);
       $trail += array(
         "node/$nid2" => $node2->menu['link_title'],
       );
@@ -1391,7 +1392,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $this->backdropLogin($this->admin_user);
     $trail += array(
       $link_admin_user['link_path'] => $link_admin_user['link_title'],
-      'user/' . $this->admin_user->uid . '/edit' => t('Edit'),
+      'user/' . $this->admin_user->uid . '/edit' => $this->admin_user->name . ' edit',
     );
     $this->assertBreadcrumb('user/' . $this->admin_user->uid . '/edit', $trail, $link_admin_user['link_title'], $tree, FALSE);
 
@@ -1403,17 +1404,24 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $this->backdropLogin($this->web_user);
 
     // Verify that we can access recent log entries, there is a corresponding
-    // page title, and that the breadcrumb is empty (because the user is not
-    // able to access "Administer", so the trail cannot recurse into it).
+    // page title, and that the breadcrumb does not contain a link to '/admin'
+    // (because the user is not able to access "Administer", so the trail cannot
+    // recurse into it).
     $trail = $home + array(
       'system/403' => t('Access denied'),
     );
     $this->assertBreadcrumb('admin', $trail, t('Access denied'));
     $this->assertResponse(403);
 
+    $trail = $home + array(
+      'admin/reports' => t('Reports'),
+    );
     $this->assertBreadcrumb('admin/reports', $trail, t('Reports'));
     $this->assertNoResponse(403);
 
+    $trail = $home + array(
+      'admin/reports/dblog' => t('Recent log messages'),
+    );
     $this->assertBreadcrumb('admin/reports/dblog', $trail, t('Recent log messages'));
     $this->assertNoResponse(403);
   }
