@@ -498,6 +498,12 @@ function image_field_widget_process($element, &$form_state, $form) {
   $element['#theme'] = 'image_widget';
   $element['#attached']['css'][] = backdrop_get_path('module', 'image') . '/css/image.css';
 
+  // Since this is an image field accept only images.
+  $element['upload']['#attributes']['accept'] = 'image/*';
+  // Support for uploads via the camera on mobile devices (.jpg is the default
+  // extension used by cameras in iOS and Android devices).
+  $element['upload']['#attributes']['capture'] = 'camera';
+
   // Add the image preview.
   if ($element['#file'] && $widget_settings['preview_image_style']) {
     $variables = array(
