@@ -400,6 +400,20 @@ function user_validate_name($name) {
 }
 
 /**
+ * Legacy wrapper function preserved for backwards-compatibility. This function
+ * is no longer required. Email fields in Backdrop are using the HTML5 #email
+ * element now, so there is no need for a special validator for user forms.
+ *
+ * If an email needs to be validated outside the Form API, it is advised to use
+ * valid_email_address() instead.
+ *
+ * @deprecated since 1.0.0
+ */
+function user_validate_mail($mail) {
+  watchdog_deprecated_function('user', __FUNCTION__, t('Change record:') . ' ' . l(t('Function <code>user_validate_mail()</code> has been removed'), 'https://docs.backdropcms.org/change-records/function-user_validate_mail-has-been-removed', array('attributes' => array('target' => '_blank'))));
+}
+
+/**
  * Validates an image uploaded by a user.
  *
  * @see user_account_form()
@@ -772,12 +786,12 @@ function user_user_view($account) {
 }
 
 /**
- * Helper function to add default user account fields to user registration and edit form.
+ * Helper function to add default user account fields to user registration and
+ * edit form.
  *
  * @see user_account_form_validate()
  * @see user_validate_current_pass()
  * @see user_validate_picture()
- * @see user_validate_mail()
  * @see user_password_policy_validate()
  */
 function user_account_form(&$form, &$form_state) {
