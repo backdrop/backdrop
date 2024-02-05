@@ -378,7 +378,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
       '#empty_value' => LANGUAGE_NONE,
       '#empty_option' => t('- All (always shown) -'),
       '#description' => t('Set a language for this menu link. The menu link will only be visible in that language.'),
-      '#ajax' => array('callback' => 'menu_parent_edit_item_callback'),
+      '#ajax' => array('callback' => 'menu_edit_item_callback'),
     );
   }
   else {
@@ -418,7 +418,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#options' => $menus,
     '#description' => t('Select the menu that this menu link should belong to.'),
     '#attributes' => array('class' => array('menu-menu-select')),
-    '#ajax' => array('callback' => 'menu_parent_edit_item_callback'),
+    '#ajax' => array('callback' => 'menu_edit_item_callback'),
     '#wrapper_attributes' => array('id' => 'menu-parent-menu-wrapper'),
   );
 
@@ -463,7 +463,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
  * Callback function to return updated list of possible parent links and
  * weights.
  */
-function menu_parent_edit_item_callback($form, $form_state) {
+function menu_edit_item_callback($form, $form_state) {
   $commands = array();
   $commands[] = ajax_command_replace("#menu-parent-menu-wrapper", backdrop_render($form['parent_menu']));
   $commands[] = ajax_command_replace("#menu-parent-select-wrapper", backdrop_render($form['parent']));
