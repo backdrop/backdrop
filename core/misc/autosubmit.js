@@ -39,20 +39,23 @@ Backdrop.behaviors.autosubmit = {
     // 'this' references the form element
     function triggerSubmit (e) {
       var $this = $(this);
-      let searchFieldID = '#' + $this.find('.autosubmit-processed').attr('id');
-      $('body').attr('data-needs-focus', searchFieldID);
+      // If this form is child of the view, not an independent block, make sure
+      // we can set focus back on the input field, after the whole view got
+      // replaced.
+      if ($this.parents('.view').length) {
+        $('body').attr('data-needs-focus', $this.find('.autosubmit-processed').attr('id'));
+      }
       $this.find('.autosubmit-click').trigger('click');
     }
 
-    // Add back focus on form item inside a form that got replaced via AJAX.
     // It's important to remove previous listeners, otherwise they stack up with
-    // every attach.
+    // every attach, triggered by typing.
     $(document).off('ajaxStop').on('ajaxStop', function () {
       if (!$('body[data-needs-focus]').length) {
         return;
       }
-      let id = $('[data-needs-focus]').data().needsFocus;
-      let $textInput = $(id);
+      let id = $('body').data().needsFocus;
+      let $textInput = $('#' + id);
       let pos = $textInput.val().length;
       $textInput.focus();
       $textInput[0].setSelectionRange(pos, pos);
