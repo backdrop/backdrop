@@ -543,18 +543,12 @@ function system_requirements($phase) {
         $problems = array_unique($problem['problems']);
         $problems = array_map('check_plain', $problems);
         $token_problems[$problem_key] = $problem['label'] . theme('item_list', array('items' => $problems));
+        $requirements['token-' . $problem_key] = array(
+          'title' => $problem['label'],
+          'value' => theme('item_list', array('items' => $problems)),
+          'severity' => $problem['severity'],
+        );
       }
-      else {
-        unset($token_problems[$problem_key]);
-      }
-    }
-    if (!empty($token_problems)) {
-      $requirements['token_problems'] = array(
-        'title' => $t('Tokens'),
-        'value' => $t('Problems detected'),
-        'severity' => REQUIREMENT_WARNING,
-        'description' => '<p>' . implode('</p><p>', $token_problems) . '</p>',
-      );
     }
   }
 
