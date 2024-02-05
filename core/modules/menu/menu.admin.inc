@@ -436,6 +436,8 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
   if (!isset($options[$default])) {
     $default = key($options);
   }
+  // @TODO in Backdrop 2.0, replace #prefix/#suffix with #wrapper_attributes.
+  // Kept here for backward compatibility with existing contrib, themes.
   $form['parent'] = array(
     '#type' => 'select',
     '#title' => t('Parent link'),
