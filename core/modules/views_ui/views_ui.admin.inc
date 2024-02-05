@@ -3789,18 +3789,18 @@ function views_ui_add_item_form($form, &$form_state) {
     '#title' => t('Search'),
   );
 
-  $groups = array('all' => t('- All -'));
   $form['options']['controls']['group'] = array(
     '#type' => 'select',
     '#title' => t('Filter'),
     '#options' => array(),
+    '#empty_value' => 'all',
+    '#empty_option' => t('- All -'),
   );
 
   $form['options']['name'] = array(
     '#prefix' => '<div class="views-radio-box form-checkboxes views-filterable-options">',
     '#suffix' => '</div>',
     '#tree' => TRUE,
-    '#default_value' => 'all',
   );
 
   // Build the sortable table header.
@@ -3809,6 +3809,7 @@ function views_ui_add_item_form($form, &$form_state) {
     'group' => array('data' => t('Category'), 'sort' => 'asc'),
     'help' => array('data' => t('Description')),
   );
+  $groups = array();
   foreach ($fields as $key => $field) {
     $group = preg_replace('/[^a-z0-9]/', '-', strtolower($field['group']));
     $groups[$group] = $field['group'];
@@ -3818,18 +3819,36 @@ function views_ui_add_item_form($form, &$form_state) {
         $group,
       ),
     );
-    $fields[$key]['help'] = "<div class='description'>" . $field['help'] . "</div>";
-    $fields[$key]['title'] = "<div class='title'>" . $field['title'] . "</div>";
-    $fields[$key]['group'] = "<div class='group'>" . $field['group'] . "</div>";
+    $fields[$key]['help'] = array(
+      'data' => $field['help'],
+      'class' => array('description'),
+    );
+    $fields[$key]['title'] = array(
+      'data' => $field['title'],
+      'class' => array('title'),
+    );
+    $fields[$key]['group'] = array(
+      'data' => $field['group'],
+      'class' => array('group'),
+    );
     if (!empty($field['aliases']) && is_array($field['aliases'])) {
       foreach ($field['aliases'] as $id => $alias) {
         if (empty($alias['base']) || !empty($base_tables[$alias['base']])) {
           $copy = $field;
           $groups[$group] = $alias['group'];
-          $copy['group'] = "<div class='group'>" . $alias['group'] . "</div>";
-          $copy['title'] = "<div class='title'>" . $alias['title'] . "</div>";
+          $copy['group'] = array(
+            'data' => $alias['group'],
+            'class' => array('group'),
+          );
+          $copy['title'] = array(
+            'data' => $alias['title'],
+            'class' => array('title'),
+          );
           if (isset($alias['help'])) {
-            $copy['help'] = "<div class='description'>" . $alias['help'] . "</div>";
+            $copy['help'] = array(
+              'data' => $alias['help'],
+              'class' => array('description'),
+            );
           }
           $group = preg_replace('/[^a-z0-9]/', '-', strtolower($copy['group']));
           $fields[$key . '$' . $id] = $copy;
