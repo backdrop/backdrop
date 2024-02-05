@@ -59,7 +59,7 @@ Backdrop.behaviors.autosubmit = {
       let pos = $textInput.val().length;
       $textInput.focus();
       $textInput[0].setSelectionRange(pos, pos);
-      $('body[data-needs-focus]').removeAttr('data-needs-focus');
+      $('body').removeAttr('data-needs-focus');
     });
 
     // the change event bubbles so we only need to bind it to the outer form
