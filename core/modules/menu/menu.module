@@ -909,8 +909,8 @@ function menu_form_node_type_form_alter(&$form, $form_state) {
       '#title' => t('Menus where this content may be placed'),
       '#options' => $menus,
       '#default_value' => $menu_options,
-     '#ajax' => array('callback' => 'menu_form_node_type_form_callback'),
-     '#wrapper_attributes' => array('id' => 'menu-menu-options-wrapper'),
+      '#ajax' => array('callback' => 'menu_form_node_type_form_callback'),
+      '#wrapper_attributes' => array('id' => 'menu-menu-options-wrapper'),
     );
 
     $parent_menu_options = array_intersect_key($menus, array_filter($menu_options));
