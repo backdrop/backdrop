@@ -418,7 +418,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
   );
   $form['revision']['revision']['revision_enabled'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Enable revisions'),
+    '#title' => t('Enable option to create revisions'),
     '#default_value' => $type->settings['revision_enabled'],
     '#parents' => array('revision_enabled'),
     '#description' => t('Revisions allow content editors to view changes over time and revert changes if needed.'),
