@@ -59,7 +59,7 @@ class CKEditor5UpgradeTestCase extends BackdropWebTestCase {
 
     // Note that the original text format had 3 rows, the new one should only
     // have two. Confirm no empty groups are left.
-    $this->assertFieldByName('editor_settings[cketoolbar]', '["bold","italic","blockQuote","style","heading","|","bulletedList","numberedList","|","alignment:left","alignment:center","alignment:right","alignment:justify","|","backdropLink","|","backdropImage","|","sourceEditing","removeFormat","maximize","-","underline","strikethrough","|","superscript","subscript","|","undo","redo","|","horizontalLine","showBlocks","specialCharacters","insertTable"]', 'Toolbar settings upgraded as expected.');
+    $this->assertFieldByName('editor_settings[toolbar]', '["bold","italic","blockQuote","style","heading","|","bulletedList","numberedList","|","alignment:left","alignment:center","alignment:right","alignment:justify","|","backdropLink","|","backdropImage","|","sourceEditing","removeFormat","maximize","-","underline","strikethrough","|","superscript","subscript","|","undo","redo","|","horizontalLine","showBlocks","specialCharacters","insertTable"]', 'Toolbar settings upgraded as expected.');
 
     $this->assertFieldChecked('edit-editor-settings-image-upload-status');
     $this->assertFieldChecked('edit-editor-settings-image-upload-orientate');
@@ -119,7 +119,7 @@ class CKEditor5UpgradeTestCase extends BackdropWebTestCase {
 
     // All heading types should be enabled to match CKEditor 4's behavior of
     // showing all allowed headings.
-    $this->assertFieldByName('editor_settings[cketoolbar]', '["bold","italic","blockQuote","heading","|","bulletedList","numberedList","|","alignment:left","alignment:center","alignment:right","|","backdropLink","|","backdropImage","|","sourceEditing","maximize","testButton"]', 'Toolbar includes the testButton provided by alter hook.');
+    $this->assertFieldByName('editor_settings[toolbar]', '["bold","italic","blockQuote","heading","|","bulletedList","numberedList","|","alignment:left","alignment:center","alignment:right","|","backdropLink","|","backdropImage","|","sourceEditing","maximize","testButton"]', 'Toolbar includes the testButton provided by alter hook.');
     $old_tag_list = $ckeditor4_format3->filters['filter_html']->settings['allowed_html'];
     $new_tag_list1 = $old_tag_list . ' <test-tag>';
     $this->assertRaw(t('Allowed HTML tags: @tags', array('@tags' => $new_tag_list1)), check_plain('Alter list of tags includes the added <test-tag>.'));

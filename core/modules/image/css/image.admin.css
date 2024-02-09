@@ -24,8 +24,6 @@ div.image-style-preview div.preview-image div.width {
   left: -1px;
   bottom: -6px;
   position: absolute;
-  -webkit-box-sizing: content-box;
-  -moz-box-sizing: content-box;
   box-sizing: content-box;
 }
 div.image-style-preview div.preview-image div.width span {
@@ -39,8 +37,6 @@ div.image-style-preview div.preview-image div.height {
   right: -6px;
   top: -1px;
   width: 2px;
-  -webkit-box-sizing: content-box;
-  -moz-box-sizing: content-box;
   box-sizing: content-box;
 }
 div.image-style-preview div.preview-image div.height span {
