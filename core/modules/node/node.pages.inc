@@ -641,6 +641,7 @@ function node_preview($node_tempstore_id, $node_type) {
   $form = backdrop_get_form('node_preview_banner_form', $node, $node_tempstore_id);
   $build['preview_form_select']['view-mode'] = $form;
   $build['preview'] = node_view($node, $view_mode);
+  $build['#theme'] = 'node_preview';
   return $build;
 }
 
