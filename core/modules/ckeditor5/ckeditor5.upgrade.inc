@@ -191,8 +191,7 @@ function _ckeditor5_upgrade_format($original_format, &$warnings) {
     array_pop($new_toolbar);
   }
 
-  $format->editor_settings['cketoolbar'] = $new_toolbar;
-  unset($format->editor_settings['toolbar']);
+  $format->editor_settings['toolbar'] = $new_toolbar;
 
   // Remove the unused format_list configuration.
   if (isset($format->editor_settings['format_list'])) {
