@@ -803,7 +803,7 @@ function menu_form_node_form_alter(&$form, $form_state) {
   $parent_menu = isset($form_state['values']['menu']['parent_menu']) ? $form_state['values']['menu']['parent_menu'] : explode(':', $menu_parent)[0];
 
   // If $parent_menu is one of our options, then that's the default value for
-  // the menu selector; otherwise, it's the first item in the list of options.
+  // the menu selector; otherwise, use the first item in the list of options.
   if (!isset($parent_menu_options[$parent_menu])) {
     $parent_menu = key($parent_menu_options);
   }
@@ -818,7 +818,7 @@ function menu_form_node_form_alter(&$form, $form_state) {
   $menu_parent_options = menu_parent_options(array($parent_menu => $menus[$parent_menu]), array('mlid' => 0));
 
   // If $menu_parent is an item of $menu_parent_options, then it's the default
-  // value for the selector; otherwise it's the first item in the list of
+  // value for the selector; otherwise use the first item in the list of
   // options.
   if (!isset($menu_parent_options[$menu_parent])) {
     $menu_parent = key($menu_parent_options);
@@ -836,13 +836,10 @@ function menu_form_node_form_alter(&$form, $form_state) {
     '#suffix' => '</div>',
   );
 
-  if (isset($form_state['values']['menu']['parent_menu'])) {
-    $menu_name = $form_state['values']['menu']['parent_menu'];
-  }
   $form['menu']['link']['weight'] = array(
     '#type' => 'weight',
     '#title' => t('Weight'),
-    '#delta' => _menu_get_menu_weight_delta($menu_name),
+    '#delta' => _menu_get_menu_weight_delta($menu_parent),
     '#default_value' => $link['weight'],
     '#description' => t('In the menu, the heavier links will sink and the lighter links will be positioned nearer the top.'),
     '#attributes' => array('class' => array('menu-weight-select')),
