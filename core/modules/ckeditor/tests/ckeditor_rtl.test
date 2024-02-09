@@ -58,6 +58,7 @@ class CKEditorRtlTestCase extends BackdropWebTestCase {
     // Set the editor to CKEditor 4 before checking the source.
     $edit = array(
       'editor' => 'ckeditor',
+      'editor_settings[toolbar]' => '[[{"name":"Formatting","items":["Bold","Italic"]}]]',
     );
     $this->backdropPost(NULL, $edit, t('Save configuration'));
     $this->backdropGet('admin/config/content/formats/filtered_html', array('language' => $arabic));
