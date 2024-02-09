@@ -9,7 +9,7 @@ Backdrop.behaviors.ckeditor5Admin = {
     // Set up toolbar drag-and-drop interface and add/remove allowed HTML tags.
     $context.find('.ckeditor5-toolbar-configuration').once('ckeditor5-toolbar', function() {
       const $wrapper = $(this);
-      const $textareaWrapper = $wrapper.find('.form-item-editor-settings-cketoolbar').hide();
+      const $textareaWrapper = $wrapper.find('.form-item-editor-settings-toolbar').hide();
       const $textarea = $textareaWrapper.find('textarea');
       const $toolbarAdmin = $(settings.ckeditor5.toolbarAdmin);
       const sortableSettings = {
