@@ -1048,6 +1048,28 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
       "<iframe>aaa</iframe>\n\n" => array(
         "<p><iframe>aaa</iframe></p>" => FALSE,
       ),
+      // Check that tags that close on a separate line do not get an extra
+      // <br /> before the closing tag. This is the default formatting output by
+      // CKEditor 5 in Backdrop.
+      "<h3>\n    indented line\n</h3>" => array(
+        "<h3>\n    indented line\n</h3>" => TRUE,
+        "<h3>\n    indented line<br />\n</h3>" => FALSE,
+      ),
+      // Check that new lines within block elements have <br /> tags added, but
+      // not before the closing tag on a new line.
+      "<p>\n    indented line\n    second indented line\n</p>" => array(
+        "<p>\n    indented line<br />\n    second indented line\n</p>" => TRUE,
+        "<p>\n    indented line<br />\n    second indented line<br />\n</p>" => FALSE,
+        "<p>\n    indented line\n    second indented line\n</p>" => FALSE,
+      ),
+      // Check that manually added <br> tags at end of lines don't duplicate
+      // another <br /> tag after them. Line breaks are normalized from <br>
+      // to <br /> as part of this filter.
+      "<p>\n    line before break<br>\n    line after break</p>" => array(
+        "<p>\n    line before break<br />\n    line after break</p>"  => TRUE,
+        "<p>\n    line before break<br><br />\n    line after break</p>"  => FALSE,
+        "<p>\n    line before break<br /><br />\n    line after break</p>"  => FALSE,
+      ),
     );
     $this->assertFilteredString($filter, $tests);
 

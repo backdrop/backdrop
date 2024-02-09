@@ -154,7 +154,7 @@ function hook_config_delete_validate(Config $active_config, $all_changes) {
 }
 
 /**
- * Respond to or modify configuration creation.
+ * Respond to configuration creation.
  *
  * @param Config $staging_config
  *   The configuration object for the settings about to be saved. This object
@@ -169,7 +169,7 @@ function hook_config_create(Config $staging_config) {
 }
 
 /**
- * Respond to or modify configuration creation.
+ * Respond to configuration updates.
  *
  * @param Config $staging_config
  *   The configuration object for the settings about to be saved. This object

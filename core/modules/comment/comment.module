@@ -418,10 +418,14 @@ function comment_permission() {
     'administer comment settings' => array(
       'title' => t('Administer comment settings'),
       'description' => t('Configure comment settings per content type.'),
+      'restrict access' => TRUE,
+      'warning' => t('Allows changing comment settings for each content type, and disabling comments.'),
     ),
     'administer comments' => array(
       'title' => t('Administer comments'),
       'description' => t('Edit, delete, unpublish, etc. comments at <em>/admin/content/comment</em>.'),
+      'restrict access' => TRUE,
+      'warning' => t('Allows deleting/updating any comment, even those posted by other people.'),
     ),
     'access comments' => array(
       'title' => t('View comments'),
@@ -430,7 +434,8 @@ function comment_permission() {
       'title' => t('Post comments'),
     ),
     'skip comment approval' => array(
-      'title' => t('Skip comment approval'),
+      'title' => t('Skip comment approval: Comments will be immediately visible to everyone'),
+      'warning' => t('Because spam and offensive comments are common, this permission should only be granted to those who are trusted, or on a site with additional spam protection measures in place.'),
     ),
     'edit own comments' => array(
       'title' => t('Edit own comments'),
