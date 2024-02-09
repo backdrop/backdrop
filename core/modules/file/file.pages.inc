@@ -495,6 +495,13 @@ function file_manage_form($form, &$form_state, File $file) {
     );
   }
 
+  $form['name'] = array(
+    '#type' => 'item',
+    '#title' => t('Filename'),
+    '#markup' => check_plain($file->filename),
+    '#weight' => -11,
+  );
+
   $form['filename'] = array(
     '#type' => 'textfield',
     '#title' => t('File display title'),
@@ -530,7 +537,7 @@ function file_manage_form($form, &$form_state, File $file) {
   $form['destination'] = array(
     '#type' => 'fieldset',
     '#access' => user_access('manage files'),
-    '#title' => t('Destination'),
+    '#title' => t('File location'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
@@ -555,6 +562,20 @@ function file_manage_form($form, &$form_state, File $file) {
     '#options' => $options,
     '#default_value' => file_uri_scheme($file->uri),
   );
+
+  if (!empty($file->uri)) {
+    $directory_path = file_stream_wrapper_get_instance_by_uri($file->uri)->getDirectoryPath();
+    $filename = file_uri_target($file->uri);
+    $filepath = $directory_path . '/' . $filename;
+    $url = url($filepath, array('absolute' => TRUE));
+    $form['destination']['url'] = array(
+      '#type' => 'item',
+      '#title' => t('File URL'),
+      '#markup' => l($url, $url, array(
+        'attributes' => array('class' => array('file-preview-link')),
+      )),
+    );
+  }
 
   // File user information for administrators.
   $anonymous = config_get_translated('system.core', 'anonymous');
