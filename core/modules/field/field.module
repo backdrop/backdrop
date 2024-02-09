@@ -498,7 +498,7 @@ function field_config_create_validate(Config $staging_config, $all_changes) {
 }
 
 /**
- * Implements hook_config_create_update().
+ * Implements hook_config_update_validate().
  */
 function field_config_update_validate(Config $staging_config, Config $active_config, $all_changes) {
   $config_name = $staging_config->getName();
@@ -593,7 +593,7 @@ function field_config_update(Config $staging_config, Config $active_config) {
 }
 
 /**
- * Implements hook_config_update().
+ * Implements hook_config_delete().
  */
 function field_config_delete(Config $active_config) {
   // This should only be called on fields that have no data at all, as fields
