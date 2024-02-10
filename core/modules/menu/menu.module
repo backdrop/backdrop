@@ -899,8 +899,19 @@ function menu_form_node_type_form_alter(&$form, $form_state) {
     '#ajax' => array('callback' => 'menu_form_node_type_form_callback'),
   );
 
-  if ($menu_default && !empty($node_type->settings['menu_options'])) {
-    $menu_options = isset($form_state['values']['menu_options']) ? $form_state['values']['menu_options'] : $node_type->settings['menu_options'];
+  if ($menu_default) {
+    if (isset($form_state['values']['menu_options'])) {
+      $menu_options = $form_state['values']['menu_options'];
+    }
+    elseif (isset($node_type->is_new) && $node_type->is_new) {
+      $menu_options = array();
+      foreach (array_keys($menus) as $menu_name) {
+        $menu_options[$menu_name] = $menu_name;
+      }
+    }
+    else {
+      $menu_options = $node_type->settings['menu_options'];
+    }
     $form['menu']['menu_options'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Menus where this content may be placed'),
@@ -911,55 +922,61 @@ function menu_form_node_type_form_alter(&$form, $form_state) {
     );
 
     $parent_menu_options = array_intersect_key($menus, array_filter($menu_options));
+    if (!empty($parent_menu_options)) {
 
-    // Get the current parent item and the menu it belongs to.
-    $menu_parent = isset($form_state['values']['menu_parent']) ? $form_state['values']['menu_parent'] : $node_type->settings['menu_parent'];
-    $parent_menu = isset($form_state['values']['parent_menu']) ? $form_state['values']['parent_menu'] : explode(':', $menu_parent)[0];
+      // Get the current parent item and the menu it belongs to.
+      $menu_parent = isset($form_state['values']['menu_parent']) ? $form_state['values']['menu_parent'] : $node_type->settings['menu_parent'];
+      $parent_menu = isset($form_state['values']['parent_menu']) ? $form_state['values']['parent_menu'] : explode(':', $menu_parent)[0];
 
-    // If $parent_menu is one of our options, then that's the default value for
-    // the menu selector; otherwise, it's the first item in the list of options.
-    if (!isset($parent_menu_options[$parent_menu])) {
-      $parent_menu = key($parent_menu_options);
+      // If $parent_menu is one of our options, then that's the default value
+      // for the menu selector; otherwise, use the first item in the list of
+      // options.
+      if (!isset($parent_menu_options[$parent_menu])) {
+        $parent_menu = key($parent_menu_options);
+      }
+      $form['menu']['parent_menu'] = array(
+        '#type' => 'select',
+        '#title' => t('Default menu'),
+        '#options' => $parent_menu_options,
+        '#default_value' => $parent_menu,
+        '#ajax' => array('callback' => 'menu_form_node_type_form_callback'),
+        '#wrapper_attributes' => array('id' => 'menu-parent-menu-wrapper'),
+      );
+
+      $menu_parent_options = menu_parent_options(array($parent_menu => $menus[$parent_menu]), array('mlid' => 0));
+
+      // If $menu_parent is an item of $menu_parent_options, then it's the
+      // default value for the selector; otherwise it's the first item in the
+      // list of options.
+      if (!isset($menu_parent_options[$menu_parent])) {
+        $menu_parent = key($menu_parent_options);
+      }
+      $form['menu']['menu_parent'] = array(
+        '#type' => 'select',
+        '#title' => t('Default parent item'),
+        '#description' => t('Links to content will be placed below this item in the menu.'),
+        '#options' => $menu_parent_options,
+        '#default_value' => $menu_parent,
+        '#attributes' => array('class' => array('menu-title-select')),
+        '#wrapper_attributes' => array('id' => 'menu-menu-parent-wrapper'),
+      );
     }
-    $form['menu']['parent_menu'] = array(
-      '#type' => 'select',
-      '#title' => t('Default menu'),
-      '#options' => $parent_menu_options,
-      '#default_value' => $parent_menu,
-      '#ajax' => array('callback' => 'menu_form_node_type_form_callback'),
-      '#wrapper_attributes' => array('id' => 'menu-parent-menu-wrapper'),
-    );
-
-    $menu_parent_options = menu_parent_options(array($parent_menu => $menus[$parent_menu]), array('mlid' => 0));
-
-    // If $menu_parent is an item of $menu_parent_options, then it's the default
-    // value for the selector; otherwise it's the first item in the list of
-    // options.
-    if (!isset($menu_parent_options[$menu_parent])) {
-      $menu_parent = key($menu_parent_options);
-    }
-
-    $form['menu']['menu_parent'] = array(
-      '#type' => 'select',
-      '#title' => t('Default parent item'),
-      '#description' => t('Links to content will be placed below this item in the menu.'),
-      '#options' => $menu_parent_options,
-      '#default_value' => $menu_parent,
-      '#attributes' => array('class' => array('menu-title-select')),
-      '#wrapper_attributes' => array('id' => 'menu-menu-parent-wrapper'),
-    );
   }
-  else {
-    // We still need divs to be present so that AJAX can replace them based on
-    // the checkbox setting above.
+
+  // We always need form items to be present so that AJAX can replace them.
+  if (empty($form['menu']['menu_options'])) {
     $form['menu']['menu_options'] = array(
       '#type' => 'container',
       '#attributes' => array('id' => 'menu-menu-options-wrapper'),
     );
+  }
+  if (empty($form['menu']['parent_menu'])) {
     $form['menu']['parent_menu'] = array(
       '#type' => 'container',
       '#attributes' => array('id' => 'menu-parent-menu-wrapper'),
     );
+  }
+  if (empty($form['menu']['menu_parent'])) {
     $form['menu']['menu_parent'] = array(
       '#type' => 'container',
       '#attributes' => array('id' => 'menu-menu-parent-wrapper'),
