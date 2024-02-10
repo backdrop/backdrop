@@ -1,0 +1,4 @@
+{
+    "_config_name": "telemetry.settings",
+    "destination": "https://telemetry.backdropcms.org/post"
+}

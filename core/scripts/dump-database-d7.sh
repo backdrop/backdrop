@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
-
 /**
+ * @file
  * Dump a Drupal 7 database into a Drupal 7 PHP script to test the upgrade
  * process.
  *
@@ -33,7 +33,6 @@ include_once dirname(__FILE__) . '/../includes/utility.inc';
 // Output the PHP header.
 $output = <<<ENDOFHEADER
 <?php
-
 /**
  * @file
  * Filled installation of Drupal 7.0, for test purposes.

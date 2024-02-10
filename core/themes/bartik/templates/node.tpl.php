@@ -22,7 +22,7 @@
  *   template_preprocess_node().
  * - $classes: Array of classes that can be used to style contextually through
  *   CSS. The default values can be one or more of the following:
- *   - node: The current template type; for example, "theming hook".
+ *   - node: The current template type; for example, "theme hook".
  *   - node-[type]: The current node type. For example, if the node is a
  *     "Post" it would result in "node-post". Note that the machine
  *     name will often be in a short form of the human readable label.
@@ -61,7 +61,7 @@
  * - $comment: State of comment settings for the node.
  * - $readmore: Flags true if the teaser content of the node cannot hold the
  *   main body content.
- * - $is_front: Flags true when presented in the front page.
+ * - $is_front: Flags true when presented in the home page.
  * - $logged_in: Flags true when the current user is a logged-in member.
  * - $is_admin: Flags true when the current user is an administrator.
  *
@@ -82,7 +82,11 @@
   <header>
     <?php print render($title_prefix); ?>
     <?php if (!$page && !empty($title)): ?>
-      <h2><a href="<?php print $node_url; ?>"><?php print $title; ?></a></h2>
+      <?php if (!empty($node_url)): ?>
+        <h2><a href="<?php print $node_url; ?>"><?php print $title; ?></a></h2>
+      <?php else: ?>
+        <h2><?php print $title; ?></h2>
+      <?php endif; ?>
     <?php endif; ?>
     <?php print render($title_suffix); ?>
 

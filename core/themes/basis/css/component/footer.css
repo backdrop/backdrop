@@ -58,6 +58,7 @@
 
 .drop-lounging {
   position: relative;
+  /* To make Drop larger/smaller, adjust the width below. */
   width: 7em;
 }
 
@@ -73,9 +74,8 @@
   height: 0;
   margin: 0;
   padding: 0 0 52%;
-  -webkit-transform: translate(-50%, -82%);
   transform: translate(-50%, -82%);
-  background: url("../images/drop-lounging.png") no-repeat;
+  background: url("../../images/drop-lounging.png") no-repeat;
   background-size: 100% auto;
 }
 

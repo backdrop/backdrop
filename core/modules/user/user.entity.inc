@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Entity classes and controllers for User module.
@@ -8,7 +7,7 @@
 /**
  * Defines the user entity class.
  */
-class User extends Entity {
+class User extends Entity implements UserInterface {
 
   /**
    * The user ID.
@@ -58,6 +57,15 @@ class User extends Entity {
    * @var integer
    */
   public $created;
+
+  /**
+   * The timestamp when the user was changed.
+   *
+   * @var integer
+   *
+   * @since 1.25.0 Property added.
+   */
+  public $changed;
 
   /**
    * The timestamp when the user last accessed the site. A value of 0 means the
@@ -164,6 +172,91 @@ class User extends Entity {
   }
 
   /**
+   * Overrides Entity::createAccess().
+   */
+  public static function createAccess($bundle = NULL, $account = NULL) {
+    // If no user object is supplied, the access check is for the current user.
+    if (empty($account)) {
+      $account = $GLOBALS['user'];
+    }
+
+    return user_access('administer users', $account);
+  }
+
+  /**
+   * Overrides Entity::access().
+   *
+   * @param string $op
+   *   The operation to be performed on the user. Possible values are:
+   *   - create
+   *   - view
+   *   - update
+   *   - delete
+   * @param User $account
+   *   (optional) The user to check for. Leave it to NULL to check for the
+   *   global user.
+   *
+   * @return bool
+   *   TRUE if access is granted, FALSE otherwise.
+   */
+  public function access($op, $account = NULL) {
+    // Casting class with private property causes errors due to added prefix.
+    // e.g. "\0" . 'User' . "\0". So use static array instead.
+    $rights = &backdrop_static(__METHOD__, array());
+
+    // We can't always count on Backdrop to provide an AnonymousUser for
+    // anonymous users, so test explicitly.
+    if (!$this->uid) {
+      return FALSE;
+    }
+
+    if ($op == 'create') {
+      return self::createAccess(NULL, $account);
+    }
+    elseif (!in_array($op, array('view', 'update', 'delete'), TRUE)) {
+      // If the $op was not one of the supported ones, we return access denied.
+      return FALSE;
+    }
+    // If no user object is supplied, the access check is for the current user.
+    if (empty($account)) {
+      $account = $GLOBALS['user'];
+    }
+
+    $cid = $this->id();
+
+    // If we've already checked access for this node, user and op, return from
+    // cache.
+    if (isset($rights[$account->uid][$cid][$op])) {
+      return $rights[$account->uid][$cid][$op];
+    }
+
+    if ($op == 'view') {
+      // Admins can view all, users can view own profiles at all times.
+      if ($account->uid == $this->uid || user_access('administer users', $account)) {
+        $rights[$account->uid][$cid][$op] = TRUE;
+        return $rights[$account->uid][$cid][$op];
+      }
+      elseif (user_access('access user profiles', $account)) {
+        $rights[$account->uid][$cid][$op] = $account->status;
+        return $rights[$account->uid][$cid][$op];
+      }
+      $rights[$account->uid][$cid][$op] = FALSE;
+      return $rights[$account->uid][$cid][$op];
+    }
+    elseif ($op == 'update') {
+      $rights[$account->uid][$cid][$op] = (($account->uid == $this->uid) || user_access('administer users', $account)) && $this->uid > 0;
+      return $rights[$account->uid][$cid][$op];
+    }
+    elseif ($op == 'delete') {
+      $rights[$account->uid][$cid][$op] = ((($account->uid == $this->uid) && user_access('cancel account', $account)) || user_access('administer users', $account)) && $this->uid > 0;
+      return $rights[$account->uid][$cid][$op];
+    }
+
+    $rights[$account->uid][$cid][$op] = FALSE;
+    return $rights[$account->uid][$cid][$op];
+  }
+
+  /**
    * Implements EntityInterface::save().
    */
   public function save() {
@@ -176,6 +269,7 @@ class User extends Entity {
 
     return $return;
   }
+
 }
 
 
@@ -200,7 +294,7 @@ class UserStorageController extends EntityDatabaseStorageController {
       if ($record->picture) {
         $picture_fids[] = $record->picture;
       }
-      $queried_users[$key]->data = unserialize($record->data);
+      $queried_users[$key]->data = unserialize((string) $record->data);
       $queried_users[$key]->roles = array();
       if ($record->uid) {
         $queried_users[$record->uid]->roles[] = BACKDROP_AUTHENTICATED_ROLE;
@@ -237,6 +331,8 @@ class UserStorageController extends EntityDatabaseStorageController {
     if (!isset($values['created'])) {
       $values['created'] = REQUEST_TIME;
     }
+    $values['changed'] = REQUEST_TIME;
+
     // Users always have the authenticated user role.
     $values['roles'][] = BACKDROP_AUTHENTICATED_ROLE;
 
@@ -264,6 +360,9 @@ class UserStorageController extends EntityDatabaseStorageController {
    *   The user entity about to be saved.
    */
   protected function preSave(EntityInterface $entity) {
+    // Save current time as last changed time.
+    $entity->changed = REQUEST_TIME;
+
     // Update the user password if it has changed.
     $new_pass = isset($entity->pass) && strlen(trim($entity->pass)) > 0 ? trim($entity->pass) : NULL;
     if ($entity->isNew() || !is_null($new_pass) && $new_pass !== $entity->original->pass) {
@@ -338,6 +437,9 @@ class UserStorageController extends EntityDatabaseStorageController {
     // Move account cancellation information into $entity->data.
     foreach (array('user_cancel_method', 'user_cancel_notify') as $key) {
       if (isset($entity->{$key})) {
+        if (!$entity->data) {
+          $entity->data = array();
+        }
         $entity->data[$key] = $entity->{$key};
       }
     }
@@ -350,7 +452,6 @@ class UserStorageController extends EntityDatabaseStorageController {
    *   The user entity that has just been saved.
    */
   protected function postSave(EntityInterface $entity, $update) {
-
     if ($update) {
       // If the password has been changed, delete all open sessions for the
       // user and recreate the current one.
@@ -409,5 +510,66 @@ class UserStorageController extends EntityDatabaseStorageController {
         $query->execute();
       }
     }
+  }
+
+  /**
+   * Implements EntityControllerInterface::buildContent().
+   */
+  public function buildContent(EntityInterface $account, $view_mode = 'full', $langcode = NULL) {
+    global $language_content;
+    $langcode = $langcode ? $langcode : $language_content->langcode;
+
+    // Remove previously built content, if exists.
+    $account->content = array();
+
+    // Allow modules to change the display mode.
+    $view_mode = key(entity_view_mode_prepare('user', array($account->uid => $account), $view_mode, $langcode));
+
+    // Build fields content.
+    field_attach_prepare_view('user', array($account->uid => $account), $view_mode, $langcode);
+    entity_prepare_view('user', array($account->uid => $account), $langcode);
+    $account->content += field_attach_view('user', $account, $view_mode, $langcode);
+
+    // Populate $account->content with a render() array.
+    module_invoke_all('user_view', $account, $view_mode, $langcode);
+    module_invoke_all('entity_view', $account, 'user', $view_mode, $langcode);
+
+    // Make sure the current display mode is stored if no module has already
+    // populated the related key.
+    $account->content += array('#view_mode' => $view_mode);
+  }
+
+  /**
+   * Overrides DefaultEntityController::view().
+   */
+  public function view($accounts, $view_mode = 'full', $langcode = NULL, $page = NULL) {
+    global $language_content;
+    $langcode = $langcode ? $langcode : $language_content->langcode;
+
+    $view = array();
+    foreach ($accounts as $account) {
+      /* @var User $account */
+      // Retrieve all profile fields and attach to $account->content.
+      $this->buildContent($account, $view_mode, $langcode);
+
+      $build = $account->content;
+      // We don't need duplicate rendering info in account->content.
+      unset($account->content);
+
+      $build += array(
+        '#theme' => 'user_profile__' . $view_mode,
+        '#account' => $account,
+        '#view_mode' => $view_mode,
+        '#language' => $langcode,
+        '#page' => $page,
+      );
+
+      // Allow modules to modify the structured user.
+      $type = 'user';
+      backdrop_alter(array('user_view', 'entity_view'), $build, $type);
+      $view[$type][$account->id()] = $build;
+    }
+
+    return $view;
   }
 }

@@ -10,6 +10,7 @@
 .admin-panel {
   margin: 0;
   padding: 5px 5px 15px 5px;
+  break-inside: avoid;
 }
 .admin-panel .description {
   margin: 0 0 3px;
@@ -23,6 +24,12 @@
 }
 div.admin {
   padding-top: 15px;
+  columns: 2;
+}
+@media all and (max-width: 768px) {
+  div.admin {
+    columns: 1;
+  }
 }
 div.admin .left {
   float: left; /* LTR */
@@ -70,6 +77,14 @@ small .admin-link:after {
 /**
  * Modules page.
  */
+#system-modules .form-item-search {
+  display: inline-block;
+}
+#system-modules .search-reset {
+  line-height: 42px;
+  position: relative;
+  top: 1px;
+}
 #system-modules .table-filter {
   margin: 1em 0;
   padding: 7px 13px;
@@ -82,6 +97,15 @@ small .admin-link:after {
 }
 #system-modules td.checkbox {
   width: 20px;
+}
+#system-modules .modules-error:before {
+  content: "";
+  display: block;
+  width: 20px;
+  height: 20px;
+  border-radius: 15px;
+  background: #EE3D23 url(../../../misc/icon-error.png) no-repeat center center;
+  background-size: 60%;
 }
 #system-modules td.module {
   width: 110px;
@@ -201,6 +225,11 @@ span.admin-missing {
   font-size: 0.9em;
   color: #444;
 }
+.system-status-report.phase-install .status-description,
+.system-status-report.phase-install .status-value {
+  white-space: normal;
+  font-weight: normal;
+}
 .system-status-report .report-error .status-summary {
   color: #EC351C;
 }
@@ -217,10 +246,6 @@ span.admin-missing {
     white-space: nowrap;
   }
 }
-.system-status-report .report-error .status-summary {
-  color: #EC351C;
-}
-
 
 /**
  * Theme settings.
@@ -309,6 +334,13 @@ table.screenshot {
 .system-themes-list-enabled .theme-selector h3 {
   margin-top: 0;
 }
+.has-flexbox .system-themes-list-disabled {
+  display: flex;
+  flex-wrap: wrap;
+}
+.has-flexbox .system-themes-list-disabled > h2 {
+  flex-basis: 100%;
+}
 .system-themes-list-disabled .theme-selector {
   width: 300px;
   float: left; /* LTR */
@@ -317,6 +349,28 @@ table.screenshot {
 [dir="rtl"] .system-themes-list-disabled .theme-selector {
   float: right;
   padding: 20px 0 20px 20px;
+}
+.has-flexbox .system-themes-list-disabled .theme-selector {
+  float: none;
+  flex: 1 0 auto;
+}
+@media all and (max-width: 710px) {
+  .system-themes-list-disabled .theme-selector {
+    width: 100%;
+    float: none;
+    padding: 20px 0;
+  }
+  .system-themes-list-disabled .theme-selector .screenshot,
+  .system-themes-list-disabled .theme-selector .no-screenshot {
+    float: left; /* LTR */
+    margin-right: 20px;
+  }
+  [dir="rtl"] .system-themes-list-disabled .theme-selector .screenshot,
+  [dir="rtl"] .system-themes-list-disabled .theme-selector .no-screenshot {
+    float: right;
+    margin-left: 20px;
+    margin-right: 0;
+  }
 }
 .system-themes-list-enabled .theme-info {
   max-width: 940px;

@@ -76,6 +76,26 @@ class CommonURLWebTestCase extends BackdropWebTestCase {
     $link = l($text, $path);
     $sanitized_path = check_url(url($path));
     $this->assertTrue(strpos($link, $sanitized_path) !== FALSE, format_string('XSS attack @path was filtered', array('@path' => $path)));
+
+    // Verify that a dangerous protocol is sanitized.
+    $text = $this->randomName();
+    $path = "javascript:alert('XSS')";
+    $link = l($text, $path, array('external' => TRUE));
+    $this->assertTrue(strpos($link, 'javascript:') === FALSE, 'Dangerous protocol javascript: was sanitized.');
+
+    // Verify that these harmless javascript paths are left intact for BC.
+    $special_case_js_paths = array(
+      'javascript:void()',
+      'javascript:void();',
+      'javascript:void(0)',
+      'javascript:void(0);',
+      'JavaScript:Void(0)',
+    );
+    foreach ($special_case_js_paths as $path) {
+      $text = $this->randomName();
+      $link = l($text, $path, array('external' => TRUE));
+      $this->assertTrue(strpos($link, $path) !== FALSE, format_string('Harmless @path was not sanitized.', array('@path' => $path)));
+    }
   }
 
   /*
@@ -189,11 +209,11 @@ class CommonURLWebTestCase extends BackdropWebTestCase {
     $result = url($url);
     $this->assertEqual($url, $result, 'External URL with fragment works without a fragment in $options.');
 
-    // Verify fragment can be overidden in an external URL.
+    // Verify fragment can be overridden in an external URL.
     $url = $test_url . '#backdrop';
     $fragment = $this->randomName(10);
     $result = url($url, array('fragment' => $fragment));
-    $this->assertEqual($test_url . '#' . $fragment, $result, 'External URL fragment is overidden with a custom fragment in $options.');
+    $this->assertEqual($test_url . '#' . $fragment, $result, 'External URL fragment is overridden with a custom fragment in $options.');
 
     // Verify external URL can contain a query string.
     $url = $test_url . '?backdrop=awesome';
@@ -469,18 +489,25 @@ class CommonXssUnitTestCase extends BackdropUnitTestCase {
    * Check that invalid multi-byte sequences are rejected.
    */
   function testInvalidMultiByte() {
-     // Ignore PHP 5.3+ invalid multibyte sequence warning.
-     $text = @check_plain("Foo\xC0barbaz");
-     $this->assertEqual($text, '', 'check_plain() rejects invalid sequence "Foo\xC0barbaz"');
-     // Ignore PHP 5.3+ invalid multibyte sequence warning.
-     $text = @check_plain("\xc2\"");
-     $this->assertEqual($text, '', 'check_plain() rejects invalid sequence "\xc2\""');
-     $text = check_plain("Fooÿñ");
-     $this->assertEqual($text, "Fooÿñ", 'check_plain() accepts valid sequence "Fooÿñ"');
-     $text = filter_xss("Foo\xC0barbaz");
-     $this->assertEqual($text, '', 'filter_xss() rejects invalid sequence "Foo\xC0barbaz"');
+     // Ignore PHP 8.0+ null deprecations.
+     $text = check_plain(NULL);
+     $this->assertEqual($text, '', 'check_plain() casts null to string');
+     $text = check_plain(FALSE);
+     $this->assertEqual($text, '', 'check_plain() casts boolean to string');
+     // cspell:disable
      $text = filter_xss("Fooÿñ");
      $this->assertEqual($text, "Fooÿñ", 'filter_xss() accepts valid sequence Fooÿñ');
+     $text = check_plain("Fooÿñ");
+     $this->assertEqual($text, "Fooÿñ", 'check_plain() accepts valid sequence "Fooÿñ"');
+     // cspell:enable
+     $text = filter_xss("Foo\xC0barbaz");
+     $this->assertEqual($text, '', 'filter_xss() rejects invalid sequence "Foo\xC0barbaz"');
+     // Ignore invalid multibyte sequence warning.
+     $text = @check_plain("Foo\xC0barbaz");
+     $this->assertEqual($text, '', 'check_plain() rejects invalid sequence "Foo\xC0barbaz"');
+     // Ignore invalid multibyte sequence warning.
+     $text = @check_plain("\xc2\"");
+     $this->assertEqual($text, '', 'check_plain() rejects invalid sequence "\xc2\""');
   }
 
   /**
@@ -594,7 +621,7 @@ class CommonSizeUnitTestCase extends BackdropUnitTestCase {
       $size = 79691776,
       $string . ' == ' . $parsed_size . ' bytes'
     );
-    $string = '76.24 Giggabyte'; // Misspeld text -> 76.24 GB
+    $string = '76.24 Giggabyte'; // Misspelled text -> 76.24 GB
     $this->assertEqual(
       $parsed_size = parse_size($string),
       $size = 81862076662,
@@ -724,7 +751,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Makes sure that reseting the CSS empties the cache.
+   * Makes sure that resetting the CSS empties the cache.
    */
   function testReset() {
     backdrop_static_reset('backdrop_add_css');
@@ -766,7 +793,6 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
     backdrop_add_css($css, array('type' => 'inline'));
     $styles = backdrop_get_css();
     $this->assertEqual(trim($styles), $css_preprocessed, 'Rendering preprocessed inline CSS adds it to the page.');
-
   }
 
   /**
@@ -836,7 +862,6 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
       backdrop_get_path('module', 'simpletest') . '/css/simpletest.css',
     );
 
-
     $styles = backdrop_get_css();
     // Stylesheet URL may be the href of a LINK tag or in an @import statement
     // of a STYLE tag.
@@ -873,6 +898,30 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
     $styles = backdrop_get_css();
     $this->assert(strpos($styles, $system . '/css/system.css') !== FALSE, 'The overriding CSS file is output.');
     $this->assert(strpos($styles, $simpletest . '/tests/system.css') === FALSE, 'The overridden CSS file is not output.');
+  }
+
+  /**
+   * Test CSS Styles with attributes rendering.
+   */
+  function testRenderStylesAttributes() {
+    // Disable aggregation.
+    config_set('system.core', 'preprocess_css', 0);
+
+    // Add internal and external CSS files that add custom attributes, and
+    // check that these attributes appear on the <link> tags.
+    $css_internal = 'core/misc/print.css';
+    $css_external = 'http://example.com/styles.css';
+    backdrop_add_css($css_internal, array('attributes' => array('custom' => 'foo')));
+    backdrop_add_css($css_external, array(
+      'attributes' => array(
+        'custom' => 'foo',
+      ),
+      'type' => 'external',
+    ));
+    $css = backdrop_get_css();
+    $this->backdropSetContent($css);
+    $this->assertTrue($this->xpath('//link[starts-with(@href, "' . file_create_url($css_internal) . '") and @custom="foo"]'), 'Rendered internal CSS with correct custom attribute.');
+    $this->assertTrue($this->xpath('//link[@href="' . $css_external . '" and @custom="foo"]'), 'Rendered external CSS with correct custom attribute.');
   }
 
   /**
@@ -951,6 +1000,8 @@ class CommonCascadingStylesheetsUnitTestCase extends BackdropUnitTestCase {
    * - Proper URLs in imported files. (https://drupal.org/node/265719)
    * - Retain pseudo-selectors. (https://drupal.org/node/460448)
    * - Don't adjust data URIs. (https://drupal.org/node/2142441)
+   * - Support semicolons in import statements.
+   *   (https://github.com/backdrop/backdrop-issues/issues/6337)
    */
   function testLoadCssBasic() {
     // Array of files to test living in 'simpletest/files/css_test_files/'.
@@ -1008,14 +1059,21 @@ class CommonBackdropHTTPRequestTestCase extends BackdropWebTestCase {
     $this->assertEqual($unable_to_parse->code, -1001, 'Returned with "-1001" error code.');
     $this->assertEqual($unable_to_parse->error, 'unable to parse URL', 'Returned with "unable to parse URL" error message.');
 
-    // Fetch page.
-    $result = backdrop_http_request(url('node', array('absolute' => TRUE)));
+    // Fetch page, and check that the data parameter works with both array and
+    // string.
+    $data_array = array($this->randomName() => $this->randomString() . ' "\'');
+    $data_string = backdrop_http_build_query($data_array);
+    $result = backdrop_http_request(url('node', array('absolute' => TRUE)), array('data' => $data_array));
     $this->assertEqual($result->code, 200, 'Fetched page successfully.');
+    $this->assertTrue(substr($result->request, -strlen($data_string)) === $data_string, 'Request ends with URL-encoded data when drupal_http_request() is called using an array.');
+    $result = backdrop_http_request(url('node', array('absolute' => TRUE)), array('data' => $data_string));
+    $this->assertTrue(substr($result->request, -strlen($data_string)) === $data_string, 'Request ends with URL-encoded data when drupal_http_request() is called using a string.');
+
     $this->backdropSetContent($result->data);
-    $this->assertTitle(t('Home | @site-name', array('@site-name' => config_get('system.core', 'site_name'))), 'Site title matches.');
+    $this->assertTitle(t('Home | @site-name', array('@site-name' => config_get_translated('system.core', 'site_name'))), 'Site title matches.');
 
     // Test that code and status message is returned.
-    $result = backdrop_http_request(url('pagedoesnotexist', array('absolute' => TRUE)));
+    $result = backdrop_http_request(url('page-does-not-exist', array('absolute' => TRUE)));
     $this->assertTrue(!empty($result->protocol),  'Result protocol is returned.');
     $this->assertEqual($result->code, '404', 'Result code is 404');
     $this->assertEqual($result->status_message, 'Not Found', 'Result status message is "Not Found"');
@@ -1106,7 +1164,7 @@ class CommonBackdropHTTPRequestTestCase extends BackdropWebTestCase {
     );
     language_save($language);
 
-    // Request front page in French and check for matching Content-language.
+    // Request home page in French and check for matching Content-language.
     $request = backdrop_http_request(url('<front>', array('absolute' => TRUE, 'language' => $language)));
     $this->assertEqual($request->headers['content-language'], 'fr', t('Content-Language HTTP header is French.'));
   }
@@ -1289,7 +1347,6 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     $javascript = backdrop_add_js('core/misc/collapse.js');
     $this->assertTrue(array_key_exists('core/misc/jquery.js', $javascript), 'jQuery is added when a file is added.');
     $this->assertTrue(array_key_exists('core/misc/backdrop.js', $javascript), 'Backdrop.js is added when file is added.');
-    $this->assertTrue(array_key_exists('core/misc/html5.js', $javascript), 'html5.js is added when file is added.');
     $this->assertTrue(array_key_exists('core/misc/collapse.js', $javascript), 'JavaScript files are correctly added.');
     $this->assertEqual(base_path(), $javascript['settings']['data'][0]['basePath'], 'Base path JavaScript setting is correctly set.');
     url('', array('prefix' => &$prefix));
@@ -1300,8 +1357,8 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
    * Test adding settings.
    */
   function testAddSetting() {
-    $javascript = backdrop_add_js(array('backdrop' => 'rocks', 'dries' => 280342800), 'setting');
-    $this->assertEqual(280342800, $javascript['settings']['data'][2]['dries'], 'JavaScript setting is set correctly.');
+    $javascript = backdrop_add_js(array('backdrop' => 'rocks', 'v1.0.0' => 1421394600), 'setting');
+    $this->assertEqual(1421394600, $javascript['settings']['data'][2]['v1.0.0'], 'JavaScript setting is set correctly.');
     $this->assertEqual('rocks', $javascript['settings']['data'][2]['backdrop'], 'The other JavaScript setting is set correctly.');
   }
 
@@ -1538,22 +1595,30 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Test adding JavaScript within conditional comments.
+   * Test deprecated conditional comments are no longer output.
+   *
+   * Since Backdrop 1.27.0, the "browsers" option for backdrop_add_js() and
+   * backdrop_add_css() no longer outputs conditional comments, because
+   * conditional comments only work on IE 4-10 (which is completely
+   * unsupported). The "browsers" attribute still exists to prevent IE-only
+   * files from suddenly appearing on existing sites.
    *
    * @see backdrop_pre_render_conditional_comments()
    */
-  function testBrowserConditionalComments() {
+  function testDeprecatedBrowserConditionalComments() {
     $default_query_string = state_get('css_js_query_string', '0');
 
     backdrop_add_js('core/misc/collapse.js', array('browsers' => array('IE' => 'lte IE 8', '!IE' => FALSE)));
     backdrop_add_js('jQuery(function () { });', array('type' => 'inline', 'browsers' => array('IE' => FALSE)));
     $javascript = backdrop_get_js();
 
-    $expected_1 = "<!--[if lte IE 8]>\n" . '<script src="' . file_create_url('core/misc/collapse.js') . '?' . $default_query_string . '"></script>' . "\n<![endif]-->";
-    $expected_2 = "<!--[if !IE]><!-->\n" . '<script>' . 'jQuery(function () { });' . '</script>' . "\n<!--<![endif]-->";
+    $expected_1 = '<script src="' . file_create_url('core/misc/collapse.js') . '?' . $default_query_string . '"></script>';
+    $expected_2 = '<script>jQuery(function () { });</script>';
 
-    $this->assertTrue(strpos($javascript, $expected_1) > 0, t('Rendered JavaScript within downlevel-hidden conditional comments.'));
-    $this->assertTrue(strpos($javascript, $expected_2) > 0, t('Rendered JavaScript within downlevel-revealed conditional comments.'));
+    $this->assertTrue(strpos($javascript, $expected_1) === FALSE, 'IE-only browser file not output at all.');
+    $this->assertTrue(strpos($javascript, '<!--[if lte IE 8]>') === FALSE, 'IE conditional comment output is suppressed.');
+    $this->assertTrue(strpos($javascript, $expected_2) > 0, 'Browsers except IE file output directly with no conditional comments.');
+    $this->assertTrue(strpos($javascript, '<!--[if !IE]>') === FALSE, 'Not-IE conditional comment output is suppressed.');
   }
 
   /**
@@ -1939,7 +2004,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     // Retrieve all libraries for a module not implementing hook_library_info().
     // Note: This test installs Locale module.
     $libraries = backdrop_get_library('locale');
-    $this->assertEqual($libraries, array(), 'Retrieving libraries from a module not implementing hook_library_info() returns an emtpy array.');
+    $this->assertEqual($libraries, array(), 'Retrieving libraries from a module not implementing hook_library_info() returns an empty array.');
 
     // Retrieve a specific library by module and name.
     $farbtastic = backdrop_get_library('common_test', 'farbtastic');
@@ -2391,6 +2456,7 @@ class CommonValidUrlUnitTestCase extends BackdropUnitTestCase {
   function testValidAbsolute() {
     $url_schemes = array('http', 'https', 'ftp');
     $valid_absolute_urls = array(
+      // cspell:disable
       'example.com',
       'www.example.com',
       'ex-ample.com',
@@ -2409,6 +2475,7 @@ class CommonValidUrlUnitTestCase extends BackdropUnitTestCase {
       'example.org/~,$\'*;',
       'caf%C3%A9.example.org',
       '[FEDC:BA98:7654:3210:FEDC:BA98:7654:3210]:80/index.html',
+      // cspell:enable
     );
 
     foreach ($url_schemes as $scheme) {
@@ -2425,14 +2492,16 @@ class CommonValidUrlUnitTestCase extends BackdropUnitTestCase {
    */
   function testInvalidAbsolute() {
     $url_schemes = array('http', 'https', 'ftp');
-    $invalid_ablosule_urls = array(
+    $invalid_absolute_urls = array(
+      // cspell:disable
       '',
       'ex!ample.com',
       'ex%ample.com',
+      // cspell:enable
     );
 
     foreach ($url_schemes as $scheme) {
-      foreach ($invalid_ablosule_urls as $url) {
+      foreach ($invalid_absolute_urls as $url) {
         $test_url = $scheme . '://' . $url;
         $valid_url = valid_url($test_url, TRUE);
         $this->assertFalse($valid_url, format_string('@url is NOT a valid url.', array('@url' => $test_url)));
@@ -2445,11 +2514,13 @@ class CommonValidUrlUnitTestCase extends BackdropUnitTestCase {
    */
   function testValidRelative() {
     $valid_relative_urls = array(
+      // cspell:disable
       'paren(the)sis',
       'index.html#pagetop',
       'index.php?q=node',
       'index.php?q=node&param=false',
       'login.php?do=login&style=%23#pagetop',
+      // cspell:enable
     );
 
     foreach (array('', '/') as $front) {
@@ -2466,9 +2537,11 @@ class CommonValidUrlUnitTestCase extends BackdropUnitTestCase {
    */
   function testInvalidRelative() {
     $invalid_relative_urls = array(
+      // cspell:disable
       'ex^mple',
       'example<>',
       'ex%ample',
+      // cspell:enable
     );
 
     foreach (array('', '/') as $front) {
@@ -2498,13 +2571,21 @@ class CommonValidNumberStepUnitTestCase extends BackdropUnitTestCase {
 
     // Valid float steps.
     $this->assertTrue(valid_number_step(42, 10.5));
-    $this->assertTrue(valid_number_step(1, 1/3));
-    $this->assertTrue(valid_number_step(-100, 100/7));
     $this->assertTrue(valid_number_step(1000, -10));
 
     // Valid and very small float steps.
     $this->assertTrue(valid_number_step(1000.12345, 1e-10));
+    $this->assertTrue(valid_number_step(1936.5, 3e-8));
     $this->assertTrue(valid_number_step(3.9999999999999, 1e-13));
+
+    // Valid and confirmed to fail with the former approach.
+    $this->assertTrue(valid_number_step(20.123456789, 1.0E-10));
+    $this->assertTrue(valid_number_step(9999.1933172003, 1.0E-10));
+    $this->assertTrue(valid_number_step(199.200001, 1.0E-10));
+    $this->assertTrue(valid_number_step(1109.87, 1.0E-10));
+    $this->assertTrue(valid_number_step(41239412.55, 1.0E-2));
+    $this->assertTrue(valid_number_step(13517282.20, 1.0E-2));
+    $this->assertTrue(valid_number_step(12345678.12, 1.0E-2));
 
     // Invalid integer steps.
     $this->assertFalse(valid_number_step(100, 30));
@@ -2513,10 +2594,14 @@ class CommonValidNumberStepUnitTestCase extends BackdropUnitTestCase {
     // Invalid float steps.
     $this->assertFalse(valid_number_step(6, 5/7));
     $this->assertFalse(valid_number_step(10.3, 10.25));
+    $this->assertFalse(valid_number_step(1, 1/3));
+    $this->assertFalse(valid_number_step(-100, 100/7));
 
-    // Step mismatches very close to beeing valid.
+    // Step mismatches very close to being valid.
     $this->assertFalse(valid_number_step(70 + 9e-7, 10 + 9e-7));
-    $this->assertFalse(valid_number_step(1936.5, 3e-8));
+    $this->assertFalse(valid_number_step(1109.87, 0.07));
+    $this->assertFalse(valid_number_step(41239412.11, 2));
+    $this->assertFalse(valid_number_step(13517283.0001, 3));
   }
 
   /**
@@ -2526,14 +2611,13 @@ class CommonValidNumberStepUnitTestCase extends BackdropUnitTestCase {
     // Try obvious fits.
     $this->assertTrue(valid_number_step(11.3, 10.3, 1));
     $this->assertTrue(valid_number_step(100, 10, 50));
-    $this->assertTrue(valid_number_step(-100, 90/7, -10));
-    $this->assertTrue(valid_number_step(2/7 + 5/9, 1/7, 5/9));
 
     // Ensure a small offset is still invalid.
     $this->assertFalse(valid_number_step(10.3, 10.3, 0.0001));
     $this->assertFalse(valid_number_step(1/5, 1/7, 1/11));
 
     // Try negative values and offsets.
+    $this->assertFalse(valid_number_step(-100, 90/7, -10));
     $this->assertFalse(valid_number_step(1000, 10, -5));
     $this->assertFalse(valid_number_step(-10, 4, 0));
     $this->assertFalse(valid_number_step(-10, 4, -4));
@@ -2676,7 +2760,7 @@ class CommonSimpleTestErrorCollectorTestCase extends BackdropWebTestCase {
   /**
    * Errors triggered during the test.
    *
-   * Errors are intercepted by the overriden implementation
+   * Errors are intercepted by the overridden implementation
    * of BackdropWebTestCase::error below.
    *
    * @var Array
@@ -2696,8 +2780,8 @@ class CommonSimpleTestErrorCollectorTestCase extends BackdropWebTestCase {
     $this->assertEqual(count($this->collectedErrors), 3, 'Three errors were collected');
 
     if (count($this->collectedErrors) == 3) {
-      $this->assertError($this->collectedErrors[0], 'Notice', 'error_test_generate_warnings()', 'error_test.module', 'Undefined variable: bananas');
-      $this->assertError($this->collectedErrors[1], 'Warning', 'error_test_generate_warnings()', 'error_test.module', 'Division by zero');
+      $this->assertError($this->collectedErrors[0], 'Notice', 'error_test_generate_warnings()', 'error_test.module', 'Object of class stdClass could not be converted to int');
+      $this->assertError($this->collectedErrors[1], 'Warning', 'error_test_generate_warnings()', 'error_test.module', \PHP_VERSION_ID < 80000 ? 'Invalid argument supplied for foreach()' : 'foreach() argument must be of type array|object, string given');
       $this->assertError($this->collectedErrors[2], 'User warning', 'error_test_generate_warnings()', 'error_test.module', 'Backdrop is awesome');
     }
     else {
@@ -2824,6 +2908,11 @@ class CommonBackdropSystemListingTestCase extends BackdropWebTestCase {
 class CommonFormatDateTestCase extends BackdropWebTestCase {
 
   /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
    * Arbitrary langcode for a custom language.
    */
   const LANGCODE = 'xx';
@@ -2872,6 +2961,10 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/config/regional/date-time/formats/add', $edit, t('Add format'));
     $this->assertText(t('Date format updated.'));
 
+    // Reset the statically cached date formats so that these calls to
+    // format_date() will pick up the newly created date formats from config.
+    backdrop_static_reset('system_get_date_formats');
+
     $timestamp = strtotime('2007-03-10T00:00:00+00:00');
     $this->assertIdentical(format_date($timestamp, 'example_style', '', 'America/Los_Angeles'), '9 Mar 07', 'Test format_date() using an admin-defined date type.');
     $this->assertIdentical(format_date($timestamp, 'example_style_uppercase', '', 'America/Los_Angeles'), '9 Mar 2007', 'Test format_date() using an admin-defined date type with different case.');
@@ -2899,6 +2992,7 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
       'predefined_langcode' => 'custom',
       'langcode' => self::LANGCODE,
       'name' => self::LANGCODE,
+      'native' => self::LANGCODE,
       'direction' => LANGUAGE_LTR,
     );
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add custom language'));
@@ -2924,7 +3018,7 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
     date_default_timezone_set(backdrop_get_user_timezone());
 
     $this->assertIdentical(format_date($timestamp, 'custom', 'l, d-M-y H:i:s T', 'America/Los_Angeles', 'en'), 'Sunday, 25-Mar-07 17:00:00 PDT', 'Test a different language.');
-    $this->assertIdentical(format_date($timestamp, 'custom', 'l, d-M-y H:i:s T', 'Europe/London'), 'Monday, 26-Mar-07 01:00:00 BST', 'Test a different time zone.');
+    $this->assertIdentical(format_date($timestamp, 'custom', 'l, d-M-y H:i:s T', 'Europe/London', 'en'), 'Monday, 26-Mar-07 01:00:00 BST', 'Test a different time zone.');
     $this->assertIdentical(format_date($timestamp, 'custom', 'l, d-M-y H:i:s T'), 'domingo, 25-Mar-07 17:00:00 PDT', 'Test custom date format.');
     $this->assertIdentical(format_date($timestamp, 'long'), 'domingo, 25. marzo 2007 - 17:00', 'Test long date format.');
     $this->assertIdentical(format_date($timestamp, 'medium'), '25. marzo 2007 - 17:00', 'Test medium date format.');
@@ -2945,6 +3039,76 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
     // Restore default time zone.
     date_default_timezone_set(backdrop_get_user_timezone());
     backdrop_save_session(TRUE);
+  }
+}
+
+/**
+ * Tests the format_xml_elements() API function.
+ */
+class CommonBackdropFormatXmlElementsUnitTestCase extends BackdropUnitTestCase {
+  /**
+   * Provide a sample data structure and verify the XML results.
+   */
+  function testParseFormatXmlElements() {
+    $structure = array(
+      // Test normal key => value pairs.
+      'key-value-pairs' => array(
+        'second-1' => 'foo',
+        'second-2' => 'bar',
+      ),
+      // Test normal key => value pairs.
+      'attributes' => array(
+        array(
+          'key' => 'second',
+          'value' => 'baz',
+          'attributes' => array(
+            'attr-1' => 'foo',
+            'attr-2' => 'bar',
+          ),
+        ),
+      ),
+      // Test encoded vs. normal.
+      'encoding' => array(
+        array(
+          'key' => 'second',
+          'value' => '<foo>',
+        ),
+        array(
+          'key' => 'second',
+          'value' => check_plain('<bar>'),
+          'encoded' => TRUE,
+        ),
+      ),
+      // Test nesting multiple levels.
+      'nested' => array(
+        array(
+          'key' => 'second',
+          'value' => array(
+            'third' => 'foo'
+          ),
+        ),
+      ),
+    );
+    $expected_output = <<<EOF
+<key-value-pairs>
+  <second-1>foo</second-1>
+  <second-2>bar</second-2>
+</key-value-pairs>
+<attributes>
+  <second attr-1="foo" attr-2="bar">baz</second>
+</attributes>
+<encoding>
+  <second>&lt;foo&gt;</second>
+  <second>&lt;bar&gt;</second>
+</encoding>
+<nested>
+  <second>
+    <third>foo</third>
+  </second>
+</nested>
+
+EOF;
+    $this->assertIdentical($expected_output, format_xml_elements($structure));
   }
 }
 
@@ -3129,7 +3293,7 @@ class CommonJSONUnitTestCase extends BackdropUnitTestCase {
     foreach ($html_unsafe as $char) {
       $this->assertTrue(strpos($json, $char) === FALSE, format_string('A JSON encoded string does not contain @s.', array('@s' => $char)));
     }
-    // Verify that JSON encoding escapes the HTML unsafe characters
+    // Verify that JSON encoding escapes the HTML unsafe characters.
     foreach ($html_unsafe_escaped as $char) {
       $this->assertTrue(strpos($json, $char) > 0, format_string('A JSON encoded string contains @s.', array('@s' => $char)));
     }
@@ -3143,6 +3307,7 @@ class CommonJSONUnitTestCase extends BackdropUnitTestCase {
     $this->assertIdentical($source, $json_decoded, 'Encoding structured data to pretty-printed JSON and decoding back results in the original data.');
 
     // Unicode test strings.
+    // cspell:disable-next-line
     $unicode_decoded = 'üéåâ';
     $unicode_encoded = '\u00fc\u00e9\u00e5\u00e2';
     $unicode_encoded_escaped = '\\\\u00fc\\\\u00e9\\\\u00e5\\\\u00e2';
@@ -3424,7 +3589,7 @@ class BackdropGetQueryArrayTestCase extends BackdropWebTestCase {
    * Tests that backdrop_get_query_array() correctly explodes query parameters.
    */
   public function testBackdropGetQueryArray() {
-    $url = "http://my.site.com/somepath?foo=/content/folder[@name='foo']/folder[@name='bar']";
+    $url = "http://my.site.com/some-path?foo=/content/folder[@name='foo']/folder[@name='bar']";
     $parsed = parse_url($url);
     $result = backdrop_get_query_array($parsed['query']);
     $this->assertEqual($result['foo'], "/content/folder[@name='foo']/folder[@name='bar']", 'backdrop_get_query_array() should only explode parameters on the first equals sign.');

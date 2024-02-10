@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Admin page callbacks for the block module.
+ * Admin page callbacks for the Block module.
  */
 
 /**
@@ -9,6 +9,11 @@
  */
 function block_admin_list() {
   $custom_blocks_info = block_block_info();
+
+  $help_text = array(
+    '#theme' => 'help',
+    '#markup' => t('These blocks are available to be placed in any layout in the <a href="@link">Layouts</a> page.', array('@link' => url('admin/structure/layouts'))),
+  );
 
   $header = array(
     t('Block'),
@@ -20,8 +25,11 @@ function block_admin_list() {
   foreach ($custom_blocks_info as $delta => $block_info) {
     $block = block_custom_block_load($delta);
     $row = array();
-    $row[] = check_plain($block_info['info']);
-    $row[] = check_plain($block_info['description']);
+    $row[] = theme('label_machine_name__block', array(
+      'label' => $block_info['info'],
+      'machine_name' => $delta,
+    ));
+    $row[] = filter_xss($block_info['description']);
     $links = array();
     $links['configure'] = array(
       'title' => t('Configure'),
@@ -37,7 +45,7 @@ function block_admin_list() {
         'href' => 'admin/structure/block/manage/' . $delta . '/translation',
       );
     }
-    if (user_access('synchronize configuration')) {
+    if (module_exists('config') && user_access('synchronize configuration')) {
       $links['export'] = array(
         'title' => t('Export'),
         'href' => 'admin/config/development/configuration/single/export',
@@ -52,15 +60,18 @@ function block_admin_list() {
       '#links' => $links,
     );
     $row[] = array('data' => $operations);
+
     $rows[] = $row;
   }
 
-  return array(
+  $block_admin_list = array(
     '#theme' => 'table__block_admin_list',
-    '#rows' => $rows,
     '#header' => $header,
+    '#rows' => $rows,
     '#empty' => t('No custom blocks have been created yet.'),
   );
+
+  return array('help_text' => $help_text, 'block_admin_list' => $block_admin_list);
 }
 
 /**
@@ -137,6 +148,14 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
     '#type' => 'submit',
     '#value' => t('Save block'),
   );
+  if ($delta) {
+    $form['actions']['delete'] = array(
+      '#type' => 'link',
+      '#title' => t('Delete'),
+      '#href' => 'admin/structure/block/manage/' . $delta . '/delete',
+      '#attributes' => array('class' => array('button', 'button-secondary', 'form-delete')),
+    );
+  }
   $form['actions']['cancel'] = array(
     '#type' => 'link',
     '#title' => t('Cancel'),

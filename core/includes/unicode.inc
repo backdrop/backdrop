@@ -1,9 +1,8 @@
 <?php
-
 /**
-* @file
-* Provides Unicode-related conversions and operations.
-*/
+ * @file
+ * Provides Unicode-related conversions and operations.
+ */
 
 /**
  * Indicates an error during check for PHP unicode support.
@@ -45,6 +44,7 @@ define('UNICODE_MULTIBYTE', 1);
  *
  * @see http://unicode.org/glossary
  */
+// cspell:disable
 define('PREG_CLASS_UNICODE_WORD_BOUNDARY',
   '\x{0}-\x{2F}\x{3A}-\x{40}\x{5B}-\x{60}\x{7B}-\x{A9}\x{AB}-\x{B1}\x{B4}' .
   '\x{B6}-\x{B8}\x{BB}\x{BF}\x{D7}\x{F7}\x{2C2}-\x{2C5}\x{2D2}-\x{2DF}' .
@@ -81,6 +81,7 @@ define('PREG_CLASS_UNICODE_WORD_BOUNDARY',
   '\x{E000}-\x{F8FF}\x{FB29}\x{FD3E}-\x{FD3F}\x{FDFC}-\x{FDFD}' .
   '\x{FE10}-\x{FE19}\x{FE30}-\x{FE6B}\x{FEFF}-\x{FF0F}\x{FF1A}-\x{FF20}' .
   '\x{FF3B}-\x{FF40}\x{FF5B}-\x{FF65}\x{FFE0}-\x{FFFD}');
+  // cspell:enable
 
 /**
  * Wrapper around _unicode_check().
@@ -120,16 +121,6 @@ function _unicode_check() {
   }
   if (ini_get('mbstring.encoding_translation') != 0) {
     return array(UNICODE_ERROR, $t('Multibyte string input conversion in PHP is active and must be disabled. Check the php.ini <em>mbstring.encoding_translation</em> setting. Please refer to the <a href="@url">PHP mbstring documentation</a> for more information.', array('@url' => 'http://www.php.net/mbstring')));
-  }
-  // mbstring.http_input and mbstring.http_output are deprecated and empty by
-  // default in PHP 5.6.
-  if (version_compare(PHP_VERSION, '5.6.0') == -1) {
-    if (ini_get('mbstring.http_input') != 'pass') {
-      return array(UNICODE_ERROR, $t('Multibyte string input conversion in PHP is active and must be disabled. Check the php.ini <em>mbstring.http_input</em> setting. Please refer to the <a href="@url">PHP mbstring documentation</a> for more information.', array('@url' => 'http://www.php.net/mbstring')));
-    }
-    if (ini_get('mbstring.http_output') != 'pass') {
-      return array(UNICODE_ERROR, $t('Multibyte string output conversion in PHP is active and must be disabled. Check the php.ini <em>mbstring.http_output</em> setting. Please refer to the <a href="@url">PHP mbstring documentation</a> for more information.', array('@url' => 'http://www.php.net/mbstring')));
-    }
   }
 
   // Set appropriate configuration
@@ -334,7 +325,9 @@ function truncate_utf8($string, $max_length, $wordsafe = FALSE, $add_ellipsis = 
   }
 
   if ($add_ellipsis) {
-    // Truncate ellipsis in case $max_length is small.
+    // Truncate ellipsis in case $max_length is small. The ellipsis character is
+    // wrapped in t(), since different characters or symbols may be used for
+    // this purpose in other languages.
     $ellipsis = backdrop_substr(t('…'), 0, $max_length);
     $max_length -= backdrop_strlen($ellipsis);
     $max_length = max($max_length, 0);
@@ -476,7 +469,7 @@ function decode_entities($text) {
  *
  * This is less than or equal to the byte count.
  *
- * @param $text
+ * @param string $text
  *   The string to run the operation on.
  *
  * @return integer
@@ -485,6 +478,12 @@ function decode_entities($text) {
  * @ingroup php_wrappers
  */
 function backdrop_strlen($text) {
+  // Bail early if $text is NULL.
+  // @todo Remove this in 2.x.
+  if (is_null($text)) {
+    return 0;
+  }
+
   global $multibyte;
   if ($multibyte == UNICODE_MULTIBYTE) {
     return mb_strlen($text);
@@ -498,7 +497,7 @@ function backdrop_strlen($text) {
 /**
  * Uppercase a UTF-8 string.
  *
- * @param $text
+ * @param string $text
  *   The string to run the operation on.
  *
  * @return string
@@ -507,6 +506,12 @@ function backdrop_strlen($text) {
  * @ingroup php_wrappers
  */
 function backdrop_strtoupper($text) {
+  // Bail early if $text is NULL.
+  // @todo Remove this in 2.x.
+  if (is_null($text)) {
+    return "";
+  }
+
   global $multibyte;
   if ($multibyte == UNICODE_MULTIBYTE) {
     return mb_strtoupper($text);
@@ -523,7 +528,7 @@ function backdrop_strtoupper($text) {
 /**
  * Lowercase a UTF-8 string.
  *
- * @param $text
+ * @param string $text
  *   The string to run the operation on.
  *
  * @return string
@@ -532,6 +537,12 @@ function backdrop_strtoupper($text) {
  * @ingroup php_wrappers
  */
 function backdrop_strtolower($text) {
+  // Bail early if $text is NULL.
+  // @todo Remove this in 2.x.
+  if (is_null($text)) {
+    return "";
+  }
+
   global $multibyte;
   if ($multibyte == UNICODE_MULTIBYTE) {
     return mb_strtolower($text);
@@ -583,20 +594,27 @@ function backdrop_ucfirst($text) {
  * cutting off a string at a known character/substring location, the usage of
  * PHP's normal strpos/substr is safe and much faster.
  *
- * @param $text
+ * @param string $text
  *   The input string.
- * @param $start
+ * @param int $start
  *   The position at which to start reading.
- * @param $length
+ * @param int $length
  *   The number of characters to read.
  *
- * @return
+ * @return string
  *   The shortened string.
  *
  * @ingroup php_wrappers
  */
 function backdrop_substr($text, $start, $length = NULL) {
+  // Bail early if $text is NULL.
+  // @todo Remove this in 2.x.
+  if (is_null($text)) {
+    return "";
+  }
+
   global $multibyte;
+  $text = (string) $text;
   if ($multibyte == UNICODE_MULTIBYTE) {
     return $length === NULL ? mb_substr($text, $start) : mb_substr($text, $start, $length);
   }

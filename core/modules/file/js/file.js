@@ -19,10 +19,6 @@ Backdrop.behaviors.fileUploadChange = {
     $(context).find('input[data-file-auto-upload]').once('auto-upload').on('change', Backdrop.file.autoUpload).each(function() {
       $(this).closest('.form-item').find('.file-upload-button').hide();
     });
-  },
-  detach: function (context, settings) {
-    $(context).find('input[data-file-extensions]').off('change', Backdrop.file.validateExtension);
-    $(context).find('input[data-file-auto-upload]').off('change', Backdrop.file.autoUpload);
   }
 };
 
@@ -31,12 +27,8 @@ Backdrop.behaviors.fileUploadChange = {
  */
 Backdrop.behaviors.fileButtons = {
   attach: function (context) {
-    $('input.form-submit', context).once('file-disable-fields').bind('mousedown', Backdrop.file.disableFields);
-    $('div.form-managed-file input.form-submit', context).once('file-progress-bar').bind('mousedown', Backdrop.file.progressBar);
-  },
-  detach: function (context) {
-    $('input.form-submit', context).unbind('mousedown', Backdrop.file.disableFields);
-    $('div.form-managed-file input.form-submit', context).unbind('mousedown', Backdrop.file.progressBar);
+    $('input.form-submit', context).once('file-disable-fields').on('mousedown', Backdrop.file.disableFields);
+    $('div.form-managed-file input.form-submit', context).once('file-progress-bar').on('mousedown', Backdrop.file.progressBar);
   }
 };
 
@@ -45,10 +37,10 @@ Backdrop.behaviors.fileButtons = {
  */
 Backdrop.behaviors.filePreviewLinks = {
   attach: function (context) {
-    $('div.form-managed-file .file a, .file-widget .file a', context).once('file-preview-link').bind('click', Backdrop.file.openInNewWindow);
+    $('.file-preview-link', context).once('file-preview-link').on('click', Backdrop.file.openInNewWindow);
   },
   detach: function (context){
-    $('div.form-managed-file .file a, .file-widget .file a', context).unbind('click', Backdrop.file.openInNewWindow);
+    $('.file-preview-link', context).off('click', Backdrop.file.openInNewWindow);
   }
 };
 
@@ -128,7 +120,7 @@ Backdrop.file = Backdrop.file || {
 
     // Check if we're working with an "Upload" button.
     var $enabledFields = [];
-    if ($(this).closest('div.form-managed-file').length > 0) {
+    if ($(this).is('.file-upload-button')) {
       $enabledFields = $(this).closest('div.form-managed-file').find('input.form-file');
     }
 
@@ -137,7 +129,7 @@ Backdrop.file = Backdrop.file || {
     // do not get enabled when we re-enable these fields at the end of behavior
     // processing. Re-enable in a setTimeout set to a relatively short amount
     // of time (1 second). All the other mousedown handlers (like Backdrop's
-    // Ajax behaviors) are excuted before any timeout functions are called, so
+    // AJAX behaviors) are executed before any timeout functions are called, so
     // we don't have to worry about the fields being re-enabled too soon.
     // @todo If the previous sentence is true, why not set the timeout to 0?
     var $fieldsToTemporarilyDisable = $('div.form-managed-file input.form-file').not($enabledFields).not(':disabled');
@@ -175,7 +167,71 @@ Backdrop.file = Backdrop.file || {
     $(this).attr('target', '_blank');
     window.open(this.href, 'filePreview', 'toolbar=0,scrollbars=1,location=1,statusbar=1,menubar=0,resizable=1,width=500,height=550');
     return false;
+  },
+
+  /**
+   * Provide events for files in the file browser dialog.
+   */
+  dialogOpenEvent: function(e, dialog, $element, settings) {
+    var $browserContainer = $element.find(".file-browser");
+    $browserContainer.once('file-browser').on('click', '[data-fid]', function () {
+      var $selectedElement = $(this);
+      if ($selectedElement.is('img')) {
+        $browserContainer.find('.image-library-image-selected').removeClass('image-library-image-selected');
+        $selectedElement.parent('.image-library-choose-file').addClass('image-library-image-selected');
+      }
+      else {
+        $browserContainer.find('.file-browser-selected').removeClass('file-browser-selected');
+        $selectedElement.parent('.file-browser-file').addClass('file-browser-selected');
+      }
+      var selectedFid = $(this).data('fid');
+      // Set the FID in the modal submit form.
+      $('form.file-managed-file-browser-form [name="fid"]').val(selectedFid);
+    }).on('dblclick', '.image-library-choose-file', function() {
+      var $selectedElement = $(this);
+      $selectedElement.click();
+      var $form = $selectedElement.closest('.ui-dialog-content').find('form');
+      var $submit = $form.find('.form-actions input[type=submit]:first');
+      $submit.trigger('mousedown').trigger('click').trigger('mouseup');
+    });
+  },
+
+  /**
+   * After closing a dialog, check if the file ID needs to be updated..
+   */
+  dialogCloseEvent: function(e, dialog, $element) {
+    var $browserContainer = $element.find(".file-browser");
+    if ($browserContainer.length > 0) {
+      // These two variables are set server-side when submitting the dialog, in
+      // file_managed_file_browser_submit().
+      var selectedFid = Backdrop.settings.file.browser.selectedFid;
+      var $fidElement = $(Backdrop.settings.file.browser.currentFidElement);
+
+      var $parentElement = $fidElement.closest('.form-type-managed-file');
+      var $fileInputField = $parentElement.find('input[type="file"]');
+      var $uploadButton = $parentElement.find('.file-upload-button');
+
+      if ($fidElement.length && selectedFid) {
+        // Clear any selected file (in the event it was selected before opening).
+        $fileInputField.val('');
+
+        // Set this hidden FID value to the selected file.
+        $fidElement.val(selectedFid);
+
+        // Then click the "Upload" button, which will utilize the given file.
+        $uploadButton
+          .trigger('mousedown')
+          .trigger('click')
+          .trigger('mouseup');
+      }
+    }
   }
 };
+
+/**
+ * Attach dialog behaviors for the file browser.
+ */
+$(window).on('dialog:aftercreate.fileBrowser', Backdrop.file.dialogOpenEvent);
+$(window).on('dialog:afterclose.fileBrowser', Backdrop.file.dialogCloseEvent);
 
 })(jQuery);

@@ -14,7 +14,7 @@
  *
  * Field UI's "Manage fields" and "Manage displays" pages let users re-order
  * fields, but also non-field components. For nodes, these include the title,
- * path aliases, and other elements exposed by modules through hook_form() or
+ * URL aliases, and other elements exposed by modules through hook_form() or
  * hook_form_alter().
  *
  * Fieldable entities or modules that want to have their components supported
@@ -263,6 +263,34 @@ function hook_field_schema($field) {
 }
 
 /**
+ * Allow modules to alter the schema for a field.
+ *
+ * @param array $schema
+ *   The schema definition as returned by hook_field_schema().
+ * @param array $field
+ *   The field definition.
+ *
+ * @see field_retrieve_schema()
+ *
+ * @since 1.26.4 Hook added.
+ */
+function hook_field_schema_alter(&$schema, $field) {
+  if ($field['type'] == 'image') {
+    // Alter the length of a field.
+    $schema['columns']['alt']['length'] = 2048;
+    // Add an additional column of data.
+    $schema['columns']['additional_column'] = array(
+      'description' => "Additional column added to image field table.",
+      'type' => 'varchar',
+      'length' => 128,
+      'not null' => FALSE,
+    );
+    // Add an additional index.
+    $schema['indexes']['fid_additional_column'] = array('fid', 'additional_column');
+  }
+}
+
+/**
  * Define custom load behavior for this module's field types.
  *
  * Unlike most other field hooks, this hook operates on multiple entities. The
@@ -298,7 +326,7 @@ function hook_field_schema($field) {
  *   FIELD_LOAD_REVISION to load the version indicated by each entity.
  */
 function hook_field_load($entity_type, $entities, $field, $instances, $langcode, &$items, $age) {
-  // Sample code from text.module: precompute sanitized strings so they are
+  // Sample code from text.module: pre-compute sanitized strings so they are
   // stored in the field cache.
   foreach ($entities as $id => $entity) {
     foreach ($items[$id] as $delta => $item) {
@@ -1236,6 +1264,52 @@ function hook_field_formatter_view($entity_type, $entity, $field, $instance, $la
   }
 
   return $element;
+}
+
+/**
+ * Alter the form elements for a formatter's settings.
+ *
+ * @param $context
+ *   An array of additional context for the settings form, containing:
+ *   - module: The module providing the formatter being configured.
+ *   - formatter: The definition array of the formatter being configured. Note
+ *     that this does not contain the machine name of the formatter. This can
+ *     be found in:
+ *     @code
+ *     $context['instance']['display'][$context['view_mode']]['type']
+ *     @endcode
+ *   - field: The field structure being configured.
+ *   - instance: The instance structure being configured.
+ *   - view_mode: The view mode being configured.
+ *   - form: The (entire) configuration form array, which will usually have no
+ *     use here.
+ *   - form_state: The form state of the (entire) configuration form.
+ *
+ * @since 1.13.0
+ *
+ * @see hook_field_formatter_settings()
+ */
+function hook_field_formatter_settings_form_alter(&$settings_form, $context) {
+
+}
+
+/**
+ * Alter the short summary for the current formatter settings of an instance.
+ *
+ * @param $summary
+ *   A string containing a short summary of the formatter settings.
+ * @param $context
+ *   An array with additional context for the summary:
+ *   - field: The field structure.
+ *   - instance: The instance structure.
+ *   - view_mode: The view mode for which a settings summary is requested.
+ *
+ * @since 1.13.0
+ *
+ * @see hook_field_formatter_settings_summary()
+ */
+function hook_field_formatter_settings_summary_alter(&$summary, array $context) {
+
 }
 
 /**

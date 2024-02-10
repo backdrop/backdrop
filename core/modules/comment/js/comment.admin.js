@@ -12,7 +12,7 @@ Backdrop.behaviors.commentFieldsetSummaries = {
       var vals = [];
       var status = $context.find('.form-item-comment input:checked').next('label').text().replace(/^\s+|\s+$/g, '');
       vals.push(Backdrop.checkPlain(status));
-      if ($.trim(status) != 'Open') {
+      if (status.trim() != 'Open') {
         if ($context.find(".form-item-comment-hidden input:checked").length) {
           vals.push(Backdrop.t('Hidden'));
         }
@@ -28,7 +28,7 @@ Backdrop.behaviors.commentFieldsetSummaries = {
       vals.push($context.find(".form-item-comment-default input:checked").parent().find('label').text().replace(/^\s+|\s+$/g, ''));
 
       // Comments per page.
-      var number = parseInt($context.find(".form-item-comment-per-page select option:selected").val());
+      var number = parseInt($context.find(".form-item-comment-per-page input").val());
       vals.push(Backdrop.t('@number comments per page', {'@number': number}));
 
       // Threading.

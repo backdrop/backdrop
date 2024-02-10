@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Database schema code for MySQL database servers.
@@ -127,7 +126,7 @@ class DatabaseSchema_mysql extends DatabaseSchema {
    * Create an SQL string for a field to be used in table creation or alteration.
    *
    * Before passing a field out of a schema definition into this function it has
-   * to be processed by _db_process_field().
+   * to be processed by DatabaseSchema_mysql::processField().
    *
    * @param $name
    *   Name of the field.
@@ -334,9 +333,9 @@ class DatabaseSchema_mysql extends DatabaseSchema {
       throw new DatabaseSchemaObjectExistsException(t("Cannot add field @table.@field: field already exists.", array('@field' => $field, '@table' => $table)));
     }
 
-    $fixnull = FALSE;
+    $fix_null = FALSE;
     if (!empty($spec['not null']) && !isset($spec['default'])) {
-      $fixnull = TRUE;
+      $fix_null = TRUE;
       $spec['not null'] = FALSE;
     }
     $query = 'ALTER TABLE {' . $table . '} ADD ';
@@ -350,7 +349,7 @@ class DatabaseSchema_mysql extends DatabaseSchema {
         ->fields(array($field => $spec['initial']))
         ->execute();
     }
-    if ($fixnull) {
+    if ($fix_null) {
       $spec['not null'] = TRUE;
       $this->changeField($table, $field, $field, $spec);
     }
@@ -474,10 +473,12 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     // Work around a bug in some versions of PDO, see http://bugs.php.net/bug.php?id=41125
     $comment = str_replace("'", '’', $comment);
 
+    // Prefix tables, but remove any back-ticks.
+    $comment = str_replace('`', '', $this->connection->prefixTables($comment));
+
     // Truncate comment to maximum comment length.
     if (isset($length)) {
-      // Add table prefixes before truncating.
-      $comment = truncate_utf8($this->connection->prefixTables($comment), $length, TRUE, TRUE);
+      $comment = truncate_utf8($comment, $length, TRUE, TRUE);
     }
 
     return $this->connection->quote($comment);
@@ -516,6 +517,14 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     catch (Exception $e) {
       return FALSE;
     }
+  }
+
+  public function findTables($table_expression) {
+    // Back-ticks need to be removed when selecting from the information_schema
+    // table. These may be added if using DatabaseConnection::prefixTables() on
+    // a table name.
+    $table_expression = str_replace('`', '', $table_expression);
+    return parent::findTables($table_expression);
   }
 
   public function fieldExists($table, $column) {

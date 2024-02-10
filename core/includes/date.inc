@@ -27,6 +27,7 @@ define('DATE_FORMAT_DATETIME', "Y-m-d H:i:s");
 define('DATE_FORMAT_ICAL', "Ymd\THis");
 define('DATE_FORMAT_ICAL_DATE', "Ymd");
 define('DATE_FORMAT_DATE', 'Y-m-d');
+define('DATE_FORMAT_TIME', 'H:i:s');
 
 define('DATE_REGEX_ISO', '/(\d{4})?(-(\d{2}))?(-(\d{2}))?([T\s](\d{2}))?(:(\d{2}))?(:(\d{2}))?/');
 define('DATE_REGEX_DATETIME', '/(\d{4})-(\d{2})-(\d{2})\s(\d{2}):(\d{2}):?(\d{2})?/');
@@ -599,7 +600,6 @@ function date_timezone_abbr($refresh = FALSE) {
   return $data;
 }
 
-
 /**
  * Formats a date, using a date type or a custom date format string.
  *
@@ -695,6 +695,7 @@ function date_format_date($date, $type = 'medium', $format = '', $langcode = NUL
         break;
 
       default:
+        // cspell:disable-next-line
         if (strpos('BdcgGhHiIjLmnNosStTuUwWYyz', $c) !== FALSE) {
           $date_string .= $date->format($c);
         }
@@ -1334,7 +1335,7 @@ function date_format_order($format) {
  *   An array like ('year', 'month', 'day', 'hour', 'minute', 'second');
  *
  * @return array
- *   A reduced set of granularitiy elements.
+ *   A reduced set of granularity elements.
  */
 function date_nongranularity($granularity) {
   $options = array(

@@ -121,17 +121,7 @@ class AJAXFrameworkTestCase extends AJAXTestCase {
       'css' => backdrop_get_path('module', 'system') . '/css/system.admin.css',
       'js' => backdrop_get_path('module', 'system') . '/js/system.admin.js',
     );
-    // @todo: Add a backdrop_css_defaults() helper function.
-    $expected_css_html = backdrop_get_css(array($expected['css'] => array(
-      'type' => 'file',
-      'group' => CSS_DEFAULT,
-      'weight' => 0,
-      'every_page' => FALSE,
-      'media' => 'all',
-      'preprocess' => TRUE,
-      'data' => $expected['css'],
-      'browsers' => array('IE' => TRUE, '!IE' => TRUE),
-    )), TRUE);
+    $expected_css_html = backdrop_get_css(array($expected['css'] => backdrop_css_defaults($expected['css'])), TRUE);
     $expected_js_html = backdrop_get_js('header', array($expected['js'] => backdrop_js_defaults($expected['js'])), TRUE);
 
     // Get the base page.
@@ -291,8 +281,8 @@ class AJAXCommandsTestCase extends AJAXTestCase {
     $commands = $this->backdropPostAJAX($form_path, $edit, array('op' => t("AJAX data command: Issue command.")));
     $expected = array(
       'command' => 'data',
-      'name' => 'testkey',
-      'value' => 'testvalue',
+      'name' => 'test_key',
+      'value' => 'test_value',
     );
     $this->assertCommand($commands, $expected, "'data' AJAX command issued with correct key and value");
 
@@ -369,6 +359,12 @@ class AJAXCommandsTestCase extends AJAXTestCase {
  * Test that $form_state['values'] is properly delivered to $ajax['callback'].
  */
 class AJAXFormValuesTestCase extends AJAXTestCase {
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   function setUp() {
     parent::setUp();
 
@@ -412,6 +408,12 @@ class AJAXFormValuesTestCase extends AJAXTestCase {
  * Tests that Ajax-enabled forms work when multiple instances of the same form are on a page.
  */
 class AJAXMultiFormTestCase extends AJAXTestCase {
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   function setUp() {
     parent::setUp(array('form_test'));
 
@@ -448,7 +450,7 @@ class AJAXMultiFormTestCase extends AJAXTestCase {
       'page-node-form--2' => '//form[@id="page-node-form--2"]//div[contains(@class, "field-name-field-ajax-test")]',
     );
     $button_name = $field_name . '_add_more';
-    $button_value = t('Add another item');
+    $button_value = t('Add another');
     $button_xpath_suffix = '//input[@name="' . $button_name . '"]';
     $field_items_xpath_suffix = '//input[@type="text"]';
 
@@ -576,6 +578,11 @@ class AJAXElementValidation extends AJAXTestCase {
  */
 class AJAXDialogTest extends AJAXTestCase {
   protected $profile = 'testing';
+
+  /**
+   * @var User
+   */
+  protected $web_user;
 
   function setUp() {
     parent::setUp();

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * An include file to test loading it with the form API.

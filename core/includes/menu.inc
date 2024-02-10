@@ -511,6 +511,8 @@ function menu_get_item($path = NULL, $router_item = NULL) {
  *   it will be printed directly to the page.
  */
 function menu_execute_active_handler($path = NULL, $deliver = TRUE, $route_handler = NULL) {
+  $site_config = config('system.core');
+
   // Check if site is offline.
   $site_status = _menu_site_status($path, TRUE);
 
@@ -521,7 +523,7 @@ function menu_execute_active_handler($path = NULL, $deliver = TRUE, $route_handl
         // In most cases, Layout module will provide the route handler if
         // it is enabled. See layout_route_handler().
         if (empty($route_handler)) {
-          $route_handler = config_get('system.core', 'menu_route_handler');
+          $route_handler = $site_config->get('menu_route_handler');
         }
         if (empty($route_handler) || !function_exists($route_handler)) {
           $route_handler = 'menu_default_route_handler';
@@ -539,8 +541,8 @@ function menu_execute_active_handler($path = NULL, $deliver = TRUE, $route_handl
   // Offline pages are not cached in the database but have a Cache-Control
   // header to allow reverse proxies to serve offline hits instead of Backdrop.
   elseif ($site_status == MENU_SITE_OFFLINE) {
-    $page_cache_enabled = (bool) config_get('system.core', 'page_cache_maximum_age');
-    $maintenance_max_age = config_get('system.core', 'maintenance_page_maximum_age');
+    $page_cache_enabled = (bool) $site_config->get('page_cache_maximum_age');
+    $maintenance_max_age = $site_config->get('maintenance_page_maximum_age');
     if ($page_cache_enabled && $maintenance_max_age) {
       backdrop_add_http_header('Cache-Control', 'public; max-age: ' . $maintenance_max_age);
     }
@@ -591,7 +593,9 @@ function menu_default_route_handler($router_item) {
  *   An array of path arguments; for example, array('node', '5').
  *
  * @return
- *   Returns TRUE for success, FALSE if an object cannot be loaded.
+ *   Returns TRUE for success, FALSE if an object cannot be loaded, and NULL
+ *   if the $map contains the placeholders (e.g., '%node'), not arguments for
+ *   the load functions (e.g., '5').
  *   Names of object loading functions are placed in $item['load_functions'].
  *   Loaded objects are placed in $map[]; keys are the same as keys in the
  *   $item['load_functions'] array.
@@ -599,6 +603,12 @@ function menu_default_route_handler($router_item) {
  */
 function _menu_load_objects(&$item, &$map) {
   if ($load_functions = $item['load_functions']) {
+    // If the path map is the same as the router path, don't bother loading
+    // placeholders.
+    if (!empty($item['path']) && $item['path'] === implode('/', $map)) {
+      return NULL;
+    }
+
     // If someone calls this function twice, then unserialize will fail.
     if (!is_array($load_functions)) {
       $load_functions = unserialize($load_functions);
@@ -637,7 +647,7 @@ function _menu_load_objects(&$item, &$map) {
           $return = call_user_func_array($function, $args);
         }
         else {
-          $return = $function($value);
+          $return = (backdrop_substr($value, 0, 1) === '%') ? NULL : $function($value);
         }
         // If callback returned an error or there is no callback, trigger 404.
         if ($return === FALSE) {
@@ -1122,14 +1132,14 @@ function menu_tree_output($tree, $_current_depth = 0) {
     // the active class accordingly. But local tasks do not appear in menu
     // trees, so if the current path is a local task, and this link is its
     // tab root, then we have to set the class manually.
-    if ($data['link']['href'] == $router_item['tab_root_href'] && $data['link']['href'] != $_GET['q']) {
+    if ($router_item && $data['link']['href'] == $router_item['tab_root_href'] && $data['link']['href'] != $_GET['q']) {
       $class[] = 'active';
       $data['link']['localized_options']['attributes']['class'][] = 'active';
     }
     // Add the active class to the wrapper itself if necessary as the l()
     // function would.
     if (($data['link']['href'] == $_GET['q'] || ($data['link']['href'] == '<front>' && backdrop_is_front_page())) &&
-      (empty($data['link']['language']) || $data['link']['language']->langcode == $language_url->langcode)) {
+      (empty($data['link']['langcode']) || $data['link']['langcode'] == $language_url->langcode)) {
       $class[] = 'active';
     }
     $class[] = 'menu-mlid-' . $data['link']['mlid'];
@@ -1178,17 +1188,37 @@ function menu_tree_output($tree, $_current_depth = 0) {
  *   Optional maximum depth of links to retrieve. Typically useful if only one
  *   or two levels of a sub tree are needed in conjunction with a non-NULL
  *   $link, in which case $max_depth should be greater than $link['depth'].
+ * @param string $langcode
+ *   Optional, filter tree by this langcode, defaults to current language if not
+ *   set. Language neutral items are always included.
  *
  * @return
  *   An tree of menu links in an array, in the order they should be rendered.
+ *
+ * @since 1.17.5 $langcode parameter added.
  */
-function menu_tree_all_data($menu_name, $link = NULL, $max_depth = NULL) {
+function menu_tree_all_data($menu_name, $link = NULL, $max_depth = NULL, $langcode = NULL) {
   $tree = &backdrop_static(__FUNCTION__, array());
 
   // Use $mlid as a flag for whether the data being loaded is for the whole tree.
   $mlid = isset($link['mlid']) ? $link['mlid'] : 0;
   // Generate a cache ID (cid) specific for this $menu_name, $link, $language, and depth.
-  $cid = 'links:' . $menu_name . ':all:' . $mlid . ':' . $GLOBALS['language']->langcode . ':' . (int) $max_depth;
+  if (empty($langcode)) {
+    $langcode = $GLOBALS['language']->langcode;
+    $langcode_params = FALSE;
+  }
+  else {
+    if ($langcode == LANGUAGE_NONE) {
+      // Language neutral items can be attached to any parent.
+      $all_enabled = language_list(TRUE);
+      $langcode_params = array_keys($all_enabled);
+    }
+    else {
+      $langcode_params = array($langcode);
+    }
+    $langcode_params[] = LANGUAGE_NONE;
+  }
+  $cid = 'links:' . $menu_name . ':all:' . $mlid . ':' . $langcode . ':' . (int) $max_depth;
 
   if (!isset($tree[$cid])) {
     // If the static variable doesn't have the data, check {cache_menu}.
@@ -1216,6 +1246,9 @@ function menu_tree_all_data($menu_name, $link = NULL, $max_depth = NULL) {
         $tree_parameters['expanded'] = $parents;
         $tree_parameters['active_trail'] = $parents;
         $tree_parameters['active_trail'][] = $mlid;
+      }
+      if ($langcode_params) {
+        $tree_parameters['langcode'] = $langcode_params;
       }
 
       // Cache the tree building parameters using the page-specific cid.
@@ -1292,8 +1325,8 @@ function menu_tree_get_path($menu_name) {
  *
  * @return
  *   An array of menu links, in the order they should be rendered. The array
- *   is a list of associative arrays -- these have two keys, link and below.
- *   link is a menu item, ready for theming as a link. Below represents the
+ *   is a list of associative arrays -- these have two keys, 'link' and 'below'.
+ *   'link' is a menu item, ready for rendering as a link. 'below' represents the
  *   submenu below the link if there is one, and it is a subtree that has the
  *   same structure described for the top-level array.
  */
@@ -1884,7 +1917,7 @@ function theme_menu_toggle($variables) {
     $output  = '<input id="' . $id . '" class="menu-toggle-state element-invisible" type="checkbox" aria-controls="' . $id . '" />';
     $output .= '<label class="menu-toggle-button" for="' . $id . '">';
     $output .= '<span class="menu-toggle-button-icon"></span>';
-    $output .= '<span class="menu-toggle-button-text">' . $variables['text'] . '</span>';
+    $output .= (!empty($variables['text'])) ? '<span class="menu-toggle-button-text">' . check_plain($variables['text']) . '</span>' : '';
     $output .= '<span class="menu-toggle-assistive-text element-invisible">' . t('Toggle menu visibility') . '</span>';
     $output .= '</label>';
   }
@@ -1905,16 +1938,17 @@ function theme_menu_toggle($variables) {
  */
 function menu_get_custom_theme($initialize = FALSE) {
   $custom_theme = &backdrop_static(__FUNCTION__);
+  $site_config = config('system.core');
 
   // Offline mode checking does not allow for module overrides of the theme.
   $offline_mode = (_menu_site_status() === MENU_SITE_OFFLINE || defined('MAINTENANCE_MODE'));
   if ($offline_mode) {
     $custom_theme = settings_get('maintenance_theme');
     if (empty($custom_theme)) {
-      $custom_theme = config_get('system.core', 'maintenance_theme');
+      $custom_theme = $site_config->get('maintenance_theme');
     }
     if (empty($custom_theme)) {
-      $custom_theme = config_get('system.core', 'theme_default');
+      $custom_theme = $site_config->get('theme_default');
     }
   }
   elseif ($initialize) {
@@ -2471,7 +2505,7 @@ function menu_get_active_menu_names() {
  * menu_execute_active_handler() to generate your page output.
  *
  * @param $path
- *   A Backdrop path - not a path alias.
+ *   A Backdrop path - not a URL alias.
  */
 function menu_set_active_item($path) {
   $_GET['q'] = $path;
@@ -2563,7 +2597,7 @@ function menu_set_active_trail($new_trail = NULL) {
     }
     // Make sure the current page is in the trail to build the page title, by
     // appending either the preferred link or the menu router item for the
-    // current page. Exclude it if we are on the front page.
+    // current page. Exclude it if we are on the home page.
     $last = end($trail);
     if ($preferred_link && $last['href'] != $preferred_link['href'] && !backdrop_is_front_page()) {
       $trail[] = $preferred_link;
@@ -2601,12 +2635,11 @@ function menu_link_get_preferred($path = NULL, $selected_menu = NULL) {
     $selected_menu = MENU_PREFERRED_LINK;
   }
 
-  if (!isset($preferred_links[$path])) {
+  if (!isset($preferred_links[$path]) && ($item = menu_get_item($path))) {
     // Look for the correct menu link by building a list of candidate paths,
     // which are ordered by priority (translated hrefs are preferred over
     // untranslated paths). Afterwards, the most relevant path is picked from
     // the menus, ordered by menu preference.
-    $item = menu_get_item($path);
     $path_candidates = array();
     // 1. The current item href.
     $path_candidates[$item['href']] = $item['href'];
@@ -2701,7 +2734,7 @@ function menu_get_active_trail() {
 function menu_get_active_breadcrumb() {
   $breadcrumb = array();
 
-  // No breadcrumb for the front page.
+  // No breadcrumb for the home page.
   if (backdrop_is_front_page()) {
     return $breadcrumb;
   }
@@ -2754,9 +2787,9 @@ function menu_get_active_title() {
   foreach (array_reverse($active_trail) as $item) {
     // Local task titles are displayed as tabs and therefore should not be
     // repeated as the page title. However, if the local task appears in a
-    // top-level menu, it is no longer a "local task" anymore (the front page
+    // top-level menu, it is no longer a "local task" anymore (the home page
     // of the site does not have tabs) so it is better to use the local task
-    // title in that case than to fall back on the front page link in the
+    // title in that case than to fall back on the home page link in the
     // active trail (which is usually "Home" and would not make sense in this
     // context).
     if ((bool) ($item['type'] & MENU_IS_LOCAL_TASK)) {
@@ -2968,9 +3001,11 @@ function _menu_link_build($item) {
 function _menu_navigation_links_rebuild($menu) {
   // Add normal and suggested items as links.
   $menu_links = array();
+  $default_menu_link_paths = array();
   foreach ($menu as $path => $item) {
     if ($item['_visible']) {
       $menu_links[$path] = $item;
+      $default_menu_link_paths[] = $path;
       $sort[$path] = $item['_number_parts'];
     }
   }
@@ -3046,10 +3081,10 @@ function _menu_navigation_links_rebuild($menu) {
         ->execute();
     }
   }
-  // Find any item whose router path does not exist any more.
+  // Find any item that is no longer visible.
   $result = db_select('menu_links')
     ->fields('menu_links')
-    ->condition('router_path', $paths, 'NOT IN')
+    ->condition('router_path', $default_menu_link_paths, 'NOT IN')
     ->condition('external', 0)
     ->condition('updated', 0)
     ->condition('customized', 0)
@@ -3402,7 +3437,7 @@ function menu_link_save(&$item, $existing_item = array(), $parent_candidates = a
 function _menu_link_find_parent($menu_link, $parent_candidates = array()) {
   $parent = FALSE;
 
-  // This item is explicitely top-level, skip the rest of the parenting.
+  // This item is explicitly top-level, skip the rest of the parenting.
   if (isset($menu_link['plid']) && empty($menu_link['plid'])) {
     return $parent;
   }
@@ -3532,7 +3567,7 @@ function _menu_find_router_path($link_path) {
 }
 
 /**
- * Inserts, updates, or deletes an uncustomized menu link related to a module.
+ * Inserts, updates, or deletes an un-customized menu link related to a module.
  *
  * @param $module
  *   The name of the module.
@@ -3857,11 +3892,11 @@ function _menu_router_build($callbacks) {
             $item['theme arguments'] = $parent['theme arguments'];
           }
         }
-        // Same for load arguments: if a loader doesn't have any explict
+        // Same for load arguments: if a loader doesn't have any explicit
         // arguments, try to find arguments in the parent.
         if (!isset($item['load arguments'])) {
           foreach ($item['_load_functions'] as $k => $function) {
-            // This loader doesn't have any explict arguments...
+            // This loader doesn't have any explicit arguments...
             if (!is_array($function)) {
               // ... check the parent for a loader at the same position
               // using the same function name and defining arguments...
@@ -4004,7 +4039,7 @@ function _menu_router_save($menu, $masks) {
 /**
  * Checks whether the site is in maintenance mode.
  *
- * This function will log the current user out and redirect to front page
+ * This function will log the current user out and redirect to home page
  * if the current user has no 'access site in maintenance mode' permission.
  *
  * @param string $path
@@ -4032,17 +4067,19 @@ function _menu_site_status($path = NULL, $display_messages = FALSE) {
   // Check if site is in maintenance mode.
   if (state_get('maintenance_mode', FALSE)) {
     if (user_access('access site in maintenance mode')) {
-      // Ensure that the maintenance mode message is displayed only once
-      // (allowing for page redirects) and specifically suppress its display on
-      // the batch and maintenance mode settings pages. 'admin_bar/flush-cache'
-      // has been added to the list of excluded paths in order to suppress the
-      // warning on the maintenance mode settings page when clearing caches (see
+      // Ensure that the maintenance mode message is displayed only once and
+      // specifically suppress its display on the batch and maintenance mode
+      // settings pages. 'admin_bar/flush-cache' has been added to the list of
+      // excluded paths in order to suppress the warning on the maintenance mode
+      // settings page when clearing caches (see
       // https://github.com/backdrop/backdrop-issues/issues/3313).
       $excluded_paths = array('batch', 'admin/config/development/maintenance', 'admin_bar/flush-cache');
       if ($display_messages && !in_array(current_path(), $excluded_paths)) {
         $message = t('The site is currently in maintenance mode.');
         if (user_access('administer site configuration')) {
-          $message .= ' ' . l(t('Go online.'), 'admin/config/development/maintenance', array('query' => backdrop_get_destination()));
+          $message = t('The site is currently in <a href="@maintenance-url">maintenance mode</a>.', array(
+            '@maintenance-url' => url('admin/config/development/maintenance'),
+          ));
         }
         backdrop_set_message($message, 'warning', FALSE);
       }

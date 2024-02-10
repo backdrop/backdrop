@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Preprocessors and helper functions to make theming easier.
+ * Preprocessors and helper functions to make theme development easier.
  */
 
 /**
@@ -20,7 +20,7 @@ function _views_theme_functions($hook, $view, $display = NULL) {
   if ($display) {
     $themes[] = $hook . '__' . $view->name . '__' . $display->id;
     $themes[] = $hook . '__' . $display->id;
-    $themes[] = $hook . '__' . preg_replace('/[^a-z0-9]/', '_', strtolower($view->tag));
+    $themes[] = $hook . '__' . preg_replace('/[^a-z0-9]/', '_', strtolower((string) $view->tag));
 
     // Add theme suggestions foreach single tag.
     foreach (backdrop_explode_tags($view->tag) as $tag) {
@@ -56,7 +56,7 @@ function template_preprocess_views_view(&$variables) {
 
   $variables['classes'] = array();
   $variables['classes'][] = 'view';
-  $variables['classes'][] = 'view-' . backdrop_clean_css_identifier($variables['name']);
+  $variables['classes'][] = 'view-' . $variables['css_name'];
   $variables['classes'][] = 'view-id-' . $variables['name'];
   $variables['classes'][] = 'view-display-id-' . $variables['display_id'];
 
@@ -929,14 +929,18 @@ function template_preprocess_views_view_unformatted(&$variables) {
 function template_preprocess_views_view_list(&$variables) {
   $handler  = $variables['view']->style_plugin;
 
-  $class = explode(' ', $handler->options['class']);
-  $class = array_map('backdrop_clean_css_identifier', $class, array(array()));
+  $classes = explode(' ', $handler->options['class']);
+  foreach ($classes as $key => $class) {
+    $classes[$key] = backdrop_clean_css_identifier($class, array());
+  }
 
-  $wrapper_class = explode(' ', $handler->options['wrapper_class']);
-  $wrapper_class = array_map('backdrop_clean_css_identifier', $wrapper_class, array(array()));
+  $wrapper_classes = explode(' ', $handler->options['wrapper_class']);
+  foreach ($wrapper_classes as $key => $class) {
+    $wrapper_classes[$key] = backdrop_clean_css_identifier($class, array());
+  }
 
-  $variables['class'] = implode(' ', $class);
-  $variables['wrapper_class'] = implode(' ', $wrapper_class);
+  $variables['class'] = implode(' ', $classes);
+  $variables['wrapper_class'] = implode(' ', $wrapper_classes);
   $variables['wrapper_prefix'] = '';
   $variables['wrapper_suffix'] = '';
   $variables['list_type_prefix'] = '<' . $handler->options['type'] . '>';
@@ -973,7 +977,7 @@ function template_preprocess_views_view_rss(&$variables) {
   if ($view->display_handler->get_option('sitename_title')) {
     $site_config = config('system.core');
     $title = $site_config->get('site_name');
-    if ($slogan = $site_config->get('site_slogan')) {
+    if ($slogan = $site_config->getTranslated('site_slogan')) {
       $title .= ' - ' . $slogan;
     }
   }
@@ -1138,53 +1142,49 @@ function theme_views_mini_pager($variables) {
   $element = $variables['element'];
   $parameters = $variables['parameters'];
 
-  // current is the page we are currently paged to
+  // Current is the page we are currently paged to.
   $pager_current = $pager_page_array[$element] + 1;
-  // max is the maximum page number
+  // Max is the maximum page number.
   $pager_max = $pager_total[$element];
   // End of marker calculations.
 
   if ($pager_total[$element] > 1) {
-
     $li_previous = theme('pager_previous',
       array(
-        'text' => (isset($tags[1]) ? $tags[1] : t('‹‹')),
+        'text' => isset($tags[1]) ? $tags[1] : t('‹‹'),
         'element' => $element,
         'interval' => 1,
         'parameters' => $parameters,
       )
     );
-    if (empty($li_previous)) {
-      $li_previous = "&nbsp;";
-    }
 
     $li_next = theme('pager_next',
       array(
-        'text' => (isset($tags[3]) ? $tags[3] : t('››')),
+        'text' => isset($tags[3]) ? $tags[3] : t('››'),
         'element' => $element,
         'interval' => 1,
         'parameters' => $parameters,
       )
     );
 
-    if (empty($li_next)) {
-      $li_next = "&nbsp;";
+    if ($li_previous) {
+      $items[] = array(
+        'class' => array('pager-previous'),
+        'data' => $li_previous,
+      );
     }
-
-    $items[] = array(
-      'class' => array('pager-previous'),
-      'data' => $li_previous,
-    );
-
     $items[] = array(
       'class' => array('pager-current'),
       'data' => t('@current of @max', array('@current' => $pager_current, '@max' => $pager_max)),
     );
 
-    $items[] = array(
-      'class' => array('pager-next'),
-      'data' => $li_next,
-    );
+    if ($li_next) {
+      $items[] = array(
+        'class' => array('pager-next'),
+        'data' => $li_next,
+      );
+    }
+
     return theme('item_list',
       array(
         'items' => $items,

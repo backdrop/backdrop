@@ -29,6 +29,10 @@ a:active {
   background: #dddddd;
 }
 
+a.button {
+  text-decoration: none;
+}
+
 blockquote,
 figcaption {
   border-left-color: #bbbbbb;
@@ -169,17 +173,13 @@ fieldset .fieldset-legend {
 
 .header-menu a:hover,
 .l-header a:active {
-  background: #114a75;
+  text-decoration: underline;
+  background: unset;
 }
 
 .block-system-header {
   /* Helps center .header-identity-wrapper on smaller screens */
   text-align: center;
-}
-
-.header-identity-wrapper {
-  /* BG color for slogan, and logo/site name if they don't have a bg */
-  background: #000000;
 }
 
 @media (min-width: 34em) {
@@ -240,6 +240,7 @@ fieldset .fieldset-legend {
 
 @media (min-width: 34em) {
   .header-site-name-link {
+    background: transparent;
     display: inline-block;
   }
 }
@@ -344,7 +345,7 @@ fieldset .fieldset-legend {
   }
 
   .menu-dropdown a span.sub-arrow {
-    border-top-color: #ffffff;
+    border-top-color: #fffffe;
   }
 
   .menu-dropdown ul {
@@ -356,7 +357,7 @@ fieldset .fieldset-legend {
   .menu-dropdown ul a:focus,
   .menu-dropdown ul a:active,
   .menu-dropdown ul a.highlighted {
-    color: #ffffff;
+    color: #fffffe;
   }
 
   .menu-dropdown ul a:hover,
@@ -367,17 +368,17 @@ fieldset .fieldset-legend {
   }
 
   .menu-dropdown ul a.disabled {
-    background: #ffffff;
+    background: #fffffe;
     color: #cccccc;
   }
 
   .menu-dropdown ul a span.sub-arrow {
-    border-left-color: #ffffff;
+    border-left-color: #fffffe;
   }
 
   .menu-dropdown span.scroll-up,
   .menu-dropdown span.scroll-down {
-    background: #ffffff;
+    background: #fffffe;
   }
 
   .menu-dropdown span.scroll-up:hover,
@@ -399,17 +400,17 @@ fieldset .fieldset-legend {
   }
 }
 
-
 /**
  * Footer styles
  */
 .l-footer {
-  border-top: 0.25rem solid #bbbbbb;
+  border-top: 0.25rem solid #bbbbbc;
   /* If footer text wraps, remove line-height & add padding styles to blocks */
   line-height: 3;
   padding: 0.5em 0 1em;
   margin: 5em 0 0;
   background-color: #fffeff;
+  color: #000100;
 }
 
 /**
@@ -423,17 +424,6 @@ fieldset .fieldset-legend {
   text-decoration: underline;
 }
 
-.drop-lounging {
-  /* To make Drop larger/smaller, adjust the width below. */
-  width: 7em;
-}
-
-.drop-lounging:before {
-  /* Uncomment below to remove Drop, or remove markup from block--system--powered-by.tpl.php */
-  /* display: none; */
-  background-image: url("../images/drop-lounging.png");
-}
-
 /**
  * Breadcrumb
  */
@@ -442,7 +432,7 @@ fieldset .fieldset-legend {
 }
 
 .breadcrumb a {
-  color: #000000;
+  color: #010000;
 }
 
 /* Arrow color */
@@ -527,6 +517,7 @@ button.form-submit,
   text-align: center;
   text-transform: uppercase;
   color: #333333;
+  cursor: pointer;
   letter-spacing: 0.025em;
   line-height: 2.875;
   background: #d5d5d5;
@@ -547,7 +538,10 @@ input.form-submit:active {
 }
 
 .button,
-input.form-submit,
+input.form-submit {
+  color: #444b53;
+  background: #e5e5e6;
+}
 input.button-primary,
 button.button-primary,
 .ui-state-default,
@@ -573,6 +567,7 @@ button.button-primary:active {
   color: white;
 }
 
+a.button-secondary,
 input.button-secondary,
 button.button-secondary {
   color: #828188;
@@ -633,6 +628,8 @@ button.button-secondary[disabled] {
 input.form-autocomplete,
 input.form-text,
 input.form-tel,
+input.form-date,
+input.form-time,
 input.form-email,
 input.form-url,
 input.form-color,
@@ -648,6 +645,8 @@ textarea.form-textarea {
 
 input.form-text:focus,
 input.form-tel:focus,
+input.form-date:focus,
+input.form-time:focus,
 input.form-email:focus,
 input.form-url:focus,
 input.form-color:focus,
@@ -662,6 +661,8 @@ textarea.form-textarea:focus {
 .form-disabled input.form-autocomplete,
 .form-disabled input.form-text,
 .form-disabled input.form-tel,
+.form-disabled input.form-date,
+.form-disabled input.form-time,
 .form-disabled input.form-email,
 .form-disabled input.form-url,
 .form-disabled input.form-color,
@@ -673,6 +674,8 @@ textarea.form-textarea:focus {
 input.form-autocomplete[disabled],
 input.form-text[disabled],
 input.form-tel[disabled],
+input.form-date[disabled],
+input.form-time[disabled],
 input.form-email[disabled],
 input.form-url[disabled],
 input.form-color[disabled],
@@ -688,6 +691,8 @@ select.form-select[disabled] {
 .form-error input.form-autocomplete,
 .form-error input.form-text,
 .form-error input.form-tel,
+.form-error input.form-date,
+.form-error input.form-time,
 .form-error input.form-email,
 .form-error input.form-url,
 .form-error input.form-color,
@@ -712,7 +717,7 @@ select.form-select[disabled] {
 }
 
 ul.action-links a {
-  background: transparent url(../images/add.png) no-repeat 0 center;
+  background-color: transparent;
   line-height: 1.875;
 }
 
@@ -746,10 +751,6 @@ ul.action-links a {
 .pager-item {
   background: #586172;
   color: #ffffff;
-}
-
-.pager-ellipsis {
-  color: #586172;
 }
 
 .pager-first a,
@@ -895,7 +896,7 @@ ul.primary li.active a,
 .responsive-tabs-mobile .expand-dropdown-tabs-control:before,
 .responsive-tabs-mobile .expand-dropdown-tabs-label {
   border-color: #586172; /* Should be color of bg behind tabs */
-  color: #757575;
+  color: #010000;
   background-color: #dee2ea;
 }
 
@@ -904,7 +905,7 @@ ul.primary li.active a.active,
 ul.primary li.active a:active,
 ul.primary li.active a:visited,
 .responsive-tabs-mobile .expand-dropdown-tabs-label {
-  color: #000000;
+  color: #000001;
   background-color: #ffffff;
   font-weight: bold;
 }
@@ -917,7 +918,7 @@ ul.primary li a:focus,
 .responsive-tabs-mobile .expand-dropdown-tabs-control:focus:before,
 .responsive-tabs-mobile .expand-dropdown-tabs-control.js-active:before,
 .expand-dropdown-tabs-control.js-active {
-  color: #000000;
+  color: #000001;
   background: #d5d5d5;
 }
 
@@ -1035,7 +1036,6 @@ ul.secondary li a:active {
 
 .responsive-tabs-mobile ul.primary,
 .expand-dropdown-tabs.responsive-tabs-mobile ul.primary {
-  -webkit-border-radius: 0 0 4px 4px;
   border-radius: 4px;
 }
 
@@ -1212,16 +1212,13 @@ div.messages.info:before {
  * SVGs.
  */
 div.status:before {
-  /* background-image: -webkit-linear-gradient(transparent, transparent), url(../../../misc/message-ok.svg); */
   /* background-image: linear-gradient(transparent, transparent), url(../../../misc/message-ok.svg); */
 }
 
 div.warning:before {
-  /* background-image: -webkit-linear-gradient(transparent, transparent), url(../../../misc/message-warning.svg); */
   /* background-image: linear-gradient(transparent, transparent), url(../../../misc/message-warning.svg); */
 }
 
 div.error:before {
-  /* background-image: -webkit-linear-gradient(transparent, transparent), url(../../../misc/message-error.svg); */
   /* background-image: linear-gradient(transparent, transparent), url(../../../misc/message-error.svg); */
 }

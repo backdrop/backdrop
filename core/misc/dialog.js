@@ -29,11 +29,16 @@ Backdrop.dialog = function (element, options) {
     settings = $.extend({}, Backdrop.settings.dialog, options, settings);
     settings.beforeClose = beforeClose;
 
+    // Add class to the page to modify overall page display.
+    $('html').addClass('dialog-open');
+
     // Trigger a global event to allow scripts to bind events to the dialog.
     $(window).trigger('dialog:beforecreate', [dialog, $element, settings]);
     $element.dialog(settings);
 
-    if (settings.autoResize === true || settings.autoResize === 'true') {
+    if (settings.autoResize === true || settings.autoResize === 'true') {
+      // Add a class specifically to help to lock scrolling.
+      $('html').addClass('dialog-auto-resize');
 
       // Callback function for positioning the dialog on resize/scroll.
       var resetPosition = function() {
@@ -70,7 +75,23 @@ Backdrop.dialog = function (element, options) {
         })
         .dialog('widget').css('position', 'fixed');
       Backdrop.optimizedResize.add(resetPosition, 'dialogResize.' + dialogId);
-      resetPosition();
+
+      // Because of Chromium's behavior, we must wait until the ajax-loaded
+      // jquery.ui.dialog.css is applied.
+      var computedStyle = getComputedStyle($element[0]);
+      var waitForCss = function(counter) {
+        var cssOverflowProperty = computedStyle.getPropertyValue('overflow');
+        // If the overflow is not 'auto' or 'hidden' yet, schedule this function
+        // again, but prevent infinite loops for dialogs that use a different
+        // overflow. 
+        if (cssOverflowProperty != 'auto' && cssOverflowProperty != 'hidden' && counter < 10) {
+          setTimeout(waitForCss, 10, ++counter);
+        }
+        else {
+          resetPosition();
+        }
+      }
+      setTimeout(waitForCss, 0, 0);
     }
     dialog.open = true;
     $(window).trigger('dialog:aftercreate', [dialog, $element, settings]);
@@ -92,6 +113,7 @@ Backdrop.dialog = function (element, options) {
    * key or using the close button, which are triggered by jQuery UI directly.
    */
   function beforeClose (event, ui) {
+    $('html').removeClass('dialog-open dialog-auto-resize');
     Backdrop.optimizedResize.remove('dialogResize.' + dialogId);
   }
 
