@@ -904,7 +904,7 @@ function menu_form_node_type_form_alter(&$form, $form_state) {
       $menu_options = $form_state['values']['menu_options'];
     }
     elseif (isset($node_type->is_new) && $node_type->is_new) {
-      $menu_options = array_keys($menus);
+      $menu_options = array();
     }
     else {
       $menu_options = $node_type->settings['menu_options'];
