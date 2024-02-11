@@ -342,7 +342,8 @@ function menu_delete($menu) {
  * menu item.
  *
  * @param array $menus
- *   An array of menu names and titles, such as from menu_get_menus().
+ *   An array of menu names and titles, such as from menu_get_menus(). Returned
+ *   menu items will be limited to menus in this list.
  * @param array $item
  *   The menu item or the node type for which to generate a list of parents. If
  *   $item['mlid'] == 0 then the complete tree is returned.
@@ -366,10 +367,13 @@ function menu_parent_options($menus, $item, $type = '') {
     $available_menus = $menus;
   }
   else {
-    // If a node type is set, use all available menus for this type.
+    // If a node type is set, use all available menus for this type if they're
+    // in $menus.
     $node_type = node_type_load($type);
     foreach ($node_type->settings['menu_options'] as $menu) {
-      $available_menus[$menu] = $menu;
+      if (isset($menus[$menu])) {
+        $available_menus[$menu] = $menu;
+      }
     }
   }
 
@@ -413,7 +417,7 @@ function _menu_get_options($menus, $available_menus, $item) {
   foreach ($menus as $menu_name => $title) {
     if (isset($available_menus[$menu_name])) {
       $tree = menu_tree_all_data($menu_name, NULL, NULL, $langcode);
-      $options[$menu_name . ':0'] = $title . ' ' . t('(top level)');
+      $options[$menu_name . ':0'] = $title . ' (' . t('top level') . ')';
       _menu_parents_recurse($tree, $menu_name, '· ', $options, $item['mlid'], $limit);
     }
   }
