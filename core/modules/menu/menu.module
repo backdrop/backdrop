@@ -815,7 +815,7 @@ function menu_form_node_form_alter(&$form, $form_state) {
     '#ajax' => array('callback' => 'menu_form_node_form_callback'),
   );
 
-  $menu_parent_options = menu_parent_options(array($parent_menu => $menus[$parent_menu]), array('mlid' => 0));
+  $menu_parent_options = menu_parent_options(array($parent_menu => $menus[$parent_menu]), $link, $type);
 
   // If $menu_parent is an item of $menu_parent_options, then it's the default
   // value for the selector; otherwise use the first item in the list of
@@ -904,10 +904,7 @@ function menu_form_node_type_form_alter(&$form, $form_state) {
       $menu_options = $form_state['values']['menu_options'];
     }
     elseif (isset($node_type->is_new) && $node_type->is_new) {
-      $menu_options = array();
-      foreach (array_keys($menus) as $menu_name) {
-        $menu_options[$menu_name] = $menu_name;
-      }
+      $menu_options = array_keys($menus);
     }
     else {
       $menu_options = $node_type->settings['menu_options'];
@@ -921,7 +918,7 @@ function menu_form_node_type_form_alter(&$form, $form_state) {
       '#wrapper_attributes' => array('id' => 'menu-menu-options-wrapper'),
     );
 
-    $parent_menu_options = array_intersect_key($menus, array_filter($menu_options));
+    $parent_menu_options = array_intersect_key($menus, array_flip($menu_options));
     if (!empty($parent_menu_options)) {
 
       // Get the current parent item and the menu it belongs to.
