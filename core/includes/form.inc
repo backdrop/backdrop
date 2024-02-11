@@ -709,14 +709,14 @@ function form_load_include(&$form_state, $type, $module, $name = NULL) {
  *   build info array so that the reference can be preserved. For example, a
  *   form builder function with the following signature:
  *   @code
- *   function mymodule_form($form, &$form_state, &$object) {
+ *   function my_module_form($form, &$form_state, &$object) {
  *   }
  *   @endcode
  *   would be called via backdrop_form_submit() as follows:
  *   @code
  *   $form_state['values'] = $my_form_values;
  *   $form_state['build_info']['args'] = array(&$object);
- *   backdrop_form_submit('mymodule_form', $form_state);
+ *   backdrop_form_submit('my_module_form', $form_state);
  *   @endcode
  * For example:
  * @code
