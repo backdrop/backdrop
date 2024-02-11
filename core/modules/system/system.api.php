@@ -1509,7 +1509,7 @@ function hook_module_implements_alter(&$implementations, $hook) {
 /**
  * Return additional themes provided by modules.
  *
- * Only use this hook for testing purposes. Use a hidden MYMODULE_test.module
+ * Only use this hook for testing purposes. Use a hidden MY_MODULE_test.module
  * to implement this hook. Testing themes should be hidden, too.
  *
  * This hook is invoked from _system_rebuild_theme_data() and allows modules to
