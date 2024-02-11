@@ -4526,8 +4526,9 @@ function system_file_download($uri) {
  * );
  * @endcode
  *
- * The top-level '#config' is "my_module.settings". The values of 'first_setting'
- * and 'second_setting' will both be saved to "my_module.settings".
+ * The top-level '#config' is "my_module.settings". The values of
+ * 'first_setting' and 'second_setting' will both be saved to
+ * "my_module.settings".
  *
  * The 'bonus_fieldset' has its own '#config' setting, "my_module.second", which
  * overrides the top-level '#config' setting, so 'bonus_one' and 'bonus_two'

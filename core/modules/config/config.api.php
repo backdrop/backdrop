@@ -147,7 +147,11 @@ function hook_config_delete_validate(Config $active_config, $all_changes) {
       $my_config = config('my_module.settings');
       $image_style_name = $active_config->get('name');
       if ($my_config->get('image_style') === $image_style_name) {
-        throw new ConfigValidateException(t('The configuration "@file" cannot be deleted because the image style "@style" is in use by "@my_module".', array('@file' => $active_config->getName(), '@style' => $image_style_name, '@my_module' => $my_config->getName())));
+        throw new ConfigValidateException(t('The configuration "@file" cannot be deleted because the image style "@style" is in use by "@my_module".', array(
+          '@file' => $active_config->getName(),
+          '@style' => $image_style_name,
+          '@my_module' => $my_config->getName(),
+        )));
       }
     }
   }
@@ -172,9 +176,9 @@ function hook_config_create(Config $staging_config) {
  * Respond to configuration updates.
  *
  * @param Config $staging_config
- *   The configuration object for the settings about to be saved. This object
- *   is always passed by reference and may be modified to adjust the settings
- *   that are saved.
+ *   The configuration object for the settings about to be saved. This object is
+ *   always passed by reference and may be modified to adjust the settings that
+ *   are saved.
  * @param Config $active_config
  *   The configuration object for the settings being replaced.
  */

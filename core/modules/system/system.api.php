@@ -563,12 +563,12 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  * @subsection sub_autoload_wildcards Auto-Loader Wildcards
  * Registered paths may also contain special "auto-loader" wildcard components
  * in the form of '%my_module_abc', where the '%' part means that this path
- * component is a wildcard, and the 'my_module_abc' part defines the prefix for a
- * load function, which here would be named my_module_abc_load(). When a matching
- * path is requested, your load function will receive as its first argument the
- * path component in the position of the wildcard; load functions may also be
- * passed additional arguments (see "load arguments" in the return value
- * section below). For example, your module could register path
+ * component is a wildcard, and the 'my_module_abc' part defines the prefix for
+ * a load function, which here would be named my_module_abc_load(). When a
+ * matching path is requested, your load function will receive as its first
+ * argument the path component in the position of the wildcard; load functions
+ * may also be passed additional arguments (see "load arguments" in the return
+ * value section below). For example, your module could register path
  * 'my-module/%my_module_abc/edit':
  * @code
  *   $items['my-module/%my_module_abc/edit'] = array(
@@ -2817,8 +2817,9 @@ function hook_install() {
  * @link http://drupal.org/node/150215 Schema API. @endlink
  *
  * Implementations of this hook should be placed in a my_module.install file in
- * the same directory as my_module.module. Backdrop core's updates are implemented
- * using the system module as a name and stored in database/updates.inc.
+ * the same directory as my_module.module. Backdrop core's updates are
+ * implemented using the system module as a name and stored in
+ * database/updates.inc.
  *
  * Implementations of hook_update_N() are named (module name)_update_(number).
  * The numbers are composed of three parts:
@@ -2842,12 +2843,13 @@ function hook_install() {
  * Examples:
  * - my_module_update_1000(): This is the required update for my_module to run
  *   with Backdrop core API 1.x when upgrading from Drupal core API 7.x.
- * - my_module_update_1100(): This is the first update to get the database/config
- *   ready to run my_module 1.x-1.*.
- * - my_module_update_1200(): This is the first update to get the database/config
- *   ready to run my_module 1.x-2.*. Users can directly update from Drupal 7.x to
- *   Backdrop 1.x-2.*, and they get all the 10xx and 12xx updates, but not the
- *   11xx updates, because those reside in the 1.x-1.x branch only.
+ * - my_module_update_1100(): This is the first update to get the
+ *   database/config ready to run my_module 1.x-1.*.
+ * - my_module_update_1200(): This is the first update to get the
+ *   database/config ready to run my_module 1.x-2.*. Users can directly update
+ *   from Drupal 7.x to Backdrop 1.x-2.*, and they get all the 10xx and 12xx
+ *   updates, but not the 11xx updates, because those reside in the 1.x-1.x
+ *   branch only.
  *
  * A good rule of thumb is to remove updates older than two major releases of
  * Backdrop. See hook_update_last_removed() to notify Backdrop about the
@@ -2905,10 +2907,11 @@ function hook_install() {
  * @see update_get_update_list()
  */
 function hook_update_N(&$sandbox) {
-  // For non-multipass updates the signature can be `function hook_update_N() {`
+  // For non-multipass updates the signature can be:
+  // `function hook_update_N() {`.
 
   // Convert Drupal 7 variables to Backdrop config. Make sure these new config
-  // settings and their default values exist in `config/my_module.settings.json`.
+  // settings and their default values exist in config/my_module.settings.json.
   $config = config('my_module.settings');
   $config->set('one', update_variable_get('my_module_one', '1.11'));
   $config->set('two', update_variable_get('my_module_two', '2.22'));
