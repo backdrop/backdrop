@@ -736,7 +736,7 @@ function menu_form_node_form_alter(&$form, $form_state) {
 
   // Function menu_node_prepare() makes sure, that $node->menu always exists.
   $menu_options = $node_type->settings['menu_options'];
-  $parent_menu_options = array_intersect_key($menus, array_filter($menu_options));
+  $parent_menu_options = array_intersect_key($menus, array_flip($menu_options));
   // If no possible parent menu items were found, there is nothing to display.
   if (empty($parent_menu_options)) {
     return;
