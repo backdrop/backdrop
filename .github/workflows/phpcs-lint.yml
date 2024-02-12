@@ -54,8 +54,19 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
-      name: Checkout code
-    - name: Install modules
-      run: yarn
-    - name: Run ESLint
-      run: eslint . --ext .js,.jsx,.ts,.tsx
+    - uses: actions/setup-node@v4
+      with:
+        node-version: current
+    # - name: install Yarn
+    #   run: yarn install
+    - name: Install dependencies
+      run: npm ci
+    - name: Install ESLint
+      run: npm install eslint
+    - name: Run code linting
+      run: npm run lint
+
+    # - name: ESLint
+    #   run: yarn run fix .
+    # - name: Run ESLint
+    #   run: eslint . --ext .js,.jsx,.ts,.tsx
