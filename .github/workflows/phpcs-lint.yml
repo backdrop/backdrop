@@ -64,7 +64,7 @@ jobs:
     - name: Install ESLint
       run: npm install eslint
     - name: Run code linting
-      working-directory: ./github/workflows
+      working-directory: .github/workflows
       run: npm run lint
 
     # - name: ESLint
