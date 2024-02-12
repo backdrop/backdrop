@@ -57,18 +57,16 @@ jobs:
     - uses: actions/setup-node@v4
       with:
         node-version: current
-    # - name: install Yarn
-    #   run: yarn install
-    # - name: Install dependencies
-    #   run: npm ci
-    - name: Install ESLint
-      run: npm install eslint
-      working-directory: .github/workflows
-    - name: Run code linting
-      run: npm run lint
-      working-directory: .github/workflows
-
-    # - name: ESLint
-    #   run: yarn run fix .
-    # - name: Run ESLint
-    #   run: eslint . --ext .js,.jsx,.ts,.tsx
+    - name: Run eslint on changed files
+      uses: tj-actions/eslint-changed-files@v23
+      with:
+        config_path: ".github/workflows/.eslintrc.json"
+        # ignore_path: ".github/workflows/.eslintignore"
+        # extra_args: "--max-warnings=0"
+        extra_args: "--ext .js,.jsx,.ts,.tsx"
+    # - name: Install ESLint
+    #   run: npm install eslint
+    #   working-directory: .github/workflows
+    # - name: Run code linting
+    #   run: npm run lint
+    #   working-directory: .github/workflows
