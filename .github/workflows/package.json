@@ -1,6 +1,6 @@
 {
   "scripts": {
-    "lint:js": "eslint . --ext .js,.jsx,.ts,.tsx --config .github/workflows/.eslintrc.json",
+    "lint:js": "eslint . --ext .js,.jsx,.ts,.tsx",
     "lint": "npm run lint:js"
   },
   "devDependencies": {
