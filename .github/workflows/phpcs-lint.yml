@@ -59,8 +59,8 @@ jobs:
         node-version: current
     # - name: install Yarn
     #   run: yarn install
-    - name: Install dependencies
-      run: npm ci
+    # - name: Install dependencies
+    #   run: npm ci
     - name: Install ESLint
       run: npm install eslint
     - name: Run code linting
