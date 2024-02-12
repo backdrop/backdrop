@@ -57,7 +57,6 @@ jobs:
     - uses: actions/setup-node@v4
       with:
         node-version: current
-        node-version-file: '.github/workflows/package.json'
     # - name: install Yarn
     #   run: yarn install
     # - name: Install dependencies
@@ -65,6 +64,7 @@ jobs:
     - name: Install ESLint
       run: npm install eslint
     - name: Run code linting
+      working-directory: ./github/workflows
       run: npm run lint
 
     # - name: ESLint
