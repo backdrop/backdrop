@@ -48,3 +48,14 @@ jobs:
       with:
         incremental_files_only: true
         config: '.cspell/cspell.json'
+
+  eslint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      name: Checkout code
+    - name: Install modules
+      run: yarn
+    - name: Run ESLint
+      run: eslint . --ext .js,.jsx,.ts,.tsx
