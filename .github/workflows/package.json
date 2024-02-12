@@ -1,0 +1,6 @@
+{
+  "scripts": {
+    "lint:js": "eslint . --ext .js,.jsx,.ts,.tsx",
+    "lint": "npm run lint:js"
+  }
+}
