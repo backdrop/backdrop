@@ -4547,8 +4547,7 @@ function backdrop_region_class($region) {
  *   the $data parameter ('file'/'setting'/'inline'/'external'), or an
  *   associative array.
  *   - type: The type of JavaScript that is to be added to the page. Allowed
- *     values are 'file', 'inline', 'external' or 'setting'. Defaults
- *     to 'file'.
+ *     values are 'file', 'inline', 'external' or 'setting'. Defaults to 'file'.
  *   - key: Applies to the 'setting' and 'inline' types only. A string that
  *     identifies data that should only be added once per page. If omitted,
  *     multiple settings within the same namespace will be merged together
@@ -4590,12 +4589,12 @@ function backdrop_region_class($region) {
  *     and 'every_page' value. In some cases, the order in which the JavaScript
  *     is presented on the page is very important. jQuery, for example, must be
  *     added to the page before any jQuery code is run, so jquery.js uses the
- *     JS_LIBRARY group and a weight of -20, jquery.once.js (a library backdrop.js
- *     depends on) uses the JS_LIBRARY group and a weight of -19, backdrop.js uses
- *     the JS_LIBRARY group and a weight of -1, other libraries use the
- *     JS_LIBRARY group and a weight of 0 or higher, and all other scripts use
- *     one of the other group constants. The exact ordering of JavaScript is as
- *     follows:
+ *     JS_LIBRARY group and a weight of -20, jquery.once.js (a library
+ *     backdrop.js depends on) uses the JS_LIBRARY group and a weight of -19,
+ *     backdrop.js uses the JS_LIBRARY group and a weight of -1, other libraries
+ *     use the JS_LIBRARY group and a weight of 0 or higher, and all other
+ *     scripts use one of the other group constants. The exact ordering of
+ *     JavaScript is as follows:
  *     - First by scope, with 'header' first, 'footer' last, and any other
  *       scopes provided by a custom theme coming in between, as determined by
  *       the theme.
@@ -4603,16 +4602,23 @@ function backdrop_region_class($region) {
  *     - Then by the 'every_page' flag, with TRUE coming before FALSE.
  *     - Then by weight.
  *     - Then by the order in which the JavaScript was added. For example, all
- *       else being the same, JavaScript added by a call to backdrop_add_js() that
- *       happened later in the page request gets added to the page after one for
- *       which backdrop_add_js() happened earlier in the page request.
- *   - defer: If set to TRUE, the defer attribute is set on the <script>
- *     tag. Defaults to FALSE. Note that setting this to TRUE will disable
+ *       else being the same, JavaScript added by a call to backdrop_add_js()
+ *       that happened later in the page request, gets added to the page after
+ *       one for which backdrop_add_js() happened earlier in the page request.
+ *   - requires_jquery: Set this to FALSE if the JavaScript you are adding does
+ *     not have a dependency on jQuery. Defaults to TRUE, except for JavaScript
+ *     settings where it defaults to FALSE. This is used on sites that have the
+ *     'javascript_always_use_jquery' setting set to FALSE; on those sites, if
+ *     all the JavaScript added to the page by backdrop_add_js() does not have a
+ *     dependency on jQuery, then for improved front-end performance Backdrop
+ *     will not add jQuery and related libraries and settings to the page.
+ *   - defer: If set to TRUE, the defer attribute is set on the <script> tag.
+ *     Defaults to FALSE. Note that setting this to TRUE will disable
  *     preprocessing as though the 'preprocess' option was set to FALSE.
  *   - attributes: An associative array of attributes for the <script> tag.
- *     This may be used to add 'async' or custom attributes. Note that
- *     setting any attributes will disable preprocessing as though the
- *     'preprocess' option was set to FALSE.
+ *     This may be used to add 'async' or custom attributes. Note that setting
+ *     any attributes will disable preprocessing as though the 'preprocess'
+ *     option was set to FALSE.
  *   - cache: If set to FALSE, the JavaScript file is loaded anew on every page
  *     call; in other words, it is not cached. Used only when 'type' references
  *     a JavaScript file. Defaults to TRUE.
@@ -4634,6 +4640,14 @@ function backdrop_region_class($region) {
  */
 function backdrop_add_js($data = NULL, $options = NULL) {
   $javascript = &backdrop_static(__FUNCTION__, array());
+  $jquery_added = &backdrop_static(__FUNCTION__ . ':jquery_added', FALSE);
+
+  // If the $javascript variable has been reset with backdrop_static_reset(),
+  // jQuery and related files will have been removed from the list. So set the
+  // variable back to FALSE, to indicate they have not yet been added.
+  if (empty($javascript)) {
+    $jquery_added = FALSE;
+  }
 
   // Construct the options, taking the defaults into consideration.
   if (isset($options)) {
@@ -4643,6 +4657,9 @@ function backdrop_add_js($data = NULL, $options = NULL) {
   }
   else {
     $options = array();
+  }
+  if (isset($options['type']) && $options['type'] == 'setting') {
+    $options += array('requires_jquery' => FALSE);
   }
   $options += backdrop_js_defaults($data);
 
@@ -4658,15 +4675,19 @@ function backdrop_add_js($data = NULL, $options = NULL) {
   $options['every_page_weight'] = $options['every_page'] ? -1 : 1;
 
   if (isset($data)) {
-    // Add jquery.js and backdrop.js, as well as the basePath setting, the
-    // first time a JavaScript file is added.
-    if (empty($javascript)) {
+    // Add jquery.js, backdrop.js, and related files and settings if they have
+    // not been added yet. However, if the 'javascript_always_use_jquery'
+    // setting is set to FALSE (indicating that the site does not want jQuery
+    // automatically added on all pages) then only add it if a file or setting
+    // that requires jQuery is being added also.
+    if (!$jquery_added && (settings_get('javascript_always_use_jquery', TRUE) || $options['requires_jquery'])) {
+      $jquery_added = TRUE;
       // url() generates the prefix using hook_url_outbound_alter(). Instead of
       // running the hook_url_outbound_alter() again here, extract the prefix
       // from url().
       $prefix = '';
       url('', array('prefix' => &$prefix));
-      $javascript = array(
+      $default_javascript = array(
         'settings' => array(
           'data' => array(
             array('basePath' => base_path()),
@@ -4686,6 +4707,7 @@ function backdrop_add_js($data = NULL, $options = NULL) {
           'group' => JS_LIBRARY,
           'every_page' => TRUE,
           'weight' => -1,
+          'requires_jquery' => TRUE,
           'preprocess' => TRUE,
           'cache' => TRUE,
           'defer' => FALSE,
@@ -4694,6 +4716,7 @@ function backdrop_add_js($data = NULL, $options = NULL) {
           'version' => BACKDROP_VERSION,
         ),
       );
+      $javascript = backdrop_array_merge_deep($javascript, $default_javascript);
       // Backwards-compatibility for JavaScript.
       if (!empty($GLOBALS['settings']['backdrop_drupal_compatibility'])) {
         $javascript['settings']['data'][] = array('drupalCompatibility' => TRUE);
@@ -4753,6 +4776,7 @@ function backdrop_js_defaults($data = NULL) {
     'group' => JS_DEFAULT,
     'every_page' => FALSE,
     'weight' => 0,
+    'requires_jquery' => TRUE,
     'scope' => 'header',
     'cache' => TRUE,
     'defer' => FALSE,
@@ -4801,7 +4825,12 @@ function backdrop_get_js($scope = 'header', $javascript = NULL, $skip_alter = FA
   if (!isset($javascript)) {
     $javascript = backdrop_add_js();
   }
-  if (empty($javascript)) {
+
+  // If no JavaScript items have been added, or if the only JavaScript items
+  // that have been added are JavaScript settings (which don't do anything
+  // without any JavaScript code to use them), then no JavaScript code should
+  // be added to the page.
+  if (empty($javascript) || (isset($javascript['settings']) && count($javascript) == 1)) {
     return '';
   }
 

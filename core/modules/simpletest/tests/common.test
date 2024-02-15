@@ -1448,7 +1448,130 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Test backdrop_add_js() sets preprocess to false when cache is set to false.
+   * Test the 'javascript_always_use_jquery' setting.
+   */
+  function testJavaScriptAlwaysUseJQuery() {
+    // The default front page of the site should use jQuery and other standard
+    // scripts and settings.
+    $this->backdropGet('');
+    $this->assertRaw('core/misc/jquery.js', 'Default behavior: The front page of the site includes jquery.js.');
+    $this->assertRaw('core/misc/backdrop.js', 'Default behavior: The front page of the site includes backdrop.js.');
+    $this->assertRaw('window.Backdrop', 'Default behavior: The front page of the site includes Backdrop settings.');
+    $this->assertRaw('basePath', 'Default behavior: The front page of the site includes the basePath Backdrop setting.');
+
+    // The default front page should not use jQuery and other standard scripts
+    // and settings when the 'javascript_always_use_jquery' setting is set to
+    // FALSE.
+    state_set('javascript_always_use_jquery', FALSE);
+    $this->backdropGet('');
+    $this->assertNoRaw('core/misc/jquery.js', 'When "javascript_always_use_jquery" is FALSE: The front page of the site does not include jquery.js.');
+    $this->assertNoRaw('core/misc/backdrop.js', 'When "javascript_always_use_jquery" is FALSE: The front page of the site does not include backdrop.js.');
+    $this->assertNoRaw('window.Backdrop', 'When "javascript_always_use_jquery" is FALSE: The front page of the site does not include Backdrop settings.');
+    $this->assertNoRaw('basePath', 'When "javascript_always_use_jquery" is FALSE: The front page of the site does not include the basePath Backdrop setting.');
+    state_del('javascript_always_use_jquery');
+
+    // When only settings have been added via backdrop_add_js(),
+    // backdrop_get_js() should still return jQuery and other standard scripts
+    // and settings.
+    $this->resetStaticVariables();
+    backdrop_add_js(array('testJavaScriptSetting' => 'test'), 'setting');
+    $javascript = backdrop_get_js();
+    $this->assertTrue(strpos($javascript, 'core/misc/jquery.js') !== FALSE, 'Default behavior: The JavaScript returned by backdrop_get_js() when only settings have been added includes jquery.js.');
+    $this->assertTrue(strpos($javascript, 'core/misc/backdrop.js') !== FALSE, 'Default behavior: The JavaScript returned by backdrop_get_js() when only settings have been added includes backdrop.js.');
+    $this->assertTrue(strpos($javascript, 'Backdrop.settings') !== FALSE, 'Default behavior: The JavaScript returned by backdrop_get_js() when only settings have been added includes Backdrop.settings.');
+    $this->assertTrue(strpos($javascript, 'basePath') !== FALSE, 'Default behavior: The JavaScript returned by backdrop_get_js() when only settings have been added includes the basePath Backdrop setting.');
+    $this->assertTrue(strpos($javascript, 'testJavaScriptSetting') !== FALSE, 'Default behavior: The JavaScript returned by backdrop_get_js() when only settings have been added includes the added Backdrop settings.');
+
+    // When only settings have been added via backdrop_add_js() and the
+    // 'javascript_always_use_jquery' setting is set to FALSE,
+    // backdrop_get_js() should not return jQuery and other standard scripts and
+    // settings, nor should it return the requested settings (since they cannot
+    // actually be addded to the page without jQuery).
+    $this->resetStaticVariables();
+    state_set('javascript_always_use_jquery', FALSE);
+    backdrop_add_js(array('testJavaScriptSetting' => 'test'), 'setting');
+    $javascript = backdrop_get_js();
+    $this->assertTrue(strpos($javascript, 'core/misc/jquery.js') === FALSE, 'When "javascript_always_use_jquery" is FALSE: The JavaScript returned by backdrop_get_js() when only settings have been added does not include jquery.js.');
+    $this->assertTrue(strpos($javascript, 'core/misc/backdrop.js') === FALSE, 'When "javascript_always_use_jquery" is FALSE: The JavaScript returned by backdrop_get_js() when only settings have been added does not include backdrop.js.');
+    $this->assertTrue(strpos($javascript, 'Backdrop.settings') === FALSE, 'When "javascript_always_use_jquery" is FALSE: The JavaScript returned by backdrop_get_js() when only settings have been added does not include Backdrop.settings.');
+    $this->assertTrue(strpos($javascript, 'basePath') === FALSE, 'When "javascript_always_use_jquery" is FALSE: The JavaScript returned by backdrop_get_js() when only settings have been added does not include the basePath Backdrop setting.');
+    $this->assertTrue(strpos($javascript, 'testJavaScriptSetting') === FALSE, 'When "javascript_always_use_jquery" is FALSE: The JavaScript returned by backdrop_get_js() when only settings have been added does not include the added Backdrop settings.');
+    state_del('javascript_always_use_jquery');
+
+    // When a regular file has been added via backdrop_add_js(),
+    // backdrop_get_js() should return jQuery and other standard scripts and
+    // settings.
+    $this->resetStaticVariables();
+    backdrop_add_js('core/misc/collapse.js');
+    $javascript = backdrop_get_js();
+    $this->assertTrue(strpos($javascript, 'core/misc/jquery.js') !== FALSE, 'Default behavior: The JavaScript returned by backdrop_get_js() when a custom JavaScript file has been added includes jquery.js.');
+    $this->assertTrue(strpos($javascript, 'core/misc/backdrop.js') !== FALSE, 'Default behavior: The JavaScript returned by backdrop_get_js() when a custom JavaScript file has been added includes backdrop.js.');
+    $this->assertTrue(strpos($javascript, 'Backdrop.settings') !== FALSE, 'Default behavior: The JavaScript returned by backdrop_get_js() when a custom JavaScript file has been added includes Backdrop.settings.');
+    $this->assertTrue(strpos($javascript, 'basePath') !== FALSE, 'Default behavior: The JavaScript returned by backdrop_get_js() when a custom JavaScript file has been added includes the basePath Backdrop setting.');
+    $this->assertTrue(strpos($javascript, 'core/misc/collapse.js') !== FALSE, 'Default behavior: The JavaScript returned by backdrop_get_js() when a custom JavaScript file has been added includes the custom file.');
+
+    // When a regular file has been added via backdrop_add_js() and the
+    // 'javascript_always_use_jquery' setting is set to FALSE,
+    // backdrop_get_js() should still return jQuery and other standard scripts
+    // and settings (since the file is assumed to require jQuery by default).
+    $this->resetStaticVariables();
+    state_set('javascript_always_use_jquery', FALSE);
+    backdrop_add_js('core/misc/collapse.js');
+    $javascript = backdrop_get_js();
+    $this->assertTrue(strpos($javascript, 'core/misc/jquery.js') !== FALSE, 'When "javascript_always_use_jquery" is FALSE: The JavaScript returned by backdrop_get_js() when a custom JavaScript file has been added includes jquery.js.');
+    $this->assertTrue(strpos($javascript, 'core/misc/backdrop.js') !== FALSE, 'When "javascript_always_use_jquery" is FALSE: The JavaScript returned by backdrop_get_js() when a custom JavaScript file has been added includes backdrop.js.');
+    $this->assertTrue(strpos($javascript, 'Backdrop.settings') !== FALSE, 'When "javascript_always_use_jquery" is FALSE: The JavaScript returned by backdrop_get_js() when a custom JavaScript file has been added includes Backdrop.settings.');
+    $this->assertTrue(strpos($javascript, 'basePath') !== FALSE, 'When "javascript_always_use_jquery" is FALSE: The JavaScript returned by backdrop_get_js() when a custom JavaScript file has been added includes the basePath Backdrop setting.');
+    $this->assertTrue(strpos($javascript, 'core/misc/collapse.js') !== FALSE, 'When "javascript_always_use_jquery" is FALSE: The JavaScript returned by backdrop_get_js() when a custom JavaScript file has been added includes the custom file.');
+    state_del('javascript_always_use_jquery');
+
+    // When a file that does not require jQuery has been added via
+    // backdrop_add_js(), backdrop_get_js() should still return jQuery and other
+    // standard scripts and settings by default.
+    $this->resetStaticVariables();
+    backdrop_add_js('core/misc/collapse.js', array('requires_jquery' => FALSE));
+    $javascript = backdrop_get_js();
+    $this->assertTrue(strpos($javascript, 'core/misc/jquery.js') !== FALSE, 'Default behavior: The JavaScript returned by backdrop_get_js() when a custom JavaScript file that does not require jQuery has been added includes jquery.js.');
+    $this->assertTrue(strpos($javascript, 'core/misc/backdrop.js') !== FALSE, 'Default behavior: The JavaScript returned by backdrop_get_js() when a custom JavaScript file that does not require jQuery has been added includes backdrop.js.');
+    $this->assertTrue(strpos($javascript, 'Backdrop.settings') !== FALSE, 'Default behavior: The JavaScript returned by backdrop_get_js() when a custom JavaScript file that does not require jQuery has been added includes Backdrop.settings.');
+    $this->assertTrue(strpos($javascript, 'basePath') !== FALSE, 'Default behavior: The JavaScript returned by backdrop_get_js() when a custom JavaScript file that does not require jQuery has been added includes the basePath Backdrop setting.');
+    $this->assertTrue(strpos($javascript, 'core/misc/collapse.js') !== FALSE, 'Default behavior: The JavaScript returned by backdrop_get_js() when a custom JavaScript file that does not require jQuery has been added includes the custom file.');
+
+    // When a file that does not require jQuery has been added via
+    // backdrop_add_js() and the 'javascript_always_use_jquery' setting is set
+    // to FALSE, backdrop_get_js() should not return jQuery and other standard
+    // scripts and setting, but it should still return the requested file.
+    $this->resetStaticVariables();
+    state_set('javascript_always_use_jquery', FALSE);
+    backdrop_add_js('core/misc/collapse.js', array('requires_jquery' => FALSE));
+    $javascript = backdrop_get_js();
+    $this->assertTrue(strpos($javascript, 'core/misc/jquery.js') === FALSE, 'When "javascript_always_use_jquery" is FALSE: The JavaScript returned by backdrop_get_js() when a custom JavaScript file that does not require jQuery has been added does not include jquery.js.');
+    $this->assertTrue(strpos($javascript, 'core/misc/backdrop.js') === FALSE, 'When "javascript_always_use_jquery" is FALSE: The JavaScript returned by backdrop_get_js() when a custom JavaScript file that does not require jQuery has been added does not include backdrop.js.');
+    $this->assertTrue(strpos($javascript, 'Backdrop.settings') === FALSE, 'When "javascript_always_use_jquery" is FALSE: The JavaScript returned by backdrop_get_js() when a custom JavaScript file that does not require jQuery has been added does not include Backdrop.settings.');
+    $this->assertTrue(strpos($javascript, 'basePath') === FALSE, 'When "javascript_always_use_jquery" is FALSE: The JavaScript returned by backdrop_get_js() when a custom JavaScript file that does not require jQuery has been added does not include the basePath Backdrop setting.');
+    $this->assertTrue(strpos($javascript, 'core/misc/collapse.js') !== FALSE, 'When "javascript_always_use_jquery" is FALSE: The JavaScript returned by backdrop_get_js() when a custom JavaScript file that does not require jQuery has been added includes the custom file.');
+    state_del('javascript_always_use_jquery');
+
+    // When 'javascript_always_use_jquery' is set to FALSE and a file that does
+    // not require jQuery is added, followed by one that does, backdrop_get_js()
+    // should return jQuery and other standard scripts and settings, in
+    // addition to both of the requested files.
+    $this->resetStaticVariables();
+    state_set('javascript_always_use_jquery', FALSE);
+    backdrop_add_js('core/misc/collapse.js', array('requires_jquery' => FALSE));
+    backdrop_add_js('core/misc/ajax.js');
+    $javascript = backdrop_get_js();
+    $this->assertTrue(strpos($javascript, 'core/misc/jquery.js') !== FALSE, 'When "javascript_always_use_jquery" is FALSE: The JavaScript returned by backdrop_get_js() when at least one custom JavaScript file that requires jQuery has been added includes jquery.js.');
+    $this->assertTrue(strpos($javascript, 'core/misc/backdrop.js') !== FALSE, 'When "javascript_always_use_jquery" is FALSE: The JavaScript returned by backdrop_get_js() when at least one custom JavaScript file that requires jQuery has been added includes backdrop.js.');
+    $this->assertTrue(strpos($javascript, 'Backdrop.settings') !== FALSE, 'When "javascript_always_use_jquery" is FALSE: The JavaScript returned by backdrop_get_js() when at least one custom JavaScript file that requires jQuery has been added includes Backdrop.settings.');
+    $this->assertTrue(strpos($javascript, 'basePath') !== FALSE, 'When "javascript_always_use_jquery" is FALSE: The JavaScript returned by backdrop_get_js() when at least one custom JavaScript file that requires jQuery has been added includes the basePath Backdrop setting.');
+    $this->assertTrue(strpos($javascript, 'core/misc/collapse.js') !== FALSE, 'When "javascript_always_use_jquery" is FALSE: The JavaScript returned by backdrop_get_js() when at least one custom JavaScript file that requires jQuery has been added includes the first custom file.');
+    $this->assertTrue(strpos($javascript, 'core/misc/ajax.js') !== FALSE, 'When "javascript_always_use_jquery" is FALSE: The JavaScript returned by backdrop_get_js() when at least one custom JavaScript file that requires jQuery has been added includes the second custom file.');
+    state_del('javascript_always_use_jquery');
+  }
+
+  /**
+   * Test backdrop_add_js() sets preproccess to false when cache is set to false.
    */
   function testNoCache() {
     $javascript = backdrop_add_js('core/misc/collapse.js', array('cache' => FALSE));
@@ -1893,12 +2016,21 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
 
   /**
    * Tests that the query string remains intact when adding JavaScript files
-   *  that have query string parameters.
+   * that have query string parameters.
    */
   function testAddJsFileWithQueryString() {
     $this->backdropGet('common-test/query-string');
     $query_string = state_get('css_js_query_string', '0');
     $this->assertRaw(backdrop_get_path('module', 'node') . '/js/node.js?' . $query_string, 'Query string was appended correctly to js.');
+  }
+
+  /**
+   * Resets static variables related to adding JavaScript to a page.
+   */
+  function resetStaticVariables() {
+    backdrop_static_reset('backdrop_add_js');
+    backdrop_static_reset('backdrop_add_library');
+    backdrop_static_reset('backdrop_get_library');
   }
 }
 
