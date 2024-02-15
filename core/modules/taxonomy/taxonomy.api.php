@@ -239,7 +239,7 @@ function hook_taxonomy_term_view($term, $view_mode, $langcode) {
   $term->content['my_additional_field'] = array(
     '#markup' => $additional_field,
     '#weight' => 10,
-    '#theme' => 'mymodule_my_additional_field',
+    '#theme' => 'my_module_my_additional_field',
   );
 }
 

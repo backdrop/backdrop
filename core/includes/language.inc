@@ -44,7 +44,7 @@ define('LANGUAGE_NEGOTIATION_DEFAULT', 'language-default');
  * language (which by default inherits the interface language's values)
  * configurable:
  * @code
- * function mymodule_language_types_info_alter(&$language_types) {
+ * function my_module_language_types_info_alter(&$language_types) {
  *   unset($language_types[LANGUAGE_TYPE_CONTENT]['fixed']);
  * }
  * @endcode
@@ -74,13 +74,13 @@ define('LANGUAGE_NEGOTIATION_DEFAULT', 'language-default');
  * hook_language_negotiation_info_alter(). Here is an example snippet that lets
  * path prefixes be ignored for administrative paths:
  * @code
- * function mymodule_language_negotiation_info_alter(&$negotiation_info) {
+ * function my_module_language_negotiation_info_alter(&$negotiation_info) {
  *   // Replace the core function with our own function.
- *   $negotiation_info[LANGUAGE_NEGOTIATION_URL]['callbacks']['language'] = 'mymodule_from_url';
- *   $negotiation_info[LANGUAGE_NEGOTIATION_URL]['file'] = backdrop_get_path('module', 'mymodule') . '/mymodule.module';
+ *   $negotiation_info[LANGUAGE_NEGOTIATION_URL]['callbacks']['language'] = 'my_module_from_url';
+ *   $negotiation_info[LANGUAGE_NEGOTIATION_URL]['file'] = backdrop_get_path('module', 'my_module') . '/my_module.module';
  * }
  *
- * function mymodule_from_url($languages) {
+ * function my_module_from_url($languages) {
  *   // Use the core URL language negotiation provider to get a valid language
  *   // code.
  *   $langcode = locale_language_from_url($languages);

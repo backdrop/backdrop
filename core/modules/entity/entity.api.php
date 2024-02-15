@@ -219,7 +219,7 @@ function hook_entity_info_alter(&$entity_info) {
  */
 function hook_entity_load($entities, $type) {
   foreach ($entities as $entity) {
-    $entity->foo = mymodule_add_something($entity, $type);
+    $entity->foo = my_module_add_something($entity, $type);
   }
 }
 
@@ -379,7 +379,7 @@ function hook_entity_view($entity, $type, $view_mode, $langcode) {
   $entity->content['my_additional_field'] = array(
     '#markup' => $additional_field,
     '#weight' => 10,
-    '#theme' => 'mymodule_my_additional_field',
+    '#theme' => 'my_module_my_additional_field',
   );
 }
 
@@ -431,7 +431,7 @@ function hook_entity_view_alter(&$build, $type) {
 function hook_entity_prepare_view($entities, $type) {
   // Load a specific node into the user object to theme later.
   if ($type == 'user') {
-    $nodes = mymodule_get_user_nodes(array_keys($entities));
+    $nodes = my_module_get_user_nodes(array_keys($entities));
     foreach ($entities as $uid => $entity) {
       $entity->user_node = $nodes[$uid];
     }

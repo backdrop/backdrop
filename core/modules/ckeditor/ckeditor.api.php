@@ -80,10 +80,10 @@
  */
 function hook_ckeditor_plugins() {
   $plugins['myplugin'] = array(
-    'path' => backdrop_get_path('module', 'mymodule') . '/js/myplugin',
+    'path' => backdrop_get_path('module', 'my_module') . '/js/myplugin',
     'file' => 'plugin.js',
-    'css' => array(backdrop_get_path('module', 'mymodule') . '/css/myplugin.css'),
-    'enabled callback' => 'mymodule_myplugin_plugin_check',
+    'css' => array(backdrop_get_path('module', 'my_module') . '/css/myplugin.css'),
+    'enabled callback' => 'my_module_myplugin_plugin_check',
     'buttons' => array(
       'MyPlugin' => array(
         'label' => t('My custom button'),
@@ -113,7 +113,7 @@ function hook_ckeditor_plugins() {
  * @see hook_ckeditor_plugins()
  */
 function hook_ckeditor_plugins_alter(array &$plugins) {
-  $plugins['someplugin']['enabled callback'] = 'mymodule_someplugin_enabled_callback';
+  $plugins['someplugin']['enabled callback'] = 'my_module_someplugin_enabled_callback';
 }
 
 /**
@@ -143,7 +143,7 @@ function hook_ckeditor_plugins_alter(array &$plugins) {
  * @see _ckeditor_theme_css()
  */
 function hook_ckeditor_css_alter(array &$css, $format) {
-  $css[] = backdrop_get_path('module', 'mymodule') . '/css/mymodule-ckeditor.css';
+  $css[] = backdrop_get_path('module', 'my_module') . '/css/my_module-ckeditor.css';
 }
 
 /**
