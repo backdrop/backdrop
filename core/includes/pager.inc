@@ -55,14 +55,14 @@ function pager_find_page($element = 0) {
  * @code
  *   // First find the total number of items and initialize the pager.
  *   $where = "status = 1";
- *   $total = mymodule_select("SELECT COUNT(*) FROM data " . $where)->result();
- *   $num_per_page = config_get('mymodule.settings', 'num_per_page');
+ *   $total = my_module_select("SELECT COUNT(*) FROM data " . $where)->result();
+ *   $num_per_page = config_get('my_module.settings', 'num_per_page');
  *   $page = pager_default_initialize($total, $num_per_page);
  *
  *   // Next, retrieve and display the items for the current page.
  *   $offset = $num_per_page * $page;
- *   $result = mymodule_select("SELECT * FROM data " . $where . " LIMIT %d, %d", $offset, $num_per_page)->fetchAll();
- *   $output = theme('mymodule_results', array('result' => $result));
+ *   $result = my_module_select("SELECT * FROM data " . $where . " LIMIT %d, %d", $offset, $num_per_page)->fetchAll();
+ *   $output = theme('my_module_results', array('result' => $result));
  *
  *   // Finally, display the pager controls, and return.
  *   $output .= theme('pager');
@@ -80,9 +80,9 @@ function pager_find_page($element = 0) {
  *   // parameter corresponds to an actual page of results that will exist
  *   // within the set.
  *   $page = pager_find_page();
- *   $num_per_page = config_get('mymodule.settings', 'num_per_page');
+ *   $num_per_page = config_get('my_module.settings', 'num_per_page');
  *   $offset = $num_per_page * $page;
- *   $result = mymodule_remote_search($keywords, $offset, $num_per_page);
+ *   $result = my_module_remote_search($keywords, $offset, $num_per_page);
  *
  *   // Now that we have the total number of results, initialize the pager.
  *   pager_default_initialize($result->total, $num_per_page);
