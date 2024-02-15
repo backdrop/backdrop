@@ -4490,18 +4490,18 @@ function system_file_download($uri) {
  * submit function saves all the data in the form.
  *
  * If $form['#config'] is present in the form, the values will be saved to the
- * named settings file (e.g., mymodule.settings). If sub-elements or groups of
+ * named settings file (e.g., my_module.settings). If sub-elements or groups of
  * sub-elements have their own '#config' keys, then values of those elements and
  * their children will be saved to that settings file.
  *
  * For example, consider the form:
  *
  * @code
- * $primary_config = config('mymodule.settings');
- * $secondary_config = config('mymodule.second');
- * $tertiary_config = config('mymodule.third');
+ * $primary_config = config('my_module.settings');
+ * $secondary_config = config('my_module.second');
+ * $tertiary_config = config('my_module.third');
  * $form = array(
- *   '#config' => 'mymodule.settings',
+ *   '#config' => 'my_module.settings',
  *   'first_setting' => array(
  *     '#type' => 'textfield',
  *     '#title' => t('First Setting'),
@@ -4512,7 +4512,7 @@ function system_file_download($uri) {
  *   'bonus_fieldset' => array(
  *     '#type' => 'fieldset',
  *     '#title' => t('Secondary Settings'),
- *     '#config' => 'mymodule.second',
+ *     '#config' => 'my_module.second',
  *
  *     'bonus_one' => array( ... ),
  *     'bonus_two' => array( ... ),
@@ -4520,22 +4520,23 @@ function system_file_download($uri) {
  *     'bonus_three' => array(
  *       '#type' => 'textfield',
  *       '#default_value' => $tertiary_config->get('bonus_three'),
- *       '#config' => 'mymodule.third',
+ *       '#config' => 'my_module.third',
  *     ),
  *   ),
  * );
  * @endcode
  *
- * The top-level '#config' is "mymodule.settings". The values of 'first_setting'
- * and 'second_setting' will both be saved to "mymodule.settings".
+ * The top-level '#config' is "my_module.settings". The values of
+ * 'first_setting' and 'second_setting' will both be saved to
+ * "my_module.settings".
  *
- * The 'bonus_fieldset' has its own '#config' setting, "mymodule.second", which
+ * The 'bonus_fieldset' has its own '#config' setting, "my_module.second", which
  * overrides the top-level '#config' setting, so 'bonus_one' and 'bonus_two'
- * will be saved to "mymodule.second".
+ * will be saved to "my_module.second".
  *
- * The 'bonus_three' has its own '#config' setting, "mymodule.third", which
+ * The 'bonus_three' has its own '#config' setting, "my_module.third", which
  * overrides the one from the fieldset. The value of 'bonus_three' will be
- * saved to the "mymodule.third".
+ * saved to the "my_module.third".
  *
  * Modules that implement hook_form_alter() can use the '#config' settings to
  * save their data to their own settings file by setting the '#config' parameter
