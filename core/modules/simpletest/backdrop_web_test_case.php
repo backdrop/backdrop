@@ -168,11 +168,14 @@ abstract class BackdropTestCase {
    * the user agent HTTP header is parsed, and if it matches, all database
    * queries use the database table prefix that has been generated here.
    *
+   * @param $prefix
+   *   If provided, the test will only check if this prefix is available.
+   *
    * @see BackdropWebTestCase::curlInitialize()
    * @see backdrop_valid_test_ua()
    * @see BackdropWebTestCase::setUp()
    */
-  protected function prepareDatabasePrefix() {
+  public function prepareDatabasePrefix($prefix = NULL) {
     $lock_id = 'simpletest:' . $this->profile;
     if (!lock_acquire($lock_id)) {
       lock_wait($lock_id);
@@ -180,9 +183,13 @@ abstract class BackdropTestCase {
     }
 
     // Check if there is an existing prefix that is not in use.
-    $prefix = db_query("SELECT prefix FROM {simpletest_prefix} WHERE test_id = 0 AND profile = :profile AND in_use = 0", array(
-      ':profile' => $this->profile,
-    ))->fetchField();
+    $query = "SELECT prefix FROM {simpletest_prefix} WHERE test_id = 0 AND profile = :profile AND in_use = 0";
+    $args = array(':profile' => $this->profile);
+    if ($prefix !== NULL) {
+      $query .= ' AND prefix = :prefix';
+      $args[':prefix'] = $prefix;
+    }
+    $prefix = db_query($query, $args)->fetchField();
 
     if (empty($prefix)) {
       do {
@@ -218,6 +225,18 @@ abstract class BackdropTestCase {
     }
 
     lock_release($lock_id);
+
+    return $this->databasePrefix;
+  }
+
+  /**
+   * Gets the profile for the current test class.
+   *
+   * @return string
+   *   The name of the installation profile that will be used for the database.
+   */
+  public function getProfile() {
+    return $this->profile;
   }
 
   /**
@@ -677,6 +696,17 @@ abstract class BackdropTestCase {
     backdrop_get_messages();
     restore_error_handler();
 
+    $this->releaseDatabasePrefix();
+
+    // Get the stop time and put it in the results to display later.
+    $end = microtime(TRUE);
+    $this->results['#duration'] = round($end - $start, 3);
+  }
+
+  /**
+   * Mark the current prefix as no longer in use.
+   */
+  public function releaseDatabasePrefix() {
     if ($this->useCache) {
       // Release the test prefix so it can be used by another test.
       db_update('simpletest_prefix')
@@ -695,10 +725,6 @@ abstract class BackdropTestCase {
         ->condition('prefix', $this->databasePrefix)
         ->execute();
     }
-
-    // Get the stop time and put it in the results to display later.
-    $end = microtime(TRUE);
-    $this->results['#duration'] = round($end - $start, 3);
   }
 
   /**
