@@ -69,6 +69,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     'dimensions' => array('max_width' => '', 'max_height' => ''),
     'max_size' => NULL,
     'scheme' => 'public',
+    'alt_required' => FALSE,
     'directory' => 'inline-images',
   );
 
@@ -88,7 +89,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#upload_location' => $upload_settings['scheme'] . '://' . $upload_settings['directory'],
     '#default_value' => $fid ? $fid : NULL,
     '#upload_validators' => array(
-      'file_validate_extensions' => array('gif png jpg jpeg'),
+      'file_validate_extensions' => array(implode(' ', image_get_supported_extensions())),
       'file_validate_image_orientation' => array($orientation),
       'file_validate_size' => array($max_filesize),
       'file_validate_image_resolution' => array($max_dimensions),
@@ -126,7 +127,9 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#title' => t('Alternative text'),
     '#type' => 'textfield',
     '#default_value' => isset($values['alt']) ? $values['alt'] : NULL,
+    '#description' => t('The alt attribute may be used by screen readers, search engines, and when the image cannot be loaded.'),
     '#parents' => array('attributes', 'alt'),
+    '#required' => $upload_settings['alt_required'],
   );
   $form['size'] = array(
     '#title' => t('Image size'),
@@ -461,9 +464,7 @@ function filter_format_editor_link_form_submit($form, &$form_state) {
     }
   }
   else {
-    // Modify references to other URIs if not an external link.
-    $url = (substr($uri, 0, 4) == 'http') ? $uri : substr(base_path(), 0, -1) . $uri;
-    $form_state['values']['attributes']['href'] = $url;
+    $form_state['values']['attributes']['href'] = $uri;
     // Remove any reference to a data file.
     unset($form_state['values']['fid']);
     $form_state['values']['attributes']['data-file-id'] = NULL;
@@ -502,8 +503,19 @@ function filter_format_editor_dialog_save($form, &$form_state) {
     $error_messages = theme('status_messages');
     $rendered_form = backdrop_render($form);
     $commands[] = ajax_command_remove('.editor-dialog .messages');
-    $commands[] = ajax_command_replace('.editor-dialog form', $rendered_form);
+    $commands[] = ajax_command_replace('.editor-dialog form.filter-format-editor-image-form', $rendered_form);
     $commands[] = ajax_command_prepend('.editor-dialog .ui-dialog-content', $error_messages);
+    // Check whether this is an image upload, a library selection, or a link to
+    // another non-library file. Note that classes "first" and "last" are
+    // dynamically assigned, so are not consistently on the same link.
+    if (empty($form_state['input']['fid']['fid'])) {
+      // Custom link to a non-library file.
+      $commands[] = ajax_command_invoke('.editor-dialog form.filter-format-editor-image-form a.last', 'click');
+    }
+    else {
+      // Library file has been selected.
+      $commands[] = ajax_command_invoke('.editor-dialog form.filter-format-editor-image-form a.first', 'click');
+    }
   }
   else {
     $commands[] = array(
@@ -560,6 +572,7 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
  * internal alias.
  *
  * @param string $url
+ *   A URL before it is cleaned-up.
  *
  * @return string
  *   A cleaned-up URL that is either a properly formatted external URL or an
@@ -587,7 +600,7 @@ function _filter_cleanup_url($url) {
   // - adding extra prefixes if being re-edited;
   // - a url getting double-encoded;
   // - or domains with relative protocols.
-  // E.g. /fr/node/1, //domain.tld
+  // E.g. /fr/node/1, //domain.tld.
   if (substr($url, 0, 1) == '/') {
     return $url;
   }
@@ -610,7 +623,7 @@ function _filter_cleanup_url($url) {
  * @return string
  *   The URL with the protocol prepended if needed.
  *
- * @see link_cleanup_url().
+ * @see link_cleanup_url()
  */
 function _filter_create_valid_external_url($url) {
   // Skip if it's already a valid external URL with a protocol.
@@ -638,6 +651,7 @@ function _filter_create_valid_external_url($url) {
  * all external URLs even if they have dangerous protocols.
  *
  * @param string $url
+ *   The URL entered by the user.
  *
  * @return bool
  *   TRUE if URL has protocol.
@@ -656,20 +670,25 @@ function _filter_url_has_protocol($url) {
 function _filter_get_file_id($href) {
   $result = 0;
 
-  // Check URI for valid file scheme.
-  if (!file_valid_uri($href)){
+  // Make sure this is a file, either in public or in private path.
+  global $base_path;
+  $public_path = config_get('system.core', 'file_public_path');
+  // Private files have "system/files/" in their URL.
+  // @see BackdropPrivateStreamWrapper::getExternalUrl()
+  $pattern = '#^' . $base_path . '(\?q=)?(' . $public_path . '|system/files/' . ')#';
+  if (preg_match($pattern, $href) === FALSE) {
     return $result;
   }
 
   // Extract file name and directory from $href.
   $pos = strrpos($href, "/");
-  $filename = substr($href,$pos + 1);
+  $filename = substr($href, $pos + 1);
 
   // Now find this file name in uri field to get fid.
   if (!empty($filename)) {
     $results = db_select('file_managed')
       ->fields('file_managed', array('fid', 'uri'))
-      ->condition('uri', '%' . $filename, 'LIKE')
+      ->condition('uri', '%/' . $filename, 'LIKE')
       ->orderBy('fid', 'DESC')
       ->execute();
 

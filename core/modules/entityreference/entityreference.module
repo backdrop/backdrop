@@ -146,7 +146,12 @@ function _entityreference_get_behavior_handler($behavior) {
   if (!isset($object_cache[$behavior])) {
     $class = entityreference_load_behavior_class($behavior);
 
-    $class = class_exists($class) ? $class : 'EntityReferenceBehaviorHandlerBroken';
+    // Ensure the class is available, setting it as broken if it isn't.
+    if (!$class || !class_exists($class)) {
+      include_once(dirname(__FILE__) . '/plugins/behavior/EntityReferenceBehaviorHandler.inc');
+      $class = 'EntityReferenceBehaviorHandlerBroken';
+    }
+
     $object_cache[$behavior] = new $class($behavior);
   }
 
@@ -160,7 +165,7 @@ function entityreference_get_selection_handler($field, $instance = NULL, $entity
   $handler = $field['settings']['handler'];
   $class = entityreference_load_selection_class($handler);
 
-  if (class_exists($class)) {
+  if ($class && class_exists($class)) {
     return call_user_func(array($class, 'getInstance'), $field, $instance, $entity_type, $entity);
   }
   else {
@@ -688,7 +693,8 @@ function entityreference_field_widget_info() {
     'settings' => array(
       'match_operator' => 'CONTAINS',
       'size' => 60,
-      // No default here, because it's not the same between
+      'hide_ids' => FALSE,
+      // We don't have a default here, because it's not the same between
       // the two widgets, and the Field API doesn't update default
       // settings when the widget changes.
       'path' => '',
@@ -702,7 +708,8 @@ function entityreference_field_widget_info() {
     'settings' => array(
       'match_operator' => 'CONTAINS',
       'size' => 60,
-      // No default here, because it's not the same between
+      'hide_ids' => FALSE,
+      // We don't have a default here, because it's not the same between
       // the two widgets, and the Field API doesn't update default
       // settings when the widget changes.
       'path' => '',
@@ -751,6 +758,12 @@ function entityreference_field_widget_settings_form($field, $instance) {
       '#default_value' => $settings['size'],
       '#min' => 1,
       '#required' => TRUE,
+    );
+    $form['hide_ids'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Hide IDs'),
+      '#description' => t('If your target entities have unique labels you may choose not to have the IDs shown to the user. Note that this setting will make it impossible to reference entities with non-unique labels!'),
+      '#default_value' => $settings['hide_ids'],
     );
   }
 
@@ -827,7 +840,7 @@ function entityreference_field_widget_form(&$form, &$form_state, $field, $instan
 
     foreach ($entities as $entity_id => $entity_item) {
       $label = $handler->getLabel($entity_item);
-      $key = "$label ($entity_id)";
+      $key = $instance['widget']['settings']['hide_ids'] ? $label : "$label ($entity_id)";
       // Labels containing commas or quotes must be wrapped in quotes.
       if (strpos($key, ',') !== FALSE || strpos($key, '"') !== FALSE) {
         $key = '"' . str_replace('"', '""', $key) . '"';
@@ -1016,9 +1029,9 @@ function entityreference_autocomplete_callback($type, $field_name, $entity_type,
  * @param $type
  *   The widget type (i.e. 'single' or 'tags').
  * @param $field
- *   The field array defintion.
+ *   The field array definition.
  * @param $instance
- *   The instance array defintion.
+ *   The instance array definition.
  * @param $entity_type
  *   The entity type.
  * @param $entity_id
@@ -1068,7 +1081,7 @@ function entityreference_autocomplete_callback_get_matches($type, $field, $insta
         if ($label == $denied_label) {
           continue;
         }
-        $key = "$label ($entity_id)";
+        $key = $instance['widget']['settings']['hide_ids'] ? $label : "$label ($entity_id)";
         // Strip starting/trailing white spaces, line breaks and tags.
         $key = preg_replace('/\s\s+/', ' ', str_replace("\n", '', trim(decode_entities(strip_tags($key)))));
         // Names containing commas or quotes must be wrapped in quotes.
@@ -1252,11 +1265,22 @@ function entityreference_field_formatter_prepare_view($entity_type, $entities, $
     }
   }
 
+  $target_entities = array();
   if ($target_ids) {
-    $target_entities = entity_load_multiple($target_type, $target_ids);
-  }
-  else {
-    $target_entities = array();
+    if (entity_get_info($target_type)) {
+      $target_entities = entity_load_multiple($target_type, $target_ids);
+    }
+    else {
+      watchdog(
+        'entityreference',
+        'The field %field_label references entities of type %entity_type, but that entity type does not exist.',
+        array(
+          '%field_label' => $field['field_name'],
+          '%entity_type' => $target_type,
+        ),
+        WATCHDOG_ERROR
+      );
+    }
   }
 
   // Iterate through the fieldable entities again to attach the loaded data.
@@ -1265,7 +1289,7 @@ function entityreference_field_formatter_prepare_view($entity_type, $entities, $
 
     foreach ($items[$id] as $delta => $item) {
       // Check whether the referenced entity could be loaded.
-      if (isset($target_entities[$item[$column]]) && isset($target_entities[$item[$column]])) {
+      if (isset($target_entities[$item[$column]])) {
         // Replace the instance value with the term data.
         $items[$id][$delta]['entity'] = $target_entities[$item[$column]];
         // Check whether the user has access to the referenced entity.

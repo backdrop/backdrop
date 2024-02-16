@@ -185,7 +185,7 @@ class Archive_Tar
                     if ($data == "\37\213") {
                         $this->_compress = true;
                         $this->_compress_type = 'gz';
-                        // No sure it's enought for a magic code ....
+                        // Not sure it's enough for a magic code.
                     } elseif ($data == "BZ") {
                         $this->_compress = true;
                         $this->_compress_type = 'bz2';
@@ -1655,6 +1655,8 @@ class Archive_Tar
         $v_mtime = sprintf("%011s", 0);
         $v_typeflag = ($is_link ? 'K' : 'L');
         $v_linkname = '';
+        $v_magic = 'ustar ';
+        $v_version = ' ';
         $v_uname = '';
         $v_gname = '';
         $v_devmajor = '';
@@ -2508,7 +2510,7 @@ class Archive_Tar
 
     /**
      * Compress path by changing for example "/dir/foo/../bar" to "/dir/bar",
-     * rand emove double slashes.
+     * and remove double slashes.
      *
      * @param string $p_dir path to reduce
      *

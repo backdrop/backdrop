@@ -19,14 +19,7 @@
   padding: 0;
   margin: 0;
   z-index: 999;
-  background: #2D2D2D; /* Old browsers */
-  background: -moz-linear-gradient(#2D2D2D 0%, #171717 100%); /* FF3.6+ */
-  background: -webkit-gradient(color-stop(0%, #2D2D2D), color-stop(100%, #171717)); /* Chrome,Safari4+ */
-  background: -webkit-linear-gradient(#2D2D2D 0%, #171717 100%); /* Chrome10+,Safari5.1+ */
-  background: -o-linear-gradient(#2D2D2D 0%, #171717 100%); /* Opera 11.10+ */
-  background: -ms-linear-gradient(#2D2D2D 0%, #171717 100%); /* IE10+ */
   background: linear-gradient(#2D2D2D 0%, #171717 100%); /* W3C */
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#2D2D2D', endColorstr='#171717',GradientType=0); /* IE6-9 */
 }
 [dir="rtl"] #admin-bar {
   text-align: right;
@@ -81,6 +74,15 @@
   background-position: 95% center;
   padding-left: 10px;
   padding-right: 28px;
+}
+
+/* Back to Site arrow. */
+
+#admin-bar .dropdown li.admin-bar-icon > a.escape {
+  background-image: url("../images/chevron-disc-left--white-64.png");
+}
+[dir="rtl"] #admin-bar .dropdown li.admin-bar-icon > a.escape {
+  background-image: url("../images/chevron-disc-right--white-64.png");
 }
 
 /* Admin bar label. */
@@ -155,6 +157,19 @@
   background-position: 95% center;
   padding-left: 10px;
   padding-right: 28px;
+}
+
+/* Locale link in Admin bar */
+#admin-bar .dropdown .admin-bar-locale-links > span {
+  background: transparent url(../images/language--white--64.png) 95% center no-repeat;
+  background-size: 20px;
+  padding-right: 30px; /* LTR */
+}
+
+[dir="rtl"] #admin-bar .dropdown .admin-bar-locale-links > span {
+  background-position: 5% center;
+  padding-right: 10px;
+  padding-left: 30px;
 }
 
 /* Page link. */
@@ -409,7 +424,6 @@
   outline: none;
   padding: 5px 22px 3px 8px; /* LTR */
   width: 100%;
-  -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 [dir="rtl"] #admin-bar .admin-bar-search input {

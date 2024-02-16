@@ -100,7 +100,7 @@ class views_handler_filter_date extends views_handler_filter_numeric {
   function build_group_validate($form, &$form_state) {
     // Special case to validate grouped date filters, this is because the
     // $group['value'] array contains the type of filter (date or offset)
-    // and therefore the number of items the comparission has to be done
+    // and therefore the number of items the comparison has to be done
     // against 'one' instead of 'zero'.
     foreach ($form_state['values']['options']['group_info']['group_items'] as $id => $group) {
       if (empty($group['remove'])) {
