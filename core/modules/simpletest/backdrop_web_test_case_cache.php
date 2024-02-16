@@ -110,6 +110,10 @@ class BackdropWebTestCaseCache extends BackdropWebTestCase {
     if ($install_profile_module_exists) {
       module_enable(array($this->profile), FALSE);
     }
+
+    // Reset caches and menus.
+    $this->resetAll();
+
     return TRUE;
   }
 
@@ -176,10 +180,13 @@ class BackdropWebTestCaseCache extends BackdropWebTestCase {
     );
     $tables = db_find_tables($this->databasePrefix . '%');
     foreach ($tables as $table) {
-      $original_table_name = substr($table, strlen($this->databasePrefix));
-      if(!in_array($original_table_name, $skip_alter)){
-        db_query('ALTER TABLE ' . $table . ' ENGINE=MyISAM');
+      try {
+        $original_table_name = substr($table, strlen($this->databasePrefix));
+        if(!in_array($original_table_name, $skip_alter)){
+          db_query('ALTER TABLE ' . $table . ' ENGINE=MyISAM');
+        }
       }
+      catch (Exception $e) {}
     }
   }
 }

@@ -18,6 +18,13 @@ global $backdrop_test_info;
  */
 abstract class BackdropTestCase {
   /**
+   * The profile to install as a basis for testing.
+   *
+   * @var string
+   */
+  protected $profile = 'testing';
+
+  /**
    * The test run ID.
    *
    * @var string
@@ -121,6 +128,11 @@ abstract class BackdropTestCase {
   protected $httpauth_credentials = NULL;
 
   /**
+   * Flag to indicate if the test cache is in use for the test run.
+   */
+  protected $useCache = FALSE;
+
+  /**
    * Constructor for BackdropTestCase.
    *
    * @param $test_id
@@ -156,30 +168,75 @@ abstract class BackdropTestCase {
    * the user agent HTTP header is parsed, and if it matches, all database
    * queries use the database table prefix that has been generated here.
    *
+   * @param $prefix
+   *   If provided, the test will only check if this prefix is available.
+   *
    * @see BackdropWebTestCase::curlInitialize()
    * @see backdrop_valid_test_ua()
    * @see BackdropWebTestCase::setUp()
    */
-  protected function prepareDatabasePrefix() {
-    // Generate a temporary prefixed database to ensure that tests have a clean
-    // starting point and confirm that random prefix isn't already in use.
-    db_transaction();
-    do {
-      $prefix = 'simpletest' . mt_rand(100000, 999999);
-      $prefix_exists = db_query("SELECT COUNT(*) FROM {simpletest_prefix} WHERE prefix = :prefix", array(':prefix' => $prefix))->fetchField();
-    } while ($prefix_exists);
-    $this->databasePrefix = $prefix;
-    $this->fileDirectoryName = substr($prefix, 10);
+  public function prepareDatabasePrefix($prefix = NULL) {
+    $lock_id = 'simpletest:' . $this->profile;
+    if (!lock_acquire($lock_id)) {
+      lock_wait($lock_id);
+      return $this->prepareDatabasePrefix();
+    }
 
-    // As soon as the database prefix is set, the test might start to execute.
-    // All assertions as well as the SimpleTest batch operations are associated
-    // with the testId, so the database prefix has to be associated with it.
-    db_insert('simpletest_prefix')
-      ->fields(array(
-        'test_id' => $this->testId,
-        'prefix' => $this->databasePrefix,
-      ))
-      ->execute();
+    // Check if there is an existing prefix that is not in use.
+    $query = "SELECT prefix FROM {simpletest_prefix} WHERE test_id = 0 AND profile = :profile AND in_use = 0";
+    $args = array(':profile' => $this->profile);
+    if ($prefix !== NULL) {
+      $query .= ' AND prefix = :prefix';
+      $args[':prefix'] = $prefix;
+    }
+    $prefix = db_query($query, $args)->fetchField();
+
+    if (empty($prefix)) {
+      do {
+        $prefix = 'simpletest' . mt_rand(100000, 999999);
+        $prefix_exists = db_query("SELECT COUNT(*) FROM {simpletest_prefix} WHERE prefix = :prefix", array(':prefix' => $prefix))->fetchField();
+      } while ($prefix_exists);
+      $this->databasePrefix = $prefix;
+      $this->fileDirectoryName = substr($prefix, 10);
+
+      // As soon as the database prefix is set, the test might start to execute.
+      // All assertions as well as the SimpleTest batch operations are associated
+      // with the testId, so the database prefix has to be associated with it.
+      db_insert('simpletest_prefix')
+        ->fields(array(
+          'test_id' => $this->testId,
+          'prefix' => $this->databasePrefix,
+          'profile' => $this->profile,
+          'in_use' => 1,
+        ))
+        ->execute();
+    }
+    else {
+      db_update('simpletest_prefix')
+        ->condition('prefix', $prefix)
+        ->fields(array(
+          'test_id' => $this->testId,
+          'in_use' => 1,
+        ))
+        ->execute();
+
+      $this->databasePrefix = $prefix;
+      $this->fileDirectoryName = substr($prefix, 10);
+    }
+
+    lock_release($lock_id);
+
+    return $this->databasePrefix;
+  }
+
+  /**
+   * Gets the profile for the current test class.
+   *
+   * @return string
+   *   The name of the installation profile that will be used for the database.
+   */
+  public function getProfile() {
+    return $this->profile;
   }
 
   /**
@@ -584,6 +641,11 @@ abstract class BackdropTestCase {
       $this->httpauth_credentials = $username . ':' . $password;
     }
 
+    // Select a database prefix to use for this test.
+    if (empty($this->databasePrefix)) {
+      $this->prepareDatabasePrefix();
+    }
+
     set_error_handler(array($this, 'errorHandler'));
     $class = get_class($this);
     // Iterate through all the methods in this class, unless a specific list of
@@ -634,9 +696,35 @@ abstract class BackdropTestCase {
     backdrop_get_messages();
     restore_error_handler();
 
+    $this->releaseDatabasePrefix();
+
     // Get the stop time and put it in the results to display later.
     $end = microtime(TRUE);
     $this->results['#duration'] = round($end - $start, 3);
+  }
+
+  /**
+   * Mark the current prefix as no longer in use.
+   */
+  public function releaseDatabasePrefix() {
+    if ($this->useCache) {
+      // Release the test prefix so it can be used by another test.
+      db_update('simpletest_prefix')
+        ->condition('test_id', $this->testId)
+        ->condition('prefix', $this->databasePrefix)
+        ->fields(array(
+          'test_id' => 0,
+          'in_use' => 0,
+        ))
+        ->execute();
+    }
+    else {
+      // Delete the database table prefix record.
+      db_delete('simpletest_prefix')
+        ->condition('test_id', $this->testId)
+        ->condition('prefix', $this->databasePrefix)
+        ->execute();
+    }
   }
 
   /**
@@ -859,8 +947,6 @@ class BackdropUnitTestCase extends BackdropTestCase {
       'weight' => 0,
     );
 
-    $this->prepareDatabasePrefix();
-
     // Reset all statics so that test is performed with a clean environment.
     backdrop_static_reset();
 
@@ -904,12 +990,6 @@ class BackdropUnitTestCase extends BackdropTestCase {
     // Get back to the original connection.
     Database::removeConnection('default');
     Database::renameConnection('simpletest_original_default', 'default');
-
-    // Delete the database table prefix record.
-    db_delete('simpletest_prefix')
-      ->condition('test_id', $this->testId)
-      ->condition('prefix', $this->databasePrefix)
-      ->execute();
 
     $conf['file_public_path'] = $this->originalFileDirectory;
     // Restore modules if necessary.
@@ -1497,6 +1577,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected function changeDatabasePrefix() {
     if (empty($this->databasePrefix)) {
       $this->prepareDatabasePrefix();
+
       // If $this->prepareDatabasePrefix() failed to work, return without
       // setting $this->setupDatabasePrefix to TRUE, so setUp() methods will
       // know to bail out.
@@ -1613,24 +1694,71 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @see BackdropWebTestCase::tearDown()
    */
   protected function useCache() {
+    $this->useCache = FALSE;
+
     $config_cache_dir = $this->originalFileDirectory . '/simpletest/simpletest_cache_' . $this->profile;
 
     if (is_dir($config_cache_dir)) {
-      $prefix = 'simpletest_cache_' . $this->profile . '_';
+      $cache_prefix = 'simpletest_cache_' . $this->profile . '_';
 
-      $tables = db_query("SHOW TABLES LIKE :prefix", array(':prefix' => db_like($prefix) . '%' ))->fetchCol();
+      $cache_tables = db_query("SHOW TABLES LIKE :prefix", array(':prefix' => db_like($cache_prefix) . '%' ))->fetchCol();
+      $prefix_tables = db_query("SHOW TABLES LIKE :prefix", array(':prefix' => db_like($this->databasePrefix) . '%' ))->fetchCol();
 
-      foreach ($tables as $table_prefix) {
-        $table = substr($table_prefix, strlen($prefix));
-        db_query('CREATE TABLE ' . $this->databasePrefix . $table . ' LIKE ' . $table_prefix);
-        db_query('INSERT ' . $this->databasePrefix . $table . ' SELECT * FROM ' . $table_prefix);
+      // If there are no tables in this prefix, then we need to set them up for a new run.
+      if (empty($prefix_tables)) {
+        foreach ($cache_tables as $table_name) {
+          $table = substr($table_name, strlen($cache_prefix));
+          db_query('CREATE TABLE ' . $this->databasePrefix . $table . ' LIKE ' . $table_name);
+          db_query('INSERT ' . $this->databasePrefix . $table . ' SELECT * FROM ' . $table_name);
+        }
+      }
+      else {
+        // Get table checksums so we can tell which tables were changed.
+        $checksums = db_query('CHECKSUM TABLE ' . implode(', ', array_merge($cache_tables, $prefix_tables)))->fetchAllKeyed();
+        foreach ($checksums as $key => $sum) {
+          // The CHECKSUM command in MySQL adds the database name to the table, so we need to remove it.
+          list($database, $table) = explode('.', $key);
+          $checksums[$table] = $sum;
+          unset($checksums[$key]);
+        }
+
+        $prefix_tables = array_flip($prefix_tables);
+        foreach ($cache_tables as $cache_table_name) {
+          $original_name = substr($cache_table_name, strlen($cache_prefix));
+          $prefix_table_name = $this->databasePrefix . $original_name;
+          if (isset($prefix_tables[$prefix_table_name])) {
+            // The table exists, so check if it was changed.
+            // Cache tables will get cleared before the test starts, so skip them.
+            if (strpos($original_name, 'cache') === FALSE && $checksums[$cache_table_name] !== $checksums[$prefix_table_name]) {
+              // They don't match, so drop the prefix table and recreate it.
+              db_query('DROP TABLE ' . $prefix_table_name);
+              db_query('CREATE TABLE ' . $prefix_table_name . ' LIKE ' . $cache_table_name);
+              db_query('INSERT ' . $prefix_table_name . ' SELECT * FROM ' . $cache_table_name);
+            }
+            unset($prefix_tables[$prefix_table_name]);
+          }
+          else {
+             // The table was deleted in the last run, so recreate it.
+            db_query('CREATE TABLE ' . $prefix_table_name . ' LIKE ' . $cache_table_name);
+            db_query('INSERT ' . $prefix_table_name . ' SELECT * FROM ' . $cache_table_name);
+            unset($prefix_tables[$prefix_table_name]);
+          }
+        }
+
+        if (!empty($prefix_tables)) {
+          // There are tables in the prefix that were not in the cache.
+          foreach ($prefix_tables as $prefix_table_name => $tmp) {
+            db_query('DROP TABLE ' . $prefix_table_name);
+          }
+        }
       }
 
       $this->recursiveCopy($config_cache_dir, $this->public_files_directory);
 
-      return TRUE;
+      $this->useCache = TRUE;
     }
-    return FALSE;
+
+    return $this->useCache;
   }
 
   /**
@@ -1685,8 +1813,11 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function setUp() {
     global $user, $language, $language_url, $conf;
-    // Create the database prefix for this test.
-    $this->prepareDatabasePrefix();
+
+    if (empty($this->databasePrefix)) {
+      // Create the database prefix for this test.
+      $this->prepareDatabasePrefix();
+    }
 
     // Prepare the environment for running tests.
     $this->prepareEnvironment();
@@ -1878,20 +2009,22 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Delete temporary files directory.
     file_unmanaged_delete_recursive($this->originalFileDirectory . '/simpletest/' . $this->fileDirectoryName);
 
-    // Remove all prefixed tables.
-    $connection_info = Database::getConnectionInfo('default');
-    $tables = db_find_tables($connection_info['default']['prefix']['default'] . '%');
-    if (empty($tables)) {
-      $this->fail('Failed to find test tables to drop.');
-    }
-    $prefix_length = strlen($connection_info['default']['prefix']['default']);
-    foreach ($tables as $table) {
-      if (db_drop_table(substr($table, $prefix_length))) {
-        unset($tables[$table]);
+    // If we are not using the test cache, remove all prefixed tables.
+    if (!$this->useCache) {
+      $connection_info = Database::getConnectionInfo('default');
+      $tables = db_find_tables($connection_info['default']['prefix']['default'] . '%');
+      if (empty($tables)) {
+        $this->fail('Failed to find test tables to drop.');
       }
-    }
-    if (!empty($tables)) {
-      $this->fail('Failed to drop all prefixed tables.');
+      $prefix_length = strlen($connection_info['default']['prefix']['default']);
+      foreach ($tables as $table) {
+        if (db_drop_table(substr($table, $prefix_length))) {
+          unset($tables[$table]);
+        }
+      }
+      if (!empty($tables)) {
+        $this->fail('Failed to drop all prefixed tables.');
+      }
     }
 
     // In PHP 8 some tests encounter problems as some shutdown code tries to
@@ -1903,12 +2036,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Get back to the original connection.
     Database::removeConnection('default', $close);
     Database::renameConnection('simpletest_original_default', 'default');
-
-    // Delete the database table prefix record.
-    db_delete('simpletest_prefix')
-      ->condition('test_id', $this->testId)
-      ->condition('prefix', $this->databasePrefix)
-      ->execute();
 
     // Set the configuration directories back to the originals.
     $config_directories = $this->originalConfigDirectories;
