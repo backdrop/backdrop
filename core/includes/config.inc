@@ -8,12 +8,12 @@
  * Retrieves a configuration object.
  *
  * This is the main entry point to the configuration API. Calling
- * @code config(book.admin) @endcode will return a configuration object in which
+ * @code config('book.admin') @endcode will return a configuration object in which
  * the book module can store its administrative settings.
  *
  * @param string $config_file
  *   The name of the configuration object to retrieve. The name corresponds to
- *   an JSON configuration file. For @code config(book.admin) @endcode, the
+ *   an JSON configuration file. For @code config('book.admin') @endcode, the
  *   config object returned will contain the contents of book.admin.json.
  * @param string $type
  *   (optional) The type of config directory to return. Backdrop core provides
@@ -58,7 +58,7 @@ function config($config_file, $type = 'active') {
  *
  * @param string $config_file
  *   The name of the configuration object to retrieve. The name corresponds to
- *   an JSON configuration file. For @code config(book.admin) @endcode, the
+ *   an JSON configuration file. For @code config('book.admin') @endcode, the
  *   config object returned will contain the contents of book.admin.json.
  * @param string $option
  *   The name of the config option within the file to delete. The config option
@@ -80,7 +80,7 @@ function config_clear($config_file, $option) {
  *
  * @param string $config_file
  *   The name of the configuration object to check. The name corresponds to
- *   an JSON configuration file. For @code config(book.admin) @endcode, the
+ *   an JSON configuration file. For @code config('book.admin') @endcode, the
  *   config object returned will contain the contents of book.admin.json.
  * @param string $option
  *   The name of the config option within the file to check. The config option
@@ -100,7 +100,7 @@ function config_is_overridden($config_file, $option) {
  *
  * @param string $config_file
  *   The name of the configuration object to retrieve. The name corresponds to
- *   an JSON configuration file. For @code config(book.admin) @endcode, the
+ *   an JSON configuration file. For @code config('book.admin') @endcode, the
  *   config object returned will contain the contents of book.admin.json.
  * @param string $option
  *   The name of the config option within the file to read. The config option
@@ -164,7 +164,7 @@ function config_get_translated($config_file, $option = NULL, $args = array(), $o
  *
  * @param string $config_file
  *   The name of the configuration object to retrieve. The name corresponds to
- *   an JSON configuration file. For @code config(book.admin) @endcode, the
+ *   an JSON configuration file. For @code config('book.admin') @endcode, the
  *   config object returned will contain the contents of book.admin.json.
  * @param string $option
  *   The name of the config option within the file to set. The config option
@@ -191,7 +191,7 @@ function config_set($config_file, $option, $value) {
  *
  * @param string $config_file
  *   The name of the configuration object to retrieve. The name corresponds to
- *   an JSON configuration file. For @code config(book.admin) @endcode, the
+ *   an JSON configuration file. For @code config('book.admin') @endcode, the
  *   config object returned will contain the contents of book.admin.json.
  * @param array $options
  *   A keyed array of configuration option names mapping their values.
