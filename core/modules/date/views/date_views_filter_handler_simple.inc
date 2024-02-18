@@ -114,7 +114,9 @@ class date_views_filter_handler_simple extends views_handler_filter_date {
         return str_replace(' ', 'T', $this->date_default_value($prefix));
       }
       elseif (isset($this->options['expose']['identifier']) && !isset($_GET[$this->options['expose']['identifier']])) {
-        return str_replace(' ', 'T', $this->date_default_value($prefix));
+        if ($this->date_default_value($prefix) != NULL) {
+          return str_replace(' ', 'T', $this->date_default_value($prefix));
+        }
       }
     }
 
