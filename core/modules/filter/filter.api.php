@@ -159,7 +159,7 @@ function hook_editor_info() {
       'resizeable' => TRUE,
     ),
     'file' => 'myeditor.admin.inc',
-    'library' => array('mymodule', 'myeditor'),
+    'library' => array('my_module', 'myeditor'),
     'js settings callback' => '_myeditor_js_settings',
   );
   return $editors;
@@ -593,7 +593,7 @@ function hook_editor_EDITOR_js_settings($format, $filters, $existing_settings) {
  * @see hook_filter_format_disable()
  */
 function hook_filter_format_insert($format) {
-  mymodule_cache_rebuild();
+  my_module_cache_rebuild();
 }
 
 /**
@@ -610,7 +610,7 @@ function hook_filter_format_insert($format) {
  * @see hook_filter_format_disable()
  */
 function hook_filter_format_update($format) {
-  mymodule_cache_rebuild();
+  my_module_cache_rebuild();
 }
 
 /**
@@ -623,7 +623,7 @@ function hook_filter_format_update($format) {
  * @see hook_filter_format_update()
  */
 function hook_filter_format_disable($format) {
-  mymodule_cache_rebuild();
+  my_module_cache_rebuild();
 }
 
 /**
