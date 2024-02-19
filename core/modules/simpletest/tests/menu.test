@@ -1092,11 +1092,11 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $this->assertBreadcrumb('home', $trail);
 
     // Verify node breadcrumbs (in menu).
-    // Do this separately for Main menu and Main menu, since only the
-    // latter is a preferred menu by default.
+    // Do this separately for two menus, since only main-menu is a preferred
+    // menu by default.
     // @todo Also test all themes? Manually testing led to the suspicion that
     //   breadcrumbs may differ, possibly due to template.php overrides.
-    $menus = array('main-menu', 'main-menu');
+    $menus = array('user-menu', 'main-menu');
     // Alter node type menu settings.
     $node_type = node_type_get_type($type);
     $node_type->settings['menu_options'] = $menus;
@@ -1177,6 +1177,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $link = db_query('SELECT * FROM {menu_links} WHERE link_title = :title', array(':title' => 'Root'))->fetchAssoc();
 
     $edit = array(
+      'menu[parent_menu]' => $link['menu_name'],
       'menu[parent]' => $link['menu_name'] . ':' . $link['mlid'],
     );
     $this->backdropPost("node/{$parent->nid}/edit", $edit, t('Save'));
