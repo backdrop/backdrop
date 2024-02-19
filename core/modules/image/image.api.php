@@ -37,13 +37,13 @@
 function hook_image_effect_info() {
   $effects = array();
 
-  $effects['mymodule_resize'] = array(
+  $effects['my_module_resize'] = array(
     'label' => t('Resize'),
     'help' => t('Resize an image to an exact set of dimensions, ignoring aspect ratio.'),
-    'effect callback' => 'mymodule_resize_effect',
-    'dimensions callback' => 'mymodule_resize_dimensions',
-    'form callback' => 'mymodule_resize_form',
-    'summary theme' => 'mymodule_resize_summary',
+    'effect callback' => 'my_module_resize_effect',
+    'dimensions callback' => 'my_module_resize_dimensions',
+    'form callback' => 'my_module_resize_form',
+    'summary theme' => 'my_module_resize_summary',
   );
 
   return $effects;
@@ -59,9 +59,9 @@ function hook_image_effect_info() {
  */
 function hook_image_effect_info_alter(&$effects) {
   // Override the Image module's crop effect with more options.
-  $effects['image_crop']['effect callback'] = 'mymodule_crop_effect';
-  $effects['image_crop']['dimensions callback'] = 'mymodule_crop_dimensions';
-  $effects['image_crop']['form callback'] = 'mymodule_crop_form';
+  $effects['image_crop']['effect callback'] = 'my_module_crop_effect';
+  $effects['image_crop']['dimensions callback'] = 'my_module_crop_dimensions';
+  $effects['image_crop']['form callback'] = 'my_module_crop_form';
 }
 
 /**
@@ -77,8 +77,8 @@ function hook_image_effect_info_alter(&$effects) {
 function hook_image_style_save($style) {
   // If a module defines an image style and that style is renamed by the user
   // the module should update any references to that style.
-  if (isset($style['old_name']) && $style['old_name'] == config_get('mymodule.settings', 'image_style')) {
-     config_set('mymodule.settings', 'image_style', $style['name']);
+  if (isset($style['old_name']) && $style['old_name'] == config_get('my_module.settings', 'image_style')) {
+     config_set('my_module.settings', 'image_style', $style['name']);
   }
 }
 
@@ -96,8 +96,8 @@ function hook_image_style_save($style) {
 function hook_image_style_delete($style) {
   // Administrators can choose an optional replacement style when deleting.
   // Update the modules style variable accordingly.
-  if (isset($style['old_name']) && $style['old_name'] == config_get('mymodule.settings', 'image_style')) {
-    config_set('mymodule.settings', 'image_style', $style['name']);
+  if (isset($style['old_name']) && $style['old_name'] == config_get('my_module.settings', 'image_style')) {
+    config_set('my_module.settings', 'image_style', $style['name']);
   }
 }
 
@@ -115,7 +115,7 @@ function hook_image_style_delete($style) {
  */
 function hook_image_style_flush($style) {
   // Empty cached data that contains information about the style.
-  cache('mymodule')->flush();
+  cache('my_module')->flush();
 }
 
 /**
