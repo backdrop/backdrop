@@ -1395,7 +1395,15 @@ function user_update_1024() {
   // In some cases sites have added the changed field themselves e.g. via a
   // contrib or custom module. Ensure the field uses core's new schema.
   if (db_field_exists('users', 'changed')) {
-    db_change_field('users', 'changed', 'changed', $spec, $keys);
+    db_change_field('users', 'changed', 'changed', $spec);
+    // While It is possible to do add indexes in a single step with
+    // db_change_field(), we are doing it separately to avoid issues with older
+    // versions of MariaDB.
+    // @see https://github.com/backdrop/backdrop-issues/issues/5496
+    // @todo: revert this workaround once the minimum version of MySQL/MariaDB
+    // in the Backdrop official system requirements is bumped to a version that
+    // doesn't exhibit this problem.
+    db_add_index('users', 'changed', array('changed'));
   }
   else {
     db_add_field('users', 'changed', $spec, $keys);
