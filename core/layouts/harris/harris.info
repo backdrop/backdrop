@@ -5,6 +5,7 @@ backdrop = 1.x
 
 ; Specify regions for this layout.
 regions[header]     = Header
+regions[banner]     = Banner
 regions[top]        = Top
 regions[content]    = Content
 regions[sidebar]    = First Sidebar
