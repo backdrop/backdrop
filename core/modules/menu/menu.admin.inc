@@ -441,11 +441,8 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
   $menu_options = !empty($menu_options) ? $menu_options : $menu_names;
 
   $form['weight'] = array(
-    '#type' => 'weight',
-    '#title' => t('Weight'),
-    '#delta' => _menu_get_menu_weight_delta($menu_options),
-    '#default_value' => $item['weight'],
-    '#description' => t('Optional. In the menu, the heavier links will sink and the lighter links will be positioned nearer the top.'),
+    '#type' => 'hidden',
+    '#value' => $item['weight'],
   );
 
   return $form;
