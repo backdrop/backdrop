@@ -4,14 +4,14 @@
     "description": "Manage user accounts, roles, and permissions.",
     "module": "user",
     "storage": 4,
-    "tag": "default",
+    "tag": "",
     "disabled": false,
     "base_table": "users",
     "human_name": "Administer user accounts",
     "core": "1.0-dev",
     "display": {
         "default": {
-            "display_title": "Master",
+            "display_title": "Default",
             "display_plugin": "default",
             "display_options": {
                 "query": {

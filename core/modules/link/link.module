@@ -6,6 +6,7 @@
 
 define('LINK_EXTERNAL', 'external');
 define('LINK_INTERNAL', 'internal');
+define('LINK_BOTH', 'both');
 define('LINK_FRONT', 'front');
 define('LINK_EMAIL', 'email');
 define('LINK_NEWS', 'news');
@@ -31,6 +32,7 @@ function link_field_info() {
       'instance_settings' => array(
         'attributes' => _link_default_attributes(),
         'url' => 0,
+        'type' => LINK_BOTH,
         'title' => 'optional',
         'title_value' => '',
         'title_label_use_field_label' => FALSE,
@@ -74,6 +76,19 @@ function link_field_instance_settings_form($field, $instance) {
     '#return_value' => 'optional',
     '#description' => t('If checked, the URL field is optional and submitting a title alone will be acceptable. If the URL is omitted, the title will be displayed as plain text.'),
   );
+
+  $form['type'] = array(
+    '#type' => 'radios',
+    '#title' => t('Allowed URL types'),
+    '#default_value' => $instance['settings']['type'],
+    '#options' => array(
+      LINK_INTERNAL => t('Internal only'),
+      LINK_EXTERNAL => t('External only'),
+      LINK_BOTH => t('Both (internal and external)'),
+    ),
+  );
+  $form['type'][LINK_INTERNAL]['#description'] = t('Internal URLs point to pages on this website; an autocomplete displays matching pages to select from.');
+  $form['type'][LINK_EXTERNAL]['#description'] = t('External URLs point to other websites; no autocomplete is used.');
 
   $title_options = array(
     'optional' => t('Optional Title'),
@@ -419,6 +434,18 @@ function _link_validate(&$item, $delta, $field, $entity, $instance, $langcode, &
         'message' => t('Titles are required for all links.'),
         'error_element' => array('url' => FALSE, 'title' => TRUE),
       );
+    }
+    // Validate the URL type.
+    if ($instance['settings']['type'] != LINK_BOTH) {
+      $url_type = link_validate_url(trim($item['url']));
+      if (($instance['settings']['type'] == LINK_INTERNAL && $url_type === LINK_EXTERNAL) || ($instance['settings']['type'] == LINK_EXTERNAL && in_array($url_type, array(LINK_INTERNAL, LINK_FRONT), TRUE))) {
+        $field_label = array('%field' => $instance['label']);
+        $errors[$field['field_name']][$langcode][$delta][] = array(
+          'error' => 'link_required',
+          'message' => ($instance['settings']['type'] == LINK_INTERNAL) ? t('Only internal URLs are allowed in %field.', $field_label) : t('Only external URLs are allowed in %field.', $field_label),
+          'error_element' => array('url' => TRUE, 'title' => FALSE),
+        );
+      }
     }
   }
   // Require a link if we have a title.
@@ -833,8 +860,10 @@ function link_field_process($element, $form_state, $complete_form) {
     '#title' => t('URL'),
     '#required' => ($element['#delta'] == 0 && $settings['url'] !== 'optional') ? $element['#required'] : FALSE,
     '#default_value' => isset($element['#value']['url']) ? $element['#value']['url'] : NULL,
-    '#autocomplete_path' => 'path-autocomplete',
   );
+  if ($settings['type'] != LINK_EXTERNAL) {
+    $element['url']['#autocomplete_path'] = 'path-autocomplete';
+  }
   if ($settings['title'] !== 'none' && $settings['title'] !== 'value') {
     // Figure out the label of the title field.
     if (!empty($settings['title_label_use_field_label'])) {

@@ -140,8 +140,8 @@ function hook_layout_context_info() {
  *     through hook_autoload_info().
  *   - path: Optional. Override the path to the file to be used. Ordinarily
  *     theme functions are located in a file in the module path (for example:
- *     mymodule/mymodule.theme.inc) and template files are located in a
- *     subdirectory named templates (for example: mymodule/templates/), but if
+ *     my_module/my_module.theme.inc) and template files are located in a
+ *     subdirectory named templates (for example: my_module/templates/), but if
  *     your file will not be in the default location, include it here. This
  *     path should be relative to the Backdrop root directory.
  *   - template: If specified, this theme implementation is a template, and
@@ -161,7 +161,7 @@ function hook_layout_style_info() {
     'title' => t('A new style'),
     'description' => t('An advanced style with settings.'),
     // The theme key for rendering an individual block.
-    'block theme' => 'mymodule_block',
+    'block theme' => 'my_module_block',
     // Provide a class name if this style has settings. The class should extend
     // the LayoutStyle class.
     'class' => 'MyModuleLayoutStyle',
@@ -356,7 +356,7 @@ function hook_layout_presave(Layout $layout) {
  * from the path in the router item and you will rely on the system to set the
  * context, you should set the position of the context(s) in the layout to the
  * position in the router. Example: the path in the router item is
- * mymodule/node/% and you wish to use the layout with path node/%. Then you
+ * my_module/node/% and you wish to use the layout with path node/%. Then you
  * would find the context at position 2 in the router item and set its
  *  Context::position variable to 2, so that the layout with path node/% looks
  * at position 2 to set the context for that placeholder.
@@ -589,7 +589,7 @@ function hook_block_configure($delta = '', $settings = array()) {
  */
 function hook_block_save($delta, &$edit = array()) {
   if ($delta == 'my_block_delta') {
-    config_set('mymodule.settings', 'my_global_value', $edit['my_global_value']);
+    config_set('my_module.settings', 'my_global_value', $edit['my_global_value']);
     // Remove the value so it is not saved by Layout module.
     unset($edit['my_global_value']);
   }
@@ -700,9 +700,9 @@ function hook_block_view_alter(&$data, $block) {
     unset($data['content']['#contextual_links']);
   }
   // Add a theme wrapper function defined by the current module to all blocks
-  // provided by the "somemodule" module.
-  if (is_array($data['content']) && $block->module == 'somemodule') {
-    $data['content']['#theme_wrappers'][] = 'mymodule_special_block';
+  // provided by the "some_module" module.
+  if (is_array($data['content']) && $block->module == 'some_module') {
+    $data['content']['#theme_wrappers'][] = 'my_module_special_block';
   }
 }
 
@@ -735,10 +735,10 @@ function hook_block_view_alter(&$data, $block) {
  */
 function hook_block_view_MODULE_DELTA_alter(&$data, $block) {
   // This code will only run for a specific block. For example, if MODULE_DELTA
-  // in the function definition above is set to "mymodule_somedelta", the code
-  // will only run on the "somedelta" block provided by the "mymodule" module.
-
-  // Change the title of the "somedelta" block provided by the "mymodule"
+  // in the function definition above is set to "my_module_some_delta", the code
+  // will only run on the "some_delta" block provided by the "my_module" module.
+  //
+  // Change the title of the "some_delta" block provided by the "my_module"
   // module.
   $data['title'] = t('New title of the block');
 }

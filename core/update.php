@@ -301,6 +301,10 @@ function update_info_page() {
     cache('update')->flush();
   }
 
+  // Flush the theme cache so we can render this page correctly if the theme
+  // registry been updated with new preprocess or template variables.
+  backdrop_theme_rebuild();
+
   // Get database name
   $db_name = $databases['default']['default']['database'];
 
@@ -324,7 +328,7 @@ function update_info_page() {
   $output .= "</ol>\n";
   $output .= "<p>After performing the above steps proceed using the continue button.</p>\n";
   $module_status_report = update_upgrade_check_dependencies();
-	if (!empty($module_status_report)) {
+  if (!empty($module_status_report)) {
     $output .= $module_status_report;
   }
   $form_action = check_url(backdrop_current_script_url(array('op' => 'selection', 'token' => $token)));
@@ -445,8 +449,9 @@ function update_check_requirements($skip_warnings = FALSE) {
   if ($severity == REQUIREMENT_ERROR || ($severity == REQUIREMENT_WARNING && !$skip_warnings)) {
     backdrop_set_title('Requirements problem');
     $task_list = update_task_list('requirements');
-    $status_report = theme('status_report', array('requirements' => $requirements));
-    $status_report .= 'Check the messages and <a href="' . check_url(backdrop_requirements_url($severity)) . '">try again</a>.';
+    $status_report = 'Resolve the problems and <a href="' . check_url(backdrop_requirements_url($severity)) . '">try again</a>.';
+    $status_report .= '<br><br>';
+    $status_report .= theme('status_report', array('requirements' => $requirements, 'phase' => 'update'));
     print theme('update_page', array('content' => $status_report, 'sidebar' => $task_list));
     exit();
   }

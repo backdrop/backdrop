@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Install, update and uninstall functions for the standard installation profile.
+ * Install/uninstall and update functions for the standard installation profile.
  */
 
 /**
@@ -13,11 +13,13 @@
  */
 function standard_install() {
   // Add text formats.
+  // Changed the display name from "Filtered HTML" to "Basic", but kept the
+  // machine name as "filtered_html" for backward compatibility.
   $filtered_html_format = array(
     'format' => 'filtered_html',
-    'name' => 'Filtered HTML',
+    'name' => 'Basic',
     'weight' => 0,
-    'editor' => 'ckeditor',
+    'editor' => 'ckeditor5',
     'editor_settings' => array(
       'image_upload' => array(
         'status' => 1,
@@ -28,12 +30,10 @@ function standard_install() {
       ),
     ),
     'filters' => array(
-      // URL filter.
       'filter_url' => array(
         'weight' => 0,
         'status' => 1,
       ),
-      // HTML filter.
       'filter_html' => array(
         'weight' => 1,
         'status' => 1,
@@ -43,17 +43,14 @@ function standard_install() {
         'weight' => 2,
         'status' => 1,
       ),
-      // Image captions.
       'filter_image_caption' => array(
         'weight' => 4,
         'status' => 1,
       ),
-      // Image alignment.
       'filter_image_align' => array(
         'weight' => 4,
         'status' => 1,
       ),
-      // HTML corrector filter.
       'filter_htmlcorrector' => array(
         'weight' => 10,
         'status' => 1,
@@ -63,15 +60,14 @@ function standard_install() {
   $filtered_html_format = (object) $filtered_html_format;
   filter_format_save($filtered_html_format);
 
-  // Changed display name from Full HTML to Raw HTML but keeping machine name
-  // for backward compatibility.
+  // Changed the display name from "Full HTML" to "Raw HTML", but kept the
+  // machine name as "full_html" for backward compatibility.
   $full_html_format = array(
     'format' => 'full_html',
     'name' => 'Raw HTML',
     'weight' => 1,
     'editor' => NULL,
     'filters' => array(
-      // URL filter.
       'filter_url' => array(
         'weight' => 0,
         'status' => 1,
@@ -81,17 +77,14 @@ function standard_install() {
         'weight' => 1,
         'status' => 1,
       ),
-      // Image captions.
       'filter_image_caption' => array(
         'weight' => 4,
         'status' => 1,
       ),
-      // Image alignment.
       'filter_image_align' => array(
         'weight' => 4,
         'status' => 1,
       ),
-      // HTML corrector filter.
       'filter_htmlcorrector' => array(
         'weight' => 10,
         'status' => 1,
@@ -196,7 +189,8 @@ function standard_install() {
 
   cache_clear_all();
 
-  // Create a default vocabulary named "Tags", enabled for the 'post' content type.
+  // Create a default vocabulary named "Tags", enabled for the "post" content
+  // type.
   $description = st('Use tags to group posts on similar topics into categories.');
   $vocabulary = new TaxonomyVocabulary(array(
     'name' => st('Tags'),
@@ -246,8 +240,9 @@ function standard_install() {
   field_create_instance($instance);
 
 
-  // Create an image field named "Image", enabled for the 'post' content type.
-  // Many of the following values will be defaulted, they're included here as an illustrative examples.
+  // Create an image field named "Image", enabled for the "post" content type.
+  // Many of the following values will be defaulted. They're included here as
+  // an illustrative example.
   // See https://docs.backdropcms.org/api/backdrop/core%21modules%21field%21field.crud.inc/function/field_create_field/1
 
   $field = array(
@@ -268,7 +263,8 @@ function standard_install() {
   field_create_field($field);
 
 
-  // Many of the following values will be defaulted, they're included here as an illustrative examples.
+  // Many of the following values will be defaulted, they're included here as
+  // an illustrative example.
   // See https://docs.backdropcms.org/api/backdrop/core%21modules%21field%21field.crud.inc/function/field_create_instance/1
   $instance = array(
     'field_name' => 'field_image',
@@ -373,7 +369,7 @@ function standard_install() {
       'body' => array(
         LANGUAGE_NONE => array(
           array(
-            'value' => st('This is your first post! You may edit or delete it.'),
+            'value' => '<p>' . st('This is your first post! You may edit or delete it.') . '</p>',
             'format' => 'filtered_html',
           ),
         ),
@@ -393,7 +389,7 @@ function standard_install() {
       'body' => array(
         LANGUAGE_NONE => array(
           array(
-            'value' => st('This is a page with static content. You may edit or delete it.'),
+            'value' => '<p>' . st('This is a page with static content. You may edit or delete it.') . '</p>',
             'format' => 'filtered_html',
           ),
         ),

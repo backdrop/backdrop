@@ -20,8 +20,8 @@
  * node operation:
  * - Node-type-specific hooks: When defining a node type, node_type_save()
  *   returns a 'base' component. Node-type-specific hooks are named
- *   base_hookname() instead of mymodule_hookname() (in a module called
- *   'mymodule' for example). Only the node type's corresponding implementation
+ *   base_hookname() instead of my_module_hookname() (in a module called
+ *   'my_module' for example). Only the node type's corresponding implementation
  *   is invoked. For example, book_node_info() in book.module defines the base
  *   for the 'book' node type as 'book'. So when a book node is created,
  *   hook_insert() is invoked on book_insert() only. Hooks that are
@@ -780,7 +780,7 @@ function hook_node_view(Node $node, $view_mode, $langcode) {
   $node->content['my_additional_field'] = array(
     '#markup' => $additional_field,
     '#weight' => 10,
-    '#theme' => 'mymodule_my_additional_field',
+    '#theme' => 'my_module_my_additional_field',
   );
 }
 
@@ -1014,8 +1014,8 @@ function hook_delete(Node $node) {
  * @ingroup node_api_hooks
  */
 function hook_prepare(Node $node) {
-  if (!isset($node->mymodule_value)) {
-    $node->mymodule_value = 'foo';
+  if (!isset($node->my_module_value)) {
+    $node->my_module_value = 'foo';
   }
 }
 
@@ -1247,7 +1247,7 @@ function hook_view(Node $node, $view_mode) {
   }
 
   $node->content['myfield'] = array(
-    '#markup' => theme('mymodule_myfield', $node->myfield),
+    '#markup' => theme('my_module_myfield', $node->myfield),
     '#weight' => 1,
   );
 
