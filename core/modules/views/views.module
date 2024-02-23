@@ -2291,3 +2291,14 @@ function _views_tokenized_clean_css_identifier($class, $plugin, $row_index) {
     return backdrop_clean_css_identifier($class, array());
   }
 }
+
+/**
+ * Implements hook_views_pre_render().
+ */
+function views_views_pre_render(&$view) {
+  $tags = array(
+    'views:' . $view->name,
+    'views:' . $view->name . '.' . $view->current_display,
+  );
+  backdrop_add_cache_tags($tags);
+}
