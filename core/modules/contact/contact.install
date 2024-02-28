@@ -13,7 +13,7 @@ function contact_install() {
     // Insert a default contact category.
     $contact = array(
       'cid' => 1,
-      'category' => 'Website feedback',
+      'category' => 'General',
       'recipients' => $email,
       'reply' => '',
       'weight' => 1,

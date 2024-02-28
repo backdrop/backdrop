@@ -546,6 +546,34 @@ class ConfigurationUITest extends BackdropWebTestCase {
   }
 
   /**
+   * Test comparing configs whose elements are in different order.
+   */
+  public function testConfigOrderChange() {
+    $config_name = 'foo.bar';
+    $content = array(
+      'a' => 'Foo',
+      'b' => 'Bar',
+    );
+    $config = config($config_name);
+    $config->setData($content);
+    $config->save();
+
+    // Copy all configuration to staging before modification.
+    $this->copyConfig('active', 'staging');
+
+    // Reverse the content of the array.
+    krsort($content);
+
+    // Store the reversed config.
+    $config->setData($content);
+    $config->save();
+
+    // Verify that the file appears as ready to import.
+    $this->backdropGet('admin/config/development/configuration');
+    $this->assertText($config_name, 'The configuration name appears in the list of changed configurations.');
+  }
+
+  /**
    * Copies configuration objects from source storage to target storage.
    *
    * @param string $source
