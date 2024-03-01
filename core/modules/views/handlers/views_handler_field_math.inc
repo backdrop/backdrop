@@ -63,7 +63,7 @@ class views_handler_field_math extends views_handler_field_numeric {
       $precision = $this->options['precision'];
     }
     elseif ($decimal_position = strpos($value, '.')) {
-      $precision = strlen($value) - $decimal_position - 1;
+      $precision = strlen(rtrim($value, '0')) - $decimal_position - 1;
     }
     else {
       $precision = 0;
