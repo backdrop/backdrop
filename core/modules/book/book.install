@@ -42,7 +42,7 @@ function _book_install_type_create() {
     ),
   );
 
-  $book_node_type = node_type_set_defaults($book_node_type);
+  $book_node_type = (object) $book_node_type;
   node_type_save($book_node_type);
   node_add_body_field($book_node_type);
 }
