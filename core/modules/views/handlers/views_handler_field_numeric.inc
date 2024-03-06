@@ -147,7 +147,7 @@ class views_handler_field_numeric extends views_handler_field {
      }
 
     $value = number_format($value, $precision, $this->options['decimal'], $this->options['separator']);
-    
+
     // Should we format as a plural.
     if (!empty($this->options['format_plural'])) {
       $value = format_plural($value, $this->options['format_plural_singular'], $this->options['format_plural_plural']);
