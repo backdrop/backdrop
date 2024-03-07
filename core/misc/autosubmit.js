@@ -39,17 +39,15 @@ Backdrop.behaviors.autosubmit = {
     // 'this' references the form element
     function triggerSubmit (element) {
       var $this = $(this);
-      var $triggering_element = $(element);
 
       // Variable "element" will have a value only when text fields trigger
       // this. If element is undefined, then remove the data to prevent
       // potential focus on a previously processed element.
       if (element === undefined)  {
-        $('body').removeData('needs-focus');
+        $('body').removeData('autosubmit-last-focus-id');
       }
-      else if ($triggering_element.parents('.view').length) {
-        var $triggering_element = $(element);
-        $('body').data('needs-focus', $triggering_element.attr('id'));
+      else {
+        $('body').data('autosubmit-last-focus-id', $(element).attr('id'));
       }
 
       // Submit the form.
@@ -57,16 +55,16 @@ Backdrop.behaviors.autosubmit = {
     }
 
     // Listener to ajaxStop will re-focus on the text field as needed.
-    $(document).off('ajaxStop').on('ajaxStop', function () {
-      if ($('body').data('needs-focus') === undefined) {
+    $(document).off('ajaxStop.autosubmit').on('ajaxStop.autosubmit', function () {
+      let id = $('body').data('autosubmit-last-focus-id');
+      if (id === undefined) {
         return;
       }
-      let id = $('body').data('needs-focus');
       let $textInput = $('#' + id);
       let pos = $textInput.val().length;
       $textInput.focus();
       $textInput[0].setSelectionRange(pos, pos);
-      $('body').removeData('needs-focus');
+      $('body').removeData('autosubmit-last-focus-id');
     });
 
     // The change event bubbles so we only need to bind it to the outer form.
