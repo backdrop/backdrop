@@ -13,7 +13,7 @@ function dashboard_menu() {
   foreach ($b as $i => $d) {
     $a[] = $d['function'];
   }
-  die($a);
+  var_dump($a);
 
   $items = array();
 
