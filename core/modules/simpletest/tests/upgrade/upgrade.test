@@ -69,7 +69,7 @@ abstract class UpgradePathTestCase extends BackdropWebTestCase {
     // Reset all statics and variables to perform tests in a clean environment.
     $conf = array();
     backdrop_static_reset();
-    menu_router_build();
+    cache('layout_path')->flush();
 
     // Change the database prefix.
     // All static variables need to be reset before the database prefix is
