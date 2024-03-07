@@ -8,6 +8,13 @@
  * Implements hook_menu().
  */
 function dashboard_menu() {
+  $b = debug_backtrace();
+  $a = array();
+  foreach ($b as $i => $d) {
+    $a[] = $d['function'];
+  }
+  die($a);
+
   $items = array();
 
   // Check if any dashboard is present and is not disabled.
