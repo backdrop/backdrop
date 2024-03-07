@@ -28,6 +28,11 @@ abstract class UpgradePathTestCase extends BackdropWebTestCase {
   var $loadedModules = array();
 
   /**
+   * @var string
+   */
+  protected $profile = 'testing';
+
+  /**
    * Checks that zlib is enabled in order to run the upgrade tests.
    */
   protected function checkRequirements() {
