@@ -418,7 +418,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
   );
   $form['revision']['revision']['revision_enabled'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Show option to create new revisions'),
+    '#title' => t('Enable option to create revisions'),
     '#default_value' => $type->settings['revision_enabled'],
     '#parents' => array('revision_enabled'),
     '#description' => t('Revisions allow content editors to view changes over time and revert changes if needed.'),
@@ -426,8 +426,17 @@ function node_type_form($form, &$form_state, $type = NULL) {
   $form['revision']['revision']['revision_default'] = array(
     '#type' => 'checkbox',
     '#title' => t('Create new revision by default'),
+    '#description' => t('If enabled, revisions to content will be created by default. People with the "Administer content" permission will see an option to create a revision.'),
     '#default_value' => $type->settings['revision_default'],
     '#parents' => array('revision_default'),
+    '#states' => array(
+      'visible' => array(
+        'input[name="revision_enabled"]' => array('checked' => TRUE),
+      ),
+      'enabled' => array(
+        'input[name="revision_enabled"]' => array('checked' => TRUE),
+      ),
+    ),
   );
 
   // Menu settings.
