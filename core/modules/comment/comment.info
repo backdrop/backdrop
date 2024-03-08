@@ -5,9 +5,9 @@ package = Comments
 tags[] = Content
 version = BACKDROP_VERSION
 backdrop = 1.x
+dependencies[] = entity
 dependencies[] = node
 dependencies[] = text
-dependencies[] = entity
 
 configure = admin/content/comment
 

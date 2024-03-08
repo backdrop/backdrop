@@ -48,6 +48,56 @@ function config($config_file, $type = 'active') {
 }
 
 /**
+ * Retrieves configuration information provided by modules.
+ *
+ * @param string $config_name
+ *   (optional) The name of the config file whose information should be
+ *   retrieved. If not specified, information for all configuration prefixes is
+ *   returned.
+ * @return array
+ *   An array of all configuration information, either for the single
+ *   configuration file based on its prefix, or configuration information for
+ *   all installed modules if no $config_name is specified.
+ *
+ * @see hook_config_info()
+ * @see hook_config_info_alter()
+ *
+ * @since 1.28.0 The returned array now includes the "module" key for each item.
+ */
+function config_get_info($config_name = NULL) {
+  $config_info = &backdrop_static(__FUNCTION__, array());
+  if (empty($config_info)) {
+    $modules = module_implements('config_info');
+    foreach ($modules as $module) {
+      $module_config_info = module_invoke($module, 'config_info');
+      foreach ($module_config_info as $config_name_single => $config_info_single) {
+        // Populate defaults:
+        $config_info_single += array(
+          'module' => $module,
+          'enforce_data_types' => FALSE,
+        );
+        $config_info[$config_name_single] = $config_info_single;
+      }
+    }
+    backdrop_alter('config_info', $config_info);
+  }
+
+  if ($config_name) {
+    $return_config_info = FALSE;
+    foreach ($config_info as $prefix => $this_config_info) {
+      if ($config_name === $prefix || strpos($config_name, $prefix . '.') === 0) {
+        $return_config_info = $this_config_info;
+        break;
+      }
+    }
+    return $return_config_info;
+  }
+  else {
+    return $config_info;
+  }
+}
+
+/**
  * A shortcut function to delete a single value from a config file.
  *
  * Note that this function immediately writes the config file to disk and clears
@@ -270,6 +320,33 @@ function config_load_multiple($names, $type = 'active') {
 }
 
 /**
+ * Reads the default data from a project's default JSON configuration file.
+ *
+ * @param string $project
+ *   The name of the project providing the configuration file.
+ * @param string $config_name
+ *   The configuration file name without the extension.
+ *
+ * @return array
+ *   The configuration data provided by the default project configuration file.
+ */
+function config_get_default_config_data($project, $config_name) {
+  // Determine if this is a module or theme:
+  foreach (array('module', 'theme') as $project_type) {
+    if ($project_path = backdrop_get_path($project_type, $project)) {
+      break;
+    }
+  }
+  $project_path = backdrop_get_path($project_type, $project);
+  $project_config_dir = $project_path . '/config';
+  $config_file_path = $project_config_dir . '/' . $config_name . '.json';
+  if (is_dir($project_config_dir) && is_file($config_file_path)) {
+    $storage = new ConfigFileStorage($project_config_dir);
+    return $storage->read($config_name);
+  }
+}
+
+/**
  * Moves the default config supplied by a project to the live config directory.
  *
  * @param string $project
@@ -289,7 +366,6 @@ function config_install_default_config($project, $config_name = NULL) {
   }
   $project_config_dir = $project_path . '/config';
   if (is_dir($project_config_dir)) {
-    $storage = new ConfigFileStorage($project_config_dir);
     $files = glob($project_config_dir . '/*.json');
     foreach ($files as $file) {
       // Load config data into the active store and write it out to the
@@ -299,7 +375,7 @@ function config_install_default_config($project, $config_name = NULL) {
       $file = array_pop($parts);
       $file_config_name = str_replace('.json', '', $file);
       if (is_null($config_name) || $file_config_name === $config_name) {
-        $data = $storage->read($file_config_name);
+        $data = config_get_default_config_data($project, $file_config_name);
         $config = config($file_config_name);
         // We only create new configs, and do not overwrite existing ones.
         if ($config->isNew()) {
@@ -1002,6 +1078,25 @@ class Config {
     }
     // Ensure config name is saved in the result.
     $this->data = array_merge(array('_config_name' => $this->name), $this->data);
+
+    // Cast data types to match the default configuration.
+    $config_info = config_get_info($this->name);
+    if ($config_info && $config_info['enforce_data_types']) {
+      $default_data = config_get_default_config_data($config_info['module'], $this->name);
+      $copy_types = array('boolean', 'integer', 'double', 'string', 'array');
+      // @todo: Deep data type copying? Right now this only enforces the first
+      // level of data types.
+      foreach ($default_data as $default_key => $default_value) {
+        if (isset($this->data[$default_key])) {
+          $default_type = gettype($default_value);
+          if (in_array($default_type, $copy_types)) {
+            settype($this->data[$default_key], $default_type);
+          }
+        }
+      }
+    }
+
+    // Write the config to storage.
     $this->storage->write($this->name, $this->data);
     $this->isNew = FALSE;
 
