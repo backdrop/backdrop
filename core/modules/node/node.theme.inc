@@ -33,12 +33,13 @@ function theme_node_preview_banner_form($variables) {
 }
 
 /**
- * Returns HTML for node_preview().
+ * Returns HTML for a node preview for display during node creation and editing.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - node_preview: A render element representing the node preview.
  *
+ * @see node_preview()
  * @see node_preview_banner_form()
  * @see theme_node_preview_banner_form()
  * @ingroup themeable

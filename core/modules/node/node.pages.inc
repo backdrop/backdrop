@@ -376,7 +376,7 @@ function node_form($form, &$form_state, Node $node) {
       ),
       '#states' => array(
         'visible' => array(
-         ':input[name="status"]' => array('value' => NODE_SCHEDULED),
+          ':input[name="status"]' => array('value' => NODE_SCHEDULED),
         ),
       ),
     );
@@ -1083,7 +1083,7 @@ function node_autocomplete($string = '') {
  * Since the user chose a unique node, we must now use the same one in our
  * submit handler, which means we need to look in the string for the nid.
  *
- * @param $string
+ * @param string $string
  *   The string to validate.
  * @return $nid
  *   A node ID if matched, or NULL if no match.

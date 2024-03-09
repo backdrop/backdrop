@@ -1967,7 +1967,7 @@ function node_menu() {
 /**
  * Access callback: Checks a user's permission for previewing a node.
  *
- * @param $node_tempstore_id
+ * @param string $node_tempstore_id
  *   The node_tempstore_id of the node being created or updated.
  *
  * @return bool
@@ -2158,7 +2158,7 @@ function node_block_configure($delta = '', $settings = array()) {
  * @param array $settings
  *   Block configuration settings.
  */
-function node_syndicate_content($settings) {
+function node_syndicate_content(array $settings) {
   if (isset($settings['syndicate_settings']) && $settings['syndicate_settings'] == 'page_content') {
     return backdrop_get_feeds();
   }
