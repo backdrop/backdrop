@@ -186,20 +186,22 @@ function color_css_alter(&$css) {
         );
         foreach ($theme_info['css'] as $file) {
           $filename = _color_get_file_path($file, $preview_theme);
-          $stylesheet = file_get_contents($filename);
-          $paths['source'] = backdrop_get_path('theme', _color_get_theme_from_file($file, $preview_theme));
-          $base = base_path() . dirname($filename) . '/';
-          _backdrop_build_css_path(NULL, $base);
+          if ($filename) {
+            $stylesheet = file_get_contents($filename);
+            $paths['source'] = backdrop_get_path('theme', _color_get_theme_from_file($file, $preview_theme));
+            $base = base_path() . dirname($filename) . '/';
+            _backdrop_build_css_path(NULL, $base);
 
-          $stylesheet = preg_replace_callback('/url\([\'"]?(?![a-z]+:|\/+)([^\'")]+)[\'"]?\)/i', '_backdrop_build_css_path', $stylesheet);
-          $stylesheet = _color_rewrite_stylesheet($preview_theme, $theme_info, $paths, $preview_data['palette'], $stylesheet);
+            $stylesheet = preg_replace_callback('/url\([\'"]?(?![a-z]+:|\/+)([^\'")]+)[\'"]?\)/i', '_backdrop_build_css_path', $stylesheet);
+            $stylesheet = _color_rewrite_stylesheet($preview_theme, $theme_info, $paths, $preview_data['palette'], $stylesheet);
 
-          foreach ($css as $path => $data) {
-            if ($path == $filename) {
-              $css[$path]['type'] = 'inline';
-              $css[$path]['preprocess'] = 'false';
-              $css[$path]['data'] = $stylesheet;
-              break;
+            foreach ($css as $path => $data) {
+              if ($path == $filename) {
+                $css[$path]['type'] = 'inline';
+                $css[$path]['preprocess'] = 'false';
+                $css[$path]['data'] = $stylesheet;
+                break;
+              }
             }
           }
         }
@@ -227,7 +229,9 @@ function color_css_alter(&$css) {
         if (array_key_exists($basename, $old_paths)) {
           // Replace the path to the new css file.
           // This keeps the order of the stylesheets intact.
-          $css[$old_paths[$basename]]['data'] = $color_path;
+          if (isset($css[$old_paths[$basename]])) {
+            $css[$old_paths[$basename]]['data'] = $color_path;
+          }
         }
       }
     }
@@ -394,6 +398,17 @@ function color_get_info($theme) {
     if (isset($theme_info->base_theme) && !empty($theme_info->base_theme)) {
       $base_info = color_get_info($theme_info->base_theme);
       $info = backdrop_array_merge_deep($info, $base_info);
+    }
+
+    $module_color_info = array();
+    foreach (module_implements('color_info') as $module) {
+      $module_color_info = module_invoke($module, 'color_info');
+      $module_color_info['schemes']['default']['colors'] = $module_color_info['default_colors'];
+      unset($module_color_info['default_colors']);
+      foreach ($module_color_info['css'] as $key => $file) {
+        $module_color_info['css'][$key] = $module . '_css_path_' . $file;
+      }
+      $info = backdrop_array_merge_deep($info, $module_color_info);
     }
 
     $info['css'] = array_unique($info['css']);
@@ -756,6 +771,23 @@ function _color_save_stylesheet($file, $style, &$paths) {
  */
 function _color_get_file_path($filename, $theme_name) {
   static $basenames = array();
+  static $module_filenames = array();
+
+  // Get paths from modules CSS files. These are stored in the format:
+  // MODULE_NAME_css_path_PATH_TO_CSS_FILE.
+  if (isset($module_filenames[$filename])) {
+    return $module_filenames[$filename];
+  }
+  else {
+    $file_data = explode('_css_path_', $filename);
+    if (isset($file_data[1])) {
+      $module_css = backdrop_get_path('module', $file_data[0]) . '/' . $file_data[1];
+      if (file_exists($module_css)) {
+        $module_filenames[$filename] = $module_css;
+        return $module_css;
+      }
+    }
+  }
 
   $themes = list_themes();
   $theme = $themes[$theme_name];
