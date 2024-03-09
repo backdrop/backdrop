@@ -659,7 +659,10 @@ function image_field_formatter_info() {
 function image_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
-  $svg_allowed = strpos($instance['settings']['file_extensions'], 'svg') !== FALSE;
+  $svg_allowed = FALSE;
+  if (isset($instance['settings']['file_extensions'])) {
+    $svg_allowed = strpos($instance['settings']['file_extensions'], 'svg') !== FALSE;
+  }
 
   $image_styles = image_style_options(FALSE, PASS_THROUGH);
   $element['image_style'] = array(
@@ -716,7 +719,7 @@ function image_field_formatter_settings_form($field, $instance, $view_mode, $for
     '#type' => 'checkbox',
     '#access' => $svg_allowed,
     '#title' => t('Render SVG images in an &lt;img&gt; tag'),
-    '#default_value' => $settings['image_svg_display'],
+    '#default_value' => !empty($settings['image_svg_display']),
   );
   $element['image_svg_dimensions'] = array(
     '#type' => 'item',
@@ -736,7 +739,7 @@ function image_field_formatter_settings_form($field, $instance, $view_mode, $for
     '#type' => 'number',
     '#title' => t('Maximum width'),
     '#title_display' => 'invisible',
-    '#default_value' => $settings['image_svg_dimensions']['width'],
+    '#default_value' => isset($settings['image_svg_dimensions']['width']) ? $settings['image_svg_dimensions']['width'] : IMAGE_SVG_DEFAULT_WIDTH,
     '#min' => 0,
     '#max' => 100000,
     '#field_suffix' => ' x ',
@@ -745,7 +748,7 @@ function image_field_formatter_settings_form($field, $instance, $view_mode, $for
     '#type' => 'number',
     '#title' => t('Maximum height'),
     '#title_display' => 'invisible',
-    '#default_value' => $settings['image_svg_dimensions']['height'],
+    '#default_value' => isset($settings['image_svg_dimensions']['height']) ? $settings['image_svg_dimensions']['height'] : IMAGE_SVG_DEFAULT_HEIGHT,
     '#min' => 0,
     '#max' => 100000,
     '#field_suffix' => ' ' . t('pixels'),
