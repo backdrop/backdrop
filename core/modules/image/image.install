@@ -367,6 +367,17 @@ function image_update_1008() {
 }
 
 /**
+ * Set the default SVG sanitizer on update.
+ */
+function image_update_1009() {
+  $config = config('image.settings');
+  if (!$config->get('svg_sanitizer_class')) {
+    $config->set('svg_sanitizer_class', 'enshrined\\svgSanitize\\Sanitizer');
+    $config->save();
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
