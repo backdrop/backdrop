@@ -586,7 +586,7 @@ Backdrop.ajaxError = function (xmlhttp, uri, customMessage) {
   // Unfortunately, testing for it with typeof, etc, doesn't seem to catch that
   // and the test causes an exception. So we need to catch the exception here.
   try {
-    statusText = "\n" + Backdrop.t("StatusText: !statusText", {'!statusText': $.trim(xmlhttp.statusText)});
+    statusText = "\n" + Backdrop.t("StatusText: !statusText", {'!statusText': xmlhttp.statusText.trim()});
   }
   catch (e) {}
 
@@ -594,7 +594,7 @@ Backdrop.ajaxError = function (xmlhttp, uri, customMessage) {
   // Again, we don't have a way to know for sure whether accessing
   // xmlhttp.responseText is going to throw an exception. So we'll catch it.
   try {
-    responseText = "\n" + Backdrop.t("ResponseText: !responseText", {'!responseText': $.trim(xmlhttp.responseText) } );
+    responseText = "\n" + Backdrop.t("ResponseText: !responseText", {'!responseText': xmlhttp.responseText.trim() } );
   } catch (e) {}
 
   // Make the responseText more readable by stripping HTML tags and newlines.
