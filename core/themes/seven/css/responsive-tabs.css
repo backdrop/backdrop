@@ -105,8 +105,6 @@ ul.primary.responsive-tabs-dropdown li:last-child a {
 .responsive-tabs-after .expand-dropdown-tabs-control {
   border-left: 0;
   border-right: 2px solid #f0f0f0;
-  -webkit-border-radius: 4px 0 0 0;
-  -moz-border-radius: 4px 0 0 0;
   border-radius: 4px 0 0 0;
 }
 .desktop-primary-tabs .expand-dropdown-tabs-control {
@@ -149,8 +147,6 @@ ul.primary.responsive-tabs-dropdown li:last-child a {
   height: 100%;
   padding: 0;
   border: 0;
-  -webkit-border-radius: 4px 4px 0 0;
-  -moz-border-radius: 4px 4px 0 0;
   overflow: hidden;
   border-radius: 4px 4px 0 0;
 }

@@ -41,6 +41,10 @@ function system_token_info() {
     'description' => t('Tokens related to arrays of strings.'),
     'needs-data' => 'array',
   );
+  $types['random'] = array(
+    'name' => t('Random'),
+    'description' => ('Tokens related to random data.'),
+  );
 
   // Site-wide global tokens.
   $site['name'] = array(
@@ -256,6 +260,21 @@ function system_token_info() {
     'type' => 'user',
   );
 
+  // Random tokens.
+  $random['number'] = array(
+    'name' => t('Number'),
+    'description' => t('A random number from 0 to @max.', array(
+      '@max' => mt_getrandmax(),
+    )),
+  );
+  $random['hash'] = array(
+    'name' => t('Hash'),
+    'description' => t('A random hash. The possible hashing algorithms are: @hash-algos.', array(
+      '@hash-algos' => implode(', ', hash_algos()),
+    )),
+    'dynamic' => TRUE,
+  );
+
   return array(
     'types' => $types,
     'tokens' => array(
@@ -266,6 +285,7 @@ function system_token_info() {
       'array' => $array,
       'date' => $date,
       'file' => $file,
+      'random' => $random,
     ),
   );
 }
@@ -598,6 +618,27 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
 
     if (($url_tokens = token_find_with_prefix($tokens, 'url'))) {
       $replacements += token_generate('url', $url_tokens, $file->uri(), $options);
+    }
+  }
+
+  // Random tokens.
+  elseif ($type == 'random') {
+    foreach ($tokens as $name => $original) {
+      switch ($name) {
+        case 'number':
+          $replacements[$original] = mt_rand();
+          break;
+      }
+    }
+
+    // For [random:hash:?] dynamic token.
+    if ($hash_tokens = token_find_with_prefix($tokens, 'hash')) {
+      $algos = hash_algos();
+      foreach ($hash_tokens as $name => $original) {
+        if (in_array($name, $algos)) {
+          $replacements[$original] = hash($name, backdrop_random_bytes(55));
+        }
+      }
     }
   }
 

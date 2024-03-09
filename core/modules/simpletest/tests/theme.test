@@ -225,7 +225,7 @@ class ThemeTableUnitTest extends BackdropWebTestCase {
   /**
    * Tests that the 'footer' option works correctly.
    */
-  function testThemeTableFooter() {
+  protected function testThemeTableFooter() {
     $footer = array(
       array(
         'data' => array(1),
@@ -277,11 +277,24 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
     $expected = '<div class="item-list"><h3>Some title</h3>No items found.</div>';
     $this->assertThemeOutput('item_list', $variables, $expected, 'Empty %callback generates empty string with title.');
 
+    // Verify that additional attributes can be added to the wrapper div.
+    $attribute_name = $this->randomName();
+    $attribute_value = $this->randomName();
+    $another_css_class = $this->randomName();
+    $variables = array();
+    $variables['empty'] = 'No items found.';
+    $variables['wrapper_attributes'] = array(
+      $attribute_name => $attribute_value,
+      'class' => array($another_css_class),
+    );
+    $expected = '<div ' . $attribute_name . '="' . $attribute_value . '" class="' . $another_css_class . ' item-list">No items found.</div>';
+    $this->assertThemeOutput('item_list', $variables, $expected, 'Additional attributes added to the wrapper div.');
+
     // Verify nested item lists.
     $variables = array();
     $variables['title'] = 'Some title';
     $variables['attributes'] = array(
-      'id' => 'parentlist',
+      'id' => 'parent-list',
     );
     $variables['items'] = array(
       'a',
@@ -295,7 +308,7 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
             'class' => array('dee'),
           ),
           // Any string key is treated as child list attribute.
-          'id' => 'childlist',
+          'id' => 'child-list',
         ),
         // Any other keys are treated as item attributes.
         'id' => 'bee',
@@ -305,14 +318,14 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
         'id' => 'E',
       ),
     );
-    $inner = '<div class="item-list"><ul id="childlist">';
+    $inner = '<div class="item-list"><ul id="child-list">';
     $inner .= '<li class="odd first">c</li>';
     $inner .= '<li class="dee even last">d</li>';
     $inner .= '</ul></div>';
 
     $expected = '<div class="item-list">';
     $expected .= '<h3>Some title</h3>';
-    $expected .= '<ul id="parentlist">';
+    $expected .= '<ul id="parent-list">';
     $expected .= '<li class="odd first">a</li>';
     $expected .= '<li id="bee" class="even">b' . $inner . '</li>';
     $expected .= '<li id="E" class="odd last">e</li>';
@@ -343,7 +356,7 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
 
     // Verify that a list of links is properly rendered.
     $variables = array();
-    $variables['attributes'] = array('id' => 'somelinks');
+    $variables['attributes'] = array('id' => 'some-links');
     $variables['links'] = array(
       'a link' => array(
         'title' => 'A <link>',
@@ -359,7 +372,7 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
     );
 
     $expected_links = '';
-    $expected_links .= '<ul id="somelinks">';
+    $expected_links .= '<ul id="some-links">';
     $expected_links .= '<li class="a-link odd first"><a href="' . url('a/link') . '">' . check_plain('A <link>') . '</a></li>';
     $expected_links .= '<li class="plain-text even"><span>' . check_plain('Plain "text"') . '</span></li>';
     $expected_links .= '<li class="front-page odd last active"><a href="' . url('<front>') . '" class="active" aria-current="page">' . check_plain('Home page') . '</a></li>';
@@ -396,7 +409,7 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
    * @param $message
    *   (optional) An assertion message.
    */
-  protected function assertThemeOutput($callback, array $variables = array(), $expected, $message = '', $group = 'Other') {
+  protected function assertThemeOutput($callback, array $variables = array(), $expected = '', $message = '', $group = 'Other') {
     $output = theme($callback, $variables);
     $this->verbose('Variables:<pre>' .  check_plain(var_export($variables, TRUE)) . '</pre>'
       . '<hr />Result:<pre>' .  check_plain(var_export($output, TRUE)) . '</pre>'

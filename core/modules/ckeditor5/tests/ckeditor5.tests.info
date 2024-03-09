@@ -1,0 +1,17 @@
+[CKEditor5TestCase]
+name = CKEditor5
+description = Check the functionality of CKEditor5 module.
+group = CKEditor5
+file = ckeditor5.test
+
+[CKEditor5RtlTestCase]
+name = CKEditor5 RTL
+description = Check the functionality of CKEditor5 with right-to-left languages.
+group = CKEditor5
+file = ckeditor5_rtl.test
+
+[CKEditor5UpgradeTestCase]
+name = CKEditor5 Upgrade
+description = Check the upgrade process from CKEditor 4 to CKEditor 5.
+group = CKEditor5
+file = ckeditor5_upgrade.test

@@ -11,7 +11,7 @@ function user_path_info() {
   $info['user'] = array(
     'entity type' => 'user',
     'label' => t('User account'),
-    'pattern description' => t('URL alias pattern for user account URLs'),
+    'pattern label' => t('URL alias pattern for user accounts'),
     'pattern default' => 'users/[user:name]',
     'batch update callback' => 'user_path_bulk_update_batch_process',
     'batch file' => 'user.path.inc',

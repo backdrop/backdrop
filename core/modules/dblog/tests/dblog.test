@@ -649,17 +649,10 @@ class DBLogTestCase extends BackdropWebTestCase {
    */
   protected function getSeverityConstant($class) {
     // Reversed array from dblog_overview().
-    $map = array(
-      'dblog-deprecated' => WATCHDOG_DEPRECATED,
-      'dblog-debug' => WATCHDOG_DEBUG,
-      'dblog-info' => WATCHDOG_INFO,
-      'dblog-notice' => WATCHDOG_NOTICE,
-      'dblog-warning' => WATCHDOG_WARNING,
-      'dblog-error' => WATCHDOG_ERROR,
-      'dblog-critical' => WATCHDOG_CRITICAL,
-      'dblog-alert' => WATCHDOG_ALERT,
-      'dblog-emergency' => WATCHDOG_EMERGENCY,
-    );
+    $levels = watchdog_severity_levels('name');
+    foreach (array_reverse($levels, TRUE) as $key => $value) {
+      $map['dblog-' . $value] = $key;
+    }
 
     // Find the class that contains the severity.
     $classes = explode(' ', $class);

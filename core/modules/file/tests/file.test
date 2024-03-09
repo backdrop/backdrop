@@ -74,7 +74,10 @@ class FileTestHelper extends BackdropWebTestCase {
   protected function createFile($settings = array()) {
     // Populate defaults array.
     $settings += array(
-      'filepath' => 'Файлдлятестирования ' . $this->randomName(), // Prefix with non-latin characters to ensure that all file-related tests work with international filenames.
+      // Prefix with non-latin characters to ensure that all file-related tests
+      // work with international filenames.
+      // cspell:disable-next-line
+      'filepath' => 'Файлдлятестирования ' . $this->randomName(),
       'filemime' => 'text/plain',
       'uid' => 1,
       'timestamp' => REQUEST_TIME,
@@ -1383,7 +1386,10 @@ class FileFieldDisplayTestCase extends FileTestHelper {
     // Check that the default formatter is displaying with the file name.
     $node = node_load($nid, NULL, TRUE);
     $node_file = (object) $node->{$field_name}[LANGUAGE_NONE][0];
-    $default_output = theme('file_link', array('file' => $node_file));
+    $default_output = theme('file_link', array(
+      'file' => $node_file,
+      'attributes' => array('class' => array('file-preview-link')),
+    ));
     $this->assertRaw($default_output, 'Default formatter displaying correctly on full node view.');
 
     // Turn the "display" option off and check that the file is no longer displayed.
@@ -1668,6 +1674,7 @@ class FileTokenReplaceTestCase extends FileTestHelper {
 
     $test_file = $this->getTestFile('text');
     // Coping a file to test uploads with non-latin filenames.
+    //cspell:disable-next-line
     $filename = backdrop_dirname($test_file->uri) . '/текстовый файл.txt';
     $test_file = file_copy($test_file, $filename);
 

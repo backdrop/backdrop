@@ -3,7 +3,7 @@
  * @file
  * Test module implementing a form that can be embedded in search results.
  *
- * Embedded form are important, for example, for ecommerce sites where each
+ * Embedded form are important, for example, for e-commerce sites where each
  * search result may included an embedded form with buttons like "Add to cart"
  * for each individual product (node) listed in the search results.
  */

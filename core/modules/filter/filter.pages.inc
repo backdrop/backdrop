@@ -503,8 +503,19 @@ function filter_format_editor_dialog_save($form, &$form_state) {
     $error_messages = theme('status_messages');
     $rendered_form = backdrop_render($form);
     $commands[] = ajax_command_remove('.editor-dialog .messages');
-    $commands[] = ajax_command_replace('.editor-dialog form', $rendered_form);
+    $commands[] = ajax_command_replace('.editor-dialog form.filter-format-editor-image-form', $rendered_form);
     $commands[] = ajax_command_prepend('.editor-dialog .ui-dialog-content', $error_messages);
+    // Check whether this is an image upload, a library selection, or a link to
+    // another non-library file. Note that classes "first" and "last" are
+    // dynamically assigned, so are not consistently on the same link.
+    if (empty($form_state['input']['fid']['fid'])) {
+      // Custom link to a non-library file.
+      $commands[] = ajax_command_invoke('.editor-dialog form.filter-format-editor-image-form a.last', 'click');
+    }
+    else {
+      // Library file has been selected.
+      $commands[] = ajax_command_invoke('.editor-dialog form.filter-format-editor-image-form a.first', 'click');
+    }
   }
   else {
     $commands[] = array(

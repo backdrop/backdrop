@@ -80,8 +80,8 @@ function hook_hook_info_alter(&$hooks) {
  */
 function hook_admin_paths() {
   $paths = array(
-    'mymodule/*/add' => TRUE,
-    'mymodule/*/edit' => TRUE,
+    'my_module/*/add' => TRUE,
+    'my_module/*/edit' => TRUE,
   );
   return $paths;
 }
@@ -460,7 +460,7 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
   // When retrieving the router item for the current path...
   if ($path == $_GET['q']) {
     // ...call a function that prepares something for this request.
-    mymodule_prepare_something();
+    my_module_prepare_something();
   }
 }
 
@@ -485,14 +485,14 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  * components are passed to the callback function. For example, your module
  * could register path 'abc/def':
  * @code
- *   function mymodule_menu() {
+ *   function my_module_menu() {
  *     $items['abc/def'] = array(
- *       'page callback' => 'mymodule_abc_view',
+ *       'page callback' => 'my_module_abc_view',
  *     );
  *     return $items;
  *   }
  *
- *   function mymodule_abc_view($ghi = 0, $jkl = '') {
+ *   function my_module_abc_view($ghi = 0, $jkl = '') {
  *     // ...
  *   }
  * @endcode
@@ -517,9 +517,9 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  * allows you to re-use a callback function for several different paths. For
  * example:
  * @code
- *   function mymodule_menu() {
+ *   function my_module_menu() {
  *     $items['abc/def'] = array(
- *       'page callback' => 'mymodule_abc_view',
+ *       'page callback' => 'my_module_abc_view',
  *       'page arguments' => array(1, 'foo'),
  *     );
  *     return $items;
@@ -532,14 +532,14 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  * requested with optional path arguments, then the list array's arguments are
  * passed to the callback function first, followed by the optional path
  * arguments. Using the above example, when path 'abc/def/bar/baz' is requested,
- * mymodule_abc_view() will be called with 'def', 'foo', 'bar' and 'baz' as
+ * my_module_abc_view() will be called with 'def', 'foo', 'bar' and 'baz' as
  * arguments, in that order.
  *
  * Special care should be taken for the page callback backdrop_get_form(),
  * because your specific form callback function will always receive $form and
  * &$form_state as the first function arguments:
  * @code
- *   function mymodule_abc_form($form, &$form_state) {
+ *   function my_module_abc_form($form, &$form_state) {
  *     // ...
  *     return $form;
  *   }
@@ -552,7 +552,7 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  * your module could register path 'my-module/%/edit':
  * @code
  *   $items['my-module/%/edit'] = array(
- *     'page callback' => 'mymodule_abc_edit',
+ *     'page callback' => 'my_module_abc_edit',
  *     'page arguments' => array(1),
  *   );
  * @endcode
@@ -562,30 +562,30 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *
  * @subsection sub_autoload_wildcards Auto-Loader Wildcards
  * Registered paths may also contain special "auto-loader" wildcard components
- * in the form of '%mymodule_abc', where the '%' part means that this path
- * component is a wildcard, and the 'mymodule_abc' part defines the prefix for a
- * load function, which here would be named mymodule_abc_load(). When a matching
- * path is requested, your load function will receive as its first argument the
- * path component in the position of the wildcard; load functions may also be
- * passed additional arguments (see "load arguments" in the return value
- * section below). For example, your module could register path
- * 'my-module/%mymodule_abc/edit':
+ * in the form of '%my_module_abc', where the '%' part means that this path
+ * component is a wildcard, and the 'my_module_abc' part defines the prefix for
+ * a load function, which here would be named my_module_abc_load(). When a
+ * matching path is requested, your load function will receive as its first
+ * argument the path component in the position of the wildcard; load functions
+ * may also be passed additional arguments (see "load arguments" in the return
+ * value section below). For example, your module could register path
+ * 'my-module/%my_module_abc/edit':
  * @code
- *   $items['my-module/%mymodule_abc/edit'] = array(
- *     'page callback' => 'mymodule_abc_edit',
+ *   $items['my-module/%my_module_abc/edit'] = array(
+ *     'page callback' => 'my_module_abc_edit',
  *     'page arguments' => array(1),
  *   );
  * @endcode
  * When path 'my-module/123/edit' is requested, your load function
- * mymodule_abc_load() will be invoked with the argument '123', and should
+ * my_module_abc_load() will be invoked with the argument '123', and should
  * load and return an "abc" object with internal id 123:
  * @code
- *   function mymodule_abc_load($abc_id) {
- *     return db_query("SELECT * FROM {mymodule_abc} WHERE abc_id = :abc_id", array(':abc_id' => $abc_id))->fetchObject();
+ *   function my_module_abc_load($abc_id) {
+ *     return db_query("SELECT * FROM {my_module_abc} WHERE abc_id = :abc_id", array(':abc_id' => $abc_id))->fetchObject();
  *   }
  * @endcode
  * This 'abc' object will then be passed into the callback functions defined
- * for the menu item, such as the page callback function mymodule_abc_edit()
+ * for the menu item, such as the page callback function my_module_abc_edit()
  * to replace the integer 1 in the argument array. Note that a load function
  * should return FALSE when it is unable to provide a loadable object. For
  * example, the node_load() function for the 'node/%node/edit' menu item will
@@ -594,7 +594,7 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *
  * @subsection sub_argument_wildcards Argument Wildcards
  * You can also define a %wildcard_to_arg() function (for the example menu
- * entry above this would be 'mymodule_abc_to_arg()'). The _to_arg() function
+ * entry above this would be 'my_module_abc_to_arg()'). The _to_arg() function
  * is invoked to retrieve a value that is used in the path in place of the
  * wildcard. A good example is user.module, which defines
  * user_uid_optional_to_arg() (corresponding to the menu entry
@@ -1305,34 +1305,34 @@ function hook_form_BASE_FORM_ID_alter(&$form, &$form_state, $form_id) {
  *     belong to the wizard, which all share the same wrapper callback.
  */
 function hook_forms($form_id, $args) {
-  // Reroute the (non-existing) $form_id 'mymodule_first_form' to
-  // 'mymodule_main_form'.
-  $forms['mymodule_first_form'] = array(
-    'callback' => 'mymodule_main_form',
+  // Reroute the (non-existing) $form_id 'my_module_first_form' to
+  // 'my_module_main_form'.
+  $forms['my_module_first_form'] = array(
+    'callback' => 'my_module_main_form',
   );
 
   // Reroute the $form_id and prepend an additional argument that gets passed to
-  // the 'mymodule_main_form' form builder function.
-  $forms['mymodule_second_form'] = array(
-    'callback' => 'mymodule_main_form',
+  // the 'my_module_main_form' form builder function.
+  $forms['my_module_second_form'] = array(
+    'callback' => 'my_module_main_form',
     'callback arguments' => array('some parameter'),
   );
 
   // Reroute the $form_id, but invoke the form builder function
-  // 'mymodule_main_form_wrapper' first, so we can prepopulate the $form array
-  // that is passed to the actual form builder 'mymodule_main_form'.
-  $forms['mymodule_wrapped_form'] = array(
-    'callback' => 'mymodule_main_form',
-    'wrapper_callback' => 'mymodule_main_form_wrapper',
+  // 'my_module_main_form_wrapper' first, so we can prepopulate the $form array
+  // that is passed to the actual form builder 'my_module_main_form'.
+  $forms['my_module_wrapped_form'] = array(
+    'callback' => 'my_module_main_form',
+    'wrapper_callback' => 'my_module_main_form_wrapper',
   );
 
   // Build a form with a static class callback.
-  $forms['mymodule_class_generated_form'] = array(
+  $forms['my_module_class_generated_form'] = array(
     // This will call: MyClass::generateMainForm().
     'callback' => array('MyClass', 'generateMainForm'),
     // The base_form_id is required when the callback is a static function in
     // a class. This can also be used to keep newer code backwards compatible.
-    'base_form_id' => 'mymodule_main_form',
+    'base_form_id' => 'my_module_main_form',
   );
 
   return $forms;
@@ -1509,7 +1509,7 @@ function hook_module_implements_alter(&$implementations, $hook) {
 /**
  * Return additional themes provided by modules.
  *
- * Only use this hook for testing purposes. Use a hidden MYMODULE_test.module
+ * Only use this hook for testing purposes. Use a hidden MY_MODULE_test.module
  * to implement this hook. Testing themes should be hidden, too.
  *
  * This hook is invoked from _system_rebuild_theme_data() and allows modules to
@@ -1521,7 +1521,7 @@ function hook_module_implements_alter(&$implementations, $hook) {
  *   is the corresponding path to the theme's .info file.
  */
 function hook_system_theme_info() {
-  $themes['mymodule_test_theme'] = backdrop_get_path('module', 'mymodule') . '/mymodule_test_theme/mymodule_test_theme.info';
+  $themes['my_module_test_theme'] = backdrop_get_path('module', 'my_module') . '/my_module_test_theme/my_module_test_theme.info';
   return $themes;
 }
 
@@ -1813,17 +1813,8 @@ function hook_custom_theme() {
  *     occurred.
  *   - ip: The IP address where the request for the page came from.
  *   - timestamp: The UNIX timestamp of the date/time the event occurred.
- *   - severity: The severity of the message; one of the following values as
- *     defined in @link http://www.faqs.org/rfcs/rfc3164.html RFC 3164: @endlink
- *     - WATCHDOG_EMERGENCY: Emergency, system is unusable.
- *     - WATCHDOG_ALERT: Alert, action must be taken immediately.
- *     - WATCHDOG_CRITICAL: Critical conditions.
- *     - WATCHDOG_ERROR: Error conditions.
- *     - WATCHDOG_WARNING: Warning conditions.
- *     - WATCHDOG_NOTICE: Normal but significant conditions.
- *     - WATCHDOG_INFO: Informational messages.
- *     - WATCHDOG_DEBUG: Debug-level messages.
- *     - WATCHDOG_DEPRECATED: Deprecated use of a function or feature.
+ *   - severity: The severity of the message; see watchdog_severity_levels() for
+ *     possible values.
  *   - link: An optional link provided by the module that called the watchdog()
  *     function.
  *   - message: The text of the message to be logged. Variables in the message
@@ -1837,18 +1828,7 @@ function hook_custom_theme() {
 function hook_watchdog(array $log_entry) {
   global $base_url, $language;
 
-  $severity_list = array(
-    WATCHDOG_EMERGENCY  => t('Emergency'),
-    WATCHDOG_ALERT      => t('Alert'),
-    WATCHDOG_CRITICAL   => t('Critical'),
-    WATCHDOG_ERROR      => t('Error'),
-    WATCHDOG_WARNING    => t('Warning'),
-    WATCHDOG_NOTICE     => t('Notice'),
-    WATCHDOG_INFO       => t('Info'),
-    WATCHDOG_DEBUG      => t('Debug'),
-    WATCHDOG_DEPRECATED => t('Deprecated Use'),
-  );
-
+  $severity_list = watchdog_severity_levels();
   $to = 'someone@example.com';
   $params = array();
   $params['subject'] = t('[@site_name] @severity_desc: Alert from your web site', array(
@@ -1882,7 +1862,7 @@ function hook_watchdog(array $log_entry) {
     '@message'       => strip_tags($log_entry['message']),
   ));
 
-  backdrop_mail('emaillog', 'entry', $to, $language, $params);
+  backdrop_mail('email_log', 'entry', $to, $language, $params);
 }
 
 /**
@@ -1977,7 +1957,7 @@ function hook_flush_caches() {
  *   An array of modules about to be installed.
  */
 function hook_modules_preinstall($modules) {
-  mymodule_cache_clear();
+  my_module_cache_clear();
 }
 
 /**
@@ -1989,7 +1969,7 @@ function hook_modules_preinstall($modules) {
  *   An array of modules about to be enabled.
  */
 function hook_modules_preenable($modules) {
-  mymodule_cache_clear();
+  my_module_cache_clear();
 }
 
 /**
@@ -2034,8 +2014,8 @@ function hook_modules_installed($modules) {
  */
 function hook_modules_enabled($modules) {
   if (in_array('lousy_module', $modules)) {
-    backdrop_set_message(t('mymodule is not compatible with lousy_module'), 'error');
-    mymodule_disable_functionality();
+    backdrop_set_message(t('my_module is not compatible with lousy_module'), 'error');
+    my_module_disable_functionality();
   }
 }
 
@@ -2054,7 +2034,7 @@ function hook_modules_enabled($modules) {
  */
 function hook_modules_disabled($modules) {
   if (in_array('lousy_module', $modules)) {
-    mymodule_enable_functionality();
+    my_module_enable_functionality();
   }
 }
 
@@ -2076,11 +2056,11 @@ function hook_modules_disabled($modules) {
  */
 function hook_modules_uninstalled($modules) {
   foreach ($modules as $module) {
-    db_delete('mymodule_table')
+    db_delete('my_module_table')
       ->condition('module', $module)
       ->execute();
   }
-  mymodule_cache_rebuild();
+  my_module_cache_rebuild();
 }
 
 /**
@@ -2687,31 +2667,31 @@ function hook_schema_alter(&$schema) {
  * @ingroup schemaapi
  */
 function hook_schema_0() {
-  $schema['mymodule'] = array(
-    'description' => 'The base table for mymodule.',
+  $schema['my_module'] = array(
+    'description' => 'The base table for my_module.',
     'fields' => array(
-      'mymodule_id' => array(
-        'description' => 'The primary identifier for mymodule.',
+      'my_module_id' => array(
+        'description' => 'The primary identifier for my_module.',
         'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
       'title' => array(
-        'description' => 'The title column of mymodule.',
+        'description' => 'The title column of my_module.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
         'default' => '',
       ),
       'description' => array(
-        'description' => 'The description column of mymodule.',
+        'description' => 'The description column of my_module.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
         'default' => '',
       ),
     ),
-    'primary key' => array('mymodule_id'),
+    'primary key' => array('my_module_id'),
   );
   return $schema;
 }
@@ -2836,9 +2816,10 @@ function hook_install() {
  * updates should adhere to the
  * @link http://drupal.org/node/150215 Schema API. @endlink
  *
- * Implementations of this hook should be placed in a mymodule.install file in
- * the same directory as mymodule.module. Backdrop core's updates are implemented
- * using the system module as a name and stored in database/updates.inc.
+ * Implementations of this hook should be placed in a my_module.install file in
+ * the same directory as my_module.module. Backdrop core's updates are
+ * implemented using the system module as a name and stored in
+ * database/updates.inc.
  *
  * Implementations of hook_update_N() are named (module name)_update_(number).
  * The numbers are composed of three parts:
@@ -2860,14 +2841,15 @@ function hook_install() {
  * compatibility.
  *
  * Examples:
- * - mymodule_update_1000(): This is the required update for mymodule to run
+ * - my_module_update_1000(): This is the required update for my_module to run
  *   with Backdrop core API 1.x when upgrading from Drupal core API 7.x.
- * - mymodule_update_1100(): This is the first update to get the database/config
- *   ready to run mymodule 1.x-1.*.
- * - mymodule_update_1200(): This is the first update to get the database/config
- *   ready to run mymodule 1.x-2.*. Users can directly update from Drupal 7.x to
- *   Backdrop 1.x-2.*, and they get all the 10xx and 12xx updates, but not the
- *   11xx updates, because those reside in the 1.x-1.x branch only.
+ * - my_module_update_1100(): This is the first update to get the
+ *   database/config ready to run my_module 1.x-1.*.
+ * - my_module_update_1200(): This is the first update to get the
+ *   database/config ready to run my_module 1.x-2.*. Users can directly update
+ *   from Drupal 7.x to Backdrop 1.x-2.*, and they get all the 10xx and 12xx
+ *   updates, but not the 11xx updates, because those reside in the 1.x-1.x
+ *   branch only.
  *
  * A good rule of thumb is to remove updates older than two major releases of
  * Backdrop. See hook_update_last_removed() to notify Backdrop about the
@@ -2880,12 +2862,12 @@ function hook_install() {
  *
  * Module functions not in the install file cannot be counted on to be available
  * from within a hook_update_N() function. In order to call a function from your
- * mymodule.module or an include file, you need to explicitly load that file
+ * my_module.module or an include file, you need to explicitly load that file
  * first.
  *
  * This is because if a module was previously enabled but is now disabled (and
  * has not been uninstalled), update hooks will still be called for that module
- * during system updates, but the mymodule.module file (and any other files
+ * during system updates, but the my_module.module file (and any other files
  * loaded by that one, including, for example, autoload information) will not
  * have been loaded.
  *
@@ -2925,20 +2907,21 @@ function hook_install() {
  * @see update_get_update_list()
  */
 function hook_update_N(&$sandbox) {
-  // For non-multipass updates the signature can be `function hook_update_N() {`
+  // For non-multipass updates the signature can be:
+  // `function hook_update_N() {`.
 
   // Convert Drupal 7 variables to Backdrop config. Make sure these new config
-  // settings and their default values exist in `config/mymodule.settings.json`.
-  $config = config('mymodule.settings');
-  $config->set('one', update_variable_get('mymodule_one', '1.11'));
-  $config->set('two', update_variable_get('mymodule_two', '2.22'));
+  // settings and their default values exist in config/my_module.settings.json.
+  $config = config('my_module.settings');
+  $config->set('one', update_variable_get('my_module_one', '1.11'));
+  $config->set('two', update_variable_get('my_module_two', '2.22'));
   $config->save();
-  update_variable_del('mymodule_one');
-  update_variable_del('mymodule_two');
+  update_variable_del('my_module_one');
+  update_variable_del('my_module_two');
 
   // Update existing config with a new setting. Make sure the new setting and
-  // its default value exists in `config/mymodule.settings.json`.
-  config_set('mymodule.settings', 'three', '3.33');
+  // its default value exists in `config/my_module.settings.json`.
+  config_set('my_module.settings', 'three', '3.33');
 
   // For most database updates, the following is sufficient.
   db_add_field('mytable1', 'newcol', array('type' => 'int', 'not null' => TRUE, 'description' => 'My new integer column.'));
@@ -2990,8 +2973,8 @@ function hook_update_N(&$sandbox) {
  * system to determine the appropriate order in which updates should be run, as
  * well as to search for missing dependencies.
  *
- * Implementations of this hook should be placed in a mymodule.install file in
- * the same directory as mymodule.module.
+ * Implementations of this hook should be placed in a my_module.install file in
+ * the same directory as my_module.module.
  *
  * @return
  *   A multidimensional array containing information about the module update
@@ -3008,21 +2991,21 @@ function hook_update_N(&$sandbox) {
  * @see hook_update_N()
  */
 function hook_update_dependencies() {
-  // Indicate that the mymodule_update_1000() function provided by this module
+  // Indicate that the my_module_update_1000() function provided by this module
   // must run after the another_module_update_1002() function provided by the
   // 'another_module' module.
-  $dependencies['mymodule'][1000] = array(
+  $dependencies['my_module'][1000] = array(
     'another_module' => 1002,
   );
-  // Indicate that the mymodule_update_1001() function provided by this module
+  // Indicate that the my_module_update_1001() function provided by this module
   // must run before the yet_another_module_update_1004() function provided by
   // the 'yet_another_module' module. (Note that declaring dependencies in this
   // direction should be done only in rare situations, since it can lead to the
   // following problem: If a site has already run the yet_another_module
   // module's database updates before it updates its codebase to pick up the
-  // newest mymodule code, then the dependency declared here will be ignored.)
+  // newest my_module code, then the dependency declared here will be ignored.)
   $dependencies['yet_another_module'][1004] = array(
-    'mymodule' => 1001,
+    'my_module' => 1001,
   );
   return $dependencies;
 }
@@ -3030,12 +3013,12 @@ function hook_update_dependencies() {
 /**
  * Return a number which is no longer available as hook_update_N().
  *
- * If you remove some update functions from your mymodule.install file, you
+ * If you remove some update functions from your my_module.install file, you
  * should notify Backdrop of those missing functions. This way, Backdrop can
  * ensure that no update is accidentally skipped.
  *
- * Implementations of this hook should be placed in a mymodule.install file in
- * the same directory as mymodule.module.
+ * Implementations of this hook should be placed in a my_module.install file in
+ * the same directory as my_module.module.
  *
  * If upgrading from a Drupal 7 module where the last removed update was a
  * update function numbering in the 7xxx values, that update number should still
@@ -3045,14 +3028,14 @@ function hook_update_dependencies() {
  *
  * @return int
  *   An integer, corresponding to hook_update_N() which has been removed from
- *   mymodule.install.
+ *   my_module.install.
  *
  * @see hook_update_N()
  */
 function hook_update_last_removed() {
-  // We've removed the 1.x-1.x version of mymodule, including database updates.
+  // We've removed the 1.x-1.x version of my_module, including database updates.
   // For the 1.x-2.x version of the module, the next update function would be
-  // mymodule_update_1200().
+  // my_module_update_1200().
   return 1103;
 }
 
@@ -3100,7 +3083,7 @@ function hook_uninstall() {
  * @see hook_modules_enabled()
  */
 function hook_enable() {
-  mymodule_cache_rebuild();
+  my_module_cache_rebuild();
 }
 
 /**
@@ -3114,7 +3097,7 @@ function hook_enable() {
  * @see hook_modules_disabled()
  */
 function hook_disable() {
-  mymodule_cache_rebuild();
+  my_module_cache_rebuild();
 }
 
 /**
@@ -3367,7 +3350,7 @@ function hook_html_head_alter(&$head_elements) {
   foreach ($head_elements as $key => $element) {
     if (isset($element['#attributes']['rel']) && $element['#attributes']['rel'] == 'canonical') {
       // I want a custom canonical URL.
-      $head_elements[$key]['#attributes']['href'] = mymodule_canonical_url();
+      $head_elements[$key]['#attributes']['href'] = my_module_canonical_url();
     }
   }
 }
@@ -3567,11 +3550,13 @@ function hook_page_delivery_callback_alter(&$callback) {
 function hook_system_themes_page_alter(&$theme_groups) {
   foreach ($theme_groups as $state => &$group) {
     foreach ($theme_groups[$state] as &$theme) {
-      // Add a foo link to each list of theme operations.
-      $theme->operations[] = array(
+      // Add a foo link to each list of theme operations. 'foo' is also added as
+      // an additional class to the operation link's <li> HTML tag.
+      $theme->operations['foo'] = array(
         'title' => t('Foo'),
         'href' => 'admin/appearance/foo',
-        'query' => array('theme' => $theme->name)
+        'query' => array('theme' => $theme->name),
+        'attributes' => array('title' => t('Perform operation foo')),
       );
     }
   }
@@ -4065,7 +4050,7 @@ function hook_filetransfer_info() {
  * @see hook_filetransfer_info()
  */
 function hook_filetransfer_info_alter(&$filetransfer_info) {
-  if (config_get('mymodule.settings', 'paranoia')) {
+  if (config_get('my_module.settings', 'paranoia')) {
     // Remove the FTP option entirely.
     unset($filetransfer_info['ftp']);
     // Make sure the SSH option is listed first.
@@ -4094,16 +4079,16 @@ function hook_filetransfer_info_alter(&$filetransfer_info) {
  * Instead, a simplified utility function should be used. If a utility version
  * of the API function you require does not already exist, then you should
  * create a new function. The new utility function should be named
- * _update_N_mymodule_my_function(). N is the schema version the function acts
+ * _update_N_my_module_my_function(). N is the schema version the function acts
  * on (the schema version is the number N from the hook_update_N()
  * implementation where this schema was introduced, or a number following the
- * same numbering scheme), and mymodule_my_function is the name of the original
+ * same numbering scheme), and my_module_my_function is the name of the original
  * API function including the module's name.
  *
  * Examples:
- * - _update_6000_mymodule_save(): This function performs a save operation
+ * - _update_6000_my_module_save(): This function performs a save operation
  *   without invoking any hooks using the 6.x schema.
- * - _update_7000_mymodule_save(): This function performs the same save
+ * - _update_7000_my_module_save(): This function performs the same save
  *   operation using the 7.x schema.
  *
  * The utility function should not invoke any hooks, and should perform database

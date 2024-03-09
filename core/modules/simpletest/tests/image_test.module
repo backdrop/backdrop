@@ -71,7 +71,7 @@ function _image_test_log_call($op, $args) {
 }
 
 /**
- * Image tookit's settings operation.
+ * Image toolkit's settings operation.
  */
 function image_test_settings() {
   _image_test_log_call('settings', array());
@@ -87,7 +87,7 @@ function image_test_get_info(stdClass $image) {
 }
 
 /**
- * Image tookit's load operation.
+ * Image toolkit's load operation.
  */
 function image_test_load(stdClass $image) {
   _image_test_log_call('load', array($image));
@@ -95,7 +95,7 @@ function image_test_load(stdClass $image) {
 }
 
 /**
- * Image tookit's save operation.
+ * Image toolkit's save operation.
  */
 function image_test_save(stdClass $image, $destination) {
   _image_test_log_call('save', array($image, $destination));
@@ -105,7 +105,7 @@ function image_test_save(stdClass $image, $destination) {
 }
 
 /**
- * Image tookit's crop operation.
+ * Image toolkit's crop operation.
  */
 function image_test_crop(stdClass $image, $x, $y, $width, $height) {
   _image_test_log_call('crop', array($image, $x, $y, $width, $height));
@@ -113,7 +113,7 @@ function image_test_crop(stdClass $image, $x, $y, $width, $height) {
 }
 
 /**
- * Image tookit's resize operation.
+ * Image toolkit's resize operation.
  */
 function image_test_resize(stdClass $image, $width, $height) {
   _image_test_log_call('resize', array($image, $width, $height));
@@ -121,7 +121,7 @@ function image_test_resize(stdClass $image, $width, $height) {
 }
 
 /**
- * Image tookit's rotate operation.
+ * Image toolkit's rotate operation.
  */
 function image_test_rotate(stdClass $image, $degrees, $background = NULL) {
   _image_test_log_call('rotate', array($image, $degrees, $background));
@@ -129,7 +129,7 @@ function image_test_rotate(stdClass $image, $degrees, $background = NULL) {
 }
 
 /**
- * Image tookit's desaturate operation.
+ * Image toolkit's desaturate operation.
  */
 function image_test_desaturate(stdClass $image) {
   _image_test_log_call('desaturate', array($image));

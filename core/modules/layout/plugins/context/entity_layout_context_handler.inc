@@ -33,7 +33,7 @@ class EntityLayoutContext extends LayoutContext {
       }
     }
     if ($this->entity_type === 'user' && isset($this->name) && $this->name === 'current_user') {
-      return t('Current user');
+      return t('Logged in user account');
     }
     else {
       return parent::label();

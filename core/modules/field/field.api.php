@@ -187,13 +187,13 @@ function hook_field_info_alter(&$info) {
   // Add a setting to all field types.
   foreach ($info as $field_type => $field_type_info) {
     $info[$field_type]['settings'] += array(
-      'mymodule_additional_setting' => 'default value',
+      'my_module_additional_setting' => 'default value',
     );
   }
 
   // Change the default widget for fields of type 'foo'.
   if (isset($info['foo'])) {
-    $info['foo']['default widget'] = 'mymodule_widget';
+    $info['foo']['default widget'] = 'my_module_widget';
   }
 }
 
@@ -263,6 +263,34 @@ function hook_field_schema($field) {
 }
 
 /**
+ * Allow modules to alter the schema for a field.
+ *
+ * @param array $schema
+ *   The schema definition as returned by hook_field_schema().
+ * @param array $field
+ *   The field definition.
+ *
+ * @see field_retrieve_schema()
+ *
+ * @since 1.26.4 Hook added.
+ */
+function hook_field_schema_alter(&$schema, $field) {
+  if ($field['type'] == 'image') {
+    // Alter the length of a field.
+    $schema['columns']['alt']['length'] = 2048;
+    // Add an additional column of data.
+    $schema['columns']['additional_column'] = array(
+      'description' => "Additional column added to image field table.",
+      'type' => 'varchar',
+      'length' => 128,
+      'not null' => FALSE,
+    );
+    // Add an additional index.
+    $schema['indexes']['fid_additional_column'] = array('fid', 'additional_column');
+  }
+}
+
+/**
  * Define custom load behavior for this module's field types.
  *
  * Unlike most other field hooks, this hook operates on multiple entities. The
@@ -298,7 +326,7 @@ function hook_field_schema($field) {
  *   FIELD_LOAD_REVISION to load the version indicated by each entity.
  */
 function hook_field_load($entity_type, $entities, $field, $instances, $langcode, &$items, $age) {
-  // Sample code from text.module: precompute sanitized strings so they are
+  // Sample code from text.module: pre-compute sanitized strings so they are
   // stored in the field cache.
   foreach ($entities as $id => $entity) {
     foreach ($items[$id] as $delta => $item) {
@@ -789,7 +817,7 @@ function hook_field_widget_info() {
 function hook_field_widget_info_alter(&$info) {
   // Add a setting to a widget type.
   $info['text_textfield']['settings'] += array(
-    'mymodule_additional_setting' => 'default value',
+    'my_module_additional_setting' => 'default value',
   );
 
   // Let a new field type re-use an existing widget.
@@ -938,9 +966,9 @@ function hook_field_widget_form_alter(&$element, &$form_state, $context) {
  */
 function hook_field_widget_WIDGET_TYPE_form_alter(&$element, &$form_state, $context) {
   // Code here will only act on widgets of type WIDGET_TYPE.  For example,
-  // hook_field_widget_mymodule_autocomplete_form_alter() will only act on
-  // widgets of type 'mymodule_autocomplete'.
-  $element['#autocomplete_path'] = 'mymodule/autocomplete_path';
+  // hook_field_widget_my_module_autocomplete_form_alter() will only act on
+  // widgets of type 'my_module_autocomplete'.
+  $element['#autocomplete_path'] = 'my_module/autocomplete_path';
 }
 
 /**
@@ -1087,7 +1115,7 @@ function hook_field_formatter_info() {
 function hook_field_formatter_info_alter(&$info) {
   // Add a setting to a formatter type.
   $info['text_default']['settings'] += array(
-    'mymodule_additional_setting' => 'default value',
+    'my_module_additional_setting' => 'default value',
   );
 
   // Let a new field type re-use an existing formatter.
@@ -1213,7 +1241,7 @@ function hook_field_formatter_view($entity_type, $entity, $field, $instance, $la
       // customization.
       foreach ($items as $delta => $item) {
         $element[$delta] = array(
-          '#theme' => 'mymodule_theme_sample_field_formatter_themeable',
+          '#theme' => 'my_module_theme_sample_field_formatter_themeable',
           '#data' => $item['value'],
           '#some_setting' => $settings['some_setting'],
         );
@@ -1502,9 +1530,9 @@ function hook_field_attach_delete_revision($entity_type, $entity) {
  * @see field_purge_data()
  */
 function hook_field_attach_purge($entity_type, $entity, $field, $instance) {
-  // find the corresponding data in mymodule and purge it
+  // Find the corresponding data in my_module and purge it.
   if ($entity_type == 'node' && $field->field_name == 'my_field_name') {
-    mymodule_remove_mydata($entity->nid);
+    my_module_remove_mydata($entity->nid);
   }
 }
 
@@ -1704,7 +1732,7 @@ function hook_field_storage_info() {
 function hook_field_storage_info_alter(&$info) {
   // Add a setting to a storage type.
   $info['field_sql_storage']['settings'] += array(
-    'mymodule_additional_setting' => 'default value',
+    'my_module_additional_setting' => 'default value',
   );
 }
 

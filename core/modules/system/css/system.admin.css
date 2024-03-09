@@ -225,6 +225,11 @@ span.admin-missing {
   font-size: 0.9em;
   color: #444;
 }
+.system-status-report.phase-install .status-description,
+.system-status-report.phase-install .status-value {
+  white-space: normal;
+  font-weight: normal;
+}
 .system-status-report .report-error .status-summary {
   color: #EC351C;
 }

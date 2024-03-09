@@ -396,7 +396,7 @@ function system_element_info() {
     '#input' => TRUE,
     '#cols' => 60,
     '#rows' => 5,
-    '#resizable' => TRUE,
+    '#resizable' => 'vertical',
     '#process' => array('ajax_process_form'),
     '#theme' => 'textarea',
     '#theme_wrappers' => array('form_element'),
@@ -1250,15 +1250,6 @@ function system_library_info() {
     ),
   );
 
-  // Backdrop's resizable textarea.
-  $libraries['backdrop.textarea'] = array(
-    'title' => 'Backdrop resizable textarea',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      'core/misc/textarea.js' => array('group' => JS_LIBRARY),
-    ),
-  );
-
   // Backdrop's autocomplete widget.
   $libraries['backdrop.autocomplete'] = array(
     'title' => 'Backdrop autocomplete',
@@ -1431,20 +1422,6 @@ function system_library_info() {
     ),
     'css' => array(
       'core/misc/farbtastic/farbtastic.css' => array(),
-    ),
-  );
-
-  // HTML5 Shiv.
-  $libraries['html5shiv'] = array(
-    'title' => 'html5shiv',
-    'website' => 'http://code.google.com/p/html5shiv/',
-    'version' => '3.7.3',
-    'js' => array(
-      'core/misc/html5.js' => array(
-        'group' => JS_LIBRARY,
-        'weight' => -21,
-        'browsers' => array('IE' => 'lte IE 8', '!IE' => FALSE),
-      ),
     ),
   );
 
@@ -2453,9 +2430,11 @@ function system_init() {
   // can be re-enabled.
 
   // @todo remove this backwards-compatible session variable wrapper in 2.0.
+  // cspell:disable
   if (isset($_SESSION['ignore_slave_server'])) {
     $_SESSION['ignore_replica_server'] = $_SESSION['ignore_slave_server'];
     unset($_SESSION['ignore_slave_server']);
+    // cspell:enable
   }
 
   if (isset($_SESSION['ignore_replica_server'])) {
@@ -2970,9 +2949,9 @@ function system_get_info($type, $name = NULL) {
     $type = 'module_enabled';
   }
   $list = system_list($type);
-  foreach ($list as $shortname => $item) {
+  foreach ($list as $short_name => $item) {
     if (!empty($item->status)) {
-      $info[$shortname] = $item->info;
+      $info[$short_name] = $item->info;
     }
   }
   if (isset($name)) {
@@ -3650,7 +3629,7 @@ function system_jump_menu_submit($form, &$form_state) {
   }
 
   // If the path we are redirecting to starts with the base path (for example,
-  // "/somepath/node/1"), we need to strip the base path off before passing it
+  // "/some_path/node/1"), we need to strip the base path off before passing it
   // to $form_state['redirect'].
   $base_path = base_path();
   if (strpos($redirect, $base_path) === 0) {
@@ -3851,9 +3830,9 @@ function system_mail($key, &$message, $params) {
  *   If evaluates true, prepend an empty time zone option to the array.
  */
 function system_time_zones($blank = NULL) {
-  $zonelist = timezone_identifiers_list();
+  $zone_list = timezone_identifiers_list();
   $zones = $blank ? array('' => t('- None selected -')) : array();
-  foreach ($zonelist as $zone) {
+  foreach ($zone_list as $zone) {
     // Because many time zones exist in PHP only for backward compatibility
     // reasons and should not be used, the list is filtered by a regular
     // expression.
@@ -4511,18 +4490,18 @@ function system_file_download($uri) {
  * submit function saves all the data in the form.
  *
  * If $form['#config'] is present in the form, the values will be saved to the
- * named settings file (e.g., mymodule.settings). If sub-elements or groups of
+ * named settings file (e.g., my_module.settings). If sub-elements or groups of
  * sub-elements have their own '#config' keys, then values of those elements and
  * their children will be saved to that settings file.
  *
  * For example, consider the form:
  *
  * @code
- * $primary_config = config('mymodule.settings');
- * $secondary_config = config('mymodule.second');
- * $tertiary_config = config('mymodule.third');
+ * $primary_config = config('my_module.settings');
+ * $secondary_config = config('my_module.second');
+ * $tertiary_config = config('my_module.third');
  * $form = array(
- *   '#config' => 'mymodule.settings',
+ *   '#config' => 'my_module.settings',
  *   'first_setting' => array(
  *     '#type' => 'textfield',
  *     '#title' => t('First Setting'),
@@ -4533,7 +4512,7 @@ function system_file_download($uri) {
  *   'bonus_fieldset' => array(
  *     '#type' => 'fieldset',
  *     '#title' => t('Secondary Settings'),
- *     '#config' => 'mymodule.second',
+ *     '#config' => 'my_module.second',
  *
  *     'bonus_one' => array( ... ),
  *     'bonus_two' => array( ... ),
@@ -4541,22 +4520,23 @@ function system_file_download($uri) {
  *     'bonus_three' => array(
  *       '#type' => 'textfield',
  *       '#default_value' => $tertiary_config->get('bonus_three'),
- *       '#config' => 'mymodule.third',
+ *       '#config' => 'my_module.third',
  *     ),
  *   ),
  * );
  * @endcode
  *
- * The top-level '#config' is "mymodule.settings". The values of 'first_setting'
- * and 'second_setting' will both be saved to "mymodule.settings".
+ * The top-level '#config' is "my_module.settings". The values of
+ * 'first_setting' and 'second_setting' will both be saved to
+ * "my_module.settings".
  *
- * The 'bonus_fieldset' has its own '#config' setting, "mymodule.second", which
+ * The 'bonus_fieldset' has its own '#config' setting, "my_module.second", which
  * overrides the top-level '#config' setting, so 'bonus_one' and 'bonus_two'
- * will be saved to "mymodule.second".
+ * will be saved to "my_module.second".
  *
- * The 'bonus_three' has its own '#config' setting, "mymodule.third", which
+ * The 'bonus_three' has its own '#config' setting, "my_module.third", which
  * overrides the one from the fieldset. The value of 'bonus_three' will be
- * saved to the "mymodule.third".
+ * saved to the "my_module.third".
  *
  * Modules that implement hook_form_alter() can use the '#config' settings to
  * save their data to their own settings file by setting the '#config' parameter

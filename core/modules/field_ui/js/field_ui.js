@@ -40,7 +40,7 @@ Backdrop.fieldUIFieldOverview = {
         this.targetSelect.fieldUIPopulateOptions(options, null, widgetDefault);
       });
 
-      // Trigger change on initial pageload to get the right widget options
+      // Trigger change on initial page load to get the right widget options
       // when field type comes pre-selected (on failed validation).
       $(this).trigger('change', false);
     });
@@ -75,7 +75,7 @@ Backdrop.fieldUIFieldOverview = {
         }
       });
 
-      // Trigger change on initial pageload to get the right widget options
+      // Trigger change on initial page load to get the right widget options
       // and label when field type comes pre-selected (on failed validation).
       $(this).trigger('change', false);
     });

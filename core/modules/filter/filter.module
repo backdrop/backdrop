@@ -869,6 +869,12 @@ function filter_get_editors() {
       $module_editors = module_invoke($module, 'editor_info');
       foreach ($module_editors as $editor_name => $editor) {
         $editor['module'] = $module;
+        // Populate optional defaults.
+        $editor += array(
+          'settings callback' => NULL,
+          'default settings' => array(),
+          'file' => NULL,
+        );
         $editors[$editor_name] = $editor;
       }
     }
@@ -1061,6 +1067,7 @@ function filter_get_filters() {
           $info[$name] += array(
             'description' => '',
             'weight' => 0,
+            'default settings' => array(),
           );
         }
         $filters = array_merge($filters, $info);
@@ -1419,7 +1426,7 @@ function filter_process_format($element) {
         $element['value']['#rows'] = 3;
       }
       $element['value']['#disabled'] = TRUE;
-      $element['value']['#resizable'] = FALSE;
+      $element['value']['#resizable'] = 'none';
 
       // Hide the text format selector and any other child element (such as text
       // field's summary).
@@ -1943,7 +1950,7 @@ function filter_filter_info() {
     'settings callback' => '_filter_html_settings',
     'allowed html callback' => '_filter_html_allowed_html',
     'default settings' => array(
-      'allowed_html' => '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <h3> <h4> <h5> <p> <img> <figure> <figcaption>',
+      'allowed_html' => '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <h3> <h4> <h5> <p> <br> <img> <figure> <figcaption>',
       'filter_html_help' => 1,
       'filter_html_nofollow' => 0,
     ),
@@ -2469,7 +2476,7 @@ function _filter_autop($text) {
   // Note: PHP ensures the array consists of alternating delimiters and literals
   // and begins and ends with a literal (inserting NULL as required).
   $ignore = FALSE;
-  $ignoretag = '';
+  $ignore_tag = '';
   $output = '';
   foreach ($chunks as $i => $chunk) {
     if ($i % 2) {
@@ -2485,16 +2492,17 @@ function _filter_autop($text) {
       if (!$ignore) {
         if ($open) {
           $ignore = TRUE;
-          $ignoretag = $tag;
+          $ignore_tag = $tag;
         }
       }
       // Only allow a matching tag to close it.
-      elseif (!$open && $ignoretag == $tag) {
+      elseif (!$open && $ignore_tag == $tag) {
         $ignore = FALSE;
-        $ignoretag = '';
+        $ignore_tag = '';
       }
     }
     elseif (!$ignore) {
+      $chunk = preg_replace('|<br>|', '<br />', $chunk); // Normalize break tags for consistency in matching
       $chunk = preg_replace('|\n*$|', '', $chunk) . "\n\n"; // just to make things a little easier, pad the end
       $chunk = preg_replace('|<br />\s*<br />|', "\n\n", $chunk);
       $chunk = preg_replace('!(<' . $block . '[^>]*>)!', "\n$1", $chunk); // Space things out a little
@@ -2510,7 +2518,7 @@ function _filter_autop($text) {
       $chunk = preg_replace('!(</?' . $block . '[^>]*>)\s*</p>!', "$1", $chunk);
       $chunk = preg_replace('|(?<!<br />)\s*\n|', "<br />\n", $chunk); // make line breaks
       $chunk = preg_replace('!(</?' . $block . '[^>]*>)\s*<br />!', "$1", $chunk);
-      $chunk = preg_replace('!<br />(\s*</?(?:p|li|div|th|pre|td|ul|ol)>)!', '$1', $chunk);
+      $chunk = preg_replace('!<br />(\s*</?(?:p|li|div|th|pre|td|ul|ol|h[1-6])>)!', '$1', $chunk); // Remove added break tags before closing block tags
       $chunk = preg_replace('/&([^#])(?![A-Za-z0-9]{1,8};)/', '&amp;$1', $chunk);
     }
     $output .= $chunk;
@@ -2661,6 +2669,11 @@ function _filter_image_align($text) {
       $parent = $node->parentNode;
       if ($parent && $parent->nodeName === 'figure') {
         $target = $parent;
+      }
+      // Consider more deeply nested structures. A link wrapped around a
+      // captioned image.
+      elseif ($parent && $parent->nodeName === 'a' && $parent->parentNode && $parent->parentNode->nodeName === 'figure') {
+        $target = $parent->parentNode;
       }
       else {
         $target = $node;

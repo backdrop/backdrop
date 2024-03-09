@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Install, update and uninstall functions for CKEditor module.
+ * Install, update and uninstall functions for CKEditor 4 module.
  */
 
 /**
@@ -12,31 +12,23 @@ function ckeditor_requirements($phase) {
   $t = get_t();
 
   if ($phase == 'runtime') {
-
-    // @todo: Update the description and severity when CKEditor 5 is part of core.
     $ckeditor_version = $t('Version: !version', array('!version' => CKEDITOR_VERSION));
-    $requirements['ckeditor_version'] = array(
-      'title' => $t('CKEditor'),
-      'value' => $ckeditor_version,
-      'description' => $t('CKEditor 4 reached its official end-of-life in June 2023. It will continue to be supported for Open Source projects like Backdrop and Drupal until November 2023. Backdrop core will include CKEditor 5 in the future. To switch to CKEditor 5 earlier, please use the !module.', array('!module' => l(t('CKEditor 5 contrib module'), 'https://backdropcms.org/project/ckeditor5'))),
-      'severity' => REQUIREMENT_INFO,
-    );
+    $description = $t('CKEditor 4 reached its official end-of-life in June 2023.');
+    if (!module_exists('ckeditor5')) {
+      $description .= ' ' . $t('To start the upgrade to CKEditor 5, enable it from the <a href="!modules">modules page</a>.', array(
+        '!modules' => url('admin/modules', array('query' => array('search' => 'ckeditor'))),
+      ));
+    }
+    $description .= ' ' . $t('See the <a href="!documentation">documentation for more information on the upgrade process</a>.', array(
+      '!documentation' => 'https://backdropcms.org/news/upgrade-from-ckeditor-4-to-5',
+    ));
 
-    // Check if CKEditor is not enabled on any formats.
-    $ckeditor_found = FALSE;
-    $formats = filter_formats();
-    foreach ($formats as $format) {
-      if (isset($format->editor) && $format->editor === 'ckeditor') {
-        $ckeditor_found = TRUE;
-      }
-    }
-    if (!$ckeditor_found) {
-      $requirements['ckeditor_not_enabled'] = array(
-        'title' => $t('CKEditor'),
-        'value' => $t('CKEditor is installed but not enabled on any formats. Visit the <a href="!url">text editors and formats configuration</a> to enable CKEditor on one or more formats.', array('!url' => url('admin/config/content/formats'))),
-        'severity' => REQUIREMENT_WARNING,
-      );
-    }
+    $requirements['ckeditor_version'] = array(
+      'title' => $t('CKEditor 4 (Deprecated)'),
+      'value' => $ckeditor_version,
+      'description' => $description,
+      'severity' => REQUIREMENT_WARNING,
+    );
   }
 
   return $requirements;

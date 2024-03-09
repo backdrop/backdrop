@@ -1,0 +1,127 @@
+<?php
+/**
+ * @file
+ * Tests for ckeditor5.module.
+ */
+
+/**
+ * Upgrade tests from CKEditor 4 to CKEditor 5.
+ */
+class CKEditor5UpgradeTestCase extends BackdropWebTestCase {
+  /**
+   * @var User
+   */
+  protected $adminUser;
+
+  /**
+   * @var string
+   */
+  protected $profile = 'testing';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    // The CKEditor 4 test text formats are created by installing the
+    // "ckeditor5_upgrade_test" module.
+    parent::setUp(array('ckeditor', 'ckeditor5', 'ckeditor5_upgrade_test'));
+
+    // Create and log in as the admin user.
+    $this->adminUser = $this->backdropCreateUser(array(
+      'administer filters',
+      'access administration pages',
+      'access content',
+      'administer nodes',
+    ));
+    $this->backdropLogin($this->adminUser);
+  }
+
+  /**
+   * Test upgrading a CKEditor 4 text format to CKEditor 5.
+   */
+  protected function testUpgrade() {
+    // The first text format has all buttons enabled and has the Filtered HTML
+    // filter applied.
+    $ckeditor4_format1 = filter_format_load('ckeditor_upgrade1');
+    $this->backdropGet('admin/config/content/formats/ckeditor_upgrade1');
+    $this->assertRaw(t('This text format uses CKEditor 4, which is unsupported. It can be upgraded using the <a href="!url">CKEditor 5 upgrade page</a>.', array('!url' => url('admin/config/content/formats/ckeditor_upgrade1/ckeditor5-upgrade'))));
+    $this->clickLink(t('CKEditor 5 upgrade page'));
+
+    $elements = $this->xpath('//ul[contains(@class, :class)]/li', array(':class' => 'ckeditor5-removed-buttons-list'));
+    $this->assertEqual(count($elements), 6, 'Expected number of removed buttons shown.');
+
+    // Execute the upgrade.
+    $this->backdropPost(NULL, array(), t('Confirm upgrade'));
+    $this->assertRaw(t('The %label text format has been upgraded from CKEditor 4 to CKEditor 5. Verify the CKEditor 5 toolbar and settings.', array('%label' => $ckeditor4_format1->name)));
+
+    backdrop_static_reset('filter_formats');
+    $ckeditor5_format1 = filter_format_load('ckeditor_upgrade1');
+
+    // Note that the original text format had 3 rows, the new one should only
+    // have two. Confirm no empty groups are left.
+    $this->assertFieldByName('editor_settings[toolbar]', '["bold","italic","blockQuote","style","heading","|","bulletedList","numberedList","|","alignment:left","alignment:center","alignment:right","alignment:justify","|","backdropLink","|","backdropImage","|","sourceEditing","removeFormat","maximize","-","underline","strikethrough","|","superscript","subscript","|","undo","redo","|","horizontalLine","showBlocks","specialCharacters","insertTable"]', 'Toolbar settings upgraded as expected.');
+
+    $this->assertFieldChecked('edit-editor-settings-image-upload-status');
+    $this->assertFieldChecked('edit-editor-settings-image-upload-orientate');
+    $this->assertFieldChecked('edit-editor-settings-image-upload-alt-required');
+
+    $this->assertFieldByName('editor_settings[image_upload][directory]', 'inline-images/test');
+    $this->assertFieldByName('editor_settings[image_upload][max_size]', '10MB');
+    $this->assertFieldByName('editor_settings[image_upload][max_dimensions][width]', '800');
+    $this->assertFieldByName('editor_settings[image_upload][max_dimensions][height]', '1024');
+
+    $this->assertFieldChecked('edit-editor-settings-file-upload-status');
+    $this->assertFieldByName('editor_settings[file_upload][directory]', 'inline-files/test');
+    $this->assertFieldByName('editor_settings[file_upload][max_size]', '12MB');
+    $this->assertFieldByName('editor_settings[file_upload][file_extensions]', 'pdf docx');
+
+    $this->assertFieldByName('editor_settings[style_list]', "h3.big|H3 Big\nh3.small|H3 Small\n");
+
+    $this->assertNoFieldChecked('edit-editor-settings-heading-list-h1');
+    $this->assertNoFieldChecked('edit-editor-settings-heading-list-h2');
+    $this->assertFieldChecked('edit-editor-settings-heading-list-h3');
+    $this->assertFieldChecked('edit-editor-settings-heading-list-h4');
+    $this->assertFieldChecked('edit-editor-settings-heading-list-h5');
+    $this->assertNoFieldChecked('edit-editor-settings-heading-list-h6');
+
+    // Check that <u> was added to the list of tags.
+    $old_tag_list = $ckeditor4_format1->filters['filter_html']->settings['allowed_html'];
+    $new_tag_list1 = $old_tag_list . ' <u>';
+    $new_tag_list2 = $ckeditor5_format1->filters['filter_html']->settings['allowed_html'];
+    $this->assertEqual($new_tag_list1, $new_tag_list2);
+    $this->assertRaw(t('Allowed HTML tags: @tags', array('@tags' => $new_tag_list1)), 'Complete new tag list found.');
+    $this->assertNoRaw(check_plain('<u> <u>'), check_plain('Newly added <u> tag only added once.'));
+
+    // Upgrade the second text format. This text format is the same as the first
+    // one, except it has the Filtered HTML filter disabled. This affects the
+    // list of headings applied.
+    $ckeditor4_format2 = filter_format_load('ckeditor_upgrade2');
+    $this->backdropGet('admin/config/content/formats/ckeditor_upgrade2/ckeditor5-upgrade');
+    $this->backdropPost(NULL, array(), t('Confirm upgrade'));
+    $this->assertRaw(t('The %label text format has been upgraded from CKEditor 4 to CKEditor 5. Verify the CKEditor 5 toolbar and settings.', array('%label' => $ckeditor4_format2->name)));
+
+    // All heading types should be enabled to match CKEditor 4's behavior of
+    // showing all allowed headings.
+    $this->assertFieldChecked('edit-editor-settings-heading-list-h1');
+    $this->assertFieldChecked('edit-editor-settings-heading-list-h2');
+    $this->assertFieldChecked('edit-editor-settings-heading-list-h3');
+    $this->assertFieldChecked('edit-editor-settings-heading-list-h4');
+    $this->assertFieldChecked('edit-editor-settings-heading-list-h5');
+    $this->assertFieldChecked('edit-editor-settings-heading-list-h6');
+
+    // Upgrade the third text format. This text format contains a "TestButton"
+    // button in the toolbar and will be modified by the alter hooks in the
+    // ckeditor5_upgrade_test.module.
+    $ckeditor4_format3 = filter_format_load('ckeditor_upgrade3');
+    $this->backdropGet('admin/config/content/formats/ckeditor_upgrade3/ckeditor5-upgrade');
+    $this->backdropPost(NULL, array(), t('Confirm upgrade'));
+    $this->assertRaw(t('The %label text format has been upgraded from CKEditor 4 to CKEditor 5. Verify the CKEditor 5 toolbar and settings.', array('%label' => $ckeditor4_format3->name)));
+
+    // All heading types should be enabled to match CKEditor 4's behavior of
+    // showing all allowed headings.
+    $this->assertFieldByName('editor_settings[toolbar]', '["bold","italic","blockQuote","heading","|","bulletedList","numberedList","|","alignment:left","alignment:center","alignment:right","|","backdropLink","|","backdropImage","|","sourceEditing","maximize","testButton"]', 'Toolbar includes the testButton provided by alter hook.');
+    $old_tag_list = $ckeditor4_format3->filters['filter_html']->settings['allowed_html'];
+    $new_tag_list1 = $old_tag_list . ' <test-tag>';
+    $this->assertRaw(t('Allowed HTML tags: @tags', array('@tags' => $new_tag_list1)), check_plain('Alter list of tags includes the added <test-tag>.'));
+  }
+}

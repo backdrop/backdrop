@@ -999,6 +999,7 @@ function layout_autoload_info() {
     'PathLayoutAccess' => 'plugins/access/path_layout_access.inc',
     'UserRoleLayoutAccess' => 'plugins/access/user_role_layout_access.inc',
     'UserPermissionLayoutAccess' => 'plugins/access/user_permission_layout_access.inc',
+    'UserCompareLayoutAccess' => 'plugins/access/user_compare_layout_access.inc',
 
     // Renderer handlers.
     'LayoutRendererEditor' => 'plugins/renderers/layout_renderer_editor.inc',
@@ -2106,17 +2107,17 @@ function layout_context_required_by_path($path) {
 }
 
 /**
- * Returns the current user context, which is always available.
+ * Returns the current user account context, which is always available.
  *
  * @return EntityLayoutContext
- *   The layout context for the current user.
+ *   The layout context for the current user account.
  *
  * @since 1.17.5 Function added.
  */
 function layout_current_user_context() {
   $current_user_context = layout_create_context('user', array(
     'name' => 'current_user',
-    'label' => t('Current user'),
+    'label' => t('Logged-in user account'),
     'locked' => TRUE,
     'usageType' => LayoutContext::USAGE_TYPE_SYSTEM,
   ));

@@ -593,7 +593,9 @@ function menu_default_route_handler($router_item) {
  *   An array of path arguments; for example, array('node', '5').
  *
  * @return
- *   Returns TRUE for success, FALSE if an object cannot be loaded.
+ *   Returns TRUE for success, FALSE if an object cannot be loaded, and NULL
+ *   if the $map contains the placeholders (e.g., '%node'), not arguments for
+ *   the load functions (e.g., '5').
  *   Names of object loading functions are placed in $item['load_functions'].
  *   Loaded objects are placed in $map[]; keys are the same as keys in the
  *   $item['load_functions'] array.
@@ -601,6 +603,12 @@ function menu_default_route_handler($router_item) {
  */
 function _menu_load_objects(&$item, &$map) {
   if ($load_functions = $item['load_functions']) {
+    // If the path map is the same as the router path, don't bother loading
+    // placeholders.
+    if (!empty($item['path']) && $item['path'] === implode('/', $map)) {
+      return NULL;
+    }
+
     // If someone calls this function twice, then unserialize will fail.
     if (!is_array($load_functions)) {
       $load_functions = unserialize($load_functions);
@@ -639,7 +647,7 @@ function _menu_load_objects(&$item, &$map) {
           $return = call_user_func_array($function, $args);
         }
         else {
-          $return = $function($value);
+          $return = (backdrop_substr($value, 0, 1) === '%') ? NULL : $function($value);
         }
         // If callback returned an error or there is no callback, trigger 404.
         if ($return === FALSE) {
@@ -1909,7 +1917,7 @@ function theme_menu_toggle($variables) {
     $output  = '<input id="' . $id . '" class="menu-toggle-state element-invisible" type="checkbox" aria-controls="' . $id . '" />';
     $output .= '<label class="menu-toggle-button" for="' . $id . '">';
     $output .= '<span class="menu-toggle-button-icon"></span>';
-    $output .= '<span class="menu-toggle-button-text">' . $variables['text'] . '</span>';
+    $output .= (!empty($variables['text'])) ? '<span class="menu-toggle-button-text">' . check_plain($variables['text']) . '</span>' : '';
     $output .= '<span class="menu-toggle-assistive-text element-invisible">' . t('Toggle menu visibility') . '</span>';
     $output .= '</label>';
   }
@@ -4059,17 +4067,19 @@ function _menu_site_status($path = NULL, $display_messages = FALSE) {
   // Check if site is in maintenance mode.
   if (state_get('maintenance_mode', FALSE)) {
     if (user_access('access site in maintenance mode')) {
-      // Ensure that the maintenance mode message is displayed only once
-      // (allowing for page redirects) and specifically suppress its display on
-      // the batch and maintenance mode settings pages. 'admin_bar/flush-cache'
-      // has been added to the list of excluded paths in order to suppress the
-      // warning on the maintenance mode settings page when clearing caches (see
+      // Ensure that the maintenance mode message is displayed only once and
+      // specifically suppress its display on the batch and maintenance mode
+      // settings pages. 'admin_bar/flush-cache' has been added to the list of
+      // excluded paths in order to suppress the warning on the maintenance mode
+      // settings page when clearing caches (see
       // https://github.com/backdrop/backdrop-issues/issues/3313).
       $excluded_paths = array('batch', 'admin/config/development/maintenance', 'admin_bar/flush-cache');
       if ($display_messages && !in_array(current_path(), $excluded_paths)) {
         $message = t('The site is currently in maintenance mode.');
         if (user_access('administer site configuration')) {
-          $message .= ' ' . l(t('Go online.'), 'admin/config/development/maintenance', array('query' => backdrop_get_destination()));
+          $message = t('The site is currently in <a href="@maintenance-url">maintenance mode</a>.', array(
+            '@maintenance-url' => url('admin/config/development/maintenance'),
+          ));
         }
         backdrop_set_message($message, 'warning', FALSE);
       }
