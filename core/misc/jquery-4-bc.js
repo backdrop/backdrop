@@ -9,9 +9,8 @@
 (function ($) {
   "use strict";
 
-  $.isArray = function (obj) {
-    return Array.isArray(obj);
-  };
+  $.isArray = Array.isArray;
+  $.parseJSON = JSON.parse;
   $.isFunction = function (obj) {
     return typeof obj === 'function';
   };
