@@ -312,7 +312,7 @@ function _update_checking_enabled() {
  *   automatically if there's no data. Defaults to FALSE.
  *
  * @return
- *   Array of data about available releases, keyed by project shortname.
+ *   Array of data about available releases, keyed by project machine name.
  *
  * @see update_refresh()
  * @see update_get_projects()
@@ -404,7 +404,7 @@ function update_fetch_data() {
  * Returns all currently cached data about available releases for all projects.
  *
  * @return
- *   Array of data about available releases, keyed by project shortname.
+ *   Array of data about available releases, keyed by project machine name.
  */
 function _update_get_cached_available_releases() {
   $data = array();
@@ -414,7 +414,7 @@ function _update_get_cached_available_releases() {
     if ($cache->expire < REQUEST_TIME) {
       $cache->data['fetch_status'] = UPDATE_FETCH_PENDING;
     }
-    // The project shortname is embedded in the cache ID, even if there's no
+    // The project machine name is embedded in the cache ID, even if there's no
     // data for this project in the DB at all, so use that for the indexes in
     // the array.
     $parts = explode('::', $cid, 2);

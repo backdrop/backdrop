@@ -1,0 +1,7 @@
+name = "Field API Schema Alter Test"
+description = "Support module for the Field API schema alter tests."
+backdrop = 1.x
+package = Testing
+version = BACKDROP_VERSION
+type = module
+hidden = TRUE

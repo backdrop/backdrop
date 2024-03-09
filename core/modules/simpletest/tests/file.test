@@ -202,6 +202,7 @@ class FileTestCase extends BackdropWebTestCase {
     if (!isset($filepath)) {
       // Prefix with non-latin characters to ensure that all file-related
       // tests work with international filenames.
+      // cspell:disable-next-line
       $filepath = 'Файл для тестирования ' . $this->randomName();
     }
     if (!isset($scheme)) {
@@ -1014,6 +1015,7 @@ class FileUploadTransliterationTest extends FileTestCase {
   function testTransliteration() {
     // Make a particularly troublesome file name, starting with an umlaut and
     // containing upper-case variant characters.
+    // cspell:disable-next-line
     $original_filename = 'üФайл Ä fàü.txt';
     $file = $this->createFile($original_filename, 'Sample text');
     $config = config('system.core');
@@ -2376,6 +2378,7 @@ class FileSaveDataTest extends FileHookTestCase {
     $contents = $this->randomName(8);
 
     // Using filename with non-latin characters.
+    //cspell:disable-next-line
     $filename = 'Текстовый файл.txt';
 
     $result = file_save_data($contents, 'public://' . $filename);
@@ -2777,9 +2780,9 @@ class FileMimeTypeTest extends BackdropWebTestCase {
       'pcf.z' => 'application/octet-stream',
       'jar' => 'application/octet-stream',
       'some.junk' => 'application/octet-stream',
-      'foo.file_test_1' => 'madeup/file_test_1',
-      'foo.file_test_2' => 'madeup/file_test_2',
-      'foo.doc' => 'madeup/doc',
+      'foo.file_test_1' => 'made_up/file_test_1',
+      'foo.file_test_2' => 'made_up/file_test_2',
+      'foo.doc' => 'made_up/doc',
       'test.ogg' => 'audio/ogg',
     );
 

@@ -1108,7 +1108,7 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
   /**
    * Test the whether the option checker gives an error on invalid tableselect values for checkboxes.
    */
-  function testMultipleTrueOptionchecker() {
+  function testMultipleTrueOptionChecker() {
 
     list($header, $options) = _form_test_tableselect_get_data();
 
@@ -1132,7 +1132,7 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
   /**
    * Test the whether the option checker gives an error on invalid tableselect values for radios.
    */
-  function testMultipleFalseOptionchecker() {
+  function testMultipleFalseOptionChecker() {
 
     list($header, $options) = _form_test_tableselect_get_data();
 
@@ -1208,7 +1208,7 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
     form_clear_error();
 
     // Return the processed form together with form_state and errors
-    // to allow the caller lowlevel access to the form.
+    // to allow the caller low-level access to the form.
     return array($form, $form_state, $errors);
   }
 
@@ -2020,8 +2020,8 @@ class FormsTriggeringElementTestCase extends BackdropWebTestCase {
     // Ensure submitting a form with buttons of different types results in
     // $form_state['triggering_element'] being set to the first button,
     // regardless of type. For the FAPI 'button' type, this should result in the
-    // submit handler not executing. The types are 's'(ubmit), 'b'(utton), and
-    // 'i'(mage_button).
+    // submit handler not executing. The types are 's' (submit), 'b' (button),
+    // and 'i' (image_button).
     $this->backdropPost($path . '/s/b/i', $edit, NULL, array(), array(), $form_html_id);
     $this->assertText('The clicked button is button1.', '$form_state[\'triggering_element\'] set to first button.');
     $this->assertText('Submit handler for form_test_clicked_button executed.', 'Form submit handler executed.');
@@ -2164,7 +2164,7 @@ class FormCheckboxTestCase extends BackdropWebTestCase {
     // Ensure that the checked state is determined and rendered correctly for
     // tricky combinations of default and return values.
     foreach (array(FALSE, NULL, TRUE, 0, '0', '', 1, '1', 'foobar', '1foobar') as $default_value) {
-      // Only values that can be used for array indeces are supported for
+      // Only values that can be used for array indices are supported for
       // #return_value, with the exception of integer 0, which is not supported.
       // @see form_process_checkbox().
       foreach (array('0', '', 1, '1', 'foobar', '1foobar') as $return_value) {
@@ -2256,6 +2256,50 @@ class FormCheckboxTestCase extends BackdropWebTestCase {
 
       $this->assertEqual(isset($attributes['checked']), $values[$key], format_string('Expected checked status is set via GET for value %key.', array(
         '%key' => $key,
+      )));
+    }
+  }
+
+}
+
+/**
+ * Test transition from old JS-based textarea resize to new CSS approach.
+ */
+class FormResizableTextareaTestCase extends BackdropWebTestCase {
+
+  protected $profile = 'testing';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp('form_test');
+    return TRUE;
+  }
+
+  /**
+   * Test that setting #resizable on form item results in correct CSS classes.
+   */
+  protected function testResizableTextarea() {
+    $this->backdropGet('form-test/textarea-resize');
+    // @see form_test_resizable_textarea().
+    $name_classes = array(
+      'text-true' => 'form-textarea resize-vertical',
+      'text-false' => 'form-textarea resize-none',
+      'text-vertical' => 'form-textarea resize-vertical',
+      'text-horizontal' => 'form-textarea resize-horizontal',
+      'text-none' => 'form-textarea resize-none',
+      'text-wrong' => 'form-textarea',
+    );
+
+    foreach ($name_classes as $name => $classes) {
+      $textarea = $this->xpath('//textarea[@name=:name]', array(
+        ':name' => $name,
+      ));
+      $class_attrib = (string) $textarea[0]->attributes()->class;
+      $this->assertEqual($class_attrib, $classes, format_string('Classes for item with name %name set to %classes', array(
+        '%name' => $name,
+        '%classes' => $classes,
       )));
     }
   }

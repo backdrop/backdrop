@@ -490,7 +490,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
           'title' => 'Test title attribute',
         ),
         'query' => array(
-          'testparam' => 'testvalue',
+          'test_param' => 'test_value',
         ),
       ),
     );
@@ -499,7 +499,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
     // Load home page.
     $this->backdropGet('<front>');
     $this->assertRaw('title="Test title attribute"', 'Title attribute of a menu link renders.');
-    $this->assertRaw('testparam=testvalue', 'Query parameter added to menu link.');
+    $this->assertRaw('test_param=test_value', 'Query parameter added to menu link.');
   }
 
   /**

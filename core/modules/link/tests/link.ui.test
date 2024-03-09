@@ -344,7 +344,7 @@ class LinkUITest extends LinkBaseTestClass {
     );
     $this->backdropPost(NULL, $edit, t('Save'));
 
-    // Check that both internal and externa values are output correctly.
+    // Check that both internal and external values are output correctly.
     $this->assertElementByXPath('//a[contains(@href, :path) and text()=:title]', array(
       ':path' => 'http://www.example.com/',
       ':title' => 'Example External URL',

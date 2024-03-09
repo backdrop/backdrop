@@ -203,14 +203,17 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
     $config->save();
     backdrop_static_reset('path_clean_string');
 
+    // cspell:disable-next-line
     $input = 'ädd ä accènts thè';
     $expected = 'add-accents'; // "a" and "the" is stripped out.
     $output = path_clean_string($input);
     $this->assertEqual($output, $expected, format_string("path_clean_string('@input') expected '@expected', actual '@output'", array('@input' => $input, '@expected' => $expected, '@output' => $output)));
 
     // German transliteration: "Ä" -> "ae", "ü" -> "ue", "ö" -> "oe".
+    // cspell:disable
     $input = 'Ärger im Büro ist möglich';
     $expected = 'aerger-im-buero-ist-moeglich';
+    // cspell:enable
     $output = path_clean_string($input, array('langcode' => 'de'));
     $this->assertEqual($output, $expected, format_string("path_clean_string('@input') expected '@expected', actual '@output'", array(
       '@input' => $input,
@@ -901,8 +904,10 @@ class PathPatternLocaleTestCase extends PathPatternFunctionalTestHelper {
   public function testNeutralTransliteration() {
     config_set('system.core', 'language_default', 'de');
     config_set('path.settings', 'transliterate', TRUE);
+    // cspell:disable
     $title_de = 'Lückenbüßer stören DE';
     $title_en = 'Lückenbüßer stören EN';
+    // cspell:enable
     $edit = array(
       'title' => $title_de,
       'path[auto]' => TRUE,
@@ -913,12 +918,14 @@ class PathPatternLocaleTestCase extends PathPatternFunctionalTestHelper {
     $this->backdropPost('node/add/page', $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($title_de);
     // DE: "ü" -> "ue", "ß" -> "ss", "ö" -> "oe".
+    // cspell:disable-next-line
     $this->assertEntityAlias('node', $node, 'content/lueckenbuesser-stoeren-de');
     config_set('system.core', 'language_default', 'en');
     $edit['title'] = $title_en;
     $this->backdropPost('node/add/page', $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($title_en);
     // EN: "ü" -> "u", "ß" -> "ss", "ö" -> "o".
+    // cspell:disable-next-line
     $this->assertEntityAlias('node', $node, 'content/luckenbusser-storen-en');
   }
 

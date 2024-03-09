@@ -75,23 +75,27 @@ fieldset.collapsible .fieldset-legend {
 
 /**
  * Resizable textareas.
- *
- * @see textarea.js
  */
 .form-textarea-wrapper textarea {
   display: block;
   margin: 0;
   width: 100%;
-  -webkit-box-sizing: border-box;
-  box-sizing: border-box;
 }
-.resizable-textarea .grippie {
-  background: #eee url(../../../misc/grippie.png) no-repeat center 2px;
-  border: 1px solid #ddd;
-  border-top-width: 0;
-  cursor: s-resize;
-  height: 9px;
-  overflow: hidden;
+textarea.resize-none {
+  resize: none;
+}
+textarea.resize-vertical {
+  resize: vertical;
+  min-height: 2em;
+}
+textarea.resize-horizontal {
+  resize: horizontal;
+  max-width: 100%;
+}
+textarea.resize-both {
+  resize: both;
+  max-width: 100%;
+  min-height: 2em;
 }
 
 /**
@@ -125,9 +129,6 @@ a.tabledrag-handle .handle {
   padding: 0.42em 0.5em; /* LTR */
   width: 13px;
   box-sizing: content-box;
-  -moz-box-sizing: content-box;
-  -webkit-box-sizing: content-box;
-  -o-box-sizing: content-box;
 }
 [dir="rtl"] a.tabledrag-handle .handle {
   margin: -0.4em 0.5em;

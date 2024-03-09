@@ -30,7 +30,7 @@ function layout_layout_context_info() {
     'load callback' => 'node_load',
   );
   $info['user'] = array(
-    'title' => t('User'),
+    'title' => t('User account'),
     'class' => 'EntityLayoutContext',
     'menu paths' => array(
       'user/%user',
@@ -85,7 +85,7 @@ function layout_layout_relationship_info() {
     'class' => 'LayoutRelationshipAuthorFromNode',
     'context' => 'node',
     'context_label' => t('Content'),
-    'description' => t('Creates a user context from the author of a piece of content.'),
+    'description' => t('Creates a user account context based on the author of content.'),
   );
 
   return $info;
@@ -141,7 +141,7 @@ function layout_layout_access_info() {
     'class' => 'LanguageLayoutAccess',
   );
   $info['user_permission'] = array(
-    'title' => t('User: Permission'),
+    'title' => t('User account: Permission'),
     'description' => t('Control access by permission string.'),
     'class' => 'UserPermissionLayoutAccess',
     'required contexts' => array(
@@ -149,7 +149,7 @@ function layout_layout_access_info() {
     ),
   );
   $info['user_role'] = array(
-    'title' => t('User: Role'),
+    'title' => t('User account: Role'),
     'description' => t('Control access by role.'),
     'class' => 'UserRoleLayoutAccess',
     // Contexts are specified as context key => context type. The key will be
@@ -160,7 +160,24 @@ function layout_layout_access_info() {
     ),
     // Optional if needing to clarify between contexts of the same type.
     'required contexts labels' => array(
-      'user' => t('User'),
+      'user' => t('User account'),
+    ),
+  );
+  $info['user_compare'] = array(
+    'title' => t('User account: Compare'),
+    'description' => t('Compare two user accounts. For example: logged-in vs profile being viewed.'),
+    'class' => 'UserCompareLayoutAccess',
+    // Contexts are specified as context key => context type. The key will be
+    // used in the $contexts array passed to the access class methods. The type
+    // references a context provided by hook_layout_context_info().
+    'required contexts' => array(
+      'user1' => 'user',
+      'user2' => 'user',
+    ),
+    // Optional if needing to clarify between contexts of the same type.
+    'required contexts labels' => array(
+      'user1' => t('The logged-in user account'),
+      'user2' => t('User account to compare to the logged-in user account'),
     ),
   );
   $info['path'] = array(

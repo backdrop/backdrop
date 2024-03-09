@@ -3159,6 +3159,8 @@ function db_ignore_replica() {
  *
  * @deprecated since 1.20.4
  */
+// @todo Remove forbidden backwards compatibility word in Backdrop 2.x.
+// cspell:disable-next-line
 function db_ignore_slave() {
   db_ignore_replica();
 }
@@ -3173,6 +3175,7 @@ function db_ignore_slave() {
  *   TRUE if a replica, FALSE otherwise.
  */
 function _db_is_replica($db_options) {
-  // @todo Remove deprecated terminology "slave" in Backdrop 2.0.
-  return empty($db_options['target']) || $db_options['target'] == 'slave' || $options['target'] == 'replica';
+  // @todo Remove forbidden backwards compatibility word in Backdrop 2.x.
+  // cspell:disable-next-line
+  return empty($db_options['target']) || $db_options['target'] == 'slave' || $db_options['target'] == 'replica';
 }

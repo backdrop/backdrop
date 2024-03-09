@@ -16,6 +16,7 @@ class ViewsHandlerTestXss extends ViewsSqlTest {
     $map = array(
       'John' => 'John',
       "Foo\xC0barbaz" => '',
+      // cspell:disable-next-line
       'Fooÿñ' => 'Fooÿñ'
     );
 

@@ -128,10 +128,6 @@
   width: 0;
   background-color: #47C965;
   position: absolute;
-  -webkit-transition: width .2s;
-  -moz-transition: width .2s;
-  -ms-transition: width .2s;
-  -o-transition: width .2s;
   transition: width .2s;
 }
 .password-strength.weak .indicator {

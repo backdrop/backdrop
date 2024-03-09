@@ -13,24 +13,43 @@
   ],
   "dictionaries": [
     "backdrop",
+    "bash",
     "drupal",
     "css",
     "en-gb",
     "en-us",
+    "filetypes",
+    "fonts",
     "fullstack",
     "html",
     "lorem-ipsum",
     "php",
-    "sql"
+    "publicLicenses",
+    "softwareTerms",
+    "sql",
+    "typescript"
+  ],
+  "flagWords": [
+    "blacklist: denylist, deny list, deny, block, denied list, blocked list",
+    "blacklisted: disallowed, denied, blocked",
+    "blacklisting: disallowing, denying, blocking",
+    "master: primary, main, active, default, base",
+    "slave: secondary, replica, standby, fallback",
+    "webmaster: admin, administrator",
+    "whitelist: allowlist, allow list, allow, allowed list",
+    "whitelisted: allowed",
+    "whitelisting: allowing"
   ],
   "globRoot": "../",
   "ignorePaths": [
     "*.svg",
     "/.*/",
+    "/core/includes/diff.inc",
     "/core/includes/file.mimetypes.inc",
     "/core/includes/standard.inc",
     "/core/includes/transliteration/",
     "/core/misc/ckeditor/",
+    "/core/misc/html5.js",
     "/core/misc/jquery.js",
     "/core/misc/jquery-extend*",
     "/core/misc/jquery-html-prefilter*",
@@ -39,11 +58,24 @@
     "/core/misc/smartmenus/",
     "/core/misc/ui/",
     "/core/modules/search/tests/UnicodeTest.txt",
+    "/core/modules/system/system.tar.inc",
     "/core/themes/bartik/color/preview.html",
     "/files/",
     "/.*"
   ],
   "overrides": [
+    {
+      "filename": "/core/modules/ckeditor/ckeditor.module",
+      "ignoreWords": ["pastetext", "pastefromword", "showblocks"]
+    },
+    {
+      "filename": "/core/modules/filter/tests/filter.test",
+      "ignoreWords": ["nbbb", "nccc", "nddd", "neee", "nfff"]
+    },
+    {
+      "filename": "/core/modules/simpletest/tests/file.test",
+      "ignoreWords": ["NONEXISTINGFILENAME", "ufail"]
+    },
     {
       "filename": "/core/themes/bartik/color/color.inc",
       "ignoreWords": ["Blackdrop"]

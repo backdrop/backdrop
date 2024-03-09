@@ -96,6 +96,7 @@ class FilterEditorLinkValidateTestCase extends BackdropWebTestCase {
     $valid_urls = array(
       // Should get altered.
       'node/1' => '/de/node/1',
+      // cspell:disable-next-line
       'ärger-im-büro' => '/de/%C3%A4rger-im-b%C3%BCro',
       '<front>?page=1#main-content' => '/de?page=1#main-content',
       // Should stay untouched.

@@ -1246,7 +1246,7 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
     $this->assertRaw('The site is now in maintenance mode. Only users with the "Access site in maintenance mode" permission will be able to access the site.', 'Maintenance confirmation message shown.');
 
     $path = config_get('system.core', 'site_frontpage');
-    $admin_message = format_string('The site is currently in maintenance mode. <a href="@url">Go online.</a>', array('@url' => url('admin/config/development/maintenance', array('query' => array('destination' => $path)))));
+    $admin_message = format_string('The site is currently in <a href="@url">maintenance mode</a>', array('@url' => url('admin/config/development/maintenance')));
     $user_message = 'The site is currently in maintenance mode.';
     $offline_message = format_string('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => config_get('system.core', 'site_name')));
 
@@ -2341,12 +2341,14 @@ class RetrieveFileTestCase extends BackdropWebTestCase {
   function testFileRetrieving() {
     // Test 404 handling by trying to fetch a randomly named file.
     backdrop_mkdir($sourcedir = 'public://' . $this->randomName());
+    // cspell:disable-next-line
     $filename = 'Файл для тестирования ' . $this->randomName();
     $url = file_create_url($sourcedir . '/' . $filename);
     $retrieved_file = system_retrieve_file($url);
     $this->assertFalse($retrieved_file, 'Non-existent file not fetched.');
 
-    // Actually create that file, download it via HTTP and test the returned path.
+    // Actually create that file, download it via HTTP and test the returned
+    // path.
     file_put_contents($sourcedir . '/' . $filename, 'testing');
     $retrieved_file = system_retrieve_file($url);
 

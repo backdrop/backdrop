@@ -16,30 +16,30 @@ function layout_list_page() {
   // Group layouts by path.
   $layout_paths = array();
   $path_groups = array();
-  $path_groups_end = array();
+  $admin_path_groups = array();
   foreach ($layouts as $layout) {
     $path = $layout->getPath();
-    // Move admin layouts to the bottom of the list. Note that default layout
-    // has a NULL path, which path_is_admin() won't like in PHP 8.1.
-    if (is_null($path) || path_is_admin($path)) {
-      $path_groups_end[$path][$layout->name] = $layout;
+    // Admin layouts are to be added to the bottom of the list.
+    if (path_is_admin($path)) {
+      $admin_path_groups[$path][$layout->name] = $layout;
     }
     else {
       $path_groups[$path][$layout->name] = $layout;
     }
-    // Build a list of all layout paths to check callbacks.
-    if ($path) {
+    // Build a list of all layout paths to check callbacks for.
+    if ($path && !in_array($path, $layout_paths)) {
       $layout_paths[] = $path;
     }
   }
 
   // Put admin layouts at the bottom of the list.
-  foreach ($path_groups_end as $path => $name) {
+  foreach ($admin_path_groups as $path => $name) {
     foreach ($name as $layout) {
       $path_groups[$path][$layout->name] = $layout;
     }
   }
 
+  // Check layout paths for callbacks.
   if (!empty($layout_paths)) {
     $page_callbacks = db_query('
       SELECT path, page_callback
@@ -53,8 +53,10 @@ function layout_list_page() {
   }
 
   // Assemble the rows of the table.
-  $override_rows = array();
   $stand_alone_rows = array();
+  $override_rows = array();
+  $default_rows = array();
+
   foreach ($path_groups as $path => $group) {
     // Print a row for rearranging a group of layouts.
     $operations = array(
@@ -62,18 +64,10 @@ function layout_list_page() {
       '#links' => _layout_get_group_operations($path, $group),
     );
     $row = array();
-    // Default layouts have a null path.
-    if ($path === '') {
-      $row[] = array('data' => t('Default layouts (used on all paths without a specific layout)'));
-      // Empty columns are intentional so that they may be hidden with
-      // priority-low class on the $header array.
-      $row[] = '';
-      $row[] = '';
-      $row[] = '';
-    }
-    else {
+    // Generate the heading row for non-default layout path groups.
+    if ($path !== '') {
       if (strpos($path, '%') === FALSE) {
-         $path_link = t('Path: ') . l($path, $path);
+        $path_link = t('Path: ') . l($path, $path);
       }
       else {
         $path_link = t('System path: ') . check_plain($path);
@@ -85,26 +79,27 @@ function layout_list_page() {
         $path_link .= ' <span class="path-parenthetical">(' . t('missing callback') . ')</span>';
       }
       $row[] = array('data' => $path_link, 'class' => $class);
-      // Empty columns are intentional.
+      // Empty columns are intentional so that they may be hidden with
+      // priority-low class on the $header array.
       $row[] = '';
       $row[] = '';
       $row[] = '';
-    }
 
-    if (count($operations['#links']) !== 0) {
-      $row[] = backdrop_render($operations);
+      if (count($operations['#links']) !== 0) {
+        $row[] = backdrop_render($operations);
+      }
+      else {
+        $row[] = '';
+      }
     }
-    else {
-      $row[] = '';
-    }
-
+    // Add the heading row to the non-default layout path groups.
     if (isset($page_callbacks[$path]) && $page_callbacks[$path] == 'layout_page_callback') {
       $stand_alone_rows[] = array(
         'data' => $row,
         'class' => array('layout-group'),
       );
     }
-    else {
+    elseif ($path !== '') {
       $override_rows[] = array('data' => $row, 'class' => array('layout-group'));
     }
 
@@ -141,6 +136,9 @@ function layout_list_page() {
       if (isset($page_callbacks[$path]) && $page_callbacks[$path] == 'layout_page_callback') {
         $stand_alone_rows[] = array('data' => $row, 'class' => $class);
       }
+      elseif ($path === '') {
+        $default_rows[] = array('data' => $row, 'class' => $class);
+      }
       else {
         $override_rows[] = array('data' => $row, 'class' => $class);
       }
@@ -155,10 +153,11 @@ function layout_list_page() {
     array('data' => t('Operations'), 'class' => array('layout-operations')),
   );
 
-  $help = '<p>' . t('There are two kinds of <em>Layouts</em>:') . '</p>';
+  $help = '<p>' . t('There are three kinds of <em>Layouts</em>:') . '</p>';
   $help_items = array();
   $help_items[] = t('<strong>Layout pages</strong> are layouts that create new stand-alone pages on the site.  Without the layouts, these pages would not exist.');
-  $help_items[] = t('<strong>Layout overrides</strong> are layouts that override existing pages on the site. Without these layout overrides, these pages would use other layouts. Which one is used will depend on the path and visibility conditions. If no other layouts match, one of the defaults will be used.');
+  $help_items[] = t('<strong>Layout overrides</strong> are layouts that override existing pages on the site. Without these layout overrides, these pages would use other layouts. Which one is used will depend on the path and visibility conditions. If no other layouts match, one of the default layouts will be used.');
+  $help_items[] = t('<strong>Default layouts</strong> are used for paths that have no other matching layouts.');
   $help .= theme('item_list', array('items' => $help_items));
   $help .= '<p>' . t('As a page is rendered, a <em>Layout</em> is selected as follows.') . '</p>';
   $help_items = array();
@@ -211,9 +210,21 @@ function layout_list_page() {
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $override_rows,
-    '#attributes' => array('class' =>   array('layout-list')),
+    '#attributes' => array('class' => array('layout-list')),
     '#empty' => t('No layout overrides have been created yet.'),
     '#weight' => 3,
+  );
+  $page['default'] = array(
+    '#type' => 'help',
+    '#markup' => '<h2>' . t('Default layouts') . '</h2>' . t('Used as a fallback for all paths without a matching layout.'),
+    '#weight' => 4,
+  );
+  $page['default_table'] = array(
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $default_rows,
+    '#attributes' => array('class' => array('layout-list')),
+    '#weight' => 5,
   );
   return $page;
 }
@@ -2448,9 +2459,7 @@ function layout_reorder_form($form, &$form_state) {
     '#title' => t('Cancel'),
     '#href' => 'admin/structure/layouts',
     '#options' => array(
-      'attributes' => array(
-        'class' => array('form-cancel')
-      ),
+      'attributes' => array('class' => array('form-cancel')),
     ),
   );
 

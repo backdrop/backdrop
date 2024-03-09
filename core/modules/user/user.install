@@ -1431,7 +1431,7 @@ function user_update_1025() {
     'core' => '1.0-dev',
     'display' => array(
       'default' => array(
-        'display_title' => 'Master',
+        'display_title' => 'Default',
         'display_plugin' => 'default',
         'display_options' => array(
           'query' => array(

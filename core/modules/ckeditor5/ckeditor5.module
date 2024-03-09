@@ -1,0 +1,1393 @@
+<?php
+/**
+ * @file
+ * Provides integration with the CKEditor WYSIWYG editor.
+ */
+
+define('CKEDITOR5_VERSION', '40.2.0');
+
+/**
+ * Implements hook_menu().
+ */
+function ckeditor5_menu() {
+  $items['ckeditor5/upload/image/%filter_format'] = array(
+    'title' => 'Upload image',
+    'page callback' => 'ckeditor5_image_upload',
+    'page arguments' => array(3),
+    'access callback' => 'filter_dialog_access',
+    'access arguments' => array(3, 'image'),
+    'theme callback' => 'ajax_base_page_theme',
+    'delivery callback' => 'backdrop_json_deliver',
+    'type' => MENU_CALLBACK,
+    'file' => 'ckeditor5.pages.inc',
+  );
+  $items['admin/config/content/formats/%filter_format/ckeditor5-upgrade'] = array(
+    'title' => 'Upgrade CKEditor 4 to CKEditor 5',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('ckeditor5_upgrade_form', 4),
+    'access arguments' => array('administer filters'),
+    'type' => MENU_IS_LOCAL_TASK | MENU_VISIBLE_IN_BREADCRUMB,
+    'file' => 'ckeditor5.upgrade.inc',
+  );
+  return $items;
+}
+
+/**
+ * Implements hook_editor_info().
+ */
+function ckeditor5_editor_info() {
+  $editors['ckeditor5'] = array(
+    'label' => t('CKEditor 5'),
+    'library' => array('ckeditor5', 'backdrop.ckeditor5'),
+    'default settings' => array(
+      'toolbar' => array(
+        'bold', 'italic', 'blockQuote', 'heading', '|',
+        'bulletedList', 'numberedList', '|',
+        'alignment:left', 'alignment:center', 'alignment:right', '|',
+        'backdropLink', 'backdropImage', '|',
+        'sourceEditing', 'removeFormat',
+      ),
+      'heading_list' => array('p', 'h3', 'h4', 'h5'),
+      'style_list' => array(),
+    ),
+    'file' => 'ckeditor5.admin.inc',
+    'settings callback' => 'ckeditor5_settings_form',
+    'js settings callback' => 'ckeditor5_get_config',
+  );
+
+  return $editors;
+}
+
+/**
+ * Implements hook_library_info().
+ */
+function ckeditor5_library_info() {
+  $module_path = backdrop_get_path('module', 'ckeditor5');
+  $info = system_get_info('module', 'ckeditor5');
+
+  $libraries['backdrop.ckeditor5.admin'] = array(
+    'title' => 'Administrative library for configuring CKEditor.',
+    'version' => $info['version'],
+    'js' => array(
+      $module_path . '/js/ckeditor5.admin.js' => array(),
+    ),
+    'css' => array(
+      $module_path . '/css/ckeditor5.admin.css' => array(),
+    ),
+    'dependencies' => array(
+      array('system', 'ui.sortable'),
+      array('system', 'ui.draggable'),
+    ),
+  );
+  $libraries['backdrop.ckeditor5'] = array(
+    'title' => 'Backdrop behavior to enable CKEditor on textareas.',
+    'version' => $info['version'],
+    'js' => array(
+      $module_path . '/js/ckeditor5.js' => array(),
+      $module_path . '/js/ckeditor5.formatter.js' => array(),
+    ),
+    'css' => array(
+      $module_path . '/css/ckeditor5.css' => array(),
+    ),
+    'dependencies' => array(
+      array('filter', 'filter'),
+      array('system', 'backdrop.ajax'),
+      array('ckeditor5', 'ckeditor5'),
+    ),
+  );
+
+  // CKEditor 5 does not have a built-in script loader. Any needed dependencies
+  // should be present on the page when CKEditor loads. Add in library
+  // dependencies to the overall CKEditor 5 library.
+  $libraries['backdrop.ckeditor5']['dependencies'] = array_merge(
+    $libraries['backdrop.ckeditor5']['dependencies'],
+    _ckeditor5_get_plugin_libraries()
+  );
+
+  // Collect a list of CSS files from the default theme to be added to the page
+  // along with CKEditor 5 instances.
+  $css = _ckeditor5_theme_css();
+  backdrop_alter('ckeditor5_css', $css);
+  foreach ($css as $file) {
+    $libraries['backdrop.ckeditor5']['css'][$file] = array(
+      'group' => CSS_THEME,
+    );
+  }
+
+  $libraries['backdrop.ckeditor5.backdrop-basic-styles'] = array(
+    'title' => 'CKEditor plugin to convert basic HTML tags to preferred tags.',
+    'version' => $info['version'],
+    'js' => array(
+      $module_path . '/js/plugins/backdrop-basic-styles/backdrop-basic-styles.js' => array(),
+    ),
+  );
+  $libraries['backdrop.ckeditor5.backdrop-html-engine'] = array(
+    'title' => 'CKEditor plugin that writes the HTML source from the editor.',
+    'version' => $info['version'],
+    'js' => array(
+      $module_path . '/js/plugins/backdrop-html-engine/backdrop-html-engine.js' => array(),
+    ),
+  );
+  $libraries['backdrop.ckeditor5.backdrop-image'] = array(
+    'title' => 'Integrates uploading images with CKEditor 5.',
+    'version' => $info['version'],
+    'js' => array(
+      $module_path . '/js/plugins/backdrop-image/backdrop-image.js' => array(),
+    ),
+  );
+  $libraries['backdrop.ckeditor5.backdrop-link'] = array(
+    'title' => 'Provides a CKEditor 5 plugin for linking with a dialog.',
+    'version' => $info['version'],
+    'js' => array(
+      $module_path . '/js/plugins/backdrop-link/backdrop-link.js' => array(),
+    ),
+  );
+  $libraries['backdrop.ckeditor5.maximize'] = array(
+    'title' => 'Provides a CKEditor 5 plugin to maximize the editor.',
+    'version' => $info['version'],
+    'js' => array(
+      $module_path . '/js/plugins/backdrop-maximize/backdrop-maximize.js' => array(),
+    ),
+    'css' => array(
+      $module_path . '/css/ckeditor5-maximize.css' => array(),
+    ),
+  );
+
+  $libraries['ckeditor5'] = array(
+    'title' => 'Loads the main CKEditor library.',
+    'version' => $info['version'],
+    'js' => array(
+      // CKEditor is a large library but already compressed. Do not aggregate.
+      $module_path . '/lib/ckeditor5/build/ckeditor5-dll.js' => array(
+        'preprocess' => FALSE,
+        'group' => JS_LIBRARY,
+      ),
+    ),
+  );
+
+  return $libraries;
+}
+
+/**
+ * Implements hook_library_info_alter().
+ */
+function ckeditor5_library_info_alter(&$libraries, $module) {
+  if ($module == 'system' && isset($libraries['ui.dialog'])) {
+    // Override jquery.ui dialog _allowInteraction method to allow interaction
+    // for editor form elements from within jquery dialogs.
+    // @see https://bugs.jqueryui.com/ticket/9087/
+    $path = backdrop_get_path('module', 'ckeditor5') . '/js/ckeditor5-dialog-fix.js';
+    $libraries['ui.dialog']['js'][$path] = array();
+  }
+}
+
+/**
+ * Implements hook_theme().
+ */
+function ckeditor5_theme() {
+  return array(
+    'ckeditor5_settings_toolbar' => array(
+      'variables' => array('format' => NULL, 'plugins' => NULL),
+      'file' => 'ckeditor5.theme.inc',
+    ),
+  );
+}
+
+/**
+ * Implements hook_telemetry_info().
+ */
+function ckeditor5_telemetry_info() {
+  $info['ckeditor5_version'] = array(
+    'label' => t('CKEditor 5 Version'),
+    'description' => t('The current version of CKEditor 5 in use.'),
+    'project' => 'backdrop',
+  );
+  return $info;
+}
+
+/**
+ * Implements hook_telemetry_data().
+ */
+function ckeditor5_telemetry_data($telemetry_key) {
+  switch ($telemetry_key) {
+    case 'ckeditor5_version':
+      return CKEDITOR5_VERSION;
+  }
+}
+
+/**
+ * Implements hook_js_alter().
+ *
+ * Adds a matching CKEditor 5 translation file if the UI is non-English.
+ */
+function ckeditor5_js_alter(&$javascript) {
+  global $language;
+  if ($language->langcode === 'en') {
+    return;
+  }
+
+  $module_path = backdrop_get_path('module', 'ckeditor5');
+  $build_path = $module_path . '/lib/ckeditor5/build';
+  $js_path = $build_path . '/ckeditor5-dll.js';
+  $translation_path = $build_path . '/translations/' . $language->langcode . '.js';
+
+  // If the ckeditor5-dll.js library is present AND a translation file exists
+  // for the current language, append the translation file to the JavaScript
+  // array.
+  if (isset($javascript[$js_path]) && file_exists($translation_path)) {
+    // Copy the CKEditor library settings, which will be nearly identical the
+    // translation settings (same preprocessing, scope, weight, version, etc.)
+    $javascript[$translation_path] = $javascript[$js_path];
+    $javascript[$translation_path]['data'] = $translation_path;
+  }
+}
+
+/**
+ * Retrieves the full list of installed CKEditor plugins.
+ *
+ * @return array
+ *   An array of CKEditor plugin information, as returned by
+ *   hook_ckeditor5_plugins().
+ *
+ * @see hook_ckeditor5_plugins()
+ * @see hook_ckeditor5_plugins_alter()
+ */
+function ckeditor5_plugins() {
+  $plugins = &backdrop_static(__FUNCTION__, array());
+  if (!$plugins) {
+    $plugins = module_invoke_all('ckeditor5_plugins');
+    backdrop_alter('ckeditor5_plugins', $plugins);
+  }
+  return $plugins;
+}
+
+/**
+ * Implements hook_ckeditor5_plugins().
+ *
+ * Return a list of all plugins provided by this module.
+ */
+function ckeditor5_ckeditor5_plugins() {
+  $image_prefix = backdrop_get_path('module', 'ckeditor5') . '/icons';
+
+  // The "essentials" plugin is necessary for any kind of basic editing. Basic
+  // formatting buttons are included under this plugin, even though they are
+  // not technically provided by it.
+  $plugins['essentials.Essentials'] = array(
+    'buttons' => array(
+      // Provided by the basic-styles plugin.
+      // @see https://ckeditor.com/docs/ckeditor5/latest/features/basic-styles.html
+      'bold' => array(
+        'label' => t('Bold'),
+        'image' => $image_prefix . '/bold.svg',
+        'required_html' => array('<strong>'),
+        'plugin_dependencies' => array('basicStyles.Bold'),
+      ),
+      'italic' => array(
+        'label' => t('Italic'),
+        'image' => $image_prefix . '/italic.svg',
+        // CKEditor defaults to <i>, the BackdropBasicStyles plugin converts it
+        // to <em> for backwards-compatibility with Backdrop standards.
+        'required_html' => array('<em>'),
+        'plugin_dependencies' => array(
+          'basicStyles.Italic',
+          'backdropBasicStyles.BackdropBasicStyles',
+        ),
+      ),
+      'underline' => array(
+        'label' => t('Underline'),
+        'image' => $image_prefix . '/underline.svg',
+        // Unlike CKEditor 4, we conform to CKEditor 5's preference for the <u>
+        // tag for underlined content. The BackdropBasicStyles plugin converts
+        // legacy <span class="underline"> content to use <u>.
+        'required_html' => array('<u>'),
+        'plugin_dependencies' => array(
+          'basicStyles.Underline',
+          'backdropBasicStyles.BackdropBasicStyles',
+        ),
+      ),
+      'strikethrough' => array(
+        'label' => t('Strike-through'),
+        'image' => $image_prefix . '/strikethrough.svg',
+        // CKEditor defaults to <s>, the BackdropBasicStyles plugin converts it
+        // to <del> for backwards-compatibility with Backdrop standards.
+        'required_html' => array('<del>'),
+        'plugin_dependencies' => array(
+          'basicStyles.Strikethrough',
+          'backdropBasicStyles.BackdropBasicStyles',
+        ),
+      ),
+      'code' => array(
+        'label' => t('Code'),
+        'image' => $image_prefix . '/code.svg',
+        'required_html' => array('<code>'),
+        'plugin_dependencies' => array('basicStyles.Code'),
+      ),
+      'subscript' => array(
+        'label' => t('Subscript'),
+        'image' => $image_prefix . '/subscript.svg',
+        'required_html' => array('<sub>'),
+        'plugin_dependencies' => array('basicStyles.Subscript'),
+      ),
+      'superscript' => array(
+        'label' => t('Superscript'),
+        'image' => $image_prefix . '/superscript.svg',
+        'required_html' => array('<sup>'),
+        'plugin_dependencies' => array('basicStyles.Superscript'),
+      ),
+      // Separator, part of toolbar core.
+      // @see https://ckeditor.com/docs/ckeditor5/latest/features/toolbar/toolbar.html#separating-toolbar-items
+      '|' => array(
+        'label' => t('Separator'),
+        'image_alternative' => '<span class="ckeditor5-separator" title="' . t('Button separator') . '" aria-label="' . t('Button separator') . '">&nbsp;</span>',
+        'attributes' => array('class' => array('ckeditor5-button-separator')),
+        'multiple' => TRUE,
+      ),
+      // Line break, part of toolbar core.
+      // @see https://ckeditor.com/docs/ckeditor5/latest/features/toolbar/toolbar.html#multiline-wrapping-toolbar
+      '-' => array(
+        'label' => t('Line Break'),
+        'image_alternative' => '<span class="ckeditor5-line-break" title="' . t('Line break') . '" aria-label="' . t('Line break') . '">&nbsp;</span>',
+        'multiple' => TRUE,
+      ),
+    ),
+    'enabled_callback' => TRUE,
+  );
+
+  // @see https://ckeditor.com/docs/ckeditor5/latest/features/text-alignment.html
+  $plugins['alignment.Alignment'] = array(
+    'buttons' => array(
+      'alignment' => array(
+        'label' => t('Alignment'),
+        'image_alternative' => '<span class="ckeditor5-button-dropdown">' . t('Alignment') . '<span class="ckeditor5-button-arrow"></span></span>',
+        'required_html' => array('<p class="text-align-left text-align-center text-align-right text-align-justify">'),
+      ),
+      'alignment:left' => array(
+        'label' => t('Align left'),
+        'image' => $image_prefix . '/align-left.svg',
+        'required_html' => array('<p class="text-align-left">'),
+      ),
+      'alignment:center' => array(
+        'label' => t('Align center'),
+        'required_html' => array('<p class="text-align-center">'),
+        'image' => $image_prefix . '/align-center.svg',
+      ),
+      'alignment:right' => array(
+        'label' => t('Align right'),
+        'required_html' => array('<p class="text-align-right">'),
+        'image' => $image_prefix . '/align-right.svg',
+      ),
+      'alignment:justify' => array(
+        'label' => t('Justify'),
+        'required_html' => array('<p class="text-align-justify">'),
+        'image' => $image_prefix . '/align-justify.svg',
+      ),
+    ),
+    'plugin_dependencies' => array('alignment.Alignment'),
+    'config' => array(
+      'alignment' => array(
+        'options' => array(
+          array('name' => 'left', 'className' => 'text-align-left'),
+          array('name' => 'center', 'className' => 'text-align-center'),
+          array('name' => 'right', 'className' => 'text-align-right'),
+          array('name' => 'justify', 'className' => 'text-align-justify'),
+        ),
+      ),
+    ),
+  );
+
+  // @see https://ckeditor.com/docs/ckeditor5/latest/features/indent.html
+  $plugins['indent.Indent'] = array(
+    'buttons' => array(
+      'indent' => array(
+        'label' => t('Indent'),
+        'image' => $image_prefix . '/indent.svg',
+        'required_html' => array('<p class="indent1 indent2 indent3">'),
+      ),
+      'outdent' => array(
+        'label' => t('Outdent'),
+        'image' => $image_prefix . '/outdent.svg',
+        'required_html' => array('<p class="indent1 indent2 indent3">'),
+      ),
+    ),
+    'plugin_dependencies' => array('list.DocumentList'),
+  );
+
+  // @see https://ckeditor.com/docs/ckeditor5/latest/features/lists/document-lists.html
+  $plugins['list.DocumentList'] = array(
+    'buttons' => array(
+      'bulletedList' => array(
+        'label' => t('Bullet list'),
+        'image' => $image_prefix . '/bulleted-list.svg',
+        'image_rtl' => $image_prefix . '/bulleted-list-rtl.svg',
+        'required_html' => array('<ul>', '<li>'),
+      ),
+      'numberedList' => array(
+        'label' => t('Numbered list'),
+        'image' => $image_prefix . '/numbered-list.svg',
+        'image_rtl' => $image_prefix . '/numbered-list-rtl.svg',
+        'required_html' => array('<ol>', '<li>'),
+      ),
+    ),
+    // Re-specify list.DocumentList as its own dependency to ensure it loads
+    // before list.DocumentListProperties, otherwise list properties will not
+    // show in the UI.
+    'plugin_dependencies' => array(
+      'list.DocumentList',
+      'list.DocumentListProperties',
+    ),
+    'config' => array(
+      'list' => array(
+        'properties' => array(
+          'reversed' => TRUE,
+          'startIndex' => TRUE,
+          'styles' => FALSE,
+        ),
+      ),
+    ),
+  );
+
+  // @see https://ckeditor.com/docs/ckeditor5/latest/features/code-blocks.html
+  $plugins['codeBlock.CodeBlock'] = array(
+    'buttons' => array(
+      'codeBlock' => array(
+        'label' => t('Code block'),
+        'image' => $image_prefix . '/code-block.svg',
+        'required_html' => array('<code>', '<pre>'),
+      ),
+    ),
+  );
+
+  // @see https://ckeditor.com/docs/ckeditor5/latest/features/block-quote.html
+  $plugins['blockQuote.BlockQuote'] = array(
+    'buttons' => array(
+      'blockQuote' => array(
+        'label' => t('Block quote'),
+        'image' => $image_prefix . '/block-quote.svg',
+        'required_html' => array('<blockquote>'),
+      ),
+    ),
+  );
+
+  // @see https://ckeditor.com/docs/ckeditor5/latest/features/source-editing.html
+  $plugins['sourceEditing.SourceEditing'] = array(
+    'buttons' => array(
+      'sourceEditing' => array(
+        'label' => t('Source'),
+        'image' => $image_prefix . '/source-editing.svg',
+      ),
+    ),
+  );
+
+  // @see https://ckeditor.com/docs/ckeditor5/latest/features/horizontal-line.html
+  $plugins['horizontalLine.HorizontalLine'] = array(
+    'buttons' => array(
+      'horizontalLine' => array(
+        'label' => t('Horizontal line'),
+        'image' => $image_prefix . '/horizontal-line.svg',
+        'required_html' => array('<hr>'),
+      ),
+    ),
+  );
+
+  // @see https://ckeditor.com/docs/ckeditor5/latest/features/remove-format.html
+  $plugins['removeFormat.RemoveFormat'] = array(
+    'buttons' => array(
+      'removeFormat' => array(
+        'label' => t('Remove format'),
+        'image' => $image_prefix . '/remove-format.svg',
+      ),
+    ),
+  );
+
+  // @see https://ckeditor.com/docs/ckeditor5/latest/features/autoformat.html
+  $plugins['autoformat.Autoformat'] = array(
+    // @todo: Provide a configuration option to toggle.
+    'enabled_callback' => TRUE,
+  );
+
+  // @see https://ckeditor.com/docs/ckeditor5/latest/features/tables/tables.html
+  $plugins['table.Table'] = array(
+    'buttons' => array(
+      'insertTable' => array(
+        'label' => t('Table'),
+        'image' => $image_prefix . '/table.svg',
+        'required_html' => array(
+          '<table>',
+          '<td rowspan colspan>',
+          '<th rowspan colspan>',
+          '<tr>',
+          '<thead>',
+          '<tbody>',
+          '<tfoot>',
+          '<caption>',
+        ),
+      ),
+    ),
+    'plugin_dependencies' => array(
+      'table.TableToolbar',
+      'table.TableCaption',
+      'table.PlainTableOutput',
+      'table.TableCellProperties',
+      'table.TableColumnResize',
+      'table.TableProperties',
+    ),
+    'config' => array(
+      'table' => array(
+        'contentToolbar' => array(
+          'tableColumn',
+          'tableRow',
+          'mergeTableCells',
+          'toggleTableCaption',
+        ),
+      ),
+    ),
+  );
+
+  // Paragraph is always enabled in Backdrop to ensure text can be added in case
+  // the Headings are not enabled.
+  $plugins['paragraph.Paragraph'] = array(
+    'enabled_callback' => TRUE,
+  );
+
+  // @see https://ckeditor.com/docs/ckeditor5/latest/features/headings.html
+  $plugins['heading.Heading'] = array(
+    'buttons' => array(
+      'heading' => array(
+        'label' => t('Headings'),
+        'image_alternative' => '<span class="ckeditor5-button-dropdown">' . t('Headings') . '<span class="ckeditor5-button-arrow"></span></span>',
+      ),
+    ),
+  );
+
+  // @see https://ckeditor.com/docs/ckeditor5/latest/features/style.html
+  $plugins['style.Style'] = array(
+    'buttons' => array(
+      'style' => array(
+        'label' => t('Font style'),
+        'image_alternative' => '<span class="ckeditor5-button-dropdown">' . t('Styles') . '<span class="ckeditor5-button-arrow"></span></span>',
+        'plugin_dependencies' => array('htmlSupport.GeneralHtmlSupport'),
+      ),
+    ),
+  );
+
+  // General HTML support is always enabled in Backdrop to provide compatibility
+  // with existing content and to preserve otherwise unsupported HTML tags.
+  $plugins['htmlSupport.GeneralHtmlSupport'] = array(
+    'enabled_callback' => TRUE,
+  );
+
+  // @see https://ckeditor.com/docs/ckeditor5/latest/features/special-characters.html
+  $plugins['specialCharacters.SpecialCharacters'] = array(
+    'buttons' => array(
+      'specialCharacters' => array(
+        'label' => t('Special characters'),
+        'image' => $image_prefix . '/special-characters.svg',
+        'plugin_dependencies' => array('specialCharacters.SpecialCharactersEssentials'),
+      ),
+    ),
+  );
+
+  // Plugin that converts CKEditor preferred tags to Backdrop preferred tags,
+  // such as converting <s> to <del> or <i> to <em>.
+  $plugins['backdropBasicStyles.BackdropBasicStyles'] = array(
+    'library' => array('ckeditor5', 'backdrop.ckeditor5.backdrop-basic-styles'),
+    'enabled_callback' => TRUE,
+  );
+
+  // Plugin that writes the HTML source when saving the editor contents. This
+  // properly escapes HTML attributes and formats the HTML source.
+  $plugins['backdropHtmlEngine.BackdropHtmlEngine'] = array(
+    'library' => array('ckeditor5', 'backdrop.ckeditor5.backdrop-html-engine'),
+    'enabled_callback' => TRUE,
+  );
+
+  // The BackdropImage plugin extends the default CKEditor Image plugin.
+  $plugins['backdropImage.BackdropImage'] = array(
+    'library' => array('ckeditor5', 'backdrop.ckeditor5.backdrop-image'),
+    'buttons' => array(
+      'backdropImage' => array(
+        'label' => t('Image'),
+        'plugin_dependencies' => array(
+          'image.Image',
+          'image.ImageToolbar',
+          'image.ImageInsertUI',
+          'image.ImageUpload',
+          'image.ImageResize',
+          'image.ImageCaptionUtils',
+        ),
+        'required_html' => array(
+          '<img src alt height width data-file-id>',
+        ),
+        'image' => $image_prefix . '/image.svg',
+      ),
+    ),
+    'config' => array(
+      'image' => array(
+        // Configure the balloon toolbar items shown when an image is selected.
+        'toolbar' => array(
+          'imageTextAlternative',
+          'editBackdropImage',
+        ),
+        'upload' => array(
+          'type' => image_get_supported_extensions(),
+        ),
+        'resizeUnit' => 'px',
+      ),
+      'backdropImage' => array(
+        'editLabel' => t('Edit Image'),
+        'insertLabel' => t('Insert Image'),
+        // Specify an array of CKEditor model name => attribute name values.
+        // These attributes are then allowed to be changed via the Backdrop
+        // image dialog. Additional attributes can be added here to prevent
+        // CKEditor from striping out attributes on img tags.
+        'extraAttributes' => array(
+          'dataFileId' => 'data-file-id',
+          'alt' => 'alt',
+          'src' => 'src',
+          'width' => 'width',
+          'height' => 'height',
+        ),
+      ),
+    ),
+  );
+
+  // The BackdropImageCaption plugin provides configuration only. It enables
+  // converting data-caption attributes on img tags to figure and figcaption
+  // elements.
+  $plugins['backdropImageCaption.BackdropImageCaption'] = array(
+    'pseudo_plugin' => TRUE,
+    'enabled_callback' => '_ckeditor5_image_caption_plugin_check',
+    'required_html' => array(
+      '<img data-caption>',
+      '<figure>',
+      '<figcaption>',
+    ),
+    // The BackdropImage plugin builds on CKEditor's ImageCaptionEditing plugin.
+    'plugin_dependencies' => array('image.ImageCaption'),
+    'config' => array(
+      'image' => array(
+        'toolbar' => array(
+          'toggleImageCaption',
+        ),
+      ),
+      'backdropImage' => array(
+        'captionFilterEnabled' => TRUE,
+        'captionPlaceholderText' => t('Enter caption text here.'),
+        'extraAttributes' => array(
+          'dataCaption' => 'data-caption',
+        ),
+      ),
+    ),
+  );
+
+  // The BackdropImageAlignment plugin provides configuration only. It enables
+  // converting data-align attributes on img tags to classes.
+  $plugins['backdropImage.BackdropImageAlignment'] = array(
+    'pseudo_plugin' => TRUE,
+    'enabled_callback' => '_ckeditor5_image_alignment_plugin_check',
+    'required_html' => array(
+      '<img data-align>',
+    ),
+    // Not to be confused with Backdrop Image Styles (provided by Image module),
+    // CKEditor Image Styles are used to configure the presentation of images,
+    // including alignment options.
+    'plugin_dependencies' => array('image.ImageStyle'),
+    'config' => array(
+      'image' => array(
+        // Add buttons to the balloon toolbar shown when an image is selected.
+        // Note that each of these image styles are pre-defined by the
+        // ImageStyle plugin.
+        // See https://ckeditor.com/docs/ckeditor5/latest/features/images/images-styles.html#ready-to-use-styles
+        'toolbar' => array(
+          '|',
+          'imageStyle:block',
+          'imageStyle:alignLeft',
+          'imageStyle:alignCenter',
+          'imageStyle:alignRight',
+          'imageStyle:inline',
+          '|',
+        ),
+        // Configure the style buttons that were added above.
+        'styles' => array(
+          'options' => array(
+            'inline',
+            array(
+              'name' => 'block',
+              'icon' => 'left',
+              'title' => t('Break text'),
+            ),
+            array(
+              'name' => 'alignLeft',
+              'title' => t('Align left and wrap text'),
+            ),
+            array(
+              'name' => 'alignCenter',
+              'title' => t('Align center and break text'),
+            ),
+            array(
+              'name' => 'alignRight',
+              'title' => t('Align right and wrap text'),
+            ),
+          ),
+        ),
+      ),
+      'backdropImage' => array(
+        'extraAttributes' => array(
+          'dataAlign' => 'data-align',
+        ),
+      ),
+    ),
+  );
+
+  // The BackdropLink plugin extends the build in link button.
+  $plugins['backdropLink.BackdropLink'] = array(
+    'buttons' => array(
+      'backdropLink' => array(
+        'label' => t('Link'),
+        'image' => $image_prefix . '/link.svg',
+        // @todo: The id attribute is being flagged as disallowed by core's
+        // blocking of on* attributes. It should be included here.
+        'required_html' => array('<a href target class title rel data-file-id>'),
+        // Include a dependency on ImageUtils to help detect linked images, even
+        // if the backdropImage button is not enabled.
+        'plugin_dependencies' => array(
+          'link.Link',
+          'link.LinkUI',
+          'image.ImageUtils',
+        ),
+      ),
+    ),
+    'library' => array('ckeditor5', 'backdrop.ckeditor5.backdrop-link'),
+    'config' => array(
+      'backdropLink' => array(
+        'editLabel' => t('Edit Link'),
+        'insertLabel' => t('Insert Link'),
+        // Specify an array of CKEditor model name => attribute name values.
+        // These attributes are then allowed to be changed via the Backdrop
+        // link dialog. Additional attributes can be added here to prevent
+        // CKEditor from striping out attributes on anchor tags.
+        'extraAttributes' => array(
+          'linkTarget' => 'target',
+          'linkClass' => 'class',
+          'linkTitle' => 'title',
+          'linkId' => 'id',
+          'linkRel' => 'rel',
+          'linkDataFileId' => 'data-file-id',
+        ),
+      ),
+    ),
+  );
+
+  // The BackdropLinkImage plugin provides configuration only. It enables
+  // adds the "Link Image" button to the image balloon toolbar if both the
+  // Link and Image plugins are enabled.
+  $plugins['backdropLink.BackdropLinkImage'] = array(
+    'pseudo_plugin' => TRUE,
+    'enabled_callback' => '_ckeditor5_link_image_plugin_check',
+    'plugin_dependencies' => array('link.Link', 'image.Image', 'link.LinkImage'),
+    'config' => array(
+      'image' => array(
+        'toolbar' => array('|', 'backdropLinkImage', '|'),
+      ),
+    ),
+  );
+
+  $plugins['backdropMaximize.Maximize'] = array(
+    'library' => array('ckeditor5', 'backdrop.ckeditor5.maximize'),
+    'buttons' => array(
+      'maximize' => array(
+        'label' => t('Maximize'),
+        'image' => $image_prefix . '/maximize.svg',
+      ),
+    ),
+    'config' => array(
+      'maximizeLabel' => t('Maximize'),
+    ),
+  );
+
+  // See https://ckeditor.com/docs/ckeditor5/latest/features/undo-redo.html
+  $plugins['undo.Undo'] = array(
+    'buttons' => array(
+      'undo' => array(
+        'label' => t('Undo'),
+        'image' => $image_prefix . '/undo.svg',
+        'image_rtl' => $image_prefix . '/undo-rtl.svg',
+      ),
+      'redo' => array(
+        'label' => t('Redo'),
+        'image' => $image_prefix . '/redo.svg',
+        'image_rtl' => $image_prefix . '/redo-rtl.svg',
+      ),
+    ),
+  );
+
+  // See https://ckeditor.com/docs/ckeditor5/latest/features/show-blocks.html
+  $plugins['showBlocks.ShowBlocks'] = array(
+    'buttons' => array(
+      'showBlocks' => array(
+        'label' => t('Show blocks'),
+        'image' => $image_prefix . '/show-blocks.svg',
+      ),
+    ),
+  );
+
+  return $plugins;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Manipulate the image insert form to describe CKEditor-integration.
+ */
+function ckeditor5_form_filter_format_editor_image_form_alter(&$form, $form_state) {
+  $format = $form_state['format'];
+  if ($format->editor === 'ckeditor5') {
+    $form['caption']['#description'] = t('If checked, a caption area will appear in the editor.');
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Manipulate the link dialog form to remove setting the link text, which is
+ * not (yet) supported).
+ */
+function ckeditor5_form_filter_format_editor_link_form_alter(&$form, $form_state) {
+  $format = $form_state['format'];
+  if ($format->editor === 'ckeditor5') {
+    $form['text']['#access'] = FALSE;
+  }
+}
+
+/**
+ * Enabled callback for hook_ckeditor5_plugins().
+ *
+ * Checks if the data-caption support should be enabled based on the
+ * configuration of a text format and editor.
+ *
+ * @param object $format
+ *   The filter format object for which CKEditor is checking settings.
+ * @param string $plugin_name
+ *   The plugin that is being checked.
+ *
+ * @return bool
+ *   TRUE if the image plugin is enabled, FALSE otherwise.
+ */
+function _ckeditor5_image_caption_plugin_check($format, $plugin_name) {
+  return !empty($format->filters['filter_image_caption']->status);
+}
+
+/**
+ * Enabled callback for hook_ckeditor5_plugins().
+ *
+ * Checks if the Image Alignment configuration should be loaded. Note that the
+ * alignment functionality is part of the backdropImage.BackdropImage plugin, so
+ * this does not actually enable an additional plugin, but rather only adds the
+ * configuration needed to enable image alignment.
+ *
+ * @param object $format
+ *   The filter format object for which CKEditor is checking settings.
+ * @param string $plugin_name
+ *   The plugin that is being checked.
+ *
+ * @return bool
+ *   TRUE if the image plugin is enabled, FALSE otherwise.
+ */
+function _ckeditor5_image_alignment_plugin_check($format, $plugin_name) {
+  return !empty($format->filters['filter_image_align']->status);
+}
+
+
+/**
+ * Enabled callback for hook_ckeditor5_plugins().
+ *
+ * Checks if the Link Image configuration should be loaded. This plugin's
+ * functionality is extended by the backdropImage.BackdropImage plugin.
+ *
+ * @param object $format
+ *   The filter format object for which CKEditor is checking settings.
+ * @param string $plugin_name
+ *   The plugin that is being checked.
+ *
+ * @return bool
+ *   TRUE if the image plugin is enabled, FALSE otherwise.
+ */
+function _ckeditor5_link_image_plugin_check($format, $plugin_name) {
+  $link_enabled = in_array('backdropLink', $format->editor_settings['toolbar']);
+  $image_enabled = in_array('backdropImage', $format->editor_settings['toolbar']);
+  return $link_enabled && $image_enabled;
+}
+
+/**
+ * Editor JS settings callback; Add CKEditor config to the page for a format.
+ *
+ * Note that this function uses the term "config" to match that of CKEditor's
+ * own terminology. It is not related to Backdrop's configuration system.
+ *
+ * See https://ckeditor.com/docs/ckeditor5/latest/installation/getting-started/configuration.html
+ *
+ * @param object $format
+ *   The filter format object for which CKEditor is adding its config.
+ */
+function ckeditor5_get_config($format) {
+  // Static cache the configuration per format. This function is called once per
+  // filtered text field on the page.
+  $ckeditor5_configs = &backdrop_static(__FUNCTION__, array());
+  $format_id = $format->name;
+  if (isset($ckeditor5_configs[$format_id])) {
+    return $ckeditor5_configs[$format_id];
+  }
+
+  global $language;
+
+  // Loop through all available plugins and check to see if it has been
+  // explicitly enabled. At the same time, associate each plugin with its
+  // buttons (if any) so we can check if the plugin should be enabled implicitly
+  // based on the toolbar.
+  $plugin_info = ckeditor5_plugins();
+  $all_buttons = array();
+  $plugins = array();
+  $pseudo_plugins = array();
+  foreach ($plugin_info as $plugin_name => $plugin) {
+    // Check if this plugin should be enabled.
+    if (isset($plugin['enabled_callback'])) {
+      if ($plugin['enabled_callback'] === TRUE || $plugin['enabled_callback']($format, $plugin_name)) {
+        $plugins[] = $plugin_name;
+        if (!empty($plugin['pseudo_plugin'])) {
+          $pseudo_plugins[] = $plugin_name;
+        }
+        // Enable other plugins this plugin depends on.
+        if (isset($plugin['plugin_dependencies'])) {
+          // Add the plugin and its dependencies to the list of plugins.
+          $plugins = array_merge($plugin['plugin_dependencies'], $plugins);
+        }
+      }
+    }
+    // Associate each button with its providing plugin.
+    if (isset($plugin['buttons'])) {
+      foreach ($plugin['buttons'] as $button_name => &$button) {
+        $button['plugin'] = $plugin;
+        $button['plugin']['name'] = $plugin_name;
+        unset($button['plugin']['buttons']);
+      }
+      $all_buttons = array_merge($all_buttons, $plugin['buttons']);
+    }
+  }
+
+  // Record needed plugins based on use in the toolbar.
+  $toolbar = array();
+  foreach ($format->editor_settings['toolbar'] as $button_name) {
+    // Sanity check that the button exists in our installation.
+    if (isset($all_buttons[$button_name])) {
+      // Add in the button parent's overall plugin and its dependencies.
+      if (isset($all_buttons[$button_name]['plugin']['name'])) {
+        $plugin_name = $all_buttons[$button_name]['plugin']['name'];
+        $plugins[] = $plugin_name;
+        if (isset($plugin_info[$plugin_name]['plugin_dependencies'])) {
+          $plugins = array_merge($plugin_info[$plugin_name]['plugin_dependencies'], $plugins);
+        }
+      }
+      // Add in plugin dependencies for this specific button.
+      if (isset($all_buttons[$button_name]['plugin_dependencies'])) {
+        $plugins = array_merge($all_buttons[$button_name]['plugin_dependencies'], $plugins);
+      }
+    }
+    $toolbar[] = $button_name;
+  }
+
+  // Remove duplicates from the plugin list (as happens with dependencies).
+  $plugins = array_unique($plugins);
+
+  // Initialize reasonable defaults that provide expected basic behavior.
+  $config = array(
+    'language' => $language->langcode,
+    'toolbar' => array(
+      'items' => $toolbar,
+      'shouldNotGroupWhenFull' => TRUE,
+    ),
+    // Plugin list is not a "real" CKEditor configuration value. It is converted
+    // from an array of strings to variables references in the ckeditor5-dll.js
+    // file. Exclude the pseudo-plugins that are configuration-only.
+    'pluginList' => array_values(array_diff($plugins, $pseudo_plugins)),
+  );
+
+  // Add default settings from plugins.
+  foreach ($plugins as $plugin_name) {
+    if (isset($plugin_info[$plugin_name]['config'])) {
+      $config = backdrop_array_merge_deep($config, $plugin_info[$plugin_name]['config']);
+    }
+  }
+
+  // Add "allow" and "disallow" for CKEditor GeneralHtmlSupportConfig to apply
+  // settings from the Filter module. Prevents data loss for content not handled
+  // by editor plugins.
+  $config['htmlSupport'] = array();
+  list($config['htmlSupport']['allow'], $config['htmlSupport']['disallow']) = _ckeditor5_get_generic_html_settings($format);
+
+  // Create a token for access to dialogs.
+  if (in_array('backdropLink.BackdropLink', $plugins)) {
+    $link_token = filter_editor_dialog_token($format, 'link');
+    $config['backdropLink']['dialogUrl'] = url('editor/dialog/link/' . $format->format, array('query' => array(
+      'token' => $link_token,
+      'calling_path' => $_GET['q'],
+    )));
+    $config['backdropLink']['buttonLabel'] = t('Advanced');
+  }
+  if (in_array('backdropImage.BackdropImage', $plugins)) {
+    $image_token = filter_editor_dialog_token($format, 'image');
+    $config['backdropImage']['dialogUrl'] = url('editor/dialog/image/'. $format->format, array('query' => array(
+      'token' => $image_token,
+      'calling_path' => $_GET['q'],
+    )));
+    $config['backdropImage']['uploadUrl'] = url('ckeditor5/upload/image/'. $format->format, array('query' => array(
+      'token' => $image_token,
+      'calling_path' => $_GET['q'],
+    )));
+  }
+
+  // Add the style list if configured.
+  if (in_array('style.Style', $plugins)) {
+    if (!empty($format->editor_settings['style_list'])) {
+      $style_list = $format->editor_settings['style_list'];
+      $config['style']['definitions'] = $style_list;
+    }
+  }
+
+  // Add heading list if configured.
+  if (in_array('heading.Heading', $plugins)) {
+    $html_restrictions = filter_format_allowed_html($format);
+    $heading_list = $format->editor_settings['heading_list'];
+    $possible_headings = array(
+      'h1' => array(
+        'model' => 'heading1',
+        'view' => 'h1',
+        'title' => t('Heading 1'),
+      ),
+      'h2' => array(
+        'model' => 'heading2',
+        'view' => 'h2',
+        'title' => t('Heading 2'),
+      ),
+      'h3' => array(
+        'model' => 'heading3',
+        'view' => 'h3',
+        'title' => t('Heading 3'),
+      ),
+      'h4' => array(
+        'model' => 'heading4',
+        'view' => 'h4',
+        'title' => t('Heading 4'),
+      ),
+      'h5' => array(
+        'model' => 'heading5',
+        'view' => 'h5',
+        'title' => t('Heading 5'),
+      ),
+      'h6' => array(
+        'model' => 'heading6',
+        'view' => 'h6',
+        'title' => t('Heading 6'),
+      ),
+    );
+    foreach ($possible_headings as $tag => $heading_config) {
+      // Remove if not enabled in the editor settings.
+      if (!in_array($tag, $heading_list)) {
+        unset($possible_headings[$tag]);
+      }
+      // Or remove if the HTML filter does not allow it.
+      if (is_array($html_restrictions) && !isset($html_restrictions['allowed'][$tag])) {
+        unset($possible_headings[$tag]);
+      }
+    }
+    $config['heading']['options'] = array_values($possible_headings);
+    // Add the always required normal paragraph formatting.
+    array_unshift($config['heading']['options'], array(
+      'model' => 'paragraph',
+      'title' => t('Paragraph'),
+    ));
+  }
+
+  backdrop_alter('ckeditor5_config', $config, $format);
+
+  // Save the configuration into the static variable.
+  $ckeditor5_configs[$format_id] = $config;
+  return $ckeditor5_configs[$format_id];
+}
+
+/**
+ * Builds the ACF part of the CKEditor JS settings.
+ *
+ * This ensures that CKEditor obeys the HTML restrictions defined by Backdrop's
+ * filter system, by enabling CKEditor's Advanced Content Filter (ACF)
+ * functionality: http://ckeditor5.com/blog/CKEditor-4.1-RC-Released.
+ *
+ * @param object $format
+ *   The text format object.
+ *
+ * @return array
+ *   An array with two values:
+ *   - Configuration array of allowed content rules used by the editor's
+ *     General HTML Support "allow" setting.
+ *   - Configuration array of disallowed content rules used by the editor's
+ *     General HTML Support "disallow" setting.
+ */
+function _ckeditor5_get_generic_html_settings($format) {
+  $html_restrictions = filter_format_allowed_html($format);
+
+  // When all HTML is allowed, we return empty arrays. This case gets handled in
+  // js/ckeditor5.js.
+  if ($html_restrictions === TRUE) {
+    return array(array(), array());
+  }
+
+  // Converts Backdrop-stored attribute values to CKEditor attribute lists.
+  $get_attribute_values = function($attribute_values, $allowed_values) {
+    $values = array_keys(array_filter($attribute_values, function($value) use ($allowed_values) {
+      if ($allowed_values) {
+        return $value !== FALSE;
+      }
+      else {
+        return $value === FALSE;
+      }
+    }));
+    if (count($values)) {
+      return $values;
+    }
+    else {
+      return NULL;
+    }
+  };
+
+  $allowed = array();
+  $disallowed = array();
+  if (isset($html_restrictions['forbidden'])) {
+    foreach ($html_restrictions['forbidden'] as $tag) {
+      $disallowed[$tag] = array(
+        'name' => $tag,
+      );
+    }
+  }
+  foreach ($html_restrictions['allowed'] as $tag => $attributes) {
+    // Tell CKEditor the tag is allowed, but no attributes.
+    if ($attributes === FALSE) {
+      $allowed[$tag] = array(
+        'name' => $tag,
+        'attributes' => FALSE,
+        'styles' => FALSE,
+        'classes' => FALSE,
+      );
+    }
+    // Tell CKEditor the tag is allowed, as well as any attribute on it. The
+    // "style" and "class" attributes are handled separately by CKEditor:
+    // they are disallowed even if you specify it in the list of allowed
+    // attributes, unless you state specific values for them that are
+    // allowed. Or, in this case: any value for them is allowed.
+    elseif ($attributes === TRUE) {
+      $allowed[$tag] = array(
+        'name' => $tag,
+        'attributes' => TRUE,
+        'styles' => TRUE,
+        'classes' => TRUE,
+      );
+      // We've just marked that any value for the "style" and "class"
+      // attributes is allowed. However, that may not be the case: the "*"
+      // tag may still apply restrictions.
+      // Since CKEditor's ACF follows the following principle:
+      // Once validated, an element or its property cannot be invalidated
+      // by another rule.
+      // That means that the most permissive setting wins. Which means that
+      // it will still be allowed by CKEditor to e.g. define any style, no
+      // matter what the "*" tag's restrictions may be. If there's a setting
+      // for either the "style" or "class" attribute, it cannot possibly be
+      // more permissive than what was set above. Hence: inherit from the
+      // "*" tag where possible.
+      if (isset($html_restrictions['allowed']['*'])) {
+        $wildcard = $html_restrictions['allowed']['*'];
+        if (isset($wildcard['style'])) {
+          if (!is_array($wildcard['style'])) {
+            $allowed[$tag]['styles'] = $wildcard['style'];
+          }
+          else {
+            $allowed_styles = $get_attribute_values($wildcard['style'], TRUE);
+            if (isset($allowed_styles)) {
+              $allowed[$tag]['styles'] = $allowed_styles;
+            }
+            else {
+              unset($allowed[$tag]['styles']);
+            }
+          }
+        }
+        if (isset($wildcard['class'])) {
+          if (!is_array($wildcard['class'])) {
+            $allowed[$tag]['classes'] = $wildcard['class'];
+          }
+          else {
+            $allowed_classes = $get_attribute_values($wildcard['class'], TRUE);
+            if (isset($allowed_classes)) {
+              $allowed[$tag]['classes'] = $allowed_classes;
+            }
+            else {
+              unset($allowed[$tag]['classes']);
+            }
+          }
+        }
+      }
+    }
+    // Tell CKEditor the tag is allowed, along with some tags.
+    elseif (is_array($attributes)) {
+      // Configure allowed attributes, allowed "style" attribute values and
+      // allowed "class" attribute values.
+      // CKEditor only allows specific values for the "class" and "style"
+      // attributes; so ignore restrictions on other attributes, which
+      // Drupal filters may provide.
+      // NOTE: A Drupal contrib module can subclass this class, override the
+      // getConfig() method, and override the JavaScript at
+      // Drupal.editors.ckeditor5 to somehow make validation of values for
+      // attributes other than "class" and "style" work.
+      $allowed_attributes = array_filter($attributes, function($value) {
+        return $value !== FALSE;
+      });
+      if (count($allowed_attributes)) {
+        $allowed[$tag]['name'] = $tag;
+        if (isset($allowed[$tag]['attributes'])) {
+          $allowed[$tag]['attributes'] = $allowed_attributes['attributes'];
+        }
+        if (isset($allowed_attributes['style']) && is_array($allowed_attributes['style'])) {
+          $allowed[$tag]['styles'] = $allowed_attributes['style'];
+        }
+        if (isset($allowed_attributes['class']) && is_array($allowed_attributes['class'])) {
+          $allowed[$tag]['classes'] = $allowed_attributes['class'];
+        }
+      }
+
+      // Handle disallowed attributes analogously. However, to handle *dis-
+      // allowed* attribute values, we must look at *allowed* attributes'
+      // disallowed attribute values! After all, a disallowed attribute
+      // implies that all of its possible attribute values are disallowed,
+      // thus we must look at the disallowed attribute values on allowed
+      // attributes.
+      $disallowed_attributes = array_filter($attributes, function($value) {
+        return $value === FALSE;
+      });
+      if (count($disallowed_attributes)) {
+        // A simple "*" placeholder has no meaning for CKEditor5, we catch that
+        // in js/ckeditor5.js by using proper RegExp.
+        // @see https://ckeditor.com/docs/ckeditor5/latest/api/module_engine_view_matcher-MatcherPattern.html
+        if ($tag == '*') {
+          continue;
+        }
+        $disallowed[$tag]['name'] = $tag;
+        // No need to disallow the 'class' or 'style' attributes; CKEditor
+        // handles them separately (if no specific class or style attribute
+        // values are allowed, then those attributes are disallowed).
+        if (isset($disallowed_attributes['class'])) {
+          unset($disallowed_attributes['class']);
+        }
+        if (isset($disallowed_attributes['style'])) {
+          unset($disallowed_attributes['style']);
+        }
+        $disallowed[$tag]['attributes'] = $disallowed_attributes;
+      }
+      if (isset($allowed_attributes['style']) && is_array($allowed_attributes['style'])) {
+        $disallowed_styles = $get_attribute_values($allowed_attributes['style'], FALSE);
+        if (isset($disallowed_styles)) {
+          $disallowed[$tag]['styles'] = $disallowed_styles;
+        }
+      }
+      if (isset($allowed_attributes['class']) && is_array($allowed_attributes['class'])) {
+        $disallowed_classes = $get_attribute_values($allowed_attributes['class'], FALSE);
+        if (isset($disallowed_classes)) {
+          $disallowed[$tag]['classes'] = $disallowed_classes;
+        }
+      }
+    }
+  }
+
+  // CKEditor htmlSupport arrays are not supposed to be keyed.
+  $allowed = array_values($allowed);
+  $disallowed = array_values($disallowed);
+
+  return array($allowed, $disallowed);
+}
+
+/**
+ * Retrieve a list of CKEditor-related libraries used by any CKEditor 5 plugin.
+ *
+ * @return array
+ *   An array of library keys.
+ */
+function _ckeditor5_get_plugin_libraries() {
+  $plugins = ckeditor5_plugins();
+  $libraries = array();
+  foreach ($plugins as $plugin) {
+    if (isset($plugin['library'])) {
+      $libraries[$plugin['library'][0] . '--' . $plugin['library'][1]] = $plugin['library'];
+    }
+  }
+
+  return array_values($libraries);
+}
+
+/**
+ * Retrieves the default theme's CKEditor stylesheets defined in the .info file.
+ *
+ * Themes may specify specific CSS files that will be applied to all pages that
+ * contain a CKEditor instance (even on administrative pages), by adding a
+ * "ckeditor5_stylesheets" key in the theme .info file.
+ *
+ * @code
+ * ckeditor5_stylesheets[] = css/ckeditor5-styles.css
+ * @endcode
+ *
+ * Note that unlike CKEditor 4 that used an iframe, CKEditor 5 includes the
+ * editor directly on the page. Styles added by this file may affect other
+ * parts of the page. To limit the effect of the CSS to just the CKEditor
+ * instance, all CSS selectors within this file should be prefixed with
+ * ".ck-content". For example:
+ *
+ * @code
+ * .ck-content blockquote {
+ *   border-left: 5px solid #ccc;
+ * }
+ * @endcode
+ *
+ * @param string $theme
+ *   The theme name from which the "ckeditor5_stylesheets" property should be
+ *   read in the .info files. This theme and all its parent themes will be
+ *   checked. Defaults to the current front-end theme.
+ *
+ * @return array
+ *   An array of all CSS to be added by the theme to the page.
+ */
+function _ckeditor5_theme_css($theme = NULL) {
+  $css = array();
+  if (!isset($theme)) {
+    $theme = config_get('system.core', 'theme_default');
+  }
+  if ($theme_path = backdrop_get_path('theme', $theme)) {
+    $info = system_get_info('theme', $theme);
+    if (isset($info['ckeditor5_stylesheets'])) {
+      $css = $info['ckeditor5_stylesheets'];
+      foreach ($css as $key => $path) {
+        $css[$key] = $theme_path . '/' . $path;
+      }
+    }
+    if (isset($info['base theme'])) {
+      $css = array_merge($css, _ckeditor5_theme_css($info['base theme']));
+    }
+  }
+  return $css;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ *
+ * Modify the format configuration form to provide a link to upgrade CKEditor 4.
+ */
+function ckeditor5_form_filter_admin_format_form_alter(&$form, &$form_state) {
+  $editor_info = $form_state['editor_info'];
+  $format = $form_state['format'];
+  if ($editor_info && $editor_info['module'] === 'ckeditor' && empty($form_state['input'])) {
+    backdrop_set_message(t('This text format uses CKEditor 4, which is unsupported. It can be upgraded using the <a href="!url">CKEditor 5 upgrade page</a>.', array('!url' => url('admin/config/content/formats/' . $format->format . '/ckeditor5-upgrade'))), 'info');
+  }
+}

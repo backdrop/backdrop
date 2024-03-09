@@ -9,6 +9,7 @@
   position: absolute;
   width: 12em;
   top: 1em;
+  display: none;
 }
 
 .menu-dropdown li {
@@ -56,10 +57,6 @@
   border-style: solid dashed dashed dashed;
   border-color: #555555 transparent transparent transparent;
   background: transparent;
-  -webkit-border-radius: 0;
-  -moz-border-radius: 0;
-  -ms-border-radius: 0;
-  -o-border-radius: 0;
   border-radius: 0;
 }
 .menu-dropdown a.highlighted span.sub-arrow:before {

@@ -782,16 +782,16 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
     if ($recursive) {
       // $this->getLocalPath() fails if $uri has multiple levels of directories
       // that do not yet exist.
-      $localpath = $this->getDirectoryPath() . '/' . $this->getTarget($uri);
+      $local_path = $this->getDirectoryPath() . '/' . $this->getTarget($uri);
     }
     else {
-      $localpath = $this->getLocalPath($uri);
+      $local_path = $this->getLocalPath($uri);
     }
     if ($options & STREAM_REPORT_ERRORS) {
-      return mkdir($localpath, $mode, $recursive);
+      return mkdir($local_path, $mode, $recursive);
     }
     else {
-      return @mkdir($localpath, $mode, $recursive);
+      return @mkdir($local_path, $mode, $recursive);
     }
   }
 

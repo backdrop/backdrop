@@ -167,7 +167,7 @@ Backdrop.jsAC.prototype.unhighlight = function (node) {
  * Hides the autocomplete suggestions.
  */
 Backdrop.jsAC.prototype.hidePopup = function (keycode) {
-  // Select item if the right key or mousebutton was pressed.
+  // Select item if the right key or mouse button was pressed.
   if (this.selected && ((keycode && keycode !== 46 && keycode !== 8 && keycode !== 27) || !keycode)) {
     this.input.value = $(this.selected).data('autocompleteValue');
   }
