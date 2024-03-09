@@ -16,6 +16,7 @@
  * - $content: An array of content, each item in the array is keyed to one
  *   region of the layout. This layout supports the following sections:
  *   - $content['header']
+ *   - $content['banner']
  *   - $content['top']
  *   - $content['content']
  *   - $content['sidebar']
@@ -37,6 +38,13 @@
   <?php endif; ?>
 
   <div class="l-wrapper">
+
+    <?php if (!empty($content['banner'])): ?>
+      <div class="l-banner">
+        <?php print $content['banner']; ?>
+      </div>
+    <?php endif; ?>
+
     <div class="l-wrapper-inner container container-fluid">
 
       <?php if ($messages): ?>
