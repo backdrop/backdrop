@@ -43,7 +43,11 @@ Backdrop.behaviors.color = {
   attach: function (context) {
     var settings = document.getElementById('edit-scheme').dataset;
     var schemes = JSON.parse(settings.colorSchemes);
+
+    // Hide the custom name field on first load.
     var $nameField = $('input[data-custom-name]').parent();
+    $nameField.hide();
+
     // This behavior attaches by ID, so is only valid once on a page.
     var form = $('#system-theme-settings .color-form', context).once('color');
     if (form.length === 0) {
@@ -67,12 +71,19 @@ Backdrop.behaviors.color = {
         updatePreview();
         $nameField.hide();
       }
+      else {
+        $nameField.show();
+      }
     });
 
     $('input[data-color-name]').on('change', function () {
       var schemeName =  document.getElementById('edit-scheme').value;
       var key = this.dataset.colorName;
-      if (schemeName !== '' && this.value !== schemes[schemeName][key]) {
+      if (schemeName === '') {
+        $nameField.show();
+        resetScheme();
+      }
+      else if (this.value !== schemes[schemeName][key]) {
         $nameField.show();
         resetScheme();
       }
