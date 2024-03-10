@@ -561,6 +561,22 @@ function color_scheme_form_submit($form, &$form_state) {
   // other color configs for this theme, and from color.inc.
   unset($info['schemes']['']);
 
+  // This is a custom scheme; save a new config.
+  if ($scheme == '') {
+    array_pop($info['schemes']);
+    $custom_name = check_plain($form_state['values']['custom_name']);
+    if (empty($custom_name)) {
+      $number = count($info['schemes']) + 1;
+      $custom_name = t('Custom !number', array('!number' => $number));
+    }
+    $custom_machine_name = system_transliterate_machine_name(strtolower($custom_name));
+    // $info['schemes'] = array();
+    $info['schemes'][$custom_machine_name] = array(
+      'title' => $custom_name,
+      'colors' => $palette,
+    );
+  }
+
   $config = config($theme . '.color.default');
   $config->setData($info);
   $config->save();
