@@ -478,27 +478,42 @@ function views_menu_alter(&$callbacks) {
  * called in order to 'load' a views argument; primarily it
  * will be used to perform validation.
  *
- * @param $value
+ * @param string $value
  *   The actual value passed.
- * @param $name
+ * @param string $name
  *   The name of the view. This needs to be specified in the 'load function'
  *   of the menu entry.
- * @param $display_id
+ * @param string | array $display_id
  *   The display id that will be loaded for this menu item.
- * @param $index
+ * @param int $index
  *   The menu argument index. This counts from 1.
  */
 function views_arg_load($value, $name, $display_id, $index) {
   static $views = array();
 
-  // Make sure we haven't already loaded this views argument for a similar menu
-  // item elsewhere.
-  $key = $name . ':' . $display_id . ':' . $value . ':' . $index;
-  if (isset($views[$key])) {
-    return $views[$key];
+  $display_ids = is_array($display_id) ? $display_id : array($display_id);
+  $display_id = reset($display_ids);
+
+  foreach ($display_ids as $id) {
+    // Make sure we haven't already loaded this views argument for a similar
+    // menu item elsewhere. Since access is always checked for the current user,
+    // we are sure that the static cache contains valid entries.
+    $key = $name . ':' . $id . ':' . $value . ':' . $index;
+    if (isset($views[$key])) {
+      return $views[$key];
+    }
+    // Lazy load the view object to avoid unnecessary work.
+    if (!isset($view)) {
+      $view = views_get_view($name);
+    }
+    // Pick the first display we have access to.
+    if ($view && count($display_ids) > 1 && $view->access($id)) {
+      $display_id = $id;
+      break;
+    }
   }
 
-  if ($view = views_get_view($name)) {
+  if ($view) {
     $view->set_display($display_id);
     $view->init_handlers();
 
