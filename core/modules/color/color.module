@@ -96,13 +96,8 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
     );
     $form['color']['custom_name'] = array(
       '#type' => 'textfield',
-      '#title' => t('Name'),
+      '#title' => t('Custom scheme name'),
       '#attributes' => array('data-custom-name' => 'custom-name'),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="scheme"]' => array('value' => ''),
-        ),
-      ),
     );
 
     $form['color']['palette'] = array(
@@ -378,7 +373,8 @@ function color_get_info($theme) {
   static $color_info = array();
 
   if (!isset($color_info[$theme])) {
-    $info = array(); // The variable to be populated by the theme color.inc file.
+    // The variable to be populated by the theme's color info.
+    $info = array();
     $config_names = config_get_names_with_prefix($theme . '.color.');
     if (!empty($config_names)) {
       // Check for a default color config for this theme.
@@ -561,8 +557,8 @@ function color_scheme_form_submit($form, &$form_state) {
   $form_state['values']['color'] = color_save_configuration($theme, $info, $palette);
 
   // Save color info to the default config file, or create one if it has not
-  // yet been created. THis will merge all color schemes from default config,
-  // other color configs for this theme, and from color.info.
+  // yet been created. This will merge all color schemes from default config,
+  // other color configs for this theme, and from color.inc.
   unset($info['schemes']['']);
 
   $config = config($theme . '.color.default');
