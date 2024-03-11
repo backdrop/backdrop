@@ -74,8 +74,7 @@ function theme_field($variables) {
   $output .= '<div class="field-items"' . $content_attributes . '>';
   foreach ($variables['items'] as $delta => $item) {
     $classes = 'field-item ' . ($delta % 2 ? 'odd' : 'even');
-    $item_attributes = (isset($variables['item_attributes'][$delta])) ? backdrop_attributes($variables['item_attributes'][$delta]) : '';
-    $output .= '<div class="' . $classes . '"' . $item_attributes . '>' . backdrop_render($item) . '</div>';
+    $output .= '<div class="' . $classes . '">' . backdrop_render($item) . '</div>';
   }
   $output .= '</div>';
 
