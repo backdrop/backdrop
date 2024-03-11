@@ -628,6 +628,18 @@ function color_get_custom_scheme_names($theme_name) {
 }
 
 /**
+ * Implements hook_themes_disabled().
+ */
+function color_themes_disabled($theme_list) {
+  foreach ($theme_list as $theme) {
+    $scheme_config_names = config_get_names_with_prefix($theme . '.color');
+    foreach ($scheme_config_names as $config_name) {
+      $config = config($config_name)->delete();
+    }
+  }
+}
+
+/**
  * Implements hook_flush_caches().
  */
 function color_flush_caches() {
