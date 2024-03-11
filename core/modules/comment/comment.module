@@ -1896,6 +1896,11 @@ function comment_form($form, &$form_state, $comment) {
     '#weight' => -1,
   );
 
+  // Add form-item class to body for consistent styling
+  if (!empty($form['comment_body'])) {
+    $form['comment_body']['#attributes']['class'][] = 'form-item';
+  }
+
   // Used for conditional validation of author fields.
   $form['is_anonymous'] = array(
     '#type' => 'value',
