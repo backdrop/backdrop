@@ -2161,25 +2161,58 @@ function system_regional_settings_submit($form, &$form_state) {
  */
 function system_site_maintenance_mode($form, &$form_state) {
   $config = config('system.core');
+  $maintenance_mode = state_get('maintenance_mode', FALSE)? 1 : 0;
+
   $form['maintenance_mode'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Put site into maintenance mode'),
-    '#default_value' => state_get('maintenance_mode', FALSE),
-    '#description' => t('Visitors will only see the maintenance mode message. Only users with the "Access site in maintenance mode" <a href="@permissions-url">permission</a> will be able to access the site. Authorized users can log in directly via the <a href="@user-login">user login</a> page.', array('@permissions-url' => url('admin/config/people/permissions'), '@user-login' => url('user'))),
+    '#type' => 'radios',
+    '#title' => t('Maintenance mode'),
+    '#default_value' => $maintenance_mode,
+    '#options' => array(
+      '0' => t('Off'),
+      '1' => t('On'),
+    ),
   );
+  $form['maintenance_mode']['0']['#description'] = t('Visitors will see the site as usual.');
+  $form['maintenance_mode']['1']['#description'] = t('Visitors will only see the maintenance mode message.');
+
   $form['maintenance_mode_message'] = array(
     '#type' => 'textarea',
-    '#title' => t('Message to display when in maintenance mode'),
+    '#title' => t('Maintenance mode message'),
     '#default_value' => $config->get('maintenance_mode_message'),
     '#description' => theme('token_tree_link'),
     '#element_validate' => array('token_element_validate'),
   );
+
+  $permissions_message_type = 'info';
+  if ($maintenance_mode) {
+    backdrop_set_message(t('<strong>The site is currently in maintenance mode</strong>. Visitors will only see the maintenance mode message (as configured below).'), 'warning');
+
+    $permissions_message_type = 'warning';
+  }
+
+  $form['permissions_message'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('messages', $permissions_message_type)),
+  );
+  $form['permissions_message']['info'] = array(
+    '#markup' => t('People with the "Use site in maintenance mode" permission will still be able to <a href="@user-login">log in</a> while the site is in maintenance mode.', array('@user-login' => url('user/login'))),
+  );
+
+  $form['permissions_wrapper'] = array(
+    '#type' => 'fieldset',
+    '#collapsible' => TRUE,
+    '#collapsed' => FALSE,
+    '#title' => t("Permissions"),
+  );
+  $form['permissions_wrapper']['permissions'] = system_site_maintenance_mode_form_permissions();
+  $form['permissions_wrapper']['permissions']['#tree'] = TRUE;
 
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save configuration'),
   );
+
   return $form;
 }
 
@@ -2187,20 +2220,103 @@ function system_site_maintenance_mode($form, &$form_state) {
  * Submit handler for the system_site_maintenance_mode() form.
  */
 function system_site_maintenance_mode_submit($form, &$form_state) {
-  state_set('maintenance_mode', (bool) $form_state['values']['maintenance_mode']);
+  $previous_maintenance_mode_state = state_get('maintenance_mode', FALSE);
+  $maintenance_mode = $form_state['values']['maintenance_mode'];
+  state_set('maintenance_mode', (bool) $maintenance_mode);
   config_set('system.core', 'maintenance_mode_message', $form_state['values']['maintenance_mode_message']);
 
-  // Give specific messages on the primary action for this form.
-  if ($form_state['values']['maintenance_mode'] && current_path() == 'admin/config/development/maintenance') {
-    backdrop_set_message(t('The site is now in maintenance mode. Only users with the "Access site in maintenance mode" permission will be able to access the site.'), 'warning');
+  // Update user permissions for each role.
+  foreach ($form_state['values']['permissions']['roles'] as $role_name => $role) {
+    user_role_change_permissions($role->name, $form_state['values']['permissions']['checkboxes'][$role->name]);
   }
-  elseif ($form['maintenance_mode']['#default_value'] != $form_state['values']['maintenance_mode']) {
-    backdrop_get_messages();
-    backdrop_set_message(t('The site is no longer in maintenance mode.'));
+
+  // Remove permissions from default #config store (system.settings).
+  unset($form_state['values']['permissions']);
+
+  backdrop_get_messages();
+  backdrop_set_message(t('The configuration options have been saved.'));
+
+  if ($previous_maintenance_mode_state == 1 && !$maintenance_mode) {
+    backdrop_set_message(t('The site is no longer in maintenance mode. Visitors will see the site as per usual.'));
   }
-  else {
-    backdrop_set_message(t('The configuration options have been saved.'));
+
+  // In some cases, the site might seem as still online, due to cache.
+  cache_clear_all();
+}
+
+/**
+ * Builds a matrix of maintenance mode permissions.
+ *
+ * @see node_type_form_permissions()
+ */
+function system_site_maintenance_mode_form_permissions() {
+  // Retrieve role names for columns.
+  $roles = user_roles(FALSE, NULL, TRUE);
+  $admin_role = config_get('system.core', 'user_admin_role');
+
+  // Note that in system_theme(), the theme callback
+  // 'system_site_maintenance_mode_form_permissions' reuses
+  // theme_user_admin_permissions(), to make it identical to the user module
+  // permissions page.
+  $form['#theme'] = array('system_site_maintenance_mode_form_permissions');
+
+  // Wrap the table in a form element to make margins match other form elements.
+  $form['#theme_wrappers'] = array('form_element');
+
+  $form['roles'] = array(
+    '#type' => 'value',
+    '#value' => $roles,
+  );
+
+  // Retrieve all system-related permissions.
+  $systmem_permissions = system_permission();
+
+  // We currently need only the "Use the site in maintenance mode" permission.
+  $permissions['access site in maintenance mode'] = $systmem_permissions['access site in maintenance mode'];
+
+  // Render role/permission overview:
+  $options = array();
+  $status = array();
+  foreach ($permissions as $permission => $permission_item) {
+    // Fill in default values for the permission.
+    $permission_item += array(
+      'description' => '',
+      'restrict access' => FALSE,
+      'warning' => !empty($permission_item['restrict access']) ? t('Warning: Give to trusted roles only; this permission has security implications.') : '',
+    );
+    $options[$permission] = '';
+    $form['permission'][$permission] = array(
+      '#type' => 'item',
+      '#markup' => $permission_item['title'],
+      '#description' => theme('user_permission_description', array('permission_item' => $permission_item)),
+    );
+
+    foreach ($roles as $role_name => $role) {
+      // Builds arrays for checked boxes for each role. Always select the Admin
+      // role on new forms.
+      if (in_array($permission, $role->permissions) || ($role->name == $admin_role)) {
+        $status[$role_name][] = $permission;
+      }
+    }
   }
+
+  // Have to build checkboxes here after checkbox arrays are built.
+  foreach ($roles as $role_name => $role) {
+    $form['checkboxes'][$role_name] = array(
+      '#type' => 'checkboxes',
+      '#options' => $options,
+      '#default_value' => isset($status[$role_name]) ? $status[$role_name] : array(),
+      '#attributes' => array('class' => array('role-' . $role_name)),
+    );
+    $form['role_names'][$role_name] = array(
+      '#markup' => check_plain($role->label),
+      '#tree' => TRUE,
+    );
+  }
+
+  $form['#attached']['js'][] = backdrop_get_path('module', 'user') . '/js/user.permissions.js';
+
+  return $form;
 }
 
 /**

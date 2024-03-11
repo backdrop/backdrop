@@ -1243,7 +1243,7 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
       'maintenance_mode' => TRUE,
     );
     $this->backdropPost('admin/config/development/maintenance', $edit, 'Save configuration');
-    $this->assertRaw('The site is now in maintenance mode. Only users with the "Access site in maintenance mode" permission will be able to access the site.', 'Maintenance confirmation message shown.');
+    $this->assertText('The site is currently in maintenance mode. Visitors will only see the maintenance mode message (as configured below).', 'Maintenance confirmation message shown.');
 
     $path = config_get('system.core', 'site_frontpage');
     $admin_message = format_string('The site is currently in <a href="@url">maintenance mode</a>', array('@url' => url('admin/config/development/maintenance')));
@@ -1342,7 +1342,7 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
       'maintenance_mode' => FALSE,
     );
     $this->backdropPost('admin/config/development/maintenance', $edit, 'Save configuration');
-    $this->assertRaw('The site is no longer in maintenance mode.');
+    $this->assertRaw('The site is no longer in maintenance mode. Visitors will see the site as per usual.');
   }
 }
 
