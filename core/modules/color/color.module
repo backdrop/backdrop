@@ -595,7 +595,7 @@ function color_scheme_form_submit($form, &$form_state) {
   }
   // This is a theme-provided scheme; save to the existing config.
   else {
-    $info['scheme_name'] = 'custom';
+    $info['scheme_name'] = 'default';
     $config = config($theme . '.color.default');
     $config->setData($info);
     $config->save();
@@ -635,6 +635,26 @@ function color_themes_disabled($theme_list) {
     $scheme_config_names = config_get_names_with_prefix($theme . '.color');
     foreach ($scheme_config_names as $config_name) {
       $config = config($config_name)->delete();
+    }
+  }
+}
+
+/**
+ * Implements hook_themes_enabled().
+ */
+function color_themes_enabled($theme_list) {
+  foreach ($theme_list as $theme) {
+    // Don't use color_get_info() here because that function aggregates all
+    // color palettes from all custom config files, and we don't want to save
+    // custom config data in the default file.
+    $path = backdrop_get_path('theme', $theme);
+    $file = BACKDROP_ROOT . '/' . $path . '/color/color.inc';
+    if ($path && file_exists($file)) {
+      include $file;
+      $info['scheme_name'] = 'default';
+      $config = config($theme . '.color.' . '.default');
+      $config->setData($info);
+      $config->save();
     }
   }
 }
