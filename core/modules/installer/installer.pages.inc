@@ -735,9 +735,25 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
 
   if (!empty($all_options)) {
     $form['module_instructions'] = array(
-      '#type' => 'item',
+      '#type' => 'container',
+      '#attributes' => array('class' => array('messages', 'info')),
+    );
+    $form['module_instructions']['info'] = array(
       '#markup' => t('You may enable modules using the form below or on the main !link page.', array('!link' => l(t('Modules'), 'admin/modules'))),
     );
+
+    // If there is at least one module with unmet dependencies, then show a
+    // warning to explain why these modules in the list have no checkboxes.
+    if (!empty($missing)) {
+      $form['missing_dependencies'] = array(
+        '#type' => 'container',
+        '#attributes' => array('class' => array('messages', 'warning')),
+      );
+      $form['missing_dependencies']['warning'] = array(
+        '#markup' => t('Some modules are missing one or more dependencies and cannot be enabled. The checkboxes for these modules have been disabled.'),
+      );
+    }
+
     $form['modules'] = array(
       '#type' => 'tableselect',
       '#title' => t('Enable modules'),
@@ -779,12 +795,6 @@ function installer_browser_installation_enable_form($form, &$form_state, $projec
         '#href' => 'admin/installer/reset/module/all',
         '#options' => array(),
       );
-    }
-
-    // If there is at least one module with unmet dependencies, then show a
-    // warning to explain why these modules in the list have no checkboxes.
-    if (!empty($missing)) {
-      backdrop_set_message(t('Some modules are missing one or more dependencies and cannot be enabled. The checkboxes for these modules have been disabled.'), 'warning');
     }
   }
 
