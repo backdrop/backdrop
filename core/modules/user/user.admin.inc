@@ -346,7 +346,11 @@ function user_login_settings($form, &$form_state) {
   );
   $form['ip_limit_settings']['help'] = array(
     '#type' => 'item',
-    '#description' => t('Do not allow any login from the current user\'s IP if the limit has been reached. This is independent of the per-user limit to catch attempts from one IP to log in to many different user accounts. By default we have a reasonably high limit since there may be only one apparent IP for all users at an institution.'),
+    '#description' => t("Do not allow any further login attempts <em>from the current user's IP</em>, if the limit has been reached. This is used to prevent malicious login attempts from one IP using many different user accounts. By default the limit is set reasonably high, to account for legitimate use cases (for example, multiple users from the same institution logging in from a common IP)."),
+  );
+  $form['ip_limit_settings']['note'] = array(
+    '#type' => 'item',
+    '#description' => t("<strong>Note:</strong> This is independent of the per-user limit (see setting below)."),
   );
   $form['user_limit_settings'] = array(
     '#type' => 'fieldset',
@@ -374,7 +378,7 @@ function user_login_settings($form, &$form_state) {
   );
   $form['user_limit_settings']['help'] = array(
     '#type' => 'item',
-    '#description' => t('Configure the limit and the time window for users attempting to log in. That is, how many failed login attempts are allowed per specified time period.'),
+    '#description' => t('Do not allow any further login attempts <em>for the same user account</em>, if the limit has been reached. This is used to prevent repeated malicious login attempts (for example someone trying to guess the password of a specific user account).'),
   );
   $form['user_limit_settings']['flood_uid_only'] = array(
     '#type' => 'radios',
