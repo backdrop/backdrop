@@ -1128,6 +1128,11 @@ function menu_tree_output($tree, $_current_depth = 0) {
       $class[] = 'active-trail';
       $data['link']['localized_options']['attributes']['class'][] = 'active-trail';
     }
+     // Issue 2413. Make user link active on user/UID page
+    if($data['link']['href'] == 'user' && $router_item['path'] == 'user/%') {
+      $class[] = 'active';
+      $data['link']['localized_options']['attributes']['class'][] = 'active';
+    }
     // Normally, l() compares the href of every link with $_GET['q'] and sets
     // the active class accordingly. But local tasks do not appear in menu
     // trees, so if the current path is a local task, and this link is its
@@ -2028,6 +2033,21 @@ function menu_navigation_links($menu_name, $level = 0) {
   $links = array();
   foreach ($tree as $item) {
     if ($item['link']['access'] && !$item['link']['hidden']) {
+      // Issue #2413.
+      // If default home page is user.
+      if('user' == config_get('system.core', 'site_frontpage')){
+        if( $router_item['path'] == 'user/%' && $item['link']['link_path'] == '<front>') {
+          $item['link']['in_active_trail'] = TRUE;
+        }
+      }
+      // Make menu item `user` active if we on user profile page.
+      if($router_item['path'] == 'user/%' && $item['link']['link_path'] == 'user' ) {
+        $item['link']['in_active_trail'] = TRUE;
+      }
+      // Make menu item `user` active if we on user login page.
+      if($router_item['path'] == 'user' && $item['link']['link_path'] == 'user/login') {
+        $item['link']['in_active_trail'] = TRUE;
+      }      
       $class = '';
       $l = $item['link']['localized_options'];
       $l['href'] = $item['link']['href'];
