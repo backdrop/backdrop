@@ -52,6 +52,7 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
         break;
       }
     }
+    dpm($schemes);
     if (empty($scheme_name)) {
       if (empty($current_scheme)) {
         $scheme_name = 'default';
@@ -71,6 +72,8 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
     $preview_markup = theme('color_preview', array('preview_url' => $preview_url));
 
     $base = backdrop_get_path('module', 'color');
+    $custom_schemes = color_get_custom_scheme_names($theme_name);
+
     // Add scheme selector.
     $form['color']['scheme'] = array(
       '#type' => 'select',
@@ -78,6 +81,7 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
       '#options' => $color_sets,
       '#default_value' => $scheme_name,
       '#attributes' => array(
+        'data-color-custom-schemes' => backdrop_json_encode($custom_schemes),
         'data-color-schemes' => backdrop_json_encode($schemes),
         'data-color-theme-name' => $theme_name,
         'data-color-preview-markup' => $preview_markup,
@@ -536,10 +540,14 @@ function color_scheme_form_submit($form, &$form_state) {
   // Remove color info so it doesn't get saved in config.
   unset($form_state['values']['info']);
 
+  $custom_scheme_names = color_get_custom_scheme_names($theme);
+
   // Resolve palette.
   $palette = $form_state['values']['palette'];
+  dpm($info);
+  dpm($palette);
   $scheme = $form_state['values']['scheme'];
-  if ($scheme != '') {
+  if ($scheme != '' && !in_array($scheme, $custom_scheme_names)) {
     foreach ($palette as $key => $color) {
       if (isset($info['schemes'][$scheme]['colors'][$key])) {
         $palette[$key] = $info['schemes'][$scheme]['colors'][$key];
@@ -552,16 +560,9 @@ function color_scheme_form_submit($form, &$form_state) {
   unset($form_state['values']['scheme']);
   unset($form_state['values']['palette']);
   unset($_SESSION['color']);
-
-  // Save all the values into form state for saving to config.
-  $form_state['values']['color'] = color_save_configuration($theme, $info, $palette);
-
-  // Save color info to the default config file, or create one if it has not
-  // yet been created. This will merge all color schemes from default config,
-  // other color configs for this theme, and from color.inc.
   unset($info['schemes']['']);
 
-  // This is a custom scheme; save a new config.
+  // This is a new custom scheme; save a new config.
   if ($scheme == '') {
     array_pop($info['schemes']);
     $custom_name = check_plain($form_state['values']['custom_name']);
@@ -570,16 +571,60 @@ function color_scheme_form_submit($form, &$form_state) {
       $custom_name = t('Custom !number', array('!number' => $number));
     }
     $custom_machine_name = system_transliterate_machine_name(strtolower($custom_name));
-    // $info['schemes'] = array();
+
+    $info['schemes'] = array();
     $info['schemes'][$custom_machine_name] = array(
       'title' => $custom_name,
       'colors' => $palette,
     );
+
+    $config = config($theme . '.color.' . $custom_machine_name);
+    $config->setData($info);
+    $config->save();
+  }
+  // This is an existing custom scheme; save to the existing config.
+  elseif ($custom_scheme_names && in_array($scheme, $custom_scheme_names)) {
+    $info['schemes'] = array();
+    $info['schemes'][$scheme] = array(
+      'title' => $scheme,
+      'colors' => $palette,
+    );
+
+    $config = config($theme . '.color.' . $scheme);
+    $config->setData($info);
+    $config->save();
+  }
+  // This is a theme-provided scheme; save to the existing config.
+  else {
+    $config = config($theme . '.color.default');
+    $config->setData($info);
+    $config->save();
   }
 
-  $config = config($theme . '.color.default');
-  $config->setData($info);
-  $config->save();
+  // Save all the values into form state for saving to config.
+  $form_state['values']['color'] = color_save_configuration($theme, $info, $palette);
+}
+
+/**
+ * Retrieves the names of any custom color schemes for this theme.
+ *
+ * @param $theme_name
+ *   The name of the theme.
+ *
+ * @return array
+ *   An array of names, or an empty array if no custom config files exist for
+ *   this theme.
+ */
+function color_get_custom_scheme_names($theme_name) {
+  $schemes = array();
+  $custom_scheme_names = config_get_names_with_prefix($theme_name . '.color');
+  foreach ($custom_scheme_names as $name) {
+    if ($name != $theme_name . '.color.default') {
+      $schemes[] = ltrim($name, $theme_name . '.color.');
+    }
+  }  
+
+  return $schemes;
 }
 
 /**
