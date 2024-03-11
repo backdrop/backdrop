@@ -261,16 +261,31 @@ function theme_layout_conditions($variables) {
 }
 
 /**
- * Output region content wrapped by tag specified in layout UI.
+ * Output region content, including title and/or wrapping tag as specified in
+ * the layout UI.
  */
 function theme_layout_region_inner($variables) {
   $tag = $variables['tag'];
   $attributes['class'] = $variables['classes'];
+  $title = $variables['title'];
+  $title_tag = $variables['title_tag'];
+  $title_attributes['class'] = $variables['title_classes'];
+
+  if ($title != '') {
+    $output = '<' . $title_tag;
+    // Region titles do not have any default class, so conditionally render them
+    // if any has been configured in the layout UI.
+    $output .= !empty($title_attributes['class']) ? backdrop_attributes($title_attributes) : '';
+    $output .= '>' . $title . '</' . $title_tag . '>';
+  }
+
+  $output .= implode('', $variables['blocks']);
 
   if ($tag != '') {
-    return '<' . $tag . backdrop_attributes($attributes) . '>' . implode('', $variables['blocks']) . '</' . $tag . '>';
+    $output = '<' . $tag . backdrop_attributes($attributes) . '>' . $output . '</' . $tag . '>';
   }
-  return implode('', $variables['blocks']);
+
+  return $output;
 }
 
 /**
