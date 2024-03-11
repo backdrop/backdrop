@@ -2113,13 +2113,14 @@ function field_ui_field_edit_instance_pre_render($element) {
  */
 function field_ui_default_value_widget($field, $instance, &$form, &$form_state) {
   $field_name = $field['field_name'];
+  $cardinality = isset($field['cardinality']) ? $field['cardinality'] : 1;
 
   $element = array(
     '#type' => 'fieldset',
-    '#title' => t('Default value'),
+    '#title' => format_plural($cardinality, 'Default value', 'Default values'),
     '#collapsible' => FALSE,
     '#tree' => TRUE,
-    '#description' => t('The default value for this field, used when creating new content.'),
+    '#description' => format_plural($cardinality, 'The default value for this field, used when creating new content.', 'The default values for this field, used when creating new content.'),
     // Stick to an empty 'parents' on this form in order not to breaks widgets
     // that do not use field_widget_[field|instance]() and still access
     // $form_state['field'] directly.
@@ -2131,8 +2132,8 @@ function field_ui_default_value_widget($field, $instance, &$form, &$form_state) 
   $instance['required'] = FALSE;
   $instance['description'] = '';
 
-  // @todo Allow multiple values (requires more work on 'add more' JS handler).
-  $element += field_default_form($instance['entity_type'], NULL, $field, $instance, LANGUAGE_NONE, $items, $element, $form_state, 0);
+  // @todo Allow unlimited values (requires more work on 'add more' JS handler).
+  $element += field_default_form($instance['entity_type'], NULL, $field, $instance, LANGUAGE_NONE, $items, $element, $form_state);
 
   return $element;
 }
@@ -2147,7 +2148,6 @@ function field_ui_field_edit_form_validate($form, &$form_state) {
   // value' gets validated using the instance settings being submitted.
   $instance = $form_state['values']['instance'];
   $field_name = $instance['field_name'];
-
 
   // Validate field cardinality.
   $cardinality = $form_state['values']['field']['cardinality'];
@@ -2171,6 +2171,23 @@ function field_ui_field_edit_form_validate($form, &$form_state) {
     $function = $field['module'] . '_field_validate';
     if (function_exists($function)) {
       $function(NULL, NULL, $field, $instance, LANGUAGE_NONE, $items, $errors);
+    }
+    // Checking for a difference between the existing default values
+    // and the cardinality setting.
+    $non_empty_items_count = 0;
+    foreach ($items as $item) {
+      if (!empty($item['value'])) {
+        $non_empty_items_count++;
+      }
+    }
+    if ($cardinality === 'number' && $non_empty_items_count > $cardinality_number) {
+      $errors[$field['field_name']][LANGUAGE_NONE][0][] = array(
+        'error' => 'cardinality_smaller_than_existing_default_values',
+        'message' => t('%name: you have entered more default values (@count_non_empty_items) than allowed by the Number of values setting.', array(
+          '%name' => $instance['label'],
+          '@count_non_empty_items' => $non_empty_items_count,
+        )),
+      );
     }
     if (isset($errors[$field_name][LANGUAGE_NONE])) {
       // Store reported errors in $form_state.
