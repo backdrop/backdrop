@@ -52,7 +52,6 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
         break;
       }
     }
-    dpm($schemes);
     if (empty($scheme_name)) {
       if (empty($current_scheme)) {
         $scheme_name = 'default';
@@ -544,8 +543,6 @@ function color_scheme_form_submit($form, &$form_state) {
 
   // Resolve palette.
   $palette = $form_state['values']['palette'];
-  dpm($info);
-  dpm($palette);
   $scheme = $form_state['values']['scheme'];
   if ($scheme != '' && !in_array($scheme, $custom_scheme_names)) {
     foreach ($palette as $key => $color) {
@@ -645,6 +642,23 @@ function color_themes_disabled($theme_list) {
 function color_flush_caches() {
   // Rebuild all color palettes.
   color_rebuild_settings();
+}
+
+
+/**
+ * Implements hook_config_info().
+ */
+function color_config_info() {
+  foreach (list_themes() as $key => $data) {
+    $scheme_config_names = config_get_names_with_prefix($key . '.color');
+    foreach ($scheme_config_names as $config_name) {
+      $prefixes[$config_name] = array(
+        'label' => $config_name,
+        'group' => t('Color'),
+      );
+    }
+  }
+  return $prefixes;
 }
 
 /**
