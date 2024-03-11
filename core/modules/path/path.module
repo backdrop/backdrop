@@ -815,7 +815,7 @@ function path_form_element(Entity $entity) {
     'pid' => NULL,
     'source' => NULL,
     'alias' => '',
-    'langcode' => $langcode,
+    'langcode' => isset($langcode) ? $langcode : LANGUAGE_NONE,
     'auto' => NULL,
   );
 

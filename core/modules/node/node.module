@@ -155,6 +155,7 @@ function node_entity_info() {
         'id' => 'nid',
         'revision' => 'vid',
         'bundle' => 'type',
+        'langcode' => 'language',
       ),
       'bundle keys' => array(
         'bundle' => 'type',
@@ -1440,7 +1441,7 @@ function node_search_execute($keys = NULL, $conditions = NULL) {
       'extra' => $extra,
       'score' => $item->calculated_score,
       'snippet' => search_excerpt($keys, $node->rendered),
-      'langcode' => $node->langcode,
+      'language' => entity_language('node', $node),
     );
   }
   return $results;

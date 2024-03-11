@@ -876,7 +876,8 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
     '#weight' => 99,
   );
 
-  field_attach_form('taxonomy_term', $term, $form, $form_state);
+  $langcode = entity_language('taxonomy_term', $term);
+  field_attach_form('taxonomy_term', $term, $form, $form_state, $langcode);
 
   $form['relations'] = array(
     '#type' => 'fieldset',

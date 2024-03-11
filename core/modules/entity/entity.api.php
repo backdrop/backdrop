@@ -39,6 +39,18 @@
  *     the entity type. Defaults to TRUE.
  *   - load hook: The name of the hook which should be invoked by
  *     DefaultEntityController:attachLoad(), for example 'node_load'.
+ *   - language callback: (optional) A function taking an entity and an entity
+ *     type as arguments and returning a language code. In most situations, when
+ *     needing to determine this value, inspecting a property named after the
+ *     'langcode' element of the 'entity keys' should be enough. The language
+ *     callback is meant to be used primarily for temporary alterations of the
+ *     property value: entity-defining modules are encouraged to always define a
+ *     language property, instead of using the callback as main entity language
+ *     source. In fact not having a language property defined is likely to
+ *     prevent an entity from being queried by language. Moreover, given that
+ *     entity_language() is not necessarily used everywhere it would be
+ *     appropriate, modules implementing the language callback should be aware
+ *     that this might not be always called.
  *   - fieldable: Set to TRUE if you want your entity type to be fieldable.
  *   - translation: An associative array of modules registered as field
  *     translation handlers. Array keys are the module names, array values
@@ -62,6 +74,13 @@
  *       omitted if this entity type exposes a single bundle (all entities have
  *       the same collection of fields). The name of this single bundle will be
  *       the same as the entity type.
+ *     - langcode: The name of the property, typically 'language', that contains
+ *       the language code representing the language the entity has been created
+ *       in. This value may be changed when editing the entity and represents
+ *       the language its textual components are supposed to have. If no
+ *       language property is available, the 'language callback' may be used
+ *       instead. This entry can be omitted if the entities of this type are not
+ *       language-aware.
  *   - bundle keys: An array describing how the Field API can extract the
  *     information it needs from the bundle objects for this type (e.g
  *     $vocabulary objects for terms; not applicable for nodes). This entry can
@@ -134,6 +153,7 @@ function hook_entity_info() {
         'id' => 'nid',
         'revision' => 'vid',
         'bundle' => 'type',
+        'langcode' => 'language',
       ),
       'bundle keys' => array(
         'bundle' => 'type',
