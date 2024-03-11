@@ -575,6 +575,7 @@ function color_scheme_form_submit($form, &$form_state) {
       'colors' => $palette,
     );
 
+    $info['scheme_name'] = $custom_machine_name;
     $config = config($theme . '.color.' . $custom_machine_name);
     $config->setData($info);
     $config->save();
@@ -587,12 +588,14 @@ function color_scheme_form_submit($form, &$form_state) {
       'colors' => $palette,
     );
 
+    $info['scheme_name'] = $scheme;
     $config = config($theme . '.color.' . $scheme);
     $config->setData($info);
     $config->save();
   }
   // This is a theme-provided scheme; save to the existing config.
   else {
+    $info['scheme_name'] = 'custom';
     $config = config($theme . '.color.default');
     $config->setData($info);
     $config->save();
@@ -650,15 +653,25 @@ function color_flush_caches() {
  */
 function color_config_info() {
   foreach (list_themes() as $key => $data) {
-    $scheme_config_names = config_get_names_with_prefix($key . '.color');
-    foreach ($scheme_config_names as $config_name) {
-      $prefixes[$config_name] = array(
-        'label' => $config_name,
-        'group' => t('Color'),
-      );
-    }
+    $prefixes[$key . '.color'] = array(
+      'name_key' => 'scheme_name',
+      'label_callback' => 'color_config_label_callback',
+      'group' => t('Color schemes'),
+
+    );
   }
   return $prefixes;
+}
+
+/**
+ * Given a color scheme, display a unique label.
+ */
+function color_config_label_callback($color_scheme, $config_name) {
+  $config_name_data = explode('.', $config_name);
+  $themes = list_themes();
+  $theme_name = $themes[$config_name_data[0]]->info['name'];
+  $scheme_name = $color_scheme['schemes'][$color_scheme['scheme_name']]['title'];
+  return $theme_name . ' - ' . $scheme_name;
 }
 
 /**
