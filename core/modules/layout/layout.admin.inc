@@ -1568,11 +1568,14 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
   }
 
   if (empty($block->uuid)) {
-    $form['#title'] = t('Add block "!title"', array('!title' => $block->getAdminTitle()));
+    $form['#title'] = t('Add block "%title"', array('%title' => $block->getAdminTitle()));
   }
   else {
-    $form['#title'] = t('Configure block "!title"', array('!title' => $block->getAdminTitle()));
+    $form['#title'] = t('Configure block "%title"', array('%title' => $block->getAdminTitle()));
   }
+  $region_label = layout_create_renderer($renderer_name, $layout)->layout_info['regions'][$region_name];
+  $page_title = $form['#title'] . ' ' . t('in the %region_label region', array('%region_label' => $region_label));
+  backdrop_set_title($page_title, PASS_THROUGH);
 
   $template_info = layout_get_layout_template_info($layout->layout_template);
   $form['region'] = array(
@@ -3446,6 +3449,10 @@ function layout_configure_region_page($form, &$form_state, Layout $layout, $rend
   if (!array_key_exists($region_name, $layout_info['regions'])) {
     return MENU_NOT_FOUND;
   }
+
+  $region_label = layout_create_renderer($renderer_name, $layout)->layout_info['regions'][$region_name];
+  $form['#title'] = t('Configure "%region_name" region', array('%region_name' => $region_label));
+  backdrop_set_title($form['#title'], PASS_THROUGH);
 
   $form['#tree'] = TRUE;
 
