@@ -2670,6 +2670,11 @@ function _filter_image_align($text) {
       if ($parent && $parent->nodeName === 'figure') {
         $target = $parent;
       }
+      // Consider more deeply nested structures. A link wrapped around a
+      // captioned image.
+      elseif ($parent && $parent->nodeName === 'a' && $parent->parentNode && $parent->parentNode->nodeName === 'figure') {
+        $target = $parent->parentNode;
+      }
       else {
         $target = $node;
       }
