@@ -95,12 +95,38 @@ class BookTestCase extends BackdropWebTestCase {
 
     // Check that book pages display along with the correct outlines and
     // previous/next links.
-    $this->checkBookNode($book, array($nodes[0], $nodes[3], $nodes[4]), FALSE, FALSE, $nodes[0], array());
-    $this->checkBookNode($nodes[0], array($nodes[1], $nodes[2]), $book, $book, $nodes[1], array($book));
-    $this->checkBookNode($nodes[1], NULL, $nodes[0], $nodes[0], $nodes[2], array($book, $nodes[0]));
-    $this->checkBookNode($nodes[2], NULL, $nodes[1], $nodes[0], $nodes[3], array($book, $nodes[0]));
-    $this->checkBookNode($nodes[3], NULL, $nodes[2], $book, $nodes[4], array($book));
-    $this->checkBookNode($nodes[4], NULL, $nodes[3], $book, FALSE, array($book));
+    $this->checkBookNode($book, array(
+      $nodes[0],
+      $nodes[3],
+      $nodes[4],
+    ), FALSE, FALSE, $nodes[0], array(
+      $book,
+    ));
+    $this->checkBookNode($nodes[0], array(
+      $nodes[1],
+      $nodes[2],
+    ), $book, $book, $nodes[1], array(
+      $book,
+      $nodes[0],
+    ));
+    $this->checkBookNode($nodes[1], NULL, $nodes[0], $nodes[0], $nodes[2], array(
+      $book,
+      $nodes[0],
+      $nodes[1],
+    ));
+    $this->checkBookNode($nodes[2], NULL, $nodes[1], $nodes[0], $nodes[3], array(
+      $book,
+      $nodes[0],
+      $nodes[2],
+    ));
+    $this->checkBookNode($nodes[3], NULL, $nodes[2], $book, $nodes[4], array(
+      $book,
+      $nodes[3],
+    ));
+    $this->checkBookNode($nodes[4], NULL, $nodes[3], $book, FALSE, array(
+      $book,
+      $nodes[4],
+    ));
 
     $this->backdropLogout();
 
@@ -118,8 +144,13 @@ class BookTestCase extends BackdropWebTestCase {
     // First we must set $this->book to the second book, so that the
     // correct regex will be generated for testing the outline.
     $this->book = $other_book;
-    $this->checkBookNode($other_book, array($node), FALSE, FALSE, $node, array());
-    $this->checkBookNode($node, NULL, $other_book, $other_book, FALSE, array($other_book));
+    $this->checkBookNode($other_book, array($node), FALSE, FALSE, $node, array(
+      $other_book,
+    ));
+    $this->checkBookNode($node, NULL, $other_book, $other_book, FALSE, array(
+      $other_book,
+      $node,
+    ));
   }
 
   /**
@@ -183,7 +214,6 @@ class BookTestCase extends BackdropWebTestCase {
     foreach ($links as $link) {
       $got_breadcrumb[] = (string) $link['href'];
     }
-
     // Compare expected and got breadcrumbs.
     $this->assertIdentical($expected_breadcrumb, $got_breadcrumb, 'The breadcrumb is correctly displayed on the page.');
 

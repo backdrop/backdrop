@@ -3398,8 +3398,11 @@ function system_header_block($settings) {
  */
 function system_breadcrumb_block($settings = array()) {
   $crumbs = backdrop_get_breadcrumb();
-  if (isset($settings['current']) && $settings['current'] == TRUE) {
-    $crumbs[] = '<span aria-current="page">' . backdrop_get_title() . '</span>';
+  if (empty($settings['current'])) {
+    // Hide the last link if the block settings don't call for showing it, for
+    // backwards compatibility.
+    $last_crumb = array_pop($crumbs);
+    $crumbs[] = str_replace('class="', 'class="element-invisible ', $last_crumb);
   }
 
   return theme('breadcrumb', array('breadcrumb' => $crumbs));

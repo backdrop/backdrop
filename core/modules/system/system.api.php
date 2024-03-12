@@ -1029,9 +1029,6 @@ function hook_menu_local_tasks_alter(&$data, $router_item, $root_path) {
  * Implementations should take into account that menu_get_active_breadcrumb()
  * subsequently performs the following adjustments to the active trail *after*
  * this hook has been invoked:
- * - The last link in $active_trail is removed, if its 'href' is identical to
- *   the 'href' of $item. This happens, because the breadcrumb normally does
- *   not contain a link to the current page.
  * - The (second to) last link in $active_trail is removed, if the current $item
  *   is a MENU_DEFAULT_LOCAL_TASK. This happens in order to do not show a link
  *   to the current page, when being on the path for the default local task;
@@ -1054,14 +1051,11 @@ function hook_menu_local_tasks_alter(&$data, $router_item, $root_path) {
  * @see menu_set_active_trail()
  */
 function hook_menu_breadcrumb_alter(&$active_trail, $item) {
-  // Always display a link to the current page by duplicating the last link in
-  // the active trail. This means that menu_get_active_breadcrumb() will remove
-  // the last link (for the current page), but since it is added once more here,
-  // it will appear.
+  // Remove the link to the current page.
   if (!backdrop_is_front_page()) {
     $end = end($active_trail);
     if ($item['href'] == $end['href']) {
-      $active_trail[] = $end;
+      array_pop($active_trail);
     }
   }
 }

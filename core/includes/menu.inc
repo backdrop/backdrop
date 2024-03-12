@@ -2747,12 +2747,6 @@ function menu_get_active_breadcrumb() {
     // faster than rebuilding an entirely new active trail.
     backdrop_alter('menu_breadcrumb', $active_trail, $item);
 
-    // Don't show a link to the current page in the breadcrumb trail.
-    $end = end($active_trail);
-    if ($item['href'] == $end['href']) {
-      array_pop($active_trail);
-    }
-
     // Remove the tab root (parent) if the current path links to its parent.
     // Normally, the tab root link is included in the breadcrumb, as soon as we
     // are on a local task or any other child link. However, if we are on a

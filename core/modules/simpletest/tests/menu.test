@@ -972,82 +972,85 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
       'menu-test' => t('Menu test root'),
     );
     $title = t('Breadcrumbs test: Local tasks');
-    $trail = $home + $expected;
+    $trail = $home + $expected + array(
+      'menu-test/breadcrumb/tasks' => $title,
+    );
     $tree = $expected + array(
       'menu-test/breadcrumb/tasks' => $title,
     );
     $this->assertBreadcrumb('menu-test/breadcrumb/tasks', $trail, $title, $tree);
-    $this->assertBreadcrumb('menu-test/breadcrumb/tasks/first', $trail, $title, $tree);
-    $this->assertBreadcrumb('menu-test/breadcrumb/tasks/first/first', $trail, $title, $tree);
     $trail += array(
-      'menu-test/breadcrumb/tasks' => t('Breadcrumbs test: Local tasks'),
+      'menu-test/breadcrumb/tasks/second' => "Second",
     );
-    $this->assertBreadcrumb('menu-test/breadcrumb/tasks/first/second', $trail, $title, $tree);
     $this->assertBreadcrumb('menu-test/breadcrumb/tasks/second', $trail, $title, $tree);
-    $this->assertBreadcrumb('menu-test/breadcrumb/tasks/second/first', $trail, $title, $tree);
-    $trail += array(
-      'menu-test/breadcrumb/tasks/second' => t('Second'),
-    );
-    $this->assertBreadcrumb('menu-test/breadcrumb/tasks/second/second', $trail, $title, $tree);
 
     // Verify Taxonomy administration breadcrumbs.
     $trail = $admin + array(
       'admin/structure' => t('Structure'),
+      'admin/structure/taxonomy' => t('Taxonomy'),
     );
     $this->assertBreadcrumb('admin/structure/taxonomy', $trail);
 
     $trail += array(
-      'admin/structure/taxonomy' => t('Taxonomy'),
+      'admin/structure/taxonomy/tags' => t('Tags'),
     );
     $this->assertBreadcrumb('admin/structure/taxonomy/tags', $trail);
     $trail += array(
-      'admin/structure/taxonomy/tags' => t('Tags'),
+      'admin/structure/taxonomy/tags/configure' => t('Configure'),
     );
     $this->assertBreadcrumb('admin/structure/taxonomy/tags/configure', $trail);
-    $this->assertBreadcrumb('admin/structure/taxonomy/tags/fields', $trail);
-    $this->assertBreadcrumb('admin/structure/taxonomy/tags/add', $trail);
 
     // Verify Menu administration breadcrumbs.
     $trail = $admin + array(
       'admin/structure' => t('Structure'),
+      'admin/structure/menu' => t('Menus'),
     );
     $this->assertBreadcrumb('admin/structure/menu', $trail);
 
     $trail += array(
-      'admin/structure/menu' => t('Menus'),
-    );
-    $this->assertBreadcrumb('admin/structure/menu/manage/main-menu', $trail);
-    $trail += array(
       'admin/structure/menu/manage/main-menu' => t('Primary navigation'),
     );
+    $this->assertBreadcrumb('admin/structure/menu/manage/main-menu', $trail);
     $this->assertBreadcrumb('admin/structure/menu/manage/main-menu/configure', $trail);
-    $this->assertBreadcrumb('admin/structure/menu/manage/main-menu/add', $trail);
 
     // Verify Node administration breadcrumbs.
     $trail = $admin + array(
       'admin/structure' => t('Structure'),
       'admin/structure/types' => t('Content types'),
+      'admin/structure/types/add' => t('Add content type'),
     );
     $this->assertBreadcrumb('admin/structure/types/add', $trail);
-    $this->assertBreadcrumb("admin/structure/types/manage/$type", $trail);
+    array_pop($trail);
     $trail += array(
       "admin/structure/types/manage/$type" => t('Post'),
     );
-    $this->assertBreadcrumb("admin/structure/types/manage/$type/fields", $trail);
-    $this->assertBreadcrumb("admin/structure/types/manage/$type/display", $trail);
-    $trail_teaser = $trail + array(
-      "admin/structure/types/manage/$type/display" => t('Manage displays'),
-    );
-    $this->assertBreadcrumb("admin/structure/types/manage/$type/display/teaser", $trail_teaser);
-    $this->assertBreadcrumb("admin/structure/types/manage/$type/comment/fields", $trail);
-    $this->assertBreadcrumb("admin/structure/types/manage/$type/comment/display", $trail);
-    $this->assertBreadcrumb("admin/structure/types/manage/$type/delete", $trail);
+    $this->assertBreadcrumb("admin/structure/types/manage/$type", $trail);
     $trail += array(
       "admin/structure/types/manage/$type/fields" => t('Manage fields'),
     );
+    $this->assertBreadcrumb("admin/structure/types/manage/$type/fields", $trail);
+    array_pop($trail);
+    $trail += array(
+      "admin/structure/types/manage/$type/display" => t('Manage displays'),
+    );
+    $this->assertBreadcrumb("admin/structure/types/manage/$type/display", $trail);
+    $trail_teaser = $trail + array(
+      "admin/structure/types/manage/$type/display/teaser" => t('Teaser'),
+    );
+    $this->assertBreadcrumb("admin/structure/types/manage/$type/display/teaser", $trail_teaser);
+    array_pop($trail);
+    $trail += array(
+      "admin/structure/types/manage/$type/delete" => t('Delete'),
+    );
+    $this->assertBreadcrumb("admin/structure/types/manage/$type/delete", $trail);
+    array_pop($trail);
+    $trail += array(
+      "admin/structure/types/manage/$type/fields" => t('Manage fields'),
+      "admin/structure/types/manage/$type/fields/body" => t('Body'),
+    );
     $this->assertBreadcrumb("admin/structure/types/manage/$type/fields/body", $trail);
     $trail += array(
-      "admin/structure/types/manage/$type/fields/body" => t('Body'),
+      "admin/structure/types/manage/$type/fields/body/widget-type" => t('Widget type'),
     );
     $this->assertBreadcrumb("admin/structure/types/manage/$type/fields/body/widget-type", $trail);
 
@@ -1056,38 +1059,41 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $format_id = $format->format;
     $trail = $config + array(
       'admin/config/content' => t('Content authoring'),
+      'admin/config/content/formats' => t('Text editors and formats'),
     );
     $this->assertBreadcrumb('admin/config/content/formats', $trail);
 
     $trail += array(
-      'admin/config/content/formats' => t('Text editors and formats'),
+      'admin/config/content/formats/add' => t('Add text format'),
     );
     $this->assertBreadcrumb('admin/config/content/formats/add', $trail);
-    $this->assertBreadcrumb("admin/config/content/formats/$format_id", $trail);
+    array_pop($trail);
     $trail += array(
       "admin/config/content/formats/$format_id" => $format->name,
+    );
+    $this->assertBreadcrumb("admin/config/content/formats/$format_id", $trail);
+    $trail += array(
+      "admin/config/content/formats/$format_id/disable" => t('Disable text format'),
     );
     $this->assertBreadcrumb("admin/config/content/formats/$format_id/disable", $trail);
 
     // Verify node breadcrumbs (without menu link).
     $node1 = $this->backdropCreateNode();
     $nid1 = $node1->nid;
-    $trail = $home;
+    $trail = $home + array(
+      $node1->path['alias'] => $node1->title,
+    );
     $this->assertBreadcrumb("node/$nid1", $trail);
-    // Also verify that the node does not appear elsewhere (e.g., menu trees).
-    $this->assertNoLink($node1->title);
-    // The node itself should not be contained in the breadcrumb on the default
+    // The node should only be contained in the breadcrumb once on the default
     // local task, since there is no difference between both pages.
     $this->assertBreadcrumb("node/$nid1/view", $trail);
-    // Also verify that the node does not appear elsewhere (e.g., menu trees).
-    $this->assertNoLink($node1->title);
 
     $trail += array(
-      "node/$nid1" => $node1->title,
+      "node/$nid1/edit" => "Edit",
     );
     $this->assertBreadcrumb("node/$nid1/edit", $trail);
 
-    // Verify that breadcrumb on node listing page contains "Home" only.
+    // Verify that breadcrumb on the front page does not show up.
     $trail = array();
     $this->assertBreadcrumb('home', $trail);
 
@@ -1120,14 +1126,17 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
       ));
       $nid2 = $node2->nid;
 
-      $trail = $home;
+      $trail = $home + array(
+        "node/$nid2" => $node2->menu['link_title'],
+      );
       $tree = array(
         "node/$nid2" => $node2->menu['link_title'],
       );
       $this->assertBreadcrumb("node/$nid2", $trail, $node2->title, $tree);
-      // The node itself should not be contained in the breadcrumb on the
-      // default local task, since there is no difference between both pages.
-      $this->assertBreadcrumb("node/$nid2/view", $trail, $node2->title, $tree);
+      // The current page title should only be contained once in the breadcrumb
+      // on the default local task, since there is no difference between both
+      // pages.
+      $this->assertBreadcrumb("node/$nid2/view", $trail, $node2->title);
       $trail += array(
         "node/$nid2" => $node2->menu['link_title'],
       );
@@ -1148,14 +1157,15 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
       ));
       $nid3 = $node3->nid;
 
-      $this->assertBreadcrumb("node/$nid3", $trail, $node3->title, $tree, FALSE);
-      // The node itself should not be contained in the breadcrumb on the
-      // default local task, since there is no difference between both pages.
-      $this->assertBreadcrumb("node/$nid3/view", $trail, $node3->title, $tree, FALSE);
       $trail += array(
         "node/$nid3" => $node3->menu['link_title'],
       );
+      $this->assertBreadcrumb("node/$nid3", $trail, $node3->title, $tree, FALSE);
       $this->assertBreadcrumb("node/$nid3/edit", $trail);
+      // The node itself should not be contained in the breadcrumb on the
+      // default local task, since there is no difference between both pages.
+      array_pop($trail);
+      $this->assertBreadcrumb("node/$nid3/view", $trail, $node3->title, $tree, FALSE);
 
       // Verify that the home page does not have a breadcrumb.
       $this->assertBreadcrumb('<front>', array());
@@ -1183,13 +1193,15 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $expected = array(
       "node" => $link['link_title'],
     );
-    $trail = $home + $expected;
+    $trail = $home + $expected + array(
+      "node/{$parent->nid}" => $parent->menu['link_title'],
+    );
     $tree = $expected + array(
       "node/{$parent->nid}" => $parent->menu['link_title'],
     );
     $this->assertBreadcrumb(NULL, $trail, $parent->title, $tree);
     $trail += array(
-      "node/{$parent->nid}" => $parent->menu['link_title'],
+      "node/{$child->nid}" => $child->menu['link_title'],
     );
     $tree += array(
       "node/{$child->nid}" => $child->menu['link_title'],
@@ -1280,16 +1292,20 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $this->assertBreadcrumb('<front>', array());
 
     // Verify breadcrumb on user pages for anonymous user.
-    $trail = $home;
+    $trail = $home + array(
+      'user/' . $this->admin_user->uid => $this->admin_user->name,
+    );
     $this->assertBreadcrumb('user/' . $this->admin_user->uid, $trail, $this->admin_user->name);
 
     // Verify breadcrumb on user pages for registered users.
     $this->backdropLogin($this->admin_user);
-    $trail = $home;
+    $trail = $home + array(
+      'user/' . $this->admin_user->uid => $this->admin_user->name,
+    );
     $this->assertBreadcrumb('user', $trail, $this->admin_user->name);
     $this->assertBreadcrumb('user/' . $this->admin_user->uid, $trail, $this->admin_user->name);
     $trail += array(
-      'user/' . $this->admin_user->uid => $this->admin_user->name,
+      'user/' . $this->admin_user->uid . '/edit' => t('Edit'),
     );
     $this->assertBreadcrumb('user/' . $this->admin_user->uid . '/edit', $trail, $this->admin_user->name);
 
@@ -1301,18 +1317,22 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $this->backdropLogin($this->web_user);
 
     // Verify correct breadcrumb and page title on another user's account pages.
-    $trail = $home;
+    $trail = $home + array(
+      'user/' . $this->admin_user->uid => $this->admin_user->name,
+    );
     $this->assertBreadcrumb('user/' . $this->admin_user->uid, $trail, $this->admin_user->name);
     $trail += array(
-      'user/' . $this->admin_user->uid => $this->admin_user->name,
+      'user/' . $this->admin_user->uid . '/edit' => t('Edit'),
     );
     $this->assertBreadcrumb('user/' . $this->admin_user->uid . '/edit', $trail, $this->admin_user->name);
 
     // Verify correct breadcrumb and page title when viewing own user account.
-    $trail = $home;
+    $trail = $home + array(
+      'user/' . $this->web_user->uid => $this->web_user->name,
+    );
     $this->assertBreadcrumb('user/' . $this->web_user->uid, $trail, $this->web_user->name);
     $trail += array(
-      'user/' . $this->web_user->uid => $this->web_user->name,
+      'user/' . $this->web_user->uid . '/edit' => t('Edit'),
     );
     $this->assertBreadcrumb('user/' . $this->web_user->uid . '/edit', $trail, $this->web_user->name);
 
@@ -1330,7 +1350,9 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
 
     // Verify expected breadcrumbs.
     $this->backdropLogout();
-    $trail = $home;
+    $trail = $home + array(
+      $link_admin_user['link_path'] => $link_admin_user['link_title'],
+    );
     $tree = array(
       $link_admin_user['link_path'] => $link_admin_user['link_title'],
     );
@@ -1338,7 +1360,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
 
     $this->backdropLogin($this->admin_user);
     $trail += array(
-      $link_admin_user['link_path'] => $link_admin_user['link_title'],
+      'user/' . $this->admin_user->uid . '/edit' => t('Edit'),
     );
     $this->assertBreadcrumb('user/' . $this->admin_user->uid . '/edit', $trail, $link_admin_user['link_title'], $tree, FALSE);
 
@@ -1370,6 +1392,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $this->backdropLogin($this->admin_user);
     $trail += array(
       $link_admin_user['link_path'] => $link_admin_user['link_title'],
+      'user/' . $this->admin_user->uid . '/edit' => $this->admin_user->name . ' edit',
     );
     $this->assertBreadcrumb('user/' . $this->admin_user->uid . '/edit', $trail, $link_admin_user['link_title'], $tree, FALSE);
 
@@ -1381,15 +1404,24 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $this->backdropLogin($this->web_user);
 
     // Verify that we can access recent log entries, there is a corresponding
-    // page title, and that the breadcrumb is empty (because the user is not
-    // able to access "Administer", so the trail cannot recurse into it).
-    $trail = $home;
+    // page title, and that the breadcrumb does not contain a link to '/admin'
+    // (because the user is not able to access "Administer", so the trail cannot
+    // recurse into it).
+    $trail = $home + array(
+      'system/403' => t('Access denied'),
+    );
     $this->assertBreadcrumb('admin', $trail, t('Access denied'));
     $this->assertResponse(403);
 
+    $trail = $home + array(
+      'admin/reports' => t('Reports'),
+    );
     $this->assertBreadcrumb('admin/reports', $trail, t('Reports'));
     $this->assertNoResponse(403);
 
+    $trail = $home + array(
+      'admin/reports/dblog' => t('Recent log messages'),
+    );
     $this->assertBreadcrumb('admin/reports/dblog', $trail, t('Recent log messages'));
     $this->assertNoResponse(403);
   }
@@ -1456,6 +1488,7 @@ class MenuTrailTestCase extends MenuWebTestCase {
 
     $breadcrumb = $home + array(
       'menu-test' => t('Menu test root'),
+      'menu-test/menu-trail' => t('Menu trail - Case 1'),
     );
     $tree = array(
       'menu-test' => t('Menu test root'),
@@ -1473,6 +1506,7 @@ class MenuTrailTestCase extends MenuWebTestCase {
 
     $breadcrumb = $config + array(
       'admin/config/development' => t('Development'),
+      'admin/config/development/menu-trail' => t('Menu trail - Case 2'),
     );
     $tree = $config_tree + array(
       'admin/config/development' => t('Development'),
@@ -1482,6 +1516,7 @@ class MenuTrailTestCase extends MenuWebTestCase {
     $override_breadcrumb = $config + array(
       'admin/config/system' => t('System'),
       'admin/config/system/site-information' => t('Site information'),
+      'admin/config/development/menu-trail' => t('Menu trail - Case 2'),
     );
     $override_tree = $config_tree + array(
       'admin/config/system' => t('System'),
@@ -1585,10 +1620,7 @@ class MenuTrailTestCase extends MenuWebTestCase {
       }
 
       // Check that the breadcrumb displayed on the final custom 403/404 page
-      // matches what we expect. (The last item of the active trail represents
-      // the current page, which is not supposed to appear in the breadcrumb,
-      // so we need to remove it from the array before checking.)
-      array_pop($expected_trail[$status_code]['final']);
+      // matches what we expect.
       $this->assertBreadcrumb(NULL, $expected_trail[$status_code]['final']);
     }
   }
