@@ -608,7 +608,7 @@ function color_scheme_form_submit($form, &$form_state) {
 /**
  * Retrieves the names of any custom color schemes for this theme.
  *
- * @param $theme_name
+ * @param string $theme_name
  *   The name of the theme.
  *
  * @return array
@@ -622,7 +622,7 @@ function color_get_custom_scheme_names($theme_name) {
     if ($name != $theme_name . '.color.default') {
       $schemes[] = ltrim($name, $theme_name . '.color.');
     }
-  }  
+  }
 
   return $schemes;
 }
@@ -652,7 +652,7 @@ function color_themes_enabled($theme_list) {
     if ($path && file_exists($file)) {
       include $file;
       $info['scheme_name'] = 'default';
-      $config = config($theme . '.color.' . '.default');
+      $config = config($theme . '.color.default');
       $config->setData($info);
       $config->save();
     }
