@@ -63,6 +63,8 @@ class ColorTestCase extends BackdropWebTestCase {
       $this->backdropGet($settings_path);
       $this->assertResponse(200);
       $edit['scheme'] = '';
+      backdrop_static_reset('theme_get_setting');
+
       $edit[$test_values['palette_input']] = '#123456';
       $this->backdropPost($settings_path, $edit, t('Save theme settings'));
 
@@ -144,6 +146,7 @@ class ColorTestCase extends BackdropWebTestCase {
     $data = array_merge(array('_config_name' => 'bartik.settings'), $config->get());
     $data['color']['palette']['top'] = '#654321';
     $edit = array('import' => json_encode($data));
+    backdrop_static_reset('theme_get_setting');
     $this->backdropPost($import_path, $edit, t('Import'));
 
     // Check that the new color shows up in the css files.

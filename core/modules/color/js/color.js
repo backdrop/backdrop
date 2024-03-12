@@ -42,7 +42,6 @@ Backdrop.featureDetect.inputTypeColor = function() {
 Backdrop.behaviors.color = {
   attach: function (context) {
     var settings = document.getElementById('edit-scheme').dataset;
-    console.log(settings);
     var schemes = JSON.parse(settings.colorSchemes);
     var customSchemes = JSON.parse(settings.colorCustomSchemes);
 
@@ -81,7 +80,6 @@ Backdrop.behaviors.color = {
     $('input[data-color-name]').on('change', function () {
       var schemeName =  document.getElementById('edit-scheme').value;
       var isCustomScheme =  $.inArray(schemeName, customSchemes) > -1;
-      console.log(isCustomScheme);
       var key = this.dataset.colorName;
       if (schemeName === '') {
         $nameField.show();
