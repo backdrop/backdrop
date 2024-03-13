@@ -3803,7 +3803,7 @@ function views_ui_add_item_form($form, &$form_state) {
     '#tree' => TRUE,
   );
 
-  // Build the sortable table header.
+  // Build the table header.
   $header = array(
     'title' => array('data' => t('Title'), 'sort' => 'asc'),
     'group' => array('data' => t('Category'), 'sort' => 'asc'),
@@ -3869,7 +3869,6 @@ function views_ui_add_item_form($form, &$form_state) {
     '#empty' => t('There are no @types available to add.', array(
       '@types' => $ltitle,
     )),
-    '#attributes' => array('id' => 'views-filterable-options'),
     '#js_select' => FALSE,
   );
   $form['options']['controls']['group']['#options'] = $groups;
