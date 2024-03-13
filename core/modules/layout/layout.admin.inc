@@ -625,21 +625,23 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
           ),
           '#name' => 'conditions_' . $context_key . '_remove',
         );
-        $form['context_wrapper']['context']['required'][$context_key]['operations']['configure'] = array(
-          '#type' => 'submit',
-          '#value' => t('Configure'),
-          '#attributes' => array('class' => array('layout-link-button', 'layout-context-configure')),
-          '#validate' => array(
-            'layout_settings_form_validate',
-          ),
-          '#submit' => array(
-            'layout_settings_form_context_edit',
-          ),
-          '#ajax' => array(
-            'callback' => 'layout_ajax_form_open_dialog',
-          ),
-          '#name' => 'conditions_' . $context_key . '_configure',
-        );
+        if ($layout_context->plugin != 'dashboard') {
+          $form['context_wrapper']['context']['required'][$context_key]['operations']['configure'] = array(
+            '#type' => 'submit',
+            '#value' => t('Configure'),
+            '#attributes' => array('class' => array('layout-link-button', 'layout-context-configure')),
+            '#validate' => array(
+              'layout_settings_form_validate',
+            ),
+            '#submit' => array(
+              'layout_settings_form_context_edit',
+            ),
+            '#ajax' => array(
+              'callback' => 'layout_ajax_form_open_dialog',
+            ),
+            '#name' => 'conditions_' . $context_key . '_configure',
+          );
+        }
       }
     }
   }
