@@ -1881,6 +1881,9 @@ function file_validate_size(File $file, $file_limit = 0, $user_limit = 0) {
  */
 function file_validate_is_image(File $file) {
   $errors = array();
+  if ('image/svg+xml' === mime_content_type($file->uri)) {
+    return $errors;
+  }
 
   $info = image_get_info($file->uri);
   if (!$info || empty($info['extension'])) {

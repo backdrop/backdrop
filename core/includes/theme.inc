@@ -1994,6 +1994,11 @@ function template_preprocess_image(&$variables) {
   $path_or_uri = $variables['uri'] ? $variables['uri'] : $variables['path'];
   $variables['attributes']['src'] = file_create_url($path_or_uri);
 
+  if ($svg_dimensions = image_get_svg_dimensions($path_or_uri)) {
+    $variables['width'] = $svg_dimensions['width'];
+    $variables['height'] = $svg_dimensions['height'];
+  }
+
   // Convert all other variables into the attributes array.
   foreach (array('width', 'height', 'alt', 'title') as $key) {
     if (isset($variables[$key])) {

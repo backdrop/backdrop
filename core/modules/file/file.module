@@ -3424,3 +3424,15 @@ function file_type_classify_finished($success, $results, $operations) {
     );
   }
 }
+
+/**
+ * Get core SVG support from default allowed file extensions.
+ */
+function file_get_svg_support() {
+  static $file_svg_support = NULL;
+  if (is_null($file_svg_support)) {
+    $default_allowed_extensions = config_get('file.settings', 'default_allowed_extensions');
+    $file_svg_support = strpos($default_allowed_extensions, 'svg') !== FALSE;
+  }
+  return $file_svg_support;
+}

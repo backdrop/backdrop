@@ -1,0 +1,4 @@
+{
+    "_config_name": "image.settings",
+    "svg_sanitizer_class": "enshrined\\svgSanitize\\Sanitizer"
+}

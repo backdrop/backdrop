@@ -225,8 +225,10 @@ function image_field_instance_settings_form($field, $instance) {
  * Element validate handler for image_field_instance_settings_form().
  */
 function image_field_instance_settings_form_validate($element, &$form_state, $complete_form) {
-  $min_dimensions = explode('x', $form_state['values']['instance']['settings']['min_dimensions']) + array('', '');
-  $max_dimensions = explode('x', $form_state['values']['instance']['settings']['max_dimensions']) + array('', '');
+  $min = $form_state['values']['instance']['settings']['min_dimensions'];
+  $max = $form_state['values']['instance']['settings']['max_dimensions'];
+  $min_dimensions = explode('x', $min) + array('', '');
+  $max_dimensions = explode('x', $max) + array('', '');
 
   $min_dimensions_x = (int) $min_dimensions[0];
   $min_dimensions_y = (int) $min_dimensions[1];
@@ -442,6 +444,8 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
 
   $elements = file_field_widget_form($form, $form_state, $field, $instance, $langcode, $items, $delta, $element);
   $settings = $instance['settings'];
+  $allowed_extensions = explode(' ', $settings['file_extensions']);
+  $svg_allowed = in_array('svg', $allowed_extensions);
 
   foreach (element_children($elements) as $delta) {
     // Add adjustment of orientation before resizing because EXIF data is needed.
@@ -458,6 +462,10 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     backdrop_alter('image_supported_extensions', $supported_extensions);
     $extensions = isset($elements[$delta]['#upload_validators']['file_validate_extensions'][0]) ? $elements[$delta]['#upload_validators']['file_validate_extensions'][0] : implode(' ', $supported_extensions);
     $extensions = array_intersect(explode(' ', $extensions), $supported_extensions);
+    // Todo: Decide if we're keeping this permission.
+    if (!user_access('upload svg images')) {
+      // Remove SVG;
+    }
     $elements[$delta]['#upload_validators']['file_validate_extensions'][0] = implode(' ', $extensions);
 
     // Set any view used as a browser.
@@ -621,22 +629,26 @@ function _image_field_widget_alt_validate($element, &$form_state) {
  * Implements hook_field_formatter_info().
  */
 function image_field_formatter_info() {
-  $formatters = array(
-    'image' => array(
-      'label' => t('Image'),
-      'field types' => array('image'),
-      'settings' => array(
-        'image_style' => '',
-        'image_link' => '',
-        'image_float' => '',
-        'image_load' => 'auto',
-      ),
-	  'description' => t('Format the file as an image. The image can be displayed using an image style and can optionally be linked to the image file itself or its parent content.'),
-	  'file formatter' => array(
-        'mime types' => array('image/*'),
+  $image_formatter = array(
+    'label' => t('Image'),
+    'field types' => array('image'),
+    'settings' => array(
+      'image_style' => '',
+      'image_link' => '',
+      'image_float' => '',
+      'image_load' => 'auto',
+      'image_svg_display' => TRUE,
+      'image_svg_dimensions' => array(
+        'width' => IMAGE_SVG_DEFAULT_WIDTH,
+        'height' => IMAGE_SVG_DEFAULT_HEIGHT,
       ),
     ),
+    'description' => t('Format the file as an image. The image can be displayed using an image style and can optionally be linked to the image file itself or its parent content.'),
+    'file formatter' => array(
+      'mime types' => array('image/*'),
+    ),
   );
+  $formatters['image'] = $image_formatter;
 
   return $formatters;
 }
@@ -647,6 +659,10 @@ function image_field_formatter_info() {
 function image_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
+  $svg_allowed = FALSE;
+  if (isset($instance['settings']['file_extensions'])) {
+    $svg_allowed = strpos($instance['settings']['file_extensions'], 'svg') !== FALSE;
+  }
 
   $image_styles = image_style_options(FALSE, PASS_THROUGH);
   $element['image_style'] = array(
@@ -699,6 +715,45 @@ function image_field_formatter_settings_form($field, $instance, $view_mode, $for
   $element['image_load']['auto']['#description'] = t('Each browser will determine whether or not to lazily load the image.');
   $element['image_load']['eager']['#description'] = t('Load this image immediately, regardless of where it is located on the page.');
 
+  $element['image_svg_display'] = array(
+    '#type' => 'checkbox',
+    '#access' => $svg_allowed,
+    '#title' => t('Render SVG images in an &lt;img&gt; tag'),
+    '#default_value' => !empty($settings['image_svg_display']),
+  );
+  $element['image_svg_dimensions'] = array(
+    '#type' => 'item',
+    '#title' => t('Maximum SVG image dimensions'),
+    '#access' => $svg_allowed,
+    '#field_prefix' => '<div class="container-inline">',
+    '#field_suffix' => '</div>',
+    '#description' => t('The maximum allowed SVG image dimensions expressed as <code>WIDTH</code> x <code>HEIGHT</code>. If left blank, SVG images will be displayed at @svg_default_width x @svg_default_height pixels. Selecting an image style will override this setting.', array('@svg_default_width' => IMAGE_SVG_DEFAULT_WIDTH, '@svg_default_height' => IMAGE_SVG_DEFAULT_HEIGHT)),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="fields[field_image][settings_edit_form][settings][image_style]"]' => array('value' => ''),
+        ':input[name="fields[field_image][settings_edit_form][settings][image_svg_display]"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  $element['image_svg_dimensions']['width'] = array(
+    '#type' => 'number',
+    '#title' => t('Maximum width'),
+    '#title_display' => 'invisible',
+    '#default_value' => isset($settings['image_svg_dimensions']['width']) ? $settings['image_svg_dimensions']['width'] : IMAGE_SVG_DEFAULT_WIDTH,
+    '#min' => 0,
+    '#max' => 100000,
+    '#field_suffix' => ' x ',
+  );
+  $element['image_svg_dimensions']['height'] = array(
+    '#type' => 'number',
+    '#title' => t('Maximum height'),
+    '#title_display' => 'invisible',
+    '#default_value' => isset($settings['image_svg_dimensions']['height']) ? $settings['image_svg_dimensions']['height'] : IMAGE_SVG_DEFAULT_HEIGHT,
+    '#min' => 0,
+    '#max' => 100000,
+    '#field_suffix' => ' ' . t('pixels'),
+  );
+
   return $element;
 }
 
@@ -708,6 +763,7 @@ function image_field_formatter_settings_form($field, $instance, $view_mode, $for
 function image_field_formatter_settings_summary($field, $instance, $view_mode) {
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
+  $svg_allowed = strpos($instance['settings']['file_extensions'], 'svg') !== FALSE;
 
   $summary = array();
 
@@ -741,6 +797,19 @@ function image_field_formatter_settings_summary($field, $instance, $view_mode) {
     $summary[] = t('Loading: @speed', array('@speed' => $settings['image_load']));
   }
 
+  $formatter_settings = $instance['display'][$view_mode]['settings'];
+
+  if ($svg_allowed && $formatter_settings['image_svg_display'] && (!empty($formatter_settings['image_svg_dimensions']['width'])
+    || !empty($formatter_settings['image_svg_dimensions']['width']))) {
+    $summary[] = t(
+      'SVG image attributes: @width x @height pixels',
+      array(
+        '@width' => $formatter_settings['image_svg_dimensions']['width'],
+        '@height' => $formatter_settings['image_svg_dimensions']['height'],
+      )
+    );
+  }
+
   return implode('<br />', $summary);
 }
 
@@ -759,32 +828,74 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
   }
 
   foreach ($items as $delta => $item) {
-    // Add class for floating the image
-    if (!empty($display['settings']['image_float'])) {
-      $item['attributes']['class'][] = 'align-' . $display['settings']['image_float'];
-    }
+    if (!empty($item)) {
+      // Add class for floating the image.
+      if (!empty($display['settings']['image_float'])) {
+        $item['attributes']['class'][] = 'align-' . $display['settings']['image_float'];
+      }
 
-    if (!empty($display['settings']['image_load'])) {
-      // Although available in Chromium, the 'auto' value is not mentioned in
-      // the specification. Since it may be subject to change, we recommend not
-      // to use it until it gets officially included.
-      if ($display['settings']['image_load'] != 'auto') {
-        $item['attributes']['loading'] = $display['settings']['image_load'];
+      if (!empty($display['settings']['image_load'])) {
+        // Although available in Chromium, the 'auto' value is not mentioned in
+        // the specification. Since it may be subject to change, we recommend
+        // not to use it until it gets officially included.
+        if ($display['settings']['image_load'] != 'auto') {
+          $item['attributes']['loading'] = $display['settings']['image_load'];
+        }
+      }
+
+      if (isset($link_file)) {
+        $uri = array(
+          'path' => file_create_url($item['uri']),
+          'options' => array(),
+        );
+      }
+
+      $is_svg = image_is_svg($item['uri']);
+
+      // Add custom attributes only for SVG images.
+      if ($is_svg) {
+        $image_svg_dimensions = $display['settings']['image_svg_dimensions'];
+
+        foreach ($image_svg_dimensions as $attribute => $attribute_value) {
+          if (!empty($attribute)) {
+            $item[$attribute] = $attribute_value;
+          }
+        }
       }
     }
 
-    if (isset($link_file)) {
-      $uri = array(
-        'path' => file_create_url($item['uri']),
-        'options' => array(),
+    if (!$is_svg || $display['settings']['image_svg_display']) {
+      $element[$delta] = array(
+        '#theme' => 'image_formatter',
+        '#item' => $item,
+        '#image_style' => $display['settings']['image_style'],
+        '#path' => isset($uri) ? $uri : '',
       );
     }
-    $element[$delta] = array(
-      '#theme' => 'image_formatter',
-      '#item' => $item,
-      '#image_style' => $display['settings']['image_style'],
-      '#path' => isset($uri) ? $uri : '',
-    );
+    else {
+      $svg_path = file_create_url($item['uri']);
+      $svg = file_get_contents($svg_path);
+      $svg_clean = image_svg_sanitizer_sanitize($svg);
+      $svg_clean = preg_replace(['/<\?xml.*\?>/i', '/<!DOCTYPE((.|\n|\r)*?)">/i'], '', $svg_clean);
+      $svg_clean = trim($svg_clean);
+
+      if (isset($uri)) {
+        $element[$delta] = array(
+          '#type' => 'link',
+          '#href' => $uri['path'],
+          '#title' => $svg_clean,
+          '#options' => array(
+            'html' => TRUE,
+          ),
+        );
+      }
+      else {
+        $element[$delta] = array(
+          '#type' => 'markup',
+          '#markup' => $svg_clean,
+        );
+      }
+    }
   }
 
   return $element;

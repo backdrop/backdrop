@@ -31,6 +31,16 @@
  */
 
 /**
+ * Default width for SVG images.
+ */
+define('IMAGE_SVG_DEFAULT_WIDTH', 200);
+
+/**
+ * Default height for SVG images.
+ */
+define('IMAGE_SVG_DEFAULT_HEIGHT', 200);
+
+/**
  * Gets a list of available toolkits.
  *
  * @return
@@ -112,7 +122,11 @@ function image_get_supported_extensions() {
   $toolkit = image_get_toolkit();
   $function = 'image_' . $toolkit . '_supported_extensions';
   if (function_exists($function)) {
-    return $function();
+    $extensions = $function();
+    if (file_get_svg_support()) {
+      $extensions[] = 'svg';
+    }
+    return $extensions;
   }
   watchdog('image', 'The selected image handling toolkit %toolkit should provide a %function callback.',
     array(
@@ -524,6 +538,62 @@ function image_hex2rgba(&$hex) {
     'blue' => hexdec($colors[3]),
     'alpha' => isset($colors[4]) ? hexdec($colors[4]) : 0,
   );
+}
+
+/**
+ * Get an SVG image's defined dimensions.
+ *
+ * @param string $uri
+ *   The URI or path to an SVG image.
+ *
+ * @return array|FALSE
+ *   An array containing the keys "width" and "height" as integer values. If the
+ *   image is an SVG but no set dimensions are available, these keys will have
+ *   NULL values. If the image is not an SVG, FALSE will be return.
+ */
+function image_get_svg_dimensions($uri) {
+  // Safety check.
+  if (!image_is_svg($uri)) {
+    return FALSE;
+  }
+
+  // Return cached dimensions if already retrieved once this request.
+  $cached_images = &backdrop_static(__FUNCTION__, array());
+  if (isset($cached_images[$uri])) {
+    return $cached_images[$uri];
+  }
+
+  $svg_dimensions = array(
+    'width' => IMAGE_SVG_DEFAULT_WIDTH,
+    'height' => IMAGE_SVG_DEFAULT_HEIGHT,
+  );
+
+  $file_contents = file_get_contents($uri);
+  if ($file_contents) {
+    $svg = simplexml_load_string($file_contents);
+    foreach ($svg->attributes() as $attribute => $value) {
+      if ($attribute === 'width' || $attribute === 'height') {
+        $svg_dimensions[$attribute] = (int) $value;
+      }
+    }
+  }
+
+  // Save values to static cache.
+  $cached_images[$uri] = $svg_dimensions;
+  return $svg_dimensions;
+}
+
+/**
+ * Determine if a file URI is an SVG image based on its file extension.
+ *
+ * @param string $uri
+ *   A path or URI to an image.
+ * @return bool
+ *   TRUE if the image is an SVG. FALSE if it is not.
+ */
+function image_is_svg($uri) {
+  $mimetype = file_get_mimetype($uri);
+  return $mimetype === 'image/svg+xml';
 }
 
 /**

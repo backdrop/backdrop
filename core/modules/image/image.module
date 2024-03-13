@@ -232,6 +232,10 @@ function image_permission() {
       'title' => t('Administer image styles'),
       'description' => t('Create and modify styles for generating image modifications such as thumbnails.'),
     ),
+    'upload svg images' => array(
+      'title' => t('Upload SVG images'),
+      'description' => t('Allowed to upload SVG images.'),
+    ),
   );
 }
 
@@ -254,6 +258,12 @@ function image_config_info() {
     'label_key' => 'name',
     'group' => t('Image styles'),
   );
+
+  $prefixes['image.settings'] = array(
+    'label' => t('Image settings'),
+    'group' => t('Configuration'),
+  );
+
   return $prefixes;
 }
 
@@ -1348,4 +1358,187 @@ function image_filter_keyword($value, $current_pixels, $new_pixels) {
       return (int) round($current_pixels / 2 - $new_pixels / 2);
   }
   return (int) $value;
+}
+
+/**
+ * Preprocess function for theme_image_style().
+ *
+ * If theme_image_style() is called without setting explicit height/width for
+ * an SVG image, attempt to set those dimensions. This helps in particular when
+ * uploading an image for the first time in a content form.
+ */
+function image_preprocess_image_style(&$variables) {
+  $uri = $variables['path'];
+  // Only try to get file information if $uri is not empty.
+  if (!empty($uri) && image_is_svg($uri)) {
+    if (empty($variables['width']) && empty($variables['height'])) {
+      if ($dimensions = image_get_svg_dimensions($uri)) {
+        $variables['width'] = $dimensions['width'];
+        $variables['height'] = $dimensions['height'];
+      }
+      else {
+        $variables['width'] = IMAGE_SVG_DEFAULT_WIDTH;
+        $variables['height'] = IMAGE_SVG_DEFAULT_HEIGHT;
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_file_presave().
+ *
+ * Set the dimensions in the "metadata" property used by the File Entity module.
+ */
+function image_file_presave($file) {
+  if (image_is_svg($file->uri) && isset($file->metadata)) {
+    $svg_dimensions = image_get_svg_dimensions($file->uri);
+    if ($svg_dimensions) {
+      $file->metadata['width'] = $svg_dimensions['width'];
+      $file->metadata['height'] = $svg_dimensions['height'];
+    }
+  }
+}
+
+
+/**
+ * Implements hook_field_attach_presave().
+ *
+ * When saving an entity, this hook is called to make any adjustments to the
+ * entire entity's fields before attempting to write to the database. When the
+ * Image module encounters an SVG image, it sets the height and width values
+ * to be empty strings, which would cause a database constraint error when
+ * a string is inserted into an integer column.
+ *
+ * This implementation loops through all fields attached to an entity, finds
+ * those that are an image field, then sets the width and height values within
+ * that field. These changes are made by reference, so they are in the $entity
+ * object when the Field module saves to the database.
+ */
+function image_field_attach_presave($entity_type, $entity) {
+  // Get information about which fields are on this type of entity.
+  list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
+  $bundle_field_info = field_info_instances($entity_type, $bundle);
+
+  // Loop through each of the fields and find those that are image fields.
+  foreach ($bundle_field_info as $field_name => $instance_info) {
+    $field_info = field_info_field($field_name);
+    if ($field_info['type'] === 'image') {
+      // The langcode should normally be LANGUAGE_NONE for an image field, but
+      // check the langcode property just to be certain.
+      $langcode = LANGUAGE_NONE;
+      if (isset($entity->langcode) && isset($entity->{$field_name}[$entity->langcode])) {
+        $langcode = $entity->langcode;
+      }
+      if (!isset($entity->{$field_name}[$langcode])) {
+        continue;
+      }
+
+      // Update the field values (by reference) for SVG images.
+      $field_values = &$entity->{$field_name}[$langcode];
+      foreach ($field_values as $delta => $field_value) {
+        if (!isset($field_value['fid'])) {
+          continue;
+        }
+        $file = file_load($field_value['fid']);
+        if ($file && image_is_svg($file->uri)) {
+          // Set width/height as a safety measure. Savable NULL is better than
+          // the not savable empty string.
+          $field_values[$delta]['width'] = NULL;
+          $field_values[$delta]['height'] = NULL;
+          if ($svg_dimensions = image_get_svg_dimensions($file->uri)) {
+            $field_values[$delta]['width'] = $svg_dimensions['width'];
+            $field_values[$delta]['height'] = $svg_dimensions['height'];
+          }
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_file_url_alter().
+ *
+ * Prevent image_style_url() from using a different URL for SVG images. Because
+ * image styles cannot operate on SVGs, set the URL back to the original image.
+ * This affects theme_image_style(), which normally would point to a new image.
+ */
+function image_file_url_alter(&$url) {
+  if (!empty($url)) {
+    // If this is an SVG image in the styles directory...
+    if (strpos($url, '/styles/') && strpos($url, '.svg')) {
+      // Remove the styles directory portions and use the original image URL.
+      $url = preg_replace('!/styles/.*?/.*?/!', '/', $url);
+    }
+  }
+}
+
+/**
+ * Implements hook_autoload_info().
+ */
+function image_autoload_info() {
+  return array(
+    'enshrined\svgSanitize\data\AttributeInterface' => 'libraries/svg_sanitizer/data/AttributeInterface.php',
+    'enshrined\svgSanitize\data\TagInterface' => 'libraries/svg_sanitizer/data/TagInterface.php',
+    'enshrined\svgSanitize\ElementReference\Resolver' => 'libraries/svg_sanitizer/ElementReference/Resolver.php',
+    'enshrined\svgSanitize\ElementReference\Subject' => 'libraries/svg_sanitizer/ElementReference/Subject.php',
+    'enshrined\svgSanitize\ElementReference\Usage' => 'libraries/svg_sanitizer/ElementReference/Usage.php',
+    'enshrined\svgSanitize\Exceptions\NestingException' => 'libraries/svg_sanitizer/Exceptions/NestingException.php',
+    'enshrined\svgSanitize\Helper' => 'libraries/svg_sanitizer/Helper.php',
+    'enshrined\svgSanitize\Sanitizer' => 'libraries/svg_sanitizer/Sanitizer.php',
+    'enshrined\svgSanitize\data\AllowedAttributes' => 'libraries/svg_sanitizer/data/AllowedAttributes.php',
+    'enshrined\svgSanitize\data\AllowedTags' => 'libraries/svg_sanitizer/data/AllowedTags.php',
+    'enshrined\svgSanitize\data\XPath' => 'libraries/svg_sanitizer/data/XPath.php',
+  );
+}
+
+/**
+ * API function which will generate a sanitized SVG file.
+ *
+ * @param string $svg
+ *    The xml contents of an svg that you would like to sanitize.
+ *
+ * @return string
+ *    The xml contents of an svg that has been stripped of harmful
+ *    contents.
+ */
+function image_svg_sanitizer_sanitize($svg) {
+  // instantiate the sanitizer class.
+  $svg_sanitizer_class = image_get_svg_sanitizer_class();
+  if ($svg_sanitizer_class) {
+    $sanitizer = new $svg_sanitizer_class();
+
+    // run the svg through the sanitizer.
+    $clean_svg = $sanitizer->sanitize($svg);
+
+    return $clean_svg;
+  }
+
+  return $svg;
+}
+
+/**
+ * Get the class name of the preferred SVG sanitizer.
+ *
+ * This class must return a method called sanitize() which initiates the
+ * sanitizing process. If a custom sanitizer is used, the class (and any Other
+ * associated classes) must also be declared in a hook_autoload_info()
+ * implementation.
+ *
+ * @return string
+ *    The class name of the preferred SVG sanitizer.
+ */
+function image_get_svg_sanitizer_class() {
+  // Use the advanced backdrop_static() pattern, since may be called very often
+  // in sites with many SVG images.
+  static $backdrop_static_fast;
+  if (!isset($backdrop_static_fast)) {
+    $backdrop_static_fast['svg_sanitizer_class'] = &backdrop_static(__FUNCTION__);
+  }
+  $svg_sanitizer_class = &$backdrop_static_fast['svg_sanitizer_class'];
+  
+  if (empty($svg_sanitizer_class)) {
+    $svg_sanitizer_class = config_get('image.settings', 'svg_sanitizer_class');
+  }
+
+  return $svg_sanitizer_class;
 }
