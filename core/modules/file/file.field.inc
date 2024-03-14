@@ -263,8 +263,25 @@ function file_field_update($entity_type, $entity, $field, $instance, $langcode, 
     $current_fids[] = $item['fid'];
   }
 
-  // Compare the original field values with the ones that are being saved.
-  $original = $entity->original;
+  // Compare the original field values with the ones that are being saved. Use
+  // $entity->original to check this when possible, but if it isn't available,
+  // create a bare-bones entity and load its previous values instead.
+  if (isset($entity->original)) {
+    $original = $entity->original;
+  }
+  else {
+    $entity_properties = array();
+    $info = entity_get_info($entity_type);
+    $entity_properties[$info['entity keys']['id']] = $id;
+    if (!empty($info['entity keys']['revision']) && isset($entity->revision_id)) {
+      $entity_properties[$info['entity keys']['revision']] = $entity->revision_id;
+    }
+    if (!empty($info['entity keys']['bundle']) && NULL !== $entity->bundle()) {
+      $entity_properties[$info['entity keys']['bundle']] = $entity->bundle();
+    }
+    $original = entity_create($entity_type, $entity_properties);
+    field_attach_load($entity_type, array($id => $original), FIELD_LOAD_CURRENT, array('field_name' => $field['field_name']));
+  }
   $original_fids = array();
   if (!empty($original->{$field['field_name']}[$langcode])) {
     foreach ($original->{$field['field_name']}[$langcode] as $original_item) {
