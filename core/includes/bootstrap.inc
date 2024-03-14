@@ -3028,6 +3028,7 @@ function _backdrop_bootstrap_configuration() {
   set_exception_handler('_backdrop_exception_handler');
 
   // Load configuration classes and functions.
+  include_once BACKDROP_ROOT . '/core/includes/module.inc';
   require_once BACKDROP_ROOT . '/core/includes/config.inc';
 
   // Redirect the user to the installation script if Backdrop has not been
