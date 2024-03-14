@@ -96,18 +96,10 @@ class DashboardMenuBlock extends Block {
       }
     }
 
-    if (empty($rows)) {
+    if (empty($rows) && !empty($menus)) {
       // If there are existing menus, but user has no access to manage any of
       // them, hide the block completely.
-      if (!empty($menus)) {
-        return;
-      }
-      $rows[] = array(
-        array(
-          'data' => t('There are no menus to display.'),
-          'colspan' => 4,
-        ),
-      );
+      return;
     }
 
     $panel = array(
@@ -117,6 +109,7 @@ class DashboardMenuBlock extends Block {
       '#theme' => 'table',
       '#header' => $header,
       '#rows' => $rows,
+      '#empty' => t('There are no menus to display.'),
     );
 
     if (user_access('administer menu')) {

@@ -105,14 +105,11 @@ function theme_image_style_list($variables) {
     $rows[] = $row;
   }
 
-  if (empty($rows)) {
-    $rows[] = array(array(
-      'colspan' => 4,
-      'data' => t('There are currently no styles. <a href="!url">Add a new one</a>.', array('!url' => url('admin/config/media/image-styles/add'))),
-    ));
-  }
+  $empty = t('There are currently no styles. <a href="!url">Add a new one</a>.', array('!url' => url('admin/config/media/image-styles/add')));
 
-  return theme('table', array('header' => $header, 'rows' => $rows));
+  return theme('table', array('header' => $header,
+    'rows' => $rows, 'empty' => $empty,
+  ));
 }
 
 /**

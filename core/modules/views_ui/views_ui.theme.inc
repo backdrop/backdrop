@@ -134,14 +134,14 @@ function theme_views_ui_rearrange_form($variables) {
       $rows[] = array('data' => $row, 'class' => array('draggable'), 'id' => 'views-row-' . $id);
     }
   }
-  if (empty($rows)) {
-    $rows[] = array(array('data' => t('No fields available.'), 'colspan' => '2'));
-  }
 
   $header = array('', t('Weight'), t('Remove'));
   $output = backdrop_render($form['override']);
   $output .= '<div class="scroll" data-backdrop-views-scroll>';
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'arrange')));
+  $output .= theme('table', array('header' => $header,
+    'rows' => $rows, 'attributes' => array('id' => 'arrange'),
+    'empty' => t('No fields available.'),
+  ));
   $output .= '</div>';
   $output .= backdrop_render_children($form);
   backdrop_add_tabledrag('arrange', 'order', 'sibling', 'weight');
@@ -321,9 +321,6 @@ function theme_views_ui_rearrange_filter_form(&$variables) {
       }
     }
   }
-  if (empty($rows)) {
-    $rows[] = array(array('data' => t('No fields available.'), 'colspan' => '2'));
-  }
 
   $output = backdrop_render($form['override']);
   $output .= '<div class="scroll">';
@@ -343,7 +340,12 @@ function theme_views_ui_rearrange_filter_form(&$variables) {
 
   // Set up tabledrag so that the weights are changed when rows are dragged.
   backdrop_add_tabledrag('views-rearrange-filters', 'order', 'sibling', 'weight');
-  $output .= theme('table', array('rows' => $rows, 'attributes' => array('id' => 'views-rearrange-filters', 'class' => array('arrange'))));
+  $output .= theme('table', array('rows' => $rows,
+    'attributes' => array('id' => 'views-rearrange-filters',
+      'class' => array('arrange'),
+    ),
+    'empty' => t('No fields available.'),
+  ));
   $output .= '</div>';
 
   // When JavaScript is enabled, the button for adding a new group should be
