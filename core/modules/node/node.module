@@ -2667,7 +2667,7 @@ function node_form_system_themes_admin_form_submit($form, &$form_state) {
   config_set('system.core', 'node_admin_theme', $form_state['values']['node_admin_theme']);
   // The default and admin layout are tied directly to this setting, so clear
   // the Layout cache.
-  layout_reset_caches()
+  layout_reset_caches();
 }
 
 /**
