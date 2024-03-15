@@ -990,6 +990,7 @@ function layout_autoload_info() {
 
     // Access handlers.
     'EntityBundleLayoutAccess' => 'plugins/access/entity_bundle_layout_access.inc',
+    'EntityFieldValueLayoutAccess' => 'plugins/access/entity_field_value_layout_access.inc',
     'LayoutAccess' => 'plugins/access/layout_access.inc',
     'LayoutAccessBroken' => 'plugins/access/layout_access.inc',
     'LayoutAccessNegatable' => 'plugins/access/layout_access.inc',

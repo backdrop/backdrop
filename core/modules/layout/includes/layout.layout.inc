@@ -100,13 +100,18 @@ function layout_layout_access_info() {
   // Provide type-specific plugins for each entity type.
   foreach ($entity_types as $entity_type => $entity_info) {
 
+    $entity_label = $entity_info['label'];
+    if ($entity_label == 'Node') {
+      $entity_label = 'Content';
+    }
+
     // Create a key such as "node_type" or "comment_node_type".
     // Skip users, which don't support multiple types.
     if (!empty($entity_info['entity keys']['bundle'])) {
-      $key = $entity_type . '_' . $entity_info['entity keys']['bundle'];
+      $bundle_key = $entity_type . '_' . $entity_info['entity keys']['bundle'];
       $bundle_label = array_key_exists('bundle label', $entity_info) ? $entity_info['bundle label'] : 'Type';
-      $info[$key] = array(
-        'title' => t('@entity: @bundle', array('@entity' => $entity_info['label'], '@bundle' => $bundle_label)),
+      $info[$bundle_key] = array(
+        'title' => t('@entity: @bundle', array('@entity' => $entity_label, '@bundle' => $bundle_label)),
         'description' => t('Control access by @entity_type @bundle_label.', array('@entity_type' => $entity_type, '@bundle_label' => backdrop_strtolower($bundle_label))),
         'entity_type' => $entity_type,
         'class' => 'EntityBundleLayoutAccess',
@@ -116,11 +121,11 @@ function layout_layout_access_info() {
       );
     }
 
-    // Create a entity id key such as "nid" or "cid".
-    $key = $entity_type . '_' . $entity_info['entity keys']['id'];
+    // Create an entity id key such as "nid" or "cid".
+    $id_key = $entity_type . '_' . $entity_info['entity keys']['id'];
     $key_label = strtoupper($entity_info['entity keys']['id']);
-    $info[$key] = array(
-      'title' => t('@entity: @entity_id_key', array('@entity' => $entity_info['label'], '@entity_id_key' => $key_label)),
+    $info[$id_key] = array(
+      'title' => t('@entity: @entity_id_key', array('@entity' => $entity_label, '@entity_id_key' => $key_label)),
       'description' => t('Control access by @entity_type @entity_id_key.', array('@entity_type' => $entity_type, '@entity_id_key' => $key_label)),
       'entity_type' => $entity_type,
       'class' => 'EntityIDLayoutAccess',
@@ -128,7 +133,25 @@ function layout_layout_access_info() {
         $entity_type => $entity_type,
       ),
     );
+
+    if ($entity_info['fieldable']) {
+      foreach ($entity_info['bundles'] as $bundle => $bundle_info) {
+        // Entity field has value.
+        $field_key = $entity_type . ':' . $bundle . ':field_value';
+        $info[$field_key] = array(
+          'title' => t('@entity: @bundle field has value', array('@entity' => $entity_label, '@bundle' => $bundle_info['label'])),
+          'description' => t('Control visibility by field value.'),
+          'entity_type' => $entity_type,
+          'bundle' => $bundle,
+          'class' => 'EntityFieldValueLayoutAccess',
+          'required contexts' => array(
+            $entity_type => $entity_type,
+          ),
+        );
+      }
+    }
   }
+
 
   $info['front'] = array(
     'title' => t('Home page'),
