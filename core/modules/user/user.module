@@ -2168,7 +2168,7 @@ function user_pass_rehash($password, $timestamp, $login, $uid, $mail = '') {
     $mail = $account->mail;
   }
 
-  return backdrop_hmac_base64($timestamp . $login . $uid . $mail, backdrop_get_hash_salt() . $password);
+  return backdrop_hmac_base64($timestamp . ':' . $login . ':' . $uid . ':' . $mail, backdrop_get_hash_salt() . $password);
 
 }
 
