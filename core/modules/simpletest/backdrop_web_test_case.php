@@ -1705,13 +1705,17 @@ class BackdropWebTestCase extends BackdropTestCase {
       return FALSE;
     }
 
-    // Copy over cached database tables if using a cache.
+
+    // This has to happen before any config changes are made to ensure that the
+    // database tables from the test cache exist.
     $use_cache = $this->useCache();
 
-    // Initialize config storage. The database storage needs to be done after
-    // switching the database prefix.
-    config_get_config_storage('active')->initializeStorage();
-    config_get_config_storage('staging')->initializeStorage();
+    if (!$use_cache) {
+      // Initialize config storage. The database storage needs to be done after
+      // switching the database prefix.
+      config_get_config_storage('active')->initializeStorage();
+      config_get_config_storage('staging')->initializeStorage();
+    }
 
     // Preset the 'install_profile' system variable, so the first call into
     // system_rebuild_module_data() (in backdrop_install_system()) will register
