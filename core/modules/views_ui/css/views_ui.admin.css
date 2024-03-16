@@ -323,7 +323,6 @@
   max-height: 400px;
   overflow: auto;
   padding: 20px;
-  -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 @media only screen and (min-height: 750px) {

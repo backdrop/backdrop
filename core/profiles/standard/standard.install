@@ -19,7 +19,7 @@ function standard_install() {
     'format' => 'filtered_html',
     'name' => 'Basic',
     'weight' => 0,
-    'editor' => 'ckeditor',
+    'editor' => 'ckeditor5',
     'editor_settings' => array(
       'image_upload' => array(
         'status' => 1,
@@ -369,7 +369,7 @@ function standard_install() {
       'body' => array(
         LANGUAGE_NONE => array(
           array(
-            'value' => st('This is your first post! You may edit or delete it.'),
+            'value' => '<p>' . st('This is your first post! You may edit or delete it.') . '</p>',
             'format' => 'filtered_html',
           ),
         ),
@@ -389,7 +389,7 @@ function standard_install() {
       'body' => array(
         LANGUAGE_NONE => array(
           array(
-            'value' => st('This is a page with static content. You may edit or delete it.'),
+            'value' => '<p>' . st('This is a page with static content. You may edit or delete it.') . '</p>',
             'format' => 'filtered_html',
           ),
         ),

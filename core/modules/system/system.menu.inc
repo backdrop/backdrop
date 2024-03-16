@@ -27,6 +27,7 @@ function system_menu_block_defaults($menu_name) {
     'expand_all' => FALSE,
     'clickdown' => FALSE,
     'collapse' => 'default',
+    'toggle_text' => 'Menu',
   );
   if ($menu_name == 'main-menu') {
     $defaults['depth'] = 1;
@@ -146,6 +147,21 @@ function system_menu_block_form($config) {
       '!menu_settings' => $link,
     )),
   );
+  $toggle_text_default = system_menu_block_defaults($config['menu_name'])['toggle_text'];
+  $form['toggle_text'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Toggle button text'),
+    '#default_value' => $config['toggle_text'],
+    '#description' => t('Text to display beside the toggle button. Default: %toggle_text.', array(
+      '%toggle_text' => $toggle_text_default,
+    )),
+    '#indentation' => 1,
+    '#states' => array(
+      'visible' => array(
+        'input[name="block_settings[toggle]"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
   $form['collapse'] = array(
     '#type' => 'radios',
     '#title' => t('Collapsible behavior'),
@@ -246,16 +262,30 @@ function system_menu_block_build(array $config) {
         $collapsible_behavior = (empty($config['collapse'])) ? 'default' : $config['collapse'];
       }
       $data['content']['#wrapper_attributes']['data-collapse'] = $collapsible_behavior;
-      $data['content']['#attached']['library'][] = array('system', 'backdrop.menus');
+      $data['content']['#attached']['library'][] = array(
+        'system',
+        'backdrop.menus',
+      );
       if ($config['style'] === 'dropdown') {
-        $data['content']['#attached']['library'][] = array('system', 'smartmenus');
+        $data['content']['#attached']['library'][] = array(
+          'system',
+          'smartmenus',
+        );
       }
     }
     if (!empty($config['toggle']) && $config['toggle'] == TRUE) {
       $id = backdrop_html_id('menu-toggle-state');
       $data['content']['#wrapper_attributes']['data-menu-toggle-id'] = $id;
-      $data['content']['#prefix'] = theme('menu_toggle', array('enabled' => $config['toggle'], 'id' => $id, 'text' => t('Menu')));
-      $data['content']['#attached']['library'][] = array('system', 'backdrop.menu-toggle');
+      $data['content']['#prefix'] = theme('menu_toggle', array(
+        'enabled' => $config['toggle'],
+        'id' => $id,
+        // Allow the user-entered menu toggle text to be translated.
+        'text' => t(trim($config['toggle_text'])),
+      ));
+      $data['content']['#attached']['library'][] = array(
+        'system',
+        'backdrop.menu-toggle',
+      );
     }
     if (!empty($config['style_settings'])) {
       $data['content']['#wrapper_attributes']['data-menu-style'] = backdrop_json_encode($config['style_settings']);

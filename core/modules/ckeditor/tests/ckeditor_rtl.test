@@ -55,6 +55,14 @@ class CKEditorRtlTestCase extends BackdropWebTestCase {
     $notice = '<em class="placeholder">Notice</em>: Undefined index: image_rtl in <em class="placeholder">{closure}()</em>';
 
     $this->backdropGet('admin/config/content/formats/filtered_html', array('language' => $arabic));
+    // Set the editor to CKEditor 4 before checking the source.
+    $edit = array(
+      'editor' => 'ckeditor',
+      'editor_settings[toolbar]' => '[[{"name":"Formatting","items":["Bold","Italic"]}]]',
+    );
+    $this->backdropPost(NULL, $edit, t('Save configuration'));
+    $this->backdropGet('admin/config/content/formats/filtered_html', array('language' => $arabic));
+
     // Make sure, there's no php notice.
     $this->assertNoRaw($notice, '"Notice: Undefined index: image_rtl in {closure}()" not found');
 

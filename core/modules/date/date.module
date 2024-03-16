@@ -644,10 +644,6 @@ function date_field_widget_properties_alter(&$widget, $context) {
  * Implements hook_config_info().
  */
 function date_config_info() {
-  $prefixes['date.settings'] = array(
-    'label' => t('Date settings'),
-    'group' => t('Configuration'),
-  );
   $prefixes['date_views.settings'] = array(
     'label' => t('Date views settings'),
     'group' => t('Configuration'),
