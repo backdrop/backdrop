@@ -16,7 +16,25 @@ $database = 'mysql://user:pass@localhost/database_name';
 $database_prefix = '';
 
 /**
- * Site configuration files location.
+ * Configuration storage
+ *
+ * By default configuration will be stored in the filesystem, using the
+ * directories specified in the $config_directories setting. Optionally,
+ * configuration can be store in the database instead of the filesystem.
+ * Switching this option on a live site is not currently supported without some
+ * manual work.
+ *
+ * Example using the database for live and file storage for staging:
+ * @code
+ * $settings['config_active_class'] = 'ConfigDatabaseStorage';
+ * $settings['config_staging_class'] = 'ConfigFileStorage';
+ * @endcode
+ */
+// $settings['config_active_class'] = 'ConfigFileStorage';
+// $settings['config_staging_class'] = 'ConfigFileStorage';
+
+/**
+ * Site configuration files location (if using file storage for configuration)
  *
  * By default these directories are stored within the files directory with a
  * hashed path. For the best security, these directories should be in a location
