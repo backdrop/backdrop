@@ -1355,7 +1355,11 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    * @throws ConfigStorageException
    */
   public function initializeStorage() {
-    if (!db_table_exists($this->table, array('target' => $this->database))) {
+    // db_table_exists() does not prefix our tables, so we have to do it
+    // manually when we do this check.
+    $connection_info = Database::getConnectionInfo($this->database);
+    $prefix = $connection_info[$this->database]['prefix']['default'];
+    if (!db_table_exists($prefix . $this->table)) {
       try {
         db_create_table($this->table, $this->schema($this->table));
       }

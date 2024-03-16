@@ -1707,6 +1707,17 @@ class BackdropWebTestCase extends BackdropTestCase {
       return FALSE;
     }
 
+    // This has to happen before any config changes are made to ensure that the
+    // database tables from the test cache exist.
+    $use_cache = $this->useCache();
+
+    if (!$use_cache) {
+      // Force config storage to initialize so that it will make sure the tables
+      // and folders we need exist.
+      $storage = config_get_config_storage();
+      $storage->initializeStorage();
+    }
+
     // Preset the 'install_profile' system variable, so the first call into
     // system_rebuild_module_data() (in backdrop_install_system()) will register
     // the test's profile as a module. Without this, the installation profile of
@@ -1715,7 +1726,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     config_install_default_config('system');
     config_set('system.core', 'install_profile', $this->profile);
 
-    $use_cache = $this->useCache();
     if (!$use_cache) {
       // Perform the actual Backdrop installation.
       include_once BACKDROP_ROOT . '/core/includes/install.inc';
