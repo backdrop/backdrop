@@ -45,20 +45,26 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
 
     // See if we're using a predefined scheme.
     // Note: we use the original theme when the default scheme is chosen.
-    $current_scheme = theme_get_setting('color.palette', $theme_name);
-    foreach ($schemes as $key => $scheme) {
-      if ($current_scheme == $scheme) {
-        $scheme_name = $key;
-        break;
+    $theme_color_settings = theme_get_setting('color', $theme_name);
+    if (empty($theme_color_settings['active_scheme'])) {
+      $current_scheme = $theme_color_settings['palette'];
+      foreach ($schemes as $key => $scheme) {
+        if ($current_scheme == $scheme) {
+          $scheme_name = $key;
+          break;
+        }
+      }
+      if (empty($scheme_name)) {
+        if (empty($current_scheme)) {
+          $scheme_name = 'default';
+        }
+        else {
+          $scheme_name = '';
+        }
       }
     }
-    if (empty($scheme_name)) {
-      if (empty($current_scheme)) {
-        $scheme_name = 'default';
-      }
-      else {
-        $scheme_name = '';
-      }
+    else {
+      $scheme_name = $theme_color_settings['active_scheme'];
     }
 
     // Generate the preview markup.
@@ -400,6 +406,7 @@ function color_get_info($theme) {
     $config_names = config_get_names_with_prefix($theme . '.color.');
     foreach ($config_names as $config_name) {
       $data = config_get($config_name);
+      unset($data['scheme_config_name']);
       $info = backdrop_array_merge_deep($info, $data);
     }
 
@@ -558,6 +565,7 @@ function color_scheme_form_submit($form, &$form_state) {
   unset($form_state['values']['palette']);
   unset($_SESSION['color']);
   unset($info['schemes']['']);
+  $active_scheme = $scheme;
 
   // This is a new custom scheme; save a new config.
   if ($scheme == '') {
@@ -578,6 +586,7 @@ function color_scheme_form_submit($form, &$form_state) {
     $config = config($theme . '.color.' . $custom_machine_name);
     $config->setData($data);
     $config->save();
+    $active_scheme = $custom_machine_name;
   }
   // This is an existing custom scheme; save to the existing config.
   elseif ($custom_scheme_names && in_array($scheme, array_keys($custom_scheme_names))) {
@@ -598,6 +607,9 @@ function color_scheme_form_submit($form, &$form_state) {
   }
   $info['default_schemes'] = $info['schemes'];
   unset($info['schemes']);
+
+  // Set the active scheme in settings.
+  $info['active_scheme'] = $active_scheme;
 
   unset($form_state['values']['custom_name']);
 
