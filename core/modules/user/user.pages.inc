@@ -166,7 +166,13 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
     // A different user is already logged in on the computer.
     else {
       $reset_link_account = user_load($uid);
-      if (!empty($reset_link_account)) {
+      $is_valid = FALSE;
+      if (!empty($reset_link_account) && $timestamp >= $reset_link_account->login && $timestamp <= REQUEST_TIME) {
+        if ($hashed_pass == user_pass_rehash($reset_link_account->pass, $timestamp, $reset_link_account->login, $reset_link_account->uid)) {
+          $is_valid = TRUE;
+        }
+      }
+      if ($is_valid) {
         backdrop_set_message(t('You cannot use a password reset link while logged into the site. Please <a href="!logout">logout</a> and try using the link again.',
           array('!logout' => url('user/logout'))), 'warning');
       } else {
