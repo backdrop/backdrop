@@ -632,7 +632,11 @@ function color_scheme_form_submit($form, &$form_state) {
  *   files exist for this theme.
  */
 function color_get_custom_scheme_names($theme_name) {
-  $schemes = array();
+  $schemes = &backdrop_static(__FUNCTION__, array());
+  if (isset($schemes)) {
+    return $schemes;
+  }
+
   $custom_scheme_names = config_get_names_with_prefix($theme_name . '.color');
   foreach ($custom_scheme_names as $name) {
     $config_schemes = config_get($name, 'schemes');
