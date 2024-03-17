@@ -2434,9 +2434,8 @@ function _user_mail_text($key, $language = NULL, $variables = array()) {
   // We do not sanitize the token replacement, since the output of this
   // replacement is intended for an email message, not a web browser.
   $text = config('user.mail')->getTranslated($key, array(), array(
-      'langcode' => $langcode,
-    ),
-  );
+    'langcode' => $langcode,
+  ));
   $options = array(
     'langcode' => $langcode,
     'callback' => 'user_mail_tokens',
