@@ -592,9 +592,14 @@ function color_scheme_form_submit($form, &$form_state) {
     $config->save();
   }
 
+  // Save only default schemes to settings.
+  foreach (array_keys($custom_scheme_names) as $custom_scheme_name) {
+    unset($info['schemes'][$custom_scheme_name]);
+  }
   $info['default_schemes'] = $info['schemes'];
-  unset($form_state['values']['custom_name']);
   unset($info['schemes']);
+
+  unset($form_state['values']['custom_name']);
 
   // Save all the values into form state for saving to config.
   $info += color_save_configuration($theme, $info, $palette);
