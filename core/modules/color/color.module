@@ -698,7 +698,8 @@ function color_rebuild_settings($theme_name = NULL) {
       if ($color_info) {
         $palette = isset($new_color_config['palette']) ? $new_color_config['palette'] : NULL;
         $new_color_info = color_save_configuration($theme, $color_info, $palette);
-        $theme_config->set('color', $new_color_info);
+        $new_color_config = array_merge($new_color_config, $new_color_info);
+        $theme_config->set('color', $new_color_config);
         $theme_config->save();
       }
     }
