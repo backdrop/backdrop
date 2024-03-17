@@ -71,7 +71,7 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
     $preview_markup = theme('color_preview', array('preview_url' => $preview_url));
 
     $base = backdrop_get_path('module', 'color');
-    $custom_schemes = color_get_custom_scheme_names($theme_name);
+    $custom_schemes = array_keys(color_get_custom_scheme_names($theme_name));
 
     // Add scheme selector.
     $form['color']['scheme'] = array(
@@ -544,7 +544,7 @@ function color_scheme_form_submit($form, &$form_state) {
   // Resolve palette.
   $palette = $form_state['values']['palette'];
   $scheme = $form_state['values']['scheme'];
-  if ($scheme != '' && !in_array($scheme, $custom_scheme_names)) {
+  if ($scheme != '' && !in_array($scheme, array_keys($custom_scheme_names))) {
     foreach ($palette as $key => $color) {
       if (isset($info['schemes'][$scheme]['colors'][$key])) {
         $palette[$key] = $info['schemes'][$scheme]['colors'][$key];
@@ -574,22 +574,21 @@ function color_scheme_form_submit($form, &$form_state) {
       'colors' => $palette,
     );
 
-    $data['scheme_name'] = $custom_machine_name;
+    $data['scheme_config_name'] = $custom_machine_name;
     $config = config($theme . '.color.' . $custom_machine_name);
     $config->setData($data);
     $config->save();
   }
   // This is an existing custom scheme; save to the existing config.
-  elseif ($custom_scheme_names && in_array($scheme, $custom_scheme_names)) {
-    $data = array();
-    $data['schemes'][$scheme] = array(
+  elseif ($custom_scheme_names && in_array($scheme, array_keys($custom_scheme_names))) {
+    $config_name = $custom_scheme_names[$scheme];
+    $config = config($config_name);
+    $schemes = $config->get('schemes');
+    $schemes[$scheme] = array(
       'title' => $scheme,
       'colors' => $palette,
     );
-
-    $data['scheme_name'] = $scheme;
-    $config = config($theme . '.color.' . $scheme);
-    $config->setData($data);
+    $config->set('schemes', $schemes);
     $config->save();
   }
 
@@ -605,19 +604,23 @@ function color_scheme_form_submit($form, &$form_state) {
 /**
  * Retrieves the names of any custom color schemes for this theme.
  *
+ * Config files may store more than one scheme in the schemes array.
+ *
  * @param string $theme_name
  *   The name of the theme.
  *
  * @return array
- *   An array of names, or an empty array if no custom config files exist for
- *   this theme.
+ *   An associative array of names, with the scheme name as the array key and
+ *   the config file name as the value, or an empty array if no custom config
+ *   files exist for this theme.
  */
 function color_get_custom_scheme_names($theme_name) {
   $schemes = array();
   $custom_scheme_names = config_get_names_with_prefix($theme_name . '.color');
   foreach ($custom_scheme_names as $name) {
-    if ($name != $theme_name . '.color.default') {
-      $schemes[] = ltrim($name, $theme_name . '.color.');
+    $config_schemes = config_get($name, 'schemes');
+    foreach ($config_schemes as $key => $config_scheme) {
+      $schemes[$key] = $name;
     }
   }
 
@@ -651,7 +654,7 @@ function color_flush_caches() {
 function color_config_info() {
   foreach (list_themes() as $key => $data) {
     $prefixes[$key . '.color'] = array(
-      'name_key' => 'scheme_name',
+      'name_key' => 'scheme_config_name',
       'label_callback' => 'color_config_label_callback',
       'group' => t('Color schemes'),
 
