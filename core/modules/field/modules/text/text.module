@@ -494,6 +494,9 @@ function text_summary($text, $format_id = NULL, $size = 600) {
     }
   }
 
+  // Trim opening tag fragment like previous versions of libxml did.
+  $summary = rtrim($summary, '<');
+
   // Clean up any invalid HTML.
   if (function_exists('_filter_htmlcorrector')) {
     $summary = _filter_htmlcorrector($summary);

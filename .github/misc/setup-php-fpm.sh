@@ -17,12 +17,15 @@ sudo sed -i -e 's/user = www-data/user = runner/' \
   -e 's/pm.start_servers = 2/pm.start_servers = 4/' \
   -e 's/pm.min_spare_servers = 1/pm.min_spare_servers = 2/' \
   -e 's/pm.max_spare_servers = 3/pm.max_spare_servers = 4/' \
-  ls /etc/php/*/fpm/pool.d/www.conf
+  /etc/php/*/fpm/pool.d/www.conf
 
 # Let above changes take effect and setup Apache to work with php-fpm.
 sudo systemctl restart php${1}-fpm.service
 sudo apt-get -q install libapache2-mod-fcgid
 sudo a2enmod rewrite proxy fcgid proxy_fcgi
-sudo systemctl start apache2.service
+sudo systemctl restart apache2.service
+# This prevents the "denied (filesystem path '/home/runner/work') because search
+# permissions are missing on a component of the path" problem.
+sudo chmod 751 /home/runner
 
 exit 0
