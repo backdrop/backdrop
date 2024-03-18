@@ -653,7 +653,7 @@ class UserLoginTestCase extends UserLoginTestBase {
    * @return string
    *   New password.
    */
-  protected function resetUserPassword($user) {
+  protected function resetUserPassword(User $user) {
     $this->backdropGet('user/password');
     $edit['name'] = $user->name;
     $this->backdropPost(NULL, $edit, 'Reset password');
