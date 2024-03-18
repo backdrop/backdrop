@@ -2303,6 +2303,9 @@ class BackdropWebTestCase extends BackdropTestCase {
       }
       $forms = $this->xpath($xpath);
       foreach ($forms as $form) {
+if ($this instanceof ConfigurationSyncTest) {
+debug($form);
+}
         // We try to set the fields of this form as specified in $edit.
         $edit = $edit_save;
         $post = array();
