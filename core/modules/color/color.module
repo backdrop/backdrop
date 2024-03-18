@@ -46,8 +46,11 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
     // See if we're using a predefined scheme.
     // Note: we use the original theme when the default scheme is chosen.
     $theme_color_settings = theme_get_setting('color', $theme_name);
-    if (empty($theme_color_settings['active_scheme'])) {
-      $current_scheme = $theme_color_settings['palette'];
+    if (!empty($theme_color_settings['active_scheme'])) {
+      $scheme_name = $theme_color_settings['active_scheme'];
+    }
+    else {
+      $current_scheme = isset($theme_color_settings['palette']) ? $theme_color_settings['palette'] : NULL;
       foreach ($schemes as $key => $scheme) {
         if ($current_scheme == $scheme) {
           $scheme_name = $key;
@@ -62,9 +65,6 @@ function color_form_system_theme_settings_alter(&$form, &$form_state) {
           $scheme_name = '';
         }
       }
-    }
-    else {
-      $scheme_name = $theme_color_settings['active_scheme'];
     }
 
     // Generate the preview markup.
@@ -614,7 +614,9 @@ function color_scheme_form_submit($form, &$form_state) {
   unset($form_state['values']['custom_name']);
 
   // Save all the values into form state for saving to config.
-  $info += color_save_configuration($theme, $info, $palette);
+  if ($color_save_configuration = color_save_configuration($theme, $info, $palette)) {
+    $info += $color_save_configuration;
+  }
   $form_state['values']['color'] = $info;
 }
 

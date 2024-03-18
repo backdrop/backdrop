@@ -205,7 +205,7 @@ class ColorTestCase extends BackdropWebTestCase {
     }
     $this->backdropPost($settings_path, $edit, t('Save theme settings'));
     $this->assertFalse(config_get('bartik.settings', 'color_legacy'), 'Legacy color flag set to FALSE in Bartik configuration.');
-    $this->assertNull(config_get('bartik.settings', 'color'), 'Color settings emptied out.');
+    $this->assertNull(config_get('bartik.settings', 'color.files'), 'Color settings emptied out.');
     $this->assertNoRaw('bartik/css/colors-legacy.css', 'Legacy color CSS correctly not found found on the homepage.');
     $this->assertRaw('bartik/css/colors.css', 'Default color CSS found on the homepage.');
   }
