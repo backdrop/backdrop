@@ -635,7 +635,7 @@ function color_scheme_form_submit($form, &$form_state) {
  */
 function color_get_custom_scheme_names($theme_name) {
   $schemes = &backdrop_static(__FUNCTION__, array());
-  if (isset($schemes)) {
+  if (!empty($schemes)) {
     return $schemes;
   }
 
@@ -721,6 +721,7 @@ function color_rebuild_settings($theme_name = NULL) {
       if ($color_info) {
         $palette = isset($new_color_config['palette']) ? $new_color_config['palette'] : NULL;
         $new_color_info = color_save_configuration($theme, $color_info, $palette);
+        $new_color_info = is_null($new_color_info) ? array() : $new_color_info;
         $new_color_config = array_merge($new_color_config, $new_color_info);
         $theme_config->set('color', $new_color_config);
         $theme_config->save();
