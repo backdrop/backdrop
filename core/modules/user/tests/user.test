@@ -503,6 +503,14 @@ class UserLoginTestCase extends UserLoginTestBase {
     // A login with the correct password should also result in a flood error
     // message.
     $this->assertFailedLogin($user1, NULL, TRUE, 'ip');
+
+    // A login attempt after resetting the password should still fail, since the
+    // IP-based flood control count is not cleared after a password reset.
+    $new_pass = $this->resetUserPassword($user1);
+    $user1->pass_raw = $new_pass;
+    $this->backdropLogout();
+    $this->assertFailedLogin($user1, NULL, FALSE, 'ip');
+    $this->assertRaw(t('Sorry, too many failed login attempts from your IP address. This IP address is temporarily blocked. Try again later or <a href="@url">request a new password</a>.', array('@url' => url('user/password'))));
   }
 
   /**
@@ -543,6 +551,17 @@ class UserLoginTestCase extends UserLoginTestBase {
     // Try one more attempt for user 1, it should be rejected, even if the
     // correct password has been used.
     $this->assertFailedLogin($user1, NULL, TRUE, 'user');
+
+    // Resetting the password should clear the flood control for the user.
+    $new_pass = $this->resetUserPassword($user1);
+    $this->backdropLogout();
+
+    // Try to log in as user 1, it should be successful.
+    // Need to reload user since the password changed.
+    $user1->pass_raw = $new_pass;
+    $this->backdropLogin($user1);
+    $this->assertRaw('Member for');
+
   }
 
   /**
@@ -625,6 +644,35 @@ class UserLoginTestCase extends UserLoginTestBase {
     $this->backdropPost('user', $edit, t('Log in'), array(), array(), NULL, $extra_post);
     $this->assertText(t('Sorry, incorrect password.'));
   }
+
+  /**
+   * Resets the user password and logs the user in.
+   *
+   * @param User $user
+   *   The account to reset the password for.
+   * @return string
+   *   New password.
+   */
+  protected function resetUserPassword($user) {
+    $this->backdropGet('user/password');
+    $edit['name'] = $user->name;
+    $this->backdropPost(NULL, $edit, 'Reset password');
+    $emails = $this->backdropGetMails();
+    $email = end($emails);
+    $urls = array();
+    preg_match('#.+user/reset/.+#', $email['body'], $urls);
+    $resetURL = $urls[0];
+    $this->backdropGet($resetURL);
+    $pass = user_password();
+    $pass_edit = array(
+      'pass[pass1]' => $pass,
+      'pass[pass2]' => $pass,
+    );
+    $this->backdropPost(NULL, $pass_edit, t('Save password & log in'));
+
+    return $pass;
+  }
+
 }
 
 /**
