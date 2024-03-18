@@ -1714,7 +1714,7 @@ class BackdropWebTestCase extends BackdropTestCase {
       // Initialize config storage. The database storage needs to be done after
       // switching the database prefix.
       config_get_config_storage('active')->initializeStorage();
-      config_get_config_storage('staging')->initializeStorage();
+//      config_get_config_storage('staging')->initializeStorage();
     }
 
     // Preset the 'install_profile' system variable, so the first call into
