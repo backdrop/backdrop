@@ -189,6 +189,20 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
         backdrop_goto('user/password');
       }
       elseif ($account->uid && $timestamp >= $account->login && $timestamp <= $current && $hashed_pass == user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid)) {
+        if (config_get('user.flood', 'flood_uid_only')) {
+          // Clear flood events based on the uid only if configured.
+          $identifier = $account->uid;
+        }
+        else {
+          // The default identifier is a combination of uid and IP address.
+          $identifier = $account->uid . '-' . ip_address();
+        }
+        // Only clear the user specific flood events. We cannot clear the more
+        // broad IP address flood events because that would open a
+        // vulnerability where an attacker with a valid account could use that
+        // to brute force other accounts.
+        flood_clear_event('failed_login_attempt_user', $identifier);
+
         if ($immediate_login) {
           $user = $account;
           user_login_finalize();
