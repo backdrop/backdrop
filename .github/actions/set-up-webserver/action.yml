@@ -45,6 +45,7 @@ runs:
 
     - name: Disable mod_php if necessary
       if: ${{ inputs.php-version == '5.6' }}
+      shell: bash
       run: if [ $(sudo apache2ctl -M | grep -c 'php.*module') -eq 1 ]; then sudo a2dismod php5.6; fi
 
     - name: Finish webserver setup
