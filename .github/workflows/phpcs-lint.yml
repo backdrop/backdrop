@@ -48,3 +48,27 @@ jobs:
       with:
         incremental_files_only: true
         config: '.cspell/cspell.json'
+
+  eslint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: current
+    - name: Install ESLint
+      run: npm install eslint eslint-config-airbnb-base
+      working-directory: .github/workflows
+    - name: Run eslint on changed files
+      uses: tj-actions/eslint-changed-files@v23
+      with:
+        config_path: ".github/workflows/.eslintrc.json"
+        # ignore_path: ".github/workflows/.eslintignore"
+        # extra_args: "--max-warnings=0"
+    # - name: Install ESLint
+    #   run: npm install eslint
+    #   working-directory: .github/workflows
+    # - name: Run code linting
+    #   run: npm run lint
+    #   working-directory: .github/workflows
