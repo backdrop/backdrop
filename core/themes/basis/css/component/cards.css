@@ -3,14 +3,12 @@
  * Card listing view on the default home page.
  */
 
-/* @todo compensates for a bug in Basis. */
-.l-top .block-views-promoted-cards-block {
+.l-top .block-hero + .block-views-promoted-cards-block {
   margin-top: -2rem; /* Negative top margin collapses spacing under header */
 }
 .block-views-promoted-cards-block {
-  padding-top: 2rem;
-  padding-bottom: 2rem;
-  background-color: #f2f2f2;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
 }
 
 .block-views-promoted-cards-block .views-view-grid-cols-3 {
@@ -25,6 +23,9 @@
   margin: 1rem 0;
   padding: 0 0 1rem 0;
   background-color: #ffffff;
+  box-shadow:
+    0.25em 0.5em 1em #ddd,
+    0 0 0.25em #dddddd88;
 }
 .view-promoted-cards h2 {
   font-size: 1.25rem;

@@ -22,7 +22,7 @@
   overflow-wrap: break-word;
 }
 
-.l-top .block-hero {
+.l-top .block-hero:first-child {
   margin-top: -2rem;/* Negative top margin collapses spacing under header */
 }
 
