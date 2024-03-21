@@ -68,7 +68,6 @@ jobs:
       - name: Install Backdrop
         run: |
           cp ./.github/misc/settings.local.php .
-          echo "\$settings['config_active_class'] = 'ConfigDatabaseStorage';" >> settings.local.php
           core/scripts/install.sh --db-url=mysql://root:root@127.0.0.1/backdrop
 
       - name: Run tests
