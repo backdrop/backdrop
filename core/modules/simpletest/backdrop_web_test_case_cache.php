@@ -75,6 +75,11 @@ class BackdropWebTestCaseCache extends BackdropWebTestCase {
       return FALSE;
     }
 
+    // Initialize config storage. The database storage needs to be done after
+    // switching the database prefix.
+    config_get_config_storage('active')->initializeStorage();
+    config_get_config_storage('staging')->initializeStorage();
+
     // Preset the 'install_profile' system variable, so the first call into
     // system_rebuild_module_data() (in backdrop_install_system()) will register
     // the test's profile as a module. Without this, the installation profile of

@@ -786,15 +786,16 @@ function backdrop_rewrite_settings($settings = array()) {
 }
 
 /**
- * Creates the config directory and ensures it is operational.
+ * Creates the config directory (for config in file storage) and ensures the
+ * config storage location is operational.
  *
- * @see install_config_directories()
+ * @see install_config_location()
  * @see update_prepare_bootstrap()
  */
-function backdrop_install_config_directories() {
+function backdrop_install_config_location() {
   // Default values for variables coming from settings.php.
   $database = NULL;
-  $config_directories = array();
+  $config_storage_active = config_get_config_storage('active');
   $t = get_t();
 
   // Include the current settings file to check the current database string.
@@ -802,44 +803,45 @@ function backdrop_install_config_directories() {
   $settings_file = $conf_path . '/settings.php';
   include $settings_file;
 
-  $is_empty = empty($config_directories['active']);
-  $is_default = $config_directories['active'] === 'files/config_' . md5($database) . '/active';
+  if (is_a($config_storage_active, 'ConfigFileStorage')) {
+    global $config_directories;
+    $is_empty = empty($config_directories['active']);
+    $is_default_file_storage = $config_directories['active'] === 'files/config_' . md5($database) . '/active';
 
-  // Add a randomized config directory name to settings.php, unless it was
-  // manually defined in the existing already.
-  if ($is_empty || $is_default) {
-    $config_directories_hash = md5(backdrop_random_bytes(55));
-    $update_settings["config_directories['active']"] = array(
-      'value' => $conf_path . '/files/config_' . $config_directories_hash . '/active',
-      'required' => TRUE,
-    );
-    $update_settings["config_directories['staging']"] = array(
-      'value' => $conf_path . '/files/config_' . $config_directories_hash . '/staging',
-      'required' => TRUE,
-    );
+    // Add a randomized config directory name to settings.php, unless it was
+    // manually defined in the existing already.
+    if ($is_empty || $is_default_file_storage) {
+      $config_directories_hash = md5(backdrop_random_bytes(55));
+      $update_settings["config_directories['active']"] = array(
+        'value' => $conf_path . '/files/config_' . $config_directories_hash . '/active',
+        'required' => TRUE,
+      );
+      $update_settings["config_directories['staging']"] = array(
+        'value' => $conf_path . '/files/config_' . $config_directories_hash . '/staging',
+        'required' => TRUE,
+      );
 
-    // Rewrite settings.php.
-    try {
-      backdrop_rewrite_settings($update_settings);
-    }
-    catch (Exception $e) {
-      // If the config directory is empty and we can't write one, error out.
-      // Proceed anyway if using the default directory based on database string.
-      if ($is_empty) {
-        throw $e;
+      // Rewrite settings.php.
+      try {
+        backdrop_rewrite_settings($update_settings);
+      }
+      catch (Exception $e) {
+        // If the config directory is empty and we can't write one, error out.
+        // Proceed anyway if using the default directory based on database string.
+        if ($is_empty) {
+          throw $e;
+        }
       }
     }
   }
 
-  // Ensure the config directories exist or can be created, and are writable.
-
+  // Ensure the config location exists or can be created, and is writable.
   // This should never fail, since if the config directory was specified in
   // settings.php it will have already been created and verified earlier, and
   // if it wasn't specified in settings.php, it is created here inside the
   // public files directory, which has already been verified to be writable
   // itself. But if it somehow fails anyway, the installation cannot proceed.
   // Bail out using a similar error message as in system_requirements().
-  $config_storage_active = config_get_config_storage('active');
   try {
     $config_storage_active->initializeStorage();
   }

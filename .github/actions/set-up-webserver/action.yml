@@ -1,0 +1,62 @@
+name: "Set up webserver"
+description: "Set up a webserver with PHP and a database"
+inputs:
+  php-version:
+    description: "PHP version to install"
+    required: true
+  database-version:
+    description: "Database (mysql/mariadb) version to install"
+    required: true
+outputs: {}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Prepare for database
+      shell: bash
+      run: |
+        # The database runs as user "runner".
+        sudo mkdir /dev/shm/mysql_tmp
+        sudo chown runner:runner /dev/shm/mysql_tmp
+
+    - name: Install database server
+      uses: shogo82148/actions-setup-mysql@v1
+      with:
+        mysql-version: ${{ inputs.mysql-version }}
+        root-password: 'root'
+        my-cnf: |
+          datadir=/dev/shm/mysql
+          tmpdir=/dev/shm/mysql_tmp
+        auto-start: true
+
+    - name: Verify setup and create database
+      shell: bash
+      run: |
+        echo -e '[client]\nuser = root\npassword = root\nhost = 127.0.0.1' > ~/.my.cnf
+        mysql -e 'SELECT version()\G'
+        mysql -e 'CREATE DATABASE backdrop;'
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ inputs.php-version }}
+        coverage: none
+        tools: none
+
+    - name: Disable mod_php if necessary
+      if: ${{ inputs.php-version == '5.6' }}
+      shell: bash
+      run: if [ $(sudo apache2ctl -M | grep -c 'php.*module') -eq 1 ]; then sudo a2dismod php5.6; fi
+
+    - name: Finish webserver setup
+      shell: bash
+      run: |
+        # Set up apache with php-fpm.
+        sudo cp .github/misc/default.conf /etc/apache2/sites-available/000-default.conf
+        sudo sed -i -e "s/_PHP_VERSION_/ ${{ inputs.php-version }}/" /etc/apache2/sites-available/000-default.conf
+        # Setup php-fpm, this script is intentionally not executable by default.
+        chmod 700 .github/misc/setup-php-fpm.sh
+        ./.github/misc/setup-php-fpm.sh ${{ inputs.php-version }}
+        # This should be a redirect to the installer:
+        echo 'Verify webserver setup'
+        curl -sI 'http://localhost/'
