@@ -1465,7 +1465,7 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
       }
     }
     catch (\Exception $e) {
-      throw new ConfigStorageException('Failed to write configuration to the database: ' . $this->$name, 0, $e);
+      throw new ConfigStorageException('Failed to write configuration to the database: ' . $name, 0, $e);
     }
     return TRUE;
   }
