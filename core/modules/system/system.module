@@ -2135,7 +2135,20 @@ function system_library_info_alter(&$libraries, $module) {
       ),
     );
   }
-
+  elseif ($config->get('jquery_version') == 'latest') {
+    $libraries['jquery']['version'] = '4.0.0-beta';
+    $libraries['jquery']['js'] = array(
+      'core/misc/jquery-4.0.0-beta.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -20,
+      ),
+      // Backwards compatibility.
+      'core/misc/jquery-4-bc.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -19,
+      ),
+    );
+  }
 }
 
 /**
