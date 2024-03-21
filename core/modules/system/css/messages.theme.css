@@ -6,13 +6,14 @@
   position: relative;
   box-sizing: border-box;
   margin: 0.375rem 0;
-  padding: 0.9em 0.625em 1em 3.438em; /* LTR */
+  padding: 0.9em 36px 1em 3.438em; /* LTR */
   border-radius: 4px;
   min-height: 3.2em;
   overflow: hidden;
 }
 [dir="rtl"] .messages {
-  padding: .625em 3.438em .625em .625em;
+  padding-right:3.438em;
+  padding-left: 36px;
 }
 .messages:before {
   content: '';
@@ -38,7 +39,7 @@
     padding-left: 4.375em;
   }
   [dir="rtl"] .messages {
-    padding-left: .625em;
+    padding-left: 36px;
     padding-right: 4.375em;
   }
   .messages:before {
@@ -52,7 +53,15 @@
 .messages ul,
 .messages .item-list ul {
   margin-bottom: 0;
+  margin-left: 1.25em; /* LTR */
+  padding-left: 0;
+}
+[dir="rtl"] .messages ul,
+[dir="rtl"] .messages .item-list ul {
   margin-left: 0;
+  margin-right: 1.25em;
+  padding-left: 0;
+  padding-right: 0;
 }
 
 .messages a {
@@ -129,8 +138,8 @@ div.messages.info:before {
   display: block;
   height: 15px;
   position: absolute;
-  right: 5px; /* LTR */
-  top: 5px;
+  right: 12px; /* LTR */
+  top: 12px;
   width: 15px;
 }
 .messages .dismiss:before,
@@ -150,6 +159,6 @@ div.messages.info:before {
   transform: rotate(45deg);
 }
 [dir="rtl"] .messages .dismiss {
-  left: 5px;
+  left: 12px;
   right: auto;
 }
