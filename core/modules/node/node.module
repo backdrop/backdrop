@@ -3155,14 +3155,14 @@ function _node_query_node_access_alter($query, $type) {
         // If it's a join, add the node access check to the join condition.
         $join_cond = db_and()->exists($subquery);
         // Add the existing join conditions into the Condition object.
-        if ($tables[$nalias]['condition'] instanceof QueryConditionInterface) {
-          $join_cond->condition($tables[$nalias]['condition']);
+        if ($tables[$node_alias]['condition'] instanceof QueryConditionInterface) {
+          $join_cond->condition($tables[$node_alias]['condition']);
         }
         else {
-          $join_cond->where($tables[$nalias]['condition'], $tables[$nalias]['arguments']);
-          $tables[$nalias]['arguments'] = array();
+          $join_cond->where($tables[$node_alias]['condition'], $tables[$node_alias]['arguments']);
+          $tables[$node_alias]['arguments'] = array();
         }
-        $tables[$nalias]['condition'] = $join_cond;
+        $tables[$node_alias]['condition'] = $join_cond;
       }
     }
   }
