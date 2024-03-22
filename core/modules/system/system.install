@@ -771,7 +771,8 @@ function _system_check_db_utf8mb4_requirements($phase) {
  * Implements hook_install().
  */
 function system_install() {
-  // Create tables.
+  // Differently from other modules, the System module needs to explicitly
+  // call backdrop_install_schema('system') or its tables won't be created.
   backdrop_install_schema('system');
   $versions = backdrop_get_schema_versions('system');
   $version = $versions ? max($versions) : SCHEMA_INSTALLED;
