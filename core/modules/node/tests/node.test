@@ -3741,6 +3741,252 @@ class NodeEntityViewModeAlterTest extends NodeWebTestCase {
 }
 
 /**
+ * Tests the interaction of the node access system with joined Query objects.
+ */
+class NodeAccessJoinTest extends NodeWebTestCase {
+
+  function setUp() {
+    $modules = array('node_access_test');
+    parent::setUp($modules);
+
+    node_access_rebuild();
+    state_set('node_access_test_private', TRUE);
+
+    // Add a custom field to the page content type.
+    $this->field_name = 'related_post';
+    $this->field = field_create_field(
+      array(
+        'field_name' => $this->field_name,
+        'type' => 'number_integer',
+        'cardinality' => FIELD_CARDINALITY_UNLIMITED,
+      )
+    );
+    $page_instance = array(
+      'field_name' => $this->field_name,
+      'entity_type' => 'node',
+      'bundle' => 'page',
+    );
+    field_create_instance($page_instance);
+    $post_instance = array(
+      'field_name' => $this->field_name,
+      'entity_type' => 'node',
+      'bundle' => 'post',
+    );
+    field_create_instance($post_instance);
+  }
+
+  /**
+   * Tests the accessibility of joined nodes.
+   *
+   * - Create two users with "access content" and "create post" permissions
+   *   who can each access their own private posts but not others'.
+   * - Create post-type nodes with and without references to other posts.
+   *   The posts and references represent all possible combinations of the
+   *   tested access types.
+   * - Create page-type nodes referencing each of the posts, as well as a
+   *   page with no reference.
+   * - Use a custom view that creates two joins between nodes and has a
+   *   node_access tag. The view lists the page nodes, the post
+   *   referenced by each page node, and the post referenced by each
+   *   post.
+   *
+   * - Login with the author user and check that he does not have access to
+   *   private nodes created by other users. Test access using total row
+   *   count as well as checking for presence of individual page titles.
+   * - Repeat tests using a user with only the "access content" permission,
+   *   confirming this user does not have access to any private nodes.
+   * - Repeat tests using a user with "access content" and "node test view"
+   *   permissions, confirming this user sees the complete view.
+   */
+  public function testNodeAccessJoin() {
+
+    // User to add posts and test author access.
+    $this->authorUser = $this->backdropCreateUser(array(
+      'access content',
+      'create post content',
+    ));
+    // Another user to add posts (whose private posts can not be accessed
+    // by authorUser).
+    $this->otherUser = $this->backdropCreateUser(array(
+      'access content',
+      'create post content',
+    ));
+
+    // Create the posts.
+    $langcode = LANGUAGE_NONE;
+
+    // The posts are stored in an array keyed by $post and $reference2,
+    // where $post is the access type of the post itself, and $reference2
+    // is the access type of the reference linked to by the post.
+    //  'public' posts are created by otherUser with private=0.
+    //  'private' posts are created by otherUser with private=1.
+    //  'author_public' posts are created by authorUser with private=0.
+    //  'author_private' posts are created by authorUser with private=1.
+    //  'no_reference' is used for references when there is no related post.
+    foreach (array('no_reference', 'public', 'private', 'author_public', 'author_private') as $reference2) {
+      foreach (array('public', 'private', 'author_public', 'author_private') as $post) {
+        $is_author = (substr($post, 0, 6) == 'author');
+        $is_private = (substr($post, -7) == 'private');
+        $edit = array(
+          'type' => 'post',
+          'uid' => $is_author ? $this->authorUser->uid : $this->otherUser->uid,
+          'private' => $is_private,
+        );
+        // The post names provide the access status of the post and the
+        // access status of the related post (if any).
+        // The naming system ensures that the text 'Post $post' will only
+        // appear in the view if an post with that access type is displayed
+        // in the view. (The text '$post' alone will appear in the titles of
+        // other nodes that reference an post.)
+        $edit['title'] = "Post $post - $reference2";
+        if ($reference2 != 'no_reference') {
+          $edit['related_post'][$langcode][0]['value'] = $this->posts[$reference2]['no_reference'];
+        }
+        $node = $this->backdropCreateNode($edit);
+        $this->posts[$post][$reference2] = $node->nid;
+
+        $this->assertEqual((int) $is_private, (int) $node->private, 'The private status of the post node was properly set in the node_access_test table.');
+        if ($reference2 != 'no_reference') {
+          $this->assertEqual((int) $this->posts[$reference2]['no_reference'], (int) $node->related_post[$langcode][0]['value'], 'Proper post attached to post.');
+        }
+      }
+    }
+
+    // Add a blank 'no_reference' entry to the post list, so that a page with
+    // no reference gets created.
+    $this->posts['no_reference']['no_reference'] = NULL;
+
+    $total = 0;
+    $count_s_total = $count_s2_total = 0;
+    $count_s_public = $count_s2_public = 0;
+    $count_s_author = $count_s2_author = 0;
+    $total_public = $total_author = 0;
+
+    // Create page nodes referencing each post, as well as a page with no
+    // reference.
+    foreach ($this->posts as $reference => $list) {
+      foreach ($list as $reference2 => $post_nid) {
+        $title = "Page - $reference";
+        if ($reference != 'no_reference') {
+          $title .= " - $reference2";
+        }
+        $edit = array(
+          'type' => 'page',
+          'title' => $title,
+          'private' => FALSE,
+        );
+        if ($post_nid) {
+          $edit['related_post'][$langcode][0]['value'] = $post_nid;
+        }
+        $node = $this->backdropCreateNode($edit);
+        if ($post_nid) {
+          $this->assertEqual((int) $post_nid, (int) $node->related_post[$langcode][0]['value'], 'Proper post attached to page.');
+        }
+
+        // Calculate totals expected for each user type
+        // Total number of pages.
+        $total++;
+        // Total number of primary and secondary references.
+        if ($reference != 'no_reference') {
+          $count_s_total++;
+          if ($reference2 != 'no_reference') {
+            $count_s2_total++;
+          }
+        }
+        // Public users only see 'public' and 'author_public' posts.
+        if (substr($reference, -6) == 'public') {
+          $count_s_public++;
+          if (substr($reference2, -6) == 'public') {
+            $count_s2_public++;
+          }
+        }
+        // authorUser sees 'public', 'author_public', and 'author_private'
+        // posts.
+        if (substr($reference, -6) == 'public' || substr($reference, 0, 6) == 'author') {
+          $count_s_author++;
+          if (substr($reference2, -6) == 'public' || substr($reference2, 0, 6) == 'author') {
+            $count_s2_author++;
+          }
+        }
+
+        // $total_public and $total_author are not currently in use -- but
+        // represent the totals when joins are handled by adding an is-null
+        // check (i.e., if inaccessible references caused the entire row to be
+        // be hidden from view, instead of hiding just one cell of the table).
+        // Count of pages where all related posts are accessible by
+        // public users.
+        if (substr($reference, -7) != 'private' && substr($reference2, -7) != 'private') {
+          $total_public++;
+        }
+        // Count of pages where all related posts are accessible by
+        // authorUser.
+        if ($reference != 'private' && $reference2 != 'private') {
+          $total_author++;
+        }
+      }
+    }
+
+    // Open a webpage listing all the pages, and check the webpage's content for
+    // users with three different access levels.
+    // Check the author of the 'author' posts.
+    $this->backdropLogin($this->authorUser);
+    $this->backdropGet('node_access_join_test_page');
+    $chk_total = count($this->xpath("//td[@headers='view-title-table-column']"));
+    $this->assertEqual($chk_total, $total, 'Author should see ' . $total . ' rows. Actual: ' . $chk_total);
+    $chk_total = count($this->xpath("//td[@headers='view-title-1-table-column']/a"));
+    $this->assertEqual($chk_total, $count_s_author, 'Author should see ' . $count_s_author . ' primary references. Actual: ' . $chk_total);
+    $chk_total = count($this->xpath("//td[@headers='view-title-2-table-column']/a"));
+    $this->assertEqual($chk_total, $count_s2_author, 'Author should see ' . $count_s2_author . ' secondary references. Actual: ' . $chk_total);
+    $this->assertText('Page - no_reference', 'Author should see page with no reference.');
+    $this->assertText('Page - public - no_reference', 'Author should see page with one public reference.');
+    $this->assertText('Page - public - public', 'Author should see page with two public references.');
+    $this->assertText('Page - author_private - no_reference', 'Author should see page with own private reference.');
+    $this->assertText('Post public', 'Author should see posts with access type: public.');
+    $this->assertNoText('Post private', 'Author should not see posts with access type: private.');
+    $this->assertText('Post author_public', 'Author should see posts with access type: author_public.');
+    $this->assertText('Post author_private', 'Author should see posts with access type: author_private.');
+
+    // Check a regular user (who did not author any posts).
+    $this->regularUser = $this->backdropCreateUser(array('access content'));
+    $this->backdropLogin($this->regularUser);
+    $this->backdropGet('node_access_join_test_page');
+    $chk_total = count($this->xpath("//td[@headers='view-title-table-column']"));
+    $this->assertEqual($chk_total, $total, 'Public user should see ' . $total . ' rows. Actual: ' . $chk_total);
+    $chk_total = count($this->xpath("//td[@headers='view-title-1-table-column']/a"));
+    $this->assertEqual($chk_total, $count_s_public, 'Public user should see ' . $count_s_public . ' primary references. Actual: ' . $chk_total);
+    $chk_total = count($this->xpath("//td[@headers='view-title-2-table-column']/a"));
+    $this->assertEqual($chk_total, $count_s2_public, 'Public user should see ' . $count_s2_public . ' secondary references. Actual: ' . $chk_total);
+    $this->assertText('Page - no_reference', 'Public user should see page with no reference.');
+    $this->assertText('Page - public - no_reference', 'Public user should see page with one public reference.');
+    $this->assertText('Page - public - public', 'Public user should see page with two public references.');
+    $this->assertText('Post public', 'Public user should see posts with access type: public.');
+    $this->assertNoText('Post private', 'Public user should not see posts with access type: private.');
+    $this->assertText('Post author_public', 'Public user should see posts with access type: author_public.');
+    $this->assertNoText('Post author_private', 'Public user should not see posts with access type: author_private.');
+
+    // Check a user with the special 'node test view' permission, who should
+    // be able to view all pages and posts.
+    $this->accessUser = $this->backdropCreateUser(array('access content', 'node test view'));
+    $this->backdropLogin($this->accessUser);
+    $this->backdropGet('node_access_join_test_page');
+    $chk_total = count($this->xpath("//td[@headers='view-title-table-column']"));
+    $this->assertEqual($chk_total, $total, 'Full-access user should see ' . $total . ' rows. Actual: ' . $chk_total);
+    $chk_total = count($this->xpath("//td[@headers='view-title-1-table-column']/a"));
+    $this->assertEqual($chk_total, $count_s_total, 'Full-access user should see ' . $count_s_total . ' primary references. Actual: ' . $chk_total);
+    $chk_total = count($this->xpath("//td[@headers='view-title-2-table-column']/a"));
+    $this->assertEqual($chk_total, $count_s2_total, 'Full-access user should see ' . $count_s2_total . ' secondary references. Actual: ' . $chk_total);
+    $this->assertText('Page - no_reference', 'Full-access user should see page with no reference.');
+    $this->assertText('Page - public - no_reference', 'Full-access user should see page with one public reference.');
+    $this->assertText('Page - public - public', 'Full-access user should see page with two public references.');
+    $this->assertText('Page - author_private - no_reference', 'Full-access user should see page with author_private reference.');
+    $this->assertText('Post public', 'Full-access user should see posts with access type: public.');
+    $this->assertText('Post private', 'Full-access user should see posts with access type: private.');
+    $this->assertText('Post author_public', 'Full-access user should see posts with access type: author_public.');
+    $this->assertText('Post author_private', 'Full-access user should see posts with access type: author_private.');
+  }
+}
+
+/**
  * Tests the cache invalidation of node operations.
  */
 class NodePageCacheTest extends NodeWebTestCase {
