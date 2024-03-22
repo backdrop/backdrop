@@ -2710,6 +2710,10 @@ function user_role_change_permissions($role_name, array $permissions = array()) 
   if (!empty($revoke)) {
     user_role_revoke_permissions($role_name, array_keys($revoke));
   }
+  // Clear the page cache for visitors, when their permissions are changed.
+  if ($role_name == 'anonymous' && (!empty($grant) || !empty($revoke))) {
+    cache('page')->flush();
+  }
 }
 
 /**
