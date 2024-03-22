@@ -991,8 +991,8 @@ function search_expression_insert($expression, $option, $value = NULL) {
  *
  * If your module needs to provide a more complicated search form, then you need
  * to implement it yourself without hook_search_info(). In that case, you should
- * define it as a local task (tab) under the /search page (e.g. /search/mymodule)
- * so that users know where to find it.
+ * define it as a local task (tab) under the /search page (e.g.
+ * /search/my_module), so that users know where to find it.
  */
 
 /**
