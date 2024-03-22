@@ -2181,8 +2181,8 @@ class FileSaveTest extends FileHookTestCase {
     // Check that the correct hooks were called.
     $this->assertFileHooksCalled(array('load', 'update'));
 
-    $this->assertEqual($file->fid, $file->fid, "The file ID of an existing file is not changed when updating the database.", 'File');
-    $this->assertTrue($file->timestamp >= $file->timestamp, "Timestamp didn't go backwards.", 'File');
+    $this->assertEqual($file->fid, $loaded_file->fid, "The file ID of an existing file is not changed when updating the database.", 'File');
+    $this->assertTrue($file->timestamp >= $loaded_file->timestamp, "Timestamp didn't go backwards.", 'File');
     $loaded_file = db_query('SELECT * FROM {file_managed} f WHERE f.fid = :fid', array(':fid' => $file->fid))->fetch(PDO::FETCH_OBJ);
     $this->assertNotNull($loaded_file, "Record still exists in the database.", 'File');
     $this->assertEqual($loaded_file->status, $file->status, "Status was saved correctly.");
