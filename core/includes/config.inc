@@ -317,13 +317,10 @@ function config_install_default_config($project, $config_name = NULL) {
  *
  * @param string $project
  *   The name of the project we are uninstalling.
- * @param string|NULL $config_name
- *   (optional) If wanting to remove just a single configuration file from the
- *   project, specify the configuration file name without the extension.
  *
  * @since 1.26.0 First parameter changed from $module to $project.
  */
-function config_uninstall_config($project, $config_name = NULL) {
+function config_uninstall_config($project) {
   // If this is a theme key, load the matching template.php file.
   if (!backdrop_load('module', $project) && $theme_path = backdrop_get_path('theme', $project)) {
     if (file_exists($theme_path . '/template.php')) {
