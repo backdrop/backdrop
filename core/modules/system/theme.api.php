@@ -170,7 +170,7 @@ function hook_preprocess_HOOK(&$variables) {
  */
 function hook_themes_enabled($theme_list) {
   foreach ($theme_list as $theme) {
-    mymodule_prepare_theme($theme);
+    my_module_prepare_theme($theme);
   }
 }
 
