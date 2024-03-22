@@ -4702,7 +4702,6 @@ function backdrop_add_js($data = NULL, $options = NULL) {
       // Register all required libraries.
       backdrop_add_library('system', 'jquery', TRUE);
       backdrop_add_library('system', 'jquery.once', TRUE);
-      backdrop_add_library('system', 'html5shiv', TRUE);
     }
 
     switch ($options['type']) {
