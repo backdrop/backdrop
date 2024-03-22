@@ -890,7 +890,7 @@ function hook_ranking() {
  * after loading, if the node type is later saved, these defaults are saved into
  * configuration.
  *
- * @param $types
+ * @param array $types
  *   An array of type information, passed by reference. Each item is keyed by
  *   the node type name, and is an array of values as loaded from the node
  *   type config file. The most common use is to populate the "settings" array
@@ -914,10 +914,9 @@ function hook_node_type_load(&$types) {
 /**
  * Respond to node type creation.
  *
- * This hook is invoked from node_type_save() after the node type is added to
- * the database.
+ * This hook is invoked from node_type_save() after the node type is created.
  *
- * @param $info
+ * @param object $info
  *   The node type object that is being created.
  */
 function hook_node_type_insert($info) {
@@ -927,10 +926,9 @@ function hook_node_type_insert($info) {
 /**
  * Respond to node type updates.
  *
- * This hook is invoked from node_type_save() after the node type is updated in
- * the database.
+ * This hook is invoked from node_type_save() after the node type is updated.
  *
- * @param $info
+ * @param object $info
  *   The node type object that is being updated.
  */
 function hook_node_type_update($info) {
@@ -947,10 +945,9 @@ function hook_node_type_update($info) {
 /**
  * Respond to node type deletion.
  *
- * This hook is invoked from node_type_delete() after the node type is removed
- * from the database.
+ * This hook is invoked from node_type_delete() after the node type is deleted.
  *
- * @param $info
+ * @param object $info
  *   The node type object that is being deleted.
  */
 function hook_node_type_delete($info) {

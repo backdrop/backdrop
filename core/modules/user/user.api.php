@@ -351,17 +351,17 @@ function hook_user_view_alter(&$build) {
 /**
  * Act on a user role being inserted or updated.
  *
- * Modules implementing this hook can act on the user role object before
- * it has been saved to the database.
+ * Modules implementing this hook can act on the user role object before it is
+ * saved.
  *
- * @param $role
+ * @param object $role
  *   A user role object.
  *
  * @see hook_user_role_insert()
  * @see hook_user_role_update()
  */
 function hook_user_role_presave($role) {
-  // Set a UUID for the user role if it doesn't already exist
+  // Set a UUID for the user role if it doesn't already exist.
   if (empty($role->uuid)) {
     $role->uuid = uuid_uuid();
   }
@@ -370,12 +370,11 @@ function hook_user_role_presave($role) {
 /**
  * Respond to creation of a new user role.
  *
- * Modules implementing this hook can act on the user role object when saved to
- * the database. It's recommended that you implement this hook if your module
- * adds additional data to user roles object. The module should save its custom
- * additions to the database.
+ * Modules implementing this hook can act on the user role object when created.
+ * It's recommended that you implement this hook if your module adds additional
+ * data to user roles object.
  *
- * @param $role
+ * @param object $role
  *   A user role object.
  */
 function hook_user_role_insert($role) {
@@ -393,10 +392,9 @@ function hook_user_role_insert($role) {
  *
  * Modules implementing this hook can act on the user role object when updated.
  * It's recommended that you implement this hook if your module adds additional
- * data to user roles object. The module should save its custom additions to
- * the database.
+ * data to user roles object.
  *
- * @param $role
+ * @param object $role
  *   A user role object.
  */
 function hook_user_role_update($role) {
@@ -404,7 +402,7 @@ function hook_user_role_update($role) {
   db_merge('my_module_table')
     ->key(array('role' => $role->name))
     ->fields(array(
-      'role_description' => $role->description
+      'role_description' => $role->description,
     ))
     ->execute();
 }
@@ -412,12 +410,9 @@ function hook_user_role_update($role) {
 /**
  * Respond to user role deletion.
  *
- * This hook allows you act when a user role has been deleted.
- * If your module stores references to roles, it's recommended that you
- * implement this hook and delete existing instances of the deleted role
- * in your module database tables.
+ * Modules implementing this hook can act on the user role object when deleted.
  *
- * @param $role
+ * @param object $role
  *   The $role object being deleted.
  */
 function hook_user_role_delete($role) {
