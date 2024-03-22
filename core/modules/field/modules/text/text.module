@@ -462,8 +462,8 @@ function text_summary($text, $format_id = NULL, $size = 600) {
   // If no complete paragraph then treat line breaks as paragraphs.
   $line_breaks = array('<br />' => 6, '<br>' => 4);
   // Newline only indicates a line break if line break converter
-  // filter is present.
-  if (isset($format->filters['filter_autop'])) {
+  // filter is enabled.
+  if (isset($format->filters['filter_autop']) && $format->filters['filter_autop']->status) {
     $line_breaks["\n"] = 1;
   }
   $break_points[] = $line_breaks;
