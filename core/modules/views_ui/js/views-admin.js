@@ -197,7 +197,7 @@ Backdrop.viewsUi.AddItemForm = function ($form) {
 
 Backdrop.viewsUi.AddItemForm.prototype.handleCheck = function (event) {
   var $target = $(event.target);
-  var label = $.trim($target.next().text());
+  var label = $.trim($target.closest("td").next().text());
   // Add/remove the checked item to the list.
   if ($target.is(':checked')) {
     this.$selected_div.css('display', 'block');
@@ -298,120 +298,128 @@ Backdrop.behaviors.viewsUiSearchOptions = {
   }
 };
 
-/**
- * Constructor for the viewsUi.OptionsSearch object.
- *
- * The OptionsSearch object filters the available options on a form according
- * to the user's search term. Typing in "taxonomy" will show only those options
- * containing "taxonomy" in their label.
- */
-Backdrop.viewsUi.OptionsSearch = function ($form) {
-  this.$form = $form;
-  // Add a keyup handler to the search box.
-  this.$searchBox = this.$form.find('#edit-options-search');
-  this.$searchBox.on('keyup', $.proxy(this.handleKeyup, this));
-  // Get a list of option labels and their corresponding divs and maintain it
-  // in memory, so we have as little overhead as possible at keyup time.
-  this.options = this.getOptions(this.$form.find('.filterable-option'));
-  // Restripe on initial loading.
-  this.handleKeyup();
-
-  // Add a change handler to the filter group select.
-  this.$filterGroup = this.$form.find('select[name="group"]');
-  this.$filterGroup.on('change', $.proxy(this.filterGroup, this));
-  // Trap the ENTER key in the search box so that it doesn't submit the form.
-  this.$searchBox.on('keypress', function (event) {
-    if (event.which == 13) {
-      event.preventDefault();
-    }
-  });
-};
-
-$.extend(Backdrop.viewsUi.OptionsSearch.prototype, {
   /**
-   * Assemble a list of all the filterable options on the form.
+   * Constructor for the viewsUi.OptionsSearch object.
    *
-   * @param $allOptions
-   *   A $ object representing the rows of filterable options to be
-   *   shown and hidden depending on the user's search terms.
+   * The OptionsSearch object filters the available options on a form according
+   * to the user's search term. Typing in "taxonomy" will show only those options
+   * containing "taxonomy" in their label.
    */
-  getOptions: function ($allOptions) {
-    var i, $label, $description, $option;
-    var options = [];
-    var length = $allOptions.length;
-    for (i = 0; i < length; i++) {
-      $option = $($allOptions[i]);
-      $label = $option.find('label');
-      $description = $option.find('div.description');
-      options[i] = {
-        // Search on the lowercase version of the label text + description.
-        'searchText': $label.text().toLowerCase() + " " + $description.text().toLowerCase(),
-        // Maintain a reference to the jQuery object for each row, so we don't
-        // have to create a new object inside the performance-sensitive keyup
-        // handler.
-        '$div': $option
-      };
-    }
-    return options;
-  },
+  Backdrop.viewsUi.OptionsSearch = function ($form) {
+    /**
+     *
+     * @type {jQuery}
+     */
+    this.$form = $form;
 
-  /**
-   * Keyup handler for the search box that hides or shows the relevant options.
-   */
-  handleKeyup: function (event) {
-    var found, i, j, option, search, words, wordsLength, zebraClass, zebraCounter;
+    // Click on the title checks the box.
+    this.$form.on('click', 'td.title', (event) => {
+      const $target = $(event.currentTarget);
+      $target.closest('tr').find('input').trigger('click');
+    });
 
-    // Determine the user's search query. The search text has been converted to
-    // lowercase.
-    search = this.$searchBox.val().toLowerCase();
-    words = search.split(' ');
-    wordsLength = words.length;
+    const searchBoxSelector = '#edit-options-search';
+    const controlGroupSelector = 'select[name="group"]';
+    this.$form.on(
+      'formUpdated',
+      `${searchBoxSelector},${controlGroupSelector}`,
+      $.proxy(this.handleFilter, this),
+    );
 
-    // Start the counter for restriping rows.
-    zebraCounter = 0;
+    this.$searchBox = this.$form.find(searchBoxSelector);
+    this.$controlGroup = this.$form.find(controlGroupSelector);
 
-    // Search through the search texts in the form for matching text.
-    var length = this.options.length;
-    for (i = 0; i < length; i++) {
-      // Use a local variable for the option being searched, for performance.
-      option = this.options[i];
-      found = true;
-      // Each word in the search string has to match the item in order for the
-      // item to be shown.
-      for (j = 0; j < wordsLength; j++) {
-        if (option.searchText.indexOf(words[j]) === -1) {
-          found = false;
+    /**
+     * Get a list of option labels and their corresponding divs and maintain it
+     * in memory, so we have as little overhead as possible at keyup time.
+     */
+    this.options = this.getOptions(this.$form.find('.views-filterable-option'));
+
+    // Trap the ENTER key in the search box so that it doesn't submit the form.
+    this.$searchBox.on('keypress', (event) => {
+      if (event.which === 13) {
+        event.preventDefault();
+      }
+    });
+  };
+
+  $.extend(
+    Backdrop.viewsUi.OptionsSearch.prototype,
+  /** @lends Backdrop.viewsUi.OptionsSearch# */ {
+      /**
+       * Assemble a list of all the filterable options on the form.
+       *
+       * @param {jQuery} $allOptions
+       *   A jQuery object representing the rows of filterable options to be
+       *   shown and hidden depending on the user's search terms.
+       *
+       * @return {Array}
+       *   An array of all the filterable options.
+       */
+      getOptions($allOptions) {
+        let $title;
+        let $description;
+        let $option;
+        let $group;
+        const options = [];
+        const length = $allOptions.length;
+        for (let i = 0; i < length; i++) {
+          $option = $($allOptions[i]);
+          $title = $option.find('.title');
+          $description = $option.find('.description');
+          $group = $option.find('.group');
+          options[i] = {
+            // Search on the lowercase version of the title text + description.
+            searchText: `${$title[0].textContent.toLowerCase()} ${$description[0].textContent.toLowerCase()} ${$group[0].textContent.toLowerCase()}
+            .toLowerCase()}`,
+            // Maintain a reference to the jQuery object for each row, so we don't
+            // have to create a new object inside the performance-sensitive keyup
+            // handler.
+            $div: $option,
+          };
         }
-      }
-      if (found) {
-        // Show the checkbox row, and restripe it.
-        zebraClass = (zebraCounter % 2) ? 'odd' : 'even';
-        option.$div.show();
-        option.$div.removeClass('even odd');
-        option.$div.addClass(zebraClass);
-        zebraCounter++;
-      }
-      else {
-        // The search string wasn't found; hide this item.
-        option.$div.hide();
-      }
-    }
-  },
+        return options;
+      },
 
-  /**
-   * Filter down the list of all options based on group.
-   */
-  filterGroup: function() {
-    var groupName = this.$filterGroup.val();
-    if (groupName === 'all') {
-      this.$form.find('.views-filterable-group').show();
-    }
-    else {
-      this.$form.find('.views-filterable-group').hide();
-      this.$form.find('.views-filterable-group-' + groupName).show();
-    }
-  }
-});
+      /**
+       * Filter handler for the search box and type select that hides or shows the
+       * relevant options.
+       *
+       * @param {jQuery.Event} event
+       *   The formUpdated event.
+       */
+      handleFilter(event) {
+        // Determine the user's search query. The search text has been converted
+        // to lowercase.
+        const search = this.$searchBox[0].value.toLowerCase();
+        const words = search.split(' ');
+        // Get selected Group
+        const group = this.$controlGroup[0].value;
+
+        // Search through the search texts in the form for matching text.
+        this.options.forEach((option) => {
+          function hasWord(word) {
+            return option.searchText.indexOf(word) !== -1;
+          }
+
+          let found = true;
+          // Each word in the search string has to match the item in order for
+          // the item to be shown.
+          if (search) {
+            found = words.every(hasWord);
+          }
+          if (found && group !== 'all') {
+            found = option.$div.hasClass(group);
+          }
+
+          option.$div.toggle(found);
+        });
+
+        // Adapt dialog to content size.
+        $(event.target).trigger('dialogContentResize');
+      },
+    },
+  );
 
 Backdrop.behaviors.viewsUiPreview = {
  attach: function (context) {

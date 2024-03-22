@@ -3775,86 +3775,105 @@ function views_ui_add_item_form($form, &$form_state) {
   // Add the display override dropdown.
   views_ui_standard_display_dropdown($form, $form_state, $section);
 
-  // Figure out all the base tables allowed based upon what the relationships provide.
+  // Figure out base tables allowed based upon what the relationships provide.
   $base_tables = $view->get_base_tables();
-  $options = views_fetch_fields(array_keys($base_tables), $type, $display->handler->use_group_by());
+  $fields = views_fetch_fields(array_keys($base_tables), $type, $display->handler->use_group_by());
 
-  if (!empty($options)) {
-    $form['options']['controls'] = array(
-      '#theme_wrappers' => array('container'),
-      '#id' => 'views-filterable-options-controls',
-      '#attributes' => array('class' => array('container-inline')),
+  $form['options']['controls'] = array(
+    '#theme_wrappers' => array('container'),
+    '#id' => 'views-filterable-options-controls',
+    '#attributes' => array('class' => array('container-inline')),
+  );
+  $form['options']['controls']['options_search'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Search'),
+  );
+
+  $form['options']['controls']['group'] = array(
+    '#type' => 'select',
+    '#title' => t('Filter'),
+    '#options' => array(),
+    '#empty_value' => 'all',
+    '#empty_option' => t('- All -'),
+  );
+
+  $form['options']['name'] = array(
+    '#prefix' => '<div class="views-radio-box form-checkboxes views-filterable-options">',
+    '#suffix' => '</div>',
+    '#tree' => TRUE,
+  );
+
+  // Build the table header.
+  $header = array(
+    'title' => array('data' => t('Title'), 'sort' => 'asc'),
+    'group' => array('data' => t('Category'), 'sort' => 'asc'),
+    'help' => array('data' => t('Description')),
+  );
+  $groups = array();
+  foreach ($fields as $key => $field) {
+    $group = preg_replace('/[^a-z0-9]/', '-', strtolower($field['group']));
+    $groups[$group] = $field['group'];
+    $fields[$key]['#attributes'] = array(
+      'class' => array(
+        'views-filterable-option',
+        $group,
+      ),
     );
-    $form['options']['controls']['options_search'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Search'),
+    $fields[$key]['help'] = array(
+      'data' => $field['help'],
+      'class' => array('description'),
     );
-
-    $groups = array('all' => t('- All -'));
-    $form['options']['controls']['group'] = array(
-      '#type' => 'select',
-      '#title' => t('Filter'),
-      '#options' => array(),
+    $fields[$key]['title'] = array(
+      'data' => $field['title'],
+      'class' => array('title'),
     );
-
-    $form['options']['name'] = array(
-      '#prefix' => '<div class="views-radio-box form-checkboxes views-filterable-options">',
-      '#suffix' => '</div>',
-      '#tree' => TRUE,
-      '#default_value' => 'all',
+    $fields[$key]['group'] = array(
+      'data' => $field['group'],
+      'class' => array('group'),
     );
-
-    // Group options first to simplify the DOM objects that Views
-    // dependent JS will act upon.
-    $grouped_options = array();
-    foreach ($options as $key => $option) {
-      $group = preg_replace('/[^a-z0-9]/', '-', strtolower($option['group']));
-      $groups[$group] = $option['group'];
-      $grouped_options[$group][$key] = $option;
-      if (!empty($option['aliases']) && is_array($option['aliases'])) {
-        foreach ($option['aliases'] as $id => $alias) {
-          if (empty($alias['base']) || !empty($base_tables[$alias['base']])) {
-            $copy = $option;
-            $copy['group'] = $alias['group'];
-            $copy['title'] = $alias['title'];
-            if (isset($alias['help'])) {
-              $copy['help'] = $alias['help'];
-            }
-
-            $group = preg_replace('/[^a-z0-9]/', '-', strtolower($copy['group']));
-            $groups[$group] = $copy['group'];
-            $grouped_options[$group][$key . '$' . $id] = $copy;
+    if (!empty($field['aliases']) && is_array($field['aliases'])) {
+      foreach ($field['aliases'] as $id => $alias) {
+        if (empty($alias['base']) || !empty($base_tables[$alias['base']])) {
+          $copy = $field;
+          $groups[$group] = $alias['group'];
+          $copy['group'] = array(
+            'data' => $alias['group'],
+            'class' => array('group'),
+          );
+          $copy['title'] = array(
+            'data' => $alias['title'],
+            'class' => array('title'),
+          );
+          if (isset($alias['help'])) {
+            $copy['help'] = array(
+              'data' => $alias['help'],
+              'class' => array('description'),
+            );
           }
+          $group = preg_replace('/[^a-z0-9]/', '-', strtolower($copy['group']));
+          $fields[$key . '$' . $id] = $copy;
+          $fields[$key . '$' . $id]['#attributes'] = array(
+            'class' => array(
+              'views-filterable-option',
+              $group,
+            ),
+          );
         }
       }
     }
-
-    foreach ($grouped_options as $group => $group_options) {
-      $form['options']['name'][$group . '_start']['#markup'] = '<div class="views-filterable-group views-filterable-group-' . $group . '">';
-      $zebra = 0;
-      foreach ($group_options as $key => $option) {
-        $zebra_class = ($zebra % 2) ? 'odd' : 'even';
-        $form['options']['name'][$key] = array(
-          '#type' => 'checkbox',
-          '#title' => t('!group: !field', array('!group' => check_plain($option['group']), '!field' => check_plain($option['title']))),
-          '#description' => filter_xss_admin($option['help']),
-          '#return_value' => $key,
-          '#prefix' => "<div class='$zebra_class filterable-option'>",
-          '#suffix' => '</div>',
-        );
-        $zebra++;
-      }
-      $form['options']['name'][$group . '_end']['#markup'] = '</div>';
-    }
-
-    $form['options']['controls']['group']['#options'] = $groups;
   }
-  else {
-    $form['options']['markup'] = array(
-      '#markup' => '<div class="form-item">' . t('There are no @types available to add.', array('@types' =>  $ltitle)) . '</div>',
-    );
-  }
-  // Add a div to show the selected items
+  $form['options']['name']['fields'] = array(
+    '#type' => 'tableselect',
+    '#header' => $header,
+    '#options' => $fields,
+    '#empty' => t('There are no @types available to add.', array(
+      '@types' => $ltitle,
+    )),
+    '#js_select' => FALSE,
+  );
+  $form['options']['controls']['group']['#options'] = $groups;
+
+  // Add a div to show the selected items.
   $form['selected'] = array(
     '#type' => 'item',
     '#markup' => '<div class="views-selected-options"></div>',
@@ -3901,9 +3920,9 @@ function views_ui_add_item_form_submit($form, &$form_state) {
     $display->handler->set_override($section);
   }
 
-  if (!empty($form_state['values']['name']) && is_array($form_state['values']['name'])) {
+  if (!empty($form_state['values']['name']['fields']) && is_array($form_state['values']['name']['fields'])) {
     // Loop through each of the items that were checked and add them to the view.
-    foreach (array_keys(array_filter($form_state['values']['name'])) as $field) {
+    foreach (array_keys(array_filter($form_state['values']['name']['fields'])) as $field) {
       list($table, $field) = explode('.', $field, 2);
 
       if ($cut = strpos($field, '$')) {

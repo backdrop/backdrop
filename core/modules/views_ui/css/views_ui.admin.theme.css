@@ -808,20 +808,16 @@ td.group-title {
 }
 
 .views-filterable-options .form-type-checkbox {
-  border: 1px solid #CCC;
-  padding: 5px 8px;
-  border-top: none;
+  border: none;
+  padding: 0;
 }
 
 .views-filterable-options {
-  border-top:  1px solid #CCC;
+  box-shadow: inset 0 1px 0 0 #eee;
+  border-radius: 4px;
 }
 
-.views-filterable-options .even .form-type-checkbox {
-  background-color: #f7f7f7;
-}
-
-.filterable-option .form-item {
+tr.views-filterable-option .form-item {
   margin-bottom: 0;
   margin-top: 0;
 }
