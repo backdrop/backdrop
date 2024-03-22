@@ -131,7 +131,7 @@ function node_access_test_page() {
       $output .= '<p>No nodes</p>';
     }
 
-    $output .= '<p>' . ((string) $query ) . '</p>';
+    $output .= '<p>' . ((string) $query) . '</p>';
   }
   catch (Exception $e) {
     $output = '<p>Exception</p>';
@@ -193,8 +193,8 @@ function node_access_entity_test_page() {
 function node_access_join_test_page() {
   $output = '';
   try {
-    // Get custom field info
-    $field_name = 'related_article';
+    // Get custom field info.
+    $field_name = 'related_post';
     $field = field_info_field($field_name);
     $join_table = _field_sql_storage_tablename($field);
     $join_column = $field_name . '_value';
@@ -206,11 +206,11 @@ function node_access_join_test_page() {
     $query->condition('n.type', 'page');
     $query->orderBy('n.title');
 
-    // Add primary related article field and its associated node.
+    // Add primary related post field and its associated node.
     $query->addJoin('LEFT OUTER', $join_table, 'jf1', 'n.vid = jf1.revision_id');
     $query->addJoin('LEFT OUTER', 'node', 's1', 'jf1.' . $join_column .' = s1.nid');
 
-    // Add the article's related article field and its associated node.
+    // Add the post's related post field and its associated node.
     $query->addJoin('LEFT OUTER', $join_table, 'jf2', 's1.vid = jf2.revision_id');
     $query->addJoin('LEFT OUTER', 'node', 's2', 'jf2.' . $join_column .' = s2.nid');
 
@@ -227,8 +227,8 @@ function node_access_join_test_page() {
       // Generate table listing the results. The tests using this table rely on
       // xpath counting to get the number of rows and number of non-empty cells.
       // Those xpath counts are controlled using "headers" attributes that are
-      // automatically inserted by views in Drupal 10. This table adds the same
-      // headers attributes so the Drupal 10 xpath requests can be used unaltered.
+      // automatically inserted by Views in Drupal 10. This table adds the same
+      // headers attributes so the D10 xpath requests can be used unaltered.
       $output .= '<table>';
       $output .= '<tr><th>Title</th><th>Article</th><th>Article 2</th></tr>';
       $result = $query->execute();
@@ -237,9 +237,9 @@ function node_access_join_test_page() {
         $output .= '<td headers="view-title-table-column"><a>'.$row->title.'</a></td>';
         $output .= '<td headers="view-title-1-table-column">';
         if (!empty($row->s1_title)) {
-          // Non-empty nodes are wrapped in <a> solely for sake of xpath counting --
-          // in Drupal 10 these are links (because href is set), but for the purpose
-          // of the tests, href is unnecessary.
+          // Non-empty nodes are wrapped in <a> solely for sake of xpath
+          // counting -- in Drupal 10 these are links (because href is set), but
+          // for the purpose of the tests, href is unnecessary.
           $output .= '<a>'.$row->s1_title.'</a>';
         }
         $output .= '</td><td headers="view-title-2-table-column">';
@@ -254,7 +254,7 @@ function node_access_join_test_page() {
       $output .= '<p>No nodes</p>';
     }
 
-    $output .= '<p>' . ((string) $query ) . '</p>';
+    $output .= '<p>' . ((string) $query) . '</p>';
     $output .= '<p>' . serialize($query->getArguments()) . '</p>';
   }
   catch (Exception $e) {
@@ -293,7 +293,6 @@ function node_access_test_node_load($nodes, $types) {
 /**
  * Implements hook_node_predelete().
  */
-
 function node_access_test_node_predelete(Node $node) {
   db_delete('node_access_test')->condition('nid', $node->nid)->execute();
 }

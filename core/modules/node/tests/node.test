@@ -3753,7 +3753,7 @@ class NodeAccessJoinTest extends NodeWebTestCase {
     state_set('node_access_test_private', TRUE);
 
     // Add a custom field to the page content type.
-    $this->field_name = 'related_article';
+    $this->field_name = 'related_post';
     $this->field = field_create_field(
       array(
         'field_name' => $this->field_name,
@@ -3767,28 +3767,28 @@ class NodeAccessJoinTest extends NodeWebTestCase {
       'bundle' => 'page',
     );
     field_create_instance($page_instance);
-    $article_instance = array(
+    $post_instance = array(
       'field_name' => $this->field_name,
       'entity_type' => 'node',
-      'bundle' => 'article',
+      'bundle' => 'post',
     );
-    field_create_instance($article_instance);
+    field_create_instance($post_instance);
   }
 
   /**
    * Tests the accessibility of joined nodes.
    *
-   * - Create two users with "access content" and "create article" permissions
-   *   who can each access their own private articles but not others'.
-   * - Create article-type nodes with and without references to other articles.
-   *   The articles and references represent all possible combinations of the
+   * - Create two users with "access content" and "create post" permissions
+   *   who can each access their own private posts but not others'.
+   * - Create post-type nodes with and without references to other posts.
+   *   The posts and references represent all possible combinations of the
    *   tested access types.
-   * - Create page-type nodes referencing each of the articles, as well as a
+   * - Create page-type nodes referencing each of the posts, as well as a
    *   page with no reference.
    * - Use a custom view that creates two joins between nodes and has a
-   *   node_access tag. The view lists the page nodes, the article
-   *   referenced by each page node, and the article referenced by each
-   *   article.
+   *   node_access tag. The view lists the page nodes, the post
+   *   referenced by each page node, and the post referenced by each
+   *   post.
    *
    * - Login with the author user and check that he does not have access to
    *   private nodes created by other users. Test access using total row
@@ -3800,61 +3800,61 @@ class NodeAccessJoinTest extends NodeWebTestCase {
    */
   public function testNodeAccessJoin() {
 
-    // User to add articles and test author access.
+    // User to add posts and test author access.
     $this->authorUser = $this->backdropCreateUser(array(
       'access content',
-      'create article content',
+      'create post content',
     ));
-    // Another user to add articles (whose private articles can not be accessed
+    // Another user to add posts (whose private posts can not be accessed
     // by authorUser).
     $this->otherUser = $this->backdropCreateUser(array(
       'access content',
-      'create article content',
+      'create post content',
     ));
 
-    // Create the articles.
+    // Create the posts.
     $langcode = LANGUAGE_NONE;
 
-    // The articles are stored in an array keyed by $article and $reference2,
-    // where $article is the access type of the article itself, and $reference2
-    // is the access type of the reference linked to by the article.
-    //  'public' articles are created by otherUser with private=0.
-    //  'private' articles are created by otherUser with private=1.
-    //  'author_public' articles are created by authorUser with private=0.
-    //  'author_private' articles are created by authorUser with private=1.
-    //  'no_reference' is used for references when there is no related article.
+    // The posts are stored in an array keyed by $post and $reference2,
+    // where $post is the access type of the post itself, and $reference2
+    // is the access type of the reference linked to by the post.
+    //  'public' posts are created by otherUser with private=0.
+    //  'private' posts are created by otherUser with private=1.
+    //  'author_public' posts are created by authorUser with private=0.
+    //  'author_private' posts are created by authorUser with private=1.
+    //  'no_reference' is used for references when there is no related post.
     foreach (array('no_reference', 'public', 'private', 'author_public', 'author_private') as $reference2) {
-      foreach (array('public', 'private', 'author_public', 'author_private') as $article) {
-        $is_author = (substr($article, 0, 6) == 'author');
-        $is_private = (substr($article, -7) == 'private');
+      foreach (array('public', 'private', 'author_public', 'author_private') as $post) {
+        $is_author = (substr($post, 0, 6) == 'author');
+        $is_private = (substr($post, -7) == 'private');
         $edit = array(
-          'type' => 'article',
+          'type' => 'post',
           'uid' => $is_author ? $this->authorUser->uid : $this->otherUser->uid,
           'private' => $is_private,
         );
-        // The article names provide the access status of the article and the
-        // access status of the related article (if any).
-        // The naming system ensures that the text 'Article $article' will only
-        // appear in the view if an article with that access type is displayed
-        // in the view. (The text '$article' alone will appear in the titles of
-        // other nodes that reference an article.)
-        $edit['title'] = "Article $article - $reference2";
+        // The post names provide the access status of the post and the
+        // access status of the related post (if any).
+        // The naming system ensures that the text 'Post $post' will only
+        // appear in the view if an post with that access type is displayed
+        // in the view. (The text '$post' alone will appear in the titles of
+        // other nodes that reference an post.)
+        $edit['title'] = "Post $post - $reference2";
         if ($reference2 != 'no_reference') {
-          $edit['related_article'][$langcode][0]['value'] = $this->articles[$reference2]['no_reference'];
+          $edit['related_post'][$langcode][0]['value'] = $this->posts[$reference2]['no_reference'];
         }
         $node = $this->backdropCreateNode($edit);
-        $this->articles[$article][$reference2] = $node->nid;
+        $this->posts[$post][$reference2] = $node->nid;
 
-        $this->assertEqual((int) $is_private, (int) $node->private, 'The private status of the article node was properly set in the node_access_test table.');
+        $this->assertEqual((int) $is_private, (int) $node->private, 'The private status of the post node was properly set in the node_access_test table.');
         if ($reference2 != 'no_reference') {
-          $this->assertEqual((int) $this->articles[$reference2]['no_reference'], (int) $node->related_article[$langcode][0]['value'], 'Proper article attached to article.');
+          $this->assertEqual((int) $this->posts[$reference2]['no_reference'], (int) $node->related_post[$langcode][0]['value'], 'Proper post attached to post.');
         }
       }
     }
 
-    // Add a blank 'no_reference' entry to the article list, so that a page with
+    // Add a blank 'no_reference' entry to the post list, so that a page with
     // no reference gets created.
-    $this->articles['no_reference']['no_reference'] = NULL;
+    $this->posts['no_reference']['no_reference'] = NULL;
 
     $total = 0;
     $count_s_total = $count_s2_total = 0;
@@ -3862,10 +3862,10 @@ class NodeAccessJoinTest extends NodeWebTestCase {
     $count_s_author = $count_s2_author = 0;
     $total_public = $total_author = 0;
 
-    // Create page nodes referencing each article, as well as a page with no
+    // Create page nodes referencing each post, as well as a page with no
     // reference.
-    foreach ($this->articles as $reference => $list) {
-      foreach ($list as $reference2 => $article_nid) {
+    foreach ($this->posts as $reference => $list) {
+      foreach ($list as $reference2 => $post_nid) {
         $title = "Page - $reference";
         if ($reference != 'no_reference') {
           $title .= " - $reference2";
@@ -3875,12 +3875,12 @@ class NodeAccessJoinTest extends NodeWebTestCase {
           'title' => $title,
           'private' => FALSE,
         );
-        if ($article_nid) {
-          $edit['related_article'][$langcode][0]['value'] = $article_nid;
+        if ($post_nid) {
+          $edit['related_post'][$langcode][0]['value'] = $post_nid;
         }
         $node = $this->backdropCreateNode($edit);
-        if ($article_nid) {
-          $this->assertEqual((int) $article_nid, (int) $node->related_article[$langcode][0]['value'], 'Proper article attached to page.');
+        if ($post_nid) {
+          $this->assertEqual((int) $post_nid, (int) $node->related_post[$langcode][0]['value'], 'Proper post attached to page.');
         }
 
         // Calculate totals expected for each user type
@@ -3893,7 +3893,7 @@ class NodeAccessJoinTest extends NodeWebTestCase {
             $count_s2_total++;
           }
         }
-        // Public users only see 'public' and 'author_public' articles.
+        // Public users only see 'public' and 'author_public' posts.
         if (substr($reference, -6) == 'public') {
           $count_s_public++;
           if (substr($reference2, -6) == 'public') {
@@ -3901,7 +3901,7 @@ class NodeAccessJoinTest extends NodeWebTestCase {
           }
         }
         // authorUser sees 'public', 'author_public', and 'author_private'
-        // articles.
+        // posts.
         if (substr($reference, -6) == 'public' || substr($reference, 0, 6) == 'author') {
           $count_s_author++;
           if (substr($reference2, -6) == 'public' || substr($reference2, 0, 6) == 'author') {
@@ -3913,12 +3913,12 @@ class NodeAccessJoinTest extends NodeWebTestCase {
         // represent the totals when joins are handled by adding an is-null
         // check (i.e., if inaccessible references caused the entire row to be
         // be hidden from view, instead of hiding just one cell of the table).
-        // Count of pages where all related articles are accessible by
+        // Count of pages where all related posts are accessible by
         // public users.
         if (substr($reference, -7) != 'private' && substr($reference2, -7) != 'private') {
           $total_public++;
         }
-        // Count of pages where all related articles are accessible by
+        // Count of pages where all related posts are accessible by
         // authorUser.
         if ($reference != 'private' && $reference2 != 'private') {
           $total_author++;
@@ -3928,7 +3928,7 @@ class NodeAccessJoinTest extends NodeWebTestCase {
 
     // Open a webpage listing all the pages, and check the webpage's content for
     // users with three different access levels.
-    // Check the author of the 'author' articles.
+    // Check the author of the 'author' posts.
     $this->backdropLogin($this->authorUser);
     $this->backdropGet('node_access_join_test_page');
     $chk_total = count($this->xpath("//td[@headers='view-title-table-column']"));
@@ -3941,12 +3941,12 @@ class NodeAccessJoinTest extends NodeWebTestCase {
     $this->assertText('Page - public - no_reference', 'Author should see page with one public reference.');
     $this->assertText('Page - public - public', 'Author should see page with two public references.');
     $this->assertText('Page - author_private - no_reference', 'Author should see page with own private reference.');
-    $this->assertText('Article public', 'Author should see articles with access type: public.');
-    $this->assertNoText('Article private', 'Author should not see articles with access type: private.');
-    $this->assertText('Article author_public', 'Author should see articles with access type: author_public.');
-    $this->assertText('Article author_private', 'Author should see articles with access type: author_private.');
+    $this->assertText('Post public', 'Author should see posts with access type: public.');
+    $this->assertNoText('Post private', 'Author should not see posts with access type: private.');
+    $this->assertText('Post author_public', 'Author should see posts with access type: author_public.');
+    $this->assertText('Post author_private', 'Author should see posts with access type: author_private.');
 
-    // Check a regular user (who did not author any articles).
+    // Check a regular user (who did not author any posts).
     $this->regularUser = $this->backdropCreateUser(array('access content'));
     $this->backdropLogin($this->regularUser);
     $this->backdropGet('node_access_join_test_page');
@@ -3959,13 +3959,13 @@ class NodeAccessJoinTest extends NodeWebTestCase {
     $this->assertText('Page - no_reference', 'Public user should see page with no reference.');
     $this->assertText('Page - public - no_reference', 'Public user should see page with one public reference.');
     $this->assertText('Page - public - public', 'Public user should see page with two public references.');
-    $this->assertText('Article public', 'Public user should see articles with access type: public.');
-    $this->assertNoText('Article private', 'Public user should not see articles with access type: private.');
-    $this->assertText('Article author_public', 'Public user should see articles with access type: author_public.');
-    $this->assertNoText('Article author_private', 'Public user should not see articles with access type: author_private.');
+    $this->assertText('Post public', 'Public user should see posts with access type: public.');
+    $this->assertNoText('Post private', 'Public user should not see posts with access type: private.');
+    $this->assertText('Post author_public', 'Public user should see posts with access type: author_public.');
+    $this->assertNoText('Post author_private', 'Public user should not see posts with access type: author_private.');
 
     // Check a user with the special 'node test view' permission, who should
-    // be able to view all pages and articles.
+    // be able to view all pages and posts.
     $this->accessUser = $this->backdropCreateUser(array('access content', 'node test view'));
     $this->backdropLogin($this->accessUser);
     $this->backdropGet('node_access_join_test_page');
@@ -3979,10 +3979,10 @@ class NodeAccessJoinTest extends NodeWebTestCase {
     $this->assertText('Page - public - no_reference', 'Full-access user should see page with one public reference.');
     $this->assertText('Page - public - public', 'Full-access user should see page with two public references.');
     $this->assertText('Page - author_private - no_reference', 'Full-access user should see page with author_private reference.');
-    $this->assertText('Article public', 'Full-access user should see articles with access type: public.');
-    $this->assertText('Article private', 'Full-access user should see articles with access type: private.');
-    $this->assertText('Article author_public', 'Full-access user should see articles with access type: author_public.');
-    $this->assertText('Article author_private', 'Full-access user should see articles with access type: author_private.');
+    $this->assertText('Post public', 'Full-access user should see posts with access type: public.');
+    $this->assertText('Post private', 'Full-access user should see posts with access type: private.');
+    $this->assertText('Post author_public', 'Full-access user should see posts with access type: author_public.');
+    $this->assertText('Post author_private', 'Full-access user should see posts with access type: author_private.');
   }
 }
 
