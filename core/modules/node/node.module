@@ -2249,7 +2249,11 @@ function node_feed($nids = FALSE, $channel = array()) {
       ->fetchCol();
   }
 
-  $item_length = $rss_config->get('rss_viewmode');
+  $display_mode = $rss_config->get('rss_viewmode');
+  if ($display_mode == 'fulltext') {
+    $display_mode = 'full';
+  }
+
   $namespaces = array('xmlns:dc' => 'http://purl.org/dc/elements/1.1/');
 
   // Load all nodes to be rendered.
@@ -2269,14 +2273,14 @@ function node_feed($nids = FALSE, $channel = array()) {
 
     // The node gets built and modules add to or modify $node->rss_elements
     // and $node->rss_namespaces.
-    $build = node_view($node, 'rss');
+    $build = node_view($node, $display_mode);
     unset($build['#theme']);
 
     if (!empty($node->rss_namespaces)) {
       $namespaces = array_merge($namespaces, $node->rss_namespaces);
     }
 
-    if ($item_length != 'title') {
+    if ($display_mode != 'title') {
       // We render node contents and force links to be last.
       $build['links']['#weight'] = 1000;
       $item_text .= backdrop_render($build);
