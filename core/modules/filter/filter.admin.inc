@@ -688,6 +688,8 @@ function filter_admin_format_form_submit($form, &$form_state) {
 
   // Add the submitted form values to the text format, and save it.
   $format = $form_state['format'];
+  // Whether we need this, depends on the tempstore triggered by AJAX or not.
+  $filters_orig = $form_state['format']->filters;
   // Save allowed HTML tags from the hidden field in the event JS modified them.
   $allowed_html = $form_state['values']['allowed_html'];
   unset($form_state['values']['allowed_html']);
@@ -699,6 +701,16 @@ function filter_admin_format_form_submit($form, &$form_state) {
   if ($stored_format = filter_get_format_tempstore($format->format)) {
     foreach ($stored_format->filters as $name => $filter) {
       $format->filters[$name]['settings'] = $filter->settings;
+    }
+  }
+  // We have no tempstore, if none of the extended configure forms has been
+  // opened. So we fall back to the existing filter settings. They haven't been
+  // changed then.
+  else {
+    foreach ($filters_orig as $name => $value) {
+      if (!empty($value->settings) && $name != 'filter_html') {
+        $format->filters[$name]['settings'] = $value->settings;
+      }
     }
   }
   // Set allowed html, parked in a variable previously.
