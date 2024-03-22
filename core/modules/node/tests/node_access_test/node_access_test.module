@@ -90,6 +90,12 @@ function node_access_test_menu() {
     'access arguments' => array('access content'),
     'type' => MENU_SUGGESTED_ITEM,
   );
+  $items['node_access_join_test_page'] = array(
+    'title' => 'Node access join test',
+    'page callback' => 'node_access_join_test_page',
+    'access arguments' => array('access content'),
+    'type' => MENU_SUGGESTED_ITEM,
+  );
   return $items;
 }
 
@@ -162,6 +168,94 @@ function node_access_entity_test_page() {
     else {
       $output .= '<p>No nodes</p>';
     }
+  }
+  catch (Exception $e) {
+    $output = '<p>Exception</p>';
+    $output .= '<p>' . $e->getMessage() . '</p>';
+  }
+
+  return $output;
+}
+
+/**
+ * Page callback for node access join test page.
+ *
+ * This page simulates views join queries for testing.
+ *
+ * Page should say "No nodes" if there are no nodes, and "Yes, # nodes" (with
+ * the number filled in) if there were nodes the user could access. If there
+ * were nodes, a table lists the query results. Also, the database query is
+ * shown, for debugging purposes. And if there is a query exception, the page
+ * says "Exception" and gives the error.
+ *
+ * @see node_access_test_menu()
+ */
+function node_access_join_test_page() {
+  $output = '';
+  try {
+    // Get custom field info
+    $field_name = 'related_article';
+    $field = field_info_field($field_name);
+    $join_table = _field_sql_storage_tablename($field);
+    $join_column = $field_name . '_value';
+
+    // Set up template query.
+    $query = db_select('node', 'n');
+    // Add the tag that triggers node_access processing.
+    $query->addTag('node_access');
+    $query->condition('n.type', 'page');
+    $query->orderBy('n.title');
+
+    // Add primary related article field and its associated node.
+    $query->addJoin('LEFT OUTER', $join_table, 'jf1', 'n.vid = jf1.revision_id');
+    $query->addJoin('LEFT OUTER', 'node', 's1', 'jf1.' . $join_column .' = s1.nid');
+
+    // Add the article's related article field and its associated node.
+    $query->addJoin('LEFT OUTER', $join_table, 'jf2', 's1.vid = jf2.revision_id');
+    $query->addJoin('LEFT OUTER', 'node', 's2', 'jf2.' . $join_column .' = s2.nid');
+
+    $query
+      ->fields('n', array('nid', 'title'))
+      ->fields('s1', array('nid', 'title'))
+      ->fields('s2', array('nid', 'title'));
+
+    $total_count = $query->countQuery()->execute()->fetchField();
+
+    if (!empty($total_count)) {
+      $output .= '<p>Yes, ' . $total_count . ' nodes</p>';
+
+      // Generate table listing the results. The tests using this table rely on
+      // xpath counting to get the number of rows and number of non-empty cells.
+      // Those xpath counts are controlled using "headers" attributes that are
+      // automatically inserted by views in Drupal 10. This table adds the same
+      // headers attributes so the Drupal 10 xpath requests can be used unaltered.
+      $output .= '<table>';
+      $output .= '<tr><th>Title</th><th>Article</th><th>Article 2</th></tr>';
+      $result = $query->execute();
+      foreach ($result as $row) {
+        $output .= '<tr>';
+        $output .= '<td headers="view-title-table-column"><a>'.$row->title.'</a></td>';
+        $output .= '<td headers="view-title-1-table-column">';
+        if (!empty($row->s1_title)) {
+          // Non-empty nodes are wrapped in <a> solely for sake of xpath counting --
+          // in Drupal 10 these are links (because href is set), but for the purpose
+          // of the tests, href is unnecessary.
+          $output .= '<a>'.$row->s1_title.'</a>';
+        }
+        $output .= '</td><td headers="view-title-2-table-column">';
+        if (!empty($row->s2_title)) {
+          $output .= '<a>'.$row->s2_title.'</a>';
+        }
+        $output .= '</td></tr>';
+      }
+      $output .= '</table>';
+    }
+    else {
+      $output .= '<p>No nodes</p>';
+    }
+
+    $output .= '<p>' . ((string) $query ) . '</p>';
+    $output .= '<p>' . serialize($query->getArguments()) . '</p>';
   }
   catch (Exception $e) {
     $output = '<p>Exception</p>';

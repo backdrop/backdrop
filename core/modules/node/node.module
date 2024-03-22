@@ -800,7 +800,7 @@ function node_type_set_defaults($info = array()) {
 
   // Populate module-provided defaults.
   $types = array(
-    '_new' => $new_type
+    '_new' => $new_type,
   );
   module_load_include('inc', 'node', 'node.types');
   foreach (module_implements('node_type_load') as $module) {
@@ -1023,7 +1023,6 @@ function node_submit($node) {
   if (!empty($node->revision)) {
     $node->revision_uid = $user->uid;
   }
-
 
   // Convert the date into a timestamp.
   if (isset($node->date) && is_array($node->date)) {
@@ -1333,7 +1332,7 @@ function node_search_admin() {
     '#title' => t('Content settings'),
     '#states' => array(
       'visible' => array(
-        '[name*="search_active_modules[node]"]' => array('checked' => TRUE)
+        '[name*="search_active_modules[node]"]' => array('checked' => TRUE),
       ),
     ),
     '#element_validate' => array('node_search_admin_validate'),
@@ -1390,7 +1389,7 @@ function node_search_admin_validate($element, &$form_state) {
  * Implements hook_search_execute().
  */
 function node_search_execute($keys = NULL, $conditions = NULL) {
-  // Build matching conditions
+  // Build matching conditions.
   $query = db_select('search_index', 'i', array('target' => 'replica'))->extend('SearchQuery')->extend('PagerDefault');
   $query->join('node', 'n', 'n.nid = i.sid');
   $query
@@ -1454,7 +1453,7 @@ function node_ranking() {
   $ranking = array(
     'relevance' => array(
       'title' => t('Keyword relevance'),
-      // Average relevance values hover around 0.15
+      // Average relevance values hover around 0.15.
       'score' => 'i.relevance',
     ),
     'sticky' => array(
@@ -1473,7 +1472,7 @@ function node_ranking() {
   if ($node_cron_last = state_get('node_cron_last', 0)) {
     $ranking['recent'] = array(
       'title' => t('Recently posted'),
-      // Exponential decay with half-life of 6 months, starting at last indexed node
+      // Exponential decay with half-life of 6 months, starting at last indexed node.
       'score' => 'POW(2.0, (GREATEST(n.created, n.changed) - :node_cron_last) * 6.43e-8)',
       'arguments' => array(':node_cron_last' => $node_cron_last),
     );
@@ -2264,7 +2263,7 @@ function node_feed($nids = FALSE, $channel = array()) {
     $node->rss_elements = array(
       array('key' => 'pubDate', 'value' => gmdate('r', $node->created)),
       array('key' => 'dc:creator', 'value' => user_format_name($account)),
-      array('key' => 'guid', 'value' => $node->nid . ' at ' . $base_url, 'attributes' => array('isPermaLink' => 'false'))
+      array('key' => 'guid', 'value' => $node->nid . ' at ' . $base_url, 'attributes' => array('isPermaLink' => 'false')),
     );
 
     // The node gets built and modules add to or modify $node->rss_elements
@@ -2290,7 +2289,7 @@ function node_feed($nids = FALSE, $channel = array()) {
     'title'       => config_get_translated('system.core', 'site_name'),
     'link'        => $base_url,
     'description' => $rss_config->get('rss_description'),
-    'language'    => $language_content->langcode
+    'language'    => $language_content->langcode,
   );
   $channel_extras = array_diff_key($channel, $channel_defaults);
   $channel = array_merge($channel_defaults, $channel);
@@ -2353,7 +2352,7 @@ function node_view_multiple($nodes, $view_mode = 'teaser', $weight = 0, $langcod
  * @see node_menu()
  */
 function node_page_default() {
-  // Check for custom <front> page
+  // Check for custom <front> page.
   $front = config_get('system.core', 'site_frontpage');
   if ($front != 'node') {
     backdrop_goto('<front>', array(), '301');
@@ -2484,13 +2483,13 @@ function _node_index_node(Node $node) {
 
   $text = '<h1>' . check_plain($node->title) . '</h1>' . $node->rendered;
 
-  // Fetch extra data normally not visible
+  // Fetch extra data normally not visible.
   $extra = module_invoke_all('node_update_index', $node);
   foreach ($extra as $t) {
     $text .= $t;
   }
 
-  // Update index
+  // Update index.
   search_index($node->nid, 'node', $text);
 }
 
@@ -3038,7 +3037,7 @@ function _node_query_node_access_alter($query, $type) {
     $query->range(0, 0);
   }
 
-  $tables = $query->getTables();
+  $tables = &$query->getTables();
   $base_table = $query->getMetaData('base_table');
   // If no base table is specified explicitly, search for one.
   if (!$base_table) {
@@ -3089,7 +3088,6 @@ function _node_query_node_access_alter($query, $type) {
   // Find all instances of the base table being joined -- could appear
   // more than once in the query, and could be aliased. Join each one to
   // the node_access table.
-
   $grants = node_access_grants($op, $account);
   if ($type == 'entity') {
     // The original query looked something like:
@@ -3145,13 +3143,26 @@ function _node_query_node_access_alter($query, $type) {
       }
       $subquery->where("$node_alias.$field = na.nid");
 
-      // For an entity query, attach the subquery to entity conditions.
+      // For an entity query, attach the subquery to the entity conditions.
       if (isset($node_conditions)) {
         $node_conditions->exists($subquery);
       }
       // Otherwise attach it to the node query itself.
+      elseif (empty($tableinfo['join type'])) {
+         $query->exists($subquery);
+      }
       else {
-        $query->exists($subquery);
+        // If it's a join, add the node access check to the join condition.
+        $join_cond = db_and()->exists($subquery);
+        // Add the existing join conditions into the Condition object.
+        if ($tables[$nalias]['condition'] instanceof QueryConditionInterface) {
+          $join_cond->condition($tables[$nalias]['condition']);
+        }
+        else {
+          $join_cond->where($tables[$nalias]['condition'], $tables[$nalias]['arguments']);
+          $tables[$nalias]['arguments'] = array();
+        }
+        $tables[$nalias]['condition'] = $join_cond;
       }
     }
   }
@@ -3353,12 +3364,12 @@ function node_access_rebuild($batch_mode = FALSE) {
         'operations' => array(
           array('_node_access_rebuild_batch_operation', array()),
         ),
-        'finished' => '_node_access_rebuild_batch_finished'
+        'finished' => '_node_access_rebuild_batch_finished',
       );
       batch_set($batch);
     }
     else {
-      // Try to allocate enough time to rebuild node grants
+      // Try to allocate enough time to rebuild node grants.
       backdrop_set_time_limit(240);
 
       // Rebuild newest nodes first so that recent content becomes available quickly.
@@ -3515,7 +3526,7 @@ function node_action_info() {
       'type' => 'node',
       'label' => t('Publish content'),
       'callback' => 'node_publish_action',
-      'file' => 'node.actions.inc'
+      'file' => 'node.actions.inc',
     ),
     'node_unpublish_action' => array(
       'type' => 'node',
@@ -3596,7 +3607,7 @@ function node_requirements($phase) {
       'title' => t('Node Access Permissions'),
       'value' => $value,
       'description' => $description,
-      'severity' => $severity
+      'severity' => $severity,
     );
   }
   return $requirements;
