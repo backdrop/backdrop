@@ -4582,9 +4582,6 @@ function system_settings_form($form) {
 /**
  * Form submission handler for system_settings_form().
  *
- * If you want node type configure style handling of your checkboxes,
- * add an array_filter value to your form.
- *
  * @since 1.6.0 Restored and made compatible with configuration management.
  */
 function system_settings_form_submit($form, &$form_state) {
@@ -4603,6 +4600,8 @@ function system_settings_form_submit($form, &$form_state) {
       return;
     }
 
+    // For compatibility with Drupal 7, if $form['array_filter'] is set,
+    // pass the form state values to array_filter().
     foreach ($form_state['values'] as $key => $value) {
       if (is_array($value) && isset($form_state['values']['array_filter'])) {
         $value = array_keys(array_filter($value));
