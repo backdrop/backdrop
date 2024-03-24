@@ -25,12 +25,13 @@
 .layout--flexible .layout-editor-block-title {
   padding: 0.4em 1em;
   margin-bottom: 10px;
+  margin-top: 8px;
 }
 .layout--flexible .layout-editor-block-title .text {
-  font-weight: normal;
+  font-weight: bold;
 }
 .layout--flexible .layout-editor-block-content p {
-  color: #575357;
+  color: black;
 }
 
 .layout-flexible-region-top .buttons {
@@ -39,14 +40,11 @@
 
 .layout-flexible-editor .flexible-row {
   padding: 0;
-  border: 1.25px dashed #0074bd;
+  border: 1.25px solid #CCC;
   margin-bottom: 15px;
   border-radius: 4px;
-  box-shadow: 3px 3px 0 0 #c6c6c6;
-}
-.layout-flexible-editor .flexible-row:hover {
-  background-color: #ffffff;
-  cursor: move;
+  box-shadow: 2px 2px 0 0 #d0d0d0;
+  background-color: #f7f7f7;
 }
 
 .layout-flexible-add-row {
@@ -66,4 +64,11 @@
   color: #fff;
   background-clip: content-box;
   text-align: center;
+}
+
+.l-flexible-row .layout-editor-region {
+  border: 1px solid white;
+}
+.l-content #layout-flexible-content {
+  background-color: white;
 }
