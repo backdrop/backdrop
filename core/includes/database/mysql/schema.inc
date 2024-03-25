@@ -126,7 +126,7 @@ class DatabaseSchema_mysql extends DatabaseSchema {
    * Create an SQL string for a field to be used in table creation or alteration.
    *
    * Before passing a field out of a schema definition into this function it has
-   * to be processed by _db_process_field().
+   * to be processed by DatabaseSchema_mysql::processField().
    *
    * @param $name
    *   Name of the field.

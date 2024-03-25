@@ -543,6 +543,12 @@ function ckeditor5_ckeditor5_plugins() {
     ),
   );
 
+  // Paragraph is always enabled in Backdrop to ensure text can be added in case
+  // the Headings are not enabled.
+  $plugins['paragraph.Paragraph'] = array(
+    'enabled_callback' => TRUE,
+  );
+
   // @see https://ckeditor.com/docs/ckeditor5/latest/features/headings.html
   $plugins['heading.Heading'] = array(
     'buttons' => array(
@@ -607,6 +613,7 @@ function ckeditor5_ckeditor5_plugins() {
           'image.ImageInsertUI',
           'image.ImageUpload',
           'image.ImageResize',
+          'image.ImageCaptionUtils',
         ),
         'required_html' => array(
           '<img src alt height width data-file-id>',
@@ -741,7 +748,13 @@ function ckeditor5_ckeditor5_plugins() {
         // @todo: The id attribute is being flagged as disallowed by core's
         // blocking of on* attributes. It should be included here.
         'required_html' => array('<a href target class title rel data-file-id>'),
-        'plugin_dependencies' => array('link.Link', 'link.LinkUI'),
+        // Include a dependency on ImageUtils to help detect linked images, even
+        // if the backdropImage button is not enabled.
+        'plugin_dependencies' => array(
+          'link.Link',
+          'link.LinkUI',
+          'image.ImageUtils',
+        ),
       ),
     ),
     'library' => array('ckeditor5', 'backdrop.ckeditor5.backdrop-link'),
