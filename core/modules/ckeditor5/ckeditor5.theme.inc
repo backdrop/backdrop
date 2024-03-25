@@ -31,7 +31,7 @@ function template_preprocess_ckeditor5_settings_toolbar(&$variables) {
 
   $active_buttons = array();
   $settings = $format->editor_settings;
-  foreach ($settings['cketoolbar'] as $button_name) {
+  foreach ($settings['toolbar'] as $button_name) {
     if (isset($buttons[$button_name])) {
       $active_buttons[] = $buttons[$button_name];
       if (empty($buttons[$button_name]['multiple'])) {

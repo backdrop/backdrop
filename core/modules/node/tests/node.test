@@ -2567,7 +2567,13 @@ class NodeTitleTestCase extends BackdropWebTestCase {
     theme_enable(array('stark'));
     config_set('system.core', 'theme_default', 'stark');
 
-    $this->admin_user = $this->backdropCreateUser(array('administer nodes', 'create post content', 'create page content'));
+    $permissions = array(
+      'administer nodes',
+      'create post content',
+      'create page content',
+      'view hidden paths',
+    );
+    $this->admin_user = $this->backdropCreateUser($permissions);
     $this->backdropLogin($this->admin_user);
   }
 
@@ -2599,6 +2605,34 @@ class NodeTitleTestCase extends BackdropWebTestCase {
     // Test node title is clickable on teaser list (/node).
     $this->backdropGet('node');
     $this->clickLink($node->title);
+
+    // Hide path display for Post node type.
+    $config = config('node.type.post');
+    $config->set('settings.hidden_path', '1');
+    $config->save();
+    $this->assertEqual($config->get('settings.hidden_path'), '1', 'The POST content type has hidden_path enabled.');
+
+    // Create "Post" content with title.
+    $settings = array(
+      'type' => 'post',
+      'title' => $this->randomName(8),
+      'promote' => 1,
+    );
+    $node = $this->backdropCreateNode($settings);
+    backdrop_flush_all_caches();
+
+    // Test post title is clickable for admin account on teaser list (/node).
+    $this->backdropGet('');
+    $this->assertLink($node->title);
+    $this->clickLink($node->title);
+    $this->assertResponse(200, 'Received 200 response from post with hidden_path.');
+    // Test node title is NOT clickable for standard account.
+    $this->backdropLogout();
+    backdrop_flush_all_caches();
+    $this->backdropGet('');
+    $this->assertNoLink($node->title);
+    // Also ensure that there is no "read more" link.
+    $this->assertNoLinkByHref(backdrop_get_path_alias('node/' . $node->nid));
   }
 }
 

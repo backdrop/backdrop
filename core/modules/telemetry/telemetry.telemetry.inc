@@ -38,6 +38,11 @@ function telemetry_telemetry_info() {
     'description' => t('Is this Backdrop installation set up as a multisite?'),
     'project' => 'backdrop',
   );
+  $info['ckeditor_module_version'] = array(
+    'label' => t('CKEditor Module Version'),
+    'description' => t('The CKEditor module version that your site uses (either 4, 5, both, or neither).'),
+    'project' => 'backdrop',
+  );
   return $info;
 }
 
@@ -69,5 +74,20 @@ function telemetry_telemetry_data($key) {
       return backdrop_get_profile();
     case 'multisite':
       return conf_path() == '.' ? 'No' : 'Yes';
+    case 'ckeditor_module_version':
+      $ckeditor4 = module_exists('ckeditor');
+      $ckeditor5 = module_exists('ckeditor5');
+      if ($ckeditor4 && $ckeditor5) {
+        return 'Both CKEditor 4 and 5';
+      }
+      elseif ($ckeditor4) {
+        return 'CKEditor 4';
+      }
+      elseif ($ckeditor5) {
+        return 'CKEditor 5';
+      }
+      else {
+        return 'Neither';
+      }
   }
 }

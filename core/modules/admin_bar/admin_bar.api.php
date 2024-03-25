@@ -75,8 +75,8 @@ function hook_admin_bar_output_build(&$content) {
     $content['menu']['menu']['myitem'] = array(
       '#title' => t('My item'),
       // #attributes are used for list items (LI).
-      '#attributes' => array('class' => array('mymodule-myitem')),
-      '#href' => 'mymodule/path',
+      '#attributes' => array('class' => array('my_module-myitem')),
+      '#href' => 'my_module/path',
       // #options are passed to l().
       '#options' => array(
         'query' => backdrop_get_destination(),

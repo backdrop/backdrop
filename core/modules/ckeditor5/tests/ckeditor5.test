@@ -76,7 +76,7 @@ class CKEditor5TestCase extends BackdropWebTestCase {
     );
 
     $this->backdropPost(NULL, array(
-      'editor_settings[cketoolbar]' => json_encode($toolbar),
+      'editor_settings[toolbar]' => json_encode($toolbar),
       'filters[filter_autop][status]' => TRUE,
       'filters[filter_image_align][status]' => TRUE,
       'filters[filter_image_caption][status]' => TRUE,
@@ -95,6 +95,7 @@ class CKEditor5TestCase extends BackdropWebTestCase {
       'image.ImageInsertUI',
       'image.ImageUpload',
       'image.ImageResize',
+      'image.ImageCaptionUtils',
       'list.DocumentList',
       'list.DocumentListProperties',
       'alignment.Alignment',
@@ -105,6 +106,7 @@ class CKEditor5TestCase extends BackdropWebTestCase {
       'image.ImageCaption',
       'essentials.Essentials',
       'autoformat.Autoformat',
+      'paragraph.Paragraph',
       'htmlSupport.GeneralHtmlSupport',
       'backdropHtmlEngine.BackdropHtmlEngine',
       'blockQuote.BlockQuote',
@@ -115,7 +117,7 @@ class CKEditor5TestCase extends BackdropWebTestCase {
     // Turn on the table plugin and check that the JavaScript is adjusted.
     $toolbar = array('insertTable');
     $this->backdropPost('admin/config/content/formats/ckeditor5', array(
-      'editor_settings[cketoolbar]' => json_encode($toolbar),
+      'editor_settings[toolbar]' => json_encode($toolbar),
       'allowed_html' => '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <h3> <h4> <h5> <p> <img> <figure> <figcaption> <table> <thead> <tbody> <tr> <td> <th>',
     ), t('Save configuration'));
     $this->backdropGet('node/add/article');
@@ -132,6 +134,7 @@ class CKEditor5TestCase extends BackdropWebTestCase {
       'image.ImageCaption',
       'essentials.Essentials',
       'autoformat.Autoformat',
+      'paragraph.Paragraph',
       'htmlSupport.GeneralHtmlSupport',
       'backdropBasicStyles.BackdropBasicStyles',
       'backdropHtmlEngine.BackdropHtmlEngine',

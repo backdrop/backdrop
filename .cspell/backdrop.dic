@@ -98,6 +98,7 @@ drush
 dynsrc
 edik
 editbackdropimage
+editunblock
 elementtype
 enddate
 endskip
@@ -109,6 +110,7 @@ evid
 expandtab
 exportables
 extname
+externa
 EXTR
 falias
 farb
@@ -155,6 +157,7 @@ geary
 Giggabyte
 gname
 Gnomovision
+gotit
 grippie
 groupinfo
 groupnames
@@ -223,6 +226,7 @@ localzone
 LXSS
 manytoone
 marzo
+master
 maxadjustment
 maxdate
 menutoggle
@@ -267,6 +271,7 @@ mytype
 myusername
 myverylongurlexample
 myverylongurl
+nalias
 natu
 NCHUNKS
 nclosing
@@ -309,6 +314,7 @@ oldtext
 oneof
 onmediaerror
 opensans
+Optionchecker
 otherjob
 othername
 otherval
@@ -332,6 +338,7 @@ primarytabstext
 PRNG
 propertyname
 Punycode
+queryor
 quicktime
 Quieligo
 ratis
@@ -370,6 +377,7 @@ simpletest
 simpletests
 sioc
 sito
+slave
 skipdots
 smartmenus
 softtabstop
@@ -403,6 +411,7 @@ tagwords
 tarname
 targetdir
 tascript
+tempstore
 tést
 Teletubbies
 tempstore

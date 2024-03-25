@@ -11,8 +11,14 @@ function ckeditor5_requirements($phase) {
   $requirements = array();
   $t = get_t();
 
-  // Check if CKEditor is not enabled on any formats.
   if ($phase == 'runtime') {
+    $requirements['ckeditor5_version'] = array(
+      'title' => $t('CKEditor 5'),
+      'value' => $t('Version: !version', array('!version' => CKEDITOR5_VERSION)),
+      'severity' => REQUIREMENT_INFO,
+    );
+
+    // Check if CKEditor is not enabled on any formats.
     $ckeditor5_found = FALSE;
     $formats = filter_formats();
     foreach ($formats as $format) {
@@ -23,11 +29,46 @@ function ckeditor5_requirements($phase) {
     if (!$ckeditor5_found) {
       $requirements['ckeditor5_not_enabled'] = array(
         'title' => $t('CKEditor 5'),
-        'value' => $t('CKEditor 5 is installed but not enabled on any formats. Visit the <a href="!url">text editors and formats configuration</a> to enable CKEditor on one or more formats.', array('!url' => url('admin/config/content/formats'))),
+        'value' => $t('CKEditor 5 is installed but not added to any text formats. Visit the <a href="!url">text editors and formats configuration</a> to add CKEditor 5 to one or more formats.', array(
+          '!url' => url('admin/config/content/formats'),
+        )),
         'severity' => REQUIREMENT_WARNING,
       );
     }
   }
 
   return $requirements;
+}
+
+/**
+ * Implements hook_enable().
+ */
+function ckeditor5_enable() {
+  if (module_exists('ckeditor')) {
+    backdrop_set_message(t('To upgrade text formats from CKEditor 4 to CKEditor 5, visit the <a href="!url">text editors and formats configuration</a> and configure each text format that uses CKEditor 4.', array(
+      '!url' => url('admin/config/content/formats'),
+    )), 'info');
+  }
+}
+
+/**
+ * Updates the editor settings key from "cketoolbar" to just "toolbar".
+ */
+function ckeditor5_update_1000() {
+  // cspell:ignore cketoolbar
+  $config_names = config_get_names_with_prefix('filter.format');
+  foreach ($config_names as $config_name) {
+    $config = config($config_name);
+    $data = $config->getData();
+    if (isset($data['editor']) && $data['editor'] === 'ckeditor5' && isset($data['editor_settings']['cketoolbar'])) {
+      $editor_settings = $data['editor_settings'];
+      $toolbar = $editor_settings['cketoolbar'];
+      unset($editor_settings['cketoolbar']);
+      $data['editor_settings'] = array_merge(array(
+        'toolbar' => $toolbar,
+      ), $editor_settings);
+      $config->setData($data);
+      $config->save();
+    }
+  }
 }

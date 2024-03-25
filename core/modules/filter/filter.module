@@ -1950,7 +1950,7 @@ function filter_filter_info() {
     'settings callback' => '_filter_html_settings',
     'allowed html callback' => '_filter_html_allowed_html',
     'default settings' => array(
-      'allowed_html' => '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <h3> <h4> <h5> <p> <img> <figure> <figcaption>',
+      'allowed_html' => '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <h3> <h4> <h5> <p> <br> <img> <figure> <figcaption>',
       'filter_html_help' => 1,
       'filter_html_nofollow' => 0,
     ),
@@ -2502,6 +2502,7 @@ function _filter_autop($text) {
       }
     }
     elseif (!$ignore) {
+      $chunk = preg_replace('|<br>|', '<br />', $chunk); // Normalize break tags for consistency in matching
       $chunk = preg_replace('|\n*$|', '', $chunk) . "\n\n"; // just to make things a little easier, pad the end
       $chunk = preg_replace('|<br />\s*<br />|', "\n\n", $chunk);
       $chunk = preg_replace('!(<' . $block . '[^>]*>)!', "\n$1", $chunk); // Space things out a little
@@ -2517,7 +2518,7 @@ function _filter_autop($text) {
       $chunk = preg_replace('!(</?' . $block . '[^>]*>)\s*</p>!', "$1", $chunk);
       $chunk = preg_replace('|(?<!<br />)\s*\n|', "<br />\n", $chunk); // make line breaks
       $chunk = preg_replace('!(</?' . $block . '[^>]*>)\s*<br />!', "$1", $chunk);
-      $chunk = preg_replace('!<br />(\s*</?(?:p|li|div|th|pre|td|ul|ol)>)!', '$1', $chunk);
+      $chunk = preg_replace('!<br />(\s*</?(?:p|li|div|th|pre|td|ul|ol|h[1-6])>)!', '$1', $chunk); // Remove added break tags before closing block tags
       $chunk = preg_replace('/&([^#])(?![A-Za-z0-9]{1,8};)/', '&amp;$1', $chunk);
     }
     $output .= $chunk;
@@ -2668,6 +2669,11 @@ function _filter_image_align($text) {
       $parent = $node->parentNode;
       if ($parent && $parent->nodeName === 'figure') {
         $target = $parent;
+      }
+      // Consider more deeply nested structures. A link wrapped around a
+      // captioned image.
+      elseif ($parent && $parent->nodeName === 'a' && $parent->parentNode && $parent->parentNode->nodeName === 'figure') {
+        $target = $parent->parentNode;
       }
       else {
         $target = $node;
