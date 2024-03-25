@@ -22,15 +22,7 @@ class views_handler_filter_node_access extends views_handler_filter {
   function query() {
     if (!user_access('administer nodes') && module_implements('node_grants')) {
       $table = $this->ensure_my_table();
-      $grants = db_or();
-      foreach (node_access_grants('view') as $realm => $gids) {
-        foreach ($gids as $gid) {
-          $grants->condition(db_and()
-            ->condition($table . '.gid', $gid)
-            ->condition($table . '.realm', $realm)
-          );
-        }
-      }
+      $grants = node_add_node_grants_to_query(node_access_grants('view'));
 
       $this->query->add_where('AND', $grants);
       $this->query->add_where('AND', $table . '.grant_view', 1, '>=');
