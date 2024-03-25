@@ -233,13 +233,15 @@ class MenuTestCase extends BackdropWebTestCase {
 
     // Add 102 menu links with increasing weights.
     $items = array();
-    for ($i = -51; $i <= 51; $i++) {
+    for ($i = -50; $i <= 52; $i++) {
       $items[$i] = $this->addMenuLink(0, 'node/' . $node1->nid, $menu_name, TRUE, strval($i));
     }
     // Make sure that the first-added and last-added items' weights don't get
-    // changed because of the old hardcoded delta = 50.
-    $this->assertMenuLink($items[-51]['mlid'], array('weight' => '-51'));
-    $this->assertMenuLink($items[51]['mlid'], array('weight' => '51'));
+    // changed because of the old hardcoded delta = 50. Note, though, that the
+    // initial delta value for small menus (like main-menu) is 50, per
+    // _menu_get_menu_weight_delta().
+    $this->assertMenuLink($items[-50]['mlid'], array('weight' => '-50'));
+    $this->assertMenuLink($items[52]['mlid'], array('weight' => '52'));
 
     // Verify menu links.
     $this->verifyMenuLink($item1, $node1);
@@ -349,6 +351,7 @@ class MenuTestCase extends BackdropWebTestCase {
       'description' => '',
       'enabled' => TRUE, // Use this to disable the menu and test.
       'expanded' => $expanded, // Setting this to true should test whether it works when we do the std_user tests.
+      'parent_menu' => $menu_name,
       'parent' =>  $menu_name . ':' . $plid,
       'weight' => $weight,
     );
@@ -800,7 +803,7 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     // Assert that it is not possible to set the parent of the first node to itself or the second node.
     $this->assertNoOption('edit-menu-parent', 'main-menu:'. $item['mlid']);
     $this->assertNoOption('edit-menu-parent', 'main-menu:'. $child_item['mlid']);
-    // Assert that unallowed Management menu is not available in options.
+    // Assert that disallowed Management menu is not available in options.
     $this->assertNoOption('edit-menu-parent', 'management:0');
   }
 }
