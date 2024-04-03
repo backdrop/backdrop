@@ -278,7 +278,7 @@ function layout_entity_admin_add_form_submit($form, &$form_state) {
     }
 
     $fields = field_info_instances($entity_type, $bundle_type);
-    $template_info = layout_get_layout_template_info('geary');
+
     $content_region = '';
     if (isset($template_info['regions']['content'])) {
       $content_region = 'content';
