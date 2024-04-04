@@ -50,7 +50,7 @@ function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg
     }
 
     // Create a link to the settings page.
-    $info = $layout_template_info[$layout->layout_template];
+    $info = layout_get_layout_template_info($layout->layout_template);
     $template = l($info['title'], 'admin/structure/layouts/manage/' . $layout->name . '/configure');
 
     $row = array();
@@ -89,17 +89,19 @@ function layout_get_entity_layouts($entity_type, $bundle_name = 'card') {
   $all_layouts = layout_load_all();
   $matched_layouts = array();
   foreach ($all_layouts as $layout) {
-    $path_contexts = layout_context_required_by_path($layout->getPath());
-    foreach ($path_contexts as $path_context) {
-      if (is_a($path_context, 'EntityLayoutContext') && $path_context->isA($entity_type)) {
-        if (empty($layout->conditions)) {
-          $matched_layouts[] = $layout;
-        }
-        else {
-          foreach ($layout->conditions as $condition) {
-            if (is_a($condition, 'EntityBundleLayoutAccess') && in_array($bundle_name, $condition->settings['bundles'])) {
-              $matched_layouts[] = $layout;
-              break;
+    if ($path = $layout->getPath()) {
+      $path_contexts = layout_context_required_by_path($path);
+      foreach ($path_contexts as $path_context) {
+        if (is_a($path_context, 'EntityLayoutContext') && $path_context->isA($entity_type)) {
+          if (empty($layout->conditions)) {
+            $matched_layouts[] = $layout;
+          }
+          else {
+            foreach ($layout->conditions as $condition) {
+              if (is_a($condition, 'EntityBundleLayoutAccess') && in_array($bundle_name, $condition->settings['bundles'])) {
+                $matched_layouts[] = $layout;
+                break;
+              }
             }
           }
         }
@@ -197,9 +199,6 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => empty($layout->is_new) ? t('Save layout') : t('Create layout'),
-    '#validate' => array(
-      'layout_settings_form_validate',
-    ),
     '#submit' => array(
       'layout_settings_form_update_layout',
       'layout_entity_admin_add_form_submit',
@@ -284,7 +283,8 @@ function layout_entity_admin_add_form_submit($form, &$form_state) {
       $content_region = 'content';
     }
     else {
-      $content_region = end(array_keys($template_info['regions']));
+      $template_regions = array_keys($template_info['regions']);
+      $content_region = end($template_regions);
     }
 
     foreach ($fields as $field) {
