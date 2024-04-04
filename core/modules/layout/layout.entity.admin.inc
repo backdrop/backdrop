@@ -34,6 +34,7 @@ function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg
     array('data' => t('Operations'), 'class' => array('layout-operations')),
   );
 
+  $rows = array();
   foreach ($layouts as $layout) {
     $operations = array(
       '#type' => 'dropbutton',
