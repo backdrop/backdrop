@@ -297,6 +297,16 @@ function layout_entity_admin_add_form_submit($form, &$form_state) {
       form_execute_handlers('validate', $build, $build_state);
       form_execute_handlers('submit', $build, $build_state);
     }
+    $main_content_uuid = '';
+    foreach ($layout->content as $uuid => $block) {
+      if ($block->module === 'system' && $block->delta === 'main') {
+        $main_content_uuid = $uuid;
+        break;
+      }
+    }
+    if ($main_content_uuid) {
+      $layout->removeBlock($main_content_uuid);
+    }
 
   }
 
