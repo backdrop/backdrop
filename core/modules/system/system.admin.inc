@@ -31,6 +31,14 @@ function system_admin_config_page() {
         $item['description'] = $item['localized_options']['attributes']['title'];
         unset($item['localized_options']['attributes']['title']);
       }
+      if (!empty($item['localized_options']['icon'])) {
+        $item['icon'] = $item['localized_options']['icon'];
+        unset($item['localized_options']['icon']);
+      }
+      else {
+        // @todo: Handle RTL.
+        $item['icon'] = 'arrow-caret-right';
+      }
       $block = $item;
       $block['content'] = '';
       $block['content'] .= theme('admin_block_content', array('content' => system_admin_menu_block($item)));

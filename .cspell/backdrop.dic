@@ -324,6 +324,7 @@ pagenum
 pagerpieces
 phptemplate
 phpwiki
+plid
 plids
 pneum
 Ponedjeljak
@@ -342,6 +343,9 @@ queryor
 quicktime
 Quieligo
 ratis
+rawurldecode
+rawurlencode
+rawurlencoded
 readwrite
 realelement
 refclass
@@ -454,6 +458,7 @@ unmunged
 unmunging
 unnested
 unpackage
+unrendered
 uploadimage
 uploadwidget
 USERAGENT
@@ -467,6 +472,7 @@ VERIFYHOST
 VERIFYPEER
 verygreatbackdropmodule
 VIEWNAME
+viewmode
 watchdog
 WCAG
 wday
