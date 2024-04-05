@@ -184,6 +184,14 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle
     '#wrapper_attributes' => array('class' => array('clearfix', 'layout-options')),
     '#required' => TRUE,
   );
+  $form['content_area'] = array(
+    '#title' => t('"Main content" block'),
+    '#type' => 'checkboxes',
+    '#default_value' => 1,
+    '#options' => array(
+      'field_blocks' => t('Replace the "Main content" block with individual field blocks.'),
+    ),
+  );
 
   // Get the list of layout template options. The list needs to be rebuilt (see
   // https://github.com/backdrop/backdrop-issues/issues/984)
@@ -269,44 +277,37 @@ function layout_entity_admin_add_form_submit($form, &$form_state) {
       }
     }
 
-    $content_region = '';
-    if (isset($template_info['regions']['content'])) {
-      $content_region = 'content';
-    }
-    else {
-      $content_region = end(array_keys($template_info['regions']));
-    }
-
-    $fields = field_info_instances($entity_type, $bundle_type);
-
-    $content_region = '';
-    if (isset($template_info['regions']['content'])) {
-      $content_region = 'content';
-    }
-    else {
-      $template_regions = array_keys($template_info['regions']);
-      $content_region = end($template_regions);
-    }
-
-    foreach ($fields as $field) {
-      $key = 'field:field_block:' . $field['entity_type'] . '-' . $field['field_name'];
-      $field_block = layout_create_handler('block', $key);
-      $build_state = array(
-        'build_info' => array('args' => array($layout, $field_block, 'standard', $content_region)),
-      );
-      $build = backdrop_build_form('layout_block_configure_form', $build_state);
-      form_execute_handlers('validate', $build, $build_state);
-      form_execute_handlers('submit', $build, $build_state);
-    }
-    $main_content_uuid = '';
-    foreach ($layout->content as $uuid => $block) {
-      if ($block->module === 'system' && $block->delta === 'main') {
-        $main_content_uuid = $uuid;
-        break;
+    if ($form_state['values']['content_area']['field_blocks']) {
+      $content_region = '';
+      if (isset($template_info['regions']['content'])) {
+        $content_region = 'content';
       }
-    }
-    if ($main_content_uuid) {
-      $layout->removeBlock($main_content_uuid);
+      else {
+        $template_regions = array_keys($template_info['regions']);
+        $content_region = end($template_regions);
+      }
+      $fields = field_info_instances($entity_type, $bundle_type);
+
+      foreach ($fields as $field) {
+        $key = 'field:field_block:' . $field['entity_type'] . '-' . $field['field_name'];
+        $field_block = layout_create_handler('block', $key);
+        $build_state = array(
+          'build_info' => array('args' => array($layout, $field_block, 'standard', $content_region)),
+        );
+        $build = backdrop_build_form('layout_block_configure_form', $build_state);
+        form_execute_handlers('validate', $build, $build_state);
+        form_execute_handlers('submit', $build, $build_state);
+      }
+      $main_content_uuid = '';
+      foreach ($layout->content as $uuid => $block) {
+        if ($block->module === 'system' && $block->delta === 'main') {
+          $main_content_uuid = $uuid;
+          break;
+        }
+      }
+      if ($main_content_uuid) {
+        $layout->removeBlock($main_content_uuid);
+      }
     }
 
   }
