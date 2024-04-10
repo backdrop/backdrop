@@ -58,6 +58,8 @@
  *  to throw new Exception($p_message).
  */
 
+// phpcs:ignoreFile
+
 // Backdrop removal require_once 'PEAR.php'.
 
 // Backdrop addition OS_WINDOWS as defined in PEAR.php.
