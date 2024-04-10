@@ -58,6 +58,7 @@
  *  to throw new Exception($p_message).
  */
 
+// Backdrop addition Ignore PHP_CodeSniffer warnings/errors for this file.
 // phpcs:ignoreFile
 
 // Backdrop removal require_once 'PEAR.php'.
