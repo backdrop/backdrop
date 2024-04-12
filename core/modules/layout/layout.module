@@ -1040,6 +1040,9 @@ function layout_contextual_links_view_alter(&$element, $items) {
  *
  * @param string $layout_name
  *   The layout machine name to load.
+ * @param string $load_argument
+ *   An argument that may be passed in from the 'load arguments' in the menu
+ *   loader.
  * @param bool $skip_menu_items
  *   Flag to skip the attempted loading of menu items for the loaded layouts.
  *   This should be set to TRUE if loading layouts that definitely do not have
@@ -1050,7 +1053,7 @@ function layout_contextual_links_view_alter(&$element, $items) {
  *
  * @return Layout|boolean
  */
-function layout_load($layout_name, $skip_menu_items = NULL, $type = 'layout') {
+function layout_load($layout_name, $load_argument = '', $skip_menu_items = NULL, $type = 'layout') {
   // Skip menu item loading for default layouts, as we know they do not have
   // an associated menu item.
   if (is_null($skip_menu_items)) {
@@ -2014,7 +2017,7 @@ function layout_clear_layout_tempstore($name, $type = 'layout') {
  * Menu loader callback to load a Layout cache object. The second argument is
  * a placeholder for the 'load argument' from the menu loader system.
  */
-function layout_tempstore_load($layout_name, $layout_name2 = '', $type = 'layout') {
+function layout_tempstore_load($layout_name, $load_argument = '', $type = 'layout') {
   return layout_get_layout_tempstore($layout_name, $type);
 }
 
