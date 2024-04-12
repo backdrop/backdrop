@@ -2011,9 +2011,10 @@ function layout_clear_layout_tempstore($name, $type = 'layout') {
 }
 
 /**
- * Menu loader callback to load a Layout cache object.
+ * Menu loader callback to load a Layout cache object. The second argument is
+ * a placeholder for the 'load argument' from the menu loader system.
  */
-function layout_tempstore_load($layout_name, $type = 'layout') {
+function layout_tempstore_load($layout_name, $layout_name2 = '', $type = 'layout') {
   return layout_get_layout_tempstore($layout_name, $type);
 }
 
@@ -2028,7 +2029,7 @@ function layout_tempstore_menu_item_load($layout_name) {
  * Menu loader to load an individual block from a layout.
  */
 function layout_tempstore_block_load($layout_block_uuid, $layout_name, $type = 'layout') {
-  $layout = layout_tempstore_load($layout_name, $type);
+  $layout = layout_tempstore_load($layout_name, '', $type);
   $block = FALSE;
 
   if (isset($layout->in_progress['block']) && $layout->in_progress['block']->uuid === $layout_block_uuid) {
