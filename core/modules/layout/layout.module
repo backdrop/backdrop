@@ -605,11 +605,21 @@ function layout_menu() {
             'weight' => 2,
             'file' => 'layout.entity.admin.inc',
           ) + $access;
-
           $items["$path/layouts/add"] = array(
-            'title' => 'Add layout',
+            'title' => "Add layout",
+            'title callback' => 'layout_entity_menu_title',
+            'title arguments' => array($entity_type, $bundle_arg),
             'page callback' => 'backdrop_get_form',
             'page arguments' => array('layout_entity_admin_add_form', $entity_type, $bundle_arg),
+            'file' => 'layout.entity.admin.inc',
+            'type' => MENU_LOCAL_ACTION,
+          ) + $access;
+          $items["$path/layouts/add-entity"] = array(
+            'title' => "Add layout",
+            'title callback' => 'layout_entity_menu_title',
+            'title arguments' => array($entity_type, $bundle_arg, 'entity'),
+            'page callback' => 'backdrop_get_form',
+            'page arguments' => array('layout_entity_admin_add_form', $entity_type, $bundle_arg, 'entity'),
             'file' => 'layout.entity.admin.inc',
             'type' => MENU_LOCAL_ACTION,
           ) + $access;
@@ -620,6 +630,35 @@ function layout_menu() {
   }
 
   return $items;
+}
+
+/**
+ * Title callback: Returns the name of a given instance.
+ *
+ * @see field_ui_menu()
+ */
+function layout_entity_menu_title($entity_type, $bundle_arg, $entity = NULL) {
+  $entity_info = entity_get_info($entity_type);
+  $entity_name = ($entity_type == 'node') ? t('content') : $entity_info['label'];
+  $entity_plural_name = ($entity_type == 'node') ? t('content') : $entity_info['plural label'];
+  $bundle_name = '';
+  if (!$entity) {
+    if (is_object($bundle_arg) && property_exists($bundle_arg, 'name')) {
+      $bundle_name = $bundle_arg->name;
+    }
+    elseif (is_object($bundle_arg) && property_exists($bundle_arg, 'label')) {
+      $bundle_name = $bundle_arg->label;
+    }
+    elseif (is_string($bundle_arg)) {
+      if (isset($entity_info['label'])) {
+        $bundle_name = $entity_info['label'];
+      }
+    }
+    return t('Create a layout for [@bundle_name] @entities', array('@bundle_name' => $bundle_name, '@entities' => $entity_plural_name));
+  }
+  else {
+    return t('Create a layout for all @entity types', array('@entity' => $entity_name));
+  }
 }
 
 /**
