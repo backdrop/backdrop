@@ -37,10 +37,10 @@ Backdrop.behaviors.fileButtons = {
  */
 Backdrop.behaviors.filePreviewLinks = {
   attach: function (context) {
-    $('div.form-managed-file .file a, .file-widget .file a', context).once('file-preview-link').on('click', Backdrop.file.openInNewWindow);
+    $('.file-preview-link', context).once('file-preview-link').on('click', Backdrop.file.openInNewWindow);
   },
   detach: function (context){
-    $('div.form-managed-file .file a, .file-widget .file a', context).off('click', Backdrop.file.openInNewWindow);
+    $('.file-preview-link', context).off('click', Backdrop.file.openInNewWindow);
   }
 };
 

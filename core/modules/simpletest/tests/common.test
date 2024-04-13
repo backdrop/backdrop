@@ -793,7 +793,6 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
     backdrop_add_css($css, array('type' => 'inline'));
     $styles = backdrop_get_css();
     $this->assertEqual(trim($styles), $css_preprocessed, 'Rendering preprocessed inline CSS adds it to the page.');
-
   }
 
   /**
@@ -862,7 +861,6 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
       $system_path . '/css/system.theme.css',
       backdrop_get_path('module', 'simpletest') . '/css/simpletest.css',
     );
-
 
     $styles = backdrop_get_css();
     // Stylesheet URL may be the href of a LINK tag or in an @import statement
@@ -1002,6 +1000,8 @@ class CommonCascadingStylesheetsUnitTestCase extends BackdropUnitTestCase {
    * - Proper URLs in imported files. (https://drupal.org/node/265719)
    * - Retain pseudo-selectors. (https://drupal.org/node/460448)
    * - Don't adjust data URIs. (https://drupal.org/node/2142441)
+   * - Support semicolons in import statements.
+   *   (https://github.com/backdrop/backdrop-issues/issues/6337)
    */
   function testLoadCssBasic() {
     // Array of files to test living in 'simpletest/files/css_test_files/'.
@@ -1347,7 +1347,6 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     $javascript = backdrop_add_js('core/misc/collapse.js');
     $this->assertTrue(array_key_exists('core/misc/jquery.js', $javascript), 'jQuery is added when a file is added.');
     $this->assertTrue(array_key_exists('core/misc/backdrop.js', $javascript), 'Backdrop.js is added when file is added.');
-    $this->assertTrue(array_key_exists('core/misc/html5.js', $javascript), 'html5.js is added when file is added.');
     $this->assertTrue(array_key_exists('core/misc/collapse.js', $javascript), 'JavaScript files are correctly added.');
     $this->assertEqual(base_path(), $javascript['settings']['data'][0]['basePath'], 'Base path JavaScript setting is correctly set.');
     url('', array('prefix' => &$prefix));
@@ -1473,22 +1472,30 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Test adding JavaScript within conditional comments.
+   * Test deprecated conditional comments are no longer output.
+   *
+   * Since Backdrop 1.27.0, the "browsers" option for backdrop_add_js() and
+   * backdrop_add_css() no longer outputs conditional comments, because
+   * conditional comments only work on IE 4-10 (which is completely
+   * unsupported). The "browsers" attribute still exists to prevent IE-only
+   * files from suddenly appearing on existing sites.
    *
    * @see backdrop_pre_render_conditional_comments()
    */
-  function testBrowserConditionalComments() {
+  function testDeprecatedBrowserConditionalComments() {
     $default_query_string = state_get('css_js_query_string', '0');
 
     backdrop_add_js('core/misc/collapse.js', array('browsers' => array('IE' => 'lte IE 8', '!IE' => FALSE)));
     backdrop_add_js('jQuery(function () { });', array('type' => 'inline', 'browsers' => array('IE' => FALSE)));
     $javascript = backdrop_get_js();
 
-    $expected_1 = "<!--[if lte IE 8]>\n" . '<script src="' . file_create_url('core/misc/collapse.js') . '?' . $default_query_string . '"></script>' . "\n<![endif]-->";
-    $expected_2 = "<!--[if !IE]><!-->\n" . '<script>jQuery(function () { });</script>' . "\n<!--<![endif]-->";
+    $expected_1 = '<script src="' . file_create_url('core/misc/collapse.js') . '?' . $default_query_string . '"></script>';
+    $expected_2 = '<script>jQuery(function () { });</script>';
 
-    $this->assertTrue(strpos($javascript, $expected_1) > 0, t('Rendered JavaScript within downlevel-hidden conditional comments.'));
-    $this->assertTrue(strpos($javascript, $expected_2) > 0, t('Rendered JavaScript within downlevel-revealed conditional comments.'));
+    $this->assertTrue(strpos($javascript, $expected_1) === FALSE, 'IE-only browser file not output at all.');
+    $this->assertTrue(strpos($javascript, '<!--[if lte IE 8]>') === FALSE, 'IE conditional comment output is suppressed.');
+    $this->assertTrue(strpos($javascript, $expected_2) > 0, 'Browsers except IE file output directly with no conditional comments.');
+    $this->assertTrue(strpos($javascript, '<!--[if !IE]>') === FALSE, 'Not-IE conditional comment output is suppressed.');
   }
 
   /**

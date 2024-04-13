@@ -493,10 +493,10 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
     // Do not let a term start the page that is not at the root.
     if (isset($term->depth) && ($term->depth > 0) && !isset($back_step)) {
       $back_step = 0;
-      while ($pterm = prev($tree)) {
+      while ($previous_term = prev($tree)) {
         $before_entries--;
         $back_step++;
-        if ($pterm->depth == 0) {
+        if ($previous_term->depth == 0) {
           prev($tree);
           continue 2; // Jump back to the start of the root level parent.
        }

@@ -31,7 +31,6 @@
   width: 100%;
   max-width: 500px;
   z-index: 9996 !important; /* To come above the full-screen CKEditor button. */
-  -webkit-transition: max-width .5s, left .5s, right .5s; /* For Safari 3.1 to 6.0 */
   transition: max-width .5s, left .5s, right .5s;
 }
 .editor-dialog-with-library {
