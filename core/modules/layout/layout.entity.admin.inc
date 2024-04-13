@@ -41,6 +41,10 @@ function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg
       '#type' => 'dropbutton',
       '#links' => _layout_get_operations($layout),
     );
+    foreach ($operations['#links'] as $link_key => $op) {
+      $operations['#links'][$link_key]['query'] = backdrop_get_destination();
+    }
+
     if ($layout->storage === LAYOUT_STORAGE_OVERRIDE) {
       $storage = t('Overridden');
     }
