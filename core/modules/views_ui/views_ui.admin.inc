@@ -2142,7 +2142,7 @@ function views_ui_edit_view_form_submit($form, &$form_state) {
 function views_ui_edit_view_form_cancel($form, &$form_state) {
   // Remove this view from cache so configurations will be lost.
   tempstore_clear('views.view', $form_state['view']->name);
-  backdrop_set_message(t('Changes to the view %name have been discarded.', array('%name' => $form_state['view']->get_human_name())), 'info');
+  backdrop_set_message(t('Any changes to the %name view have been discarded.', array('%name' => $form_state['view']->get_human_name())), 'info');
   
   if (empty($form['view']->vid)) {
     // I seem to have to backdrop_goto here because I can't get fapi to
