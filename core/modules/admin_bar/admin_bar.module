@@ -94,7 +94,9 @@ function admin_bar_menu_alter(&$items) {
  */
 function admin_bar_menu_link_insert($link) {
   // Flush all of our caches to pick up the link.
-  cache('admin_bar')->flush();
+  if ($link['menu_name'] == 'management') {
+    cache('admin_bar')->flush();
+  }
 }
 
 /**
@@ -102,7 +104,9 @@ function admin_bar_menu_link_insert($link) {
  */
 function admin_bar_menu_link_update($link) {
   // Flush all of our caches to pick up the link.
-  cache('admin_bar')->flush();
+  if ($link['menu_name'] == 'management') {
+    cache('admin_bar')->flush();
+  }
 }
 
 /**
@@ -110,7 +114,9 @@ function admin_bar_menu_link_update($link) {
  */
 function admin_bar_menu_link_delete($link) {
   // Flush all of our caches to pick up the link.
-  cache('admin_bar')->flush();
+  if ($link['menu_name'] == 'management') {
+    cache('admin_bar')->flush();
+  }
 }
 
 /**

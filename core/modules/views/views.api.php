@@ -964,7 +964,7 @@ function hook_views_ajax_data_alter(&$commands, $view) {
  * @see views_invalidate_cache()
  */
 function hook_views_invalidate_cache() {
-  cache('mymodule')->deletePrefix('views:');
+  cache('my_module')->deletePrefix('views:');
 }
 
 /**

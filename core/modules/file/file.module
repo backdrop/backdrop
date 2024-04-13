@@ -846,7 +846,7 @@ function file_theme() {
       'template' => 'templates/file',
     ) + $base,
     'file_link' => array(
-      'variables' => array('file' => NULL, 'icon_directory' => NULL),
+      'variables' => array('file' => NULL, 'icon_directory' => NULL, 'attributes' => array()),
     ) + $base,
     'file_icon' => array(
       'variables' => array('file' => NULL, 'icon_directory' => NULL, 'alt' => ''),
@@ -1418,7 +1418,10 @@ function file_managed_file_process($element, &$form_state, $form) {
   if ($fid && $element['#file']) {
     $element['filename'] = array(
       '#type' => 'markup',
-      '#markup' => theme('file_link', array('file' => $element['#file'])) . ' ',
+      '#markup' => theme('file_link', array(
+        'file' => $element['#file'],
+        'attributes' => array('class' => array('file-preview-link')),
+      )) . ' ',
       '#weight' => -10,
     );
 
