@@ -25,6 +25,7 @@ function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg
   );
   $bundle = field_extract_bundle($entity_type, $bundle_arg);
   $layouts = layout_get_entity_layouts($entity_type, $bundle);
+  $entity_info = entity_get_info($entity_type);
 
   $header = array(
     array('data' => t('Layout'), 'class' => array('layout-title')),
@@ -73,7 +74,7 @@ function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg
     '#header' => $header,
     '#rows' => $rows,
     '#attributes' => array('class' => array('layout-list')),
-    '#empty' => t('No layout pages have been created yet.'),
+    '#empty' => t('No layout overrides have been created for !entity_types yet.', array('!entity_types' => $entity_info['plural label'])),
     '#weight' => 1,
   );
 
