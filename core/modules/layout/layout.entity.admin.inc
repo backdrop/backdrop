@@ -121,6 +121,7 @@ function layout_get_entity_layouts($entity_type, $bundle_name = 'card') {
 function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle_arg, $all_types = NULL) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   form_load_include($form_state, 'inc', 'layout', 'layout.context.admin');
+  backdrop_set_title(layout_entity_menu_title($entity_type, $bundle_arg, $all_types));
 
   $config = array(
     'is_new' => TRUE,
