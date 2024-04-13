@@ -605,15 +605,19 @@ function layout_menu() {
             'weight' => 2,
             'file' => 'layout.entity.admin.inc',
           ) + $access;
-          $items["$path/layouts/add"] = array(
-            'title' => "Add layout",
-            'title callback' => 'layout_entity_menu_title',
-            'title arguments' => array($entity_type, $bundle_arg),
-            'page callback' => 'backdrop_get_form',
-            'page arguments' => array('layout_entity_admin_add_form', $entity_type, $bundle_arg),
-            'file' => 'layout.entity.admin.inc',
-            'type' => MENU_LOCAL_ACTION,
-          ) + $access;
+          // Check that this isn't a single-bundle entity.
+          $single_bundle = (count($entity_info['bundles']) == 1) && isset($entity_info['bundles'][$entity_type]);
+          if (!$single_bundle) {
+            $items["$path/layouts/add"] = array(
+              'title' => "Add layout",
+              'title callback' => 'layout_entity_menu_title',
+              'title arguments' => array($entity_type, $bundle_arg),
+              'page callback' => 'backdrop_get_form',
+              'page arguments' => array('layout_entity_admin_add_form', $entity_type, $bundle_arg),
+              'file' => 'layout.entity.admin.inc',
+              'type' => MENU_LOCAL_ACTION,
+            ) + $access;
+          }
           $items["$path/layouts/add-entity"] = array(
             'title' => "Add layout",
             'title callback' => 'layout_entity_menu_title',
