@@ -14,6 +14,7 @@
 function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   form_load_include($form_state, 'inc', 'layout', 'layout.context.admin');
+  $form['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
 
   $form['messages'] = array(
     '#theme' => 'status_messages',
@@ -31,7 +32,6 @@ function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg
     array('data' => t('Layout'), 'class' => array('layout-title')),
     array('data' => t('Template'), 'class' => array('layout-template', 'priority-low')),
     array('data' => t('Visibility conditions'), 'class' => array('layout-conditions', 'priority-low')),
-    array('data' => t('Storage state'), 'class' => array('layout-status', 'priority-low')),
     array('data' => t('Operations'), 'class' => array('layout-operations')),
   );
 
@@ -45,16 +45,6 @@ function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg
       $operations['#links'][$link_key]['query'] = backdrop_get_destination();
     }
 
-    if ($layout->storage === LAYOUT_STORAGE_OVERRIDE) {
-      $storage = t('Overridden');
-    }
-    elseif ($layout->storage === LAYOUT_STORAGE_DEFAULT) {
-      $storage = t('Default (module-provided)');
-    }
-    else {
-      $storage = t('Custom');
-    }
-
     // Create a link to the settings page.
     $info = layout_get_layout_template_info($layout->layout_template);
     $template = l($info['title'], 'admin/structure/layouts/manage/' . $layout->name . '/configure');
@@ -63,7 +53,6 @@ function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg
     $row[] = theme('layout_info', array('layout' => $layout));
     $row[] = $template;
     $row[] = theme('layout_condition_info', array('layout' => $layout));
-    $row[] = $storage;
     $row[] = backdrop_render($operations);
     $class = array('layout-row');
     if ($layout->disabled) {
