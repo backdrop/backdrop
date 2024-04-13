@@ -35,7 +35,7 @@ function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg
   );
 
   $rows = array();
-  foreach ($layouts as $layout) {
+  foreach ($layouts['all'] as $layout) {
     $operations = array(
       '#type' => 'dropbutton',
       '#links' => _layout_get_operations($layout),
@@ -86,7 +86,7 @@ function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg
  *
  * @ingroup forms
  */
-function layout_get_entity_layouts($entity_type, $bundle_name = 'card') {
+function layout_get_entity_layouts($entity_type, $bundle_name = '') {
   $all_layouts = layout_load_all();
   $matched_layouts = array();
   foreach ($all_layouts as $layout) {
@@ -95,13 +95,22 @@ function layout_get_entity_layouts($entity_type, $bundle_name = 'card') {
       foreach ($path_contexts as $path_context) {
         if (is_a($path_context, 'EntityLayoutContext') && $path_context->isA($entity_type)) {
           if (empty($layout->conditions)) {
-            $matched_layouts[] = $layout;
+            $matched_layouts['all'][] = $layout;
           }
           else {
             foreach ($layout->conditions as $condition) {
-              if (is_a($condition, 'EntityBundleLayoutAccess') && in_array($bundle_name, $condition->settings['bundles'])) {
-                $matched_layouts[] = $layout;
-                break;
+              if (is_a($condition, 'EntityBundleLayoutAccess')) {
+                if (empty($bundle_name)) {
+                  $matched_layouts['all'][] = $layout;
+                  foreach ($condition->settings['bundles'] as $bundle) {
+                    $matched_layouts['bundles'][$bundle][] = $layout;
+                  }
+                }
+                elseif (in_array($bundle_name, $condition->settings['bundles'])) {
+                  $matched_layouts['all'][] = $layout;
+                  $matched_layouts['bundles'][$bundle_name][] = $layout;
+                  break;
+                }
               }
             }
           }
@@ -145,17 +154,35 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle
     );
   }
 
-  $bundle_name = '';
-  if (is_object($bundle_arg) && property_exists($bundle_arg, 'name')) {
-    $bundle_name = $bundle_arg->name;
+  $entity_layouts = layout_get_entity_layouts($entity_type);
+  $bundle = field_extract_bundle($entity_type, $bundle_arg);
+  $entity_info = entity_get_info($entity_type);
+  if (!$all_types) {
+    $bundle_name = '';
+    if (is_object($bundle_arg) && property_exists($bundle_arg, 'name')) {
+      $bundle_name = $bundle_arg->name;
+    }
+    elseif (is_object($bundle_arg) && property_exists($bundle_arg, 'label')) {
+      $bundle_name = $bundle_arg->label;
+    }
+    elseif (is_string($bundle_arg)) {
+      if (isset($entity_info['label'])) {
+        $bundle_name = $entity_info['label'];
+      }
+    }
+    if (isset($entity_layouts['bundles'][$bundle]) && $bundle_count = count($entity_layouts['bundles'][$bundle])) {
+      $default_name = t('!bundle_name layout !count', array('!bundle_name' => $bundle_name, '!count' => $bundle_count + 1));
+    }
+    else {
+      $default_name = t('!bundle_name layout', array('!bundle_name' => $bundle_name));
+    }
   }
-  elseif (is_object($bundle_arg) && property_exists($bundle_arg, 'label')) {
-    $bundle_name = $bundle_arg->label;
-  }
-  elseif (is_string($bundle_arg)) {
-    $entity_info = entity_get_info($entity_type);
-    if (isset($entity_info['label'])) {
-      $bundle_name = $entity_info['label'];
+  else {
+    if (isset($entity_layouts['all']) && $bundle_count = count($entity_layouts['all'])) {
+      $default_name = t('!entity_label layout !count', array('!entity_label' => $entity_info['label'], '!count' => $bundle_count + 1));
+    }
+    else {
+      $default_name = t('!entity_label layout', array('!entity_label' => $entity_info['label']));
     }
   }
 
@@ -163,7 +190,7 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle
     '#title' => t('Layout name'),
     '#type' => 'textfield',
     '#maxlength' => 128,
-    '#default_value' => t('!bundle_name layout', array('!bundle_name' => $bundle_name)),
+    '#default_value' => $default_name,
     '#required' => TRUE,
     '#access' => !$layout->isDefault(),
   );
