@@ -118,7 +118,7 @@ function layout_get_entity_layouts($entity_type, $bundle_name = 'card') {
  *
  * @ingroup forms
  */
-function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle_arg) {
+function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle_arg, $all_types = NULL) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   form_load_include($form_state, 'inc', 'layout', 'layout.context.admin');
 
@@ -128,6 +128,7 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle
   $layout = new Layout($config);
 
   $form_state['layout'] = &$layout;
+  $form_state['all_types'] = $all_types;
   $form_state['entity_type'] = $entity_type;
   $form_state['bundle_type'] = field_extract_bundle($entity_type, $bundle_arg);
 
@@ -249,10 +250,11 @@ function layout_entity_admin_add_form_submit($form, &$form_state) {
   $layout->setPath($entity_path);
 
   // Set the bundle type visibility condition.
-
-  $handler = layout_create_access('node_type');
-  $handler->settings['bundles'][] = $bundle_type;
-  $layout->conditions[] = $handler;
+  if (!$form_state['all_types']) {
+    $handler = layout_create_access('node_type');
+    $handler->settings['bundles'][] = $bundle_type;
+    $layout->conditions[] = $handler;
+  }
 
   // If this is a new layout, populate blocks from default layout.
   if (!empty($layout->is_new)) {
