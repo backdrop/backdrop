@@ -302,35 +302,37 @@ function layout_entity_admin_add_form_submit($form, &$form_state) {
     }
 
     if ($form_state['values']['content_area']['field_blocks']) {
-      $content_region = '';
-      if (isset($template_info['regions']['content'])) {
-        $content_region = 'content';
-      }
-      else {
-        $template_regions = array_keys($template_info['regions']);
-        $content_region = end($template_regions);
-      }
       $fields = field_info_instances($entity_type, $bundle_type);
-
-      foreach ($fields as $field) {
-        $key = 'field:field_block:' . $field['entity_type'] . '-' . $field['field_name'];
-        $field_block = layout_create_handler('block', $key);
-        $build_state = array(
-          'build_info' => array('args' => array($layout, $field_block, 'standard', $content_region)),
-        );
-        $build = backdrop_build_form('layout_block_configure_form', $build_state);
-        form_execute_handlers('validate', $build, $build_state);
-        form_execute_handlers('submit', $build, $build_state);
-      }
-      $main_content_uuid = '';
-      foreach ($layout->content as $uuid => $block) {
-        if ($block->module === 'system' && $block->delta === 'main') {
-          $main_content_uuid = $uuid;
-          break;
+      if ($fields) {
+        $content_region = '';
+        if (isset($template_info['regions']['content'])) {
+          $content_region = 'content';
         }
-      }
-      if ($main_content_uuid) {
-        $layout->removeBlock($main_content_uuid);
+        else {
+          $template_regions = array_keys($template_info['regions']);
+          $content_region = end($template_regions);
+        }
+
+        foreach ($fields as $field) {
+          $key = 'field:field_block:' . $field['entity_type'] . '-' . $field['field_name'];
+          $field_block = layout_create_handler('block', $key);
+          $build_state = array(
+            'build_info' => array('args' => array($layout, $field_block, 'standard', $content_region)),
+          );
+          $build = backdrop_build_form('layout_block_configure_form', $build_state);
+          form_execute_handlers('validate', $build, $build_state);
+          form_execute_handlers('submit', $build, $build_state);
+        }
+        $main_content_uuid = '';
+        foreach ($layout->content as $uuid => $block) {
+          if ($block->module === 'system' && $block->delta === 'main') {
+            $main_content_uuid = $uuid;
+            break;
+          }
+        }
+        if ($main_content_uuid) {
+          $layout->removeBlock($main_content_uuid);
+        }
       }
     }
 
