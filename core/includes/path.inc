@@ -224,7 +224,6 @@ function backdrop_get_path_alias($path = NULL, $langcode = NULL) {
   }
 
   $path_alias = $path;
-  $is_admin_path = path_is_admin($path);
 
   // Sub-path alias functionality. Start by assuming that this is not a
   // sub-path.
@@ -232,6 +231,7 @@ function backdrop_get_path_alias($path = NULL, $langcode = NULL) {
   $path_parts = explode('/', $path);
   // Only consider providing sub-path aliases for non-admin paths and paths that
   // have a depth of greater then 2 (entity type path / entity ID / sub-path).
+  $is_admin_path = in_array($path_parts[0], array('admin', 'batch', 'js'));
   if (!$is_admin_path && count($path_parts) > 2) {
     // Special handling for taxonomy term sub-paths. Makes sure that the
     // $path_parts array is reduced to 3 items, which is what the equivalent
@@ -319,7 +319,7 @@ function backdrop_get_normal_path($path, $langcode = NULL) {
     // If no matching source path was found for the provided alias, consider
     // whether this is a sub-path alias.
     $path_parts = explode('/', $path);
-    $is_admin_path = path_is_admin($path);
+    $is_admin_path = in_array($path_parts[0], array('admin', 'batch', 'js'));
     // Only consider non-admin paths and paths that have a depth of greater then
     // 1 (we need at the very least a path alias + a sub-path).
     if (!$is_admin_path && count($path_parts) > 1) {
