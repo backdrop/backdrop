@@ -330,8 +330,7 @@ function backdrop_get_normal_path($path, $langcode = NULL) {
       while (count($path_parts) > 1 && $source == FALSE) {
         // Assume that the last array item is the sub-path. Store that and
         // remove it from the array.
-        $path_last_part = array_pop($path_parts);
-        $sub_path_parts[] = $path_last_part;
+        $sub_path_parts[] = array_pop($path_parts);
         // Assume that the rest of the array items are the actual path alias.
         $path = implode('/', $path_parts);
         // Try to find a source match for that remaining assumed path alias.
