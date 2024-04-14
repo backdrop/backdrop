@@ -214,7 +214,7 @@ function backdrop_cache_system_paths() {
  * @return
  *   An aliased path if one was found, or the original path if no alias was
  *   found.
- * 
+ *
  * @since 1.28.0: Added support for sub-path aliases.
  */
 function backdrop_get_path_alias($path = NULL, $langcode = NULL) {
@@ -225,7 +225,6 @@ function backdrop_get_path_alias($path = NULL, $langcode = NULL) {
 
   $path_alias = $path;
 
-
   // Sub-path alias functionality. Start by assuming that this is not a
   // sub-path.
   $sub_path = '';
@@ -233,14 +232,13 @@ function backdrop_get_path_alias($path = NULL, $langcode = NULL) {
   // Only consider providing sub-path aliases for non-admin paths and paths that
   // have a depth of greater then 2 (entity type path / entity ID / sub-path).
   if ($path_parts[0] != 'admin' && count($path_parts) > 2) {
+    // Special handling for taxonomy term sub-paths. Makes sure that the
+    // $path_parts array is reduced to 3 items, which is what the equivalent
+    // array for a user or node path would have:
+    // - $path_parts[0] holds the entire path for the specific entity type.
+    // - $path_parts[1] holds the entity ID.
+    // - $path_parts[2] and the rest of the array items hold the sub-path.
     if ($path_parts[0] == 'taxonomy' && $path_parts[1] == 'term' && count($path_parts) > 3) {
-      // Special handling for taxonomy term sub-paths. Makes sure that the
-      // $path_parts array is reduced to 3 items, which is what the equivalent
-      // array for a user or node path would have:
-      // - $path_parts[0] holds the entire path of the entity type.
-      // - $path_parts[1] holds the entity ID.
-      // - $path_parts[2] and the rest of the array items hold the sub-path.
-
       // Append the "/term" path part to "taxonomy" in the first item of the
       // array.
       $path_parts[0] = 'taxonomy/term';
