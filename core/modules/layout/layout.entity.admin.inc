@@ -207,6 +207,8 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle
     '#wrapper_attributes' => array('class' => array('clearfix', 'layout-options')),
     '#required' => TRUE,
   );
+  $fields = field_info_instances($entity_type, $bundle_type);
+  $first_field = reset($fields);
   $form['content_area'] = array(
     '#title' => t('"Main content" block'),
     '#type' => 'checkboxes',
@@ -214,6 +216,8 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle
     '#options' => array(
       'field_blocks' => t('Replace the "Main content" block with individual field blocks.'),
     ),
+    '#description' => empty($first_field) ? t('There are no fields attached to this entity.') : '',
+    '#disabled' => empty($first_field),
   );
 
   // Get the list of layout template options. The list needs to be rebuilt (see
@@ -271,8 +275,10 @@ function layout_entity_admin_add_form_submit($form, &$form_state) {
   $entity_path = preg_replace('/%[a-z0-9_]+/', '%', $entity_path_type);
   $layout->setPath($entity_path);
 
-  // Set the bundle type visibility condition.
-  if (!$form_state['all_types']) {
+  // Set the bundle type visibility condition if the entity has bundles.
+  $entity_info = entity_get_info($entity_type);
+  $single_bundle = (count($entity_info['bundles']) == 1) && isset($entity_info['bundles'][$entity_type]);
+  if (!$form_state['all_types'] && !$single_bundle) {
     $handler = layout_create_access('node_type');
     $handler->settings['bundles'][] = $bundle_type;
     $layout->conditions[] = $handler;
@@ -303,7 +309,8 @@ function layout_entity_admin_add_form_submit($form, &$form_state) {
 
     if ($form_state['values']['content_area']['field_blocks']) {
       $fields = field_info_instances($entity_type, $bundle_type);
-      if ($fields) {
+      $first_field = reset($fields);
+      if (!empty($first_field)) {
         $content_region = '';
         if (isset($template_info['regions']['content'])) {
           $content_region = 'content';
