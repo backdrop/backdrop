@@ -593,10 +593,7 @@ function color_scheme_form_submit($form, &$form_state) {
     $config_name = $custom_scheme_names[$scheme];
     $config = config($config_name);
     $schemes = $config->get('schemes');
-    $schemes[$scheme] = array(
-      'title' => $scheme,
-      'colors' => $palette,
-    );
+    $schemes[$scheme]['colors'] = $palette;
     $config->set('schemes', $schemes);
     $config->save();
   }
