@@ -176,6 +176,15 @@ function image_get_info($filepath, $toolkit = FALSE) {
     if (isset($details) && is_array($details)) {
       $details['file_size'] = filesize($filepath);
     }
+    elseif ('image/svg+xml' === mime_content_type($filepath)) {
+      $details = array(
+        'width'     => 100,
+        'height'    => 100,
+        'extension' => 'svg',
+        'mime_type' => 'image/svg+xml',
+        'file_size' => filesize($filepath),
+      );
+    }
   }
 
   return $details;
