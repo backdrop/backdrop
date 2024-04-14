@@ -348,6 +348,10 @@ function backdrop_get_normal_path($path, $langcode = NULL) {
           // If a match is found, append the sub-path to it.
           $path .= '/' . $sub_path;
         }
+        else {
+          // If no match is fount, fall back to the original path.
+          $path = $original_path;
+        }
       }
     }
   }
