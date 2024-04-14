@@ -875,7 +875,7 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
     else {
       $svg_path = file_create_url($item['uri']);
       $svg = file_get_contents($svg_path);
-      $svg_clean = image_svg_sanitizer_sanitize($svg);
+      $svg_clean = filter_xss($svg, array('svg', 'use', 'title', 'desc', 'defs', 'linearGradient', 'stop', 'rect', 'circle', 'path'));
       $svg_clean = preg_replace(['/<\?xml.*\?>/i', '/<!DOCTYPE((.|\n|\r)*?)">/i'], '', $svg_clean);
       $svg_clean = trim($svg_clean);
 
