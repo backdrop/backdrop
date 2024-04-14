@@ -230,7 +230,7 @@ function backdrop_get_path_alias($path = NULL, $langcode = NULL) {
   // sub-path.
   $sub_path = '';
   $path_parts = explode('/', $path);
-  // Only consider providing sub-path aiases for non-admin paths and paths that
+  // Only consider providing sub-path aliases for non-admin paths and paths that
   // have a depth of greater then 2 (entity type path / entity ID / sub-path).
   if ($path_parts[0] != 'admin' && count($path_parts) > 2) {
     if ($path_parts[0] == 'taxonomy' && $path_parts[1] == 'term' && count($path_parts) > 3) {
@@ -265,7 +265,7 @@ function backdrop_get_path_alias($path = NULL, $langcode = NULL) {
     //   comments?
     if (in_array($path_parent_part, $known_entity_type_paths)) {
       // Check whether the second part of the path is an integer (which is what
-      // enitity IDs are). is_int() does not work as expected here, since the
+      // entity IDs are). is_int() does not work as expected here, since the
       // expected numeric path part is actually a string; and is_numeric() is
       // also less than ideal, since it returns TRUE for more than just
       // integers. Since the path part we are checking is a actually a string
@@ -277,7 +277,7 @@ function backdrop_get_path_alias($path = NULL, $langcode = NULL) {
         $path_entity_id = $path_parts[1];
         $path = $path_parent_part . '/' . $path_entity_id;
         // Remove the parent and entity ID from the array, and use the rest of
-        // the path parts to costruct the sub-path.
+        // the path parts to construct the sub-path.
         unset($path_parts[0]);
         unset($path_parts[1]);
         $sub_path = '/' . implode('/', $path_parts);
