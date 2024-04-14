@@ -569,7 +569,7 @@ function color_scheme_form_submit($form, &$form_state) {
 
   // This is a new custom scheme; save a new config.
   if ($scheme == '') {
-    $custom_name = check_plain($form_state['values']['custom_name']);
+    $custom_name = $form_state['values']['custom_name'];
     if (empty($custom_name)) {
       $number = count($info['schemes']) + 1;
       $custom_name = t('Custom !number', array('!number' => $number));
