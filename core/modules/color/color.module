@@ -571,8 +571,8 @@ function color_scheme_form_submit($form, &$form_state) {
   if ($scheme == '') {
     $custom_name = $form_state['values']['custom_name'];
     if (empty($custom_name)) {
-      $number = count($info['schemes']) + 1;
-      $custom_name = t('Custom !number', array('!number' => $number));
+      $number = count($custom_scheme_names) + 1;
+      $custom_name = t('Custom scheme !number', array('!number' => $number));
     }
     $custom_machine_name = system_transliterate_machine_name(strtolower($custom_name));
 
