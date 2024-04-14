@@ -207,12 +207,12 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle
     '#wrapper_attributes' => array('class' => array('clearfix', 'layout-options')),
     '#required' => TRUE,
   );
-  $fields = field_info_instances($entity_type, $bundle_type);
+  $fields = field_info_instances($entity_type, $form_state['bundle_type']);
   $first_field = reset($fields);
   $form['content_area'] = array(
     '#title' => t('"Main content" block'),
     '#type' => 'checkboxes',
-    '#default_value' => 1,
+    '#default_value' => array('field_blocks'),
     '#options' => array(
       'field_blocks' => t('Replace the "Main content" block with individual field blocks.'),
     ),
