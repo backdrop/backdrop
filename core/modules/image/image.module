@@ -1395,62 +1395,6 @@ function image_file_presave($file) {
   }
 }
 
-
-/**
- * Implements hook_field_attach_presave().
- *
- * When saving an entity, this hook is called to make any adjustments to the
- * entire entity's fields before attempting to write to the database. When the
- * Image module encounters an SVG image, it sets the height and width values
- * to be empty strings, which would cause a database constraint error when
- * a string is inserted into an integer column.
- *
- * This implementation loops through all fields attached to an entity, finds
- * those that are an image field, then sets the width and height values within
- * that field. These changes are made by reference, so they are in the $entity
- * object when the Field module saves to the database.
- */
-function image_field_attach_presave($entity_type, $entity) {
-  // Get information about which fields are on this type of entity.
-  list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
-  $bundle_field_info = field_info_instances($entity_type, $bundle);
-
-  // Loop through each of the fields and find those that are image fields.
-  foreach ($bundle_field_info as $field_name => $instance_info) {
-    $field_info = field_info_field($field_name);
-    if ($field_info['type'] === 'image') {
-      // The langcode should normally be LANGUAGE_NONE for an image field, but
-      // check the langcode property just to be certain.
-      $langcode = LANGUAGE_NONE;
-      if (isset($entity->langcode) && isset($entity->{$field_name}[$entity->langcode])) {
-        $langcode = $entity->langcode;
-      }
-      if (!isset($entity->{$field_name}[$langcode])) {
-        continue;
-      }
-
-      // Update the field values (by reference) for SVG images.
-      $field_values = &$entity->{$field_name}[$langcode];
-      foreach ($field_values as $delta => $field_value) {
-        if (!isset($field_value['fid'])) {
-          continue;
-        }
-        $file = file_load($field_value['fid']);
-        if ($file && image_is_svg($file->uri)) {
-          // Set width/height as a safety measure. Savable NULL is better than
-          // the not savable empty string.
-          $field_values[$delta]['width'] = NULL;
-          $field_values[$delta]['height'] = NULL;
-          if ($svg_dimensions = image_get_svg_dimensions($file->uri)) {
-            $field_values[$delta]['width'] = $svg_dimensions['width'];
-            $field_values[$delta]['height'] = $svg_dimensions['height'];
-          }
-        }
-      }
-    }
-  }
-}
-
 /**
  * Implements hook_file_url_alter().
  *
