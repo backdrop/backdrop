@@ -2751,10 +2751,10 @@ function user_role_revoke_permissions($role_name, array $permissions = array()) 
  * List user administration filters that can be applied.
  */
 function user_filters() {
-  // Regular filters
   $filters = array();
   $roles = user_roles(TRUE);
-  unset($roles[BACKDROP_AUTHENTICATED_ROLE]); // Don't list authorized role.
+  // Don't list authorized role.
+  unset($roles[BACKDROP_AUTHENTICATED_ROLE]);
   if (count($roles)) {
     $filters['role'] = array(
       'title' => t('role'),
