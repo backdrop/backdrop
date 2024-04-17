@@ -444,8 +444,6 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
 
   $elements = file_field_widget_form($form, $form_state, $field, $instance, $langcode, $items, $delta, $element);
   $settings = $instance['settings'];
-  $allowed_extensions = explode(' ', $settings['file_extensions']);
-  $svg_allowed = in_array('svg', $allowed_extensions);
 
   foreach (element_children($elements) as $delta) {
     // Add adjustment of orientation before resizing because EXIF data is needed.
@@ -871,8 +869,8 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
     else {
       $svg_path = file_create_url($item['uri']);
       $svg = file_get_contents($svg_path);
-      $svg_clean = filter_xss($svg, array('svg', 'use', 'title', 'desc', 'defs', 'linearGradient', 'stop', 'rect', 'circle', 'path'));
-      $svg_clean = preg_replace(['/<\?xml.*\?>/i', '/<!DOCTYPE((.|\n|\r)*?)">/i'], '', $svg_clean);
+      $svg = preg_replace(['/<\?xml.*\?>/i', '/<!DOCTYPE((.|\n|\r)*?)">/i'], '', $svg);
+      $svg_clean = filter_xss($svg, image_field_allowed_svg_tags());
       $svg_clean = trim($svg_clean);
 
       if (isset($uri)) {
@@ -895,4 +893,82 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
   }
 
   return $element;
+}
+
+/**
+ * Provides a list of allowed SVG tags.
+ */
+function image_field_allowed_svg_tags() {
+  $tagsUc = array(
+    'a',
+    'animate',
+    'animateMotion',
+    'animateTransform',
+    'audio',
+    'canvas',
+    'circle',
+    'clipPath',
+    'defs',
+    'desc',
+    'discard',
+    'ellipse',
+    'feBlend',
+    'feColorMatrix',
+    'feComponentTransfer',
+    'feComposite',
+    'feConvolveMatrix',
+    'feDiffuseLighting',
+    'feDisplacementMap',
+    'feDistantLight',
+    'feDropShadow',
+    'feFlood',
+    'feFuncA',
+    'feFuncB',
+    'feFuncG',
+    'feFuncR',
+    'feGaussianBlur',
+    'feImage',
+    'feMerge',
+    'feMergeNode',
+    'feMorphology',
+    'feOffset',
+    'fePointLight',
+    'feSpecularLighting',
+    'feSpotLight',
+    'feTile',
+    'feTurbulence',
+    'filter',
+    'foreignObject',
+    'g',
+    'iframe',
+    'image',
+    'line',
+    'linearGradient',
+    'marker',
+    'mask',
+    'metadata',
+    'mpath',
+    'path',
+    'pattern',
+    'polygon',
+    'polyline',
+    'radialGradient',
+    'rect',
+    'set',
+    'stop',
+    'style',
+    'svg',
+    'switch',
+    'symbol',
+    'text',
+    'textPath',
+    'title',
+    'tspan',
+    'unknown',
+    'use',
+    'video',
+    'view',
+  );
+
+  return array_map('strtolower', $tagsUc);
 }
