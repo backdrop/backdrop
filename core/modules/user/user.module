@@ -2771,7 +2771,7 @@ function user_filters() {
     if ($permissions = $function()) {
       asort($permissions);
       foreach ($permissions as $permission => $description) {
-        $options[t('@module module', array('@module' => $module))][$permission] = t($permission);
+        $options[t('@module module', array('@module' => $module))][$permission] = $description['title'];
       }
     }
   }
