@@ -2755,6 +2755,7 @@ function user_filters() {
   $roles = user_roles(TRUE);
   // Don't list authorized role.
   unset($roles[BACKDROP_AUTHENTICATED_ROLE]);
+
   if (count($roles)) {
     $filters['role'] = array(
       'title' => t('role'),
