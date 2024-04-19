@@ -653,10 +653,6 @@ function image_field_formatter_info() {
 function image_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
-  $svg_allowed = FALSE;
-  if (isset($instance['settings']['file_extensions'])) {
-    $svg_allowed = strpos($instance['settings']['file_extensions'], 'svg') !== FALSE;
-  }
 
   $image_styles = image_style_options(FALSE, PASS_THROUGH);
   $element['image_style'] = array(
@@ -711,14 +707,12 @@ function image_field_formatter_settings_form($field, $instance, $view_mode, $for
 
   $element['image_svg_display'] = array(
     '#type' => 'checkbox',
-    '#access' => $svg_allowed,
     '#title' => t('Render SVG images in an &lt;img&gt; tag'),
     '#default_value' => !empty($settings['image_svg_display']),
   );
   $element['image_svg_dimensions'] = array(
     '#type' => 'item',
     '#title' => t('Maximum SVG image dimensions'),
-    '#access' => $svg_allowed,
     '#field_prefix' => '<div class="container-inline">',
     '#field_suffix' => '</div>',
     '#description' => t('The maximum allowed SVG image dimensions expressed as <code>WIDTH</code> x <code>HEIGHT</code>. If left blank, SVG images will be displayed at @svg_default_width x @svg_default_height pixels. Selecting an image style will override this setting.', array('@svg_default_width' => IMAGE_SVG_DEFAULT_WIDTH, '@svg_default_height' => IMAGE_SVG_DEFAULT_HEIGHT)),
@@ -757,7 +751,6 @@ function image_field_formatter_settings_form($field, $instance, $view_mode, $for
 function image_field_formatter_settings_summary($field, $instance, $view_mode) {
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
-  $svg_allowed = strpos($instance['settings']['file_extensions'], 'svg') !== FALSE;
 
   $summary = array();
 
@@ -793,7 +786,7 @@ function image_field_formatter_settings_summary($field, $instance, $view_mode) {
 
   $formatter_settings = $instance['display'][$view_mode]['settings'];
 
-  if ($svg_allowed && $formatter_settings['image_svg_display'] && (!empty($formatter_settings['image_svg_dimensions']['width'])
+  if ($formatter_settings['image_svg_display'] && (!empty($formatter_settings['image_svg_dimensions']['width'])
     || !empty($formatter_settings['image_svg_dimensions']['width']))) {
     $summary[] = t(
       'SVG image attributes: @width x @height pixels',

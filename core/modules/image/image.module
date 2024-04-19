@@ -255,11 +255,6 @@ function image_config_info() {
     'group' => t('Image styles'),
   );
 
-  $prefixes['image.settings'] = array(
-    'label' => t('Image settings'),
-    'group' => t('Configuration'),
-  );
-
   return $prefixes;
 }
 
