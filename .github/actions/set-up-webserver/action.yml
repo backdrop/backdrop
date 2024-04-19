@@ -22,7 +22,7 @@ runs:
     - name: Install database server
       uses: shogo82148/actions-setup-mysql@v1
       with:
-        mysql-version: ${{ inputs.mysql-version }}
+        mysql-version: ${{ inputs.database-version }}
         root-password: 'root'
         my-cnf: |
           datadir=/dev/shm/mysql
@@ -53,7 +53,7 @@ runs:
       run: |
         # Set up apache with php-fpm.
         sudo cp .github/misc/default.conf /etc/apache2/sites-available/000-default.conf
-        sudo sed -i -e "s/_PHP_VERSION_/ ${{ inputs.php-version }}/" /etc/apache2/sites-available/000-default.conf
+        sudo sed -i -e "s/_PHP_VERSION_/${{ inputs.php-version }}/" /etc/apache2/sites-available/000-default.conf
         # Setup php-fpm, this script is intentionally not executable by default.
         chmod 700 .github/misc/setup-php-fpm.sh
         ./.github/misc/setup-php-fpm.sh ${{ inputs.php-version }}

@@ -1,11 +1,11 @@
-name: Database configuration tests
+name: SimpleTest (Database Config)
 on:
   pull_request:
     branches: [1.*]
 jobs:
-  simpletest:
-    name: Simpletest (database config)
-    runs-on: ubuntu-20.04
+  simpletest-db-config:
+    name: SimpleTest
+    runs-on: ubuntu-22.04
     # Skip this job if the PR title contains "[skip tests]".
     if: ${{ !contains(github.event.pull_request.title, '[skip tests]') }}
     timeout-minutes: 20
@@ -28,8 +28,11 @@ jobs:
       - name: Install Backdrop
         run: |
           cp ./.github/misc/settings.local.php .
+
           # Set the config storage class to use the database.
           echo "\$settings['config_active_class'] = 'ConfigDatabaseStorage';" >> settings.local.php
+          echo "\$config_directories['active'] = NULL;" >> settings.local.php
+
           core/scripts/install.sh --db-url=mysql://root:root@127.0.0.1/backdrop
 
       - name: Run tests

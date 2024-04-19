@@ -1,4 +1,4 @@
-name: Functional tests
+name: SimpleTest (Functional Tests)
 on:
   pull_request:
     branches: [1.*]
