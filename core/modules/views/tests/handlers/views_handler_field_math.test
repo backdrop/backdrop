@@ -10,12 +10,24 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests the core views_handler_field_math handler.
  */
 class ViewsHandlerFieldMath extends ViewsSqlTest {
-  function viewsData() {
+
+  /**
+   * {@inheritdoc}
+   */
+  protected $profile = 'testing';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function viewsData() {
     $data = parent::viewsData();
     return $data;
   }
 
-  public function testFieldCustom() {
+  /**
+   * Test basic field functionality.
+   */
+  protected function testFieldCustom() {
     $view = $this->getBasicView();
 
     // Alter the text of the field to a random string.
@@ -35,4 +47,33 @@ class ViewsHandlerFieldMath extends ViewsSqlTest {
 
     $this->assertEqual($rand1 + $rand2, $view->style_plugin->get_field(0, 'expression'));
   }
+
+  /**
+   * Test rendering of float values in "Global: Math expression" fields.
+   */
+  protected function testMathFloatRender() {
+    // We need one dummy node of any type for our node based views query.
+    $type = $this->backdropCreateContentType();
+    $this->backdropCreateNode(array(
+      'type' => $type->type,
+    ));
+    $view = views_get_view('floatval_check');
+    $this->executeView($view);
+    $result = $view->result[0];
+
+    foreach ($view->field as $name => $view_field) {
+      if ($name == 'nid') {
+        continue;
+      }
+      // In the view we set the label value to the raw input value (floats), to
+      // compare rendered output here.
+      $label = $view->field[$name]->label();
+      $render = $view->field[$name]->advanced_render($result);
+      $this->assertIdentical($label, $render, format_string('Expected rendered output to be %label, got %render', array(
+        '%label' => $label,
+        '%render' => $render,
+      )));
+    }
+  }
+
 }
