@@ -827,7 +827,8 @@ function backdrop_install_config_location() {
       }
       catch (Exception $e) {
         // If the config directory is empty and we can't write one, error out.
-        // Proceed anyway if using the default directory based on database string.
+        // Proceed anyway if using the default directory based on the database
+        // string.
         if ($is_empty) {
           throw $e;
         }
