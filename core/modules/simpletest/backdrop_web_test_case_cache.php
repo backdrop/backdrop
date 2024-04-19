@@ -83,8 +83,8 @@ class BackdropWebTestCaseCache extends BackdropWebTestCase {
     // Preset the 'install_profile' system variable, so the first call into
     // system_rebuild_module_data() (in backdrop_install_system()) will register
     // the test's profile as a module. Without this, the installation profile of
-    // the parent site (executing the test) is registered, and the test
-    // profile's hook_install() and other hook implementations are never invoked.
+    // the parent site (executing the test) is registered and hook_install() and
+    // other hook implementations of the test profile are never invoked.
     config_install_default_config('system');
     config_set('system.core', 'install_profile', $this->profile);
 
