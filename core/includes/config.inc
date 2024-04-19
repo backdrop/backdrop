@@ -360,7 +360,7 @@ function config_get_config_storage($type = 'active') {
   $class = settings_get('config_' . $type . '_class', 'ConfigFileStorage');
   switch ($class) {
     case 'ConfigDatabaseStorage':
-      $config_location = 'db:/default/' . $type . '_config';
+      $config_location = 'db://default/config_' . $type;
       break;
     case 'ConfigFileStorage':
     default:
@@ -1293,19 +1293,19 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
           'type' => 'varchar',
           'length' => 255,
           'not null' => TRUE,
-          'description' => 'The top-level name for the full key.  Would be the filename in the ConfigFileStore, minus the .json extension',
+          'description' => 'The top-level name for the config item. Would be the filename in the ConfigFileStore, minus the .json extension.',
         ),
         'data' => array(
           'type' => 'text',
           'size' => 'big',
           'not null' => TRUE,
-          'description' => 'The JSON encoded value for the key.',
+          'description' => 'The JSON encoded value of the config item. Same as the contents of a config .json file.',
         ),
-        'ctime' => array(
+        'changed' => array(
           'type' => 'int',
           'not null' => TRUE,
           'default' => 0,
-          'description' => 'The node changed time (see stat(2) for details.)',
+          'description' => 'The timestamp this config item was last changed',
         ),
       ),
       'primary key' => array('name'),
@@ -1317,9 +1317,9 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
   /**
    * Constructs a new ConfigDatabaseStorage controller.
    *
-   * @param string $dburl
+   * @param string $db_url
    *   A URL that references a backdrop connection (optional) and table. The
-   *   string has a format of db:/<database connection>/<database table>.
+   *   string has a format of db::/<database connection>/<database table>.
    *
    *   Examples:
    *    * db:/default/config_active
@@ -1330,11 +1330,11 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    *   If no database connection is specified, then the 'default' connection is
    *   used.
    */
-  public function __construct($dburl) {
+  public function __construct($db_url) {
     $matches = array();
-    preg_match('/^db:(\/(\w*)\/)?(\w+)$/', trim($dburl), $matches);
+    preg_match('/^db:(\/\/(\w*)\/)?(\w+)$/', trim($db_url), $matches);
     if (count($matches) != 4) {
-      throw new ConfigStorageException(t('Invalid database specifier: @db', array('@db' => $dburl)));
+      throw new ConfigStorageException(t('Invalid database specifier: @db', array('@db' => $db_url)));
     }
     $this->table = $matches[3];
     $this->database = $matches[2] ? $matches[2] : 'default';
@@ -1396,7 +1396,7 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
       $value = FALSE;
     }
 
-    return $value ? TRUE : FALSE;
+    return (bool) $value;
   }
 
   /**
@@ -1458,9 +1458,9 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
         ->execute();
       if ($result == MergeQuery::STATUS_INSERT) {
         db_update($this->table, array('target' => $this->database))
-          ->fields(array('ctime' => time()))
+          ->fields(array('changed' => time()))
           ->condition('name', $name)
-          ->condition('ctime', 0)
+          ->condition('changed', 0)
           ->execute();
       }
     }
@@ -1507,7 +1507,7 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    */
   public function getModifiedTime($name) {
     $data = db_select($this->table, 'c', array('target' => $this->database))
-      ->fields('c', array('ctime'))
+      ->fields('c', array('changed'))
       ->condition('c.name', $name)
       ->execute()
       ->fetchField();
