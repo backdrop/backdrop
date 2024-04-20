@@ -24,7 +24,7 @@ class BackdropWebTestCaseCache extends BackdropWebTestCase {
   /**
    * Check if cache folder already exists.
    *
-   * @return
+   * @return boolean
    *   TRUE if cache exists, FALSE if no cache for current profile.
    */
   public function isCached(){

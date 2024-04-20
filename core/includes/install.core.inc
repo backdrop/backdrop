@@ -1363,9 +1363,9 @@ function install_select_language(&$install_state) {
           $output .= '<ul>';
           $output .= '<li><a href="' . check_url(backdrop_current_script_url(array('translate' => NULL))) . '">Reload the language selection page after adding translations</a></li>';
           $output .= '<li><a href="' . check_url(backdrop_current_script_url(array(
-              'langcode' => 'en',
-              'translate' => NULL
-            ))) . '">Continue installation in English</a></li>';
+            'langcode' => 'en',
+            'translate' => NULL,
+          ))) . '">Continue installation in English</a></li>';
           $output .= '</ul>';
         }
         else {

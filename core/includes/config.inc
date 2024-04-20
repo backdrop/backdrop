@@ -1319,16 +1319,16 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    *
    * @param string $db_url
    *   A URL that references a backdrop connection (optional) and table. The
-   *   string has a format of db::/<database connection>/<database table>.
+   *   string has a format of db://<database connection>/<database table>.
    *
    *   Examples:
-   *    * db:/default/config_active
-   *    * db:config_active
-   *    * db://config_active
-   *    * db:/config_store/config_stage
+   *    * db://default/config_active
+   *    * db://second_database/config_stage
    *
    *   If no database connection is specified, then the 'default' connection is
    *   used.
+   *
+   * @throws ConfigStorageException
    */
   public function __construct($db_url) {
     $matches = array();
@@ -1347,7 +1347,7 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
   }
 
   /**
-   * Create the database table it does not already exist.
+   * Create the database table if does not already exist.
    *
    * @return bool
    *   TRUE on success, FALSE in case of an error.

@@ -356,7 +356,7 @@ abstract class BackdropTestCase {
    *   The message to display along with the assertion.
    * @param $group
    *   The type of assertion - examples are "Browser", "PHP".
-   * @return
+   * @return boolean
    *   TRUE if the assertion succeeded, FALSE otherwise.
    */
   protected function assertTrue($value, $message = '', $group = 'Other') {
@@ -1039,7 +1039,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected $originalCleanUrl;
 
   /**
-   * The original shutdown handlers array, before it was cleaned for testing purposes.
+   * The original shutdown handlers array, before it was cleaned for testing.
    *
    * @var array
    */
@@ -1433,14 +1433,14 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   $account->pass_raw = $pass_raw;
    * @endcode
    *
-   * @param $account
+   * @param User $account
    *   User object representing the user to log in.
-   * @param $by_email
+   * @param boolean $by_email
    *   Whether to use email for login instead of username.
    *
    * @see backdropCreateUser()
    */
-  protected function backdropLogin($account, $by_email = FALSE) {
+  protected function backdropLogin(User $account, $by_email = FALSE) {
     global $user;
     if ($this->loggedInUser) {
       $this->backdropLogout();
@@ -1604,7 +1604,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   /**
    * Copies the cached tables and config for a profile if one is available.
    *
-   * @return
+   * @return boolean
    *   TRUE when cache used, FALSE when cache is not available.
    *
    * @see BackdropWebTestCase::setUp()
@@ -1686,15 +1686,15 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Create the database prefix for this test.
     $this->prepareDatabasePrefix();
 
+    // Reset all statics and variables to perform tests in a clean environment.
+    $conf = array();
+    backdrop_static_reset();
+
     // Prepare the environment for running tests.
     $this->prepareEnvironment();
     if (!$this->setupEnvironment) {
       return FALSE;
     }
-
-    // Reset all statics and variables to perform tests in a clean environment.
-    $conf = array();
-    backdrop_static_reset();
 
     // Change the database prefix.
     // All static variables need to be reset before the database prefix is
@@ -1704,7 +1704,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     if (!$this->setupDatabasePrefix) {
       return FALSE;
     }
-
 
     // This has to happen before any config changes are made to ensure that the
     // database tables from the test cache exist.
@@ -2851,8 +2850,8 @@ class BackdropWebTestCase extends BackdropTestCase {
       $xpath = $this->buildXPathQuery($xpath, $arguments);
       $result = $this->elements->xpath($xpath);
       // Some combinations of PHP / libxml versions return an empty array
-      // instead of the documented FALSE. Forcefully convert any false-ish values
-      // to an empty array to allow foreach(...) constructions.
+      // instead of the documented FALSE. Forcefully convert any false-ish
+      // values to an empty array to allow foreach(...) constructions.
       return $result ? $result : array();
     }
     else {
@@ -3096,7 +3095,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @param $all_requests
    *   Boolean value specifying whether to check all requests if the header is
    *   not found in the last request. Defaults to FALSE.
-   * @return
+   * @return string|FALSE
    *   The HTTP header value or FALSE if not found.
    */
   protected function backdropGetHeader($name, $all_requests = FALSE) {
@@ -3993,26 +3992,31 @@ class BackdropWebTestCase extends BackdropTestCase {
   /**
    * Verifies that a watchdog message has been entered.
    *
-   * @param $watchdog_message
+   * @param string $watchdog_message
    *   The watchdog message.
-   * @param $variables
+   * @param array $variables
    *   The array of variables passed to watchdog().
-   * @param $message
+   * @param string $message
    *   The assertion message.
    *
    * @since 1.19.0 Method added.
    */
-  function assertWatchdogMessage($watchdog_message, $variables, $message) {
-    $status = (bool) db_query_range("SELECT 1 FROM {watchdog} WHERE message = :message AND variables = :variables", 0, 1, array(':message' => $watchdog_message, ':variables' => serialize($variables)))->fetchField();
+  protected function assertWatchdogMessage($watchdog_message, array $variables, $message) {
+    $status = (bool) db_query_range("SELECT 1 FROM {watchdog} WHERE message = :message AND variables = :variables", 0, 1, array(
+      ':message' => $watchdog_message,
+      ':variables' => serialize($variables),
+    ))->fetchField();
     return $this->assert($status, format_string('@message', array('@message' => $message)));
   }
 
   /**
    * Clears the watchdog database table.
    *
+   * @return NULL
+   *
    * @since 1.19.0 Method added.
    */
-  function clearWatchdog() {
+  protected function clearWatchdog() {
     db_truncate('watchdog')->execute();
   }
 }

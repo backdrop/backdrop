@@ -421,7 +421,7 @@ abstract class BackdropCacheArray implements ArrayAccess {
    * @param $persist
    *   Optional boolean to specify whether the offset should be persisted or
    *   not, defaults to TRUE. When called with $persist = FALSE the offset will
-   *   be unflagged so that it will not be written at the end of the request.
+   *   be un-flagged so that it will not be written at the end of the request.
    */
   protected function persist($offset, $persist = TRUE) {
     $this->keysToPersist[$offset] = $persist;
@@ -806,6 +806,12 @@ function backdrop_is_https() {
  * @since 1.9.2
  */
 function backdrop_is_apache() {
+  // Test runs always emulate Apache.
+  $test_info = &$GLOBALS['backdrop_test_info'];
+  if (!empty($test_info['in_child_site'])) {
+    return TRUE;
+  }
+
   $server_software = $_SERVER['SERVER_SOFTWARE'];
   return (bool) preg_match("/apache/i", $server_software);
 }
