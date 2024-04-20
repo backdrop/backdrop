@@ -171,6 +171,7 @@ class ConfigurationTest extends BackdropWebTestCase {
       $this->assert(TRUE, 'Config storage is not file-based, so .htaccess test skipped.');
       return;
     }
+
     // Check that the .htaccess file is present in config location.
     $active_dir = config_get_config_directory();
     $this->assertTrue(is_file($active_dir . '/.htaccess'), "Located the .htaccess file in the 'active' config directory.");

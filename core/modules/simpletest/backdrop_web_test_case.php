@@ -1604,7 +1604,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   /**
    * Copies the cached tables and config for a profile if one is available.
    *
-   * @return
+   * @return boolean
    *   TRUE when cache used, FALSE when cache is not available.
    *
    * @see BackdropWebTestCase::setUp()
@@ -1645,7 +1645,7 @@ class BackdropWebTestCase extends BackdropTestCase {
       mkdir($dst);
     }
     while (FALSE !== ($file = readdir($dir))) {
-      if ($file != '.' && $file != '..' && $file != '.htaccess') {
+      if ($file != '.' && $file != '..') {
         if (is_dir($src . '/' . $file)) {
           $this->recursiveCopy($src . '/' . $file, $dst . '/' . $file);
         }
@@ -2851,8 +2851,8 @@ class BackdropWebTestCase extends BackdropTestCase {
       $xpath = $this->buildXPathQuery($xpath, $arguments);
       $result = $this->elements->xpath($xpath);
       // Some combinations of PHP / libxml versions return an empty array
-      // instead of the documented FALSE. Forcefully convert any false-ish values
-      // to an empty array to allow foreach(...) constructions.
+      // instead of the documented FALSE. Forcefully convert any false-ish
+      // values to an empty array to allow foreach(...) constructions.
       return $result ? $result : array();
     }
     else {

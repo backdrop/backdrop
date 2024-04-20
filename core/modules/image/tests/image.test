@@ -252,8 +252,8 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
       $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'no-cache, must-revalidate', 'Cache-Control header was set to prevent caching.');
       $this->assertEqual($this->backdropGetHeader('X-Image-Owned-By'), 'image_module_test', 'Expected custom header has been added.');
 
-      // Make sure that a second request to the already existing derivate works
-      // too.
+      // Make sure that a second request to the already existing derivative
+      // works too.
       $this->backdropGet($generate_url);
       $this->assertResponse(200, 'Image was generated at the URL.');
 
