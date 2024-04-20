@@ -30,9 +30,9 @@ function contact_install() {
   // Build menu router before creating a menu item to the /contact path.
   menu_router_build();
 
-  // Get main-menu max weight
+  // Get main-menu max weight.
   $query = db_select('menu_links')
-    ->condition('menu_name' , 'main-menu');
+    ->condition('menu_name', 'main-menu');
   $query->addExpression('MAX(weight)');
   $weight = $query->execute()->fetchField();
 
@@ -52,10 +52,10 @@ function contact_install() {
  */
 function contact_disable() {
   // Delete contact menu item from main-menu.
-  $menu_links = db_select('menu_links' , 'ml')
+  $menu_links = db_select('menu_links', 'ml')
     ->fields('ml', array('mlid'))
-    ->condition('menu_name' , 'main-menu')
-    ->condition('link_path' , 'contact')
+    ->condition('menu_name', 'main-menu')
+    ->condition('link_path', 'contact')
     ->execute()
     ->fetchAll();
 
