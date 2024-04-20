@@ -208,16 +208,33 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle
     '#required' => TRUE,
   );
   $fields = field_info_instances($entity_type, $form_state['bundle_type']);
+  $field_blocks = array();
+  foreach ($fields as $key => $field) {
+    $field_blocks[$key] = $field['label'];
+  }
+  $field_blocks += array('main' => t('Main content block'));
+    
   $first_field = reset($fields);
   $form['content_area'] = array(
     '#title' => t('"Main content" block'),
     '#type' => 'checkboxes',
     '#default_value' => array('field_blocks'),
     '#options' => array(
-      'field_blocks' => t('Replace the "Main content" block with individual field blocks.'),
+      'field_blocks' => t('Use field blocks.'),
     ),
     '#description' => empty($first_field) ? t('There are no fields attached to this entity.') : '',
     '#disabled' => empty($first_field),
+  );
+  $form['field_blocks'] = array(
+    '#title' => t('Available field blocks'),
+    '#type' => 'checkboxes',
+    '#default_value' => array('main'),
+    '#options' => $field_blocks,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="content_area[field_blocks]"]' => array('checked' => TRUE),
+      ),
+    ),
   );
 
   // Get the list of layout template options. The list needs to be rebuilt (see
@@ -254,10 +271,18 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle
 
   return $form;
 }
+
 /**
- * Render the settings form for layout.
- *
- * @ingroup forms
+ * Validate handler for the layout_entity_admin_add_form().
+ */
+function layout_entity_admin_add_form_validate($form, &$form_state) {
+  if (empty(array_filter($form_state['values']['field_blocks']))) {
+    form_set_error('field_blocks', t('At least one block should be placed.'));
+  }
+}
+
+/**
+ * Submit handler for layout_entity_admin_add_form().
  */
 function layout_entity_admin_add_form_submit($form, &$form_state) {
   /* @var Layout $layout */
@@ -321,24 +346,28 @@ function layout_entity_admin_add_form_submit($form, &$form_state) {
         }
 
         foreach ($fields as $field) {
-          $key = 'field:field_block:' . $field['entity_type'] . '-' . $field['field_name'];
-          $field_block = layout_create_handler('block', $key);
-          $build_state = array(
-            'build_info' => array('args' => array($layout, $field_block, 'standard', $content_region)),
-          );
-          $build = backdrop_build_form('layout_block_configure_form', $build_state);
-          form_execute_handlers('validate', $build, $build_state);
-          form_execute_handlers('submit', $build, $build_state);
-        }
-        $main_content_uuid = '';
-        foreach ($layout->content as $uuid => $block) {
-          if ($block->module === 'system' && $block->delta === 'main') {
-            $main_content_uuid = $uuid;
-            break;
+          if ($form_state['values']['field_blocks'][$field['field_name']]) {
+            $key = 'field:field_block:' . $field['entity_type'] . '-' . $field['field_name'];
+            $field_block = layout_create_handler('block', $key);
+            $build_state = array(
+              'build_info' => array('args' => array($layout, $field_block, 'standard', $content_region)),
+            );
+            $build = backdrop_build_form('layout_block_configure_form', $build_state);
+            form_execute_handlers('validate', $build, $build_state);
+            form_execute_handlers('submit', $build, $build_state);
           }
         }
-        if ($main_content_uuid) {
-          $layout->removeBlock($main_content_uuid);
+        if (!$form_state['values']['field_blocks']['main']) {
+          $main_content_uuid = '';
+          foreach ($layout->content as $uuid => $block) {
+            if ($block->module === 'system' && $block->delta === 'main') {
+              $main_content_uuid = $uuid;
+              break;
+            }
+          }
+          if ($main_content_uuid) {
+            $layout->removeBlock($main_content_uuid);
+          }
         }
       }
     }
