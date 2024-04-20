@@ -792,7 +792,11 @@ function image_style_deliver($style, $scheme) {
     image_style_remove_allowed_uri($derivative_uri);
 
     $image = image_load($derivative_uri);
-    file_transfer($image->source, array('Content-Type' => $image->info['mime_type'], 'Content-Length' => $image->info['file_size']));
+    file_transfer($image->source, array(
+      'Content-Type' => $image->info['mime_type'],
+      'Content-Length' => $image->info['file_size'],
+      'X-Backdrop-Generated' => 'true',
+    ));
   }
   else {
     watchdog('image', 'Unable to generate the derived image located at %path.', array('%path' => $derivative_uri));

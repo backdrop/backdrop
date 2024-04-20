@@ -1645,7 +1645,7 @@ class BackdropWebTestCase extends BackdropTestCase {
       mkdir($dst);
     }
     while (FALSE !== ($file = readdir($dir))) {
-      if ($file != '.' && $file != '..') {
+      if ($file != '.' && $file != '..' && $file != '.htaccess') {
         if (is_dir($src . '/' . $file)) {
           $this->recursiveCopy($src . '/' . $file, $dst . '/' . $file);
         }

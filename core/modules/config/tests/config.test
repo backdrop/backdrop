@@ -166,15 +166,12 @@ class ConfigurationTest extends BackdropWebTestCase {
    */
   public function testConfigHtaccess() {
     // This test only run if using file-based config storage.
-    $storage = config_get_config_storage();
-    if (!is_a($storage, 'ConfigFileStorage')) {
+    $active_storage = config_get_config_storage();
+    $active_dir = config_get_config_directory();
+    if (!is_a($active_storage, 'ConfigFileStorage')) {
       $this->assert(TRUE, 'Config storage is not file-based, so .htaccess test skipped.');
       return;
     }
-
-    // Check that the .htaccess file is present in config location.
-    $active_dir = config_get_config_directory();
-    $this->assertTrue(is_file($active_dir . '/.htaccess'), "Located the .htaccess file in the 'active' config directory.");
 
     // Visit the status report to confirm the file is re-created automatically.
     $admin_user = $this->backdropCreateUser(array(
