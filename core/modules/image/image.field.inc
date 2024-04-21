@@ -781,7 +781,7 @@ function image_field_formatter_settings_summary($field, $instance, $view_mode) {
 
   if (!empty($formatter_settings['image_svg_dimensions']['width']) || !empty($formatter_settings['image_svg_dimensions']['width'])) {
     $summary[] = t(
-      'SVG image attributes: @width x @height pixels',
+      'Default SVG dimensions: @width x @height pixels',
       array(
         '@width' => $formatter_settings['image_svg_dimensions']['width'],
         '@height' => $formatter_settings['image_svg_dimensions']['height'],
