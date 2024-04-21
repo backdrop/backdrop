@@ -2803,7 +2803,7 @@ function backdrop_http_header_attributes(array $attributes = array()) {
  *
  * Attribute values are sanitized by running them through check_plain().
  * Attribute names are not automatically sanitized. When using user-supplied
- * attribute names, it is strongly recommended to allow only white-listed names,
+ * attribute names, it is strongly recommended to ensure that they are allowed,
  * since certain attributes carry security risks and can be abused.
  *
  * Examples of security aspects when using backdrop_attributes:
