@@ -3587,7 +3587,7 @@ function form_process_actions($element, &$form_state) {
       $first_button = $key;
     }
     // Record the primary button if found.
-    if (isset($button['#attributes']['class']) && in_array('button-primary', $button['#attributes']['class'])  && in_array('button-danger', $button['#attributes']['class'])) {
+    if (isset($button['#attributes']['class']) && in_array('button-primary', $button['#attributes']['class']) && in_array('button-danger', $button['#attributes']['class'])) {
       $primary_set = TRUE;
     }
     // Add the secondary button class otherwise.
@@ -4265,6 +4265,14 @@ function theme_button($variables) {
   element_set_attributes($element, array('id', 'name', 'value'));
 
   $element['#attributes']['class'][] = 'form-' . $element['#button_type'];
+
+  // Add indentation.
+  if (isset($element['#indentation'])) {
+    $element['#attributes']['class'][] = 'form-item-indentation';
+    $element['#attributes']['class'][] = 'form-item-indentation-' . $element['#indentation'];
+    $element['#attributes']['data-indentation-depth'] = $element['#indentation'];
+  }
+
   if (!empty($element['#attributes']['disabled'])) {
     $element['#attributes']['class'][] = 'form-button-disabled';
   }
@@ -4294,6 +4302,14 @@ function theme_image_button($variables) {
   }
 
   $element['#attributes']['class'][] = 'form-' . $element['#button_type'];
+
+  // Add indentation.
+  if (isset($element['#indentation'])) {
+    $element['#attributes']['class'][] = 'form-item-indentation';
+    $element['#attributes']['class'][] = 'form-item-indentation-' . $element['#indentation'];
+    $element['#attributes']['data-indentation-depth'] = $element['#indentation'];
+  }
+
   if (!empty($element['#attributes']['disabled'])) {
     $element['#attributes']['class'][] = 'form-button-disabled';
   }
