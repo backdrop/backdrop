@@ -1181,13 +1181,14 @@ function backdrop_http_request($url, array $options = array()) {
   while ($line = trim((string) array_shift($response))) {
     list($name, $value) = explode(':', $line, 2);
     $name = strtolower($name);
+    $value = trim($value);
     if (isset($result->headers[$name]) && $name == 'set-cookie') {
       // RFC 2109: the Set-Cookie response header comprises the token Set-
       // Cookie:, followed by a comma-separated list of one or more cookies.
-      $result->headers[$name] .= ',' . trim($value);
+      $result->headers[$name] .= ',' . $value;
     }
-    elseif ($header == 'Transfer-Encoding' && trim($value) == 'chunked') {
-      $result->headers[$header] = trim($value);
+    elseif (isset($result->headers[$name]) && $name == 'transfer-encoding' && $value == 'chunked') {
+      $result->headers[$name] = $value;
 
       // RFC 2616, Section 3.6: The chunked encoding modifies the body of
       // a message in order to transfer it as a series of chunks.
@@ -1209,7 +1210,7 @@ function backdrop_http_request($url, array $options = array()) {
       $result->data = $return;
     }
     else {
-      $result->headers[$name] = trim($value);
+      $result->headers[$name] = $value;
     }
   }
 
