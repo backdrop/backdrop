@@ -631,7 +631,6 @@ function image_field_formatter_info() {
       'image_link' => '',
       'image_float' => '',
       'image_load' => 'auto',
-      'image_svg_display' => TRUE,
       'image_svg_dimensions' => array(
         'width' => IMAGE_SVG_DEFAULT_WIDTH,
         'height' => IMAGE_SVG_DEFAULT_HEIGHT,
@@ -705,11 +704,6 @@ function image_field_formatter_settings_form($field, $instance, $view_mode, $for
   $element['image_load']['auto']['#description'] = t('Each browser will determine whether or not to lazily load the image.');
   $element['image_load']['eager']['#description'] = t('Load this image immediately, regardless of where it is located on the page.');
 
-  $element['image_svg_display'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Render SVG images in an &lt;img&gt; tag'),
-    '#default_value' => !empty($settings['image_svg_display']),
-  );
   $element['image_svg_dimensions'] = array(
     '#type' => 'item',
     '#title' => t('Maximum SVG image dimensions'),
@@ -719,7 +713,6 @@ function image_field_formatter_settings_form($field, $instance, $view_mode, $for
     '#states' => array(
       'visible' => array(
         ':input[name="fields[field_image][settings_edit_form][settings][image_style]"]' => array('value' => ''),
-        ':input[name="fields[field_image][settings_edit_form][settings][image_svg_display]"]' => array('checked' => TRUE),
       ),
     ),
   );
@@ -786,8 +779,7 @@ function image_field_formatter_settings_summary($field, $instance, $view_mode) {
 
   $formatter_settings = $instance['display'][$view_mode]['settings'];
 
-  if ($formatter_settings['image_svg_display'] && (!empty($formatter_settings['image_svg_dimensions']['width'])
-    || !empty($formatter_settings['image_svg_dimensions']['width']))) {
+  if (!empty($formatter_settings['image_svg_dimensions']['width']) || !empty($formatter_settings['image_svg_dimensions']['width'])) {
     $summary[] = t(
       'SVG image attributes: @width x @height pixels',
       array(
@@ -851,117 +843,13 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
       }
     }
 
-    if (!$is_svg || $display['settings']['image_svg_display']) {
-      $element[$delta] = array(
-        '#theme' => 'image_formatter',
-        '#item' => $item,
-        '#image_style' => $display['settings']['image_style'],
-        '#path' => isset($uri) ? $uri : '',
-      );
-    }
-    else {
-      $svg_path = file_create_url($item['uri']);
-      $svg = file_get_contents($svg_path);
-      $svg = preg_replace(['/<\?xml.*\?>/i', '/<!DOCTYPE((.|\n|\r)*?)">/i'], '', $svg);
-      $svg_clean = filter_xss($svg, image_field_allowed_svg_tags());
-      $svg_clean = trim($svg_clean);
-
-      if (isset($uri)) {
-        $element[$delta] = array(
-          '#type' => 'link',
-          '#href' => $uri['path'],
-          '#title' => $svg_clean,
-          '#options' => array(
-            'html' => TRUE,
-          ),
-        );
-      }
-      else {
-        $element[$delta] = array(
-          '#type' => 'markup',
-          '#markup' => $svg_clean,
-        );
-      }
-    }
+    $element[$delta] = array(
+      '#theme' => 'image_formatter',
+      '#item' => $item,
+      '#image_style' => $display['settings']['image_style'],
+      '#path' => isset($uri) ? $uri : '',
+    );
   }
 
   return $element;
-}
-
-/**
- * Provides a list of allowed SVG tags.
- */
-function image_field_allowed_svg_tags() {
-  $tagsUc = array(
-    'a',
-    'animate',
-    'animateMotion',
-    'animateTransform',
-    'audio',
-    'canvas',
-    'circle',
-    'clipPath',
-    'defs',
-    'desc',
-    'discard',
-    'ellipse',
-    'feBlend',
-    'feColorMatrix',
-    'feComponentTransfer',
-    'feComposite',
-    'feConvolveMatrix',
-    'feDiffuseLighting',
-    'feDisplacementMap',
-    'feDistantLight',
-    'feDropShadow',
-    'feFlood',
-    'feFuncA',
-    'feFuncB',
-    'feFuncG',
-    'feFuncR',
-    'feGaussianBlur',
-    'feImage',
-    'feMerge',
-    'feMergeNode',
-    'feMorphology',
-    'feOffset',
-    'fePointLight',
-    'feSpecularLighting',
-    'feSpotLight',
-    'feTile',
-    'feTurbulence',
-    'filter',
-    'foreignObject',
-    'g',
-    'iframe',
-    'image',
-    'line',
-    'linearGradient',
-    'marker',
-    'mask',
-    'metadata',
-    'mpath',
-    'path',
-    'pattern',
-    'polygon',
-    'polyline',
-    'radialGradient',
-    'rect',
-    'set',
-    'stop',
-    'style',
-    'svg',
-    'switch',
-    'symbol',
-    'text',
-    'textPath',
-    'title',
-    'tspan',
-    'unknown',
-    'use',
-    'video',
-    'view',
-  );
-
-  return array_map('strtolower', $tagsUc);
 }
