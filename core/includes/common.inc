@@ -1186,6 +1186,28 @@ function backdrop_http_request($url, array $options = array()) {
       // Cookie:, followed by a comma-separated list of one or more cookies.
       $result->headers[$name] .= ',' . trim($value);
     }
+    elseif ($header == 'Transfer-Encoding' && trim($value) == 'chunked') {
+      $result->headers[$header] = trim($value);
+
+      // RFC 2616, Section 3.6: The chunked encoding modifies the body of
+      // a message in order to transfer it as a series of chunks.
+      $do = TRUE;
+      $size = NULL;
+
+      while ($do) {
+        $pos = @strpos($result->data, "\r\n", 0);
+        if (!($pos === FALSE) && $size === NULL) {
+          $size = hexdec(substr($result->data, 0, $pos));
+          $return .= substr($result->data, $pos + 2, $size);
+          $result->data = substr($result->data, ($pos + 2) + $size);
+          $size = NULL;
+        }
+        else {
+          $do = FALSE;
+        }
+      }
+      $result->data = $return;
+    }
     else {
       $result->headers[$name] = trim($value);
     }
