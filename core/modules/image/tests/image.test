@@ -272,7 +272,7 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
       $this->pass('Expected Content-Length was reported.');
     }
     else {
-      $this->fail('Expected Content-Length or Chunked response was not returned');
+      $this->fail('Expected Content-Length or Chunked response was not returned.');
     }
 
     if ($scheme == 'private') {
