@@ -67,7 +67,7 @@ function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg
     '#header' => $header,
     '#rows' => $rows,
     '#attributes' => array('class' => array('layout-list')),
-    '#empty' => t('No layout overrides have been created for !entity_types yet.', array('!entity_types' => $entity_info['plural label'])),
+    '#empty' => t('No layout overrides have been created for !entity_type types yet.', array('!entity_type' => $entity_info['label'])),
     '#weight' => 1,
   );
 
@@ -82,7 +82,7 @@ function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg
  */
 function layout_get_entity_layouts($entity_type, $bundle_name = '') {
   $all_layouts = layout_load_all();
-  $matched_layouts = array();
+  $matched_layouts = array('all' => array(), 'bundles' => array());
   foreach ($all_layouts as $layout) {
     if ($path = $layout->getPath()) {
       $path_contexts = layout_context_required_by_path($path);

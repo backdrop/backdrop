@@ -644,7 +644,6 @@ function layout_menu() {
 function layout_entity_menu_title($entity_type, $bundle_arg, $create_for_all_bundles = NULL) {
   $entity_info = entity_get_info($entity_type);
   $entity_name = ($entity_type == 'node') ? t('content') : $entity_info['label'];
-  $entity_plural_name = ($entity_type == 'node') ? t('content') : $entity_info['plural label'];
   $bundle_name = '';
 
   if (!$create_for_all_bundles) {
@@ -659,14 +658,14 @@ function layout_entity_menu_title($entity_type, $bundle_arg, $create_for_all_bun
         $bundle_name = $entity_info['label'];
       }
     }
-    return t('Create a layout for [@bundle_name] @entities', array('@bundle_name' => $bundle_name, '@entities' => $entity_plural_name));
+    return t('Create a layout for a [@bundle_name] @entity', array('@bundle_name' => $bundle_name, '@entity' => $entity_name));
   }
   else {
     if (count($entity_info['bundles']) > 1) {
       return t('Create a layout for all @entity types', array('@entity' => $entity_name));
     }
     else {
-      return t('Create a layout for @entities', array('@entities' => $entity_plural_name));
+      return t('Create a layout for a @entity', array('@entity' => $entity_name));
     }
   }
 }
