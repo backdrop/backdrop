@@ -20,14 +20,6 @@
 
 /* @end */
 
-/* @group Views listing page */
-
-#views-list tr.disabled td {
-  color: #999;
-}
-
-/* @end */
-
 /* @group Columns */
 
 @media (min-width:768px) {
@@ -331,7 +323,6 @@
   max-height: 400px;
   overflow: auto;
   padding: 20px;
-  -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 @media only screen and (min-height: 750px) {
@@ -375,6 +366,10 @@
   float: right;
 }
 
+#views-page-path {
+  word-break: break-all;
+}
+
 /* @end */
 
 /* @group Filter Settings form */
@@ -392,24 +387,6 @@ div.form-item-options-value-all {
  */
 #views-ajax-body form {
   width: 100%;
-}
-
-/* @end */
-
-
-
-/* @group Javascript dependent styling */
-
-.js-only {
-  display: none;
-}
-
-html.js .js-only {
-  display: inherit;
-}
-
-html.js span.js-only {
-  display: inline;
 }
 
 /* @end */

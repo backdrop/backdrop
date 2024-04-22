@@ -1,3 +1,6 @@
+/**
+ * Styles used when displaying a formatted_html field or rich text editor.
+ */
 .text-format-wrapper .form-item {
   margin-bottom: 0;
 }
@@ -16,17 +19,6 @@
   margin-top: 0.5em;
 }
 
-#filter-order tr .form-item {
-  padding: 0.5em 0 0 3em;
-  white-space: normal;
-}
-#filter-order tr .form-type-checkbox .description {
-  padding: 0 0 0 2.5em;
-}
-input#edit-filters-filter-html-settings-allowed-html {
-  width: 100%;
-}
-
 .tips {
   margin-top: 0;
   margin-bottom: 0;
@@ -39,7 +31,6 @@ input#edit-filters-filter-html-settings-allowed-html {
   width: 100%;
   max-width: 500px;
   z-index: 9996 !important; /* To come above the full-screen CKEditor button. */
-  -webkit-transition: max-width .5s, left .5s, right .5s; /* For Safari 3.1 to 6.0 */
   transition: max-width .5s, left .5s, right .5s;
 }
 .editor-dialog-with-library {
@@ -178,11 +169,11 @@ input#edit-filters-filter-html-settings-allowed-html {
   border: 1px solid #99d1ff;
 }
 
-.image-form-wrapper {
+.editor-dialog-with-library .filter-format-editor-image-form {
   display: flex;
   flex-direction: row;
 }
-.editor-image-fields {
+.image-form-wrapper {
   width: 350px;
   flex-grow: 0;
   padding-top: 0;

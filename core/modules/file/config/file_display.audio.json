@@ -1,0 +1,29 @@
+{
+    "_config_name": "file_display.audio",
+    "_module": "file",
+    "type": "audio",
+    "default": {
+        "formatter": "file_field_file_audio",
+        "settings": {
+            "file_field_file_audio": {
+                "controls": 1,
+                "autoplay": 0,
+                "loop": 0,
+                "preload": "",
+                "multiple_file_behavior": "tags"
+            }
+        }
+    },
+    "preview": {
+        "formatter": "file_field_file_audio",
+        "settings": {
+            "file_field_file_audio": {
+                "controls": 1,
+                "autoplay": 0,
+                "loop": 0,
+                "preload": "",
+                "multiple_file_behavior": "tags"
+            }
+        }
+    }
+}

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Unit test file for the entity API.
@@ -9,6 +8,17 @@
  * Tests EntityFieldQuery.
  */
 class EntityFieldQueryTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var array
+   */
+  protected $fields;
+
+  /**
+   * @var array
+   */
+  protected $field_names;
+
   function setUp() {
     parent::setUp(array('node', 'field_test', 'entity_query_access_test', 'node_access_test'));
 
@@ -85,13 +95,12 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
     $instances[1]['bundle'] = $instances[1]['entity_type'] = 'test_entity_bundle';
     field_create_instance($instances[1]);
 
-    $this->instances = $instances;
     // Write entity base table if there is one.
     $entities = array();
 
     // Create entities which have a 'bundle key' defined.
     for ($i = 1; $i < 7; $i++) {
-      $entity = new stdClass();
+      $entity = entity_create('test_entity', array());
       $entity->ftid = $i;
       $entity->fttype = ($i < 5) ? 'bundle1' : 'bundle2';
 
@@ -100,7 +109,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
       field_attach_insert('test_entity_bundle_key', $entity);
     }
 
-    $entity = new stdClass();
+    $entity = entity_create('test_entity', array());
     $entity->ftid = 5;
     $entity->fttype = 'test_entity_bundle';
     $entity->{$this->field_names[1]}[LANGUAGE_NONE][0]['shape'] = 'square';
@@ -118,7 +127,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
 
     // Create entities with support for revisions.
     for ($i = 1; $i < 5; $i++) {
-      $entity = new stdClass();
+      $entity = entity_create('test_entity', array());
       $entity->ftid = $i;
       $entity->ftvid = $i;
       $entity->fttype = 'test_bundle';
@@ -131,7 +140,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
 
     // Add two revisions to an entity.
     for ($i = 100; $i < 102; $i++) {
-      $entity = new stdClass();
+      $entity = entity_create('test_entity', array());
       $entity->ftid = 4;
       $entity->ftvid = $i;
       $entity->fttype = 'test_bundle';
@@ -969,7 +978,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
     ), 'Test offset on a field.', TRUE);
 
     for ($i = 6; $i < 10; $i++) {
-      $entity = new stdClass();
+      $entity = entity_create('test_entity', array());
       $entity->ftid = $i;
       $entity->fttype = 'test_entity_bundle';
       $entity->{$this->field_names[0]}[LANGUAGE_NONE][0]['value'] = $i - 5;
@@ -1051,7 +1060,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
     field_test_entity_info_translatable('test_entity', TRUE);
 
     // Create more items with different languages.
-    $entity = new stdClass();
+    $entity = entity_create('test_entity', array());
     $entity->ftid = 1;
     $entity->ftvid = 1;
     $entity->fttype = 'test_bundle';
@@ -1088,7 +1097,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
     field_test_entity_info_translatable('test_entity', TRUE);
 
     // Create more items with different languages.
-    $entity = new stdClass();
+    $entity = entity_create('test_entity', array());
     $entity->ftid = 1;
     $entity->ftvid = 1;
     $entity->fttype = 'test_bundle';
@@ -1172,7 +1181,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
       ->fieldCondition($this->fields[0], 'value', 0, '=', 'delta', 'language')
       ->fieldDeltaCondition($this->fields[0], 1, '>=', 'delta', 'language')
       ->fieldLanguageCondition($this->fields[0], 'en', '<>', 'delta', 'language');
-    $this->assertEntityFieldQuery($query, array(), 'Test with a grouped delta + language meta condition (empty result set, delta condition unsatisifed).');
+    $this->assertEntityFieldQuery($query, array(), 'Test with a grouped delta + language meta condition (empty result set, delta condition unsatisfied).');
 
     $query = new EntityFieldQuery();
     $query
@@ -1180,7 +1189,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
       ->fieldCondition($this->fields[0], 'value', 0, '=', 'delta', 'language')
       ->fieldDeltaCondition($this->fields[0], 1, '<', 'delta', 'language')
       ->fieldLanguageCondition($this->fields[0], LANGUAGE_NONE, '<>', 'delta', 'language');
-    $this->assertEntityFieldQuery($query, array(), 'Test with a grouped delta + language meta condition (empty result set, language condition unsatisifed).');
+    $this->assertEntityFieldQuery($query, array(), 'Test with a grouped delta + language meta condition (empty result set, language condition unsatisfied).');
 
     $query = new EntityFieldQuery();
     $query
@@ -1188,7 +1197,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
       ->fieldCondition($this->fields[0], 'value', 0, '=', 'delta', 'language')
       ->fieldDeltaCondition($this->fields[0], 1, '>=', 'delta', 'language')
       ->fieldLanguageCondition($this->fields[0], LANGUAGE_NONE, '<>', 'delta', 'language');
-    $this->assertEntityFieldQuery($query, array(), 'Test with a grouped delta + language meta condition (empty result set, both conditions unsatisifed).');
+    $this->assertEntityFieldQuery($query, array(), 'Test with a grouped delta + language meta condition (empty result set, both conditions unsatisfied).');
 
     // Test grouping with another field to ensure that grouping cache is reset
     // properly.
@@ -1237,7 +1246,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'test_entity_bundle_key');
     // Add a flag that will be caught by field_test_entity_query_alter().
-    $query->alterMyExecuteCallbackPlease = TRUE;
+    $query->addTag('alterMyExecuteCallbackPlease');
     $this->assertEntityFieldQuery($query, array(
       array('user', 1),
     ), 'executeCallback can override the query handler when set in a hook_entity_query_alter().');

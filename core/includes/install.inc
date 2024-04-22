@@ -1,9 +1,8 @@
 <?php
-
 /**
-* @file
-* API functions for installing modules and themes.
-*/
+ * @file
+ * API functions for installing modules and themes.
+ */
 
 /**
  * Indicates that a module has not been installed yet.
@@ -115,7 +114,7 @@ function backdrop_get_schema_versions($module) {
     // Narrow this down to functions ending with an integer, since all
     // hook_update_N() functions end this way, and there are other
     // possible functions which match '_update_'. We use preg_grep() here
-    // instead of foreaching through all defined functions, since the loop
+    // instead of iterating through all defined functions, since the loop
     // through all PHP functions can take significant page execution time
     // and this function is called on every administrative page via
     // system_requirements().
@@ -247,7 +246,7 @@ function backdrop_detect_baseurl($file = 'core/install.php') {
  * Returns all supported database installer objects that are compiled into PHP.
  *
  * @return
- *  An array of database installer objects compiled into PHP.
+ *   An array of database installer objects compiled into PHP.
  */
 function backdrop_load_database_driver() {
   // Because we have no registry yet, we need to include the install.inc file
@@ -302,6 +301,10 @@ abstract class DatabaseTasks {
   protected $tasks = array(
     array(
       'function'    => 'checkEngineVersion',
+      'arguments'   => array(),
+    ),
+    array(
+      'function'    => 'checkUtf8mb4',
       'arguments'   => array(),
     ),
     array(
@@ -414,7 +417,7 @@ abstract class DatabaseTasks {
         }
       }
     }
-    // Check for failed results and compile message
+    // Check for failed results and compile message.
     $message = '';
     foreach ($this->results as $result => $success) {
       if (!$success) {
@@ -499,7 +502,10 @@ abstract class DatabaseTasks {
       Database::addConnectionInfo('default', 'default', $modified_connection_info['default']);
       try {
         Database::getConnection()->createDatabase($database);
-        $last_exception = FALSE;
+        // After creating the database, we must run DatabaseTasks::connect()
+        // again to be sure a connection to the new database can be established.
+        Database::removeConnection('default');
+        return $this->connect();
       }
       catch (PDOException $e) {
         $last_exception = $e;
@@ -574,7 +580,7 @@ abstract class DatabaseTasks {
    * Return driver specific configuration options.
    *
    * @param $database
-   *  An array of driver specific configuration options.
+   *   An array of driver specific configuration options.
    *
    * @return
    *   The options form array.
@@ -602,6 +608,7 @@ abstract class DatabaseTasks {
       '#default_value' => empty($database['password']) ? '' : $database['password'],
       '#required' => FALSE,
       '#size' => 45,
+      '#password_toggle' => TRUE,
     );
 
     $form['advanced_options'] = array(
@@ -620,7 +627,10 @@ abstract class DatabaseTasks {
       '#title' => st('Table prefix'),
       '#default_value' => '',
       '#size' => 45,
-      '#description' => st('If more than one application will be sharing this database, enter a table prefix such as %prefix for your @profile site here.', array('@profile' => backdrop_install_profile_distribution_name(), '%prefix' => $prefix)),
+      '#description' => st('If more than one application will be sharing this database, enter a table prefix such as %prefix for your @profile site here.', array(
+        '@profile' => backdrop_install_profile_distribution_name(),
+        '%prefix' => $prefix,
+      )),
       '#weight' => 10,
     );
 
@@ -669,7 +679,7 @@ abstract class DatabaseTasks {
 
     // Verify the database port.
     if (!empty($database['port']) && !is_numeric($database['port'])) {
-      $errors[$database['driver'] . '][advanced_options][port'] =  st('Database port must be a number.');
+      $errors[$database['driver'] . '][advanced_options][port'] = st('Database port must be a number.');
     }
 
     return $errors;
@@ -835,8 +845,8 @@ function backdrop_install_config_directories() {
   }
   catch (\ConfigStorageException $e) {
     throw new Exception($e->getMessage() . ' ' . $t('To proceed with the installation, either create the directory and modify its permissions to make it writable, or adjust the permissions on the parent directory to allow the installer to create it automatically. For more information, see the <a href="@handbook_url">Installation Instructions</a> page.', array(
-        '@handbook_url' => 'https://backdropcms.org/installation',
-      )), 0, $e);
+      '@handbook_url' => 'https://backdropcms.org/installation',
+    )), 0, $e);
   }
 
   // Check that the active config is entirely empty, preventing installing over
@@ -967,14 +977,14 @@ function backdrop_install_system() {
   db_insert('system')
     ->fields(array('filename', 'name', 'type', 'owner', 'status', 'schema_version', 'bootstrap'))
     ->values(array(
-        'filename' => $system_path . '/system.module',
-        'name' => 'system',
-        'type' => 'module',
-        'owner' => '',
-        'status' => 1,
-        'schema_version' => $system_version,
-        'bootstrap' => 0,
-      ))
+      'filename' => $system_path . '/system.module',
+      'name' => 'system',
+      'type' => 'module',
+      'owner' => '',
+      'status' => 1,
+      'schema_version' => $system_version,
+      'bootstrap' => 0,
+    ))
     ->execute();
   system_rebuild_module_data();
 }
@@ -987,18 +997,25 @@ function backdrop_install_system() {
  *   all modules in this list have already been disabled before this function
  *   is called.
  * @param bool $uninstall_dependents
- *   (optional) If TRUE, the function will check that all modules which depend
- *   on the passed-in module list either are already uninstalled or contained in
- *   the list, and it will ensure that the modules are uninstalled in the
- *   correct order. This incurs a significant performance cost, so use FALSE if
- *   you know $module_list is already complete and in the correct order.
- *   Defaults to TRUE.
+ *   (optional)
+ *   - If TRUE, dependency-checking is enabled. This means that any modules
+ *     dependent on the passed-in module(s) are checked to see if they're
+ *     already uninstalled, or if they're included in $module_list. If all
+ *     dependents are in $module_list, they will all be uninstalled in the
+ *     correct order. If, however, dependent modules are still installed and not
+ *     included in $module_list, the passed-in module(s) will not be
+ *     uninstalled. Note that dependency-checking incurs a significant
+ *     performance cost.
+ *   - If FALSE, dependency-checking is bypassed. Dependent modules not included
+ *     in $module_list will not be uninstalled, and modules in the list may not
+ *     be uninstalled in the correct order. This could lead to problems, and so
+ *     should only be used if you know $module_list is already complete and in
+ *     the correct order.
  *
  * @return bool
- *   Returns TRUE if the operation succeeds or FALSE if it aborts due to an
- *   unsafe condition, namely, $uninstall_dependents is TRUE and a module in
- *   $module_list has dependents which are not already uninstalled and not also
- *   included in $module_list).
+ *   Returns FALSE if $uninstall_dependents is TRUE, and one or more dependent
+ *   modules are still installed but not included in $module_list. Otherwise
+ *   returns TRUE.
  *
  * @see module_disable()
  * @see module_enable()
@@ -1039,8 +1056,8 @@ function backdrop_uninstall_modules($module_list = array(), $uninstall_dependent
     // Uninstall the module.
     module_load_install($module);
     module_invoke($module, 'uninstall');
-    backdrop_uninstall_schema($module);
     config_uninstall_config($module);
+    backdrop_uninstall_schema($module);
 
     watchdog('system', '%module module uninstalled.', array('%module' => $module), WATCHDOG_INFO);
     backdrop_set_installed_schema_version($module, SCHEMA_UNINSTALLED);
@@ -1138,14 +1155,14 @@ function backdrop_verify_install_file($file, $mask = NULL, $type = 'file') {
  * Creates a directory with the specified permissions.
  *
  * @param $file
- *  The name of the directory to create;
+ *   The name of the directory to create;
  * @param $mask
- *  The permissions of the directory to create.
+ *   The permissions of the directory to create.
  * @param $message
- *  (optional) Whether to output messages. Defaults to TRUE.
+ *   (optional) Whether to output messages. Defaults to TRUE.
  *
- * @return
- *  TRUE/FALSE whether or not the directory was successfully created.
+ * @return bool
+ *   TRUE/FALSE whether or not the directory was successfully created.
  */
 function backdrop_install_mkdir($file, $mask, $message = TRUE) {
   $mod = 0;
@@ -1292,19 +1309,19 @@ function st($string, array $args = array(), array $options = array()) {
     }
   }
 
-  // Transform arguments before inserting them
+  // Transform arguments before inserting them.
   foreach ($args as $key => $value) {
-    switch ($key[0]) {
-      // Escaped only
+    switch (substr($key, 0, 1)) {
+      // Escaped only.
       case '@':
         $args[$key] = check_plain($value);
         break;
-      // Escaped and placeholder
+      // Escaped and placeholder.
       case '%':
       default:
         $args[$key] = '<em>' . check_plain($value) . '</em>';
         break;
-      // Pass-through
+      // Pass-through.
       case '!':
     }
   }
@@ -1354,7 +1371,7 @@ function backdrop_check_profile($profile) {
  * @return
  *   The highest severity in the array.
  *
- * @see system_get_requirements().
+ * @see system_get_requirements()
  */
 function backdrop_requirements_severity(&$requirements) {
   $severity = REQUIREMENT_OK;
@@ -1395,10 +1412,10 @@ function system_get_requirements() {
 function backdrop_check_module($module) {
   module_load_install($module);
   if (module_hook($module, 'requirements')) {
-    // Check requirements
+    // Check requirements.
     $requirements = module_invoke($module, 'requirements', 'install');
     if (is_array($requirements) && backdrop_requirements_severity($requirements) == REQUIREMENT_ERROR) {
-      // Print any error messages
+      // Print any error messages.
       foreach ($requirements as $requirement) {
         if (isset($requirement['severity']) && $requirement['severity'] == REQUIREMENT_ERROR) {
           $message = $requirement['description'];
@@ -1421,7 +1438,7 @@ function backdrop_check_module($module) {
  * a normal Backdrop module .info file. For example:
  * - name: The real name of the installation profile for display purposes.
  * - description: A brief description of the profile.
- * - dependencies: An array of shortnames of other modules that this install
+ * - dependencies: An array of machine names of other modules that this install
  *   profile requires.
  *
  * Additional, less commonly-used information that can appear in a profile.info

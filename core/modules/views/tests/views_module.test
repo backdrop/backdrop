@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of ViewsModuleTest.
@@ -11,8 +10,8 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests basic functions from the Views module.
  */
 class ViewsModuleTest extends ViewsSqlTest {
-  public function setUp() {
-    parent::setUp();
+  protected function setUp(array $modules = array()) {
+    parent::setUp($modules);
     backdrop_theme_rebuild();
   }
 
@@ -34,6 +33,7 @@ class ViewsModuleTest extends ViewsSqlTest {
 
     // Test unicode, @see http://drupal.org/node/513396#comment-2839416
     $text = array(
+      // cspell:disable
       'Tuy nhiên, những hi vọng',
       'Giả sử chúng tôi có 3 Apple',
       'siêu nhỏ này là bộ xử lý',
@@ -42,12 +42,14 @@ class ViewsModuleTest extends ViewsSqlTest {
       'của hãng bao gồm ba dòng',
       'сд асд асд ас',
       'асд асд асд ас'
+      // cspell:enable
     );
-    // Just test maxlength without word boundry.
+    // Just test maxlength without word boundary.
     $alter = array(
       'max_length' => 10,
     );
     $expect = array(
+      // cspell:disable
       'Tuy nhiên,',
       'Giả sử chú',
       'siêu nhỏ n',
@@ -56,6 +58,7 @@ class ViewsModuleTest extends ViewsSqlTest {
       'của hãng b',
       'сд асд асд',
       'асд асд ас',
+      // cspell:enable
     );
 
     foreach ($text as $key => $line) {
@@ -66,6 +69,7 @@ class ViewsModuleTest extends ViewsSqlTest {
     // Test also word_boundary
     $alter['word_boundary'] = TRUE;
     $expect = array(
+      // cspell:disable
       'Tuy nhiên',
       'Giả sử',
       'siêu nhỏ',
@@ -74,6 +78,7 @@ class ViewsModuleTest extends ViewsSqlTest {
       'của hãng',
       'сд асд',
       'асд асд',
+      // cspell:enable
     );
 
     foreach ($text as $key => $line) {
@@ -186,6 +191,29 @@ class ViewsModuleTest extends ViewsSqlTest {
     $this->assertEqual(state_get('views_test_views_data_count', 0), 1, 'Views data rebuilt once');
     $this->assertFalse(backdrop_static('_views_fetch_data_fully_loaded'), 'Views data is not fully loaded');
 
+    // Test if the cache consistency is ensured. There was an issue where
+    // calling _views_fetch_data() first with a table, would prevent the
+    // function from properly rebuilding, and missing the general cache entry.
+    // See https://www.drupal.org/node/2475669 for details.
+    // Make sure we start with an empty cache.
+    $this->resetStaticViewsDataCache();
+    cache_clear_all('*', 'cache_views', TRUE);
+
+    // Prime the static cache of _views_fetch_data(), by calling it with a table
+    // first.
+    views_fetch_data('views_test');
+    // Remove the general cache.
+    cache_clear_all('views_data:en', 'cache_views');
+    // Reset the static cache, to see if fetches from the persistent cache
+    // properly rebuild the static cache.
+    $this->resetStaticViewsDataCache();
+    // Prime the static cache of _views_fetch_data() by calling it with a table
+    // first.
+    views_fetch_data('views_test');
+    // Fetch the general cache, which was deleted, and see if it has been
+    // properly rebuilt.
+    views_fetch_data();
+    $this->assertTrue(cache_get('views_data:en', 'cache_views'), 'Cache for all tables was properly rebuilt.');
   }
 
   /**

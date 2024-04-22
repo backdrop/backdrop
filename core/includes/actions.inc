@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * This is the actions engine for executing stored actions.

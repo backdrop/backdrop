@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Helper module for the file tests.
@@ -76,9 +75,13 @@ function _file_test_form($form, &$form_state) {
   );
 
   $form['allow_all_extensions'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Allow all extensions?'),
-    '#default_value' => FALSE,
+    '#type' => 'radios',
+    '#options' => array(
+      'false' => 'No',
+      'empty_array' => 'Empty array',
+      'empty_string' => 'Empty string',
+    ),
+    '#default_value' => 'false',
   );
 
   $form['is_image_file'] = array(
@@ -114,8 +117,12 @@ function _file_test_form_submit(&$form, &$form_state) {
     $validators['file_validate_is_image'] = array();
   }
 
-  if ($form_state['values']['allow_all_extensions']) {
+  $allow = $form_state['values']['allow_all_extensions'];
+  if ($allow === 'empty_array') {
     $validators['file_validate_extensions'] = array();
+  }
+  elseif ($allow === 'empty_string') {
+    $validators['file_validate_extensions'] = array('');
   }
   elseif (!empty($form_state['values']['extensions'])) {
     $validators['file_validate_extensions'] = array($form_state['values']['extensions']);
@@ -408,9 +415,9 @@ function file_test_file_url_alter(&$uri) {
  */
 function file_test_file_mimetype_mapping_alter(&$mapping) {
   // Add new mappings.
-  $mapping['mimetypes']['file_test_mimetype_1'] = 'madeup/file_test_1';
-  $mapping['mimetypes']['file_test_mimetype_2'] = 'madeup/file_test_2';
-  $mapping['mimetypes']['file_test_mimetype_3'] = 'madeup/doc';
+  $mapping['mimetypes']['file_test_mimetype_1'] = 'made_up/file_test_1';
+  $mapping['mimetypes']['file_test_mimetype_2'] = 'made_up/file_test_2';
+  $mapping['mimetypes']['file_test_mimetype_3'] = 'made_up/doc';
   $mapping['extensions']['file_test_1'] = 'file_test_mimetype_1';
   $mapping['extensions']['file_test_2'] = 'file_test_mimetype_2';
   $mapping['extensions']['file_test_3'] = 'file_test_mimetype_2';

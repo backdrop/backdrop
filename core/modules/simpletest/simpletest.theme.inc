@@ -88,7 +88,7 @@ function theme_simpletest_test_table($variables) {
         'class' => array('simpletest-test-select'),
       );
       $row[] = array(
-        'data' => '<label for="' . $test['#id'] . '">' . $title . '</label>',
+        'data' => '<label for="' . $test['#id'] . '">' . $title . '</label><span class="description test-name"> (' . $test_name . ')</span>',
         'class' => array('simpletest-test-label'),
       );
       $row[] = array(

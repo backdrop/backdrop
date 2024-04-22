@@ -10,6 +10,12 @@ description = Test date field settings and Start/End date interaction.
 group = Date
 file = date_field.test
 
+[DateFieldTokenTestCase]
+name = Date Field Token
+description = Test the date field token replacements.
+group = Date
+file = date_field.test
+
 [DateTimezoneTestCase]
 name = Date Timezone & Granularity
 description = Test combinations of date field timezone handling and granularity.
@@ -33,3 +39,9 @@ name = Date API tests
 description = Test Date API functions.
 group = Date
 file = date_api.test
+
+[DateThemeTestCase]
+name = Date Theme
+description = Test date theme functions.
+group = Date
+file = date_themes.test

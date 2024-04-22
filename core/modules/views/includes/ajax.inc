@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Handles the server side AJAX interactions of Views.
@@ -53,7 +52,7 @@ function views_ajax() {
       // Overwrite the destination.
       // @see backdrop_get_destination()
       $origin_destination = $path;
-      $query = backdrop_http_build_query($_REQUEST);
+      $query = backdrop_http_build_query(backdrop_get_query_parameters());
       if ($query != '') {
         $origin_destination .= '?' . $query;
       }

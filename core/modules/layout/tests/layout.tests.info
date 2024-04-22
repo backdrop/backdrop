@@ -51,3 +51,21 @@ name = Layout Renderer Test
 description = Tests that the correct renderer is used.
 group = Layout
 file = layout.test
+
+[LayoutFlexibleTemplateTest]
+name = Layout Flexible Template Test
+description = Tests that flexible layout templates perform correctly.
+group = Layout
+file = layout.test
+
+[LayoutPathTest]
+name = Layout Paths Test
+description = Tests layout paths, like the Default Layout.
+group = Layout
+file = layout.test
+
+[LayoutDeletionTest]
+name = Layout Deletion Test
+description = Tests checks and messages when layouts are deleted.
+group = Layout
+file = layout.test

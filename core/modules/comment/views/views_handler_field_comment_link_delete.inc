@@ -1,12 +1,11 @@
 <?php
-
 /**
  * @file
  * Definition of views_handler_field_comment_link_delete.
  */
 
 /**
- * Field handler to present a link to delete a node.
+ * Field handler to present a link to delete a comment.
  *
  * @ingroup views_field_handlers
  */

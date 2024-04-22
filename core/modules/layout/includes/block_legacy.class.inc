@@ -55,8 +55,12 @@ class BlockLegacy extends Block {
    * {@inheritdoc}
    */
   function getAdminTitle() {
+    if (!empty($this->settings['admin_label'])) {
+      return check_plain($this->settings['admin_label']);
+    }
+
     $info = $this->getBlockInfo();
-    return $info['info'];
+    return check_plain($info['info']);
   }
 
   /**

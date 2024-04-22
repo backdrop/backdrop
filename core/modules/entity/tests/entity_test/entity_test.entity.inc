@@ -5,7 +5,7 @@
  */
 
 /**
- * Test class for the test_entity entity type.
+ * Test class for the entity_test entity type.
  */
 class TestEntity extends Entity {
   public $id;
@@ -19,10 +19,8 @@ class TestEntity extends Entity {
 
   /**
    * Implements EntityInterface::entityType().
-   *
-   * @since 1.13.0 This method is now static.
    */
-  public static function entityType() {
+  public function entityType() {
     return 'entity_test';
   }
 
@@ -55,5 +53,4 @@ class TestEntity extends Entity {
   public function access($op, $account = NULL) {
     return NULL;
   }
-
 }

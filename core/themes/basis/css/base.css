@@ -123,6 +123,11 @@ img {
   height: auto;
 }
 
+video {
+  max-width: 100%;
+  height: auto;
+}
+
 iframe {
   max-width: 100%;
 }
@@ -207,6 +212,36 @@ fieldset {
 
 [dir="rtl"] fieldset {
   padding: 2.5em 0 0;
+}
+
+/**
+ * HTML5 details element.
+ */
+details {
+  padding: 0.78947em;
+  margin: 1em 0;
+  overflow: hidden;
+  border: 2px solid #bbbbbb;
+  background-color: #ffffff;
+}
+
+details summary {
+  display: list-item;
+  cursor: pointer;
+}
+
+details summary span {
+  color: #0073bd;
+  font-size: 1.1875em;
+}
+
+details .details-content-wrapper,
+details .details-child-wrapper {
+  margin: 0.78947em 0;
+}
+
+details summary:focus:not(:focus-visible) {
+  outline: none;
 }
 
 /**

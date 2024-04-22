@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Callbacks and related functions invoked by authorize.php to update projects.

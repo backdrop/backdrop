@@ -15,6 +15,16 @@
             "weight": "0"
         }
     },
-    "conditions": [],
+    "conditions": [
+        {
+            "plugin": "user_permission",
+            "data": {
+                "settings": {
+                    "permission": "access dashboard",
+                    "load_condition_nojs": "Load condition"
+                }
+            }
+        }
+    ],
     "arguments": []
 }

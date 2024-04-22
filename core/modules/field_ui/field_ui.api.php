@@ -5,7 +5,7 @@
  */
 
 /**
- * @addtogroup field_types
+ * @addtogroup hooks
  * @{
  */
 
@@ -33,6 +33,8 @@
  *
  * @return
  *   The form definition for the field settings.
+ *
+ * @ingroup field_types
  */
 function hook_field_settings_form($field, $instance, $has_data) {
   $settings = $field['settings'];
@@ -60,6 +62,8 @@ function hook_field_settings_form($field, $instance, $has_data) {
  *
  * @return
  *   The form definition for the field instance settings.
+ *
+ * @ingroup field_types
  */
 function hook_field_instance_settings_form($field, $instance) {
   $settings = $instance['settings'];
@@ -102,6 +106,8 @@ function hook_field_instance_settings_form($field, $instance) {
  *
  * @return
  *   The form definition for the widget settings.
+ *
+ * @ingroup field_widget
  */
 function hook_field_widget_settings_form($field, $instance) {
   $widget = $instance['widget'];
@@ -146,6 +152,8 @@ function hook_field_widget_settings_form($field, $instance) {
  *
  * @return
  *   The form elements for the formatter settings.
+ *
+ * @ingroup field_formatter
  */
 function hook_field_formatter_settings_form($field, $instance, $view_mode, $form, &$form_state) {
   $display = $instance['display'][$view_mode];
@@ -184,6 +192,8 @@ function hook_field_formatter_settings_form($field, $instance, $view_mode, $form
  *
  * @return
  *   A string containing a short summary of the formatter settings.
+ *
+ * @ingroup field_formatter
  */
 function hook_field_formatter_settings_summary($field, $instance, $view_mode) {
   $display = $instance['display'][$view_mode];
@@ -199,5 +209,5 @@ function hook_field_formatter_settings_summary($field, $instance, $view_mode) {
 }
 
 /**
- * @} End of "addtogroup field_types".
+ * @} End of "addtogroup hooks".
  */

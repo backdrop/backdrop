@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Field forms management.
@@ -30,7 +29,7 @@
  *   or an empty array to use default values.
  * @param $form
  *   An array representing the form that the editing element will be attached
- *   to. 
+ *   to.
  * @param $form_state
  *   An array containing the current state of the form.
  * @param $get_delta
@@ -136,7 +135,7 @@ function field_default_form($entity_type, $entity, $field, $instance, $langcode,
     }
   }
 
-  // Also aid in theming of field widgets by rendering a classified container.
+  // Also aids in theming of field widgets by rendering a classified container.
   $addition[$field_name] = array(
     '#type' => 'container',
     '#attributes' => array(
@@ -194,7 +193,7 @@ function field_multiple_value_form($field, $instance, $langcode, $items, &$form,
   }
 
   $title = check_plain($instance['label']);
-  $description = field_filter_xss($instance['description']);
+  $description = field_filter_xss(token_replace($instance['description']));
 
   $id_prefix = implode('-', array_merge($parents, array($field_name)));
   $wrapper_id = backdrop_html_id($id_prefix . '-add-more-wrapper');
@@ -213,14 +212,25 @@ function field_multiple_value_form($field, $instance, $langcode, $items, &$form,
         '#language' => $langcode,
         '#field_parents' => $parents,
         '#columns' => array_keys($field['columns']),
-        // For multiple fields, title and description are handled by the wrapping table.
-        '#title' => $multiple ? '' : $title,
-        '#description' => $multiple ? '' : $description,
+        '#title' => $title,
+        '#description' => $description,
         // Only the first widget should be required.
         '#required' => $delta == 0 && $instance['required'],
         '#delta' => $delta,
         '#weight' => $delta,
       );
+      // For multiple fields, title and description are handled by the wrapping
+      // table.
+      if ($multiple) {
+        if ($delta == 0) {
+          $element['#title'] = t('!title', array('!title' => $title));
+        }
+        else {
+          $element['#title'] = t('!title (value @number)', array('!title' => $title, '@number' => $delta + 1));
+        }
+        $element['#title_display'] = 'invisible';
+        $element['#description'] = '';
+      }
       if ($element = $function($form, $form_state, $field, $instance, $langcode, $items, $delta, $element)) {
         // Input field for the delta (drag-n-drop reordering).
         if ($multiple) {
@@ -271,7 +281,7 @@ function field_multiple_value_form($field, $instance, $langcode, $items, &$form,
         $field_elements['add_more'] = array(
           '#type' => 'submit',
           '#name' => strtr($id_prefix, '-', '_') . '_add_more',
-          '#value' => t('Add another item'),
+          '#value' => t('Add another'),
           '#attributes' => array('class' => array('field-add-more-submit')),
           '#limit_validation_errors' => array(array_merge($parents, array($field_name, $langcode))),
           '#submit' => array('field_add_more_submit'),
@@ -347,7 +357,7 @@ function field_default_form_errors($entity_type, $entity, $field, $instance, $la
 }
 
 /**
- * Submit handler for the "Add another item" button of a field form.
+ * Submit handler for the "Add another" button of a field form.
  *
  * This handler is run regardless of whether JS is enabled or not. It makes
  * changes to the form state. If the button was clicked with JS disabled, then

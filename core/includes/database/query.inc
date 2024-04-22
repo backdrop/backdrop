@@ -1,12 +1,12 @@
 <?php
 /**
- * @addtogroup database
- * @{
+ * @file
+ * Non-specific Database query code. Used by all engines.
  */
 
 /**
- * @file
- * Non-specific Database query code. Used by all engines.
+ * @addtogroup database
+ * @{
  */
 
 /**
@@ -676,6 +676,11 @@ class InsertQuery extends Query {
     // Default fields are always placed first for consistency.
     $insert_fields = array_merge($this->defaultFields, $this->insertFields);
 
+    // Escape each field.
+    foreach ($insert_fields as $field_key => $insert_field) {
+      $insert_fields[$field_key] = $this->connection->escapeField($insert_field);
+    }
+
     if (!empty($this->fromQuery)) {
       return $comments . 'INSERT INTO {' . $this->table . '} (' . implode(', ', $insert_fields) . ') ' . $this->fromQuery;
     }
@@ -1203,12 +1208,14 @@ class UpdateQuery extends Query implements QueryConditionInterface {
     $fields = $this->fields;
     $update_fields = array();
     foreach ($this->expressionFields as $field => $data) {
-      $update_fields[] = $field . '=' . $data['expression'];
       unset($fields[$field]);
+      $field = $this->connection->escapeField($field);
+      $update_fields[] = $field . '=' . $data['expression'];
     }
 
     $max_placeholder = 0;
     foreach ($fields as $field => $value) {
+      $field = $this->connection->escapeField($field);
       $update_fields[] = $field . '=:db_update_placeholder_' . ($max_placeholder++);
     }
 
@@ -1275,6 +1282,13 @@ class MergeQuery extends Query implements QueryConditionInterface {
    * @var string
    */
   protected $table;
+
+  /**
+   * The condition object for this query.
+   *
+   * @var DatabaseCondition
+   */
+  protected $condition;
 
   /**
    * An array of fields on which to insert.
@@ -1730,6 +1744,7 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
    * size of its conditional array minus one, because one element is the
    * conjunction.
    */
+  #[\ReturnTypeWillChange]
   public function count() {
     return count($this->conditions) - 1;
   }
@@ -1914,7 +1929,7 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
   public function __toString() {
     // If the caller forgot to call compile() first, refuse to run.
     if ($this->changed) {
-      return NULL;
+      return '';
     }
     return $this->stringVersion;
   }

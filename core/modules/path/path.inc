@@ -59,7 +59,7 @@ define('PATH_PUNCTUATION_DO_NOTHING', 2);
  * @return
  *   FALSE if no alias was found or an associative array containing the
  *   following keys:
- *   - pid: Unique path alias identifier.
+ *   - pid: Unique URL alias identifier.
  *   - alias: The URL alias.
  */
 function _path_load_loosely_by_source($source, $langcode = LANGUAGE_NONE) {
@@ -172,7 +172,7 @@ function path_clean_string($string, array $options = array()) {
     unset($config);
   }
 
-  // Empty strings do not need any proccessing.
+  // Empty strings do not need any processing.
   if ($string === '' || $string === NULL) {
     return '';
   }
@@ -183,6 +183,15 @@ function path_clean_string($string, array $options = array()) {
   }
   elseif (!empty($options['langcode'])) {
     $langcode = $options['langcode'];
+  }
+  if ($langcode == LANGUAGE_NONE) {
+    // Paths for language neutral content get transliterated according to
+    // current language.
+    global $language;
+    // We are intentionally not using config_get('system.core', 'language_default')
+    // here. That can have unexpected behavior in cases such as on a multilingual
+    // site with language-neutral content types.
+    $langcode = $language->langcode;
   }
 
   // Check if the string has already been processed, and if so return the
@@ -312,7 +321,7 @@ function path_clean_alias($alias) {
   // Trim duplicate, leading, and trailing separators. Do this before cleaning
   // backslashes since a pattern like "[token1]/[token2]-[token3]/[token4]"
   // could end up like "value1/-/value2" and if backslashes were cleaned first
-  // this would result in a duplicate blackslash.
+  // this would result in a duplicate backslash.
   $output = _path_clean_separators($output);
 
   // Trim duplicate, leading, and trailing backslashes.
@@ -325,9 +334,9 @@ function path_clean_alias($alias) {
 }
 
 /**
- * Check to ensure a path alias is unique and add suffix variants if necessary.
+ * Check to ensure a URL alias is unique and add suffix variants if necessary.
  *
- * Given an alias 'content/test' if a path alias with the exact alias already
+ * Given an alias 'content/test' if a URL alias with the exact alias already
  * exists, the function will change the alias to 'content/test-0' and will
  * increase the number suffix until it finds a unique alias.
  *
@@ -492,7 +501,7 @@ function path_generate_entity_alias(Entity $entity, $source = NULL, $langcode = 
 }
 
 /**
- * Update the URL aliases for an individual taxonomy term.
+ * Update the URL aliases for an individual entity.
  *
  * @param Entity $entity
  *   An entity (node/user/term/etc.) object.

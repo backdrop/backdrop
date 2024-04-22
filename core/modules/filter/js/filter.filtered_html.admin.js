@@ -14,7 +14,7 @@
 if (Backdrop.filterConfiguration) {
   Backdrop.filterConfiguration.liveSettingParsers.filter_html = {
     getRules: function () {
-      var currentValue = $('#edit-filters-filter-html-settings-allowed-html').val();
+      var currentValue = $('#allowed-html').val();
       var rules = [];
       var rule;
 
@@ -56,9 +56,9 @@ Backdrop.behaviors.filterFilterHtmlUpdating = {
 
   attach: function (context, settings) {
     var that = this;
-    $(context).find('[name="filters[filter_html][settings][allowed_html]"]').once('filter-filter_html-updating').each(function () {
+    $(context).find('#allowed-html').once('filter-filter_html-updating').each(function () {
       that.$allowedHTMLFormItem = $(this);
-      that.$allowedHTMLDescription = that.$allowedHTMLFormItem.closest('.form-item').find('.description');
+      that.$allowedHTMLDescription = $('[data-filter-name="filter_html"]').find('.description');
       that.userTags = that._parseSetting(this.value);
 
       // Update the new allowed tags based on added text editor features.
@@ -80,17 +80,11 @@ Backdrop.behaviors.filterFilterHtmlUpdating = {
             }
           });
 
-      // When the allowed tags list is manually changed, update userTags.
-      that.$allowedHTMLFormItem.on('change.updateUserTags', function () {
-        var tagList = that._parseSetting(this.value);
-        var userTags = [];
-        for (var n in tagList) {
-          if ($.inArray(tagList[n], that.autoTags) === -1) {
-            userTags.push(tagList[n]);
-          }
-        }
-        that.userTags = userTags;
+      // Update the user tags when the allowed-html field is manually changed.
+      that.$allowedHTMLFormItem.on('change.filter-update', function() {
+        that.userTags = that._parseSetting(this.value);
       });
+
     });
   },
 

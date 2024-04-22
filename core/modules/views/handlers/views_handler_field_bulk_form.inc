@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of views_handler_field_bulk_form.
@@ -159,8 +158,9 @@ class views_handler_field_bulk_form extends views_handler_field {
         $entities = entity_load($entity_type, $selected);
         $context = array();
         foreach ($entities as $entity) {
-          actions_execute($action_name, $entity, $context);
-          $count++;
+          if (actions_execute($action_name, $entity, $context) !== FALSE) {
+            $count++;
+          }
         }
 
         // Redirect the user the same as we would for $form_state['redirect'].
@@ -218,21 +218,10 @@ class views_handler_field_bulk_form extends views_handler_field {
   }
 
   /**
-   * Determine the base table of the bulk operation field.
+   * Determine the entity type of the bulk operation field.
    */
   protected function get_entity_type() {
-    $base_table = $this->view->base_table;
-
-    // If the current field is under a relationship you can't be sure that the
-    // base table of the view is the base table of the current field.
-    // For example a field from a node author on a node view does have users as base table.
-    if (!empty($this->options['relationship']) && $this->options['relationship'] != 'none') {
-      $relationships = $this->view->display_handler->get_option('relationships');
-      $options = $relationships[$this->options['relationship']];
-      $data = views_fetch_data($options['table']);
-      $base_table = $data[$options['field']]['relationship']['base'];
-    }
-    // The base table is now known, use it to determine the entity type.
+    $base_table = isset($this->table) ? $this->table : $this->view->base_table;
     foreach (entity_get_info() as $entity_type => $info) {
       if (isset($info['base table']) && $info['base table'] == $base_table) {
         return $entity_type;

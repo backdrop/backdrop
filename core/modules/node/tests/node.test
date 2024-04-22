@@ -139,7 +139,7 @@ class NodeLoadHooksTestCase extends BackdropWebTestCase {
     // node_test_node_load() are correctly updated.
     $nodes = node_load_multiple(array(), array('status' => NODE_NOT_PUBLISHED));
     $loaded_node = end($nodes);
-    $this->assertEqual($loaded_node->node_test_loaded_nids, array($node4->nid, $node3->nid), 'hook_node_load() received the correct list of node IDs the second time it was called.');
+    $this->assertEqual($loaded_node->node_test_loaded_nids, array($node3->nid, $node4->nid), 'hook_node_load() received the correct list of node IDs the second time it was called.');
     $this->assertEqual($loaded_node->node_test_loaded_types, array('page', 'post'), 'hook_node_load() received the correct list of node types the second time it was called.');
   }
 }
@@ -176,6 +176,7 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
       'edit any page content',
       'delete revisions',
       'delete any page content',
+      'administer nodes',
     ));
     $this->backdropLogin($web_user);
 
@@ -183,6 +184,7 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
     $node = $this->backdropCreateNode();
     $settings = get_object_vars($node);
     $settings['revision'] = 1;
+    $settings['is_active_revision'] = TRUE;
 
     $nodes = array();
     $logs = array();
@@ -200,6 +202,7 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
       // Make sure we get revision information.
       $node = node_load($node->nid);
       $settings = get_object_vars($node);
+      $settings['is_active_revision'] = TRUE;
 
       $nodes[] = $node;
     }
@@ -228,6 +231,9 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
       $this->assertText($log, t('Log message found.'));
     }
 
+    // Confirm that this is the active revision.
+    $this->assertTrue($node->isActiveRevision(), 'Third node revision is the current one.');
+
     // Confirm that revisions revert properly.
     $this->backdropPost("node/$node->nid/revisions/{$nodes[1]->vid}/revert", array(), t('Revert'));
     $this->assertRaw(t('@type %title has been reverted back to the revision from %revision-date.', array(
@@ -237,6 +243,10 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
     )), 'Revision reverted.');
     $reverted_node = node_load($node->nid);
     $this->assertTrue(($nodes[1]->body[LANGUAGE_NONE][0]['value'] == $reverted_node->body[LANGUAGE_NONE][0]['value']), 'Node reverted correctly.');
+
+    // Confirm that this is not the current version.
+    $node = node_load($node->nid, $node->vid);
+    $this->assertFalse($node->isActiveRevision(), 'Third node revision is not the current one.');
 
     // Confirm revisions delete properly.
     $this->backdropPost("node/$node->nid/revisions/{$nodes[1]->vid}/delete", array(), t('Delete'));
@@ -262,6 +272,33 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
       '%title' => $nodes[2]->title,
       '%revision-date' => format_date($old_revision_date),
     )));
+
+    // Make a new revision and set it to not be active.
+    // This will create a new revision that is not "front facing".
+    $new_node_revision = clone $node;
+    $new_body = $this->randomName();
+    $new_node_revision->body[LANGUAGE_NONE][0]['value'] = $new_body;
+    // Save this as a non-active revision.
+    $new_node_revision->revision = TRUE;
+    $new_node_revision->is_active_revision = FALSE;
+    node_save($new_node_revision);
+
+    $this->backdropGet("node/$node->nid");
+    $this->assertNoText($new_body, t('Revision body text is not present on active version of node.'));
+
+    // Verify that the new body text is present on the revision.
+    $this->backdropGet("node/$node->nid/revisions/" . $new_node_revision->vid . "/view");
+    $this->assertText($new_body, t('Revision body text is present when loading specific revision.'));
+
+    // Verify that the non-active revision vid is greater than the active
+    // revision vid.
+    $active_revision = db_select('node', 'n')
+      ->fields('n', array('vid'))
+      ->condition('nid', $node->nid)
+      ->execute()
+      ->fetchCol();
+    $active_revision_vid = $active_revision[0];
+    $this->assertTrue($new_node_revision->vid > $active_revision_vid, 'Revision vid is greater than active revision vid.');
   }
 
   /**
@@ -390,7 +427,7 @@ class PageEditTestCase extends BackdropWebTestCase {
     $this->backdropPost(NULL, $edit, t('Save'));
 
     // Ensure that the node revision has been created.
-    $revised_node = $this->backdropGetNodeByTitle($edit['title']);
+    $revised_node = $this->backdropGetNodeByTitle($edit['title'], TRUE);
     $this->assertNotIdentical($node->vid, $revised_node->vid, 'A new revision has been created.');
     // Ensure that the node author is preserved when it was not changed in the
     // edit form.
@@ -483,8 +520,6 @@ class PagePreviewTestCase extends BackdropWebTestCase {
       'name' => $this->randomName(),
       'description' => $this->randomName(),
       'machine_name' => backdrop_strtolower($this->randomName()),
-      'help' => '',
-      'nodes' => array('page' => 'page'),
     ));
     taxonomy_vocabulary_save($vocabulary);
 
@@ -600,11 +635,18 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $this->assertText($edit[$body_key], 'Body displayed.');
     $this->assertText($edit[$email_key], 'Email displayed.');
     $this->assertNoText($this->term->name, 'Term not displayed.');
+    // Make sure that the preview warnings are only shown once.
+    $this->assertUniqueText(t('This is a preview. Links within the page are disabled.'), 'Preview warning displayed.');
+    $this->assertUniqueText(t('Changes are stored temporarily.'), 'Temporary changes warning displayed.');
 
     // Change the view mode.
     $teaser_edit = array();
     $teaser_edit['view_mode'] = 'teaser';
     $this->backdropPost(NULL, $teaser_edit, t('Switch'));
+    // Make sure that the warnings are still shown, and that they are only shown
+    // once.
+    $this->assertUniqueText(t('This is a preview. Links within the page are disabled.'), 'Preview warning displayed.');
+    $this->assertUniqueText(t('Changes are stored temporarily.'), 'Temporary changes warning displayed.');
 
     // Check that the preview is displaying the title, body, and term.
     $this->assertText($edit[$title_key], 'Title displayed.');
@@ -626,6 +668,10 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $this->assertText($edit[$body_key], 'Body displayed.');
     $this->assertText($edit[$email_key], 'Email displayed.');
     $this->assertNoText($this->term->name, 'Term not displayed.');
+    // Make sure that the preview warnings are shown, and that they are only
+    // shown once.
+    $this->assertUniqueText(t('This is a preview. Links within the page are disabled.'), 'Preview warning displayed.');
+    $this->assertUniqueText(t('Changes are stored temporarily.'), 'Temporary changes warning displayed.');
 
     $this->backdropPost(NULL, array(), t('Save'));
 
@@ -634,6 +680,9 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $this->assertText($edit[$body_key], 'Body displayed.');
     $this->assertText($edit[$email_key], 'Email displayed.');
     $this->assertNoText($this->term->name, 'Term not displayed.');
+    // Make sure that the preview warnings are NOT shown after saving the node.
+    $this->assertNoText(t('This is a preview. Links within the page are disabled.'), 'Preview warning NOT displayed.');
+    $this->assertNoText(t('Changes are stored temporarily.'), 'Temporary changes warning NOT displayed.');
 
     // Edit an existing node to check preview works.
     $this->clickLink('Edit');
@@ -642,6 +691,10 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $this->assertText($edit[$body_key], 'Body displayed.');
     $this->assertText($edit[$email_key], 'Email displayed.');
     $this->assertNoText($this->term->name, 'Term not displayed.');
+    // Make sure that the preview warnings are shown, and that they are only
+    // shown once.
+    $this->assertUniqueText(t('This is a preview. Links within the page are disabled.'), 'Preview warning displayed.');
+    $this->assertUniqueText(t('Changes are stored temporarily.'), 'Temporary changes warning displayed.');
 
     // Login as a second user with path permissions.
     $web_user = $this->backdropCreateUser(array('bypass node access', 'administer nodes'));
@@ -655,6 +708,10 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $edit[$body_key] = $this->randomName(16);
     $edit['status'] = 0;
     $this->backdropPost('node/add/page', $edit, t('Preview'));
+    // Make sure that the preview warnings are shown, and that they are only
+    // shown once.
+    $this->assertUniqueText(t('This is a preview. Links within the page are disabled.'), 'Preview warning displayed.');
+    $this->assertUniqueText(t('Changes are stored temporarily.'), 'Temporary changes warning displayed.');
 
     $this->assertNoText('This Page is unpublished.', 'Page is not in draft state.');
 
@@ -663,13 +720,16 @@ class PagePreviewTestCase extends BackdropWebTestCase {
 
     $this->assertFieldByName('status', 0, 'Status is set to unpublished.');
 
-    // Return to preview and save.
+    // Save changes.
     $this->assertNoText('This Page is unpublished.', 'Page is not in draft state.');
     $this->backdropPost(NULL, array(), t('Save'));
+    // Make sure that the preview warnings are NOT shown after saving the node.
+    $this->assertNoText(t('This is a preview. Links within the page are disabled.'), 'Preview warning NOT displayed.');
+    $this->assertNoText(t('Changes are stored temporarily.'), 'Temporary changes warning NOT displayed.');
     $node = $this->backdropGetNodeByTitle($name);
     $this->assertEqual($node->status, '0', 'The node is in the state Draft.');
 
-    // Edit the node, check status then preview and save.
+    // Edit the node, check status, then preview and save.
     $this->clickLink('Edit');
     $this->assertFieldByName('status', 0, 'Status is set to unpublished.');
 
@@ -678,15 +738,22 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $edit[$title_key] = $name;
     $edit['status'] = 2;
     $edit['scheduled[date]'] = format_date(REQUEST_TIME + 360, 'custom', 'Y-m-d', $web_user->timezone);
-    $edit['scheduled[time]'] = format_date(REQUEST_TIME + 360, 'custom', 'g:i a', $web_user->timezone);
+    $edit['scheduled[time]'] = format_date(REQUEST_TIME + 360, 'custom', 'H:i:s', $web_user->timezone);
     $this->backdropPost(NULL, $edit, t('Preview'));
+    // Make sure that the preview warnings are shown, and that they are only
+    // shown once.
+    $this->assertUniqueText(t('This is a preview. Links within the page are disabled.'), 'Preview warning displayed.');
+    $this->assertUniqueText(t('Changes are stored temporarily.'), 'Temporary changes warning displayed.');
     $this->backdropPost(NULL, array(), t('Save'));
-    $node = $this->backdropGetNodeByTitle($name);
+    // Make sure that the preview warnings are NOT shown after saving the node.
+    $this->assertNoText(t('This is a preview. Links within the page are disabled.'), 'Preview warning NOT displayed.');
+    $this->assertNoText(t('Changes are stored temporarily.'), 'Temporary changes warning NOT displayed.');
+    $node = $this->backdropGetNodeByTitle($name, TRUE);
     $this->assertEqual($node->status, '0', 'The node is in the state Draft.');
 
     $this->assertNotEqual($node->scheduled, 0, 'The node has a non zero published date.');
 
-    // Test that a user with permissions to create, but not edit, can still 
+    // Test that a user with permissions to create, but not edit, can still
     // access preview.
     $no_edit_user = $this->backdropCreateUser(array(
       'create page content',
@@ -702,8 +769,12 @@ class PagePreviewTestCase extends BackdropWebTestCase {
 
     $this->backdropPost('node/add/page', $edit, t('Preview'));
     $this->assertText($edit[$title_key], 'Title displayed.');
+    // Make sure that the preview warnings are shown, and that they are only
+    // shown once.
+    $this->assertUniqueText(t('This is a preview. Links within the page are disabled.'), 'Preview warning displayed.');
+    $this->assertUniqueText(t('Changes are stored temporarily.'), 'Temporary changes warning displayed.');
 
-    // Test that a user with permissions to edit, but not create, can still 
+    // Test that a user with permissions to edit, but not create, can still
     // access preview.
     $no_create_user = $this->backdropCreateUser(array(
       'edit any page content',
@@ -717,6 +788,10 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $this->clickLink('Edit');
     $this->backdropPost(NULL, array(), t('Preview'));
     $this->assertText($name, 'Title displayed.');
+    // Make sure that the preview warnings are shown, and that they are only
+    // shown once.
+    $this->assertUniqueText(t('This is a preview. Links within the page are disabled.'), 'Preview warning displayed.');
+    $this->assertUniqueText(t('Changes are stored temporarily.'), 'Temporary changes warning displayed.');
     $url = $this->getUrl();
 
     // Test that a user with no create or edit permissions cannot access
@@ -731,6 +806,285 @@ class PagePreviewTestCase extends BackdropWebTestCase {
 
   }
 
+}
+
+/**
+ * Tests that the correct layout is used for node previews.
+ */
+class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var object
+   */
+  protected $content_type;
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * Sets up test case.
+   */
+  public function setUp() {
+    parent::setUp('node_layout_preview_revision_test');
+    // Module node_layout_preview_revision_test is a helper module that creates
+    // three layouts used in testing previews and revisions:
+    //
+    // Layout custom_node has path node/% and uses the Taylor template.
+    // Layout custom_node_preview has path node/preview/page/% and uses the
+    //   Sutro template. It is initially disabled.
+    // Layout custom_node_revision has path node/%/revisions/%/view and uses the
+    //   Sutro template. It is initially disabled.
+
+    // Create a content type for checking node/edit page layouts.
+    $this->content_type = $this->backdropCreateContentType();
+
+    // Create and login admin user.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'bypass node access',
+    ));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Returns the NID of the most recently created node of our content type.
+   */
+  public function lastNid() {
+    return db_query('
+      SELECT nid FROM {node}
+      WHERE type = :type
+      ORDER BY nid DESC
+      LIMIT 1
+      ', array(':type' => $this->content_type->type))
+      ->fetchField();
+  }
+
+  /**
+   * Tests that the correct layout is used for node add and node edit previews.
+   */
+  public function testNodeLayoutPreview() {
+
+    // The node preview should use the 'custom_node' layout with path node/%.
+
+    // Create a node to test through the admin interface.
+    $this->backdropGet('node/add/' . $this->content_type->type);
+
+    // Fill in its title and body, then select the 'Preview' option.
+    $title = $this->randomName();
+    $body = $this->randomName();
+    $edit = array(
+      'title' => $title,
+      'body[und][0][value]' => $body,
+    );
+    $this->backdropPost(NULL, $edit, t('Preview'));
+
+    // Look for the taylor template (only exists in our layout).
+    $this->assertText('taylor', 'Layout template "taylor" found.');
+
+    // Look for the heading of the field body block that exists only in our
+    // layout.
+    $this->assertText('Node body field', '"Node body field" found.');
+
+    // Look for the heading of the custom block that exists only in our
+    // layout.
+    $this->assertText('Custom Node layout title', '"Custom Node layout title" found.');
+
+    // Look for the body text, which appears only in that field if the context
+    // was set properly.
+    $this->assertText($body, "Body text \"{$body}\" found.");
+
+    // Create a new node; fill in its title and body, then save.
+    $this->backdropGet('node/add/' . $this->content_type->type);
+    $title = $this->randomName();
+    $body = $this->randomName();
+    $edit = array(
+      'title' => $title,
+      'body[und][0][value]' => $body,
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+
+    // Edit the last node with a new random body content, then preview.
+    $this->backdropGet('node/' . $this->lastNid() . '/edit');
+    $body = $this->randomName();
+    $edit = array(
+      'body[und][0][value]' => $body,
+    );
+     $this->backdropPost(NULL, $edit, t('Preview'));
+
+    // Look for the taylor template (only exists in our layout).
+    $this->assertText('taylor', 'Layout template "taylor" found.');
+
+    // Look for the heading of the field body block that exists only in our
+    // layout.
+    $this->assertText('Node body field', '"Node body field" found.');
+
+    // Look for the heading of the custom block that exists only in our
+    // layout.
+    $this->assertText('Custom Node layout title', '"Custom Node layout title" found.');
+
+    // Look for the body text, which appears only in that field if the context
+    // was set properly.
+    $this->assertText($body, "Body text \"{$body}\" found.");
+
+    // Now enable the 'custom_node_preview' layout; give it path
+    // node/preview/{$this->content_type->type}/%, and run the same tests.
+
+    $layouts = layout_load_all();
+    $preview_layout = $layouts['custom_node_preview'];
+    $preview_layout->enable();
+    $preview_layout->setPath('node/preview/' . $this->content_type->type . '/%');
+    $preview_layout->save();
+
+    // Create a node to test through the admin interface.
+    $this->backdropGet('node/add/' . $this->content_type->type);
+
+    // Fill in its title and body, then select the 'Preview' option.
+    $title = $this->randomName();
+    $body = $this->randomName();
+    $edit = array(
+      'title' => $title,
+      'body[und][0][value]' => $body,
+    );
+    $this->backdropPost(NULL, $edit, t('Preview'));
+
+    // Look for the sutro template (only exists in our layout).
+    $this->assertText('sutro', 'Layout template "sutro" found.');
+
+    // Look for the heading of the custom block that exists only in our
+    // layout.
+    $this->assertText('Custom Node Preview layout title', '"Custom Node Preview layout title" found.');
+
+    // Look for the body text, which appears only in that field if the context
+    // was set properly.
+    $this->assertText($body, "Body text \"{$body}\" found.");
+
+    // Create a new node; fill in its title and body, then save.
+    $this->backdropGet('node/add/' . $this->content_type->type);
+    $title = $this->randomName();
+    $body = $this->randomName();
+    $edit = array(
+      'title' => $title,
+      'body[und][0][value]' => $body,
+    );
+    $this->backdropPost(NULL, $edit, t('Save'));
+
+    // Edit the last node with a new random body content, then preview.
+    $this->backdropGet('node/' . $this->lastNid() . '/edit');
+    $body = $this->randomName();
+    $edit = array(
+      'body[und][0][value]' => $body,
+    );
+    $this->backdropPost(NULL, $edit, t('Preview'));
+
+    // Look for the sutro template (only exists in our layout).
+    $this->assertText('sutro', 'Layout template "sutro" found.');
+
+    // Look for the heading of the custom block that exists only in our
+    // layout.
+    $this->assertText('Custom Node Preview layout title', '"Custom Node Preview layout title" found.');
+
+    // Look for the body text, which appears only in that field if the context
+    // was set properly.
+    $this->assertText($body, "Body text \"{$body}\" found.");
+
+
+  }
+}
+
+/**
+ * Tests that the correct layout is used for node revisions.
+ */
+class NodeLayoutRevisionTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var array
+   */
+  protected $nodes;
+
+  /**
+   * Sets up test case.
+   */
+  public function setUp() {
+    parent::setUp('node_layout_preview_revision_test');
+
+    // Create and login user.
+    $web_user = $this->backdropCreateUser(array(
+      'view revisions',
+    ));
+    $this->backdropLogin($web_user);
+    $nodes = array();
+
+    // Create initial node.
+    $node = $this->backdropCreateNode();
+    $settings = get_object_vars($node);
+    $settings['revision'] = 1;
+    $settings['is_active_revision'] = TRUE;
+    $nodes[] = $node;
+
+    // Create a revision with random title and body and update variables.
+    $this->backdropCreateNode($settings);
+    // Make sure we get revision information.
+    $node = node_load($node->nid);
+    $settings = get_object_vars($node);
+    $settings['is_active_revision'] = TRUE;
+    $nodes[] = $node;
+
+    $this->nodes = $nodes;
+  }
+
+  /**
+   * Tests that the correct layout is used for node revisions.
+   */
+  public function testNodeLayoutRevisions() {
+    $nodes = $this->nodes;
+
+    // The node revision should use the 'custom_node' layout with path node/%.
+
+    // Confirm that our layout shows up on both the original node and its
+    // revision.
+    foreach ($nodes as $node) {
+      $body = $node->body[LANGUAGE_NONE][0]['value'];
+      $this->backdropGet("node/$node->nid/revisions/$node->vid/view");
+      $this->assertText($body, 'Correct body text displays for version.');
+
+      // Look for the taylor template (only exists in our layout).
+      $this->assertText('taylor', 'Layout template "taylor" found.');
+
+      // Look for the heading of the field body block that exists only in our
+      // layout.
+      $this->assertText('Node body field', '"Node body field" found.');
+
+      // Look for the body text, which appears only in that field if the context
+      // was set properly.
+      $this->assertText($body, "\"{$body}\" found.");
+    }
+
+    // Enable the node revision override layout 'custom_node_revision' with
+    // path node/%/revisions/%/view.
+
+    $layouts = layout_load_all();
+    $revision_layout = $layouts['custom_node_revision'];
+    $revision_layout->enable();
+    $revision_layout->save();
+
+    // Check the old revision to see that it uses our override layout.
+    $node = $nodes[0];
+    $body = $node->body[LANGUAGE_NONE][0]['value'];
+    $this->backdropGet("node/$node->nid/revisions/$node->vid/view");
+    $this->assertText($body, 'Correct body text displays for version.');
+
+    // Look for the sutro template (only exists in our layout).
+    $this->assertText('sutro', 'Layout template "sutro" found.');
+
+    // Look for the heading of the custom block that exists only in our
+    // layout.
+    $this->assertText('Custom Node Revision layout title', '"Custom Node Revision layout title" found.');
+
+    // Look for the body text, which appears only in that field if the context
+    // was set properly.
+    $this->assertText($body, "\"{$body}\" found.");
+  }
 }
 
 /**
@@ -1296,6 +1650,32 @@ class NodeAccessRecordsUnitTest extends BackdropWebTestCase {
  * Tests for Node Access with a non-node base table.
  */
 class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var array
+   */
+  protected $nodesByUser;
+
+  /**
+   * @var User
+   */
+  protected $webUser;
+
+  /**
+   * @var int
+   */
+  protected $publicTid;
+
+  /**
+   * @var int
+   */
+  protected $privateTid;
+
+  /**
+   * @var array
+   */
+  protected $nids_visible;
+
   public function setUp() {
     parent::setUp('node_access_test');
     node_access_rebuild();
@@ -1448,6 +1828,11 @@ class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
 class NodeSaveTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   function setUp() {
     parent::setUp('node_test');
     $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
@@ -1521,36 +1906,36 @@ class NodeSaveTestCase extends BackdropWebTestCase {
 
     $node->save();
     $node = $this->backdropGetNodeByTitle('testing_node_presave', TRUE);
-    $this->assertEqual($node->created, 280299600, 'Saving a node uses "created" timestamp set in presave hook.');
-    $this->assertEqual($node->changed, 979534800, 'Saving a node uses "changed" timestamp set in presave hook.');
+    $this->assertEqual($node->created, 1421394600, 'Saving a node uses "created" timestamp set in presave hook.');
+    $this->assertEqual($node->changed, 1474011660, 'Saving a node uses "changed" timestamp set in presave hook.');
 
     // Programmatically set the timestamps on the node.
     $edit = array(
       'uid' => $this->web_user->uid,
       'type' => 'post',
       'title' => $this->randomName(8),
-      'created' => 280299600, // Sun, 19 Nov 1978 05:00:00 GMT
-      'changed' => 979534800, // Drupal 1.0 release.
+      'created' => 1421394600, // Backdrop v1.0.0 release.
+      'changed' => 1474011660, // Backdrop v1.5.0 release.
     );
 
     entity_create('node', $edit)->save();
     $node = $this->backdropGetNodeByTitle($edit['title']);
-    $this->assertEqual($node->created, 280299600, 'Creating a node uses user-set "created" timestamp.');
-    $this->assertNotEqual($node->changed, 979534800, 'Creating a node doesn\'t use user-set "changed" timestamp.');
+    $this->assertEqual($node->created, 1421394600, 'Creating a node uses user-set "created" timestamp.');
+    $this->assertNotEqual($node->changed, 1474011660, 'Creating a node doesn\'t use user-set "changed" timestamp.');
 
     // Update the timestamps.
-    $node->created = 979534800;
-    $node->changed = 280299600;
+    $node->created = 1474011660;
+    $node->changed = 1421394600;
 
     $node->save();
     $node = $this->backdropGetNodeByTitle($edit['title'], TRUE);
-    $this->assertEqual($node->created, 979534800, 'Updating a node uses user-set "created" timestamp.');
-    $this->assertNotEqual($node->changed, 280299600, 'Updating a node doesn\'t use user-set "changed" timestamp.');
+    $this->assertEqual($node->created, 1474011660, 'Updating a node uses user-set "created" timestamp.');
+    $this->assertNotEqual($node->changed, 1421394600, 'Updating a node doesn\'t use user-set "changed" timestamp.');
   }
 
   /**
-   * Tests determing changes in hook_node_presave() and verifies the static node
-   * load cache is cleared upon save.
+   * Tests determining changes in hook_node_presave() and verifies the static
+   * node load cache is cleared upon save.
    */
   function testDeterminingChanges() {
     // Initial creation.
@@ -1588,7 +1973,7 @@ class NodeSaveTestCase extends BackdropWebTestCase {
    * @see node_test_node_insert()
    */
   function testNodeSaveOnInsert() {
-    // node_test_node_insert() tiggers a save on insert if the title equals
+    // node_test_node_insert() triggers a save on insert if the title equals
     // 'new'.
     $node = $this->backdropCreateNode(array('title' => 'new'));
     $this->assertEqual($node->title, 'Node ' . $node->nid, 'Node saved on node insert.');
@@ -1616,7 +2001,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $this->assertEqual($node_types['post']->name, node_type_get_name('post'), 'Correct node type name has been returned.');
     $this->assertEqual($node_types['page']->base, node_type_get_base('page'), 'Correct node type base has been returned.');
 
-    // Create a content type programmaticaly.
+    // Create a content type programmatically.
     $type = $this->backdropCreateContentType();
 
     $config = config('node.type.' . $type->type);
@@ -1645,8 +2030,22 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     // Add a node of type foo; make sure we can visit it with 200 response..
     $foo_settings = array('uid' => $web_user->uid, 'type' => 'foo');
     $foo_node = $this->backdropCreateNode($foo_settings);
+
+    $web_user = $this->backdropCreateUser(array('search content', 'use advanced search'));
+    $this->backdropLogin($web_user);
+
     $this->backdropGet('/node/' . $foo_node->nid);
     $this->assertResponse(200, 'Received 200 response from node type foo with hidden_path disabled.');
+
+    // Check that node is listed in /search.
+    $this->cronRun();
+
+    // Search for node title. Should be one result.
+    $this->backdropPost('search/node', array('keys' => $foo_node->title), t('Search'));
+    $this->assertText($foo_node->title, 'Node found in search results.');
+
+    // Ensure content type is available as option.
+    $this->assertFieldByXPath("//input[@name='type[foo]']", 'foo', 'Content type of foo is available as filter for search.');
 
     // Edit content type foo to hidden_path = 1 and check the setting.
     $config->set('settings.hidden_path', '1');
@@ -1656,6 +2055,16 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     backdrop_flush_all_caches();
     $this->backdropGet('/node/' . $foo_node2->nid);
     $this->assertResponse(404, 'Received 404 response from node type foo where user restricted from viewing full page.');
+
+    // Check that node is not listed in /search.
+    $this->cronRun();
+
+    // Search for node title. Should be zero results.
+    $this->backdropPost('search/node', array('keys' => $foo_node->title), t('Search'));
+    $this->assertNoText($foo_node->title, 'Node not found in search results.');
+
+    // Ensure content type is not available as option.
+    $this->assertNoFieldByXPath("//input[@name='type[foo]']", 'foo', 'Content type of foo is not available as filter for search.');
 
     // Ensure publishing settings are loaded correctly even when using boolean
     // values for "status_default".
@@ -1679,8 +2088,8 @@ class NodeTypeTestCase extends BackdropWebTestCase {
 
     // Verify that title and body fields are displayed.
     $this->backdropGet('node/add/page');
-    $this->assertRaw('Title', 'Title field was found.');
-    $this->assertRaw('Body', 'Body field was found.');
+    $this->assertRaw('<label for="edit-title">Title', 'Title field was found.');
+    $this->assertRaw('<label for="edit-body-und-0-value">Body', 'Body field was found.');
 
     // Rename the title field.
     $edit = array(
@@ -1691,8 +2100,8 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     field_info_cache_clear();
 
     $this->backdropGet('node/add/page');
-    $this->assertRaw('Foo', 'New title label was displayed.');
-    $this->assertNoRaw('Title', 'Old title label was not displayed.');
+    $this->assertRaw('<label for="edit-title">Foo', 'New title label was displayed.');
+    $this->assertNoRaw('<label for="edit-title">Title', 'Old title label was not displayed.');
 
     // Change the name, machine name and description.
     $edit = array(
@@ -1708,8 +2117,8 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $this->assertRaw('Lorem ipsum', 'New description was displayed.');
     $this->clickLink('Bar');
     $this->assertEqual(url('node/add/bar', array('absolute' => TRUE)), $this->getUrl(), 'New machine name was used in URL.');
-    $this->assertRaw('Foo', 'Title field was found.');
-    $this->assertRaw('Body', 'Body field was found.');
+    $this->assertRaw('<label for="edit-title">Foo', 'Title field was found.');
+    $this->assertRaw('<label for="edit-body-und-0-value">Body', 'Body field was found.');
 
     // Remove the body field.
     $this->backdropPost('admin/structure/types/manage/bar/fields/body/delete', NULL, t('Delete'));
@@ -1902,6 +2311,12 @@ class NodeTypePersistenceTestCase extends BackdropWebTestCase {
  * Verifies the rebuild functionality for the node_access table.
  */
 class NodeAccessRebuildTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   function setUp() {
     parent::setUp();
 
@@ -1926,6 +2341,31 @@ class NodeAccessRebuildTestCase extends BackdropWebTestCase {
  */
 class NodeAdminTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * @var User
+   */
+  protected $base_user_1;
+
+  /**
+   * @var User
+   */
+  protected $base_user_2;
+
+  /**
+   * @var User
+   */
+  protected $base_user_3;
+
+  /**
+   * @var User
+   */
+  protected $base_user_4;
 
   function setUp() {
     parent::setUp();
@@ -2095,7 +2535,7 @@ class NodeAdminTestCase extends BackdropWebTestCase {
       $this->assertLinkByHref('node/' . $node->nid . '/delete');
     }
 
-    // Verify 'view any unpubished content' allows view but not edit or delete.
+    // Verify 'view any unpublished content' allows view but not edit or delete.
     $this->backdropLogout();
     $this->backdropLogin($this->base_user_4);
     $this->backdropGet('admin/content');
@@ -2127,7 +2567,13 @@ class NodeTitleTestCase extends BackdropWebTestCase {
     theme_enable(array('stark'));
     config_set('system.core', 'theme_default', 'stark');
 
-    $this->admin_user = $this->backdropCreateUser(array('administer nodes', 'create post content', 'create page content'));
+    $permissions = array(
+      'administer nodes',
+      'create post content',
+      'create page content',
+      'view hidden paths',
+    );
+    $this->admin_user = $this->backdropCreateUser($permissions);
     $this->backdropLogin($this->admin_user);
   }
 
@@ -2159,6 +2605,34 @@ class NodeTitleTestCase extends BackdropWebTestCase {
     // Test node title is clickable on teaser list (/node).
     $this->backdropGet('node');
     $this->clickLink($node->title);
+
+    // Hide path display for Post node type.
+    $config = config('node.type.post');
+    $config->set('settings.hidden_path', '1');
+    $config->save();
+    $this->assertEqual($config->get('settings.hidden_path'), '1', 'The POST content type has hidden_path enabled.');
+
+    // Create "Post" content with title.
+    $settings = array(
+      'type' => 'post',
+      'title' => $this->randomName(8),
+      'promote' => 1,
+    );
+    $node = $this->backdropCreateNode($settings);
+    backdrop_flush_all_caches();
+
+    // Test post title is clickable for admin account on teaser list (/node).
+    $this->backdropGet('');
+    $this->assertLink($node->title);
+    $this->clickLink($node->title);
+    $this->assertResponse(200, 'Received 200 response from post with hidden_path.');
+    // Test node title is NOT clickable for standard account.
+    $this->backdropLogout();
+    backdrop_flush_all_caches();
+    $this->backdropGet('');
+    $this->assertNoLink($node->title);
+    // Also ensure that there is no "read more" link.
+    $this->assertNoLinkByHref(backdrop_get_path_alias('node/' . $node->nid));
   }
 }
 
@@ -2182,6 +2656,12 @@ class NodeFeedTestCase extends BackdropWebTestCase {
  * Test toggle between custom front page callback and default /node callback.
  */
 class NodeFrontPageCallback extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   function setUp() {
     parent::setUp('node', 'system');
 
@@ -2222,6 +2702,16 @@ class NodeFrontPageCallback extends BackdropWebTestCase {
  */
 class NodeBlockFunctionalTest extends BackdropWebTestCase {
 
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   function setUp() {
     parent::setUp('node', 'block');
 
@@ -2234,12 +2724,13 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     ));
     $this->web_user = $this->backdropCreateUser(array('access content', 'create post content'));
 
-    // Delete the two default nodes.
-    node_delete_multiple(array(1, 2));
+    // Delete all default content.
+    $nids = (array) db_query('SELECT nid FROM {node}')->fetchCol();
+    node_delete_multiple($nids);
   }
 
   /**
-   * Tests the recent comments block.
+   * Tests the recent content block.
    */
   function testRecentNodeBlock() {
     $this->backdropLogin($this->admin_user);
@@ -2582,6 +3073,11 @@ class NodeQueryAlter extends BackdropWebTestCase {
    * @var object
    */
   protected $noAccessUser;
+
+  /**
+   * @var User
+   */
+  protected $noAccessUser2;
 
   function setUp() {
     parent::setUp('node_access_test');
@@ -2959,6 +3455,7 @@ class NodeRevisionPermissionsTestCase extends BackdropWebTestCase {
       $revision = clone $node;
       $revision->revision = 1;
       $revision->log = $this->randomName(32);
+      $revision->is_active_revision = FALSE;
       node_save($revision);
       $this->node_revisions[] = $revision;
     }
@@ -3027,6 +3524,12 @@ class NodeRevisionPermissionsTestCase extends BackdropWebTestCase {
  * Tests pagination with a node access module enabled.
  */
 class NodeAccessPagerTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   public function setUp() {
     parent::setUp('node_access_test', 'comment');
     node_access_rebuild();
@@ -3071,6 +3574,32 @@ class NodeAccessPagerTestCase extends BackdropWebTestCase {
  * Tests the interaction of the node access system with fields.
  */
 class NodeAccessFieldTestCase extends NodeWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * @var User
+   */
+  protected $content_admin_user;
+
+  /**
+   * @var string
+   */
+  protected $field_name;
+
+  /**
+   * @var array
+   */
+  protected $field;
+
+  /**
+   * @var array
+   */
+  protected $instance;
+
   public function setUp() {
     parent::setUp('node_access_test', 'field_ui');
     node_access_rebuild();
@@ -3282,6 +3811,71 @@ class NodePageCacheTest extends NodeWebTestCase {
     $this->backdropGet($node_path);
     $this->assertResponse(404);
   }
+
+  /**
+   * Test node update and insert with entity cache.
+   *
+   * Make sure that creating a new node does not affect existing entity cache
+   * records, and updating a node only acts on the affected cid.
+   */
+  protected function testNodeUpdateInsertCache() {
+    $node_one = $this->backdropCreateNode(array('title' => 'Node one'));
+    $node_two = $this->backdropCreateNode(array('title' => 'Node two'));
+    $ids = array($node_one->nid, $node_two->nid);
+    $query = 'SELECT * FROM {cache_entity_node}';
+
+    // Trigger caching for both nodes and get cache records.
+    node_load_multiple($ids);
+    $cached = db_query($query)->fetchAllAssoc('cid');
+    $this->assertEqual(count($cached), 2, 'Both nodes have a record in table cache_entity_node.');
+
+    // Update one of the nodes.
+    $this->backdropLogin($this->admin_user);
+    $updated_title = 'Node two updated';
+    $edit = array('title' => $updated_title);
+    $this->backdropPost('node/' . $node_two->nid . '/edit', $edit, t('Save'));
+
+    // Check records in the entity cache database table after updating a node.
+    $cached_after_update = db_query($query)->fetchAllAssoc('cid');
+    $this->assertEqual(count($cached_after_update), 2, 'Both nodes still have a record in table cache_entity_node.');
+    $this->assertEqual($cached_after_update[1]->created, $cached[1]->created, 'Cache timestamp of node 1 is unchanged.');
+    $this->assertNotEqual($cached_after_update[2]->created, $cached[2]->created, 'Cache timestamp of node 2 has changed after updating.');
+    $node_data = unserialize($cached_after_update[2]->data);
+    $this->assertEqual($node_data->title, $updated_title, 'Cached node title is correct after updating.');
+
+    // Create a new page node.
+    $edit = array('title' => 'Node three');
+    $this->backdropPost('node/add/page', $edit, t('Save'));
+
+    // Check records again.
+    $cached_after_insert = db_query($query)->fetchAllAssoc('cid');
+    $this->assertEqual(count($cached_after_insert), 3, 'All three nodes have a record in table cache_entity_node.');
+    $this->assertEqual($cached_after_insert[1]->created, $cached[1]->created, 'Cache timestamp of node 1 is unchanged.');
+  }
+
+  /**
+   * Check that cached node info does not run out of sync with user data.
+   */
+  protected function testNodeSaveAfterUsernameChange() {
+    $author = $this->backdropCreateUser(array('create page content'));
+    $node = $this->backdropCreateNode(array(
+      'uid' => $author->uid,
+      'name' => $author->name,
+    ));
+
+    // Trigger entity cache.
+    $this->backdropGet('node/' . $node->nid);
+
+    // Simulate a username change (without actual form interaction).
+    $author->name = 'new_name';
+    user_save($author);
+
+    // Freshly load data and compare.
+    $user = entity_load('user', $author->uid);
+    $node_after = entity_load('node', $node->nid);
+    $this->assertEqual($user->name, $node_after->name, 'Name property in loaded node is equal to username after change');
+  }
+
 }
 
 /**
@@ -3302,7 +3896,7 @@ class NodeMultiByteUtf8Test extends NodeWebTestCase {
     $this->assertTrue(backdrop_strlen($title) < strlen($title), 'Title has multi-byte characters.');
     $node = $this->backdropCreateNode(array('title' => $title));
     $this->backdropGet('node/' . $node->nid);
-    $result = $this->xpath('(//div[contains(@class, "l-page-title")])//h1');
+    $result = $this->xpath('(//div[contains(@class, "l-top")])//h1');
     $this->assertEqual(trim((string) $result[0]), $title, 'The passed title was returned.');
   }
 }
@@ -3313,15 +3907,20 @@ class NodeMultiByteUtf8Test extends NodeWebTestCase {
  */
 class NodePublishScheduling extends BackdropWebTestCase {
 
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   function testNodeTypeCreateDefaultDraft() {
-    // Create a content type of fooba via the user interface.
+    // Create a content type of foobar via the user interface.
     $this->admin_user = $this->backdropCreateUser(array('bypass node access', 'administer nodes'));
     $web_user = $this->backdropCreateUser(array('bypass node access', 'administer content types', 'administer nodes'));
     $this->backdropLogin($web_user);
     $edit = array(
-      'name' => 'fooba',
-      'title_label' => 'title for fooba',
-      'type' => 'fooba',
+      'name' => 'foobar',
+      'title_label' => 'title for foobar',
+      'type' => 'foobar',
       'status_default' => 0,
     );
     $this->backdropPost('admin/structure/types/add', $edit, t('Save content type'));
@@ -3331,7 +3930,7 @@ class NodePublishScheduling extends BackdropWebTestCase {
     $edit = array(
       'title' => $name,
     );
-    $this->backdropPost('node/add/fooba', $edit, t('Save'));
+    $this->backdropPost('node/add/foobar', $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($name);
     $this->assertEqual($node->status, '0', 'The node is in the state Draft.');
 
@@ -3368,10 +3967,11 @@ class NodePublishScheduling extends BackdropWebTestCase {
     $edit = array(
       'title' => $name,
       // Schedule five minutes into the future to be sure we past the current time.
-      'scheduled[date]' => format_date(REQUEST_TIME + 360, 'custom', 'Y-m-d', $web_user->timezone),
-      'scheduled[time]' => format_date(REQUEST_TIME + 360, 'custom', 'g:i a', $web_user->timezone),
+      'scheduled[date]' => format_date(REQUEST_TIME + 300, 'custom', 'Y-m-d', $web_user->timezone),
+      'scheduled[time]' => format_date(REQUEST_TIME + 300, 'custom', 'H:i:s', $web_user->timezone),
     );
     $this->backdropPost('node/add/foobsee', $edit, t('Save'));
+
     $node = $this->backdropGetNodeByTitle($name);
     $this->assertEqual($node->status, '0', 'The node is in the state Unpublished.');
     $this->assertNotEqual($node->scheduled, 0, 'The node has a non zero scheduled date.');
@@ -3383,39 +3983,26 @@ class NodePublishScheduling extends BackdropWebTestCase {
     $node = node_load($node->nid);
     $this->assertEqual($node->status, '1', 'The node is in the state Published.');
 
-    // Ensure scheduled dates without date module also are validated and saved.
-    module_disable(array('date'), FALSE);
-
-    // Without Date module doing the validation, ensure Node module still
-    // checks the date is valid.
+    // Ensure Node module still checks the date is valid.
     $name = $this->randomName(9);
+    $invalid_date = format_date(REQUEST_TIME, 'custom', 'dddY-m-d', $web_user->timezone);
     $edit = array(
       'title' => $name,
       'status' => NODE_SCHEDULED,
-      'scheduled' => format_date(REQUEST_TIME, 'custom', 'dddY-m-d g:i a', $web_user->timezone),
+      'scheduled[date]' => $invalid_date,
+      'scheduled[time]' => format_date(REQUEST_TIME, 'custom', 'H:i', $web_user->timezone),
     );
     $this->backdropPost('node/add/foobsee', $edit, t('Save'));
-    $this->assertText(t('You have to specify a valid date.'));
+    $this->assertText(t('@date is not a valid date.', array('@date' => $invalid_date)));
 
-    // Ensure scheduling in the past is still not allowed without Date module.
+    // Ensure scheduling in the past is not allowed.
     $edit = array(
       'title' => $name,
       'status' => NODE_SCHEDULED,
-      'scheduled' => format_date(REQUEST_TIME - 300, 'custom', 'Y-m-d g:i a', $web_user->timezone),
+      'scheduled[date]' => format_date(REQUEST_TIME - 300, 'custom', 'Y-m-d', $web_user->timezone),
+      'scheduled[time]' => format_date(REQUEST_TIME - 300, 'custom', 'H:i:s', $web_user->timezone),
     );
     $this->backdropPost('node/add/foobsee', $edit, t('Save'));
     $this->assertText(t('Scheduled publish time cannot be in the past.'));
-
-    // Test successful submission and scheduling.
-    $edit = array(
-      'title' => $name,
-      'status' => NODE_SCHEDULED,
-      'scheduled' => format_date(REQUEST_TIME + 300, 'custom', 'Y-m-d g:i a', $web_user->timezone),
-    );
-    $this->backdropPost('node/add/foobsee', $edit, t('Save'));
-
-    $node = $this->backdropGetNodeByTitle($name);
-    $this->assertEqual($node->status, '0', 'The node is in the state Unpublished.');
-    $this->assertNotEqual($node->scheduled, 0, 'The node has a non zero scheduled date.');
   }
 }

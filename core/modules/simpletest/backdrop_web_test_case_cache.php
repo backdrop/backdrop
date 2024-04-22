@@ -39,10 +39,14 @@ class BackdropWebTestCaseCache extends BackdropWebTestCase {
   /**
    * Prepare cache tables and config directories.
    */
-  public function prepareCache() {
+  public function prepareCache($skip_myisam = FALSE) {
     $this->setUp();
-    // Speed up test speed by converting tables to MyISAM.
-    $this->alterToMyISAM();
+
+    if (!$skip_myisam) {
+      // Speed up test speed by converting tables to MyISAM.
+      $this->alterToMyISAM();
+    }
+
     $this->tearDown();
   }
 
@@ -148,15 +152,6 @@ class BackdropWebTestCaseCache extends BackdropWebTestCase {
     // Rebuild caches.
     $this->refreshVariables();
 
-    // Reset public files directory.
-    $GLOBALS['conf']['file_public_path'] = $this->originalFileDirectory;
-
-    // Reset language.
-    $language = $this->originalLanguage;
-    if ($this->originalLanguageDefault) {
-      $GLOBALS['conf']['language_default'] = $this->originalLanguageDefault;
-    }
-
     // Close the CURL handler.
     $this->curlClose();
   }
@@ -164,7 +159,9 @@ class BackdropWebTestCaseCache extends BackdropWebTestCase {
   /**
    * Alter tables to MyISAM engine to speed up tests.
    *
-   * MyISAM is faster to delete and copy tables. It gives small adventage when /var/lib/mysql on SHM (memory) device, but much bigger when tests run on regular device.
+   * MyISAM is faster to delete and copy tables. Its advantage is small when
+   * using /var/lib/mysql on an SHM (memory) device but is much bigger when
+   * tests are run on a regular device.
    */
   protected function alterToMyISAM() {
     if (Database::getConnection()->driver() != 'mysql') {

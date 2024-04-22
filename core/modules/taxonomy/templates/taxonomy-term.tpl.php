@@ -15,7 +15,7 @@
  * - $term_name: Name of the current term.
  * - $classes: Array of classes that can be used to style contextually through
  *   CSS. The default values can be one or more of the following:
- *   - taxonomy-term: The current template type, i.e., "theming hook".
+ *   - taxonomy-term: The current template type, i.e., "theme hook".
  *   - vocabulary-[vocabulary-name]: The vocabulary to which the term belongs to.
  *     For example, if the term is a "Tag" it would result in "vocabulary-tag".
  *
@@ -26,7 +26,7 @@
  * - $zebra: Outputs either "even" or "odd". Useful for zebra striping in
  *   teaser listings.
  * - $id: Position of the term. Increments each time it's output.
- * - $is_front: Flags true when presented in the front page.
+ * - $is_front: Flags true when presented in the home page.
  * - $logged_in: Flags true when the current user is a logged-in member.
  * - $is_admin: Flags true when the current user is an administrator.
  *
