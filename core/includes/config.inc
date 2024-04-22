@@ -1449,20 +1449,14 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
     $data = array_merge(array('_config_name' => $name), $data);
     $data = $this->encode($data) . "\n";
     try {
-      $result = db_merge($this->table, array('target' => $this->database))
+      db_merge($this->table, array('target' => $this->database))
         ->key(array('name' => $name))
         ->fields(array(
           'name' => $name,
           'data' => $data,
+          'changed' => REQUEST_TIME,
         ))
         ->execute();
-      if ($result == MergeQuery::STATUS_INSERT) {
-        db_update($this->table, array('target' => $this->database))
-          ->fields(array('changed' => time()))
-          ->condition('name', $name)
-          ->condition('changed', 0)
-          ->execute();
-      }
     }
     catch (\Exception $e) {
       throw new ConfigStorageException('Failed to write configuration to the database: ' . $this->$name, 0, $e);
@@ -1570,7 +1564,20 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
 
     try {
       $archiver = new ArchiverTar($realpath);
-      $archiver->extract(file_directory_temp(), $archiver->listContents());
+      // Only extract JSON files, ignoring anything else in the archive.
+      $file_list = preg_grep('/.json$/', $archiver->listContents());
+      $temp_directory = file_create_filename('config', file_directory_temp());
+      file_prepare_directory($temp_directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+      if ($file_list) {
+        $archiver->extract($temp_directory, $file_list);
+        foreach ($file_list as $file) {
+          $config_name = basename($file, '.json');
+          $file_contents = file_get_contents($temp_directory . '/' . $file);
+          $config_data = $this->decode($file_contents);
+          $this->write($config_name, $config_data);
+        }
+      }
+      file_unmanaged_delete_recursive($temp_directory);
     }
     catch (\Exception $e) {
       watchdog('config', 'Could not extract the archive @uri: @error', array(
@@ -1586,24 +1593,24 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    * {@inheritdoc}
    */
   public function exportArchive($archive_file_uri) {
-    $tmp_config_dir_path = file_create_filename('config', file_directory_temp());
-    file_prepare_directory($tmp_config_dir_path, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+    $temp_directory = file_create_filename('config', file_directory_temp());
+    file_prepare_directory($temp_directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     $data = db_select($this->table, 'c', array('target' => $this->database))
       ->fields('c')
       ->execute()
       ->fetchAllAssoc('name', PDO::FETCH_ASSOC);
-    foreach($data as $config_name => $row) {
-      file_put_contents($tmp_config_dir_path . '/' . $config_name . '.json', $row['data']);
+    foreach ($data as $config_name => $row) {
+      file_put_contents($temp_directory . '/' . $config_name . '.json', $row['data']);
     }
 
     // And tar it up.
-    $realpath = backdrop_realpath($archive_file_uri);
     $archiver = new ArchiverTar($archive_file_uri);
     $config_files = array();
     foreach (array_keys($data) as $config_name) {
-      $config_files[] = $tmp_config_dir_path . '/' . $config_name . '.json';
+      $config_files[] = $temp_directory . '/' . $config_name . '.json';
     }
-    $archiver->getArchive()->createModify($config_files, '', $tmp_config_dir_path);
+    $archiver->getArchive()->createModify($config_files, '', $temp_directory);
+    file_unmanaged_delete_recursive($temp_directory);
   }
 }
 

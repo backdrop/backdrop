@@ -1686,15 +1686,15 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Create the database prefix for this test.
     $this->prepareDatabasePrefix();
 
-    // Reset all statics and variables to perform tests in a clean environment.
-    $conf = array();
-    backdrop_static_reset();
-
     // Prepare the environment for running tests.
     $this->prepareEnvironment();
     if (!$this->setupEnvironment) {
       return FALSE;
     }
+
+    // Reset all statics and variables to perform tests in a clean environment.
+    $conf = array();
+    backdrop_static_reset();
 
     // Change the database prefix.
     // All static variables need to be reset before the database prefix is

@@ -5701,8 +5701,8 @@ function backdrop_clear_js_cache() {
  *   readable by humans, or emulates this functionality if running an older
  *   version of PHP.
  *
- * @return string
- *   The given $var encoded as a JSON string.
+ * @return string|FALSE
+ *   The given $var encoded as a JSON string or FALSE on failure.
  *
  * @see backdrop_json_decode()
  * @ingroup php_wrappers

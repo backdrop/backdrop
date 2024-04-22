@@ -1496,6 +1496,9 @@ class MenuTrailTestCase extends MenuWebTestCase {
     // the breadcrumbs and Management tree.
     state_set('menu_test_menu_tree_set_path', $test_menu_path);
     $this->assertBreadcrumb('admin/config/development/menu-trail', $override_breadcrumb, t('Menu trail - Case 2'), $override_tree);
+
+    // Load one more page to clear out any pending theme registry saves.
+    $this->backdropGet('admin/config/system');
   }
 
   /**
