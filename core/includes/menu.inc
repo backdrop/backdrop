@@ -323,7 +323,7 @@ define('MENU_PREFERRED_LINK', '1cf698d64d1aa4b83907cf6ed55db3a7f8e92c91');
 function menu_get_ancestors($parts) {
   $number_parts = count($parts);
   $ancestors = array();
-  $length =  $number_parts - 1;
+  $length = $number_parts - 1;
   $end = (1 << $number_parts) - 1;
   $masks = state_get('menu_masks');
   // If the optimized menu_masks array is not available use brute force to get
@@ -902,7 +902,7 @@ function menu_tail_to_arg($arg, $map, $index) {
  * $item['load arguments'] = array('%map', '%index');
  * @endcode
  *
- * @see search_menu().
+ * @see search_menu()
  */
 function menu_tail_load($arg, &$map, $index) {
   $arg = implode('/', array_slice($map, $index));
@@ -1356,7 +1356,7 @@ function menu_tree_page_data($menu_name, $max_depth = NULL, $only_active_trail =
       // Use the tree based on the normally expanded tree.
       if (isset($tree[$cid])) {
         // Use the current CID.
-        //$cid = $cid;
+        // $cid = $cid;
       }
       // Or use the existing fully expanded tree.
       elseif (isset($tree[$cid . ':all'])) {
@@ -2760,7 +2760,8 @@ function menu_get_active_breadcrumb() {
     // (commonly MENU_DEFAULT_LOCAL_TASK). In order to also hide the parent link
     // itself, we always remove the last link in the trail, if the current
     // router item links to its parent.
-    if (($item['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) {
+    $end = end($active_trail);
+    if ((($item['type'] & MENU_LINKS_TO_PARENT) == MENU_LINKS_TO_PARENT) && $item['href'] == $end['href']) {
       array_pop($active_trail);
     }
 
@@ -3018,7 +3019,7 @@ function _menu_navigation_links_rebuild($menu) {
         ->execute()->fetchAssoc();
       if ($existing_item) {
         $item['mlid'] = $existing_item['mlid'];
-        // A change in hook_menu may move the link to a different menu
+        // A change in hook_menu may move the link to a different menu.
         if (empty($item['menu_name']) || ($item['menu_name'] == $existing_item['menu_name'])) {
           $item['menu_name'] = $existing_item['menu_name'];
           $item['plid'] = $existing_item['plid'];
@@ -3257,7 +3258,7 @@ function menu_link_save(&$item, $existing_item = array(), $parent_candidates = a
 
   // This is the easiest way to handle the unique internal path '<front>',
   // since a path marked as external does not need to match a router path.
-  $item['external'] = (url_is_external($item['link_path'])  || $item['link_path'] == '<front>') ? 1 : 0;
+  $item['external'] = (url_is_external($item['link_path']) || $item['link_path'] == '<front>') ? 1 : 0;
   // Load defaults.
   $item += array(
     'menu_name' => 'main-menu',
@@ -3345,7 +3346,7 @@ function menu_link_save(&$item, $existing_item = array(), $parent_candidates = a
     _menu_link_move_children($item, $existing_item);
   }
   // Find the router_path.
-  if (empty($item['router_path'])  || !$existing_item || ($existing_item['link_path'] != $item['link_path'])) {
+  if (empty($item['router_path']) || !$existing_item || ($existing_item['link_path'] != $item['link_path'])) {
     if ($item['external']) {
       $item['router_path'] = '';
     }
@@ -3522,11 +3523,11 @@ function _menu_set_expanded_menus() {
  * Finds the router path which will serve this path.
  *
  * @param $link_path
- *  The path for we are looking up its router path.
+ *   The path for we are looking up its router path.
  *
  * @return
- *  A path from $menu keys or empty if $link_path points to a nonexisting
- *  place.
+ *   A path from $menu keys or empty if $link_path points to a nonexisting
+ *   place.
  */
 function _menu_find_router_path($link_path) {
   // $menu will only have data during a menu rebuild.
@@ -3772,7 +3773,7 @@ function _menu_router_build($callbacks) {
         $parts[$k] = '%';
       }
       else {
-        $fit |=  1 << ($slashes - $k);
+        $fit |= 1 << ($slashes - $k);
       }
     }
     if ($fit) {

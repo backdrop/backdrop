@@ -42,7 +42,7 @@ class MenuWebTestCase extends BackdropWebTestCase {
     foreach ($trail as $path => $title) {
       $url = url($path);
       $part = array_shift($parts);
-      $pass = ($pass && $part['href'] === $url && $part['text'] === check_plain($title));
+      $pass = ($pass && !empty($part['href']) && $part['href'] === $url && !empty($part['text']) && $part['text'] === check_plain($title));
     }
     // No parts must be left, or an expected "Home" will always pass.
     $pass = ($pass && empty($parts));
@@ -1136,7 +1136,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
       // The current page title should only be contained once in the breadcrumb
       // on the default local task, since there is no difference between both
       // pages.
-      $this->assertBreadcrumb("node/$nid2/view", $trail, $node2->title);
+      $this->assertBreadcrumb("node/$nid2/view", $trail, $node2->title, $tree, TRUE);
       $trail += array(
         "node/$nid2" => $node2->menu['link_title'],
       );
@@ -1162,10 +1162,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
       );
       $this->assertBreadcrumb("node/$nid3", $trail, $node3->title, $tree, FALSE);
       $this->assertBreadcrumb("node/$nid3/edit", $trail);
-      // The node itself should not be contained in the breadcrumb on the
-      // default local task, since there is no difference between both pages.
-      array_pop($trail);
-      $this->assertBreadcrumb("node/$nid3/view", $trail, $node3->title, $tree, FALSE);
+      $this->assertBreadcrumb("node/$nid3/view", $trail, $node3->title, $tree, TRUE);
 
       // Verify that the home page does not have a breadcrumb.
       $this->assertBreadcrumb('<front>', array());
@@ -1359,9 +1356,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     $this->assertBreadcrumb('user/' . $this->admin_user->uid, $trail, $link_admin_user['link_title'], $tree);
 
     $this->backdropLogin($this->admin_user);
-    $trail += array(
-      'user/' . $this->admin_user->uid . '/edit' => t('Edit'),
-    );
+
     $this->assertBreadcrumb('user/' . $this->admin_user->uid . '/edit', $trail, $link_admin_user['link_title'], $tree, FALSE);
 
     // Add 'user/%/edit' below 'user/%' and verify again.
@@ -1394,7 +1389,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
       $link_admin_user['link_path'] => $link_admin_user['link_title'],
       'user/' . $this->admin_user->uid . '/edit' => $this->admin_user->name . ' edit',
     );
-    $this->assertBreadcrumb('user/' . $this->admin_user->uid . '/edit', $trail, $link_admin_user['link_title'], $tree, FALSE);
+    $this->assertBreadcrumb('user/' . $this->admin_user->uid . '/edit', $trail, $link_admin_user['link_title'], $tree, TRUE);
 
     // Create an only slightly privileged user being able to access site reports
     // but not administration pages.
