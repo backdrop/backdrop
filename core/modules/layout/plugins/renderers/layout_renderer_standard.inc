@@ -608,7 +608,7 @@ class LayoutRendererStandard {
   }
 
   /**
-   * Ensure that the page content block is included in the default region.
+   * Ensure that the "Main content" block is included in the default region.
    *
    * This method is used specifically when the "default" layout is used,
    * to make sure that the current page content is rendered in the default

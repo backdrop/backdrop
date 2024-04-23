@@ -1102,21 +1102,69 @@ function layout_settings_form_save_submit($form, &$form_state) {
     unset($_SESSION['layout_new_name']);
   }
 
-  // If this is a new layout, populate blocks from default layout.
+  // If this is a new layout, populate it with blocks from the default layout.
   if (!empty($layout->is_new)) {
     $default_layout_name = path_is_admin($layout->getPath()) ? 'admin_default' : 'default';
     $default_layout = layout_load($default_layout_name);
+    // Skip any regions in the default layout that do not contain any blocks.
+    $default_layout_regions = array_filter($default_layout->positions);
+
     // Get the template being used by this layout.
     $template_info = layout_get_layout_template_info($layout->layout_template);
-    foreach ($default_layout->positions as $region => $region_block_list) {
-      if (array_key_exists($region, $template_info['regions'])) {
-        foreach ($region_block_list as $uuid) {
-          if (isset($default_layout->content[$uuid])) {
-            $block = $default_layout->content[$uuid];
+    $template_is_flexible = isset($template_info['flexible']) && $template_info['flexible'] == TRUE;
+
+    if ($template_is_flexible) {
+      // With flexible templates, the 'regions' array has UUIDs for keys, and
+      // human-readable names as values. In order to match what happens with
+      // non-flexible templates, we convert the human-readable values to
+      // lowercase, and flip the array keys and values. This helps later, when
+      // we are trying to find matching regions between the default layout and
+      // the flexible template being used in the new layout.
+      $new_layout_regions = array_flip(array_map('strtolower', $template_info['regions']));
+    }
+    else {
+      // With regular templates, the regions information is already available in
+      // a convenient array - no special preparation required.
+      $new_layout_regions = $template_info['regions'];
+    }
+
+    foreach ($default_layout_regions as $default_layout_region => $region_block_list) {
+      foreach ($region_block_list as $block_uuid) {
+        // Only clone blocks from the regions of the default layout if regions
+        // with matching names are found in the template used by the new layout.
+        $region_match = array_key_exists($default_layout_region, $new_layout_regions);
+        // Also, always attempt to clone the "Main content" block to any
+        // specified default region (even if there is no matching region name).
+        $block_is_default_block = ($block_uuid == 'default');
+
+        if ($region_match || $block_is_default_block) {
+          if (isset($default_layout->content[$block_uuid])) {
+            $block = $default_layout->content[$block_uuid];
             $new_block = $block->getClone();
-            // Only add the block from the default if required contexts are
-            // present for each block.
+            // Only add the blocks from the default layout if all required
+            // contexts for each block are present in the new layout.
             if ($layout->hasContexts($new_block->getRequiredContexts())) {
+              if ($template_is_flexible) {
+                // For flexible templates, attempt to match the human-readable
+                // name of the region to the respective UUID.
+                $region = $new_layout_regions[$default_layout_region];
+              }
+              else {
+                // Regular, non-flexible template with a region match.
+                if ($region_match) {
+                  $region = $default_layout_region;
+                }
+                else {
+                  // Regular, non-flexible template without a region match.
+                  // Make sure that the "Main content" block is always added if
+                  // the 'default region' property has been specified in the
+                  // .info file of the non-flexible layout template.
+                  if ($block_is_default_block && !empty($template_info['default region'])) {
+                    $region = $template_info['default region'];
+                  }
+                }
+              }
+
               $layout->positions[$region][] = $new_block->uuid;
               $layout->content[$new_block->uuid] = $new_block;
             }
