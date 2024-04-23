@@ -963,6 +963,9 @@ function image_style_flush($style) {
  * @see image_style_deliver()
  */
 function image_style_url($style_name, $uri) {
+  if (image_is_svg($uri)) {
+    return file_create_url($uri);
+  }
   $uri = image_style_path($style_name, $uri);
   $uri = file_uri_normalize_dot_segments($uri);
 
