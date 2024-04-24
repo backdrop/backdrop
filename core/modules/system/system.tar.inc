@@ -42,7 +42,7 @@
 /**
  * Backdrop-specific notes on this port from the original source.
  *
- * This file origin is Tar.php, release 1.4.9 (stable) with some code
+ * This file origin is Tar.php, release 1.5.0 (stable) with some code
  * from PEAR.php, release 1.10.10 (stable) both at http://pear.php.net.
  * To simplify future porting from pear of this file, you should not
  * do cosmetic or other non significant changes to this file.
@@ -57,6 +57,9 @@
  *  Changed $this->error_object = &$this->raiseError($p_message)
  *  to throw new Exception($p_message).
  */
+
+// Backdrop addition Ignore PHP_CodeSniffer warnings/errors for this file.
+// phpcs:ignoreFile
 
 // Backdrop removal require_once 'PEAR.php'.
 
@@ -279,7 +282,7 @@ class Archive_Tar
     {
         $this->_close();
         // ----- Look for a local copy to delete
-        if ($this->_temp_tarname != '') {
+        if ($this->_temp_tarname != ''&& (bool) preg_match('/^tar[[:alnum:]]*\.tmp$/', $this->_temp_tarname)) {
             @backdrop_unlink($this->_temp_tarname);
         }
     }
@@ -340,7 +343,7 @@ class Archive_Tar
      *              single string with names separated by a single
      *              blank space.
      *
-     * @return true on success, false on error.
+     * @return bool true on success, false on error.
      * @see    createModify()
      */
     public function create($p_filelist)
@@ -360,7 +363,7 @@ class Archive_Tar
      *              single string with names separated by a single
      *              blank space.
      *
-     * @return true on success, false on error.
+     * @return bool true on success, false on error.
      * @see    createModify()
      * @access public
      */
@@ -503,7 +506,7 @@ class Archive_Tar
      *                             each element in the list, when
      *                             relevant.
      *
-     * @return true on success, false on error.
+     * @return bool true on success, false on error.
      */
     public function addModify($p_filelist, $p_add_dir, $p_remove_dir = '')
     {
@@ -556,7 +559,7 @@ class Archive_Tar
      *                               gid => the group ID of the file
      *                                   (default = 0 = root)
      *
-     * @return true on success, false on error.
+     * @return bool true on success, false on error.
      */
     public function addString($p_filename, $p_string, $p_datetime = false, $p_params = array())
     {
@@ -682,7 +685,7 @@ class Archive_Tar
      * @param boolean $p_preserve Preserve user/group ownership of files
      * @param boolean $p_symlinks Allow symlinks.
      *
-     * @return true on success, false on error.
+     * @return bool true on success, false on error.
      * @see    extractModify()
      */
     public function extractList($p_filelist, $p_path = '', $p_remove_path = '', $p_preserve = false, $p_symlinks = true)
@@ -720,7 +723,7 @@ class Archive_Tar
      * list of parameters, in the format attribute code + attribute values :
      * $arch->setAttribute(ARCHIVE_TAR_ATT_SEPARATOR, ',');
      *
-     * @return true on success, false on error.
+     * @return bool true on success, false on error.
      */
     public function setAttribute()
     {
@@ -791,7 +794,7 @@ class Archive_Tar
      */
     public function setIgnoreList($list)
     {
-        $regexp = str_replace(array('#', '.', '^', '$'), array('\#', '\.', '\^', '\$'), $list);
+        $list = str_replace(array('#', '.', '^', '$'), array('\#', '\.', '\^', '\$'), $list);
         $regexp = '#/' . join('$|/', $list) . '#';
         $this->setIgnoreRegexp($regexp);
     }
@@ -1335,7 +1338,7 @@ class Archive_Tar
             while (($v_buffer = fread($v_file, $this->buffer_length)) != '') {
                 $buffer_length = strlen("$v_buffer");
                 if ($buffer_length != $this->buffer_length) {
-                    $pack_size = ((int)($buffer_length / 512) + 1) * 512;
+                    $pack_size = ((int)($buffer_length / 512) + ($buffer_length % 512 !== 0 ? 1 : 0)) * 512;
                     $pack_format = sprintf('a%d', $pack_size);
                 } else {
                     $pack_format = sprintf('a%d', $this->buffer_length);
@@ -1459,16 +1462,20 @@ class Archive_Tar
 
         $v_magic = 'ustar ';
         $v_version = ' ';
+        $v_uname = '';
+        $v_gname = '';
 
         if (function_exists('posix_getpwuid')) {
             $userinfo = posix_getpwuid($v_info[4]);
             $groupinfo = posix_getgrgid($v_info[5]);
 
-            $v_uname = $userinfo['name'];
-            $v_gname = $groupinfo['name'];
-        } else {
-            $v_uname = '';
-            $v_gname = '';
+            if (isset($userinfo['name'])) {
+                $v_uname = $userinfo['name'];
+            }
+
+            if (isset($groupinfo['name'])) {
+                $v_gname = $groupinfo['name'];
+            }
         }
 
         $v_devmajor = '';
@@ -1579,8 +1586,13 @@ class Archive_Tar
             $userinfo = posix_getpwuid($p_uid);
             $groupinfo = posix_getgrgid($p_gid);
 
-            $v_uname = $userinfo['name'];
-            $v_gname = $groupinfo['name'];
+            if ($userinfo === false || $groupinfo === false) {
+                $v_uname = '';
+                $v_gname = '';
+            } else {
+                $v_uname = $userinfo['name'];
+                $v_gname = $groupinfo['name'];
+            }
         } else {
             $v_uname = '';
             $v_gname = '';
@@ -2167,13 +2179,47 @@ class Archive_Tar
                 if ($v_extract_file) {
                     if ($v_header['typeflag'] == "5") {
                         if (!@file_exists($v_header['filename'])) {
-                            if (!@mkdir($v_header['filename'], 0777)) {
+                            if (!@mkdir($v_header['filename'], 0775)) {
                                 $this->_error(
                                   'Unable to create directory {'
                                   . $v_header['filename'] . '}'
                                 );
                                 return false;
                             }
+                        }
+                        $absolute_link = FALSE;
+                        $link_depth = 0;
+                        if (strpos($v_header['link'], "/") === 0 || strpos($v_header['link'], ':') !== FALSE) {
+                          $absolute_link = TRUE;
+                        }
+                        else {
+                            $s_filename = preg_replace('@^' . preg_quote($p_path) . '@', "", $v_header['filename']);
+                            $s_linkname = str_replace('\\', '/', $v_header['link']);
+                            foreach (explode("/", $s_filename) as $dir) {
+                                if ($dir === "..") {
+                                    $link_depth--;
+                                } elseif ($dir !== "" && $dir !== "." ) {
+                                    $link_depth++;
+                                }
+                            }
+                            foreach (explode("/", $s_linkname) as $dir){
+                                if ($link_depth <= 0) {
+                                    break;
+                                }
+                                if ($dir === "..") {
+                                    $link_depth--;
+                                } elseif ($dir !== "" && $dir !== ".") {
+                                    $link_depth++;
+                                }
+                            }
+                        }
+                        if ($absolute_link || $link_depth <= 0) {
+                            $this->_error(
+                                 'Out-of-path file extraction {'
+                                 . $v_header['filename'] . ' --> ' .
+                                 $v_header['link'] . '}'
+                            );
+                            return false;
                         }
                     } elseif ($v_header['typeflag'] == "2") {
                         $absolute_link = FALSE;
@@ -2500,7 +2546,7 @@ class Archive_Tar
             return false;
         }
 
-        if (!@mkdir($p_dir, 0777)) {
+        if (!@mkdir($p_dir, 0775)) {
             $this->_error("Unable to create directory '$p_dir'");
             return false;
         }
