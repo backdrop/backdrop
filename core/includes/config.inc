@@ -1176,9 +1176,6 @@ interface ConfigStorageInterface {
    *
    * @return string
    *   The encoded configuration data.
-   *
-   *   This is a publicly accessible static method to allow for alternative
-   *   usages in data conversion scripts and also tests.
    */
   public function encode($data);
 
@@ -1190,9 +1187,6 @@ interface ConfigStorageInterface {
    *
    * @return array
    *   The decoded configuration data as an associative array.
-   *
-   *   This is a publicly accessible static method to allow for alternative
-   *   usages in data conversion scripts and also tests.
    */
   public function decode($raw);
 
@@ -1322,11 +1316,8 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    *   string has a format of db://<database connection>/<database table>.
    *
    *   Examples:
-   *    * db://default/config_active
-   *    * db://second_database/config_stage
-   *
-   *   If no database connection is specified, then the 'default' connection is
-   *   used.
+   *   - db://default/config_active
+   *   - db://second_database/config_staging
    *
    * @throws ConfigStorageException
    */

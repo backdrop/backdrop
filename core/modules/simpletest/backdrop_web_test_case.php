@@ -4012,8 +4012,6 @@ class BackdropWebTestCase extends BackdropTestCase {
   /**
    * Clears the watchdog database table.
    *
-   * @return NULL
-   *
    * @since 1.19.0 Method added.
    */
   protected function clearWatchdog() {
