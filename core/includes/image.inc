@@ -175,10 +175,12 @@ function image_get_info($filepath, $toolkit = FALSE) {
       $details['file_size'] = filesize($filepath);
     }
     elseif (image_is_svg($filepath)) {
+      // Dimensions could be FALSE if the SVG is invalid, although we should
+      // have caught that on upload.
       $dimensions = image_get_svg_dimensions($filepath);
       $details = array(
-        'width'     => $dimensions['width'],
-        'height'    => $dimensions['height'],
+        'width'     => isset($dimensions['width']) ? $dimensions['width'] : IMAGE_SVG_DEFAULT_WIDTH,
+        'height'    => isset($dimensions['height']) ? $dimensions['height'] : IMAGE_SVG_DEFAULT_HEIGHT,
         'extension' => 'svg',
         'mime_type' => 'image/svg+xml',
         'file_size' => filesize($filepath),
@@ -557,7 +559,8 @@ function image_hex2rgba(&$hex) {
  * @return array|FALSE
  *   An array containing the keys "width" and "height" as integer values. If the
  *   image is an SVG but no set dimensions are available, these keys will have
- *   NULL values. If the image is not an SVG, FALSE will be return.
+ *   NULL values. If the image is not an SVG, or the SVG file is empty or
+ *   invalid, FALSE will be returned.
  */
 function image_get_svg_dimensions($uri) {
   // Safety check.
@@ -577,13 +580,15 @@ function image_get_svg_dimensions($uri) {
   );
 
   $file_contents = file_get_contents($uri);
-  if ($file_contents) {
-    $svg = simplexml_load_string($file_contents);
+  if ($file_contents && $svg = simplexml_load_string($file_contents)) {
     foreach ($svg->attributes() as $attribute => $value) {
       if ($attribute === 'width' || $attribute === 'height') {
         $svg_dimensions[$attribute] = (int) $value;
       }
     }
+  }
+  else {
+    return FALSE;
   }
 
   // Save values to static cache.
