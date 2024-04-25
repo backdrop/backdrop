@@ -1,7 +1,7 @@
 services:
   php:
     # See: https://github.com/TugboatQA/dockerfiles/blob/main/php/TAGS.md
-    image: tugboatqa/php:8.3-apache
+    image: tugboatqa/php:8.1-apache
     default: true
     depends: mariadb
     commands:
