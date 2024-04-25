@@ -168,12 +168,10 @@ function installer_manager_update_form($form, $form_state) {
 
     $recommended_release = $project['releases'][$project['recommended']];
     $title_attribute = t('Release notes for @project_title', array('@project_title' => $project['title']));
-    $link_attributes = array(
-      'attributes' => array(
-        'title' => $title_attribute,
-        'target'=>'_blank',
-      )
-    );
+    $link_attributes = array('attributes' => array(
+      'title' => $title_attribute,
+      'target' => '_blank',
+    ));
     $release_notes_link = l(t('release notes'), $recommended_release['release_link'], $link_attributes);
     $recommended_version = $recommended_release['version'] . ' (' . $release_notes_link . ')';
     if ($recommended_release['version_major'] != $project['existing_major']) {

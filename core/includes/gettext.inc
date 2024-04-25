@@ -204,11 +204,11 @@ function _locale_import_read_po($op, $file, $mode = NULL, $langcode = NULL) {
 
       // Remove 'msgid' and trim away whitespace.
       $line = trim(substr($line, 5));
-      // At this point, $line should now contain only the message ID.
 
+      // At this point, $line should now contain only the message ID.
       $quoted = _locale_import_parse_quoted($line);
       if ($quoted === FALSE) {
-        // The message id must be wrapped in quotes.
+        // The message ID must be wrapped in quotes.
         _locale_import_message('The translation file %filename contains a syntax error on line %line.', $file, $lineno);
         return FALSE;
       }
@@ -456,8 +456,8 @@ function _locale_import_one_string($op, $value = NULL, $mode = NULL, $langcode =
           _locale_import_one_string_db($report, $langcode, isset($value['msgctxt']) ? $value['msgctxt'] : '', $english, $translation, $comments, $mode);
         }
       }
-  // End of db-store operation.
-  } 
+      // End of db-store operation.
+  }
 
   return NULL;
 }
