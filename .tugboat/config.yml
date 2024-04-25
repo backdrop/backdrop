@@ -6,11 +6,12 @@ services:
     depends: mariadb
     commands:
       init:
-        # Install PHP 'zip' extension to allow installing Backdrop modules.
+        # Make sure 'zip' can be installed: https://stackoverflow.com/a/64500821/4168619
         - apt update && apt install -y libzip-dev
-        - docker-php-ext-install zip
-        # Enable Apache 'rewrite' module for clean URLs.
-        - a2enmod rewrite
+        # Install PHP 'zip' extension to allow installing Backdrop modules.
+        - docker-php-ext-install zip opcache
+        # Enable Apache 'rewrite' module for clean URLs + other required modules.
+        - a2enmod rewrite expires headers
         # Link the document root to the expected path.
         - ln -snf $TUGBOAT_ROOT $DOCROOT
         # Use the Tugboat-specific Backdrop settings.
@@ -23,22 +24,38 @@ services:
         - mkdir $TUGBOAT_ROOT/files/config/staging
       update:
         # Set appropriate file permissions/ownership for installer/self-updater.
-        - cd $TUGBOAT_ROOT && chown -R www-data:www-data files layouts modules themes core
-        - cd $TUGBOAT_ROOT && find files layouts modules themes core -type d -exec chmod 2775 {} \;
-        - cd $TUGBOAT_ROOT && find files layouts modules themes core -type f -exec chmod 0664 {} \;
-      build:
-        # Delete previous comments in the PR.
-        - cd $TUGBOAT_ROOT/.tugboat && ./delete-comments.sh
+        - chown -R www-data:www-data $TUGBOAT_ROOT
+        - find $TUGBOAT_ROOT/files $TUGBOAT_ROOT/layouts $TUGBOAT_ROOT/modules $TUGBOAT_ROOT/themes -type d -exec chmod 2775 {} \;
+        - find $TUGBOAT_ROOT/files $TUGBOAT_ROOT/layouts $TUGBOAT_ROOT/modules $TUGBOAT_ROOT/themes -type f -exec chmod 0664 {} \;
         # Clear out active config (needed when rebuilding/reinstalling).
         - find $TUGBOAT_ROOT/files/config/active -mindepth 1 -delete
         # Generate and store a random password for the admin user.
         - openssl rand -hex 6 > $TUGBOAT_ROOT/.tugboat/password
         # Install Backdrop.
         - chmod +x $TUGBOAT_ROOT/core/scripts/install.sh
-        - cd $TUGBOAT_ROOT && ./core/scripts/install.sh --db-url=mysql://tugboat:tugboat@mariadb/tugboat --account-pass=`cat .tugboat/password`
+        - cd $TUGBOAT_ROOT && php ./core/scripts/install.sh --db-url=mysql://tugboat:tugboat@mariadb/tugboat --account-pass=`cat .tugboat/password`
         # Fix config permissions after install.
         - chown -R www-data:www-data $TUGBOAT_ROOT/files/config/active
         - find $TUGBOAT_ROOT/files/config/active -type f -exec chmod 0664 {} \;
+        # Set an expiration date/time for the preview.
+        - cd $TUGBOAT_ROOT/.tugboat && ./set-expiry.sh
+        # .........
+        #- cd $TUGBOAT_ROOT && chown -R www-data:www-data files layouts modules themes core
+        #- cd $TUGBOAT_ROOT && find files layouts modules themes core -type d -exec chmod 2775 {} \;
+        #- cd $TUGBOAT_ROOT && find files layouts modules themes core -type f -exec chmod 0664 {} \;
+      build:
+        # Delete previous comments in the PR.
+        - cd $TUGBOAT_ROOT/.tugboat && ./delete-comments.sh
+        # Clear out active config (needed when rebuilding/reinstalling).
+        ###- find $TUGBOAT_ROOT/files/config/active -mindepth 1 -delete
+        # Generate and store a random password for the admin user.
+        ###- openssl rand -hex 6 > $TUGBOAT_ROOT/.tugboat/password
+        # Install Backdrop.
+        ###- chmod +x $TUGBOAT_ROOT/core/scripts/install.sh
+        ###- cd $TUGBOAT_ROOT && ./core/scripts/install.sh --db-url=mysql://tugboat:tugboat@mariadb/tugboat --account-pass=`cat .tugboat/password`
+        # Fix config permissions after install.
+        ###- chown -R www-data:www-data $TUGBOAT_ROOT/files/config/active
+        ###- find $TUGBOAT_ROOT/files/config/active -type f -exec chmod 0664 {} \;
         # Set an expiration date/time for the preview.
         - cd $TUGBOAT_ROOT/.tugboat && ./set-expiry.sh
         # Post a comment in the PR.
@@ -49,6 +66,6 @@ services:
       init:
         # Configure database for UTF-8: https://docs.backdropcms.org/documentation/database-configuration#utf8mb4
         - echo "[mysqld]\ninnodb_large_prefix=true\ninnodb_file_format=barracuda\ninnodb_file_per_table=true" >> /etc/mysql/conf.d/utf8mb.conf
-      build:
+      update:
         # Drop and re-create the database (needed when rebuilding/reinstalling).
         - mariadb-admin -f drop tugboat && mariadb-admin create tugboat
