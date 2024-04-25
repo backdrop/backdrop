@@ -21,6 +21,8 @@ class DefaultMailSystem implements MailSystemInterface {
     // Join the body array into one string.
     $message['body'] = implode("\n\n", $message['body']);
     // Convert any HTML to plain-text and wrap the mail body for sending.
+    // Note that backdrop_html_to_text() already calls backdrop_wrap_mail(), so
+    // it is not necessary to call that explicitly again.
     $message['body'] = backdrop_html_to_text($message['body']);
     return $message;
   }
