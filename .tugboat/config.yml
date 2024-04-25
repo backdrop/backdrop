@@ -1,7 +1,7 @@
 services:
   php:
     # See: https://github.com/TugboatQA/dockerfiles/blob/main/php/TAGS.md
-    image: tugboatqa/php:8.1-apache
+    image: tugboatqa/php:8.3-apache
     default: true
     depends: mariadb
     commands:
@@ -37,30 +37,15 @@ services:
         # Fix config permissions after install.
         - chown -R www-data:www-data $TUGBOAT_ROOT/files/config/active
         - find $TUGBOAT_ROOT/files/config/active -type f -exec chmod 0664 {} \;
-        # Set an expiration date/time for the preview.
-        - cd $TUGBOAT_ROOT/.tugboat && ./set-expiry.sh
-        # .........
-        #- cd $TUGBOAT_ROOT && chown -R www-data:www-data files layouts modules themes core
-        #- cd $TUGBOAT_ROOT && find files layouts modules themes core -type d -exec chmod 2775 {} \;
-        #- cd $TUGBOAT_ROOT && find files layouts modules themes core -type f -exec chmod 0664 {} \;
       build:
         # Delete previous comments in the PR.
         - cd $TUGBOAT_ROOT/.tugboat && ./delete-comments.sh
-        # Clear out active config (needed when rebuilding/reinstalling).
-        ###- find $TUGBOAT_ROOT/files/config/active -mindepth 1 -delete
-        # Generate and store a random password for the admin user.
-        ###- openssl rand -hex 6 > $TUGBOAT_ROOT/.tugboat/password
-        # Install Backdrop.
-        ###- chmod +x $TUGBOAT_ROOT/core/scripts/install.sh
-        ###- cd $TUGBOAT_ROOT && ./core/scripts/install.sh --db-url=mysql://tugboat:tugboat@mariadb/tugboat --account-pass=`cat .tugboat/password`
-        # Fix config permissions after install.
-        ###- chown -R www-data:www-data $TUGBOAT_ROOT/files/config/active
-        ###- find $TUGBOAT_ROOT/files/config/active -type f -exec chmod 0664 {} \;
         # Set an expiration date/time for the preview.
         - cd $TUGBOAT_ROOT/.tugboat && ./set-expiry.sh
         # Post a comment in the PR.
         - cd $TUGBOAT_ROOT/.tugboat && ./post-comment.sh
   mariadb:
+    # See: https://github.com/TugboatQA/dockerfiles/blob/main/mariadb/TAGS.md
     image: tugboatqa/mariadb:lts
     commands:
       init:
