@@ -57,6 +57,3 @@ services:
       update:
         # Drop and re-create the database (needed when rebuilding/reinstalling).
         - mariadb-admin -f drop tugboat && mariadb-admin create tugboat
-      build:
-        # Drop and re-create the database (needed when rebuilding/reinstalling).
-        - mariadb-admin -f drop tugboat && mariadb-admin create tugboat
