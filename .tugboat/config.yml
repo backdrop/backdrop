@@ -31,6 +31,8 @@ services:
         - find $TUGBOAT_ROOT/files $TUGBOAT_ROOT/layouts $TUGBOAT_ROOT/modules $TUGBOAT_ROOT/themes -type f -exec chmod 0664 {} \;
         # Clear out active config (needed when rebuilding/reinstalling).
         - find $TUGBOAT_ROOT/files/config/active -mindepth 1 -delete
+        # Drop and re-create the database (needed when rebuilding/reinstalling).
+        - mariadb-admin -f drop tugboat && mariadb-admin create tugboat
         # Generate and store a random password for the admin user.
         - openssl rand -hex 6 > $TUGBOAT_ROOT/.tugboat/password
         # Install Backdrop.
@@ -56,4 +58,4 @@ services:
         - echo "[mysqld]\ninnodb_large_prefix=true\ninnodb_file_format=barracuda\ninnodb_file_per_table=true" >> /etc/mysql/conf.d/utf8mb.conf
       update:
         # Drop and re-create the database (needed when rebuilding/reinstalling).
-        - mariadb-admin -f drop tugboat && mariadb-admin create tugboat
+        ##- mariadb-admin -f drop tugboat && mariadb-admin create tugboat
