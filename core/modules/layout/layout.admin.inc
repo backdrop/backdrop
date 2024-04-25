@@ -1111,7 +1111,7 @@ function layout_settings_form_save_submit($form, &$form_state) {
 
     // Get the template being used by this layout.
     $template_info = layout_get_layout_template_info($layout->layout_template);
-    $template_is_flexible = isset($template_info['flexible']) && $template_info['flexible'] == TRUE;
+    $template_is_flexible = !empty($template_info['flexible']);
 
     if ($template_is_flexible) {
       // With flexible templates, the 'regions' array has UUIDs for keys, and
