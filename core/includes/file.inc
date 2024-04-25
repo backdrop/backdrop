@@ -2033,7 +2033,7 @@ function file_validate_image_orientation(File $file, $orientation = 0) {
 function file_validate_svg(File $file) {
   $errors = array();
 
-  if (image_is_svg($file->uri)) {
+  if ($file->filemime == 'image/svg+xml') {
     $file_contents = file_get_contents($file->uri);
     $xml = simplexml_load_string($file_contents);
 
