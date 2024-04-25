@@ -259,8 +259,8 @@ function _locale_import_read_po($op, $file, $mode = NULL, $langcode = NULL) {
       }
 
       // Extract the plurality.
-      $frombracket = strstr($line, '[');
-      $plural = substr($frombracket, 1, strpos($frombracket, ']') - 1);
+      $from_bracket = strstr($line, '[');
+      $plural = substr($from_bracket, 1, strpos($from_bracket, ']') - 1);
 
       // Skip to the next whitespace and trim away any further whitespace, bringing $line to the message data.
       $line = trim(strstr($line, " "));
