@@ -600,9 +600,9 @@ function _locale_import_parse_header($header) {
 /**
  * Parses a Plural-Forms entry from a Gettext Portable Object file header.
  *
- * @param $plural_forms
+ * @param string $plural_forms
  *   A string containing the Plural-Forms entry.
- * @param $filepath
+ * @param string $filepath
  *   A string containing the filepath.
  *
  * @return
