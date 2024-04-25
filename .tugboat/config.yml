@@ -24,8 +24,6 @@ services:
         - mkdir $TUGBOAT_ROOT/files/config/active
         - mkdir $TUGBOAT_ROOT/files/config/staging
       update:
-        # Everything moved to the build step.
-      build:
         # Set appropriate file permissions/ownership to allow
         # the project installer and the self-updater to work.
         - chown -R www-data:www-data $TUGBOAT_ROOT
@@ -41,6 +39,7 @@ services:
         # Fix config permissions after installation.
         - chown -R www-data:www-data $TUGBOAT_ROOT/files/config/active
         - find $TUGBOAT_ROOT/files/config/active -type f -exec chmod 0664 {} \;
+      build:
         # Delete previous Tugboat-generated comments in the PR.
         - cd $TUGBOAT_ROOT/.tugboat && ./delete-comments.sh
         # Set an expiration date/time for the preview.
