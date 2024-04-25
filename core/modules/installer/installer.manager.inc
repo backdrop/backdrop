@@ -290,7 +290,10 @@ function installer_manager_update_form($form, $form_state) {
     $prefix .= '<p>' . t('You can update Backdrop CMS by replacing the old <code>/core</code> directory inside your docroot with the one included in the <a href="https://backdropcms.org" title="Home page with download option" target="_blank">latest release</a>. For detailed instructions, see the <a href="https://backdropcms.org/upgrade" target="_blank">Upgrading Backdrop CMS</a> document online.') . '</p>';
     $form['manual_updates'] = array(
       '#type' => 'markup',
-      '#markup' => theme('table', array('header' => $header, 'rows' => $projects['manual'])),
+      '#markup' => theme('table', array(
+        'header' => $header,
+        'rows' => $projects['manual'],
+      )),
       '#prefix' => $prefix,
       '#weight' => 120,
     );
