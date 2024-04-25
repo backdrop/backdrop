@@ -54,6 +54,9 @@ services:
         # Configure database for UTF-8.
         # See: https://docs.backdropcms.org/documentation/database-configuration#utf8mb4
         - echo "[mysqld]\ninnodb_large_prefix=true\ninnodb_file_format=barracuda\ninnodb_file_per_table=true" >> /etc/mysql/conf.d/utf8mb.conf
+      update:
+        # Drop and re-create the database (needed when rebuilding/reinstalling).
+        - mariadb-admin -f drop tugboat && mariadb-admin create tugboat
       build:
         # Drop and re-create the database (needed when rebuilding/reinstalling).
         - mariadb-admin -f drop tugboat && mariadb-admin create tugboat
