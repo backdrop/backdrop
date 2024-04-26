@@ -39,7 +39,8 @@ function dblog_menu() {
     'file' => 'dblog.admin.inc',
   );
   $items['admin/reports/event/%'] = array(
-    'title' => 'Details',
+    'title' => 'Log message #@id',
+    'title arguments' => array('@id' => 3),
     'page callback' => 'dblog_event',
     'page arguments' => array(3),
     'access arguments' => array('access site reports'),

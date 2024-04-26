@@ -709,25 +709,25 @@ function form_load_include(&$form_state, $type, $module, $name = NULL) {
  *   build info array so that the reference can be preserved. For example, a
  *   form builder function with the following signature:
  *   @code
- *   function mymodule_form($form, &$form_state, &$object) {
+ *   function my_module_form($form, &$form_state, &$object) {
  *   }
  *   @endcode
  *   would be called via backdrop_form_submit() as follows:
  *   @code
  *   $form_state['values'] = $my_form_values;
  *   $form_state['build_info']['args'] = array(&$object);
- *   backdrop_form_submit('mymodule_form', $form_state);
+ *   backdrop_form_submit('my_module_form', $form_state);
  *   @endcode
  * For example:
  * @code
- * // register a new user
- * $form_state = array();
- * $form_state['values']['name'] = 'robo-user';
- * $form_state['values']['mail'] = 'robouser@example.com';
- * $form_state['values']['pass']['pass1'] = 'password';
- * $form_state['values']['pass']['pass2'] = 'password';
- * $form_state['values']['op'] = t('Create new account');
- * backdrop_form_submit('user_register_form', $form_state);
+ *   // Register a new user.
+ *   $form_state = array();
+ *   $form_state['values']['name'] = 'new-user';
+ *   $form_state['values']['mail'] = 'new.user@example.com';
+ *   $form_state['values']['pass']['pass1'] = 'password';
+ *   $form_state['values']['pass']['pass2'] = 'password';
+ *   $form_state['values']['op'] = t('Create new account');
+ *   backdrop_form_submit('user_register_form', $form_state);
  * @endcode
  */
 function backdrop_form_submit($form_id, &$form_state) {
@@ -3023,7 +3023,7 @@ function form_process_password_confirm($element) {
     '#title' => t('New password'),
     '#value' => empty($element['#value']) ? NULL : $element['#value']['pass1'],
     '#required' => $element['#required'],
-    '#attributes' => array('class' => array('password-field')),
+    '#attributes' => $element['#attributes'] + array('class' => array('password-field')),
     '#password_strength' => TRUE,
     '#password_shown' => FALSE,
     '#password_toggle' => FALSE,
@@ -3033,7 +3033,7 @@ function form_process_password_confirm($element) {
     '#title' => t('Confirm new password'),
     '#value' => empty($element['#value']) ? NULL : $element['#value']['pass2'],
     '#required' => $element['#required'],
-    '#attributes' => array('class' => array('password-confirm')),
+    '#attributes' => $element['#attributes'] + array('class' => array('password-confirm')),
     '#password_strength' => FALSE,
     '#password_shown' => FALSE,
     '#password_toggle' => FALSE,
@@ -4711,7 +4711,7 @@ function theme_form($variables) {
  *   An associative array containing:
  *   - element: An associative array containing the properties of the element.
  *     Properties used: #title, #value, #description, #rows, #cols,
- *     #placeholder, #required, #attributes
+ *     #placeholder, #required, #attributes, #resizable
  *
  * @ingroup themeable
  */
@@ -4725,9 +4725,21 @@ function theme_textarea($variables) {
   );
 
   // Add resizable behavior.
-  if (!empty($element['#resizable'])) {
-    backdrop_add_library('system', 'backdrop.textarea');
-    $wrapper_attributes['class'][] = 'resizable';
+  if (isset($element['#resizable'])) {
+    $valid_values = array('none', 'both', 'horizontal', 'vertical');
+    // Transform previously used boolean value to new string value.
+    if ($element['#resizable'] === TRUE) {
+      $element['#resizable'] = 'vertical';
+    }
+    if ($element['#resizable'] === FALSE) {
+      $element['#resizable'] = 'none';
+    }
+    if (in_array($element['#resizable'], $valid_values)) {
+      $element['#attributes']['class'][] = 'resize-' . $element['#resizable'];
+      if ($element['#resizable'] != 'none') {
+        $wrapper_attributes['class'][] = 'resizable';
+      }
+    }
   }
 
   $output = '<div' . backdrop_attributes($wrapper_attributes) . '>';
@@ -4750,6 +4762,8 @@ function theme_textarea($variables) {
 function theme_password($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'password';
+  $element['#attributes']['spellcheck'] = !empty($element['#attributes']['spellcheck']) ? $element['#attributes']['spellcheck'] : 'false';
+
   element_set_attributes($element, array('id', 'name', 'size', 'maxlength', 'placeholder'));
   _form_set_class($element, array('form-text'));
 
@@ -4962,7 +4976,8 @@ function theme_form_required_marker($variables) {
  * @param $variables
  *   An associative array containing:
  *   - element: An associative array containing the properties of the element.
- *     Properties used: #required, #title, #id, #value, #description.
+ *     Properties used: #required, #title, #id, #value, #description,
+ *     #label_for.
  *
  * @ingroup themeable
  */
@@ -4991,7 +5006,14 @@ function theme_form_element_label($variables) {
     $attributes['class'] = 'element-invisible';
   }
 
-  if (!empty($element['#id'])) {
+  // Use the element's ID as the default value of the "for" attribute (to
+  // associate the label with this form element), but allow this to be
+  // overridden in order to associate the label with a different form element
+  // instead.
+  if (!empty($element['#label_for'])) {
+    $attributes['for'] = $element['#label_for'];
+  }
+  elseif (!empty($element['#id'])) {
     $attributes['for'] = $element['#id'];
   }
 

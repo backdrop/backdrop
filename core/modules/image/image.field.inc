@@ -100,7 +100,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#weight' => 4.1,
     '#field_prefix' => '<div class="container-inline">',
     '#field_suffix' => '</div>',
-    '#description' => t('The maximum allowed image dimensions expressed as <code>WIDTH</code> x <code>HEIGHT</code>. Leave blank for no restriction. If a larger image is uploaded, it will be resized to reflect the given width and height. Resizing images on upload will cause the loss of <a href="http://en.wikipedia.org/wiki/Exchangeable_image_file_format">EXIF data</a> in the image.'),
+    '#description' => t('Images larger than these dimensions (width × height) will be resized to these limits. This will cause the loss of <a href="http://en.wikipedia.org/wiki/Exchangeable_image_file_format">EXIF data</a> in the image. Leave blank for no restriction.'),
   );
   $form['max_dimensions']['x'] = array(
     '#type' => 'number',
@@ -109,7 +109,8 @@ function image_field_instance_settings_form($field, $instance) {
     '#default_value' => $max_dimensions[0],
     '#min' => 0,
     '#max' => 100000,
-    '#field_suffix' => ' x ',
+    '#field_suffix' => ' × ',
+    '#placeholder' => t('Width'),
   );
   $form['max_dimensions']['y'] = array(
     '#type' => 'number',
@@ -119,6 +120,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#min' => 0,
     '#max' => 100000,
     '#field_suffix' => ' ' . t('pixels'),
+    '#placeholder' => t('Height'),
   );
 
   $min_dimensions = explode('x', $settings['min_dimensions']) + array('', '');
@@ -131,7 +133,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#weight' => 4.2,
     '#field_prefix' => '<div class="container-inline">',
     '#field_suffix' => '</div>',
-    '#description' => t('The minimum allowed image dimensions expressed as <code>WIDTH</code> x <code>HEIGHT</code>. Leave blank for no restriction. If a smaller image is uploaded, it will be rejected.'),
+    '#description' => t('Images smaller than these dimensions (width × height) will be rejected. Leave blank for no restriction. '),
   );
   $form['min_dimensions']['x'] = array(
     '#type' => 'number',
@@ -140,7 +142,8 @@ function image_field_instance_settings_form($field, $instance) {
     '#default_value' => $min_dimensions[0],
     '#min' => 0,
     '#max' => 100000,
-    '#field_suffix' => ' x ',
+    '#field_suffix' => ' × ',
+    '#placeholder' => t('Width'),
   );
   $form['min_dimensions']['y'] = array(
     '#type' => 'number',
@@ -150,6 +153,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#min' => 0,
     '#max' => 100000,
     '#field_suffix' => ' ' . t('pixels'),
+    '#placeholder' => t('Height'),
   );
 
   // Remove the description option.

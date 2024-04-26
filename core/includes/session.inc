@@ -254,7 +254,7 @@ function backdrop_session_initialize() {
     // If a session cookie exists, initialize the session. Otherwise the
     // session is only started on demand in backdrop_session_commit(), making
     // anonymous users not use a session cookie unless something is stored in
-    // $_SESSION. This allows HTTP proxies to cache anonymous pageviews.
+    // $_SESSION. This allows HTTP proxies to cache anonymous page views.
     backdrop_session_start();
     if (!empty($user->uid) || !empty($_SESSION)) {
       backdrop_page_is_cacheable(FALSE);

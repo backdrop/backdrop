@@ -536,7 +536,7 @@ function node_update_1008() {
     'core' => '1.0',
     'display' => array(
       'default' => array(
-        'display_title' => 'Master',
+        'display_title' => 'Default',
         'display_plugin' => 'default',
         'display_options' => array(
           'query' => array(
@@ -1220,7 +1220,7 @@ function node_update_1018() {
     array (
       'default' =>
       array (
-        'display_title' => 'Master',
+        'display_title' => 'Default',
         'display_plugin' => 'default',
         'display_options' =>
         array (

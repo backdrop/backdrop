@@ -142,8 +142,8 @@
  * There are several types of plugins in Views:
  * - Display: Display plugins are responsible for controlling *where* a view
  *   lives; that is, how they are being exposed to other parts of Backdrop. Page
- *   and block are the most common displays, as well as the ubiquitous 'master'
- *   (or 'default') display.
+ *   and block are the most common displays, as well as the ubiquitous 'default'
+ *   display.
  * - Style: Style plugins control how a view is displayed. For the most part
  *   they are object wrappers around theme templates. Styles could for example
  *   be HTML lists or tables.
@@ -550,7 +550,7 @@ function hook_views_data_alter(&$data) {
  *       Views overview and also used as default name for new displays. Wrap in
  *       t().
  *     - no remove: Set to TRUE to make the display non-removable. (Basically
- *       only used for the master/default display.)
+ *       only used for the default display.)
  *     - use ajax: Set to TRUE to allow AJAX loads in the display. If it's
  *       disabled there will be no ajax option in the ui.
  *     - use pager: Set to TRUE to allow paging in the display.
@@ -964,7 +964,7 @@ function hook_views_ajax_data_alter(&$commands, $view) {
  * @see views_invalidate_cache()
  */
 function hook_views_invalidate_cache() {
-  cache('mymodule')->deletePrefix('views:');
+  cache('my_module')->deletePrefix('views:');
 }
 
 /**

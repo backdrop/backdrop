@@ -302,9 +302,10 @@ Backdrop.tableDrag.prototype.makeDraggable = function (item) {
   }
 
   // Add hover action for the handle.
-  handle.on('hover', function () {
+  handle.on('mouseenter', function () {
     self.dragObject == null ? $(this).addClass('tabledrag-handle-hover') : null;
-  }, function () {
+  });
+  handle.on('mouseleave', function () {
     self.dragObject == null ? $(this).removeClass('tabledrag-handle-hover') : null;
   });
 
