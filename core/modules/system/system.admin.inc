@@ -2452,7 +2452,7 @@ function system_get_debug_info() {
 
   // Add a line with a note about the default content theme (explicitly 2
   // columns per line, otherwise vsprintf() complains).
-  $default_content_theme = t('*used when editing or creating content');
+  $default_content_theme = t('*configured to also be used when editing or creating content');
   $debug_info_lines['Default content theme'] = array('', $default_content_theme);
 
   $debug_info_lines[] = $empty_line;
