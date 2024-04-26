@@ -2372,6 +2372,9 @@ function system_get_debug_info() {
   // A blank line. It needs to be 2 columns, otherwise vsprintf() complains.
   $empty_line = array('', '');
 
+  $jquery = backdrop_get_library('system', 'jquery');
+  $jquery_ui = backdrop_get_library('system', 'ui');
+
   // Main system info.
   $system_info = array(
     'Backdrop CMS:' => BACKDROP_VERSION,
@@ -2379,6 +2382,8 @@ function system_get_debug_info() {
     t('PHP version:') => phpversion(),
     t('Database server:') => Database::getConnection()->version(),
     t('Web server:') => check_plain($_SERVER['SERVER_SOFTWARE']),
+    t('jQuery version:') => $jquery['version'],
+    t('jQuery UI version:') => $jquery_ui['version'],
   );
 
   foreach ($system_info as $info => $value) {
