@@ -2035,12 +2035,13 @@ function file_validate_svg(File $file) {
 
   if ($file->filemime == 'image/svg+xml') {
     $file_contents = file_get_contents($file->uri);
-    $xml = @simplexml_load_string($file_contents);
-
+    libxml_use_internal_errors(TRUE);
+    $xml = simplexml_load_string($file_contents);
     $errors = libxml_get_errors();
+    libxml_use_internal_errors(FALSE);
 
     if (!$xml || !empty($errors)) {
-      return array(t('Invalid SVG file. See logs for details.'));
+      return array(t('Invalid SVG file.'));
     }
     else {
       $errors = array();
