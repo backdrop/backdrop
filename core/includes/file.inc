@@ -1652,6 +1652,9 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
   // Add in our check of the the file name length.
   $validators['file_validate_name_length'] = array();
 
+  // Add in check for valid SVG.
+  $validators['file_validate_svg'] = array();
+
   // Call the validation functions specified by this function's caller.
   $errors = file_validate($file, $validators);
 
