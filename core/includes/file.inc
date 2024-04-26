@@ -2035,14 +2035,15 @@ function file_validate_svg(File $file) {
 
   if ($file->filemime == 'image/svg+xml') {
     $file_contents = file_get_contents($file->uri);
-    $xml = simplexml_load_string($file_contents);
+    $xml = @simplexml_load_string($file_contents);
 
     $errors = libxml_get_errors();
 
     if (!$xml || !empty($errors)) {
-      return array(t('Invalid SVG file.'));
+      return array(t('Invalid SVG file. See logs for details.'));
     }
     else {
+      $errors = array();
       $namespaces = $xml->getNamespaces();
       if (!in_array('http://www.w3.org/2000/svg', $namespaces)) {
         $errors[] = t('Invalid SVG namespace.');
@@ -2067,6 +2068,7 @@ function file_validate_svg(File $file) {
         $found = $xml->xpath($search_pattern);
         if (!empty($found)) {
           $errors[] = t('Dangerous content found.');
+          break;
         }
       }
     }
