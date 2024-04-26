@@ -454,7 +454,6 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     if ($settings['max_dimensions'] || $settings['min_dimensions']) {
       $elements[$delta]['#upload_validators']['file_validate_image_resolution'] = array($settings['max_dimensions'], $settings['min_dimensions']);
     }
-    $elements[$delta]['#upload_validators']['file_validate_svg'] = array();
 
     // If not using custom extension validation, ensure this is an image.
     $supported_extensions = image_get_supported_extensions();
