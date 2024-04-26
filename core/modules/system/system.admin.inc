@@ -2346,9 +2346,14 @@ function system_debug_info() {
     '#value' => $debug_info,
     // Expand the default length of the text field, to ensure that all the
     // debug output is visible without having to scroll within the text field.
-    '#rows' => $debug_info_lines + 1,
-    // '#disabled' => TRUE,
-    '#attributes' => array('id' => 'debug-info-wrapper'),
+    '#rows' => $debug_info_lines,
+    '#attributes' => array(
+      'id' => 'debug-info-wrapper',
+      // Using the 'readonly' attribute to lock the text, sinc it gives us a
+      // "cursor: text" cursor for free (using 'disabled' would resultin a
+      // "cursor: text" instead).
+      'readonly' => 'readonly',
+    ),
   );
 
   return $form;
