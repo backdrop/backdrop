@@ -36,7 +36,18 @@ class ImageFieldTestCase extends BackdropWebTestCase {
    */
   public function setUp() {
     parent::setUp('image');
-    $this->admin_user = $this->backdropCreateUser(array('access content', 'access administration pages', 'administer site configuration', 'administer content types', 'administer fields', 'administer nodes', 'create post content', 'edit any post content', 'delete any post content', 'administer image styles'));
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access content',
+      'access administration pages',
+      'administer site configuration',
+      'administer content types',
+      'administer fields',
+      'administer nodes',
+      'create post content',
+      'edit any post content',
+      'delete any post content',
+      'administer image styles',
+    ));
     $this->backdropLogin($this->admin_user);
 
     // Disable default path patterns for nodes.
@@ -124,7 +135,10 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
     parent::setUp('image_module_test');
 
     $this->style_name = 'style_foo';
-    image_style_save(array('name' => $this->style_name, 'label' => $this->randomName()));
+    image_style_save(array(
+      'name' => $this->style_name,
+      'label' => $this->randomName(),
+    ));
   }
 
   /**
