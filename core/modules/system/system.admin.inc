@@ -2337,20 +2337,6 @@ function system_debug_info() {
     '#markup' => t('Ready to copy/paste information about your site. This includes items commonly requested for troubleshooting/support purposes.'),
   );
 
-  $form['copy_to_clipboard'] = array(
-    '#type' => 'link',
-    '#title' => t('Copy to clipboard'),
-    '#href' => '',
-    '#attributes' => array('onclick' => 'alert("TO-DO: this does nothing yet"); return false;'),
-    '#suffix' => ' | ',
-  );
-  $form['download_txt'] = array(
-    '#type' => 'link',
-    '#title' => t('Download as text file'),
-    '#href' => '',
-    '#attributes' => array('onclick' => 'alert("TO-DO: this does nothing yet"); return false;'),
-  );
-
   $debug_info = system_get_debug_info();
   $debug_info_lines = count(explode(PHP_EOL, $debug_info));
 
