@@ -2024,9 +2024,9 @@ function file_validate_image_orientation(File $file, $orientation = 0) {
  * @param File $file
  *   A file entity.
  *
- * @return
- *   An array. If the file is an SVG and is either not valid or contains
- *   dangerous content, it will contain an error message.
+ * @return array
+ *   If the file is an SVG and is either not valid or contains
+ *   dangerous content, the array will contain an error message.
  *
  * @see hook_file_validate()
  */
