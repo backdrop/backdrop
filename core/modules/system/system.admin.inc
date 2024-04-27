@@ -2397,6 +2397,34 @@ function system_get_debug_info() {
 
   $debug_info_lines[] = $empty_line;
 
+  // Text editors info.
+  $text_editor_usage = array();
+  $text_editors = filter_get_editors();
+  $text_formats = filter_formats(NULL, TRUE);
+  // Get the current list of all modules available on the site.
+  $modules = system_rebuild_module_data();
+
+  foreach ($text_formats as $format => $format_info) {
+    if (!empty($format_info->editor)) {
+      $editor = $text_editors[$format_info->editor];
+      $editor_label = $editor['label'];
+      // Add a suffix with the editor version or the editor library version
+      // to the editor label.
+      if (!empty($editor['library_version'])) {
+        $editor_label .= ', ' . $editor['library_version'];
+      }
+      else {
+        $editor_label .= ' ' . $modules[$editor['module']]->info['version'];
+      }
+      $text_editor_usage[$editor_label][] = $format_info->name;
+    }
+  }
+  foreach ($text_editor_usage as $editor => $formats) {
+    $debug_info_lines[] = array($editor, t('used in: @formats', array('@formats' => implode(', ', $formats))));
+  }
+
+  $debug_info_lines[] = $empty_line;
+
   $core_version = t('[core]');
 
   // Theme info.
@@ -2453,9 +2481,6 @@ function system_get_debug_info() {
 
   $debug_info_lines[] = $empty_line;
 
-
-  // Get the current list of all modules available on the site.
-  $modules = system_rebuild_module_data();
   foreach ($modules as $module => $module_data) {
     // Only include non-hidden and enabled modules in the output.
     if (empty($module_data->info['hidden']) && $module_data->status) {
