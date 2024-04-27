@@ -126,7 +126,6 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type) {
   $form_state['layout'] = &$layout;
   $form_state['entity_type'] = $entity_type;
 
-  // $form['#tree'] = TRUE;
 
   $form['#attached']['js'][] = backdrop_get_path('module', 'layout') . '/js/layout.admin.js';
   $form['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
@@ -144,11 +143,21 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type) {
     $bundle_options[$bundle_name] = $bundle_info['label'];
   }
 
+  $entity_name = ($entity_type == 'node') ? t('Content') : $entity_info['label'];
+  $entity_layouts = layout_get_entity_layouts($entity_type);
+
+  if ($count = count($entity_layouts['all'])) {
+    $default_name = t('@entity layout @count', array('@entity' => $entity_name, '@count' => $count + 1));
+  }
+  else {
+    $default_name = t('@entity layout', array('@entity' => $entity_name));
+  }
+
   $form['title'] = array(
     '#title' => t('Layout name'),
     '#type' => 'textfield',
     '#maxlength' => 128,
-    '#default_value' => '$default_name',
+    '#default_value' => $default_name,
     '#required' => TRUE,
     '#access' => !$layout->isDefault(),
   );
