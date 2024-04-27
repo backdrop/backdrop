@@ -161,6 +161,44 @@ class ColorTestCase extends BackdropWebTestCase {
   /**
    * Test the Bartik legacy color mode.
    */
+  public function testUIAndConfig() {
+    $theme = 'bartik';
+    config_set('system.core', 'theme_default', $theme);
+    $settings_path = "admin/appearance/settings/$theme";
+    $this->backdropLogin($this->bigUser);
+
+    // Create a new scheme with no custom name.
+    $config_names = config_get_names_with_prefix($theme . '.color.');
+    $edit = array(
+      'scheme' => '',
+      'palette[top]' => '#123456',
+    );
+    $this->backdropPost($settings_path, $edit, t('Save theme settings'));
+    $config_names = config_get_names_with_prefix($theme . '.color.');
+    $this->assertTrue(count($config_names) === 1, 'One new color config found.');
+    $this->assertTrue(in_array("$theme.color.custom_scheme_1", $config_names), 'Config with custom name found.');
+    $this->assertTrue(config_get("$theme.color.custom_scheme_1", 'schemes.custom_scheme_1.colors.top') === $edit['palette[top]'], 'Color palette altered as expected.');
+
+    // Create a new scheme with a custom name.
+    $edit = array(
+      'scheme' => '',
+      'custom_name' => 'New scheme',
+      'palette[top]' => '#654321',
+    );
+    $this->backdropPost($settings_path, $edit, t('Save theme settings'));
+    $config_names = config_get_names_with_prefix($theme . '.color.');
+    $this->assertTrue(count($config_names) === 2, 'Two color configs now found.');
+    $this->assertTrue(in_array("$theme.color.new_scheme", $config_names), 'Config with custom name found.');
+    $this->assertTrue(config_get("$theme.color.new_scheme", 'schemes.new_scheme.colors.top') === $edit['palette[top]'], 'Color palette altered as expected.');
+    // Test that the two new schemes are in the scheme select list.
+    $this->backdropGet($settings_path);
+    $this->assertFieldByName('scheme', 'new_scheme');
+    $this->assertFieldByName('scheme', 'custom_scheme_1');
+  }
+
+  /**
+   * Test the Bartik legacy color mode.
+   */
   public function testBartikLegacy() {
     config_set('system.core', 'theme_default', 'bartik');
     $settings_path = 'admin/appearance/settings/bartik';
