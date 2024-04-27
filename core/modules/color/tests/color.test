@@ -192,8 +192,8 @@ class ColorTestCase extends BackdropWebTestCase {
     $this->assertTrue(config_get("$theme.color.new_scheme", 'schemes.new_scheme.colors.top') === $edit['palette[top]'], 'Color palette altered as expected.');
     // Test that the two new schemes are in the scheme select list.
     $this->backdropGet($settings_path);
-    $this->assertFieldByName('scheme', 'new_scheme');
-    $this->assertFieldByName('scheme', 'custom_scheme_1');
+    $this->assertOption('edit-scheme', 'custom_scheme_1');
+    $this->assertOption('edit-scheme', 'new_scheme');
   }
 
   /**
