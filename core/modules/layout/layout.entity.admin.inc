@@ -179,7 +179,7 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type) {
   $form['layout_template'] = array(
     '#title' => t('Layout template'),
     '#type' => 'radios',
-    '#default_value' => $layout->layout_template,
+    '#default_value' => layout_load('default')->layout_template,
     '#options' => array(),
     '#wrapper_attributes' => array('class' => array('clearfix', 'layout-options')),
     '#required' => TRUE,
