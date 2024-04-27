@@ -544,8 +544,8 @@ function layout_menu() {
     'file' => 'layout.admin.inc',
   );
 
-  // Create layout tabs for all possible entity bundles. Limit to entities that
-  // define a menu context path.
+  // Create layout tabs for entities, but limit to entities that define a menu
+  // context path.
   $all_info = _layout_get_all_info('layout_context');
   $entity_names = array();
   foreach ($all_info as $entity_type_name => $context_info) {
@@ -555,6 +555,37 @@ function layout_menu() {
   }
 
   foreach (entity_get_info() as $entity_type => $entity_info) {
+    if (in_array($entity_type, $entity_names) && isset($entity_info['layout admin'])) {
+      $layout_path = $entity_info['layout admin']['path'];
+      $items[$layout_path] = array(
+        'title' => "Manage layouts",
+        'page callback' => 'backdrop_get_form',
+        'page arguments' => array('layout_entity_admin_form', $entity_type),
+        'file' => 'layout.entity.admin.inc',
+        'access callback' => 'user_access',
+        'access arguments' => array('administer layouts'),
+        'type' => $entity_info['layout admin']['type'],
+      );
+      // Check that this isn't a single-bundle entity.
+      $single_bundle = (count($entity_info['bundles']) == 1) && isset($entity_info['bundles'][$entity_type]);
+      $items["$layout_path/add-entity"] = array(
+        'title' => "Add layout",
+        'title callback' => 'layout_entity_menu_title',
+        'title arguments' => array($entity_type),
+        'page callback' => 'backdrop_get_form',
+        'page arguments' => array('layout_entity_admin_add_form', $entity_type),
+        'access callback' => 'user_access',
+        'access arguments' => array('administer layouts'),
+        'file' => 'layout.entity.admin.inc',
+        'type' => MENU_LOCAL_ACTION,
+      );
+    }
+  }
+
+
+
+
+/*   foreach (entity_get_info() as $entity_type => $entity_info) {
     if (in_array($entity_type, $entity_names)) {
       foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
         if (isset($bundle_info['admin'])) {
@@ -632,6 +663,7 @@ function layout_menu() {
       }
     }
   }
+ */
 
   return $items;
 }
@@ -641,33 +673,11 @@ function layout_menu() {
  *
  * @see field_ui_menu()
  */
-function layout_entity_menu_title($entity_type, $bundle_arg, $create_for_all_bundles = NULL) {
+function layout_entity_menu_title($entity_type) {
   $entity_info = entity_get_info($entity_type);
   $entity_name = ($entity_type == 'node') ? t('content') : $entity_info['label'];
-  $bundle_name = '';
 
-  if (!$create_for_all_bundles) {
-    if (is_object($bundle_arg) && property_exists($bundle_arg, 'name')) {
-      $bundle_name = $bundle_arg->name;
-    }
-    elseif (is_object($bundle_arg) && property_exists($bundle_arg, 'label')) {
-      $bundle_name = $bundle_arg->label;
-    }
-    elseif (is_string($bundle_arg)) {
-      if (isset($entity_info['label'])) {
-        $bundle_name = $entity_info['label'];
-      }
-    }
-    return t('Create a layout for a [@bundle_name] @entity', array('@bundle_name' => $bundle_name, '@entity' => $entity_name));
-  }
-  else {
-    if (count($entity_info['bundles']) > 1) {
-      return t('Create a layout for all @entity types', array('@entity' => $entity_name));
-    }
-    else {
-      return t('Create a layout for a @entity', array('@entity' => $entity_name));
-    }
-  }
+  return t('Add @entity layout', array('@entity' => $entity_name));
 }
 
 /**

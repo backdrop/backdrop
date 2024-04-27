@@ -148,6 +148,11 @@ function node_entity_info() {
       'controller class' => 'NodeStorageController',
       'entity class' => 'Node',
       'base table' => 'node',
+      'layout admin' => array(
+        'path' => 'admin/structure/types/layout',
+        'type' => MENU_LOCAL_TASK,
+        'access arguments' => array('administer content types'),
+      ),
       'revision table' => 'node_revision',
       'fieldable' => TRUE,
       'redirect support' => TRUE,
