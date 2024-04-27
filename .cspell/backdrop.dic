@@ -191,6 +191,7 @@ imageto
 indigoxela
 infourl
 innodb
+instantiatable
 isid
 istart
 jahwohl
@@ -249,6 +250,7 @@ mouton
 moutons
 msgbox
 multibundle
+multipage
 multisites
 Műveletek
 myclass
@@ -324,6 +326,7 @@ pagenum
 pagerpieces
 phptemplate
 phpwiki
+plid
 plids
 pneum
 Ponedjeljak
@@ -341,6 +344,7 @@ Punycode
 queryor
 quicktime
 Quieligo
+rawurlencoded
 ratis
 readwrite
 realelement
@@ -384,6 +388,7 @@ softtabstop
 someplugin
 sometable
 sourcedir
+spacebar
 stackoverflow
 statiya
 stdobj
@@ -443,6 +448,8 @@ uncustomized
 undeletable
 unescapes
 unescaping
+unextracted
+unflagged
 unhighlight
 unhighlights
 unioned
@@ -454,6 +461,7 @@ unmunged
 unmunging
 unnested
 unpackage
+unrendered
 uploadimage
 uploadwidget
 USERAGENT
@@ -466,6 +474,7 @@ vendredi
 VERIFYHOST
 VERIFYPEER
 verygreatbackdropmodule
+viewmode
 VIEWNAME
 watchdog
 WCAG
