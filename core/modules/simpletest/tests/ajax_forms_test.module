@@ -473,7 +473,11 @@ function ajax_forms_test_validation_form_submit($form, $form_state) {
  */
 function ajax_forms_test_validation_form_callback($form, $form_state) {
   backdrop_set_message("ajax_forms_test_validation_form_callback invoked");
-  backdrop_set_message(t("Callback: driver_text=%driver_text, spare_required_field=%spare_required_field", array('%driver_text' => $form_state['values']['driver_text'], '%spare_required_field' => $form_state['values']['spare_required_field'])));
+  $replacements = array(
+    '%driver_text' => $form_state['values']['driver_text'],
+    '%spare_required_field' => $form_state['values']['spare_required_field'],
+  );
+  backdrop_set_message(t("Callback: driver_text=%driver_text, spare_required_field=%spare_required_field", $replacements));
   return '<div id="message_area">ajax_forms_test_validation_form_callback at ' . date('c') . '</div>';
 }
 
