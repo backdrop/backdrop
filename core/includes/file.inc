@@ -2041,7 +2041,6 @@ function file_validate_svg(File $file) {
     libxml_use_internal_errors(TRUE);
     $xml = simplexml_load_string($file_contents);
     $errors = libxml_get_errors();
-    libxml_use_internal_errors(FALSE);
 
     if (!$xml || !empty($errors)) {
       return array(t('Invalid SVG file.'));
@@ -2077,6 +2076,7 @@ function file_validate_svg(File $file) {
       }
     }
     libxml_clear_errors();
+    libxml_use_internal_errors(FALSE);
   }
 
   return $errors;
