@@ -36,7 +36,18 @@ class ImageFieldTestCase extends BackdropWebTestCase {
    */
   public function setUp() {
     parent::setUp('image');
-    $this->admin_user = $this->backdropCreateUser(array('access content', 'access administration pages', 'administer site configuration', 'administer content types', 'administer fields', 'administer nodes', 'create post content', 'edit any post content', 'delete any post content', 'administer image styles'));
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access content',
+      'access administration pages',
+      'administer site configuration',
+      'administer content types',
+      'administer fields',
+      'administer nodes',
+      'create post content',
+      'edit any post content',
+      'delete any post content',
+      'administer image styles',
+    ));
     $this->backdropLogin($this->admin_user);
 
     // Disable default path patterns for nodes.
@@ -114,8 +125,6 @@ class ImageFieldTestCase extends BackdropWebTestCase {
  */
 class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
   protected $style_name;
-  protected $image_info;
-  protected $image_filepath;
 
   /**
    * {@inheritdoc}
@@ -124,7 +133,10 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
     parent::setUp('image_module_test');
 
     $this->style_name = 'style_foo';
-    image_style_save(array('name' => $this->style_name, 'label' => $this->randomName()));
+    image_style_save(array(
+      'name' => $this->style_name,
+      'label' => $this->randomName(),
+    ));
   }
 
   /**
@@ -246,7 +258,23 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
     $this->assertRaw(file_get_contents($generated_uri), 'URL returns expected file.');
     $generated_image_info = image_get_info($generated_uri);
     $this->assertEqual($this->backdropGetHeader('Content-Type'), $generated_image_info['mime_type'], 'Expected Content-Type was reported.');
-    $this->assertEqual($this->backdropGetHeader('Content-Length'), $generated_image_info['file_size'], 'Expected Content-Length was reported.');
+
+    // Some web servers may return a "chunked" response and ignore the
+    // Content-Length headers returned by image_style_deliver(). Allow either as
+    // an acceptable response.
+    // See https://github.com/backdrop/backdrop-issues/issues/6459.
+    $content_length = $this->backdropGetHeader('Content-Length');
+    $transfer_encoding = $this->backdropGetHeader('Transfer-Encoding');
+    if ($transfer_encoding == 'chunked') {
+      $this->pass('Response was chunked without a Content-Length.');
+    }
+    elseif ($content_length == $generated_image_info['file_size']) {
+      $this->pass('Expected Content-Length was reported.');
+    }
+    else {
+      $this->fail('Expected Content-Length or Chunked response was not returned.');
+    }
+
     if ($scheme == 'private') {
       $this->assertEqual($this->backdropGetHeader('Expires'), 'Fri, 16 Jan 2015 07:50:00 GMT', 'Expires header was sent.');
       $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'no-cache, must-revalidate', 'Cache-Control header was set to prevent caching.');
@@ -265,13 +293,13 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
 
       // Repeat this with a different file that we do not have access to and
       // make sure that access is denied.
-      $file_noaccess = array_shift($files);
-      $original_uri_noaccess = file_unmanaged_copy($file_noaccess->uri, $scheme . '://', FILE_EXISTS_RENAME);
-      $generated_uri_noaccess = $scheme . '://styles/' . $this->style_name . '/' . $scheme . '/'. backdrop_basename($original_uri_noaccess);
-      $this->assertFalse(file_exists($generated_uri_noaccess), 'Generated file does not exist.');
-      $generate_url_noaccess = image_style_url($this->style_name, $original_uri_noaccess);
+      $file_no_access = array_shift($files);
+      $original_uri_no_access = file_unmanaged_copy($file_no_access->uri, $scheme . '://', FILE_EXISTS_RENAME);
+      $generated_uri_no_access = $scheme . '://styles/' . $this->style_name . '/' . $scheme . '/'. backdrop_basename($original_uri_no_access);
+      $this->assertFalse(file_exists($generated_uri_no_access), 'Generated file does not exist.');
+      $generate_url_no_access = image_style_url($this->style_name, $original_uri_no_access);
 
-      $this->backdropGet($generate_url_noaccess);
+      $this->backdropGet($generate_url_no_access);
       $this->assertResponse(403, 'Confirmed that access is denied for the private image style.');
       // Verify that images are not appended to the response. Currently this test only uses PNG images.
       if (strpos($generate_url, '.png') === FALSE ) {

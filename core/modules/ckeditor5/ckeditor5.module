@@ -505,6 +505,12 @@ function ckeditor5_ckeditor5_plugins() {
     'enabled_callback' => TRUE,
   );
 
+  // @see https://ckeditor.com/docs/ckeditor5/latest/features/pasting/paste-from-google-docs.html
+  $plugins['pasteFromOffice.PasteFromOffice'] = array(
+    // @todo: Provide a configuration option to toggle.
+    'enabled_callback' => TRUE,
+  );
+
   // @see https://ckeditor.com/docs/ckeditor5/latest/features/tables/tables.html
   $plugins['table.Table'] = array(
     'buttons' => array(
