@@ -185,7 +185,7 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type) {
     '#required' => TRUE,
   );
   $form['bundle_wrapper'] = array(
-    '#title' => t('Type'),
+    '#title' => t('Select @entity types to use this layout', array('@entity' => $entity_name)),
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
@@ -199,16 +199,17 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type) {
     '#required' => TRUE,
   );
   $form['field_blocks_wrapper'] = array(
-    '#title' => t('Type'),
+    '#title' => t('Choose fields'),
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
+    '#attributes' => array('class' => array('layout-field-blocks-wrapper')),
     '#required' => TRUE,
   );
   $form['field_blocks_wrapper']['content_area'] = array(
     '#title' => t('"Main content" block'),
     '#type' => 'radios',
-    '#default_value' => array('field_blocks'),
+    '#default_value' => 'main',
     '#options' => array(
       'main' => t('Leave Main Content.'),
       'field_blocks' => t('Use field blocks.'),
@@ -234,7 +235,7 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type) {
       '#options' => $field_blocks,
       '#states' => array(
         'visible' => array(
-          ':input[name="field_blocks_wrapper[content_area]"]' => array('value' => 'field_blocks'),
+          ':input[name="content_area"]' => array('value' => 'field_blocks'),
         ),
       ),
     );

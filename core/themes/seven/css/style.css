@@ -1376,7 +1376,7 @@ div.filter-options select {
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
-.layout-entity-admin-add-form .form-type-radio label,
+.layout-entity-admin-add-form .layout-options .form-type-radio label,
 .form-item-region-style .form-type-radio label,
 .layout-settings-page .layout-options .form-type-checkbox label,
 .layout-settings-form .layout-options .form-type-radio label {
@@ -1398,8 +1398,8 @@ div.filter-options select {
 .layout-settings-form .layout-options.no-flexbox .form-type-radio label {
   min-height: 150px;
 }
-.layout-entity-admin-add-form .form-type-radio:active label,
-.layout-entity-admin-add-form .form-type-radio input:checked + label,
+.layout-entity-admin-add-form .layout-options .form-type-radio:active label,
+.layout-entity-admin-add-form .layout-options .form-type-radio input:checked + label,
 .form-item-region-style .form-type-radio:active label,
 .form-item-region-style .form-type-radio input:checked + label,
 .layout-settings-page .layout-options .form-type-checkbox:active label,
@@ -1409,9 +1409,9 @@ div.filter-options select {
   background-color: #ffffff;
   border-color: #d0d0d0;
 }
-.layout-entity-admin-add-form .form-type-radio input:focus + label,
-.layout-entity-admin-add-form .form-type-radio input:hover + label,
-.layout-entity-admin-add-form .form-type-radio:hover input:checked + label,
+.layout-entity-admin-add-form .layout-options .form-type-radio input:focus + label,
+.layout-entity-admin-add-form .layout-options .form-type-radio input:hover + label,
+.layout-entity-admin-add-form .layout-options .form-type-radio:hover input:checked + label,
 .form-item-region-style .form-type-radio input:focus + label,
 .form-item-region-style .form-type-radio input:hover + label,
 .form-item-region-style .form-type-radio:hover input:checked + label,
@@ -1424,7 +1424,7 @@ div.filter-options select {
   background-color: #ffffff;
   border-color: #43afe4;
 }
-.layout-entity-admin-add-form .layout-options .form-type-radio img,
+.layout-entity-admin-add-form .layout-options .layout-options .form-type-radio img,
 .layout-settings-page .layout-options .form-type-checkbox img,
 .layout-settings-form .layout-options .form-type-radio img {
   position: relative;
