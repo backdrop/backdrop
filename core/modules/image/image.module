@@ -1362,7 +1362,7 @@ function image_filter_keyword($value, $current_pixels, $new_pixels) {
  * uploading an image for the first time in a content form.
  */
 function image_preprocess_image_style(&$variables) {
-  $uri = $variables['path'];
+  $uri = $variables['uri'];
   // Only try to get file information if $uri is not empty.
   if (!empty($uri) && image_is_svg($uri)) {
     if (empty($variables['width']) && empty($variables['height'])) {
