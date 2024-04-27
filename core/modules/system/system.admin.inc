@@ -2332,21 +2332,22 @@ function system_status($check = FALSE) {
  * Menu callback: displays the debug info page.
  */
 function system_debug_info() {
+  global $language;
+
   $form['help'] = array(
     '#type' => 'help',
     '#markup' => t('Ready to copy/paste information about your site. This includes items commonly requested for troubleshooting/support purposes.'),
   );
 
   $debug_info = system_get_debug_info();
-  $debug_info_lines = count(explode(PHP_EOL, $debug_info));
 
   $form['debug_info'] = array(
     '#type' => 'textarea',
     '#title' => t('Debug report'),
-    '#value' => $debug_info,
+    '#value' => _system_format_array_to_plain_text_columns($debug_info, array('rtl' => $language->direction == LANGUAGE_RTL)),
     // Expand the default length of the text field, to ensure that all the
     // debug output is visible without having to scroll within the text field.
-    '#rows' => $debug_info_lines,
+    '#rows' => count($debug_info) + 1,
     '#attributes' => array(
       'id' => 'debug-info-wrapper',
       // Using the 'readonly' attribute to lock the text, since it gives us a
@@ -2362,11 +2363,11 @@ function system_debug_info() {
 /**
  * Compiles the various information for the debug info page.
  *
- * @see system_debug_info().
+ * @see system_debug_info()
+ * @see system_format_debug_info()
  */
 function system_get_debug_info() {
   global $language;
-  $language_is_rtl = $language->direction == LANGUAGE_RTL;
 
   // An array that is later passed to sprintf() so that the final output can be
   // formatted in two columns of plain text. The array keys will be the first
@@ -2463,7 +2464,7 @@ function system_get_debug_info() {
         // @todo: See if we can use something like str_pad() instead of
         // sprintf() to format the text into columns, and if that works
         // better with multi-byte characters like ⮑ (and ⮐ for RTL).
-        if ($language_is_rtl) {
+        if ($language->direction == LANGUAGE_RTL) {
           $base_theme_indicator = ' ⮐ ';
           $debug_info_lines[t('base theme:') . $base_theme_indicator] = $base_theme_name . $base_theme_indicator;
         }
@@ -2475,8 +2476,7 @@ function system_get_debug_info() {
     }
   }
 
-  $default_content_theme = t('*used when editing or creating content');
-  $debug_info_lines[] = $default_content_theme;
+  $debug_info_lines[] = t('*used when editing or creating content');
 
   $debug_info_lines[] = $empty_line;
 
@@ -2495,16 +2495,35 @@ function system_get_debug_info() {
     }
   }
 
+  return $debug_info_lines;
+}
+
+/**
+ * Given an array of data, it formats it into a plain-text 2-column output.
+ *
+ * @see system_get_debug_info().
+ */
+function _system_format_array_to_plain_text_columns($lines, $format_settings) {
+  global $language;
+
+  // Set some default settings.
+  $defaults = array(
+    'min_spacing' => 5,
+    'rtl' => $language->direction == LANGUAGE_RTL,
+  );
+  // Ensure that defaults are set for any settings that were not explicitly
+  // specified.
+  $format_settings += $defaults;
+
   // Get the length of the longest key in the array (which will determine the
   // max width of the first plain-text "column").
-  $longest_item_length = max(array_map('mb_strlen', array_keys($debug_info_lines)));
+  $longest_item_length = max(array_map('mb_strlen', array_keys($lines)));
+
+  // Format the output so that the items and their values are listed as columns.
+  $first_col_width = $longest_item_length + $format_settings['min_spacing'];
 
   $output = '';
-  // Format the output so that the items and their values are listed as columns.
-  $min_spacing = 5;
-  $first_col_width = $longest_item_length + $min_spacing;
-
-  foreach ($debug_info_lines as $info => $value) {
+  foreach ($lines as $info => $value) {
     if ($value == NULL) {
       // Blank lines.
       $output .= "\n";
@@ -2513,16 +2532,17 @@ function system_get_debug_info() {
       // Lines with a blank first column - only a value in the second column.
       $info = is_numeric($info) ? '' : $info;
 
-      if ($language_is_rtl) {
+      if ($format_settings['rtl']) {
         $format = '%s %' . $first_col_width . 's';
-        $output .= sprintf($format, $info, $value) . "\n";
+        // Note that the order of $value and $info parameters is reversed
+        // compared to LTR.
+        $output .= sprintf($format, $value, $info) . "\n";
       }
       else {
         $format = '%-' . $first_col_width . 's %s';
         $output .= sprintf($format, $info, $value) . "\n";
       }
     }
-
   }
 
   return $output;
