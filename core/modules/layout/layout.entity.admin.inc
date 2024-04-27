@@ -296,7 +296,6 @@ function layout_entity_admin_add_form_submit($form, &$form_state) {
   }
 
   $entity_type = $form_state['entity_type'];
-  dpm($form_state['values']);
   $bundle_types = array_filter($form_state['values']['bundles']);
 
   // Build the expected path string and set the path.
@@ -343,7 +342,6 @@ function layout_entity_admin_add_form_submit($form, &$form_state) {
 
     if ($form_state['values']['field_blocks']) {
       $fields = $form_state['fields'];
-      dpm($fields);
 
       $content_region = '';
       if (isset($template_info['regions']['content'])) {
