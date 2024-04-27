@@ -191,6 +191,7 @@ imageto
 indigoxela
 infourl
 innodb
+instantiatable
 isid
 istart
 jahwohl
@@ -249,6 +250,7 @@ mouton
 moutons
 msgbox
 multibundle
+multipage
 multisites
 Műveletek
 myclass
@@ -342,6 +344,7 @@ Punycode
 queryor
 quicktime
 Quieligo
+rawurlencoded
 ratis
 rawurldecode
 rawurlencode
@@ -388,6 +391,7 @@ softtabstop
 someplugin
 sometable
 sourcedir
+spacebar
 stackoverflow
 statiya
 stdobj
@@ -447,6 +451,8 @@ uncustomized
 undeletable
 unescapes
 unescaping
+unextracted
+unflagged
 unhighlight
 unhighlights
 unioned
@@ -471,6 +477,7 @@ vendredi
 VERIFYHOST
 VERIFYPEER
 verygreatbackdropmodule
+viewmode
 VIEWNAME
 viewmode
 watchdog
