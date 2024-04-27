@@ -92,13 +92,17 @@ function layout_get_entity_layouts($entity_type, $bundle_name = '') {
             $matched_layouts['all'][] = $layout;
           }
           else {
+            $matched_a_layout = FALSE;
             foreach ($layout->conditions as $condition) {
               if (is_a($condition, 'EntityBundleLayoutAccess')) {
-                $matched_layouts['all'][] = $layout;
+                $matched_a_layout = TRUE;
                 foreach ($condition->settings['bundles'] as $bundle) {
                   $matched_layouts['bundles'][$bundle][] = $layout;
                 }
               }
+            }
+            if ($matched_a_layout) {
+              $matched_layouts['all'][] = $layout;
             }
           }
         }
