@@ -2330,6 +2330,11 @@ function system_status($check = FALSE) {
 
 /**
  * Menu callback: displays the debug info page.
+ *
+ * @see system_get_debug_info()
+ * @see _system_format_array_to_plain_text_columns()
+ *
+ * @since 1.28.0 function added.
  */
 function system_debug_info() {
   global $language;
@@ -2364,7 +2369,8 @@ function system_debug_info() {
  * Compiles the various information for the debug info page.
  *
  * @see system_debug_info()
- * @see system_format_debug_info()
+ *
+ * @since 1.28.0 function added.
  */
 function system_get_debug_info() {
   global $language;
@@ -2501,7 +2507,19 @@ function system_get_debug_info() {
 /**
  * Given an array of data, it formats it into a plain-text 2-column output.
  *
- * @see system_get_debug_info().
+ * @param array $lines
+ *   The data to format into plain text columns. The array keys will become the
+ *   first column, and the array values the second column.
+ * @param array $format_settings
+ *   An array with various settings that control the final plain-text output:
+ *   - min_spacing: An integer indicating the minimum spaces added between the
+ *     first column of the output and the second column.
+ *   - rtl: A boolean indicating whether the output should be prepared for RTL
+ *     languages.
+ *
+ * @see system_debug_info()
+ *
+ * @since 1.28.0 function added.
  */
 function _system_format_array_to_plain_text_columns($lines, $format_settings) {
   global $language;
