@@ -2368,9 +2368,15 @@ function system_get_debug_info() {
   global $language;
   $language_is_rtl = $language->direction == LANGUAGE_RTL;
 
+  // An array that is later passed to sprintf() so that the final output can be
+  // formatted in two columns of plain text. The array keys will be the first
+  // column and the values will be the second column. The number of spaces
+  // between the two columns is dynamically calculated, based on the lenght of
+  // the string of the first column. This ensures that the strings in the second
+  // column all start at the same point and appear as vertically aligned.
   $debug_info_lines = array();
-  // A blank line. It needs to be 2 columns, otherwise vsprintf() complains.
-  $empty_line = array('', '');
+
+  $empty_line = NULL;
 
   $jquery = backdrop_get_library('system', 'jquery');
   $jquery_ui = backdrop_get_library('system', 'ui');
@@ -2387,12 +2393,7 @@ function system_get_debug_info() {
   );
 
   foreach ($system_info as $info => $value) {
-    // Add the $info string as the array key, so that we can easily count the
-    // length of each item later. This allows us to calculate the max length,
-    // which is then used to calculate the spacing between items and their
-    // value. The line itself is also an array of 2 values that are then used
-    // with vsprintf() to format the plain text output in 2 columns.
-    $debug_info_lines[$info] = array($info, $value);
+    $debug_info_lines[$info] = $value;
   }
 
   $debug_info_lines[] = $empty_line;
@@ -2420,7 +2421,7 @@ function system_get_debug_info() {
     }
   }
   foreach ($text_editor_usage as $editor => $formats) {
-    $debug_info_lines[] = array($editor, t('used in: @formats', array('@formats' => implode(', ', $formats))));
+    $debug_info_lines[$editor] = t('used in: @formats', array('@formats' => implode(', ', $formats)));
   }
 
   $debug_info_lines[] = $empty_line;
@@ -2456,28 +2457,26 @@ function system_get_debug_info() {
 
   $theme_info = array();
   foreach ($themes as $theme_role => $theme_data) {
-    $debug_info_lines[$theme_data['debug_label']] = array($theme_data['debug_label'], $theme_data['debug_name']);
+    $debug_info_lines[$theme_data['debug_label']] = $theme_data['debug_name'];
     if (!empty($theme_data['base_themes']) && $base_themes = $theme_data['base_themes']) {
       foreach ($base_themes as $base_theme => $base_theme_name) {
         // @todo: See if we can use something like str_pad() instead of
-        // vsprintf() to format the text into columns, and if that works
+        // sprintf() to format the text into columns, and if that works
         // better with multi-byte characters like ⮑ (and ⮐ for RTL).
         if ($language_is_rtl) {
           $base_theme_indicator = ' ⮐ ';
-          $debug_info_lines[$theme_role . '-base_theme'] = array(t('base theme:') . $base_theme_indicator, $base_theme_name . $base_theme_indicator);
+          $debug_info_lines[t('base theme:') . $base_theme_indicator] = $base_theme_name . $base_theme_indicator;
         }
         else {
           $base_theme_indicator = ' ⮑ ';
-          $debug_info_lines[$theme_role . '-base_theme'] = array($base_theme_indicator . t('base theme:'), ' ' . $base_theme_indicator . $base_theme_name);
+          $debug_info_lines[$base_theme_indicator . t('base theme:')] = ' ' . $base_theme_indicator . $base_theme_name;
         }
       }
     }
   }
 
-  // Add a line with a note about the default content theme (explicitly 2
-  // columns per line, otherwise vsprintf() complains).
-  $default_content_theme = t('*configured to also be used when editing or creating content');
-  $debug_info_lines['Default content theme'] = array('', $default_content_theme);
+  $default_content_theme = t('*used when editing or creating content');
+  $debug_info_lines[] = $default_content_theme;
 
   $debug_info_lines[] = $empty_line;
 
@@ -2486,12 +2485,12 @@ function system_get_debug_info() {
     if (empty($module_data->info['hidden']) && $module_data->status) {
       if (strstr($module_data->uri, 'core/modules/')) {
         // Add any enabled core module in the output.
-        $debug_info_lines[$module] = array($module, $core_version);
+        $debug_info_lines[$module] = $core_version;
       }
       else {
         // Add any enabled non-core module.
         $module_version = isset($module_data->info['version']) ? $module_data->info['version'] : '-';
-        $debug_info_lines[$module] = array($module, $module_version);
+        $debug_info_lines[$module] = $module_version;
       }
     }
   }
@@ -2500,20 +2499,30 @@ function system_get_debug_info() {
   // max width of the first plain-text "column").
   $longest_item_length = max(array_map('mb_strlen', array_keys($debug_info_lines)));
 
+  $output = '';
   // Format the output so that the items and their values are listed as columns.
   $min_spacing = 5;
   $first_col_width = $longest_item_length + $min_spacing;
 
-  $output = '';
-  foreach ($debug_info_lines as $line => $columns) {
-    if ($language_is_rtl) {
-      $format = '%s %' . $first_col_width . 's';
-      $output .= vsprintf($format, array_reverse($columns)) . "\n";
+  foreach ($debug_info_lines as $info => $value) {
+    if ($value == NULL) {
+      // Blank lines.
+      $output .= "\n";
     }
     else {
-      $format = '%-' . $first_col_width . 's %s';
-      $output .= vsprintf($format, $columns) . "\n";
+      // Lines with a blank first column - only a value in the second column.
+      $info = is_numeric($info) ? '' : $info;
+
+      if ($language_is_rtl) {
+        $format = '%s %' . $first_col_width . 's';
+        $output .= sprintf($format, $info, $value) . "\n";
+      }
+      else {
+        $format = '%-' . $first_col_width . 's %s';
+        $output .= sprintf($format, $info, $value) . "\n";
+      }
     }
+
   }
 
   return $output;
