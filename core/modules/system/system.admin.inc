@@ -2349,8 +2349,8 @@ function system_debug_info() {
     '#rows' => $debug_info_lines,
     '#attributes' => array(
       'id' => 'debug-info-wrapper',
-      // Using the 'readonly' attribute to lock the text, sinc it gives us a
-      // "cursor: text" cursor for free (using 'disabled' would resultin a
+      // Using the 'readonly' attribute to lock the text, since it gives us a
+      // "cursor: text" cursor for free (using 'disabled' would result in a
       // "cursor: text" instead).
       'readonly' => 'readonly',
     ),
