@@ -83,6 +83,8 @@ datelimits
 dbinfo
 dblog
 DDTHH
+dependee
+dependees
 derf
 devmajor
 devminor
@@ -102,6 +104,7 @@ editunblock
 elementtype
 enddate
 endskip
+Enregistrer
 entityreference
 éøïвβ
 errorcode
@@ -143,6 +146,7 @@ formfocusborder
 formtest
 foundkeys
 fourthcolumn
+Fozzie
 freso
 fromto
 fter
@@ -186,6 +190,7 @@ ieid
 iend
 ignoretag
 iinet
+imagecreatefrom
 imagefield
 imageto
 indigoxela
@@ -224,6 +229,7 @@ lished
 Lisu
 litespeed
 localzone
+lundi
 LXSS
 manytoone
 marzo
@@ -236,6 +242,7 @@ merlinofchaos
 metacharacters
 meus
 microweights
+milli
 mimeheaders
 minadjustment
 mindate
@@ -315,6 +322,7 @@ oldserver
 oldtext
 oneof
 onmediaerror
+onoff
 opensans
 Optionchecker
 otherjob
@@ -423,6 +431,7 @@ tempstore
 testconfig
 testfiles
 testviews
+textgroup
 textgroups
 textinput
 themeable
@@ -444,8 +453,11 @@ triptych
 typeflag
 Üidentifier
 unaggregated
+unaliased
+unconfigured
 uncustomized
 undeletable
+undraggable
 unescapes
 unescaping
 unextracted
@@ -461,7 +473,10 @@ unmunged
 unmunging
 unnested
 unpackage
+unpermissioned
+unpromoted
 unrendered
+unshortened
 uploadimage
 uploadwidget
 USERAGENT

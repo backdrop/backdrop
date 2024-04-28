@@ -400,10 +400,10 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html lang="en"><head><title>404 No
 /**
  * Drupal backwards compatibility.
  *
- * By default, Backdrop 1.0 includes a compatibility layer to keep it compatible
+ * By default, Backdrop 1.x includes a compatibility layer to keep it compatible
  * with Drupal 7 APIs. Backdrop core itself does not use this compatibility
- * layer however. You may disable it if all the modules you're running were
- * built for Backdrop.
+ * layer however. You may disable it if all the modules and themes used on the
+ * site were built for Backdrop.
  */
 $settings['backdrop_drupal_compatibility'] = TRUE;
 
