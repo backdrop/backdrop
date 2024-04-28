@@ -169,8 +169,8 @@ function image_get_info($filepath, $toolkit = FALSE) {
       // have caught that on upload.
       $dimensions = image_get_svg_dimensions($filepath);
       $details = array(
-        'width'     => isset($dimensions['width']) ? $dimensions['width'] : '',
-        'height'    => isset($dimensions['height']) ? $dimensions['height'] : '',
+        'width'     => isset($dimensions['width']) ? $dimensions['width'] : 0,
+        'height'    => isset($dimensions['height']) ? $dimensions['height'] : 0,
         'extension' => 'svg',
         'mime_type' => 'image/svg+xml',
         'file_size' => filesize($filepath),
@@ -623,10 +623,9 @@ function image_get_svg_dimensions($uri) {
   }
 
   $svg_dimensions = array(
-    'width' => NULL,
-    'height' => NULL,
+    'width' => 0,
+    'height' => 0,
   );
-
   $file_contents = file_get_contents($uri);
   if ($file_contents && $svg = simplexml_load_string($file_contents)) {
     foreach ($svg->attributes() as $attribute => $value) {
