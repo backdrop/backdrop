@@ -631,10 +631,6 @@ function image_field_formatter_info() {
       'image_link' => '',
       'image_float' => '',
       'image_load' => 'auto',
-      'image_svg_dimensions' => array(
-        'width' => IMAGE_SVG_DEFAULT_WIDTH,
-        'height' => IMAGE_SVG_DEFAULT_HEIGHT,
-      ),
     ),
     'description' => t('Format the file as an image. The image can be displayed using an image style and can optionally be linked to the image file itself or its parent content.'),
     'file formatter' => array(
@@ -704,40 +700,6 @@ function image_field_formatter_settings_form($field, $instance, $view_mode, $for
   $element['image_load']['auto']['#description'] = t('Each browser will determine whether or not to lazily load the image.');
   $element['image_load']['eager']['#description'] = t('Load this image immediately, regardless of where it is located on the page.');
 
-  $element['image_svg_dimensions'] = array(
-    '#type' => 'item',
-    '#title' => t('Maximum SVG image dimensions'),
-    '#field_prefix' => '<div class="container-inline">',
-    '#field_suffix' => '</div>',
-    '#description' => t('The maximum allowed SVG image dimensions expressed as <code>WIDTH</code> x <code>HEIGHT</code>. If left blank, SVG images will be displayed at @svg_default_width x @svg_default_height pixels. Selecting an image style will override this setting.', array(
-      '@svg_default_width' => IMAGE_SVG_DEFAULT_WIDTH,
-      '@svg_default_height' => IMAGE_SVG_DEFAULT_HEIGHT,
-    )),
-    '#states' => array(
-      'visible' => array(
-        ':input[name="fields[field_image][settings_edit_form][settings][image_style]"]' => array('value' => ''),
-      ),
-    ),
-  );
-  $element['image_svg_dimensions']['width'] = array(
-    '#type' => 'number',
-    '#title' => t('Maximum width'),
-    '#title_display' => 'invisible',
-    '#default_value' => isset($settings['image_svg_dimensions']['width']) ? $settings['image_svg_dimensions']['width'] : IMAGE_SVG_DEFAULT_WIDTH,
-    '#min' => 0,
-    '#max' => 100000,
-    '#field_suffix' => ' x ',
-  );
-  $element['image_svg_dimensions']['height'] = array(
-    '#type' => 'number',
-    '#title' => t('Maximum height'),
-    '#title_display' => 'invisible',
-    '#default_value' => isset($settings['image_svg_dimensions']['height']) ? $settings['image_svg_dimensions']['height'] : IMAGE_SVG_DEFAULT_HEIGHT,
-    '#min' => 0,
-    '#max' => 100000,
-    '#field_suffix' => ' ' . t('pixels'),
-  );
-
   return $element;
 }
 
@@ -780,18 +742,6 @@ function image_field_formatter_settings_summary($field, $instance, $view_mode) {
     $summary[] = t('Loading: @speed', array('@speed' => $settings['image_load']));
   }
 
-  $formatter_settings = $instance['display'][$view_mode]['settings'];
-
-  if (!empty($formatter_settings['image_svg_dimensions']['width']) || !empty($formatter_settings['image_svg_dimensions']['width'])) {
-    $summary[] = t(
-      'Default SVG dimensions: @width x @height pixels',
-      array(
-        '@width' => $formatter_settings['image_svg_dimensions']['width'],
-        '@height' => $formatter_settings['image_svg_dimensions']['height'],
-      )
-    );
-  }
-
   return implode('<br />', $summary);
 }
 
@@ -830,19 +780,6 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
           'path' => file_create_url($item['uri']),
           'options' => array(),
         );
-      }
-
-      $is_svg = image_is_svg($item['uri']);
-
-      // Add custom attributes only for SVG images.
-      if ($is_svg) {
-        $image_svg_dimensions = $display['settings']['image_svg_dimensions'];
-
-        foreach ($image_svg_dimensions as $attribute => $attribute_value) {
-          if (empty($item[$attribute])) {
-            $item[$attribute] = $attribute_value;
-          }
-        }
       }
     }
 
