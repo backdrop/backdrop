@@ -200,6 +200,12 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropGet('admin/structure/layouts');
     $this->clickLink(t('Add layout'));
 
+    // Test the default value for layout template is set.
+    $this->assertFieldByXPath('//input[@name="layout_template"][@checked="checked"]', TRUE, 'The Layout template default value is set.');
+    $default_layout_template = config_get('layout.layout.default', 'layout_template');
+    $field_id = 'edit-layout-template-' . str_replace('_', '-', $default_layout_template);
+    $this->assertFieldChecked($field_id, 'The Layout template default value is the same as the default layout.');
+
     // Create a new layout at a new path.
     $layout_title = $this->randomName();
     $layout_name = strtolower($layout_title);

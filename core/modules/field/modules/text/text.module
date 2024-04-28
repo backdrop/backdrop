@@ -218,9 +218,9 @@ function text_field_load($entity_type, $entities, $field, $instances, $langcode,
  */
 function text_field_is_empty($item, $field) {
   if (!isset($item['value']) || $item['value'] === '') {
-    if (isset($item['format']) && $item['format'] !== '') {
-      // If this text field has a text format setting,
-      // save it regardless of empty value to keep the format.
+    if (isset($item['format']) && $item['format'] !== '' && $item['format'] != filter_default_format()) {
+      // If this text field has a text format setting, save it regardless of
+      // empty value to keep the format. Unless it's the default format.
       return FALSE;
     }
     elseif (!isset($item['summary']) || $item['summary'] === '') {

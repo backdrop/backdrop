@@ -384,10 +384,18 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#required' => TRUE,
     '#access' => !$layout->isDefault(),
   );
+  if ($layout->layout_template != NULL) {
+    $layout_template = $layout->layout_template;
+  }
+  else {
+    // If no layout template has been selected, then pre-select the template
+    // used by the default layout, to avoid AJAX validation errors in the form.
+    $layout_template = config_get('layout.layout.default', 'layout_template');
+  }
   $form['layout_template'] = array(
     '#title' => t('Layout template'),
     '#type' => 'radios',
-    '#default_value' => $layout->layout_template,
+    '#default_value' => $layout_template,
     '#options' => array(),
     '#wrapper_attributes' => array('class' => array('clearfix', 'layout-options')),
     '#required' => TRUE,
@@ -690,8 +698,8 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   }
 
   // Display a notice if overriding a system path that normally contains
-  // placeholders e.g. node/1 instead of node/%. This is usually (but not always)
-  // a misconfiguration of the layout.
+  // placeholders e.g. node/1 instead of node/%. This is usually (but not
+  // always) a misconfiguration of the layout.
   $layout_path = $layout->getPath();
   $router_item = menu_get_item($layout_path);
   if ($router_item && $layout_path) {
@@ -3150,7 +3158,7 @@ function layout_ajax_form_save_dialog($form, $form_state) {
   /* @var Layout $layout */
   $layout = $form_state['layout'];
   /* @var LayoutMenuItem $menu_item */
-  $menu_item = isset($form_state['menu_item']) ? $form_state['menu_item']  : '';
+  $menu_item = isset($form_state['menu_item']) ? $form_state['menu_item'] : '';
 
   $commands = array();
   $commands[] = ajax_command_close_modal_dialog();
@@ -3193,6 +3201,12 @@ function layout_ajax_form_save_dialog($form, $form_state) {
   );
 }
 
+/**
+ * AJAX handler that updates the title.
+ *
+ * @return array
+ *   AJAX commands to update the page.
+ */
 function layout_ajax_form_save_title_dialog($form, $form_state) {
   $layout = $form_state['layout'];
 
