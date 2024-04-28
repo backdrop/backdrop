@@ -1962,6 +1962,15 @@ function node_menu() {
 }
 
 /**
+ * Implements hook_menu().
+ */
+function node_menu_alter(&$items) {
+  if (isset($items['admin/content'])) {
+    $items['admin/content']['icon'] = 'pencil-fill';
+  }
+}
+
+/**
  * Access callback: Checks a user's permission for previewing a node.
  *
  * @param $node_tempstore_id
