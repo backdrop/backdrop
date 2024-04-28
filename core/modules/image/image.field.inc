@@ -784,6 +784,7 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
 
       // SVG was likely uploaded with no dimensions. The width and height are stored
       // as zero for compatibility with other images, but for viewing set them blank.
+      $is_svg = image_is_svg($item['uri']);
       if ($is_svg) {
         if ($item['width'] == 0 && $item['height'] == 0) {
           $item['width'] = '';
