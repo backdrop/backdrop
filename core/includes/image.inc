@@ -622,6 +622,8 @@ function image_get_svg_dimensions($uri) {
     return $cached_images[$uri];
   }
 
+  // If there are no dimensions, store the dimensions as zero.
+  // Required for compatibility with image field storage.
   $svg_dimensions = array(
     'width' => 0,
     'height' => 0,
