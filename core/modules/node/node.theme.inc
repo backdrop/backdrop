@@ -42,7 +42,10 @@ function theme_node_preview_banner_form($variables) {
  * @see node_preview()
  * @see node_preview_banner_form()
  * @see theme_node_preview_banner_form()
+ *
  * @ingroup themeable
+ *
+ * @since 1.28.0 Function added.
  */
 function theme_node_preview($variables) {
   $node_preview = $variables['node_preview'];
