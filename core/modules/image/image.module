@@ -1365,16 +1365,11 @@ function image_preprocess_image_style(&$variables) {
   $uri = $variables['uri'];
   // Only try to get file information if $uri is not empty.
   if (!empty($uri) && image_is_svg($uri)) {
-    if (empty($variables['width']) && empty($variables['height'])) {
-      if ($dimensions = image_get_svg_dimensions($uri)) {
-        $variables['width'] = $dimensions['width'];
-        $variables['height'] = $dimensions['height'];
-      }
-      else {
-        $variables['width'] = IMAGE_SVG_DEFAULT_WIDTH;
-        $variables['height'] = IMAGE_SVG_DEFAULT_HEIGHT;
-      }
-    }
+    $original = array(
+      'width' => $variables['width'],
+      'height' => $variables['height'],
+    );
+    image_style_transform_dimensions($variables['style_name'], $original);
   }
 }
 
