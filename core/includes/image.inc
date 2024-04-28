@@ -169,8 +169,8 @@ function image_get_info($filepath, $toolkit = FALSE) {
       // have caught that on upload.
       $dimensions = image_get_svg_dimensions($filepath);
       $details = array(
-        'width'     => $dimensions['width'] ?? '',
-        'height'    => $dimensions['height'] ?? '',
+        'width'     => isset($dimensions['width']) ? $dimensions['width'] : '',
+        'height'    => isset($dimensions['height']) ? $dimensions['height'] : '',
         'extension' => 'svg',
         'mime_type' => 'image/svg+xml',
         'file_size' => filesize($filepath),
