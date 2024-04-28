@@ -710,7 +710,7 @@ function image_field_formatter_settings_form($field, $instance, $view_mode, $for
     '#field_prefix' => '<div class="container-inline">',
     '#field_suffix' => '</div>',
     '#description' => t('The maximum allowed SVG image dimensions expressed as <code>WIDTH</code> x <code>HEIGHT</code>. If left blank, SVG images will be displayed at @svg_default_width x @svg_default_height pixels. Selecting an image style will override this setting.', array(
-      '@svg_default_width' => IMAGE_SVG_DEFAULT_WIDTH, 
+      '@svg_default_width' => IMAGE_SVG_DEFAULT_WIDTH,
       '@svg_default_height' => IMAGE_SVG_DEFAULT_HEIGHT,
     )),
     '#states' => array(
@@ -839,7 +839,7 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
         $image_svg_dimensions = $display['settings']['image_svg_dimensions'];
 
         foreach ($image_svg_dimensions as $attribute => $attribute_value) {
-          if (!empty($attribute)) {
+          if (empty($item[$attribute])) {
             $item[$attribute] = $attribute_value;
           }
         }
