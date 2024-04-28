@@ -953,7 +953,7 @@ class CommonHTMLIdentifierTestCase extends BackdropUnitTestCase {
     $this->assertIdentical(backdrop_clean_css_identifier($identifier, array()), $identifier, 'Verify valid UTF-8 characters pass through.');
 
     // Verify that invalid characters (including non-breaking space) are stripped from the identifier.
-    $this->assertIdentical(backdrop_clean_css_identifier('invalid !"#$%&\'()*+,./:;<=>?@[\\]^`{|}~ identifier', array()), 'invalididentifier', 'Strip invalid characters.');
+    $this->assertIdentical(backdrop_clean_css_identifier('invalid- !"#$%&\'()*+,./:;<=>?@[\\]^`{|}~ identifier', array()), 'invalid-identifier', 'Strip invalid characters.');
   }
 
   /**
@@ -973,7 +973,7 @@ class CommonHTMLIdentifierTestCase extends BackdropUnitTestCase {
     $this->assertIdentical(backdrop_html_id($id), $id, 'Verify valid characters pass through.');
 
     // Verify that invalid characters are stripped from the ID.
-    $this->assertIdentical(backdrop_html_id('invalid,./:@\\^`{Üidentifier'), 'invalididentifier', 'Strip invalid characters.');
+    $this->assertIdentical(backdrop_html_id('invalid-,./:@\\^`{Üidentifier'), 'invalid-identifier', 'Strip invalid characters.');
 
     // Verify Backdrop coding standards are enforced.
     $this->assertIdentical(backdrop_html_id('ID NAME_[1]'), 'id-name-1', 'Enforce Backdrop coding standards.');
@@ -3175,7 +3175,7 @@ class CommonJSONUnitTestCase extends BackdropUnitTestCase {
     $this->assertIdentical($source, $json_decoded, 'Encoding structured data to pretty-printed JSON and decoding back results in the original data.');
 
     // Unicode test strings.
-    // cspell:disable-next-line
+    // cspell:disable-next-line.
     $unicode_decoded = 'üéåâ';
     $unicode_encoded = '\u00fc\u00e9\u00e5\u00e2';
     $unicode_encoded_escaped = '\\\\u00fc\\\\u00e9\\\\u00e5\\\\u00e2';

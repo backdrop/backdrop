@@ -11,8 +11,8 @@
  * @{
  * Functions to import and export translations.
  *
- * These functions provide the ability to import translations from
- * external files and to export translations and translation templates.
+ * These functions provide the ability to import translations from external
+ * files and to export translations and translation templates.
  */
 
 /**
@@ -36,7 +36,8 @@ function _locale_import_po($file, $langcode, $mode) {
     return FALSE;
   }
 
-  // Get strings from file (returns on failure after a partial import, or on success)
+  // Get strings from file (returns on failure after a partial import, or on
+  // success).
   $status = _locale_import_read_po('db-store', $file, $mode, $langcode);
   if ($status === FALSE) {
     // Error messages are set in _locale_import_read_po().
@@ -195,18 +196,19 @@ function _locale_import_read_po($op, $file, $mode = NULL, $langcode = NULL) {
         $current = array();
       }
       elseif ($context == 'MSGID') {
-        // We are currently already in the context, meaning we passed an id with no data.
+        // We are currently already in the context, meaning we passed an id with
+        // no data.
         _locale_import_message('The translation file %filename contains an error: "msgid" is unexpected on line %line.', $file, $lineno);
         return FALSE;
       }
 
       // Remove 'msgid' and trim away whitespace.
       $line = trim(substr($line, 5));
-      // At this point, $line should now contain only the message id.
 
+      // At this point, $line should now contain only the message ID.
       $quoted = _locale_import_parse_quoted($line);
       if ($quoted === FALSE) {
-        // The message id must be wrapped in quotes.
+        // The message ID must be wrapped in quotes.
         _locale_import_message('The translation file %filename contains a syntax error on line %line.', $file, $lineno);
         return FALSE;
       }
@@ -247,7 +249,8 @@ function _locale_import_read_po($op, $file, $mode = NULL, $langcode = NULL) {
       // A message string for a specific plurality.
 
       if (($context != 'MSGID') && ($context != 'MSGCTXT') && ($context != 'MSGID_PLURAL') && ($context != 'MSGSTR_ARR')) {
-        // Message strings must come after msgid, msgctxt, msgid_plural, or other msgstr[] entries.
+        // Message strings must come after msgid, msgctxt, msgid_plural, or
+        // other msgstr[] entries.
         _locale_import_message('The translation file %filename contains an error: "msgstr[]" is unexpected on line %line.', $file, $lineno);
         return FALSE;
       }
@@ -259,10 +262,11 @@ function _locale_import_read_po($op, $file, $mode = NULL, $langcode = NULL) {
       }
 
       // Extract the plurality.
-      $frombracket = strstr($line, '[');
-      $plural = substr($frombracket, 1, strpos($frombracket, ']') - 1);
+      $from_bracket = strstr($line, '[');
+      $plural = substr($from_bracket, 1, strpos($from_bracket, ']') - 1);
 
-      // Skip to the next whitespace and trim away any further whitespace, bringing $line to the message data.
+      // Skip to the next whitespace and trim away any further whitespace,
+      // bringing $line to the message data.
       $line = trim(strstr($line, " "));
 
       $quoted = _locale_import_parse_quoted($line);
@@ -387,16 +391,16 @@ function _locale_import_one_string($op, $value = NULL, $mode = NULL, $langcode =
   $strings = &backdrop_static(__FUNCTION__ . ':strings', array());
 
   switch ($op) {
-    // Return stored strings
+    // Return stored strings.
     case 'mem-report':
       return $strings;
 
-    // Store string in memory (only supports single strings)
+    // Store string in memory (only supports single strings).
     case 'mem-store':
       $strings[isset($value['msgctxt']) ? $value['msgctxt'] : ''][$value['msgid']] = $value['msgstr'];
       return NULL;
 
-    // Called at end of import to inform the user
+    // Called at end of import to inform the user.
     case 'db-report':
       return array($header_done, $report['additions'], $report['updates'], $report['deletes'], $report['skips']);
 
@@ -452,7 +456,8 @@ function _locale_import_one_string($op, $value = NULL, $mode = NULL, $langcode =
           _locale_import_one_string_db($report, $langcode, isset($value['msgctxt']) ? $value['msgctxt'] : '', $english, $translation, $comments, $mode);
         }
       }
-  } // end of db-store operation
+      // End of db-store operation.
+  }
 
   return NULL;
 }
@@ -595,28 +600,28 @@ function _locale_import_parse_header($header) {
 /**
  * Parses a Plural-Forms entry from a Gettext Portable Object file header.
  *
- * @param $pluralforms
+ * @param string $plural_forms
  *   A string containing the Plural-Forms entry.
- * @param $filepath
+ * @param string $filepath
  *   A string containing the filepath.
  *
  * @return
- *   An array containing the number of plurals and a
- *   formula in PHP for computing the plural form.
+ *   An array containing the number of plurals and a formula in PHP for
+ *   computing the plural form.
  */
-function _locale_import_parse_plural_forms($pluralforms, $filepath) {
-  // First, delete all whitespace
-  $pluralforms = strtr($pluralforms, array(" " => "", "\t" => ""));
+function _locale_import_parse_plural_forms($plural_forms, $filepath) {
+  // First, delete all whitespace.
+  $plural_forms = strtr($plural_forms, array(" " => "", "\t" => ""));
 
-  // Select the parts that define nplurals and plural
-  $nplurals = strstr($pluralforms, "nplurals=");
+  // Select the parts that define nplurals and plural.
+  $nplurals = strstr($plural_forms, "nplurals=");
   if (strpos($nplurals, ";")) {
     $nplurals = substr($nplurals, 9, strpos($nplurals, ";") - 9);
   }
   else {
     return FALSE;
   }
-  $plural = strstr($pluralforms, "plural=");
+  $plural = strstr($plural_forms, "plural=");
   if (strpos($plural, ";")) {
     $plural = substr($plural, 7, strpos($plural, ";") - 7);
   }
@@ -624,7 +629,7 @@ function _locale_import_parse_plural_forms($pluralforms, $filepath) {
     return FALSE;
   }
 
-  // Get PHP version of the plural formula
+  // Get PHP version of the plural formula.
   $plural = _locale_import_parse_arithmetic($plural);
 
   if ($plural !== FALSE) {
@@ -639,8 +644,8 @@ function _locale_import_parse_plural_forms($pluralforms, $filepath) {
 /**
  * Parses and sanitizes an arithmetic formula into a PHP expression.
  *
- * While parsing, we ensure, that the operators have the right
- * precedence and associativity.
+ * While parsing, we ensure, that the operators have the right precedence and
+ * associativity.
  *
  * @param $string
  *   A string containing the arithmetic formula.
@@ -649,17 +654,17 @@ function _locale_import_parse_plural_forms($pluralforms, $filepath) {
  *   The PHP version of the formula.
  */
 function _locale_import_parse_arithmetic($string) {
-  // Operator precedence table
+  // Operator precedence table.
   $precedence = array("(" => -1, ")" => -1, "?" => 1, ":" => 1, "||" => 3, "&&" => 4, "==" => 5, "!=" => 5, "<" => 6, ">" => 6, "<=" => 6, ">=" => 6, "+" => 7, "-" => 7, "*" => 8, "/" => 8, "%" => 8);
-  // Right associativity
+  // Right associativity.
   $right_associativity = array("?" => 1, ":" => 1);
 
   $tokens = _locale_import_tokenize_formula($string);
 
-  // Parse by converting into infix notation then back into postfix
-  // Operator stack - holds math operators and symbols
+  // Parse by converting into infix notation then back into postfix.
+  // Operator stack - holds math operators and symbols.
   $operator_stack = array();
-  // Element Stack - holds data to be operated on
+  // Element Stack - holds data to be operated on.
   $element_stack = array();
 
   foreach ($tokens as $token) {
@@ -676,38 +681,41 @@ function _locale_import_parse_arithmetic($string) {
       $operator_stack[] = $current_token;
     }
     elseif ($current_token == ")") {
-      $topop = array_pop($operator_stack);
-      while (isset($topop) && ($topop != "(")) {
-        $element_stack[] = $topop;
-        $topop = array_pop($operator_stack);
+      $to_pop = array_pop($operator_stack);
+      while (isset($to_pop) && ($to_pop != "(")) {
+        $element_stack[] = $to_pop;
+        $to_pop = array_pop($operator_stack);
       }
     }
     elseif (!empty($precedence[$current_token])) {
-      // If it's an operator, then pop from $operator_stack into $element_stack until the
-      // precedence in $operator_stack is less than current, then push into $operator_stack
-      $topop = array_pop($operator_stack);
-      while (isset($topop) && ($precedence[$topop] >= $precedence[$current_token]) && !(($precedence[$topop] == $precedence[$current_token]) && !empty($right_associativity[$topop]) && !empty($right_associativity[$current_token]))) {
-        $element_stack[] = $topop;
-        $topop = array_pop($operator_stack);
+      // If it's an operator, then pop from $operator_stack into $element_stack
+      // until the precedence in $operator_stack is less than current, then push
+      // into $operator_stack.
+      $to_pop = array_pop($operator_stack);
+      while (isset($to_pop) && ($precedence[$to_pop] >= $precedence[$current_token]) && !(($precedence[$to_pop] == $precedence[$current_token]) && !empty($right_associativity[$to_pop]) && !empty($right_associativity[$current_token]))) {
+        $element_stack[] = $to_pop;
+        $to_pop = array_pop($operator_stack);
       }
-      if ($topop) {
-        $operator_stack[] = $topop;   // Return element to top
+      if ($to_pop) {
+        // Return element to top.
+        $operator_stack[] = $to_pop;
       }
-      $operator_stack[] = $current_token;      // Parentheses are not needed
+      // Parentheses are not needed.
+      $operator_stack[] = $current_token;
     }
     else {
       return FALSE;
     }
   }
 
-  // Flush operator stack
-  $topop = array_pop($operator_stack);
-  while ($topop != NULL) {
-    $element_stack[] = $topop;
-    $topop = array_pop($operator_stack);
+  // Flush operator stack.
+  $to_pop = array_pop($operator_stack);
+  while ($to_pop != NULL) {
+    $element_stack[] = $to_pop;
+    $to_pop = array_pop($operator_stack);
   }
 
-  // Now extract formula from stack
+  // Now extract formula from stack.
   $previous_size = count($element_stack) + 1;
   while (count($element_stack) < $previous_size) {
     $previous_size = count($element_stack);
@@ -729,7 +737,7 @@ function _locale_import_parse_arithmetic($string) {
     }
   }
 
-  // If only one element is left, the number of operators is appropriate
+  // If only one element is left, the number of operators is appropriate.
   if (count($element_stack) == 1) {
     return $element_stack[0];
   }
@@ -761,7 +769,8 @@ function _locale_import_tokenize_formula($formula) {
       $i = $j - 1;
       $tokens[] = $num;
     }
-    elseif ($pos = strpos(" =<>!&|", $formula[$i])) { // We won't have a space
+    elseif ($pos = strpos(" =<>!&|", $formula[$i])) {
+      // We won't have a space.
       $next = $formula[$i + 1];
       switch ($pos) {
         case 1:
@@ -818,12 +827,12 @@ function _locale_import_tokenize_formula($formula) {
  *   $key value.
  */
 function _locale_import_append_plural($entry, $key) {
-  // No modifications for 0, 1
+  // No modifications for 0, 1.
   if ($key == 0 || $key == 1) {
     return $entry;
   }
 
-  // First remove any possibly false indices, then add new ones
+  // First remove any possibly false indices, then add new ones.
   $entry = preg_replace('/(@count)\[[0-9]\]/', '\\1', $entry);
   return preg_replace('/(@count)/', "\\1[$key]", $entry);
 }
@@ -862,18 +871,22 @@ function _locale_import_shorten_comments($comment) {
  */
 function _locale_import_parse_quoted($string) {
   if (substr($string, 0, 1) != substr($string, -1, 1)) {
-    return FALSE;   // Start and end quotes must be the same
+    // Start and end quotes must be the same.
+    return FALSE;
   }
   $quote = substr($string, 0, 1);
   $string = substr($string, 1, -1);
-  if ($quote == '"') {        // Double quotes: strip slashes
+  // Double quotes: strip slashes.
+  if ($quote == '"') {
     return stripcslashes($string);
   }
-  elseif ($quote == "'") {  // Simple quote: return as-is
+  // Simple quote: return as-is.
+  elseif ($quote == "'") {
     return $string;
   }
+  // Unrecognized quote.
   else {
-    return FALSE;             // Unrecognized quote
+    return FALSE;
   }
 }
 
@@ -903,10 +916,9 @@ function _locale_export_get_strings($language = NULL) {
       'translation' => isset($child->translation) ? $child->translation : '',
     );
     if ($child->plid) {
-      // Has a parent lid. Since we process in the order of plids,
-      // we already have the parent in the array, so we can add the
-      // lid to the next plural version to it. This builds a linked
-      // list of plurals.
+      // Has a parent lid. Since we process in the order of plids, we already
+      // have the parent in the array, so we can add the lid to the next plural
+      // version to it. This builds a linked list of plurals.
       $string['child'] = TRUE;
       $strings[$child->plid]['plural'] = $child->lid;
     }
@@ -922,11 +934,11 @@ function _locale_export_get_strings($language = NULL) {
  *   Language object to generate the output for, or NULL if generating
  *   translation template.
  * @param array $strings
- *   Array of strings to export. See _locale_export_get_strings()
- *   on how it should be formatted.
+ *   Array of strings to export. See _locale_export_get_strings() on how it
+ *   should be formatted.
  * @param string $header
- *   The header portion to use for the output file. Defaults
- *   are provided for PO and POT files.
+ *   The header portion to use for the output file. Defaults are provided for PO
+ *   and POT files.
  *
  * @return string
  *   The generated PO(T) file contents.
@@ -1022,8 +1034,8 @@ function _locale_export_po_generate($language = NULL, $strings = array(), $heade
  *   Language object to generate the output for, or NULL if generating
  *   translation template.
  * @param string $output
- *   The PO(T) file to output as a string. See _locale_export_generate_po()
- *   on how it can be generated.
+ *   The PO(T) file to output as a string. See _locale_export_generate_po() on
+ *   how it can be generated.
  */
 function _locale_export_po($language = NULL, $output = NULL) {
   // Log the export event.
@@ -1049,7 +1061,7 @@ function _locale_export_string($str) {
   $stri = addcslashes($str, "\0..\37\\\"");
   $parts = array();
 
-  // Cut text into several lines
+  // Cut text into several lines.
   while ($stri != "") {
     $i = strpos($stri, "\\n");
     if ($i === FALSE) {
@@ -1064,15 +1076,15 @@ function _locale_export_string($str) {
     $parts = array_merge($parts, $curparts);
   }
 
-  // Multiline string
+  // Multiline string.
   if (count($parts) > 1) {
     return "\"\"\n\"" . implode("\"\n\"", $parts) . "\"\n";
   }
-  // Single line string
+  // Single line string.
   elseif (count($parts) == 1) {
     return "\"$parts[0]\"\n";
   }
-  // No translation
+  // No translation.
   else {
     return "\"\"\n";
   }

@@ -527,5 +527,64 @@ function image_hex2rgba(&$hex) {
 }
 
 /**
+ * Determine if a file URI is an SVG image based on its file extension.
+ *
+ * @param string $uri
+ *   A path or URI to an image.
+ * @return bool
+ *   TRUE if the image is an SVG. FALSE if it is not.
+ */
+function image_is_svg($uri) {
+  $mimetype = file_get_mimetype($uri);
+  return $mimetype === 'image/svg+xml';
+}
+
+
+/**
+ * Add attributes to an SVG string.
+ *
+ * @param string $svg_content
+ *   The entire contents of an SVG image.
+ * @param array $attributes
+ *   An array of attributes to add to the SVG image. The special case of an
+ *   "alt" attribute is automatically converted to a child <title> element,
+ *   which is the accessible mechanism for alternative text within SVGs.
+ *
+ * @return string
+ *   The SVG image contents with the attributes added.
+ */
+function image_add_svg_attributes($svg_content, array $attributes) {
+  $doc = new DOMDocument();
+  $doc->loadXML($svg_content);
+
+  // Convert the alt attribute to a <title> element.
+  if (isset($attributes['alt'])) {
+      try {
+        if (strlen($attributes['alt'])) {
+          $title = $doc->createElement('title');
+          $title->textContent = $attributes['alt'];
+          $doc->firstChild->prepend($title);
+        }
+        // Remove any given <title> element if alt is an empty string.
+        elseif ($doc->firstChild->firstChild && $doc->firstChild->firstChild->nodeName === 'title') {
+          $doc->firstChild->removeChild($doc->firstChild->firstChild);
+        }
+      } catch (DOMException $e) {}
+    unset($attributes['alt']);
+  }
+
+  foreach ($attributes as $attribute_name => $attribute_value) {
+    $attribute_value = implode(' ', (array) $attribute_value);
+    if (strlen($attribute_value)) {
+      $doc->firstChild->setAttribute($attribute_name, $attribute_value);
+    }
+    else {
+      $doc->firstChild->removeAttribute($attribute_name);
+    }
+  }
+  return $doc->saveXML($doc->firstChild);
+}
+
+/**
  * @} End of "defgroup image".
  */

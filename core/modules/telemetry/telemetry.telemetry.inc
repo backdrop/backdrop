@@ -43,6 +43,11 @@ function telemetry_telemetry_info() {
     'description' => t('The CKEditor module version that your site uses (either 4, 5, both, or neither).'),
     'project' => 'backdrop',
   );
+  $info['drupal_compatibility'] = array(
+    'label' => t('Drupal compatibility layer'),
+    'description' => t('Is the Drupal compatibility layer enabled?'),
+    'project' => 'backdrop',
+  );
   return $info;
 }
 
@@ -89,5 +94,7 @@ function telemetry_telemetry_data($key) {
       else {
         return 'Neither';
       }
+    case 'drupal_compatibility':
+      return settings_get('backdrop_drupal_compatibility') ? 'Yes' : 'No';
   }
 }

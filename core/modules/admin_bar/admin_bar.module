@@ -202,14 +202,6 @@ function admin_bar_preprocess_page(&$variables) {
   }
 
   global $user, $language;
-  $path = backdrop_get_path('module', 'admin_bar');
-
-  $options = array('every_page' => TRUE);
-
-  backdrop_add_js($path . '/js/admin_bar.js', $options);
-  backdrop_add_css($path . '/css/admin_bar.css', $options);
-  $options['media'] = 'print';
-  backdrop_add_css($path . '/css/admin_bar-print.css', $options);
 
   // Add current path to support menu item highlighting.
   $args = explode('/', $_GET['q']);
@@ -272,6 +264,38 @@ function admin_bar_preprocess_page(&$variables) {
     $settings['back_to_site_link'] = TRUE;
   }
   backdrop_add_js(array('admin_bar' => $settings), 'setting');
+  backdrop_add_library('admin_bar', 'admin_bar', TRUE);
+}
+
+/**
+ * Implements hook_library_info().
+ */
+function admin_bar_library_info() {
+  $path = backdrop_get_path('module', 'admin_bar');
+  $libraries['admin_bar'] = array(
+    'title' => 'Admin Bar',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      $path . '/js/admin_bar.js' => array('group' => JS_DEFAULT),
+    ),
+    'css' => array(
+      $path . '/css/admin_bar.css' => array(
+        'type' => 'file',
+        'media' => 'screen',
+      ),
+      $path . '/css/admin_bar-print.css' => array(
+        'media' => 'print',
+      ),
+    ),
+    'icons' => array(
+      'arrow-left' => array('immutable' => TRUE),
+      'arrow-right' => array('immutable' => TRUE),
+      'caret-circle-left-fill' => array('immutable' => TRUE),
+      'caret-circle-right-fill' => array('immutable' => TRUE),
+      'magnifying-glass' => array('immutable' => TRUE),
+    ),
+  );
+  return $libraries;
 }
 
 /**
@@ -420,7 +444,7 @@ function admin_bar_admin_bar_replacements($complete) {
     $components = config_get('admin_bar.settings', 'components');
     if (in_array('admin_bar.users', $components) && ($user_count = admin_bar_get_user_count())) {
       // Replace the counters in the cached menu output with current counts.
-      $items['.admin-bar-users a'] = $user_count;
+      $items['.admin-bar-users .user-counter-value'] = $user_count;
     }
     // Check whether the page links component is enabled.
     if (in_array('admin_bar.page', $components)) {
@@ -432,6 +456,7 @@ function admin_bar_admin_bar_replacements($complete) {
         $layout = layout_get_layout_by_path();
         $items['#admin-bar-page-layout'] = l(t('Layout (@layout)', array('@layout' => $layout->title)), 'admin/structure/layouts/manage/' . $layout->name, $query);
         $items['#admin-bar-page-layout'] .= theme('admin_bar_links', array('elements' => array(
+          '#level' => 2,
           array(
             '#title' => t('Configure'),
             '#href' => 'admin/structure/layouts/manage/' . $layout->name . '/configure',
@@ -452,6 +477,7 @@ function admin_bar_admin_bar_replacements($complete) {
         if ($locale_links = admin_bar_locale_links()) {
           // Theme the locale links but remove the <ul> element
           // so we can swap out the list items for the current <ul> element.
+          $locale_links['#level'] = 0;
           $theme_locale_links = theme('admin_bar_links', array(
             'elements' => $locale_links,
           ));

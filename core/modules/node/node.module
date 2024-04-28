@@ -94,6 +94,9 @@ function node_theme() {
     'node_preview_banner_form' => array(
       'render element' => 'form',
     ) + $base,
+    'node_preview' => array(
+      'render element' => 'node_preview',
+    ) + $base,
     'node_add_list' => array(
       'variables' => array('content' => NULL),
     ) + $base,
@@ -1962,9 +1965,18 @@ function node_menu() {
 }
 
 /**
+ * Implements hook_menu().
+ */
+function node_menu_alter(&$items) {
+  if (isset($items['admin/content'])) {
+    $items['admin/content']['icon'] = 'pencil-fill';
+  }
+}
+
+/**
  * Access callback: Checks a user's permission for previewing a node.
  *
- * @param $node_tempstore_id
+ * @param string $node_tempstore_id
  *   The node_tempstore_id of the node being created or updated.
  *
  * @return bool
@@ -2155,7 +2167,7 @@ function node_block_configure($delta = '', $settings = array()) {
  * @param array $settings
  *   Block configuration settings.
  */
-function node_syndicate_content($settings) {
+function node_syndicate_content(array $settings) {
   if (isset($settings['syndicate_settings']) && $settings['syndicate_settings'] == 'page_content') {
     return backdrop_get_feeds();
   }
@@ -2665,6 +2677,9 @@ function node_form_system_themes_admin_form_alter(&$form, &$form_state, $form_id
  */
 function node_form_system_themes_admin_form_submit($form, &$form_state) {
   config_set('system.core', 'node_admin_theme', $form_state['values']['node_admin_theme']);
+  // The default and admin layout are tied directly to this setting, so clear
+  // the Layout cache.
+  layout_reset_caches();
 }
 
 /**
