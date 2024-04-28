@@ -2074,6 +2074,13 @@ function file_validate_svg(File $file) {
           break;
         }
       }
+      $attributes = $xml->attributes();
+      if (empty($attributes['width'])) {
+        $errors[] = t('Missing required attribute: width.');
+      }
+      if (empty($attributes['height'])) {
+        $errors[] = t('Missing required attribute: height.');
+      }
     }
     libxml_clear_errors();
     libxml_use_internal_errors(FALSE);
