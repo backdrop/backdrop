@@ -249,7 +249,7 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
       }
 
       // Check that the generated URL is the same when we pass in a relative
-      // path rather than a URI. We need to temporarily switch the default 
+      // path rather than a URI. We need to temporarily switch the default
       // scheme to match the desired scheme before testing this, then switch
       // it back to the "temporary" scheme used throughout this test
       // afterwards.
@@ -271,7 +271,7 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
         $this->assertEqual($this->backdropGetHeader('Content-Type'), $generated_image_info['mime_type'], 'Expected Content-Type was reported.');
 
         // Some web servers may return a "chunked" response and ignore the
-        // Content-Length headers returned by image_style_deliver(). Allow 
+        // Content-Length headers returned by image_style_deliver(). Allow
         // either as an acceptable response.
         // See https://github.com/backdrop/backdrop-issues/issues/6459.
         $content_length = $this->backdropGetHeader('Content-Length');
@@ -318,7 +318,7 @@ class ImageStylesPathAndUrlUnitTest extends BackdropWebTestCase {
           $this->fail('Confirming that private image styles are not appended require PNG file.');
         }
         elseif (strpos($generate_url, '.png') === TRUE) {
-          // Check for PNG-Signature 
+          // Check for PNG-Signature
           // (cf. http://www.libpng.org/pub/png/book/chapter08.html#png.ch08.div.2)
           // in the response body.
           $this->assertNoRaw( chr(137) . chr(80) . chr(78) . chr(71) . chr(13) . chr(10) . chr(26) . chr(10), 'No PNG signature found in the response body.');
