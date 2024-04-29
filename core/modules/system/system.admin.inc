@@ -2378,12 +2378,15 @@ function system_get_debug_info() {
   // An array that is later passed to sprintf() so that the final output can be
   // formatted in two columns of plain text. The array keys will be the first
   // column and the values will be the second column. The number of spaces
-  // between the two columns is dynamically calculated, based on the lenght of
+  // between the two columns is dynamically calculated, based on the length of
   // the string of the first column. This ensures that the strings in the second
   // column all start at the same point and appear as vertically aligned.
   $debug_info_lines = array();
 
-  $empty_line = NULL;
+  $empty_line = array(
+    'label' => '',
+    'value' => '',
+  );
 
   $jquery = backdrop_get_library('system', 'jquery');
   $jquery_ui = backdrop_get_library('system', 'ui');
@@ -2399,8 +2402,11 @@ function system_get_debug_info() {
     t('jQuery UI version:') => $jquery_ui['version'],
   );
 
-  foreach ($system_info as $info => $value) {
-    $debug_info_lines[$info] = $value;
+  foreach ($system_info as $label => $value) {
+    $debug_info_lines[] = array(
+      'label' => $label,
+      'value' => $value,
+    );
   }
 
   $debug_info_lines[] = $empty_line;
@@ -2412,7 +2418,7 @@ function system_get_debug_info() {
   // Get the current list of all modules available on the site.
   $modules = system_rebuild_module_data();
 
-  foreach ($text_formats as $format => $format_info) {
+  foreach ($text_formats as $format_info) {
     if (!empty($format_info->editor)) {
       $editor = $text_editors[$format_info->editor];
       $editor_label = $editor['label'];
@@ -2428,12 +2434,15 @@ function system_get_debug_info() {
     }
   }
   foreach ($text_editor_usage as $editor => $formats) {
-    $debug_info_lines[$editor] = t('used in: @formats', array('@formats' => implode(', ', $formats)));
+    $debug_info_lines[] = array(
+      'label' => $editor,
+      'value' => t('used in: @formats', array('@formats' => implode(', ', $formats))),
+    );
   }
 
   $debug_info_lines[] = $empty_line;
 
-  $core_version = t('[core]');
+  $core_version = BACKDROP_VERSION;
 
   // Theme info.
   $config = config('system.core');
@@ -2464,7 +2473,10 @@ function system_get_debug_info() {
 
   $theme_info = array();
   foreach ($themes as $theme_role => $theme_data) {
-    $debug_info_lines[$theme_data['debug_label']] = $theme_data['debug_name'];
+    $debug_info_lines[] = array(
+      'label' => $theme_data['debug_label'],
+      'value' => $theme_data['debug_name'],
+    );
     if (!empty($theme_data['base_themes']) && $base_themes = $theme_data['base_themes']) {
       foreach ($base_themes as $base_theme => $base_theme_name) {
         // @todo: See if we can use something like str_pad() instead of
@@ -2472,33 +2484,92 @@ function system_get_debug_info() {
         // better with multi-byte characters like ⮑ (and ⮐ for RTL).
         if ($language->direction == LANGUAGE_RTL) {
           $base_theme_indicator = ' ⮐ ';
-          $debug_info_lines[t('base theme:') . $base_theme_indicator] = $base_theme_name . $base_theme_indicator;
+          $debug_info_lines[] = array(
+            'label' => t('base theme:') . $base_theme_indicator,
+            'value' => $base_theme_name . $base_theme_indicator,
+          );
         }
         else {
           $base_theme_indicator = ' ⮑ ';
-          $debug_info_lines[$base_theme_indicator . t('base theme:')] = ' ' . $base_theme_indicator . $base_theme_name;
+          $debug_info_lines[] = array(
+            'label' => $base_theme_indicator . t('base theme:'),
+            'value' => ' ' . $base_theme_indicator . $base_theme_name,
+          );
         }
       }
     }
   }
 
-  $debug_info_lines[] = t('*used when editing or creating content');
+  $debug_info_lines[] = array(
+    'label' => '',
+    'value' => t('*used when editing or creating content'),
+  );
 
   $debug_info_lines[] = $empty_line;
 
-  foreach ($modules as $module => $module_data) {
+  $module_info_lines = array(
+    'core' => array(),
+    'contrib' => array(),
+    'custom' => array(),
+    'other' => array(),
+  );
+  foreach ($modules as $module_name => $module_data) {
     // Only include non-hidden and enabled modules in the output.
     if (empty($module_data->info['hidden']) && $module_data->status) {
       if (strstr($module_data->uri, 'core/modules/')) {
         // Add any enabled core module in the output.
-        $debug_info_lines[$module] = $core_version;
+        $module_info_lines['core'][] = array(
+          'label' => $module_name,
+          'value' => $core_version,
+        );
       }
       else {
         // Add any enabled non-core module.
         $module_version = isset($module_data->info['version']) ? $module_data->info['version'] : '-';
-        $debug_info_lines[$module] = $module_version;
+        if (strstr($module_data->uri, '/contrib/') || !empty($module_data->info['project'])) {
+          $module_info_lines['contrib'][] = array(
+            'label' => $module_name,
+            'value' => $module_version,
+          );
+        }
+        elseif (strstr($module_data->uri, '/custom/')) {
+          $module_info_lines['custom'][] = array(
+            'label' => $module_name,
+            'value' => $module_version,
+          );
+        }
+        else {
+          $module_info_lines['other'][] = array(
+            'label' => $module_name,
+            'value' => $module_version,
+          );
+        }
       }
     }
+  }
+
+  $module_group_titles = array(
+    'core' => t('Core modules'),
+    'contrib' => t('Contrib modules'),
+    'custom' => t('Custom modules'),
+    'other' => t('Other modules'),
+  );
+  foreach ($module_info_lines as $module_group => $module_group_lines) {
+    if (empty($module_group_lines)) {
+      continue;
+    }
+    $group_title = $module_group_titles[$module_group];
+    $debug_info_lines[] = array(
+      'label' => $group_title,
+      'value' => NULL,
+    );
+    // Add an underline for the module group.
+    $debug_info_lines[] = array(
+      'label' => str_repeat('-', backdrop_strlen($group_title)),
+      'value' => NULL,
+    );
+    $debug_info_lines = array_merge($debug_info_lines, $module_group_lines);
+    $debug_info_lines[] = $empty_line;
   }
 
   return $debug_info_lines;
@@ -2521,7 +2592,7 @@ function system_get_debug_info() {
  *
  * @since 1.28.0 function added.
  */
-function _system_format_array_to_plain_text_columns($lines, $format_settings) {
+function _system_format_array_to_plain_text_columns(array $lines, array $format_settings) {
   global $language;
 
   // Set some default settings.
@@ -2535,30 +2606,39 @@ function _system_format_array_to_plain_text_columns($lines, $format_settings) {
 
   // Get the length of the longest key in the array (which will determine the
   // max width of the first plain-text "column").
-  $longest_item_length = max(array_map('mb_strlen', array_keys($lines)));
+  $longest_item_length = 0;
+  foreach ($lines as $line) {
+    $label_length = backdrop_strlen($line['label']);
+    if ($label_length > $longest_item_length) {
+      $longest_item_length = $label_length;
+    }
+  }
 
   // Format the output so that the items and their values are listed as columns.
   $first_col_width = $longest_item_length + $format_settings['min_spacing'];
 
   $output = '';
-  foreach ($lines as $info => $value) {
-    if ($value == NULL) {
+  foreach ($lines as $line) {
+    $line += array('label' => NULL, 'value' => NULL);
+    $label = $line['label'];
+    $value = $line['value'];
+    if (is_numeric($label) && $value == NULL) {
       // Blank lines.
       $output .= "\n";
     }
     else {
       // Lines with a blank first column - only a value in the second column.
-      $info = is_numeric($info) ? '' : $info;
+      $label = is_numeric($label) ? '' : $label;
 
       if ($format_settings['rtl']) {
         $format = '%s %' . $first_col_width . 's';
-        // Note that the order of $value and $info parameters is reversed
+        // Note that the order of $value and $label parameters is reversed
         // compared to LTR.
-        $output .= sprintf($format, $value, $info) . "\n";
+        $output .= sprintf($format, $value, $label) . "\n";
       }
       else {
         $format = '%-' . $first_col_width . 's %s';
-        $output .= sprintf($format, $info, $value) . "\n";
+        $output .= sprintf($format, $label, $value) . "\n";
       }
     }
   }
