@@ -556,7 +556,7 @@ function standard_install() {
     'view files',
     $filtered_html_permission,
   );
-  $editor_permissions = array_merge($editor_permissions,  $file_type_permissions);
+  $editor_permissions = array_merge($editor_permissions, $file_type_permissions);
   user_role_grant_permissions('editor', $editor_permissions);
 
   // Create a default role for site administrators, with all available
