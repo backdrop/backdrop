@@ -2528,6 +2528,10 @@ class DebugReportTestCase extends BackdropWebTestCase {
     // Create an administrator user.
     $this->admin_user = $this->backdropCreateUser(array('access site reports'));
     $this->backdropLogin($this->admin_user);
+
+    // Set an admin theme.
+    theme_enable(array('seven'));
+    config_set('system.core', 'admin_theme', 'seven');
   }
 
   /**
