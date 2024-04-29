@@ -528,6 +528,18 @@ function views_arg_load($value, $name, $display_id, $index) {
 }
 
 /**
+ * Implements hook_module_implements_alter().
+ */
+function views_module_implements_alter(&$implementations, $hook) {
+  // Move views_menu_alter() to the beginning of all hook_menu_alter() calls.
+  // This allows other modules to modify the menu items created by Views, such
+  // as "admin/content" and "admin/people".
+  if ($hook == 'menu_alter') {
+    $implementations = array('views' => $implementations['views']) + $implementations;
+  }
+}
+
+/**
  * Page callback: Displays a page view, given a name and display id.
  *
  * @param $name

@@ -354,6 +354,9 @@ quicktime
 Quieligo
 rawurlencoded
 ratis
+rawurldecode
+rawurlencode
+rawurlencoded
 readwrite
 realelement
 refclass
@@ -491,6 +494,7 @@ VERIFYPEER
 verygreatbackdropmodule
 viewmode
 VIEWNAME
+viewmode
 watchdog
 WCAG
 wday

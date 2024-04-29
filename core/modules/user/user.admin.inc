@@ -149,6 +149,7 @@ function user_admin_settings($form, &$form_state) {
         'input[name="user_register"]' => array('value' => USER_REGISTER_ADMINISTRATORS_ONLY),
       ),
     ),
+    '#indentation' => 1,
   );
   $form['registration_cancellation']['user_email_match'] = array(
     '#type' => 'checkbox',
