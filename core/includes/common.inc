@@ -2166,9 +2166,9 @@ function format_rss_item($title, $link, $description, $args = array()) {
  * @since 1.12.7 Added $indentation_level parameter.
  *
  * @return string
- *  A string of XML representing the elements passed in.
+ *   A string of XML representing the elements passed in.
  */
-function format_xml_elements($array, $indentation_level = 0) {
+function format_xml_elements(array $array, $indentation_level = 0) {
   $output = '';
 
   // Indent two spaces per level.
@@ -2484,7 +2484,7 @@ function format_date($timestamp, $date_format_name = 'medium', $pattern = '', $t
  *
  * Callback for preg_replace_callback() within format_date().
  *
- * @param $matches
+ * @param array $matches
  *   The array of matches as found by preg_replace_callback().
  * @param string $new_langcode
  *   Sets the internal langcode to be used. Set the langcode prior to calling
@@ -2757,8 +2757,8 @@ function url_is_external($path) {
   $colon_position = strpos($path, ':');
   // Some browsers treat \ as / so normalize to forward slashes.
   $path = str_replace('\\', '/', $path);
-  // Avoid calling backdrop_strip_dangerous_protocols(). If the path starts with 2
-  // slashes then it is always considered an external URL without an explicit
+  // Avoid calling backdrop_strip_dangerous_protocols(). If the path starts with
+  // 2 slashes then it is always considered an external URL without an explicit
   // protocol part.
   return (strpos($path, '//') === 0)
     // Leading control characters may be ignored or mishandled by browsers, so
@@ -5748,8 +5748,8 @@ function backdrop_clear_js_cache() {
  *   readable by humans, or emulates this functionality if running an older
  *   version of PHP.
  *
- * @return string
- *   The given $var encoded as a JSON string.
+ * @return string|FALSE
+ *   The given $var encoded as a JSON string or FALSE on failure.
  *
  * @see backdrop_json_decode()
  * @ingroup php_wrappers

@@ -421,7 +421,7 @@ abstract class BackdropCacheArray implements ArrayAccess {
    * @param $persist
    *   Optional boolean to specify whether the offset should be persisted or
    *   not, defaults to TRUE. When called with $persist = FALSE the offset will
-   *   be unflagged so that it will not be written at the end of the request.
+   *   be un-flagged so that it will not be written at the end of the request.
    */
   protected function persist($offset, $persist = TRUE) {
     $this->keysToPersist[$offset] = $persist;
@@ -806,6 +806,12 @@ function backdrop_is_https() {
  * @since 1.9.2
  */
 function backdrop_is_apache() {
+  // Test runs always emulate Apache.
+  $test_info = &$GLOBALS['backdrop_test_info'];
+  if (!empty($test_info['in_child_site'])) {
+    return TRUE;
+  }
+
   $server_software = $_SERVER['SERVER_SOFTWARE'];
   return (bool) preg_match("/apache/i", $server_software);
 }
@@ -845,7 +851,6 @@ function backdrop_settings_initialize() {
   // Export these settings.php variables to the global namespace.
   global $databases, $cookie_domain, $conf, $settings, $installed_profile, $is_https, $base_secure_url, $base_insecure_url, $config_directories, $config;
   $conf = array();
-  $settings = array();
 
   $conf_path = conf_path();
   if (file_exists($conf_path . '/settings.php')) {
@@ -3043,11 +3048,20 @@ function _backdrop_bootstrap_configuration() {
     throw new Exception(format_string('The HTTP Host "@hostname" is not white-listed for this site. Check the trusted_host_patterns setting in settings.php.', array('@hostname' => $_SERVER['HTTP_HOST'])));
   }
 
+  // Bootstrap the database if it is needed but not yet available.
+  $config_storage = config_get_config_storage('active');
+
   // Check that the config directory is not empty.
-  if (!defined('MAINTENANCE_MODE') && ($config_storage = config_get_config_storage('active'))) {
+  if (!defined('MAINTENANCE_MODE') && (!empty($config_storage))) {
     if (!($config_storage->exists('system.core') || $config_storage->exists('system.performance'))) {
-      $directory = config_get_config_directory('active');
-      throw new Exception("The configuration directory in settings.php is specified as '$directory', but this directory is either empty or missing crucial files. Check that the \$config_directories variable is correct in settings.php.");
+      if (is_a($config_storage, 'ConfigFileStorage')) {
+        $directory = config_get_config_directory('active');
+        $exception_message = "The configuration directory in settings.php is specified as '$directory', but this directory is either empty or missing crucial files. Check that the \$config_directories variable is correct in settings.php.";
+      }
+      else {
+        $exception_message = "The active configuration location is either empty or missing crucial information. Check that the \$settings['config_active_class'] variable is correct in settings.php.";
+      }
+      throw new Exception($exception_message);
     }
   }
 }
