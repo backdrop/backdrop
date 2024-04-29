@@ -2398,23 +2398,21 @@ function system_get_debug_info() {
 
   // Main system info.
   $system_info = array(
-    'Backdrop CMS:' => BACKDROP_VERSION,
+    t('Backdrop CMS:') => BACKDROP_VERSION,
     t('Installation profile:') => backdrop_get_profile(),
     t('PHP version:') => phpversion(),
+    t('Drupal compatibility:') => settings_get('backdrop_drupal_compatibility') ? t('on') : t('off'),
     t('Database server:') => Database::getConnection()->version(),
     t('Web server:') => check_plain($_SERVER['SERVER_SOFTWARE']),
     t('jQuery version:') => $jquery_library['version'],
     t('jQuery UI version:') => $jquery_ui_library['version'],
   );
-
   foreach ($system_info as $label => $value) {
     $debug_info_lines[] = array(
       'label' => $label,
       'value' => $value,
     );
   }
-
-  $debug_info_lines[] = $empty_line;
 
   // Get the current list of all modules available on the site.
   $modules = system_rebuild_module_data();
@@ -2447,8 +2445,59 @@ function system_get_debug_info() {
   }
 
   $debug_info_lines[] = $empty_line;
+  $debug_info_lines[] = array(
+    'label' => t('Settings.php path:'),
+    'value' => realpath(conf_path() . '/settings.php'),
+  );
+
+  // File system settings.
+  $config = config('system.core');
+  $file_directory_types = array(
+    'public' => t('Files directory:'),
+    'temporary' => t('Temp directory:'),
+  );
+  foreach ($file_directory_types as $file_directory_type => $file_directory_label) {
+    $file_directory = $config->get('file_' . $file_directory_type . '_path');
+    $file_realpath = realpath($file_directory);
+    $is_writable = is_writable($file_directory) ? t('(writable)') : t('(not writable)');
+    $debug_info_lines[] = array(
+      'label' => $file_directory_label,
+      'value' => $file_realpath ? $file_realpath . ' ' . $is_writable : $file_directory . ' (not found)',
+    );
+  }
+
+  // Config locations.
+  $config_types = array(
+    'active' => t('Config active location:'),
+    'staging' => t('Config staging location'),
+  );
+  foreach ($config_types as $config_type => $config_label) {
+    $config_storage = config_get_config_storage($config_type);
+    if (is_a($config_storage, 'ConfigFileStorage')) {
+      $config_location = realpath(config_get_config_directory($config_type));
+    }
+    elseif (is_a($config_storage, 'ConfigDatabaseStorage')) {
+      $config_location = t('database');
+    }
+    else {
+      $config_location = get_class($config_storage);
+    }
+    $debug_info_lines[] = array(
+      'label' => $config_label,
+      'value' => $config_location,
+    );
+  }
+
+  $debug_info_lines[] = $empty_line;
 
   // Theme info, grouped by default theme and admin theme.
+  $debug_info_lines[] = array(
+    'label' => t('Themes'),
+  );
+  $debug_info_lines[] = array(
+    'label' => '======',
+  );
+
   $config = config('system.core');
   $themes = array(
     'default_theme' => $config->get('theme_default'),
