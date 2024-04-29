@@ -1471,6 +1471,7 @@ function user_menu() {
   // Administration pages.
   $items['admin/config/people'] = array(
     'title' => 'User accounts',
+    'icon' => 'users',
     'description' => 'Configure user accounts.',
     'weight' => -20,
     'page callback' => 'system_admin_menu_block_page',
@@ -1607,10 +1608,16 @@ function user_menu() {
   );
   return $items;
 }
+
 /**
  * Implements hook_menu_alter().
  */
 function user_menu_alter(&$items) {
+  // Add an icon to the Views-provided menu item.
+  if (isset($items['admin/people'])) {
+    $items['admin/people']['icon'] = 'users-fill';
+  }
+
   if (module_exists('field_ui')) {
     // Provide a parent menu item for managing fields.
     $items['admin/config/people/manage'] = $items['admin/config/people/manage/fields'];

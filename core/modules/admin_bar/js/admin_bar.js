@@ -183,7 +183,7 @@ Backdrop.adminBar.behaviors.destination = function (context, settings, $adminBar
 /**
  * Adjust the top level items based on the available viewport width.
  */
-Backdrop.adminBar.behaviors.collapseWidth = function (context, settings, $adminBar) {
+Backdrop.adminBar.behaviors.resizeCollapse = function (context, settings, $adminBar) {
   var $menu = $adminBar.find('#admin-bar-menu');
   var $extra = $adminBar.find('#admin-bar-extra');
   var menuWidth;
@@ -215,14 +215,14 @@ Backdrop.adminBar.behaviors.collapseWidth = function (context, settings, $adminB
     if (availableWidth - menuWidth - extraWidth < 20) {
       $menu.addClass('dropdown').removeClass('top-level');
     }
+
     $adminBar.trigger('afterResize');
   };
 
-
   adjustItems();
+
   // Adjust items when window is resized.
   Backdrop.optimizedResize.add(adjustItems);
-
 };
 
 /**
@@ -529,7 +529,7 @@ Backdrop.adminBar.behaviors.escapeAdmin = function (context, settings) {
   }
 
   // We only want to change the first anchor tag in the admin bar icon sub-menu.
-  var $toolbarEscape = $(".admin-bar-icon a").first();
+  const $toolbarEscape = $(".admin-bar-icon a").first();
 
   // If the current page is admin, then switch the path.
   if (
@@ -539,7 +539,19 @@ Backdrop.adminBar.behaviors.escapeAdmin = function (context, settings) {
   ) {
     $toolbarEscape.addClass("escape");
     $toolbarEscape.attr("href", escapeAdminPath);
-    $toolbarEscape.text(Backdrop.t("Back to site"));
+    $toolbarEscape.find('.admin-bar-link-text').text(Backdrop.t("Back to site"));
+
+    // Update the icon based on language direction.
+    if (window.fetch) {
+      const direction = $('html').attr('dir') === 'rtl' ? 'right' : 'left';
+      fetch(Backdrop.icons['caret-circle-' + direction + '-fill'])
+        .then(response => response.text())
+        .then(svgContents => {
+          const $svg = $(svgContents);
+          $svg.attr('class', 'icon');
+          $toolbarEscape.find('.admin-bar-link-icon').html($svg);
+        });
+    }
   }
 };
 /**
