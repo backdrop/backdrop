@@ -980,7 +980,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
     );
     $this->assertBreadcrumb('menu-test/breadcrumb/tasks', $trail, $title, $tree);
     $trail += array(
-      'menu-test/breadcrumb/tasks/second' => "Second",
+      'menu-test/breadcrumb/tasks/second' => t('Second'),
     );
     $this->assertBreadcrumb('menu-test/breadcrumb/tasks/second', $trail, $title, $tree);
 

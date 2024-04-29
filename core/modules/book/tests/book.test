@@ -120,13 +120,10 @@ class BookTestCase extends BackdropWebTestCase {
     // First we must set $this->book to the second book, so that the
     // correct regex will be generated for testing the outline.
     $this->book = $other_book;
-    $this->checkBookNode($other_book, array($node), FALSE, FALSE, $node, array(
-      $other_book,
-    ));
-    $this->checkBookNode($node, NULL, $other_book, $other_book, FALSE, array(
-      $other_book,
-      $node,
-    ));
+    // phpcs:disable
+    $this->checkBookNode($other_book, array($node), FALSE, FALSE, $node, array($other_book));
+    $this->checkBookNode($node, NULL, $other_book, $other_book, FALSE, array($other_book, $node));
+    // phpcs:enable
   }
 
   /**
