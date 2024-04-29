@@ -631,6 +631,7 @@ function image_field_formatter_info() {
       'image_link' => '',
       'image_float' => '',
       'image_load' => 'auto',
+      'image_svg_auto_scale' => FALSE,
     ),
     'description' => t('Format the file as an image. The image can be displayed using an image style and can optionally be linked to the image file itself or its parent content.'),
     'file formatter' => array(
@@ -700,6 +701,25 @@ function image_field_formatter_settings_form($field, $instance, $view_mode, $for
   $element['image_load']['auto']['#description'] = t('Each browser will determine whether or not to lazily load the image.');
   $element['image_load']['eager']['#description'] = t('Load this image immediately, regardless of where it is located on the page.');
 
+  $selector = '';
+  if (isset($field)) {
+    $selector = ':input[name="fields[' . $field['field_name'] . '][settings_edit_form][settings][image_style]"]';
+  }
+  else {
+    $selector = ':input[name="display[settings][file_field_image][image_style]"]';
+  }
+  $element['image_svg_auto_scale'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow SVG to auto scale'),
+    '#description' => t('This will allow the SVG to scale automatically to match the aspect ratio defined in the <code>viewBox</code> attribute of the SVG.'),
+    '#default_value' => $settings['image_svg_auto_scale'],
+    '#states' => array(
+      'visible' => array(
+        $selector => array('value' => ''),
+      ),
+    ),
+  );
+
   return $element;
 }
 
@@ -742,6 +762,10 @@ function image_field_formatter_settings_summary($field, $instance, $view_mode) {
     $summary[] = t('Loading: @speed', array('@speed' => $settings['image_load']));
   }
 
+  if (!empty($settings['image_svg_auto_scale'])) {
+    $summary[] = t('SVG set to scale automatically to fill the bounding box.');
+  }
+
   return implode('<br />', $summary);
 }
 
@@ -782,13 +806,12 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
         );
       }
 
-      // SVG was likely uploaded with no dimensions. The width and height are stored
-      // as zero for compatibility with other images, but for viewing set them blank.
+      // Allow SVG to scale automatically.
       $is_svg = image_is_svg($item['uri']);
-      if ($is_svg) {
-        if ($item['width'] == 0 && $item['height'] == 0) {
-          $item['width'] = '';
-          $item['height'] = '';
+      if ($is_svg && empty($display['settings']['image_style'])) {
+        $auto_scale = $display['settings']['image_svg_auto_scale'];
+        if ($auto_scale) {
+          $item['width'] = $item['height'] = NULL;
         }
       }
     }
