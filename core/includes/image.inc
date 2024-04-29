@@ -31,6 +31,16 @@
  */
 
 /**
+ * Default width for SVG images.
+ */
+define('IMAGE_SVG_DEFAULT_WIDTH', 200);
+
+/**
+ * Default height for SVG images.
+ */
+define('IMAGE_SVG_DEFAULT_HEIGHT', 200);
+
+/**
  * Gets a list of available toolkits.
  *
  * @return
@@ -169,8 +179,8 @@ function image_get_info($filepath, $toolkit = FALSE) {
       // have caught that on upload.
       $dimensions = image_get_svg_dimensions($filepath);
       $details = array(
-        'width'     => isset($dimensions['width']) ? $dimensions['width'] : 0,
-        'height'    => isset($dimensions['height']) ? $dimensions['height'] : 0,
+        'width'     => isset($dimensions['width']) ? $dimensions['width'] : IMAGE_SVG_DEFAULT_WIDTH,
+        'height'    => isset($dimensions['height']) ? $dimensions['height'] : IMAGE_SVG_DEFAULT_HEIGHT,
         'extension' => 'svg',
         'mime_type' => 'image/svg+xml',
         'file_size' => filesize($filepath),
@@ -624,10 +634,7 @@ function image_get_svg_dimensions($uri) {
 
   // If there are no dimensions, store the dimensions as zero.
   // Required for compatibility with image field storage.
-  $svg_dimensions = array(
-    'width' => 0,
-    'height' => 0,
-  );
+  $svg_dimensions = array();
   $file_contents = file_get_contents($uri);
   if ($file_contents && $svg = simplexml_load_string($file_contents)) {
     foreach ($svg->attributes() as $attribute => $value) {
