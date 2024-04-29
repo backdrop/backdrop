@@ -2384,20 +2384,17 @@ function system_get_debug_info() {
   global $language;
 
   // An array that is later passed to sprintf() so that the final output can be
-  // formatted in two columns of plain text. The array keys will be the first
-  // column and the values will be the second column. The number of spaces
-  // between the two columns is dynamically calculated, based on the length of
-  // the string of the first column. This ensures that the strings in the second
-  // column all start at the same point and appear as vertically aligned.
+  // formatted in two columns of plain text. Each entry is an array with two
+  // keys, "label" and "value". The number of spaces between the two columns is
+  // dynamically calculated, based on the length of the string of the first
+  // column. This ensures that the strings in the second column all start at the
+  // same point and appear as vertically aligned.
   $debug_info_lines = array();
 
-  $empty_line = array(
-    'label' => '',
-    'value' => '',
-  );
+  $empty_line = array();
 
-  $jquery = backdrop_get_library('system', 'jquery');
-  $jquery_ui = backdrop_get_library('system', 'ui');
+  $jquery_library = backdrop_get_library('system', 'jquery');
+  $jquery_ui_library = backdrop_get_library('system', 'ui');
 
   // Main system info.
   $system_info = array(
@@ -2406,8 +2403,8 @@ function system_get_debug_info() {
     t('PHP version:') => phpversion(),
     t('Database server:') => Database::getConnection()->version(),
     t('Web server:') => check_plain($_SERVER['SERVER_SOFTWARE']),
-    t('jQuery version:') => $jquery['version'],
-    t('jQuery UI version:') => $jquery_ui['version'],
+    t('jQuery version:') => $jquery_library['version'],
+    t('jQuery UI version:') => $jquery_ui_library['version'],
   );
 
   foreach ($system_info as $label => $value) {
@@ -2484,14 +2481,13 @@ function system_get_debug_info() {
         'value' => $theme_debug_value,
       );
 
-      // Continue looping up to the next base theme is present.
+      // Loop up to the next base theme if present.
       $base_theme_name = isset($theme_data['info']['base theme']) ? $theme_data['info']['base theme'] : '';
       $theme_data = isset($all_theme_data[$base_theme_name]) ? (array) $all_theme_data[$base_theme_name] : '';
       $indent_level = '  ' . $indent_level;
     }
   }
   $debug_info_lines[] = array(
-    'label' => '',
     'value' => t('*used when editing or creating content'),
   );
 
@@ -2499,11 +2495,9 @@ function system_get_debug_info() {
   $debug_info_lines[] = $empty_line;
   $debug_info_lines[] = array(
     'label' => t('Enabled modules'),
-    'value' => '',
   );
   $debug_info_lines[] = array(
     'label' => '===============',
-    'value' => '',
   );
   $debug_info_lines[] = $empty_line;
 
@@ -2516,15 +2510,15 @@ function system_get_debug_info() {
   foreach ($modules as $module_name => $module_data) {
     // Only include non-hidden and enabled modules in the output.
     if (empty($module_data->info['hidden']) && $module_data->status) {
+      // Core modules:
       if (strstr($module_data->uri, 'core/modules/')) {
-        // Add any enabled core module in the output.
         $module_info_lines['core'][] = array(
           'label' => $module_name,
           'value' => $core_version,
         );
       }
       else {
-        // Add any enabled non-core module.
+        // Contrib modules:
         $module_version = isset($module_data->info['version']) ? $module_data->info['version'] : '-';
         if (strstr($module_data->uri, '/contrib/') || !empty($module_data->info['project'])) {
           $module_info_lines['contrib'][] = array(
@@ -2532,12 +2526,14 @@ function system_get_debug_info() {
             'value' => $module_version,
           );
         }
+        // Custom modules:
         elseif (strstr($module_data->uri, '/custom/')) {
           $module_info_lines['custom'][] = array(
             'label' => $module_name,
             'value' => $module_version,
           );
         }
+        // Anything we can't identify as clearly contrib or custom:
         else {
           $module_info_lines['other'][] = array(
             'label' => $module_name,
@@ -2561,12 +2557,10 @@ function system_get_debug_info() {
     $group_title = $module_group_titles[$module_group];
     $debug_info_lines[] = array(
       'label' => $group_title,
-      'value' => NULL,
     );
     // Add an underline for the module group.
     $debug_info_lines[] = array(
       'label' => str_repeat('-', backdrop_strlen($group_title)),
-      'value' => NULL,
     );
     $debug_info_lines = array_merge($debug_info_lines, $module_group_lines);
     $debug_info_lines[] = $empty_line;
@@ -2608,7 +2602,8 @@ function _system_format_debug_info(array $lines, array $format_settings) {
   // Get the length of the longest key in the array (which will determine the
   // max width of the first plain-text "column").
   $longest_item_length = 0;
-  foreach ($lines as $line) {
+  foreach ($lines as &$line) {
+    $line += array('label' => NULL, 'value' => NULL);
     $label_length = backdrop_strlen($line['label']);
     if ($label_length > $longest_item_length) {
       $longest_item_length = $label_length;
@@ -2620,7 +2615,6 @@ function _system_format_debug_info(array $lines, array $format_settings) {
 
   $output = '';
   foreach ($lines as $line) {
-    $line += array('label' => NULL, 'value' => NULL);
     $label = $line['label'];
     $value = $line['value'];
     if (is_numeric($label) && $value == NULL) {
