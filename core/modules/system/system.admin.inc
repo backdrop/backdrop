@@ -2340,7 +2340,7 @@ function system_status($check = FALSE) {
  * Menu callback: displays the debug info page.
  *
  * @see system_get_debug_info()
- * @see _system_format_array_to_plain_text_columns()
+ * @see _system_format_debug_info()
  *
  * @since 1.28.0 function added.
  */
@@ -2357,7 +2357,7 @@ function system_debug_info() {
   $form['debug_info'] = array(
     '#type' => 'textarea',
     '#title' => t('Debug report'),
-    '#value' => _system_format_array_to_plain_text_columns($debug_info, array('rtl' => $language->direction == LANGUAGE_RTL)),
+    '#value' => _system_format_debug_info($debug_info, array('rtl' => $language->direction == LANGUAGE_RTL)),
     // Expand the default length of the text field, to ensure that all the
     // debug output is visible without having to scroll within the text field.
     '#rows' => count($debug_info) + 1,
@@ -2419,13 +2419,14 @@ function system_get_debug_info() {
 
   $debug_info_lines[] = $empty_line;
 
+  // Get the current list of all modules available on the site.
+  $modules = system_rebuild_module_data();
+  $core_version = BACKDROP_VERSION;
+
   // Text editors info.
   $text_editor_usage = array();
   $text_editors = filter_get_editors();
   $text_formats = filter_formats(NULL, TRUE);
-  // Get the current list of all modules available on the site.
-  $modules = system_rebuild_module_data();
-
   foreach ($text_formats as $format_info) {
     if (!empty($format_info->editor)) {
       $editor = $text_editors[$format_info->editor];
@@ -2435,7 +2436,7 @@ function system_get_debug_info() {
       if (!empty($editor['library_version'])) {
         $editor_label .= ', ' . $editor['library_version'];
       }
-      else {
+      elseif (isset($modules[$editor['module']]->info['version'])) {
         $editor_label .= ' ' . $modules[$editor['module']]->info['version'];
       }
       $text_editor_usage[$editor_label][] = $format_info->name;
@@ -2444,75 +2445,66 @@ function system_get_debug_info() {
   foreach ($text_editor_usage as $editor => $formats) {
     $debug_info_lines[] = array(
       'label' => $editor,
-      'value' => t('used in: @formats', array('@formats' => implode(', ', $formats))),
+      'value' => t('Used in: @formats', array('@formats' => implode(', ', $formats))),
     );
   }
 
   $debug_info_lines[] = $empty_line;
 
-  $core_version = BACKDROP_VERSION;
-
-  // Theme info.
+  // Theme info, grouped by default theme and admin theme.
   $config = config('system.core');
   $themes = array(
     'default_theme' => $config->get('theme_default'),
     'admin_theme' => $config->get('admin_theme'),
   );
 
-  // Get current list of themes.
+  // Collect the current list of themes, looping up through base themes.
   $all_theme_data = system_rebuild_theme_data();
   $content_theme = $config->get('node_admin_theme') ? $themes['admin_theme'] : $themes['default_theme'];
   foreach ($themes as $theme_role => $theme) {
     $theme_data = (array) $all_theme_data[$theme];
-    if (!empty($theme_data['base_themes']) && $base_themes = $theme_data['base_themes']) {
-      foreach ($base_themes as $base_theme => $base_theme_name) {
-        $base_theme_data = $all_theme_data[$base_theme];
-        $base_theme_version = strstr($base_theme_data->uri, 'core/themes/') ? $core_version : $base_theme_data->info['version'];
-        $theme_data['base_themes'][$base_theme] = $base_theme_name . ' (' . $base_theme . ') ' . $base_theme_version;
-      }
-    }
+    $indent_level = '';
+    while ($theme_data) {
+      $theme_version = isset($theme_data['info']['version']) ? $theme_data['info']['version'] : '';
+      $content_theme_indicator = $content_theme == $theme_data['name'] ? '*' : '';
 
-    $content_theme_indicator = $content_theme == $theme_data['name'] ? '*' : '';
-    $theme_version = strstr($theme_data['uri'], 'core/themes/') ? $core_version : $theme_data['info']['version'];
-    $theme_data['debug_name'] = $theme_data['info']['name'] . $content_theme_indicator . ' (' . $theme_data['name'] . ') ' . $theme_version;
-    $theme_data['debug_label'] = $theme_role == 'default_theme' ? t('Default theme:') : t('Admin theme:');
-    $themes[$theme_role] = $theme_data;
-  }
-
-  $theme_info = array();
-  foreach ($themes as $theme_role => $theme_data) {
-    $debug_info_lines[] = array(
-      'label' => $theme_data['debug_label'],
-      'value' => $theme_data['debug_name'],
-    );
-    if (!empty($theme_data['base_themes']) && $base_themes = $theme_data['base_themes']) {
-      foreach ($base_themes as $base_theme => $base_theme_name) {
-        // @todo: See if we can use something like str_pad() instead of
-        // sprintf() to format the text into columns, and if that works
-        // better with multi-byte characters like ⮑ (and ⮐ for RTL).
-        if ($language->direction == LANGUAGE_RTL) {
-          $base_theme_indicator = ' ⮐ ';
-          $debug_info_lines[] = array(
-            'label' => t('base theme:') . $base_theme_indicator,
-            'value' => $base_theme_name . $base_theme_indicator,
-          );
-        }
-        else {
-          $base_theme_indicator = ' ⮑ ';
-          $debug_info_lines[] = array(
-            'label' => $base_theme_indicator . t('base theme:'),
-            'value' => ' ' . $base_theme_indicator . $base_theme_name,
-          );
-        }
+      if ($indent_level === '') {
+        $theme_debug_label = $theme_role == 'default_theme' ? t('Default theme:') : t('Admin theme:');
+        $theme_debug_value = $theme_data['info']['name'] . $content_theme_indicator . ' (' . $theme_data['name'] . ') ' . $theme_version;
       }
+      else {
+        $base_prefix = $language->direction == LANGUAGE_RTL ? '' : $indent_level . ' ↳ ';
+        $base_suffix = $language->direction == LANGUAGE_RTL ? ' ↲ ' . $indent_level : '';
+        $theme_debug_label = $base_prefix . t('base theme:') . $base_suffix;
+        $theme_debug_value = $base_prefix . $theme_data['info']['name'] . ' (' . $theme_data['name'] . ') ' . $theme_version . $base_suffix;
+      }
+
+      $debug_info_lines[] = array(
+        'label' => $theme_debug_label,
+        'value' => $theme_debug_value,
+      );
+
+      // Continue looping up to the next base theme is present.
+      $base_theme_name = isset($theme_data['info']['base theme']) ? $theme_data['info']['base theme'] : '';
+      $theme_data = isset($all_theme_data[$base_theme_name]) ? (array) $all_theme_data[$base_theme_name] : '';
+      $indent_level = '  ' . $indent_level;
     }
   }
-
   $debug_info_lines[] = array(
     'label' => '',
     'value' => t('*used when editing or creating content'),
   );
 
+  // Module info, grouped by core, contrib, custom, and other.
+  $debug_info_lines[] = $empty_line;
+  $debug_info_lines[] = array(
+    'label' => t('Enabled modules'),
+    'value' => '',
+  );
+  $debug_info_lines[] = array(
+    'label' => '===============',
+    'value' => '',
+  );
   $debug_info_lines[] = $empty_line;
 
   $module_info_lines = array(
@@ -2557,10 +2549,10 @@ function system_get_debug_info() {
   }
 
   $module_group_titles = array(
-    'core' => t('Core modules'),
-    'contrib' => t('Contrib modules'),
-    'custom' => t('Custom modules'),
-    'other' => t('Other modules'),
+    'core' => t('Core'),
+    'contrib' => t('Contrib'),
+    'custom' => t('Custom'),
+    'other' => t('Other'),
   );
   foreach ($module_info_lines as $module_group => $module_group_lines) {
     if (empty($module_group_lines)) {
@@ -2587,8 +2579,8 @@ function system_get_debug_info() {
  * Given an array of data, it formats it into a plain-text 2-column output.
  *
  * @param array $lines
- *   The data to format into plain text columns. The array keys will become the
- *   first column, and the array values the second column.
+ *   The data to format into plain text columns. Each line may contain keys
+ *   for "label" and "value".
  * @param array $format_settings
  *   An array with various settings that control the final plain-text output:
  *   - min_spacing: An integer indicating the minimum spaces added between the
@@ -2597,10 +2589,11 @@ function system_get_debug_info() {
  *     languages.
  *
  * @see system_debug_info()
+ * @private
  *
  * @since 1.28.0 function added.
  */
-function _system_format_array_to_plain_text_columns(array $lines, array $format_settings) {
+function _system_format_debug_info(array $lines, array $format_settings) {
   global $language;
 
   // Set some default settings.
@@ -2635,9 +2628,6 @@ function _system_format_array_to_plain_text_columns(array $lines, array $format_
       $output .= "\n";
     }
     else {
-      // Lines with a blank first column - only a value in the second column.
-      $label = is_numeric($label) ? '' : $label;
-
       if ($format_settings['rtl']) {
         $format = '%s %' . $first_col_width . 's';
         // Note that the order of $value and $label parameters is reversed
