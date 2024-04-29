@@ -1882,6 +1882,10 @@ class BackdropWebTestCase extends BackdropTestCase {
       $this->pass($message, t('Email'));
     }
 
+    // Reset static variables, this may flush pending writes to the theme
+    // registry as well.
+    backdrop_static_reset();
+
     // Delete temporary files directory.
     file_unmanaged_delete_recursive($this->originalFileDirectory . '/simpletest/' . $this->fileDirectoryName);
 
