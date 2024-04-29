@@ -2445,7 +2445,7 @@ function system_get_debug_info() {
   foreach ($text_editor_usage as $editor => $formats) {
     $debug_info_lines[] = array(
       'label' => $editor,
-      'value' => t('Used in: @formats', array('@formats' => implode(', ', $formats))),
+      'value' => t('Used in formats: @formats', array('@formats' => implode(', ', $formats))),
     );
   }
 
@@ -2632,11 +2632,11 @@ function _system_format_debug_info(array $lines, array $format_settings) {
         $format = '%s %' . $first_col_width . 's';
         // Note that the order of $value and $label parameters is reversed
         // compared to LTR.
-        $output .= sprintf($format, $value, $label) . "\n";
+        $output .= ltrim(sprintf($format, $value, $label)) . "\n";
       }
       else {
         $format = '%-' . $first_col_width . 's %s';
-        $output .= sprintf($format, $label, $value) . "\n";
+        $output .= rtrim(sprintf($format, $label, $value)) . "\n";
       }
     }
   }
