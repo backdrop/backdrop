@@ -1251,6 +1251,24 @@ function system_library_info() {
     ),
   );
 
+  // Backdrop's draggable table rows library.
+  $libraries['backdrop.tabledrag'] = array(
+    'title' => 'Backdrop draggable table rows',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      'core/misc/tabledrag.js' => array('group' => JS_LIBRARY),
+    ),
+    'css' => array(
+      'core/misc/tabledrag.css' => array('group' => CSS_DEFAULT),
+    ),
+    'icons' => array(
+      'arrows-out-cardinal',
+    ),
+    'dependencies' => array(
+      array('system', 'jquery.cookie'),
+    ),
+  );
+
   // Backdrop's responsive table API.
   $libraries['backdrop.tableresponsive'] = array(
     'title' => 'Backdrop responsive table API',

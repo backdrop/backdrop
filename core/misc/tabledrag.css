@@ -1,0 +1,70 @@
+/**
+ * Styles for draggable table rows functionality.
+ */
+body.drag {
+  cursor: move;
+}
+.draggable a.tabledrag-handle {
+  cursor: move;
+  height: 1.25em;
+  padding: 1em 0.5em;
+  margin-top: -1em;
+  margin-bottom: -1em;
+  margin-left: -1em; /* LTR */
+  overflow: hidden;
+  text-decoration: none;
+  display: inline-block;
+}
+[dir="rtl"] .draggable a.tabledrag-handle {
+  margin-right: -1em;
+  margin-left: 0;
+}
+a.tabledrag-handle:hover {
+  text-decoration: none;
+}
+a.tabledrag-handle .handle {
+  /*noinspection CssUnresolvedCustomProperty*/
+  mask: var(--icon-arrows-out-cardinal) no-repeat center center;
+  background: #999999;
+  height: 1.25em;
+  width: 1.25em;
+  vertical-align: middle;
+  box-sizing: content-box;
+  display: inline-block;
+}
+a.tabledrag-handle-hover .handle {
+  background: #000000;
+}
+div.indentation {
+  float: left; /* LTR */
+  height: 1.7em;
+  margin: -1em 0.2em -1em -0.4em; /* LTR */
+  padding: 1em 0 1em 0.6em; /* LTR */
+  width: 20px;
+}
+[dir="rtl"] div.indentation {
+  float: right;
+  margin: -1em -0.4em -1em 0.2em;
+  padding: 1em 0.6em 1em 0;
+}
+div.tree-child {
+  background: url(tree.png) no-repeat 11px center; /* LTR */
+}
+[dir="rtl"] div.tree-child {
+  background-position: -65px center;
+}
+div.tree-child-last {
+  background: url(tree-bottom.png) no-repeat 11px center; /* LTR */
+}
+[dir="rtl"] div.tree-child-last {
+  background-position: -65px center;
+}
+div.tree-child-horizontal {
+  background: url(tree.png) no-repeat -11px center;
+}
+.tabledrag-toggle-weight-wrapper {
+  text-align: right; /* LTR */
+}
+[dir="rtl"] .tabledrag-toggle-weight-wrapper {
+  text-align: left;
+}
