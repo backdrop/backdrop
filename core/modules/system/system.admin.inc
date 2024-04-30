@@ -2401,7 +2401,7 @@ function system_get_debug_info() {
     t('Backdrop CMS:') => BACKDROP_VERSION,
     t('Installation profile:') => backdrop_get_profile(),
     t('PHP version:') => phpversion(),
-    t('Drupal compatibility:') => settings_get('backdrop_drupal_compatibility') ? t('on') : t('off'),
+    t('Drupal 7 compatibility:') => settings_get('backdrop_drupal_compatibility') ? t('on') : t('off'),
     t('Database server:') => Database::getConnection()->version(),
     t('Web server:') => check_plain($_SERVER['SERVER_SOFTWARE']),
     t('jQuery version:') => $jquery_library['version'],
@@ -2454,15 +2454,31 @@ function system_get_debug_info() {
   $config = config('system.core');
   $file_directory_types = array(
     'public' => t('Files directory:'),
+    'private' => t('Private directory:'),
     'temporary' => t('Temp directory:'),
   );
   foreach ($file_directory_types as $file_directory_type => $file_directory_label) {
     $file_directory = $config->get('file_' . $file_directory_type . '_path');
-    $file_realpath = realpath($file_directory);
-    $is_writable = is_writable($file_directory) ? t('(writable)') : t('(not writable)');
+    if ($file_directory) {
+      $file_realpath = realpath($file_directory);
+      $is_writable = is_writable($file_directory);
+      if (!$file_realpath) {
+        $file_extra = ' ' . t('(not found)');
+      }
+      elseif (!$is_writable) {
+        $file_extra = ' ' . t('(not writable)');
+      }
+      else {
+        $file_extra = ' ' . t('(writable)');
+      }
+    }
+    else {
+      $file_realpath = NULL;
+      $file_extra = t('(not configured)');
+    }
     $debug_info_lines[] = array(
       'label' => $file_directory_label,
-      'value' => $file_realpath ? $file_realpath . ' ' . $is_writable : $file_directory . ' (not found)',
+      'value' => ($file_realpath ? $file_realpath : $file_directory) . $file_extra,
     );
   }
 
