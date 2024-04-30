@@ -1376,7 +1376,7 @@ function image_preprocess_image_style(&$variables) {
 /**
  * Implements hook_file_presave().
  *
- * Set the dimensions in the "metadata" property used by the File Entity module.
+ * Set the dimensions in the "metadata" property used by File entities.
  */
 function image_file_presave($file) {
   if (image_is_svg($file->uri) && isset($file->metadata)) {
