@@ -2451,41 +2451,51 @@ function system_get_debug_info() {
   );
 
   // File system settings.
+  $file_stream_wrappers = file_get_stream_wrappers(STREAM_WRAPPERS_ALL);
+  // @to-do: Consider a way to be adding the private files directory to the
+  // output of file_get_stream_wrappers() even when not configured.
+  foreach ($file_stream_wrappers as $stream_wrapper => $stream_wrapper_info) {
+    $file_directory_types[$stream_wrapper] = $stream_wrapper_info['name'];
+  }
+  // Special case for the private files directory, for which we want to display
+  // details even when not configured (in which case it will not have been
+  // included in the output of file_get_stream_wrappers() above).
+  if (!isset($file_directory_types['private'])) {
+    $file_directory_types['private'] = t('Private files');
+  }
+
   $config = config('system.core');
-  $file_directory_types = array(
-    'public' => t('Files directory:'),
-    'private' => t('Private directory:'),
-    'temporary' => t('Temp directory:'),
-  );
   foreach ($file_directory_types as $file_directory_type => $file_directory_label) {
+    // @to-do: See if we can standardize this by using function_exists() and
+    // using existing file_directory_*() functions, like file_directory_temp().
     $file_directory = $config->get('file_' . $file_directory_type . '_path');
     if ($file_directory) {
       $file_realpath = realpath($file_directory);
       $is_writable = is_writable($file_directory);
       if (!$file_realpath) {
-        $file_extra = ' ' . t('(not found)');
+        $file_path_status = ' ' . t('(not found)');
       }
       elseif (!$is_writable) {
-        $file_extra = ' ' . t('(not writable)');
+        $file_path_status = ' ' . t('(not writable)');
       }
       else {
-        $file_extra = ' ' . t('(writable)');
+        $file_path_status = ' ' . t('(writable)');
       }
     }
     else {
       $file_realpath = NULL;
-      $file_extra = t('(not configured)');
+      $file_path_status = t('(not configured)');
     }
     $debug_info_lines[] = array(
-      'label' => $file_directory_label,
-      'value' => ($file_realpath ? $file_realpath : $file_directory) . $file_extra,
+      'label' => $file_directory_label . ':',
+      'value' => ($file_realpath ? $file_realpath : $file_directory) . $file_path_status,
     );
   }
 
   // Config locations.
   $config_types = array(
     'active' => t('Config active location:'),
-    'staging' => t('Config staging location'),
+    'staging' => t('Config staging location:'),
   );
   foreach ($config_types as $config_type => $config_label) {
     $config_storage = config_get_config_storage($config_type);
