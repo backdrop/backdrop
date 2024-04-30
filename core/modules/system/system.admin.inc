@@ -2395,10 +2395,11 @@ function system_get_debug_info() {
 
   $jquery_library = backdrop_get_library('system', 'jquery');
   $jquery_ui_library = backdrop_get_library('system', 'ui');
+  $core_version = BACKDROP_VERSION;
 
   // Main system info.
   $system_info = array(
-    t('Backdrop CMS:') => BACKDROP_VERSION,
+    'Backdrop CMS:' => $core_version,
     t('Installation profile:') => backdrop_get_profile(),
     t('PHP version:') => phpversion(),
     t('Drupal 7 compatibility:') => settings_get('backdrop_drupal_compatibility') ? t('on') : t('off'),
@@ -2416,7 +2417,6 @@ function system_get_debug_info() {
 
   // Get the current list of all modules available on the site.
   $modules = system_rebuild_module_data();
-  $core_version = BACKDROP_VERSION;
 
   // Text editors info.
   $text_editor_usage = array();
