@@ -1387,20 +1387,3 @@ function image_file_presave($file) {
     }
   }
 }
-
-/**
- * Implements hook_file_url_alter().
- *
- * Prevent image_style_url() from using a different URL for SVG images. Because
- * image styles cannot operate on SVGs, set the URL back to the original image.
- * This affects theme_image_style(), which normally would point to a new image.
- */
-function image_file_url_alter(&$url) {
-  if (!empty($url)) {
-    // If this is an SVG image in the styles directory...
-    if (strpos($url, '/styles/') && strpos($url, '.svg')) {
-      // Remove the styles directory portions and use the original image URL.
-      $url = preg_replace('!/styles/.*?/.*?/!', '/', $url);
-    }
-  }
-}
