@@ -332,7 +332,7 @@ class MenuTestCase extends BackdropWebTestCase {
    * @param string $menu_name
    *   Menu name.
    * @param int $weight
-   *   Menu link weight
+   *   Menu link weight.
    *
    * @return array
    *   Menu link created.
