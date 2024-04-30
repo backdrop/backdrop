@@ -822,6 +822,10 @@ tr.views-filterable-option .form-item {
   margin-top: 0;
 }
 
+tr.views-filterable-option td.title {
+  font-weight: bold;
+}
+
 .views-filterable-options .form-type-checkbox .description {
   margin-top: 0;
   margin-bottom: 0;
