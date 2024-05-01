@@ -2349,7 +2349,7 @@ function system_debug_info() {
 
   $form['help'] = array(
     '#type' => 'help',
-    '#markup' => t('Ready to copy/paste information about your site. This includes items commonly requested for troubleshooting/support purposes.'),
+    '#markup' => t('This report includes information about your site commonly requested for troubleshooting or support purposes, ready for copy/paste if needed.'),
   );
 
   $debug_info = system_get_debug_info();
@@ -2399,6 +2399,7 @@ function system_get_debug_info() {
 
   // Main system info.
   $system_info = array(
+    // Intentionally not translated to match the trademark.
     'Backdrop CMS:' => $core_version,
     t('Installation profile:') => backdrop_get_profile(),
     t('PHP version:') => phpversion(),
@@ -2429,10 +2430,10 @@ function system_get_debug_info() {
       // Add a suffix with the editor version or the editor library version
       // to the editor label.
       if (!empty($editor['library_version'])) {
-        $editor_label .= ', ' . $editor['library_version'];
+        $editor_label .= ' ' . t('version') . ': ' . $editor['library_version'];
       }
       elseif (isset($modules[$editor['module']]->info['version'])) {
-        $editor_label .= ' ' . $modules[$editor['module']]->info['version'];
+        $editor_label .= ' ' . t('version') . ': ' . $modules[$editor['module']]->info['version'];
       }
       $text_editor_usage[$editor_label][] = $format_info->name;
     }
