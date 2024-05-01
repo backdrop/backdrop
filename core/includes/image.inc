@@ -632,14 +632,25 @@ function image_get_svg_dimensions($uri) {
     return $cached_images[$uri];
   }
 
-  // If there are no dimensions, store the dimensions as zero.
-  // Required for compatibility with image field storage.
+  // Extract dimensions based on SVG attributes, if available.
   $svg_dimensions = array();
   $file_contents = file_get_contents($uri);
   if ($file_contents && $svg = simplexml_load_string($file_contents)) {
-    foreach ($svg->attributes() as $attribute => $value) {
+    $dimensions_set = FALSE;
+    $attributes = $svg->attributes();
+    foreach ($attributes as $attribute => $value) {
       if ($attribute === 'width' || $attribute === 'height') {
         $svg_dimensions[$attribute] = (int) $value;
+        $dimensions_set = TRUE;
+      }
+    }
+    // @see https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute/viewBox
+    if (!$dimensions_set && $attributes->viewBox) {
+      $attribute_value = (string) $attributes->viewBox;
+      $coordinates = preg_split('/[\s,]+/', $attribute_value);
+      if (count($coordinates) == 4) {
+        $svg_dimensions['width'] = (int) $coordinates[2];
+        $svg_dimensions['height'] = (int) $coordinates[3];
       }
     }
   }
