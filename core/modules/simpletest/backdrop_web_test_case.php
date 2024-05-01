@@ -1235,7 +1235,8 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected function backdropGetTestFiles($type, $size = NULL) {
     $files = array();
     // Make sure type is valid.
-    if (in_array($type, array('binary', 'html', 'image', 'javascript', 'php', 'sql', 'text'))) {
+    $possible_types = array('binary', 'html', 'image', 'svg', 'javascript', 'php', 'sql', 'text');
+    if (in_array($type, $possible_types)) {
 
       if (!in_array($type, $this->generatedTestFiles)) {
         switch ($type) {
