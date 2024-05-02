@@ -1006,6 +1006,12 @@ description = Graph handling unit tests.
 group = System
 file = graph.test
 
+[IconTestCase]
+name = Icon API
+description = Tests the providing and path matching of SVG icons.
+group = System
+file = icon.test
+
 [ImageToolkitUnitTest]
 name = Image toolkit tests
 description = Check image toolkit functions.

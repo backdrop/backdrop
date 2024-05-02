@@ -319,6 +319,10 @@ function hook_js_alter(&$javascript) {
  *   'type' => 'setting', and the actual settings must be contained in a 'data'
  *   element of the value.
  * - 'css': Like 'js', an array of CSS elements passed to backdrop_add_css().
+ * - 'icons': A simple array with only icon names. Each icon in the list will be
+ *   resolved to a file path and then added to the page as both a JavaScript
+ *   variable (Backdrop.icons['icon-name']) and as a CSS variable
+ *   (--icon-[icon-name]).
  * - 'dependencies': An array of libraries that are required for a library. Each
  *   element is an array listing the module and name of another library. Note
  *   that all dependencies for each dependent library will also be added when
@@ -328,7 +332,7 @@ function hook_js_alter(&$javascript) {
  * Module- or implementation-specific data and integration logic should be added
  * separately.
  *
- * @return
+ * @return array
  *   An array defining libraries associated with a module.
  *
  * @see system_library_info()
@@ -349,6 +353,15 @@ function hook_library_info() {
         'type' => 'file',
         'media' => 'screen',
       ),
+    ),
+    // A full list of icons available from core can be found in the
+    // core/misc/icons directory.
+    'icons' => array(
+      'pencil',
+      'image',
+      // If needing to use an icon that cannot be overridden by a module or
+      // theme, pass an array of options with "immutable" set to TRUE.
+      'gear' => array('immutable' => TRUE),
     ),
   );
   // Library Two.
@@ -417,6 +430,87 @@ function hook_library_info_alter(&$libraries, $module) {
 function hook_css_alter(&$css) {
   // Remove defaults.css file.
   unset($css[backdrop_get_path('module', 'system') . '/defaults.css']);
+}
+
+/**
+ * Provides reusable icons from a module.
+ *
+ * Backdrop core provides an SVG-based icon system. The default set of icons
+ * can be found in /core/misc/icons. Modules may use this hook to provide new
+ * icons or to override existing ones provided by core. If creating new,
+ * module-specific icons, it's recommended to namespace the icon file with the
+ * name of your module. For example, if your module was named "my_module" as was
+ * providing a "bird" icon, the icon name should be "my-module-bird". Icon names
+ * generally use hyphens, not underscores, in their names.
+ *
+ * @return array
+ *   An array keyed by the icon name. The icon name is used in calls to the
+ *   icon() function. Optionally providing the following nested array values:
+ *   - name: (optional) If the module-provided icon name differs from the core
+ *     name, specify the file name minus the ".svg" extension.
+ *   - directory: (optional) If the icon resides outside of the module's "icons"
+ *     directory, specify the directory from which this icon is provided,
+ *     relative to the Backdrop installation root.
+ *
+ * @see hook_icon_info_alter()
+ */
+function hook_icon_info() {
+  // For icons simply located in a module's "icons" directory, just provide the
+  // name of the file (minus ".svg") as the array key. This can be used to
+  // override core icons if the name of the icon matches a core one, or provide
+  // new ones if the name is unique.
+  $icons['my-module-icon1'] = array();
+
+  // If a module is overriding a core-provided icon but the module uses a
+  // different name, it can specify the core name as the key and provide a
+  // "name" property to map to the module's icon file name (minus .svg).
+  $icons['pencil'] = array(
+    'name' => 'pen',
+  );
+
+  // A module could use an externally provided list of icons by specifying
+  // a "directory" property, relative to the root of the Backdrop installation.
+  $icons['my-module-icon2'] = array(
+    'directory' => 'libraries/my_icon_set/standard',
+  );
+
+  // If a module wants to separate icons into different directories for
+  // variations, it can use the "directory" option to use the same icon name in
+  // different directories. For example, this would map
+  //"pencil-filled" to "icons/filled/pencil.svg".
+  $module_path = backdrop_get_path('module', 'my_module');
+  $icons['pencil-fill'] = array(
+    'name' => 'pencil',
+    'directory' => $module_path . '/icons/filled',
+  );
+
+  return $icons;
+}
+
+/**
+ * Modify the list of icons provided by other modules.
+ *
+ * Note that core-provided icons are not in this list. If wanting to override
+ * core-provided icons, use hook_icon_info(). This hook is only useful if
+ * wanting to modify the icons provided by another module.
+ *
+ * @param $icons
+ *   This parameter is passed by reference. It contains the entire list of
+ *   module-provided icons, keyed by the icon name.
+ *
+ * @see hook_icon_info()
+ */
+function hook_icon_info_alter(&$icons) {
+  // Remove a different module's override of a core icon.
+  if (isset($icons['pencil']) && $icons['pencil']['module'] === 'different_module') {
+    unset($icons['pencil']);
+  }
+
+  // Swap a different module's icon for one provide by this module.
+  if (isset($icons['pencil'])) {
+    $icons['pencil']['module'] = 'my_module';
+    $icons['pencil']['directory'] = backdrop_get_path('module', 'my_module') . '/icons';
+  }
 }
 
 /**

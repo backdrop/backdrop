@@ -254,6 +254,7 @@ function image_config_info() {
     'label_key' => 'name',
     'group' => t('Image styles'),
   );
+
   return $prefixes;
 }
 
@@ -962,6 +963,9 @@ function image_style_flush($style) {
  * @see image_style_deliver()
  */
 function image_style_url($style_name, $uri) {
+  if (image_is_svg($uri)) {
+    return file_create_url($uri);
+  }
   $uri = image_style_path($style_name, $uri);
   $uri = file_uri_normalize_dot_segments($uri);
 
@@ -1348,4 +1352,38 @@ function image_filter_keyword($value, $current_pixels, $new_pixels) {
       return (int) round($current_pixels / 2 - $new_pixels / 2);
   }
   return (int) $value;
+}
+
+/**
+ * Preprocess function for theme_image_style().
+ *
+ * If theme_image_style() is called without setting explicit height/width for
+ * an SVG image, attempt to set those dimensions. This helps in particular when
+ * uploading an image for the first time in a content form.
+ */
+function image_preprocess_image_style(&$variables) {
+  $uri = $variables['uri'];
+  // Only try to get file information if $uri is not empty.
+  if (!empty($uri) && image_is_svg($uri)) {
+    $original = array(
+      'width' => $variables['width'],
+      'height' => $variables['height'],
+    );
+    image_style_transform_dimensions($variables['style_name'], $original);
+  }
+}
+
+/**
+ * Implements hook_file_presave().
+ *
+ * Set the dimensions in the "metadata" property used by File entities.
+ */
+function image_file_presave($file) {
+  if (image_is_svg($file->uri) && isset($file->metadata)) {
+    $svg_dimensions = image_get_svg_dimensions($file->uri);
+    if ($svg_dimensions) {
+      $file->metadata['width'] = $svg_dimensions['width'];
+      $file->metadata['height'] = $svg_dimensions['height'];
+    }
+  }
 }

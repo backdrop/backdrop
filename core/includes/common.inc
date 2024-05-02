@@ -2166,9 +2166,9 @@ function format_rss_item($title, $link, $description, $args = array()) {
  * @since 1.12.7 Added $indentation_level parameter.
  *
  * @return string
- *  A string of XML representing the elements passed in.
+ *   A string of XML representing the elements passed in.
  */
-function format_xml_elements($array, $indentation_level = 0) {
+function format_xml_elements(array $array, $indentation_level = 0) {
   $output = '';
 
   // Indent two spaces per level.
@@ -2484,7 +2484,7 @@ function format_date($timestamp, $date_format_name = 'medium', $pattern = '', $t
  *
  * Callback for preg_replace_callback() within format_date().
  *
- * @param $matches
+ * @param array $matches
  *   The array of matches as found by preg_replace_callback().
  * @param string $new_langcode
  *   Sets the internal langcode to be used. Set the langcode prior to calling
@@ -2757,8 +2757,8 @@ function url_is_external($path) {
   $colon_position = strpos($path, ':');
   // Some browsers treat \ as / so normalize to forward slashes.
   $path = str_replace('\\', '/', $path);
-  // Avoid calling backdrop_strip_dangerous_protocols(). If the path starts with 2
-  // slashes then it is always considered an external URL without an explicit
+  // Avoid calling backdrop_strip_dangerous_protocols(). If the path starts with
+  // 2 slashes then it is always considered an external URL without an explicit
   // protocol part.
   return (strpos($path, '//') === 0)
     // Leading control characters may be ignored or mishandled by browsers, so
@@ -5075,6 +5075,7 @@ function backdrop_aggregate_js(&$js_groups) {
  * to elements using the #attached property. The #attached property is an
  * associative array, where the keys are the the attachment types and the values
  * are the attached data. For example:
+ *
  * @code
  * $build['#attached'] = array(
  *   'js' => array(backdrop_get_path('module', 'taxonomy') . '/js/taxonomy.admin.js'),
@@ -5122,6 +5123,7 @@ function backdrop_aggregate_js(&$js_groups) {
  * @see backdrop_add_library()
  * @see backdrop_add_js()
  * @see backdrop_add_css()
+ * @see backdrop_add_icon()
  * @see backdrop_render()
  */
 function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_check = FALSE, $every_page = NULL) {
@@ -5130,6 +5132,7 @@ function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_c
     'library' => array(),
     'js' => array(),
     'css' => array(),
+    'icons' => array(),
   );
 
   // Add the libraries first.
@@ -5174,6 +5177,10 @@ function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_c
     }
     unset($elements['#attached'][$type]);
   }
+
+  // Icons are added all at once, no need to apply separate options.
+  backdrop_add_icons($elements['#attached']['icons']);
+  unset($elements['#attached']['icons']);
 
   // Add additional types of attachments specified in the render() structure.
   // Libraries, JavaScript and CSS have been added already, as they require
@@ -5396,6 +5403,7 @@ function backdrop_add_library($module, $name, $every_page = NULL) {
         'library' => $library['dependencies'],
         'js' => $library['js'],
         'css' => $library['css'],
+        'icons' => $library['icons'],
       );
       $added[$module][$name] = backdrop_process_attached($elements, JS_LIBRARY, TRUE, $every_page);
     }
@@ -5454,7 +5462,12 @@ function backdrop_get_library($module, $name = NULL) {
     foreach ($module_libraries as $key => $data) {
       if (is_array($data)) {
         // Add default elements to allow for easier processing.
-        $module_libraries[$key] += array('dependencies' => array(), 'js' => array(), 'css' => array());
+        $module_libraries[$key] += array(
+          'dependencies' => array(),
+          'js' => array(),
+          'css' => array(),
+          'icons' => array(),
+        );
         foreach ($module_libraries[$key]['js'] as $file => $options) {
           $module_libraries[$key]['js'][$file]['version'] = $module_libraries[$key]['version'];
         }
@@ -5469,6 +5482,40 @@ function backdrop_get_library($module, $name = NULL) {
     return $libraries[$module][$name];
   }
   return $libraries[$module];
+}
+
+/**
+ * Adds icons to the page to make them available in JS and CSS files.
+ *
+ * The icon name is resolved to a file path and then added to the page as both
+ * a JavaScript variable (Backdrop.icons['icon-name']) and as a CSS variable
+ * (--icon-[icon-name]). Note that use of this function is not necessary if
+ * embedding an icon directly onto the page using the icon() function. This is
+ * only needed if using icons in JS and CSS files.
+ *
+ * @param array $icon_names
+ *   An array of unique icon names be added, without the extensions. Most icon
+ *   names can be found by browsing the core/misc/icons directory. The icon
+ *   list can either be a plain list of names in an unindexed array, or the
+ *   icon name can be the key, with an array of options as the value. The
+ *   available options for each icon include:
+ *   - immutable: Whether to use the original icon instead of any overrides.
+ *
+ * @see icon()
+ */
+function backdrop_add_icons(array $icon_names) {
+  $icon_paths = array();
+  foreach ($icon_names as $icon_key => $icon_options) {
+    $icon_name = is_array($icon_options) ? $icon_key : $icon_options;
+    $immutable = is_array($icon_options) && !empty($icon_options['immutable']);
+    if ($icon_path = icon_get_path($icon_name, $immutable)) {
+      $icon_paths[$icon_name] = base_path() . $icon_path;
+    }
+  }
+  if ($icon_paths) {
+    backdrop_add_js(array('icons' => $icon_paths), 'setting');
+    backdrop_add_library('system', 'backdrop.icons');
+  }
 }
 
 /**
@@ -5701,8 +5748,8 @@ function backdrop_clear_js_cache() {
  *   readable by humans, or emulates this functionality if running an older
  *   version of PHP.
  *
- * @return string
- *   The given $var encoded as a JSON string.
+ * @return string|FALSE
+ *   The given $var encoded as a JSON string or FALSE on failure.
  *
  * @see backdrop_json_decode()
  * @ingroup php_wrappers
@@ -5985,6 +6032,7 @@ function _backdrop_bootstrap_full() {
   require_once BACKDROP_ROOT . '/core/includes/tablesort.inc';
   require_once BACKDROP_ROOT . '/core/includes/file.inc';
   require_once BACKDROP_ROOT . '/core/includes/unicode.inc';
+  require_once BACKDROP_ROOT . '/core/includes/icon.inc';
   require_once BACKDROP_ROOT . '/core/includes/image.inc';
   require_once BACKDROP_ROOT . '/core/includes/form.inc';
   require_once BACKDROP_ROOT . '/core/includes/mail.inc';
@@ -8048,6 +8096,15 @@ function backdrop_common_theme() {
     ),
     'details' => array(
       'render element' => 'element',
+    ),
+    // From icon.inc.
+    'icon' => array(
+      'variables' => array(
+        'name' => NULL,
+        'path' => NULL,
+        'attributes' => array('class' => array()),
+        'wrapper_attributes' => array('class' => array()),
+      ),
     ),
   );
 }

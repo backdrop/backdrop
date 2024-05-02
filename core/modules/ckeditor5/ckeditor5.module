@@ -39,6 +39,7 @@ function ckeditor5_editor_info() {
   $editors['ckeditor5'] = array(
     'label' => t('CKEditor 5'),
     'library' => array('ckeditor5', 'backdrop.ckeditor5'),
+    'library_version' => CKEDITOR5_VERSION,
     'default settings' => array(
       'toolbar' => array(
         'bold', 'italic', 'blockQuote', 'heading', '|',

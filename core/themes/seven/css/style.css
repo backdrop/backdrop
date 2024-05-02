@@ -1225,21 +1225,22 @@ div.filter-options select {
 .admin-panel .block-title,
 .admin-panel h3 {
   margin: 9px 9px 0;
-  padding: 6px 0 6px 35px; /* LTR */
+  padding: 6px 0;
   font-size: 0.923em;
   text-transform: uppercase;
-  /* All icons derived from Font Awesome. See README.md in the Seven theme.*/
-  background: url('../images/chevron-circle-right--black--64.png') no-repeat left center; /* LTR */
-  background-size: 23px;
 }
-[dir="rtl"] .admin-panel .block-title,
-[dir="rtl"] .admin-panel h3 {
-  margin-left: 0;
-  margin-right: 9px;
-  padding: 6px 35px 6px 0;
-  background: url('../images/chevron-circle-left--black--64.png') no-repeat right center; /* LTR */
-  background-size: 23px;
+.admin-panel svg.icon {
+  width: 24px;
+  height: 24px;
+  vertical-align: bottom;
+  display: inline-block;
+  padding-right: 6px; /* RTL */
 }
+[dir=rtl] .admin-panel svg.icon {
+  padding-right: 0;
+  padding-left: 6px;
+}
+
 @media (min-width: 34em) { /* 544px @ 16px font size -- SM */
   .admin-panel .block-content {
     padding: 0 15px 15px;
@@ -1258,57 +1259,47 @@ div.filter-options select {
   background: none;
 }
 
-/* Add special icons for admin/config */
-.admin-panel-people h3 {
-  background-image: url('../images/users--black--64.png');
+/* Icon positioning for dashboard blocks. */
+.block-dashboard .block-title {
+  background-repeat: no-repeat;
+  background-size: 32px;
+  padding-left: 40px; /* LTR */
+  /*noinspection CssUnresolvedCustomProperty*/
+  background-image: var(--icon-caret-circle-right); /* LTR */
+  background-position: left; /* LTR */
 }
-.admin-panel-content h3 {
-  background-image: url('../images/pencil-square-o--black--64.png');
-}
-.admin-panel-system h3 {
-  background-image: url('../images/hdd-o--black--64.png');
-}
-.admin-panel-administration h3 {
-  background-image: url('../images/cog--black--64.png');
-}
-.admin-panel-media h3 {
-  background-image: url('../images/picture-o--black--64.png');
-}
-.admin-panel-search h3 {
-  background-image: url('../images/search--black--64.png');
-}
-.admin-panel-regional h3 {
-  background-image: url('../images/globe--black--64.png');
-}
-.admin-panel-urls h3 {
-  background-image: url('../images/link--black--64.png');
-}
-.admin-panel-development h3 {
-  background-image: url('../images/wrench--black--64.png');
-}
-.admin-panel-services h3 {
-  background-image: url('../images/rss--black--64.png');
+[dir=rtl] .block-dashboard .block-title {
+  padding-left: 0;
+  padding-right: 40px;
+  /*noinspection CssUnresolvedCustomProperty*/
+  background-image: var(--icon-caret-circle-left);
+  background-position: right;
 }
 
 /* Add special icons for admin/dashboard */
-
-.block-dashboard-welcome .block-title {
-  background-image: url('../images/backdrop-logo-mark--64.png');
+.block-dashboard.block-dashboard-welcome .block-title {
+  /*noinspection CssUnresolvedCustomProperty*/
+  background-image: var(--icon-backdrop-logo);
 }
-.block-dashboard-create .block-title {
-  background-image: url('../images/pencil-square-o--black--64.png');
+.block-dashboard.block-dashboard-create .block-title {
+  /*noinspection CssUnresolvedCustomProperty*/
+  background-image: var(--icon-note-pencil);
 }
-.block-dashboard-overview-content .block-title {
-  background-image: url('../images/pencil-alt--black--64.png');
+.block-dashboard.block-dashboard-overview-content .block-title {
+  /*noinspection CssUnresolvedCustomProperty*/
+  background-image: var(--icon-pencil);
 }
-.block-dashboard-overview-user .block-title {
-  background-image: url('../images/users--black--64.png');
+.block-dashboard.block-dashboard-overview-user .block-title {
+  /*noinspection CssUnresolvedCustomProperty*/
+  background-image: var(--icon-users);
 }
-.block-dashboard-updates .block-title {
-  background-image: url('../images/info-circle--black--64.png');
+.block-dashboard.block-dashboard-updates .block-title {
+  /*noinspection CssUnresolvedCustomProperty*/
+  background-image: var(--icon-cloud-arrow-down);
 }
-.block-dashboard-news .block-title {
-  background-image: url('../images/bell--black--64.png');
+.block-dashboard.block-dashboard-news .block-title {
+  /*noinspection CssUnresolvedCustomProperty*/
+  background-image: var(--icon-bell);
 }
 
 /* admin/appearance */
