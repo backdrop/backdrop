@@ -797,7 +797,11 @@ function admin_bar_links_alert() {
       ),
       '#href' => 'admin/reports/status',
       '#access' => user_access('administer site configuration'),
-      '#options' => array('html' => TRUE),
+      '#options' => array(
+        // Suppress the automatic icon by specifying FALSE.
+        'icon' => FALSE,
+        'html' => TRUE,
+      ),
     );
   }
 

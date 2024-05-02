@@ -355,7 +355,7 @@ tr.admin-bar-tweak-permissions-processed td.module {
 /* Alert colors. */
 #admin-bar .admin-bar-alert .error-count {
   box-sizing: content-box;
-  padding: 0.4em 0.5em 0.5em 0.4em;
+  padding: 0.5em 0.4em 0.5em 0.4em;
   display: inline-block;
   min-width: 1.2em;
   border-radius: 2em;
