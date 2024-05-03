@@ -490,6 +490,7 @@ function views_menu_alter(&$callbacks) {
  *   The menu argument index. This counts from 1.
  *
  * @return string|false
+ *   The argument.
  */
 function views_arg_load($value, $name, $display_id, $index) {
   static $views = array();
