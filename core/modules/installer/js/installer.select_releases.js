@@ -11,7 +11,7 @@ Backdrop.behaviors.installerSelectReleases = {
     $('.installer-browser-releases-wrapper').hide();
     $('.installer-browser-selected-release').show();
 
-    $('.installer-browser-show-releases-link').click(function (e) {
+    $('.installer-browser-show-releases-link').on('click', function (e) {
       var target = $(this).attr('rel');
       $('.installer-browser-release-' + target).show();
       $('.installer-browser-selected-release-' + target).hide();

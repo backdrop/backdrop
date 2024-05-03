@@ -40,6 +40,12 @@ description = Tests that the correct layout is used for node previews.
 group = Node
 file = node.test
 
+[NodeLayoutRevisionTestCase]
+name = Node layout revision test
+description = Tests that the correct layout is used for node revisions.
+group = Node
+file = node.test
+
 [NodeCreationTestCase]
 name = Node creation
 description = Create a node and test saving it.

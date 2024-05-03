@@ -395,7 +395,7 @@ class DateFieldTokenTestCase extends DateFieldBasic {
     $this->backdropPost('node/add/story', $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($edit['title']);
 
-    // Ceate several tokens.
+    // Create several tokens.
     $tokens = array(
       'field_date_single:long' => format_date($timestamp, 'long'),
       'field_date_single:medium' => format_date($timestamp, 'medium'),

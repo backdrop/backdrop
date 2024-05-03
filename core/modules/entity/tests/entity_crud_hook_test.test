@@ -240,7 +240,6 @@ class EntityCrudHookTestCase extends BackdropWebTestCase {
       'name' => 'Test vocabulary',
       'machine_name' => 'test',
       'description' => NULL,
-      'module' => 'entity_crud_hook_test',
     ));
     taxonomy_vocabulary_save($vocabulary);
 

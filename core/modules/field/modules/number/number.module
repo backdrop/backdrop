@@ -76,14 +76,14 @@ function number_field_instance_settings_form($field, $instance) {
     '#type' => 'textfield',
     '#title' => t('Minimum'),
     '#default_value' => $settings['min'],
-    '#description' => t('The minimum value that should be allowed in this field. Leave blank for no minimum.'),
+    '#description' => t('The minimum value that should be allowed in this field. Leave blank for the lowest possible value that can be saved to the database.'),
     '#element_validate' => array('form_validate_number'),
   );
   $form['max'] = array(
     '#type' => 'textfield',
     '#title' => t('Maximum'),
     '#default_value' => $settings['max'],
-    '#description' => t('The maximum value that should be allowed in this field. Leave blank for no maximum.'),
+    '#description' => t('The maximum value that should be allowed in this field. Leave blank for the highest possible value that can be saved to the database.'),
     '#element_validate' => array('form_validate_number'),
   );
   $form['prefix'] = array(
@@ -395,12 +395,18 @@ function number_field_widget_form(&$form, &$form_state, $field, $instance, $lang
   $element += array(
     '#type' => 'number',
     '#default_value' => $value,
-    '#max' => 1000000,
   );
 
-  // Set the step for floating point and decimal numbers.
+  // Set default field values based on the number type.
   switch ($field['type']) {
     case 'number_decimal':
+      // Calculate the minimum and maximum value of the decimal field based on
+      // precision and scale settings.
+      $number_value = intval(('1e+' . ($field['settings']['precision'] - $field['settings']['scale'])) - 1);
+      $decimal_value = intval(('1e+' . $field['settings']['scale']) - 1);
+      $element['#min'] = (float) ('-' . $number_value . '.' . $decimal_value);
+      $element['#max'] = (float) ($number_value . '.' . $decimal_value);
+
       // Avoid small float as base in function pow() for better results
       // regarding floating point precision.
       $scale = (int) $field['settings']['scale'];
@@ -408,11 +414,17 @@ function number_field_widget_form(&$form, &$form_state, $field, $instance, $lang
       break;
 
     case 'number_float':
+      $element['#min'] = -3.402823466E+38;
+      $element['#max'] = 3.402823466E+38;
       $element['#step'] = 'any';
       break;
+
+    case 'number_integer':
+      $element['#min'] = '-2147483647';
+      $element['#max'] = '2147483647';
   }
 
-  // Set minimum and maximum.
+  // Override the default minimum and maximum settings if configured.
   if (is_numeric($instance['settings']['min'])) {
     $element['#min'] = $instance['settings']['min'];
   }

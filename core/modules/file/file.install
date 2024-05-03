@@ -289,6 +289,18 @@ function file_requirements($phase) {
 }
 
 /**
+ * Implements hook_update_dependencies().
+ */
+function file_update_dependencies() {
+  // Ensure that the text filters have been converted to config prior to
+  // updating the "No results" format on the file admin View.
+  $dependencies['file'][1009] = array(
+    'system' => 1028,
+  );
+  return $dependencies;
+}
+
+/**
  * Add a view for managing files.
  */
 function file_update_1000() {
@@ -304,7 +316,7 @@ function file_update_1000() {
     'core' => '1.6',
     'display' => array(
       'default' => array(
-        'display_title' => 'Master',
+        'display_title' => 'Default',
         'display_plugin' => 'default',
         'display_options' => array(
           'query' => array(
@@ -919,6 +931,7 @@ function file_update_1005() {
       'description' => 'A document file is written information.',
       'mimetypes' => array(
           'text/plain',
+          // cspell:disable
           'application/msword',
           'application/vnd.ms-excel',
           'application/pdf',
@@ -929,6 +942,7 @@ function file_update_1005() {
           'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
           'application/vnd.openxmlformats-officedocument.presentationml.presentation',
           'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          // cspell:enable
       ),
       'disabled' => FALSE,
       'storage' => 4,
@@ -1202,7 +1216,7 @@ function file_update_1008() {
   db_create_table('cache_entity_file', $table);
 }
 
-/** 
+/**
  * Remove the file_type_determine queue.
  */
 function file_update_1009() {
@@ -1211,4 +1225,32 @@ function file_update_1009() {
     file_needs_type_classification(TRUE);
   }
   $queue->deleteQueue();
+}
+
+/**
+ * Ensures that the "no results" text in 'file_admin' view has a valid format.
+ */
+function file_update_1010() {
+  // Back in file_update_1000() we created this view containing 'filtered_html'
+  // as the "no results" text format, but if we were upgrading from a site that
+  // didn't contain that format, it results in an error. Here we ensure that the
+  // format for that text is a valid format and if it isn't, use the fallback
+  // format. Check the format for all displays, in case the user has modified
+  // the page from the default.
+  $config = config('views.view.file_admin');
+  $displays = $config->get('display');
+  if (!empty($displays)) {
+    $filter_format_configs = config_get_names_with_prefix('filter.format.');
+    foreach ($displays as &$display) {
+      if (isset($display['display_options']['empty']['area']['format'])) {
+        $format = $display['display_options']['empty']['area']['format'];
+        if (in_array('filter.format.' . $format, $filter_format_configs)) {
+          continue;
+        }
+        $display['display_options']['empty']['area']['format'] = filter_fallback_format();
+      }
+    }
+    $config->set('display', $displays);
+    $config->save();
+  }
 }

@@ -1049,7 +1049,7 @@ function backdrop_required_modules() {
  *     'unalterable' => $unalterable,
  *     'foo' => 'bar',
  *   );
- *   backdrop_alter('mymodule_data', $alterable1, $alterable2, $context);
+ *   backdrop_alter('my_module_data', $alterable1, $alterable2, $context);
  * @endcode
  *
  * Note that objects are always passed by reference in PHP5. If it is absolutely
@@ -1059,7 +1059,7 @@ function backdrop_required_modules() {
  *   $context = array(
  *     'unalterable_object' => clone $object,
  *   );
- *   backdrop_alter('mymodule_data', $data, $context);
+ *   backdrop_alter('my_module_data', $data, $context);
  * @endcode
  *
  * @param $type

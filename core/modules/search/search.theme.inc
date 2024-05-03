@@ -42,7 +42,7 @@ function template_preprocess_search_results(&$variables) {
     }
 
     $variables['search_results'][] = array(
-      'result' => $result, 
+      'result' => $result,
       'module' => $variables['module'],
       'url' => check_url($result['link']),
       'title' => check_plain($result['title']),
@@ -51,12 +51,22 @@ function template_preprocess_search_results(&$variables) {
       'info' => implode(' - ', $info),
       'attributes' => $attributes,
     );
-    
+
     if (isset($result['language']) && $result['language'] != $language->langcode && $result['language'] != LANGUAGE_NONE) {
       $variables['content_attributes']['lang'] = $result['language'];
     }
   }
-  $variables['pager'] = theme('pager', array('tags' => NULL));
+
+  $pager_type = config_get('search.settings', 'search_pager_type');
+  // @todo Move "views_mini_pager" out of Views namespace to just "mini_pager".
+  if ($pager_type === 'mini') {
+    $pager_theme = 'views_mini_pager';
+  }
+  // Set the full pager as the default/fallback.
+  else {
+    $pager_theme = 'pager';
+  }
+  $variables['pager'] = theme($pager_theme, array('tags' => NULL));
   $variables['theme_hook_suggestions'][] = 'search_results__' . $variables['module'];
 }
 

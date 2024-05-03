@@ -15,6 +15,7 @@
  * An object to contain all of the data to generate a view, plus the member
  * functions to build the view query, execute the query and render the output.
  */
+#[\AllowDynamicProperties]
 class view {
   var $base_table = 'node';
   var $base_field = 'nid';
@@ -144,7 +145,7 @@ class view {
   // To avoid recursion in views embedded into areas.
   var $parent_views = array();
 
-  // Is the current stored view runned as an attachment to another view.
+  // Whether or not the current stored view is an attachment to another view.
   var $is_attachment = NULL;
 
   // Stores the next steps of form items to handle.
@@ -895,7 +896,7 @@ class view {
         $breadcrumb_args[] = $arg;
       }
       else {
-        // determine default condition and handle.
+        // Determine default condition and handle.
         $status = $argument->default_action();
         break;
       }
@@ -904,7 +905,7 @@ class view {
       unset($argument);
     }
 
-    // set the title in the build info.
+    // Set the title in the build info.
     if (!empty($title)) {
       $this->build_info['title'] = $title;
     }
@@ -922,7 +923,7 @@ class view {
     if (!empty($this->query)) {
       $class = get_class($this->query);
       if ($class && $class != 'stdClass') {
-        // return if query is already initialized.
+        // Return if query is already initialized.
         return TRUE;
       }
     }
@@ -1515,7 +1516,7 @@ class view {
    * this sets the display handler if it hasn't been.
    */
   function access($displays = NULL, $account = NULL) {
-    // Noone should have access to disabled views.
+    // No one should have access to disabled views.
     if (!empty($this->disabled)) {
       return FALSE;
     }
@@ -1758,7 +1759,7 @@ class view {
   }
 
   /**
-   * Add the list of queries run during render to buildinfo.
+   * Add the list of queries run during render to the build info.
    *
    * @see view::start_query_capture()
    */
@@ -2304,6 +2305,7 @@ class view {
 /**
  * A display type in a view.
  */
+#[\AllowDynamicProperties]
 class views_display {
 
   /**

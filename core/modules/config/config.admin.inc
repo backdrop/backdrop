@@ -365,7 +365,7 @@ function config_export_single_form_update_type($form, &$form_state) {
   $form['export']['#value'] = '';
   $form['export']['#rows'] = 12;
 
-  // Because we need to replace both the configation name select and the
+  // Because we need to replace both the configuration name select and the
   // textarea, this requires using AJAX commands instead of a simple return.
   $commands = array();
   $commands[] = ajax_command_replace('#edit-config-type-wrapper', backdrop_render($form['config_name']));
@@ -520,7 +520,7 @@ function config_get_statuses() {
         try {
           $active_config = $active_storage->read($filename);
           $staging_config = $staging_storage->read($filename);
-          if ($active_config != $staging_config) {
+          if ($active_config !== $staging_config) {
             $config_statuses[$filename] = 'update';
           }
         }

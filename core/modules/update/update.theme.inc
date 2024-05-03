@@ -303,7 +303,7 @@ function theme_update_report($variables) {
     'core' => t('Backdrop CMS'),
     'module' => t('Modules'),
     'theme' => t('Themes'),
-    'layout' => t('Layouts'),
+    'layout' => t('Layout templates'),
   );
   foreach ($project_types as $type_name => $type_label) {
     if (!empty($rows[$type_name])) {

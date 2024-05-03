@@ -98,7 +98,7 @@ Backdrop.tableDrag = function (table, tableSettings) {
   // Add a link before the table for users to show or hide weight columns.
   $(table).before($('<a href="#" class="tabledrag-toggle-weight"></a>')
     .attr('title', Backdrop.t('Re-order rows by numerical weight instead of dragging.'))
-    .click(function () {
+    .on('click', function () {
       if (localStorage.getItem('Backdrop.tableDrag.showWeight') === '1') {
         localStorage.removeItem('Backdrop.tableDrag.showWeight');
         self.hideColumns();
@@ -302,9 +302,10 @@ Backdrop.tableDrag.prototype.makeDraggable = function (item) {
   }
 
   // Add hover action for the handle.
-  handle.hover(function () {
+  handle.on('mouseenter', function () {
     self.dragObject == null ? $(this).addClass('tabledrag-handle-hover') : null;
-  }, function () {
+  });
+  handle.on('mouseleave', function () {
     self.dragObject == null ? $(this).removeClass('tabledrag-handle-hover') : null;
   });
 
