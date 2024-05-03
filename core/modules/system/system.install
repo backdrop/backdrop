@@ -3528,6 +3528,15 @@ function system_update_1094() {
 }
 
 /**
+ * Set local_action_position in Admin Bar.
+ */
+function system_update_1095() {
+  $config = config('admin_bar.settings');
+  $config->set('local_action_position', 'top');
+  $config->save();
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
