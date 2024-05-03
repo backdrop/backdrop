@@ -1579,7 +1579,8 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
   else {
     // No validator was provided, so add one using the default list.
     // Build a default non-munged safe list for file_munge_filename().
-    $extensions = 'jpg jpeg gif png txt doc xls pdf ppt pps odt ods odp docx docm pptx pptm xlsx xlsm';
+    $extensions = implode(' ', image_get_supported_extensions()) . ' txt doc xls pdf ppt pps odt ods odp docx docm pptx pptm xlsx xlsm';
+
     $validators['file_validate_extensions'] = array();
     $validators['file_validate_extensions'][0] = $extensions;
   }
@@ -1650,6 +1651,9 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
 
   // Add in our check of the the file name length.
   $validators['file_validate_name_length'] = array();
+
+  // Add in check for valid SVG.
+  $validators['file_validate_svg'] = array();
 
   // Call the validation functions specified by this function's caller.
   $errors = file_validate($file, $validators);
@@ -1883,7 +1887,8 @@ function file_validate_is_image(File $file) {
 
   $info = image_get_info($file->uri);
   if (!$info || empty($info['extension'])) {
-    $errors[] = t('Only JPEG, PNG and GIF images are allowed.');
+    $supported_extensions = image_get_supported_extensions();
+    $errors[] = t('Only images with the following extensions are allowed: @formats.', array('@formats' => implode(', ', $supported_extensions)));
   }
 
   return $errors;
@@ -2011,6 +2016,67 @@ function file_validate_image_orientation(File $file, $orientation = 0) {
         }
       }
     }
+  }
+
+  return $errors;
+}
+
+/**
+ * Validate uploaded SVG files.
+ *
+ * @param File $file
+ *   A file entity.
+ *
+ * @return array
+ *   If the file is an SVG and is either not valid or contains
+ *   dangerous content, the array will contain an error message.
+ *
+ * @see hook_file_validate()
+ */
+function file_validate_svg(File $file) {
+  $errors = array();
+
+  if ($file->filemime == 'image/svg+xml') {
+    $file_contents = file_get_contents($file->uri);
+    libxml_use_internal_errors(TRUE);
+    $xml = simplexml_load_string($file_contents);
+    $errors = libxml_get_errors();
+
+    if (!$xml || !empty($errors)) {
+      return array(t('Invalid SVG file.'));
+    }
+    else {
+      $errors = array();
+      $namespaces = $xml->getNamespaces();
+      if (!in_array('http://www.w3.org/2000/svg', $namespaces)) {
+        $errors[] = t('Invalid SVG namespace.');
+      }
+
+      $search_patterns = array(
+        // @see https://developer.mozilla.org/en-US/docs/Web/SVG/Element
+        '//svg:foreignObject',
+        '//svg:script',
+        '//html:iframe',
+        // @see https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
+        '//@*[starts-with(name(), "on")]',
+        '//svg:a[starts-with(@href, "javascript:")]',
+        '//svg:a[starts-with(@xlink:href, "javascript:")]',
+        '//svg:a[starts-with(@href, "data:")]',
+        '//svg:a[starts-with(@xlink:href, "data:")]',
+      );
+
+      $xml->registerXPathNamespace('svg', 'http://www.w3.org/2000/svg');
+      $xml->registerXPathNamespace('html', 'http://www.w3.org/1999/xhtml');
+      foreach ($search_patterns as $search_pattern) {
+        $found = $xml->xpath($search_pattern);
+        if (!empty($found)) {
+          $errors[] = t('Dangerous content found.');
+          break;
+        }
+      }
+    }
+    libxml_clear_errors();
+    libxml_use_internal_errors(FALSE);
   }
 
   return $errors;
@@ -2169,6 +2235,7 @@ function file_download() {
   $scheme = array_shift($args);
   $target = implode('/', $args);
   $uri = $scheme . '://' . $target;
+  $uri = file_uri_normalize_dot_segments($uri);
   if (file_stream_wrapper_valid_scheme($scheme) && file_exists($uri)) {
     $headers = file_download_headers($uri);
     if (count($headers)) {
@@ -2733,6 +2800,55 @@ function file_get_content_headers(File $file) {
     'Content-Length' => $file->filesize,
     'Cache-Control' => 'private',
   );
+}
+
+/**
+ * Normalize dot segments in a URI.
+ *
+ * @param $uri
+ *   A stream, referenced as "scheme://target".
+ *
+ * @return string
+ *   The URI with dot segments removed and slashes as directory separator.
+ */
+function file_uri_normalize_dot_segments($uri) {
+  $scheme = file_uri_scheme($uri);
+
+  if (file_stream_wrapper_valid_scheme($scheme)) {
+    $target = file_uri_target($uri);
+
+    if ($target !== FALSE) {
+      $skip_schemes = config_get('system.core', 'file_not_normalized_schemes');
+      if (empty($skip_schemes) || !in_array($scheme, $skip_schemes)) {
+        // URIs should always use '/' for separating directories in paths.
+        $class = file_stream_wrapper_get_class($scheme);
+        if (is_subclass_of($class, BackdropLocalStreamWrapper::class)) {
+          $target = str_replace(DIRECTORY_SEPARATOR, '/', $target);
+
+          // Remove '.' and '..' from the path.
+          $parts = explode('/', $target);
+          $normalized = array();
+          foreach ($parts as $part) {
+            if ($part === '' || $part === '.') {
+              continue;
+            }
+            elseif ($part === '..') {
+              array_pop($normalized);
+            }
+            else {
+              $normalized[] = $part;
+            }
+          }
+
+          $target = implode('/', $normalized);
+        }
+
+        $uri = $scheme . '://' . $target;
+      }
+    }
+  }
+
+  return $uri;
 }
 
 /**

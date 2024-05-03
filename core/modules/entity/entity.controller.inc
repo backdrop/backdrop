@@ -78,7 +78,7 @@ interface EntityControllerInterface {
    * @param string|NULL $langcode
    * @param bool|NULL $page
    *   (optional) If set will control if the entity is rendered: if TRUE
-   *   the entity will be rendered without its title, so that it can be embeded
+   *   the entity will be rendered without its title, so that it can be embedded
    *   in another context. If FALSE the entity will be displayed with its title
    *   in a mode suitable for lists.
    *   If unset, the page mode will be enabled if the current path is the URI
@@ -738,8 +738,8 @@ class EntityDatabaseStorageController extends DefaultEntityController implements
       foreach ($entities as $id => $entity) {
         $this->invokeHook('delete', $entity);
       }
-      // Ignore slave server temporarily.
-      db_ignore_slave();
+      // Ignore replica server temporarily.
+      db_ignore_replica();
     }
     catch (Exception $e) {
       $transaction->rollback();
@@ -776,8 +776,8 @@ class EntityDatabaseStorageController extends DefaultEntityController implements
         $this->invokeHook('insert', $entity);
       }
 
-      // Ignore slave server temporarily.
-      db_ignore_slave();
+      // Ignore replica server temporarily.
+      db_ignore_replica();
       unset($entity->is_new);
       unset($entity->original);
 

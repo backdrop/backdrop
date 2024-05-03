@@ -713,9 +713,9 @@ function redirect_save(Redirect $redirect) {
     // Clear the static loading cache.
     redirect_load_multiple(array(), array(), TRUE);
 
-    // Ignore slave server temporarily to give time for the
-    // saved redirect to be propagated to the slave.
-    db_ignore_slave();
+    // Ignore replica server temporarily to give time for the
+    // saved redirect to be propagated to the replica.
+    db_ignore_replica();
   }
   catch (Exception $e) {
     $transaction->rollback();

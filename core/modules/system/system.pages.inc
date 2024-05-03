@@ -26,8 +26,8 @@ function system_token_output() {
       'draggable' => TRUE,
       'resizable' => TRUE,
       'autoResize' => FALSE,
-      'width' => '600',
-      'height' => '500',
+      'width' => '800',
+      'height' => '600',
     );
     $commands = array(ajax_command_open_dialog('#token-dialog', t('Available tokens'), $tree, $dialog_options));
     $return = array(

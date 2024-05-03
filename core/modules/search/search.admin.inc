@@ -54,7 +54,7 @@ function search_reindex_confirm() {
  */
 function search_reindex_confirm_submit(&$form, &$form_state) {
   $config = config('search.settings');
-  $limit_per_pass = $config->get('search_cron_limit');  
+  $limit_per_pass = $config->get('search_cron_limit');
 
   $index_stats = search_get_stats();
 
@@ -137,9 +137,27 @@ function search_admin_settings($form, &$form_state) {
     '#description' => t('Only one type of item will be searched by default. This selection will determine what appears at <a href="@search">@search</a>.', array('@search' => url('search', array('absolute' => TRUE)))),
   );
 
+  $form['pager'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Pager type'),
+  );
+  $pager_type = $config->get('search_pager_type');
+  $form['pager']['search_pager_type'] = array(
+    '#type' => 'radios',
+    '#title' => t('Pager type'),
+    '#title_display' => 'invisible',
+    '#options' => array(
+      'full' => t('Full pager'),
+      'mini' => t('Mini pager'),
+    ),
+    '#default_value' => isset($pager_type) ? $pager_type : 'full',
+  );
+  $form['pager']['search_pager_type']['full']['#description'] = t('Includes "Previous"/"Next" and "First"/"Last" links, as well as numbered links for each page of the search results.');
+  $form['pager']['search_pager_type']['mini']['#description'] = t('Shows only "Previous"/"Next" links, and indications of the current and total number of search results pages.');
+
   $form['logging'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Logging')
+    '#title' => t('Logging'),
   );
   $form['logging']['search_logging'] = array(
     '#type' => 'checkbox',
@@ -160,7 +178,7 @@ function search_admin_settings($form, &$form_state) {
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Save configuration')
+    '#value' => t('Save configuration'),
   );
 
   // Indexing settings:
@@ -190,7 +208,7 @@ function search_admin_settings($form, &$form_state) {
     '#title' => t('Number of items to index during cron runs:'),
     '#default_value' => $config->get('search_cron_limit'),
     '#options' => $items,
-    '#description' => t('The maximum number of items indexed in each pass of a <a href="@cron">cron maintenance task</a>. If necessary, reduce this number to prevent timeouts and memory errors while indexing.', array('@cron' => url('admin/reports/status')))
+    '#description' => t('The maximum number of items indexed in each pass of a <a href="@cron">cron maintenance task</a>. If necessary, reduce this number to prevent timeouts and memory errors while indexing.', array('@cron' => url('admin/reports/status'))),
   );
 
   $form['indexing']['search_minimum_word_size'] = array(
@@ -211,13 +229,13 @@ function search_admin_settings($form, &$form_state) {
     '#type' => 'checkbox',
     '#title' => t('Simple CJK handling'),
     '#default_value' => $config->get('search_overlap_cjk'),
-    '#description' => t('Whether to apply a simple Chinese/Japanese/Korean tokenizer based on overlapping sequences. Turn this off if you want to use an external preprocessor for this instead. Does not affect other languages. <strong>Changing this setting will invalidate the search index.</strong>')
+    '#description' => t('Whether to apply a simple Chinese/Japanese/Korean tokenizer based on overlapping sequences. Turn this off if you want to use an external preprocessor for this instead. Does not affect other languages. <strong>Changing this setting will invalidate the search index.</strong>'),
   );
 
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Save configuration')
+    '#value' => t('Save configuration'),
   );
 
   return $form;
@@ -252,6 +270,7 @@ function search_admin_settings_submit($form, &$form_state) {
   $config->set('search_cron_limit', $form_state['values']['search_cron_limit']);
   $config->set('search_default_module', $form_state['values']['search_default_module']);
   $config->set('search_logging', (bool) $form_state['values']['search_logging']);
+  $config->set('search_pager_type', $form_state['values']['search_pager_type']);
 
   // Check whether we are resetting the values.
   if ($form_state['triggering_element']['#value'] == t('Reset to defaults')) {

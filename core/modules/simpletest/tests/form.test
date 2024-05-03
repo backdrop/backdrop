@@ -675,6 +675,47 @@ class FormElementTestCase extends BackdropWebTestCase {
       )));
     }
   }
+
+  /**
+   * Test indentations for checkboxes, radios and select options.
+   */
+  public function testOptionIndentations() {
+    $this->backdropGet('form-test/checkboxes-radios-select-indentations');
+
+    $indentations = array(
+      'foo' => 1,
+      'bar' => 2,
+    );
+
+    foreach ($indentations as $key => $indentation) {
+      // Check checkboxes.
+      $elements = $this->xpath('//div[@class="form-checkboxes"]//div[contains(@class, :class)]', array(':class' => 'form-item-indentation-' . $indentation));
+      $this->assertEqual(count($elements), 1, format_string('Checkbox element with key :key has an indentation of :indentation',
+        array(
+          ':key' => $key,
+          ':indentation' => $indentation,
+        )
+      ));
+
+      // Check radios.
+      $elements = $this->xpath('//div[@class="form-radios"]//div[contains(@class, :class)]', array(':class' => 'form-item-indentation-' . $indentation));
+      $this->assertEqual(count($elements), 1, format_string('Radio element with value :key has an indentation of :indentation',
+        array(
+          ':key' => $key,
+          ':indentation' => $indentation,
+        )
+      ));
+
+      // Check select options.
+      $elements = $this->xpath('//option[@value=:key ]', array(':key' => $key));
+      $this->assertEqual($indentation, substr_count($elements[0], '·'), format_string('Select option with key :key has :indentation middle dot indentations',
+        array(
+          ':key' => $key,
+          ':indentation' => $indentation,
+        )
+      ));
+    }
+  }
 }
 
 /**
@@ -881,7 +922,7 @@ class FormsElementsLabelsTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Test form elements, labels, title attibutes and required marks output
+   * Test form elements, labels, title attributes and required marks output
    * correctly and have the correct label option class if needed.
    */
   function testFormLabels() {
@@ -1067,7 +1108,7 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
   /**
    * Test the whether the option checker gives an error on invalid tableselect values for checkboxes.
    */
-  function testMultipleTrueOptionchecker() {
+  function testMultipleTrueOptionChecker() {
 
     list($header, $options) = _form_test_tableselect_get_data();
 
@@ -1091,7 +1132,7 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
   /**
    * Test the whether the option checker gives an error on invalid tableselect values for radios.
    */
-  function testMultipleFalseOptionchecker() {
+  function testMultipleFalseOptionChecker() {
 
     list($header, $options) = _form_test_tableselect_get_data();
 
@@ -1167,7 +1208,7 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
     form_clear_error();
 
     // Return the processed form together with form_state and errors
-    // to allow the caller lowlevel access to the form.
+    // to allow the caller low-level access to the form.
     return array($form, $form_state, $errors);
   }
 
@@ -1201,12 +1242,17 @@ class FormsElementsVerticalTabsFunctionalTest extends BackdropWebTestCase {
  *
  * The tested form puts data into the storage during the initial form
  * construction. These tests verify that there are no duplicate form
- * constructions, with and without manual form caching activiated. Furthermore
+ * constructions, with and without manual form caching activated. Furthermore
  * when a validation error occurs, it makes sure that changed form element
  * values aren't lost due to a wrong form rebuild.
  */
 class FormsFormStorageTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
+
+  /**
+   * @var User
+   */
+  protected $web_user;
 
   function setUp() {
     parent::setUp('form_test');
@@ -1408,7 +1454,7 @@ class FormsFormStorageTestCase extends BackdropWebTestCase {
     $status = (bool) db_query_range('SELECT 1 FROM {watchdog} WHERE message = :message', 0, 1, array(':message' => 'Form build-id mismatch detected while attempting to store a form in the cache.'));
     $this->assert($status, 'A watchdog message was logged by form_set_cache');
 
-    // Ensure that the form state was not poisoned by the preceeding call.
+    // Ensure that the form state was not poisoned by the preceding call.
     $original = $this->backdropGetAJAX('form_test/form-storage-legacy/' . $build_id);
     $this->assertEqual($original['form']['#build_id_old'], $build_id, 'Original build_id was recorded');
     $this->assertNotEqual($original['form']['#build_id'], $build_id, 'New build_id was generated');
@@ -1668,6 +1714,12 @@ class FormStateValuesCleanAdvancedTestCase extends BackdropWebTestCase {
  * @todo Add tests for other aspects of form rebuilding.
  */
 class FormsRebuildTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   function setUp() {
     parent::setUp('form_test');
 
@@ -1968,8 +2020,8 @@ class FormsTriggeringElementTestCase extends BackdropWebTestCase {
     // Ensure submitting a form with buttons of different types results in
     // $form_state['triggering_element'] being set to the first button,
     // regardless of type. For the FAPI 'button' type, this should result in the
-    // submit handler not executing. The types are 's'(ubmit), 'b'(utton), and
-    // 'i'(mage_button).
+    // submit handler not executing. The types are 's' (submit), 'b' (button),
+    // and 'i' (image_button).
     $this->backdropPost($path . '/s/b/i', $edit, NULL, array(), array(), $form_html_id);
     $this->assertText('The clicked button is button1.', '$form_state[\'triggering_element\'] set to first button.');
     $this->assertText('Submit handler for form_test_clicked_button executed.', 'Form submit handler executed.');
@@ -2112,7 +2164,7 @@ class FormCheckboxTestCase extends BackdropWebTestCase {
     // Ensure that the checked state is determined and rendered correctly for
     // tricky combinations of default and return values.
     foreach (array(FALSE, NULL, TRUE, 0, '0', '', 1, '1', 'foobar', '1foobar') as $default_value) {
-      // Only values that can be used for array indeces are supported for
+      // Only values that can be used for array indices are supported for
       // #return_value, with the exception of integer 0, which is not supported.
       // @see form_process_checkbox().
       foreach (array('0', '', 1, '1', 'foobar', '1foobar') as $return_value) {
@@ -2211,6 +2263,50 @@ class FormCheckboxTestCase extends BackdropWebTestCase {
 }
 
 /**
+ * Test transition from old JS-based textarea resize to new CSS approach.
+ */
+class FormResizableTextareaTestCase extends BackdropWebTestCase {
+
+  protected $profile = 'testing';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp('form_test');
+    return TRUE;
+  }
+
+  /**
+   * Test that setting #resizable on form item results in correct CSS classes.
+   */
+  protected function testResizableTextarea() {
+    $this->backdropGet('form-test/textarea-resize');
+    // @see form_test_resizable_textarea().
+    $name_classes = array(
+      'text-true' => 'form-textarea resize-vertical',
+      'text-false' => 'form-textarea resize-none',
+      'text-vertical' => 'form-textarea resize-vertical',
+      'text-horizontal' => 'form-textarea resize-horizontal',
+      'text-none' => 'form-textarea resize-none',
+      'text-wrong' => 'form-textarea',
+    );
+
+    foreach ($name_classes as $name => $classes) {
+      $textarea = $this->xpath('//textarea[@name=:name]', array(
+        ':name' => $name,
+      ));
+      $class_attrib = (string) $textarea[0]->attributes()->class;
+      $this->assertEqual($class_attrib, $classes, format_string('Classes for item with name %name set to %classes', array(
+        '%name' => $name,
+        '%classes' => $classes,
+      )));
+    }
+  }
+
+}
+
+/**
  * Tests email element.
  */
 class FormEmailTestCase extends BackdropWebTestCase {
@@ -2279,6 +2375,24 @@ class FormH5datetimeTestCase extends BackdropWebTestCase {
     $this->backdropPost('form-test/h5datetime', $edit, 'Submit');
     $this->assertRaw(t('%date is not a valid date.', array('%date' => '2002-02-40')), 'Invalid date doesn\'t validate');
     $this->assertRaw(t('%time is not a valid time.', array('%time' => '10:66:00')), 'Invalid time doesn\'t validate');
+  }
+
+  /**
+   * Test return value for disabled html_date and html_time elements.
+   *
+   * These two FAPI elements use an array for #default_value, so, the value
+   * callback function html_date_or_time_value_callback needs to take care of
+   * converting the array to a string upon submission of a form that contains
+   * them.
+   */
+  public function testNoAccessH5DateOrTimeElement() {
+    $values = backdrop_json_decode($this->backdropPost('form-test/no-access-h5date-h5time', array(), 'Submit'));
+    // If the value callback html_date_or_time_value_callback() did its job
+    // correctly, we'll get strings.
+    $this->assertEqual($values['no_access_h5date'], '2023-01-01', 'Correct no_access_h5date value');
+    $this->assertEqual($values['no_access_h5time'], '20:30', 'Correct no_access_h5time value');
+    $this->assertEqual($values['disabled_h5date'], '2023-01-01', 'Correct disabled_h5date value');
+    $this->assertEqual($values['disabled_h5time'], '20:30', 'Correct disabled_h5time value');
   }
 }
 
@@ -2386,7 +2500,7 @@ class SystemSettingsFormTest extends SystemConfigFormCase {
         '#config_name' => 'simpletest.testconfig',
         '#config_key' => 'def',
       ),
-      // Test single-element overrrides
+      // Test single-element overrides.
       'rss_description' => array(
         '#value' => $this->randomString(),
         '#config_name' => 'system.core',

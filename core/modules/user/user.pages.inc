@@ -50,9 +50,14 @@ function user_pass() {
     '#required' => TRUE,
     '#default_value' => isset($_GET['name']) ? $_GET['name'] : '',
     '#attributes' => array(
-      'autofocus' => 'autofocus',
+      // Add attributes to field to prevent spell-jacking and unwanted
+      // automatic changes caused by the browser.
+      'autocapitalize' => 'none',
+      'autocorrect' => 'off',
+      'spellcheck' => 'false',
     ),
   );
+
   // Allow logged in users to request this also.
   if ($user->uid > 0) {
     $form['name']['#type'] = 'value';
@@ -183,7 +188,7 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
         backdrop_set_message(t('You have tried to use a reset password link that has expired. Please request a new one using the form below.'), 'error');
         backdrop_goto('user/password');
       }
-      elseif ($account->uid && $timestamp >= $account->login && $timestamp <= $current && $hashed_pass == user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid)) {
+      elseif ($account->uid && $timestamp >= $account->login && $timestamp <= $current && $hashed_pass == user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid, $account->mail)) {
         if ($immediate_login) {
           $user = $account;
           user_login_finalize();
@@ -532,19 +537,19 @@ function user_cancel_methods() {
   $anonymous_name = $site_config->get('anonymous');
   $methods = array(
     'user_cancel_block' => array(
-      'title' => t('Disable the account and keep its content.'),
+      'title' => t('Disable the account and keep its content'),
       'description' => t('Your account will be blocked and you will no longer be able to log in. All of your content will remain attributed to your user name.'),
     ),
     'user_cancel_block_unpublish' => array(
-      'title' => t('Disable the account and unpublish its content.'),
+      'title' => t('Disable the account and unpublish its content'),
       'description' => t('Your account will be blocked and you will no longer be able to log in. All of your content will be hidden from everyone but administrators.'),
     ),
     'user_cancel_reassign' => array(
-      'title' => t('Delete the account and make its content belong to the %anonymous-name user.', array('%anonymous-name' => $anonymous_name)),
+      'title' => t('Delete the account and make its content belong to the %anonymous-name user', array('%anonymous-name' => $anonymous_name)),
       'description' => t('Your account will be removed and all account information deleted. All of your content will be assigned to the %anonymous-name user.', array('%anonymous-name' => $anonymous_name)),
     ),
     'user_cancel_delete' => array(
-      'title' => t('Delete the account and its content.'),
+      'title' => t('Delete the account and its content'),
       'description' => t('Your account will be removed and all account information deleted. All of your content will also be deleted.'),
       'access' => user_access('administer users'),
     ),
@@ -581,7 +586,7 @@ function user_cancel_confirm($account, $timestamp = 0, $hashed_pass = '') {
   // Basic validation of arguments.
   if (isset($account->data['user_cancel_method']) && !empty($timestamp) && !empty($hashed_pass)) {
     // Validate expiration and hashed password/login.
-    if ($timestamp <= $current && $current - $timestamp < $timeout && $account->uid && $timestamp >= $account->login && $hashed_pass == user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid)) {
+    if ($timestamp <= $current && $current - $timestamp < $timeout && $account->uid && $timestamp >= $account->login && $hashed_pass == user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid, $account->mail)) {
       $edit = array(
         'user_cancel_notify' => isset($account->data['user_cancel_notify']) ? $account->data['user_cancel_notify'] : config_get('system.core', 'user_mail_status_canceled_notify'),
       );

@@ -320,9 +320,7 @@
   margin: 0;
   line-height: 20px;
   border-bottom: solid 1px #ccc;
-  -moz-border-radius-bottomleft: 0;
   border-bottom-left-radius: 0;
-  -moz-border-radius-bottomright: 0;
   border-bottom-right-radius: 0;
 }
 .ui-tabs .ui-tabs-nav li {
@@ -333,7 +331,6 @@
 .ui-tabs .ui-tabs-nav li a {
   float: none;
   padding: 0 10px;
-  -moz-border-radius: 10px;
   border-radius: 10px;
 }
 .ui-tabs .ui-tabs-nav li.ui-tabs-selected a {
@@ -365,8 +362,6 @@
   z-index: 1000;
 }
 .ui-widget-shadow {
-  -webkit-box-shadow: 0 0 12px -8px #666;
-  -moz-box-shadow: 0 0 12px -8px #666;
   box-shadow: 0 0 12px -8px #666;
 }
 
@@ -385,7 +380,6 @@
   border-left-color: #D2D2D2;
   border-right-color: #D2D2D2;
   background: url(../images/buttons.png) 0 0 repeat-x;
-  -moz-border-radius: 4px;
   border-radius: 4px;
 }
 .ui-slider a.ui-state-active,

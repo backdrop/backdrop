@@ -37,7 +37,7 @@
  *   - comment-preview: When previewing a new or edited comment.
  *   - comment-title-hidden: Comment titles should be hidden.
  *   - comment-title-auto: Comment titles are automatically generated.
- *   - commet-title-custom: Comment titles are custom for each comment.
+ *   - comment-title-custom: Comment titles are custom for each comment.
  *   The following applies only to viewers who are registered users:
  *   - comment-unpublished: An unpublished comment visible only to
  *     administrators.

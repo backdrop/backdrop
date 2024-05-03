@@ -44,6 +44,7 @@ define('UNICODE_MULTIBYTE', 1);
  *
  * @see http://unicode.org/glossary
  */
+// cspell:disable
 define('PREG_CLASS_UNICODE_WORD_BOUNDARY',
   '\x{0}-\x{2F}\x{3A}-\x{40}\x{5B}-\x{60}\x{7B}-\x{A9}\x{AB}-\x{B1}\x{B4}' .
   '\x{B6}-\x{B8}\x{BB}\x{BF}\x{D7}\x{F7}\x{2C2}-\x{2C5}\x{2D2}-\x{2DF}' .
@@ -80,6 +81,7 @@ define('PREG_CLASS_UNICODE_WORD_BOUNDARY',
   '\x{E000}-\x{F8FF}\x{FB29}\x{FD3E}-\x{FD3F}\x{FDFC}-\x{FDFD}' .
   '\x{FE10}-\x{FE19}\x{FE30}-\x{FE6B}\x{FEFF}-\x{FF0F}\x{FF1A}-\x{FF20}' .
   '\x{FF3B}-\x{FF40}\x{FF5B}-\x{FF65}\x{FFE0}-\x{FFFD}');
+  // cspell:enable
 
 /**
  * Wrapper around _unicode_check().
@@ -323,7 +325,9 @@ function truncate_utf8($string, $max_length, $wordsafe = FALSE, $add_ellipsis = 
   }
 
   if ($add_ellipsis) {
-    // Truncate ellipsis in case $max_length is small.
+    // Truncate ellipsis in case $max_length is small. The ellipsis character is
+    // wrapped in t(), since different characters or symbols may be used for
+    // this purpose in other languages.
     $ellipsis = backdrop_substr(t('…'), 0, $max_length);
     $max_length -= backdrop_strlen($ellipsis);
     $max_length = max($max_length, 0);

@@ -565,7 +565,7 @@ function backdrop_html_to_text($string, $allowed_tags = NULL) {
 /**
  * Wraps words on a single line.
  *
- * Callback for array_walk() winthin backdrop_wrap_mail().
+ * Callback for array_walk() within backdrop_wrap_mail().
  */
 function _backdrop_wrap_mail_line(&$line, $key, $values) {
   // Use soft-breaks only for purely quoted or unindented text.

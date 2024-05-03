@@ -23,12 +23,12 @@ class views_handler_field_entity extends views_handler_field {
   public $entity_type;
 
   /**
-   * Stores all entites which are in the result.
+   * Stores all entities that are in the result.
    */
   public $entities;
 
   /**
-   * The base field of the entity type assosiated with this field.
+   * The base field of the entity type associated with this field.
    */
   public $base_field;
 
@@ -44,7 +44,7 @@ class views_handler_field_entity extends views_handler_field {
   }
 
   /**
-   * Overriden to add the field for the entity id.
+   * Overridden to add the field for the entity ID.
    */
   function query() {
     $this->table_alias = $base_table = $this->view->base_table;

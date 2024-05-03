@@ -292,7 +292,7 @@ class views_plugin_exposed_form extends views_plugin {
   }
 
   /**
-  * This function is executed when exposed form is submited.
+  * This function is executed when the exposed form is submitted.
   *
   * @param $form
   *   Nested array of form elements that comprise the form.

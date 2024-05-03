@@ -47,14 +47,21 @@ Backdrop.behaviors.permissionsFilter = {
       }
     }
 
-    // Clear out the input field when clicking the reset button.
+    // Clear out the input field and search query when clicking the reset
+    // button.
     function resetPermissionsList(e) {
+      // Clear the input field.
       $input.val('').triggerHandler('keyup');
       e.preventDefault();
+
+      // Clear the search query.
+      var currentUrl = new URL(window.location);
+      currentUrl.searchParams.delete('search');
+      window.history.replaceState({}, '', currentUrl);
     }
 
     if ($form.length) {
-      $input.focus().on('keyup', filterPermissionsList);
+      $input.trigger('focus').on('keyup', filterPermissionsList);
       $input.triggerHandler('keyup');
       $resetLink.on('click', resetPermissionsList);
     }
@@ -140,8 +147,8 @@ Backdrop.behaviors.permissionWarnings = {
     $table.find('.permission-warning-description').hide();
 
     // Toggle the warning description.
-    $('a.warning-toggle').click(function(e) {
-      var $description = $(this).closest('.description').find('.permission-warning-description').toggle();
+    $table.on('click', 'a.warning-toggle', function(e) {
+      var $description = $(this).closest('td').find('.permission-warning-description').toggle();
       if ($description.is(':visible')) {
         $(this).text(Backdrop.t('less'));
       }

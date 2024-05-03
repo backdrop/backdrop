@@ -736,8 +736,8 @@ function _locale_invalidate_js($langcode = NULL) {
     if (!locale_translate_english()) {
       unset($languages['en']);
     }
-    foreach ($languages as $lcode => $data) {
-      $parsed['refresh:' . $lcode] = 'waiting';
+    foreach ($languages as $language_code => $data) {
+      $parsed['refresh:' . $language_code] = 'waiting';
     }
   }
   else {
