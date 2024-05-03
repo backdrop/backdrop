@@ -482,10 +482,13 @@ function views_menu_alter(&$callbacks) {
  * @param string $name
  *   The name of the view. This needs to be specified in the 'load function'
  *   of the menu entry.
- * @param string | array $display_id
- *   The display id that will be loaded for this menu item.
+ * @param string|array $display_id
+ *   The display id or an array of display ids that will be loaded for this menu
+ *   item.
  * @param int $index
  *   The menu argument index. This counts from 1.
+ *
+ * @return string|false
  */
 function views_arg_load($value, $name, $display_id, $index) {
   static $views = array();
