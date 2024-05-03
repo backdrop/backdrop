@@ -398,17 +398,24 @@ class UserValidationTestCase extends BackdropUnitTestCase {
       'Foo O\'Bar'             => array('Valid username', 'assertNull'),
       'foo@bar'                => array('Valid username', 'assertNull'),
       'foo@example.com'        => array('Valid username', 'assertNull'),
-      'foo@-example.com'       => array('Valid username', 'assertNull'), // invalid domains are allowed in usernames
+      // Invalid domains are allowed in usernames.
+      'foo@-example.com'       => array('Valid username', 'assertNull'),
+      // cspell:disable
       'þòøÇßªř€'               => array('Valid username', 'assertNull'),
-      'foo+bar'                => array('Valid username', 'assertNull'), // '+' symbol is allowed
-      'ᚠᛇᚻ᛫ᛒᛦᚦ'                 => array('Valid UTF8 username', 'assertNull'), // runes
+      // Runes.
+      'ᚠᛇᚻ᛫ᛒᛦᚦ'                 => array('Valid UTF8 username', 'assertNull'),
+      // cspell:enable
+      // '+' symbol is allowed.
+      'foo+bar'                => array('Valid username', 'assertNull'),
       ' foo'                   => array('Invalid username that starts with a space', 'assertNotNull'),
       'foo '                   => array('Invalid username that ends with a space', 'assertNotNull'),
       'foo  bar'               => array('Invalid username that contains 2 spaces \'&nbsp;&nbsp;\'', 'assertNotNull'),
       ''                       => array('Invalid empty username', 'assertNotNull'),
       'foo/'                   => array('Invalid username containing invalid chars', 'assertNotNull'),
-      'foo' . chr(0) . 'bar'   => array('Invalid username containing chr(0)', 'assertNotNull'), // NULL
-      'foo' . chr(13) . 'bar'  => array('Invalid username containing chr(13)', 'assertNotNull'), // CR
+      // NULL.
+      'foo' . chr(0) . 'bar'   => array('Invalid username containing chr(0)', 'assertNotNull'),
+      // CR.
+      'foo' . chr(13) . 'bar'  => array('Invalid username containing chr(13)', 'assertNotNull'),
       str_repeat('x', USERNAME_MAX_LENGTH + 1) => array('Invalid excessively long username', 'assertNotNull'),
     );
     foreach ($test_cases as $name => $test_case) {
@@ -504,7 +511,7 @@ class UserLoginTestCase extends UserLoginTestBase {
   function testPerUserLoginFloodControl() {
     config('user.flood')
       // Set a high global limit out so that it is not relevant in the test.
-      ->set('floo_ip_limit', 4000)
+      ->set('flood_ip_limit', 4000)
       ->set('flood_user_limit', 3)
       ->save();
 
@@ -651,7 +658,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
 
     // Attempt bogus account cancellation request confirmation.
     $timestamp = $account->login;
-    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid));
+    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid, $account->mail));
     $this->assertResponse(403, 'Bogus cancelling request rejected.');
     $account = user_load($account->uid);
     $this->assertTrue($account->status == 1, 'User account was not canceled.');
@@ -725,14 +732,14 @@ class UserCancelTestCase extends BackdropWebTestCase {
 
     // Attempt bogus account cancellation request confirmation.
     $bogus_timestamp = $timestamp + 60;
-    $this->backdropGet("user/$account->uid/cancel/confirm/$bogus_timestamp/" . user_pass_rehash($account->pass, $bogus_timestamp, $account->login, $account->uid));
+    $this->backdropGet("user/$account->uid/cancel/confirm/$bogus_timestamp/" . user_pass_rehash($account->pass, $bogus_timestamp, $account->login, $account->uid, $account->mail));
     $this->assertText(t('You have tried to use an account cancellation link that has expired. Please request a new one using the form below.'), 'Bogus cancelling request rejected.');
     $account = user_load($account->uid);
     $this->assertTrue($account->status == 1, 'User account was not canceled.');
 
     // Attempt expired account cancellation request confirmation.
     $bogus_timestamp = $timestamp - 86400 - 60;
-    $this->backdropGet("user/$account->uid/cancel/confirm/$bogus_timestamp/" . user_pass_rehash($account->pass, $bogus_timestamp, $account->login, $account->uid));
+    $this->backdropGet("user/$account->uid/cancel/confirm/$bogus_timestamp/" . user_pass_rehash($account->pass, $bogus_timestamp, $account->login, $account->uid, $account->mail));
     $this->assertText(t('You have tried to use an account cancellation link that has expired. Please request a new one using the form below.'), 'Expired cancel account request rejected.');
     $accounts = user_load_multiple(array($account->uid), array('status' => 1));
     $this->assertTrue(reset($accounts), 'User account was not canceled.');
@@ -769,7 +776,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $this->assertText(t('A confirmation request to cancel your account has been sent to your email address.'), 'Account cancellation request mailed message displayed.');
 
     // Confirm account cancellation request.
-    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid));
+    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid, $account->mail));
     $account = user_load($account->uid, TRUE);
     $this->assertTrue($account->status == 0, 'User has been blocked.');
 
@@ -807,7 +814,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $this->assertText(t('A confirmation request to cancel your account has been sent to your email address.'), 'Account cancellation request mailed message displayed.');
 
     // Confirm account cancellation request.
-    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid));
+    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid, $account->mail));
     $account = user_load($account->uid, TRUE);
     $this->assertTrue($account->status == 0, 'User has been blocked.');
 
@@ -857,7 +864,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $this->assertText(t('A confirmation request to cancel your account has been sent to your email address.'), 'Account cancellation request mailed message displayed.');
 
     // Confirm account cancellation request.
-    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid));
+    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid, $account->mail));
     $this->assertFalse(user_load($account->uid, TRUE), 'User is not found in the database.');
 
     // Confirm that user's content has been attributed to anonymous user.
@@ -926,7 +933,7 @@ class UserCancelTestCase extends BackdropWebTestCase {
     $this->assertText(t('A confirmation request to cancel your account has been sent to your email address.'), 'Account cancellation request mailed message displayed.');
 
     // Confirm account cancellation request.
-    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid));
+    $this->backdropGet("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid, $account->mail));
     $this->assertFalse(user_load($account->uid, TRUE), 'User is not found in the database.');
 
     // Confirm that user's content has been deleted.
@@ -1567,10 +1574,10 @@ class UserAdminTestCase extends BackdropWebTestCase {
     $this->assertEqual(trim($status_result[0]), 'Blocked', 'User C blocked');
 
     // Test unblocking of a user from /admin/people page and sending of activation mail
-    $editunblock = array();
-    $editunblock['action'] = 'user_unblock_user_action';
-    $editunblock[$user_c_checkbox] = TRUE;
-    $this->backdropPost('admin/people', $editunblock, t('Execute'), array('query' => array('order' => 'created', 'sort' => 'asc')));
+    $edit_unblock = array();
+    $edit_unblock['action'] = 'user_unblock_user_action';
+    $edit_unblock[$user_c_checkbox] = TRUE;
+    $this->backdropPost('admin/people', $edit_unblock, t('Execute'), array('query' => array('order' => 'created', 'sort' => 'asc')));
     $status_result = $this->xpath('//form[@id="views-form-user-admin-page"]//tr[last()]//td[position()=3]');
     $this->assertEqual(trim($status_result[0]), 'Active', 'User C unblocked');
     $this->assertMail("to", $user_c->mail, "Activation mail sent to user C");

@@ -33,6 +33,7 @@ class ViewsModuleTest extends ViewsSqlTest {
 
     // Test unicode, @see http://drupal.org/node/513396#comment-2839416
     $text = array(
+      // cspell:disable
       'Tuy nhiên, những hi vọng',
       'Giả sử chúng tôi có 3 Apple',
       'siêu nhỏ này là bộ xử lý',
@@ -41,12 +42,14 @@ class ViewsModuleTest extends ViewsSqlTest {
       'của hãng bao gồm ba dòng',
       'сд асд асд ас',
       'асд асд асд ас'
+      // cspell:enable
     );
     // Just test maxlength without word boundary.
     $alter = array(
       'max_length' => 10,
     );
     $expect = array(
+      // cspell:disable
       'Tuy nhiên,',
       'Giả sử chú',
       'siêu nhỏ n',
@@ -55,6 +58,7 @@ class ViewsModuleTest extends ViewsSqlTest {
       'của hãng b',
       'сд асд асд',
       'асд асд ас',
+      // cspell:enable
     );
 
     foreach ($text as $key => $line) {
@@ -65,6 +69,7 @@ class ViewsModuleTest extends ViewsSqlTest {
     // Test also word_boundary
     $alter['word_boundary'] = TRUE;
     $expect = array(
+      // cspell:disable
       'Tuy nhiên',
       'Giả sử',
       'siêu nhỏ',
@@ -73,6 +78,7 @@ class ViewsModuleTest extends ViewsSqlTest {
       'của hãng',
       'сд асд',
       'асд асд',
+      // cspell:enable
     );
 
     foreach ($text as $key => $line) {

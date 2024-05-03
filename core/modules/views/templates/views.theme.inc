@@ -1142,6 +1142,11 @@ function theme_views_mini_pager($variables) {
   $element = $variables['element'];
   $parameters = $variables['parameters'];
 
+  // Pager is only needed if there are results.
+  if (!isset($pager_page_array[$element]) || empty($pager_total)) {
+    return '';
+  }
+
   // Current is the page we are currently paged to.
   $pager_current = $pager_page_array[$element] + 1;
   // Max is the maximum page number.

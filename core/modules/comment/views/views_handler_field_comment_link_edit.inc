@@ -33,7 +33,7 @@ class views_handler_field_comment_link_edit extends views_handler_field_comment_
     parent::render_link($data, $values);
     // ensure user has access to edit this comment.
     $comment = $this->get_value($values);
-    if (!comment_access('edit', $comment)) {
+    if (!comment_access('update', $comment)) {
       return;
     }
 

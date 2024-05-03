@@ -1099,14 +1099,6 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     '#access' => empty($view->locked),
   );
 
-  if (empty($view->changed)) {
-    $form['actions']['#attributes'] = array(
-      'class' => array(
-        'js-hide',
-      ),
-    );
-  }
-
   $form['actions']['save'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
@@ -1114,6 +1106,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     '#validate' => array('views_ui_edit_view_form_validate'),
     '#submit' => array('views_ui_edit_view_form_submit'),
   );
+
   $form['actions']['cancel'] = array(
     '#type' => 'submit',
     '#value' => t('Cancel'),
@@ -1570,7 +1563,7 @@ function views_ui_edit_page_display_tabs($view, $display_id = NULL) {
  */
 function views_ui_show_default_display($view) {
   // Always show the default display for advanced users who prefer that mode.
-  $advanced_mode = config_get('views_ui.settings', 'show_master_display');
+  $advanced_mode = config_get('views_ui.settings', 'show_default_display');
   // For other users, show the default display only if there are no others, and
   // hide it if there's at least one "real" display.
   $additional_displays = (count($view->display) == 1);
@@ -1620,7 +1613,7 @@ function views_ui_get_display_tab_details($view, $display) {
   $plugin = views_fetch_plugin_data('display', $view->display[$display->id]->display_plugin);
   $is_display_deleted = !empty($display->deleted);
   $is_deletable = empty($plugin['no remove']);
-  // The master display cannot be cloned.
+  // The default display cannot be cloned.
   $is_default = $display->id == 'default';
   // @todo: Figure out why get_option doesn't work here.
   $is_enabled = $display->handler->get_option('enabled');
@@ -2149,6 +2142,7 @@ function views_ui_edit_view_form_submit($form, &$form_state) {
 function views_ui_edit_view_form_cancel($form, &$form_state) {
   // Remove this view from cache so configurations will be lost.
   tempstore_clear('views.view', $form_state['view']->name);
+  backdrop_set_message(t('Any changes to the %name view have been discarded.', array('%name' => $form_state['view']->get_human_name())), 'info');
   if (empty($form['view']->vid)) {
     // I seem to have to backdrop_goto here because I can't get fapi to
     // honor the redirect target. Not sure what I screwed up here.
@@ -2929,7 +2923,7 @@ function views_ui_ajax_form($js, $key, $view, $display_id = '') {
   // Automatically remove the form cache if it is set and the key does
   // not match. This way navigating away from the form without hitting
   // update will work.
-  if (isset($view->form_cache) && $view->form_cache['key'] != $key) {
+  if (isset($view->form_cache) && $key !== 0 && $view->form_cache['key'] != $key) {
     unset($view->form_cache);
   }
 
@@ -4514,11 +4508,11 @@ function views_ui_admin_settings_basic() {
     '#type' => 'fieldset',
     '#title' => t('Views UI settings'),
   );
-  $form['basic']['show_master_display'] = array(
+  $form['basic']['show_default_display'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Always show the <em>Master</em> display'),
-    '#description' => t('Show the <em>Master</em> (i.e. default) display, which is otherwise hidden.'),
-    '#default_value' => $config->get('show_master_display'),
+    '#title' => t('Always show the <em>Default</em> display'),
+    '#description' => t('Show the <em>Default</em> (i.e. default) display, which is otherwise hidden.'),
+    '#default_value' => $config->get('show_default_display'),
   );
   $form['basic']['display_embed'] = array(
     '#type' => 'checkbox',
@@ -4864,7 +4858,7 @@ function _views_sort_types($a, $b) {
  * @todo Remove this function once configuring the display title is possible.
  */
 function views_ui_get_display_label($view, $display_id, $check_changed = TRUE) {
-  $title = $display_id == 'default' ? t('Master') : $view->display[$display_id]->display_title;
+  $title = $display_id == 'default' ? t('Default') : $view->display[$display_id]->display_title;
   $title = views_ui_truncate($title, 25);
 
   if ($check_changed && !empty($view->changed_display[$display_id])) {

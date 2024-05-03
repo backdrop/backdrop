@@ -606,6 +606,20 @@ function path_get_info() {
           'batch file path' => backdrop_get_path('module', $module),
         );
         $all_info[$path_type] = $path_info;
+
+        // Backdrop core 1.26.2 introduced a 'pattern label' key in
+        // hook_path_info() (in addition to the 'pattern description' key), in
+        // order to allow both a label and a description to be specified
+        // individually for the default URL alias pattern field.
+        //
+        // Earlier implementations of the hook only allowed a 'pattern
+        // description' key, which was used as a label. Here, we provide
+        // backwards compatibility by moving the text specified in the 'pattern
+        // description' key to the 'pattern label' key.
+        if (!isset($path_info['pattern label']) && isset($path_info['pattern description'])) {
+          $path_info['pattern label'] = $path_info['pattern description'];
+          unset($path_info['pattern description']);
+        }
       }
     }
     backdrop_alter('path_info', $all_info);

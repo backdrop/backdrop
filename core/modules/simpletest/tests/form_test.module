@@ -307,6 +307,13 @@ function form_test_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
+  $items['form-test/textarea-resize'] = array(
+    'title' => 'FAPI test for resizable textarea',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('form_test_resizable_textarea'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
 
   return $items;
 }
@@ -2486,6 +2493,47 @@ function _form_test_checkboxes_zero_no_redirect($form, &$form_state) {
 }
 
 /**
+ * Menu callback for form-test/textarea-resize.
+ */
+function form_test_resizable_textarea($form, &$form_state) {
+  $form['text-true'] = array(
+    '#type' => 'textarea',
+    '#title' => 'Test',
+    '#resizable' => TRUE,
+  );
+  $form['text-false'] = array(
+    '#type' => 'textarea',
+    '#title' => 'Test',
+    '#resizable' => FALSE,
+  );
+  $form['text-vertical'] = array(
+    '#type' => 'textarea',
+    '#title' => 'Test',
+    '#resizable' => 'vertical',
+  );
+  $form['text-horizontal'] = array(
+    '#type' => 'textarea',
+    '#title' => 'Test',
+    '#resizable' => 'horizontal',
+  );
+  $form['text-none'] = array(
+    '#type' => 'textarea',
+    '#title' => 'Test',
+    '#resizable' => 'none',
+  );
+  $form['text-wrong'] = array(
+    '#type' => 'textarea',
+    '#title' => 'Test',
+    '#resizable' => 'true',
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => 'Save',
+  );
+  return $form;
+}
+
+/**
  * Menu callback returns two instances of the same form.
  */
 function form_test_double_form() {
@@ -2529,11 +2577,11 @@ function form_test_system_config_form() {
   );
 
   // Test single-element overrides.
-  $sysconfig = config('system.core');
+  $system_config = config('system.core');
   $form['rss_description'] = array(
     '#type' => 'textfield',
     '#title' => 'xyz',
-    '#default_value' => $sysconfig->get('rss_description'),
+    '#default_value' => $system_config->get('rss_description'),
     '#config' => 'system.core',
   );
 

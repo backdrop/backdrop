@@ -5,34 +5,6 @@
  */
 
 /**
- * Renders an icon to display in the administration bar.
- *
- * @ingroup themeable
- */
-function theme_admin_bar_icon($variables) {
-  return t('Home');
-}
-
-/**
-* Renders a page icon to display in the administration bar.
-*
-* @ingroup themeable
-*/
-function theme_admin_bar_icon_page($variables) {
- return t('This page');
-}
-
-/**
-* Renders a language icon to display in the administration bar.
-*
-* @ingroup themeable
-*/
-function theme_admin_bar_icon_locale($variables) {
-  global $language;
-  return isset($language->native) ? $language->native : $language->name;
-}
-
-/**
  * Render a themed list of links.
  *
  * @param $variables
@@ -72,7 +44,12 @@ function theme_admin_bar_links($variables) {
     $elements[$path] += array(
       '#attributes' => array(),
       '#options' => array(),
+      '#title' => NULL,
     );
+
+    // Increment the level for children items.
+    $elements[$path]['#level'] = $elements['#level'] + 1;
+
     // Render children to determine whether this link is expandable.
     if (isset($elements[$path]['#type']) || isset($elements[$path]['#theme']) || isset($elements[$path]['#pre_render'])) {
       $elements[$path]['#children'] = backdrop_render($elements[$path]);
@@ -83,8 +60,6 @@ function theme_admin_bar_links($variables) {
         $elements[$path]['#attributes']['class'][] = 'expandable';
       }
       if (isset($elements[$path]['#attributes']['class'])) {
-        $elements[$path]['#attributes']['class'] = $elements[$path]['#attributes']['class'];
-
         // Only add additional classes to top-level links.
         if (substr_count($path, '/') <= 1 ) {
           $class = backdrop_clean_css_identifier($path);
@@ -92,6 +67,33 @@ function theme_admin_bar_links($variables) {
         }
       }
     }
+
+    // Prepare an icon string if any for this menu item. Only allow icons on
+    // the first two tiers of items.
+    $icon = '';
+    if ($elements[$path]['#level'] < 2) {
+      if (isset($elements[$path]['#options']['icon'])) {
+        // If 'icon' is set to an empty string or FALSE, do not add an icon.
+        if ($elements[$path]['#options']['icon']) {
+          $icon = icon($elements[$path]['#options']['icon'], array('immutable' => TRUE));
+        }
+      }
+      else {
+        $arrow_direction = $GLOBALS['language']->direction ? 'left' : 'right';
+        $icon = icon('caret-circle-' . $arrow_direction . '-fill', array('immutable' => TRUE));
+      }
+    }
+
+    // Prepare the title as well.
+    if (!empty($elements[$path]['#options']['html'])) {
+      $title = $elements[$path]['#title'];
+    }
+    else {
+      $title = check_plain($elements[$path]['#title']);
+    }
+
+    $link_text = '<span class="admin-bar-link-icon">' . $icon . '</span>';
+    $link_text .= '<span class="admin-bar-link-text">' . $title . '</span>';
 
     $link = '';
     // Handle menu links.
@@ -103,21 +105,18 @@ function theme_admin_bar_links($variables) {
         $elements[$path]['#options']['attributes']['class'][] = 'admin-bar-destination';
       }
 
-      $link = l($elements[$path]['#title'], $elements[$path]['#href'], $elements[$path]['#options']);
+      // Append the icon to the sanitized title.
+      $options = $elements[$path]['#options'];
+      $options['html'] = TRUE;
+      $link = l($link_text, $elements[$path]['#href'], $options);
     }
     // Handle plain text items, but do not interfere with menu additions.
     elseif (!isset($elements[$path]['#type']) && isset($elements[$path]['#title'])) {
-      if (!empty($elements[$path]['#options']['html'])) {
-        $title = $elements[$path]['#title'];
-      }
-      else {
-        $title = check_plain($elements[$path]['#title']);
-      }
       $attributes = '';
       if (isset($elements[$path]['#options']['attributes'])) {
         $attributes = backdrop_attributes($elements[$path]['#options']['attributes']);
       }
-      $link = '<span' . $attributes . '>' . $title . '</span>';
+      $link = '<span' . $attributes . '>' . $link_text . '</span>';
     }
 
     $output .= '<li' . backdrop_attributes($elements[$path]['#attributes']) . '>';
@@ -130,12 +129,4 @@ function theme_admin_bar_links($variables) {
     $output = '<ul' . $attributes . '>' . $output . '</ul>';
   }
   return $output;
-}
-
-/**
- * Preprocesses variables for theme_admin_bar_icon().
- */
-function template_preprocess_admin_bar_icon(&$variables) {
-  $variables['src'] = $GLOBALS['base_url'] . '/' . backdrop_get_path('module', 'admin_bar') . '/images/home.png';
-  $variables['alt'] = t('Home');
 }

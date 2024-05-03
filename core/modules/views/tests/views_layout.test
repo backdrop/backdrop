@@ -116,7 +116,7 @@ class ViewsLayoutsTest extends BackdropWebTestCase {
 
     // Add the view block to the content.
     $this->backdropGet('admin/structure/layouts/manage/test_context_layout/add-block/editor/content');
-    $this->clickLink('View: Layout Context Test (User account)');
+    $this->clickLink('View: Layout Context Test (User account) (Block)');
     $this->backdropPost(NULL, array(), 'Add block');
 
     // Save the layout.

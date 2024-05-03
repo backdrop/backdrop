@@ -172,7 +172,7 @@ function hook_search_admin() {
  */
 function hook_search_execute($keys = NULL, $conditions = NULL) {
   // Build matching conditions
-  $query = db_select('search_index', 'i', array('target' => 'slave'))->extend('SearchQuery')->extend('PagerDefault');
+  $query = db_select('search_index', 'i', array('target' => 'replica'))->extend('SearchQuery')->extend('PagerDefault');
   $query->join('node', 'n', 'n.nid = i.sid');
   $query
     ->condition('n.status', 1)

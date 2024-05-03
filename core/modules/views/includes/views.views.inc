@@ -137,13 +137,19 @@ function views_views_plugins() {
     'display' => array(
       // Default settings for all display plugins.
       'default' => array(
-        'title' => t('Master'),
+        'title' => t('Default'),
         'help' => t('Default settings for this view.'),
         'handler' => 'views_plugin_display_default',
         'theme' => 'views_view',
         'no ui' => TRUE,
         'no remove' => TRUE,
-        'js' => array('core/misc/form.js', 'core/misc/collapse.js', 'core/misc/textarea.js', 'core/misc/tabledrag.js', 'core/misc/autocomplete.js', 'core/misc/states.js'),
+        'js' => array(
+          'core/misc/form.js',
+          'core/misc/collapse.js',
+          'core/misc/tabledrag.js',
+          'core/misc/autocomplete.js',
+          'core/misc/states.js',
+        ),
         'use ajax' => TRUE,
         'use pager' => TRUE,
         'use more' => TRUE,

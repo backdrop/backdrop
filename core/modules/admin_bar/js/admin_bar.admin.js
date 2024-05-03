@@ -17,30 +17,34 @@ Backdrop.behaviors.adminBarPermissionsSetupHelp = {
       var $admin = $(this).find('input[name$="[access administration pages]"]');
       var $menu = $(this).find('input[name$="[access administration bar]"]');
 
-      // Retrieve the permission label - without description.
-      var adminPermission = $admin.eq(0).parents('td').prev().children().get(0).firstChild.textContent.trim();
-      var menuPermission = $menu.eq(0).parents('td').prev().children().get(0).firstChild.textContent.trim();
+      // Only proceed if both admin bar and admin pages permissions are present
+      // on the page.
+      if ($admin.length > 0 && $menu.length > 0) {
+        // Retrieve the permission label - without description.
+        var adminPermission = $admin.eq(0).parents('td').prev().children().get(0).firstChild.textContent.trim();
+        var menuPermission = $menu.eq(0).parents('td').prev().children().get(0).firstChild.textContent.trim();
 
-      $admin.each(function (index) {
-        // Only proceed if both are not enabled already.
-        if (!(this.checked && $menu[index].checked)) {
-          // Stack both checkboxes and attach a click event handler to both.
-          $(this).add($menu[index]).on('click', function () {
-            // Do nothing when disabling a permission.
-            if (this.checked) {
-              // Figure out which is the other, check whether it still disabled,
-              // and if so, ask whether to auto-enable it.
-              var other = (this == $admin[index] ? $menu[index] : $admin[index]);
-              if (!other.checked && confirm(Backdrop.t('Also allow !name role the "!permission" permission? This is usually required to display any pages within the administration bar.', {
-                '!name': $roles[index].textContent,
-                '!permission': (this == $admin[index] ? menuPermission : adminPermission)
-              }))) {
-                other.checked = 'checked';
+        $admin.each(function (index) {
+          // Only proceed if both are not enabled already.
+          if (!(this.checked && $menu[index].checked)) {
+            // Stack both checkboxes and attach a click event handler to both.
+            $(this).add($menu[index]).on('click', function () {
+              // Do nothing when disabling a permission.
+              if (this.checked) {
+                // Figure out which is the other, check whether it still disabled,
+                // and if so, ask whether to auto-enable it.
+                var other = (this == $admin[index] ? $menu[index] : $admin[index]);
+                if (!other.checked && confirm(Backdrop.t('Also allow !name role the "!permission" permission? This is usually required to display any pages within the administration bar.', {
+                  '!name': $roles[index].textContent,
+                  '!permission': (this == $admin[index] ? menuPermission : adminPermission)
+                }))) {
+                  other.checked = 'checked';
+                }
               }
-            }
-          });
-        }
-      });
+            });
+          }
+        });
+      }
     });
   }
 };

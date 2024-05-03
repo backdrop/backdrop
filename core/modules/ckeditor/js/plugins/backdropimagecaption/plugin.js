@@ -1,6 +1,6 @@
 /**
  * @file
- * Backdrop Image Caption plugin.
+ * Backdrop CKEditor 4 Image Caption plugin.
  *
  * This alters the existing CKEditor image2 widget plugin, which is already
  * altered by the Backdrop Image plugin, to:

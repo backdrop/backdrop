@@ -430,17 +430,15 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
   /**
    * Add another Select query to UNION to this one.
    *
-   * Union queries consist of two or more queries whose
-   * results are effectively concatenated together. Queries
-   * will be UNIONed in the order they are specified, with
-   * this object's query coming first. Duplicate columns will
-   * be discarded. All forms of UNION are supported, using
-   * the second '$type' argument.
+   * Union queries consist of two or more queries whose results are effectively
+   * concatenated together. Queries  will be UNION'ed in the order they are
+   * specified, with this object's query coming first. Duplicate columns will be
+   * discarded. All forms of UNION are supported, using the second '$type'
+   * argument.
    *
-   * Note: All queries UNIONed together must have the same
-   * field structure, in the same order. It is up to the
-   * caller to ensure that they match properly. If they do
-   * not, an SQL syntax error will result.
+   * Note: All queries UNION'ed together must have the same field structure, in
+   * the same order. It is up to the caller to ensure that they match properly.
+   * If they do not, an SQL syntax error will result.
    *
    * @param $query
    *   The query to UNION to this query.
