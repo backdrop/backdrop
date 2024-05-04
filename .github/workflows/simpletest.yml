@@ -17,6 +17,9 @@ jobs:
         database-versions: ['mariadb-10.3']
 
     steps:
+      - name: Get current date
+        id: date
+        run: echo "::set-output name=date::$(date +'%Y.%m.%d-%H:%M:%S')"
       - name: Checkout
         uses: actions/checkout@v4
 
@@ -54,5 +57,5 @@ jobs:
         uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: ${{ github.event.number }}-simpletest-${{ matrix.php-versions }}-${{ matrix.fraction }}
+          name: ${{ github.event.number }}-simpletest-${{ matrix.php-versions }}-${{ matrix.fraction }}-${{ steps.date.outputs.date }}
           path: files/simpletest/verbose
