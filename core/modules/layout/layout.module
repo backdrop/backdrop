@@ -2379,7 +2379,7 @@ function layout_layout_info() {
       'flexible' => TRUE,
       'type' => 'layout',
       'path' => 'templates',
-      'preview' => 'flexible_template.png',
+      'preview' => 'flexible_template.svg',
       'libraries' => array('bootstrap4-gs'),
     );
 

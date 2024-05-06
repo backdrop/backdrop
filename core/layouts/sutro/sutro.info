@@ -22,7 +22,7 @@ default region = content
 ; stylesheets[all][] = sutro.css
 
 ; Preview
-preview = sutro.png
+preview = sutro.svg
 
 ; Include the Bootstrap4 Grid System
 libraries[] = bootstrap4-gs
