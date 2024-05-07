@@ -117,7 +117,8 @@ function contact_menu() {
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('contact_site_form'),
     'access arguments' => array('access site-wide contact form'),
-    'type' => MENU_SUGGESTED_ITEM,
+    'type' => MENU_NORMAL_ITEM,
+    'menu_name' => 'main-menu',
     'file' => 'contact.pages.inc',
   );
   $items['user/%user/contact'] = array(
