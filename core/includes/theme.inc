@@ -1015,8 +1015,8 @@ function backdrop_find_base_themes($themes, $key, $used_keys = array()) {
  */
 function theme($hook, $variables = array()) {
   // If called before all modules are loaded, we do not necessarily have a full
-  // theme registry to work with, and therefore cannot process the theme
-  // request properly. See also _theme_load_registry().
+  // theme registry to work with, and therefore cannot process the theme request
+  // properly. See also _theme_load_registry().
   if (!module_load_all(NULL) && !defined('MAINTENANCE_MODE')) {
     throw new Exception(t('theme() may not be called until all modules are loaded.'));
   }
