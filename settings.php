@@ -16,7 +16,25 @@ $database = 'mysql://user:pass@localhost/database_name';
 $database_prefix = '';
 
 /**
- * Site configuration files location.
+ * Configuration storage
+ *
+ * By default configuration will be stored in the filesystem, using the
+ * directories specified in the $config_directories setting. Optionally,
+ * configuration can be store in the database instead of the filesystem.
+ * Switching this option on a live site is not currently supported without some
+ * manual work.
+ *
+ * Example using the database for live and file storage for staging:
+ * @code
+ * $settings['config_active_class'] = 'ConfigDatabaseStorage';
+ * $settings['config_staging_class'] = 'ConfigFileStorage';
+ * @endcode
+ */
+// $settings['config_active_class'] = 'ConfigFileStorage';
+// $settings['config_staging_class'] = 'ConfigFileStorage';
+
+/**
+ * Site configuration files location (if using file storage for configuration)
  *
  * By default these directories are stored within the files directory with a
  * hashed path. For the best security, these directories should be in a location
@@ -400,10 +418,10 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html lang="en"><head><title>404 No
 /**
  * Drupal backwards compatibility.
  *
- * By default, Backdrop 1.0 includes a compatibility layer to keep it compatible
+ * By default, Backdrop 1.x includes a compatibility layer to keep it compatible
  * with Drupal 7 APIs. Backdrop core itself does not use this compatibility
- * layer however. You may disable it if all the modules you're running were
- * built for Backdrop.
+ * layer however. You may disable it if all the modules and themes used on the
+ * site were built for Backdrop.
  */
 $settings['backdrop_drupal_compatibility'] = TRUE;
 

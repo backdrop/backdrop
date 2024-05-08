@@ -931,6 +931,7 @@ function file_update_1005() {
       'description' => 'A document file is written information.',
       'mimetypes' => array(
           'text/plain',
+          // cspell:disable
           'application/msword',
           'application/vnd.ms-excel',
           'application/pdf',
@@ -941,6 +942,7 @@ function file_update_1005() {
           'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
           'application/vnd.openxmlformats-officedocument.presentationml.presentation',
           'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          // cspell:enable
       ),
       'disabled' => FALSE,
       'storage' => 4,

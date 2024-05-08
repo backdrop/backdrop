@@ -263,13 +263,16 @@ function system_requirements($phase) {
 
     // Check/create .htaccess files for active and staging config directories.
     foreach (array('active', 'staging') as $type) {
-      $config_directory = config_get_config_directory($type);
-      file_save_htaccess($config_directory);
+      $config_storage = config_get_config_storage($type);
+      if (is_a($config_storage, 'ConfigFileStorage')) {
+        $config_directory = config_get_config_directory($type);
+        file_save_htaccess($config_directory);
 
-      $htaccess_files[$config_directory . '/.htaccess'] = array(
-        'title' => $t('%type config directory', array('%type' => backdrop_ucfirst($type))),
-        'directory' => $config_directory,
-      );
+        $htaccess_files[$config_directory . '/.htaccess'] = array(
+          'title' => $t('%type config directory', array('%type' => backdrop_ucfirst($type))),
+          'directory' => $config_directory,
+        );
+      }
     }
 
     // Try to write the .htaccess files first, to prevent false alarms in case
@@ -1952,6 +1955,7 @@ function system_update_1015() {
   $config = config('system.core');
   $config->set('rss_description', update_variable_get('feed_description', ''));
   $config->set('rss_limit', update_variable_get('feed_default_items', 10));
+  // cspell:disable-next-line
   $config->set('rss_viewmode', update_variable_get('feed_item_length', 'fulltext'));
   $config->save();
 
@@ -1994,7 +1998,7 @@ function system_update_1017() {
   $config = config('system.core');
   $config->set('log_row_limit', update_variable_get('dblog_row_limit', 1000));
   $config->set('log_identity', update_variable_get('syslog_identity', 'backdrop'));
-  $config->set('log_facility', update_variable_get('syslog_facility', LOG_LOCAL0));
+  $config->set('log_facility', update_variable_get('syslog_facility', ''));
   $config->set('log_format', update_variable_get('syslog_format', '!base_url|!timestamp|!type|!ip|!request_uri|!referer|!uid|!link|!message'));
   $config->set('error_level', $error_level);
   $config->save();
