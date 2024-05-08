@@ -1007,6 +1007,11 @@ function backdrop_find_base_themes($themes, $key, $used_keys = array()) {
  * @see themeable
  * @see hook_theme()
  * @see template_preprocess()
+ *
+ * @since 1.0.0 The template process layer and process functions (e.g.
+ *   template_process_HOOK(), MODULE_process_HOOK(), THEME_process_HOOK()) have
+ *   been removed.
+ *   See https://docs.backdropcms.org/change-records/removed-the-theme-process-layer
  */
 function theme($hook, $variables = array()) {
   // If called before all modules are loaded, we do not necessarily have a full
