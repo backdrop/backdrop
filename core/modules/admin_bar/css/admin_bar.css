@@ -1,15 +1,15 @@
-
 /**
  * @file
  * Administration bar.
  *
  * Implementation of Sons of Suckerfish Dropdowns.
  *
- * @see www.htmldog.com/articles/suckerfish
+ * @see https://www.htmldog.com/articles/suckerfish
  */
 
 #admin-bar {
-  font: normal 11px "Lucida Grande", Verdana, sans-serif;
+  /* Adjusting font size will scale the entire admin menu, including icons. */
+  font: normal 12px "Lucida Grande", Verdana, sans-serif;
   left: 0;
   position: absolute;
   text-align: left; /* LTR */
@@ -29,11 +29,11 @@
 }
 /* When body is a contextual links region. */
 .contextual-links-region #admin-bar {
-  top: -33px;
+  top: -2.25em;
 }
 
 .admin-bar body {
-  border-top: 33px solid #2D2D2D !important;
+  border-top: 2.25em solid #2D2D2D !important;
 }
 
 /* Top level items. */
@@ -60,174 +60,32 @@
   width: auto;
 }
 #admin-bar-menu.top-level > li > ul > li > a.active-trail {
-  text-shadow: #333 0 1px 0;
-  background-color: #9F9F9F;
-}
-
-/* Home link. */
-#admin-bar .dropdown li.admin-bar-icon > a {
-  background: transparent url(../images/home--white--64.png) 5% center no-repeat;
-  background-size: 16px;
-  padding-left: 28px; /* LTR */
-}
-[dir="rtl"] #admin-bar .dropdown li.admin-bar-icon > a {
-  background-position: 95% center;
-  padding-left: 10px;
-  padding-right: 28px;
-}
-
-/* Back to Site arrow. */
-
-#admin-bar .dropdown li.admin-bar-icon > a.escape {
-  background-image: url("../images/chevron-disc-left--white-64.png");
-}
-[dir="rtl"] #admin-bar .dropdown li.admin-bar-icon > a.escape {
-  background-image: url("../images/chevron-disc-right--white-64.png");
-}
-
-/* Admin bar label. */
-#admin-bar #admin-bar-menu.dropdown li > span.menu {
-  background: transparent url(../images/bars--white--64.png) 5% center no-repeat; /* LTR */
-  padding-left: 28px; /* LTR */
-  background-size: 16px;
-}
-[dir="rtl"] #admin-bar #admin-bar-menu.dropdown li > span.menu {
-  background-position: 95% center;
-  padding-left: 10px;
-  padding-right: 28px;
-}
-
-/* All admin bar menu links. */
-#admin-bar #admin-bar-menu > li > .dropdown > li > a {
-  padding-left: 28px; /* LTR */
-}
-[dir="rtl"] #admin-bar #admin-bar-menu > li > .dropdown > li > a {
-  padding-left: 10px;
-  padding-right: 28px;
+  text-shadow: #333333 0 1px 0;
+  background-color: #9f9f9f;
 }
 
 /* Specific admin bar menu links. */
-#admin-bar #admin-bar-menu > li > .dropdown > li > a.admin-dashboard {
-  background: transparent url(../images/tachometer-alt--white--64.png) 5% center no-repeat;
-  background-size: 16px;
+#admin-bar svg.icon {
+  width: 2em;
+  height: 2em;
+  margin: -0.2em 0;
+  padding-right: 0.5em; /* LTR */
+  box-sizing: content-box;
+  vertical-align: bottom;
 }
-#admin-bar #admin-bar-menu > li > .dropdown > li > a.admin-content {
-  background: transparent url(../images/pencil-alt--white--64.png) 5% center no-repeat;
-  background-size: 16px;
-}
-#admin-bar #admin-bar-menu > li > .dropdown > li > a.admin-people {
-  background: transparent url(../images/users--white--64.png) 5% center no-repeat;
-  background-size: 16px;
-}
-#admin-bar #admin-bar-menu > li > .dropdown > li > a.admin-appearance {
-  background: transparent url(../images/palette--white--64.png) 5% center no-repeat;
-  background-size: 16px;
-}
-#admin-bar #admin-bar-menu > li > .dropdown > li > a.admin-modules {
-  background: transparent url(../images/puzzle-piece--white--64.png) 5% center no-repeat;
-  background-size: 16px;
-}
-#admin-bar #admin-bar-menu > li > .dropdown > li > a.admin-structure {
-  background: transparent url(../images/layer-group--white--64.png) 5% center no-repeat;
-  background-size: 16px;
-}
-#admin-bar #admin-bar-menu > li > .dropdown > li > a.admin-config {
-  background: transparent url(../images/cog--white--64.png) 5% center no-repeat;
-  background-size: 16px;
-}
-#admin-bar #admin-bar-menu > li > .dropdown > li > a.admin-devel {
-  background: transparent url(../images/code--white--64.png) 5% center no-repeat;
-  background-size: 16px;
-}
-#admin-bar #admin-bar-menu > li > .dropdown > li > a.admin-reports {
-  background: transparent url(../images/info-circle--white--64.png) 5% center no-repeat;
-  background-size: 16px;
-}
-[dir="rtl"] #admin-bar #admin-bar-menu > li > .dropdown > li > a {
-  background-position: 95% center;
-}
-
-/* Admin tasks. */
-#admin-bar #admin-bar-extra.dropdown li > span.extra {
-  background: transparent url(../images/clipboard-check--white--64.png) 5% center no-repeat; /* LTR */
-  padding-left: 28px; /* LTR */
-  background-size: 16px;
-}
-[dir="rtl"] #admin-bar #admin-bar-extra.dropdown li > span.extra {
-  background-position: 95% center;
-  padding-left: 10px;
-  padding-right: 28px;
-}
-
-/* Locale link in Admin bar */
-#admin-bar .dropdown .admin-bar-locale-links > span {
-  background: transparent url(../images/language--white--64.png) 95% center no-repeat;
-  background-size: 20px;
-  padding-right: 30px; /* LTR */
-}
-
-[dir="rtl"] #admin-bar .dropdown .admin-bar-locale-links > span {
-  background-position: 5% center;
-  padding-right: 10px;
-  padding-left: 30px;
-}
-
-/* Page link. */
-#admin-bar .dropdown .admin-bar-page-links > span {
-  background: transparent url(../images/page--white--64.png) 90% center no-repeat;
-  background-size: 14px;
-  padding-right: 30px; /* LTR */
-}
-[dir="rtl"] #admin-bar .dropdown .admin-bar-page-links > span {
-  background-position: 10% center;
-  padding-right: 10px;
-  padding-left: 30px;
-}
-
-/* Logged in users. */
-#admin-bar .dropdown .admin-bar-users > a {
-  background: transparent url(../images/user-friends--white--64.png) 90% center no-repeat;
-  background-size: 16px;
-  padding-right: 28px; /* LTR */
-}
-[dir="rtl"] #admin-bar .dropdown .admin-bar-users > a {
-  background-position: 10% center;
-  padding-right: 10px;
-  padding-left: 28px;
-}
-
-/* My Account link. */
-#admin-bar .dropdown .admin-bar-account > a {
-  background: transparent url(../images/user-circle--white--64.png) 90% center no-repeat; /* LTR */
-  padding-right: 28px; /* LTR */
-  background-size: 16px;
-}
-[dir="rtl"] #admin-bar .dropdown .admin-bar-account > a {
-  background-position: 10% center;
-  padding-right: 10px;
-  padding-left: 28px;
-}
-
-/* Log Out link. */
-#admin-bar .dropdown .admin-bar-logout > a {
-  background: transparent url(../images/sign-out--white--64.png) 90% center no-repeat; /* LTR */
-  background-size: 16px;
-  padding-right: 28px; /* LTR */
-}
-[dir="rtl"] #admin-bar .dropdown .admin-bar-logout > a {
-  background-position: 10% center;
-  padding-right: 10px;
-  padding-left: 28px;
+[dir="rtl"] #admin-bar svg.icon {
+  padding-right: 0;
+  padding-left: 0.5em;
 }
 
 /* Restore active and hover colors. */
 #admin-bar #admin-bar-menu > li > .dropdown > li > a.expanded-trail,
 #admin-bar #admin-bar-extra > li > .dropdown > li > a:hover,
 #admin-bar #admin-bar-icon li.admin-bar-icon > a:hover {
-  background-color: #45454A;
+  background-color: #45454a;
 }
 #admin-bar #admin-bar-menu > li > .dropdown > li > a.active-trail {
-  background-color: #9F9F9F;
+  background-color: #9f9f9f;
 }
 
 #admin-bar li {
@@ -237,7 +95,7 @@
 
 /* Dropdown lists. */
 #admin-bar .dropdown {
-  line-height: 1.4em;
+  line-height: 1.8em;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -248,7 +106,7 @@
   vertical-align: top;
 }
 #admin-bar-wrapper {
-  padding: 0 5px;
+  padding: 0 0.5em;
 }
 #admin-bar-wrapper > .dropdown {
   background: transparent;
@@ -257,7 +115,7 @@
 #admin-bar li > span {
   background: transparent none;
   border: none;
-  color: #EEE;
+  color: #eeeeee;
   font-weight: normal;
   text-align: left; /* LTR */
   text-decoration: none;
@@ -269,20 +127,20 @@
 #admin-bar .dropdown li > a,
 #admin-bar .dropdown li > span {
   display: block;
-  padding: 9px 12px;
+  padding: 0.75em 1.5em 0.75em 1em;
 }
 
 #admin-bar a.expanded-trail,
 #admin-bar span.expanded-trail {
-  background-color: #45454A;
+  background-color: #45454a;
 }
 
 #admin-bar .dropdown .admin-bar-tab a {
   border-left: none; /* LTR */
-  border-right: 1px solid #52565E; /* LTR */
+  border-right: 1px solid #52565e; /* LTR */
 }
 [dir="rtl"] #admin-bar .dropdown .admin-bar-tab a {
-  border-left: 1px solid #52565E;
+  border-left: 1px solid #52565e;
   border-right: none;
 }
 #admin-bar .dropdown li li a {
@@ -312,10 +170,9 @@
 
 /* First level items. */
 #admin-bar .dropdown li li {
-  width: 160px; /* Required for Opera. */
+  width: 15em; /* Required for Opera. */
 }
 #admin-bar .dropdown li li li {
-  filter: Alpha(opacity=100);
   opacity: 1;
 }
 
@@ -325,10 +182,10 @@
 #admin-bar .dropdown li ul {
   display: none;
   left: -999em; /* LTR */
-  line-height: 1.2em;
+  line-height: 1.7em;
   margin: 0;
   position: absolute;
-  width: 160px;
+  width: 15em;
 }
 [dir="rtl"] #admin-bar .dropdown li ul {
   left: auto;
@@ -336,17 +193,17 @@
 
 /* Third-and-above-level lists. */
 #admin-bar .dropdown li li.expandable ul {
-  margin: -32px 0 0 160px; /* LTR */
+  margin: -3.2em 0 0 15em; /* LTR */
 }
 #admin-bar .dropdown li li.expandable.outside-right ul {
-  margin-left: -160px; /* LTR */
+  margin-left: -15em; /* LTR */
 }
 [dir="rtl"] #admin-bar .dropdown li li.expandable ul {
-  margin-right: 160px;
+  margin-right: 15em;
   margin-left: 0;
 }
 [dir="rtl"] #admin-bar .dropdown li li.expandable.outside-left ul {
-  margin-right: -160px;
+  margin-right: -15em;
 }
 
 /* Lists nested under hovered list items. */
@@ -360,11 +217,27 @@
 
 /* Second-and-more-level hovering. */
 #admin-bar .dropdown li li.expandable > a {
-  background: #45454A url(../images/arrow.png) no-repeat 145px center; /* LTR */
+  background: #45454a;
+  position: relative;
 }
-[dir="rtl"] #admin-bar .dropdown li li.expandable > a {
-  background-image: url(../images/arrow-rtl.png);
-  background-position: 5px center;
+#admin-bar .dropdown li li.expandable > a::before {
+  content: '';
+  /*noinspection CssUnresolvedCustomProperty*/
+  mask-image: var(--icon-arrow-right); /* LTR */
+  mask-repeat: no-repeat;
+  mask-position: center center;
+  background: #ffffff;
+  width: 1em;
+  height: 100%;
+  margin: -0.75em 0;
+  position: absolute;
+  right: 1em; /* LTR */
+}
+[dir="rtl"] #admin-bar .dropdown li li.expandable > a::before {
+  /*noinspection CssUnresolvedCustomProperty*/
+  mask-image: var(--icon-arrow-left);
+  right: auto;
+  left: 1em;
 }
 #admin-bar .dropdown li li a.expanded-trail {
   background-color: #111;
@@ -379,10 +252,6 @@
 }
 #admin-bar-icon .admin-bar-icon img {
   vertical-align: center;
-}
-/* Add a border when using the default Backdrop logo. */
-#admin-bar-icon .admin-bar-icon img[src$="core/misc/favicon.ico"] {
-  outline: 1px solid #45454A;
 }
 
 /* Extras menu. */
@@ -400,35 +269,46 @@
 [dir="rtl"] #admin-bar-extra .dropdown li {
   direction: rtl;
 }
+#admin-bar-extra svg.icon {
+  float: right; /* LTR */
+  margin-left: 0.75em; /* LTR */
+  margin-right: 0; /* LTR */
+}
+[dir="rtl"] #admin-bar-extra svg.icon {
+  float: left;
+  margin-left: 0;
+  margin-right: 0.75em;
+}
 
 /* Search form. */
 #admin-bar .admin-bar-search .form-item {
   margin: 0;
-  padding: 6px;
+  padding: 0.5em;
 }
 #admin-bar .top-level .admin-bar-search {
-  width: 140px;
+  width: 12em;
 }
 #admin-bar .top-level .admin-bar-search .form-item {
-  padding: 6px 0 0;
+  padding: 0.5em 0 0;
 }
 #admin-bar .admin-bar-search input {
-  background: #fff url(../images/search--gray--64.png) center right no-repeat;
-  background-position: right 5px center; /* LTR */
-  background-size: 12px;
+  /*noinspection CssUnresolvedCustomProperty*/
+  background: #fff var(--icon-magnifying-glass) center right no-repeat;
+  background-position: right 0.5em center; /* LTR */
+  background-size: 1.2em;
   border: none;
   border-radius: 0;
   box-shadow: none;
-  font-size: 12px;
   margin: 0;
   outline: none;
-  padding: 5px 22px 3px 8px; /* LTR */
+  padding: 0.5em 2em 0.5em 1em; /* LTR */
   width: 100%;
   box-sizing: border-box;
 }
 [dir="rtl"] #admin-bar .admin-bar-search input {
-  background-position: left 5px center;
-  padding: 5px 8px 3px 22px;
+  background-position: left 0.5em center;
+  padding-left: 2em;
+  padding-right: 1em;
 }
 
 #admin-bar .admin-bar-search-results .dropdown {
@@ -438,7 +318,7 @@
 }
 #admin-bar .admin-bar-search-results .dropdown,
 #admin-bar .admin-bar-search-results .dropdown li {
-  width: 250px;
+  width: 15em;
 }
 
 #admin-bar li.active-search-item > a,
@@ -466,7 +346,6 @@ html.js fieldset.collapsible div.fieldset-wrapper {
  * Tweaks permissions, if enabled.
  */
 tr.admin-bar-tweak-permissions-processed {
-  cursor: pointer;
   cursor: hand;
 }
 tr.admin-bar-tweak-permissions-processed td.module {
@@ -476,11 +355,11 @@ tr.admin-bar-tweak-permissions-processed td.module {
 /* Alert colors. */
 #admin-bar .admin-bar-alert .error-count {
   box-sizing: content-box;
-  padding: 4px 5px 5px 4px;
+  padding: 0.5em 0.4em 0.5em 0.4em;
   display: inline-block;
-  min-width: 13px;
+  min-width: 1.2em;
   border-radius: 2em;
-  margin: -4px 0 -5px;
+  margin: -0.4em 0 -0.5em;
   text-align: center;
   background-color: #ee3d23;
   line-height: 1;

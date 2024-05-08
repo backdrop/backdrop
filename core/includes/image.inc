@@ -31,6 +31,16 @@
  */
 
 /**
+ * Default width for SVG images.
+ */
+define('IMAGE_SVG_DEFAULT_WIDTH', 200);
+
+/**
+ * Default height for SVG images.
+ */
+define('IMAGE_SVG_DEFAULT_HEIGHT', 200);
+
+/**
  * Gets a list of available toolkits.
  *
  * @return
@@ -112,7 +122,9 @@ function image_get_supported_extensions() {
   $toolkit = image_get_toolkit();
   $function = 'image_' . $toolkit . '_supported_extensions';
   if (function_exists($function)) {
-    return $function();
+    $extensions = $function();
+    $extensions[] = 'svg';
+    return $extensions;
   }
   watchdog('image', 'The selected image handling toolkit %toolkit should provide a %function callback.',
     array(
@@ -161,6 +173,18 @@ function image_get_info($filepath, $toolkit = FALSE) {
     $details = image_toolkit_invoke('get_info', $image);
     if (isset($details) && is_array($details)) {
       $details['file_size'] = filesize($filepath);
+    }
+    elseif (image_is_svg($filepath)) {
+      // Dimensions could be FALSE if the SVG is invalid, although we should
+      // have caught that on upload.
+      $dimensions = image_get_svg_dimensions($filepath);
+      $details = array(
+        'width'     => isset($dimensions['width']) ? $dimensions['width'] : IMAGE_SVG_DEFAULT_WIDTH,
+        'height'    => isset($dimensions['height']) ? $dimensions['height'] : IMAGE_SVG_DEFAULT_HEIGHT,
+        'extension' => 'svg',
+        'mime_type' => 'image/svg+xml',
+        'file_size' => filesize($filepath),
+      );
     }
   }
 
@@ -524,6 +548,108 @@ function image_hex2rgba(&$hex) {
     'blue' => hexdec($colors[3]),
     'alpha' => isset($colors[4]) ? hexdec($colors[4]) : 0,
   );
+}
+
+/**
+ * Determine if a file URI is an SVG image based on its file extension.
+ *
+ * @param string $uri
+ *   A path or URI to an image.
+ * @return bool
+ *   TRUE if the image is an SVG. FALSE if it is not.
+ */
+function image_is_svg($uri) {
+  $mimetype = file_get_mimetype($uri);
+  return $mimetype === 'image/svg+xml';
+}
+
+/**
+ * Add attributes to an SVG string.
+ *
+ * @param string $svg_content
+ *   The entire contents of an SVG image.
+ * @param array $attributes
+ *   An array of attributes to add to the SVG image. The special case of an
+ *   "alt" attribute is automatically converted to a child <title> element,
+ *   which is the accessible mechanism for alternative text within SVGs.
+ *
+ * @return string
+ *   The SVG image contents with the attributes added.
+ */
+function image_add_svg_attributes($svg_content, array $attributes) {
+  $doc = new DOMDocument();
+  $doc->loadXML($svg_content);
+
+  // Convert the alt attribute to a <title> element.
+  if (isset($attributes['alt'])) {
+      try {
+        if (strlen($attributes['alt'])) {
+          $title = $doc->createElement('title');
+          $title->textContent = $attributes['alt'];
+          $doc->firstChild->prepend($title);
+        }
+        // Remove any given <title> element if alt is an empty string.
+        elseif ($doc->firstChild->firstChild && $doc->firstChild->firstChild->nodeName === 'title') {
+          $doc->firstChild->removeChild($doc->firstChild->firstChild);
+        }
+      } catch (DOMException $e) {}
+    unset($attributes['alt']);
+  }
+
+  foreach ($attributes as $attribute_name => $attribute_value) {
+    $attribute_value = implode(' ', (array) $attribute_value);
+    if (strlen($attribute_value)) {
+      $doc->firstChild->setAttribute($attribute_name, $attribute_value);
+    }
+    else {
+      $doc->firstChild->removeAttribute($attribute_name);
+    }
+  }
+  return $doc->saveXML($doc->firstChild);
+}
+
+/**
+ * Get an SVG image's defined dimensions.
+ *
+ * @param string $uri
+ *   The URI or path to an SVG image.
+ *
+ * @return array|FALSE
+ *   An array containing the keys "width" and "height" as integer values. If the
+ *   image is an SVG but no set dimensions are available, these keys will have
+ *   NULL values. If the image is not an SVG, or the SVG file is empty or
+ *   invalid, FALSE will be returned.
+ */
+function image_get_svg_dimensions($uri) {
+  // Safety check.
+  if (!image_is_svg($uri)) {
+    return FALSE;
+  }
+
+  // Return cached dimensions if already retrieved once this request.
+  $cached_images = &backdrop_static(__FUNCTION__, array());
+  if (isset($cached_images[$uri])) {
+    return $cached_images[$uri];
+  }
+
+  // If there are no dimensions, store the dimensions as zero.
+  // Required for compatibility with image field storage.
+  $svg_dimensions = array();
+  $file_contents = file_get_contents($uri);
+  if ($file_contents && $svg = simplexml_load_string($file_contents)) {
+    foreach ($svg->attributes() as $attribute => $value) {
+      if ($attribute === 'width' || $attribute === 'height') {
+        $svg_dimensions[$attribute] = (int) $value;
+      }
+    }
+  }
+  else {
+    return FALSE;
+  }
+
+  // Save values to static cache.
+  $cached_images[$uri] = $svg_dimensions;
+  return $svg_dimensions;
 }
 
 /**

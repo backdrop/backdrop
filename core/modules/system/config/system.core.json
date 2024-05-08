@@ -25,7 +25,7 @@
     "field_purge_batch_size": 200,
     "file_not_normalized_schemes": [],
     "file_additional_public_schemes": [],
-    "file_default_allowed_extensions": "jpg jpeg gif png txt doc docx xls xlsx pdf ppt pptx pps ppsx odt ods odp mp3 mov mp4 m4a m4v mpeg avi ogg oga ogv weba webp webm",
+    "file_default_allowed_extensions": "jpg jpeg gif png txt doc docx xls xlsx pdf ppt pptx pps ppsx odt ods odp mp3 mov mp4 m4a m4v mpeg avi ogg oga ogv svg weba webp webm",
     "file_default_scheme": "public",
     "file_private_path": "",
     "file_public_path": "files",

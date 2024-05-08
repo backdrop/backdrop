@@ -427,19 +427,19 @@ function ajax_forms_test_advanced_commands_add_css_callback($form, $form_state) 
  * This form and its related submit and callback functions demonstrate
  * not validating another form element when a single Ajax element is triggered.
  *
- * The "drivertext" element is an Ajax-enabled textfield, free-form.
+ * The "driver_text" element is an Ajax-enabled textfield, free-form.
  * The "required_field" element is a textfield marked required.
  *
- * The correct behavior is that the Ajax-enabled drivertext element should
+ * The correct behavior is that the Ajax-enabled driver_text element should
  * be able to trigger without causing validation of the "required_field".
  */
 function ajax_forms_test_validation_form($form, &$form_state) {
 
-  $form['drivertext'] = array(
+  $form['driver_text'] = array(
     '#title' => t('AJAX-enabled textfield.'),
     '#description' => t("When this one AJAX-triggers and the spare required field is empty, you should not get an error."),
     '#type' => 'textfield',
-    '#default_value' => !empty($form_state['values']['drivertext']) ? $form_state['values']['drivertext'] : "",
+    '#default_value' => !empty($form_state['values']['driver_text']) ? $form_state['values']['driver_text'] : "",
     '#ajax' => array(
       'callback' => 'ajax_forms_test_validation_form_callback',
       'wrapper' => 'message_area',
@@ -469,11 +469,15 @@ function ajax_forms_test_validation_form_submit($form, $form_state) {
 }
 
 /**
- * Ajax callback for the 'drivertext' element of the validation form.
+ * Ajax callback for the 'driver_text' element of the validation form.
  */
 function ajax_forms_test_validation_form_callback($form, $form_state) {
   backdrop_set_message("ajax_forms_test_validation_form_callback invoked");
-  backdrop_set_message(t("Callback: drivertext=%drivertext, spare_required_field=%spare_required_field", array('%drivertext' => $form_state['values']['drivertext'], '%spare_required_field' => $form_state['values']['spare_required_field'])));
+  $replacements = array(
+    '%driver_text' => $form_state['values']['driver_text'],
+    '%spare_required_field' => $form_state['values']['spare_required_field'],
+  );
+  backdrop_set_message(t("Callback: driver_text=%driver_text, spare_required_field=%spare_required_field", $replacements));
   return '<div id="message_area">ajax_forms_test_validation_form_callback at ' . date('c') . '</div>';
 }
 

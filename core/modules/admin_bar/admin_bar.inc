@@ -54,10 +54,12 @@ function admin_bar_output($complete = FALSE) {
           'id' => 'admin-bar-menu',
         ),
         '#weight' => 0,
+        '#level' => -1,
       );
 
       $content['menu']['menu'] = admin_bar_links_menu(admin_bar_tree('management'));
       $content['menu']['menu']['#title'] = t('Admin bar');
+      $content['menu']['menu']['#options']['icon'] = 'list';
     }
 
     // Check for status report errors.
@@ -95,7 +97,9 @@ function admin_bar_output($complete = FALSE) {
 
     if ($content['extra']['extra']) {
       $content['extra']['#theme'] = 'admin_bar_links';
+      $content['extra']['#level'] = -1;
       $content['extra']['extra']['#title'] = t('More tasks');
+      $content['extra']['extra']['#options']['icon'] = 'list-checks';
       $content['extra']['#wrapper_attributes'] = array(
         'id' => 'admin-bar-extra',
       );
@@ -544,13 +548,14 @@ function admin_bar_links_icon() {
       'id' => 'admin-bar-icon',
     ),
     '#weight' => -100,
+    '#level' => 0,
   );
   $links['icon'] = array(
-    '#title' => theme('admin_bar_icon'),
+    '#title' => t('Home'),
     '#attributes' => array('class' => array('admin-bar-icon')),
     '#href' => '<front>',
     '#options' => array(
-      'html' => TRUE,
+      'icon' => 'house-fill',
     ),
   );
   // Add link to manually run cron.
@@ -606,12 +611,18 @@ function admin_bar_links_account() {
     '#weight' => 50,
     '#attributes' => array('class' => array('admin-bar-account')),
     '#href' => 'user/' . $GLOBALS['user']->uid,
+    '#options' => array(
+      'icon' => 'user-circle-fill',
+    ),
   );
   $links['logout'] = array(
     '#title' => t('Log out'),
     '#weight' => 51,
     '#attributes' => array('class' => array('admin-bar-logout')),
     '#href' => 'user/logout',
+    '#options' => array(
+      'icon' => 'sign-out-fill',
+    ),
   );
   return $links;
 }
@@ -624,11 +635,17 @@ function admin_bar_links_account() {
 function admin_bar_links_users() {
   // Add link to show current authenticated/anonymous users.
   $links['user-counter'] = array(
-    '#title' => admin_bar_get_user_count(),
+    // This span is used by JavaScript to update the value while preserving the
+    // overall admin bar cache.
+    '#title' => '<span class="user-counter-value">' . admin_bar_get_user_count() . '</span>',
     '#description' => t('Current anonymous / authenticated users'),
     '#weight' => 20,
     '#attributes' => array('class' => array('admin-bar-action', 'admin-bar-users')),
     '#href' => (user_access('administer users') ? 'admin/people/list' : 'user'),
+    '#options' => array(
+      'icon' => 'user-list-fill',
+      'html' => TRUE,
+    ),
   );
   return $links;
 }
@@ -672,8 +689,12 @@ function admin_bar_links_page() {
   ));
 
   $links['page'] = array(
-    '#title' => theme('admin_bar_icon_page'),
+    '#title' => t('This page'),
     '#attributes' => array('class' => array('admin-bar-page-links')),
+    '#options' => array(
+      'html' => TRUE,
+      'icon' => 'file-text-fill',
+    ),
   );
   if (user_access('administer layouts')) {
     // Get the layout used by the current page/path.
@@ -727,9 +748,13 @@ function admin_bar_links_page() {
  * @see theme_admin_bar_links()
  */
 function admin_bar_links_locale() {
+  global $language;
   $links['locale'] = array(
-    '#title' => theme('admin_bar_icon_locale'),
+    '#title' => isset($language->native) ? $language->native : $language->name,
     '#attributes' => array('class' => array('admin-bar-locale-links')),
+    '#options' => array(
+      'icon' => 'translate-fill',
+    ),
   ) + admin_bar_locale_links();
 
   // Don't display an empty menu.
@@ -763,6 +788,7 @@ function admin_bar_links_alert() {
         'id' => 'admin-bar-alert',
       ),
       '#weight' => 20,
+      '#level' => 0,
     );
 
     // Add a link to the status report.
@@ -774,7 +800,11 @@ function admin_bar_links_alert() {
       ),
       '#href' => 'admin/reports/status',
       '#access' => user_access('administer site configuration'),
-      '#options' => array('html' => TRUE),
+      '#options' => array(
+        // Suppress the automatic icon by specifying FALSE.
+        'icon' => FALSE,
+        'html' => TRUE,
+      ),
     );
   }
 
