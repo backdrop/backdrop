@@ -312,12 +312,6 @@ Backdrop.behaviors.viewsUiSearchOptions = {
      */
     this.$form = $form;
 
-    // Click on the title checks the box.
-    this.$form.on('click', 'td.title', (event) => {
-      const $target = $(event.currentTarget);
-      $target.closest('tr').find('input').trigger('click');
-    });
-
     const searchBoxSelector = '#edit-options-search';
     const controlGroupSelector = 'select[name="group"]';
     this.$form.on(
