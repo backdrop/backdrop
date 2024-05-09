@@ -752,6 +752,9 @@ function admin_bar_links_locale() {
   $links['locale'] = array(
     '#title' => isset($language->native) ? $language->native : $language->name,
     '#attributes' => array('class' => array('admin-bar-locale-links')),
+    '#options' => array(
+      'icon' => 'translate-fill',
+    ),
   ) + admin_bar_locale_links();
 
   // Don't display an empty menu.
@@ -797,7 +800,11 @@ function admin_bar_links_alert() {
       ),
       '#href' => 'admin/reports/status',
       '#access' => user_access('administer site configuration'),
-      '#options' => array('html' => TRUE),
+      '#options' => array(
+        // Suppress the automatic icon by specifying FALSE.
+        'icon' => FALSE,
+        'html' => TRUE,
+      ),
     );
   }
 

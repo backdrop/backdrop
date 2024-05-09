@@ -587,7 +587,8 @@ function node_form_submit($form, &$form_state) {
  *
  * @see node_form_preview()
  *
- * @since 1.11.0
+ * @since 1.0.6 Function removed (see: https://github.com/backdrop/backdrop-issues/issues/218).
+ * @since 1.11.0 Function re-added (see: https://github.com/backdrop/backdrop-issues/issues/3062).
  */
 function node_preview($node_tempstore_id, $node_type) {
   // The tempstore object may have expired or an invalid ID submitted. Use the

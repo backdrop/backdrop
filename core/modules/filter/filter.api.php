@@ -142,6 +142,8 @@ function hook_filter_info_alter(&$info) {
  *     the editor, to be applied when the editor has not been configured yet.
  *   - file: The name of a file containing the editor settings callback.
  *   - library: An associative array containing an optional library.
+ *   - library_version: An optional string containing the current version of the
+ *     editor library.
  *   - js settings callback: The name of a function that returns configuration
  *     options that should be added to the page via JavaScript for use on the
  *     client side. See hook_editor_EDITOR_js_settings() for details.

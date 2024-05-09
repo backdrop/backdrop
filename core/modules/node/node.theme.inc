@@ -45,7 +45,8 @@ function theme_node_preview_banner_form($variables) {
  *
  * @ingroup themeable
  *
- * @since 1.28.0 Function added.
+ * @since 1.0.6 Function removed (see: https://github.com/backdrop/backdrop-issues/issues/218).
+ * @since 1.28.0 Function re-added (see: https://github.com/backdrop/backdrop-issues/issues/6129).
  */
 function theme_node_preview($variables) {
   $node_preview = $variables['node_preview'];
