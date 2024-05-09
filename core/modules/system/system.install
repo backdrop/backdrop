@@ -14,8 +14,8 @@ function system_requirements($phase) {
   // Ensure translations don't break during installation.
   $t = get_t();
 
-  // Report Backdrop version.
   if ($phase == 'runtime') {
+    // Report Backdrop version.
     $requirements['backdrop'] = array(
       'title' => $t('Backdrop CMS'),
       'value' => BACKDROP_VERSION,
@@ -23,8 +23,8 @@ function system_requirements($phase) {
       'weight' => -10,
     );
 
-    // Display the currently active installation profile, if the site
-    // is not running the default installation profile.
+    // Display the currently active installation profile, if the site is not
+    // running the default installation profile.
     $profile = backdrop_get_profile();
     if ($profile != 'standard') {
       $info = system_get_info('module', $profile);
@@ -40,6 +40,23 @@ function system_requirements($phase) {
         'weight' => -9,
       );
     }
+
+    // Report the configuration storage being used.
+    $config_storage_active = config_get_config_storage('active');
+    $config_storage_staging = config_get_config_storage('staging');
+    $config_storage_locations = array(
+      'active' => t('Active configuration: @active_location', array(
+        '@active_location' => get_class($config_storage_active) == 'ConfigFileStorage' ? t('files') : t('database')),
+      ),
+      'staging' => t('Staging configuration: @staging_location', array(
+        '@staging_location' => get_class($config_storage_staging) == 'ConfigFileStorage' ? t('files') : t('database')),
+      ),
+    );
+    $requirements['config_storage'] = array(
+        'title' => $t('Configuration storage locations'),
+        'value' => theme('item_list', array('items' => $config_storage_locations)),
+        'severity' => REQUIREMENT_INFO,
+      );
   }
 
   // Web server information.
