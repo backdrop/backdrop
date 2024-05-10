@@ -666,7 +666,7 @@ function locale_get_plural($count, $langcode = NULL) {
 
   // Used to locally cache the plural formulas for all languages.
   $plural_formulas = &backdrop_static(__FUNCTION__, array());
-  // Used to store precomputed plural indexes corresponding to numbers
+  // Used to store pre-computed plural indexes corresponding to numbers
   // individually for each language.
   $plural_indexes = &backdrop_static(__FUNCTION__ . ':plurals', array());
 

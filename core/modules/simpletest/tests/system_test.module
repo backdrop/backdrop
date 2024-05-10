@@ -190,7 +190,7 @@ function system_test_basic_auth_page() {
   }
   // If using CGI on Apache with mod_rewrite, the forwarded HTTP header appears
   // in the redirected HTTP headers. See
-  // https://github.com/symfony/symfony/blob/master/src/Symfony/Component/HttpFoundation/ServerBag.php#L61
+  // https://github.com/symfony/symfony/blob/HEAD/src/Symfony/Component/HttpFoundation/ServerBag.php#L61
   elseif (isset($_SERVER['REDIRECT_HTTP_AUTHORIZATION'])) {
     $authorization_header = $_SERVER['REDIRECT_HTTP_AUTHORIZATION'];
   }

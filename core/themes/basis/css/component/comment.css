@@ -37,7 +37,6 @@
   height: 0.25em;
   border-top-color: #dee2ea;
   border-right-color: #dee2ea;
-  -webkit-transform: rotate(45deg);
   transform: rotate(45deg);
   transform-origin: right top;
 }
@@ -61,7 +60,6 @@
   border: 0.125em solid transparent;
   border-bottom-color: #dee2ea;
   border-left-color: #dee2ea;
-  -webkit-transform: rotate(-45deg) translate(0, -0.75em);
   transform: rotate(-45deg) translate(0, -0.75em);
   background: #ffffff;
   pointer-events: none;

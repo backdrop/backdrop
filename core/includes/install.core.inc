@@ -569,7 +569,7 @@ function install_tasks($install_state) {
       'type' => 'form',
       'run' => $install_state['settings_verified'] ? INSTALL_TASK_SKIP : INSTALL_TASK_RUN_IF_NOT_COMPLETED,
     ),
-    'install_config_directories' => array(
+    'install_config_location' => array(
     ),
     'install_system_module' => array(
     ),
@@ -776,12 +776,14 @@ function install_verify_requirements(&$install_state) {
 
   // If there are errors, always display them. If there are only warnings, skip
   // them if the user has provided a URL parameter acknowledging the warnings
-  // and indicating a desire to continue anyway. See backdrop_requirements_url().
+  // and indicating a desire to continue anyway.
+  // @see backdrop_requirements_url().
   if ($severity == REQUIREMENT_ERROR || ($severity == REQUIREMENT_WARNING && empty($install_state['parameters']['continue']))) {
     if ($install_state['interactive']) {
       backdrop_set_title(st('Requirements problem'));
-      $status_report = theme('status_report', array('requirements' => $requirements));
-      $status_report .= st('Check the messages and <a href="!url">try again</a>.', array('!url' => check_url(backdrop_requirements_url($severity))));
+      $status_report = st('Resolve the problems and <a href="!url">try again</a>.', array('!url' => check_url(backdrop_requirements_url($severity))));
+      $status_report .= '<br><br>';
+      $status_report .= theme('status_report', array('requirements' => $requirements, 'phase' => 'install'));
       return $status_report;
     }
     else {
@@ -943,10 +945,11 @@ function install_hash_salt() {
 }
 
 /**
- * Installation task; Rewrite settings.php to include config directories.
+ * Installation task; Ensure config location is empty and writable, and (for
+ * config stored in files, rewrite settings.php to include config directories.
  */
-function install_config_directories(&$install_state) {
-  backdrop_install_config_directories();
+function install_config_location(&$install_state) {
+  backdrop_install_config_location();
 }
 
 /**
@@ -1360,9 +1363,9 @@ function install_select_language(&$install_state) {
           $output .= '<ul>';
           $output .= '<li><a href="' . check_url(backdrop_current_script_url(array('translate' => NULL))) . '">Reload the language selection page after adding translations</a></li>';
           $output .= '<li><a href="' . check_url(backdrop_current_script_url(array(
-              'langcode' => 'en',
-              'translate' => NULL
-            ))) . '">Continue installation in English</a></li>';
+            'langcode' => 'en',
+            'translate' => NULL,
+          ))) . '">Continue installation in English</a></li>';
           $output .= '</ul>';
         }
         else {

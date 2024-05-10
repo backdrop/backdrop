@@ -19,7 +19,7 @@ class ViewsHandlerFieldBulkFormTest extends ViewsSqlTest {
     $view->name = 'test_bulk_form';
     $display = $view->add_display('default');
     $view->base_table = 'node';
-    $display = $view->new_display('default', 'Master', 'default');
+    $display = $view->new_display('default', 'Default', 'default');
     $display->override_option('fields', array(
       'nid' => array(
         'id' => 'nid',

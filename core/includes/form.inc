@@ -709,25 +709,25 @@ function form_load_include(&$form_state, $type, $module, $name = NULL) {
  *   build info array so that the reference can be preserved. For example, a
  *   form builder function with the following signature:
  *   @code
- *   function mymodule_form($form, &$form_state, &$object) {
+ *   function my_module_form($form, &$form_state, &$object) {
  *   }
  *   @endcode
  *   would be called via backdrop_form_submit() as follows:
  *   @code
  *   $form_state['values'] = $my_form_values;
  *   $form_state['build_info']['args'] = array(&$object);
- *   backdrop_form_submit('mymodule_form', $form_state);
+ *   backdrop_form_submit('my_module_form', $form_state);
  *   @endcode
  * For example:
  * @code
- * // register a new user
- * $form_state = array();
- * $form_state['values']['name'] = 'robo-user';
- * $form_state['values']['mail'] = 'robouser@example.com';
- * $form_state['values']['pass']['pass1'] = 'password';
- * $form_state['values']['pass']['pass2'] = 'password';
- * $form_state['values']['op'] = t('Create new account');
- * backdrop_form_submit('user_register_form', $form_state);
+ *   // Register a new user.
+ *   $form_state = array();
+ *   $form_state['values']['name'] = 'new-user';
+ *   $form_state['values']['mail'] = 'new.user@example.com';
+ *   $form_state['values']['pass']['pass1'] = 'password';
+ *   $form_state['values']['pass']['pass2'] = 'password';
+ *   $form_state['values']['op'] = t('Create new account');
+ *   backdrop_form_submit('user_register_form', $form_state);
  * @endcode
  */
 function backdrop_form_submit($form_id, &$form_state) {
@@ -4711,7 +4711,7 @@ function theme_form($variables) {
  *   An associative array containing:
  *   - element: An associative array containing the properties of the element.
  *     Properties used: #title, #value, #description, #rows, #cols,
- *     #placeholder, #required, #attributes
+ *     #placeholder, #required, #attributes, #resizable
  *
  * @ingroup themeable
  */
@@ -4725,9 +4725,21 @@ function theme_textarea($variables) {
   );
 
   // Add resizable behavior.
-  if (!empty($element['#resizable'])) {
-    backdrop_add_library('system', 'backdrop.textarea');
-    $wrapper_attributes['class'][] = 'resizable';
+  if (isset($element['#resizable'])) {
+    $valid_values = array('none', 'both', 'horizontal', 'vertical');
+    // Transform previously used boolean value to new string value.
+    if ($element['#resizable'] === TRUE) {
+      $element['#resizable'] = 'vertical';
+    }
+    if ($element['#resizable'] === FALSE) {
+      $element['#resizable'] = 'none';
+    }
+    if (in_array($element['#resizable'], $valid_values)) {
+      $element['#attributes']['class'][] = 'resize-' . $element['#resizable'];
+      if ($element['#resizable'] != 'none') {
+        $wrapper_attributes['class'][] = 'resizable';
+      }
+    }
   }
 
   $output = '<div' . backdrop_attributes($wrapper_attributes) . '>';

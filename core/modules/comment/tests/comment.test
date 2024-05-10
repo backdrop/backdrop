@@ -32,7 +32,7 @@ class CommentHelperCase extends BackdropWebTestCase {
     // Add text formats.
     $filtered_html_format = array(
       'format' => 'filtered_html',
-      'name' => 'Filtered HTML',
+      'name' => 'Basic',
       'weight' => 0,
       'editor' => 'ckeditor',
       'filters' => array(

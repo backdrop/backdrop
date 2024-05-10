@@ -958,6 +958,12 @@ description = Tests form API checkbox handling of various combinations of #defau
 group = Form API
 file = form.test
 
+[FormResizableTextareaTestCase]
+name = Form API resizable textarea
+description = Tests transition from old JS-based textarea resize to new CSS approach.
+group = Form API
+file = form.test
+
 [FormEmailTestCase]
 name = Form API email
 description = Tests the form API email element.
@@ -999,6 +1005,12 @@ name = Graph
 description = Graph handling unit tests.
 group = System
 file = graph.test
+
+[IconTestCase]
+name = Icon API
+description = Tests the providing and path matching of SVG icons.
+group = System
+file = icon.test
 
 [ImageToolkitUnitTest]
 name = Image toolkit tests
