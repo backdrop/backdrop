@@ -42,6 +42,8 @@
   ],
   "globRoot": "../",
   "ignorePaths": [
+    "LICENSE.md",
+    "LICENSE.txt",
     "*.svg",
     "/.*/",
     "/core/includes/diff.inc",
