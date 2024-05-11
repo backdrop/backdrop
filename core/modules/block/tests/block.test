@@ -83,7 +83,7 @@ class BlockTestCase extends BackdropWebTestCase {
     $this->assertLinkByHref('admin/structure/block/manage/' . $custom_block['delta'] . '/delete', 0, 'Custom block delete link found.');
 
     // Delete the created custom block & verify that it's been deleted and no longer appearing on the page.
-    $this->clickLink(t('Delete block'));
+    $this->clickLink(t('Delete'));
     $this->backdropPost('admin/structure/block/manage/' . $custom_block['delta'] . '/delete', array(), 'Delete this block from all layouts');
     $this->assertRaw(t('The block %title has been removed.', array('%title' => $custom_block['info'])), 'Custom block successfully deleted.');
     $this->assertNoText(t($custom_block['title']), 'Custom block no longer appears on page.');
