@@ -116,7 +116,7 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
     );
   }
   if ($custom_block['info']) {
-    backdrop_set_title(t('Configure %name block' , array('%name' => check_plain($custom_block['info']))), PASS_THROUGH);
+    backdrop_set_title(t('Configure %name block', array('%name' => check_plain($custom_block['info']))), PASS_THROUGH);
   }
   else {
     backdrop_set_title(t('Add custom block'));
@@ -125,7 +125,11 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
   // Set title for translate block form.
   if (isset($form['langcode'])) {
     $language = $language = language_load($form['langcode']['#value']);
-    backdrop_set_title(t('Translate %name block to %language', array('%name' => check_plain($custom_block['info']), '%language' => check_plain($language->name))), PASS_THROUGH);
+    $replacements = array(
+      '%name' => check_plain($custom_block['info']),
+      '%language' => check_plain($language->name),
+    );
+    backdrop_set_title(t('Translate %name block to %language', $replacements, PASS_THROUGH);
   }
 
   // Call our own block configuration form (also used by Layout module).
@@ -154,7 +158,7 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
   if ($delta) {
     $form['actions']['delete'] = array(
       '#type' => 'link',
-      '#title' => t('Delete'),
+      '#title' => t('Delete block'),
       '#href' => 'admin/structure/block/manage/' . $delta . '/delete',
       '#attributes' => array('class' => array('button', 'button-secondary', 'form-delete')),
     );
