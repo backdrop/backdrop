@@ -81,15 +81,17 @@ class BlockText extends Block {
       );
       $toggle = ' <a class="reusable-block-notes-toggle" href="#">' . t('Show') . '<span class="arrow"></span></a>';
       $reusable_block_notes_items = array(
-        '<strong>' . t('Making a block reusable is an action that cannot be reverted!') . '</strong>',
-        '<strong>' . t('Updating the content of a reusable block in one place will affect all places where that block is used!') . '</strong> ' ,
-        t('Once made reusable, you may edit the block title and content either directly on this layout, or via the !reusable_blocks_page page, which lists all reusable blocks available on the site.', array('!reusable_blocks_page' => l(t('Custom blocks'), 'admin/structure/block'))),
+        '<strong>' . t('Updating the content of a reusable block in one place will affect all layouts where that block is placed!') . '</strong> ',
+        t('Once made reusable, you may edit the block content either directly here, or via the <a href="@block_link" target="_blank">Custom blocks</a> page, which lists all reusable blocks available on the site.', array('@block_link' => url('admin/structure/block'))),
       );
-      $reusable_block_notes = '<div class="reusable-block-notes">' . theme('item_list', array('items' => $reusable_block_notes_items)) . '</div>';
+
+      $reusable_block_notes = '<strong>' . t('Making a block reusable is an action that cannot be reverted!') . '</strong>';
+      $reusable_block_notes .= '<br>' . t('How reusable blocks work:') . $toggle;
+      $reusable_block_notes .= '<div class="reusable-block-notes">' . theme('item_list', array('items' => $reusable_block_notes_items)) . '</div>';
       $form['convert']['reusable'] = array(
         '#type' => 'checkbox',
         '#title' => t('Make this block reusable across different layouts'),
-        '#description' => t('How reusable blocks work:') . $toggle . $reusable_block_notes,
+        '#description' => $reusable_block_notes,
         '#weight' => 1,
       );
       // Add a notice for translation.

@@ -12,7 +12,7 @@ function block_admin_list() {
 
   $help_text = array(
     '#theme' => 'help',
-    '#markup' => t('These blocks are available to be placed in any layout in the <a href="@link">Layouts</a> page. <strong>Updating the content of these blocks in one place will affect all places where they are being used!</strong>', array('@link' => url('admin/structure/layouts'))),
+    '#markup' => t('These blocks are available to be placed in any layout in the <a href="@link">Layouts</a> page. <strong>Updating the content of these blocks will affect all layouts where they are placed!</strong>', array('@link' => url('admin/structure/layouts'))),
   );
 
   $header = array(
@@ -116,7 +116,7 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
     );
   }
   if ($custom_block['info']) {
-    backdrop_set_title(t("'%name' block", array('%name' => $custom_block['info'])), PASS_THROUGH);
+    backdrop_set_title(t('Configure %name block' , array('%name' => check_plain($custom_block['info']))), PASS_THROUGH);
   }
   else {
     backdrop_set_title(t('Add custom block'));
@@ -125,7 +125,7 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
   // Set title for translate block form.
   if (isset($form['langcode'])) {
     $language = $language = language_load($form['langcode']['#value']);
-    backdrop_set_title(t("Translate '%name' block to %language", array('%name' => $custom_block['info'], '%language' => $language->name)), PASS_THROUGH);
+    backdrop_set_title(t('Translate %name block to %language', array('%name' => check_plain($custom_block['info']), '%language' => check_plain($language->name))), PASS_THROUGH);
   }
 
   // Call our own block configuration form (also used by Layout module).
@@ -278,11 +278,17 @@ function block_custom_block_delete($form, &$form_state, $delta) {
   $form['info'] = array('#type' => 'hidden', '#value' => $custom_block['info']);
   $form['delta'] = array('#type' => 'hidden', '#value' => $delta);
 
-  backdrop_set_message('<strong>' . t('Deleting this reusable block will remove it from all layouts where it is being used!') . '</strong>', 'warning');
   backdrop_set_message(t('This action cannot be undone!'), 'warning');
+  $delete_warning = '<strong>' . t('Deleting this reusable block will remove it from all layouts where it is used!') . '</strong>';
+  $delete_warning_options = array(
+    t('Use the "Remove" or "Disable" operations for this block in each individual layout.'),
+    t('Adjust the visibility of the block in each layout, so that it is shown only when certain conditions apply.'),
+  );
+  $delete_warning .= ' ' . t('You may consider the following alternatives instead:') . theme('item_list', array('items' => $delete_warning_options));
+  backdrop_set_message($delete_warning, 'warning');
   $question = t('Are you sure you want to delete the block %name?', array('%name' => $custom_block['info']));
 
-  return confirm_form($form, $question, 'admin/structure/block', '', t('Delete'), t('Cancel'));
+  return confirm_form($form, $question, 'admin/structure/block', '', t('Delete this block from all layouts'), t('Cancel'));
 }
 
 /**
