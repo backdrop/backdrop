@@ -129,7 +129,7 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
       '%name' => check_plain($custom_block['info']),
       '%language' => check_plain($language->name),
     );
-    backdrop_set_title(t('Translate %name block to %language', $replacements, PASS_THROUGH);
+    backdrop_set_title(t('Translate %name block to %language', $replacements), PASS_THROUGH);
   }
 
   // Call our own block configuration form (also used by Layout module).
