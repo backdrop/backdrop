@@ -46,10 +46,10 @@ function system_requirements($phase) {
     $config_storage_staging = config_get_config_storage('staging');
     $config_storage_locations = array(
       'active' => t('Active configuration: @active_location', array(
-        '@active_location' => get_class($config_storage_active) == 'ConfigFileStorage' ? t('files') : t('database'),
+        '@active_location' => is_a($config_storage_active, 'ConfigFileStorage') ? t('files') : t('database'),
       )),
       'staging' => t('Staging configuration: @staging_location', array(
-        '@staging_location' => get_class($config_storage_staging) == 'ConfigFileStorage' ? t('files') : t('database'),
+        '@staging_location' => is_a($config_storage_staging, 'ConfigFileStorage') ? t('files') : t('database'),
       )),
     );
     $requirements['config_storage'] = array(
