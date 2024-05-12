@@ -1371,27 +1371,35 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
   // Assemble all blocks into a single list and sort.
   $block_list = array();
   foreach ($blocks as $module => $module_blocks) {
+    // Skip modules that don't provide any blocks.
     if (empty($module_blocks)) {
       continue;
     }
+
     foreach ($module_blocks as $delta => $block_info) {
       /* @var Block $parent_block */
       $parent_block = layout_create_handler('block', $module . ':' . $delta);
+      // Check whether entries coming from hook_block_info() implementations are
+      // "combos" (several "child" block instances provided within a single
+      // entry). This also covers individual field blocks (as returned from
+      // field_get_block_list()).
       $children = $parent_block->getChildren();
       if (is_array($children)) {
+        // Handle each entry within "combo blocks" in hook_block_info().
         foreach ($children as $child_id => $child_info) {
-          // Skip blocks that don't have context requirements met.
           $required_contexts = isset($child_info['required contexts']) ? $child_info['required contexts'] : array();
+          // Skip blocks that don't have context requirements met.
           if ($layout->hasContexts($required_contexts)) {
-            $block_list[$module . ':' . $delta . ':' . $child_id] = $child_info;
+            $block_list[$module . ':' . $delta . ':' . $child_id] = _layout_block_add_block_title_prefix($module, $child_info);
           }
         }
       }
       else {
+        // Regular, non-combo entries.
         $required_contexts = isset($block_info['required contexts']) ? $block_info['required contexts'] : array();
         // Skip blocks that don't have context requirements met.
         if ($layout->hasContexts($required_contexts)) {
-          $block_list[$module . ':' . $delta] = $block_info;
+          $block_list[$module . ':' . $delta] = _layout_block_add_block_title_prefix($module, $block_info);
         }
       }
     }
@@ -1443,6 +1451,40 @@ function layout_block_add_page(Layout $layout, $renderer_name, $region_name, $bl
   }
 
   return $output;
+}
+
+/**
+ * Helper to add prefixes to the block titles shown in the "Add block" dialog.
+ *
+ * Note: the "Field:" prefix for fields is already prepended in
+ * field_get_block_list().
+ *
+ * @see layout_block_add_page()
+ * @see field_get_block_list()
+ */
+function _layout_block_add_block_title_prefix($block_module, $block_info) {
+  if ($block_module == 'views') {
+    // Check if a "View:" prefix has already been added to the block
+    // description (see views_plugin_display_block::execute_hook_block_list)
+    // and add one if not.
+    $view_block_expected_prefix = "View: ";
+    $view_block_prefix_exists = strncmp($block_info['info'], $view_block_expected_prefix, strlen($view_block_expected_prefix)) === 0;
+    if (!$view_block_prefix_exists) {
+      $block_info['info'] = t('View: @block_title', array('@block_title' => $block_info['info']));
+    }
+  }
+  // Custom menus are coming from menu_block_info(), while system-defined menus
+  // from system_block_info().
+  if ($block_module == 'menu' || ($block_module == 'system' && isset($block_info['type']) && $block_info['type'] == 'menu')) {
+    $block_info['info'] = t('Menu: @block_title', array('@block_title' => $block_info['info']));
+  }
+  // Make sure to account for blocks intended for use in dashboards that are not
+  // necessarily provided by the Dashboard module itself.
+  if ($block_module == 'dashboard' || (isset($block_info['required contexts']) && in_array('dashboard', $block_info['required contexts']))) {
+    $block_info['info'] = t('Dashboard: @block_title', array('@block_title' => $block_info['info']));
+  }
+
+  return $block_info;
 }
 
 /**

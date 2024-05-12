@@ -491,6 +491,12 @@ function menu_reset_item($link) {
 
 /**
  * Implements hook_block_info().
+ *
+ * This returns the blocks for any custom menus created on the site (as opposed
+ * to the blocks defined in menu_list_system_menus() in core/includes/menu.inc).
+ *
+ * @see system_block_info()
+ * @see menu_list_system_menus()
  */
 function menu_block_info() {
   $menus = menu_get_menus(FALSE);

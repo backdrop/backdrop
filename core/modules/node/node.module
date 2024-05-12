@@ -2086,7 +2086,7 @@ function node_block_info() {
   );
   $blocks['content'] = array(
     'info' => t('Existing content'),
-    'description' => t('Embed existing node content as a block onto other pages'),
+    'description' => t('Embed content from existing content items as a block onto other pages.'),
     'class' => 'NodeBlock',
   );
 
