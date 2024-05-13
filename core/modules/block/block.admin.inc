@@ -283,16 +283,16 @@ function block_custom_block_delete($form, &$form_state, $delta) {
   $form['delta'] = array('#type' => 'hidden', '#value' => $delta);
 
   backdrop_set_message(t('This action cannot be undone!'), 'warning');
-  $delete_warning = '<strong>' . t('Deleting this reusable block will remove it from all layouts where it is used!') . '</strong>';
-  $delete_warning_options = array(
+
+  $question = t('Are you sure you want to delete the block %name?', array('%name' => $custom_block['info']));
+
+  $alternative_actions = array(
     t('Use the "Remove" or "Disable" operations for this block in each individual layout.'),
     t('Adjust the visibility of the block in each layout, so that it is shown only when certain conditions apply.'),
   );
-  $delete_warning .= ' ' . t('You may consider the following alternatives instead:') . theme('item_list', array('items' => $delete_warning_options));
-  backdrop_set_message($delete_warning, 'warning');
-  $question = t('Are you sure you want to delete the block %name?', array('%name' => $custom_block['info']));
+  $alternative_actions_tip = t('<strong>Tip</strong>: You may consider the following alternatives instead:') . theme('item_list', array('items' => $alternative_actions));
 
-  return confirm_form($form, $question, 'admin/structure/block', '', t('Delete this block from all layouts'), t('Cancel'));
+  return confirm_form($form, $question, 'admin/structure/block', $alternative_actions_tip, t('Delete this block from all layouts'), t('Cancel'));
 }
 
 /**
@@ -310,7 +310,6 @@ function block_custom_block_delete_submit($form, &$form_state) {
   backdrop_set_message(t('The block %name has been removed.', array('%name' => $form_state['values']['info'])));
   $form_state['redirect'] = 'admin/structure/block';
 }
-
 
 /**
  * Form constructor for the block translation list form.
