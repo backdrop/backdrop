@@ -303,7 +303,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
   // In the "Add custom block" dialog specifically, provide a tip with a link
   // to the "Custom blocks" listing.
   if (!$stand_alone) {
-    $form['body']['#description'] = t('<strong>Tip</strong>: You may update the content of this reusable block either directly here, or via the <a href="@block_link" target="_blank">Custom blocks</a> page, which lists all reusable blocks available on the site.', array('@block_link' => url('admin/structure/block')));
+    $form['body']['#description'] = t('<strong>Tip</strong>: You may also edit this and all other reusable blocks on the <a href="@block_link" target="_blank">Custom blocks</a> page.', array('@block_link' => url('admin/structure/block')));
   }
 
   // Prepare a note to be placed between the label and the text area of the
