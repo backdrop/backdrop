@@ -2017,7 +2017,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $block_3 = $this->xpath('(//div[contains(@class, "block-layout-text-block")])[3]');
     $this->assertFalse($block_3);
 
-    // Convert the first block from being a text block into a custom block.
+    // Make the first custom block reusable.
     module_enable(array('block'));
     $edit = array(
       'reusable' => TRUE,
@@ -2034,9 +2034,9 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $this->assertText('My custom block label');
     $this->backdropPost(NULL, array(), t('Save layout'));
 
-    // Check that the new block.module provided configuration form is now used.
+    // Check that the new block.module-provided configuration form is now used.
     $this->backdropGet('admin/structure/layouts/manage/default/configure-block/editor/' . $first_block_uuid);
-    $this->assertText('This block is reusable across different layouts');
+    $this->assertText('Any changes to the content below will affect all layouts');
 
     // Go to the home page and check that the converted block shows up.
     $this->backdropGet('<front>');
