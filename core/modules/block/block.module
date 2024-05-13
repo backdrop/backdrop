@@ -254,26 +254,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     $edit['description'] = '';
   }
 
-  // Start compiling the various parts of the info message to be shown in
-  // different parts of the admin UI in different scenarios. Start with generic
-  // information.
   $is_new = is_null($edit['delta']);
-  $reusable_block_info = $is_new ? t('This block will be reusable across different layouts.') : t('This block is reusable across different layouts.');
-  // In the "Add custom block" dialog specifically, provide a link to the
-  // "Custom blocks" listing.
-  if (!$stand_alone) {
-    $reusable_block_info .= ' ' . t('You may update its content either directly here, or via the <a href="@block_link" target="_blank">Custom blocks</a> page, which lists all reusable blocks available on the site.', array('@block_link' => url('admin/structure/block')));
-  }
-
-  // Mimicking an info message with a form item, in order to allow it to also be
-  // displayed within dialogs.
-  $form['reusable'] = array(
-    '#type' => 'container',
-    '#attributes' => array('class' => array('messages', 'info')),
-  );
-  $form['reusable']['info'] = array(
-    '#markup' => $reusable_block_info,
-  );
 
   $form['info'] = array(
     '#type' => 'textfield',
@@ -312,27 +293,36 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
   );
   $form['body'] = array(
     '#type' => 'text_format',
-    '#title' => t('Block content'),
+    '#title' => t('Block content (reusable)'),
     '#default_value' => $edit['body']['value'],
     '#format' => $edit['body']['format'],
     '#editor_uploads' => TRUE,
     '#rows' => 8,
     '#required' => TRUE,
   );
-
-  // Specifically when editing existing custom blocks, add a #field_prefix to
-  // the "Block content" text area, styled as an info message, with a note about
-  // changes affecting all instances of the block across all layouts.
-  if (!$is_new) {
-    $reusable['reusable'] = array(
-      '#type' => 'container',
-      '#attributes' => array('class' => array('messages', 'info')),
-    );
-    $reusable['reusable']['info'] = array(
-      '#markup' => t('<strong>Note:</strong> Any changes to the content below will affect all layouts where this block is placed!'),
-    );
-    $form['body']['#field_prefix'] = render($reusable);
+  // In the "Add custom block" dialog specifically, provide a tip with a link
+  // to the "Custom blocks" listing.
+  if (!$stand_alone) {
+    $form['body']['#description'] = t('<strong>Tip</strong>: You may update the content of this reusable block either directly here, or via the <a href="@block_link" target="_blank">Custom blocks</a> page, which lists all reusable blocks available on the site.', array('@block_link' => url('admin/structure/block')));
   }
+
+  // Prepare a note to be placed between the label and the text area of the
+  // custom content field, using #field_prefix.
+  if ($is_new) {
+    $reusable_note = t('<strong>Note:</strong> The content below will be shared across all layouts where this reusable block will be placed.');
+  }
+  else {
+    $reusable_note = t('<strong>Note:</strong> Any changes to the content below will affect all layouts where this reusable block is placed!');
+  }
+  // Add the note, styled as an info message.
+  $reusable['reusable'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('messages', 'info')),
+  );
+  $reusable['reusable']['info'] = array(
+    '#markup' => $reusable_note,
+  );
+  $form['body']['#field_prefix'] = render($reusable);
 
   // Add default language select dropdown on the stand-alone config form only.
   // Not shown on the translation forms at all.
