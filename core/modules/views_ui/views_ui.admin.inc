@@ -3819,7 +3819,7 @@ function views_ui_add_item_form($form, &$form_state) {
     );
     // Here we generate what will be the ID of the checkbox for this $key.
     // This allows us to tie the label to the checkbox for better accessibility.
-    $checkbox_id = 'edit-name-fields-' . backdrop_html_class($key);
+    $checkbox_id = backdrop_html_class('edit-name-fields-' . $key);
     $fields[$key]['title'] = array(
       'data' => '<label for="' . $checkbox_id . '">' . $field['title'] . '</label>',
       'class' => array('title'),
