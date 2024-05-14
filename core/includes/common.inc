@@ -953,6 +953,8 @@ function backdrop_access_denied() {
  * @see backdrop_http_build_query()
  *
  * @since 1.18.4 The $options['data'] key may now be passed as an array.
+ * @since 1.27.2 Support added for the 429 response code (previously treaded as
+ *   a 400).
  */
 function backdrop_http_request($url, array $options = array()) {
   // Allow an alternate HTTP client library to replace Backdrop's default
