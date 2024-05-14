@@ -12,7 +12,7 @@ function block_admin_list() {
 
   $help_text = array(
     '#theme' => 'help',
-    '#markup' => t('These blocks are available to be placed in any layout in the <a href="@link">Layouts</a> page. <strong>Updating the content of these reusable blocks will affect all layouts where they are placed!</strong>', array('@link' => url('admin/structure/layouts'))),
+    '#markup' => t('This page lists all <em>reusable custom blocks</em> that are available to be placed in any layout in the <a href="@link">Layouts</a> page. <strong>Updating the content of these reusable blocks will affect all layouts where they are placed!</strong>', array('@link' => url('admin/structure/layouts')))
   );
 
   $header = array(
