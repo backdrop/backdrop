@@ -1806,6 +1806,7 @@ function user_login($form, &$form_state) {
   backdrop_set_title(t('Log in'));
 
   // Display login form:
+  $form['#theme'] = 'user_login_form';
   $credentials = config_get('system.core', 'user_login_method');
   $form['name'] = array('#type' => 'textfield',
     '#title' => $credentials === USER_LOGIN_EMAIL_ONLY ? t('Email address') : ($credentials === USER_LOGIN_USERNAME_OR_EMAIL ? t('Username or email address') : t('Username')),
@@ -1830,7 +1831,6 @@ function user_login($form, &$form_state) {
   );
 
   if (!user_page_tabs()) {
-    $form['#theme'] = 'user_login_form';
     $links = array(
       'reset' => array(
         'title' => t('Reset password'),
