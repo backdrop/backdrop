@@ -21,7 +21,7 @@ function block_permission() {
 function block_menu() {
   $items['admin/structure/block'] = array(
     'title' => 'Custom blocks',
-    'description' => 'Create reusable blocks that can be placed in multiple layouts and edited in one place.',
+    'description' => 'Create reusable custom blocks that can be placed in multiple layouts and edited in one place.',
     'page callback' => 'block_admin_list',
     'access arguments' => array('administer blocks'),
     'file' => 'block.admin.inc',
