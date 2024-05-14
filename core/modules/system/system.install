@@ -44,16 +44,15 @@ function system_requirements($phase) {
     // Report the configuration storage being used.
     $config_storage_active = config_get_config_storage('active');
     $config_storage_staging = config_get_config_storage('staging');
+    $backend = array(
+      '@backend' => is_a($config_storage_active, 'ConfigFileStorage') ? t('files') : t('database'),
+    );
     $config_storage_locations = array(
-      'active' => t('Active configuration: @active_location', array(
-        '@active_location' => is_a($config_storage_active, 'ConfigFileStorage') ? t('files') : t('database'),
-      )),
-      'staging' => t('Staging configuration: @staging_location', array(
-        '@staging_location' => is_a($config_storage_staging, 'ConfigFileStorage') ? t('files') : t('database'),
-      )),
+      'active' => t('Active configuration: @backend', $backend),
+      'staging' => t('Staging configuration: @backend', $backend),
     );
     $requirements['config_storage'] = array(
-      'title' => $t('Configuration storage locations'),
+      'title' => $t('Configuration storage backend'),
       'value' => theme('item_list', array('items' => $config_storage_locations)),
       'severity' => REQUIREMENT_INFO,
     );
