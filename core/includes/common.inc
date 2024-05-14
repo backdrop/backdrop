@@ -1226,6 +1226,7 @@ function backdrop_http_request($url, array $options = array()) {
     415 => 'Unsupported Media Type',
     416 => 'Requested range not satisfiable',
     417 => 'Expectation Failed',
+    429 => 'Too Many Requests',
     500 => 'Internal Server Error',
     501 => 'Not Implemented',
     502 => 'Bad Gateway',
