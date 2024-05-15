@@ -953,6 +953,9 @@ function backdrop_access_denied() {
  * @see backdrop_http_build_query()
  *
  * @since 1.18.4 The $options['data'] key may now be passed as an array.
+ * @since 1.27.2 Now removes any potentially sensitive headers before following
+ *   a redirect. See the 'strip_sensitive_headers_on_host_change' setting in
+ *   settings.php for details.
  */
 function backdrop_http_request($url, array $options = array()) {
   // Allow an alternate HTTP client library to replace Backdrop's default
