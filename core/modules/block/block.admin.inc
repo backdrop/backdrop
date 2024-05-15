@@ -9,12 +9,10 @@
  */
 function block_admin_list() {
   $custom_blocks_info = block_block_info();
-
   $help_text = array(
     '#theme' => 'help',
     '#markup' => t('This page lists all <em>reusable</em> custom blocks. <em>Reusable</em> blocks can be shared across multiple <a href="@link">layouts</a> and edited in one place.', array('@link' => url('admin/structure/layouts'))),
   );  
-);
 
   $header = array(
     t('Block'),
