@@ -853,11 +853,13 @@ td.group-title {
   padding-top: 0;
 }
 
+.views-ui-dialog .views-add-form-selected.container-inline #edit-selected {
+  border-top: 1px solid #cccccc;
+}
+
 .views-ui-dialog .views-add-form-selected.container-inline > div {
   display: block;
 }
-
-
 
 .views-ui-dialog #edit-selected {
   margin: 0;
