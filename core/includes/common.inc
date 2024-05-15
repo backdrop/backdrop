@@ -5545,6 +5545,8 @@ function backdrop_get_library($module, $name = NULL) {
  *   - immutable: Whether to use the original icon instead of any overrides.
  *
  * @see icon()
+ *
+ * @since 1.28.0 Function added.
  */
 function backdrop_add_icons(array $icon_names) {
   $icon_paths = array();
