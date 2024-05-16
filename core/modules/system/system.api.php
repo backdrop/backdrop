@@ -338,6 +338,8 @@ function hook_js_alter(&$javascript) {
  * @see system_library_info()
  * @see backdrop_add_library()
  * @see backdrop_get_library()
+ *
+ * @since 1.28.0 Added "icons" key to library info.
  */
 function hook_library_info() {
   // Library One.
@@ -453,6 +455,8 @@ function hook_css_alter(&$css) {
  *     relative to the Backdrop installation root.
  *
  * @see hook_icon_info_alter()
+ *
+ * @since 1.28.0 Hook added.
  */
 function hook_icon_info() {
   // For icons simply located in a module's "icons" directory, just provide the
@@ -499,6 +503,8 @@ function hook_icon_info() {
  *   module-provided icons, keyed by the icon name.
  *
  * @see hook_icon_info()
+ *
+ * @since 1.28.0 Hook added.
  */
 function hook_icon_info_alter(&$icons) {
   // Remove a different module's override of a core icon.
@@ -753,6 +759,9 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *   - title arguments: (optional) Arguments to send to t() or your custom
  *     callback, with path component substitution as described above.
  *   - description: (optional) The untranslated description of the menu item.
+ *   - icon: (optional) The icon name to be used for this menu item. Icons may
+ *     be used in places like the admin bar or on system landing pages such as
+ *     "admin/config". See the icon() function for more information on icons.
  *   - page callback: (optional) The function to call to display a web page when
  *     the user visits the path. If omitted, the parent menu item's callback
  *     will be used instead.
@@ -891,6 +900,7 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  * http://drupal.org/node/102338.
  *
  * @since 1.24.2 Support for the "position" key removed.
+ * @since 1.28.0 Added "icon" key.
  */
 function hook_menu() {
   $items['example'] = array(
