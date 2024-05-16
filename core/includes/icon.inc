@@ -2,6 +2,9 @@
 /**
  * @file
  * Provides the Backdrop API for placing icons.
+ *
+ * For comprehensive documentation on the icon API, see
+ * https://docs.backdropcms.org/documentation/icon-api
  */
 
 /**
@@ -33,6 +36,10 @@
  *     overridden, but an icon can still be added.
  *
  * @return string
+ *
+ * @see https://docs.backdropcms.org/documentation/icon-api
+ *
+ * @since 1.28.0 Function added.
  */
 function icon($icon_name, array $options = array()) {
   // Populate default options.
@@ -83,6 +90,8 @@ function icon($icon_name, array $options = array()) {
  *
  * @see hook_icon_info()
  * @see hook_icon_info_alter()
+ *
+ * @since 1.28.0 Function added.
  */
 function icon_get_path($icon_name, $immutable = FALSE) {
   // Save into a static cache with both normal and immutable paths.
@@ -228,7 +237,10 @@ function _icon_from_core($icon_name) {
  * @param string|null $icon_name
  *   An icon name, with no extension, such as "home" or "info". If omitted,
  *   all icon info will be returned.
+ *
  * @return array
+ *
+ * @since 1.28.0 Function added.
  */
 function icon_get_info($icon_name = NULL) {
   $icon_info = &backdrop_static(__FUNCTION__);
@@ -268,6 +280,11 @@ function icon_get_info($icon_name = NULL) {
  *     value is added as a <title> tag within the SVG. If not specified, the
  *     icon will automatically be assigned the aria-hidden="true" attribute.
  *   - attributes: Attributes to be added to the icon itself.
+ *
+ * @return string
+ *    The HTML output.
+ *
+ * @since 1.28.0 Function added.
  */
 function theme_icon(array $variables) {
   // Ensure the filename is .svg.

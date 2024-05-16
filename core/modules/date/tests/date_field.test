@@ -57,6 +57,7 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
     $default_format = !empty($default_format) ? $default_format : 'long';
     $cache_enabled = !empty($cache_enabled);
     $cache_count = !empty($cache_count) ? $cache_count : 4;
+    $required = !empty($required) ? $required : FALSE;
 
     $field = array(
       'field_name' => $field_name,
@@ -79,6 +80,7 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
       'bundle' => $bundle,
       // Move the date right below the title.
       'weight' => -5,
+      'required' => $required,
       'widget' => array(
         'type' => $widget_type,
         // Increment for minutes and seconds, can be 1, 5, 10, 15, or 30.
@@ -167,6 +169,7 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
     $cache_enabled = !empty($cache_enabled);
     $cache_count = !empty($cache_count) ? $cache_count : 4;
     $cardinality = !empty($cardinality) ? $cardinality : 1;
+    $required = !empty($required) ? $required : FALSE;
 
     $field = array(
       'field_name' => $field_name,
@@ -189,6 +192,7 @@ abstract class DateFieldBasic extends BackdropWebTestCase {
       'bundle' => $bundle,
       // Move the date right below the title.
       'weight' => -5,
+      'required' => $required,
       'widget' => array(
         'type' => $widget_type,
         // Increment for minutes and seconds, can be 1, 5, 10, 15, or 30.
@@ -405,7 +409,8 @@ class DateFieldTokenTestCase extends DateFieldBasic {
       'field_date_single:custom:Y-m-d' => format_date($timestamp, 'custom', 'Y-m-d'),
       'field_date_single:2:short' => NULL,
 
-      'field_date_multiple:date:short' => format_date($timestamp, 'short'), // Defaults to delta = 0.
+      // Defaults to delta = 0.
+      'field_date_multiple:date:short' => format_date($timestamp, 'short'),
       'field_date_multiple:0:date:long' => format_date($timestamp, 'long'),
       'field_date_multiple:0:end-date:medium' => format_date($timestamp_end, 'medium'),
       'field_date_multiple:1:end-date:custom:l, F j, Y' => format_date($timestamp2_end, 'custom', 'l, F j, Y'),
@@ -417,9 +422,16 @@ class DateFieldTokenTestCase extends DateFieldBasic {
     foreach ($tokens as $name => $expected) {
       $token = $input[$name];
       if (!isset($expected)) {
-        $this->assertTrue(!isset($values[$token]), t("Token value for @token was not generated.", array('@token' => $token)));
-      } else {
-        $this->assertIdentical($replacements[$token], $expected, t("Token value for @token was '@actual', expected value '@expected'.", array('@token' => $token, '@actual' => $replacements[$token], '@expected' => $expected)));
+        $this->assertTrue(!isset($values[$token]), t("Token value for @token was not generated.", array(
+          '@token' => $token,
+        )));
+      }
+      else {
+        $this->assertIdentical($replacements[$token], $expected, format_string('Token value for @token was \'@actual\', expected value \'@expected\'.', array(
+          '@token' => $token,
+          '@actual' => $replacements[$token],
+          '@expected' => $expected,
+        )));
       }
     }
   }
@@ -427,7 +439,7 @@ class DateFieldTokenTestCase extends DateFieldBasic {
   /**
    * Helper function that creates a properly formatted token map.
    */
-  function mapTokenNames($type, array $tokens = array()) {
+  public function mapTokenNames($type, array $tokens = array()) {
     $return = array();
     foreach ($tokens as $token) {
       $return[$token] = "[$type:$token]";
