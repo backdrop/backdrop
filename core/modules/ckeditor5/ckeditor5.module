@@ -39,6 +39,7 @@ function ckeditor5_editor_info() {
   $editors['ckeditor5'] = array(
     'label' => t('CKEditor 5'),
     'library' => array('ckeditor5', 'backdrop.ckeditor5'),
+    'library_version' => CKEDITOR5_VERSION,
     'default settings' => array(
       'toolbar' => array(
         'bold', 'italic', 'blockQuote', 'heading', '|',
@@ -501,6 +502,12 @@ function ckeditor5_ckeditor5_plugins() {
 
   // @see https://ckeditor.com/docs/ckeditor5/latest/features/autoformat.html
   $plugins['autoformat.Autoformat'] = array(
+    // @todo: Provide a configuration option to toggle.
+    'enabled_callback' => TRUE,
+  );
+
+  // @see https://ckeditor.com/docs/ckeditor5/latest/features/pasting/paste-from-google-docs.html
+  $plugins['pasteFromOffice.PasteFromOffice'] = array(
     // @todo: Provide a configuration option to toggle.
     'enabled_callback' => TRUE,
   );
