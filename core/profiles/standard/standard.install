@@ -586,6 +586,7 @@ function standard_install() {
     'link_path' => 'user/login',
     'menu_name' => 'user-menu',
     'weight' => -1,
+    'customized' => 1,
   );
   menu_link_save($item);
 
