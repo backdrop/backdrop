@@ -29,7 +29,7 @@
 }
 .layout--flexible .layout-editor-block-title {
   padding: 0.4em 1em;
-  margin: 0 -.9375rem .9375rem -.9375rem;
+  margin: 0 -0.9375rem 0.9375rem -0.9375rem;
 }
 .layout--flexible .layout-editor-block-title .text {
   font-weight: bold;
