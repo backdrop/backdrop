@@ -1791,6 +1791,19 @@ function user_page_title($account) {
 }
 
 /**
+ * Implements hook_init().
+ */
+function user_init() {
+  $suppress_layout_on_login_page = TRUE;
+  if (!user_page_tabs() && !user_is_logged_in() && $suppress_layout_on_login_page) {
+    $router = menu_get_item();
+    if ($router['path'] == 'user/login') {
+      layout_suppress(TRUE);
+    }
+  }
+}
+
+/**
  * Form builder; the main user login form.
  *
  * @ingroup forms
