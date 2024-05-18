@@ -1794,10 +1794,10 @@ function user_page_title($account) {
  * Implements hook_init().
  */
 function user_init() {
-  $suppress_layout_on_login_page = config_get('system.core', 'user_page_suppress_layout');
-  if (!user_page_tabs() && !user_is_logged_in() && $suppress_layout_on_login_page) {
-    $router = menu_get_item();
-    if ($router['path'] == 'user/login') {
+  $router = menu_get_item();
+  if ($router['path'] == 'user/login') {
+    $suppress_layout_on_login_page = config_get('system.core', 'user_page_suppress_layout');
+    if (!user_page_tabs() && !user_is_logged_in() && $suppress_layout_on_login_page) {
       layout_suppress(TRUE);
     }
   }
@@ -1844,6 +1844,9 @@ function user_login($form, &$form_state) {
   );
 
   if (!user_page_tabs()) {
+    if (config_get('system.core', 'user_page_suppress_layout')) {
+      $form['#attributes']['class'][] = 'user-login-layout-suppress';
+    }
     $links = array(
       'reset' => array(
         'title' => t('Reset password'),
