@@ -1415,27 +1415,27 @@ function user_menu() {
     'menu_name' => 'user-menu',
   );
 
-  $user_page_tabs = user_page_tabs();
+  $user_login_page_tabs = user_login_page_tabs();
   $items['user/login'] = array(
     'title' => 'Log in',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_login'),
     'access callback' => 'user_is_anonymous',
-    'type' => ($user_page_tabs ? MENU_DEFAULT_LOCAL_TASK : MENU_CALLBACK),
+    'type' => ($user_login_page_tabs ? MENU_DEFAULT_LOCAL_TASK : MENU_CALLBACK),
   );
 
   $items['user/register'] = array(
     'title' => 'Create new account',
     'page callback' => 'user_register_page',
     'access callback' => 'user_register_access',
-    'type' => ($user_page_tabs ? MENU_LOCAL_TASK : MENU_CALLBACK),
+    'type' => ($user_login_page_tabs ? MENU_LOCAL_TASK : MENU_CALLBACK),
   );
 
   $items['user/password'] = array(
     'title' => 'Reset password',
     'page callback' => 'user_pass_page',
     'access callback' => TRUE,
-    'type' => ($user_page_tabs ? MENU_LOCAL_TASK : MENU_CALLBACK),
+    'type' => ($user_login_page_tabs ? MENU_LOCAL_TASK : MENU_CALLBACK),
     'file' => 'user.pages.inc',
   );
 
@@ -1638,14 +1638,14 @@ function user_menu_alter(&$items) {
 /**
  * Return the user page tabs setting.
  */
-function user_page_tabs() {
-  static $user_page_tabs;
+function user_login_page_tabs() {
+  static $user_login_page_tabs;
 
-  if (!isset($user_page_tabs)) {
-    $user_page_tabs = config_get('system.core', 'user_page_tabs');
+  if (!isset($user_login_page_tabs)) {
+    $user_login_page_tabs = config_get('system.core', 'user_login_page_tabs');
   }
 
-  return $user_page_tabs;
+  return $user_login_page_tabs;
 }
 
 /**
@@ -1795,8 +1795,8 @@ function user_page_title($account) {
  */
 function user_init() {
   if (current_path() == 'user/login') {
-    $suppress_layout_on_login_page = config_get('system.core', 'user_page_suppress_layout');
-    if (!user_page_tabs() && !user_is_logged_in() && $suppress_layout_on_login_page) {
+    $suppress_layout_on_login_page = config_get('system.core', 'user_login_page_suppress_layout');
+    if (!user_login_page_tabs() && !user_is_logged_in() && $suppress_layout_on_login_page) {
       layout_suppress(TRUE);
     }
   }
@@ -1809,8 +1809,8 @@ function user_init() {
  */
 function user_login($form, &$form_state) {
   global $user;
-  $user_page_tabs = user_page_tabs();
-  $user_page_suppress_layout = config_get('system.core', 'user_page_suppress_layout');
+  $user_login_page_tabs = user_login_page_tabs();
+  $user_login_page_suppress_layout = config_get('system.core', 'user_login_page_suppress_layout');
 
   // If we are already logged on, go to the user page instead.
   if ($user->uid) {
@@ -1818,7 +1818,7 @@ function user_login($form, &$form_state) {
   }
 
   backdrop_set_title(t('Log in'));
-  if ($user_page_suppress_layout && !$user_page_tabs) {
+  if ($user_login_page_suppress_layout && !$user_login_page_tabs) {
     if ($logo = backdrop_get_logo()) {
       $logo_image = theme('image', array(
         'path' => $logo,
@@ -1867,8 +1867,8 @@ function user_login($form, &$form_state) {
     '#password_toggle' => TRUE,
   );
 
-  if (!$user_page_tabs) {
-    if (config_get('system.core', 'user_page_suppress_layout')) {
+  if (!$user_login_page_tabs) {
+    if (config_get('system.core', 'user_login_page_suppress_layout')) {
       $form['#attributes']['class'][] = 'user-login-layout-suppress';
     }
     $links = array(

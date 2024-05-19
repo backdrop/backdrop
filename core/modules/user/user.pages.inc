@@ -69,7 +69,7 @@ function user_pass() {
     );
   }
 
-  if (!user_page_tabs()) {
+  if (!user_login_page_tabs()) {
     $form['links'] = array(
       '#markup' => theme('links', array(
         'links' => array(
