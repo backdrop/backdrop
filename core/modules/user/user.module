@@ -1810,6 +1810,7 @@ function user_init() {
  */
 function user_login($form, &$form_state) {
   global $user;
+  $user_page_tabs = user_page_tabs();
 
   // If we are already logged on, go to the user page instead.
   if ($user->uid) {
@@ -1817,6 +1818,29 @@ function user_login($form, &$form_state) {
   }
 
   backdrop_set_title(t('Log in'));
+  if (!$user_page_tabs) {
+    if ($logo = backdrop_get_logo()) {
+      $logo_image = theme('image', array(
+        'path' => $logo,
+        'alt' => t('Log in'),
+      ));
+      $form['logo'] = array(
+        '#type' => 'item',
+        '#markup' => $logo_image,
+        '#prefix' => '<div class="login-page-logo">',
+        '#suffix' => '</div>',
+      );
+    }
+    $form['page_title'] = array(
+      '#type' => 'item',
+      '#markup' => t('Log in'),
+      '#prefix' => '<h1 class="page-title">',
+      '#suffix' => '</h1>',
+    );
+    $form['messages'] = array(
+      '#theme' => 'status_messages',
+    );
+  }
 
   // Display login form:
   $form['#theme'] = 'user_login_form';
@@ -1843,7 +1867,7 @@ function user_login($form, &$form_state) {
     '#password_toggle' => TRUE,
   );
 
-  if (!user_page_tabs()) {
+  if (!$user_page_tabs) {
     if (config_get('system.core', 'user_page_suppress_layout')) {
       $form['#attributes']['class'][] = 'user-login-layout-suppress';
     }
