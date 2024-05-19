@@ -5514,7 +5514,10 @@ function backdrop_get_library($module, $name = NULL) {
           'icons' => array(),
         );
         foreach ($module_libraries[$key]['js'] as $file => $options) {
-          $module_libraries[$key]['js'][$file]['version'] = $module_libraries[$key]['version'];
+          // Make sure that 'version' can be optional - see hook_library_info().
+          if (isset($module_libraries[$key]['version'])) {
+            $module_libraries[$key]['js'][$file]['version'] = $module_libraries[$key]['version'];
+          }
         }
       }
     }
