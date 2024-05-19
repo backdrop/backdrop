@@ -1776,7 +1776,7 @@ function system_performance_settings($form, &$form_state) {
 
   $form['bandwidth_optimization']['page_compression'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Compress cached pages.'),
+    '#title' => t('Compress cached pages'),
     '#default_value' => $config->get('page_compression'),
     '#states' => array(
       'visible' => array(
@@ -1786,15 +1786,28 @@ function system_performance_settings($form, &$form_state) {
   );
   $form['bandwidth_optimization']['preprocess_css'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Aggregate and compress CSS files.'),
+    '#title' => t('Aggregate and compress CSS files'),
     '#default_value' => $config->get('preprocess_css'),
     '#disabled' => $disabled,
   );
   $form['bandwidth_optimization']['preprocess_js'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Aggregate JavaScript files.'),
+    '#title' => t('Aggregate JavaScript files'),
     '#default_value' => $config->get('preprocess_js'),
     '#disabled' => $disabled,
+  );
+  $form['bandwidth_optimization']['js_asset_query_random'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use randomized string for the query of .js assets.'),
+    '#default_value' => $config->get('js_asset_query_random') ? $config->get('js_asset_query_random') : FALSE,
+    '#description' => t('Typically, when .js assets are being loaded, if a version has been specified in the respective library definitions, the version strings are used for the query. That causes cache clear to skip these .js files when the version does not change. Enabling this setting ensures that these files are always flushed on cache clear, regardless of their version. This setting only applies when JavaScript aggregation is disabled.'),
+    '#disabled' => $disabled,
+    '#indentation' => 1,
+    '#states' => array(
+      'visible' => array(
+        'input[name="preprocess_js"]' => array('checked' => FALSE),
+      ),
+    ),
   );
 
   $form['#submit'][] = 'backdrop_clear_css_cache';
