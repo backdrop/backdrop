@@ -1811,6 +1811,7 @@ function user_init() {
 function user_login($form, &$form_state) {
   global $user;
   $user_page_tabs = user_page_tabs();
+  $user_page_suppress_layout = config_get('system.core', 'user_page_suppress_layout');
 
   // If we are already logged on, go to the user page instead.
   if ($user->uid) {
@@ -1818,7 +1819,7 @@ function user_login($form, &$form_state) {
   }
 
   backdrop_set_title(t('Log in'));
-  if (!$user_page_tabs) {
+  if ($user_page_suppress_layout) {
     if ($logo = backdrop_get_logo()) {
       $logo_image = theme('image', array(
         'path' => $logo,
