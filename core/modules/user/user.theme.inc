@@ -393,6 +393,7 @@ function template_preprocess_user_profile(&$variables) {
 function template_preprocess_user_login_form(&$variables) {
   $variables['user_login_page_tabs'] = user_login_page_tabs();
   $variables['user_login_page_suppress_layout'] = config_get('system.core', 'user_login_page_suppress_layout');
+  $variables['logo_image'] = '';
 
   // @todo: change logo alt and page title for other pages.
   if (!$variables['user_login_page_tabs'] && $variables['user_login_page_suppress_layout']) {
