@@ -3326,6 +3326,20 @@ function user_register_form($form, &$form_state) {
   $options = backdrop_parse_url($path);
   $options['attributes']['class'][] = 'form-cancel';
 
+  if (!user_login_page_tabs()) {
+    $form['links'] = array(
+      '#markup' => theme('links', array(
+        'links' => array(
+          'login' => array(
+            'title' => t('Log in'),
+            'href' => 'user/login',
+          ),
+        ),
+      )),
+      '#weight' => 101,
+    );
+  }
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
