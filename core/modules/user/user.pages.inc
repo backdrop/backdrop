@@ -39,9 +39,10 @@ function user_pass_page() {
  * @see user_pass_validate()
  * @see user_pass_submit()
  */
-function user_pass() {
+function user_pass($form, &$form_state) {
   global $user;
 
+  $form['#theme'] = 'user_login_form';
   $form['name'] = array(
     '#type' => 'textfield',
     '#title' => t('Username or email address'),

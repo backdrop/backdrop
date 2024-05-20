@@ -1794,7 +1794,8 @@ function user_page_title($account) {
  * Implements hook_init().
  */
 function user_init() {
-  if (current_path() == 'user/login') {
+  $current_path = current_path();
+  if ($current_path == 'user/login' || $current_path == 'user/password') {
     $suppress_layout_on_login_page = config_get('system.core', 'user_login_page_suppress_layout');
     if (!user_login_page_tabs() && !user_is_logged_in() && $suppress_layout_on_login_page) {
       layout_suppress(TRUE);
@@ -1818,29 +1819,6 @@ function user_login($form, &$form_state) {
   }
 
   backdrop_set_title(t('Log in'));
-  if ($user_login_page_suppress_layout && !$user_login_page_tabs) {
-    if ($logo = backdrop_get_logo()) {
-      $logo_image = theme('image', array(
-        'path' => $logo,
-        'alt' => t('Log in'),
-      ));
-      $form['logo'] = array(
-        '#type' => 'item',
-        '#markup' => $logo_image,
-        '#prefix' => '<div class="login-page-logo">',
-        '#suffix' => '</div>',
-      );
-    }
-    $form['page_title'] = array(
-      '#type' => 'item',
-      '#markup' => t('Log in'),
-      '#prefix' => '<h1 class="page-title">',
-      '#suffix' => '</h1>',
-    );
-    $form['messages'] = array(
-      '#theme' => 'status_messages',
-    );
-  }
 
   // Display login form:
   $form['#theme'] = 'user_login_form';
@@ -1868,9 +1846,6 @@ function user_login($form, &$form_state) {
   );
 
   if (!$user_login_page_tabs) {
-    if (config_get('system.core', 'user_login_page_suppress_layout')) {
-      $form['#attributes']['class'][] = 'user-login-layout-suppress';
-    }
     $links = array(
       'reset' => array(
         'title' => t('Reset password'),

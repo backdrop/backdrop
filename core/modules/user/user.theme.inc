@@ -381,3 +381,30 @@ function template_preprocess_user_profile(&$variables) {
   // Preprocess fields.
   field_attach_preprocess('user', $account, $variables['elements'], $variables);
 }
+
+/**
+ * Process variables for user-login-form.tpl.php.
+ *
+ * The $variables array contains the following arguments:
+ * - $user_login_form
+ *
+ * @see user-login-form.tpl.php
+ */
+function template_preprocess_user_login_form(&$variables) {
+  $variables['user_login_page_tabs'] = user_login_page_tabs();
+  $variables['user_login_page_suppress_layout'] = config_get('system.core', 'user_login_page_suppress_layout');
+
+  // @todo: change logo alt and page title for other pages.
+  if (!$variables['user_login_page_tabs'] && $variables['user_login_page_suppress_layout']) {
+    if ($logo = backdrop_get_logo()) {
+      $variables['logo_image'] = theme('image', array(
+        'path' => $logo,
+        'alt' => t('Log in'),
+      ));
+    }
+    $variables['site_name'] = config_get_translated('system.core', 'site_name');
+    $variables['page_title'] = t('Login');
+    $variables['messages'] = theme('status_messages');
+    $variables['classes'][] = 'user-login user-login-layout-suppress';
+  }
+}
