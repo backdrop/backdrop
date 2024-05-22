@@ -391,6 +391,17 @@ function template_preprocess_user_profile(&$variables) {
  * @see user-login-form.tpl.php
  */
 function template_preprocess_user_login_form(&$variables) {
+  $form = $variables['user_login_form'];
+  if ($form['#form_id'] == 'user_login') {
+    $page_title = t('Login');
+  }
+  elseif ($form['#form_id'] == 'user_pass') {
+    $page_title = t('Reset password');
+  }
+  elseif ($form['#form_id'] == 'user_register') {
+    $page_title = t('Create new account');
+  }
+  
   $variables['user_login_page_tabs'] = user_login_page_tabs();
   $variables['user_login_page_suppress_layout'] = config_get('system.core', 'user_login_page_suppress_layout');
   $variables['logo_image'] = '';
@@ -400,11 +411,11 @@ function template_preprocess_user_login_form(&$variables) {
     if ($logo = backdrop_get_logo()) {
       $variables['logo_image'] = theme('image', array(
         'path' => $logo,
-        'alt' => t('Log in'),
+        'alt' => $page_title,
       ));
     }
     $variables['site_name'] = config_get_translated('system.core', 'site_name');
-    $variables['page_title'] = t('Login');
+    $variables['page_title'] = $page_title;
     $variables['messages'] = theme('status_messages');
     $variables['classes'][] = 'user-login user-login-layout-suppress';
   }
