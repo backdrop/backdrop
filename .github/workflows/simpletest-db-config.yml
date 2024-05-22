@@ -1,0 +1,48 @@
+name: SimpleTest (Database Config)
+on:
+  pull_request:
+    branches: [1.*]
+jobs:
+  simpletest-db-config:
+    name: SimpleTest
+    runs-on: ubuntu-22.04
+    # Skip this job if the PR title contains "[skip tests]".
+    if: ${{ !contains(github.event.pull_request.title, '[skip tests]') }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions: ['8.3']
+        database-versions: ['mariadb-10.3']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up webserver
+        uses: ./.github/actions/set-up-webserver
+        with:
+          php-version: ${{ matrix.php-versions }}
+          database-version: ${{ matrix.database-versions }}
+
+      - name: Install Backdrop
+        run: |
+          cp ./.github/misc/settings.local.php .
+
+          # Set the config storage class to use the database.
+          echo "\$settings['config_active_class'] = 'ConfigDatabaseStorage';" >> settings.local.php
+          echo "\$config_directories['active'] = NULL;" >> settings.local.php
+
+          core/scripts/install.sh --db-url=mysql://root:root@127.0.0.1/backdrop
+
+      - name: Run tests
+        run: |
+          # Run a subset of the total test suite for configuration management.
+          core/scripts/run-tests.sh --force --cache --verbose --color --group Configuration 2>&1
+
+      - name: Save Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: simpletest-db-config-${{ matrix.php-versions }}
+          path: files/simpletest/verbose

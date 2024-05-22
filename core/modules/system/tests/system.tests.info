@@ -46,6 +46,12 @@ description = Confirm that the default meta tags appear as expected.
 group = System
 file = system.test
 
+[DebugReportTestCase]
+name = Debug information report page
+description = Tests the admin/reports/debug page.
+group = System
+file = system.test
+
 [AccessDeniedTestCase]
 name = 403 functionality
 description = Tests page access denied functionality, including custom 403 pages.
