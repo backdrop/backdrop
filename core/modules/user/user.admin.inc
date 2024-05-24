@@ -400,7 +400,7 @@ function user_login_settings($form, &$form_state) {
       '#description' => t('More secure; but <strong>more likely to lock people out of the site</strong>.'),
     ),
     '0' => array(
-      '#description' => t('Less likely to lock people out of the site, but <strong>less secure<strong>.'),
+      '#description' => t('Less likely to lock people out of the site, but <strong>less secure</strong>.'),
     ),
   );
 
