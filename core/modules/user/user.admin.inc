@@ -390,7 +390,7 @@ function user_login_settings($form, &$form_state) {
   );
   $form['failed_login_limit_settings']['user_limit_settings']['flood_uid_only'] = array(
     '#type' => 'radios',
-    '#title' => t('Identify people attempting to log in, using'),
+    '#title' => t('Identify the source of failed login attempts, using'),
     '#options' => array(
       '1' => t('User account ID only'),
       '0' => t('User account ID and IP address combination'),
