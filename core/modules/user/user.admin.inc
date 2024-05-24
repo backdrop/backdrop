@@ -327,15 +327,23 @@ function user_login_settings($form, &$form_state) {
     '#default_value' => $core_config->get('user_login_method'),
   );
 
-  $form['ip_limit_settings'] = array(
+  $form['failed_login_limit_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Failed login attempts settings'),
+    '#description' => t('The settings below allow to temporarily block any further login attempts from offending IP addresses or user accounts for a configurable period, after set limits has been reached.'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+
+  $form['failed_login_limit_settings']['ip_limit_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Limit login attempts by IP address'),
   );
-  $form['ip_limit_settings']['wrapper'] = array(
+  $form['failed_login_limit_settings']['ip_limit_settings']['wrapper'] = array(
     '#type' => 'container',
     '#attributes' => array('class' => array('container-inline')),
   );
-  $form['ip_limit_settings']['wrapper']['flood_ip_limit'] = array(
+  $form['failed_login_limit_settings']['ip_limit_settings']['wrapper']['flood_ip_limit'] = array(
     '#type' => 'select',
     '#title' => t('Attempted login limit'),
     '#title_display' => 'invisible',
@@ -343,27 +351,28 @@ function user_login_settings($form, &$form_state) {
     '#default_value' => $flood_config->get('flood_ip_limit'),
     '#prefix' => t('Limit to'),
   );
-  $form['ip_limit_settings']['wrapper']['flood_ip_window'] = array(
+  $form['failed_login_limit_settings']['ip_limit_settings']['wrapper']['flood_ip_window'] = array(
     '#type' => 'select',
     '#title' => t('Attempted login time window'),
     '#title_display' => 'invisible',
     '#options' => array(0 => t('None (disabled)')) + backdrop_map_assoc(array(60, 180, 300, 600, 900, 1800, 2700, 3600, 10800, 21600, 32400, 43200, 86400), 'format_interval'),
     '#default_value' => $flood_config->get('flood_ip_window'),
-    '#prefix' => t('login attempts from one IP address per'),
+    '#prefix' => t('failed login attempts from one IP address per'),
   );
-  $form['ip_limit_settings']['help'] = array(
+  $form['failed_login_limit_settings']['ip_limit_settings']['help'] = array(
     '#type' => 'item',
-    '#description' => t('Do not allow any login from the current user\'s IP if the limit has been reached. This is independent of the per-user limit to catch attempts from one IP to log in to many different user accounts. By default we have a reasonably high limit since there may be only one apparent IP for all users at an institution.'),
+    '#description' => t('This setting is independent of the per-user-account limit, in order to catch multiple attempts to log in using different user accounts from a single IP address. By default this is set to a reasonably high limit, since it is common for multiple people within an organization to be connecting to the internet sharing the same public IP address.'),
   );
-  $form['user_limit_settings'] = array(
+
+  $form['failed_login_limit_settings']['user_limit_settings'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Limit login attempts by user'),
+    '#title' => t('Limit login attempts by user account'),
   );
-  $form['user_limit_settings']['wrapper'] = array(
+  $form['failed_login_limit_settings']['user_limit_settings']['wrapper'] = array(
     '#type' => 'container',
     '#attributes' => array('class' => array('container-inline')),
   );
-  $form['user_limit_settings']['wrapper']['flood_user_limit'] = array(
+  $form['failed_login_limit_settings']['user_limit_settings']['wrapper']['flood_user_limit'] = array(
     '#type' => 'select',
     '#title' => t('Attempted login limit'),
     '#title_display' => 'invisible',
@@ -371,39 +380,35 @@ function user_login_settings($form, &$form_state) {
     '#default_value' => $flood_config->get('flood_user_limit'),
     '#prefix' => t('Limit to'),
   );
-  $form['user_limit_settings']['wrapper']['flood_user_window'] = array(
+  $form['failed_login_limit_settings']['user_limit_settings']['wrapper']['flood_user_window'] = array(
     '#type' => 'select',
     '#title' => t('Attempted login time window'),
     '#title_display' => 'invisible',
     '#options' => array(0 => t('None (disabled)')) + backdrop_map_assoc(array(60, 180, 300, 600, 900, 1800, 2700, 3600, 10800, 21600, 32400, 43200, 86400), 'format_interval'),
     '#default_value' => $flood_config->get('flood_user_window'),
-    '#prefix' => t('login attempts by a user per'),
+    '#prefix' => t('failed login attempts by a user account per'),
   );
-  $form['user_limit_settings']['help'] = array(
-    '#type' => 'item',
-    '#description' => t('Configure the limit and the time window for users attempting to log in. That is, how many failed login attempts are allowed per specified time period.'),
-  );
-  $form['user_limit_settings']['flood_uid_only'] = array(
+  $form['failed_login_limit_settings']['user_limit_settings']['flood_uid_only'] = array(
     '#type' => 'radios',
-    '#title' => t('Identify users attempting to log in, using'),
+    '#title' => t('Identify user accounts attempting to log in, using'),
     '#options' => array(
       '1' => t('User ID only'),
       '0' => t('User ID and IP address combination'),
     ),
     '#default_value' => $flood_config->get('flood_uid_only'),
     '1' => array(
-      '#description' => t('More secure, more likely to lock out users.'),
+      '#description' => t('More secure; more likely to block user accounts.'),
     ),
     '0' => array(
-      '#description' => t('Less secure, less likely to lock out users.'),
+      '#description' => t('Less secure; less likely to block user accounts.'),
     ),
   );
 
-  $form['flood_log_failed_attempts'] = array(
+  $form['failed_login_limit_settings']['flood_log_failed_attempts'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Log excessive failed login attempts.'),
+    '#title' => t('Log excessive failed login attempts'),
     '#default_value' => $flood_config->get('flood_log_failed_attempts'),
-    '#description' => t('If there are excessive failed login attempts, the offending IP address or user account will be temporarily blocked. By default these events will be logged, as it helps identify brute force login attacks. You may want to disable logging them if for example, you are using the dblog module, and want to avoid database writes.'),
+    '#description' => t('By default these events will be logged, as it helps identify brute force login attacks. You may want to disable logging them if for example, you are using the dblog module, and want to avoid performance issues due to excessive database writes.'),
   );
 
   return system_settings_form($form);
