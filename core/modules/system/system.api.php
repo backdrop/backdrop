@@ -68,7 +68,7 @@ function hook_hook_info_alter(&$hooks) {
  * To change the administrative status of menu items defined in another module's
  * hook_menu(), modules should implement hook_admin_paths_alter().
  *
- * @return
+ * @return array
  *   An associative array. For each item:
  *   - the key is the path in question, in a format suitable for
  *       backdrop_match_path().
@@ -90,7 +90,7 @@ function hook_admin_paths() {
 /**
  * Redefine administrative paths defined by other modules.
  *
- * @param $paths
+ * @param array $paths
  *   An associative array of administrative paths, as defined by implementations
  *   of hook_admin_paths().
  *
@@ -114,7 +114,7 @@ function hook_admin_paths_alter(&$paths) {
  * To change the path type for menu items defined in another module's
  * hook_menu(), modules should implement hook_login_paths_alter().
  *
- * @return
+ * @return array
  *   An associative array. For each item:
  *   - the key is the path in question, in a format suitable for
  *       backdrop_match_path().
@@ -138,7 +138,7 @@ function hook_login_paths() {
 /**
  * Redefine login paths defined by other modules.
  *
- * @param $paths
+ * @param array $paths
  *   An associative array of login paths, as defined by implementations of
  *   hook_login_paths().
  *

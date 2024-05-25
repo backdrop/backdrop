@@ -543,10 +543,10 @@ function path_get_admin_paths() {
  * match any of the patterns in path_get_login_paths(), or if it matches both
  * login and non-login patterns, it is considered non-login.
  *
- * @param $path
+ * @param string $path
  *   A Backdrop path.
  *
- * @return
+ * @return array
  *   TRUE if the path is a login path, FALSE otherwise.
  *
  * @see path_get_login_paths()
