@@ -1724,6 +1724,20 @@ function user_admin_paths() {
 }
 
 /**
+ * Implements hook_login_paths().
+ */
+function user_login_paths() {
+  $paths = array(
+    'user/login' => TRUE,
+    'user/password' => TRUE,
+    'user/register' => TRUE,
+    'user/reset' => TRUE,
+    'user/reset/*' => TRUE,
+  );
+  return $paths;
+}
+
+/**
  * Load either a specified or the current user account.
  *
  * @param $uid

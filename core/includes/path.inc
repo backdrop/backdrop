@@ -506,7 +506,7 @@ function path_is_admin($path) {
  * @return array
  *   An associative array containing the following keys:
  *   'admin': An array of administrative paths and regular expressions
- *            in a format suitable for backdrop_match_path().
+ *     in a format suitable for backdrop_match_path().
  *   'non_admin': An array of non-administrative paths and regular expressions.
  *
  * @see hook_admin_paths()
@@ -532,6 +532,73 @@ function path_get_admin_paths() {
     }
     $patterns['admin'] = implode("\n", $patterns['admin']);
     $patterns['non_admin'] = implode("\n", $patterns['non_admin']);
+  }
+  return $patterns;
+}
+
+/**
+ * Determines whether a path is in the login section of the site.
+ *
+ * By default, paths are considered to be non-login paths. If a path does not
+ * match any of the patterns in path_get_login_paths(), or if it matches both
+ * login and non-login patterns, it is considered non-login.
+ *
+ * @param $path
+ *   A Backdrop path.
+ *
+ * @return
+ *   TRUE if the path is a login path, FALSE otherwise.
+ *
+ * @see path_get_login_paths()
+ * @see hook_login_paths()
+ * @see hook_login_paths_alter()
+ *
+ * @since 1.29.0 function added.
+ */
+function path_is_login($path) {
+  $path_map = &backdrop_static(__FUNCTION__);
+  if (!isset($path_map['login'][$path])) {
+    $patterns = path_get_login_paths();
+    $path_map['login'][$path] = backdrop_match_path($path, $patterns['login']);
+    $path_map['non_login'][$path] = backdrop_match_path($path, $patterns['non_login']);
+  }
+  return $path_map['login'][$path] && !$path_map['non_login'][$path];
+}
+
+/**
+ * Gets a list of login and non-login paths.
+ *
+ * @return array
+ *   An associative array containing the following keys:
+ *   'login': An array of login paths and regular expressions in a format
+ *     suitable for backdrop_match_path().
+ *   'non_login': An array of non-login paths and regular expressions.
+ *
+ * @see hook_login_paths()
+ * @see hook_login_paths_alter()
+ *
+ * @since 1.29.0 function added.
+ */
+function path_get_login_paths() {
+  $patterns = &backdrop_static(__FUNCTION__);
+  if (!isset($patterns)) {
+    $paths = module_invoke_all('login_paths');
+    backdrop_alter('login_paths', $paths);
+    // Combine all login paths into one array, and likewise for non-login paths,
+    // for easier handling.
+    $patterns = array();
+    $patterns['login'] = array();
+    $patterns['non_login'] = array();
+    foreach ($paths as $path => $enabled) {
+      if ($enabled) {
+        $patterns['login'][] = $path;
+      }
+      else {
+        $patterns['non_login'][] = $path;
+      }
+    }
+    $patterns['login'] = implode("\n", $patterns['login']);
+    $patterns['non_login'] = implode("\n", $patterns['non_login']);
   }
   return $patterns;
 }
