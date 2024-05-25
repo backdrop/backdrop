@@ -399,6 +399,18 @@ function user_login_settings($form, &$form_state) {
     ),
   );
 
+  $form['user_login_page_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Login page settings'),
+  );
+  $form['user_login_page_settings']['user_login_page_tabs'] = array(
+    '#title' => t('Use tabs'),
+    '#type' => 'checkbox',
+    '#description' => t('If selected shows local tabs for "Create new account", "Log in", and "Reset passord" links. A simplified page with links is shown if unchecked.'),
+    '#default_value' => $core_config->get('user_login_page_tabs'),
+    '#config' => 'system.core',
+  );
+
   $form['flood_log_failed_attempts'] = array(
     '#type' => 'checkbox',
     '#title' => t('Log excessive failed login attempts.'),
@@ -406,7 +418,22 @@ function user_login_settings($form, &$form_state) {
     '#description' => t('If there are excessive failed login attempts, the offending IP address or user account will be temporarily blocked. By default these events will be logged, as it helps identify brute force login attacks. You may want to disable logging them if for example, you are using the dblog module, and want to avoid database writes.'),
   );
 
-  return system_settings_form($form);
+  $form['actions']['#type'] = 'actions';
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration')
+  );
+
+  return $form;
+}
+
+/**
+ * Form submission handler for user_login_settings().
+ */
+function user_login_settings_submit($form, &$form_state) {
+  system_settings_form_submit($form, $form_state);
+
+  backdrop_flush_all_caches();
 }
 
 /**
