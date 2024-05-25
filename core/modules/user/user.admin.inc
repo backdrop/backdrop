@@ -307,18 +307,16 @@ function user_login_settings($form, &$form_state) {
   $flood_config = config('user.flood');
   $core_config = config('system.core');
 
-  $form['#config'] = 'user.flood';
-
   // User login settings.
   $form['user_login'] = array(
     '#type' => 'fieldset',
-    '#title' => t('User login'),
+    '#title' => t('Login method'),
     '#weight' => -2,
     '#config' => 'system.core',
   );
   $form['user_login']['user_login_method'] = array(
     '#type' => 'radios',
-    '#title' => t('Users may log in using'),
+    '#title' => t('Allow login using'),
     '#options' => array(
       USER_LOGIN_USERNAME_OR_EMAIL => t('Username or email address'),
       USER_LOGIN_USERNAME_ONLY => t('Username'),
@@ -333,6 +331,7 @@ function user_login_settings($form, &$form_state) {
     '#description' => t('The settings below allow to temporarily block any further login attempts from offending IP addresses or user accounts for a configurable period, after set limits has been reached.'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
+    '#config' => 'user.flood',
   );
 
   $form['failed_login_limit_settings']['ip_limit_settings'] = array(
