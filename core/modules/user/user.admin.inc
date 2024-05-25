@@ -316,7 +316,8 @@ function user_login_settings($form, &$form_state) {
   );
   $form['user_login']['user_login_method'] = array(
     '#type' => 'radios',
-    '#title' => t('Allow login using'),
+    '#title' => t('Allow logging into the site using'),
+    '#title_display' => 'invisible',
     '#options' => array(
       USER_LOGIN_USERNAME_OR_EMAIL => t('Username or email address'),
       USER_LOGIN_USERNAME_ONLY => t('Username'),
