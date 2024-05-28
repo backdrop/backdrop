@@ -3200,7 +3200,7 @@ function system_project_is_contrib($project) {
     // Identify the project as contrib in the following cases:
     // - When explicitly placed inside a "contrib" subdirectory (note that
     //   $project_type is always singular ('module', 'theme', 'layout'), whereas
-    //   the respectve directories are plural ('modules', 'themes', 'layouts').
+    //   the respective directories are plural ('modules', 'themes', 'layouts').
     $inside_contrib_dir = strstr($project->uri, $project_type . 's/contrib/');
     // - If both a 'version' and 'mtime' are provided in the .info file. Core
     //   projects provide the same information, but we've already ruled that
