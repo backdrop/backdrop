@@ -221,8 +221,8 @@ function _update_process_info_list(&$projects, $list, $project_type, $status) {
     // The file info arrays for modules and themes have the human-readable name
     // of the project in a 'name' key, whereas layout templates in a 'title'
     // key.
-    // - the 'name' key holds the machine name for layouts
-    // - the 'title' key is not present in modules/themes
+    // - The 'name' key holds the machine name for layouts.
+    // - The 'title' key is not present in modules/themes.
     // @todo: Fix all that in https://github.com/backdrop/backdrop-issues/issues/2548
     $includes_name = isset($file->info['title']) ? $file->info['title'] : $file->info['name'];
     if (!isset($projects[$project_name])) {
