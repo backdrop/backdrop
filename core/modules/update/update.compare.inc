@@ -193,10 +193,10 @@ function _update_process_info_list(&$projects, $list, $project_type, $status) {
 
     $project_name = $file->info['project'];
 
-    // Figure out what project type we're going to use to display this module
-    // or theme. If the project name is 'backdrop', we don't want it to show up
-    // under the usual "Modules" section, we put it at a special "Core"
-    // section at the top of the report.
+    // Figure out what project type we're going to use to display this module,
+    // theme, or layout template. If the project name is 'backdrop', we don't
+    // want it to show up under the usual "Modules"/"Themes"/"Layout templates"
+    // sections; we put it at a special "Core" section at the top of the report.
     if ($project_name == 'backdrop') {
       $project_display_type = 'core';
     }

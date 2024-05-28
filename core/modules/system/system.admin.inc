@@ -617,7 +617,7 @@ function system_modules($form, $form_state = array()) {
     }
 
     // Check to see if this is a core module.
-    if (strstr($module->uri, 'core/modules')) {
+    if ($module->source == 'core') {
       $extra['core'] = TRUE;
     }
 
@@ -782,7 +782,7 @@ function _system_modules_build_row($info, $extra) {
     'disabled' => FALSE,
     'enabled' => FALSE,
     'links' => array(),
-    'core' => FALSE,
+    'source' => '',
   );
   $form = array(
     '#tree' => TRUE,
@@ -2516,36 +2516,34 @@ function system_get_debug_info() {
   foreach ($modules as $module_name => $module_data) {
     // Only include non-hidden and enabled modules in the output.
     if (empty($module_data->info['hidden']) && $module_data->status) {
-      // Core modules:
-      if (strstr($module_data->uri, 'core/modules/')) {
-        $module_info_lines['core'][] = array(
-          'label' => $module_name,
-          'value' => $core_version,
-        );
-      }
-      else {
-        // Contrib modules:
-        $module_version = isset($module_data->info['version']) ? $module_data->info['version'] : '-';
-        if (strstr($module_data->uri, '/contrib/') || !empty($module_data->info['project'])) {
+      switch ($module_data->source) {
+        case 'core':
+          $module_info_lines['core'][] = array(
+            'label' => $module_name,
+            'value' => $core_version,
+          );
+          break;
+        case 'contrib':
+          // @todo: Isn't info['version'] always set in contrib?
+          $module_version = isset($module_data->info['version']) ? $module_data->info['version'] : '-';
           $module_info_lines['contrib'][] = array(
             'label' => $module_name,
             'value' => $module_version,
           );
-        }
-        // Custom modules:
-        elseif (strstr($module_data->uri, '/custom/')) {
+          break;
+        case 'custom':
           $module_info_lines['custom'][] = array(
             'label' => $module_name,
             'value' => $module_version,
           );
-        }
-        // Anything we can't identify as clearly contrib or custom:
-        else {
+          break;
+        default:
+          // Anything we can't identify as clearly core, contrib, or custom.
           $module_info_lines['other'][] = array(
             'label' => $module_name,
             'value' => $module_version,
           );
-        }
+          break;
       }
     }
   }
