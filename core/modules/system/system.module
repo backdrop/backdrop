@@ -3139,6 +3139,8 @@ function _system_rebuild_module_data() {
  * @return string
  *   Either 'core', 'contrib', 'custom', or 'other' if the source could not be
  *   identified.
+ *
+ * @since 1.28.1 Function added.
  */
 function system_get_project_source($project) {
   if (system_project_is_core($project)) {
@@ -3166,6 +3168,8 @@ function system_get_project_source($project) {
  *
  * @return bool
  *   TRUE if the specified project is a core project; otherwise FALSE.
+ *
+ * @since 1.28.1 Function added.
  */
 function system_project_is_core($project) {
   return strstr($project->uri, 'core/') ? TRUE : FALSE;
@@ -3180,6 +3184,8 @@ function system_project_is_core($project) {
  *
  * @return bool
  *   TRUE if the specified project is a contributed project; otherwise FALSE.
+ *
+ * @since 1.28.1 Function added.
  */
 function system_project_is_contrib($project) {
   $is_contrib = FALSE;
@@ -3220,6 +3226,8 @@ function system_project_is_contrib($project) {
  * @return bool
  *   TRUE if the specified project is a custom project (not core nor contrib);
  *   otherwise FALSE.
+ *
+ * @since 1.28.1 Function added.
  */
 function system_project_is_custom($project) {
   return !system_project_is_contrib($project) && !system_project_is_core($project);
