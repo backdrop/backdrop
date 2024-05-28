@@ -987,7 +987,7 @@ class Layout {
    * Check if this layout is a fallback default layout.
    */
   function isDefault() {
-    return in_array($this->name, array('default', 'admin_default'));
+    return in_array($this->name, array('default', 'admin_default', 'login'));
   }
 
   /**

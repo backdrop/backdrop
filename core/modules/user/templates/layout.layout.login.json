@@ -1,0 +1,56 @@
+{
+    "_config_name": "layout.layout.login",
+    "path": "",
+    "name": "login",
+    "title": "Login page Layout",
+    "description": null,
+    "renderer_name": "standard",
+    "module": "layout",
+    "weight": 0,
+    "storage": 2,
+    "layout_template": "user_login",
+    "disabled": false,
+    "settings": {
+        "title": "",
+        "title_display": "default",
+        "title_block": null
+    },
+    "positions": {
+        "header": [],
+        "content": [
+            "9fc5b44e-9f47-40f2-afdc-fe774a0a7157"
+        ],
+        "footer": [],
+        "title": []
+    },
+    "contexts": [],
+    "relationships": [],
+    "content": {
+        "9fc5b44e-9f47-40f2-afdc-fe774a0a7157": {
+            "plugin": "system:main",
+            "data": {
+                "status": 1,
+                "module": "system",
+                "delta": "main",
+                "settings": {
+                    "title_display": "default",
+                    "title": "",
+                    "style": "default",
+                    "block_settings": [],
+                    "contexts": [],
+                    "admin_label": "",
+                    "admin_description": ""
+                },
+                "uuid": "9fc5b44e-9f47-40f2-afdc-fe774a0a7157",
+                "style": {
+                    "plugin": "default",
+                    "data": {
+                        "settings": {
+                            "classes": ""
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

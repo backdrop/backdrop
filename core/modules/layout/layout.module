@@ -1442,8 +1442,15 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL, $is_layout
     return $layouts_by_path[$href];
   }
 
-  $layouts = layout_load_multiple_by_router_item($router_item, !$is_layout_page);
   $selected_layout = NULL;
+  if (in_array($href, array_keys(user_login_paths()))) {
+    // If this is a login path, use the default login layout.
+    $selected_layout = layout_load('login');
+    $layouts_by_path[$href] = $selected_layout;
+    return $selected_layout;
+  }
+
+  $layouts = layout_load_multiple_by_router_item($router_item, !$is_layout_page);
   foreach ($layouts as $layout) {
     // Contexts must have their data set before the layout's access may be
     // checked.
@@ -1473,6 +1480,20 @@ function layout_get_layout_by_path($path = NULL, $router_item = NULL, $is_layout
 
   $layouts_by_path[$href] = $selected_layout;
   return $selected_layout;
+}
+
+/**
+ * Temporary. Implements hook_login_paths().
+ */
+function user_login_paths() {
+  $paths = array(
+    'user/login' => TRUE,
+    'user/password' => TRUE,
+    'user/register' => TRUE,
+    'user/reset' => TRUE,
+    'user/reset/*' => TRUE,
+  );
+  return $paths;
 }
 
 /**

@@ -1989,6 +1989,27 @@ function user_login_final_validate($form, &$form_state) {
   }
 }
 
+function user_layout_info() {
+  $layouts = array();
+  $layouts['user_login'] = array(
+    'title' => t('User login'),
+    'default region' => '',
+    'template' => 'layout--login',
+    'flexible' => FALSE,
+    'type' => 'layout',
+    'path' => 'templates',
+    'preview' => 'flexible_template.png',
+    'libraries' => array('bootstrap4-gs'),
+    'regions' => array(
+      'header' => t('Header'),
+      'content' => t('Main'),
+      'footer' => t('Footer'),
+    ),
+  );
+
+  return $layouts;
+}
+
 /**
  * Implements hook_user_flood_control().
  */

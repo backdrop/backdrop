@@ -201,3 +201,7 @@ form:not(.user-admin-settings) .password-strength-help-text.strong em {
 .profile dd {
   margin: 0 0 1em 0;
 }
+.layout--login .l-wrapper {
+  display: flex;
+  align-items: center;
+}
