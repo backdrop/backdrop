@@ -2011,6 +2011,16 @@ function user_layout_info() {
 }
 
 /**
+ * Implements hook_layout_update().
+ */
+function user_layout_update(Layout $layout) {
+  // Clear page cache so anonymous sees new changes.
+  if ($layout->name == 'login') {
+    cache('page')->flush();
+  }
+}
+
+/**
  * Implements hook_user_flood_control().
  */
 function user_user_flood_control($ip, $username = FALSE) {
