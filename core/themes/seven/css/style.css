@@ -733,6 +733,10 @@ fieldset .fieldset-wrapper::before {
   right: .6em;
 }
 
+.fieldset-legend a:hover {
+  text-decoration: none;
+}
+
 .fieldset-legend span.summary {
   position: absolute;
   top: .4em;
