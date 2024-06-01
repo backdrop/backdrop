@@ -591,7 +591,10 @@ function image_add_svg_attributes($svg_content, array $attributes) {
         if (strlen($attributes['alt'])) {
           $title = $doc->createElement('title');
           $title->textContent = $attributes['alt'];
-          $doc->firstChild->prepend($title);
+          // Since DOMDocument::prepend() is not available in PHP versions prior
+          // to v8, we are using this tirckery with DOMNode::insertBefore() and
+          // DOMNode::firstChild.
+          $doc->firstChild->insertBefore($title, $doc->firstChild->firstChild);
         }
         // Remove any given <title> element if alt is an empty string.
         elseif ($doc->firstChild->firstChild && $doc->firstChild->firstChild->nodeName === 'title') {
