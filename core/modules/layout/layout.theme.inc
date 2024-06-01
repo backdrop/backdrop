@@ -40,7 +40,7 @@ function theme_layout_reorder_layouts($variables) {
 /**
  * Outputs information about a layout. Used in the layout listing page.
  *
- * @param $variables
+ * @param array $variables
  *   An array with a single value: "layout", which contains the layout object.
  *
  * @return string
@@ -74,7 +74,7 @@ function theme_layout_info($variables) {
 /**
  * Outputs a list of conditions for a layout. Used in the layout listing page.
  *
- * @param $variables
+ * @param array $variables
  *   An array with a single value: "layout", which contains the layout object.
  *
  * @return string
@@ -102,7 +102,7 @@ function theme_layout_condition_info($variables) {
 /**
  * Outputs an individual option label for selecting a layout.
  *
- * @param $variables
+ * @param array $variables
  *   An array which includes the template information in a 'template_info' key.
  *
  * @return string
@@ -126,7 +126,7 @@ function theme_layout_template_option($variables) {
  * Outputs information about a layout template. Used in the layout template
  * listing page.
  *
- * @param $variables
+ * @param array $variables
  *   An array which includes the template information in a 'template_info' key.
  *
  * @return string
@@ -152,9 +152,9 @@ function theme_layout_template_info($variables) {
 }
 
 /**
- * Helper funtion that renders the thumbnail previews for layout templates.
+ * Helper function that renders the thumbnail previews for layout templates.
  *
- * @param $template_info
+ * @param array $template_info
  *   An array with the information of the template for which to return a
  *   thumbnail preview.
  *
@@ -177,7 +177,10 @@ function _theme_layout_template_preview_thumbnail($template_info) {
     '@template' => $template_info['title'],
   ));
   $preview_icon_attributes = array(
-    'class' => array('layout-template-preview', 'layout-template-preview--' . $template_info['name']),
+    'class' => array(
+      'layout-template-preview',
+      'layout-template-preview--' . $template_info['name'],
+    ),
   );
 
   if (!empty($template_info['flexible'])) {
@@ -193,7 +196,7 @@ function _theme_layout_template_preview_thumbnail($template_info) {
     ));
   }
   elseif (empty($preview_path_info['extension'])) {
-    // Special handling, to allow extensionless names in the "preview" property
+    // Special handling, to allow extension-less names in the "preview" property
     // of .info files, in which case we are assuming that the intension is to
     // use icons from the core-provided Phosphor set.
     $preview_icon_attributes['class'][] = 'layout-template-preview-phosphor-icon';

@@ -134,7 +134,8 @@ function layout_list_page() {
       $row['visibility_conditions'] = theme('layout_condition_info', array('layout' => $layout));
       $row['storage'] = $storage;
       $row['operations'] = backdrop_render($operations);
-      // Add classes to each row, marking disabled layouts with a separate class.
+      // Add classes to each row, marking disabled layouts with a separate
+      // class.
       $class = array('layout-row');
       if ($layout->disabled) {
         $class[] = 'disabled';
