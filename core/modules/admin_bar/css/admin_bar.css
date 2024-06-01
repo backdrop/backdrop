@@ -7,6 +7,12 @@
  * @see https://www.htmldog.com/articles/suckerfish
  */
 
+/* Set a CSS property declaring the height of the admin bar. */
+/* This can be read by themes to offset the top of the page if needed. */
+:root {
+  --admin-bar-height: 2.35rem;
+}
+
 #admin-bar {
   /* Adjusting font size will scale the entire admin menu, including icons. */
   font: normal 12px "Lucida Grande", Verdana, sans-serif;
@@ -29,11 +35,11 @@
 }
 /* When body is a contextual links region. */
 .contextual-links-region #admin-bar {
-  top: -2.25em;
+  top: calc(var(--admin-bar-height) * -1)
 }
 
 .admin-bar body {
-  border-top: 2.25em solid #2D2D2D !important;
+  border-top: var(--admin-bar-height) solid #2D2D2D !important;
 }
 
 /* Top level items. */
@@ -65,17 +71,19 @@
 }
 
 /* Specific admin bar menu links. */
+#admin-bar .admin-bar-link-icon svg,
+#admin-bar .admin-bar-link-text {
+  vertical-align: text-bottom;
+}
 #admin-bar svg.icon {
-  width: 2em;
-  height: 2em;
-  margin: -0.2em 0;
-  padding-right: 0.5em; /* LTR */
+  width: 1.9em;
+  height: 1.9em;
+  padding-right: 0.3em; /* LTR */
   box-sizing: content-box;
-  vertical-align: bottom;
 }
 [dir="rtl"] #admin-bar svg.icon {
   padding-right: 0;
-  padding-left: 0.5em;
+  padding-left: 0.3em;
 }
 
 /* Restore active and hover colors. */
@@ -127,9 +135,14 @@
 #admin-bar .dropdown li > a,
 #admin-bar .dropdown li > span {
   display: block;
-  padding: 0.75em 1.5em 0.75em 1em;
+  padding: 0.5em 1.5em 0.5em 0.75em;
 }
-
+#admin-bar-icon > li.expandable > a,
+#admin-bar-menu > li.expandable > ul.dropdown > li > a,
+#admin-bar-extra > li.expandable > ul.dropdown > li > a,
+#admin-bar-extra > li.expandable > ul.dropdown > li > span {
+  padding: 0.5em 0.75em 0.5em 0.7em;
+}
 #admin-bar a.expanded-trail,
 #admin-bar span.expanded-trail {
   background-color: #45454a;
@@ -182,7 +195,7 @@
 #admin-bar .dropdown li ul {
   display: none;
   left: -999em; /* LTR */
-  line-height: 1.7em;
+  line-height: inherit;
   margin: 0;
   position: absolute;
   width: 15em;
@@ -193,7 +206,7 @@
 
 /* Third-and-above-level lists. */
 #admin-bar .dropdown li li.expandable ul {
-  margin: -3.2em 0 0 15em; /* LTR */
+  margin: -3.1em 0 0 15em; /* LTR */
 }
 #admin-bar .dropdown li li.expandable.outside-right ul {
   margin-left: -15em; /* LTR */
@@ -229,15 +242,15 @@
   background: #ffffff;
   width: 1em;
   height: 100%;
-  margin: -0.75em 0;
+  margin: -0.5em 0;
   position: absolute;
-  right: 1em; /* LTR */
+  right: 0.7em; /* LTR */
 }
 [dir="rtl"] #admin-bar .dropdown li li.expandable > a::before {
   /*noinspection CssUnresolvedCustomProperty*/
   mask-image: var(--icon-arrow-left);
   right: auto;
-  left: 1em;
+  left: 0.7em;
 }
 #admin-bar .dropdown li li a.expanded-trail {
   background-color: #111;

@@ -150,6 +150,8 @@ function hook_filter_info_alter(&$info) {
  *
  * @see ckeditor.module
  * @see hook_editor_info_alter()
+ *
+ * @since 1.28.0 Added "library_version" key to specify editor version.
  */
 function hook_editor_info() {
   $editors['myeditor'] = array(
@@ -162,6 +164,7 @@ function hook_editor_info() {
     ),
     'file' => 'myeditor.admin.inc',
     'library' => array('my_module', 'myeditor'),
+    'library_version' => '2.0.0',
     'js settings callback' => '_myeditor_js_settings',
   );
   return $editors;

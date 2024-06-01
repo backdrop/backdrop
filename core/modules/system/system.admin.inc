@@ -2608,9 +2608,9 @@ function _system_format_debug_info(array $lines, array $format_settings) {
   // Get the length of the longest key in the array (which will determine the
   // max width of the first plain-text "column").
   $longest_item_length = 0;
-  foreach ($lines as &$line) {
-    $line += array('label' => NULL, 'value' => NULL);
-    $label_length = backdrop_strlen($line['label']);
+  foreach ($lines as &$line_reference) {
+    $line_reference += array('label' => NULL, 'value' => NULL);
+    $label_length = backdrop_strlen($line_reference['label']);
     if ($label_length > $longest_item_length) {
       $longest_item_length = $label_length;
     }
@@ -2623,7 +2623,7 @@ function _system_format_debug_info(array $lines, array $format_settings) {
   foreach ($lines as $line) {
     $label = $line['label'];
     $value = $line['value'];
-    if (is_numeric($label) && $value == NULL) {
+    if ($label == NULL && $value == NULL) {
       // Blank lines.
       $output .= "\n";
     }
