@@ -592,7 +592,7 @@ function image_add_svg_attributes($svg_content, array $attributes) {
           $title = $doc->createElement('title');
           $title->textContent = $attributes['alt'];
           // Since DOMDocument::prepend() is not available in PHP versions prior
-          // to v8, we are using this tirckery with DOMNode::insertBefore() and
+          // to v8, we are using this trickery with DOMNode::insertBefore() and
           // DOMNode::firstChild.
           $doc->firstChild->insertBefore($title, $doc->firstChild->firstChild);
         }
