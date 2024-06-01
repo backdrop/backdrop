@@ -44,14 +44,17 @@ function theme_layout_reorder_layouts($variables) {
  *   An array with a single value: "layout", which contains the layout object.
  *
  * @return string
+ *
+ * @see layout_list_page()
+ * @see _theme_layout_template_preview_thumbnail()
  */
 function theme_layout_info($variables) {
   $layout = $variables['layout'];
-  $info = layout_get_layout_template_info($layout->layout_template);
+  $template_info = layout_get_layout_template_info($layout->layout_template);
 
-  // Build template thumbnail preview
-  $preview_path = $info['path'] . '/' . $info['preview'];
-  $preview_img = theme('image', array('path' => $preview_path));
+  // Build the thumbnail preview for the template as a link to the "Manage
+  // blocks" form for each layout.
+  $preview_img = _theme_layout_template_preview_thumbnail($template_info);
   $preview = l($preview_img, 'admin/structure/layouts/manage/' . $layout->name, array('html' => TRUE));
 
   // Get the label and machine name.
@@ -98,38 +101,41 @@ function theme_layout_condition_info($variables) {
 
 /**
  * Outputs an individual option label for selecting a layout.
+ *
+ * @param $variables
+ *   An array which includes the template information in a 'template_info' key.
+ *
+ * @return string
+ *
+ * @see layout_settings_form()
+ * @see _theme_layout_template_preview_thumbnail()
  */
 function theme_layout_template_option($variables) {
   $template_info = $variables['template_info'];
-  $icon_path = $template_info['path'] . '/' . $template_info['preview'];
 
   $output = '';
   $output .= '<div class="layout-icon">';
-  $output .= theme('image', array(
-    'uri' => $icon_path,
-    'attributes' => array('title' => $template_info['title']),
-  ));
+  $output .= _theme_layout_template_preview_thumbnail($template_info);
   $output .= '<div class="layout-caption">' . check_plain($template_info['title']) . '</div>';
   $output .= '</div>';
+
   return $output;
 }
 
 /**
- * Outputs information about a layout template . Used in the layout template
+ * Outputs information about a layout template. Used in the layout template
  * listing page.
  *
  * @param $variables
- *   An array with a single value: "template_info", which contains information
- *   about the layout template.
+ *   An array which includes the template information in a 'template_info' key.
  *
  * @return string
+ *
+ * @see layout_settings_page()
+ * @see _theme_layout_template_preview_thumbnail()
  */
 function theme_layout_template_info($variables) {
   $template_info = $variables['template_info'];
-
-  // Build template thumbnail preview
-  $preview_path = $template_info['path'] . '/' . $template_info['preview'];
-  $preview_img = theme('image', array('path' => $preview_path));
 
   // Get the label and machine name.
   $label = theme('label_machine_name__layout_template', array(
@@ -138,11 +144,76 @@ function theme_layout_template_info($variables) {
   ));
 
   $output = '<div class="layout-info">';
-  $output .= $preview_img;
+  $output .= _theme_layout_template_preview_thumbnail($template_info);
   $output .= '<div class="layout-detail">' . $label . '</div>';
   $output .= '</div>';
 
   return $output;
+}
+
+/**
+ * Helper funtion that renders the thumbnail previews for layout templates.
+ *
+ * @param $template_info
+ *   An array with the information of the template for which to return a
+ *   thumbnail preview.
+ *
+ * @return string
+ *   If the preview file that is provided with the template is a .svg, then a
+ *   <svg> HTML tag is returned, using the icon() function provided by the Icon
+ *   API. If any other type of image is provided, then an <img> HTML tag is
+ *   returned, using theme_image().
+ *
+ * @see theme_layout_info()
+ * @see theme_layout_template_option()
+ * @see theme_layout_template_info()
+ */
+function _theme_layout_template_preview_thumbnail($template_info) {
+  // Build the thumbnail preview for the template.
+  $preview_path = $template_info['path'] . '/' . $template_info['preview'];
+  $preview_path_info = pathinfo($preview_path);
+
+  $preview_icon_alt_text = t('Preview image for the @template layout template.', array(
+    '@template' => $template_info['title'],
+  ));
+  $preview_icon_attributes = array(
+    'class' => array('layout-template-preview', 'layout-template-preview--' . $template_info['name']),
+  );
+
+  if (!empty($template_info['flexible'])) {
+    // Special handling for all flexible templates.
+    $preview_icon_attributes['class'][] = 'layout-template-preview-flexible';
+  }
+
+  if (image_is_svg($template_info['preview'])) {
+    // Special handling for .svg preview images.
+    $preview_img = icon($template_info['name'], array(
+      'alt' => $preview_icon_alt_text,
+      'attributes' => $preview_icon_attributes,
+    ));
+  }
+  elseif (empty($preview_path_info['extension'])) {
+    // Special handling, to allow extensionless names in the "preview" property
+    // of .info files, in which case we are assuming that the intension is to
+    // use icons from the core-provided Phosphor set.
+    $preview_icon_attributes['class'][] = 'layout-template-preview-phosphor-icon';
+
+    $preview_img = icon($template_info['preview'], array(
+      'alt' => $preview_icon_alt_text,
+      'attributes' => $preview_icon_attributes,
+    ));
+  }
+  else {
+    // Non-SVG preview images.
+    $preview_img = theme('image', array(
+      'uri' => $preview_path,
+      'title' => $template_info['title'],
+      'alt' => $preview_icon_alt_text,
+      'attributes' => $preview_icon_attributes,
+    ));
+  }
+
+  return $preview_img;
 }
 
 /**

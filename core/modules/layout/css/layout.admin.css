@@ -10,10 +10,10 @@
   font-weight: bold;
 }
 .layout-list .layout-group td.missing-path,
- .layout-list .layout-group td.missing-path a {
-   color: #c40d00;
- }
- .layout-list .layout-row td:first-child {
+.layout-list .layout-group td.missing-path a {
+  color: #c40d00;
+}
+.layout-list .layout-row td:first-child {
   padding-left: 24px;
 }
 .layout-list tr.disabled td {
@@ -29,22 +29,49 @@
   }
 }
 
-.layout-list img {
-  display: none;
+.layout-list .layout-template-preview {
   float: left; /* LTR */
   margin-right: 10px;
-  max-width: 37px;
+  max-width: 40px;
   height: auto;
 }
-[dir="rtl"] .layout-list img {
+[dir="rtl"] .layout-list .layout-template-preview {
   float: right; /* LTR */
   margin-right: 0;
   margin-left: 10px;
 }
+
+.layout-list .layout-template-preview {
+  display: none;
+}
 @media (min-width: 768px) {
-  .layout-list img {
+  .layout-list .layout-template-preview {
     display: inline;
   }
+}
+
+svg.layout-template-preview {
+  color: #999999;
+}
+svg.layout-template-preview :not(.main) {
+  /* Denote which region is the main one, by dimming out the rest. */
+  stroke-opacity: 0.6;
+}
+
+/* Temporary. Remove all the .layout-template-preview-flexible selectors once we
+   have auto-generated preview thumbnails for flexible templates.
+   See https://github.com/backdrop/backdrop-issues/issues/4104 */
+.layout-settings-form .layout-template-preview-flexible,
+.layout-settings-form .layout-template-preview-phosphor-icon {
+  padding: 20px 0;
+}
+.layout-list .layout-template-preview-flexible,
+.layout-list .layout-template-preview-phosphor-icon {
+  padding: 15px 0;
+}
+.layout-settings-page .layout-template-preview-flexible,
+.layout-settings-page .layout-template-preview-phosphor-icon {
+  padding: 10px 0;
 }
 
 .layout-list .layout-conditions-list ul {
@@ -106,7 +133,7 @@
   margin-top: 0.5em;
 }
 
-/* Toggle for the placeholder examples */
+/* Toggle for the placeholder examples. */
 .layout-placeholder-examples-toggle {
   white-space: nowrap;
 }
@@ -180,7 +207,7 @@
   border-bottom: none;
 }
 
-/* Layout columns */
+/* Layout columns. */
 .layout-content-form .row > div,
 .layout-content-form .row > main {
   display: flex;
@@ -339,7 +366,7 @@
 .layout-content-form .title div.description {
   clear: both;
 }
-/* Remove the drop shadow indicating this item is movable */
+/* Remove the drop shadow indicating this item is movable. */
 .layout-content-form .page-title .layout-editor-block {
   box-shadow: none;
   background-color: #e9e8e8;

@@ -1824,15 +1824,30 @@ function check_url($uri) {
 /**
  * Applies a very permissive XSS/HTML filter for admin-only use.
  *
- * Use only for fields where it is impractical to use the
- * whole filter system, but where some (mainly inline) mark-up
- * is desired (so check_plain() is not acceptable).
+ * Use only for fields where it is impractical to use the whole filter system,
+ * but where some (mainly inline) mark-up is desired (so check_plain() is not
+ * acceptable).
  *
- * Allows all tags that can be used inside an HTML body, save
- * for scripts and styles.
+ * Allows all tags that can be used inside an HTML body, including certain SVG
+ * elements, save for scripts and styles.
+ *
+ * @since 1.28.1 also allows certain svg tags/elements.
  */
 function filter_xss_admin($string) {
-  return filter_xss($string, array('a', 'abbr', 'acronym', 'address', 'article', 'aside', 'b', 'bdi', 'bdo', 'big', 'blockquote', 'br', 'caption', 'cite', 'code', 'col', 'colgroup', 'command', 'dd', 'del', 'details', 'dfn', 'div', 'dl', 'dt', 'em', 'figcaption', 'figure', 'footer', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'hgroup', 'hr', 'i', 'img', 'ins', 'kbd', 'li', 'mark', 'menu', 'meter', 'nav', 'ol', 'output', 'p', 'pre', 'progress', 'q', 'rp', 'rt', 'ruby', 's', 'samp', 'section', 'small', 'span', 'strong', 'sub', 'summary', 'sup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'time', 'tr', 'tt', 'u', 'ul', 'var', 'wbr'));
+  $allowed_html_tags = array('a', 'abbr', 'acronym', 'address', 'article',
+    'aside', 'b', 'bdi', 'bdo', 'big', 'blockquote', 'br', 'caption', 'cite',
+    'code', 'col', 'colgroup', 'command', 'dd', 'del', 'details', 'dfn', 'div',
+    'dl', 'dt', 'em', 'figcaption', 'figure', 'footer', 'h1', 'h2', 'h3', 'h4',
+    'h5', 'h6', 'header', 'hgroup', 'hr', 'i', 'img', 'ins', 'kbd', 'li',
+    'mark', 'menu', 'meter', 'nav', 'ol', 'output', 'p', 'pre', 'progress', 'q',
+    'rp', 'rt', 'ruby', 's', 'samp', 'section', 'small', 'span', 'strong',
+    'sub', 'summary', 'sup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead',
+    'time', 'tr', 'tt', 'u', 'ul', 'var', 'wbr');
+  // @todo: put this list of allowed svg elements somewhere reusable. A constant
+  // or helper function perhaps?
+  $allowed_svg_elements = array('svg', 'line', 'path');
+
+  return filter_xss($string, array_merge($allowed_html_tags, $allowed_svg_elements));
 }
 
 /**
@@ -2006,7 +2021,8 @@ function _filter_xss_attributes($attr) {
     switch ($mode) {
       case 0:
         // Attribute name, href for instance.
-        if (preg_match('/^([-a-zA-Z]+)/', $attr, $match)) {
+        // @todo: fix the regex properly in https://github.com/backdrop/backdrop-issues/issues/6575
+        if (preg_match('/^([-a-zA-Z][-a-zA-Z0-9]*)/', $attr, $match)) {
           $attrname = strtolower($match[1]);
           $skip = (
             $attrname == 'style' ||
@@ -2016,7 +2032,8 @@ function _filter_xss_attributes($attr) {
             strlen($attrname) > 96
           );
           $working = $mode = 1;
-          $attr = preg_replace('/^[-a-zA-Z]+/', '', $attr);
+          // @todo: fix the regex properly in https://github.com/backdrop/backdrop-issues/issues/6575
+          $attr = preg_replace('/^[-a-zA-Z][-a-zA-Z0-9]*/', '', $attr);
         }
         break;
 
