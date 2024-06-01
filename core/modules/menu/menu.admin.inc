@@ -307,11 +307,14 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
       'hidden' => 0,
       'has_children' => 0,
     );
+    backdrop_set_title(t('@menu_name: Add link', array('@menu_name' => $menu['title'])));
   }
   else {
-    // Get the human-readable menu title from the given menu name
+    // Get the human-readable menu title from the given menu name.
     $titles = menu_get_menus();
     $current_title = $titles[$item['menu_name']];
+
+    backdrop_set_title(t('@menu_name: Edit link %link_title', array('@menu_name' => $current_title, '%link_title' => $item['link_title'])), PASS_THROUGH);
 
     // Get the current breadcrumb and add a link to that menu's overview page.
     $breadcrumb = menu_get_active_breadcrumb();

@@ -809,7 +809,7 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
       $term = entity_create('taxonomy_term', array(
         'vocabulary' => $vocabulary->machine_name,
       ));
-      backdrop_set_title(t('@vocab_name: Add term', array('@vocab_name' => $vocabulary->name)), PASS_THROUGH);
+      backdrop_set_title(t('@vocab_name: Add term', array('@vocab_name' => $vocabulary->name)));
     }
     else {
       backdrop_set_title(t('@vocab_name: Edit term %term_name', array('@vocab_name' => $vocabulary->name, '%term_name' => $term->name)), PASS_THROUGH);

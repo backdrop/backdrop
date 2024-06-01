@@ -14,7 +14,6 @@
 function layout_flexible_template_settings_add_form() {
   $flexible_template = new LayoutFlexibleTemplate();
   $flexible_template->is_new = TRUE;
-  backdrop_set_title(t('Add template'));
   return backdrop_get_form('layout_flexible_template_settings_edit_form', $flexible_template);
 }
 
