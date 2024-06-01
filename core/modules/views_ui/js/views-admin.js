@@ -101,7 +101,7 @@ Backdrop.viewsUi.FormFieldFiller = function ($target, replace, suffix) {
   };
 
   // Create bound versions of this instance's object methods to use as event
-  // handlers. This will let us easily unbind those specific handlers later on.
+  // handlers. This will let us unbind those specific handlers later on.
   // NOTE: $.proxy will not work for this because it assumes we want only
   // one bound version of an object method, whereas we need one version per
   // object instance.
@@ -124,7 +124,7 @@ $.extend(Backdrop.viewsUi.FormFieldFiller.prototype, {
     // Quit populating the field as soon as it gets focus.
     this.target.on('focus.viewsUi', this.unbind);
   },
-  
+
   /**
    * Get the source form field value as altered by the passed-in parameters.
    */
@@ -136,10 +136,10 @@ $.extend(Backdrop.viewsUi.FormFieldFiller.prototype, {
       dataType: "text"
     });
   },
-  
+
   /**
    * Use the title for populating the fields, or send a request
-   * for a translitarated version of the source field value when needed.
+   * for a transliterated version of the source field value when needed.
    */
   _populate: function () {
     if (this.replace == '') {
@@ -156,7 +156,7 @@ $.extend(Backdrop.viewsUi.FormFieldFiller.prototype, {
       });
     }
   },
-  
+
   /**
    * Stop prepopulating the form fields.
    */
@@ -164,7 +164,7 @@ $.extend(Backdrop.viewsUi.FormFieldFiller.prototype, {
     this.source.off('keyup.viewsUi change.viewsUi', this.populate);
     this.target.off('focus.viewsUi', this.unbind);
   },
-  
+
   /**
    * Bind event handlers to the new form fields, after they're replaced via AJAX.
    */
@@ -247,8 +247,8 @@ Backdrop.behaviors.viewsUiRenderAddViewButton = {
     var $displayButtons = $menu.nextAll('input.add-display').detach();
     $displayButtons.appendTo($addDisplayDropdown.find('.action-list')).wrap('<li>')
       .parent().first().addClass('first').end().last().addClass('last');
-    // Remove the 'Add ' prefix from the button labels since they're being palced
-    // in an 'Add' dropdown.
+    // Remove the 'Add ' prefix from the button labels since they're being
+    // placed in an 'Add' dropdown.
     // @todo This assumes English, but so does $addDisplayDropdown above. Add
     //   support for translation.
     $displayButtons.each(function () {
@@ -309,7 +309,7 @@ Backdrop.viewsUi.OptionsSearch = function ($form) {
   this.$form = $form;
   // Add a keyup handler to the search box.
   this.$searchBox = this.$form.find('#edit-options-search');
-  this.$searchBox.keyup($.proxy(this.handleKeyup, this));
+  this.$searchBox.on('keyup', $.proxy(this.handleKeyup, this));
   // Get a list of option labels and their corresponding divs and maintain it
   // in memory, so we have as little overhead as possible at keyup time.
   this.options = this.getOptions(this.$form.find('.filterable-option'));
@@ -318,7 +318,7 @@ Backdrop.viewsUi.OptionsSearch = function ($form) {
 
   // Add a change handler to the filter group select.
   this.$filterGroup = this.$form.find('select[name="group"]');
-  this.$filterGroup.change($.proxy(this.filterGroup, this));
+  this.$filterGroup.on('change', $.proxy(this.filterGroup, this));
   // Trap the ENTER key in the search box so that it doesn't submit the form.
   this.$searchBox.on('keypress', function (event) {
     if (event.which == 13) {
@@ -420,7 +420,7 @@ Backdrop.behaviors.viewsUiPreview = {
    if ($contextualFiltersBucket.length === 0) {
      return;
    }
-  
+
    // If the display has no contextual filters, hide the form where you enter
    // the contextual filters for the live preview. If it has contextual filters,
    // show the form.
@@ -431,7 +431,7 @@ Backdrop.behaviors.viewsUiPreview = {
    else {
      $('#preview-args').parent().hide();
    }
-  
+
    // Executes an initial preview.
    if ($('#edit-displays-live-preview').once('edit-displays-live-preview').is(':checked')) {
      $('#preview-submit').once('edit-displays-live-preview').trigger('click');
@@ -444,7 +444,7 @@ Backdrop.behaviors.viewsUiPreview = {
  */
 Backdrop.behaviors.viewsUiRemoveLink = {
   attach: function (context) {
-    $('a.views-remove-link').once('views-processed').click(function(event) {
+    $('a.views-remove-link').once('views-processed').on('click', function(event) {
       var id = $(this).attr('id').replace('views-remove-link-', '');
       $('#views-row-' + id).hide();
       $('#views-removed-' + id).attr('checked', true);
@@ -724,7 +724,7 @@ $.extend(Backdrop.viewsUi.RearrangeFilterHandler.prototype, {
         // first operator dropdown we encounter, going backwards from the current
         // row. This dropdown is the one associated with the current row's filter
         // group.
-        var operatorValue = $draggableRow.prevAll('.views-group-title').find('option:selected').html();
+        var operatorValue = $draggableRow.prevAll('.views-group-title').find('option:selected').last().html();
         var operatorLabel = '<span class="views-operator-label">' + operatorValue + '</span>';
         // If the next visible row after this one is a draggable filter row,
         // display the operator label next to the current row. (Checking for
@@ -820,7 +820,7 @@ Backdrop.behaviors.viewsFilterConfigSelectAll = {
 Backdrop.behaviors.viewsImplicitFormSubmission = {
   attach: function (context, settings) {
     $(':text, :password, :radio, :checkbox', context).once('viewsImplicitFormSubmission', function() {
-      $(this).keypress(function(event) {
+      $(this).on('keypress', function(event) {
         if (event.which == 13) {
           var formId = this.form.id;
           if (formId && settings.viewsImplicitFormSubmission && settings.viewsImplicitFormSubmission[formId] && settings.viewsImplicitFormSubmission[formId].defaultButton) {
@@ -832,7 +832,7 @@ Backdrop.behaviors.viewsImplicitFormSubmission = {
                 $button.trigger(Backdrop.ajax[buttonId].element_settings.event);
               }
               else {
-                $button.click();
+                $button.trigger('click');
               }
             }
           }
@@ -907,15 +907,15 @@ Backdrop.viewsUi.Checkboxifier = function (button) {
   this.$button.hide();
   this.$parent.find('.exposed-description, .grouped-description').hide();
 
-  this.$input.click($.proxy(this, 'clickHandler'));
+  this.$input.on('click', $.proxy(this, 'clickHandler'));
 };
 
 /**
  * When the checkbox is checked or unchecked, simulate a button press.
  */
 Backdrop.viewsUi.Checkboxifier.prototype.clickHandler = function (e) {
-  this.$button.mousedown();
-  this.$button.submit();
+  this.$button.trigger('mousedown');
+  this.$button.trigger('submit');
 };
 
 /**

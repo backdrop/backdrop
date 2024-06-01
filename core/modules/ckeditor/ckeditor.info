@@ -1,7 +1,11 @@
-name = CKEditor
-description = WYSIWYG editing for rich text fields using CKEditor.
-package = User interface
+type = module
+name = CKEditor 4 (Deprecated)
+description = WYSIWYG editing for rich text fields using CKEditor 4. This module is no longer supported and sites should use CKEditor 5 module instead.
+package = User Interface
+tags[] = Filters
+tags[] = Formats
+tags[] = Text Editors
 version = BACKDROP_VERSION
 backdrop = 1.x
-type = module
+
 configure = admin/config/content/formats

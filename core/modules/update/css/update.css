@@ -33,7 +33,7 @@ table.update {
     float: left;
   }
   .update .versions,
-  .update .info {
+  .update .project-info {
     clear: both;
   }
 }
@@ -124,11 +124,11 @@ table.update {
   padding-right: 1em;
 }
 
-.update .info {
+.update .project-info {
   display: none;
 }
 @media all and (min-width: 768px) {
-  .update .info {
+  .update .project-info {
     display: block;
   }
 }

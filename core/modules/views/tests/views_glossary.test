@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of ViewsGlossaryTestCase.
@@ -13,15 +12,11 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
 class ViewsGlossaryTestCase extends ViewsSqlTest {
   protected $profile = 'testing';
 
-  public function setUp() {
-    parent::setUp('views', 'views_test');
-  }
-
   /**
    * Tests the default glossary view.
    */
   public function testGlossaryView() {
-    // create a contentype and add some nodes, with a non random title.
+    // Create a content type and add some nodes, with a non random title.
     $type = $this->backdropCreateContentType();
     $nodes_per_char = array(
       'd' => 1,

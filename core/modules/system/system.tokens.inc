@@ -41,6 +41,10 @@ function system_token_info() {
     'description' => t('Tokens related to arrays of strings.'),
     'needs-data' => 'array',
   );
+  $types['random'] = array(
+    'name' => t('Random'),
+    'description' => ('Tokens related to random data.'),
+  );
 
   // Site-wide global tokens.
   $site['name'] = array(
@@ -57,13 +61,13 @@ function system_token_info() {
   );
   $site['url'] = array(
     'name' => t('URL'),
-    'description' => t("The URL of the site's front page."),
+    'description' => t("The URL of the site's home page."),
     'type' => 'url',
   );
   // @deprecated: Replaced by url:brief.
   $site['url-brief'] = array(
     'name' => t('URL (brief)'),
-    'description' => t("The URL of the site's front page without the protocol."),
+    'description' => t("The URL of the site's home page without the protocol."),
     'deprecated' => TRUE,
   );
   $site['login-url'] = array(
@@ -116,7 +120,7 @@ function system_token_info() {
   );
   $url['args'] = array(
     'name' => t('Arguments'),
-    'description' => t("The specific argument of the current page (e.g. 'arg:1' on the page 'node/1' returns '1')."),
+    'description' => t("The specific argument of the current page (e.g. 'args:value:1' on the page 'node/123' returns '123')."),
     'type' => 'array',
   );
 
@@ -196,7 +200,7 @@ function system_token_info() {
   }
   $date['custom'] = array(
     'name' => t('Custom format'),
-    'description' => t("A date in a custom format. See !php-date for details.", array('!php-date' => l(t('the PHP documentation'), 'http://php.net/manual/en/function.date.php'))),
+    'description' => t('A date in a custom format. See the <a href="@url" target="_blank">PHP manual</a> for available options.', array('@url' => 'https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters')),
     'dynamic' => TRUE,
   );
   $date['since'] = array(
@@ -256,6 +260,21 @@ function system_token_info() {
     'type' => 'user',
   );
 
+  // Random tokens.
+  $random['number'] = array(
+    'name' => t('Number'),
+    'description' => t('A random number from 0 to @max.', array(
+      '@max' => mt_getrandmax(),
+    )),
+  );
+  $random['hash'] = array(
+    'name' => t('Hash'),
+    'description' => t('A random hash. The possible hashing algorithms are: @hash-algos.', array(
+      '@hash-algos' => implode(', ', hash_algos()),
+    )),
+    'dynamic' => TRUE,
+  );
+
   return array(
     'types' => $types,
     'tokens' => array(
@@ -266,6 +285,7 @@ function system_token_info() {
       'array' => $array,
       'date' => $date,
       'file' => $file,
+      'random' => $random,
     ),
   );
 }
@@ -290,12 +310,12 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
     foreach ($tokens as $name => $original) {
       switch ($name) {
         case 'name':
-          $site_name = config_get('system.core', 'site_name');
+          $site_name = config_get_translated('system.core', 'site_name');
           $replacements[$original] = $sanitize ? check_plain($site_name) : $site_name;
           break;
 
         case 'slogan':
-          $slogan = config_get('system.core', 'site_slogan');
+          $slogan = config_get_translated('system.core', 'site_slogan');
           $replacements[$original] = $sanitize ? check_plain($slogan) : $slogan;
           break;
 
@@ -441,7 +461,7 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
     };
     $keys = array();
     foreach ($array as $key => $value) {
-      if ($key[0] !== '#') {
+      if (substr($key, 0, 1) !== '#') {
         $keys[] = $key;
       }
     }
@@ -477,7 +497,7 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
     // [array:value:*] dynamic tokens.
     if ($value_tokens = token_find_with_prefix($tokens, 'value')) {
       foreach ($value_tokens as $key => $original) {
-        if ($key[0] !== '#' && isset($array[$key])) {
+        if (substr($key, 0, 1) !== '#' && isset($array[$key])) {
           $replacements[$original] = token_render_array_value($array[$key], $options);
         }
       }
@@ -598,6 +618,27 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
 
     if (($url_tokens = token_find_with_prefix($tokens, 'url'))) {
       $replacements += token_generate('url', $url_tokens, $file->uri(), $options);
+    }
+  }
+
+  // Random tokens.
+  elseif ($type == 'random') {
+    foreach ($tokens as $name => $original) {
+      switch ($name) {
+        case 'number':
+          $replacements[$original] = mt_rand();
+          break;
+      }
+    }
+
+    // For [random:hash:?] dynamic token.
+    if ($hash_tokens = token_find_with_prefix($tokens, 'hash')) {
+      $algos = hash_algos();
+      foreach ($hash_tokens as $name => $original) {
+        if (in_array($name, $algos)) {
+          $replacements[$original] = hash($name, backdrop_random_bytes(55));
+        }
+      }
     }
   }
 

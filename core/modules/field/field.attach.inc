@@ -140,7 +140,7 @@ define('FIELD_STORAGE_INSERT', 'insert');
  *      will be invoked (hook_field_[op])
  *    - If TRUE, the default field implementation of the field operation
  *      will be invoked (field_default_[op])
- *    Internal use only. Do not explicitely set to TRUE, but use
+ *    Internal use only. Do not explicitly set to TRUE, but use
  *    _field_invoke_default() instead.
  *  - 'deleted': If TRUE, the function will operate on deleted fields
  *    as well as non-deleted fields. If unset or FALSE, only
@@ -228,7 +228,7 @@ function _field_invoke($op, $entity_type, $entity, &$a = NULL, &$b = NULL, $opti
  *      will be invoked (hook_field_[op])
  *    - If TRUE, the default field implementation of the field operation
  *      will be invoked (field_default_[op])
- *    Internal use only. Do not explicitely set to TRUE, but use
+ *    Internal use only. Do not explicitly set to TRUE, but use
  *    _field_invoke_multiple_default() instead.
  *  - 'deleted': If TRUE, the function will operate on deleted fields
  *    as well as non-deleted fields. If unset or FALSE, only
@@ -278,8 +278,8 @@ function _field_invoke_multiple($op, $entity_type, $entities, &$a = NULL, &$b = 
         if (!isset($fields[$field_name])) {
           $fields[$field_name] = $field;
         }
-        // Extract the field values into a separate variable, easily accessed
-        // by hook implementations.
+        // Extract the field values into a separate variable that can be
+        // accessed by hook implementations.
         // Unless a language suggestion is provided we iterate on all the
         // available languages.
         $available_languages = field_available_languages($entity_type, $field);
@@ -869,7 +869,7 @@ function field_attach_submit($entity_type, $entity, $form, &$form_state, $option
 function field_attach_presave($entity_type, $entity) {
   _field_invoke('presave', $entity_type, $entity);
 
-  // Let other modules act on presaving the entity.
+  // Let other modules act on pre-saving the entity.
   module_invoke_all('field_attach_presave', $entity_type, $entity);
 }
 

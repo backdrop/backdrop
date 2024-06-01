@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * A database-mediated implementation of a locking mechanism.
@@ -27,11 +26,11 @@
  * name of the function performing the operation. A very simple example use of
  * this API:
  * @code
- * function mymodule_long_operation() {
- *   if (lock_acquire('mymodule_long_operation')) {
+ * function my_module_long_operation() {
+ *   if (lock_acquire('my_module_long_operation')) {
  *     // Do the long operation here.
  *     // ...
- *     lock_release('mymodule_long_operation');
+ *     lock_release('my_module_long_operation');
  *   }
  * }
  * @endcode
@@ -47,9 +46,9 @@
  * If a function fails to acquire a lock it may either immediately return, or
  * it may call lock_wait() if the rest of the current page request requires
  * that the operation in question be complete. After lock_wait() returns,
- * the function may again attempt to acquire the lock, or may simply allow the
- * page request to proceed on the assumption that a parallel request completed
- * the operation.
+ * the function may again attempt to acquire the lock, or may allow the page
+ * request to proceed on the assumption that a parallel request completed the
+ * operation.
  *
  * lock_acquire() and lock_wait() will automatically break (delete) a lock
  * whose duration has exceeded the timeout specified when it was acquired.

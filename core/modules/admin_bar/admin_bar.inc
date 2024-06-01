@@ -37,17 +37,14 @@ function admin_bar_output($complete = FALSE) {
     $content['#components'] = $components;
     $content['#complete'] = $complete;
 
-    // Add site name as CSS class for development/staging theming purposes. We
-    // leverage the cookie domain instead of HTTP_HOST to account for many (but
-    // not all) multi-domain setups (e.g. language-based sub-domains).
+    // Add site name as CSS class for development/staging purposes. We leverage
+    // the cookie domain instead of HTTP_HOST to account for many (but not all)
+    // multi-domain setups (e.g. language-based sub-domains).
     $classes = 'admin-bar-site' . backdrop_strtolower(preg_replace('/[^a-zA-Z0-9-]/', '-', $GLOBALS['cookie_domain']));
 
     // @todo Always output container to harden JS-less support.
     $content['#prefix'] = '<div id="admin-bar" class="' . $classes . '"><div id="admin-bar-wrapper">';
     $content['#suffix'] = '</div></div>';
-
-    // Load menu builder functions.
-    module_load_include('inc', 'admin_bar');
 
     // Add administration bar.
     if (in_array('admin_bar.menu', $components) || $complete) {
@@ -57,10 +54,12 @@ function admin_bar_output($complete = FALSE) {
           'id' => 'admin-bar-menu',
         ),
         '#weight' => 0,
+        '#level' => -1,
       );
 
       $content['menu']['menu'] = admin_bar_links_menu(admin_bar_tree('management'));
       $content['menu']['menu']['#title'] = t('Admin bar');
+      $content['menu']['menu']['#options']['icon'] = 'list';
     }
 
     // Check for status report errors.
@@ -75,6 +74,12 @@ function admin_bar_output($complete = FALSE) {
     }
     if (in_array('admin_bar.search', $components) || $complete) {
       $content['extra']['extra'] += admin_bar_links_search();
+    }
+    if (in_array('admin_bar.locale', $components) || $complete) {
+      $content['extra']['extra'] += admin_bar_links_locale();
+    }
+    if (in_array('admin_bar.page', $components) || $complete) {
+      $content['extra']['extra'] += admin_bar_links_page();
     }
     if (in_array('admin_bar.account', $components) || $complete) {
       $content['extra']['extra'] += admin_bar_links_account();
@@ -92,7 +97,9 @@ function admin_bar_output($complete = FALSE) {
 
     if ($content['extra']['extra']) {
       $content['extra']['#theme'] = 'admin_bar_links';
-      $content['extra']['extra']['#title'] = t('More admin tasks');
+      $content['extra']['#level'] = -1;
+      $content['extra']['extra']['#title'] = t('More tasks');
+      $content['extra']['extra']['#options']['icon'] = 'list-checks';
       $content['extra']['#wrapper_attributes'] = array(
         'id' => 'admin-bar-extra',
       );
@@ -319,7 +326,7 @@ function admin_bar_merge_tree(array &$tree, array $tree_dynamic, array $expand_m
         foreach ($load_functions as $index => $function) {
           if ($function) {
             if (is_array($function)) {
-              list($function,) = each($function);
+              $function = key($function);
             }
             // Add the loader function name minus "_load".
             $placeholder = '%' . substr($function, 0, -5);
@@ -488,8 +495,6 @@ function admin_bar_links_menu($tree) {
       }
       continue;
     }
-    // Omit alias lookups.
-    $data['link']['localized_options']['alias'] = TRUE;
     // Remove description to prevent mouseover tooltip clashes.
     unset($data['link']['localized_options']['attributes']['title']);
 
@@ -543,13 +548,14 @@ function admin_bar_links_icon() {
       'id' => 'admin-bar-icon',
     ),
     '#weight' => -100,
+    '#level' => 0,
   );
   $links['icon'] = array(
-    '#title' => theme('admin_bar_icon'),
+    '#title' => t('Home'),
     '#attributes' => array('class' => array('admin-bar-icon')),
     '#href' => '<front>',
     '#options' => array(
-      'html' => TRUE,
+      'icon' => 'house-fill',
     ),
   );
   // Add link to manually run cron.
@@ -605,12 +611,18 @@ function admin_bar_links_account() {
     '#weight' => 50,
     '#attributes' => array('class' => array('admin-bar-account')),
     '#href' => 'user/' . $GLOBALS['user']->uid,
+    '#options' => array(
+      'icon' => 'user-circle-fill',
+    ),
   );
   $links['logout'] = array(
     '#title' => t('Log out'),
     '#weight' => 51,
     '#attributes' => array('class' => array('admin-bar-logout')),
     '#href' => 'user/logout',
+    '#options' => array(
+      'icon' => 'sign-out-fill',
+    ),
   );
   return $links;
 }
@@ -623,11 +635,17 @@ function admin_bar_links_account() {
 function admin_bar_links_users() {
   // Add link to show current authenticated/anonymous users.
   $links['user-counter'] = array(
-    '#title' => admin_bar_get_user_count(),
+    // This span is used by JavaScript to update the value while preserving the
+    // overall admin bar cache.
+    '#title' => '<span class="user-counter-value">' . admin_bar_get_user_count() . '</span>',
     '#description' => t('Current anonymous / authenticated users'),
     '#weight' => 20,
     '#attributes' => array('class' => array('admin-bar-action', 'admin-bar-users')),
     '#href' => (user_access('administer users') ? 'admin/people/list' : 'user'),
+    '#options' => array(
+      'icon' => 'user-list-fill',
+      'html' => TRUE,
+    ),
   );
   return $links;
 }
@@ -647,15 +665,105 @@ function admin_bar_links_search() {
   $search['search']['search'] = array(
     '#type' => 'search',
     '#title' => t('Admin search'),
-    '#title_display' => 'attribute',
+    '#title_display' => 'invisible',
     '#attributes' => array(
       'placeholder' => t('Menu search'),
       'autocomplete' => 'off',
       'autocorrect' => 'off',
       'autocapitalize' => 'off',
     ),
+    '#id' => 'admin-bar-search-items',
   );
   return $search;
+}
+
+/**
+ * Build Page links.
+ *
+ * @see theme_admin_bar_links()
+ * @see admin_bar_admin_bar_replacements()
+ */
+function admin_bar_links_page() {
+  $query = array('query' => array(
+    'destination' => current_path(),
+  ));
+
+  $links['page'] = array(
+    '#title' => t('This page'),
+    '#attributes' => array('class' => array('admin-bar-page-links')),
+    '#options' => array(
+      'html' => TRUE,
+      'icon' => 'file-text-fill',
+    ),
+  );
+  if (user_access('administer layouts')) {
+    // Get the layout used by the current page/path.
+    $layout = layout_get_layout_by_path();
+
+    // We use 'page-layout' here for the array key as it get added to the link
+    // as a class. A generic class like 'layout' would cause issues with the
+    // Basis theme.
+    $links['page']['page-layout'] = array(
+      '#title' => t('Layout (@layout)', array('@layout' => $layout->title)),
+      '#href' => 'admin/structure/layouts/manage/' . $layout->name,
+      '#attributes' => array(
+        'id' => array('admin-bar-page-layout'),
+      ),
+      '#options' => $query,
+    );
+    $links['page']['page-layout']['configure'] = array(
+      '#title' => t('Configure'),
+      '#href' => 'admin/structure/layouts/manage/' . $layout->name . '/configure',
+      '#options' => $query,
+    );
+  }
+  if (user_access('administer themes')) {
+    // Get the theme used by the current page.
+    global $theme;
+    $theme_data = list_themes();
+    $theme_object = $theme_data[$theme];
+
+    $links['page']['page-theme'] = array(
+      '#title' => t('Theme (@theme)', array('@theme' => $theme_object->info['name'])),
+      '#href' => 'admin/appearance/settings/' . $theme_object->name,
+      '#attributes' => array(
+        'id' => array('admin-bar-page-theme'),
+      ),
+      '#options' => $query,
+    );
+  }
+
+  // Don't display an empty menu.
+  $page_links = element_children($links['page']);
+  if (empty($page_links)) {
+    return array();
+  }
+
+  return $links;
+}
+
+/**
+ * Build Locale links.
+ *
+ * @see theme_admin_bar_links()
+ */
+function admin_bar_links_locale() {
+  global $language;
+  $links['locale'] = array(
+    '#title' => isset($language->native) ? $language->native : $language->name,
+    '#attributes' => array('class' => array('admin-bar-locale-links')),
+    '#options' => array(
+      'icon' => 'translate-fill',
+    ),
+  ) + admin_bar_locale_links();
+
+  // Don't display an empty menu.
+  $locale_links = element_children($links['locale']);
+  if (empty($locale_links)) {
+    return array();
+  }
+
+  return $links;
 }
 
 /**
@@ -680,6 +788,7 @@ function admin_bar_links_alert() {
         'id' => 'admin-bar-alert',
       ),
       '#weight' => 20,
+      '#level' => 0,
     );
 
     // Add a link to the status report.
@@ -691,7 +800,11 @@ function admin_bar_links_alert() {
       ),
       '#href' => 'admin/reports/status',
       '#access' => user_access('administer site configuration'),
-      '#options' => array('html' => TRUE),
+      '#options' => array(
+        // Suppress the automatic icon by specifying FALSE.
+        'icon' => FALSE,
+        'html' => TRUE,
+      ),
     );
   }
 
@@ -722,14 +835,53 @@ function admin_bar_theme_settings() {
     '#title' => t('Enabled components'),
     '#options' => array(
       'admin_bar.icon' => t('Icon menu'),
+      'admin_bar.back_to_site_link' => t('Back to site link'),
       'admin_bar.menu' => t('Management menu'),
       'admin_bar.search' => t('Search bar'),
+      'admin_bar.page' => t('Page links'),
       'admin_bar.users' => t('User counts'),
       'admin_bar.account' => t('Account links'),
+      'admin_bar.locale' => t('Language switcher'),
     ),
     '#default_value' => $config->get('components'),
     '#description' => t('These features will be enabled/visible in the administration bar. Untick the boxes to disable/hide them.'),
+    'admin_bar.back_to_site_link' => array(
+      '#states' => array(
+        'visible' => array(
+          ':input[name="components[admin_bar.icon]"]' => array('checked' => TRUE),
+        ),
+      ),
+    ),
+    'admin_bar.search' => array(
+      '#states' => array(
+        'visible' => array(
+          ':input[name="components[admin_bar.menu]"]' => array('checked' => TRUE),
+        ),
+      ),
+    ),
+    'admin_bar.locale' => array(
+      '#disabled' => !module_exists('locale'),
+    ),
   );
+
+  $form['components']['admin_bar.icon']['#description'] = t('A specialized menu that links to the home page and provides links to perform various other admin tasks (e.g.: clear caches, run cron, etc.).');
+  $form['components']['admin_bar.back_to_site_link']['#description'] = t('Replaces the "Home" link with a "Back to site" link that returns to the last non-admin page visited.');
+  $form['components']['admin_bar.menu']['#description'] = t('Displays the various administrative menu options in the admin bar.');
+  $form['components']['admin_bar.search']['#description'] = t('A search box for quickly finding specific items in the Administration Menu.');
+  $form['components']['admin_bar.page']['#description'] = t('Links to edit items that make up the current page (e.g. layout, theme).');
+  $form['components']['admin_bar.users']['#description'] = t('A count of the people currently logged into the site.');
+  $form['components']['admin_bar.account']['#description'] = t('Links to view and log out of the current user account.');
+  $language_switcher_description = t('Links to switch the language of the user interface.');
+  if (!(module_exists('locale'))) {
+    if (user_access('administer modules')) {
+      $language_switcher_description .= ' ' . t('This option is available only when the <a href="@link">Locale module</a> is enabled.', array('@link' => url('admin/modules', array('query' => array('search' => 'locale')))));
+    }
+    else {
+      $language_switcher_description .= ' ' . t('This option is available only when the Locale module is enabled.');
+    }
+
+  }
+  $form['components']['admin_bar.locale']['#description'] = $language_switcher_description;
 
   $form['actions'] = array(
     '#type' => 'actions',
@@ -747,8 +899,19 @@ function admin_bar_theme_settings() {
  * Submit handler for admin_bar_theme_settings().
  */
 function admin_bar_theme_settings_submit($form, &$form_state) {
+  $components = &$form_state['values']['components'];
+
+  // Disable back to site if icon bar is also disabled.
+  if (!$components['admin_bar.icon']) {
+    $components['admin_bar.back_to_site_link'] = FALSE;
+  }
+  // Disable the search bar if the management menu is also disabled.
+  if (!$components['admin_bar.menu']) {
+    $components['admin_bar.search'] = FALSE;
+  }
+
   // Save the list of components as a simple array, rather than key/value pair.
-  $form_state['values']['components'] = array_keys(array_filter($form_state['values']['components']));
+  $form_state['values']['components'] = array_keys(array_filter($components));
 }
 
 /**
@@ -781,7 +944,7 @@ function admin_bar_flush_cache($name = NULL) {
 
   // The JavaScript injects a destination request parameter pointing to the
   // originating page, so the user is redirected back to that page. Without
-  // destination parameter, the redirect ends on the front page.
+  // destination parameter, the redirect ends on the home page.
   backdrop_goto();
 }
 
@@ -792,38 +955,6 @@ function admin_bar_admin_bar_cache_info() {
   $caches['admin_bar'] = array(
     'title' => t('Administration bar'),
     'callback' => '_admin_bar_flush_cache',
-  );
-  return $caches;
-}
-
-/**
- * Implements hook_admin_bar_cache_info().
- */
-function system_admin_bar_cache_info() {
-  $caches = array(
-    'assets' => t('CSS and JavaScript'),
-    'cache' => t('Page and else'),
-    'layout' => t('Layout'),
-    'menu' => t('Menu'),
-    'theme' => t('Theme registry'),
-    'token' => t('Token registry'),
-  );
-  foreach ($caches as $name => $cache) {
-    $caches[$name] = array(
-      'title' => $cache,
-      'callback' => '_admin_bar_flush_cache',
-    );
-  }
-  return $caches;
-}
-
-/**
- * Implements hook_admin_bar_cache_info() on behalf of Update module.
- */
-function update_admin_bar_cache_info() {
-  $caches['update'] = array(
-    'title' => t('Update data'),
-    'callback' => '_update_cache_clear',
   );
   return $caches;
 }
@@ -858,6 +989,10 @@ function _admin_bar_flush_cache($name = NULL) {
       break;
 
     case 'assets':
+      // Rebuild all color palettes.
+      if (module_exists('color')) {
+        color_rebuild_settings();
+      }
       // Change query-strings on css/js files to enforce reload for all users.
       _backdrop_flush_css_js();
 

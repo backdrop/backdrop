@@ -90,7 +90,7 @@ function node_views_data() {
     ),
   );
 
-  // created field
+  // Created date.
   $data['node']['created'] = array(
     'title' => t('Post date'), // The item it appears as on the UI,
     'help' => t('The date the content was posted.'), // The help that appears on the UI,
@@ -106,10 +106,26 @@ function node_views_data() {
     ),
   );
 
-  // changed field
+  // Changed date.
   $data['node']['changed'] = array(
     'title' => t('Updated date'), // The item it appears as on the UI,
     'help' => t('The date the content was last updated.'), // The help that appears on the UI,
+    'field' => array(
+      'handler' => 'views_handler_field_date',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort_date',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_date',
+    ),
+  );
+
+  // Scheduled date.
+  $data['node']['scheduled'] = array(
+    'title' => t('Scheduled date'),
+    'help' => t('The date content is scheduled to be published in the future.'),
     'field' => array(
       'handler' => 'views_handler_field_date',
       'click sortable' => TRUE,
@@ -156,7 +172,22 @@ function node_views_data() {
       'handler' => 'views_handler_filter_boolean_operator',
       'label' => t('Published'),
       'type' => 'yes-no',
-      'use equal' => TRUE, // Use status = 1 instead of status <> 0 in WHERE statment
+      // Use status = 1 instead of status <> 0 in WHERE statement.
+      'use equal' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
+  // hidden path
+  $data['node']['hidden_path'] = array(
+    'title' => t('Hidden path'),
+    'help' => t('Whether or not the content has a hidden path.'),
+    'filter' => array(
+      'handler' => 'views_handler_filter_node_hidden_path',
+      'label' => t('Paths are hidden'),
+      'type' => 'yes-no',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -422,6 +453,7 @@ function node_views_data() {
   // have a group defined will go into this field by default.
   $data['node_revisions']['moved to'] = 'node_revision';
   $data['node_revision']['table']['entity type'] = 'node';
+  $data['node_revision']['table']['revision'] = TRUE;
   $data['node_revision']['table']['group']  = t('Content revision');
   // Support the conversion of the field body
   $data['node_revisions']['body']['moved to'] = array('field_revision_data', 'body-revision_id');
@@ -720,12 +752,16 @@ function node_row_node_view_preprocess_node(&$variables) {
     $node->comment = FALSE;
   }
 
+  if (!$options['title']) {
+    unset($variables['title']);
+  }
+
   if (!$options['links']) {
     unset($variables['content']['links']);
   }
 
   if (!empty($options['comments']) && user_access('access comments') && $node->comment) {
-    $variables['content']['comments'] = comment_node_page_additions($node);
+    $variables['comments'] = comment_node_page_additions($node);
   }
 }
 

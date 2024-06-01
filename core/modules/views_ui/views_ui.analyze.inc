@@ -4,11 +4,10 @@
  * Contains the view analyze tool code.
  *
  * This tool is a small plugin manager to perform analysis on a view and
- * report results to the user. This tool is meant to let modules that
- * provide data to Views also help users properly use that data by
- * detecting invalid configurations. Views itself comes with only a
- * small amount of analysis tools, but more could easily be added either
- * by modules or as patches to Views itself.
+ * report results. It is meant to let modules that provide data to Views also
+ * help users properly use that data by detecting invalid configurations.
+ * Views itself comes with only a small number of analysis tools, but more
+ * could be added with additional modules.
  */
 
 /**
@@ -114,7 +113,7 @@ function views_ui_views_analyze($view) {
     if ($display->handler->has_path() && $path = $display->handler->get_option('path')) {
       $normal_path = backdrop_get_normal_path($path);
       if ($path != $normal_path) {
-        $ret[] = views_ui_analysis(t('You have configured display %display with a path which is an path alias as well. This might lead to unwanted effects so better use an internal path.', array('%display' => $display->display_title)), 'warning');
+        $ret[] = views_ui_analysis(t('You have configured display %display with a path which is a URL alias as well. This might lead to unwanted effects so better use an internal path.', array('%display' => $display->display_title)), 'warning');
       }
     }
   }

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Installation code for MySQL embedded database engine.
@@ -15,6 +14,20 @@ class DatabaseTasks_mysql extends DatabaseTasks {
    * @var string
    */
   protected $pdoDriver = 'mysql';
+
+  /**
+   * Error code for "Unknown database" error.
+   *
+   * @var int
+   */
+  protected $databaseNotFoundErrorCode = 1049;
+
+  /**
+   * Error code for "Unknown database" error.
+   *
+   * @var int
+   */
+  protected $connectionRefusedErrorCode = 2002;
 
   /**
    * Returns a human-readable name string for MySQL and equivalent databases.

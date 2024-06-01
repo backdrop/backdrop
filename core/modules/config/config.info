@@ -1,7 +1,11 @@
-name = Configuration manager
-description = Import, export, and synchronize your configuration changes between different installations of your site, such as in development, staging, and production environments.
-version = BACKDROP_VERSION
 type = module
-backdrop = 1.x
-configure = admin/config/development/configuration
+name = Configuration Manager
+description = Import, export, and synchronize your configuration changes between different installations of your site, such as in development, staging, and production environments.
 package = Development
+tags[] = Site Architecture
+tags[] = System
+version = BACKDROP_VERSION
+backdrop = 1.x
+
+configure = admin/config/development/configuration
+

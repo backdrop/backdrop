@@ -62,6 +62,9 @@ class views_plugin extends views_object {
    * Provide a full list of possible theme templates used by this style.
    */
   function theme_functions() {
+    if (empty($this->definition['theme'])) {
+      $this->definition['theme'] = 'views_view';
+    }
     return views_theme_functions($this->definition['theme'], $this->view, $this->display);
   }
 

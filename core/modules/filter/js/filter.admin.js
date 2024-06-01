@@ -7,41 +7,28 @@
 
 Backdrop.behaviors.filterStatus = {
   attach: function (context, settings) {
-    $('#filters-status-wrapper input.form-checkbox', context).once('filter-status', function () {
-      var $checkbox = $(this);
-      // Retrieve the tabledrag row belonging to this filter.
-      var $row = $('#' + $checkbox.attr('id').replace(/-status$/, '-weight'), context).closest('tr');
-      // Retrieve the vertical tab belonging to this filter.
-      var tab = $('#' + $checkbox.attr('id').replace(/-status$/, '-settings'), context).data('verticalTab');
+    // TableDrag is required and we should be on the filters admin page.
+    if (typeof Backdrop.tableDrag == 'undefined' || typeof Backdrop.tableDrag['filter-order'] == 'undefined') {
+      return;
+    }
 
-      // Bind click handler to this checkbox to conditionally show and hide the
-      // filter's tableDrag row and vertical tab pane.
-      $checkbox.bind('click.filterUpdate', function () {
-        if ($checkbox.is(':checked')) {
-          $row.show();
-          if (tab) {
-            tab.tabShow().updateSummary();
-          }
-        }
-        else {
-          $row.hide();
-          if (tab) {
-            tab.tabHide().updateSummary();
-          }
-        }
-        // Restripe table after toggling visibility of table row.
-        Backdrop.tableDrag['filter-order'].restripeTable();
-      });
+    $('.filter-container', context).each(function() {
+      $(this).addClass('filter-container-initial');
+    });
 
-      // Attach summary for configurable filters (only for screen-readers).
-      if (tab) {
-        tab.fieldset.backdropSetSummary(function (tabContext) {
-          return $checkbox.is(':checked') ? Backdrop.t('Enabled') : Backdrop.t('Disabled');
-        });
-      }
+    // Suppress tabledrag messages.
+    Backdrop.theme.tableDragChangedWarning = function () {
+      return '';
+    };
+    Backdrop.theme.tableDragChangedMarker = function () {
+      return '';
+    }
 
-      // Trigger our bound click handler to update elements to initial state.
-      $checkbox.triggerHandler('click.filterUpdate');
+    // Toggle class on row if checkbox changed.
+    $('#filter-order input.filter-status:checkbox', context).on('change', function (event) {
+      var isChecked = !$(this).prop('checked');
+      $(this).closest('tr').toggleClass('disabled-row', isChecked);
+      Backdrop.filterConfiguration.update();
     });
   }
 };
@@ -329,9 +316,9 @@ Backdrop.FilterStatus.prototype.addHTMLRule = function (rule) {
  * Backdrop.FilterStatus.
  *
  * A text filter rule object describes
- *  1. allowed or forbidden tags: (optional) whitelist or blacklist HTML tags
- *  2. restricted tag properties: (optional) whitelist or blacklist attributes,
- *     styles and classes on a set of HTML tags.
+ *  1. allowed or forbidden tags: (optional) allow or deny HTML tags.
+ *  2. restricted tag properties: (optional) allow or deny attributes, styles
+ *     and classes on a set of HTML tags.
  *
  * Typically, each text filter rule object does either 1 or 2, not both.
  *
@@ -342,11 +329,11 @@ Backdrop.FilterStatus.prototype.addHTMLRule = function (rule) {
  *     restrictions are applied.
  *  2. all nested within the "properties" key: use the "tags" subkey to list
  *     HTML tags to which you want to apply property restrictions, then use the
- *     "allowed" subkey to whitelist specific property values, and similarly use
- *     the "forbidden" subkey to blacklist specific property values.
+ *     "allowed" subkey to allow specific property values, and similarly use the
+ *     "forbidden" subkey to deny specific property values.
  *
  * Examples:
- *  - Whitelist the "p", "strong" and "a" HTML tags:
+ *  - Allow the "p", "strong" and "a" HTML tags:
  *    {
  *      tags: ['p', 'strong', 'a'],
  *      allow: true,
@@ -513,7 +500,7 @@ Backdrop.behaviors.initializeFilterConfiguration = {
   attach: function (context, settings) {
     var $context = $(context);
 
-    $context.find('#filters-status-wrapper input.form-checkbox').once('filter-editor-status').each(function () {
+    $context.find('#filter-order input.form-checkbox').once('filter-editor-status').each(function () {
       var $checkbox = $(this);
       var nameAttribute = $checkbox.attr('name');
 

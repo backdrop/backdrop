@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Core systems for the database layer.
@@ -14,13 +13,11 @@
  * @{
  * Allow the use of different database servers using the same code base.
  *
- * Backdrop provides a database abstraction layer to provide developers with
- * the ability to support multiple database servers easily. The intent of
- * this layer is to preserve the syntax and power of SQL as much as possible,
- * but also allow developers a way to leverage more complex functionality in
- * a unified way. It also provides a structured interface for dynamically
- * constructing queries when appropriate, and enforcing security checks and
- * similar good practices.
+ * Backdrop includes a database abstraction layer to provide a structured
+ * interface for dynamically constructing queries when appropriate, and to
+ * enforce security checks and similar good practices. The intent of this layer
+ * is to preserve the syntax and power of SQL as much as possible, but also
+ * allow developers to leverage more complex functionality in a unified way.
  *
  * The system is built atop PHP's PDO (PHP Data Objects) database API and
  * inherits much of its syntax and semantics.
@@ -79,7 +76,7 @@
  * array where keys are a placeholder label (e.g., :uid) and the value is the
  * corresponding value to use. The array may be in any order.
  *
- * Unnamed placeholders are simply a question mark. Example:
+ * Unnamed placeholders are represented by a question mark. For example:
  * @code
  * SELECT nid, title FROM {node} WHERE uid=?;
  * @endcode
@@ -122,8 +119,8 @@
  *
  * Backdrop also supports transactions, including a transparent fallback for
  * databases that do not support transactions. To start a new transaction,
- * simply call $txn = db_transaction(); in your own code. The transaction will
- * remain open for as long as the variable $txn remains in scope.  When $txn is
+ * call $txn = db_transaction(); in your own code. The transaction will remain
+ * open for as long as the variable $txn remains in scope.  When $txn is
  * destroyed, the transaction will be committed.  If your transaction is nested
  * inside of another then Backdrop will track each transaction and only commit
  * the outer-most transaction when the last transaction object goes out out of
@@ -184,7 +181,7 @@
  *
  * @see http://php.net/manual/book.pdo.php
  */
-abstract class DatabaseConnection extends PDO {
+abstract class DatabaseConnection {
 
   /**
    * The database target this connection is for.
@@ -199,8 +196,8 @@ abstract class DatabaseConnection extends PDO {
    * The key representing this connection.
    *
    * The key is a unique string which identifies a database connection. A
-   * connection can be a single server or a cluster of master and slaves (use
-   * target to pick between master and slave).
+   * connection can be a single server or a cluster of primary and replicas (use
+   * target to pick between primary and replica).
    *
    * @var string
    */
@@ -212,6 +209,13 @@ abstract class DatabaseConnection extends PDO {
    * @var DatabaseLog
    */
   protected $logger = NULL;
+
+  /**
+   * The PDO object that is used for running database queries.
+   *
+   * @var PDO
+   */
+  protected $pdo = NULL;
 
   /**
    * Tracks the number of "layers" of transactions currently active.
@@ -318,11 +322,11 @@ abstract class DatabaseConnection extends PDO {
     $driver_options[PDO::ATTR_ERRMODE] = PDO::ERRMODE_EXCEPTION;
 
     // Call PDO::__construct and PDO::setAttribute.
-    parent::__construct($dsn, $username, $password, $driver_options);
+    $this->pdo = new PDO($dsn, $username, $password, $driver_options);
 
     // Set a Statement class, unless the driver opted out.
     if (!empty($this->statementClass)) {
-      $this->setAttribute(PDO::ATTR_STATEMENT_CLASS, array($this->statementClass, array($this)));
+      $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, array($this->statementClass, array($this)));
     }
   }
 
@@ -338,7 +342,7 @@ abstract class DatabaseConnection extends PDO {
     // Destroy all references to this connection by setting them to NULL.
     // The Statement class attribute only accepts a new value that presents a
     // proper callable, so we reset it to PDOStatement.
-    $this->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('PDOStatement', array()));
+    $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, array('PDOStatement', array()));
     $this->schema = NULL;
   }
 
@@ -348,7 +352,7 @@ abstract class DatabaseConnection extends PDO {
    * A given query can be customized with a number of option flags in an
    * associative array:
    * - target: The database "target" against which to execute a query. Valid
-   *   values are "default" or "slave". The system will first try to open a
+   *   values are "default" or "replica". The system will first try to open a
    *   connection to a database specified with the user-supplied key. If one
    *   is not available, it will silently fall back to the "default" target.
    *   If multiple databases connections are specified with the same target,
@@ -381,10 +385,9 @@ abstract class DatabaseConnection extends PDO {
    * - throw_exception: By default, the database system will catch any errors
    *   on a query as an Exception, log it, and then rethrow it so that code
    *   further up the call chain can take an appropriate action. To suppress
-   *   that behavior and simply return NULL on failure, set this option to
-   *   FALSE.
+   *   that behavior and return NULL on failure, set this option to FALSE.
    *
-   * @return
+   * @return array
    *   An array of default query options.
    */
   protected function defaultOptions() {
@@ -404,7 +407,7 @@ abstract class DatabaseConnection extends PDO {
    * is for requesting the connection information of this specific
    * open connection object.
    *
-   * @return
+   * @return array
    *   An array of the connection information. The exact list of
    *   properties is driver-dependent.
    */
@@ -477,6 +480,25 @@ abstract class DatabaseConnection extends PDO {
   }
 
   /**
+   * Provides a pass-through to the PDO prepare method.
+   *
+   * In adding support for PHP 8, the Backdrop DatabaseConnection no longer
+   * directly extends the PHP PDO object. A side-effect is that calls
+   * to PDO methods no longer worked. This provides a pass-through
+   * to this method specifically for compatibility with previous versions of
+   * Backdrop. See https://github.com/backdrop/backdrop-issues/issues/5094.
+   *
+   * @param $query
+   *
+   * @return bool|PDOStatement
+   *
+   * @since 1.19.2
+   */
+  public function prepare($query) {
+    return $this->pdo->prepare($query);
+  }
+
+  /**
    * Prepares a query string and returns the prepared statement.
    *
    * This method caches prepared statements, reusing them when
@@ -493,7 +515,7 @@ abstract class DatabaseConnection extends PDO {
     $query = $this->prefixTables($query);
 
     // Call PDO::prepare.
-    return parent::prepare($query);
+    return $this->pdo->prepare($query);
   }
 
   /**
@@ -678,7 +700,6 @@ abstract class DatabaseConnection extends PDO {
    * @throws PDOException
    */
   public function query($query, array $args = array(), $options = array()) {
-
     // Use default values if not already set.
     $options += $this->defaultOptions();
 
@@ -705,7 +726,7 @@ abstract class DatabaseConnection extends PDO {
         case Database::RETURN_AFFECTED:
           return $stmt->rowCount();
         case Database::RETURN_INSERT_ID:
-          return $this->lastInsertId();
+          return $this->pdo->lastInsertId();
         case Database::RETURN_NULL:
           return NULL;
         default:
@@ -716,12 +737,12 @@ abstract class DatabaseConnection extends PDO {
       if ($options['throw_exception']) {
         // Add additional debug information.
         if ($query instanceof DatabaseStatementInterface) {
-          $e->query_string = $stmt->getQueryString();
+          $e->errorInfo['query_string'] = $stmt->getQueryString();
         }
         else {
-          $e->query_string = $query;
+          $e->errorInfo['query_string'] = $query;
         }
-        $e->args = $args;
+        $e->errorInfo['args'] = $args;
         throw $e;
       }
       return NULL;
@@ -1007,6 +1028,19 @@ abstract class DatabaseConnection extends PDO {
   }
 
   /**
+   * Provides a wrapper for the quote() function from the PDO object.
+   *
+   * @param string $string
+   *   The string to be quoted.
+   *
+   * @return
+   *   The quoted string.
+   */
+  public function quote($string) {
+    return $this->pdo->quote($string);
+  }
+
+  /**
    * Determines if there is an active transaction open.
    *
    * @return
@@ -1091,7 +1125,7 @@ abstract class DatabaseConnection extends PDO {
         $rolled_back_other_active_savepoints = TRUE;
       }
     }
-    parent::rollBack();
+    $this->pdo->rollBack();
     if ($rolled_back_other_active_savepoints) {
       throw new DatabaseTransactionOutOfOrderException();
     }
@@ -1119,7 +1153,7 @@ abstract class DatabaseConnection extends PDO {
       $this->query('SAVEPOINT ' . $name);
     }
     else {
-      parent::beginTransaction();
+      $this->pdo->beginTransaction();
     }
     $this->transactionLayers[$name] = $name;
   }
@@ -1170,7 +1204,7 @@ abstract class DatabaseConnection extends PDO {
       // If there are no more layers left then we should commit.
       unset($this->transactionLayers[$name]);
       if (empty($this->transactionLayers)) {
-        if (!parent::commit()) {
+        if (!$this->pdo->commit()) {
           throw new DatabaseTransactionCommitFailedException();
         }
       }
@@ -1254,7 +1288,7 @@ abstract class DatabaseConnection extends PDO {
    * Returns the version of the database server.
    */
   public function version() {
-    return $this->getAttribute(PDO::ATTR_SERVER_VERSION);
+    return $this->pdo->getAttribute(PDO::ATTR_SERVER_VERSION);
   }
 
   /**
@@ -1285,6 +1319,16 @@ abstract class DatabaseConnection extends PDO {
    */
   abstract public function databaseType();
 
+  /**
+   * Creates a database.
+   *
+   * In order to use this method, you must be connected without a database
+   * specified.
+   *
+   * @param string $database
+   *   The name of the database to create.
+   */
+  abstract public function createDatabase($database);
 
   /**
    * Gets any special processing requirements for the condition operator.
@@ -1364,14 +1408,14 @@ abstract class DatabaseConnection extends PDO {
 /**
  * Primary front-controller for the database system.
  *
- * This class is uninstantiatable and un-extendable. It acts to encapsulate
+ * This class is un-instantiatable and un-extendable. It acts to encapsulate
  * all control and shepherding of database connections into a single location
  * without the use of globals.
  */
 abstract class Database {
 
   /**
-   * Flag to indicate a query call should simply return NULL.
+   * Flag to indicate a query call should return NULL.
    *
    * This is used for queries that have no reasonable return value anyway, such
    * as INSERT statements to a table without a serial primary key.
@@ -1409,7 +1453,7 @@ abstract class Database {
   static protected $databaseInfo = NULL;
 
   /**
-   * A list of key/target credentials to simply ignore.
+   * A list of key/target credentials to ignore.
    *
    * @var array
    */
@@ -1519,8 +1563,8 @@ abstract class Database {
     }
     // If the requested target does not exist, or if it is ignored, we fall back
     // to the default target. The target is typically either "default" or
-    // "slave", indicating to use a slave SQL server if one is available. If
-    // it's not available, then the default/master server is the correct server
+    // "replica", indicating to use a replica SQL server if one is available. If
+    // it's not available, then the default/primary server is the correct server
     // to use.
     if (!empty(self::$ignoreTargets[$key][$target]) || !isset(self::$databaseInfo[$key][$target])) {
       $target = 'default';
@@ -1577,7 +1621,7 @@ abstract class Database {
       foreach ($database_info[$index] as $target => $value) {
         // If there is no "driver" property, then we assume it's an array of
         // possible connections for this target. Pick one at random. That allows
-        //  us to have, for example, multiple slave servers.
+        //  us to have, for example, multiple replica servers.
         if (empty($value['driver'])) {
           $database_info[$index][$target] = $database_info[$index][$target][mt_rand(0, count($database_info[$index][$target]) - 1)];
         }
@@ -1698,12 +1742,16 @@ abstract class Database {
    *
    * @param $key
    *   The connection key.
+   * @param $close
+   *   Whether to close the connection.
    * @return
    *   TRUE in case of success, FALSE otherwise.
    */
-  final public static function removeConnection($key) {
+  final public static function removeConnection($key, $close = TRUE) {
     if (isset(self::$databaseInfo[$key])) {
-      self::closeConnection(NULL, $key);
+      if ($close) {
+        self::closeConnection(NULL, $key);
+      }
       unset(self::$databaseInfo[$key]);
       return TRUE;
     }
@@ -1798,7 +1846,7 @@ abstract class Database {
   /**
    * Instructs the system to temporarily ignore a given key/target.
    *
-   * At times we need to temporarily disable slave queries. To do so, call this
+   * At times we need to temporarily disable replica queries. To do so, call this
    * method with the database key and the target to disable. That database key
    * will then always fall back to 'default' for that key, even if it's defined.
    *
@@ -1870,6 +1918,11 @@ class DatabaseTransactionExplicitCommitNotAllowedException extends Exception { }
 class DatabaseTransactionOutOfOrderException extends Exception { }
 
 /**
+ * Exception thrown when the specified database cannot be found.
+ */
+class DatabaseNotFoundException extends Exception { }
+
+/**
  * Exception thrown for merge queries that do not make semantic sense.
  *
  * There are many ways that a merge query could be malformed.  They should all
@@ -1904,17 +1957,17 @@ class DatabaseDriverNotSpecifiedException extends Exception {}
 /**
  * A wrapper class for creating and managing database transactions.
  *
- * Not all databases or database configurations support transactions. For
- * example, MySQL MyISAM tables do not. It is also easy to begin a transaction
- * and then forget to commit it, which can lead to connection errors when
- * another transaction is started.
+ * Not all database configurations support transactions. For example, MySQL
+ * MyISAM tables do not. It is also easy to begin a transaction and then forget
+ * to commit it, which can lead to connection errors when another transaction is
+ * started.
  *
  * This class acts as a wrapper for transactions. To begin a transaction,
- * simply instantiate it. When the object goes out of scope and is destroyed
- * it will automatically commit. It also will check to see if the specified
- * connection supports transactions. If not, it will simply skip any transaction
- * commands, allowing user-space code to proceed normally. The only difference
- * is that rollbacks won't actually do anything.
+ * instantiate it. When the object goes out of scope and is destroyed it will
+ * automatically commit. It also will check to see if the specified connection
+ * supports transactions. If not, it will skip any transaction commands,
+ * allowing user-space code to proceed normally. The only difference is that
+ * rollbacks won't actually do anything.
  *
  * In the vast majority of cases, you should not instantiate this class
  * directly. Instead, call ->startTransaction(), from the appropriate connection
@@ -2210,6 +2263,7 @@ class DatabaseStatementBase extends PDOStatement implements DatabaseStatementInt
     $this->setFetchMode(PDO::FETCH_OBJ);
   }
 
+  #[\ReturnTypeWillChange]
   public function execute($args = array(), $options = array()) {
     if (isset($options['fetch'])) {
       if (is_string($options['fetch'])) {
@@ -2348,31 +2402,35 @@ class DatabaseStatementEmpty implements Iterator, DatabaseStatementInterface {
 
   /* Implementations of Iterator. */
 
+  #[\ReturnTypeWillChange]
   public function current() {
     return NULL;
   }
 
+  #[\ReturnTypeWillChange]
   public function key() {
     return NULL;
   }
 
+  #[\ReturnTypeWillChange]
   public function rewind() {
     // Nothing to do: our DatabaseStatement can't be rewound.
   }
 
+  #[\ReturnTypeWillChange]
   public function next() {
     // Do nothing, since this is an always-empty implementation.
   }
 
+  #[\ReturnTypeWillChange]
   public function valid() {
     return FALSE;
   }
 }
 
 /**
- * The following utility functions are simply convenience wrappers.
- *
- * They should never, ever have any database-specific code in them.
+ * The following utility functions are wrappers, for convenience. They should
+ * never have any database-specific code in them.
  */
 
 /**
@@ -2484,7 +2542,7 @@ function db_query_temporary($query, array $args = array(), array $options = arra
  *   A new InsertQuery object for this connection.
  */
 function db_insert($table, array $options = array()) {
-  if (empty($options['target']) || $options['target'] == 'slave') {
+  if (_db_is_replica($options)) {
     $options['target'] = 'default';
   }
   return Database::getConnection($options['target'])->insert($table, $options);
@@ -2502,7 +2560,7 @@ function db_insert($table, array $options = array()) {
  *   A new MergeQuery object for this connection.
  */
 function db_merge($table, array $options = array()) {
-  if (empty($options['target']) || $options['target'] == 'slave') {
+  if (_db_is_replica($options)) {
     $options['target'] = 'default';
   }
   return Database::getConnection($options['target'])->merge($table, $options);
@@ -2520,7 +2578,7 @@ function db_merge($table, array $options = array()) {
  *   A new UpdateQuery object for this connection.
  */
 function db_update($table, array $options = array()) {
-  if (empty($options['target']) || $options['target'] == 'slave') {
+  if (_db_is_replica($options)) {
     $options['target'] = 'default';
   }
   return Database::getConnection($options['target'])->update($table, $options);
@@ -2538,7 +2596,7 @@ function db_update($table, array $options = array()) {
  *   A new DeleteQuery object for this connection.
  */
 function db_delete($table, array $options = array()) {
-  if (empty($options['target']) || $options['target'] == 'slave') {
+  if (_db_is_replica($options)) {
     $options['target'] = 'default';
   }
   return Database::getConnection($options['target'])->delete($table, $options);
@@ -2556,7 +2614,7 @@ function db_delete($table, array $options = array()) {
  *   A new TruncateQuery object for this connection.
  */
 function db_truncate($table, array $options = array()) {
-  if (empty($options['target']) || $options['target'] == 'slave') {
+  if (_db_is_replica($options)) {
     $options['target'] = 'default';
   }
   return Database::getConnection($options['target'])->truncate($table, $options);
@@ -2858,10 +2916,6 @@ function db_find_tables($table_expression) {
   return Database::getConnection()->schema()->findTables($table_expression);
 }
 
-function _db_create_keys_sql($spec) {
-  return Database::getConnection()->schema()->createKeysSql($spec);
-}
-
 /**
  * Renames a table.
  *
@@ -2897,11 +2951,11 @@ function db_drop_table($table) {
  *   will be set to the value of the key in all rows. This is most useful for
  *   creating NOT NULL columns with no default value in existing tables.
  * @param $keys_new
- *   Optional keys and indexes specification to be created on the table along
- *   with adding the field. The format is the same as a table specification, but
- *   without the 'fields' element. If you are adding a type 'serial' field, you
- *   MUST specify at least one key or index including it in this array. See
- *   db_change_field() for more explanation why.
+ *   Optional. An array containing the specification for keys and indexes to be
+ *   created on the table along with the field. The format is the same as a
+ *   schema definition, but without the 'columns' element. If you are adding a
+ *   'serial' type field, you MUST specify at least one key or index in this
+ *   array. See db_change_field() for more explanation why.
  *
  * @see db_change_field()
  */
@@ -3084,18 +3138,44 @@ function db_change_field($table, $field, $field_new, $spec, $keys_new = array())
  */
 
 /**
- * Sets a session variable specifying the lag time for ignoring a slave server.
+ * Sets a session variable specifying the lag time for ignoring a replica server.
  */
-function db_ignore_slave() {
+function db_ignore_replica() {
   $connection_info = Database::getConnectionInfo();
-  // Only set ignore_slave_server if there are slave servers being used, which
+  // Only set ignore_replica_server if there are replica servers being used, which
   // is assumed if there are more than one.
   if (count($connection_info) > 1) {
-    // Five minutes is long enough to allow the slave to break and resume
+    // Five minutes is long enough to allow the replica to break and resume
     // interrupted replication without causing problems on the Backdrop site
     // from the old data.
     $duration = settings_get('maximum_replication_lag', 300);
-    // Set session variable with amount of time to delay before using slave.
-    $_SESSION['ignore_slave_server'] = REQUEST_TIME + $duration;
+    // Set session variable with amount of time to delay before using replica.
+    $_SESSION['ignore_replica_server'] = REQUEST_TIME + $duration;
   }
+}
+
+/**
+ * Backwards-compatible wrapper function.
+ *
+ * @deprecated since 1.20.4
+ */
+// @todo Remove forbidden backwards compatibility word in Backdrop 2.x.
+// cspell:disable-next-line
+function db_ignore_slave() {
+  db_ignore_replica();
+}
+
+/**
+ * Check if a database has been specified as a replica.
+ *
+ * @param array $db_options
+ *   An array of options to control how the query operates.
+ *
+ * @return bool
+ *   TRUE if a replica, FALSE otherwise.
+ */
+function _db_is_replica($db_options) {
+  // @todo Remove forbidden backwards compatibility word in Backdrop 2.x.
+  // cspell:disable-next-line
+  return empty($db_options['target']) || $db_options['target'] == 'slave' || $db_options['target'] == 'replica';
 }

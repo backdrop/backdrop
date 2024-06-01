@@ -8,8 +8,8 @@
  * Processes variables for book-all-books-block.tpl.php.
  *
  * All non-renderable elements are removed so that the template has full access
- * to the structured data but can also simply iterate over all elements and
- * render them (as in the default template).
+ * to the structured data but can also iterate over all elements and render them
+ * (as in the default template).
  *
  * @param $variables
  *   An associative array containing the following key:
@@ -46,23 +46,26 @@ function template_preprocess_book_navigation(&$variables) {
   $variables['tree'] = '';
 
   if ($book_link['mlid']) {
-    $variables['tree'] = book_children($book_link);
+    $navigation_options = config_get('book.settings','book_navigation_options');
+    if (in_array('tree', $navigation_options, TRUE)) {
+      $variables['tree'] = book_children($book_link);
+    }
 
-    if ($prev = book_prev($book_link)) {
+    if (in_array('pager', $navigation_options, TRUE) && $prev = book_prev($book_link)) {
       $prev_href = url($prev['href']);
       backdrop_add_html_head_link(array('rel' => 'prev', 'href' => $prev_href));
       $variables['prev_url'] = $prev_href;
       $variables['prev_title'] = check_plain($prev['title']);
     }
 
-    if ($book_link['plid'] && $parent = book_link_load($book_link['plid'])) {
+    if (in_array('pager', $navigation_options, TRUE) && $book_link['plid'] && $parent = book_link_load($book_link['plid'])) {
       $parent_href = url($parent['href']);
       backdrop_add_html_head_link(array('rel' => 'up', 'href' => $parent_href));
       $variables['parent_url'] = $parent_href;
       $variables['parent_title'] = check_plain($parent['title']);
     }
 
-    if ($next = book_next($book_link)) {
+    if (in_array('pager', $navigation_options, TRUE) && $next = book_next($book_link)) {
       $next_href = url($next['href']);
       backdrop_add_html_head_link(array('rel' => 'next', 'href' => $next_href));
       $variables['next_url'] = $next_href;

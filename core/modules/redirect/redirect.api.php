@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Hooks provided by the Redirect module.
@@ -97,10 +96,10 @@ function hook_redirect_load_by_source_alter(array &$redirects, $source, array $c
  * permission may always update and delete redirects through the administrative
  * interface.
  *
- * Note that not all modules will want to influence access on all
- * redirect types. If your module does not want to actively grant or
- * block access, return REDIRECT_ACCESS_IGNORE or simply return nothing.
- * Blindly returning FALSE will break other redirect access modules.
+ * Note that not all modules will want to influence access on all redirect
+ * types. If your module does not want to actively grant or block access,
+ * return REDIRECT_ACCESS_IGNORE or return nothing. Returning FALSE will break
+ * other redirect access modules.
  *
  * @param Redirect|string $redirect
  *   The redirect object on which the operation is to be performed, or, if it

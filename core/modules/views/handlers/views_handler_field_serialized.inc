@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of views_handler_field_serialized.
@@ -64,6 +63,6 @@ class views_handler_field_serialized extends views_handler_field {
       return check_plain($value[$this->options['key']]);
     }
 
-    return $value;
+    return check_plain($value);
   }
 }

@@ -1,0 +1,5 @@
+[BackdropSystemListingCompatibleTestCase]
+name = Installation profile module tests helper
+description = Verifies that tests in installation profile modules are found and may use another profile for running tests.
+group = Installation profiles
+file = backdrop_system_listing_compatible_test.test

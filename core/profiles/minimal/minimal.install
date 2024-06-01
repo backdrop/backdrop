@@ -1,0 +1,28 @@
+<?php
+/**
+ * @file
+ * Install, update and uninstall functions for the minimal installation profile.
+ */
+
+/**
+ * Implements hook_install().
+ *
+ * Performs actions to set up the site for this profile.
+ *
+ * @see system_install()
+ */
+function minimal_install() {
+  // Enable Basis theme and set it as default theme instead of Stark.
+  // @see system_install()
+  $default_theme = 'basis';
+  config_set('system.core', 'theme_default', $default_theme);
+  theme_enable(array($default_theme));
+  theme_disable(array('stark'));
+
+  // Set home page to "node".
+  config_set('system.core', 'site_frontpage', 'node');
+
+  // Enable default permissions for system roles.
+  user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, array('access content'));
+  user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array('access content'));
+}

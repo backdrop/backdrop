@@ -1,0 +1,10 @@
+name = "Backdrop system listing incompatible test"
+description = "Support module for testing the backdrop_system_listing function."
+package = Testing
+version = BACKDROP_VERSION
+type = module
+; This deliberately has the wrong core version, to test that it does not take
+; precedence over the version of the same module that is in the
+; modules/simpletest/tests directory.
+backdrop = 0.x
+hidden = TRUE

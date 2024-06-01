@@ -48,7 +48,67 @@
   text-align: center;
 }
 
+/* Views grid styles */
+
+.views-view-grid {
+  display: -ms-grid;
+  display: grid;
+}
+.views-view-grid-cols-1 {
+  -ms-grid-columns: (1fr)[1];
+  grid-template-columns: repeat(1, 1fr);
+}
+.views-view-grid-cols-2 {
+  -ms-grid-columns: (1fr)[2];
+  grid-template-columns: repeat(2, 1fr);
+}
+.views-view-grid-cols-3 {
+  -ms-grid-columns: (1fr)[3];
+  grid-template-columns: repeat(3, 1fr);
+}
+.views-view-grid-cols-4 {
+  -ms-grid-columns: (1fr)[4];
+  grid-template-columns: repeat(4, 1fr);
+}
+.views-view-grid-cols-5 {
+  -ms-grid-columns: (1fr)[5];
+  grid-template-columns: repeat(5, 1fr);
+}
+.views-view-grid-cols-6 {
+  -ms-grid-columns: (1fr)[6];
+  grid-template-columns: repeat(6, 1fr);
+}
+.views-view-grid-cols-7 {
+  -ms-grid-columns: (1fr)[7];
+  grid-template-columns: repeat(7, 1fr);
+}
+.views-view-grid-cols-8 {
+  -ms-grid-columns: (1fr)[8];
+  grid-template-columns: repeat(8, 1fr);
+}
+.views-view-grid-cols-9 {
+  -ms-grid-columns: (1fr)[9];
+  grid-template-columns: repeat(9, 1fr);
+}
+.views-view-grid-cols-10 {
+  -ms-grid-columns: (1fr)[10];
+  grid-template-columns: repeat(10, 1fr);
+}
+.views-view-grid-cols-11 {
+  -ms-grid-columns: (1fr)[11];
+  grid-template-columns: repeat(11, 1fr);
+}
+.views-view-grid-cols-12 {
+  -ms-grid-columns: (1fr)[12];
+  grid-template-columns: repeat(12, 1fr);
+}
+.views-view-grid .views-row, .views-view-grid .views-grid-box {
+  padding: 1rem;
+  border: 1px solid #cccccc;
+}
+
 /* Remove the border on tbody that system puts in */
+/* Deprecated */
 .views-view-grid tbody {
   border-top: none;
 }

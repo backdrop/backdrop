@@ -1,23 +1,28 @@
 <?php
 /**
  * @file
- * Administrative page callbacks for menu module.
+ * Admin page callbacks for the Menu module.
  */
 
 /**
- * Menu callback which shows an overview page of all the custom menus and their descriptions.
+ * Menu callback which shows an overview page of all the custom menus and their
+ * descriptions.
  */
 function menu_overview_page() {
   $menus = menu_load_all();
   backdrop_sort($menus, array('title' => SORT_STRING));
-  $header = array(t('Title'), t('Operations'));
+  $header = array(t('Title'), t('Description'), t('Operations'));
   $rows = array();
   foreach ($menus as $menu) {
     $row = array();
-    $row[] = theme('menu_admin_overview', array('title' => $menu['title'], 'name' => $menu['menu_name'], 'description' => $menu['description']));
+    $row[] = theme('label_machine_name__menu', array(
+      'label' => $menu['title'],
+      'machine_name' => $menu['menu_name'],
+    ));
+    $row[] = filter_xss_admin($menu['description']);
     $links = array();
     $links['list'] = array(
-      'title' => t('Edit links'),
+      'title' => t('Manage links'),
       'href' => 'admin/structure/menu/manage/' . $menu['menu_name'],
     );
     $links['add'] = array(
@@ -28,6 +33,23 @@ function menu_overview_page() {
       'title' => t('Configure'),
       'href' => 'admin/structure/menu/manage/' . $menu['menu_name'] . '/configure',
     );
+    $system_menus = menu_list_system_menus();
+    if (!isset($system_menus[$menu['menu_name']])) {
+      $links['delete'] = array(
+        'title' => t('Delete'),
+        'href' => 'admin/structure/menu/manage/' . $menu['menu_name'] . '/delete',
+      );
+    }
+    if (module_exists('config') && user_access('synchronize configuration')) {
+      $links['export'] = array(
+        'title' => t('Export'),
+        'href' => 'admin/config/development/configuration/single/export',
+        'query' => array(
+          'group' => 'Menus',
+          'name' => 'menu.menu.' . $menu['menu_name'],
+        ),
+      );
+    }
     $row[] = array(
       'data' => array(
         '#type' => 'operations',
@@ -49,6 +71,28 @@ function menu_overview_page() {
 function menu_overview_form($form, &$form_state, $menu) {
   global $menu_admin;
   $form['#attached']['css'] = array(backdrop_get_path('module', 'menu') . '/css/menu.css');
+
+  $default_language = language_default();
+  $filter_langcode = isset($_GET['langcode']) ? $_GET['langcode'] : $default_language->langcode;
+
+  $form['langcode'] = array(
+    '#title' => t('Show menu in language'),
+    '#type' => 'select',
+    '#options' => language_list(TRUE, TRUE),
+    '#empty_value' => LANGUAGE_NONE,
+    '#empty_option' => t('All languages'),
+    '#default_value' => $filter_langcode,
+    '#access' => module_exists('language'),
+    '#weight' => -10,
+    '#description' => t('Show menu links for a given language. Menu links with the "All" language will be shown in every language.'),
+  );
+  $form['langcode_filter'] = array(
+    '#type' => 'submit',
+    '#value' => t('Filter'),
+    '#attributes' => array('class' => array('button-primary')),
+    '#submit' => array('menu_overview_form_language_filter_submit'),
+  );
+
   $sql = "
     SELECT m.load_functions, m.to_arg_functions, m.access_callback, m.access_arguments, m.page_callback, m.page_arguments, m.delivery_callback, m.title, m.title_callback, m.title_arguments, m.type, m.description, ml.*
     FROM {menu_links} ml LEFT JOIN {menu_router} m ON m.path = ml.router_path
@@ -59,6 +103,9 @@ function menu_overview_form($form, &$form_state, $menu) {
   foreach ($result as $item) {
     $links[] = $item;
   }
+  $link_count = db_query("SELECT COUNT(*) AS counter FROM {menu_links} WHERE menu_name = :menu AND link_path NOT LIKE :link_path", array(':menu' => $menu['menu_name'], ':link_path' => '%\%%'))->fetchObject();
+  $counter = intval($link_count->counter / 2 ) + 1;
+
   $tree = menu_tree_data($links);
   $node_links = array();
   menu_tree_collect_node_links($tree, $node_links);
@@ -67,19 +114,20 @@ function menu_overview_form($form, &$form_state, $menu) {
   menu_tree_check_access($tree, $node_links);
   $menu_admin = FALSE;
 
-  $form = array_merge($form, _menu_overview_tree_form($tree));
-  $form['#menu'] =  $menu;
+  $tree_langcode = $filter_langcode === LANGUAGE_NONE ? NULL : $filter_langcode;
+  $delta = _menu_get_menu_weight_delta($menu['menu_name'], $counter);
+  $form = array_merge($form, _menu_overview_tree_form($tree, $delta, $tree_langcode));
+  $form['#menu'] = $menu;
 
-  if (element_children($form)) {
+  // Only show the form submit button if there are menu items.
+  if (count($links)) {
     $form['actions'] = array('#type' => 'actions');
     $form['actions']['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Save configuration'),
     );
   }
-  else {
-    $form['#empty_text'] = t('There are no menu links yet. <a href="@link">Add link</a>.', array('@link' => url('admin/structure/menu/manage/'. $form['#menu']['menu_name'] .'/add')));
-  }
+
   return $form;
 }
 
@@ -88,12 +136,24 @@ function menu_overview_form($form, &$form_state, $menu) {
  *
  * @param $tree
  *   The menu_tree retrieved by menu_tree_data.
+ * @param $delta
+ *   The number of items to use in the menu weight selector. Defaults to 50.
+ * @param $langcode
+ *   A language code by which to filter the list of menu items.
  */
-function _menu_overview_tree_form($tree) {
+function _menu_overview_tree_form($tree, $delta = 50, $langcode = NULL) {
   $form = &backdrop_static(__FUNCTION__, array('#tree' => TRUE));
+  $language_options = language_list(TRUE, TRUE);
+  $language_options[LANGUAGE_NONE] = t('All');
+
   foreach ($tree as $data) {
-    $title = '';
     $item = $data['link'];
+
+    // Skip all items not in the requested language.
+    if ($langcode && $item['langcode'] !== $langcode && $item['langcode'] !== LANGUAGE_NONE) {
+      continue;
+    }
+
     // Don't show callbacks; these have $item['hidden'] < 0.
     if ($item && $item['hidden'] >= 0) {
       $mlid = 'mlid:' . $item['mlid'];
@@ -107,6 +167,12 @@ function _menu_overview_tree_form($tree) {
         $form[$mlid]['title']['#markup'] .= ' (' . t('logged in users only') . ')';
       }
 
+      $langcode_label = isset($language_options[$item['langcode']]) ? $language_options[$item['langcode']] : $item['langcode'];
+      $form[$mlid]['langcode'] = array(
+        '#type' => 'markup',
+        '#markup' => check_plain($langcode_label),
+        '#access' => module_exists('language'),
+      );
       $form[$mlid]['hidden'] = array(
         '#type' => 'checkbox',
         '#title' => t('Enable @title menu link', array('@title' => $item['title'])),
@@ -115,7 +181,7 @@ function _menu_overview_tree_form($tree) {
       );
       $form[$mlid]['weight'] = array(
         '#type' => 'weight',
-        '#delta' => 50,
+        '#delta' => $delta,
         '#default_value' => $item['weight'],
         '#title_display' => 'invisible',
         '#title' => t('Weight for @title', array('@title' => $item['title'])),
@@ -155,7 +221,7 @@ function _menu_overview_tree_form($tree) {
     }
 
     if ($data['below']) {
-      _menu_overview_tree_form($data['below']);
+      _menu_overview_tree_form($data['below'], $delta, $langcode);
     }
   }
   return $form;
@@ -209,12 +275,38 @@ function menu_overview_form_submit($form, &$form_state) {
 }
 
 /**
+ * Submit handler for menu_overview_form().
+ *
+ * Filters the displayed form to a particular language.
+ */
+function menu_overview_form_language_filter_submit($form, &$form_state) {
+  $query['langcode'] = $form_state['values']['langcode'];
+  if (isset($_GET['destination'])) {
+    $query['destination'] = $_GET['destination'];
+  }
+  backdrop_goto($_GET['q'], array('query' => $query));
+}
+
+/**
  * Menu callback; Build the menu link editing form.
  */
 function menu_edit_item($form, &$form_state, $type, $item, $menu) {
   if ($type == 'add' || empty($item)) {
     // This is an add form, initialize the menu link.
-    $item = array('link_title' => '', 'mlid' => 0, 'plid' => 0, 'menu_name' => $menu['menu_name'], 'weight' => 0, 'link_path' => '', 'options' => array(), 'module' => 'menu', 'expanded' => 0, 'hidden' => 0, 'has_children' => 0);
+    $item = array(
+      'menu_name' => $menu['menu_name'],
+      'mlid' => 0,
+      'plid' => 0,
+      'link_title' => '',
+      'link_path' => '',
+      'langcode' => isset($_GET['langcode']) ? $_GET['langcode'] : LANGUAGE_NONE,
+      'weight' => 0,
+      'options' => array(),
+      'module' => 'menu',
+      'expanded' => 0,
+      'hidden' => 0,
+      'has_children' => 0,
+    );
   }
   else {
     // Get the human-readable menu title from the given menu name
@@ -257,8 +349,9 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
       '#title' => t('Path'),
       '#maxlength' => 255,
       '#default_value' => (!empty($path)) ? $path_alias : $path,
-      '#description' => t('The path for this menu link. This can be an internal site path such as %add-node or an external URL such as %external. Enter %front to link to the front page.', array('%front' => '<front>', '%add-node' => 'node/add', '%external' => 'http://example.com')),
+      '#description' => t('The path for this menu link. This can be an internal site path such as %add-node or an external URL such as %external. Enter %front to link to the home page.', array('%front' => '<front>', '%add-node' => 'node/add', '%external' => 'http://example.com')),
       '#required' => TRUE,
+      '#autocomplete_path' => 'path-autocomplete',
     );
     $form['actions']['delete'] = array(
       '#type' => 'submit',
@@ -275,6 +368,30 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
       '#description' => l($item['link_title'], $item['href'], $item['options']),
     );
   }
+
+  if (module_exists('language')) {
+    $form['langcode'] = array(
+      '#type' => 'select',
+      '#title' => t('Language'),
+      '#default_value' => $item['langcode'],
+      '#options' => language_list(TRUE, TRUE),
+      '#empty_value' => LANGUAGE_NONE,
+      '#empty_option' => t('- All (always shown) -'),
+      '#description' => t('Set a language for this menu link. The menu link will only be visible in that language.'),
+      '#ajax' => array(
+        'callback' => 'menu_update_parent_options_ajax',
+        'wrapper' => 'menu-parent-select-wrapper',
+      ),
+    );
+  }
+  else {
+    // Maintain langcode settings if Language module is not present.
+    $form['langcode'] = array(
+      '#type' => 'value',
+      '#value' => $item['langcode'],
+    );
+  }
+
   $form['description'] = array(
     '#type' => 'textarea',
     '#title' => t('Description'),
@@ -292,7 +409,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#type' => 'checkbox',
     '#title' => t('Show as expanded'),
     '#default_value' => $item['expanded'],
-    '#description' => t('If selected and this menu link has children, the menu will always appear expanded.'),
+    '#description' => t('When displayed in a "hierarchical tree" menu style, children of expanded menu links will always be visible.'),
   );
 
   // Generate a list of possible parents (not including this link or descendants).
@@ -308,11 +425,25 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#options' => $options,
     '#description' => t('The maximum depth for a link and all its children is fixed at !maxdepth. Some menu links may not be available as parents if selecting them would exceed this limit.', array('!maxdepth' => MENU_MAX_DEPTH)),
     '#attributes' => array('class' => array('menu-title-select')),
+    '#prefix' => '<div id="menu-parent-select-wrapper">',
+    '#suffix' => '</div>',
   );
+  // Get number of items in all possible parent menus, so the weight selector is
+  // sized appropriately.
+  $menu_names = array_keys(menu_get_menus());
+  $menu_options = array();
+  foreach ($menu_names as $menu_name) {
+    if (isset($options[$menu_name . ':0'])) {
+      $menu_options[] = $menu_name;
+    }
+  }
+  // Make sure that we always have values in menu_options.
+  $menu_options = !empty($menu_options) ? $menu_options : $menu_names;
+
   $form['weight'] = array(
     '#type' => 'weight',
     '#title' => t('Weight'),
-    '#delta' => 50,
+    '#delta' => _menu_get_menu_weight_delta($menu_options),
     '#default_value' => $item['weight'],
     '#description' => t('Optional. In the menu, the heavier links will sink and the lighter links will be positioned nearer the top.'),
   );
@@ -381,7 +512,12 @@ function menu_edit_item_submit($form, &$form_state) {
   else {
     backdrop_set_message(t('Your configuration has been saved.'));
   }
-  $form_state['redirect'] = 'admin/structure/menu/manage/' . $item['menu_name'];
+
+  $redirect = array('path' => 'admin/structure/menu/manage/' . $item['menu_name']);
+  if ($item['langcode'] !== LANGUAGE_NONE) {
+    $redirect['options']['query'] = array('langcode' => $item['langcode']);
+  }
+  $form_state['redirect'] = $redirect;
 }
 
 /**
@@ -389,6 +525,10 @@ function menu_edit_item_submit($form, &$form_state) {
  */
 function menu_edit_menu($form, &$form_state, $type, $menu = array()) {
   $system_menus = menu_list_system_menus();
+  if (empty($menu['menu_name'])) {
+    backdrop_set_title(t('Add menu'));
+  }
+
   $menu += array(
     'menu_name' => '',
     'old_name' => !empty($menu['menu_name']) ? $menu['menu_name'] : '',
@@ -416,6 +556,7 @@ function menu_edit_menu($form, &$form_state, $type, $menu = array()) {
     '#default_value' => $menu['menu_name'],
     '#maxlength' => MENU_MAX_MENU_NAME_LENGTH_UI,
     '#description' => t('A unique name to construct the URL for the menu. It must only contain lowercase letters, numbers and hyphens.'),
+    '#field_prefix' => empty($menu['old_name']) ? 'menu-' : '',
     '#machine_name' => array(
       'exists' => 'menu_edit_menu_name_exists',
       'source' => array('title'),
@@ -611,4 +752,62 @@ function menu_reset_item_confirm_submit($form, &$form_state) {
   $new_item = menu_reset_item($item);
   backdrop_set_message(t('The menu link was reset to its default settings.'));
   $form_state['redirect'] = 'admin/structure/menu/manage/' . $new_item['menu_name'];
+}
+
+/**
+ * Menu callback; global settings form for menus.
+ */
+function menu_settings_form($form, &$form_state) {
+  $form['#config'] = 'menu.settings';
+  $config = config('menu.settings');
+
+  $form['menu_breakpoint'] = array(
+    '#type' => 'radios',
+    '#title' => t('Breakpoint'),
+    '#description' => t("The 'min-width' for the menu breakpoint. Screens smaller than this may display a menu toggle button, depending on the menu-specific settings."),
+    '#options' => array(
+      'default' => t('Default (48em)'),
+      'custom' => t('Custom'),
+    ),
+    '#default_value' => $config->get('menu_breakpoint'),
+  );
+  $form['menu_breakpoint_custom'] = array(
+    '#type' => 'textfield',
+    '#description' => t("A valid CSS width value (e.g.: '768px', '34em')."),
+    '#default_value' => $config->get('menu_breakpoint_custom'),
+    '#size' => 8,
+    '#field_prefix' => 'min-width:',
+    '#states' => array(
+      'visible' => array(
+        ':input[name="menu_breakpoint"]' => array('value' => 'custom'),
+      ),
+    ),
+  );
+  $form['#submit'][] = 'menu_settings_form_submit';
+
+  return system_settings_form($form);
+}
+
+/**
+ * Validate form values for the global settings form.
+ */
+function menu_settings_form_validate($form, &$form_state) {
+  // Do some basic validation of the menu breakpoint setting.
+  if ($form_state['values']['menu_breakpoint'] == 'custom') {
+    // This list of CSS units has been taken from:
+    // https://developer.mozilla.org/en-US/docs/Web/CSS/length
+    if (!preg_match('/^[0-9.]+(px|em|ch|ex|rem|vh|vw|vmin|vmax|cm|mm|in|pc|pt)$/i', $form_state['values']['menu_breakpoint_custom'])) {
+      form_set_error('menu_breakpoint_custom', t("'@breakpoint' does not appear to be a valid CSS width value.", array(
+        '@breakpoint' => $form_state['values']['menu_breakpoint_custom'],
+      )));
+    }
+  }
+}
+
+/**
+ * Custom submission handler for the global settings form.
+ */
+function menu_settings_form_submit($form, &$form_state) {
+  // Flush page cache to allow new breakpoint to take effect immediately.
+  cache_flush('page');
 }

@@ -1,0 +1,22 @@
+/**
+ * Telemetry report.
+ */
+.telemetry-report td {
+  vertical-align: top;
+}
+.telemetry-report .telemetry-item-label {
+  font-weight: bold;
+}
+.telemetry-report .telemetry-item-project {
+  font-size: 0.9em;
+  color: #444;
+}
+.telemetry-report .telemetry-item-project::before {
+  content: '(';
+}
+.telemetry-report .telemetry-item-project::after {
+  content: ')';
+}
+.telemetry-report .telemetry-item-description {
+  color: #444;
+}

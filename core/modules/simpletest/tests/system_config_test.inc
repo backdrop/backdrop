@@ -13,7 +13,7 @@ class SystemConfigFormCase extends BackdropWebTestCase {
   /**
    * Values to use for testing.
    *
-   * Conatins details for form key, configuration object name, and config key.
+   * Contains details for form key, configuration object name, and config key.
    * Example:
    * @code
    *   array(

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provide views data and handlers for taxonomy.module.
@@ -111,6 +110,15 @@ function taxonomy_views_data() {
       'help' => t('Taxonomy term name.'),
       'many to one' => TRUE,
       'empty field name' => t('Uncategorized'),
+    ),
+  );
+
+  // Aliased path to term.
+  $data['taxonomy_term_data']['term_path'] = array(
+    'title' => t('Path'),
+    'help' => t('The aliased path to this taxonomy term.'),
+    'field' => array(
+      'handler' => 'views_handler_field_term_path',
     ),
   );
 
@@ -299,7 +307,7 @@ function taxonomy_views_data() {
 function taxonomy_views_data_alter(&$data) {
   $data['node']['term_node_tid'] = array(
     'title' => t('Taxonomy terms on node'),
-    'help' => t('Relate nodes to taxonomy terms, specifiying which vocabulary or vocabularies to use. This relationship will cause duplicated records if there are multiple terms.'),
+    'help' => t('Relate nodes to taxonomy terms, specifying which vocabulary or vocabularies to use. This relationship will cause duplicated records if there are multiple terms.'),
     'relationship' => array(
       'handler' => 'views_handler_relationship_node_term_data',
       'label' => t('term'),

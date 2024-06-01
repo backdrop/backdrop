@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Install, update and uninstall functions for the language module.
@@ -173,6 +172,29 @@ function language_update_1002() {
 
     db_drop_table('language');
   }
+}
+
+/**
+ * Add the native name to all enabled languages.
+ */
+function language_update_1003() {
+  require_once BACKDROP_ROOT . '/core/includes/standard.inc';
+  $predefined = standard_language_list();
+  $config = config('language.settings');
+  $languages = $config->get('languages');
+
+  foreach ($languages as $langcode => $lang) {
+    if (!empty($lang['native'])) {
+      continue;
+    }
+    if (isset($predefined[$langcode][1])) {
+      $config->set('languages.' . $langcode . '.native', $predefined[$langcode][1]);
+    }
+    else {
+      $config->set('languages.' . $langcode . '.native', $lang['name']);
+    }
+  }
+  $config->save();
 }
 
 /**

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @addtogroup database
  * @{
@@ -98,7 +97,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * $fields =& $query->getOrderBy();
    * @endcode
    *
-   * @return
+   * @return array
    *   A reference to the expression array structure.
    */
   public function &getOrderBy();
@@ -116,7 +115,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * $fields =& $query->getGroupBy();
    * @endcode
    *
-   * @return
+   * @return array
    *   A reference to the group-by array structure.
    */
   public function &getGroupBy();
@@ -208,8 +207,8 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * majority of cases that is not a problem, as the alias will be the field
    * name. However, if you do need to know the alias you can call getFields()
    * and examine the result to determine what alias was created. Alternatively,
-   * simply use addField() for the few fields you care about and this method for
-   * the rest.
+   * use addField() for the few fields you care about and this method for the
+   * rest.
    *
    * @param $table_alias
    *   The name of the table from which the field comes, as an alias. Generally
@@ -431,17 +430,15 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
   /**
    * Add another Select query to UNION to this one.
    *
-   * Union queries consist of two or more queries whose
-   * results are effectively concatenated together. Queries
-   * will be UNIONed in the order they are specified, with
-   * this object's query coming first. Duplicate columns will
-   * be discarded. All forms of UNION are supported, using
-   * the second '$type' argument.
+   * Union queries consist of two or more queries whose results are effectively
+   * concatenated together. Queries  will be UNION'ed in the order they are
+   * specified, with this object's query coming first. Duplicate columns will be
+   * discarded. All forms of UNION are supported, using the second '$type'
+   * argument.
    *
-   * Note: All queries UNIONed together must have the same
-   * field structure, in the same order. It is up to the
-   * caller to ensure that they match properly. If they do
-   * not, an SQL syntax error will result.
+   * Note: All queries UNION'ed together must have the same field structure, in
+   * the same order. It is up to the caller to ensure that they match properly.
+   * If they do not, an SQL syntax error will result.
    *
    * @param $query
    *   The query to UNION to this query.
@@ -987,7 +984,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
    */
   protected $forUpdate = FALSE;
 
-  public function __construct($table, $alias = NULL, DatabaseConnection $connection, $options = array()) {
+  public function __construct($table, $alias, DatabaseConnection $connection, $options = array()) {
     $options['return'] = Database::RETURN_STATEMENT;
     parent::__construct($connection, $options);
     $this->where = new DatabaseCondition('AND');
@@ -1428,7 +1425,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
    * @return NULL|DatabaseStatementInterface|DatabaseStatementBase|DatabaseStatementPrefetch|stdClass[]
    */
   public function execute() {
-    // If validation fails, simply return NULL.
+    // If validation fails return NULL.
     // Note that validation routines in preExecute() may throw exceptions instead.
     if (!$this->preExecute()) {
       return NULL;
@@ -1447,7 +1444,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
   }
 
   /**
-   * Implements SelectQueryInterface::addField().di
+   * Implements SelectQueryInterface::addField().
    */
   public function addField($table_alias, $field, $alias = NULL) {
     // If no alias is specified, first try the field name itself.
@@ -1589,7 +1586,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
   /**
    * Implements SelectQueryInterface::orderBy().
    *
-   * return SelectQuery
+   * @return SelectQuery
    */
   public function orderBy($field, $direction = 'ASC') {
     // Only allow ASC and DESC, default to ASC.
@@ -1601,7 +1598,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
   /**
    * Implements SelectQueryInterface::orderRandom().
    *
-   * return SelectQuery
+   * @return SelectQuery
    */
   public function orderRandom() {
     $alias = $this->addExpression('RAND()', 'random_field');
@@ -1612,7 +1609,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
   /**
    * Implements SelectQueryInterface::range().
    *
-   * return SelectQuery
+   * @return SelectQuery
    */
   public function range($start = NULL, $length = NULL) {
     $this->range = func_num_args() ? array('start' => $start, 'length' => $length) : array();
@@ -1622,7 +1619,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
   /**
    * Implements SelectQueryInterface::union().
    *
-   * return SelectQuery
+   * @return SelectQuery
    */
   public function union(SelectQueryInterface $query, $type = '') {
     // Handle UNION aliasing.
@@ -1649,7 +1646,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
   /**
    * Implements SelectQueryInterface::groupBy().
    *
-   * return SelectQuery
+   * @return SelectQuery
    */
   public function groupBy($field) {
     $this->group[$field] = $field;
@@ -1659,7 +1656,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
   /**
    * Implements SelectQueryInterface::countQuery().
    *
-   * return SelectQuery
+   * @return SelectQuery
    */
   public function countQuery() {
     // Create our new query object that we will mutate into a count query.
@@ -1830,6 +1827,8 @@ class SelectQuery extends Query implements SelectQueryInterface {
   }
 
   public function __clone() {
+    parent::__clone();
+
     // On cloning, also clone the dependent objects. However, we do not
     // want to clone the database connection object as that would duplicate the
     // connection itself.
@@ -1838,6 +1837,11 @@ class SelectQuery extends Query implements SelectQueryInterface {
     $this->having = clone($this->having);
     foreach ($this->union as $key => $aggregate) {
       $this->union[$key]['query'] = clone($aggregate['query']);
+    }
+    foreach ($this->tables as $alias => $table) {
+      if ($table['table'] instanceof SelectQueryInterface) {
+        $this->tables[$alias]['table'] = clone $table['table'];
+      }
     }
   }
 }

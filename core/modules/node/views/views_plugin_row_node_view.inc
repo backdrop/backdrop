@@ -35,6 +35,7 @@ class views_plugin_row_node_view extends views_plugin_row {
     $options = parent::option_definition();
 
     $options['view_mode'] = array('default' => 'teaser');
+    $options['title'] = array('default' => TRUE, 'bool' => TRUE);
     $options['links'] = array('default' => TRUE, 'bool' => TRUE);
     $options['comments'] = array('default' => FALSE, 'bool' => TRUE);
 
@@ -50,10 +51,17 @@ class views_plugin_row_node_view extends views_plugin_row {
       '#options' => $options,
       '#title' => t('Display mode'),
       '#default_value' => $this->options['view_mode'],
-     );
+    );
+    $form['title'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Display title'),
+      '#description' => t('The title will display as a link to each item.'),
+      '#default_value' => $this->options['title'],
+    );
     $form['links'] = array(
       '#type' => 'checkbox',
       '#title' => t('Display links'),
+      '#description' => t("e.g. 'Read more', 'Add comment', etc."),
       '#default_value' => $this->options['links'],
     );
     $form['comments'] = array(

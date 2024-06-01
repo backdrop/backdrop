@@ -345,7 +345,7 @@ function _field_info_prepare_instance($instance, $field) {
       if (!isset($instance['display'][$view_mode])) {
         $instance['display'][$view_mode] = array(
           'type' => 'hidden',
-          'label' => 'above',
+          'label' => 'hidden',
           'settings' => array(),
           'weight' => 0,
         );
@@ -370,7 +370,7 @@ function _field_info_prepare_instance_display($field, $display) {
 
   // Fill in default values.
   $display += array(
-    'label' => 'above',
+    'label' => 'hidden',
     'type' => $field_type['default_formatter'],
     'settings' => array(),
     'weight' => 0,
@@ -589,6 +589,37 @@ function field_info_storage_types($storage_type = NULL) {
 }
 
 /**
+ * Get the formatter settings for a field instance and view mode.
+ *
+ * @param string $field_name
+ * @param string $display
+ * @param string $bundle
+ * @param string $view_mode
+ *
+ * @return array
+ *
+ * @since 1.13.0
+ */
+function field_formatter_settings_get_instance_display_settings($entity_type, $field_name, $bundle, $view_mode) {
+  // There is no bundle for this entity type so the bundle name is the
+  // entity_type name.
+  if (empty($bundle)) {
+    $bundle = $entity_type;
+  }
+
+  // Fetch the instance settings and default display settings.
+  $info = field_info_instance($entity_type, $field_name, $bundle);
+  $defaults = $info['display']['default']['settings'];
+
+  if (isset($info['display'][$view_mode]['settings'])) {
+    return $info['display'][$view_mode]['settings'] + $defaults;
+  }
+  else {
+    return $defaults;
+  }
+}
+
+/**
  * Returns information about existing bundles.
  *
  * @param $entity_type
@@ -639,7 +670,7 @@ function field_info_bundles($entity_type = NULL) {
  */
 function field_info_field_map() {
   // Read from the "static" cache.
-  $field_info_cache = backdrop_static(__FUNCTION__, array());
+  $field_info_cache = &backdrop_static(__FUNCTION__, array());
 
   if (!empty($field_info_cache)) {
     return $field_info_cache;

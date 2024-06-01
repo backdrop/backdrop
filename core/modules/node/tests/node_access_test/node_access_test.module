@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * A dummy module implementing node access related hooks for testing purposes.

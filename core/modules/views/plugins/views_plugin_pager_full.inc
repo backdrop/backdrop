@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of views_plugin_pager_full.
@@ -57,13 +56,15 @@ class views_plugin_pager_full extends views_plugin_pager {
     $pager_text = $this->display->handler->get_pager_text();
     $form['items_per_page'] = array(
       '#title' => $pager_text['items per page title'],
-      '#type' => 'textfield',
+      '#type' => 'number',
+      '#min' => '0',
       '#description' => $pager_text['items per page description'],
       '#default_value' => $this->options['items_per_page'],
     );
 
     $form['offset'] = array(
-      '#type' => 'textfield',
+      '#type' => 'number',
+      '#min' => '0',
       '#title' => t('Offset'),
       '#description' => t('The number of items to skip. For example, if this field is 3, the first 3 items will be skipped and not displayed.'),
       '#default_value' => $this->options['offset'],
@@ -246,11 +247,11 @@ class views_plugin_pager_full extends views_plugin_pager {
   }
 
   function query() {
-    if ($this->items_per_page_exposed()) {
-      if (!empty($_GET['items_per_page']) && $_GET['items_per_page'] > 0) {
+    if ($this->items_per_page_exposed() && !empty($_GET['items_per_page'])) {
+      if (is_numeric($_GET['items_per_page']) && $_GET['items_per_page'] > 0) {
         $this->options['items_per_page'] = $_GET['items_per_page'];
       }
-      elseif (!empty($_GET['items_per_page']) && $_GET['items_per_page'] == 'All' && $this->options['expose']['items_per_page_options_all']) {
+      elseif ($_GET['items_per_page'] == 'All' && $this->options['expose']['items_per_page_options_all']) {
         $this->options['items_per_page'] = 0;
       }
     }
@@ -425,7 +426,7 @@ class views_plugin_pager_full extends views_plugin_pager {
   function exposed_form_validate(&$form, &$form_state) {
     if (!empty($form_state['values']['offset']) && trim($form_state['values']['offset'])) {
       if (!is_numeric($form_state['values']['offset']) || $form_state['values']['offset'] < 0) {
-        form_set_error('offset', t('Offset must be an number greather or equal than 0.'));
+        form_set_error('offset', t('Offset must be a number greater than or equal to 0.'));
       }
     }
   }

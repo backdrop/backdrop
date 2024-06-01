@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provides the view object type and associated methods.
@@ -16,6 +15,7 @@
  * An object to contain all of the data to generate a view, plus the member
  * functions to build the view query, execute the query and render the output.
  */
+#[\AllowDynamicProperties]
 class view {
   var $base_table = 'node';
   var $base_field = 'nid';
@@ -145,7 +145,7 @@ class view {
   // To avoid recursion in views embedded into areas.
   var $parent_views = array();
 
-  // Is the current stored view runned as an attachment to another view.
+  // Whether or not the current stored view is an attachment to another view.
   var $is_attachment = NULL;
 
   // Stores the next steps of form items to handle.
@@ -497,6 +497,7 @@ class view {
       }
       $this->display[$id]->handler = views_get_plugin('display', $this->display[$id]->display_plugin);
       if (!empty($this->display[$id]->handler)) {
+        $this->display[$id]->handler->localization_keys = array($id);
         // Initialize the new display handler with data.
         $this->display[$id]->handler->init($this, $this->display[$id]);
         // If this is NOT the default display handler, let it know which is
@@ -895,7 +896,7 @@ class view {
         $breadcrumb_args[] = $arg;
       }
       else {
-        // determine default condition and handle.
+        // Determine default condition and handle.
         $status = $argument->default_action();
         break;
       }
@@ -904,7 +905,7 @@ class view {
       unset($argument);
     }
 
-    // set the title in the build info.
+    // Set the title in the build info.
     if (!empty($title)) {
       $this->build_info['title'] = $title;
     }
@@ -922,7 +923,7 @@ class view {
     if (!empty($this->query)) {
       $class = get_class($this->query);
       if ($class && $class != 'stdClass') {
-        // return if query is already initialized.
+        // Return if query is already initialized.
         return TRUE;
       }
     }
@@ -1185,7 +1186,7 @@ class view {
       $cache = $this->display_handler->get_plugin('cache');
     }
     if ($cache && $cache->cache_get('results')) {
-      if($this->query->pager->use_pager()) {
+      if($this->query->pager->use_pager() || !empty($this->get_total_rows)) {
         $this->query->pager->total_items = $this->total_rows;
         $this->query->pager->update_page_info();
       }
@@ -1224,19 +1225,20 @@ class view {
    */
   function render($display_id = NULL) {
     $this->execute($display_id);
+    $show_additional_queries = config_get('views.settings', 'show_additional_queries');
 
     // Check to see if the build failed.
     if (!empty($this->build_info['fail'])) {
       return;
     }
-    if (!empty($this->view->build_info['denied'])) {
+    if (!empty($this->build_info['denied'])) {
       return;
     }
 
     backdrop_theme_initialize();
 
     $start = microtime(TRUE);
-    if (!empty($this->live_preview) && config_get('views.settings', 'show_additional_queries')) {
+    if (!empty($this->live_preview) && $show_additional_queries) {
       $this->start_query_capture();
     }
 
@@ -1326,7 +1328,7 @@ class view {
       $function($this, $this->display_handler->output, $cache);
     }
 
-    if (!empty($this->live_preview) && config_get('views.settings', 'show_additional_queries')) {
+    if (!empty($this->live_preview) && $show_additional_queries) {
       $this->end_query_capture();
     }
 
@@ -1364,7 +1366,7 @@ class view {
    * have other side effects that are only intended for the 'proper'
    * use of the display, such as setting page titles and breadcrumbs.
    *
-   * If you simply want to view the display, use view::preview() instead.
+   * If you only want to view the display, use view::preview() instead.
    */
   function execute_display($display_id = NULL, $args = array()) {
     if (empty($this->current_display) || $this->current_display != $this->choose_display($display_id)) {
@@ -1514,7 +1516,7 @@ class view {
    * this sets the display handler if it hasn't been.
    */
   function access($displays = NULL, $account = NULL) {
-    // Noone should have access to disabled views.
+    // No one should have access to disabled views.
     if (!empty($this->disabled)) {
       return FALSE;
     }
@@ -1757,7 +1759,7 @@ class view {
   }
 
   /**
-   * Add the list of queries run during render to buildinfo.
+   * Add the list of queries run during render to the build info.
    *
    * @see view::start_query_capture()
    */
@@ -1773,7 +1775,7 @@ class view {
     // Scroll through the queries until we get to our last query key.
     // Unset anything in our temp array.
     if (isset($this->last_query_key)) {
-      while (list($id, $query) = each($queries)) {
+      foreach ($queries as $id => $query) {
         if ($id == $this->last_query_key) {
           break;
         }
@@ -1820,6 +1822,7 @@ class view {
       unset($this->locked);
     }
     config('views.view.' . $this->name)->setData($config_data)->save();
+    $this->save_locale_strings();
 
     // Clear caches.
     views_invalidate_cache();
@@ -1990,12 +1993,72 @@ class view {
   }
 
   /**
+   * Find and initialize the localization plugin.
+   *
+   * @return bool
+   *   Whether the active plugin does handle translation or not. FALSE for the
+   *   plugin "none", or if no plugin was available.
+   *
+   * @see unpack_options()
+   */
+  public function init_localization() {
+    // If the translate attribute isn't set, init the localization plugin.
+    if (!isset($this->localization_plugin->translate)) {
+      $this->localization_plugin = views_get_plugin('localization', views_get_localization_plugin());
+
+      // If the plugin is still not set, turn off all localization by using the
+      // views_plugin_localization_none plugin. This plugin has the translate
+      // property set to FALSE, signifying localization should not occur.
+      if (empty($this->localization_plugin)) {
+        $this->localization_plugin = views_get_plugin('localization', 'none');
+        // If it is still NULL, not even plugin "none" is available. Only needed
+        // for edge cases, like core update.
+        if (is_null($this->localization_plugin)) {
+          return FALSE;
+        }
+      }
+
+      // Init the plugin.
+      $this->localization_plugin->init($this);
+    }
+
+    // Return the value of the translate property. This is set to FALSE if
+    // localization is off.
+    return $this->localization_plugin->translate;
+  }
+
+  /**
    * Determine whether a view supports admin string translation.
    */
   function is_translatable() {
     // If the view is normal or overridden, use admin string translation.
     // A newly created view won't have a type. Accept this.
     return (!isset($this->type) || in_array($this->type, array(t('Normal'), t('Overridden')))) ? TRUE : FALSE;
+  }
+
+  /**
+   * Send strings for localization.
+   */
+  public function save_locale_strings() {
+    $this->process_locale_strings('save');
+  }
+
+  /**
+   * Delete localized strings.
+   */
+  public function delete_locale_strings() {
+    $this->process_locale_strings('delete');
+  }
+
+  /**
+   * Process strings for localization or deletion.
+   */
+  public function process_locale_strings($op) {
+    // Ensure this view supports translation, we have a display, and we
+    // have a localization plugin.
+    if ($this->is_translatable() && $this->init_display() && $this->init_localization()) {
+      $this->localization_plugin->process_locale_strings($op);
+    }
   }
 
   /**
@@ -2009,7 +2072,7 @@ class view {
    *   The id to use.
    * @return
    *   The key to the display in $view->display, so that the new display
-   *   can be easily located.
+   *   can be located.
    */
   function add_display($type = 'page', $title = NULL, $id = NULL) {
     if (empty($type)) {
@@ -2242,6 +2305,7 @@ class view {
 /**
  * A display type in a view.
  */
+#[\AllowDynamicProperties]
 class views_display {
 
   /**

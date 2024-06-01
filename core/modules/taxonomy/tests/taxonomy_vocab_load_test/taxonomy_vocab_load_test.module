@@ -1,0 +1,15 @@
+<?php
+/**
+ * @file
+ * Dummy module implementing hook_taxonomy_vocabulary_load().
+ */
+
+/**
+ * Implements hook_taxonomy_vocabulary_load().
+ */
+function taxonomy_vocab_load_test_taxonomy_vocabulary_load(array $vocabularies) {
+  foreach ($vocabularies as $vocabulary) {
+    // No condition, just a dynamic property with a random string.
+    $vocabulary->dynamicProp = backdrop_random_key(16);
+  }
+}

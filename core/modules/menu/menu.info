@@ -1,7 +1,11 @@
 name = Menu
 description = Allows administrators to customize the site navigation menu.
 package = System
+tags[] = Menus
+tags[] = Site Navigation
+tags[] = Structure
 version = BACKDROP_VERSION
 type = module
 backdrop = 1.x
+
 configure = admin/structure/menu

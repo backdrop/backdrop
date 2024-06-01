@@ -88,6 +88,12 @@ description = Verifies that taxonomy_term_access tags are added to queries.
 group = Taxonomy
 file = taxonomy.test
 
+[TaxonomyLanguageFunctionalTest]
+name = Taxonomy multilingual support
+description = Verifies that vocabularies and terms can have languages set.
+group = Taxonomy
+file = taxonomy.test
+
 [TaxonomyViewsHandlerRelationshipNodeTermDataTest]
 name = Views taxonomy relationship
 description = Tests the taxonomy term on node relationship handler for Views.

@@ -1,4 +1,4 @@
-Basis inludes very granular CSS files so that a sub theme can override
+Basis includes very granular CSS files so that a sub theme can override
 only the files it needs to and inherit the rest.
 
 ## CSS Files
@@ -19,4 +19,4 @@ A good way to think about overriding files:
  theme will be used in it's place.
 
  # CSS Guidelines
- [See Backdrop's CSS Standards](https://api.backdropcms.org/css-standards)
+ [See Backdrop's CSS Standards](https://docs.backdropcms.org/css-standards)

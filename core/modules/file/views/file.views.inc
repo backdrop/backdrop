@@ -29,6 +29,20 @@ function file_views_data() {
   );
   $data['file_managed']['table']['entity type'] = 'file';
 
+  // Rendered file.
+  $data['file_managed']['rendered'] = array(
+    'title' => t('Rendered'),
+    'help' => t('Display the file in a specific view mode.'),
+    'field' => array(
+      'handler' => 'views_handler_field_file_rendered',
+      'click sortable' => TRUE,
+      'real field' => 'fid',
+      'additional fields' => array(
+        'fid',
+      ),
+    ),
+  );
+
   // fid
   $data['file_managed']['fid'] = array(
     'title' => t('File ID'),
@@ -47,6 +61,25 @@ function file_views_data() {
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
+    ),
+  );
+
+  // File type.
+  $data['file_managed']['type'] = array(
+    'title' => t('Type'),
+    'help' => t('The type of the file (for example, "audio", "image", "video", etc).'),
+    'field' => array(
+      'handler' => 'views_handler_field_file_type',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_file_type',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_file_type',
     ),
   );
 
@@ -72,7 +105,7 @@ function file_views_data() {
   // uri
   $data['file_managed']['uri'] = array(
     'title' => t('Path'),
-    'help' => t('The path of the file.'),
+    'help' => t('The internal path (URI) of the file. May also display the file URL.'),
     'field' => array(
       'handler' => 'views_handler_field_file_uri',
       'click sortable' => TRUE,
@@ -195,12 +228,21 @@ function file_views_data() {
   // uid
   $data['file_managed']['uid'] = array(
     'title' => t('User who uploaded'),
-    'help' => t('The user account that uploaded the file.'),
+    'help' => t('The user account that uploaded the file. If more fields than UID are needed, add the "File: User who uploaded" relationship.'),
     'relationship' => array(
       'title' => t('User who uploaded'),
       'label' => t('User who uploaded'),
       'base' => 'users',
       'base field' => 'uid',
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_user_name',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_numeric',
+    ),
+    'field' => array(
+      'handler' => 'views_handler_field_user',
     ),
   );
 

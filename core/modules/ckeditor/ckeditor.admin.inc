@@ -1,10 +1,11 @@
 <?php
 /**
- * Admin menu callbacks and theme functions for CKEditor module.
+ * @file
+ * Admin page callbacks for the CKEditor 4 module.
  */
 
 /**
- * Editor settings callback; Provide options for CKEditor module.
+ * Editor settings callback; Provide options for CKEditor 4 module.
  */
 function ckeditor_settings_form(&$form, $form_state, $format) {
   $plugins = ckeditor_plugins();
@@ -39,6 +40,17 @@ function ckeditor_settings_form(&$form, $form_state, $format) {
     '#parents' => array('editor_settings', 'image_upload'),
   );
 
+  $elements['plugins']['file'] = filter_editor_file_upload_settings_form($format);
+  $elements['plugins']['file'] += array(
+    '#type' => 'fieldset',
+    '#title' => t('File uploading'),
+    '#attributes' => array(
+      'class' => array('ckeditor-plugin-backdroplink'),
+      'data-ckeditor-feature-dependency' => 'BackdropLink',
+    ),
+    '#parents' => array('editor_settings', 'file_upload'),
+  );
+
   $elements['plugins']['style'] = array(
     '#type' => 'fieldset',
     '#title' => t('Style list'),
@@ -71,13 +83,13 @@ function ckeditor_settings_form_validate($form, &$form_state) {
   $toolbar_string = $settings['toolbar'];
   $result = json_decode($toolbar_string, TRUE);
   if (empty($result)) {
-    form_error($form['editor_settings']['toolbar'], t('The CKEditor toolbar configuration could not be saved.'));
+    form_error($form['editor_settings']['toolbar'], t('The CKEditor 4 toolbar configuration could not be saved.'));
   }
 
   $styles = _ckeditor_settings_parse_style_list($settings['plugins']['style']['style_list']);
   foreach ($styles as $style) {
     if (empty($style['name']) || empty($style['element']) || empty($style['attributes']['class'])) {
-      form_error($form['editor_settings']['plugins']['style']['style_list'], t('The CKEditor list of styles is not formatted properly. Be sure to include one style per line, with the format "element.class|Label".'));
+      form_error($form['editor_settings']['plugins']['style']['style_list'], t('The CKEditor 4 list of styles is not formatted properly. Be sure to include one style per line, with the format "element.class|Label".'));
     }
   }
 }
