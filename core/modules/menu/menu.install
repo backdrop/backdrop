@@ -168,7 +168,7 @@ function menu_update_1006() {
 /**
  * Remove the unnecessary manual administration menu links for each custom menu.
  */
-function menu_update_1006() {
+function menu_update_1007() {
   $menu_paths = array();
   $config_names = config_get_names_with_prefix('menu.menu.');
   foreach ($config_names as $config_name) {
