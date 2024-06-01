@@ -22,7 +22,7 @@ default region = third2
 ; stylesheets[all][] = geary.css
 
 ; Preview
-preview = geary.png
+preview = geary.svg
 
 ; Include the Bootstrap4 Grid System
 libraries[] = bootstrap4-gs

@@ -21,7 +21,7 @@ default region = content
 ; stylesheets[all][] = moscone-flipped.css
 
 ; Preview
-preview = moscone-flipped.png
+preview = moscone-flipped.svg
 
 ; Include the Bootstrap4 Grid System
 libraries[] = bootstrap4-gs
