@@ -76,7 +76,7 @@ require_once __DIR__ . '/query.inc';
  *     'varchar' must specify the 'length' parameter.
  *  - 'primary key': An array of one or more key column specifiers (see below)
  *    that form the primary key.
- *  - 'unique keys': An associative array of unique keys ('keyname' =>
+ *  - 'unique keys': An associative array of unique keys ('key_name' =>
  *    specification). Each specification is an array of one or more
  *    key column specifiers (see below) that form a unique key on the table.
  *  - 'foreign keys': An associative array of relations ('my_relation' =>

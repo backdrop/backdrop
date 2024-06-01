@@ -125,12 +125,12 @@ class FileTransferFTPExtension extends FileTransferFTP implements FileTransferCh
       throw new FileTransferException("Unable to set permissions on %file", NULL, array('%file' => $path));
     }
     if ($this->isDirectory($path) && $recursive) {
-      $filelist = @ftp_nlist($this->connection, $path);
-      if (!$filelist) {
+      $file_list = @ftp_nlist($this->connection, $path);
+      if (!$file_list) {
         //empty directory - returns false
         return;
       }
-      foreach ($filelist as $file) {
+      foreach ($file_list as $file) {
         $this->chmodJailed($file, $mode, $recursive);
       }
     }
