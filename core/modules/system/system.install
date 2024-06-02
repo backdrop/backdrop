@@ -3528,6 +3528,26 @@ function system_update_1094() {
 }
 
 /**
+ * Set default values for flags for stripping sensitive headers on HTTP
+ * downgrade or host change.
+ */
+function system_update_1095() {
+  $config = config('system.core');
+  $save = FALSE;
+  if ($config->get('backdrop_http_request.strip_sensitive_headers_on_host_change') === NULL) {
+    $config->set('backdrop_http_request.strip_sensitive_headers_on_host_change', TRUE);
+    $save = TRUE;
+  }
+  if ($config->get('backdrop_http_request.strip_sensitive_headers_on_https_downgrade') === NULL) {
+    $config->set('backdrop_http_request.strip_sensitive_headers_on_https_downgrade', TRUE);
+    $save = TRUE;
+  }
+  if ($save) {
+    $config->save();
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
