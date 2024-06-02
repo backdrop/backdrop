@@ -347,7 +347,7 @@ function file_display_form($form, &$form_state, $file_type, $view_mode) {
       if (!empty($settings_form)) {
         $form['display']['settings'][$name] = array(
           '#type' => 'fieldset',
-          '#title' => check_plain($formatter['label']) . ' ' . t('settings'),
+          '#title' => t('@label settings', array('@label' => $formatter['label'])),
           '#parents' => array('display', 'settings', $name),
           '#group' => 'display_settings',
           '#states' => array(
