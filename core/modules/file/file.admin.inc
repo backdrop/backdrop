@@ -312,6 +312,11 @@ function file_display_form($form, &$form_state, $file_type, $view_mode) {
     if (!empty($formatter['hidden'])) {
       unset($formatters[$name]);
     }
+    if (!isset($formatter['view callback']) || !function_exists($formatter['view callback'])) {
+      // Don't include the formatters for which file_view_file() would show a
+      // link to the file as fallback.
+      unset($formatters[$name]);
+    }
     if (isset($formatter['mime types'])) {
       if (file_match_mimetypes($formatter['mime types'], $file_type->mimetypes)) {
         continue;
