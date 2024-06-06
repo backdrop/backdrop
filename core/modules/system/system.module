@@ -3202,14 +3202,8 @@ function system_project_is_contrib($project) {
     //   $project_type is always singular ('module', 'theme', 'layout'), whereas
     //   the respective directories are plural ('modules', 'themes', 'layouts').
     $inside_contrib_dir = strstr($project->uri, $project_type . 's/contrib/');
-    // - If both a 'version' and 'mtime' are provided in the .info file. Core
-    //   projects provide the same information, but we've already ruled that
-    //   out earlier.
-    // @todo:
-    // - Check if 'mtime' is actually a timestamp(?).
-    // - What happened to isset($project->info['project'])? Should we consider
-    //     adding that information during contrib packaging?
-    $expected_data_in_info_file = isset($project->info['version']) && isset($project->info['mtime']);
+    // - If 'project', 'version' and 'timestamp' are provided in the .info file.
+    $expected_data_in_info_file = isset($project->info['project']) && isset($project->info['version']) && isset($project->info['timestamp']);
 
     if ($inside_contrib_dir || $expected_data_in_info_file) {
       $is_contrib = TRUE;

@@ -235,7 +235,7 @@ function _update_process_info_list(&$projects, $list, $project_type, $status) {
         'info' => update_filter_project_info($file->info),
         'datestamp' => $file->info['datestamp'],
         'includes' => array($file->name => $includes_name),
-        'project_type' => $project_name == 'backdrop' ? 'core' : $project_display_type,
+        'project_type' => $project_display_type,
         'project_status' => $status,
         'sub_themes' => $sub_themes,
         'base_themes' => $base_themes,

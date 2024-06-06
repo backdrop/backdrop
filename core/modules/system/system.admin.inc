@@ -540,7 +540,7 @@ function _system_is_incompatible(&$incompatible, $files, $file) {
  *   The form array.
  *
  * @ingroup forms
- * @see theme_system_modules()
+ * @see theme_system_modules_fieldset()
  * @see system_modules_submit()
  */
 function system_modules($form, $form_state = array()) {
@@ -616,10 +616,7 @@ function system_modules($form, $form_state = array()) {
       $extra['required_by'][] = $module->info['explanation'];
     }
 
-    // Check to see if this is a core module.
-    if ($module->source == 'core') {
-      $extra['core'] = TRUE;
-    }
+    $extra['source'] = $module->source;
 
     // Some modules are always required by core and cannot be disabled, for
     // example: entity, node, system, and user.
@@ -2516,6 +2513,11 @@ function system_get_debug_info() {
   foreach ($modules as $module_name => $module_data) {
     // Only include non-hidden and enabled modules in the output.
     if (empty($module_data->info['hidden']) && $module_data->status) {
+      // Use info['version'], which should always be set for properly packaged
+      // contrib modules - fall back to a dash if a custom or unidentified
+      // module provides no version in their .info file.
+      $module_version = isset($module_data->info['version']) ? $module_data->info['version'] : '-';
+
       switch ($module_data->source) {
         case 'core':
           $module_info_lines['core'][] = array(
@@ -2524,8 +2526,6 @@ function system_get_debug_info() {
           );
           break;
         case 'contrib':
-          // @todo: Isn't info['version'] always set in contrib?
-          $module_version = isset($module_data->info['version']) ? $module_data->info['version'] : '-';
           $module_info_lines['contrib'][] = array(
             'label' => $module_name,
             'value' => $module_version,
