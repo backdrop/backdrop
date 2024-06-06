@@ -569,7 +569,7 @@ function install_tasks($install_state) {
       'type' => 'form',
       'run' => $install_state['settings_verified'] ? INSTALL_TASK_SKIP : INSTALL_TASK_RUN_IF_NOT_COMPLETED,
     ),
-    'install_config_directories' => array(
+    'install_config_location' => array(
     ),
     'install_system_module' => array(
     ),
@@ -945,10 +945,11 @@ function install_hash_salt() {
 }
 
 /**
- * Installation task; Rewrite settings.php to include config directories.
+ * Installation task; Ensure config location is empty and writable, and (for
+ * config stored in files, rewrite settings.php to include config directories.
  */
-function install_config_directories(&$install_state) {
-  backdrop_install_config_directories();
+function install_config_location(&$install_state) {
+  backdrop_install_config_location();
 }
 
 /**
@@ -1362,9 +1363,9 @@ function install_select_language(&$install_state) {
           $output .= '<ul>';
           $output .= '<li><a href="' . check_url(backdrop_current_script_url(array('translate' => NULL))) . '">Reload the language selection page after adding translations</a></li>';
           $output .= '<li><a href="' . check_url(backdrop_current_script_url(array(
-              'langcode' => 'en',
-              'translate' => NULL
-            ))) . '">Continue installation in English</a></li>';
+            'langcode' => 'en',
+            'translate' => NULL,
+          ))) . '">Continue installation in English</a></li>';
           $output .= '</ul>';
         }
         else {

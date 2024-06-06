@@ -40,6 +40,7 @@ function dashboard_menu_alter(&$items) {
   if (isset($items['admin/dashboard'])) {
     // Add a description for the admin and admin/index pages.
     $items['admin/dashboard']['description'] = 'Get an overview of your site and manage administrative tasks.';
+    $items['admin/dashboard']['icon'] = 'speedometer-fill';
   }
 }
 
@@ -216,9 +217,7 @@ function dashboard_preprocess_layout(&$variables) {
   /* @var Layout $layout */
   $layout = $variables['layout'];
   if (is_a($layout, 'Layout') && $layout->hasContexts(array('dashboard'))) {
-    // Include a dashboard-specific style sheet.
-    $css_path = backdrop_get_path('module', 'dashboard') . '/css/dashboard.css';
-    backdrop_add_css($css_path);
+    backdrop_add_library('dashboard', 'dashboard');
     $variables['classes'][] = 'dashboard';
   }
 }
@@ -235,6 +234,7 @@ function dashboard_preprocess_block(&$variables) {
     if (!in_array($region_name, array('header', 'footer'))) {
       // Add the generic class for administration panels, same as on pages like
       // admin/config and admin/structure. Helps place icons. Adds borders.
+      $variables['classes'][] = 'block-dashboard';
       $variables['classes'][] = 'admin-panel';
     }
   }
@@ -250,6 +250,30 @@ function dashboard_theme() {
       'template' => 'templates/dashboard-panel',
     ),
   );
+}
+
+/**
+ * Implements hook_library_info().
+ */
+function dashboard_library_info() {
+  $libraries['dashboard'] = array(
+    'title' => 'Dashboard Library',
+    'version' => BACKDROP_VERSION,
+    'css' => array(
+      backdrop_get_path('module', 'dashboard') . '/css/dashboard.css' => array(),
+    ),
+    'icons' => array(
+      'backdrop-logo',
+      'note-pencil',
+      'pencil',
+      'users',
+      'cloud-arrow-down',
+      'bell',
+      'caret-circle-right',
+      'caret-circle-left',
+    ),
+  );
+  return $libraries;
 }
 
 /**
