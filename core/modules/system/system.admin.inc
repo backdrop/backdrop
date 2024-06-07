@@ -798,9 +798,6 @@ function _system_modules_build_row($info, $extra) {
       'machine_name' => $info['machine_name'],
     )),
   );
-  // $form['name'] = array(
-  //   '#markup' => $info['name'],
-  // );
   $form['description'] = array(
     '#markup' => t($info['description']),
   );
