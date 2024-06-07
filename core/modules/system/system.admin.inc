@@ -706,6 +706,10 @@ function system_modules($form, $form_state = array()) {
         }
       }
     }
+
+    // Pass the machine name of the module to its info array.
+    $module->info['machine_name'] = $module->name;
+
     $form['modules'][$module->info['package']][$filename] = _system_modules_build_row($module->info, $extra);
   }
 
@@ -789,8 +793,14 @@ function _system_modules_build_row($info, $extra) {
   );
   // Set the basic properties.
   $form['name'] = array(
-    '#markup' => $info['name'],
+    '#markup' => theme('label_machine_name__block', array(
+      'label' => $info['name'],
+      'machine_name' => $info['machine_name'],
+    )),
   );
+  // $form['name'] = array(
+  //   '#markup' => $info['name'],
+  // );
   $form['description'] = array(
     '#markup' => t($info['description']),
   );

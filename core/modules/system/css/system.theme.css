@@ -103,6 +103,9 @@ label {
 }
 label.option {
   display: inline;
+}
+label.option,
+label .machine-name {
   font-weight: normal;
 }
 .form-item-description-enable label.option {
