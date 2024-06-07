@@ -793,7 +793,7 @@ function _system_modules_build_row($info, $extra) {
   );
   // Set the basic properties.
   $form['name'] = array(
-    '#markup' => theme('label_machine_name__block', array(
+    '#markup' => theme('label_machine_name', array(
       'label' => $info['name'],
       'machine_name' => $info['machine_name'],
     )),
