@@ -1,5 +1,5 @@
 name = Interface Translation
-description = Provides language negotiation functionality, as well as translation of configuration and the administrative interface to other languages.
+description = Provides language negotiation functionality, and allows translation of the administrative interface text to other languages.
 package = Translation
 tags[] = Language
 version = BACKDROP_VERSION
