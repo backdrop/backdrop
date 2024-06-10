@@ -795,7 +795,10 @@ function backdrop_rewrite_settings($settings = array()) {
 function backdrop_install_config_location() {
   // Default values for variables coming from settings.php.
   $database = NULL;
-  $config_storage_active = config_get_config_storage('active');
+  $config_directories = array();
+  $settings = array(
+    'config_active_class' => 'ConfigFileStorage',
+  );
   $t = get_t();
 
   // Include the current settings file to check the current database string.
@@ -803,8 +806,7 @@ function backdrop_install_config_location() {
   $settings_file = $conf_path . '/settings.php';
   include $settings_file;
 
-  if (is_a($config_storage_active, 'ConfigFileStorage')) {
-    global $config_directories;
+  if ($settings['config_active_class'] === 'ConfigFileStorage') {
     $is_empty = empty($config_directories['active']);
     $is_default_file_storage = $config_directories['active'] === 'files/config_' . md5($database) . '/active';
 
@@ -843,6 +845,7 @@ function backdrop_install_config_location() {
   // public files directory, which has already been verified to be writable
   // itself. But if it somehow fails anyway, the installation cannot proceed.
   // Bail out using a similar error message as in system_requirements().
+  $config_storage_active = config_get_config_storage('active');
   try {
     $config_storage_active->initializeStorage();
   }
