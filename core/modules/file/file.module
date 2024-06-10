@@ -1729,8 +1729,8 @@ function file_managed_file_browser_open($form, $form_state) {
 
   $submit_form = backdrop_get_form('file_managed_file_browser_form');
 
-  $view_info = views_get_view($view_name);
-  $title = t('Select from @view_name', array('@view_name' => $view_info->human_name));
+  $view_name = config_get_translated('views.view.' . $view_name, 'human_name');
+  $title = t('Select from @view_name', array('@view_name' => $view_name));
 
   $options = array(
     'dialogClass' => 'file-browser-container',
