@@ -302,9 +302,9 @@
       beforeAttachValue = Backdrop.ckeditor5.elementGetHtml(beforeElement.content);
 
       // Then run both strings through the same whitespace formatting, using
-      // formatHtml(). Since the output of DOMParser() won't work with
-      // childNodes (which is used later when comparing the two strings), we are
-      // wrapping both strings with a temporary <temp> tag.
+      // formatHtml(). Wrap both strings with a temporary <temp> tag, to allow
+      // childNodes (which is used later when comparing the two strings) to work
+      // on them.
       const formattedBeforeValue = document.createElement('temp');
       formattedBeforeValue.innerHTML = Backdrop.ckeditor5.formatHtml(beforeAttachValue);
       const formattedAfterValue = document.createElement('temp');
@@ -321,8 +321,9 @@
       }
 
       // If the number of Nodes is the same between the two strings, start
-      // comparing each pair of Nodes one-by-one.
+      // comparing each pair of respective Nodes one-by-one.
       for (let i = 0; i < formattedBeforeValueNodes.length; i++) {
+        // Check if each pair of Nodes is identical between the two strings.
         if (formattedBeforeValueNodes[i] !== formattedAfterValueNodes[i]) {
           // The respective Nodes are not the same. This may be because despite
           // all attributes being the same, they are in a different order. Do a
