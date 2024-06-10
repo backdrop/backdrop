@@ -602,7 +602,7 @@ function _date_field_settings_form($field, $instance, $has_data) {
       ),
     ),
   );
-  $description = t('Select the timezone handling method for this date field.');
+  $description = t('Select the timezones should be displayed for this date field. ');
   $form['tz_handling'] = array(
     '#type' => 'select',
     '#title' => t('Time zone handling'),
@@ -708,8 +708,8 @@ function date_field_settings_validate(&$form, &$form_state) {
 function date_timezone_handling_options() {
   return array(
     'site' => t("Site's time zone"),
-    'date' => t("Date's time zone"),
     'user' => t("User's time zone"),
+    'date' => t("Server time zone"),
     'utc'  => 'UTC',
     'none' => t('No time zone conversion'),
   );
