@@ -277,7 +277,7 @@
     },
 
     /**
-     * Compare the data before CKEditor 5 is attached and after attachment.
+     * Compare the data before CKEditor 5 is attached vs. after it is attached.
      *
      * This comparison reformats both the before and after values to the same
      * consistent format before doing a string comparison.
@@ -301,10 +301,46 @@
       beforeElement.innerHTML = beforeAttachValue;
       beforeAttachValue = Backdrop.ckeditor5.elementGetHtml(beforeElement.content);
 
-      // Then run both strings through the same whitespace formatting.
-      const formattedBeforeValue = Backdrop.ckeditor5.formatHtml(beforeAttachValue);
-      const formattedAfterValue = Backdrop.ckeditor5.formatHtml(afterAttachValue);
-      return formattedBeforeValue !== formattedAfterValue;
+      // Then run both strings through the same whitespace formatting, using
+      // formatHtml(). Since the output of DOMParser() won't work with
+      // childNodes (which is used later when comparing the two strings), we are
+      // wrapping both strings with a temporary <temp> tag.
+      const formattedBeforeValue = document.createElement('temp');
+      formattedBeforeValue.innerHTML = Backdrop.ckeditor5.formatHtml(beforeAttachValue);
+      const formattedAfterValue = document.createElement('temp');
+      formattedAfterValue.innerHTML = Backdrop.ckeditor5.formatHtml(afterAttachValue);
+
+      // Get all Nodes for each string.
+      let formattedBeforeValueNodes = formattedBeforeValue.childNodes;
+      let formattedAfterValueNodes = formattedAfterValue.childNodes;
+
+      // If the number of Nodes differs, then the values have been modified.
+      // Bail early in that case.
+      if (formattedBeforeValueNodes.length !== formattedAfterValueNodes.length) {
+        return true;
+      }
+
+      // If the number of Nodes is the same between the two strings, start
+      // comparing each pair of Nodes one-by-one.
+      for (let i = 0; i < formattedBeforeValueNodes.length; i++) {
+        if (formattedBeforeValueNodes[i] !== formattedAfterValueNodes[i]) {
+          // The respective Nodes are not the same. This may be because despite
+          // all attributes being the same, they are in a different order. Do a
+          // final check about that, to determine whether they are really
+          // different. isEqualNode() doesn't care about the order of attributes
+          // each Node has - it only expects the same attributes with the same
+          // values.
+          if (!formattedBeforeValueNodes[i].isEqualNode(formattedAfterValueNodes[i])) {
+            // Bail on the first pair of Nodes that is found to have different
+            // attributes/values regardless of their order.
+            return true;
+          }
+        }
+      }
+
+      // If all previous checks for modified values failed, assume that the two
+      // strings have not been modified.
+      return false;
     },
 
     /**
