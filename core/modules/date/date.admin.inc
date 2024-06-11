@@ -752,13 +752,13 @@ function date_timezone_handling_options_descriptions() {
       '#description' => t('Exposes a timezone selection menu in the form widget for this field. The timezone in that menu defaults to UTC.'),
     ),
     'user' => array(
-      '#description' => t('Uses the time zone configured in the "Region and langugage" setting of each user account. <br> This option requires the "Users may set their own time zone" setting to be enabled in the !regional_settings configuration (<strong>currently @status</strong>).', array(
+      '#description' => t('Uses the time zone configured in the "Region and language" setting of each user account. <br> This option requires the "Users may set their own time zone" setting to be enabled in the !regional_settings configuration (<strong>currently @status</strong>).', array(
         '!regional_settings' => $regional_settings,
         '@status' => $configurable_timezones ? t('enabled') : t('disabled'),
       )),
     ),
     'utc'  => array(
-      '#description' => t('Coordinated Universal Time (UTC) is the primary time standard globally used to regulate clocks and time. See: https://en.wikipedia.org/wiki/Coordinated_Universal_Time'),
+      '#description' => t('<a href="https://en.wikipedia.org/wiki/Coordinated_Universal_Time" target="_blank">Coordinated Universal Time (UTC)</a> is the primary time standard globally used to regulate clocks and time.'),
     ),
     'none' => array(
       '#description' => t('Useful in situations where timezone conversions are not working reliably, for dates with no times, for historical dates where timezones are irrelevant, or anytime conversion is unnecessary or undesirable.'),
