@@ -2247,10 +2247,11 @@ function _date_default_field_widget_form(array $field, array $instance, $langcod
   // If this is a new entity, populate the field with the right default values.
   // This happens early so even fields later hidden with #access get those
   // values. We should only add default values to new entities, to avoid
-  // over-writing a value that has already been set. This means we can't just
+  // overwriting a value that has already been set. This means we can't just
   // check to see if $items is empty, because it might have been set that way on
   // purpose.
-  // @see date_field_widget_properties_alter() where we flagged if this is a new entity.
+  // @see date_field_widget_properties_alter() where we flagged if this is a new
+  // entity.
   //
   // We check !isset($items[$delta]['value']) because entity translation may
   // create a new translation entity for an existing entity and we don't want to
@@ -2272,11 +2273,10 @@ function _date_default_field_widget_form(array $field, array $instance, $langcod
 
   $timezone = date_get_timezone($field['settings']['tz_handling'], isset($items[$delta]['timezone']) ? $items[$delta]['timezone'] : date_default_timezone());
 
-  // TODO see if there's a way to keep the timezone element from ever being
-  // nested as array('timezone' => 'timezone' => value)). After struggling
-  // with this a while, I can find no way to get it displayed in the form
-  // correctly and get it to use the timezone element without ending up
-  // with nesting.
+  // @todo: see if there's a way to keep the timezone element from ever being
+  // nested as array('timezone' => 'timezone' => value)). After struggling with
+  // this a while, I can find no way to get it displayed in the form correctly
+  // and get it to use the timezone element without ending up with nesting.
   if (is_array($timezone)) {
     $timezone = $timezone['timezone'];
   }
@@ -2297,6 +2297,7 @@ function _date_default_field_widget_form(array $field, array $instance, $langcod
   if ($field['settings']['tz_handling'] == 'date') {
     $element['timezone'] = array(
       '#type' => 'date_timezone',
+      '#title' => t('Timezone'),
       '#theme_wrappers' => array('date_timezone'),
       '#delta' => $delta,
       '#default_value' => $timezone,
@@ -2351,10 +2352,7 @@ function _date_html5_field_widget_form(array $field, array $instance, $langcode,
   $attributes = _date_html5_get_attributes($date_limits, $granularity);
 
   $timezone_db = date_get_timezone_db($field_settings['tz_handling']);
-  $timezone = date_get_timezone($field_settings['tz_handling']);
-  if (isset($items[$delta]['timezone'])) {
-    $timezone = $items[$delta]['timezone'];
-  }
+  $timezone = date_get_timezone($field['settings']['tz_handling'], isset($items[$delta]['timezone']) ? $items[$delta]['timezone'] : date_default_timezone());
 
   $value = '';
   $has_todate = !empty($field_settings['todate']);
@@ -2364,7 +2362,8 @@ function _date_html5_field_widget_form(array $field, array $instance, $langcode,
 
   if (isset($items[$delta]['value'])) {
     $value = _date_html5_get_form_value($items[$delta]['value'], $type, $timestep, $timezone_db, $timezone);
-  } elseif ($delta == 0) {
+  }
+  elseif ($delta == 0) {
     $value = $default['start'];
   }
   $element['value'] = array(
@@ -2400,7 +2399,7 @@ function _date_html5_field_widget_form(array $field, array $instance, $langcode,
       '#type' => 'date_timezone',
       '#title' => t('Timezone'),
       '#date_label_position' => NULL,
-      '#default_value' => isset($items[$delta]['timezone']) ? $items[$delta]['timezone'] : '',
+      '#default_value' => $timezone,
     );
   }
 

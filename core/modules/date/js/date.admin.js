@@ -1,16 +1,5 @@
 (function ($) {
 
-Backdrop.behaviors.dateAdmin = {};
-
-Backdrop.behaviors.dateAdmin.attach = function (context, settings) {
-  // Remove timezone handling options for fields without hours granularity.
-  var $hour = $('#edit-field-settings-granularity-hour').once('date-admin');
-  if ($hour.length) {
-    new Backdrop.dateAdmin.TimezoneHandler($hour);
-  }
-};
-
-
 Backdrop.dateAdmin = {};
 
 /**
