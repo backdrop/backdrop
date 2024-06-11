@@ -602,7 +602,7 @@ function _date_field_settings_form($field, $instance, $has_data) {
       ),
     ),
   );
-  $description = t('Select the timezones should be displayed for this date field. ');
+  $description = t('Select how timezones should be displayed for this date field.');
   $form['tz_handling'] = array(
     '#type' => 'select',
     '#title' => t('Time zone handling'),
