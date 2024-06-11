@@ -631,7 +631,8 @@ function _date_field_settings_form($field, $instance, $has_data) {
     '#options' => date_timezone_handling_options(),
     '#states' => array(
       'invisible' => array(
-        // Remove timezone handling options for fields without hours granularity.
+        // Remove the timezone handling options for fields without hours
+        // granularity.
         ':input[name="field[settings][granularity][hour]"]' => array(
           'checked' => FALSE,
         ),
