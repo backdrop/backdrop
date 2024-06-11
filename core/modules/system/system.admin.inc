@@ -2101,7 +2101,7 @@ function system_regional_settings($form, &$form_state) {
   $configurable_timezones = $system_date->get('user_configurable_timezones');
   $form['timezone']['configurable_timezones'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Users may set their own time zone.'),
+    '#title' => t('Users may set their own time zone'),
     '#default_value' => $configurable_timezones,
   );
 
@@ -2119,7 +2119,7 @@ function system_regional_settings($form, &$form_state) {
   $description = t('Only applied if users may set their own time zone.');
   $form['timezone']['configurable_timezones_wrapper']['empty_timezone_message'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Remind users at login if their time zone is not set.'),
+    '#title' => t('Remind users at login if their time zone is not set'),
     '#default_value' => $system_date->get('user_empty_timezone_message'),
     '#description' => $description,
   );
