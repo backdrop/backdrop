@@ -638,7 +638,7 @@ function _date_field_settings_form($field, $instance, $has_data) {
     '#weight' => 10,
   );
   $form['cache_enabled']['all']['#description'] = t('All date values on every entity will be cached. Note that caching every date on fields that may have a large number of multiple or repeating values may create a <strong>significant performance penalty</strong> when the cache is cleared.');
-  $form['cache_enabled']['enabled']['#description'] = t('Cahcing happens when date fields are loaded, rather than when they are displayed.');
+  $form['cache_enabled']['enabled']['#description'] = t('Caching happens when date fields are loaded, rather than when they are displayed.');
 
   // Special backwards compatibility treatment, to account for the fact that a
   // value of 0 for cache_count has a special meaning of "Cache all dates".
@@ -648,7 +648,7 @@ function _date_field_settings_form($field, $instance, $has_data) {
     // to make sure that the field value is never set to 0, otherwise the native
     // browser validation error for the number field will be triggered, but it
     // will not be shown (because the field is hidden via #states in this case).
-    // Not doing this would casue the form submition to be blocked without any
+    // Not doing this would cause the form submission to be blocked without any
     // obvious reason/error. Upon form validation, if cache_enabled is still
     // set to 'all' ("Cache all dates"), the value of the cache_count field is
     // switched back to 0 before finally being saved in config.
@@ -728,7 +728,7 @@ function date_field_settings_validate(&$form, &$form_state) {
     case 'enabled':
       $field['settings']['cache_enabled'] = 1;
       // In this case, accept whatever value was set for cache_count in the
-      // respectie number field. Also make sure that it is saved as a number.
+      // respective number field. Also make sure that it is saved as a number.
       $field['settings']['cache_count'] = (int) $field['settings']['cache_count'];
       break;
 
@@ -743,7 +743,8 @@ function date_field_settings_validate(&$form, &$form_state) {
     case 'disabled':
     default:
       $field['settings']['cache_enabled'] = 0;
-      // If cahing for date fields was disabled, set cache_count to the default.
+      // If caching for date fields was disabled, set cache_count to the
+      // default recommended value.
       $field['settings']['cache_count'] = 4;
       break;
   }
