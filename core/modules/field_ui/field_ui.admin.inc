@@ -1743,7 +1743,7 @@ function field_ui_widget_type_form($form, &$form_state, $instance) {
     '#required' => TRUE,
     '#options' => field_ui_widget_type_options($field['type']),
     '#default_value' => $instance['widget']['type'],
-    '#description' => t('The type of form element you would like to make available when creating this field in the %type type.', array('%type' => $bundle_label)),
+    '#description' => t('The type of form element you would like to present to the user when creating this field in the %type type.', array('%type' => $bundle_label)),
   );
 
   $form['actions'] = array('#type' => 'actions');
