@@ -588,7 +588,7 @@ function _date_field_settings_form($field, $instance, $has_data) {
   );
   $form['enddate_required'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Required end date'),
+    '#title' => t('Required'),
     '#default_value' => ((isset($settings['todate']) && $settings['todate'] === 'required') ? TRUE : FALSE),
     '#disabled' => $has_data,
     '#states' => array(
@@ -605,16 +605,11 @@ function _date_field_settings_form($field, $instance, $has_data) {
     '#default_value' => !empty($settings['cache_enabled']),
   );
   $form['cache_count'] = array(
-    '#type' => 'number',
-    '#title' => t('Maximum cached dates per field'),
+    '#type' => 'textfield',
+    '#title' => t('Maximum dates per field'),
     '#default_value' => (isset($settings['cache_count'])) ? $settings['cache_count'] : 4,
-    '#min' => 0,
-    // We are already advising against setting this too high because there's
-    // risk for performance penalty. 999 seems reasonable enough to limit the
-    // field width.
-    '#max' => 999,
     '#description' => t("If set to '0', all date values on every entity will be cached. Note that caching every date on fields that may have a large number of multiple or repeating values may create a significant performance penalty when the cache is cleared. The suggested setting for multiple value and repeating fields is no more than 4 values per field."),
-    '#indentation' => 1,
+    '#size' => 3,
     '#states' => array(
       'visible' => array(
         'input[name="field[settings][cache_enabled]"]' => array(
