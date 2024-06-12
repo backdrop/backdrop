@@ -506,7 +506,9 @@ class LayoutRendererStandard {
     }
 
     $output = '';
-    if ($content = $block->getContent()) {
+    // Only render a block if it has content, or if it is a custom block.
+    // Custom blocks may only have a title and no actual content.
+    if (($content = $block->getContent()) || $block->delta === 'custom_block') {
       $style = layout_get_style_info($block->style->plugin);
 
       // Ensure block content is a renderable array for contextual links.
