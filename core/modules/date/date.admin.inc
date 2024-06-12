@@ -337,6 +337,7 @@ function _date_field_widget_settings_form($field, $instance) {
       '#weight' => 5,
       '#fieldset' => 'date_format',
       '#attributes' => array('class' => array('indent')),
+      '#indentation' => 1,
       '#states' => array(
         'visible' => array(
           ':input[name="instance[widget][settings][input_format]"]' => array('value' => 'custom'),
