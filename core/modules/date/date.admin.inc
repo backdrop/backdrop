@@ -629,14 +629,8 @@ function _date_field_settings_form($field, $instance, $has_data) {
     '#title' => t('Time zone handling method'),
     '#default_value' => $tz_handling,
     '#options' => date_timezone_handling_options(),
-    '#states' => array(
-      'invisible' => array(
-        // Remove the timezone handling options for fields without hours
-        // granularity.
-        ':input[name="field[settings][granularity][hour]"]' => array(
-          'checked' => FALSE,
-        ),
-      ),
+    '#attached' => array(
+      'js' => array(backdrop_get_path('module', 'date') . '/js/date.admin.js'),
     ),
   );
   $form['tz_handling'] += date_timezone_handling_options_descriptions();
