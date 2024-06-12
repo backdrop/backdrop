@@ -620,24 +620,62 @@ function _date_field_settings_form($field, $instance, $has_data) {
     '#value' => date_get_timezone_db($tz_handling),
   );
 
+  if (!empty($settings['cache_enabled']) && isset($settings['cache_count'])) {
+    $cache_enabled_default = $settings['cache_count'] == 0 ? 'all' : 'enabled';
+  }
+  else {
+    $cache_enabled_default = 'disabled';
+  }
   $form['cache_enabled'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Cache dates'),
-    '#description' => t('Create and cache date objects when date fields are loaded, rather than when they are displayed. This can help to improve performance.'),
-    '#default_value' => !empty($settings['cache_enabled']),
+    '#type' => 'radios',
+    '#title' => t('Date value caching'),
+    '#options' => array(
+      'disabled' => t('No caching'),
+      'all' => t('Cache all dates (<strong>not recommended</strong>)'),
+      'enabled' => t('Cache some date values, to improve performance'),
+    ),
+    '#default_value' => $cache_enabled_default,
     '#weight' => 10,
   );
+  $form['cache_enabled']['all']['#description'] = t('All date values on every entity will be cached. Note that caching every date on fields that may have a large number of multiple or repeating values may create a <strong>significant performance penalty</strong> when the cache is cleared.');
+  $form['cache_enabled']['enabled']['#description'] = t('Cahcing happens when date fields are loaded, rather than when they are displayed.');
+
+  // Special backwards compatibility treatment, to account for the fact that a
+  // value of 0 for cache_count has a special meaning of "Cache all dates".
+  if ($cache_enabled_default == 'all') {
+    // In this case, cache_count is set to 0 in config. However, the respective
+    // number field in the form has its #min allowed value set to 1. So we need
+    // to make sure that the field value is never set to 0, otherwise the native
+    // browser validation error for the number field will be triggered, but it
+    // will not be shown (because the field is hidden via #states in this case).
+    // Not doing this would casue the form submition to be blocked without any
+    // obvious reason/error. Upon form validation, if cache_enabled is still
+    // set to 'all' ("Cache all dates"), the value of the cache_count field is
+    // switched back to 0 before finally being saved in config.
+    $cache_count_default = 4;
+  }
+  else {
+    $cache_count_default = isset($settings['cache_count']) ? $settings['cache_count'] : 4;
+  }
+
   $form['cache_count'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Maximum dates per field'),
-    '#default_value' => (isset($settings['cache_count'])) ? $settings['cache_count'] : 4,
-    '#description' => t("If set to '0', all date values on every entity will be cached. Note that caching every date on fields that may have a large number of multiple or repeating values may create a significant performance penalty when the cache is cleared. The suggested setting for multiple value and repeating fields is no more than 4 values per field."),
-    '#size' => 3,
-    '#weight' => 11,
+    '#type' => 'number',
+    '#title' => t('Maximum cached dates per field'),
+    '#default_value' => $cache_count_default,
+    '#description' => t('The suggested setting for multiple value and repeating fields is no more than 4 values per field.'),
+    '#min' => 1,
+    // Since the '#size' property does not work on HTML number inputs, we are
+    // using '#max' instead. We are already advising against setting this too
+    // high because there's risk for performance penalty. 999 seems reasonable
+    // enough to limit the field width to 3 digits, and it should cover most
+    // common cases.
+    '#max' => 999,
+    '#indentation' => 2,
+    '#weight' => 12,
     '#states' => array(
       'visible' => array(
         'input[name="field[settings][cache_enabled]"]' => array(
-          'checked' => TRUE,
+          'value' => 'enabled',
         ),
       ),
     ),
@@ -686,13 +724,28 @@ function date_field_settings_validate(&$form, &$form_state) {
   // Don't save the pseudo values created in the UI.
   unset($field['settings']['enddate_get'], $field['settings']['enddate_required']);
 
-  if (!empty($field['settings']['cache_enabled'])) {
-    if (!is_numeric($field['settings']['cache_count'])) {
-      form_set_error('field[settings][cache_count]', t('The number of cache values must be a number.'));
-    }
-    elseif ($field['settings']['cache_count'] < 0) {
-      form_set_error('field[settings][cache_count]', t('The number of cache values must be a number 0 or greater.'));
-    }
+  switch ($field['settings']['cache_enabled']) {
+    case 'enabled':
+      $field['settings']['cache_enabled'] = 1;
+      // In this case, accept whatever value was set for cache_count in the
+      // respectie number field. Also make sure that it is saved as a number.
+      $field['settings']['cache_count'] = (int) $field['settings']['cache_count'];
+      break;
+
+    case 'all':
+      $field['settings']['cache_enabled'] = 1;
+      // Ignore any value set for cache_count (the field is hidden via #states
+      // in this case anyway), and set it to 0 (which means "cache all date
+      // values").
+      $field['settings']['cache_count'] = 0;
+      break;
+
+    case 'disabled':
+    default:
+      $field['settings']['cache_enabled'] = 0;
+      // If cahing for date fields was disabled, set cache_count to the default.
+      $field['settings']['cache_count'] = 4;
+      break;
   }
 }
 
