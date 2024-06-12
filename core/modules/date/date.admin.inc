@@ -641,6 +641,7 @@ function _date_field_settings_form($field, $instance, $has_data) {
     '#max' => 999,
     '#description' => t("If set to '0', all date values on every entity will be cached. Note that caching every date on fields that may have a large number of multiple or repeating values may create a significant performance penalty when the cache is cleared. The suggested setting for multiple value and repeating fields is no more than 4 values per field."),
     '#indentation' => 1,
+    '#weight' => 11,
     '#states' => array(
       'visible' => array(
         'input[name="field[settings][cache_enabled]"]' => array(
