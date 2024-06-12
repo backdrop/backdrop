@@ -2101,13 +2101,12 @@ function system_regional_settings($form, &$form_state) {
   $configurable_timezones = $system_date->get('user_configurable_timezones');
   $form['timezone']['configurable_timezones'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Users may set their own time zone'),
+    '#title' => t('Users may set their own time zone.'),
     '#default_value' => $configurable_timezones,
   );
 
   $form['timezone']['configurable_timezones_wrapper'] =  array(
     '#type' => 'container',
-    '#indentation' => 1,
     '#states' => array(
       // Hide the user configured timezone settings when users are forced to use
       // the default setting.
@@ -2116,13 +2115,13 @@ function system_regional_settings($form, &$form_state) {
       ),
     ),
   );
-  $description = t('Only applied if users may set their own time zone.');
   $form['timezone']['configurable_timezones_wrapper']['empty_timezone_message'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Remind users at login if their time zone is not set'),
+    '#title' => t('Remind users at login if their time zone is not set.'),
     '#default_value' => $system_date->get('user_empty_timezone_message'),
-    '#description' => $description,
+    '#description' => t('Only applied if users may set their own time zone.')
   );
+
   $form['timezone']['configurable_timezones_wrapper']['user_default_timezone'] = array(
     '#type' => 'radios',
     '#title' => t('Time zone for new users'),
@@ -2132,7 +2131,7 @@ function system_regional_settings($form, &$form_state) {
       BACKDROP_USER_TIMEZONE_EMPTY   => t('Empty time zone.'),
       BACKDROP_USER_TIMEZONE_SELECT  => t('Users may set their own time zone at registration.'),
     ),
-    '#description' => $description,
+    '#description' => t('Only applied if users may set their own time zone.')
   );
 
   $form['actions']['#type'] = 'actions';
