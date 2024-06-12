@@ -632,9 +632,12 @@ function _date_field_settings_form($field, $instance, $has_data) {
     '#title' => t('Maximum cached dates per field'),
     '#default_value' => (isset($settings['cache_count'])) ? $settings['cache_count'] : 4,
     '#min' => 0,
-    // We are already advising against setting this too high because there's
-    // risk for performance penalty. 999 seems reasonable enough to limit the
-    // field width.
+    // Since #size does not work with HTML number input fields, we are using
+    // #max instead to limit the width of the field. We are already advising
+    // against setting this too high, because there's risk for a performance
+    // penalty. 999 seems reasonably high enough to not be limiting when it
+    // comes to possible reasonable values, while at the same time reduces the
+    // width of the field to 3 digits max.
     '#max' => 999,
     '#description' => t("If set to '0', all date values on every entity will be cached. Note that caching every date on fields that may have a large number of multiple or repeating values may create a significant performance penalty when the cache is cleared. The suggested setting for multiple value and repeating fields is no more than 4 values per field."),
     '#indentation' => 1,
