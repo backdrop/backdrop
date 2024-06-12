@@ -332,6 +332,13 @@ function _update_build_fetch_url($project, $site_key = '') {
     $url .= '&list=';
     $url .= rawurlencode(implode(',', $list));
   }
+
+  // Use HTTP instead of HTTPS (if the respective setting in settings.php has
+  // been enabled).
+  if (settings_get('update_fetch_with_http', FALSE)) {
+    $url = str_replace('https://', 'http://', $url);
+  }
+
   return $url;
 }
 

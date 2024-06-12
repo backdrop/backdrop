@@ -246,7 +246,17 @@ function installer_browser_fetch_results($filters) {
   $local_filters['method'] = 'query';
 
   $query_url = $server['url'] . '/query/' . $local_filters['type'] . '/1?' . http_build_query($local_filters, FALSE, '&');
-  $response = backdrop_http_request($query_url);
+  // Skip SSL verification (if the respective setting in settings.php has been
+  // enabled).
+  $verify = !settings_get('installer_disable_ssl_verification', FALSE);
+  $options['context'] = stream_context_create(array(
+    'ssl' => array(
+      'verify_peer' => $verify,
+      'verify_peer_name' => $verify,
+    ),
+  ));
+
+  $response = backdrop_http_request($query_url, $options);
 
   if ($response->code == '200') {
     $results = backdrop_json_decode($response->data);
