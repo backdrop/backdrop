@@ -40,10 +40,22 @@ class DateUITestCase extends DateFieldBasic {
     }
 
     // Test timezone handling validation on the field settings form.
-    $this->createDateField(array('label' => $label, 'field_type' => 'date', 'widget_type' => 'date_select', 'granularity' => array('year', 'month', 'day')));
+    $this->createDateField(array('label' => $label, 'field_type' => 'date', 'widget_type' => 'date_select', 'granularity' => array('year', 'month', 'day', 'hour')));
+    $field_name = 'field_' . strtolower($label);
+    $field_edit_path = 'admin/structure/types/manage/story/fields/' . $field_name;
+    $this->backdropGet($field_edit_path);
+    $this->assertOptionSelected('edit-field-settings-tz-handling', 'site', 'Found the default timezone handling method preselected when editing the field settings.');
+    $edit = array('field[settings][tz_handling]' => 'user');
+    $this->backdropPost($field_edit_path, $edit, t('Save settings'));
+    $this->backdropGet($field_edit_path);
+    $this->assertOptionSelected('edit-field-settings-tz-handling', 'user', 'Found the expected timezone handling method preselected when editing the field settings.');
+    // Remove the hour granularity.
     $edit = array('field[settings][granularity][hour]' => FALSE);
-    $this->backdropPost('admin/structure/types/manage/story/fields/field_' . strtolower($label), $edit, t('Save settings'));
-    $this->assertText("Dates without hours granularity must not use any timezone handling.", "Dates without hours granularity required to use timezone handling of 'none.'");
+    $this->backdropPost($field_edit_path, $edit, t('Save settings'));
+    // The tz_handling select should now be visually hidden via #states, however
+    // the #default selected value should be set to 'none'.
+    $this->assertOptionSelected('edit-field-settings-tz-handling', 'none', 'Timezone handling method correctly set to "none" when editing the field settings after removing the hour granularity.');
+
     $this->deleteDateField($label);
   }
 
