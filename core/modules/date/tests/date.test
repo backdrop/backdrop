@@ -55,12 +55,14 @@ class DateUITestCase extends DateFieldBasic {
     $this->backdropPost($field_edit_path, $edit, t('Save settings'));
     $this->backdropGet($field_edit_path);
     $this->assertOptionSelected('edit-field-settings-tz-handling', 'user', 'Found the expected timezone handling method preselected when editing the field settings.');
-    // Remove the hour granularity.
+    // Remove the hour granularity and save.
     $edit = array('field[settings][granularity][hour]' => FALSE);
     $this->backdropPost($field_edit_path, $edit, t('Save settings'));
-    // The tz_handling select should now be visually hidden via #states, however
-    // the #default selected value should be set to 'none'.
-    $this->assertOptionSelected('edit-field-settings-tz-handling', 'none', 'Timezone handling method correctly set to "none" when editing the field settings after removing the hour granularity.');
+    // The tz_handling select should now be visually hidden via #states, so we
+    // cannot verify if it was correctly set to "none" via
+    // assertOptionSelected(). We check whether the config value has been set to
+    // 'none' instead.
+    $this->assertEqual('none', config_get('field.field.field_' $field_name. , 'settings.tz_handling'), 'Timezone handling method correctly set to "none" in config after removing the hour granularity from the field settings.');
 
     $this->deleteDateField($label);
   }
