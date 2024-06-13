@@ -1,0 +1,153 @@
+<?php
+
+/**
+ * Implements hook_install().
+ */
+function media_install(){
+  // Create default pre-defined node types. For a complete list of available
+  // node type attributes please refer to the node type API documentation at:
+  // https://api.backdropcms.org/api/backdrop/core!modules!node!node.module/function/node_type_save
+  $types = array(
+    array(
+      'type' => 'media',
+      'name' => st('Media'),
+      'description' => st("Add a media content, like an image or file."),
+      'base' => 'node_content',
+      'module' => 'media',
+      'locked' => TRUE,
+      'is_new' => TRUE,
+      'has_title' => FALSE,
+      'settings' => array(
+        'status_default' => TRUE,
+        'promote_enabled' => FALSE,
+        'promote_default' => FALSE,
+        'sticky_enabled' => FALSE,
+        'sticky_default' => FALSE,
+        'revision_enabled' => TRUE,
+        'revision_default' => FALSE,
+        'node_submitted' => FALSE,
+        'node_user_picture' => FALSE,
+        'comment_default' => COMMENT_NODE_CLOSED,
+        'menu_options' => array(),
+      ),
+    ),
+  );
+
+  foreach ($types as $type) {
+    $type = node_type_set_defaults($type);
+    node_type_save($type);
+    node_add_body_field($type, 'Description');
+  }
+
+  // Add default alias for page content types.
+  config('path.settings')
+    ->set('node_media_pattern', 'media/[node:title]')
+    ->save();
+
+  // Add a generic file upload field.
+  $fields = array(
+    'media_file' =>  array(
+      'field_name' => 'field_media_file',
+      'type' => 'file',
+      'cardinality' => 1,
+      'locked' => FALSE,
+      'indexes' => array('fid' => array('fid')),
+      'settings' => array(
+        'uri_scheme' => 'public',
+      ),
+      'storage' => array(
+        'type' => 'field_sql_storage',
+        'settings' => array(),
+      ),
+    )
+  );
+
+  foreach ($fields as $field) {
+    field_create_field($field);
+  }
+
+  $instances = array(
+    'media_file' =>array(
+      'field_name' => 'field_media_file',
+      'entity_type' => 'node',
+      'label' => 'Media File',
+      'bundle' => 'media',
+      'description' => st('Upload an image to go with this post.'),
+      'required' => TRUE,
+
+      'settings' => array(
+        'file_directory' => 'media',
+        'file_extensions' => 'gif jpg jpeg png pdf',
+        'max_filesize' => '',
+        'description_field' => TRUE,
+
+        // ???
+        'alt_field' => TRUE,
+        'title_field' => '',
+      ),
+
+      'widget' => array(
+        'type' => 'file_generic',
+        'settings' => array(
+          'progress_indicator' => 'throbber',
+
+          // ??
+          'preview_image_style' => 'thumbnail',
+        ),
+        'weight' => -1,
+      ),
+
+      'display' => array(
+        'default' => array(
+          'label' => 'hidden',
+          'type' => 'media_dynamic',
+          'weight' => -1,
+          'settings' => array(
+            'image_style' => 'medium',
+            'file_formatter' => 'file_default',
+          ),
+        ),
+        'teaser' => array(
+          'label' => 'hidden',
+          'type' => 'media_dynamic',
+          'weight' => -1,
+          'settings' => array(
+            'image_style' => 'thumbnail',
+            'file_formatter' => 'file_default',
+          ),
+        ),
+      ),
+    )
+  );
+
+  foreach ($instances as $instance) {
+    field_create_instance($instance);
+  }
+
+  // Install the media library view.
+  $config = config('views.view.media_admin');
+  if ($config->isNew()) {
+    $path = backdrop_get_path('module', 'media') . '/config/';
+    $contents = file_get_contents($path . 'views.view.media_admin.json');
+    $data = json_decode($contents, TRUE);
+    $config->setData($data);
+    $config->save();
+  }
+}
+
+/**
+ * Implements hook_uninstall
+ */
+function media_uninstall(){
+  if ($instance = field_info_instance('node', 'field_media_file', 'media')) {
+    field_delete_instance($instance);
+  }
+
+  field_purge_batch(100);
+
+  node_type_delete('media');
+
+  config('path.settings')
+    ->clear('node_media_pattern')
+    ->save();
+}
