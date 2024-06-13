@@ -40,7 +40,13 @@ class DateUITestCase extends DateFieldBasic {
     }
 
     // Test timezone handling validation on the field settings form.
-    $this->createDateField(array('label' => $label, 'field_type' => 'date', 'widget_type' => 'date_select', 'granularity' => array('year', 'month', 'day', 'hour')));
+    $date_field = array(
+      'label' => $label,
+      'field_type' => 'date',
+      'widget_type' => 'date_select',
+      'granularity' => array('year', 'month', 'day', 'hour'),
+    );
+    $this->createDateField($date_field);
     $field_name = 'field_' . strtolower($label);
     $field_edit_path = 'admin/structure/types/manage/story/fields/' . $field_name;
     $this->backdropGet($field_edit_path);
