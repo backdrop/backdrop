@@ -673,7 +673,8 @@ function date_field_settings_validate(&$form, &$form_state) {
   }
 
   if ($field['settings']['tz_handling'] != 'none' && !in_array('hour', array_filter($field['settings']['granularity']))) {
-    form_set_error('field[settings][tz_handling]', t('Dates without hours granularity must not use any timezone handling.'));
+    // Dates without hours granularity must not use any timezone handling.
+    $field['settings']['tz_handling'] = 'none';
   }
 
   // Extract the correct 'todate' value out of the two end date checkboxes.
