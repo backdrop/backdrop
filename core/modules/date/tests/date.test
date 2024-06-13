@@ -62,7 +62,7 @@ class DateUITestCase extends DateFieldBasic {
     // cannot verify if it was correctly set to "none" via
     // assertOptionSelected(). We check whether the config value has been set to
     // 'none' instead.
-    $this->assertEqual('none', config_get('field.field.field_' . $field_name, 'settings.tz_handling'), 'Timezone handling method correctly set to "none" in config after removing the hour granularity from the field settings.');
+    $this->assertEqual('none', config_get('field.field.' . $field_name, 'settings.tz_handling'), 'Timezone handling method correctly set to "none" in config after removing the hour granularity from the field settings.');
 
     $this->deleteDateField($label);
   }
