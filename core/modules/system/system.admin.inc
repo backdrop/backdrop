@@ -2641,7 +2641,7 @@ function _system_format_debug_info(array $lines, array $format_settings) {
  * Menu callback: run cron manually.
  */
 function system_run_cron() {
-  // Run cron manually
+  // Run cron manually.
   if (backdrop_cron_run()) {
     backdrop_set_message(t('Cron ran successfully.'));
   }
