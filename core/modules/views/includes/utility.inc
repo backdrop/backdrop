@@ -123,8 +123,11 @@ function views_get_table_join($table, $base_table) {
     return $handler;
   }
 
-  // DEBUG -- identify missing handlers
-  watchdog('views', "Missing join: @table @base_table", array('@table' => $table, '@base_table' => $base_table));
+  // DEBUG: Identify missing handlers unless both tables are the same, because
+  // no join is needed in that case.
+  if ($table != $base_table) {
+    watchdog('views', "Missing join: @table @base_table", array('@table' => $table, '@base_table' => $base_table));
+  }
 }
 
 /**
@@ -511,7 +514,7 @@ function views_discover_plugins() {
  * Get enabled display extenders.
  */
 function views_get_enabled_display_extenders() {
-  $enabled = array_filter(config_get('views.settings', 'display_extenders'));
+  $enabled = array_filter((array) config_get('views.settings', 'display_extenders'));
   $options = views_fetch_plugin_names('display_extender');
   foreach ($options as $name => $plugin) {
     $enabled[$name] = $name;
@@ -596,7 +599,7 @@ function views_fetch_fields($base, $type, $grouping = FALSE) {
                 $strings[$field][$key][$string] = $table_data['table'][$string];
               }
               else {
-                if ($string != 'base' && $string != 'base') {
+                if ($string != 'base') {
                   $strings[$field][$key][$string] = t("Error: missing @component", array('@component' => $string));
                 }
               }

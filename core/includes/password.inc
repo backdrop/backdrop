@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Secure password hashing functions for user authentication.

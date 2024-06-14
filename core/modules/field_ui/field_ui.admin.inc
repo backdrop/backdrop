@@ -1498,8 +1498,8 @@ function field_ui_field_type_options() {
     $field_types = field_info_field_types();
     $field_type_options = array();
     foreach ($field_types as $name => $field_type) {
-      // Skip field types which have no widget types, or should not be add via
-      // uesr interface.
+      // Skip field types which have no widget types, or should not be added via
+      // the user interface.
       if (field_ui_widget_type_options($name) && empty($field_type['no_ui'])) {
         $options[$name] = $field_type['label'];
       }
@@ -2066,7 +2066,16 @@ function field_ui_field_edit_form_delete_submit($form, &$form_state) {
     unset($_GET['destination']);
   }
   $instance = $form['#instance'];
-  $form_state['redirect'] = array('admin/structure/types/manage/' . $instance['bundle'] . '/fields/' . $instance['field_name'] . '/delete', array('query' => $destination));
+  $entity_type = $instance['entity_type'];
+  $bundle = field_extract_bundle($entity_type, $instance['bundle']);
+  $admin_path = _field_ui_bundle_admin_path($entity_type, $bundle);
+  $admin_field_path = $admin_path . '/fields/' . $instance['field_name'] . '/delete';
+  $form_state['redirect'] = array(
+    $admin_field_path,
+    array(
+      'query' => $destination,
+    ),
+  );
 }
 
 /**
@@ -2439,6 +2448,7 @@ function field_ui_view_mode_enable($entity_type, $bundle, $view_mode_name, $redi
 
   // Clear the menu cache to add display mode to administration menu.
   menu_cache_clear();
+  state_set('menu_rebuild_needed', TRUE);
 
   if ($redirect) {
     // Reload the current page.
@@ -2507,6 +2517,7 @@ function field_ui_view_mode_reset_form_submit($form, &$form_state) {
   $label = $entity_info['view modes'][$view_mode_name]['label'];
   $message = t('The display mode %name will now use the <em>Default</em> settings.', array('%name' => $label));
   backdrop_set_message($message);
+  state_set('menu_rebuild_needed', TRUE);
 
   // Reload the current page.
   $form_state['redirect'] = $path;

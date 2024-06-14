@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Database interface code for MySQL database servers.
@@ -72,13 +71,10 @@ class DatabaseConnection_mysql extends DatabaseConnection {
       // PDO::ATTR_EMULATE_PREPARES now behaves the same way as non emulated
       // prepares and returns integers. See https://externals.io/message/113294
       // for further discussion.
-      \PDO::ATTR_STRINGIFY_FETCHES => TRUE,
+      PDO::ATTR_STRINGIFY_FETCHES => TRUE,
+      // Limit SQL to a single statement like mysqli.
+      PDO::MYSQL_ATTR_MULTI_STATEMENTS => FALSE,
     );
-    if (defined('PDO::MYSQL_ATTR_MULTI_STATEMENTS')) {
-      // An added connection option in PHP 5.5.21+ to optionally limit SQL to a
-      // single statement like mysqli.
-      $connection_options['pdo'] += array(PDO::MYSQL_ATTR_MULTI_STATEMENTS => FALSE);
-    }
 
     parent::__construct($dsn, $connection_options['username'], $connection_options['password'], $connection_options['pdo']);
 
@@ -218,8 +214,8 @@ class DatabaseConnection_mysql extends DatabaseConnection {
   public function createDatabase($database) {
     try {
       // Create the database and set it as active.
-      $this->exec("CREATE DATABASE IF NOT EXISTS $database");
-      $this->exec("USE $database");
+      $this->pdo->exec("CREATE DATABASE IF NOT EXISTS $database");
+      $this->pdo->exec("USE $database");
     }
     catch (\Exception $e) {
       throw new DatabaseNotFoundException($e->getMessage());
@@ -377,32 +373,17 @@ class DatabaseConnection_mysql extends DatabaseConnection {
       return $this->utf8mb4Supported;
     }
 
-    // Ensure that the MySQL driver supports utf8mb4 encoding.
-    $version = $this->pdo->getAttribute(PDO::ATTR_CLIENT_VERSION);
-
-    if (strpos($version, 'mysqlnd') !== FALSE) {
-      // The mysqlnd driver supports utf8mb4 starting at version 5.0.9.
-      $version = preg_replace('/^\D+([\d.]+).*/', '$1', $version);
-      if (version_compare($version, '5.0.9', '<')) {
-        return FALSE;
-      }
-    }
-    else {
-      // The libmysqlclient driver supports utf8mb4 starting at version 5.5.3.
-      if (version_compare($version, '5.5.3', '<')) {
-        return FALSE;
-      }
-    }
-
     // Ensure that the MySQL server supports large prefixes and utf8mb4.
     try {
       $this->query("DROP TABLE IF EXISTS {backdrop_utf8mb4_test}");
       $this->query("CREATE TABLE {backdrop_utf8mb4_test} (id VARCHAR(255), PRIMARY KEY(id(255))) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci ROW_FORMAT=DYNAMIC ENGINE=INNODB");
     }
     catch (Exception $e) {
+      $this->utf8mb4Supported = FALSE;
       return FALSE;
     }
     $this->query("DROP TABLE IF EXISTS {backdrop_utf8mb4_test}");
+    $this->utf8mb4Supported = TRUE;
     return TRUE;
   }
 }

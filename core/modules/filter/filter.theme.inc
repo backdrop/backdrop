@@ -171,7 +171,7 @@ function theme_filter_admin_format_filter_order($variables) {
  *       array(
  *         'Raw HTML' => array(
  *           0 => array(
- *             'tip' => 'Web page addresses and e-mail addresses turn into links automatically.',
+ *             'tip' => 'Web page addresses and email addresses turn into links automatically.',
  *             'id' => 'filter/2',
  *           ),
  *         ),
@@ -192,22 +192,22 @@ function theme_filter_tips($variables) {
 
   $multiple = count($tips) > 1;
   if ($multiple) {
-    $output = '<h2>' . t('Text Formats') . '</h2>';
+    $output = '<h2>' . t('Text formats') . '</h2>';
   }
 
   if (count($tips)) {
     if ($multiple) {
       $output .= '<div class="compose-tips">';
     }
-    foreach ($tips as $name => $tiplist) {
+    foreach ($tips as $name => $tip_list) {
       if ($multiple) {
         $output .= '<div class="filter-type filter-' . backdrop_html_class($name) . '">';
         $output .= '<h3>' . check_plain($name) . '</h3>';
       }
 
-      if (count($tiplist) > 0) {
+      if (count($tip_list) > 0) {
         $output .= '<ul class="tips">';
-        foreach ($tiplist as $tip) {
+        foreach ($tip_list as $tip) {
           $output .= '<li' . ($long ? ' id="filter-' . str_replace("/", "-", $tip['id']) . '">' : '>') . $tip['tip'] . '</li>';
         }
         $output .= '</ul>';
@@ -235,9 +235,6 @@ function theme_filter_format_editor_image_form($variables) {
 
   $output .= '<div class="editor-image-fields">';
   $output .= backdrop_render_children($form);
-  $output .= '</div>';
-
-  $output .= '<div class="editor-image-library">';
   $output .= '</div>';
 
   $output .= '</div>';

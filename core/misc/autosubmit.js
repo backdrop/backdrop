@@ -37,17 +37,42 @@
 Backdrop.behaviors.autosubmit = {
   attach: function(context) {
     // 'this' references the form element
-    function triggerSubmit (e) {
+    function triggerSubmit (element) {
       var $this = $(this);
-      $this.find('.autosubmit-click').click();
+
+      // Variable "element" will have a value only when text fields trigger
+      // this. If element is undefined, then remove the data to prevent
+      // potential focus on a previously processed element.
+      if (element === undefined)  {
+        $('body').removeData('autosubmit-last-focus-id');
+      }
+      else {
+        $('body').data('autosubmit-last-focus-id', $(element).attr('id'));
+      }
+
+      // Submit the form.
+      $this.find('.autosubmit-click').trigger('click');
     }
 
-    // the change event bubbles so we only need to bind it to the outer form
+    // Listener to ajaxStop will re-focus on the text field as needed.
+    $(document).off('ajaxStop.autosubmit').on('ajaxStop.autosubmit', function () {
+      let id = $('body').data('autosubmit-last-focus-id');
+      if (id === undefined) {
+        return;
+      }
+      let $textInput = $('#' + id);
+      let pos = $textInput.val().length;
+      $textInput.focus();
+      $textInput[0].setSelectionRange(pos, pos);
+      $('body').removeData('autosubmit-last-focus-id');
+    });
+
+    // The change event bubbles so we only need to bind it to the outer form.
     $('form.autosubmit-full-form', context)
       .add('.autosubmit', context)
       .filter('form, select, input:not(:text, :submit)')
       .once('autosubmit')
-      .change(function (e) {
+      .on('change', function (e) {
         // don't trigger on text change for full-form
         if ($(e.target).is(':not(:text, :submit, .autosubmit-exclude)')) {
           triggerSubmit.call(e.target.form);
@@ -79,19 +104,21 @@ Backdrop.behaviors.autosubmit = {
         // each textinput element has his own timeout
         var timeoutID = 0;
         $(this)
-          .bind('keydown keyup', function (e) {
+          .on('keydown keyup', function (e) {
             if ($.inArray(e.keyCode, discardKeyCode) === -1) {
               timeoutID && clearTimeout(timeoutID);
             }
           })
-          .keyup(function(e) {
+          .on('keyup', function(e) {
             if ($.inArray(e.keyCode, discardKeyCode) === -1) {
-              timeoutID = setTimeout($.proxy(triggerSubmit, this.form), 500);
+              // Provide the target element to triggerSubmit.
+              timeoutID = setTimeout($.proxy(triggerSubmit, this.form, e.target), 500);
             }
           })
-          .bind('change', function (e) {
+          .on('change', function (e) {
             if ($.inArray(e.keyCode, discardKeyCode) === -1) {
-              timeoutID = setTimeout($.proxy(triggerSubmit, this.form), 500);
+              // Provide the target element to triggerSubmit.
+              timeoutID = setTimeout($.proxy(triggerSubmit, this.form, e.target), 500);
             }
           });
       });

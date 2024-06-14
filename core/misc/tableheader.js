@@ -79,7 +79,7 @@ $(document).on({
  * TableHeader will make the current table header stick to the top of the page
  * if the table is very long.
  *
- * Fire a custom "topoffsetchange" event to make TableHeader compute the
+ * Fire a custom "offsettopchange" event to make TableHeader compute the
  * new offset value from the "data-offset-top" attributes of relevant elements.
  *
  * @param table
@@ -98,7 +98,7 @@ function TableHeader(table) {
   this.tableOffset = this.$originalTable.offset();
 
   // React to columns change to avoid making checks in the scroll callback.
-  this.$originalTable.bind('columnschange', {tableHeader: this}, function (e, display) {
+  this.$originalTable.on('columnschange', {tableHeader: this}, function (e, display) {
     var tableHeader = e.data.tableHeader;
     if (tableHeader.displayWeight === null || tableHeader.displayWeight !== display) {
       tableHeader.recalculateSticky();

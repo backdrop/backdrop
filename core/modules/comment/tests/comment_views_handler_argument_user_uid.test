@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of CommentViewsHandlerArgumentUserUidTest.
@@ -11,6 +10,27 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests the argument_comment_user_uid handler.
  */
 class CommentViewsHandlerArgumentUserUidTest extends ViewsSqlTest {
+  protected $profile = 'testing';
+
+  /**
+   * @var User
+   */
+  protected $account;
+
+  /**
+   * @var Node
+   */
+  protected $node_user_posted;
+
+  /**
+   * @var Node
+   */
+  protected $node_user_commented;
+
+  /**
+   * @var array
+   */
+  protected $column_map;
 
   /**
    * Post comment.
@@ -33,16 +53,36 @@ class CommentViewsHandlerArgumentUserUidTest extends ViewsSqlTest {
     return comment_save($comment);
   }
 
-  function setUp() {
-    parent::setUp();
+  protected function setUp(array $modules = array()) {
+    $modules[] = 'comment';
+    parent::setUp($modules);
 
-    // Add two users, create a node with the user1 as author and another node with user2 as author.
-    // For the second node add a comment from user1.
+    // Create a post content type with comments enabled and grant permissions.
+    $this->backdropCreateContentType(array(
+      'type' => 'post',
+      'name' => 'Post',
+      'settings' => array(
+        'comment_default' => COMMENT_NODE_OPEN,
+      ),
+      'is_new' => TRUE,
+    ));
+    user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array(
+      'access content',
+      'access comments',
+      'post comments',
+      'skip comment approval',
+    ));
+
+    // Add two users, create a node with user1 as author and another node with
+    // user2 as author. For the second node, add a comment from user1.
     $this->account = $this->backdropCreateUser();
-    $this->account2 = $this->backdropCreateUser();
+    $account2 = $this->backdropCreateUser();
     $this->backdropLogin($this->account);
     $this->node_user_posted = $this->backdropCreateNode();
-    $this->node_user_commented = $this->backdropCreateNode(array('uid' => $this->account2->uid));
+    $this->node_user_commented = $this->backdropCreateNode(array(
+      'type' => 'post',
+      'uid' => $account2->uid,
+    ));
     $this->postComment($this->node_user_commented);
   }
 
@@ -75,8 +115,8 @@ class CommentViewsHandlerArgumentUserUidTest extends ViewsSqlTest {
     $view->api_version = '3.0';
     $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
-    /* Display: Master */
-    $handler = $view->new_display('default', 'Master', 'default');
+    /* Display: Default */
+    $handler = $view->new_display('default', 'Default', 'default');
     $handler->display->display_options['access']['type'] = 'perm';
     $handler->display->display_options['cache']['type'] = 'none';
     $handler->display->display_options['query']['type'] = 'views_query';

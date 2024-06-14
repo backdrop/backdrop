@@ -476,7 +476,7 @@ class LayoutRendererStandard {
       if ($block->module === 'system' && $block->delta === 'main') {
         $this->rendered['blocks'][$uuid] = $system_content;
       }
-      elseif ($content = $this->renderBlock($block)) {
+      elseif ($block->status && $content = $this->renderBlock($block)) {
         $this->rendered['blocks'][$uuid] = $content;
       }
     }
