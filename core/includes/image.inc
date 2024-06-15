@@ -555,8 +555,11 @@ function image_hex2rgba(&$hex) {
  *
  * @param string $uri
  *   A path or URI to an image.
+ *
  * @return bool
  *   TRUE if the image is an SVG. FALSE if it is not.
+ *
+ * @since 1.28.0 Function added.
  */
 function image_is_svg($uri) {
   $mimetype = file_get_mimetype($uri);
@@ -575,6 +578,8 @@ function image_is_svg($uri) {
  *
  * @return string
  *   The SVG image contents with the attributes added.
+ *
+ * @since 1.28.0 Function added.
  */
 function image_add_svg_attributes($svg_content, array $attributes) {
   $doc = new DOMDocument();
@@ -619,6 +624,8 @@ function image_add_svg_attributes($svg_content, array $attributes) {
  *   image is an SVG but no set dimensions are available, these keys will have
  *   NULL values. If the image is not an SVG, or the SVG file is empty or
  *   invalid, FALSE will be returned.
+ *
+ * @since 1.28.0 Function added.
  */
 function image_get_svg_dimensions($uri) {
   // Safety check.

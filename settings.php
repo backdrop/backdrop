@@ -502,6 +502,24 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
 // $config['system.core']['file_additional_public_schemes'] = array('example');
 
 /**
+ * Sensitive request headers in backdrop_http_request() when following a
+ * redirect.
+ *
+ * By default backdrop_http_request() will strip sensitive request headers when
+ * following a redirect if the redirect location has a different http host to
+ * the original request, or if the scheme downgrades from https to http.
+ *
+ * These variables allow opting out of this behaviour. Careful consideration of
+ * the security implications of opting out is recommended. To opt out, set to
+ * FALSE.
+ *
+ * @see _backdrop_should_strip_sensitive_headers_on_http_redirect()
+ * @see backdrop_http_request()
+ */
+// $config['system.core']['backdrop_http_request']['strip_sensitive_headers_on_host_change'] = TRUE;
+// $config['system.core']['backdrop_http_request']['strip_sensitive_headers_on_https_downgrade'] = TRUE;
+
+/**
  * Include a local settings file, if available.
  *
  * To make local development easier, you can add a settings.local.php file that
