@@ -201,7 +201,7 @@ ini_set('session.gc_maxlifetime', 200000);
 
 /**
  * Set session cookie lifetime (in seconds).
- * 
+ *
  * I.e. the time from the session is created to the cookie expires, i.e. when
  * the browser is expected to discard the cookie. The value 0 means "until the
  * browser is closed".
