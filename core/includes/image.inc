@@ -596,8 +596,8 @@ function image_add_svg_attributes($svg_content, array $attributes) {
           // to v8, we are using DOMNode::insertBefore().
           $svg_tag->insertBefore($title, $svg_tag->firstChild);
         }
-        // Remove any given <title> element if alt is an empty string.
         elseif ($svg_tag->firstChild && $svg_tag->firstChild->nodeName === 'title') {
+          // Remove any given <title> element if alt is an empty string.
           $svg_tag->removeChild($svg_tag->firstChild);
         }
       } catch (DOMException $e) {}
