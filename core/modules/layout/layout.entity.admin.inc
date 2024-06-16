@@ -11,7 +11,7 @@
  *
  * @ingroup forms
  */
-function layout_entity_admin_form($form, &$form_state, $entity_type) {
+function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg = NULL) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   form_load_include($form_state, 'inc', 'layout', 'layout.context.admin');
   $form['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
@@ -24,8 +24,8 @@ function layout_entity_admin_form($form, &$form_state, $entity_type) {
     '#prefix' => '<div id="layout-messages">',
     '#suffix' => '</div>',
   );
-  // $bundle = field_extract_bundle($entity_type, $bundle_arg);
-  $layouts = layout_get_entity_layouts($entity_type);
+  $bundle = field_extract_bundle($entity_type, $bundle_arg);
+  $layouts = layout_get_entity_layouts($entity_type, $bundle);
   $entity_info = entity_get_info($entity_type);
 
   $header = array(
@@ -36,30 +36,32 @@ function layout_entity_admin_form($form, &$form_state, $entity_type) {
   );
 
   $rows = array();
-  foreach ($layouts['all'] as $layout) {
-    $operations = array(
-      '#type' => 'dropbutton',
-      '#links' => _layout_get_operations($layout),
-    );
-    foreach ($operations['#links'] as $link_key => $op) {
-      $operations['#links'][$link_key]['query'] = backdrop_get_destination();
+  if (!empty($layouts['all'])) {
+    foreach ($layouts['all'] as $layout) {
+      $operations = array(
+        '#type' => 'dropbutton',
+        '#links' => _layout_get_operations($layout),
+      );
+      foreach ($operations['#links'] as $link_key => $op) {
+        $operations['#links'][$link_key]['query'] = backdrop_get_destination();
+      }
+
+      // Create a link to the settings page.
+      $info = layout_get_layout_template_info($layout->layout_template);
+      $template = l($info['title'], 'admin/structure/layouts/manage/' . $layout->name . '/configure');
+
+      $row = array();
+      $row[] = theme('layout_info', array('layout' => $layout));
+      $row[] = $template;
+      $row[] = theme('layout_condition_info', array('layout' => $layout));
+      $row[] = backdrop_render($operations);
+      $class = array('layout-row');
+      if ($layout->disabled) {
+        $class[] = 'disabled';
+      }
+
+      $rows[] = array('data' => $row, 'class' => $class);
     }
-
-    // Create a link to the settings page.
-    $info = layout_get_layout_template_info($layout->layout_template);
-    $template = l($info['title'], 'admin/structure/layouts/manage/' . $layout->name . '/configure');
-
-    $row = array();
-    $row[] = theme('layout_info', array('layout' => $layout));
-    $row[] = $template;
-    $row[] = theme('layout_condition_info', array('layout' => $layout));
-    $row[] = backdrop_render($operations);
-    $class = array('layout-row');
-    if ($layout->disabled) {
-      $class[] = 'disabled';
-    }
-
-    $rows[] = array('data' => $row, 'class' => $class);
   }
 
   $form['stand_alone_table'] = array(
@@ -67,7 +69,7 @@ function layout_entity_admin_form($form, &$form_state, $entity_type) {
     '#header' => $header,
     '#rows' => $rows,
     '#attributes' => array('class' => array('layout-list')),
-    '#empty' => t('No layout overrides have been created for !entity_type types yet.', array('!entity_type' => $entity_info['label'])),
+    '#empty' => t('No layout overrides have been created for !entity_types yet.', array('!entity_types' => $entity_info['label'])),
     '#weight' => 1,
   );
 
@@ -82,33 +84,45 @@ function layout_entity_admin_form($form, &$form_state, $entity_type) {
  */
 function layout_get_entity_layouts($entity_type, $bundle_name = '') {
   $all_layouts = layout_load_all();
-  $matched_layouts = array('all' => array(), 'bundles' => array());
+  $matched_layouts = array();
   foreach ($all_layouts as $layout) {
     if ($path = $layout->getPath()) {
       $path_contexts = layout_context_required_by_path($path);
       foreach ($path_contexts as $path_context) {
         if (is_a($path_context, 'EntityLayoutContext') && $path_context->isA($entity_type)) {
           if (empty($layout->conditions)) {
+            // Add weight to layouts that are not specific to a bundle type, to
+            // force them below the bundle-specific ones in the layout list.
+            $layout->weight = 1;
             $matched_layouts['all'][] = $layout;
           }
           else {
-            $matched_a_layout = FALSE;
             foreach ($layout->conditions as $condition) {
               if (is_a($condition, 'EntityBundleLayoutAccess')) {
-                $matched_a_layout = TRUE;
-                foreach ($condition->settings['bundles'] as $bundle) {
-                  $matched_layouts['bundles'][$bundle][] = $layout;
+                if (empty($bundle_name)) {
+                  $matched_layouts['all'][] = $layout;
+                  foreach ($condition->settings['bundles'] as $bundle) {
+                    $matched_layouts['bundles'][$bundle][] = $layout;
+                  }
+                }
+                elseif (in_array($bundle_name, $condition->settings['bundles'])) {
+                  $matched_layouts['all'][] = $layout;
+                  $matched_layouts['bundles'][$bundle_name][] = $layout;
+                  break;
                 }
               }
-            }
-            if ($matched_a_layout) {
-              $matched_layouts['all'][] = $layout;
             }
           }
         }
       }
     }
   }
+
+  backdrop_sort($matched_layouts['all'], array(
+    'weight' => SORT_NUMERIC,
+  ));
+
+  $matched_layouts['all'][] = $all_layouts['default'];
   return $matched_layouts;
 
 }
@@ -118,9 +132,10 @@ function layout_get_entity_layouts($entity_type, $bundle_name = '') {
  *
  * @ingroup forms
  */
-function layout_entity_admin_add_form($form, &$form_state, $entity_type) {
+function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle_arg, $all_types = NULL) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   form_load_include($form_state, 'inc', 'layout', 'layout.context.admin');
+  backdrop_set_title(layout_entity_menu_title($entity_type, $bundle_arg, $all_types));
 
   $config = array(
     'is_new' => TRUE,
@@ -128,8 +143,11 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type) {
   $layout = new Layout($config);
 
   $form_state['layout'] = &$layout;
+  $form_state['all_types'] = $all_types;
   $form_state['entity_type'] = $entity_type;
+  $form_state['bundle_type'] = field_extract_bundle($entity_type, $bundle_arg);
 
+  $form['#tree'] = TRUE;
 
   $form['#attached']['js'][] = backdrop_get_path('module', 'layout') . '/js/layout.admin.js';
   $form['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
@@ -141,20 +159,36 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type) {
     );
   }
 
-  $entity_info = entity_get_info($entity_type);
-  $bundle_options = array();
-  foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
-    $bundle_options[$bundle_name] = $bundle_info['label'];
-  }
-
-  $entity_name = ($entity_type == 'node') ? t('Content') : $entity_info['label'];
   $entity_layouts = layout_get_entity_layouts($entity_type);
-
-  if ($count = count($entity_layouts['all'])) {
-    $default_name = t('@entity layout @count', array('@entity' => $entity_name, '@count' => $count + 1));
+  $bundle = field_extract_bundle($entity_type, $bundle_arg);
+  $entity_info = entity_get_info($entity_type);
+  if (!$all_types) {
+    $bundle_name = '';
+    if (is_object($bundle_arg) && property_exists($bundle_arg, 'name')) {
+      $bundle_name = $bundle_arg->name;
+    }
+    elseif (is_object($bundle_arg) && property_exists($bundle_arg, 'label')) {
+      $bundle_name = $bundle_arg->label;
+    }
+    elseif (is_string($bundle_arg)) {
+      if (isset($entity_info['label'])) {
+        $bundle_name = $entity_info['label'];
+      }
+    }
+    if (isset($entity_layouts['bundles'][$bundle]) && $bundle_count = count($entity_layouts['bundles'][$bundle])) {
+      $default_name = t('!bundle_name layout !count', array('!bundle_name' => $bundle_name, '!count' => $bundle_count + 1));
+    }
+    else {
+      $default_name = t('!bundle_name layout', array('!bundle_name' => $bundle_name));
+    }
   }
   else {
-    $default_name = t('@entity layout', array('@entity' => $entity_name));
+    if (isset($entity_layouts['all']) && $bundle_count = count($entity_layouts['all'])) {
+      $default_name = t('!entity_label layout !count', array('!entity_label' => $entity_info['label'], '!count' => $bundle_count + 1));
+    }
+    else {
+      $default_name = t('!entity_label layout', array('!entity_label' => $entity_info['label']));
+    }
   }
 
   $form['title'] = array(
@@ -179,66 +213,40 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type) {
   $form['layout_template'] = array(
     '#title' => t('Layout template'),
     '#type' => 'radios',
-    '#default_value' => layout_load('default')->layout_template,
+    '#default_value' => $layout->layout_template,
     '#options' => array(),
     '#wrapper_attributes' => array('class' => array('clearfix', 'layout-options')),
     '#required' => TRUE,
   );
-  $form['bundle_wrapper'] = array(
-    '#title' => t('Select @entity types to use this layout', array('@entity' => $entity_name)),
-    '#type' => 'fieldset',
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-    '#required' => TRUE,
-  );
-  $form['bundle_wrapper']['bundles'] = array(
-    '#title' => t('Type'),
-    '#type' => 'checkboxes',
-    '#options' => $bundle_options,
-    '#wrapper_attributes' => array('class' => array('clearfix', 'layout-options')),
-    '#required' => TRUE,
-  );
-  $form['field_blocks_wrapper'] = array(
-    '#title' => t('Choose fields'),
-    '#type' => 'fieldset',
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
-    '#attributes' => array('class' => array('layout-field-blocks-wrapper')),
-    '#required' => TRUE,
-  );
-  $form['field_blocks_wrapper']['content_area'] = array(
+  $fields = field_info_instances($entity_type, $form_state['bundle_type']);
+  $field_blocks = array();
+  foreach ($fields as $key => $field) {
+    $field_blocks[$key] = $field['label'];
+  }
+  $field_blocks += array('main' => t('Main content block'));
+    
+  $first_field = reset($fields);
+  $form['content_area'] = array(
     '#title' => t('"Main content" block'),
-    '#type' => 'radios',
-    '#default_value' => 'main',
+    '#type' => 'checkboxes',
+    '#default_value' => array('field_blocks'),
     '#options' => array(
-      'main' => t('Leave Main Content.'),
       'field_blocks' => t('Use field blocks.'),
     ),
-    //'#description' => empty($first_field) ? t('There are no fields attached to this entity.') : '',
-    //'#disabled' => empty($first_field),
+    '#description' => empty($first_field) ? t('There are no fields attached to this entity.') : '',
+    '#disabled' => empty($first_field),
   );
-    $fields = field_info_instances($entity_type);
-    $field_blocks = array();
-    foreach ($fields as $key => $field_bundle) {
-      foreach ($field_bundle as $field_name => $field) {
-        $field_blocks[$field_name] = $field['label'] . ' (' . $key . ')';
-        $form_state['fields'][$field_name] = $field;
-      }
-    }
-    $field_blocks += array('main' => t('Main content block'));
-      
-    $first_field = reset($fields);
-    $form['field_blocks_wrapper']['field_blocks'] = array(
-      '#title' => t('Available field blocks'),
-      '#type' => 'checkboxes',
-      '#default_value' => array('main'),
-      '#options' => $field_blocks,
-      '#states' => array(
-        'visible' => array(
-          ':input[name="content_area"]' => array('value' => 'field_blocks'),
-        ),
+  $form['field_blocks'] = array(
+    '#title' => t('Available field blocks'),
+    '#type' => 'checkboxes',
+    '#default_value' => array('main'),
+    '#options' => $field_blocks,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="content_area[field_blocks]"]' => array('checked' => TRUE),
       ),
-    );
+    ),
+  );
 
   // Get the list of layout template options. The list needs to be rebuilt (see
   // https://github.com/backdrop/backdrop-issues/issues/984)
@@ -279,10 +287,9 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type) {
  * Validate handler for the layout_entity_admin_add_form().
  */
 function layout_entity_admin_add_form_validate($form, &$form_state) {
-  // if (empty(array_filter($form_state['values']['field_blocks']))) {
-    // form_set_error('field_blocks', t('At least one block should be placed.'));
-  // }
-  // If all types checked, then no vis cond
+  if (empty(array_filter($form_state['values']['field_blocks']))) {
+    form_set_error('field_blocks', t('At least one block should be placed.'));
+  }
 }
 
 /**
@@ -296,7 +303,7 @@ function layout_entity_admin_add_form_submit($form, &$form_state) {
   }
 
   $entity_type = $form_state['entity_type'];
-  $bundle_types = array_filter($form_state['values']['bundles']);
+  $bundle_type = $form_state['bundle_type'];
 
   // Build the expected path string and set the path.
   $all_info = _layout_get_all_info('layout_context');
@@ -304,17 +311,13 @@ function layout_entity_admin_add_form_submit($form, &$form_state) {
   $entity_path = preg_replace('/%[a-z0-9_]+/', '%', $entity_path_type);
   $layout->setPath($entity_path);
 
-  // Set the bundle type visibility condition if the entity has bundles, and at
-  // least one bundle type was chosen, but not all bundle types were chosen.
+  // Set the bundle type visibility condition if the entity has bundles.
   $entity_info = entity_get_info($entity_type);
-  $max_bundles = count($entity_info['bundles']);
-  $single_bundle = ($max_bundles == 1) && isset($entity_info['bundles'][$entity_type]);
-  if (!$single_bundle && $bundle_types && count($bundle_types) < $max_bundles) {
-    foreach ($bundle_types as $bundle_type) {
-      $handler = layout_create_access('node_type');
-      $handler->settings['bundles'][] = $bundle_type;
-      $layout->conditions[] = $handler;
-    }
+  $single_bundle = (count($entity_info['bundles']) == 1) && isset($entity_info['bundles'][$entity_type]);
+  if (!$form_state['all_types'] && !$single_bundle) {
+    $handler = layout_create_access('node_type');
+    $handler->settings['bundles'][] = $bundle_type;
+    $layout->conditions[] = $handler;
   }
 
   // If this is a new layout, populate blocks from default layout.
@@ -340,43 +343,46 @@ function layout_entity_admin_add_form_submit($form, &$form_state) {
       }
     }
 
-    if ($form_state['values']['field_blocks']) {
-      $fields = $form_state['fields'];
-
-      $content_region = '';
-      if (isset($template_info['regions']['content'])) {
-        $content_region = 'content';
-      }
-      else {
-        $template_regions = array_keys($template_info['regions']);
-        $content_region = end($template_regions);
-      }
-
-      foreach ($fields as $field) {
-        if ($form_state['values']['field_blocks'][$field['field_name']]) {
-          $key = 'field:field_block:' . $field['entity_type'] . '-' . $field['field_name'];
-          $field_block = layout_create_handler('block', $key);
-          $build_state = array(
-            'build_info' => array('args' => array($layout, $field_block, 'standard', $content_region)),
-          );
-          $build = backdrop_build_form('layout_block_configure_form', $build_state);
-          form_execute_handlers('validate', $build, $build_state);
-          form_execute_handlers('submit', $build, $build_state);
+    if ($form_state['values']['content_area']['field_blocks']) {
+      $fields = field_info_instances($entity_type, $bundle_type);
+      $first_field = reset($fields);
+      if (!empty($first_field)) {
+        $content_region = '';
+        if (isset($template_info['regions']['content'])) {
+          $content_region = 'content';
         }
-      }
-      if (!$form_state['values']['field_blocks']['main']) {
-        $main_content_uuid = '';
-        foreach ($layout->content as $uuid => $block) {
-          if ($block->module === 'system' && $block->delta === 'main') {
-            $main_content_uuid = $uuid;
-            break;
+        else {
+          $template_regions = array_keys($template_info['regions']);
+          $content_region = end($template_regions);
+        }
+
+        foreach ($fields as $field) {
+          if ($form_state['values']['field_blocks'][$field['field_name']]) {
+            $key = 'field:field_block:' . $field['entity_type'] . '-' . $field['field_name'];
+            $field_block = layout_create_handler('block', $key);
+            $build_state = array(
+              'build_info' => array('args' => array($layout, $field_block, 'standard', $content_region)),
+            );
+            $build = backdrop_build_form('layout_block_configure_form', $build_state);
+            form_execute_handlers('validate', $build, $build_state);
+            form_execute_handlers('submit', $build, $build_state);
           }
         }
-        if ($main_content_uuid) {
-          $layout->removeBlock($main_content_uuid);
+        if (!$form_state['values']['field_blocks']['main']) {
+          $main_content_uuid = '';
+          foreach ($layout->content as $uuid => $block) {
+            if ($block->module === 'system' && $block->delta === 'main') {
+              $main_content_uuid = $uuid;
+              break;
+            }
+          }
+          if ($main_content_uuid) {
+            $layout->removeBlock($main_content_uuid);
+          }
         }
       }
     }
+
   }
 
   $layout->save();

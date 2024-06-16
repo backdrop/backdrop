@@ -579,14 +579,6 @@ function layout_menu() {
         'file' => 'layout.entity.admin.inc',
         'type' => MENU_LOCAL_ACTION,
       );
-    }
-  }
-
-
-
-
-/*   foreach (entity_get_info() as $entity_type => $entity_info) {
-    if (in_array($entity_type, $entity_names)) {
       foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
         if (isset($bundle_info['admin'])) {
           // Extract path information from the bundle.
@@ -658,26 +650,49 @@ function layout_menu() {
             'file' => 'layout.entity.admin.inc',
             'type' => MENU_LOCAL_ACTION,
           ) + $access;
-
         }
       }
     }
   }
- */
 
   return $items;
 }
 
 /**
- * Title callback: Returns the name of a given instance.
+ * Title callback: Returns the title of an entity layout page.
  *
  * @see field_ui_menu()
  */
-function layout_entity_menu_title($entity_type) {
+function layout_entity_menu_title($entity_type, $bundle_arg = NULL, $create_for_all_bundles = NULL) {
   $entity_info = entity_get_info($entity_type);
   $entity_name = ($entity_type == 'node') ? t('content') : $entity_info['label'];
+  $bundle_name = '';
 
-  return t('Add @entity layout', array('@entity' => $entity_name));
+  if (!$bundle_arg) {
+    return t('Create a layout for @entity types', array('@entity' => $entity_name));
+  }
+  elseif (!$create_for_all_bundles) {
+    if (is_object($bundle_arg) && property_exists($bundle_arg, 'name')) {
+      $bundle_name = $bundle_arg->name;
+    }
+    elseif (is_object($bundle_arg) && property_exists($bundle_arg, 'label')) {
+      $bundle_name = $bundle_arg->label;
+    }
+    elseif (is_string($bundle_arg)) {
+      if (isset($entity_info['label'])) {
+        $bundle_name = $entity_info['label'];
+      }
+    }
+    return t('Create a layout for [@bundle_name] @entities', array('@bundle_name' => $bundle_name, '@entities' => $entity_name));
+  }
+  else {
+    if (count($entity_info['bundles']) > 1) {
+      return t('Create a layout for all @entity types', array('@entity' => $entity_name));
+    }
+    else {
+      return t('Create a layout for @entities', array('@entities' => $entity_name));
+    }
+  }
 }
 
 /**
