@@ -16,11 +16,11 @@ $database = 'mysql://user:pass@localhost/database_name';
 $database_prefix = '';
 
 /**
- * Configuration storage:
+ * Configuration storage
  *
  * By default configuration will be stored in the filesystem, using the
  * directories specified in the $config_directories setting. Optionally,
- * configuration can be stored in the database instead of the filesystem.
+ * configuration can be store in the database instead of the filesystem.
  * Switching this option on a live site is not currently supported without some
  * manual work.
  *
@@ -500,24 +500,6 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
  * access to all files within that scheme.
  */
 // $config['system.core']['file_additional_public_schemes'] = array('example');
-
-/**
- * Sensitive request headers in backdrop_http_request() when following a
- * redirect.
- *
- * By default backdrop_http_request() will strip sensitive request headers when
- * following a redirect if the redirect location has a different http host to
- * the original request, or if the scheme downgrades from https to http.
- *
- * These variables allow opting out of this behaviour. Careful consideration of
- * the security implications of opting out is recommended. To opt out, set to
- * FALSE.
- *
- * @see _backdrop_should_strip_sensitive_headers_on_http_redirect()
- * @see backdrop_http_request()
- */
-// $config['system.core']['backdrop_http_request']['strip_sensitive_headers_on_host_change'] = TRUE;
-// $config['system.core']['backdrop_http_request']['strip_sensitive_headers_on_https_downgrade'] = TRUE;
 
 /**
  * Include a local settings file, if available.
