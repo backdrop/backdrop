@@ -401,8 +401,6 @@ function installer_browser_get_installed_types() {
   return $types;
 }
 
-
-
 /**
  * Determines the form destination after installed projects.
  */
@@ -413,7 +411,7 @@ function installer_browser_get_destination_after_install() {
   $theme = in_array('theme', $types);
   $module = in_array('module', $types);
 
-  $layout_message = t('Installation finished successfully. All newly-added layout templates have been enabled and are available for use in your layouts. You can manage them on the <a href="@link">Layout templates</a> page.', array('@link' => 'admin/structure/layouts/settings'));
+  $layout_message = t('Installation finished successfully. All newly-added layout templates have been enabled and are available for use in your layouts. You can manage them on the <a href="@link">Layout templates</a> page.', array('@link' => url('admin/structure/layouts/settings')));
 
   if ($layout) {
     // Installed a layout and other project(s), continue the wizard. There's no

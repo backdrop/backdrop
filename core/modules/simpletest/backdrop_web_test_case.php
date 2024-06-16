@@ -356,7 +356,7 @@ abstract class BackdropTestCase {
    *   The message to display along with the assertion.
    * @param $group
    *   The type of assertion - examples are "Browser", "PHP".
-   * @return
+   * @return boolean
    *   TRUE if the assertion succeeded, FALSE otherwise.
    */
   protected function assertTrue($value, $message = '', $group = 'Other') {
@@ -1039,7 +1039,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected $originalCleanUrl;
 
   /**
-   * The original shutdown handlers array, before it was cleaned for testing purposes.
+   * The original shutdown handlers array, before it was cleaned for testing.
    *
    * @var array
    */
@@ -1235,7 +1235,8 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected function backdropGetTestFiles($type, $size = NULL) {
     $files = array();
     // Make sure type is valid.
-    if (in_array($type, array('binary', 'html', 'image', 'javascript', 'php', 'sql', 'text'))) {
+    $possible_types = array('binary', 'html', 'image', 'svg', 'javascript', 'php', 'sql', 'text');
+    if (in_array($type, $possible_types)) {
 
       if (!in_array($type, $this->generatedTestFiles)) {
         switch ($type) {
@@ -1433,14 +1434,14 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   $account->pass_raw = $pass_raw;
    * @endcode
    *
-   * @param $account
+   * @param User $account
    *   User object representing the user to log in.
-   * @param $by_email
+   * @param boolean $by_email
    *   Whether to use email for login instead of username.
    *
    * @see backdropCreateUser()
    */
-  protected function backdropLogin($account, $by_email = FALSE) {
+  protected function backdropLogin(User $account, $by_email = FALSE) {
     global $user;
     if ($this->loggedInUser) {
       $this->backdropLogout();
@@ -1584,8 +1585,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     $config_base_path = 'files/simpletest/' . $this->fileDirectoryName . '/config_';
     $config_directories['active'] = $config_base_path . 'active';
     $config_directories['staging'] = $config_base_path . 'staging';
-    config_get_config_storage('active')->initializeStorage();
-    config_get_config_storage('staging')->initializeStorage();
 
     // Log fatal errors.
     ini_set('log_errors', 1);
@@ -1606,7 +1605,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   /**
    * Copies the cached tables and config for a profile if one is available.
    *
-   * @return
+   * @return boolean
    *   TRUE when cache used, FALSE when cache is not available.
    *
    * @see BackdropWebTestCase::setUp()
@@ -1707,6 +1706,17 @@ class BackdropWebTestCase extends BackdropTestCase {
       return FALSE;
     }
 
+    // This has to happen before any config changes are made to ensure that the
+    // database tables from the test cache exist.
+    $use_cache = $this->useCache();
+
+    if (!$use_cache) {
+      // Initialize config storage. The database storage needs to be done after
+      // switching the database prefix.
+      config_get_config_storage('active')->initializeStorage();
+      config_get_config_storage('staging')->initializeStorage();
+    }
+
     // Preset the 'install_profile' system variable, so the first call into
     // system_rebuild_module_data() (in backdrop_install_system()) will register
     // the test's profile as a module. Without this, the installation profile of
@@ -1715,7 +1725,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     config_install_default_config('system');
     config_set('system.core', 'install_profile', $this->profile);
 
-    $use_cache = $this->useCache();
     if (!$use_cache) {
       // Perform the actual Backdrop installation.
       include_once BACKDROP_ROOT . '/core/includes/install.inc';
@@ -1753,7 +1762,6 @@ class BackdropWebTestCase extends BackdropTestCase {
       $core_config->set('file_temporary_path', $this->temp_files_directory);
       $core_config->save();
     }
-
 
     // Set 'parent_profile' of simpletest to add the parent profile's
     // search path to the child site's search paths.
@@ -1874,6 +1882,10 @@ class BackdropWebTestCase extends BackdropTestCase {
       $message = format_plural($emailCount, '1 email was sent during this test.', '@count emails were sent during this test.');
       $this->pass($message, t('Email'));
     }
+
+    // Reset static variables, this may flush pending writes to the theme
+    // registry as well.
+    backdrop_static_reset();
 
     // Delete temporary files directory.
     file_unmanaged_delete_recursive($this->originalFileDirectory . '/simpletest/' . $this->fileDirectoryName);
@@ -2843,8 +2855,8 @@ class BackdropWebTestCase extends BackdropTestCase {
       $xpath = $this->buildXPathQuery($xpath, $arguments);
       $result = $this->elements->xpath($xpath);
       // Some combinations of PHP / libxml versions return an empty array
-      // instead of the documented FALSE. Forcefully convert any false-ish values
-      // to an empty array to allow foreach(...) constructions.
+      // instead of the documented FALSE. Forcefully convert any false-ish
+      // values to an empty array to allow foreach(...) constructions.
       return $result ? $result : array();
     }
     else {
@@ -3088,7 +3100,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @param $all_requests
    *   Boolean value specifying whether to check all requests if the header is
    *   not found in the last request. Defaults to FALSE.
-   * @return
+   * @return string|FALSE
    *   The HTTP header value or FALSE if not found.
    */
   protected function backdropGetHeader($name, $all_requests = FALSE) {
@@ -3985,17 +3997,20 @@ class BackdropWebTestCase extends BackdropTestCase {
   /**
    * Verifies that a watchdog message has been entered.
    *
-   * @param $watchdog_message
+   * @param string $watchdog_message
    *   The watchdog message.
-   * @param $variables
+   * @param array $variables
    *   The array of variables passed to watchdog().
-   * @param $message
+   * @param string $message
    *   The assertion message.
    *
    * @since 1.19.0 Method added.
    */
-  function assertWatchdogMessage($watchdog_message, $variables, $message) {
-    $status = (bool) db_query_range("SELECT 1 FROM {watchdog} WHERE message = :message AND variables = :variables", 0, 1, array(':message' => $watchdog_message, ':variables' => serialize($variables)))->fetchField();
+  protected function assertWatchdogMessage($watchdog_message, array $variables, $message) {
+    $status = (bool) db_query_range("SELECT 1 FROM {watchdog} WHERE message = :message AND variables = :variables", 0, 1, array(
+      ':message' => $watchdog_message,
+      ':variables' => serialize($variables),
+    ))->fetchField();
     return $this->assert($status, format_string('@message', array('@message' => $message)));
   }
 
@@ -4004,7 +4019,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    *
    * @since 1.19.0 Method added.
    */
-  function clearWatchdog() {
+  protected function clearWatchdog() {
     db_truncate('watchdog')->execute();
   }
 }

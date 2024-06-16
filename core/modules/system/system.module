@@ -638,6 +638,7 @@ function system_menu() {
   // Menu items that are basically just menu blocks.
   $items['admin/structure'] = array(
     'title' => 'Structure',
+    'icon' => 'stack-fill',
     'description' => 'Administer blocks, content types, menus, etc.',
     'weight' => -2,
     'page callback' => 'system_admin_menu_block_page',
@@ -647,6 +648,7 @@ function system_menu() {
   // Appearance.
   $items['admin/appearance'] = array(
     'title' => 'Appearance',
+    'icon' => 'palette-fill',
     'description' => 'Select and configure themes.',
     'page callback' => 'system_themes_page',
     'access arguments' => array('administer themes'),
@@ -701,6 +703,7 @@ function system_menu() {
   // Modules.
   $items['admin/modules'] = array(
     'title' => 'Functionality',
+    'icon' => 'puzzle-piece-fill',
     'description' => 'Install or uninstall modules.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_modules'),
@@ -735,6 +738,7 @@ function system_menu() {
   // Configuration.
   $items['admin/config'] = array(
     'title' => 'Configuration',
+    'icon' => 'gear-fill',
     'description' => 'Administer settings.',
     'page callback' => 'system_admin_config_page',
     'access arguments' => array('access administration pages'),
@@ -742,6 +746,7 @@ function system_menu() {
   );
   $items['admin/config/administration'] = array(
     'title' => 'Administration',
+    'icon' => 'gear',
     'description' => 'Administration tools.',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -750,6 +755,7 @@ function system_menu() {
   // Media settings.
   $items['admin/config/media'] = array(
     'title' => 'Media',
+    'icon' => 'image',
     'description' => 'Media tools.',
     'weight' => -10,
     'page callback' => 'system_admin_menu_block_page',
@@ -787,6 +793,7 @@ function system_menu() {
   // Service settings.
   $items['admin/config/services'] = array(
     'title' => 'Web services',
+    'icon' => 'rss',
     'description' => 'Tools related to web services.',
     'weight' => 0,
     'page callback' => 'system_admin_menu_block_page',
@@ -805,6 +812,7 @@ function system_menu() {
   // Development settings.
   $items['admin/config/development'] = array(
     'title' => 'Development',
+    'icon' => 'wrench',
     'description' => 'Development tools.',
     'weight' => -10,
     'page callback' => 'system_admin_menu_block_page',
@@ -860,6 +868,7 @@ function system_menu() {
   // Regional and date settings.
   $items['admin/config/regional'] = array(
     'title' => 'Regional and language',
+    'icon' => 'globe',
     'description' => 'Regional settings, localization and translation.',
     'weight' => -5,
     'page callback' => 'system_admin_menu_block_page',
@@ -925,6 +934,7 @@ function system_menu() {
   // Search settings.
   $items['admin/config/search'] = array(
     'title' => 'Search',
+    'icon' => 'magnifying-glass',
     'description' => 'Local site search settings.',
     'weight' => -10,
     'page callback' => 'system_admin_menu_block_page',
@@ -935,6 +945,7 @@ function system_menu() {
   // System settings.
   $items['admin/config/system'] = array(
     'title' => 'System',
+    'icon' => 'hard-drives',
     'description' => 'General system related configuration.',
     'weight' => -20,
     'page callback' => 'system_admin_menu_block_page',
@@ -963,6 +974,7 @@ function system_menu() {
   // URL handling.
   $items['admin/config/urls'] = array(
     'title' => 'URL handling',
+    'icon' => 'link',
     'description' => 'Settings related to URLs including URL aliases and URL redirects.',
     'weight' => -20,
     'page callback' => 'system_admin_menu_block_page',
@@ -1011,6 +1023,7 @@ function system_menu() {
   // Additional categories
   $items['admin/config/content'] = array(
     'title' => 'Content authoring',
+    'icon' => 'note-pencil',
     'description' => 'Settings related to formatting and authoring content.',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -1018,6 +1031,7 @@ function system_menu() {
   );
   $items['admin/config/metadata'] = array(
     'title' => 'Metadata',
+    'icon' => 'code',
     'description' => 'Settings related to meta tags, and other data commonly used by search engines.',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -1025,6 +1039,7 @@ function system_menu() {
   );
   $items['admin/config/user-interface'] = array(
     'title' => 'User interface',
+    'icon' => 'app-window',
     'description' => 'Tools that enhance the user interface.',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -1032,6 +1047,7 @@ function system_menu() {
   );
   $items['admin/config/workflow'] = array(
     'title' => 'Workflow',
+    'icon' => 'path',
     'description' => 'Settings related to editorial workflow.',
     'weight' => 5,
     'page callback' => 'system_admin_menu_block_page',
@@ -1042,6 +1058,7 @@ function system_menu() {
   // Reports.
   $items['admin/reports'] = array(
     'title' => 'Reports',
+    'icon' => 'info-fill',
     'description' => 'View reports, updates, and errors.',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access site reports'),
@@ -1052,8 +1069,16 @@ function system_menu() {
     'title' => 'Status report',
     'description' => "Get a status report about your site's operation and any detected problems.",
     'page callback' => 'system_status',
-    'weight' => -60,
     'access arguments' => array('access site reports'),
+    'weight' => -60,
+    'file' => 'system.admin.inc',
+  );
+  $items['admin/reports/debug'] = array(
+    'title' => 'Debug information',
+    'description' => 'Get information about the site that can help with support requests and debugging.',
+    'page callback' => 'system_debug_info',
+    'access arguments' => array('access site reports'),
+    'weight' => -50,
     'file' => 'system.admin.inc',
   );
   $items['admin/reports/status/run-cron'] = array(
@@ -1213,6 +1238,15 @@ function system_library_info() {
       array('system', 'jquery'),
       array('system', 'backdrop.ajax'),
       array('system', 'backdrop.dialog'),
+    ),
+  );
+
+  // Backdrop's icon API library.
+  $libraries['backdrop.icons'] = array(
+    'title' => 'Backdrop icons',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      'core/misc/icons.js' => array('group' => JS_LIBRARY, 'weight' => -18),
     ),
   );
 
@@ -4490,18 +4524,18 @@ function system_file_download($uri) {
  * submit function saves all the data in the form.
  *
  * If $form['#config'] is present in the form, the values will be saved to the
- * named settings file (e.g., mymodule.settings). If sub-elements or groups of
+ * named settings file (e.g., my_module.settings). If sub-elements or groups of
  * sub-elements have their own '#config' keys, then values of those elements and
  * their children will be saved to that settings file.
  *
  * For example, consider the form:
  *
  * @code
- * $primary_config = config('mymodule.settings');
- * $secondary_config = config('mymodule.second');
- * $tertiary_config = config('mymodule.third');
+ * $primary_config = config('my_module.settings');
+ * $secondary_config = config('my_module.second');
+ * $tertiary_config = config('my_module.third');
  * $form = array(
- *   '#config' => 'mymodule.settings',
+ *   '#config' => 'my_module.settings',
  *   'first_setting' => array(
  *     '#type' => 'textfield',
  *     '#title' => t('First Setting'),
@@ -4512,7 +4546,7 @@ function system_file_download($uri) {
  *   'bonus_fieldset' => array(
  *     '#type' => 'fieldset',
  *     '#title' => t('Secondary Settings'),
- *     '#config' => 'mymodule.second',
+ *     '#config' => 'my_module.second',
  *
  *     'bonus_one' => array( ... ),
  *     'bonus_two' => array( ... ),
@@ -4520,22 +4554,23 @@ function system_file_download($uri) {
  *     'bonus_three' => array(
  *       '#type' => 'textfield',
  *       '#default_value' => $tertiary_config->get('bonus_three'),
- *       '#config' => 'mymodule.third',
+ *       '#config' => 'my_module.third',
  *     ),
  *   ),
  * );
  * @endcode
  *
- * The top-level '#config' is "mymodule.settings". The values of 'first_setting'
- * and 'second_setting' will both be saved to "mymodule.settings".
+ * The top-level '#config' is "my_module.settings". The values of
+ * 'first_setting' and 'second_setting' will both be saved to
+ * "my_module.settings".
  *
- * The 'bonus_fieldset' has its own '#config' setting, "mymodule.second", which
+ * The 'bonus_fieldset' has its own '#config' setting, "my_module.second", which
  * overrides the top-level '#config' setting, so 'bonus_one' and 'bonus_two'
- * will be saved to "mymodule.second".
+ * will be saved to "my_module.second".
  *
- * The 'bonus_three' has its own '#config' setting, "mymodule.third", which
+ * The 'bonus_three' has its own '#config' setting, "my_module.third", which
  * overrides the one from the fieldset. The value of 'bonus_three' will be
- * saved to the "mymodule.third".
+ * saved to the "my_module.third".
  *
  * Modules that implement hook_form_alter() can use the '#config' settings to
  * save their data to their own settings file by setting the '#config' parameter
