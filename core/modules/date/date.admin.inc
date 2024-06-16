@@ -620,6 +620,10 @@ function _date_field_settings_form($field, $instance, $has_data) {
     '#value' => date_get_timezone_db($tz_handling),
   );
 
+  $cache_help_details = t('Caching happens when date fields are loaded, rather than when they are displayed.');
+  // Logic to handle config values in a backwards-compatible way. Previously,
+  // enabling cache and setting 'cache_count' to 0 meant "cache all date values
+  // always". This is now split into a set of explicit radio options.
   if (!empty($settings['cache_enabled']) && isset($settings['cache_count'])) {
     $cache_enabled_default = $settings['cache_count'] == 0 ? 'all' : 'enabled';
   }
@@ -631,14 +635,22 @@ function _date_field_settings_form($field, $instance, $has_data) {
     '#title' => t('Date value caching'),
     '#options' => array(
       'disabled' => t('No caching'),
-      'all' => t('Cache all dates (<strong>not recommended</strong>)'),
-      'enabled' => t('Cache some date values, to improve performance'),
+      'all' => t('Cache all date values on every entity (<strong>not recommended!</strong>)'),
+      'enabled' => t('Cache up to a configurable maximum of date values, to improve performance'),
     ),
     '#default_value' => $cache_enabled_default,
     '#weight' => 10,
   );
-  $form['cache_enabled']['all']['#description'] = t('All date values on every entity will be cached. Note that caching every date on fields that may have a large number of multiple or repeating values may create a <strong>significant performance penalty</strong> when the cache is cleared.');
-  $form['cache_enabled']['enabled']['#description'] = t('Caching happens when date fields are loaded, rather than when they are displayed.');
+  $form['cache_enabled']['all']['#description'] = t('Caching every date on fields that may have a large number of multiple or repeating values may create a <strong>significant performance penalty</strong> when the cache is cleared.') . ' ' . $cache_help_details;
+
+  // Visually hide the 'enabled' radio option and its label. Later, we are using
+  // a pseudo-radio input in its place, to allow the 'cache_count' number field
+  // to be placed inline with it. Intentionally not using "'#access' => FALSE"
+  // here, as we want the 'enabled' value to be able to be set as the default if
+  // that is what is saved in config, and we also want its value to be able to
+  // be submitted.
+  $form['cache_enabled']['enabled']['#attributes']['class'][] = 'element-invisible';
+  $form['cache_enabled']['enabled']['#title_display'] = 'invisible';
 
   // Special backwards compatibility treatment, to account for the fact that a
   // value of 0 for cache_count has a special meaning of "Cache all dates".
@@ -658,11 +670,45 @@ function _date_field_settings_form($field, $instance, $has_data) {
     $cache_count_default = isset($settings['cache_count']) ? $settings['cache_count'] : 4;
   }
 
-  $form['cache_count'] = array(
+  // Wrapper that allows to inline a radio (pseudo) button with the
+  // 'cache_count' number field.
+  $form['cache_count_wrapper'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('container-inline')),
+    '#weight' => 20,
+  );
+  // Since all individual radio inputs of a "'#type' => 'radios'" form element
+  // are rendered inside their own div, we cannot inline any other form elements
+  // with one of them. We can achieve that with a single radio input though.
+  $form['cache_count_wrapper']['pseudo_radio'] = array(
+    '#type' => 'radio',
+    '#title' => t('Cache a maximum of'),
+    // Make sure that the pseudo-field returns the same value as the actual
+    // option of the 'cache_enabled' group of radios.
+    '#return_value' => 'enabled',
+    '#attributes' => array(
+      // Override the otherwise automatically-assigned 'name' attribute of this
+      // single radio, and set it to the same value as the 'cache_enabled' set
+      // of radios. This causes the single radio to behave as part of the group
+      // of radios without having to use any custom #states (it gets unchecked
+      // when any of the other radios is checked, and all other radios are
+      // unchecked if this one here is checked).
+      'name' => 'field[settings][cache_enabled]',
+    ),
+    '#states' => array(
+      'checked' => array(
+        'input[name="field[settings][cache_enabled]"]' => array(
+          'value' => 'enabled',
+        ),
+      ),
+    ),
+  );
+  $form['cache_count_wrapper']['cache_count'] = array(
     '#type' => 'number',
     '#title' => t('Maximum cached dates per field'),
+    '#title_display' => 'invisible',
+    '#suffix' => '<span class="label-suffix">' . t('date values') . '</span>',
     '#default_value' => $cache_count_default,
-    '#description' => t('The suggested setting for multiple value and repeating fields is no more than 4 values per field.'),
     '#min' => 1,
     // Since the '#size' property does not work on HTML number inputs, we are
     // using '#max' instead. We are already advising against setting this too
@@ -670,15 +716,28 @@ function _date_field_settings_form($field, $instance, $has_data) {
     // enough to limit the field width to 3 digits, and it should cover most
     // common cases.
     '#max' => 999,
-    '#indentation' => 2,
-    '#weight' => 12,
     '#states' => array(
-      'visible' => array(
-        'input[name="field[settings][cache_enabled]"]' => array(
-          'value' => 'enabled',
+      'disabled' => array(
+        array(
+          'input[name="field[settings][cache_enabled]"]' => array(
+            'value' => 'disabled',
+          ),
+        ),
+        array(
+          'input[name="field[settings][cache_enabled]"]' => array(
+            'value' => 'all',
+          ),
         ),
       ),
     ),
+  );
+  // Since we have inlined the pseudo-radio and the 'cache_count' number field,
+  // we cannot add '#description' to any of them. We add a separate form element
+  // for it instead.
+  $form['cache_count_help'] = array(
+    '#type' => 'item',
+    '#description' => t('The suggested setting for multiple-value and repeating-date fields is no more than 4 values per field.') . ' ' . $cache_help_details,
+    '#weight' => 22,
   );
 
   $context = array(
@@ -721,15 +780,12 @@ function date_field_settings_validate(&$form, &$form_state) {
     $field['settings']['todate'] = '';
   }
 
-  // Don't save the pseudo values created in the UI.
-  unset($field['settings']['enddate_get'], $field['settings']['enddate_required']);
-
   switch ($field['settings']['cache_enabled']) {
     case 'enabled':
       $field['settings']['cache_enabled'] = 1;
       // In this case, accept whatever value was set for cache_count in the
       // respective number field. Also make sure that it is saved as a number.
-      $field['settings']['cache_count'] = (int) $field['settings']['cache_count'];
+      $field['settings']['cache_count'] = (int) $field['settings']['cache_count_wrapper']['cache_count'];
       break;
 
     case 'all':
@@ -748,6 +804,9 @@ function date_field_settings_validate(&$form, &$form_state) {
       $field['settings']['cache_count'] = 4;
       break;
   }
+
+  // Don't save the values of any helper pseudo-fields in the form.
+  unset($field['settings']['enddate_get'], $field['settings']['enddate_required'], $field['settings']['cache_count_wrapper']);
 }
 
 /**
