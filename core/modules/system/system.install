@@ -47,27 +47,33 @@ function system_requirements($phase) {
       $storage = config_get_config_storage($type);
       $class = get_class($storage);
 
+      // The 'active' and 'staging' keys in the $config_storage_types array.
+      // They need to be translated, so passed through t() here.
+      $type_name = t($type);
+
       switch ($class) {
         case 'ConfigDatabaseStorage':
-          $prefix = t('database');
-          $config_location = 'db://default/config_' . $type;
+          $config_locations[$type] = t('!type: database: <code>@config_location</code>', array (
+            // $type_name has already been passed through t() earlier. Avoid
+            // double-escaping.
+            '!type' => $type_name,
+            '@config_location' => 'db://default/config_' . $type,
+          ));
           break;
         case 'ConfigFileStorage':
         default:
-          $prefix = t('JSON files');
-          $config_location = config_get_config_directory($type);
+          $config_locations[$type] = t('!type: JSON files: <code>@config_location</code>', array (
+            // $type_name has already been passed through t() earlier. Avoid
+            // double-escaping.
+            '!type' => $type_name,
+            '@config_location' => config_get_config_directory($type),
+          ));
       }
-
-      $replacements = array(
-        '@type' => $type,
-        '@prefix' => $prefix,
-        '@config_location' => $config_location,
-      );
-      $storage_types[$type] = format_string('@type: @prefix: <code>@config_location</code>', $replacements);
     }
+
     $requirements['config_storage'] = array(
       'title' => $t('Configuration storage'),
-      'value' => theme('item_list', array('items' => $storage_types)),
+      'value' => theme('item_list', array('items' => $config_locations)),
       'severity' => REQUIREMENT_INFO,
     );
   }
