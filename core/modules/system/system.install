@@ -263,13 +263,16 @@ function system_requirements($phase) {
 
     // Check/create .htaccess files for active and staging config directories.
     foreach (array('active', 'staging') as $type) {
-      $config_directory = config_get_config_directory($type);
-      file_save_htaccess($config_directory);
+      $config_storage = config_get_config_storage($type);
+      if (is_a($config_storage, 'ConfigFileStorage')) {
+        $config_directory = config_get_config_directory($type);
+        file_save_htaccess($config_directory);
 
-      $htaccess_files[$config_directory . '/.htaccess'] = array(
-        'title' => $t('%type config directory', array('%type' => backdrop_ucfirst($type))),
-        'directory' => $config_directory,
-      );
+        $htaccess_files[$config_directory . '/.htaccess'] = array(
+          'title' => $t('%type config directory', array('%type' => backdrop_ucfirst($type))),
+          'directory' => $config_directory,
+        );
+      }
     }
 
     // Try to write the .htaccess files first, to prevent false alarms in case
@@ -420,7 +423,7 @@ function system_requirements($phase) {
   // See if updates are available in update.php.
   if ($phase == 'runtime') {
     $requirements['update'] = array(
-      'title' => $t('Database updates'),
+      'title' => $t('Site updates'),
       'severity' => REQUIREMENT_OK,
       'value' => $t('Up to date'),
     );
@@ -434,8 +437,8 @@ function system_requirements($phase) {
         if ($current_schema < $latest_schema) {
           $update_link = base_path() . 'core/update.php';
           $requirements['update']['severity'] = REQUIREMENT_ERROR;
-          $requirements['update']['value'] = $t('Out of date (<a href="@update">Run database updates</a>)', array('@update' => $update_link));
-          $requirements['update']['description'] = $t('Some modules have database schema updates to install. You should run the <a href="@update">database update script</a> immediately.', array('@update' => $update_link));
+          $requirements['update']['value'] = $t('Out of date (<a href="@update">Run site updates</a>)', array('@update' => $update_link));
+          $requirements['update']['description'] = $t('Some modules have database schema updates to install. You should run the <a href="@update">site update script</a> immediately.', array('@update' => $update_link));
           break;
         }
       }
@@ -1952,6 +1955,7 @@ function system_update_1015() {
   $config = config('system.core');
   $config->set('rss_description', update_variable_get('feed_description', ''));
   $config->set('rss_limit', update_variable_get('feed_default_items', 10));
+  // cspell:disable-next-line
   $config->set('rss_viewmode', update_variable_get('feed_item_length', 'fulltext'));
   $config->save();
 
@@ -3521,6 +3525,26 @@ function system_update_1094() {
   ), $data);
   $config->setData($data);
   $config->save();
+}
+
+/**
+ * Set default values for flags for stripping sensitive headers on HTTP
+ * downgrade or host change.
+ */
+function system_update_1095() {
+  $config = config('system.core');
+  $save = FALSE;
+  if ($config->get('backdrop_http_request.strip_sensitive_headers_on_host_change') === NULL) {
+    $config->set('backdrop_http_request.strip_sensitive_headers_on_host_change', TRUE);
+    $save = TRUE;
+  }
+  if ($config->get('backdrop_http_request.strip_sensitive_headers_on_https_downgrade') === NULL) {
+    $config->set('backdrop_http_request.strip_sensitive_headers_on_https_downgrade', TRUE);
+    $save = TRUE;
+  }
+  if ($save) {
+    $config->save();
+  }
 }
 
 /**

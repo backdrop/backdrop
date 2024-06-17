@@ -730,7 +730,7 @@ function _menu_item_localize(&$item, $map, $link_translate = FALSE) {
   $item['localized_options'] = $item['options'];
   // All 'class' attributes are assumed to be an array during rendering, but
   // links stored in the database may use an old string value.
-  // @todo In order to remove this code we need to implement a database update
+  // @todo In order to remove this code we need to implement a site update,
   //   including unserializing all existing link options and running this code
   //   on them, as well as adding validation to menu_link_save().
   if (isset($item['options']['attributes']['class']) && is_string($item['options']['attributes']['class'])) {
@@ -2982,6 +2982,16 @@ function _menu_link_build($item) {
   elseif (!($item['type'] & MENU_VISIBLE_IN_TREE)) {
     $item['hidden'] = -1;
   }
+
+  // Save icon and description to options.
+  $options = array();
+  if (!empty($item['icon'])) {
+    $options['icon'] = $item['icon'];
+  }
+  if (!empty($item['description'])) {
+    $options['attributes']['title'] = $item['description'];
+  }
+
   // Note, we set this as 'system', so that we can be sure to distinguish all
   // the menu links generated automatically from entries in {menu_router}.
   $item['module'] = 'system';
@@ -2990,7 +3000,7 @@ function _menu_link_build($item) {
     'link_title' => $item['title'],
     'link_path' => $item['path'],
     'hidden' => 0,
-    'options' => empty($item['description']) ? array() : array('attributes' => array('title' => $item['description'])),
+    'options' => $options,
   );
   return $item;
 }
