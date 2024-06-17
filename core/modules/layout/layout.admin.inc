@@ -406,7 +406,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#default_value' => $layout_template,
     '#options' => array(),
     '#wrapper_attributes' => array('class' => array('clearfix', 'layout-options')),
-    '#description' => t('Loose visual representation of the regions provided by each template. The region where the main content is placed by default is usually denoted with a darker shade.'),
+    '#description' => t('The icons provide an approximate visual representation of the regions provided by each template. The region where the main content is placed by default is usually denoted with a darker shade.'),
     '#required' => TRUE,
   );
 
@@ -3355,6 +3355,10 @@ function layout_settings_page($form, &$form_state) {
   }
 
   $form['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => t('The icons provide an approximate visual representation of the regions provided by each template. The region where the main content is placed by default is usually denoted with a darker shade.'),
+  );
   $form['templates'] = array(
     '#type' => 'tableselect',
     '#js_select' => FALSE,
