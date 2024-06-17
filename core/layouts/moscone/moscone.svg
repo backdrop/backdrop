@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 150" stroke="currentColor">
+  <line class="header" x1="0" y1="7" x2="100" y2="7" stroke-width="15" />
+  <line class="header" x1="0" y1="27" x2="100" y2="27" stroke-width="15" />
+
+  <line x1="0" y1="75" x2="30" y2="75" stroke-width="70" />
+  <line class="main" x1="35" y1="75" x2="100" y2="75" stroke-width="70" />
+
+  <line class="footer" x1="0" y1="123" x2="100" y2="123" stroke-width="15" />
+  <line class="footer" x1="0" y1="143" x2="100" y2="143" stroke-width="15" />
+</svg>
