@@ -47,10 +47,10 @@ if (version_compare(PHP_VERSION, '5.6.0') < 0) {
 define('MAINTENANCE_MODE', 'update');
 
 /**
- * Renders form with a list of available database updates.
+ * Renders form with a list of available site updates.
  */
 function update_selection_page() {
-  backdrop_set_title('Backdrop database update');
+  backdrop_set_title('Backdrop site update');
   $elements = backdrop_get_form('update_script_selection_form');
   $output = backdrop_render($elements);
 
@@ -202,7 +202,7 @@ function update_helpful_links() {
  * Displays results of the update script with any accompanying errors.
  */
 function update_results_page() {
-  backdrop_set_title('Backdrop database update');
+  backdrop_set_title('Backdrop site update');
 
   update_task_list();
   // Report end result.
@@ -283,7 +283,7 @@ function update_results_page() {
 }
 
 /**
- * Provides an overview of the Backdrop database update.
+ * Provides an overview of the Backdrop site update.
  *
  * This page provides cautionary suggestions that should happen before
  * proceeding with the update to ensure data integrity.
@@ -312,9 +312,9 @@ function update_info_page() {
   $config_dir = config_get_config_directory('active');
 
   update_task_list('info');
-  backdrop_set_title('Backdrop database update');
+  backdrop_set_title('Backdrop site update');
   $token = backdrop_get_token('update');
-  $output = '<p>Use this utility to update your database whenever you install a new version of Backdrop CMS or one of the site\'s modules.</p>';
+  $output = '<p>Use this utility to update your site whenever you install a new version of Backdrop CMS or one of the site\'s modules.</p>';
   $output .= '<p>For more detailed information, see the <a href="https://backdropcms.org/upgrade">Upgrading Backdrop CMS</a> page. If you are unsure of what these terms mean, contact your hosting provider.</p>';
   $output .= '<p>Before running updates, the following steps are recommended.</p>';
   $output .= "<ol>\n";
@@ -361,7 +361,7 @@ function update_access_denied_page() {
 
   $steps[] = t('Find the <code>settings.php</code> file on your system, and open it with a text editor.');
   $steps[] = t('There is a line inside your <code>settings.php</code> file that says <code>$settings[\'update_free_access\'] = FALSE</code>. Change it to <code>$settings[\'update_free_access\'] = TRUE</code>.');
-  $steps[] = t('Reload this page. The database update script should be able to run now.');
+  $steps[] = t('Reload this page. The site update script should be able to run now.');
   $steps[] = t('As soon as the update script is done, you must change the <code>update_free_access</code> setting in the <code>settings.php</code> file back to <code>FALSE</code>: <code>$settings[\'update_free_access\'] = FALSE;</code>.');
 
   $output .= theme('item_list', array('items' => $steps, 'type' => 'ol'));

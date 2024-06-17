@@ -169,7 +169,7 @@ function system_permission() {
     'administer software updates' => array(
       'title' => t('Administer software updates'),
       'restrict access' => TRUE,
-      'warning' => t('Run database updates for Backdrop projects.'),
+      'warning' => t('Run site updates for Backdrop projects.'),
     ),
     'access administration pages' => array(
       'title' => t('Use the administration pages'),
