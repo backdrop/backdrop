@@ -118,9 +118,11 @@ function layout_get_entity_layouts($entity_type, $bundle_name = '') {
     }
   }
 
-  backdrop_sort($matched_layouts['all'], array(
-    'weight' => SORT_NUMERIC,
-  ));
+  if (!empty($matched_layouts['all'])) {
+    backdrop_sort($matched_layouts['all'], array(
+      'weight' => SORT_NUMERIC,
+    ));
+  }
 
   $matched_layouts['all'][] = $all_layouts['default'];
   return $matched_layouts;
@@ -132,7 +134,7 @@ function layout_get_entity_layouts($entity_type, $bundle_name = '') {
  *
  * @ingroup forms
  */
-function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle_arg, $all_types = NULL) {
+function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle_arg = NULL, $all_types = NULL) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   form_load_include($form_state, 'inc', 'layout', 'layout.context.admin');
   backdrop_set_title(layout_entity_menu_title($entity_type, $bundle_arg, $all_types));
@@ -176,7 +178,7 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle
       }
     }
     if (isset($entity_layouts['bundles'][$bundle]) && $bundle_count = count($entity_layouts['bundles'][$bundle])) {
-      $default_name = t('!bundle_name layout !count', array('!bundle_name' => $bundle_name, '!count' => $bundle_count + 1));
+      $default_name = t('!bundle_name layout !count', array('!bundle_name' => $bundle_name, '!count' => $bundle_count > 1 ? $bundle_count : ''));
     }
     else {
       $default_name = t('!bundle_name layout', array('!bundle_name' => $bundle_name));
@@ -184,7 +186,7 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle
   }
   else {
     if (isset($entity_layouts['all']) && $bundle_count = count($entity_layouts['all'])) {
-      $default_name = t('!entity_label layout !count', array('!entity_label' => $entity_info['label'], '!count' => $bundle_count + 1));
+      $default_name = t('!entity_label layout !count', array('!entity_label' => $entity_info['label'], '!count' => $bundle_count > 1 ? $bundle_count : ''));
     }
     else {
       $default_name = t('!entity_label layout', array('!entity_label' => $entity_info['label']));
@@ -221,7 +223,9 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle
   $fields = field_info_instances($entity_type, $form_state['bundle_type']);
   $field_blocks = array();
   foreach ($fields as $key => $field) {
-    $field_blocks[$key] = $field['label'];
+    if (!empty($field)) {
+      $field_blocks[$key] = $field['label'];
+    }
   }
   $field_blocks += array('main' => t('Main content block'));
     

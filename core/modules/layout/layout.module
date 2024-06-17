@@ -573,64 +573,40 @@ function layout_menu() {
         'title callback' => 'layout_entity_menu_title',
         'title arguments' => array($entity_type),
         'page callback' => 'backdrop_get_form',
-        'page arguments' => array('layout_entity_admin_add_form', $entity_type),
+        'page arguments' => array('layout_entity_admin_add_form', $entity_type, NULL, $single_bundle),
         'access callback' => 'user_access',
         'access arguments' => array('administer layouts'),
         'file' => 'layout.entity.admin.inc',
         'type' => MENU_LOCAL_ACTION,
       );
-      foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
-        if (isset($bundle_info['admin'])) {
-          // Extract path information from the bundle.
-          $path = $bundle_info['admin']['path'];
-          // Different bundles can appear on the same path (e.g. %node_type and
-          // %comment_menu_node_type). To allow field_ui_menu_load() to extract the
-          // actual bundle object from the translated menu router path
-          // arguments, we need to identify the argument position of the bundle
-          // name string ('bundle argument') and pass that position to the menu
-          // loader. The position needs to be casted into a string; otherwise it
-          // would be replaced with the bundle name string.
-          if (isset($bundle_info['admin']['bundle argument'])) {
-            $bundle_arg = $bundle_info['admin']['bundle argument'];
-            $bundle_position = (string) $bundle_arg;
-          }
-          else {
-            $bundle_arg = $bundle_name;
-            $bundle_position = '0';
-          }
-          // This is the position of the %field_ui_menu placeholder in the
-          // items below.
-          $field_position = count(explode('/', $path)) + 1;
-          $view_mode_position = count(explode('/', $path)) + 1;
+      // Create a layout management page for individual bundles.
+      if (!$single_bundle) {
+        foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
+          if (isset($bundle_info['admin'])) {
+            // Extract path information from the bundle.
+            $path = $bundle_info['admin']['path'];
+            if (isset($bundle_info['admin']['bundle argument'])) {
+              $bundle_arg = $bundle_info['admin']['bundle argument'];
+            }
+            else {
+              $bundle_arg = $bundle_name;
+            }
 
-          // Extract access information, providing defaults.
-          $access = array_intersect_key($bundle_info['admin'], backdrop_map_assoc(array('access callback', 'access arguments')));
-          $access += array(
-            'access callback' => 'user_access',
-            'access arguments' => array('administer fields'),
-          );
-
-          // Add the "administer fields" permission on top of the access
-          // restriction because the field UI should only be accessible to
-          // trusted users.
-          if ($access['access callback'] != 'user_access' || $access['access arguments'] != array('administer fields')) {
-            $access = array(
-              'access callback' => 'field_ui_admin_access',
-              'access arguments' => array($access['access callback'], $access['access arguments']),
+            // Extract access information, providing defaults.
+            $access = array_intersect_key($bundle_info['admin'], backdrop_map_assoc(array('access callback', 'access arguments')));
+            $access += array(
+              'access callback' => 'user_access',
+              'access arguments' => array('administer layouts'),
             );
-          }
 
-          $items["$path/layouts"] = array(
-            'title' => 'Manage layouts',
-            'page callback' => 'backdrop_get_form',
-            'page arguments' => array('layout_entity_admin_form', $entity_type, $bundle_arg),
-            'type' => MENU_LOCAL_TASK,
-            'weight' => 2,
-            'file' => 'layout.entity.admin.inc',
-          ) + $access;
-          // Check that this isn't a single-bundle entity.
-          $single_bundle = (count($entity_info['bundles']) == 1) && isset($entity_info['bundles'][$entity_type]);
-          if (!$single_bundle) {
+            $items["$path/layouts"] = array(
+              'title' => 'Manage layouts',
+              'page callback' => 'backdrop_get_form',
+              'page arguments' => array('layout_entity_admin_form', $entity_type, $bundle_arg),
+              'type' => MENU_LOCAL_TASK,
+              'weight' => 2,
+              'file' => 'layout.entity.admin.inc',
+            ) + $access;
             $items["$path/layouts/add"] = array(
               'title' => "Add layout",
               'title callback' => 'layout_entity_menu_title',
@@ -640,16 +616,16 @@ function layout_menu() {
               'file' => 'layout.entity.admin.inc',
               'type' => MENU_LOCAL_ACTION,
             ) + $access;
+            $items["$path/layouts/add-entity"] = array(
+              'title' => "Add layout",
+              'title callback' => 'layout_entity_menu_title',
+              'title arguments' => array($entity_type, $bundle_arg, 'create_for_all_bundles'),
+              'page callback' => 'backdrop_get_form',
+              'page arguments' => array('layout_entity_admin_add_form', $entity_type, $bundle_arg, 'entity'),
+              'file' => 'layout.entity.admin.inc',
+              'type' => MENU_LOCAL_ACTION,
+            ) + $access;
           }
-          $items["$path/layouts/add-entity"] = array(
-            'title' => "Add layout",
-            'title callback' => 'layout_entity_menu_title',
-            'title arguments' => array($entity_type, $bundle_arg, 'create_for_all_bundles'),
-            'page callback' => 'backdrop_get_form',
-            'page arguments' => array('layout_entity_admin_add_form', $entity_type, $bundle_arg, 'entity'),
-            'file' => 'layout.entity.admin.inc',
-            'type' => MENU_LOCAL_ACTION,
-          ) + $access;
         }
       }
     }
@@ -661,16 +637,18 @@ function layout_menu() {
 /**
  * Title callback: Returns the title of an entity layout page.
  *
- * @see field_ui_menu()
+ * @see layout_menu()
  */
 function layout_entity_menu_title($entity_type, $bundle_arg = NULL, $create_for_all_bundles = NULL) {
   $entity_info = entity_get_info($entity_type);
   $entity_name = ($entity_type == 'node') ? t('content') : $entity_info['label'];
   $bundle_name = '';
 
+  // This entity has only a single bundle.
   if (!$bundle_arg) {
     return t('Create a layout for @entity types', array('@entity' => $entity_name));
   }
+  // This is the action link to create a layout for a particular bundle.
   elseif (!$create_for_all_bundles) {
     if (is_object($bundle_arg) && property_exists($bundle_arg, 'name')) {
       $bundle_name = $bundle_arg->name;
@@ -685,13 +663,9 @@ function layout_entity_menu_title($entity_type, $bundle_arg = NULL, $create_for_
     }
     return t('Create a layout for [@bundle_name] @entities', array('@bundle_name' => $bundle_name, '@entities' => $entity_name));
   }
+  // This is the action link to create a layout for the entity.
   else {
-    if (count($entity_info['bundles']) > 1) {
-      return t('Create a layout for all @entity types', array('@entity' => $entity_name));
-    }
-    else {
-      return t('Create a layout for @entities', array('@entities' => $entity_name));
-    }
+    return t('Create a layout for all @entity types', array('@entity' => $entity_name));
   }
 }
 
