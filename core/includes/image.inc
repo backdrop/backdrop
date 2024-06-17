@@ -584,38 +584,33 @@ function image_is_svg($uri) {
 function image_add_svg_attributes($svg_content, array $attributes) {
   $doc = new DOMDocument();
   $doc->loadXML($svg_content);
-  $svg_tag = $doc->getElementsByTagName('svg')->item(0);
 
   // Convert the alt attribute to a <title> element.
   if (isset($attributes['alt'])) {
-    try {
-      if (strlen($attributes['alt'])) {
-        $title = $doc->createElement('title');
-        $title->textContent = $attributes['alt'];
-        // Since DOMDocument::prepend() is not available in PHP versions prior
-        // to v8, we are using DOMNode::insertBefore().
-        $svg_tag->insertBefore($title, $svg_tag->firstChild);
-      }
-      elseif ($svg_tag->firstChild && $svg_tag->firstChild->nodeName === 'title') {
+      try {
+        if (strlen($attributes['alt'])) {
+          $title = $doc->createElement('title');
+          $title->textContent = $attributes['alt'];
+          $doc->firstChild->prepend($title);
+        }
         // Remove any given <title> element if alt is an empty string.
-        $svg_tag->removeChild($svg_tag->firstChild);
-      }
-    }
-    catch (DOMException $e) {}
-
+        elseif ($doc->firstChild->firstChild && $doc->firstChild->firstChild->nodeName === 'title') {
+          $doc->firstChild->removeChild($doc->firstChild->firstChild);
+        }
+      } catch (DOMException $e) {}
     unset($attributes['alt']);
   }
 
   foreach ($attributes as $attribute_name => $attribute_value) {
     $attribute_value = implode(' ', (array) $attribute_value);
     if (strlen($attribute_value)) {
-      $svg_tag->setAttribute($attribute_name, $attribute_value);
+      $doc->firstChild->setAttribute($attribute_name, $attribute_value);
     }
     else {
-      $svg_tag->removeAttribute($attribute_name);
+      $doc->firstChild->removeAttribute($attribute_name);
     }
   }
-  return $doc->saveXML($svg_tag);
+  return $doc->saveXML($doc->firstChild);
 }
 
 /**
