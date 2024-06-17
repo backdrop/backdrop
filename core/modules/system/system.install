@@ -42,14 +42,10 @@ function system_requirements($phase) {
     }
 
     // Report the configuration storage being used.
-    $config_storage_types = array('active', 'staging');
-    foreach ($config_storage_types as $type) {
+    $config_storage_types = array('active' => t('Active'), 'staging' => t('Staging'));
+    foreach ($config_storage_types as $type => $type_name) {
       $storage = config_get_config_storage($type);
       $class = get_class($storage);
-
-      // The 'active' and 'staging' keys in the $config_storage_types array.
-      // They need to be translated, so passed through t() here.
-      $type_name = t($type);
 
       switch ($class) {
         case 'ConfigDatabaseStorage':
