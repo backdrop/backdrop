@@ -406,7 +406,7 @@ function user_login_settings($form, &$form_state) {
   $form['user_login_page_settings']['user_login_page_tabs'] = array(
     '#title' => t('Use tabs'),
     '#type' => 'checkbox',
-    '#description' => t('If selected shows local tabs for "Create new account", "Log in", and "Reset passord" links. A simplified page with links is shown if unchecked.'),
+    '#description' => t('If selected shows local tabs for "Create new account", "Log in", and "Reset password" links. A simplified page with links is shown if unchecked.'),
     '#default_value' => $core_config->get('user_login_page_tabs'),
     '#config' => 'system.core',
   );
