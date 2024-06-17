@@ -620,7 +620,6 @@ function _date_field_settings_form($field, $instance, $has_data) {
     '#value' => date_get_timezone_db($tz_handling),
   );
 
-  $cache_help_details = t('Caching happens when date fields are loaded, rather than when they are displayed.');
   // Logic to handle config values in a backwards-compatible way. Previously,
   // enabling cache and setting 'cache_count' to 0 meant "cache all date values
   // always". This is now split into a set of explicit radio options.
@@ -641,7 +640,7 @@ function _date_field_settings_form($field, $instance, $has_data) {
     '#default_value' => $cache_enabled_default,
     '#weight' => 10,
   );
-  $form['cache_enabled']['all']['#description'] = t('Caching every date on fields that may have a large number of multiple or repeating values may create a <strong>significant performance penalty</strong> when the cache is cleared.') . ' ' . $cache_help_details;
+  $form['cache_enabled']['all']['#description'] = t('Caching every date on fields that may have a large number of multiple or repeating values may create a <strong>significant performance penalty</strong> when the cache is cleared.');
 
   // Visually hide the 'enabled' radio option and its label. Later, we are using
   // a pseudo-radio input in its place, to allow the 'cache_count' number field
@@ -716,6 +715,8 @@ function _date_field_settings_form($field, $instance, $has_data) {
     // enough to limit the field width to 3 digits, and it should cover most
     // common cases.
     '#max' => 999,
+    // The field should be disabled if either 'disabled' or 'all' has been
+    // selected for the the 'cache_enabled' radio.
     '#states' => array(
       'disabled' => array(
         array(
@@ -736,7 +737,18 @@ function _date_field_settings_form($field, $instance, $has_data) {
   // for it instead.
   $form['cache_count_help'] = array(
     '#type' => 'item',
-    '#description' => t('The suggested setting for multiple-value and repeating-date fields is no more than 4 values per field.') . ' ' . $cache_help_details,
+    '#description' => t('The suggested setting for multiple-value and repeating-date fields is no more than 4 values per field.'),
+    '#weight' => 21,
+  );
+  // Similar to the above, this help text cannot be added as a proper 
+  // #description to the cache_enabled radio set, as it then gets injected
+  // between the last radio and the pseudo-radio.
+  // @todo: Once we have https://github.com/backdrop/backdrop-issues/issues/1403
+  // this description should ideally be moved below the label of the
+  // cache_enabled radio set via '#description_display' => 'before'.
+  $form['cache_enabled_help'] = array(
+    '#type' => 'item',
+    '#description' => t('Caching happens when date fields are loaded, rather than when they are displayed.'),
     '#weight' => 22,
   );
 
@@ -790,7 +802,7 @@ function date_field_settings_validate(&$form, &$form_state) {
 
     case 'all':
       $field['settings']['cache_enabled'] = 1;
-      // Ignore any value set for cache_count (the field is hidden via #states
+      // Ignore any value set for cache_count (the field is disabled via #states
       // in this case anyway), and set it to 0 (which means "cache all date
       // values").
       $field['settings']['cache_count'] = 0;
