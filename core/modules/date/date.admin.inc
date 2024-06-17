@@ -740,7 +740,7 @@ function _date_field_settings_form($field, $instance, $has_data) {
     '#description' => t('The suggested setting for multiple-value and repeating-date fields is no more than 4 values per field.'),
     '#weight' => 21,
   );
-  // Similar to the above, this help text cannot be added as a proper 
+  // Similar to the above, this help text cannot be added as a proper
   // #description to the cache_enabled radio set, as it then gets injected
   // between the last radio and the pseudo-radio.
   // @todo: Once we have https://github.com/backdrop/backdrop-issues/issues/1403
