@@ -2,8 +2,8 @@
   <line class="header" x1="0" y1="7" x2="100" y2="7" stroke-width="15" />
   <line class="header" x1="0" y1="27" x2="100" y2="27" stroke-width="15" />
 
-  <line x1="0" y1="75" x2="21" y2="75" stroke-width="70" />
-  <line class="main" x1="26" y1="75" x2="47" y2="75" stroke-width="70" />
+  <line class="main" x1="0" y1="75" x2="21" y2="75" stroke-width="70" />
+  <line x1="26" y1="75" x2="47" y2="75" stroke-width="70" />
   <line x1="52" y1="75" x2="73" y2="75" stroke-width="70" />
   <line x1="78" y1="75" x2="100" y2="75" stroke-width="70" />
 
