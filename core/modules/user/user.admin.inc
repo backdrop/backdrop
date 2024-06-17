@@ -421,6 +421,7 @@ function user_login_settings($form, &$form_state) {
       ),
     ),
     '#config' => 'system.core',
+    '#indentation' => 1,
   );
 
   $form['flood_log_failed_attempts'] = array(
