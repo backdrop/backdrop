@@ -644,10 +644,6 @@ function date_field_widget_properties_alter(&$widget, $context) {
  * Implements hook_config_info().
  */
 function date_config_info() {
-  $prefixes['date.settings'] = array(
-    'label' => t('Date settings'),
-    'group' => t('Configuration'),
-  );
   $prefixes['date_views.settings'] = array(
     'label' => t('Date views settings'),
     'group' => t('Configuration'),
@@ -887,6 +883,23 @@ function date_date_formatter_pre_view_alter(&$entity, &$variables) {
   }
 }
 
+/**
+ * Implements hook_form_FORM_ID_alter() for views_exposed_form().
+ */
+function date_form_views_exposed_form_alter(&$form, &$form_state, $form_id) {
+  $children = element_children($form);
+  foreach ($children as $child) {
+    if (isset($form[$child]['#id']) && strpos($form[$child]['#id'], 'date_views_exposed_filter-') === 0) {
+      // Remove empty or scalar date input when an array was expected.
+      if (empty($form_state['input'][$child]) || !is_array($form_state['input'][$child])) {
+        unset($form_state['input'][$child]);
+      }
+      elseif (empty($form_state['input'][$child]['value']) || !is_array($form_state['input'][$child]['value'])) {
+        unset($form_state['input'][$child]['value']);
+      }
+    }
+  }
+}
 
 /**
  * Temporary helper to re-create equivalent of content_database_info().

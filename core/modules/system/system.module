@@ -396,7 +396,7 @@ function system_element_info() {
     '#input' => TRUE,
     '#cols' => 60,
     '#rows' => 5,
-    '#resizable' => TRUE,
+    '#resizable' => 'vertical',
     '#process' => array('ajax_process_form'),
     '#theme' => 'textarea',
     '#theme_wrappers' => array('form_element'),
@@ -454,12 +454,14 @@ function system_element_info() {
     '#element_validate' => array('html_date_validate'),
     '#theme' => 'html_date',
     '#theme_wrappers' => array('form_element'),
+    '#value_callback' => 'html_date_or_time_value_callback',
   );
   $types['html_time'] = array(
     '#input' => TRUE,
     '#element_validate' => array('html_time_validate'),
     '#theme' => 'html_time',
     '#theme_wrappers' => array('form_element'),
+    '#value_callback' => 'html_date_or_time_value_callback',
   );
   $types['html_datetime'] = array(
     '#input' => TRUE,
@@ -636,6 +638,7 @@ function system_menu() {
   // Menu items that are basically just menu blocks.
   $items['admin/structure'] = array(
     'title' => 'Structure',
+    'icon' => 'stack-fill',
     'description' => 'Administer blocks, content types, menus, etc.',
     'weight' => -2,
     'page callback' => 'system_admin_menu_block_page',
@@ -645,6 +648,7 @@ function system_menu() {
   // Appearance.
   $items['admin/appearance'] = array(
     'title' => 'Appearance',
+    'icon' => 'palette-fill',
     'description' => 'Select and configure themes.',
     'page callback' => 'system_themes_page',
     'access arguments' => array('administer themes'),
@@ -699,6 +703,7 @@ function system_menu() {
   // Modules.
   $items['admin/modules'] = array(
     'title' => 'Functionality',
+    'icon' => 'puzzle-piece-fill',
     'description' => 'Install or uninstall modules.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_modules'),
@@ -733,6 +738,7 @@ function system_menu() {
   // Configuration.
   $items['admin/config'] = array(
     'title' => 'Configuration',
+    'icon' => 'gear-fill',
     'description' => 'Administer settings.',
     'page callback' => 'system_admin_config_page',
     'access arguments' => array('access administration pages'),
@@ -740,6 +746,7 @@ function system_menu() {
   );
   $items['admin/config/administration'] = array(
     'title' => 'Administration',
+    'icon' => 'gear',
     'description' => 'Administration tools.',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -748,6 +755,7 @@ function system_menu() {
   // Media settings.
   $items['admin/config/media'] = array(
     'title' => 'Media',
+    'icon' => 'image',
     'description' => 'Media tools.',
     'weight' => -10,
     'page callback' => 'system_admin_menu_block_page',
@@ -785,6 +793,7 @@ function system_menu() {
   // Service settings.
   $items['admin/config/services'] = array(
     'title' => 'Web services',
+    'icon' => 'rss',
     'description' => 'Tools related to web services.',
     'weight' => 0,
     'page callback' => 'system_admin_menu_block_page',
@@ -803,6 +812,7 @@ function system_menu() {
   // Development settings.
   $items['admin/config/development'] = array(
     'title' => 'Development',
+    'icon' => 'wrench',
     'description' => 'Development tools.',
     'weight' => -10,
     'page callback' => 'system_admin_menu_block_page',
@@ -836,6 +846,15 @@ function system_menu() {
     'file' => 'system.admin.inc',
     'weight' => -15,
   );
+  $items['admin/config/development/jquery'] = array(
+    'title' => 'jQuery',
+    'description' => 'Configure settings related to the jQuery version.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('system_jquery_settings'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'system.admin.inc',
+    'weight' => -10,
+  );
   $items['admin/config/development/utf8mb4-upgrade'] = array(
     'title' => 'Database 4 byte UTF-8 upgrade',
     'description' => 'Upgrades the database to support 4 byte UTF-8 characters such as emoji and mathematical symbols.',
@@ -849,6 +868,7 @@ function system_menu() {
   // Regional and date settings.
   $items['admin/config/regional'] = array(
     'title' => 'Regional and language',
+    'icon' => 'globe',
     'description' => 'Regional settings, localization and translation.',
     'weight' => -5,
     'page callback' => 'system_admin_menu_block_page',
@@ -914,6 +934,7 @@ function system_menu() {
   // Search settings.
   $items['admin/config/search'] = array(
     'title' => 'Search',
+    'icon' => 'magnifying-glass',
     'description' => 'Local site search settings.',
     'weight' => -10,
     'page callback' => 'system_admin_menu_block_page',
@@ -924,6 +945,7 @@ function system_menu() {
   // System settings.
   $items['admin/config/system'] = array(
     'title' => 'System',
+    'icon' => 'hard-drives',
     'description' => 'General system related configuration.',
     'weight' => -20,
     'page callback' => 'system_admin_menu_block_page',
@@ -952,6 +974,7 @@ function system_menu() {
   // URL handling.
   $items['admin/config/urls'] = array(
     'title' => 'URL handling',
+    'icon' => 'link',
     'description' => 'Settings related to URLs including URL aliases and URL redirects.',
     'weight' => -20,
     'page callback' => 'system_admin_menu_block_page',
@@ -1000,6 +1023,7 @@ function system_menu() {
   // Additional categories
   $items['admin/config/content'] = array(
     'title' => 'Content authoring',
+    'icon' => 'note-pencil',
     'description' => 'Settings related to formatting and authoring content.',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -1007,6 +1031,7 @@ function system_menu() {
   );
   $items['admin/config/metadata'] = array(
     'title' => 'Metadata',
+    'icon' => 'code',
     'description' => 'Settings related to meta tags, and other data commonly used by search engines.',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -1014,6 +1039,7 @@ function system_menu() {
   );
   $items['admin/config/user-interface'] = array(
     'title' => 'User interface',
+    'icon' => 'app-window',
     'description' => 'Tools that enhance the user interface.',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -1021,6 +1047,7 @@ function system_menu() {
   );
   $items['admin/config/workflow'] = array(
     'title' => 'Workflow',
+    'icon' => 'path',
     'description' => 'Settings related to editorial workflow.',
     'weight' => 5,
     'page callback' => 'system_admin_menu_block_page',
@@ -1031,6 +1058,7 @@ function system_menu() {
   // Reports.
   $items['admin/reports'] = array(
     'title' => 'Reports',
+    'icon' => 'info-fill',
     'description' => 'View reports, updates, and errors.',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access site reports'),
@@ -1041,8 +1069,16 @@ function system_menu() {
     'title' => 'Status report',
     'description' => "Get a status report about your site's operation and any detected problems.",
     'page callback' => 'system_status',
-    'weight' => -60,
     'access arguments' => array('access site reports'),
+    'weight' => -60,
+    'file' => 'system.admin.inc',
+  );
+  $items['admin/reports/debug'] = array(
+    'title' => 'Debug information',
+    'description' => 'Get information about the site that can help with support requests and debugging.',
+    'page callback' => 'system_debug_info',
+    'access arguments' => array('access site reports'),
+    'weight' => -50,
     'file' => 'system.admin.inc',
   );
   $items['admin/reports/status/run-cron'] = array(
@@ -1205,6 +1241,15 @@ function system_library_info() {
     ),
   );
 
+  // Backdrop's icon API library.
+  $libraries['backdrop.icons'] = array(
+    'title' => 'Backdrop icons',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      'core/misc/icons.js' => array('group' => JS_LIBRARY, 'weight' => -18),
+    ),
+  );
+
   // Backdrop's states library.
   $libraries['backdrop.states'] = array(
     'title' => 'Backdrop states',
@@ -1236,15 +1281,6 @@ function system_library_info() {
     'dependencies' => array(
       // collapse.js relies on backdropGetSummary in form.js
       array('system', 'backdrop.form'),
-    ),
-  );
-
-  // Backdrop's resizable textarea.
-  $libraries['backdrop.textarea'] = array(
-    'title' => 'Backdrop resizable textarea',
-    'version' => BACKDROP_VERSION,
-    'js' => array(
-      'core/misc/textarea.js' => array('group' => JS_LIBRARY),
     ),
   );
 
@@ -1334,21 +1370,16 @@ function system_library_info() {
   $libraries['jquery'] = array(
     'title' => 'jQuery',
     'website' => 'http://jquery.com',
-    'version' => '1.12.4',
+    'version' => '3.7.1',
     'js' => array(
       'core/misc/jquery.js' => array('group' => JS_LIBRARY, 'weight' => -20),
-      // These include security fixes, so assign a weight that makes them load
-      // as soon after jquery.js is loaded as possible.
-      'core/misc/jquery-extend-3.4.0.js' => array('group' => JS_LIBRARY, 'weight' => -19),
-      'core/misc/jquery-html-prefilter-3.5.0.js' => array('group' => JS_LIBRARY, 'weight' => -19),
     ),
   );
 
   // jQuery Once.
   $libraries['jquery.once'] = array(
-    'title' => 'jQuery Once',
-    'website' => 'http://plugins.jquery.com/project/once',
-    'version' => '1.2',
+    'title' => 'jQuery Once (Backdrop fork)',
+    'version' => '1.2.6',
     'js' => array(
       'core/misc/jquery.once.js' => array('group' => JS_LIBRARY, 'weight' => -19),
     ),
@@ -1358,7 +1389,7 @@ function system_library_info() {
   $libraries['jquery.form'] = array(
     'title' => 'jQuery Form Plugin',
     'website' => 'https://github.com/jquery-form/form',
-    'version' => '4.2.1',
+    'version' => '4.3.0',
     'js' => array(
       'core/misc/jquery.form.js' => array(),
     ),
@@ -1428,20 +1459,6 @@ function system_library_info() {
     ),
   );
 
-  // HTML5 Shiv.
-  $libraries['html5shiv'] = array(
-    'title' => 'html5shiv',
-    'website' => 'http://code.google.com/p/html5shiv/',
-    'version' => '3.7.3',
-    'js' => array(
-      'core/misc/html5.js' => array(
-        'group' => JS_LIBRARY,
-        'weight' => -21,
-        'browsers' => array('IE' => 'lte IE 8', '!IE' => FALSE),
-      ),
-    ),
-  );
-
   // SmartMenus.
   $libraries['smartmenus'] = array(
     'title' => 'SmartMenus',
@@ -1490,25 +1507,72 @@ function system_library_info() {
   $libraries['ui'] = array(
     'title' => 'jQuery UI: Core',
     'website' => 'http://jqueryui.com',
-    'version' => '1.13.0',
+    'version' => '1.13.2',
     'js' => array(
-      'core/misc/ui/jquery.ui.data.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.disable-selection.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.form.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.labels.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.scroll-parent.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.tabbable.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.unique-id.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.version.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.jquery-patch.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.focusable.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.form-reset-mixin.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.ie.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.keycode.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.scroll-parent.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.plugin.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.safe-active-element.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
-      'core/misc/ui/jquery.ui.safe-blur.min.js' => array('group' => JS_LIBRARY, 'weight' => -11),
+      'core/misc/ui/jquery.ui.data.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.disable-selection.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.form.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.labels.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.scroll-parent.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.tabbable.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.unique-id.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.version.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.jquery-patch.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.focusable.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.form-reset-mixin.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.ie.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.keycode.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.plugin.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.safe-active-element.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
+      'core/misc/ui/jquery.ui.safe-blur.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
     ),
     'css' => array(
       'core/misc/ui/jquery.ui.core.css' => array(),
@@ -1823,7 +1887,10 @@ function system_library_info() {
     'website' => 'http://jqueryui.com/widget/',
     'version' => $libraries['ui']['version'],
     'js' => array(
-      'core/misc/ui/jquery.ui.widget.min.js' => array('group' => JS_LIBRARY, 'weight' => -10),
+      'core/misc/ui/jquery.ui.widget.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -10,
+      ),
     ),
     'dependencies' => array(
       array('system', 'ui'),
@@ -1838,7 +1905,10 @@ function system_library_info() {
     'website' => 'https://github.com/jquery/jquery-color',
     'version' => '2.2.0',
     'js' => array(
-      'core/misc/jquery.color.js'  => array('group' => JS_LIBRARY, 'weight' => -9),
+      'core/misc/jquery.color.js'  => array(
+        'group' => JS_LIBRARY,
+        'weight' => -9,
+      ),
     ),
   );
 
@@ -1847,7 +1917,10 @@ function system_library_info() {
     'website' => 'http://jqueryui.com/effect/',
     'version' => $libraries['ui']['version'],
     'js' => array(
-      'core/misc/ui/jquery.ui.effect.min.js' => array('group' => JS_LIBRARY, 'weight' => -9),
+      'core/misc/ui/jquery.ui.effect.min.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -9,
+      ),
     ),
     'dependencies' => array(
       array('system', 'jquery.color'),
@@ -2022,8 +2095,8 @@ function system_library_info() {
   // Touch Punch for jQuery UI touch support.
   $libraries['ui.touch-punch'] = array(
     'title' => 'jQuery UI Touch Punch',
-    'website' => 'http://touchpunch.furf.com/',
-    'version' => '0.2.3',
+    'website' => 'https://github.com/RWAP/jquery-ui-touch-punch/',
+    'version' => '1.0.9',
     'js' => array(
       'core/misc/jquery.ui.touch-punch.js' => array(),
     ),
@@ -2064,6 +2137,39 @@ function system_library_info() {
   );
 
   return $libraries;
+}
+
+/**
+ * Implements hook_library_info_alter().
+ */
+function system_library_info_alter(&$libraries, $module) {
+  // Immediately return if not modifying the system libraries.
+  if ($module !== 'system') {
+    return;
+  }
+  $config = config('system.core');
+
+  // Don't replace anything if default jQuery should be used.
+  if ($config->get('jquery_version') == 'legacy') {
+    $libraries['jquery']['version'] = '1.12.4';
+    $libraries['jquery']['js'] = array(
+      'core/misc/jquery.1.12.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -20,
+      ),
+      // These include security fixes, so assign a weight that makes them load
+      // as soon after jquery.js is loaded as possible.
+      'core/misc/jquery-extend-3.4.0.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -19,
+      ),
+      'core/misc/jquery-html-prefilter-3.5.0.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -19,
+      ),
+    );
+  }
+
 }
 
 /**
@@ -2342,26 +2448,35 @@ function system_init() {
   backdrop_add_css($path . '/css/system.theme.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
   backdrop_add_css($path . '/css/messages.theme.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
 
-  // Ignore slave database servers for this request.
+  // Ignore replica database servers for this request.
   //
   // In Backdrop's distributed database structure, new data is written to the
-  // master and then propagated to the slave servers.  This means there is a
-  // lag between when data is written to the master and when it is available on
-  // the slave. At these times, we will want to avoid using a slave server
+  // primary and then propagated to the replica servers. This means there is a
+  // lag between when data is written to the primary and when it is available on
+  // the replica. At these times, we will want to avoid using a replica server
   // temporarily. For example, if a user posts a new node then we want to
-  // disable the slave server for that user temporarily to allow the slave
+  // disable the replica server for that user temporarily to allow the replica
   // server to catch up. That way, that user will see their changes immediately
-  // while for other users we still get the benefits of having a slave server,
-  // just with slightly stale data.  Code that wants to disable the slave
-  // server should use the db_ignore_slave() function to set
-  // $_SESSION['ignore_slave_server'] to the timestamp after which the slave
+  // while for other users we still get the benefits of having a replica server,
+  // just with slightly stale data. Code that wants to disable the replica
+  // server should use the db_ignore_replica() function to set
+  // $_SESSION['ignore_replica_server'] to the timestamp after which the replica
   // can be re-enabled.
+
+  // @todo remove this backwards-compatible session variable wrapper in 2.0.
+  // cspell:disable
   if (isset($_SESSION['ignore_slave_server'])) {
-    if ($_SESSION['ignore_slave_server'] >= REQUEST_TIME) {
-      Database::ignoreTarget('default', 'slave');
+    $_SESSION['ignore_replica_server'] = $_SESSION['ignore_slave_server'];
+    unset($_SESSION['ignore_slave_server']);
+    // cspell:enable
+  }
+
+  if (isset($_SESSION['ignore_replica_server'])) {
+    if ($_SESSION['ignore_replica_server'] >= REQUEST_TIME) {
+      Database::ignoreTarget('default', 'replica');
     }
     else {
-      unset($_SESSION['ignore_slave_server']);
+      unset($_SESSION['ignore_replica_server']);
     }
   }
 
@@ -2868,9 +2983,9 @@ function system_get_info($type, $name = NULL) {
     $type = 'module_enabled';
   }
   $list = system_list($type);
-  foreach ($list as $shortname => $item) {
+  foreach ($list as $short_name => $item) {
     if (!empty($item->status)) {
-      $info[$shortname] = $item->info;
+      $info[$short_name] = $item->info;
     }
   }
   if (isset($name)) {
@@ -3100,6 +3215,12 @@ function _system_rebuild_theme_data() {
     $themes[$key]->filename = $theme->uri;
     $themes[$key]->info = backdrop_parse_info_file($theme->uri) + $defaults;
 
+    // Skip modules or layouts that have been placed in the wrong directory.
+    if (isset($themes[$key]->info['type']) && $themes[$key]->info['type'] != 'theme') {
+      unset($themes[$key]);
+      continue;
+    }
+
     // The "name" key is required, but to avoid a fatal error in the menu system
     // we set a reasonable default if it is not provided.
     $themes[$key]->info += array('name' => $key);
@@ -3143,7 +3264,7 @@ function _system_rebuild_theme_data() {
     }
   }
 
-  // Now that we've established all our master themes, go back and fill in data
+  // Now that we've established all our base themes, go back and fill in data
   // for subthemes.
   foreach ($sub_themes as $key) {
     $themes[$key]->base_themes = backdrop_find_base_themes($themes, $key);
@@ -3542,7 +3663,7 @@ function system_jump_menu_submit($form, &$form_state) {
   }
 
   // If the path we are redirecting to starts with the base path (for example,
-  // "/somepath/node/1"), we need to strip the base path off before passing it
+  // "/some_path/node/1"), we need to strip the base path off before passing it
   // to $form_state['redirect'].
   $base_path = base_path();
   if (strpos($redirect, $base_path) === 0) {
@@ -3743,9 +3864,9 @@ function system_mail($key, &$message, $params) {
  *   If evaluates true, prepend an empty time zone option to the array.
  */
 function system_time_zones($blank = NULL) {
-  $zonelist = timezone_identifiers_list();
+  $zone_list = timezone_identifiers_list();
   $zones = $blank ? array('' => t('- None selected -')) : array();
-  foreach ($zonelist as $zone) {
+  foreach ($zone_list as $zone) {
     // Because many time zones exist in PHP only for backward compatibility
     // reasons and should not be used, the list is filtered by a regular
     // expression.
@@ -4211,7 +4332,7 @@ function path_autocomplete($string = '') {
                 $found_match = TRUE;
                 $view_title = $display->display_options['title'];
               }
-              // Master title.
+              // Default title.
               elseif (!empty($view->display['default']->display_options['title']) && stripos($view->display['default']->display_options['title'], $string) !== FALSE) {
                 $found_match = TRUE;
                 $view_title = $view->display['default']->display_options['title'];
@@ -4403,18 +4524,18 @@ function system_file_download($uri) {
  * submit function saves all the data in the form.
  *
  * If $form['#config'] is present in the form, the values will be saved to the
- * named settings file (e.g., mymodule.settings). If sub-elements or groups of
+ * named settings file (e.g., my_module.settings). If sub-elements or groups of
  * sub-elements have their own '#config' keys, then values of those elements and
  * their children will be saved to that settings file.
  *
  * For example, consider the form:
  *
  * @code
- * $primary_config = config('mymodule.settings');
- * $secondary_config = config('mymodule.second');
- * $tertiary_config = config('mymodule.third');
+ * $primary_config = config('my_module.settings');
+ * $secondary_config = config('my_module.second');
+ * $tertiary_config = config('my_module.third');
  * $form = array(
- *   '#config' => 'mymodule.settings',
+ *   '#config' => 'my_module.settings',
  *   'first_setting' => array(
  *     '#type' => 'textfield',
  *     '#title' => t('First Setting'),
@@ -4425,7 +4546,7 @@ function system_file_download($uri) {
  *   'bonus_fieldset' => array(
  *     '#type' => 'fieldset',
  *     '#title' => t('Secondary Settings'),
- *     '#config' => 'mymodule.second',
+ *     '#config' => 'my_module.second',
  *
  *     'bonus_one' => array( ... ),
  *     'bonus_two' => array( ... ),
@@ -4433,22 +4554,23 @@ function system_file_download($uri) {
  *     'bonus_three' => array(
  *       '#type' => 'textfield',
  *       '#default_value' => $tertiary_config->get('bonus_three'),
- *       '#config' => 'mymodule.third',
+ *       '#config' => 'my_module.third',
  *     ),
  *   ),
  * );
  * @endcode
  *
- * The top-level '#config' is "mymodule.settings". The values of 'first_setting'
- * and 'second_setting' will both be saved to "mymodule.settings".
+ * The top-level '#config' is "my_module.settings". The values of
+ * 'first_setting' and 'second_setting' will both be saved to
+ * "my_module.settings".
  *
- * The 'bonus_fieldset' has its own '#config' setting, "mymodule.second", which
+ * The 'bonus_fieldset' has its own '#config' setting, "my_module.second", which
  * overrides the top-level '#config' setting, so 'bonus_one' and 'bonus_two'
- * will be saved to "mymodule.second".
+ * will be saved to "my_module.second".
  *
- * The 'bonus_three' has its own '#config' setting, "mymodule.third", which
+ * The 'bonus_three' has its own '#config' setting, "my_module.third", which
  * overrides the one from the fieldset. The value of 'bonus_three' will be
- * saved to the "mymodule.third".
+ * saved to the "my_module.third".
  *
  * Modules that implement hook_form_alter() can use the '#config' settings to
  * save their data to their own settings file by setting the '#config' parameter

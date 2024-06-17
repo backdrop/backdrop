@@ -66,7 +66,11 @@ function theme_user_signature($variables) {
  *   - attributes: An array of attributes to pass to the
  *     backdrop_attributes() function if not linking to the user's page.
  *
+ *   $variables['account'] is typically a User object, but it can be any object
+ *   that provides the uid and name properties, for example, a Node.
+ *
  * @see template_preprocess_username()
+ * @see template_preprocess_node()
  */
 function theme_username($variables) {
   if (isset($variables['link_path'])) {

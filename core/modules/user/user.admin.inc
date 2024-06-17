@@ -140,13 +140,20 @@ function user_admin_settings($form, &$form_state) {
   );
   $form['registration_cancellation']['user_email_verification'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Require email verification when a visitor creates an account.'),
+    '#title' => t('Require email verification when a visitor creates an account'),
     '#default_value' => $config->get('user_email_verification'),
-    '#description' => t('New users will be required to validate their email address prior to logging into the site, and will be assigned a system-generated password. With this setting disabled, users will be logged in immediately upon registering, and may select their own passwords during registration.')
+    '#description' => t('New users will be required to validate their email address prior to logging into the site, and will be assigned a system-generated password. With this setting disabled, users will be logged in immediately upon registering, and may select their own passwords during registration.'),
+    '#states' => array(
+      // Hide this checkbox when "Administrators only" is selected.
+      'invisible' => array(
+        'input[name="user_register"]' => array('value' => USER_REGISTER_ADMINISTRATORS_ONLY),
+      ),
+    ),
+    '#indentation' => 1,
   );
   $form['registration_cancellation']['user_email_match'] = array(
     '#type' => 'checkbox',
-    '#title' => t('When an email address is used as username, require a matching email address.'),
+    '#title' => t('When an email address is used as username, require a matching email address'),
     '#default_value' => $config->get('user_email_match'),
   );
   module_load_include('inc', 'user', 'user.pages');
@@ -193,7 +200,7 @@ function user_admin_settings($form, &$form_state) {
   );
   $form['personalization']['user_signatures'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Enable signatures.'),
+    '#title' => t('Enable signatures'),
     '#default_value' => $config->get('user_signatures'),
   );
   // If picture support is enabled, check whether the picture directory exists.
@@ -208,7 +215,7 @@ function user_admin_settings($form, &$form_state) {
   $picture_support = $config->get('user_pictures');
   $form['personalization']['user_pictures'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Enable user pictures.'),
+    '#title' => t('Enable user pictures'),
     '#default_value' => $picture_support,
   );
   backdrop_add_js(backdrop_get_path('module', 'user') . '/js/user.js');
@@ -380,15 +387,15 @@ function user_login_settings($form, &$form_state) {
     '#type' => 'radios',
     '#title' => t('Identify users attempting to log in, using'),
     '#options' => array(
-      '0' => t('User ID and IP address combination'),
       '1' => t('User ID only'),
+      '0' => t('User ID and IP address combination'),
     ),
     '#default_value' => $flood_config->get('flood_uid_only'),
-    FALSE => array(
-      '#description' => ' Less secure, less likely to lock out users.',
+    '1' => array(
+      '#description' => t('More secure, more likely to lock out users.'),
     ),
-    TRUE => array(
-      '#description' => 'More secure, more likely to lock out users.',
+    '0' => array(
+      '#description' => t('Less secure, less likely to lock out users.'),
     ),
   );
 
@@ -653,7 +660,12 @@ function user_admin_roles($form, $form_state) {
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save configuration'),
-    '#limit_validation_errors' => array(array('roles'), array('user_admin_role'), array('user_editor_role'), array('anonymous')),
+    '#limit_validation_errors' => array(
+      array('roles'),
+      array('user_admin_role'),
+      array('user_editor_role'),
+      array('anonymous'),
+    ),
     '#submit' => array('user_admin_roles_order_submit'),
   );
 

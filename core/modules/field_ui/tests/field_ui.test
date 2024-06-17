@@ -858,6 +858,11 @@ class FieldUIViewModeTestHelper extends BackdropWebTestCase {
   protected $profile = 'testing';
 
   /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
    * Overrides BackdropWebTestCase::setUp().
    */
   public function setUp(array $modules = array()) {

@@ -1142,6 +1142,11 @@ function theme_views_mini_pager($variables) {
   $element = $variables['element'];
   $parameters = $variables['parameters'];
 
+  // Pager is only needed if there are results.
+  if (!isset($pager_page_array[$element]) || empty($pager_total)) {
+    return '';
+  }
+
   // Current is the page we are currently paged to.
   $pager_current = $pager_page_array[$element] + 1;
   // Max is the maximum page number.
@@ -1157,9 +1162,6 @@ function theme_views_mini_pager($variables) {
         'parameters' => $parameters,
       )
     );
-    if (empty($li_previous)) {
-      $li_previous = "&nbsp;";
-    }
 
     $li_next = theme('pager_next',
       array(
@@ -1169,22 +1171,24 @@ function theme_views_mini_pager($variables) {
         'parameters' => $parameters,
       )
     );
-    if (empty($li_next)) {
-      $li_next = "&nbsp;";
-    }
 
-    $items[] = array(
-      'class' => array('pager-previous'),
-      'data' => $li_previous,
-    );
+    if ($li_previous) {
+      $items[] = array(
+        'class' => array('pager-previous'),
+        'data' => $li_previous,
+      );
+    }
     $items[] = array(
       'class' => array('pager-current'),
       'data' => t('@current of @max', array('@current' => $pager_current, '@max' => $pager_max)),
     );
-    $items[] = array(
-      'class' => array('pager-next'),
-      'data' => $li_next,
-    );
+
+    if ($li_next) {
+      $items[] = array(
+        'class' => array('pager-next'),
+        'data' => $li_next,
+      );
+    }
 
     return theme('item_list',
       array(

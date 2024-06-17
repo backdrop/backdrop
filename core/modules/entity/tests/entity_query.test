@@ -8,6 +8,17 @@
  * Tests EntityFieldQuery.
  */
 class EntityFieldQueryTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var array
+   */
+  protected $fields;
+
+  /**
+   * @var array
+   */
+  protected $field_names;
+
   function setUp() {
     parent::setUp(array('node', 'field_test', 'entity_query_access_test', 'node_access_test'));
 
@@ -84,7 +95,6 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
     $instances[1]['bundle'] = $instances[1]['entity_type'] = 'test_entity_bundle';
     field_create_instance($instances[1]);
 
-    $this->instances = $instances;
     // Write entity base table if there is one.
     $entities = array();
 
@@ -1236,7 +1246,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'test_entity_bundle_key');
     // Add a flag that will be caught by field_test_entity_query_alter().
-    $query->alterMyExecuteCallbackPlease = TRUE;
+    $query->addTag('alterMyExecuteCallbackPlease');
     $this->assertEntityFieldQuery($query, array(
       array('user', 1),
     ), 'executeCallback can override the query handler when set in a hook_entity_query_alter().');

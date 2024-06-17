@@ -11,7 +11,10 @@
     "active_menus_default": [],
     "admin_theme": "",
     "anonymous": "Anonymous",
-    "block_interest_cohort": 1,
+    "backdrop_http_request": {
+      "strip_sensitive_headers_on_host_change": true,
+      "strip_sensitive_headers_on_https_downgrade": true
+    },
     "cache": 0,
     "canonical_secure": 0,
     "clean_url": 0,
@@ -26,7 +29,7 @@
     "field_purge_batch_size": 200,
     "file_not_normalized_schemes": [],
     "file_additional_public_schemes": [],
-    "file_default_allowed_extensions": "jpg jpeg gif png txt doc docx xls xlsx pdf ppt pptx pps ppsx odt ods odp mp3 mov mp4 m4a m4v mpeg avi ogg oga ogv weba webp webm",
+    "file_default_allowed_extensions": "jpg jpeg gif png txt doc docx xls xlsx pdf ppt pptx pps ppsx odt ods odp mp3 mov mp4 m4a m4v mpeg avi ogg oga ogv svg weba webp webm",
     "file_default_scheme": "public",
     "file_private_path": "",
     "file_public_path": "files",
@@ -40,6 +43,7 @@
     "image_jpeg_quality": "75",
     "image_style_flood_limit": 5,
     "install_profile": "",
+    "jquery_version": "default",
     "language_count": 1,
     "language_default": "en",
     "log_row_limit": 1000,

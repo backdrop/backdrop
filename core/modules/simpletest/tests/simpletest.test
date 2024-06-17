@@ -13,6 +13,26 @@ class SimpleTestFunctionalTest extends BackdropWebTestCase {
   protected $childTestResults;
 
   /**
+   * @var string
+   */
+  protected $pass;
+
+  /**
+   * @var string
+   */
+  protected $fail;
+
+  /**
+   * @var string
+   */
+  protected $valid_permission;
+
+  /**
+   * @var string
+   */
+  protected $invalid_permission;
+
+  /**
    * Store the test ID from each test run for comparison, to ensure they are
    * incrementing.
    */
@@ -230,12 +250,18 @@ class SimpleTestFunctionalTest extends BackdropWebTestCase {
    * Assert that an assertion with the specified values is displayed
    * in the test results.
    *
-   * @param string $message Assertion message.
-   * @param string $type Assertion type.
-   * @param string $status Assertion status.
-   * @param string $file File where the assertion originated.
-   * @param string $function Function where the assertion originated.
-   * @return Assertion result.
+   * @param string $message
+   *   Assertion message.
+   * @param string $type
+   *   Assertion type.
+   * @param string $status
+   *   Assertion status.
+   * @param string $file
+   *   File where the assertion originated.
+   * @param string $function
+   *   Function where the assertion originated.
+   * @return boolean
+   *   TRUE if the assertion is displayed, FALSE if it is not.
    */
   function assertAssertion($message, $type, $status, $file, $function) {
     $message = trim(strip_tags($message));
@@ -357,7 +383,7 @@ class SimpleTestBrowserTestCase extends BackdropWebTestCase {
    * Tests XPath escaping.
    */
   function testXPathEscaping() {
-    $testpage = <<< EOF
+    $test_page = <<< EOF
 <html>
 <body>
 <a href="link1">A "weird" link, just to bother the dumb "XPath 1.0"</a>
@@ -365,7 +391,7 @@ class SimpleTestBrowserTestCase extends BackdropWebTestCase {
 </body>
 </html>
 EOF;
-    $this->backdropSetContent($testpage);
+    $this->backdropSetContent($test_page);
 
     // Matches the first link.
     $urls = $this->xpath('//a[text()=:text]', array(':text' => 'A "weird" link, just to bother the dumb "XPath 1.0"'));
@@ -587,6 +613,11 @@ class SimpleTestInstallationProfileModuleTestsTestCase extends BackdropWebTestCa
    */
   protected $profile = 'testing';
 
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   function setUp() {
     parent::setUp(array('simpletest'));
 
@@ -624,6 +655,11 @@ class SimpleTestOtherInstallationProfileModuleTestsTestCase extends BackdropWebT
    * @see BackdropSystemListingCompatibleTestCase
    */
   protected $profile = 'minimal';
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
 
   function setUp() {
     parent::setUp(array('simpletest'));

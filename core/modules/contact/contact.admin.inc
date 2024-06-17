@@ -141,9 +141,8 @@ function contact_form_permissions() {
       '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
     );
     foreach ($roles as $role_name => $role) {
-      // Builds arrays for checked boxes for each role. Always select the Admin
-      // role on new forms.
-      if (in_array($perm, $role->permissions) || ($role->name == $admin_role)) {
+      // Builds arrays for checked boxes for each role.
+      if (in_array($perm, $role->permissions)) {
         $status[$role_name][] = $perm;
       }
     }
@@ -316,7 +315,7 @@ function contact_category_edit_form($form, &$form_state, array $category = array
     // better human readability.
     '#default_value' => implode("\n", explode(',', $category['recipients'])),
     '#description' => t("To specify multiple recipients, separate each email address with a new line, comma, semicolon or space."),
-    '#placeholder' => t("webmaster@example.com\nsales@example.com"),
+    '#placeholder' => t("admin@example.com\nsales@example.com"),
     '#required' => TRUE,
     '#rows' => max(5, sizeof(explode(',', $category['recipients'])) + 2),
   );

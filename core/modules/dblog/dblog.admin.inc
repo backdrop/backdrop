@@ -18,17 +18,10 @@
 function dblog_overview() {
   $filter = dblog_build_filter_query();
   $rows = array();
-  $classes = array(
-    WATCHDOG_DEBUG => 'dblog-debug',
-    WATCHDOG_INFO => 'dblog-info',
-    WATCHDOG_NOTICE => 'dblog-notice',
-    WATCHDOG_WARNING => 'dblog-warning',
-    WATCHDOG_ERROR => 'dblog-error',
-    WATCHDOG_CRITICAL => 'dblog-critical',
-    WATCHDOG_ALERT => 'dblog-alert',
-    WATCHDOG_EMERGENCY => 'dblog-emergency',
-    WATCHDOG_DEPRECATED => 'dblog-deprecated',
-  );
+  $classes = watchdog_severity_levels('name');
+  foreach ($classes as $key => $value) {
+    $classes[$key] = 'dblog-' . $value;
+  }
 
   $build['dblog_filter_form'] = backdrop_get_form('dblog_filter_form');
 
@@ -302,13 +295,19 @@ function dblog_format_message($event, $is_link = FALSE) {
   $output = '';
   // Check for required properties.
   if (isset($event->message) && isset($event->variables)) {
+    $event_variables = @unserialize($event->variables);
     // Messages without variables or user specified text.
-    if ($event->variables === 'N;') {
+    if ($event_variables === NULL) {
       $output = $event->message;
+    }
+    elseif (!is_array($event_variables)) {
+      $output = t('Log data is corrupted and cannot be unserialized: @message', array(
+        '@message' => $event->message,
+      ));
     }
     // Message to translate with injected variables.
     else {
-      $output = t($event->message, unserialize($event->variables));
+      $output = t($event->message, $event_variables);
     }
     // If the output is expected to be a link, strip all the tags and
     // special characters by using filter_xss() without any allowed tags.

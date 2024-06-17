@@ -33,6 +33,27 @@ function theme_node_preview_banner_form($variables) {
 }
 
 /**
+ * Returns HTML for a node preview for display during node creation and editing.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - node_preview: A render element representing the node preview.
+ *
+ * @see node_preview()
+ * @see node_preview_banner_form()
+ * @see theme_node_preview_banner_form()
+ *
+ * @ingroup themeable
+ *
+ * @since 1.0.6 Function removed (see: https://github.com/backdrop/backdrop-issues/issues/218).
+ * @since 1.28.0 Function re-added (see: https://github.com/backdrop/backdrop-issues/issues/6129).
+ */
+function theme_node_preview($variables) {
+  $node_preview = $variables['node_preview'];
+  return backdrop_render_children($node_preview);
+}
+
+/**
  * Returns HTML for the content ranking part of the search settings admin page.
  *
  * @param $variables
@@ -264,7 +285,13 @@ function template_preprocess_node(&$variables) {
     $variables['classes'][] = 'node-by-anonymous';
   }
   elseif ($node->uid == $variables['user']->uid) {
-      $variables['classes'][] = 'node-by-viewer';
+    $variables['classes'][] = 'node-by-viewer';
+  }
+
+  // Remove the link to the node if this type has a hidden path.
+  if ($node_type->settings['hidden_path'] && !user_access('view hidden paths')) {
+    // Empty the $node_url variable so the node title won't be linked.
+    $variables['node_url'] = FALSE;
   }
 
   // Add an extra theme hook suggestion for node id.

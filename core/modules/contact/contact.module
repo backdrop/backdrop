@@ -34,7 +34,7 @@ function contact_permission() {
       'title' => t('Use the site-wide contact form'),
     ),
     'access user contact forms' => array(
-      'title' => t("Use users' personal contact forms"),
+      'title' => t('Use personal contact forms'),
     ),
   );
 }

@@ -236,7 +236,7 @@ if ($args['xml']) {
   simpletest_script_reporter_write_xml_results();
 }
 
-if($args['summary']) {
+if ($args['summary']) {
   simpletest_script_write_summary($args['summary']);
 }
 

@@ -75,7 +75,6 @@ class LayoutRendererFlexible {
     $this->admin = TRUE;
     $this->layout = &$layout;
     $this->layout_info = $template_info;
-    $this->flexible = TRUE;
   }
 
   /**

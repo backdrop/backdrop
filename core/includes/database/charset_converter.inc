@@ -84,9 +84,11 @@ class DatabaseCharsetConverter {
     $success = FALSE;
     foreach ($databases as $database_key => $database_values) {
       foreach ($database_values as $target => $database) {
-        // Do not update slave databases, they will have changes replicated
+        // Do not update replica databases, they will have changes replicated
         // to them automatically. Only update mysql/mysqli-based connections.
-        if ($target === 'slave' || !isset($database['driver']) || strpos($database['driver'], 'mysql') !== 0) {
+        $no_driver = !isset($database['driver']);
+        $no_mysql_driver = strpos($database['driver'], 'mysql') !== 0;
+        if ($target === 'replica' || $no_driver || $no_mysql_driver) {
           continue;
         }
 

@@ -167,9 +167,6 @@ button.form-submit,
   padding: 0 1.5625em;
   margin-bottom: 1em;
   margin-right: 1em; /* LTR */
-  -webkit-transition:
-    background-color 0.6s ease 0s,
-    color 0.6s ease 0s;
   transition:
     background-color 0.6s ease 0s,
     color 0.6s ease 0s;
@@ -209,7 +206,6 @@ textarea.form-textarea {
   padding: 0.625em;
   border: 0.125rem solid #d0d0d0;
   font-weight: 400;
-  -webkit-transition: border-color 0.25s ease-in-out;
   transition: border-color 0.25s ease-in-out;
   will-change: border-color;
 }

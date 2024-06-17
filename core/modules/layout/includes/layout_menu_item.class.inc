@@ -35,6 +35,13 @@ class LayoutMenuItem {
   var $path = '';
 
   /**
+   * The weight of this menu item.
+   *
+   * @var int
+   */
+  public $weight = 0;
+
+  /**
    * The settings for this menu item's menu link (if any).
    *
    * This contains at least the following properties:
