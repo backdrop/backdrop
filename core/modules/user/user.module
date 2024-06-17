@@ -124,6 +124,11 @@ function user_entity_info() {
       'bundle label' => t('Type'),
       'controller class' => 'UserStorageController',
       'base table' => 'users',
+      'layout admin' => array(
+        'path' => 'admin/config/people/layouts',
+        'type' => MENU_LOCAL_TASK,
+        'access arguments' => array('administer users'),
+      ),
       'fieldable' => TRUE,
       'redirect support' => TRUE,
       'entity class' => 'User',
