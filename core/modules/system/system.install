@@ -42,7 +42,10 @@ function system_requirements($phase) {
     }
 
     // Report the configuration storage being used.
-    $config_storage_types = array('active' => t('Active'), 'staging' => t('Staging'));
+    $config_storage_types = array(
+      'active' => t('Active'),
+      'staging' => t('Staging'),
+    );
     foreach ($config_storage_types as $type => $type_name) {
       $storage = config_get_config_storage($type);
       $class = get_class($storage);
