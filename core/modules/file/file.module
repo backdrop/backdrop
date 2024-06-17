@@ -3231,7 +3231,7 @@ function file_view_multiple($files, $view_mode = 'full', $weight = 0, $langcode 
   }
   // Sort here, to preserve the input order of the entities that were passed to
   // this function.
-  uasort($build['files'], 'element_sort');
+  backdrop_sort($build['files'], array('#weight'));
   $build['files']['#sorted'] = TRUE;
 
   return $build;

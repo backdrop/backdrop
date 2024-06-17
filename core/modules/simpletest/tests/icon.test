@@ -91,6 +91,67 @@ class IconTestCase extends BackdropWebTestCase {
   }
 
   /**
+   * Test that rendered icons have the expected content and attributes.
+   */
+  protected function testIconAttributes() {
+    $options_alt = array(
+      'alt' => 'Hello world',
+    );
+    $expected_alt = '<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 256 256" fill="currentColor" class="icon icon--circle-fill"><title>Hello world</title><path d="M232,128A104,104,0,1,1,128,24,104.13,104.13,0,0,1,232,128Z"/></svg>';
+    $icon = icon('circle-fill', $options_alt);
+    $this->assertEqual($icon, $expected_alt, 'Alt option properly converted to title dom element.');
+
+    $options_dimensions = array(
+      'attributes' => array(
+        'width' => 99,
+        'height' => 99,
+      ),
+    );
+    $expected_dimensions = '<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 256 256" fill="currentColor" width="99" height="99" aria-hidden="true" class="icon icon--line-vertical"><path d="M136,24V232a8,8,0,0,1-16,0V24a8,8,0,0,1,16,0Z"/></svg>';
+    $icon = icon('line-vertical', $options_dimensions);
+    $this->assertEqual($icon, $expected_dimensions, 'Width and height attributes properly added.');
+
+    $options_fill = array(
+      'attributes' => array(
+        'fill' => 'red',
+      ),
+    );
+    $expected_fill = '<svg xmlns="http://www.w3.org/2000/svg" viewbox="0 0 256 256" fill="red" aria-hidden="true" class="icon icon--dot"><path d="M140,128a12,12,0,1,1-12-12A12,12,0,0,1,140,128Z"/></svg>';
+    $icon = icon('dot', $options_fill);
+    $this->assertEqual($icon, $expected_fill, 'Value of fill attribute properly overridden.');
+
+    // Remove title tag if alt option is an empty string, low level check.
+    $initial_svg = '<svg width="16" height="16" version="1.1" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><title>Hello world</title><circle cx="8" cy="8" r="4"></circle></svg>';
+    $options = array(
+      'alt' => '',
+      'aria-hidden' => 'true',
+    );
+    $expected_svg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" version="1.1" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="4"/></svg>';
+    $updated_svg = image_add_svg_attributes($initial_svg, $options);
+    $this->assertEqual($updated_svg, $expected_svg, 'Title tag stripped and aria attribute added properly.');
+
+    // Make sure, a comment does not break attribute handling.
+    $initial_svg = '<!-- Some vendor comment --><svg width="16" height="16" version="1.1" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><circle cx="8" cy="8" r="4"></circle></svg>';
+    $options = array(
+      'alt' => 'Some alternative text',
+      'fill' => 'blue',
+    );
+    $expected_svg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" version="1.1" viewBox="0 0 16 16" fill="blue"><title>Some alternative text</title><circle cx="8" cy="8" r="4"/></svg>';
+    $updated_svg = image_add_svg_attributes($initial_svg, $options);
+    $this->assertEqual($updated_svg, $expected_svg, 'Addition of title and attribute works with comment in svg file.');
+
+    // Unlikely but possible: a comment as first item in svg tag.
+    $initial_svg = '<svg width="16" height="16" version="1.1" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><!-- Comment --><circle cx="8" cy="8" r="4"></circle></svg>';
+    $options = array(
+      'alt' => 'Some alternative text',
+      'fill' => 'green',
+    );
+    $expected_svg = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" version="1.1" viewBox="0 0 16 16" fill="green"><title>Some alternative text</title><!-- Comment --><circle cx="8" cy="8" r="4"/></svg>';
+    $updated_svg = image_add_svg_attributes($initial_svg, $options);
+    $this->assertEqual($updated_svg, $expected_svg, 'Addition of title and attribute works with comment as first child of svg tag.');
+  }
+
+  /**
    * Compare an expected icon path against the active icon path by icon name.
    *
    * @param string $expected_path

@@ -69,14 +69,14 @@ Backdrop.behaviors.userFieldsetSummaries = {
       // Timezone.
       var $timezone = $context.find('select[name="timezone"]');
       if ($timezone.length && $timezone.val().length) {
-        var timezoneText = Backdrop.t('Time zone:') + ' ' + $.trim($timezone.find(':selected').text());
+        var timezoneText = Backdrop.t('Time zone:') + ' ' + $timezone.find(':selected').text().trim();
         vals.push(timezoneText);
       }
 
       // Language.
       var $language = $context.find('input[name="language"]:checked');
       if ($language.length) {
-        var languageText = Backdrop.t('Language:') + ' ' + $.trim($language.parent().find('label').text());
+        var languageText = Backdrop.t('Language:') + ' ' + $language.parent().find('label').text().trim();
         vals.push(languageText);
       }
 
