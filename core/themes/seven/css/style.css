@@ -1358,10 +1358,11 @@ div.filter-options select {
 }
 
 /**
- * Pretty block radios, `:not(#foo) >` rules out browsers that can't support this
+ * Pretty radio tiles for templates, `:not(#foo) >` rules out browsers that can't
+ * can't support this.
  */
 :not(#foo) > .layout-settings-form .layout-options .form-type-radio input, .form-item-region-style .form-type-radio input {
-  /* Hide radios from visuals but not screen-readers */
+  /* Hide radios from visuals but not screen-readers. */
   position: absolute;
   width: 1px;
   height: 1px;
@@ -1375,7 +1376,7 @@ div.filter-options select {
 .layout-settings-page .layout-options .form-type-checkbox label,
 .layout-settings-form .layout-options .form-type-radio label {
   position: relative;
-  z-index: 2; /* Fix IE issue clicking on image doesn't trigger radio */
+  z-index: 2; /* Fix IE issue clicking on image doesn't trigger radio. */
   display: block;
   padding: .6em;
   border: 2px solid transparent;
@@ -1398,8 +1399,18 @@ div.filter-options select {
 .layout-settings-form .layout-options .form-type-radio:active label,
 .layout-settings-form .layout-options .form-type-radio input:checked + label {
   background-color: #ffffff;
-  border-color: #d0d0d0;
+  border-color: #43afe4;
 }
+
+/**
+ * Change the color of the .png icon of template previews from gray to blue.
+ * Try to match #43afe4 as much as possible (given that we are starting from a
+ * gray base), while at the same time avoid ending up with a red/pink outline.
+ */
+.layout-settings-form .layout-options .form-type-radio input:checked + label .layout-icon img {
+  filter: sepia(65%) saturate(2260%) hue-rotate(175deg);
+}
+
 .form-item-region-style .form-type-radio input:focus + label,
 .form-item-region-style .form-type-radio input:hover + label,
 .form-item-region-style .form-type-radio:hover input:checked + label,
@@ -1415,7 +1426,7 @@ div.filter-options select {
 .layout-settings-page .layout-options .form-type-checkbox img,
 .layout-settings-form .layout-options .form-type-radio img {
   position: relative;
-  z-index: -1; /* Fix IE issue clicking on image doesn't trigger radio */
+  z-index: -1; /* Fix IE issue clicking on image doesn't trigger radio. */
   padding: 4px;
   border-radius: 4px;
   background: #ffffff;
@@ -1837,10 +1848,7 @@ div.add-or-remove-shortcuts {
   }
 }
 
-/**
- * Progress Bar
- * See system module
- */
+/* Progress Bar (see system module). */
 .progress {
   font-weight: bold;
 }
