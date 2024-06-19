@@ -1804,6 +1804,27 @@ function user_init() {
 }
 
 /**
+ * Implements hook_custom_theme().
+ */
+function user_custom_theme() {
+  $current_path = current_path();
+  if ($current_path == 'user/login' || $current_path == 'user/password') {
+    return config_get('system.core', 'admin_theme');
+  }
+}
+
+/**
+ * Implements hook_preprocess_page().
+ */
+function user_preprocess_page(&$variables) {
+  // Add a class that tells us whether we're on a login page or not.
+  $current_path = current_path();
+  if ($current_path == 'user/login' || $current_path == 'user/password') {
+    $variables['classes'][] = 'user-login-page';
+  }
+}
+
+/**
  * Form builder; the main user login form.
  *
  * @ingroup forms
