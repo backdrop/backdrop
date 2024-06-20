@@ -48,6 +48,13 @@
   content: '-';
 }
 
+/* Makes sure all menu items after the 1st level are rendered above the admin
+   bar menu. Prevents issues with menu items being inaccessible as described in
+   https://github.com/backdrop/backdrop-issues/issues/2161 */
+ul.menu-dropdown li.has-children * {
+  z-index: 1000; /* provided #admin-bar stays at 999 */
+}
+
 @media (min-width: 48em) {
   /* Switch to desktop layout
   -----------------------------------------------
