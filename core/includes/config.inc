@@ -164,7 +164,7 @@ function config_get_translated($config_file, $option = NULL, $args = array(), $o
  *
  * @param string $config_file
  *   The name of the configuration object to retrieve. The name corresponds to
- *   an JSON configuration file. For @code config(book.admin) @endcode, the
+ *   an JSON configuration file. For @code book.admin @endcode, the
  *   config object returned will contain the contents of book.admin.json.
  * @param string $option
  *   The name of the config option within the file to set. The config option
