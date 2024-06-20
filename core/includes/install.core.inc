@@ -535,16 +535,19 @@ function install_tasks($install_state) {
   // Determine whether translation import tasks will need to be performed.
   $needs_translations = count($install_state['translations']) > 1 && !empty($install_state['parameters']['langcode']) && $install_state['parameters']['langcode'] != 'en';
 
-  // Display profile task only when there is more than one non-hidden profile.
+  // Display the "Choose profile" task only when there is more than one
+  // non-hidden profiles; hide it if there is only a single exclusive profile.
   $hidden_profile_count = 0;
+  $exclusive_profile_count = 0;
   foreach ($install_state['profiles'] as $profile) {
     $profile_info = install_profile_info($profile->name);
     $hidden_profile_count += empty($profile_info['hidden']);
+    $exclusive_profile_count += !empty($profile_info['exclusive']);
   }
-  $display_select_profile = $hidden_profile_count > 1 && count($install_state['profiles']) != 1;
+  $display_select_profile = $hidden_profile_count > 1 && count($install_state['profiles']) != 1 && $exclusive_profile_count !=1;
 
-  // Start with the core installation tasks that run before handing control
-  // to the installation profile.
+  // Start with the core installation tasks that run before handing control to
+  // the installation profile.
   $tasks = array(
     'install_select_language' => array(
       'display_name' => st('Choose language'),
