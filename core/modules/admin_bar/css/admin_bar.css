@@ -10,12 +10,13 @@
 /* Set a CSS property declaring the height of the admin bar. */
 /* This can be read by themes to offset the top of the page if needed. */
 :root {
-  --admin-bar-height: 2.35rem;
+  --admin-bar-font-size: 12px;
+  --admin-bar-height: calc(var(--admin-bar-font-size) * 3.05);
 }
 
 #admin-bar {
   /* Adjusting font size will scale the entire admin menu, including icons. */
-  font: normal 12px "Lucida Grande", Verdana, sans-serif;
+  font: normal var(--admin-bar-font-size) "Lucida Grande", Verdana, sans-serif;
   left: 0;
   position: absolute;
   text-align: left; /* LTR */
@@ -71,13 +72,14 @@
 }
 
 /* Specific admin bar menu links. */
-#admin-bar .admin-bar-link-icon svg,
-#admin-bar .admin-bar-link-text {
-  vertical-align: text-bottom;
+#admin-bar .admin-bar-link-icon {
+  vertical-align: middle;
 }
 #admin-bar svg.icon {
   width: 1.9em;
   height: 1.9em;
+  margin-top: -0.3em;
+  margin-bottom: -0.4em;
   padding-right: 0.3em; /* LTR */
   box-sizing: content-box;
 }
@@ -99,11 +101,11 @@
 #admin-bar li {
   margin: 0;
   padding: 0;
+  line-height: 1.5;
 }
 
 /* Dropdown lists. */
 #admin-bar .dropdown {
-  line-height: 1.8em;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -135,13 +137,13 @@
 #admin-bar .dropdown li > a,
 #admin-bar .dropdown li > span {
   display: block;
-  padding: 0.5em 1.5em 0.5em 0.75em;
+  padding: 0.7em 1.5em 0.7em 0.75em;
 }
 #admin-bar-icon > li.expandable > a,
 #admin-bar-menu > li.expandable > ul.dropdown > li > a,
 #admin-bar-extra > li.expandable > ul.dropdown > li > a,
 #admin-bar-extra > li.expandable > ul.dropdown > li > span {
-  padding: 0.5em 0.75em 0.5em 0.7em;
+  padding: 0.7em 0.75em 0.7em 0.7em;
 }
 #admin-bar a.expanded-trail,
 #admin-bar span.expanded-trail {
@@ -195,7 +197,6 @@
 #admin-bar .dropdown li ul {
   display: none;
   left: -999em; /* LTR */
-  line-height: inherit;
   margin: 0;
   position: absolute;
   width: 15em;
@@ -206,7 +207,7 @@
 
 /* Third-and-above-level lists. */
 #admin-bar .dropdown li li.expandable ul {
-  margin: -3.1em 0 0 15em; /* LTR */
+  margin: calc(-1px - var(--admin-bar-height)) 0 0 15em; /* LTR */
 }
 #admin-bar .dropdown li li.expandable.outside-right ul {
   margin-left: -15em; /* LTR */
@@ -242,7 +243,7 @@
   background: #ffffff;
   width: 1em;
   height: 100%;
-  margin: -0.5em 0;
+  margin: -0.7em 0;
   position: absolute;
   right: 0.7em; /* LTR */
 }
