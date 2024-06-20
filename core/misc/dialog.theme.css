@@ -22,6 +22,7 @@
 .ui-dialog .ui-dialog-titlebar-close {
   border: 0;
   background: none;
+  right: .9em;
 }
 .ui-dialog .ui-dialog-buttonpane {
   margin-top: 0;
