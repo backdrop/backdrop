@@ -167,6 +167,10 @@ td {
   border: 0.0625rem solid #dee2ea;
 }
 
+tr.odd {
+  background: #f7f7f7;
+}
+
 th {
   border-right: 0.0625rem solid #bbbbbb;
   background: #dee2ea;
