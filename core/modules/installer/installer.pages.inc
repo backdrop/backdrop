@@ -496,21 +496,35 @@ function installer_browser_installation_install_dependencies_page() {
     $missing_projects = array();
     // Add the project data in the array as best we can.
     foreach ($missing as $project_shortname => $dependencies) {
-      foreach ($dependencies as $dependency_shortname) {
-        // The dependency is a submodule (denoted as PROJECT:SUBMODULE).
-        if (($separator_position = strpos($dependency_shortname, ':')) !== FALSE) {
-          // Use the submodule name as the dependency name.
-          $dependency_name = substr($dependency_shortname, $separator_position + 1);
+      foreach ($dependencies as $dependency_string) {
+        // Check whether the dependency is a combo of a parent project + a
+        // submodule (denoted with the format PROJECT:SUBMODULE).
+        $dependency_breakdown = explode(':', $dependency_string);
+
+        // Parent module + submodule dependency.
+        if (count($dependency_breakdown) == 2) {
+          list($parent_project, $dependency_name) = $dependency_breakdown;
           // Temporarily set the dependency type to 'submodule' (used in order
           // to exclude these dependencies from fetching release data in
           // installer_browser_installation_select_versions_form() - we still
           // want to include them as missing dependencies though, so that they
           // can be enabled later).
           $dependency_type = 'submodule';
+
+          // If the parent project was not previously added in the dependency
+          // list, make sure to add it now.
+          if (!in_array($parent_project, $missing_projects)) {
+            $missing_projects[$parent_project] = array(
+              'name' => $parent_project,
+              'type' => 'module',
+              'title' => $parent_project,
+              'includes' => array(),
+            );
+          }
         }
         else {
           // Regular, non-submodule dependency.
-          $dependency_name = $dependency_shortname;
+          $dependency_name = $dependency_string;
           $dependency_type = 'module';
         }
 
