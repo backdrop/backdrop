@@ -272,13 +272,21 @@ function installer_browser_installation_select_versions_form($form, &$form_state
           '@project' => $project['title'],
           '@version' => $release['version'],
           '@date' => format_date($release['date'], 'custom', 'M j, Y'),
-          ));
+        ));
         if (isset($release['terms']['Release type']) && !empty($release['terms']['Release type'])) {
           $release_title .= check_plain(" (" . implode(', ', $release['terms']['Release type']) . ")");
         }
         $releases_list[$version] = $release_title;
         if (isset($release['release_link'])) {
-          $releases_list[$version] .= ' (' . l(t('release notes'), $release['release_link'], array('attributes' => array('title' => t('Release notes for @project_title', array('@project_title' => $project['title'])), 'target' => '_blank'))) . ')';
+          $options = array(
+            'attributes' => array(
+              'title' => t('Release notes for @project_title', array(
+                '@project_title' => $project['title'],
+              )),
+              'target' => '_blank',
+            )
+          );
+          $releases_list[$version] .= ' (' . l(t('release notes'), $release['release_link'], $options) . ')';
         }
       }
 
@@ -314,8 +322,7 @@ function installer_browser_installation_select_versions_form($form, &$form_state
         $form['releases'][$project['name']]['selected_text']['#markup'] = $releases_list[$project_data['recommended']];
       }
       if (count($releases_list) > 1) {
-        $form['releases'][$project['name']]['selected_text']['#markup'] .=
-          ' (<a class="installer-browser-show-releases-link js-show" href="#" rel="' . $project['name'] . '">' . t('change release') . '</a>)';
+        $form['releases'][$project['name']]['selected_text']['#markup'] .= ' (<a class="installer-browser-show-releases-link js-show" href="#" rel="' . $project['name'] . '">' . t('change release') . '</a>)';
       }
 
       // Update the project type based on the type of projects being selected.
