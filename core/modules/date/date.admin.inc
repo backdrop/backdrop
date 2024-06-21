@@ -634,7 +634,7 @@ function _date_field_settings_form($field, $instance, $has_data) {
     '#title' => t('Date value caching'),
     '#options' => array(
       'disabled' => t('No caching'),
-      'all' => t('Cache all date values on every entity (<strong>not recommended!</strong>)'),
+      'all' => t('Cache all values of this field everywhere it is used (<strong>not recommended!</strong>)'),
       'enabled' => t('Cache up to a configurable maximum of date values, to improve performance'),
     ),
     '#default_value' => $cache_enabled_default,
@@ -737,7 +737,7 @@ function _date_field_settings_form($field, $instance, $has_data) {
   // for it instead.
   $form['cache_count_help'] = array(
     '#type' => 'item',
-    '#description' => t('The suggested setting for multiple-value and repeating-date fields is no more than 4 values per field.'),
+    '#description' => t('The suggested setting for multiple-value and repeating-date fields is no more than 4 values cached per field.'),
     '#weight' => 21,
   );
   // Similar to the above, this help text cannot be added as a proper
@@ -745,7 +745,9 @@ function _date_field_settings_form($field, $instance, $has_data) {
   // between the last radio and the pseudo-radio.
   // @todo: Once we have https://github.com/backdrop/backdrop-issues/issues/1403
   // this description should ideally be moved below the label of the
-  // cache_enabled radio set via '#description_display' => 'before'.
+  // cache_enabled radio set via '#description_display' => 'before' (or simply
+  // added as '#description' to that field if 'before' is the default for
+  // description text in radios).
   $form['cache_enabled_help'] = array(
     '#type' => 'item',
     '#description' => t('Caching happens when date fields are loaded, rather than when they are displayed.'),
