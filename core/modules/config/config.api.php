@@ -27,6 +27,14 @@
  *     not suitable for generating a label, a function may be specified as a
  *     label callback.
  *   - group: A translated string to be used as the configuration group.
+ *   - enforce_data_types: Boolean indicator as to whether the data type from
+ *     the default configuration file will be applied to saved values. For
+ *     example if the default "my_module.settings.json" file had a key for
+ *     "enabled" that had the value of TRUE, and the form that updated the
+ *     configuration saved that value as "0" or 0, the value would be cast to
+ *     FALSE, matching the original data type.
+ *
+ * @since 1.28.0 The "enforce_data_types" key was added.
  */
 function hook_config_info() {
   // If there are a large number of configuration files prefixed with this

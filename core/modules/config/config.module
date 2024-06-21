@@ -108,43 +108,6 @@ function config_file_download($uri) {
 }
 
 /**
- * Retrieves configuration information provided by modules.
- *
- * @param string $config_name
- *   (optional) The name of the config file whose information should be
- *   retrieved. If not specified, information for all configuration prefixes is
- *   returned.
- * @return array
- *   An array of all configuration information, either for the single
- *   configuration file based on its prefix, or configuration information for
- *   all installed modules if no $config_name is specified.
- *
- * @see hook_config_info()
- * @see hook_config_info_alter()
- */
-function config_get_info($config_name = NULL) {
-  $config_info = &backdrop_static(__FUNCTION__, array());
-  if (empty($config_info)) {
-    $config_info = module_invoke_all('config_info');
-    backdrop_alter('config_info', $config_info);
-  }
-
-  if ($config_name) {
-    $return_config_info = FALSE;
-    foreach ($config_info as $prefix => $this_config_info) {
-      if ($config_name === $prefix || strpos($config_name, $prefix . '.') === 0) {
-        $return_config_info = $this_config_info;
-        break;
-      }
-    }
-    return $return_config_info;
-  }
-  else {
-    return $config_info;
-  }
-}
-
-/**
  * Get a list of all configuration prefixes and groups.
  *
  * This list provided by hook_config_info().
