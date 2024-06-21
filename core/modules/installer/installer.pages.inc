@@ -535,16 +535,21 @@ function installer_browser_installation_install_dependencies_page() {
           'includes' => array(),
         );
 
-        // Make an assumption that the dependencies will have the same update
-        // status URL as the project. This may not be true in the future if
-        // we have decide to have more than one update server, but for now this
-        // is necessary to test dependencies installation.
-        // We only do this for regular, non-submodule dependencies.
-        if (isset($projects[$project_shortname]['project status url']) && $dependency_type != 'submodule') {
-          // Replace the dependent project short name with the parent short
-          // name, as is needed with Backdrop's default update server.
-          $status_url = preg_replace('/\/' . preg_quote($project_shortname, '/') . '([.\/]?)/', '/' . $dependency_name . '$1', $projects[$project_shortname]['project status url']);
-          $missing_projects[$dependency_name]['project status url'] = $status_url;
+        // Add the URL where project release data can be fetched from, but only
+        // for regular projects - not for submodules contained within parent
+        // projects.
+        if ($dependency_type != 'submodule') {
+          // Make an assumption that the dependencies will have the same update
+          // status URL as the project that depends on them. This may not be
+          // true in the future if we decide to allow more than one update
+          // server, but for now this is necessary to test dependencies
+          // installation.
+          if (isset($projects[$project_shortname]['project status url'])) {
+            // Replace the dependent project short name with the parent short
+            // name, as is needed with Backdrop's default update server.
+            $status_url = preg_replace('/\/' . preg_quote($project_shortname, '/') . '([.\/]?)/', '/' . $dependency_name . '$1', $projects[$project_shortname]['project status url']);
+            $missing_projects[$dependency_name]['project status url'] = $status_url;
+          }
         }
       }
     }
