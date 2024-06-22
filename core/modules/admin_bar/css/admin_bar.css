@@ -26,7 +26,7 @@
   font: normal var(--admin-bar-font-size) "Lucida Grande", Verdana, sans-serif;
   line-height: 1;
   text-align: left; /* LTR */
-  background: linear-gradient(#2D2D2D 0%, #171717 100%); /* W3C */
+  background: linear-gradient(#2D2D2D 0%, #171717 100%);
 }
 [dir="rtl"] #admin-bar {
   text-align: right;
@@ -88,14 +88,20 @@
   padding-left: 0.3em;
 }
 
+#admin-bar #admin-bar-menu > li > .dropdown > li > a.active-trail {
+  background-color: #000000;
+  box-shadow:
+    inset 0 -1px 0 0 #999,
+    inset 0 -3px 0 0 #eee;
+}
 /* Restore active and hover colors. */
 #admin-bar #admin-bar-menu > li > .dropdown > li > a.expanded-trail,
 #admin-bar #admin-bar-extra > li > .dropdown > li > a:hover,
-#admin-bar #admin-bar-icon li.admin-bar-icon > a:hover {
-  background-color: #45454a;
-}
-#admin-bar #admin-bar-menu > li > .dropdown > li > a.active-trail {
-  background-color: #9f9f9f;
+#admin-bar #admin-bar-icon li.admin-bar-icon > a:hover,
+#admin-bar #admin-bar-extra > li > .dropdown > li > a:focus,
+#admin-bar #admin-bar-icon li.admin-bar-icon > a:focus {
+  background-image: linear-gradient(#000000, #222222);
+  box-shadow: inset 0 -2px 0 0 #0074bd;
 }
 
 #admin-bar li {
@@ -143,10 +149,6 @@
 #admin-bar-extra > li.expandable > ul.dropdown > li > a,
 #admin-bar-extra > li.expandable > ul.dropdown > li > span {
   padding: 0.7em 0.75em 0.7em 0.7em;
-}
-#admin-bar a.expanded-trail,
-#admin-bar span.expanded-trail {
-  background-color: #45454a;
 }
 
 #admin-bar .dropdown .admin-bar-tab a {
@@ -231,7 +233,6 @@
 /* Second-and-more-level hovering. */
 #admin-bar .dropdown li li.expandable > a {
   position: relative;
-  background: #45454a;
 }
 #admin-bar .dropdown li li.expandable > a::before {
   content: '';
@@ -375,7 +376,14 @@ tr.admin-bar-tweak-permissions-processed td.module {
   border-radius: 2em;
   text-align: center;
   line-height: 1;
-  background-color: #ee3d23;
+  font-weight: bold;
+  background-color: #a31600;
+  box-shadow: 0 -1px 0 0 #ee3d23;
+}
+#admin-bar .admin-bar-alert:hover .error-count,
+#admin-bar .admin-bar-alert:focus .error-count {
+  background-color: #ca1b00;
+  box-shadow: 0 -1px 0 0 #ff5c43;
 }
 #admin-bar .admin-bar-alert .error-count {
   margin-left: 0;
