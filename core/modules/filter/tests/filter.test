@@ -1259,13 +1259,19 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
     $this->assertEqual($f, '', 'HTML filter -- overlong UTF-8 sequences.');
 
     $f = filter_xss("Who&#039;s Online");
-    $this->assertNormalized($f, "who's online", 'HTML filter -- html entity number');
+    $this->assertNormalized($f, "who's online", 'HTML filter -- html entity number.');
 
     $f = filter_xss("Who&amp;#039;s Online");
-    $this->assertNormalized($f, "who&#039;s online", 'HTML filter -- encoded html entity number');
+    $this->assertNormalized($f, "who&#039;s online", 'HTML filter -- encoded html entity number.');
 
     $f = filter_xss("Who&amp;amp;#039; Online");
-    $this->assertNormalized($f, "who&amp;#039; online", 'HTML filter -- double encoded html entity number');
+    $this->assertNormalized($f, "who&amp;#039; online", 'HTML filter -- double encoded html entity number.');
+
+    $f = filter_xss('<a data-a2a-url="foo">', array('a'));
+    $this->assertEqual($f, '<a data-a2a-url="foo">', 'Numeric data attribute is not stripped out.');
+
+    $f = filter_xss('<svg><line x1="0" y1="5" x2="10" y2="20" /></svg>', array('svg', 'line'));
+    $this->assertEqual($f, '<svg><line x1="0" y1="5" x2="10" y2="20" /></svg>', 'Line coordinate attributes within SVG files are not stripped out.');
   }
 
   /**

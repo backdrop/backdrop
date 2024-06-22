@@ -2006,7 +2006,17 @@ function _filter_xss_attributes($attr) {
     switch ($mode) {
       case 0:
         // Attribute name, href for instance.
-        if (preg_match('/^([-a-zA-Z]+)/', $attr, $match)) {
+        // According to https://www.w3.org/TR/REC-xml/#NT-Name:
+        // - The first character of attribute names must NOT be a number, nor a
+        //   dash. It may be an upper- or lower-case Latin letter, an underscore
+        //   or a colon (:). For now, we are treating the colon as an edge case,
+        //   and not allowing it.
+        // - Any characters following the first one, are allowed to be upper- or
+        //   lower-case Latin letters, numbers, or dashes. Underscores are NOT
+        //   allowed by the standard. Although dots and mid-dots are allowed by
+        //   the standard, we are treating them as edge cases, and not allowing
+        //   them.
+        if (preg_match('/^([_a-zA-Z][-a-zA-Z0-9]*)/', $attr, $match)) {
           $attrname = strtolower($match[1]);
           $skip = (
             $attrname == 'style' ||
@@ -2016,7 +2026,8 @@ function _filter_xss_attributes($attr) {
             strlen($attrname) > 96
           );
           $working = $mode = 1;
-          $attr = preg_replace('/^[-a-zA-Z]+/', '', $attr);
+          // As per https://www.w3.org/TR/REC-xml/#NT-Name - see comment above.
+          $attr = preg_replace('/^[a-zA-Z][-a-zA-Z0-9]*/', '', $attr);
         }
         break;
 
