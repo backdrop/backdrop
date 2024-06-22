@@ -2027,7 +2027,7 @@ function _filter_xss_attributes($attr) {
           );
           $working = $mode = 1;
           // As per https://www.w3.org/TR/REC-xml/#NT-Name - see comment above.
-          $attr = preg_replace('/^[a-zA-Z][-a-zA-Z0-9]*/', '', $attr);
+          $attr = preg_replace('/^[_a-zA-Z][-a-zA-Z0-9]*/', '', $attr);
         }
         break;
 
