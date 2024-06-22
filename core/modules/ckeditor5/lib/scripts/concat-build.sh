@@ -1,5 +1,5 @@
 #/bin/bash
-# Downloads and concats build
+# Download and concatenate build.
 
 declare -a PLUGINS=(
 "@ckeditor/ckeditor5-alignment"
