@@ -1270,7 +1270,10 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
     $f = filter_xss('<a data-a2a-url="foo">', array('a'));
     $this->assertEqual($f, '<a data-a2a-url="foo">', 'Numeric data attribute is not stripped out.');
 
-    $f = filter_xss('<svg><line x1="0" y1="5" x2="10" y2="20" /></svg>', array('svg', 'line'));
+    $f = filter_xss('<svg><line x1="0" y1="5" x2="10" y2="20" /></svg>', array(
+      'svg',
+      'line',
+    ));
     $this->assertEqual($f, '<svg><line x1="0" y1="5" x2="10" y2="20" /></svg>', 'Line coordinate attributes within SVG files are not stripped out.');
   }
 
@@ -1951,10 +1954,10 @@ EOF;
     $f = _filter_htmlcorrector('<p>test\n</p>\n');
     $this->assertEqual($f, '<p>test\n</p>\n', 'HTML corrector -- New-lines are accepted and kept as-is.');
 
-    // cspell:disable
+    // cspell:disable.
     $f = _filter_htmlcorrector('<p>دروبال');
     $this->assertEqual($f, '<p>دروبال</p>', 'HTML corrector -- Encoding is correctly kept.');
-    // cspell:enable
+    // cspell:enable.
 
     $f = _filter_htmlcorrector('<script type="text/javascript">alert("test")</script>');
     $this->assertEqual($f, '<script type="text/javascript">
