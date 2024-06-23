@@ -1290,9 +1290,13 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
       // Successful upload and node creation.
       $this->assertNoText(strip_tags($refused_message), 'WebP image type has not been refused.');
       $this->assertNoText(strip_tags($allowed_extensions_message), 'Not only jpg extension allowed.');
-      // Also check the field description.
-      $this->backdropGet("node/$nid/edit");
+
+      // Since the image was successfully uploaded, we are not in the edit form
+      // any longer. Go back to it, and remove the image - but do not save; only
+      // check allowed extensions in the field description.
+      $this->backdropPost("node/$nid/edit", array(), t('Remove'));
       $this->assertText(strip_tags('Allowed file types: jpg webp.'), 'Field allows both jpg and webp extensions.');
+
       $node = node_load($nid);
       $uploaded_filename = $node->{$field_name}[LANGUAGE_NONE][0]['filename'];
       $this->assertEqual($uploaded_filename, $webp_image->filename, 'New node contains the file.');
