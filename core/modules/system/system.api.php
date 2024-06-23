@@ -218,19 +218,29 @@ function callback_queue_worker($queue_item_data) {
  *  An associative array describing the element types being defined. The array
  *  contains a sub-array for each element type, with the machine-readable type
  *  name as the key. Each sub-array has a number of possible attributes:
- *  - "#input": boolean indicating whether or not this element carries a value
- *    (even if it's hidden).
- *  - "#process": array of callback functions taking $element, $form_state,
- *    and $complete_form.
- *  - "#after_build": array of callback functions taking $element and $form_state.
- *  - "#validate": array of callback functions taking $form and $form_state.
- *  - "#element_validate": array of callback functions taking $element and
- *    $form_state.
- *  - "#pre_render": array of callback functions taking $element and $form_state.
- *  - "#post_render": array of callback functions taking $element and $form_state.
- *  - "#submit": array of callback functions taking $form and $form_state.
- *  - "#title_display": optional string indicating if and how #title should be
- *    displayed, see theme_form_element() and theme_form_element_label().
+ *   - "#input": boolean indicating whether or not this element carries a value
+ *     (even if it's hidden).
+ *   - "#process": array of callback functions taking $element, $form_state,
+ *     and $complete_form.
+ *   - "#after_build": array of callback functions taking $element and
+ *     $form_state.
+ *   - "#validate": array of callback functions taking $form and $form_state.
+ *   - "#element_validate": array of callback functions taking $element and
+ *     $form_state.
+ *   - "#pre_render": array of callback functions taking $element and
+ *     $form_state.
+ *   - "#post_render": array of callback functions taking $element and
+ *     $form_state.
+ *   - "#submit": array of callback functions taking $form and $form_state.
+ *   - "#title_display": optional string indicating if and how #title should be
+ *     displayed, see theme_form_element() and theme_form_element_label().
+ *   - "#description_display": Description display setting. It can have these
+ *     values:
+ *     - before: The description is output before the element.
+ *     - after: The description is output after the element. This is the default
+ *       value.
+ *     - invisible: The description is output after the element, hidden visually
+ *       but available to screen readers.
  *
  * @see hook_element_info_alter()
  * @see system_element_info()

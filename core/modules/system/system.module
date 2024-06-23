@@ -397,12 +397,14 @@ function system_element_info() {
     '#cols' => 60,
     '#rows' => 5,
     '#resizable' => 'vertical',
+    '#description_display' => 'before',
     '#process' => array('ajax_process_form'),
     '#theme' => 'textarea',
     '#theme_wrappers' => array('form_element'),
   );
   $types['radios'] = array(
     '#input' => TRUE,
+    '#description_display' => 'before',
     '#process' => array('form_process_radios'),
     '#theme_wrappers' => array('container__radios'),
     '#pre_render' => array('form_pre_render_conditional_form_element'),
@@ -417,6 +419,7 @@ function system_element_info() {
   );
   $types['checkboxes'] = array(
     '#input' => TRUE,
+    '#description_display' => 'before',
     '#process' => array('form_process_checkboxes'),
     '#theme_wrappers' => array('container__checkboxes'),
     '#pre_render' => array('form_pre_render_conditional_form_element'),
@@ -516,6 +519,7 @@ function system_element_info() {
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
     '#value' => NULL,
+    '#description_display' => 'before',
     '#process' => array('form_process_fieldset', 'ajax_process_form'),
     '#pre_render' => array('form_pre_render_fieldset'),
     '#theme_wrappers' => array('fieldset'),
