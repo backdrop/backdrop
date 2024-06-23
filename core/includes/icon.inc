@@ -2,6 +2,9 @@
 /**
  * @file
  * Provides the Backdrop API for placing icons.
+ *
+ * For comprehensive documentation on the icon API, see
+ * https://docs.backdropcms.org/documentation/icon-api
  */
 
 /**
@@ -33,6 +36,10 @@
  *     overridden, but an icon can still be added.
  *
  * @return string
+ *
+ * @see https://docs.backdropcms.org/documentation/icon-api
+ *
+ * @since 1.28.0 Function added.
  */
 function icon($icon_name, array $options = array()) {
   // Populate default options.
@@ -83,6 +90,8 @@ function icon($icon_name, array $options = array()) {
  *
  * @see hook_icon_info()
  * @see hook_icon_info_alter()
+ *
+ * @since 1.28.0 Function added.
  */
 function icon_get_path($icon_name, $immutable = FALSE) {
   // Save into a static cache with both normal and immutable paths.
@@ -228,7 +237,10 @@ function _icon_from_core($icon_name) {
  * @param string|null $icon_name
  *   An icon name, with no extension, such as "home" or "info". If omitted,
  *   all icon info will be returned.
+ *
  * @return array
+ *
+ * @since 1.28.0 Function added.
  */
 function icon_get_info($icon_name = NULL) {
   $icon_info = &backdrop_static(__FUNCTION__);
@@ -257,7 +269,7 @@ function icon_get_info($icon_name = NULL) {
  * Returns HTML for an inline-icon.
  *
  * This effectively returns the contents of an SVG file. But it could
- * potentially be override to replace inlined SVGs with other mechanisms, like
+ * potentially be overridden to replace inlined SVGs with other mechanisms, like
  * an icon font.
  *
  * @param array $variables
@@ -268,6 +280,13 @@ function icon_get_info($icon_name = NULL) {
  *     value is added as a <title> tag within the SVG. If not specified, the
  *     icon will automatically be assigned the aria-hidden="true" attribute.
  *   - attributes: Attributes to be added to the icon itself.
+ *
+ * @return string
+ *   The HTML output.
+ *
+ * @since 1.28.0 Function added.
+ * @since 1.28.1 The <ellipse>, <line>, <polygon> and <polyline> SVG elements
+ *   are allowed.
  */
 function theme_icon(array $variables) {
   // Ensure the filename is .svg.
@@ -275,10 +294,34 @@ function theme_icon(array $variables) {
     // Ensure the file contents are an SVG.
     $svg_contents = file_get_contents($variables['path']);
     if (strpos($svg_contents, '<svg') === 0) {
-      // Clean out any embedded XSS within the SVG. This very-restrictive set
-      // of options should be adequate for icons.
-      $svg_contents = filter_xss($svg_contents, array('svg', 'use', 'title',
-        'desc', 'defs', 'linearGradient', 'stop', 'rect', 'circle', 'path'));
+      // Allow basic shapes. See:
+      // https://developer.mozilla.org/en-US/docs/Web/SVG/Element#basic_shapes.
+      $allowed_svg_basic_shapes = array(
+        'circle',
+        'ellipse',
+        'line',
+        'polygon',
+        'polyline',
+        'rect',
+      );
+
+      // Allow some other elements. This very-restrictive set of options should
+      // be adequate for icons.
+      $allowed_svg_other = array(
+        'defs',
+        'desc',
+        'linearGradient',
+        'path',
+        'stop',
+        'svg',
+        'title',
+        'use',
+      );
+
+      $allowed_svg_elements = array_merge($allowed_svg_basic_shapes, $allowed_svg_other);
+
+      // Clean out any embedded XSS within the SVG.
+      $svg_contents = filter_xss($svg_contents, $allowed_svg_elements);
 
       // Move the "alt" text to an attribute.
       if ($variables['alt']) {
