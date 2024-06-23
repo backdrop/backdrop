@@ -1053,6 +1053,54 @@ class ImageFieldDisplayTestCase extends ImageFieldTestCase {
  */
 class ImageFieldValidateTestCase extends ImageFieldTestCase {
   /**
+   * Test image validity.
+   */
+  public function testValid() {
+    $image_files = $this->backdropGetTestFiles('image');
+
+    $field_name = strtolower($this->randomName());
+    $this->createImageField($field_name, 'post', array(), array('file_directory' => 'test-upload'));
+    $expected_path = 'public://test-upload';
+
+    // Create a node with a valid image.
+    $random_valid_image = array_rand($image_files);
+    $node = $this->uploadNodeImage($image_files[$random_valid_image], $field_name, 'article');
+    $this->assertTrue(file_exists($expected_path . '/' . $image_files[$random_valid_image]->filename));
+
+    // Remove the image.
+    $this->backdropPost('node/' . $node . '/edit', array(), t('Remove'));
+    $this->backdropPost(NULL, array(), t('Save'));
+
+    // Get invalid image test files from simpletest.
+    $invalid_image_files = file_scan_directory(backdrop_get_path('module', 'simpletest') . '/files', '/invalid-img-.*/', array('key' => 'filename'));
+
+    // Try uploading a zero-byte image.
+    $zero_size_image = $invalid_image_files['invalid-img-zero-size.png'];
+    $edit = array(
+      'files[' . $field_name . '_' . LANGUAGE_NONE . '_0]' => backdrop_realpath($zero_size_image->uri),
+    );
+    $this->backdropPost('node/' . $node . '/edit', $edit, t('Upload'));
+    $this->assertFalse(file_exists($expected_path . '/' . $zero_size_image->filename));
+
+    // Try uploading an invalid image.
+    $invalid_image = $invalid_image_files['invalid-img-test.png'];
+    $edit = array(
+      'files[' . $field_name . '_' . LANGUAGE_NONE . '_0]' => backdrop_realpath($invalid_image->uri),
+    );
+    $this->backdropPost('node/' . $node . '/edit', $edit, t('Upload'));
+    $this->assertFalse(file_exists($expected_path . '/' . $invalid_image->filename));
+
+    // Upload a valid image again.
+    $random_valid_image = array_rand($image_files);
+    $valid_image = $image_files[$random_valid_image];
+    $edit = array(
+      'files[' . $field_name . '_' . LANGUAGE_NONE . '_0]' => backdrop_realpath($valid_image->uri),
+    );
+    $this->backdropPost('node/' . $node . '/edit', $edit, t('Upload'));
+    $this->assertTrue(file_exists($expected_path . '/' . $valid_image->filename));
+  }
+
+  /**
    * Test min/max resolution settings.
    */
   public function testDimensions() {
@@ -1212,10 +1260,7 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     );
     $this->createImageField($field_name, 'post', array(), $instance_settings);
 
-    $path = backdrop_get_path('module', 'image') . '/tests/images';
-    $filename = 'test-image.webp';
-    $files = file_scan_directory($path, '/' . $filename . '/');
-    $webp_image = reset($files);
+    $webp_image = current($this->backdropGetTestFiles('webp'));
     $nid = $this->uploadNodeImage($webp_image, $field_name, 'post');
     $refused_message = t('The specified file %file could not be uploaded. Only files with the following extensions are allowed: %extensions.', array(
       '%file' => $filename,
@@ -1226,19 +1271,18 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     // particularly for getimagesize() so that's the minimum.
     // @see https://www.php.net/manual/en/function.gd-info.php
     // @see https://www.php.net/manual/en/function.getimagesize.php
-    $gd_info = gd_info();
-    $webp_supported = isset($gd_info['WebP Support']) && $gd_info['WebP Support'] == TRUE;
-    if (version_compare(PHP_VERSION, '7.1.0', '<') || !$webp_supported) {
-      $this->assertText(strip_tags($refused_message), 'WebP image type has been refused');
+    $supported_extensions = image_gd_supported_extensions();
+    if (version_compare(PHP_VERSION, '7.1.0', '<') || !in_array('webp', $supported_extensions)) {
+      $this->assertText(strip_tags($refused_message), 'WebP image type has been refused.');
       // Also check the field description.
-      $this->assertText('Allowed file types: jpg.', 'Field allows only jpg extension');
+      $this->assertText('Allowed file types: jpg.', 'Field allows only jpg extension.');
     }
     else {
       // Successful upload and node creation.
-      $this->assertNoText(strip_tags($refused_message), 'WebP image type has not been refused');
+      $this->assertNoText(strip_tags($refused_message), 'WebP image type has not been refused.');
       $node = node_load($nid);
       $uploaded_filename = $node->{$field_name}[LANGUAGE_NONE][0]['filename'];
-      $this->assertEqual($uploaded_filename, $filename, 'New node contains the file');
+      $this->assertEqual($uploaded_filename, $filename, 'New node contains the file.');
       // Thumbnail image has been created.
       $image_uri = $node->{$field_name}[LANGUAGE_NONE][0]['uri'];
       $this->backdropGet(image_style_url('thumbnail', $image_uri));
@@ -1345,7 +1389,8 @@ class ImageDimensionsUnitTest extends BackdropWebTestCase {
     $this->assertEqual($image_info['width'], 60, 'Expected width was found.');
     $this->assertEqual($image_info['height'], 120, 'Expected height was found.');
 
-    // Scale an image that is higher than it is wide (rotated by previous effect).
+    // Scale an image that is higher than it is wide (rotated by previous
+    // effect).
     $effect = array(
       'name' => 'image_scale',
       'data' => array(

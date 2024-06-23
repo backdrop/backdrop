@@ -1886,7 +1886,10 @@ function file_validate_is_image(File $file) {
   $errors = array();
 
   $info = image_get_info($file->uri);
-  if (!$info || empty($info['extension'])) {
+  if (!$info) {
+    $errors[] = t('The uploaded file is either corrupt or not an image.');
+  }
+  elseif (empty($info['extension'])) {
     $supported_extensions = image_get_supported_extensions();
     $errors[] = t('Only images with the following extensions are allowed: @formats.', array('@formats' => implode(', ', $supported_extensions)));
   }

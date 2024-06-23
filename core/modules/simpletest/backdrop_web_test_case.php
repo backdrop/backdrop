@@ -1216,26 +1216,31 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     $this->assertEqual($saved_type, SAVED_NEW, t('Created content type %type.', array('%type' => $type->type)));
 
-    // Reset permissions so that permissions for this content type are available.
+    // Reset permissions so that permissions for this content type are
+    // available.
     $this->checkPermissions(array(), TRUE);
 
     return $type;
   }
 
   /**
-   * Get a list files that can be used in tests.
+   * Get a list of files that can be used in tests.
    *
    * @param $type
-   *   File type, possible values: 'binary', 'html', 'image', 'javascript', 'php', 'sql', 'text'.
+   *   File type, possible values: 'binary', 'html', 'image', 'javascript',
+   *   'php', 'sql', 'svg', 'text', 'webp'.
    * @param $size
    *   File size in bytes to match. Please check the tests/files folder.
+   *
    * @return
    *   List of files that match filter.
+   *
+   * @since 1.28.1 'webp' added to the possible values of $type.
    */
   protected function backdropGetTestFiles($type, $size = NULL) {
     $files = array();
     // Make sure type is valid.
-    $possible_types = array('binary', 'html', 'image', 'svg', 'javascript', 'php', 'sql', 'text');
+    $possible_types = array('binary', 'html', 'image', 'javascript', 'php', 'sql', 'svg', 'text', 'webp');
     if (in_array($type, $possible_types)) {
 
       if (!in_array($type, $this->generatedTestFiles)) {
@@ -1274,7 +1279,7 @@ class BackdropWebTestCase extends BackdropTestCase {
 
       $files = file_scan_directory('public://', '/' . $type . '\-.*/');
 
-      // If size is set then remove any files that are not of that size.
+      // If size is set, then remove any files that are not of that size.
       if ($size !== NULL) {
         foreach ($files as $file) {
           $stats = stat($file->uri);
