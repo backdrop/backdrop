@@ -14,7 +14,7 @@ regions[bottom]     = Bottom
 regions[footer]     = Footer
 
 ; The default region automatically receives the "Main Content" block if needed.
-default region = third2
+default region = content
 
 ; Include a file for special preprocessing of this layout's variables.
 ; file = geary.php
