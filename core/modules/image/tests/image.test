@@ -1064,7 +1064,7 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
 
     // Create a node with a valid image.
     $random_valid_image = array_rand($image_files);
-    $node = $this->uploadNodeImage($image_files[$random_valid_image], $field_name, 'article');
+    $node = $this->uploadNodeImage($image_files[$random_valid_image], $field_name, 'post');
     $this->assertTrue(file_exists($expected_path . '/' . $image_files[$random_valid_image]->filename));
 
     // Remove the image.
