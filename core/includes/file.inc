@@ -1874,6 +1874,10 @@ function file_validate_size(File $file, $file_limit = 0, $user_limit = 0) {
 /**
  * Checks that the file is recognized by image_get_info() as an image.
  *
+ * When it comes to extensions, this function checks what is supported, rather
+ * than what is allowed. Allowed extensions should be explicitly checked via
+ * file_validate_extensions().
+ *
  * @param File $file
  *   A file entity.
  *
@@ -1891,7 +1895,7 @@ function file_validate_is_image(File $file) {
   }
   elseif (empty($info['extension'])) {
     $supported_extensions = image_get_supported_extensions();
-    $errors[] = t('Only images with the following extensions are allowed: @formats.', array('@formats' => implode(', ', $supported_extensions)));
+    $errors[] = t('Only images with the following extensions are supported: @extensions.', array('@extensions' => implode(', ', $supported_extensions)));
   }
 
   return $errors;

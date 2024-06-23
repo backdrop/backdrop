@@ -1262,7 +1262,10 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
 
     $webp_image = current($this->backdropGetTestFiles('webp'));
     $nid = $this->uploadNodeImage($webp_image, $field_name, 'post');
-    $refused_message = t('The specified file %file could not be uploaded. Only files with the following extensions are allowed: %extensions.', array(
+    $refused_message = t('The specified file %file could not be uploaded.');
+    // Note that this message is coming from file_validate_extensions() - not
+    // from file_validate_is_image().
+    $allowed_extensions_message = t('Only files with the following extensions are allowed: %extensions.', array(
       '%file' => $webp_image->filename,
       '%extensions' => 'jpg',
     ));
@@ -1274,12 +1277,16 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     $supported_extensions = image_get_supported_extensions();
     if (version_compare(PHP_VERSION, '7.1.0', '<') || !in_array('webp', $supported_extensions)) {
       $this->assertText(strip_tags($refused_message), 'WebP image type has been refused.');
+      $this->assertText(strip_tags($allowed_extensions_message), 'Only jpg extension allowed.');
       // Also check the field description.
       $this->assertText('Allowed file types: jpg.', 'Field allows only jpg extension.');
     }
     else {
       // Successful upload and node creation.
       $this->assertNoText(strip_tags($refused_message), 'WebP image type has not been refused.');
+      $this->assertNoText(strip_tags($allowed_extensions_message), 'Not only jpg extension allowed.');
+      // Also check the field description.
+      $this->assertText('Allowed file types: jpg webp.', 'Field allows both jpg and webp extensions.');
       $node = node_load($nid);
       $uploaded_filename = $node->{$field_name}[LANGUAGE_NONE][0]['filename'];
       $this->assertEqual($uploaded_filename, $webp_image->filename, 'New node contains the file.');
