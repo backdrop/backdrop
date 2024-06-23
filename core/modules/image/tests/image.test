@@ -1262,11 +1262,15 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
 
     $webp_image = current($this->backdropGetTestFiles('webp'));
     $nid = $this->uploadNodeImage($webp_image, $field_name, 'post');
-    $refused_message = t('The specified file %file could not be uploaded.');
-    // Note that this message is coming from file_validate_extensions() - not
-    // from file_validate_is_image().
-    $allowed_extensions_message = t('Only files with the following extensions are allowed: %extensions.', array(
+    $refused_message = t('The specified file %file could not be uploaded.', array(
       '%file' => $webp_image->filename,
+    ));
+    // Note that this message is coming from file_validate_extensions() - not
+    // from file_validate_is_image(). If there is no support for webp (older
+    // version of PHP and/or no support in the active image toolkit), then the
+    // extension has been removed in image_field_widget_form(), via a call to
+    // image_get_supported_extensions() in the upload validators.
+    $allowed_extensions_message = t('Only files with the following extensions are allowed: %extensions.', array(
       '%extensions' => 'jpg',
     ));
 
