@@ -285,7 +285,6 @@ function icon_get_info($icon_name = NULL) {
  *    The HTML output.
  *
  * @since 1.28.0 Function added.
- * @since 1.28.1 The <line> SVG element is allowed.
  */
 function theme_icon(array $variables) {
   // Ensure the filename is .svg.
@@ -295,23 +294,8 @@ function theme_icon(array $variables) {
     if (strpos($svg_contents, '<svg') === 0) {
       // Clean out any embedded XSS within the SVG. This very-restrictive set
       // of options should be adequate for icons.
-      // @todo: Allow <line> for now for the purpose of layout template preview
-      // icons, but follow up properly in
-      // https://github.com/backdrop/backdrop-issues/issues/6576
-      $allowed_svg_elements = array(
-        'circle',
-        'defs',
-        'desc',
-        'line',
-        'linearGradient',
-        'path',
-        'rect',
-        'stop',
-        'svg',
-        'title',
-        'use',
-      );
-      $svg_contents = filter_xss($svg_contents, $allowed_svg_elements);
+      $svg_contents = filter_xss($svg_contents, array('svg', 'use', 'title',
+        'desc', 'defs', 'linearGradient', 'stop', 'rect', 'circle', 'path'));
 
       // Move the "alt" text to an attribute.
       if ($variables['alt']) {
