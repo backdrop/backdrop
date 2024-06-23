@@ -1271,7 +1271,7 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     // particularly for getimagesize() so that's the minimum.
     // @see https://www.php.net/manual/en/function.gd-info.php
     // @see https://www.php.net/manual/en/function.getimagesize.php
-    $supported_extensions = image_gd_supported_extensions();
+    $supported_extensions = image_get_supported_extensions();
     if (version_compare(PHP_VERSION, '7.1.0', '<') || !in_array('webp', $supported_extensions)) {
       $this->assertText(strip_tags($refused_message), 'WebP image type has been refused.');
       // Also check the field description.
