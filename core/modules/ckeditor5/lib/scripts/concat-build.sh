@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 # Download and concatenate build.
 
 declare -a PLUGINS=(
