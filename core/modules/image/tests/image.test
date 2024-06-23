@@ -1066,11 +1066,9 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     $supported_extensions = image_get_supported_extensions();
     foreach ($image_files as $key => $image_file) {
       // Skip testing webp images if unsupported.
-      if (version_compare(PHP_VERSION, '7.1.0', '<') || !in_array('webp', $supported_extensions)) {
-        if (image_is_webp($image_file->uri)) {
-          unset($image_files[$key]);
-          continue;
-        }
+      if (!image_is_webp_supported() && image_is_webp($image_file->uri)) {
+        unset($image_files[$key]);
+        continue;
       }
 
       $node = $this->uploadNodeImage($image_file, $field_name, 'post');
@@ -1287,18 +1285,7 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
       '%extensions' => 'jpg',
     ));
 
-    // Both, PHP and GD must support WebP. PHP ships with support since 7.1.+,
-    // particularly for getimagesize() so that's the minimum.
-    // @see https://www.php.net/manual/en/function.gd-info.php
-    // @see https://www.php.net/manual/en/function.getimagesize.php
-    $supported_extensions = image_get_supported_extensions();
-    if (version_compare(PHP_VERSION, '7.1.0', '<') || !in_array('webp', $supported_extensions)) {
-      $this->assertText(strip_tags($refused_message), 'WebP image type has been refused.');
-      $this->assertText(strip_tags($allowed_extensions_message), 'Only jpg extension allowed message shown.');
-      // Also check the field description.
-      $this->assertText(strip_tags('Allowed file types: jpg.'), 'Field allows only jpg extension.');
-    }
-    else {
+    if (image_is_webp_supported()) {
       // Successful upload and node creation.
       $this->assertNoText(strip_tags($refused_message), 'WebP image type has not been refused.');
       $this->assertNoText(strip_tags($allowed_extensions_message), 'Only jpg extension allowed message not shown.');
@@ -1317,6 +1304,13 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
       $this->backdropGet(image_style_url('thumbnail', $image_uri));
       $this->assertResponse(200, 'Received a 200 response for derivative image.');
       $this->assertNoText('Error generating image.');
+    }
+    else {
+      // Webp not supported.
+      $this->assertText(strip_tags($refused_message), 'WebP image type has been refused.');
+      $this->assertText(strip_tags($allowed_extensions_message), 'Only jpg extension allowed message shown.');
+      // Also check the field description.
+      $this->assertText(strip_tags('Allowed file types: jpg.'), 'Field allows only jpg extension.');
     }
   }
 

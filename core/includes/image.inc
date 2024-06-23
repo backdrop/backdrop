@@ -551,6 +551,46 @@ function image_hex2rgba(&$hex) {
 }
 
 /**
+ * Determine if a file URI is an WebP image based on its file extension.
+ *
+ * @param string $uri
+ *   A path or URI to an image.
+ *
+ * @return bool
+ *   TRUE if the image is an WebP. FALSE if it is not.
+ *
+ * @since 1.28.2 Function added.
+ */
+function image_is_webp($uri) {
+  $mimetype = file_get_mimetype($uri);
+  return $mimetype === 'image/webp';
+}
+
+/**
+ * Determine if WebP is supported, based on the PHP version and GD support.
+ *
+ * Both, PHP and GD must support WebP. PHP ships with support since 7.1.+,
+ * particularly for getimagesize() so that's the minimum.
+ * @see https://www.php.net/manual/en/function.gd-info.php
+ * @see https://www.php.net/manual/en/function.getimagesize.php
+ *
+ * @return bool
+ *   TRUE if WebP images are supported. FALSE if not supported.
+ *
+ * @since 1.28.2 Function added.
+ */
+function image_is_webp_supported() {
+  $supported_extensions = image_get_supported_extensions();
+
+  // Instead of using version_compare() against PHP_VERSION, use the predefined
+  // IMAGETYPE_WEBP constant, which is available as of PHP 7.1.0.
+  // @see https://www.php.net/manual/en/image.constants.php#constant.imagetype-webp
+  // We are already checking for that in image_gd_supported_extensions(), but
+  // this check here is to account for other toolkits.
+  return defined('IMAGETYPE_WEBP') && in_array('webp', $supported_extensions);
+}
+
+/**
  * Determine if a file URI is an SVG image based on its file extension.
  *
  * @param string $uri
@@ -564,22 +604,6 @@ function image_hex2rgba(&$hex) {
 function image_is_svg($uri) {
   $mimetype = file_get_mimetype($uri);
   return $mimetype === 'image/svg+xml';
-}
-
-/**
- * Determine if a file URI is an WebP image based on its file extension.
- *
- * @param string $uri
- *   A path or URI to an image.
- *
- * @return bool
- *   TRUE if the image is an WebP. FALSE if it is not.
- *
- * @since 1.28.1 Function added.
- */
-function image_is_webp($uri) {
-  $mimetype = file_get_mimetype($uri);
-  return $mimetype === 'image/webp';
 }
 
 /**
