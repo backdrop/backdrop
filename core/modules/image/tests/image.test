@@ -1062,15 +1062,25 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     $this->createImageField($field_name, 'post', array(), array('file_directory' => 'test-upload'));
     $expected_path = 'public://test-upload';
 
-    // Create a node with a valid image.
-    $random_valid_image = array_rand($image_files);
-    $node = $this->uploadNodeImage($image_files[$random_valid_image], $field_name, 'post');
-    $expected_file = $expected_path . '/' . $image_files[$random_valid_image]->filename;
-    $this->assertTrue(file_exists($expected_file), "Valid image file $expected_file exists.");
+    // Test creating a node with a series of valid images.
+    $supported_extensions = image_get_supported_extensions();
+    foreach ($image_files as $key => $image_file) {
+      // Skip testing webp images if unsupported.
+      if (version_compare(PHP_VERSION, '7.1.0', '<') || !in_array('webp', $supported_extensions)) {
+        if (image_is_webp($image_file->uri)) {
+          unset($image_files[$key]);
+          continue;
+        }
+      }
 
-    // Remove the image.
-    $this->backdropPost('node/' . $node . '/edit', array(), t('Remove'));
-    $this->backdropPost(NULL, array(), t('Save'));
+      $node = $this->uploadNodeImage($image_file, $field_name, 'post');
+      $expected_file = $expected_path . '/' . $image_file->filename;
+      $this->assertTrue(file_exists($expected_file), "Valid image file $expected_file exists.");
+
+      // Remove the image.
+      $this->backdropPost('node/' . $node . '/edit', array(), t('Remove'));
+      $this->backdropPost(NULL, array(), t('Save'));
+    }
 
     // Get invalid image test files from simpletest.
     $invalid_image_files = file_scan_directory(backdrop_get_path('module', 'simpletest') . '/files', '/invalid-img-.*/', array('key' => 'filename'));
@@ -1091,14 +1101,16 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     $this->backdropPost('node/' . $node . '/edit', $edit, t('Upload'));
     $this->assertFalse(file_exists($expected_path . '/' . $invalid_image->filename));
 
-    // Upload a valid image again.
+    // Select a random valid image to upload again. Note: webp images have been
+    // removed if not supported.
     $random_valid_image = array_rand($image_files);
     $valid_image = $image_files[$random_valid_image];
     $edit = array(
       'files[' . $field_name . '_' . LANGUAGE_NONE . '_0]' => backdrop_realpath($valid_image->uri),
     );
     $this->backdropPost('node/' . $node . '/edit', $edit, t('Upload'));
-    $this->assertTrue(file_exists($expected_path . '/' . $valid_image->filename));
+    $expected_file = $expected_path . '/' . $valid_image->filename;
+    $this->assertTrue(file_exists($expected_file), "Valid image file $expected_file exists.");
   }
 
   /**
@@ -1282,14 +1294,14 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     $supported_extensions = image_get_supported_extensions();
     if (version_compare(PHP_VERSION, '7.1.0', '<') || !in_array('webp', $supported_extensions)) {
       $this->assertText(strip_tags($refused_message), 'WebP image type has been refused.');
-      $this->assertText(strip_tags($allowed_extensions_message), 'Only jpg extension allowed.');
+      $this->assertText(strip_tags($allowed_extensions_message), 'Only jpg extension allowed message shown.');
       // Also check the field description.
       $this->assertText(strip_tags('Allowed file types: jpg.'), 'Field allows only jpg extension.');
     }
     else {
       // Successful upload and node creation.
       $this->assertNoText(strip_tags($refused_message), 'WebP image type has not been refused.');
-      $this->assertNoText(strip_tags($allowed_extensions_message), 'Not only jpg extension allowed.');
+      $this->assertNoText(strip_tags($allowed_extensions_message), 'Only jpg extension allowed message not shown.');
 
       // Since the image was successfully uploaded, we are not in the edit form
       // any longer. Go back to it, and remove the image - but do not save; only

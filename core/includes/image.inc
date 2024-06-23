@@ -567,6 +567,22 @@ function image_is_svg($uri) {
 }
 
 /**
+ * Determine if a file URI is an WebP image based on its file extension.
+ *
+ * @param string $uri
+ *   A path or URI to an image.
+ *
+ * @return bool
+ *   TRUE if the image is an WebP. FALSE if it is not.
+ *
+ * @since 1.28.1 Function added.
+ */
+function image_is_webp($uri) {
+  $mimetype = file_get_mimetype($uri);
+  return $mimetype === 'image/webp';
+}
+
+/**
  * Add attributes to an SVG string.
  *
  * @param string $svg_content
