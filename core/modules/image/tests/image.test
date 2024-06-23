@@ -1065,7 +1065,8 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
     // Create a node with a valid image.
     $random_valid_image = array_rand($image_files);
     $node = $this->uploadNodeImage($image_files[$random_valid_image], $field_name, 'post');
-    $this->assertTrue(file_exists($expected_path . '/' . $image_files[$random_valid_image]->filename));
+    $expected_file = $expected_path . '/' . $image_files[$random_valid_image]->filename;
+    $this->assertTrue(file_exists($expected_file), "Valid image file $expected_file exists.");
 
     // Remove the image.
     $this->backdropPost('node/' . $node . '/edit', array(), t('Remove'));
@@ -1290,6 +1291,7 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
       $this->assertNoText(strip_tags($refused_message), 'WebP image type has not been refused.');
       $this->assertNoText(strip_tags($allowed_extensions_message), 'Not only jpg extension allowed.');
       // Also check the field description.
+      $this->backdropGet("node/$nid/edit");
       $this->assertText(strip_tags('Allowed file types: jpg webp.'), 'Field allows both jpg and webp extensions.');
       $node = node_load($nid);
       $uploaded_filename = $node->{$field_name}[LANGUAGE_NONE][0]['filename'];
