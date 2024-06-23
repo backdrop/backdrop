@@ -9,6 +9,7 @@ regions[top]        = Top
 regions[third1]     = First Column
 regions[third2]     = Second Column
 regions[third3]     = Third Column
+regions[content]    = Content
 regions[bottom]     = Bottom
 regions[footer]     = Footer
 
