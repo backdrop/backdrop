@@ -1227,22 +1227,32 @@ class BackdropWebTestCase extends BackdropTestCase {
    * Get a list of files that can be used in tests.
    *
    * @param $type
-   *   File type, possible values: 'binary', 'html', 'image', 'javascript',
+   *   File type. Possible values: 'binary', 'html', 'image', 'javascript',
    *   'php', 'sql', 'svg', 'text', 'webp'.
    * @param $size
-   *   File size in bytes to match. Please check the tests/files folder.
+   *   File size in bytes to match (optional). Check the tests/files folder.
    *
    * @return
-   *   List of files that match filter.
+   *   List of files that match the $type and $size.
    *
    * @since 1.28.1 'webp' added to the possible values of $type.
    */
   protected function backdropGetTestFiles($type, $size = NULL) {
     $files = array();
     // Make sure type is valid.
-    $possible_types = array('binary', 'html', 'image', 'javascript', 'php', 'sql', 'svg', 'text', 'webp');
-    if (in_array($type, $possible_types)) {
+    $possible_types = array(
+      'binary',
+      'html',
+      'image',
+      'javascript',
+      'php',
+      'sql',
+      'svg',
+      'text',
+      'webp',
+    );
 
+    if (in_array($type, $possible_types)) {
       if (!in_array($type, $this->generatedTestFiles)) {
         switch ($type) {
           case 'binary':
@@ -1289,6 +1299,7 @@ class BackdropWebTestCase extends BackdropTestCase {
         }
       }
     }
+
     usort($files, array($this, 'backdropCompareFiles'));
     return $files;
   }

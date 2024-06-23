@@ -1282,7 +1282,7 @@ class ImageFieldValidateTestCase extends ImageFieldTestCase {
       $this->assertNoText(strip_tags($refused_message), 'WebP image type has not been refused.');
       $node = node_load($nid);
       $uploaded_filename = $node->{$field_name}[LANGUAGE_NONE][0]['filename'];
-      $this->assertEqual($uploaded_filename, $filename, 'New node contains the file.');
+      $this->assertEqual($uploaded_filename, $webp_image->filename, 'New node contains the file.');
       // Thumbnail image has been created.
       $image_uri = $node->{$field_name}[LANGUAGE_NONE][0]['uri'];
       $this->backdropGet(image_style_url('thumbnail', $image_uri));
