@@ -14,8 +14,8 @@ function system_requirements($phase) {
   // Ensure translations don't break during installation.
   $t = get_t();
 
-  // Report Backdrop version.
   if ($phase == 'runtime') {
+    // Report Backdrop version.
     $requirements['backdrop'] = array(
       'title' => $t('Backdrop CMS'),
       'value' => BACKDROP_VERSION,
@@ -23,8 +23,8 @@ function system_requirements($phase) {
       'weight' => -10,
     );
 
-    // Display the currently active installation profile, if the site
-    // is not running the default installation profile.
+    // Display the currently active installation profile, if the site is not
+    // running the default installation profile.
     $profile = backdrop_get_profile();
     if ($profile != 'standard') {
       $info = system_get_info('module', $profile);
@@ -40,6 +40,41 @@ function system_requirements($phase) {
         'weight' => -9,
       );
     }
+
+    // Report the configuration storage being used.
+    $config_storage_types = array(
+      'active' => t('Active'),
+      'staging' => t('Staging'),
+    );
+    foreach ($config_storage_types as $type => $type_name) {
+      $storage = config_get_config_storage($type);
+      $class = get_class($storage);
+
+      switch ($class) {
+        case 'ConfigDatabaseStorage':
+          $config_locations[$type] = t('!type: database: <code>@config_location</code>', array (
+            // $type_name has already been passed through t() earlier. Avoid
+            // double-escaping.
+            '!type' => $type_name,
+            '@config_location' => 'db://default/config_' . $type,
+          ));
+          break;
+        case 'ConfigFileStorage':
+        default:
+          $config_locations[$type] = t('!type: JSON files: <code>@config_location</code>', array (
+            // $type_name has already been passed through t() earlier. Avoid
+            // double-escaping.
+            '!type' => $type_name,
+            '@config_location' => config_get_config_directory($type),
+          ));
+      }
+    }
+
+    $requirements['config_storage'] = array(
+      'title' => $t('Configuration storage'),
+      'value' => theme('item_list', array('items' => $config_locations)),
+      'severity' => REQUIREMENT_INFO,
+    );
   }
 
   // Web server information.
@@ -423,7 +458,7 @@ function system_requirements($phase) {
   // See if updates are available in update.php.
   if ($phase == 'runtime') {
     $requirements['update'] = array(
-      'title' => $t('Database updates'),
+      'title' => $t('Site updates'),
       'severity' => REQUIREMENT_OK,
       'value' => $t('Up to date'),
     );
@@ -437,8 +472,8 @@ function system_requirements($phase) {
         if ($current_schema < $latest_schema) {
           $update_link = base_path() . 'core/update.php';
           $requirements['update']['severity'] = REQUIREMENT_ERROR;
-          $requirements['update']['value'] = $t('Out of date (<a href="@update">Run database updates</a>)', array('@update' => $update_link));
-          $requirements['update']['description'] = $t('Some modules have database schema updates to install. You should run the <a href="@update">database update script</a> immediately.', array('@update' => $update_link));
+          $requirements['update']['value'] = $t('Out of date (<a href="@update">Run site updates</a>)', array('@update' => $update_link));
+          $requirements['update']['description'] = $t('Some modules have database schema updates to install. You should run the <a href="@update">site update script</a> immediately.', array('@update' => $update_link));
           break;
         }
       }
@@ -3543,6 +3578,56 @@ function system_update_1095() {
     $save = TRUE;
   }
   if ($save) {
+    $config->save();
+  }
+}
+
+/**
+ * Fix icon display for customized system menu items.
+ */
+function system_update_1096() {
+  $icon_mapping = array(
+    'admin/dashboard' => 'speedometer-fill',
+    'admin/content' => 'pencil-fill',
+    'admin/people' => 'users-fill',
+    'admin/appearance' => 'palette-fill',
+    'admin/modules' => 'puzzle-piece-fill',
+    'admin/structure' => 'stack-fill',
+    'admin/config' => 'gear-fill',
+    'admin/reports' => 'info-fill',
+  );
+
+  $items = db_select('menu_links')
+    ->fields('menu_links')
+    ->condition('menu_name', 'management')
+    ->condition('module', 'system')
+    ->condition('depth', 2)
+    ->condition('customized', 1)
+    ->execute()->fetchAllAssoc('router_path');
+
+  foreach ($items as $router_path => $item) {
+    if (!array_key_exists($router_path, $icon_mapping)) {
+      continue;
+    }
+    $existing_item = (array) $item;
+    $options = unserialize($existing_item['options']);
+    if (isset($options['icon'])) {
+      continue;
+    }
+    $updated_item = $existing_item;
+    $options['icon'] = $icon_mapping[$router_path];
+    $updated_item['options'] = $options;
+    menu_link_save($updated_item, $existing_item);
+  }
+}
+
+/**
+ * Set local_action_position in Admin Bar.
+ */
+function system_update_1097() {
+  $config = config('admin_bar.settings');
+  if ($config->get('local_action_position') === NULL) {
+    $config->set('local_action_position', 'top');
     $config->save();
   }
 }
