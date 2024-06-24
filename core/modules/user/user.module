@@ -2775,13 +2775,20 @@ function user_role_revoke_permissions($role_name, array $permissions = array()) 
 }
 
 /**
- * List user administration filters that can be applied.
+ * Provided filters that could be applied to the user account listing.
+ *
+ * Same as with user_build_filter_query(), this function was used in the user
+ * account listing page in Drupal 7. Since that listing is provided by Views in
+ * Backdrop, this function here is slated for removal in Backdrop 2.0. Kept only
+ * for backwards-compatibility purposes in Backdrop 1.0.
+ *
+ * @todo Remove this function in Backdrop 2.0.
  */
 function user_filters() {
-  // Regular filters
   $filters = array();
   $roles = user_roles(TRUE);
-  unset($roles[BACKDROP_AUTHENTICATED_ROLE]); // Don't list authorized role.
+  // Don't list the authenticated user role.
+  unset($roles[BACKDROP_AUTHENTICATED_ROLE]);
   if (count($roles)) {
     $filters['role'] = array(
       'title' => t('role'),
@@ -2793,12 +2800,14 @@ function user_filters() {
   }
 
   $options = array();
+  $module_info = system_get_info('module');
   foreach (module_implements('permission') as $module) {
     $function = $module . '_permission';
+    $module_group = t('@module module', array('@module' => $module_info[$module]['name']));
     if ($permissions = $function()) {
       asort($permissions);
-      foreach ($permissions as $permission => $description) {
-        $options[t('@module module', array('@module' => $module))][$permission] = t($permission);
+      foreach ($permissions as $permission => $permission_info) {
+        $options[$module_group][$permission] = t($permission_info['title']);
       }
     }
   }
@@ -2823,10 +2832,18 @@ function user_filters() {
 }
 
 /**
- * Extends a query object for user administration filters based on session.
+ * Extended a query object for user account administration filters based on
+ * session.
+ *
+ * Same as with user_filters(), this function was used in the user account
+ * listing page in Drupal 7. Since that listing is provided by Views in
+ * Backdrop, this function here is slated for removal in Backdrop 2.0. Kept only
+ * for backwards-compatibility purposes in Backdrop 1.0.
  *
  * @param $query
  *   Query object that should be filtered.
+ *
+ * @todo Remove this function in Backdrop 2.0.
  */
 function user_build_filter_query(SelectQuery $query) {
   $filters = user_filters();

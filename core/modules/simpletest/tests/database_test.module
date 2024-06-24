@@ -31,7 +31,6 @@ function database_test_query_alter(QueryAlterableInterface $query) {
   }
 }
 
-
 /**
  * Implements hook_query_TAG_alter().
  *
@@ -206,6 +205,9 @@ function database_test_theme_tablesort($form, &$form_state) {
 
   $query = db_select('users', 'u');
   $query->condition('u.uid', 0, '<>');
+  // @todo: user_build_filter_query(), as well as user_filters() which is called
+  // by user_build_filter_query(), are slated for removal in Backdrop 2.0. We
+  // will need to build this query here manually when that happens.
   user_build_filter_query($query);
 
   $count_query = clone $query;
