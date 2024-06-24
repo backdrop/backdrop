@@ -28,6 +28,11 @@ class date_sql_handler {
   var $granularity;
 
   /**
+   * @var array
+   */
+  public $placeholders;
+
+  /**
    * The object constructor.
    */
   public function __construct($date_type = DATE_DATETIME, $local_timezone = NULL, $offset = '+00:00') {

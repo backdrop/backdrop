@@ -52,7 +52,6 @@ class SessionTestCase extends BackdropWebTestCase {
     $this->backdropPost('user/login', $edit, t('Log in'));
     $this->backdropGet('user');
     $pass = $this->assertText($user->name, format_string('Found name: %name', array('%name' => $user->name)), 'User login');
-    $this->_logged_in = $pass;
 
     $this->backdropGet('session-test/id');
     $matches = array();

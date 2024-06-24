@@ -1,6 +1,7 @@
 services:
   php:
-    image: tugboatqa/php:8.1-apache-bullseye
+    # See: https://github.com/TugboatQA/dockerfiles/blob/main/php/TAGS.md
+    image: tugboatqa/php:8.3-apache
     default: true
     depends: mariadb
     commands:

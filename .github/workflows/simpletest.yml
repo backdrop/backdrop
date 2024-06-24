@@ -1,0 +1,58 @@
+name: SimpleTest (Functional Tests)
+on:
+  pull_request:
+    branches: [1.*]
+jobs:
+  simpletest:
+    name: Simpletest batches
+    runs-on: ubuntu-22.04
+    # Skip this job if the PR title contains "[skip tests]".
+    if: ${{ !contains(github.event.pull_request.title, '[skip tests]') }}
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions: ['5.6', '7.4', '8.3']
+        fraction: ['1', '2', '3']
+        database-versions: ['mariadb-10.3']
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up webserver
+        uses: ./.github/actions/set-up-webserver
+        with:
+          php-version: ${{ matrix.php-versions }}
+          database-version: ${{ matrix.database-versions }}
+
+      - name: Install Backdrop
+        run: |
+          cp ./.github/misc/settings.local.php .
+          core/scripts/install.sh --db-url=mysql://root:root@127.0.0.1/backdrop
+
+      - name: Run tests
+        run: |
+          echo Running fraction ${{ matrix.fraction }} with PHP ${{ matrix.php-versions }}
+          # Pipe stderr to stdout so that GitHub Actions displays errors inline
+          # with the rest of the results, otherwise it prints them afterwards.
+          core/scripts/run-tests.sh --force --cache --verbose --color --directory=core --split=${{ matrix.fraction }}/3 --concurrency 7 2>&1
+
+      - name: System status
+        if: ${{ always() }}
+        run: |
+          echo Get load
+          uptime
+          echo Get mem usage
+          free -m
+          echo Get disk usage
+          df -h
+          echo Get running procs by user
+          pgrep -au runner
+
+      - name: Save Test Results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: simpletest-${{ matrix.php-versions }}-${{ matrix.fraction }}
+          path: files/simpletest/verbose

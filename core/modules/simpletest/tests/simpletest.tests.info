@@ -298,6 +298,12 @@ description = Performs tests on Backdrop's HTTP request mechanism.
 group = Common
 file = common.test
 
+[CommonBackdropHTTPRedirectTest]
+name = Backdrop HTTP Redirect Processing
+description = Perform unit tests on processing of http redirects.
+group = Common
+file = common.test
+
 [CommonBackdropHTTPResponseStatusLineTest]
 name = Backdrop HTTP Response Status
 description = Performs unit tests on Backdrop's HTTP Response Status.
@@ -410,12 +416,6 @@ file = common.test
 name = Query parsing using backdrop_get_query_array()
 description = Tests that backdrop_get_query_array() correctly parses query parameters.
 group = Common
-file = common.test
-
-[BlockInterestCohortTest]
-name = Block Interest Cohort
-description = Check Permissions-Policy header to disable Google FLoC.
-group = System
 file = common.test
 
 [FeedIconTest]
@@ -964,6 +964,12 @@ description = Tests form API checkbox handling of various combinations of #defau
 group = Form API
 file = form.test
 
+[FormResizableTextareaTestCase]
+name = Form API resizable textarea
+description = Tests transition from old JS-based textarea resize to new CSS approach.
+group = Form API
+file = form.test
+
 [FormEmailTestCase]
 name = Form API email
 description = Tests the form API email element.
@@ -1005,6 +1011,12 @@ name = Graph
 description = Graph handling unit tests.
 group = System
 file = graph.test
+
+[IconTestCase]
+name = Icon API
+description = Tests the providing and path matching of SVG icons.
+group = System
+file = icon.test
 
 [ImageToolkitUnitTest]
 name = Image toolkit tests

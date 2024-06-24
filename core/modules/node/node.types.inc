@@ -105,7 +105,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#title' => t('Name'),
     '#type' => 'textfield',
     '#default_value' => $type->name,
-    '#description' => t('The human-readable name of this content type. This text will be displayed as part of the list on the <em>Add content</em> page. It is recommended that this name begin with a capital letter and contain only letters, numbers, and spaces. This name must be unique.'),
+    '#description' => t('The human-readable name of this content type; as to be displayed on the <a href="@url"><em>Add content</em></a> page. It is recommended that this name begins with a capital letter and contains only letters, numbers, and spaces. This name must be unique.', array('@url' => url('node/add'))),
     '#required' => TRUE,
     '#size' => 30,
   );
@@ -118,16 +118,34 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#machine_name' => array(
       'exists' => 'node_type_load',
     ),
-    '#description' => t('A unique machine-readable name for this content type. It must only contain lowercase letters, numbers, and underscores. This name will be used for constructing the URL of the %node-add page, in which underscores will be converted into hyphens.', array(
-      '%node-add' => t('Add content'),
-    )),
+    '#description' => t('A unique machine-readable name for this content type. It must only contain lowercase letters, numbers, and underscores. This name will be used for constructing the URL of the <a href="@url"><em>Add content</em></a> page, in which underscores will be converted into hyphens.', array('@url' => url('node/add'))),
   );
 
+  // Add a toggle for the "Description" field.
+  $form['description_enable'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Provide description'),
+    '#default_value' => $type->description != '' ? 1 : 0,
+  );
   $form['description'] = array(
-    '#title' => t('Description'),
     '#type' => 'textarea',
+    '#title' => t('Description'),
+    '#title_display' => 'invisible',
     '#default_value' => $type->description,
-    '#description' => t('Describe this content type. The text will be displayed on the <em>Add content</em> page.'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="description_enable"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+  // We need to implement the description as a separate form element, so that it
+  // is shown for both the checkbox and the text field.
+  $form['description_description'] = array(
+    '#type' => 'item',
+    // Fields of #type 'item' do not support #attributes - use
+    // #wrapper_attributes instead.
+    '#wrapper_attributes' => array('class' => array('description', 'form-item-description')),
+    '#markup' => t('This text will be shown on the <a href="@url"><em>Add content</em></a> page.', array('@url' => url('node/add'))),
   );
 
   // Prepare various messages about automatic permission assignment, and
@@ -208,7 +226,10 @@ function node_type_form($form, &$form_state, $type = NULL) {
     // to people even if they don't have access to the "Permissions" tab.
     $form['permissions_message_container'] = array(
       '#type' => 'container',
-      '#attributes' => array('class' => array('messages', $permissions_message_type)),
+      '#attributes' => array('class' => array(
+        'messages',
+        $permissions_message_type,
+      )),
     );
     $form['permissions_message_container']['message'] = array(
       '#type' => 'markup',
@@ -244,12 +265,34 @@ function node_type_form($form, &$form_state, $type = NULL) {
     $form['submission']['title_label']['#description'] = t('This content type does not have a title field.');
     $form['submission']['title_label']['#required'] = FALSE;
   }
+
+  // Add a toggle for the "Explanation or submission guidelines" field.
+  $form['submission']['help_enable'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Provide explanation or submission guidelines'),
+    '#default_value' => $type->help != '' ? 1 : 0,
+  );
   $form['submission']['help']  = array(
     '#type' => 'textarea',
     '#title' => t('Explanation or submission guidelines'),
+    '#title_display' => 'invisible',
     '#default_value' => $type->help,
-    '#description' => t('This text will be displayed at the top of the page when creating or editing content of this type.'),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="help_enable"]' => array('checked' => TRUE),
+      ),
+    ),
   );
+  // We need to implement the description as a separate form element, so that it
+  // is shown for both the checkbox and the text field.
+  $form['submission']['help_description'] = array(
+    '#type' => 'item',
+    // Fields of #type 'item' do not support #attributes - use
+    // #wrapper_attributes instead.
+    '#wrapper_attributes' => array('class' => array('description', 'form-item-description')),
+    '#markup' => t('This text will be displayed at the top of the page when creating or editing content of this type.'),
+  );
+
   $form['submission']['node_preview'] = array(
     '#type' => 'radios',
     '#title' => t('Preview before submitting'),
@@ -375,7 +418,7 @@ function node_type_form($form, &$form_state, $type = NULL) {
   );
   $form['revision']['revision']['revision_enabled'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Show option to create new revisions'),
+    '#title' => t('Enable option to create revisions'),
     '#default_value' => $type->settings['revision_enabled'],
     '#parents' => array('revision_enabled'),
     '#description' => t('Revisions allow content editors to view changes over time and revert changes if needed.'),
@@ -383,8 +426,17 @@ function node_type_form($form, &$form_state, $type = NULL) {
   $form['revision']['revision']['revision_default'] = array(
     '#type' => 'checkbox',
     '#title' => t('Create new revision by default'),
+    '#description' => t('If enabled, revisions to content will be created by default. People with the "Administer content" permission will see an option to create a revision.'),
     '#default_value' => $type->settings['revision_default'],
     '#parents' => array('revision_default'),
+    '#states' => array(
+      'visible' => array(
+        'input[name="revision_enabled"]' => array('checked' => TRUE),
+      ),
+      'enabled' => array(
+        'input[name="revision_enabled"]' => array('checked' => TRUE),
+      ),
+    ),
   );
 
   // Menu settings.

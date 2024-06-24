@@ -451,7 +451,7 @@ class ImageToolkitGdTestCase extends BackdropWebTestCase {
           $correct_colors = $this->colorsAreEqual($color, $corner);
         }
 
-        $directory = file_default_scheme() . '://imagetests';
+        $directory = file_default_scheme() . '://image_tests';
         file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
         image_save($image, $directory . '/' . $op . '.' . $image->info['extension']);
 

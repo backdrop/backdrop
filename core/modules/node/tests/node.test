@@ -520,8 +520,6 @@ class PagePreviewTestCase extends BackdropWebTestCase {
       'name' => $this->randomName(),
       'description' => $this->randomName(),
       'machine_name' => backdrop_strtolower($this->randomName()),
-      'help' => '',
-      'nodes' => array('page' => 'page'),
     ));
     taxonomy_vocabulary_save($vocabulary);
 
@@ -816,6 +814,16 @@ class PagePreviewTestCase extends BackdropWebTestCase {
 class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
 
   /**
+   * @var object
+   */
+  protected $content_type;
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
    * Sets up test case.
    */
   public function setUp() {
@@ -988,6 +996,11 @@ class NodeLayoutPreviewTestCase extends BackdropWebTestCase {
  * Tests that the correct layout is used for node revisions.
  */
 class NodeLayoutRevisionTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var array
+   */
+  protected $nodes;
 
   /**
    * Sets up test case.
@@ -1637,6 +1650,32 @@ class NodeAccessRecordsUnitTest extends BackdropWebTestCase {
  * Tests for Node Access with a non-node base table.
  */
 class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var array
+   */
+  protected $nodesByUser;
+
+  /**
+   * @var User
+   */
+  protected $webUser;
+
+  /**
+   * @var int
+   */
+  protected $publicTid;
+
+  /**
+   * @var int
+   */
+  protected $privateTid;
+
+  /**
+   * @var array
+   */
+  protected $nids_visible;
+
   public function setUp() {
     parent::setUp('node_access_test');
     node_access_rebuild();
@@ -1788,6 +1827,11 @@ class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
  */
 class NodeSaveTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
+
+  /**
+   * @var User
+   */
+  protected $web_user;
 
   function setUp() {
     parent::setUp('node_test');
@@ -2044,8 +2088,8 @@ class NodeTypeTestCase extends BackdropWebTestCase {
 
     // Verify that title and body fields are displayed.
     $this->backdropGet('node/add/page');
-    $this->assertRaw('Title', 'Title field was found.');
-    $this->assertRaw('Body', 'Body field was found.');
+    $this->assertRaw('<label for="edit-title">Title', 'Title field was found.');
+    $this->assertRaw('<label for="edit-body-und-0-value">Body', 'Body field was found.');
 
     // Rename the title field.
     $edit = array(
@@ -2056,8 +2100,8 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     field_info_cache_clear();
 
     $this->backdropGet('node/add/page');
-    $this->assertRaw('Foo', 'New title label was displayed.');
-    $this->assertNoRaw('Title', 'Old title label was not displayed.');
+    $this->assertRaw('<label for="edit-title">Foo', 'New title label was displayed.');
+    $this->assertNoRaw('<label for="edit-title">Title', 'Old title label was not displayed.');
 
     // Change the name, machine name and description.
     $edit = array(
@@ -2073,8 +2117,8 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $this->assertRaw('Lorem ipsum', 'New description was displayed.');
     $this->clickLink('Bar');
     $this->assertEqual(url('node/add/bar', array('absolute' => TRUE)), $this->getUrl(), 'New machine name was used in URL.');
-    $this->assertRaw('Foo', 'Title field was found.');
-    $this->assertRaw('Body', 'Body field was found.');
+    $this->assertRaw('<label for="edit-title">Foo', 'Title field was found.');
+    $this->assertRaw('<label for="edit-body-und-0-value">Body', 'Body field was found.');
 
     // Remove the body field.
     $this->backdropPost('admin/structure/types/manage/bar/fields/body/delete', NULL, t('Delete'));
@@ -2267,6 +2311,12 @@ class NodeTypePersistenceTestCase extends BackdropWebTestCase {
  * Verifies the rebuild functionality for the node_access table.
  */
 class NodeAccessRebuildTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   function setUp() {
     parent::setUp();
 
@@ -2291,6 +2341,31 @@ class NodeAccessRebuildTestCase extends BackdropWebTestCase {
  */
 class NodeAdminTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * @var User
+   */
+  protected $base_user_1;
+
+  /**
+   * @var User
+   */
+  protected $base_user_2;
+
+  /**
+   * @var User
+   */
+  protected $base_user_3;
+
+  /**
+   * @var User
+   */
+  protected $base_user_4;
 
   function setUp() {
     parent::setUp();
@@ -2492,7 +2567,13 @@ class NodeTitleTestCase extends BackdropWebTestCase {
     theme_enable(array('stark'));
     config_set('system.core', 'theme_default', 'stark');
 
-    $this->admin_user = $this->backdropCreateUser(array('administer nodes', 'create post content', 'create page content'));
+    $permissions = array(
+      'administer nodes',
+      'create post content',
+      'create page content',
+      'view hidden paths',
+    );
+    $this->admin_user = $this->backdropCreateUser($permissions);
     $this->backdropLogin($this->admin_user);
   }
 
@@ -2524,6 +2605,34 @@ class NodeTitleTestCase extends BackdropWebTestCase {
     // Test node title is clickable on teaser list (/node).
     $this->backdropGet('node');
     $this->clickLink($node->title);
+
+    // Hide path display for Post node type.
+    $config = config('node.type.post');
+    $config->set('settings.hidden_path', '1');
+    $config->save();
+    $this->assertEqual($config->get('settings.hidden_path'), '1', 'The POST content type has hidden_path enabled.');
+
+    // Create "Post" content with title.
+    $settings = array(
+      'type' => 'post',
+      'title' => $this->randomName(8),
+      'promote' => 1,
+    );
+    $node = $this->backdropCreateNode($settings);
+    backdrop_flush_all_caches();
+
+    // Test post title is clickable for admin account on teaser list (/node).
+    $this->backdropGet('');
+    $this->assertLink($node->title);
+    $this->clickLink($node->title);
+    $this->assertResponse(200, 'Received 200 response from post with hidden_path.');
+    // Test node title is NOT clickable for standard account.
+    $this->backdropLogout();
+    backdrop_flush_all_caches();
+    $this->backdropGet('');
+    $this->assertNoLink($node->title);
+    // Also ensure that there is no "read more" link.
+    $this->assertNoLinkByHref(backdrop_get_path_alias('node/' . $node->nid));
   }
 }
 
@@ -2547,6 +2656,12 @@ class NodeFeedTestCase extends BackdropWebTestCase {
  * Test toggle between custom front page callback and default /node callback.
  */
 class NodeFrontPageCallback extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   function setUp() {
     parent::setUp('node', 'system');
 
@@ -2586,6 +2701,16 @@ class NodeFrontPageCallback extends BackdropWebTestCase {
  * Functional tests for the node module blocks.
  */
 class NodeBlockFunctionalTest extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * @var User
+   */
+  protected $web_user;
 
   function setUp() {
     parent::setUp('node', 'block');
@@ -2948,6 +3073,11 @@ class NodeQueryAlter extends BackdropWebTestCase {
    * @var object
    */
   protected $noAccessUser;
+
+  /**
+   * @var User
+   */
+  protected $noAccessUser2;
 
   function setUp() {
     parent::setUp('node_access_test');
@@ -3394,6 +3524,12 @@ class NodeRevisionPermissionsTestCase extends BackdropWebTestCase {
  * Tests pagination with a node access module enabled.
  */
 class NodeAccessPagerTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   public function setUp() {
     parent::setUp('node_access_test', 'comment');
     node_access_rebuild();
@@ -3438,6 +3574,32 @@ class NodeAccessPagerTestCase extends BackdropWebTestCase {
  * Tests the interaction of the node access system with fields.
  */
 class NodeAccessFieldTestCase extends NodeWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * @var User
+   */
+  protected $content_admin_user;
+
+  /**
+   * @var string
+   */
+  protected $field_name;
+
+  /**
+   * @var array
+   */
+  protected $field;
+
+  /**
+   * @var array
+   */
+  protected $instance;
+
   public function setUp() {
     parent::setUp('node_access_test', 'field_ui');
     node_access_rebuild();
@@ -3656,7 +3818,7 @@ class NodePageCacheTest extends NodeWebTestCase {
    * Make sure that creating a new node does not affect existing entity cache
    * records, and updating a node only acts on the affected cid.
    */
-  function testNodeUpdateInsertCache() {
+  protected function testNodeUpdateInsertCache() {
     $node_one = $this->backdropCreateNode(array('title' => 'Node one'));
     $node_two = $this->backdropCreateNode(array('title' => 'Node two'));
     $ids = array($node_one->nid, $node_two->nid);
@@ -3690,6 +3852,30 @@ class NodePageCacheTest extends NodeWebTestCase {
     $this->assertEqual(count($cached_after_insert), 3, 'All three nodes have a record in table cache_entity_node.');
     $this->assertEqual($cached_after_insert[1]->created, $cached[1]->created, 'Cache timestamp of node 1 is unchanged.');
   }
+
+  /**
+   * Check that cached node info does not run out of sync with user data.
+   */
+  protected function testNodeSaveAfterUsernameChange() {
+    $author = $this->backdropCreateUser(array('create page content'));
+    $node = $this->backdropCreateNode(array(
+      'uid' => $author->uid,
+      'name' => $author->name,
+    ));
+
+    // Trigger entity cache.
+    $this->backdropGet('node/' . $node->nid);
+
+    // Simulate a username change (without actual form interaction).
+    $author->name = 'new_name';
+    user_save($author);
+
+    // Freshly load data and compare.
+    $user = entity_load('user', $author->uid);
+    $node_after = entity_load('node', $node->nid);
+    $this->assertEqual($user->name, $node_after->name, 'Name property in loaded node is equal to username after change');
+  }
+
 }
 
 /**
@@ -3721,15 +3907,20 @@ class NodeMultiByteUtf8Test extends NodeWebTestCase {
  */
 class NodePublishScheduling extends BackdropWebTestCase {
 
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   function testNodeTypeCreateDefaultDraft() {
-    // Create a content type of fooba via the user interface.
+    // Create a content type of foobar via the user interface.
     $this->admin_user = $this->backdropCreateUser(array('bypass node access', 'administer nodes'));
     $web_user = $this->backdropCreateUser(array('bypass node access', 'administer content types', 'administer nodes'));
     $this->backdropLogin($web_user);
     $edit = array(
-      'name' => 'fooba',
-      'title_label' => 'title for fooba',
-      'type' => 'fooba',
+      'name' => 'foobar',
+      'title_label' => 'title for foobar',
+      'type' => 'foobar',
       'status_default' => 0,
     );
     $this->backdropPost('admin/structure/types/add', $edit, t('Save content type'));
@@ -3739,7 +3930,7 @@ class NodePublishScheduling extends BackdropWebTestCase {
     $edit = array(
       'title' => $name,
     );
-    $this->backdropPost('node/add/fooba', $edit, t('Save'));
+    $this->backdropPost('node/add/foobar', $edit, t('Save'));
     $node = $this->backdropGetNodeByTitle($name);
     $this->assertEqual($node->status, '0', 'The node is in the state Draft.');
 

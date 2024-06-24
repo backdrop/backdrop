@@ -10,6 +10,7 @@ class TransliterationTest extends BackdropUnitTestCase {
     $random = $this->randomName(10);
     // Make some strings with two, three, and four-byte characters for testing.
     // Note that the 3-byte character is overridden by the 'kg' language.
+    // cspell:disable-next-line
     $two_byte = 'Ä Ö Ü Å Ø äöüåøhello';
     // This is a Cyrillic character that looks something like a u. See
     // http://www.unicode.org/charts/PDF/U0400.pdf
@@ -34,10 +35,13 @@ class TransliterationTest extends BackdropUnitTestCase {
       array('fr', $three_byte, 'c'),
       array('fr', $four_byte, 'wii'),
       // Test a language with no overrides.
+      // cspell:disable-next-line
       array('en', $two_byte, 'A O U A O aouaohello'),
       // Test language overrides provided by core.
+      // cspell:disable-next-line
       array('de', $two_byte, 'Ae Oe Ue A O aeoeueaohello'),
       array('de', $random, $random),
+      // cspell:disable-next-line
       array('da', $two_byte, 'A O U Aa Oe aouaaoehello'),
       array('da', $random, $random),
       array('kg', $three_byte, 'ts'),
@@ -47,9 +51,11 @@ class TransliterationTest extends BackdropUnitTestCase {
       array('en', 'foo' . $unknown_character . $unknown_character . $unknown_character . 'foo', 'foo???foo'),
 
       // Chinese characters.
+      // cspell:disable-next-line
       array('en', '一個簡單的句子', 'yigejiandandejuzi'),
 
       // Bulgarian characters.
+      // cspell:disable-next-line
       array('bg', 'първа статия', 'parva statiya'),
     );
 

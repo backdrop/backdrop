@@ -357,7 +357,9 @@ function taxonomy_form_vocabulary_submit($form, &$form_state) {
   $vocabulary = $form_state['vocabulary'];
   form_state_values_clean($form_state);
   foreach ($form_state['values'] as $key => $value) {
-    $vocabulary->$key = $value;
+    if (property_exists($vocabulary, $key)) {
+      $vocabulary->$key = $value;
+    }
   }
 
   // Prevent leading and trailing spaces in vocabulary names.
@@ -491,10 +493,10 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
     // Do not let a term start the page that is not at the root.
     if (isset($term->depth) && ($term->depth > 0) && !isset($back_step)) {
       $back_step = 0;
-      while ($pterm = prev($tree)) {
+      while ($previous_term = prev($tree)) {
         $before_entries--;
         $back_step++;
-        if ($pterm->depth == 0) {
+        if ($previous_term->depth == 0) {
           prev($tree);
           continue 2; // Jump back to the start of the root level parent.
        }

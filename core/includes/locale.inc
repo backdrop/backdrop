@@ -627,17 +627,9 @@ function _locale_parse_js_file($filepath) {
     (                             # capture plural string argument
       (?:                         # non-capturing group to repeat string pieces
         (?:
-          \'                      # match start of single-quoted string
-          (?:\\\\\'|[^\'])*       # match any character except unescaped single-quote
-          @count                  # match "@count"
-          (?:\\\\\'|[^\'])*       # match any character except unescaped single-quote
-          \'                      # match end of single-quoted string
+          \'(?:\\\\\'|[^\'])*\'   # match single-quoted string with any character except unescaped single-quote
           |
-          "                       # match start of double-quoted string
-          (?:\\\\"|[^"])*         # match any character except unescaped double-quote
-          @count                  # match "@count"
-          (?:\\\\"|[^"])*         # match any character except unescaped double-quote
-          "                       # match end of double-quoted string
+          "(?:\\\\"|[^"])*"       # match double-quoted string with any character except unescaped double-quote
         )
         (?:\s*\+\s*)?             # match "+" with possible whitespace, for str concat
       )+                          # match multiple because we supports concatenating strs
@@ -736,8 +728,8 @@ function _locale_invalidate_js($langcode = NULL) {
     if (!locale_translate_english()) {
       unset($languages['en']);
     }
-    foreach ($languages as $lcode => $data) {
-      $parsed['refresh:' . $lcode] = 'waiting';
+    foreach ($languages as $language_code => $data) {
+      $parsed['refresh:' . $language_code] = 'waiting';
     }
   }
   else {
