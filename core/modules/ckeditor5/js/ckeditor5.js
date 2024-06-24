@@ -302,12 +302,12 @@
       beforeAttachValue = Backdrop.ckeditor5.elementGetHtml(beforeElement.content);
 
       // Then run both strings through the same whitespace formatting, using
-      // formatHtml(). Wrap both strings with a temporary <temp> tag, to allow
+      // formatHtml(). Wrap both strings with a temporary <div> tag, to allow
       // childNodes (which is used later when comparing the two strings) to work
       // on them.
-      const formattedBeforeValue = document.createElement('temp');
+      const formattedBeforeValue = document.createElement('div');
       formattedBeforeValue.innerHTML = Backdrop.ckeditor5.formatHtml(beforeAttachValue);
-      const formattedAfterValue = document.createElement('temp');
+      const formattedAfterValue = document.createElement('div');
       formattedAfterValue.innerHTML = Backdrop.ckeditor5.formatHtml(afterAttachValue);
 
       // Get all Nodes for each string.
