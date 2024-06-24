@@ -53,6 +53,11 @@ function telemetry_telemetry_info() {
     'description' => t('The version of jQuery configured on your site.'),
     'project' => 'backdrop',
   );
+  $info['config_storage'] = array(
+    'label' => t('Config storage backend'),
+    'description' => t('The backend(s) used for configuration storage on your site.'),
+    'project' => 'backdrop',
+  );
   return $info;
 }
 
@@ -104,5 +109,18 @@ function telemetry_telemetry_data($key) {
     case 'jquery_version':
       $jquery = backdrop_get_library('system', 'jquery');
       return $jquery['version'];
+    case 'config_storage':
+      $config_default_storage = 'ConfigFileStorage';
+      $config_backends = array(
+        settings_get('config_active_class', $config_default_storage),
+        settings_get('config_staging_class', $config_default_storage),
+      );
+      if (count(array_unique($config_backends)) == 1) {
+        // Both active and staging configured to use the same storage class.
+        return reset($config_backends) == $config_default_storage ? '.json files' : 'database';
+      }
+      else {
+        return 'Both .json files and database';
+      }
   }
 }
