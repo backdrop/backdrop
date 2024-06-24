@@ -428,7 +428,7 @@ class UserLoginTestCase extends UserLoginTestBase {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  public function setUp() {
     parent::setUp('user_session_test');
   }
 
@@ -576,7 +576,7 @@ class UserLoginTestCase extends UserLoginTestBase {
   /**
    * Test logging in when an anon session already exists.
    */
-  protected function testLoginWithAnonSession() {
+  public function testLoginWithAnonSession() {
     // Visit the callback to generate a session for this anon user.
     $this->backdropGet('user_session_test_anon_session');
     // Now login.
@@ -632,7 +632,7 @@ class UserPasswordResetTestCase extends BackdropWebTestCase {
   /**
    * Tests password reset functionality.
    */
-  function testUserPasswordReset() {
+  public function testUserPasswordReset() {
     // Create a user.
     $account = $this->backdropCreateUser();
     $this->backdropLogin($account);
@@ -647,7 +647,7 @@ class UserPasswordResetTestCase extends BackdropWebTestCase {
   /**
    * Test user password reset while logged in.
    */
-  function testUserPasswordResetLoggedIn() {
+  public function testUserPasswordResetLoggedIn() {
     $account = $this->backdropCreateUser();
     $this->backdropLogin($account);
     // Make sure the test account has a valid password.
@@ -675,7 +675,7 @@ class UserPasswordResetTestCase extends BackdropWebTestCase {
   /**
    * Attempts login using an expired password reset link.
    */
-  function testUserPasswordResetExpired() {
+  public function testUserPasswordResetExpired() {
     // Set password reset timeout variable to 43200 seconds = 12 hours.
     $timeout = 43200;
     variable_set('user_password_reset_timeout', $timeout);
@@ -697,7 +697,7 @@ class UserPasswordResetTestCase extends BackdropWebTestCase {
   /**
    * Prefill the text box on incorrect login via link to password reset page.
    */
-  function testUserPasswordTextboxFilled() {
+  public function testUserPasswordTextboxFilled() {
     $this->backdropGet('user/login');
     $edit = array(
       'name' => $this->randomName(),
@@ -714,7 +714,7 @@ class UserPasswordResetTestCase extends BackdropWebTestCase {
   /**
    * Make sure that users cannot forge password reset URLs of other users.
    */
-  function testResetImpersonation() {
+  public function testResetImpersonation() {
     // Make sure user 1 has a valid password, so it does not interfere with the
     // test user accounts that are created below.
     $account = user_load(1);
@@ -1575,7 +1575,7 @@ class UserPermissionsTestCase extends BackdropWebTestCase {
   /**
    * Test assigning of permissions for the editor role.
    */
-  protected function testEditorRole() {
+  public function testEditorRole() {
     $this->backdropLogin($this->admin_user);
     $this->backdropGet('admin/config/people/roles');
 
