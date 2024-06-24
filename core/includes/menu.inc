@@ -154,8 +154,11 @@ define('MENU_CALLBACK', 0x0000);
  *
  * Modules may "suggest" menu items that the administrator may enable. They act
  * just as callbacks do until enabled, at which time they act like normal items.
- * Note for the value: 0x0010 was a flag which is no longer used, but this way
- * the values of MENU_CALLBACK and MENU_SUGGESTED_ITEM are separate.
+ *
+ * Note: The value 0x0010 cannot be removed from the definition of
+ * MENU_SUGGESTED_ITEM. It is a flag (no longer used) that at one time ensured
+ * that the values of MENU_VISIBLE_IN_BREADCRUMB and MENU_SUGGESTED_ITEM were
+ * separate.
  */
 define('MENU_SUGGESTED_ITEM', MENU_VISIBLE_IN_BREADCRUMB | 0x0010);
 
