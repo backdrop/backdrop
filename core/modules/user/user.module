@@ -2782,7 +2782,7 @@ function user_role_revoke_permissions($role_name, array $permissions = array()) 
  * Backdrop, this function here is slated for removal in Backdrop 2.0. Kept only
  * for backwards-compatibility purposes in Backdrop 1.0.
  *
- * @todo Remove this function in Backdrop 2.0.
+ * @deprecated since 1.0.
  */
 function user_filters() {
   $filters = array();
@@ -2807,7 +2807,7 @@ function user_filters() {
     if ($permissions = $function()) {
       asort($permissions);
       foreach ($permissions as $permission => $permission_info) {
-        $options[$module_group][$permission] = t($permission_info['title']);
+        $options[$module_group][$permission] = $permission_info['title'];
       }
     }
   }
@@ -2843,7 +2843,7 @@ function user_filters() {
  * @param $query
  *   Query object that should be filtered.
  *
- * @todo Remove this function in Backdrop 2.0.
+ * @deprecated since 1.0.
  */
 function user_build_filter_query(SelectQuery $query) {
   $filters = user_filters();
