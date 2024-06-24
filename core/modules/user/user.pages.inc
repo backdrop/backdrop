@@ -59,12 +59,11 @@ function user_pass() {
     $form['name']['#value'] = $user->mail;
     $form['mail'] = array(
       '#prefix' => '<p>',
-      // As of https://www.drupal.org/node/889772 the user no longer must log
-      // out (if they are still logged in when using the password reset link,
-      // they will be logged out automatically then), but this text is kept as
-      // is to avoid breaking translations as well as to encourage the user to
-      // log out manually at a time of their own choosing (when it will not
-      // interrupt anything else they may have been in the middle of doing).
+      // As of Backdrop 1.28.1 the user no longer must log out. If they are
+      // still logged in when using the password reset link, they will be
+      // logged out automatically. This text is kept as-is to encourage the
+      // user to log out manually at a time of their own choosing, rather
+      // than have their session replaced when they follow the reset link.
       '#markup' => t('Password reset instructions will be mailed to %email. You must log out to use the password reset link in the email.', array('%email' => $user->mail)),
       '#suffix' => '</p>',
     );
