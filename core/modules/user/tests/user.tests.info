@@ -148,7 +148,7 @@ description = Test user edit page when a form rebuild is triggered.
 group = User
 file = user.test
 
-[UserViewsTestCase]
+[UserPasswordResetTestCase]
 name = Reset password
 description = Ensure that password reset methods work as expected.
 group = User
