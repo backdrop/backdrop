@@ -2775,14 +2775,7 @@ function user_role_revoke_permissions($role_name, array $permissions = array()) 
 }
 
 /**
- * Provided filters that could be applied to the user account listing.
- *
- * Same as with user_build_filter_query(), this function was used in the user
- * account listing page in Drupal 7. Since that listing is provided by Views in
- * Backdrop, this function here is slated for removal in Backdrop 2.0. Kept only
- * for backwards-compatibility purposes in Backdrop 1.0.
- *
- * @deprecated since 1.0.
+ * List user administration filters that can be applied.
  */
 function user_filters() {
   $filters = array();
@@ -2832,18 +2825,10 @@ function user_filters() {
 }
 
 /**
- * Extended a query object for user account administration filters based on
- * session.
- *
- * Same as with user_filters(), this function was used in the user account
- * listing page in Drupal 7. Since that listing is provided by Views in
- * Backdrop, this function here is slated for removal in Backdrop 2.0. Kept only
- * for backwards-compatibility purposes in Backdrop 1.0.
+ * Extends a query object for user administration filters based on session.
  *
  * @param $query
  *   Query object that should be filtered.
- *
- * @deprecated since 1.0.
  */
 function user_build_filter_query(SelectQuery $query) {
   $filters = user_filters();
