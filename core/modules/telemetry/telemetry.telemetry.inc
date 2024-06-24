@@ -48,6 +48,11 @@ function telemetry_telemetry_info() {
     'description' => t('Is the Drupal compatibility layer enabled?'),
     'project' => 'backdrop',
   );
+  $info['jquery_version'] = array(
+    'label' => t('jQuery version'),
+    'description' => t('The version of jQuery configured on your site.'),
+    'project' => 'backdrop',
+  );
   return $info;
 }
 
@@ -96,5 +101,8 @@ function telemetry_telemetry_data($key) {
       }
     case 'drupal_compatibility':
       return settings_get('backdrop_drupal_compatibility') ? 'Yes' : 'No';
+    case 'jquery_version':
+      $jquery = backdrop_get_library('system', 'jquery');
+      return $jquery['version'];
   }
 }

@@ -757,6 +757,9 @@ function admin_bar_links_locale() {
   $links['locale'] = array(
     '#title' => isset($language->native) ? $language->native : $language->name,
     '#attributes' => array('class' => array('admin-bar-locale-links')),
+    '#options' => array(
+      'icon' => 'translate-fill',
+    ),
   ) + admin_bar_locale_links();
 
   // Don't display an empty menu.
