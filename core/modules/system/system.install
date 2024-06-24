@@ -3619,6 +3619,7 @@ function system_update_1096() {
     $updated_item['options'] = $options;
     menu_link_save($updated_item, $existing_item);
   }
+}
 
 /**
  * Set local_action_position in Admin Bar.
