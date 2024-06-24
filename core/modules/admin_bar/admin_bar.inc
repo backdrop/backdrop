@@ -498,11 +498,16 @@ function admin_bar_links_menu($tree) {
     // Remove description to prevent mouseover tooltip clashes.
     unset($data['link']['localized_options']['attributes']['title']);
 
-    // Make action links (typically "Add ...") appear first in dropdowns.
-    // They might appear first already, but only as long as there is no link
-    // that comes alphabetically first (e.g., a node type with label "Ad").
+    // Move local action links to the appropriate position based on the
+    // respective setting. Defaults to 'top'.
+    $local_actions_bottom = config_get('admin_bar.settings', 'local_actions_bottom');
     if ($data['link']['type'] & MENU_IS_LOCAL_ACTION) {
-      $data['link']['weight'] -= 1000;
+      if (config_get('admin_bar.settings', 'local_action_position') == 'bottom') {
+        $data['link']['weight'] += 9999;
+      }
+      else {
+        $data['link']['weight'] -= 9999;
+      }
     }
 
     $links[$data['link']['href']] = array(
@@ -817,22 +822,43 @@ function admin_bar_links_alert() {
 function admin_bar_theme_settings() {
   $config = config('admin_bar.settings');
   $form['#config'] = 'admin_bar.settings';
-  $form['margin_top'] = array(
+
+  $form['settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Settings'),
+  );
+  $form['settings']['margin_top'] = array(
     '#type' => 'checkbox',
     '#title' => t('Adjust top margin'),
     '#default_value' => $config->get('margin_top'),
     '#description' => t('Shifts the entire site content down to make room for the administration bar. If disabled, absolute- or fixed-positioned page elements may be covered by the administration bar.'),
   );
-  $form['position_fixed'] = array(
+  $form['settings']['position_fixed'] = array(
     '#type' => 'checkbox',
     '#title' => t('Keep bar at top of page'),
     '#default_value' => $config->get('position_fixed'),
     '#description' => t('Displays the administration bar always at the top of the browser viewport, even when scrolling the page.'),
   );
+  $form['settings']['local_action_position'] = array(
+    '#type' => 'radios',
+    '#title' => t('Position of local action links'),
+    '#default_value' => $config->get('local_action_position'),
+    '#options' => array(
+      'top' => t('Top'),
+      'bottom' => t('Bottom'),
+    ),
+    '#description' => t('Where to display local action links (e.g. "<em>Add [something]</em>") within their respective sub-menus.'),
+  );
 
   $form['components'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Enabled components'),
+    '#description' => t('These features will be enabled/visible in the administration bar. Untick the boxes to disable/hide them.'),
+  );
+  $form['components']['components'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Enabled components'),
+    '#title_display' => 'invisible',
     '#options' => array(
       'admin_bar.icon' => t('Icon menu'),
       'admin_bar.back_to_site_link' => t('Back to site link'),

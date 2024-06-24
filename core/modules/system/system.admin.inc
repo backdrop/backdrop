@@ -1644,15 +1644,8 @@ function system_cron_settings($form, &$form_state) {
  * @ingroup forms
  */
 function system_run_cron_submit($form, &$form_state) {
-  // Run cron manually from Cron form.
-  if (backdrop_cron_run()) {
-    backdrop_set_message(t('Cron run successfully.'));
-  }
-  else {
-    backdrop_set_message(t('Cron run failed.'), 'error');
-  }
-
-  backdrop_goto('admin/config/system/cron');
+  // Run cron manually.
+  system_run_cron();
 }
 
 /**
@@ -2648,7 +2641,7 @@ function _system_format_debug_info(array $lines, array $format_settings) {
  * Menu callback: run cron manually.
  */
 function system_run_cron() {
-  // Run cron manually
+  // Run cron manually.
   if (backdrop_cron_run()) {
     backdrop_set_message(t('Cron ran successfully.'));
   }
@@ -2656,7 +2649,12 @@ function system_run_cron() {
     backdrop_set_message(t('Cron run failed.'), 'error');
   }
 
-  backdrop_goto('admin/reports/status');
+  if ($_SERVER['HTTP_REFERER']) {
+    backdrop_goto($_SERVER['HTTP_REFERER']);
+  }
+  else {
+    backdrop_goto('admin/reports/status');
+  }
 }
 
 /**
