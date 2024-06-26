@@ -3456,8 +3456,8 @@ function _layout_settings_get_group_operations($template_info, $is_default) {
 function layout_configure_region_page($form, &$form_state, Layout $layout, $renderer_name, $region_name, $block_key = NULL) {
   $form_state['layout'] = $layout;
   $form_state['region_name'] = $region_name;
-  $layout_info = layout_get_layout_template_info($layout->layout_template);
-  if (!array_key_exists($region_name, $layout_info['regions'])) {
+  $layout_template_info = layout_get_layout_template_info($layout->layout_template);
+  if (!array_key_exists($region_name, $layout_template_info['regions'])) {
     return MENU_NOT_FOUND;
   }
 

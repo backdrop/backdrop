@@ -12,7 +12,7 @@ class LayoutRendererFlexible {
   var $layout;
 
   /**
-   * The information from hook_layout_info() for the layout template.
+   * The information from hook_layout_template_info() for the layout template.
    *
    * @var array
    */

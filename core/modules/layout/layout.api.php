@@ -10,6 +10,62 @@
  */
 
 /**
+ * Provides a list of layout templates that can be used within the Layout
+ * module.
+ *
+ * This hook returns an array keyed by a unique identifier for a layout template
+ * name.
+ *
+ * The contents of this hook are merged with layout template information
+ * provided by stand-alone layout templates with their own .info files.
+ * Generally, the data returned here matches the keys used within layout 
+ * template .info files.
+ *
+ * @return array
+ *   Each item in the returned array of info should have the following keys:
+ *   - title: The human-readable name of the layout template.
+ *   - path: A local path within the providing module to files needed by this
+ *     layout template, such as associated CSS, the icon image, and tpl.php
+ *     file.
+ *   - regions: A list of regions this layout template provides, keyed by a
+ *     machine name with a human label value.
+ *   - preview: Optional. An image representing the appearance of this layout
+ *     template. If left empty, "preview.png" will be used.
+ *   - stylesheets: An array of CSS file used whenever this layout template
+ *     is presented. If left empty, "one-column.css" will be used for all media
+ *     types.
+ *   - template: The name of the template file (without the extension) used for
+ *     this layout template. Layout templates should always be named with a 
+ *     "layout--" prefix, so that the default variables may be provided in
+ *     template_preprocess_layout(). If left empty, "layout--[key]" will be
+ *     used, with underscores converted to hyphens in the layout template key.
+ *   - file: Optional. The name of a PHP file to be included prior to any
+ *     rendering of this layout template. This may be used to provide preprocess
+ *     functions to prepare variables for the use of the layout template.
+ */
+function hook_layout_template_info() {
+  $layout_templates['my_layout_template'] = array(
+    'title' => t('A custom layout template'),
+    'path' => 'layouts/my-layout-template',
+    'regions' => array(
+      'header' => t('Header'),
+      'content' => t('Content'),
+      'sidebar' => t('Sidebar'),
+      'footer' => t('Footer'),
+    ),
+
+    // Optional information that populates using defaults.
+    // 'preview' => 'preview.png',
+    // 'stylesheets' => array('all' => array('one-column.css')),
+    // 'template' => 'layout--my-layout-template',
+
+    // Specify a file containing preprocess functions if needed.
+    // 'file' => 'my_layout_template.php',
+  );
+  return $layout_templates;
+}
+
+/**
  * Provides a list of layouts that can be used within the Layout module.
  *
  * This hook returns an array keyed by a unique identifier for a layout name.

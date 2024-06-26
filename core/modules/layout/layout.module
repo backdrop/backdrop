@@ -1570,8 +1570,9 @@ function _layout_get_all_info($data_type, $init = array()) {
  *
  * @return array|boolean
  *   The layout template information, as returned by either a stand-alone
- *   template .info file, or through a module's hook_layout_info().
+ *   template .info file, or through a module's hook_layout_template_info().
  *
+ * @see hook_layout_template_info()
  * @see hook_layout_info()
  */
 function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE) {
@@ -1604,7 +1605,9 @@ function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE
       $init[$name]['title'] = $init[$name]['name'];
       $init[$name]['name'] = $name;
     }
-    $info = _layout_get_all_info('layout', $init);
+    $info = _layout_get_all_info('layout_template', $init);
+    // Account for implementations of the deprecated hook_layout_info().
+    $info = _layout_get_all_info('layout', $info);
 
     // Populate defaults.
     foreach ($info as $name => $layout_info) {
@@ -1657,7 +1660,7 @@ function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE
  *
  * @return array|boolean
  *   The layout template information, as returned by either a stand-alone
- *   template .info file, or through a module's hook_layout_info().
+ *   template .info file, or through a module's hook_layout_template_info().
  *
  * @deprecated since 1.4.0
  * @see layout_get_layout_template_info()
@@ -2363,9 +2366,9 @@ function layout_flexible_template_load_all() {
 }
 
 /**
- * Implements hook_layout_info().
+ * Implements hook_layout_template_info().
  */
-function layout_layout_info() {
+function layout_layout_template_info() {
   $layouts = array();
   $styles = layout_flexible_row_styles();
 
@@ -2398,6 +2401,20 @@ function layout_layout_info() {
   }
 
   return $layouts;
+}
+
+/**
+ * Implementation of deprecated hook_layout_info().
+ *
+ * This hook has been replaced by hook_layout_template_info.
+ *
+ * @deprecated since 1.28.0
+ * @see layout_layout_templatet_info()
+ * @see https://docs.backdropcms.org/node/***** @todo
+ */
+function layout_layout_info() {
+  watchdog_deprecated_function('layout', __FUNCTION__);
+  return layout_layout_template_info();
 }
 
 /**
