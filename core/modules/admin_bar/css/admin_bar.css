@@ -10,8 +10,8 @@
 /* Set a CSS property declaring the height of the admin bar. */
 /* This can be read by themes to offset the top of the page if needed. */
 :root {
-  --admin-bar__font-size: 12px;
-  --admin-bar__height: calc(var(--admin-bar__font-size) * 3.05);
+  --admin-bar-font-size: 12px;
+  --admin-bar-height: calc(var(--admin-bar-font-size) * 3.05);
 }
 
 #admin-bar {
@@ -23,7 +23,7 @@
   margin: 0;
   padding: 0;
   /* Adjusting font size will scale the entire admin menu, including icons. */
-  font: normal var(--admin-bar__font-size) "Lucida Grande", Verdana, sans-serif;
+  font: normal var(--admin-bar-font-size) "Lucida Grande", Verdana, sans-serif;
   line-height: 1;
   text-align: left; /* LTR */
   background: linear-gradient(#2D2D2D 0%, #171717 100%);
@@ -36,11 +36,11 @@
 }
 /* When body is a contextual links region. */
 .contextual-links-region #admin-bar {
-  top: calc(var(--admin-bar__height) * -1)
+  top: calc(var(--admin-bar-height) * -1)
 }
 
 .admin-bar body {
-  border-top: var(--admin-bar__height) solid #2D2D2D !important;
+  border-top: var(--admin-bar-height) solid #2D2D2D !important;
 }
 
 /* Top level items. */
@@ -89,19 +89,33 @@
 }
 
 #admin-bar #admin-bar-menu > li > .dropdown > li > a.active-trail {
-  background-color: #000000;
-  box-shadow:
-    inset 0 -1px 0 0 #999,
-    inset 0 -3px 0 0 #eee;
+  color: #000;
+  font-weight: bold;
+  text-shadow: none;
+  background: #eee;
+  box-shadow: inset 0 -3px 0 0 #489fd4;
 }
+#admin-bar #admin-bar-menu > li > .dropdown > li > a.active-trail.expanded-trail,
+#admin-bar #admin-bar-menu > li > .dropdown > li > a.active-trail:hover,
+#admin-bar #admin-bar-menu > li > .dropdown > li > a.active-trail:focus {
+  background: linear-gradient(#d9d9d9, #fff 50%);
+  box-shadow: inset 0 -3px 0 0 #0074bd;
+}
+
 /* Restore active and hover colors. */
 #admin-bar #admin-bar-menu > li > .dropdown > li > a.expanded-trail,
+#admin-bar #admin-bar-menu > li > .dropdown > li > a:hover,
+#admin-bar #admin-bar-menu > li > .dropdown > li > a:focus,
 #admin-bar #admin-bar-extra > li > .dropdown > li > a:hover,
 #admin-bar #admin-bar-icon li.admin-bar-icon > a:hover,
 #admin-bar #admin-bar-extra > li > .dropdown > li > a:focus,
 #admin-bar #admin-bar-icon li.admin-bar-icon > a:focus {
   background-image: linear-gradient(#000000, #222222);
   box-shadow: inset 0 -2px 0 0 #0074bd;
+}
+
+#admin-bar #admin-bar-menu > li > .dropdown > li > a:focus {
+  outline: 2px solid #0074bd;
 }
 
 #admin-bar li {
@@ -166,9 +180,6 @@
 [dir="rtl"] #admin-bar .dropdown li li a {
   border-left: none;
 }
-#admin-bar .dropdown a:hover {
-  text-decoration: underline;
-}
 
 /* All dropdown list items. */
 #admin-bar .dropdown li {
@@ -208,7 +219,7 @@
 
 /* Third-and-above-level lists. */
 #admin-bar .dropdown li li.expandable ul {
-  margin: calc(-1px - var(--admin-bar__height)) 0 0 15em; /* LTR */
+  margin: calc(-1px - var(--admin-bar-height)) 0 0 15em; /* LTR */
 }
 #admin-bar .dropdown li li.expandable.outside-right ul {
   margin-left: -15em; /* LTR */
