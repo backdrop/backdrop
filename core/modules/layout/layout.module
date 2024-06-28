@@ -802,6 +802,7 @@ function layout_theme() {
           'content' => NULL,
           'settings' => NULL,
           'layout' => NULL,
+          // @todo: Rename to layout_template_info in 2.x.
           'layout_info' => NULL,
           'renderer' => NULL,
           'attributes' => array(),
