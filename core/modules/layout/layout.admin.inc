@@ -1222,7 +1222,7 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
     '#markup' => $renderer->render(),
   );
 
-  foreach ($renderer->layout_info['regions'] as $region_id => $title) {
+  foreach ($renderer->layout_template_info['regions'] as $region_id => $title) {
     // Make sure we at least have an empty array for all possible locations.
     if (!isset($layout->positions[$region_id])) {
       $layout->positions[$region_id] = array();
