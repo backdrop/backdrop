@@ -2,13 +2,13 @@
  * Generic elements.
  */
 body {
-  color: #000;
-  background: #fafafa;
+  color: var(--seven-palette__grayscale--0, #000);
+  background: var(--seven-palette__grayscale--98, #fafafa);
   font: normal 16px/1.538 "Open Sans", "Lucida Grande", "Lucida Sans Unicode", sans-serif;
 }
 a,
 .link {
-  color: #0074bd;
+  color: var(--seven-palette__highlight--50, #0074bd);
   text-decoration: none;
 }
 a:hover,
@@ -20,7 +20,7 @@ hr {
   padding: 0;
   border: none;
   height: 1px;
-  background: #cccccc;
+  background: var(--seven-palette__grayscale--65, #ccc);
 }
 h1,
 h2,
@@ -66,7 +66,7 @@ dl dl {
 blockquote {
   padding: 5px 30px;
   width: 85%;
-  background-color: #fff;
+  background-color: var(--seven-palette__grayscale--100, #fff);
   margin: 20px auto;
   border-left: 2px solid #BDBDBD;
 }
