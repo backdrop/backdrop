@@ -8,7 +8,7 @@ body {
 }
 a,
 .link {
-  color: var(--seven-palette__highlight--50, #0074bd);
+  color: var(--seven-palette__accent--50, #0074bd);
   text-decoration: none;
 }
 a:hover,
@@ -20,7 +20,7 @@ hr {
   padding: 0;
   border: none;
   height: 1px;
-  background: var(--seven-palette__grayscale--65, #ccc);
+  background: var(--seven-palette__grayscale--75, #ccc);
 }
 h1,
 h2,

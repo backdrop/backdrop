@@ -1,0 +1,33 @@
+/**
+ * @file
+ * General styles for dropbuttons.
+ */
+
+.js .dropbutton-widget {
+  background-color: var(--seven-palette__grayscale--100, #fff);
+  border: 1px solid var(--seven-palette__grayscale--75, #ccc);
+}
+.js .dropbutton-widget:hover {
+  border-color: light-dark(#b8b8b8, #474747);
+}
+.dropbutton .dropbutton-action > * {
+  padding: 0.1em 0.5em;
+  white-space: nowrap;
+}
+.dropbutton .secondary-action {
+  border-top: 1px solid var(--seven-palette__grayscale--90, #e9e8e8);
+}
+.dropbutton-multiple .dropbutton {
+  border-right: 1px solid var(--seven-palette__grayscale--90, #e9e8e8); /* LTR */
+}
+[dir="rtl"] .dropbutton-multiple .dropbutton {
+  border-left: 1px solid var(--seven-palette__grayscale--90, #e9e8e8);
+  border-right: 0 none;
+}
+
+.js .dropbutton button:hover,
+.js .dropbutton a:hover,
+.js .dropbutton button:focus,
+.js .dropbutton a:focus {
+  background-color: var(--seven-palette__grayscale--95, #f7f7f7);
+}

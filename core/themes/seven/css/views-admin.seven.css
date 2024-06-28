@@ -131,7 +131,7 @@ table th {
 /* @group Attachment details */
 
 #edit-display-settings-title {
-  color: var(--seven-palette__highlight--60, #008BCB);
+  color: var(--seven-palette__accent--60, #008bcb);
 }
 
 #edit-display-settings-top {
@@ -160,11 +160,11 @@ table th {
 }
 .views-displays .secondary li.add a {
   background-color: var(--seven-palette__grayscale--100, #fff);
-  color: var(--seven-palette__highlight--60, #008BCB);
+  color: var(--seven-palette__accent--60, #008bcb);
 }
 .views-displays .secondary li.add a:hover {
   background-color: var(--seven-palette__grayscale--95, #f7f7f7);
-  color: var(--seven-palette__highlight--60, #008BCB);
+  color: var(--seven-palette__accent--60, #008bcb);
 }
 .views-displays .secondary a:hover > .icon.add {
   background-position: center 3px;
@@ -186,7 +186,7 @@ table th {
 }
 .views-displays .secondary .open > a:hover {
   background-color: #f1f1f1;
-  color: var(--seven-palette__highlight--60, #008BCB);
+  color: var(--seven-palette__accent--60, #008bcb);
 }
 
 .views-displays .secondary .action-list  li:first-child {
@@ -199,7 +199,7 @@ table th {
 
 .views-displays .secondary .action-list input.form-submit {
   border-radius: 0;
-  color: var(--seven-palette__highlight--60, #008BCB);
+  color: var(--seven-palette__accent--60, #008bcb);
 }
 
 /* @end */
