@@ -486,6 +486,7 @@ function theme_file_audio($variables) {
  *   - controls: Boolean indicating whether or not controls should be displayed.
  *   - autoplay: Boolean indicating whether or not the video should start
  *     playing automatically.
+ *   - playsinline: Boolean indicating whether the video should play inline.
  *   - loop: Boolean indicating whether or not the video should loop.
  *   - muted: Boolean indicating whether or not the sound should be muted.
  *   - width: Width, in pixels, of the video player.
@@ -503,6 +504,9 @@ function theme_file_video($variables) {
   }
   if ($variables['autoplay']) {
     $video_attributes['autoplay'] = 'autoplay';
+  }
+  if (!empty($variables['playsinline'])) {
+    $video_attributes['playsinline'] = 'playsinline';
   }
   if ($variables['loop']) {
     $video_attributes['loop'] = 'loop';

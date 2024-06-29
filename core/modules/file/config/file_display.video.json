@@ -8,6 +8,7 @@
             "file_field_file_video": {
                 "controls": 1,
                 "autoplay": 0,
+                "playsinline": 0,
                 "loop": 0,
                 "muted": 0,
                 "width": "",
@@ -23,6 +24,7 @@
             "file_field_file_video" : {
                 "controls": 1,
                 "autoplay": 0,
+                "playsinline": 0,
                 "loop": 0,
                 "muted": 0,
                 "width": "",

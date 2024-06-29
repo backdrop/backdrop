@@ -890,6 +890,7 @@ function file_theme() {
         'files' => array(),
         'controls' => TRUE,
         'autoplay' => FALSE,
+        'playsinline' => FALSE,
         'loop' => FALSE,
         'muted' => FALSE,
         'width' => NULL,
