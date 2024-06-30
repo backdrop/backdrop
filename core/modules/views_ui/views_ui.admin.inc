@@ -2079,7 +2079,7 @@ function views_ui_toggle_enable_page(view $view, $status) {
  */
 function views_ui_edit_view_form_validate($form, &$form_state) {
   // Do not validate cancel or delete or revert.
-  if (empty($form_state['clicked_button']['#value']) || $form_state['clicked_button']['#value'] != t('Save')) {
+  if (empty($form_state['triggering_element']['#value']) || $form_state['triggering_element']['#value'] != t('Save')) {
     return;
   }
 
@@ -3673,15 +3673,15 @@ function views_ui_rearrange_filter_form_submit($form, &$form_state) {
 
   // If the #group property is set on the clicked button, that means we are
   // either adding or removing a group, not actually updating the filters.
-  if (!empty($form_state['clicked_button']['#group'])) {
-    if ($form_state['clicked_button']['#group'] == 'add') {
+  if (!empty($form_state['triggering_element']['#group'])) {
+    if ($form_state['triggering_element']['#group'] == 'add') {
       // Add a new group
       $groups['groups'][] = 'AND';
     }
     else {
       // Renumber groups above the removed one down.
       foreach (array_keys($groups['groups']) as $group_id) {
-        if ($group_id >= $form_state['clicked_button']['#group']) {
+        if ($group_id >= $form_state['triggering_element']['#group']) {
           $old_group = $group_id + 1;
           if (isset($groups['groups'][$old_group])) {
             $groups['groups'][$group_id] = $groups['groups'][$old_group];
