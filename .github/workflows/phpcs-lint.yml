@@ -47,4 +47,4 @@ jobs:
       name: Run CSpell
       with:
         incremental_files_only: true
-        config: './.cspell/cspell.json'
+        config: '.cspell/cspell.json'
