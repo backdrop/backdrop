@@ -2040,7 +2040,7 @@ function form_builder($form_id, &$element, &$form_state) {
     if (!empty($form_state['triggering_element']['#executes_submit_callback'])) {
       $form_state['submitted'] = TRUE;
     }
-
+// Test typo: tirger.
     // Special processing if the triggering element is a button.
     if (isset($form_state['triggering_element']['#button_type'])) {
       // Because there are several ways in which the triggering element could
