@@ -2055,6 +2055,9 @@ function form_builder($form_id, &$element, &$form_state) {
 
       // @todo Legacy support. Remove in Backdrop 2.x.
       $form_state['clicked_button'] = $form_state['triggering_element'];
+
+      // Tste tyop: tirger.
+      $master = $form_state['clicked_button'];
     }
   }
   return $element;

@@ -926,7 +926,7 @@ function layout_settings_form_condition_add($form, &$form_state) {
  * Submit handler for layout_settings_form() that removes a condition.
  */
 function layout_settings_form_condition_remove($form, &$form_state) {
-  $removed_condition = $form_state['clicked_button']['#array_parents'][2];
+  $removed_condition = $form_state['triggering_element']['#array_parents'][2];
   unset($form_state['layout']->conditions[$removed_condition]);
   layout_set_layout_tempstore($form_state['layout']);
 
@@ -937,7 +937,7 @@ function layout_settings_form_condition_remove($form, &$form_state) {
  * Submit handler for layout_settings_form() that edits an condition.
  */
 function layout_settings_form_condition_edit($form, &$form_state) {
-  $edit_condition = $form_state['clicked_button']['#array_parents'][2];
+  $edit_condition = $form_state['triggering_element']['#array_parents'][2];
   $form_state['redirect'] = 'admin/structure/layouts/manage/' . $form_state['layout']->name . '/condition/edit/layout/' . $edit_condition;
 }
 
@@ -1767,7 +1767,7 @@ function layout_block_configure_form_condition_edit($form, &$form_state) {
   /* @var Block $block */
   $block = $form_state['block'];
 
-  $edit_condition = $form_state['clicked_button']['#array_parents'][2];
+  $edit_condition = $form_state['triggering_element']['#array_parents'][2];
   $form_state['redirect'] = 'admin/structure/layouts/manage/' . $layout->name . '/condition/edit/' . $block->uuid . '/' . $edit_condition;
 }
 
@@ -1780,7 +1780,7 @@ function layout_block_configure_form_condition_remove($form, &$form_state) {
   /* @var Block $block */
   $block = $form_state['block'];
 
-  $removed_condition = $form_state['clicked_button']['#array_parents'][2];
+  $removed_condition = $form_state['triggering_element']['#array_parents'][2];
   unset($block->conditions[$removed_condition]);
   $layout->in_progress['section'] = 'conditions';
   layout_set_layout_tempstore($layout);
@@ -2646,7 +2646,7 @@ function layout_delete_form_submit(&$form, &$form_state) {
   $path = $layout->getPath();
   $removal_removes_page = layout_removal_removes_page($layout);
 
-  switch ($form_state['clicked_button']['#value']) {
+  switch ($form_state['triggering_element']['#value']) {
     case t('Delete layout'):
       $layout->delete();
       backdrop_set_message(t('Layout %title has been deleted.', array('%title' => $title)));
@@ -3024,7 +3024,7 @@ function layout_menu_item_form_condition_add($form, &$form_state) {
  * Submit handler for layout_settings_form() that removes a condition.
  */
 function layout_menu_item_form_condition_remove($form, &$form_state) {
-  $removed_condition = $form_state['clicked_button']['#array_parents'][2];
+  $removed_condition = $form_state['triggering_element']['#array_parents'][2];
   unset($form_state['menu_item']->conditions[$removed_condition]);
   layout_set_layout_tempstore($form_state['menu_item'], 'menu_item');
 
@@ -3035,7 +3035,7 @@ function layout_menu_item_form_condition_remove($form, &$form_state) {
  * Submit handler for layout_settings_form() that edits an condition.
  */
 function layout_menu_item_form_condition_edit($form, &$form_state) {
-  $edit_condition = $form_state['clicked_button']['#array_parents'][2];
+  $edit_condition = $form_state['triggering_element']['#array_parents'][2];
   $form_state['redirect'] = 'admin/structure/layouts/menu/' . $form_state['menu_item']->name . '/condition/edit/' . $edit_condition;
 }
 

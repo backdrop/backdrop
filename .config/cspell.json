@@ -39,6 +39,7 @@
     "whitelist: allowlist, allow list, allow, allowed list",
     "whitelisted: allowed",
     "whitelisting: allowing"
+    "clicked_button: triggering_element"
   ],
   "globRoot": "../",
   "ignorePaths": [

@@ -15,7 +15,7 @@ function layout_settings_form_context_add($form, &$form_state) {
   if (isset($_GET['destination'])) {
     unset($_GET['destination']);
   }
-  if ($form_state['clicked_button']['#name'] === 'relationship_add_button') {
+  if ($form_state['triggering_element']['#name'] === 'relationship_add_button') {
     $form_state['redirect'] = 'admin/structure/layouts/manage/' . $form_state['layout']->name . '/relationship/add';
   }
   else {
@@ -340,7 +340,7 @@ function layout_context_add_form_submit($form, &$form_state) {
   if (!empty($handler->is_new)) {
     $handler->is_new = FALSE;
     $handler->storage = TRUE;
-    if ($form_state['clicked_button']['#name'] === 'context_add_button') {
+    if ($form_state['triggering_element']['#name'] === 'context_add_button') {
       $layout->setContexts($handler->name, $handler);
     }
     else {
@@ -361,7 +361,7 @@ function layout_context_add_form_submit($form, &$form_state) {
  * Submit handler for layout_settings_form() that edits a context.
  */
 function layout_settings_form_context_edit($form, &$form_state) {
-  $edit_context = $form_state['clicked_button']['#array_parents'][3];
+  $edit_context = $form_state['triggering_element']['#array_parents'][3];
   $form_state['redirect'] = 'admin/structure/layouts/manage/' . $form_state['layout']->name . '/context/edit/layout/' . $edit_context;
 }
 
@@ -369,7 +369,7 @@ function layout_settings_form_context_edit($form, &$form_state) {
  * Submit handler for layout_settings_form() that edits a relationship.
  */
 function layout_settings_form_context_relationship_edit($form, &$form_state) {
-  $edit_relationship = $form_state['clicked_button']['#array_parents'][3];
+  $edit_relationship = $form_state['triggering_element']['#array_parents'][3];
   $form_state['redirect'] = 'admin/structure/layouts/manage/' . $form_state['layout']->name . '/relationship/edit/layout/' . $edit_relationship;
 }
 
@@ -377,7 +377,7 @@ function layout_settings_form_context_relationship_edit($form, &$form_state) {
  * Submit handler for layout_settings_form() that removes a context.
  */
 function layout_settings_form_context_remove($form, &$form_state) {
-  $removed_context = $form_state['clicked_button']['#array_parents'][3];
+  $removed_context = $form_state['triggering_element']['#array_parents'][3];
 
   // Find all relationships to this context and remove them too.
   $contexts = $form_state['layout']->getContexts();
@@ -400,7 +400,7 @@ function layout_settings_form_context_remove($form, &$form_state) {
  * Submit handler for layout_settings_form() that removes a relationship.
  */
 function layout_settings_form_context_relationship_remove($form, &$form_state) {
-  $removed_relationship = $form_state['clicked_button']['#array_parents'][3];
+  $removed_relationship = $form_state['triggering_element']['#array_parents'][3];
   unset($form_state['layout']->relationships[$removed_relationship]);
   layout_set_layout_tempstore($form_state['layout']);
 
