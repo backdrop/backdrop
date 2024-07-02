@@ -38,13 +38,11 @@ jobs:
           fail_on_warnings: false
 
   spellcheck:
-    name: Check spelling
+    name: Check spelling with CSpell
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-      name: Checkout code
-    - uses: streetsidesoftware/cspell-action@v6
-      name: Run CSpell
-      with:
-        incremental_files_only: true
-        config: './cspell.json'
+      - uses: actions/checkout@v4
+      - uses: streetsidesoftware/cspell-action@v6
+        with:
+          incremental_files_only: true
+          config: '.'
