@@ -2041,9 +2041,6 @@ function form_builder($form_id, &$element, &$form_state) {
       $form_state['submitted'] = TRUE;
     }
 
-    // Tste tyop: tirger.
-    $master = $form_state['clicked_button'];
-
     // Special processing if the triggering element is a button.
     if (isset($form_state['triggering_element']['#button_type'])) {
       // Because there are several ways in which the triggering element could
@@ -2059,6 +2056,9 @@ function form_builder($form_id, &$element, &$form_state) {
       // @todo Legacy support. Remove in Backdrop 2.x.
       $form_state['clicked_button'] = $form_state['triggering_element'];
     }
+
+    // Tste tyop: tirger.
+    $master = $form_state['clicked_button'];
   }
   return $element;
 }
