@@ -854,6 +854,7 @@ function admin_bar_theme_settings() {
     '#type' => 'fieldset',
     '#title' => t('Enabled components'),
     '#description' => t('These features will be enabled/visible in the administration bar. Untick the boxes to disable/hide them.'),
+    '#tree' => TRUE,
   );
   $form['components']['options'] = array(
     '#type' => 'checkboxes',
@@ -873,16 +874,18 @@ function admin_bar_theme_settings() {
     'admin_bar.back_to_site_link' => array(
       '#states' => array(
         'visible' => array(
-          ':input[name="components[admin_bar.icon]"]' => array('checked' => TRUE),
+          ':input[name="components[options][admin_bar.icon]"]' => array('checked' => TRUE),
         ),
       ),
+      '#indentation' => 1,
     ),
     'admin_bar.search' => array(
       '#states' => array(
         'visible' => array(
-          ':input[name="components[admin_bar.menu]"]' => array('checked' => TRUE),
+          ':input[name="components[options][admin_bar.menu]"]' => array('checked' => TRUE),
         ),
       ),
+      '#indentation' => 1,
     ),
     'admin_bar.locale' => array(
       '#disabled' => !module_exists('locale'),
@@ -896,6 +899,7 @@ function admin_bar_theme_settings() {
   $form['components']['options']['admin_bar.page']['#description'] = t('Links to edit items that make up the current page (e.g. layout, theme).');
   $form['components']['options']['admin_bar.users']['#description'] = t('A count of the people currently logged into the site.');
   $form['components']['options']['admin_bar.account']['#description'] = t('Links to view and log out of the current user account.');
+
   $language_switcher_description = t('Links to switch the language of the user interface.');
   if (!(module_exists('locale'))) {
     if (user_access('administer modules')) {
@@ -924,7 +928,7 @@ function admin_bar_theme_settings() {
  * Submit handler for admin_bar_theme_settings().
  */
 function admin_bar_theme_settings_submit($form, &$form_state) {
-  $components = &$form_state['values']['components'];
+  $components = &$form_state['values']['components']['options'];
 
   // Disable back to site if icon bar is also disabled.
   if (!$components['admin_bar.icon']) {
