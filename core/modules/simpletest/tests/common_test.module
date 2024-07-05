@@ -51,18 +51,6 @@ function common_test_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
-  $items['common-test/existing_interest_cohort_policy'] = array(
-    'title' => 'Test existing interest-cohort policy',
-    'page callback' => 'existing_interest_cohort_policy',
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
-  );
-  $items['common-test/existing_permissions_policy_header'] = array(
-    'title' => 'Test existing Permissions-Policy header',
-    'page callback' => 'existing_permissions_policy_header',
-    'access callback' => TRUE,
-    'type' => MENU_CALLBACK,
-  );
   $items['common-test/backdrop-render-invalid-keys'] = array(
     'title' => 'Backdrop Render',
     'page callback' => 'common_test_backdrop_render_invalid_keys',
@@ -327,20 +315,4 @@ function common_test_js_and_css_querystring() {
  */
 function common_test_cron() {
   throw new Exception(t('Uncaught exception'));
-}
-
-/**
- * Page callback. Used when testing existing interest-cohort policy.
- */
-function existing_interest_cohort_policy() {
-  backdrop_add_http_header('Permissions-Policy', 'interest-cohort=*');
-  print __FUNCTION__;
-}
-
-/**
- * Page callback. Used when testing existing Permissions-Policy header.
- */
-function existing_permissions_policy_header() {
-  backdrop_add_http_header('Permissions-Policy', 'geolocation=()');
-  print __FUNCTION__;
 }

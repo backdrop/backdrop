@@ -418,10 +418,14 @@ function comment_permission() {
     'administer comment settings' => array(
       'title' => t('Administer comment settings'),
       'description' => t('Configure comment settings per content type.'),
+      'restrict access' => TRUE,
+      'warning' => t('Allows changing comment settings for each content type, and disabling comments.'),
     ),
     'administer comments' => array(
       'title' => t('Administer comments'),
       'description' => t('Edit, delete, unpublish, etc. comments at <em>/admin/content/comment</em>.'),
+      'restrict access' => TRUE,
+      'warning' => t('Allows deleting/updating any comment, even those posted by other people.'),
     ),
     'access comments' => array(
       'title' => t('View comments'),
@@ -430,7 +434,8 @@ function comment_permission() {
       'title' => t('Post comments'),
     ),
     'skip comment approval' => array(
-      'title' => t('Skip comment approval'),
+      'title' => t('Skip comment approval: Comments will be immediately visible to everyone'),
+      'warning' => t('Because spam and offensive comments are common, this permission should only be granted to those who are trusted, or on a site with additional spam protection measures in place.'),
     ),
     'edit own comments' => array(
       'title' => t('Edit own comments'),
@@ -1095,7 +1100,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       ),
       '#weight' => 25,
     );
-    // Unlike coment_form_node_form_alter(), all of these settings are applied
+    // Unlike comment_form_node_form_alter(), all of these settings are applied
     // as defaults to all new nodes. Therefore, it would be wrong to use #states
     // to hide the other settings based on the primary comment setting.
     $form['comment']['comment_default'] = array(
@@ -1500,7 +1505,7 @@ function comment_config_create_validate(Config $staging_config, $all_changes) {
  *   (optional) The comment object, or NULL when using 'create' op.
  *
  * @return bool
- *   TRUE if the current user has acces to the comment, FALSE otherwise.
+ *   TRUE if the current user has access to the comment, FALSE otherwise.
  *
  * @since 1.13.0 The "create" $op option was added.
  * @since 1.13.0 The "edit" $op option is deprecated. Use "update" instead.
@@ -1667,7 +1672,7 @@ function comment_get_display_ordinal($cid, $node_type) {
 
   if ($mode == COMMENT_MODE_FLAT) {
     // For flat comments, cid is used for ordering comments due to
-    // unpredicatable behavior with timestamp, so we make the same assumption
+    // unpredictable behavior with timestamp, so we make the same assumption
     // here.
     $query->condition('c1.cid', $cid, '<');
   }

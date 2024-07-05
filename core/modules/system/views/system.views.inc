@@ -19,15 +19,15 @@ function system_views_data() {
   // Advertise this table as a possible base table
   $data['system']['table']['base'] = array(
     'field' => 'filename',
-    'title' => t('Module/Theme/Theme engine'),
+    'title' => t('Project'),
     'help' => t('Modules/Themes/Theme engines in your codebase.'),
   );
 
   // fields
   // - filename
   $data['system']['filename'] = array(
-    'title' => t('Module/Theme/Theme engine filename'),
-    'help' => t('The path of the primary file for this item, relative to the Backdrop root; e.g. modules/node/node.module.'),
+    'title' => t('Project filename'),
+    'help' => t('The path of the primary file for this module/theme/theme engine, relative to the Backdrop root; e.g. modules/node/node.module.'),
     'field' => array(
       'handler' => 'views_handler_field',
       'click sortable' => TRUE,
@@ -45,8 +45,8 @@ function system_views_data() {
   );
   // - name
   $data['system']['name'] = array(
-    'title' => t('Module/Theme/Theme engine name'),
-    'help' => t('The name of the item; e.g. node.'),
+    'title' => t('Project name'),
+    'help' => t('The name of the module/theme/theme engine; e.g. node.'),
     'field' => array(
       'handler' => 'views_handler_field',
       'click sortable' => TRUE,
@@ -64,7 +64,7 @@ function system_views_data() {
   );
   // - type
   $data['system']['type'] = array(
-    'title' => t('Type'),
+    'title' => t('Project type'),
     'help' => t('The type of the item, either module, theme, or theme_engine.'),
     'field' => array(
       'handler' => 'views_handler_field',
@@ -83,8 +83,8 @@ function system_views_data() {
   );
   // - status
   $data['system']['status'] = array(
-    'title' => t('Status'),
-    'help' => t('Boolean indicating whether or not this item is enabled.'),
+    'title' => t('Project status'),
+    'help' => t('Boolean indicating whether or not this module/theme/theme engine is enabled.'),
     'field' => array(
       'handler' => 'views_handler_field_boolean',
       'click sortable' => TRUE,
@@ -119,6 +119,16 @@ function system_views_data() {
       'handler' => 'views_handler_sort',
     ),
   );
+
+  // - info
+  $data['system']['info'] = array(
+    'title' => t('Project properties'),
+    'help' => t('Selected properties from the module/theme/theme engine\'s info file.'),
+    'field' => array(
+      'handler' => 'views_handler_field_system_info',
+      'click sortable' => FALSE,
+    ),
+  );  
 
   return $data;
 }

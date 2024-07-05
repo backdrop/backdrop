@@ -55,10 +55,20 @@ function taxonomy_token_info() {
     'description' => t("An array of all the term's parents, starting with the root."),
     'type' => 'array',
   );
+  $term['parent'] = array(
+    'name' => t('Parent term'),
+    'description' => t('The parent term of the taxonomy term, if one exists. If more than one parent exists, the first parent.'),
+    'type' => 'term',
+  );
   $term['root'] = array(
     'name' => t('Root term'),
     'description' => t('The root term of the taxonomy term.'),
     'type' => 'term',
+  );
+  $term['vocabulary'] = array(
+    'name' => t('Vocabulary'),
+    'description' => t('The vocabulary the taxonomy term belongs to.'),
+    'type' => 'vocabulary',
   );
 
   // Taxonomy vocabulary related variables.
@@ -86,18 +96,6 @@ function taxonomy_token_info() {
     'name' => t('Edit URL'),
     'description' => t("The URL of the vocabulary's edit page."),
     'type' => 'url',
-  );
-
-  // Chained tokens for taxonomies
-  $term['parent'] = array(
-    'name' => t('Parent term'),
-    'description' => t('The parent term of the taxonomy term, if one exists. If more than one parent exists, the first parent.'),
-    'type' => 'term',
-  );
-  $term['vocabulary'] = array(
-    'name' => t('Vocabulary'),
-    'description' => t('The vocabulary the taxonomy term belongs to.'),
-    'type' => 'vocabulary',
   );
 
   return array(

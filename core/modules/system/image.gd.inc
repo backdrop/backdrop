@@ -13,27 +13,39 @@
  * Retrieve settings for the GD2 toolkit.
  */
 function image_gd_settings() {
-  if (image_gd_check_settings()) {
-    $form['status'] = array(
-      '#markup' => t('The GD toolkit is installed and working properly.')
-    );
+  $form['image_jpeg_quality'] = array(
+    '#type' => 'number',
+    '#title' => t('JPEG quality'),
+    '#description' => t('Define the image quality for JPEG manipulations. Ranges from 0 to 100. Higher values mean better image quality but bigger files.'),
+    '#min' => 0,
+    '#max' => 100,
+    '#default_value' => config_get('system.core', 'image_jpeg_quality'),
+    '#field_suffix' => t('%'),
+  );
 
-    $form['image_jpeg_quality'] = array(
-      '#type' => 'number',
-      '#title' => t('JPEG quality'),
-      '#description' => t('Define the image quality for JPEG manipulations. Ranges from 0 to 100. Higher values mean better image quality but bigger files.'),
-      '#min' => 0,
-      '#max' => 100,
-      '#default_value' => config_get('system.core', 'image_jpeg_quality'),
-      '#field_suffix' => t('%'),
-    );
+  return $form;
+}
 
-    return $form;
+/**
+ * Retrieve supported extensions for the GD2 toolkit.
+ *
+ * @since 1.25.0 Function added.
+ */
+function image_gd_supported_extensions() {
+  $supported_extensions = array('png', 'gif', 'jpg', 'jpeg');
+  if (defined('IMAGETYPE_WEBP')) {
+    $gd_info = gd_info();
+    if (isset($gd_info['WebP Support']) && $gd_info['WebP Support'] == TRUE) {
+      // Extend supported extensions, as the PHP and GD versions support WebP.
+      // IMAGETYPE_WEBP and getimagesize() WebP support were both added in
+      // PHP 7.1.0.
+      // @see https://www.php.net/manual/en/image.constants.php
+      // @see https://www.php.net/manual/en/function.getimagesize.php
+      $supported_extensions[] = 'webp';
+    }
   }
-  else {
-    form_set_error('image_toolkit', t('The GD image toolkit requires that the GD module for PHP be installed and configured properly. For more information see <a href="@url">PHP\'s image documentation</a>.', array('@url' => 'http://php.net/image')));
-    return FALSE;
-  }
+
+  return $supported_extensions;
 }
 
 /**
@@ -349,17 +361,13 @@ function image_gd_get_info(stdClass $image) {
   $data = @getimagesize($image->source);
 
   if (isset($data) && is_array($data)) {
-    $extensions = array('1' => 'gif', '2' => 'jpg', '3' => 'png');
-    if (defined('IMAGETYPE_WEBP')) {
-      $gd_info = gd_info();
-      if (isset($gd_info['WebP Support']) && $gd_info['WebP Support'] == TRUE) {
-        // Extend mapping of constants to extensions, as the PHP and GD
-        // versions support WebP.
-        // @see https://www.php.net/manual/en/image.constants.php
-        $extensions['18'] = 'webp';
-      }
-    }
-    $extension = isset($extensions[$data[2]]) ?  $extensions[$data[2]] : '';
+    $supported_extensions = image_get_supported_extensions();
+    // Only extensions that exist in GD.
+    $extension = image_type_to_extension($data[2], FALSE) ?: '';
+    // Only extensions supported by Backdrop at this time.
+    $extension = in_array($extension, $supported_extensions) ? $extension : '';
+    // Treat jpeg as jpg.
+    $extension = $extension == 'jpeg' ? 'jpg' : $extension;
     $details = array(
       'width'     => $data[0],
       'height'    => $data[1],

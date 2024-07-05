@@ -31,13 +31,15 @@ class views_handler_filter_user_name extends views_handler_filter_in_operator {
     $form['value'] = array(
       '#type' => 'textfield',
       '#title' => t('Usernames'),
-      '#description' => t('Enter a comma separated list of user names.'),
       '#default_value' => $default_value,
       '#autocomplete_path' => 'admin/views/ajax/autocomplete/user',
     );
 
     if (!empty($form_state['exposed']) && !isset($form_state['input'][$this->options['expose']['identifier']])) {
       $form_state['input'][$this->options['expose']['identifier']] = $default_value;
+    }
+    if (empty($form_state['exposed'])) {
+      $form['value']['#description'] = t('Enter a comma separated list of user names.');
     }
   }
 

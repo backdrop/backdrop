@@ -12,7 +12,7 @@ Backdrop.behaviors.commentFieldsetSummaries = {
       var vals = [];
       var status = $context.find('.form-item-comment input:checked').next('label').text().replace(/^\s+|\s+$/g, '');
       vals.push(Backdrop.checkPlain(status));
-      if ($.trim(status) != 'Open') {
+      if (status.trim() != 'Open') {
         if ($context.find(".form-item-comment-hidden input:checked").length) {
           vals.push(Backdrop.t('Hidden'));
         }

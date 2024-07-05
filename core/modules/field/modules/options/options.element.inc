@@ -53,7 +53,7 @@ function _form_options_expand($element) {
   if (!isset($element['options'])) {
     $element['options_field'] = array(
       '#type' => 'textarea',
-      '#resizable' => TRUE,
+      '#resizable' => 'vertical',
       '#cols' => 60,
       '#rows' => 5,
       '#required' => isset($element['#required']) ? $element['#required'] : FALSE,
