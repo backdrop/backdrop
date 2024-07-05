@@ -338,7 +338,7 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
 
       $variables['items'][1]['type'] = $inner_type;
       $variables['type'] = $outer_type;
-      $variables['title'] = $list_title
+      $variables['title'] = $list_title;
 
       $inner = '<div class="item-list"><' . $inner_type . ' id="child-list">';
       $inner .= '<li class="odd first">c</li>';
