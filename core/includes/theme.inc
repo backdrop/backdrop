@@ -2395,8 +2395,7 @@ function theme_mark($variables) {
  *     Any other key/value pairs are used as HTML attributes for the list item
  *     in 'data'.
  *   - title: The title of the list.
- *   - type: The type of list to return for the main/parent list (e.g. "ul",
- *     "ol").
+ *   - type: The type of list to return for the parent list ('ul' or 'ol').
  *   - attributes: The attributes applied to the list element.
  *   - wrapper_attributes: Any additional attributes that should be applied to
  *       the wrapper DIV around the list element (the "item-list" CSS class is
