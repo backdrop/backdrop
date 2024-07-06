@@ -250,7 +250,7 @@ function installer_authorize_update_batch_finished($success, $results) {
   }
   // Only add a task for running update.php if it is actually needed.
   if ($updates_needed) {
-    $results['tasks'][] = t('<a href="@update">Run database updates</a>', array('@update' => base_path() . 'core/update.php'));
+    $results['tasks'][] = t('<a href="@update">Run site updates</a>', array('@update' => base_path() . 'core/update.php'));
   }
   elseif ($success) {
     backdrop_set_message($page_message['message'], $page_message['type']);
