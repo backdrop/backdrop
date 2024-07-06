@@ -2391,8 +2391,7 @@ function theme_mark($variables) {
  *     - children: A list of nested child items to render that behave
  *       identically to 'items', but any non-numeric string keys are treated as
  *       HTML attributes for the child list that wraps 'children'.
- *     - type: The type of list to return for the nested/children items (e.g.
- *       "ul", "ol").
+ *     - type: The type of list to return for the children ('ul' or 'ol').
  *     Any other key/value pairs are used as HTML attributes for the list item
  *     in 'data'.
  *   - title: The title of the list.
