@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provides views data and handlers for locale.module.

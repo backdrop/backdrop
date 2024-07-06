@@ -1,0 +1,19 @@
+{
+    "_config_name": "image.style.card",
+    "storage": 1,
+    "module": "image",
+    "label": "Card (800x533 cropped)",
+    "name": "card",
+    "effects": [
+        {
+            "name": "image_scale_and_crop",
+            "data": {
+                "width": "800",
+                "height": "533",
+                "anchor": "center-top",
+                "upscale": 1
+            },
+            "weight": 1
+        }
+    ]
+}

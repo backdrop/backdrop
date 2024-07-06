@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Dashboard block displaying informtion about content types.
+ * Dashboard block displaying information about content types.
  */
 class DashboardContentTypesBlock extends Block {
   /**

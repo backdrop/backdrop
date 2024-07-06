@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Helper module for testing EntityFieldQuery access on any type of entity.

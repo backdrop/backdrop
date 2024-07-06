@@ -639,6 +639,7 @@ class views_handler extends views_object {
  *            queries.
  *
  */
+#[\AllowDynamicProperties]
 class views_many_to_one_helper {
   /**
    * Contains possible existing placeholders used by the query.
@@ -790,7 +791,7 @@ class views_many_to_one_helper {
             $join->type = 'LEFT';
             // INNER joins are slightly faster; use them when we know it's safe.
             $group = isset($this->handler->options['group']) ? $this->handler->options['group'] : FALSE;
-            $group_type = $this->handler->query->where[$group]['type'];
+            $group_type = !empty($group) ? $this->handler->query->where[$group]['type'] : FALSE;
             $plugin_id = isset($this->handler->options['plugin_id']) ? $this->handler->options['plugin_id'] : FALSE;
             // @todo Figure out why taxonomy_index_tid is being special-cased here.
             // See: https://github.com/backdrop/backdrop-issues/issues/5225
@@ -999,6 +1000,7 @@ class views_many_to_one_helper {
  *   - - numeric: If true, the value will not be surrounded in quotes.
  *   - - extra type: How all the extras will be combined. Either AND or OR. Defaults to AND.
  */
+#[\AllowDynamicProperties]
 class views_join {
   var $table = NULL;
   var $left_table = NULL;

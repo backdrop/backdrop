@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Backdrop core implementations of MailSystemInterface.
@@ -10,7 +9,7 @@
  */
 class DefaultMailSystem implements MailSystemInterface {
   /**
-   * Concatenate and wrap the e-mail body for plain-text mails.
+   * Concatenate and wrap the email body for plain-text mails.
    *
    * @param $message
    *   A message array, as described in hook_mail_alter().
@@ -29,7 +28,7 @@ class DefaultMailSystem implements MailSystemInterface {
   }
 
   /**
-   * Send an e-mail message, using Backdrop variables and default settings.
+   * Send an email message, using Backdrop variables and default settings.
    *
    * @see http://php.net/manual/function.mail.php
    * @see backdrop_mail()
@@ -56,7 +55,7 @@ class DefaultMailSystem implements MailSystemInterface {
     $line_endings = settings_get('mail_line_endings', MAIL_LINE_ENDINGS);
     // Prepare mail commands.
     $mail_subject = mime_header_encode($message['subject']);
-    // Note: e-mail uses CRLF for line-endings. PHP's API requires LF
+    // Note: email uses CRLF for line-endings. PHP's API requires LF
     // on Unix and CRLF on Windows. Backdrop automatically guesses the
     // line-ending format appropriate for your system. If you need to
     // override this, adjust $settings['mail_line_endings'] in settings.php.
@@ -140,10 +139,10 @@ class DefaultMailSystem implements MailSystemInterface {
  */
 class TestingMailSystem extends DefaultMailSystem implements MailSystemInterface {
   /**
-   * Accept an e-mail message and store it in a variable.
+   * Accept an email message and store it in a variable.
    *
    * @param $message
-   *   An e-mail message.
+   *   An email message.
    */
   public function mail(array $message) {
     $captured_emails = state_get('test_email_collector', array());

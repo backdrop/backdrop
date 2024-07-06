@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Holds the Entity module's theme functions.

@@ -16,6 +16,7 @@
     },
     "settings": {
         "text_processing": "1",
+        "allowed_formats": [],
         "display_summary": 0,
         "user_register_form": false
     },

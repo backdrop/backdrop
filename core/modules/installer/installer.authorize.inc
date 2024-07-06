@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Callbacks and related functions invoked by authorize.php to update projects.
@@ -232,6 +231,7 @@ function installer_authorize_update_batch_finished($success, $results) {
       'type' => 'error',
     );
   }
+
   $updates_needed = FALSE;
   include_once(BACKDROP_ROOT . '/core/includes/install.inc');
   foreach ($successful_projects as $module) {
@@ -256,6 +256,10 @@ function installer_authorize_update_batch_finished($success, $results) {
     backdrop_set_message($page_message['message'], $page_message['type']);
     backdrop_goto('admin/config/system/updates');
   }
+  // Since we're doing an update of existing code, always add a task for
+  // running update.php.
+  $results['tasks'][] = t('Your projects have been downloaded and updated.');
+  $results['tasks'][] = t('<a href="@update">Run site updates</a>', array('@update' => base_path() . 'core/update.php'));
 
   // Unset the variable since it is no longer needed.
   unset($_SESSION['maintenance_mode']);

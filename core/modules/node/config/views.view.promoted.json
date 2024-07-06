@@ -4,14 +4,14 @@
     "description": "Provides a list of promoted content. Used by default on the home page.",
     "module": "node",
     "storage": 4,
-    "tag": "default",
+    "tag": "",
     "disabled": false,
     "base_table": "node",
     "human_name": "Promoted content",
     "core": 0,
     "display": {
         "default": {
-            "display_title": "Master",
+            "display_title": "Default",
             "display_plugin": "default",
             "display_options": {
                 "query": {

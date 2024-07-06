@@ -803,7 +803,7 @@ function token_get_invalid_tokens($type, array $tokens) {
         $invalid_tokens[] = $full_token;
       }
       else {
-        // Resursively check the chained tokens.
+        // Recursively check the chained tokens.
         $sub_tokens = token_find_with_prefix(array($token => $full_token), $parts[0]);
         $invalid_tokens = array_merge($invalid_tokens, token_get_invalid_tokens($sub_token_info['type'], $sub_tokens));
       }

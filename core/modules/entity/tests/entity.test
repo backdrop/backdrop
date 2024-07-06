@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Entity CRUD API tests.
@@ -55,6 +54,47 @@ class EntityAPITestCase extends BackdropWebTestCase {
 
     $all = entity_test_load_multiple(FALSE);
     $this->assertTrue(empty($all), 'Deleted all entities.');
+  }
+
+  /**
+   * Tests caching (and not caching) of entities in the Entity API.
+   */
+  function testCaching() {
+    module_enable(array('entity_caching_test'));
+
+    $user1 = $this->backdropCreateUser();
+
+    // Create an entity that is cached.
+    $entity = entity_create('test_cacheable', array('name' => 'cache_this', 'uid' => $user1->uid));
+    $entity->save();
+    $loaded_entity = entity_load('test_cacheable', $entity->id);
+    $ids = array($entity->id);
+    $data = cache_get_multiple($ids, 'cache_entity_test_cacheable');
+    $this->assertTrue(!empty($data), "Entity 'test_cacheable' is cached.");
+
+    // Create an entity whose caching has been disabled.
+    $entity = entity_create('test_disable_cache', array('name' => 'disable_cache', 'uid' => $user1->uid));
+    $entity->save();
+    $loaded_entity = entity_load('test_disable_cache', $entity->id);
+    $ids = array($entity->id);
+    $data = cache_get_multiple($ids, 'cache_entity_test_disable_cache');
+    $this->assertTrue(empty($data), "Entity 'test_disable_cache' is not cached.");
+
+    // Create an entity/bundle that is cached.
+    $entity = entity_create('test_multibundle', array('type' => 'docache', 'name' => 'bundle_cached', 'uid' => $user1->uid));
+    $entity->save();
+    $loaded_entity = entity_load('test_multibundle', $entity->id);
+    $ids = array($entity->id);
+    $data = cache_get_multiple($ids, 'cache_entity_test_multibundle');
+    $this->assertTrue(!empty($data), "Entity 'test_multibundle' of type 'docache' is cached.");
+
+    // Create an entity/bundle that is not cached.
+    $entity = entity_create('test_multibundle', array('type' => 'nocache', 'name' => 'bundle_not_cached', 'uid' => $user1->uid));
+    $entity->save();
+    $loaded_entity = entity_load('test_multibundle', $entity->id);
+    $ids = array($entity->id);
+    $data = cache_get_multiple($ids, 'cache_entity_test_multibundle');
+    $this->assertTrue(empty($data), "Entity 'test_multibundle' of type 'nocache' is not cached.");
   }
 
   /**

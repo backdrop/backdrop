@@ -79,8 +79,8 @@ function hook_file_default_types_alter(&$types) {
  *   - label: The human-readable name for the formatter.
  *   - default settings: default values for the formatter settings, if any.
  *   - view callback: a function to call when the formatter is being viewed.
- *   - settigs callback: a function to call for collecting the settings.
- *   - hidden: wheter the formatter is hidden or not.
+ *   - settings callback: a function to call for collecting the settings.
+ *   - hidden: whether the formatter is hidden or not.
  *   - mime types: An array of mime types this formatter applies to.
  *
  * @see hook_file_formatter_info_alter()
@@ -125,7 +125,7 @@ function hook_file_formatter_info_alter(array &$info) {
  * @param array $display
  *   An array containing settings for how to display the file.
  * @param string $langcode
- *   A language code indiciating the language used to render the file.
+ *   A language code indicating the language used to render the file.
  */
 function hook_file_formatter_FORMATTER_view($file, $display, $langcode) {
   $element = array(
@@ -147,7 +147,7 @@ function hook_file_formatter_FORMATTER_view($file, $display, $langcode) {
  * callback name pattern.
  *
  * @param $form
- *   An array represeting the settings form.
+ *   An array representing the settings form.
  * @param $form_state
  *   An array representing the current state of the settings form.
  * @param $settings
@@ -170,9 +170,9 @@ function hook_file_formatter_FORMATTER_settings($form, &$form_state, $settings) 
  * @param File $file
  *   The fully loaded file object
  * @param string $view_mode
- *   The machhine name of the Display mode for viewing the file.
+ *   The machine name of the Display mode for viewing the file.
  * @langcode string
- *   A language code indiciating the language used to render the file.
+ *   A language code indicating the language used to render the file.
  */
 function hook_file_view($file, $view_mode, $langcode) {
   // Add a contextual link to edit the file.

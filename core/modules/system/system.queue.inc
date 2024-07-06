@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Queue functionality.
@@ -46,7 +45,7 @@
  * However, such a backend would be able to deal with significantly more writes
  * than a reliable queue and for many tasks this is more important. Another
  * example is doing Twitter statistics -- the small possibility of losing a few
- * items is insignificant next to power of the queue being able to keep up with 
+ * items is insignificant next to power of the queue being able to keep up with
  * writes. As described in the processing section, regardless of the queue being
  * reliable or not, the processing code should be aware that an item might be
  * handed over for processing more than once (because the processing code might

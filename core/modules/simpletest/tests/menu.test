@@ -188,7 +188,8 @@ class MenuRouterTestCase extends BackdropWebTestCase {
     $this->assertRaw('seven/css/style.css', "The administrative theme's CSS appears on the page.");
     $this->backdropLogout();
 
-    // Make sure the maintenance mode can be bypassed using hook_menu_site_status_alter().
+    // Make sure the maintenance mode can be bypassed using
+    // hook_menu_site_status_alter().
     $offline_message = t('@site is currently under maintenance. We should be back shortly. Thank you for your patience.', array('@site' => config_get_translated('system.core', 'site_name')));
     $this->backdropGet('node');
     $this->assertText($offline_message);
@@ -208,7 +209,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
     $this->assertText('Custom theme: stark. Actual theme: stark.', 'The theme callback system uses an optional theme once it has been enabled.');
     $this->assertRaw('stark/layout.css', "The optional theme's CSS appears on the page.");
 
-    // Test the theme callback when it is set to use a theme that does not exist.
+    // Test the theme callback when set to use a theme that does not exist.
     $this->backdropGet('menu-test/theme-callback/use-fake-theme');
     $this->assertText('Custom theme: NONE. Actual theme: bartik.', 'The theme callback system falls back on the default theme when a theme that does not exist is requested.');
     $this->assertRaw('bartik/css/style.css', "The default theme's CSS appears on the page.");
@@ -490,7 +491,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
           'title' => 'Test title attribute',
         ),
         'query' => array(
-          'testparam' => 'testvalue',
+          'test_param' => 'test_value',
         ),
       ),
     );
@@ -499,7 +500,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
     // Load home page.
     $this->backdropGet('<front>');
     $this->assertRaw('title="Test title attribute"', 'Title attribute of a menu link renders.');
-    $this->assertRaw('testparam=testvalue', 'Query parameter added to menu link.');
+    $this->assertRaw('test_param=test_value', 'Query parameter added to menu link.');
   }
 
   /**
@@ -562,7 +563,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
         2 => NULL,
         3 => NULL,
       ),
-      // Explicit loader arguments should not be overriden by parent.
+      // Explicit loader arguments should not be overridden by parent.
       'menu-test/arguments/%/%/explicit-arguments' => array(
         2 => array('menu_test_argument_load' => array()),
         3 => NULL,
@@ -665,7 +666,7 @@ class MenuLinksUnitTestCase extends BackdropWebTestCase {
     $this->assertMenuLinkParents($links, $expected_hierarchy);
 
     // Start over, and move child-1 under child-2, and check that all the
-    // childs of child-1 have been moved too.
+    // children of child-1 have been moved too.
     $links = $this->createLinkHierarchy($module);
     $links['child-1']['plid'] = $links['child-2']['mlid'];
     menu_link_save($links['child-1']);
@@ -738,7 +739,7 @@ class MenuLinksUnitTestCase extends BackdropWebTestCase {
     // menu routers.
     $this->testMenuLinkReparenting('system');
 
-    // Additionnaly, test reparenting based on path.
+    // Additionally, test reparenting based on path.
     $links = $this->createLinkHierarchy('system');
 
     // Move child-1-2 has a child of child-2, making the link hierarchy

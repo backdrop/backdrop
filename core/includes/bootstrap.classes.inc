@@ -14,7 +14,7 @@ function backdrop_class_list() {
     'BatchQueue' => $path . 'batch.queue.inc',
     'BatchMemoryQueue' => $path . 'batch.queue.inc',
     'BackdropCacheArray' => $path . 'bootstrap.inc',
-    'SchemaCache' => $path . 'boostrap.inc',
+    'SchemaCache' => $path . 'bootstrap.inc',
     'BackdropFakeCache' => $path . 'cache-install.inc',
     'BackdropNullCache' => $path . 'cache.inc',
     'BackdropDatabaseCache' => $path . 'cache.inc',

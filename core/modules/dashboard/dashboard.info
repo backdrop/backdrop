@@ -5,3 +5,4 @@ version = BACKDROP_VERSION
 type = module
 backdrop = 1.x
 configure = admin/dashboard/settings
+dependencies[] = layout

@@ -33,4 +33,4 @@ MORE INFORMATION
 
 Refer to the "Developing Themes" section of the developer documentation on the
 Backdrop API website for further information on customizing the appearance of
-Backdrop with custom themes: https://api.backdropcms.org/developing-themes.
+Backdrop with custom themes: https://docs.backdropcms.org/documentation/developing-themes.

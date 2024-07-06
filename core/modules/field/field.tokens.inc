@@ -99,7 +99,7 @@ function field_pre_render_token(&$elements) {
   unset($elements['#states']);
   unset($elements['#attached']);
 
-  // Prevent multi-value fields from appearing smooshed together by appending
+  // Prevent multi-value fields from appearing collapsed together by appending
   // a join suffix to all but the last value.
   $deltas = element_get_visible_children($elements);
   $count = count($deltas);
