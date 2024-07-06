@@ -2405,7 +2405,7 @@ function theme_mark($variables) {
  *
  * @since 1.21.0: added the "empty" variable.
  * @since 1.27.0: added the "wrapper_attributes" variable.
- * @since ???: added support for a "type" variable in nested/children items.
+ * @since 1.28.3: added support for a "type" variable in nested/children items.
  */
 function theme_item_list($variables) {
   $items = $variables['items'];
