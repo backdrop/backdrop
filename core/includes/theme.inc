@@ -2391,15 +2391,18 @@ function theme_mark($variables) {
  *     - children: A list of nested child items to render that behave
  *       identically to 'items', but any non-numeric string keys are treated as
  *       HTML attributes for the child list that wraps 'children'.
- *     - type: The type of list to return for the children ('ul' or 'ol').
+ *     - type: (optional) The type of list to return for the children ('ul' or
+ *       'ol'). If no type is specified, the type is inherited from the parent
+ *       list.
  *     Any other key/value pairs are used as HTML attributes for the list item
  *     in 'data'.
  *   - title: The title of the list.
- *   - type: The type of list to return for the parent list ('ul' or 'ol').
- *   - attributes: The attributes applied to the list element.
+ *   - type: (optional) The type of list to return for the parent list ('ul' or
+ *     'ol'). Defaults to 'ul'.
+ *   - attributes: The attributes applied to the parent list element.
  *   - wrapper_attributes: Any additional attributes that should be applied to
- *       the wrapper DIV around the list element (the "item-list" CSS class is
- *       added by default).
+ *     the wrapper DIV around the list element (the "item-list" CSS class is
+ *     added by default).
  *   - empty: A message to display when there are no items. Allowed value is a
  *     string or render array.
  *
