@@ -196,7 +196,6 @@ description = Tests that the confirm form does not use external destinations.
 group = System
 file = system.test
 
-
 [BackdropRequestSanitizerUnitTestCase]
 name = Request sanitizer
 description = Ensure early bootstrap sanitization routines filter dangerous input.
@@ -218,5 +217,11 @@ file = system.test
 [MenuBlockTestCase]
 name = Menu Block tests
 description = Tests limiting menu block level and depth.
+group = System
+file = system.test
+
+[HtaccessTest]
+name = .htaccess tests
+description = Tests .htaccess is working correctly.
 group = System
 file = system.test

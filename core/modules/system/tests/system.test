@@ -3081,3 +3081,31 @@ class MenuBlockTestCase extends BackdropWebTestCase {
     return $item;
   }
 }
+
+/**
+ * Tests .htaccess is working correctly.
+ *
+ * @group system
+ */
+class HtaccessTest extends BackdropWebTestCase {
+
+  /**
+   * Tests that SVGZ files are served with the proper content encoding/type.
+   */
+  protected function testSvgzContentEncoding() {
+    $this->backdropGet('core/modules/system/tests/test.svgz');
+    $this->assertResponse(200);
+
+    // Sometimes the 'Content-Encoding' header is not set at all - especially
+    // when X-Content-Type-Options nosniff has been set. Avoid test failures in
+    // that case, by checking if the header exists (backdropGetHeader() should
+    // not have returned FALSE).
+    if ($content_encoding = $this->backdropGetHeader('Content-Encoding')) {
+      $this->assertEqual($content_encoding, 'gzip');
+    }
+    // Regardless of 'Content-Encoding' being set or not, the 'Content-Type'
+    // header should still be that of svg for the file.
+    $content_type = $this->backdropGetHeader('Content-Type');
+    $this->assertEqual($content_type, 'image/svg+xml');
+  }
+}
