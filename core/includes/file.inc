@@ -1652,6 +1652,9 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
   // Add in our check of the the file name length.
   $validators['file_validate_name_length'] = array();
 
+  // Add in check for valid SVG.
+  $validators['file_validate_svg'] = array();
+
   // Call the validation functions specified by this function's caller.
   $errors = file_validate($file, $validators);
 
@@ -2013,6 +2016,67 @@ function file_validate_image_orientation(File $file, $orientation = 0) {
         }
       }
     }
+  }
+
+  return $errors;
+}
+
+/**
+ * Validate uploaded SVG files.
+ *
+ * @param File $file
+ *   A file entity.
+ *
+ * @return array
+ *   If the file is an SVG and is either not valid or contains
+ *   dangerous content, the array will contain an error message.
+ *
+ * @see hook_file_validate()
+ */
+function file_validate_svg(File $file) {
+  $errors = array();
+
+  if ($file->filemime == 'image/svg+xml') {
+    $file_contents = file_get_contents($file->uri);
+    libxml_use_internal_errors(TRUE);
+    $xml = simplexml_load_string($file_contents);
+    $errors = libxml_get_errors();
+
+    if (!$xml || !empty($errors)) {
+      return array(t('Invalid SVG file.'));
+    }
+    else {
+      $errors = array();
+      $namespaces = $xml->getNamespaces();
+      if (!in_array('http://www.w3.org/2000/svg', $namespaces)) {
+        $errors[] = t('Invalid SVG namespace.');
+      }
+
+      $search_patterns = array(
+        // @see https://developer.mozilla.org/en-US/docs/Web/SVG/Element
+        '//svg:foreignObject',
+        '//svg:script',
+        '//html:iframe',
+        // @see https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
+        '//@*[starts-with(name(), "on")]',
+        '//svg:a[starts-with(@href, "javascript:")]',
+        '//svg:a[starts-with(@xlink:href, "javascript:")]',
+        '//svg:a[starts-with(@href, "data:")]',
+        '//svg:a[starts-with(@xlink:href, "data:")]',
+      );
+
+      $xml->registerXPathNamespace('svg', 'http://www.w3.org/2000/svg');
+      $xml->registerXPathNamespace('html', 'http://www.w3.org/1999/xhtml');
+      foreach ($search_patterns as $search_pattern) {
+        $found = $xml->xpath($search_pattern);
+        if (!empty($found)) {
+          $errors[] = t('Dangerous content found.');
+          break;
+        }
+      }
+    }
+    libxml_clear_errors();
+    libxml_use_internal_errors(FALSE);
   }
 
   return $errors;

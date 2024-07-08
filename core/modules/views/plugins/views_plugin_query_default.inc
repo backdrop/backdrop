@@ -208,7 +208,7 @@ class views_plugin_query_default extends views_plugin_query {
       'default' => FALSE,
       'bool' => TRUE,
     );
-    $options['slave'] = array(
+    $options['replica'] = array(
       'default' => FALSE,
       'bool' => TRUE,
     );
@@ -252,11 +252,11 @@ class views_plugin_query_default extends views_plugin_query {
         ),
       ),
     );
-    $form['slave'] = array(
+    $form['replica'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Use Slave Server'),
-      '#description' => t('This will make the query attempt to connect to a slave server if available.  If no slave server is defined or available, it will fall back to the default server.'),
-      '#default_value' => !empty($this->options['slave']),
+      '#title' => t('Use replica server'),
+      '#description' => t('This will make the query attempt to connect to a replica server if available. If no replica server is defined or available, it will fall back to the default server.'),
+      '#default_value' => !empty($this->options['replica']),
     );
     $form['query_comment'] = array(
       '#type' => 'textfield',
@@ -298,8 +298,8 @@ class views_plugin_query_default extends views_plugin_query {
    * they must join either to the primary table or to a pre-existing
    * relationship.
    *
-   * An example of a relationship would be a nodereference table.
-   * If you have a nodereference named 'book_parent' which links to a
+   * An example of a relationship would be an entity reference table.
+   * If you have a entity reference named 'book_parent' which links to a
    * parent node, you could set up a relationship 'node_book_parent'
    * to 'node'. Then, anything that links to 'node' can link to
    * 'node_book_parent' instead, thus allowing all properties of
@@ -1232,11 +1232,11 @@ class views_plugin_query_default extends views_plugin_query {
   }
 
   /**
-   * Generate a query and a countquery from all of the information supplied
+   * Generate a query and a countQuery from all of the information supplied
    * to the object.
    *
    * @param $get_count
-   *   Provide a countquery if this is true, otherwise provide a normal query.
+   *   Provide a countQuery if this is true, otherwise provide a normal query.
    */
   function query($get_count = FALSE) {
     // Check query distinct value.
@@ -1276,9 +1276,9 @@ class views_plugin_query_default extends views_plugin_query {
       $key = $this->view->base_database;
     }
 
-    // Set the slave target if the slave option is set
-    if (!empty($this->options['slave'])) {
-      $target = 'slave';
+    // Set the replica target if the replica option is set
+    if (!empty($this->options['replica'])) {
+      $target = 'replica';
     }
 
     // Go ahead and build the query.
@@ -1613,7 +1613,8 @@ class views_plugin_query_default extends views_plugin_query {
     }
     $entity_type = $table_data['table']['entity type'];
     $info = entity_get_info($entity_type);
-    $id_alias = $this->get_field_alias($base_table_alias, $info['entity keys']['id']);
+    $is_revision = !empty($table_data['table']['revision']);
+    $id_alias = $this->get_field_alias($base_table_alias, $info['entity keys'][$is_revision ? 'revision' : 'id']);
 
     // Assemble the ids of the entities to load.
     $ids = array();
@@ -1623,12 +1624,33 @@ class views_plugin_query_default extends views_plugin_query {
       }
     }
 
-    $entities = entity_load($entity_type, $ids);
-    // Re-key the array by row-index.
-    $result = array();
-    foreach ($ids as $key => $id) {
-      $result[$key] = isset($entities[$id]) ? $entities[$id] : FALSE;
+    if (!$is_revision) {
+      $entities = entity_load($entity_type, $ids);
+
+      // Re-key the array by row-index.
+      $result = array();
+      foreach ($ids as $key => $id) {
+        $result[$key] = isset($entities[$id]) ? $entities[$id] : FALSE;
+      }
     }
+    else {
+      // There's no way in core to load revisions in bulk.
+      $result = array();
+      foreach ($ids as $key => $id) {
+        // @todo: Switch this to entity_revision_load() if that function gets
+        // into core.
+        // See: https://github.com/backdrop/backdrop-issues/issues/3777
+        $entity_info = entity_get_info($entity_type);
+        if (!empty($entity_info['entity keys']['revision'])) {
+          $entity_revisions = entity_load_multiple($entity_type, FALSE, array($entity_info['entity keys']['revision'] => $id));
+          $result[$key] = reset($entity_revisions);
+        }
+        else {
+          $result[$key] = FALSE;
+        }
+      }
+    }
+
     return array($entity_type, $result);
   }
 }

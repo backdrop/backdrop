@@ -1,5 +1,5 @@
 /*!
- * jQuery UI CSS Framework 1.13.0
+ * jQuery UI CSS Framework 1.13.2
  * http://jqueryui.com
  *
  * Copyright jQuery Foundation and other contributors
@@ -8,5 +8,5 @@
  *
  * http://api.jqueryui.com/category/theming/
  */
-@import "jquery.ui.base.css";
-@import "jquery.ui.theme.css";
+@import "base.css";
+@import "theme.css";

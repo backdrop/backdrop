@@ -183,7 +183,7 @@ Backdrop.adminBar.behaviors.destination = function (context, settings, $adminBar
 /**
  * Adjust the top level items based on the available viewport width.
  */
-Backdrop.adminBar.behaviors.collapseWidth = function (context, settings, $adminBar) {
+Backdrop.adminBar.behaviors.resizeCollapse = function (context, settings, $adminBar) {
   var $menu = $adminBar.find('#admin-bar-menu');
   var $extra = $adminBar.find('#admin-bar-extra');
   var menuWidth;
@@ -215,14 +215,14 @@ Backdrop.adminBar.behaviors.collapseWidth = function (context, settings, $adminB
     if (availableWidth - menuWidth - extraWidth < 20) {
       $menu.addClass('dropdown').removeClass('top-level');
     }
+
     $adminBar.trigger('afterResize');
   };
 
-
   adjustItems();
+
   // Adjust items when window is resized.
   Backdrop.optimizedResize.add(adjustItems);
-
 };
 
 /**
@@ -267,7 +267,7 @@ Backdrop.adminBar.behaviors.hover = function (context, settings, $adminBar) {
   });
 
   // Close all menus if clicking outside the menu.
-  $(document).bind('click', function (e) {
+  $(document).on('click', function (e) {
     if ($(e.target).closest($adminBar).length === 0) {
       $adminBar.find('ul').removeClass('expanded');
     }
@@ -490,7 +490,7 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
   $adminBar.on('beforeResize', resetSearchDisplay);
   $adminBar.on('afterResize searchChanged', updateSearchDisplay);
   // Attach the search input event handler.
-  $input.bind('focus keyup search', keyupHandler);
+  $input.on('focus keyup search', keyupHandler);
 
   // Close search if clicking outside the menu.
   $(document).on('click', function (e) {
@@ -524,12 +524,12 @@ Backdrop.adminBar.behaviors.escapeAdmin = function (context, settings) {
   ) {
     sessionStorage.setItem(
       "escapeAdminPath",
-      settings.admin_bar.current_path
+      window.location
     );
   }
 
   // We only want to change the first anchor tag in the admin bar icon sub-menu.
-  var $toolbarEscape = $(".admin-bar-icon a").first();
+  const $toolbarEscape = $(".admin-bar-icon a").first();
 
   // If the current page is admin, then switch the path.
   if (
@@ -538,8 +538,20 @@ Backdrop.adminBar.behaviors.escapeAdmin = function (context, settings) {
     escapeAdminPath !== null
   ) {
     $toolbarEscape.addClass("escape");
-    $toolbarEscape.attr("href", settings.basePath + escapeAdminPath);
-    $toolbarEscape.text(Backdrop.t("Back to site"));
+    $toolbarEscape.attr("href", escapeAdminPath);
+    $toolbarEscape.find('.admin-bar-link-text').text(Backdrop.t("Back to site"));
+
+    // Update the icon based on language direction.
+    if (window.fetch) {
+      const direction = $('html').attr('dir') === 'rtl' ? 'right' : 'left';
+      fetch(Backdrop.icons['caret-circle-' + direction + '-fill'])
+        .then(response => response.text())
+        .then(svgContents => {
+          const $svg = $(svgContents);
+          $svg.attr('class', 'icon');
+          $toolbarEscape.find('.admin-bar-link-icon').html($svg);
+        });
+    }
   }
 };
 /**

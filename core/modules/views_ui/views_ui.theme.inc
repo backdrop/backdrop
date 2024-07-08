@@ -28,7 +28,9 @@ function theme_views_ui_view_description($variables) {
 
   $output = '';
   $output = '<div class="views-ui-view-description">' . check_plain($view->description) . '</div>';
-  $output .= '<div class="views-ui-view-tag">' . t('Tags') . ': ' . check_plain($view->tag) . '</div>';
+  if (!empty($view->tag)) {
+    $output .= '<div class="views-ui-view-tag">' . t('Tags') . ': ' . check_plain($view->tag) . '</div>';
+  }
   $output .= '<div class="views-ui-view-storage">' . t('Type') . ': ' . check_plain($view->base_table). '</div>';
   return $output;
 }

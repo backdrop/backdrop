@@ -1254,8 +1254,9 @@ function path_to_theme() {
  * @param $prefixes
  *   An array of prefixes to test, in reverse order of importance.
  *
- * @return $implementations
- *   The functions found, suitable for returning from hook_theme;
+ * @return array
+ *   An array of the functions found, suitable for returning from hook_theme.
+ *   Keyed by the theme hook and includes the function that implements it.
  */
 function backdrop_find_theme_functions($cache, $prefixes) {
   $implementations = array();
@@ -1499,6 +1500,9 @@ function theme_get_setting($setting_name, $theme = NULL) {
  *   TRUE if the theme has settings, FALSE otherwise.
  */
 function theme_has_settings($theme) {
+  if (config_get_names_with_prefix($theme . '.settings')) {
+    return TRUE;
+  }
   $themes = list_themes();
   $theme_info = $themes[$theme];
   if (!empty($theme_info->info['settings'])) {
@@ -1643,6 +1647,9 @@ function theme_enable($theme_list) {
       ->condition('type', 'theme')
       ->condition('name', $key)
       ->execute();
+
+    // Copy any default configuration data to the system config directory.
+    config_install_default_config($key);
   }
 
   list_themes(TRUE);
@@ -1676,6 +1683,8 @@ function theme_disable($theme_list) {
       ->condition('type', 'theme')
       ->condition('name', $key)
       ->execute();
+
+    config_uninstall_config($key);
   }
 
   list_themes(TRUE);
@@ -2041,7 +2050,7 @@ function theme_breadcrumb($variables) {
   $output = '';
   if (!empty($breadcrumb)) {
     $output .= '<nav class="breadcrumb" aria-label="' . t('Website Orientation') . '">';
-    $output .= '<ol><li>' . implode(' » </li><li>', $breadcrumb) . '</li></ol>';
+    $output .= '<ol><li>' . implode('<span class="breadcrumb-separator" aria-hidden="true"> » </span></li><li>', $breadcrumb) . '</li></ol>';
     $output .= '</nav>';
   }
   return $output;
@@ -2252,8 +2261,8 @@ function theme_table(array $variables) {
     $sections['tfoot'] = $variables['footer'];
   }
 
-  // tbody and tfoot have the same structure, and are built using the same
-  // procedure.
+  // The tbody and tfoot HTML tags have the same structure, and are built
+  // using the same procedure.
   foreach ($sections as $tag => $content) {
     $output .= "<$tag>\n";
     $flip = array('even' => 'odd', 'odd' => 'even');
@@ -2387,16 +2396,21 @@ function theme_mark($variables) {
  *   - title: The title of the list.
  *   - type: The type of list to return (e.g. "ul", "ol").
  *   - attributes: The attributes applied to the list element.
+ *   - wrapper_attributes: Any additional attributes that should be applied to
+ *       the wrapper DIV around the list element (the "item-list" CSS class is
+ *       added by default).
  *   - empty: A message to display when there are no items. Allowed value is a
  *     string or render array.
  *
  * @since 1.21.0: added the "empty" variable.
+ * @since 1.27.0: added the "wrapper_attributes" variable.
  */
 function theme_item_list($variables) {
   $items = $variables['items'];
   $title = $variables['title'];
   $type = $variables['type'];
   $list_attributes = $variables['attributes'];
+  $wrapper_attributes = $variables['wrapper_attributes'];
 
   $output = '';
   if ($items) {
@@ -2454,14 +2468,29 @@ function theme_item_list($variables) {
     $output .= render($variables['empty']);
   }
 
-  // Only output the list container and title, if there are any list items.
-  // Check to see whether the block title exists before adding a header.
-  // Empty headers are not semantic and present accessibility challenges.
+  // Only output the list container and title if there are any list items.
   if ($output !== '') {
+    // Check to see whether the list title exists before adding a header. Empty
+    // headers are not semantic and present accessibility challenges.
     if (isset($title) && $title !== '') {
       $title = '<h3>' . $title . '</h3>';
     }
-    $output = '<div class="item-list">' . $title . $output . '</div>';
+
+    // Add any attributes specified for the wrapper div tag.
+    if (!isset($wrapper_attributes['class'])) {
+      // Make sure that the 'class' key exists in the array.
+      $wrapper_attributes['class'] = array();
+    }
+    elseif (is_string($wrapper_attributes['class'])) {
+      // Do not choke if 'class' was provided as a string which may include
+      // commas, spaces, or semicolons. Convert sub-strings into array items.
+      $wrapper_class_items = array_map('trim', preg_split("/[;,]/", $wrapper_attributes['class']));
+      $wrapper_attributes['class'] = $wrapper_class_items;
+    }
+    // Finally, include a default CSS class "item-list".
+    $wrapper_attributes['class'][] = 'item-list';
+
+    $output = '<div' . backdrop_attributes($wrapper_attributes) . '>' . $title . $output . '</div>';
   }
 
   return $output;

@@ -380,15 +380,17 @@ function user_validate_name($name) {
   if (preg_match('/[^\x{80}-\x{F7} a-z0-9@+_.\'-]/i', $name)) {
     return t('The username contains an illegal character.');
   }
-  if (preg_match('/[\x{80}-\x{A0}' .         // Non-printable ISO-8859-1 + NBSP
-                  '\x{AD}' .                // Soft-hyphen
-                  '\x{2000}-\x{200F}' .     // Various space characters
-                  '\x{2028}-\x{202F}' .     // Bidirectional text overrides
-                  '\x{205F}-\x{206F}' .     // Various text hinting characters
-                  '\x{FEFF}' .              // Byte order mark
-                  '\x{FF01}-\x{FF60}' .     // Full-width latin
-                  '\x{FFF9}-\x{FFFD}' .     // Replacement characters
-                  '\x{0}-\x{1F}]/u',        // NULL byte and control characters
+  // cspell:disable
+  if (preg_match('/[\x{80}-\x{A0}' .        // Non-printable ISO-8859-1 + NBSP.
+                  '\x{AD}' .                // Soft-hyphen.
+                  '\x{2000}-\x{200F}' .     // Various space characters.
+                  '\x{2028}-\x{202F}' .     // Bidirectional text overrides.
+                  '\x{205F}-\x{206F}' .     // Various text hinting characters.
+                  '\x{FEFF}' .              // Byte order mark.
+                  '\x{FF01}-\x{FF60}' .     // Full-width latin.
+                  '\x{FFF9}-\x{FFFD}' .     // Replacement characters.
+                  '\x{0}-\x{1F}]/u',        // NULL byte and control characters.
+                  // cspell:enable
                   $name)) {
     return t('The username contains an illegal character.');
   }
@@ -430,6 +432,7 @@ function user_password($length = 10) {
   // password. Note that the number 0 and the letter 'O' have been
   // removed to avoid confusion between the two. The same is true
   // of 'I', 1, and 'l'.
+  // cspell:disable-next-line
   $allowable_characters = 'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
 
   // Zero-based count of characters in the allowable list:
@@ -451,6 +454,25 @@ function user_password($length = 10) {
   }
 
   return $pass;
+}
+
+/**
+ * Checks if a user role has a permission.
+ *
+ * @param string $role_name
+ *   The role machine name.
+ * @param string $permission_name
+ *   The permission to check.
+ *
+ * @return bool
+ *   TRUE if the role has the permission, FALSE if it does not have the
+ *   permission.
+ *
+ * @since 1.26.0 Function added
+ */
+function user_role_has_permission($role_name, $permission_name) {
+  $role = user_role_load($role_name);
+  return $role ? in_array($permission_name, $role->permissions) : FALSE;
 }
 
 /**
@@ -551,7 +573,7 @@ function user_is_blocked($name) {
  *
  * @since 1.14.0 First parameter changed from $rid to $role_name.
  */
-function user_has_role($role_name, $account = NULL) {
+function user_has_role($role_name, User $account = NULL) {
   if (!$account) {
     $account = $GLOBALS['user'];
   }
@@ -789,7 +811,14 @@ function user_account_form(&$form, &$form_state) {
     '#maxlength' => USERNAME_MAX_LENGTH,
     '#description' => t('Spaces are allowed; punctuation is not allowed except for periods, hyphens, apostrophes, and underscores.'),
     '#required' => TRUE,
-    '#attributes' => array('class' => array('username')),
+    '#attributes' => array(
+      'class' => array('username'),
+      // Add attributes to field to prevent spell-jacking and unwanted
+      // automatic changes caused by the browser.
+      'autocapitalize' => 'none',
+      'autocorrect' => 'off',
+      'spellcheck' => 'false',
+    ),
     '#default_value' => (!$register ? $account->name : ''),
     '#access' => ($register || ($user->uid == $account->uid && user_access('change own username')) || $admin_users),
     '#weight' => -10,
@@ -805,6 +834,13 @@ function user_account_form(&$form, &$form_state) {
     '#description' => t('A valid email address. All emails from the system will be sent to this address. The email address is not made public and will only be used if you wish to receive a new password or wish to receive certain news or notifications by email.'),
     '#required' => TRUE,
     '#default_value' => (!$register ? $account->mail : ''),
+    '#attributes' => array(
+      // Add attributes to field to prevent spell-jacking and unwanted
+      // automatic changes caused by the browser.
+      'autocapitalize' => 'none',
+      'autocorrect' => 'off',
+      'spellcheck' => 'false',
+    ),
   );
 
   // Display password field only for existing users or when user is allowed to
@@ -1162,7 +1198,15 @@ function user_login_block($form) {
     '#size' => 15,
     '#required' => TRUE,
     '#weight' => 1,
+    '#attributes' => array(
+      // Add attributes to field to prevent spell-jacking and unwanted
+      // automatic changes caused by the browser.
+      'autocapitalize' => 'none',
+      'autocorrect' => 'off',
+      'spellcheck' => 'false',
+    ),
   );
+
   $form['pass'] = array(
     '#type' => 'password',
     '#title' => t('Password'),
@@ -1427,6 +1471,7 @@ function user_menu() {
   // Administration pages.
   $items['admin/config/people'] = array(
     'title' => 'User accounts',
+    'icon' => 'users',
     'description' => 'Configure user accounts.',
     'weight' => -20,
     'page callback' => 'system_admin_menu_block_page',
@@ -1563,10 +1608,16 @@ function user_menu() {
   );
   return $items;
 }
+
 /**
  * Implements hook_menu_alter().
  */
 function user_menu_alter(&$items) {
+  // Add an icon to the Views-provided menu item.
+  if (isset($items['admin/people'])) {
+    $items['admin/people']['icon'] = 'users-fill';
+  }
+
   if (module_exists('field_ui')) {
     // Provide a parent menu item for managing fields.
     $items['admin/config/people/manage'] = $items['admin/config/people/manage/fields'];
@@ -1584,7 +1635,8 @@ function user_menu_alter(&$items) {
  */
 function user_admin_bar_output_alter(&$content) {
   // Admin menu shows both the parent menu item and its children.
-  // Remove the duplicate child element so "Manage fields" doesn't show up twice.
+  // Remove the duplicate child element so "Manage fields" doesn't show up
+  // twice.
   unset($content['menu']['menu']['admin/config']['admin/config/people']['admin/config/people/manage']['admin/config/people/manage/fields']);
 }
 
@@ -1744,6 +1796,11 @@ function user_login($form, &$form_state) {
     '#required' => TRUE,
     '#attributes' => array(
       'autofocus' => 'autofocus',
+      // Add attributes to field to prevent spell-jacking and unwanted
+      // automatic changes caused by the browser.
+      'autocapitalize' => 'none',
+      'autocorrect' => 'off',
+      'spellcheck' => 'false',
     ),
   );
 
@@ -2042,7 +2099,7 @@ function user_login_submit($form, &$form_state) {
  */
 function user_pass_reset_url($account) {
   $timestamp = REQUEST_TIME;
-  return url("user/reset/$account->uid/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid), array('absolute' => TRUE));
+  return url("user/reset/$account->uid/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid, $account->mail), array('absolute' => TRUE));
 }
 
 /**
@@ -2064,7 +2121,7 @@ function user_pass_reset_url($account) {
  */
 function user_cancel_url($account) {
   $timestamp = REQUEST_TIME;
-  return url("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid), array('absolute' => TRUE));
+  return url("user/$account->uid/cancel/confirm/$timestamp/" . user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid, $account->mail), array('absolute' => TRUE));
 }
 
 /**
@@ -2086,11 +2143,13 @@ function user_cancel_url($account) {
  *   The UNIX timestamp of the user's last login.
  * @param int $uid
  *   The user ID of the user account.
+ * @param string $mail
+ *   The email address of the user.
  *
  * @return
  *   A string that is safe for use in URLs and SQL statements.
  */
-function user_pass_rehash($password, $timestamp, $login, $uid) {
+function user_pass_rehash($password, $timestamp, $login, $uid, $mail = '') {
   // Backwards compatibility: Try to determine a $uid if one was not passed.
   // (Since $uid is a required parameter to this function, a PHP warning will
   // be generated if it's not provided, which is an indication that the calling
@@ -2110,7 +2169,15 @@ function user_pass_rehash($password, $timestamp, $login, $uid) {
     }
   }
 
-  return backdrop_hmac_base64($timestamp . $login . $uid, backdrop_get_hash_salt() . $password);
+  // Backwards compatibility: If the $mail parameter is not provided, load it
+  // from the user object.
+  if (empty($mail)) {
+    $account = user_load($uid);
+    $mail = $account->mail;
+  }
+
+  return backdrop_hmac_base64($timestamp . ':' . $login . ':' . $uid . ':' . $mail, backdrop_get_hash_salt() . $password);
+
 }
 
 /**
@@ -2369,7 +2436,16 @@ function _user_mail_text($key, $language = NULL, $variables = array()) {
 
   // We do not sanitize the token replacement, since the output of this
   // replacement is intended for an email message, not a web browser.
-  return token_replace(config('user.mail')->getTranslated($key, array(), array('langcode' => $langcode)), $variables, array('langcode' => $langcode, 'callback' => 'user_mail_tokens', 'sanitize' => FALSE, 'clear' => TRUE));
+  $text = config('user.mail')->getTranslated($key, array(), array(
+    'langcode' => $langcode,
+  ));
+  $options = array(
+    'langcode' => $langcode,
+    'callback' => 'user_mail_tokens',
+    'sanitize' => FALSE,
+    'clear' => TRUE,
+  );
+  return token_replace($text, $variables, $options);
 }
 
 /**
@@ -3185,7 +3261,7 @@ function user_register_form($form, &$form_state) {
   elseif (isset($_SERVER['HTTP_REFERER'])) {
     $path = $_SERVER['HTTP_REFERER'];
   }
-  elseif (user_access('administer users')) {
+  elseif ($admin) {
     $path = 'admin/people';
   }
   else {

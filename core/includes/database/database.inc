@@ -196,8 +196,8 @@ abstract class DatabaseConnection {
    * The key representing this connection.
    *
    * The key is a unique string which identifies a database connection. A
-   * connection can be a single server or a cluster of master and slaves (use
-   * target to pick between master and slave).
+   * connection can be a single server or a cluster of primary and replicas (use
+   * target to pick between primary and replica).
    *
    * @var string
    */
@@ -352,7 +352,7 @@ abstract class DatabaseConnection {
    * A given query can be customized with a number of option flags in an
    * associative array:
    * - target: The database "target" against which to execute a query. Valid
-   *   values are "default" or "slave". The system will first try to open a
+   *   values are "default" or "replica". The system will first try to open a
    *   connection to a database specified with the user-supplied key. If one
    *   is not available, it will silently fall back to the "default" target.
    *   If multiple databases connections are specified with the same target,
@@ -737,12 +737,12 @@ abstract class DatabaseConnection {
       if ($options['throw_exception']) {
         // Add additional debug information.
         if ($query instanceof DatabaseStatementInterface) {
-          $e->query_string = $stmt->getQueryString();
+          $e->errorInfo['query_string'] = $stmt->getQueryString();
         }
         else {
-          $e->query_string = $query;
+          $e->errorInfo['query_string'] = $query;
         }
-        $e->args = $args;
+        $e->errorInfo['args'] = $args;
         throw $e;
       }
       return NULL;
@@ -1408,7 +1408,7 @@ abstract class DatabaseConnection {
 /**
  * Primary front-controller for the database system.
  *
- * This class is uninstantiatable and un-extendable. It acts to encapsulate
+ * This class is un-instantiatable and un-extendable. It acts to encapsulate
  * all control and shepherding of database connections into a single location
  * without the use of globals.
  */
@@ -1563,8 +1563,8 @@ abstract class Database {
     }
     // If the requested target does not exist, or if it is ignored, we fall back
     // to the default target. The target is typically either "default" or
-    // "slave", indicating to use a slave SQL server if one is available. If
-    // it's not available, then the default/master server is the correct server
+    // "replica", indicating to use a replica SQL server if one is available. If
+    // it's not available, then the default/primary server is the correct server
     // to use.
     if (!empty(self::$ignoreTargets[$key][$target]) || !isset(self::$databaseInfo[$key][$target])) {
       $target = 'default';
@@ -1621,7 +1621,7 @@ abstract class Database {
       foreach ($database_info[$index] as $target => $value) {
         // If there is no "driver" property, then we assume it's an array of
         // possible connections for this target. Pick one at random. That allows
-        //  us to have, for example, multiple slave servers.
+        //  us to have, for example, multiple replica servers.
         if (empty($value['driver'])) {
           $database_info[$index][$target] = $database_info[$index][$target][mt_rand(0, count($database_info[$index][$target]) - 1)];
         }
@@ -1846,7 +1846,7 @@ abstract class Database {
   /**
    * Instructs the system to temporarily ignore a given key/target.
    *
-   * At times we need to temporarily disable slave queries. To do so, call this
+   * At times we need to temporarily disable replica queries. To do so, call this
    * method with the database key and the target to disable. That database key
    * will then always fall back to 'default' for that key, even if it's defined.
    *
@@ -2542,7 +2542,7 @@ function db_query_temporary($query, array $args = array(), array $options = arra
  *   A new InsertQuery object for this connection.
  */
 function db_insert($table, array $options = array()) {
-  if (empty($options['target']) || $options['target'] == 'slave') {
+  if (_db_is_replica($options)) {
     $options['target'] = 'default';
   }
   return Database::getConnection($options['target'])->insert($table, $options);
@@ -2560,7 +2560,7 @@ function db_insert($table, array $options = array()) {
  *   A new MergeQuery object for this connection.
  */
 function db_merge($table, array $options = array()) {
-  if (empty($options['target']) || $options['target'] == 'slave') {
+  if (_db_is_replica($options)) {
     $options['target'] = 'default';
   }
   return Database::getConnection($options['target'])->merge($table, $options);
@@ -2578,7 +2578,7 @@ function db_merge($table, array $options = array()) {
  *   A new UpdateQuery object for this connection.
  */
 function db_update($table, array $options = array()) {
-  if (empty($options['target']) || $options['target'] == 'slave') {
+  if (_db_is_replica($options)) {
     $options['target'] = 'default';
   }
   return Database::getConnection($options['target'])->update($table, $options);
@@ -2596,7 +2596,7 @@ function db_update($table, array $options = array()) {
  *   A new DeleteQuery object for this connection.
  */
 function db_delete($table, array $options = array()) {
-  if (empty($options['target']) || $options['target'] == 'slave') {
+  if (_db_is_replica($options)) {
     $options['target'] = 'default';
   }
   return Database::getConnection($options['target'])->delete($table, $options);
@@ -2614,7 +2614,7 @@ function db_delete($table, array $options = array()) {
  *   A new TruncateQuery object for this connection.
  */
 function db_truncate($table, array $options = array()) {
-  if (empty($options['target']) || $options['target'] == 'slave') {
+  if (_db_is_replica($options)) {
     $options['target'] = 'default';
   }
   return Database::getConnection($options['target'])->truncate($table, $options);
@@ -3138,18 +3138,44 @@ function db_change_field($table, $field, $field_new, $spec, $keys_new = array())
  */
 
 /**
- * Sets a session variable specifying the lag time for ignoring a slave server.
+ * Sets a session variable specifying the lag time for ignoring a replica server.
  */
-function db_ignore_slave() {
+function db_ignore_replica() {
   $connection_info = Database::getConnectionInfo();
-  // Only set ignore_slave_server if there are slave servers being used, which
+  // Only set ignore_replica_server if there are replica servers being used, which
   // is assumed if there are more than one.
   if (count($connection_info) > 1) {
-    // Five minutes is long enough to allow the slave to break and resume
+    // Five minutes is long enough to allow the replica to break and resume
     // interrupted replication without causing problems on the Backdrop site
     // from the old data.
     $duration = settings_get('maximum_replication_lag', 300);
-    // Set session variable with amount of time to delay before using slave.
-    $_SESSION['ignore_slave_server'] = REQUEST_TIME + $duration;
+    // Set session variable with amount of time to delay before using replica.
+    $_SESSION['ignore_replica_server'] = REQUEST_TIME + $duration;
   }
+}
+
+/**
+ * Backwards-compatible wrapper function.
+ *
+ * @deprecated since 1.20.4
+ */
+// @todo Remove forbidden backwards compatibility word in Backdrop 2.x.
+// cspell:disable-next-line
+function db_ignore_slave() {
+  db_ignore_replica();
+}
+
+/**
+ * Check if a database has been specified as a replica.
+ *
+ * @param array $db_options
+ *   An array of options to control how the query operates.
+ *
+ * @return bool
+ *   TRUE if a replica, FALSE otherwise.
+ */
+function _db_is_replica($db_options) {
+  // @todo Remove forbidden backwards compatibility word in Backdrop 2.x.
+  // cspell:disable-next-line
+  return empty($db_options['target']) || $db_options['target'] == 'slave' || $db_options['target'] == 'replica';
 }

@@ -74,7 +74,10 @@ class FileTestHelper extends BackdropWebTestCase {
   protected function createFile($settings = array()) {
     // Populate defaults array.
     $settings += array(
-      'filepath' => 'Файлдлятестирования ' . $this->randomName(), // Prefix with non-latin characters to ensure that all file-related tests work with international filenames.
+      // Prefix with non-latin characters to ensure that all file-related tests
+      // work with international filenames.
+      // cspell:disable-next-line
+      'filepath' => 'Файлдлятестирования ' . $this->randomName(),
       'filemime' => 'text/plain',
       'uid' => 1,
       'timestamp' => REQUEST_TIME,
@@ -563,6 +566,29 @@ class FileTaxonomyTermTestCase extends BackdropWebTestCase {
  *   that aren't related to fields into it.
  */
 class FileManagedFileElementTestCase extends FileTestHelper {
+
+  protected $originalDisplayErrorsValue;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
+    parent::setUp();
+
+    // Disable the displaying of errors, so that the AJAX responses are not
+    // contaminated with error messages about exceeding the maximum POST size.
+    $this->originalDisplayErrorsValue = ini_set('display_errors', '0');
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function tearDown() {
+    ini_set('display_errors', $this->originalDisplayErrorsValue);
+
+    parent::tearDown();
+  }
+
   /**
    * Tests the managed_file element type.
    */
@@ -686,6 +712,43 @@ class FileManagedFileElementTestCase extends FileTestHelper {
         $this->assertEqual($last_fid, $last_fid_prior, 'No new file got uploaded.');
       }
     }
+  }
+
+  /**
+   * Tests uploading a file that exceeds the maximum file size.
+   */
+  public function testManagedFileExceedMaximumFileSize() {
+    $path = 'file/test/0/0';
+    $this->backdropGet($path);
+
+    // Create a test file that exceeds the maximum POST size with 1 kilobyte.
+    $post_max_size = $this->_postMaxSizeToInteger(ini_get('post_max_size'));
+    $filename = 'text-exceeded';
+    simpletest_generate_file($filename, ceil(($post_max_size + 1024) / 1024), 1024, 'text');
+    $uri = 'public://' . $filename . '.txt';
+    $input_base_name = 'file';
+    $edit = array('files[' . $input_base_name . ']' => backdrop_realpath($uri));
+    $this->backdropPostAJAX(NULL, $edit, $input_base_name . '_upload_button');
+    $this->assertFieldByXpath('//input[@type="submit"]', t('Upload'), 'After uploading a file that exceeds the maximum file size, the "Upload" button is displayed.');
+    $this->backdropPost($path, array(), t('Save'));
+    $this->assertRaw(t('The file id is %fid.', array('%fid' => 0)), 'Submitted without a file.');
+  }
+
+  /**
+   * Converts php.ini post_max_size value to integer.
+   *
+   * @param string $string
+   *   The value from php.ini.
+   *
+   * @return int
+   *   Converted value.
+   */
+  protected function _postMaxSizeToInteger($string) {
+    sscanf($string, '%u%c', $number, $suffix);
+    if (isset($suffix)) {
+      $number = $number * pow(1024, strpos(' KMG', strtoupper($suffix)));
+    }
+    return $number;
   }
 }
 
@@ -1323,7 +1386,10 @@ class FileFieldDisplayTestCase extends FileTestHelper {
     // Check that the default formatter is displaying with the file name.
     $node = node_load($nid, NULL, TRUE);
     $node_file = (object) $node->{$field_name}[LANGUAGE_NONE][0];
-    $default_output = theme('file_link', array('file' => $node_file));
+    $default_output = theme('file_link', array(
+      'file' => $node_file,
+      'attributes' => array('class' => array('file-preview-link')),
+    ));
     $this->assertRaw($default_output, 'Default formatter displaying correctly on full node view.');
 
     // Turn the "display" option off and check that the file is no longer displayed.
@@ -1608,6 +1674,7 @@ class FileTokenReplaceTestCase extends FileTestHelper {
 
     $test_file = $this->getTestFile('text');
     // Coping a file to test uploads with non-latin filenames.
+    //cspell:disable-next-line
     $filename = backdrop_dirname($test_file->uri) . '/текстовый файл.txt';
     $test_file = file_copy($test_file, $filename);
 
@@ -2506,10 +2573,152 @@ class FileUploadWizardTestCase extends FileTestHelper {
 }
 
 /**
+ * Tests validation of SVG uploads.
+ */
+class FileUploadSvgTestCase extends FileTestHelper {
+
+  function setUp() {
+    parent::setUp();
+
+    $this->private_files_directory = config_get('system.core', 'file_private_path');
+    // Disable the private file system which is automatically enabled by
+    // BackdropTestCase so we can test the upload wizard correctly.
+    config_set('system.core', 'file_private_path', '');
+
+    $config = config('file.settings');
+    $default_allowed_extensions = $config->get('default_allowed_extensions');
+    $config->set('default_allowed_extensions', $default_allowed_extensions . ' svg');
+    $config->save();
+
+    $web_user = $this->backdropCreateUser(array(
+      'create files',
+      'view files',
+      'view own private files',
+      'manage files',
+    ));
+    $this->backdropLogin($web_user);
+  }
+
+  /**
+   * Create SVG file.
+   *
+   * @param array $settings
+   *   File settings.
+   *
+   * @return string
+   *   filepath
+   */
+  protected function createSvgFile($settings = array()) {
+    // Populate defaults array.
+    $settings += array(
+      'filepath' => $this->randomName() . '.svg',
+      'contents' => "file_put_contents() doesn't seem to appreciate empty strings so let's put in some data.",
+      'scheme' => file_default_scheme(),
+    );
+
+    $filepath = $settings['scheme'] . '://' . $settings['filepath'];
+
+    file_put_contents($filepath, $settings['contents']);
+    $this->assertTrue(is_file($filepath), t('The SVG file exists on the disk.'), 'Create SVG file');
+
+    return $filepath;
+  }
+
+  /**
+   * Test SVG upload validation.
+   */
+  public function testSVGFileUploadValidation() {
+    $default_content = '<rect width="400" height="400" fill="#93a7ac"/>';
+    $default_open_tag = '<svg width="400" height="400" version="1.1" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">';
+
+    $samples = array(
+      'valid' => array(
+        'contents' => $default_open_tag . $default_content . '</svg>',
+        'message' => 'was uploaded.',
+      ),
+      'no_dimensions' => array(
+        'contents' => '<svg version="1.1" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">' . $default_content . '</svg>',
+        'message' => 'was uploaded.',
+      ),
+      'no_namespace_script' => array(
+        'contents' => '<svg><script>alert(1)</script>' . $default_content . '</svg>',
+        'message' => 'could not be uploaded. Invalid SVG namespace.',
+      ),
+      'invalid_namespace' => array(
+        'contents' => $default_open_tag . '<g xmlns="invalid ns"/>' . $default_content . '</svg>',
+        'message' => 'could not be uploaded. Invalid SVG file.',
+      ),
+      'broken' => array(
+        'contents' => $default_open_tag . '<g>' . $default_content . '</svg>',
+        'message' => 'could not be uploaded. Invalid SVG file.',
+      ),
+      'not_svg' => array(
+        'contents' => '<xml><foobar/></xml>',
+        'message' => 'could not be uploaded. Invalid SVG namespace.',
+      ),
+      'onevent' => array(
+        'contents' => $default_open_tag . '<rect width="400" height="400" onload="alert(1)" fill="#93a7ac"/></svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
+      'iframe' => array(
+        'contents' => $default_open_tag . $default_content . '<foreignObject x="20" y="20" width="220" height="220"><iframe src="https://example.org/" width="220" height="220"></iframe></foreignObject></svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
+      'script' => array(
+        'contents' => $default_open_tag . $default_content . '<script>alert(1)</script></svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
+      'xlink_script' => array(
+        'contents' => '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><a xlink:href="javascript:alert(1)">test</a>' . $default_content . '</svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
+      'link_data' => array(
+        'contents' => $default_open_tag . $default_content . '<a href="data:image/svg+xml,%3Csvg+xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22+onload%3D%22alert%281%29%22%3E%3C%2Fsvg%3E"></a></svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
+    );
+
+    foreach ($samples as $sample => $settings) {
+      $filename = $sample . '.svg';
+      $filepath = $this->createSvgFile($settings + array('filepath' => $filename));
+
+      // Upload an SVG file.
+      $edit = array();
+      $edit['files[upload]'] = backdrop_realpath($filepath);
+      $this->backdropPost('file/add', $edit, t('Next'));
+
+      // Check that the file exists in the database.
+      $fid = $this->getLastFileId();
+      $file = file_load($fid);
+      $this->assertTrue($file, t('SVG file found in database.'));
+
+      // Check that the SVG file has been validated.
+      $this->assertRaw(t('%name ' . $settings['message'], array('%name' => $filename)), t('File validated.'));
+    }
+
+  }
+}
+
+/**
  * Test file administration page functionality.
  */
 class FileAdminTestCase extends FileTestHelper {
   protected $profile = 'minimal';
+
+  /**
+   * @var User
+   */
+  protected $base_user_1;
+
+  /**
+   * @var User
+   */
+  protected $base_user_2;
+
+  /**
+   * @var User
+   */
+  protected $base_user_3;
 
   function setUp() {
     parent::setUp();

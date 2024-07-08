@@ -194,7 +194,6 @@
   padding: 8px 8px 16px 8px;
   border: 1px dashed #CCC;
   background: white;
-  -webkit-box-sizing: border-box;
   box-sizing: border-box;
 }
 .layout-editor-region-title {
@@ -252,8 +251,6 @@
   margin: -1px 1px 15px -1px;
   background: #FFF;
   border-radius: 4px;
-  -webkit-box-shadow: 2px 2px 0 0 #d0d0d0;
-  -moz-box-shadow: 2px 2px 0 0 #d0d0d0;
   box-shadow: 2px 2px 0 0 #d0d0d0;
 }
 .layout-editor-block:last-child {
@@ -272,9 +269,6 @@
   margin: 0 0.5em 0 0; /* LTR */
   padding: 0.25em 0.75em;
   box-sizing: content-box;
-  -moz-box-sizing: content-box;
-  -webkit-box-sizing: content-box;
-  -o-box-sizing: content-box;
 }
 [dir="rtl"] .layout-editor-block-title .handle {
   margin: 0 0 0 0.5em;

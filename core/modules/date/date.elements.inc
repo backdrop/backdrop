@@ -354,7 +354,7 @@ function date_text_element_process($element, &$form_state, $form) {
 
   $element['#tree'] = TRUE;
   $element['#theme_wrappers'] = array('date_text');
-  $element['date']['#value'] = $element['#value']['date'];
+  $element['date']['#value'] = isset($element['#value']['date']) ? $element['#value']['date'] : '';
   $element['date']['#type'] = 'textfield';
   $element['date']['#weight'] = !empty($element['date']['#weight']) ? $element['date']['#weight'] : $element['#weight'];
   $element['date']['#attributes'] = array('class' => isset($element['#attributes']['class']) ? $element['#attributes']['class'] += array('date-date') : array('date-date'));
@@ -369,8 +369,13 @@ function date_text_element_process($element, &$form_state, $form) {
     $element['#date_title_printed'] = TRUE;
   }
 
-  // Always remove the title from the parent element.
+  // Remove the title from the overall element but put it on the date part so
+  // it is available for validation errors.
+  $element['#date_title'] = $element['#title'];
   $element['#title'] = NULL;
+
+  // Move the #required property from the parent to the child date element.
+  $element['date']['#required'] = !empty($element['#required']);
 
   // Keep the system from creating an error message for the sub-element.
   // We'll set our own message on the parent element.
@@ -1010,7 +1015,9 @@ function date_popup_element_process($element, &$form_state, $form) {
 
   }
 
-  // Remove the title from the overall element.
+  // Remove the title from the overall element but put it on the date part so
+  // it is available for validation errors.
+  $element['#date_title'] = $element['#title'];
   $element['#title'] = NULL;
 
   if (isset($element['#element_validate'])) {
@@ -1233,8 +1240,13 @@ function date_popup_validate($element, &$form_state) {
   $error_field = implode('][', $element['#parents']);
   if (empty($date) || !empty($date->errors)) {
     if (is_object($date) && !empty($date->errors)) {
-      $message = t('The value input for field %field is invalid:', array('%field' => $label));
-      $message .= count($date->errors) ? (' ' . implode('', $date->errors)) : ('<br />' . implode('<br />', $date->errors));
+      if (count($date->errors) === 1) {
+        $error_list = ' ' . reset($date->errors);
+      }
+      else {
+        $error_list = theme('item_list', array('items' => $date->errors));
+      }
+      $message = t('The value input for field %field is invalid:', array('%field' => $label)) . $error_list;
       form_set_error($error_field, $message);
       return;
     }
@@ -1585,7 +1597,6 @@ function date_combo_validate($element, &$form_state) {
   if (!is_array($element['#field_parents'])) {
     $element['#field_parents'] = array();
   }
-  $form_values = backdrop_array_get_nested_value($form_state['values'], $element['#field_parents']);
   $form_input = backdrop_array_get_nested_value($form_state['input'], $element['#field_parents']);
 
   // If the whole field is empty and that's OK, stop now.
@@ -1613,6 +1624,8 @@ function date_combo_validate($element, &$form_state) {
   $offset_field = 'offset';
   $offset_field2 = 'offset2';
 
+  $errors = array();
+
   // Check for empty 'Start date', which could either be an empty
   // value or an array of empty values, depending on the widget.
   $empty = TRUE;
@@ -1633,13 +1646,18 @@ function date_combo_validate($element, &$form_state) {
   // An 'End' date without a 'Start' date is a validation error.
   if ($empty && !empty($item[$to_field])) {
     if (!is_array($item[$to_field])) {
-      form_error($element, t("A start date is required if an end date is supplied for field @field #@delta.", array('@delta' => $field['cardinality'] ? intval($delta + 1) : '', '@field' => $instance['label'])));
+      $errors[] = t("A start date is required if an end date is supplied.", array(
+        '%field' => $instance['label'],
+      ));
       $empty = FALSE;
     }
     else {
       foreach ($item[$to_field] as $key => $value) {
         if (!empty($value)) {
-          form_error($element, t("A start date is required if an end date is supplied for field @field #@delta.", array('@delta' => $field['cardinality'] ? intval($delta + 1) : '', '@field' => $instance['label'])));
+          $errors[] = t("A start date is required if an end date is supplied for field %field #@delta.", array(
+            '@delta' => $field['cardinality'] ? intval($delta + 1) : '',
+            '%field' => $instance['label'],
+          ));
           $empty = FALSE;
           break;
         }
@@ -1660,78 +1678,78 @@ function date_combo_validate($element, &$form_state) {
       return;
     }
   }
-
-  $timezone = !empty($item[$tz_field]) ? $item[$tz_field] : $element['#date_timezone'];
-  $timezone_db = date_get_timezone_db($field['settings']['tz_handling']);
-  $element[$from_field]['#date_timezone'] = $timezone;
-  $from_date = date_input_date($field, $instance, $element[$from_field], $posted[$from_field]);
-
-  if (!empty($field['settings']['todate'])) {
-    $element[$to_field]['#date_timezone'] = $timezone;
-    $to_date = date_input_date($field, $instance, $element[$to_field], $posted[$to_field]);
-  }
   else {
-    $to_date = $from_date;
-  }
+    $timezone = !empty($item[$tz_field]) ? $item[$tz_field] : $element['#date_timezone'];
+    $timezone_db = date_get_timezone_db($field['settings']['tz_handling']);
+    $element[$from_field]['#date_timezone'] = $timezone;
+    $from_date = date_input_date($field, $instance, $element[$from_field], $posted[$from_field]);
 
-  // Neither the start date nor the end date should be empty at this point
-  // unless they held values that couldn't be evaluated.
+    if (!empty($field['settings']['todate'])) {
+      $element[$to_field]['#date_timezone'] = $timezone;
+      $to_date = date_input_date($field, $instance, $element[$to_field], $posted[$to_field]);
+    }
+    else {
+      $to_date = $from_date;
+    }
 
-  if (!$instance['required'] && (!date_is_date($from_date) || !date_is_date($to_date))) {
-    date_element_empty($element, $form_state);
-    $errors[] = t('The dates are invalid.');
-  }
-  elseif (!empty($field['settings']['todate']) && $from_date > $to_date) {
-    form_set_value($element[$to_field], $to_date, $form_state);
-    $errors[] = t('The end date must be greater than the start date.');
-  }
-  else {
-    // Convert input dates back to their UTC values and re-format to ISO
-    // or UNIX instead of the DATETIME format used in element processing.
-    $item[$tz_field] = $timezone;
+    if (!$instance['required'] && (!date_is_date($from_date) || !date_is_date($to_date))) {
+      $errors[] = t('The dates are invalid.');
+    }
+    elseif (!empty($field['settings']['todate']) && $from_date > $to_date) {
+      form_set_value($element[$to_field], $to_date, $form_state);
+      $errors[] = t('The end date must be greater than the start date.');
+    }
 
-    // Update the context for changes in the $item, and allow other modules to
-    // alter the computed local dates.
-    $context['item'] = $item;
-    // We can only pass two additional values to backdrop_alter, so $element
-    // needs to be included in $context.
-    $context['element'] = $element;
-    backdrop_alter('date_combo_validate_date_start', $from_date, $form_state, $context);
-    backdrop_alter('date_combo_validate_date_end', $to_date, $form_state, $context);
+    if (empty($errors) && !empty($from_date)) {
+      // Convert input dates back to their UTC values and re-format to ISO
+      // or UNIX instead of the DATETIME format used in element processing.
+      $item[$tz_field] = $timezone;
 
-    $item[$offset_field] = date_offset_get($from_date);
+      // Update the context for changes in the $item, and allow other modules
+      // to alter the computed local dates.
+      $context['item'] = $item;
+      // We can only pass two additional values to backdrop_alter, so $element
+      // needs to be included in $context.
+      $context['element'] = $element;
+      backdrop_alter('date_combo_validate_date_start', $from_date, $form_state, $context);
+      backdrop_alter('date_combo_validate_date_end', $to_date, $form_state, $context);
 
-    $test_from = date_format($from_date, 'r');
-    $test_to = date_format($to_date, 'r');
+      $item[$offset_field] = date_offset_get($from_date);
 
-    $item[$offset_field2] = date_offset_get($to_date);
-    date_timezone_set($from_date, timezone_open($timezone_db));
-    date_timezone_set($to_date, timezone_open($timezone_db));
-    $item[$from_field] = date_format($from_date, date_type_format($field['type']));
-    $item[$to_field] = date_format($to_date, date_type_format($field['type']));
+      $test_from = date_format($from_date, 'r');
+      $test_to = date_format($to_date, 'r');
 
-    // If the db timezone is not the same as the display timezone
-    // and we are using a date with time granularity,
-    // test a roundtrip back to the original timezone to catch
-    // invalid dates, like 2AM on the day that spring daylight savings
-    // time begins in the US.
-    $granularity = date_format_order($element[$from_field]['#date_format']);
-    if ($timezone != $timezone_db && date_has_time($granularity)) {
-      date_timezone_set($from_date, timezone_open($timezone));
-      date_timezone_set($to_date, timezone_open($timezone));
+      $item[$offset_field2] = date_offset_get($to_date);
+      date_timezone_set($from_date, timezone_open($timezone_db));
+      date_timezone_set($to_date, timezone_open($timezone_db));
+      $item[$from_field] = date_format($from_date, date_type_format($field['type']));
+      $item[$to_field] = date_format($to_date, date_type_format($field['type']));
 
-      if ($test_from != date_format($from_date, 'r')) {
-        $errors[] = t('The start date is invalid.');
+      // If the db timezone is not the same as the display timezone
+      // and we are using a date with time granularity,
+      // test a roundtrip back to the original timezone to catch
+      // invalid dates, like 2AM on the day that spring daylight savings
+      // time begins in the US.
+      $granularity = date_format_order($element[$from_field]['#date_format']);
+      if ($timezone != $timezone_db && date_has_time($granularity)) {
+        date_timezone_set($from_date, timezone_open($timezone));
+        date_timezone_set($to_date, timezone_open($timezone));
+
+        if ($test_from != date_format($from_date, 'r')) {
+          $errors[] = t('The start date is invalid.');
+        }
+        if ($test_to != date_format($to_date, 'r')) {
+          $errors[] = t('The end date is invalid.');
+        }
       }
-      if ($test_to != date_format($to_date, 'r')) {
-        $errors[] = t('The end date is invalid.');
+      if (empty($errors)) {
+        form_set_value($element, $item, $form_state);
       }
     }
-    if (empty($errors)) {
-      form_set_value($element, $item, $form_state);
-    }
   }
-
+  // Don't show further errors if errors are already flagged
+  // because otherwise we'll show errors on the nested elements
+  // more than once.
   if (!empty($errors)) {
     if (count($errors) === 1) {
       $error_list = ' ' . reset($errors);
@@ -1739,11 +1757,16 @@ function date_combo_validate($element, &$form_state) {
     else {
       $error_list = theme('item_list', array('items' => $errors));
     }
-    if ($field['cardinality']) {
-      form_error($element, t('There are errors in @field_name value #@delta:', array('@field_name' => $instance['label'], '@delta' => $delta + 1)) . $error_list);
+    if ($field['cardinality'] != 1) {
+      form_error($element, t('There are errors in %field_name value #@delta:', array(
+        '%field_name' => $instance['label'],
+        '@delta' => $delta + 1,
+      )) . $error_list);
     }
     else {
-      form_error($element, t('There are errors in @field_name:', array('@field_name' => $instance['label'])) . $error_list);
+      form_error($element, t('There are errors in %field_name:', array(
+        '%field_name' => $instance['label'],
+      )) . $error_list);
     }
   }
 }
@@ -2218,25 +2241,33 @@ function _date_html5_get_attributes(array $date_limits, array $granularity) {
  * @return array
  *   The form elements for a single widget for this field.
  */
-function _date_default_field_widget_form($field, $instance, $langcode, $items, $delta, $base) {
+function _date_default_field_widget_form(array $field, array $instance, $langcode, array $items, $delta, array $base) {
   $element = $base;
 
   // If this is a new entity, populate the field with the right default values.
-  // This happens early so even fields later hidden with #access get those values.
-  // We should only add default values to new entities, to avoid over-writing
-  // a value that has already been set. This means we can't just check to see
-  // if $items is empty, because it might have been set that way on purpose.
+  // This happens early so even fields later hidden with #access get those
+  // values. We should only add default values to new entities, to avoid
+  // over-writing a value that has already been set. This means we can't just
+  // check to see if $items is empty, because it might have been set that way on
+  // purpose.
   // @see date_field_widget_properties_alter() where we flagged if this is a new entity.
-
-  // We check !isset($items[$delta]['value']) because entity translation may create
-  // a new translation entity for an existing entity and we don't want to clobber
-  // values that were already set in that case.
+  //
+  // We check !isset($items[$delta]['value']) because entity translation may
+  // create a new translation entity for an existing entity and we don't want to
+  // clobber values that were already set in that case.
   // @see http://drupal.org/node/1478848.
-
   $is_default = FALSE;
-  if (!empty($instance['widget']['is_new']) && !isset($items[$delta]['value'])) {
-    $items = date_default_value($field, $instance, $langcode);
-    $is_default = TRUE;
+  if (!isset($items[$delta]['value'])) {
+    if (!empty($instance['widget']['is_new'])) {
+      // New entity; use default values defined on instance.
+      $items = date_default_value($field, $instance, $langcode);
+      $is_default = TRUE;
+    }
+    else {
+      // Date is empty; create array structure for value keys.
+      $keys = date_process_values($field);
+      $items[$delta] = array_fill_keys($keys, '');
+    }
   }
 
   $timezone = date_get_timezone($field['settings']['tz_handling'], isset($items[$delta]['timezone']) ? $items[$delta]['timezone'] : date_default_timezone());
@@ -2300,13 +2331,13 @@ function _date_default_field_widget_form($field, $instance, $langcode, $items, $
  *   Array of default values for this field.
  * @param int $delta
  *   The order of this item in the array of subelements (0, 1, 2, etc).
- * @param array $base
+ * @param array $element
  *   A form element array containing basic properties for the widget.
  *
  * @return array
  *   The form elements for a single widget for this field.
  */
-function _date_html5_field_widget_form($field, $instance, $langcode, $items, $delta, $element) {
+function _date_html5_field_widget_form(array $field, array $instance, $langcode, array $items, $delta, array $element) {
   $field_settings = $field['settings'];
   $widget_settings = $instance['widget']['settings'];
 

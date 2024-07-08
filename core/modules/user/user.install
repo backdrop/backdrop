@@ -523,7 +523,7 @@ function user_update_1009() {
     'core' => '1.0-dev',
     'display' => array(
       'default' => array(
-        'display_title' => 'Master',
+        'display_title' => 'Default',
         'display_plugin' => 'default',
         'display_options' => array(
           'query' => array(
@@ -1431,7 +1431,7 @@ function user_update_1025() {
     'core' => '1.0-dev',
     'display' => array(
       'default' => array(
-        'display_title' => 'Master',
+        'display_title' => 'Default',
         'display_plugin' => 'default',
         'display_options' => array(
           'query' => array(
@@ -2355,6 +2355,19 @@ function user_update_1025() {
   );
   $config->setData($data);
   $config->save();
+}
+
+/**
+ * Correct the default config value for the "flood_uid_only" setting.
+ */
+function user_update_1026() {
+  $config = config('user.flood');
+
+  // Only update if the value is exactly the string "false".
+  if ($config->get('flood_uid_only') === 'false') {
+    $config->set('flood_uid_only', '0');
+    $config->save();
+  }
 }
 
 /**

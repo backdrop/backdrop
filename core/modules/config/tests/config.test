@@ -165,9 +165,13 @@ class ConfigurationTest extends BackdropWebTestCase {
    * Tests that config directories are protected by .htaccess files.
    */
   public function testConfigHtaccess() {
-    // Check that the .htaccess file is present in config location.
+    // This test only run if using file-based config storage.
+    $active_storage = config_get_config_storage();
     $active_dir = config_get_config_directory();
-    $this->assertTrue(is_file($active_dir . '/.htaccess'), "Located the .htaccess file in the 'active' config directory.");
+    if (!is_a($active_storage, 'ConfigFileStorage')) {
+      $this->assert(TRUE, 'Config storage is not file-based, so .htaccess test skipped.');
+      return;
+    }
 
     // Visit the status report to confirm the file is re-created automatically.
     $admin_user = $this->backdropCreateUser(array(
@@ -258,6 +262,12 @@ class ConfigurationHooksTest extends BackdropWebTestCase {
  * Tests the UI for syncing, importing, and exporting.
  */
 class ConfigurationUITest extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $webUser;
+
   function setUp() {
     parent::setUp(array('config_test'));
 
@@ -459,7 +469,16 @@ class ConfigurationUITest extends BackdropWebTestCase {
     $files = file_scan_directory($directory, '/.*\.json/');
     foreach ($files as $filepath => $file) {
       $config_data = json_decode(file_get_contents($filepath), TRUE);
-      $config_data['config_test_addition'] = 'test';
+      // The Layout and TaxonomyVocabulary class don't allow dynamic properties.
+      if (strpos($file->name, 'layout.layout.') === 0) {
+        $config_data['layout_template'] = 'simmons';
+      }
+      elseif (strpos($file->name, 'taxonomy.vocabulary.') === 0) {
+        $config_data['description'] = 'config_test_addition';
+      }
+      else {
+        $config_data['config_test_addition'] = 'test';
+      }
       file_put_contents($filepath, backdrop_json_encode($config_data, TRUE));
     }
 
@@ -525,6 +544,34 @@ class ConfigurationUITest extends BackdropWebTestCase {
   }
 
   /**
+   * Test comparing configs whose elements are in different order.
+   */
+  public function testConfigOrderChange() {
+    $config_name = 'foo.bar';
+    $content = array(
+      'a' => 'Foo',
+      'b' => 'Bar',
+    );
+    $config = config($config_name);
+    $config->setData($content);
+    $config->save();
+
+    // Copy all configuration to staging before modification.
+    $this->copyConfig('active', 'staging');
+
+    // Reverse the content of the array.
+    krsort($content);
+
+    // Store the reversed config.
+    $config->setData($content);
+    $config->save();
+
+    // Verify that the file appears as ready to import.
+    $this->backdropGet('admin/config/development/configuration');
+    $this->assertText($config_name, 'The configuration name appears in the list of changed configurations.');
+  }
+
+  /**
    * Copies configuration objects from source storage to target storage.
    *
    * @param string $source
@@ -548,12 +595,17 @@ class ConfigurationUITest extends BackdropWebTestCase {
 class ConfigurationSyncTest extends BackdropWebTestCase {
   protected $profile = 'testing';
 
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   protected function setUp() {
     parent::setUp(array('config_test_hooks'));
 
     // Create a blank content type into which our new config-based field will be
     // added.
-    $this->content_type = $this->backdropCreateContentType(array(
+    $this->backdropCreateContentType(array(
       'type' => 'post',
       'name' => 'Post',
     ));

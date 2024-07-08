@@ -203,7 +203,11 @@ abstract class LayoutContext extends LayoutHandler {
     }
     $info = layout_get_context_info($this->plugin);
     if (isset($this->position)) {
-      return t('@label from path (position @position)', array('@label' => $info['title'], '@position' => $this->position + 1));
+      $substitutions = array(
+        '@label' => $info['title'], 
+        '@position' => $this->position + 1,
+      );
+      return t('@label from the path (in position @position)', $substitutions);
     }
     else {
       return check_plain($info['title']);

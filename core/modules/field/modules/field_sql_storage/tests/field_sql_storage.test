@@ -11,6 +11,32 @@
  * Tests field storage.
  */
 class FieldSqlStorageTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var string
+   */
+  protected $field_name;
+
+  /**
+   * @var array
+   */
+  protected $field;
+
+  /**
+   * @var array
+   */
+  protected $instance;
+
+  /**
+   * @var string
+   */
+  protected $table;
+
+  /**
+   * @var string
+   */
+  protected $revision_table;
+
   function setUp() {
     parent::setUp('field_sql_storage', 'field', 'field_test', 'text');
     $this->field_name = strtolower($this->randomName());
@@ -354,7 +380,7 @@ class FieldSqlStorageTestCase extends BackdropWebTestCase {
    */
   function testFieldSqlStorageForeignKeys() {
     // Create a decimal field.
-    $field_name = 'testfield';
+    $field_name = 'test_field';
     $field = array(
       'field_name' => $field_name,
       'type' => 'shape',

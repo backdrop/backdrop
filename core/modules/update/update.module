@@ -67,61 +67,6 @@ define('UPDATE_FETCH_PENDING', -4);
 define('UPDATE_NOT_IMPLEMENTED', -5);
 
 /**
- * Implements hook_init().
- */
-function update_init() {
-  if (arg(0) == 'admin' && user_access('administer site configuration')) {
-    switch ($_GET['q']) {
-      // These pages don't need additional nagging.
-      case 'admin/config/system/updates':
-      case 'admin/appearance/install':
-      case 'admin/modules/install':
-      case 'admin/structure/layouts/install':
-      case 'admin/reports/updates':
-      case 'admin/reports/updates/update':
-      case 'admin/reports/updates/install':
-      case 'admin/reports/updates/settings':
-      case 'admin/reports/status':
-      case 'admin/update/ready':
-        return;
-
-      // If we are on the modules, themes, or layout templates list, display a
-      // detailed report of the update status.
-      case 'admin/appearance':
-      case 'admin/modules':
-      case 'admin/structure/layouts':
-        $verbose = TRUE;
-        break;
-
-    }
-    module_load_install('update');
-    $status = update_requirements('runtime');
-    foreach (array('core', 'contrib') as $report_type) {
-      $type = 'update_' . $report_type;
-      if (!empty($verbose)) {
-        if (isset($status[$type]['severity'])) {
-          if ($status[$type]['severity'] == REQUIREMENT_ERROR) {
-            backdrop_set_message($status[$type]['description'], 'error', FALSE);
-          }
-          elseif ($status[$type]['severity'] == REQUIREMENT_WARNING) {
-            backdrop_set_message($status[$type]['description'], 'warning', FALSE);
-          }
-        }
-      }
-      // Otherwise, if we're on *any* admin page and there's a security
-      // update missing, print an error message about it.
-      else {
-        if (isset($status[$type])
-            && isset($status[$type]['reason'])
-            && $status[$type]['reason'] === UPDATE_NOT_SECURE) {
-          backdrop_set_message($status[$type]['description'], 'error', FALSE);
-        }
-      }
-    }
-  }
-}
-
-/**
  * Implements hook_menu().
  */
 function update_menu() {
@@ -312,7 +257,7 @@ function _update_checking_enabled() {
  *   automatically if there's no data. Defaults to FALSE.
  *
  * @return
- *   Array of data about available releases, keyed by project shortname.
+ *   Array of data about available releases, keyed by project machine name.
  *
  * @see update_refresh()
  * @see update_get_projects()
@@ -404,7 +349,7 @@ function update_fetch_data() {
  * Returns all currently cached data about available releases for all projects.
  *
  * @return
- *   Array of data about available releases, keyed by project shortname.
+ *   Array of data about available releases, keyed by project machine name.
  */
 function _update_get_cached_available_releases() {
   $data = array();
@@ -414,7 +359,7 @@ function _update_get_cached_available_releases() {
     if ($cache->expire < REQUEST_TIME) {
       $cache->data['fetch_status'] = UPDATE_FETCH_PENDING;
     }
-    // The project shortname is embedded in the cache ID, even if there's no
+    // The project machine name is embedded in the cache ID, even if there's no
     // data for this project in the DB at all, so use that for the indexes in
     // the array.
     $parts = explode('::', $cid, 2);
@@ -526,7 +471,7 @@ function _update_message_text($msg_type, $msg_reason, $report_link = FALSE, $lan
 
     case UPDATE_UNKNOWN:
     case UPDATE_NOT_CHECKED:
-    if ($msg_type == 'core') {
+      if ($msg_type == 'core') {
         $text = t('Update checking is not available for your version of Backdrop.');
       }
       else {

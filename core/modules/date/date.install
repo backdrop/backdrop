@@ -89,7 +89,7 @@ function date_update_1000() {
 }
 
 /**
- * Remove legacy Date API, Date Views, and Date Popup configurations.
+ * Remove legacy Date API and Date Popup configurations.
  */
 function date_update_1001() {
   config('date_api.settings')->delete();
@@ -100,4 +100,22 @@ function date_update_1001() {
 
   // Remove old system table entries for merged in modules.
   db_query("DELETE FROM {system} WHERE name IN ('date_api', 'date_popup', 'date_views') AND type = 'module'");
+}
+
+/**
+ * Remove entries with null values from date field tables.
+ */
+function date_update_1002() {
+  // Get all date fields.
+  $fields = field_info_fields();
+  foreach ($fields as $field_name => $field) {
+    if (in_array($field['type'], array('date', 'datetime', 'datestamp'))) {
+      db_delete('field_data_' . $field_name)
+        ->isNull($field_name . '_value')
+        ->execute();
+      db_delete('field_revision_' . $field_name)
+        ->isNull($field_name . '_value')
+        ->execute();
+    }
+  }
 }

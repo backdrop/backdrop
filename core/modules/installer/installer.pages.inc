@@ -846,7 +846,6 @@ function installer_browser_get_install_list() {
  */
 function installer_browser_install_button_form($form, &$form_state) {
   $project_type = installer_browser_type_from_path();
-  $form['#attributes']['class'] = 'installer-browser-install-button-form';
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Install'),

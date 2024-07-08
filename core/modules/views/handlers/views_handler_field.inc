@@ -159,7 +159,7 @@ class views_handler_field extends views_handler {
   }
 
   /**
-   * Called to determine what to tell the clicksorter.
+   * Called to determine what to tell the click sorter.
    */
   function click_sort($order) {
     if (isset($this->field_alias)) {
@@ -474,6 +474,7 @@ class views_handler_field extends views_handler {
       '#type' => 'textfield',
       '#title' => t('Label'),
       '#default_value' => $label,
+      '#indentation' => 1,
       '#states' => array(
         'visible' => array(
           ':input[name="options[custom_label]"]' => array('checked' => TRUE),
@@ -486,6 +487,7 @@ class views_handler_field extends views_handler {
       '#type' => 'checkbox',
       '#title' => t('Place a colon after the label'),
       '#default_value' => $this->options['element_label_colon'],
+      '#indentation' => 1,
       '#states' => array(
         'visible' => array(
           ':input[name="options[custom_label]"]' => array('checked' => TRUE),
@@ -1195,7 +1197,7 @@ If you would like to have the characters \'[\' and \']\' please use the html ent
       $value = $this->render_altered($alter, $tokens);
     }
 
-    if (!empty($this->options['alter']['trim_whitespace'])) {
+    if (!is_null($value) && !empty($this->options['alter']['trim_whitespace'])) {
       $value = trim($value);
     }
 

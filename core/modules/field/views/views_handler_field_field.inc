@@ -311,7 +311,7 @@ class views_handler_field_field extends views_handler_field {
   }
 
   /**
-   * Called to determine what to tell the clicksorter.
+   * Called to determine what to tell the click sorter.
    */
   function click_sort($order) {
     // No column selected, can't continue.

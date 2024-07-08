@@ -2,14 +2,14 @@
     "_config_name": "views.view.promoted_cards",
     "name": "promoted_cards",
     "description": "Provides a block of 3 promoted Cards. Used by default on the home page.",
-    "tag": "default",
+    "tag": "",
     "disabled": false,
     "base_table": "node",
     "human_name": "Promoted cards",
     "core": "1.20.3",
     "display": {
         "default": {
-            "display_title": "Master",
+            "display_title": "Default",
             "display_plugin": "default",
             "display_options": {
                 "query": {
