@@ -1855,6 +1855,7 @@ function install_drupal() {
  */
 function drupal_load_updates() {
   watchdog_deprecated_function('drupal', __FUNCTION__);
+  include_once BACKDROP_ROOT . '/core/includes/install.inc';
   backdrop_load_updates();
 }
 
