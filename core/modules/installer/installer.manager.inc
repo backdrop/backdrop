@@ -846,19 +846,11 @@ function installer_manager_download_project($url, $is_installer = FALSE) {
       'message' => $e->getMessage(),
     );
   }
-  $files = $archive->listContents();
-  if (!$files) {
-    return array(
-      'success' => FALSE,
-      'message' => t('Provided archive contains no files.'),
-    );
-  }
 
-
-  // Unfortunately, we can only use the directory name to determine the project
-  // name. Some archivers list the first file as the directory (i.e., MODULE/)
-  // and others list an actual file (i.e., MODULE/README.MD).
-  $project = strtok($files[0], '/\\');
+  // Retrieve the project name from the archive, and also clean it up (e.g.
+  // remove any version numbers appended to the folder name by packaging
+  // scripts, GitHub etc.).
+  $project = _installer_manager_get_project_from_archive($local_cache);
 
   $archive_errors = installer_manager_archive_verify($project, $local_cache, $directory);
   if (!empty($archive_errors)) {
@@ -988,45 +980,84 @@ function installer_manager_download_project($url, $is_installer = FALSE) {
  */
 
 /**
- * Unpacks a downloaded archive file.
+ * Unpacks a downloaded project archive file.
  *
- * @param string $file
- *   The filename of the archive you wish to extract.
+ * @param string $archive
+ *   The path to the archive that is to be extracted.
  * @param string $directory
- *   The directory you wish to extract the archive into.
+ *   The directory to extract the project archive into.
  *
  * @return ArchiverInterface
  *   The Archiver object used to extract the archive.
  *
  * @throws Exception
  */
-function installer_manager_archive_extract($file, $directory) {
-  $archiver = archiver_get_archiver($file);
-  if (!$archiver) {
-    throw new Exception(t('Cannot extract %file, not a valid archive.', array ('%file' => $file)));
-  }
+function installer_manager_archive_extract($archive, $directory) {
+  // Determine the project name from the archive, and also clean it up (e.g.
+  // remove any version numbers that might have been appended to the folder name
+  // by the packaging script, GitHub etc.).
+  $project = _installer_manager_get_project_from_archive($archive);
 
-  // Remove the directory if it exists, otherwise it might contain a mixture of
-  // old files mixed with the new files (e.g. in cases where files were removed
-  // from a later release).
-  $files = $archiver->listContents();
-
-  // Unfortunately, we can only use the directory name to determine the project
-  // name. Some archivers list the first file as the directory (i.e., MODULE/)
-  // and others list an actual file (i.e., MODULE/README.MD).
-  $project = strtok($files[0], '/\\');
-
+  // If the destination directory already exists, ensure that it is empty before
+  // extracting the files from the new archive into it, otherwise we might end
+  // up with a mixture of old files and the new files (e.g. in cases where files
+  // were removed from a later release).
   $extract_location = $directory . '/' . $project;
   if (file_exists($extract_location)) {
     file_unmanaged_delete_recursive($extract_location);
   }
 
+  $archiver = archiver_get_archiver($archive);
+  // Ensure that the folder with the project name within the archive is correct,
+  // so that we don't end up with problematic project folders when extracted
+  // (for example, project folder does not contain any version strings, and
+  // generally not matching the project name and .inf and .module etc. files).
+  $archiver->renameContents('/^.*?\//', $project . '/');
   $archiver->extract($directory);
 
   // Clear the file stat cache to ensure PHP picks up the new files.
   clearstatcache();
 
   return $archiver;
+}
+
+/**
+ * Determines the project name from the contents of a provided project archive.
+ *
+ * @param string $archive
+ *   The path to the archive to determine the project name for.
+ *
+ * @return string $project
+ *   The project name, as determined by the contents of the provided archive.
+ *
+ * @throws Exception
+ *
+ * @see installer_manager_download_project()
+ * @see installer_manager_archive_extract()
+ */
+function _installer_manager_get_project_from_archive($archive) {
+  $archiver = archiver_get_archiver($archive);
+  if (!$archiver) {
+    throw new Exception(t('Cannot extract %file. No valid archiver found.', array('%file' => $archive)));
+  }
+
+  $files = $archiver->listContents();
+  if (!$files) {
+    throw new Exception(t('The provided archive %file contains no files.', array('%file' => $archive)));
+  }
+
+  // Unfortunately, we can only use the directory name to determine the project
+  // name. Some archivers list the first file as the directory (i.e., MODULE/)
+  // and others list an actual file (i.e., MODULE/README.MD).
+  $project = strtok($files[0], '/\\');
+
+  // Clean up the project name. Remove any version number that might have been
+  // added as a suffix to the directory. Version number suffixes typically start
+  // with a dash, may include additional dashes, dots, numbers, and lower- and
+  // upper-case letters.
+  $project = preg_replace('/-[a-zA-Z0-9-\.]+$/', '', $project);
+
+  return $project;
 }
 
 /**

@@ -27,10 +27,9 @@ class ArchiverTar implements ArchiverInterface {
   }
 
   public function remove($file_path) {
-    // @todo Archive_Tar doesn't have a remove operation
-    // so we'll have to simulate it somehow, probably by
-    // creating a new archive with everything but the removed
-    // file.
+    // @todo Archive_Tar doesn't have a remove operation so we'll have to
+    // simulate it somehow, probably by creating a new archive with everything
+    // but the removed file.
 
     return $this;
   }
@@ -52,6 +51,14 @@ class ArchiverTar implements ArchiverInterface {
       $files[] = $file_data['filename'];
     }
     return $files;
+  }
+
+  public function renameContents($pattern, $replacement) {
+    // @todo. On first look, Archive_Tar doesn't support renaming archive
+    // contents. Perhaps simulate it by creating a new archive, similarly to
+    // remove() above.
+
+    return $this;
   }
 
   /**
@@ -83,12 +90,27 @@ class ArchiverZip implements ArchiverInterface {
    */
   protected $zip;
 
+  /**
+   * @var string The path of the Zip archive.
+   */
+  public $zip_archive = '';
+
   public function __construct($file_path) {
     $this->zip = new ZipArchive();
+
+    // @todo: various comments in php.net and stackoverflow.com suggest that
+    // ZipArchive::open() fails in certain PHP versions, unless called with the
+    // 'ZipArchive::CREATE | ZipArchive::OVERWRITE' flags. Need to confirm and
+    // adjust this accordingly.
+    // Also see: https://www.drupal.org/project/drupal/issues/2850794.
     if ($this->zip->open($file_path) !== TRUE) {
       // @todo: This should be an interface-specific exception some day.
       throw new Exception(t('Cannot open %file_path', array('%file_path' => $file_path)));
     }
+
+    // Store the path of the archive so that it can be used by other methods if
+    // needed (like renameContents() for instance).
+    $this->zip_archive = $file_path;
   }
 
   public function add($file_path) {
@@ -120,6 +142,24 @@ class ArchiverZip implements ArchiverInterface {
       $files[] = $this->zip->getNameIndex($i);
     }
     return $files;
+  }
+
+  public function renameContents($pattern, $replacement) {
+    for ($i=0; $i < $this->zip->numFiles; $i++) {
+      $new_name = preg_replace($pattern, $replacement, $this->zip->getNameIndex($i));
+      $this->zip->renameName($this->zip->getNameIndex($i), $new_name);
+    }
+    // Need to close the archive in order to save the changes.
+    if ($this->zip->close() !== TRUE) {
+      // @todo: This should be an interface-specific exception some day.
+      throw new Exception(t('Failure to close the archive. Changes might have not been saved.'));
+    }
+
+    // Reopen the archive after save.
+    $this->zip = new ZipArchive();
+    $this->zip->open($this->zip_archive);
+
+    return $this;
   }
 
   /**
