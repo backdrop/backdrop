@@ -239,6 +239,7 @@ function installer_verify_update_archive($project, $archive_file, $directory) {
     // project may ship with some out-of-date modules that are not necessary for
     // its overall functionality).
     $compatible_project = FALSE;
+    $valid_project_types = array('module', 'theme', 'layout');
 
     $problems = array(
       'incompatible' => array(),
@@ -246,7 +247,8 @@ function installer_verify_update_archive($project, $archive_file, $directory) {
       'invalid_type' => array(),
     );
     foreach ($files as $key => $file) {
-      // Get the .info file for the module, theme or layout this file belongs to.
+      // Retrieve properties from the .info file and get the project name if
+      // specified.
       $info = backdrop_parse_info_file($file->uri);
       $project_name = !empty($info['name']) ? $info['name'] : t('Unknown');
 
@@ -259,7 +261,7 @@ function installer_verify_update_archive($project, $archive_file, $directory) {
         // If the project type is missing.
         $problems['missing_type'][] = $project_name;
       }
-      elseif (isset($info['type']) && !in_array($info['type'], array('module', 'theme', 'layout'))) {
+      elseif (isset($info['type']) && !in_array($info['type'], $valid_project_types)) {
         // If the project type is invalid.
         $problems['invalid_type'][] = $project_name;
       }
@@ -270,35 +272,35 @@ function installer_verify_update_archive($project, $archive_file, $directory) {
     }
 
     if (!$compatible_project) {
-      $repplacements = array(
+      $replacements = array(
         '!version' => BACKDROP_CORE_COMPATIBILITY,
         '%archive_file' => backdrop_basename($archive_file),
       );
       if ($incompatible = count($problems['incompatible'])) {
-        $repplacements['%names'] = implode(', ', $problems['incompatible']);
+        $replacements['%names'] = implode(', ', $problems['incompatible']);
         $errors[] = format_plural(
           $incompatible,
           '%archive_file contains a version of %names that is not compatible with Backdrop !version.',
           '%archive_file contains versions of projects that are not compatible with Backdrop !version: %names',
-          $repplacements
+          $replacements
         );
       }
       if ($missing_type = count($problems['missing_type'])) {
-        $repplacements['%names'] = implode(', ', $problems['missing_type']);
+        $replacements['%names'] = implode(', ', $problems['missing_type']);
         $errors[] = format_plural(
           $missing_type,
           '%archive_file contains a version of %names that is missing a project type.',
           '%archive_file contains versions of projects that are missing their project type: %names',
-          $repplacements
+          $replacements
         );
       }
       if ($invalid_type = count($problems['invalid_type'])) {
-        $repplacements['%names'] = implode(', ', $problems['invalid_type']);
+        $replacements['%names'] = implode(', ', $problems['invalid_type']);
         $errors[] = format_plural(
           $invalid_type,
           '%archive_file contains a version of %names that has an invalid project type.',
           '%archive_file contains versions of projects that have invalid project types: %names',
-          $repplacements
+          $replacements
         );
       }
     }

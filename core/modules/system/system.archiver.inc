@@ -30,7 +30,6 @@ class ArchiverTar implements ArchiverInterface {
     // @todo Archive_Tar doesn't have a remove operation so we'll have to
     // simulate it somehow, probably by creating a new archive with everything
     // but the removed file.
-
     return $this;
   }
 
@@ -57,7 +56,6 @@ class ArchiverTar implements ArchiverInterface {
     // @todo. On first look, Archive_Tar doesn't support renaming archive
     // contents. Perhaps simulate it by creating a new archive, similarly to
     // remove() above.
-
     return $this;
   }
 
@@ -145,7 +143,7 @@ class ArchiverZip implements ArchiverInterface {
   }
 
   public function renameContents($pattern, $replacement) {
-    for ($i=0; $i < $this->zip->numFiles; $i++) {
+    for ($i = 0; $i < $this->zip->numFiles; $i++) {
       $new_name = preg_replace($pattern, $replacement, $this->zip->getNameIndex($i));
       $this->zip->renameName($this->zip->getNameIndex($i), $new_name);
     }
