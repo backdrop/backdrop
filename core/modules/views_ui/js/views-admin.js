@@ -201,10 +201,10 @@ Backdrop.viewsUi.AddItemForm.prototype.handleCheck = function (event) {
   // Add/remove the checked item to the list.
   if ($target.is(':checked')) {
     this.$selected_div.css('display', 'block');
-    this.checkedItems.push(label);
+    this.checkedItems.push(Backdrop.checkPlain(label));
   }
   else {
-    var position = $.inArray(label, this.checkedItems);
+    var position = $.inArray(Backdrop.checkPlain(label), this.checkedItems);
     // Delete the item from the list and take sure that the list doesn't have undefined items left.
     for (var i = 0; i < this.checkedItems.length; i++) {
       if (i == position) {
