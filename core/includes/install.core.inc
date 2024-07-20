@@ -783,7 +783,10 @@ function install_verify_requirements(&$install_state) {
       backdrop_set_title(st('Requirements problem'));
       $status_report = st('Resolve the problems and <a href="!url">try again</a>.', array('!url' => check_url(backdrop_requirements_url($severity))));
       $status_report .= '<br><br>';
-      $status_report .= theme('status_report', array('requirements' => $requirements, 'phase' => 'install'));
+      $status_report .= theme('status_report', array(
+        'requirements' => $requirements,
+        'phase' => 'install',
+      ));
       return $status_report;
     }
     else {
@@ -1449,13 +1452,16 @@ function install_select_language_form($form, &$form_state, $files) {
   );
   $form['languages']['instructions'] = array(
     '#type' => 'markup',
-    '#markup' => theme('item_list', array('items' => $translation_steps, 'type' => 'ol')),
+    '#markup' => theme('item_list', array(
+      'items' => $translation_steps,
+      'type' => 'ol',
+    )),
   );
   // Intentionally not adding this button with the rest of the form actions, as
   // we don't want it to be clicked without having an understanding of the fact
   // that there are manual steps involved before additional languages actually
   // become available.
-  $form['languages']['refresh'] =  array(
+  $form['languages']['refresh'] = array(
     '#type' => 'button',
     '#value' => st('Reload languages'),
     // Refresh the page - do not submit the form.
