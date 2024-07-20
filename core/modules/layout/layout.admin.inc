@@ -66,11 +66,10 @@ function layout_list_page() {
     $row = array();
     // Generate the heading row for non-default layout path groups.
     if ($path !== '') {
-      $row[] = theme('layout_path_info', array('path' => $path, 'missing_path' => !isset($page_callbacks[$path])));
+      $row[] = array('data' => theme('layout_path_info', array('path' => $path, 'missing_path' => !isset($page_callbacks[$path]))), 'colspan' => 3);
+      
       // Empty columns are intentional so that they may be hidden with
       // priority-low class on the $header array.
-      $row[] = '';
-      $row[] = '';
       $row[] = '';
 
       if (count($operations['#links']) !== 0) {
