@@ -135,7 +135,7 @@ function theme_layout_path_info($variables) {
 
     if ($menu_item->conditions) {
       $conditions = theme('layout_condition_info', array('layout' => $menu_item));
-      $details_output .= ' <div class="layout-path-details-conditions">' . t('visibility conditions: ') . $conditions . '</div>';
+      $details_output .= ' <div class="layout-path-details-conditions">' . t('Visibility conditions: ') . $conditions . '</div>';
     }
     $details_output .= '</div>';
 
