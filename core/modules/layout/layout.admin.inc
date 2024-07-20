@@ -66,19 +66,7 @@ function layout_list_page() {
     $row = array();
     // Generate the heading row for non-default layout path groups.
     if ($path !== '') {
-      if (strpos($path, '%') === FALSE) {
-        $path_link = t('Path: ') . l($path, $path);
-      }
-      else {
-        $path_link = t('System path: ') . check_plain($path);
-      }
-
-      $class = array();
-      if (!$page_callbacks[$path]) {
-        $class[] = 'missing-path';
-        $path_link .= ' <span class="path-parenthetical">(' . t('missing callback') . ')</span>';
-      }
-      $row[] = array('data' => $path_link, 'class' => $class);
+      $row[] = theme('layout_path_info', array('path' => $path, 'missing_path' => !isset($page_callbacks[$path])));
       // Empty columns are intentional so that they may be hidden with
       // priority-low class on the $header array.
       $row[] = '';
@@ -2789,13 +2777,7 @@ function layout_menu_item_form($form, &$form_state, LayoutMenuItem $menu_item) {
   $form['menu']['type'] = array(
     '#title' => t('Type'),
     '#type' => 'radios',
-    '#options' => array(
-      'none' => t('No menu entry'),
-      'normal' => t('Normal menu entry'),
-      'tab' => t('Menu tab'),
-      'default tab' => t('Default menu tab'),
-      'action' => t('Local action'),
-    ),
+    '#options' => layout_get_menu_types(),
     '#default_value' => $menu_settings['type'],
   );
 
@@ -3618,4 +3600,18 @@ function layout_get_block_usage($module = NULL, $delta = NULL) {
     return $blocks[$module];
   }
   return $blocks;
+}
+
+
+/**
+ * Lists information about menu types.
+ */
+function layout_get_menu_types() {
+  return array(
+    'none' => t('No menu entry'),
+    'normal' => t('Normal menu entry'),
+    'tab' => t('Menu tab'),
+    'default tab' => t('Default menu tab'),
+    'action' => t('Local action'),
+  );
 }

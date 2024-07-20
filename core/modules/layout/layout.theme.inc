@@ -95,6 +95,57 @@ function theme_layout_condition_info($variables) {
 
   return $output;
 }
+/**
+ * Outputs a list of details for a layout path. Used in the layout listing page.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - path: The layout path.
+ *   - missing_path: (boolean) Whether this path is missing a page callback.
+ *
+ * @return string
+ */
+function theme_layout_path_info($variables) {
+  $path = $variables['path'];
+  $missing_path = $variables['missing_path'];
+  $menu_item = layout_menu_item_load_multiple_by_path($path);
+
+  if (strpos($path, '%') === FALSE) {
+    $path_link = t('Path: ') . l($path, $path);
+  }
+  else {
+    $path_link = t('System path: ') . check_plain($path);
+  }
+
+  $class = array();
+  if ($missing_path) {
+    $class[] = 'missing-path';
+    $path_link .= ' <span class="path-parenthetical">(' . t('missing callback') . ')</span>';
+  }
+
+  $output = '<div class="layout-path-info">' . $path_link . '</div>';
+  if ($menu_item->conditions || $menu_item->menu['type'] != 'none') {
+    module_load_include('inc', 'layout', 'layout.admin');
+    $menus = menu_get_menus();
+    $menu_types = layout_get_menu_types();
+
+    $details_output = '<div class="layout-path-details">';
+    $details_output .= ' <div class="layout-path-details-menu-type">' . t('Menu item type: ') . $menu_types[$menu_item->menu['type']] . '</div>';
+    $details_output .= ' <div class="layout-path-details-menu">' . t('Menu: ') . $menus[$menu_item->menu['name']] . '</div>';
+
+    if ($menu_item->conditions) {
+      $conditions = theme('layout_condition_info', array('layout' => $menu_item));
+      $details_output .= ' <div class="layout-path-details-conditions">' . t('visibility conditions: ') . $conditions . '</div>';
+    }
+    $details_output .= '</div>';
+
+    $details = theme('details', array('element' => array('#summary' => 'Path info', '#details' => $details_output)));
+
+    $output .= '<div class="layout-detail">' . $details . '</div>';
+  }
+
+  return $output;
+}
 
 /**
  * Outputs an individual option label for selecting a layout.
