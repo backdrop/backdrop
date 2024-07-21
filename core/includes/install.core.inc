@@ -194,6 +194,10 @@ function install_state_defaults() {
     // A list of installation tasks which have already been performed during
     // the current page request.
     'tasks_performed' => array(),
+    // The server URL where the interface translation files can be downloaded.
+    // Tokens in the pattern will be replaced by appropriate values for the
+    // required translation file.
+    'server_pattern' => 'https://localize.backdropcms.org/files/l10n_packager/%core/%project/%project-%version.%language.po',
   );
   return $defaults;
 }
@@ -550,6 +554,10 @@ function install_tasks($install_state) {
       'display_name' => st('Choose language'),
       'run' => INSTALL_TASK_RUN_IF_REACHED,
     ),
+    'install_download_translation' => [
+      // 'run' => $needs_download ? INSTALL_TASK_RUN_IF_REACHED : INSTALL_TASK_SKIP,
+      'run' => TRUE ? INSTALL_TASK_RUN_IF_REACHED : INSTALL_TASK_SKIP,
+    ],
     'install_select_profile' => array(
       'display_name' => st('Choose profile'),
       'display' => $display_select_profile,
@@ -1307,7 +1315,7 @@ function install_find_translation_files($langcode = NULL) {
   $directory = settings_get('locale_translate_file_directory', conf_path() . '/files/translations');
   // @todo: Remove the "drupal" check in 2.x (assuming we have a localization
   //   server by then).
-  $files = file_scan_directory($directory, '!(install|drupal|backdrop(cms)?)(-[\d\.]+)?\.' . (!empty($langcode) ? preg_quote($langcode, '!') : '[^\.]+') . '\.po$!', array('recurse' => FALSE));
+  $files = file_scan_directory($directory, '!(install|drupal|backdrop(cms)?)(-[\d]+\.)([\d]+|x)?\.' . (!empty($langcode) ? preg_quote($langcode, '!') : '[^\.]+') . '\.po$!', array('recurse' => FALSE));
   return $files;
 }
 
@@ -1332,13 +1340,14 @@ function install_select_language(&$install_state) {
   // Find all available translations.
   $files = install_find_translations();
   $install_state['translations'] += $files;
+  include_once BACKDROP_ROOT . '/core/includes/standard.inc';
 
   if (!empty($_POST['langcode'])) {
-    foreach ($files as $file) {
-      if ($_POST['langcode'] == $file->langcode) {
-        $install_state['parameters']['langcode'] = $file->langcode;
-        return NULL;
-      }
+    $standard_languages = standard_language_list();
+    $langcode = $_POST['langcode'];
+    if ($langcode == 'en' || isset($files[$langcode]) || isset($standard_languages[$langcode])) {
+      $install_state['parameters']['langcode'] = $langcode;
+      return;
     }
   }
 
@@ -1370,7 +1379,7 @@ function install_select_language(&$install_state) {
         }
         else {
           include_once BACKDROP_ROOT . '/core/includes/form.inc';
-          $elements = backdrop_get_form('install_select_language_form', $files);
+          $elements = backdrop_get_form('install_select_language_form', $files, $install_state);
           $output = backdrop_render($elements);
         }
         return $output;
@@ -1390,7 +1399,7 @@ function install_select_language(&$install_state) {
       if ($install_state['interactive']) {
         backdrop_set_title(st('Choose language'));
         include_once BACKDROP_ROOT . '/core/includes/form.inc';
-        $elements = backdrop_get_form('install_select_language_form', $files);
+        $elements = backdrop_get_form('install_select_language_form', $files, $install_state);
         return backdrop_render($elements);
       }
       else {
@@ -1409,7 +1418,7 @@ function install_select_language(&$install_state) {
  *
  * @ingroup forms
  */
-function install_select_language_form($form, &$form_state, $files) {
+function install_select_language_form($form, &$form_state, $files, $install_state) {
   include_once BACKDROP_ROOT . '/core/includes/standard.inc';
   include_once BACKDROP_ROOT . '/core/includes/locale.inc';
 
@@ -1417,20 +1426,44 @@ function install_select_language_form($form, &$form_state, $files) {
   $select_options = array();
   $languages = array();
 
-  foreach ($files as $file) {
-    if (isset($standard_languages[$file->langcode])) {
-      // Build a list of select list options based on files we found.
-      $select_options[$file->langcode] = $standard_languages[$file->langcode][1];
+    if (count($install_state['translations']) > 1) {
+      $files = $install_state['translations'];
     }
     else {
-      // If the language was not found in standard.inc, display its langcode.
-      $select_options[$file->langcode] = $file->langcode;
+      $files = [];
     }
-    // Build a list of languages simulated for browser detection.
-    $languages[$file->langcode] = (object) array(
-      'langcode' => $file->langcode,
-    );
-  }
+    $select_options = [];
+    $browser_options = [];
+
+    $form['#title'] = 'Choose language';
+
+    // Build a select list with language names in native language for the user
+    // to choose from. And build a list of available languages for the browser
+    // to select the language default from.
+    // Select lists based on all standard languages.
+    foreach ($standard_languages as $langcode => $language_names) {
+      $select_options[$langcode] = isset($language_names[1]) ? $language_names[1] : $language_names[0];
+      $browser_options[$langcode] = $langcode;
+    }
+    // Add languages based on language files in the translations directory.
+    if (count($files)) {
+      foreach ($files as $file) {
+        if (isset($standard_languages[$file->langcode])) {
+          // Build a list of select list options based on files we found.
+          $select_options[$file->langcode] = $standard_languages[$file->langcode][1];
+        }
+        else {
+          // If the language was not found in standard.inc, display its langcode.
+          $select_options[$file->langcode] = $file->langcode;
+        }
+        // Build a list of languages simulated for browser detection.
+        $languages[$file->langcode] = (object) array(
+          'langcode' => $file->langcode,
+        );
+      }
+    }
+    asort($select_options);
+
 
   $browser_langcode = locale_language_from_browser($languages);
   $form['langcode'] = array(
@@ -1452,6 +1485,311 @@ function install_select_language_form($form, &$form_state, $files) {
     '#value' => st('Save and continue'),
   );
   return $form;
+}
+/**
+ * Download a translation file for the selected language.
+ *
+ * @param array $install_state
+ *   An array of information about the current installation state.
+ *
+ * @return string
+ *   A themed status report, or an exception if there are requirement errors.
+ *   Upon successful download the page is reloaded and no output is returned.
+ */
+function install_download_translation(&$install_state) {
+  // Check whether all conditions are met to download. Download the translation
+  // if possible.
+  $requirements = install_check_translations($install_state['parameters']['langcode'], $install_state['server_pattern']);
+  // Render requirements if any warnings or errors returned.
+  if ($output = install_display_requirements($install_state, $requirements)) {
+    return $output;
+  }
+
+  // The download was successful, reload the page in the new language.
+  $install_state['translations'][$install_state['parameters']['langcode']] = TRUE;
+}
+
+/**
+ * Attempts to get a file using a HTTP request and to store it locally.
+ *
+ * @param string $uri
+ *   The URI of the file to grab.
+ * @param string $destination
+ *   Stream wrapper URI specifying where the file should be placed. If a
+ *   directory path is provided, the file is saved into that directory under its
+ *   original name. If the path contains a filename as well, that one will be
+ *   used instead.
+ *
+ * @return bool
+ *   TRUE on success, FALSE on failure.
+ */
+function install_retrieve_file($uri, $destination) {
+  $parsed_url = parse_url($uri);
+
+  if (is_dir(backdrop_realpath($destination))) {
+    // Prevent URIs with triple slashes when gluing parts together.
+    $path = str_replace('///', '//', "$destination/") . backdrop_basename($parsed_url['path']);
+  }
+  else {
+    $path = $destination;
+  }
+
+  try {
+    $response = backdrop_http_request($uri);
+    $data = $response->data;
+    if (empty($data)) {
+      return FALSE;
+    }
+  }
+  catch (TransferException $e) {
+    return FALSE;
+  }
+  return file_put_contents($path, $data) !== FALSE;
+}
+
+/**
+ * Checks if the localization server can be contacted.
+ *
+ * @param string $uri
+ *   The URI to contact.
+ *
+ * @return string
+ *   TRUE if the URI was contacted successfully, FALSE if not.
+ */
+function install_check_localization_server($uri) {
+  try {
+    backdrop_http_request($uri);
+    return TRUE;
+  }
+  catch (TransferException $e) {
+    return FALSE;
+  }
+}
+
+
+/**
+ * Checks installation requirements and reports any errors.
+ *
+ * @param string $langcode
+ *   Language code to check for download.
+ * @param string $server_pattern
+ *   Server access pattern (to replace language code, version number, etc. in).
+ *
+ * @return array
+ *   Requirements compliance array. If the translation cannot be downloaded this
+ *   will contain a requirements error with detailed information.
+ */
+function install_check_translations($langcode, $server_pattern) {
+  $requirements = [];
+
+  $readable = FALSE;
+  $writable = FALSE;
+  // @todo: Make this configurable.
+  $files_directory = BACKDROP_ROOT . '/files';
+  $translations_directory = BACKDROP_ROOT . '/files/translations';
+  $translations_directory_exists = FALSE;
+  $online = FALSE;
+
+  // First attempt to create or make writable the files directory.
+  file_prepare_directory($files_directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+
+  // Then, attempt to create or make writable the translations directory.
+  file_prepare_directory($translations_directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
+
+  // Get values so the requirements errors can be specific.
+  if (backdrop_verify_install_file($translations_directory, FILE_EXIST, 'dir')) {
+    $readable = is_readable($translations_directory);
+    $writable = is_writable($translations_directory);
+    $translations_directory_exists = TRUE;
+  }
+
+  $version = BACKDROP_VERSION;
+
+  // For dev releases, remove the '-dev' part and trust the translation server
+  // to fall back to the latest stable release for that branch.
+  // @see locale_translation_build_projects()
+  if (preg_match("/^(\d+\.).*-dev$/", $version, $matches)) {
+    // Example match: 1.28-dev => 1.x (Backdrop core)
+    $version = $matches[1] . 'x';
+  }
+
+  // Build URL for the translation file and the translation server.
+  $variables = [
+    '%project' => 'backdropcms',
+    '%version' => $version,
+    '%core' => 'all',
+    '%language' => $langcode,
+  ];
+  $translation_url = strtr($server_pattern, $variables);
+
+  $elements = parse_url($translation_url);
+  $server_url = $elements['scheme'] . '://' . $elements['host'];
+
+  // Build the language name for display.
+  include_once BACKDROP_ROOT . '/core/includes/standard.inc';
+
+  $languages = standard_language_list();
+  $language = isset($languages[$langcode]) ? $languages[$langcode][0] : $langcode;
+
+  // Check if any of the desired translation files are available or if the
+  // translation server can be reached. In other words, check if we are online
+  // and have an internet connection.
+  if ($translation_available = install_check_localization_server($translation_url)) {
+    $online = TRUE;
+  }
+  if (!$translation_available) {
+    if (install_check_localization_server($server_url)) {
+      $online = TRUE;
+    }
+  }
+
+  // If the translations directory does not exist, throw an error.
+  if (!$translations_directory_exists) {
+    $requirements['translations directory exists'] = [
+      'title'       => t('Translations directory'),
+      'value'       => t('The translations directory does not exist.'),
+      'severity'    => REQUIREMENT_ERROR,
+      'description' => t('The installer requires that you create a translations directory as part of the installation process. Create the directory %translations_directory . More details about installing Drupal are available in <a href=":install_txt">INSTALL.txt</a>.', ['%translations_directory' => $translations_directory, ':install_txt' => base_path() . 'core/INSTALL.txt']),
+    ];
+  }
+  else {
+    $requirements['translations directory exists'] = [
+      'title'       => t('Translations directory'),
+      'value'       => t('The directory %translations_directory exists.', ['%translations_directory' => $translations_directory]),
+    ];
+    // If the translations directory is not readable, throw an error.
+    if (!$readable) {
+      $requirements['translations directory readable'] = [
+        'title'       => t('Translations directory'),
+        'value'       => t('The translations directory is not readable.'),
+        'severity'    => REQUIREMENT_ERROR,
+        'description' => t('The installer requires read permissions to %translations_directory at all times. The <a href=":handbook_url">webhosting issues</a> documentation section offers help on this and other topics.', ['%translations_directory' => $translations_directory, ':handbook_url' => 'https://www.drupal.org/server-permissions']),
+      ];
+    }
+    // If translations directory is not writable, throw an error.
+    if (!$writable) {
+      $requirements['translations directory writable'] = [
+        'title'       => t('Translations directory'),
+        'value'       => t('The translations directory is not writable.'),
+        'severity'    => REQUIREMENT_ERROR,
+        'description' => t('The installer requires write permissions to %translations_directory during the installation process. The <a href=":handbook_url">webhosting issues</a> documentation section offers help on this and other topics.', ['%translations_directory' => $translations_directory, ':handbook_url' => 'https://www.drupal.org/server-permissions']),
+      ];
+    }
+    else {
+      $requirements['translations directory writable'] = [
+        'title'       => t('Translations directory'),
+        'value'       => t('The translations directory is writable.'),
+      ];
+    }
+  }
+
+  // If the translations server can not be contacted, throw an error.
+  if (!$online) {
+    $requirements['online'] = [
+      'title'       => t('Internet'),
+      'value'       => t('The translation server is offline.'),
+      'severity'    => REQUIREMENT_ERROR,
+      'description' => t('The installer requires to contact the translation server to download a translation file. Check your internet connection and verify that your website can reach the translation server at <a href=":server_url">@server_url</a>.', [':server_url' => $server_url, '@server_url' => $server_url]),
+    ];
+  }
+  else {
+    $requirements['online'] = [
+      'title'       => t('Internet'),
+      'value'       => t('The translation server is online.'),
+    ];
+    // If translation file is not found at the translation server, throw an
+    // error.
+    if (!$translation_available) {
+      $requirements['translation available'] = [
+        'title'       => t('Translation'),
+        'value'       => t('The %language translation is not available.', ['%language' => $language]),
+        'severity'    => REQUIREMENT_ERROR,
+        'description' => t('The %language translation file is not available at the translation server. <a href=":url">Choose a different language</a> or select English and translate your website later.', ['%language' => $language, ':url' => $_SERVER['SCRIPT_NAME']]),
+      ];
+    }
+    else {
+      $requirements['translation available'] = [
+        'title'       => t('Translation'),
+        'value'       => t('The %language translation is available.', ['%language' => $language]),
+      ];
+    }
+  }
+
+  if ($translations_directory_exists && $readable && $writable && $translation_available) {
+    $translation_downloaded = install_retrieve_file($translation_url, $translations_directory);
+
+    if (!$translation_downloaded) {
+      $requirements['translation downloaded'] = [
+        'title'       => t('Translation'),
+        'value'       => t('The %language translation could not be downloaded.', ['%language' => $language]),
+        'severity'    => REQUIREMENT_ERROR,
+        'description' => t('The %language translation file could not be downloaded. <a href=":url">Choose a different language</a> or select English and translate your website later.', ['%language' => $language, ':url' => $_SERVER['SCRIPT_NAME']]),
+      ];
+    }
+  }
+
+  return $requirements;
+}
+
+/**
+ * Displays installation requirements.
+ *
+ * @param array $install_state
+ *   An array of information about the current installation state.
+ * @param array $requirements
+ *   An array of requirements, in the same format as is returned by
+ *   hook_requirements().
+ *
+ * @return array|null
+ *   A themed status report, or an exception if there are requirement errors.
+ *   If there are only requirement warnings, a themed status report is shown
+ *   initially, but the user is allowed to bypass it by providing 'continue=1'
+ *   in the URL. Otherwise, no output is returned, so that the next task can be
+ *   run in the same page request.
+ *
+ * @throws \Drupal\Core\Installer\Exception\InstallerException
+ */
+function install_display_requirements($install_state, $requirements) {
+  // Check the severity of the requirements reported.
+  $severity = drupal_requirements_severity($requirements);
+
+  // If there are errors, always display them. If there are only warnings, skip
+  // them if the user has provided a URL parameter acknowledging the warnings
+  // and indicating a desire to continue anyway. See drupal_requirements_url().
+  if ($severity == REQUIREMENT_ERROR || ($severity == REQUIREMENT_WARNING && empty($install_state['parameters']['continue']))) {
+    if ($install_state['interactive']) {
+      backdrop_set_title(st('Requirements problem'));
+      $status_report = st('Resolve the problems and <a href="!url">try again</a>.', array('!url' => check_url(backdrop_requirements_url($severity))));
+      $status_report .= '<br><br>';
+      $status_report .= theme('status_report', array('requirements' => $requirements, 'phase' => 'install'));
+      return $status_report;
+    }
+    else {
+      // @Todo: fix this for Backdrop.
+      // Throw an exception showing any unmet requirements.
+      $failures = [];
+      foreach ($requirements as $requirement) {
+        // Skip warnings altogether for non-interactive installations; these
+        // proceed in a single request so there is no good opportunity (and no
+        // good method) to warn the user anyway.
+        if (isset($requirement['severity']) && $requirement['severity'] == REQUIREMENT_ERROR) {
+          $render_array = [
+            '#type' => 'inline_template',
+            '#template' => '{{ title }}:{{ value }}<br /><br />{{ description }}',
+            '#context' => [
+              'title' => $requirement['title'],
+              'value' => $requirement['value'],
+              'description' => $requirement['description'],
+            ],
+          ];
+          $failures[] = \Drupal::service('renderer')->renderPlain($render_array);
+        }
+      }
+      if (!empty($failures)) {
+        throw new InstallerException(implode("\n\n", $failures));
+      }
+    }
+  }
 }
 
 /**
