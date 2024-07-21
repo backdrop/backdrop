@@ -547,7 +547,7 @@ function install_tasks($install_state) {
   // to the installation profile.
   $tasks = array(
     'install_select_language' => array(
-      'display_name' => st('Choose language'),
+      'display_name' => st('Installation language'),
       'run' => INSTALL_TASK_RUN_IF_REACHED,
     ),
     'install_select_profile' => array(
@@ -783,7 +783,10 @@ function install_verify_requirements(&$install_state) {
       backdrop_set_title(st('Requirements problem'));
       $status_report = st('Resolve the problems and <a href="!url">try again</a>.', array('!url' => check_url(backdrop_requirements_url($severity))));
       $status_report .= '<br><br>';
-      $status_report .= theme('status_report', array('requirements' => $requirements, 'phase' => 'install'));
+      $status_report .= theme('status_report', array(
+        'requirements' => $requirements,
+        'phase' => 'install',
+      ));
       return $status_report;
     }
     else {
@@ -1343,58 +1346,28 @@ function install_select_language(&$install_state) {
   }
 
   if (empty($install_state['parameters']['langcode'])) {
-    // If only the built-in (English) language is available, and we are
-    // performing an interactive installation, inform the user that the
-    // installer can be translated. Otherwise we assume the user knows what he
-    // is doing.
-    if (count($files) == 1) {
-      if ($install_state['interactive']) {
-        $directory = settings_get('locale_translate_file_directory', conf_path() . '/files/translations');
-
-        backdrop_set_title(st('Choose language'));
-        if (!empty($install_state['parameters']['translate'])) {
-          $output = '<p>Follow these steps to translate Backdrop into your language:</p>';
-          $output .= '<ol>';
-          $output .= '<li>Download a translation from the <a href="https://localize.backdropcms.org/translate/languages" target="_blank">translation server</a>.</li>';
-          $output .= '<li>Place it into the following directory:<pre>' . $directory . '</pre></li>';
-          $output .= '</ol>';
-          $output .= '<p>For more information on installing Backdrop in different languages, visit the <a href="https://backdropcms.org/installing-in-other-languages" target="_blank">Backdrop user guide page</a>.</p>';
-          $output .= '<p>How should the installation continue?</p>';
-          $output .= '<ul>';
-          $output .= '<li><a href="' . check_url(backdrop_current_script_url(array('translate' => NULL))) . '">Reload the language selection page after adding translations</a></li>';
-          $output .= '<li><a href="' . check_url(backdrop_current_script_url(array(
-            'langcode' => 'en',
-            'translate' => NULL,
-          ))) . '">Continue installation in English</a></li>';
-          $output .= '</ul>';
-        }
-        else {
-          include_once BACKDROP_ROOT . '/core/includes/form.inc';
-          $elements = backdrop_get_form('install_select_language_form', $files);
-          $output = backdrop_render($elements);
-        }
-        return $output;
-      }
-      // One language, but not an interactive installation. Assume the user
-      // knows what he is doing.
-      $file = current($files);
-      $install_state['parameters']['langcode'] = $file->langcode;
-      return NULL;
+    if ($install_state['interactive']) {
+      // During an interactive installation, display a form that allows
+      // selecting one of the available languages. The form also informs that
+      // the installer allows other languages to be manually added and become
+      // available. We do this not only when the default English language is
+      // available, but also when other languages have been added (because more
+      // languages can always be added).
+      include_once BACKDROP_ROOT . '/core/includes/form.inc';
+      $elements = backdrop_get_form('install_select_language_form', $files);
+      return backdrop_render($elements);
     }
     else {
-      // We still don't have a langcode, so display a form for selecting one.
-      // Only do this in the case of interactive installations, since this is
-      // not a real form with submit handlers (the database isn't even set up
-      // yet), rather just a convenience method for setting parameters in the
-      // URL.
-      if ($install_state['interactive']) {
-        backdrop_set_title(st('Choose language'));
-        include_once BACKDROP_ROOT . '/core/includes/form.inc';
-        $elements = backdrop_get_form('install_select_language_form', $files);
-        return backdrop_render($elements);
+      // This is a non-interactive installation. If there's only a single
+      // language available, assume the person performing the installation knows
+      // what they are doing, and proceed with that language.
+      if (count($files) == 1) {
+        $file = current($files);
+        $install_state['parameters']['langcode'] = $file->langcode;
+        return NULL;
       }
       else {
-        throw new Exception(st('Sorry, you must select a language to continue the installation.'));
+        throw new Exception(st('Several languages available. You must specify which language to use for the installation.'));
       }
     }
   }
@@ -1432,24 +1405,73 @@ function install_select_language_form($form, &$form_state, $files) {
     );
   }
 
-  $browser_langcode = locale_language_from_browser($languages);
-  $form['langcode'] = array(
-    '#type' => 'select',
-    '#options' => $select_options,
-    // Use the browser detected language as default or English if nothing found.
-    '#default_value' => !empty($browser_langcode) ? $browser_langcode : 'en',
-  );
+  $one_language = count($files) == 1;
 
-  if (count($files) == 1) {
-    $form['help'] = array(
-      '#type' => 'help',
-      '#markup' => '<a href="' . check_url(backdrop_current_script_url(array('translate' => 'true'))) . '">' . st('Learn how to install Backdrop in other languages') . '</a>',
+  if ($one_language) {
+    $language = current($select_options);
+    backdrop_set_title(st('Installation in @language', array('@language' => $language)));
+    $submit_title = st('Continue in @language', array('@language' => $language));
+  }
+  else {
+    backdrop_set_title(st('Select installation language'));
+    $submit_title = st('Continue');
+
+    $browser_langcode = locale_language_from_browser($languages);
+    $form['langcode'] = array(
+      // The most common use case is to add another one language during
+      // installation. Showing the options as a set of radios with only very few
+      // languages (which requires less clicks), while switching to a select
+      // menu when several languages exist (to avoid a lengthy form).
+      '#type' => count($files) > 3 ? 'select' : 'radios',
+      '#options' => $select_options,
+      // Use the browser-detected language as default, or English if nothing
+      // found.
+      '#default_value' => !empty($browser_langcode) ? $browser_langcode : 'en',
+      '#disabled' => $one_language,
+      '#description' => st('Select from languages currently available. More languages can be added manually. See instructions below.'),
     );
   }
+
+  $form['languages'] = array(
+    '#type' => 'fieldset',
+    '#title' => st('How to install Backdrop in other languages'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+
+  $directory = settings_get('locale_translate_file_directory', conf_path() . '/files/translations');
+  $translation_steps = array(
+    st('Download any translation file(s) from the <a href="https://localize.backdropcms.org/translate/languages" target="_blank">translation server</a>. These files have a .po extension.'),
+    st('Place the .po files into the following directory:<pre>@directory</pre>', array('@directory' => $directory)),
+    st('Load the newly-added languages, either by clicking the button below or by refreshing the page.'),
+  );
+  $form['languages']['help'] = array(
+    '#type' => 'help',
+    '#markup' => st('For detailed information on installing Backdrop in different languages, visit the <a href="https://backdropcms.org/installing-in-other-languages" target="_blank">Backdrop user guide page</a>.'),
+  );
+  $form['languages']['instructions'] = array(
+    '#type' => 'markup',
+    '#markup' => theme('item_list', array(
+      'items' => $translation_steps,
+      'type' => 'ol',
+    )),
+  );
+  // Intentionally not adding this button with the rest of the form actions, as
+  // we don't want it to be clicked without having an understanding of the fact
+  // that there are manual steps involved before additional languages actually
+  // become available.
+  $form['languages']['refresh'] = array(
+    '#type' => 'button',
+    '#value' => st('Reload languages'),
+    // Refresh the page - do not submit the form.
+    '#executes_submit_callback' => FALSE,
+    '#attributes' => array('onclick' => 'location.reload();'),
+  );
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] =  array(
     '#type' => 'submit',
-    '#value' => st('Save and continue'),
+    '#value' => $submit_title,
   );
   return $form;
 }
