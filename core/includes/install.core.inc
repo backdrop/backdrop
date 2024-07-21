@@ -1346,7 +1346,6 @@ function install_select_language(&$install_state) {
   }
 
   if (empty($install_state['parameters']['langcode'])) {
-    include_once BACKDROP_ROOT . '/core/includes/form.inc';
     if ($install_state['interactive']) {
       // During an interactive installation, display a form that allows
       // selecting one of the available languages. The form also informs that
@@ -1354,9 +1353,9 @@ function install_select_language(&$install_state) {
       // available. We do this not only when the default English language is
       // available, but also when other languages have been added (because more
       // languages can always be added).
+      include_once BACKDROP_ROOT . '/core/includes/form.inc';
       $elements = backdrop_get_form('install_select_language_form', $files);
-      $output = backdrop_render($elements);
-      return $output;
+      return backdrop_render($elements);
     }
     else {
       // This is a non-interactive installation. If there's only a single
