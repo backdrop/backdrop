@@ -547,6 +547,11 @@ function install_tasks($install_state) {
   }
   $display_select_profile = $hidden_profile_count > 1 && count($install_state['profiles']) != 1;
 
+  // Determine whether a translation file must be downloaded during the
+  // 'install_download_translation' task. Download when a non-English language
+  // is selected, but no translation is yet in the translations directory.
+  $needs_download = isset($install_state['parameters']['langcode']) && !isset($install_state['translations'][$install_state['parameters']['langcode']]) && $install_state['parameters']['langcode'] != 'en';
+
   // Start with the core installation tasks that run before handing control
   // to the installation profile.
   $tasks = array(
@@ -555,8 +560,7 @@ function install_tasks($install_state) {
       'run' => INSTALL_TASK_RUN_IF_REACHED,
     ),
     'install_download_translation' => [
-      // 'run' => $needs_download ? INSTALL_TASK_RUN_IF_REACHED : INSTALL_TASK_SKIP,
-      'run' => TRUE ? INSTALL_TASK_RUN_IF_REACHED : INSTALL_TASK_SKIP,
+      'run' => $needs_download ? INSTALL_TASK_RUN_IF_REACHED : INSTALL_TASK_SKIP,
     ],
     'install_select_profile' => array(
       'display_name' => st('Choose profile'),
@@ -763,14 +767,8 @@ function install_display_output($output, $install_state) {
  * @param $install_state
  *   An array of information about the current installation state.
  *
- * @return string|NULL
+ * @return array
  *   A themed status report, or an exception if there are requirement errors.
- *   If there are only requirement warnings, a themed status report is shown
- *   initially, but the user is allowed to bypass it by providing 'continue=1'
- *   in the URL. Otherwise, no output is returned, so that the next task can be
- *   run in the same page request.
- *
- * @throws Exception
  */
 function install_verify_requirements(&$install_state) {
   // Check the installation requirements for Backdrop and this profile.
@@ -779,40 +777,7 @@ function install_verify_requirements(&$install_state) {
   // Verify existence of all required modules.
   $requirements += backdrop_verify_profile($install_state);
 
-  // Check the severity of the requirements reported.
-  $severity = backdrop_requirements_severity($requirements);
-
-  // If there are errors, always display them. If there are only warnings, skip
-  // them if the user has provided a URL parameter acknowledging the warnings
-  // and indicating a desire to continue anyway.
-  // @see backdrop_requirements_url().
-  if ($severity == REQUIREMENT_ERROR || ($severity == REQUIREMENT_WARNING && empty($install_state['parameters']['continue']))) {
-    if ($install_state['interactive']) {
-      backdrop_set_title(st('Requirements problem'));
-      $status_report = st('Resolve the problems and <a href="!url">try again</a>.', array('!url' => check_url(backdrop_requirements_url($severity))));
-      $status_report .= '<br><br>';
-      $status_report .= theme('status_report', array('requirements' => $requirements, 'phase' => 'install'));
-      return $status_report;
-    }
-    else {
-      // Throw an exception showing any unmet requirements.
-      $failures = array();
-      foreach ($requirements as $requirement) {
-        // Skip warnings altogether for non-interactive installations; these
-        // proceed in a single request so there is no good opportunity (and no
-        // good method) to warn the user anyway.
-        if (isset($requirement['severity']) && $requirement['severity'] == REQUIREMENT_ERROR) {
-          $failures[] = $requirement['title'] . ': ' . $requirement['value'] . "\n\n" . $requirement['description'];
-        }
-      }
-      if (!empty($failures)) {
-        throw new Exception(implode("\n\n", $failures));
-      }
-    }
-  }
-
-  // Non-interactive requirements check.
-  return NULL;
+  return install_display_requirements($install_state, $requirements);
 }
 
 /**
@@ -1536,6 +1501,9 @@ function install_retrieve_file($uri, $destination) {
 
   try {
     $response = backdrop_http_request($uri);
+    if ($response->code != 200) {
+      return FALSE;
+    }
     $data = $response->data;
     if (empty($data)) {
       return FALSE;
@@ -1558,7 +1526,10 @@ function install_retrieve_file($uri, $destination) {
  */
 function install_check_localization_server($uri) {
   try {
-    backdrop_http_request($uri);
+    $response = backdrop_http_request($uri);
+    if ($response->code != 200) {
+      return FALSE;
+    }
     return TRUE;
   }
   catch (TransferException $e) {
@@ -1649,7 +1620,7 @@ function install_check_translations($langcode, $server_pattern) {
       'title'       => t('Translations directory'),
       'value'       => t('The translations directory does not exist.'),
       'severity'    => REQUIREMENT_ERROR,
-      'description' => t('The installer requires that you create a translations directory as part of the installation process. Create the directory %translations_directory . More details about installing Drupal are available in <a href=":install_txt">INSTALL.txt</a>.', ['%translations_directory' => $translations_directory, ':install_txt' => base_path() . 'core/INSTALL.txt']),
+      'description' => t('The installer requires that you create a translations directory as part of the installation process. Create the directory %translations_directory . The Backdrop <a href="!install_docs">installation instructions</a> offers help on this and other topics.', ['%translations_directory' => $translations_directory, '!install_docs' => 'https://docs.backdropcms.org/documentation/installation-instructions']),
     ];
   }
   else {
@@ -1663,7 +1634,7 @@ function install_check_translations($langcode, $server_pattern) {
         'title'       => t('Translations directory'),
         'value'       => t('The translations directory is not readable.'),
         'severity'    => REQUIREMENT_ERROR,
-        'description' => t('The installer requires read permissions to %translations_directory at all times. The <a href=":handbook_url">webhosting issues</a> documentation section offers help on this and other topics.', ['%translations_directory' => $translations_directory, ':handbook_url' => 'https://www.drupal.org/server-permissions']),
+        'description' => t('The installer requires read permissions to %translations_directory at all times. The <a href="!handbook_url">webhosting issues</a> documentation section offers help on this and other topics.', ['%translations_directory' => $translations_directory, '!handbook_url' => 'https://docs.backdropcms.org/documentation/file-permissions-and-ownership']),
       ];
     }
     // If translations directory is not writable, throw an error.
@@ -1672,7 +1643,7 @@ function install_check_translations($langcode, $server_pattern) {
         'title'       => t('Translations directory'),
         'value'       => t('The translations directory is not writable.'),
         'severity'    => REQUIREMENT_ERROR,
-        'description' => t('The installer requires write permissions to %translations_directory during the installation process. The <a href=":handbook_url">webhosting issues</a> documentation section offers help on this and other topics.', ['%translations_directory' => $translations_directory, ':handbook_url' => 'https://www.drupal.org/server-permissions']),
+        'description' => t('The installer requires write permissions to %translations_directory during the installation process. The <a href="!handbook_url">webhosting issues</a> documentation section offers help on this and other topics.', ['%translations_directory' => $translations_directory, '!handbook_url' => 'https://docs.backdropcms.org/documentation/file-permissions-and-ownership']),
       ];
     }
     else {
@@ -1689,7 +1660,7 @@ function install_check_translations($langcode, $server_pattern) {
       'title'       => t('Internet'),
       'value'       => t('The translation server is offline.'),
       'severity'    => REQUIREMENT_ERROR,
-      'description' => t('The installer requires to contact the translation server to download a translation file. Check your internet connection and verify that your website can reach the translation server at <a href=":server_url">@server_url</a>.', [':server_url' => $server_url, '@server_url' => $server_url]),
+      'description' => t('The installer requires to contact the translation server to download a translation file. Check your internet connection and verify that your website can reach the translation server at <a href="!server_url">@server_url</a>.', ['!server_url' => $server_url, '@server_url' => $server_url]),
     ];
   }
   else {
@@ -1704,7 +1675,7 @@ function install_check_translations($langcode, $server_pattern) {
         'title'       => t('Translation'),
         'value'       => t('The %language translation is not available.', ['%language' => $language]),
         'severity'    => REQUIREMENT_ERROR,
-        'description' => t('The %language translation file is not available at the translation server. <a href=":url">Choose a different language</a> or select English and translate your website later.', ['%language' => $language, ':url' => $_SERVER['SCRIPT_NAME']]),
+        'description' => t('The %language translation file is not available at the translation server. <a href="!url">Choose a different language</a> or select English and translate your website later.', ['%language' => $language, '!url' => $_SERVER['SCRIPT_NAME']]),
       ];
     }
     else {
@@ -1723,7 +1694,7 @@ function install_check_translations($langcode, $server_pattern) {
         'title'       => t('Translation'),
         'value'       => t('The %language translation could not be downloaded.', ['%language' => $language]),
         'severity'    => REQUIREMENT_ERROR,
-        'description' => t('The %language translation file could not be downloaded. <a href=":url">Choose a different language</a> or select English and translate your website later.', ['%language' => $language, ':url' => $_SERVER['SCRIPT_NAME']]),
+        'description' => t('The %language translation file could not be downloaded. <a href="!url">Choose a different language</a> or select English and translate your website later.', ['%language' => $language, '!url' => $_SERVER['SCRIPT_NAME']]),
       ];
     }
   }
@@ -1732,30 +1703,28 @@ function install_check_translations($langcode, $server_pattern) {
 }
 
 /**
- * Displays installation requirements.
+ * Verifies the requirements for installing Backdrop.
  *
- * @param array $install_state
+ * @param $install_state
  *   An array of information about the current installation state.
- * @param array $requirements
- *   An array of requirements, in the same format as is returned by
- *   hook_requirements().
  *
- * @return array|null
+ * @return string|NULL
  *   A themed status report, or an exception if there are requirement errors.
  *   If there are only requirement warnings, a themed status report is shown
  *   initially, but the user is allowed to bypass it by providing 'continue=1'
  *   in the URL. Otherwise, no output is returned, so that the next task can be
  *   run in the same page request.
  *
- * @throws \Drupal\Core\Installer\Exception\InstallerException
+ * @throws Exception
  */
 function install_display_requirements($install_state, $requirements) {
   // Check the severity of the requirements reported.
-  $severity = drupal_requirements_severity($requirements);
+  $severity = backdrop_requirements_severity($requirements);
 
   // If there are errors, always display them. If there are only warnings, skip
   // them if the user has provided a URL parameter acknowledging the warnings
-  // and indicating a desire to continue anyway. See drupal_requirements_url().
+  // and indicating a desire to continue anyway.
+  // @see backdrop_requirements_url().
   if ($severity == REQUIREMENT_ERROR || ($severity == REQUIREMENT_WARNING && empty($install_state['parameters']['continue']))) {
     if ($install_state['interactive']) {
       backdrop_set_title(st('Requirements problem'));
@@ -1765,31 +1734,24 @@ function install_display_requirements($install_state, $requirements) {
       return $status_report;
     }
     else {
-      // @Todo: fix this for Backdrop.
       // Throw an exception showing any unmet requirements.
-      $failures = [];
+      $failures = array();
       foreach ($requirements as $requirement) {
         // Skip warnings altogether for non-interactive installations; these
         // proceed in a single request so there is no good opportunity (and no
         // good method) to warn the user anyway.
         if (isset($requirement['severity']) && $requirement['severity'] == REQUIREMENT_ERROR) {
-          $render_array = [
-            '#type' => 'inline_template',
-            '#template' => '{{ title }}:{{ value }}<br /><br />{{ description }}',
-            '#context' => [
-              'title' => $requirement['title'],
-              'value' => $requirement['value'],
-              'description' => $requirement['description'],
-            ],
-          ];
-          $failures[] = \Drupal::service('renderer')->renderPlain($render_array);
+          $failures[] = $requirement['title'] . ': ' . $requirement['value'] . "\n\n" . $requirement['description'];
         }
       }
       if (!empty($failures)) {
-        throw new InstallerException(implode("\n\n", $failures));
+        throw new Exception(implode("\n\n", $failures));
       }
     }
   }
+
+  // Non-interactive requirements check.
+  return NULL;
 }
 
 /**
