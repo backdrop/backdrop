@@ -1391,43 +1391,43 @@ function install_select_language_form($form, &$form_state, $files, $install_stat
   $select_options = array();
   $languages = array();
 
-    if (count($install_state['translations']) > 1) {
-      $files = $install_state['translations'];
-    }
-    else {
-      $files = [];
-    }
-    $select_options = [];
-    $browser_options = [];
+  if (count($install_state['translations']) > 1) {
+    $files = $install_state['translations'];
+  }
+  else {
+    $files = [];
+  }
+  $select_options = [];
+  $browser_options = [];
 
-    $form['#title'] = 'Choose language';
+  $form['#title'] = 'Choose language';
 
-    // Build a select list with language names in native language for the user
-    // to choose from. And build a list of available languages for the browser
-    // to select the language default from.
-    // Select lists based on all standard languages.
-    foreach ($standard_languages as $langcode => $language_names) {
-      $select_options[$langcode] = isset($language_names[1]) ? $language_names[1] : $language_names[0];
-      $browser_options[$langcode] = $langcode;
-    }
-    // Add languages based on language files in the translations directory.
-    if (count($files)) {
-      foreach ($files as $file) {
-        if (isset($standard_languages[$file->langcode])) {
-          // Build a list of select list options based on files we found.
-          $select_options[$file->langcode] = $standard_languages[$file->langcode][1];
-        }
-        else {
-          // If the language was not found in standard.inc, display its langcode.
-          $select_options[$file->langcode] = $file->langcode;
-        }
-        // Build a list of languages simulated for browser detection.
-        $languages[$file->langcode] = (object) array(
-          'langcode' => $file->langcode,
-        );
+  // Build a select list with language names in native language for the user
+  // to choose from. And build a list of available languages for the browser
+  // to select the language default from.
+  // Select lists based on all standard languages.
+  foreach ($standard_languages as $langcode => $language_names) {
+    $select_options[$langcode] = isset($language_names[1]) ? $language_names[1] : $language_names[0];
+    $browser_options[$langcode] = $langcode;
+  }
+  // Add languages based on language files in the translations directory.
+  if (count($files)) {
+    foreach ($files as $file) {
+      if (isset($standard_languages[$file->langcode])) {
+        // Build a list of select list options based on files we found.
+        $select_options[$file->langcode] = $standard_languages[$file->langcode][1];
       }
+      else {
+        // If the language was not found in standard.inc, display its langcode.
+        $select_options[$file->langcode] = $file->langcode;
+      }
+      // Build a list of languages simulated for browser detection.
+      $languages[$file->langcode] = (object) array(
+        'langcode' => $file->langcode,
+      );
     }
-    asort($select_options);
+  }
+  asort($select_options);
 
 
   $browser_langcode = locale_language_from_browser($languages);
@@ -1730,7 +1730,12 @@ function install_display_requirements($install_state, $requirements) {
       backdrop_set_title(st('Requirements problem'));
       $status_report = st('Resolve the problems and <a href="!url">try again</a>.', array('!url' => check_url(backdrop_requirements_url($severity))));
       $status_report .= '<br><br>';
-      $status_report .= theme('status_report', array('requirements' => $requirements, 'phase' => 'install'));
+      $status_report .= theme(
+        'status_report', array(
+          'requirements' => $requirements,
+          'phase' => 'install'
+        )
+      );
       return $status_report;
     }
     else {
