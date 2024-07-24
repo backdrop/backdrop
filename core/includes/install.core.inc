@@ -1387,7 +1387,7 @@ function install_select_language_form($form, &$form_state, $files, $install_stat
   include_once BACKDROP_ROOT . '/core/includes/standard.inc';
   include_once BACKDROP_ROOT . '/core/includes/locale.inc';
 
-  $standard_languages = standard_language_list();
+  $standard_languages = install_available_translations();
   $select_options = array();
   $languages = array();
 
@@ -1429,7 +1429,6 @@ function install_select_language_form($form, &$form_state, $files, $install_stat
   }
   asort($select_options);
 
-
   $browser_langcode = locale_language_from_browser($languages);
   $form['langcode'] = array(
     '#type' => 'select',
@@ -1451,6 +1450,50 @@ function install_select_language_form($form, &$form_state, $files, $install_stat
   );
   return $form;
 }
+
+/**
+ * Provide a list of available translation files.
+ *
+ * @return array
+ *   An array of language codes.
+ */
+function install_available_translations() {
+  $standard_languages = standard_language_list();
+  // Correct as of 2024/07/23.
+  $available_languages = array(
+    // English is always available.
+    'en', // English
+    'ar', // Arabic
+    'bg', // Bulgarian
+    'ca', // Catalan
+    'cs', // Czech
+    'da', // Danish
+    'de', // German
+    'el', // Greek
+    'es', // Spanish
+    'fa', // Persian
+    'fi', // Finnish
+    'fr', // French
+    'he', // Hebrew
+    'hu', // Hungarian
+    'it', // Italian
+    'ja', // Japanese
+    'kk', // Kazakh
+    'ky', // Kyrgyz
+    'mg', // Malagasy
+    'nl', // Dutch
+    'pl', // Polish
+    'pt-br', // Portuguese, Brazil
+    'ru', // Russian
+    'sv', // Swedish
+    'sw', // Swahili
+    'tr', // Turkish
+    'uz', // Uzbek
+    'zh-hans', // Chinese, Simplified
+  );
+  return array_intersect_key($standard_languages, array_flip($available_languages));
+}
+
 /**
  * Download a translation file for the selected language.
  *
@@ -1525,18 +1568,12 @@ function install_retrieve_file($uri, $destination) {
  *   TRUE if the URI was contacted successfully, FALSE if not.
  */
 function install_check_localization_server($uri) {
-  try {
-    $response = backdrop_http_request($uri);
-    if ($response->code != 200) {
-      return FALSE;
-    }
-    return TRUE;
-  }
-  catch (TransferException $e) {
+  $response = backdrop_http_request($uri);
+  if ($response->code != 200) {
     return FALSE;
   }
+  return TRUE;
 }
-
 
 /**
  * Checks installation requirements and reports any errors.
@@ -1733,7 +1770,7 @@ function install_display_requirements($install_state, $requirements) {
       $status_report .= theme(
         'status_report', array(
           'requirements' => $requirements,
-          'phase' => 'install'
+          'phase' => 'install',
         )
       );
       return $status_report;
