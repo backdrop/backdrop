@@ -1616,7 +1616,7 @@ function install_check_translations($langcode, $server_pattern) {
   // For dev releases, remove the '-dev' part and trust the translation server
   // to fall back to the latest stable release for that branch.
   // @see locale_translation_build_projects()
-  if (preg_match("/^(\d+\.).*-dev$/", $version, $matches)) {
+  if (preg_match("/^(\d+\.).*-(dev|preview)$/", $version, $matches)) {
     // Example match: 1.28-dev => 1.x (Backdrop core)
     $version = $matches[1] . 'x';
   }
@@ -1657,13 +1657,13 @@ function install_check_translations($langcode, $server_pattern) {
       'title'       => t('Translations directory'),
       'value'       => t('The translations directory does not exist.'),
       'severity'    => REQUIREMENT_ERROR,
-      'description' => t('The installer requires that you create a translations directory as part of the installation process. Create the directory %translations_directory . The Backdrop <a href="!install_docs">installation instructions</a> offers help on this and other topics.', ['%translations_directory' => $translations_directory, '!install_docs' => 'https://docs.backdropcms.org/documentation/installation-instructions']),
+      'description' => st('The installation process requires a translations directory to be created under <code>%translations_directory</code>. The <a href="!install_docs">How to install Backdrop CMS</a> documentation page offers help on this and other topics.', ['%translations_directory' => $translations_directory, '!install_docs' => 'https://docs.backdropcms.org/documentation/installation-instructions']),
     ];
   }
   else {
     $requirements['translations directory exists'] = [
       'title'       => t('Translations directory'),
-      'value'       => t('The directory %translations_directory exists.', ['%translations_directory' => $translations_directory]),
+      'value'       => st('The directory <code>%translations_directory</code> exists.', ['%translations_directory' => $translations_directory]),
     ];
     // If the translations directory is not readable, throw an error.
     if (!$readable) {
@@ -1671,7 +1671,7 @@ function install_check_translations($langcode, $server_pattern) {
         'title'       => t('Translations directory'),
         'value'       => t('The translations directory is not readable.'),
         'severity'    => REQUIREMENT_ERROR,
-        'description' => t('The installer requires read permissions to %translations_directory at all times. The <a href="!handbook_url">webhosting issues</a> documentation section offers help on this and other topics.', ['%translations_directory' => $translations_directory, '!handbook_url' => 'https://docs.backdropcms.org/documentation/file-permissions-and-ownership']),
+        'description' => st('The installer requires read permissions to <code>%translations_directory</code> at all times. The <a href="!handbook_url">File permissions and ownership</a> documentation section offers help on this and other topics.', ['%translations_directory' => $translations_directory, '!handbook_url' => 'https://docs.backdropcms.org/documentation/file-permissions-and-ownership']),
       ];
     }
     // If translations directory is not writable, throw an error.
@@ -1680,7 +1680,7 @@ function install_check_translations($langcode, $server_pattern) {
         'title'       => t('Translations directory'),
         'value'       => t('The translations directory is not writable.'),
         'severity'    => REQUIREMENT_ERROR,
-        'description' => t('The installer requires write permissions to %translations_directory during the installation process. The <a href="!handbook_url">webhosting issues</a> documentation section offers help on this and other topics.', ['%translations_directory' => $translations_directory, '!handbook_url' => 'https://docs.backdropcms.org/documentation/file-permissions-and-ownership']),
+        'description' => st('The installer requires write permissions to the <code>%translations_directory<code> directory during the installation process. The <a href="!handbook_url">File permissions and ownership</a> documentation section offers help on this and other topics.', ['%translations_directory' => $translations_directory, '!handbook_url' => 'https://docs.backdropcms.org/documentation/file-permissions-and-ownership']),
       ];
     }
     else {
@@ -1695,7 +1695,7 @@ function install_check_translations($langcode, $server_pattern) {
   if (!$online) {
     $requirements['online'] = [
       'title'       => t('Internet'),
-      'value'       => t('The translation server is offline.'),
+      'value'       => t('The translation server is offline or cannot be reached for other reasons.'),
       'severity'    => REQUIREMENT_ERROR,
       'description' => t('The installer requires to contact the translation server to download a translation file. Check your internet connection and verify that your website can reach the translation server at <a href="!server_url">@server_url</a>.', ['!server_url' => $server_url, '@server_url' => $server_url]),
     ];
