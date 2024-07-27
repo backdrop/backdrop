@@ -12,7 +12,7 @@
   overflow: hidden;
 }
 [dir="rtl"] .messages {
-  padding-right:3.438em;
+  padding-right: 3.438em;
   padding-left: 36px;
 }
 .messages:before {
