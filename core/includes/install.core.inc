@@ -1592,9 +1592,9 @@ function install_check_translations($langcode, $server_pattern) {
 
   $readable = FALSE;
   $writable = FALSE;
-  // @todo: Make this configurable.
-  $files_directory = BACKDROP_ROOT . '/files';
-  $translations_directory = BACKDROP_ROOT . '/files/translations';
+
+  $files_directory = conf_path() . '/files';
+  $translations_directory = settings_get('locale_translate_file_directory', conf_path() . '/files/translations');
   $translations_directory_exists = FALSE;
   $online = FALSE;
 
