@@ -9,6 +9,7 @@ stylesheets[screen][] = css/style.css
 stylesheets[screen][] = css/responsive-tabs.css
 stylesheets[screen][] = css/dropbutton.theme.css
 stylesheets[screen][] = css/messages.palette.css
+stylesheets[screen][] = css/layout.admin.palette.css
 
 ; Include a style sheet in the rich-text editor.
 ckeditor_stylesheets[] = css/seven.base.css

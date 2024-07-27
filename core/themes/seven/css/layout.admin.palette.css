@@ -1,0 +1,64 @@
+/**
+ * Layout admin css.
+ */
+
+/* Layout listing form. */
+.layout-list .layout-group td {
+  background: var(--seven-palette__grayscale--85, #d0d0d0);
+}
+.layout-list .layout-group td.missing-path,
+ .layout-list .layout-group td.missing-path a {
+   color: var(--seven-palette__danger--30, #9c1d0d); /* Was #c40d00 */
+ }
+.layout-list tr.disabled td {
+  color: var(--seven-palette__grayscale--55, #999);
+}
+
+.layout-placeholder-examples-toggle .arrow.close {
+  border-bottom-color: var(--seven-palette__accent--50, #0074bd);
+}
+
+.layout-block-add-row.form-item {
+  border-bottom-color: var(--seven-palette__grayscale--75, #ccc);
+}
+.layout-block-add-row.odd {
+  background-color: var(--seven-palette__grayscale--95, #f7f7f7);/* Was #F3F4EE */
+}
+.layout-block-list-wrapper {
+  border-color: var(--seven-palette__grayscale--75, #ccc);
+}
+
+.layout-editor-region {
+  border-color: var(--seven-palette__grayscale--75, #ccc);
+  background: var(--seven-palette__grayscale--100, #fff);
+}
+.layout-editor-region-title .label {
+  color: var(--seven-palette__grayscale--30, #444b53);/* Was #5b575b */
+}
+.layout-editor-block {
+  background: var(--seven-palette__grayscale--100, #fff);
+  box-shadow: 2px 2px 0 0 var(--seven-palette__grayscale--85, #d0d0d0);
+}
+.layout-editor-block-title {
+  background: var(--seven-palette__grayscale--90, #e9e8e8);
+}
+.layout-editor-block-content {
+  border-color: var(--seven-palette__grayscale--95, #f7f7f7);
+  background: var(--seven-palette__grayscale--95, #f7f7f7);
+}
+.layout-editor-placeholder {
+  background-color: var(--seven-palette__accent--80, #bdf);
+}
+.layout-content-form .page-title .layout-editor-block {
+  background-color: var(--seven-palette__grayscale--90, #e9e8e8);
+}
+.layout-access-list ul li {
+  background: var(--seven-palette__grayscale--87, #eee);
+  border-bottom-color: var(--seven-palette__grayscale--75, #ccc);
+}
+.edit-layout-top {
+  background: var(--seven-palette__grayscale--90, #e9e8e8);
+}
+.layout-editor-block-disabled {
+  color: var(--seven-palette__grayscale--55, #999);
+}
