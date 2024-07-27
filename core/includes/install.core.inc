@@ -1387,7 +1387,7 @@ function install_select_language_form($form, &$form_state, $files, $install_stat
   include_once BACKDROP_ROOT . '/core/includes/standard.inc';
   include_once BACKDROP_ROOT . '/core/includes/locale.inc';
 
-  $standard_languages = install_available_translations();
+  $standard_languages = install_get_available_translations();
   $select_options = array();
   $languages = array();
 
@@ -1457,7 +1457,7 @@ function install_select_language_form($form, &$form_state, $files, $install_stat
  * @return array
  *   An array of language codes.
  */
-function install_available_translations() {
+function install_get_available_translations() {
   $standard_languages = standard_language_list();
   // Correct as of 2024/07/23.
   $available_languages = array(
