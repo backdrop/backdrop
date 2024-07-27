@@ -550,7 +550,16 @@ function install_tasks($install_state) {
   // Determine whether a translation file must be downloaded during the
   // 'install_download_translation' task. Download when a non-English language
   // is selected, but no translation is yet in the translations directory.
-  $needs_download = isset($install_state['parameters']['langcode']) && !isset($install_state['translations'][$install_state['parameters']['langcode']]) && $install_state['parameters']['langcode'] != 'en';
+  $needs_download = TRUE;
+  if (isset($install_state['parameters']['langcode']) && $install_state['parameters']['langcode'] != 'en') {
+    if (isset($install_state['translations'])) {
+      foreach($install_state['translations'] as $translation_file) {
+        if ($translation_file->langcode == $install_state['parameters']['langcode']) {
+          $needs_download = FALSE;
+        }
+      }
+    }
+  }
 
   // Start with the core installation tasks that run before handing control
   // to the installation profile.
@@ -1280,7 +1289,8 @@ function install_find_translation_files($langcode = NULL) {
   $directory = settings_get('locale_translate_file_directory', conf_path() . '/files/translations');
   // @todo: Remove the "drupal" check in 2.x (assuming we have a localization
   //   server by then).
-  $files = file_scan_directory($directory, '!(install|drupal|backdrop(cms)?)(-[\d]+\.)?([\d]+|x)?\.' . (!empty($langcode) ? preg_quote($langcode, '!') : '[^\.]+') . '\.po$!', array('recurse' => FALSE));
+  $files = file_scan_directory($directory, '!(install|drupal|backdrop(cms)?)(-[\d\.x]+)?\.' . (!empty($langcode) ? preg_quote($langcode, '!') : '[^\.]+') . '\.po$!', array('recurse' => FALSE));
+
   return $files;
 }
 
@@ -1391,12 +1401,6 @@ function install_select_language_form($form, &$form_state, $files, $install_stat
   $select_options = array();
   $languages = array();
 
-  if (count($install_state['translations']) > 1) {
-    $files = $install_state['translations'];
-  }
-  else {
-    $files = [];
-  }
   $select_options = [];
   $browser_options = [];
 
@@ -1694,9 +1698,9 @@ function install_check_translations($langcode, $server_pattern) {
   if (!$online) {
     $requirements['online'] = [
       'title'       => st('Internet'),
-      'value'       => st('The translation server is offline or cannot be reached for other reasons.'),
+      'value'       => st('The translation server is offline or cannot be reached.'),
       'severity'    => REQUIREMENT_ERROR,
-      'description' => st('The installer requires to contact the translation server to download a translation file. Check your internet connection and verify that your website can reach the translation server at <a href="!server_url">@server_url</a>.', ['!server_url' => $server_url, '@server_url' => $server_url]),
+      'description' => st('The installer was unable to contact the translation server to download a translation file. Check your internet connection and verify that your website can reach the translation server at <a href="!server_url">@server_url</a>.', ['!server_url' => $server_url, '@server_url' => $server_url]),
     ];
   }
   else {
