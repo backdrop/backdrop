@@ -2954,40 +2954,6 @@ function form_get_options($element, $key) {
 }
 
 /**
- * Returns HTML for a fieldset form element and its children.
- *
- * @param $variables
- *   An associative array containing:
- *   - element: An associative array containing the properties of the element.
- *     Properties used: #attributes, #children, #collapsed, #collapsible,
- *     #description, #id, #title, #value.
- *
- * @ingroup themeable
- */
-function theme_fieldset($variables) {
-  $element = $variables['element'];
-  element_set_attributes($element, array('id'));
-  _form_set_class($element, array('form-wrapper'));
-
-  $output = '<fieldset' . backdrop_attributes($element['#attributes']) . '>';
-  if (!empty($element['#title'])) {
-    // Always wrap fieldset legends in a SPAN for CSS positioning.
-    $output .= '<legend><span class="fieldset-legend">' . $element['#title'] . '</span></legend>';
-  }
-  $output .= '<div class="fieldset-wrapper">';
-  if (!empty($element['#description'])) {
-    $output .= '<div class="fieldset-description">' . $element['#description'] . '</div>';
-  }
-  $output .= $element['#children'];
-  if (isset($element['#value'])) {
-    $output .= $element['#value'];
-  }
-  $output .= '</div>';
-  $output .= "</fieldset>\n";
-  return $output;
-}
-
-/**
  * Returns HTML for a radio button form element.
  *
  * Note: The input "name" attribute needs to be sanitized before output, which
@@ -3757,7 +3723,11 @@ function theme_details($variables) {
   }
 
   $output = '<details' . backdrop_attributes($element['#attributes']) . '>';
-  $output .= '<summary><span>' . $element['#summary'] . '</span></summary>';
+  $output .= '<summary><span>' . $element['#summary'];
+  // If the details element contains any required fields in it, add a "required"
+  // indicator in the summary.
+  $output .= _element_has_required_children($element) ? ' <abbr class="form-required" title="' . t('This details element contains required fields.') . '">*</abbr>' : '';
+  $output .= '</span></summary>';
   if (isset($element['#details']) && !empty($element['#details'])) {
     $output .= '<div class="details-content-wrapper">' . $element['#details'] . '</div>';
   }
@@ -3767,6 +3737,63 @@ function theme_details($variables) {
   $output .= '</details>';
 
   return $output;
+}
+
+/**
+ * Returns HTML for a fieldset form element and its children.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - element: An associative array containing the properties of the element.
+ *     Properties used: #attributes, #children, #collapsed, #collapsible,
+ *     #description, #id, #title, #value.
+ *
+ * @ingroup themeable
+ */
+function theme_fieldset($variables) {
+  $element = $variables['element'];
+  element_set_attributes($element, array('id'));
+  _form_set_class($element, array('form-wrapper'));
+
+  $output = '<fieldset' . backdrop_attributes($element['#attributes']) . '>';
+  if (!empty($element['#title'])) {
+    // Always wrap fieldset legends in a SPAN for CSS positioning.
+    $output .= '<legend><span class="fieldset-legend">' . $element['#title'];
+    // If the fieldset contains any required fields in it, add a "required"
+    // indicator in the legend.
+    $output .= _element_has_required_children($element) ? ' <abbr class="form-required" title="' . t('This fieldset contains required fields.') . '">*</abbr>' : '';
+    $output .= '</span></legend>';
+  }
+  $output .= '<div class="fieldset-wrapper">';
+  if (!empty($element['#description'])) {
+    $output .= '<div class="fieldset-description">' . $element['#description'] . '</div>';
+  }
+  $output .= $element['#children'];
+  if (isset($element['#value'])) {
+    $output .= $element['#value'];
+  }
+  $output .= '</div>';
+  $output .= "</fieldset>\n";
+  return $output;
+}
+
+/**
+ * Determines whether a form element contains any required children.
+ */
+function _element_has_required_children($element) {
+  $contains_required = FALSE;
+  $children = element_children($element);
+  // Check whether the element contains any required fields in it.
+  foreach ($children as $child) {
+    if (isset($element[$child]['#required']) && $element[$child]['#required']) {
+      $contains_required = TRUE;
+      // If we find even one required field, set the $contains_required flag and
+      // bail early from the loop.
+      break;
+    }
+  }
+
+  return $contains_required;
 }
 
 /**
