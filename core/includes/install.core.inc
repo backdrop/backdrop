@@ -1542,19 +1542,16 @@ function install_retrieve_file($uri, $destination) {
     $path = $destination;
   }
 
-  try {
-    $response = backdrop_http_request($uri);
-    if ($response->code != 200) {
-      return FALSE;
-    }
-    $data = $response->data;
-    if (empty($data)) {
-      return FALSE;
-    }
-  }
-  catch (TransferException $e) {
+  $response = backdrop_http_request($uri);
+  if ($response->code != 200) {
     return FALSE;
   }
+
+  $data = $response->data;
+  if (empty($data)) {
+    return FALSE;
+  }
+
   return file_put_contents($path, $data) !== FALSE;
 }
 
@@ -1586,6 +1583,8 @@ function install_check_localization_server($uri) {
  * @return array
  *   Requirements compliance array. If the translation cannot be downloaded this
  *   will contain a requirements error with detailed information.
+ *
+ * @see install_state_defaults()
  */
 function install_check_translations($langcode, $server_pattern) {
   $requirements = [];
