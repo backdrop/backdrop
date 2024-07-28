@@ -197,7 +197,12 @@ Backdrop.adminBar.behaviors.resizeCollapse = function (context, settings, $admin
 
     $adminBar.trigger('beforeResize');
 
-    menuWidth = $menu.width();
+    if ($menu.length) {
+      menuWidth = $menu.width();
+    }
+    else {
+      menuWidth = 0;
+    }
     if ($extra.length) {
       extraWidth = $extra.width();
     }
