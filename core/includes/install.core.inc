@@ -39,6 +39,12 @@ define('INSTALL_TASK_RUN_IF_REACHED', 2);
 define('INSTALL_TASK_RUN_IF_NOT_COMPLETED', 3);
 
 /**
+ * The URI used to fetch the list of available translations from the
+ * localization server..
+ */
+define('INSTALL_AVAILABLE_TRANSLATIONS_URI', 'https://localize.backdropcms.org/translate/available-languages');
+
+/**
  * Installs Backdrop either interactively or via an array of passed-in settings.
  *
  * The Backdrop installation happens in a series of steps, which may be spread
@@ -550,14 +556,17 @@ function install_tasks($install_state) {
   // Determine whether a translation file must be downloaded during the
   // 'install_download_translation' task. Download when a non-English language
   // is selected, but no translation is yet in the translations directory.
-  $needs_download = TRUE;
+  $needs_download = FALSE;
   if (isset($install_state['parameters']['langcode']) && $install_state['parameters']['langcode'] != 'en') {
     if (isset($install_state['translations'])) {
+      $local_file_found = FALSE;
       foreach($install_state['translations'] as $translation_file) {
         if ($translation_file->langcode == $install_state['parameters']['langcode']) {
-          $needs_download = FALSE;
+          $local_file_found = TRUE;
+          break;
         }
       }
+      $needs_download = !$local_file_found;
     }
   }
 
@@ -1317,10 +1326,11 @@ function install_select_language(&$install_state) {
   $install_state['translations'] += $files;
   include_once BACKDROP_ROOT . '/core/includes/standard.inc';
 
+  $standard_languages = install_get_available_translations($files);
+
   if (!empty($_POST['langcode'])) {
-    $standard_languages = standard_language_list();
     $langcode = $_POST['langcode'];
-    if ($langcode == 'en' || isset($files[$langcode]) || isset($standard_languages[$langcode])) {
+    if ($langcode == 'en' || isset($standard_languages[$langcode])) {
       $install_state['parameters']['langcode'] = $langcode;
       return;
     }
@@ -1331,7 +1341,7 @@ function install_select_language(&$install_state) {
     // performing an interactive installation, inform the user that the
     // installer can be translated. Otherwise we assume the user knows what he
     // is doing.
-    if (count($files) == 1) {
+    if (count($standard_languages) == 1) {
       if ($install_state['interactive']) {
         $directory = settings_get('locale_translate_file_directory', conf_path() . '/files/translations');
 
@@ -1339,6 +1349,9 @@ function install_select_language(&$install_state) {
         if (!empty($install_state['parameters']['translate'])) {
           $output = '<p>Follow these steps to translate Backdrop into your language:</p>';
           $output .= '<ol>';
+          if (!install_check_localization_server(INSTALL_AVAILABLE_TRANSLATIONS_URI)) {
+            $output .= '<li>Ensure that you are connected to the internet, since Backdrop is able to automatically download new translations. Alternatively,</li>';
+          }
           $output .= '<li>Download a translation from the <a href="https://localize.backdropcms.org/translate/languages" target="_blank">translation server</a>.</li>';
           $output .= '<li>Place it into the following directory:<pre>' . $directory . '</pre></li>';
           $output .= '</ol>';
@@ -1354,15 +1367,15 @@ function install_select_language(&$install_state) {
         }
         else {
           include_once BACKDROP_ROOT . '/core/includes/form.inc';
-          $elements = backdrop_get_form('install_select_language_form', $files, $install_state);
+          $elements = backdrop_get_form('install_select_language_form', $files, $standard_languages);
           $output = backdrop_render($elements);
         }
         return $output;
       }
       // One language, but not an interactive installation. Assume the user
       // knows what he is doing.
-      $file = current($files);
-      $install_state['parameters']['langcode'] = $file->langcode;
+      $single_language = reset($standard_languages);
+      $install_state['parameters']['langcode'] = key($single_language);
       return NULL;
     }
     else {
@@ -1374,7 +1387,7 @@ function install_select_language(&$install_state) {
       if ($install_state['interactive']) {
         backdrop_set_title(st('Choose language'));
         include_once BACKDROP_ROOT . '/core/includes/form.inc';
-        $elements = backdrop_get_form('install_select_language_form', $files, $install_state);
+        $elements = backdrop_get_form('install_select_language_form', $files, $standard_languages);
         return backdrop_render($elements);
       }
       else {
@@ -1393,16 +1406,12 @@ function install_select_language(&$install_state) {
  *
  * @ingroup forms
  */
-function install_select_language_form($form, &$form_state, $files, $install_state) {
+function install_select_language_form($form, &$form_state, $files, $standard_languages) {
   include_once BACKDROP_ROOT . '/core/includes/standard.inc';
   include_once BACKDROP_ROOT . '/core/includes/locale.inc';
 
-  $standard_languages = install_get_available_translations();
   $select_options = array();
-  $languages = array();
-
-  $select_options = [];
-  $browser_options = [];
+  $browser_options = array();
 
   $form['#title'] = 'Choose language';
 
@@ -1412,28 +1421,14 @@ function install_select_language_form($form, &$form_state, $files, $install_stat
   // Select lists based on all standard languages.
   foreach ($standard_languages as $langcode => $language_names) {
     $select_options[$langcode] = isset($language_names[1]) ? $language_names[1] : $language_names[0];
-    $browser_options[$langcode] = $langcode;
-  }
-  // Add languages based on language files in the translations directory.
-  if (count($files)) {
-    foreach ($files as $file) {
-      if (isset($standard_languages[$file->langcode])) {
-        // Build a list of select list options based on files we found.
-        $select_options[$file->langcode] = $standard_languages[$file->langcode][1];
-      }
-      else {
-        // If the language was not found in standard.inc, display its langcode.
-        $select_options[$file->langcode] = $file->langcode;
-      }
       // Build a list of languages simulated for browser detection.
-      $languages[$file->langcode] = (object) array(
-        'langcode' => $file->langcode,
-      );
-    }
+    $browser_options[$langcode] = (object) array(
+      'langcode' => $langcode,
+    );
   }
   asort($select_options);
 
-  $browser_langcode = locale_language_from_browser($languages);
+  $browser_langcode = locale_language_from_browser($browser_options);
   $form['langcode'] = array(
     '#type' => 'select',
     '#options' => $select_options,
@@ -1441,7 +1436,7 @@ function install_select_language_form($form, &$form_state, $files, $install_stat
     '#default_value' => !empty($browser_langcode) ? $browser_langcode : 'en',
   );
 
-  if (count($files) == 1) {
+  if (count($standard_languages) == 1) {
     $form['help'] = array(
       '#type' => 'help',
       '#markup' => '<a href="' . check_url(backdrop_current_script_url(array('translate' => 'true'))) . '">' . st('Learn how to install Backdrop in other languages') . '</a>',
@@ -1461,41 +1456,31 @@ function install_select_language_form($form, &$form_state, $files, $install_stat
  * @return array
  *   An array of language codes.
  */
-function install_get_available_translations() {
+function install_get_available_translations($files) {
+  $available_translations = array();
+  $response = backdrop_http_request(INSTALL_AVAILABLE_TRANSLATIONS_URI);
+
+  $data = '';
+  if ($response->code === '200') {
+    $data = json_decode($response->data, TRUE);
+  }
+
+  if ($data) {
+    $available_translations = array_keys($data);
+  }
+  elseif (count($files) > 1) {
+    foreach($files as $translation_file) {
+      $available_translations[] = $translation_file->langcode;
+    }
+  }
+  else {
+    return FALSE;
+  }
+
+  // English is always available.
+  $available_translations[] = 'en';
   $standard_languages = standard_language_list();
-  // Correct as of 2024/07/23.
-  $available_languages = array(
-    // English is always available.
-    'en', // English
-    'ar', // Arabic
-    'bg', // Bulgarian
-    'ca', // Catalan
-    'cs', // Czech
-    'da', // Danish
-    'de', // German
-    'el', // Greek
-    'es', // Spanish
-    'fa', // Persian
-    'fi', // Finnish
-    'fr', // French
-    'he', // Hebrew
-    'hu', // Hungarian
-    'it', // Italian
-    'ja', // Japanese
-    'kk', // Kazakh
-    'ky', // Kyrgyz
-    'mg', // Malagasy
-    'nl', // Dutch
-    'pl', // Polish
-    'pt-br', // Portuguese, Brazil
-    'ru', // Russian
-    'sv', // Swedish
-    'sw', // Swahili
-    'tr', // Turkish
-    'uz', // Uzbek
-    'zh-hans', // Chinese, Simplified
-  );
-  return array_intersect_key($standard_languages, array_flip($available_languages));
+  return array_intersect_key($standard_languages, array_flip(array_unique($available_translations)));
 }
 
 /**
