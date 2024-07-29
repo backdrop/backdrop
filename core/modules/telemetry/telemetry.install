@@ -7,7 +7,7 @@
 /**
  * Implements hook_uninstall().
  */
-function project_uninstall() {
+function telemetry_uninstall() {
   $state_settings = array(
     'telemetry_cron_last',
   );
