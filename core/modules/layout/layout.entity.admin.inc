@@ -147,7 +147,12 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle
   $form_state['layout'] = &$layout;
   $form_state['all_types'] = $all_types;
   $form_state['entity_type'] = $entity_type;
-  $form_state['bundle_type'] = field_extract_bundle($entity_type, $bundle_arg);
+  if ($bundle_arg) {
+    $form_state['bundle_type'] = field_extract_bundle($entity_type, $bundle_arg);
+  }
+  else {
+    $form_state['bundle_type'] = NULL;
+  }
 
   $form['#tree'] = TRUE;
 
@@ -220,11 +225,22 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle
     '#wrapper_attributes' => array('class' => array('clearfix', 'layout-options')),
     '#required' => TRUE,
   );
-  $fields = field_info_instances($entity_type, $form_state['bundle_type']);
   $field_blocks = array();
-  foreach ($fields as $key => $field) {
-    if (!empty($field)) {
-      $field_blocks[$key] = $field['label'];
+  $fields = field_info_instances($entity_type, $form_state['bundle_type']);
+  if ($form_state['bundle_type']) {
+    foreach ($fields as $key => $field) {
+      if (!empty($field)) {
+        $field_blocks[$key] = $field['label'];
+      }
+    }
+  }
+  else {
+    foreach ($fields as $bundle_type) {
+      foreach ($bundle_type as $key => $field) {
+        if (!empty($field)) {
+          $field_blocks[$key] = $field['label'];
+        }
+      }
     }
   }
   $field_blocks += array('main' => t('Main content block'));
