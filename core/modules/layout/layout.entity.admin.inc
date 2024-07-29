@@ -226,8 +226,11 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle
     '#required' => TRUE,
   );
   $field_blocks = array();
-  $fields = field_info_instances($entity_type, $form_state['bundle_type']);
-  if ($form_state['bundle_type']) {
+  
+  $bundle_types = $all_types ? NULL : $form_state['bundle_type'];
+  $fields = field_info_instances($entity_type, $bundle_types);
+  dpm($bundle_types);
+  if ($bundle_types) {
     foreach ($fields as $key => $field) {
       if (!empty($field)) {
         $field_blocks[$key] = $field['label'];

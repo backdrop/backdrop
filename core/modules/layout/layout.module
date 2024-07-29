@@ -568,7 +568,7 @@ function layout_menu() {
       );
       // Check that this isn't a single-bundle entity.
       $single_bundle = (count($entity_info['bundles']) == 1) && isset($entity_info['bundles'][$entity_type]);
-      $items["$layout_path/add-entity"] = array(
+      $items["$layout_path/add-entity-layout"] = array(
         'title' => "Add layout",
         'title callback' => 'layout_entity_menu_title',
         'title arguments' => array($entity_type),
@@ -607,7 +607,7 @@ function layout_menu() {
               'weight' => 2,
               'file' => 'layout.entity.admin.inc',
             ) + $access;
-            $items["$path/layouts/add"] = array(
+            $items["$path/layouts/add-bundle-layout"] = array(
               'title' => "Add layout",
               'title callback' => 'layout_entity_menu_title',
               'title arguments' => array($entity_type, $bundle_arg),
@@ -616,12 +616,12 @@ function layout_menu() {
               'file' => 'layout.entity.admin.inc',
               'type' => MENU_LOCAL_ACTION,
             ) + $access;
-            $items["$path/layouts/add-entity"] = array(
+            $items["$path/layouts/add-entity-layout"] = array(
               'title' => "Add layout",
               'title callback' => 'layout_entity_menu_title',
               'title arguments' => array($entity_type, $bundle_arg, 'create_for_all_bundles'),
               'page callback' => 'backdrop_get_form',
-              'page arguments' => array('layout_entity_admin_add_form', $entity_type, $bundle_arg, 'entity'),
+              'page arguments' => array('layout_entity_admin_add_form', $entity_type, $bundle_arg, TRUE),
               'file' => 'layout.entity.admin.inc',
               'type' => MENU_LOCAL_ACTION,
             ) + $access;
