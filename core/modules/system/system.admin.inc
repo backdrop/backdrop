@@ -1692,7 +1692,7 @@ function system_logging_settings_validate($form, &$form_state) {
  * Form builder; Configure site performance settings.
  *
  * @ingroup forms
- * @see system_performance_settings_validate().
+ * @see system_performance_settings_validate()
  */
 function system_performance_settings($form, &$form_state) {
   backdrop_add_js(backdrop_get_path('module', 'system') . '/js/system.admin.js');
