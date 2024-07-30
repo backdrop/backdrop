@@ -1692,7 +1692,7 @@ function system_logging_settings_validate($form, &$form_state) {
  * Form builder; Configure site performance settings.
  *
  * @ingroup forms
- * @see system_performance_settings_submit().
+ * @see system_performance_settings_validate().
  */
 function system_performance_settings($form, &$form_state) {
   backdrop_add_js(backdrop_get_path('module', 'system') . '/js/system.admin.js');
@@ -1748,8 +1748,15 @@ function system_performance_settings($form, &$form_state) {
   );
 
   $directory = 'public://';
-  $is_writable = is_dir($directory) && is_writable($directory);
-  $disabled = !$is_writable;
+  $aggregation_disabled = !is_dir($directory) || !is_writable($directory);
+
+  // Internal flag, used to skip saving the values of 'preprocess_css' and
+  // 'preprocess_js' when the public directory is not properly configured or not
+  // writable. See system_performance_settings_validate().
+  $form['aggregation_disabled'] = array(
+    '#type' => 'value',
+    '#value' => $aggregation_disabled,
+  );
 
   $form['bandwidth_optimization'] = array(
     '#type' => 'fieldset',
@@ -1757,13 +1764,13 @@ function system_performance_settings($form, &$form_state) {
     '#description' => t('External resources can be optimized automatically, which can reduce both the size and number of requests made to your website.'),
   );
 
-  if (!$is_writable) {
+  if ($aggregation_disabled) {
     $form['bandwidth_optimization']['file_system_message'] = array(
       '#type' => 'container',
       '#attributes' => array('class' => array('messages', 'warning')),
     );
     $form['bandwidth_optimization']['file_system_message']['warning'] = array(
-      '#markup' => t('Aggregation of Javascript and CSS files is disabled. You need to set up the <a href="!file-system">public files directory</a> to make these optimizations available.', array('!file-system' => url('admin/config/media/file-system'))),
+      '#markup' => t('Aggregation of Javascript and CSS files cannot be used. To make these optimizations available, ensure that the <a href="!file-system">public files directory</a> is configured properly and is writable.', array('!file-system' => url('admin/config/media/file-system'))),
     );
   }
 
@@ -1780,14 +1787,22 @@ function system_performance_settings($form, &$form_state) {
   $form['bandwidth_optimization']['preprocess_css'] = array(
     '#type' => 'checkbox',
     '#title' => t('Aggregate and compress CSS files.'),
-    '#default_value' => $config->get('preprocess_css'),
-    '#disabled' => $disabled,
+    // Show the checkbox as unticked and disabled when the public directory is
+    // not configured properly or not writable. In that case, the value of this
+    // element is ignored on form submission.
+    // See system_performance_settings_validate().
+    '#default_value' => $aggregation_disabled ? 0 : $config->get('preprocess_css'),
+    '#disabled' => $aggregation_disabled,
   );
   $form['bandwidth_optimization']['preprocess_js'] = array(
     '#type' => 'checkbox',
     '#title' => t('Aggregate JavaScript files.'),
-    '#default_value' => $config->get('preprocess_js'),
-    '#disabled' => $disabled,
+    // Show the checkbox as unticked and disabled when the public directory is
+    // not configured properly or not writable. In that case, the value of this
+    // element is ignored on form submission.
+    // See system_performance_settings_validate().
+    '#default_value' => $aggregation_disabled ? 0 : $config->get('preprocess_js'),
+    '#disabled' => $aggregation_disabled,
   );
 
   $form['#submit'][] = 'backdrop_clear_css_cache';
@@ -1797,6 +1812,46 @@ function system_performance_settings($form, &$form_state) {
   $form['#submit'][] = 'system_clear_page_cache_submit';
 
   return system_settings_form($form);
+}
+
+/**
+ * Validation handler for system_performance_settings().
+ *
+ * @ingroup forms
+ */
+function system_performance_settings_validate($form, &$form_state) {
+  // If the public files directory has not been configured properly, or is not
+  // writable, ignore the values of 'preprocess_css' and 'preprocess_js' upon
+  // form submission. In that case, the respective checkboxes in the form are
+  // disabled/locked and unticked, regardless of the actual values already in
+  // config, and we don't want to be changing those in that case, as they need
+  // to persist after the public files directory has been configured properly.
+  if ($form_state['values']['aggregation_disabled']) {
+    unset($form_state['values']['preprocess_css']);
+    unset($form_state['values']['preprocess_js']);
+    // Also unset 'aggregation_disabled' itself, as we don't want that saved in
+    // config.
+    unset($form_state['values']['aggregation_disabled']);
+  }
+}
+
+/**
+ * Submit callback; clear system caches.
+ *
+ * @ingroup forms
+ */
+function system_clear_cache_submit($form, &$form_state) {
+  backdrop_flush_all_caches();
+  backdrop_set_message(t('Caches cleared.'));
+}
+
+/**
+ * Submit callback; clear the page cache.
+ *
+ * @ingroup forms
+ */
+function system_clear_page_cache_submit($form, &$form_state) {
+  cache('page')->flush();
 }
 
 /**
@@ -1827,25 +1882,6 @@ function system_jquery_settings() {
   );
 
   return system_settings_form($form);
-}
-
-/**
- * Submit callback; clear system caches.
- *
- * @ingroup forms
- */
-function system_clear_cache_submit($form, &$form_state) {
-  backdrop_flush_all_caches();
-  backdrop_set_message(t('Caches cleared.'));
-}
-
-/**
- * Submit callback; clear the page cache.
- *
- * @ingroup forms
- */
-function system_clear_page_cache_submit($form, &$form_state) {
-  cache('page')->flush();
 }
 
 /**
