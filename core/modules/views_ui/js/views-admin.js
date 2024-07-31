@@ -31,8 +31,8 @@ Backdrop.behaviors.viewsUiAddView = {
     var replace = '-';
     var suffix;
 
-    // The page title, block title, and menu link fields can all be
-    // pre-populated with the view name - no regular expression needed.
+    // The page title, block title, and menu link fields can all be prepopulated
+    // with the view name - no regular expression needed.
     var $fields = $context.find('[id^="edit-page-title"], [id^="edit-block-title"], [id^="edit-page-link-properties-title"]');
     if ($fields.length) {
       if (!this.fieldsFiller) {
