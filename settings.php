@@ -390,7 +390,7 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html lang="en"><head><title>404 No
  * External access proxy settings.
  *
  * If your site must access the Internet via a web proxy then you can enter the
- * proxy settings here. Currently only basic authentication is supported  by
+ * proxy settings here. Currently only basic authentication is supported by
  * using the username and password variables. The proxy_user_agent variable can
  * be set to NULL for proxies that require no User-Agent header or to a
  * non-empty string for proxies that limit requests to a specific agent. The
