@@ -1035,9 +1035,9 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
       ),
       // Comments remain unchanged and subsequent lines/paragraphs are
       // transformed normally.
-      "aaa<!--comment-->\n\nbbb\n\nccc\n\nddd<!--comment\nwith linebreak-->\n\neee\n\nfff" => array(
+      "aaa<!--comment-->\n\nbbb\n\nccc\n\nddd<!--comment\nwith line break-->\n\neee\n\nfff" => array(
         "<p>aaa</p>\n<!--comment--><p>\nbbb</p>\n<p>ccc</p>\n<p>ddd</p>" => TRUE,
-        "<!--comment\nwith linebreak--><p>\neee</p>\n<p>fff</p>" => TRUE,
+        "<!--comment\nwith line break--><p>\neee</p>\n<p>fff</p>" => TRUE,
       ),
       // Check that a comment in a PRE will result that the text after
       // the comment, but still in PRE, is not transformed.
