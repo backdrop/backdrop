@@ -1554,7 +1554,8 @@ function install_retrieve_file($uri, $destination) {
  *   TRUE if the URI was contacted successfully, FALSE if not.
  */
 function install_check_localization_server($uri) {
-  $response = backdrop_http_request($uri);
+  $options = array('method' => 'HEAD');
+  $response = backdrop_http_request($uri, $options);
   if ($response->code != 200) {
     return FALSE;
   }
