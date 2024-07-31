@@ -114,6 +114,7 @@ function file_autoload_info() {
 
     // Views handlers.
     'views_handler_argument_file_fid' => 'views/views_handler_argument_file_fid.inc',
+    'views_handler_argument_file_type' => 'views/views_handler_argument_file_type.inc',
     'views_handler_field_file' => 'views/views_handler_field_file.inc',
     'views_handler_field_file_link_edit' => 'views/views_handler_field_file_link_edit.inc',
     'views_handler_field_file_link_delete' => 'views/views_handler_field_file_link_delete.inc',
