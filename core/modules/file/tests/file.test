@@ -1674,7 +1674,7 @@ class FileTokenReplaceTestCase extends FileTestHelper {
 
     $test_file = $this->getTestFile('text');
     // Coping a file to test uploads with non-latin filenames.
-    //cspell:disable-next-line
+    // cspell:disable-next-line
     $filename = backdrop_dirname($test_file->uri) . '/текстовый файл.txt';
     $test_file = file_copy($test_file, $filename);
 
