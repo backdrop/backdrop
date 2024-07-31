@@ -40,7 +40,7 @@ define('INSTALL_TASK_RUN_IF_NOT_COMPLETED', 3);
 
 /**
  * The URI used to fetch the list of available translations from the
- * localization server..
+ * localization server.
  */
 define('INSTALL_AVAILABLE_TRANSLATIONS_URI', 'https://localize.backdropcms.org/translate/available-languages');
 
@@ -577,9 +577,9 @@ function install_tasks($install_state) {
       'display_name' => st('Choose language'),
       'run' => INSTALL_TASK_RUN_IF_REACHED,
     ),
-    'install_download_translation' => [
+    'install_download_translation' => array(
       'run' => $needs_download ? INSTALL_TASK_RUN_IF_REACHED : INSTALL_TASK_SKIP,
-    ],
+    ),
     'install_select_profile' => array(
       'display_name' => st('Choose profile'),
       'display' => $display_select_profile,
@@ -1413,7 +1413,7 @@ function install_select_language_form($form, &$form_state, $files, $standard_lan
   $select_options = array();
   $browser_options = array();
 
-  $form['#title'] = 'Choose language';
+  $form['#title'] = st('Choose language');
 
   // Build a select list with language names in native language for the user
   // to choose from. And build a list of available languages for the browser
@@ -1421,7 +1421,7 @@ function install_select_language_form($form, &$form_state, $files, $standard_lan
   // Select lists based on all standard languages.
   foreach ($standard_languages as $langcode => $language_names) {
     $select_options[$langcode] = isset($language_names[1]) ? $language_names[1] : $language_names[0];
-      // Build a list of languages simulated for browser detection.
+    // Build a list of languages simulated for browser detection.
     $browser_options[$langcode] = (object) array(
       'langcode' => $langcode,
     );
@@ -1576,7 +1576,7 @@ function install_check_localization_server($uri) {
  * @see install_state_defaults()
  */
 function install_check_translations($langcode, $server_pattern) {
-  $requirements = [];
+  $requirements = array();
 
   $readable = FALSE;
   $writable = FALSE;
@@ -1605,17 +1605,17 @@ function install_check_translations($langcode, $server_pattern) {
   // to fall back to the latest stable release for that branch.
   // @see locale_translation_build_projects()
   if (preg_match("/^(\d+\.).*-(dev|preview)$/", $version, $matches)) {
-    // Example match: 1.28-dev => 1.x (Backdrop core)
+    // Example match: 1.28-dev => 1.x (Backdrop core).
     $version = $matches[1] . 'x';
   }
 
   // Build URL for the translation file and the translation server.
-  $variables = [
+  $variables = array(
     '%project' => 'backdropcms',
     '%version' => $version,
     '%core' => 'all',
     '%language' => $langcode,
-  ];
+  );
   $translation_url = strtr($server_pattern, $variables);
 
   $elements = parse_url($translation_url);
@@ -1641,73 +1641,73 @@ function install_check_translations($langcode, $server_pattern) {
 
   // If the translations directory does not exist, throw an error.
   if (!$translations_directory_exists) {
-    $requirements['translations directory exists'] = [
+    $requirements['translations directory exists'] = array(
       'title'       => st('Translations directory'),
       'value'       => st('The translations directory does not exist.'),
       'severity'    => REQUIREMENT_ERROR,
-      'description' => st('The installation process requires a translations directory to be created under <code>%translations_directory</code>. The <a href="!install_docs">How to install Backdrop CMS</a> documentation page offers help on this and other topics.', ['%translations_directory' => $translations_directory, '!install_docs' => 'https://docs.backdropcms.org/documentation/installation-instructions']),
-    ];
+      'description' => st('The installation process requires a translations directory to be created under <code>%translations_directory</code>. The <a href="!install_docs">How to install Backdrop CMS</a> documentation page offers help on this and other topics.', array('%translations_directory' => $translations_directory, '!install_docs' => 'https://docs.backdropcms.org/documentation/installation-instructions')),
+    );
   }
   else {
-    $requirements['translations directory exists'] = [
+    $requirements['translations directory exists'] = array(
       'title'       => st('Translations directory'),
       'value'       => st('The directory <code>%translations_directory</code> exists.', ['%translations_directory' => $translations_directory]),
-    ];
+    );
     // If the translations directory is not readable, throw an error.
     if (!$readable) {
-      $requirements['translations directory readable'] = [
+      $requirements['translations directory readable'] = array(
         'title'       => st('Translations directory'),
         'value'       => st('The translations directory is not readable.'),
         'severity'    => REQUIREMENT_ERROR,
-        'description' => st('The installer requires read permissions to <code>%translations_directory</code> at all times. The <a href="!handbook_url">File permissions and ownership</a> documentation section offers help on this and other topics.', ['%translations_directory' => $translations_directory, '!handbook_url' => 'https://docs.backdropcms.org/documentation/file-permissions-and-ownership']),
-      ];
+        'description' => st('The installer requires read permissions to <code>%translations_directory</code> at all times. The <a href="!handbook_url">File permissions and ownership</a> documentation section offers help on this and other topics.', array('%translations_directory' => $translations_directory, '!handbook_url' => 'https://docs.backdropcms.org/documentation/file-permissions-and-ownership')),
+      );
     }
     // If translations directory is not writable, throw an error.
     if (!$writable) {
-      $requirements['translations directory writable'] = [
+      $requirements['translations directory writable'] = array(
         'title'       => st('Translations directory'),
         'value'       => st('The translations directory is not writable.'),
         'severity'    => REQUIREMENT_ERROR,
-        'description' => st('The installer requires write permissions to the <code>%translations_directory<code> directory during the installation process. The <a href="!handbook_url">File permissions and ownership</a> documentation section offers help on this and other topics.', ['%translations_directory' => $translations_directory, '!handbook_url' => 'https://docs.backdropcms.org/documentation/file-permissions-and-ownership']),
-      ];
+        'description' => st('The installer requires write permissions to the <code>%translations_directory<code> directory during the installation process. The <a href="!handbook_url">File permissions and ownership</a> documentation section offers help on this and other topics.', array('%translations_directory' => $translations_directory, '!handbook_url' => 'https://docs.backdropcms.org/documentation/file-permissions-and-ownership')),
+      );
     }
     else {
-      $requirements['translations directory writable'] = [
+      $requirements['translations directory writable'] = array(
         'title'       => st('Translations directory'),
         'value'       => st('The translations directory is writable.'),
-      ];
+      );
     }
   }
 
   // If the translations server can not be contacted, throw an error.
   if (!$online) {
-    $requirements['online'] = [
+    $requirements['online'] = array(
       'title'       => st('Internet'),
       'value'       => st('The translation server is offline or cannot be reached.'),
       'severity'    => REQUIREMENT_ERROR,
-      'description' => st('The installer was unable to contact the translation server to download a translation file. Check your internet connection and verify that your website can reach the translation server at <a href="!server_url">@server_url</a>.', ['!server_url' => $server_url, '@server_url' => $server_url]),
-    ];
+      'description' => st('The installer was unable to contact the translation server to download a translation file. Check your internet connection and verify that your website can reach the translation server at <a href="!server_url">@server_url</a>.', array('!server_url' => $server_url, '@server_url' => $server_url)),
+    );
   }
   else {
-    $requirements['online'] = [
+    $requirements['online'] = array(
       'title'       => st('Internet'),
       'value'       => st('The translation server is online.'),
-    ];
+    );
     // If translation file is not found at the translation server, throw an
     // error.
     if (!$translation_available) {
-      $requirements['translation available'] = [
+      $requirements['translation available'] = array(
         'title'       => st('Translation'),
         'value'       => st('The %language translation is not available.', ['%language' => $language]),
         'severity'    => REQUIREMENT_ERROR,
-        'description' => st('The %language translation file is not available at the translation server. <a href="!url">Choose a different language</a> or select English and translate your website later.', ['%language' => $language, '!url' => $_SERVER['SCRIPT_NAME']]),
-      ];
+        'description' => st('The %language translation file is not available at the translation server. <a href="!url">Choose a different language</a> or select English and translate your website later.', array('%language' => $language, '!url' => $_SERVER['SCRIPT_NAME'])),
+      );
     }
     else {
-      $requirements['translation available'] = [
+      $requirements['translation available'] = array(
         'title'       => st('Translation'),
         'value'       => st('The %language translation is available.', ['%language' => $language]),
-      ];
+      );
     }
   }
 
@@ -1715,12 +1715,12 @@ function install_check_translations($langcode, $server_pattern) {
     $translation_downloaded = install_retrieve_file($translation_url, $translations_directory);
 
     if (!$translation_downloaded) {
-      $requirements['translation downloaded'] = [
+      $requirements['translation downloaded'] = array(
         'title'       => st('Translation'),
         'value'       => st('The %language translation could not be downloaded.', ['%language' => $language]),
         'severity'    => REQUIREMENT_ERROR,
-        'description' => st('The %language translation file could not be downloaded. <a href="!url">Choose a different language</a> or select English and translate your website later.', ['%language' => $language, '!url' => $_SERVER['SCRIPT_NAME']]),
-      ];
+        'description' => st('The %language translation file could not be downloaded. <a href="!url">Choose a different language</a> or select English and translate your website later.', array('%language' => $language, '!url' => $_SERVER['SCRIPT_NAME'])),
+      );
     }
   }
 
