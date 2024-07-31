@@ -2630,6 +2630,8 @@ class FileUploadSvgTestCase extends FileTestHelper {
   public function testSVGFileUploadValidation() {
     $default_content = '<rect width="400" height="400" fill="#93a7ac"/>';
     $default_open_tag = '<svg width="400" height="400" version="1.1" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">';
+    // cspell:disable-next-line
+    $a_tag_svg_href_content = '%3Csvg+xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22+onload%3D%22alert%281%29%22%3E%3C%2Fsvg%3E';
 
     $samples = array(
       'valid' => array(
@@ -2673,7 +2675,7 @@ class FileUploadSvgTestCase extends FileTestHelper {
         'message' => 'could not be uploaded. Dangerous content found.',
       ),
       'link_data' => array(
-        'contents' => $default_open_tag . $default_content . '<a href="data:image/svg+xml,%3Csvg+xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22+onload%3D%22alert%281%29%22%3E%3C%2Fsvg%3E"></a></svg>',
+        'contents' => $default_open_tag . $default_content . '<a href="data:image/svg+xml,' . $a_tag_svg_href_content . '"></a></svg>',
         'message' => 'could not be uploaded. Dangerous content found.',
       ),
     );
