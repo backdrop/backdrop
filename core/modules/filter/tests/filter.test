@@ -1600,11 +1600,11 @@ HTML www.example21.com soup by person@example22.com can literally http://www.exa
 <script>
 <!--
   // @see www.example.com
-  var exampleurl = "http://example.net";
+  var exampleUrl = "http://example.net";
 -->
 <!--//--><![CDATA[//><!--
   // @see www.example.com
-  var exampleurl = "http://example.net";
+  var exampleUrl = "http://example.net";
 //--><!]]>
 </script>
 ' => array(
