@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provide Views data and handlers for field.module.
@@ -78,7 +77,7 @@ function field_views_field_label($field_name) {
   if (empty($label_counter)) {
     return array($field_name, $all_labels);
   }
-  // Sort the field lables by it most used label and return the most used one.
+  // Sort the field labels by it most used label and return the most used one.
   arsort($label_counter);
   $label_counter = array_keys($label_counter);
   return array($label_counter[0], $all_labels);
@@ -113,6 +112,10 @@ function field_views_field_default_views_data($field) {
   // Build the relationships between the field table and the entity tables.
   foreach ($field['bundles'] as $entity => $bundles) {
     $entity_info = entity_get_info($entity);
+    if (empty($entity_info)) {
+      continue;
+    }
+
     $groups[$entity] = $entity_info['label'];
 
     // Override Node to Content.
@@ -190,8 +193,8 @@ function field_views_field_default_views_data($field) {
     $data[$table][$old_column]['field']['moved to'] = array($table, $column);
     $data[$table][$column] = array(
       'group' => $group,
-      'title' => $label,
-      'title short' => $label,
+      'title' => check_plain($label),
+      'title short' => check_plain($label),
       'help' =>  t('Appears in: @bundles.', array('@bundles' => implode(', ', $bundles_names))),
     );
 
@@ -200,13 +203,16 @@ function field_views_field_default_views_data($field) {
     $aliases = array();
     $also_known = array();
     foreach ($all_labels as $entity_name => $labels) {
+      if (empty($groups[$entity_name])) {
+        continue;
+      }
       foreach ($labels as $label_name => $true) {
         if ($type == FIELD_LOAD_CURRENT) {
           if ($group_name != $groups[$entity_name] || $label != $label_name) {
             $aliases[] = array(
               'base' => $current_tables[$entity_name],
               'group' => $groups[$entity_name],
-              'title' => $label_name,
+              'title' => check_plain($label_name),
               'help' => t('This is an alias of @group: @field.', array('@group' => $group_name, '@field' => $label)),
             );
           }
@@ -309,6 +315,9 @@ function field_views_field_default_views_data($field) {
       $aliases = array();
       $also_known = array();
       foreach ($all_labels as $entity_name => $labels) {
+        if (empty($groups[$entity_name])) {
+          continue;
+        }
         foreach ($labels as $label_name => $true) {
           if ($group_name != $groups[$entity_name] || $label != $label_name) {
             if (count($field['columns']) == 1 || $column == 'value') {

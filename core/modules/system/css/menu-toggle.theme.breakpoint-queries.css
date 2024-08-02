@@ -1,0 +1,19 @@
+/**
+ * @file
+ * Breakpoint-specific CSS for the responsive menu toggle checkbox / button.
+ */
+
+/**
+ * Menu toggle button - hidden in desktop view.
+ */
+.menu-toggle-button,
+.menu-toggle-state {
+  display: none;
+}
+
+/**
+ * Menu state checkbox - always show menu in desktop view.
+ */
+.menu-toggle-state:not(:checked) ~ .menu {
+  display: block;
+}

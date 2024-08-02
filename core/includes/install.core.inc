@@ -173,7 +173,7 @@ function install_state_defaults() {
     // established.
     'settings_verified' => FALSE,
     // Installation tasks can set this to TRUE to force the page request to
-    // end (even if there is no themable output), in the case of an interactive
+    // end (even if there is no themeable output), in the case of an interactive
     // installation. This is needed only rarely; for example, it would be used
     // by an installation task that prints JSON output rather than returning a
     // themed page. The most common example of this is during batch processing,
@@ -569,7 +569,7 @@ function install_tasks($install_state) {
       'type' => 'form',
       'run' => $install_state['settings_verified'] ? INSTALL_TASK_SKIP : INSTALL_TASK_RUN_IF_NOT_COMPLETED,
     ),
-    'install_config_directories' => array(
+    'install_config_location' => array(
     ),
     'install_system_module' => array(
     ),
@@ -776,12 +776,14 @@ function install_verify_requirements(&$install_state) {
 
   // If there are errors, always display them. If there are only warnings, skip
   // them if the user has provided a URL parameter acknowledging the warnings
-  // and indicating a desire to continue anyway. See backdrop_requirements_url().
+  // and indicating a desire to continue anyway.
+  // @see backdrop_requirements_url().
   if ($severity == REQUIREMENT_ERROR || ($severity == REQUIREMENT_WARNING && empty($install_state['parameters']['continue']))) {
     if ($install_state['interactive']) {
       backdrop_set_title(st('Requirements problem'));
-      $status_report = theme('status_report', array('requirements' => $requirements));
-      $status_report .= st('Check the messages and <a href="!url">try again</a>.', array('!url' => check_url(backdrop_requirements_url($severity))));
+      $status_report = st('Resolve the problems and <a href="!url">try again</a>.', array('!url' => check_url(backdrop_requirements_url($severity))));
+      $status_report .= '<br><br>';
+      $status_report .= theme('status_report', array('requirements' => $requirements, 'phase' => 'install'));
       return $status_report;
     }
     else {
@@ -943,10 +945,11 @@ function install_hash_salt() {
 }
 
 /**
- * Installation task; Rewrite settings.php to include config directories.
+ * Installation task; Ensure config location is empty and writable, and (for
+ * config stored in files, rewrite settings.php to include config directories.
  */
-function install_config_directories(&$install_state) {
-  backdrop_install_config_directories();
+function install_config_location(&$install_state) {
+  backdrop_install_config_location();
 }
 
 /**
@@ -1360,9 +1363,9 @@ function install_select_language(&$install_state) {
           $output .= '<ul>';
           $output .= '<li><a href="' . check_url(backdrop_current_script_url(array('translate' => NULL))) . '">Reload the language selection page after adding translations</a></li>';
           $output .= '<li><a href="' . check_url(backdrop_current_script_url(array(
-              'langcode' => 'en',
-              'translate' => NULL
-            ))) . '">Continue installation in English</a></li>';
+            'langcode' => 'en',
+            'translate' => NULL,
+          ))) . '">Continue installation in English</a></li>';
           $output .= '</ul>';
         }
         else {
@@ -1585,10 +1588,11 @@ function install_import_translations(&$install_state) {
   $standard_languages = standard_language_list();
   if (!isset($standard_languages[$langcode])) {
     // Backdrop does not know about this language, so we prefill its values with
-    // our best guess. The user will be able to edit afterwards.
+    // our best guess. If required, this can be edited post-installation.
     $language = (object) array(
       'langcode' => $langcode,
       'name' => $langcode,
+      'native' => $langcode,
       'default' => TRUE,
     );
     language_save($language);
@@ -1711,7 +1715,13 @@ function install_finished(&$install_state) {
   // Will also trigger indexing of profile-supplied content or feeds.
   backdrop_cron_run();
 
-  $message = st('Congratulations, you installed @profile!', array('@profile' => backdrop_install_profile_distribution_name()));
+  $profile = backdrop_install_profile_distribution_name();
+  $message = st('Thank you for installing @profile!', array('@profile' => $profile));
+
+  // Confirming that the Dashboard module is enabled.
+  if (module_exists('dashboard')) {
+    $message .= '<br>' . st('If you are new to @profile, then the <a href="@dashboard">Dashboard</a> may be a good place to start.', array('@profile' => $profile, '@dashboard' => url('admin/dashboard')));
+  }
 
   if (!backdrop_is_cli()) {
     backdrop_set_message($message);
@@ -1854,7 +1864,7 @@ function _install_configure_form($form, &$form_state, &$install_state) {
 
   $form['admin_account']['account']['mail'] = array(
     '#type' => 'email',
-    '#title' => st('E-mail address'),
+    '#title' => st('Email address'),
     '#required' => TRUE,
     '#weight' => -5,
   );
@@ -1898,7 +1908,7 @@ function _install_configure_form($form, &$form_state, &$install_state) {
     '#type' => 'checkboxes',
     '#options' => array(
       1 => st('Check for updates automatically'),
-      2 => st('Receive e-mail notifications'),
+      2 => st('Receive email notifications'),
     ),
     '#default_value' => array(1, 2),
     '#description' => st('The system will notify you when updates and important security releases are available for installed components. Anonymous information about your site is sent to <a href="https://backdropcms.org">BackdropCMS.org</a>.'),
@@ -1940,14 +1950,26 @@ function install_configure_form_validate($form, &$form_state) {
  */
 function install_configure_form_submit($form, &$form_state) {
   global $user;
+  $timezone = $form_state['values']['date_default_timezone'];
+  $timezone_country = _install_get_timezone_country($timezone);
 
   config('system.core')
     ->set('site_name', $form_state['values']['site_name'])
     ->save();
   config('system.date')
-    ->set('default_timezone', $form_state['values']['date_default_timezone'])
-    ->set('default_country', _install_get_timezone_country($form_state['values']['date_default_timezone']))
+    ->set('default_timezone', $timezone)
+    ->set('default_country', $timezone_country)
     ->save();
+
+  // Update the default date/time formats for different regions.
+  if ($timezone_country == 'US') {
+    config('system.date')
+      ->set('formats.long.pattern', 'l, F j, Y - g:ia')
+      ->set('formats.medium.pattern', 'D, m/d/Y - g:ia')
+      ->set('formats.short.pattern', 'm/d/Y - g:ia')
+      ->set('formats.date_only.pattern', 'm/d/Y')
+      ->save();
+  }
 
   // Enable checking for updates on cron.
   if (module_exists('update')) {
@@ -1961,12 +1983,12 @@ function install_configure_form_submit($form, &$form_state) {
     }
   }
 
-  // We precreated user 1 with placeholder values. Let's save the real values.
+  // We pre-created user 1 with placeholder values. Let's save the real values.
   $account = user_load(1);
   $account->init = $account->mail = $form_state['values']['account']['mail'];
   $account->roles = !empty($account->roles) ? $account->roles : array();
   $account->status = 1;
-  $account->timezone = $form_state['values']['date_default_timezone'];
+  $account->timezone = $timezone;
   $account->pass = $form_state['values']['account']['pass'];
   $account->name = $form_state['values']['account']['name'];
   $account->save();

@@ -1,0 +1,9 @@
+{
+    "_config_name": "date_views.settings",
+    "date_views_month_format_with_year": "F Y",
+    "date_views_month_format_without_year": "F",
+    "date_views_day_format_with_year": "l, F j, Y",
+    "date_views_day_format_without_year": "l, F j",
+    "date_views_week_format_with_year": "F j, Y",
+    "date_views_week_format_without_year": "F j"
+}

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of views_handler_field_math.
@@ -26,7 +25,7 @@ class views_handler_field_math extends views_handler_field_numeric {
     $form['expression'] = array(
       '#type' => 'textarea',
       '#title' => t('Expression'),
-      '#description' => t('Enter mathematical expressions such as 2 + 2 or sqrt(5). You may assign variables and create mathematical functions and evaluate them. Use the ; to separate these. For example: f(x) = x + 2; f(2).'),
+      '#description' => t("Enter mathematical expressions such as <code>2 + 2</code> or <code>sqrt(5)</code>. You may assign variables and create mathematical functions and evaluate them. Use the <code>;</code> to separate these. For example: <code>f(x) = x + 2; f(2)</code>. The result of the mathematical expression of the previous row can be accessed by using the <code>[expression]</code> token itself."),
       '#default_value' => $this->options['expression'],
     );
 
@@ -54,23 +53,30 @@ class views_handler_field_math extends views_handler_field_numeric {
 
     // The rest is directly from views_handler_field_numeric but because it
     // does not allow the value to be passed in, it is copied.
-    if (!empty($this->options['set_precision'])) {
-      $value = number_format($value, $this->options['precision'], $this->options['decimal'], $this->options['separator']);
-    }
-    else {
-      $remainder = abs($value) - intval(abs($value));
-      $value = $value > 0 ? floor($value) : ceil($value);
-      $value = number_format($value, 0, '', $this->options['separator']);
-      if ($remainder) {
-        // The substr may not be locale safe.
-        $value .= $this->options['decimal'] . substr($remainder, 2);
-      }
-    }
 
     // Check to see if hiding should happen before adding prefix and suffix.
     if ($this->options['hide_empty'] && empty($value) && ($value !== 0 || $this->options['empty_zero'])) {
       return '';
     }
+
+    if (!empty($this->options['set_precision'])) {
+      $precision = $this->options['precision'];
+    }
+    elseif ($decimal_position = strpos($value, '.')) {
+      $precision = strlen(rtrim($value, '0')) - $decimal_position - 1;
+    }
+    else {
+      $precision = 0;
+    }
+
+    // Use round first to avoid negative zeros.
+    $value = round($value, $precision);
+    // Test against both integer zero and float zero.
+    if ($this->options['empty_zero'] && ($value === 0 || $value === 0.0)) {
+       return '';
+     }
+
+    $value = number_format($value, $precision, $this->options['decimal'], $this->options['separator']);
 
     // Should we format as a plural.
     if (!empty($this->options['format_plural']) && ($value != 0 || !$this->options['empty_zero'])) {

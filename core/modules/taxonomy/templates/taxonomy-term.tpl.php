@@ -26,7 +26,7 @@
  * - $zebra: Outputs either "even" or "odd". Useful for zebra striping in
  *   teaser listings.
  * - $id: Position of the term. Increments each time it's output.
- * - $is_front: Flags true when presented in the front page.
+ * - $is_front: Flags true when presented in the home page.
  * - $logged_in: Flags true when the current user is a logged-in member.
  * - $is_admin: Flags true when the current user is an administrator.
  *

@@ -354,6 +354,19 @@ function image_update_1007() {
 }
 
 /**
+ * Uninstall the imagecache_token contrib module, now part of core.
+ */
+function image_update_1008() {
+  $module = db_query("SELECT name FROM {system} WHERE name = 'imagecache_token' AND type = 'module'")->fetchField();
+  if ($module) {
+    db_query("DELETE FROM {system} WHERE name = 'imagecache_token' AND type = 'module'");
+  }
+  else {
+    return t('<em>Imagecache Token</em> module not found. Nothing to be done.');
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

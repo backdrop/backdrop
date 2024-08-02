@@ -3,7 +3,7 @@
     "_module": "file",
     "type": "audio",
     "name": "Audio",
-    "description": "An Audio file is a sound recording.",
+    "description": "An audio file is a sound recording.",
     "mimetypes": [
         "audio/*"
     ],

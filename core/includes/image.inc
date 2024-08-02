@@ -22,15 +22,23 @@
  * software.
  *
  * Image toolkits are discovered based on the associated module's
- * hook_image_toolkits. Additionally the image toolkit include file
- * must be identified in the files array in the module.info file. The
- * toolkit must then be enabled using the admin/config/media/image-toolkit
- * form.
+ * hook_image_toolkits. The toolkit must then be enabled using the
+ * admin/config/media/image-toolkit form.
  *
  * Only one toolkit may be selected at a time. If a module author wishes to call
  * a specific toolkit they can check that it is installed by calling
  * image_get_available_toolkits(), and then calling its functions directly.
  */
+
+/**
+ * Default width for SVG images.
+ */
+define('IMAGE_SVG_DEFAULT_WIDTH', 200);
+
+/**
+ * Default height for SVG images.
+ */
+define('IMAGE_SVG_DEFAULT_HEIGHT', 200);
 
 /**
  * Gets a list of available toolkits.
@@ -100,6 +108,35 @@ function image_toolkit_invoke($method, stdClass $image, array $params = array())
 }
 
 /**
+ * Gets supported image extensions.
+ *
+ * Backdrop supports GIF, JPG, PNG, and WEBP file formats when supported by the
+ * GD toolkit, and may support others, depending on the currently used toolkit.
+ *
+ * @return array
+ *   Array of supported extensions.
+ *
+ * @since 1.25.0 Function added.
+ */
+function image_get_supported_extensions() {
+  $toolkit = image_get_toolkit();
+  $function = 'image_' . $toolkit . '_supported_extensions';
+  if (function_exists($function)) {
+    $extensions = $function();
+    $extensions[] = 'svg';
+    return $extensions;
+  }
+  watchdog('image', 'The selected image handling toolkit %toolkit should provide a %function callback.',
+    array(
+      '%toolkit' => $toolkit,
+      '%function' => $function),
+    WATCHDOG_ERROR
+  );
+  // Provide a fallback list of extensions.
+  return array('jpg', 'jpeg', 'gif', 'png');
+}
+
+/**
  * Gets details about an image.
  *
  * Backdrop supports GIF, JPG and PNG file formats when used with the GD
@@ -137,6 +174,18 @@ function image_get_info($filepath, $toolkit = FALSE) {
     if (isset($details) && is_array($details)) {
       $details['file_size'] = filesize($filepath);
     }
+    elseif (image_is_svg($filepath)) {
+      // Dimensions could be FALSE if the SVG is invalid, although we should
+      // have caught that on upload.
+      $dimensions = image_get_svg_dimensions($filepath);
+      $details = array(
+        'width'     => isset($dimensions['width']) ? $dimensions['width'] : IMAGE_SVG_DEFAULT_WIDTH,
+        'height'    => isset($dimensions['height']) ? $dimensions['height'] : IMAGE_SVG_DEFAULT_HEIGHT,
+        'extension' => 'svg',
+        'mime_type' => 'image/svg+xml',
+        'file_size' => filesize($filepath),
+      );
+    }
   }
 
   return $details;
@@ -146,8 +195,7 @@ function image_get_info($filepath, $toolkit = FALSE) {
  * Scales an image to the exact width and height given.
  *
  * This function achieves the target aspect ratio by cropping the original image
- * equally on both sides, or equally on the top and bottom. This function is
- * useful to create uniform sized avatars from larger images.
+ * according to the selected anchor type.
  *
  * The resulting image always has the exact target dimensions.
  *
@@ -157,18 +205,26 @@ function image_get_info($filepath, $toolkit = FALSE) {
  *   The target width, in pixels.
  * @param $height
  *   The target height, in pixels.
+ * @param $anchor
+ *   The anchor to use when cropping.
  *
  * @return
  *   TRUE on success, FALSE on failure.
  *
+ * @since 1.21.0 $anchor parameter added.
+ *
  * @see image_load()
  * @see image_resize()
  * @see image_crop()
+ * @see image_scale_and_crop_effect()
  */
-function image_scale_and_crop(stdClass $image, $width, $height) {
+function image_scale_and_crop(stdClass $image, $width, $height, $anchor = 'center-center') {
   $scale = max($width / $image->info['width'], $height / $image->info['height']);
-  $x = ($image->info['width'] * $scale - $width) / 2;
-  $y = ($image->info['height'] * $scale - $height) / 2;
+
+  // Set the top left coordinates of the crop area, based on the anchor.
+  list($x, $y) = explode('-', $anchor);
+  $x = image_filter_keyword($x, $image->info['width'] * $scale, $width);
+  $y = image_filter_keyword($y, $image->info['height'] * $scale, $height);
 
   if (image_resize($image, $image->info['width'] * $scale, $image->info['height'] * $scale)) {
     return image_crop($image, $x, $y, $width, $height);
@@ -492,6 +548,118 @@ function image_hex2rgba(&$hex) {
     'blue' => hexdec($colors[3]),
     'alpha' => isset($colors[4]) ? hexdec($colors[4]) : 0,
   );
+}
+
+/**
+ * Determine if a file URI is an SVG image based on its file extension.
+ *
+ * @param string $uri
+ *   A path or URI to an image.
+ *
+ * @return bool
+ *   TRUE if the image is an SVG. FALSE if it is not.
+ *
+ * @since 1.28.0 Function added.
+ */
+function image_is_svg($uri) {
+  $mimetype = file_get_mimetype($uri);
+  return $mimetype === 'image/svg+xml';
+}
+
+/**
+ * Add attributes to an SVG string.
+ *
+ * @param string $svg_content
+ *   The entire contents of an SVG image.
+ * @param array $attributes
+ *   An array of attributes to add to the SVG image. The special case of an
+ *   "alt" attribute is automatically converted to a child <title> element,
+ *   which is the accessible mechanism for alternative text within SVGs.
+ *
+ * @return string
+ *   The SVG image contents with the attributes added.
+ *
+ * @since 1.28.0 Function added.
+ */
+function image_add_svg_attributes($svg_content, array $attributes) {
+  $doc = new DOMDocument();
+  $doc->loadXML($svg_content);
+  $svg_tag = $doc->getElementsByTagName('svg')->item(0);
+
+  // Convert the alt attribute to a <title> element.
+  if (isset($attributes['alt'])) {
+      try {
+        if (strlen($attributes['alt'])) {
+          $title = $doc->createElement('title');
+          $title->textContent = $attributes['alt'];
+          // Since DOMDocument::prepend() is not available in PHP versions prior
+          // to v8, we are using DOMNode::insertBefore().
+          $svg_tag->insertBefore($title, $svg_tag->firstChild);
+        }
+        // Remove any given <title> element if alt is an empty string.
+        elseif ($svg_tag->firstChild && $svg_tag->firstChild->nodeName === 'title') {
+          $svg_tag->removeChild($svg_tag->firstChild);
+        }
+      } catch (DOMException $e) {}
+    unset($attributes['alt']);
+  }
+
+  foreach ($attributes as $attribute_name => $attribute_value) {
+    $attribute_value = implode(' ', (array) $attribute_value);
+    if (strlen($attribute_value)) {
+      $svg_tag->setAttribute($attribute_name, $attribute_value);
+    }
+    else {
+      $svg_tag->removeAttribute($attribute_name);
+    }
+  }
+  return $doc->saveXML($svg_tag);
+}
+
+/**
+ * Get an SVG image's defined dimensions.
+ *
+ * @param string $uri
+ *   The URI or path to an SVG image.
+ *
+ * @return array|FALSE
+ *   An array containing the keys "width" and "height" as integer values. If the
+ *   image is an SVG but no set dimensions are available, these keys will have
+ *   NULL values. If the image is not an SVG, or the SVG file is empty or
+ *   invalid, FALSE will be returned.
+ *
+ * @since 1.28.0 Function added.
+ */
+function image_get_svg_dimensions($uri) {
+  // Safety check.
+  if (!image_is_svg($uri)) {
+    return FALSE;
+  }
+
+  // Return cached dimensions if already retrieved once this request.
+  $cached_images = &backdrop_static(__FUNCTION__, array());
+  if (isset($cached_images[$uri])) {
+    return $cached_images[$uri];
+  }
+
+  // If there are no dimensions, store the dimensions as zero.
+  // Required for compatibility with image field storage.
+  $svg_dimensions = array();
+  $file_contents = file_get_contents($uri);
+  if ($file_contents && $svg = simplexml_load_string($file_contents)) {
+    foreach ($svg->attributes() as $attribute => $value) {
+      if ($attribute === 'width' || $attribute === 'height') {
+        $svg_dimensions[$attribute] = (int) $value;
+      }
+    }
+  }
+  else {
+    return FALSE;
+  }
+
+  // Save values to static cache.
+  $cached_images[$uri] = $svg_dimensions;
+  return $svg_dimensions;
 }
 
 /**

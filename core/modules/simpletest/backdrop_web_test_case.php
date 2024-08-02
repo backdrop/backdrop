@@ -74,6 +74,7 @@ abstract class BackdropTestCase {
     '#fail' => 0,
     '#exception' => 0,
     '#debug' => 0,
+    '#duration' => 0,
   );
 
   /**
@@ -355,7 +356,7 @@ abstract class BackdropTestCase {
    *   The message to display along with the assertion.
    * @param $group
    *   The type of assertion - examples are "Browser", "PHP".
-   * @return
+   * @return boolean
    *   TRUE if the assertion succeeded, FALSE otherwise.
    */
   protected function assertTrue($value, $message = '', $group = 'Other') {
@@ -567,6 +568,9 @@ abstract class BackdropTestCase {
    *   methods during debugging.
    */
   public function run(array $methods = array()) {
+    // Get start time so that we can see how long tests are taking.
+    $start = microtime(TRUE);
+
     $config = config('simpletest.settings');
     // Initialize verbose debugging.
     simpletest_verbose(NULL, config_get('system.core', 'file_public_path'), get_class($this));
@@ -629,6 +633,10 @@ abstract class BackdropTestCase {
     // Clear out the error messages and restore error handler.
     backdrop_get_messages();
     restore_error_handler();
+
+    // Get the stop time and put it in the results to display later.
+    $end = microtime(TRUE);
+    $this->results['#duration'] = round($end - $start, 3);
   }
 
   /**
@@ -663,16 +671,9 @@ abstract class BackdropTestCase {
         E_USER_WARNING => 'User warning',
         E_USER_NOTICE => 'User notice',
         E_RECOVERABLE_ERROR => 'Recoverable error',
+        E_DEPRECATED => 'Deprecated',
+        E_USER_DEPRECATED => 'User deprecated',
       );
-
-      // PHP 5.3 adds new error logging constants. Add these conditionally for
-      // backwards compatibility with PHP 5.2.
-      if (defined('E_DEPRECATED')) {
-        $error_map += array(
-          E_DEPRECATED => 'Deprecated',
-          E_USER_DEPRECATED => 'User deprecated',
-        );
-      }
 
       $backtrace = debug_backtrace();
       $this->error($message, $error_map[$severity], _backdrop_get_last_caller($backtrace));
@@ -818,6 +819,11 @@ class BackdropUnitTestCase extends BackdropTestCase {
    * @var array
    */
   protected $originalModuleList;
+
+  /**
+   * @var object
+   */
+  protected $originalLanguage;
 
   /**
    * Constructor for BackdropUnitTestCase.
@@ -992,7 +998,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected $cookieFile = NULL;
 
   /**
-   * An array of cookies set in the most recent cURL request.
+   * The cookies of the page currently loaded in the internal browser.
    *
    * @var array
    */
@@ -1033,7 +1039,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected $originalCleanUrl;
 
   /**
-   * The original shutdown handlers array, before it was cleaned for testing purposes.
+   * The original shutdown handlers array, before it was cleaned for testing.
    *
    * @var array
    */
@@ -1052,7 +1058,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   /**
    * Whether the files were copied to the test files directory.
    */
-  protected $generatedTestFiles = FALSE;
+  protected $generatedTestFiles = array();
 
   /**
    * The maximum number of redirects to follow when handling responses.
@@ -1067,6 +1073,16 @@ class BackdropWebTestCase extends BackdropTestCase {
   public $public_files_directory;
   public $private_files_directory;
   public $temp_files_directory;
+
+  /**
+   * @var object
+   */
+  protected $originalLanguage;
+
+  /**
+   * @var object
+   */
+  protected $originalLanguageUrl;
 
   /**
    * Constructor for BackdropWebTestCase.
@@ -1217,34 +1233,45 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   List of files that match filter.
    */
   protected function backdropGetTestFiles($type, $size = NULL) {
-    if (empty($this->generatedTestFiles)) {
-      // Generate binary test files.
-      $lines = array(64, 1024);
-      $count = 0;
-      foreach ($lines as $line) {
-        simpletest_generate_file('binary-' . $count++, 64, $line, 'binary');
-      }
-
-      // Generate text test files.
-      $lines = array(16, 256, 1024, 2048, 20480);
-      $count = 0;
-      foreach ($lines as $line) {
-        simpletest_generate_file('text-' . $count++, 64, $line, 'text');
-      }
-
-      // Copy other test files from simpletest.
-      $original = backdrop_get_path('module', 'simpletest') . '/files';
-      $files = file_scan_directory($original, '/(html|image|javascript|php|sql)-.*/');
-      foreach ($files as $file) {
-        file_unmanaged_copy($file->uri, config_get('system.core', 'file_public_path'));
-      }
-
-      $this->generatedTestFiles = TRUE;
-    }
-
     $files = array();
     // Make sure type is valid.
-    if (in_array($type, array('binary', 'html', 'image', 'javascript', 'php', 'sql', 'text'))) {
+    $possible_types = array('binary', 'html', 'image', 'svg', 'javascript', 'php', 'sql', 'text');
+    if (in_array($type, $possible_types)) {
+
+      if (!in_array($type, $this->generatedTestFiles)) {
+        switch ($type) {
+          case 'binary':
+            // Generate binary test files.
+            $lines = array(64, 1024);
+            $count = 0;
+            foreach ($lines as $line) {
+              simpletest_generate_file('binary-' . $count++, 64, $line, 'binary');
+            }
+            $this->generatedTestFiles[] = 'binary';
+            break;
+
+          case 'text':
+            // Generate text test files.
+            $lines = array(16, 256, 1024, 2048, 20480);
+            $count = 0;
+            foreach ($lines as $line) {
+              simpletest_generate_file('text-' . $count++, 64, $line, 'text');
+            }
+            $this->generatedTestFiles[] = 'text';
+            break;
+
+          default:
+            // Copy other test files from simpletest.
+            $original = backdrop_get_path('module', 'simpletest') . '/files';
+            $files = file_scan_directory($original, '/' . $type . '-.*/');
+            foreach ($files as $file) {
+              file_unmanaged_copy($file->uri, config_get('system.core', 'file_public_path'));
+            }
+            $this->generatedTestFiles[] = $type;
+            break;
+        }
+      }
+
       $files = file_scan_directory('public://', '/' . $type . '\-.*/');
 
       // If size is set then remove any files that are not of that size.
@@ -1407,14 +1434,14 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   $account->pass_raw = $pass_raw;
    * @endcode
    *
-   * @param $account
+   * @param User $account
    *   User object representing the user to log in.
-   * @param $by_email
+   * @param boolean $by_email
    *   Whether to use email for login instead of username.
    *
    * @see backdropCreateUser()
    */
-  protected function backdropLogin($account, $by_email = FALSE) {
+  protected function backdropLogin(User $account, $by_email = FALSE) {
     global $user;
     if ($this->loggedInUser) {
       $this->backdropLogout();
@@ -1509,15 +1536,16 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function prepareEnvironment() {
     global $user, $language, $language_url, $settings, $config_directories;
+    $site_config = config('system.core');
 
     // Store necessary current values before switching to prefixed database.
     $this->originalLanguage = $language;
     $this->originalLanguageUrl = $language_url;
     $this->originalConfigDirectories = $config_directories;
-    $this->originalFileDirectory = config_get('system.core', 'file_public_path');
+    $this->originalFileDirectory = $site_config->get('file_public_path');
     $this->verboseDirectoryUrl = file_create_url($this->originalFileDirectory . '/simpletest/verbose');
     $this->originalProfile = backdrop_get_profile();
-    $this->originalCleanUrl = config_get('system.core', 'clean_url');
+    $this->originalCleanUrl = $site_config->get('clean_url');
     $this->originalUser = $user;
     $this->originalSettings = $settings;
 
@@ -1550,17 +1578,13 @@ class BackdropWebTestCase extends BackdropTestCase {
     file_prepare_directory($this->public_files_directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     file_prepare_directory($this->private_files_directory, FILE_CREATE_DIRECTORY);
     file_prepare_directory($this->temp_files_directory, FILE_CREATE_DIRECTORY);
-    $this->generatedTestFiles = FALSE;
+    $this->generatedTestFiles = array();
 
     // Set the new config directories. During test execution, these values are
     // manually set directly in config_get_config_directory().
     $config_base_path = 'files/simpletest/' . $this->fileDirectoryName . '/config_';
     $config_directories['active'] = $config_base_path . 'active';
     $config_directories['staging'] = $config_base_path . 'staging';
-    $active_directory = config_get_config_directory('active');
-    $staging_directory = config_get_config_directory('staging');
-    file_prepare_directory($active_directory, FILE_CREATE_DIRECTORY);
-    file_prepare_directory($staging_directory, FILE_CREATE_DIRECTORY);
 
     // Log fatal errors.
     ini_set('log_errors', 1);
@@ -1581,7 +1605,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   /**
    * Copies the cached tables and config for a profile if one is available.
    *
-   * @return
+   * @return boolean
    *   TRUE when cache used, FALSE when cache is not available.
    *
    * @see BackdropWebTestCase::setUp()
@@ -1611,15 +1635,19 @@ class BackdropWebTestCase extends BackdropTestCase {
   /**
    * Recursively copy one directory to another.
    *
+   * @param string $src
+   *   Source directory to copy.
+   * @param string $dst
+   *   Destination directory to copy files to.
    */
   private function recursiveCopy($src, $dst) {
     $dir = opendir($src);
-    if(!file_exists($dst)){
+    if (!file_exists($dst)) {
       mkdir($dst);
     }
-    while(false !== ( $file = readdir($dir)) ) {
-      if (( $file != '.' ) && ( $file != '..' )) {
-        if ( is_dir($src . '/' . $file) ) {
+    while (FALSE !== ($file = readdir($dir))) {
+      if ($file != '.' && $file != '..' && $file != '.htaccess') {
+        if (is_dir($src . '/' . $file)) {
           $this->recursiveCopy($src . '/' . $file, $dst . '/' . $file);
         }
         else {
@@ -1678,6 +1706,17 @@ class BackdropWebTestCase extends BackdropTestCase {
       return FALSE;
     }
 
+    // This has to happen before any config changes are made to ensure that the
+    // database tables from the test cache exist.
+    $use_cache = $this->useCache();
+
+    if (!$use_cache) {
+      // Initialize config storage. The database storage needs to be done after
+      // switching the database prefix.
+      config_get_config_storage('active')->initializeStorage();
+      config_get_config_storage('staging')->initializeStorage();
+    }
+
     // Preset the 'install_profile' system variable, so the first call into
     // system_rebuild_module_data() (in backdrop_install_system()) will register
     // the test's profile as a module. Without this, the installation profile of
@@ -1686,11 +1725,18 @@ class BackdropWebTestCase extends BackdropTestCase {
     config_install_default_config('system');
     config_set('system.core', 'install_profile', $this->profile);
 
-    $use_cache = $this->useCache();
     if (!$use_cache) {
       // Perform the actual Backdrop installation.
       include_once BACKDROP_ROOT . '/core/includes/install.inc';
       backdrop_install_system();
+
+      // Set path variables.
+      $core_config = config('system.core');
+      $core_config->set('file_default_scheme', 'public');
+      $core_config->set('file_public_path', $this->public_files_directory);
+      $core_config->set('file_private_path', $this->private_files_directory);
+      $core_config->set('file_temporary_path', $this->temp_files_directory);
+      $core_config->save();
 
       // Ensure schema versions are recalculated.
       backdrop_static_reset('backdrop_get_schema_versions');
@@ -1707,14 +1753,15 @@ class BackdropWebTestCase extends BackdropTestCase {
         module_enable(array($this->profile), FALSE);
       }
     }
-
-    // Set path variables.
-    $core_config = config('system.core');
-    $core_config->set('file_default_scheme', 'public');
-    $core_config->set('file_public_path', $this->public_files_directory);
-    $core_config->set('file_private_path', $this->private_files_directory);
-    $core_config->set('file_temporary_path', $this->temp_files_directory);
-    $core_config->save();
+    else {
+      // Set path variables. This must be done even when using a profile cache.
+      $core_config = config('system.core');
+      $core_config->set('file_default_scheme', 'public');
+      $core_config->set('file_public_path', $this->public_files_directory);
+      $core_config->set('file_private_path', $this->private_files_directory);
+      $core_config->set('file_temporary_path', $this->temp_files_directory);
+      $core_config->save();
+    }
 
     // Set 'parent_profile' of simpletest to add the parent profile's
     // search path to the child site's search paths.
@@ -1737,10 +1784,6 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Reset/rebuild all data structures after enabling the modules.
     $this->resetAll();
 
-    // Run cron once in that environment, as install.php does at the end of
-    // the installation process.
-    backdrop_cron_run();
-
     // Ensure that the session is not written to the new environment and replace
     // the global $user session with uid 1 from the new test site.
     backdrop_save_session(FALSE);
@@ -1760,6 +1803,17 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     // Use the test mail class instead of the default mail handler class.
     config_set('system.mail', 'default-system', 'TestingMailSystem');
+
+    // Disable news checking against BackdropCMS.org.
+    $dashboard_config = config('dashboard.settings');
+    if (!$dashboard_config->isNew()) {
+      $dashboard_config->set('news_feed_url', FALSE);
+      $dashboard_config->save();
+    }
+
+    // Run cron once in that environment, as install.php does at the end of
+    // the installation process.
+    backdrop_cron_run();
 
     backdrop_set_time_limit($this->timeLimit);
     $this->setup = TRUE;
@@ -1825,9 +1879,13 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     $emailCount = count(state_get('test_email_collector', array()));
     if ($emailCount) {
-      $message = format_plural($emailCount, '1 e-mail was sent during this test.', '@count e-mails were sent during this test.');
-      $this->pass($message, t('E-mail'));
+      $message = format_plural($emailCount, '1 email was sent during this test.', '@count emails were sent during this test.');
+      $this->pass($message, t('Email'));
     }
+
+    // Reset static variables, this may flush pending writes to the theme
+    // registry as well.
+    backdrop_static_reset();
 
     // Delete temporary files directory.
     file_unmanaged_delete_recursive($this->originalFileDirectory . '/simpletest/' . $this->fileDirectoryName);
@@ -1848,8 +1906,14 @@ class BackdropWebTestCase extends BackdropTestCase {
       $this->fail('Failed to drop all prefixed tables.');
     }
 
+    // In PHP 8 some tests encounter problems as some shutdown code tries to
+    // access the database connection after it's been explicitly closed (for
+    // example the destructor of BackdropCacheArray). We avoid this by not fully
+    // destroying the test database connection.
+    $close = \PHP_VERSION_ID < 80000;
+
     // Get back to the original connection.
-    Database::removeConnection('default');
+    Database::removeConnection('default', $close);
     Database::renameConnection('simpletest_original_default', 'default');
 
     // Delete the database table prefix record.
@@ -1885,15 +1949,14 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Rebuild caches.
     $this->refreshVariables();
 
-    // Reset public files directory.
-    $GLOBALS['conf']['file_public_path'] = $this->originalFileDirectory;
-
     // Reset language.
     $language = $this->originalLanguage;
     $language_url = $this->originalLanguageUrl;
 
-    // Close the CURL handler.
+    // Close the CURL handler and reset the cookies array, so that test classes
+    // containing multiple tests are not polluted.
     $this->curlClose();
+    $this->cookies = array();
   }
 
   /**
@@ -2053,7 +2116,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Errors are being sent via X-Backdrop-Assertion-* headers,
     // generated by _backdrop_log_error() in the exact form required
     // by BackdropWebTestCase::error().
-    if (preg_match('/^X-Backdrop-Assertion-[0-9]+: (.*)$/', $header, $matches)) {
+    if (preg_match('/^X-Backdrop-Assertion-[0-9]+: (.*)$/', trim($header), $matches)) {
       // Call BackdropWebTestCase::error() with the parameters from the header.
       call_user_func_array(array(&$this, 'error'), unserialize(urldecode($matches[1])));
     }
@@ -2271,14 +2334,7 @@ class BackdropWebTestCase extends BackdropTestCase {
             foreach ($upload as $key => $file) {
               $file = backdrop_realpath($file);
               if ($file && is_file($file)) {
-                // Use the new CurlFile class for file uploads when using PHP
-                // 5.5 or higher.
-                if (class_exists('CurlFile')) {
-                  $post[$key] = curl_file_create($file);
-                }
-                else {
-                  $post[$key] = '@' . $file;
-                }
+                $post[$key] = curl_file_create($file);
               }
             }
           }
@@ -2618,6 +2674,8 @@ class BackdropWebTestCase extends BackdropTestCase {
           case 'range':
           case 'text':
           case 'tel':
+          case 'date':
+          case 'time':
           case 'textarea':
           case 'url':
           case 'password':
@@ -2799,8 +2857,8 @@ class BackdropWebTestCase extends BackdropTestCase {
       $xpath = $this->buildXPathQuery($xpath, $arguments);
       $result = $this->elements->xpath($xpath);
       // Some combinations of PHP / libxml versions return an empty array
-      // instead of the documented FALSE. Forcefully convert any false-ish values
-      // to an empty array to allow foreach(...) constructions.
+      // instead of the documented FALSE. Forcefully convert any false-ish
+      // values to an empty array to allow foreach(...) constructions.
       return $result ? $result : array();
     }
     else {
@@ -3044,7 +3102,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @param $all_requests
    *   Boolean value specifying whether to check all requests if the header is
    *   not found in the last request. Defaults to FALSE.
-   * @return
+   * @return string|FALSE
    *   The HTTP header value or FALSE if not found.
    */
   protected function backdropGetHeader($name, $all_requests = FALSE) {
@@ -3082,12 +3140,12 @@ class BackdropWebTestCase extends BackdropTestCase {
   }
 
   /**
-   * Gets an array containing all e-mails sent during this test case.
+   * Gets an array containing all emails sent during this test case.
    *
    * @param $filter
-   *   An array containing key/value pairs used to filter the e-mails that are returned.
+   *   An array containing key/value pairs used to filter the emails that are returned.
    * @return
-   *   An array containing e-mail messages captured during the current test.
+   *   An array containing email messages captured during the current test.
    */
   protected function backdropGetMails($filter = array()) {
     $captured_emails = state_get('test_email_collector', array());
@@ -3249,7 +3307,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @return
    *   TRUE on pass, FALSE on fail.
    */
-  protected function assertTextHelper($text, $message = '', $group, $not_exists) {
+  protected function assertTextHelper($text, $message, $group, $not_exists) {
     if ($this->plainTextContent === FALSE) {
       $this->plainTextContent = filter_xss($this->backdropGetContent(), array());
     }
@@ -3315,7 +3373,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @return
    *   TRUE on pass, FALSE on fail.
    */
-  protected function assertUniqueTextHelper($text, $message = '', $group, $be_unique) {
+  protected function assertUniqueTextHelper($text, $message, $group, $be_unique) {
     if ($this->plainTextContent === FALSE) {
       $this->plainTextContent = filter_xss($this->backdropGetContent(), array());
     }
@@ -3437,11 +3495,11 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @return
    *   TRUE on pass, FALSE on fail.
    */
-  protected function assertThemeOutput($callback, array $variables = array(), $expected, $message = '', $group = 'Other') {
+  protected function assertThemeOutput($callback, array $variables, $expected, $message = '', $group = 'Other') {
     $output = theme($callback, $variables);
-    $this->verbose('Variables:' . '<pre>' .  check_plain(var_export($variables, TRUE)) . '</pre>'
-      . '<hr />' . 'Result:' . '<pre>' .  check_plain(var_export($output, TRUE)) . '</pre>'
-      . '<hr />' . 'Expected:' . '<pre>' .  check_plain(var_export($expected, TRUE)) . '</pre>'
+    $this->verbose('Variables:<pre>' .  check_plain(var_export($variables, TRUE)) . '</pre>'
+      . '<hr />Result:<pre>' .  check_plain(var_export($output, TRUE)) . '</pre>'
+      . '<hr />Expected:<pre>' .  check_plain(var_export($expected, TRUE)) . '</pre>'
       . '<hr />' . $output
     );
     if (!$message) {
@@ -3856,7 +3914,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   }
 
   /**
-   * Asserts that the most recently sent e-mail message has the given value.
+   * Asserts that the most recently sent email message has the given value.
    *
    * The field in $name must have the content described in $value.
    *
@@ -3873,11 +3931,11 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected function assertMail($name, $value = '', $message = '') {
     $captured_emails = state_get('test_email_collector', array());
     $email = end($captured_emails);
-    return $this->assertTrue($email && isset($email[$name]) && $email[$name] == $value, $message, t('E-mail'));
+    return $this->assertTrue($email && isset($email[$name]) && $email[$name] == $value, $message, t('Email'));
   }
 
   /**
-   * Asserts that the most recently sent e-mail message has the string in it.
+   * Asserts that the most recently sent email message has the string in it.
    *
    * @param $field_name
    *   Name of field or message property to assert: subject, body, id, ...
@@ -3907,7 +3965,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   }
 
   /**
-   * Asserts that the most recently sent e-mail message has the pattern in it.
+   * Asserts that the most recently sent email message has the pattern in it.
    *
    * @param $field_name
    *   Name of field or message property to assert: subject, body, id, ...
@@ -3936,6 +3994,35 @@ class BackdropWebTestCase extends BackdropTestCase {
       $mail = $mails[$i];
       $this->verbose(t('Email:') . '<pre>' . print_r($mail, TRUE) . '</pre>');
     }
+  }
+
+  /**
+   * Verifies that a watchdog message has been entered.
+   *
+   * @param string $watchdog_message
+   *   The watchdog message.
+   * @param array $variables
+   *   The array of variables passed to watchdog().
+   * @param string $message
+   *   The assertion message.
+   *
+   * @since 1.19.0 Method added.
+   */
+  protected function assertWatchdogMessage($watchdog_message, array $variables, $message) {
+    $status = (bool) db_query_range("SELECT 1 FROM {watchdog} WHERE message = :message AND variables = :variables", 0, 1, array(
+      ':message' => $watchdog_message,
+      ':variables' => serialize($variables),
+    ))->fetchField();
+    return $this->assert($status, format_string('@message', array('@message' => $message)));
+  }
+
+  /**
+   * Clears the watchdog database table.
+   *
+   * @since 1.19.0 Method added.
+   */
+  protected function clearWatchdog() {
+    db_truncate('watchdog')->execute();
   }
 }
 

@@ -9,7 +9,6 @@
 }
 
 .l-header a {
-  -webkit-transition: background-color 0.25s ease-out;
   transition: background-color 0.25s ease-out;
 }
 
@@ -189,6 +188,6 @@
 
 .header-menu .links li:before,
 .header-menu .links li:after {
-  /* Hides arrows intented for action links in body */
+  /* Hides arrows intended for action links in body */
   display: none;
 }

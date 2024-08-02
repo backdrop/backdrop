@@ -73,3 +73,7 @@
   background: #EE3D23 url(../../../misc/message-32-error.png) no-repeat center center;
   background-size: 25px;
 }
+
+.dblog-clear-log-form {
+  margin-top: 2em;
+}

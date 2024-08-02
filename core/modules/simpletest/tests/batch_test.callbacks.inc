@@ -1,6 +1,4 @@
 <?php
-
-
 /**
  * @file
  * Batch callbacks for the Batch API tests.

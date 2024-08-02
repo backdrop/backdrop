@@ -30,6 +30,7 @@
             "aab75ee1-7a16-4137-b253-83a0f6323936"
         ],
         "half2": [
+            "271e8ac3-a2a9-4a0b-8d45-69e68e95938a",
             "a4b4935d-e085-4d77-a522-ea805e172c1a",
             "2496a766-3efd-410d-88ea-c84f7b67806e",
             "fe51ec3f-6310-42cd-87f1-1c2361d666c1"
@@ -186,6 +187,29 @@
                     ]
                 },
                 "uuid": "aab75ee1-7a16-4137-b253-83a0f6323936",
+                "style": {
+                    "plugin": "default",
+                    "data": {
+                        "settings": {
+                            "classes": ""
+                        }
+                    }
+                }
+            }
+        },
+        "271e8ac3-a2a9-4a0b-8d45-69e68e95938a": {
+            "plugin": "dashboard:news",
+            "data": {
+                "module": "dashboard",
+                "delta": "news",
+                "settings": {
+                    "title_display": "default",
+                    "title": "",
+                    "style": "default",
+                    "block_settings": [],
+                    "contexts": []
+                },
+                "uuid": "271e8ac3-a2a9-4a0b-8d45-69e68e95938a",
                 "style": {
                     "plugin": "default",
                     "data": {

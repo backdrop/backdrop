@@ -32,7 +32,7 @@ function layout_disable() {
  * Implements hook_install().
  */
 function layout_install() {
-  db_query("UPDATE {system} SET weight = 60 WHERE name = 'layout' AND type = 'module'");
+  module_set_weight('layout', 60);
 }
 
 // IMPORTANT NOTE: hook_update_X() functions added to this file will not be
