@@ -49,3 +49,28 @@ class TestFieldEntity extends Entity {
   }
 
 }
+
+/**
+ * Test class for the test_entity entity type.
+ */
+class TestEntity extends Entity {
+  public $id;
+
+  function id() {
+    return $this->id;
+  }
+
+  public function entityType() {
+    return 'test_entity';
+  }
+
+  function label() {
+    return 'label';
+  }
+
+  function uri() {
+    return array(
+      'path' => 'test/' . $this->id,
+    );
+  }
+}

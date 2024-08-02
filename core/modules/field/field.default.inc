@@ -92,13 +92,8 @@ function field_default_validate($entity_type, $entity, $field, $instance, $langc
  * below.
  */
 function field_default_submit($entity_type, $entity, $field, $instance, $langcode, &$items, $form, &$form_state) {
-  // Empty values are okay for setting default values, so we want to avoid
-  // calling _field_filter_items(). Example: set the default value for a text
-  // format. See https://github.com/backdrop/backdrop-issues/issues/3378
-  if (!empty($entity)){
-    // Filter out empty values.
-    $items = _field_filter_items($field, $items);
-  }
+  // Filter out empty values.
+  $items = _field_filter_items($field, $items);
   // Reorder items to account for drag-n-drop reordering.
   $items = _field_sort_items($field, $items);
 }

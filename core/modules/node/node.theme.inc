@@ -33,31 +33,52 @@ function theme_node_preview_banner_form($variables) {
 }
 
 /**
+ * Returns HTML for a node preview for display during node creation and editing.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - node_preview: A render element representing the node preview.
+ *
+ * @see node_preview()
+ * @see node_preview_banner_form()
+ * @see theme_node_preview_banner_form()
+ *
+ * @ingroup themeable
+ *
+ * @since 1.0.6 Function removed (see: https://github.com/backdrop/backdrop-issues/issues/218).
+ * @since 1.28.0 Function re-added (see: https://github.com/backdrop/backdrop-issues/issues/6129).
+ */
+function theme_node_preview($variables) {
+  $node_preview = $variables['node_preview'];
+  return backdrop_render_children($node_preview);
+}
+
+/**
  * Returns HTML for the content ranking part of the search settings admin page.
  *
  * @param $variables
  *   An associative array containing:
- *   - form: A render element representing the form.
+ *   - element: A render element representing the content rankings portion of the form.
  *
  * @see node_search_admin()
  * @ingroup themeable
  */
-function theme_node_search_admin($variables) {
-  $form = $variables['form'];
+function theme_node_search_factors($variables) {
+  $element = $variables['element'];
 
-  $output = backdrop_render($form['info']);
-
+  $rows = array();
   $header = array(t('Factor'), t('Influence'));
-  foreach (element_children($form['factors']) as $key) {
+  foreach (element_children($element) as $key) {
     $row = array();
-    $row[] = $form['factors'][$key]['#title'];
-    $form['factors'][$key]['#title_display'] = 'invisible';
-    $row[] = backdrop_render($form['factors'][$key]);
+    $row[] = $element[$key]['#title'];
+    $element[$key]['#title_display'] = 'invisible';
+    $row[] = backdrop_render($element[$key]);
     $rows[] = $row;
   }
+  $output = '';
+  $output .= theme('help', array('markup' => $element['#help']));
   $output .= theme('table', array('header' => $header, 'rows' => $rows));
-
-  $output .= backdrop_render_children($form);
+  $output .= backdrop_render_children($element);
   return $output;
 }
 
@@ -161,9 +182,14 @@ function theme_node_add_list($variables) {
  *   - type: An object containing the 'type' (machine name) and 'description' of
  *     the content type.
  *
+ * @deprecated as of 1.19.4. Labels are now output using the
+ * theme_label_machine_name() function, and descriptions are displayed in a
+ * separate column.
+ *
  * @ingroup themeable
  */
 function theme_node_admin_overview($variables) {
+  watchdog_deprecated_function('theme', __FUNCTION__);
   $name = $variables['name'];
   $type = $variables['type'];
 
@@ -233,16 +259,13 @@ function template_preprocess_node(&$variables) {
   if ($node_type->settings['node_submitted']) {
     if (!isset($variables['elements']['#display_submitted']) || $variables['elements']['#display_submitted'] == TRUE) {
       $variables['display_submitted'] = TRUE;
-      $variables['submitted'] = t('!datetime by !username', array('!datetime' => $variables['date'], '!username' => $variables['name']));
+      $variables['submitted'] = token_replace($node_type->settings['node_submitted_format'], array('node' => $node));
       $variables['user_picture'] = '';
       if ($node_type->settings['node_user_picture']) {
         $variables['user_picture'] = theme('user_picture', array('account' => $node));
       }
     }
   }
-
-  // Add article ARIA role.
-  $variables['attributes']['role'] = 'article';
 
   // Gather node classes.
   $variables['classes'][] = backdrop_html_class('node-' . $node->type);
@@ -258,8 +281,24 @@ function template_preprocess_node(&$variables) {
   if ($variables['view_mode']) {
     $variables['classes'][] = backdrop_html_class('view-mode-' . $variables['view_mode']);
   }
+  if (!$node->uid) {
+    $variables['classes'][] = 'node-by-anonymous';
+  }
+  elseif ($node->uid == $variables['user']->uid) {
+    $variables['classes'][] = 'node-by-viewer';
+  }
 
-  // Add an extra theme hook suggetion for node id.
+  // Remove the link to the node if this type has a hidden path.
+  if ($node_type->settings['hidden_path'] && !user_access('view hidden paths')) {
+    // Empty the $node_url variable so the node title won't be linked.
+    $variables['node_url'] = FALSE;
+  }
+
+  // Add an extra theme hook suggestion for node id.
   $variables['theme_hook_suggestions'][] = 'node__' . $node->nid;
-}
 
+  // Add a legacy theme hook suggestion for content block. @todo remove in 2.x.
+  if (strstr($variables['theme_hook_original'], 'node_block')) {
+    $variables['theme_hook_suggestions'][] = 'node__block_' . $node->nid;
+  }
+}

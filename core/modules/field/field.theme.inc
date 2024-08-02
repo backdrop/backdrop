@@ -116,6 +116,16 @@ function theme_field_multiple_value_form($variables) {
     );
     $rows = array();
 
+    if ($element['#description']) {
+      $description = '<div class="description">' . $element['#description'] . '</div>';
+      $rows[] = array(
+        'data' => array(
+          array('data' => ''),
+          array('data' => $description, 'colspan' => 3),
+        ),
+      );
+    }
+
     // Sort items according to '_weight' (needed when the form comes back after
     // preview or failed validation)
     $items = array();
@@ -144,10 +154,16 @@ function theme_field_multiple_value_form($variables) {
       );
     }
 
+    $add_more = backdrop_render($add_more_button);
+    $rows[] = array(
+      'data' => array(
+        array('data' => ''),
+        array('data' => $add_more, 'colspan' => 2),
+      ),
+    );
+
     $output = '<div class="form-item">';
     $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => $table_id, 'class' => array('field-multiple-table'))));
-    $output .= $element['#description'] ? '<div class="description">' . $element['#description'] . '</div>' : '';
-    $output .= '<div class="clearfix">' . backdrop_render($add_more_button) . '</div>';
     $output .= '</div>';
 
     backdrop_add_tabledrag($table_id, 'order', 'sibling', $order_class);
@@ -206,6 +222,11 @@ function template_preprocess_field(&$variables, $hook) {
     'field-type-' . $variables['field_type_css'],
     'field-label-' . $element['#label_display'],
   );
+  // Add a "clearfix" class to the wrapper since we float the label and the
+  // field items in field.css if the label is inline.
+  if ($element['#label_display'] == 'inline') {
+    $variables['classes'][] = 'clearfix';
+  }
 
   // Add specific suggestions that can override the default implementation.
   $variables['theme_hook_suggestions'] = array(

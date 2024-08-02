@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Database additions for language tests. Used in upgrade.language.test.

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Callbacks provided by the form system.

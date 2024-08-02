@@ -37,7 +37,8 @@ function node_test_node_view(Node $node, $view_mode) {
 
     // Add content that should be displayed only in the RSS feed.
     $node->content['extra_feed_content'] = array(
-      '#markup' => '<p>' . t('Extra data that should appear only in the RSS feed for node !nid.', array('!nid' => $node->nid)) . '</p>',
+      '#type' => 'help',
+      '#markup' => t('Extra data that should appear only in the RSS feed for node !nid.', array('!nid' => $node->nid)),
       '#weight' => 10,
     );
   }
@@ -45,7 +46,8 @@ function node_test_node_view(Node $node, $view_mode) {
   if ($view_mode != 'rss') {
     // Add content that should NOT be displayed in the RSS feed.
     $node->content['extra_non_feed_content'] = array(
-      '#markup' => '<p>' . t('Extra data that should appear everywhere except the RSS feed for node !nid.', array('!nid' => $node->nid)) . '</p>',
+      '#type' => 'help',
+      '#markup' => t('Extra data that should appear everywhere except the RSS feed for node !nid.', array('!nid' => $node->nid)),
     );
   }
 }
@@ -126,10 +128,10 @@ function node_test_node_grants_alter(&$grants, $account, $op) {
  */
 function node_test_node_presave(Node $node) {
   if ($node->title == 'testing_node_presave') {
-    // Sun, 19 Nov 1978 05:00:00 GMT
-    $node->created = 280299600;
-    // Drupal 1.0 release.
-    $node->changed = 979534800;
+    // Backdrop v1.0.0 release.
+    $node->created = 1421394600;
+    // Backdrop v1.5.0 release.
+    $node->changed = 1474011660;
   }
   // Determine changes.
   if (!empty($node->original) && $node->original->title == 'test_changes') {

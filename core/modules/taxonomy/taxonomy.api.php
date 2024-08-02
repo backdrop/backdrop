@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Hooks provided by the Taxonomy module.
@@ -200,7 +199,7 @@ function hook_taxonomy_term_update(TaxonomyTerm $term) {
  * @see taxonomy_term_delete()
  */
 function hook_taxonomy_term_predelete(TaxonomyTerm $term) {
-  db_delete('term_synoynm')->condition('tid', $term->tid)->execute();
+  db_delete('term_synonym')->condition('tid', $term->tid)->execute();
 }
 
 /**
@@ -240,7 +239,7 @@ function hook_taxonomy_term_view($term, $view_mode, $langcode) {
   $term->content['my_additional_field'] = array(
     '#markup' => $additional_field,
     '#weight' => 10,
-    '#theme' => 'mymodule_my_additional_field',
+    '#theme' => 'my_module_my_additional_field',
   );
 }
 
@@ -270,6 +269,24 @@ function hook_taxonomy_term_view_alter(&$build) {
 
   // Add a #post_render callback to act on the rendered HTML of the term.
   $build['#post_render'][] = 'my_module_taxonomy_term_post_render';
+}
+
+/**
+ * Alter the results of taxonomy_term_page().
+ *
+ * This hook is called after the node listing for a taxonomy term page has
+ * been assembled in a structured array and may be used for altering that listing.
+ *
+ * @param array $build
+ *   A renderable array representing the taxonomy term content.
+ *
+ * @see taxonomy_term_page()
+ */
+function hook_taxonomy_term_page_alter(&$build) {
+  // Remove the list of nodes with this term.
+  unset($build['nodes']);
+  // Remove the pager for the list of nodes.
+  unset($build['pager']);
 }
 
 /**

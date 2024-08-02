@@ -65,4 +65,28 @@ class LinkBaseTestClass extends BackdropWebTestCase {
 
     return $field_name;
   }
+
+
+  /**
+   * Check that an element exists in HTML markup.
+   *
+   * @param $xpath
+   *   An XPath expression.
+   * @param array $arguments
+   *   An associative array of XPath replacement tokens to pass to
+   *   BackdropWebTestCase::buildXPathQuery().
+   * @param $message
+   *   The message to display along with the assertion.
+   * @param $group
+   *   The type of assertion - examples are "Browser", "PHP".
+   *
+   * @return
+   *   TRUE if the assertion succeeded, FALSE otherwise.
+   *
+   * @todo: Consolidate this function with the one provided by admin_bar.test.
+   */
+  protected function assertElementByXPath($xpath, array $arguments, $message, $group = 'Other') {
+    $elements = $this->xpath($xpath, $arguments);
+    return $this->assertTrue(!empty($elements[0]), $message, $group);
+  }
 }

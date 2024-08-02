@@ -434,7 +434,7 @@ class views_handler_argument extends views_handler {
     // Let the plugins do validation.
     $default_id = $form_state['values']['options']['default_argument_type'];
     $plugin = $this->get_plugin('argument default', $default_id);
-    if ($plugin) {
+    if ($plugin && isset($form['argument_default'][$default_id]) && isset($form_state['values']['options']['argument_default'][$default_id])) {
       $plugin->options_validate($form['argument_default'][$default_id], $form_state, $form_state['values']['options']['argument_default'][$default_id]);
     }
 
@@ -727,7 +727,7 @@ class views_handler_argument extends views_handler {
   }
 
   /**
-   * How to act if validation failes
+   * How to act if validation fails.
    */
   function validate_fail() {
     $info = $this->default_actions($this->options['validate']['fail']);
@@ -925,7 +925,7 @@ class views_handler_argument extends views_handler {
 
   /**
    * Sorts the summary based upon the user's selection. The base variant of
-   * this is usually adequte.
+   * this is usually adequate.
    *
    * @param $order
    *   The order selected in the UI.

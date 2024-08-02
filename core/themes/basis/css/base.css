@@ -215,6 +215,36 @@ fieldset {
 }
 
 /**
+ * HTML5 details element.
+ */
+details {
+  padding: 0.78947em;
+  margin: 1em 0;
+  overflow: hidden;
+  border: 2px solid #bbbbbb;
+  background-color: #ffffff;
+}
+
+details summary {
+  display: list-item;
+  cursor: pointer;
+}
+
+details summary span {
+  color: #0073bd;
+  font-size: 1.1875em;
+}
+
+details .details-content-wrapper,
+details .details-child-wrapper {
+  margin: 0.78947em 0;
+}
+
+details summary:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/**
  * Clearfix text areas in case of floated contents
  */
 .field-type-text-long:after,

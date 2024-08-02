@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Tests for language.module.
@@ -7,7 +6,6 @@
  * The test file includes:
  *  - a functional test for the language configuration forms;
  */
-
 
 /**
  * Functional tests for the language list configuration forms.
@@ -42,6 +40,7 @@ class LanguageListTest extends BackdropWebTestCase {
       'predefined_langcode' => 'custom',
       'langcode' => $langcode,
       'name' => $name,
+      'native' => $name,
       'direction' => '0',
     );
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add custom language'));
@@ -83,10 +82,11 @@ class LanguageListTest extends BackdropWebTestCase {
     // Ensure 'edit' link works.
     $this->clickLink(t('Configure'));
     $this->assertTitle(t('Configure language | Backdrop CMS'), t('Page title is "Configure language".'));
-    // Configre a language.
+    // Configure a language.
     $name = $this->randomName(16);
     $edit = array(
       'name' => $name,
+      'native' => $name,
     );
     $this->backdropPost('admin/config/regional/language/edit/' . $langcode, $edit, t('Save language'));
     $this->assertRaw($name, t('The language has been updated.'));
@@ -147,6 +147,7 @@ class LanguageListTest extends BackdropWebTestCase {
       'predefined_langcode' => 'custom',
       'langcode' => $langcode,
       'name' => $name,
+      'native' => $name,
       'direction' => '0',
     );
     $this->backdropPost('admin/config/regional/language/add', $edit, t('Add custom language'));

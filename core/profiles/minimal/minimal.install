@@ -12,14 +12,14 @@
  * @see system_install()
  */
 function minimal_install() {
-  // Enable Bartik theme and set it as default theme instead of Stark.
+  // Enable Basis theme and set it as default theme instead of Stark.
   // @see system_install()
   $default_theme = 'basis';
   config_set('system.core', 'theme_default', $default_theme);
   theme_enable(array($default_theme));
   theme_disable(array('stark'));
 
-  // Set front page to "node".
+  // Set home page to "node".
   config_set('system.core', 'site_frontpage', 'node');
 
   // Enable default permissions for system roles.

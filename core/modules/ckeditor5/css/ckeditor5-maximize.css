@@ -1,0 +1,40 @@
+/**
+ * @file
+ * Styles to maximize the editor.
+ */
+:root {
+  /* Keep editor modal elements above maximized item. */
+  --ck-z-modal: 1002 !important;
+}
+body.ck-scroll-prevented {
+  /* Prevent double scroll bars with large content. */
+  overflow: hidden;
+}
+.ck-maximize-active .ck.ck-sticky-panel .ck-sticky-panel__content_sticky {
+  /* Force to ignore the space for admin-bar. */
+  top: 0 !important;
+  /* Force full width. */
+  width: 100% !important;
+}
+.ck-maximize-active {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100%;
+  z-index: 1001;
+  overflow: auto;
+}
+.ck-maximize-active .ck.ck-editor {
+  flex-grow: 1;
+}
+.ck-maximize-active .ck.ck-editor__main {
+  height: calc(100% - 41px);
+}
+.ck-maximize-active .ck.ck-content {
+  height: 100%;
+}

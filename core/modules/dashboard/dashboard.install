@@ -31,3 +31,14 @@ function dashboard_uninstall() {
   $config->delete();
   layout_reset_caches();
 }
+
+/**
+ * Set the URL for the Dashboard news feed.
+ */
+function dashboard_update_1000() {
+  $config = config('dashboard.settings');
+  if ($config->get('news_feed_url') === NULL) {
+    $config->set('news_feed_url', 'https://backdropcms.org/api/notifications');
+    $config->save();
+  }
+}

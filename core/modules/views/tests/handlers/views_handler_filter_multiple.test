@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of ViewsHandlerFilterTest.
@@ -15,9 +14,9 @@ class ViewsHandlerFilterMultipleTest extends ViewsSqlTest {
   /**
    * {@inheritdoc}
    */
-  protected function setUp() {
+  protected function setUp(array $modules = array()) {
     // The Views and Views UI modules will be enabled with this.
-    parent::setUp();
+    parent::setUp($modules);
 
     // Assign vocabulary 'tags' to user entity.
     $field_definition = field_read_field('field_tags');
@@ -55,10 +54,10 @@ class ViewsHandlerFilterMultipleTest extends ViewsSqlTest {
     $this->backdropLogin($user2);
 
     $this->backdropGet('node/' . $node1->nid . '/edit');
-    $edit['field_tags' . '[' . LANGUAGE_NONE . ']'] = $term->name;
+    $edit['field_tags[' . LANGUAGE_NONE . ']'] = $term->name;
     $this->backdropPost('node/' . $node1->nid . '/edit', $edit, t('Save'));
 
-    $edit['field_tags' . '[' . LANGUAGE_NONE . ']'] = $term->name;
+    $edit['field_tags[' . LANGUAGE_NONE . ']'] = $term->name;
     $this->backdropPost('user/' . $user1->uid . '/edit', $edit, t('Save'));
 
     $result[] = array('nid' => $node1->nid);

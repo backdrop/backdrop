@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Database interface code for engines that need complete control over their
@@ -265,6 +264,7 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
    * @return
    *  The current row formatted as requested.
    */
+  #[\ReturnTypeWillChange]
   public function current() {
     if (isset($this->currentRow)) {
       switch ($this->fetchStyle) {
@@ -315,14 +315,17 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
 
   /* Implementations of Iterator. */
 
+  #[\ReturnTypeWillChange]
   public function key() {
     return $this->currentKey;
   }
 
+  #[\ReturnTypeWillChange]
   public function rewind() {
     // Nothing to do: our DatabaseStatement can't be rewound.
   }
 
+  #[\ReturnTypeWillChange]
   public function next() {
     if (!empty($this->data)) {
       $this->currentRow = reset($this->data);
@@ -334,6 +337,7 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
     }
   }
 
+  #[\ReturnTypeWillChange]
   public function valid() {
     return isset($this->currentRow);
   }
