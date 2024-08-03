@@ -1458,7 +1458,8 @@ function install_select_language_form($form, &$form_state, $files, $standard_lan
  */
 function install_get_available_translations($files) {
   $available_translations = array();
-  $response = backdrop_http_request(INSTALL_AVAILABLE_TRANSLATIONS_URI);
+  $options = array('timeout' => 5);
+  $response = backdrop_http_request(INSTALL_AVAILABLE_TRANSLATIONS_URI, $options);
 
   $data = '';
   if ($response->code === '200') {
@@ -1472,9 +1473,6 @@ function install_get_available_translations($files) {
     foreach($files as $translation_file) {
       $available_translations[] = $translation_file->langcode;
     }
-  }
-  else {
-    return FALSE;
   }
 
   // English is always available.
@@ -1531,7 +1529,7 @@ function install_retrieve_file($uri, $destination) {
     $path = $destination;
   }
 
-  $response = backdrop_http_request($uri);
+  $response = backdrop_http_request($uri, array('timeout' => 5));
   if ($response->code != 200) {
     return FALSE;
   }
@@ -1554,10 +1552,20 @@ function install_retrieve_file($uri, $destination) {
  *   TRUE if the URI was contacted successfully, FALSE if not.
  */
 function install_check_localization_server($uri) {
-  $options = array('method' => 'HEAD');
+  // Check only if a previous check in this page request returned TRUE.
+  $online = &backdrop_static(__FUNCTION__, TRUE);
+  if (!$online) {
+    return FALSE;
+  }
+
+  $options = array(
+    'method' => 'HEAD',
+    'timeout' => 5,
+  );
   $response = backdrop_http_request($uri, $options);
   if ($response->code != 200) {
-    return FALSE;
+    $online = FALSE;
+    return $online;
   }
   return TRUE;
 }
