@@ -611,7 +611,7 @@ class FileSaveUploadTest extends FileHookTestCase {
     $dir = $this->randomName();
     $edit = array(
       'files[file_test_upload]' => $image3_realpath,
-      'file_subdir' => $dir,
+      'file_subdirectory' => $dir,
     );
     $this->backdropPost('file-test/upload', $edit, t('Submit'));
     $this->assertResponse(200, 'Received a 200 response for posted test file.');

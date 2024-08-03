@@ -166,7 +166,7 @@ function hook_layout_style_info() {
     // the LayoutStyle class.
     'class' => 'MyModuleLayoutStyle',
     // Override the path to the file to be used.
-    'path' => 'templates/subdir',
+    'path' => 'templates/subdirectory',
     // Name of template file (with or without path).
     'template' => 'templates/my-filename',
   );
