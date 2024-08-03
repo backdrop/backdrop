@@ -785,7 +785,7 @@ function install_display_output($output, $install_state) {
  * @param $install_state
  *   An array of information about the current installation state.
  *
- * @return array
+ * @return string|NULL
  *   A themed status report, or an exception if there are requirement errors.
  */
 function install_verify_requirements(&$install_state) {
