@@ -1494,7 +1494,7 @@ function install_get_available_translations($files) {
 function install_download_translation(array &$install_state) {
   // Check whether all conditions are met to download. Download the translation
   // if possible.
-  $requirements = install_check_translations($install_state['parameters']['langcode'], $install_state['server_pattern']);
+  $requirements = install_check_translation_download($install_state['parameters']['langcode'], $install_state['server_pattern']);
   // Render requirements if any warnings or errors returned.
   if ($output = install_display_requirements($install_state, $requirements)) {
     return $output;
@@ -1571,7 +1571,11 @@ function install_check_localization_server($uri) {
 }
 
 /**
- * Checks installation requirements and reports any errors.
+ * Checks installation requirements, downloads a translation, and reports any
+ * errors.
+ *
+ * This function is only called if the user selects a translation that is not
+ * English and for which there is no local translation file.
  *
  * @param string $langcode
  *   Language code to check for download.
@@ -1583,12 +1587,14 @@ function install_check_localization_server($uri) {
  *   will contain a requirements error with detailed information.
  *
  * @see install_state_defaults()
+ * @see install_download_translation()
  */
-function install_check_translations($langcode, $server_pattern) {
+function install_check_translation_download($langcode, $server_pattern) {
   $requirements = array();
 
   $readable = FALSE;
   $writable = FALSE;
+  $translation_available = FALSE;
 
   $files_directory = conf_path() . '/files';
   $translations_directory = settings_get('locale_translate_file_directory', conf_path() . '/files/translations');
@@ -1639,13 +1645,11 @@ function install_check_translations($langcode, $server_pattern) {
   // Check if any of the desired translation files are available or if the
   // translation server can be reached. In other words, check if we are online
   // and have an internet connection.
-  if ($translation_available = install_check_localization_server($translation_url)) {
+  if (install_check_localization_server($server_url)) {
     $online = TRUE;
   }
-  if (!$translation_available) {
-    if (install_check_localization_server($server_url)) {
-      $online = TRUE;
-    }
+  if ($online) {
+    $translation_available = install_check_localization_server($translation_url);
   }
 
   // If the translations directory does not exist, throw an error.
@@ -1703,9 +1707,10 @@ function install_check_translations($langcode, $server_pattern) {
       'title'       => st('Internet'),
       'value'       => st('The translation server is offline or cannot be reached.'),
       'severity'    => REQUIREMENT_ERROR,
-      'description' => st('The installer was unable to contact the translation server to download a translation file. Check your internet connection and verify that your website can reach the translation server at <a href="!server_url">@server_url</a>.', array(
+      'description' => st('The installer was unable to contact the translation server to download a translation file. Check your internet connection and verify that your website can reach the translation server at <a href="!server_url">@server_url</a> , or <a href="!url">continue in English</a> and translate your website later.', array(
         '!server_url' => $server_url,
         '@server_url' => $server_url,
+        '!url' => $_SERVER['SCRIPT_NAME'],
       )),
     );
   }
