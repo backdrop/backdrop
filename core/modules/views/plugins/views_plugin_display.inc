@@ -145,9 +145,9 @@ class views_plugin_display extends views_plugin {
     }
 
 
-    // Plugable headers, footer and empty texts are
-    // not compatible with previous version of views
-    // This code converts old values into a configured handler for each area
+    // Pluggable headers, footer and empty texts are not compatible with
+    // previous version of views. This code converts old values into a
+    // configured handler for each area.
     foreach (array('header', 'footer', 'empty') as $area) {
       $converted = FALSE;
       if (isset($this->options[$area]) && !is_array($this->options[$area])) {
@@ -2099,7 +2099,7 @@ class views_plugin_display extends views_plugin {
       case 'exposed_block':
         $form['#title'] .= t('Put the exposed form in a block');
         $form['description'] = array(
-          '#markup' => '<div class="description form-item">' . t('If set, any exposed widgets will not appear with this view. Instead, a block will be made available to the Backdrop block administration system, and the exposed form will appear there. Note that this block must be enabled manually, Views will not enable it for you.') . '</div>',
+          '#markup' => '<div class="description form-item">' . t('If set, any exposed widgets will not appear with this view. Instead, a block will be made available to the Backdrop layouts system, and the exposed form will become available there. Note that this block must be placed manually, Views will not place it for you.') . '</div>',
         );
         $form['exposed_block'] = array(
           '#type' => 'radios',
@@ -2557,7 +2557,7 @@ class views_plugin_display extends views_plugin {
   function render_filters() { }
 
   /**
-   * Not all display plugins will suppert pager rendering.
+   * Not all display plugins will support pager rendering.
    */
   function render_pager() {
     return TRUE;
@@ -2926,7 +2926,7 @@ class views_plugin_display extends views_plugin {
    * The result should contain of an array with
    *   - filter value present: The title of the fieldset in the argument
    *     where you can configure what should be done with a given argument.
-   *   - filter value not present: The tiel of the fieldset in the argument
+   *   - filter value not present: The title of the fieldset in the argument
    *     where you can configure what should be done if the argument does not
    *     exist.
    *   - description: A description about how arguments comes to the display.

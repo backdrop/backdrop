@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provide node vid argument handler.

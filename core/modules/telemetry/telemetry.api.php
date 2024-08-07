@@ -24,16 +24,16 @@
  *     the module name, or if the project contains multiple modules.
  */
 function hook_telemetry_info() {
-  // If this were in mymodule.module, "project" would assume to be "mymodule".
-  $info['mymodule_setting_1'] = array(
+  // If this were in my_module.module, "project" would assume to be "my_module".
+  $info['my_module_setting_1'] = array(
     'label' => t('My module setting 1'),
     'description' => t('Some information about what setting 1 is.'),
   );
   // If this were in submodule.module, specify the project name explicitly.
-  $info['mymodule_submodule_setting_2'] = array(
+  $info['my_module_submodule_setting_2'] = array(
     'label' => t('Submodule setting 2'),
     'description' => t('A description describing this setting of a sub-module.'),
-    'project' => 'mymodule',
+    'project' => 'my_module',
   );
   return $info;
 }
@@ -53,7 +53,7 @@ function hook_telemetry_info_alter(array &$info) {
 
   // Prevent one particular module from reporting anything.
   foreach ($info as $info_key => $info_data) {
-    if ($info_data['module'] === 'mymodule') {
+    if ($info_data['module'] === 'my_module') {
       unset($info[$info_key]);
     }
   }
@@ -82,8 +82,8 @@ function hook_telemetry_data($telemetry_key) {
   switch ($telemetry_key) {
     case 'php_version':
       return PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION . '.' . PHP_RELEASE_VERSION;
-    case 'mymodule_setting_1':
-      return config_get('mymodule.settings', 'setting_1');
+    case 'my_module_setting_1':
+      return config_get('my_module.settings', 'setting_1');
   }
 }
 
@@ -101,8 +101,8 @@ function hook_telemetry_data($telemetry_key) {
  * @param array $telemetry_data
  */
 function hook_telemetry_data_alter(array $telemetry_data) {
-  if (isset($telemetry_data['mymodule_setting_1'])) {
-    $telemetry_data['mymodule_setting_1'] = 'some_different_value';
+  if (isset($telemetry_data['my_module_setting_1'])) {
+    $telemetry_data['my_module_setting_1'] = 'some_different_value';
   }
 }
 

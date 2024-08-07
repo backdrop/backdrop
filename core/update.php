@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Administrative page for handling updates from one Backdrop version to another.
@@ -30,8 +29,8 @@ chdir(BACKDROP_ROOT);
 // The minimum version is specified explicitly, as BACKDROP_MINIMUM_PHP is not
 // yet available. It is defined in bootstrap.inc, but it is not possible to
 // load that file yet as it would cause a fatal error on older versions of PHP.
-if (version_compare(PHP_VERSION, '5.3.2') < 0) {
-  print 'Your PHP installation is too old. Backdrop CMS requires at least PHP 5.3.2. See the <a href="https://backdropcms.org/guide/requirements">System Requirements</a> page for more information.';
+if (version_compare(PHP_VERSION, '5.6.0') < 0) {
+  print 'Your PHP installation is too old. Backdrop CMS requires at least PHP 5.6.0. See the <a href="https://backdropcms.org/guide/requirements">System Requirements</a> page for more information.';
   exit;
 }
 
@@ -48,10 +47,10 @@ if (version_compare(PHP_VERSION, '5.3.2') < 0) {
 define('MAINTENANCE_MODE', 'update');
 
 /**
- * Renders form with a list of available database updates.
+ * Renders form with a list of available site updates.
  */
 function update_selection_page() {
-  backdrop_set_title('Backdrop database update');
+  backdrop_set_title('Backdrop site update');
   $elements = backdrop_get_form('update_script_selection_form');
   $output = backdrop_render($elements);
 
@@ -203,32 +202,33 @@ function update_helpful_links() {
  * Displays results of the update script with any accompanying errors.
  */
 function update_results_page() {
-  backdrop_set_title('Backdrop database update');
+  backdrop_set_title('Backdrop site update');
 
   update_task_list();
   // Report end result.
   if (module_exists('dblog') && user_access('access site reports')) {
-    $log_message = ' All errors have been <a href="' . base_path() . '?q=admin/reports/dblog">logged</a>.';
+    $log_message = 'All errors have been <a href="' . base_path() . '?q=admin/reports/dblog">logged</a>.';
   }
   else {
-    $log_message = ' All errors have been logged.';
+    $log_message = 'All errors have been logged.';
   }
 
+  $output = '';
   if ($_SESSION['update_success']) {
-    $output = '<p>Updates were attempted. If you see no failures below, you may proceed happily back to your <a href="' . base_path() . '">site</a>. Otherwise, you may need to update your database manually.' . $log_message . '</p>';
+    $output = '<p>Updates were attempted. If you see no failures below, you may proceed happily back to your <a href="' . base_path() . '">site</a>. Otherwise, you may need to update your database manually.' . ' ' . $log_message . '</p>';
   }
   else {
     $updates_remaining = reset($_SESSION['updates_remaining']);
     list($module, $version) = array_pop($updates_remaining);
-    $output = '<p class="error">The update process was aborted prematurely while running <strong>update #' . $version . ' in ' . $module . '.module</strong>.' . $log_message;
+    $message = 'The update process was aborted prematurely while running <strong>update #' . $version . ' in ' . $module . '.module</strong>.' . ' ' . $log_message;
     if (module_exists('dblog')) {
-      $output .= ' You may need to check the <code>watchdog</code> database table manually.';
+      $message .= ' ' . 'You may need to check the <code>watchdog</code> database table manually.';
     }
-    $output .= '</p>';
+    backdrop_set_message($message, 'error');
   }
 
   if (settings_get('update_free_access')) {
-    $output .= "<p><strong>Reminder: Don't forget to set the <code>\$settings[&#39;update_free_access&#39;]</code> value in your <code>settings.php</code> file back to <code>FALSE</code>.</strong></p>";
+    backdrop_set_message("Reminder: Don't forget to set the <code>\$settings['update_free_access']</code> value in your <code>settings.php</code> file back to <code>FALSE</code>.", 'warning');
   }
 
   $output .= theme('links', array('links' => update_helpful_links()));
@@ -283,7 +283,7 @@ function update_results_page() {
 }
 
 /**
- * Provides an overview of the Backdrop database update.
+ * Provides an overview of the Backdrop site update.
  *
  * This page provides cautionary suggestions that should happen before
  * proceeding with the update to ensure data integrity.
@@ -301,6 +301,10 @@ function update_info_page() {
     cache('update')->flush();
   }
 
+  // Flush the theme cache so we can render this page correctly if the theme
+  // registry been updated with new preprocess or template variables.
+  backdrop_theme_rebuild();
+
   // Get database name
   $db_name = $databases['default']['default']['database'];
 
@@ -308,9 +312,9 @@ function update_info_page() {
   $config_dir = config_get_config_directory('active');
 
   update_task_list('info');
-  backdrop_set_title('Backdrop database update');
+  backdrop_set_title('Backdrop site update');
   $token = backdrop_get_token('update');
-  $output = '<p>Use this utility to update your database whenever you install a new version of Backdrop CMS or one of the site\'s modules.</p>';
+  $output = '<p>Use this utility to update your site whenever you install a new version of Backdrop CMS or one of the site\'s modules.</p>';
   $output .= '<p>For more detailed information, see the <a href="https://backdropcms.org/upgrade">Upgrading Backdrop CMS</a> page. If you are unsure of what these terms mean, contact your hosting provider.</p>';
   $output .= '<p>Before running updates, the following steps are recommended.</p>';
   $output .= "<ol>\n";
@@ -323,6 +327,10 @@ function update_info_page() {
   $output .= "<li>Install your new files into the appropriate location, as described in <a href=\"https://backdropcms.org/upgrade\">the handbook</a>.</li>\n";
   $output .= "</ol>\n";
   $output .= "<p>After performing the above steps proceed using the continue button.</p>\n";
+  $module_status_report = update_upgrade_check_dependencies();
+  if (!empty($module_status_report)) {
+    $output .= $module_status_report;
+  }
   $form_action = check_url(backdrop_current_script_url(array('op' => 'selection', 'token' => $token)));
   $output .= '<form method="post" action="' . $form_action . '">
   <div class="form-actions">
@@ -353,7 +361,7 @@ function update_access_denied_page() {
 
   $steps[] = t('Find the <code>settings.php</code> file on your system, and open it with a text editor.');
   $steps[] = t('There is a line inside your <code>settings.php</code> file that says <code>$settings[\'update_free_access\'] = FALSE</code>. Change it to <code>$settings[\'update_free_access\'] = TRUE</code>.');
-  $steps[] = t('Reload this page. The database update script should be able to run now.');
+  $steps[] = t('Reload this page. The site update script should be able to run now.');
   $steps[] = t('As soon as the update script is done, you must change the <code>update_free_access</code> setting in the <code>settings.php</code> file back to <code>FALSE</code>: <code>$settings[\'update_free_access\'] = FALSE;</code>.');
 
   $output .= theme('item_list', array('items' => $steps, 'type' => 'ol'));
@@ -441,8 +449,9 @@ function update_check_requirements($skip_warnings = FALSE) {
   if ($severity == REQUIREMENT_ERROR || ($severity == REQUIREMENT_WARNING && !$skip_warnings)) {
     backdrop_set_title('Requirements problem');
     $task_list = update_task_list('requirements');
-    $status_report = theme('status_report', array('requirements' => $requirements));
-    $status_report .= 'Check the messages and <a href="' . check_url(backdrop_requirements_url($severity)) . '">try again</a>.';
+    $status_report = 'Resolve the problems and <a href="' . check_url(backdrop_requirements_url($severity)) . '">try again</a>.';
+    $status_report .= '<br><br>';
+    $status_report .= theme('status_report', array('requirements' => $requirements, 'phase' => 'update'));
     print theme('update_page', array('content' => $status_report, 'sidebar' => $task_list));
     exit();
   }
@@ -545,12 +554,17 @@ if (update_access_allowed()) {
       }
 
     case t('Apply pending updates'):
+      update_upgrade_enable_dependencies();
       if (isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'update')) {
         // Generate absolute URLs for the batch processing (using $base_root),
         // since the batch API will pass them to url() which does not handle
         // update.php correctly by default.
         $batch_url = $base_root . backdrop_current_script_url();
         $redirect_url = $base_root . backdrop_current_script_url(array('op' => 'results'));
+        // Set a state indicating we are upgrading a Drupal 7 site.
+        if (backdrop_get_installed_schema_version('system') > 7000) {
+          state_set('update_d7_upgrade', TRUE);
+        }
         update_batch($_POST['start'], $redirect_url, $batch_url);
         break;
       }
@@ -560,6 +574,8 @@ if (update_access_allowed()) {
       break;
 
     case 'results':
+      // Remove the state indicating a Drupal 7 upgrade.
+      state_del('update_d7_upgrade');
       $output = update_results_page();
       break;
 

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * User page callbacks for the Translation module.

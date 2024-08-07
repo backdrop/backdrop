@@ -64,6 +64,12 @@ description = Upload a file using the multi-step wizard.
 group = File
 file = file.test
 
+[FileUploadSvgTestCase]
+name = File upload SVG validation tests
+description = Tests validation functions for SVG files.
+group = File
+file = file.test
+
 [FileAdminTestCase]
 name = File administration
 description = Test file administration page functionality.
@@ -121,6 +127,12 @@ file = file.test
 [FileAccessTestCase]
 name = File access
 description = Test the access aspects of file entity.
+group = File
+file = file.test
+
+[FileAccessFunctionsAlignedTestCase]
+name = File access functions aligned
+description = Test that file access functions return consistent values.
 group = File
 file = file.test
 

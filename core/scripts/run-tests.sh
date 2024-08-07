@@ -236,7 +236,7 @@ if ($args['xml']) {
   simpletest_script_reporter_write_xml_results();
 }
 
-if($args['summary']) {
+if ($args['summary']) {
   simpletest_script_write_summary($args['summary']);
 }
 
@@ -301,7 +301,7 @@ All arguments are long options.
 
   --verbose   Output detailed assertion messages in addition to summary.
 
-  --cache     Generate cache for instalation profiles to boost tests speed.
+  --cache     Generate cache for installation profiles to boost tests speed.
 
   --myisam-convert
               Convert cache tables to MyISAM. Improves test performance but is

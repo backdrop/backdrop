@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Module to help test hook_url_inbound_alter() and hook_url_outbound_alter().

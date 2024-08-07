@@ -6,6 +6,7 @@
 
 define('LINK_EXTERNAL', 'external');
 define('LINK_INTERNAL', 'internal');
+define('LINK_BOTH', 'both');
 define('LINK_FRONT', 'front');
 define('LINK_EMAIL', 'email');
 define('LINK_NEWS', 'news');
@@ -31,6 +32,7 @@ function link_field_info() {
       'instance_settings' => array(
         'attributes' => _link_default_attributes(),
         'url' => 0,
+        'type' => LINK_BOTH,
         'title' => 'optional',
         'title_value' => '',
         'title_label_use_field_label' => FALSE,
@@ -74,6 +76,19 @@ function link_field_instance_settings_form($field, $instance) {
     '#return_value' => 'optional',
     '#description' => t('If checked, the URL field is optional and submitting a title alone will be acceptable. If the URL is omitted, the title will be displayed as plain text.'),
   );
+
+  $form['type'] = array(
+    '#type' => 'radios',
+    '#title' => t('Allowed URL types'),
+    '#default_value' => $instance['settings']['type'],
+    '#options' => array(
+      LINK_INTERNAL => t('Internal only'),
+      LINK_EXTERNAL => t('External only'),
+      LINK_BOTH => t('Both (internal and external)'),
+    ),
+  );
+  $form['type'][LINK_INTERNAL]['#description'] = t('Internal URLs point to pages on this website; an autocomplete displays matching pages to select from.');
+  $form['type'][LINK_EXTERNAL]['#description'] = t('External URLs point to other websites; no autocomplete is used.');
 
   $title_options = array(
     'optional' => t('Optional Title'),
@@ -145,7 +160,7 @@ function link_field_instance_settings_form($field, $instance) {
     '#type' => 'textfield',
     '#title' => t('URL Display Cutoff'),
     '#default_value' => $instance['settings']['display']['url_cutoff'],
-    '#description' => t('If the user does not include a title for this link, the URL will be used as the title. When should the link title be trimmed and finished with an elipsis (&hellip;)? Leave blank for no limit.'),
+    '#description' => t('If the user does not include a title for this link, the URL will be used as the title. When should the link title be trimmed and finished with an ellipsis (&hellip;)? Leave blank for no limit.'),
     '#maxlength' => 3,
     '#size' => 3,
   );
@@ -207,7 +222,7 @@ function link_field_instance_settings_form($field, $instance) {
         ':input[name="instance[settings][attributes][configurable_title]"]' => array('checked' => TRUE),
       ),
     ),
-    '#description' => t('When output, links will use this "title" attribute if the user does not provide one and when different from the link text. Read <a href="http://www.w3.org/TR/WCAG10-HTML-TECHS/#links">WCAG 1.0 Guidelines</a> for links comformances. Tokens values will be evaluated.'),
+    '#description' => t('When output, links will use this "title" attribute if the user does not provide one and when different from the link text. Read <a href="http://www.w3.org/TR/WCAG10-HTML-TECHS/#links">WCAG 1.0 Guidelines</a> for link conformance. Tokens values will be evaluated.'),
     '#default_value' => $instance['settings']['attributes']['title'],
     '#field_prefix' => 'title = "',
     '#field_suffix' => '"',
@@ -420,6 +435,18 @@ function _link_validate(&$item, $delta, $field, $entity, $instance, $langcode, &
         'error_element' => array('url' => FALSE, 'title' => TRUE),
       );
     }
+    // Validate the URL type.
+    if ($instance['settings']['type'] != LINK_BOTH) {
+      $url_type = link_validate_url(trim($item['url']));
+      if (($instance['settings']['type'] == LINK_INTERNAL && $url_type === LINK_EXTERNAL) || ($instance['settings']['type'] == LINK_EXTERNAL && in_array($url_type, array(LINK_INTERNAL, LINK_FRONT), TRUE))) {
+        $field_label = array('%field' => $instance['label']);
+        $errors[$field['field_name']][$langcode][$delta][] = array(
+          'error' => 'link_required',
+          'message' => ($instance['settings']['type'] == LINK_INTERNAL) ? t('Only internal URLs are allowed in %field.', $field_label) : t('Only external URLs are allowed in %field.', $field_label),
+          'error_element' => array('url' => TRUE, 'title' => FALSE),
+        );
+      }
+    }
   }
   // Require a link if we have a title.
   if ($instance['settings']['url'] !== 'optional' && strlen(isset($item['title']) ? $item['title'] : '') > 0 && strlen(trim($item['url'])) == 0) {
@@ -430,7 +457,7 @@ function _link_validate(&$item, $delta, $field, $entity, $instance, $langcode, &
     );
   }
 
-  // In a totally bizzaro case, where URLs and titles are optional but the field
+  // In a totally bizarre case, where URLs and titles are optional but the field
   // is required, ensure there is at least one link.
   if ($instance['settings']['url'] === 'optional' && $instance['settings']['title'] === 'optional' && (strlen(trim($item['url'])) !== 0 || strlen(trim($item['title'])) !== 0)) {
     $optional_field_found = TRUE;
@@ -569,7 +596,7 @@ function _link_sanitize(array &$item, $delta, array $field, $instance, $entity) 
     $item['attributes'] = array();
   }
 
-  // Unserialize attributtes array if it has not been unserialized yet.
+  // Unserialize attributes array if it has not been unserialized yet.
   if (!is_array($item['attributes'])) {
     $item['attributes'] = (array) unserialize($item['attributes']);
   }
@@ -721,7 +748,7 @@ function _link_escape_domain($url) {
         $escaped_url = $matches['1'] . $matches['2'] . idn_to_ascii($matches['3']) . $matches['4'];
       }
     }
-    // E-mail links.
+    // Email links.
     elseif (strpos($url, 'mailto:') === 0 && preg_match('/^(mailto:)([^@]+@)(.*)$/', $url, $matches)) {
       if (defined('INTL_IDNA_VARIANT_UTS46')) {
         $escaped_url = $matches['1'] . $matches['2'] . idn_to_ascii($matches['3'], IDNA_DEFAULT, INTL_IDNA_VARIANT_UTS46);
@@ -833,8 +860,10 @@ function link_field_process($element, $form_state, $complete_form) {
     '#title' => t('URL'),
     '#required' => ($element['#delta'] == 0 && $settings['url'] !== 'optional') ? $element['#required'] : FALSE,
     '#default_value' => isset($element['#value']['url']) ? $element['#value']['url'] : NULL,
-    '#autocomplete_path' => 'path-autocomplete',
   );
+  if ($settings['type'] != LINK_EXTERNAL) {
+    $element['url']['#autocomplete_path'] = 'path-autocomplete';
+  }
   if ($settings['title'] !== 'none' && $settings['title'] !== 'value') {
     // Figure out the label of the title field.
     if (!empty($settings['title_label_use_field_label'])) {
@@ -890,7 +919,7 @@ function link_field_process($element, $form_state, $complete_form) {
     );
   }
 
-  // If the title field is avaliable or there are field accepts multiple values
+  // If the title field is available or there are field accepts multiple values
   // then allow the individual field items display the required asterisk if needed.
   if (isset($element['title']) || isset($element['_weight'])) {
     // To prevent an extra required indicator, disable the required flag on the
@@ -1044,7 +1073,7 @@ function link_cleanup_url($url, $protocol = 'http') {
 /**
  * Validates a URL.
  *
- * Accepts all URLs following RFC 1738 standard for URL formation and all e-mail
+ * Accepts all URLs following RFC 1738 standard for URL formation and all email
  * addresses following the RFC 2368 standard for mailto address formation.
  *
  * @param string $text

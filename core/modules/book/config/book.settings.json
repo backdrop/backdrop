@@ -1,8 +1,16 @@
 {
     "_config_name": "book.settings",
-    "book_allowed_types": ["book"],
+    "book_allowed_types": [
+        "book"
+    ],
     "book_child_type": "book",
     "book_navigation": 1,
-    "book_navigation_options": ["tree", "pager"],
-    "book_links": ["book_add_child"]
+    "book_navigation_options": [
+        "tree",
+        "pager"
+    ],
+    "book_links": [
+        "book_add_child",
+        "book_reorder"
+    ]
 }

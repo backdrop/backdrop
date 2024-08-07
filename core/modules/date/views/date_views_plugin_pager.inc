@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Date views pager plugin.

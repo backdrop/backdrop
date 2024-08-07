@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provides Image module hook implementations for testing purposes.

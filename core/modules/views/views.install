@@ -149,7 +149,7 @@ function views_update_1004() {
 }
 
 /**
- * Set all grid style Views to use the deprecrated table if not set already.
+ * Set all grid style Views to use the deprecated table if not set already.
  */
 function views_update_1005() {
   $configs = config_get_names_with_prefix('views.view.');

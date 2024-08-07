@@ -894,7 +894,7 @@ class ViewsUIWizardDisplaysTestCase extends ViewsUIWizardHelper {
   function testRevertAllDisplays() {
     // Create a basic view with a page, block.
     // Because there is both a title on page and block we expect the title on
-    // the block be overriden.
+    // the block be overridden.
     $view['human_name'] = $this->randomName(16);
     $view['name'] = strtolower($this->randomName(16));
     $view['page[create]'] = 1;

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Contains the unformatted summary style plugin.
