@@ -18,6 +18,6 @@ function installer_update_1000() {
  */
 function installer_update_1001() {
   $config = config('installer.settings');
-  $config->set('download_location', 'root');
+  $config->set('download_location', 'global');
   $config->save();
 }

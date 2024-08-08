@@ -74,7 +74,7 @@ class ModuleUpdater extends Updater {
       $path = dirname($module_path);
     }
     else {
-      if (config_get('installer.settings', 'download_location') == 'multisite') {
+      if (config_get('installer.settings', 'download_location') == 'this_site') {
         $path = conf_path();
       }
       else {
@@ -153,7 +153,7 @@ class ThemeUpdater extends Updater {
       $path = dirname($theme_path);
     }
     else {
-      if (config_get('installer.settings', 'download_location') == 'multisite') {
+      if (config_get('installer.settings', 'download_location') == 'this_site') {
         $path = conf_path();
       }
       else {
@@ -219,7 +219,7 @@ class LayoutUpdater extends Updater {
       $path = dirname($layout_path);
     }
     else {
-      if (config_get('installer.settings', 'download_location') == 'multisite') {
+      if (config_get('installer.settings', 'download_location') == 'this_site') {
         $path = conf_path();
       }
       else {

@@ -5,5 +5,5 @@
         "name": "Backdrop"
     },
     "core_update": true,
-    "download_location": "root"
+    "download_location": "global"
 }
