@@ -1256,7 +1256,7 @@ function file_update_1010() {
 }
 
 /**
- * Add Apple media types to document file type. 
+ * Add Apple media types to document file type.
  */
 function file_update_1011() {
   $config = config('file.type.document');
