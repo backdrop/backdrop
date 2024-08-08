@@ -1254,3 +1254,18 @@ function file_update_1010() {
     $config->save();
   }
 }
+
+/**
+ * Add Apple media types to document file type. 
+ */
+function file_update_1011() {
+  $config = config('file.type.document');
+  $mimetypes = $config->get('mimetypes');
+  $mimetypes = array_merge($mimetypes, array(
+    'application/vnd.apple.keynote',
+    'application/vnd.apple.numbers',
+    'application/vnd.apple.pages',
+  ));
+  $config->set('mimetypes', $mimetypes);
+  $config->save();
+}
