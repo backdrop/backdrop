@@ -86,6 +86,7 @@ class ModuleUpdater extends Updater {
       }
       else {
         $path .= '/modules';
+        file_prepare_directory($path, FILE_CREATE_DIRECTORY);
       }
     }
 
@@ -165,6 +166,7 @@ class ThemeUpdater extends Updater {
       }
       else {
         $path .= '/themes';
+        file_prepare_directory($path, FILE_CREATE_DIRECTORY);
       }
     }
 
@@ -231,6 +233,7 @@ class LayoutUpdater extends Updater {
       }
       else {
         $path .= '/layouts';
+        file_prepare_directory($path, FILE_CREATE_DIRECTORY);
       }
     }
 
