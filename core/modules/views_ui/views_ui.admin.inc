@@ -3850,7 +3850,7 @@ function views_ui_add_item_form($form, &$form_state) {
               'class' => array('description'),
             );
           }
-          $group = preg_replace('/[^a-z0-9]/', '-', strtolower($copy['group']));
+          $group = preg_replace('/[^a-z0-9]/', '-', strtolower($copy['group']['data']));
           $fields[$key . '$' . $id] = $copy;
           $fields[$key . '$' . $id]['#attributes'] = array(
             'class' => array(

@@ -854,8 +854,9 @@ function admin_bar_theme_settings() {
     '#type' => 'fieldset',
     '#title' => t('Enabled components'),
     '#description' => t('These features will be enabled/visible in the administration bar. Untick the boxes to disable/hide them.'),
+    '#tree' => TRUE,
   );
-  $form['components']['components'] = array(
+  $form['components']['options'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Enabled components'),
     '#title_display' => 'invisible',
@@ -870,33 +871,35 @@ function admin_bar_theme_settings() {
       'admin_bar.locale' => t('Language switcher'),
     ),
     '#default_value' => $config->get('components'),
-    '#description' => t('These features will be enabled/visible in the administration bar. Untick the boxes to disable/hide them.'),
     'admin_bar.back_to_site_link' => array(
       '#states' => array(
         'visible' => array(
-          ':input[name="components[admin_bar.icon]"]' => array('checked' => TRUE),
+          ':input[name="components[options][admin_bar.icon]"]' => array('checked' => TRUE),
         ),
       ),
+      '#indentation' => 1,
     ),
     'admin_bar.search' => array(
       '#states' => array(
         'visible' => array(
-          ':input[name="components[admin_bar.menu]"]' => array('checked' => TRUE),
+          ':input[name="components[options][admin_bar.menu]"]' => array('checked' => TRUE),
         ),
       ),
+      '#indentation' => 1,
     ),
     'admin_bar.locale' => array(
       '#disabled' => !module_exists('locale'),
     ),
   );
 
-  $form['components']['admin_bar.icon']['#description'] = t('A specialized menu that links to the home page and provides links to perform various other admin tasks (e.g.: clear caches, run cron, etc.).');
-  $form['components']['admin_bar.back_to_site_link']['#description'] = t('Replaces the "Home" link with a "Back to site" link that returns to the last non-admin page visited.');
-  $form['components']['admin_bar.menu']['#description'] = t('Displays the various administrative menu options in the admin bar.');
-  $form['components']['admin_bar.search']['#description'] = t('A search box for quickly finding specific items in the Administration Menu.');
-  $form['components']['admin_bar.page']['#description'] = t('Links to edit items that make up the current page (e.g. layout, theme).');
-  $form['components']['admin_bar.users']['#description'] = t('A count of the people currently logged into the site.');
-  $form['components']['admin_bar.account']['#description'] = t('Links to view and log out of the current user account.');
+  $form['components']['options']['admin_bar.icon']['#description'] = t('A specialized menu that links to the home page and provides links to perform various other admin tasks (e.g.: clear caches, run cron, etc.).');
+  $form['components']['options']['admin_bar.back_to_site_link']['#description'] = t('Replaces the "Home" link with a "Back to site" link that returns to the last non-admin page visited.');
+  $form['components']['options']['admin_bar.menu']['#description'] = t('Displays the various administrative menu options in the admin bar.');
+  $form['components']['options']['admin_bar.search']['#description'] = t('A search box for quickly finding specific items in the Administration Menu.');
+  $form['components']['options']['admin_bar.page']['#description'] = t('Links to edit items that make up the current page (e.g. layout, theme).');
+  $form['components']['options']['admin_bar.users']['#description'] = t('A count of the people currently logged into the site.');
+  $form['components']['options']['admin_bar.account']['#description'] = t('Links to view and log out of the current user account.');
+
   $language_switcher_description = t('Links to switch the language of the user interface.');
   if (!(module_exists('locale'))) {
     if (user_access('administer modules')) {
@@ -907,7 +910,7 @@ function admin_bar_theme_settings() {
     }
 
   }
-  $form['components']['admin_bar.locale']['#description'] = $language_switcher_description;
+  $form['components']['options']['admin_bar.locale']['#description'] = $language_switcher_description;
 
   $form['actions'] = array(
     '#type' => 'actions',
@@ -925,7 +928,7 @@ function admin_bar_theme_settings() {
  * Submit handler for admin_bar_theme_settings().
  */
 function admin_bar_theme_settings_submit($form, &$form_state) {
-  $components = &$form_state['values']['components'];
+  $components = &$form_state['values']['components']['options'];
 
   // Disable back to site if icon bar is also disabled.
   if (!$components['admin_bar.icon']) {
