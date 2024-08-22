@@ -45,6 +45,13 @@ define('INSTALL_TASK_RUN_IF_NOT_COMPLETED', 3);
 define('INSTALL_AVAILABLE_TRANSLATIONS_URI', 'https://localize.backdropcms.org/translate/available-languages');
 
 /**
+ * The server URL where the interface translation files can be downloaded.
+ * Tokens in the pattern will be replaced by appropriate values for the
+ * required translation file.
+ */
+define('INSTALL_LOCALIZATION_SERVER_PATTERN', 'https://localize.backdropcms.org/files/l10n_packager/%core/%project/%project-%version.%language.po');
+
+/**
  * Installs Backdrop either interactively or via an array of passed-in settings.
  *
  * The Backdrop installation happens in a series of steps, which may be spread
@@ -200,10 +207,6 @@ function install_state_defaults() {
     // A list of installation tasks which have already been performed during
     // the current page request.
     'tasks_performed' => array(),
-    // The server URL where the interface translation files can be downloaded.
-    // Tokens in the pattern will be replaced by appropriate values for the
-    // required translation file.
-    'server_pattern' => 'https://localize.backdropcms.org/files/l10n_packager/%core/%project/%project-%version.%language.po',
   );
   return $defaults;
 }
@@ -1297,7 +1300,7 @@ function install_find_translations() {
 function install_find_translation_files($langcode = NULL) {
   $directory = settings_get('locale_translate_file_directory', conf_path() . '/files/translations');
   // @todo: Remove the "drupal" check in 2.x (assuming we have a localization
-  //   server by then).
+  // server by then).
   $files = file_scan_directory($directory, '!(install|drupal|backdrop(cms)?)(-[\d\.x]+)?\.' . (!empty($langcode) ? preg_quote($langcode, '!') : '[^\.]+') . '\.po$!', array('recurse' => FALSE));
 
   return $files;
@@ -1461,7 +1464,7 @@ function install_get_available_translations($files) {
   $response = backdrop_http_request(INSTALL_AVAILABLE_TRANSLATIONS_URI, array(
     'timeout' => 5,
   ));
-  $data = '';
+  $data = array();
   if ($response->code === '200') {
     $data = json_decode($response->data, TRUE);
   }
@@ -1494,7 +1497,7 @@ function install_get_available_translations($files) {
 function install_download_translation(array &$install_state) {
   // Check whether all conditions are met to download. Download the translation
   // if possible.
-  $requirements = install_check_translation_download($install_state['parameters']['langcode'], $install_state['server_pattern']);
+  $requirements = install_check_translation_download($install_state['parameters']['langcode']);
   // Render requirements if any warnings or errors returned.
   if ($output = install_display_requirements($install_state, $requirements)) {
     return $output;
@@ -1579,8 +1582,6 @@ function install_check_localization_server($uri) {
  *
  * @param string $langcode
  *   Language code to check for download.
- * @param string $server_pattern
- *   Server access pattern (to replace language code, version number, etc. in).
  *
  * @return array
  *   Requirements compliance array. If the translation cannot be downloaded this
@@ -1589,7 +1590,7 @@ function install_check_localization_server($uri) {
  * @see install_state_defaults()
  * @see install_download_translation()
  */
-function install_check_translation_download($langcode, $server_pattern) {
+function install_check_translation_download($langcode) {
   $requirements = array();
 
   $readable = FALSE;
@@ -1631,7 +1632,7 @@ function install_check_translation_download($langcode, $server_pattern) {
     '%core' => 'all',
     '%language' => $langcode,
   );
-  $translation_url = strtr($server_pattern, $variables);
+  $translation_url = strtr(INSTALL_LOCALIZATION_SERVER_PATTERN, $variables);
 
   $elements = parse_url($translation_url);
   $server_url = $elements['scheme'] . '://' . $elements['host'];
