@@ -95,6 +95,15 @@ function layout_menu() {
   );
   $items['admin/structure/layouts/list'] += $base;
 
+  $items['admin/structure/layouts/%/%'] = array(
+    'title' => 'List layouts',
+    'type' => MENU_CALLBACK,
+    'page callback' => 'layout_list_page',
+    'page arguments' => array(3, 4),
+    'file' => 'layout.admin.inc',
+  );
+  $items['admin/structure/layouts/%/%'] += $base;
+
   $items['admin/structure/layouts/settings'] = array(
     'title' => 'Layout templates',
     'description' => 'Manage layout templates.',
@@ -534,6 +543,48 @@ function layout_menu() {
     }
   }
 
+  // Create layout tabs for entities, but limit to entities that define a menu
+  // context path.
+  $all_info = _layout_get_all_info('layout_context');
+  $entity_names = array();
+  foreach ($all_info as $entity_type_name => $context_info) {
+    if (!empty($context_info['menu paths'])) {
+      $entity_names[] = $entity_type_name;
+    }
+  }
+
+  foreach (entity_get_info() as $entity_type => $entity_info) {
+    if (in_array($entity_type, $entity_names)) {
+      // Create a layout management page for individual bundles.
+        foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
+          if (isset($bundle_info['admin'])) {
+            // Extract path information from the bundle.
+            $path = $bundle_info['admin']['path'];
+            if (isset($bundle_info['admin']['bundle argument'])) {
+              $bundle_arg = $bundle_info['admin']['bundle argument'];
+            }
+            else {
+              $bundle_arg = $bundle_name;
+            }
+
+            // Extract access information, providing defaults.
+            $access = array_intersect_key($bundle_info['admin'], backdrop_map_assoc(array('access callback', 'access arguments')));
+            $access += array(
+              'access callback' => 'user_access',
+              'access arguments' => array('administer layouts'),
+            );
+
+            $items["$path/layouts"] = array(
+              'title' => 'Manage layouts',
+              'page callback' => 'layout_entity_redirect_form',
+              'page arguments' => array($entity_type, $bundle_arg),
+              'weight' => 2,
+            ) + $access;
+          }
+        }
+    }
+  }
+
   // A page in the Reports section to list all blocks and their modules.
   $items['admin/reports/blocks'] = array(
     'title' => 'Blocks',
@@ -545,6 +596,16 @@ function layout_menu() {
   );
 
   return $items;
+}
+
+/**
+ * Render the settings form for layout.
+ *
+ * @ingroup forms
+ */
+function layout_entity_redirect_form($entity_type, $bundle_arg = NULL) {
+  $bundle = field_extract_bundle($entity_type, $bundle_arg);
+  backdrop_goto('admin/structure/layouts/' . $entity_type . '/' . $bundle);
 }
 
 /**
@@ -631,6 +692,25 @@ function layout_page_title(Layout $layout) {
   // Page titles are run through check_plain() before output, so no escaping
   // here is intentional. See backdrop_get_title().
   return $layout->title;
+}
+
+function layout_menu_local_tasks_alter(&$data, $router_item, $root_path) {
+  if (strpos($root_path, 'admin/structure/layouts') === 0) {
+    $item = menu_get_item('admin/structure/layouts/add');
+    if ($item['access'] && $entity_type = arg(3)) {
+      $query['entity_type'] = $entity_type;
+      $item['title'] = t('New entity');
+      if ($bundle_type = arg(4)) {
+        $query['bundle_type'] = $bundle_type;
+        $item['title'] = t('New bundle');
+      }
+      $item['localized_options'] =  array('query' => $query);
+      $data['actions']['output'][] = array(
+        '#theme' => 'menu_local_action',
+        '#link' => $item,
+      );
+    }
+  }
 }
 
 /**

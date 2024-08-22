@@ -45,6 +45,11 @@ function node_overview_types() {
         'weight' => 10,
       );
     }
+    $links['node_layout'] = array(
+      'title' => t('Manage layouts'),
+      'href' => 'admin/structure/layouts/node/' . $type_url_str,
+      'weight' => 11,
+    );
     if ($type->module === 'node') {
       $links['delete'] = array(
         'title' => t('Delete'),

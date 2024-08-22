@@ -9,8 +9,14 @@
 /**
  * Output a list of layouts that are managed.
  */
-function layout_list_page() {
-  $layouts = layout_load_all();
+function layout_list_page($entity_type = '', $bundle_name = '') {
+  if ($entity_type) {
+    $layouts = layout_get_entity_layouts($entity_type, $bundle_name);
+  }
+  else {
+    $layouts = layout_load_all();
+  }
+    
   $layout_template_info = layout_get_layout_template_info();
 
   // Group layouts by path.
@@ -230,6 +236,50 @@ function layout_list_page() {
 }
 
 /**
+ * Render the settings form for layout.
+ *
+ * @ingroup forms
+ */
+function layout_get_entity_layouts($entity_type, $bundle_name = '') {
+  $all_layouts = layout_load_all();
+  $matched_layouts = array();
+  foreach ($all_layouts as $layout) {
+    if ($path = $layout->getPath()) {
+      $path_contexts = layout_context_required_by_path($path);
+      foreach ($path_contexts as $path_context) {
+        if (is_a($path_context, 'EntityLayoutContext') && $path_context->isA($entity_type)) {
+          if (empty($layout->conditions)) {
+            $matched_layouts['all'][] = $layout;
+          }
+          else {
+            foreach ($layout->conditions as $condition) {
+              if (is_a($condition, 'EntityBundleLayoutAccess')) {
+                if (empty($bundle_name)) {
+                  $matched_layouts['all'][] = $layout;
+                  foreach ($condition->settings['bundles'] as $bundle) {
+                    $matched_layouts['bundles'][$bundle][] = $layout;
+                  }
+                }
+                elseif (in_array($bundle_name, $condition->settings['bundles'])) {
+                  $matched_layouts['all'][] = $layout;
+                  $matched_layouts['bundles'][$bundle_name][] = $layout;
+                  break;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  $matched_layouts['all'][] = $all_layouts['default'];
+
+  // return $bundle_name ? $matched_layouts['bundles'][$bundle_name] : $matched_layouts['all'];
+  return $matched_layouts['all'];
+
+}
+
+/**
  * Given a layout, return a list of operations that can be performed on it.
  */
 function _layout_get_operations(Layout $layout) {
@@ -321,7 +371,7 @@ function _layout_get_group_operations($path, array $group) {
 /**
  * Menu callback; Display the form for adding a new layout.
  */
-function layout_add_page() {
+function layout_add_page($entity_type = '', $bundle_name = '') {
   if (isset($_SESSION['layout_new_name'])) {
     $layout = layout_tempstore_load($_SESSION['layout_new_name']);
   }
@@ -330,6 +380,24 @@ function layout_add_page() {
       'is_new' => TRUE,
     );
     $layout = new Layout($config);
+    if (isset($_GET['entity_type']) && isset($_GET['bundle_type'])) {
+      // Set the bundle type visibility condition if the entity has bundles.
+      $entity_type = $_GET['entity_type'];
+      $entity_info = entity_get_info($entity_type);
+      $single_bundle = (count($entity_info['bundles']) == 1) && isset($entity_info['bundles'][$entity_type]);
+      if (!$single_bundle) {
+        $handler = layout_create_access('node_type');
+        $handler->settings['bundles'][] = $_GET['bundle_type'];
+        $layout->conditions[] = $handler;
+      }
+      // Build the expected path string and set the path.
+      $all_info = _layout_get_all_info('layout_context');
+      $entity_path_type = $all_info[$entity_type]['menu paths'][0];
+      $entity_path = preg_replace('/%[a-z0-9_]+/', '%', $entity_path_type);
+      $layout->setPath($entity_path);
+      $layout->name = 'nodes';
+      $layout->title = 'Nodes';
+    }
   }
   backdrop_set_title(t('Add layout'));
   return backdrop_get_form('layout_settings_form', $layout);
