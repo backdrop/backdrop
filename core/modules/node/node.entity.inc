@@ -791,7 +791,7 @@ class NodeStorageController extends EntityDatabaseStorageController {
       unset($node->content);
 
       $build += array(
-        '#theme' => 'node__' . $node->type . '__' . $view_mode,
+        '#theme' => 'node',
         '#node' => $node,
         '#view_mode' => $view_mode,
         '#langcode' => $langcode,

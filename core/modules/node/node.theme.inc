@@ -294,8 +294,11 @@ function template_preprocess_node(&$variables) {
     $variables['node_url'] = FALSE;
   }
 
-  // Add an extra theme hook suggestion for node id.
+  // Add extra theme hook suggestions for node type, view_mode and id.
+  $variables['theme_hook_suggestions'][] = 'node__' . $node->type;
+  $variables['theme_hook_suggestions'][] = 'node__' . $node->type . '__' . $variables['view_mode'];
   $variables['theme_hook_suggestions'][] = 'node__' . $node->nid;
+  $variables['theme_hook_suggestions'][] = 'node__' . $node->nid . '__' . $variables['view_mode'];
 
   // Add a legacy theme hook suggestion for content block. @todo remove in 2.x.
   if (strstr($variables['theme_hook_original'], 'node_block')) {
