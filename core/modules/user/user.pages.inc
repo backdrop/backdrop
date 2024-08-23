@@ -166,7 +166,13 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
     // A different user is already logged in on the computer.
     else {
       $reset_link_account = user_load($uid);
-      if (!empty($reset_link_account)) {
+      $is_valid = FALSE;
+      if (!empty($reset_link_account) && $timestamp >= $reset_link_account->login && $timestamp <= REQUEST_TIME) {
+        if ($hashed_pass == user_pass_rehash($reset_link_account->pass, $timestamp, $reset_link_account->login, $reset_link_account->uid, $reset_link_account->mail)) {
+          $is_valid = TRUE;
+        }
+      }
+      if ($is_valid) {
         backdrop_set_message(t('You cannot use a password reset link while logged into the site. Please <a href="!logout">logout</a> and try using the link again.',
           array('!logout' => url('user/logout'))), 'warning');
       } else {
@@ -188,7 +194,21 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
         backdrop_set_message(t('You have tried to use a reset password link that has expired. Please request a new one using the form below.'), 'error');
         backdrop_goto('user/password');
       }
-      elseif ($account->uid && $timestamp >= $account->login && $timestamp <= $current && $hashed_pass == user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid)) {
+      elseif ($account->uid && $timestamp >= $account->login && $timestamp <= $current && $hashed_pass == user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid, $account->mail)) {
+        if (config_get('user.flood', 'flood_uid_only')) {
+          // Clear flood events based on the uid only if configured.
+          $identifier = $account->uid;
+        }
+        else {
+          // The default identifier is a combination of uid and IP address.
+          $identifier = $account->uid . '-' . ip_address();
+        }
+        // Only clear the user specific flood events. We cannot clear the more
+        // broad IP address flood events because that would open a
+        // vulnerability where an attacker with a valid account could use that
+        // to brute force other accounts.
+        flood_clear_event('failed_login_attempt_user', $identifier);
+
         if ($immediate_login) {
           $user = $account;
           user_login_finalize();
@@ -586,7 +606,7 @@ function user_cancel_confirm($account, $timestamp = 0, $hashed_pass = '') {
   // Basic validation of arguments.
   if (isset($account->data['user_cancel_method']) && !empty($timestamp) && !empty($hashed_pass)) {
     // Validate expiration and hashed password/login.
-    if ($timestamp <= $current && $current - $timestamp < $timeout && $account->uid && $timestamp >= $account->login && $hashed_pass == user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid)) {
+    if ($timestamp <= $current && $current - $timestamp < $timeout && $account->uid && $timestamp >= $account->login && $hashed_pass == user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid, $account->mail)) {
       $edit = array(
         'user_cancel_notify' => isset($account->data['user_cancel_notify']) ? $account->data['user_cancel_notify'] : config_get('system.core', 'user_mail_status_canceled_notify'),
       );

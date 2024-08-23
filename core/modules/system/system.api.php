@@ -319,6 +319,10 @@ function hook_js_alter(&$javascript) {
  *   'type' => 'setting', and the actual settings must be contained in a 'data'
  *   element of the value.
  * - 'css': Like 'js', an array of CSS elements passed to backdrop_add_css().
+ * - 'icons': A simple array with only icon names. Each icon in the list will be
+ *   resolved to a file path and then added to the page as both a JavaScript
+ *   variable (Backdrop.icons['icon-name']) and as a CSS variable
+ *   (--icon-[icon-name]).
  * - 'dependencies': An array of libraries that are required for a library. Each
  *   element is an array listing the module and name of another library. Note
  *   that all dependencies for each dependent library will also be added when
@@ -328,12 +332,14 @@ function hook_js_alter(&$javascript) {
  * Module- or implementation-specific data and integration logic should be added
  * separately.
  *
- * @return
+ * @return array
  *   An array defining libraries associated with a module.
  *
  * @see system_library_info()
  * @see backdrop_add_library()
  * @see backdrop_get_library()
+ *
+ * @since 1.28.0 Added "icons" key to library info.
  */
 function hook_library_info() {
   // Library One.
@@ -349,6 +355,15 @@ function hook_library_info() {
         'type' => 'file',
         'media' => 'screen',
       ),
+    ),
+    // A full list of icons available from core can be found in the
+    // core/misc/icons directory.
+    'icons' => array(
+      'pencil',
+      'image',
+      // If needing to use an icon that cannot be overridden by a module or
+      // theme, pass an array of options with "immutable" set to TRUE.
+      'gear' => array('immutable' => TRUE),
     ),
   );
   // Library Two.
@@ -417,6 +432,91 @@ function hook_library_info_alter(&$libraries, $module) {
 function hook_css_alter(&$css) {
   // Remove defaults.css file.
   unset($css[backdrop_get_path('module', 'system') . '/defaults.css']);
+}
+
+/**
+ * Provides reusable icons from a module.
+ *
+ * Backdrop core provides an SVG-based icon system. The default set of icons
+ * can be found in /core/misc/icons. Modules may use this hook to provide new
+ * icons or to override existing ones provided by core. If creating new,
+ * module-specific icons, it's recommended to namespace the icon file with the
+ * name of your module. For example, if your module was named "my_module" as was
+ * providing a "bird" icon, the icon name should be "my-module-bird". Icon names
+ * generally use hyphens, not underscores, in their names.
+ *
+ * @return array
+ *   An array keyed by the icon name. The icon name is used in calls to the
+ *   icon() function. Optionally providing the following nested array values:
+ *   - name: (optional) If the module-provided icon name differs from the core
+ *     name, specify the file name minus the ".svg" extension.
+ *   - directory: (optional) If the icon resides outside of the module's "icons"
+ *     directory, specify the directory from which this icon is provided,
+ *     relative to the Backdrop installation root.
+ *
+ * @see hook_icon_info_alter()
+ *
+ * @since 1.28.0 Hook added.
+ */
+function hook_icon_info() {
+  // For icons simply located in a module's "icons" directory, just provide the
+  // name of the file (minus ".svg") as the array key. This can be used to
+  // override core icons if the name of the icon matches a core one, or provide
+  // new ones if the name is unique.
+  $icons['my-module-icon1'] = array();
+
+  // If a module is overriding a core-provided icon but the module uses a
+  // different name, it can specify the core name as the key and provide a
+  // "name" property to map to the module's icon file name (minus .svg).
+  $icons['pencil'] = array(
+    'name' => 'pen',
+  );
+
+  // A module could use an externally provided list of icons by specifying
+  // a "directory" property, relative to the root of the Backdrop installation.
+  $icons['my-module-icon2'] = array(
+    'directory' => 'libraries/my_icon_set/standard',
+  );
+
+  // If a module wants to separate icons into different directories for
+  // variations, it can use the "directory" option to use the same icon name in
+  // different directories. For example, this would map
+  //"pencil-filled" to "icons/filled/pencil.svg".
+  $module_path = backdrop_get_path('module', 'my_module');
+  $icons['pencil-fill'] = array(
+    'name' => 'pencil',
+    'directory' => $module_path . '/icons/filled',
+  );
+
+  return $icons;
+}
+
+/**
+ * Modify the list of icons provided by other modules.
+ *
+ * Note that core-provided icons are not in this list. If wanting to override
+ * core-provided icons, use hook_icon_info(). This hook is only useful if
+ * wanting to modify the icons provided by another module.
+ *
+ * @param $icons
+ *   This parameter is passed by reference. It contains the entire list of
+ *   module-provided icons, keyed by the icon name.
+ *
+ * @see hook_icon_info()
+ *
+ * @since 1.28.0 Hook added.
+ */
+function hook_icon_info_alter(&$icons) {
+  // Remove a different module's override of a core icon.
+  if (isset($icons['pencil']) && $icons['pencil']['module'] === 'different_module') {
+    unset($icons['pencil']);
+  }
+
+  // Swap a different module's icon for one provide by this module.
+  if (isset($icons['pencil'])) {
+    $icons['pencil']['module'] = 'my_module';
+    $icons['pencil']['directory'] = backdrop_get_path('module', 'my_module') . '/icons';
+  }
 }
 
 /**
@@ -659,6 +759,9 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  *   - title arguments: (optional) Arguments to send to t() or your custom
  *     callback, with path component substitution as described above.
  *   - description: (optional) The untranslated description of the menu item.
+ *   - icon: (optional) The icon name to be used for this menu item. Icons may
+ *     be used in places like the admin bar or on system landing pages such as
+ *     "admin/config". See the icon() function for more information on icons.
  *   - page callback: (optional) The function to call to display a web page when
  *     the user visits the path. If omitted, the parent menu item's callback
  *     will be used instead.
@@ -797,6 +900,7 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  * http://drupal.org/node/102338.
  *
  * @since 1.24.2 Support for the "position" key removed.
+ * @since 1.28.0 Added "icon" key.
  */
 function hook_menu() {
   $items['example'] = array(
@@ -2871,8 +2975,8 @@ function hook_install() {
  * loaded by that one, including, for example, autoload information) will not
  * have been loaded.
  *
- * During database updates the schema of any module could be out of date. For
- * this reason, caution is needed when using any API function within an update
+ * During site updates the schema of any module could be out of date. For this
+ * reason, caution is needed when using any API function within an update
  * function - particularly CRUD functions, functions that depend on the schema
  * (for example by using backdrop_write_record()), and any functions that invoke
  * hooks. See @link update_api Update versions of API functions @endlink for
@@ -2923,7 +3027,7 @@ function hook_update_N(&$sandbox) {
   // its default value exists in `config/my_module.settings.json`.
   config_set('my_module.settings', 'three', '3.33');
 
-  // For most database updates, the following is sufficient.
+  // For most site updates, the following is sufficient.
   db_add_field('mytable1', 'newcol', array('type' => 'int', 'not null' => TRUE, 'description' => 'My new integer column.'));
 
   // However, for more complex operations that may take a long time, you may
@@ -3002,7 +3106,7 @@ function hook_update_dependencies() {
   // the 'yet_another_module' module. (Note that declaring dependencies in this
   // direction should be done only in rare situations, since it can lead to the
   // following problem: If a site has already run the yet_another_module
-  // module's database updates before it updates its codebase to pick up the
+  // module's site update(s) before it updates its codebase to pick up the
   // newest my_module code, then the dependency declared here will be ignored.)
   $dependencies['yet_another_module'][1004] = array(
     'my_module' => 1001,
@@ -3033,7 +3137,7 @@ function hook_update_dependencies() {
  * @see hook_update_N()
  */
 function hook_update_last_removed() {
-  // We've removed the 1.x-1.x version of my_module, including database updates.
+  // We've removed the 1.x-1.x version of my_module, including site updates.
   // For the 1.x-2.x version of the module, the next update function would be
   // my_module_update_1200().
   return 1103;
@@ -4070,8 +4174,8 @@ function hook_filetransfer_info_alter(&$filetransfer_info) {
  * These simplified versions of core API functions are provided for use by
  * update functions (hook_update_N() implementations).
  *
- * During database updates the schema of any module could be out of date. For
- * this reason, caution is needed when using any API function within an update
+ * During site updates the schema of any module could be out of date. For this
+ * reason, caution is needed when using any API function within an update
  * function - particularly CRUD functions, functions that depend on the schema
  * (for example by using backdrop_write_record()), and any functions that invoke
  * hooks.

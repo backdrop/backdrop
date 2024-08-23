@@ -83,6 +83,8 @@ datelimits
 dbinfo
 dblog
 DDTHH
+dependee
+dependees
 derf
 devmajor
 devminor
@@ -102,6 +104,7 @@ editunblock
 elementtype
 enddate
 endskip
+Enregistrer
 entityreference
 éøïвβ
 errorcode
@@ -143,6 +146,7 @@ formfocusborder
 formtest
 foundkeys
 fourthcolumn
+Fozzie
 freso
 fromto
 fter
@@ -186,11 +190,13 @@ ieid
 iend
 ignoretag
 iinet
+imagecreatefrom
 imagefield
 imageto
 indigoxela
 infourl
 innodb
+instantiatable
 isid
 istart
 jahwohl
@@ -223,6 +229,7 @@ lished
 Lisu
 litespeed
 localzone
+lundi
 LXSS
 manytoone
 marzo
@@ -235,6 +242,7 @@ merlinofchaos
 metacharacters
 meus
 microweights
+milli
 mimeheaders
 minadjustment
 mindate
@@ -249,6 +257,7 @@ mouton
 moutons
 msgbox
 multibundle
+multipage
 multisites
 Műveletek
 myclass
@@ -313,6 +322,7 @@ oldserver
 oldtext
 oneof
 onmediaerror
+onoff
 opensans
 Optionchecker
 otherjob
@@ -324,6 +334,7 @@ pagenum
 pagerpieces
 phptemplate
 phpwiki
+plid
 plids
 pneum
 Ponedjeljak
@@ -341,7 +352,11 @@ Punycode
 queryor
 quicktime
 Quieligo
+rawurlencoded
 ratis
+rawurldecode
+rawurlencode
+rawurlencoded
 readwrite
 realelement
 refclass
@@ -384,6 +399,7 @@ softtabstop
 someplugin
 sometable
 sourcedir
+spacebar
 stackoverflow
 statiya
 stdobj
@@ -418,6 +434,7 @@ tempstore
 testconfig
 testfiles
 testviews
+textgroup
 textgroups
 textinput
 themeable
@@ -439,10 +456,15 @@ triptych
 typeflag
 Üidentifier
 unaggregated
+unaliased
+unconfigured
 uncustomized
 undeletable
+undraggable
 unescapes
 unescaping
+unextracted
+unflagged
 unhighlight
 unhighlights
 unioned
@@ -454,6 +476,10 @@ unmunged
 unmunging
 unnested
 unpackage
+unpermissioned
+unpromoted
+unrendered
+unshortened
 uploadimage
 uploadwidget
 USERAGENT
@@ -466,7 +492,9 @@ vendredi
 VERIFYHOST
 VERIFYPEER
 verygreatbackdropmodule
+viewmode
 VIEWNAME
+viewmode
 watchdog
 WCAG
 wday
