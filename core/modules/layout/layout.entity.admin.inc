@@ -216,11 +216,12 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle
     
   $first_field = reset($fields);
   $form['content_area'] = array(
-    '#title' => t('"Main content" block'),
-    '#type' => 'checkboxes',
-    '#default_value' => array('field_blocks'),
+    '#title' => t('Field blocks'),
+    '#type' => 'radios',
+    '#default_value' => 'main_content',
     '#options' => array(
-      'field_blocks' => t('Use field blocks.'),
+      'main_content' => t('Use the "Main content" block to render fields'),
+      'field_blocks' => t('Select individual field blocks'),
     ),
     '#description' => empty($first_field) ? t('There are no fields attached to this entity.') : '',
     '#disabled' => empty($first_field),
@@ -232,7 +233,7 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle
     '#options' => $field_blocks,
     '#states' => array(
       'visible' => array(
-        ':input[name="content_area[field_blocks]"]' => array('checked' => TRUE),
+        ':input[name="content_area"]' => array('value' => 'field_blocks'),
       ),
     ),
   );
@@ -276,7 +277,7 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle
  * Validate handler for the layout_entity_admin_add_form().
  */
 function layout_entity_admin_add_form_validate($form, &$form_state) {
-  if (empty(array_filter($form_state['values']['field_blocks']))) {
+  if ($form_state['values']['content_area'] == 'field_blocks' && empty(array_filter($form_state['values']['field_blocks']))) {
     form_set_error('field_blocks', t('At least one block should be placed.'));
   }
 }
@@ -332,7 +333,7 @@ function layout_entity_admin_add_form_submit($form, &$form_state) {
       }
     }
 
-    if ($form_state['values']['content_area']['field_blocks']) {
+    if ($form_state['values']['content_area'] == 'field_blocks') {
       $fields = field_info_instances($entity_type, $bundle_type);
       $first_field = reset($fields);
       if (!empty($first_field)) {
