@@ -374,14 +374,9 @@ function layout_entity_admin_add_form_submit($form, &$form_state) {
 
   }
 
-  $layout->save();
+  layout_set_layout_tempstore($layout);
 
-  layout_clear_layout_tempstore($layout->name);
-  if (!empty($layout->is_new)) {
-    backdrop_set_message(t('Layout created. Blocks may now be added to this layout.'));
-  }
-  else {
-    backdrop_set_message(t('Layout saved.'));
-  }
+  layout_locked_message($layout, 'layout');
+
   $form_state['redirect'] = 'admin/structure/layouts/manage/' . $layout->name;
 }
