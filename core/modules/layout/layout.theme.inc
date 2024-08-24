@@ -124,7 +124,7 @@ function theme_layout_path_info($variables) {
   }
 
   $output = '<div class="layout-path-info">' . $path_link . '</div>';
-  if ($menu_item->conditions || $menu_item->menu['type'] != 'none') {
+  if (!empty($menu_item->conditions) || (isset($menu_item->menu['type']) && $menu_item->menu['type'] != 'none')) {
     module_load_include('inc', 'layout', 'layout.admin');
     $menus = menu_get_menus();
     $menu_types = layout_get_menu_types();
