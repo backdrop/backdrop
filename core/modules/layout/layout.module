@@ -558,44 +558,18 @@ function layout_menu() {
     if (in_array($entity_type, $entity_names)) {
       foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
         if (isset($bundle_info['admin'])) {
-          // Extract path information from the bundle.
           $path = $bundle_info['admin']['path'];
-          // Different bundles can appear on the same path (e.g. %node_type and
-          // %comment_menu_node_type). To allow field_ui_menu_load() to extract the
-          // actual bundle object from the translated menu router path
-          // arguments, we need to identify the argument position of the bundle
-          // name string ('bundle argument') and pass that position to the menu
-          // loader. The position needs to be casted into a string; otherwise it
-          // would be replaced with the bundle name string.
           if (isset($bundle_info['admin']['bundle argument'])) {
             $bundle_arg = $bundle_info['admin']['bundle argument'];
-            $bundle_position = (string) $bundle_arg;
           }
           else {
             $bundle_arg = $bundle_name;
-            $bundle_position = '0';
           }
-          // This is the position of the %field_ui_menu placeholder in the
-          // items below.
-          $field_position = count(explode('/', $path)) + 1;
-          $view_mode_position = count(explode('/', $path)) + 1;
 
-          // Extract access information, providing defaults.
-          $access = array_intersect_key($bundle_info['admin'], backdrop_map_assoc(array('access callback', 'access arguments')));
-          $access += array(
+          $access = array(
             'access callback' => 'user_access',
-            'access arguments' => array('administer fields'),
+            'access arguments' => array('administer layouts'),
           );
-
-          // Add the "administer fields" permission on top of the access
-          // restriction because the field UI should only be accessible to
-          // trusted users.
-          if ($access['access callback'] != 'user_access' || $access['access arguments'] != array('administer fields')) {
-            $access = array(
-              'access callback' => 'field_ui_admin_access',
-              'access arguments' => array($access['access callback'], $access['access arguments']),
-            );
-          }
 
           $items["$path/layouts"] = array(
             'title' => 'Manage layouts',
