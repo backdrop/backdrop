@@ -93,6 +93,15 @@ function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg
  *
  * @return array
  *   An array of matched layouts.
+ *
+ * @return array
+ *   Associative array of matched layouts.
+ *   Array keys:
+ *   - all: An array of all layouts that apply to this entity type, as well as
+*       layouts with visibility conditions matching $bundle_name if provided.
+ *       layouts without bundle visibility conditions.
+ *   - bundles: An array of layouts with visibility conditions for this bundle
+ *       type if the $bundle_name parameter is provided.
  */
 function layout_get_entity_layouts($entity_type, $bundle_name = '') {
   $all_layouts = layout_load_all();
@@ -126,6 +135,7 @@ function layout_get_entity_layouts($entity_type, $bundle_name = '') {
       }
     }
   }
+
   return $matched_layouts;
 
 }
