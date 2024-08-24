@@ -1,13 +1,11 @@
 <?php
 /**
  * @file
- * Admin page callbacks for the Layout module.
- *
- * This provides the UI to list, create, edit and delete layouts.
+ * Provides a user interface for managing layouts for entity bundles.
  */
 
 /**
- * Render the settings form for layout.
+ * Render the settings form for listing entity layouts.
  *
  * @ingroup forms
  */
@@ -86,9 +84,15 @@ function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg
 
 
 /**
- * Render the settings form for layout.
+ * Returns layouts with visibility conditions matching an entity type or bundle.
  *
- * @ingroup forms
+ * @param string $entity_type
+ *   The entity type.
+ * @param string $bundle_name
+ *   The entity bundle name.
+ *
+ * @return array
+ *   An array of matched layouts.
  */
 function layout_get_entity_layouts($entity_type, $bundle_name = '') {
   $all_layouts = layout_load_all();
@@ -127,7 +131,7 @@ function layout_get_entity_layouts($entity_type, $bundle_name = '') {
 }
 
 /**
- * Render the settings form for layout.
+ * Render the form for adding a layout for an entity.
  *
  * @ingroup forms
  */
