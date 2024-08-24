@@ -92,9 +92,6 @@ function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg
  *   The entity bundle name.
  *
  * @return array
- *   An array of matched layouts.
- *
- * @return array
  *   Associative array of matched layouts.
  *   Array keys:
  *   - all: An array of all layouts that apply to this entity type, as well as
