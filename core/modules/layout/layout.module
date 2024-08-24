@@ -2216,7 +2216,7 @@ function layout_set_handler_contexts(array &$contexts, array $all_contexts, arra
 }
 
 /**
- * Implements hook_modules_uninstalled()
+ * Implements hook_modules_uninstalled().
  *
  * Deletes all blocks provided by a module when that module is uninstalled.
  */

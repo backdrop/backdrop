@@ -66,8 +66,11 @@ function layout_list_page() {
     $row = array();
     // Generate the heading row for non-default layout path groups.
     if ($path !== '') {
-      $row[] = array('data' => theme('layout_path_info', array('path' => $path, 'missing_path' => !isset($page_callbacks[$path]))), 'colspan' => 3);
-      
+      $row[] = array('data' => theme('layout_path_info', array(
+        'path' => $path,
+        'missing_path' => !isset($page_callbacks[$path])
+      )), 'colspan' => 3);
+
       // Empty columns are intentional so that they may be hidden with
       // priority-low class on the $header array.
       $row[] = '';
@@ -1186,7 +1189,8 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
 
   // Add a link to preview the page.
   $link_path = $layout->getPath();
-  // A null path returns the site root. See https://github.com/backdrop/backdrop-issues/issues/4383
+  // A null path returns the site root.
+  // See https://github.com/backdrop/backdrop-issues/issues/4383
   if (!is_null($link_path) && backdrop_valid_path($link_path)) {
     $form['top']['#theme_wrappers'] = array('container');
     $form['top']['#attributes']['class'] = array('edit-layout-top', 'clearfix');
@@ -1198,7 +1202,7 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
       array(
         'title' => t('View page'),
         'href' => $link_path,
-      )
+      ),
     );
   }
 
@@ -1887,7 +1891,7 @@ function layout_block_configure_ajax_update($form, $form_state) {
 
   // Remove the page title pseudo region if we're adding a Title block or a
   // Combo block.
-  if ($block->module == 'system' && $block->delta == 'page_components' && ($block->childDelta == 'title' || $block->childDelta =='title_combo')) {
+  if ($block->module == 'system' && $block->delta == 'page_components' && ($block->childDelta == 'title' || $block->childDelta == 'title_combo')) {
     $commands[] = ajax_command_replace('#layout-editor-title', '<div id="layout-title-region-empty"></div>');
   }
 
@@ -1920,7 +1924,7 @@ function layout_block_remove_page(Layout $layout, Block $block, $renderer_name) 
     $commands[] = ajax_command_remove('#layout-editor-block-' . $block->uuid);
     // If neither a Title block nor a Combo block remains in the layout, add
     // the page title pseudo-region.
-    if ($block->module == 'system' && $block->delta == 'page_components' && ($block->childDelta == 'title' || $block->childDelta =='title_combo')) {
+    if ($block->module == 'system' && $block->delta == 'page_components' && ($block->childDelta == 'title' || $block->childDelta == 'title_combo')) {
       $render_title_region = TRUE;
       $all_layout_blocks = $layout->content;
       foreach ($all_layout_blocks as $existing_block) {
