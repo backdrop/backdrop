@@ -68,7 +68,7 @@ function layout_list_page() {
     if ($path !== '') {
       $row[] = array('data' => theme('layout_path_info', array(
         'path' => $path,
-        'missing_path' => !isset($page_callbacks[$path])
+        'missing_path' => !isset($page_callbacks[$path]),
       )), 'colspan' => 3);
 
       // Empty columns are intentional so that they may be hidden with
@@ -1928,7 +1928,7 @@ function layout_block_remove_page(Layout $layout, Block $block, $renderer_name) 
       $render_title_region = TRUE;
       $all_layout_blocks = $layout->content;
       foreach ($all_layout_blocks as $existing_block) {
-        if ($existing_block->module == 'system' && $existing_block->delta == 'page_components' && ($existing_block->childDelta == 'title' || $existing_block->childDelta =='title_combo') && ($existing_block->uuid != $block->uuid)) {
+        if ($existing_block->module == 'system' && $existing_block->delta == 'page_components' && ($existing_block->childDelta == 'title' || $existing_block->childDelta == 'title_combo') && ($existing_block->uuid != $block->uuid)) {
           $render_title_region = FALSE;
           break;
         }
@@ -2320,13 +2320,21 @@ function layout_condition_edit_title(Layout $layout = NULL, Block $block = NULL,
   $access_info = layout_get_access_info($plugin_name);
   if (isset($access_info['title'])) {
     if ($menu_item) {
-      return t('Configure condition "@condition" for "@title"', array('@condition' => $access_info['title'], '@title' => $menu_item->path));
+      return t('Configure condition "@condition" for "@title"', array(
+        '@condition' => $access_info['title'],
+        '@title' => $menu_item->path,
+      ));
     }
     elseif ($block) {
-      return t('Configure condition "@condition" for "@title"', array('@condition' => $access_info['title'], '@title' => $block->getAdminTitle()));
+      return t('Configure condition "@condition" for "@title"', array(
+        '@condition' => $access_info['title'],
+        '@title' => $block->getAdminTitle(),
+      ));
     }
     else {
-      return t('Configure condition "@condition"', array('@condition' => $access_info['title']));
+      return t('Configure condition "@condition"', array(
+        '@condition' => $access_info['title'],
+      ));
     }
   }
 }
@@ -3293,7 +3301,11 @@ function layout_ajax_form_update($form, $form_state) {
 function layout_settings_page($form, &$form_state) {
   $header = array(
     'layout_template_info' => array('data' => t('Template')),
-    'type' => array('data' => t('Type'), 'sort' => 'desc', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
+    'type' => array(
+      'data' => t('Type'),
+      'sort' => 'desc',
+      'class' => array(RESPONSIVE_PRIORITY_LOW),
+    ),
     'operations' => t('Operations'),
   );
 
@@ -3322,7 +3334,7 @@ function layout_settings_page($form, &$form_state) {
       $rows[$template_name]['operations']['data'] = array(
         '#type' => 'dropbutton',
         '#links' => _layout_settings_get_group_operations($template_info, $is_default),
-       );
+      );
     }
     // For disabled and hidden templates, save the fact they are disabled.
     elseif ($template_info['hidden']) {
