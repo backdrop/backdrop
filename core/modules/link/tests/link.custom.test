@@ -1,0 +1,23 @@
+<?php
+/**
+ * @file
+ * Basic simpletests to test basic link fields in a custom form.
+ */
+
+require_once(__DIR__ . '/link.test');
+
+class LinkCustomFormTest extends LinkBaseTestClass {
+  /**
+   * Test the output of a custom form with link fields.
+   */
+  function testCustomLinkFields() {
+    $group = 'Link field custom form';
+    $this->backdropGet('link-field-custom-form');
+    $message = "Defaults";
+    $this->assertPattern('@<label for="edit-link-test-defaults-title">Title@is', $message, $group);
+    $message = "Title changed - label hidden";
+    $this->assertPattern('@<label class="element-invisible" for="edit-link-test-title-changes">Link with title changed@is', $message, $group);
+    $message = "No title";
+    $this->assertNoPattern('@name="link_test_no_title[title]"@is', $message, $group);
+  }
+}

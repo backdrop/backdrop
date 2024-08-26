@@ -1,0 +1,63 @@
+<?php
+/**
+ * @file
+ * Helper module for testing link fields with custom forms.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function link_field_custom_form_test_menu() {
+  $items['link-field-custom-form'] = array(
+    'title' => "Custom Form to test link field",
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('link_field_custom_form_test_form'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
+  return $items;
+}
+
+/**
+ * Custom form for testing link field.
+ *
+ * @param $form
+ *   The form array.
+ * @param $form_state
+ *   The form state array.
+ *
+ * @see link_field_custom_form_test_menu()
+ *
+ */
+function link_field_custom_form_test_form($form, &$form_state) {
+  $form = array();
+  $form['link_test_defaults'] = array(
+    '#type' => 'link_field',
+    '#title' => t('Link defaults'),
+    '#tree' => TRUE,
+    '#required' => TRUE,
+  );
+  $form['link_test_title_changes'] = array(
+    '#type' => 'link_field',
+    '#title' => t('Link with title changed'),
+    '#tree' => TRUE,
+    '#instance' => array(
+      'settings' => array(
+        'title_maxlength' => 16,
+        'title_label_use_field_label' => TRUE,
+      ),
+    ),
+  );
+  $form['link_test_no_title'] = array(
+    '#type' => 'link_field',
+    '#title' => t('Link without title'),
+    '#tree' => TRUE,
+    '#instance' => array(
+      'settings' => array(
+        'title' => 'none',
+      ),
+    ),
+  );
+  return $form;
+}

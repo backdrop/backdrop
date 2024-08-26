@@ -853,24 +853,18 @@ function link_field_process($element, $form_state, $complete_form) {
   $instance = !empty($field_state['instance']) ? $field_state['instance'] : array();
 
   if (!$instance) {
-    // The element comes from a custom form, we have to manually create the
-    // $instance settings.
-    $instance['settings'] = array (
-      'title_maxlength' => isset($element['#title_maxlength']) ? $element['#title_maxlength'] : 128,
-      'title' => isset($element['#title_mode']) ? $element['#title_mode'] : 'optional',
-      'title_label_use_field_label' => isset($element['#title_label_use_field_label']) ? $element['#title_label_use_field_label'] : FALSE,
-      'url' => isset($element['#url']) ? $element['#url'] : 'optional',
-      'type' => isset($element['#type']) ? $element['#type'] : LINK_BOTH,
-      'enable_tokens' => isset($element['#enable_tokens']) ? $element['#enable_tokens'] : 0,
-      'display' => array(
-        'url_cutoff' => isset($element['#url_cutoff']) ? $element['#url_cutoff'] : 80,
-      ),
-      'rel_remove' => isset($element['#rel_remove']) ? $element['#rel_remove'] : 'default',
-      'validate_url' => isset($element['#validate_url']) ? $element['#validate_url'] : 1,
-    );
+    // The element comes from a custom form, we'll check for custom instance
+    // settings or use defaults.
+    $link_field_info = link_field_info();
+    $default_settings = $link_field_info['link_field']['instance_settings'];
+    $instance = (!empty($element['#instance'])) ? $element['#instance'] : array();
     if (isset($element['#attributes'])) {
       $instance['settings']['attributes'] = $element['#attributes'];
     }
+    if (isset($element['#required'])) {
+      $instance['settings']['required'] = $element['#required'];
+    }
+    $instance['settings'] += $default_settings;
   }
   $settings = $instance['settings'];
 
