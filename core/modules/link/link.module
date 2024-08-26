@@ -861,6 +861,12 @@ function link_field_process($element, $form_state, $complete_form) {
       'title_label_use_field_label' => isset($element['#title_label_use_field_label']) ? $element['#title_label_use_field_label'] : FALSE,
       'url' => isset($element['#url']) ? $element['#url'] : 'optional',
       'type' => isset($element['#type']) ? $element['#type'] : LINK_BOTH,
+      'enable_tokens' => isset($element['#enable_tokens']) ? $element['#enable_tokens'] : 0,
+      'display' => array(
+        'url_cutoff' => isset($element['#url_cutoff']) ? $element['#url_cutoff'] : 80,
+      ),
+      'rel_remove' => isset($element['#rel_remove']) ? $element['#rel_remove'] : 'default',
+      'validate_url' => isset($element['#validate_url']) ? $element['#validate_url'] : 1,
     );
     if (isset($element['#attributes'])) {
       $instance['settings']['attributes'] = $element['#attributes'];
