@@ -3542,16 +3542,38 @@ function layout_block_list() {
           'label' => $block['info'],
           'machine_name' => $delta,
         ));
-        $rows[] = array('name' => $block_name, 'usage' => $usage_list, 'module' => $module, 'contexts' => $contexts);
+        $rows[] = array(
+          'name' => $block_name,
+          'usage' => $usage_list,
+          'module' => $module,
+          'contexts' => $contexts,
+        );
       }
     }
   }
 
   $header = array(
-    array('data' => 'Name', 'field' => 'name', 'sort' => 'ASC'),
-    array('data' => 'Usage', 'field' => 'usage', 'sort' => 'ASC'),
-    array('data' => 'Module', 'field' => 'module', 'sort' => 'ASC', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
-    array('data' => 'Required contexts', 'field' => 'contexts', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
+    array(
+      'data' => 'Name',
+      'field' => 'name',
+      'sort' => 'ASC',
+    ),
+    array(
+      'data' => 'Usage',
+      'field' => 'usage',
+      'sort' => 'ASC',
+    ),
+    array(
+      'data' => 'Module',
+      'field' => 'module',
+      'sort' => 'ASC',
+      'class' => array(RESPONSIVE_PRIORITY_LOW),
+    ),
+    array(
+      'data' => 'Required contexts',
+      'field' => 'contexts',
+      'class' => array(RESPONSIVE_PRIORITY_LOW),
+    ),
   );
 
   $order = tablesort_get_order($header);

@@ -40,7 +40,7 @@ function theme_layout_reorder_layouts($variables) {
 /**
  * Outputs information about a layout. Used in the layout listing page.
  *
- * @param $variables
+ * @param array $variables
  *   An array with a single value: "layout", which contains the layout object.
  *
  * @return string
@@ -71,7 +71,7 @@ function theme_layout_info($variables) {
 /**
  * Outputs a list of conditions for a layout. Used in the layout listing page.
  *
- * @param $variables
+ * @param array $variables
  *   An array with a single value: "layout", which contains the layout object.
  *
  * @return string
@@ -98,7 +98,7 @@ function theme_layout_condition_info($variables) {
 /**
  * Outputs a list of details for a layout path. Used in the layout listing page.
  *
- * @param $variables
+ * @param array $variables
  *   An associative array containing:
  *   - path: The layout path.
  *   - missing_path: (boolean) Whether this path is missing a page callback.
@@ -169,7 +169,7 @@ function theme_layout_template_option($variables) {
  * Outputs information about a layout template . Used in the layout template
  * listing page.
  *
- * @param $variables
+ * @param array $variables
  *   An array with a single value: "template_info", which contains information
  *   about the layout template.
  *

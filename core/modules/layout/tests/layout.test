@@ -2220,7 +2220,8 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $page_title = $this->xpath('(//div[contains(@class, "block-system-title")])//h1');
     $this->assertEqual((string) $page_title[0], 'Test node title');
 
-    // Configure the block to use a custom title that overrides the normal title.
+    // Configure the block to use a custom title that overrides the normal
+    // title.
     $data = array(
       'title_display' => 'custom',
       'title' => 'A & "custom" title',
