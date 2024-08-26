@@ -629,7 +629,7 @@ function _link_sanitize(array &$item, $delta, array $field, $instance, $entity) 
   // Handle "title" link attribute.
   if (!empty($item['attributes']['title']) && module_exists('token')) {
     $text_tokens = token_scan($item['attributes']['title']);
-      if (!empty($text_tokens)) {
+    if (!empty($text_tokens)) {
       // Load the entity (necessary for entities in views).
       if (isset($entity->{$property_id})) {
         $entity_loaded = entity_load($entity_type, $entity->{$property_id});
@@ -849,7 +849,23 @@ function _link_default_attributes() {
  * The $fields array is in $complete_form['#field_info'][$element['#field_name']].
  */
 function link_field_process($element, $form_state, $complete_form) {
-  $instance = field_widget_instance($element, $form_state);
+  $field_state = field_form_get_state($element['#field_parents'], $element['#field_name'], $element['#language'], $form_state);
+  $instance = !empty($field_state['instance']) ? $field_state['instance'] : array();
+
+  if (!$instance) {
+    // The element comes from a custom form, we have to manually create the
+    // $instance settings.
+    $instance['settings'] = array (
+      'title_maxlength' => isset($element['#title_maxlength']) ? $element['#title_maxlength'] : 128,
+      'title' => isset($element['#title_mode']) ? $element['#title_mode'] : 'optional',
+      'title_label_use_field_label' => isset($element['#title_label_use_field_label']) ? $element['#title_label_use_field_label'] : FALSE,
+      'url' => isset($element['#url']) ? $element['#url'] : 'optional',
+      'type' => isset($element['#type']) ? $element['#type'] : LINK_BOTH,
+    );
+    if (isset($element['#attributes'])) {
+      $instance['settings']['attributes'] = $element['#attributes'];
+    }
+  }
   $settings = $instance['settings'];
 
   $element['#attached']['css'][] = backdrop_get_path('module', 'link') . '/css/link.css';
@@ -1030,7 +1046,7 @@ function link_field_formatter_view($entity_type, $entity, $field, $instance, $la
       '#element' => $item,
       '#field' => $instance,
       '#display' => array(
-        'settings' => $display['settings']
+        'settings' => $display['settings'],
       ),
     );
   }
