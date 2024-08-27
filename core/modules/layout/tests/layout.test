@@ -1397,6 +1397,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     // layouts are added in tests in this class, be sure they are deleted at the
     // end of the test.
     $this->backdropGet('admin/structure/layouts');
+    $this->assertNoRaw('<span>Path info</span>');
     $this->clickLink(t('Menu settings'));
     $this->assertUrl('admin/structure/layouts/menu/' . $layout_name, array(), 'Menu settings link goes to the correct layout menu item settings.');
 
@@ -1408,6 +1409,9 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'menu[weight]' => 1,
     );
     $this->backdropPost(NULL, $edit, t('Save menu settings'));
+    $this->assertRaw('<span>Path info</span>');
+    $this->assertText('Menu item type: Normal menu entry');
+    $this->assertText('Menu: Primary navigation');
 
     // Check that the link is available on the homepage (via the main menu).
     $this->backdropGet('<front>');
@@ -1427,6 +1431,10 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Add visibility condition'));
     $this->backdropPost(NULL, array(), t('Save menu settings'));
+    $this->assertRaw('<span>Path info</span>');
+    $this->assertText('Menu item type: Normal menu entry');
+    $this->assertText('Menu: Primary navigation');
+    $this->assertText('Current path is one of');
 
     $this->backdropGet('<front>');
     $this->assertLink($menu_title, 0, 'Menu link found on the homepage.');
