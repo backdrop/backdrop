@@ -1434,7 +1434,11 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->assertRaw('<span>Path info</span>');
     $this->assertText('Menu item type: Normal menu entry');
     $this->assertText('Menu: Primary navigation');
-    $this->assertText('Current path is one of');
+    $vc_text = 'Current path is one of "' . str_replace("\n", ', ', $edit['paths']);
+    $vc = $this->xpath('//ul//li[contains(., :vc_text)]', array(
+      ':vc_text' => $vc_text,
+    ));
+    $this->assertEqual(count($vc), 1, 'The visibility condition shows up properly.');
 
     $this->backdropGet('<front>');
     $this->assertLink($menu_title, 0, 'Menu link found on the homepage.');
