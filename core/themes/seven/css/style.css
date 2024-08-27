@@ -881,7 +881,10 @@ span.admin-missing {
   background-color: var(--seven-palette__grayscale--90, #e9e8e8);
 }
 .field-ui-view-modes tr.uses-default td {
-  color: var(--seven-palette__grayscale--55, #999);
+  color: light-dark(
+    var(--seven-palette__grayscale--55, #999),
+    var(--seven-palette__grayscale--50, #828188)
+  );
 }
 
 

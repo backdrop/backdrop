@@ -18,6 +18,7 @@
   --seven-palette__grayscale--0: #000;
 
   --seven-palette__accent--90: #d5e9f2;
+  --seven-palette__accent--80: #bdf;
   --seven-palette__accent--60: #008bcb;
   --seven-palette__accent--50: #0074bd;
   --seven-palette__accent--45: #1766ae;
@@ -59,10 +60,10 @@
     --seven-palette__accent--45: #018be1;
     --seven-palette__accent--35: #009be3;
 
-    /* --seven-palette__accent--60: #0074bd;
+    --seven-palette__accent--60: #0074bd;
     --seven-palette__accent--50: #009be3;
     --seven-palette__accent--45: #22b9ff;
-    --seven-palette__accent--35: #3dc2ff; */
+    --seven-palette__accent--35: #3dc2ff;
 
     --seven-palette__accent--secondary--30: #404715;
 
