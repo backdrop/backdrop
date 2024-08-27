@@ -6,11 +6,14 @@
 
 require_once(__DIR__ . '/link.test');
 
+/**
+ * Testing that the basics work for link fields on custom forms.
+ */
 class LinkCustomFormTest extends LinkBaseTestClass {
   /**
    * Test the output of a custom form with link fields.
    */
-  function testCustomLinkFields() {
+  public function testCustomLinkFields() {
     $group = 'Link field custom form';
     $this->backdropGet('link-field-custom-form');
     $message = "Defaults";

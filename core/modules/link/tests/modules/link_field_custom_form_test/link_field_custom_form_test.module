@@ -22,9 +22,9 @@ function link_field_custom_form_test_menu() {
 /**
  * Custom form for testing link field.
  *
- * @param $form
+ * @param array $form
  *   The form array.
- * @param $form_state
+ * @param array $form_state
  *   The form state array.
  *
  * @see link_field_custom_form_test_menu()

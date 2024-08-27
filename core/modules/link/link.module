@@ -849,8 +849,12 @@ function _link_default_attributes() {
  * The $fields array is in $complete_form['#field_info'][$element['#field_name']].
  */
 function link_field_process($element, $form_state, $complete_form) {
-  $field_state = field_form_get_state($element['#field_parents'], $element['#field_name'], $element['#language'], $form_state);
+  $field_parents = (!empty($element['#field_parents'])) ? $element['#field_parents'] : array();
+  $field_name = (!empty($element['#field_name'])) ? $element['#field_name'] : '';
+  $language = (!empty($element['#language'])) ? $element['#language'] : LANGUAGE_NONE;
+  $field_state = field_form_get_state($field_parents, $field_name, $language, $form_state);
   $instance = !empty($field_state['instance']) ? $field_state['instance'] : array();
+  $delta = !empty($element['#delta']) ? $element['#delta'] : 0;
 
   if (!$instance) {
     // The element comes from a custom form, we'll check for custom instance
@@ -874,7 +878,7 @@ function link_field_process($element, $form_state, $complete_form) {
     '#type' => 'textfield',
     '#maxlength' => LINK_URL_MAX_LENGTH,
     '#title' => t('URL'),
-    '#required' => ($element['#delta'] == 0 && $settings['url'] !== 'optional') ? $element['#required'] : FALSE,
+    '#required' => ($delta == 0 && $settings['url'] !== 'optional') ? $element['#required'] : FALSE,
     '#default_value' => isset($element['#value']['url']) ? $element['#value']['url'] : NULL,
   );
   if ($settings['type'] != LINK_EXTERNAL) {
@@ -896,7 +900,7 @@ function link_field_process($element, $form_state, $complete_form) {
       '#type' => 'textfield',
       '#maxlength' => $settings['title_maxlength'],
       '#title' => $title_label,
-      '#required' => ($settings['title'] == 'required' && (($element['#delta'] == 0 && $element['#required']) || !empty($element['#value']['url']))) ? TRUE : FALSE,
+      '#required' => ($settings['title'] == 'required' && (($delta == 0 && $element['#required']) || !empty($element['#value']['url']))) ? TRUE : FALSE,
       '#default_value' => isset($element['#value']['title']) ? $element['#value']['title'] : NULL,
     );
   }
