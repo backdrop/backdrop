@@ -75,7 +75,10 @@ function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg
     '#header' => $header,
     '#rows' => $rows,
     '#attributes' => array('class' => array('layout-list')),
-    '#empty' => t('No layout overrides have been created for !entity_type types yet.', array('!entity_type' => $entity_info['label'])),
+    '#empty' => t('No layout overrides have been created for !entity_type types yet. All !entity_types will display using the <a href="@default_layout_href">Default layout</a>.', array(
+      '!entity_type' => $entity_info['label'],
+      '@default_layout_href' => '/admin/structure/layouts/manage/default',
+    )),
     '#weight' => 1,
   );
 
