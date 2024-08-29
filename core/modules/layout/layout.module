@@ -548,6 +548,38 @@ function layout_menu() {
 }
 
 /**
+ * Implements hook_icon_info().
+ *
+ * Makes any .svg preview files specified in .info files of layout templates
+ * available as icons that can be used via the Icon API icon() function. Preview
+ * thumbnails for other types of images are handled via theme_image() instead.
+ *
+ * @see _theme_layout_template_preview_thumbnail()
+ */
+function layout_icon_info() {
+  $all_template_info = layout_get_layout_template_info(NULL, TRUE);
+  $icons = array();
+
+  foreach ($all_template_info as $template => $template_info) {
+
+    $preview_path = $template_info['path'] . '/' . $template_info['preview'];
+    $preview_path_info = pathinfo($preview_path);
+
+    // If the preview icon is an SVG, make it available as an icon that can be
+    // used with the Icon API icon() function.
+    if (image_is_svg($template_info['preview'])) {
+      $icon_name = $template_info['name'];
+      $icons[$icon_name] = array(
+        'directory' => $preview_path_info['dirname'],
+        'name' => $preview_path_info['filename'],
+      );
+    }
+  }
+
+  return $icons;
+}
+
+/**
  * Menu loader callback; Convert %layout_path placeholders to loaded objects.
  */
 function layout_path_load($arg_value, $menu_item_name, $path_parts, $arg_position) {
@@ -2379,7 +2411,7 @@ function layout_layout_info() {
       'flexible' => TRUE,
       'type' => 'layout',
       'path' => 'templates',
-      'preview' => 'flexible_template.png',
+      'preview' => 'pencil-ruler',
       'libraries' => array('bootstrap4-gs'),
     );
 

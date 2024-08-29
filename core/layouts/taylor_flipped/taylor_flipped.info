@@ -22,7 +22,7 @@ default region = content
 ; stylesheets[all][] = taylor-flipped.css
 
 ; Preview
-preview = taylor-flipped.png
+preview = taylor-flipped.svg
 
 ; Include the Bootstrap4 Grid System
 libraries[] = bootstrap4-gs

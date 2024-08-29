@@ -22,7 +22,7 @@ default region = content
 ; stylesheets[all][] = harris.css
 
 ; Preview
-preview = harris.png
+preview = harris.svg
 
 ; Include the Bootstrap4 Grid System
 libraries[] = bootstrap4-gs

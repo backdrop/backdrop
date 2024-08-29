@@ -22,7 +22,7 @@ default region = content
 ; stylesheets[all][] = taylor.css
 
 ; Preview
-preview = taylor.png
+preview = taylor.svg
 
 ; Include the Bootstrap4 Grid System
 libraries[] = bootstrap4-gs

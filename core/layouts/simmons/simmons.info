@@ -23,7 +23,7 @@ regions[footer]     = Footer
 default region = content
 
 ; Preview
-preview = simmons.png
+preview = simmons.svg
 
 ; Include the Bootstrap4 Grid System
 libraries[] = bootstrap4-gs

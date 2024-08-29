@@ -79,7 +79,7 @@ function layout_list_page() {
         $path_link .= ' <span class="path-parenthetical">(' . t('missing callback') . ')</span>';
       }
       $row[] = array('data' => $path_link, 'class' => $class);
-      // Empty columns are intentional so that they may be hidden with
+      // Empty columns are intentional, so that they may be hidden with a
       // priority-low class on the $header array.
       $row[] = '';
       $row[] = '';
@@ -103,11 +103,15 @@ function layout_list_page() {
       $override_rows[] = array('data' => $row, 'class' => array('layout-group'));
     }
 
+    // Start compiling the information needed for each layout row on the table.
     foreach ($group as $layout) {
+      // Get the available operations for each layout.
       $operations = array(
         '#type' => 'dropbutton',
         '#links' => _layout_get_operations($layout),
       );
+
+      // Get the storage type for each layout.
       if ($layout->storage === LAYOUT_STORAGE_OVERRIDE) {
         $storage = t('Overridden');
       }
@@ -118,16 +122,20 @@ function layout_list_page() {
         $storage = t('Custom');
       }
 
-      // Create a link to the settings page.
+      // Create a link to the settings page. To be used in the "Template" row.
       $info = $layout_template_info[$layout->layout_template];
       $template = l($info['title'], 'admin/structure/layouts/manage/' . $layout->name . '/configure');
 
+      // Prepare each layout row.
       $row = array();
-      $row[] = theme('layout_info', array('layout' => $layout));
-      $row[] = $template;
-      $row[] = theme('layout_condition_info', array('layout' => $layout));
-      $row[] = $storage;
-      $row[] = backdrop_render($operations);
+      // Add table cells to the various table columns for each layout.
+      $row['layout_info'] = theme('layout_info', array('layout' => $layout));
+      $row['template_info'] = $template;
+      $row['visibility_conditions'] = theme('layout_condition_info', array('layout' => $layout));
+      $row['storage'] = $storage;
+      $row['operations'] = backdrop_render($operations);
+      // Add classes to each row, marking disabled layouts with a separate
+      // class.
       $class = array('layout-row');
       if ($layout->disabled) {
         $class[] = 'disabled';
@@ -398,6 +406,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#default_value' => $layout_template,
     '#options' => array(),
     '#wrapper_attributes' => array('class' => array('clearfix', 'layout-options')),
+    '#description' => t('The icons provide an approximate visual representation of the regions provided by each template. The region where the main content is placed by default is usually denoted with a darker shade.'),
     '#required' => TRUE,
   );
 
@@ -3346,6 +3355,10 @@ function layout_settings_page($form, &$form_state) {
   }
 
   $form['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => t('The icons provide an approximate visual representation of the regions provided by each template. The region where the main content is placed by default is usually denoted with a darker shade.'),
+  );
   $form['templates'] = array(
     '#type' => 'tableselect',
     '#js_select' => FALSE,

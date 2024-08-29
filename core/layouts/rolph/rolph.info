@@ -23,7 +23,7 @@ default region = quarter1
 ; stylesheets[all][] = rolph.css
 
 ; Preview
-preview = rolph.png
+preview = rolph.svg
 
 ; Include the Bootstrap4 Grid System
 libraries[] = bootstrap4-gs

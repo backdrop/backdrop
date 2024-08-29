@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 150" stroke="currentColor">
+  <line class="header" x1="0" y1="7" x2="100" y2="7" stroke-width="15" />
+  <line class="header" x1="0" y1="27" x2="100" y2="27" stroke-width="15" />
+
+  <line x1="0" y1="55" x2="18" y2="55" stroke-width="32" />
+  <line class="main" x1="23" y1="55" x2="77" y2="55" stroke-width="32" />
+  <line x1="82" y1="55" x2="100" y2="55" stroke-width="32" />
+
+  <line class="footer" x1="0" y1="83" x2="29" y2="83" stroke-width="15" />
+  <line class="footer" x1="34" y1="83" x2="66" y2="83" stroke-width="15" />
+  <line class="footer" x1="71" y1="83" x2="100" y2="83" stroke-width="15" />
+
+  <line class="footer" x1="0" y1="103" x2="21" y2="103" stroke-width="15" />
+  <line class="footer" x1="26" y1="103" x2="47" y2="103" stroke-width="15" />
+  <line class="footer" x1="52" y1="103" x2="73" y2="103" stroke-width="15" />
+  <line class="footer" x1="78" y1="103" x2="100" y2="103" stroke-width="15" />
+
+  <line class="footer" x1="0" y1="123" x2="100" y2="123" stroke-width="15" />
+  <line class="footer" x1="0" y1="143" x2="100" y2="143" stroke-width="15" />
+</svg>

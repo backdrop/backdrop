@@ -21,7 +21,7 @@ default region = content
 ; stylesheets[all][] = moscone.css
 
 ; Preview
-preview = moscone.png
+preview = moscone.svg
 
 ; Include the Bootstrap4 Grid System
 libraries[] = bootstrap4-gs

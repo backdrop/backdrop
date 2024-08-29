@@ -20,7 +20,7 @@ default region = content
 ; stylesheets[all][] = boxton.css
 
 ; Preview
-preview = boxton.png
+preview = boxton.svg
 
 ; Include the Bootstrap4 Grid System
 libraries[] = bootstrap4-gs
