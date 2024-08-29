@@ -260,10 +260,10 @@ function link_field_custom_form_validate($element, &$form_state, $form) {
   $instance = link_field_custom_create_instance($element);
   $langcode = (!empty($element['#language'])) ? $element['#language'] : LANGUAGE_NONE;
   $item = $element['#value'];
-  $field['field_name'] = 'link_field_custom';
-  link_field_validate('link_field_custom', 'link_field_custom', $field, $instance, $langcode, array($item), $errors);
-  if (!empty($errors['link_field_custom'][$langcode])) {
-    foreach ($errors['link_field_custom'][$langcode][0] as $error) {
+  $field_name = $element['#name'];
+  link_field_validate('link_field_custom', 'link_field_custom', array('field_name' => $field_name), $instance, $langcode, array($item), $errors);
+  if (!empty($errors[$field_name][$langcode])) {
+    foreach ($errors[$field_name][$langcode][0] as $error) {
       form_error($element, $error['message']);
     }
   }
