@@ -870,14 +870,9 @@ function link_field_process($element, $form_state, $complete_form) {
   $field_name = (!empty($element['#field_name'])) ? $element['#field_name'] : '';
   $language = (!empty($element['#language'])) ? $element['#language'] : LANGUAGE_NONE;
   $field_state = field_form_get_state($field_parents, $field_name, $language, $form_state);
-  $instance = !empty($field_state['instance']) ? $field_state['instance'] : array();
+  $instance = !empty($field_state['instance']) ? $field_state['instance'] : link_field_custom_create_instance($element);
   $delta = !empty($element['#delta']) ? $element['#delta'] : 0;
 
-  if (!$instance) {
-    // The element comes from a custom form, we'll check for custom instance
-    // settings or use defaults.
-    $instance = link_field_custom_create_instance($element);
-  }
   $settings = $instance['settings'];
 
   $element['#attached']['css'][] = backdrop_get_path('module', 'link') . '/css/link.css';
