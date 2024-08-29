@@ -253,6 +253,23 @@ function link_field_settings_form_validate($element, &$form_state, $complete_for
 }
 
 /**
+ * #element_validate handler for custom form usage.
+ */
+function link_field_custom_form_validate($element, &$form_state, $form) {
+  $errors = array();
+  $instance = link_field_custom_create_instance($element);
+  $langcode = (!empty($element['#language'])) ? $element['#language'] : LANGUAGE_NONE;
+  $item = $element['#value'];
+  $field['field_name'] = 'link_field_custom';
+  link_field_validate('link_field_custom', 'link_field_custom', $field, $instance, $langcode, array($item), $errors);
+  if (!empty($errors['link_field_custom'][$langcode])) {
+    foreach ($errors['link_field_custom'][$langcode][0] as $error) {
+      form_error($element, $error['message']);
+    }
+  }
+}
+
+/**
  * Implements hook_field_is_empty().
  */
 function link_field_is_empty($item, $field) {
@@ -859,16 +876,7 @@ function link_field_process($element, $form_state, $complete_form) {
   if (!$instance) {
     // The element comes from a custom form, we'll check for custom instance
     // settings or use defaults.
-    $link_field_info = link_field_info();
-    $default_settings = $link_field_info['link_field']['instance_settings'];
-    $instance = (!empty($element['#instance'])) ? $element['#instance'] : array();
-    if (isset($element['#attributes'])) {
-      $instance['settings']['attributes'] = $element['#attributes'];
-    }
-    if (isset($element['#required'])) {
-      $instance['settings']['required'] = $element['#required'];
-    }
-    $instance['settings'] += $default_settings;
+    $instance = link_field_custom_create_instance($element);
   }
   $settings = $instance['settings'];
 
@@ -1172,4 +1180,32 @@ function link_validate_url($text) {
  */
 function link_field_settings_form() {
   return array();
+}
+
+/**
+ * Helper to create a pseudo field instance for custom form usage.
+ */
+function link_field_custom_create_instance($element) {
+  $instance['settings'] = array (
+    'title_maxlength' => isset($element['#title_maxlength']) ? $element['#title_maxlength'] : 128,
+    'title' => isset($element['#title_mode']) ? $element['#title_mode'] : 'optional',
+    'title_label_use_field_label' => isset($element['#title_label_use_field_label']) ? $element['#title_label_use_field_label'] : FALSE,
+    'url' => isset($element['#url']) ? $element['#url'] : 'optional',
+    'validate_url' => isset($element['#validate_url']) ? $element['#validate_url'] : 'optional',
+    'type' => isset($element['#type']) ? $element['#type'] : LINK_BOTH,
+    'enable_tokens' => isset($element['#enable_tokens']) ? $element['#enable_tokens'] : 0,
+    'display' => array(
+      'url_cutoff' => isset($element['#url_cutoff']) ? $element['#url_cutoff'] : 80,
+    ),
+    'rel_remove' => isset($element['#rel_remove']) ? $element['#rel_remove'] : 'default',
+  );
+  if (isset($element['#attributes'])) {
+    $instance['settings']['attributes'] = $element['#attributes'];
+  }
+  if (isset($element['#required'])) {
+    $instance['required'] = $element['#required'];
+  }
+  $instance['label'] = $element['#title'];
+  $instance['default_value'][0]['url'] = isset($element['#default_value']['url']) ? $element['#default_value']['url'] : '';
+  return $instance;
 }
