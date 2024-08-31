@@ -248,23 +248,36 @@ function theme_system_modules_uninstall($variables) {
       $disabled_message = format_plural(count($form['modules'][$module]['#required_by']),
         'To uninstall @module, the following module must be uninstalled first: @required_modules',
         'To uninstall @module, the following modules must be uninstalled first: @required_modules',
-        array('@module' => $form['modules'][$module]['#module_name'], '@required_modules' => implode(', ', $form['modules'][$module]['#required_by'])));
+        array(
+          '@module' => $form['modules'][$module]['#module_name'],
+          '@required_modules' => implode(', ', $form['modules'][$module]['#required_by']),
+        ));
       $disabled_message = '<div class="admin-requirements">' . $disabled_message . '</div>';
     }
     else {
       $disabled_message = '';
     }
     $rows[] = array(
-      array('data' => backdrop_render($form['uninstall'][$module]), 'align' => 'center'),
+      array(
+        'data' => backdrop_render($form['uninstall'][$module]),
+        'align' => 'center',
+      ),
       '<strong><label for="' . $form['uninstall'][$module]['#id'] . '">' . backdrop_render($form['modules'][$module]['name']) . '</label></strong>',
-      array('data' => backdrop_render($form['modules'][$module]['description']) . $disabled_message, 'class' => array('description')),
+      array(
+        'data' => backdrop_render($form['modules'][$module]['description']) . $disabled_message,
+        'class' => array('description'),
+      ),
     );
   }
 
-  $output  = theme('table', array('header' => $header, 'rows' => $rows, 'empty' => t('No modules are available to uninstall.')));
-  $output .= backdrop_render_children($form);
+  $form['modules'] = array(
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $rows,
+    '#empty' => t('No modules are available to uninstall.'),
+  );
 
-  return $output;
+  return backdrop_render_children($form);
 }
 
 /**
@@ -447,6 +460,7 @@ function theme_admin_page($variables) {
  *   - block: An array containing information about the block:
  *     - show: A Boolean whether to output the block. Defaults to FALSE.
  *     - title: The block's title.
+ *     - icon: (optional) The block's icon.
  *     - content: (optional) Formatted content for the block.
  *     - description: (optional) Description of the block. Only output if
  *       'content' is not set.
@@ -471,7 +485,9 @@ function theme_admin_block($variables) {
 
   $output .= '<div class="' . implode(' ', $classes) . '">';
   if (!empty($block['title'])) {
-    $output .= '<h3>' . $block['title'] . '</h3>';
+    $icon = empty($block['icon']) ? '' : '<span class="admin-panel-icon">' . icon($block['icon']) . '</span>';
+    $title = '<span class="admin-panel-title">' . $block['title'] . '</span>';
+    $output .= '<h3>' . $icon . $title . '</h3>';
   }
   if (!empty($block['content'])) {
     $output .= '<div class="body">' . $block['content'] . '</div>';

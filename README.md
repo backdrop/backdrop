@@ -107,7 +107,7 @@ Backdrop is [GPL v2](http://www.gnu.org/licenses/gpl-2.0.html) (or higher)
 software. See the LICENSE.txt file for complete text. Distributions of this
 software may relicense it as any later version of the GPL.
 
-All Backdrop code is Copyright 2001 - 2023 by the original authors.
+All Backdrop code is Copyright 2001 - 2024 by the original authors.
 
 Backdrop also includes works under different copyright notices that are
 distributed according to the terms of the GNU General Public License or a

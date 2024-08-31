@@ -114,6 +114,7 @@ function file_autoload_info() {
 
     // Views handlers.
     'views_handler_argument_file_fid' => 'views/views_handler_argument_file_fid.inc',
+    'views_handler_argument_file_type' => 'views/views_handler_argument_file_type.inc',
     'views_handler_field_file' => 'views/views_handler_field_file.inc',
     'views_handler_field_file_link_edit' => 'views/views_handler_field_file_link_edit.inc',
     'views_handler_field_file_link_delete' => 'views/views_handler_field_file_link_delete.inc',
@@ -846,7 +847,7 @@ function file_theme() {
       'template' => 'templates/file',
     ) + $base,
     'file_link' => array(
-      'variables' => array('file' => NULL, 'icon_directory' => NULL),
+      'variables' => array('file' => NULL, 'icon_directory' => NULL, 'attributes' => array()),
     ) + $base,
     'file_icon' => array(
       'variables' => array('file' => NULL, 'icon_directory' => NULL, 'alt' => ''),
@@ -1418,7 +1419,10 @@ function file_managed_file_process($element, &$form_state, $form) {
   if ($fid && $element['#file']) {
     $element['filename'] = array(
       '#type' => 'markup',
-      '#markup' => theme('file_link', array('file' => $element['#file'])) . ' ',
+      '#markup' => theme('file_link', array(
+        'file' => $element['#file'],
+        'attributes' => array('class' => array('file-preview-link')),
+      )) . ' ',
       '#weight' => -10,
     );
 
@@ -3228,7 +3232,7 @@ function file_view_multiple($files, $view_mode = 'full', $weight = 0, $langcode 
   }
   // Sort here, to preserve the input order of the entities that were passed to
   // this function.
-  uasort($build['files'], 'element_sort');
+  backdrop_sort($build['files'], array('#weight'));
   $build['files']['#sorted'] = TRUE;
 
   return $build;

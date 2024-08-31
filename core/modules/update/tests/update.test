@@ -166,60 +166,6 @@ class UpdateCoreTestCase extends UpdateTestHelper {
   }
 
   /**
-   * Checks the messages at admin/modules when an update is missing.
-   */
-  function testModulePageRegularUpdate() {
-    $this->setSystemInfo1_0();
-    $config = config('update.settings');
-    // Instead of using refreshUpdateStatus(), set these manually.
-    $config->set('update_url', url('update-test', array('absolute' => TRUE)))->save();
-    state_set('update_test_xml_map', array('backdrop' => '1'));
-
-    $this->backdropGet('admin/reports/updates');
-    $this->clickLink(t('Check manually'));
-    $this->assertText(t('Checked available update data for one project.'));
-    $this->backdropGet('admin/modules');
-    $this->assertText(t('There are updates available for your version of Backdrop.'));
-    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
-  }
-
-  /**
-   * Checks the messages at admin/modules when a security update is missing.
-   */
-  function testModulePageSecurityUpdate() {
-    $this->setSystemInfo1_0();
-    $config = config('update.settings');
-    // Instead of using refreshUpdateStatus(), set these manually.
-    $config->set('update_url', url('update-test', array('absolute' => TRUE)))->save();
-    state_set('update_test_xml_map', array('backdrop' => '2-sec'));
-
-    $this->backdropGet('admin/reports/updates');
-    $this->clickLink(t('Check manually'));
-    $this->assertText(t('Checked available update data for one project.'));
-    $this->backdropGet('admin/modules');
-    $this->assertNoText(t('There are updates available for your version of Backdrop.'));
-    $this->assertText(t('There is a security update available for your version of Backdrop.'));
-
-    // Make sure admin/appearance warns you you're missing a security update.
-    $this->backdropGet('admin/appearance');
-    $this->assertNoText(t('There are updates available for your version of Backdrop.'));
-    $this->assertText(t('There is a security update available for your version of Backdrop.'));
-
-    // Make sure duplicate messages don't appear on Update status pages.
-    $this->backdropGet('admin/reports/status');
-    // We're expecting "There is a security update..." inside the status report
-    // itself, but the backdrop_set_message() appears as an li so we can prefix
-    // with that and search for the raw HTML.
-    $this->assertNoRaw('<li>' . t('There is a security update available for your version of Backdrop.'));
-
-    $this->backdropGet('admin/reports/updates');
-    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
-
-    $this->backdropGet('admin/reports/updates/settings');
-    $this->assertNoText(t('There is a security update available for your version of Backdrop.'));
-  }
-
-  /**
    * Tests the Update Manager module when the update server returns 503 errors.
    */
   function testServiceUnavailable() {
@@ -233,26 +179,26 @@ class UpdateCoreTestCase extends UpdateTestHelper {
    * Tests that exactly one fetch task per project is created and not more.
    */
   function testFetchTasks() {
-    $projecta = array(
+    $project_a = array(
       'name' => 'aaa_update_test',
     );
-    $projectb = array(
+    $project_b = array(
       'name' => 'bbb_update_test',
     );
     $queue = BackdropQueue::get('update_fetch_tasks');
     $this->assertEqual($queue->numberOfItems(), 0, 'Queue is empty');
-    update_create_fetch_task($projecta);
+    update_create_fetch_task($project_a);
     $this->assertEqual($queue->numberOfItems(), 1, 'Queue contains one item');
-    update_create_fetch_task($projectb);
+    update_create_fetch_task($project_b);
     $this->assertEqual($queue->numberOfItems(), 2, 'Queue contains two items');
     // Try to add project a again.
-    update_create_fetch_task($projecta);
+    update_create_fetch_task($project_a);
     $this->assertEqual($queue->numberOfItems(), 2, 'Queue still contains two items');
 
     // Clear cache and try again.
     _update_cache_clear();
     backdrop_static_reset('_update_create_fetch_task');
-    update_create_fetch_task($projecta);
+    update_create_fetch_task($project_a);
     $this->assertEqual($queue->numberOfItems(), 2, 'Queue contains two items');
   }
 
@@ -622,7 +568,7 @@ class UpdateTestContribCase extends UpdateTestHelper {
         'hidden' => FALSE,
       ),
     );
-    state_set('update_test_system_info',  $system_info);
+    state_set('update_test_system_info', $system_info);
 
     $xml_mapping = array(
       'backdrop' => '0',

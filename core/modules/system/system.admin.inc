@@ -31,6 +31,14 @@ function system_admin_config_page() {
         $item['description'] = $item['localized_options']['attributes']['title'];
         unset($item['localized_options']['attributes']['title']);
       }
+      if (!empty($item['localized_options']['icon'])) {
+        $item['icon'] = $item['localized_options']['icon'];
+        unset($item['localized_options']['icon']);
+      }
+      else {
+        // @todo: Handle RTL.
+        $item['icon'] = 'arrow-caret-right';
+      }
       $block = $item;
       $block['content'] = '';
       $block['content'] .= theme('admin_block_content', array('content' => system_admin_menu_block($item)));
@@ -112,6 +120,7 @@ function system_themes_page() {
   uasort($themes, 'system_sort_modules_by_info_name');
 
   $theme_default = config_get('system.core', 'theme_default');
+  $admin_theme = config_get('system.core', 'admin_theme');
   $theme_groups  = array(
     'enabled' => array(),
     'disabled' => array(),
@@ -123,6 +132,7 @@ function system_themes_page() {
     }
     $admin_theme_options[$theme->name] = $theme->info['name'];
     $theme->is_default = ($theme->name == $theme_default);
+    $theme->is_admin = ($theme->name == $admin_theme);
 
     // Identify theme screenshot.
     $theme->screenshot = NULL;
@@ -202,6 +212,10 @@ function system_themes_page() {
     if ($theme->is_default) {
       $theme->classes[] = 'theme-default';
       $theme->notes[] = t('default theme');
+    }
+    if ($theme->is_admin) {
+      $theme->classes[] = 'admin-theme';
+      $theme->notes[] = t('administration theme');
     }
 
     // Sort enabled and disabled themes into their own groups.
@@ -734,10 +748,10 @@ function system_sort_modules_by_info_name($a, $b) {
  * Array sorting callback; sorts modules or themes by their name.
  */
 function system_sort_themes($a, $b) {
-  if ($a->is_default) {
+  if ($a->is_default || $a->is_admin) {
     return -1;
   }
-  if ($b->is_default) {
+  if ($b->is_default || $b->is_admin) {
     return 1;
   }
   return strcasecmp($a->info['name'], $b->info['name']);
@@ -1039,6 +1053,16 @@ function system_modules_submit($form, &$form_state) {
   if ($pre_install_list != $post_install_list) {
     backdrop_flush_all_caches();
     backdrop_set_message(t('The configuration options have been saved.'));
+
+    // Display reminder about uninstalling disabled modules.
+    if (!empty($actions['disable'])) {
+      $disabled_modules = array();
+      foreach ($actions['disable'] as $module) {
+        $disabled_modules[] = $files[$module]->info['name'];
+      }
+      $disabled_message = t('You have disabled some modules. If they are no longer needed you might want to <a href="!uninstall">uninstall them</a>.', array('!uninstall' => url('admin/modules/uninstall')));
+      backdrop_set_message($disabled_message, 'info');
+    }
   }
 
   // Check if a previous search is present and preserve it on redirect.
@@ -1088,6 +1112,16 @@ function system_modules_uninstall($form, $form_state = NULL) {
       $disabled_modules[$name] = $module;
     }
   }
+
+  $help = t('Modules must be disabled in the <a href="@link">List modules</a> tab before they can be uninstalled.', array('@link' => url('admin/modules')));
+  if (!empty($disabled_modules)) {
+    $help .= ' ' . t('The modules listed below have been disabled and may be uninstalled.');
+  }
+  $help .= ' ' . t('Uninstalling a module will permanently remove its settings and/or associated data, while leaving the module files in place. To remove a module permanently, delete its files from the <code>/modules</code> folder of your Backdrop installation.');
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => $help,
+  );
 
   // Only build the rest of the form if there are any modules available to
   // uninstall.
@@ -1583,7 +1617,10 @@ function system_cron_settings($form, &$form_state) {
 
   $form['cron_url'] = array(
     '#type' => 'help',
-    '#markup' => t('To run cron from outside the site, go to <a href="!cron">!cron</a>', array('!cron' => url($base_url . '/core/cron.php', array('external' => TRUE, 'query' => array('cron_key' => state_get('cron_key', 'backdrop')))))),
+    '#markup' => t('To run cron from outside the site, go to <a href="!cron">!cron</a>', array('!cron' => url($base_url . '/core/cron.php', array(
+      'external' => TRUE,
+      'query' => array('cron_key' => state_get('cron_key', 'backdrop')),
+    )))),
   );
 
   $form['cron'] = array(
@@ -1607,15 +1644,8 @@ function system_cron_settings($form, &$form_state) {
  * @ingroup forms
  */
 function system_run_cron_submit($form, &$form_state) {
-  // Run cron manually from Cron form.
-  if (backdrop_cron_run()) {
-    backdrop_set_message(t('Cron run successfully.'));
-  }
-  else {
-    backdrop_set_message(t('Cron run failed.'), 'error');
-  }
-
-  backdrop_goto('admin/config/system/cron');
+  // Run cron manually.
+  system_run_cron();
 }
 
 /**
@@ -1641,17 +1671,7 @@ function system_logging_settings($form, &$form_state) {
   $form['watchdog_enabled_severity_levels'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Severity of messages to log'),
-    '#options' => array(
-      WATCHDOG_EMERGENCY => t('Emergency'),
-      WATCHDOG_ALERT => t('Alert'),
-      WATCHDOG_CRITICAL => t('Critical'),
-      WATCHDOG_ERROR => t('Error'),
-      WATCHDOG_WARNING => t('Warning'),
-      WATCHDOG_NOTICE => t('Notice'),
-      WATCHDOG_INFO => t('Info'),
-      WATCHDOG_DEBUG => t('Debug'),
-      WATCHDOG_DEPRECATED => t('Deprecated'),
-    ),
+    '#options' => watchdog_severity_levels(),
     '#default_value' => $site_config->get('watchdog_enabled_severity_levels'),
     '#description' => t('The <em>debug</em> and <em>deprecated</em> severity levels are recommended for developer environments, but not on production sites.'),
   );
@@ -2310,10 +2330,318 @@ function system_status($check = FALSE) {
 }
 
 /**
+ * Menu callback: displays the debug info page.
+ *
+ * @see system_get_debug_info()
+ * @see _system_format_debug_info()
+ *
+ * @since 1.28.0 function added.
+ */
+function system_debug_info() {
+  global $language;
+
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => t('This report includes information about your site commonly requested for troubleshooting or support purposes, ready for copy/paste if needed.'),
+  );
+
+  $debug_info = system_get_debug_info();
+
+  $form['debug_info'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Debug report'),
+    '#value' => _system_format_debug_info($debug_info, array('rtl' => $language->direction == LANGUAGE_RTL)),
+    // Expand the default length of the text field, to ensure that all the
+    // debug output is visible without having to scroll within the text field.
+    '#rows' => count($debug_info) + 1,
+    '#attributes' => array(
+      'id' => 'debug-info-wrapper',
+      // Using the 'readonly' attribute to lock the text, since it gives us a
+      // "cursor: text" cursor for free (using 'disabled' would result in a
+      // "cursor: text" instead).
+      'readonly' => 'readonly',
+    ),
+  );
+
+  return $form;
+}
+
+/**
+ * Compiles the various information for the debug info page.
+ *
+ * @see system_debug_info()
+ *
+ * @since 1.28.0 function added.
+ */
+function system_get_debug_info() {
+  global $language;
+
+  // An array that is later passed to sprintf() so that the final output can be
+  // formatted in two columns of plain text. Each entry is an array with two
+  // keys, "label" and "value". The number of spaces between the two columns is
+  // dynamically calculated, based on the length of the string of the first
+  // column. This ensures that the strings in the second column all start at the
+  // same point and appear as vertically aligned.
+  $debug_info_lines = array();
+
+  $empty_line = array();
+
+  $jquery_library = backdrop_get_library('system', 'jquery');
+  $jquery_ui_library = backdrop_get_library('system', 'ui');
+  $core_version = BACKDROP_VERSION;
+
+  // Main system info.
+  $system_info = array(
+    // Intentionally not translated to match the trademark.
+    'Backdrop CMS:' => $core_version,
+    t('Installation profile:') => backdrop_get_profile(),
+    t('PHP version:') => phpversion(),
+    t('Drupal 7 compatibility:') => settings_get('backdrop_drupal_compatibility') ? t('on') : t('off'),
+    t('Database server:') => Database::getConnection()->version(),
+    t('Web server:') => check_plain($_SERVER['SERVER_SOFTWARE']),
+    t('jQuery version:') => $jquery_library['version'],
+    t('jQuery UI version:') => $jquery_ui_library['version'],
+  );
+  foreach ($system_info as $label => $value) {
+    $debug_info_lines[] = array(
+      'label' => $label,
+      'value' => $value,
+    );
+  }
+
+  // Get the current list of all modules available on the site.
+  $modules = system_rebuild_module_data();
+
+  // Text editors info.
+  $text_editor_usage = array();
+  $text_editors = filter_get_editors();
+  $text_formats = filter_formats(NULL, TRUE);
+  foreach ($text_formats as $format_info) {
+    if (!empty($format_info->editor)) {
+      $editor = $text_editors[$format_info->editor];
+      $editor_label = $editor['label'];
+      // Add a suffix with the editor version or the editor library version
+      // to the editor label.
+      if (!empty($editor['library_version'])) {
+        $editor_label .= ' ' . t('version') . ': ' . $editor['library_version'];
+      }
+      elseif (isset($modules[$editor['module']]->info['version'])) {
+        $editor_label .= ' ' . t('version') . ': ' . $modules[$editor['module']]->info['version'];
+      }
+      $text_editor_usage[$editor_label][] = $format_info->name;
+    }
+  }
+  foreach ($text_editor_usage as $editor => $formats) {
+    $debug_info_lines[] = array(
+      'label' => $editor,
+      'value' => t('Used in formats: @formats', array('@formats' => implode(', ', $formats))),
+    );
+  }
+
+  $debug_info_lines[] = $empty_line;
+
+  // Theme info, grouped by default theme and admin theme.
+  $debug_info_lines[] = array(
+    'label' => t('Themes'),
+  );
+  $debug_info_lines[] = array(
+    'label' => '======',
+  );
+
+  $config = config('system.core');
+  $themes = array(
+    'default_theme' => $config->get('theme_default'),
+    'admin_theme' => $config->get('admin_theme'),
+  );
+
+  // Collect the current list of themes, looping up through base themes.
+  $all_theme_data = system_rebuild_theme_data();
+  $content_theme = $config->get('node_admin_theme') ? $themes['admin_theme'] : $themes['default_theme'];
+  foreach ($themes as $theme_role => $theme) {
+    $theme_data = (array) $all_theme_data[$theme];
+    $indent_level = '';
+    while ($theme_data) {
+      $theme_version = isset($theme_data['info']['version']) ? $theme_data['info']['version'] : '';
+      $content_theme_indicator = $content_theme == $theme_data['name'] ? '*' : '';
+
+      if ($indent_level === '') {
+        $theme_debug_label = $theme_role == 'default_theme' ? t('Default theme:') : t('Admin theme:');
+        $theme_debug_value = $theme_data['info']['name'] . $content_theme_indicator . ' (' . $theme_data['name'] . ') ' . $theme_version;
+      }
+      else {
+        $base_prefix = $language->direction == LANGUAGE_RTL ? '' : $indent_level . ' ↳ ';
+        $base_suffix = $language->direction == LANGUAGE_RTL ? ' ↲ ' . $indent_level : '';
+        $theme_debug_label = $base_prefix . t('base theme:') . $base_suffix;
+        $theme_debug_value = $base_prefix . $theme_data['info']['name'] . ' (' . $theme_data['name'] . ') ' . $theme_version . $base_suffix;
+      }
+
+      $debug_info_lines[] = array(
+        'label' => $theme_debug_label,
+        'value' => $theme_debug_value,
+      );
+
+      // Loop up to the next base theme if present.
+      $base_theme_name = isset($theme_data['info']['base theme']) ? $theme_data['info']['base theme'] : '';
+      $theme_data = isset($all_theme_data[$base_theme_name]) ? (array) $all_theme_data[$base_theme_name] : '';
+      $indent_level = '  ' . $indent_level;
+    }
+  }
+  $debug_info_lines[] = array(
+    'value' => t('*used when editing or creating content'),
+  );
+
+  // Module info, grouped by core, contrib, custom, and other.
+  $debug_info_lines[] = $empty_line;
+  $debug_info_lines[] = array(
+    'label' => t('Enabled modules'),
+  );
+  $debug_info_lines[] = array(
+    'label' => '===============',
+  );
+  $debug_info_lines[] = $empty_line;
+
+  $module_info_lines = array(
+    'core' => array(),
+    'contrib' => array(),
+    'custom' => array(),
+    'other' => array(),
+  );
+  foreach ($modules as $module_name => $module_data) {
+    // Only include non-hidden and enabled modules in the output.
+    if (empty($module_data->info['hidden']) && $module_data->status) {
+      // Core modules:
+      if (strstr($module_data->uri, 'core/modules/')) {
+        $module_info_lines['core'][] = array(
+          'label' => $module_name,
+          'value' => $core_version,
+        );
+      }
+      else {
+        // Contrib modules:
+        $module_version = isset($module_data->info['version']) ? $module_data->info['version'] : '-';
+        if (strstr($module_data->uri, '/contrib/') || !empty($module_data->info['project'])) {
+          $module_info_lines['contrib'][] = array(
+            'label' => $module_name,
+            'value' => $module_version,
+          );
+        }
+        // Custom modules:
+        elseif (strstr($module_data->uri, '/custom/')) {
+          $module_info_lines['custom'][] = array(
+            'label' => $module_name,
+            'value' => $module_version,
+          );
+        }
+        // Anything we can't identify as clearly contrib or custom:
+        else {
+          $module_info_lines['other'][] = array(
+            'label' => $module_name,
+            'value' => $module_version,
+          );
+        }
+      }
+    }
+  }
+
+  $module_group_titles = array(
+    'core' => t('Core'),
+    'contrib' => t('Contrib'),
+    'custom' => t('Custom'),
+    'other' => t('Other'),
+  );
+  foreach ($module_info_lines as $module_group => $module_group_lines) {
+    if (empty($module_group_lines)) {
+      continue;
+    }
+    $group_title = $module_group_titles[$module_group];
+    $debug_info_lines[] = array(
+      'label' => $group_title,
+    );
+    // Add an underline for the module group.
+    $debug_info_lines[] = array(
+      'label' => str_repeat('-', backdrop_strlen($group_title)),
+    );
+    $debug_info_lines = array_merge($debug_info_lines, $module_group_lines);
+    $debug_info_lines[] = $empty_line;
+  }
+
+  return $debug_info_lines;
+}
+
+/**
+ * Given an array of data, it formats it into a plain-text 2-column output.
+ *
+ * @param array $lines
+ *   The data to format into plain text columns. Each line may contain keys
+ *   for "label" and "value".
+ * @param array $format_settings
+ *   An array with various settings that control the final plain-text output:
+ *   - min_spacing: An integer indicating the minimum spaces added between the
+ *     first column of the output and the second column.
+ *   - rtl: A boolean indicating whether the output should be prepared for RTL
+ *     languages.
+ *
+ * @see system_debug_info()
+ * @private
+ *
+ * @since 1.28.0 function added.
+ */
+function _system_format_debug_info(array $lines, array $format_settings) {
+  global $language;
+
+  // Set some default settings.
+  $defaults = array(
+    'min_spacing' => 5,
+    'rtl' => $language->direction == LANGUAGE_RTL,
+  );
+  // Ensure that defaults are set for any settings that were not explicitly
+  // specified.
+  $format_settings += $defaults;
+
+  // Get the length of the longest key in the array (which will determine the
+  // max width of the first plain-text "column").
+  $longest_item_length = 0;
+  foreach ($lines as &$line_reference) {
+    $line_reference += array('label' => NULL, 'value' => NULL);
+    $label_length = backdrop_strlen($line_reference['label']);
+    if ($label_length > $longest_item_length) {
+      $longest_item_length = $label_length;
+    }
+  }
+
+  // Format the output so that the items and their values are listed as columns.
+  $first_col_width = $longest_item_length + $format_settings['min_spacing'];
+
+  $output = '';
+  foreach ($lines as $line) {
+    $label = $line['label'];
+    $value = $line['value'];
+    if ($label == NULL && $value == NULL) {
+      // Blank lines.
+      $output .= "\n";
+    }
+    else {
+      if ($format_settings['rtl']) {
+        $format = '%s %' . $first_col_width . 's';
+        // Note that the order of $value and $label parameters is reversed
+        // compared to LTR.
+        $output .= ltrim(sprintf($format, $value, $label)) . "\n";
+      }
+      else {
+        $format = '%-' . $first_col_width . 's %s';
+        $output .= rtrim(sprintf($format, $label, $value)) . "\n";
+      }
+    }
+  }
+
+  return $output;
+}
+
+/**
  * Menu callback: run cron manually.
  */
 function system_run_cron() {
-  // Run cron manually
+  // Run cron manually.
   if (backdrop_cron_run()) {
     backdrop_set_message(t('Cron ran successfully.'));
   }
@@ -2321,7 +2649,12 @@ function system_run_cron() {
     backdrop_set_message(t('Cron run failed.'), 'error');
   }
 
-  backdrop_goto('admin/reports/status');
+  if ($_SERVER['HTTP_REFERER']) {
+    backdrop_goto($_SERVER['HTTP_REFERER']);
+  }
+  else {
+    backdrop_goto('admin/reports/status');
+  }
 }
 
 /**
@@ -2449,7 +2782,7 @@ function system_date_time_formats() {
 /**
  * Allow users to add additional date formats.
  *
- * @param string $format
+ * @param array|null $format
  *   (optional) When present, provides the format being edited, otherwise a new
  *   format is being created.
  */

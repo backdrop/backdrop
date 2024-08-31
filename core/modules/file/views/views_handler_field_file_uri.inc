@@ -41,7 +41,7 @@ class views_handler_field_file_uri extends views_handler_field_file {
     $data = $values->{$this->field_alias};
     if (!empty($this->options['file_download_path']) && $data !== NULL && $data !== '') {
       $data = file_create_url($data);
-      if (!empty($this->options['image_style'])) {
+      if (!image_is_svg($data) && !empty($this->options['image_style'])) {
         // $data contains url of image.
         // Get public file system path and its length.
         $file_public_path = '/' . config_get('system.core', 'file_public_path');
