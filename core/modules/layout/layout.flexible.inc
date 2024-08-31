@@ -32,7 +32,7 @@ function layout_flexible_template_settings_edit_form($form, &$form_state, Layout
 
   $form['help'] = array(
     '#theme' => 'help',
-    '#markup' => t('Name your custom layout template and create your custom regions after saving.'),
+    '#markup' => t('Build your own flexible layout template.'),
   );
 
   $form['name'] = array(
