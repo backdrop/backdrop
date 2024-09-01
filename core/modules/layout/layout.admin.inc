@@ -478,7 +478,11 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     t('Taxonomy terms: <code>taxonomy/term/%</code>'),
     t('Comments: <code>comment/%</code>'),
   );
-  $description_list = '<div class="layout-placeholder-examples">' . t('Some common examples of placeholders include:') . theme('item_list', array('items' => $description_items)) . '</div>';
+  $other_examples = array(
+    t('Custom path: <code>custompath</code>'),
+    t('404 error page: <code>system/404</code>'),
+  );
+  $description_list = '<div class="layout-placeholder-examples">' . t('Some common examples of placeholders include:') . theme('item_list', array('items' => $description_items)) . t('Other path examples:') . theme('item_list', array('items' => $other_examples)) . '</div>';
   $form['path'] = array(
     '#title' => t('Path'),
     '#field_prefix' => url('', array('absolute' => TRUE)),
