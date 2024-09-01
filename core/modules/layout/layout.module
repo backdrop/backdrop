@@ -579,29 +579,15 @@ function layout_menu() {
             'weight' => 2,
             'file' => 'layout.entity.admin.inc',
           ) + $access;
-          // Check that this isn't a single-bundle entity.
-          $single_bundle = (count($entity_info['bundles']) == 1) && isset($entity_info['bundles'][$entity_type]);
-          if (!$single_bundle) {
-            $items["$path/layouts/add"] = array(
-              'title' => "Add layout",
-              'title callback' => 'layout_entity_menu_title',
-              'title arguments' => array($entity_type, $bundle_arg),
-              'page callback' => 'backdrop_get_form',
-              'page arguments' => array('layout_entity_admin_add_form', $entity_type, $bundle_arg),
-              'file' => 'layout.entity.admin.inc',
-              'type' => MENU_LOCAL_ACTION,
-            ) + $access;
-          }
-          $items["$path/layouts/add-entity"] = array(
+          $items["$path/layouts/add"] = array(
             'title' => "Add layout",
             'title callback' => 'layout_entity_menu_title',
-            'title arguments' => array($entity_type, $bundle_arg, 'create_for_all_bundles'),
+            'title arguments' => array($entity_type, $bundle_arg),
             'page callback' => 'backdrop_get_form',
-            'page arguments' => array('layout_entity_admin_add_form', $entity_type, $bundle_arg, 'entity'),
+            'page arguments' => array('layout_entity_admin_add_form', $entity_type, $bundle_arg),
             'file' => 'layout.entity.admin.inc',
             'type' => MENU_LOCAL_ACTION,
           ) + $access;
-
         }
       }
     }
@@ -611,16 +597,18 @@ function layout_menu() {
 }
 
 /**
- * Title callback: Returns the name of a given instance.
+ * Title callback: Returns a label for the action links to create bundle
+ * layouts.
  *
- * @see field_ui_menu()
+ * @see layout_menu()
  */
-function layout_entity_menu_title($entity_type, $bundle_arg, $create_for_all_bundles = NULL) {
+function layout_entity_menu_title($entity_type, $bundle_arg) {
   $entity_info = entity_get_info($entity_type);
+  $single_bundle = (count($entity_info['bundles']) == 1) && isset($entity_info['bundles'][$entity_type]);
   $entity_name = ($entity_type == 'node') ? t('content') : $entity_info['label'];
   $bundle_name = '';
 
-  if (!$create_for_all_bundles) {
+  if (!$single_bundle) {
     if (is_object($bundle_arg) && property_exists($bundle_arg, 'name')) {
       $bundle_name = $bundle_arg->name;
     }
