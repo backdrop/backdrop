@@ -77,11 +77,12 @@ function layout_list_page() {
         $class[] = 'missing-path';
         $path_link .= ' <span class="path-parenthetical">(' . t('missing callback') . ')</span>';
       }
+      $menu_item = layout_menu_item_load_multiple_by_path($path);
       $row[] = array('data' => $path_link, 'class' => $class);
       // Empty columns are intentional so that they may be hidden with
       // priority-low class on the $header array.
       $row[] = '';
-      $row[] = theme('layout_condition_info', array('layout' => $layout, 'show_empty' => FALSE));
+      $row[] = theme('layout_condition_info', array('layout' => $menu_item, 'show_empty' => FALSE));
       $row[] = '';
 
       if (count($operations['#links']) !== 0) {

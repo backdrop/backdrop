@@ -81,12 +81,13 @@ function theme_layout_condition_info($variables) {
   $layout = $variables['layout'];
   // Build a list of visibility conditions on this layout
   $conditions = array();
-  foreach ($layout->conditions as $access_key => $layout_access) {
-    $conditions[] = $layout_access->summary();
+  if (isset($layout->conditions)) {
+    foreach ($layout->conditions as $access_key => $layout_access) {
+      $conditions[] = $layout_access->summary();
+    }
   }
   $output  = '<div class="layout-conditions-list">';
   if (empty($conditions) && $variables['show_empty']) {
-    dpm($layout->name);
     $output .= t('No conditions set.');
   }
   else {
