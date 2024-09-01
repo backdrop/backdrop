@@ -101,7 +101,7 @@ function telemetry_get_data() {
  */
 function telemetry_cron() {
   if (settings_get('telemetry_enabled', TRUE)) {
-    $last_run = state_get('telemetry_cron');
+    $last_run = state_get('telemetry_cron_last');
     $interval = 86400; // One day in seconds.
     if (REQUEST_TIME - $last_run > $interval) {
       $telemetry_data = telemetry_get_data();
@@ -114,6 +114,9 @@ function telemetry_cron() {
           'X-Site-Key' => _telemetry_site_key(),
         ),
       ));
+      if ($response->code == 200) {
+        state_set('telemetry_cron_last', REQUEST_TIME);
+      }
     }
   }
 }

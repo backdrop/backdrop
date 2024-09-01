@@ -1711,6 +1711,7 @@ function drupal_tempnam($directory, $prefix) {
  * Creates a .htaccess file in the given directory.
  *
  * @deprecated since 1.0.0
+ * @see file_save_htaccess()
  */
 function file_create_htaccess($directory, $private = TRUE, $force_overwrite = FALSE) {
   watchdog_deprecated_function('drupal', __FUNCTION__);

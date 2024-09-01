@@ -1386,7 +1386,10 @@ class FileFieldDisplayTestCase extends FileTestHelper {
     // Check that the default formatter is displaying with the file name.
     $node = node_load($nid, NULL, TRUE);
     $node_file = (object) $node->{$field_name}[LANGUAGE_NONE][0];
-    $default_output = theme('file_link', array('file' => $node_file));
+    $default_output = theme('file_link', array(
+      'file' => $node_file,
+      'attributes' => array('class' => array('file-preview-link')),
+    ));
     $this->assertRaw($default_output, 'Default formatter displaying correctly on full node view.');
 
     // Turn the "display" option off and check that the file is no longer displayed.
@@ -2566,6 +2569,133 @@ class FileUploadWizardTestCase extends FileTestHelper {
       $config->set('upload_wizard_skip_fields', FALSE);
       $config->save();
     }
+  }
+}
+
+/**
+ * Tests validation of SVG uploads.
+ */
+class FileUploadSvgTestCase extends FileTestHelper {
+
+  function setUp() {
+    parent::setUp();
+
+    $this->private_files_directory = config_get('system.core', 'file_private_path');
+    // Disable the private file system which is automatically enabled by
+    // BackdropTestCase so we can test the upload wizard correctly.
+    config_set('system.core', 'file_private_path', '');
+
+    $config = config('file.settings');
+    $default_allowed_extensions = $config->get('default_allowed_extensions');
+    $config->set('default_allowed_extensions', $default_allowed_extensions . ' svg');
+    $config->save();
+
+    $web_user = $this->backdropCreateUser(array(
+      'create files',
+      'view files',
+      'view own private files',
+      'manage files',
+    ));
+    $this->backdropLogin($web_user);
+  }
+
+  /**
+   * Create SVG file.
+   *
+   * @param array $settings
+   *   File settings.
+   *
+   * @return string
+   *   filepath
+   */
+  protected function createSvgFile($settings = array()) {
+    // Populate defaults array.
+    $settings += array(
+      'filepath' => $this->randomName() . '.svg',
+      'contents' => "file_put_contents() doesn't seem to appreciate empty strings so let's put in some data.",
+      'scheme' => file_default_scheme(),
+    );
+
+    $filepath = $settings['scheme'] . '://' . $settings['filepath'];
+
+    file_put_contents($filepath, $settings['contents']);
+    $this->assertTrue(is_file($filepath), t('The SVG file exists on the disk.'), 'Create SVG file');
+
+    return $filepath;
+  }
+
+  /**
+   * Test SVG upload validation.
+   */
+  public function testSVGFileUploadValidation() {
+    $default_content = '<rect width="400" height="400" fill="#93a7ac"/>';
+    $default_open_tag = '<svg width="400" height="400" version="1.1" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">';
+
+    $samples = array(
+      'valid' => array(
+        'contents' => $default_open_tag . $default_content . '</svg>',
+        'message' => 'was uploaded.',
+      ),
+      'no_dimensions' => array(
+        'contents' => '<svg version="1.1" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">' . $default_content . '</svg>',
+        'message' => 'was uploaded.',
+      ),
+      'no_namespace_script' => array(
+        'contents' => '<svg><script>alert(1)</script>' . $default_content . '</svg>',
+        'message' => 'could not be uploaded. Invalid SVG namespace.',
+      ),
+      'invalid_namespace' => array(
+        'contents' => $default_open_tag . '<g xmlns="invalid ns"/>' . $default_content . '</svg>',
+        'message' => 'could not be uploaded. Invalid SVG file.',
+      ),
+      'broken' => array(
+        'contents' => $default_open_tag . '<g>' . $default_content . '</svg>',
+        'message' => 'could not be uploaded. Invalid SVG file.',
+      ),
+      'not_svg' => array(
+        'contents' => '<xml><foobar/></xml>',
+        'message' => 'could not be uploaded. Invalid SVG namespace.',
+      ),
+      'onevent' => array(
+        'contents' => $default_open_tag . '<rect width="400" height="400" onload="alert(1)" fill="#93a7ac"/></svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
+      'iframe' => array(
+        'contents' => $default_open_tag . $default_content . '<foreignObject x="20" y="20" width="220" height="220"><iframe src="https://example.org/" width="220" height="220"></iframe></foreignObject></svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
+      'script' => array(
+        'contents' => $default_open_tag . $default_content . '<script>alert(1)</script></svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
+      'xlink_script' => array(
+        'contents' => '<svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><a xlink:href="javascript:alert(1)">test</a>' . $default_content . '</svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
+      'link_data' => array(
+        'contents' => $default_open_tag . $default_content . '<a href="data:image/svg+xml,%3Csvg+xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22+onload%3D%22alert%281%29%22%3E%3C%2Fsvg%3E"></a></svg>',
+        'message' => 'could not be uploaded. Dangerous content found.',
+      ),
+    );
+
+    foreach ($samples as $sample => $settings) {
+      $filename = $sample . '.svg';
+      $filepath = $this->createSvgFile($settings + array('filepath' => $filename));
+
+      // Upload an SVG file.
+      $edit = array();
+      $edit['files[upload]'] = backdrop_realpath($filepath);
+      $this->backdropPost('file/add', $edit, t('Next'));
+
+      // Check that the file exists in the database.
+      $fid = $this->getLastFileId();
+      $file = file_load($fid);
+      $this->assertTrue($file, t('SVG file found in database.'));
+
+      // Check that the SVG file has been validated.
+      $this->assertRaw(t('%name ' . $settings['message'], array('%name' => $filename)), t('File validated.'));
+    }
+
   }
 }
 

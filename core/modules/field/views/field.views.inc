@@ -193,8 +193,8 @@ function field_views_field_default_views_data($field) {
     $data[$table][$old_column]['field']['moved to'] = array($table, $column);
     $data[$table][$column] = array(
       'group' => $group,
-      'title' => $label,
-      'title short' => $label,
+      'title' => check_plain($label),
+      'title short' => check_plain($label),
       'help' =>  t('Appears in: @bundles.', array('@bundles' => implode(', ', $bundles_names))),
     );
 
@@ -212,7 +212,7 @@ function field_views_field_default_views_data($field) {
             $aliases[] = array(
               'base' => $current_tables[$entity_name],
               'group' => $groups[$entity_name],
-              'title' => $label_name,
+              'title' => check_plain($label_name),
               'help' => t('This is an alias of @group: @field.', array('@group' => $group_name, '@field' => $label)),
             );
           }

@@ -460,6 +460,7 @@ function theme_admin_page($variables) {
  *   - block: An array containing information about the block:
  *     - show: A Boolean whether to output the block. Defaults to FALSE.
  *     - title: The block's title.
+ *     - icon: (optional) The block's icon.
  *     - content: (optional) Formatted content for the block.
  *     - description: (optional) Description of the block. Only output if
  *       'content' is not set.
@@ -484,7 +485,9 @@ function theme_admin_block($variables) {
 
   $output .= '<div class="' . implode(' ', $classes) . '">';
   if (!empty($block['title'])) {
-    $output .= '<h3>' . $block['title'] . '</h3>';
+    $icon = empty($block['icon']) ? '' : '<span class="admin-panel-icon">' . icon($block['icon']) . '</span>';
+    $title = '<span class="admin-panel-title">' . $block['title'] . '</span>';
+    $output .= '<h3>' . $icon . $title . '</h3>';
   }
   if (!empty($block['content'])) {
     $output .= '<div class="body">' . $block['content'] . '</div>';

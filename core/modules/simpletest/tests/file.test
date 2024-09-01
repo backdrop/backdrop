@@ -202,7 +202,7 @@ class FileTestCase extends BackdropWebTestCase {
     if (!isset($filepath)) {
       // Prefix with non-latin characters to ensure that all file-related
       // tests work with international filenames.
-      // cspell:disable-next-line
+      // cspell:disable-next-line.
       $filepath = 'Файл для тестирования ' . $this->randomName();
     }
     if (!isset($scheme)) {
@@ -534,7 +534,7 @@ class FileSaveUploadTest extends FileHookTestCase {
   /**
    * A PHP file path for upload security testing.
    */
-  protected $phpfile;
+  protected $php_file;
 
   /**
    * The largest file id when the test starts.
@@ -550,8 +550,8 @@ class FileSaveUploadTest extends FileHookTestCase {
     list(, $this->image_extension) = explode('.', $this->image->filename);
     $this->assertTrue(is_file($this->image->uri), "The image file we're going to upload exists.");
 
-    $this->phpfile = current($this->backdropGetTestFiles('php'));
-    $this->assertTrue(is_file($this->phpfile->uri), "The PHP file we're going to upload exists.");
+    $this->php_file = current($this->backdropGetTestFiles('php'));
+    $this->assertTrue(is_file($this->php_file->uri), "The PHP file we're going to upload exists.");
 
     $this->maxFidBefore = db_query('SELECT MAX(fid) AS fid FROM {file_managed}')->fetchField();
 
@@ -689,13 +689,13 @@ class FileSaveUploadTest extends FileHookTestCase {
     // malicious file.
     $edit = array(
       'file_test_replace' => FILE_EXISTS_REPLACE,
-      'files[file_test_upload]' => backdrop_realpath($this->phpfile->uri),
+      'files[file_test_upload]' => backdrop_realpath($this->php_file->uri),
       'is_image_file' => FALSE,
       'allow_all_extensions' => 'empty_array',
     );
     $this->backdropPost('file-test/upload', $edit, t('Submit'));
     $this->assertResponse(200, 'Received a 200 response for posted test file.');
-    $message = t('For security reasons, your upload has been renamed to') . ' <em class="placeholder">' . $this->phpfile->filename . '_.txt' . '</em>';
+    $message = format_string('For security reasons, your upload has been renamed to %renamed_file', array('%renamed_file' => $this->php_file->filename . '_.txt'));
     $this->assertRaw($message, 'Dangerous file was renamed.');
     $this->assertRaw('File name is php-2.php_.txt.');
     $this->assertRaw(t('File MIME type is text/plain.'), "Dangerous file's MIME type was changed.");
@@ -712,14 +712,14 @@ class FileSaveUploadTest extends FileHookTestCase {
     // extension for safety. Also check to make sure its MIME type was changed.
     $edit = array(
       'file_test_replace' => FILE_EXISTS_REPLACE,
-      'files[file_test_upload]' => backdrop_realpath($this->phpfile->uri),
+      'files[file_test_upload]' => backdrop_realpath($this->php_file->uri),
       'is_image_file' => FALSE,
       'extensions' => 'php',
     );
 
     $this->backdropPost('file-test/upload', $edit, t('Submit'));
     $this->assertResponse(200, 'Received a 200 response for posted test file.');
-    $message = t('For security reasons, your upload has been renamed to') . ' <em class="placeholder">' . $this->phpfile->filename . '_.txt</em>';
+    $message = t('For security reasons, your upload has been renamed to') . ' <em class="placeholder">' . $this->php_file->filename . '_.txt</em>';
     $this->assertRaw($message, 'Dangerous file was renamed.');
     $this->assertRaw(t('File MIME type is text/plain.'), "Dangerous file's MIME type was changed.");
     $this->assertRaw(t('You WIN!'), 'Found the success message.');
@@ -739,7 +739,7 @@ class FileSaveUploadTest extends FileHookTestCase {
     $this->backdropPost('file-test/upload', $edit, t('Submit'));
     $this->assertResponse(200, 'Received a 200 response for posted test file.');
     $this->assertNoRaw(t('For security reasons, your upload has been renamed'), 'Found no security message.');
-    $this->assertRaw(t('File name is !filename', array('!filename' => $this->phpfile->filename)), 'Dangerous file was not renamed when insecure uploads is TRUE.');
+    $this->assertRaw(t('File name is !filename', array('!filename' => $this->php_file->filename)), 'Dangerous file was not renamed when insecure uploads is TRUE.');
     $this->assertRaw(t('You WIN!'), 'Found the success message.');
 
     // Check that the correct hooks were called.
@@ -1015,7 +1015,7 @@ class FileUploadTransliterationTest extends FileTestCase {
   function testTransliteration() {
     // Make a particularly troublesome file name, starting with an umlaut and
     // containing upper-case variant characters.
-    // cspell:disable-next-line
+    // cspell:disable-next-line.
     $original_filename = 'üФайл Ä fàü.txt';
     $file = $this->createFile($original_filename, 'Sample text');
     $config = config('system.core');
@@ -2378,7 +2378,7 @@ class FileSaveDataTest extends FileHookTestCase {
     $contents = $this->randomName(8);
 
     // Using filename with non-latin characters.
-    //cspell:disable-next-line
+    // cspell:disable-next-line.
     $filename = 'Текстовый файл.txt';
 
     $result = file_save_data($contents, 'public://' . $filename);

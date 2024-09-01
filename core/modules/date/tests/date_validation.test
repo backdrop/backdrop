@@ -35,6 +35,11 @@ class DateValidationTestCase extends DateFieldBasic {
 
         $this->checkGranularity($field_name, $field_type, $widget_type);
         $this->deleteDateField($label);
+
+        $options['required'] = TRUE;
+        $this->createDateField($options);
+        $this->dateRangeTests($field_name, $field_type, $widget_type);
+        $this->deleteDateField($label);
       }
     }
   }
@@ -62,7 +67,7 @@ class DateValidationTestCase extends DateFieldBasic {
       $edit[$field_name . '[und][0][value][time]'] = '10:30';
     }
     $this->backdropPost('node/add/story', $edit, t('Save'));
-    $should_not_be = $edit['title'] . "has been created";
+    $should_not_be = $edit['title'] . ' has been created';
     $this->assertNoText($should_not_be, "Correctly blocked creation of node with invalid month and day for a $field_type field using the $widget_type widget.");
     $this->assertText('The month is invalid.', "Correctly blocked invalid month for a $field_type field using the $widget_type widget.");
     $this->assertText('The day is invalid.', "Correctly blocked invalid day for a $field_type field using the $widget_type widget.");
@@ -148,6 +153,110 @@ class DateValidationTestCase extends DateFieldBasic {
     }
     else {
       $this->assertRaw($message, "Correctly allowed creation of node with missing time for a $field_type field using the $widget_type widget.");
+    }
+  }
+
+  /**
+   * Tests for date ranges.
+   *
+   * These tests are run using a required field.
+   */
+  public function dateRangeTests($field_name, $field_type, $widget_type) {
+    // Create a node with wrong end date.
+    $edit = array();
+    $edit['title'] = $this->randomName(8);
+    $edit['body[und][0][value]'] = $this->randomName(16);
+
+    if ($widget_type == 'date_select') {
+      $edit[$field_name . '[und][0][show_todate]'] = '1';
+      $edit[$field_name . '[und][0][value][year]'] = '2011';
+      $edit[$field_name . '[und][0][value][month]'] = '12';
+      $edit[$field_name . '[und][0][value][day]'] = '10';
+      $edit[$field_name . '[und][0][value][hour]'] = '10';
+      $edit[$field_name . '[und][0][value][minute]'] = '00';
+
+      $edit[$field_name . '[und][0][value2][year]'] = '2011';
+      $edit[$field_name . '[und][0][value2][month]'] = '12';
+      $edit[$field_name . '[und][0][value2][day]'] = '10';
+      $edit[$field_name . '[und][0][value2][hour]'] = '9';
+      $edit[$field_name . '[und][0][value2][minute]'] = '00';
+    }
+    elseif ($widget_type == 'date_text') {
+      $edit[$field_name . '[und][0][show_todate]'] = '1';
+      $edit[$field_name . '[und][0][value][date]'] = '12/10/2011 - 10:00';
+      $edit[$field_name . '[und][0][value2][date]'] = '12/10/2011 - 9:00';
+    }
+    elseif ($widget_type == 'date_popup') {
+      $edit[$field_name . '[und][0][show_todate]'] = '1';
+      $edit[$field_name . '[und][0][value][date]'] = '12/10/2011';
+      $edit[$field_name . '[und][0][value][time]'] = '10:00';
+
+      $edit[$field_name . '[und][0][value2][date]'] = '12/10/2011';
+      $edit[$field_name . '[und][0][value2][time]'] = '9:00';
+    }
+    elseif ($widget_type == 'date_html5') {
+      $edit[$field_name . '[und][0][value][date]'] = '2011-12-10';
+      $edit[$field_name . '[und][0][value][time]'] = '11:00';
+
+      $edit[$field_name . '[und][0][value2][date]'] = '2011-12-10';
+      $edit[$field_name . '[und][0][value2][time]'] = '10:00';
+    }
+    $this->backdropPost('node/add/story', $edit, t('Save'));
+    $should_not_be = $edit['title'] . ' has been created';
+    $args = array(
+      '@field_type' => $field_type,
+      '@widget_type' => $widget_type,
+    );
+    $this->assertNoText($should_not_be, format_string('Correctly blocked creation of node with end date after start date for a @field_type field using the @widget_type widget.', $args));
+    $this->assertText('must be greater', format_string('Marked form with wrong end date as invalid for a @field_type field using the @widget_type widget.', $args));
+
+    // Create a node with missing start date.
+    // date_select doesn't allow empty dates when required.
+    if ($widget_type != 'date_select') {
+      $edit = [];
+      $edit['title'] = $this->randomName(8);
+      $edit['body[und][0][value]'] = $this->randomName(16);
+
+      if ($widget_type == 'date_select') {
+        $edit[$field_name . '[und][0][show_todate]'] = '1';
+        $edit[$field_name . '[und][0][value][year]'] = '';
+        $edit[$field_name . '[und][0][value][month]'] = '';
+        $edit[$field_name . '[und][0][value[day]'] = '';
+        $edit[$field_name . '[und][0][value][hour]'] = '';
+        $edit[$field_name . '[und][0][value][minute]'] = '';
+
+        $edit[$field_name . '[und][0][value2][year]'] = '2011';
+        $edit[$field_name . '[und][0][value2][month]'] = '12';
+        $edit[$field_name . '[und][0][value2][day]'] = '10';
+        $edit[$field_name . '[und][0][value2][hour]'] = '9';
+        $edit[$field_name . '[und][0][value2][minute]'] = '00';
+      }
+      elseif ($widget_type == 'date_text') {
+        $edit[$field_name . '[und][0][show_todate]'] = '1';
+        $edit[$field_name . '[und][0][value][date]'] = '';
+        $edit[$field_name . '[und][0][value2][date]'] = '12/10/2011 9:00';
+      }
+      elseif ($widget_type == 'date_popup') {
+        $edit[$field_name . '[und][0][show_todate]'] = '1';
+        $edit[$field_name . '[und][0][value][date]'] = '';
+        $edit[$field_name . '[und][0][value][time]'] = '';
+        $edit[$field_name . '[und][0][value2][date]'] = '12/10/2011';
+        $edit[$field_name . '[und][0][value2][time]'] = '9:00';
+      }
+      elseif ($widget_type == 'date_html5') {
+        $edit[$field_name . '[und][0][value][date]'] = '';
+        $edit[$field_name . '[und][0][value][time]'] = '';
+        $edit[$field_name . '[und][0][value2][date]'] = '2011-12-10';
+        $edit[$field_name . '[und][0][value2][time]'] = '10:00';
+      }
+      $this->backdropPost('node/add/story', $edit, t('Save'));
+      $should_not_be = $edit['title'] . ' has been created';
+      $args = array(
+        '@field_type' => $field_type,
+        '@widget_type' => $widget_type,
+      );
+      $this->assertNoText($should_not_be, format_string('Correctly blocked creation of node with missing start date for a @field_type field using the @widget_type widget.', $args));
+      $this->assertText('A start date is required', format_string('Marked form with start date as invalid for a @field_type field using the @widget_type widget.', $args));
     }
   }
 }
