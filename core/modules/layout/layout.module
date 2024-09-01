@@ -758,10 +758,10 @@ function layout_theme() {
       'variables' => array('layout' => NULL),
     ) + $base,
     'layout_condition_info' => array(
-      'variables' => array('layout' => NULL),
-    ) + $base,
-    'layout_path_info' => array(
-      'variables' => array('path' => NULL, 'missing_path' => NULL),
+      'variables' => array(
+        'layout' => NULL,
+        'show_empty' => TRUE,
+      ),
     ) + $base,
     'layout_template_option' => array(
       'variables' => array('template_info' => NULL),

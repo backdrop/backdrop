@@ -9,10 +9,6 @@
 .layout-list .layout-group td:first-child {
   font-weight: bold;
 }
-.layout-list .layout-group td .layout-detail {
-  font-weight: normal;
-  font-size: smaller;
-}
 .layout-list .layout-group td.missing-path,
  .layout-list .layout-group td.missing-path a {
    color: #c40d00;
