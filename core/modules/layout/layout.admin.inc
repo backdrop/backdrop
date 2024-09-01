@@ -82,7 +82,10 @@ function layout_list_page() {
       // Empty columns are intentional so that they may be hidden with
       // priority-low class on the $header array.
       $row[] = '';
-      $row[] = theme('layout_condition_info', array('layout' => $menu_item, 'show_empty' => FALSE));
+      $row[] = theme('layout_condition_info', array(
+        'layout' => $menu_item,
+        'show_empty' => FALSE,
+      ));
       $row[] = '';
 
       if (count($operations['#links']) !== 0) {

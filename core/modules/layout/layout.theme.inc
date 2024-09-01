@@ -69,10 +69,11 @@ function theme_layout_info($variables) {
 }
 
 /**
- * Outputs a list of conditions for a layout. Used in the layout listing page.
+ * Outputs a list of conditions. Used in the layout listing page.
  *
  * @param array $variables
- *   An array with a single value: "layout", which contains the layout object.
+ *   An array with a single value: "layout", which contains a layout object or
+ *   a menu item.
  *
  * @return string
  */
@@ -87,7 +88,8 @@ function theme_layout_condition_info($variables) {
     }
   }
   $output  = '<div class="layout-conditions-list">';
-  if (empty($conditions) && $variables['show_empty']) {
+  // Don't show empty text if this is a menu item.
+  if (empty($conditions) && isset($layout->menu)) {
     $output .= t('No conditions set.');
   }
   else {
@@ -129,7 +131,7 @@ function theme_layout_template_option($variables) {
 function theme_layout_template_info($variables) {
   $template_info = $variables['template_info'];
 
-  // Build template thumbnail preview
+  // Build template thumbnail preview.
   $preview_path = $template_info['path'] . '/' . $template_info['preview'];
   $preview_img = theme('image', array('path' => $preview_path));
 

@@ -783,14 +783,6 @@ details {
   background-color: #ffffff;
   display: table-cell;
 }
-.layout-detail details {
-  padding: 0;
-  border: none;
-  margin: 0;
-  overflow: hidden;
-  background: none;
-  display: table-cell;
-}
 details summary span {
   color: #0074bd;
   font-size: 120%;
