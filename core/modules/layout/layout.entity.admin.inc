@@ -25,6 +25,9 @@ function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg
   $bundle = field_extract_bundle($entity_type, $bundle_arg);
   $layouts = layout_get_entity_layouts($entity_type, $bundle);
   $entity_info = entity_get_info($entity_type);
+  if ($entity_info['label'] == 'Node') {
+    $entity_info['label'] = 'Content';
+  }
 
   $header = array(
     array('data' => t('Layout'), 'class' => array(
@@ -75,7 +78,7 @@ function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg
     '#header' => $header,
     '#rows' => $rows,
     '#attributes' => array('class' => array('layout-list')),
-    '#empty' => t('No layout overrides have been created for !entity_type types yet. All !entity_types will display using the <a href="@default_layout_href">Default layout</a>.', array(
+    '#empty' => t('No layout overrides have been created for !entity_type types yet. All !entity_type types will display using the <a href="@default_layout_href">Default layout</a>.', array(
       '!entity_type' => $entity_info['label'],
       '@default_layout_href' => '/admin/structure/layouts/manage/default',
     )),
