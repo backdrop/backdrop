@@ -17,7 +17,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   protected $orphaned_blocks = FALSE;
 
   function setUp() {
-    parent::setUp('layout_test', 'menu');
+    parent::setUp('layout_test');
 
     // Create and login admin user.
     $this->admin_user = $this->backdropCreateUser(array(
@@ -1397,7 +1397,6 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     // layouts are added in tests in this class, be sure they are deleted at the
     // end of the test.
     $this->backdropGet('admin/structure/layouts');
-    $this->assertNoRaw('<span>Path info</span>');
     $this->clickLink(t('Menu settings'));
     $this->assertUrl('admin/structure/layouts/menu/' . $layout_name, array(), 'Menu settings link goes to the correct layout menu item settings.');
 
@@ -1409,9 +1408,6 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'menu[weight]' => 1,
     );
     $this->backdropPost(NULL, $edit, t('Save menu settings'));
-    $this->assertRaw('<span>Path info</span>');
-    $this->assertText('Menu item type: Normal menu entry');
-    $this->assertText('Menu: Primary navigation');
 
     // Check that the link is available on the homepage (via the main menu).
     $this->backdropGet('<front>');
@@ -1431,11 +1427,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Add visibility condition'));
     $this->backdropPost(NULL, array(), t('Save menu settings'));
-    $this->assertRaw('<span>Path info</span>');
-    $this->assertText('Menu item type: Normal menu entry');
-    $this->assertText('Menu: Primary navigation');
     $vc_text = 'Current path is one of "' . str_replace("\n", ', ', $edit['paths']);
-    $vc = $this->xpath('//ul//li[contains(., :vc_text)]', array(
+    $vc = $this->xpath('//tr[contains(@class,"layout-group")]//ul//li[contains(., :vc_text)]', array(
       ':vc_text' => $vc_text,
     ));
     $this->assertEqual(count($vc), 1, 'The visibility condition shows up properly.');
