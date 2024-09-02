@@ -1,9 +1,8 @@
 <?php
 /**
  * @file
- * Class for loading, modifying, and saving a layout access rule (condition).
+ * Plugin to provide access control by the server HTTP response code.
  */
-
 class HttpResponseCodeLayoutAccess extends LayoutAccessNegatable {
   /**
    * {@inheritdoc}
@@ -12,13 +11,15 @@ class HttpResponseCodeLayoutAccess extends LayoutAccessNegatable {
     parent::form($form, $form_state);
     $response_codes = isset($this->settings['http_response_codes']) ? $this->settings['http_response_codes'] : array();
 
+    $checkboxes_description = '';
+    $negate_description = '';
     if (isset($form_state['block'])) {
-      $checkboxes_description = t('Shows the block on pages with any matching response code. If nothing is selected, the block will be shown on all pages where this layout applies.');
+      $checkboxes_description = t('Shows the block on pages with any matching response code.');
       $negate_description = t('Hides the block on pages with any matching response code selected from the options above.');
     }
     elseif (isset($form_state['layout'])) {
-      $checkboxes_description = t('This layout will apply on pages with any matching response code. If nothing is selected, the layout will apply on all pages (subject to other visibility conditions).');
-      $negate_description = t('This layout will apply on all pages, except those with any matching response code selected from the options above (subject to other visibility conditions).');
+      $checkboxes_description = t('This layout will apply on pages with any matching response code.');
+      $negate_description = t('This layout will apply on all pages, except those with any matching response code selected from the options above.');
     }
     $form['http_response_codes'] = array(
       '#type' => 'checkboxes',
@@ -28,6 +29,7 @@ class HttpResponseCodeLayoutAccess extends LayoutAccessNegatable {
         403 => t('Access denied (403)'),
         404 => t('Page not found (404)'),
       ),
+      '#required' => TRUE,
       '#default_value' => $response_codes,
       '#description' => $checkboxes_description,
     );
