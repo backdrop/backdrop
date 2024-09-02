@@ -51,20 +51,13 @@ class HttpResponseCodeLayoutAccess extends LayoutAccessNegatable {
   public function checkAccess() {
     $allowed_status_codes = array_filter($this->settings['http_response_codes']);
 
-    $router = menu_get_item();
-    $router_path = $router['path'];
-    // "Access denied" and "Page not found" get "system/403" and "system/404" as
-    // their path respectively. See backdrop_deliver_html_page().
-    switch ($router_path) {
-      case 'system/403':
-        $current_status_code = 403;
-        break;
-      case 'system/404':
-        $current_status_code = 404;
-        break;
-      default:
-        $current_status_code = 200;
-        break;
+    $http_response_header = backdrop_get_http_header('Status');
+    if ($http_response_header) {
+      $current_status_code = substr($http_response_header, 0, 3);
+    }
+    // Response header might not be set, which indicates a normal page load.
+    else {
+      $current_status_code = '200';
     }
 
     $access = in_array($current_status_code, $allowed_status_codes);
