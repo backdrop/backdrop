@@ -73,13 +73,26 @@ function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg
     $rows[] = array('data' => $row, 'class' => $class);
   }
 
+  $bundle_name = '';
+  if (is_object($bundle_arg) && property_exists($bundle_arg, 'name')) {
+    $bundle_name = $bundle_arg->name;
+  }
+  elseif (is_object($bundle_arg) && property_exists($bundle_arg, 'label')) {
+    $bundle_name = $bundle_arg->label;
+  }
+  elseif (is_string($bundle_arg)) {
+    if (isset($entity_info['label'])) {
+      $bundle_name = $entity_info['label'];
+    }
+  }
+
   $form['stand_alone_table'] = array(
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
     '#attributes' => array('class' => array('layout-list')),
-    '#empty' => t('No layout overrides have been created for !entity_type types yet. All !entity_type types will display using the <a href="@default_layout_href">Default layout</a>.', array(
-      '!entity_type' => $entity_info['label'],
+    '#empty' => t('No layout overrides have been created for !bundle types yet. All !bundle types will display using the <a href="@default_layout_href">Default layout</a>.', array(
+      '!bundle' => $bundle_name,
       '@default_layout_href' => '/admin/structure/layouts/manage/default',
     )),
     '#weight' => 1,
