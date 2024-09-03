@@ -13,7 +13,10 @@ class LayoutEntityLayoutsTest extends BackdropWebTestCase {
   protected $vocabulary;
   protected $field_email_name;
 
-  function setUp() {
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
     parent::setUp(array('taxonomy', 'email'));
     // Create content types for testing.
     $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));

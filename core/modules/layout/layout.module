@@ -580,7 +580,7 @@ function layout_menu() {
             'file' => 'layout.entity.admin.inc',
           ) + $access;
           $items["$path/layouts/add"] = array(
-            'title' => "Add layout",
+            'title' => 'Add layout',
             'title callback' => 'layout_entity_menu_title',
             'title arguments' => array($entity_type, $bundle_arg),
             'page callback' => 'backdrop_get_form',
@@ -689,48 +689,6 @@ function layout_page_access() {
   module_load_include('inc', 'layout', 'layout.pages');
   $args = func_get_args();
   return call_user_func_array('_layout_page_access', $args);
-}
-
-/**
- * Title callback: Returns a label for the action link to create bundle layouts.
- *
- * @param string $entity_type
- *   The entity type such as "node", "user", "taxonomy_term", etc.
- * @param string|stdClass $bundle_arg
- *   The bundle as a string or object. The object may be a TaxonomyVocabulary
- *   or stdClass (in the case of a node type).
- *
- * @return string
- *   The translated label used for the local actions.
- *
- * @see layout_menu()
- *
- * @since 1.29.0 Function added.
- */
-function layout_entity_menu_title($entity_type, $bundle_arg) {
-  $entity_info = entity_get_info($entity_type);
-  $single_bundle = (count($entity_info['bundles']) == 1) && isset($entity_info['bundles'][$entity_type]);
-  $entity_name = $entity_type == 'node' ? t('Content') : $entity_info['label'];
-  $bundle_label = '';
-
-  if (!$single_bundle) {
-    if (is_object($bundle_arg) && property_exists($bundle_arg, 'label')) {
-      $bundle_label = $bundle_arg->label;
-    }
-    elseif (is_object($bundle_arg) && property_exists($bundle_arg, 'name')) {
-      $bundle_label = $bundle_arg->name;
-    }
-    // If unable to find a bundle label, fallback to the entity label.
-    elseif (is_string($bundle_arg)) {
-      if (isset($entity_info['label'])) {
-        $bundle_label = $entity_info['label'];
-      }
-    }
-    return t('Add @bundle_label layout', array('@bundle_label' => $bundle_label));
-  }
-  else {
-    return t('Add @entity layout', array('@entity' => $entity_name));
-  }
 }
 
 /**

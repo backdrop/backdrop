@@ -5,6 +5,33 @@
  */
 
 /**
+ * Title callback: Returns a label for the action link to create bundle layouts.
+ *
+ * @param string $entity_type
+ *   The entity type such as "node", "user", "taxonomy_term", etc.
+ * @param string|stdClass $bundle_arg
+ *   The bundle as a string or object. The object may be a TaxonomyVocabulary
+ *   or stdClass (in the case of a node type).
+ *
+ * @return string
+ *   The translated label used for the local actions.
+ *
+ * @see layout_menu()
+ */
+function layout_entity_menu_title($entity_type, $bundle_arg) {
+  $entity_info = entity_get_info($entity_type);
+  $single_bundle = (count($entity_info['bundles']) == 1) && isset($entity_info['bundles'][$entity_type]);
+
+  if (!$single_bundle) {
+    $bundle_label = _layout_entity_bundle_label($entity_type, $bundle_arg);
+    return t('Add @bundle_label layout', array('@bundle_label' => $bundle_label));
+  }
+  else {
+    return t('Add @entity layout', array('@entity' => $entity_info['label']));
+  }
+}
+
+/**
  * Render the settings form for listing entity layouts.
  *
  * @param array $form
@@ -22,7 +49,7 @@
  *
  * @ingroup forms
  */
-function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg) {
+function layout_entity_admin_form(array $form, array &$form_state, $entity_type, $bundle_arg) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   form_load_include($form_state, 'inc', 'layout', 'layout.context.admin');
   $form['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
@@ -86,19 +113,7 @@ function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg
     $rows[] = array('data' => $row, 'class' => $class);
   }
 
-  $bundle_label = '';
-  if (is_object($bundle_arg) && property_exists($bundle_arg, 'label')) {
-    $bundle_label = $bundle_arg->label;
-  }
-  elseif (is_object($bundle_arg) && property_exists($bundle_arg, 'name')) {
-    $bundle_label = $bundle_arg->name;
-  }
-  elseif (is_string($bundle_arg)) {
-    if (isset($entity_info['label'])) {
-      $bundle_label = $entity_info['label'];
-    }
-  }
-
+  $bundle_label = _layout_entity_bundle_label($entity_type, $bundle_arg);
   $form['stand_alone_table'] = array(
     '#theme' => 'table',
     '#header' => $header,
@@ -206,28 +221,9 @@ function layout_entity_admin_add_form(array $form, array &$form_state, $entity_t
   $form['#attached']['js'][] = backdrop_get_path('module', 'layout') . '/js/layout.admin.js';
   $form['#attached']['css'][] = backdrop_get_path('module', 'layout') . '/css/layout.admin.css';
 
-  $messages = array();
-  if ($layout->locked) {
-    $messages['warning'] = array(
-      layout_locked_message($layout, 'layout'),
-    );
-  }
-
   $entity_layouts = layout_get_entity_layouts($entity_type);
   $bundle = field_extract_bundle($entity_type, $bundle_arg);
-  $entity_info = entity_get_info($entity_type);
-  $bundle_label = '';
-  if (is_object($bundle_arg) && property_exists($bundle_arg, 'label')) {
-    $bundle_label = $bundle_arg->label;
-  }
-  elseif (is_object($bundle_arg) && property_exists($bundle_arg, 'name')) {
-    $bundle_label = $bundle_arg->name;
-  }
-  elseif (is_string($bundle_arg)) {
-    if (isset($entity_info['label'])) {
-      $bundle_label = $entity_info['label'];
-    }
-  }
+  $bundle_label = _layout_entity_bundle_label($entity_type, $bundle_arg);
   if (isset($entity_layouts['bundles'][$bundle]) && $bundle_count = count($entity_layouts['bundles'][$bundle])) {
     $default_name = t('@bundle_label layout @count', array(
       '@bundle_label' => $bundle_label,
@@ -449,4 +445,39 @@ function layout_entity_admin_add_form_submit($form, &$form_state) {
   layout_locked_message($layout, 'layout');
 
   $form_state['redirect'] = 'admin/structure/layouts/manage/' . $layout->name;
+}
+
+/**
+ * Get a bundle's label.
+ *
+ * This function is a temporary measure until there is a central way to get the
+ * label of an entity type's bundles.
+ *
+ * @param string $entity_type
+ *   The entity type such as "node", "user", "taxonomy_term", etc.
+ * @param string|stdClass $bundle_arg
+ *   The bundle as a string or object. The object may be a TaxonomyVocabulary
+ *   or stdClass (in the case of a node type).
+ *
+ * @return string
+ *   The label of the given entity bundle.
+ *
+ * @private
+ */
+function _layout_entity_bundle_label($entity_type, $bundle_arg) {
+  $entity_info = entity_get_info($entity_type);
+  $bundle_label = t('Unknown');
+  if (is_object($bundle_arg) && property_exists($bundle_arg, 'label')) {
+    $bundle_label = $bundle_arg->label;
+  }
+  elseif (is_object($bundle_arg) && property_exists($bundle_arg, 'name')) {
+    $bundle_label = $bundle_arg->name;
+  }
+  // If unable to find a bundle label, fallback to the entity label.
+  elseif (is_string($bundle_arg)) {
+    if (isset($entity_info['label'])) {
+      $bundle_label = $entity_info['label'];
+    }
+  }
+  return $bundle_label;
 }
