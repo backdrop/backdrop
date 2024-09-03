@@ -355,7 +355,8 @@ function layout_entity_admin_add_form_submit($form, &$form_state) {
   $entity_info = entity_get_info($entity_type);
   $single_bundle = (count($entity_info['bundles']) == 1) && isset($entity_info['bundles'][$entity_type]);
   if (!$form_state['all_types'] && !$single_bundle) {
-    $handler = layout_create_access('node_type');
+    $key = $entity_type . '_' . $entity_info['entity keys']['bundle'];
+    $handler = layout_create_access($key);
     $handler->settings['bundles'][] = $bundle_type;
     $layout->conditions[] = $handler;
   }
