@@ -304,6 +304,7 @@ function link_field_validate($entity_type, $entity, $field, $instance, $langcode
  * Link field element validation.
  */
 function link_field_element_validate(&$element, &$form_state, $complete_form) {
+  $value = $element['#value'];
   if (!empty($element['#validate_url']) && (!empty($value['#url']) || $element['#url'] == 'required')) {
     $url_valid = link_validate_url(trim($value['url']));
     if ($url_valid === FALSE) {
