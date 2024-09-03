@@ -161,10 +161,10 @@ function layout_get_entity_layouts($entity_type, $bundle_name = '') {
  *
  * @ingroup forms
  */
-function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle_arg, $all_types = NULL) {
+function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle_arg) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   form_load_include($form_state, 'inc', 'layout', 'layout.context.admin');
-  backdrop_set_title(layout_entity_menu_title($entity_type, $bundle_arg, $all_types));
+  backdrop_set_title(layout_entity_menu_title($entity_type, $bundle_arg));
 
   $config = array(
     'is_new' => TRUE,
@@ -172,7 +172,6 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle
   $layout = new Layout($config);
 
   $form_state['layout'] = &$layout;
-  $form_state['all_types'] = $all_types;
   $form_state['entity_type'] = $entity_type;
   $form_state['bundle_type'] = field_extract_bundle($entity_type, $bundle_arg);
 
@@ -191,41 +190,28 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle
   $entity_layouts = layout_get_entity_layouts($entity_type);
   $bundle = field_extract_bundle($entity_type, $bundle_arg);
   $entity_info = entity_get_info($entity_type);
-  if (!$all_types) {
-    $bundle_name = '';
-    if (is_object($bundle_arg) && property_exists($bundle_arg, 'name')) {
-      $bundle_name = $bundle_arg->name;
-    }
-    elseif (is_object($bundle_arg) && property_exists($bundle_arg, 'label')) {
-      $bundle_name = $bundle_arg->label;
-    }
-    elseif (is_string($bundle_arg)) {
-      if (isset($entity_info['label'])) {
-        $bundle_name = $entity_info['label'];
-      }
-    }
-    if (isset($entity_layouts['bundles'][$bundle]) && $bundle_count = count($entity_layouts['bundles'][$bundle])) {
-      $default_name = t('!bundle_name layout !count', array(
-        '!bundle_name' => $bundle_name,
-        '!count' => $bundle_count + 1,
-      ));
-    }
-    else {
-      $default_name = t('!bundle_name layout', array(
-        '!bundle_name' => $bundle_name,
-      ));
+  $bundle_name = '';
+  if (is_object($bundle_arg) && property_exists($bundle_arg, 'name')) {
+    $bundle_name = $bundle_arg->name;
+  }
+  elseif (is_object($bundle_arg) && property_exists($bundle_arg, 'label')) {
+    $bundle_name = $bundle_arg->label;
+  }
+  elseif (is_string($bundle_arg)) {
+    if (isset($entity_info['label'])) {
+      $bundle_name = $entity_info['label'];
     }
   }
+  if (isset($entity_layouts['bundles'][$bundle]) && $bundle_count = count($entity_layouts['bundles'][$bundle])) {
+    $default_name = t('!bundle_name layout !count', array(
+      '!bundle_name' => $bundle_name,
+      '!count' => $bundle_count + 1,
+    ));
+  }
   else {
-    if (isset($entity_layouts['all']) && $bundle_count = count($entity_layouts['all'])) {
-      $default_name = t('!entity_label layout !count', array(
-        '!entity_label' => $entity_info['label'],
-        '!count' => $bundle_count + 1,
-      ));
-    }
-    else {
-      $default_name = t('!entity_label layout', array('!entity_label' => $entity_info['label']));
-    }
+    $default_name = t('!bundle_name layout', array(
+      '!bundle_name' => $bundle_name,
+    ));
   }
 
   $form['title'] = array(
@@ -354,7 +340,7 @@ function layout_entity_admin_add_form_submit($form, &$form_state) {
   // Set the bundle type visibility condition if the entity has bundles.
   $entity_info = entity_get_info($entity_type);
   $single_bundle = (count($entity_info['bundles']) == 1) && isset($entity_info['bundles'][$entity_type]);
-  if (!$form_state['all_types'] && !$single_bundle) {
+  if (!$single_bundle) {
     $key = $entity_type . '_' . $entity_info['entity keys']['bundle'];
     $handler = layout_create_access($key);
     $handler->settings['bundles'][] = $bundle_type;
