@@ -2595,13 +2595,14 @@ function views_clean_css_identifier($identifier, $filter = array(' ' => '-', '/'
 /**
  * Finds the most recently changed nodes that are available to the current user.
  *
- * @deprecated since 1.29.0
  * @param (int) $limit
  *   (optional) The maximum number of nodes to find. Defaults to 10.
  *
  * @return array
  *   An array of node entities or an empty array if there are no recent nodes
  *   visible to the current user.
+ *
+ * @deprecated since 1.30.0
  */
 function node_get_recent($limit = 10) {
   $query = db_select('node', 'n');
