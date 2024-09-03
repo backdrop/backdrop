@@ -2742,7 +2742,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
 
     // Set the block to a region to confirm block is available.
     $layout = layout_load('home');
-    $block = $layout->addBlock('views', 'content_recent-block', 'sidebar');
+    $block = $layout->addBlock('views', 'recent_content-block', 'sidebar');
 
     // Set block title and variables.
     $block_title = $this->randomName();
@@ -2791,7 +2791,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     $this->assertText($node3->title, t('Node found in block.'));
 
     // Check to make sure nodes are in the right order.
-    $this->assertTrue($this->xpath('//*[contains(@class,"block-views-content-recent-block")]/div/div/div/table/tbody/tr[position() = 1]/td/div/a[text() = "' . $node3->title . '"]'), t('Nodes were ordered correctly in block.'));
+    $this->assertTrue($this->xpath('//*[contains(@class,"block-views-recent-content-block")]/div/div/div/table/tbody/tr[position() = 1]/td/div/a[text() = "' . $node3->title . '"]'), t('Nodes were ordered correctly in block.'));
 
     // Set the number of recent nodes to show to 10.
     $this->backdropLogout();
