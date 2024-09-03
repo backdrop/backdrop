@@ -253,23 +253,6 @@ function link_field_settings_form_validate($element, &$form_state, $complete_for
 }
 
 /**
- * #element_validate handler for custom form usage.
- */
-function link_field_custom_form_validate($element, &$form_state, $form) {
-  $errors = array();
-  $instance = link_field_custom_create_instance($element);
-  $langcode = (!empty($element['#language'])) ? $element['#language'] : LANGUAGE_NONE;
-  $item = $element['#value'];
-  $field_name = $element['#name'];
-  link_field_validate('link_field_custom', 'link_field_custom', array('field_name' => $field_name), $instance, $langcode, array($item), $errors);
-  if (!empty($errors[$field_name][$langcode])) {
-    foreach ($errors[$field_name][$langcode][0] as $error) {
-      form_error($element, $error['message']);
-    }
-  }
-}
-
-/**
  * Implements hook_field_is_empty().
  */
 function link_field_is_empty($item, $field) {
@@ -314,6 +297,21 @@ function link_field_validate($entity_type, $entity, $field, $instance, $langcode
       'message' => t('At least one title or URL must be entered.'),
       'error_element' => array('url' => FALSE, 'title' => TRUE),
     );
+  }
+}
+
+/**
+ * Link field element validation.
+ */
+function link_field_element_validate(&$element, &$form_state, $complete_form) {
+  if (!empty($element['#validate_url']) && (!empty($value['#url']) || $element['#url'] == 'required')) {
+    $url_valid = link_validate_url(trim($value['url']));
+    if ($url_valid === FALSE) {
+      form_error($element['url'], t('The value %value provided for %field is not a valid URL.', array(
+        '%value' => trim($value['url']),
+        '%field' => $element['#title'],
+      )));
+    }
   }
 }
 
@@ -839,6 +837,17 @@ function link_element_info() {
     '#process' => array('link_field_process'),
     '#theme' => 'link_field',
     '#theme_wrappers' => array('form_element'),
+    '#tree' => TRUE,
+    '#title_maxlength' => 128,
+    '#title_mode' => 'optional',
+    '#title_label_use_field_label' => FALSE,
+    '#url' => 'optional',
+    '#link_type' => LINK_BOTH,
+    '#validate_url' => TRUE,
+    '#field_parents' => array(),
+    '#field_name' => '',
+    '#language' => LANGUAGE_NONE,
+    '#element_validate' => array('link_field_element_validate'),
   );
   return $elements;
 }
@@ -866,14 +875,27 @@ function _link_default_attributes() {
  * The $fields array is in $complete_form['#field_info'][$element['#field_name']].
  */
 function link_field_process($element, $form_state, $complete_form) {
-  $field_parents = (!empty($element['#field_parents'])) ? $element['#field_parents'] : array();
-  $field_name = (!empty($element['#field_name'])) ? $element['#field_name'] : '';
-  $language = (!empty($element['#language'])) ? $element['#language'] : LANGUAGE_NONE;
-  $field_state = field_form_get_state($field_parents, $field_name, $language, $form_state);
-  $instance = !empty($field_state['instance']) ? $field_state['instance'] : link_field_custom_create_instance($element);
-  $delta = !empty($element['#delta']) ? $element['#delta'] : 0;
+  $instance = field_widget_instance($element, $form_state);
 
-  $settings = $instance['settings'];
+  if (!$instance) {
+    // The element comes from a custom form, use element-level settings.
+    $settings = array (
+      'title_maxlength' => isset($element['#title_maxlength']) ? $element['#title_maxlength'] : 128,
+      'title' => isset($element['#title_mode']) ? $element['#title_mode'] : 'optional',
+      'title_label_use_field_label' => isset($element['#title_label_use_field_label']) ? $element['#title_label_use_field_label'] : FALSE,
+      'url' => isset($element['#url']) ? $element['#url'] : 'optional',
+      'type' => isset($element['#link_type']) ? $element['#link_type'] : LINK_BOTH,
+    );
+    if (isset($element['#attributes'])) {
+      $settings['attributes'] = $element['#attributes'];
+    }
+    if (isset($element['#required'])) {
+      $settings['required'] = $element['#required'];
+    }
+  }
+  else {
+    $settings = $instance['settings'];
+  }
 
   $element['#attached']['css'][] = backdrop_get_path('module', 'link') . '/css/link.css';
 
@@ -881,7 +903,7 @@ function link_field_process($element, $form_state, $complete_form) {
     '#type' => 'textfield',
     '#maxlength' => LINK_URL_MAX_LENGTH,
     '#title' => t('URL'),
-    '#required' => ($delta == 0 && $settings['url'] !== 'optional') ? $element['#required'] : FALSE,
+    '#required' => (empty($element['#delta']) && $settings['url'] !== 'optional') ? $element['#required'] : FALSE,
     '#default_value' => isset($element['#value']['url']) ? $element['#value']['url'] : NULL,
   );
   if ($settings['type'] != LINK_EXTERNAL) {
@@ -903,7 +925,7 @@ function link_field_process($element, $form_state, $complete_form) {
       '#type' => 'textfield',
       '#maxlength' => $settings['title_maxlength'],
       '#title' => $title_label,
-      '#required' => ($settings['title'] == 'required' && (($delta == 0 && $element['#required']) || !empty($element['#value']['url']))) ? TRUE : FALSE,
+      '#required' => ($settings['title'] == 'required' && ((empty($element['#delta']) && $element['#required']) || !empty($element['#value']['url']))) ? TRUE : FALSE,
       '#default_value' => isset($element['#value']['title']) ? $element['#value']['title'] : NULL,
     );
   }
@@ -1175,32 +1197,4 @@ function link_validate_url($text) {
  */
 function link_field_settings_form() {
   return array();
-}
-
-/**
- * Helper to create a pseudo field instance for custom form usage.
- */
-function link_field_custom_create_instance($element) {
-  $instance['settings'] = array (
-    'title_maxlength' => isset($element['#title_maxlength']) ? $element['#title_maxlength'] : 128,
-    'title' => isset($element['#title_mode']) ? $element['#title_mode'] : 'optional',
-    'title_label_use_field_label' => isset($element['#title_label_use_field_label']) ? $element['#title_label_use_field_label'] : FALSE,
-    'url' => isset($element['#url']) ? $element['#url'] : 'optional',
-    'validate_url' => isset($element['#validate_url']) ? $element['#validate_url'] : 'optional',
-    'type' => isset($element['#type']) ? $element['#type'] : LINK_BOTH,
-    'enable_tokens' => isset($element['#enable_tokens']) ? $element['#enable_tokens'] : 0,
-    'display' => array(
-      'url_cutoff' => isset($element['#url_cutoff']) ? $element['#url_cutoff'] : 80,
-    ),
-    'rel_remove' => isset($element['#rel_remove']) ? $element['#rel_remove'] : 'default',
-  );
-  if (isset($element['#attributes'])) {
-    $instance['settings']['attributes'] = $element['#attributes'];
-  }
-  if (isset($element['#required'])) {
-    $instance['required'] = $element['#required'];
-  }
-  $instance['label'] = $element['#title'];
-  $instance['default_value'][0]['url'] = isset($element['#default_value']['url']) ? $element['#default_value']['url'] : '';
-  return $instance;
 }

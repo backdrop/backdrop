@@ -536,5 +536,5 @@ function field_widget_field($element, $form_state) {
  */
 function field_widget_instance($element, $form_state) {
   $field_state = field_form_get_state($element['#field_parents'], $element['#field_name'], $element['#language'], $form_state);
-  return $field_state['instance'];
+  return (!empty($field_state['instance'])) ? $field_state['instance'] : array();
 }
