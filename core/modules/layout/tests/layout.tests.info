@@ -72,6 +72,6 @@ file = layout.test
 
 [LayoutEntityLayoutsTest]
 name = Layout Entity Layouts Test
-description = Tests the user interface for entity layouts.
+description = Tests the user interface for adding layout configuration to entity types.
 group = Layout
-file = layout.test
+file = layout_entity.test
