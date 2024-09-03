@@ -2084,7 +2084,7 @@ function system_library_info() {
   $libraries['ui.touch-punch'] = array(
     'title' => 'jQuery UI Touch Punch',
     'website' => 'https://github.com/RWAP/jquery-ui-touch-punch/',
-    'version' => '1.0.9',
+    'version' => '1.1.5',
     'js' => array(
       'core/misc/jquery.ui.touch-punch.js' => array(),
     ),
