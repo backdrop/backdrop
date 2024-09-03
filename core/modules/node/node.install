@@ -2857,8 +2857,8 @@ function node_update_1023() {
     $config->save();
   }
 
-  // Upgrade recent content block to views
-  $layouts= config_get_names_with_prefix('layout');
+  // Upgrade recent content block to views.
+  $layouts = config_get_names_with_prefix('layout');
   foreach ($layouts as $layout_name) {
     $config = config($layout_name);
     $configs = $config->get();
