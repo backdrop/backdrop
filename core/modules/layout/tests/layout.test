@@ -3746,7 +3746,7 @@ class LayoutEntityLayoutsTest extends BackdropWebTestCase {
   /**
    * Test Custom Text blocks.
    */
-  function testEntityLayouts() {
+  public function testEntityLayouts() {
     // This rebuild is needed to ensure taxonomy entity info is available.
     menu_rebuild();
 

@@ -7,6 +7,19 @@
 /**
  * Render the settings form for listing entity layouts.
  *
+ * @param array $form
+ *   The form array.
+ * @param array $form_state
+ *   The form state.
+ * @param string $entity_type
+ *   The entity type such as "node", "user", "taxonomy_term", etc.
+ * @param string|stdClass $bundle_arg
+ *   The bundle as a string or object. The object may be a TaxonomyVocabulary
+ *   or stdClass (in the case of a node type).
+ *
+ * @return array
+ *   The built form array.
+ *
  * @ingroup forms
  */
 function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg) {
@@ -73,16 +86,16 @@ function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg
     $rows[] = array('data' => $row, 'class' => $class);
   }
 
-  $bundle_name = '';
-  if (is_object($bundle_arg) && property_exists($bundle_arg, 'name')) {
-    $bundle_name = $bundle_arg->name;
+  $bundle_label = '';
+  if (is_object($bundle_arg) && property_exists($bundle_arg, 'label')) {
+    $bundle_label = $bundle_arg->label;
   }
-  elseif (is_object($bundle_arg) && property_exists($bundle_arg, 'label')) {
-    $bundle_name = $bundle_arg->label;
+  elseif (is_object($bundle_arg) && property_exists($bundle_arg, 'name')) {
+    $bundle_label = $bundle_arg->name;
   }
   elseif (is_string($bundle_arg)) {
     if (isset($entity_info['label'])) {
-      $bundle_name = $entity_info['label'];
+      $bundle_label = $entity_info['label'];
     }
   }
 
@@ -91,8 +104,8 @@ function layout_entity_admin_form($form, &$form_state, $entity_type, $bundle_arg
     '#header' => $header,
     '#rows' => $rows,
     '#attributes' => array('class' => array('layout-list')),
-    '#empty' => t('No layout overrides have been created for !bundle types yet. All !bundle types will display using the <a href="@default_layout_href">Default layout</a>.', array(
-      '!bundle' => $bundle_name,
+    '#empty' => t('No layout overrides have been created for @bundle pages yet. All pages for @bundle will display using the <a href="@default_layout_href">Default layout</a>.', array(
+      '@bundle' => $bundle_label,
       '@default_layout_href' => '/admin/structure/layouts/manage/default',
     )),
     '#weight' => 1,
@@ -159,9 +172,22 @@ function layout_get_entity_layouts($entity_type, $bundle_name = '') {
 /**
  * Render the form for adding a layout for an entity.
  *
+ * @param array $form
+ *   The form array.
+ * @param array $form_state
+ *   The form state.
+ * @param string $entity_type
+ *   The entity type such as "node", "user", "taxonomy_term", etc.
+ * @param string|stdClass $bundle_arg
+ *   The bundle as a string or object. The object may be a TaxonomyVocabulary
+ *   or stdClass (in the case of a node type).
+ *
+ * @return array
+ *   The built form array.
+ *
  * @ingroup forms
  */
-function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle_arg) {
+function layout_entity_admin_add_form(array $form, array &$form_state, $entity_type, $bundle_arg) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   form_load_include($form_state, 'inc', 'layout', 'layout.context.admin');
   backdrop_set_title(layout_entity_menu_title($entity_type, $bundle_arg));
@@ -190,27 +216,27 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle
   $entity_layouts = layout_get_entity_layouts($entity_type);
   $bundle = field_extract_bundle($entity_type, $bundle_arg);
   $entity_info = entity_get_info($entity_type);
-  $bundle_name = '';
-  if (is_object($bundle_arg) && property_exists($bundle_arg, 'name')) {
-    $bundle_name = $bundle_arg->name;
+  $bundle_label = '';
+  if (is_object($bundle_arg) && property_exists($bundle_arg, 'label')) {
+    $bundle_label = $bundle_arg->label;
   }
-  elseif (is_object($bundle_arg) && property_exists($bundle_arg, 'label')) {
-    $bundle_name = $bundle_arg->label;
+  elseif (is_object($bundle_arg) && property_exists($bundle_arg, 'name')) {
+    $bundle_label = $bundle_arg->name;
   }
   elseif (is_string($bundle_arg)) {
     if (isset($entity_info['label'])) {
-      $bundle_name = $entity_info['label'];
+      $bundle_label = $entity_info['label'];
     }
   }
   if (isset($entity_layouts['bundles'][$bundle]) && $bundle_count = count($entity_layouts['bundles'][$bundle])) {
-    $default_name = t('!bundle_name layout !count', array(
-      '!bundle_name' => $bundle_name,
-      '!count' => $bundle_count + 1,
+    $default_name = t('@bundle_label layout @count', array(
+      '@bundle_label' => $bundle_label,
+      '@count' => $bundle_count + 1,
     ));
   }
   else {
-    $default_name = t('!bundle_name layout', array(
-      '!bundle_name' => $bundle_name,
+    $default_name = t('@bundle_label layout', array(
+      '@bundle_label' => $bundle_label,
     ));
   }
 
@@ -272,6 +298,7 @@ function layout_entity_admin_add_form($form, &$form_state, $entity_type, $bundle
         ':input[name="content_area"]' => array('value' => 'field_blocks'),
       ),
     ),
+    '#indentation' => 1,
   );
 
   // Get the list of layout template options. The list needs to be rebuilt (see

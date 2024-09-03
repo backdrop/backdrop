@@ -597,42 +597,6 @@ function layout_menu() {
 }
 
 /**
- * Title callback: Returns a label for the action links to create bundle
- * layouts.
- *
- * @see layout_menu()
- */
-function layout_entity_menu_title($entity_type, $bundle_arg) {
-  $entity_info = entity_get_info($entity_type);
-  $single_bundle = (count($entity_info['bundles']) == 1) && isset($entity_info['bundles'][$entity_type]);
-  $entity_name = ($entity_type == 'node') ? t('content') : $entity_info['label'];
-  $bundle_name = '';
-
-  if (!$single_bundle) {
-    if (is_object($bundle_arg) && property_exists($bundle_arg, 'name')) {
-      $bundle_name = $bundle_arg->name;
-    }
-    elseif (is_object($bundle_arg) && property_exists($bundle_arg, 'label')) {
-      $bundle_name = $bundle_arg->label;
-    }
-    elseif (is_string($bundle_arg)) {
-      if (isset($entity_info['label'])) {
-        $bundle_name = $entity_info['label'];
-      }
-    }
-    return t('Add @bundle_name layout', array('@bundle_name' => $bundle_name, '@entity' => $entity_name));
-  }
-  else {
-    if (count($entity_info['bundles']) > 1) {
-      return t('Add @entity layout', array('@entity' => $entity_name));
-    }
-    else {
-      return t('Add @entity layout', array('@entity' => $entity_name));
-    }
-  }
-}
-
-/**
  * Menu loader callback; Convert %layout_path placeholders to loaded objects.
  */
 function layout_path_load($arg_value, $menu_item_name, $path_parts, $arg_position) {
@@ -725,6 +689,48 @@ function layout_page_access() {
   module_load_include('inc', 'layout', 'layout.pages');
   $args = func_get_args();
   return call_user_func_array('_layout_page_access', $args);
+}
+
+/**
+ * Title callback: Returns a label for the action link to create bundle layouts.
+ *
+ * @param string $entity_type
+ *   The entity type such as "node", "user", "taxonomy_term", etc.
+ * @param string|stdClass $bundle_arg
+ *   The bundle as a string or object. The object may be a TaxonomyVocabulary
+ *   or stdClass (in the case of a node type).
+ *
+ * @return string
+ *   The translated label used for the local actions.
+ *
+ * @see layout_menu()
+ *
+ * @since 1.29.0 Function added.
+ */
+function layout_entity_menu_title($entity_type, $bundle_arg) {
+  $entity_info = entity_get_info($entity_type);
+  $single_bundle = (count($entity_info['bundles']) == 1) && isset($entity_info['bundles'][$entity_type]);
+  $entity_name = $entity_type == 'node' ? t('Content') : $entity_info['label'];
+  $bundle_label = '';
+
+  if (!$single_bundle) {
+    if (is_object($bundle_arg) && property_exists($bundle_arg, 'label')) {
+      $bundle_label = $bundle_arg->label;
+    }
+    elseif (is_object($bundle_arg) && property_exists($bundle_arg, 'name')) {
+      $bundle_label = $bundle_arg->name;
+    }
+    // If unable to find a bundle label, fallback to the entity label.
+    elseif (is_string($bundle_arg)) {
+      if (isset($entity_info['label'])) {
+        $bundle_label = $entity_info['label'];
+      }
+    }
+    return t('Add @bundle_label layout', array('@bundle_label' => $bundle_label));
+  }
+  else {
+    return t('Add @entity layout', array('@entity' => $entity_name));
+  }
 }
 
 /**
