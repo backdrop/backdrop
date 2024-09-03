@@ -5,33 +5,6 @@
  */
 
 /**
- * Title callback: Returns a label for the action link to create bundle layouts.
- *
- * @param string $entity_type
- *   The entity type such as "node", "user", "taxonomy_term", etc.
- * @param string|stdClass $bundle_arg
- *   The bundle as a string or object. The object may be a TaxonomyVocabulary
- *   or stdClass (in the case of a node type).
- *
- * @return string
- *   The translated label used for the local actions.
- *
- * @see layout_menu()
- */
-function layout_entity_menu_title($entity_type, $bundle_arg) {
-  $entity_info = entity_get_info($entity_type);
-  $single_bundle = (count($entity_info['bundles']) == 1) && isset($entity_info['bundles'][$entity_type]);
-
-  if (!$single_bundle) {
-    $bundle_label = _layout_entity_bundle_label($entity_type, $bundle_arg);
-    return t('Add @bundle_label layout', array('@bundle_label' => $bundle_label));
-  }
-  else {
-    return t('Add @entity layout', array('@entity' => $entity_info['label']));
-  }
-}
-
-/**
  * Render the settings form for listing entity layouts.
  *
  * @param array $form
