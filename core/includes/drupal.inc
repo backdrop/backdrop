@@ -2595,6 +2595,7 @@ function views_clean_css_identifier($identifier, $filter = array(' ' => '-', '/'
 /**
  * Finds the most recently changed nodes that are available to the current user.
  *
+ * @deprecated since 1.29.0
  * @param (int) $limit
  *   (optional) The maximum number of nodes to find. Defaults to 10.
  *
