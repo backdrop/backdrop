@@ -696,7 +696,7 @@ function node_update_1008() {
               'empty_zero' => 0,
               'hide_alter_empty' => 1,
               'type' => 'published-notpublished',
-              'type_custom_true' => '',
+              'type_custom_TRUE' => '',
               'type_custom_false' => '',
               'not' => 0,
             ),
@@ -1216,35 +1216,26 @@ function node_update_1018() {
     'base_table' => 'node',
     'human_name' => 'Administer content',
     'core' => '1.0',
-    'display' =>
-    array (
-      'default' =>
-      array (
+    'display' => array (
+      'default' => array (
         'display_title' => 'Default',
         'display_plugin' => 'default',
-        'display_options' =>
-        array (
-          'query' =>
-          array (
+        'display_options' => array (
+          'query' => array (
             'type' => 'views_query',
-            'options' =>
-            array (
+            'options' => array (
             ),
           ),
-          'access' =>
-          array (
+          'access' => array (
             'type' => 'perm',
             'perm' => 'access content overview',
           ),
-          'cache' =>
-          array (
+          'cache' => array (
             'type' => 'none',
           ),
-          'exposed_form' =>
-          array (
+          'exposed_form' => array (
             'type' => 'basic',
-            'options' =>
-            array (
+            'options' => array (
               'submit_button' => 'Filter',
               'reset_button' => 0,
               'reset_button_label' => 'Reset',
@@ -1256,25 +1247,21 @@ function node_update_1018() {
               'autosubmit_hide' => 1,
             ),
           ),
-          'pager' =>
-          array (
+          'pager' => array (
             'type' => 'full',
-            'options' =>
-            array (
+            'options' => array (
               'items_per_page' => '50',
               'offset' => '0',
               'id' => '0',
               'total_pages' => '',
               'quantity' => '9',
-              'tags' =>
-              array (
+              'tags' => array (
                 'first' => '« first',
                 'previous' => '‹ previous',
                 'next' => 'next ›',
                 'last' => 'last »',
               ),
-              'expose' =>
-              array (
+              'expose' => array (
                 'items_per_page' => 0,
                 'items_per_page_label' => 'Items per page',
                 'items_per_page_options' => '5, 10, 20, 40, 60',
@@ -1287,10 +1274,8 @@ function node_update_1018() {
           ),
           'style_plugin' => 'table',
           'row_plugin' => 'fields',
-          'fields' =>
-          array (
-            'scheduled_1' =>
-            array (
+          'fields' => array (
+            'scheduled_1' => array (
               'id' => 'scheduled_1',
               'table' => 'node',
               'field' => 'scheduled',
@@ -1299,8 +1284,7 @@ function node_update_1018() {
               'ui_name' => 'Scheduled status flag',
               'label' => '',
               'exclude' => 1,
-              'alter' =>
-              array (
+              'alter' => array (
                 'alter_text' => 1,
                 'text' => 'Not published (Scheduled)',
                 'make_link' => 0,
@@ -1344,8 +1328,7 @@ function node_update_1018() {
               'custom_date_format' => '',
               'timezone' => '',
             ),
-            'bulk_form' =>
-            array (
+            'bulk_form' => array (
               'id' => 'bulk_form',
               'table' => 'node',
               'field' => 'bulk_form',
@@ -1367,12 +1350,10 @@ function node_update_1018() {
               'empty_zero' => 0,
               'hide_alter_empty' => 1,
               'include_exclude' => 'exclude',
-              'selected_actions' =>
-              array (
+              'selected_actions' => array (
               ),
             ),
-            'title' =>
-            array (
+            'title' => array (
               'id' => 'title',
               'table' => 'node',
               'field' => 'title',
@@ -1380,8 +1361,7 @@ function node_update_1018() {
               'empty_zero' => 0,
               'link_to_node' => 1,
             ),
-            'type' =>
-            array (
+            'type' => array (
               'id' => 'type',
               'table' => 'node',
               'field' => 'type',
@@ -1405,8 +1385,7 @@ function node_update_1018() {
               'link_to_node' => 0,
               'machine_name' => 0,
             ),
-            'name' =>
-            array (
+            'name' => array (
               'id' => 'name',
               'table' => 'users',
               'field' => 'name',
@@ -1432,8 +1411,7 @@ function node_update_1018() {
               'anonymous_text' => '',
               'format_username' => 1,
             ),
-            'status' =>
-            array (
+            'status' => array (
               'id' => 'status',
               'table' => 'node',
               'field' => 'status',
@@ -1442,8 +1420,7 @@ function node_update_1018() {
               'ui_name' => '',
               'label' => 'Status',
               'exclude' => 0,
-              'alter' =>
-              array (
+              'alter' => array (
                 'alter_text' => 1,
                 'text' => 'Published',
                 'make_link' => 0,
@@ -1484,12 +1461,11 @@ function node_update_1018() {
               'empty_zero' => 1,
               'hide_alter_empty' => 1,
               'type' => 'boolean',
-              'type_custom_true' => 'Published',
+              'type_custom_TRUE' => 'Published',
               'type_custom_false' => '[scheduled]',
               'not' => 0,
             ),
-            'scheduled' =>
-            array (
+            'scheduled' => array (
               'id' => 'scheduled',
               'table' => 'node',
               'field' => 'scheduled',
@@ -1498,8 +1474,7 @@ function node_update_1018() {
               'ui_name' => '',
               'label' => 'Scheduled',
               'exclude' => 0,
-              'alter' =>
-              array (
+              'alter' => array (
                 'alter_text' => 0,
                 'text' => '',
                 'make_link' => 0,
@@ -1543,8 +1518,7 @@ function node_update_1018() {
               'custom_date_format' => '',
               'timezone' => '',
             ),
-            'changed' =>
-            array (
+            'changed' => array (
               'id' => 'changed',
               'table' => 'node',
               'field' => 'changed',
@@ -1569,8 +1543,7 @@ function node_update_1018() {
               'custom_date_format' => '',
               'timezone' => '',
             ),
-            'edit_node' =>
-            array (
+            'edit_node' => array (
               'id' => 'edit_node',
               'table' => 'views_entity_node',
               'field' => 'edit_node',
@@ -1593,8 +1566,7 @@ function node_update_1018() {
               'hide_alter_empty' => 1,
               'text' => '',
             ),
-            'delete_node' =>
-            array (
+            'delete_node' => array (
               'id' => 'delete_node',
               'table' => 'views_entity_node',
               'field' => 'delete_node',
@@ -1617,8 +1589,7 @@ function node_update_1018() {
               'hide_alter_empty' => 1,
               'text' => '',
             ),
-            'dropbutton' =>
-            array (
+            'dropbutton' => array (
               'id' => 'dropbutton',
               'table' => 'views',
               'field' => 'dropbutton',
@@ -1639,18 +1610,15 @@ function node_update_1018() {
               'hide_empty' => 0,
               'empty_zero' => 0,
               'hide_alter_empty' => 1,
-              'fields' =>
-              array (
+              'fields' => array (
                 'edit_node' => 'edit_node',
                 'delete_node' => 'delete_node',
               ),
               'destination' => 1,
             ),
           ),
-          'filters' =>
-          array (
-            'status' =>
-            array (
+          'filters' => array (
+            'status' => array (
               'id' => 'status',
               'table' => 'node',
               'field' => 'status',
@@ -1661,8 +1629,7 @@ function node_update_1018() {
               'value' => 'All',
               'group' => 1,
               'exposed' => TRUE,
-              'expose' =>
-              array (
+              'expose' => array (
                 'operator_id' => '',
                 'label' => 'Published',
                 'description' => '',
@@ -1672,8 +1639,7 @@ function node_update_1018() {
                 'required' => 0,
                 'remember' => 0,
                 'multiple' => FALSE,
-                'remember_roles' =>
-                array (
+                'remember_roles' => array (
                   'anonymous' => 0,
                   'authenticated' => 0,
                   'administrator' => 0,
@@ -1681,8 +1647,7 @@ function node_update_1018() {
               ),
               'is_grouped' => FALSE,
             ),
-            'type' =>
-            array (
+            'type' => array (
               'id' => 'type',
               'table' => 'node',
               'field' => 'type',
@@ -1690,13 +1655,11 @@ function node_update_1018() {
               'group_type' => 'group',
               'ui_name' => '',
               'operator' => 'in',
-              'value' =>
-              array (
+              'value' => array (
               ),
               'group' => '1',
               'exposed' => TRUE,
-              'expose' =>
-              array (
+              'expose' => array (
                 'operator_id' => 'type_op',
                 'label' => 'Type',
                 'description' => '',
@@ -1706,8 +1669,7 @@ function node_update_1018() {
                 'required' => 0,
                 'remember' => 0,
                 'multiple' => 0,
-                'remember_roles' =>
-                array (
+                'remember_roles' => array (
                   'anonymous' => 0,
                   'authenticated' => 0,
                   'administrator' => 0,
@@ -1716,8 +1678,7 @@ function node_update_1018() {
               ),
               'is_grouped' => FALSE,
             ),
-            'title' =>
-            array (
+            'title' => array (
               'id' => 'title',
               'table' => 'node',
               'field' => 'title',
@@ -1728,8 +1689,7 @@ function node_update_1018() {
               'value' => '',
               'group' => '1',
               'exposed' => TRUE,
-              'expose' =>
-              array (
+              'expose' => array (
                 'operator_id' => 'title_op',
                 'label' => 'Title contains',
                 'description' => '',
@@ -1739,8 +1699,7 @@ function node_update_1018() {
                 'required' => 0,
                 'remember' => 0,
                 'multiple' => FALSE,
-                'remember_roles' =>
-                array (
+                'remember_roles' => array (
                   'anonymous' => 0,
                   'authenticated' => 0,
                   'administrator' => 0,
@@ -1748,8 +1707,7 @@ function node_update_1018() {
               ),
               'is_grouped' => FALSE,
             ),
-            'status_extra' =>
-            array (
+            'status_extra' => array (
               'id' => 'status_extra',
               'table' => 'node',
               'field' => 'status_extra',
@@ -1763,10 +1721,8 @@ function node_update_1018() {
               'is_grouped' => FALSE,
             ),
           ),
-          'sorts' =>
-          array (
-            'changed' =>
-            array (
+          'sorts' => array (
+            'changed' => array (
               'id' => 'changed',
               'table' => 'node',
               'field' => 'changed',
@@ -1774,10 +1730,8 @@ function node_update_1018() {
             ),
           ),
           'title' => 'Content',
-          'relationships' =>
-          array (
-            'uid' =>
-            array (
+          'relationships' => array (
+            'uid' => array (
               'id' => 'uid',
               'table' => 'node',
               'field' => 'uid',
@@ -1789,10 +1743,8 @@ function node_update_1018() {
             ),
           ),
           'css_class' => 'node-admin-content',
-          'empty' =>
-          array (
-            'area_text_custom' =>
-            array (
+          'empty' => array (
+            'area_text_custom' => array (
               'id' => 'area_text_custom',
               'table' => 'views',
               'field' => 'area_text_custom',
@@ -1805,10 +1757,8 @@ function node_update_1018() {
               'tokenize' => 0,
             ),
           ),
-          'style_options' =>
-          array (
-            'grouping' =>
-            array (
+          'style_options' => array (
+            'grouping' => array (
             ),
             'row_class' => '',
             'default_row_class' => 1,
@@ -1817,8 +1767,7 @@ function node_update_1018() {
             'sticky' => 0,
             'caption' => '',
             'summary' => '',
-            'columns' =>
-            array (
+            'columns' => array (
               'scheduled_1' => 'scheduled_1',
               'bulk_form' => 'bulk_form',
               'title' => 'title',
@@ -1831,84 +1780,72 @@ function node_update_1018() {
               'delete_node' => 'delete_node',
               'dropbutton' => 'dropbutton',
             ),
-            'info' =>
-            array (
-              'scheduled_1' =>
-              array (
+            'info' => array (
+              'scheduled_1' => array (
                 'sortable' => 0,
                 'default_sort_order' => 'asc',
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'bulk_form' =>
-              array (
+              'bulk_form' => array (
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'title' =>
-              array (
+              'title' => array (
                 'sortable' => 1,
                 'default_sort_order' => 'asc',
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'type' =>
-              array (
+              'type' => array (
                 'sortable' => 1,
                 'default_sort_order' => 'asc',
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'name' =>
-              array (
+              'name' => array (
                 'sortable' => 1,
                 'default_sort_order' => 'asc',
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'status' =>
-              array (
+              'status' => array (
                 'sortable' => 1,
                 'default_sort_order' => 'asc',
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'scheduled' =>
-              array (
+              'scheduled' => array (
                 'sortable' => 1,
                 'default_sort_order' => 'asc',
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 1,
               ),
-              'changed' =>
-              array (
+              'changed' => array (
                 'sortable' => 1,
                 'default_sort_order' => 'desc',
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'edit_node' =>
-              array (
+              'edit_node' => array (
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'delete_node' =>
-              array (
+              'delete_node' => array (
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'dropbutton' =>
-              array (
+              'dropbutton' => array (
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
@@ -1919,22 +1856,17 @@ function node_update_1018() {
           ),
         ),
       ),
-      'page' =>
-      array (
+      'page' => array (
         'display_title' => 'Page',
         'display_plugin' => 'page',
-        'display_options' =>
-        array (
-          'query' =>
-          array (
+        'display_options' => array (
+          'query' => array (
             'type' => 'views_query',
-            'options' =>
-            array (
+            'options' => array (
             ),
           ),
           'path' => 'admin/content/node',
-          'menu' =>
-          array (
+          'menu' => array (
             'type' => 'default tab',
             'title' => 'Manage content',
             'description' => '',
@@ -1943,8 +1875,7 @@ function node_update_1018() {
             'context' => 0,
             'context_only_inline' => 0,
           ),
-          'tab_options' =>
-          array (
+          'tab_options' => array (
             'type' => 'normal',
             'title' => 'Content',
             'description' => 'Find and manage content.',
@@ -2122,48 +2053,36 @@ function node_update_1023() {
     'base_table' => 'node',
     'human_name' => 'Recent content',
     'core' => '1.0',
-    'display' => 
-    array (
-      'default' => 
-      array (
+    'display' => array (
+      'default' => array (
         'display_title' => 'Default',
         'display_plugin' => 'default',
-        'display_options' => 
-        array (
-          'query' => 
-          array (
+        'display_options' => array (
+          'query' => array (
             'type' => 'views_query',
-            'options' => 
-            array (
+            'options' => array (
             ),
           ),
-          'access' => 
-          array (
+          'access' => array (
             'type' => 'perm',
           ),
-          'cache' => 
-          array (
+          'cache' => array (
             'type' => 'none',
           ),
-          'exposed_form' => 
-          array (
+          'exposed_form' => array (
             'type' => 'basic',
           ),
-          'pager' => 
-          array (
+          'pager' => array (
             'type' => 'some',
-            'options' => 
-            array (
+            'options' => array (
               'items_per_page' => '10',
               'offset' => '0',
             ),
           ),
           'style_plugin' => 'table',
           'row_plugin' => 'fields',
-          'fields' => 
-          array (
-            'timestamp' => 
-            array (
+          'fields' => array (
+            'timestamp' => array (
               'id' => 'timestamp',
               'table' => 'history',
               'field' => 'timestamp',
@@ -2172,8 +2091,7 @@ function node_update_1023() {
               'ui_name' => '',
               'label' => '',
               'exclude' => 1,
-              'alter' => 
-              array (
+              'alter' => array (
                 'alter_text' => 0,
                 'text' => '',
                 'make_link' => 0,
@@ -2205,7 +2123,7 @@ function node_update_1023() {
               'element_class' => '',
               'element_label_type' => '',
               'element_label_class' => '',
-              'element_label_colon' => false,
+              'element_label_colon' => FALSE,
               'element_wrapper_type' => '',
               'element_wrapper_class' => '',
               'element_default_classes' => 1,
@@ -2216,8 +2134,7 @@ function node_update_1023() {
               'link_to_node' => 0,
               'comments' => 0,
             ),
-            'path' => 
-            array (
+            'path' => array (
               'id' => 'path',
               'table' => 'node',
               'field' => 'path',
@@ -2226,8 +2143,7 @@ function node_update_1023() {
               'ui_name' => '',
               'label' => '',
               'exclude' => 1,
-              'alter' => 
-              array (
+              'alter' => array (
                 'alter_text' => 0,
                 'text' => '',
                 'make_link' => 0,
@@ -2259,7 +2175,7 @@ function node_update_1023() {
               'element_class' => '',
               'element_label_type' => '',
               'element_label_class' => '',
-              'element_label_colon' => false,
+              'element_label_colon' => FALSE,
               'element_wrapper_type' => '',
               'element_wrapper_class' => '',
               'element_default_classes' => 1,
@@ -2269,8 +2185,7 @@ function node_update_1023() {
               'hide_alter_empty' => 1,
               'absolute' => 0,
             ),
-            'title' => 
-            array (
+            'title' => array (
               'id' => 'title',
               'table' => 'node',
               'field' => 'title',
@@ -2279,8 +2194,7 @@ function node_update_1023() {
               'ui_name' => '',
               'label' => '',
               'exclude' => 0,
-              'alter' => 
-              array (
+              'alter' => array (
                 'alter_text' => 1,
                 'text' => '<div class="node-title"><a href="[path]">[title]</a> [timestamp]</div>',
                 'make_link' => 0,
@@ -2312,7 +2226,7 @@ function node_update_1023() {
               'element_class' => 'title-author',
               'element_label_type' => '',
               'element_label_class' => '',
-              'element_label_colon' => false,
+              'element_label_colon' => FALSE,
               'element_wrapper_type' => '',
               'element_wrapper_class' => '',
               'element_default_classes' => 1,
@@ -2322,8 +2236,7 @@ function node_update_1023() {
               'hide_alter_empty' => 1,
               'link_to_node' => 0,
             ),
-            'created' => 
-            array (
+            'created' => array (
               'id' => 'created',
               'table' => 'node',
               'field' => 'created',
@@ -2332,8 +2245,7 @@ function node_update_1023() {
               'ui_name' => '',
               'label' => '',
               'exclude' => 1,
-              'alter' => 
-              array (
+              'alter' => array (
                 'alter_text' => 0,
                 'text' => '',
                 'make_link' => 0,
@@ -2365,7 +2277,7 @@ function node_update_1023() {
               'element_class' => 'node-author',
               'element_label_type' => '',
               'element_label_class' => '',
-              'element_label_colon' => false,
+              'element_label_colon' => FALSE,
               'element_wrapper_type' => '',
               'element_wrapper_class' => '',
               'element_default_classes' => 1,
@@ -2377,8 +2289,7 @@ function node_update_1023() {
               'custom_date_format' => '',
               'timezone' => '',
             ),
-            'name' => 
-            array (
+            'name' => array (
               'id' => 'name',
               'table' => 'users',
               'field' => 'name',
@@ -2387,8 +2298,7 @@ function node_update_1023() {
               'ui_name' => '',
               'label' => '',
               'exclude' => 0,
-              'alter' => 
-              array (
+              'alter' => array (
                 'alter_text' => 1,
                 'text' => '<div class="node-author">[created] by [name]</div>',
                 'make_link' => 0,
@@ -2420,7 +2330,7 @@ function node_update_1023() {
               'element_class' => '',
               'element_label_type' => '',
               'element_label_class' => '',
-              'element_label_colon' => false,
+              'element_label_colon' => FALSE,
               'element_wrapper_type' => '',
               'element_wrapper_class' => '',
               'element_default_classes' => 1,
@@ -2433,8 +2343,7 @@ function node_update_1023() {
               'anonymous_text' => '',
               'format_username' => 1,
             ),
-            'edit_node' => 
-            array (
+            'edit_node' => array (
               'id' => 'edit_node',
               'table' => 'views_entity_node',
               'field' => 'edit_node',
@@ -2443,14 +2352,13 @@ function node_update_1023() {
               'ui_name' => '',
               'label' => '',
               'exclude' => 1,
-              'alter' => 
-              array (
+              'alter' => array (
                 'alter_text' => 0,
                 'text' => '',
                 'make_link' => 0,
                 'path' => '',
                 'absolute' => 0,
-                'external' => false,
+                'external' => FALSE,
                 'replace_spaces' => 0,
                 'path_case' => 'none',
                 'trim_whitespace' => 0,
@@ -2476,7 +2384,7 @@ function node_update_1023() {
               'element_class' => '',
               'element_label_type' => '',
               'element_label_class' => '',
-              'element_label_colon' => false,
+              'element_label_colon' => FALSE,
               'element_wrapper_type' => '',
               'element_wrapper_class' => '',
               'element_default_classes' => 1,
@@ -2486,8 +2394,7 @@ function node_update_1023() {
               'hide_alter_empty' => 1,
               'text' => '',
             ),
-            'delete_node' => 
-            array (
+            'delete_node' => array (
               'id' => 'delete_node',
               'table' => 'views_entity_node',
               'field' => 'delete_node',
@@ -2496,14 +2403,13 @@ function node_update_1023() {
               'ui_name' => '',
               'label' => '',
               'exclude' => 1,
-              'alter' => 
-              array (
+              'alter' => array (
                 'alter_text' => 0,
                 'text' => '',
                 'make_link' => 0,
                 'path' => '',
                 'absolute' => 0,
-                'external' => false,
+                'external' => FALSE,
                 'replace_spaces' => 0,
                 'path_case' => 'none',
                 'trim_whitespace' => 0,
@@ -2529,7 +2435,7 @@ function node_update_1023() {
               'element_class' => '',
               'element_label_type' => '',
               'element_label_class' => '',
-              'element_label_colon' => false,
+              'element_label_colon' => FALSE,
               'element_wrapper_type' => '',
               'element_wrapper_class' => '',
               'element_default_classes' => 1,
@@ -2539,8 +2445,7 @@ function node_update_1023() {
               'hide_alter_empty' => 1,
               'text' => '',
             ),
-            'dropbutton' => 
-            array (
+            'dropbutton' => array (
               'id' => 'dropbutton',
               'table' => 'views',
               'field' => 'dropbutton',
@@ -2549,40 +2454,39 @@ function node_update_1023() {
               'ui_name' => '',
               'label' => '',
               'exclude' => 0,
-              'alter' => 
-              array (
-                'alter_text' => false,
+              'alter' => array (
+                'alter_text' => FALSE,
                 'text' => '',
-                'make_link' => false,
+                'make_link' => FALSE,
                 'path' => '',
-                'absolute' => false,
-                'external' => false,
-                'replace_spaces' => false,
+                'absolute' => FALSE,
+                'external' => FALSE,
+                'replace_spaces' => FALSE,
                 'path_case' => 'none',
-                'trim_whitespace' => false,
+                'trim_whitespace' => FALSE,
                 'alt' => '',
                 'rel' => '',
                 'link_class' => '',
                 'prefix' => '',
                 'suffix' => '',
                 'target' => '',
-                'nl2br' => false,
+                'nl2br' => FALSE,
                 'max_length' => '',
-                'word_boundary' => true,
-                'ellipsis' => true,
-                'more_link' => false,
+                'word_boundary' => TRUE,
+                'ellipsis' => TRUE,
+                'more_link' => FALSE,
                 'more_link_text' => '',
                 'more_link_path' => '',
-                'strip_tags' => false,
-                'trim' => false,
+                'strip_tags' => FALSE,
+                'trim' => FALSE,
                 'preserve_tags' => '',
-                'html' => false,
+                'html' => FALSE,
               ),
               'element_type' => '',
               'element_class' => '',
               'element_label_type' => '',
               'element_label_class' => '',
-              'element_label_colon' => false,
+              'element_label_colon' => FALSE,
               'element_wrapper_type' => '',
               'element_wrapper_class' => '',
               'element_default_classes' => 0,
@@ -2590,8 +2494,7 @@ function node_update_1023() {
               'hide_empty' => 0,
               'empty_zero' => 0,
               'hide_alter_empty' => 1,
-              'fields' => 
-              array (
+              'fields' => array (
                 'edit_node' => 'edit_node',
                 'delete_node' => 'delete_node',
                 'title' => 0,
@@ -2601,10 +2504,8 @@ function node_update_1023() {
               'destination' => 1,
             ),
           ),
-          'filters' => 
-          array (
-            'status_extra' => 
-            array (
+          'filters' => array (
+            'status_extra' => array (
               'id' => 'status_extra',
               'table' => 'node',
               'field' => 'status_extra',
@@ -2614,44 +2515,38 @@ function node_update_1023() {
               'operator' => '=',
               'value' => '',
               'group' => '1',
-              'exposed' => false,
-              'expose' => 
-              array (
-                'operator_id' => false,
+              'exposed' => FALSE,
+              'expose' => array (
+                'operator_id' => FALSE,
                 'label' => '',
                 'description' => '',
-                'use_operator' => false,
+                'use_operator' => FALSE,
                 'operator' => '',
                 'identifier' => '',
-                'required' => false,
-                'remember' => false,
-                'multiple' => false,
-                'remember_roles' => 
-                array (
+                'required' => FALSE,
+                'remember' => FALSE,
+                'multiple' => FALSE,
+                'remember_roles' => array (
                   2 => 2,
                 ),
               ),
-              'is_grouped' => false,
-              'group_info' => 
-              array (
+              'is_grouped' => FALSE,
+              'group_info' => array (
                 'label' => '',
                 'description' => '',
                 'identifier' => '',
-                'optional' => true,
+                'optional' => TRUE,
                 'widget' => 'select',
-                'multiple' => false,
+                'multiple' => FALSE,
                 'remember' => 0,
                 'default_group' => 'All',
-                'default_group_multiple' => 
-                array (
+                'default_group_multiple' => array (
                 ),
-                'group_items' => 
-                array (
+                'group_items' => array (
                 ),
               ),
             ),
-            'type' => 
-            array (
+            'type' => array (
               'id' => 'type',
               'table' => 'node',
               'field' => 'type',
@@ -2659,13 +2554,11 @@ function node_update_1023() {
               'group_type' => 'group',
               'ui_name' => '',
               'operator' => 'in',
-              'value' => 
-              array (
+              'value' => array (
               ),
               'group' => '1',
-              'exposed' => true,
-              'expose' => 
-              array (
+              'exposed' => TRUE,
+              'expose' => array (
                 'operator_id' => 'type_op',
                 'label' => 'Content types',
                 'description' => '',
@@ -2675,8 +2568,7 @@ function node_update_1023() {
                 'required' => 0,
                 'remember' => 0,
                 'multiple' => 1,
-                'remember_roles' => 
-                array (
+                'remember_roles' => array (
                   'authenticated' => 'authenticated',
                   'anonymous' => 0,
                   'editor' => 0,
@@ -2684,30 +2576,25 @@ function node_update_1023() {
                 ),
                 'reduce' => 0,
               ),
-              'is_grouped' => false,
-              'group_info' => 
-              array (
+              'is_grouped' => FALSE,
+              'group_info' => array (
                 'label' => '',
                 'description' => '',
                 'identifier' => '',
-                'optional' => true,
+                'optional' => TRUE,
                 'widget' => 'select',
-                'multiple' => false,
+                'multiple' => FALSE,
                 'remember' => 0,
                 'default_group' => 'All',
-                'default_group_multiple' => 
-                array (
+                'default_group_multiple' => array (
                 ),
-                'group_items' => 
-                array (
+                'group_items' => array (
                 ),
               ),
             ),
           ),
-          'sorts' => 
-          array (
-            'changed' => 
-            array (
+          'sorts' => array (
+            'changed' => array (
               'id' => 'changed',
               'table' => 'node',
               'field' => 'changed',
@@ -2715,19 +2602,16 @@ function node_update_1023() {
               'group_type' => 'group',
               'ui_name' => '',
               'order' => 'DESC',
-              'exposed' => false,
-              'expose' => 
-              array (
+              'exposed' => FALSE,
+              'expose' => array (
                 'label' => '',
               ),
               'granularity' => 'minute',
             ),
           ),
           'title' => 'Recent content',
-          'relationships' => 
-          array (
-            'uid' => 
-            array (
+          'relationships' => array (
+            'uid' => array (
               'id' => 'uid',
               'table' => 'node',
               'field' => 'uid',
@@ -2738,10 +2622,8 @@ function node_update_1023() {
               'required' => 0,
             ),
           ),
-          'empty' => 
-          array (
-            'area_text_custom' => 
-            array (
+          'empty' => array (
+            'area_text_custom' => array (
               'id' => 'area_text_custom',
               'table' => 'views',
               'field' => 'area_text_custom',
@@ -2749,18 +2631,17 @@ function node_update_1023() {
               'group_type' => 'group',
               'ui_name' => '',
               'label' => '',
-              'empty' => true,
+              'empty' => TRUE,
               'content' => 'No content available.',
               'tokenize' => 0,
             ),
           ),
           'use_more' => 1,
-          'use_more_always' => false,
+          'use_more_always' => FALSE,
           'use_more_text' => 'more',
           'style_options' => 
           array (
-            'grouping' => 
-            array (
+            'grouping' => array (
             ),
             'row_class' => '',
             'default_row_class' => 1,
@@ -2769,46 +2650,39 @@ function node_update_1023() {
             'sticky' => 0,
             'caption' => '',
             'summary' => '',
-            'columns' => 
-            array (
+            'columns' => array (
               'title' => 'title',
               'timestamp' => 'title',
               'name' => 'title',
               'edit_node' => 'edit_node',
               'delete_node' => 'delete_node',
             ),
-            'info' => 
-            array (
-              'title' => 
-              array (
+            'info' => array (
+              'title' => array (
                 'sortable' => 0,
                 'default_sort_order' => 'asc',
                 'align' => 'views-align-left',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'timestamp' => 
-              array (
+              'timestamp' => array (
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'name' => 
-              array (
+              'name' => array (
                 'sortable' => 0,
                 'default_sort_order' => 'asc',
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'edit_node' => 
-              array (
+              'edit_node' => array (
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 1,
               ),
-              'delete_node' => 
-              array (
+              'delete_node' => array (
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 1,
@@ -2819,21 +2693,16 @@ function node_update_1023() {
           ),
         ),
       ),
-      'block' => 
-      array (
+      'block' => array (
         'display_title' => 'Block',
         'display_plugin' => 'block',
-        'display_options' => 
-        array (
-          'query' => 
-          array (
+        'display_options' => array (
+          'query' => array (
             'type' => 'views_query',
-            'options' => 
-            array (
+            'options' => array (
             ),
           ),
-          'allow' => 
-          array (
+          'allow' => array (
             'items_per_page' => 'items_per_page',
             'exposed_form' => 'exposed_form',
             'use_pager' => 0,
