@@ -197,8 +197,8 @@ Backdrop.adminBar.behaviors.resizeCollapse = function (context, settings, $admin
 
     $adminBar.trigger('beforeResize');
 
-    menuWidth = $menu.width();
-    extraWidth = $extra.width();
+    menuWidth = $menu.width() || 0;
+    extraWidth = $extra.width() || 0;
 
     // Available width is anything except the menus that may be collapsed.
     availableWidth = $adminBar.width();
@@ -209,7 +209,7 @@ Backdrop.adminBar.behaviors.resizeCollapse = function (context, settings, $admin
     // Collapse the extra items first if needed.
     if (availableWidth - menuWidth - extraWidth < 20) {
       $extra.addClass('dropdown').removeClass('top-level');
-      extraWidth = $extra.width();
+      extraWidth = $extra.width() || 0;
     }
     // See if the menu also needs to be collapsed.
     if (availableWidth - menuWidth - extraWidth < 20) {

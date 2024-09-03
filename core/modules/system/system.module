@@ -1507,17 +1507,17 @@ function system_library_info() {
   $libraries['ui'] = array(
     'title' => 'jQuery UI: Core',
     'website' => 'http://jqueryui.com',
-    'version' => '1.13.2',
+    'version' => '1.14.0',
     'js' => array(
+      'core/misc/jquery-ui-compat.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
       'core/misc/ui/jquery.ui.data.min.js' => array(
         'group' => JS_LIBRARY,
         'weight' => -11,
       ),
       'core/misc/ui/jquery.ui.disable-selection.min.js' => array(
-        'group' => JS_LIBRARY,
-        'weight' => -11,
-      ),
-      'core/misc/ui/jquery.ui.form.min.js' => array(
         'group' => JS_LIBRARY,
         'weight' => -11,
       ),
@@ -1553,23 +1553,11 @@ function system_library_info() {
         'group' => JS_LIBRARY,
         'weight' => -11,
       ),
-      'core/misc/ui/jquery.ui.ie.min.js' => array(
-        'group' => JS_LIBRARY,
-        'weight' => -11,
-      ),
       'core/misc/ui/jquery.ui.keycode.min.js' => array(
         'group' => JS_LIBRARY,
         'weight' => -11,
       ),
       'core/misc/ui/jquery.ui.plugin.min.js' => array(
-        'group' => JS_LIBRARY,
-        'weight' => -11,
-      ),
-      'core/misc/ui/jquery.ui.safe-active-element.min.js' => array(
-        'group' => JS_LIBRARY,
-        'weight' => -11,
-      ),
-      'core/misc/ui/jquery.ui.safe-blur.min.js' => array(
         'group' => JS_LIBRARY,
         'weight' => -11,
       ),
@@ -2096,7 +2084,7 @@ function system_library_info() {
   $libraries['ui.touch-punch'] = array(
     'title' => 'jQuery UI Touch Punch',
     'website' => 'https://github.com/RWAP/jquery-ui-touch-punch/',
-    'version' => '1.0.9',
+    'version' => '1.1.5',
     'js' => array(
       'core/misc/jquery.ui.touch-punch.js' => array(),
     ),
