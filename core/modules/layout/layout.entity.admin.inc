@@ -238,6 +238,7 @@ function layout_entity_admin_add_form(array $form, array &$form_state, $entity_t
     ),
     '#required' => TRUE,
   );
+
   $fields = field_info_instances($entity_type, $form_state['bundle_type']);
   $field_blocks = array();
   foreach ($fields as $key => $field) {
@@ -268,6 +269,21 @@ function layout_entity_admin_add_form(array $form, array &$form_state, $entity_t
       ),
     ),
     '#indentation' => 1,
+  );
+
+  // Set the new layout weight to be one less than the lowest weight for this
+  // path. This ensures that the new layout takes effect, regardless of other
+  // conditions that might be in place at the same path.
+  $lowest_weight = count($entity_layouts['all']);
+  foreach ($entity_layouts['all'] as $entity_layout) {
+    /* @var Layout $entity_layout */
+    if ($entity_layout->weight < $lowest_weight) {
+      $lowest_weight = $entity_layout->weight;
+    }
+  }
+  $form['weight'] = array(
+    '#type' => 'hidden',
+    '#value' => $lowest_weight - 1,
   );
 
   // Get the list of layout template options. The list needs to be rebuilt (see
@@ -332,6 +348,7 @@ function layout_entity_admin_add_form_submit($form, &$form_state) {
   $entity_path_type = $all_info[$entity_type]['menu paths'][0];
   $entity_path = preg_replace('/%[a-z0-9_]+/', '%', $entity_path_type);
   $layout->setPath($entity_path);
+  $layout->weight = $form_state['values']['weight'];
 
   // Set the bundle type visibility condition if the entity has bundles.
   $entity_info = entity_get_info($entity_type);
