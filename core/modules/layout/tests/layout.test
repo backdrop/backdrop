@@ -3750,29 +3750,35 @@ class LayoutEntityLayoutsTest extends BackdropWebTestCase {
     // This rebuild is needed to ensure taxonomy entity info is available.
     menu_rebuild();
 
+    // Check that no layouts listed for Pages.
     $this->backdropGet('admin/structure/types/manage/page/layouts');
     $this->assertText(t('No layout overrides have been created for Page types yet'));
+
     $this->clickLink(t('Add Page layout'));
     $this->assertTitle(t('Add Page layout | Backdrop CMS'));
     $this->assertFieldByName('title', 'Page layout');
+
+    // Test only two field blocks show on Pages.
     $checkboxes = $this->xpath('//*[contains(@class,:class)]//*[contains(@class,:checkbox_class)]', array(
       ':class' => 'form-item-field-blocks',
       ':checkbox_class' => 'form-type-checkbox',
     ));
     $this->assertEqual(count($checkboxes), 2, 'Two options are found in the field block list.');
 
-
+    // Now check Posts.
     $this->backdropGet('admin/structure/types/manage/post/layouts');
     $this->assertText(t('No layout overrides have been created for Post types yet'));
     $this->clickLink(t('Add Post layout'));
     $this->assertTitle(t('Add Post layout | Backdrop CMS'));
     $this->assertFieldByName('title', 'Post layout');
+    // Three field blocks because we added one on setup.
     $checkboxes = $this->xpath('//*[contains(@class,:class)]//*[contains(@class,:checkbox_class)]', array(
       ':class' => 'form-item-field-blocks',
       ':checkbox_class' => 'form-type-checkbox',
     ));
     $this->assertEqual(count($checkboxes), 3, 'Three options are found in the field block list.');
 
+    // Submit and test that expected blocks show up in the layout.
     $edit = array(
       'name' => 'post_layout',
       'content_area' => 'field_blocks',
@@ -3785,6 +3791,7 @@ class LayoutEntityLayoutsTest extends BackdropWebTestCase {
     $this->assertText('Displays values of the ' . $this->field_email_name . ' field');
     $this->assertNoText('This block may be required for this page to work properly');
     $this->backdropPost(NULL, array(), t('Save layout'));
+
     $this->backdropGet('admin/structure/types/manage/post/layouts');
     $this->assertNoText(t('No layout overrides have been created for Post types yet'));
     $post_layouts = $this->xpath('//tr[contains(@class,:class)]', array(
@@ -3793,6 +3800,7 @@ class LayoutEntityLayoutsTest extends BackdropWebTestCase {
     $this->assertEqual(count($post_layouts), 1, 'One layout found in table.');
     $this->assertText('(Machine name: post_layout)');
 
+    // Check that we still don't have a layout for Pages, then add one.
     $this->backdropGet('admin/structure/types/manage/page/layouts');
     $this->assertText(t('No layout overrides have been created for Page types yet'));
     $this->clickLink(t('Add Page layout'));
@@ -3805,9 +3813,11 @@ class LayoutEntityLayoutsTest extends BackdropWebTestCase {
     $this->assertNoText('Displays values of the body field');
     $this->assertText('This block may be required for this page to work properly');
 
+    // Test Taxonomy vocabulary types.
     $this->backdropGet('admin/structure/taxonomy/tags/layouts');
     $this->assertText(t('No layout overrides have been created for Tags types yet'));
     $this->clickLink(t('Add Tags layout'));
+    // The field blocks UI is disabled because taxonomy has no fields.
     $this->assertFieldByXPath("//*[@name='content_area' and @disabled='disabled']");
     $this->assertText(t('There are no fields attached to this entity'));
     $edit = array(
@@ -3818,6 +3828,7 @@ class LayoutEntityLayoutsTest extends BackdropWebTestCase {
     $this->backdropGet('admin/structure/taxonomy/tags/layouts');
     $this->assertNoText(t('No layout overrides have been created for Tags types yet'));
 
+    // Check User types.
     $this->backdropGet('admin/config/people/manage/layouts');
     $this->assertText(t('No layout overrides have been created for User account types yet'));
     $this->clickLink(t('Add User account layout'));
