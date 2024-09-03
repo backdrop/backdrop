@@ -2112,7 +2112,7 @@ function node_update_1022() {
  * Create the view replacement for recent content block.
  */
 function node_update_1023() {
-  $data = array(
+  $data = array (
     'name' => 'recent_content',
     'description' => 'A list of recently published content.',
     'module' => 'node',
@@ -2151,31 +2151,11 @@ function node_update_1023() {
           ),
           'pager' => 
           array (
-            'type' => 'full',
+            'type' => 'some',
             'options' => 
             array (
               'items_per_page' => '10',
               'offset' => '0',
-              'id' => '0',
-              'total_pages' => '',
-              'quantity' => '9',
-              'tags' => 
-              array (
-                'first' => '« first',
-                'previous' => '‹ previous',
-                'next' => 'next ›',
-                'last' => 'last »',
-              ),
-              'expose' => 
-              array (
-                'items_per_page' => 0,
-                'items_per_page_label' => 'Items per page',
-                'items_per_page_options' => '5, 10, 20, 40, 60',
-                'items_per_page_options_all' => 0,
-                'items_per_page_options_all_label' => '- All -',
-                'offset' => 0,
-                'offset_label' => 'Offset',
-              ),
             ),
           ),
           'style_plugin' => 'table',
@@ -2302,7 +2282,9 @@ function node_update_1023() {
               'alter' => 
               array (
                 'alter_text' => 1,
-                'text' => '<a href="[path]">[title]</a> [timestamp]',
+                'text' => '<div class="node-title">
+    <a href="[path]">[title]</a> [timestamp]
+  </div>',
                 'make_link' => 0,
                 'path' => '',
                 'absolute' => 0,
@@ -2328,8 +2310,8 @@ function node_update_1023() {
                 'preserve_tags' => '',
                 'html' => 0,
               ),
-              'element_type' => 'div',
-              'element_class' => '',
+              'element_type' => '',
+              'element_class' => 'title-author',
               'element_label_type' => '',
               'element_label_class' => '',
               'element_label_colon' => false,
@@ -2381,8 +2363,8 @@ function node_update_1023() {
                 'preserve_tags' => '',
                 'html' => 0,
               ),
-              'element_type' => '',
-              'element_class' => '',
+              'element_type' => 'div',
+              'element_class' => 'node-author',
               'element_label_type' => '',
               'element_label_class' => '',
               'element_label_colon' => false,
@@ -2393,7 +2375,7 @@ function node_update_1023() {
               'hide_empty' => 0,
               'empty_zero' => 0,
               'hide_alter_empty' => 1,
-              'date_format' => 'date_only',
+              'date_format' => 'medium',
               'custom_date_format' => '',
               'timezone' => '',
             ),
@@ -2410,7 +2392,9 @@ function node_update_1023() {
               'alter' => 
               array (
                 'alter_text' => 1,
-                'text' => 'By [name], on [created]',
+                'text' => '<div class="node-author">
+    [created] by [name]
+  </div>',
                 'make_link' => 0,
                 'path' => '',
                 'absolute' => 0,
@@ -2436,7 +2420,7 @@ function node_update_1023() {
                 'preserve_tags' => '',
                 'html' => 0,
               ),
-              'element_type' => 'div',
+              'element_type' => '',
               'element_class' => '',
               'element_label_type' => '',
               'element_label_class' => '',
