@@ -2122,37 +2122,37 @@ function node_update_1023() {
     'base_table' => 'node',
     'human_name' => 'Recent content',
     'core' => '1.0',
-    'display' => 
+    'display' =>
     array (
-      'default' => 
+      'default' =>
       array (
         'display_title' => 'Default',
         'display_plugin' => 'default',
-        'display_options' => 
+        'display_options' =>
         array (
-          'query' => 
+          'query' =>
           array (
             'type' => 'views_query',
-            'options' => 
+            'options' =>
             array (
             ),
           ),
-          'access' => 
+          'access' =>
           array (
             'type' => 'perm',
           ),
-          'cache' => 
+          'cache' =>
           array (
             'type' => 'none',
           ),
-          'exposed_form' => 
+          'exposed_form' =>
           array (
             'type' => 'basic',
           ),
-          'pager' => 
+          'pager' =>
           array (
             'type' => 'some',
-            'options' => 
+            'options' =>
             array (
               'items_per_page' => '10',
               'offset' => '0',
@@ -2160,9 +2160,9 @@ function node_update_1023() {
           ),
           'style_plugin' => 'table',
           'row_plugin' => 'fields',
-          'fields' => 
+          'fields' =>
           array (
-            'timestamp' => 
+            'timestamp' =>
             array (
               'id' => 'timestamp',
               'table' => 'history',
@@ -2172,7 +2172,7 @@ function node_update_1023() {
               'ui_name' => '',
               'label' => '',
               'exclude' => 1,
-              'alter' => 
+              'alter' =>
               array (
                 'alter_text' => 0,
                 'text' => '',
@@ -2216,7 +2216,7 @@ function node_update_1023() {
               'link_to_node' => 0,
               'comments' => 0,
             ),
-            'path' => 
+            'path' =>
             array (
               'id' => 'path',
               'table' => 'node',
@@ -2226,7 +2226,7 @@ function node_update_1023() {
               'ui_name' => '',
               'label' => '',
               'exclude' => 1,
-              'alter' => 
+              'alter' =>
               array (
                 'alter_text' => 0,
                 'text' => '',
@@ -2269,7 +2269,7 @@ function node_update_1023() {
               'hide_alter_empty' => 1,
               'absolute' => 0,
             ),
-            'title' => 
+            'title' =>
             array (
               'id' => 'title',
               'table' => 'node',
@@ -2279,7 +2279,7 @@ function node_update_1023() {
               'ui_name' => '',
               'label' => '',
               'exclude' => 0,
-              'alter' => 
+              'alter' =>
               array (
                 'alter_text' => 1,
                 'text' => '<div class="node-title">
@@ -2324,7 +2324,7 @@ function node_update_1023() {
               'hide_alter_empty' => 1,
               'link_to_node' => 0,
             ),
-            'created' => 
+            'created' =>
             array (
               'id' => 'created',
               'table' => 'node',
@@ -2334,7 +2334,7 @@ function node_update_1023() {
               'ui_name' => '',
               'label' => '',
               'exclude' => 1,
-              'alter' => 
+              'alter' =>
               array (
                 'alter_text' => 0,
                 'text' => '',
@@ -2379,7 +2379,7 @@ function node_update_1023() {
               'custom_date_format' => '',
               'timezone' => '',
             ),
-            'name' => 
+            'name' =>
             array (
               'id' => 'name',
               'table' => 'users',
@@ -2389,7 +2389,7 @@ function node_update_1023() {
               'ui_name' => '',
               'label' => '',
               'exclude' => 0,
-              'alter' => 
+              'alter' =>
               array (
                 'alter_text' => 1,
                 'text' => '<div class="node-author">
@@ -2437,7 +2437,7 @@ function node_update_1023() {
               'anonymous_text' => '',
               'format_username' => 1,
             ),
-            'edit_node' => 
+            'edit_node' =>
             array (
               'id' => 'edit_node',
               'table' => 'views_entity_node',
@@ -2447,7 +2447,7 @@ function node_update_1023() {
               'ui_name' => '',
               'label' => '',
               'exclude' => 1,
-              'alter' => 
+              'alter' =>
               array (
                 'alter_text' => 0,
                 'text' => '',
@@ -2490,7 +2490,7 @@ function node_update_1023() {
               'hide_alter_empty' => 1,
               'text' => '',
             ),
-            'delete_node' => 
+            'delete_node' =>
             array (
               'id' => 'delete_node',
               'table' => 'views_entity_node',
@@ -2500,7 +2500,7 @@ function node_update_1023() {
               'ui_name' => '',
               'label' => '',
               'exclude' => 1,
-              'alter' => 
+              'alter' =>
               array (
                 'alter_text' => 0,
                 'text' => '',
@@ -2543,7 +2543,7 @@ function node_update_1023() {
               'hide_alter_empty' => 1,
               'text' => '',
             ),
-            'dropbutton' => 
+            'dropbutton' =>
             array (
               'id' => 'dropbutton',
               'table' => 'views',
@@ -2553,7 +2553,7 @@ function node_update_1023() {
               'ui_name' => '',
               'label' => '',
               'exclude' => 0,
-              'alter' => 
+              'alter' =>
               array (
                 'alter_text' => false,
                 'text' => '',
@@ -2594,7 +2594,7 @@ function node_update_1023() {
               'hide_empty' => 0,
               'empty_zero' => 0,
               'hide_alter_empty' => 1,
-              'fields' => 
+              'fields' =>
               array (
                 'edit_node' => 'edit_node',
                 'delete_node' => 'delete_node',
@@ -2605,9 +2605,9 @@ function node_update_1023() {
               'destination' => 1,
             ),
           ),
-          'filters' => 
+          'filters' =>
           array (
-            'status_extra' => 
+            'status_extra' =>
             array (
               'id' => 'status_extra',
               'table' => 'node',
@@ -2619,7 +2619,7 @@ function node_update_1023() {
               'value' => '',
               'group' => '1',
               'exposed' => false,
-              'expose' => 
+              'expose' =>
               array (
                 'operator_id' => false,
                 'label' => '',
@@ -2630,13 +2630,13 @@ function node_update_1023() {
                 'required' => false,
                 'remember' => false,
                 'multiple' => false,
-                'remember_roles' => 
+                'remember_roles' =>
                 array (
                   2 => 2,
                 ),
               ),
               'is_grouped' => false,
-              'group_info' => 
+              'group_info' =>
               array (
                 'label' => '',
                 'description' => '',
@@ -2646,15 +2646,15 @@ function node_update_1023() {
                 'multiple' => false,
                 'remember' => 0,
                 'default_group' => 'All',
-                'default_group_multiple' => 
+                'default_group_multiple' =>
                 array (
                 ),
-                'group_items' => 
+                'group_items' =>
                 array (
                 ),
               ),
             ),
-            'type' => 
+            'type' =>
             array (
               'id' => 'type',
               'table' => 'node',
@@ -2663,12 +2663,12 @@ function node_update_1023() {
               'group_type' => 'group',
               'ui_name' => '',
               'operator' => 'in',
-              'value' => 
+              'value' =>
               array (
               ),
               'group' => '1',
               'exposed' => true,
-              'expose' => 
+              'expose' =>
               array (
                 'operator_id' => 'type_op',
                 'label' => 'Content types',
@@ -2679,7 +2679,7 @@ function node_update_1023() {
                 'required' => 0,
                 'remember' => 0,
                 'multiple' => 1,
-                'remember_roles' => 
+                'remember_roles' =>
                 array (
                   'authenticated' => 'authenticated',
                   'anonymous' => 0,
@@ -2689,7 +2689,7 @@ function node_update_1023() {
                 'reduce' => 0,
               ),
               'is_grouped' => false,
-              'group_info' => 
+              'group_info' =>
               array (
                 'label' => '',
                 'description' => '',
@@ -2699,18 +2699,18 @@ function node_update_1023() {
                 'multiple' => false,
                 'remember' => 0,
                 'default_group' => 'All',
-                'default_group_multiple' => 
+                'default_group_multiple' =>
                 array (
                 ),
-                'group_items' => 
+                'group_items' =>
                 array (
                 ),
               ),
             ),
           ),
-          'sorts' => 
+          'sorts' =>
           array (
-            'changed' => 
+            'changed' =>
             array (
               'id' => 'changed',
               'table' => 'node',
@@ -2720,7 +2720,7 @@ function node_update_1023() {
               'ui_name' => '',
               'order' => 'DESC',
               'exposed' => false,
-              'expose' => 
+              'expose' =>
               array (
                 'label' => '',
               ),
@@ -2728,9 +2728,9 @@ function node_update_1023() {
             ),
           ),
           'title' => 'Recent content',
-          'relationships' => 
+          'relationships' =>
           array (
-            'uid' => 
+            'uid' =>
             array (
               'id' => 'uid',
               'table' => 'node',
@@ -2742,9 +2742,9 @@ function node_update_1023() {
               'required' => 0,
             ),
           ),
-          'empty' => 
+          'empty' =>
           array (
-            'area_text_custom' => 
+            'area_text_custom' =>
             array (
               'id' => 'area_text_custom',
               'table' => 'views',
@@ -2761,9 +2761,9 @@ function node_update_1023() {
           'use_more' => 1,
           'use_more_always' => false,
           'use_more_text' => 'more',
-          'style_options' => 
+          'style_options' =>
           array (
-            'grouping' => 
+            'grouping' =>
             array (
             ),
             'row_class' => '',
@@ -2773,7 +2773,7 @@ function node_update_1023() {
             'sticky' => 0,
             'caption' => '',
             'summary' => '',
-            'columns' => 
+            'columns' =>
             array (
               'title' => 'title',
               'timestamp' => 'title',
@@ -2781,9 +2781,9 @@ function node_update_1023() {
               'edit_node' => 'edit_node',
               'delete_node' => 'delete_node',
             ),
-            'info' => 
+            'info' =>
             array (
-              'title' => 
+              'title' =>
               array (
                 'sortable' => 0,
                 'default_sort_order' => 'asc',
@@ -2791,13 +2791,13 @@ function node_update_1023() {
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'timestamp' => 
+              'timestamp' =>
               array (
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'name' => 
+              'name' =>
               array (
                 'sortable' => 0,
                 'default_sort_order' => 'asc',
@@ -2805,13 +2805,13 @@ function node_update_1023() {
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'edit_node' => 
+              'edit_node' =>
               array (
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 1,
               ),
-              'delete_node' => 
+              'delete_node' =>
               array (
                 'align' => '',
                 'separator' => '',
@@ -2823,20 +2823,20 @@ function node_update_1023() {
           ),
         ),
       ),
-      'block' => 
+      'block' =>
       array (
         'display_title' => 'Block',
         'display_plugin' => 'block',
-        'display_options' => 
+        'display_options' =>
         array (
-          'query' => 
+          'query' =>
           array (
             'type' => 'views_query',
-            'options' => 
+            'options' =>
             array (
             ),
           ),
-          'allow' => 
+          'allow' =>
           array (
             'items_per_page' => 'items_per_page',
             'exposed_form' => 'exposed_form',
@@ -2868,10 +2868,22 @@ function node_update_1023() {
           $config->set('content.' . $uuid . '.data.delta', 'recent_content-block');
           $config->set('content.' . $uuid . '.data.module', 'views');
           $config->set('content.' . $uuid . '.plugin', 'views:recent_content-block');
+
+          // Carry over the node_count setting to items_per_page.
+          if (isset($block['data']['settings']['block_settings']['node_count'])) {
+            $node_count = $block['data']['settings']['block_settings']['node_count'];
+            $config->set('content.' . $uuid . '.data.settings.items_per_page', $node_count);
+            $config->clear('content.' . $uuid . '.data.settings.block_settings');
+          }
+
+          // Add "block-node-recent" class for styling consistency.
+          $existing_class = isset($block['data']['style']['data']['settings']['classes']) ? $block['data']['style']['data']['settings']['classes'] : '';
+          $new_class = trim($existing_class . ' block-node-recent');
+          $config->set('content.' . $uuid . '.data.style.data.settings.classes', $new_class);
         }
       }
     }
-  $config->save();
+    $config->save();
   }
 }
 
