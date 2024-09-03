@@ -817,7 +817,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   /**
    * Tests 403 and 404 visibility conditions.
    */
-  function testBlockHttpResponseCodeConditions() {
+  public function testBlockHttpResponseCodeConditions() {
     // Create a new layout at a custom path.
     $layout_title = 'Response Codes Test';
     $layout_name = 'response_codes_test';
