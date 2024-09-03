@@ -47,7 +47,7 @@
   border: 1px solid #cccccc;
   margin-bottom: 15px;
   border-radius: 4px;
-  cursor: row-resize;
+  cursor: ns-resize;
   box-shadow: 2px 2px 0 0 #d0d0d0;
   background: #f7f7f7;
 }
