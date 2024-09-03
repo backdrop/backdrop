@@ -3,7 +3,7 @@
     "name": "recent_content",
     "description": "A list of recently published content.",
     "module": "node",
-    "storage": 4,
+    "storage": 2,
     "tag": "",
     "disabled": false,
     "base_table": "node",
@@ -151,7 +151,7 @@
                         "exclude": 0,
                         "alter": {
                             "alter_text": 1,
-                            "text": "<a href=\"[path]\">[title]</a> [timestamp]",
+                            "text": "<div class=\"node-title\">\r\n  <a href=\"[path]\">[title]</a> [timestamp]\r\n</div>",
                             "make_link": 0,
                             "path": "",
                             "absolute": 0,
@@ -177,8 +177,8 @@
                             "preserve_tags": "",
                             "html": 0
                         },
-                        "element_type": "div",
-                        "element_class": "",
+                        "element_type": "",
+                        "element_class": "title-author",
                         "element_label_type": "",
                         "element_label_class": "",
                         "element_label_colon": false,
@@ -228,8 +228,8 @@
                             "preserve_tags": "",
                             "html": 0
                         },
-                        "element_type": "",
-                        "element_class": "",
+                        "element_type": "div",
+                        "element_class": "node-author",
                         "element_label_type": "",
                         "element_label_class": "",
                         "element_label_colon": false,
@@ -240,7 +240,7 @@
                         "hide_empty": 0,
                         "empty_zero": 0,
                         "hide_alter_empty": 1,
-                        "date_format": "date_only",
+                        "date_format": "medium",
                         "custom_date_format": "",
                         "timezone": ""
                     },
@@ -255,7 +255,7 @@
                         "exclude": 0,
                         "alter": {
                             "alter_text": 1,
-                            "text": "By [name], on [created]",
+                            "text": "<div class=\"node-author\">\r\n  [created] by [name]\r\n</div>",
                             "make_link": 0,
                             "path": "",
                             "absolute": 0,
@@ -281,7 +281,7 @@
                             "preserve_tags": "",
                             "html": 0
                         },
-                        "element_type": "div",
+                        "element_type": "",
                         "element_class": "",
                         "element_label_type": "",
                         "element_label_class": "",
