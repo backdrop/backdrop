@@ -696,7 +696,7 @@ function node_update_1008() {
               'empty_zero' => 0,
               'hide_alter_empty' => 1,
               'type' => 'published-notpublished',
-              'type_custom_TRUE' => '',
+              'type_custom_true' => '',
               'type_custom_false' => '',
               'not' => 0,
             ),
@@ -1461,7 +1461,7 @@ function node_update_1018() {
               'empty_zero' => 1,
               'hide_alter_empty' => 1,
               'type' => 'boolean',
-              'type_custom_TRUE' => 'Published',
+              'type_custom_true' => 'Published',
               'type_custom_false' => '[scheduled]',
               'not' => 0,
             ),
@@ -2049,7 +2049,7 @@ function node_update_1023() {
     'module' => 'node',
     'storage' => 2,
     'tag' => '',
-    'disabled' => false,
+    'disabled' => FALSE,
     'base_table' => 'node',
     'human_name' => 'Recent content',
     'core' => '1.0',
@@ -2639,8 +2639,7 @@ function node_update_1023() {
           'use_more' => 1,
           'use_more_always' => FALSE,
           'use_more_text' => 'more',
-          'style_options' => 
-          array (
+          'style_options' => array (
             'grouping' => array (
             ),
             'row_class' => '',
