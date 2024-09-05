@@ -92,10 +92,8 @@ function node_overview_types() {
  */
 function node_type_form($form, &$form_state, $type = NULL) {
   if (!isset($type->type)) {
-    // This is a new type. Populate with the defaults...
+    // This is a new type. Populate with the defaults.
     $type = node_type_set_defaults();
-    // ...and set the page title.
-    backdrop_set_title(t('Add content type'));
   }
 
   // Make the type object available to implementations of hook_form_alter().
@@ -151,7 +149,9 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#type' => 'item',
     // Fields of #type 'item' do not support #attributes - use
     // #wrapper_attributes instead.
-    '#wrapper_attributes' => array('class' => array('description', 'form-item-description')),
+    '#wrapper_attributes' => array(
+      'class' => array('description', 'form-item-description'),
+    ),
     '#markup' => t('This text will be shown on the <a href="@url"><em>Add content</em></a> page.', array('@url' => url('node/add'))),
   );
 
@@ -296,7 +296,9 @@ function node_type_form($form, &$form_state, $type = NULL) {
     '#type' => 'item',
     // Fields of #type 'item' do not support #attributes - use
     // #wrapper_attributes instead.
-    '#wrapper_attributes' => array('class' => array('description', 'form-item-description')),
+    '#wrapper_attributes' => array(
+      'class' => array('description', 'form-item-description'),
+    ),
     '#markup' => t('This text will be displayed at the top of the page when creating or editing content of this type.'),
   );
 

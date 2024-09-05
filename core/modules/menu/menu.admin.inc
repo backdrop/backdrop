@@ -103,7 +103,9 @@ function menu_overview_form($form, &$form_state, $menu) {
   foreach ($result as $item) {
     $links[] = $item;
   }
-  $link_count = db_query("SELECT COUNT(*) AS counter FROM {menu_links} WHERE menu_name = :menu AND link_path NOT LIKE :link_path", array(':menu' => $menu['menu_name'], ':link_path' => '%\%%'))->fetchObject();
+  $db_query = "SELECT COUNT(*) AS counter FROM {menu_links} WHERE menu_name = :menu AND link_path NOT LIKE :link_path";
+  $arguments = array(':menu' => $menu['menu_name'], ':link_path' => '%\%%');
+  $link_count = db_query($db_query, $arguments)->fetchObject();
   $counter = intval($link_count->counter / 2 ) + 1;
 
   $tree = menu_tree_data($links);
@@ -134,11 +136,11 @@ function menu_overview_form($form, &$form_state, $menu) {
 /**
  * Recursive helper function for menu_overview_form().
  *
- * @param $tree
- *   The menu_tree retrieved by menu_tree_data.
- * @param $delta
+ * @param array $tree
+ *   The menu_tree retrieved by menu_tree_data().
+ * @param int $delta
  *   The number of items to use in the menu weight selector. Defaults to 50.
- * @param $langcode
+ * @param string $langcode
  *   A language code by which to filter the list of menu items.
  */
 function _menu_overview_tree_form($tree, $delta = 50, $langcode = NULL) {
@@ -307,11 +309,17 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
       'hidden' => 0,
       'has_children' => 0,
     );
+    backdrop_set_title(t('@menu_name: Add link', array('@menu_name' => $menu['title'])));
   }
   else {
-    // Get the human-readable menu title from the given menu name
+    // Get the human-readable menu title from the given menu name.
     $titles = menu_get_menus();
     $current_title = $titles[$item['menu_name']];
+
+    backdrop_set_title(t('@menu_name: Edit link %link_title', array(
+      '@menu_name' => $current_title,
+      '%link_title' => $item['link_title'],
+    )), PASS_THROUGH);
 
     // Get the current breadcrumb and add a link to that menu's overview page.
     $breadcrumb = menu_get_active_breadcrumb();
