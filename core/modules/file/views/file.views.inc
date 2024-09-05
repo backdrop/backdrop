@@ -177,6 +177,17 @@ function file_views_data() {
      ),
   );
 
+  // Icon based on file extension.
+  $data['file_managed']['icon'] = array(
+    'title' => t('Icon'),
+    'help' => t('An SVG icon according to file extension.'),
+    'real field' => 'uri',
+    'field' => array(
+      'handler' => 'views_handler_field_file_icon',
+      'click sortable' => FALSE,
+     ),
+  );
+
   // filesize
   $data['file_managed']['filesize'] = array(
     'title' => t('Size'),
