@@ -161,9 +161,9 @@ function layout_list_page() {
   $help .= theme('item_list', array('items' => $help_items));
   $help .= '<p>' . t('As a page is rendered, a <em>Layout</em> is selected as follows.') . '</p>';
   $help_items = array();
-  $help_items[] = t('Both Paths and Layouts each have their own visibility conditions.');
+  $help_items[] = t('Both Paths and Layouts each have their own <a href="https://docs.backdropcms.org/documentation/visibility-conditions" target="_blank">access or visibility conditions</a>.');
   $help_items[] = array(
-    'data' => t('The <em>Path</em> for the page is compared to those in the alphabetical list here, and any <em>Visibility conditions</em> specific to the path are evaluated first.'),
+    'data' => t('The <em>Path</em> for the page is compared to those in the alphabetical list here, and any <em>access conditions</em> specific to the path are evaluated first.'),
     'children' => array(
       t('Each path may have one or more layouts available. These are listed beneath the path, each layout with their own visibility conditions.'),
       array(
@@ -176,7 +176,7 @@ function layout_list_page() {
   $help_items[] = t('If no match is found, or if visibility conditions are not met, the page will use one of the <em>Default layouts</em> shown at the bottom of this page.');
   $help .= theme('item_list', array('items' => $help_items));
   $help .= '<p>' . t('Note: Paths used by the layout system are <em>menu router paths</em>, not normal paths or !link. For the default About page, <code>node/%</code> is the menu router path, <code>node/2</code> is the normal path, and <code>about</code> is the URL alias.', array('!link' => l(t('URL aliases'), 'admin/config/urls/path'))) . '</p>';
-  $help .= '<p class="align-right">' . t('For more information and details, see the <a href="https://docs.backdropcms.org/documentation/layouts-and-templates" target="_blank">online documentation</a>.') . '</p>';
+  $help .= '<p>' . t('For more information about Layouts and details, see the <a href="https://docs.backdropcms.org/documentation/layouts-and-templates" target="_blank">online documentation</a>.') . '</p>';
 
   $page = array();
   $page['help'] = array(
