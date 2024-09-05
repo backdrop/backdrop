@@ -106,8 +106,14 @@ function _vocabulary_get_operations($vocabulary) {
       'title' => t('Manage displays'),
       'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/display',
       'weight' => 10,
-      );
-    }
+    );
+  }
+  if (user_access('administer layouts')) {
+    $links['taxonomy_layouts'] = array(
+      'title' => t('Manage layout'),
+      'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/layouts',
+    );
+  }
   if (module_exists('config') && user_access('synchronize configuration')) {
     $links['export'] = array(
       'title' => t('Export'),

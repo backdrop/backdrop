@@ -1,10 +1,10 @@
 <?php
 /**
  * @file
- * Backdrop database update API.
+ * Backdrop site update API.
  *
- * This file contains functions to perform database updates for a Backdrop
- * installation. It is included and used extensively by update.php.
+ * This file contains functions to perform database and config updates for a
+ * Backdrop installation. It is included and used extensively by update.php.
  */
 
 /**
@@ -611,7 +611,7 @@ function update_do_one($module, $number, $dependency_map, &$context) {
 class BackdropUpdateException extends Exception { }
 
 /**
- * Starts the database update batch process.
+ * Starts the site update batch process.
  *
  * @param $start
  *   An array whose keys contain the names of modules to be updated during the
@@ -714,11 +714,11 @@ function update_finished($success, $results, $operations) {
 }
 
 /**
- * Returns a list of all the pending database updates.
+ * Returns a list of all the pending site updates.
  *
  * @return
- *   An associative array keyed by module name which contains all information
- *   about database updates that need to be run, and any updates that are not
+ *   An associative array keyed by module name, which contains all information
+ *   about site updates that need to be run and any updates that are not
  *   going to proceed due to missing requirements. The system module will
  *   always be listed first.
  *

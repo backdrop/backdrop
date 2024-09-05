@@ -269,7 +269,7 @@ function icon_get_info($icon_name = NULL) {
  * Returns HTML for an inline-icon.
  *
  * This effectively returns the contents of an SVG file. But it could
- * potentially be override to replace inlined SVGs with other mechanisms, like
+ * potentially be overridden to replace inlined SVGs with other mechanisms, like
  * an icon font.
  *
  * @param array $variables
@@ -282,9 +282,11 @@ function icon_get_info($icon_name = NULL) {
  *   - attributes: Attributes to be added to the icon itself.
  *
  * @return string
- *    The HTML output.
+ *   The HTML output.
  *
  * @since 1.28.0 Function added.
+ * @since 1.28.1 The <ellipse>, <line>, <polygon> and <polyline> SVG elements
+ *   are allowed.
  */
 function theme_icon(array $variables) {
   // Ensure the filename is .svg.
@@ -292,10 +294,34 @@ function theme_icon(array $variables) {
     // Ensure the file contents are an SVG.
     $svg_contents = file_get_contents($variables['path']);
     if (strpos($svg_contents, '<svg') === 0) {
-      // Clean out any embedded XSS within the SVG. This very-restrictive set
-      // of options should be adequate for icons.
-      $svg_contents = filter_xss($svg_contents, array('svg', 'use', 'title',
-        'desc', 'defs', 'linearGradient', 'stop', 'rect', 'circle', 'path'));
+      // Allow basic shapes. See:
+      // https://developer.mozilla.org/en-US/docs/Web/SVG/Element#basic_shapes.
+      $allowed_svg_basic_shapes = array(
+        'circle',
+        'ellipse',
+        'line',
+        'polygon',
+        'polyline',
+        'rect',
+      );
+
+      // Allow some other elements. This very-restrictive set of options should
+      // be adequate for icons.
+      $allowed_svg_other = array(
+        'defs',
+        'desc',
+        'linearGradient',
+        'path',
+        'stop',
+        'svg',
+        'title',
+        'use',
+      );
+
+      $allowed_svg_elements = array_merge($allowed_svg_basic_shapes, $allowed_svg_other);
+
+      // Clean out any embedded XSS within the SVG.
+      $svg_contents = filter_xss($svg_contents, $allowed_svg_elements);
 
       // Move the "alt" text to an attribute.
       if ($variables['alt']) {

@@ -338,9 +338,10 @@ function hook_views_data() {
   );
 
   // Next, describe each of the individual fields in this table to Views. This
-  // is done by describing $data['example_table']['FIELD_NAME']. This part of
-  // the array may then have further entries:
-  //   - title: The label for the table field, as presented in Views.
+  // is done by describing $data['example_table']['FIELD_NAME']. All text should
+  // both be sanitized and translated or run through t() before being passed to
+  // the views UI. Keys are as follows:
+  //   - title: A sanitized label for the table field, as presented in Views.
   //   - help: The description text for the table field.
   //   - relationship: A description of any relationship handler for the table
   //     field.

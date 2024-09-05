@@ -815,6 +815,108 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   }
 
   /**
+   * Tests 403 and 404 visibility conditions.
+   */
+  function testBlockHttpResponseCodeConditions() {
+    // Create a new layout at a custom path.
+    $layout_title = 'Response Codes Test';
+    $layout_name = 'response_codes_test';
+    $layout_url = 'response-codes-test';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout_template' => 'moscone_flipped',
+      'path' => $layout_url,
+    );
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
+
+    // Add a test block that shows on 404 pages only.
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Layout foo block'));
+    $block_title_404 = $this->randomString();
+    $edit = array(
+      'title_display' => LAYOUT_TITLE_CUSTOM,
+      'title' => $block_title_404,
+    );
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $edit = array(
+      'condition' => 'http_response_code',
+    );
+    $this->backdropPost(NULL, $edit, t('Load condition'));
+    $edit = array(
+      'http_response_codes[404]' => TRUE,
+    );
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, array(), t('Update block'));
+
+    // Add another test block that shows on 403 pages only.
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Layout foo block'));
+    $block_title_403 = $this->randomString();
+    $edit = array(
+      'title_display' => LAYOUT_TITLE_CUSTOM,
+      'title' => $block_title_403,
+    );
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $edit = array(
+      'condition' => 'http_response_code',
+    );
+    $this->backdropPost(NULL, $edit, t('Load condition'));
+    $edit = array(
+      'http_response_codes[403]' => TRUE,
+    );
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, array(), t('Update block'));
+
+    // Add another test block that shows non-200 pages only.
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Layout foo block'));
+    $block_title_non_200 = $this->randomString();
+    $edit = array(
+      'title_display' => LAYOUT_TITLE_CUSTOM,
+      'title' => $block_title_non_200,
+    );
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $edit = array(
+      'condition' => 'http_response_code',
+    );
+    $this->backdropPost(NULL, $edit, t('Load condition'));
+    $edit = array(
+      'http_response_codes[200]' => TRUE,
+      'negate' => TRUE,
+    );
+    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, array(), t('Update block'));
+
+    // Save the entire layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Set this test layout as the 404 page.
+    $edit = array(
+      'site_404' => 'response-codes-test',
+      'site_403' => 'response-codes-test',
+    );
+    $this->backdropPost('admin/config/system/site-information', $edit, t('Save configuration'));
+
+    // When visiting the layout directly, none of the blocks should show.
+    $this->backdropGet('response-codes-test');
+    $this->assertNoText(check_plain($block_title_403), 'Block not shown when not on a 403 page.');
+    $this->assertNoText(check_plain($block_title_404), 'Block not shown when not on a 404 page.');
+    $this->assertNoText(check_plain($block_title_non_200), 'Block not shown when not on a non-200 page.');
+
+    // Now visit a non-existent page, which should show the 404 block.
+    $this->backdropGet('non-existent-page-test-url');
+    $this->assertText(check_plain($block_title_404), 'Block shown when on a 404 page.');
+    $this->assertText(check_plain($block_title_non_200), 'Block shown when on a non-200 page.');
+
+    // Log out and visit an access denied page.
+    $this->backdropLogout();
+    $this->backdropGet('admin');
+    $this->assertText(check_plain($block_title_403), 'Block shown when on a 403 page.');
+    $this->assertText(check_plain($block_title_non_200), 'Block shown when on a non-200 page.');
+  }
+
+  /**
    * Test the support for contexts within conditions and blocks.
    */
   function testContexts() {
@@ -1427,6 +1529,11 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Add visibility condition'));
     $this->backdropPost(NULL, array(), t('Save menu settings'));
+    $vc_text = 'Current path is one of "' . str_replace("\n", ', ', $edit['paths']);
+    $vc = $this->xpath('//tr[contains(@class,"layout-group")]//ul//li[contains(., :vc_text)]', array(
+      ':vc_text' => $vc_text,
+    ));
+    $this->assertEqual(count($vc), 1, 'The visibility condition shows up properly.');
 
     $this->backdropGet('<front>');
     $this->assertLink($menu_title, 0, 'Menu link found on the homepage.');
@@ -2220,7 +2327,8 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $page_title = $this->xpath('(//div[contains(@class, "block-system-title")])//h1');
     $this->assertEqual((string) $page_title[0], 'Test node title');
 
-    // Configure the block to use a custom title that overrides the normal title.
+    // Configure the block to use a custom title that overrides the normal
+    // title.
     $data = array(
       'title_display' => 'custom',
       'title' => 'A & "custom" title',
@@ -3683,3 +3791,4 @@ class LayoutDeletionTest extends BackdropWebTestCase {
     config_set('system.core', 'site_404', '');
   }
 }
+

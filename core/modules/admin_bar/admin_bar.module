@@ -244,6 +244,7 @@ function admin_bar_preprocess_page(&$variables) {
     $settings['replacements'] = $replacements;
   }
 
+  // Send any setting required for the placement of the admin bar to JS.
   $config = config('admin_bar.settings');
   if ($setting = $config->get('margin_top')) {
     $settings['margin_top'] = $setting;
