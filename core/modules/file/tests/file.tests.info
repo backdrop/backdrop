@@ -141,3 +141,9 @@ name = File attribute override
 description = Test overriding file entity attributes.
 group = File
 file = file.test
+
+[FileViewsTestCase]
+name = File views integration
+description = Tests integration between File module and Views module.
+group = File
+file = file_views.test
