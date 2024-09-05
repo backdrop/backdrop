@@ -165,7 +165,7 @@ function layout_list_page() {
   $help .= '<p>' . t('As a page is rendered, a <em>Layout</em> is selected as follows.') . '</p>';
   $help_items = array();
   $help_items[] = t('Both Paths and Layouts each have their own <a href="https://docs.backdropcms.org/documentation/visibility-conditions" target="_blank">access or visibility conditions</a>.');
-  $help_items[] = t('Layout pages generate their own path with their own visibility conditions in addition to the visibility conditions specific to the layout itself.');
+  $help_items[] = t('Layout pages generate their own path with their own access conditions in addition to the visibility conditions specific to the layout itself.');
   $help_items[] = array(
     'data' => t('The <em>Path</em> for the page is compared to those in the alphabetical list here, and any <em>access conditions</em> specific to the path are evaluated first.'),
     'children' => array(
