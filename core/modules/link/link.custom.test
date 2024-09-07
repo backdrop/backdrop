@@ -1,0 +1,25 @@
+<?php
+/**
+ * @file
+ * Basic simpletests to test basic link fields in a custom form.
+ */
+
+require_once(__DIR__ . '/link.test');
+
+/**
+ * Testing that the basics work for link fields on custom forms.
+ */
+class LinkCustomFormTest extends LinkBaseTestClass {
+  /**
+   * Test the output of a custom form with link fields.
+   */
+  public function testCustomLinkFields() {
+    $group = 'Link field custom form';
+    $this->backdropGet('link-field-custom-form');
+    $this->assertPattern('@<label for="edit-link-test-defaults-title">Title@is', "Defaults", $group);
+    $this->assertPattern('@<label class="element-invisible" for="edit-link-test-title-changes">Link with title changed@is', "Title changed - label hidden", $group);
+    $this->assertNoPattern('@name="link_test_no_title[title]"@is', "No title", $group);
+    $this->backdropPost(NULL, array('link_test_validate_url[url]' => 'http://example'), t('Submit'));
+    $this->assertPattern('@The value <em class="placeholder">http:\/\/example<\/em> provided for <em class="placeholder">Required link with URL validation<\/em> is not a valid URL@is', "Invalid URL flagged with validation active", $group);
+  }
+}
