@@ -7,13 +7,31 @@
 /**
  * Database configuration:
  *
- * Most sites can configure their database by entering the connection string
- * below. If using primary/replica databases or multiple connections, see the
- * advanced database documentation at
- * https://api.backdropcms.org/database-configuration
+ * Most sites can configure the database connection using the string below.
  */
 $database = 'mysql://user:pass@localhost/database_name';
 $database_prefix = '';
+
+/**
+ * Alternatively, the database connection can be specified as an array. This
+ * may be needed for passwords with special characters and to override default
+ * MySQL configurations with utf8mb4 charset and collation settings. See below.
+ *
+ * For more advanced database configuration details, including primary/replica
+ * databases or multiple connections, see documentation at
+ * https://docs.backdropcms.org/documentation/database-configuration
+ *
+ * $databases['default']['default'] = array(
+ *  'driver' => 'mysql',
+ *  'database' => 'databasename',
+ *  'username' => 'username',
+ *  'password' => 'password',
+ *  'host' => 'localhost',
+ *  'port' => '',
+ *  'charset' => 'utf8mb4',
+ *  'collation' => 'utf8mb4_unicode_ci',
+ * );
+ */
 
 /**
  * Configuration storage
