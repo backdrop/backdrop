@@ -1269,14 +1269,6 @@ function file_update_1011() {
   $config->set('mimetypes', $mimetypes);
   $config->save();
 
-  $config = config('file.settings');
-  $default_allowed_extensions = $config->get('default_allowed_extensions');
-  $default_allowed_extensions .= ' numbers pages keynote';
-  $default_allowed_extensions = explode(' ', $default_allowed_extensions);
-  $default_allowed_extensions = array_unique($default_allowed_extensions);
-  $default_allowed_extensions = implode(' ', $default_allowed_extensions);
-  $config->set('default_allowed_extensions', $default_allowed_extensions);
-  $config->save();
   // Set the flag to TRUE.
   file_needs_type_classification(TRUE);
 }
