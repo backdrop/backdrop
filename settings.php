@@ -20,18 +20,19 @@ $database_prefix = '';
  * For more advanced database configuration details, including primary/replica
  * databases or multiple connections, see documentation at
  * https://docs.backdropcms.org/documentation/database-configuration
- *
- * $databases['default']['default'] = array(
- *  'driver' => 'mysql',
- *  'database' => 'databasename',
- *  'username' => 'username',
- *  'password' => 'password',
- *  'host' => 'localhost',
- *  'port' => '',
- *  'charset' => 'utf8mb4',
- *  'collation' => 'utf8mb4_unicode_ci',
- * );
  */
+/*
+$databases['default']['default'] = array(
+  'driver' => 'mysql',
+  'database' => 'database_name',
+  'username' => 'username',
+  'password' => 'password',
+  'host' => 'localhost',
+  'port' => '',
+  'charset' => 'utf8mb4',
+  'collation' => 'utf8mb4_unicode_ci',
+);
+*/
 
 /**
  * Configuration storage
