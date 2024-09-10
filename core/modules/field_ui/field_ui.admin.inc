@@ -1991,7 +1991,7 @@ function field_ui_field_edit_form($form, &$form_state, $instance) {
   $form['field'] = array(
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
+    '#collapsed' => empty($_GET['destinations']),
     '#title' => t('Global settings'),
     '#description' => $description,
     '#tree' => TRUE,
