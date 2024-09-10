@@ -848,13 +848,15 @@ class ThemeDebugMarkupTestCase extends BackdropWebTestCase {
   protected $admin_user;
 
   function setUp() {
-    parent::setUp('theme_test', 'node');
+    parent::setUp('theme_test', 'node', 'taxonomy');
     theme_enable(array('test_theme'));
 
     // Create and login admin user.
     $this->admin_user = $this->backdropCreateUser(array(
       'access content',
       'administer nodes',
+      'access user profiles',
+      'administer taxonomy',
     ));
     $this->backdropLogin($this->admin_user);
 
@@ -867,9 +869,9 @@ class ThemeDebugMarkupTestCase extends BackdropWebTestCase {
   }
 
   /**
-   * Tests debug markup added to template output.
+   * Tests debug node markup added to template output.
    */
-  function testDebugOutput() {
+  function testDebugNodeOutput() {
     config_set('system.core', 'theme_default', 'test_theme');
     // Enable the debug output.
     config_set('system.core', 'theme_debug', TRUE);
@@ -884,11 +886,12 @@ class ThemeDebugMarkupTestCase extends BackdropWebTestCase {
     $node = $this->backdropCreateNode();
     $this->backdropGet("node/$node->nid");
     $this->assertRaw('<!-- THEME DEBUG -->', 'Theme debug markup found in theme output when debug is enabled.');
-    $this->assertRaw("CALL: theme('node__page__full')", 'Theme call information found.');
+    $this->assertRaw("CALL: theme('node')", 'Theme call information found.');
     $debug_output = <<<EOL
+   * node--{$node->nid}--full.tpl.php
+   x node--{$node->nid}.tpl.php
    * node--page--full.tpl.php
    * node--page.tpl.php
-   x node--{$node->nid}.tpl.php
    * node.tpl.php
 EOL;
     $this->assertRaw($debug_output, 'Suggested template files found in order and node ID specific template shown as current template.');
@@ -900,9 +903,10 @@ EOL;
     $node2 = $this->backdropCreateNode();
     $this->backdropGet("node/$node2->nid");
     $debug_output = <<<EOL
+   * node--{$node2->nid}--full.tpl.php
+   * node--{$node2->nid}.tpl.php
    * node--page--full.tpl.php
    * node--page.tpl.php
-   * node--{$node2->nid}.tpl.php
    x node.tpl.php
 EOL;
     $this->assertRaw($debug_output, 'Suggested template files found in order and base template shown as current template.');
@@ -917,7 +921,10 @@ EOL;
     $debug_output = <<<EOL
    * node--foo--bar.tpl.php
    * node--foo.tpl.php
+   * node--{$node3->nid}--full.tpl.php
    * node--{$node3->nid}.tpl.php
+   * node--page--full.tpl.php
+   * node--page.tpl.php
    x node.tpl.php
 EOL;
     $this->assertTrue(strpos($output, $debug_output) !== FALSE, 'Suggested template files found in order and base template shown as current template.');
@@ -926,6 +933,172 @@ EOL;
     config_set('system.core', 'theme_debug', FALSE);
 
     $this->backdropGet('node/' . $node->nid);
+    $this->assertNoRaw('<!-- THEME DEBUG -->', 'Theme debug markup not found in theme output when debug is disabled.');
+  }
+
+  /**
+   * Tests debug user markup added to template output.
+   */
+  function testDebugUserOutput() {
+    config_set('system.core', 'theme_default', 'test_theme');
+    // Enable the debug output.
+    config_set('system.core', 'theme_debug', TRUE);
+
+    $registry = theme_get_registry();
+    $extension = '.tpl.php';
+    // Populate array of templates.
+    $templates = backdrop_find_theme_templates($registry, $extension, backdrop_get_path('theme', 'test_theme'));
+    $templates += backdrop_find_theme_templates($registry, $extension, backdrop_get_path('module', 'user'));
+
+    // Create a user and test different features of the debug markup.
+    $admin_user = $this->admin_user;
+    $this->backdropGet("user/$admin_user->uid");
+    $this->assertRaw('<!-- THEME DEBUG -->', 'Theme debug markup found in theme output when debug is enabled.');
+    $this->assertRaw("CALL: theme('user_profile')", 'Theme call information found.');
+    $debug_output = <<<EOL
+   * user-profile--{$admin_user->uid}--full.tpl.php
+   x user-profile--{$admin_user->uid}.tpl.php
+   * user-profile--full.tpl.php
+   * user-profile.tpl.php
+EOL;
+    $this->assertRaw($debug_output, 'Suggested template files found in order and user ID specific template shown as current template.');
+    $template_filename = $templates['user_profile__' . $admin_user->uid]['path'] . '/' . $templates['user_profile__' . $admin_user->uid]['template'] . $extension;
+    $this->assertRaw("BEGIN OUTPUT from '$template_filename'", 'Full path to current template file found.');
+
+    // Create another user and make sure the template suggestions shown in the
+    // debug markup are correct.
+    $user2 = $this->backdropCreateUser();
+    $this->backdropGet("user/$user2->uid");
+    $debug_output = <<<EOL
+   * user-profile--{$user2->uid}--full.tpl.php
+   * user-profile--{$user2->uid}.tpl.php
+   * user-profile--full.tpl.php
+   x user-profile.tpl.php
+EOL;
+    $this->assertRaw($debug_output, 'Suggested template files found in order and base template shown as current template.');
+
+    // Create another user and make sure the template suggestions shown in the
+    // debug markup are correct.
+    $user3 = $this->backdropCreateUser();
+    $build = array('#theme' => 'user_profile__foo__bar');
+    $build += user_view($user3);
+    $output = backdrop_render($build);
+    $this->assertTrue(strpos($output, "CALL: theme('user_profile__foo__bar')") !== FALSE, 'Theme call information found.');
+    $debug_output = <<<EOL
+   * user-profile--foo--bar.tpl.php
+   * user-profile--foo.tpl.php
+   * user-profile--{$user3->uid}--full.tpl.php
+   * user-profile--{$user3->uid}.tpl.php
+   * user-profile--full.tpl.php
+   x user-profile.tpl.php
+EOL;
+    $this->assertTrue(strpos($output, $debug_output) !== FALSE, 'Suggested template files found in order and base template shown as current template.');
+
+    // Disable theme debug.
+    config_set('system.core', 'theme_debug', FALSE);
+
+    $this->backdropGet('user/' . $admin_user->uid);
+    $this->assertNoRaw('<!-- THEME DEBUG -->', 'Theme debug markup not found in theme output when debug is disabled.');
+  }
+
+  /**
+   * Tests debug taxonomy markup added to template output.
+   */
+  function testDebugTaxonomyOutput() {
+    config_set('system.core', 'theme_default', 'test_theme');
+    // Enable the debug output.
+    config_set('system.core', 'theme_debug', TRUE);
+
+    $vocabulary = new TaxonomyVocabulary(array(
+      'name' => $this->randomName(),
+      'description' => $this->randomName(),
+      'machine_name' => backdrop_strtolower($this->randomName()),
+      'weight' => mt_rand(0, 10),
+    ));
+    taxonomy_vocabulary_save($vocabulary);
+
+    $registry = theme_get_registry();
+    $extension = '.tpl.php';
+    // Populate array of templates.
+    $templates = backdrop_find_theme_templates($registry, $extension, backdrop_get_path('theme', 'test_theme'));
+    $templates += backdrop_find_theme_templates($registry, $extension, backdrop_get_path('module', 'taxonomy'));
+
+    // Create a term and test different features of the debug markup.
+    $term = entity_create('taxonomy_term', array(
+      'name' => $this->randomName(),
+      'description' => $this->randomName(),
+      'format' => filter_default_format(),
+      'vocabulary' => $vocabulary->machine_name,
+      'langcode' => LANGUAGE_NONE,
+    ));
+    taxonomy_term_save($term);
+
+    $this->backdropGet("taxonomy/term/$term->tid");
+    $this->assertRaw('<!-- THEME DEBUG -->', 'Theme debug markup found in theme output when debug is enabled.');
+    $this->assertRaw("CALL: theme('taxonomy_term')", 'Theme call information found.');
+    $debug_output = <<<EOL
+   * taxonomy-term--{$term->tid}--full.tpl.php
+   x taxonomy-term--{$term->tid}.tpl.php
+   * taxonomy-term--{$vocabulary->machine_name}--full.tpl.php
+   * taxonomy-term--{$vocabulary->machine_name}.tpl.php
+   * taxonomy-term.tpl.php
+EOL;
+
+    $this->assertRaw($debug_output, 'Suggested template files found in order and term ID specific template shown as current template.');
+    $template_filename = $templates['taxonomy_term__' . $term->tid]['path'] . '/' . $templates['taxonomy_term__' . $term->tid]['template'] . $extension;
+    $this->assertRaw("BEGIN OUTPUT from '$template_filename'", 'Full path to current template file found.');
+
+    // Create another term and make sure the template suggestions shown in the
+    // debug markup are correct.
+    $term2 = entity_create('taxonomy_term', array(
+      'name' => $this->randomName(),
+      'description' => $this->randomName(),
+      'format' => filter_default_format(),
+      'vocabulary' => $vocabulary->machine_name,
+      'langcode' => LANGUAGE_NONE,
+    ));
+    taxonomy_term_save($term2);
+
+    $this->backdropGet("taxonomy/term/$term2->tid");
+    $debug_output = <<<EOL
+   * taxonomy-term--{$term2->tid}--full.tpl.php
+   * taxonomy-term--{$term2->tid}.tpl.php
+   * taxonomy-term--{$vocabulary->machine_name}--full.tpl.php
+   * taxonomy-term--{$vocabulary->machine_name}.tpl.php
+   x taxonomy-term.tpl.php
+EOL;
+    $this->assertRaw($debug_output, 'Suggested template files found in order and base template shown as current template.');
+
+    // Create another term and make sure the template suggestions shown in the
+    // debug markup are correct.
+    $term3 = entity_create('taxonomy_term', array(
+      'name' => $this->randomName(),
+      'description' => $this->randomName(),
+      'format' => filter_default_format(),
+      'vocabulary' => $vocabulary->machine_name,
+      'langcode' => LANGUAGE_NONE,
+    ));
+    taxonomy_term_save($term3);
+
+    $build = array('#theme' => 'taxonomy_term__foo__bar');
+    $build += taxonomy_term_view($term3);
+    $output = backdrop_render($build);
+    $this->assertTrue(strpos($output, "CALL: theme('taxonomy_term__foo__bar')") !== FALSE, 'Theme call information found.');
+    $debug_output = <<<EOL
+   * taxonomy-term--foo--bar.tpl.php
+   * taxonomy-term--foo.tpl.php
+   * taxonomy-term--{$term3->tid}--full.tpl.php
+   * taxonomy-term--{$term3->tid}.tpl.php
+   * taxonomy-term--{$vocabulary->machine_name}--full.tpl.php
+   * taxonomy-term--{$vocabulary->machine_name}.tpl.php
+   x taxonomy-term.tpl.php
+EOL;
+    $this->assertTrue(strpos($output, $debug_output) !== FALSE, 'Suggested template files found in order and base template shown as current template.');
+
+    // Disable theme debug.
+    config_set('system.core', 'theme_debug', FALSE);
+
+    $this->backdropGet("taxonomy/term/$term3->tid");
     $this->assertNoRaw('<!-- THEME DEBUG -->', 'Theme debug markup not found in theme output when debug is disabled.');
   }
 

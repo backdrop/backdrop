@@ -1,0 +1,96 @@
+<?php
+/**
+ * @file
+ * Provides testing hooks for Icon API.
+ */
+
+/**
+ * Implements hook_menu().
+ */
+function icon_test_menu() {
+  $items['icon-content/%'] = array(
+    'page callback' => '_icon_test_content',
+    'page arguments' => array(1, 2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['icon-path/%'] = array(
+    'page callback' => '_icon_test_path',
+    'page arguments' => array(1, 2),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * Page callback for displaying an icon.
+ */
+function _icon_test_content($icon_name, $immutable = 0) {
+  print icon($icon_name, array('immutable' => (bool) $immutable));
+  exit();
+}
+
+/**
+ * Page callback for displaying an icon path.
+ */
+function _icon_test_path($icon_name, $immutable = 0) {
+  print icon_get_path($icon_name, $immutable);
+  exit();
+}
+
+/**
+ * Implements hook_icon_info().
+ */
+function icon_test_icon_info() {
+  $icons = array();
+  $module_path = backdrop_get_path('module', 'icon_test');
+
+  // Replace an icon in the default location.
+  if (state_get('icon_test_location') === 'default') {
+    $icons['gear'] = array();
+  }
+
+  // Replace an icon with the same name in a different directory.
+  if (state_get('icon_test_location') === 'directory') {
+    $icons['gear'] = array(
+      'directory' => $module_path . '/icons/bold',
+    );
+  }
+
+  // Replace an icon with a different name in the default directory.
+  if (state_get('icon_test_location') === 'renamed') {
+    $icons['gear'] = array(
+      'name' => 'gear-thin',
+    );
+  }
+
+  // Replace an icon with a different name in the default directory.
+  if (state_get('icon_test_location') === 'renamed_directory') {
+    $icons['gear'] = array(
+      'directory' => $module_path . '/icons/bold',
+      'name' => 'gear-bold',
+    );
+  }
+
+  // Replace an icon outside of the module directory.
+  if (state_get('icon_test_location') === 'outside_module') {
+    $icons['gear'] = array(
+      'directory' => 'core/misc/icons',
+      'name' => 'gear-six',
+    );
+  }
+
+  return $icons;
+}
+
+/**
+ * Implements hook_icon_info_alter().
+ */
+function icon_test_icon_info_alter(&$icons) {
+  // Remove the icon provided by another module (in this case we're actually
+  // removing the icon set in icon_test_icon_info() from above).
+  if (state_get('icon_test_alter') === 'remove') {
+    unset($icons['gear']);
+  }
+}

@@ -14,8 +14,8 @@ function system_requirements($phase) {
   // Ensure translations don't break during installation.
   $t = get_t();
 
-  // Report Backdrop version.
   if ($phase == 'runtime') {
+    // Report Backdrop version.
     $requirements['backdrop'] = array(
       'title' => $t('Backdrop CMS'),
       'value' => BACKDROP_VERSION,
@@ -23,8 +23,8 @@ function system_requirements($phase) {
       'weight' => -10,
     );
 
-    // Display the currently active installation profile, if the site
-    // is not running the default installation profile.
+    // Display the currently active installation profile, if the site is not
+    // running the default installation profile.
     $profile = backdrop_get_profile();
     if ($profile != 'standard') {
       $info = system_get_info('module', $profile);
@@ -40,6 +40,41 @@ function system_requirements($phase) {
         'weight' => -9,
       );
     }
+
+    // Report the configuration storage being used.
+    $config_storage_types = array(
+      'active' => t('Active'),
+      'staging' => t('Staging'),
+    );
+    foreach ($config_storage_types as $type => $type_name) {
+      $storage = config_get_config_storage($type);
+      $class = get_class($storage);
+
+      switch ($class) {
+        case 'ConfigDatabaseStorage':
+          $config_locations[$type] = t('!type: database: <code>@config_location</code>', array (
+            // $type_name has already been passed through t() earlier. Avoid
+            // double-escaping.
+            '!type' => $type_name,
+            '@config_location' => 'db://default/config_' . $type,
+          ));
+          break;
+        case 'ConfigFileStorage':
+        default:
+          $config_locations[$type] = t('!type: JSON files: <code>@config_location</code>', array (
+            // $type_name has already been passed through t() earlier. Avoid
+            // double-escaping.
+            '!type' => $type_name,
+            '@config_location' => config_get_config_directory($type),
+          ));
+      }
+    }
+
+    $requirements['config_storage'] = array(
+      'title' => $t('Configuration storage'),
+      'value' => theme('item_list', array('items' => $config_locations)),
+      'severity' => REQUIREMENT_INFO,
+    );
   }
 
   // Web server information.
@@ -263,13 +298,16 @@ function system_requirements($phase) {
 
     // Check/create .htaccess files for active and staging config directories.
     foreach (array('active', 'staging') as $type) {
-      $config_directory = config_get_config_directory($type);
-      file_save_htaccess($config_directory);
+      $config_storage = config_get_config_storage($type);
+      if (is_a($config_storage, 'ConfigFileStorage')) {
+        $config_directory = config_get_config_directory($type);
+        file_save_htaccess($config_directory);
 
-      $htaccess_files[$config_directory . '/.htaccess'] = array(
-        'title' => $t('%type config directory', array('%type' => backdrop_ucfirst($type))),
-        'directory' => $config_directory,
-      );
+        $htaccess_files[$config_directory . '/.htaccess'] = array(
+          'title' => $t('%type config directory', array('%type' => backdrop_ucfirst($type))),
+          'directory' => $config_directory,
+        );
+      }
     }
 
     // Try to write the .htaccess files first, to prevent false alarms in case
@@ -420,7 +458,7 @@ function system_requirements($phase) {
   // See if updates are available in update.php.
   if ($phase == 'runtime') {
     $requirements['update'] = array(
-      'title' => $t('Database updates'),
+      'title' => $t('Site updates'),
       'severity' => REQUIREMENT_OK,
       'value' => $t('Up to date'),
     );
@@ -434,8 +472,8 @@ function system_requirements($phase) {
         if ($current_schema < $latest_schema) {
           $update_link = base_path() . 'core/update.php';
           $requirements['update']['severity'] = REQUIREMENT_ERROR;
-          $requirements['update']['value'] = $t('Out of date (<a href="@update">Run database updates</a>)', array('@update' => $update_link));
-          $requirements['update']['description'] = $t('Some modules have database schema updates to install. You should run the <a href="@update">database update script</a> immediately.', array('@update' => $update_link));
+          $requirements['update']['value'] = $t('Out of date (<a href="@update">Run site updates</a>)', array('@update' => $update_link));
+          $requirements['update']['description'] = $t('Some modules have database schema updates to install. You should run the <a href="@update">site update script</a> immediately.', array('@update' => $update_link));
           break;
         }
       }
@@ -1952,6 +1990,7 @@ function system_update_1015() {
   $config = config('system.core');
   $config->set('rss_description', update_variable_get('feed_description', ''));
   $config->set('rss_limit', update_variable_get('feed_default_items', 10));
+  // cspell:disable-next-line
   $config->set('rss_viewmode', update_variable_get('feed_item_length', 'fulltext'));
   $config->save();
 
@@ -1994,7 +2033,7 @@ function system_update_1017() {
   $config = config('system.core');
   $config->set('log_row_limit', update_variable_get('dblog_row_limit', 1000));
   $config->set('log_identity', update_variable_get('syslog_identity', 'backdrop'));
-  $config->set('log_facility', update_variable_get('syslog_facility', LOG_LOCAL0));
+  $config->set('log_facility', update_variable_get('syslog_facility', ''));
   $config->set('log_format', update_variable_get('syslog_format', '!base_url|!timestamp|!type|!ip|!request_uri|!referer|!uid|!link|!message'));
   $config->set('error_level', $error_level);
   $config->save();
@@ -3521,6 +3560,76 @@ function system_update_1094() {
   ), $data);
   $config->setData($data);
   $config->save();
+}
+
+/**
+ * Set default values for flags for stripping sensitive headers on HTTP
+ * downgrade or host change.
+ */
+function system_update_1095() {
+  $config = config('system.core');
+  $save = FALSE;
+  if ($config->get('backdrop_http_request.strip_sensitive_headers_on_host_change') === NULL) {
+    $config->set('backdrop_http_request.strip_sensitive_headers_on_host_change', TRUE);
+    $save = TRUE;
+  }
+  if ($config->get('backdrop_http_request.strip_sensitive_headers_on_https_downgrade') === NULL) {
+    $config->set('backdrop_http_request.strip_sensitive_headers_on_https_downgrade', TRUE);
+    $save = TRUE;
+  }
+  if ($save) {
+    $config->save();
+  }
+}
+
+/**
+ * Fix icon display for customized system menu items.
+ */
+function system_update_1096() {
+  $icon_mapping = array(
+    'admin/dashboard' => 'speedometer-fill',
+    'admin/content' => 'pencil-fill',
+    'admin/people' => 'users-fill',
+    'admin/appearance' => 'palette-fill',
+    'admin/modules' => 'puzzle-piece-fill',
+    'admin/structure' => 'stack-fill',
+    'admin/config' => 'gear-fill',
+    'admin/reports' => 'info-fill',
+  );
+
+  $items = db_select('menu_links')
+    ->fields('menu_links')
+    ->condition('menu_name', 'management')
+    ->condition('module', 'system')
+    ->condition('depth', 2)
+    ->condition('customized', 1)
+    ->execute()->fetchAllAssoc('router_path');
+
+  foreach ($items as $router_path => $item) {
+    if (!array_key_exists($router_path, $icon_mapping)) {
+      continue;
+    }
+    $existing_item = (array) $item;
+    $options = unserialize($existing_item['options']);
+    if (isset($options['icon'])) {
+      continue;
+    }
+    $updated_item = $existing_item;
+    $options['icon'] = $icon_mapping[$router_path];
+    $updated_item['options'] = $options;
+    menu_link_save($updated_item, $existing_item);
+  }
+}
+
+/**
+ * Set local_action_position in Admin Bar.
+ */
+function system_update_1097() {
+  $config = config('admin_bar.settings');
+  if ($config->get('local_action_position') === NULL) {
+    $config->set('local_action_position', 'top');
+    $config->save();
+  }
 }
 
 /**
