@@ -96,6 +96,12 @@ class views_plugin_style_table extends views_plugin_style {
 
     // Tell the field to click sort.
     $this->view->field[$sort]->click_sort($this->order);
+
+    // If we're overriding the default sorts, include default sorts after the
+    // click sort.
+    if ($this->options['override']) {
+      $this->view->_build('sort');
+    }
   }
 
   /**
