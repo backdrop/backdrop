@@ -30,6 +30,7 @@ class views_plugin_style_table extends views_plugin_style {
     $options['default'] = array('default' => '');
     $options['info'] = array('default' => array());
     $options['override'] = array('default' => TRUE, 'bool' => TRUE);
+    $options['append_orig_sort'] = array('default' => FALSE, 'bool' => TRUE);
     $options['sticky'] = array('default' => FALSE, 'bool' => TRUE);
     $options['order'] = array('default' => 'asc');
     $options['caption'] = array('default' => '', 'translatable' => TRUE);
@@ -97,9 +98,8 @@ class views_plugin_style_table extends views_plugin_style {
     // Tell the field to click sort.
     $this->view->field[$sort]->click_sort($this->order);
 
-    // If we're overriding the default sorts, include default sorts after the
-    // click sort.
-    if ($this->options['override']) {
+    // Combine click sort and default sort criteria.
+    if ($this->options['override'] && $this->options['append_orig_sort']) {
       $this->view->_build('sort');
     }
   }
@@ -176,6 +176,18 @@ class views_plugin_style_table extends views_plugin_style {
       '#type' => 'checkbox',
       '#title' => t('Override normal sorting if click sorting is used'),
       '#default_value' => !empty($this->options['override']),
+    );
+
+    $form['append_orig_sort'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Apply normal sorting criteria after click sorting'),
+      '#default_value' => !empty($this->options['override']) && !empty($this->options['append_orig_sort']),
+      '#description' => t('Leave unchecked to discard default sorting criteria when click sort is active.'),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="style_options[override]"]' => array('checked' => TRUE),
+        ),
+      ),
     );
 
     $form['sticky'] = array(
