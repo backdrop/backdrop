@@ -1269,20 +1269,20 @@ function file_update_1011() {
   $config->set('mimetypes', $mimetypes);
   $config->save();
 
-  // Check if there are any existing files with these mimetypes that are of type
-  // undefined. If so, turn on the reclassification alert.
+  // Check if there are any existing files with these extensions that are of
+  // type 'undefined'. If so, turn on the reclassification alert.
   $count = db_query("
   SELECT COUNT(fid)
   FROM {file_managed}
   WHERE 
-  (filemime = :keynotetype OR filemime = :numberstype OR filemime = :pagestype)
-  AND type = :undefined
+  (filename LIKE :keynoteextension OR filename LIKE :numbersextension OR filename LIKE :pagesextension)
+  AND type = :undefinedtype
   ",
   array(
-    ':keynotetype' => 'application/vnd.apple.keynote',
-    ':numberstype' => 'application/vnd.apple.numbers',
-    ':pagestype' => 'application/vnd.apple.pages',
-    ':undefined' => 'undefined',
+    ':keynoteextension' => '%.keynote',
+    ':numbersextension' => '%.numbers',
+    ':pagesextension' => '%.pages',
+    ':undefinedtype' => 'undefined',
   ))->fetchField();
   if ($count) {
     file_needs_type_classification(TRUE);
