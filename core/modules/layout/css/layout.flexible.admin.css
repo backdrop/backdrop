@@ -25,7 +25,7 @@
 
 .layout--flexible .layout-editor-block {
   box-shadow: none;
-  cursor: row-resize;
+  cursor: ns-resize;
 }
 .layout--flexible .layout-editor-block-title {
   padding: 0.4em 1em;
