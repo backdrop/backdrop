@@ -371,17 +371,20 @@ function link_field_widget_form(&$form, &$form_state, $field, $instance, $langco
   );
   if ($instance['widget']['type'] == 'link_field') {
     $settings = $instance['settings'];
-    $element += array(
-      '#validate_url' => $settings['validate_url'],
-      '#url' => $settings['url'] ? 'optional' : 'required',
-      '#link_type' => $settings['type'],
-      '#title_mode' => $settings['title'],
-      '#title_label_use_field_label' => $settings['title_label_use_field_label'],
-      '#title_maxlength' => $settings['title_maxlength'],
-      '#target' => $settings['attributes']['target'],
-      '#configurable_title' => $settings['attributes']['configurable_title'],
-      '#configurable_class' => $settings['attributes']['configurable_class'],
-      '#instance' => $instance,
+    if (empty($element['#link_field_options'])) {
+      $element['#link_field_options'] = array();
+    }
+    $element['#link_field_options'] += array(
+      'validate_url' => $settings['validate_url'],
+      'url' => $settings['url'] ? 'optional' : 'required',
+      'link_type' => $settings['type'],
+      'title_mode' => $settings['title'],
+      'title_label_use_field_label' => $settings['title_label_use_field_label'],
+      'title_maxlength' => $settings['title_maxlength'],
+      'target' => $settings['attributes']['target'],
+      'configurable_title' => $settings['attributes']['configurable_title'],
+      'configurable_class' => $settings['attributes']['configurable_class'],
+      'instance' => $instance,
     );
   }
   return $element;
@@ -784,7 +787,7 @@ function link_theme() {
  *       'title' => 'A link to Content', // Prepopulates the "title" attribute.
  *       'class' => 'additional-css-class',
  *       'target' => '_blank',
- *     )
+ *     ),
  *   ),
  * @endcode
  */
@@ -799,34 +802,13 @@ function link_element_info() {
     '#theme_wrappers' => array('form_element'),
     '#element_validate' => array('link_field_element_validate'),
 
-    // Possible values: 'optional' or 'required'. If 'optional', the element can
-    // be submitted without filling in the url textfield.
-    '#url' => 'optional',
+    // Custom options for link_field. Defaults are provided within
+    // link_field_process().
+    '#link_field_options' => array(),
 
-    // Options: LINK_BOTH, LINK_INTERNAL, LINK_EXTERNAL.
-    '#link_type' => LINK_BOTH,
-    '#validate_url' => TRUE,
-
-    // Options: LINK_TARGET_DEFAULT, LINK_TARGET_TOP, LINK_TARGET_NEW_WINDOW and
-    // LINK_TARGET_USER. LINK_TARGET_USER will show a checkbox to indicate
-    // if the link should use '_blank' as target.
-    '#target' => LINK_TARGET_DEFAULT,
-    
-    // Options are: 'optional', 'required', 'value' and 'none'. If 'optional' or
-    // 'required', a textfield will be shown to enter a title for the link.
-    '#title_mode' => 'optional',
-    '#title_maxlength' => 128,
-
-    // If TRUE, the element's #title property will be use as the the label for
-    // the link's 'title' textfield. Otherwise, the string 'Title' will be used.
-    '#title_label_use_field_label' => FALSE,
-
-    // If true, the element will show a textfield to enter the value of the
-    // "title" link attribute.
-    '#configurable_title' => FALSE,
-
-    // If true, the element will show a textfield to enter a custom link class.
-    '#configurable_class' => FALSE,
+    // #delta is typically passed by the widget form, but we provide a default
+    // value to help validations when link_field is used as a FAPI element.
+    '#delta' => 0,
 
     // Attach the css by default.
     '#attached' => array(
@@ -834,16 +816,50 @@ function link_element_info() {
         backdrop_get_path('module', 'link') . '/css/link.css',
       ),
     ),
+  );
+  return $elements;
+}
+
+/**
+ * Provides default values for #link_field_options properties.
+ */
+function _link_field_options_defaults() {
+  return array(
+    // Possible values: 'optional' or 'required'. If 'optional', the element
+    // can be submitted without filling in the url textfield.
+    'url' => 'optional',
+
+    // Options: LINK_BOTH, LINK_INTERNAL, LINK_EXTERNAL.
+    'link_type' => LINK_BOTH,
+    'validate_url' => TRUE,
+
+    // Options: LINK_TARGET_DEFAULT, LINK_TARGET_TOP, LINK_TARGET_NEW_WINDOW
+    // and LINK_TARGET_USER. LINK_TARGET_USER will show a checkbox to indicate
+    // if the link should use '_blank' as target.
+    'target' => LINK_TARGET_DEFAULT,
+    
+    // Options are: 'optional', 'required', 'value' and 'none'. If 'optional'
+    // or 'required', a textfield will be shown to enter a title for the link.
+    'title_mode' => 'optional',
+    'title_maxlength' => 128,
+
+    // If TRUE, the element's #title property will be use as the the label for
+    // the link's 'title' textfield. Otherwise, the string 'Title' will be
+    // used.
+    'title_label_use_field_label' => FALSE,
+
+    // If true, the element will show a textfield to enter the value of the
+    // "title" link attribute.
+    'configurable_title' => FALSE,
+
+    // If true, the element will show a textfield to enter a custom link
+    // class.
+    'configurable_class' => FALSE,
 
     // When this element is used by the Field API Link field, we receive the
     // field instance array to help us deal with special validations.
-    '#instance' => array(),
-
-    // #delta is typically passed by the widget form, but we provide a default
-    // value to help validations when link_field is used as a FAPI element.
-    '#delta' => 0,
+    'instance' => array(),
   );
-  return $elements;
 }
 
 /**
@@ -856,24 +872,25 @@ function link_element_info() {
  */
 function link_field_process($element, $form_state, $complete_form) {
   $element['#tree'] = TRUE;
+  $element['#link_field_options'] += _link_field_options_defaults();
 
   $element['url'] = array(
     '#type' => 'textfield',
     '#maxlength' => LINK_URL_MAX_LENGTH,
     '#title' => t('URL'),
-    '#required' => (empty($element['#delta']) && $element['#url'] !== 'optional') ? $element['#required'] : FALSE,
+    '#required' => (empty($element['#delta']) && $element['#link_field_options']['url'] !== 'optional') ? $element['#required'] : FALSE,
     '#default_value' => isset($element['#value']['url']) ? $element['#value']['url'] : NULL,
   );
-  if ($element['#link_type'] != LINK_EXTERNAL) {
+  if ($element['#link_field_options']['link_type'] != LINK_EXTERNAL) {
     $element['url']['#autocomplete_path'] = 'path-autocomplete';
   }
-  if ($element['#title_mode'] !== 'none' && $element['#title_mode'] !== 'value') {
+  if ($element['#link_field_options']['title_mode'] !== 'none' && $element['#link_field_options']['title_mode'] !== 'value') {
     // Figure out the label of the title field.
-    if (!empty($element['#title_label_use_field_label'])) {
+    if (!empty($element['#link_field_options']['title_label_use_field_label'])) {
       // Use the element label as the title field label.
       $title_label = $element['#title'];
       // Hide the field label because there is no need for the duplicate labels.
-      $element['#title_display'] = 'invisible';
+      $element['#link_field_options']['title_display'] = 'invisible';
     }
     else {
       $title_label = t('Title');
@@ -881,16 +898,16 @@ function link_field_process($element, $form_state, $complete_form) {
 
     $element['title'] = array(
       '#type' => 'textfield',
-      '#maxlength' => $element['#title_maxlength'],
+      '#maxlength' => $element['#link_field_options']['title_maxlength'],
       '#title' => $title_label,
-      '#required' => ($element['#title_mode'] == 'required' && (($element['#delta'] == 0 && $element['#required']) || !empty($element['#value']['url']))) ? TRUE : FALSE,
+      '#required' => ($element['#link_field_options']['title_mode'] == 'required' && (($element['#delta'] == 0 && $element['#required']) || !empty($element['#value']['url']))) ? TRUE : FALSE,
       '#default_value' => isset($element['#value']['title']) ? $element['#value']['title'] : NULL,
     );
   }
 
   // Add sub-elements under the 'attributes' key.
   $attributes = isset($element['#value']['attributes']) ? $element['#value']['attributes'] : array();
-  if ($element['#target'] == LINK_TARGET_USER) {
+  if ($element['#link_field_options']['target'] == LINK_TARGET_USER) {
     $element['attributes']['target'] = array(
       '#type' => 'checkbox',
       '#title' => t('Open URL in a New Window'),
@@ -898,7 +915,7 @@ function link_field_process($element, $form_state, $complete_form) {
       '#default_value' => isset($attributes['target']) ? $attributes['target'] : FALSE,
     );
   }
-  if ($element['#configurable_title']) {
+  if ($element['#link_field_options']['configurable_title']) {
     $element['attributes']['title'] = array(
       '#type' => 'textfield',
       '#title' => t('Link "title" attribute'),
@@ -907,7 +924,7 @@ function link_field_process($element, $form_state, $complete_form) {
       '#field_suffix' => '"',
     );
   }
-  if ($element['#configurable_class']) {
+  if ($element['#link_field_options']['configurable_class']) {
     $element['attributes']['class'] = array(
       '#type' => 'textfield',
       '#title' => t('Custom link class'),
@@ -936,13 +953,13 @@ function link_field_element_validate(&$element, &$form_state, $complete_form) {
   $is_default_field_value = FALSE;
 
   // Check if this element is used in Field API Link field.
-  if (isset($element['#field_name'])) {
+  if (isset($element['#link_field_options']['field_name'])) {
     // Do not validate when submitting a field instance settings form.
     if (empty($element['#entity'])) {
       return;
     }
     else {
-      $instance = $element['#instance'];
+      $instance = $element['#link_field_options']['instance'];
       $delta = $element['#delta'];
       $is_default_field_value =  isset($instance['default_value'][$delta]['url']) && $value['url'] === $instance['default_value'][$delta]['url'] && !$instance['required'];
     }
@@ -952,7 +969,7 @@ function link_field_element_validate(&$element, &$form_state, $complete_form) {
   // value. NB: validation for subelements marked as 'required' is done by core.
   if (!empty($value['url']) && !$is_default_field_value) {
     // Validate the URL.
-    if (!empty($element['#validate_url'])) {
+    if (!empty($element['#link_field_options']['validate_url'])) {
       $url_valid = link_validate_url(trim($value['url']));
       if ($url_valid === FALSE) {
         form_error($element['url'], t('The value %value provided for %field is not a valid URL.', array(
@@ -962,24 +979,24 @@ function link_field_element_validate(&$element, &$form_state, $complete_form) {
       }
     }
 
-    // Require title if #title_mode == required.
-    if ($element['#title_mode'] == 'required' && strlen(trim($value['title'])) == 0) {
+    // Require title if title_mode == required.
+    if ($element['#link_field_options']['title_mode'] == 'required' && strlen(trim($value['title'])) == 0) {
       form_error($element['title'], t('Titles are required for all links.'));
     }
 
-    // Check the submitted link type matches the required #link_type.
-    if ($element['#link_type'] != LINK_BOTH) {
+    // Check the submitted link type matches the required link_type.
+    if ($element['#link_field_options']['link_type'] != LINK_BOTH) {
       $url_type = link_validate_url(trim($value['url']));
-      if (($element['#link_type'] == LINK_INTERNAL && $url_type === LINK_EXTERNAL) || ($element['#link_type'] == LINK_EXTERNAL && in_array($url_type, array(LINK_INTERNAL, LINK_FRONT), TRUE))) {
+      if (($element['#link_field_options']['link_type'] == LINK_INTERNAL && $url_type === LINK_EXTERNAL) || ($element['#link_field_options']['link_type'] == LINK_EXTERNAL && in_array($url_type, array(LINK_INTERNAL, LINK_FRONT), TRUE))) {
         $field_label = array('%field' => $element['#title']);
-        $error = ($element['#link_type'] == LINK_INTERNAL) ? t('Only internal URLs are allowed in %field.', $field_label) : t('Only external URLs are allowed in %field.', $field_label);
+        $error = ($element['#link_field_options']['link_type'] == LINK_INTERNAL) ? t('Only internal URLs are allowed in %field.', $field_label) : t('Only external URLs are allowed in %field.', $field_label);
         form_error($element['url'], $error); 
       }
     }
   }
 
   // Require a link if we have a title.
-  if ($element['#url'] !== 'optional' && strlen(isset($value['title']) ? $value['title'] : '') > 0 && strlen(trim($value['url'])) == 0) {
+  if ($element['#link_field_options']['url'] !== 'optional' && strlen(isset($value['title']) ? $value['title'] : '') > 0 && strlen(trim($value['url'])) == 0) {
     form_error($element['title'], t('You cannot enter a title without a link url.'));
   }
 
