@@ -40,21 +40,27 @@ function link_field_custom_form_test_form($form, &$form_state) {
   $form['link_test_title_changes'] = array(
     '#type' => 'link_field',
     '#title' => t('Link with title changed'),
-    '#title_maxlength' => 16,
-    '#title_label_use_field_label' => TRUE,
+    '#link_field_options' => array(
+      'title_maxlength' => 16,
+      'title_label_use_field_label' => TRUE,
+    )
   );
   $form['link_test_no_title'] = array(
     '#type' => 'link_field',
     '#title' => t('Link without title'),
-    '#title_mode' => 'none',
+    '#link_field_options' => array(
+      'title_mode' => 'none',
+    ),
   );
   $form['link_test_validate_url'] = array(
     '#type' => 'link_field',
     '#title' => t('Required link with URL validation'),
     '#required' => TRUE,
-    '#url' => 'required',
-    '#title_mode' => 'required',
-    '#validate_url' => TRUE,
+    '#link_field_options' => array(
+      'url' => 'required',
+      'title_mode' => 'required',
+      'validate_url' => TRUE,
+    ),
     '#default_value' => array(
       'title' => 'Example title on custom link field',
       'url' => 'http://example.com',

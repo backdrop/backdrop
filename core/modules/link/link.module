@@ -890,7 +890,7 @@ function link_field_process($element, $form_state, $complete_form) {
       // Use the element label as the title field label.
       $title_label = $element['#title'];
       // Hide the field label because there is no need for the duplicate labels.
-      $element['#link_field_options']['title_display'] = 'invisible';
+      $element['#title_display'] = 'invisible';
     }
     else {
       $title_label = t('Title');
