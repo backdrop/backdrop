@@ -37,8 +37,8 @@ class views_plugin_display extends views_plugin {
   var $extender = array();
 
   /**
- *
- */
+   *
+   */
   function init(&$view, &$display, $options = NULL) {
     $this->view = &$view;
     $this->display = &$display;
@@ -55,7 +55,7 @@ class views_plugin_display extends views_plugin {
           $this->extender[$extender] = $plugin;
         }
         else {
-          watchdog('views', 'Invalid display extender @extender', array('@extender' => $extender));
+          watchdog('views', 'Invalid display extender @extender', array('@handler' => $extender));
         }
       }
     }
@@ -255,8 +255,8 @@ class views_plugin_display extends views_plugin {
   }
 
   /**
- *
- */
+   *
+   */
   function destroy() {
     parent::destroy();
 
@@ -281,7 +281,8 @@ class views_plugin_display extends views_plugin {
    * Determine if this display is the 'default' display which contains
    * fallback settings
    */
-  function is_default_display() { return FALSE;
+  function is_default_display() {
+    return FALSE;
   }
 
   /**
@@ -469,8 +470,8 @@ class views_plugin_display extends views_plugin {
   }
 
   /**
- *
- */
+   *
+   */
   function option_definition() {
     $options = array(
       'defaults' => array(
@@ -729,7 +730,8 @@ class views_plugin_display extends views_plugin {
    *
    * By default, displays do not have a path.
    */
-  function has_path() { return FALSE;
+  function has_path() {
+    return FALSE;
   }
 
   /**
@@ -739,7 +741,8 @@ class views_plugin_display extends views_plugin {
    * sometimes displays that have a path might also need to link to another display.
    * This is true for feeds.
    */
-  function uses_link_display() { return !$this->has_path();
+  function uses_link_display() {
+    return !$this->has_path();
   }
 
   /**
@@ -750,7 +753,8 @@ class views_plugin_display extends views_plugin {
    * place to go and Views really wants the forms to go to a specific
    * page.
    */
-  function uses_exposed_form_in_block() { return $this->has_path();
+  function uses_exposed_form_in_block() {
+    return $this->has_path();
   }
 
   /**
@@ -806,7 +810,8 @@ class views_plugin_display extends views_plugin {
    *
    * By default, displays do not need breadcrumbs
    */
-  function uses_breadcrumb() { return FALSE;
+  function uses_breadcrumb() {
+    return FALSE;
   }
 
   /**
@@ -2629,8 +2634,8 @@ class views_plugin_display extends views_plugin {
   }
 
   /**
- *
- */
+   *
+   */
   function render_empty() {
     return $this->render_area('empty');
   }
@@ -2638,13 +2643,15 @@ class views_plugin_display extends views_plugin {
   /**
    * If this display creates a block, implement one of these.
    */
-  function hook_block_list($delta = 0, $edit = array()) { return array();
+  function hook_block_list($delta = 0, $edit = array()) {
+    return array();
   }
 
   /**
    * If this display creates a page with a menu item, implement it here.
    */
-  function hook_menu() { return array();
+  function hook_menu() {
+    return array();
   }
 
   /**
@@ -2655,8 +2662,8 @@ class views_plugin_display extends views_plugin {
   }
 
   /**
- *
- */
+   *
+   */
   function render_area($area, $empty = FALSE) {
     $return = '';
     foreach ($this->get_handlers($area) as $area) {
@@ -2726,14 +2733,16 @@ class views_plugin_display extends views_plugin {
    * Fully render the display for the purposes of a live preview or
    * some other AJAXy reason.
    */
-  function preview() { return $this->view->render();
+  function preview() {
+    return $this->view->render();
   }
 
   /**
    * Displays can require a certain type of style plugin. By default, they will
    * be 'normal'.
    */
-  function get_style_type() { return 'normal';
+  function get_style_type() {
+    return 'normal';
   }
 
   /**
