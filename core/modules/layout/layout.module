@@ -2748,7 +2748,7 @@ function layout_flexible_row_styles() {
  * Utility function to clean CSS for Layout UI.
  *
  * @param string $classes
- *  CSS classes, as entered into the Layout user interface.
+ *   CSS classes, as entered into the Layout user interface.
  *
  * @return string
  *   String of sanitized classes separated by spaces.
@@ -2786,8 +2786,8 @@ function layout_layout_load_by_router_item_alter(&$layouts, $router_item) {
 
   // Check for additional paths.
   // We'll use any layout whose additional path matches the requested path AND
-  // that has the same, or greater, number of placeholders so that contexts can be
-  // appropriately set. (We check for this during form validation, but check
+  // that has the same, or greater, number of placeholders so that contexts can
+  // be appropriately set. (We check for this during form validation, but check
   // again here in case the user edited the config file directly or something
   // like that).
   foreach ($configs as $config) {
@@ -2825,7 +2825,8 @@ function layout_layout_load_by_router_item_alter(&$layouts, $router_item) {
     $altered_contexts = array();
     foreach ($contexts as $context) {
       if (isset($context->position)) {
-        // The added layout has a positioned context that may need to be repositioned.
+        // The added layout has a positioned context that may need to be
+        // repositioned.
         $position = $context->position;
         $new_position = $placeholder_map[$position];
         if ($position != $new_position) {

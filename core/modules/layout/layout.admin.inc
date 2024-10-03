@@ -909,7 +909,12 @@ function layout_settings_form_validate(&$form, &$form_state) {
       $path = trim($path);
       if(!empty($path)) {
         if ($num_placeholders > count(_layout_placeholder_positions($path))) {
-          form_set_error('additional_paths', t('Additional path %path should have the same, or greater, number of placeholders as primary path %primary_path.', array('%path' => $path, '%primary_path' => $primary_path)));
+          form_set_error('additional_paths', t('Additional path %path should have the same, or greater, number of placeholders as primary path %primary_path.',
+            array(
+              '%path' => $path,
+              '%primary_path' => $primary_path,
+            )
+          ));
         }
         else {
           $_layout_additional_paths[] = $path;
