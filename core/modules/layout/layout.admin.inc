@@ -795,6 +795,19 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     );
   }
 
+  if (isset($form_state['build_info']['args'][0]->settings['additional_paths'])) {
+    $default_value = implode("\n", $form_state['build_info']['args'][0]->settings['additional_paths']);
+  }
+  else {
+    $default_value = '';
+  }
+  $form['additional_paths'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Additional paths'),
+    '#description' => t('Optionally specify one or more additional paths to be handled by this layout (in addition to the primary path above). These paths must already be provided by the system or another module. Use the percent symbol ("%") to indicate a placeholder in the path. e.g. "node/%" or "node/%/edit". The number of placeholders must be the same as, or greater than, the number of placeholders in the primary path.'),
+    '#default_value' => $default_value,
+  );
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -883,6 +896,25 @@ function layout_settings_form_validate(&$form, &$form_state) {
     $required_contexts = $condition->getRequiredContexts();
     if (array_diff($required_contexts, $context_plugins)) {
       form_error($form['conditions']['active'][$key], t('The condition \'!condition\' does not have the required contexts at this path. Remove the condition to save the layout.', array('!condition' => $condition->summary())));
+    }
+  }
+
+  global $_layout_additional_paths;
+  $_layout_additional_paths = array();
+  if (isset($form_state['values']['additional_paths'])) {
+    $primary_path = $form_state['values']['path'];
+    $num_placeholders = count(_layout_placeholder_positions($primary_path));
+    $paths = explode("\n", $form_state['values']['additional_paths']);
+    foreach($paths as $path){
+      $path = trim($path);
+      if(!empty($path)) {
+        if ($num_placeholders > count(_layout_placeholder_positions($path))) {
+          form_set_error('additional_paths', t('Additional path %path should have the same, or greater, number of placeholders as primary path %primary_path.', array('%path' => $path, '%primary_path' => $primary_path)));
+        }
+        else {
+          $_layout_additional_paths[] = $path;
+        }
+      }
     }
   }
 }

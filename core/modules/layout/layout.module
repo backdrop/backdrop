@@ -2512,6 +2512,11 @@ function layout_layout_template_info() {
  * Implements hook_layout_presave().
  */
 function layout_layout_presave($layout) {
+  global $_layout_additional_paths;
+  if (isset($_layout_additional_paths)) {
+    $layout->settings['additional_paths'] = $_layout_additional_paths;
+  }
+
   if (!empty($layout->removed_blocks)) {
     foreach ($layout->removed_blocks as $uuid => $block) {
       // @todo: Follow-up for other block types with files/images.
@@ -2767,4 +2772,100 @@ function _layout_clean_custom_css($classes = array()) {
  */
 function layout_field_delete_instance($instance) {
   cache('layout_path')->flush();
+}
+
+/**
+ * Implements hook_layout_load_by_router_item_alter().
+ */
+function layout_layout_load_by_router_item_alter(&$layouts, $router_item) {
+  $path = $router_item['path'];
+  $placeholder_positions = _layout_placeholder_positions($path);
+  $num_placeholders = count($placeholder_positions);
+  $configs = layout_get_all_configs('layout');
+  $added_layout_names = $added_layout_placeholder_positions = array();
+
+  // Check for additional paths.
+  // We'll use any layout whose additional path matches the requested path AND
+  // that has the same, or greater, number of placeholders so that contexts can be
+  // appropriately set. (We check for this during form validation, but check
+  // again here in case the user edited the config file directly or something
+  // like that).
+  foreach ($configs as $config) {
+    $disabled = isset($config['disabled']) ? $config['disabled'] : FALSE;
+    if ($disabled || empty($config['settings']['additional_paths'])) {
+      continue;
+    }
+    $name = $config['name'];
+    foreach ($config['settings']['additional_paths'] as $additional_path) {
+      if ($additional_path == $path && !isset($layouts[$name]) && !isset($added_layout_names[$name])) {
+        $add_placeholder_positions = _layout_placeholder_positions($config['path']);
+        if ($num_placeholders <= count($add_placeholder_positions)) {
+          $added_layout_names[$name] = $name;
+          $added_layout_placeholder_positions[$name] = $add_placeholder_positions;
+          break;
+        }
+      }
+    }
+  }
+
+  $added_layouts = layout_load_multiple($added_layout_names);
+
+  // Check contexts on the added layouts. If the positions don't line up between
+  // the request path and the added layout's primary path, alter the positions
+  // of the contexts so that positional contexts will fetch the right variable
+  // from the path.
+  foreach ($added_layouts as $layout) {
+    // Create a map from layout path positions to request path positions.
+    $add_placeholder_positions = $added_layout_placeholder_positions[$layout->name];
+    $placeholder_map = array();
+    for ($i = 0; $i < $num_placeholders; $i++) {
+      $placeholder_map[$add_placeholder_positions[$i]] = $placeholder_positions[$i];
+    }
+    $contexts = $layout->getContexts();
+    $altered_contexts = array();
+    foreach ($contexts as $context) {
+      if (isset($context->position)) {
+        // The added layout has a positioned context that may need to be repositioned.
+        $position = $context->position;
+        $new_position = $placeholder_map[$position];
+        if ($position != $new_position) {
+          $context->position = $new_position;
+          $altered_contexts[$new_position] = $context;
+          $layout->clearContexts($position);
+        }
+      }
+    }
+    foreach ($altered_contexts as $position => $context) {
+      $layout->setContexts($position, $context);
+    }
+  }
+
+  // Note that either default or admin default layouts should come last, so
+  // we'll check for those in the original list, pull them out if present, and
+  // add them at the end.
+  $default_layouts = array();
+  if (isset($layouts['default'])) {
+    $default_layouts['default'] = $layouts['default'];
+    unset($layouts['default']);
+  }
+  if (isset($layouts['admin_default'])) {
+    $default_layouts['admin_default'] = $layouts['admin_default'];
+    unset($layouts['admin_default']);
+  }
+
+  $layouts = array_merge($layouts, $added_layouts, $default_layouts);
+}
+
+/**
+ * Returns an array of placeholder positions in a path.
+ */
+function _layout_placeholder_positions($path) {
+  $path_parts = explode('/', $path);
+  $placeholder_positions = array();
+  for ($i = 0; $i < count($path_parts); $i++) {
+    if ($path_parts[$i] == '%') {
+      $placeholder_positions[] = $i;
+    }
+  }
+  return $placeholder_positions;
 }
