@@ -2859,6 +2859,10 @@ function layout_layout_load_by_router_item_alter(&$layouts, $router_item) {
 
 /**
  * Returns an array of placeholder positions in a path.
+ *
+ * @param string $path
+ *
+ * @return array
  */
 function _layout_placeholder_positions($path) {
   $path_parts = explode('/', $path);
@@ -2869,4 +2873,26 @@ function _layout_placeholder_positions($path) {
     }
   }
   return $placeholder_positions;
+}
+
+/**
+ * Ensure path is properly formed.
+ *
+ * @param array $form
+ * @param string $field_name
+ * @param string $path
+ *
+ * @return bool
+ *   TRUE if error found, else FALSE
+ */
+function _layout_validate_path(&$form, $field_name, $path) {
+  $parts = explode('/', $path);
+  foreach ($parts as $part) {
+    $wildcard_position = strpos($part, '%');
+    if ($wildcard_position !== FALSE && ($wildcard_position > 0 || strlen($part) > 1)) {
+      form_error($form[$field_name], t('Placeholders must be the only character in their part of the path i.e. "@part" should be "%".', array('@part' => $part)));
+      return TRUE;
+    }
+  }
+  return FALSE;
 }

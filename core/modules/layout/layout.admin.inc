@@ -876,13 +876,7 @@ function layout_settings_form_validate(&$form, &$form_state) {
   }
 
   // Ensure path is properly formed.
-  $parts = explode('/', $path);
-  foreach ($parts as $part) {
-    $wildcard_position = strpos($part, '%');
-    if ($wildcard_position !== FALSE && ($wildcard_position > 0 || strlen($part) > 1)) {
-      form_error($form['path'], t('Placeholders must be the only character in their part of the path i.e. "@part" should be "%".', array('@part' => $part)));
-    }
-  }
+  _layout_validate_path($form, 'path', $path);
 
   // Ensure that all conditions have context requirements met.
   $context_plugins = array(
@@ -915,6 +909,9 @@ function layout_settings_form_validate(&$form, &$form_state) {
               '%primary_path' => $primary_path,
             )
           ));
+        }
+        elseif(_layout_validate_path($form, 'additional_paths', $path)) {
+          continue;
         }
         else {
           $_layout_additional_paths[] = $path;
