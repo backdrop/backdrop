@@ -637,7 +637,7 @@ function user_admin_roles($form, $form_state) {
         'title' => t('Export role'),
         'href' => 'admin/config/development/configuration/single/export',
         'query' => array(
-          'group' => 'User roles',
+          'group' => t('User roles'),
           'name' => 'user.role.' . $role_name,
         ),
       );

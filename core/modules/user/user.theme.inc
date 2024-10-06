@@ -370,7 +370,7 @@ function template_preprocess_username(&$variables) {
  * @see user-profile.tpl.php
  */
 function template_preprocess_user_profile(&$variables) {
-  $variables['view_mode'] = $variables['elements']['#view_mode'];
+  $view_mode = $variables['view_mode'] = $variables['elements']['#view_mode'];
   $account = $variables['elements']['#account'];
 
   // Helpful $user_profile variable for templates.
@@ -380,4 +380,9 @@ function template_preprocess_user_profile(&$variables) {
 
   // Preprocess fields.
   field_attach_preprocess('user', $account, $variables['elements'], $variables);
+
+  // Add extra theme hook suggestions for user view_mode and id.
+  $variables['theme_hook_suggestions'][] = 'user_profile__' . $view_mode;
+  $variables['theme_hook_suggestions'][] = 'user_profile__' . $account->uid;
+  $variables['theme_hook_suggestions'][] = 'user_profile__' . $account->uid . '__' . $view_mode;
 }

@@ -201,10 +201,10 @@ Backdrop.viewsUi.AddItemForm.prototype.handleCheck = function (event) {
   // Add/remove the checked item to the list.
   if ($target.is(':checked')) {
     this.$selected_div.css('display', 'block');
-    this.checkedItems.push(label);
+    this.checkedItems.push(Backdrop.checkPlain(label));
   }
   else {
-    var position = $.inArray(label, this.checkedItems);
+    var position = $.inArray(Backdrop.checkPlain(label), this.checkedItems);
     // Delete the item from the list and take sure that the list doesn't have undefined items left.
     for (var i = 0; i < this.checkedItems.length; i++) {
       if (i == position) {
@@ -324,8 +324,8 @@ Backdrop.behaviors.viewsUiSearchOptions = {
     this.$controlGroup = this.$form.find(controlGroupSelector);
 
     /**
-     * Get a list of option labels and their corresponding divs and maintain it
-     * in memory, so we have as little overhead as possible at keyup time.
+     * Get a list of option labels and their corresponding DIV tags and maintain
+     * it in memory, so we have as little overhead as possible at keyup time.
      */
     this.options = this.getOptions(this.$form.find('.views-filterable-option'));
 

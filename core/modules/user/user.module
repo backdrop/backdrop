@@ -2778,10 +2778,10 @@ function user_role_revoke_permissions($role_name, array $permissions = array()) 
  * List user administration filters that can be applied.
  */
 function user_filters() {
-  // Regular filters
   $filters = array();
   $roles = user_roles(TRUE);
-  unset($roles[BACKDROP_AUTHENTICATED_ROLE]); // Don't list authorized role.
+  // Don't list the authenticated user role.
+  unset($roles[BACKDROP_AUTHENTICATED_ROLE]);
   if (count($roles)) {
     $filters['role'] = array(
       'title' => t('role'),
@@ -2793,12 +2793,14 @@ function user_filters() {
   }
 
   $options = array();
+  $module_info = system_get_info('module');
   foreach (module_implements('permission') as $module) {
     $function = $module . '_permission';
+    $module_group = t('@module module', array('@module' => $module_info[$module]['name']));
     if ($permissions = $function()) {
       asort($permissions);
-      foreach ($permissions as $permission => $description) {
-        $options[t('@module module', array('@module' => $module))][$permission] = t($permission);
+      foreach ($permissions as $permission => $permission_info) {
+        $options[$module_group][$permission] = $permission_info['title'];
       }
     }
   }

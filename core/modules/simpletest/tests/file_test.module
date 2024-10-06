@@ -62,7 +62,7 @@ function _file_test_form($form, &$form_state) {
     ),
     '#default_value' => FILE_EXISTS_RENAME,
   );
-  $form['file_subdir'] = array(
+  $form['file_subdirectory'] = array(
     '#type' => 'textfield',
     '#title' => t('Subdirectory for test file'),
     '#default_value' => '',
@@ -103,8 +103,8 @@ function _file_test_form($form, &$form_state) {
 function _file_test_form_submit(&$form, &$form_state) {
   // Process the upload and perform validation. Note: we're using the
   // form value for the $replace parameter.
-  if (!empty($form_state['values']['file_subdir'])) {
-    $destination = 'temporary://' . $form_state['values']['file_subdir'];
+  if (!empty($form_state['values']['file_subdirectory'])) {
+    $destination = 'temporary://' . $form_state['values']['file_subdirectory'];
     file_prepare_directory($destination, FILE_CREATE_DIRECTORY);
   }
   else {

@@ -1674,7 +1674,7 @@ class FileTokenReplaceTestCase extends FileTestHelper {
 
     $test_file = $this->getTestFile('text');
     // Coping a file to test uploads with non-latin filenames.
-    //cspell:disable-next-line
+    // cspell:disable-next-line
     $filename = backdrop_dirname($test_file->uri) . '/текстовый файл.txt';
     $test_file = file_copy($test_file, $filename);
 
@@ -2403,6 +2403,58 @@ class FileUploadWizardTestCase extends FileTestHelper {
   }
 
   /**
+   * Test the file upload wizard when uploading a private file fails.
+   */
+  function testFileUploadWizardPrivateFailure() {
+    $test_file = $this->getTestFile('text');
+
+    // Record the last saved file ID.
+    $previous_last_fid = $this->getLastFileId();
+
+    // Enable the private file system.
+    config_set('system.core', 'file_private_path', $this->private_files_directory);
+
+    // Step 1: Upload a basic document file.
+    $edit = array();
+    $edit['files[upload]'] = backdrop_realpath($test_file->uri);
+    $this->backdropPost('file/add', $edit, t('Next'));
+
+    // After the file is uploaded but before the file is saved to its final
+    // location, update the private files directory to an non-writable location.
+    // The /root directory is the home directory of the root user, and should
+    // never be writable by the web user. As long as the directory either does
+    // not exist, or is not writable, this example should work.
+    $temp_private_location = '/root';
+    config_set('system.core', 'file_private_path', $temp_private_location);
+
+    // Now the file is in a temporary location. Load its entity.
+    $new_fid = $this->getLastFileId();
+    $new_file = file_load($new_fid);
+    $this->assertTrue(file_exists($new_file->uri), 'File is temporarily uploaded.');
+
+    // Step 3: Scheme selection.
+    $edit = array();
+    $edit['scheme'] = 'private';
+    $this->backdropPost(NULL, $edit, t('Next'));
+
+    // Check that a message was printed indicating the file was not saved.
+    $this->assertRaw(t('@type %name was not saved.', array('@type' => 'Document', '%name' => $test_file->filename)), 'Failed private upload was deleted.');
+
+    // Check that the file is no longer on disk.
+    clearstatcache($new_file->uri);
+    $this->assertFalse(file_exists($new_file->uri), 'Temporary file on disk has been deleted.');
+
+    // Check that the file entity was deleted.
+    $last_fid = $this->getLastFileId();
+    $this->assertTrue($previous_last_fid == $last_fid, 'Latest file entity remains the same.');
+    $this->assertFalse($new_fid == $last_fid, 'New file entity was deleted when file fails to upload.');
+
+    // Reset the private file path so the testing framework doesn't try to
+    // clean up the non-writable directory.
+    config_clear('system.core', 'file_private_path');
+  }
+
+  /**
    * Test the file upload wizard field step.
    */
   function testFileUploadWizardFields() {
@@ -2630,6 +2682,8 @@ class FileUploadSvgTestCase extends FileTestHelper {
   public function testSVGFileUploadValidation() {
     $default_content = '<rect width="400" height="400" fill="#93a7ac"/>';
     $default_open_tag = '<svg width="400" height="400" version="1.1" viewBox="0 0 400 400" xmlns="http://www.w3.org/2000/svg">';
+    // cspell:disable-next-line
+    $a_tag_svg_href_content = '%3Csvg+xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22+onload%3D%22alert%281%29%22%3E%3C%2Fsvg%3E';
 
     $samples = array(
       'valid' => array(
@@ -2673,7 +2727,7 @@ class FileUploadSvgTestCase extends FileTestHelper {
         'message' => 'could not be uploaded. Dangerous content found.',
       ),
       'link_data' => array(
-        'contents' => $default_open_tag . $default_content . '<a href="data:image/svg+xml,%3Csvg+xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22+onload%3D%22alert%281%29%22%3E%3C%2Fsvg%3E"></a></svg>',
+        'contents' => $default_open_tag . $default_content . '<a href="data:image/svg+xml,' . $a_tag_svg_href_content . '"></a></svg>',
         'message' => 'could not be uploaded. Dangerous content found.',
       ),
     );

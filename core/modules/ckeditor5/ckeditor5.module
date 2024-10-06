@@ -4,7 +4,7 @@
  * Provides integration with the CKEditor WYSIWYG editor.
  */
 
-define('CKEDITOR5_VERSION', '40.2.0');
+define('CKEDITOR5_VERSION', '42.0.2');
 
 /**
  * Implements hook_menu().
@@ -410,11 +410,11 @@ function ckeditor5_ckeditor5_plugins() {
         'required_html' => array('<p class="indent1 indent2 indent3">'),
       ),
     ),
-    'plugin_dependencies' => array('list.DocumentList'),
+    'plugin_dependencies' => array('list.List'),
   );
 
   // @see https://ckeditor.com/docs/ckeditor5/latest/features/lists/document-lists.html
-  $plugins['list.DocumentList'] = array(
+  $plugins['list.List'] = array(
     'buttons' => array(
       'bulletedList' => array(
         'label' => t('Bullet list'),
@@ -429,12 +429,12 @@ function ckeditor5_ckeditor5_plugins() {
         'required_html' => array('<ol>', '<li>'),
       ),
     ),
-    // Re-specify list.DocumentList as its own dependency to ensure it loads
-    // before list.DocumentListProperties, otherwise list properties will not
+    // Re-specify list.List as its own dependency to ensure it loads
+    // before list.ListProperties, otherwise list properties will not
     // show in the UI.
     'plugin_dependencies' => array(
-      'list.DocumentList',
-      'list.DocumentListProperties',
+      'list.List',
+      'list.ListProperties',
     ),
     'config' => array(
       'list' => array(
