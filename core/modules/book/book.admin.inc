@@ -1,8 +1,7 @@
 <?php
-
 /**
  * @file
- * Administration page callbacks for the Book module.
+ * Admin page callbacks for the Book module.
  */
 
 /**
@@ -60,11 +59,43 @@ function book_admin_settings($form, &$form_state) {
     '#required' => TRUE,
   );
   $form['book_child_type'] = array(
-    '#type' => 'radios',
+    '#type' => 'select',
     '#title' => t('Content type for child pages'),
     '#default_value' => $config->get('book_child_type'),
     '#options' => $types,
     '#required' => TRUE,
+  );
+  $form['book_options'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Options'),
+  );
+  $form['book_options']['book_navigation'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Display default book navigation on book pages'),
+    '#default_value' => $config->get('book_navigation'),
+  );
+  $form['book_options']['book_navigation_options'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Select book navigation options'),
+    '#default_value' => $config->get('book_navigation_options'),
+    '#options' => array(
+      'tree' => t('Table of contents'),
+      'pager' => t('Previous, Next, and Up links'),
+    ),
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="book_navigation"]' => array('checked' => FALSE),
+      ),
+    ),
+  );
+  $form['book_options']['book_links'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Select book links options'),
+    '#default_value' => $config->get('book_links'),
+    '#options' => array(
+      'book_add_child' => t('Add child page'),
+      'book_reorder' => t('Reorder book'),
+    ),
   );
   $form['array_filter'] = array('#type' => 'value', '#value' => TRUE);
   $form['#validate'][] = 'book_admin_settings_validate';
@@ -98,6 +129,9 @@ function book_admin_settings_submit($form, &$form_state) {
   config('book.settings')
     ->set('book_allowed_types', $form_state['values']['book_allowed_types'])
     ->set('book_child_type', $form_state['values']['book_child_type'])
+    ->set('book_navigation', $form_state['values']['book_navigation'])
+    ->set('book_navigation_options', $form_state['values']['book_navigation_options'])
+    ->set('book_links', $form_state['values']['book_links'])
     ->save();
   backdrop_set_message(t('The configuration options have been saved.'));
 }
@@ -321,6 +355,11 @@ function theme_book_admin_table($variables) {
       $links['delete'] = array(
         'title' => t('Delete'),
         'href' => "node/$nid/delete",
+        'query' => $destination,
+      );
+      $links['remove'] = array(
+        'title' => t('Remove'),
+        'href' => "node/$nid/outline-remove",
         'query' => $destination,
       );
     }

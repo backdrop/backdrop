@@ -29,6 +29,10 @@ class DashboardMenuBlock extends Block {
    * {@inheritdoc}
    */
   function getAdminTitle() {
+    if (!empty($this->settings['admin_label'])) {
+      return check_plain($this->settings['admin_label']);
+    }
+
     return t('Manage menus');
   }
 
@@ -36,6 +40,10 @@ class DashboardMenuBlock extends Block {
    * {@inheritdoc}
    */
   function getAdminPreview() {
+    if (!empty($this->settings['admin_description'])) {
+      return filter_xss($this->settings['admin_description']);
+    }
+
     return t('Links to manage menus.');
   }
 
@@ -88,18 +96,10 @@ class DashboardMenuBlock extends Block {
       }
     }
 
-    if (empty($rows)) {
-      // If there are existing menuse, but user has no access to manage any
-      // of them, hide the block completely.
-      if (!empty($menus)) {
-        return array();
-      }
-      $rows[] = array(
-        array(
-          'data' => t('There are no menus to display.'),
-          'colspan' => 4,
-        ),
-      );
+    if (empty($rows) && !empty($menus)) {
+      // If there are existing menus, but user has no access to manage any of
+      // them, hide the block completely.
+      return;
     }
 
     $panel = array(
@@ -109,6 +109,7 @@ class DashboardMenuBlock extends Block {
       '#theme' => 'table',
       '#header' => $header,
       '#rows' => $rows,
+      '#empty' => t('There are no menus to display.'),
     );
 
     if (user_access('administer menu')) {

@@ -4,14 +4,14 @@
     "description": "Administrative listing for managing files.",
     "module": "file",
     "storage": 4,
-    "tag": "default",
+    "tag": "",
     "disabled": false,
     "base_table": "file_managed",
     "human_name": "Administer files",
     "core": "1.6",
     "display": {
         "default": {
-            "display_title": "Master",
+            "display_title": "Default",
             "display_plugin": "default",
             "display_options": {
                 "query": {

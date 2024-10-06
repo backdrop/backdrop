@@ -1,0 +1,163 @@
+<?php
+/**
+ * @file
+ * Tests the user interface for adding layout configuration to entity types.
+ */
+
+/**
+ * Tests adding and modifying entity layouts.
+ */
+class LayoutEntityLayoutsTest extends BackdropWebTestCase {
+  protected $profile = 'minimal';
+  protected $admin_user;
+  protected $vocabulary;
+  protected $field_email_name;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp(array('taxonomy', 'email'));
+    // Create content types for testing.
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
+    $vocabulary = new TaxonomyVocabulary(array(
+      'name' => 'Tags',
+      'description' => $this->randomName(),
+      'machine_name' => 'tags',
+      'weight' => mt_rand(0, 10),
+    ));
+    taxonomy_vocabulary_save($vocabulary);
+
+    // Create a field on Posts.
+    $this->field_email_name = backdrop_strtolower($this->randomName());
+    $field_email = array(
+      'field_name' => $this->field_email_name,
+      'type' => 'email',
+    );
+    field_create_field($field_email);
+    $email_instance = array(
+      'field_name' => $field_email['field_name'],
+      'entity_type' => 'node',
+      'bundle' => 'post',
+      'widget' => array(
+        'type' => 'email_default',
+      ),
+      'display' => array(
+        'full' => array(
+          'type' => 'email_mailto',
+        ),
+      ),
+    );
+    field_create_instance($email_instance);
+
+    // Create and login admin user.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access administration pages',
+      'administer taxonomy',
+      'administer layouts',
+      'access user profiles',
+      'edit any page content',
+      'administer nodes',
+    ));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Test Custom Text blocks.
+   */
+  public function testEntityLayouts() {
+    // This rebuild is needed to ensure taxonomy entity info is available.
+    menu_rebuild();
+
+    // Check that no layouts listed for Pages.
+    $this->backdropGet('admin/structure/types/manage/page/layouts');
+    $this->assertText('No layout overrides have been created for Page pages yet.');
+
+    $this->clickLink(t('Add @bundle_label layout', array('@bundle_label' => 'Page')));
+    $this->assertFieldByName('title', 'Page layout');
+
+    // Test only two field blocks show on Pages.
+    $checkboxes = $this->xpath('//*[contains(@class,:class)]//*[contains(@class,:checkbox_class)]', array(
+      ':class' => 'form-item-field-blocks',
+      ':checkbox_class' => 'form-type-checkbox',
+    ));
+    $this->assertEqual(count($checkboxes), 2, 'Two options are found in the field block list.');
+
+    // Now check Posts.
+    $this->backdropGet('admin/structure/types/manage/post/layouts');
+    $this->assertText('No layout overrides have been created for Post pages yet.');
+    $this->clickLink(t('Add @bundle_label layout', array('@bundle_label' => 'Post')));
+    $this->assertFieldByName('title', 'Post layout');
+    // Three field blocks because we added one on setup.
+    $checkboxes = $this->xpath('//*[contains(@class,:class)]//*[contains(@class,:checkbox_class)]', array(
+      ':class' => 'form-item-field-blocks',
+      ':checkbox_class' => 'form-type-checkbox',
+    ));
+    $this->assertEqual(count($checkboxes), 3, 'Three options are found in the field block list.');
+
+    // Submit and test that expected blocks show up in the layout.
+    $edit = array(
+      'name' => 'post_layout',
+      'content_area' => 'field_blocks',
+      'field_blocks[body]' => TRUE,
+      'field_blocks[' . $this->field_email_name . ']' => TRUE,
+      'field_blocks[main]' => FALSE,
+    );
+    $this->backdropPost(NULL, $edit, t('Create layout'));
+    $this->assertText('Displays values of the body field');
+    $this->assertText('Displays values of the ' . $this->field_email_name . ' field');
+    $this->assertNoRaw(t('The default content for this page. <strong>This block may be required for this page to work properly.</strong>'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $this->backdropGet('admin/structure/types/manage/post/layouts');
+    $this->assertNoText('No layout overrides have been created for Post pages yet.');
+    $post_layouts = $this->xpath('//tr[contains(@class,:class)]', array(
+      ':class' => 'layout-row',
+    ));
+    $this->assertEqual(count($post_layouts), 1, 'One layout found in table.');
+    $this->assertText('(Machine name: post_layout)');
+
+    // Check that we still don't have a layout for Pages, then add one.
+    $this->backdropGet('admin/structure/types/manage/page/layouts');
+    $this->assertText('No layout overrides have been created for Page pages yet.');
+    $this->clickLink(t('Add @bundle_label layout', array('@bundle_label' => 'Page')));
+    $edit = array(
+      'name' => 'page_layout',
+      'content_area' => 'main_content',
+      'field_blocks[body]' => TRUE,
+    );
+    $this->backdropPost(NULL, $edit, t('Create layout'));
+    $this->assertNoText('Displays values of the body field');
+    $this->assertRaw(t('The default content for this page. <strong>This block may be required for this page to work properly.</strong>'));
+
+    // Test Taxonomy vocabulary types.
+    $this->backdropGet('admin/structure/taxonomy/tags/layouts');
+    $this->assertText('No layout overrides have been created for Tags pages yet.');
+    $this->clickLink(t('Add @bundle_label layout', array('@bundle_label' => 'Tags')));
+    // The field blocks UI is disabled because taxonomy has no fields.
+    $this->assertFieldByXPath("//*[@name='content_area' and @disabled='disabled']");
+    $this->assertText(t('There are no fields attached to this entity.'));
+    $edit = array(
+      'name' => 'tags_layout',
+    );
+    $this->backdropPost(NULL, $edit, t('Create layout'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+    $this->backdropGet('admin/structure/taxonomy/tags/layouts');
+    $this->assertNoText('No layout overrides have been created for Tags pages yet.');
+
+    // Check User types.
+    $this->backdropGet('admin/config/people/manage/layouts');
+    $this->assertText('No layout overrides have been created for User account pages yet.');
+    $this->clickLink(t('Add User account layout'));
+    $this->assertFieldByXPath("//*[@name='content_area' and @disabled='disabled']");
+    $this->assertText(t('There are no fields attached to this entity.'));
+    $edit = array(
+      'name' => 'user_layout',
+    );
+    $this->backdropPost(NULL, $edit, t('Create layout'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+    $this->backdropGet('admin/config/people/manage/layouts');
+    $this->assertNoText('No layout overrides have been created for User account pages yet.');
+  }
+}

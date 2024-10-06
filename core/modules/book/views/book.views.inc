@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Provide views data and handlers for book.module.
@@ -45,6 +44,18 @@ function book_views_data() {
       'left_table' => 'book',
       'left_field' => 'mlid',
       'field' => 'mlid',
+    ),
+  );
+
+  $data['book_menu_links']['mlid'] = array(
+    'title' => t('Menu link ID'),
+    'help' => t('The menu link ID of the book page.'),
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+      'click sortable' => TRUE,
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
     ),
   );
 

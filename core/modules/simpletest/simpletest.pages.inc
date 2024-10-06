@@ -8,6 +8,24 @@
  * List tests arranged in groups that can be selected and run.
  */
 function simpletest_test_form($form) {
+  $form['filter'] = array(
+    '#type' => 'container',
+    '#attributes' => array(
+      'class' => array('table-filter', 'js-show'),
+    ),
+  );
+  $form['filter']['search'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Filter'),
+    '#size' => 30,
+    '#placeholder' => t('Search...'),
+    '#attributes' => array(
+      'class' => array('simpletest-filter-text'),
+      'autocomplete' => 'off',
+      'title' => t('Enter a part of the test name or description to filter.'),
+    ),
+  );
+
   $form['tests'] = array(
     '#type' => 'fieldset',
     '#title' => t('Tests'),
@@ -153,7 +171,7 @@ function simpletest_result_form($form, &$form_state, $test_id) {
     $filter[$group_summary['#ok'] ? 'pass' : 'fail'][] = $group;
   }
 
-  // Overal summary status.
+  // Overall summary status.
   $form['result']['summary']['#ok'] = $form['result']['summary']['#fail'] + $form['result']['summary']['#exception'] == 0;
 
   // Actions.
@@ -348,6 +366,7 @@ function simpletest_settings_form($form, &$form_state) {
   $form['httpauth']['simpletest_httpauth_password'] = array(
     '#type' => 'password',
     '#title' => t('Password'),
+    '#password_toggle' => TRUE,
   );
   if ($password) {
     $form['httpauth']['simpletest_httpauth_password']['#description'] = t('To change the password, enter the new password here.');
@@ -368,6 +387,7 @@ function simpletest_settings_form_submit($form, &$form_state) {
   config('simpletest.settings')
     ->set('simpletest_clear_results', $form_state['values']['simpletest_clear_results'])
     ->set('simpletest_verbose', $form_state['values']['simpletest_verbose'])
+    ->set('simpletest_cache', $form_state['values']['simpletest_cache'])
     ->set('simpletest_method', $form_state['values']['simpletest_httpauth_method'])
     ->set('simpletest_username', $form_state['values']['simpletest_httpauth_username'])
     ->set('simpletest_password', $form_state['values']['simpletest_httpauth_password'])
@@ -391,4 +411,3 @@ function simpletest_settings_form_validate($form, &$form_state) {
     form_set_error('simpletest_httpauth_username', t('HTTP authentication credentials must include a username in addition to a password.'));
   }
 }
-

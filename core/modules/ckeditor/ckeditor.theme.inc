@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Theme functions for CKEditor module.
+ * Theme functions for CKEditor 4 module.
  */
 
 /**
@@ -63,7 +63,13 @@ function template_preprocess_ckeditor_settings_toolbar(&$variables) {
       $value = filter_xss_admin($button['image_alternative']);
     }
     elseif (isset($button['image']) || isset($button['image' . $rtl])) {
-      $value = '<img src="'. file_create_url($button['image' . $rtl]) . '" title="' . check_plain($button['label']) . '" />';
+      if (isset($button['image' . $rtl])) {
+        $src = file_create_url($button['image' . $rtl]);
+      }
+      else {
+        $src = file_create_url($button['image']);
+      }
+      $value = '<img src="'. $src . '" title="' . check_plain($button['label']) . '" />';
       $value = '<a href="#" role="button" title="' . $button['label'] . '" aria-label="' . $button['label'] . '"><span class="cke_button_icon">' . $value . '</span></a>';
     }
     else {
@@ -133,7 +139,7 @@ function template_preprocess_ckeditor_settings_toolbar(&$variables) {
 }
 
 /**
- * Displays the toolbar configuration for CKEditor.
+ * Displays the toolbar configuration for CKEditor 4.
  */
 function theme_ckeditor_settings_toolbar($variables) {
   $add_group = '<span class="ckeditor-group-add-wrapper"><a href="#" class="ckeditor-group-add">' . t('Add group') . '</a></span>';

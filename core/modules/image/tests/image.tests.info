@@ -63,3 +63,9 @@ name = Image style flood protection
 description = Test prevention of unauthorized image style generation.
 group = Image
 file = image.test
+
+[ImageStyleTokenTests]
+name = Image Style token tests
+description = Test image style and attribute tokens.
+group = Image
+file = token.test

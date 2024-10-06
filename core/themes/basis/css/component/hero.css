@@ -10,9 +10,7 @@
   min-height: 30vh;
   padding: 1.5rem 2rem 2rem;
   margin: 0 0 2rem;
-  -webkit-transform: translate(-50%, 0);
   transform: translate(-50%, 0);
-  -webkit-transition: min-height 0.25s;
   transition: min-height 0.25s;
   will-change: min-height;
   background-size: cover;
@@ -50,7 +48,6 @@
     /* Remove full width styles on larger screens */
     left: auto;
     width: 100%;
-    -webkit-transform: none;
     transform: none;
   }
 }

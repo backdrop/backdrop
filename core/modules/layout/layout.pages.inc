@@ -13,31 +13,15 @@ function layout_page_callback() {
   $menu_item = layout_menu_item_load($menu_item_name);
 
   // Determine the correct layout to use at this path.
-  $layouts = layout_load_multiple_by_path($menu_item->path);
-  $match_found = FALSE;
-  $layout = NULL;
-  foreach ($layouts as $layout) {
-    if ($layout->disabled) {
-      continue;
-    }
-
-    // Populate the contexts from the menu system.
-    $contexts = $layout->getContexts();
-    foreach ($contexts as $context) {
-      if (isset($context->position) && isset($args[$context->position])) {
-        $context->setData($args[$context->position]);
-      }
-    }
-
-    // Check access to this layout.
-    if ($layout->checkAccess()) {
-      $match_found = TRUE;
-      break;
-    }
+  $router_item_path = $menu_item->path;
+  if (strpos($router_item_path, '%') !== FALSE) {
+    $router_item_path = current_path();
   }
+  $router_item = menu_get_item($router_item_path);
+  $layout = layout_get_layout_by_path(NULL, $router_item, TRUE);
 
   // No layouts match based on conditions.
-  if (!$match_found) {
+  if (!$layout) {
     return MENU_NOT_FOUND;
   }
 

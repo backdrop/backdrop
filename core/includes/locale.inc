@@ -360,7 +360,7 @@ function locale_language_url_fallback($languages = NULL, $language_type = LANGUA
  */
 function locale_language_switcher_url($type, $path) {
   // Get the enabled languages only.
-  $language_list = language_list(TRUE, TRUE);
+  $language_list = language_list(TRUE, TRUE, TRUE);
   $links = array();
 
   foreach ($language_list as $langcode => $label) {
@@ -385,7 +385,7 @@ function locale_language_switcher_session($type, $path) {
   $language_query = isset($_SESSION[$param]) ? $_SESSION[$param] : $GLOBALS[$type]->langcode;
 
   // Get the enabled languages only.
-  $language_list = language_list(TRUE, TRUE);
+  $language_list = language_list(TRUE, TRUE, TRUE);
   $links = array();
 
   $query = $_GET;
@@ -627,17 +627,9 @@ function _locale_parse_js_file($filepath) {
     (                             # capture plural string argument
       (?:                         # non-capturing group to repeat string pieces
         (?:
-          \'                      # match start of single-quoted string
-          (?:\\\\\'|[^\'])*       # match any character except unescaped single-quote
-          @count                  # match "@count"
-          (?:\\\\\'|[^\'])*       # match any character except unescaped single-quote
-          \'                      # match end of single-quoted string
+          \'(?:\\\\\'|[^\'])*\'   # match single-quoted string with any character except unescaped single-quote
           |
-          "                       # match start of double-quoted string
-          (?:\\\\"|[^"])*         # match any character except unescaped double-quote
-          @count                  # match "@count"
-          (?:\\\\"|[^"])*         # match any character except unescaped double-quote
-          "                       # match end of double-quoted string
+          "(?:\\\\"|[^"])*"       # match double-quoted string with any character except unescaped double-quote
         )
         (?:\s*\+\s*)?             # match "+" with possible whitespace, for str concat
       )+                          # match multiple because we supports concatenating strs
@@ -736,8 +728,8 @@ function _locale_invalidate_js($langcode = NULL) {
     if (!locale_translate_english()) {
       unset($languages['en']);
     }
-    foreach ($languages as $lcode => $data) {
-      $parsed['refresh:' . $lcode] = 'waiting';
+    foreach ($languages as $language_code => $data) {
+      $parsed['refresh:' . $language_code] = 'waiting';
     }
   }
   else {

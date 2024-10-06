@@ -1,0 +1,7 @@
+name = "Deprecated Redirect Test"
+description = "Testing module to confirm deprecated paths can redirect to new paths."
+backdrop = 1.x
+package = Testing
+version = BACKDROP_VERSION
+type = module
+hidden = TRUE

@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Dashboard block displaying informtion about content types.
+ * Dashboard block displaying information about content types.
  */
 class DashboardContentTypesBlock extends Block {
   /**
@@ -26,6 +26,10 @@ class DashboardContentTypesBlock extends Block {
    * {@inheritdoc}
    */
   function getAdminTitle() {
+    if (!empty($this->settings['admin_label'])) {
+      return check_plain($this->settings['admin_label']);
+    }
+
     return t('Manage content types');
   }
 
@@ -33,6 +37,10 @@ class DashboardContentTypesBlock extends Block {
    * {@inheritdoc}
    */
   function getAdminPreview() {
+    if (!empty($this->settings['admin_description'])) {
+      return filter_xss($this->settings['admin_description']);
+    }
+
     return t('Links to administer content types.');
   }
 
@@ -87,15 +95,6 @@ class DashboardContentTypesBlock extends Block {
       return array();
     }
 
-    if (empty($rows)) {
-      $rows[] = array(
-        array(
-          'data' => t('There are no content types to display.'),
-          'colspan' => 4,
-        ),
-      );
-    }
-
     $panel = array(
       '#theme' => 'dashboard_panel__node_types',
     );
@@ -103,6 +102,7 @@ class DashboardContentTypesBlock extends Block {
       '#theme' => 'table',
       '#header' => $header,
       '#rows' => $rows,
+      '#empty' => t('There are no content types to display.'),
     );
 
     if ($access) {
