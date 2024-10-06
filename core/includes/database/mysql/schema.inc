@@ -109,7 +109,7 @@ class DatabaseSchema_mysql extends DatabaseSchema {
 
     // The row format needs to be either DYNAMIC or COMPRESSED in order to allow
     // for the innodb_large_prefix setting to take effect, see
-    // https://dev.mysql.com/doc/refman/5.6/en/create-table.html
+    // https://dev.mysql.com/doc/refman/8.4/en/create-table.html
     if ($this->connection->utf8mb4IsActive()) {
       $sql .= ' ROW_FORMAT=DYNAMIC';
     }
@@ -389,7 +389,7 @@ class DatabaseSchema_mysql extends DatabaseSchema {
 
   public function indexExists($table, $name) {
     // Returns one row for each column in the index. Result is string or FALSE.
-    // Details at http://dev.mysql.com/doc/refman/5.0/en/show-index.html
+    // Details at https://dev.mysql.com/doc/refman/8.4/en/show-index.html
     $row = $this->connection->query('SHOW INDEX FROM {' . $table . "} WHERE key_name = '$name'")->fetchAssoc();
     return isset($row['Key_name']);
   }
@@ -497,9 +497,7 @@ class DatabaseSchema_mysql extends DatabaseSchema {
     }
     $condition->compile($this->connection, $this);
     // Don't use {} around information_schema.tables table.
-    $comment = $this->connection->query("SELECT table_comment FROM information_schema.tables WHERE " . (string) $condition, $condition->arguments())->fetchField();
-    // Work-around for MySQL 5.0 bug http://bugs.mysql.com/bug.php?id=11379
-    return preg_replace('/; InnoDB free:.*$/', '', $comment);
+    return $this->connection->query("SELECT table_comment FROM information_schema.tables WHERE " . (string) $condition, $condition->arguments())->fetchField();
   }
 
   public function findTables($table_expression) {
