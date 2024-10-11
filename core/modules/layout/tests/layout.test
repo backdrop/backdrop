@@ -3688,11 +3688,19 @@ class LayoutPathTest extends BackdropWebTestCase {
   public function setUp() {
     parent::setUp(array('layout_test'));
 
+    // Create content types for testing.
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+    $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
+
     // Create and login admin user.
     $this->admin_user = $this->backdropCreateUser(array(
+      'access administration pages',
       'access content',
       'administer layouts',
       'access user profiles',
+      'edit any page content',
+      'edit any post content',
+      'administer nodes',
     ));
     $this->backdropLogin($this->admin_user);
   }
@@ -3713,6 +3721,66 @@ class LayoutPathTest extends BackdropWebTestCase {
 
     // Make sure backdrop_match_path() can handle a NULL path.
     backdrop_match_path($path, "foo\nbar");
+  }
+
+  /**
+   * Test additional layout paths.
+   */
+  public function testAdditionalLayoutPaths() {
+    config_set('system.core', 'node_admin_theme', 0);
+
+    // Create a new layout using the UI.
+    $layout_name = 'test_page_layout';
+    $edit = array(
+      'title' => 'Page test',
+      'name' => $layout_name,
+      'layout_template' => 'boxton',
+      'path' => 'node/%',
+      'additional_paths' => 'node/%/edit'
+    );
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
+
+    // Add a few blocks via the API.
+    $test_layout_1 = layout_load($layout_name);
+    $test_layout_1->addBlock('layout_test', 'foo', 'content');
+    $test_layout_1->addBlock('layout_test', 'foo', 'sidebar');
+    $test_layout_1->save();
+
+    $this->assertRaw($layout_name);
+
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure');
+    $this->backdropPost(NULL, $edit, t('Add condition'));
+    $edit = array(
+      'condition' => 'node_type',
+    );
+    $this->backdropPost(NULL, $edit, t('Load condition'));
+    $edit = array(
+      'bundles[page]' => TRUE,
+    );
+    $this->backdropPost(NULL, $edit, t('Add condition'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $test_node1 = $this->backdropCreateNode(array(
+      'type' => 'page',
+      'title' => "Test page title",
+    ));
+
+    $test_node2 = $this->backdropCreateNode(array(
+      'type' => 'post',
+      'title' => "Test post title",
+    ));
+
+    $this->backdropGet('node/' . $test_node1->nid);
+    $this->assertResponse(200);
+    $this->assertRaw('Foo subject', 'Testing block is present on page layout');
+
+    $this->backdropGet('node/' . $test_node1->nid . '/edit');
+    $this->assertResponse(200);
+    $this->assertRaw('Foo subject', 'Testing block is present on page layout');
+
+    $this->backdropGet('node/' . $test_node2->nid . '/edit');
+    $this->assertResponse(200);
+    $this->assertNoRaw('Foo subject', 'Testing block is not present on page layout');
   }
 }
 
