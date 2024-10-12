@@ -574,40 +574,6 @@ function theme_system_admin_index($variables) {
  * Theme a link to a token tree either as a regular link or a dialog.
  */
 function theme_token_tree_link($variables) {
-  // if (empty($variables['text'])) {
-  //   $variables['text'] = t('Browse available tokens');
-  // }
-
-  // if (!empty($variables['dialog'])) {
-  //   backdrop_add_library('system', 'token');
-  //   $variables['options']['attributes']['class'][] = 'use-ajax token-browser-link';
-  // }
-
-  // $info = system_theme();
-  // $tree_variables = array_intersect_key($variables, $info['token_tree']['variables']);
-  // $tree_variables = backdrop_array_diff_assoc_recursive($tree_variables, $info['token_tree']['variables']);
-  // if (!isset($variables['options']['query']['options'])) {
-  //   $variables['options']['query']['options'] = array();
-  // }
-  // $variables['options']['query']['options'] += $tree_variables;
-
-  // // We should never pass the dialog option to theme_token_tree(). It is only
-  // // used for this function.
-  // unset($variables['options']['query']['options']['dialog']);
-
-  // // Add a security token so that the tree page should only work when used
-  // // when the dialog link is output with theme('token_tree_link').
-  // $variables['options']['query']['token'] = backdrop_get_token('token-tree:' . serialize($variables['options']['query']['options']));
-
-  // // Because PHP converts query strings with arrays into a different syntax on
-  // // the next request, the options have to be encoded with JSON in the query
-  // // string so that we can reliably decode it for token comparison.
-  // $variables['options']['query']['options'] = backdrop_json_encode($variables['options']['query']['options']);
-
-  // // Set the token tree to open in a separate window.
-  // $variables['options']['attributes'] + array('target' => '_blank');
-
-  // return l($variables['text'], 'token/tree', $variables['options']);
   $options = array(
     'attributes' => array(),
     'query' => array(
@@ -623,13 +589,16 @@ function theme_token_tree_link($variables) {
   if (!empty($variables['dialog'])) {
     backdrop_add_library('system', 'token');
     backdrop_add_library('system', 'backdrop.ajax');
-
     $options['attributes']['class'][] = 'use-ajax token-browser-link';
   }
   else {
     $options['attributes']['target'] = '_blank';
   }
-
+  // Create a security token.
+  $settings['tokenBrowser'] = array(
+    'token' => backdrop_get_token('token-browser-endpoint'),
+  );
+  backdrop_add_js($settings, 'setting');
   return l($variables['text'], 'token/tree', $options);
 }
 
@@ -665,76 +634,16 @@ function theme_tree_table($variables) {
  * @ingroup themeable
  */
 function theme_token_tree($variables) {
-  // $token_types = $variables['token_types'];
-  // $info = token_get_info();
-
-  // if ($token_types == 'all') {
-  //   $token_types = array_keys($info['types']);
-  // }
-  // elseif ($variables['global_types']) {
-  //   $token_types = array_merge($token_types, token_get_global_token_types());
-  // }
-
-  // $options = array(
-  //   'flat' => TRUE,
-  //   'restricted' => $variables['show_restricted'],
-  //   'depth' => $variables['recursion_limit'],
-  // );
-  // $multiple_token_types = (count($token_types) > 1);
-  // $rows = array();
-
-  // foreach ($info['types'] as $type => $type_info) {
-  //   if (!in_array($type, $token_types)) {
-  //     continue;
-  //   }
-
-  //   if ($multiple_token_types) {
-  //     $row = _token_token_tree_format_row($type, $type_info, TRUE);
-  //     unset($row['data']['value']);
-  //     $rows[] = $row;
-  //   }
-
-  //   $tree = token_build_tree($type, $options);
-  //   foreach ($tree as $token => $token_info) {
-  //     if (!empty($token_info['restricted']) && empty($variables['show_restricted'])) {
-  //       continue;
-  //     }
-  //     if (!empty($token_info['deprecated'])) {
-  //       continue;
-  //     }
-  //     if ($multiple_token_types && !isset($token_info['parent'])) {
-  //       $token_info['parent'] = $type;
-  //     }
-  //     $row = _token_token_tree_format_row($token, $token_info);
-  //     unset($row['data']['value']);
-  //     $rows[] = $row;
-  //   }
-  // }
-
-  // $table_variables = array(
-  //   'header' => array(
-  //     t('Name'),
-  //     t('Token'),
-  //   ),
-  //   'rows' => $rows,
-  //   'attributes' => array('class' => array('token-tree')),
-  //   'empty' => t('No tokens available'),
-  // );
-
-  // if ($variables['click_insert']) {
-  //   $table_variables['caption'] = t('Select a token to insert it into the current field.');
-  //   $table_variables['attributes']['class'][] = 'token-click-insert';
-  // }
-
-  // backdrop_add_library('system', 'token');
-  // $output = theme('tree_table', $table_variables);
-  // return $output;
-
   if (!empty($variables['dialog'])) {
     return theme('token_tree_link', $variables);
   }
   module_load_include('inc', 'system', 'system.pages');
   $content = system_token_browser_tree_build_content($variables['token_types'], $variables['global_types']);
+  // Create a security token.
+  $settings['tokenBrowser'] = array(
+    'token' => backdrop_get_token('token-browser-endpoint'),
+  );
+  backdrop_add_js($settings, 'setting');
 
   return system_token_browser_render($content);
 }
