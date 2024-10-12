@@ -119,28 +119,51 @@ function system_theme() {
         'caption' => '',
       ),
     ) + $base,
+    // 'token_tree' => array(
+    //   'variables' => array(
+    //     'token_types' => array(),
+    //     'global_types' => TRUE,
+    //     'click_insert' => TRUE,
+    //     'show_restricted' => FALSE,
+    //     'recursion_limit' => 3,
+    //     'dialog' => FALSE,
+    //   ),
+    // ) + $base,
     'token_tree' => array(
       'variables' => array(
+        'text' => t('Browse available tokens.'),
         'token_types' => array(),
         'global_types' => TRUE,
+        'dialog' => FALSE,
+
         'click_insert' => TRUE,
         'show_restricted' => FALSE,
-        'recursion_limit' => 3,
-        'dialog' => FALSE,
       ),
     ) + $base,
     'token_tree_link' => array(
       'variables' => array(
-        'text' => NULL,
-        'options' => array(),
+        'text' => t('Browse available tokens.'),
         'token_types' => array(),
         'global_types' => TRUE,
+        'dialog' => TRUE,
+
+        'options' => array(),
         'click_insert' => TRUE,
         'show_restricted' => FALSE,
-        'recursion_limit' => 3,
-        'dialog' => TRUE,
       ),
     ) + $base,
+    // 'token_tree_link' => array(
+    //   'variables' => array(
+    //     'text' => NULL,
+    //     'options' => array(),
+    //     'token_types' => array(),
+    //     'global_types' => TRUE,
+    //     'click_insert' => TRUE,
+    //     'show_restricted' => FALSE,
+    //     'recursion_limit' => 3,
+    //     'dialog' => TRUE,
+    //   ),
+    // ) + $base,
     'label_machine_name' => array(
       'variables' => array(
         'label' => NULL,
@@ -1105,13 +1128,23 @@ function system_menu() {
     'file' => 'system.admin.inc',
   );
 
-  // Token paths.
+  // AJAX endpoint for the assembled token tree.
   $items['token/tree'] = array(
     'page callback' => 'system_token_output',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
     'file' => 'system.pages.inc',
     'theme callback' => 'ajax_base_page_theme',
+  );
+
+  // AJAX endpoint for retrieving a token.
+  $items['token-browser/token/%'] = array(
+    'page callback' => 'system_token_browser_endpoint',
+    'page arguments' => array(2),
+    'delivery callback' => 'system_token_browser_endpoint_output',
+    'access callback' => 'system_token_browser_endpoint_access',
+    'file' => 'system.pages.inc',
+    'type' => MENU_CALLBACK,
   );
 
   // Machine names transliteration.
@@ -2100,6 +2133,10 @@ function system_library_info() {
     'version' => '1.0',
     'js' => array(
       $system_module_path . '/js/token.js' => array(),
+      array(
+        'type' => 'setting',
+        'data' => array('tokenBrowser' => array('token' => backdrop_get_token('token-browser-endpoint'))),
+      ),
     ),
     'css' => array(
       $system_module_path . '/css/token.css' => array(),
@@ -2107,6 +2144,9 @@ function system_library_info() {
     'dependencies' => array(
       array('system', 'jquery.treetable'),
       array('system', 'backdrop.ajax'),
+    ),
+    'icons' => array(
+      'caret-down',
     ),
   );
 

@@ -1,59 +1,171 @@
-/**
- * Styles for displaying the token tree and dialog.
- */
-/* Normally we would use a mobile-first media query, but in this case we only
-   apply max-width on smaller screens. Max-width/max-height settings interfere
-   with jQuery UI dialog resizing, but on a small screen we'll just take up
-   all available room. */
-.token-dialog {
-  max-width: none;
-  max-height: none;
-}
-@media only screen and (max-width: 600px) {
-  .token-dialog {
-    width: 100% !important;
-    max-width: 100%;
-    max-height: 100%;
-  }
+@charset 'UTF-8';
+
+.token-browser-dialog {
+  padding: 0;
+  z-index: 10000;
 }
 
-.token-tree {
-  font-size: 0.85em;
-}
-.token-tree td {
+.token-browser-dialog .ui-dialog-content {
+  background: #aaa;
   padding: 0;
-  vertical-align: top;
 }
-.token-tree th {
-  padding: 4px 0;
+
+.tree-grid {
+  background: #aaa;
+  border: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  line-height: 1.5;
+  margin: 0;
+  table-layout: fixed;
+  width: 100%;
 }
-.token-tree th:first-child {
-  padding-left: 20px;
-  padding-right: 20px;
+
+.tree-grid .token-name {
+  width: 25%;
 }
-.token-tree .branch.collapsed .token-name,
-.token-tree .branch.expanded .token-name {
-  cursor: pointer;
-}
-.token-tree .token-name {
+
+.tree-grid .token-raw {
   width: 30%;
-  white-space: nowrap;
-}
-.token-tree .token-token {
-  white-space: nowrap;
-}
-.token-tree .token-key {
-  float: left;
-}
-.token-tree .token-more {
-  float: right;
-}
-.token-tree .token-description {
-  color: #666;
-  white-space: normal;
-  clear: both;
-}
-.token-tree .token-group-description {
-  padding: 0;
 }
 
+.tree-grid .token-description {
+  width: 40%;
+}
+
+.tree-grid tr {
+  background: padding-box #aaa;
+  border: 0;
+}
+
+.tree-grid th {
+  border: 0;
+}
+
+.tree-grid td {
+  background: padding-box #fff;
+  border: #aaa solid 0;
+  border-bottom-width: 1px;
+  height: 2.4em;
+  padding: .2em .5em;
+}
+
+.tree-grid .token-name {
+  padding-left: 2.4em;
+}
+
+.tree-grid td:first-child {
+  border-left-width: 24em;
+}
+
+.tree-grid [aria-level="1"] td:first-child {
+  border-left-width: 0;
+}
+
+.tree-grid [aria-level="2"] td:first-child {
+  border-left-width: 2em;
+}
+
+.tree-grid [aria-level="3"] td:first-child {
+  border-left-width: 4em;
+}
+
+.tree-grid [aria-level="4"] td:first-child {
+  border-left-width: 6em;
+}
+
+.tree-grid [aria-level="5"] td:first-child {
+  border-left-width: 8em;
+}
+
+.tree-grid [aria-level="6"] td:first-child {
+  border-left-width: 10em;
+}
+
+.tree-grid [aria-level="7"] td:first-child {
+  border-left-width: 12em;
+}
+
+.tree-grid [aria-level="8"] td:first-child {
+  border-left-width: 14em;
+}
+
+.tree-grid [aria-level="9"] td:first-child {
+  border-left-width: 16em;
+}
+
+.tree-grid [aria-level="10"] td:first-child {
+  border-left-width: 18em;
+}
+
+.tree-grid [aria-level="11"] td:first-child {
+  border-left-width: 20em;
+}
+
+.tree-grid [aria-level="12"] td:first-child {
+  border-left-width: 22em;
+}
+
+.tree-grid [aria-level="2"] td {
+  background: #f5f5f5;
+}
+
+.tree-grid [aria-level="3"] td,
+.tree-grid [aria-level="4"] td,
+.tree-grid [aria-level="5"] td,
+.tree-grid [aria-level="6"] td,
+.tree-grid [aria-level="7"] td,
+.tree-grid [aria-level="8"] td,
+.tree-grid [aria-level="9"] td,
+.tree-grid [aria-level="10"] td {
+  background: #e9e9e9;
+}
+
+.tree-grid button {
+  background: transparent;
+  border: 0;
+  height: 2em;
+  line-height: 0;
+  margin: 0 .2em 0 -2.2em;
+  overflow: hidden;
+  padding: 0;
+  position: relative;
+  text-indent: -9999em;
+  white-space: nowrap;
+  width: 2em;
+}
+
+.tree-grid button:focus {
+  background-color: #ddd;
+}
+
+.tree-grid button:after {
+  background: content-box transparent var(--icon-caret-down) center / 50% no-repeat;
+  /* background-image: var(--icon-caret-down); */
+  box-sizing: border-box;
+  content: '';
+  display: block;
+  left: 0;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  transform: rotate(-90deg);
+  transition: .15s;
+  width: 100%;
+}
+
+[aria-expanded="true"] button:after {
+  transform: rotate(0deg);
+}
+
+.tree-grid a:focus {
+  text-decoration: underline;
+}
+
+.token-key.selected-token {
+  font-weight: bold;
+}
+
+.token-key.selected-token:after {
+  content: ' (selected)';
+}
