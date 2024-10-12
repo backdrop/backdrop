@@ -119,16 +119,6 @@ function system_theme() {
         'caption' => '',
       ),
     ) + $base,
-    // 'token_tree' => array(
-    //   'variables' => array(
-    //     'token_types' => array(),
-    //     'global_types' => TRUE,
-    //     'click_insert' => TRUE,
-    //     'show_restricted' => FALSE,
-    //     'recursion_limit' => 3,
-    //     'dialog' => FALSE,
-    //   ),
-    // ) + $base,
     'token_tree' => array(
       'variables' => array(
         'text' => t('Browse available tokens.'),
@@ -152,18 +142,6 @@ function system_theme() {
         'show_restricted' => FALSE,
       ),
     ) + $base,
-    // 'token_tree_link' => array(
-    //   'variables' => array(
-    //     'text' => NULL,
-    //     'options' => array(),
-    //     'token_types' => array(),
-    //     'global_types' => TRUE,
-    //     'click_insert' => TRUE,
-    //     'show_restricted' => FALSE,
-    //     'recursion_limit' => 3,
-    //     'dialog' => TRUE,
-    //   ),
-    // ) + $base,
     'label_machine_name' => array(
       'variables' => array(
         'label' => NULL,
