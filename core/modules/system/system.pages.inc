@@ -89,15 +89,15 @@ function system_token_browser_endpoint_output($page_callback_result) {
 
 /**
  * Helper function to generate a render array of token types.
- * 
- * @param array|string $type
+ *
+ * @param array|string $types
  *   An array of token types to display in the tree or the string 'all'.
  * @param bool $global_types
  *   Whether or not to include global types in the tree.
- * 
+ *
  * @return array
  *   The constructed array of types keyed by type.
- * 
+ *
  */
 function system_token_browser_tree_build_content($types, $global_types) {
   global $language;
