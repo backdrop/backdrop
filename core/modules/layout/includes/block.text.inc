@@ -68,6 +68,7 @@ class BlockText extends Block {
     $form['content'] = array(
       '#type' => 'text_format',
       '#title' => t('Block content'),
+      '#description' => t('This field supports tokens.') . ' ' . theme('token_tree_link'),
       '#default_value' => $this->settings['content'],
       '#format' => $this->settings['format'],
       '#editor_uploads' => TRUE,
