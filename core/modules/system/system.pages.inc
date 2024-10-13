@@ -205,7 +205,7 @@ function system_token_browser_tree_build_content($types, $global_types) {
  * @return array
  *   The constructed level of tokens as an array keyed by token.
  */
-function system_token_browser_build_level($type, array $ancestors = array(), $show_restricted) {
+function system_token_browser_build_level($type, array $ancestors, $show_restricted) {
   global $language;
 
   $level = array();
