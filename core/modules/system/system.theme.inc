@@ -597,35 +597,11 @@ function theme_token_tree_link($variables) {
   // Create a security token.
   $settings['tokenBrowser'] = array(
     'token' => backdrop_get_token('token-browser-endpoint'),
+    'restricted' => $variables['show_restricted'],
+    'click_insert' => $variables['click_insert'],
   );
   backdrop_add_js($settings, 'setting');
   return l($variables['text'], 'token/tree', $options);
-}
-
-/**
- * Theme a tree table.
- *
- * @ingroup themeable
- */
-function theme_tree_table($variables) {
-  foreach ($variables['rows'] as &$row) {
-    $row += array('class' => array());
-    if (!empty($row['id'])) {
-      $row['data-tt-id'] = $row['id'];
-      $row['no_striping'] = TRUE;
-      unset($row['id']);
-    }
-    if (!empty($row['parent'])) {
-      $row['data-tt-parent-id'] = $row['parent'];
-      unset($row['parent']);
-    }
-  }
-
-  if (!empty($variables['rows'])) {
-    backdrop_add_library('system', 'jquery.treetable');
-  }
-
-  return theme('table', $variables);
 }
 
 /**
@@ -642,6 +618,8 @@ function theme_token_tree($variables) {
   // Create a security token.
   $settings['tokenBrowser'] = array(
     'token' => backdrop_get_token('token-browser-endpoint'),
+    'restricted' => $variables['show_restricted'],
+    'click_insert' => $variables['click_insert'],
   );
   backdrop_add_js($settings, 'setting');
 

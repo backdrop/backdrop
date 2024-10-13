@@ -60,8 +60,9 @@ function system_token_browser_endpoint($type) {
 
   $input = filter_input_array(INPUT_GET, $definition);
   $ancestors = isset($input['ancestors']) ? backdrop_json_decode($input['ancestors']) : array();
+  $show_restricted = (isset($_GET['show_restricted']) && $_GET['show_restricted'] == 'true') ? TRUE : FALSE;
 
-  return system_token_browser_build_level($type, $ancestors);
+  return system_token_browser_build_level($type, $ancestors, $show_restricted);
 }
 
 /**
@@ -198,10 +199,13 @@ function system_token_browser_tree_build_content($types, $global_types) {
  * @param array $ancestors
  *   The ancestors of the given type. This allows the complete token to be
  *   constructed.
+ * @param bool $show_restricted
+ *   A flag to indicate if restricted tokens should be shown.
+ *
  * @return array
  *   The constructed level of tokens as an array keyed by token.
  */
-function system_token_browser_build_level($type, array $ancestors = array()) {
+function system_token_browser_build_level($type, array $ancestors = array(), $show_restricted) {
   global $language;
 
   $level = array();
@@ -229,6 +233,10 @@ function system_token_browser_build_level($type, array $ancestors = array()) {
     $raw_token_parts = $ancestors;
 
     if (in_array($child, array_slice($raw_token_parts, 1), TRUE)) {
+      continue;
+    }
+
+    if (!$show_restricted && !empty($child_info['restricted'])) {
       continue;
     }
 

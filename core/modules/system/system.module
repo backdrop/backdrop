@@ -125,7 +125,6 @@ function system_theme() {
         'token_types' => array(),
         'global_types' => TRUE,
         'dialog' => FALSE,
-
         'click_insert' => TRUE,
         'show_restricted' => FALSE,
       ),
@@ -136,7 +135,6 @@ function system_theme() {
         'token_types' => array(),
         'global_types' => TRUE,
         'dialog' => TRUE,
-
         'options' => array(),
         'click_insert' => TRUE,
         'show_restricted' => FALSE,

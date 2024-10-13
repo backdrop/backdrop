@@ -13,6 +13,7 @@ Backdrop.behaviors.tokenBrowser = {
     var tr_template;
     var button_template;
     var link_template;
+    var no_link_template;
     var name_template;
     var raw_template;
     var description_template;
@@ -22,6 +23,7 @@ Backdrop.behaviors.tokenBrowser = {
     tr_template = document.createElement('tr');
     button_template = document.createElement('button');
     link_template = document.createElement('a');
+    no_link_template = document.createElement('span');
     name_template = document.createElement('td');
     raw_template = document.createElement('td');
     description_template = document.createElement('td');
@@ -153,9 +155,15 @@ Backdrop.behaviors.tokenBrowser = {
      *   The table row.
      */
     function row(element, level, index) {
+      var click_insert = Backdrop.settings.tokenBrowser.click_insert;
       var tr = tr_template.cloneNode(false);
       var button = button_template.cloneNode(false);
-      var link = link_template.cloneNode(false);
+      if (click_insert) {
+        var link = link_template.cloneNode(false);
+      }
+      else {
+        var link = no_link_template.cloneNode(false);
+      }
       var name = name_template.cloneNode(false);
       var raw = raw_template.cloneNode(false);
       var description = description_template.cloneNode(false);
@@ -166,8 +174,10 @@ Backdrop.behaviors.tokenBrowser = {
       button.addEventListener('click', expand);
       button.innerHTML = 'Expand';
 
-      link.setAttribute('title', 'Select the token ' + element.raw + '. Click in a text field to insert it.');
-      link.addEventListener('click', select);
+      if (click_insert) {
+        link.setAttribute('title', 'Select the token ' + element.raw + '. Click in a text field to insert it.');
+        link.addEventListener('click', select);
+      }
 
       name.setAttribute('data-token', element.token);
       name.setAttribute('data-type', element.type);
@@ -210,6 +220,7 @@ Backdrop.behaviors.tokenBrowser = {
 
       parameters.ancestors = JSON.stringify(ancestors);
       parameters.token = Backdrop.settings.tokenBrowser.token;
+      parameters.show_restricted = Backdrop.settings.tokenBrowser.restricted;
 
       $.ajax({
         'url': url,
