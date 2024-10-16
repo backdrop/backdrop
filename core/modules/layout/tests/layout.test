@@ -3736,7 +3736,7 @@ class LayoutPathTest extends BackdropWebTestCase {
       'name' => $layout_name,
       'layout_template' => 'boxton',
       'path' => 'node/%',
-      'additional_paths' => 'node/%/edit'
+      'additional_paths' => 'node/%/edit',
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 

@@ -876,7 +876,7 @@ function layout_settings_form_validate(&$form, &$form_state) {
   }
 
   // Ensure path is properly formed.
-  _layout_validate_path($form, 'path', $path);
+  _layout_set_message_on_path_error($form, 'path', $path);
 
   // Ensure that all conditions have context requirements met.
   $context_plugins = array(
@@ -910,7 +910,7 @@ function layout_settings_form_validate(&$form, &$form_state) {
             )
           ));
         }
-        elseif(_layout_validate_path($form, 'additional_paths', $path)) {
+        elseif(_layout_set_message_on_path_error($form, 'additional_paths', $path)) {
           continue;
         }
         else {
