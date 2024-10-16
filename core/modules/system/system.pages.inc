@@ -10,8 +10,10 @@
 function system_token_output() {
   $types = isset($_GET['token_types']) ? backdrop_json_decode($_GET['token_types']) : array();
   $globals = isset($_GET['global_types']) ? backdrop_json_decode($_GET['global_types']) : TRUE;
+  $query = backdrop_get_query_parameters();
+  $show_restricted = $query['show_restricted'];
 
-  $out = system_token_browser_tree_build_content($types, $globals);
+  $out = system_token_browser_tree_build_content($types, $globals, $show_restricted);
   $out = system_token_browser_render($out);
 
   if (backdrop_is_ajax()) {
@@ -100,7 +102,7 @@ function system_token_browser_endpoint_output($page_callback_result) {
  *   The constructed array of types keyed by type.
  *
  */
-function system_token_browser_tree_build_content($types, $global_types) {
+function system_token_browser_tree_build_content($types, $global_types, $show_restricted) {
   global $language;
 
   $info = token_get_info();
@@ -118,6 +120,7 @@ function system_token_browser_tree_build_content($types, $global_types) {
     'token_types' => $types,
     'global_types' => $global_types,
     'language' => $language->langcode,
+    'show_restricted' => $show_restricted,
   )));
 
   $cid = 'token-browser-build:' . $hash;
@@ -223,6 +226,7 @@ function system_token_browser_build_level($type, array $ancestors, $show_restric
     'type' => $type,
     'ancestors' => $ancestors,
     'language' => $language->langcode,
+    'show_restricted' => $show_restricted,
   )));
 
   if ($cache = cache_get($cid, 'cache_token')) {

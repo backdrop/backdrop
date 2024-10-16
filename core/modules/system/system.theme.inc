@@ -578,6 +578,7 @@ function theme_token_tree_link($variables) {
     'attributes' => array(),
     'query' => array(
       'token' => backdrop_get_token('token-browser'),
+      'show_restricted' => $variables['show_restricted'] ? 1 : 0,
     ),
   );
 
@@ -614,7 +615,7 @@ function theme_token_tree($variables) {
     return theme('token_tree_link', $variables);
   }
   module_load_include('inc', 'system', 'system.pages');
-  $content = system_token_browser_tree_build_content($variables['token_types'], $variables['global_types']);
+  $content = system_token_browser_tree_build_content($variables['token_types'], $variables['global_types'], $variables['show_restricted']);
   // Create a security token.
   $settings['tokenBrowser'] = array(
     'token' => backdrop_get_token('token-browser-endpoint'),
