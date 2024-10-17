@@ -42,6 +42,7 @@
     "image_toolkit": "gd",
     "image_jpeg_quality": "75",
     "image_style_flood_limit": 5,
+    "initial_version": "",
     "install_profile": "",
     "jquery_version": "default",
     "language_count": 1,
