@@ -2861,7 +2861,7 @@ function layout_layout_load_by_router_item_alter(&$layouts, $router_item) {
  * Returns an array of placeholder positions in a path.
  *
  * @param string $path
- *    The menu routing path, with all placeholders represented by "%" symbols.
+ *   The menu routing path, with all placeholders represented by "%" symbols.
  *
  * @return array
  *   An array of placeholder positions.
@@ -2881,16 +2881,16 @@ function _layout_placeholder_positions($path) {
  * Ensure path is properly formed.
  *
  * @param array $form
- *    An associative array containing the structure of the form.
+ *   An associative array containing the structure of the form.
  * @param string $field_name
- *    The machine name of the field.
+ *   The machine name of the field.
  * @param string $path
- *    The menu routing path, with all placeholders represented by "%" symbols.
+ *   The menu routing path, with all placeholders represented by "%" symbols.
  *
  * @return bool
  *   TRUE if error found, else FALSE
  */
-function _layout_set_message_on_path_error(&$form, $field_name, $path) {
+function _layout_set_message_on_path_error(array &$form, $field_name, $path) {
   $parts = explode('/', $path);
   foreach ($parts as $part) {
     $wildcard_position = strpos($part, '%');
