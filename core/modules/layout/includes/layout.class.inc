@@ -534,7 +534,7 @@ class Layout {
     $this->positions[$region_name][] = $block->uuid;
 
     // Move the block into the correct position.
-    if ($position) {
+    if (is_numeric($position)) {
       $positions = array();
       foreach ($this->positions[$region_name] as $n => $uuid) {
         if ($position == $n) {
