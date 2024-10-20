@@ -288,7 +288,7 @@ function update_results_page() {
  * This page provides cautionary suggestions that should happen before
  * proceeding with the update to ensure data integrity.
  *
- * @return
+ * @return string
  *   Rendered HTML form.
  */
 function update_info_page() {
@@ -331,7 +331,8 @@ function update_info_page() {
   if (!empty($module_status_report)) {
     $output .= $module_status_report;
   }
-  $form_action = check_url(backdrop_current_script_url(array('op' => 'selection', 'token' => $token)));
+
+  $form_action = check_url(backdrop_current_script_url(array('op' => 'backup', 'token' => $token)));
   $output .= '<form method="post" action="' . $form_action . '">
   <div class="form-actions">
     <input type="submit" value="Continue" class="form-submit button-primary" />
@@ -340,6 +341,143 @@ function update_info_page() {
   </form>';
   $output .= "\n";
   return $output;
+}
+
+/**
+ * Provides a form to create an on-demand backup before updating.
+ *
+ * @return string
+ *   Rendered HTML form.
+ */
+function update_backup_page() {
+  update_task_list('backup');
+  backdrop_set_title('Pre-update backup');
+
+  $elements = backdrop_get_form('update_backup_form');
+  return backdrop_render($elements);
+}
+
+
+/**
+ * Form constructor for the list of available database module updates.
+ */
+function update_backup_form($form, &$form_state) {
+  $help = '<p>Before running updates, it is recommended to create a backup of your database and configuration.</p>';
+  $help .= '<p>If needing to skip the backup process, please ensure you create a backup through a different mechanism, such as through your hosting provider.</p>';
+  $help .= '<p>The backup process may take several minutes, depending on the size of your database.</p>';
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => $help,
+    '#weight' => -5,
+  );
+
+  $backup_classes = settings_get('backup_classes', array());
+  $backup_classes = array_merge($backup_classes, array(
+    'BackupMySql',
+    'BackupConfig',
+  ));
+
+  $backup_targets = settings_get('backup_targets', array());
+  $backup_targets = array_merge($backup_targets, array(
+    'db:default',
+    'config:active',
+  ));
+
+  $all_backup_settings = settings_get('backup_settings', array());
+
+  $form['backups'] = array(
+    '#tree' => TRUE,
+  );
+
+  foreach ($backup_targets as $backup_target) {
+    list($backup_plugin_id, $backup_subkey) = explode(':', $backup_target, 2);
+    foreach ($backup_classes as $backup_class) {
+      if ($backup_class::BACKUP_ID != $backup_plugin_id) {
+        continue;
+      }
+
+      // @todo: Implement Backup::applies() method to check if the class matches the database type.
+
+      /** @var Backup $backup_instance */
+      $backup_name = $backup_plugin_id . '_' . $backup_subkey;
+      $backup_settings = isset($all_backup_settings[$backup_target]) ? $all_backup_settings[$backup_target] : array();
+      $backup_instance = new $backup_class($backup_name, $backup_target, $backup_settings);
+      $backup_form = $backup_instance->backupSettingsForm();
+      if ($backup_form) {
+        $form['backups'][$backup_name] = array(
+          '#type' => 'fieldset',
+          '#title' => t('!type backup settings', array(
+            '!type' => $backup_instance->typeLabel(),
+          )),
+          '#collapsible' => TRUE,
+          '#collapsed' => TRUE,
+        );
+        $form['backups'][$backup_name]['settings'] = $backup_form;
+        $form['backups'][$backup_name]['settings']['#type'] = 'container';
+
+        // Show a checkbox if non-default targets are present.
+        if ($backup_target != 'db:default' && $backup_target != 'config:active') {
+          $form['backups'][$backup_name]['enabled'] = array(
+            '#type' => 'checkbox',
+            '#title' => t('Enabled'),
+            '#default_value' => TRUE,
+            '#weight' => -1,
+          );
+          $form['backups'][$backup_name]['settings']['#states'] = array(
+            'visible' => array(
+              '[name="backups[db_default][enabled]"]' => array('checked' => TRUE),
+            ),
+          );
+        }
+        else {
+          $form['backups'][$backup_name]['enabled'] = array(
+            '#type' => 'hidden',
+            '#value' => TRUE,
+          );
+        }
+      }
+      else {
+        $form['backups'][$backup_name]['enabled'] = array(
+          '#type' => 'hidden',
+          '#value' => TRUE,
+        );
+      }
+
+      // @todo: Do not pass as a value, recalculate on submit.
+      $form['backups'][$backup_name]['class'] = array(
+        '#type' => 'hidden',
+        '#value' => $backup_class,
+      );
+      $form['backups'][$backup_name]['name'] = array(
+        '#type' => 'hidden',
+        '#value' => $backup_name,
+      );
+      $form['backups'][$backup_name]['target'] = array(
+        '#type' => 'hidden',
+        '#value' => $backup_target,
+      );
+    }
+  }
+
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Create backup'),
+  );
+
+  $form['actions']['continue'] = array(
+    '#type' => 'link',
+    '#href' => $_SERVER['SCRIPT_NAME'],
+    '#options' => array(
+      'query' => array(
+        'op' => 'selection',
+        'token' => backdrop_get_token('update'),
+      )
+    ),
+    '#title' => t('Skip backup'),
+  );
+
+  return $form;
 }
 
 /**
@@ -406,6 +544,7 @@ function update_task_list($set_active = NULL) {
   $tasks = array(
     'requirements' => 'Verify requirements',
     'info' => 'Overview',
+    'backup' => 'Backup',
     'select' => 'Review updates',
     'run' => 'Run updates',
     'finished' => 'Review log',
@@ -531,6 +670,7 @@ ini_set('display_errors', TRUE);
 if (update_access_allowed()) {
 
   include_once BACKDROP_ROOT . '/core/includes/install.inc';
+  include_once BACKDROP_ROOT . '/core/includes/backup.inc';
   include_once BACKDROP_ROOT . '/core/includes/batch.inc';
   backdrop_load_updates();
 
@@ -544,18 +684,51 @@ if (update_access_allowed()) {
   update_check_requirements($skip_warnings);
 
   $op = isset($_REQUEST['op']) ? $_REQUEST['op'] : '';
+  $valid_token = isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'update');
   switch ($op) {
     // update.php ops.
+    case 'info':
+      $output = update_info_page();
+      break;
+
+    case 'backup':
+      if ($valid_token) {
+        $output = update_backup_page();
+        break;
+      }
+
+    case t('Create backup'):
+      if ($valid_token) {
+        // Generate absolute URLs for the batch processing (using $base_root),
+        // since the batch API will pass them to url() which does not handle
+        // update.php correctly by default.
+        $batch_url = $base_root . backdrop_current_script_url();
+        $redirect_url = $base_root . backdrop_current_script_url(array('op' => 'selection'));
+
+        // Check that a backup directory is specified.
+        $backups = $_POST['backups'];
+        $errors = array();
+        $ready = backup_batch_prepare($backups, $errors);
+        if ($ready) {
+          backup_batch($backups, $redirect_url, $batch_url);
+          break;
+        }
+        else {
+          foreach ($errors as $error) {
+            backdrop_set_message($error, 'error');
+          }
+        }
+      }
 
     case 'selection':
-      if (isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'update')) {
+      if ($valid_token) {
         $output = update_selection_page();
         break;
       }
 
     case t('Apply pending updates'):
       update_upgrade_enable_dependencies();
-      if (isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'update')) {
+      if ($valid_token) {
         // Generate absolute URLs for the batch processing (using $base_root),
         // since the batch API will pass them to url() which does not handle
         // update.php correctly by default.
@@ -568,10 +741,6 @@ if (update_access_allowed()) {
         update_batch($_POST['start'], $redirect_url, $batch_url);
         break;
       }
-
-    case 'info':
-      $output = update_info_page();
-      break;
 
     case 'results':
       // Remove the state indicating a Drupal 7 upgrade.

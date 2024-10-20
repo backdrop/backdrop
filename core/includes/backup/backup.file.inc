@@ -1,0 +1,250 @@
+<?php
+/**
+ * @file Contains the BackupFile class.
+ */
+
+/**
+ * Provides a utility object for reading and writing local backup files.
+ */
+class BackupFile {
+  protected $backup_name = "";
+  protected $directory = "";
+  protected $file_extensions = array();
+  protected $handle = NULL;
+  protected $log = array();
+
+  /**
+   * Construct a file object given a file path, or create a temp file for writing.
+   *
+   * @param string $backup_name
+   *   The name of the backup file without the extension. The extension will be
+   *   determined by the backup execution (depending on compression).
+   * @param string $directory
+   *   The URI or local path to the directory that will hold the backup. Stream
+   *   wrappers may be used but they may not be reliable in restoration
+   *   operations, if the database is not in a working state. Do not include
+   *   a trailing slash.
+   */
+  public function __construct($backup_name, $directory) {
+    $this->directory = $directory;
+    $this->backup_name = $backup_name;
+  }
+
+  /**
+   * Get the backup name.
+   */
+  public function backupName() {
+    return $this->backup_name;
+  }
+
+  /**
+   * Get the file directory;
+   */
+  public function directory() {
+    return $this->directory;
+  }
+
+  /**
+   * Get the full current filepath.
+   */
+  public function filePath() {
+    return $this->directory . '/' . $this->fileName();
+  }
+
+  /**
+   * Get the final filename.
+   */
+  public function fileName() {
+    $extension_str = '.' . $this->extension();
+    return $this->backup_name . $extension_str;
+  }
+
+  /**
+   * Get the file extension.
+   */
+  public function extension() {
+    return implode('.', $this->file_extensions);
+  }
+
+  /**
+   * Get the file mimetype.
+   */
+  public function mimetype() {
+    return file_get_mimetype($this->fileName());
+  }
+
+  /**
+   * Add to the extension list.
+   */
+  public function pushExtension($extension) {
+    $this->file_extensions[] = $extension;
+  }
+
+  /**
+   * Remove rom the extension list.
+   */
+  public function popExtension() {
+    return array_pop($this->file_extensions);
+  }
+
+  /**
+   * Get the last file extension.
+   */
+  public function lastExtension() {
+    return end($this->file_extensions);
+  }
+
+  /**
+   * Open a file for reading or writing.
+   */
+  public function open($write = FALSE, $binary = FALSE) {
+    if (!$this->handle) {
+      $path = $this->filepath();
+
+      // Check if the file can be read/written.
+      if ($write && ((file_exists($path) && !is_writable($path)) || !is_writable(dirname($path)))) {
+        $this->log('The file %path is not writable.', array('%path' => $path), 'error');
+        return FALSE;
+      }
+      if (!$write && !is_readable($path)) {
+        $this->log('The file %path cannot be read.', array('%path' => $path), 'error');
+        return FALSE;
+      }
+
+      // Open the file.
+      $mode = ($write ? "w" : "r") . ($binary ? "b" : "");
+      $this->handle = fopen($path, $mode);
+      return $this->handle;
+    }
+    return NULL;
+  }
+
+  /**
+   * Close a file when we're done reading/writing.
+   */
+  public function close() {
+    fclose($this->handle);
+    $this->handle = NULL;
+  }
+
+  /**
+   * Write a line to the file.
+   */
+  public function write($data) {
+    if (!$this->handle) {
+      $this->handle = $this->open(TRUE);
+    }
+    if ($this->handle) {
+      fwrite($this->handle, $data);
+    }
+  }
+
+  /**
+   * Read a line from the file.
+   */
+  public function read($size = NULL) {
+    if (!$this->handle) {
+      $this->handle = $this->open();
+    }
+    if ($this->handle && !feof($this->handle)) {
+      return $size ? fread($this->handle, $size) : fgets($this->handle);
+    }
+    return NULL;
+  }
+
+  /**
+   * Write data to the file.
+   */
+  public function putContents($data) {
+    file_put_contents($this->filePath(), $data);
+  }
+
+  /**
+   * Read data from the file.
+   */
+  public function getContents() {
+    return file_get_contents($this->filePath());
+  }
+
+  /**
+   * Get the file size.
+   */
+  public function getFileSize() {
+    return filesize($this->filePath());
+  }
+
+  /**
+   * Transfer file using http to client. Similar to the built in file_transfer,
+   * but it calls module_invoke_all('exit') so that temp files can be deleted.
+   */
+  public function transfer() {
+    $headers = array(
+      array('key' => 'Content-Type', 'value' => $this->mimetype()),
+      array('key' => 'Content-Disposition', 'value' => 'attachment; filename="'. $this->filename() .'"'),
+    );
+    // In some circumstances, web-servers will double compress gzipped files.
+    // This may help alleviate that issue by disabling mod-deflate.
+    if ($this->mimetype() == 'application/x-gzip') {
+      $headers[] = array('key' => 'Content-Encoding', 'value' => 'gzip');
+    }
+    if ($size = $this->getFileSize()) {
+      $headers[] = array('key' => 'Content-Length', 'value' => $size);
+    }
+
+    // Suppress the warning you get when the buffer is empty.
+    @ob_end_clean();
+
+    if ($this->open(FALSE, TRUE)) {
+      foreach ($headers as $header) {
+        // To prevent HTTP header injection, we delete new lines that are
+        // not followed by a space or a tab.
+        // See http://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2
+        $header['value'] = preg_replace('/\r?\n(?![\t ])/', '', $header['value']);
+        backdrop_add_http_header($header['key'], $header['value']);
+      }
+      // Transfer file in 1024 byte chunks to save memory usage.
+      while ($data = $this->read(1024)) {
+        print $data;
+      }
+      $this->close();
+
+      // Ask devel.module not to print it's footer.
+      $GLOBALS['devel_shutdown'] = FALSE;
+    }
+    else {
+      backdrop_not_found();
+    }
+
+    // Start buffering and throw away the results so that errors don't get appended to the file.
+    ob_start('_backup_file_dispose_buffer');
+
+    // @todo Clean up temporary files
+    //backup_migrate_cleanup();
+
+    exit();
+  }
+
+  /**
+   * Log any issues with reading or writing files.
+   */
+  protected function log($message, $replacements, $log_type) {
+    $this->log[] = array($message, $replacements, $log_type);
+  }
+
+  /**
+   * Return the array of current log messages.
+   *
+   * @return array
+   */
+  public function getLog() {
+    return $this->log;
+  }
+
+  /**
+   * Clear the current log messages.
+   */
+  public function clearLog() {
+    $this->log = array();
+  }
+
+}

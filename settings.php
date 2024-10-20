@@ -83,6 +83,11 @@ $config_directories['staging'] = 'files/config_' . md5(serialize($database)) . '
 $settings['update_free_access'] = FALSE;
 
 /**
+ * Enable backups during update.php process.
+ */
+$settings['backup_directory'] = 'backups';
+
+/**
  * Salt for one-time login links and cancel links, form tokens, etc.
  *
  * This variable will be set to a random value by the installer. All one-time
