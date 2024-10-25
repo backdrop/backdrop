@@ -501,7 +501,7 @@ function filter_update_1004() {
   $config = config('views.view.image_library');
 
   // Only update if view isn't overridden
-  if ($config->get('storage') == VIEWS_STORAGE_DEFAULT) {
+  if ($config->get('storage') == 4) {
     $view_config = $config->get();
     $view_config['display']['default']['display_options']['exposed_form'] = array(
       'type' => 'basic',
