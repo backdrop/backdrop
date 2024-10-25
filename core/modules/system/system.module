@@ -3498,10 +3498,16 @@ function confirm_form($form, $question, $path, $description = NULL, $yes = NULL,
     $options = array('path' => $path);
   }
 
-  $title = t('Confirm deletion of @type: !title', array(
-    '@type' => $form['#node']->type,
-    '!title' => '<em>' . $form['#node']->title . '</em>')
-  );
+  if (isset($form['#node'])) {
+    $title = t('Confirm deletion of @type: !title', array(
+      '@type' => $form['#node']->type,
+      '!title' => '<em>' . $form['#node']->title . '</em>')
+    );
+  }
+  else {
+    $title = t('Confirm deletion');
+  }
+
   backdrop_set_title($title, PASS_THROUGH);
   backdrop_set_message($question, 'warning');
 
