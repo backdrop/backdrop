@@ -3499,7 +3499,11 @@ function confirm_form($form, $question, $path, $description = NULL, $yes = NULL,
   }
 
   backdrop_set_title(t('Confirm action'));
-  backdrop_set_message($question, 'warning');
+  $form['question'] = array(
+    '#prefix' => '<div class="messages warning">',
+    '#markup' => $question,
+    '#suffix' => '</div>',
+  );
 
   $form['#attributes']['class'][] = 'confirmation';
   $form['description'] = array('#markup' => $description);
