@@ -1,4 +1,60 @@
 <?php
+/**
+ * @file
+ * Contains functionality related to creating and restoring site backups.
+ */
+
+/**
+ * Get a list of all available backups.
+ */
+function backup_directory_list() {
+  $backups = array();
+  $backup_directory = settings_get('backup_directory');
+  if (empty($backup_directory)) {
+    return $backups;
+  }
+
+  $current_directory = '';
+  $skip_this_directory = FALSE;
+  $backup_file_list = file_scan_directory($backup_directory, '/\.json$/');
+  foreach ($backup_file_list as $backup_file_path => $backup_file) {
+    $backup_file_directory = dirname($backup_file->uri);
+    $backup_file_path = $backup_file->uri;
+    if ($backup_file_directory != $current_directory) {
+      $current_directory = $backup_file_directory;
+      $skip_this_directory = FALSE;
+    }
+
+    // If a single backup or JSON file in this directory is invalid, skip the
+    // entire backup.
+    if ($skip_this_directory) {
+      continue;
+    }
+
+    // Check if the JSON file is valid, if not, continue to the next file.
+    $backup_info = @json_decode($backup_file_path, TRUE);
+    if (!$backup_info) {
+      $backups[$backup_file_directory] = array(
+        'label' => $backup_file_directory,
+        'valid' => FALSE,
+      );
+      $skip_this_directory = TRUE;
+      continue;
+    }
+
+    // If valid, add to list of backups.
+    if (!isset($backups[$backup_file_directory])) {
+      $backups[$backup_file_directory] = array(
+        'label' => $backup_info['label'],
+        'targets' => array(),
+        'valid' => TRUE,
+      );
+    }
+    $backups[$backup_file_directory]['targets'][] = $backup_info['target'];
+  }
+
+  return $backups;
+}
 
 /**
  * Starts a batch process to create a backup.

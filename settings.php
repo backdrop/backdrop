@@ -70,7 +70,7 @@ $config_directories['staging'] = 'files/config_' . md5(serialize($database)) . '
 // $config['system.core']['config_sync_clear_staging'] = 0;
 
 /**
- * Access control for update.php script.
+ * Temporary access control for update.php script.
  *
  * If you are updating your Backdrop installation using the update.php script
  * but are not logged in using either an account with the "Administer software
@@ -81,6 +81,17 @@ $config_directories['staging'] = 'files/config_' . md5(serialize($database)) . '
  * TRUE back to a FALSE!
  */
 $settings['update_free_access'] = FALSE;
+
+/**
+ * Temporary access control for the restore.php script.
+ *
+ * The restore.php script allows restoring database and configuration backups.
+ * Accounts with the "Restore system backups" permission can access this script.
+ * Change the FALSE to a TRUE to disable the access check. This can be used to
+ * restore your site in an emergency situation. After finishing the restore, be
+ * sure to open this file again and change the TRUE back to a FALSE.
+ */
+$settings['restore_free_access'] = FALSE;
 
 /**
  * Enable backups during update.php process.

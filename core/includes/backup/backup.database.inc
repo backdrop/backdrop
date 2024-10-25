@@ -28,7 +28,7 @@ abstract class BackupDatabase extends Backup {
   }
 
   /**
-   * Get the file type for to backup this destination to.
+   * Get the file type supported when backing-up or restoring to/from a file.
    */
   public function getFileTypeId() {
     return 'sql';
@@ -187,8 +187,7 @@ abstract class BackupDatabase extends Backup {
    */
   public function restore(BackupFile $file) {
     $num = 0;
-    // Open the file using the file wrapper. Check that the dump is of the right
-    // type (allow .sql for legacy reasons).
+    // Open the file using the file wrapper.
     if ($file->extension() !== $this->getFileTypeId()) {
       $this->log('Unable to restore from file %file because a %type file can\'t be restored to this database.',
         array(

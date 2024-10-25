@@ -24,6 +24,6 @@
 <?php print render($title_suffix); ?>
 
   <div class="block-content">
-    <?php print render($content); ?>
+    <?php print render($content); ?><?php print icon('backdrop-logo', array('attributes' => array('width' => 24))); ?>
   </div>
 </div>

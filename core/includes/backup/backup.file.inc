@@ -7,9 +7,9 @@
  * Provides a utility object for reading and writing local backup files.
  */
 class BackupFile {
-  protected $backup_name = "";
+  protected $backupName = "";
   protected $directory = "";
-  protected $file_extensions = array();
+  protected $fileExtensions = array();
   protected $handle = NULL;
   protected $log = array();
 
@@ -27,14 +27,14 @@ class BackupFile {
    */
   public function __construct($backup_name, $directory) {
     $this->directory = $directory;
-    $this->backup_name = $backup_name;
+    $this->backupName = $backup_name;
   }
 
   /**
    * Get the backup name.
    */
   public function backupName() {
-    return $this->backup_name;
+    return $this->backupName;
   }
 
   /**
@@ -56,14 +56,14 @@ class BackupFile {
    */
   public function fileName() {
     $extension_str = '.' . $this->extension();
-    return $this->backup_name . $extension_str;
+    return $this->backupName . $extension_str;
   }
 
   /**
    * Get the file extension.
    */
   public function extension() {
-    return implode('.', $this->file_extensions);
+    return implode('.', $this->fileExtensions);
   }
 
   /**
@@ -77,21 +77,21 @@ class BackupFile {
    * Add to the extension list.
    */
   public function pushExtension($extension) {
-    $this->file_extensions[] = $extension;
+    $this->fileExtensions[] = $extension;
   }
 
   /**
    * Remove rom the extension list.
    */
   public function popExtension() {
-    return array_pop($this->file_extensions);
+    return array_pop($this->fileExtensions);
   }
 
   /**
    * Get the last file extension.
    */
   public function lastExtension() {
-    return end($this->file_extensions);
+    return end($this->fileExtensions);
   }
 
   /**
@@ -153,14 +153,14 @@ class BackupFile {
   }
 
   /**
-   * Write data to the file.
+   * Write the entire contents of the file.
    */
   public function putContents($data) {
     file_put_contents($this->filePath(), $data);
   }
 
   /**
-   * Read data from the file.
+   * Read the entire contents of the file.
    */
   public function getContents() {
     return file_get_contents($this->filePath());

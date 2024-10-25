@@ -279,7 +279,7 @@ abstract class Backup {
     $destination = $compressed_file->filePath();
     $level = 9;
 
-    if (@function_exists('gzopen')) {
+    if (function_exists('gzopen')) {
       $fp_out = gzopen($destination, 'wb'. $level);
       $fp_in = fopen($source, 'rb');
       if ($fp_out && $fp_in) {
@@ -323,7 +323,7 @@ abstract class Backup {
     $source = $file->filePath();
     $destination = $decompressed_file->filePath();
 
-    if (@function_exists("gzopen")) {
+    if (function_exists("gzopen")) {
       $fp_out = fopen($destination, 'wb');
       $fp_in = gzopen($source, 'rb');
       if ($fp_out && $fp_in) {

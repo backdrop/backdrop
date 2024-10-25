@@ -15,11 +15,10 @@ class BackupConfig extends Backup {
    * {@inheritdoc}
    */
   public function backup(BackupFile $file) {
-    $target = $this->getTarget();
-    if ($target != 'config:active' && $target != 'config:staging') {
+    $config_type = $this->getConfigType();
+    if (!$config_type) {
       return FALSE;
     }
-    list(,$config_type) = explode(':', $target);
 
     $file->pushExtension('tar');
     $file->pushExtension('gz');
@@ -40,14 +39,28 @@ class BackupConfig extends Backup {
    * {@inheritdoc}
    */
   public function restore(BackupFile $file) {
+    $config_type = $this->getConfigType();
+    if (!$config_type) {
+      return FALSE;
+    }
 
+    $config_storage = config_get_config_storage($config_type);
+    try {
+      $config_storage->importArchive($file->filePath());
+    }
+    catch (ConfigStorageException $e) {
+      $this->log($e->getMessage(), array(), 'error');
+      return FALSE;
+    }
+
+    return TRUE;
   }
 
   /**
    * {@inheritdoc}
    */
   function typeLabel() {
-    // TODO: Implement typeLabel() method.
+    return t('Configuration');
   }
 
   /**
@@ -60,4 +73,20 @@ class BackupConfig extends Backup {
   public function backupSettingsForm() {
 
   }
+
+  /**
+   * Get the type of config being backed-up or restored.
+   *
+   * @return false|string
+   *   Either "active", "staging", or FALSE.
+   */
+  protected function getConfigType() {
+    $target = $this->getTarget();
+    if ($target != 'config:active' && $target != 'config:staging') {
+      return FALSE;
+    }
+    list(,$config_type) = explode(':', $target);
+    return $config_type;
+  }
+
 }
