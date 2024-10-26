@@ -7,42 +7,42 @@
 
 Backdrop.behaviors.tokenBrowser = {
   attach: function (context, settings) {
-    var ANCESTORS = {};
+    var allAncestors = {};
 
     var buffer;
-    var tr_template;
-    var button_template;
-    var link_template;
-    var no_link_template;
-    var name_template;
-    var raw_template;
-    var description_template;
+    var trTemplate;
+    var buttonTemplate;
+    var linkTemplate;
+    var noLinkTemplate;
+    var nameTemplate;
+    var rawTemplate;
+    var descriptionTemplate;
 
     // Create DOM element templates and assign attributes. 
     buffer = document.createDocumentFragment();
-    tr_template = document.createElement('tr');
-    button_template = document.createElement('button');
-    link_template = document.createElement('a');
-    no_link_template = document.createElement('span');
-    name_template = document.createElement('td');
-    raw_template = document.createElement('td');
-    description_template = document.createElement('td');
+    trTemplate = document.createElement('tr');
+    buttonTemplate = document.createElement('button');
+    linkTemplate = document.createElement('a');
+    noLinkTemplate = document.createElement('span');
+    nameTemplate = document.createElement('td');
+    rawTemplate = document.createElement('td');
+    descriptionTemplate = document.createElement('td');
 
-    tr_template.setAttribute('role', 'row');
-    tr_template.setAttribute('aria-expanded', 'false');
-    tr_template.setAttribute('aria-busy', 'false');
+    trTemplate.setAttribute('role', 'row');
+    trTemplate.setAttribute('aria-expanded', 'false');
+    trTemplate.setAttribute('aria-busy', 'false');
 
-    link_template.setAttribute('href', 'javascript:void(0);');
-    link_template.setAttribute('class', 'token-key');
+    linkTemplate.setAttribute('href', 'javascript:void(0);');
+    linkTemplate.setAttribute('class', 'token-key');
 
-    name_template.setAttribute('role', 'gridcell');
-    name_template.setAttribute('class', 'token-name');
+    nameTemplate.setAttribute('role', 'gridcell');
+    nameTemplate.setAttribute('class', 'token-name');
 
-    raw_template.setAttribute('role', 'gridcell');
-    raw_template.setAttribute('class', 'token-raw');
+    rawTemplate.setAttribute('role', 'gridcell');
+    rawTemplate.setAttribute('class', 'token-raw');
 
-    description_template.setAttribute('role', 'gridcell');
-    description_template.setAttribute('class', 'token-description');
+    descriptionTemplate.setAttribute('role', 'gridcell');
+    descriptionTemplate.setAttribute('class', 'token-description');
 
     /**
      * Selects a token.
@@ -104,7 +104,7 @@ Backdrop.behaviors.tokenBrowser = {
      *  An array of token parts. 
      */
     function getAncestors($cell) {
-      var ancestors = ANCESTORS[$cell.data('raw')];
+      var ancestors = allAncestors[$cell.data('raw')];
 
       return ancestors ? ancestors : [];
     }
@@ -156,17 +156,17 @@ Backdrop.behaviors.tokenBrowser = {
      */
     function row(element, level, index) {
       var click_insert = Backdrop.settings.tokenBrowser.click_insert;
-      var tr = tr_template.cloneNode(false);
-      var button = button_template.cloneNode(false);
+      var tr = trTemplate.cloneNode(false);
+      var button = buttonTemplate.cloneNode(false);
       if (click_insert) {
-        var link = link_template.cloneNode(false);
+        var link = linkTemplate.cloneNode(false);
       }
       else {
-        var link = no_link_template.cloneNode(false);
+        var link = noLinkTemplate.cloneNode(false);
       }
-      var name = name_template.cloneNode(false);
-      var raw = raw_template.cloneNode(false);
-      var description = description_template.cloneNode(false);
+      var name = nameTemplate.cloneNode(false);
+      var raw = rawTemplate.cloneNode(false);
+      var description = descriptionTemplate.cloneNode(false);
 
       tr.setAttribute('aria-level', level);
       tr.setAttribute('aria-posinset', index);
@@ -197,7 +197,7 @@ Backdrop.behaviors.tokenBrowser = {
         tr.classList.add('tree-grid-leaf');
       }
 
-      ANCESTORS[element.raw] = element.ancestors;
+      allAncestors[element.raw] = element.ancestors;
 
       tr.appendChild(name);
       tr.appendChild(raw);

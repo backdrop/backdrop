@@ -624,50 +624,7 @@ function theme_token_tree($variables) {
   );
   backdrop_add_js($settings, 'setting');
 
-  return system_token_browser_render($content);
-}
-
-/**
- * Build a row in the token tree.
- */
-function _token_token_tree_format_row($token, array $token_info, $is_group = FALSE) {
-  // Build a statically cached array of default values. This is around four
-  // times as efficient as building the base array from scratch each time this
-  // function is called.
-  static $defaults = array(
-    'id' => '',
-    'class' => array(),
-    'data' => array(
-      'name' => array(),
-      'token' => array(),
-      'value' => '',
-    ),
-  );
-
-  $row = $defaults;
-  $row['id'] = backdrop_clean_css_identifier($token);
-  $row['data']['name']['data'] = $token_info['name'];
-  $row['data']['name']['class'][] = 'token-name';
-
-  if ($is_group) {
-    // This is a token type/group.
-    $row['class'][] = 'token-group';
-    $row['data']['token']['data'] = '<span class="token-group-description">' . $token_info['description'] . '</span>';
-  }
-  else {
-    // This is a token.
-    $row['data']['token']['class'][] = 'token-token';
-    $row['data']['token']['data'] = '<span class="token-key">' . $token . '</span>';
-    if (isset($token_info['value'])) {
-      $row['data']['value'] = $token_info['value'];
-    }
-    if (!empty($token_info['parent'])) {
-      $row['parent'] = backdrop_clean_css_identifier($token_info['parent']);
-    }
-    $row['data']['token']['data'] .= '<span class="token-description">' . $token_info['description'] . '</span>';
-  }
-
-  return $row;
+  return backdrop_render($content);
 }
 
 /**

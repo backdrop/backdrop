@@ -1,13 +1,15 @@
-@charset 'UTF-8';
-
 .token-browser-dialog {
   padding: 0;
-  z-index: 10000;
+  z-index: 998;
 }
 
 .token-browser-dialog .ui-dialog-content {
   background: #aaa;
   padding: 0;
+}
+
+.token-browser-dialog th:first-child, .token-browser-dialog th:last-child {
+  border-radius: 0;
 }
 
 .tree-grid {
@@ -117,7 +119,9 @@
 .tree-grid [aria-level="7"] td,
 .tree-grid [aria-level="8"] td,
 .tree-grid [aria-level="9"] td,
-.tree-grid [aria-level="10"] td {
+.tree-grid [aria-level="10"] td, 
+.tree-grid [aria-level="11"] td,
+.tree-grid [aria-level="12"] td {
   background: #e9e9e9;
 }
 
@@ -135,13 +139,8 @@
   width: 2em;
 }
 
-.tree-grid button:focus {
-  background-color: #ddd;
-}
-
 .tree-grid button:after {
   background: content-box transparent var(--icon-caret-down) center / 50% no-repeat;
-  /* background-image: var(--icon-caret-down); */
   box-sizing: border-box;
   content: '';
   display: block;

@@ -14,7 +14,7 @@ function system_token_output() {
   $show_restricted = $query['show_restricted'];
 
   $out = system_token_browser_tree_build_content($types, $globals, $show_restricted);
-  $out = system_token_browser_render($out);
+  $out = backdrop_render($out);
 
   if (backdrop_is_ajax()) {
     $dialog_options = array(
@@ -24,6 +24,8 @@ function system_token_output() {
       'draggable' => TRUE,
       'resizable' => TRUE,
       'autoResize' => FALSE,
+      'width' => '800',
+      'height' => '600',
     );
     $commands = array(
       ajax_command_open_dialog('#token-dialog', t('Token Browser'), $out, $dialog_options),
@@ -266,26 +268,4 @@ function system_token_browser_build_level($type, array $ancestors, $show_restric
   cache_set($cid, $level, 'cache_token');
 
   return $level;
-}
-
-/**
- * Sets the request method to GET before calling backdrop_render().
- *
- * Fools backdrop_render_cache_set() and backdrop_render_cache_get() into
- * working even when the request method is other than GET or HEAD. This is
- * necessary because the jQuery.load() method requests data via POST, which
- * would normally prevent render caching.
- *
- * @param array $elements
- *   The structured array describing the data to be rendered.
- * @return string
- *   The result of backdrop_render().
- */
-function system_token_browser_render(array &$elements) {
-  $method = $_SERVER['REQUEST_METHOD'];
-  $_SERVER['REQUEST_METHOD'] = 'GET';
-  $output = backdrop_render($elements);
-  $_SERVER['REQUEST_METHOD'] = $method;
-
-  return $output;
 }
