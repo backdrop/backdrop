@@ -1115,10 +1115,10 @@ function system_menu() {
 
   // AJAX endpoint for retrieving a token.
   $items['token-browser/token/%'] = array(
-    'page callback' => 'system_token_browser_endpoint',
+    'page callback' => 'system_token_browser',
     'page arguments' => array(2),
-    'delivery callback' => 'system_token_browser_endpoint_output',
-    'access callback' => 'system_token_browser_endpoint_access',
+    'delivery callback' => 'system_token_browser_output',
+    'access callback' => 'system_token_browser_access',
     'file' => 'system.pages.inc',
     'type' => MENU_CALLBACK,
   );

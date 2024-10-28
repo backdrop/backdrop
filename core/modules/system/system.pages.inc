@@ -19,7 +19,6 @@ function system_token_output() {
   if (backdrop_is_ajax()) {
     $dialog_options = array(
       'dialogClass' => 'token-browser-dialog',
-      'width' => 900,
       'modal' => FALSE,
       'draggable' => TRUE,
       'resizable' => TRUE,
@@ -43,6 +42,8 @@ function system_token_output() {
 
 /**
  * Token browser tree access callback.
+ *
+ * @since 1.30.0 Function added.
  */
 function system_token_browser_tree_access() {
   return isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'token-browser');
@@ -53,8 +54,10 @@ function system_token_browser_tree_access() {
  *
  * @param string $type
  *   The token type.
+ *
+ * @since 1.30.0 Function added.
  */
-function system_token_browser_endpoint($type) {
+function system_token_browser($type) {
   $definition = array(
     'ancestors' => array(
       'filter' => FILTER_CALLBACK,
@@ -71,15 +74,19 @@ function system_token_browser_endpoint($type) {
 
 /**
  * Token browser JSON endpoint access callback.
+ *
+ * @since 1.30.0 Function added.
  */
-function system_token_browser_endpoint_access() {
+function system_token_browser_access() {
   return isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'token-browser-endpoint');
 }
 
 /**
  * Token browser JSON endpoint delivery callback.
+ *
+ * @since 1.30.0 Function added.
  */
-function system_token_browser_endpoint_output($page_callback_result) {
+function system_token_browser_output($page_callback_result) {
   if (is_int($page_callback_result)) {
     backdrop_deliver_html_page($page_callback_result);
   }
@@ -103,6 +110,7 @@ function system_token_browser_endpoint_output($page_callback_result) {
  * @return array
  *   The constructed array of types keyed by type.
  *
+ * @since 1.30.0 Function added.
  */
 function system_token_browser_tree_build_content($types, $global_types, $show_restricted) {
   global $language;
@@ -209,6 +217,8 @@ function system_token_browser_tree_build_content($types, $global_types, $show_re
  *
  * @return array
  *   The constructed level of tokens as an array keyed by token.
+ *
+ * @since 1.30.0 Function added.
  */
 function system_token_browser_build_level($type, array $ancestors, $show_restricted) {
   global $language;
