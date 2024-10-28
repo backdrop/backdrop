@@ -67,7 +67,7 @@ Backdrop.behaviors.tokenBrowser = {
       else {
         Backdrop.settings.tokenBrowserSelectedToken = $token;
         Backdrop.settings.tokenBrowserSelectedToken.addClass('selected-token');
-        Backdrop.settings.tokenBrowserSelectedToken.attr('data-after', Backdrop.t(' (selected)'));
+        Backdrop.settings.tokenBrowserSelectedToken.attr('data-after', ' ' + Backdrop.t('(selected)'));
         Backdrop.settings.tokenBrowserSelectedToken.attr('aria-selected');
       }
       // If we have a focused field, insert the selected token.
