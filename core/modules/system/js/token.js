@@ -57,6 +57,7 @@ Backdrop.behaviors.tokenBrowser = {
 
       if (Backdrop.settings.tokenBrowserSelectedToken) {
         Backdrop.settings.tokenBrowserSelectedToken.removeClass('selected-token');
+        Backdrop.settings.tokenBrowserSelectedToken.removeAttr('data-after');
         Backdrop.settings.tokenBrowserSelectedToken.removeAttr('aria-selected');
       }
 
@@ -66,6 +67,7 @@ Backdrop.behaviors.tokenBrowser = {
       else {
         Backdrop.settings.tokenBrowserSelectedToken = $token;
         Backdrop.settings.tokenBrowserSelectedToken.addClass('selected-token');
+        Backdrop.settings.tokenBrowserSelectedToken.attr('data-after', Backdrop.t(' (selected)'));
         Backdrop.settings.tokenBrowserSelectedToken.attr('aria-selected');
       }
       // If we have a focused field, insert the selected token.
@@ -320,6 +322,13 @@ Backdrop.behaviors.tokenBrowser = {
         insert(event.target);
       });
     }
+
+    // Attach listener to open first token type when there is only one in the table.
+    $('body').once('token-browser-dialogopen').on('dialogopen', '.token-browser-dialog', function (event){
+      if ($(this).find('table tr.tree-grid-parent').length == 1) {
+        $(this).find('table tr.tree-grid-parent').first().find('button').trigger('click');
+      }
+    });
   }
 }
 })(jQuery);

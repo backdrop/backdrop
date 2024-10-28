@@ -166,5 +166,5 @@
 }
 
 .token-key.selected-token:after {
-  content: ' (selected)';
+  content: attr(data-after);
 }
