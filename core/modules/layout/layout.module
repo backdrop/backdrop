@@ -2799,7 +2799,7 @@ function layout_layout_load_by_router_item_alter(&$layouts, $router_item) {
     foreach ($config['settings']['additional_paths'] as $additional_path) {
       if ($additional_path == $path && !isset($layouts[$name]) && !isset($added_layout_names[$name])) {
         $add_placeholder_positions = _layout_placeholder_positions($config['path']);
-        if ($num_placeholders <= count($add_placeholder_positions)) {
+        if ($num_placeholders == count($add_placeholder_positions)) {
           $added_layout_names[$name] = $name;
           $added_layout_placeholder_positions[$name] = $add_placeholder_positions;
           break;
