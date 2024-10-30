@@ -2,6 +2,7 @@
   font-family: 'Open Sans';
   font-style: normal;
   font-weight: 400;
+  font-display: swap;
   src:
     url('OpenSans-Regular-webfont.woff2') format('woff2'),
     url('OpenSans-Regular-webfont.woff') format('woff');
@@ -11,6 +12,7 @@
   font-family: 'Open Sans';
   font-style: italic;
   font-weight: 400;
+  font-display: swap;
   src:
     url('OpenSans-Italic-webfont.woff2') format('woff2'),
     url('OpenSans-Italic-webfont.woff') format('woff');
@@ -20,6 +22,7 @@
   font-family: 'Open Sans';
   font-style: normal;
   font-weight: 700;
+  font-display: swap;
   src:
     url('OpenSans-Bold-webfont.woff2') format('woff2'),
     url('OpenSans-Bold-webfont.woff') format('woff');
@@ -29,6 +32,7 @@
   font-family: 'Open Sans';
   font-style: italic;
   font-weight: 700;
+  font-display: swap;
   src:
     url('OpenSans-BoldItalic-webfont.woff2') format('woff2'),
     url('OpenSans-BoldItalic-webfont.woff') format('woff');
