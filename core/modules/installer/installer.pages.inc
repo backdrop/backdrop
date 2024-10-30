@@ -171,19 +171,19 @@ function installer_browser_installation_page($op) {
 
   switch ($op) {
     case 'select_versions':
-      backdrop_set_title(t("Select versions"));
+      backdrop_set_title(t('Select versions'));
       $content = installer_browser_installation_select_versions_page();
       break;
     case 'install_dependencies':
-      backdrop_set_title(t("Install Dependencies"));
+      backdrop_set_title(t('Install Dependencies'));
       $content = installer_browser_installation_install_dependencies_page();
       break;
     case 'theme':
-      backdrop_set_title(t("Set themes"));
+      backdrop_set_title(t('Set themes'));
       $content = installer_browser_installation_enable_page('theme');
       break;
     case 'enable':
-      backdrop_set_title(t("Enable modules"));
+      backdrop_set_title(t('Enable modules'));
       $content = installer_browser_installation_enable_page();
       break;
     default:
@@ -451,10 +451,10 @@ function installer_browser_installation_select_versions_form_submit($form, &$for
   $batch = array(
     'operations' => $operations,
     'finished' => '_installer_browser_batch_install_releases_finished',
-    'title' => t('Installing projects'),
-    'init_message' => t('Installing projects...'),
-    'progress_message' => t('Installed @current out of @total.'),
-    'error_message' => t('Installation has encountered an error.'),
+    'title' => t('Downloading projects'),
+    'init_message' => t('Downloading projects...'),
+    'progress_message' => t('Downloaded @current out of @total.'),
+    'error_message' => t('An error occurred downloading the projects.'),
     'file' => backdrop_get_path('module', 'installer') . '/installer.browser.inc',
   );
   batch_set($batch);
