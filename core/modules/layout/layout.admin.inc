@@ -804,7 +804,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   $form['additional_paths'] = array(
     '#type' => 'textarea',
     '#title' => t('Additional paths'),
-    '#description' => t('Optionally specify one or more additional paths to be handled by this layout (in addition to the primary path above). These paths must already be provided by the system or another module. Use the percent symbol ("%") to indicate a placeholder in the path. e.g. "node/%" or "node/%/edit". The number of placeholders must be the same as, or greater than, the number of placeholders in the primary path.'),
+    '#description' => t('Optionally specify one or more additional paths to be handled by this layout (in addition to the primary path above). These paths must already be provided by the system or another module. Use the percent symbol ("%") to indicate a placeholder in the path. e.g. "node/%" or "node/%/edit". The number of placeholders must be the same as the number of placeholders in the primary path.'),
     '#default_value' => $default_value,
   );
 
@@ -899,22 +899,60 @@ function layout_settings_form_validate(&$form, &$form_state) {
     $primary_path = $form_state['values']['path'];
     $num_placeholders = count(_layout_placeholder_positions($primary_path));
     $paths = explode("\n", $form_state['values']['additional_paths']);
-    foreach($paths as $path){
+    foreach ($paths as $path){
       $path = trim($path);
-      if(!empty($path)) {
-        if ($num_placeholders == count(_layout_placeholder_positions($path))) {
-          form_set_error('additional_paths', t('Additional path %path should have the same, or greater, number of placeholders as primary path %primary_path.',
-            array(
-              '%path' => $path,
-              '%primary_path' => $primary_path,
-            )
-          ));
+      if (!empty($path)) {
+        $layout_provides_path = layout_provides_path($path);
+        $router_item = menu_get_item($path);
+        $router_item_path = $router_item ? (string) $router_item['path'] : '';
+        $num_additional_placeholders = count(_layout_placeholder_positions($path));
+        $alias = NULL;
+        if (strpos($path, '%') === FALSE) {
+          $alias = db_query('SELECT * FROM {url_alias} WHERE alias = :path', array(':path' => $path))->fetchObject();
         }
-        elseif(_layout_set_message_on_path_error($form, 'additional_paths', $path)) {
-          continue;
-        }
-        else {
-          $_layout_additional_paths[] = $path;
+        switch (TRUE) {
+          case ($num_placeholders != $num_additional_placeholders):
+            form_set_error('additional_paths', t('Additional path %path should have the same number of placeholders as primary path %primary_path.',
+              array(
+                '%path' => $path,
+                '%primary_path' => $primary_path,
+              )
+            ));
+            break;
+          case (!empty($alias)):
+            form_set_error('additional_paths', t('Additional path %path is currently assigned to be an alias for "@alias" and cannot be used.',
+              array(
+                '%path' => $path,
+                '@alias' => $alias->source,
+              )
+            ));
+            break;
+          case ($layout_provides_path === TRUE):
+            form_set_error('additional_paths', t('Additional path %path is already used as the primary path of another layout.',
+              array(
+                '%path' => $path,
+              )
+            ));
+            break;
+          case ($router_item_path !== $path && substr_count($router_item_path, '/') === substr_count($path, '/') && layout_context_required_by_path($router_item_path)):
+            form_set_error('additional_paths', t('Additional path %path cannot be used as an additional path.',
+              array(
+                '%path' => $path,
+              )
+            ));
+            break;
+          case ($router_item_path !== $path):
+            form_set_error('additional_paths', t('Additional path %path does not exist in the system.',
+              array(
+                '%path' => $path,
+              )
+            ));
+            break;
+          case (_layout_set_message_on_path_error($form, 'additional_paths', $path)):
+            break;
+          default:
+            $_layout_additional_paths[] = $path;
+            break;
         }
       }
     }
