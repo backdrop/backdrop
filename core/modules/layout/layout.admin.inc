@@ -912,6 +912,7 @@ function layout_settings_form_validate(&$form, &$form_state) {
         }
         switch (TRUE) {
           case ($num_placeholders != $num_additional_placeholders):
+            // E.g. Cannot have "node/%" and "node".
             form_set_error('additional_paths', t('Additional path %path should have the same number of placeholders as primary path %primary_path.',
               array(
                 '%path' => $path,
@@ -920,6 +921,7 @@ function layout_settings_form_validate(&$form, &$form_state) {
             ));
             break;
           case (!empty($alias)):
+            // E.g. "about" is an alias of "node/2".
             form_set_error('additional_paths', t('Additional path %path is currently assigned to be an alias for "@alias" and cannot be used.',
               array(
                 '%path' => $path,
@@ -928,21 +930,26 @@ function layout_settings_form_validate(&$form, &$form_state) {
             ));
             break;
           case ($layout_provides_path === TRUE):
+            // E.g. "home" is the primary path of the default Home layout and
+            // cannot be used in the additional paths.
             form_set_error('additional_paths', t('Additional path %path is already used as the primary path of another layout.',
               array(
                 '%path' => $path,
               )
             ));
             break;
-          case ($router_item_path !== $path && substr_count($router_item_path, '/') === substr_count($path, '/') && layout_context_required_by_path($router_item_path)):
-            form_set_error('additional_paths', t('Additional path %path cannot be used as an additional path.',
+          case ($router_item_path !== $path && strpos($router_item_path, '%') !== FALSE):
+            // E.g. "node/2" cannot be used since it requires a context.
+            form_set_error('additional_paths', t('Additional path %path cannot be used as an additional path. It requires a context in the primary path.',
               array(
                 '%path' => $path,
               )
             ));
             break;
-          case ($router_item_path !== $path):
-            form_set_error('additional_paths', t('Additional path %path does not exist in the system.',
+          case (!$router_item_path && strpos($path, '%') === FALSE):
+            // E.g. Only allow "pages/2" if the router item exists. But allow
+            // "node/%/edit" to pass.
+            form_set_error('additional_paths', t('Additional path %path cannot be used as an additional path. It does not exist in the system.',
               array(
                 '%path' => $path,
               )
