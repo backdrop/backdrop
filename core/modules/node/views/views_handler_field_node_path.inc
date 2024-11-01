@@ -14,7 +14,7 @@ class views_handler_field_node_path extends views_handler_field {
   /**
    * Default value for the path field option.
    */
-  function option_definition() {
+  public function option_definition() {
     $options = parent::option_definition();
     $options['absolute'] = array('default' => FALSE, 'bool' => TRUE);
 
