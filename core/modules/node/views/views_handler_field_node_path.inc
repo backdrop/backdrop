@@ -11,13 +11,9 @@
  */
 class views_handler_field_node_path extends views_handler_field {
 
-  function init(&$view, &$options) {
-    parent::init($view, $options);
-    if (module_exists('translation')) {
-      $this->additional_fields['langcode'] = array('table' => 'node', 'field' => 'langcode');
-    }
-  }
-
+  /**
+   * Default value for the path field option.
+   */
   function option_definition() {
     $options = parent::option_definition();
     $options['absolute'] = array('default' => FALSE, 'bool' => TRUE);
@@ -25,12 +21,21 @@ class views_handler_field_node_path extends views_handler_field {
     return $options;
   }
 
-  function construct() {
+  /**
+   * Override construct function to provide the langcode additional field.
+   */
+  public function construct() {
     parent::construct();
     $this->additional_fields['nid'] = 'nid';
+    if (module_exists('translation')) {
+      $this->additional_fields['langcode'] = array('table' => 'node', 'field' => 'langcode');
+    }
   }
 
-  function options_form(&$form, &$form_state) {
+  /**
+   * Provide additional options for the path field.
+   */
+  public function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
     $form['absolute'] = array(
       '#type' => 'checkbox',
@@ -41,12 +46,18 @@ class views_handler_field_node_path extends views_handler_field {
     );
   }
 
-  function query() {
+  /**
+   * Provide necessary query segments.
+   */
+  public function query() {
     $this->ensure_my_table();
     $this->add_additional_fields();
   }
 
-  function render($values) {
+  /**
+   * Render the path field.
+   */
+  public function render($values) {
     $nid = $this->get_value($values, 'nid');
     $options['absolute'] = $this->options['absolute'];
     if (isset($this->aliases['langcode'])) {
