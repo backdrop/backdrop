@@ -150,6 +150,7 @@
   text-indent: -9999em;
   white-space: nowrap;
   width: 2em;
+  cursor: pointer;
 }
 
 .tree-grid button:after {
