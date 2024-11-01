@@ -28,7 +28,10 @@ class views_handler_field_node_path extends views_handler_field {
     parent::construct();
     $this->additional_fields['nid'] = 'nid';
     if (module_exists('translation')) {
-      $this->additional_fields['langcode'] = array('table' => 'node', 'field' => 'langcode');
+      $this->additional_fields['langcode'] = array(
+        'table' => 'node',
+        'field' => 'langcode',
+      );
     }
   }
 
