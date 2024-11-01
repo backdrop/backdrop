@@ -11,6 +11,13 @@
  */
 class views_handler_field_node_path extends views_handler_field {
 
+  function init(&$view, &$options) {
+    parent::init($view, $options);
+    if (module_exists('translation')) {
+      $this->additional_fields['langcode'] = array('table' => 'node', 'field' => 'langcode');
+    }
+  }
+
   function option_definition() {
     $options = parent::option_definition();
     $options['absolute'] = array('default' => FALSE, 'bool' => TRUE);
@@ -41,6 +48,14 @@ class views_handler_field_node_path extends views_handler_field {
 
   function render($values) {
     $nid = $this->get_value($values, 'nid');
-    return url("node/$nid", array('absolute' => $this->options['absolute']));
+    $options['absolute'] = $this->options['absolute'];
+    if (isset($this->aliases['langcode'])) {
+      $languages = language_list();
+      $language = $this->get_value($values, 'langcode');
+      if (isset($languages[$language])) {
+        $options['language'] = $languages[$language];
+      }
+    }
+    return url("node/$nid", $options);
   }
 }
