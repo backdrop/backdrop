@@ -436,6 +436,8 @@ abstract class DatabaseTasks {
   protected function connect() {
     $original_connection_info = $modified_connection_info = Database::getConnectionInfo();
     $last_exception = FALSE;
+    $extra_help = '';
+
     try {
       // This doesn't actually test the connection.
       db_set_active();
@@ -454,11 +456,13 @@ abstract class DatabaseTasks {
     //   socket may work instead. This can happen when using local environments
     //   that use non-standard port numbers for the database.
     if ($last_exception && ($last_exception->getCode() === $this->connectionRefusedErrorCode)) {
-      if ($original_connection_info['default']['host'] === 'localhost') {
+      $localhost_invalid = $original_connection_info['default']['host'] === 'localhost';
+      $local_ip_invalid = $original_connection_info['default']['host'] === '127.0.0.1';
+      if ($localhost_invalid) {
         $modified_connection_info['default']['host'] = '127.0.0.1';
         $modified_connection_info['default']['port'] = '3306';
       }
-      elseif ($original_connection_info['default']['host'] === '127.0.0.1') {
+      elseif ($local_ip_invalid) {
         $modified_connection_info['default']['host'] = 'localhost';
         $modified_connection_info['default']['port'] = '';
       }
@@ -466,41 +470,15 @@ abstract class DatabaseTasks {
         Database::removeConnection('default');
         Database::addConnectionInfo('default', 'default', $modified_connection_info['default']);
         try {
-          Database::getConnection();
-          $last_exception = FALSE;
+          Database::getConnection('default', 'default');
 
-          // Connection was successful, but settings.php needs to be updated.
-          $db_settings = $modified_connection_info['default'];
-          $settings['database'] = array(
-            'value' => array(
-              'database' => $db_settings['database'],
-              'username' => $db_settings['username'],
-              'password' => $db_settings['password'],
-              'host' => $db_settings['host'],
-            ),
-            'required' => TRUE,
-          );
-          // Include the driver if it is not 'mysql'.
-          if ($db_settings['driver'] != 'mysql') {
-            $settings['database']['value']['driver'] = $db_settings['driver'];
-          }
-          // Include the prefix if one has been set.
-          if (!empty($db_settings['prefix'])) {
-            $settings['database']['value']['prefix'] = $db_settings['prefix'];
-          }
-          // Include the port if the default has been overridden.
-          if ($db_settings['port']) {
-            $settings['database']['value']['port'] = $db_settings['port'];
-          }
-          // Include the charset if the default has been overridden.
-          if ($db_settings['charset']) {
-            $settings['database']['value']['charset'] = $db_settings['charset'];
-          }
-          // Include the collation if the default has been overridden.
-          if ($db_settings['collation']) {
-            $settings['database']['value']['collation'] = $db_settings['collation'];
-          }
-          backdrop_rewrite_settings($settings);
+          // The modified database connection was successful. Provide an
+          // informative help message asking the installer to adjust the
+          // values.
+          $extra_help = st('Connecting to "@broken_host" was not successful, but connecting to "@working_host" with the same credentials was successful. Try setting the database connection host to "@working_host".', array(
+            '@broken_host' => $localhost_invalid ? 'localhost' : '127.0.0.1',
+            '@working_host' => $localhost_invalid ? '127.0.0.1' : 'localhost',
+          ));
         }
         catch (Exception $e) {
           $last_exception = $e;
@@ -543,13 +521,21 @@ abstract class DatabaseTasks {
       }
       $exception_message = preg_replace('/SQLSTATE\[.*\]/', '', $original_failed_exception->getMessage());
       $error = st('Failed to connect to your database server. The server reports the following message: %error.', array('%error' => $exception_message));
-      $error .= '<div class="item-list"><ul><li>';
-      $error .= st('Is the database server running on %host?', array('%host' => $host));
-      $error .= '</li><li>';
-      $error .= st('Is %database the correct database name?', array('%database' => $original_connection_info['default']['database']));
-      $error .= '</li><li>';
-      $error .= st('Are the username and password correct?');
-      $error .= '</li></ul></div>';
+
+      $error .= '<div class="database-extra-help">';
+      if ($extra_help) {
+        $error .= $extra_help;
+      }
+      else {
+        $error .= '<div class="item-list"><ul><li>';
+        $error .= st('Is the database server running on %host?', array('%host' => $host));
+        $error .= '</li><li>';
+        $error .= st('Is %database the correct database name?', array('%database' => $original_connection_info['default']['database']));
+        $error .= '</li><li>';
+        $error .= st('Are the username and password correct?');
+        $error .= '</li></ul></div>';
+      }
+      $error .= '</div>';
       $this->fail($error);
       return FALSE;
     }
@@ -738,6 +724,8 @@ class DatabaseTaskException extends Exception {
  */
 function backdrop_rewrite_settings($settings = array()) {
   backdrop_static_reset('conf_path');
+  include_once BACKDROP_ROOT . '/core/includes/utility.inc';
+
   $settings_file = conf_path(FALSE) . '/settings.php';
   $additional_settings = $settings;
   $additions = '';
@@ -760,13 +748,14 @@ function backdrop_rewrite_settings($settings = array()) {
         if (array_key_exists($variable_name, $settings)) {
           // If variable_name is 'database', we need to remove the next 5
           // lines as they are part of the default database array.
+          // @todo Improve this logic to support replacing any size array.
           if ($variable_name == 'database') {
             $database_line_count = 5;
           }
           // Write new value to settings.php in the following format:
           //    $'setting' = 'value'; // 'comment'
           $setting = $settings[$variable_name];
-          $new_line = '$' . $variable_name . " = " . var_export($setting['value'], TRUE) . ";" . (!empty($setting['comment']) ? ' // ' . $setting['comment'] . "\n" : "\n");
+          $new_line = '$' . $variable_name . " = " . backdrop_var_export($setting['value']) . ";" . (!empty($setting['comment']) ? ' // ' . $setting['comment'] . "\n" : "\n");
           $buffer .= $new_line;
           $additions .= $new_line;
           // Remove this variable from being added to the bottom of the file.

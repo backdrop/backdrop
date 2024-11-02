@@ -861,8 +861,16 @@ function backdrop_settings_initialize() {
   }
 
   $database_is_set = FALSE;
-  // Database connection settings have been provided in the form of a connection
-  // string.
+
+  // The database connection can be specified in multiple formats:
+  // - $database as a string.
+  // - $database as an simple array.
+  // - $databases as a multi-level nested array.
+  // Both the simplified syntaxes are converted to the larger $databases array.
+
+  // First option: the database connection settings have been provided in the
+  // form of a connection string. This was the default format in versions prior
+  // to Backdrop 1.30.0:
   if (!empty($database) && is_string($database)) {
     $default_db_string = 'mysql://user:pass@localhost/database_name';
     if ($database !== $default_db_string) {
@@ -885,8 +893,8 @@ function backdrop_settings_initialize() {
       $database_is_set = TRUE;
     }
   }
-  // Database connection settings have been provided in the form of a simplified
-  // array.
+  // Second option: the database connection settings is a simplified array. This
+  // is the default format in version 1.30.0 and higher.
   if (!empty($database) && is_array($database)) {
     $default_db_array = array(
       'database' => 'database_name',
@@ -907,6 +915,9 @@ function backdrop_settings_initialize() {
       $database_is_set = TRUE;
     }
   }
+
+  // If using one of the simplified syntaxes, verify all the necessary parts
+  // are specified.
   if ($database_is_set) {
     // Check that all required parts are included.
     $required_parts = array('driver', 'database', 'username', 'host');

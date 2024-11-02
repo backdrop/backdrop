@@ -1085,20 +1085,22 @@ function install_settings_form_submit($form, &$form_state) {
     $db_settings['charset'] = 'utf8';
   }
 
-  // Include the driver if it is not 'mysql'.
+  // Only populate values if they are not the defaults:
   if ($db_settings['driver'] != 'mysql') {
     $settings['database']['value']['driver'] = $db_settings['driver'];
   }
-  // Include the prefix if one has been set.
   if (!empty($db_settings['prefix'])) {
     $settings['database']['value']['prefix'] = $db_settings['prefix'];
   }
-  // Include the port if the default has been overridden.
-  if ($db_settings['port']) {
+  if ($db_settings['port'] && $db_settings['port'] != '3306') {
     $settings['database']['value']['port'] = $db_settings['port'];
   }
-  $settings['database']['value']['charset'] = $db_settings['charset'];
-  $settings['database']['value']['collation'] = $db_settings['collation'];
+  if ($db_settings['charset'] && $db_settings['charset'] != 'utf8mb4') {
+    $settings['database']['value']['charset'] = $db_settings['charset'];
+  }
+  if ($db_settings['collation'] && $db_settings['collation'] != 'utf8mb4_general_ci') {
+    $settings['database']['value']['collation'] = $db_settings['collation'];
+  }
   backdrop_rewrite_settings($settings);
 
   // Indicate that the settings file has been verified, and check the database

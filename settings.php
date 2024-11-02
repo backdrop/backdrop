@@ -8,12 +8,11 @@
  * Database configuration:
  *
  * Most sites can configure their database by entering the connection details
- * below. If you need to:
- *   - customize the 'port', 'prefix', 'charset', 'collation' or 'driver'
- *   - use primary/replica databases
- *   - use multiple connections
- * see the advanced database documentation at
- * https://docs.backdropcms.org/database-configuration
+ * below. For advanced configurations, including:
+ *   - Custom 'port', 'prefix', 'charset', 'collation' or 'driver' values
+ *   - Primary/replica databases
+ *   - Multiple connections
+ * See the documentation at https://docs.backdropcms.org/database-configuration
  */
 $database = array(
   'database' => 'database_name',
