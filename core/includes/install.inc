@@ -475,7 +475,7 @@ abstract class DatabaseTasks {
           // The modified database connection was successful. Provide an
           // informative help message asking the installer to adjust the
           // values.
-          $extra_help = st('Connecting to "@broken_host" was not successful, but connecting to "@working_host" with the same credentials was successful. Try setting the database connection host to "@working_host".', array(
+          $extra_help = st('Connecting to "@broken_host" was not successful, but connecting to "@working_host" with the same credentials was successful. Try setting the database host (under Advanced options) to "@working_host".', array(
             '@broken_host' => $localhost_invalid ? 'localhost' : '127.0.0.1',
             '@working_host' => $localhost_invalid ? '127.0.0.1' : 'localhost',
           ));
