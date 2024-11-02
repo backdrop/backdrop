@@ -254,7 +254,8 @@
 }
 .layout-editor-block {
   margin: -1px 1px 15px -1px;
-  background: #FFF;
+  background: #ffffff;
+  border: 1px solid #cccccc;
   border-radius: 4px;
   box-shadow: 2px 2px 0 0 #d0d0d0;
 }

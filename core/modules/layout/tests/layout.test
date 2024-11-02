@@ -587,7 +587,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title_display' => LAYOUT_TITLE_CUSTOM,
       'title' => $block_title,
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
     $edit = array(
       'condition' => 'node_type',
     );
@@ -595,7 +595,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'bundles[page]' => TRUE,
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
     $this->backdropPost(NULL, array(), t('Update block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
@@ -635,7 +635,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Add another condition to show this block only on a single node path.
     $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure-block/editor/' . $block_uuid);
-    $this->backdropPost(NULL, array(), t('Add visibility condition'));
+    $this->backdropPost(NULL, array(), t('Add condition'));
     $edit = array(
       'condition' => 'path',
     );
@@ -643,7 +643,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'paths' => 'node/' . $this->test_node1->nid,
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
     $this->backdropPost(NULL, array(), t('Update block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
@@ -689,7 +689,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title_display' => LAYOUT_TITLE_CUSTOM,
       'title' => $block_title,
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
     $edit = array(
       'condition' => 'node_nid',
     );
@@ -697,7 +697,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'entity_id' => $this->test_node1->nid,
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
     $this->backdropPost(NULL, array(), t('Update block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
@@ -714,7 +714,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Add another condition to show this block only for a particular user ID.
     $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure-block/editor/' . $block_uuid);
-    $this->backdropPost(NULL, array(), t('Add visibility condition'));
+    $this->backdropPost(NULL, array(), t('Add condition'));
     $edit = array(
       'condition' => 'user_uid',
     );
@@ -722,7 +722,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'entity_id' => $this->web_user->uid,
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
     $this->backdropPost(NULL, array(), t('Update block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
@@ -766,7 +766,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title_display' => LAYOUT_TITLE_CUSTOM,
       'title' => $block_title,
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
     $edit = array(
       'condition' => 'user_compare',
     );
@@ -781,7 +781,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'contexts[user2]' => '1',
       'equality' => '1',
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
     $this->backdropPost(NULL, array(), t('Update block'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
@@ -838,7 +838,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title_display' => LAYOUT_TITLE_CUSTOM,
       'title' => $block_title_404,
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
     $edit = array(
       'condition' => 'http_response_code',
     );
@@ -846,7 +846,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'http_response_codes[404]' => TRUE,
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
     $this->backdropPost(NULL, array(), t('Update block'));
 
     // Add another test block that shows on 403 pages only.
@@ -857,7 +857,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title_display' => LAYOUT_TITLE_CUSTOM,
       'title' => $block_title_403,
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
     $edit = array(
       'condition' => 'http_response_code',
     );
@@ -865,7 +865,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'http_response_codes[403]' => TRUE,
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
     $this->backdropPost(NULL, array(), t('Update block'));
 
     // Add another test block that shows non-200 pages only.
@@ -876,7 +876,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title_display' => LAYOUT_TITLE_CUSTOM,
       'title' => $block_title_non_200,
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
     $edit = array(
       'condition' => 'http_response_code',
     );
@@ -885,7 +885,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'http_response_codes[200]' => TRUE,
       'negate' => TRUE,
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
     $this->backdropPost(NULL, array(), t('Update block'));
 
     // Save the entire layout.
@@ -1307,7 +1307,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/clone', $edit, t('Clone layout'));
     $this->assertText('You may now configure the cloned layout.', 'Layout cloned and landed on settings page.');
-    $this->backdropPost(NULL, array(), t('Add visibility condition'));
+    $this->backdropPost(NULL, array(), t('Add condition'));
     $edit = array(
       'condition' => 'node_type',
     );
@@ -1315,7 +1315,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'bundles[post]' => TRUE,
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     // Record the UUID for the same block in this layout.
@@ -1515,7 +1515,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropGet('<front>');
     $this->assertLink($menu_title, 0, 'Menu link shown on the homepage.');
 
-    $this->backdropPost('admin/structure/layouts/menu/' . $layout_name, array(), t('Add visibility condition'));
+    $this->backdropPost('admin/structure/layouts/menu/' . $layout_name, array(), t('Add condition'));
     $edit = array(
       'condition' => 'path',
     );
@@ -1527,7 +1527,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'paths' => "<front>\n$layout_name*\n",
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
     $this->backdropPost(NULL, array(), t('Save menu settings'));
     $vc_text = 'Current path is one of "' . str_replace("\n", ', ', $edit['paths']);
     $vc = $this->xpath('//tr[contains(@class,"layout-group")]//ul//li[contains(., :vc_text)]', array(
@@ -1916,10 +1916,10 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Try to add a condition to the layout itself to only show on the Tag
     // vocabulary.
-    $this->backdropPost(NULL, array(), t('Add visibility condition'));
+    $this->backdropPost(NULL, array(), t('Add condition'));
 
     $this->backdropPost(NULL, array('condition' => 'taxonomy_term_vocabulary'), t('Load condition'));
-    $this->backdropPost(NULL, array('bundles[tags]' => TRUE), t('Add visibility condition'));
+    $this->backdropPost(NULL, array('bundles[tags]' => TRUE), t('Add condition'));
     $this->backdropPost(NULL, array(), t('Create layout'));
 
     $this->assertText(t('Layout created. Blocks may now be added to this layout.'));
@@ -2587,7 +2587,7 @@ class LayoutSelectionTest extends BackdropWebTestCase {
     );
 
     // This adds a condition, not saving the layout yet.
-    $this->backdropPost('admin/structure/layouts/add', $edit, t('Add visibility condition'));
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Add condition'));
 
     // Select the condition to add.
     $edit = array(
@@ -2599,7 +2599,7 @@ class LayoutSelectionTest extends BackdropWebTestCase {
     $edit = array(
       'roles[authenticated]' => TRUE,
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
 
     // Save the layout.
     $this->backdropPost(NULL, array(), t('Create layout'));

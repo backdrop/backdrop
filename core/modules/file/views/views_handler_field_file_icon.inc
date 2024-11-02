@@ -37,18 +37,22 @@ class views_handler_field_file_icon extends views_handler_field {
       '#type' => 'radios',
       '#title' => t('Display type'),
       '#options' => array(
-        'svg' => t('Inline SVG markup'),
-        'img' => t('Regular images'),
+        'svg' => t('Embedded with !svg tag', array(
+          '!svg' => '<code>&lt;svg&gt;</code>',
+        )),
+        'img' => t('Referenced with !img tag', array(
+          '!img' => '<code>&lt;img&gt;</code>',
+        )),
       ),
       '#default_value' => $this->options['display_type'],
     );
-    $form['display_type']['svg']['#description'] = t('Inline SVG images are usually more efficient and easier to style.');
-    $form['display_type']['img']['#description'] = t('Regular image tags can be more efficient when showing the same icon many times.');
+    $form['display_type']['svg']['#description'] = t('Inline SVG icons are efficient and easier to recolor and style.');
+    $form['display_type']['img']['#description'] = t('Referenced images can be more efficient when showing the same icon many times.');
     $form['add_alt_text'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Add alternative text'),
+      '#title' => t('Include text alternative'),
       '#default_value' => $this->options['add_alt_text'],
-      '#description' => t('If alternative text is omitted, this icon will be marked as decorative only.'),
+      '#description' => t('Adds descriptive text. Do not enable for icons that are decorative only.'),
     );
   }
 

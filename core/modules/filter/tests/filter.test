@@ -1035,9 +1035,9 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
       ),
       // Comments remain unchanged and subsequent lines/paragraphs are
       // transformed normally.
-      "aaa<!--comment-->\n\nbbb\n\nccc\n\nddd<!--comment\nwith linebreak-->\n\neee\n\nfff" => array(
+      "aaa<!--comment-->\n\nbbb\n\nccc\n\nddd<!--comment\nwith line break-->\n\neee\n\nfff" => array(
         "<p>aaa</p>\n<!--comment--><p>\nbbb</p>\n<p>ccc</p>\n<p>ddd</p>" => TRUE,
-        "<!--comment\nwith linebreak--><p>\neee</p>\n<p>fff</p>" => TRUE,
+        "<!--comment\nwith line break--><p>\neee</p>\n<p>fff</p>" => TRUE,
       ),
       // Check that a comment in a PRE will result that the text after
       // the comment, but still in PRE, is not transformed.
@@ -1461,6 +1461,7 @@ http://encoded.com/?a=1&amp;b=2
       ),
       // Domain name length.
       '
+// cspell:disable-next-line
 www.ex.ex or www.example.example or www.toolongdomainexampledomainexampledomainexampledomainexampledomain or
 me@me.tv
 ' => array(
@@ -1600,11 +1601,11 @@ HTML www.example21.com soup by person@example22.com can literally http://www.exa
 <script>
 <!--
   // @see www.example.com
-  var exampleurl = "http://example.net";
+  var exampleUrl = "http://example.net";
 -->
 <!--//--><![CDATA[//><!--
   // @see www.example.com
-  var exampleurl = "http://example.net";
+  var exampleUrl = "http://example.net";
 //--><!]]>
 </script>
 ' => array(

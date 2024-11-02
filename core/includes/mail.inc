@@ -201,20 +201,20 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
  * composed using backdrop_mail().
  *
  * An implementation needs to implement the following methods:
- * - format: Allows to preprocess, format, and postprocess a mail
- *   message before it is passed to the sending system. By default, all messages
- *   may contain HTML and are converted to plain-text by the DefaultMailSystem
+ * - format: Allows to preprocess, format, and post-process a mail message
+ *   before it is passed to the sending system. By default, all messages may
+ *   contain HTML and are converted to plain-text by the DefaultMailSystem
  *   implementation. For example, an alternative implementation could override
  *   the default implementation and additionally sanitize the HTML for usage in
  *   a MIME-encoded email, but still invoking the DefaultMailSystem
  *   implementation to generate an alternate plain-text version for sending.
- * - mail: Sends a message through a custom mail sending engine.
- *   By default, all messages are sent via PHP's mail() function by the
- *   DefaultMailSystem implementation.
+ * - mail: Sends a message through a custom mail sending engine. By default, all
+ *   messages are sent via PHP's mail() function by the DefaultMailSystem
+ *   implementation.
  *
  * The selection of a particular implementation is controlled via the config
- * 'system.mail', which contains a keyed array.  The default implementation
- * is the class whose name is the value of 'default-system' key. A more specific
+ * 'system.mail', which contains a keyed array.  The default implementation is
+ * the class whose name is the value of 'default-system' key. A more specific
  * match first to key and then to module will be used in preference to the
  * default. To specify a different class for all mail sent by one module, set
  * the class name as the value for the key corresponding to the module name. To
@@ -623,6 +623,6 @@ function _backdrop_html_to_text_pad($text, $pad, $prefix = '') {
     $p = -1;
   }
   $n = max(0, 79 - (strlen($text) - $p) - strlen($prefix));
-  // Add prefix and padding, and restore linebreak.
+  // Add prefix and padding, and restore line break.
   return $text . $prefix . str_repeat($pad, $n) . "\n";
 }

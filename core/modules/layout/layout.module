@@ -2145,7 +2145,7 @@ function layout_context_required_by_path($path) {
         // Determine the argument placement within the path.
         $parts = explode('/', $context_path);
         foreach ($parts as $part_index => $part) {
-          if ($part === $context_info['path placeholder']) {
+          if (!empty($context_info['path placeholder']) && $part === $context_info['path placeholder']) {
             $required_context_info[$part_index] = array(
               'plugin' => $context_info['name'],
               'position' => $part_index,

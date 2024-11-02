@@ -50,7 +50,7 @@ function layout_entity_admin_form(array $form, array &$form_state, $entity_type,
       'layout-template',
       'priority-low',
     )),
-    array('data' => t('Visibility conditions'), 'class' => array(
+    array('data' => t('Conditions'), 'class' => array(
       'layout-conditions',
       'priority-low',
     )),
