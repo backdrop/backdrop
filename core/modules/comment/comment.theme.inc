@@ -104,7 +104,7 @@ function template_preprocess_comment(&$variables) {
 
   $uri = $comment->uri();
   $uri['options'] += array('attributes' => array('class' => array('permalink'), 'rel' => 'bookmark'));
-  
+
   $variables['permalink'] = l(t('Permalink'), $uri['path'], $uri['options']);
   $variables['permalink_path'] = $uri['path'] . "#" . $uri['options']['fragment'];
   $variables['title_display'] = $node_type->settings['comment_title_options'] != COMMENT_TITLE_HIDDEN;
@@ -156,7 +156,7 @@ function template_preprocess_comment(&$variables) {
   else {
     $variables['classes'][] = 'comment-title-custom';
   }
-  
+
   // Gather classes specific to the comment title.
   $variables['title_classes'][] = 'comment-title';
 }

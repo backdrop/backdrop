@@ -514,8 +514,8 @@ function file_save_htaccess($directory, $private = TRUE, $force_overwrite = FALS
 
   $htaccess_lines = file_htaccess_lines($private);
 
-  // Write the .htaccess file.
-  if (file_put_contents($htaccess_path, $htaccess_lines)) {
+  // Write the .htaccess file. Suppress any PHP error and write to watchdog.
+  if (@file_put_contents($htaccess_path, $htaccess_lines)) {
     backdrop_chmod($htaccess_path, 0444);
   }
   else {
@@ -2372,7 +2372,8 @@ function file_scan_directory($dir, $mask, $options = array(), $depth = 0) {
         $uri = "$dir/$filename";
         $uri = file_stream_wrapper_uri_normalize($uri);
         if (is_dir($uri) && $options['recurse']) {
-          // Give priority to files in this folder by merging them in after any subdirectory files.
+          // Give priority to files in this folder by merging them in after any
+          // subdirectory files.
           $files = array_merge(file_scan_directory($uri, $mask, $options, $depth + 1), $files);
         }
         elseif ($depth >= $options['min_depth'] && preg_match($mask, $filename)) {
