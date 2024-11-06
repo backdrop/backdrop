@@ -91,9 +91,7 @@ class LayoutRendererFlexible {
     // Adjust for the renaming of "layout_info" to "layout_template_info".
     // See https://github.com/backdrop/backdrop-issues/issues/6628.
     // @todo: Remove in 2.x.
-    if (isset($this->layout_info)) {
-      $this->layout_info = $this->layout_template_info;
-    }
+    $this->layout_info = $this->layout_template_info;
   }
 
   /**
