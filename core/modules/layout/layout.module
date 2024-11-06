@@ -817,6 +817,7 @@ function layout_theme() {
         'content' => NULL,
         'settings' => NULL,
         'layout' => NULL,
+        // @todo: Rename to layout_template_info in 2.x.
         'layout_info' => NULL,
         'renderer' => NULL,
         'attributes' => array(),
@@ -1662,6 +1663,7 @@ function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE
 
   // Try getting a cached list of layout info.
   if (!isset($info) && !$rebuild) {
+    // @todo: Rename cache key to layout_template_info in 2.x.
     $cache = cache('cache')->get('layout_info');
 
     if ($cache && $cache->data) {
@@ -1692,7 +1694,7 @@ function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE
     $info = _layout_get_all_info('layout', $info);
 
     // Populate defaults.
-    foreach ($info as $name => $layout_info) {
+    foreach ($info as $name => $layout_template_info) {
       $info[$name] += array(
         'hidden' => FALSE,
         'preview' => 'preview.png',
@@ -1702,7 +1704,7 @@ function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE
         ),
       );
       if (!isset($info[$name]['template'])) {
-        $template_path = BACKDROP_ROOT . '/' . $layout_info['path'] . '/layout--' . str_replace('_', '-', $name) . '.tpl.php';
+        $template_path = BACKDROP_ROOT . '/' . $layout_template_info['path'] . '/layout--' . str_replace('_', '-', $name) . '.tpl.php';
 
         if (is_file($template_path)) {
           $info[$name]['template'] = 'layout--' . str_replace('_', '-', $name);
