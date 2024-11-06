@@ -31,7 +31,8 @@ class LayoutRendererStandard {
   var $layout_info;
 
   /**
-   * The information from hook_layout_template_info() for the layout being rendered.
+   * The information from hook_layout_template_info() for the layout being
+   * rendered.
    *
    * This array is stored here for easy access, as it contains most importantly
    * the list of regions that can be configured.

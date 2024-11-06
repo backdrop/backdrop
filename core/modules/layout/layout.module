@@ -2486,7 +2486,7 @@ function layout_layout_template_info() {
 }
 
 /**
- * Implementation of deprecated hook_layout_info().
+ * Implements deprecated hook_layout_info().
  *
  * This hook has been replaced by hook_layout_template_info.
  *

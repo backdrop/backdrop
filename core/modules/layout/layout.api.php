@@ -18,7 +18,7 @@
  *
  * The contents of this hook are merged with layout template information
  * provided by stand-alone layout templates with their own .info files.
- * Generally, the data returned here matches the keys used within layout 
+ * Generally, the data returned here matches the keys used within layout
  * template .info files.
  *
  * @return array
@@ -35,7 +35,7 @@
  *     is presented. If left empty, "one-column.css" will be used for all media
  *     types.
  *   - template: The name of the template file (without the extension) used for
- *     this layout template. Layout templates should always be named with a 
+ *     this layout template. Layout templates should always be named with a
  *     "layout--" prefix, so that the default variables may be provided in
  *     template_preprocess_layout(). If left empty, "layout--[key]" will be
  *     used, with underscores converted to hyphens in the layout template key.
@@ -55,12 +55,12 @@ function hook_layout_template_info() {
     ),
 
     // Optional information that populates using defaults.
-    // 'preview' => 'preview.png',
-    // 'stylesheets' => array('all' => array('one-column.css')),
-    // 'template' => 'layout--my-layout-template',
+    'preview' => 'preview.png',
+    'stylesheets' => array('all' => array('one-column.css')),
+    'template' => 'layout--my-layout-template',
 
     // Specify a file containing preprocess functions if needed.
-    // 'file' => 'my_layout_template.php',
+    'file' => 'my_layout_template.php',
   );
   return $layout_templates;
 }
