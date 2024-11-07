@@ -314,6 +314,13 @@ function form_test_menu() {
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
   );
+  $items['form-test/disabled-tabledrag-row'] = array(
+    'title' => 'FAPI test for disabled tabledrag rows',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('form_test_disabled_tabledrag_row'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
 
   return $items;
 }
@@ -2604,4 +2611,46 @@ function form_test_system_config_form() {
   );
 
   return system_settings_form($form);
+}
+
+/**
+ * Menu callback for testing disabled tabledrag rows.
+ */
+function form_test_disabled_tabledrag_row($form, &$form_state) {
+  $options = array(
+    1 => array(
+      'title' => 'How to Learn Backdrop',
+      'content_type' => 'Post',
+      'status' => 'published',
+    ),
+    3 => array(
+      'title' => 'Privacy Policy',
+      'content_type' => 'Page',
+      'status' => 'published',
+    ),
+    5 => array(
+      'title' => 'Disabled row',
+      'content_type' => 'Page',
+      'status' => 'published',
+      '#disabled' => TRUE,
+    ),
+  );
+  $header = array(
+    'title' => t('Title'),
+    'content_type' => t('Content type'),
+    'status' => t('Status'),
+  );
+  $form['tabledrag_test'] = array(
+    '#type' => 'tableselect',
+    '#options' => $options,
+    '#header' => $header,
+  );
+  $form['actions'] = array(
+    '#type' => 'actions',
+    'submit' => array(
+      '#type' => 'submit',
+      '#value' => 'Submit',
+    ),
+  );
+  return $form;
 }
