@@ -62,6 +62,7 @@ class views_handler_field_node_path extends views_handler_field {
    */
   public function render($values) {
     $nid = $this->get_value($values, 'nid');
+    $options = array();
     $options['absolute'] = $this->options['absolute'];
     if (isset($this->aliases['langcode'])) {
       $languages = language_list();
