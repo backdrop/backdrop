@@ -324,8 +324,8 @@ Backdrop.behaviors.viewsUiSearchOptions = {
     this.$controlGroup = this.$form.find(controlGroupSelector);
 
     /**
-     * Get a list of option labels and their corresponding divs and maintain it
-     * in memory, so we have as little overhead as possible at keyup time.
+     * Get a list of option labels and their corresponding DIV tags and maintain
+     * it in memory, so we have as little overhead as possible at keyup time.
      */
     this.options = this.getOptions(this.$form.find('.views-filterable-option'));
 

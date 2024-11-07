@@ -279,7 +279,7 @@ function file_requirements($phase) {
     if ($file_needs_classification) {
       $requirements['file_needs_classification'] = array(
         'title' => t('File Type Classification'),
-        'value' => t('File types need to be classified. (<a href="!path">Classify file types</a>).', array('!path' => '/admin/structure/file-types/classify')),
+        'value' => t('File types need to be classified. (<a href="!path">Classify file types</a>).', array('!path' => url('admin/structure/file-types/classify'))),
         'description' => t('This site may not work properly if file types are not classified. Classifying file types may take some time if there are a lot of files without an assigned file type.'),
         'severity' => REQUIREMENT_ERROR,
       );

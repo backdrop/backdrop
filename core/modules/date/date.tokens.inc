@@ -22,7 +22,7 @@ function date_token_info() {
     'description' => t('The date value.'),
     'type' => 'date',
   );
-  $info['tokens']['date-field-value']['to-date'] = array(
+  $info['tokens']['date-field-value']['end-date'] = array(
     'name' => t('End Date'),
     'description' => t('The End date value.'),
     'type' => 'date',
@@ -40,18 +40,22 @@ function date_token_info_alter(&$info) {
   $fields = _field_token_info();
 
   foreach ($fields as $field_name => $field) {
-    if (in_array($field_info[$field_name]['type'], array('date', 'datetime', 'datestamp'))) {
+    if (in_array($field_info[$field_name]['type'], array(
+      'date',
+      'datetime',
+      'datestamp',
+    ))) {
       foreach (array_keys($field['bundles']) as $token_type) {
         // If a token already exists for this field, then don't add it.
         if (isset($info['tokens'][$token_type][$field_name])) {
           continue;
         }
-  
-        // Ensure token type for this entity already exists. 
+
+        // Ensure token type for this entity already exists.
         if (!isset($info['types'][$token_type]) || !isset($info['tokens'][$token_type])) {
           continue;
         }
-  
+
         $info['tokens'][$token_type][$field_name] = array(
           // Note that label and description have already been
           // sanitized by _field_token_info().
@@ -86,7 +90,7 @@ function date_tokens($type, $tokens, array $data = array(), array $options = arr
   if (!empty($data[$type]) && is_a($data[$type], 'Entity')) {
     $entity = $data[$type];
     $entity_type = $entity->entityType();
-    $entity_info = entity_get_info($entity_type); 
+    $entity_info = entity_get_info($entity_type);
 
     if (isset($entity_info['fieldable']) && $entity_info['fieldable']) {
       $fields = field_info_field_map();
@@ -95,7 +99,6 @@ function date_tokens($type, $tokens, array $data = array(), array $options = arr
       foreach ($fields as $field_name => $field) {
         if (in_array($field['type'], array('date', 'datetime', 'datestamp'))) {
           $date_field_tokens = token_find_with_prefix($tokens, $field_name);
-
           $field_items = field_get_items($entity_type, $entity, $field_name);
           if ($date_field_tokens && $field_items) {
             $replacements += token_generate('date-field', $date_field_tokens, array('date-field' => $field_items), $options);
@@ -103,8 +106,8 @@ function date_tokens($type, $tokens, array $data = array(), array $options = arr
         }
       }
     }
-  } 
-  
+  }
+
   // Process the chain after the field name.
   elseif (($type == 'date-field') && !empty($data[$type])) {
     $field_items = $data[$type];
@@ -118,8 +121,8 @@ function date_tokens($type, $tokens, array $data = array(), array $options = arr
         // If there is no arguments after delta, send date:medium as default.
         if (empty($chained_token)) {
           $chained_token = array('date:medium' => $original);
-        } 
-        $replacements += token_generate('date-field-value', $chained_token,array('date-field-value' => $field_items[$delta]), $options);
+        }
+        $replacements += token_generate('date-field-value', $chained_token, array('date-field-value' => $field_items[$delta]), $options);
 
       } else {
         // If no delta is specified, send the first item of the field.
@@ -127,9 +130,9 @@ function date_tokens($type, $tokens, array $data = array(), array $options = arr
       }
     }
   }
-    
-  // Process date field item. The token at this point is in the format 
-  // "[date||end-date]:[format]", where format is 'long', 'medium', etc. 
+
+  // Process date field item. The token at this point is in the format
+  // "[date||end-date]:[format]", where format is 'long', 'medium', etc.
   // or 'custom'.
   elseif (($type == 'date-field-value') && !empty($data['date-field-value'])) {
     $item = $data['date-field-value'];
@@ -160,7 +163,7 @@ function date_tokens($type, $tokens, array $data = array(), array $options = arr
       $replacements += token_generate('date', $date_tokens, array('date' => $timestamp), $options);
     }
 
-    // Handle token chains that do not contain 'date' or 'end-date'. 
+    // Handle token chains that do not contain 'date' or 'end-date'.
     // Defaults to "starting date".
     $short_tokens = array();
     foreach ($tokens as $token => $original) {

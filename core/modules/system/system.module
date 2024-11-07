@@ -121,24 +121,23 @@ function system_theme() {
     ) + $base,
     'token_tree' => array(
       'variables' => array(
+        'text' => t('Browse available tokens.'),
         'token_types' => array(),
         'global_types' => TRUE,
+        'dialog' => FALSE,
         'click_insert' => TRUE,
         'show_restricted' => FALSE,
-        'recursion_limit' => 3,
-        'dialog' => FALSE,
       ),
     ) + $base,
     'token_tree_link' => array(
       'variables' => array(
-        'text' => NULL,
-        'options' => array(),
+        'text' => t('Browse available tokens.'),
         'token_types' => array(),
         'global_types' => TRUE,
+        'dialog' => TRUE,
+        'options' => array(),
         'click_insert' => TRUE,
         'show_restricted' => FALSE,
-        'recursion_limit' => 3,
-        'dialog' => TRUE,
       ),
     ) + $base,
     'label_machine_name' => array(
@@ -1105,13 +1104,23 @@ function system_menu() {
     'file' => 'system.admin.inc',
   );
 
-  // Token paths.
+  // AJAX endpoint for the assembled token tree.
   $items['token/tree'] = array(
     'page callback' => 'system_token_output',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
     'file' => 'system.pages.inc',
     'theme callback' => 'ajax_base_page_theme',
+  );
+
+  // AJAX endpoint for retrieving a token.
+  $items['token-browser/token/%'] = array(
+    'page callback' => 'system_token_browser',
+    'page arguments' => array(2),
+    'delivery callback' => 'system_token_browser_output',
+    'access callback' => 'system_token_browser_access',
+    'file' => 'system.pages.inc',
+    'type' => MENU_CALLBACK,
   );
 
   // Machine names transliteration.
@@ -1507,17 +1516,17 @@ function system_library_info() {
   $libraries['ui'] = array(
     'title' => 'jQuery UI: Core',
     'website' => 'http://jqueryui.com',
-    'version' => '1.13.2',
+    'version' => '1.14.0',
     'js' => array(
+      'core/misc/jquery-ui-compat.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
       'core/misc/ui/jquery.ui.data.min.js' => array(
         'group' => JS_LIBRARY,
         'weight' => -11,
       ),
       'core/misc/ui/jquery.ui.disable-selection.min.js' => array(
-        'group' => JS_LIBRARY,
-        'weight' => -11,
-      ),
-      'core/misc/ui/jquery.ui.form.min.js' => array(
         'group' => JS_LIBRARY,
         'weight' => -11,
       ),
@@ -1553,23 +1562,11 @@ function system_library_info() {
         'group' => JS_LIBRARY,
         'weight' => -11,
       ),
-      'core/misc/ui/jquery.ui.ie.min.js' => array(
-        'group' => JS_LIBRARY,
-        'weight' => -11,
-      ),
       'core/misc/ui/jquery.ui.keycode.min.js' => array(
         'group' => JS_LIBRARY,
         'weight' => -11,
       ),
       'core/misc/ui/jquery.ui.plugin.min.js' => array(
-        'group' => JS_LIBRARY,
-        'weight' => -11,
-      ),
-      'core/misc/ui/jquery.ui.safe-active-element.min.js' => array(
-        'group' => JS_LIBRARY,
-        'weight' => -11,
-      ),
-      'core/misc/ui/jquery.ui.safe-blur.min.js' => array(
         'group' => JS_LIBRARY,
         'weight' => -11,
       ),
@@ -2096,7 +2093,7 @@ function system_library_info() {
   $libraries['ui.touch-punch'] = array(
     'title' => 'jQuery UI Touch Punch',
     'website' => 'https://github.com/RWAP/jquery-ui-touch-punch/',
-    'version' => '1.0.9',
+    'version' => '1.1.5',
     'js' => array(
       'core/misc/jquery.ui.touch-punch.js' => array(),
     ),
@@ -2119,6 +2116,9 @@ function system_library_info() {
     'dependencies' => array(
       array('system', 'jquery.treetable'),
       array('system', 'backdrop.ajax'),
+    ),
+    'icons' => array(
+      'caret-down',
     ),
   );
 
