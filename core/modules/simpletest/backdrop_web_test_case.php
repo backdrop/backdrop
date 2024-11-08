@@ -1348,7 +1348,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     }
 
     // Check that all the permission strings are valid.
-    // @todo: Remove 'TRUE' when we sort out https://github.com/backdrop/backdrop-issues/issues/5354
+    // @todo: Remove the TRUE parameter when we sort out https://github.com/backdrop/backdrop-issues/issues/5354
     if (!$this->checkPermissions($permissions, TRUE)) {
       return FALSE;
     }
