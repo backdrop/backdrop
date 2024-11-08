@@ -277,6 +277,34 @@ function theme_layout_region_inner($variables) {
   return implode('', $variables['blocks']);
 }
 
+
+/**
+ * Output a preview of hero block background image.
+ */
+function theme_layout_hero_background_image($variables) {
+  $element = $variables['element'];
+  $attributes = array();
+  if (isset($element['#id'])) {
+    $attributes['id'] = $element['#id'];
+  }
+  if (!empty($element['#attributes']['class'])) {
+    $attributes['class'] = (array) $element['#attributes']['class'];
+  }
+  $attributes['class'][] = 'form-managed-file';
+
+  $output = '';
+  $output .= '<div' . backdrop_attributes($attributes) . '>';
+  if (isset($element['#file']->uri)) {
+    $output .= '<div class="hero-bg-preview">';
+    $output .= '<img style="height:250px" src="' . image_style_url('medium', $element['#file']->uri) . '" />';
+    $output .= '</div>';
+  }
+  $output .= backdrop_render_children($element);
+  $output .= '</div>';
+
+  return $output;
+}
+
 /**
  * Prepares variables for layout templates.
  *
