@@ -68,7 +68,7 @@ function hook_layout_template_info() {
   /**
    * Deprecated. Now replaced by hook_layout_template_info().
    *
-   * @deprecated since 1.29.0
+   * @deprecated since 1.30.0
    */
 function hook_layout_info() {
   $layouts['my_layout'] = array(

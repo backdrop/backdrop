@@ -2492,9 +2492,9 @@ function layout_layout_template_info() {
  *
  * This hook has been replaced by hook_layout_template_info.
  *
- * @deprecated since 1.28.0
+ * @deprecated since 1.30.0
  * @see layout_layout_templatet_info()
- * @see https://docs.backdropcms.org/node/***** @todo
+ * @see https://docs.backdropcms.org/change-records/hook_layout_info-renamed-to-hook_layout_template_info
  */
 function layout_layout_info() {
   watchdog_deprecated_function('layout', __FUNCTION__);

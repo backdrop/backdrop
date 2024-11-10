@@ -16,7 +16,7 @@ class LayoutRendererFlexible {
    * Deprecated. Now replaced by $layout_template_info.
    *
    * @var NULL
-   * @deprecated since 1.29.0
+   * @deprecated since 1.30.0
    */
   var $layout_info;
 
