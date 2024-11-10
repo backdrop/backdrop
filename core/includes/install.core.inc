@@ -1071,23 +1071,37 @@ function install_settings_form_submit($form, &$form_state) {
   // Update global settings array and save.
   $db_settings = $form_state['storage']['database'];
   $settings['database'] = array(
-    'value' => $db_settings['driver'] . '://' . rawurlencode($db_settings['username']) . ':' . rawurlencode($db_settings['password']) . '@' . $db_settings['host'] . ($db_settings['port'] ? (':' . $db_settings['port']) : '') . '/' . rawurlencode($db_settings['database']),
+    'value' => array(
+      'database' => $db_settings['database'],
+      'username' => $db_settings['username'],
+      'password' => $db_settings['password'],
+      'host' => $db_settings['host'],
+    ),
     'required' => TRUE,
   );
-  $settings['database_prefix'] = array(
-    'value' => $db_settings['prefix'],
-  );
-  backdrop_rewrite_settings($settings);
 
-  // Check if UTF-8 MB4 support exists in the database and add to settings.php.
-  if (install_verify_database_utf8mb4()) {
-    $settings = array();
-    $settings['database_charset'] = array(
-      'value' => 'utf8mb4',
-      'required' => TRUE,
-    );
-    backdrop_rewrite_settings($settings);
+  // If UTF-8 MB4 is not supported, use the old UTF-8 charset.
+  if (install_verify_database_utf8mb4() === FALSE && $db_settings['charset'] === 'utf8mb4') {
+    $db_settings['charset'] = 'utf8';
   }
+
+  // Only populate values if they are not the defaults:
+  if ($db_settings['driver'] != 'mysql') {
+    $settings['database']['value']['driver'] = $db_settings['driver'];
+  }
+  if (!empty($db_settings['prefix'])) {
+    $settings['database']['value']['prefix'] = $db_settings['prefix'];
+  }
+  if ($db_settings['port'] && $db_settings['port'] != '3306') {
+    $settings['database']['value']['port'] = $db_settings['port'];
+  }
+  if ($db_settings['charset'] && $db_settings['charset'] != 'utf8mb4') {
+    $settings['database']['value']['charset'] = $db_settings['charset'];
+  }
+  if ($db_settings['collation'] && $db_settings['collation'] != 'utf8mb4_general_ci') {
+    $settings['database']['value']['collation'] = $db_settings['collation'];
+  }
+  backdrop_rewrite_settings($settings);
 
   // Indicate that the settings file has been verified, and check the database
   // for the last completed task, now that we have a valid connection. This
