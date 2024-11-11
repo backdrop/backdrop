@@ -646,7 +646,7 @@ function image_style_delete($style, $replacement_style_name = '') {
  * Get an array of image styles suitable for using as select list options.
  *
  * @param $include_empty
- *   If TRUE a " - None -" option will be inserted in the options array.
+ *   If TRUE a "- None -" option will be inserted in the options array.
  * @param $output
  *   Optional flag determining how the options will be sanitized on output.
  *   Leave this at the default (CHECK_PLAIN) if you are using the output of
