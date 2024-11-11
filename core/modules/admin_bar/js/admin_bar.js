@@ -201,7 +201,7 @@ Backdrop.adminBar.behaviors.resizeCollapse = function (context, settings, $admin
     extraWidth = $extra.width() || 0;
 
     // Available width is anything except the menus that may be collapsed.
-    availableWidth = $adminBar.width();
+    availableWidth = $(window).width();
     $adminBar.children().children().not($menu).not($extra).each(function() {
       availableWidth -= $(this).width();
     });

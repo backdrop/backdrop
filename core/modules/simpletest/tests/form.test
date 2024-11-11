@@ -716,6 +716,17 @@ class FormElementTestCase extends BackdropWebTestCase {
       ));
     }
   }
+
+  /**
+   * Test disabled tableselect row.
+   */
+  public function testDisabledTabledragRow() {
+    $this->backdropGet('form-test/disabled-tabledrag-row');
+    $element = $this->xpath('//input[@name="tabledrag_test[5]"][@disabled]');
+    $this->assertEqual(count($element), 1, 'One disabled tabledrag checkbox has been found');
+    $element = $this->xpath('//form[@class="form-test-disabled-tabledrag-row"]//tr[contains(@class, "disabled")]');
+    $this->assertEqual(count($element), 1, 'One tabledrag row with class "disabled" has been found');
+  }
 }
 
 /**

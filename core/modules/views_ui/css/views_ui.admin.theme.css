@@ -27,12 +27,12 @@
 
 /* @group Icons */
 
-.views-admin .icon {
+.views-admin .icon:not(svg) {
   height: 16px;
   width: 16px;
 }
 
-.views-admin .icon,
+.views-admin .icon:not(svg),
 .views-admin .icon-text {
   background-attachment: scroll;
   background-image: url("../images/sprites.png");
