@@ -66,7 +66,7 @@ interface EntityInterface {
   /**
    * Returns the URI elements of the entity.
    *
-   * @return
+   * @return array
    *   An array containing the 'path' and 'options' keys used to build the URI
    *   of the entity, and matching the signature of url(). An empty array if the
    *   entity has no URI of its own.
