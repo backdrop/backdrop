@@ -18,8 +18,8 @@ function filter_schema() {
  * Implements hook_update_dependencies().
  */
 function filter_update_dependencies() {
-  // Ensure that roles have been converted to config before calling
-  // user_role_grant_permissions().
+  // Ensure that roles have been converted to config before updating
+  // the user role configuration files.
   $dependencies['filter'][1001] = array(
     'user' => 1007,
   );
