@@ -73,7 +73,11 @@ function filter_update_1000() {
  */
 function filter_update_1001() {
   // This update assumes the role table has already been replaced by config.
-  user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array('upload editor images'));
+  $config = config('user.role.authenticated');
+  $permissions = $config->get('permissions');
+  $permissions[] = 'upload editor images';
+  $config->set('permissions', $permissions);
+  $config->save();
 
   // Enable uploading on existing text formats. Access previously was not
   // checked previously, so all formats had uploading enabled.
