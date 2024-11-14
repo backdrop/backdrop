@@ -37,9 +37,9 @@ function restore_script_selection_form($form, &$form_state) {
 
   // If there are no backups, display a message.
   if (empty($existing_backups)) {
-    $help = t('No backups are currently available to be restored.');
+    $help = st('No backups are currently available to be restored.');
     if (!settings_get('backups_directory')) {
-      $help .= ' ' . t('Future backups may be created by specifying the $settings[\'backups_directory\'] variable in settings.php.');
+      $help .= ' ' . st('Future backups may be created by specifying the $settings[\'backups_directory\'] variable in settings.php.');
     }
 
     $form['help'] = array(
@@ -59,12 +59,12 @@ function restore_script_selection_form($form, &$form_state) {
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Apply pending updates'),
+    '#value' => st('Apply pending updates'),
   );
   $form['actions']['cancel'] = array(
     '#type' => 'link',
     '#href' => '<front>',
-    '#title' => t('Cancel'),
+    '#title' => st('Cancel'),
   );
 
   return $form;
@@ -75,24 +75,24 @@ function restore_script_selection_form($form, &$form_state) {
  */
 function restore_helpful_links() {
   $links['front'] = array(
-    'title' => t('Home page'),
+    'title' => st('Home page'),
     'href' => '<front>',
   );
   if (module_exists('dashboard') && user_access('access dashboard')) {
     $links['dashboard'] = array(
-      'title' => t('Dashboard'),
+      'title' => st('Dashboard'),
       'href' => 'admin/dashboard',
     );
   }
   elseif (user_access('access administration pages')) {
     $links['admin-pages'] = array(
-      'title' => t('Administration pages'),
+      'title' => st('Administration pages'),
       'href' => 'admin',
     );
   }
   if (user_access('administer site configuration')) {
     $links['status-report'] = array(
-      'title' => t('Status report'),
+      'title' => st('Status report'),
       'href' => 'admin/reports/status',
     );
   }
@@ -107,18 +107,11 @@ function restore_results_page() {
 
   restore_task_list();
 
-  $output = '';
   if ($_SESSION['restore_success']) {
-    $output = '<p>Updates were attempted. If you see no failures below, you may proceed happily back to your <a href="' . base_path() . '">site</a>. Otherwise, you may need to update your database manually.' . ' ' . $log_message . '</p>';
+    $output = '<p>The backup was successfully restored. Proceed happily back to your <a href="' . base_path() . '">site</a></p>';
   }
   else {
-    $updates_remaining = reset($_SESSION['updates_remaining']);
-    list($module, $version) = array_pop($updates_remaining);
-    $message = 'The update process was aborted prematurely while running <strong>update #' . $version . ' in ' . $module . '.module</strong>.' . ' ' . $log_message;
-    if (module_exists('dblog')) {
-      $message .= ' ' . 'You may need to check the <code>watchdog</code> database table manually.';
-    }
-    backdrop_set_message($message, 'error');
+    $output = '<p>The restore process failed. Check the online documentation or reach out to the Backdrop community for help.</p>';
   }
 
   if (settings_get('restore_free_access')) {
@@ -187,7 +180,9 @@ function restore_select_page() {
  * Form constructor for the list of available database module updates.
  */
 function restore_backup_form($form, &$form_state) {
-  $help = '<p>The restore process may take several minutes, depending on the size of your database.</p>';
+  // This function uses st() because it needs to function even when there is
+  // no database available.
+  $help = st('The restore process may take several minutes, depending on the size of your database.');
   $form['help'] = array(
     '#type' => 'help',
     '#markup' => $help,
@@ -198,18 +193,36 @@ function restore_backup_form($form, &$form_state) {
     '#tree' => TRUE,
   );
 
-  backup_directory_list();
+  $form['backup'] = array(
+    '#type' => 'radios',
+    '#title' => st('Select backup'),
+    '#options' => array(),
+  );
+
+  $backups = backup_directory_list();
+  foreach ($backups as $backup_directory => $backup_info) {
+    $form['backup']['#options'][$backup_directory] = $backup_info['label'];
+    if (!$backup_info['valid']) {
+      $form['backup'][$backup_directory]['#disabled'] = TRUE;
+      $form['backup'][$backup_directory]['#description'] = st('This backup is missing a backup information file and cannot be restored.');
+    }
+    else {
+      $form['backup'][$backup_directory]['#description'] = st('Contains backup files: @list', array(
+        '@list' => implode(', ', array_keys($backup_info['backups'])),
+      ));
+    }
+  }
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Restore backup'),
+    '#value' => st('Restore backup'),
   );
 
   $form['actions']['cancel'] = array(
     '#type' => 'link',
-    '#href' => '<front>',
-    '#title' => t('Cancel'),
+    '#href' => base_path() . 'core/restore.php',
+    '#title' => st('Cancel'),
   );
 
   return $form;
@@ -224,18 +237,18 @@ function restore_backup_form($form, &$form_state) {
 function restore_access_denied_page() {
   backdrop_add_http_header('Status', '403 Forbidden');
   watchdog('access denied', 'restore.php', NULL, WATCHDOG_WARNING);
-  backdrop_set_title(t('Access denied'));
+  backdrop_set_title(st('Access denied'));
 
   $output = '';
   $steps = array();
 
-  $output .= t('You are not authorized to access this page. Log in using either an account with the <em>restore system backups</em> permission, or the site maintenance account (the account you created during installation). If you cannot log in, you will have to edit <code>settings.php</code> to bypass this access check. To do this:');
+  $output .= st('You are not authorized to access this page. Log in using either an account with the <em>restore system backups</em> permission, or the site maintenance account (the account you created during installation). If you cannot log in, you will have to edit <code>settings.php</code> to bypass this access check. To do this:');
   $output = '<p>' . $output . '</p>';
 
-  $steps[] = t('Find the <code>settings.php</code> file on your system, and open it with a text editor.');
-  $steps[] = t('There is a line inside your <code>settings.php</code> file that says <code>$settings[\'restore_free_access\'] = FALSE</code>. Change it to <code>$settings[\'restore_free_access\'] = TRUE</code>.');
-  $steps[] = t('Reload this page. The site restore script should be able to run now.');
-  $steps[] = t('As soon as restoring a backup is complete, you must change the <code>restore_free_access</code> setting in the <code>settings.php</code> file back to <code>FALSE</code>: <code>$settings[\'restore_free_access\'] = FALSE;</code>.');
+  $steps[] = st('Find the <code>settings.php</code> file on your system, and open it with a text editor.');
+  $steps[] = st('There is a line inside your <code>settings.php</code> file that says <code>$settings[\'restore_free_access\'] = FALSE</code>. Change it to <code>$settings[\'restore_free_access\'] = TRUE</code>.');
+  $steps[] = st('Reload this page. The site restore script should be able to run now.');
+  $steps[] = st('As soon as restoring a backup is complete, you must change the <code>restore_free_access</code> setting in the <code>settings.php</code> file back to <code>FALSE</code>: <code>$settings[\'restore_free_access\'] = FALSE;</code>.');
 
   $output .= theme('item_list', array('items' => $steps, 'type' => 'ol'));
 
@@ -282,7 +295,7 @@ function restore_task_list($set_active = NULL) {
     'info' => 'Overview',
     'select' => 'Select backup',
     'restore' => 'Restore',
-    'finished' => 'Review',
+    'results' => 'Review',
   );
 
   // Only show the task list on the left sidebar if the logged-in user has
@@ -351,20 +364,28 @@ if (restore_access_allowed()) {
         break;
       }
 
-    case t('Restore backup'):
+    case st('Restore backup'):
       if ($valid_token) {
         // Generate absolute URLs for the batch processing (using $base_root),
         // since the batch API will pass them to url() which does not handle
         // update.php correctly by default.
         $batch_url = $base_root . backdrop_current_script_url();
-        $redirect_url = $base_root . backdrop_current_script_url(array('op' => 'selection'));
+        $redirect_url = $base_root . backdrop_current_script_url(array('op' => 'results'));
 
         // Check that a backup directory is specified.
-        $backups = $_POST['backups'];
+        $backup_directory = $_POST['backup'];
+        $backups = backup_directory_list();
         $errors = array();
-        $ready = backup_restore_batch_prepare($backups, $errors);
+        $ready = FALSE;
+        if (!isset($backups[$backup_directory])) {
+          $errors[] = st('Backup directory does not exist.');
+        }
+        else {
+          $ready = backup_restore_batch_prepare($backup_directory, $backups[$backup_directory], $errors);
+        }
         if ($ready) {
-          backup_restore_batch($backups, $redirect_url, $batch_url);
+          $backups[$backup_directory]['backup_directory'] = $backup_directory;
+          backup_restore_batch($backups[$backup_directory], $redirect_url, $batch_url);
           break;
         }
         else {
@@ -375,7 +396,7 @@ if (restore_access_allowed()) {
       }
 
     case 'results':
-      $output = backup_restore_results_page();
+      $output = restore_results_page();
       break;
 
     // Regular batch ops: defer to batch processing API.
@@ -389,7 +410,7 @@ else {
   $output = restore_access_denied_page();
 }
 if (isset($output) && $output) {
-  // Explicitly start a session so that the update.php token will be accepted.
+  // Explicitly start a session so that the restore.php token will be accepted.
   backdrop_session_start();
   // We defer the display of messages until all updates are done.
   $progress_page = ($batch = batch_get()) && isset($batch['running']);

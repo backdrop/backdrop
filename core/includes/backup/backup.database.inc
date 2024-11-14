@@ -21,6 +21,16 @@ abstract class BackupDatabase extends Backup {
   protected $connection = NULL;
 
   /**
+   * @var array
+   *
+   * If a restore operation is happening as part of a batch, a copy of the batch
+   * information from the "batch" database table. This is saved in preRestore()
+   * and re-inserted in postRestore().
+   */
+  protected $restoreBatch = NULL;
+  protected $restoreQueue = NULL;
+
+  /**
    * {@inheritdoc}
    */
   function typeLabel() {
@@ -63,13 +73,6 @@ abstract class BackupDatabase extends Backup {
     $basic = array(
       // Default core tables.
       'accesslog',
-      'sessions',
-      'watchdog',
-      // Search module.
-      'search_dataset',
-      'search_index',
-      'search_keywords_log',
-      'search_total',
       // Devel module.
       'devel_queries',
       'devel_times',
@@ -179,6 +182,18 @@ abstract class BackupDatabase extends Backup {
     // Decompress the backup but leave the original file.
     if ($file->lastExtension() === 'gz') {
       $this->decompress($file, self::COMPRESSION_GZIP, FALSE);
+      $file->popExtension();
+    }
+
+    $batch_id = isset($_REQUEST['id']) ? (int) $_REQUEST['id'] : 0;
+    if ($batch_id && $batch = batch_load($batch_id)) {
+      $this->restoreBatch = $batch;
+      $queue_item = db_select('queue', 'q')
+        ->fields('q')
+        ->condition('name', 'backdrop_batch:' . $batch_id . ':0')
+        ->execute()
+        ->fetchAssoc();
+      $this->restoreQueue = $queue_item;
     }
   }
 
@@ -231,6 +246,26 @@ abstract class BackupDatabase extends Backup {
       }
       else {
         $file->popExtension();
+      }
+    }
+
+    // If a batch is in progress, put back the batch entry into the database.
+    if ($this->restoreBatch) {
+      $batch = $this->restoreBatch;
+      db_insert('batch')
+        ->fields(array(
+          'bid' => $batch['id'],
+          'timestamp' => REQUEST_TIME,
+          'token' => backdrop_get_token($batch['id']),
+          'batch' => serialize($batch),
+        ))
+        ->execute();
+      $_SESSION['batches'][$batch['id']] = TRUE;
+
+      if ($this->restoreQueue) {
+        db_insert('queue')
+          ->fields($this->restoreQueue)
+          ->execute();
       }
     }
   }

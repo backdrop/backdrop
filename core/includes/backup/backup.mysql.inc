@@ -194,7 +194,7 @@ class BackupMySql extends BackupDatabase {
 
       // Read one line at a time and run the query.
       while ($line = $this->readSqlCommandFromFile($file)) {
-        if (_backup_migrate_check_timeout()) {
+        if ($this->timeoutCheck()) {
           return FALSE;
         }
 

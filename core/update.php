@@ -400,41 +400,14 @@ function update_backup_form($form, &$form_state) {
 
       /** @var Backup $backup_instance */
       $backup_name = $backup_plugin_id . '_' . $backup_subkey;
-      $backup_settings = isset($all_backup_settings[$backup_target]) ? $all_backup_settings[$backup_target] : array();
-      $backup_instance = new $backup_class($backup_name, $backup_target, $backup_settings);
-      $backup_form = $backup_instance->backupSettingsForm();
-      if ($backup_form) {
-        $form['backups'][$backup_name] = array(
-          '#type' => 'fieldset',
-          '#title' => t('!type backup settings', array(
-            '!type' => $backup_instance->typeLabel(),
-          )),
-          '#collapsible' => TRUE,
-          '#collapsed' => TRUE,
+      // Show a checkbox if non-default targets are present.
+      if ($backup_target != 'db:default' && $backup_target != 'config:active') {
+        $form['backups'][$backup_name]['enabled'] = array(
+          '#type' => 'checkbox',
+          '#title' => t('Optional backup: @backup_name', array('@backup_name' => $backup_name)),
+          '#default_value' => TRUE,
+          '#weight' => -1,
         );
-        $form['backups'][$backup_name]['settings'] = $backup_form;
-        $form['backups'][$backup_name]['settings']['#type'] = 'container';
-
-        // Show a checkbox if non-default targets are present.
-        if ($backup_target != 'db:default' && $backup_target != 'config:active') {
-          $form['backups'][$backup_name]['enabled'] = array(
-            '#type' => 'checkbox',
-            '#title' => t('Enabled'),
-            '#default_value' => TRUE,
-            '#weight' => -1,
-          );
-          $form['backups'][$backup_name]['settings']['#states'] = array(
-            'visible' => array(
-              '[name="backups[db_default][enabled]"]' => array('checked' => TRUE),
-            ),
-          );
-        }
-        else {
-          $form['backups'][$backup_name]['enabled'] = array(
-            '#type' => 'hidden',
-            '#value' => TRUE,
-          );
-        }
       }
       else {
         $form['backups'][$backup_name]['enabled'] = array(

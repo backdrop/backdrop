@@ -1,0 +1,101 @@
+<?php
+/**
+ * @file
+ * Test module for verifying backup capabilities.
+ */
+
+/**
+ * Form that contains Backup form capabilities.
+ */
+function backup_test_form(array $form, array &$form_state) {
+
+  $backup_classes = settings_get('backup_classes', array());
+  $backup_classes = array_merge($backup_classes, array(
+    'BackupMySql',
+    'BackupConfig',
+  ));
+
+  $backup_targets = settings_get('backup_targets', array());
+  $backup_targets = array_merge($backup_targets, array(
+    'db:default',
+    'config:active',
+  ));
+
+  $all_backup_settings = settings_get('backup_settings', array());
+
+  $form['backups'] = array(
+    '#tree' => TRUE,
+  );
+
+  foreach ($backup_targets as $backup_target) {
+    list($backup_plugin_id, $backup_subkey) = explode(':', $backup_target, 2);
+    foreach ($backup_classes as $backup_class) {
+      if ($backup_class::BACKUP_ID != $backup_plugin_id) {
+        continue;
+      }
+
+      // @todo: Implement Backup::applies() method to check if the class matches the database type.
+
+      /** @var Backup $backup_instance */
+      $backup_name = $backup_plugin_id . '_' . $backup_subkey;
+      $backup_settings = isset($all_backup_settings[$backup_target]) ? $all_backup_settings[$backup_target] : array();
+      $backup_instance = new $backup_class($backup_name, $backup_target, $backup_settings);
+      $backup_form = $backup_instance->backupSettingsForm();
+      if ($backup_form) {
+        $form['backups'][$backup_name] = array(
+          '#type' => 'fieldset',
+          '#title' => t('!type backup settings', array(
+            '!type' => $backup_instance->typeLabel(),
+          )),
+          '#collapsible' => TRUE,
+          '#collapsed' => TRUE,
+        );
+        $form['backups'][$backup_name]['settings'] = $backup_form;
+        $form['backups'][$backup_name]['settings']['#type'] = 'container';
+
+        // Show a checkbox if non-default targets are present.
+        if ($backup_target != 'db:default' && $backup_target != 'config:active') {
+          $form['backups'][$backup_name]['enabled'] = array(
+            '#type' => 'checkbox',
+            '#title' => t('Enabled'),
+            '#default_value' => TRUE,
+            '#weight' => -1,
+          );
+          $form['backups'][$backup_name]['settings']['#states'] = array(
+            'visible' => array(
+              '[name="backups[db_default][enabled]"]' => array('checked' => TRUE),
+            ),
+          );
+        }
+        else {
+          $form['backups'][$backup_name]['enabled'] = array(
+            '#type' => 'hidden',
+            '#value' => TRUE,
+          );
+        }
+      }
+      else {
+        $form['backups'][$backup_name]['enabled'] = array(
+          '#type' => 'hidden',
+          '#value' => TRUE,
+        );
+      }
+
+      // @todo: Do not pass as a value, recalculate on submit.
+      $form['backups'][$backup_name]['class'] = array(
+        '#type' => 'hidden',
+        '#value' => $backup_class,
+      );
+      $form['backups'][$backup_name]['name'] = array(
+        '#type' => 'hidden',
+        '#value' => $backup_name,
+      );
+      $form['backups'][$backup_name]['target'] = array(
+        '#type' => 'hidden',
+        '#value' => $backup_target,
+      );
+    }
+  }
+
+  return $form;
+}
