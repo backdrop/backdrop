@@ -5,6 +5,38 @@
  */
 
 /**
+ * Get all backup/restore class names and file paths.
+ *
+ * This acts a miniature version of backdrop_autoload() that loads needed
+ * backup handlers. Unlike the normal autoloader, this is not modifiable by
+ * modules, since a full module bootstrap depends on the database. As an
+ * emergency restore cannot depend on either the database nor config to be
+ * available, settings.php is the only mechanism to configuring backup/restore
+ * handlers. Additional backup handlers can be added by adding the following
+ * lines to settings.php:
+ *
+ * @code
+ * $settings['backup_handlers'] = array(
+ *   'MyBackupHandler' = BACKDROP_ROOT . '/modules/my_module/includes/my_module.backup.inc';
+ * );
+ * @endcode
+ *
+ * @return array
+ *   An array of paths to classes, keyed by the class name.
+ */
+function backup_get_handlers() {
+  $backup_directory = 'core/includes/backup/';
+  $class_map = array(
+    'Backup' => $backup_directory . 'backup.class.inc',
+    'BackupConfig' => $backup_directory . 'backup.config.inc',
+    'BackupDatabase' => $backup_directory . 'backup.database.inc',
+    'BackupFile' => $backup_directory . 'backup.file.inc',
+    'BackupMySql' => $backup_directory . 'backup.mysql.inc',
+  );
+  return array_merge($class_map, settings_get('backup_handlers', array()));
+}
+
+/**
  * Get a list of all available backups.
  */
 function backup_directory_list() {
@@ -336,93 +368,6 @@ function backup_prepare_environment() {
 }
 
 /**
- * Starts a batch process to create a backup.
- *
- * @param $backup_info
- *   The contents of a Backdrop *.backup.json file.
- * @param $redirect
- *   Path to redirect to when the batch has finished processing.
- * @param $url
- *   URL of the batch processing page (should only be used for separate
- *   scripts like update.php).
- * @param $batch
- *   Optional parameters to pass into the batch API.
- * @param $redirect_callback
- *   (optional) Specify a function to be called to redirect to the progressive
- *   processing page.
- *
- * @see update_resolve_dependencies()
- */
-function backup_restore_batch($backup_info, $redirect = NULL, $url = NULL, $batch = array(), $redirect_callback = 'backdrop_goto') {
-  $operations = array();
-
-  foreach ($backup_info['backups'] as $backup) {
-    $settings = isset($backup['settings']) ? $backup['settings'] : array();
-    // @todo: Better determine which class should be used.
-    $class = NULL;
-    if (strpos($backup['target'], 'db:') === 0) {
-      $class = 'BackupMySql';
-    }
-    if (strpos($backup['target'], 'config:') === 0) {
-      $class = 'BackupConfig';
-    }
-    if ($class) {
-      $operations[] = array('backup_restore_execute', array($class, $backup['name'], $backup_info['backup_directory'], $backup['target'], $settings));
-    }
-  }
-  $batch['operations'] = $operations;
-  $batch += array(
-    'title' => st('Restoring backup'),
-    'init_message' => st('Starting restore'),
-    'error_message' => st('The restore failed.'),
-    'finished' => 'backup_restore_batch_finished',
-    'file' => 'core/includes/backup.inc',
-  );
-  batch_set($batch);
-  batch_process($redirect, $url, $redirect_callback);
-}
-
-/**
- * Finishes the restore process and stores the results for eventual display.
- *
- * @param $success
- *   Indicate that the batch API tasks were all completed successfully.
- * @param $results
- *   An array of all the results that were updated in update_do_one().
- * @param $operations
- *   A list of all the operations that had not been completed by the batch API.
- *
- * @see backup_restore_batch()
- */
-function backup_restore_batch_finished($success, $results, $operations) {
-  $_SESSION['restore_results'] = $results;
-  $_SESSION['restore_success'] = $success;
-}
-
-/**
- * Prepare for a batch backup process, ensuring requirements are met.
- *
- * @param string $backup_directory
- *   The path to the backup directory to be restored.
- * @param array $backup_info
- *   The backup information as read from a *.backup.json file.
- * @param array $errors
- *   Any errors that were encountered while preparing for the backup. This
- *   value is modified by reference.
- *
- * @return boolean
- *   TRUE if the batch is ready to run, FALSE if errors were encountered.
- */
-function backup_restore_batch_prepare($backup_directory, &$backup_info, &$errors) {
-  foreach ($backup_info['backups'] as $backup_name => $backup) {
-    if (!backup_restore_prepare($backup_name, $backup['target'], $backup['settings'], $errors)) {
-      return FALSE;
-    }
-  }
-  return TRUE;
-}
-
-/**
  * Prepare for a single restore process, ensuring requirements are met.
  *
  * @param string $backup_file
@@ -477,8 +422,14 @@ function backup_restore_execute($backup_class, $backup_name, $backup_directory, 
   // Create the BackupFile instance to hold the backup output.
   $file = new BackupFile($backup_name, $backup_directory);
   // @todo: Determine these extensions in a more flexible way.
-  $file->pushExtension('sql');
-  $file->pushExtension('gz');
+  if (strpos($restore_target, 'db:') === 0) {
+    $file->pushExtension('sql');
+    $file->pushExtension('gz');
+  }
+  elseif (strpos($restore_target, 'config:') === 0) {
+    $file->pushExtension('tar');
+    $file->pushExtension('gz');
+  }
 
   // Register shutdown callback to deal with timeouts.
   //  register_shutdown_function('backup_restore_shutdown', $settings);

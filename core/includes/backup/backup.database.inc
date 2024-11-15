@@ -202,7 +202,7 @@ abstract class BackupDatabase extends Backup {
    * {@inheritdoc}
    */
   public function restore(BackupFile $file) {
-    $num = 0;
+    $lines_executed = 0;
     // Open the file using the file wrapper.
     if ($file->extension() !== $this->getFileTypeId()) {
       $this->log('Unable to restore from file %file because a %type file can\'t be restored to this database.',
@@ -215,10 +215,10 @@ abstract class BackupDatabase extends Backup {
     }
     else {
       // Restore the database.
-      $num = $this->restoreDatabaseFromFile($file);
+      $lines_executed = $this->restoreDatabaseFromFile($file);
 
       if ($this->settings['verbose']) {
-        $this->log('%num SQL commands executed.', array('%num' => $num), self::LOG_INFO);
+        $this->log('@count SQL commands executed.', array('@count' => $lines_executed), self::LOG_INFO);
       }
     }
 
@@ -229,7 +229,7 @@ abstract class BackupDatabase extends Backup {
     }
     $file->clearLog();
 
-    return $num;
+    return $lines_executed;
   }
 
   /**
@@ -329,8 +329,8 @@ abstract class BackupDatabase extends Backup {
   /**
    * Backup the databases to a file.
    *
-   * @return bool
-   *   TRUE is restore successful, FALSE otherwise.
+   * @return int|false
+   *   The number of commands executed on restore. FALSE on failure.
    */
   abstract protected function restoreDatabaseFromFile(BackupFile $file);
 

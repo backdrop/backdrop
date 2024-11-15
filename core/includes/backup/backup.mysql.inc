@@ -181,6 +181,7 @@ class BackupMySql extends BackupDatabase {
    */
   protected function restoreDatabaseFromFile(BackupFile $file) {
     $settings = $this->settings;
+    $lines_executed = 0;
 
     if ($file->open() && $connection = $this->getDatabaseConnection()) {
       // Optionally drop all existing tables.
@@ -188,8 +189,8 @@ class BackupMySql extends BackupDatabase {
         $all_tables = $this->getTables();
         $table_names = array_map('backup_migrate_array_name_value', $all_tables);
         $table_list = join(', ', $table_names);
-        $stmt = $connection->prepare("DROP TABLE IF EXISTS $table_list;\n");
-        $stmt->execute();
+        $statement = $connection->prepare("DROP TABLE IF EXISTS $table_list;\n");
+        $statement->execute();
       }
 
       // Read one line at a time and run the query.
@@ -200,8 +201,9 @@ class BackupMySql extends BackupDatabase {
 
         // Prepare and execute the statement instead of the api function to
         // avoid substitution of '{' etc.
-        $stmt = $connection->prepare($line);
-        $stmt->execute();
+        $statement = $connection->prepare($line);
+        $statement->execute();
+        $lines_executed++;
       }
       // Close the file with fclose/gzclose.
       $file->close();
@@ -210,7 +212,7 @@ class BackupMySql extends BackupDatabase {
       backdrop_set_message(t('Unable to open file %file to restore database', array('%file' => $file->filepath())), 'error');
       return FALSE;
     }
-    return TRUE;
+    return $lines_executed;
   }
 
   /**

@@ -71,54 +71,32 @@ function restore_script_selection_form($form, &$form_state) {
 }
 
 /**
- * Provides links to the homepage and administration pages.
- */
-function restore_helpful_links() {
-  $links['front'] = array(
-    'title' => st('Home page'),
-    'href' => '<front>',
-  );
-  if (module_exists('dashboard') && user_access('access dashboard')) {
-    $links['dashboard'] = array(
-      'title' => st('Dashboard'),
-      'href' => 'admin/dashboard',
-    );
-  }
-  elseif (user_access('access administration pages')) {
-    $links['admin-pages'] = array(
-      'title' => st('Administration pages'),
-      'href' => 'admin',
-    );
-  }
-  if (user_access('administer site configuration')) {
-    $links['status-report'] = array(
-      'title' => st('Status report'),
-      'href' => 'admin/reports/status',
-    );
-  }
-  return $links;
-}
-
-/**
  * Displays results of the restore script with any accompanying errors.
  */
 function restore_results_page() {
-  backdrop_set_title('Restore site backup');
 
   restore_task_list();
 
-  if ($_SESSION['restore_success']) {
-    $output = '<p>The backup was successfully restored. Proceed happily back to your <a href="' . base_path() . '">site</a></p>';
+  if ($_GET['success']) {
+    backdrop_set_title('Restore success');
+    $output = '<p>' . st('The backup was successfully restored.') . '</p>';
+
+    if (settings_get('restore_free_access')) {
+      // Note this does not use backdrop_set_message() because session handling
+      // is not initialized on restore.php.
+      $output .= '<p>' . st("Reminder: Don't forget to set the !variable value in your !file file back to !value.", array(
+        '!variable' => "<code>\$settings['restore_free_access']</code>",
+        '!file' => '<code>settings.php</code>',
+        '!value' => '<code>FALSE</code>',
+      )) . '</p>';
+    }
+
+    $output .= '<p>' . l(st('Return to your site'), '<front>') . '</p>';
   }
   else {
-    $output = '<p>The restore process failed. Check the online documentation or reach out to the Backdrop community for help.</p>';
+    backdrop_set_title('Restore failure');
+    $output = '<p>' . st('The restore process failed. Check the online documentation or reach out to the Backdrop community for help.') . '</p>';
   }
-
-  if (settings_get('restore_free_access')) {
-    backdrop_set_message("Reminder: Don't forget to set the <code>\$settings['restore_free_access']</code> value in your <code>settings.php</code> file back to <code>FALSE</code>.", 'warning');
-  }
-
-  $output .= theme('links', array('links' => restore_helpful_links()));
 
   return $output;
 }
@@ -132,31 +110,20 @@ function restore_results_page() {
  *   Rendered HTML form.
  */
 function restore_info_page() {
-  global $databases;
-
-  // Change query-strings on css/js files to enforce reload for all users.
-  _backdrop_flush_css_js();
-  // Flush the cache of all data for the update status module.
-  if (db_table_exists('cache_update')) {
-    cache('update')->flush();
-  }
-
-  // Flush the theme cache so we can render this page correctly if the theme
-  // registry been updated with new preprocess or template variables.
-  backdrop_theme_rebuild();
-
   restore_task_list('info');
   backdrop_set_title('Restore site backup');
-  $token = backdrop_get_token('restore');
-  $output = '<p>Use this utility to restore your site\'s database and configuration to a previous version.</p>';
-  $output .= '<p>For more detailed information, see the Backdrop CMS <a href="https://docs.backdropcms.org/documentation/restoring-backups">documentation on restoring backups</a>.</p>';
+  $token = settings_get('restore_free_access') ? '1' : backdrop_get_token('restore');
+  $output = '<p>' . st('Use this utility to restore your site\'s database and configuration to a previous version.') . '</p>';
+  $output .= '<p>' . st('For more detailed information, see the Backdrop CMS <a href="!url">documentation on restoring backups</a>.', array(
+    '!url' => 'https://docs.backdropcms.org/documentation/restoring-backups',
+  )) . '</p>';
 
   $form_action = check_url(backdrop_current_script_url(array('op' => 'select', 'token' => $token)));
   $output .= '<form method="post" action="' . $form_action . '">
-  <div class="form-actions">
-    <input type="submit" value="Continue" class="form-submit button-primary" />
-    <a href="' . base_path() . '">Cancel</a>
-  </div>
+    <div class="form-actions">
+      <input type="submit" value="Continue" class="form-submit button-primary" />
+      <a href="' . base_path() . '">Cancel</a>
+    </div>
   </form>';
   $output .= "\n";
   return $output;
@@ -200,6 +167,7 @@ function restore_backup_form($form, &$form_state) {
   );
 
   $backups = backup_directory_list();
+  backdrop_sort($backups, array('label' => SORT_STRING), SORT_DESC);
   foreach ($backups as $backup_directory => $backup_info) {
     $form['backup']['#options'][$backup_directory] = $backup_info['label'];
     if (!$backup_info['valid']) {
@@ -213,6 +181,11 @@ function restore_backup_form($form, &$form_state) {
     }
   }
 
+  // Set the default to the most recent backup.
+  $first_backup = key($form['backup']['#options']);
+  $form['backup']['#default_value'] = $first_backup;
+  $form['backup']['#options'][$first_backup] .= ' ' . st('(most recent)');
+
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
     '#type' => 'submit',
@@ -221,11 +194,39 @@ function restore_backup_form($form, &$form_state) {
 
   $form['actions']['cancel'] = array(
     '#type' => 'link',
-    '#href' => base_path() . 'core/restore.php',
+    '#href' => '<front>',
     '#title' => st('Cancel'),
   );
 
   return $form;
+}
+
+/**
+ * Show a progress message while processing a restore.
+ *
+ * Note this page has an HTTP "Refresh" header set, so it's immediately
+ * attempting to load the restore page while being shown.
+ */
+function restore_progress_page($one_time_token) {
+  restore_task_list('restore');
+  backdrop_set_title('Restoring backup');
+
+  // Redirect to restore process page. This uses a one-time token that is
+  // only valid for a few seconds.
+
+  $redirect_path = backdrop_current_script_url(array(
+    'op' => 'restore',
+    'token' => $one_time_token,
+    'time' => REQUEST_TIME,
+    'backup' => $_POST['backup'],
+  ));
+  backdrop_add_http_header('Refresh', '0; ' . $redirect_path);
+
+  $output = '<p>';
+  $output .= st('This process may take a while. Please wait...');
+  $output .= '<span class="restore-progress">&nbsp;</span>';
+  $output .= '</p>';
+  return $output;
 }
 
 /**
@@ -306,114 +307,123 @@ function restore_task_list($set_active = NULL) {
   }
 }
 
-// Some unavoidable errors happen because the database is not yet up-to-date.
-// Our custom error handler is not yet installed, so we just suppress them.
-//ini_set('display_errors', FALSE);
-
-// Determine if the current user has access to run restore.php.
-include_once BACKDROP_ROOT . '/core/includes/install.inc';
-include_once BACKDROP_ROOT . '/core/includes/bootstrap.inc';
-backdrop_bootstrap(BACKDROP_BOOTSTRAP_SESSION);
-backdrop_maintenance_theme();
-
-// Only allow the requirements check to proceed if the current user has access
-// to run restoration (since it may expose sensitive information about the
-// site's configuration).
-$op = isset($_REQUEST['op']) ? $_REQUEST['op'] : '';
-if (empty($op) && restore_access_allowed()) {
-
-  // Load module basics.
-  include_once BACKDROP_ROOT . '/core/includes/module.inc';
-  $module_list['system']['filename'] = 'core/modules/system/system.module';
-  module_list(TRUE, FALSE, FALSE, $module_list);
-  backdrop_load('module', 'system');
-
-  // Set up $language, since the installer components require it.
-  backdrop_language_initialize();
-
-  // Redirect to the restore information page if all requirements were met.
-  install_goto('core/restore.php?op=info');
+/**
+ * Light-weight version of backdrop_goto() that guarantees no database usage.
+ */
+function restore_goto($url) {
+  header('Location: ' . $url, TRUE, 302);
+  exit();
 }
 
-backdrop_bootstrap(BACKDROP_BOOTSTRAP_LANGUAGE);
-include_once BACKDROP_ROOT . '/core/includes/unicode.inc';
-
-// Now proceed with a full bootstrap.
-backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
-
-// Turn error reporting back on. From now on, only fatal errors (which are
-// not passed through the error handler) will cause a message to be printed.
-ini_set('display_errors', TRUE);
+// Determine if the current user has access to run restore.php.
+require_once BACKDROP_ROOT . '/core/includes/install.inc';
+require_once BACKDROP_ROOT . '/core/includes/bootstrap.inc';
+backdrop_bootstrap(BACKDROP_BOOTSTRAP_DATABASE);
+backdrop_maintenance_theme();
 
 // Only proceed if the user is allowed to restore backups.
 if (restore_access_allowed()) {
-  include_once BACKDROP_ROOT . '/core/includes/backup.inc';
-  include_once BACKDROP_ROOT . '/core/includes/batch.inc';
+  require_once BACKDROP_ROOT . '/core/includes/unicode.inc';
+  require_once BACKDROP_ROOT . '/core/includes/form.inc';
+  require_once BACKDROP_ROOT . '/core/includes/ajax.inc';
+  require_once BACKDROP_ROOT . '/core/includes/backup.inc';
+  foreach (backup_get_handlers() as $class_name => $include_path) {
+    require_once BACKDROP_ROOT . '/' . $include_path;
+  }
 
-  $op = isset($_REQUEST['op']) ? $_REQUEST['op'] : '';
-  $valid_token = isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'restore');
+  $op = isset($_REQUEST['op']) ? $_REQUEST['op'] : 'info';
+
+  // If free access is set, skip using any kind of token (which is session and
+  // thus database dependent). This allows restore.php to be used with an
+  // entirely empty or corrupted database.
+  if (settings_get('restore_free_access')) {
+    $valid_token = TRUE;
+    $one_time_token = 1;
+    $valid_one_time_token = TRUE;
+  }
+  else {
+    $valid_token = isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'restore');
+    $one_time_token = backdrop_get_token('restore_' . REQUEST_TIME);
+    $valid_one_time_token = isset($_GET['time']) && isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'restore_' . $_GET['time']);
+  }
   switch ($op) {
     // Main restore.php operations.
-    case 'info':
-      $output = restore_info_page();
-      break;
-
     case 'select':
       if ($valid_token) {
         $output = restore_select_page();
-        break;
       }
+      break;
 
     case st('Restore backup'):
       if ($valid_token) {
-        // Generate absolute URLs for the batch processing (using $base_root),
-        // since the batch API will pass them to url() which does not handle
-        // update.php correctly by default.
-        $batch_url = $base_root . backdrop_current_script_url();
-        $redirect_url = $base_root . backdrop_current_script_url(array('op' => 'results'));
+        $output = restore_progress_page($one_time_token);
+      }
+      else {
+        restore_goto($_SERVER['SCRIPT_NAME']);
+      }
+      break;
 
-        // Check that a backup directory is specified.
-        $backup_directory = $_POST['backup'];
-        $backups = backup_directory_list();
-        $errors = array();
-        $ready = FALSE;
-        if (!isset($backups[$backup_directory])) {
-          $errors[] = st('Backup directory does not exist.');
+    case 'restore':
+      if (!$valid_one_time_token || $_GET['time'] < REQUEST_TIME - 10) {
+        restore_goto($_SERVER['SCRIPT_NAME']);
+      }
+      // Check that a backup directory is specified.
+      $backup_directory = $_GET['backup'];
+      $backups = backup_directory_list();
+      $errors = array();
+      $ready = FALSE;
+      if (!isset($backups[$backup_directory])) {
+        $errors[] = st('Backup directory does not exist.');
+      }
+      else {
+        $backup_info = $backups[$backup_directory];
+
+        foreach ($backup_info['backups'] as $backup_name => $backup) {
+          backup_restore_prepare($backup_name, $backup['target'], $backup['settings'], $errors);
         }
-        else {
-          $ready = backup_restore_batch_prepare($backup_directory, $backups[$backup_directory], $errors);
-        }
-        if ($ready) {
-          $backups[$backup_directory]['backup_directory'] = $backup_directory;
-          backup_restore_batch($backups[$backup_directory], $redirect_url, $batch_url);
-          break;
-        }
-        else {
-          foreach ($errors as $error) {
-            backdrop_set_message($error, 'error');
+        if (empty($errors)) {
+          foreach ($backup_info['backups'] as $backup) {
+            $settings = isset($backup['settings']) ? $backup['settings'] : array();
+            // @todo: Better determine which class should be used.
+            $class = NULL;
+            if (strpos($backup['target'], 'db:') === 0) {
+              $class = 'BackupMySql';
+            }
+            if (strpos($backup['target'], 'config:') === 0) {
+              $class = 'BackupConfig';
+            }
+            backup_restore_execute($class, $backup['name'], $backup_directory, $backup['target'], $settings);
           }
         }
       }
+
+      foreach ($errors as $error) {
+        backdrop_set_message($error, 'error');
+      }
+
+      // Redirect to results page.
+      $success = empty($errors) ? '1' : '0';
+      header('Location: ' . $_SERVER['SCRIPT_NAME'] . '?op=results&success=' . $success, TRUE, 302);
+      exit();
 
     case 'results':
       $output = restore_results_page();
       break;
 
-    // Regular batch ops: defer to batch processing API.
     default:
-      restore_task_list('run');
-      $output = _batch_page();
+      $output = restore_info_page();
       break;
   }
 }
 else {
   $output = restore_access_denied_page();
 }
+
 if (isset($output) && $output) {
   // Explicitly start a session so that the restore.php token will be accepted.
-  backdrop_session_start();
-  // We defer the display of messages until all updates are done.
-  $progress_page = ($batch = batch_get()) && isset($batch['running']);
+  if (backdrop_bootstrap() >= BACKDROP_BOOTSTRAP_SESSION) {
+    backdrop_session_start();
+  }
   $task_list = restore_task_list();
-  print theme('restore_page', array('content' => $output, 'sidebar' => $task_list, 'show_messages' => !$progress_page));
+  print theme('restore_page', array('content' => $output, 'sidebar' => $task_list, 'show_messages' => TRUE));
 }
