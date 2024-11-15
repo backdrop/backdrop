@@ -164,6 +164,7 @@ class BackupMySql extends BackupDatabase {
         }
       }
     }
+    // @todo: This is not yet supported.
     $success = backup_migrate_exec($command, $args);
 
     // Get the nodata tables.
@@ -179,7 +180,6 @@ class BackupMySql extends BackupDatabase {
    * {@inheritdoc}
    */
   protected function restoreDatabaseFromFile(BackupFile $file) {
-    $num = 0;
     $settings = $this->settings;
 
     if ($file->open() && $connection = $this->getDatabaseConnection()) {
@@ -202,16 +202,15 @@ class BackupMySql extends BackupDatabase {
         // avoid substitution of '{' etc.
         $stmt = $connection->prepare($line);
         $stmt->execute();
-        $num++;
       }
       // Close the file with fclose/gzclose.
       $file->close();
     }
     else {
-      backdrop_set_message(t("Unable to open file %file to restore database", array("%file" => $file->filepath())), 'error');
-      $num = FALSE;
+      backdrop_set_message(t('Unable to open file %file to restore database', array('%file' => $file->filepath())), 'error');
+      return FALSE;
     }
-    return $num;
+    return TRUE;
   }
 
   /**
@@ -359,7 +358,7 @@ class BackupMySql extends BackupDatabase {
    * Get the SQL for the structure of the given view.
    */
   protected function getViewCreateSql($view) {
-    $out = "";
+    $out = '';
     // Switch SQL mode to get rid of "CREATE ALGORITHM..." what requires more
     // permissions + troubles with the DEFINER user.
     $sql_mode = $this->query("SELECT @@SESSION.sql_mode")->fetchField();

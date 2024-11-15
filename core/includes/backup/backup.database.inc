@@ -72,6 +72,7 @@ abstract class BackupDatabase extends Backup {
     // Basic modules that should be excluded.
     $basic = array(
       // Default core tables.
+      'session',
       'accesslog',
       // Devel module.
       'devel_queries',
@@ -260,10 +261,15 @@ abstract class BackupDatabase extends Backup {
           'batch' => serialize($batch),
         ))
         ->execute();
+
+      // Save the current session into the restored database.
       $_SESSION['batches'][$batch['id']] = TRUE;
+      backdrop_static_reset('backdrop_session_last_read');
+      backdrop_session_commit();
 
       if ($this->restoreQueue) {
-        db_insert('queue')
+        db_merge('queue')
+          ->key(array('item_id' => $this->restoreQueue['item_id']))
           ->fields($this->restoreQueue)
           ->execute();
       }
@@ -314,11 +320,17 @@ abstract class BackupDatabase extends Backup {
 
   /**
    * Backup the databases to a file.
+   *
+   * @return bool
+   *   TRUE is backup successful, FALSE otherwise.
    */
   abstract protected function backupDatabaseToFile(BackupFile $file);
 
   /**
    * Backup the databases to a file.
+   *
+   * @return bool
+   *   TRUE is restore successful, FALSE otherwise.
    */
   abstract protected function restoreDatabaseFromFile(BackupFile $file);
 
