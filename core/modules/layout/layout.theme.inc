@@ -295,8 +295,19 @@ function theme_layout_hero_background_image($variables) {
   $output = '';
   $output .= '<div' . backdrop_attributes($attributes) . '>';
   if (isset($element['#file']->uri)) {
-    $output .= '<div class="hero-bg-preview">';
-    $output .= '<img style="height:250px" src="' . image_style_url('medium', $element['#file']->uri) . '" />';
+    $output .= '<div class="layout-hero-background-preview">';
+    $output .= theme('image_style', 
+      array(
+        'style_name' => $element['#image_style'],
+        'uri' => $element['#file']->uri,
+        'width' => '200',
+        'height' => '250',
+      ));
+    $output .= '</div>';
+  }
+  else {
+    $output .= '<div class="layout-hero-background-preview-empty">';
+    $output .= t('No background image is currently set. Some themes, such as Basis theme, may display a background image defined in CSS.');
     $output .= '</div>';
   }
   $output .= backdrop_render_children($element);
