@@ -285,7 +285,7 @@ function number_field_formatter_settings_form($field, $instance, $view_mode, $fo
 
   if ($display['type'] == 'number_decimal' || $display['type'] == 'number_integer') {
     $options = array(
-      ''  => t('<none>'),
+      ''  => t('- None -'),
       '.' => t('Decimal point'),
       ',' => t('Comma'),
       ' ' => t('Space'),
