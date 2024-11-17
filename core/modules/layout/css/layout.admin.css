@@ -184,6 +184,9 @@
   border: 1px solid #CCC;
   border-bottom: none;
 }
+.layout-hero-background-preview-empty {
+  margin-bottom: 1em;
+}
 
 /* Layout columns */
 .layout-content-form .row > div,
