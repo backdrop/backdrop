@@ -5078,7 +5078,7 @@ function theme_form_element_label($variables) {
  *   An associative array containing:
  *   - element: An associative array containing the properties of the element.
  *
- * @since 1.29.0 theme function introduced.
+ * @since 1.30.0 Function added.
  *
  * @ingroup themeable
  */
