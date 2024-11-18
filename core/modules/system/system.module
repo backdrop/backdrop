@@ -4213,14 +4213,14 @@ function system_system_info_alter(&$info, $file, $type) {
  * Menu callback; Returns the standard "Page not found" error page.
  */
 function system_404() {
-  return t('The requested page "@path" could not be found.', array('@path' => request_uri()));
+  return '<p>' . t('The requested page "@path" could not be found.', array('@path' => request_uri())) . '</p>';
 }
 
 /**
  * Menu callback; Returns the standard "Page not found" error page.
  */
 function system_403() {
-  return t('You are not authorized to access this page.');
+  return '<p>' . t('You are not authorized to access this page.') . '</p>';
 }
 
 /**
