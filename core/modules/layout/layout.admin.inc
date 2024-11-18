@@ -801,10 +801,17 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   else {
     $default_value = '';
   }
+  $toggle_additional = ' <a class="layout-additional-paths-examples-toggle" href="#">' . t('Show examples') . '<span class="arrow"></span></a>';
+  $description_additional_items = array(
+    t('Content: <code>node/%/edit</code> if primary path is <code>node/%</code>'),
+    t('Views page: <code>user/%/posts</code> if primary path is <code>user/%</code>'),
+    t('Login: <code>user/register</code> if primary path is <code>user/login</code>'),
+  );
+  $description_additional_list = '<div class="layout-additional-paths-examples">' . t('Some common examples of additional paths include:') . theme('item_list', array('items' => $description_additonal_items)) . '</div>';
   $form['additional_paths'] = array(
     '#type' => 'textarea',
     '#title' => t('Additional paths'),
-    '#description' => t('Optionally specify one or more additional paths to be handled by this layout (in addition to the primary path above). These paths must already be provided by the system or another module. Use the percent symbol ("%") to indicate a placeholder in the path. e.g. "node/%" or "node/%/edit". The number of placeholders must be the same as the number of placeholders in the primary path.'),
+    '#description' => t('Optionally, specify one or more additional paths to be handled by this layout (in addition to the primary path above). These paths must already be provided by the system or another module. If an additional path contains a placeholder it must be a child path of the primary path.') . $$toggle_additional . $description_additional_list,
     '#default_value' => $default_value,
   );
 
