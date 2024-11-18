@@ -3000,7 +3000,8 @@ function theme_fieldset($variables) {
   if (isset($element['#value'])) {
     $output .= $element['#value'];
   }
-  $output .= $description_after . '</div>';
+  $output .= $description_after;
+  $output .= '</div>';
   $output .= "</fieldset>\n";
   return $output;
 }
