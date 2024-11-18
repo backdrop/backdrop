@@ -611,7 +611,7 @@ class FileSaveUploadTest extends FileHookTestCase {
     $dir = $this->randomName();
     $edit = array(
       'files[file_test_upload]' => $image3_realpath,
-      'file_subdir' => $dir,
+      'file_subdirectory' => $dir,
     );
     $this->backdropPost('file-test/upload', $edit, t('Submit'));
     $this->assertResponse(200, 'Received a 200 response for posted test file.');
@@ -2838,7 +2838,7 @@ class FileMimeTypeTest extends BackdropWebTestCase {
 class StreamWrapperTest extends BackdropWebTestCase {
 
   protected $scheme = 'dummy';
-  protected $classname = 'BackdropDummyStreamWrapper';
+  protected $class_name = 'BackdropDummyStreamWrapper';
 
   function setUp() {
     parent::setUp('file_test');
@@ -2855,7 +2855,7 @@ class StreamWrapperTest extends BackdropWebTestCase {
    */
   function testGetClassName() {
     // Check the dummy scheme.
-    $this->assertEqual($this->classname, file_stream_wrapper_get_class($this->scheme), 'Got correct class name for dummy scheme.');
+    $this->assertEqual($this->class_name, file_stream_wrapper_get_class($this->scheme), 'Got correct class name for dummy scheme.');
     // Check core's scheme.
     $this->assertEqual('BackdropPublicStreamWrapper', file_stream_wrapper_get_class('public'), 'Got correct class name for public scheme.');
   }
@@ -2865,7 +2865,7 @@ class StreamWrapperTest extends BackdropWebTestCase {
    */
   function testGetInstanceByScheme() {
     $instance = file_stream_wrapper_get_instance_by_scheme($this->scheme);
-    $this->assertEqual($this->classname, get_class($instance), 'Got correct class type for dummy scheme.');
+    $this->assertEqual($this->class_name, get_class($instance), 'Got correct class type for dummy scheme.');
 
     $instance = file_stream_wrapper_get_instance_by_scheme('public');
     $this->assertEqual('BackdropPublicStreamWrapper', get_class($instance), 'Got correct class type for public scheme.');
@@ -2877,7 +2877,7 @@ class StreamWrapperTest extends BackdropWebTestCase {
   function testUriFunctions() {
     $site_config = config('system.core');
     $instance = file_stream_wrapper_get_instance_by_uri($this->scheme . '://foo');
-    $this->assertEqual($this->classname, get_class($instance), 'Got correct class type for dummy URI.');
+    $this->assertEqual($this->class_name, get_class($instance), 'Got correct class type for dummy URI.');
 
     $instance = file_stream_wrapper_get_instance_by_uri('public://foo');
     $this->assertEqual('BackdropPublicStreamWrapper', get_class($instance), 'Got correct class type for public URI.');

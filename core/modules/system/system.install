@@ -3633,6 +3633,27 @@ function system_update_1097() {
 }
 
 /**
+ * Uninstall the fast_token_browser contrib module, now part of core.
+ */
+function field_update_1098() {
+  $module = db_query("SELECT name FROM {system} WHERE name = 'fast_token_browser' AND type = 'module'")->fetchField();
+  if ($module) {
+    $path = backdrop_get_path('module', 'fast_token_browser');
+    backdrop_set_message(t('The contributed module <em>Fast Token Browser</em> has been located at %path. The module has been disabled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    // Remove the entry for the Fast Token Browser module from the system table.
+    // As this module does not provide any config or settings, there doesn't
+    // seem to be anything else left to clean up or migrate.
+    // While the contrib module remains in the filesystem, this entry will be
+    // recreated, but it will have status 0 (disabled), and schema -1
+    // (uninstalled), so it is safe to remove.
+    db_query("DELETE FROM {system} WHERE name = 'fast_token_browser' AND type = 'module'");
+  }
+  else {
+    return t('<em>Fast Token Browser</em> not found. Nothing to be done.');
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

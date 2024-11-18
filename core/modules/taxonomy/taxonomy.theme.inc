@@ -134,10 +134,6 @@ function theme_taxonomy_overview_terms($variables) {
     $row_position++;
   }
 
-  if (empty($rows)) {
-    $rows[] = array(array('data' => $form['#empty_text'], 'colspan' => '3'));
-  }
-
   $output = '';
 
   if (module_exists('language') && $form['#vocabulary']->language == TAXONOMY_LANGUAGE_ENABLED) {
@@ -157,6 +153,7 @@ function theme_taxonomy_overview_terms($variables) {
   $output .= theme('table', array(
     'header' => $header,
     'rows' => $rows,
+    'empty' => $form['#empty_text'],
     'attributes' => array('id' => 'taxonomy'),
   ));
   $output .= backdrop_render_children($form);

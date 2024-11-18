@@ -36,6 +36,8 @@ barbaz
 Barepaths
 bartik
 basenames
+basepath
+basetheme
 basethemes
 bitmasks
 bitstring
@@ -73,6 +75,7 @@ cresult
 cript
 csspath
 CURLAUTH
+CURLOPT
 curparts
 curstr
 Dairiki
@@ -83,6 +86,7 @@ datelimits
 dbinfo
 dblog
 DDTHH
+deconstructor
 dependee
 dependees
 derf
@@ -90,6 +94,8 @@ devmajor
 devminor
 diffutils
 dimanche
+dialogclose
+dialogopen
 divitis
 docache
 docwilmot
@@ -257,7 +263,9 @@ mouton
 moutons
 msgbox
 multibundle
+multilanguage
 multipage
+multisite
 multisites
 Műveletek
 myclass
@@ -328,6 +336,7 @@ Optionchecker
 otherjob
 othername
 otherval
+outro
 padder
 pageno
 pagenum
@@ -338,8 +347,15 @@ plid
 plids
 pneum
 Ponedjeljak
+POSTFIELDS
 preenable
 Prefilter
+preinstall
+preinstalled
+preinstalling
+prepopulate
+prepopulated
+prepopulating
 prevdate
 prevdatealt
 prevfirst
@@ -367,6 +383,7 @@ reparented
 reparenting
 requeing
 restriping
+RETURNTRANSFER
 retval
 rger
 rkey

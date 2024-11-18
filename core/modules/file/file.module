@@ -119,6 +119,7 @@ function file_autoload_info() {
     'views_handler_field_file_link_edit' => 'views/views_handler_field_file_link_edit.inc',
     'views_handler_field_file_link_delete' => 'views/views_handler_field_file_link_delete.inc',
     'views_handler_field_file_extension' => 'views/views_handler_field_file_extension.inc',
+    'views_handler_field_file_icon' => 'views/views_handler_field_file_icon.inc',
     'views_handler_field_file_filemime' => 'views/views_handler_field_file_filemime.inc',
     'views_handler_field_file_uri' => 'views/views_handler_field_file_uri.inc',
     'views_handler_field_file_status' => 'views/views_handler_field_file_status.inc',
