@@ -2995,7 +2995,8 @@ function theme_fieldset($variables) {
     }
   }
 
-  $output .= $description_before . $element['#children'];
+  $output .= $description_before;
+  $output .= $element['#children'];
   if (isset($element['#value'])) {
     $output .= $element['#value'];
   }
