@@ -35,7 +35,7 @@ Backdrop.behaviors.layoutConfigure = {
   attach: function(context) {
 
     /**
-     * Toggle handler for the placeholder examples.
+     * Toggle handler for the examples.
      */
     function examples_toggle_handler(e) {
       var $examples = $(this).next().toggle();
@@ -62,6 +62,7 @@ Backdrop.behaviors.layoutConfigure = {
 
       // (Re)install placeholder examples toggle handler.
       $('a.layout-placeholder-examples-toggle').on('click', examples_toggle_handler);
+      $('a.layout-additional-paths-examples-toggle').on('click', examples_toggle_handler);
 
       };
       // Update contexts after a slight typing delay.
@@ -72,11 +73,13 @@ Backdrop.behaviors.layoutConfigure = {
       });
     }
 
-    // Hide the placeholder examples.
+    // Hide the examples.
     $form.find('.layout-placeholder-examples').hide();
+    $form.find('.layout-additional-paths-examples').hide();
 
-    // Handle toggling the placeholder examples.
+    // Handle toggling the examples.
     $('a.layout-placeholder-examples-toggle').on('click', examples_toggle_handler);
+    $('a.layout-additional-paths-examples-toggle').on('click', examples_toggle_handler);
 
     // Convert AJAX buttons to links.
     var $linkButtons = $(context).find('.layout-link-button').once('link-button');
