@@ -4849,43 +4849,43 @@ function theme_file($variables) {
  *   $form structure and set via form_builder()).
  * - form-disabled: Only set if the form element is #disabled.
  *
- * In addition to the element itself, the DIV contains:
- * - a label (#title) for the element, which can be positioned relative to the
- *   element using an optional #title_display property. The optional
- *   #title_display property can have the following values:
- *   - before (default): The label is output before the element. The label
- *     includes the #title and the required marker (if #required is set to
- *     TRUE).
- *   - after: The label is output after the element. For example, this is used
- *     for checkboxes and radios, as set in system_element_info(). If the #title
- *     is empty but the field is #required, the label will contain only the
- *     required marker.
- *   - invisible: Labels are critical for screen readers to enable them to
- *     properly navigate through forms, but they can be visually distracting.
- *     This property hides the label for everyone except screen readers.
- *   - attribute: Set the title attribute on the element to create a tooltip but
- *     output no label element. This is supported only for checkboxes and radios
- *     in form_pre_render_conditional_form_element(). It is used where a visual
- *     label is not needed, such as a table of checkboxes where the row and
- *     column provide the context. The tooltip will include the title and the
- *     required marker.
- *   If the #title property is not set, then the label and any required marker
- *   will not be output, regardless of the #title_display or #required values.
- *   This can be useful in cases such as the password_confirm element, which
- *   creates children elements that have their own labels and required markers,
- *   but the parent element should have neither. Use this carefully because a
- *   field without an associated label can cause accessibility challenges.
- * - an optional help text (#description), which can also be positioned relative
- *   to the element using the optional #description_display property. The
- *   optional #description_display property can have the following values:
- *   - after (the default for all elements except for fieldset): The description
- *     is output after the element.
- *   - before (the default for fieldsets): The description is output before the
- *     element, after the label (if not visually hidden).
- *   - invisible: The description is output between the label and the main form
- *     element, hidden visually but available to screen readers.
+ * In addition to the element itself, the DIV contains a label and an optional
+ * description. The label and description can be positioned by the
+ * #title_display and #description_display properties respectively.
  *
- * @param $variables
+ * The optional #title_display property can have these values:
+ * - before: The label is output before the element. This is the default.
+ *   The label includes the #title and the required marker, if #required.
+ * - after: The label is output after the element. For example, this is used
+ *   for radio and checkbox #type elements as set in system_element_info().
+ *   If the #title is empty but the field is #required, the label will
+ *   contain only the required marker.
+ * - invisible: Labels are critical for screen readers to enable them to
+ *   properly navigate through forms but can be visually distracting. This
+ *   property hides the label for everyone except screen readers.
+ * - attribute: Set the title attribute on the element to create a tooltip
+ *   but output no label element. This is supported only for checkboxes
+ *   and radios in form_pre_render_conditional_form_element(). It is used
+ *   where a visual label is not needed, such as a table of checkboxes where
+ *   the row and column provide the context. The tooltip will include the
+ *   title and required marker.
+ *
+ * If the #title property is not set, then the label and any required marker
+ * will not be output, regardless of the #title_display or #required values.
+ * This can be useful in cases such as the password_confirm element, which
+ * creates children elements that have their own labels and required markers,
+ * but the parent element should have neither. Use this carefully because a
+ * field without an associated label can cause accessibility challenges.
+ *
+ * The optional #description_display property can have these values:
+ * - after (the default for all elements except for fieldset): The description
+ *   is output after the element.
+ * - before (the default for fieldsets): The description is output before the
+ *   element, after the label (if not visually hidden).
+ * - invisible: The description is output between the label and the main form
+ *   element, hidden visually but available to screen readers.
+ *
+ * @param array $variables
  *   An associative array containing:
  *   - element: An associative array containing the properties of the element.
  *     Properties used: #type, #name, #title, #title_display, #id, #required,
