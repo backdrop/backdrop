@@ -57,6 +57,7 @@
     "/core/misc/opensans/",
     "/core/misc/smartmenus/",
     "/core/misc/ui/",
+    "/core/modules/ckeditor5/lib/ckeditor5/",
     "/core/modules/search/tests/UnicodeTest.txt",
     "/core/modules/system/system.tar.inc",
     "/core/themes/bartik/color/preview.html",

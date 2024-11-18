@@ -953,6 +953,11 @@ function backdrop_access_denied() {
  * @see backdrop_http_build_query()
  *
  * @since 1.18.4 The $options['data'] key may now be passed as an array.
+ * @since 1.27.2 Support added for the 429 response code (previously treaded as
+ *   a 400).
+ * @since 1.27.2 Now removes any potentially sensitive headers before following
+ *   a redirect. See the 'strip_sensitive_headers_on_host_change' setting in
+ *   settings.php for details.
  */
 function backdrop_http_request($url, array $options = array()) {
   // Allow an alternate HTTP client library to replace Backdrop's default
@@ -1226,6 +1231,7 @@ function backdrop_http_request($url, array $options = array()) {
     415 => 'Unsupported Media Type',
     416 => 'Requested range not satisfiable',
     417 => 'Expectation Failed',
+    429 => 'Too Many Requests',
     500 => 'Internal Server Error',
     501 => 'Not Implemented',
     502 => 'Bad Gateway',
@@ -1262,6 +1268,15 @@ function backdrop_http_request($url, array $options = array()) {
       elseif ($options['max_redirects']) {
         // Redirect to the new location.
         $options['max_redirects']--;
+
+        // Check if we need to remove any potentially sensitive headers before
+        // following the redirect.
+        // @see https://www.rfc-editor.org/rfc/rfc9110.html#name-redirection-3xx
+        if (_backdrop_should_strip_sensitive_headers_on_http_redirect($url, $location)) {
+          unset($options['headers']['Cookie']);
+          unset($options['headers']['Authorization']);
+        }
+
         // Remove the automatically added Host header, as the redirect may
         // be on a different domain name.
         if (isset($options['headers']['Host'])) {
@@ -1279,6 +1294,36 @@ function backdrop_http_request($url, array $options = array()) {
   }
 
   return $result;
+}
+
+/**
+ * Determine whether to strip sensitive headers from a request when redirected.
+ *
+ * @param string $url
+ *   The url from the original outbound http request.
+ *
+ * @param string $location
+ *   The location to which the request has been redirected.
+ *
+ * @return boolean
+ *   Whether sensitive headers should be stripped from the request before
+ *   following the redirect.
+ */
+function _backdrop_should_strip_sensitive_headers_on_http_redirect($url, $location) {
+  $url_parsed = parse_url($url);
+  $location_parsed = parse_url($location);
+  if (!isset($location_parsed['host'])) {
+    return FALSE;
+  }
+  $strip_on_host_change = config_get('system.core', 'backdrop_http_request.strip_sensitive_headers_on_host_change');
+  $strip_on_https_downgrade = config_get('system.core', 'backdrop_http_request.strip_sensitive_headers_on_https_downgrade');
+  if ($strip_on_host_change && strcasecmp($url_parsed['host'], $location_parsed['host']) !== 0) {
+    return TRUE;
+  }
+  if ($strip_on_https_downgrade && $url_parsed['scheme'] !== $location_parsed['scheme'] && $location_parsed['scheme'] !== 'https') {
+    return TRUE;
+  }
+  return FALSE;
 }
 
 /**
@@ -2166,9 +2211,9 @@ function format_rss_item($title, $link, $description, $args = array()) {
  * @since 1.12.7 Added $indentation_level parameter.
  *
  * @return string
- *  A string of XML representing the elements passed in.
+ *   A string of XML representing the elements passed in.
  */
-function format_xml_elements($array, $indentation_level = 0) {
+function format_xml_elements(array $array, $indentation_level = 0) {
   $output = '';
 
   // Indent two spaces per level.
@@ -2484,7 +2529,7 @@ function format_date($timestamp, $date_format_name = 'medium', $pattern = '', $t
  *
  * Callback for preg_replace_callback() within format_date().
  *
- * @param $matches
+ * @param array $matches
  *   The array of matches as found by preg_replace_callback().
  * @param string $new_langcode
  *   Sets the internal langcode to be used. Set the langcode prior to calling
@@ -2757,8 +2802,8 @@ function url_is_external($path) {
   $colon_position = strpos($path, ':');
   // Some browsers treat \ as / so normalize to forward slashes.
   $path = str_replace('\\', '/', $path);
-  // Avoid calling backdrop_strip_dangerous_protocols(). If the path starts with 2
-  // slashes then it is always considered an external URL without an explicit
+  // Avoid calling backdrop_strip_dangerous_protocols(). If the path starts with
+  // 2 slashes then it is always considered an external URL without an explicit
   // protocol part.
   return (strpos($path, '//') === 0)
     // Leading control characters may be ignored or mishandled by browsers, so
@@ -5502,6 +5547,8 @@ function backdrop_get_library($module, $name = NULL) {
  *   - immutable: Whether to use the original icon instead of any overrides.
  *
  * @see icon()
+ *
+ * @since 1.28.0 Function added.
  */
 function backdrop_add_icons(array $icon_names) {
   $icon_paths = array();
@@ -5748,8 +5795,8 @@ function backdrop_clear_js_cache() {
  *   readable by humans, or emulates this functionality if running an older
  *   version of PHP.
  *
- * @return string
- *   The given $var encoded as a JSON string.
+ * @return string|FALSE
+ *   The given $var encoded as a JSON string or FALSE on failure.
  *
  * @see backdrop_json_decode()
  * @ingroup php_wrappers

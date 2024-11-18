@@ -2833,9 +2833,9 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
     // Add a condition to specify only the post type should have this layout.
-    $this->backdropPost('admin/structure/layouts/manage/post_layout/configure', array(), t('Add visibility condition'));
+    $this->backdropPost('admin/structure/layouts/manage/post_layout/configure', array(), t('Add condition'));
     $this->backdropPost(NULL, array('condition' => 'node_type'), t('Load condition'));
-    $this->backdropPost(NULL, array('bundles[post]' => 1), t('Add visibility condition'));
+    $this->backdropPost(NULL, array('bundles[post]' => 1), t('Add condition'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     // Add the custom block to the layout.

@@ -29,7 +29,7 @@ function theme_admin_bar_links($variables) {
 
   // The majority of items in the menu are sorted already, but since modules
   // may add or change arbitrary items anywhere, there is no way around sorting
-  // everything again. element_sort() is not sufficient here, as it
+  // everything again. Sorting by the key #weight is not sufficient here, as it
   // intentionally retains the order of elements having the same #weight,
   // whereas menu links are supposed to be ordered by #weight and #title.
   backdrop_sort($elements, array('#weight' => SORT_NUMERIC, '#title' => SORT_STRING));
@@ -73,7 +73,10 @@ function theme_admin_bar_links($variables) {
     $icon = '';
     if ($elements[$path]['#level'] < 2) {
       if (isset($elements[$path]['#options']['icon'])) {
-        $icon = icon($elements[$path]['#options']['icon'], array('immutable' => TRUE));
+        // If 'icon' is set to an empty string or FALSE, do not add an icon.
+        if ($elements[$path]['#options']['icon']) {
+          $icon = icon($elements[$path]['#options']['icon'], array('immutable' => TRUE));
+        }
       }
       else {
         $arrow_direction = $GLOBALS['language']->direction ? 'left' : 'right';
