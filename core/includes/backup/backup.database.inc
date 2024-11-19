@@ -11,8 +11,6 @@
  * @ingroup backup_restore
  */
 abstract class BackupDatabase extends Backup {
-  const BACKUP_ID = 'db';
-
   /**
    * @var DatabaseConnection
    *
@@ -21,19 +19,9 @@ abstract class BackupDatabase extends Backup {
   protected $connection = NULL;
 
   /**
-   * @var array
-   *
-   * If a restore operation is happening as part of a batch, a copy of the batch
-   * information from the "batch" database table. This is saved in preRestore()
-   * and re-inserted in postRestore().
-   */
-  protected $restoreBatch = NULL;
-  protected $restoreQueue = NULL;
-
-  /**
    * {@inheritdoc}
    */
-  function typeLabel() {
+  public function typeLabel() {
     return t('Database');
   }
 
@@ -185,17 +173,6 @@ abstract class BackupDatabase extends Backup {
       $this->decompress($file, self::COMPRESSION_GZIP, FALSE);
       $file->popExtension();
     }
-
-    $batch_id = isset($_REQUEST['id']) ? (int) $_REQUEST['id'] : 0;
-    if ($batch_id && $batch = batch_load($batch_id)) {
-      $this->restoreBatch = $batch;
-      $queue_item = db_select('queue', 'q')
-        ->fields('q')
-        ->condition('name', 'backdrop_batch:' . $batch_id . ':0')
-        ->execute()
-        ->fetchAssoc();
-      $this->restoreQueue = $queue_item;
-    }
   }
 
   /**
@@ -247,31 +224,6 @@ abstract class BackupDatabase extends Backup {
       }
       else {
         $file->popExtension();
-      }
-    }
-
-    // If a batch is in progress, put back the batch entry into the database.
-    if ($this->restoreBatch) {
-      $batch = $this->restoreBatch;
-      db_insert('batch')
-        ->fields(array(
-          'bid' => $batch['id'],
-          'timestamp' => REQUEST_TIME,
-          'token' => backdrop_get_token($batch['id']),
-          'batch' => serialize($batch),
-        ))
-        ->execute();
-
-      // Save the current session into the restored database.
-      $_SESSION['batches'][$batch['id']] = TRUE;
-      backdrop_static_reset('backdrop_session_last_read');
-      backdrop_session_commit();
-
-      if ($this->restoreQueue) {
-        db_merge('queue')
-          ->key(array('item_id' => $this->restoreQueue['item_id']))
-          ->fields($this->restoreQueue)
-          ->execute();
       }
     }
   }

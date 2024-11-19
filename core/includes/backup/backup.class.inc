@@ -109,13 +109,28 @@ abstract class Backup {
    */
   public function defaultSettings() {
     return array(
-      'backup_name' => '',
-      'backup_directory' => '',
-
       'backup_max_time' => 1200,
       'backup_timeout_buffer' => 5,
+      'memory_limit' => '256M',
       'verbose' => FALSE,
     );
+  }
+
+  /**
+   * Determine if this backup source should be used for a particular target.
+   *
+   * This method needs to be implemented by all Backup classes. Up until PHP 7,
+   * static methods could not be made abstract. Once PHP 7 is the minimum
+   * requirement, this should be made abstract and the function body removed.
+   *
+   * @param string $target
+   *   The target from which a backup will be created (or restored to). Examples
+   *   are "db:default" or "config:active".
+   *
+   * @return boolean
+   */
+  public static function applies($target) {
+    return FALSE;
   }
 
   /**
@@ -141,7 +156,7 @@ abstract class Backup {
    * @return void
    */
   public function preBackup(BackupFile &$file) {
-    // No-op.
+    $this->prepareEnvironment();
   }
 
   /**
@@ -182,7 +197,7 @@ abstract class Backup {
    * @return void
    */
   public function preRestore(BackupFile &$file) {
-    // No-op.
+    $this->prepareEnvironment();
   }
 
   /**
@@ -203,14 +218,9 @@ abstract class Backup {
   /**
    * Get the form for the backup settings for this destination.
    */
-  abstract public function backupSettingsForm();
-
-  /**
-   * Determine if this backup source is relevant based on the site configuration.
-   *
-   * @return boolean
-   */
-  //abstract public function applies();
+  public function backupSettingsForm() {
+    return array();
+  }
 
   /**
    * Log a message that occurs during a backup or migration process.
@@ -341,6 +351,45 @@ abstract class Backup {
     }
 
     return $success ? $decompressed_file : FALSE;
+  }
+
+  /**
+   * Prepare the PHP environment for performing a backup or restore.
+   */
+  protected function prepareEnvironment() {
+    // If not in 'safe mode', increase the maximum execution time.
+    $backup_max_time = $this->settings['backup_max_time'];
+    if (!ini_get('safe_mode') && strpos(ini_get('disable_functions'), 'set_time_limit') === FALSE && ini_get('max_execution_time') < $backup_max_time) {
+      backdrop_set_time_limit($backup_max_time);
+    }
+
+    // Conditionally increase the memory limit.
+    // Get the current PHP memory limit.
+    $php_memory_limit = ini_get('memory_limit');
+
+    // If the memory limit is set to -1, there's no need to do anything.
+    if ($php_memory_limit != '-1') {
+      // Convert the PHP memory limit to bytes.
+      $php_memory_limit_bytes = parse_size($php_memory_limit);
+      // Convert the instance settings memory limit to bytes.
+      $backup_memory_limit_bytes = parse_size($this->settings['memory_limit']);
+
+      // Increase the memory limit.
+      if ($php_memory_limit_bytes < $backup_memory_limit_bytes) {
+        // Ensure ini_set() is not disabled.
+        if (!strpos(ini_get('disable_functions'), 'ini_set')) {
+          // Convert bytes to megabytes, add the 'M' unit.
+          $backup_memory_limit = round($backup_memory_limit_bytes / 1024 / 1024) . 'M';
+
+          // Update the PHP memory limit.
+          ini_set('memory_limit', $backup_memory_limit);
+        }
+      }
+    }
+
+    if ($this->settings['verbose']) {
+      $this->log('Memory limit: %limit', array('%limit' => ini_get('memory_limit')), self::LOG_SUCCESS);
+    }
   }
 }
 

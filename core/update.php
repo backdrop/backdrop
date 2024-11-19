@@ -391,45 +391,37 @@ function update_backup_form($form, &$form_state) {
 
   foreach ($backup_targets as $backup_target) {
     list($backup_plugin_id, $backup_subkey) = explode(':', $backup_target, 2);
-    foreach ($backup_classes as $backup_class) {
-      if ($backup_class::BACKUP_ID != $backup_plugin_id) {
-        continue;
-      }
+    $backup_class = backup_get_handler_name($backup_target);
+    if (!$backup_class) {
+      continue;
+    }
 
-      // @todo: Implement Backup::applies() method to check if the class matches the database type.
-
-      /** @var Backup $backup_instance */
-      $backup_name = $backup_plugin_id . '_' . $backup_subkey;
-      // Show a checkbox if non-default targets are present.
-      if ($backup_target != 'db:default' && $backup_target != 'config:active') {
-        $form['backups'][$backup_name]['enabled'] = array(
-          '#type' => 'checkbox',
-          '#title' => t('Optional backup: @backup_name', array('@backup_name' => $backup_name)),
-          '#default_value' => TRUE,
-          '#weight' => -1,
-        );
-      }
-      else {
-        $form['backups'][$backup_name]['enabled'] = array(
-          '#type' => 'hidden',
-          '#value' => TRUE,
-        );
-      }
-
-      // @todo: Do not pass as a value, recalculate on submit.
-      $form['backups'][$backup_name]['class'] = array(
-        '#type' => 'hidden',
-        '#value' => $backup_class,
-      );
-      $form['backups'][$backup_name]['name'] = array(
-        '#type' => 'hidden',
-        '#value' => $backup_name,
-      );
-      $form['backups'][$backup_name]['target'] = array(
-        '#type' => 'hidden',
-        '#value' => $backup_target,
+    /** @var Backup $backup_instance */
+    $backup_name = $backup_plugin_id . '_' . $backup_subkey;
+    // Show a checkbox if non-default targets are present.
+    if ($backup_target != 'db:default' && $backup_target != 'config:active') {
+      $form['backups'][$backup_name]['enabled'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Optional backup: @backup_name', array('@backup_name' => $backup_name)),
+        '#default_value' => TRUE,
+        '#weight' => -1,
       );
     }
+    else {
+      $form['backups'][$backup_name]['enabled'] = array(
+        '#type' => 'hidden',
+        '#value' => TRUE,
+      );
+    }
+
+    $form['backups'][$backup_name]['name'] = array(
+      '#type' => 'hidden',
+      '#value' => $backup_name,
+    );
+    $form['backups'][$backup_name]['target'] = array(
+      '#type' => 'hidden',
+      '#value' => $backup_target,
+    );
   }
 
   $form['actions'] = array('#type' => 'actions');

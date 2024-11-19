@@ -9,8 +9,6 @@
  * @ingroup backup_restore
  */
 class BackupConfig extends Backup {
-  const BACKUP_ID = 'config';
-
   /**
    * {@inheritdoc}
    */
@@ -59,19 +57,22 @@ class BackupConfig extends Backup {
   /**
    * {@inheritdoc}
    */
-  function typeLabel() {
+  public function typeLabel() {
     return t('Configuration');
   }
 
   /**
    * {@inheritdoc}
    */
-  public function applies() {
-    // TODO: Implement applies() method.
-  }
-
-  public function backupSettingsForm() {
-
+  public static function applies($target) {
+    list($target_type, $target_name) = explode(':', $target, 2);
+    if ($target_type === 'config') {
+      $storage = config_get_config_storage($target_name);
+      if (is_a($storage, 'ConfigFileStorage')) {
+        return TRUE;
+      }
+    }
+    return FALSE;
   }
 
   /**

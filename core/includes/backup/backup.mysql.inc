@@ -67,6 +67,18 @@ class BackupMySql extends BackupDatabase {
   /**
    * {@inheritdoc}
    */
+  public static function applies($target) {
+    list($target_type, $target_key) = explode(':', $target, 2);
+    if ($target_type === 'db') {
+      $connection = Database::getConnection($target_key);
+      return $connection->driver() === 'mysql';
+    }
+    return FALSE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   protected function backupDatabaseToFile(BackupFile $file) {
     if ($this->settings['use_mysqldump']) {
       $result = $this->backupToFileMysqldump($file);
@@ -547,6 +559,25 @@ SET NAMES utf8;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 ";
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  function prepareEnvironment() {
+    parent::prepareEnvironment();
+
+    // Increase the MySQL wait timeout if needed to prevent disconnects.
+    list(,$db_target) = explode(':', $this->getTarget(), 2);
+    $options = array(
+      'target' => $db_target,
+    );
+    $mysql_wait_timeout = db_query('SELECT @@session.wait_timeout', array(), $options)->fetchField();
+    $backup_max_time = $this->settings['backup_max_time'];
+    if ($mysql_wait_timeout < $backup_max_time) {
+      // This does not work with placeholders, so sanitize by casting to int.
+      db_query('SET SESSION wait_timeout = ' . (int) $backup_max_time, array(), $options);
+    }
   }
 
 }

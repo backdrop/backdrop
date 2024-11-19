@@ -327,7 +327,7 @@ if (restore_access_allowed()) {
   require_once BACKDROP_ROOT . '/core/includes/form.inc';
   require_once BACKDROP_ROOT . '/core/includes/ajax.inc';
   require_once BACKDROP_ROOT . '/core/includes/backup.inc';
-  foreach (backup_get_handlers() as $class_name => $include_path) {
+  foreach (backup_class_list() as $class_name => $include_path) {
     require_once BACKDROP_ROOT . '/' . $include_path;
   }
 
@@ -384,15 +384,7 @@ if (restore_access_allowed()) {
         if (empty($errors)) {
           foreach ($backup_info['backups'] as $backup) {
             $settings = isset($backup['settings']) ? $backup['settings'] : array();
-            // @todo: Better determine which class should be used.
-            $class = NULL;
-            if (strpos($backup['target'], 'db:') === 0) {
-              $class = 'BackupMySql';
-            }
-            if (strpos($backup['target'], 'config:') === 0) {
-              $class = 'BackupConfig';
-            }
-            backup_restore_execute($class, $backup['name'], $backup_directory, $backup['target'], $settings);
+            backup_restore_execute($backup['name'], $backup['target'], $backup_directory, $settings);
           }
         }
       }

@@ -7,13 +7,13 @@
 /**
  * Get all backup/restore class names and file paths.
  *
- * This acts a miniature version of backdrop_autoload() that loads needed
- * backup handlers. Unlike the normal autoloader, this is not modifiable by
- * modules, since a full module bootstrap depends on the database. As an
- * emergency restore cannot depend on either the database nor config to be
- * available, settings.php is the only mechanism to configuring backup/restore
- * handlers. Additional backup handlers can be added by adding the following
- * lines to settings.php:
+ * This acts a miniature version of backdrop_class_list() that lists all
+ * available classes that act as backup handlers. Unlike the normal autoloader,
+ * this is not modifiable by modules, since a full module bootstrap depends on
+ * the database. As an emergency restore cannot depend on either the database
+ * nor config to be available, settings.php is the only mechanism to configuring
+ * backup/restore handlers. Additional backup handlers can be added by adding
+ * the following lines to settings.php:
  *
  * @code
  * $settings['backup_handlers'] = array(
@@ -24,7 +24,7 @@
  * @return array
  *   An array of paths to classes, keyed by the class name.
  */
-function backup_get_handlers() {
+function backup_class_list() {
   $backup_directory = 'core/includes/backup/';
   $class_map = array(
     'Backup' => $backup_directory . 'backup.class.inc',
@@ -34,6 +34,26 @@ function backup_get_handlers() {
     'BackupMySql' => $backup_directory . 'backup.mysql.inc',
   );
   return array_merge($class_map, settings_get('backup_handlers', array()));
+}
+
+/**
+ * Given a particular backup/restore target, find the class that applies.
+ *
+ * @param string $target
+ *   The backup source or restore target as a string, such as "db:default" or
+ *   "config:active".
+ *
+ * @return Backup|false
+ */
+function backup_get_handler_name($target) {
+  foreach (backup_class_list() as $class_name => $class_path) {
+    if (is_subclass_of($class_name, 'Backup')) {
+      if ($class_name::applies($target)) {
+        return $class_name;
+      }
+    }
+  }
+  return FALSE;
 }
 
 /**
@@ -115,7 +135,7 @@ function backup_batch($backups, $redirect = NULL, $url = NULL, $batch = array(),
 
   foreach ($backups as $backup) {
     $settings = isset($backup['settings']) ? $backup['settings'] : array();
-    $operations[] = array('backup_execute', array($backup['class'], $backup['name'], $backup['target'], $settings));
+    $operations[] = array('backup_execute', array($backup['name'], $backup['target'], $settings));
   }
   $batch['operations'] = $operations;
   $batch += array(
@@ -271,9 +291,6 @@ function backup_prepare($backup_name, $backup_target, &$backup_settings, &$error
 /**
  * Run a backup process.
  *
- * @param string $backup_class
- *   The name of the Backup class to save the backup, such as BackupMySql or
- *   BackupConfig.
  * @param string $backup_name
  *   The overall name of the backup, used as the base name of the created backup
  *   file.
@@ -287,13 +304,12 @@ function backup_prepare($backup_name, $backup_target, &$backup_settings, &$error
  *
  * @return false|mixed|void
  */
-function backup_execute($backup_class, $backup_name, $backup_target, array $backup_settings) {
-  // Safety check that the passed-in class uses the Backup base class.
-  if (!is_subclass_of($backup_class, 'Backup', TRUE)) {
+function backup_execute($backup_name, $backup_target, array $backup_settings) {
+  // Safety check that backup target has an associate backup handler.
+  $backup_class = backup_get_handler_name($backup_target);
+  if (!is_subclass_of($backup_class, 'Backup')) {
     return FALSE;
   }
-
-  backup_prepare_environment();
 
   // If no filepath is set, a backup cannot be created.
   if (empty($backup_settings['backup_directory'])) {
@@ -323,51 +339,6 @@ function backup_execute($backup_class, $backup_name, $backup_target, array $back
 }
 
 /**
- * Prepare the PHP environment for a backup/restore.
- *
- * @return void
- */
-function backup_prepare_environment() {
-  // If not in 'safe mode', increase the maximum execution time.
-  //  if (!ini_get('safe_mode') && strpos(ini_get('disable_functions'), 'set_time_limit') === FALSE && ini_get('max_execution_time') < 1200) {
-  //    _backup_migrate_set_timeout();
-  //  }
-  //
-  //  // Conditionally increase the memory limit.
-  //  // Get the current php memory limit.
-  //  $php_memory_limit = ini_get('memory_limit');
-  //
-  //  // If the memory limit is set to -1, there's no need to do anything.
-  //  if ($php_memory_limit !== -1) {
-  //    // Convert the php memory limit to bytes.
-  //    $php_memory_limit_bytes = _backup_migrate_to_bytes($php_memory_limit);
-  //
-  //    // Get the current Backup Migrate memory limit.
-  //    $backup_migrate_memory_limit = config_get('backup_migrate.settings', 'backup_migrate_memory_limit');
-  //
-  //    // Convert the Backup Migrate memory limit to bytes.
-  //    $backup_migrate_memory_limit_bytes = _backup_migrate_to_bytes($backup_migrate_memory_limit);
-  //
-  //    // Increase the memory limit.
-  //    if ($php_memory_limit_bytes < $backup_migrate_memory_limit_bytes) {
-  //      // Ensure ini_set() is not disabled.
-  //      if (!strpos(ini_get('disable_functions'), 'ini_set')) {
-  //        // Convert bytes to megabytes, add the 'M' unit.
-  //        $backup_migrate_memory_limit = round($backup_migrate_memory_limit_bytes / 1024 / 1024) . 'M';
-  //
-  //        // Update the php memory limit.
-  //        ini_set('memory_limit', $backup_migrate_memory_limit);
-  //      }
-  //    }
-  //  }
-  //
-  //  if (config_get('backup_migrate.settings', 'backup_migrate_verbose')) {
-  //    _backup_migrate_message("Memory limit: %limit", array('%limit' => ini_get('memory_limit')), 'success');
-  //  }
-  //
-}
-
-/**
  * Prepare for a single restore process, ensuring requirements are met.
  *
  * @param string $backup_file
@@ -392,17 +363,14 @@ function backup_restore_prepare($backup_file, $restore_target, &$backup_settings
 /**
  * Run a backup process.
  *
- * @param string $backup_class
- *   The name of the Backup class to save the backup, such as BackupMySql or
- *   BackupConfig.
  * @param string $backup_name
  *   The overall name of the backup, used as the base name of the created backup
  *   file.
- * @param string $backup_directory
- *   The directory containing the backup file to restore.
  * @param string $restore_target
  *   The target to which the backup should be restored. Typically an indicator
  *   such as "db:default" (for the database) or "config:active" (for config).
+ * @param string $backup_directory
+ *    The directory containing the backup file to restore.
  * @param array $backup_settings
  *   An array of settings that are read by the Backup class, modifying its
  *   behavior. Each Backup class may have different settings. Check the
@@ -411,13 +379,15 @@ function backup_restore_prepare($backup_file, $restore_target, &$backup_settings
  * @return bool
  *   TRUE if the restore was successful, FALSE on failure.
  */
-function backup_restore_execute($backup_class, $backup_name, $backup_directory, $restore_target, array $backup_settings) {
-  // Safety check that the passed-in class uses the Backup base class.
+function backup_restore_execute($backup_name, $restore_target, $backup_directory, array $backup_settings) {
+  // Safety check that restore target has an associate backup handler.
+  $backup_class = backup_get_handler_name($restore_target);
   if (!is_subclass_of($backup_class, 'Backup', TRUE)) {
     return FALSE;
   }
 
-  backup_prepare_environment();
+  /** @var Backup $backup_instance */
+  $backup_instance = new $backup_class($backup_name, $restore_target, $backup_settings);
 
   // Create the BackupFile instance to hold the backup output.
   $file = new BackupFile($backup_name, $backup_directory);
@@ -434,8 +404,6 @@ function backup_restore_execute($backup_class, $backup_name, $backup_directory, 
   // Register shutdown callback to deal with timeouts.
   //  register_shutdown_function('backup_restore_shutdown', $settings);
 
-  /** @var Backup $backup_instance */
-  $backup_instance = new $backup_class($backup_name, $restore_target, $backup_settings);
 
   // Pre and post steps are separate to allow offloading compression and
   // decompression into separate requests (eventually).
