@@ -2038,7 +2038,7 @@ function file_validate_svg(File $file) {
 
   if ($file->filemime == 'image/svg+xml') {
     $file_contents = file_get_contents($file->uri);
-    $file_contents = preg_replace('/<!DOCTYPE[^>]*>/', '', $file_contents);
+    $file_contents = preg_replace('/<!DOCTYPE[^>]*>/i', '', $file_contents);
     $file_contents = html_entity_decode($file_contents);
     $file_contents = strtolower($file_contents);
     libxml_use_internal_errors(TRUE);
