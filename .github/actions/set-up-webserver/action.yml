@@ -7,6 +7,10 @@ inputs:
   database-version:
     description: "Database (mysql/mariadb) version to install"
     required: true
+  repository-name:
+    description: "The location of the repository, if not backdrop/backdrop"
+    required: false
+    default: "backdrop/backdrop"
 outputs: {}
 
 runs:
@@ -53,7 +57,8 @@ runs:
       run: |
         # Set up apache with php-fpm.
         sudo cp .github/misc/default.conf /etc/apache2/sites-available/000-default.conf
-        sudo sed -i -e "s/_PHP_VERSION_/${{ inputs.php-version }}/" /etc/apache2/sites-available/000-default.conf
+        sudo sed -i -e "s|_PHP_VERSION_|${{ inputs.php-version }}|" /etc/apache2/sites-available/000-default.conf
+        sudo sed -i -e "s|_REPOSITORY_NAME_|${{ inputs.repository-name }}|" /etc/apache2/sites-available/000-default.conf
         # Setup php-fpm, this script is intentionally not executable by default.
         chmod 700 .github/misc/setup-php-fpm.sh
         ./.github/misc/setup-php-fpm.sh ${{ inputs.php-version }}

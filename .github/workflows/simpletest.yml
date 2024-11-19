@@ -25,6 +25,7 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           database-version: ${{ matrix.database-versions }}
+          repository-name: ${{ github.repository }}
 
       - name: Install Backdrop
         run: |
