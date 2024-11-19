@@ -76,7 +76,8 @@ function backdrop_class_list() {
     'DatabaseStatementEmpty' => $path . 'database/database.inc',
     'DatabaseStatementInterface' => $path . 'database/database.inc',
     'DatabaseLog' => $path . 'database/log.inc',
-    'DatabaseStatementPrefetch' => $path . 'database/prefetch.inc',
+    // @todo Remove DatabaseStatementPrefetch entirely, only used by SQLite.
+    // 'DatabaseStatementPrefetch' => $path . 'database/prefetch.inc',
     'Query' => $path . 'database/query.inc',
     'InsertQuery' => $path . 'database/query.inc',
     'DeleteQuery' => $path . 'database/query.inc',
