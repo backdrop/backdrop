@@ -1277,7 +1277,7 @@ function file_update_1011() {
       ':numbers_extension' => '%.numbers',
       ':pages_extension' => '%.pages',
       ':undefined_type' => 'undefined',
-  ))->fetchField();
+    ))->fetchField();
   if ($count) {
     file_needs_type_classification(TRUE);
   }
