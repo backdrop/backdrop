@@ -250,6 +250,14 @@ function form_test_menu() {
     'type' => MENU_CALLBACK,
   );
 
+  $items['form_test/form-descriptions'] = array(
+    'title' => 'Form description test',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('form_description_test_form'),
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+
   $items['form-test/state-persist'] = array(
     'title' => 'Form state persistence without storage',
     'page callback' => 'backdrop_get_form',
@@ -1133,6 +1141,89 @@ function form_label_test_form() {
     '#required' => TRUE,
     '#description' => 'Required checkboxes with #title_display attribute and a description.',
     '#options' => backdrop_map_assoc(array('foo', 'bar', 'baz')),
+  );
+
+  return $form;
+}
+
+/**
+ * A form for testing form descriptions.
+ */
+function form_description_test_form() {
+  $form['form_textfield_test_description_before'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Textfield test for description before element',
+    '#description' => 'Textfield test for description before element',
+    '#description_display' => 'before',
+  );
+
+  $form['form_textfield_test_description_after'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Textfield test for description after element',
+    '#description' => 'Textfield test for description after element',
+    '#description_display' => 'after',
+  );
+
+  $form['form_textfield_test_description_invisible'] = array(
+    '#type' => 'textfield',
+    '#title' => 'Textfield test for visually-hidden description',
+    '#description' => 'Textfield test for visually-hidden description',
+    '#description_display' => 'invisible',
+  );
+
+  $form['form_checkboxes_test_description_before'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Checkboxes test for description before element'),
+    '#description' => 'Checkboxes test for description before element',
+    '#options' => array(
+      'first-checkbox' => t('First checkbox'),
+      'second-checkbox' => t('Second checkbox'),
+    ),
+  );
+
+  $form['form_radios_test_description_before'] = array(
+    '#type' => 'radios',
+    '#title' => 'Radios test for description before element',
+    '#description' => 'Radios test for description before element',
+    '#options' => array(
+      'first-radio' => 'First radio',
+      'second-radio' => 'Second radio',
+    ),
+  );
+
+  $form['form_textarea_test_description_before'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Textarea test for description before element'),
+    '#description' => 'Radios test for description before element',
+  );
+
+  $form['form_checkboxes_test_description_after'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Checkboxes test for description after element'),
+    '#description' => 'Checkboxes test for description after element',
+    '#description_display' => 'after',
+    '#options' => array(
+      'first-checkbox' => t('First checkbox'),
+      'second-checkbox' => t('Second checkbox'),
+    ),
+  );
+
+  $form['form_radios_test_description_after'] = array(
+    '#type' => 'radios',
+    '#title' => t('Radios test for description after element'),
+    '#description' => 'Radios test for description after element',
+    '#description_display' => 'after',
+    '#options' => array(
+      'first-radio' => 'First radio',
+      'second-radio' => 'Second radio',
+    ),
+  );
+
+  $form['form_textarea_test_description_after'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Textarea test for description after element'),
+    '#description' => 'Radios test for description after element',
+    '#description_display' => 'after',
   );
 
   return $form;

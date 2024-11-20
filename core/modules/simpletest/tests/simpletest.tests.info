@@ -880,6 +880,12 @@ description = Test form element labels, required markers and associated output.
 group = Form API
 file = form.test
 
+[FormsElementsDescriptionsTestCase]
+name = Form element and description output test
+description = Test form element descriptions.
+group = Form API
+file = form.test
+
 [FormsElementsTableSelectFunctionalTest]
 name = Tableselect form element type test
 description = Test the tableselect element for expected behavior
