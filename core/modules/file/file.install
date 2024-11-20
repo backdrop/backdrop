@@ -1271,18 +1271,12 @@ function file_update_1011() {
 
   // Check if there are any existing files with these extensions that are of
   // type 'undefined'. If so, turn on the reclassification alert.
-  $count = db_query("
-  SELECT COUNT(fid)
-  FROM {file_managed}
-  WHERE 
-  (filename LIKE :keynoteextension OR filename LIKE :numbersextension OR filename LIKE :pagesextension)
-  AND type = :undefinedtype
-  ",
-  array(
-    ':keynoteextension' => '%.keynote',
-    ':numbersextension' => '%.numbers',
-    ':pagesextension' => '%.pages',
-    ':undefinedtype' => 'undefined',
+  $count = db_query("SELECT COUNT(fid) FROM {file_managed} WHERE (filename LIKE :keynote_extension OR filename LIKE :numbers_extension OR filename LIKE :pages_extension) AND type = :undefined_type",
+    array(
+      ':keynote_extension' => '%.keynote',
+      ':numbers_extension' => '%.numbers',
+      ':pages_extension' => '%.pages',
+      ':undefined_type' => 'undefined',
   ))->fetchField();
   if ($count) {
     file_needs_type_classification(TRUE);
