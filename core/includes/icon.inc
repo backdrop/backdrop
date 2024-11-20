@@ -282,7 +282,7 @@ function icon_get_info($icon_name = NULL) {
  *   - attributes: Attributes to be added to the icon itself.
  *
  * @return string
- *   The HTML output.
+ *   The HTML output. An empty string if the icon file is not svg.
  *
  * @since 1.28.0 Function added.
  * @since 1.28.1 The <ellipse>, <line>, <polygon> and <polyline> SVG elements
@@ -340,4 +340,5 @@ function theme_icon(array $variables) {
       return image_add_svg_attributes($svg_contents, $variables['attributes']);
     }
   }
+  return '';
 }
