@@ -1280,7 +1280,7 @@ function file_update_1011() {
     ))->fetchField();
   if ($count) {
     file_needs_type_classification(TRUE);
-    $message = format_plural('@count files with Apple file types were found.', '@count file with an Apple File type was found', $count);
+    $message = format_plural($count, '@count file with an Apple File type was found.', '@count files with Apple file types were found.', array('@count' => $count));
     $message .= ' ' . t('Visit the <a href="@url">File reclassification form</a> next to classify these files properly.', array(
       '@url' => url('admin/structure/file-types/classify'),
     ));
