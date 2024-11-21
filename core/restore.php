@@ -243,7 +243,7 @@ function restore_access_denied_page() {
   $output = '';
   $steps = array();
 
-  $output .= st('You are not authorized to access this page. Log in using either an account with the <em>restore system backups</em> permission, or the site maintenance account (the account you created during installation). If you cannot log in, you will have to edit <code>settings.php</code> to bypass this access check. To do this:');
+  $output .= st('You are not authorized to access this page. Log in using either an account with the <em>restore site backups</em> permission, or the site maintenance account (the account you created during installation). If you cannot log in, you will have to edit <code>settings.php</code> to bypass this access check. To do this:');
   $output = '<p>' . $output . '</p>';
 
   $steps[] = st('Find the <code>settings.php</code> file on your system, and open it with a text editor.');
@@ -269,13 +269,19 @@ function restore_access_allowed() {
   if (settings_get('restore_free_access')) {
     return TRUE;
   }
+
+  // If sessions are not available, then no further access can be checked.
+  if (backdrop_bootstrap() < BACKDROP_BOOTSTRAP_SESSION) {
+    return FALSE;
+  }
+
   // Calls to user_access() might not be available if the site is not in a
   // working state (or the database is completely empty). The user #1 fallback
   // may not work either, in which case "restore_free_access" is the only
   // available way to grant access.
   try {
     require_once BACKDROP_ROOT . '/' . backdrop_get_path('module', 'user') . '/user.module';
-    return user_access('restore system backups');
+    return user_access('restore site backups');
   }
   catch (Exception $e) {
     return ($user->uid == 1);
@@ -302,7 +308,7 @@ function restore_task_list($set_active = NULL) {
   // Only show the task list on the left sidebar if the logged-in user has
   // permission to restore backups, or if the "restore_free_access" setting in
   // settings.php has been set to TRUE.
-  if (settings_get('restore_free_access') || user_access('restore system backups')) {
+  if (restore_access_allowed()) {
     return theme('task_list', array('items' => $tasks, 'active' => $active));
   }
 }
@@ -320,6 +326,16 @@ require_once BACKDROP_ROOT . '/core/includes/install.inc';
 require_once BACKDROP_ROOT . '/core/includes/bootstrap.inc';
 backdrop_bootstrap(BACKDROP_BOOTSTRAP_DATABASE);
 backdrop_maintenance_theme();
+
+// Bootstrapping the session might not work in the event of a highly corrupted
+// database.
+try {
+  @backdrop_bootstrap(BACKDROP_BOOTSTRAP_SESSION);
+  $session_available = TRUE;
+}
+catch (Exception $e) {
+  $session_available = FALSE;
+}
 
 // Only proceed if the user is allowed to restore backups.
 if (restore_access_allowed()) {
@@ -346,21 +362,21 @@ if (restore_access_allowed()) {
     $one_time_token = backdrop_get_token('restore_' . REQUEST_TIME);
     $valid_one_time_token = isset($_GET['time']) && isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'restore_' . $_GET['time']);
   }
+
   switch ($op) {
     // Main restore.php operations.
     case 'select':
-      if ($valid_token) {
-        $output = restore_select_page();
+      if (!$valid_token) {
+        restore_goto($_SERVER['SCRIPT_NAME']);
       }
+      $output = restore_select_page();
       break;
 
     case st('Restore backup'):
-      if ($valid_token) {
-        $output = restore_progress_page($one_time_token);
-      }
-      else {
+      if (!$valid_token) {
         restore_goto($_SERVER['SCRIPT_NAME']);
       }
+      $output = restore_progress_page($one_time_token);
       break;
 
     case 'restore':
@@ -413,7 +429,7 @@ else {
 
 if (isset($output) && $output) {
   // Explicitly start a session so that the restore.php token will be accepted.
-  if (backdrop_bootstrap() >= BACKDROP_BOOTSTRAP_SESSION) {
+  if ($session_available) {
     backdrop_session_start();
   }
   $task_list = restore_task_list();

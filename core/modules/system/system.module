@@ -168,7 +168,12 @@ function system_permission() {
     'administer software updates' => array(
       'title' => t('Administer software updates'),
       'restrict access' => TRUE,
-      'warning' => t('Run site updates for Backdrop projects.'),
+      'warning' => t('Allows running site updates (update.php) for Backdrop projects.'),
+    ),
+    'restore site backups' => array(
+      'title' => t('Restore site backups'),
+      'restrict access' => TRUE,
+      'warning' => t('Allows restoring the configuration and database from backups (restore.php).'),
     ),
     'access administration pages' => array(
       'title' => t('Use the administration pages'),

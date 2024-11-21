@@ -2953,6 +2953,12 @@ function backdrop_bootstrap($phase = NULL, $new_phase = TRUE) {
  * at an empty database. If this happens, redirect the user to install.php.
  */
 function backdrop_bootstrap_is_installed() {
+  // If in any maintenance mode (install, update, restore, etc.) assume being
+  // installed or in the process of installing or restoring.
+  if (defined('MAINTENANCE_MODE')) {
+    return TRUE;
+  }
+
   // We may get a situation where the config directory has been specified in
   // settings.php but the database is empty. In which case a config exception
   // is thrown in the first bootstrap phase but the database hasn't been loaded.

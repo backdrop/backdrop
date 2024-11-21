@@ -305,34 +305,20 @@ function update_info_page() {
   // registry been updated with new preprocess or template variables.
   backdrop_theme_rebuild();
 
-  // Get database name
-  $db_name = $databases['default']['default']['database'];
-
-  // Get the config path
-  $config_dir = config_get_config_directory('active');
-
   update_task_list('info');
   backdrop_set_title('Backdrop site update');
   $token = backdrop_get_token('update');
   $output = '<p>Use this utility to update your site whenever you install a new version of Backdrop CMS or one of the site\'s modules.</p>';
   $output .= '<p>For more detailed information, see the <a href="https://backdropcms.org/upgrade">Upgrading Backdrop CMS</a> page. If you are unsure of what these terms mean, contact your hosting provider.</p>';
-  $output .= '<p>Before running updates, the following steps are recommended.</p>';
-  $output .= "<ol>\n";
-  $output .= "<li><strong>Create backups.</strong> This update utility will alter your database and config files. In case of an emergency you may need to revert to a recent backup; make sure you have one.\n";
-  $output .= "<ul>\n";
-  $output .= "<li><strong>Database:</strong> Create a database dump of the '" . $db_name . "' database.</li>\n";
-  $output .= "<li><strong>Config files:</strong> Back up the entire directory at '" . $config_dir . "'.</li>\n";
-  $output .= "</ul>\n";
-  $output .= '<li>Put your site into <a href="' . base_path() . '?q=admin/config/development/maintenance">maintenance mode</a>.</li>' . "\n";
-  $output .= "<li>Install your new files into the appropriate location, as described in <a href=\"https://backdropcms.org/upgrade\">the handbook</a>.</li>\n";
-  $output .= "</ol>\n";
-  $output .= "<p>After performing the above steps proceed using the continue button.</p>\n";
   $module_status_report = update_upgrade_check_dependencies();
   if (!empty($module_status_report)) {
     $output .= $module_status_report;
   }
 
-  $form_action = check_url(backdrop_current_script_url(array('op' => 'backup', 'token' => $token)));
+  // Skip the backup and go to update selection if upgrading from Drupal 7.
+  $op = state_get('update_d7_upgrade', FALSE) ? 'selection' : 'backup';
+
+  $form_action = check_url(backdrop_current_script_url(array('op' => $op, 'token' => $token)));
   $output .= '<form method="post" action="' . $form_action . '">
   <div class="form-actions">
     <input type="submit" value="Continue" class="form-submit button-primary" />
@@ -363,7 +349,7 @@ function update_backup_page() {
  */
 function update_backup_form($form, &$form_state) {
   $help = '<p>Before running updates, it is recommended to create a backup of your database and configuration.</p>';
-  $help .= '<p>If needing to skip the backup process, please ensure you create a backup through a different mechanism, such as through your hosting provider.</p>';
+  $help .= '<p>If skipping the backup process, please ensure you create a backup through a different mechanism, such as through your hosting provider.</p>';
   $help .= '<p>The backup process may take several minutes, depending on the size of your database.</p>';
   $form['help'] = array(
     '#type' => 'help',
@@ -511,9 +497,15 @@ function update_task_list($set_active = NULL) {
     'info' => 'Overview',
     'backup' => 'Backup',
     'select' => 'Review updates',
-    'run' => 'Run updates',
+    'update' => 'Run updates',
     'finished' => 'Review log',
   );
+
+  // Hide the Backup task if upgrading from Drupal 7, where the original
+  // database has already been modified and no config exists.
+  if (state_get('update_d7_upgrade', FALSE)) {
+    unset($tasks['backup']);
+  }
 
   // Only show the task list on the left sidebar if the logged-in user is has
   // permission to perform updates, or if the update_free_access' setting in
@@ -667,7 +659,7 @@ if (update_access_allowed()) {
         // Generate absolute URLs for the batch processing (using $base_root),
         // since the batch API will pass them to url() which does not handle
         // update.php correctly by default.
-        $batch_url = $base_root . backdrop_current_script_url();
+        $batch_url = $base_root . backdrop_current_script_url(array('action' => 'backup'));
         $redirect_url = $base_root . backdrop_current_script_url(array('op' => 'selection'));
 
         // Check that a backup directory is specified.
@@ -697,12 +689,8 @@ if (update_access_allowed()) {
         // Generate absolute URLs for the batch processing (using $base_root),
         // since the batch API will pass them to url() which does not handle
         // update.php correctly by default.
-        $batch_url = $base_root . backdrop_current_script_url();
+        $batch_url = $base_root . backdrop_current_script_url(array('action' => 'update'));
         $redirect_url = $base_root . backdrop_current_script_url(array('op' => 'results'));
-        // Set a state indicating we are upgrading a Drupal 7 site.
-        if (backdrop_get_installed_schema_version('system') > 7000) {
-          state_set('update_d7_upgrade', TRUE);
-        }
         update_batch($_POST['start'], $redirect_url, $batch_url);
         break;
       }
@@ -713,9 +701,10 @@ if (update_access_allowed()) {
       $output = update_results_page();
       break;
 
-    // Regular batch ops : defer to batch processing API.
+    // Regular batch ops: defer to batch processing API.
     default:
-      update_task_list('run');
+      $action = isset($_GET['action']) ? $_GET['action'] : 'update';
+      update_task_list($action);
       $output = _batch_page();
       break;
   }
