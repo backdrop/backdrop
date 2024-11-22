@@ -896,7 +896,7 @@ class view {
         $breadcrumb_args[] = $arg;
       }
       else {
-        // determine default condition and handle.
+        // Determine default condition and handle.
         $status = $argument->default_action();
         break;
       }
@@ -905,7 +905,7 @@ class view {
       unset($argument);
     }
 
-    // set the title in the build info.
+    // Set the title in the build info.
     if (!empty($title)) {
       $this->build_info['title'] = $title;
     }
@@ -923,7 +923,7 @@ class view {
     if (!empty($this->query)) {
       $class = get_class($this->query);
       if ($class && $class != 'stdClass') {
-        // return if query is already initialized.
+        // Return if query is already initialized.
         return TRUE;
       }
     }
@@ -1759,7 +1759,7 @@ class view {
   }
 
   /**
-   * Add the list of queries run during render to buildinfo.
+   * Add the list of queries run during render to the build info.
    *
    * @see view::start_query_capture()
    */

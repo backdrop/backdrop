@@ -105,9 +105,9 @@ class views_handler_field_term_node_tid extends views_handler_field_prerender_li
       $query->orderby('td.name');
       $query->condition('tn.nid', $nids);
       $query->addTag('taxonomy_term_access');
-      $vocabs = array_filter($this->options['vocabularies']);
-      if (!empty($this->options['limit']) && !empty($vocabs)) {
-        $query->condition('td.vocabulary', $vocabs);
+      $vocabularies = array_filter($this->options['vocabularies']);
+      if (!empty($this->options['limit']) && !empty($vocabularies)) {
+        $query->condition('td.vocabulary', $vocabularies);
       }
       $result = $query->execute();
 

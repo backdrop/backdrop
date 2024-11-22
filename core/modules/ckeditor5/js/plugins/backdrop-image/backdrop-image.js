@@ -849,11 +849,10 @@ class BackdropImageCommand extends CKEditor5.core.Command {
       // The image caption is stored outside the imageElement model and must
       // be retrieved to get its value.
       const imageCaption = ImageCaptionUtils.getCaptionFromImageModelElement(imageElement);
+      // Inform the image dialog, that there is a caption and the checkbox in
+      // the form should be ticked. The value for data-caption isn't relevant.
+      // @see filter_format_editor_image_form()
       existingValues['data-has-caption'] = !!imageCaption;
-      if (imageCaption && imageCaption.childCount) {
-        const captionValue = editor.data.processor.toData(imageCaption.getChild(0));
-        existingValues['data-caption'] = captionValue;
-      }
     }
 
     const saveCallback = (dialogValues) => {

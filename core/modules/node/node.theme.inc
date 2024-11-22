@@ -33,6 +33,27 @@ function theme_node_preview_banner_form($variables) {
 }
 
 /**
+ * Returns HTML for a node preview for display during node creation and editing.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - node_preview: A render element representing the node preview.
+ *
+ * @see node_preview()
+ * @see node_preview_banner_form()
+ * @see theme_node_preview_banner_form()
+ *
+ * @ingroup themeable
+ *
+ * @since 1.0.6 Function removed (see: https://github.com/backdrop/backdrop-issues/issues/218).
+ * @since 1.28.0 Function re-added (see: https://github.com/backdrop/backdrop-issues/issues/6129).
+ */
+function theme_node_preview($variables) {
+  $node_preview = $variables['node_preview'];
+  return backdrop_render_children($node_preview);
+}
+
+/**
  * Returns HTML for the content ranking part of the search settings admin page.
  *
  * @param $variables
@@ -273,8 +294,11 @@ function template_preprocess_node(&$variables) {
     $variables['node_url'] = FALSE;
   }
 
-  // Add an extra theme hook suggestion for node id.
+  // Add extra theme hook suggestions for node type, view_mode and id.
+  $variables['theme_hook_suggestions'][] = 'node__' . $node->type;
+  $variables['theme_hook_suggestions'][] = 'node__' . $node->type . '__' . $variables['view_mode'];
   $variables['theme_hook_suggestions'][] = 'node__' . $node->nid;
+  $variables['theme_hook_suggestions'][] = 'node__' . $node->nid . '__' . $variables['view_mode'];
 
   // Add a legacy theme hook suggestion for content block. @todo remove in 2.x.
   if (strstr($variables['theme_hook_original'], 'node_block')) {

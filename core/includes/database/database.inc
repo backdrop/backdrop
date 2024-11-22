@@ -1408,7 +1408,7 @@ abstract class DatabaseConnection {
 /**
  * Primary front-controller for the database system.
  *
- * This class is uninstantiatable and un-extendable. It acts to encapsulate
+ * This class is un-instantiatable and un-extendable. It acts to encapsulate
  * all control and shepherding of database connections into a single location
  * without the use of globals.
  */

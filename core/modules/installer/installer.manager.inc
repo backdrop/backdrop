@@ -5,7 +5,7 @@
  *
  * This allows site administrators with the 'administer software updates'
  * permission to either upgrade existing projects, or download and install new
- * ones, so long as the killswitch $settings['allow_authorize_operations'] is
+ * ones, so long as the kill switch $settings['allow_authorize_operations'] is
  * still TRUE.
  *
  * To install new code, the administrator is prompted for either the URL of an
@@ -69,7 +69,10 @@ function installer_manager_update_form($form, $form_state) {
   $update_interval_days = $update_config->get('update_interval_days');
   if ($update_interval_days != 0) {
     $frequency = array(1 => t('daily'), 7 => t('weekly'));
-    $frequency_message = t('<a href="@link">Automatic update checks are configured to run @frequency</a>.', array('@link' => $settings_link, '@frequency' => $frequency[$update_interval_days]));
+    $frequency_message = t('<a href="@link">Automatic update checks are configured to run @frequency</a>.', array(
+      '@link' => $settings_link,
+      '@frequency' => $frequency[$update_interval_days],
+    ));
     $message_type = 'info';
   }
   else {
@@ -91,7 +94,10 @@ function installer_manager_update_form($form, $form_state) {
     }
     else {
       $recipients = implode(', ', $update_emails);
-      $email_notifications_message = t('<a href="@link">Update notifications will be sent</a> to: @recipients', array('@link' => $settings_link, '@recipients' => $recipients));
+      $email_notifications_message = t('<a href="@link">Update notifications will be sent</a> to: @recipients', array(
+        '@link' => $settings_link,
+        '@recipients' => $recipients,
+      ));
       $message_type = 'info';
     }
   }
@@ -141,7 +147,7 @@ function installer_manager_update_form($form, $form_state) {
     // The project name to display can vary based on the info we have.
     if (!empty($project['title'])) {
       if (!empty($project['link'])) {
-        $project_name = l($project['title'], $project['link'], array('attributes' => array('target'=>'_blank')));
+        $project_name = l($project['title'], $project['link'], array('attributes' => array('target' => '_blank')));
       }
       else {
         $project_name = check_plain($project['title']);
@@ -162,7 +168,10 @@ function installer_manager_update_form($form, $form_state) {
 
     $recommended_release = $project['releases'][$project['recommended']];
     $title_attribute = t('Release notes for @project_title', array('@project_title' => $project['title']));
-    $link_attributes = array('attributes' => array('title' => $title_attribute, 'target'=>'_blank'));
+    $link_attributes = array('attributes' => array(
+      'title' => $title_attribute,
+      'target' => '_blank',
+    ));
     $release_notes_link = l(t('release notes'), $recommended_release['release_link'], $link_attributes);
     $recommended_version = $recommended_release['version'] . ' (' . $release_notes_link . ')';
     if ($recommended_release['version_major'] != $project['existing_major']) {
@@ -281,7 +290,10 @@ function installer_manager_update_form($form, $form_state) {
     $prefix .= '<p>' . t('You can update Backdrop CMS by replacing the old <code>/core</code> directory inside your docroot with the one included in the <a href="https://backdropcms.org" title="Home page with download option" target="_blank">latest release</a>. For detailed instructions, see the <a href="https://backdropcms.org/upgrade" target="_blank">Upgrading Backdrop CMS</a> document online.') . '</p>';
     $form['manual_updates'] = array(
       '#type' => 'markup',
-      '#markup' => theme('table', array('header' => $header, 'rows' => $projects['manual'])),
+      '#markup' => theme('table', array(
+        'header' => $header,
+        'rows' => $projects['manual'],
+      )),
       '#prefix' => $prefix,
       '#weight' => 120,
     );
