@@ -10,6 +10,7 @@
         "post comments",
         "skip comment approval",
         "upload editor images",
-        "use text format filtered_html"
+        "use text format filtered_html",
+        "view own unpublished content"
     ]
 }

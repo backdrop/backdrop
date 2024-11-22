@@ -39,3 +39,11 @@ function node_access_test_schema() {
 
   return $schema;
 }
+
+/**
+ * Implements hook_install().
+ */
+function node_access_test_install() {
+  // Set view own unpublished permission, used to test private access.
+  user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array('view own unpublished content'));
+}

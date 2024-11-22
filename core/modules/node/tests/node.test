@@ -3745,34 +3745,12 @@ class NodeEntityViewModeAlterTest extends NodeWebTestCase {
  */
 class NodeAccessJoinTest extends NodeWebTestCase {
 
-  function setUp() {
+  public function setUp() {
     $modules = array('node_access_test');
     parent::setUp($modules);
 
     node_access_rebuild();
     state_set('node_access_test_private', TRUE);
-
-    // Add a custom field to the page content type.
-    $this->field_name = 'related_post';
-    $this->field = field_create_field(
-      array(
-        'field_name' => $this->field_name,
-        'type' => 'number_integer',
-        'cardinality' => FIELD_CARDINALITY_UNLIMITED,
-      )
-    );
-    $page_instance = array(
-      'field_name' => $this->field_name,
-      'entity_type' => 'node',
-      'bundle' => 'page',
-    );
-    field_create_instance($page_instance);
-    $post_instance = array(
-      'field_name' => $this->field_name,
-      'entity_type' => 'node',
-      'bundle' => 'post',
-    );
-    field_create_instance($post_instance);
   }
 
   /**
@@ -3840,7 +3818,7 @@ class NodeAccessJoinTest extends NodeWebTestCase {
         // other nodes that reference an post.)
         $edit['title'] = "Post $post - $reference2";
         if ($reference2 != 'no_reference') {
-          $edit['related_post'][$langcode][0]['value'] = $this->posts[$reference2]['no_reference'];
+          $edit['field_related_post'][$langcode][0]['value'] = $this->posts[$reference2]['no_reference'];
         }
         $node = $this->backdropCreateNode($edit);
         $this->posts[$post][$reference2] = $node->nid;
@@ -3928,9 +3906,10 @@ class NodeAccessJoinTest extends NodeWebTestCase {
 
     // Open a webpage listing all the pages, and check the webpage's content for
     // users with three different access levels.
+
     // Check the author of the 'author' posts.
     $this->backdropLogin($this->authorUser);
-    $this->backdropGet('node_access_join_test_page');
+    $this->backdropGet('test-node-access-join');
     $chk_total = count($this->xpath("//td[@headers='view-title-table-column']"));
     $this->assertEqual($chk_total, $total, 'Author should see ' . $total . ' rows. Actual: ' . $chk_total);
     $chk_total = count($this->xpath("//td[@headers='view-title-1-table-column']/a"));
@@ -3949,7 +3928,7 @@ class NodeAccessJoinTest extends NodeWebTestCase {
     // Check a regular user (who did not author any posts).
     $this->regularUser = $this->backdropCreateUser(array('access content'));
     $this->backdropLogin($this->regularUser);
-    $this->backdropGet('node_access_join_test_page');
+    $this->backdropGet('test-node-access-join');
     $chk_total = count($this->xpath("//td[@headers='view-title-table-column']"));
     $this->assertEqual($chk_total, $total, 'Public user should see ' . $total . ' rows. Actual: ' . $chk_total);
     $chk_total = count($this->xpath("//td[@headers='view-title-1-table-column']/a"));
@@ -3968,7 +3947,7 @@ class NodeAccessJoinTest extends NodeWebTestCase {
     // be able to view all pages and posts.
     $this->accessUser = $this->backdropCreateUser(array('access content', 'node test view'));
     $this->backdropLogin($this->accessUser);
-    $this->backdropGet('node_access_join_test_page');
+    $this->backdropGet('test-node-access-join');
     $chk_total = count($this->xpath("//td[@headers='view-title-table-column']"));
     $this->assertEqual($chk_total, $total, 'Full-access user should see ' . $total . ' rows. Actual: ' . $chk_total);
     $chk_total = count($this->xpath("//td[@headers='view-title-1-table-column']/a"));

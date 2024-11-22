@@ -1,0 +1,39 @@
+{
+    "_config_name": "field.instance.node.post.field_related_post",
+    "field_name": "field_related_post",
+    "entity_type": "node",
+    "bundle": "post",
+    "label": "Related post",
+    "widget": {
+        "weight": "6",
+        "type": "entityreference_autocomplete",
+        "module": "entityreference",
+        "active": 1,
+        "settings": {
+            "match_operator": "CONTAINS",
+            "size": "60",
+            "hide_ids": 0,
+            "path": ""
+        }
+    },
+    "description": "",
+    "required": 0,
+    "deleted": 0,
+    "default_value": null,
+    "default_value_function": null,
+    "settings": {
+        "user_register_form": false
+    },
+    "display": {
+        "default": {
+            "label": "hidden",
+            "type": "entityreference_label",
+            "settings": {
+                "link": false,
+                "bypass_access": false
+            },
+            "module": "entityreference",
+            "weight": 12
+        }
+    }
+}

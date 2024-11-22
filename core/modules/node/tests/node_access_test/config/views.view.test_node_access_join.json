@@ -1,0 +1,315 @@
+{
+    "_config_name": "views.view.test_node_access_join",
+    "name": "test_node_access_join",
+    "description": "",
+    "tag": "",
+    "disabled": false,
+    "base_table": "node",
+    "human_name": "Test Node Access Join",
+    "core": "1.29.x-dev",
+    "display": {
+        "default": {
+            "display_title": "Default",
+            "display_plugin": "default",
+            "display_options": {
+                "query": {
+                    "type": "views_query",
+                    "options": []
+                },
+                "access": {
+                    "type": "perm",
+                    "perm": "access content"
+                },
+                "cache": {
+                    "type": "none"
+                },
+                "exposed_form": {
+                    "type": "basic"
+                },
+                "pager": {
+                    "type": "full",
+                    "options": {
+                        "items_per_page": "1000",
+                        "offset": "0",
+                        "id": "0",
+                        "total_pages": "",
+                        "quantity": "9",
+                        "tags": {
+                            "first": "« first",
+                            "previous": "‹ previous",
+                            "next": "next ›",
+                            "last": "last »"
+                        },
+                        "expose": {
+                            "items_per_page": 0,
+                            "items_per_page_label": "Items per page",
+                            "items_per_page_options": "5, 10, 20, 40, 60",
+                            "items_per_page_options_all": 0,
+                            "items_per_page_options_all_label": "- All -",
+                            "offset": 0,
+                            "offset_label": "Offset"
+                        }
+                    }
+                },
+                "style_plugin": "table",
+                "row_plugin": "node",
+                "fields": {
+                    "title": {
+                        "id": "title",
+                        "table": "node",
+                        "field": "title",
+                        "label": "",
+                        "alter": {
+                            "alter_text": 0,
+                            "make_link": 0,
+                            "absolute": 0,
+                            "trim": 0,
+                            "word_boundary": 0,
+                            "ellipsis": 0,
+                            "strip_tags": 0,
+                            "html": 0
+                        },
+                        "hide_empty": 0,
+                        "empty_zero": 0,
+                        "link_to_node": 1
+                    },
+                    "title_1": {
+                        "id": "title_1",
+                        "table": "node",
+                        "field": "title",
+                        "relationship": "field_related_post_target_id",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "label": "Related Post Title",
+                        "exclude": 0,
+                        "alter": {
+                            "alter_text": 0,
+                            "text": "",
+                            "make_link": 0,
+                            "path": "",
+                            "absolute": 0,
+                            "external": 0,
+                            "replace_spaces": 0,
+                            "path_case": "none",
+                            "trim_whitespace": 0,
+                            "alt": "",
+                            "rel": "",
+                            "link_class": "",
+                            "prefix": "",
+                            "suffix": "",
+                            "target": "",
+                            "nl2br": 0,
+                            "max_length": "",
+                            "word_boundary": 1,
+                            "ellipsis": 1,
+                            "more_link": 0,
+                            "more_link_text": "",
+                            "more_link_path": "",
+                            "strip_tags": 0,
+                            "trim": 0,
+                            "preserve_tags": "",
+                            "html": 0
+                        },
+                        "element_type": "",
+                        "element_class": "",
+                        "element_label_type": "",
+                        "element_label_class": "",
+                        "element_label_colon": 1,
+                        "element_wrapper_type": "",
+                        "element_wrapper_class": "",
+                        "element_default_classes": 1,
+                        "empty": "",
+                        "hide_empty": 0,
+                        "empty_zero": 0,
+                        "hide_alter_empty": 1,
+                        "link_to_node": 1
+                    },
+                    "title_2": {
+                        "id": "title_2",
+                        "table": "node",
+                        "field": "title",
+                        "relationship": "field_related_post_target_id_1",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "label": "Related Post 2 Title",
+                        "exclude": 0,
+                        "alter": {
+                            "alter_text": 0,
+                            "text": "",
+                            "make_link": 0,
+                            "path": "",
+                            "absolute": 0,
+                            "external": 0,
+                            "replace_spaces": 0,
+                            "path_case": "none",
+                            "trim_whitespace": 0,
+                            "alt": "",
+                            "rel": "",
+                            "link_class": "",
+                            "prefix": "",
+                            "suffix": "",
+                            "target": "",
+                            "nl2br": 0,
+                            "max_length": "",
+                            "word_boundary": 1,
+                            "ellipsis": 1,
+                            "more_link": 0,
+                            "more_link_text": "",
+                            "more_link_path": "",
+                            "strip_tags": 0,
+                            "trim": 0,
+                            "preserve_tags": "",
+                            "html": 0
+                        },
+                        "element_type": "",
+                        "element_class": "",
+                        "element_label_type": "",
+                        "element_label_class": "",
+                        "element_label_colon": 1,
+                        "element_wrapper_type": "",
+                        "element_wrapper_class": "",
+                        "element_default_classes": 1,
+                        "empty": "",
+                        "hide_empty": 0,
+                        "empty_zero": 0,
+                        "hide_alter_empty": 1,
+                        "link_to_node": 1
+                    }
+                },
+                "filters": {
+                    "status": {
+                        "value": 1,
+                        "table": "node",
+                        "field": "status",
+                        "id": "status",
+                        "expose": {
+                            "operator": false
+                        },
+                        "group": 1
+                    },
+                    "type": {
+                        "id": "type",
+                        "table": "node",
+                        "field": "type",
+                        "relationship": "none",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "operator": "in",
+                        "value": {
+                            "page": "page"
+                        },
+                        "group": "1",
+                        "exposed": false,
+                        "expose": {
+                            "operator_id": false,
+                            "label": "",
+                            "description": "",
+                            "use_operator": false,
+                            "operator": "",
+                            "identifier": "",
+                            "required": false,
+                            "remember": false,
+                            "multiple": false,
+                            "remember_roles": {
+                                "authenticated": "authenticated"
+                            },
+                            "reduce": false
+                        },
+                        "is_grouped": false,
+                        "group_info": {
+                            "label": "",
+                            "description": "",
+                            "identifier": "",
+                            "optional": true,
+                            "widget": "select",
+                            "multiple": false,
+                            "remember": 0,
+                            "default_group": "All",
+                            "default_group_multiple": [],
+                            "group_items": []
+                        }
+                    }
+                },
+                "sorts": {
+                    "title": {
+                        "id": "title",
+                        "table": "node",
+                        "field": "title",
+                        "relationship": "none",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "order": "ASC",
+                        "exposed": false,
+                        "expose": {
+                            "label": ""
+                        }
+                    }
+                },
+                "title": "Test Node Access Join",
+                "row_options": {
+                    "build_mode": "teaser",
+                    "title": true,
+                    "links": true,
+                    "comments": false
+                },
+                "style_options": {
+                    "grouping": [],
+                    "row_class": "",
+                    "default_row_class": 1,
+                    "row_class_special": 1,
+                    "override": 1,
+                    "sticky": 0,
+                    "caption": "",
+                    "summary": "",
+                    "columns": {
+                        "title": "title"
+                    },
+                    "info": {
+                        "title": {
+                            "sortable": 0,
+                            "default_sort_order": "asc",
+                            "align": "",
+                            "separator": "",
+                            "empty_column": 0
+                        }
+                    },
+                    "default": "-1",
+                    "empty_table": 0
+                },
+                "relationships": {
+                    "field_related_post_target_id": {
+                        "id": "field_related_post_target_id",
+                        "table": "field_data_field_related_post",
+                        "field": "field_related_post_target_id",
+                        "relationship": "none",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "label": "Page Related Post",
+                        "required": 0
+                    },
+                    "field_related_post_target_id_1": {
+                        "id": "field_related_post_target_id_1",
+                        "table": "field_data_field_related_post",
+                        "field": "field_related_post_target_id",
+                        "relationship": "field_related_post_target_id",
+                        "group_type": "group",
+                        "ui_name": "",
+                        "label": "Post Related Post",
+                        "required": 0
+                    }
+                }
+            }
+        },
+        "page": {
+            "display_title": "Page",
+            "display_plugin": "page",
+            "display_options": {
+                "query": {
+                    "type": "views_query",
+                    "options": []
+                },
+                "path": "test-node-access-join"
+            }
+        }
+    }
+}
