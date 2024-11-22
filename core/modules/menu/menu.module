@@ -354,7 +354,7 @@ function menu_delete($menu) {
  *   An array of menu link titles keyed on the a string containing the menu name
  *   and mlid. The list excludes the given item and its children.
  */
-function menu_parent_options($menus, $item, $type = '') {
+function menu_parent_options(array $menus, array $item, $type = '') {
   $available_menus = array();
   if (!is_array($item)) {
     // If $item is not an array then it is a node type.
@@ -378,6 +378,34 @@ function menu_parent_options($menus, $item, $type = '') {
   }
 
   return _menu_get_options($menus, $available_menus, $item);
+}
+
+/**
+ * Ajax callback to replace the menu item parent options.
+ *
+ * Whenever the item language changes, the available parents also have to get
+ * updated.
+ *
+ * @see menu_edit_item().
+ * @see menu_form_node_form_alter().
+ */
+function menu_update_parent_options_ajax($form, $form_state) {
+  if ($form['#form_id'] == 'menu_edit_item') {
+    $item = $form['original_item']['#value'];
+    if (isset($form_state['values']['langcode'])) {
+      $item['langcode'] = $form_state['values']['langcode'];
+      $form['parent']['#options'] = menu_parent_options(menu_get_menus(), $item);
+    }
+    return $form['parent'];
+  }
+  elseif (isset($form['#node'])) {
+    $item = $form['#node']->menu;
+    if (isset($form_state['values']['langcode'])) {
+      $item['langcode'] = $form_state['values']['langcode'];
+      $form['menu']['link']['parent']['#options'] = menu_parent_options(menu_get_menus(), $item, $form['#node']->type);
+    }
+    return $form['menu']['link']['parent'];
+  }
 }
 
 /**

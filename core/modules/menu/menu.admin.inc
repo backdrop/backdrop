@@ -291,6 +291,7 @@ function menu_overview_form_language_filter_submit($form, &$form_state) {
  * Menu callback; Build the menu link editing form.
  */
 function menu_edit_item($form, &$form_state, $type, $item, $menu) {
+  $menus = menu_get_menus();
   if ($type == 'add' || empty($item)) {
     // This is an add form, initialize the menu link.
     $item = array(
@@ -310,8 +311,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
   }
   else {
     // Get the human-readable menu title from the given menu name
-    $titles = menu_get_menus();
-    $current_title = $titles[$item['menu_name']];
+    $current_title = $menus[$item['menu_name']];
 
     // Get the current breadcrumb and add a link to that menu's overview page.
     $breadcrumb = menu_get_active_breadcrumb();
@@ -409,8 +409,12 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#description' => t('When displayed in a "hierarchical tree" menu style, children of expanded menu links will always be visible.'),
   );
 
-  $menu_name = $item['menu_name'];
-  $menus = menu_get_menus();
+  if (isset($form_state['values']['parent_menu'])) {
+    $menu_name = $form_state['values']['parent_menu'];
+  }
+  else {
+    $menu_name = $item['menu_name'];
+  }
   $form['parent_menu'] = array(
     '#type' => 'select',
     '#title' => t('Menu'),
@@ -422,9 +426,6 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#wrapper_attributes' => array('id' => 'menu-parent-menu-wrapper'),
   );
 
-  if (isset($form_state['values']['parent_menu'])) {
-    $menu_name = $form_state['values']['parent_menu'];
-  }
   // Generate a list of possible parents (not including this link or
   // descendants) from the selected menu. Note that whenever the item language
   // changes, the available parents also have to get updated.
