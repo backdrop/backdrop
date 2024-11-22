@@ -1677,7 +1677,7 @@ class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
   protected $nids_visible;
 
   public function setUp() {
-    parent::setUp('node_access_test');
+    parent::setUp(array('entityreference', 'node_access_test'));
     node_access_rebuild();
     state_set('node_access_test_private', TRUE);
 
@@ -3818,14 +3818,14 @@ class NodeAccessJoinTest extends NodeWebTestCase {
         // other nodes that reference an post.)
         $edit['title'] = "Post $post - $reference2";
         if ($reference2 != 'no_reference') {
-          $edit['field_related_post'][$langcode][0]['value'] = $this->posts[$reference2]['no_reference'];
+          $edit['field_related_post'][$langcode][0]['target_id'] = $this->posts[$reference2]['no_reference'];
         }
         $node = $this->backdropCreateNode($edit);
         $this->posts[$post][$reference2] = $node->nid;
 
         $this->assertEqual((int) $is_private, (int) $node->private, 'The private status of the post node was properly set in the node_access_test table.');
         if ($reference2 != 'no_reference') {
-          $this->assertEqual((int) $this->posts[$reference2]['no_reference'], (int) $node->related_post[$langcode][0]['value'], 'Proper post attached to post.');
+          $this->assertEqual((int) $this->posts[$reference2]['no_reference'], (int) $node->field_related_post[$langcode][0]['target_id'], 'Proper post attached to post.');
         }
       }
     }
@@ -3854,11 +3854,11 @@ class NodeAccessJoinTest extends NodeWebTestCase {
           'private' => FALSE,
         );
         if ($post_nid) {
-          $edit['related_post'][$langcode][0]['value'] = $post_nid;
+          $edit['field_related_post'][$langcode][0]['target_id'] = $post_nid;
         }
         $node = $this->backdropCreateNode($edit);
         if ($post_nid) {
-          $this->assertEqual((int) $post_nid, (int) $node->related_post[$langcode][0]['value'], 'Proper post attached to page.');
+          $this->assertEqual((int) $post_nid, (int) $node->field_related_post[$langcode][0]['target_id'], 'Proper post attached to page.');
         }
 
         // Calculate totals expected for each user type
