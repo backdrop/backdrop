@@ -1,0 +1,6 @@
+{
+    "_config_name": "menu.menu.management",
+    "menu_name": "management",
+    "title": "Administration menu",
+    "description": "The <em>Administration</em> menu contains links for administrative tasks and content entry."
+}

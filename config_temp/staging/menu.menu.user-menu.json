@@ -1,0 +1,6 @@
+{
+    "_config_name": "menu.menu.user-menu",
+    "menu_name": "user-menu",
+    "title": "Account menu",
+    "description": "The <em>Account</em> menu contains links related to each user's account, as well as links to 'Log in' and 'Log out'."
+}

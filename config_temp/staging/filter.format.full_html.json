@@ -1,0 +1,41 @@
+{
+    "_config_name": "filter.format.full_html",
+    "format": "full_html",
+    "name": "Raw HTML",
+    "weight": 1,
+    "editor": null,
+    "filters": {
+        "filter_url": {
+            "weight": 0,
+            "status": 1,
+            "module": "filter",
+            "settings": []
+        },
+        "filter_autop": {
+            "weight": 1,
+            "status": 1,
+            "module": "filter",
+            "settings": []
+        },
+        "filter_image_caption": {
+            "weight": 4,
+            "status": 1,
+            "module": "filter",
+            "settings": []
+        },
+        "filter_image_align": {
+            "weight": 4,
+            "status": 1,
+            "module": "filter",
+            "settings": []
+        },
+        "filter_htmlcorrector": {
+            "weight": 10,
+            "status": 1,
+            "module": "filter",
+            "settings": []
+        }
+    },
+    "cache": true,
+    "status": 1
+}

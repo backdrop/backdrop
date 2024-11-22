@@ -1,0 +1,12 @@
+{
+    "_config_name": "user.role.anonymous",
+    "name": "anonymous",
+    "label": "Anonymous",
+    "description": "Special role assigned to any site visitor that has not signed into the site.",
+    "weight": "0",
+    "permissions": [
+        "access content",
+        "access comments",
+        "use text format filtered_html"
+    ]
+}

@@ -1,0 +1,250 @@
+{
+    "_config_name": "layout.layout.home",
+    "path": "home",
+    "name": "home",
+    "title": "Home page",
+    "description": null,
+    "renderer_name": "standard",
+    "module": "standard",
+    "weight": 0,
+    "storage": 2,
+    "layout_template": "boxton",
+    "disabled": false,
+    "settings": {
+        "title": "Welcome to Backdrop",
+        "title_display": "none",
+        "title_block": "094cbc03-d088-4b3c-8361-977733540ae8"
+    },
+    "positions": {
+        "header": [
+            "9bd5a524-3670-4922-8b12-18b00a2858b9",
+            "9aece1df-ac4f-44a6-8b0c-12a7f6a1fb21"
+        ],
+        "top": [
+            "094cbc03-d088-4b3c-8361-977733540ae8",
+            "6a46fd7b-646b-4c91-9d03-034e630a2135",
+            "fe8c7715-c7e9-46d0-8b09-09afb78b2891"
+        ],
+        "content": [
+            "578243cf-a4c8-46ad-9504-04aaf4ec9ccc"
+        ],
+        "bottom": [],
+        "footer": [
+            "d6903155-4ad7-46d3-9300-e628fd337f06"
+        ],
+        "title": []
+    },
+    "contexts": [],
+    "relationships": [],
+    "content": {
+        "9bd5a524-3670-4922-8b12-18b00a2858b9": {
+            "plugin": "system:header",
+            "data": {
+                "status": 1,
+                "module": "system",
+                "delta": "header",
+                "settings": {
+                    "title_display": "default",
+                    "title": "",
+                    "style": "default",
+                    "block_settings": {
+                        "menu": "user-menu",
+                        "logo": 1,
+                        "site_name": 1,
+                        "site_slogan": 1
+                    },
+                    "contexts": []
+                },
+                "uuid": "9bd5a524-3670-4922-8b12-18b00a2858b9",
+                "style": {
+                    "plugin": "default",
+                    "data": {
+                        "settings": {
+                            "classes": ""
+                        }
+                    }
+                }
+            }
+        },
+        "9aece1df-ac4f-44a6-8b0c-12a7f6a1fb21": {
+            "plugin": "system:main-menu",
+            "data": {
+                "status": 1,
+                "module": "system",
+                "delta": "main-menu",
+                "settings": {
+                    "title_display": "none",
+                    "title": "",
+                    "style": "default",
+                    "block_settings": {
+                        "style": "dropdown",
+                        "level": 1,
+                        "depth": 0
+                    },
+                    "contexts": []
+                },
+                "uuid": "9aece1df-ac4f-44a6-8b0c-12a7f6a1fb21",
+                "style": {
+                    "plugin": "default",
+                    "data": {
+                        "settings": {
+                            "classes": ""
+                        }
+                    }
+                }
+            }
+        },
+        "094cbc03-d088-4b3c-8361-977733540ae8": {
+            "plugin": "layout:hero",
+            "data": {
+                "status": 1,
+                "module": "layout",
+                "delta": "hero",
+                "settings": {
+                    "title_display": "default",
+                    "title": "Welcome to My Backdrop Site!",
+                    "style": "default",
+                    "block_settings": [],
+                    "contexts": [],
+                    "content": "",
+                    "format": "filtered_html",
+                    "image": null,
+                    "image_path": null
+                },
+                "uuid": "094cbc03-d088-4b3c-8361-977733540ae8",
+                "style": {
+                    "plugin": "default",
+                    "data": {
+                        "settings": {
+                            "classes": ""
+                        }
+                    }
+                }
+            }
+        },
+        "6a46fd7b-646b-4c91-9d03-034e630a2135": {
+            "plugin": "system:page_components:messages",
+            "data": {
+                "status": 1,
+                "module": "system",
+                "delta": "page_components",
+                "settings": {
+                    "title_display": "none",
+                    "title": "",
+                    "style": "default",
+                    "block_settings": [],
+                    "contexts": [],
+                    "title_tag": "h1",
+                    "title_classes": "page-title",
+                    "tab_type": "both",
+                    "admin_label": "",
+                    "admin_description": ""
+                },
+                "uuid": "6a46fd7b-646b-4c91-9d03-034e630a2135",
+                "style": {
+                    "plugin": "default",
+                    "data": {
+                        "settings": {
+                            "classes": "container"
+                        }
+                    }
+                }
+            }
+        },
+        "fe8c7715-c7e9-46d0-8b09-09afb78b2891": {
+            "plugin": "views:promoted_cards-block",
+            "data": {
+                "status": 1,
+                "module": "views",
+                "delta": "promoted_cards-block",
+                "settings": {
+                    "link_to_view": 0,
+                    "more_link": false,
+                    "use_pager": false,
+                    "pager_id": 0,
+                    "items_per_page": "3",
+                    "offset": 0,
+                    "path": "card-grid",
+                    "fields_override": null,
+                    "title_display": "none",
+                    "title": "",
+                    "style": "default",
+                    "block_settings": [],
+                    "contexts": [],
+                    "allowed": [],
+                    "path_override": false,
+                    "exposed": [],
+                    "admin_label": "",
+                    "admin_description": ""
+                },
+                "uuid": "fe8c7715-c7e9-46d0-8b09-09afb78b2891",
+                "style": {
+                    "plugin": "default",
+                    "data": {
+                        "settings": {
+                            "classes": ""
+                        }
+                    }
+                }
+            }
+        },
+        "578243cf-a4c8-46ad-9504-04aaf4ec9ccc": {
+            "plugin": "views:promoted-block",
+            "data": {
+                "status": 1,
+                "module": "views",
+                "delta": "promoted-block",
+                "settings": {
+                    "link_to_view": null,
+                    "more_link": false,
+                    "use_pager": true,
+                    "pager_id": 0,
+                    "items_per_page": 10,
+                    "offset": 0,
+                    "path": "rss.xml",
+                    "fields_override": null,
+                    "title_display": "default",
+                    "title": "",
+                    "style": "default",
+                    "block_settings": [],
+                    "contexts": [],
+                    "allowed": [],
+                    "path_override": false
+                },
+                "uuid": "578243cf-a4c8-46ad-9504-04aaf4ec9ccc",
+                "style": {
+                    "plugin": "default",
+                    "data": {
+                        "settings": {
+                            "classes": ""
+                        }
+                    }
+                }
+            }
+        },
+        "d6903155-4ad7-46d3-9300-e628fd337f06": {
+            "plugin": "system:powered-by",
+            "data": {
+                "status": 1,
+                "module": "system",
+                "delta": "powered-by",
+                "settings": {
+                    "title_display": "default",
+                    "title": "",
+                    "style": "default",
+                    "block_settings": [],
+                    "contexts": []
+                },
+                "uuid": "d6903155-4ad7-46d3-9300-e628fd337f06",
+                "style": {
+                    "plugin": "default",
+                    "data": {
+                        "settings": {
+                            "classes": ""
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,15 @@
+{
+    "_config_name": "user.role.authenticated",
+    "name": "authenticated",
+    "label": "Authenticated",
+    "description": "Special role assigned to all accounts. Permissions assigned to this role are given to all other roles except the anonymous role.",
+    "weight": "1",
+    "permissions": [
+        "access content",
+        "access comments",
+        "post comments",
+        "skip comment approval",
+        "upload editor images",
+        "use text format filtered_html"
+    ]
+}
