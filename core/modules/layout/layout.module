@@ -544,6 +544,55 @@ function layout_menu() {
     'file' => 'layout.admin.inc',
   );
 
+  // Create layout tabs for all possible entity bundles. Limit to entities that
+  // define a menu context path.
+  $all_info = _layout_get_all_info('layout_context');
+  $entity_names = array();
+  foreach ($all_info as $entity_type_name => $context_info) {
+    if (!empty($context_info['menu paths'])) {
+      $entity_names[] = $entity_type_name;
+    }
+  }
+
+  foreach (entity_get_info() as $entity_type => $entity_info) {
+    if (in_array($entity_type, $entity_names)) {
+      foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
+        if (isset($bundle_info['admin'])) {
+          $path = $bundle_info['admin']['path'];
+          if (isset($bundle_info['admin']['bundle argument'])) {
+            $bundle_arg = $bundle_info['admin']['bundle argument'];
+          }
+          else {
+            $bundle_arg = $bundle_name;
+          }
+
+          $access = array(
+            'access callback' => 'user_access',
+            'access arguments' => array('administer layouts'),
+          );
+
+          $items["$path/layouts"] = array(
+            'title' => 'Manage layouts',
+            'page callback' => 'backdrop_get_form',
+            'page arguments' => array('layout_entity_admin_form', $entity_type, $bundle_arg),
+            'type' => MENU_LOCAL_TASK,
+            'weight' => 2,
+            'file' => 'layout.entity.admin.inc',
+          ) + $access;
+          $items["$path/layouts/add"] = array(
+            'title' => 'Add layout',
+            'title callback' => 'layout_entity_menu_title',
+            'title arguments' => array($entity_type, $bundle_arg),
+            'page callback' => 'backdrop_get_form',
+            'page arguments' => array('layout_entity_admin_add_form', $entity_type, $bundle_arg),
+            'file' => 'layout.entity.admin.inc',
+            'type' => MENU_LOCAL_ACTION,
+          ) + $access;
+        }
+      }
+    }
+  }
+
   return $items;
 }
 
@@ -640,6 +689,34 @@ function layout_page_access() {
   module_load_include('inc', 'layout', 'layout.pages');
   $args = func_get_args();
   return call_user_func_array('_layout_page_access', $args);
+}
+
+/**
+ * Title callback: Returns a label for the action link to create bundle layouts.
+ *
+ * @param string $entity_type
+ *   The entity type such as "node", "user", "taxonomy_term", etc.
+ * @param string|stdClass $bundle_arg
+ *   The bundle as a string or object. The object may be a TaxonomyVocabulary
+ *   or stdClass (in the case of a node type).
+ *
+ * @return string
+ *   The translated label used for the local actions.
+ *
+ * @see layout_menu()
+ */
+function layout_entity_menu_title($entity_type, $bundle_arg) {
+  module_load_include('inc', 'layout', 'layout.entity.admin');
+  $entity_info = entity_get_info($entity_type);
+  $single_bundle = (count($entity_info['bundles']) == 1) && isset($entity_info['bundles'][$entity_type]);
+
+  if (!$single_bundle) {
+    $bundle_label = _layout_entity_bundle_label($entity_type, $bundle_arg);
+    return t('Add @bundle_label layout', array('@bundle_label' => $bundle_label));
+  }
+  else {
+    return t('Add @entity layout', array('@entity' => $entity_info['label']));
+  }
 }
 
 /**
@@ -740,6 +817,7 @@ function layout_theme() {
         'content' => NULL,
         'settings' => NULL,
         'layout' => NULL,
+        // @todo: Rename to layout_template_info in 2.x.
         'layout_info' => NULL,
         'renderer' => NULL,
         'attributes' => array(),
@@ -758,7 +836,10 @@ function layout_theme() {
       'variables' => array('layout' => NULL),
     ) + $base,
     'layout_condition_info' => array(
-      'variables' => array('layout' => NULL),
+      'variables' => array(
+        'layout' => NULL,
+        'show_empty' => TRUE,
+      ),
     ) + $base,
     'layout_template_option' => array(
       'variables' => array('template_info' => NULL),
@@ -802,6 +883,7 @@ function layout_theme() {
           'content' => NULL,
           'settings' => NULL,
           'layout' => NULL,
+          // @todo: Rename to layout_template_info in 2.x.
           'layout_info' => NULL,
           'renderer' => NULL,
           'attributes' => array(),
@@ -965,41 +1047,42 @@ function layout_block_info() {
  */
 function layout_autoload_info() {
   return array(
-    'LayoutHandler' => 'includes/layout_handler.class.inc',
-    'LayoutHandlerBroken' => 'includes/layout_handler.class.inc',
-    'Layout' => 'includes/layout.class.inc',
-    'LayoutFlexibleTemplate' => 'includes/layout_flexible.class.inc',
     'Block' => 'includes/block.class.inc',
     'BlockBroken' => 'includes/block.class.inc',
+    'BlockHero' => 'includes/block.hero.inc',
     'BlockLegacy' => 'includes/block_legacy.class.inc',
     'BlockText' => 'includes/block.text.inc',
-    'BlockHero' => 'includes/block.hero.inc',
+    'Layout' => 'includes/layout.class.inc',
+    'LayoutFlexibleTemplate' => 'includes/layout_flexible.class.inc',
+    'LayoutHandler' => 'includes/layout_handler.class.inc',
+    'LayoutHandlerBroken' => 'includes/layout_handler.class.inc',
     'LayoutMenuItem' => 'includes/layout_menu_item.class.inc',
 
     // Exceptions.
     'LayoutException' => 'includes/layout.exceptions.inc',
-    'LayoutSaveException' => 'includes/layout.exceptions.inc',
     'LayoutMissingException' => 'includes/layout.exceptions.inc',
+    'LayoutSaveException' => 'includes/layout.exceptions.inc',
 
     // Context handlers.
-    'LayoutContext' => 'plugins/context/layout_context.inc',
+    'EntityLayoutContext' => 'plugins/context/entity_layout_context_handler.inc',
     'LayoutContextBroken' => 'plugins/context/layout_context.inc',
     'LayoutOverridesPathContext' => 'plugins/context/layout_context.inc',
     'LayoutStringContext' => 'plugins/context/layout_context.inc',
-    'EntityLayoutContext' => 'plugins/context/entity_layout_context_handler.inc',
+    'LayoutContext' => 'plugins/context/layout_context.inc',
 
     // Access handlers.
     'EntityBundleLayoutAccess' => 'plugins/access/entity_bundle_layout_access.inc',
+    'EntityIDLayoutAccess' => 'plugins/access/entity_id_layout_access.inc',
+    'FrontLayoutAccess' => 'plugins/access/front_layout_access.inc',
+    'HttpResponseCodeLayoutAccess' => 'plugins/access/http_response_code_layout_access.inc',
+    'LanguageLayoutAccess' => 'plugins/access/language_layout_access.inc',
     'LayoutAccess' => 'plugins/access/layout_access.inc',
     'LayoutAccessBroken' => 'plugins/access/layout_access.inc',
     'LayoutAccessNegatable' => 'plugins/access/layout_access.inc',
-    'LanguageLayoutAccess' => 'plugins/access/language_layout_access.inc',
-    'FrontLayoutAccess' => 'plugins/access/front_layout_access.inc',
-    'EntityIDLayoutAccess' => 'plugins/access/entity_id_layout_access.inc',
     'PathLayoutAccess' => 'plugins/access/path_layout_access.inc',
-    'UserRoleLayoutAccess' => 'plugins/access/user_role_layout_access.inc',
-    'UserPermissionLayoutAccess' => 'plugins/access/user_permission_layout_access.inc',
     'UserCompareLayoutAccess' => 'plugins/access/user_compare_layout_access.inc',
+    'UserPermissionLayoutAccess' => 'plugins/access/user_permission_layout_access.inc',
+    'UserRoleLayoutAccess' => 'plugins/access/user_role_layout_access.inc',
 
     // Renderer handlers.
     'LayoutRendererEditor' => 'plugins/renderers/layout_renderer_editor.inc',
@@ -1011,8 +1094,8 @@ function layout_autoload_info() {
     'LayoutStyleDynamic' => 'plugins/styles/layout_style_dynamic.inc',
 
     // Relationships.
-    'LayoutRelationshipAuthorFromNode' => 'plugins/relationships/author_from_node.inc',
     'LayoutRelationship' => 'plugins/relationships/layout_relationship.inc',
+    'LayoutRelationshipAuthorFromNode' => 'plugins/relationships/author_from_node.inc',
     'LayoutRelationshipBroken' => 'plugins/relationships/layout_relationship.inc',
   );
 }
@@ -1570,8 +1653,9 @@ function _layout_get_all_info($data_type, $init = array()) {
  *
  * @return array|boolean
  *   The layout template information, as returned by either a stand-alone
- *   template .info file, or through a module's hook_layout_info().
+ *   template .info file, or through a module's hook_layout_template_info().
  *
+ * @see hook_layout_template_info()
  * @see hook_layout_info()
  */
 function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE) {
@@ -1579,6 +1663,7 @@ function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE
 
   // Try getting a cached list of layout info.
   if (!isset($info) && !$rebuild) {
+    // @todo: Rename cache key to layout_template_info in 2.x.
     $cache = cache('cache')->get('layout_info');
 
     if ($cache && $cache->data) {
@@ -1604,10 +1689,12 @@ function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE
       $init[$name]['title'] = $init[$name]['name'];
       $init[$name]['name'] = $name;
     }
-    $info = _layout_get_all_info('layout', $init);
+    $info = _layout_get_all_info('layout_template', $init);
+    // Account for implementations of the deprecated hook_layout_info().
+    $info = _layout_get_all_info('layout', $info);
 
     // Populate defaults.
-    foreach ($info as $name => $layout_info) {
+    foreach ($info as $name => $layout_template_info) {
       $info[$name] += array(
         'hidden' => FALSE,
         'preview' => 'preview.png',
@@ -1617,7 +1704,7 @@ function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE
         ),
       );
       if (!isset($info[$name]['template'])) {
-        $template_path = BACKDROP_ROOT . '/' . $layout_info['path'] . '/layout--' . str_replace('_', '-', $name) . '.tpl.php';
+        $template_path = BACKDROP_ROOT . '/' . $layout_template_info['path'] . '/layout--' . str_replace('_', '-', $name) . '.tpl.php';
 
         if (is_file($template_path)) {
           $info[$name]['template'] = 'layout--' . str_replace('_', '-', $name);
@@ -1657,7 +1744,7 @@ function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE
  *
  * @return array|boolean
  *   The layout template information, as returned by either a stand-alone
- *   template .info file, or through a module's hook_layout_info().
+ *   template .info file, or through a module's hook_layout_template_info().
  *
  * @deprecated since 1.4.0
  * @see layout_get_layout_template_info()
@@ -2064,7 +2151,7 @@ function layout_context_required_by_path($path) {
         // Determine the argument placement within the path.
         $parts = explode('/', $context_path);
         foreach ($parts as $part_index => $part) {
-          if ($part === $context_info['path placeholder']) {
+          if (!empty($context_info['path placeholder']) && $part === $context_info['path placeholder']) {
             $required_context_info[$part_index] = array(
               'plugin' => $context_info['name'],
               'position' => $part_index,
@@ -2213,7 +2300,7 @@ function layout_set_handler_contexts(array &$contexts, array $all_contexts, arra
 }
 
 /**
- * Implements hook_modules_uninstalled()
+ * Implements hook_modules_uninstalled().
  *
  * Deletes all blocks provided by a module when that module is uninstalled.
  */
@@ -2363,9 +2450,9 @@ function layout_flexible_template_load_all() {
 }
 
 /**
- * Implements hook_layout_info().
+ * Implements hook_layout_template_info().
  */
-function layout_layout_info() {
+function layout_layout_template_info() {
   $layouts = array();
   $styles = layout_flexible_row_styles();
 
@@ -2398,6 +2485,20 @@ function layout_layout_info() {
   }
 
   return $layouts;
+}
+
+/**
+ * Implements deprecated hook_layout_info().
+ *
+ * This hook has been replaced by hook_layout_template_info.
+ *
+ * @deprecated since 1.30.0
+ * @see layout_layout_template_info()
+ * @see https://docs.backdropcms.org/change-records/hook_layout_info-renamed-to-hook_layout_template_info
+ */
+function layout_layout_info() {
+  watchdog_deprecated_function('layout', __FUNCTION__);
+  return layout_layout_template_info();
 }
 
 /**

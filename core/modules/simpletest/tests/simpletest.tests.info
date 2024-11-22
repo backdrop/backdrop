@@ -298,6 +298,12 @@ description = Performs tests on Backdrop's HTTP request mechanism.
 group = Common
 file = common.test
 
+[CommonBackdropHTTPRedirectTest]
+name = Backdrop HTTP Redirect Processing
+description = Perform unit tests on processing of http redirects.
+group = Common
+file = common.test
+
 [CommonBackdropHTTPResponseStatusLineTest]
 name = Backdrop HTTP Response Status
 description = Performs unit tests on Backdrop's HTTP Response Status.
@@ -874,6 +880,12 @@ description = Test form element labels, required markers and associated output.
 group = Form API
 file = form.test
 
+[FormsElementsDescriptionsTestCase]
+name = Form element and description output test
+description = Test form element descriptions.
+group = Form API
+file = form.test
+
 [FormsElementsTableSelectFunctionalTest]
 name = Tableselect form element type test
 description = Test the tableselect element for expected behavior
@@ -1005,6 +1017,12 @@ name = Graph
 description = Graph handling unit tests.
 group = System
 file = graph.test
+
+[IconTestCase]
+name = Icon API
+description = Tests the providing and path matching of SVG icons.
+group = System
+file = icon.test
 
 [ImageToolkitUnitTest]
 name = Image toolkit tests

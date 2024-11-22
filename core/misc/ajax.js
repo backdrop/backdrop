@@ -218,7 +218,7 @@ Backdrop.ajax = function (base, element, element_settings) {
       // Sanity check for browser support (object expected).
       // When using iFrame uploads, responses must be returned as a string.
       if (typeof response == 'string') {
-        response = $.parseJSON(response);
+        response = JSON.parse(response);
 
         // Prior to invoking the response's commands, verify that they can be
         // trusted by checking for a response header. See
@@ -367,6 +367,20 @@ Backdrop.ajax.prototype.beforeSerialize = function (element, options) {
   if (this.form) {
     var settings = this.settings || Backdrop.settings;
     Backdrop.detachBehaviors(this.form, settings, 'serialize');
+
+    // Ensure Backdrop isn't vulnerable to the bugs disclosed in the unmerged
+    // pull request: https://github.com/jquery-form/form/pull/586.
+    // - Under normal circumstances, the first if statement doesn't evaluate
+    //   to true, because options.dataType is initialized in the Drupal.ajax()
+    //   constructor.
+    // - Under normal circumstances, the second if statement doesn't evaluate
+    //   to true, because $.parseJSON is initialized by jQuery.
+    if (!options.dataType && options.target) {
+      delete options.target;
+    }
+    if (!$.parseJSON) {
+      $.parseJSON = JSON.parse;
+    }
   }
 
   // Prevent duplicate HTML ids in the returned markup.

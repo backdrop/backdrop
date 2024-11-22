@@ -159,7 +159,7 @@ class views_handler_field extends views_handler {
   }
 
   /**
-   * Called to determine what to tell the clicksorter.
+   * Called to determine what to tell the click sorter.
    */
   function click_sort($order) {
     if (isset($this->field_alias)) {

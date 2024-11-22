@@ -1,0 +1,129 @@
+<?php
+/**
+ * @file Contains tests for File module's Views integration.
+ */
+
+/**
+ * Provides test methods covering File module's Views handlers.
+ */
+class FileViewsTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+  protected $admin_user;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp($modules = array()) {
+    $modules[] = 'file';
+    $modules[] = 'file_module_test';
+    parent::setUp($modules);
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access file overview',
+      'manage files',
+      'view files',
+      'create files',
+      'delete files',
+      'access content',
+      'access administration pages',
+      'administer site configuration',
+    ));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Tests the File "Icon" field capability within Views.
+   */
+  public function testFileViewsIcon() {
+    $this->backdropLogin($this->admin_user);
+
+    // Upload a few test files.
+    $test_path = backdrop_get_path('module', 'simpletest') . '/files';
+    $files = array(
+      1 => array(
+        'path' => $test_path . '/html-1.txt',
+        'icon' => 'file-txt',
+      ),
+      2 => array(
+        'path' => $test_path . '/image-1.png',
+        'icon' => 'file-png',
+      ),
+      3 => array(
+        'path' => $test_path . '/image-test.gif',
+        'icon' => 'file-image',
+      ),
+      4 => array(
+        'path' => $test_path . '/image-test.jpg',
+        'icon' => 'file-jpg',
+      ),
+      5 => array(
+        'path' => $test_path . '/svg-good1.svg',
+        'icon' => 'file-svg',
+      ),
+    );
+    foreach ($files as $file_id => $file_info) {
+      $edit = array(
+        'files[upload]' => $file_info['path'],
+      );
+      // Upload the file.
+      $this->backdropPost('file/add', $edit, t('Upload'));
+      // Continue to next screen (file scheme).
+      $this->backdropPost(NULL, array(), t('Next'));
+      // Continue with the file as Public.
+      $this->backdropPost(NULL, array(), t('Next'));
+      $message = format_string('File %file uploaded successfully.', array(
+        '%file' => $file_info['path'],
+      ));
+      // Note this assumes there are no other files at all, so this should be
+      // file ID 1. This should be the case when using the testing profile.
+      $this->assertUrl('file/' . $file_id, array(), $message);
+    }
+
+    // Verify the default output of the views.view.file_icon_test config.
+    $this->backdropGet('file/views-icon-test');
+
+    // By default, the SVG is rendered inline.
+    foreach ($files as $file_id => $file_info) {
+      $xpath_result = $this->xpath('//*[@id="file-icon-' . $file_id . '"]/svg[contains(@class, :class)]', array(':class' => 'icon--' . $file_info['icon']));
+      $this->assertTrue($xpath_result, format_string('Inline %icon SVG found for %filename.', array(
+        '%icon' => $file_info['icon'],
+        '%filename' => basename($file_info['path']),
+      )));
+
+      /* @var SimpleXMLElement $svg_element */
+      $svg_element = $xpath_result[0];
+      $title_element = $svg_element->xpath('title');
+      $this->assertTrue((string) $title_element[0], format_string('Inline SVG for %filename includes nested title as alt text.', array(
+        '%filename' => basename($file_info['path']),
+      )));
+      $this->assertEqual((string) $svg_element['width'], '32', format_string('Inline SVG for %filename has the expected width.', array(
+        '%filename' => basename($file_info['path']),
+      )));
+    }
+
+    // Change the view configuration to render as a normal <img> tag.
+    $view_config = config('views.view.file_icon_test');
+    $view_config->set('display.default.display_options.fields.icon.display_type', 'img');
+    $view_config->set('display.default.display_options.fields.icon.icon_size', '64');
+    $view_config->save();
+    views_flush_caches();
+
+    // Verify the modified output, now using an <img> tag and 64 px icon size.
+    $this->backdropGet('file/views-icon-test');
+    foreach ($files as $file_id => $file_info) {
+      $xpath_result = $this->xpath('//*[@id="file-icon-' . $file_id . '"]/img');
+      $this->assertTrue($xpath_result, format_string('Regular img tag %icon found for %filename.', array(
+        '%icon' => $file_info['icon'],
+        '%filename' => basename($file_info['path']),
+      )));
+
+      /* @var SimpleXMLElement $svg_element */
+      $img_element = $xpath_result[0];
+      $this->assertTrue((string) $img_element['alt'], format_string('Regular img tag icon for %filename includes alt text.', array(
+        '%filename' => basename($file_info['path']),
+      )));
+      $this->assertEqual((string) $img_element['width'], '64', format_string('Regular img tag icon for %filename has the expected width.', array(
+        '%filename' => basename($file_info['path']),
+      )));
+    }
+  }
+}

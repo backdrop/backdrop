@@ -364,7 +364,7 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
       unset($term->content);
 
       $build += array(
-        '#theme' => 'taxonomy_term__' . $term->vocabulary . '__' . $view_mode,
+        '#theme' => 'taxonomy_term',
         '#term' => $term,
         '#view_mode' => $view_mode,
         '#language' => $langcode,

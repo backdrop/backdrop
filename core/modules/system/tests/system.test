@@ -2513,6 +2513,61 @@ class SystemAdminTestCase extends BackdropWebTestCase {
 }
 
 /**
+ * Tests administrative overview pages.
+ */
+class DebugReportTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp();
+
+    // Create an administrator user.
+    $this->admin_user = $this->backdropCreateUser(array('access site reports'));
+    $this->backdropLogin($this->admin_user);
+
+    // Set an admin theme.
+    theme_enable(array('seven'));
+    config_set('system.core', 'admin_theme', 'seven');
+  }
+
+  /**
+   * Tests the "admin/reports/debug" page.
+   */
+  public function testDebugReportPage() {
+    $this->backdropGet('admin/reports/debug');
+    $this->assertResponse(200);
+    $element = $this->xpath('//textarea[@id="debug-info-wrapper"]');
+    $debug_contents = (string) $element[0];
+
+    $tab_size = 29;
+
+    // Check core version.
+    $core_string = str_pad('Backdrop CMS:', $tab_size) . BACKDROP_VERSION;
+    $this->assertTrue(strpos($debug_contents, $core_string) === 0, 'Backdrop core version found in debug report.');
+
+    // Install profile.
+    $core_string = str_pad('Installation profile:', $tab_size) . 'testing';
+    $this->assertTrue(strpos($debug_contents, $core_string), 'Install profile found in debug report.');
+
+    // Check current theme.
+    $theme_string = str_pad('Default theme:', $tab_size) . 'Stark';
+    $this->assertTrue(strpos($debug_contents, $theme_string), 'Current theme found in debug report.');
+
+    // Check an enabled module.
+    $theme_string = str_pad('node', $tab_size) . BACKDROP_VERSION;
+    $this->assertTrue(strpos($debug_contents, $theme_string), 'Enabled module "node" found.');
+  }
+}
+
+/**
  * Tests authorize.php and related hooks.
  */
 class SystemAuthorizeCase extends BackdropWebTestCase {

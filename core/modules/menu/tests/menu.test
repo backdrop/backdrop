@@ -332,7 +332,7 @@ class MenuTestCase extends BackdropWebTestCase {
    * @param string $menu_name
    *   Menu name.
    * @param int $weight
-   *   Menu link weight
+   *   Menu link weight.
    *
    * @return array
    *   Menu link created.
@@ -775,13 +775,14 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     );
     menu_link_save($item);
 
-    // Assert that disabled Administration menu is not shown on the node/$nid/edit page.
+    // Assert that disabled Administration menu is not shown on the
+    // node/$nid/edit page.
     $this->backdropGet('node/' . $node->nid . '/edit');
-    $this->assertText('Provide a menu link', 'Link in not allowed menu not shown in node edit form');
+    $this->assertText('Provide a menu link', 'Link in not-allowed menu not shown in node edit form.');
     // Assert that the link is still in the Administration menu after save.
     $this->backdropPost('node/' . $node->nid . '/edit', $edit, t('Save'));
     $link = menu_link_load($item['mlid']);
-    $this->assertTrue($link, 'Link in not allowed menu still exists after saving node');
+    $this->assertTrue($link, 'Link in not-allowed menu still exists after saving node.');
 
     // Move the menu link back to the Main menu.
     $item['menu_name'] = 'main-menu';
@@ -797,10 +798,12 @@ class MenuNodeTestCase extends BackdropWebTestCase {
     menu_link_save($child_item);
     // Edit the first node.
     $this->backdropGet('node/'. $node->nid .'/edit');
-    // Assert that it is not possible to set the parent of the first node to itself or the second node.
+    // Assert that it is not possible to set the parent of the first node to
+    // itself...
     $this->assertNoOption('edit-menu-parent', 'main-menu:'. $item['mlid']);
+    // ...nor to the second node
     $this->assertNoOption('edit-menu-parent', 'main-menu:'. $child_item['mlid']);
-    // Assert that unallowed Management menu is not available in options.
+    // ...nor to the not-allowed "Management" menu.
     $this->assertNoOption('edit-menu-parent', 'management:0');
   }
 }
