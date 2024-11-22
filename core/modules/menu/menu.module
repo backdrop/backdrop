@@ -381,6 +381,23 @@ function menu_parent_options(array $menus, array $item, $type = '') {
 }
 
 /**
+ * Page callback.
+ * Get all the available menus and menu items as a JavaScript array.
+ */
+function menu_parent_options_js() {
+  $available_menus = array();
+  if (isset($_POST['menus']) && count($_POST['menus'])) {
+    foreach ($_POST['menus'] as $menu) {
+      $available_menus[$menu] = $menu;
+    }
+  }
+  $options = _menu_get_options(menu_get_menus(), $available_menus, array('mlid' => 0));
+
+  // Displayed as JSON by delivery callback backdrop_json_deliver().
+  return $options;
+}
+
+/**
  * Ajax callback to replace the menu item parent options.
  *
  * Whenever the item language changes, the available parents also have to get
@@ -406,23 +423,6 @@ function menu_update_parent_options_ajax($form, $form_state) {
     }
     return $form['menu']['link']['parent'];
   }
-}
-
-/**
- * Page callback.
- * Get all the available menus and menu items as a JavaScript array.
- */
-function menu_parent_options_js() {
-  $available_menus = array();
-  if (isset($_POST['menus']) && count($_POST['menus'])) {
-    foreach ($_POST['menus'] as $menu) {
-      $available_menus[$menu] = $menu;
-    }
-  }
-  $options = _menu_get_options(menu_get_menus(), $available_menus, array('mlid' => 0));
-
-  // Displayed as JSON by delivery callback backdrop_json_deliver().
-  return $options;
 }
 
 /**
