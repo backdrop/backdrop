@@ -23,14 +23,23 @@ class LayoutRendererStandard {
   var $layout;
 
   /**
-   * The information from hook_layout_info() for the layout being rendered.
+   * Deprecated. Now replaced by $layout_template_info.
+   *
+   * @var NULL
+   * @deprecated since 1.30.0
+   */
+  var $layout_info;
+
+  /**
+   * The information from hook_layout_template_info() for the layout being
+   * rendered.
    *
    * This array is stored here for easy access, as it contains most importantly
    * the list of regions that can be configured.
    *
    * @var array
    */
-  var $layout_info;
+  var $layout_template_info;
 
   /**
    * A multilevel array of rendered data. The first level of the array
@@ -146,15 +155,20 @@ class LayoutRendererStandard {
    */
   function __construct(Layout $layout, array $renderer_plugin) {
     $this->plugin = $renderer_plugin;
-    $layout_info = layout_get_layout_template_info($layout->layout_template);
+    $layout_template_info = layout_get_layout_template_info($layout->layout_template);
     $this->layout = &$layout;
 
-    if (empty($layout_info)) {
+    if (empty($layout_template_info)) {
       throw new LayoutMissingException(t('The layout plugin "@plugin" could not been found to display the "@title" layout.', array('@plugin' => $layout->layout_template, '@title' => $layout->title)));
     }
     else {
-      $this->layout_info = $layout_info;
+      $this->layout_template_info = $layout_template_info;
     }
+
+    // Adjust for the renaming of "layout_info" to "layout_template_info".
+    // See https://github.com/backdrop/backdrop-issues/issues/6628.
+    // @todo: Remove in 2.x.
+    $this->layout_info = $this->layout_template_info;
   }
 
   /**
@@ -306,7 +320,7 @@ class LayoutRendererStandard {
     $regions = array();
     if (empty($settings)) {
       // No region settings exist, init all with the defaults.
-      foreach ($this->layout_info['regions'] as $region_id => $title) {
+      foreach ($this->layout_template_info['regions'] as $region_id => $title) {
         // Ensure this region has at least an empty block array.
         $blocks = array();
         if (isset($region_block_list[$region_id])) {
@@ -319,7 +333,7 @@ class LayoutRendererStandard {
     }
     else {
       // Some settings exist; iterate through each region and set individually.
-      foreach ($this->layout_info['regions'] as $region_id => $title) {
+      foreach ($this->layout_template_info['regions'] as $region_id => $title) {
         // Ensure this region has at least an empty blocks array.
         $blocks = !empty($region_block_list[$region_id]) ? $region_block_list[$region_id] : array();
 
@@ -381,13 +395,13 @@ class LayoutRendererStandard {
     }
 
     module_load_include('inc', 'layout', 'layout.theme');
-    if (empty($this->layout_info['template'])) {
+    if (empty($this->layout_template_info['template'])) {
       $theme = 'layout__' . $this->layout->layout_template;
     }
     else {
-      $theme = str_replace('-', '_', $this->layout_info['template']);
+      $theme = str_replace('-', '_', $this->layout_template_info['template']);
     }
-    $this->rendered['layout'] = theme($theme, array('content' => $this->rendered['regions'], 'settings' => $this->layout->settings, 'layout' => $this->layout, 'layout_info' => $this->layout_info, 'renderer' => $this, 'admin' => $this->admin));
+    $this->rendered['layout'] = theme($theme, array('content' => $this->rendered['regions'], 'settings' => $this->layout->settings, 'layout' => $this->layout, 'layout_info' => $this->layout_template_info, 'renderer' => $this, 'admin' => $this->admin));
     return $this->prefix . $this->rendered['layout'] . $this->suffix;
   }
 
@@ -398,15 +412,15 @@ class LayoutRendererStandard {
    * their CSS added in the right order: inner content before outer content.
    */
   function addMeta() {
-    if (!empty($this->layout_info['stylesheets'])) {
-      foreach ($this->layout_info['stylesheets'] as $media => $file_names) {
+    if (!empty($this->layout_template_info['stylesheets'])) {
+      foreach ($this->layout_template_info['stylesheets'] as $media => $file_names) {
         foreach ($file_names as $file_name) {
-          $this->addCss($this->layout_info['path'] . '/' . $file_name, array('media' => $media));
+          $this->addCss($this->layout_template_info['path'] . '/' . $file_name, array('media' => $media));
         }
       }
     }
-    if (!empty($this->layout_info['libraries'])) {
-      foreach ($this->layout_info['libraries'] as $library) {
+    if (!empty($this->layout_template_info['libraries'])) {
+      foreach ($this->layout_template_info['libraries'] as $library) {
         $this->addLibrary('layout', $library);
       }
     }
@@ -617,7 +631,7 @@ class LayoutRendererStandard {
    */
   function ensurePageContentBlock() {
     $page_content_uuid = NULL;
-    $default_region = $this->layout_info['default region'];
+    $default_region = $this->layout_template_info['default region'];
 
     // Check that the page content block exists in the layout.
     foreach ($this->layout->content as $uuid => $block) {

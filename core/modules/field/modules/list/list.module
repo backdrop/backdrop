@@ -146,11 +146,15 @@ function list_field_settings_form($field, $instance, $has_data) {
 /**
  * Implements hook_form_FORM_ID_alter().
  */
-
 function list_form_field_ui_field_edit_form_alter(&$form, &$form_state) {
   $field = $form['#field'];
+  $instance = $form['#instance'];
 
   if (in_array($field['type'], array('list_integer', 'list_float', 'list_text'))) {
+    // If the default value is set automatically skip setting the widget.
+    if ($instance['default_value_function']) {
+      return;
+    }
 
     // Use options_element default widget instead of field widget.
     $form['instance']['default_value_widget']['#access'] = FALSE;
@@ -498,7 +502,7 @@ function list_field_formatter_info() {
         'custom_off' => '',
         'reverse' => 0,
       ),
-    )
+    ),
   );
 }
 

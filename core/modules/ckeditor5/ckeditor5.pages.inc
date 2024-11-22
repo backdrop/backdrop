@@ -33,7 +33,7 @@ function ckeditor5_image_upload($format) {
   if ($upload_settings['max_size']) {
     $validators['file_validate_size'] = array(parse_size($upload_settings['max_size']));
   }
-  if ($upload_settings['max_dimensions']['width']) {
+  if (!empty($upload_settings['max_dimensions']['width'])) {
     $validators['file_validate_image_resolution'] = array($upload_settings['max_dimensions']['width'] . 'x' . $upload_settings['max_dimensions']['height']);
   }
 

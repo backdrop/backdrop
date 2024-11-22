@@ -199,6 +199,29 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     return 'mysql';
   }
 
+  /**
+   * Returns the version of the database server.
+   */
+  public function version() {
+    $version = parent::version();
+
+    // Some MariaDB version strings prepend a fake MySQL version to the front,
+    // which is always "5.5.5-". This was done to so that old MySQL clients
+    // could connect to newer MariaDB servers.
+    // For example, 5.5.5-10.5.11-MariaDB:
+    // - 5.5.5 is a fake MySQL version.
+    // - 10.5.11 would be the actual MariaDB version.
+    // See https://github.com/MariaDB/server/blob/f6633bf058802ad7da8196d01fd19d75c53f7274/include/mysql_com.h#L42
+    // Remove any leading MySQL 5.5.5- prefixes:
+    $regex = '/^(?:5\.5\.5-)?(\d+\.\d+\.\d+.*-mariadb.*)/i';
+    preg_match($regex, $version, $matches);
+    if (!empty($matches[1])) {
+      $version = $matches[1];
+    }
+
+    return $version;
+  }
+
   public function databaseType() {
     return 'mysql';
   }

@@ -380,7 +380,7 @@ class FieldSqlStorageTestCase extends BackdropWebTestCase {
    */
   function testFieldSqlStorageForeignKeys() {
     // Create a decimal field.
-    $field_name = 'testfield';
+    $field_name = 'test_field';
     $field = array(
       'field_name' => $field_name,
       'type' => 'shape',
