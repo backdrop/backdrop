@@ -386,8 +386,8 @@ function menu_parent_options(array $menus, array $item, $type = '') {
  * Whenever the item language changes, the available parents also have to get
  * updated.
  *
- * @see menu_edit_item().
- * @see menu_form_node_form_alter().
+ * @see menu_edit_item()
+ * @see menu_form_node_form_alter()
  */
 function menu_update_parent_options_ajax($form, $form_state) {
   if ($form['#form_id'] == 'menu_edit_item') {
