@@ -369,7 +369,25 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     );
   }
 
+  // To support contrib modules that are expecting the old way of putting all
+  // menu items of all menus into a single list, we check for whether those
+  // contrib modules have been updated by their addition of a config setting.
+  $legacy_modules = array('content_menu');
+  $use_legacy_menus = FALSE;
+  foreach ($legacy_modules as $legacy_module) {
+    $use_legacy_menus |= (module_exists($legacy_module) && !config_get($legacy_module . '.settings', 'use_updated_edit_menu_item'));
+  }
+
   if (module_exists('language')) {
+    if ($use_legacy_menus) {
+      $ajax = array(
+        'callback' => 'menu_update_parent_options_ajax',
+        'wrapper' => 'menu-parent-select-wrapper',
+      );
+    }
+    else {
+      $ajax = array('callback' => 'menu_edit_item_callback');
+    }
     $form['langcode'] = array(
       '#type' => 'select',
       '#title' => t('Language'),
@@ -378,7 +396,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
       '#empty_value' => LANGUAGE_NONE,
       '#empty_option' => t('- All (always shown) -'),
       '#description' => t('Set a language for this menu link. The menu link will only be visible in that language.'),
-      '#ajax' => array('callback' => 'menu_edit_item_callback'),
+      '#ajax' => $ajax,
     );
   }
   else {
@@ -409,50 +427,79 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#description' => t('When displayed in a "hierarchical tree" menu style, children of expanded menu links will always be visible.'),
   );
 
-  if (isset($form_state['values']['parent_menu'])) {
-    $menu_name = $form_state['values']['parent_menu'];
+  if ($use_legacy_menus) {
+    // Generate a list of possible parents (not including this link or
+    // descendants).
+    $parent_options = menu_parent_options($menus, $item);
+    $parent_default = $item['menu_name'] . ':' . $item['plid'];
+    if (!isset($parent_options[$parent_default])) {
+      $parent_default = 'main-menu:0';
+    }
+
+    // Get number of items in all possible parent menus, so the weight selector
+    // is sized appropriately.
+    $menu_names = array_keys($menus);
+    $menu_options = array();
+    foreach ($menu_names as $menu_name) {
+      if (isset($options[$menu_name . ':0'])) {
+        $menu_options[] = $menu_name;
+      }
+    }
+    // Make sure that we always have values in menu_options.
+    $menu_options = !empty($menu_options) ? $menu_options : $menu_names;
+    $weight_delta = _menu_get_menu_weight_delta($menu_options);
   }
   else {
-    $menu_name = $item['menu_name'];
-  }
-  $form['parent_menu'] = array(
-    '#type' => 'select',
-    '#title' => t('Menu'),
-    '#default_value' => $menu_name,
-    '#options' => $menus,
-    '#description' => t('Select the menu that this menu link should belong to.'),
-    '#attributes' => array('class' => array('menu-menu-select')),
-    '#ajax' => array('callback' => 'menu_edit_item_callback'),
-    '#wrapper_attributes' => array('id' => 'menu-parent-menu-wrapper'),
-  );
+    // Create a separate select list to choose the parent menu, then limit the
+    // menu item choices to just the items in the chosen menu.
+    if (isset($form_state['values']['parent_menu'])) {
+      $menu_name = $form_state['values']['parent_menu'];
+    }
+    else {
+      $menu_name = $item['menu_name'];
+    }
+    $form['parent_menu'] = array(
+      '#type' => 'select',
+      '#title' => t('Menu'),
+      '#default_value' => $menu_name,
+      '#options' => $menus,
+      '#description' => t('Select the menu that this menu link should belong to.'),
+      '#attributes' => array('class' => array('menu-menu-select')),
+      '#ajax' => array('callback' => 'menu_edit_item_callback'),
+      '#wrapper_attributes' => array('id' => 'menu-parent-menu-wrapper'),
+    );
 
-  // Generate a list of possible parents (not including this link or
-  // descendants) from the selected menu. Note that whenever the item language
-  // changes, the available parents also have to get updated.
-  if (isset($form_state['values']['langcode'])) {
-    $item['langcode'] = $form_state['values']['langcode'];
+    // Generate a list of possible parents (not including this link or
+    // descendants) from the selected menu. Note that whenever the item language
+    // changes, the available parents also have to get updated.
+    if (isset($form_state['values']['langcode'])) {
+      $item['langcode'] = $form_state['values']['langcode'];
+    }
+    $parent_options = menu_parent_options(array($menu_name => $menus[$menu_name]), $item);
+    $parent_default = $item['menu_name'] . ':' . $item['plid'];
+    if (!isset($parent_options[$parent_default])) {
+      $parent_default = key($parent_options);
+    }
+    $weight_delta = _menu_get_menu_weight_delta($menu_name);
   }
-  $options = menu_parent_options(array($menu_name => $menus[$menu_name]), $item);
-  $default = $item['menu_name'] . ':' . $item['plid'];
-  if (!isset($options[$default])) {
-    $default = key($options);
-  }
+
   // @TODO in Backdrop 2.0, replace #prefix/#suffix with #wrapper_attributes.
   // Kept here for backward compatibility with existing contrib, themes.
   $form['parent'] = array(
     '#type' => 'select',
     '#title' => t('Parent link'),
-    '#default_value' => $default,
-    '#options' => $options,
+    '#default_value' => $parent_default,
+    '#options' => $parent_options,
     '#description' => t('The maximum depth for a link and all its children is fixed at !maxdepth. Some menu links may not be available as parents if selecting them would exceed this limit.', array('!maxdepth' => MENU_MAX_DEPTH)),
     '#attributes' => array('class' => array('menu-title-select')),
     '#prefix' => '<div id="menu-parent-select-wrapper">',
     '#suffix' => '</div>',
   );
+
   $form['weight'] = array(
     '#type' => 'weight',
     '#title' => t('Weight'),
-    '#delta' => _menu_get_menu_weight_delta($menu_name),
+    '#delta' => $weight_delta,
     '#default_value' => $item['weight'],
     '#description' => t('Optional. In the menu, the heavier links will sink and the lighter links will be positioned nearer the top.'),
     '#attributes' => array('class' => array('menu-weight-select')),
@@ -471,10 +518,6 @@ function menu_edit_item_callback($form, $form_state) {
   $commands[] = ajax_command_replace("#menu-parent-menu-wrapper", backdrop_render($form['parent_menu']));
   $commands[] = ajax_command_replace("#menu-parent-select-wrapper", backdrop_render($form['parent']));
   $commands[] = ajax_command_replace("#menu-parent-weight-wrapper", backdrop_render($form['weight']));
-  // Special handling for the content_menu contrib module.
-  if (module_exists('content_menu') && isset($form['advanced'])) {
-    $commands[] = ajax_command_replace("#edit-advanced", backdrop_render($form['advanced']));
-  }
   return array('#type' => 'ajax', '#commands' => $commands);
 }
 
