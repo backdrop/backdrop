@@ -78,7 +78,7 @@ class BackupConfig extends Backup {
   /**
    * Get the type of config being backed-up or restored.
    *
-   * @return false|string
+   * @return string|false
    *   Either "active", "staging", or FALSE.
    */
   protected function getConfigType() {

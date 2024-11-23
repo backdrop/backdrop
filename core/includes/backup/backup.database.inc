@@ -134,12 +134,16 @@ abstract class BackupDatabase extends Backup {
   public function backup(BackupFile $file) {
     $file->pushExtension($this->getFileTypeId());
 
-    //$this->lock_tables($settings);
+    if ($this->settings['lock_tables']) {
+      $this->lockTables();
+    }
 
     // Switch to a different db if specified.
     $success = $this->backupDatabaseToFile($file);
 
-    //$this->unlock_tables($settings);
+    if ($this->settings['lock_tables']) {
+      $this->unlockTables();
+    }
 
     // Pull any logged messages out of the file and up to this class.
     $file_log = $file->getLog();

@@ -2953,8 +2953,8 @@ function backdrop_bootstrap($phase = NULL, $new_phase = TRUE) {
  * at an empty database. If this happens, redirect the user to install.php.
  */
 function backdrop_bootstrap_is_installed() {
-  // If in any maintenance mode (install, update, restore, etc.) assume being
-  // installed or in the process of installing or restoring.
+  // If in any maintenance mode (install, update, restore, etc.) assume the site
+  // is in the process of installing or restoring.
   if (defined('MAINTENANCE_MODE')) {
     return TRUE;
   }

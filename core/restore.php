@@ -38,8 +38,8 @@ function restore_script_selection_form($form, &$form_state) {
   // If there are no backups, display a message.
   if (empty($existing_backups)) {
     $help = st('No backups are currently available to be restored.');
-    if (!settings_get('backups_directory')) {
-      $help .= ' ' . st('Future backups may be created by specifying the $settings[\'backups_directory\'] variable in settings.php.');
+    if (!settings_get('backup_directory')) {
+      $help .= ' ' . st('Future backups may be created by specifying the $settings[\'backup_directory\'] variable in settings.php.');
     }
 
     $form['help'] = array(

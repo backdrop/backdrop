@@ -25,13 +25,13 @@
  *   An array of paths to classes, keyed by the class name.
  */
 function backup_class_list() {
-  $backup_directory = 'core/includes/backup/';
+  $backup_class_directory = 'core/includes/backup/';
   $class_map = array(
-    'Backup' => $backup_directory . 'backup.class.inc',
-    'BackupConfig' => $backup_directory . 'backup.config.inc',
-    'BackupDatabase' => $backup_directory . 'backup.database.inc',
-    'BackupFile' => $backup_directory . 'backup.file.inc',
-    'BackupMySql' => $backup_directory . 'backup.mysql.inc',
+    'Backup' => $backup_class_directory . 'backup.class.inc',
+    'BackupConfig' => $backup_class_directory . 'backup.config.inc',
+    'BackupDatabase' => $backup_class_directory . 'backup.database.inc',
+    'BackupFile' => $backup_class_directory . 'backup.file.inc',
+    'BackupMySql' => $backup_class_directory . 'backup.mysql.inc',
   );
   return array_merge($class_map, settings_get('backup_handlers', array()));
 }

@@ -94,9 +94,26 @@ $settings['update_free_access'] = FALSE;
 $settings['restore_free_access'] = FALSE;
 
 /**
- * Enable backups during update.php process.
+ * Enable creating database and config backups during the update.php process.
+ *
+ * By default the backup directory is stored within the files directory with a
+ * hashed path. For the best security, this directory should be in a location
+ * that is not publicly accessible through a web browser.
+ *
+ * Example using directories one parent level up:
+ * @code
+ * $settings['backup_directory'] = '../backups';
+ * @endcode
+ *
+ * Example using absolute paths:
+ * @code
+ * $settings['backup_directory'] = '/home/myusername/backups';
+ * @endcode
+ *
+ * This can also be set to a value of FALSE to disable the backup capability,
+ * for sites that have an alternative backup mechanism in place.
  */
-$settings['backup_directory'] = 'backups';
+$settings['backup_directory'] = '';
 
 /**
  * Salt for one-time login links and cancel links, form tokens, etc.
@@ -115,7 +132,6 @@ $settings['backup_directory'] = 'backups';
  * @code
  * $settings['hash_salt'] = file_get_contents('/home/example/salt.txt');
  * @endcode
- *
  */
 $settings['hash_salt'] = '';
 

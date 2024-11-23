@@ -310,6 +310,17 @@ function system_requirements($phase) {
       }
     }
 
+    // Check/create the .htaccess file for the backup directory.
+    $backup_directory = settings_get('backup_directory');
+    if ($backup_directory) {
+      file_save_htaccess($backup_directory);
+
+      $htaccess_files[$backup_directory . '/.htaccess'] = array(
+        'title' => $t('Backup directory'),
+        'directory' => $backup_directory,
+      );
+    }
+
     // Try to write the .htaccess files first, to prevent false alarms in case
     // (for example) the /tmp directory was wiped.
     file_ensure_htaccess();
