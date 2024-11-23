@@ -3643,6 +3643,14 @@ function system_update_1097() {
   }
 }
 
+
+/**
+ * Dummy update.
+ */
+function system_update_1099() {
+
+}
+
 /**
  * Uninstall the fast_token_browser contrib module, now part of core.
  */

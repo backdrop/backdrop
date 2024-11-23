@@ -127,45 +127,33 @@ function update_script_selection_form($form, &$form_state) {
     backdrop_set_message('Some of the pending updates cannot be applied because their dependencies were not met.', 'warning');
   }
 
-  if (empty($count)) {
-    backdrop_set_message(t('No pending updates.'));
-    unset($form);
-    $form['links'] = array(
-      '#theme' => 'links',
-      '#links' => update_helpful_links(),
+  $form['help'] = array(
+    '#type' => 'help',
+    '#markup' => 'Updates have been found that need to be applied. You may review the updates below before executing them.',
+    '#weight' => -5,
+  );
+  if ($incompatible_count) {
+    $form['start']['#title'] = format_plural(
+      $count,
+      '1 pending update (@number_applied to be applied, @number_incompatible skipped)',
+      '@count pending updates (@number_applied to be applied, @number_incompatible skipped)',
+      array('@number_applied' => $count - $incompatible_count, '@number_incompatible' => $incompatible_count)
     );
-
-    // No updates to run, so caches won't get flushed later.  Clear them now.
-    backdrop_flush_all_caches();
   }
   else {
-    $form['help'] = array(
-      '#type' => 'help',
-      '#markup' => 'Updates have been found that need to be applied. You may review the updates below before executing them.',
-      '#weight' => -5,
-    );
-    if ($incompatible_count) {
-      $form['start']['#title'] = format_plural(
-        $count,
-        '1 pending update (@number_applied to be applied, @number_incompatible skipped)',
-        '@count pending updates (@number_applied to be applied, @number_incompatible skipped)',
-        array('@number_applied' => $count - $incompatible_count, '@number_incompatible' => $incompatible_count)
-      );
-    }
-    else {
-      $form['start']['#title'] = format_plural($count, '1 pending update', '@count pending updates');
-    }
-    $form['actions'] = array('#type' => 'actions');
-    $form['actions']['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Apply pending updates'),
-    );
-    $form['actions']['cancel'] = array(
-      '#type' => 'link',
-      '#href' => '<front>',
-      '#title' => t('Cancel'),
-    );
+    $form['start']['#title'] = format_plural($count, '1 pending update', '@count pending updates');
   }
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Apply pending updates'),
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#href' => $_SERVER['SCRIPT_NAME'],
+    '#title' => t('Cancel'),
+  );
+
   return $form;
 }
 
@@ -214,7 +202,10 @@ function update_results_page() {
   }
 
   $output = '';
-  if ($_SESSION['update_success']) {
+  if (!isset($_SESSION['update_success'])) {
+    $output = '<p>No updates needed. Caches have been cleared.</p>';
+  }
+  elseif ($_SESSION['update_success']) {
     $output = '<p>Updates were attempted. If you see no failures below, you may proceed happily back to your <a href="' . base_path() . '">site</a>. Otherwise, you may need to update your database manually.' . ' ' . $log_message . '</p>';
   }
   else {
@@ -292,8 +283,6 @@ function update_results_page() {
  *   Rendered HTML form.
  */
 function update_info_page() {
-  global $databases;
-
   // Change query-strings on css/js files to enforce reload for all users.
   _backdrop_flush_css_js();
   // Flush the cache of all data for the update status module.
@@ -315,10 +304,7 @@ function update_info_page() {
     $output .= $module_status_report;
   }
 
-  // Skip the backup and go to update selection if upgrading from Drupal 7.
-  $op = state_get('update_d7_upgrade', FALSE) ? 'selection' : 'backup';
-
-  $form_action = check_url(backdrop_current_script_url(array('op' => $op, 'token' => $token)));
+  $form_action = check_url(backdrop_current_script_url(array('op' => 'check_updates', 'token' => $token)));
   $output .= '<form method="post" action="' . $form_action . '">
   <div class="form-actions">
     <input type="submit" value="Continue" class="form-submit button-primary" />
@@ -648,11 +634,31 @@ if (update_access_allowed()) {
       $output = update_info_page();
       break;
 
+    case 'check_updates':
+      $update_count = update_get_update_count();
+      if ($update_count === 0) {
+        backdrop_set_message(t('No pending updates.'));
+
+        // No updates to run, so caches won't get flushed later.  Clear them now.
+        backdrop_flush_all_caches();
+        install_goto('core/update.php?op=results');
+      }
+      else {
+        // Skip the backup and go to update selection if upgrading from Drupal 7.
+        $op = state_get('update_d7_upgrade', FALSE) ? 'selection' : 'backup';
+        $token = backdrop_get_token('update');
+        install_goto('core/update.php?op=' . $op . '&token=' . $token);
+      }
+      break;
+
     case 'backup':
       if ($valid_token) {
         $output = update_backup_page();
-        break;
       }
+      else {
+        install_goto('core/update.php');
+      }
+      break;
 
     case t('Create backup'):
       if ($valid_token) {
@@ -676,12 +682,19 @@ if (update_access_allowed()) {
           }
         }
       }
+      else {
+        install_goto('core/update.php');
+      }
+      break;
 
     case 'selection':
       if ($valid_token) {
         $output = update_selection_page();
-        break;
       }
+      else {
+        install_goto('core/update.php');
+      }
+      break;
 
     case t('Apply pending updates'):
       update_upgrade_enable_dependencies();
@@ -692,8 +705,11 @@ if (update_access_allowed()) {
         $batch_url = $base_root . backdrop_current_script_url(array('action' => 'update'));
         $redirect_url = $base_root . backdrop_current_script_url(array('op' => 'results'));
         update_batch($_POST['start'], $redirect_url, $batch_url);
-        break;
       }
+      else {
+        install_goto('core/update.php');
+      }
+      break;
 
     case 'results':
       // Remove the state indicating a Drupal 7 upgrade.

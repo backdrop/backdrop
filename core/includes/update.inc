@@ -719,7 +719,7 @@ function update_finished($success, $results, $operations) {
 /**
  * Returns a list of all the pending site updates.
  *
- * @return
+ * @return array
  *   An associative array keyed by module name, which contains all information
  *   about site updates that need to be run and any updates that are not
  *   going to proceed due to missing requirements. The system module will
@@ -795,6 +795,23 @@ function update_get_update_list() {
     unset($ret['system']);
   }
   return $ret;
+}
+
+/**
+ * Returns a count of all the pending site updates.
+ *
+ * @return int
+ *   The number of updates pending (not yet run).
+ */
+function update_get_update_count() {
+  $updates = update_get_update_list();
+  $count = 0;
+  foreach ($updates as $update) {
+    if (isset($update['pending'])) {
+      $count = $count + count($update['pending']);
+    }
+  }
+  return $count;
 }
 
 /**

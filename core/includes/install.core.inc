@@ -956,7 +956,7 @@ function install_backup_location(&$install_state) {
 
   // A value of FALSE disables backups and will not rewrite on install.
   if (empty($settings['backup_directory']) && $settings['backup_directory'] !== FALSE) {
-    $backup_directory = 'backups_' . md5(json_encode($databases)) . '/active';;
+    $backup_directory = 'files/backups_' . md5(json_encode($databases) . backdrop_random_bytes(10));
     $update_settings["settings['backup_directory']"] = array(
       'value' => $backup_directory,
       'required' => TRUE,

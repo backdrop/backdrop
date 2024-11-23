@@ -147,50 +147,57 @@ function restore_select_page() {
  * Form constructor for the list of available database module updates.
  */
 function restore_backup_form($form, &$form_state) {
+  $backups = backup_directory_list();
+
   // This function uses st() because it needs to function even when there is
   // no database available.
   $help = st('The restore process may take several minutes, depending on the size of your database.');
+  $no_backups_help = st('No backups are currently available to be restored.');
   $form['help'] = array(
     '#type' => 'help',
-    '#markup' => $help,
+    '#markup' => $no_backups_help,
     '#weight' => -5,
   );
 
-  $form['backups'] = array(
-    '#tree' => TRUE,
-  );
+  if ($backups) {
+    $form['help']['#markup'] = $help;
 
-  $form['backup'] = array(
-    '#type' => 'radios',
-    '#title' => st('Select backup'),
-    '#options' => array(),
-  );
+    $form['backups'] = array(
+      '#tree' => TRUE,
+    );
 
-  $backups = backup_directory_list();
-  backdrop_sort($backups, array('label' => SORT_STRING), SORT_DESC);
-  foreach ($backups as $backup_directory => $backup_info) {
-    $form['backup']['#options'][$backup_directory] = $backup_info['label'];
-    if (!$backup_info['valid']) {
-      $form['backup'][$backup_directory]['#disabled'] = TRUE;
-      $form['backup'][$backup_directory]['#description'] = st('This backup is missing a backup information file and cannot be restored.');
+    $form['backup'] = array(
+      '#type' => 'radios',
+      '#title' => st('Select backup'),
+      '#options' => array(),
+    );
+
+    $backups = backup_directory_list();
+    backdrop_sort($backups, array('label' => SORT_STRING), SORT_DESC);
+    foreach ($backups as $backup_directory => $backup_info) {
+      $form['backup']['#options'][$backup_directory] = $backup_info['label'];
+      if (!$backup_info['valid']) {
+        $form['backup'][$backup_directory]['#disabled'] = TRUE;
+        $form['backup'][$backup_directory]['#description'] = st('This backup is missing a backup information file and cannot be restored.');
+      }
+      else {
+        $form['backup'][$backup_directory]['#description'] = st('Contains backup files: @list', array(
+          '@list' => implode(', ', array_keys($backup_info['backups'])),
+        ));
+      }
     }
-    else {
-      $form['backup'][$backup_directory]['#description'] = st('Contains backup files: @list', array(
-        '@list' => implode(', ', array_keys($backup_info['backups'])),
-      ));
-    }
+
+    // Set the default to the most recent backup.
+    $first_backup = key($form['backup']['#options']);
+    $form['backup']['#default_value'] = $first_backup;
+    $form['backup']['#options'][$first_backup] .= ' ' . st('(most recent)');
+
+    $form['actions'] = array('#type' => 'actions');
+    $form['actions']['submit'] = array(
+      '#type' => 'submit',
+      '#value' => st('Restore backup'),
+    );
   }
-
-  // Set the default to the most recent backup.
-  $first_backup = key($form['backup']['#options']);
-  $form['backup']['#default_value'] = $first_backup;
-  $form['backup']['#options'][$first_backup] .= ' ' . st('(most recent)');
-
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => st('Restore backup'),
-  );
 
   $form['actions']['cancel'] = array(
     '#type' => 'link',
