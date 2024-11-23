@@ -471,6 +471,10 @@ function menu_edit_item_callback($form, $form_state) {
   $commands[] = ajax_command_replace("#menu-parent-menu-wrapper", backdrop_render($form['parent_menu']));
   $commands[] = ajax_command_replace("#menu-parent-select-wrapper", backdrop_render($form['parent']));
   $commands[] = ajax_command_replace("#menu-parent-weight-wrapper", backdrop_render($form['weight']));
+  // Special handling for the content_menu contrib module.
+  if (module_exists('content_menu') && isset($form['advanced'])) {
+    $commands[] = ajax_command_replace("#edit-advanced", backdrop_render($form['advanced']));
+  }
   return array('#type' => 'ajax', '#commands' => $commands);
 }
 
