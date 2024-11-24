@@ -121,24 +121,23 @@ function system_theme() {
     ) + $base,
     'token_tree' => array(
       'variables' => array(
+        'text' => t('Browse available tokens.'),
         'token_types' => array(),
         'global_types' => TRUE,
+        'dialog' => FALSE,
         'click_insert' => TRUE,
         'show_restricted' => FALSE,
-        'recursion_limit' => 3,
-        'dialog' => FALSE,
       ),
     ) + $base,
     'token_tree_link' => array(
       'variables' => array(
-        'text' => NULL,
-        'options' => array(),
+        'text' => t('Browse available tokens.'),
         'token_types' => array(),
         'global_types' => TRUE,
+        'dialog' => TRUE,
+        'options' => array(),
         'click_insert' => TRUE,
         'show_restricted' => FALSE,
-        'recursion_limit' => 3,
-        'dialog' => TRUE,
       ),
     ) + $base,
     'label_machine_name' => array(
@@ -169,7 +168,7 @@ function system_permission() {
     'administer software updates' => array(
       'title' => t('Administer software updates'),
       'restrict access' => TRUE,
-      'warning' => t('Run database updates for Backdrop projects.'),
+      'warning' => t('Run site updates for Backdrop projects.'),
     ),
     'access administration pages' => array(
       'title' => t('Use the administration pages'),
@@ -397,12 +396,14 @@ function system_element_info() {
     '#cols' => 60,
     '#rows' => 5,
     '#resizable' => 'vertical',
+    '#description_display' => 'before',
     '#process' => array('ajax_process_form'),
     '#theme' => 'textarea',
     '#theme_wrappers' => array('form_element'),
   );
   $types['radios'] = array(
     '#input' => TRUE,
+    '#description_display' => 'before',
     '#process' => array('form_process_radios'),
     '#theme_wrappers' => array('container__radios'),
     '#pre_render' => array('form_pre_render_conditional_form_element'),
@@ -417,6 +418,7 @@ function system_element_info() {
   );
   $types['checkboxes'] = array(
     '#input' => TRUE,
+    '#description_display' => 'before',
     '#process' => array('form_process_checkboxes'),
     '#theme_wrappers' => array('container__checkboxes'),
     '#pre_render' => array('form_pre_render_conditional_form_element'),
@@ -516,6 +518,7 @@ function system_element_info() {
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
     '#value' => NULL,
+    '#description_display' => 'before',
     '#process' => array('form_process_fieldset', 'ajax_process_form'),
     '#pre_render' => array('form_pre_render_fieldset'),
     '#theme_wrappers' => array('fieldset'),
@@ -638,6 +641,7 @@ function system_menu() {
   // Menu items that are basically just menu blocks.
   $items['admin/structure'] = array(
     'title' => 'Structure',
+    'icon' => 'stack-fill',
     'description' => 'Administer blocks, content types, menus, etc.',
     'weight' => -2,
     'page callback' => 'system_admin_menu_block_page',
@@ -647,6 +651,7 @@ function system_menu() {
   // Appearance.
   $items['admin/appearance'] = array(
     'title' => 'Appearance',
+    'icon' => 'palette-fill',
     'description' => 'Select and configure themes.',
     'page callback' => 'system_themes_page',
     'access arguments' => array('administer themes'),
@@ -701,6 +706,7 @@ function system_menu() {
   // Modules.
   $items['admin/modules'] = array(
     'title' => 'Functionality',
+    'icon' => 'puzzle-piece-fill',
     'description' => 'Install or uninstall modules.',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('system_modules'),
@@ -735,6 +741,7 @@ function system_menu() {
   // Configuration.
   $items['admin/config'] = array(
     'title' => 'Configuration',
+    'icon' => 'gear-fill',
     'description' => 'Administer settings.',
     'page callback' => 'system_admin_config_page',
     'access arguments' => array('access administration pages'),
@@ -742,6 +749,7 @@ function system_menu() {
   );
   $items['admin/config/administration'] = array(
     'title' => 'Administration',
+    'icon' => 'gear',
     'description' => 'Administration tools.',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -750,6 +758,7 @@ function system_menu() {
   // Media settings.
   $items['admin/config/media'] = array(
     'title' => 'Media',
+    'icon' => 'image',
     'description' => 'Media tools.',
     'weight' => -10,
     'page callback' => 'system_admin_menu_block_page',
@@ -787,6 +796,7 @@ function system_menu() {
   // Service settings.
   $items['admin/config/services'] = array(
     'title' => 'Web services',
+    'icon' => 'rss',
     'description' => 'Tools related to web services.',
     'weight' => 0,
     'page callback' => 'system_admin_menu_block_page',
@@ -805,6 +815,7 @@ function system_menu() {
   // Development settings.
   $items['admin/config/development'] = array(
     'title' => 'Development',
+    'icon' => 'wrench',
     'description' => 'Development tools.',
     'weight' => -10,
     'page callback' => 'system_admin_menu_block_page',
@@ -860,6 +871,7 @@ function system_menu() {
   // Regional and date settings.
   $items['admin/config/regional'] = array(
     'title' => 'Regional and language',
+    'icon' => 'globe',
     'description' => 'Regional settings, localization and translation.',
     'weight' => -5,
     'page callback' => 'system_admin_menu_block_page',
@@ -925,6 +937,7 @@ function system_menu() {
   // Search settings.
   $items['admin/config/search'] = array(
     'title' => 'Search',
+    'icon' => 'magnifying-glass',
     'description' => 'Local site search settings.',
     'weight' => -10,
     'page callback' => 'system_admin_menu_block_page',
@@ -935,6 +948,7 @@ function system_menu() {
   // System settings.
   $items['admin/config/system'] = array(
     'title' => 'System',
+    'icon' => 'hard-drives',
     'description' => 'General system related configuration.',
     'weight' => -20,
     'page callback' => 'system_admin_menu_block_page',
@@ -963,6 +977,7 @@ function system_menu() {
   // URL handling.
   $items['admin/config/urls'] = array(
     'title' => 'URL handling',
+    'icon' => 'link',
     'description' => 'Settings related to URLs including URL aliases and URL redirects.',
     'weight' => -20,
     'page callback' => 'system_admin_menu_block_page',
@@ -1011,6 +1026,7 @@ function system_menu() {
   // Additional categories
   $items['admin/config/content'] = array(
     'title' => 'Content authoring',
+    'icon' => 'note-pencil',
     'description' => 'Settings related to formatting and authoring content.',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -1018,6 +1034,7 @@ function system_menu() {
   );
   $items['admin/config/metadata'] = array(
     'title' => 'Metadata',
+    'icon' => 'code',
     'description' => 'Settings related to meta tags, and other data commonly used by search engines.',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -1025,6 +1042,7 @@ function system_menu() {
   );
   $items['admin/config/user-interface'] = array(
     'title' => 'User interface',
+    'icon' => 'app-window',
     'description' => 'Tools that enhance the user interface.',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access administration pages'),
@@ -1032,6 +1050,7 @@ function system_menu() {
   );
   $items['admin/config/workflow'] = array(
     'title' => 'Workflow',
+    'icon' => 'path',
     'description' => 'Settings related to editorial workflow.',
     'weight' => 5,
     'page callback' => 'system_admin_menu_block_page',
@@ -1042,6 +1061,7 @@ function system_menu() {
   // Reports.
   $items['admin/reports'] = array(
     'title' => 'Reports',
+    'icon' => 'info-fill',
     'description' => 'View reports, updates, and errors.',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('access site reports'),
@@ -1052,8 +1072,16 @@ function system_menu() {
     'title' => 'Status report',
     'description' => "Get a status report about your site's operation and any detected problems.",
     'page callback' => 'system_status',
-    'weight' => -60,
     'access arguments' => array('access site reports'),
+    'weight' => -60,
+    'file' => 'system.admin.inc',
+  );
+  $items['admin/reports/debug'] = array(
+    'title' => 'Debug information',
+    'description' => 'Get information about the site that can help with support requests and debugging.',
+    'page callback' => 'system_debug_info',
+    'access arguments' => array('access site reports'),
+    'weight' => -50,
     'file' => 'system.admin.inc',
   );
   $items['admin/reports/status/run-cron'] = array(
@@ -1080,13 +1108,23 @@ function system_menu() {
     'file' => 'system.admin.inc',
   );
 
-  // Token paths.
+  // AJAX endpoint for the assembled token tree.
   $items['token/tree'] = array(
     'page callback' => 'system_token_output',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
     'file' => 'system.pages.inc',
     'theme callback' => 'ajax_base_page_theme',
+  );
+
+  // AJAX endpoint for retrieving a token.
+  $items['token-browser/token/%'] = array(
+    'page callback' => 'system_token_browser',
+    'page arguments' => array(2),
+    'delivery callback' => 'system_token_browser_output',
+    'access callback' => 'system_token_browser_access',
+    'file' => 'system.pages.inc',
+    'type' => MENU_CALLBACK,
   );
 
   // Machine names transliteration.
@@ -1213,6 +1251,15 @@ function system_library_info() {
       array('system', 'jquery'),
       array('system', 'backdrop.ajax'),
       array('system', 'backdrop.dialog'),
+    ),
+  );
+
+  // Backdrop's icon API library.
+  $libraries['backdrop.icons'] = array(
+    'title' => 'Backdrop icons',
+    'version' => BACKDROP_VERSION,
+    'js' => array(
+      'core/misc/icons.js' => array('group' => JS_LIBRARY, 'weight' => -18),
     ),
   );
 
@@ -1473,17 +1520,17 @@ function system_library_info() {
   $libraries['ui'] = array(
     'title' => 'jQuery UI: Core',
     'website' => 'http://jqueryui.com',
-    'version' => '1.13.2',
+    'version' => '1.14.0',
     'js' => array(
+      'core/misc/jquery-ui-compat.js' => array(
+        'group' => JS_LIBRARY,
+        'weight' => -11,
+      ),
       'core/misc/ui/jquery.ui.data.min.js' => array(
         'group' => JS_LIBRARY,
         'weight' => -11,
       ),
       'core/misc/ui/jquery.ui.disable-selection.min.js' => array(
-        'group' => JS_LIBRARY,
-        'weight' => -11,
-      ),
-      'core/misc/ui/jquery.ui.form.min.js' => array(
         'group' => JS_LIBRARY,
         'weight' => -11,
       ),
@@ -1519,23 +1566,11 @@ function system_library_info() {
         'group' => JS_LIBRARY,
         'weight' => -11,
       ),
-      'core/misc/ui/jquery.ui.ie.min.js' => array(
-        'group' => JS_LIBRARY,
-        'weight' => -11,
-      ),
       'core/misc/ui/jquery.ui.keycode.min.js' => array(
         'group' => JS_LIBRARY,
         'weight' => -11,
       ),
       'core/misc/ui/jquery.ui.plugin.min.js' => array(
-        'group' => JS_LIBRARY,
-        'weight' => -11,
-      ),
-      'core/misc/ui/jquery.ui.safe-active-element.min.js' => array(
-        'group' => JS_LIBRARY,
-        'weight' => -11,
-      ),
-      'core/misc/ui/jquery.ui.safe-blur.min.js' => array(
         'group' => JS_LIBRARY,
         'weight' => -11,
       ),
@@ -2062,7 +2097,7 @@ function system_library_info() {
   $libraries['ui.touch-punch'] = array(
     'title' => 'jQuery UI Touch Punch',
     'website' => 'https://github.com/RWAP/jquery-ui-touch-punch/',
-    'version' => '1.0.9',
+    'version' => '1.1.5',
     'js' => array(
       'core/misc/jquery.ui.touch-punch.js' => array(),
     ),
@@ -2085,6 +2120,9 @@ function system_library_info() {
     'dependencies' => array(
       array('system', 'jquery.treetable'),
       array('system', 'backdrop.ajax'),
+    ),
+    'icons' => array(
+      'caret-down',
     ),
   );
 
@@ -4179,14 +4217,14 @@ function system_system_info_alter(&$info, $file, $type) {
  * Menu callback; Returns the standard "Page not found" error page.
  */
 function system_404() {
-  return t('The requested page "@path" could not be found.', array('@path' => request_uri()));
+  return '<p>' . t('The requested page "@path" could not be found.', array('@path' => request_uri())) . '</p>';
 }
 
 /**
  * Menu callback; Returns the standard "Page not found" error page.
  */
 function system_403() {
-  return t('You are not authorized to access this page.');
+  return '<p>' . t('You are not authorized to access this page.') . '</p>';
 }
 
 /**

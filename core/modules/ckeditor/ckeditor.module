@@ -31,6 +31,7 @@ function ckeditor_editor_info() {
   $editors['ckeditor'] = array(
     'label' => t('CKEditor 4'),
     'library' => array('ckeditor', 'backdrop.ckeditor'),
+    'library_version' => CKEDITOR_VERSION,
     'default settings' => array(
       'toolbar' => array(
         array(

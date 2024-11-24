@@ -43,6 +43,21 @@ function telemetry_telemetry_info() {
     'description' => t('The CKEditor module version that your site uses (either 4, 5, both, or neither).'),
     'project' => 'backdrop',
   );
+  $info['drupal_compatibility'] = array(
+    'label' => t('Drupal compatibility layer'),
+    'description' => t('Is the Drupal compatibility layer enabled?'),
+    'project' => 'backdrop',
+  );
+  $info['jquery_version'] = array(
+    'label' => t('jQuery version'),
+    'description' => t('The version of jQuery configured on your site.'),
+    'project' => 'backdrop',
+  );
+  $info['update_module'] = array(
+    'label' => t('Update module enabled'),
+    'description' => t('Whether this site has Update module enabled to check for project updates.'),
+    'project' => 'backdrop',
+  );
   return $info;
 }
 
@@ -89,5 +104,12 @@ function telemetry_telemetry_data($key) {
       else {
         return 'Neither';
       }
+    case 'drupal_compatibility':
+      return settings_get('backdrop_drupal_compatibility') ? 'Yes' : 'No';
+    case 'jquery_version':
+      $jquery = backdrop_get_library('system', 'jquery');
+      return $jquery['version'];
+    case 'update_module':
+      return module_exists('update') ? 'Yes' : 'No';
   }
 }
