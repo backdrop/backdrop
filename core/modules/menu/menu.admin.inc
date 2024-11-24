@@ -372,7 +372,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
   // To support contrib modules that are expecting the old way of putting all
   // menu items of all menus into a single list, we check for whether those
   // contrib modules have been updated by their addition of a config setting.
-  $legacy_modules = array('content_menu');
+  $legacy_modules = array('content_menu', 'menu_views');
   $use_legacy_menus = FALSE;
   foreach ($legacy_modules as $legacy_module) {
     $use_legacy_menus |= (module_exists($legacy_module) && !config_get($legacy_module . '.settings', 'use_updated_edit_menu_item'));
