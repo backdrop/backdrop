@@ -298,6 +298,7 @@ function node_form($form, &$form_state, Node $node) {
     ),
     '#attributes' => array(
       'date' => array(
+        'min' => '1902-01-01',
         'max' => '2037-12-31',
         'placeholder' => t('e.g. @date', array(
           '@date' => format_date(REQUEST_TIME, 'custom', DATE_FORMAT_DATE)
