@@ -301,18 +301,22 @@ function system_requirements($phase) {
       $config_storage = config_get_config_storage($type);
       if (is_a($config_storage, 'ConfigFileStorage')) {
         $config_directory = config_get_config_directory($type);
-        file_save_htaccess($config_directory);
+        $config_directory_accessible = strstr(realpath($config_directory), BACKDROP_ROOT);
+        if ($config_directory_accessible) {
+          file_save_htaccess($config_directory);
 
-        $htaccess_files[$config_directory . '/.htaccess'] = array(
-          'title' => $t('%type config directory', array('%type' => backdrop_ucfirst($type))),
-          'directory' => $config_directory,
-        );
+          $htaccess_files[$config_directory . '/.htaccess'] = array(
+            'title' => $t('%type config directory', array('%type' => backdrop_ucfirst($type))),
+            'directory' => $config_directory,
+          );
+        }
       }
     }
 
     // Check/create the .htaccess file for the backup directory.
     $backup_directory = settings_get('backup_directory');
-    if ($backup_directory) {
+    $backup_directory_accessible = strstr(realpath($backup_directory), BACKDROP_ROOT);
+    if ($backup_directory && $backup_directory_accessible) {
       file_save_htaccess($backup_directory);
 
       $htaccess_files[$backup_directory . '/.htaccess'] = array(
@@ -3641,14 +3645,6 @@ function system_update_1097() {
     $config->set('local_action_position', 'top');
     $config->save();
   }
-}
-
-
-/**
- * Dummy update.
- */
-function system_update_1099() {
-
 }
 
 /**

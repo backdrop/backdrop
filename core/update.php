@@ -203,7 +203,7 @@ function update_results_page() {
 
   $output = '';
   if (!isset($_SESSION['update_success'])) {
-    $output = '<p>No updates needed. Caches have been cleared.</p>';
+    $output = '<p>No updates needed.</p>';
   }
   elseif ($_SESSION['update_success']) {
     $output = '<p>Updates were attempted. If you see no failures below, you may proceed happily back to your <a href="' . base_path() . '">site</a>. Otherwise, you may need to update your database manually.' . ' ' . $log_message . '</p>';
@@ -267,6 +267,7 @@ function update_results_page() {
       $output .= '</div>';
     }
   }
+
   unset($_SESSION['update_results']);
   unset($_SESSION['update_success']);
 
@@ -334,28 +335,36 @@ function update_backup_page() {
  * Form constructor for the list of available database module updates.
  */
 function update_backup_form($form, &$form_state) {
-  $help = '<p>Before running updates, it is recommended to create a backup of your database and configuration.</p>';
-  $help .= '<p>If skipping the backup process, please ensure you create a backup through a different mechanism, such as through your hosting provider.</p>';
-  $help .= '<p>The backup process may take several minutes, depending on the size of your database.</p>';
+  // Check if Backup directory is specified. If FALSE, this form shouldn't even
+  // be displayed. If NULL, link to documentation on setting up backups.
+  $backup_directory = settings_get('backup_directory');
+
+  $help = '<p>' . t('Before running updates, it is recommended to create a backup of your database and configuration.') . '</p>';
+  $help .= '<p>' . t('If skipping the backup process, please ensure you create a backup through a different mechanism, such as through your hosting provider.') . '</p>';
+
+  if (empty($backup_directory)) {
+    $help .= '<p>' . t('Backups are not available because the variable !variable has not been set in !file.', array(
+      '!variable' => '<code>$settings[\'backup_directory\']</code>',
+      '!file' => '<code>settings.php</code>',
+    )) . '</p>';
+    $help .= '<p>' . t('Please check the <a href="!url">documentation on configuring backups</a>.', array(
+      '!url' => 'https://docs.backdropcms.org/documentation/backup-and-restore',
+    )) . '</p>';
+  }
+  else {
+    $help .= '<p>' . t('The backup process may take several minutes, depending on the size of your database.') . '</p>';
+  }
   $form['help'] = array(
     '#type' => 'help',
     '#markup' => $help,
     '#weight' => -5,
   );
 
-  $backup_classes = settings_get('backup_classes', array());
-  $backup_classes = array_merge($backup_classes, array(
-    'BackupMySql',
-    'BackupConfig',
-  ));
-
   $backup_targets = settings_get('backup_targets', array());
   $backup_targets = array_merge($backup_targets, array(
     'db:default',
     'config:active',
   ));
-
-  $all_backup_settings = settings_get('backup_settings', array());
 
   $form['backups'] = array(
     '#tree' => TRUE,
@@ -400,6 +409,7 @@ function update_backup_form($form, &$form_state) {
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Create backup'),
+    '#disabled' => empty($backup_directory),
   );
 
   $form['actions']['continue'] = array(
@@ -637,7 +647,7 @@ if (update_access_allowed()) {
     case 'check_updates':
       $update_count = update_get_update_count();
       if ($update_count === 0) {
-        backdrop_set_message(t('No pending updates.'));
+        backdrop_set_message(t('No pending updates.') . ' ' . t('All caches cleared.'));
 
         // No updates to run, so caches won't get flushed later.  Clear them now.
         backdrop_flush_all_caches();
@@ -680,6 +690,8 @@ if (update_access_allowed()) {
           foreach ($errors as $error) {
             backdrop_set_message($error, 'error');
           }
+          $token = backdrop_get_token('update');
+          install_goto('core/update.php?op=backup&token=' . $token);
         }
       }
       else {

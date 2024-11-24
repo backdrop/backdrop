@@ -230,7 +230,10 @@ function backup_prepare($backup_name, $backup_target, &$backup_settings, &$error
     // This should never occur as the Backup step is disabled if the
     // $settings['backup_directory'] variable is empty.
     if (empty($default_directory)) {
-      $errors[] = t('No backup can be created because the "$settings[\'backup_directory\']" variable is not set in settings.php.');
+      $errors[] = t('No backup can be created because the !variable variable is not set in !file.', array(
+        '!variable' => '<code>$settings[\'backup_directory\']</code>',
+        '!file' => '<code>settings.php</code>'
+      ));
       return FALSE;
     }
     $backup_settings['backup_directory'] = $default_directory . '/' . $date;

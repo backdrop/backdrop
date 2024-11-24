@@ -254,7 +254,7 @@ function restore_access_denied_page() {
   $output = '<p>' . $output . '</p>';
 
   $steps[] = st('Find the <code>settings.php</code> file on your system, and open it with a text editor.');
-  $steps[] = st('There is a line inside your <code>settings.php</code> file that says <code>$settings[\'restore_free_access\'] = FALSE</code>. Change it to <code>$settings[\'restore_free_access\'] = TRUE</code>.');
+  $steps[] = st('There is a line inside your <code>settings.php</code> file that says <code>$settings[\'restore_free_access\'] = FALSE;</code>. Change it to <code>$settings[\'restore_free_access\'] = TRUE;</code>.');
   $steps[] = st('Reload this page. The site restore script should be able to run now.');
   $steps[] = st('As soon as restoring a backup is complete, you must change the <code>restore_free_access</code> setting in the <code>settings.php</code> file back to <code>FALSE</code>: <code>$settings[\'restore_free_access\'] = FALSE;</code>.');
 
