@@ -412,14 +412,13 @@ function update_backup_form($form, &$form_state) {
     '#disabled' => empty($backup_directory),
   );
 
+  $query = backdrop_get_query_parameters();
+  $query['op'] = 'selection';
   $form['actions']['continue'] = array(
     '#type' => 'link',
     '#href' => $_SERVER['SCRIPT_NAME'],
     '#options' => array(
-      'query' => array(
-        'op' => 'selection',
-        'token' => backdrop_get_token('update'),
-      )
+      'query' => $query,
     ),
     '#title' => t('Skip backup'),
   );
@@ -499,7 +498,7 @@ function update_task_list($set_active = NULL) {
 
   // Hide the Backup task if upgrading from Drupal 7, where the original
   // database has already been modified and no config exists.
-  if (state_get('update_d7_upgrade', FALSE)) {
+  if (!update_backup_enabled()) {
     unset($tasks['backup']);
   }
 
@@ -629,15 +628,18 @@ if (update_access_allowed()) {
 
   update_fix_compatibility();
 
+  $op = isset($_REQUEST['op']) ? $_REQUEST['op'] : '';
+  $valid_token = isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'update');
+
   // Check the update requirements for all modules. If there are warnings, but
   // no errors, skip reporting them if the user has provided a URL parameter
   // acknowledging the warnings and indicating a desire to continue anyway. See
   // backdrop_requirements_url().
-  $skip_warnings = !empty($_GET['continue']);
-  update_check_requirements($skip_warnings);
+  if (!$op || $op == 'info') {
+    $skip_warnings = !empty($_GET['continue']);
+    update_check_requirements($skip_warnings);
+  }
 
-  $op = isset($_REQUEST['op']) ? $_REQUEST['op'] : '';
-  $valid_token = isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'update');
   switch ($op) {
     // update.php ops.
     case 'info':
@@ -655,7 +657,7 @@ if (update_access_allowed()) {
       }
       else {
         // Skip the backup and go to update selection if upgrading from Drupal 7.
-        $op = state_get('update_d7_upgrade', FALSE) ? 'selection' : 'backup';
+        $op = update_backup_enabled() ? 'backup' : 'selection';
         $token = backdrop_get_token('update');
         install_goto('core/update.php?op=' . $op . '&token=' . $token);
       }
@@ -674,16 +676,18 @@ if (update_access_allowed()) {
       if ($valid_token) {
         // Generate absolute URLs for the batch processing (using $base_root),
         // since the batch API will pass them to url() which does not handle
-        // update.php correctly by default.
+        // update.php correctly by default. Note the "action" query parameter
+        // here distinguishes between the two batch operations, which can be
+        // either "batch" or "update".
         $batch_url = $base_root . backdrop_current_script_url(array('action' => 'backup'));
-        $redirect_url = $base_root . backdrop_current_script_url(array('op' => 'selection'));
+        $batch_redirect_url = $base_root . backdrop_current_script_url(array('op' => 'selection'));
 
         // Check that a backup directory is specified.
         $backups = $_POST['backups'];
         $errors = array();
         $ready = backup_batch_prepare($backups, $errors);
         if ($ready) {
-          backup_batch($backups, $redirect_url, $batch_url);
+          backup_batch($backups, $batch_redirect_url, $batch_url);
           break;
         }
         else {

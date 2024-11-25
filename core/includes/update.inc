@@ -1044,6 +1044,15 @@ function update_already_performed($module, $number) {
 }
 
 /**
+ * Check if backups are enabled during the update.php process.
+ */
+function update_backup_enabled() {
+  // Backups are disabled when upgrading from Drupal 7, and if the
+  // $settings['backup_directory'] is set to FALSE in settings.php.
+  return state_get('update_d7_upgrade', FALSE) === FALSE && settings_get('backup_directory') !== FALSE;
+}
+
+/**
  * Invokes hook_update_dependencies() in all installed modules.
  *
  * This function is similar to module_invoke_all(), with the main difference
