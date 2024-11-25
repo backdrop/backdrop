@@ -1,8 +1,7 @@
 <?php
-
 /**
  * @file
- * Functions to handle the direct to database destination.
+ * Functions to handle the direct to/from database backup source.
  */
 
 /**

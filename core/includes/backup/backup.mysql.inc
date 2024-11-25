@@ -34,7 +34,7 @@ class BackupMySql extends BackupDatabase {
   /**
    * Constructor for creating a new MySQL-based backup.
    */
-  function __construct($backup_name, $backup_target, $settings) {
+  public function __construct($backup_name, $backup_target, $settings) {
     parent::__construct($backup_name, $backup_target, $settings);
   }
 
@@ -564,7 +564,7 @@ SET NAMES utf8;
   /**
    * {@inheritdoc}
    */
-  function prepareEnvironment() {
+  protected function prepareEnvironment() {
     parent::prepareEnvironment();
 
     // Increase the MySQL wait timeout if needed to prevent disconnects.

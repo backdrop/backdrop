@@ -444,7 +444,7 @@ function update_access_denied_page() {
   $output = '<p>' . $output . '</p>';
 
   $steps[] = t('Find the <code>settings.php</code> file on your system, and open it with a text editor.');
-  $steps[] = t('There is a line inside your <code>settings.php</code> file that says <code>$settings[\'update_free_access\'] = FALSE</code>. Change it to <code>$settings[\'update_free_access\'] = TRUE</code>.');
+  $steps[] = t('There is a line inside your <code>settings.php</code> file that says <code>$settings[\'update_free_access\'] = FALSE;</code>. Change it to <code>$settings[\'update_free_access\'] = TRUE;</code>.');
   $steps[] = t('Reload this page. The site update script should be able to run now.');
   $steps[] = t('As soon as the update script is done, you must change the <code>update_free_access</code> setting in the <code>settings.php</code> file back to <code>FALSE</code>: <code>$settings[\'update_free_access\'] = FALSE;</code>.');
 

@@ -1,5 +1,6 @@
 abcdefghijklmnopqrstuvwx
 abiword
+accesslog
 accum
 acdb
 activemenu
@@ -312,6 +313,7 @@ Nmedi
 noaccess
 noajax
 nocache
+nodata
 nodeapi
 nongranularity
 nonmodal

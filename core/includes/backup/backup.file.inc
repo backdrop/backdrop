@@ -14,7 +14,7 @@ class BackupFile {
   protected $log = array();
 
   /**
-   * Construct a file object given a file path, or create a temp file for writing.
+   * Construct a file object used to save or load a backup from disk.
    *
    * @param string $backup_name
    *   The name of the backup file without the extension. The extension will be
@@ -179,16 +179,28 @@ class BackupFile {
    */
   public function transfer() {
     $headers = array(
-      array('key' => 'Content-Type', 'value' => $this->mimetype()),
-      array('key' => 'Content-Disposition', 'value' => 'attachment; filename="'. $this->filename() .'"'),
+      array(
+        'key' => 'Content-Type',
+        'value' => $this->mimetype(),
+      ),
+      array(
+        'key' => 'Content-Disposition',
+        'value' => 'attachment; filename="'. $this->filename() .'"',
+      ),
     );
     // In some circumstances, web-servers will double compress gzipped files.
     // This may help alleviate that issue by disabling mod-deflate.
     if ($this->mimetype() == 'application/x-gzip') {
-      $headers[] = array('key' => 'Content-Encoding', 'value' => 'gzip');
+      $headers[] = array(
+        'key' => 'Content-Encoding',
+        'value' => 'gzip',
+      );
     }
     if ($size = $this->getFileSize()) {
-      $headers[] = array('key' => 'Content-Length', 'value' => $size);
+      $headers[] = array(
+        'key' => 'Content-Length',
+        'value' => $size,
+      );
     }
 
     // Suppress the warning you get when the buffer is empty.
@@ -207,21 +219,19 @@ class BackupFile {
         print $data;
       }
       $this->close();
-
-      // Ask devel.module not to print it's footer.
-      $GLOBALS['devel_shutdown'] = FALSE;
     }
     else {
       backdrop_not_found();
     }
 
-    // Start buffering and throw away the results so that errors don't get appended to the file.
+    // Start buffering and throw away the results so that errors don't get
+    // appended to the file.
     ob_start('_backup_file_dispose_buffer');
 
     // @todo Clean up temporary files
-    //backup_migrate_cleanup();
+    // backup_migrate_cleanup();
 
-    exit();
+    exit;
   }
 
   /**

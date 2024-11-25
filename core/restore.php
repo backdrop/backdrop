@@ -7,7 +7,7 @@
  * the instructions.
  *
  * If you are not logged in using either the site maintenance account or an
- * account with the "Restore system backups" permission, you will need to
+ * account with the "Restore site backups" permission, you will need to
  * modify the access check statement inside your settings.php file. After
  * finishing the upgrade, be sure to open settings.php again, and change it
  * back to its original state!
@@ -118,7 +118,10 @@ function restore_info_page() {
     '!url' => 'https://docs.backdropcms.org/documentation/restoring-backups',
   )) . '</p>';
 
-  $form_action = check_url(backdrop_current_script_url(array('op' => 'select', 'token' => $token)));
+  $form_action = check_url(backdrop_current_script_url(array(
+    'op' => 'select',
+    'token' => $token,
+  )));
   $output .= '<form method="post" action="' . $form_action . '">
     <div class="form-actions">
       <input type="submit" value="Continue" class="form-submit button-primary" />
@@ -220,7 +223,6 @@ function restore_progress_page($one_time_token) {
 
   // Redirect to restore process page. This uses a one-time token that is
   // only valid for a few seconds.
-
   $redirect_path = backdrop_current_script_url(array(
     'op' => 'restore',
     'token' => $one_time_token,
@@ -419,7 +421,7 @@ if (restore_access_allowed()) {
       // Redirect to results page.
       $success = empty($errors) ? '1' : '0';
       header('Location: ' . $_SERVER['SCRIPT_NAME'] . '?op=results&success=' . $success, TRUE, 302);
-      exit();
+      exit;
 
     case 'results':
       $output = restore_results_page();
@@ -440,5 +442,9 @@ if (isset($output) && $output) {
     backdrop_session_start();
   }
   $task_list = restore_task_list();
-  print theme('restore_page', array('content' => $output, 'sidebar' => $task_list, 'show_messages' => TRUE));
+  print theme('restore_page', array(
+    'content' => $output,
+    'sidebar' => $task_list,
+    'show_messages' => TRUE,
+  ));
 }

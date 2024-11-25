@@ -59,7 +59,10 @@ abstract class Backup {
    * Constructor for creating a new backup of any type.
    *
    * @param string $backup_name
-   *   The name for the backup. This will be used as the
+   *   The name for the backup. This will be used as the base name for the file,
+   *   not including any extensions. Extensions are determined by the backup
+   *   handler class and the values in $settings, including if compression is
+   *   enabled or not.
    * @param string $backup_target
    *   This key is very important, as it indicates the type of Backup to be
    *   performed. For example the name "db:default" will backup the primary
@@ -69,7 +72,7 @@ abstract class Backup {
    *   These will be merged with the defaults provided by the defaultSettings()
    *   method.
    */
-  function __construct($backup_name, $backup_target, $settings) {
+  public function __construct($backup_name, $backup_target, array $settings) {
     $this->backupName = $backup_name;
     $this->backupTarget = $backup_target;
     $this->settings = $settings + $this->defaultSettings();
@@ -178,10 +181,10 @@ abstract class Backup {
    * Restore a backup from a file.
    *
    * @param BackupFile $file
-   *    A BackupFile instance, used to read from the file handle.
+   *   A BackupFile instance, used to read from the file handle.
    *
    * @return boolean
-   *    TRUE if the restore was successful, FALSE on failure.
+   *   TRUE if the restore was successful, FALSE on failure.
    */
   abstract public function restore(BackupFile $file);
 
@@ -206,8 +209,8 @@ abstract class Backup {
    * This step is usually used to delete up the decompressed backup file.
    *
    * @param BackupFile $file
-   *  The file containing the backup that was restored. This is explicitly
-   *  passed by reference to allow it to be reassigned to a new file if needed.
+   *   The file containing the backup that was restored. This is explicitly
+   *   passed by reference to allow it to be reassigned to a new file if needed.
    *
    * @return void
    */

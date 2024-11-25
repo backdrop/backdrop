@@ -110,32 +110,36 @@ function backup_directory_list() {
 /**
  * Starts a batch process to create a backup.
  *
- * @param $backups
+ * @param array $backups
  *   An array of backup settings, keyed by the backup type and key. For example
  *   a common set of keys would be:
  *   - mysql:default
  *   - config:active
  *   The value of each array is another array of backup settings, as would be
  *   passed to backup_execute().
- * @param $redirect
+ * @param string $redirect
  *   Path to redirect to when the batch has finished processing.
- * @param $url
+ * @param string $url
  *   URL of the batch processing page (should only be used for separate
  *   scripts like update.php).
- * @param $batch
+ * @param array $batch
  *   Optional parameters to pass into the batch API.
- * @param $redirect_callback
+ * @param string $redirect_callback
  *   (optional) Specify a function to be called to redirect to the progressive
  *   processing page.
  *
  * @see update_resolve_dependencies()
  */
-function backup_batch($backups, $redirect = NULL, $url = NULL, $batch = array(), $redirect_callback = 'backdrop_goto') {
+function backup_batch(array $backups, $redirect = NULL, $url = NULL, array $batch = array(), $redirect_callback = 'backdrop_goto') {
   $operations = array();
 
   foreach ($backups as $backup) {
     $settings = isset($backup['settings']) ? $backup['settings'] : array();
-    $operations[] = array('backup_execute', array($backup['name'], $backup['target'], $settings));
+    $operations[] = array('backup_execute', array(
+      $backup['name'],
+      $backup['target'],
+      $settings,
+    ));
   }
   $batch['operations'] = $operations;
   $batch += array(
@@ -152,16 +156,16 @@ function backup_batch($backups, $redirect = NULL, $url = NULL, $batch = array(),
 /**
  * Finishes the backup process and stores the results for eventual display.
  *
- * @param $success
+ * @param bool $success
  *   Indicate that the batch API tasks were all completed successfully.
- * @param $results
+ * @param array $results
  *   An array of all the results that were updated in update_do_one().
- * @param $operations
+ * @param array $operations
  *   A list of all the operations that had not been completed by the batch API.
  *
  * @see backup_batch()
  */
-function backup_batch_finished($success, $results, $operations) {
+function backup_batch_finished($success, array $results, array $operations) {
   $_SESSION['backup_results'] = $results;
   $_SESSION['backup_success'] = $success;
 }
@@ -173,13 +177,13 @@ function backup_batch_finished($success, $results, $operations) {
  *   An array of backup configurations, keyed by backup ID. This value is
  *   modified by reference.
  * @param array $errors
- *    Any errors that were encountered while preparing for the backup. This
- *    value is modified by reference.
+ *   Any errors that were encountered while preparing for the backup. This
+ *   value is modified by reference.
  *
  * @return boolean
  *   TRUE if the batch is ready to run, FALSE if errors were encountered.
  */
-function backup_batch_prepare(&$backups, &$errors) {
+function backup_batch_prepare(array &$backups, array &$errors) {
   foreach ($backups as $backup_name => $backup) {
     if (!isset($backups[$backup_name]['settings'])) {
       $backups[$backup_name]['settings'] = array();
@@ -198,11 +202,11 @@ function backup_batch_prepare(&$backups, &$errors) {
  * Prepare for a single backup process, ensuring requirements are met.
  *
  * @param string $backup_name
- *  The overall name of the backup, used as the base name of the created backup
- *  file.
+ *   The overall name of the backup, used as the base name of the created backup
+ *   file.
  * @param string $backup_target
- *  The target to be backed up (the source). This is usually an indicator
- *  such as "db:default" (for the database) or "config:active" (for config).
+ *   The target to be backed up (the source). This is usually an indicator
+ *   such as "db:default" (for the database) or "config:active" (for config).
  * @param array $backup_settings
  *   An array of backup settings. This value is modified by reference.
  * @param array $errors
@@ -212,7 +216,7 @@ function backup_batch_prepare(&$backups, &$errors) {
  * @return boolean
  *   TRUE if the backup is ready to run, FALSE if errors were encountered.
  */
-function backup_prepare($backup_name, $backup_target, &$backup_settings, &$errors) {
+function backup_prepare($backup_name, $backup_target, array &$backup_settings, array &$errors) {
   // Populate the destination directory if not specified.
   $default_directory = settings_get('backup_directory', '');
   $timestamp = isset($backup_settings['timestamp']) ? $backup_settings['timestamp'] : REQUEST_TIME;
@@ -232,7 +236,7 @@ function backup_prepare($backup_name, $backup_target, &$backup_settings, &$error
     if (empty($default_directory)) {
       $errors[] = t('No backup can be created because the !variable variable is not set in !file.', array(
         '!variable' => '<code>$settings[\'backup_directory\']</code>',
-        '!file' => '<code>settings.php</code>'
+        '!file' => '<code>settings.php</code>',
       ));
       return FALSE;
     }
@@ -322,8 +326,8 @@ function backup_execute($backup_name, $backup_target, array $backup_settings) {
   // Create the BackupFile instance to hold the backup output.
   $file = new BackupFile($backup_name, $backup_settings['backup_directory']);
 
-  // Register shutdown callback to deal with timeouts.
-//  register_shutdown_function('backup_migrate_shutdown', $settings);
+  // @todo Register shutdown callback to deal with timeouts.
+  // register_shutdown_function('backup_restore_shutdown', $settings);
 
   /** @var Backup $backup_instance */
   $backup_instance = new $backup_class($backup_name, $backup_target, $backup_settings);
@@ -358,7 +362,7 @@ function backup_execute($backup_name, $backup_target, array $backup_settings) {
  * @return boolean
  *   TRUE if the restore is ready to run, FALSE if errors were encountered.
  */
-function backup_restore_prepare($backup_file, $restore_target, &$backup_settings, &$errors) {
+function backup_restore_prepare($backup_file, $restore_target, array &$backup_settings, array &$errors) {
   // @todo: check if anything is needed here.
   return TRUE;
 }
@@ -373,7 +377,7 @@ function backup_restore_prepare($backup_file, $restore_target, &$backup_settings
  *   The target to which the backup should be restored. Typically an indicator
  *   such as "db:default" (for the database) or "config:active" (for config).
  * @param string $backup_directory
- *    The directory containing the backup file to restore.
+ *   The directory containing the backup file to restore.
  * @param array $backup_settings
  *   An array of settings that are read by the Backup class, modifying its
  *   behavior. Each Backup class may have different settings. Check the
@@ -405,8 +409,8 @@ function backup_restore_execute($backup_name, $restore_target, $backup_directory
   }
 
   // Register shutdown callback to deal with timeouts.
-  //  register_shutdown_function('backup_restore_shutdown', $settings);
-
+  // @todo: Register and implement shutdown handler.
+  // register_shutdown_function('backup_restore_shutdown', $settings);
 
   // Pre and post steps are separate to allow offloading compression and
   // decompression into separate requests (eventually).
