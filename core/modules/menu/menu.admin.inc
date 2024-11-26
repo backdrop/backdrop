@@ -369,24 +369,17 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     );
   }
 
-  // To support contrib modules that are expecting the old way of putting all
-  // menu items of all menus into a single list, we check for whether those
-  // contrib modules have been updated by their addition of a config setting.
-  $legacy_modules = array('content_menu', 'menu_views');
-  $use_legacy_menus = FALSE;
-  foreach ($legacy_modules as $legacy_module) {
-    $use_legacy_menus |= (module_exists($legacy_module) && !config_get($legacy_module . '.settings', 'use_updated_edit_menu_item'));
-  }
+  $use_menu_select = config_get('menu.settings', 'menu_use_menu_select');
 
   if (module_exists('language')) {
-    if ($use_legacy_menus) {
+    if ($use_menu_select) {
+      $ajax = array('callback' => 'menu_edit_item_callback');
+    }
+     else {
       $ajax = array(
         'callback' => 'menu_update_parent_options_ajax',
         'wrapper' => 'menu-parent-select-wrapper',
       );
-    }
-    else {
-      $ajax = array('callback' => 'menu_edit_item_callback');
     }
     $form['langcode'] = array(
       '#type' => 'select',
@@ -427,31 +420,9 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#description' => t('When displayed in a "hierarchical tree" menu style, children of expanded menu links will always be visible.'),
   );
 
-  if ($use_legacy_menus) {
-    // Generate a list of possible parents (not including this link or
-    // descendants).
-    $parent_options = menu_parent_options($menus, $item);
-    $parent_default = $item['menu_name'] . ':' . $item['plid'];
-    if (!isset($parent_options[$parent_default])) {
-      $parent_default = 'main-menu:0';
-    }
-
-    // Get number of items in all possible parent menus, so the weight selector
-    // is sized appropriately.
-    $menu_names = array_keys($menus);
-    $menu_options = array();
-    foreach ($menu_names as $menu_name) {
-      if (isset($options[$menu_name . ':0'])) {
-        $menu_options[] = $menu_name;
-      }
-    }
-    // Make sure that we always have values in menu_options.
-    $menu_options = !empty($menu_options) ? $menu_options : $menu_names;
-    $weight_delta = _menu_get_menu_weight_delta($menu_options);
-  }
-  else {
+  if ($use_menu_select) {
     // Create a separate select list to choose the parent menu, then limit the
-    // menu item choices to just the items in the chosen menu.
+    // parent menu item choices to just the items in the chosen menu.
     if (isset($form_state['values']['parent_menu'])) {
       $menu_name = $form_state['values']['parent_menu'];
     }
@@ -482,9 +453,31 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     }
     $weight_delta = _menu_get_menu_weight_delta($menu_name);
   }
+  else {
+    // Generate a list of possible parents (not including this link or
+    // descendants).
+    $parent_options = menu_parent_options($menus, $item);
+    $parent_default = $item['menu_name'] . ':' . $item['plid'];
+    if (!isset($parent_options[$parent_default])) {
+      $parent_default = 'main-menu:0';
+    }
+
+    // Get number of items in all possible parent menus, so the weight selector
+    // is sized appropriately.
+    $menu_names = array_keys($menus);
+    $menu_options = array();
+    foreach ($menu_names as $menu_name) {
+      if (isset($options[$menu_name . ':0'])) {
+        $menu_options[] = $menu_name;
+      }
+    }
+    // Make sure that we always have values in menu_options.
+    $menu_options = !empty($menu_options) ? $menu_options : $menu_names;
+    $weight_delta = _menu_get_menu_weight_delta($menu_options);
+  }
 
   // @TODO in Backdrop 2.0, replace #prefix/#suffix with #wrapper_attributes.
-  // Kept here for backward compatibility with existing contrib, themes.
+  // Kept here for backward compatibility with existing contrib and themes.
   $form['parent'] = array(
     '#type' => 'select',
     '#title' => t('Parent link'),
@@ -511,7 +504,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
 
 /**
  * Callback function to return updated list of possible parent links and
- * weights.
+ * weights when using a separate parent menu select.
  */
 function menu_edit_item_callback($form, $form_state) {
   $commands = array();
@@ -839,6 +832,13 @@ function menu_settings_form($form, &$form_state) {
   $form['#config'] = 'menu.settings';
   $config = config('menu.settings');
 
+  $form['menu_use_menu_select'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Select specific menu on menu item edit forms'),
+    '#description' => t('When creating or editing a menu item, this allows you to choose parent links by individual menus, rather than selecting from a single long list of every menu item on the site. Caution, this option may conflict with some menu-related contrib modules.'),
+    '#default_value' => $config->get('menu_use_menu_select'),
+  );
+
   $form['menu_breakpoint'] = array(
     '#type' => 'radios',
     '#title' => t('Breakpoint'),
@@ -861,6 +861,7 @@ function menu_settings_form($form, &$form_state) {
       ),
     ),
   );
+
   $form['#submit'][] = 'menu_settings_form_submit';
 
   return system_settings_form($form);
