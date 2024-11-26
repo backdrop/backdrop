@@ -375,7 +375,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     if ($use_menu_select) {
       $ajax = array('callback' => 'menu_edit_item_callback');
     }
-     else {
+    else {
       $ajax = array(
         'callback' => 'menu_update_parent_options_ajax',
         'wrapper' => 'menu-parent-select-wrapper',
