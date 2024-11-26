@@ -43,10 +43,15 @@ function backup_class_list() {
  *   The backup source or restore target as a string, such as "db:default" or
  *   "config:active".
  *
- * @return Backup|false
+ * @return string|false
+ *   The name of the class that indicates it can handle the given backup target.
+ *   Additional classes can be added through $settings['backup_handlers'] in
+ *   settings.php. If multiple classes match the target, the last class in the
+ *   list takes priority.
  */
 function backup_get_handler_name($target) {
-  foreach (backup_class_list() as $class_name => $class_path) {
+  $class_list = array_reverse(backup_class_list(), TRUE);
+  foreach ($class_list as $class_name => $class_path) {
     if (is_subclass_of($class_name, 'Backup')) {
       if ($class_name::applies($target)) {
         return $class_name;

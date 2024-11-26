@@ -30,78 +30,6 @@ chdir(BACKDROP_ROOT);
 const MAINTENANCE_MODE = 'restore';
 
 /**
- * Form constructor for the list of backups that can be restored.
- */
-function restore_script_selection_form($form, &$form_state) {
-  $existing_backups = array();
-
-  // If there are no backups, display a message.
-  if (empty($existing_backups)) {
-    $help = st('No backups are currently available to be restored.');
-    if (!settings_get('backup_directory')) {
-      $help .= ' ' . st('Future backups may be created by specifying the $settings[\'backup_directory\'] variable in settings.php.');
-    }
-
-    $form['help'] = array(
-      '#type' => 'help',
-      '#markup' => $help,
-    );
-
-    return $form;
-  }
-
-  $form['help'] = array(
-    '#type' => 'help',
-    '#markup' => 'Select a backup to restore. This will restore the database and configuration to a previous state.',
-    '#weight' => -5,
-  );
-
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => st('Apply pending updates'),
-  );
-  $form['actions']['cancel'] = array(
-    '#type' => 'link',
-    '#href' => '<front>',
-    '#title' => st('Cancel'),
-  );
-
-  return $form;
-}
-
-/**
- * Displays results of the restore script with any accompanying errors.
- */
-function restore_results_page() {
-
-  restore_task_list();
-
-  if ($_GET['success']) {
-    backdrop_set_title('Restore success');
-    $output = '<p>' . st('The backup was successfully restored.') . '</p>';
-
-    if (settings_get('restore_free_access')) {
-      // Note this does not use backdrop_set_message() because session handling
-      // is not initialized on restore.php.
-      $output .= '<p>' . st("Reminder: Don't forget to set the !variable value in your !file file back to !value.", array(
-        '!variable' => "<code>\$settings['restore_free_access']</code>",
-        '!file' => '<code>settings.php</code>',
-        '!value' => '<code>FALSE</code>',
-      )) . '</p>';
-    }
-
-    $output .= '<p>' . l(st('Return to your site'), '<front>') . '</p>';
-  }
-  else {
-    backdrop_set_title('Restore failure');
-    $output = '<p>' . st('The restore process failed. Check the online documentation or reach out to the Backdrop community for help.') . '</p>';
-  }
-
-  return $output;
-}
-
-/**
  * Provides an overview of the backup restoration process.
  *
  * This page provides cautionary statements before proceeding with a restore.
@@ -235,6 +163,36 @@ function restore_progress_page($one_time_token) {
   $output .= st('This process may take a while. Please wait...');
   $output .= '<span class="restore-progress">&nbsp;</span>';
   $output .= '</p>';
+  return $output;
+}
+
+/**
+ * Displays results of the restore script with any accompanying errors.
+ */
+function restore_results_page() {
+  restore_task_list();
+
+  if ($_GET['success']) {
+    backdrop_set_title('Restore success');
+    $output = '<p>' . st('The backup was successfully restored.') . '</p>';
+
+    if (settings_get('restore_free_access')) {
+      // Note this does not use backdrop_set_message() because session handling
+      // is not initialized on restore.php.
+      $output .= '<p>' . st("Reminder: Don't forget to set the !variable value in your !file file back to !value.", array(
+          '!variable' => "<code>\$settings['restore_free_access']</code>",
+          '!file' => '<code>settings.php</code>',
+          '!value' => '<code>FALSE</code>',
+        )) . '</p>';
+    }
+
+    $output .= '<p>' . l(st('Return to your site'), '<front>') . '</p>';
+  }
+  else {
+    backdrop_set_title('Restore failure');
+    $output = '<p>' . st('The restore process failed. Check the online documentation or reach out to the Backdrop community for help.') . '</p>';
+  }
+
   return $output;
 }
 

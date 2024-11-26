@@ -377,7 +377,6 @@ function update_backup_form($form, &$form_state) {
       continue;
     }
 
-    /** @var Backup $backup_instance */
     $backup_name = $backup_plugin_id . '_' . $backup_subkey;
     // Show a checkbox if non-default targets are present.
     if ($backup_target != 'db:default' && $backup_target != 'config:active') {
@@ -503,11 +502,14 @@ function update_task_list($set_active = NULL) {
   }
 
   // Only show the task list on the left sidebar if the logged-in user is has
-  // permission to perform updates, or if the update_free_access' setting in
+  // permission to perform updates, or if the 'update_free_access' setting in
   // settings.php has been set to TRUE.
   if (settings_get('update_free_access') || user_access('administer software updates')) {
     return theme('task_list', array('items' => $tasks, 'active' => $active));
   }
+
+  // Return nothing if access is not allowed.
+  return '';
 }
 
 /**
@@ -718,8 +720,8 @@ if (update_access_allowed()) {
         // Generate absolute URLs for the batch processing (using $base_root),
         // since the batch API will pass them to url() which does not handle
         // update.php correctly by default.
-        $batch_url = $base_root . backdrop_current_script_url(array('action' => 'update'));
-        $redirect_url = $base_root . backdrop_current_script_url(array('op' => 'results'));
+        $batch_url = $GLOBALS['base_root'] . backdrop_current_script_url(array('action' => 'update'));
+        $redirect_url = $GLOBALS['base_root'] . backdrop_current_script_url(array('op' => 'results'));
         update_batch($_POST['start'], $redirect_url, $batch_url);
       }
       else {

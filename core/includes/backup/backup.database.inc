@@ -162,7 +162,13 @@ abstract class BackupDatabase extends Backup {
     // Compress the backup and delete the original once compressed.
     if ($this->settings['compression'] === self::COMPRESSION_GZIP) {
       // The returned value should overwrite $file by reference.
-      $file = $this->compress($file, self::COMPRESSION_GZIP, TRUE);
+      $compressed_file = $this->compress($file, self::COMPRESSION_GZIP, TRUE);
+      if ($compressed_file) {
+        $file = $compressed_file;
+      }
+      else {
+        $this->log('The backup file could not be compressed. Check that the zlib PHP extension is installed and enough disk space is available.', array(), self::LOG_ERROR);
+      }
     }
   }
 
@@ -266,9 +272,7 @@ abstract class BackupDatabase extends Backup {
           $key = $target = 'default';
         }
       }
-      if ($target && $key) {
-        $this->connection = Database::getConnection($target, $key);
-      }
+      $this->connection = Database::getConnection($target, $key);
     }
     return $this->connection;
   }
@@ -293,11 +297,8 @@ abstract class BackupDatabase extends Backup {
    * Get a list of objects in the database.
    */
   protected function getObjectNames() {
-    // Must be overridden.
     $out = $this->getTableNames();
-    if (method_exists($this, 'getViewNames')) {
-      $out += $this->getViewNames();
-    }
+    $out += $this->getViewNames();
     return $out;
   }
 
@@ -329,7 +330,7 @@ abstract class BackupDatabase extends Backup {
       foreach ($this->getTableNames() as $table) {
         // There's no need to lock excluded or structure only tables because it
         // doesn't matter if they change.
-        if (empty($settings['exclude_tables']) || !in_array($table, (array) $settings['exclude_tables'])) {
+        if (empty($this->settings['exclude_tables']) || !in_array($table, $this->settings['exclude_tables'])) {
           $tables[] = $table;
         }
       }
