@@ -101,7 +101,7 @@ Backdrop.FieldGroup.Effects.processAccordion = {
           if ($('.error', $(this)).length) {
             // Save first error item, for focussing it.
             if (!$firstErrorItem) {
-              $firstErrorItem = $(this).parent().accordion("activate" , i);
+              $firstErrorItem = $(this).parent().accordion("option", "activate" , i);
             }
             $('h3.ui-accordion-header').eq(i).addClass('error');
           }
