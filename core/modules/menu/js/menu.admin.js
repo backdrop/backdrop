@@ -19,6 +19,56 @@ Backdrop.behaviors.menuAdminFieldsetSummaries = {
   }
 };
 
+Backdrop.behaviors.menu_edit_item_parents = {
+  attach: function (context, settings) {
+    var menuOptions = settings.menu_edit_item_parents;
+    $('.form-item-parent-menu').insertBefore('.form-item-parent');
+    var sel = $('.form-item-parent-menu select');
+    // $.each(menuOptions, function(index, value) { 
+     // sel.append($("<option>").attr('value',index).text(value));
+    // });
+    sel.on('change', function () {
+      Backdrop.menu_edit_update_parent_list(this.value);
+    });
+  }
+}
+
+/**
+ * Function to set the options of the menu parent item dropdown.
+ */
+Backdrop.menu_edit_update_parent_list = function (value) {
+  var values = [value];
+
+  var url = Backdrop.settings.basePath + 'admin/structure/menu/parents';
+  $.ajax({
+    url: location.protocol + '//' + location.host + url,
+    type: 'POST',
+    data: {'menus[]' : values},
+    dataType: 'json',
+    success: function (options) {
+      // Save key of last selected element.
+      var selected = $('#edit-parent :selected').val();
+      // Remove all existing options from dropdown.
+      var selectForm = $('#edit-parent');
+      selectForm.children().remove();
+      // Add new options to dropdown.
+      jQuery.each(options, function(index, value) {
+        $('#edit-parent').append(
+          $('<option ' + (index == selected ? ' selected="selected"' : '') + '></option>').val(index).text(value)
+        );
+      });
+      // Hide Default parent item form if empty.
+      var menuParent = selectForm.parents('.form-item-menu-parent');
+      if (selectForm.children().length === 0) {
+        menuParent.hide();
+      }
+      else {
+        menuParent.show();
+      }
+    }
+  });
+};
+
 Backdrop.behaviors.menuChangeParentItems = {
   attach: function (context, settings) {
     $('fieldset#edit-menu input').each(function () {
@@ -29,6 +79,7 @@ Backdrop.behaviors.menuChangeParentItems = {
     });
   }
 };
+
 
 /**
  * Function to set the options of the menu parent item dropdown.
