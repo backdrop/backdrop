@@ -1294,6 +1294,12 @@ description = Test that the 7xxx updates are run in proper order before 1xxx upd
 group = Update API
 file = update.test
 
+[UpdateBackupTestCase]
+name = Update with backup and restore
+description = Run update.php with a backup and then restore that backup.
+group = Update API
+file = update_backup.test
+
 [BareUpgradePathTestCase]
 name = Bare upgrade test
 description = Bare upgrade test.

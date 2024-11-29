@@ -957,14 +957,14 @@ class BackdropWebTestCase extends BackdropTestCase {
   /**
    * The content of the page currently loaded in the internal browser.
    *
-   * @var string
+   * @var string|false
    */
   protected $content;
 
   /**
    * The content of the page currently loaded in the internal browser (plain text version).
    *
-   * @var string
+   * @var string|false
    */
   protected $plainTextContent;
 

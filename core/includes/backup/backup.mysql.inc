@@ -103,9 +103,8 @@ class BackupMySql extends BackupDatabase {
    */
   private function backupToFileInternal(BackupFile $file) {
     $lines = 0;
-    $settings = $this->settings;
-    $exclude = !empty($settings['exclude_tables']) ? $settings['exclude_tables'] : array();
-    $nodata = !empty($settings['nodata_tables']) ? $settings['nodata_tables'] : array();
+    $exclude = $this->settings['exclude_tables'];
+    $nodata = $this->settings['nodata_tables'];
     if ($file->open(TRUE)) {
       $file->write($this->getSqlFileHeader());
       $all_tables = $this->getTables();
@@ -115,7 +114,7 @@ class BackupMySql extends BackupDatabase {
         if ($this->timeoutCheck()) {
           return FALSE;
         }
-        if ($table['name'] && !isset($exclude[$table['name']])) {
+        if ($table['name'] && !in_array($table['name'], $exclude)) {
           $file->write($this->getTableStructureSql($table));
           $lines++;
           if (!in_array($table['name'], $nodata)) {
@@ -147,7 +146,6 @@ class BackupMySql extends BackupDatabase {
   private function backupToFileMysqldump(BackupFile $file) {
     $nodata_tables = array();
     $all_tables = $this->getTables();
-    $settings = $this->settings;
 
     $command = 'mysqldump --result-file=%file --opt -Q --host=%host --port=%port --user=%user --password=%pass %name';
     $args = array(
@@ -161,19 +159,15 @@ class BackupMySql extends BackupDatabase {
 
     // Ignore the excluded and no-data tables.
     $db = $this->settings['database_name'];
-    if (!empty($settings['exclude_tables'])) {
-      foreach ((array) $settings['exclude_tables'] as $table) {
-        if (isset($all_tables[$table])) {
-          $command .= ' --ignore-table=' . $db . '.' . $table;
-        }
+    foreach ($this->settings['exclude_tables'] as $table) {
+      if (isset($all_tables[$table])) {
+        $command .= ' --ignore-table=' . $db . '.' . $table;
       }
     }
-    if (!empty($settings['nodata_tables'])) {
-      foreach ((array) $settings['nodata_tables'] as $table) {
-        if (isset($all_tables[$table])) {
-          $nodata_tables[] = $table;
-          $command .= ' --ignore-table=' . $db . '.' . $table;
-        }
+    foreach ($this->settings['nodata_tables'] as $table) {
+      if (isset($all_tables[$table])) {
+        $nodata_tables[] = $table;
+        $command .= ' --ignore-table=' . $db . '.' . $table;
       }
     }
     // @todo: This is not yet supported.
@@ -192,12 +186,11 @@ class BackupMySql extends BackupDatabase {
    * {@inheritdoc}
    */
   protected function restoreDatabaseFromFile(BackupFile $file) {
-    $settings = $this->settings;
     $lines_executed = 0;
 
     if ($file->open() && $connection = $this->getDatabaseConnection()) {
       // Optionally drop all existing tables.
-      if (!empty($settings['utils_drop_all_tables'])) {
+      if (!empty($this->settings['utils_drop_all_tables'])) {
         $all_tables = $this->getTables();
         $table_names = array_map('backup_migrate_array_name_value', $all_tables);
         $table_list = join(', ', $table_names);
@@ -258,7 +251,7 @@ class BackupMySql extends BackupDatabase {
   protected function getTableNames() {
     if (empty($this->tableNames)) {
       $this->tableNames = $this->query("SHOW FULL TABLES WHERE Table_Type = 'BASE TABLE'")
-        ->fetchAllKeyed(0, 0);
+        ->fetchCol();
     }
 
     return $this->tableNames;
@@ -270,7 +263,7 @@ class BackupMySql extends BackupDatabase {
   protected function getViewNames() {
     if (empty($this->viewNames)) {
       $this->viewNames = $this->query("SHOW FULL TABLES WHERE Table_Type = 'VIEW'")
-        ->fetchAllKeyed(0, 0);
+        ->fetchCol();
     }
 
     return $this->viewNames;

@@ -55,38 +55,86 @@ abstract class BackupDatabase extends Backup {
     $settings = parent::defaultSettings();
 
     $all_tables = $this->getTableNames();
+    $connection = $this->getDatabaseConnection();
+    $prefixes = $connection->getPrefixes();
 
-    // Basic modules that should be excluded.
-    $basic = array(
+    // Check if a default database prefix is set. If in use, only back up the
+    // tables within that prefix. If prefixes exist for some tables but there
+    // is no default prefix, maintain the normal behavior of just allowing all
+    // tables.
+    $prefixed_tables = array();
+    $default_prefix = isset($prefixes['default']) ? $prefixes['default'] : NULL;
+    if ($default_prefix) {
+      unset($prefixes['default']);
+      foreach ($all_tables as $table) {
+        foreach ($prefixes as $non_prefixed_table => $prefix) {
+          if ($table == $prefix . $non_prefixed_table) {
+            $prefixed_tables[] = $table;
+          }
+        }
+        if (strpos($table, $default_prefix) === 0) {
+          $prefixed_tables[] = $table;
+        }
+      }
+    }
+
+    // Identify tables that should omit data by default.
+    $nodata_basic = array(
       // Default core tables.
-      'session',
       'accesslog',
       // Devel module.
       'devel_queries',
       'devel_times',
     );
 
-    // Identify all cache tables.
-    $cache = array('cache');
+    // Identify all cache tables as no-data tables.
+    $nodata_cache = array('cache');
     foreach ($all_tables as $table_name) {
       if (strpos($table_name, 'cache_') === 0) {
-        $cache[] = $table_name;
+        $nodata_cache[] = $table_name;
       }
+    }
+
+    // Prefix all the hard-coded no-data tables.
+    $nodata_tables = array_merge($nodata_basic, $nodata_cache);
+    foreach ($nodata_tables as $index => $table) {
+      $nodata_tables[$index] = $connection->tablePrefix($table) . $table;
     }
 
     // Simpletest can create a lot of tables that do not need to be backed up,
     // but all of them start with the string 'simpletest' so they can be easily
     // excluded.
-    $simpletest = array();
+    $simpletest_tables = array();
+    $valid_simpletest_tables = array(
+      'simpletest',
+      'simpletest_prefix',
+    );
+    foreach ($valid_simpletest_tables as $index => $table) {
+      $valid_simpletest_tables[$index] = $connection->tablePrefix($table) . $table;
+    }
+
+    // When assembling the simpletest tables to exclude, make sure to not
+    // exclude a prefixed table (meaning this backup is happening as part of a
+    // SimpleTest execution).
     foreach ($all_tables as $table_name) {
-      if (strpos($table_name, 'simpletest') === 0) {
-        $simpletest[] = $table_name;
+      if (strpos($table_name, 'simpletest') === 0 &&
+        !in_array($table_name, $valid_simpletest_tables) &&
+        !in_array($table_name, $prefixed_tables)) {
+        $simpletest_tables[] = $table_name;
       }
     }
 
+    $excluded_tables = array();
+    if ($prefixed_tables) {
+      $excluded_tables = array_diff($all_tables, $prefixed_tables);
+    }
+    if ($simpletest_tables) {
+      $excluded_tables = array_merge($excluded_tables, $simpletest_tables);
+    }
+
     $settings += array(
-      'nodata_tables' => backdrop_map_assoc(array_merge($basic, $cache)),
-      'exclude_tables' => $simpletest,
+      'nodata_tables' => $nodata_tables,
+      'exclude_tables' => $excluded_tables,
       'lock_tables' => TRUE,
       'compression' => self::COMPRESSION_GZIP,
     );
@@ -106,7 +154,7 @@ abstract class BackupDatabase extends Backup {
       '#type' => 'select',
       '#multiple' => TRUE,
       '#title' => t('Exclude the following tables altogether'),
-      '#options' => $objects,
+      '#options' => backdrop_map_assoc($objects),
       '#default_value' => $settings['exclude_tables'],
       '#description' => t('The selected tables will not be added to the backup file.'),
     );
@@ -297,16 +345,14 @@ abstract class BackupDatabase extends Backup {
    * Get a list of objects in the database.
    */
   protected function getObjectNames() {
-    $out = $this->getTableNames();
-    $out += $this->getViewNames();
-    return $out;
+    return array_merge($this->getTableNames(), $this->getViewNames());
   }
 
   /**
    * Get a list of tables in the database.
    *
    * @return string[]
-   *   An array of all table names keyed by the table name.
+   *   An array of all table names, numerically indexed.
    */
   abstract protected function getTableNames();
 
@@ -314,7 +360,7 @@ abstract class BackupDatabase extends Backup {
    * Get a list of views in the database.
    *
    * @return string[]
-   *   An array of all view names keyed by the view name.
+   *   An array of all view names, numerically indexed.
    */
   abstract protected function getViewNames();
 
@@ -325,12 +371,13 @@ abstract class BackupDatabase extends Backup {
    *   The list of tables to be locked, if any.
    */
   protected function getLockedTables() {
+
     $tables = array();
     if ($this->settings['lock_tables']) {
       foreach ($this->getTableNames() as $table) {
         // There's no need to lock excluded or structure only tables because it
-        // doesn't matter if they change.
-        if (empty($this->settings['exclude_tables']) || !in_array($table, $this->settings['exclude_tables'])) {
+        // doesn't matter if they are updated during the backup.
+        if (!in_array($table, $this->settings['exclude_tables'])) {
           $tables[] = $table;
         }
       }

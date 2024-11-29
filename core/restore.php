@@ -157,7 +157,15 @@ function restore_progress_page($one_time_token) {
     'time' => REQUEST_TIME,
     'backup' => $_POST['backup'],
   ));
-  backdrop_add_http_header('Refresh', '0; ' . $redirect_path);
+
+  $refresh_meta = array(
+    '#tag' => 'meta',
+    '#attributes' => array(
+      'http-equiv' => 'Refresh',
+      'content' => '0; URL=' . $redirect_path,
+    ),
+  );
+  backdrop_add_html_head($refresh_meta, 'restore_meta_refresh');
 
   $output = '<p>';
   $output .= st('This process may take a while. Please wait...');
@@ -284,6 +292,7 @@ function restore_task_list($set_active = NULL) {
  * Light-weight version of backdrop_goto() that guarantees no database usage.
  */
 function restore_goto($url) {
+  $url = $GLOBALS['base_url'] . $_SERVER['SCRIPT_NAME'] . $url;
   header('Location: ' . $url, TRUE, 302);
   exit();
 }
@@ -334,21 +343,21 @@ if (restore_access_allowed()) {
     // Main restore.php operations.
     case 'select':
       if (!$valid_token) {
-        restore_goto($_SERVER['SCRIPT_NAME']);
+        restore_goto('');
       }
       $output = restore_select_page();
       break;
 
     case st('Restore backup'):
       if (!$valid_token) {
-        restore_goto($_SERVER['SCRIPT_NAME']);
+        restore_goto('');
       }
       $output = restore_progress_page($one_time_token);
       break;
 
     case 'restore':
       if (!$valid_one_time_token || $_GET['time'] < REQUEST_TIME - 10) {
-        restore_goto($_SERVER['SCRIPT_NAME']);
+        restore_goto('');
       }
       // Check that a backup directory is specified.
       $backup_directory = $_GET['backup'];
@@ -378,8 +387,7 @@ if (restore_access_allowed()) {
 
       // Redirect to results page.
       $success = empty($errors) ? '1' : '0';
-      header('Location: ' . $_SERVER['SCRIPT_NAME'] . '?op=results&success=' . $success, TRUE, 302);
-      exit;
+      restore_goto('?op=results&success=' . $success);
 
     case 'results':
       $output = restore_results_page();
