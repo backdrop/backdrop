@@ -419,6 +419,16 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
   if (!isset($options[$default])) {
     $default = 'main-menu:0';
   }
+  $form['parent_menu'] = array(
+    '#type' => 'select',
+    '#title' => t('Menu'),
+    '#default_value' => $item['menu_name'],
+    '#options' => $titles,
+    '#description' => t('The parent menu'),
+    '#wrapper_attributes' => array(
+      'class' => array('js-show'),
+    ),
+  );
   $form['parent'] = array(
     '#type' => 'select',
     '#title' => t('Parent link'),
@@ -431,14 +441,6 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#attached' => array(
       'js' => array(backdrop_get_path('module', 'menu') . '/js/menu.admin.js'),
     ),
-  );
-  $form['parent_menu'] = array(
-    '#type' => 'select',
-    '#title' => t('Menu'),
-    '#default_value' => '',
-    '#options' => $titles,
-    '#description' => t('The parent menu'),
-    '#attributes' => array('class' => array('menu-title-select')),
   );
   // Get number of items in all possible parent menus, so the weight selector is
   // sized appropriately.

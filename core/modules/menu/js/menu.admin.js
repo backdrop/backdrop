@@ -22,11 +22,8 @@ Backdrop.behaviors.menuAdminFieldsetSummaries = {
 Backdrop.behaviors.menu_edit_item_parents = {
   attach: function (context, settings) {
     var menuOptions = settings.menu_edit_item_parents;
-    $('.form-item-parent-menu').insertBefore('.form-item-parent');
+    $('.form-item-parent-menu').insertBefore('#menu-parent-select-wrapper');
     var sel = $('.form-item-parent-menu select');
-    // $.each(menuOptions, function(index, value) { 
-     // sel.append($("<option>").attr('value',index).text(value));
-    // });
     sel.on('change', function () {
       Backdrop.menu_edit_update_parent_list(this.value);
     });
