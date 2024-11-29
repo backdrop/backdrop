@@ -3744,7 +3744,7 @@ function node_config_create_validate(Config $staging_config, $all_changes) {
 
     // Check that the node type does or will exist.
     $type_exists = (bool) node_type_get_type($node_type);
-    $type_created = $all_changes['node.type.' . $node_type];
+    $type_created = !empty($all_changes['node.type.' . $node_type]);
     if (!$type_exists && !$type_created) {
       throw new ConfigValidateException(t('The field "@name" cannot be added because the node type "@type" does not exist.', array('@name' => $field_name, '@type' => $node_type)));
     }
