@@ -9,6 +9,9 @@
  * @{
  */
 
+/**
+ * MySQL database connection driver.
+ */
 class DatabaseConnection_mysql extends DatabaseConnection {
   /**
    * Flag to indicate if the cleanup function in __destruct() should run.
@@ -24,8 +27,11 @@ class DatabaseConnection_mysql extends DatabaseConnection {
    */
   protected $utf8mb4Supported;
 
+  /**
+   * Constructs a MySQL-based DatabaseConnection.
+   */
   public function __construct(array $connection_options = array()) {
-    // This driver defaults to transaction support, except if explicitly passed FALSE.
+    // Default to transaction support, unless explicitly set FALSE.
     $this->transactionSupport = !isset($connection_options['transactions']) || ($connection_options['transactions'] !== FALSE);
 
     // MySQL never supports transactional DDL.
@@ -63,9 +69,9 @@ class DatabaseConnection_mysql extends DatabaseConnection {
       // rows that actually didn't have to be updated because the values didn't
       // change. This matches common behaviour among other database systems.
       PDO::MYSQL_ATTR_FOUND_ROWS => TRUE,
-      // So we don't have to mess around with cursors and unbuffered queries by default.
+      // Avoid mess around with cursors and unbuffered queries by default.
       PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => TRUE,
-      // Because MySQL's prepared statements skip the query cache, because it's dumb.
+      // MySQL prepared statements skip the query cache, because it's dumb.
       PDO::ATTR_EMULATE_PREPARES => TRUE,
       // Convert numeric values to strings when fetching. In PHP 8.1,
       // PDO::ATTR_EMULATE_PREPARES now behaves the same way as non emulated
@@ -179,28 +185,40 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     return "`$identifier`";
   }
 
+  /**
+   * Destroy a MySQL database connection object.
+   */
   public function __destruct() {
     if ($this->needsCleanup) {
       $this->nextIdDelete();
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function queryRange($query, $from, $count, array $args = array(), array $options = array()) {
     return $this->query($query . ' LIMIT ' . (int) $from . ', ' . (int) $count, $args, $options);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function queryTemporary($query, array $args = array(), array $options = array()) {
     $tablename = $this->generateTemporaryTableName();
     $this->query('CREATE TEMPORARY TABLE {' . $tablename . '} Engine=MEMORY ' . $query, $args, $options);
     return $tablename;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function driver() {
     return 'mysql';
   }
 
   /**
-   * Returns the version of the database server.
+   * {@inheritdoc}
    */
   public function version() {
     $version = parent::version();
@@ -222,17 +240,15 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     return $version;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function databaseType() {
     return 'mysql';
   }
 
   /**
-   * Overrides DatabaseConnection::createDatabase().
-   *
-   * @param string $database
-   *   The name of the database to create.
-   *
-   * @throws DatabaseNotFoundException
+   * {@inheritdoc}
    */
   public function createDatabase($database) {
     try {
@@ -245,11 +261,17 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function mapConditionOperator($operator) {
     // We don't want to override any of the defaults.
     return NULL;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function nextId($existing_id = 0) {
     $new_id = $this->query('INSERT INTO {sequences} () VALUES ()', array(), array('return' => Database::RETURN_INSERT_ID));
     // This should only happen after an import or similar event.
@@ -268,12 +290,17 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     return $new_id;
   }
 
+  /**
+   * Clean up the sequences table when closing a database connection.
+   *
+   * @see DatabaseConnection_mysql::__destruct()
+   */
   public function nextIdDelete() {
     // While we want to clean up the table to keep it up from occupying too
     // much storage and memory, we must keep the highest value in the table
-    // because InnoDB  uses an in-memory auto-increment counter as long as the
+    // because InnoDB uses an in-memory auto-increment counter as long as the
     // server runs. When the server is stopped and restarted, InnoDB
-    // reinitializes the counter for each table for the first INSERT to the
+    // re-initializes the counter for each table for the first INSERT to the
     // table based solely on values from the table so deleting all values would
     // be a problem in this case. Also, TRUNCATE resets the auto increment
     // counter.
@@ -293,6 +320,8 @@ class DatabaseConnection_mysql extends DatabaseConnection {
   }
 
   /**
+   * {@inheritdoc}
+   *
    * Overridden to work around issues to MySQL not supporting transactional DDL.
    */
   protected function popCommittableTransactions() {
@@ -368,7 +397,6 @@ class DatabaseConnection_mysql extends DatabaseConnection {
       // On PHP 7 $this->connection->inTransaction() will return TRUE and
       // $this->connection->rollback() does not throw an exception; the
       // following code is unreachable.
-
       // If \DatabaseConnection::rollback() would throw an
       // exception then continue to throw an exception.
       if (!$this->inTransaction()) {
@@ -381,15 +409,21 @@ class DatabaseConnection_mysql extends DatabaseConnection {
       }
 
       trigger_error('Rollback attempted when there is no active transaction. This can cause data integrity issues.', E_USER_WARNING);
-      return;
+      return NULL;
     }
     return parent::rollback($savepoint_name);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function utf8mb4IsActive() {
     return isset($this->connectionOptions['charset']) && $this->connectionOptions['charset'] === 'utf8mb4';
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function utf8mb4IsSupported() {
     // Caching if this method is called multiple times in the same request.
     if (isset($this->utf8mb4Supported)) {

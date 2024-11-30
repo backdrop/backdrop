@@ -67,7 +67,7 @@ class DatabaseCharsetConverter {
   /**
    * Set the active connection for all operations.
    */
-  function setConnection(DatabaseConnection $connection) {
+  public function setConnection(DatabaseConnection $connection) {
     $this->connection = $connection;
   }
 
@@ -98,7 +98,6 @@ class DatabaseCharsetConverter {
           // Intentionally no translation here in the event this is used
           // outside a full Backdrop bootstrap (e.g. a command line tool).
           throw new Exception('The ' . $database_key . ':' . $target . ' MySQL database does not support UTF8MB4! Ensure that the conditions listed in settings.php related to innodb_large_prefix, the server version, and the MySQL driver version are met. See https://docs.backdropcms.org/documentation/database-configuration for more information.');
-          continue;
         }
         // For each database:
         $this->setConnection($connection);
@@ -121,7 +120,7 @@ class DatabaseCharsetConverter {
   /**
    * Convert the database charset and collation, but not the tables within it.
    *
-   * @param string
+   * @param string $database_name
    *   Database name.
    * @param string $charset
    *   (Optional) The character set. Defaults to the constructor value.
@@ -154,7 +153,7 @@ class DatabaseCharsetConverter {
    *
    * @throws PDOException
    */
-  public function convertTables($table_names, $charset = NULL, $collation = NULL) {
+  public function convertTables(array $table_names, $charset = NULL, $collation = NULL) {
     foreach ($table_names as $table_name) {
       if (!$this->connection->schema()->tableExists($table_name)) {
         continue;
@@ -199,6 +198,7 @@ class DatabaseCharsetConverter {
    * @param string $table_name
    *   The table name to convert. This should be the actual table name
    *   in the database, with any table prefix already prepended.
+   * @param string $charset
    *   (Optional) The character set. Defaults to the constructor value.
    * @param string $collation
    *   (Optional) The collation. Defaults to the constructor value.
@@ -214,9 +214,9 @@ class DatabaseCharsetConverter {
     $charset = $charset ?: $this->charset;
     $collation = $collation ?: $this->collation;
     foreach ($results as $row) {
-      // Skip fields that don't have collation, as they are probably int or similar.
-      // or if we are using that collation for this field already save a query
-      // or is not binary.
+      // Skip fields that don't have collation, as they are probably int or
+      // similar. If we are using that collation for this field already save a
+      // query or is not binary.
       if (!$row->Collation || $row->Collation === $collation || strpos($row->Collation, '_bin') !== FALSE) {
         continue;
       }
