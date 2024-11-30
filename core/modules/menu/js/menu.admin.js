@@ -21,8 +21,23 @@ Backdrop.behaviors.menuAdminFieldsetSummaries = {
 
 Backdrop.behaviors.menu_edit_item_parents = {
   attach: function (context, settings) {
+    // Get the menu parent options from settings.
     var menuOptions = settings.menu_edit_item_parents;
+    // Get the current menu name from settings.
+    var menuName = settings.menu_edit_item_menu;
+    // Always move the menu selector before the menu parent selector.
     $('.form-item-parent-menu').insertBefore('#menu-parent-select-wrapper');
+    // On load set the current menu as default in the menu select.
+    Backdrop.menu_edit_update_parent_list(menuName);
+    // Ensure that the menu parent select list is filtered again when any ajax
+    // process runs.
+    $( document ).ajaxComplete(function( event, xhr, settings ) {
+      if (settings.url=='/system/ajax') {
+        var selected = $('[data-menu-parent] :selected').val().split(':')[0];
+        Backdrop.menu_edit_update_parent_list(selected);
+      }
+    });
+    // On changing the menu select, update the menu parent select.
     var sel = $('.form-item-parent-menu select');
     sel.on('change', function () {
       Backdrop.menu_edit_update_parent_list(this.value);
@@ -44,24 +59,16 @@ Backdrop.menu_edit_update_parent_list = function (value) {
     dataType: 'json',
     success: function (options) {
       // Save key of last selected element.
-      var selected = $('#edit-parent :selected').val();
+      var selected = $('[data-menu-parent] :selected').val();
       // Remove all existing options from dropdown.
-      var selectForm = $('#edit-parent');
+      var selectForm = $('[data-menu-parent]');
       selectForm.children().remove();
       // Add new options to dropdown.
       jQuery.each(options, function(index, value) {
-        $('#edit-parent').append(
+        $('[data-menu-parent]').append(
           $('<option ' + (index == selected ? ' selected="selected"' : '') + '></option>').val(index).text(value)
         );
       });
-      // Hide Default parent item form if empty.
-      var menuParent = selectForm.parents('.form-item-menu-parent');
-      if (selectForm.children().length === 0) {
-        menuParent.hide();
-      }
-      else {
-        menuParent.show();
-      }
     }
   });
 };

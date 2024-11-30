@@ -319,6 +319,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     $breadcrumb[] = l($current_title, 'admin/structure/menu/manage/' . $item['menu_name']);
     backdrop_set_breadcrumb($breadcrumb);
   }
+  backdrop_add_js(array('menu_edit_item_menu' => $item['menu_name']), 'setting');
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
   $form['link_title'] = array(
@@ -435,7 +436,10 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#default_value' => $default,
     '#options' => $options,
     '#description' => t('The maximum depth for a link and all its children is fixed at !maxdepth. Some menu links may not be available as parents if selecting them would exceed this limit.', array('!maxdepth' => MENU_MAX_DEPTH)),
-    '#attributes' => array('class' => array('menu-title-select')),
+    '#attributes' => array(
+      'class' => array('menu-title-select'),
+      'data-menu-parent' => TRUE,
+    ),
     '#prefix' => '<div id="menu-parent-select-wrapper">',
     '#suffix' => '</div>',
     '#attached' => array(
