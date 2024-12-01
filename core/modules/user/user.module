@@ -1795,7 +1795,7 @@ function user_page_title($account) {
  */
 function user_init() {
   $current_path = current_path();
-  if ($current_path == 'user/login' || $current_path == 'user/password') {
+  if (!user_is_logged_in() && ($current_path == 'user/login' || $current_path == 'user/password')) {
     $suppress_layout_on_login_page = config_get('system.core', 'user_login_page_suppress_layout');
     if (!user_login_page_tabs() && !user_is_logged_in() && $suppress_layout_on_login_page) {
       layout_suppress(TRUE);
@@ -1808,7 +1808,7 @@ function user_init() {
  */
 function user_custom_theme() {
   $current_path = current_path();
-  if ($current_path == 'user/login' || $current_path == 'user/password') {
+  if (!user_is_logged_in() && ($current_path == 'user/login' || $current_path == 'user/password')) {
     return config_get('system.core', 'admin_theme');
   }
 }

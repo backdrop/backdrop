@@ -42,7 +42,10 @@ function user_pass_page() {
 function user_pass($form, &$form_state) {
   global $user;
 
-  $form['#theme'] = 'user_login_form';
+  $user_is_logged_in = user_is_logged_in();
+  if (!$user_is_logged_in) {
+    $form['#theme'] = 'user_login_form';
+  }
   $form['name'] = array(
     '#type' => 'textfield',
     '#title' => t('Username or email address'),
@@ -70,7 +73,7 @@ function user_pass($form, &$form_state) {
     );
   }
 
-  if (!user_login_page_tabs()) {
+  if (!$user_is_logged_in && !user_login_page_tabs()) {
     $form['links'] = array(
       '#markup' => theme('links', array(
         'links' => array(
