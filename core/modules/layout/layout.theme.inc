@@ -306,8 +306,8 @@ function theme_layout_hero_background_image($variables) {
     $output .= '</div>';
   }
   else {
-    $output .= '<div class="layout-hero-background-preview-empty">';
-    $output .= t('No background image is currently set. Some themes, such as Basis theme, may display a background image defined in CSS.');
+    $output .= '<div class="layout-hero-background-preview-empty description">';
+    $output .= t('No background image is currently set.<br/>Themes, such as Basis, may display a background image defined in CSS.');
     $output .= '</div>';
   }
   $output .= backdrop_render_children($element);

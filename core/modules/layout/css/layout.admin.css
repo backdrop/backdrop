@@ -185,7 +185,7 @@
   border-bottom: none;
 }
 .layout-hero-background-preview-empty {
-  margin-bottom: 1em;
+  /* margin-bottom: 1em !important; */
 }
 
 /* Layout columns */
