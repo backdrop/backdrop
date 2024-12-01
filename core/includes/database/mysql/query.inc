@@ -62,6 +62,15 @@ class InsertQuery_mysql extends InsertQuery {
 
     $max_placeholder = 0;
     $values = array();
+    if (!is_array($this->insertValues)) {
+      // Older PHP versions cannot throw an exception within __toString().
+      if (version_compare(PHP_VERSION, '7.4', '>=')) {
+        throw new UnexpectedValueException();
+      }
+      else {
+        trigger_error('Unexpected Value');
+      }
+    }
     if (count($this->insertValues)) {
       foreach ($this->insertValues as $insert_values) {
         $placeholders = array();

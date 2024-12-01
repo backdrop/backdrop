@@ -1360,7 +1360,9 @@ div.filter-options select {
 /**
  * Pretty block radios, `:not(#foo) >` rules out browsers that can't support this
  */
-:not(#foo) > .layout-settings-form .layout-options .form-type-radio input, .form-item-region-style .form-type-radio input {
+:not(#foo) > .layout-settings-form .layout-options .form-type-radio input,
+.layout-entity-admin-add-form .layout-options .form-type-radio input,
+.form-item-region-style .form-type-radio input {
   /* Hide radios from visuals but not screen-readers */
   position: absolute;
   width: 1px;
@@ -1371,6 +1373,7 @@ div.filter-options select {
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
+.layout-entity-admin-add-form .layout-options .form-type-radio label,
 .form-item-region-style .form-type-radio label,
 .layout-settings-page .layout-options .form-type-checkbox label,
 .layout-settings-form .layout-options .form-type-radio label {
@@ -1387,10 +1390,13 @@ div.filter-options select {
 .form-item-region-style .form-type-radio label {
   min-height: inherit;
 }
+.layout-entity-admin-add-form .layout-options.no-flexbox .form-type-radio label,
 .layout-settings-page .layout-options.no-flexbox .form-type-checkbox label,
 .layout-settings-form .layout-options.no-flexbox .form-type-radio label {
   min-height: 150px;
 }
+.layout-entity-admin-add-form .layout-options .form-type-radio:active label,
+.layout-entity-admin-add-form .layout-options .form-type-radio input:checked + label,
 .form-item-region-style .form-type-radio:active label,
 .form-item-region-style .form-type-radio input:checked + label,
 .layout-settings-page .layout-options .form-type-checkbox:active label,
@@ -1400,6 +1406,9 @@ div.filter-options select {
   background-color: #ffffff;
   border-color: #d0d0d0;
 }
+.layout-entity-admin-add-form .layout-options .form-type-radio input:focus + label,
+.layout-entity-admin-add-form .layout-options .form-type-radio input:hover + label,
+.layout-entity-admin-add-form .layout-options .form-type-radio:hover input:checked + label,
 .form-item-region-style .form-type-radio input:focus + label,
 .form-item-region-style .form-type-radio input:hover + label,
 .form-item-region-style .form-type-radio:hover input:checked + label,
@@ -1412,6 +1421,7 @@ div.filter-options select {
   background-color: #ffffff;
   border-color: #43afe4;
 }
+.layout-entity-admin-add-form .layout-options .layout-options .form-type-radio img,
 .layout-settings-page .layout-options .form-type-checkbox img,
 .layout-settings-form .layout-options .form-type-radio img {
   position: relative;

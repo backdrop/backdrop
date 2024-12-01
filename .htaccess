@@ -23,24 +23,18 @@ DirectoryIndex index.php index.html index.htm
 # for settings that can be changed at runtime.
 <IfModule mod_php.c>
   php_flag session.auto_start               off
-  php_value mbstring.http_input             pass
-  php_value mbstring.http_output            pass
   php_value max_input_vars                  10007
   php_flag mbstring.encoding_translation    off
 </IfModule>
 # Same settings again for PHP 7 versions.
 <IfModule mod_php7.c>
   php_flag session.auto_start               off
-  php_value mbstring.http_input             pass
-  php_value mbstring.http_output            pass
   php_value max_input_vars                  10007
   php_flag mbstring.encoding_translation    off
 </IfModule>
 # Same settings again for PHP 5 versions.
 <IfModule mod_php5.c>
   php_flag session.auto_start               off
-  php_value mbstring.http_input             pass
-  php_value mbstring.http_output            pass
   php_value max_input_vars                  10007
   php_flag mbstring.encoding_translation    off
 </IfModule>
@@ -50,8 +44,8 @@ DirectoryIndex index.php index.html index.htm
   # Enable expirations.
   ExpiresActive On
 
-  # Cache all files for 2 weeks after access (A).
-  ExpiresDefault A1209600
+  # Cache all files for 2 weeks.
+  ExpiresDefault "access plus 2 weeks"
 
   <FilesMatch \.php$>
     # Do not allow PHP scripts to be cached unless they explicitly send cache

@@ -514,8 +514,8 @@ function file_save_htaccess($directory, $private = TRUE, $force_overwrite = FALS
 
   $htaccess_lines = file_htaccess_lines($private);
 
-  // Write the .htaccess file.
-  if (file_put_contents($htaccess_path, $htaccess_lines)) {
+  // Write the .htaccess file. Suppress any PHP error and write to watchdog.
+  if (@file_put_contents($htaccess_path, $htaccess_lines)) {
     backdrop_chmod($htaccess_path, 0444);
   }
   else {
@@ -2038,6 +2038,9 @@ function file_validate_svg(File $file) {
 
   if ($file->filemime == 'image/svg+xml') {
     $file_contents = file_get_contents($file->uri);
+    $file_contents = preg_replace('/<!DOCTYPE[^>]*>/i', '', $file_contents);
+    $file_contents = html_entity_decode($file_contents);
+    $file_contents = strtolower($file_contents);
     libxml_use_internal_errors(TRUE);
     $xml = simplexml_load_string($file_contents);
     $errors = libxml_get_errors();
@@ -2054,15 +2057,15 @@ function file_validate_svg(File $file) {
 
       $search_patterns = array(
         // @see https://developer.mozilla.org/en-US/docs/Web/SVG/Element
-        '//svg:foreignObject',
+        '//svg:foreignobject',
         '//svg:script',
         '//html:iframe',
         // @see https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
         '//@*[starts-with(name(), "on")]',
-        '//svg:a[starts-with(@href, "javascript:")]',
-        '//svg:a[starts-with(@xlink:href, "javascript:")]',
-        '//svg:a[starts-with(@href, "data:")]',
-        '//svg:a[starts-with(@xlink:href, "data:")]',
+        '//svg:a[starts-with(normalize-space(@href), "javascript:")]',
+        '//svg:a[starts-with(normalize-space(@xlink:href), "javascript:")]',
+        '//svg:a[starts-with(normalize-space(@href), "data:")]',
+        '//svg:a[starts-with(normalize-space(@xlink:href), "data:")]',
       );
 
       $xml->registerXPathNamespace('svg', 'http://www.w3.org/2000/svg');
@@ -2372,7 +2375,8 @@ function file_scan_directory($dir, $mask, $options = array(), $depth = 0) {
         $uri = "$dir/$filename";
         $uri = file_stream_wrapper_uri_normalize($uri);
         if (is_dir($uri) && $options['recurse']) {
-          // Give priority to files in this folder by merging them in after any subdirectory files.
+          // Give priority to files in this folder by merging them in after any
+          // subdirectory files.
           $files = array_merge(file_scan_directory($uri, $mask, $options, $depth + 1), $files);
         }
         elseif ($depth >= $options['min_depth'] && preg_match($mask, $filename)) {

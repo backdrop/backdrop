@@ -577,30 +577,39 @@ function image_is_svg($uri) {
  *   which is the accessible mechanism for alternative text within SVGs.
  *
  * @return string
- *   The SVG image contents with the attributes added.
+ *   The SVG image contents with the attributes added. An empty string in case
+ *   of errors.
  *
  * @since 1.28.0 Function added.
  */
 function image_add_svg_attributes($svg_content, array $attributes) {
   $doc = new DOMDocument();
+  libxml_use_internal_errors(TRUE);
   $doc->loadXML($svg_content);
   $svg_tag = $doc->getElementsByTagName('svg')->item(0);
+  $last_error = libxml_get_last_error();
+  libxml_use_internal_errors(FALSE);
+  if (empty($svg_tag)) {
+    $message = $last_error ? trim($last_error->message) : '';
+    watchdog('image', 'Failed to parse SVG content. %message', array(
+      '%message' => $message,
+    ), WATCHDOG_ERROR);
+    return '';
+  }
 
   // Convert the alt attribute to a <title> element.
   if (isset($attributes['alt'])) {
-      try {
-        if (strlen($attributes['alt'])) {
-          $title = $doc->createElement('title');
-          $title->textContent = $attributes['alt'];
-          // Since DOMDocument::prepend() is not available in PHP versions prior
-          // to v8, we are using DOMNode::insertBefore().
-          $svg_tag->insertBefore($title, $svg_tag->firstChild);
-        }
-        // Remove any given <title> element if alt is an empty string.
-        elseif ($svg_tag->firstChild && $svg_tag->firstChild->nodeName === 'title') {
-          $svg_tag->removeChild($svg_tag->firstChild);
-        }
-      } catch (DOMException $e) {}
+    if (strlen($attributes['alt'])) {
+      $title = $doc->createElement('title');
+      $title->textContent = $attributes['alt'];
+      // Since DOMDocument::prepend() is not available in PHP versions prior
+      // to v8, we are using DOMNode::insertBefore().
+      $svg_tag->insertBefore($title, $svg_tag->firstChild);
+    }
+    // Remove any given <title> element if alt is an empty string.
+    elseif ($svg_tag->firstChild && $svg_tag->firstChild->nodeName === 'title') {
+      $svg_tag->removeChild($svg_tag->firstChild);
+    }
     unset($attributes['alt']);
   }
 

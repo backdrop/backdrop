@@ -210,7 +210,12 @@
   margin: calc(-1px - var(--admin-bar-height)) 0 0 15em; /* LTR */
 }
 #admin-bar .dropdown li li.expandable.outside-right ul {
+  z-index: 1;
   margin-left: -15em; /* LTR */
+  /* Add a shadow to help distinguish when a sub-menu overlaps its parent. */
+  box-shadow:
+    -1px 0 0 1px #777,
+    -8px 0px 24px 3px rgba(0, 0, 0, 0.6);
 }
 [dir="rtl"] #admin-bar .dropdown li li.expandable ul {
   margin-right: 15em;
@@ -218,6 +223,9 @@
 }
 [dir="rtl"] #admin-bar .dropdown li li.expandable.outside-left ul {
   margin-right: -15em;
+  box-shadow:
+    1px 0 0 1px #777,
+    8px 0px 24px 3px rgba(0, 0, 0, 0.6);
 }
 
 /* Lists nested under hovered list items. */

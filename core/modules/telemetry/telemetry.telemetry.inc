@@ -53,6 +53,11 @@ function telemetry_telemetry_info() {
     'description' => t('The version of jQuery configured on your site.'),
     'project' => 'backdrop',
   );
+  $info['update_module'] = array(
+    'label' => t('Update module enabled'),
+    'description' => t('Whether this site has Update module enabled to check for project updates.'),
+    'project' => 'backdrop',
+  );
   return $info;
 }
 
@@ -104,5 +109,7 @@ function telemetry_telemetry_data($key) {
     case 'jquery_version':
       $jquery = backdrop_get_library('system', 'jquery');
       return $jquery['version'];
+    case 'update_module':
+      return module_exists('update') ? 'Yes' : 'No';
   }
 }

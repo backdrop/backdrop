@@ -561,6 +561,10 @@ if (update_access_allowed()) {
         // update.php correctly by default.
         $batch_url = $base_root . backdrop_current_script_url();
         $redirect_url = $base_root . backdrop_current_script_url(array('op' => 'results'));
+        // Set a state indicating we are upgrading a Drupal 7 site.
+        if (backdrop_get_installed_schema_version('system') > 7000) {
+          state_set('update_d7_upgrade', TRUE);
+        }
         update_batch($_POST['start'], $redirect_url, $batch_url);
         break;
       }
@@ -570,6 +574,8 @@ if (update_access_allowed()) {
       break;
 
     case 'results':
+      // Remove the state indicating a Drupal 7 upgrade.
+      state_del('update_d7_upgrade');
       $output = update_results_page();
       break;
 
