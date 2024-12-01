@@ -716,6 +716,17 @@ class FormElementTestCase extends BackdropWebTestCase {
       ));
     }
   }
+
+  /**
+   * Test disabled tableselect row.
+   */
+  public function testDisabledTabledragRow() {
+    $this->backdropGet('form-test/disabled-tabledrag-row');
+    $element = $this->xpath('//input[@name="tabledrag_test[5]"][@disabled]');
+    $this->assertEqual(count($element), 1, 'One disabled tabledrag checkbox has been found');
+    $element = $this->xpath('//form[@class="form-test-disabled-tabledrag-row"]//tr[contains(@class, "disabled")]');
+    $this->assertEqual(count($element), 1, 'One tabledrag row with class "disabled" has been found');
+  }
 }
 
 /**
@@ -993,6 +1004,77 @@ class FormsElementsLabelsTestCase extends BackdropWebTestCase {
     $this->assertEqual($elements[0]['title'], 'Checkboxes test (' . t('Required') . ')', 'Title attribute found.');
     $elements = $this->xpath('//div[@id="edit-form-radios-title-attribute"]');
     $this->assertEqual($elements[0]['title'], 'Radios test (' . t('Required') . ')', 'Title attribute found.');
+  }
+}
+
+/**
+ * Test form element labels, required markers and associated output.
+ */
+class FormsElementsDescriptionsTestCase extends BackdropWebTestCase {
+  /**
+   * {inheritdoc}
+   */
+  protected $profile = 'testing';
+
+  /**
+   * {inheritdoc}
+   */
+  protected function setUp() {
+    parent::setUp('form_test');
+  }
+
+  /**
+   * Test Form Descriptions.
+   */
+  public function testFormDescriptions() {
+    $this->backdropGet('form_test/form-descriptions');
+
+    // Check #description placement with #description_display='after'.
+    $field_id = 'edit-form-textfield-test-description-after';
+    $elements = $this->xpath('//input[@id="' . $field_id . '"]/following-sibling::div[contains(@class, "description")]');
+    $this->assertTrue(isset($elements[0]), t('Properly places the #description element after the form item.'));
+
+    // Check #description placement with #description_display='before'.
+    $field_id = 'edit-form-textfield-test-description-before';
+    $elements = $this->xpath('//input[@id="' . $field_id . '"]/preceding-sibling::div[contains(@class, "description")]');
+    $this->assertTrue(isset($elements[0]), t('Properly places the #description element before the form item.'));
+
+    // Check if the class is 'visually-hidden' on the form element description
+    // for the option with #description_display='invisible' and also check that
+    // the description is placed after the form element.
+    $field_id = 'edit-form-textfield-test-description-invisible';
+    $elements = $this->xpath('//input[@id="' . $field_id . '"]/following-sibling::div[contains(@class, "element-invisible")]');
+    $this->assertTrue(isset($elements[0]), t('Properly renders the #description element invisible.'));
+
+    // Check #description placement with #description_display='before'.
+    $field_id = 'edit-form-checkboxes-test-description-before';
+    $elements = $this->xpath('//div[@id="' . $field_id . '"]/preceding-sibling::div[contains(@class, "description")]');
+    $this->assertTrue(isset($elements[0]), t('Properly places the #description element before the form item.'));
+
+    // Check #description placement with #description_display='before'.
+    $field_id = 'edit-form-radios-test-description-before';
+    $elements = $this->xpath('//div[@id="' . $field_id . '"]/preceding-sibling::div[contains(@class, "description")]');
+    $this->assertTrue(isset($elements[0]), t('Properly places the #description element before the form item.'));
+
+    // Check #description placement with #description_display='before'.
+    $field_id = 'edit-form-textarea-test-description-before';
+    $elements = $this->xpath('//label[@for="' . $field_id . '"]/following-sibling::div[contains(@class, "description")]');
+    $this->assertTrue(isset($elements[0]), t('Properly places the #description element before the form item.'));
+
+    // Check #description placement with #description_display='after'.
+    $field_id = 'edit-form-checkboxes-test-description-after';
+    $elements = $this->xpath('//div[@id="' . $field_id . '"]/following-sibling::div[contains(@class, "description")]');
+    $this->assertTrue(isset($elements[0]), t('Properly places the #description element after the form item.'));
+
+    // Check #description placement with #description_display='after'.
+    $field_id = 'edit-form-radios-test-description-after';
+    $elements = $this->xpath('//div[@id="' . $field_id . '"]/following-sibling::div[contains(@class, "description")]');
+    $this->assertTrue(isset($elements[0]), t('Properly places the #description element after the form item.'));
+
+    // Check #description placement with #description_display='after'.
+    $field_id = 'edit-form-textarea-test-description-after';
+    $elements = $this->xpath('//textarea[@id="' . $field_id . '"]/parent::div/following-sibling::div[contains(@class, "description")]');
+    $this->assertTrue(isset($elements[0]), t('Properly places the #description element after the form item.'));
   }
 }
 

@@ -25,6 +25,7 @@ attrarr
 attributename
 attrlist
 attrname
+autocreate
 backdropcaption
 backdropcms
 backdropimage
@@ -36,6 +37,8 @@ barbaz
 Barepaths
 bartik
 basenames
+basepath
+basetheme
 basethemes
 bitmasks
 bitstring
@@ -73,6 +76,7 @@ cresult
 cript
 csspath
 CURLAUTH
+CURLOPT
 curparts
 curstr
 Dairiki
@@ -83,6 +87,7 @@ datelimits
 dbinfo
 dblog
 DDTHH
+deconstructor
 dependee
 dependees
 derf
@@ -90,7 +95,10 @@ devmajor
 devminor
 diffutils
 dimanche
+dialogclose
+dialogopen
 divitis
+divs
 docache
 docwilmot
 domdocument
@@ -110,6 +118,7 @@ entityreference
 errorcode
 evalmath
 evid
+exitcode
 expandtab
 exportables
 extname
@@ -183,6 +192,7 @@ Htmlto
 httpauth
 HTTPAUTH
 HTTPGET
+HWLDF
 ical
 ICAL
 IDNA
@@ -199,6 +209,7 @@ innodb
 instantiatable
 isid
 istart
+itoa
 jahwohl
 Jamo
 jdalton
@@ -256,8 +267,11 @@ mousedown
 mouton
 moutons
 msgbox
+msword
 multibundle
+multilanguage
 multipage
+multisite
 multisites
 Műveletek
 myclass
@@ -328,18 +342,27 @@ Optionchecker
 otherjob
 othername
 otherval
+outro
 padder
 pageno
 pagenum
 pagerpieces
+PHPGGC
 phptemplate
 phpwiki
 plid
 plids
 pneum
 Ponedjeljak
+POSTFIELDS
 preenable
 Prefilter
+preinstall
+preinstalled
+preinstalling
+prepopulate
+prepopulated
+prepopulating
 prevdate
 prevdatealt
 prevfirst
@@ -367,6 +390,7 @@ reparented
 reparenting
 requeing
 restriping
+RETURNTRANSFER
 retval
 rger
 rkey
@@ -433,6 +457,7 @@ Teletubbies
 tempstore
 testconfig
 testfiles
+testsuite
 testviews
 textgroup
 textgroups

@@ -336,19 +336,8 @@ function file_add_form_submit($form, &$form_state) {
   if ($save) {
     $file = file_load($form_state['storage']['upload']);
     if ($file) {
-      if (file_uri_scheme($file->uri) != $form_state['storage']['scheme']) {
-        $file_destination = $form_state['storage']['scheme'] . '://' . file_uri_target($file->uri);
-        $file_destination = file_stream_wrapper_uri_normalize($file_destination);
-        if ($moved_file = file_move($file, $file_destination, FILE_EXISTS_RENAME)) {
-          // Only re-assign the file object if file_move() did not fail.
-          $file = $moved_file;
-        }
-      }
       $file->type = $form_state['storage']['type'];
       $file->display = TRUE;
-
-      // Change the file from temporary to permanent.
-      $file->status = FILE_STATUS_PERMANENT;
 
       // Save the form fields.
       // Keep in mind that the values for the Field API fields must be in
@@ -356,14 +345,49 @@ function file_add_form_submit($form, &$form_state) {
       // the fields are on the last page of the multi step form.
       entity_form_submit_build_entity('file', $file, $form, $form_state);
 
-      file_save($file);
-      // Record that the module (in this case, the File module) is using the
-      // file. Without the call to file_usage_add, file_managed_file_validate()
-      // produces an error upon saving the form, saying that the uploaded file
-      // may not be referenced.
-      file_usage_add($file, 'file', 'file', $file->fid);
-      $form_state['file'] = $file;
-      backdrop_set_message(t('@type %name was uploaded.', array('@type' => file_type_get_name($file), '%name' => $file->filename)));
+      if (file_uri_scheme($file->uri) != $form_state['storage']['scheme']) {
+        $file_destination = $form_state['storage']['scheme'] . '://' . file_uri_target($file->uri);
+        $file_destination = file_stream_wrapper_uri_normalize($file_destination);
+        $file_destination_dirname = backdrop_dirname($file_destination);
+        // Create the directory in case it doesn't exist.
+        file_prepare_directory($file_destination_dirname, FILE_CREATE_DIRECTORY);
+        if ($moved_file = file_move($file, $file_destination, FILE_EXISTS_RENAME)) {
+          // Only re-assign the file object if file_move() did not fail.
+          $file = $moved_file;
+          $file_in_final_location = TRUE;
+        }
+        else {
+          $file_in_final_location = FALSE;
+        }
+      }
+      else {
+        $file_in_final_location = TRUE;
+      }
+
+      $substitutions = array(
+        '@type' => file_type_get_name($file),
+        '%name' => $file->filename,
+      );
+
+      // Only save the file if any necessary move was successful.
+      if ($file_in_final_location) {
+        // Change the file from temporary to permanent.
+        $file->status = FILE_STATUS_PERMANENT;
+
+        file_save($file);
+        // Record that the module (in this case, the File module) is using the
+        // file. Without the call to file_usage_add, file_managed_file_validate()
+        // produces an error upon saving the form, saying that the uploaded file
+        // may not be referenced.
+        file_usage_add($file, 'file', 'file', $file->fid);
+        $form_state['file'] = $file;
+
+        backdrop_set_message(t('@type %name was uploaded.', $substitutions));
+      }
+      else {
+        $file->delete();
+        backdrop_set_message(t('@type %name was not saved.', $substitutions), 'error');
+      }
     }
     else {
       backdrop_set_message(t('An error occurred and no file was uploaded.'), 'error');

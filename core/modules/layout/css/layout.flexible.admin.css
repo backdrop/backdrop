@@ -1,5 +1,5 @@
 /**
- * Flexible template admin css.
+ * Flexible template admin CSS.
  */
 
 .layout-flexible-region-top .label {
@@ -9,10 +9,14 @@
   line-height: 1.2;
   text-transform: uppercase;
   font-weight: normal;
-  color: #000;
+  color: #000000;
 }
 [dir="rtl"] .layout-flexible-region-top .label {
   padding: 4px 0 4px 12px;
+}
+
+.flexible-row .layout-editor-region {
+  border: 1px solid #cccccc;
 }
 
 .flexible-row .layout-editor-region-title .label {
@@ -21,16 +25,17 @@
 
 .layout--flexible .layout-editor-block {
   box-shadow: none;
+  cursor: ns-resize;
 }
 .layout--flexible .layout-editor-block-title {
   padding: 0.4em 1em;
-  margin-bottom: 10px;
+  margin: 0 -0.9375rem 0.9375rem -0.9375rem;
 }
 .layout--flexible .layout-editor-block-title .text {
-  font-weight: normal;
+  font-weight: bold;
 }
 .layout--flexible .layout-editor-block-content p {
-  color: #575357;
+  color: #000000;
 }
 
 .layout-flexible-region-top .buttons {
@@ -39,14 +44,12 @@
 
 .layout-flexible-editor .flexible-row {
   padding: 0;
-  border: 1.25px dashed #0074bd;
+  border: 1px solid #cccccc;
   margin-bottom: 15px;
   border-radius: 4px;
-  box-shadow: 3px 3px 0 0 #c6c6c6;
-}
-.layout-flexible-editor .flexible-row:hover {
-  background-color: #ffffff;
-  cursor: move;
+  cursor: ns-resize;
+  box-shadow: 2px 2px 0 0 #d0d0d0;
+  background: #f7f7f7;
 }
 
 .layout-flexible-add-row {
@@ -57,13 +60,17 @@
 }
 
 .flexible-icon {
-  border: 2px solid #999;
+  border: 2px solid #999999;
   border-radius: 3px;
   padding: 1px;
 }
 .flexible-icon-region {
-  background-color: #ccc;
-  color: #fff;
+  color: #ffffff;
+  background: #cccccc;
   background-clip: content-box;
   text-align: center;
+}
+
+.l-content #layout-flexible-content {
+  background: #ffffff;
 }
