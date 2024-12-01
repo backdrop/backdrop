@@ -543,7 +543,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    *   The table to be altered.
    * @param string $name
    *   The name of the key.
-   * @param string $fields
+   * @param string[] $fields
    *   An array of field names.
    *
    * @return void

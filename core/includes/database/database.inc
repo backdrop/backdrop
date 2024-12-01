@@ -698,7 +698,7 @@ abstract class DatabaseConnection {
    * query. All queries executed by Backdrop are executed as PDO prepared
    * statements.
    *
-   * @param string $query
+   * @param string|DatabaseStatementInterface $query
    *   The query to execute. In most cases this will be a string containing
    *   an SQL query with placeholders. An already-prepared instance of
    *   DatabaseStatementInterface may also be passed in order to allow calling
@@ -715,7 +715,7 @@ abstract class DatabaseConnection {
    *   An associative array of options to control how the query is run. See
    *   the documentation for DatabaseConnection::defaultOptions() for details.
    *
-   * @return DatabaseStatementInterface|false|int|PDOStatement|string|NULL
+   * @return DatabaseStatementInterface|false|int|PDOStatement|string|null
    *   This method will return one of: the executed statement, the number of
    *   rows affected by the query (not the number matched), or the generated
    *   insert ID of the last query, depending on the value of
@@ -857,7 +857,7 @@ abstract class DatabaseConnection {
    *   The base table for this query, that is, the first table in the FROM
    *   clause. This table will also be used as the "base" table for query_alter
    *   hook implementations.
-   * @param string $alias
+   * @param string|null $alias
    *   The alias of the base table of this query.
    * @param array $options
    *   An array of options on the query.
@@ -1399,7 +1399,7 @@ abstract class DatabaseConnection {
    * @param string $operator
    *   The condition operator, such as "IN", "BETWEEN", etc. Case-sensitive.
    *
-   * @return array|NULL
+   * @return array|null
    *   The extra handling directives for the specified operator, or NULL.
    *
    * @see DatabaseCondition::compile()
@@ -1608,7 +1608,7 @@ abstract class Database {
    *
    * @param string $target
    *   The database target name.
-   * @param string $key
+   * @param string|null $key
    *   The database connection key. Defaults to NULL which means the active key.
    *
    * @return DatabaseConnection
@@ -1652,7 +1652,7 @@ abstract class Database {
   /**
    * Sets the active connection to the specified key.
    *
-   * @return string|NULL
+   * @return string|null
    *   The previous database connection key.
    */
   final public static function setActiveConnection($key = 'default') {
@@ -1748,7 +1748,7 @@ abstract class Database {
    * @param string $key
    *   The connection key for which we want information.
    *
-   * @return array|NULL
+   * @return array|null
    *   The array of connection info if the $key is found. NULL if it is missing.
    */
   final public static function getConnectionInfo($key = 'default') {
@@ -1868,10 +1868,10 @@ abstract class Database {
   /**
    * Closes a connection to the server specified by the given key and target.
    *
-   * @param string $target
-   *   The database target name.  Defaults to NULL meaning that all target
+   * @param string|null $target
+   *   The database target name. Defaults to NULL meaning that all target
    *   connections will be closed.
-   * @param string $key
+   * @param string|null $key
    *   The database connection key. Defaults to NULL which means the active key.
    */
   public static function closeConnection($target = NULL, $key = NULL) {
@@ -2061,7 +2061,7 @@ class DatabaseTransaction {
    *
    * @param DatabaseConnection $connection
    *   The database connection for this transaction.
-   * @param string $name
+   * @param string|null $name
    *   An optional name for the transaction. Note these need to be unique within
    *   the current transaction stack. Can be left empty to automatically assign
    *   a name, but the name can be useful to identify complex series of queries.
@@ -2300,7 +2300,7 @@ interface DatabaseStatementInterface extends Traversable {
    *
    * @param string $key
    *   The name of the field on which to index the array.
-   * @param int $fetch
+   * @param int|null $fetch
    *   The fetch mode to use. If set to PDO::FETCH_ASSOC, PDO::FETCH_NUM, or
    *   PDO::FETCH_BOTH the returned value with be an array of arrays. For any
    *   other value it will be an array of objects. By default, the fetch mode
@@ -2609,7 +2609,7 @@ class DatabaseStatementEmpty implements Iterator, DatabaseStatementInterface {
  * @param array $options
  *   An array of options to control how the query operates.
  *
- * @return DatabaseStatementInterface|DatabaseStatementBase|DatabaseStatementPrefetch|stdClass[]
+ * @return DatabaseStatementInterface
  *   A prepared statement object, already executed.
  *
  * @see DatabaseConnection::defaultOptions()
@@ -2636,12 +2636,12 @@ function db_query($query, array $args = array(), array $options = array()) {
  * @param array $args
  *   An array of values to substitute into the query. If the query uses named
  *   placeholders, this is an associative array in any order. If the query uses
- *   unnamed placeholders (?), this is an indexed array and the order must match
+ *   unnamed placeholders, this is an indexed array and the order must match
  *   the order of placeholders in the query string.
  * @param array $options
  *   An array of options to control how the query operates.
  *
- * @return DatabaseStatementInterface|DatabaseStatementBase|DatabaseStatementPrefetch|stdClass[]
+ * @return DatabaseStatementBase|DatabaseStatementInterface|DatabaseStatementPrefetch
  *   A prepared statement object, already executed.
  *
  * @see DatabaseConnection::defaultOptions()
@@ -2780,7 +2780,7 @@ function db_truncate($table, array $options = array()) {
  * @param string $table
  *   The base table for this query. May be a string or another SelectQuery
  *   object. If a query object is passed, it will be used as a subselect.
- * @param string $alias
+ * @param string|null $alias
  *   The alias for the base table of this query.
  * @param array $options
  *   An array of options to control how the query operates.
@@ -2798,7 +2798,7 @@ function db_select($table, $alias = NULL, array $options = array()) {
 /**
  * Returns a new transaction object for the active database.
  *
- * @param string $name
+ * @param string|null $name
  *   Optional name of the transaction.
  * @param array $options
  *   An array of options to control how the transaction operates:
@@ -3088,6 +3088,10 @@ function db_rename_table($table, $new_name) {
  *
  * @param string $table
  *   The table to be dropped.
+ *
+ * @return bool
+ *    TRUE if the table was successfully dropped, FALSE if there was no table
+ *    by that name to begin with.
  */
 function db_drop_table($table) {
   return Database::getConnection()->schema()->dropTable($table);
@@ -3112,10 +3116,12 @@ function db_drop_table($table) {
  *   'serial' type field, you MUST specify at least one key or index in this
  *   array. See db_change_field() for more explanation why.
  *
+ * @return void
+ *
  * @see db_change_field()
  */
 function db_add_field($table, $field, array $spec, array $keys_new = array()) {
-  return Database::getConnection()->schema()->addField($table, $field, $spec, $keys_new);
+  Database::getConnection()->schema()->addField($table, $field, $spec, $keys_new);
 }
 
 /**
@@ -3139,9 +3145,11 @@ function db_drop_field($table, $field) {
  *   The field to be altered.
  * @param mixed $default
  *   Default value to be set. NULL for 'default NULL'.
+ *
+ * @return void
  */
 function db_field_set_default($table, $field, $default) {
-  return Database::getConnection()->schema()->fieldSetDefault($table, $field, $default);
+  Database::getConnection()->schema()->fieldSetDefault($table, $field, $default);
 }
 
 /**
@@ -3151,9 +3159,11 @@ function db_field_set_default($table, $field, $default) {
  *   The table to be altered.
  * @param string $field
  *   The field to be altered.
+ *
+ * @return void
  */
 function db_field_set_no_default($table, $field) {
-  return Database::getConnection()->schema()->fieldSetNoDefault($table, $field);
+  Database::getConnection()->schema()->fieldSetNoDefault($table, $field);
 }
 
 /**
@@ -3163,9 +3173,11 @@ function db_field_set_no_default($table, $field) {
  *   Name of the table to be altered.
  * @param array $fields
  *   Array of fields for the primary key.
+ *
+ * @return void
  */
 function db_add_primary_key($table, array $fields) {
-  return Database::getConnection()->schema()->addPrimaryKey($table, $fields);
+  Database::getConnection()->schema()->addPrimaryKey($table, $fields);
 }
 
 /**
@@ -3173,6 +3185,10 @@ function db_add_primary_key($table, array $fields) {
  *
  * @param string $table
  *   Name of the table to be altered.
+ *
+ * @return bool
+ *    TRUE if the primary key was successfully dropped, FALSE if there was no
+ *    primary key on this table to begin with.
  */
 function db_drop_primary_key($table) {
   return Database::getConnection()->schema()->dropPrimaryKey($table);
@@ -3187,9 +3203,11 @@ function db_drop_primary_key($table) {
  *   The name of the key.
  * @param array $fields
  *   An array of field names.
+ *
+ * @return void
  */
 function db_add_unique_key($table, $name, array $fields) {
-  return Database::getConnection()->schema()->addUniqueKey($table, $name, $fields);
+  Database::getConnection()->schema()->addUniqueKey($table, $name, $fields);
 }
 
 /**
@@ -3199,6 +3217,10 @@ function db_add_unique_key($table, $name, array $fields) {
  *   The table to be altered.
  * @param string $name
  *   The name of the key.
+ *
+ * @return bool
+ *    TRUE if the key was successfully dropped, FALSE if there was no key by
+ *    that name to begin with.
  */
 function db_drop_unique_key($table, $name) {
   return Database::getConnection()->schema()->dropUniqueKey($table, $name);
@@ -3213,9 +3235,11 @@ function db_drop_unique_key($table, $name) {
  *   The name of the index.
  * @param array $fields
  *   An array of field names.
+ *
+ * @return void
  */
 function db_add_index($table, $name, array $fields) {
-  return Database::getConnection()->schema()->addIndex($table, $name, $fields);
+  Database::getConnection()->schema()->addIndex($table, $name, $fields);
 }
 
 /**
@@ -3225,6 +3249,10 @@ function db_add_index($table, $name, array $fields) {
  *   The table to be altered.
  * @param string $name
  *   The name of the index.
+ *
+ * @return bool
+ *    TRUE if the index was successfully dropped, FALSE if there was no index
+ *    by that name to begin with.
  */
 function db_drop_index($table, $name) {
   return Database::getConnection()->schema()->dropIndex($table, $name);
@@ -3283,9 +3311,11 @@ function db_drop_index($table, $name) {
  *   Optional keys and indexes specification to be created on the table along
  *   with changing the field. The format is the same as a table specification
  *   but without the 'fields' element.
+ *
+ * @return void
  */
 function db_change_field($table, $field, $field_new, array $spec, array $keys_new = array()) {
-  return Database::getConnection()->schema()->changeField($table, $field, $field_new, $spec, $keys_new);
+  Database::getConnection()->schema()->changeField($table, $field, $field_new, $spec, $keys_new);
 }
 
 /**

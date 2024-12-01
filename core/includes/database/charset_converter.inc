@@ -47,9 +47,9 @@ class DatabaseCharsetConverter {
   /**
    * DatabaseCharsetConverter constructor.
    *
-   * @param string $charset
+   * @param string|null $charset
    *   (Optional) The character set to be used. Defaults to "utf8mb4".
-   * @param string $collation
+   * @param string|null $collation
    *   (Optional) The collation to be used. Defaults to "utf8mb4_general_ci".
    */
   public function __construct($charset = NULL, $collation = NULL) {
@@ -122,9 +122,9 @@ class DatabaseCharsetConverter {
    *
    * @param string $database_name
    *   Database name.
-   * @param string $charset
+   * @param string|null $charset
    *   (Optional) The character set. Defaults to the constructor value.
-   * @param string $collation
+   * @param string|null $collation
    *   (Optional) The collation. Defaults to the constructor value.
    *
    * @return bool
@@ -146,9 +146,9 @@ class DatabaseCharsetConverter {
    * @param array $table_names
    *   A list of table names to convert. These should be actual table names
    *   in the database, with any table prefixes already prepended.
-   * @param string $charset
+   * @param string|null $charset
    *   (Optional) The character set. Defaults to the constructor value.
-   * @param string $collation
+   * @param string|null $collation
    *   (Optional) The collation. Defaults to the constructor value.
    *
    * @throws PDOException
@@ -168,9 +168,9 @@ class DatabaseCharsetConverter {
    * @param string $table_name
    *   The table name to convert. This should be the actual table name
    *   in the database, with any table prefix already prepended.
-   * @param string $charset
+   * @param string|null $charset
    *   (Optional) The character set. Defaults to the constructor value.
-   * @param string $collation
+   * @param string|null $collation
    *   (Optional) The collation. Defaults to the constructor value.
    *
    * @return bool
@@ -198,9 +198,9 @@ class DatabaseCharsetConverter {
    * @param string $table_name
    *   The table name to convert. This should be the actual table name
    *   in the database, with any table prefix already prepended.
-   * @param string $charset
+   * @param string|null $charset
    *   (Optional) The character set. Defaults to the constructor value.
-   * @param string $collation
+   * @param string|null $collation
    *   (Optional) The collation. Defaults to the constructor value.
    *
    * @return bool

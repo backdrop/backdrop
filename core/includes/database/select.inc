@@ -242,7 +242,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    *
    * @param string $expression
    *   The expression string. May contain placeholders.
-   * @param string $alias
+   * @param string|null $alias
    *   The alias for this expression. If not specified, one will be generated
    *   automatically in the form "expression_#". The alias will be checked for
    *   uniqueness, so the requested alias may not be the alias that is assigned
@@ -250,7 +250,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * @param array $arguments
    *   Any placeholder arguments needed for this expression.
    *
-   * @return string|NULL
+   * @return string|null
    *   The unique alias that was assigned for this expression.
    */
   public function addExpression($expression, $alias = NULL, $arguments = array());
@@ -262,10 +262,10 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    *
    * @param string $table
    *   The table against which to join.
-   * @param string $alias
+   * @param string|null $alias
    *   The alias for the table. In most cases this should be the first letter
    *   of the table, or the first letter of each "word" in the table.
-   * @param array $condition
+   * @param array|null $condition
    *   The condition on which to join this table. If the join requires values,
    *   this clause should use a named placeholder and the value or values to
    *   insert should be passed in the 4th parameter. For the first table joined
@@ -286,10 +286,10 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    *
    * @param string $table
    *   The table against which to join.
-   * @param string $alias
+   * @param string|null $alias
    *   The alias for the table. In most cases this should be the first letter
    *   of the table, or the first letter of each "word" in the table.
-   * @param string $condition
+   * @param string|null $condition
    *   The condition on which to join this table. If the join requires values,
    *   this clause should use a named placeholder and the value or values to
    *   insert should be passed in the 4th parameter. For the first table joined
@@ -310,10 +310,10 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    *
    * @param string $table
    *   The table against which to join.
-   * @param string $alias
+   * @param string|null $alias
    *   The alias for the table. In most cases this should be the first letter
    *   of the table, or the first letter of each "word" in the table.
-   * @param string $condition
+   * @param string|null $condition
    *   The condition on which to join this table. If the join requires values,
    *   this clause should use a named placeholder and the value or values to
    *   insert should be passed in the 4th parameter. For the first table joined
@@ -334,10 +334,10 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    *
    * @param string $table
    *   The table against which to join.
-   * @param string $alias
+   * @param string|null $alias
    *   The alias for the table. In most cases this should be the first letter
    *   of the table, or the first letter of each "word" in the table.
-   * @param string $condition
+   * @param string|null $condition
    *   The condition on which to join this table. If the join requires values,
    *   this clause should use a named placeholder and the value or values to
    *   insert should be passed in the 4th parameter. For the first table joined
@@ -365,11 +365,11 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * @param string $table
    *   The table against which to join. May be a string or another SelectQuery
    *   object. If a query object is passed, it will be used as a sub-select.
-   * @param string $alias
+   * @param string|null $alias
    *   The alias for the table. In most cases this should be the first letter
    *   of the table, or the first letter of each "word" in the table. If
    *   omitted, one will be dynamically generated.
-   * @param string $condition
+   * @param string|null $condition
    *   The condition on which to join this table. If the join requires values,
    *   this clause should use a named placeholder and the value or values to
    *   insert should be passed in the 4th parameter. For the first table joined
@@ -434,11 +434,12 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * If this method is called with no parameters, will remove any range
    * directives that have been set.
    *
-   * @param int $start
+   * @param int|null $start
    *   The first record from the result set to return. If NULL, removes any
    *   range directives that are set.
-   * @param int $length
-   *   The number of records to return from the result set.
+   * @param int|null $length
+   *   The number of records to return from the result set. If NULL, all
+   *   remaining results are returned.
    *
    * @return SelectQueryInterface
    *   The called object.
@@ -834,7 +835,7 @@ class SelectQueryExtender implements SelectQueryInterface {
   /**
    * Executes the extended select query.
    *
-   * @return NULL|DatabaseStatementInterface|DatabaseStatementBase|DatabaseStatementPrefetch|stdClass[]
+   * @return DatabaseStatementEmpty|DatabaseStatementInterface|false|int|PDOStatement|string|null
    */
   public function execute() {
     // By calling preExecute() here, we force it to preprocess the extender

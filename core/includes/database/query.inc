@@ -31,7 +31,7 @@ interface QueryConditionInterface {
    *   The value to test the field against. In most cases, this is a scalar.
    *   For more complex options, it is an array. The meaning of each element in
    *   the array is dependent on the $operator.
-   * @param string $operator
+   * @param string|null $operator
    *   The comparison operator, such as =, <, or >=. It also accepts more
    *   complex options such as IN, LIKE, or BETWEEN. Defaults to IN if $value is
    *   an array, and = otherwise.
@@ -621,7 +621,7 @@ class InsertQuery extends Query {
   /**
    * Executes the insert query.
    *
-   * @return DatabaseStatementInterface|false|int|PDOStatement|string|NULL
+   * @return DatabaseStatementInterface|false|int|PDOStatement|string|null
    *   The last insert ID of the query, if one exists. If the query
    *   was given multiple sets of values to insert, the return value is
    *   undefined. If no fields are specified, this method will do nothing and
@@ -939,7 +939,7 @@ class TruncateQuery extends Query {
   /**
    * Executes the TRUNCATE query.
    *
-   * @return DatabaseStatementInterface|false|int|PDOStatement|string|NULL
+   * @return DatabaseStatementInterface|false|int|PDOStatement|string|null
    *   Return value is dependent on the database type.
    */
   public function execute() {
@@ -1982,7 +1982,7 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
    * @param string $operator
    *   The condition operator, such as "IN", "BETWEEN", etc. Case-sensitive.
    *
-   * @return array|NULL
+   * @return array|null
    *   The extra handling directives for the specified operator, or NULL.
    */
   protected function mapConditionOperator($operator) {
