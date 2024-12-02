@@ -332,7 +332,7 @@ abstract class DatabaseConnection {
    * @param array $driver_options
    *   A key => value array of driver-specific connection options.
    */
-  public function __construct($dsn, $username, $password, $driver_options = array()) {
+  public function __construct($dsn, $username, $password, $driver_options = array()) { // phpcs:ignore -- No type hint on $driver_options, add in 2.x.
     // Initialize and prepare the connection prefix.
     $this->setPrefix(isset($this->connectionOptions['prefix']) ? $this->connectionOptions['prefix'] : '');
 
@@ -645,7 +645,7 @@ abstract class DatabaseConnection {
    * @return string
    *   A sanitized comment string.
    */
-  public function makeComment($comments) {
+  public function makeComment($comments) { // phpcs:ignore -- No type hint on $comments, add in 2.x.
     if (empty($comments))
       return '';
 
@@ -726,7 +726,7 @@ abstract class DatabaseConnection {
    *
    * @throws PDOException
    */
-  public function query($query, array $args = array(), $options = array()) {
+  public function query($query, array $args = array(), $options = array()) { // phpcs:ignore -- No type hint on $options, add in 2.x.
     // Use default values if not already set.
     $options += $this->defaultOptions();
 
@@ -790,7 +790,7 @@ abstract class DatabaseConnection {
    * @return bool
    *   TRUE if the query was modified, FALSE otherwise.
    */
-  protected function expandArguments(&$query, &$args) {
+  protected function expandArguments(&$query, &$args) { // phpcs:ignore -- No type hint on $args, add in 2.x.
     $modified = FALSE;
 
     // If the placeholder value to insert is an array, assume that we need
@@ -1652,8 +1652,12 @@ abstract class Database {
   /**
    * Sets the active connection to the specified key.
    *
+   * @param string $key
+   *   The key in the $databases array to set as the active database.
+   *
    * @return string|null
-   *   The previous database connection key.
+   *   The previous database connection key if the connection changed. NULL if
+   *   the connection was not changed.
    */
   final public static function setActiveConnection($key = 'default') {
     if (empty(self::$databaseInfo)) {
@@ -1736,7 +1740,7 @@ abstract class Database {
    *   settings.php. Note that the structure of this array will depend on the
    *   database driver it is connecting to.
    */
-  public static function addConnectionInfo($key, $target, $info) {
+  public static function addConnectionInfo($key, $target, $info) { // phpcs:ignore -- No type hint on $info, add in 2.x.
     if (empty(self::$databaseInfo[$key][$target])) {
       self::$databaseInfo[$key][$target] = $info;
     }
@@ -2156,7 +2160,7 @@ interface DatabaseStatementInterface extends Traversable {
    * @return bool
    *   TRUE on success, or FALSE on failure.
    */
-  public function execute($args = array(), $options = array());
+  public function execute($args = array(), $options = array()); // phpcs:ignore -- No type hints, add in 2.x.
 
   /**
    * Gets the query string of this statement.
@@ -2216,7 +2220,7 @@ interface DatabaseStatementInterface extends Traversable {
   /**
    * Returns a single field from the next record of a result set.
    *
-   * @param $index
+   * @param int $index
    *   The numeric index of the field to return. Defaults to the first field.
    *
    * @return mixed
@@ -2820,8 +2824,9 @@ function db_transaction($name = NULL, array $options = array()) {
  * @param string $key
  *   The key in the $databases array to set as the default database.
  *
- * @return string
- *   The key of the formerly active database.
+ * @return string|null
+ *   The previous database connection key if the connection changed. NULL if
+ *   the connection was not changed.
  */
 function db_set_active($key = 'default') {
   return Database::setActiveConnection($key);
@@ -3090,8 +3095,8 @@ function db_rename_table($table, $new_name) {
  *   The table to be dropped.
  *
  * @return bool
- *    TRUE if the table was successfully dropped, FALSE if there was no table
- *    by that name to begin with.
+ *   TRUE if the table was successfully dropped, FALSE if there was no table
+ *   by that name to begin with.
  */
 function db_drop_table($table) {
   return Database::getConnection()->schema()->dropTable($table);
@@ -3187,8 +3192,8 @@ function db_add_primary_key($table, array $fields) {
  *   Name of the table to be altered.
  *
  * @return bool
- *    TRUE if the primary key was successfully dropped, FALSE if there was no
- *    primary key on this table to begin with.
+ *   TRUE if the primary key was successfully dropped, FALSE if there was no
+ *   primary key on this table to begin with.
  */
 function db_drop_primary_key($table) {
   return Database::getConnection()->schema()->dropPrimaryKey($table);
@@ -3219,8 +3224,8 @@ function db_add_unique_key($table, $name, array $fields) {
  *   The name of the key.
  *
  * @return bool
- *    TRUE if the key was successfully dropped, FALSE if there was no key by
- *    that name to begin with.
+ *   TRUE if the key was successfully dropped, FALSE if there was no key by
+ *   that name to begin with.
  */
 function db_drop_unique_key($table, $name) {
   return Database::getConnection()->schema()->dropUniqueKey($table, $name);
@@ -3251,8 +3256,8 @@ function db_add_index($table, $name, array $fields) {
  *   The name of the index.
  *
  * @return bool
- *    TRUE if the index was successfully dropped, FALSE if there was no index
- *    by that name to begin with.
+ *   TRUE if the index was successfully dropped, FALSE if there was no index
+ *   by that name to begin with.
  */
 function db_drop_index($table, $name) {
   return Database::getConnection()->schema()->dropIndex($table, $name);

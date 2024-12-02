@@ -56,7 +56,7 @@ interface QueryConditionInterface {
    * @return QueryConditionInterface
    *   The called object.
    */
-  public function where($snippet, $args = array());
+  public function where($snippet, $args = array()); // phpcs:ignore -- No type hint on $args, add in 2.x.
 
   /**
    * Sets a condition that the specified field be NULL.
@@ -334,7 +334,7 @@ abstract class Query implements QueryPlaceholderInterface {
    * @param array $options
    *   Array of query options.
    */
-  public function __construct(DatabaseConnection $connection, $options) {
+  public function __construct(DatabaseConnection $connection, $options) { // phpcs:ignore -- No type hint on $options, add in 2.x.
     $this->uniqueIdentifier = uniqid('', TRUE);
 
     $this->connection = $connection;
@@ -2035,7 +2035,7 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
    *   The updated extra handling directives for the operator with brackets
    *   added if necessary.
    */
-  protected function ensureBrackets($operator) {
+  protected function ensureBrackets($operator) { // phpcs:ignore -- No type hint on $operator, add in 2.x.
     if (strpos($operator['prefix'], '(') === FALSE) {
       $operator['prefix'] .= ' (';
     }

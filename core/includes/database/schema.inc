@@ -446,7 +446,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    * @throws DatabaseSchemaObjectExistsException
    *   If the specified table already has a field by that name.
    */
-  abstract public function addField($table, $field, $spec, $keys_new = array());
+  abstract public function addField($table, $field, $spec, $keys_new = array()); // phpcs:ignore -- No type hint on $spec or $keys_new, add in 2.x.
 
   /**
    * Drop a field.
@@ -512,7 +512,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    *
    * @param string $table
    *   The table to be altered.
-   * @param array $fields
+   * @param string[] $fields
    *   Fields for the primary key.
    *
    * @return void
@@ -522,7 +522,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    * @throws DatabaseSchemaObjectExistsException
    *   If the specified table already has a primary key.
    */
-  abstract public function addPrimaryKey($table, $fields);
+  abstract public function addPrimaryKey($table, $fields); // phpcs:ignore -- No type hint on $fields, add in 2.x.
 
   /**
    * Drop the primary key.
@@ -553,7 +553,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    * @throws DatabaseSchemaObjectExistsException
    *   If the specified table already has a key by that name.
    */
-  abstract public function addUniqueKey($table, $name, $fields);
+  abstract public function addUniqueKey($table, $name, $fields); // phpcs:ignore -- No type hint on $fields, add in 2.x.
 
   /**
    * Drop a unique key.
@@ -576,7 +576,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    *   The table to be altered.
    * @param string $name
    *   The name of the index.
-   * @param array $fields
+   * @param string[] $fields
    *   An array of field names.
    *
    * @return void
@@ -586,7 +586,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    * @throws DatabaseSchemaObjectExistsException
    *   If the specified table already has an index by that name.
    */
-  abstract public function addIndex($table, $name, $fields);
+  abstract public function addIndex($table, $name, $fields); // phpcs:ignore -- No type hint on $fields, add in 2.x.
 
   /**
    * Drop an index.
@@ -664,7 +664,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    * @throws DatabaseSchemaObjectExistsException
    *   If the specified destination field already exists.
    */
-  abstract public function changeField($table, $field, $field_new, $spec, $keys_new = array());
+  abstract public function changeField($table, $field, $field_new, $spec, $keys_new = array()); // phpcs:ignore -- No type hint on $spec or $keys_new, add in 2.x.
 
   /**
    * Create a new table from a Backdrop table definition.
@@ -679,7 +679,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    * @throws DatabaseSchemaObjectExistsException
    *   If the specified table already exists.
    */
-  public function createTable($name, $table) {
+  public function createTable($name, $table) { // phpcs:ignore -- No type hint on $table, add in 2.x.
     if ($this->tableExists($name)) {
       throw new DatabaseSchemaObjectExistsException(t('Table @name already exists.', array('@name' => $name)));
     }
@@ -700,7 +700,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    * @return array
    *   An array of SQL statements to create the table.
    */
-  abstract protected function createTableSql($name, $table);
+  abstract protected function createTableSql($name, $table); // phpcs:ignore -- No type hint on $table, add in 2.x.
 
   /**
    * Return an array of field names from an array of key/index column map.
@@ -732,7 +732,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    *
    * @param string $comment
    *   The comment string to prepare.
-   * @param int $length
+   * @param int|null $length
    *   Optional upper limit on the returned string length.
    *
    * @return string

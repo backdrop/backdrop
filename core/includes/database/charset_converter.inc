@@ -233,11 +233,11 @@ class DatabaseCharsetConverter {
 
       $sql = "ALTER TABLE `$table_name`
               MODIFY `" . $row->Field . "` " .
-        $row->Type . " " .
+        $row->Type . " " . // phpcs:ignore -- Separate concat string for clarity.
         "CHARACTER SET :charset COLLATE :collation " .
         ($row->Null == "YES" ? "" : "NOT NULL ") .
         $default . " " .
-        $row->Extra . " " .
+        $row->Extra . " " . // phpcs:ignore -- Separate concat string for clarity.
         "COMMENT :comment";
 
       $params = array(

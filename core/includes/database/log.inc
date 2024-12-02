@@ -113,7 +113,7 @@ class DatabaseLog {
    * @param float $time
    *   The time in milliseconds the query took to execute.
    */
-  public function log(DatabaseStatementInterface $statement, $args, $time) {
+  public function log(DatabaseStatementInterface $statement, $args, $time) { // phpcs:ignore -- No type hint on $args, add in 2.x.
     foreach (array_keys($this->queryLog) as $key) {
       $this->queryLog[$key][] = array(
         'query' => $statement->getQueryString(),

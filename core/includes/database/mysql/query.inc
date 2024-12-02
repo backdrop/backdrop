@@ -28,7 +28,7 @@ class InsertQuery_mysql extends InsertQuery {
       $values = array();
       foreach ($this->insertValues as $insert_values) {
         foreach ($insert_values as $value) {
-          $values[':db_insert_placeholder_' . $max_placeholder++] = $value;
+          $values[':db_insert_placeholder_' . ($max_placeholder++)] = $value;
         }
       }
     }

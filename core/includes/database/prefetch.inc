@@ -149,7 +149,7 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
    * @return bool
    *   TRUE on success, or FALSE on failure.
    */
-  public function execute($args = array(), $options = array()) {
+  public function execute($args = array(), $options = array()) { // phpcs:ignore -- No type hints, add in 2.x.
     if (isset($options['fetch'])) {
       if (is_string($options['fetch'])) {
         // Default to an object. Note: db fields will be added to the object
@@ -229,7 +229,7 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
    * @return PDOStatement
    *   A PDOStatement object.
    */
-  protected function getStatement($query, &$args = array()) {
+  protected function getStatement($query, &$args = array()) { // phpcs:ignore -- No type hint on $args, add in 2.x.
     return $this->dbh->prepare($query);
   }
 

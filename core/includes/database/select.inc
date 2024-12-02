@@ -167,7 +167,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
   /**
    * Compiles and returns an array of the arguments for this prepared statement.
    *
-   * @param QueryPlaceholderInterface $queryPlaceholder
+   * @param QueryPlaceholderInterface|null $queryPlaceholder
    *   When collecting the arguments of a subquery, the main placeholder
    *   object should be passed as this parameter.
    *
@@ -198,7 +198,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    *   valid.
    * @param string $field
    *   The name of the field.
-   * @param string $alias
+   * @param string|null $alias
    *   The alias for this field. If not specified, one will be generated
    *   automatically based on the $table_alias and $field. The alias will be
    *   checked for uniqueness, so the requested alias may not be the alias
@@ -253,7 +253,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * @return string|null
    *   The unique alias that was assigned for this expression.
    */
-  public function addExpression($expression, $alias = NULL, $arguments = array());
+  public function addExpression($expression, $alias = NULL, $arguments = array()); // phpcs:ignore -- No type hint on $arguments, add in 2.x.
 
   /**
    * Default Join against another table in the database.
@@ -279,7 +279,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * @return string
    *   The unique alias that was assigned for this table.
    */
-  public function join($table, $alias = NULL, $condition = NULL, $arguments = array());
+  public function join($table, $alias = NULL, $condition = NULL, $arguments = array()); // phpcs:ignore -- No type hint on $arguments, add in 2.x.
 
   /**
    * Inner Join against another table in the database.
@@ -303,7 +303,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * @return string
    *   The unique alias that was assigned for this table.
    */
-  public function innerJoin($table, $alias = NULL, $condition = NULL, $arguments = array());
+  public function innerJoin($table, $alias = NULL, $condition = NULL, $arguments = array()); // phpcs:ignore -- No type hint on $arguments, add in 2.x.
 
   /**
    * Left Outer Join against another table in the database.
@@ -327,7 +327,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * @return string
    *   The unique alias that was assigned for this table.
    */
-  public function leftJoin($table, $alias = NULL, $condition = NULL, $arguments = array());
+  public function leftJoin($table, $alias = NULL, $condition = NULL, $arguments = array()); // phpcs:ignore -- No type hint on $arguments, add in 2.x.
 
   /**
    * Right Outer Join against another table in the database.
@@ -351,7 +351,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * @return string
    *   The unique alias that was assigned for this table.
    */
-  public function rightJoin($table, $alias = NULL, $condition = NULL, $arguments = array());
+  public function rightJoin($table, $alias = NULL, $condition = NULL, $arguments = array()); // phpcs:ignore -- No type hint on $arguments, add in 2.x.
 
   /**
    * Join against another table in the database.
@@ -383,7 +383,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * @return string
    *   The unique alias that was assigned for this table.
    */
-  public function addJoin($type, $table, $alias = NULL, $condition = NULL, $arguments = array());
+  public function addJoin($type, $table, $alias = NULL, $condition = NULL, $arguments = array()); // phpcs:ignore -- No type hint on $arguments, add in 2.x.
 
   /**
    * Orders the result set by a given field.
@@ -518,7 +518,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    *   The value to test the field against. In most cases, this is a scalar. For
    *   more complex options, it is an array. The meaning of each element in the
    *   array is dependent on the $operator.
-   * @param string $operator
+   * @param string|null $operator
    *   The comparison operator, such as =, <, or >=. It also accepts more
    *   complex options such as IN, LIKE, or BETWEEN. Defaults to IN if $value is
    *   an array, and = otherwise.
@@ -1654,7 +1654,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
     $alias_candidate = $alias;
     $count = 2;
     while (!empty($this->fields[$alias_candidate])) {
-      $alias_candidate = $alias . '_' . $count++;
+      $alias_candidate = $alias . '_' . ($count++);
     }
     $alias = $alias_candidate;
 
@@ -1699,7 +1699,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
     $alias_candidate = $alias;
     $count = 2;
     while (!empty($this->expressions[$alias_candidate])) {
-      $alias_candidate = $alias . '_' . $count++;
+      $alias_candidate = $alias . '_' . ($count++);
     }
     $alias = $alias_candidate;
 
@@ -1757,7 +1757,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
     $alias_candidate = $alias;
     $count = 2;
     while (!empty($this->tables[$alias_candidate])) {
-      $alias_candidate = $alias . '_' . $count++;
+      $alias_candidate = $alias . '_' . ($count++);
     }
     $alias = $alias_candidate;
 
