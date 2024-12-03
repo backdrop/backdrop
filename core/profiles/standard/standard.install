@@ -410,6 +410,24 @@ function standard_install() {
   );
   menu_link_save($item);
 
+  // Prepping new image to use in hero block of front page.
+  $field_image_dir = 'public://hero';
+  file_prepare_directory($field_image_dir, FILE_CREATE_DIRECTORY);
+  $image_url = BACKDROP_ROOT . '/core/profiles/standard/images/bluewaves.svg';
+  $moved_file = file_unmanaged_copy($image_url, $field_image_dir);
+
+  $file = entity_create('file', array(
+    'filename' => 'bluewaves.svg',
+    'uri' => $moved_file,
+    'uid' => 1,
+  ));
+  $file->save();
+  file_usage_add($file, 'file', 'file', $file->fid);
+
+  // Adding image to hero block on front page.
+  config_set('layout.layout.home', 'content.094cbc03-d088-4b3c-8361-977733540ae8.data.settings.image_path', '/files/hero/bluewaves.svg');
+  config_set('layout.layout.home', 'content.094cbc03-d088-4b3c-8361-977733540ae8.data.settings.image', $file->fid);
+
   // Creating three default Card nodes.
   // Special thanks to @indigoxela for providing the icons.
   $field_image_dir = 'public://field/image';
