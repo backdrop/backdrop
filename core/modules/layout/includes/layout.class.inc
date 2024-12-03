@@ -721,11 +721,11 @@ class Layout {
       return;
     }
 
-    $old_layout_info = layout_get_layout_template_info($this->layout_template);
-    $new_layout_info = layout_get_layout_template_info($layout_name);
+    $old_layout_template_info = layout_get_layout_template_info($this->layout_template);
+    $new_layout_template_info = layout_get_layout_template_info($layout_name);
     // Set up the array with region names for the new layout.
     $new_positions = array();
-    $new_regions = array_keys($new_layout_info['regions']);
+    $new_regions = array_keys($new_layout_template_info['regions']);
     foreach ($new_regions as $new_region_name) {
       $new_positions[$new_region_name] = array();
     }
@@ -733,16 +733,16 @@ class Layout {
     // Do the mapping in the order provided (if any).
     if ($region_mapping) {
       $regions = array_keys($region_mapping);
-      $regions = array_unique(array_merge($regions, array_keys($old_layout_info['regions'])));
+      $regions = array_unique(array_merge($regions, array_keys($old_layout_template_info['regions'])));
     }
     else {
-      $regions = array_keys($old_layout_info['regions']);
+      $regions = array_keys($old_layout_template_info['regions']);
     }
     foreach ($regions as $old_region_name) {
       if (isset($region_mapping[$old_region_name])) {
         $new_region_name = $region_mapping[$old_region_name];
       }
-      elseif (array_key_exists($old_region_name, $new_layout_info['regions'])) {
+      elseif (array_key_exists($old_region_name, $new_layout_template_info['regions'])) {
         $new_region_name = $old_region_name;
       }
       else {
@@ -768,7 +768,7 @@ class Layout {
     // exist.
     if (!empty($this->orphaned_blocks)) {
       end($new_positions);
-      $this->refuge_region = !empty($new_layout_info['default region']) ? $new_layout_info['default region'] : key($new_positions);
+      $this->refuge_region = !empty($new_layout_template_info['default region']) ? $new_layout_template_info['default region'] : key($new_positions);
       foreach ($this->orphaned_blocks as $uuid) {
         $new_positions[$this->refuge_region][] = $uuid;
       }
@@ -776,7 +776,7 @@ class Layout {
 
     $this->layout_template = $layout_name;
     $this->positions = $new_positions;
-    module_invoke_all('layout_template_change', $this, $old_layout_info['name']);
+    module_invoke_all('layout_template_change', $this, $old_layout_template_info['name']);
   }
 
   /**

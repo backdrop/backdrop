@@ -43,6 +43,7 @@
   "globRoot": "../",
   "ignorePaths": [
     "*.svg",
+    "file.type.*.json",
     "/.*/",
     "/core/includes/diff.inc",
     "/core/includes/file.mimetypes.inc",

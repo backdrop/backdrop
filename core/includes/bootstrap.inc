@@ -469,6 +469,9 @@ abstract class BackdropCacheArray implements ArrayAccess {
    * Destructs the BackdropCacheArray object.
    */
   public function __destruct() {
+    if (!is_array($this->keysToPersist)) {
+      throw new UnexpectedValueException();
+    }
     $data = array();
     foreach ($this->keysToPersist as $offset => $persist) {
       if ($persist) {
