@@ -101,12 +101,12 @@ function theme_simpletest_test_table($variables) {
     unset($table[$key]);
   }
 
-  if (empty($rows)) {
-    return '<strong>' . t('No tests to display.') . '</strong>';
-  }
-  else {
-    return theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'simpletest-form-table')));
-  }
+  return theme('table', array(
+    'header' => $header,
+    'rows' => $rows,
+    'empty' => '<strong>' . t('No tests to display.') . '</strong>',
+    'attributes' => array('id' => 'simpletest-form-table'),
+  ));
 }
 
 /**
