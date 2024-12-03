@@ -468,12 +468,10 @@ function installer_manager_update_ready_form_submit($form, &$form_state) {
       );
     }
 
-    // If the owner of the last directory we extracted is the same as the
-    // owner of our configuration directory where we're trying to install the
-    // code, there's no need to prompt for FTP/SSH credentials. Instead, we
-    // instantiate a FileTransferLocal and invoke installer_authorize_run_update()
-    // directly.
-    if (fileowner($project_realpath) == fileowner(conf_path())) {
+    // If local transfers are allowed, there's no need to prompt for FTP/SSH
+    // credentials. Instead, we instantiate a FileTransferLocal and invoke
+    // installer_authorize_run_update() directly.
+    if (installer_manager_local_transfers_allowed()) {
       module_load_include('inc', 'installer', 'installer.authorize');
       $filetransfer = new FileTransferLocal(BACKDROP_ROOT);
       installer_authorize_run_update($filetransfer, $updates);
@@ -1141,11 +1139,11 @@ function installer_manager_batch_project_get($project, $url, &$context) {
 /**
  * Determines if file transfers will be performed locally.
  *
- * If the server is configured such that webserver-created files have the same
- * owner as the configuration directory where new code will eventually be
- * installed, the update manager can transfer files entirely locally, without
- * changing their ownership (in other words, without prompting the user for FTP,
- * SSH or other credentials).
+ * If the server is configured so that files can be written to the configuration
+ * directory where new code will eventually be installed, and the files have
+ * the right ownership, the update manager can transfer files entirely locally,
+ * without changing their ownership (in other words, without prompting the
+ * user for FTP, SSH or other credentials).
  *
  * This server configuration is an inherent security weakness because it allows
  * a malicious webserver process to append arbitrary PHP code and then execute
@@ -1161,10 +1159,10 @@ function installer_manager_batch_project_get($project, $url, &$context) {
  */
 function installer_manager_local_transfers_allowed() {
   // Compare the owner of a webserver-created temporary file to the owner of
-  // the configuration directory to determine if local transfers will be
-  // allowed.
+  // the settings file to determine if local transfers will be
+  // allowed. The conf_path() may be owned by a different user but writable.
   $temporary_file = backdrop_tempnam('temporary://', 'update_');
-  $local_transfers_allowed = fileowner($temporary_file) === fileowner(conf_path());
+  $local_transfers_allowed = (fileowner($temporary_file) === fileowner(conf_path() . "/settings.php")) && is_writable(conf_path());
 
   // Clean up. If this fails, we can ignore it (since this is just a temporary
   // file anyway).

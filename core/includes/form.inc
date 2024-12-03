@@ -1857,11 +1857,13 @@ function form_builder($form_id, &$element, &$form_state) {
     $element += $info;
     $element['#defaults_loaded'] = TRUE;
   }
+
   // Assign basic defaults common for all form elements.
   $element += array(
     '#required' => FALSE,
     '#attributes' => array(),
     '#title_display' => 'before',
+    '#description_display' => 'after',
   );
 
   // Special handling if we're on the top level form element.
@@ -2975,13 +2977,30 @@ function theme_fieldset($variables) {
     $output .= '<legend><span class="fieldset-legend">' . $element['#title'] . '</span></legend>';
   }
   $output .= '<div class="fieldset-wrapper">';
+
+  $description_before = '';
+  $description_after = '';
   if (!empty($element['#description'])) {
-    $output .= '<div class="fieldset-description">' . $element['#description'] . '</div>';
+    $description = theme('form_element_description', $variables);
+
+    switch ($element['#description_display']) {
+      case 'before':
+        $description_before = $description;
+        break;
+
+      case 'after':
+      case 'invisible':
+        $description_after = $description;
+        break;
+    }
   }
+
+  $output .= $description_before;
   $output .= $element['#children'];
   if (isset($element['#value'])) {
     $output .= $element['#value'];
   }
+  $output .= $description_after;
   $output .= '</div>';
   $output .= "</fieldset>\n";
   return $output;
@@ -3783,17 +3802,26 @@ function theme_details($variables) {
  *     options:
  *     @code
  *     $options = array(
- *       array(
+ *       1 => array(
  *         'title' => 'How to Learn Backdrop',
  *         'content_type' => 'Post',
  *         'status' => 'published',
  *         '#attributes' => array('class' => array('post-row')),
  *       ),
- *       array(
+ *       5 => array(
  *         'title' => 'Privacy Policy',
  *         'content_type' => 'Page',
  *         'status' => 'published',
  *         '#attributes' => array('class' => array('page-row')),
+ *       ),
+ *       23 => array(
+ *         'title' => 'Sample content',
+ *         'content_type' => 'Page',
+ *         'status' => 'published',
+ *         '#attributes' => array('class' => array('page-row')),
+ *         // Prevent users from selecting a row by adding a '#disabled'
+ *         // property set to TRUE.
+ *         '#disabled' => TRUE,
  *       ),
  *     );
  *     $header = array(
@@ -3831,6 +3859,9 @@ function theme_tableselect($variables) {
       // correct order by iterating over the header fields.
       foreach ($element['#header'] as $fieldname => $title) {
         $row['data'][] = $element['#options'][$key][$fieldname];
+      }
+      if (!empty($element['#options'][$key]['#disabled'])) {
+        $row['class'][] = 'disabled';
       }
       $rows[] = $row;
     }
@@ -3898,6 +3929,7 @@ function form_process_tableselect($element) {
             '#default_value' => isset($value[$key]) ? $key : NULL,
             '#attributes' => $element['#attributes'],
             '#ajax' => isset($element['#ajax']) ? $element['#ajax'] : NULL,
+            '#disabled' => !empty($element['#options'][$key]['#disabled']),
           );
         }
         else {
@@ -3913,6 +3945,7 @@ function form_process_tableselect($element) {
             '#parents' => $element['#parents'],
             '#id' => backdrop_html_id('edit-' . implode('-', $parents_for_id)),
             '#ajax' => isset($element['#ajax']) ? $element['#ajax'] : NULL,
+            '#disabled' => !empty($element['#options'][$key]['#disabled']),
           );
         }
         $element[$key]['#attributes']['data-tableselect-id'] = implode('-', $element['#parents']);
@@ -4830,8 +4863,9 @@ function theme_file($variables) {
  *   $form structure and set via form_builder()).
  * - form-disabled: Only set if the form element is #disabled.
  *
- * In addition to the element itself, the DIV contains a label for the element
- * based on the optional #title_display property, and an optional #description.
+ * In addition to the element itself, the DIV contains a label and an optional
+ * description. The label and description can be positioned by the
+ * #title_display and #description_display properties respectively.
  *
  * The optional #title_display property can have these values:
  * - before: The label is output before the element. This is the default.
@@ -4857,11 +4891,19 @@ function theme_file($variables) {
  * but the parent element should have neither. Use this carefully because a
  * field without an associated label can cause accessibility challenges.
  *
- * @param $variables
+ * The optional #description_display property can have these values:
+ * - after (the default for all elements except for fieldset): The description
+ *   is output after the element.
+ * - before (the default for fieldsets): The description is output before the
+ *   element, after the label (if not visually hidden).
+ * - invisible: The description is output between the label and the main form
+ *   element, hidden visually but available to screen readers.
+ *
+ * @param array $variables
  *   An associative array containing:
  *   - element: An associative array containing the properties of the element.
- *     Properties used: #title, #title_display, #description, #id, #required,
- *     #children, #type, #name.
+ *     Properties used: #type, #name, #title, #title_display, #id, #required,
+ *     #description, #description_display, #children.
  *
  * @ingroup themeable
  */
@@ -4872,6 +4914,7 @@ function theme_form_element($variables) {
   // may not necessarily have been processed by form_builder().
   $element += array(
     '#title_display' => 'before',
+    '#description_display' => 'after',
     '#wrapper_attributes' => array(),
   );
   $attributes = $element['#wrapper_attributes'];
@@ -4907,33 +4950,49 @@ function theme_form_element($variables) {
   if (!isset($element['#title'])) {
     $element['#title_display'] = 'none';
   }
+
+  $description_before = '';
+  $description_after = '';
+  if (!empty($element['#description'])) {
+    $description = theme('form_element_description', $variables);
+
+    switch ($element['#description_display']) {
+      case 'before':
+        // It is preferable for screen readers if the help text is near/after
+        // the label of the element. So treat it the same as "before" when it
+        // comes to its placement in that case.
+        $description_before = $description;
+        break;
+
+      case 'after':
+      case 'invisible':
+        $description_after = $description;
+        break;
+    }
+  }
+
   $prefix = isset($element['#field_prefix']) ? '<span class="field-prefix">' . $element['#field_prefix'] . '</span> ' : '';
   $suffix = isset($element['#field_suffix']) ? ' <span class="field-suffix">' . $element['#field_suffix'] . '</span>' : '';
+  $main_element = $description_before . $prefix . $element['#children'] . $suffix;
 
   switch ($element['#title_display']) {
     case 'before':
     case 'invisible':
-      $output .= ' ' . theme('form_element_label', $variables);
-      $output .= ' ' . $prefix . $element['#children'] . $suffix . "\n";
+      $output .= ' ' . theme('form_element_label', $variables) . ' ' . $main_element . "\n";
       break;
 
     case 'after':
-      $output .= ' ' . $prefix . $element['#children'] . $suffix;
-      $output .= ' ' . theme('form_element_label', $variables) . "\n";
+      $output .= ' ' . $main_element . ' ' . theme('form_element_label', $variables) . "\n";
       break;
 
     case 'none':
     case 'attribute':
-      // Output no label and no required marker, only the children.
-      $output .= ' ' . $prefix . $element['#children'] . $suffix . "\n";
+      // Output no label and no required marker; only the children.
+      $output .= ' ' . $main_element . "\n";
       break;
   }
 
-  if (!empty($element['#description'])) {
-    $output .= '<div class="description">' . $element['#description'] . "</div>\n";
-  }
-
-  $output .= "</div>\n";
+  $output .= $description_after . "</div>\n";
 
   return $output;
 }
@@ -5019,6 +5078,40 @@ function theme_form_element_label($variables) {
 
   // The leading whitespace helps visually separate fields from inline labels.
   return ' <label' . backdrop_attributes($attributes) . '>' . $t('!title !required', array('!title' => $title, '!required' => $required)) . "</label>\n";
+}
+
+/**
+ * Returns HTML for a form element's help text (#description).
+ *
+ * Form element descriptions may appear before or after elements, depending on
+ * theme_form_element() and #description_display.
+ *
+ * This function will not be called for elements with no description.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - element: An associative array containing the properties of the element.
+ *
+ * @since 1.30.0 Function added.
+ *
+ * @ingroup themeable
+ */
+function theme_form_element_description(array $variables) {
+  $element = $variables['element'];
+  // This is also used in the installer, pre-database setup.
+  $t = get_t();
+
+  // If description is not set, output nothing.
+  if (!isset($element['#description'])) {
+    return '';
+  }
+
+  $attributes = array('class' => array('description'));
+  if (isset($element['#description_display']) && $element['#description_display'] === 'invisible') {
+    $attributes['class'][] = 'element-invisible';
+  }
+
+  return '<div' . backdrop_attributes($attributes) . '>' . $element['#description'] . "</div>\n";
 }
 
 /**

@@ -60,6 +60,7 @@ function filter_element_info() {
     '#process' => array('filter_process_format'),
     '#base_type' => 'textarea',
     '#theme_wrappers' => array('text_format_wrapper'),
+    '#description_display' => 'before',
   );
   return $type;
 }
@@ -1281,8 +1282,6 @@ function filter_process_format($element) {
     // Do not copy this #process function to prevent form_builder() from
     // recursing infinitely.
     '#process',
-    // Description is handled by theme_text_format_wrapper().
-    '#description',
     // Ensure proper ordering of children.
     '#weight',
     // Properties already processed for the parent element.
@@ -1292,6 +1291,16 @@ function filter_process_format($element) {
     '#processed',
     '#theme_wrappers',
   );
+
+  // If the #description is set to be placed after the element (which is the
+  // default), let theme_text_format_wrapper() handle it. Otherwise, if the
+  // #description is set to be placed before the element, or set to invisible,
+  // then it would be rendered between the text-format-enabled area and the
+  // "Formatting options" fieldset.
+  if ($element['#description_display'] == 'after') {
+    $denylist[] = '#description';
+  }
+
   // Move this element into sub-element 'value'.
   unset($element['value']);
   foreach (element_properties($element) as $key) {

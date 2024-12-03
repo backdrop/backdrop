@@ -1764,7 +1764,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Change the layout to the test layout, which has identical regions.
     $edit = array(
-      'layout_template' => 'layout_test_layout',
+      'layout_template' => 'layout_test_layout_template',
     );
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', $edit, t('Save layout'));
 
@@ -1929,8 +1929,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
    * Check that all the blocks in $layout match those in $copied_from_layout.
    */
   protected function assertBlocksMatch($layout, $copied_from_layout, $orphaned_uuids = array()) {
-    $layout_info = layout_get_layout_template_info($layout->layout_template);
-    $default_region = $layout_info['default region'];
+    $layout_template_info = layout_get_layout_template_info($layout->layout_template);
+    $default_region = $layout_template_info['default region'];
     foreach ($layout->positions as $region_name => $blocks) {
       // Don't compare if it's the default region since orphaned blocks might
       // get reassigned here, which throws off the numbers.
