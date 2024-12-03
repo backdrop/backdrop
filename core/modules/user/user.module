@@ -1795,7 +1795,7 @@ function user_page_title($account) {
  */
 function user_init() {
   $current_path = current_path();
-  if (!user_is_logged_in() && ($current_path == 'user/login' || $current_path == 'user/password')) {
+  if (!user_is_logged_in() && ($current_path == 'user/login' || $current_path == 'user/password' || $current_path == 'user/register')) {
     $suppress_layout_on_login_page = config_get('system.core', 'user_login_page_suppress_layout');
     if (!user_login_page_tabs() && !user_is_logged_in() && $suppress_layout_on_login_page) {
       layout_suppress(TRUE);
@@ -1808,7 +1808,7 @@ function user_init() {
  */
 function user_custom_theme() {
   $current_path = current_path();
-  if (!user_is_logged_in() && ($current_path == 'user/login' || $current_path == 'user/password')) {
+  if (!user_is_logged_in() && ($current_path == 'user/login' || $current_path == 'user/password' || $current_path == 'user/register')) {
     return config_get('system.core', 'admin_theme');
   }
 }
@@ -1819,7 +1819,7 @@ function user_custom_theme() {
 function user_preprocess_page(&$variables) {
   // Add a class that tells us whether we're on a login page or not.
   $current_path = current_path();
-  if ($current_path == 'user/login' || $current_path == 'user/password') {
+  if ($current_path == 'user/login' || $current_path == 'user/password' || $current_path == 'user/register') {
     $variables['classes'][] = 'user-login-page';
   }
 }
@@ -3296,6 +3296,7 @@ function user_register_page() {
 function user_register_form($form, &$form_state) {
   global $user;
   $admin = user_access('administer users');
+  $form['#theme'] = 'user_login_form';
 
   // Pass access information to the submit handler. Running an access check
   // inside the submit function interferes with form processing and breaks

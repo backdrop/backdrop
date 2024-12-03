@@ -397,13 +397,14 @@ function template_preprocess_user_profile(&$variables) {
  */
 function template_preprocess_user_login_form(&$variables) {
   $form = $variables['user_login_form'];
+
   if ($form['#form_id'] == 'user_login') {
     $page_title = t('Login');
   }
   elseif ($form['#form_id'] == 'user_pass') {
     $page_title = t('Reset password');
   }
-  elseif ($form['#form_id'] == 'user_register') {
+  elseif ($form['#form_id'] == 'user_register_form') {
     $page_title = t('Create new account');
   }
   
