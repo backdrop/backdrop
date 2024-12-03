@@ -2682,6 +2682,7 @@ function node_update_1023() {
             'default' => '-1',
             'empty_table' => 0,
           ),
+          'link_display' => 'custom_url',
         ),
       ),
       'block' => array(
@@ -2703,6 +2704,7 @@ function node_update_1023() {
             'path_override' => 0,
             'fields_override' => 0,
           ),
+          'link_url' => '/admin/content',
         ),
       ),
     ),

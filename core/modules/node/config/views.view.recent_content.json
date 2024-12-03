@@ -638,7 +638,8 @@
                     },
                     "default": "-1",
                     "empty_table": 0
-                }
+                },
+                "link_display": "custom_url"
             }
         },
         "block": {
@@ -658,7 +659,8 @@
                     "more_link": 0,
                     "path_override": 0,
                     "fields_override": 0
-                }
+                },
+                "link_url": "/admin/content"
             }
         }
     }
