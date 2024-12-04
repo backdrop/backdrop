@@ -660,7 +660,7 @@
                     "path_override": 0,
                     "fields_override": 0
                 },
-                "link_url": "/admin/content"
+                "link_url": "admin/content"
             }
         }
     }
