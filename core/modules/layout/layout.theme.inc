@@ -498,6 +498,10 @@ function template_preprocess_block(&$variables) {
     }
     else {
       $variables['classes'][] = 'block-hero-no-image';
+      // @todo do a better version check here.
+      if (version_compare(BACKDROP_VERSION, '1.29.99', '>=')) {
+        $variables['classes'][] = 'block-hero-new';
+      }
     }
   }
 
