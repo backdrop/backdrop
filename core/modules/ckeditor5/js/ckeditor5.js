@@ -297,8 +297,8 @@
         Backdrop.ckeditor5.activeEditor = editor;
       }
       // Track when focus is set on a new editor.
-      // See https://ckeditor.com/docs/ckeditor5/latest/framework/deep-dive/ui/focus-tracking.html#checking-if-the-view-document-is-focused
-      editor.editing.view.document.on('change:isFocused', (evt, data, isFocused) => {
+      // See https://ckeditor.com/docs/ckeditor5/latest/framework/deep-dive/ui/focus-tracking.html#a-note-about-the-global-focus-tracker
+      editor.ui.focusTracker.on('change:isFocused', (evt, data, isFocused) => {
         if (isFocused) {
           Backdrop.ckeditor5.activeEditor = editor;
         }
