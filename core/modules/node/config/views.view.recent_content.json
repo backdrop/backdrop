@@ -656,7 +656,7 @@
                     "use_pager": 0,
                     "offset": 0,
                     "link_to_view": 0,
-                    "more_link": 0,
+                    "more_link": "more_link",
                     "path_override": 0,
                     "fields_override": 0
                 },
