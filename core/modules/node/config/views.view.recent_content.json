@@ -587,7 +587,7 @@
                     }
                 },
                 "use_more": 1,
-                "use_more_always": false,
+                "use_more_always": true,
                 "use_more_text": "More",
                 "style_options": {
                     "grouping": [],

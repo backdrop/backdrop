@@ -2629,7 +2629,7 @@ function node_update_1023() {
             ),
           ),
           'use_more' => 1,
-          'use_more_always' => FALSE,
+          'use_more_always' => TRUE,
           'use_more_text' => 'More',
           'style_options' => array(
             'grouping' => array(
