@@ -59,8 +59,6 @@
 .block-hero-no-image.block-hero-new {
   background-image: url(../../images/waves.svg);
   background-size: cover;
-  padding-top: 12vh;
-  padding-bottom: 11vh;
 }
 
 .no-background-blend-mode .block-hero-no-image * {
