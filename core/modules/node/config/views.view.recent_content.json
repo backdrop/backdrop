@@ -603,7 +603,8 @@
                         "timestamp": "title",
                         "name": "title",
                         "edit_node": "edit_node",
-                        "delete_node": "delete_node"
+                        "delete_node": "delete_node",
+                        "dropbutton": "dropbutton"
                     },
                     "info": {
                         "title": {
@@ -631,6 +632,11 @@
                             "empty_column": 1
                         },
                         "delete_node": {
+                            "align": "",
+                            "separator": "",
+                            "empty_column": 1
+                        },
+                        "dropbutton": {
                             "align": "",
                             "separator": "",
                             "empty_column": 1

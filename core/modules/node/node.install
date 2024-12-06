@@ -2647,6 +2647,7 @@ function node_update_1023() {
               'name' => 'title',
               'edit_node' => 'edit_node',
               'delete_node' => 'delete_node',
+              'dropbutton' => 'dropbutton',
             ),
             'info' => array(
               'title' => array(
@@ -2674,6 +2675,11 @@ function node_update_1023() {
                 'empty_column' => 1,
               ),
               'delete_node' => array(
+                'align' => '',
+                'separator' => '',
+                'empty_column' => 1,
+              ),
+              'dropbutton' => array(
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 1,
