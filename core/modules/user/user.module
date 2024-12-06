@@ -1808,7 +1808,7 @@ function user_init() {
  */
 function user_custom_theme() {
   $current_path = current_path();
-  if (!user_is_logged_in() && ($current_path == 'user/login' || $current_path == 'user/password' || $current_path == 'user/register')) {
+  if (config_get('system.core', 'user_login_page_suppress_layout') && !user_is_logged_in() && ($current_path == 'user/login' || $current_path == 'user/password' || $current_path == 'user/register')) {
     return config_get('system.core', 'admin_theme');
   }
 }
