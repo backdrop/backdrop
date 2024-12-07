@@ -1808,7 +1808,8 @@ function user_init() {
  */
 function user_custom_theme() {
   $current_path = current_path();
-  if (config_get('system.core', 'user_login_page_suppress_layout') && !user_is_logged_in() && ($current_path == 'user/login' || $current_path == 'user/password' || $current_path == 'user/register')) {
+  $config = config('system.core');
+  if ($config->get('user_login_page_suppress_layout') && !$config->get('user_login_page_tabs') && !user_is_logged_in() && ($current_path == 'user/login' || $current_path == 'user/password' || $current_path == 'user/register')) {
     return config_get('system.core', 'admin_theme');
   }
 }
