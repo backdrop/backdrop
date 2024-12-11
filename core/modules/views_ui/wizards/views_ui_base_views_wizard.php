@@ -644,9 +644,10 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $display_options['style_plugin'] = 'default';
     $display_options['row_plugin'] = 'fields';
 
-    // Add a least one field so the view validates and the user has already a preview.
-    // Therefore the basefield could provide 'defaults][field]' in it's base settings.
-    // If there is nothing like this choose the first field with a field handler.
+    // Add a least one field so the view validates and the user has already
+    // preview. Therefore the base field could provide '[defaults][field]' in
+    // it's base settings. If there is nothing like this choose the first field
+    // with a field handler.
     $data = views_fetch_data($this->base_table);
     if (isset($data['table']['base']['defaults']['field'])) {
       $field = $data['table']['base']['defaults']['field'];

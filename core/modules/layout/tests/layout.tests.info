@@ -69,3 +69,9 @@ name = Layout Deletion Test
 description = Tests checks and messages when layouts are deleted.
 group = Layout
 file = layout.test
+
+[LayoutEntityLayoutsTest]
+name = Layout Entity Layouts Test
+description = Tests the user interface for adding layout configuration to entity types.
+group = Layout
+file = layout_entity.test

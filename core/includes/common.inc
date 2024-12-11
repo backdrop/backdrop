@@ -953,6 +953,11 @@ function backdrop_access_denied() {
  * @see backdrop_http_build_query()
  *
  * @since 1.18.4 The $options['data'] key may now be passed as an array.
+ * @since 1.27.2 Support added for the 429 response code (previously treaded as
+ *   a 400).
+ * @since 1.27.2 Now removes any potentially sensitive headers before following
+ *   a redirect. See the 'strip_sensitive_headers_on_host_change' setting in
+ *   settings.php for details.
  */
 function backdrop_http_request($url, array $options = array()) {
   // Allow an alternate HTTP client library to replace Backdrop's default
@@ -3304,7 +3309,7 @@ function backdrop_map_assoc($array, $function = NULL) {
  * not possible to reliably ensure that PHP or a security extension will
  * not issue a warning/error if they prevent the use of this function.
  *
- * @param $time_limit
+ * @param int $time_limit
  *   An integer specifying the new time limit, in seconds. A value of 0
  *   indicates unlimited execution time.
  *
@@ -3323,12 +3328,12 @@ function backdrop_set_time_limit($time_limit) {
 /**
  * Returns the path to a system item (module, theme, etc.).
  *
- * @param $type
+ * @param string $type
  *   The type of the item (i.e. theme, theme_engine, module, profile).
- * @param $name
+ * @param string $name
  *   The name of the item for which the path is requested.
  *
- * @return
+ * @return string
  *   The path to the requested item or an empty string if the item is not found.
  */
 function backdrop_get_path($type, $name) {
@@ -3358,9 +3363,9 @@ function base_path() {
  * a link will overwrite a prior link with the exact same 'rel' and 'href'
  * attributes.
  *
- * @param $attributes
+ * @param array $attributes
  *   Associative array of element attributes including 'href' and 'rel'.
- * @param $header
+ * @param bool $header
  *   Optional flag to determine if a HTTP 'Link:' header should be sent.
  */
 function backdrop_add_html_head_link($attributes, $header = FALSE) {
@@ -3383,7 +3388,7 @@ function backdrop_add_html_head_link($attributes, $header = FALSE) {
 /**
  * Constructs an array of the defaults that are used for styles items.
  *
- * @param $data
+ * @param array|null $data
  *   (optional) The default data parameter for the style item array.
  *
  * @see backdrop_get_css()
@@ -3436,7 +3441,7 @@ function backdrop_css_defaults($data = NULL) {
  * Non-preprocessed files should only be added to the page when they are
  * actually needed.
  *
- * @param $data
+ * @param array|null $data
  *   (optional) The stylesheet data to be added, depending on what is passed
  *   through to the $options['type'] parameter:
  *   - 'file': The path to the CSS file relative to the base_path(), or a
@@ -3453,7 +3458,7 @@ function backdrop_css_defaults($data = NULL) {
  *   - 'external': The absolute path to an external CSS file that is not hosted
  *     on the local server. These files will not be aggregated if CSS
  *     aggregation is enabled.
- * @param $options
+ * @param array|null $options
  *   (optional) A string defining the 'type' of CSS that is being added in the
  *   $data parameter ('file', 'inline', or 'external'), or an array which can
  *   have any or all of the following keys:
@@ -5542,6 +5547,8 @@ function backdrop_get_library($module, $name = NULL) {
  *   - immutable: Whether to use the original icon instead of any overrides.
  *
  * @see icon()
+ *
+ * @since 1.28.0 Function added.
  */
 function backdrop_add_icons(array $icon_names) {
   $icon_paths = array();
@@ -8126,6 +8133,9 @@ function backdrop_common_theme() {
       'render element' => 'element',
     ),
     'form_element_label' => array(
+      'render element' => 'element',
+    ),
+    'form_element_description' => array(
       'render element' => 'element',
     ),
     'vertical_tabs' => array(

@@ -555,8 +555,11 @@ function image_hex2rgba(&$hex) {
  *
  * @param string $uri
  *   A path or URI to an image.
+ *
  * @return bool
  *   TRUE if the image is an SVG. FALSE if it is not.
+ *
+ * @since 1.28.0 Function added.
  */
 function image_is_svg($uri) {
   $mimetype = file_get_mimetype($uri);
@@ -574,38 +577,52 @@ function image_is_svg($uri) {
  *   which is the accessible mechanism for alternative text within SVGs.
  *
  * @return string
- *   The SVG image contents with the attributes added.
+ *   The SVG image contents with the attributes added. An empty string in case
+ *   of errors.
+ *
+ * @since 1.28.0 Function added.
  */
 function image_add_svg_attributes($svg_content, array $attributes) {
   $doc = new DOMDocument();
+  libxml_use_internal_errors(TRUE);
   $doc->loadXML($svg_content);
+  $svg_tag = $doc->getElementsByTagName('svg')->item(0);
+  $last_error = libxml_get_last_error();
+  libxml_use_internal_errors(FALSE);
+  if (empty($svg_tag)) {
+    $message = $last_error ? trim($last_error->message) : '';
+    watchdog('image', 'Failed to parse SVG content. %message', array(
+      '%message' => $message,
+    ), WATCHDOG_ERROR);
+    return '';
+  }
 
   // Convert the alt attribute to a <title> element.
   if (isset($attributes['alt'])) {
-      try {
-        if (strlen($attributes['alt'])) {
-          $title = $doc->createElement('title');
-          $title->textContent = $attributes['alt'];
-          $doc->firstChild->prepend($title);
-        }
-        // Remove any given <title> element if alt is an empty string.
-        elseif ($doc->firstChild->firstChild && $doc->firstChild->firstChild->nodeName === 'title') {
-          $doc->firstChild->removeChild($doc->firstChild->firstChild);
-        }
-      } catch (DOMException $e) {}
+    if (strlen($attributes['alt'])) {
+      $title = $doc->createElement('title');
+      $title->textContent = $attributes['alt'];
+      // Since DOMDocument::prepend() is not available in PHP versions prior
+      // to v8, we are using DOMNode::insertBefore().
+      $svg_tag->insertBefore($title, $svg_tag->firstChild);
+    }
+    // Remove any given <title> element if alt is an empty string.
+    elseif ($svg_tag->firstChild && $svg_tag->firstChild->nodeName === 'title') {
+      $svg_tag->removeChild($svg_tag->firstChild);
+    }
     unset($attributes['alt']);
   }
 
   foreach ($attributes as $attribute_name => $attribute_value) {
     $attribute_value = implode(' ', (array) $attribute_value);
     if (strlen($attribute_value)) {
-      $doc->firstChild->setAttribute($attribute_name, $attribute_value);
+      $svg_tag->setAttribute($attribute_name, $attribute_value);
     }
     else {
-      $doc->firstChild->removeAttribute($attribute_name);
+      $svg_tag->removeAttribute($attribute_name);
     }
   }
-  return $doc->saveXML($doc->firstChild);
+  return $doc->saveXML($svg_tag);
 }
 
 /**
@@ -619,6 +636,8 @@ function image_add_svg_attributes($svg_content, array $attributes) {
  *   image is an SVG but no set dimensions are available, these keys will have
  *   NULL values. If the image is not an SVG, or the SVG file is empty or
  *   invalid, FALSE will be returned.
+ *
+ * @since 1.28.0 Function added.
  */
 function image_get_svg_dimensions($uri) {
   // Safety check.

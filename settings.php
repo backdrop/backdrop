@@ -7,13 +7,19 @@
 /**
  * Database configuration:
  *
- * Most sites can configure their database by entering the connection string
- * below. If using primary/replica databases or multiple connections, see the
- * advanced database documentation at
- * https://api.backdropcms.org/database-configuration
+ * Most sites can configure their database by entering the connection details
+ * below. For advanced configurations, including:
+ *   - Custom 'port', 'prefix', 'charset', 'collation' or 'driver' values
+ *   - Primary/replica databases
+ *   - Multiple connections
+ * See the documentation at https://docs.backdropcms.org/database-configuration
  */
-$database = 'mysql://user:pass@localhost/database_name';
-$database_prefix = '';
+$database = array(
+  'database' => 'database_name',
+  'username' => 'user',
+  'password' => 'pass',
+  'host' => 'localhost',
+);
 
 /**
  * Configuration storage
@@ -52,8 +58,8 @@ $database_prefix = '';
  * $config_directories['staging'] = '/home/myusername/config/staging';
  * @endcode
  */
-$config_directories['active'] = 'files/config_' . md5($database) . '/active';
-$config_directories['staging'] = 'files/config_' . md5($database) . '/staging';
+$config_directories['active'] = 'files/config_' . md5(serialize($database)) . '/active';
+$config_directories['staging'] = 'files/config_' . md5(serialize($database)) . '/staging';
 
 /**
  * Skip the configuration staging directory cleanup
@@ -516,8 +522,8 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
  * @see _backdrop_should_strip_sensitive_headers_on_http_redirect()
  * @see backdrop_http_request()
  */
-// $config['system.core']['backdrop_http_request']['strip_sensitive_headers_on_host_change']= TRUE;
-// $config['system.core']['backdrop_http_request']['strip_sensitive_headers_on_https_downgrade']= TRUE;
+// $config['system.core']['backdrop_http_request']['strip_sensitive_headers_on_host_change'] = TRUE;
+// $config['system.core']['backdrop_http_request']['strip_sensitive_headers_on_https_downgrade'] = TRUE;
 
 /**
  * Include a local settings file, if available.
