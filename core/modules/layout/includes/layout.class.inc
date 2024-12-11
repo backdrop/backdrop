@@ -729,6 +729,7 @@ class Layout {
     foreach ($new_regions as $new_region_name) {
       $new_positions[$new_region_name] = array();
     }
+    $this->setRefugeRegion();
 
     // Do the mapping in the order provided (if any).
     if ($region_mapping) {
@@ -756,6 +757,7 @@ class Layout {
           }
           elseif ($new_region_name === '') {
             $this->orphaned_blocks[] = $uuid;
+            $new_positions[$this->refuge_region][] = $uuid;
           }
           else {
             unset($this->content[$uuid]);

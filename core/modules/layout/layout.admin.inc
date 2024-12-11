@@ -978,17 +978,6 @@ function layout_settings_form_update_layout($form, &$form_state) {
       }
       $layout->setLayoutTemplate($new_template, $region_mapping);
     }
-    if (!empty($layout->orphaned_blocks)) {
-      $orphaned_blocks_titles = array();
-      $layout_template_info = layout_get_layout_template_info($form_state['values']['layout_template']);
-      foreach ($layout->orphaned_blocks as $uuid) {
-        $orphaned_blocks_titles[] = $layout->content[$uuid]->getAdminTitle();
-      }
-      $message = t('The following blocks have been reassigned to the %new_region region. The regions they were placed in previously do not exist in the new layout template. You can move them to more appropriate regions:', array(
-        '%new_region' => $layout_template_info['regions'][$layout->refuge_region]));
-      $message .= theme('item_list', array('items' => $orphaned_blocks_titles));
-      backdrop_set_message($message, 'warning');
-    }
   }
   if (isset($form_state['values']['path'])) {
     $layout->setPath($form_state['values']['path']);
@@ -1114,29 +1103,7 @@ function layout_settings_form_save_submit($form, &$form_state) {
   }
 
   // If this is a new layout, populate blocks from default layout.
-  if (!empty($layout->is_new)) {
-    $default_layout_name = path_is_admin($layout->getPath()) ? 'admin_default' : 'default';
-    $default_layout = layout_load($default_layout_name);
-    // Get the template being used by this layout.
-    $template_info = layout_get_layout_template_info($layout->layout_template);
-    foreach ($default_layout->positions as $region => $region_block_list) {
-      if (array_key_exists($region, $template_info['regions'])) {
-        foreach ($region_block_list as $uuid) {
-          if (isset($default_layout->content[$uuid])) {
-            $block = $default_layout->content[$uuid];
-            $new_block = $block->getClone();
-            // Only add the block from the default if required contexts are
-            // present for each block.
-            if ($layout->hasContexts($new_block->getRequiredContexts())) {
-              $layout->positions[$region][] = $new_block->uuid;
-              $layout->content[$new_block->uuid] = $new_block;
-            }
-          }
-        }
-      }
-    }
-  }
-
+  layout->setDefaultBlocks();
   $layout->save();
 
   layout_clear_layout_tempstore($layout->name);
