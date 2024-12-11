@@ -1103,7 +1103,7 @@ function layout_settings_form_save_submit($form, &$form_state) {
   }
 
   // If this is a new layout, populate blocks from default layout.
-  layout->setDefaultBlocks();
+  $layout->setDefaultBlocks();
   $layout->save();
 
   layout_clear_layout_tempstore($layout->name);
