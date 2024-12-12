@@ -2593,5 +2593,52 @@ function views_clean_css_identifier($identifier, $filter = array(' ' => '-', '/'
 }
 
 /**
+ * Finds the most recently changed nodes that are available to the current user.
+ *
+ * @param (int) $limit
+ *   (optional) The maximum number of nodes to find. Defaults to 10.
+ *
+ * @return array
+ *   An array of node entities or an empty array if there are no recent nodes
+ *   visible to the current user.
+ *
+ * @deprecated since 1.30.0
+ */
+function node_get_recent($limit = 10) {
+  $query = db_select('node', 'n');
+
+  if (!user_access('bypass node access') && !user_access('view any unpublished content')) {
+    // If the user is able to view unpublished nodes, allow them to see these
+    // in addition to published nodes. Check that they actually have some
+    // unpublished nodes to view before adding the condition.
+    // Note: this query still ignores unpublished by type permissions.
+    // See: https://github.com/backdrop/backdrop-issues/issues/146.
+    $own_unpublished = db_query('SELECT nid FROM {node} WHERE uid = :uid AND status = :status',
+      array(':uid' => $GLOBALS['user']->uid, ':status' => NODE_NOT_PUBLISHED))->fetchCol();
+    if (user_access('view own unpublished content') && $own_unpublished) {
+      $query->condition(db_or()
+        ->condition('n.status', NODE_PUBLISHED)
+        ->condition('n.nid', $own_unpublished, 'IN')
+      );
+    }
+    else {
+      // If not, restrict the query to published nodes.
+      $query->condition('n.status', NODE_PUBLISHED);
+    }
+  }
+  $nids = $query
+    ->fields('n', array('nid'))
+    ->orderBy('n.changed', 'DESC')
+    ->range(0, $limit)
+    ->addTag('node_access')
+    ->execute()
+    ->fetchCol();
+
+  $nodes = node_load_multiple($nids);
+
+  return $nodes ? $nodes : array();
+}
+
+/**
  * @} End of "defgroup drupal_compatibility".
  */
