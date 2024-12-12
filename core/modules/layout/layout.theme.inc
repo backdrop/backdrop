@@ -280,6 +280,9 @@ function theme_layout_region_inner($variables) {
 
 /**
  * Output a preview of hero block background image.
+ *
+ * @see BlockHero::form()
+ * @since 1.30.0 Theme function added.
  */
 function theme_layout_hero_background_image($variables) {
   $element = $variables['element'];
@@ -296,7 +299,7 @@ function theme_layout_hero_background_image($variables) {
   $output .= '<div' . backdrop_attributes($attributes) . '>';
   if (isset($element['#file']->uri)) {
     $output .= '<div class="layout-hero-background-preview">';
-    $output .= theme('image_style', 
+    $output .= theme('image_style',
       array(
         'style_name' => $element['#image_style'],
         'uri' => $element['#file']->uri,
