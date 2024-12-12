@@ -3635,7 +3635,7 @@ function system_update_1097() {
 /**
  * Uninstall the fast_token_browser contrib module, now part of core.
  */
-function field_update_1098() {
+function system_update_1098() {
   $module = db_query("SELECT name FROM {system} WHERE name = 'fast_token_browser' AND type = 'module'")->fetchField();
   if ($module) {
     $path = backdrop_get_path('module', 'fast_token_browser');

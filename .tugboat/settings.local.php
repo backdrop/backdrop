@@ -1,7 +1,19 @@
 <?php
+/**
+ * @file settings.local.php
+ *
+ * Local environment overrides and settings.
+ */
+
 // Database.
-$database = 'mysql://tugboat:tugboat@mariadb/tugboat';
-$database_charset = 'utf8mb4';
+$database = array (
+  'database' => 'tugboat',
+  'username' => 'tugboat',
+  'password' => 'tugboat',
+  'host' => 'mariadb',
+  'charset' => 'utf8mb4',
+  'collation' => 'utf8mb4_general_ci',
+);
 
 // Config.
 $config_directories['active'] = 'files/config/active';
