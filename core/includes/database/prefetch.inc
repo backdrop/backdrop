@@ -92,7 +92,7 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
   protected $fetchStyle = PDO::FETCH_OBJ;
 
   /**
-   * Holds supplementary current fetch options (which will be used by the next fetch).
+   * Holds supplementary current fetch options (to be used by the next fetch).
    *
    * @var array
    */
@@ -122,6 +122,16 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
     'column' => 0,
   );
 
+  /**
+   * Creates a prefetch database statement object.
+   *
+   * @param DatabaseConnection $connection
+   *   The database connection for this query.
+   * @param string $query
+   *   The query to be executed.
+   * @param array $driver_options
+   *   Driver-specific options.
+   */
   public function __construct(DatabaseConnection $connection, $query, array $driver_options = array()) {
     $this->dbh = $connection;
     $this->queryString = $query;
@@ -131,14 +141,15 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
   /**
    * Executes a prepared statement.
    *
-   * @param $args
-   *   An array of values with as many elements as there are bound parameters in the SQL statement being executed.
-   * @param $options
+   * @param array $args
+   *   An array of values with as many elements as there are bound parameters in
+   *   the SQL statement being executed.
+   * @param array $options
    *   An array of options for this query.
-   * @return
+   * @return bool
    *   TRUE on success, or FALSE on failure.
    */
-  public function execute($args = array(), $options = array()) {
+  public function execute($args = array(), $options = array()) { // phpcs:ignore -- No type hints, add in 2.x.
     if (isset($options['fetch'])) {
       if (is_string($options['fetch'])) {
         // Default to an object. Note: db fields will be added to the object
@@ -211,14 +222,14 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
    * Some drivers will need to perform some preparation themselves to get the
    * statement right.
    *
-   * @param $query
+   * @param string $query
    *   The query.
    * @param array $args
    *   An array of arguments.
    * @return PDOStatement
    *   A PDOStatement object.
    */
-  protected function getStatement($query, &$args = array()) {
+  protected function getStatement($query, &$args = array()) { // phpcs:ignore -- No type hint on $args, add in 2.x.
     return $this->dbh->prepare($query);
   }
 
@@ -261,8 +272,8 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
    * array position in $this->data and format it according to $this->fetchStyle
    * and $this->fetchMode.
    *
-   * @return
-   *  The current row formatted as requested.
+   * @return mixed
+   *   The current row formatted as requested.
    */
   #[\ReturnTypeWillChange]
   public function current() {
@@ -322,16 +333,25 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
 
   /* Implementations of Iterator. */
 
+  /**
+   * {@inheritdoc}
+   */
   #[\ReturnTypeWillChange]
   public function key() {
     return $this->currentKey;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   #[\ReturnTypeWillChange]
   public function rewind() {
     // Nothing to do: our DatabaseStatement can't be rewound.
   }
 
+  /**
+   * {@inheritdoc}
+   */
   #[\ReturnTypeWillChange]
   public function next() {
     if (!empty($this->data)) {
@@ -344,6 +364,9 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   #[\ReturnTypeWillChange]
   public function valid() {
     return isset($this->currentRow);
@@ -351,10 +374,16 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
 
   /* Implementations of DatabaseStatementInterface. */
 
+  /**
+   * {@inheritdoc}
+   */
   public function rowCount() {
     return $this->rowCount;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function fetch($fetch_style = NULL, $cursor_orientation = PDO::FETCH_ORI_NEXT, $cursor_offset = NULL) {
     if (isset($this->currentRow)) {
       // Set the fetch parameter.
@@ -376,6 +405,9 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function fetchColumn($index = 0) {
     if (isset($this->currentRow) && isset($this->columnNames[$index])) {
       // We grab the value directly from $this->data, and format it.
@@ -388,10 +420,16 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function fetchField($index = 0) {
     return $this->fetchColumn($index);
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function fetchObject($class_name = NULL, $constructor_args = array()) {
     if (isset($this->currentRow)) {
       if (!isset($class_name)) {
@@ -417,6 +455,9 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function fetchAssoc() {
     if (isset($this->currentRow)) {
       $result = $this->currentRow;
@@ -428,7 +469,10 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
     }
   }
 
-  public function fetchAll($fetch_style = NULL, $fetch_column = NULL, $constructor_args = NULL) {
+  /**
+   * {@inheritdoc}
+   */
+  public function fetchAll($fetch_style = NULL, $fetch_column = NULL, $constructor_args = array()) {
     $this->fetchStyle = isset($fetch_style) ? $fetch_style : $this->defaultFetchStyle;
     $this->fetchOptions = $this->defaultFetchOptions;
     if (isset($fetch_column)) {
@@ -452,6 +496,9 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
     return $result;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function fetchCol($index = 0) {
     if (isset($this->columnNames[$index])) {
       $column = $this->columnNames[$index];
@@ -468,6 +515,9 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
     }
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function fetchAllKeyed($key_index = 0, $value_index = 1) {
     if (!isset($this->columnNames[$key_index]) || !isset($this->columnNames[$value_index]))
       return array();
@@ -484,6 +534,9 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
     return $result;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function fetchAllAssoc($key, $fetch_style = NULL) {
     $this->fetchStyle = isset($fetch_style) ? $fetch_style : $this->defaultFetchStyle;
     $this->fetchOptions = $this->defaultFetchOptions;
