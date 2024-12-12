@@ -184,9 +184,6 @@
   border: 1px solid #CCC;
   border-bottom: none;
 }
-.layout-hero-background-preview-empty {
-  /* margin-bottom: 1em !important; */
-}
 
 /* Layout columns */
 .layout-content-form .row > div,
@@ -361,6 +358,14 @@
 .layout-content-form .page-title .layout-editor-block-title .description {
   padding: 0 0.8em;
   font-size: 90%;
+}
+
+/* Hero block provided by Layout module. */
+.layout-hero-image-upload .layout-hero-background-preview-empty {
+  padding-bottom: 0.5em;
+}
+.layout-hero-image-upload .form-file {
+  max-width: 20em;
 }
 
 /* Layout Misc */
