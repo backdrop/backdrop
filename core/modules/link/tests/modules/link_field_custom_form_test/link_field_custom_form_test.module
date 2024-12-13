@@ -30,7 +30,7 @@ function link_field_custom_form_test_menu() {
  * @see link_field_custom_form_test_menu()
  *
  */
-function link_field_custom_form_test_form($form, &$form_state) {
+function link_field_custom_form_test_form(array $form, array &$form_state) {
   $form = array();
   $form['link_test_defaults'] = array(
     '#type' => 'link_field',
@@ -43,7 +43,7 @@ function link_field_custom_form_test_form($form, &$form_state) {
     '#link_field_options' => array(
       'title_maxlength' => 16,
       'title_label_use_field_label' => TRUE,
-    )
+    ),
   );
   $form['link_test_no_title'] = array(
     '#type' => 'link_field',
@@ -57,7 +57,7 @@ function link_field_custom_form_test_form($form, &$form_state) {
     '#title' => t('Required link with URL validation'),
     '#required' => TRUE,
     '#link_field_options' => array(
-      'url' => 'required',
+      'url_mode' => 'required',
       'title_mode' => 'required',
       'validate_url' => TRUE,
     ),
@@ -76,6 +76,6 @@ function link_field_custom_form_test_form($form, &$form_state) {
 /**
  * Form submission handler for link_field_custom_form_test_form().
  */
-function link_field_custom_form_test_form_submit($form, &$form_state) {
+function link_field_custom_form_test_form_submit(array $form, array &$form_state) {
   backdrop_set_message(t('Form submitted.'));
 }
