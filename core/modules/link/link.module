@@ -279,7 +279,7 @@ function link_field_load($entity_type, $entities, $field, $instances, $langcode,
 
 /**
  * Implements hook_field_validate().
- * 
+ *
  * Most validations are done at the element level, which runs before this.
  */
 function link_field_validate($entity_type, $entity, $field, $instance, $langcode, $items, &$errors) {
@@ -292,7 +292,7 @@ function link_field_validate($entity_type, $entity, $field, $instance, $langcode
   }
 
   // In a totally bizarre case, where URLs and titles are optional but the field
-  // is required, ensure there is at least one link. Populate the 
+  // is required, ensure there is at least one link. Populate the
   // $optional_field_found variable if any "required" values have been provided.
   $optional_field_found = FALSE;
   foreach ($items as $delta => $value) {
@@ -376,7 +376,7 @@ function link_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     }
     $element['#link_field_options'] += array(
       'validate_url' => $settings['validate_url'],
-      'url' => $settings['url'] ? 'optional' : 'required',
+      'url_mode' => $settings['url'] ? 'optional' : 'required',
       'link_type' => $settings['type'],
       'title_mode' => $settings['title'],
       'title_label_use_field_label' => $settings['title_label_use_field_label'],
@@ -777,7 +777,7 @@ function link_theme() {
 
 /**
  * Implements hook_element_info().
- * 
+ *
  * The #default_value should be an array with the following keys:
  * @code
  *   '#default_value' => array(
@@ -827,7 +827,7 @@ function _link_field_options_defaults() {
   return array(
     // Possible values: 'optional' or 'required'. If 'optional', the element
     // can be submitted without filling in the url textfield.
-    'url' => 'optional',
+    'url_mode' => 'optional',
 
     // Options: LINK_BOTH, LINK_INTERNAL, LINK_EXTERNAL.
     'link_type' => LINK_BOTH,
@@ -837,7 +837,7 @@ function _link_field_options_defaults() {
     // and LINK_TARGET_USER. LINK_TARGET_USER will show a checkbox to indicate
     // if the link should use '_blank' as target.
     'target' => LINK_TARGET_DEFAULT,
-    
+
     // Options are: 'optional', 'required', 'value' and 'none'. If 'optional'
     // or 'required', a textfield will be shown to enter a title for the link.
     'title_mode' => 'optional',
@@ -855,10 +855,6 @@ function _link_field_options_defaults() {
     // If true, the element will show a textfield to enter a custom link
     // class.
     'configurable_class' => FALSE,
-
-    // When this element is used by the Field API Link field, we receive the
-    // field instance array to help us deal with special validations.
-    'instance' => array(),
   );
 }
 
@@ -878,7 +874,7 @@ function link_field_process($element, $form_state, $complete_form) {
     '#type' => 'textfield',
     '#maxlength' => LINK_URL_MAX_LENGTH,
     '#title' => t('URL'),
-    '#required' => (empty($element['#delta']) && $element['#link_field_options']['url'] !== 'optional') ? $element['#required'] : FALSE,
+    '#required' => (empty($element['#delta']) && $element['#link_field_options']['url_mode'] !== 'optional') ? $element['#required'] : FALSE,
     '#default_value' => isset($element['#value']['url']) ? $element['#value']['url'] : NULL,
   );
   if ($element['#link_field_options']['link_type'] != LINK_EXTERNAL) {
@@ -952,19 +948,6 @@ function link_field_element_validate(&$element, &$form_state, $complete_form) {
   $value = $element['#value'];
   $is_default_field_value = FALSE;
 
-  // Check if this element is used in Field API Link field.
-  if (isset($element['#link_field_options']['field_name'])) {
-    // Do not validate when submitting a field instance settings form.
-    if (empty($element['#entity'])) {
-      return;
-    }
-    else {
-      $instance = $element['#link_field_options']['instance'];
-      $delta = $element['#delta'];
-      $is_default_field_value =  isset($instance['default_value'][$delta]['url']) && $value['url'] === $instance['default_value'][$delta]['url'] && !$instance['required'];
-    }
-  }
-
   // Special validations when the values are not the default and when url has a
   // value. NB: validation for subelements marked as 'required' is done by core.
   if (!empty($value['url']) && !$is_default_field_value) {
@@ -990,13 +973,13 @@ function link_field_element_validate(&$element, &$form_state, $complete_form) {
       if (($element['#link_field_options']['link_type'] == LINK_INTERNAL && $url_type === LINK_EXTERNAL) || ($element['#link_field_options']['link_type'] == LINK_EXTERNAL && in_array($url_type, array(LINK_INTERNAL, LINK_FRONT), TRUE))) {
         $field_label = array('%field' => $element['#title']);
         $error = ($element['#link_field_options']['link_type'] == LINK_INTERNAL) ? t('Only internal URLs are allowed in %field.', $field_label) : t('Only external URLs are allowed in %field.', $field_label);
-        form_error($element['url'], $error); 
+        form_error($element['url'], $error);
       }
     }
   }
 
   // Require a link if we have a title.
-  if ($element['#link_field_options']['url'] !== 'optional' && strlen(isset($value['title']) ? $value['title'] : '') > 0 && strlen(trim($value['url'])) == 0) {
+  if ($element['#link_field_options']['url_mode'] !== 'optional' && strlen(isset($value['title']) ? $value['title'] : '') > 0 && strlen(trim($value['url'])) == 0) {
     form_error($element['title'], t('You cannot enter a title without a link url.'));
   }
 
