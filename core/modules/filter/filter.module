@@ -1316,7 +1316,8 @@ function filter_process_format($element) {
   $formats = filter_formats($user);
   $fallback_format = filter_fallback_format();
 
-  // Turn original element into a text format wrapper.
+  // Turn original element into a text format wrapper. Settings for all
+  // available formats are added to make them available for all fields.
   if (isset($element['#attached'])) {
     $element['#attached'] = array_merge_recursive($element['#attached'], filter_get_attached($formats));
   }
