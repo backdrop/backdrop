@@ -131,7 +131,7 @@ table th {
 /* @group Attachment details */
 
 #edit-display-settings-title {
-  color: #008BCB;
+  color: var(--seven-palette__accent--60, #008bcb);
 }
 
 #edit-display-settings-top {
@@ -155,16 +155,16 @@ table th {
 }
 .views-displays .secondary a {
   transition: none;
-  border: 2px solid #fff;
+  border: 2px solid var(--seven-palette__grayscale--100, #fff);
   border-radius: 5px; /* Additional radius needed to include border width. */
 }
 .views-displays .secondary li.add a {
-  background-color: #fff;
-  color: #008BCB;
+  background-color: var(--seven-palette__grayscale--100, #fff);
+  color: var(--seven-palette__accent--60, #008bcb);
 }
 .views-displays .secondary li.add a:hover {
-  background-color: #f7f7f7;
-  color: #008BCB;
+  background-color: var(--seven-palette__grayscale--95, #f7f7f7);
+  color: var(--seven-palette__accent--60, #008bcb);
 }
 .views-displays .secondary a:hover > .icon.add {
   background-position: center 3px;
@@ -175,10 +175,10 @@ table th {
   box-shadow: 0 5px 5px -5px hsla(0, 0%, 0%, 0.3);
 }
 .views-displays .secondary .action-list li {
-  background-color: #fff;
+  background-color: var(--seven-palette__grayscale--100, #fff);
 }
 .views-displays .secondary .action-list li:hover {
-  background-color: #f7f7f7;
+  background-color: var(--seven-palette__grayscale--95, #f7f7f7);
 }
 .views-displays .secondary .open > a {
   border-bottom-left-radius: 0;
@@ -186,7 +186,7 @@ table th {
 }
 .views-displays .secondary .open > a:hover {
   background-color: #f1f1f1;
-  color: #008BCB;
+  color: var(--seven-palette__accent--60, #008bcb);
 }
 
 .views-displays .secondary .action-list  li:first-child {
@@ -199,7 +199,7 @@ table th {
 
 .views-displays .secondary .action-list input.form-submit {
   border-radius: 0;
-  color: #008BCB;
+  color: var(--seven-palette__accent--60, #008bcb);
 }
 
 /* @end */
@@ -255,7 +255,7 @@ table th {
 }
 
 #views-ui-rearrange-filter-form tr.drag-previous td {
-  background-color: #FFFFBB !important;
+  background-color: var(--seven-palette__grayscale--100, #fff)FBB !important;
 }
 
 /* @end */

@@ -8,10 +8,10 @@
  * Component containers
  */
 .ui-widget {
-  background: #fff;
+  background: var(--seven-palette__grayscale--100, #fff);
 }
 .ui-widget-content {
-  border: solid 1px #ccc;
+  border: solid 1px var(--seven-palette__grayscale--75, #ccc);
 }
 
 /**
@@ -25,7 +25,7 @@
 }
 .ui-state-error,
 .ui-widget-content .ui-state-error {
-  color: #fff;
+  color: var(--seven-palette__grayscale--100, #fff);
   background: #e63;
   border-color: #d52;
 }
@@ -288,7 +288,7 @@
   border: none;
 }
 .ui-accordion .ui-accordion-header {
-  border: solid 1px #ccc;
+  border: solid 1px var(--seven-palette__grayscale--75, #ccc);
   text-transform: uppercase;
 }
 .ui-accordion h3.ui-accordion-header,
@@ -305,7 +305,7 @@
 }
 .ui-accordion .ui-accordion-content {
   padding: 1em 2.2em;
-  border: solid 1px #ccc;
+  border: solid 1px var(--seven-palette__grayscale--75, #ccc);
   border-top: 0;
 }
 
@@ -319,7 +319,7 @@
   padding: 5px 10px 4px;
   margin: 0;
   line-height: 20px;
-  border-bottom: solid 1px #ccc;
+  border-bottom: solid 1px var(--seven-palette__grayscale--75, #ccc);
   border-bottom-left-radius: 0;
   border-bottom-right-radius: 0;
 }
@@ -334,8 +334,8 @@
   border-radius: 10px;
 }
 .ui-tabs .ui-tabs-nav li.ui-tabs-selected a {
-  color: #fff;
-  background: #666;
+  color: var(--seven-palette__grayscale--100, #fff);
+  background: var(--seven-palette__grayscale--40, #666);
   font-weight: normal;
 }
 
@@ -343,8 +343,8 @@
  * Dialogs
  */
 .ui-dialog {
-  background: #fff;
-  border: solid 1px #ccc;
+  background: var(--seven-palette__grayscale--100, #fff);
+  border: solid 1px var(--seven-palette__grayscale--75, #ccc);
   padding: 0;
   z-index: 1001;
 }
@@ -356,20 +356,20 @@
   border-width: 0;
 }
 .ui-widget-overlay {
-  background: #000;
+  background: var(--seven-palette__grayscale--0, #000);
   opacity: 0.2;
   filter: Alpha(opacity=20);
   z-index: 1000;
 }
 .ui-widget-shadow {
-  box-shadow: 0 0 12px -8px #666;
+  box-shadow: 0 0 12px -8px var(--seven-palette__grayscale--40, #666);
 }
 
 /**
  * Slider
  */
 .ui-slider {
-  border: solid 1px #ccc;
+  border: solid 1px var(--seven-palette__grayscale--75, #ccc);
 }
 .ui-slider .ui-slider-range {
   background: #e4e4e4;
@@ -384,8 +384,8 @@
 }
 .ui-slider a.ui-state-active,
 .ui-slider .ui-slider-handle:active {
-  background: #666;
-  color: #fff;
+  background: var(--seven-palette__grayscale--40, #666);
+  color: var(--seven-palette__grayscale--100, #fff);
   border: solid 1px #555;
 }
 
@@ -419,7 +419,7 @@
 .ui-datepicker-calendar .ui-state-highlight {
   background: none;
   border: none;
-  color: #000;
+  color: var(--seven-palette__grayscale--0, #000);
 }
 .ui-datepicker-calendar .ui-state-hover,
 .ui-datepicker-calendar .ui-datepicker-current-day a {
