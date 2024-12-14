@@ -76,7 +76,7 @@ require_once __DIR__ . '/query.inc';
  *     'varchar' must specify the 'length' parameter.
  *  - 'primary key': An array of one or more key column specifiers (see below)
  *    that form the primary key.
- *  - 'unique keys': An associative array of unique keys ('keyname' =>
+ *  - 'unique keys': An associative array of unique keys ('key_name' =>
  *    specification). Each specification is an array of one or more
  *    key column specifiers (see below) that form a unique key on the table.
  *  - 'foreign keys': An associative array of relations ('my_relation' =>
@@ -85,7 +85,7 @@ require_once __DIR__ . '/query.inc';
  *    ('columns'). Column mappings are defined by key pairs ('source_column' =>
  *    'referenced_column'). This key is for documentation purposes only; foreign
  *    keys are not created in the database, nor are they enforced by Backdrop.
- *  - 'indexes':  An associative array of indexes ('indexname' =>
+ *  - 'indexes':  An associative array of indexes ('index_name' =>
  *    specification). Each specification is an array of one or more
  *    key column specifiers (see below) that form an index on the
  *    table.
@@ -194,7 +194,13 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    */
   protected $uniqueIdentifier;
 
-  public function __construct($connection) {
+  /**
+   * Constructs a database schema object.
+   *
+   * @param DatabaseConnection $connection
+   *   The database connection on which tables will be modified.
+   */
+  public function __construct(DatabaseConnection $connection) {
     $this->uniqueIdentifier = uniqid('', TRUE);
     $this->connection = $connection;
   }
@@ -207,14 +213,14 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
   }
 
   /**
-   * Implements QueryPlaceHolderInterface::uniqueIdentifier().
+   * {@inheritdoc}
    */
   public function uniqueIdentifier() {
     return $this->uniqueIdentifier;
   }
 
   /**
-   * Implements QueryPlaceHolderInterface::nextPlaceholder().
+   * {@inheritdoc}
    */
   public function nextPlaceholder() {
     return $this->placeholder++;
@@ -223,13 +229,13 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
   /**
    * Get information about the table name and schema from the prefix.
    *
-   * @param
+   * @param string $table
    *   Name of table to look prefix up for. Defaults to 'default' because thats
    *   default key for prefix.
-   * @param $add_prefix
+   * @param bool $add_prefix
    *   Boolean that indicates whether the given table name should be prefixed.
    *
-   * @return
+   * @return array
    *   A keyed array with information about the schema, table name and prefix.
    */
   protected function getPrefixInfo($table = 'default', $add_prefix = TRUE) {
@@ -269,26 +275,26 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
   }
 
   /**
-   * Build a condition to match a table name against a standard information_schema.
+   * Build a condition to match a table name against the information_schema.
    *
-   * The information_schema is a SQL standard that provides information about the
-   * database server and the databases, schemas, tables, columns and users within
-   * it. This makes information_schema a useful tool to use across the Backdrop
-   * database drivers and is used by a few different functions. The function below
-   * describes the conditions to be meet when querying information_schema.tables
-   * for Backdrop tables or information associated with Backdrop tables. Even
-   * though this is the standard method, not all databases follow standards and
-   * so this method should be overwritten by a database driver if the database
-   * provider uses alternate methods. Because information_schema.tables is used
-   * in a few different functions, a database driver will only need to override
-   * this function to make all the others work. For example see
-   * core/includes/databases/mysql/schema.inc.
+   * The information_schema is a SQL standard that provides information about
+   * the database server and the databases, schemas, tables, columns and users
+   * within it. This makes information_schema a useful tool to use across the
+   * Backdrop database drivers and is used by a few different functions. The
+   * function below describes the conditions to be meet when querying
+   * information_schema.tables for Backdrop tables or information associated
+   * with Backdrop tables. Even though this is the standard method, not all
+   * databases follow standards and so this method should be overwritten by a
+   * database driver if the database provider uses alternate methods. Because
+   * information_schema.tables is used in a few different functions, a database
+   * driver will only need to override this function to make all the others
+   * work. For example see core/includes/databases/mysql/schema.inc.
    *
-   * @param $table_name
+   * @param string $table_name
    *   The name of the table in question.
-   * @param $operator
+   * @param string $operator
    *   The operator to apply on the 'table' part of the condition.
-   * @param $add_prefix
+   * @param bool $add_prefix
    *   Boolean to indicate whether the table name needs to be prefixed.
    *
    * @return QueryConditionInterface
@@ -297,7 +303,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
   protected function buildTableNameCondition($table_name, $operator = '=', $add_prefix = TRUE) {
     $info = $this->connection->getConnectionOptions();
 
-    // Retrieve the table name and schema
+    // Retrieve the table name and schema.
     $table_info = $this->getPrefixInfo($table_name, $add_prefix);
 
     $condition = new DatabaseCondition('AND');
@@ -310,10 +316,10 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
   /**
    * Check if a table exists.
    *
-   * @param $table
+   * @param string $table
    *   The name of the table in Backdrop (no prefixing).
    *
-   * @return
+   * @return bool
    *   TRUE if the given table exists, otherwise FALSE.
    */
   public function tableExists($table) {
@@ -330,12 +336,12 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
   /**
    * Find all tables that are like the specified base table name.
    *
-   * @param $table_expression
+   * @param string $table_expression
    *   An SQL expression, for example "simpletest%" (without the quotes).
    *   BEWARE: this is not prefixed, the caller should take care of that.
    *
-   * @return
-   *   Array, both the keys and the values are the matching tables.
+   * @return array
+   *   An array with both the keys and values containing the matching tables.
    */
   public function findTables($table_expression) {
     $condition = $this->buildTableNameCondition($table_expression, 'LIKE', FALSE);
@@ -352,12 +358,12 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
   /**
    * Check if a column exists in the given table.
    *
-   * @param $table
+   * @param string $table
    *   The name of the table in Backdrop (no prefixing).
-   * @param $name
+   * @param string $column
    *   The name of the column.
    *
-   * @return
+   * @return bool
    *   TRUE if the given column exists, otherwise FALSE.
    */
   public function fieldExists($table, $column) {
@@ -388,9 +394,9 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
   /**
    * Rename a table.
    *
-   * @param $table
+   * @param string $table
    *   The table to be renamed.
-   * @param $new_name
+   * @param string $new_name
    *   The new name for the table.
    *
    * @throws DatabaseSchemaObjectDoesNotExistException
@@ -403,10 +409,10 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
   /**
    * Drop a table.
    *
-   * @param $table
+   * @param string $table
    *   The table to be dropped.
    *
-   * @return
+   * @return bool
    *   TRUE if the table was successfully dropped, FALSE if there was no table
    *   by that name to begin with.
    */
@@ -415,17 +421,17 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
   /**
    * Add a new field to a table.
    *
-   * @param $table
+   * @param string $table
    *   Name of the table to be altered.
-   * @param $field
+   * @param string $field
    *   Name of the field to be added.
-   * @param $spec
+   * @param array $spec
    *   The field specification array, as taken from a schema definition.
    *   The specification may also contain the key 'initial', the newly
    *   created field will be set to the value of the key in all rows.
    *   This is most useful for creating NOT NULL columns with no default
    *   value in existing tables.
-   * @param $keys_new
+   * @param array $keys_new
    *   Optional keys and indexes specification to be created on the
    *   table along with adding the field. The format is the same as a
    *   table specification but without the 'fields' element. If you are
@@ -433,22 +439,24 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    *   or index including it in this array. See db_change_field() for more
    *   explanation why.
    *
+   * @return void
+   *
    * @throws DatabaseSchemaObjectDoesNotExistException
    *   If the specified table doesn't exist.
    * @throws DatabaseSchemaObjectExistsException
    *   If the specified table already has a field by that name.
    */
-  abstract public function addField($table, $field, $spec, $keys_new = array());
+  abstract public function addField($table, $field, $spec, $keys_new = array()); // phpcs:ignore -- No type hint on $spec or $keys_new, add in 2.x.
 
   /**
    * Drop a field.
    *
-   * @param $table
+   * @param string $table
    *   The table to be altered.
-   * @param $field
+   * @param string $field
    *   The field to be dropped.
    *
-   * @return
+   * @return bool
    *   TRUE if the field was successfully dropped, FALSE if there was no field
    *   by that name to begin with.
    */
@@ -457,12 +465,14 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
   /**
    * Set the default value for a field.
    *
-   * @param $table
+   * @param string $table
    *   The table to be altered.
-   * @param $field
+   * @param string $field
    *   The field to be altered.
-   * @param $default
+   * @param mixed $default
    *   Default value to be set. NULL for 'default NULL'.
+   *
+   * @return void
    *
    * @throws DatabaseSchemaObjectDoesNotExistException
    *   If the specified table or field doesn't exist.
@@ -472,10 +482,12 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
   /**
    * Set a field to have no default value.
    *
-   * @param $table
+   * @param string $table
    *   The table to be altered.
-   * @param $field
+   * @param string $field
    *   The field to be altered.
+   *
+   * @return void
    *
    * @throws DatabaseSchemaObjectDoesNotExistException
    *   If the specified table or field doesn't exist.
@@ -485,12 +497,12 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
   /**
    * Checks if an index exists in the given table.
    *
-   * @param $table
+   * @param string $table
    *   The name of the table in Backdrop (no prefixing).
-   * @param $name
+   * @param string $name
    *   The name of the index in Backdrop (no prefixing).
    *
-   * @return
+   * @return bool
    *   TRUE if the given index exists, otherwise FALSE.
    */
   abstract public function indexExists($table, $name);
@@ -498,25 +510,27 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
   /**
    * Add a primary key.
    *
-   * @param $table
+   * @param string $table
    *   The table to be altered.
-   * @param $fields
+   * @param string[] $fields
    *   Fields for the primary key.
+   *
+   * @return void
    *
    * @throws DatabaseSchemaObjectDoesNotExistException
    *   If the specified table doesn't exist.
    * @throws DatabaseSchemaObjectExistsException
    *   If the specified table already has a primary key.
    */
-  abstract public function addPrimaryKey($table, $fields);
+  abstract public function addPrimaryKey($table, $fields); // phpcs:ignore -- No type hint on $fields, add in 2.x.
 
   /**
    * Drop the primary key.
    *
-   * @param $table
+   * @param string $table
    *   The table to be altered.
    *
-   * @return
+   * @return bool
    *   TRUE if the primary key was successfully dropped, FALSE if there was no
    *   primary key on this table to begin with.
    */
@@ -525,29 +539,31 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
   /**
    * Add a unique key.
    *
-   * @param $table
+   * @param string $table
    *   The table to be altered.
-   * @param $name
+   * @param string $name
    *   The name of the key.
-   * @param $fields
+   * @param string[] $fields
    *   An array of field names.
+   *
+   * @return void
    *
    * @throws DatabaseSchemaObjectDoesNotExistException
    *   If the specified table doesn't exist.
    * @throws DatabaseSchemaObjectExistsException
    *   If the specified table already has a key by that name.
    */
-  abstract public function addUniqueKey($table, $name, $fields);
+  abstract public function addUniqueKey($table, $name, $fields); // phpcs:ignore -- No type hint on $fields, add in 2.x.
 
   /**
    * Drop a unique key.
    *
-   * @param $table
+   * @param string $table
    *   The table to be altered.
-   * @param $name
+   * @param string $name
    *   The name of the key.
    *
-   * @return
+   * @return bool
    *   TRUE if the key was successfully dropped, FALSE if there was no key by
    *   that name to begin with.
    */
@@ -556,29 +572,31 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
   /**
    * Add an index.
    *
-   * @param $table
+   * @param string $table
    *   The table to be altered.
-   * @param $name
+   * @param string $name
    *   The name of the index.
-   * @param $fields
+   * @param string[] $fields
    *   An array of field names.
+   *
+   * @return void
    *
    * @throws DatabaseSchemaObjectDoesNotExistException
    *   If the specified table doesn't exist.
    * @throws DatabaseSchemaObjectExistsException
    *   If the specified table already has an index by that name.
    */
-  abstract public function addIndex($table, $name, $fields);
+  abstract public function addIndex($table, $name, $fields); // phpcs:ignore -- No type hint on $fields, add in 2.x.
 
   /**
    * Drop an index.
    *
-   * @param $table
+   * @param string $table
    *   The table to be altered.
-   * @param $name
+   * @param string $name
    *   The name of the index.
    *
-   * @return
+   * @return bool
    *   TRUE if the index was successfully dropped, FALSE if there was no index
    *   by that name to begin with.
    */
@@ -625,38 +643,43 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    * unless you are converting a field to be type serial. You can use
    * the $keys_new argument in all cases.
    *
-   * @param $table
+   * @param string $table
    *   Name of the table.
-   * @param $field
+   * @param string $field
    *   Name of the field to change.
-   * @param $field_new
-   *   New name for the field (set to the same as $field if you don't want to change the name).
-   * @param $spec
+   * @param string $field_new
+   *   New name for the field (set to the same as $field if you don't want to
+   *   change the name).
+   * @param array $spec
    *   The field specification for the new field.
-   * @param $keys_new
+   * @param array $keys_new
    *   Optional keys and indexes specification to be created on the
    *   table along with changing the field. The format is the same as a
    *   table specification but without the 'fields' element.
+   *
+   * @return void
    *
    * @throws DatabaseSchemaObjectDoesNotExistException
    *   If the specified table or source field doesn't exist.
    * @throws DatabaseSchemaObjectExistsException
    *   If the specified destination field already exists.
    */
-  abstract public function changeField($table, $field, $field_new, $spec, $keys_new = array());
+  abstract public function changeField($table, $field, $field_new, $spec, $keys_new = array()); // phpcs:ignore -- No type hint on $spec or $keys_new, add in 2.x.
 
   /**
    * Create a new table from a Backdrop table definition.
    *
-   * @param $name
+   * @param string $name
    *   The name of the table to create.
-   * @param $table
+   * @param array $table
    *   A Schema API table definition array.
+   *
+   * @return void
    *
    * @throws DatabaseSchemaObjectExistsException
    *   If the specified table already exists.
    */
-  public function createTable($name, $table) {
+  public function createTable($name, $table) { // phpcs:ignore -- No type hint on $table, add in 2.x.
     if ($this->tableExists($name)) {
       throw new DatabaseSchemaObjectExistsException(t('Table @name already exists.', array('@name' => $name)));
     }
@@ -669,28 +692,29 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
   /**
    * Generate an array of query strings suitable for creating a table.
    *
-   * @param $name
+   * @param string $name
    *   The name of the table to create.
-   * @param $table
+   * @param array $table
    *   A Schema API table definition array.
-   * @return
+   *
+   * @return array
    *   An array of SQL statements to create the table.
    */
-  abstract protected function createTableSql($name, $table);
+  abstract protected function createTableSql($name, $table); // phpcs:ignore -- No type hint on $table, add in 2.x.
 
   /**
-   * Return an array of field names from an array of key/index column specifiers.
+   * Return an array of field names from an array of key/index column map.
    *
-   * This is usually an identity function but if a key/index uses a column prefix
-   * specification, this function extracts just the name.
+   * This is usually an identity function but if a key/index uses a column
+   * prefix specification, this function extracts just the name.
    *
-   * @param $fields
+   * @param array $fields
    *   An array of key/index column specifiers.
    *
-   * @return
+   * @return array
    *   An array of field names.
    */
-  public function fieldNames($fields) {
+  public function fieldNames(array $fields) {
     $return = array();
     foreach ($fields as $field) {
       if (is_array($field)) {
@@ -706,12 +730,12 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
   /**
    * Prepare a table or column comment for database query.
    *
-   * @param $comment
+   * @param string $comment
    *   The comment string to prepare.
-   * @param $length
+   * @param int|null $length
    *   Optional upper limit on the returned string length.
    *
-   * @return
+   * @return string
    *   The prepared comment.
    */
   public function prepareComment($comment, $length = NULL) {
