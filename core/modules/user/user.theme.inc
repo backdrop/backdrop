@@ -421,6 +421,7 @@ function template_preprocess_user_login_form(&$variables) {
       ));
     }
     $variables['site_name'] = config_get_translated('system.core', 'site_name');
+    $variables['front_page'] = url();
     $variables['page_title'] = $page_title;
     $variables['messages'] = theme('status_messages');
     $variables['classes'][] = 'user-login user-login-layout-suppress';

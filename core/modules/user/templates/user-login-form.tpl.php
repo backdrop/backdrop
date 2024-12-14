@@ -20,11 +20,13 @@
     <div class="user-login-wrapper">
       <?php if ($logo_image): ?>
         <div class="login-page-logo">
-          <?php print $logo_image; ?>
+          <a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>" rel="home" class="logo">
+            <?php print $logo_image; ?>
+          </a>
         </div>
       <?php endif; ?>
-      <h1 class="page-title">
-        <?php print $site_name; ?>
+      <h1 class="site-name">
+        <a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>" rel="home"><span><?php print $site_name; ?></span></a>
       </h1>
       <h2 class="login-page-page-title">
         <?php print $page_title; ?>
