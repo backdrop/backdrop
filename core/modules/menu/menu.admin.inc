@@ -426,6 +426,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#default_value' => $item['menu_name'],
     '#options' => $titles,
     '#description' => t('The parent menu'),
+    '#access' => user_access('administer menu'),
     '#wrapper_attributes' => array(
       'class' => array('js-show'),
     ),
