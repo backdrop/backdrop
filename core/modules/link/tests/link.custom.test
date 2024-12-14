@@ -33,7 +33,7 @@ class LinkCustomFormTest extends LinkBaseTestClass {
 
     // Test submitted form.
     $good_submission_data = array(
-      'link_test_defaults[title]' => 'BackdropCMS Demo',
+      'link_test_defaults[title]' => 'Backdrop CMS Demo',
       'link_test_defaults[url]' => 'https://backdropcms.org/demo',
       'link_test_title_changes[title]' => 'Upgrade',
       'link_test_title_changes[url]' => 'https://backdropcms.org/drupal-alternative',
