@@ -202,7 +202,7 @@ abstract class BackdropTestCase {
    * @return bool
    *   TRUE if the assertion passed and FALSE if it failed.
    */
-  protected function assert($status, $message = '', $group = 'Other', array $caller = NULL) {
+  protected function assert($status, $message = '', $group = 'Other', array $caller = array()) {
     // Convert boolean status to string status.
     if (is_bool($status)) {
       $status = $status ? 'pass' : 'fail';
@@ -523,7 +523,7 @@ abstract class BackdropTestCase {
    * @return
    *   FALSE.
    */
-  protected function error($message = '', $group = 'Other', array $caller = NULL) {
+  protected function error($message = '', $group = 'Other', array $caller = array()) {
     if ($group == 'User notice') {
       // Since 'User notice' is set by trigger_error() which is used for debug
       // set the message to a status of 'debug'.
@@ -662,7 +662,6 @@ abstract class BackdropTestCase {
   public function errorHandler($severity, $message, $file = NULL, $line = NULL) {
     if ($severity & error_reporting()) {
       $error_map = array(
-        E_STRICT => 'Run-time notice',
         E_WARNING => 'Warning',
         E_NOTICE => 'Notice',
         E_CORE_ERROR => 'Core error',

@@ -494,9 +494,9 @@ function backdrop_get_feeds($delimiter = "\n") {
  * @return
  *   An array containing query parameters, which can be used for url().
  */
-function backdrop_get_query_parameters(array $query = NULL, array $exclude = array('q'), $parent = '') {
+function backdrop_get_query_parameters(array $query = array(), array $exclude = array('q'), $parent = '') {
   // Set defaults, if none given.
-  if (!isset($query)) {
+  if (empty($query)) {
     $query = $_GET;
   }
   // If $exclude is empty, there is nothing to filter.
@@ -2518,7 +2518,7 @@ function format_date($timestamp, $date_format_name = 'medium', $pattern = '', $t
   $formatted_date_time = date_format($date_time, $pattern);
 
   // Pass the langcode to _format_date_callback().
-  _format_date_callback(NULL, $langcode);
+  _format_date_callback(array(), $langcode);
 
   // Translate the marked sequences.
   return preg_replace_callback('/\xEF([AaeDlMTF]?)(.*?)\xFF/', '_format_date_callback', $formatted_date_time);
@@ -2538,11 +2538,11 @@ function format_date($timestamp, $date_format_name = 'medium', $pattern = '', $t
  * @return string
  *   The date from $matches as a translated string.
  */
-function _format_date_callback(array $matches = NULL, $new_langcode = NULL) {
+function _format_date_callback(array $matches = array(), $new_langcode = NULL) {
   // We cache translations to avoid redundant and rather costly calls to t().
   static $cache, $langcode;
 
-  if (!isset($matches)) {
+  if (empty($matches)) {
     $langcode = $new_langcode;
     return NULL;
   }

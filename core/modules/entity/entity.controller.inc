@@ -24,7 +24,7 @@ interface EntityControllerInterface {
    *   (optional) If specified, the cache is reset for the entities with the
    *   given ids only.
    */
-  public function resetCache(array $ids = NULL);
+  public function resetCache(array $ids = array());
 
   /**
    * Resets the internal, static entity cache.
@@ -33,7 +33,7 @@ interface EntityControllerInterface {
    *   (optional) If specified, the cache is reset for the entities with the
    *   given IDs only.
    */
-  public function resetStaticCache(array $ids = NULL);
+  public function resetStaticCache(array $ids = array());
 
   /**
    * Loads one or more entities.
@@ -214,7 +214,7 @@ class DefaultEntityController implements EntityControllerInterface {
   /**
    * Implements EntityControllerInterface::resetCache().
    */
-  public function resetCache(array $ids = NULL) {
+  public function resetCache(array $ids = array()) {
     // Reset the persistent cache.
     if ($this->persistentCache) {
       if (!empty($ids)) {
@@ -232,7 +232,7 @@ class DefaultEntityController implements EntityControllerInterface {
   /**
    * Implements EntityControllerInterface::resetStaticCache().
    */
-  public function resetStaticCache(array $ids = NULL) {
+  public function resetStaticCache(array $ids = array()) {
     // An empty array will not clear any cache, but NULL will clear everything.
     if (isset($ids)) {
       foreach ($ids as $id) {

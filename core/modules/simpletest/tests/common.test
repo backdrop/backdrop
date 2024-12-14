@@ -2715,7 +2715,7 @@ class CommonSimpleTestErrorCollectorTestCase extends BackdropWebTestCase {
    * the class hierarchy. It just stuffs them into a protected collectedErrors
    * array for various assertions to inspect.
    */
-  protected function error($message = '', $group = 'Other', array $caller = NULL) {
+  protected function error($message = '', $group = 'Other', array $caller = array()) {
     // Due to a WTF elsewhere, simpletest treats debug() and verbose()
     // messages as if they were an 'error'. But, we don't want to collect
     // those here. This function just wants to collect the real errors (PHP
