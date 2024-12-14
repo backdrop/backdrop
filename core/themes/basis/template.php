@@ -38,13 +38,23 @@ function basis_preprocess_page(&$variables) {
     $variables['classes'][] = 'view-name-' . $view->name;
   }
 
-  // Add body class for each update.
+  // Get the installed version to add body class for each version.
   $install_version = config_get('system.core', 'install_version');
+
+  // Trim the version to major.minor only.
+  if (!empty($install_version)) {
+    // Explode version by '.' and keep only the first two parts.
+    $version_parts = explode('.', $install_version);
+    $install_version = isset($version_parts[0], $version_parts[1]) 
+      ? $version_parts[0] . '.' . $version_parts[1] 
+      : '0.0';  // Fallback if version is malformed.
+  }
+
   // Every time we add supplemental CSS we add the version number here.
   $supplemental_css_versions = array('1.30.0');
-  foreach ($supplemental_css_versions as $supplemental_css_version_version) {
-    if (version_compare($install_version, $supplemental_css_version_version, '>=')) {
-      $class_version = preg_replace('/^([0-9.]+)\.0$/', '${1}', $supplemental_css_version_version);
+  foreach ($supplemental_css_versions as $supplemental_css_version) {
+    if (version_compare($install_version, $supplemental_css_version, '>=')) {
+      $class_version = preg_replace('/^([0-9.]+)\.0$/', '${1}', $supplemental_css_version);
       $supplemental_css_version_class = 'update-' . str_replace('.', '-', $class_version);
       $variables['classes'][] = $supplemental_css_version_class;
     }
