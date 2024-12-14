@@ -291,8 +291,7 @@ function menu_overview_form_language_filter_submit($form, &$form_state) {
  * Menu callback; Build the menu link editing form.
  */
 function menu_edit_item($form, &$form_state, $type, $item, $menu) {
-  $titles = menu_get_menus();
-  backdrop_add_js(array('menu_edit_item_parents' => $titles), 'setting');
+  $menus = menu_get_menus();
   if ($type == 'add' || empty($item)) {
     // This is an add form, initialize the menu link.
     $item = array(
@@ -312,14 +311,13 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
   }
   else {
     // Get the human-readable menu title from the given menu name
-    $current_title = $titles[$item['menu_name']];
+    $current_title = $menus[$item['menu_name']];
 
     // Get the current breadcrumb and add a link to that menu's overview page.
     $breadcrumb = menu_get_active_breadcrumb();
     $breadcrumb[] = l($current_title, 'admin/structure/menu/manage/' . $item['menu_name']);
     backdrop_set_breadcrumb($breadcrumb);
   }
-  backdrop_add_js(array('menu_edit_item_menu' => $item['menu_name']), 'setting');
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
   $form['link_title'] = array(
@@ -424,7 +422,7 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#type' => 'select',
     '#title' => t('Menu'),
     '#default_value' => $item['menu_name'],
-    '#options' => $titles,
+    '#options' => $menus,
     '#description' => t('The parent menu'),
     '#access' => user_access('administer menu'),
     '#wrapper_attributes' => array(
@@ -444,7 +442,17 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
     '#prefix' => '<div id="menu-parent-select-wrapper">',
     '#suffix' => '</div>',
     '#attached' => array(
-      'js' => array(backdrop_get_path('module', 'menu') . '/js/menu.admin.js'),
+      'js' => array(
+        backdrop_get_path('module', 'menu') . '/js/menu.admin.js',
+        array(
+          'data' => array('menu_edit_item_menu' => $item['menu_name']),
+          'type' => 'setting',
+        ),
+        array(
+          'data' => array('menu_edit_item_parents' => $menus),
+          'type' => 'setting',
+        ),
+      ),
     ),
   );
   // Get number of items in all possible parent menus, so the weight selector is
