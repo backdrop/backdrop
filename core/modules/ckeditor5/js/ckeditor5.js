@@ -6,7 +6,7 @@
 
     attach: function (element, format) {
       // Bail out if the editor has already been attached to the element.
-      if (typeof element.ckeditor5AttachedEditor != 'undefined') {
+      if (typeof element.ckeditor5Processed !== 'undefined') {
         return;
       }
 
@@ -69,8 +69,9 @@
         }
       });
 
-      // Hide the resizable grippie while CKEditor is active.
-      $(element).siblings('.grippie').hide();
+      // Indicate that this element is about to receive an editor. This prevents
+      // double-binding if the .attach() method is called twice very quickly.
+      element.ckeditor5Processed = true;
 
       const beforeAttachValue = element.value;
       CKEditor5.editorClassic.ClassicEditor
@@ -79,6 +80,7 @@
           Backdrop.ckeditor5.setEditorOffset(editor);
           Backdrop.ckeditor5.instances.set(editor.id, editor);
           Backdrop.ckeditor5.watchEditorChanges(editor, element);
+          Backdrop.ckeditor5.trackActiveEditor(editor);
           element.ckeditor5AttachedEditor = editor;
           const valueModified = Backdrop.ckeditor5.checkValueModified(beforeAttachValue, editor.getData());
           if (valueModified && !Backdrop.ckeditor5.bypassContentWarning) {
@@ -87,6 +89,7 @@
           return true;
         })
         .catch(error => {
+          element.ckeditor5Processed = false;
           console.error('The CKEditor instance could not be initialized.');
           console.error(error);
           return false;
@@ -116,14 +119,13 @@
         editor.destroy();
         Backdrop.ckeditor5.instances.delete(editor.id);
         delete element.ckeditor5AttachedEditor;
+        delete element.ckeditor5Processed;
       }
 
       // Save formatted value after destroying the editor, which can also
       // update the element value.
       element.value = newData;
 
-      // Restore the resize grippie.
-      $(element).siblings('.grippie').show();
       return !!editor;
     },
 
@@ -149,6 +151,11 @@
      * Key-value map of all active instances of CKEditor 5.
      */
     instances: new Map(),
+
+    /**
+     * The last-active CKEditor 5 instance.
+     */
+    activeEditor: null,
 
     /**
      * Boolean indicating if CKEditor instances should be attached even if they
@@ -274,6 +281,29 @@
         element.value = Backdrop.ckeditor5.formatHtml(newData);
       }, 1000);
       editor.model.document.on('change:data', updateValue);
+    },
+
+    /**
+     * Binds an on change event to the editor to watch for focus changes.
+     *
+     * The Backdrop.ckeditor5.activeEditor variable can be used by other modules
+     * to insert content into the editor, or provide other outside integrations.
+     *
+     * @param editor
+     *   The CKEditor 5 instance.
+     */
+    trackActiveEditor: function (editor) {
+      // If no editor has been set yet, set the first one as the active.
+      if (!Backdrop.ckeditor5.activeEditor) {
+        Backdrop.ckeditor5.activeEditor = editor;
+      }
+      // Track when focus is set on a new editor.
+      // See https://ckeditor.com/docs/ckeditor5/latest/framework/deep-dive/ui/focus-tracking.html#a-note-about-the-global-focus-tracker
+      editor.ui.focusTracker.on('change:isFocused', (evt, data, isFocused) => {
+        if (isFocused) {
+          Backdrop.ckeditor5.activeEditor = editor;
+        }
+      });
     },
 
     /**
