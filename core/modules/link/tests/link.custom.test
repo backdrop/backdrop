@@ -45,7 +45,7 @@ class LinkCustomFormTest extends LinkBaseTestClass {
       'configurable_title_and_class[attributes][title]' => 'Learn more about using Backdrop CMS',
       'configurable_title_and_class[attributes][class]' => 'help',
     );
-    $expected_result = '[link_test_defaults] => Array ( [title] => BackdropCMS Demo [url] => https://backdropcms.org/demo ) [link_test_title_changes] => Array ( [title] => Upgrade [url] => https://backdropcms.org/drupal-alternative ) [link_test_internal_no_title] => Array ( [url] => about ) [link_test_validate_url] => Array ( [title] => Add-ons [url] => https://backdropcms.org/add-ons ) [configurable_title_and_class] => Array ( [title] => Backdrop User Guide [url] => https://docs.backdropcms.org/documentation/user-guide [attributes] => Array (  [title] => Learn more about using BackdropCMS  [class] => help ) )';
+    $expected_result = '[link_test_defaults] => Array ( [title] => Backdrop CMS Demo [url] => https://backdropcms.org/demo ) [link_test_title_changes] => Array ( [title] => Upgrade [url] => https://backdropcms.org/drupal-alternative ) [link_test_internal_no_title] => Array ( [url] => about ) [link_test_validate_url] => Array ( [title] => Add-ons [url] => https://backdropcms.org/add-ons ) [configurable_title_and_class] => Array ( [title] => Backdrop User Guide [url] => https://docs.backdropcms.org/documentation/user-guide [attributes] => Array (  [title] => Learn more about using Backdrop CMS  [class] => help ) )';
     $this->backdropPost('link-field-custom-form', $good_submission_data, t('Submit'));
     $this->assertRaw($expected_result, "Form submission successful", $group);
   }
