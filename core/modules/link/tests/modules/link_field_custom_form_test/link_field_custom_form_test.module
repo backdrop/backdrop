@@ -45,11 +45,12 @@ function link_field_custom_form_test_form(array $form, array &$form_state) {
       'title_label_use_field_label' => TRUE,
     ),
   );
-  $form['link_test_no_title'] = array(
+  $form['link_test_internal_no_title'] = array(
     '#type' => 'link_field',
     '#title' => t('Link without title'),
     '#link_field_options' => array(
       'title_mode' => 'none',
+      'link_type' => 'internal',
     ),
   );
   $form['link_test_validate_url'] = array(
@@ -66,6 +67,14 @@ function link_field_custom_form_test_form(array $form, array &$form_state) {
       'url' => 'http://example.com',
     ),
   );
+  $form['configurable_title_and_class'] = array(
+    '#type' => 'link_field',
+    '#title' => t('Link with configurable title and class'),
+    '#link_field_options' => array(
+      'configurable_title' => TRUE,
+      'configurable_class' => TRUE,
+    ),
+  );
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Submit'),
@@ -77,5 +86,8 @@ function link_field_custom_form_test_form(array $form, array &$form_state) {
  * Form submission handler for link_field_custom_form_test_form().
  */
 function link_field_custom_form_test_form_submit(array $form, array &$form_state) {
-  backdrop_set_message(t('Form submitted.'));
+  $output = print_r($form_state['values'], TRUE);
+  $output = str_replace(array("\r", "\n"), '', $output);
+  $output = str_replace(array("    ", "   ", "  "), ' ', $output);
+  backdrop_set_message($output);
 }

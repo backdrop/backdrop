@@ -384,7 +384,6 @@ function link_field_widget_form(&$form, &$form_state, $field, $instance, $langco
       'target' => $settings['attributes']['target'],
       'configurable_title' => $settings['attributes']['configurable_title'],
       'configurable_class' => $settings['attributes']['configurable_class'],
-      'instance' => $instance,
     );
   }
   return $element;
@@ -843,7 +842,7 @@ function _link_field_options_defaults() {
     'title_mode' => 'optional',
     'title_maxlength' => 128,
 
-    // If TRUE, the element's #title property will be use as the the label for
+    // If TRUE, the element's #title property will be used as the the label for
     // the link's 'title' textfield. Otherwise, the string 'Title' will be
     // used.
     'title_label_use_field_label' => FALSE,
