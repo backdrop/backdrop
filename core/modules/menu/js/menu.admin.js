@@ -19,9 +19,9 @@ Backdrop.behaviors.menuAdminFieldsetSummaries = {
   }
 };
 
-Backdrop.behaviors.menu_edit_item_parents = {
+Backdrop.behaviors.menuEditItemParents = {
   attach: function (context, settings) {
-    if ($('.form-item-parent-menu').length) {
+    $('.form-item-parent-menu', context).once('form-item-parent-menu', function () {
       // Get the menu parent options from settings.
       var menuOptions = settings.menu_edit_item_parents;
       // Get the current menu name from settings.
@@ -32,8 +32,8 @@ Backdrop.behaviors.menu_edit_item_parents = {
       Backdrop.menu_edit_update_parent_list(menuName);
       // Ensure that the menu parent select list is filtered again when any ajax
       // process runs.
-      $( document ).ajaxComplete(function( event, xhr, settings ) {
-        if (settings.url=='/system/ajax') {
+      $(document).ajaxComplete(function(event, xhr, settings) {
+        if (settings.url == Backdrop.settings.basePath + 'system/ajax') {
           var selected = $('[data-menu-parent] :selected').val().split(':')[0];
           Backdrop.menu_edit_update_parent_list(selected);
         }
@@ -43,7 +43,7 @@ Backdrop.behaviors.menu_edit_item_parents = {
       sel.on('change', function () {
         Backdrop.menu_edit_update_parent_list(this.value);
       });
-    }
+    });
   }
 }
 
@@ -66,7 +66,7 @@ Backdrop.menu_edit_update_parent_list = function (value) {
       var selectForm = $('[data-menu-parent]');
       selectForm.children().remove();
       // Add new options to dropdown.
-      jQuery.each(options, function(index, value) {
+      $.each(options, function(index, value) {
         $('[data-menu-parent]').append(
           $('<option ' + (index == selected ? ' selected="selected"' : '') + '></option>').val(index).text(value)
         );
@@ -85,7 +85,6 @@ Backdrop.behaviors.menuChangeParentItems = {
     });
   }
 };
-
 
 /**
  * Function to set the options of the menu parent item dropdown.
