@@ -1254,3 +1254,36 @@ function file_update_1010() {
     $config->save();
   }
 }
+
+/**
+ * Add Apple media types to document file type and to allowed extensions.
+ */
+function file_update_1011() {
+  $config = config('file.type.document');
+  $mimetypes = $config->get('mimetypes');
+  $mimetypes = array_merge($mimetypes, array(
+    'application/vnd.apple.keynote',
+    'application/vnd.apple.numbers',
+    'application/vnd.apple.pages',
+  ));
+  $config->set('mimetypes', $mimetypes);
+  $config->save();
+
+  // Check if there are any existing files with these extensions that are of
+  // type 'undefined'. If so, turn on the reclassification alert.
+  $count = db_query("SELECT COUNT(fid) FROM {file_managed} WHERE (filename LIKE :keynote_extension OR filename LIKE :numbers_extension OR filename LIKE :pages_extension) AND type = :undefined_type",
+    array(
+      ':keynote_extension' => '%.keynote',
+      ':numbers_extension' => '%.numbers',
+      ':pages_extension' => '%.pages',
+      ':undefined_type' => 'undefined',
+    ))->fetchField();
+  if ($count) {
+    file_needs_type_classification(TRUE);
+    $message = format_plural($count, '@count file with an Apple file type was found.', '@count files with Apple file types were found.', array('@count' => $count));
+    $message .= ' ' . t('Visit the <a href="@url">File reclassification form</a> next to classify these files properly.', array(
+      '@url' => url('admin/structure/file-types/classify'),
+    ));
+    return $message;
+  }
+}

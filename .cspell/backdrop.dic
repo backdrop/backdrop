@@ -25,6 +25,7 @@ attrarr
 attributename
 attrlist
 attrname
+autocreate
 backdropcaption
 backdropcms
 backdropimage
@@ -97,6 +98,7 @@ dimanche
 dialogclose
 dialogopen
 divitis
+divs
 docache
 docwilmot
 domdocument
@@ -116,6 +118,7 @@ entityreference
 errorcode
 evalmath
 evid
+exitcode
 expandtab
 exportables
 extname
@@ -206,6 +209,7 @@ innodb
 instantiatable
 isid
 istart
+itoa
 jahwohl
 Jamo
 jdalton
@@ -263,6 +267,7 @@ mousedown
 mouton
 moutons
 msgbox
+msword
 multibundle
 multilanguage
 multipage
@@ -452,6 +457,7 @@ Teletubbies
 tempstore
 testconfig
 testfiles
+testsuite
 testviews
 textgroup
 textgroups
