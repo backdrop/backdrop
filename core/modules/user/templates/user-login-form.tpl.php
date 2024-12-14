@@ -15,7 +15,7 @@
  * @ingroup themeable
  */
 ?>
-<?php if ($user_login_page_suppress_layout && !$user_login_page_tabs): ?>
+<?php if ($user_login_page_simplified): ?>
   <div class="<?php print implode(' ', $classes); ?>">
     <div class="user-login-wrapper">
       <?php if ($logo_image): ?>
@@ -36,7 +36,7 @@
 
 <?php print backdrop_render_children($user_login_form); ?>
 
-<?php if ($user_login_page_suppress_layout && !$user_login_page_tabs): ?>
+<?php if ($user_login_page_simplified): ?>
     </div>
   </div>
 <?php endif; ?>

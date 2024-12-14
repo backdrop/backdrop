@@ -403,27 +403,28 @@ function user_login_settings($form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Login page settings'),
   );
-  $form['user_login_page_settings']['user_login_page_tabs'] = array(
-    '#title' => t('Use tabs'),
-    '#type' => 'checkbox',
-    '#description' => t('If selected shows local tabs for "Create new account", "Log in", and "Reset password" links. A simplified page with links is shown if unchecked.'),
-    '#default_value' => $core_config->get('user_login_page_tabs'),
-    '#config' => 'system.core',
+  $user_login_page_tab_options = array(
+    'tabs' => t('Use tabs'),
+    'links' => t('Use links'),
+    'simplified' => t('Show simplified page'),
   );
-  $form['user_login_page_settings']['user_login_page_suppress_layout'] = array(
-    '#title' => t('Hide layout regions'),
-    '#type' => 'checkbox',
-    '#description' => t('Hide all layout regions, such as headers, footers, and sidebars. Only applies if the "Use tabs" setting is off.'),
-    '#default_value' => $core_config->get('user_login_page_suppress_layout'),
-    '#states' => array(
-      'visible' => array(
-        ':input[name="user_login_page_tabs"]' => array('checked' => FALSE),
-      ),
+  $user_login_page_default_settings = $core_config->get('user_login_page_settings');
+  $form['user_login_page_settings']['user_login_page_settings'] = array(
+    '#title' => t('Login page options'),
+    '#type' => 'radios',
+    '#options' => $user_login_page_tab_options,
+    '#default_value' => $user_login_page_default_settings ? $user_login_page_default_settings : 'tabs',
+    '#config' => 'system.core',
+    'tabs' => array(
+      '#description' => t('Show local tabs for "Create new account", "Log in", and "Reset password" links.'),
     ),
-    '#config' => 'system.core',
-    '#indentation' => 1,
+    'links' => array(
+      '#description' => t('Show plain links to these pages.'),
+    ),
+    'simplified' => array(
+      '#description' => t('Show plain links to these pages, and hide all layout regions, such as headers, footers, and sidebars.'),
+    ),
   );
-
   $form['flood_log_failed_attempts'] = array(
     '#type' => 'checkbox',
     '#title' => t('Log excessive failed login attempts.'),

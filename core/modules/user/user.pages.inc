@@ -73,7 +73,8 @@ function user_pass($form, &$form_state) {
     );
   }
 
-  if (!$user_is_logged_in && !user_login_page_tabs()) {
+  $user_login_page_settings = user_login_page_settings();
+  if (!$user_is_logged_in && $user_login_page_settings != 'tabs') {
     $form['links'] = array(
       '#markup' => theme('links', array(
         'links' => array(
