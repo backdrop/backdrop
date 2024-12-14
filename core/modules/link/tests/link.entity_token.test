@@ -1,0 +1,80 @@
+<?php
+/**
+ * @file
+ * Contains simpletests making sure entity_token integration works.
+ */
+
+/**
+ * Testing that tokens can be used in link titles
+ */
+class LinkEntityTokenTest extends LinkBaseTestClass {
+
+  function setUp($modules = array()) {
+    parent::setUp();
+  }
+
+  /**
+   * Creates a link field, fills it, and then attempts to use the url value in a token.
+   */
+  function testFieldToken() {
+    // create field
+    $settings = array(
+      'instance[settings][enable_tokens]' => 0,
+    );
+    $field_name = $this->createLinkField('page',
+                                        $settings);
+
+    // create page form
+    $this->backdropGet('node/add/page');
+    //$field_name = 'field_' . $name;
+    $this->assertField($field_name . '[und][0][title]', 'Title found');
+    $this->assertField($field_name . '[und][0][url]', 'URL found');
+
+    $token_url_tests = array(
+      1 => array(
+        'href' => 'http://example.com/' . $this->randomName(),
+        'label' => $this->randomName(),
+      ),
+      2 => array(
+        'href' => 'http://example.com/' . $this->randomName() . '?property=value',
+        'label' => $this->randomName(),
+      ),
+      3 => array(
+        'href' => 'http://example.com/' . $this->randomName() . '#position',
+        'label' => $this->randomName(),
+      ),
+      4 => array(
+        'href' => 'http://example.com/' . $this->randomName() . '#lower?property=value2',
+        'label' => $this->randomName(),
+      ),
+    );
+    //$this->assert('pass', '<pre>' . print_r($token_url_tests, TRUE) . '<pre>');
+
+    foreach ($token_url_tests as &$input) {
+      $this->backdropGet('node/add/page');
+
+      $edit = array(
+        'title' => $input['label'],
+        $field_name . '[und][0][title]' => $input['label'],
+        $field_name . '[und][0][url]' => $input['href'],
+      );
+      $this->backdropPost(NULL, $edit, t('Save'));
+      $url = $this->getUrl();
+      $input['url'] = $url;
+    }
+
+    // change to anonymous user
+    $this->backdropLogout();
+
+    foreach ($token_url_tests as $index => $input2) {
+      $node = node_load($index);
+      $this->assertNotEqual(NULL, $node, "Do we have a node?");
+      $this->assertEqual($node->nid, $index, "Test that we have a node.");
+      $token_name = '[node:' . str_replace('_', '-', $field_name) . ':url]';
+      $assert_data = token_replace($token_name,
+                      array('node' => $node));
+      $this->assertEqual($input2['href'], $assert_data, "Test that the url token has been set to " . $input2['href'] . ' - ' . $assert_data);
+    }
+  }
+
+}
