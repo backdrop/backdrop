@@ -18,7 +18,7 @@ function telemetry_telemetry_info() {
     'description' => t('The version number of your database (either MySQL or MariaDB).'),
     'project' => 'backdrop',
   );
-  $info['initial_version'] = array(
+  $info['install_version'] = array(
     'label' => t('Backdrop initial version'),
     'description' => t('The Backdrop version at the time Backdrop was first installed, or 1.30.0 if it was installed before then.'),
     'project' => 'backdrop',
@@ -75,8 +75,8 @@ function telemetry_telemetry_data($key) {
       return PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION . '.' . PHP_RELEASE_VERSION;
     case 'mysql_version':
       return Database::getConnection()->databaseType() === 'mysql' ? Database::getConnection()->version() : NULL;
-    case 'initial_version':
-      return config_get('system.core', 'initial_version');
+    case 'install_version':
+      return config_get('system.core', 'install_version');
     case 'server_os':
       return PHP_OS;
     case 'web_server':
