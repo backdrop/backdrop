@@ -58,8 +58,6 @@ class BackupMySql extends BackupDatabase {
       'data_rows_per_query' => 50000,
       'data_rows_per_line' => 10,
       'data_bytes_per_line' => 2048,
-
-      'use_mysqldump' => FALSE,
     );
     return $settings;
   }
@@ -80,28 +78,6 @@ class BackupMySql extends BackupDatabase {
    * {@inheritdoc}
    */
   protected function backupDatabaseToFile(BackupFile $file) {
-    if ($this->settings['use_mysqldump']) {
-      $result = $this->backupToFileMysqldump($file);
-    }
-    else {
-      $result = $this->backupToFileInternal($file);
-    }
-
-    return $result;
-  }
-
-  /**
-   * Backup the databases to a file.
-   *
-   * Writes a list of SQL commands, one command per line.
-   * That makes it easier to import without loading the whole file into memory.
-   * The files are a little harder to read, but human-readability is not a
-   * priority.
-   *
-   * @return int|boolean
-   *   If successful, the number of lines written. FALSE if the backup failed.
-   */
-  private function backupToFileInternal(BackupFile $file) {
     $lines = 0;
     $exclude = $this->settings['exclude_tables'];
     $nodata = $this->settings['nodata_tables'];
@@ -141,63 +117,12 @@ class BackupMySql extends BackupDatabase {
   }
 
   /**
-   * Backup the databases to a file using the mysqldump command.
-   */
-  private function backupToFileMysqldump(BackupFile $file) {
-    $nodata_tables = array();
-    $all_tables = $this->getTables();
-
-    $command = 'mysqldump --result-file=%file --opt -Q --host=%host --port=%port --user=%user --password=%pass %name';
-    $args = array(
-      '%file' => $file->filepath(),
-      '%host' => $this->settings['database_host'],
-      '%port' => $this->settings['database_port'],
-      '%user' => $this->settings['database_user'],
-      '%pass' => $this->settings['database_pass'],
-      '%name' => $this->settings['database_name'],
-    );
-
-    // Ignore the excluded and no-data tables.
-    $db = $this->settings['database_name'];
-    foreach ($this->settings['exclude_tables'] as $table) {
-      if (isset($all_tables[$table])) {
-        $command .= ' --ignore-table=' . $db . '.' . $table;
-      }
-    }
-    foreach ($this->settings['nodata_tables'] as $table) {
-      if (isset($all_tables[$table])) {
-        $nodata_tables[] = $table;
-        $command .= ' --ignore-table=' . $db . '.' . $table;
-      }
-    }
-    // @todo: This is not yet supported.
-    $success = backup_migrate_exec($command, $args);
-
-    // Get the nodata tables.
-    if ($success && !empty($nodata_tables)) {
-      $tables = implode(' ', array_unique($nodata_tables));
-      $command = "mysqldump --no-data --opt -Q --host=%host --port=%port --user=%user --password=%pass %name $tables >> %file";
-      $success = backup_migrate_exec($command, $args);
-    }
-    return $success;
-  }
-
-  /**
    * {@inheritdoc}
    */
   protected function restoreDatabaseFromFile(BackupFile $file) {
     $lines_executed = 0;
 
     if ($file->open() && $connection = $this->getDatabaseConnection()) {
-      // Optionally drop all existing tables.
-      if (!empty($this->settings['utils_drop_all_tables'])) {
-        $all_tables = $this->getTables();
-        $table_names = array_map('backup_migrate_array_name_value', $all_tables);
-        $table_list = join(', ', $table_names);
-        $statement = $connection->prepare("DROP TABLE IF EXISTS $table_list;\n");
-        $statement->execute();
-      }
-
       // Read one line at a time and run the query.
       while ($line = $this->readSqlCommandFromFile($file)) {
         if ($this->timeoutCheck()) {
@@ -451,7 +376,8 @@ class BackupMySql extends BackupDatabase {
     }
 
     if ($this->settings['verbose']) {
-      $this->log('Peak memory usage: %mem', array('%mem' => backup_migrate_get_peak_memory_usage() . 'MB'), Backup::LOG_INFO);
+      $peak_memory_usage = format_size(memory_get_peak_usage(TRUE), LANGUAGE_SYSTEM);
+      $this->log('Peak memory usage: %size', array('%size' => $peak_memory_usage), Backup::LOG_INFO);
     }
 
     return $lines;
@@ -507,7 +433,7 @@ class BackupMySql extends BackupDatabase {
    * These commands set the connection character encoding to help prevent
    * encoding conversion issues.
    *
-   * Note some versions of mysql are sensitive to the spacing in the dump file.
+   * Note some versions of MySQL are sensitive to the spacing in the dump file.
    * Do not add indents or remove empty lines.
    */
   protected function getSqlFileHeader() {

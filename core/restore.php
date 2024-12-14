@@ -61,7 +61,7 @@ function restore_info_page() {
 }
 
 /**
- * Provides a form to create an on-demand backup before updating.
+ * Provides a form to select a backup to restore.
  *
  * @return string
  *   Rendered HTML form.

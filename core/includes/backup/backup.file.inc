@@ -174,67 +174,6 @@ class BackupFile {
   }
 
   /**
-   * Transfer file using http to client. Similar to the built in file_transfer,
-   * but it calls module_invoke_all('exit') so that temp files can be deleted.
-   */
-  public function transfer() {
-    $headers = array(
-      array(
-        'key' => 'Content-Type',
-        'value' => $this->mimetype(),
-      ),
-      array(
-        'key' => 'Content-Disposition',
-        'value' => 'attachment; filename="'. $this->filename() .'"',
-      ),
-    );
-    // In some circumstances, web-servers will double compress gzipped files.
-    // This may help alleviate that issue by disabling mod-deflate.
-    if ($this->mimetype() == 'application/x-gzip') {
-      $headers[] = array(
-        'key' => 'Content-Encoding',
-        'value' => 'gzip',
-      );
-    }
-    if ($size = $this->getFileSize()) {
-      $headers[] = array(
-        'key' => 'Content-Length',
-        'value' => $size,
-      );
-    }
-
-    // Suppress the warning you get when the buffer is empty.
-    @ob_end_clean();
-
-    if ($this->open(FALSE, TRUE)) {
-      foreach ($headers as $header) {
-        // To prevent HTTP header injection, we delete new lines that are
-        // not followed by a space or a tab.
-        // See http://www.w3.org/Protocols/rfc2616/rfc2616-sec4.html#sec4.2
-        $header['value'] = preg_replace('/\r?\n(?![\t ])/', '', $header['value']);
-        backdrop_add_http_header($header['key'], $header['value']);
-      }
-      // Transfer file in 1024 byte chunks to save memory usage.
-      while ($data = $this->read(1024)) {
-        print $data;
-      }
-      $this->close();
-    }
-    else {
-      backdrop_not_found();
-    }
-
-    // Start buffering and throw away the results so that errors don't get
-    // appended to the file.
-    ob_start('_backup_file_dispose_buffer');
-
-    // @todo Clean up temporary files
-    // backup_migrate_cleanup();
-
-    exit;
-  }
-
-  /**
    * Log any issues with reading or writing files.
    */
   protected function log($message, $replacements, $log_type) {
