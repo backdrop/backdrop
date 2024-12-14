@@ -793,7 +793,7 @@ function link_theme() {
 function link_element_info() {
   $elements = array();
   // We use "link_field" here to avoid conflicts with theme_link().
-  // Many of these property are related to the Field API Link field settings.
+  // Many of these properties are related to the Field API Link field settings.
   $elements['link_field'] = array(
     '#input' => TRUE,
     '#process' => array('link_field_process'),
