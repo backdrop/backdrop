@@ -418,6 +418,14 @@ function menu_edit_item($form, &$form_state, $type, $item, $menu) {
   if (!isset($options[$default])) {
     $default = 'main-menu:0';
   }
+  // This select element lists all available menus. When an option is chosen,
+  // the link options in the "Parent link" element below will be filtered to
+  // list only links from that chosen menu. This is accomplished via an AJAX
+  // request. Part of the AJAX request queries admin/structure/menu/parents,
+  // hence we ensure only users with access to that path (those users with
+  // "administer menu" permissions) will have access to this element.
+  // Since this requires JavaScript, the "js-show" class is added to hide this
+  // element if JavaScript is disabled.
   $form['parent_menu'] = array(
     '#type' => 'select',
     '#title' => t('Menu'),
