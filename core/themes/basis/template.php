@@ -38,16 +38,25 @@ function basis_preprocess_page(&$variables) {
     $variables['classes'][] = 'view-name-' . $view->name;
   }
 
-  // Get the installed version to add body class for each version.
+  // Get the installed version.
   $install_version = config_get('system.core', 'install_version');
 
-  // Trim the version to major.minor only.
+  // Process the version to retain major.minor.patch format.
   if (!empty($install_version)) {
-    // Explode version by '.' and keep only the first two parts.
-    $version_parts = explode('.', $install_version);
-    $install_version = isset($version_parts[0], $version_parts[1]) 
-      ? $version_parts[0] . '.' . $version_parts[1] 
-      : '0.0';  // Fallback if version is malformed.
+    // Extract major, minor, and patch versions.
+    preg_match('/^(\d+)\.(\d+)(?:\.(\d+))?/', $install_version, $matches);
+
+    // Build the cleaned-up version.
+    if (!empty($matches)) {
+      $major = $matches[1];
+      $minor = $matches[2];
+      $patch = isset($matches[3]) && is_numeric($matches[3]) ? $matches[3] : '0';
+      $install_version = "$major.$minor.$patch";
+    }
+    else {
+      // Fallback in case of unexpected format.
+      $install_version = '0.0.0';
+    }
   }
 
   // Every time we add supplemental CSS we add the version number here.
