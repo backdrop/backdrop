@@ -853,6 +853,29 @@ function system_install() {
 
   // Set the install version to the current version of Backdrop.
   config_set('system.core', 'install_version', BACKDROP_VERSION);
+
+  // Use install version as initial css update version.
+  $initial_update_version = BACKDROP_VERSION;
+
+  // Process the version to retain major.minor.patch format.
+  if (!empty($initial_update_version)) {
+    // Extract major, minor, and patch versions.
+    preg_match('/^(\d+)\.(\d+)(?:\.(\d+))?/', $initial_update_version, $matches);
+
+    // Build the cleaned-up version.
+    if (!empty($matches)) {
+      $major = $matches[1];
+      $minor = $matches[2];
+      $patch = isset($matches[3]) && is_numeric($matches[3]) ? $matches[3] : '0';
+      $initial_update_version = "$major.$minor.$patch";
+    }
+    else {
+      // Fallback in case of unexpected format.
+      $initial_update_version = '0.0.0';
+    }
+  }
+  config_set('basis.settings', 'css_update_version_preference', $initial_update_version);
+  config_set('basis.settings', 'css_update_preference', 'default');
 }
 
 /**

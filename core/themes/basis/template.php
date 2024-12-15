@@ -39,29 +39,13 @@ function basis_preprocess_page(&$variables) {
   }
 
   // Get the installed version.
-  $preferred_version = config_get('basis.settings', 'css_update_version_preference');
-
-  // Process the version to retain major.minor.patch format.
-  if (!empty($preferred_version)) {
-    // Extract major, minor, and patch versions.
-    preg_match('/^(\d+)\.(\d+)(?:\.(\d+))?/', $preferred_version, $matches);
-
-    // Build the cleaned-up version.
-    if (!empty($matches)) {
-      $major = $matches[1];
-      $minor = $matches[2];
-      $patch = isset($matches[3]) && is_numeric($matches[3]) ? $matches[3] : '0';
-      $preferred_version = "$major.$minor.$patch";
-    }
-    else {
-      // Fallback in case of unexpected format.
-      $preferred_version = '0.0.0';
-    }
-  }
-
+  $update_version_preference = config_get('basis.settings', 'css_update_version_preference');
+  $update_preference = config_get('basis.settings', 'css_update_preference');
+  
+  // Process supplemental CSS versions.
   $supplemental_css_versions = basis_supplemental_css_versions();
   foreach ($supplemental_css_versions as $supplemental_css_version) {
-    if (version_compare($preferred_version, $supplemental_css_version, '>=')) {
+    if ($update_preference === 'all_updates' || version_compare($update_version_preference, $supplemental_css_version, '>=')) {
       $class_version = preg_replace('/^([0-9.]+)\.0$/', '${1}', $supplemental_css_version);
       $supplemental_css_version_class = 'update-' . str_replace('.', '-', $class_version);
       $variables['classes'][] = $supplemental_css_version_class;

@@ -82,7 +82,6 @@ function basis_form_system_theme_settings_alter(&$form, &$form_state, $form_id =
   $install_version = config_get('system.core', 'install_version');
 
   $css_update_options = array(
-    'installation' => t('Updates thru installation'),
     'all_updates' => t('All updates'),
     'custom' => t('Updates thru specific version.'),
   );
@@ -104,9 +103,6 @@ function basis_form_system_theme_settings_alter(&$form, &$form_state, $form_id =
     '#options' => $css_update_options,
     '#default_value' => theme_get_setting('css_update_preference', $theme_name),
     '#config' => 'basis.settings',
-    'installation' => array(
-      '#description' => t('Accept changes that were made prior to or including the initial install version of your Backdrop site (Your site: '. $install_version . ').'),
-    ),
     'all_updates' => array(
       '#description' => t('Warning: Some future changes may effect your site.'),
     ),
