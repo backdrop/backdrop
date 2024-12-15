@@ -39,30 +39,29 @@ function basis_preprocess_page(&$variables) {
   }
 
   // Get the installed version.
-  $install_version = config_get('system.core', 'install_version');
+  $preferred_version = config_get('basis.settings', 'css_update_version_preference');
 
-  // Process the version to retain major.minor.patch format.
-  if (!empty($install_version)) {
+  //Process the version to retain major.minor.patch format.
+  if (!empty($preferred_version)) {
     // Extract major, minor, and patch versions.
-    preg_match('/^(\d+)\.(\d+)(?:\.(\d+))?/', $install_version, $matches);
+    preg_match('/^(\d+)\.(\d+)(?:\.(\d+))?/', $preferred_version, $matches);
 
     // Build the cleaned-up version.
     if (!empty($matches)) {
       $major = $matches[1];
       $minor = $matches[2];
       $patch = isset($matches[3]) && is_numeric($matches[3]) ? $matches[3] : '0';
-      $install_version = "$major.$minor.$patch";
+      $preferred_version = "$major.$minor.$patch";
     }
     else {
       // Fallback in case of unexpected format.
-      $install_version = '0.0.0';
+      $preferred_version = '0.0.0';
     }
   }
 
-  // Every time we add supplemental CSS we add the version number here.
-  $supplemental_css_versions = array('1.30.0');
+  $supplemental_css_versions = basis_supplemental_css_versions();
   foreach ($supplemental_css_versions as $supplemental_css_version) {
-    if (version_compare($install_version, $supplemental_css_version, '>=')) {
+    if (version_compare($preferred_version, $supplemental_css_version, '>=')) {
       $class_version = preg_replace('/^([0-9.]+)\.0$/', '${1}', $supplemental_css_version);
       $supplemental_css_version_class = 'update-' . str_replace('.', '-', $class_version);
       $variables['classes'][] = $supplemental_css_version_class;
@@ -82,6 +81,13 @@ function basis_preprocess_page(&$variables) {
       'media' => 'all and (min-width: ' . $config->get('menu_breakpoint_custom') . ')',
     ));
   }
+}
+
+/**
+ * Every time we add supplemental CSS we add the version number here.
+ */
+function basis_supplemental_css_versions() {
+  return ['1.23.0', '1.28.4', '1.30.0','1.31.5'];
 }
 
 /**
