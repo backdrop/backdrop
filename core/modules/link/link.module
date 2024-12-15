@@ -945,11 +945,9 @@ function link_field_process($element, $form_state, $complete_form) {
  */
 function link_field_element_validate(&$element, &$form_state, $complete_form) {
   $value = $element['#value'];
-  $is_default_field_value = FALSE;
-
   // Special validations when the values are not the default and when url has a
-  // value. NB: validation for subelements marked as 'required' is done by core.
-  if (!empty($value['url']) && !$is_default_field_value) {
+  // value. Sub-elements marked as 'required' are validated by core.
+  if (!empty($value['url'])) {
     // Validate the URL.
     if (!empty($element['#link_field_options']['validate_url'])) {
       $url_valid = link_validate_url(trim($value['url']));
