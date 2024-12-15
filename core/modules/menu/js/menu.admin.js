@@ -32,7 +32,7 @@ Backdrop.behaviors.menuEditItemParents = {
       Backdrop.menu_edit_update_parent_list(menuName);
       // Ensure that the menu parent select list is filtered again when any ajax
       // process runs.
-      $(document).ajaxComplete(function(event, xhr, settings) {
+      $(document).on('ajaxComplete', function(event, xhr, settings) {
         if (settings.url == Backdrop.settings.basePath + 'system/ajax') {
           var selected = $('[data-menu-parent] :selected').val().split(':')[0];
           Backdrop.menu_edit_update_parent_list(selected);
