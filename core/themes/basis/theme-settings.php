@@ -71,6 +71,9 @@ if (module_exists('color')) {
   }
 }
 
+/**
+ * Altering the theme settings for CSS updates.
+ */
 function basis_form_system_theme_settings_alter(&$form, &$form_state, $form_id = NULL) {
   // Ensure template.php is included.
   $theme_name = $form['theme']['#value'];
@@ -113,7 +116,7 @@ function basis_form_system_theme_settings_alter(&$form, &$form_state, $form_id =
 
   $default_version_value = theme_get_setting('css_update_version_preference', $theme_name);
 
-  // Reverse lookup to get the correct key if a value is stored instead of a key.
+  // Reverse lookup to get the correct key.
   $options = basis_supplemental_css_versions();
   $default_version_key = array_search($default_version_value, $options, TRUE);
 
@@ -150,7 +153,7 @@ function basis_process_css_update_value($element, &$form_state, $form) {
       break;
 
     case 'all_updates':
-      $form_state['values']['css_update_version_preference'] = BACKDROP_VERSION; // Latest version.
+      $form_state['values']['css_update_version_preference'] = BACKDROP_VERSION;
       break;
 
     case 'custom':

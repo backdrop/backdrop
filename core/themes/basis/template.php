@@ -41,7 +41,7 @@ function basis_preprocess_page(&$variables) {
   // Get the installed version.
   $preferred_version = config_get('basis.settings', 'css_update_version_preference');
 
-  //Process the version to retain major.minor.patch format.
+  // Process the version to retain major.minor.patch format.
   if (!empty($preferred_version)) {
     // Extract major, minor, and patch versions.
     preg_match('/^(\d+)\.(\d+)(?:\.(\d+))?/', $preferred_version, $matches);
