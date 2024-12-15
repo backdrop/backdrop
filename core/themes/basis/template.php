@@ -39,13 +39,13 @@ function basis_preprocess_page(&$variables) {
   }
 
   // Get the installed version.
-  $update_version_preference = config_get('basis.settings', 'css_update_version_preference');
-  $update_preference = config_get('basis.settings', 'css_update_preference');
-  
+  $update_version = config_get('basis.settings', 'css_update_version');
+  $update_preference = config_get('basis.settings', 'css_update');
+
   // Process supplemental CSS versions.
   $supplemental_css_versions = basis_supplemental_css_versions();
   foreach ($supplemental_css_versions as $supplemental_css_version) {
-    if ($update_preference === 'all_updates' || version_compare($update_version_preference, $supplemental_css_version, '>=')) {
+    if ($update_preference === 'all_updates' || version_compare($update_version, $supplemental_css_version, '>=')) {
       $class_version = preg_replace('/^([0-9.]+)\.0$/', '${1}', $supplemental_css_version);
       $supplemental_css_version_class = 'update-' . str_replace('.', '-', $class_version);
       $variables['classes'][] = $supplemental_css_version_class;

@@ -874,8 +874,8 @@ function system_install() {
       $initial_update_version = '0.0.0';
     }
   }
-  config_set('basis.settings', 'css_update_version_preference', $initial_update_version);
-  config_set('basis.settings', 'css_update_preference', 'default');
+  config_set('basis.settings', 'css_update_version', $initial_update_version);
+  config_set('basis.settings', 'css_update', 'default');
 }
 
 /**

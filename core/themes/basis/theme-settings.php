@@ -97,11 +97,11 @@ function basis_form_system_theme_settings_alter(&$form, &$form_state, $form_id =
   );
 
   // Load the saved configuration value.
-  $form['css_updates']['css_update_preference'] = array(
+  $form['css_updates']['css_update'] = array(
     '#title' => t('CSS Update Options'),
     '#type' => 'radios',
     '#options' => $css_update_options,
-    '#default_value' => theme_get_setting('css_update_preference', $theme_name),
+    '#default_value' => theme_get_setting('css_update', $theme_name),
     '#config' => 'basis.settings',
     'all_updates' => array(
       '#description' => t('Warning: Some future changes may effect your site.'),
@@ -110,14 +110,14 @@ function basis_form_system_theme_settings_alter(&$form, &$form_state, $form_id =
     ),
   );
 
-  $default_version_value = theme_get_setting('css_update_version_preference', $theme_name);
+  $default_version_value = theme_get_setting('css_update_version', $theme_name);
 
   // Reverse lookup to get the correct key.
   $options = basis_supplemental_css_versions();
   $default_version_key = array_search($default_version_value, $options, TRUE);
 
   // Conditionally displayed CSS updates select element.
-  $form['css_updates']['css_update_version_preference'] = [
+  $form['css_updates']['css_update_version'] = [
     '#type' => 'select',
     '#title' => t('Version'),
     '#description' => t('Accept CSS changes through this specific version of Backdrop.'),
@@ -127,7 +127,7 @@ function basis_form_system_theme_settings_alter(&$form, &$form_state, $form_id =
     '#empty_value' => NULL,
     '#states' => [
       'visible' => [
-        ':input[name="css_update_preference"]' => ['value' => 'custom'],
+        ':input[name="css_update"]' => ['value' => 'custom'],
       ],
     ],
     '#process' => ['basis_process_css_update_value'],
@@ -138,24 +138,24 @@ function basis_form_system_theme_settings_alter(&$form, &$form_state, $form_id =
  * Process function to adjust the CSS update version value before saving.
  */
 function basis_process_css_update_value($element, &$form_state, $form) {
-  $css_update_preference = $form_state['values']['css_update_preference'] ?? 'installation';
+  $css_update = $form_state['values']['css_update'] ?? 'installation';
   $options = basis_supplemental_css_versions();
   $install_version = config_get('system.core', 'install_version');
 
   // Adjust version value based on preference.
-  switch ($css_update_preference) {
+  switch ($css_update) {
     case 'installation':
-      $form_state['values']['css_update_version_preference'] = $install_version;
+      $form_state['values']['css_update_version'] = $install_version;
       break;
 
     case 'all_updates':
-      $form_state['values']['css_update_version_preference'] = BACKDROP_VERSION;
+      $form_state['values']['css_update_version'] = BACKDROP_VERSION;
       break;
 
     case 'custom':
-      $selected_key = $form_state['values']['css_update_version_preference'] ?? NULL;
+      $selected_key = $form_state['values']['css_update_version'] ?? NULL;
       if (isset($options[$selected_key])) {
-        $form_state['values']['css_update_version_preference'] = $options[$selected_key];
+        $form_state['values']['css_update_version'] = $options[$selected_key];
       }
       break;
   }
