@@ -3696,7 +3696,7 @@ function system_update_1099() {
       '1.28.x' => 1715731200, // 2024-05-15
       '1.29.x' => 1726358400, // 2024-09-15
     ];
-    // Loop over the array and print version and timestamp
+    // Loop over the array and print version and timestamp.
     foreach ($version_timestamps as $version => $timestamp) {
       if ($install_time < $timestamp) {
         break;
