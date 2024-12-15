@@ -874,8 +874,9 @@ function system_install() {
       $initial_update_version = '0.0.0';
     }
   }
+  config_set('basis.settings', 'install_version_clean', $initial_update_version);
   config_set('basis.settings', 'css_update_version', $initial_update_version);
-  config_set('basis.settings', 'css_update', 'default');
+  config_set('basis.settings', 'css_update', 'no_updates');
 }
 
 /**
@@ -3687,7 +3688,7 @@ function system_update_1099() {
   $install_version = $config->get('install_version');
   if (!isset($install_version)) {
     $install_time = state_get('install_time');
-    $version_timestamps = [
+    $version_timestamps = array(
       '1.0.x' => 1421280000, // 2015-01-15
       '1.1.x' => 1431648000, // 2015-05-15
       '1.2.x' => 1442275200, // 2015-09-15
@@ -3718,7 +3719,7 @@ function system_update_1099() {
       '1.27.x' => 1705276800, // 2024-01-15
       '1.28.x' => 1715731200, // 2024-05-15
       '1.29.x' => 1726358400, // 2024-09-15
-    ];
+    );
     // Loop over the array and print version and timestamp.
     foreach ($version_timestamps as $version => $timestamp) {
       if ($install_time < $timestamp) {

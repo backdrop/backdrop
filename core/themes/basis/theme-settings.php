@@ -82,6 +82,7 @@ function basis_form_system_theme_settings_alter(&$form, &$form_state, $form_id =
   $install_version = config_get('system.core', 'install_version');
 
   $css_update_options = array(
+    'no_updates' => t('No updates'),
     'all_updates' => t('All updates'),
     'custom' => t('Updates thru specific version.'),
   );
@@ -89,8 +90,8 @@ function basis_form_system_theme_settings_alter(&$form, &$form_state, $form_id =
   $form['css_updates'] = array(
     '#type' => 'details',
     '#open' => FALSE,
-    '#summary' => t('Expert Options'),
-    '#details' => t('There are occasional updates to Basis that may effect existing sites. For more information and details, see the <a href="https://docs.backdropcms.org/documentation/layouts-and-templates" target="_blank">online documentation</a>.</br></br>Select which updates you would like to accept. '),
+    '#summary' => t('Advanced CSS Updates'),
+    '#details' => t('There are occasional updates to Basis that may affect existing sites. For more information and details, see the <a href="https://docs.backdropcms.org/documentation/layouts-and-templates" target="_blank">online documentation</a>.</br></br>Select which updates you would like to accept. '),
     '#attributes' => array(
       'class' => array('description'),
     ),
@@ -103,6 +104,9 @@ function basis_form_system_theme_settings_alter(&$form, &$form_state, $form_id =
     '#options' => $css_update_options,
     '#default_value' => theme_get_setting('css_update', $theme_name),
     '#config' => 'basis.settings',
+    'no_updates' => array(
+      '#description' => t('Default: Accept no updates introduced after installation.'),
+    ),
     'all_updates' => array(
       '#description' => t('Warning: Some future changes may effect your site.'),
     ),
@@ -140,16 +144,12 @@ function basis_form_system_theme_settings_alter(&$form, &$form_state, $form_id =
 function basis_process_css_update_value($element, &$form_state, $form) {
   $css_update = $form_state['values']['css_update'] ?? 'installation';
   $options = basis_supplemental_css_versions();
-  $install_version = config_get('system.core', 'install_version');
+  $install_version = config_get('basis.settings', 'install_version_clean');
 
   // Adjust version value based on preference.
   switch ($css_update) {
-    case 'installation':
+    case 'no_updates':
       $form_state['values']['css_update_version'] = $install_version;
-      break;
-
-    case 'all_updates':
-      $form_state['values']['css_update_version'] = BACKDROP_VERSION;
       break;
 
     case 'custom':

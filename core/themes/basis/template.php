@@ -43,12 +43,11 @@ function basis_preprocess_page(&$variables) {
   $update_preference = config_get('basis.settings', 'css_update');
 
   // Process supplemental CSS versions.
-  $supplemental_css_versions = basis_supplemental_css_versions();
-  foreach ($supplemental_css_versions as $supplemental_css_version) {
-    if ($update_preference === 'all_updates' || version_compare($update_version, $supplemental_css_version, '>=')) {
-      $class_version = preg_replace('/^([0-9.]+)\.0$/', '${1}', $supplemental_css_version);
-      $supplemental_css_version_class = 'update-' . str_replace('.', '-', $class_version);
-      $variables['classes'][] = $supplemental_css_version_class;
+  $update_css_versions = basis_supplemental_css_versions();
+  foreach ($update_css_versions as $update_css_version) {
+    if ($update_preference === 'all_updates' || version_compare($update_version, $update_css_version, '>=')) {
+      $update_css_version_class = 'update-' . str_replace('.', '-', $update_css_version);
+      $variables['classes'][] = $update_css_version_class;
     }
   }
 
@@ -71,7 +70,7 @@ function basis_preprocess_page(&$variables) {
  * Every time we add supplemental CSS we add the version number here.
  */
 function basis_supplemental_css_versions() {
-  return ['1.23.0', '1.28.4', '1.30.0','1.31.5'];
+  return array('1.23', '1.28.4', '1.30','1.31.5');
 }
 
 /**
