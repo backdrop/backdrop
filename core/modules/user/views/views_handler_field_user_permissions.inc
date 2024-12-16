@@ -12,7 +12,7 @@
 class views_handler_field_user_permissions extends views_handler_field_prerender_list {
   function construct() {
     parent::construct();
-    $this->additional_fields['uid'] = array('table' => 'users', 'field' => 'uid');
+    $this->additional_fields['uid'] = ['table' => 'users', 'field' => 'uid'];
   }
 
   function query() {
@@ -21,13 +21,13 @@ class views_handler_field_user_permissions extends views_handler_field_prerender
   }
 
   function pre_render(&$values) {
-    $uids = array();
-    $this->items = array();
+    $uids = [];
+    $this->items = [];
 
     // Assemble authenticated permissions which are available for all accounts.
     $permissions = module_invoke_all('permission');
     $all_roles = user_roles(FALSE, NULL, TRUE);
-    $authenticated_permissions = array();
+    $authenticated_permissions = [];
     foreach ($all_roles[BACKDROP_AUTHENTICATED_ROLE]->permissions as $permission) {
       $authenticated_permissions[$permission]['permissions'] = $permissions[$permission]['title'];
     }
@@ -39,7 +39,7 @@ class views_handler_field_user_permissions extends views_handler_field_prerender
     }
 
     if ($uids) {
-      $result = db_query("SELECT u.uid, u.role FROM {users_roles} u WHERE u.uid IN (:uids)", array(':uids' => $uids));
+      $result = db_query("SELECT u.uid, u.role FROM {users_roles} u WHERE u.uid IN (:uids)", [':uids' => $uids]);
       foreach ($result as $user) {
         foreach ($all_roles as $user_role) {
           foreach ($user_role->permissions as $permission) {

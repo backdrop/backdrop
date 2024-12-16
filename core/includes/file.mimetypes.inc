@@ -33,8 +33,8 @@ function file_mimetype_mapping() {
  * @see file_get_mimetype()
  */
 function file_default_mimetype_mapping() {
-  return array(
-    'mimetypes' => array(
+  return [
+    'mimetypes' => [
       // cspell:disable
       0 => 'application/andrew-inset',
       1 => 'application/atom',
@@ -399,10 +399,10 @@ function file_default_mimetype_mapping() {
       344 => 'x-epoc/x-sisx-app',
       345 => 'x-world/x-vrml',
       // cspell:enable
-    ),
+    ],
 
     // Extensions added to this list MUST be lower-case.
-    'extensions' => array(
+    'extensions' => [
       // cspell:disable
       'ez' => 0,
       'atom' => 1,
@@ -883,6 +883,6 @@ function file_default_mimetype_mapping() {
       'numbers' => 360,
       'pages' => 361,
       // cspell:enable
-    ),
-  );
+    ],
+  ];
 }

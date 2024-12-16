@@ -5,17 +5,17 @@
  *  Provides entity field values in configurable blocks.
  */
 class FieldBlock extends Block {
-  function __construct($plugin_name, array $data = array()) {
+  function __construct($plugin_name, array $data = []) {
     parent::__construct($plugin_name, $data);
 
-    $this->settings += array(
+    $this->settings += [
       'label' => 'hidden',
       'formatter' => '',
-      'formatter_settings' => array(),
+      'formatter_settings' => [],
       'delta_offset' => 0,
       'delta_limit' => '',
       'delta_reversed' => 0,
-    );
+    ];
   }
 
   /**
@@ -27,7 +27,7 @@ class FieldBlock extends Block {
     }
 
     list($entity_type, $field_name) = explode('-', $this->childDelta, 2);
-    return t('Field %field', array('%field' => $field_name));
+    return t('Field %field', ['%field' => $field_name]);
   }
 
   /**
@@ -48,7 +48,7 @@ class FieldBlock extends Block {
     $pseudo_instance = $this->createPseudoInstance($formatter_name, $formatter_settings);
 
     $summary = module_invoke($formatter['module'], 'field_formatter_settings_summary', $field, $pseudo_instance, '_custom');
-    $preview = '<p>' . t('Displays values of the %field field.', array('%field' => $field_name)) . '</p>';
+    $preview = '<p>' . t('Displays values of the %field field.', ['%field' => $field_name]) . '</p>';
     $preview .= '<div class="field-formatter-summary">' . $summary . '</div>';
     $preview .= $this->getAdminConditionsPreview();
     return $preview;
@@ -111,11 +111,11 @@ class FieldBlock extends Block {
     }
     $language = field_language($entity_type, $entity, $field_name);
 
-    $field_settings = array(
+    $field_settings = [
       'type' => $settings['formatter'],
       'settings' => $settings['formatter_settings'],
       'label' => $settings['label'],
-    );
+    ];
 
     $all_values = field_get_items($entity_type, $entity, $field_name, $language);
     if (!is_array($all_values)) {
@@ -158,24 +158,24 @@ class FieldBlock extends Block {
 
     // Get formatter info.
     $formatters = field_info_formatter_types();
-    $formatter_options = array();
+    $formatter_options = [];
     foreach ($formatters as $formatter_name => $formatter) {
       if (in_array($field['type'], $formatter['field types'])) {
         $formatter_options[$formatter_name] = $formatter['label'];
       }
     }
 
-    $form['label'] = array(
+    $form['label'] = [
       '#type' => 'select',
       '#title' => t('Field label display'),
       '#default_value' => $settings['label'],
-      '#options' => array(
+      '#options' => [
         'hidden' => 'None',
         'above' => 'Above',
         'inline' => 'Inline',
-      ),
+      ],
       '#description' => t('The field label is displayed within the block content area.'),
-    );
+    ];
 
     // Get the currently selected formatter.
     $formatter_name = isset($form_state['values']['formatter']) ? $form_state['values']['formatter'] : $settings['formatter'];
@@ -185,31 +185,31 @@ class FieldBlock extends Block {
     $formatter = $formatters[$formatter_name];
     $formatter_settings = (array) $settings['formatter_settings'] + field_info_formatter_settings($formatter_name);
 
-    $form['formatter'] = array(
+    $form['formatter'] = [
       '#type' => 'select',
       '#title' => t('Field display format'),
       '#default_value' => $formatter_name,
       '#options' => $formatter_options,
-      '#ajax' => array(
+      '#ajax' => [
         'callback' => 'FieldBlock::formatterFormAjax',
-      ),
+      ],
       '#access' => count($formatter_options) > 1,
-    );
+    ];
 
     // Provide an instance array for hook_field_formatter_settings_form().
     $pseudo_instance = $this->createPseudoInstance($formatter_name, $formatter_settings);
 
     // Store the settings in a '_custom' display mode.
-    $pseudo_instance['display']['_custom'] = array(
+    $pseudo_instance['display']['_custom'] = [
       'type' => $formatter_name,
       'settings' => $formatter_settings,
-    );
+    ];
 
     // Get the settings form.
-    $formatter_settings_form = array(
+    $formatter_settings_form = [
       '#type' => 'value',
-      '#value' => array(),
-    );
+      '#value' => [],
+    ];
     $function = $formatter['module'] . '_field_formatter_settings_form';
     if (function_exists($function)) {
       $formatter_settings_form = $function($field, $pseudo_instance, '_custom', $form, $form_state);
@@ -221,38 +221,38 @@ class FieldBlock extends Block {
     // Settings that are only shown for multiple field
     if (isset($field['cardinality']) && $field['cardinality'] != 1) {
       list($prefix, $suffix) = explode('@count', t('Skip the first @count item(s)'));
-      $form['trim_output'] = array(
+      $form['trim_output'] = [
         '#type' => 'fieldset',
         '#title' => t('Trim the output values'),
-      );
-      $form['trim_output']['delta_offset'] = array(
+      ];
+      $form['trim_output']['delta_offset'] = [
         '#type' => 'textfield',
         '#size' => 5,
         '#field_prefix' => $prefix,
         '#field_suffix' => $suffix,
         '#default_value' => $settings['delta_offset'],
-      );
+      ];
 
       list($prefix, $suffix) = explode('@count', t('Then display at most @count item(s)'));
-      $form['trim_output']['delta_limit'] = array(
+      $form['trim_output']['delta_limit'] = [
         '#type' => 'textfield',
         '#size' => 5,
         '#field_prefix' => $prefix,
         '#field_suffix' => $suffix,
         '#description' => t('Enter 0 to display all items.'),
         '#default_value' => $settings['delta_limit'],
-      );
+      ];
 
-      $form['delta_reversed'] = array(
+      $form['delta_reversed'] = [
         '#type' => 'fieldset',
         '#title' => t('Reverse the output values'),
-      );
-      $form['delta_reversed']['delta_reversed'] = array(
+      ];
+      $form['delta_reversed']['delta_reversed'] = [
         '#title' => t('Display in reverse order'),
         '#type' => 'checkbox',
         '#default_value' => !empty($settings['delta_reversed']),
         '#description' => t('(start from last values)'),
-      );
+      ];
     }
   }
 
@@ -266,7 +266,7 @@ class FieldBlock extends Block {
 
     $this->settings['label'] = $values['label'];
     $this->settings['formatter'] = $values['formatter'];
-    $this->settings['formatter_settings'] = isset($values['formatter_settings']) ? $values['formatter_settings'] : array();
+    $this->settings['formatter_settings'] = isset($values['formatter_settings']) ? $values['formatter_settings'] : [];
     $this->settings['delta_offset'] = isset($values['trim_output']['delta_offset']) ? $values['trim_output']['delta_offset'] : 0;
     $this->settings['delta_limit'] = !empty($values['trim_output']['delta_limit']) ? $values['trim_output']['delta_limit'] : '';
     $this->settings['delta_reversed'] = isset($values['delta_reversed']['delta_reversed']) ? $values['delta_reversed']['delta_reversed'] : 0;
@@ -277,10 +277,10 @@ class FieldBlock extends Block {
    */
   static function formatterFormAjax($form, &$form_state) {
     $commands[] = ajax_command_replace('#formatter-settings', backdrop_render($form['formatter_settings']));
-    return array(
+    return [
       '#type' => 'ajax',
       '#commands' => $commands,
-    );
+    ];
   }
 
   /**
@@ -316,7 +316,7 @@ class FieldBlock extends Block {
     $field = field_info_field($field_name);
     $field_type = field_info_field_types($field['type']);
 
-    $instance = array(
+    $instance = [
       // Build a fake entity type and bundle.
       'field_name' => $field_name,
       'entity_type' => 'block',
@@ -324,18 +324,18 @@ class FieldBlock extends Block {
 
       // Use the default field settings for settings and widget.
       'settings' => field_info_instance_settings($field['type']),
-      'widget' => array(
+      'widget' => [
         'type' => $field_type['default_widget'],
-        'settings' => array(),
-      ),
+        'settings' => [],
+      ],
 
       // Build a dummy display mode.
-      'display' => array(
-        '_custom' => array(
+      'display' => [
+        '_custom' => [
           'type' => $formatter_name,
           'settings' => $formatter_settings,
-        ),
-      ),
+        ],
+      ],
 
       // Set the other fields to their default values.
       // @see _field_write_instance().
@@ -343,7 +343,7 @@ class FieldBlock extends Block {
       'label' => $field['field_name'],
       'description' => '',
       'deleted' => 0,
-    );
+    ];
 
     return $instance;
   }

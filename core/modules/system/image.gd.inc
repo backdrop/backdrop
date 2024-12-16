@@ -13,7 +13,7 @@
  * Retrieve settings for the GD2 toolkit.
  */
 function image_gd_settings() {
-  $form['image_jpeg_quality'] = array(
+  $form['image_jpeg_quality'] = [
     '#type' => 'number',
     '#title' => t('JPEG quality'),
     '#description' => t('Define the image quality for JPEG manipulations. Ranges from 0 to 100. Higher values mean better image quality but bigger files.'),
@@ -21,7 +21,7 @@ function image_gd_settings() {
     '#max' => 100,
     '#default_value' => config_get('system.core', 'image_jpeg_quality'),
     '#field_suffix' => t('%'),
-  );
+  ];
 
   return $form;
 }
@@ -32,7 +32,7 @@ function image_gd_settings() {
  * @since 1.25.0 Function added.
  */
 function image_gd_supported_extensions() {
-  $supported_extensions = array('png', 'gif', 'jpg', 'jpeg');
+  $supported_extensions = ['png', 'gif', 'jpg', 'jpeg'];
   if (defined('IMAGETYPE_WEBP')) {
     $gd_info = gd_info();
     if (isset($gd_info['WebP Support']) && $gd_info['WebP Support'] == TRUE) {
@@ -119,7 +119,7 @@ function image_gd_resize(stdClass $image, $width, $height, $background = NULL) {
 function image_gd_rotate(stdClass $image, $degrees, $background = NULL) {
   // PHP installations using non-bundled GD do not have imagerotate.
   if (!function_exists('imagerotate')) {
-    watchdog('image', 'The image %file could not be rotated because the imagerotate() function is not available in this PHP installation.', array('%file' => $image->source));
+    watchdog('image', 'The image %file could not be rotated because the imagerotate() function is not available in this PHP installation.', ['%file' => $image->source]);
     return FALSE;
   }
 
@@ -223,7 +223,7 @@ function image_gd_crop(stdClass $image, $x, $y, $width, $height, $background = N
 function image_gd_desaturate(stdClass $image) {
   // PHP installations using non-bundled GD do not have imagefilter.
   if (!function_exists('imagefilter')) {
-    watchdog('image', 'The image %file could not be desaturated because the imagefilter() function is not available in this PHP installation.', array('%file' => $image->source));
+    watchdog('image', 'The image %file could not be desaturated because the imagefilter() function is not available in this PHP installation.', ['%file' => $image->source]);
     return FALSE;
   }
 
@@ -368,12 +368,12 @@ function image_gd_get_info(stdClass $image) {
     $extension = in_array($extension, $supported_extensions) ? $extension : '';
     // Treat jpeg as jpg.
     $extension = $extension == 'jpeg' ? 'jpg' : $extension;
-    $details = array(
+    $details = [
       'width'     => $data[0],
       'height'    => $data[1],
       'extension' => $extension,
       'mime_type' => $data['mime'],
-    );
+    ];
   }
 
   return $details;

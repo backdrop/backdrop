@@ -38,14 +38,14 @@
  */
 function hook_field_settings_form($field, $instance, $has_data) {
   $settings = $field['settings'];
-  $form['max_length'] = array(
+  $form['max_length'] = [
     '#type' => 'number',
     '#title' => t('Maximum length'),
     '#default_value' => $settings['max_length'],
     '#required' => FALSE,
     '#min' => 1,
     '#description' => t('The maximum length of the field in characters. Leave blank for an unlimited size.'),
-  );
+  ];
   return $form;
 }
 
@@ -68,26 +68,26 @@ function hook_field_settings_form($field, $instance, $has_data) {
 function hook_field_instance_settings_form($field, $instance) {
   $settings = $instance['settings'];
 
-  $form['text_processing'] = array(
+  $form['text_processing'] = [
     '#type' => 'radios',
     '#title' => t('Text processing'),
     '#default_value' => $settings['text_processing'],
-    '#options' => array(
+    '#options' => [
       t('Plain text'),
       t('Filtered text (user selects text format)'),
-    ),
-  );
+    ],
+  ];
   if ($field['type'] == 'text_with_summary') {
-    $form['display_summary'] = array(
+    $form['display_summary'] = [
       '#type' => 'select',
       '#title' => t('Display summary'),
-      '#options' => array(
+      '#options' => [
         t('No'),
         t('Yes'),
-      ),
+      ],
       '#description' => t('Display the summary to allow the user to input a summary value. Hide the summary to automatically fill it with a trimmed portion from the main post.'),
       '#default_value' => !empty($settings['display_summary']) ? $settings['display_summary'] :  0,
-    );
+    ];
   }
 
   return $form;
@@ -114,22 +114,22 @@ function hook_field_widget_settings_form($field, $instance) {
   $settings = $widget['settings'];
 
   if ($widget['type'] == 'text_textfield') {
-    $form['size'] = array(
+    $form['size'] = [
       '#type' => 'number',
       '#title' => t('Size of textfield'),
       '#default_value' => $settings['size'],
       '#min' => 1,
       '#required' => TRUE,
-    );
+    ];
   }
   else {
-    $form['rows'] = array(
+    $form['rows'] = [
       '#type' => 'number',
       '#title' => t('Rows'),
       '#default_value' => $settings['rows'],
       '#min' => 1,
       '#required' => TRUE,
-    );
+    ];
   }
 
   return $form;
@@ -159,17 +159,17 @@ function hook_field_formatter_settings_form($field, $instance, $view_mode, $form
   $display = $instance['display'][$view_mode];
   $settings = $display['settings'];
 
-  $element = array();
+  $element = [];
 
   if ($display['type'] == 'text_trimmed' || $display['type'] == 'text_summary_or_trimmed') {
-    $element['trim_length'] = array(
+    $element['trim_length'] = [
       '#title' => t('Length'),
       '#type' => 'number',
       '#size' => 20,
       '#default_value' => $settings['trim_length'],
       '#min' => 1,
       '#required' => TRUE,
-    );
+    ];
   }
 
   return $element;
@@ -202,7 +202,7 @@ function hook_field_formatter_settings_summary($field, $instance, $view_mode) {
   $summary = '';
 
   if ($display['type'] == 'text_trimmed' || $display['type'] == 'text_summary_or_trimmed') {
-    $summary = t('Length: @chars chars', array('@chars' => $settings['trim_length']));
+    $summary = t('Length: @chars chars', ['@chars' => $settings['trim_length']]);
   }
 
   return $summary;

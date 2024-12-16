@@ -8,119 +8,119 @@
  * Implements hook_token_info().
  */
 function node_token_info() {
-  $types = array(
-    'node' => array(
+  $types = [
+    'node' => [
       'name' => t('Content'),
       'description' => t('Tokens related to individual pieces of content, or "nodes".'),
       'needs-data' => 'node',
-    ),
-    'content-type' => array(
+    ],
+    'content-type' => [
       'name' => t('Content types'),
       'description' => t('Tokens related to content types.'),
       'needs-data' => 'node_type',
-    ),
-  );
+    ],
+  ];
 
   // Node tokens.
-  $node['nid'] = array(
+  $node['nid'] = [
     'name' => t('Content ID'),
     'description' => t('The unique ID of the content item, or "node".'),
-  );
-  $node['content-type'] = array(
+  ];
+  $node['content-type'] = [
     'name' => t('Content type'),
     'description' => t('The human-readable name of the content type.'),
     'type' => 'content-type',
-  );
+  ];
   // @deprecated: Use node:content-type:name
-  $node['type-name'] = array(
+  $node['type-name'] = [
     'name' => t('Content type name'),
     'description' => t('The human-readable name of the content type.'),
     'deprecated' => TRUE,
-  );
+  ];
   // @deprecated: Use node:content-type
-  $node['type'] = array(
+  $node['type'] = [
     'name' => t('Content type'),
     'description' => t('The machine name of the content type.'),
     'deprecated' => TRUE,
-  );
-  $node['title'] = array(
+  ];
+  $node['title'] = [
     'name' => t('Title'),
     'description' => t('The title of the node.'),
-  );
-  $node['body'] = array(
+  ];
+  $node['body'] = [
     'name' => t('Body'),
     'description' => t('The main body text of the node.'),
-  );
-  $node['summary'] = array(
+  ];
+  $node['summary'] = [
     'name' => t('Summary'),
     'description' => t("The summary of the node's main body text."),
-  );
-  $node['langcode'] = array(
+  ];
+  $node['langcode'] = [
     'name' => t('Language code'),
     'description' => t('The language code of the language the node is written in.'),
-  );
-  $node['url'] = array(
+  ];
+  $node['url'] = [
     'name' => t('URL'),
     'description' => t('The URL of the node.'),
     'type' => 'url',
-  );
-  $node['edit-url'] = array(
+  ];
+  $node['edit-url'] = [
     'name' => t('Edit URL'),
     'description' => t("The URL of the node's edit page."),
     'type' => 'url',
-  );
-  $node['tnid'] = array(
+  ];
+  $node['tnid'] = [
     'name' => t('Translation set ID'),
     'description' => t('The unique ID of the original-language version of this node, if one exists.'),
-  );
-  $node['source'] = array(
+  ];
+  $node['source'] = [
     'name' => t('Translation source node'),
     'description' => t("The source node for this current node's translation set."),
     'type' => 'node',
-  );
-  $node['vid'] = array(
+  ];
+  $node['vid'] = [
     'name' => t('Revision ID'),
     'description' => t("The unique ID of the node's latest revision."),
-  );
-  $node['log'] = array(
+  ];
+  $node['log'] = [
     'name' => t('Revision log message'),
     'description' => t('The explanation of the most recent changes made to the node.'),
-  );
+  ];
 
   // Chained tokens for nodes.
-  $node['created'] = array(
+  $node['created'] = [
     'name' => t('Date created'),
     'description' => t('The date the node was posted.'),
     'type' => 'date',
-  );
-  $node['changed'] = array(
+  ];
+  $node['changed'] = [
     'name' => t('Date changed'),
     'description' => t('The date the node was most recently updated.'),
     'type' => 'date',
-  );
-  $node['author'] = array(
+  ];
+  $node['author'] = [
     'name' => t('Author'),
     'description' => t('The author of the node.'),
     'type' => 'user',
-  );
+  ];
 
   // Content type tokens.
-  $content_type['name'] = array(
+  $content_type['name'] = [
     'name' => t('Name'),
     'description' => t('The human-readable name of the content type.'),
-  );
-  $content_type['machine-name'] = array(
+  ];
+  $content_type['machine-name'] = [
     'name' => t('Machine-readable name'),
     'description' => t('The unique machine-readable name of the content type.'),
-  );
-  $content_type['description'] = array(
+  ];
+  $content_type['description'] = [
     'name' => t('Description'),
     'description' => t('The optional description of the content type.'),
-  );
-  $content_type['node-count'] = array(
+  ];
+  $content_type['node-count'] = [
     'name' => t('Node count'),
     'description' => t('The number of nodes belonging to the content type.'),
-  );
+  ];
 
   // Check to see if translation modules are enabled before showing tokens.
   if (!module_exists('translation')) {
@@ -128,20 +128,20 @@ function node_token_info() {
     $node['source']['restricted'] = TRUE;
   }
 
-  return array(
+  return [
     'types' => $types,
-    'tokens' => array(
+    'tokens' => [
       'node' => $node,
       'content-type' => $content_type,
-    ),
-  );
+    ],
+  ];
 }
 
 /**
  * Implements hook_tokens().
  */
-function node_tokens($type, $tokens, array $data = array(), array $options = array()) {
-  $url_options = array('absolute' => TRUE);
+function node_tokens($type, $tokens, array $data = [], array $options = []) {
+  $url_options = ['absolute' => TRUE];
   if (isset($options['language'])) {
     $url_options['language'] = $options['language'];
     $language_code = $options['language']->langcode;
@@ -152,7 +152,7 @@ function node_tokens($type, $tokens, array $data = array(), array $options = arr
 
   $sanitize = !empty($options['sanitize']);
 
-  $replacements = array();
+  $replacements = [];
 
   if ($type == 'node' && !empty($data['node'])) {
     $node = $data['node'];
@@ -258,19 +258,19 @@ function node_tokens($type, $tokens, array $data = array(), array $options = arr
     // Chained token relationships.
     if ($author_tokens = token_find_with_prefix($tokens, 'author')) {
       $author = user_load($node->uid);
-      $replacements += token_generate('user', $author_tokens, array('user' => $author), $options);
+      $replacements += token_generate('user', $author_tokens, ['user' => $author], $options);
     }
 
     if ($created_tokens = token_find_with_prefix($tokens, 'created')) {
-      $replacements += token_generate('date', $created_tokens, array('date' => $node->created), $options);
+      $replacements += token_generate('date', $created_tokens, ['date' => $node->created], $options);
     }
 
     if ($changed_tokens = token_find_with_prefix($tokens, 'changed')) {
-      $replacements += token_generate('date', $changed_tokens, array('date' => $node->changed), $options);
+      $replacements += token_generate('date', $changed_tokens, ['date' => $node->changed], $options);
     }
 
     if (!empty($node->tnid) && ($source_tokens = token_find_with_prefix($tokens, 'source')) && $source_node = node_load($node->tnid)) {
-      $replacements += token_generate('node', $source_tokens, array('node' => $source_node), $options);
+      $replacements += token_generate('node', $source_tokens, ['node' => $source_node], $options);
     }
 
     if (($url_tokens = token_find_with_prefix($tokens, 'url'))) {
@@ -278,7 +278,7 @@ function node_tokens($type, $tokens, array $data = array(), array $options = arr
     }
 
     if (($node_type_tokens = token_find_with_prefix($tokens, 'content-type')) && $node_type = node_type_load($node->type)) {
-      $replacements += token_generate('content-type', $node_type_tokens, array('node_type' => $node_type), $options);
+      $replacements += token_generate('content-type', $node_type_tokens, ['node_type' => $node_type], $options);
     }
   }
 

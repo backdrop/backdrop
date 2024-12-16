@@ -14,7 +14,7 @@ class views_handler_sort_search_score extends views_handler_sort {
     // Check to see if the search filter/argument added 'score' to the table.
     // Our filter stores it as $handler->search_score -- and we also need to
     // check its relationship to make sure that we're using the same one.
-    foreach (array('filter', 'argument') as $type) {
+    foreach (['filter', 'argument'] as $type) {
       foreach ($this->view->{$type} as $handler) {
         if (isset($handler->search_score) && $handler->relationship == $this->relationship) {
           $this->query->add_orderby(NULL, NULL, $this->options['order'], $handler->search_score);

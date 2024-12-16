@@ -90,7 +90,7 @@ class EntityReferenceBehaviorHandlerTaxonomyIndex extends EntityReferenceBehavio
     // Only maintain the taxonomy index for published nodes.
     if ($status) {
       // Collect a unique list of all the term IDs from all node fields.
-      $tid_all = array();
+      $tid_all = [];
       foreach (field_info_instances('node', $node->type) as $instance) {
         $field_name = $instance['field_name'];
         $field = field_info_field($field_name);
@@ -117,7 +117,7 @@ class EntityReferenceBehaviorHandlerTaxonomyIndex extends EntityReferenceBehavio
 
         // Re-calculate the terms added in taxonomy_build_node_index() so
         // database queries can be optimized.
-        $original_tid_all = array();
+        $original_tid_all = [];
         if ($field['module'] == 'taxonomy' && $field['storage']['type'] == 'field_sql_storage') {
           // If a field value is not set in the node object when node_save() is
           // called, the old value from $node->original is used.
@@ -147,12 +147,12 @@ class EntityReferenceBehaviorHandlerTaxonomyIndex extends EntityReferenceBehavio
       // Insert index entries for all the node's terms, preventing duplicates.
       if (!empty($tid_all)) {
         foreach ($tid_all as $tid) {
-          $row = array(
+          $row = [
             'nid' => $node->nid,
             'tid' => $tid,
             'sticky' => $sticky,
             'created' => $node->created,
-          );
+          ];
           $query = db_merge('taxonomy_index')
             ->key($row)
             ->fields($row);
@@ -166,25 +166,25 @@ class EntityReferenceBehaviorHandlerTaxonomyIndex extends EntityReferenceBehavio
    * Overrides EntityReferenceBehaviorHandler::settingsForm().
    */
   public function settingsForm($field, $instance) {
-    $form = array();
+    $form = [];
     $target = $field['settings']['target_type'];
     if ($target != 'taxonomy_term') {
-      $form['ti-on-terms'] = array(
-        '#markup' => t('This behavior can only be set when the target type is taxonomy_term, but the target of this field is %target.', array('%target' => $target)),
-      );
+      $form['ti-on-terms'] = [
+        '#markup' => t('This behavior can only be set when the target type is taxonomy_term, but the target of this field is %target.', ['%target' => $target]),
+      ];
     }
 
     $entity_type = $instance['entity_type'];
     if ($entity_type != 'node') {
-      $form['ti-on-nodes'] = array(
-        '#markup' => t('This behavior can only be set when the entity type is node, but the entity type of this instance is %type.', array('%type' => $entity_type)),
-      );
+      $form['ti-on-nodes'] = [
+        '#markup' => t('This behavior can only be set when the entity type is node, but the entity type of this instance is %type.', ['%type' => $entity_type]),
+      ];
     }
 
     if (!config_get('taxonomy.settings', 'maintain_index_table')) {
-      $form['ti-disabled'] = array(
+      $form['ti-disabled'] = [
         '#markup' => t('This core setting "maintain_index_table" is disabled.'),
-      );
+      ];
     }
     return $form;
   }

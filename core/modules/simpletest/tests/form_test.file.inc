@@ -12,19 +12,19 @@ function form_test_load_include_menu($form, &$form_state) {
   // Submit the form via Ajax. That way the FAPI has to care about including
   // the file specified in hook_menu().
   $ajax_wrapper_id = backdrop_html_id('form-test-load-include-menu-ajax-wrapper');
-  $form['ajax_wrapper'] = array(
+  $form['ajax_wrapper'] = [
     '#markup' => '<div id="' . $ajax_wrapper_id . '"></div>',
-  );
-  $form['button'] = array(
+  ];
+  $form['button'] = [
     '#type' => 'submit',
     '#value' => t('Save'),
-    '#submit' => array('form_test_load_include_submit'),
-    '#ajax' => array(
+    '#submit' => ['form_test_load_include_submit'],
+    '#ajax' => [
       'wrapper' => $ajax_wrapper_id,
       'method' => 'append',
       'callback' => 'form_test_load_include_menu_ajax',
-    ),
-  );
+    ],
+  ];
   return $form;
 }
 

@@ -14,14 +14,14 @@ class AnonymousUser extends stdClass implements UserInterface {
   public $uid = 0;
   public $name = NULL;
   public $hostname = NULL;
-  public $roles = array(BACKDROP_ANONYMOUS_ROLE);
+  public $roles = [BACKDROP_ANONYMOUS_ROLE];
   public $status = 1;
   public $cache = 0;
 
   /**
    * Constructor for an anonymous user object.
    */
-  public function __construct($values = array()) {
+  public function __construct($values = []) {
     foreach ($values as $key => $value) {
       $this->$key = $value;
     }

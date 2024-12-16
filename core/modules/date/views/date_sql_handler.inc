@@ -241,7 +241,7 @@ class date_sql_handler {
    *   An appropriate SQL string for the db type and field type.
    */
   function sql_format($format, $field) {
-   $replace = array(
+   $replace = [
       'Y' => '%Y',
       'y' => '%y',
       'M' => '%b',
@@ -259,7 +259,7 @@ class date_sql_handler {
       's' => '%s',
       'A' => '%p',
       '\WW' => 'W%U',
-    );
+    ];
     $format = strtr($format, $replace);
     return "DATE_FORMAT($field, '$format')";
   }
@@ -413,14 +413,14 @@ class date_sql_handler {
    * optionally limited to an array of allowed parts.
    */
   function date_parts($limit = NULL) {
-    $parts = array(
-      'year' => t('Year', array(), array('context' => 'datetime')),
-      'month' => t('Month', array(), array('context' => 'datetime')),
-      'day' => t('Day', array(), array('context' => 'datetime')),
-      'hour' => t('Hour', array(), array('context' => 'datetime')),
-      'minute' => t('Minute', array(), array('context' => 'datetime')),
-      'second' => t('Second', array(), array('context' => 'datetime')),
-    );
+    $parts = [
+      'year' => t('Year', [], ['context' => 'datetime']),
+      'month' => t('Month', [], ['context' => 'datetime']),
+      'day' => t('Day', [], ['context' => 'datetime']),
+      'hour' => t('Hour', [], ['context' => 'datetime']),
+      'minute' => t('Minute', [], ['context' => 'datetime']),
+      'second' => t('Second', [], ['context' => 'datetime']),
+    ];
     if (!empty($limit)) {
       $last = FALSE;
       foreach ($parts as $key => $part) {
@@ -446,63 +446,63 @@ class date_sql_handler {
    *   returns info for all parts if empty.
    */
   function part_info($op = NULL, $part = NULL) {
-    $info = array();
-    $info['min'] = array(
+    $info = [];
+    $info['min'] = [
       'year' => 100,
       'month' => 1,
       'day' => 1,
       'hour' => 0,
       'minute' => 0,
       'second' => 0,
-    );
-    $info['max'] = array(
+    ];
+    $info['max'] = [
       'year' => 4000,
       'month' => 12,
       'day' => 31,
       'hour' => 23,
       'minute' => 59,
       'second' => 59,
-    );
-    $info['format'] = array(
+    ];
+    $info['format'] = [
       'year' => 'Y',
       'month' => 'm',
       'day' => 'd',
       'hour' => 'H',
       'minute' => 'i',
       'second' => 's',
-    );
-    $info['sep'] = array(
+    ];
+    $info['sep'] = [
       'year' => '',
       'month' => '-',
       'day' => '-',
       'hour' => ' ',
       'minute' => ':',
       'second' => ':',
-    );
-    $info['empty_now'] = array(
+    ];
+    $info['empty_now'] = [
       'year' => date('Y'),
       'month' => date('m'),
       'day' => min('28', date('d')),
       'hour' => date('H'),
       'minute' => date('i'),
       'second' => date('s'),
-    );
-    $info['empty_min'] = array(
+    ];
+    $info['empty_min'] = [
       'year' => '1000',
       'month' => '01',
       'day' => '01',
       'hour' => '00',
       'minute' => '00',
       'second' => '00',
-    );
-    $info['empty_max'] = array(
+    ];
+    $info['empty_max'] = [
       'year' => '9999',
       'month' => '12',
       'day' => '31',
       'hour' => '23',
       'minute' => '59',
       'second' => '59',
-    );
+    ];
     if (!empty($op)) {
       if (!empty($part)) {
         return $info[$op][$part];
@@ -568,7 +568,7 @@ class date_sql_handler {
    *   The converted help text.
    */
   function format_help($format) {
-    $replace = array(
+    $replace = [
       'Y' => 'YYYY',
       'm' => 'MM',
       'd' => 'DD',
@@ -576,7 +576,7 @@ class date_sql_handler {
       'i' => 'MM',
       's' => 'SS',
       '\T' => 'T',
-    );
+    ];
     return strtr($format, $replace);
   }
 
@@ -626,7 +626,7 @@ class date_sql_handler {
     if (empty($granularity)) {
       return DATE_FORMAT_ISO;
     }
-    $formats = array('display', 'sql');
+    $formats = ['display', 'sql'];
     // Start with the site long date format and add seconds to it.
     $shortformat = system_date_format_load('short');
     $short = str_replace(':i', ':i:s', $shortformat['pattern']);
@@ -637,30 +637,30 @@ class date_sql_handler {
         break;
 
       case 'month':
-        $formats['display'] = date_limit_format($short, array('year', 'month'));
+        $formats['display'] = date_limit_format($short, ['year', 'month']);
         $formats['sql'] = 'Y-m';
         break;
 
       case 'day':
-        $args = array('year', 'month', 'day');
+        $args = ['year', 'month', 'day'];
         $formats['display'] = date_limit_format($short, $args);
         $formats['sql'] = 'Y-m-d';
         break;
 
       case 'hour':
-        $args = array('year', 'month', 'day', 'hour');
+        $args = ['year', 'month', 'day', 'hour'];
         $formats['display'] = date_limit_format($short, $args);
         $formats['sql'] = 'Y-m-d\TH';
         break;
 
       case 'minute':
-        $args = array('year', 'month', 'day', 'hour', 'minute');
+        $args = ['year', 'month', 'day', 'hour', 'minute'];
         $formats['display'] = date_limit_format($short, $args);
         $formats['sql'] = 'Y-m-d\TH:i';
         break;
 
       case 'second':
-        $args = array('year', 'month', 'day', 'hour', 'minute', 'second');
+        $args = ['year', 'month', 'day', 'hour', 'minute', 'second'];
         $formats['display'] = date_limit_format($short, $args);
         $formats['sql'] = 'Y-m-d\TH:i:s';
         break;
@@ -677,12 +677,12 @@ class date_sql_handler {
    * @todo.
    */
   function granularity_form($granularity) {
-    $form = array(
+    $form = [
       '#title' => t('Granularity'),
       '#type' => 'radios',
       '#default_value' => $granularity,
       '#options' => $this->date_parts(),
-    );
+    ];
     return $form;
   }
 
@@ -706,20 +706,20 @@ class date_sql_handler {
    * @see http://en.wikipedia.org/wiki/ISO_8601#Duration
    */
   function arg_parts($argument) {
-    $values = array();
+    $values = [];
     // Keep mal-formed arguments from creating errors.
     if (empty($argument) || is_array($argument)) {
-      return array('date' => array(), 'period' => array());
+      return ['date' => [], 'period' => []];
     }
     $fromto = explode('--', $argument);
     foreach ($fromto as $arg) {
-      $parts = array();
+      $parts = [];
       if ($arg == '@') {
         $date = date_now();
         $parts['date'] = $date->toArray();
       }
       elseif (preg_match('/(\d{4})?-?(W)?(\d{1,2})?-?(\d{1,2})?[T\s]?(\d{1,2})?:?(\d{1,2})?:?(\d{1,2})?/', $arg, $matches)) {
-        $date = array();
+        $date = [];
         if (!empty($matches[1])) {
           $date['year'] = $matches[1];
         }
@@ -746,7 +746,7 @@ class date_sql_handler {
         $parts['date'] = $date;
       }
       if (preg_match('/^P(\d{1,4}[Y])?(\d{1,2}[M])?(\d{1,2}[W])?(\d{1,2}[D])?([T]{0,1})?(\d{1,2}[H])?(\d{1,2}[M])?(\d{1,2}[S])?/', $arg, $matches)) {
-        $period = array();
+        $period = [];
         if (!empty($matches[1])) {
           $period['year'] = str_replace('Y', '', $matches[1]);
         }
@@ -785,7 +785,7 @@ class date_sql_handler {
     $direction = $results[1];
     $count = $results[2];
     $item = $results[3];
-    $replace = array(
+    $replace = [
       'now' => '@',
       '+' => 'P',
       '-' => 'P-',
@@ -805,8 +805,8 @@ class date_sql_handler {
       'second' => 'S',
       '  ' => '',
       ' ' => '',
-    );
-    $args = array('hours', 'hour', 'minutes', 'minute', 'seconds', 'second');
+    ];
+    $args = ['hours', 'hour', 'minutes', 'minute', 'seconds', 'second'];
     if (in_array($item, $args)) {
       $prefix = 'T';
     }
@@ -830,7 +830,7 @@ class date_sql_handler {
   function arg_granularity($arg) {
     $granularity = '';
     $parts = $this->arg_parts($arg);
-    $date = !empty($parts[0]['date']) ? $parts[0]['date'] : (!empty($parts[1]['date']) ? $parts[1]['date'] : array());
+    $date = !empty($parts[0]['date']) ? $parts[0]['date'] : (!empty($parts[1]['date']) ? $parts[1]['date'] : []);
     foreach ($date as $key => $part) {
       $granularity = $key;
     }
@@ -853,7 +853,7 @@ class date_sql_handler {
         date_modify($max_date, "+$value $part");
       }
       date_modify($max_date, '-1 second');
-      return array($min_date, $max_date);
+      return [$min_date, $max_date];
     }
     // Build a range from a period to period argument.
     if (empty($parts[0]['date']) && !empty($parts[0]['period']) && !empty($parts[1]['period'])) {
@@ -867,7 +867,7 @@ class date_sql_handler {
         date_modify($max_date, "+$value $part");
       }
       date_modify($max_date, '-1 second');
-      return array($min_date, $max_date);
+      return [$min_date, $max_date];
     }
     if (!empty($parts[0]['date'])) {
       $value = $this->complete_date($parts[0]['date'], 'min');
@@ -876,7 +876,7 @@ class date_sql_handler {
       if (empty($parts[1]) || (empty($parts[1]['date']) && empty($parts[1]['period']))) {
         $value = $this->complete_date($parts[0]['date'], 'max');
         $max_date = new BackdropDateTime($value, date_default_timezone(), DATE_FORMAT_DATETIME);
-        return array($min_date, $max_date);
+        return [$min_date, $max_date];
       }
       // Build a range from start date + period.
       elseif (!empty($parts[1]['period'])) {
@@ -885,7 +885,7 @@ class date_sql_handler {
           date_modify($max_date, "+$value $part");
         }
         date_modify($max_date, '-1 second');
-        return array($min_date, $max_date);
+        return [$min_date, $max_date];
       }
     }
     // Build a range from start date and end date.
@@ -893,7 +893,7 @@ class date_sql_handler {
       $value = $this->complete_date($parts[1]['date'], 'max');
       $max_date = new BackdropDateTime($value, date_default_timezone(), DATE_FORMAT_DATETIME);
       if (isset($min_date)) {
-        return array($min_date, $max_date);
+        return [$min_date, $max_date];
       }
     }
     // Build a range from period + end date.
@@ -902,10 +902,10 @@ class date_sql_handler {
       foreach ($parts[0]['period'] as $part => $value) {
         date_modify($min_date, "$value $part");
       }
-      return array($min_date, $max_date);
+      return [$min_date, $max_date];
     }
     // Intercept invalid info and fall back to the current date.
     $now = date_now();
-    return array($now, $now);
+    return [$now, $now];
   }
 }

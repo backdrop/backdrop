@@ -78,7 +78,7 @@ function callback_batch_operation($MULTIPLE_PARAMS, &$context) {
     // Update our progress information.
     $context['sandbox']['progress']++;
     $context['sandbox']['current_node'] = $node->nid;
-    $context['message'] = t('Now processing %node', array('%node' => $node->title));
+    $context['message'] = t('Now processing %node', ['%node' => $node->title]);
   }
 
   // Inform the batch engine that we are not finished,
@@ -106,20 +106,20 @@ function callback_batch_operation($MULTIPLE_PARAMS, &$context) {
 function callback_batch_finished($success, $results, $operations) {
   if ($success) {
     // Here we do something meaningful with the results.
-    $message = t("!count items were processed.", array(
+    $message = t("!count items were processed.", [
       '!count' => count($results),
-      ));
-    $message .= theme('item_list', array('items' => $results));
+      ]);
+    $message .= theme('item_list', ['items' => $results]);
     backdrop_set_message($message);
   }
   else {
     // An error occurred.
     // $operations contains the operations that remained unprocessed.
     $error_operation = reset($operations);
-    $message = t('An error occurred while processing %error_operation with arguments: @arguments', array(
+    $message = t('An error occurred while processing %error_operation with arguments: @arguments', [
       '%error_operation' => $error_operation[0],
       '@arguments' => print_r($error_operation[1], TRUE)
-    ));
+    ]);
     backdrop_set_message($message, 'error');
   }
 }

@@ -46,11 +46,11 @@ abstract class LayoutRelationship extends LayoutHandler {
   function __construct($plugin_name, $config) {
     parent::__construct($plugin_name, $config);
     $this->plugin = $plugin_name;
-    $properties = array(
+    $properties = [
       'name',
       'label',
       'context',
-    );
+    ];
     foreach ($properties as $property) {
       if (isset($config[$property])) {
         $this->$property = $config[$property];
@@ -89,12 +89,12 @@ abstract class LayoutRelationship extends LayoutHandler {
     $options = $this->getOptionLabels($contexts, $relationship_info);
 
     $form_state['relationship'] = $relationship_info;
-    $form['context_parent'] = array(
+    $form['context_parent'] = [
       '#type' => 'select',
       '#default_value' => isset($this->settings['context_parent']) ? $this->settings['context_parent'] : '',
       '#options' => $options,
       '#title' => $relationship_info['context_label'],
-    );
+    ];
   }
 
   /**
@@ -106,7 +106,7 @@ abstract class LayoutRelationship extends LayoutHandler {
    * Submit handler for the settings form for this relationship item.
    */
   function formSubmit($form, &$form_state) {
-    $excluded = backdrop_map_assoc(array('cancel', 'submit', 'form_build_id', 'form_token', 'form_id', 'op', 'add', 'context', 'load_relationship_nojs', 'relationship_add_button'));
+    $excluded = backdrop_map_assoc(['cancel', 'submit', 'form_build_id', 'form_token', 'form_id', 'op', 'add', 'context', 'load_relationship_nojs', 'relationship_add_button']);
     $settings = array_diff_key($form_state['values'], $excluded);
     $this->settings = array_merge($this->settings, $settings);
     $this->context = $form_state['relationship']['context'];
@@ -116,7 +116,7 @@ abstract class LayoutRelationship extends LayoutHandler {
    * Returns an array of appropriate contexts for this relationship.
    */
   function getOptionLabels($contexts, $relationship) {
-    $options = array();
+    $options = [];
 
     foreach ($contexts as $context) {
       if ($context->plugin == $relationship['context']) {
@@ -143,10 +143,10 @@ abstract class LayoutRelationship extends LayoutHandler {
    * Convert the configuration of this relationship to an array for storage.
    */
   function toArray() {
-    $array = array(
+    $array = [
       'context' => $this->context,
       'settings' => $this->settings,
-    );
+    ];
 
     return $array;
   }
@@ -180,13 +180,13 @@ class LayoutRelationshipBroken extends LayoutRelationship {
     return FALSE;
   }
   function getAdminSummary() {
-    return '<em>' . t('Missing relationship: @plugin', array('@plugin' => $this->plugin)) . '</em>';
+    return '<em>' . t('Missing relationship: @plugin', ['@plugin' => $this->plugin]) . '</em>';
   }
   function type() {
     return 'broken';
   }
   function label() {
-    return t('Broken or missing relationship (@plugin)', array('@plugin' => $this->plugin));
+    return t('Broken or missing relationship (@plugin)', ['@plugin' => $this->plugin]);
   }
 }
 

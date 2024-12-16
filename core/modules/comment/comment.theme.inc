@@ -10,13 +10,13 @@
  * @ingroup themeable
  */
 function theme_comment_block($variables) {
-  $items = array();
+  $items = [];
   foreach ($variables['comments'] as $comment) {
-    $items[] = l($comment->subject, 'comment/' . $comment->cid, array('fragment' => 'comment-' . $comment->cid)) . '&nbsp;<span>' . t('@time ago', array('@time' => format_interval(REQUEST_TIME - $comment->changed))) . '</span>';
+    $items[] = l($comment->subject, 'comment/' . $comment->cid, ['fragment' => 'comment-' . $comment->cid]) . '&nbsp;<span>' . t('@time ago', ['@time' => format_interval(REQUEST_TIME - $comment->changed)]) . '</span>';
   }
 
   if ($items) {
-    return theme('item_list', array('items' => $items));
+    return theme('item_list', ['items' => $items]);
   }
   else {
     return t('No comments available.');
@@ -53,19 +53,19 @@ function theme_comment_post_forbidden($variables) {
       // We cannot use backdrop_get_destination() because these links
       // sometimes appear on /node and taxonomy listing pages.
       if ($node_type->settings['comment_form_location'] == COMMENT_FORM_SEPARATE_PAGE) {
-        $destination = array('destination' => "comment/reply/$node->nid#comment-form");
+        $destination = ['destination' => "comment/reply/$node->nid#comment-form"];
       }
       else {
-        $destination = array('destination' => "node/$node->nid#comment-form");
+        $destination = ['destination' => "node/$node->nid#comment-form"];
       }
 
       if (config_get('system.core', 'user_register') != USER_REGISTER_ADMINISTRATORS_ONLY) {
         // Users can register themselves.
-        return t('<a href="@login">Log in</a> or <a href="@register">register</a> to post comments', array('@login' => url('user/login', array('query' => $destination)), '@register' => url('user/register', array('query' => $destination))));
+        return t('<a href="@login">Log in</a> or <a href="@register">register</a> to post comments', ['@login' => url('user/login', ['query' => $destination]), '@register' => url('user/register', ['query' => $destination])]);
       }
       else {
         // Only admins can add new users, no public registration.
-        return t('<a href="@login">Log in</a> to post comments', array('@login' => url('user/login', array('query' => $destination))));
+        return t('<a href="@login">Log in</a> to post comments', ['@login' => url('user/login', ['query' => $destination])]);
       }
     }
   }
@@ -85,7 +85,7 @@ function template_preprocess_comment(&$variables) {
 
   $variables['comment'] = $comment;
   $variables['node'] = $node;
-  $variables['author'] = theme('username', array('account' => $comment));
+  $variables['author'] = theme('username', ['account' => $comment]);
   $variables['user_picture'] = '';
   $variables['created'] = format_date($comment->created);
   // Avoid calling format_date() twice on the same timestamp.
@@ -98,18 +98,18 @@ function template_preprocess_comment(&$variables) {
 
   $variables['new'] = !empty($comment->new) ? t('new') : '';
   if ($node_type->settings['comment_user_picture']) {
-    $variables['user_picture'] = theme('user_picture', array('account' => $comment));
+    $variables['user_picture'] = theme('user_picture', ['account' => $comment]);
   }
   $variables['signature'] = $comment->signature;
 
   $uri = $comment->uri();
-  $uri['options'] += array('attributes' => array('class' => array('permalink'), 'rel' => 'bookmark'));
+  $uri['options'] += ['attributes' => ['class' => ['permalink'], 'rel' => 'bookmark']];
 
   $variables['permalink'] = l(t('Permalink'), $uri['path'], $uri['options']);
   $variables['permalink_path'] = $uri['path'] . "#" . $uri['options']['fragment'];
   $variables['title_display'] = $node_type->settings['comment_title_options'] != COMMENT_TITLE_HIDDEN;
   $variables['title'] = l($comment->subject, $uri['path'], $uri['options']);
-  $variables['submitted'] = t('!datetime by !username', array('!datetime' => $variables['created'], '!username' => $variables['author']));
+  $variables['submitted'] = t('!datetime by !username', ['!datetime' => $variables['created'], '!username' => $variables['author']]);
 
   // Preprocess fields.
   field_attach_preprocess('comment', $comment, $variables['elements'], $variables);

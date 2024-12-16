@@ -42,7 +42,7 @@ class views_handler_filter_node_hidden_path extends views_handler_filter_boolean
       return $val->type;
     }, $diff_types);
 
-    $this->query->add_where_expression($this->options['group'], "$table.type IN (:types)", array(':types' => $types_names));
+    $this->query->add_where_expression($this->options['group'], "$table.type IN (:types)", [':types' => $types_names]);
   }
 
 }

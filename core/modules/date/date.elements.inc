@@ -85,55 +85,55 @@
  *   - speed => 'immediate'
  */
 function _date_element_info() {
-  $date_base = array(
+  $date_base = [
     '#input' => TRUE,
     '#tree' => TRUE,
     '#date_timezone' => date_default_timezone(),
     '#date_flexible' => 0,
     '#date_format' => system_date_format_load('short'),
-    '#date_text_parts' => array(),
+    '#date_text_parts' => [],
     '#date_increment' => 1,
     '#date_year_range' => '-3:+3',
     '#date_label_position' => 'above',
-  );
-  $type['date_select'] = array(
-    '#process' => array('date_select_element_process'),
-    '#theme_wrappers' => array('date_select'),
+  ];
+  $type['date_select'] = [
+    '#process' => ['date_select_element_process'],
+    '#theme_wrappers' => ['date_select'],
     '#value_callback' => 'date_select_element_value_callback',
-  ) + $date_base;
-  $type['date_text'] = array(
-    '#process' => array('date_text_element_process'),
-    '#theme_wrappers' => array('date_text'),
+  ] + $date_base;
+  $type['date_text'] = [
+    '#process' => ['date_text_element_process'],
+    '#theme_wrappers' => ['date_text'],
     '#value_callback' => 'date_text_element_value_callback',
-  ) + $date_base;
-  $type['date_popup'] = array(
-    '#datepicker_options' => array(),
+  ] + $date_base;
+  $type['date_popup'] = [
+    '#datepicker_options' => [],
     '#timepicker' => TRUE,
-    '#process' => array('date_popup_element_process'),
+    '#process' => ['date_popup_element_process'],
     '#value_callback' => 'date_popup_element_value_callback',
-    '#theme_wrappers' => array('date_popup'),
-    ) + $date_base;
-  $type['date_timezone'] = array(
+    '#theme_wrappers' => ['date_popup'],
+    ] + $date_base;
+  $type['date_timezone'] = [
     '#input' => TRUE,
     '#tree' => TRUE,
-    '#process' => array('date_timezone_element_process'),
-    '#theme_wrappers' => array('date_text'),
+    '#process' => ['date_timezone_element_process'],
+    '#theme_wrappers' => ['date_text'],
     '#value_callback' => 'date_timezone_element_value_callback',
-  );
-  $type['date_year_range'] = array(
+  ];
+  $type['date_year_range'] = [
     '#input' => TRUE,
-    '#process' => array('date_year_range_element_process'),
+    '#process' => ['date_year_range_element_process'],
     '#value_callback' => 'date_year_range_element_value_callback',
-    '#element_validate' => array('date_year_range_validate'),
-  );
-  $type['date_combo'] = array(
+    '#element_validate' => ['date_year_range_validate'],
+  ];
+  $type['date_combo'] = [
     '#input' => TRUE,
     '#delta' => 0,
-    '#columns' => array('value', 'value2', 'timezone', 'offset', 'offset2'),
-    '#process' => array('date_combo_element_process'),
-    '#element_validate' => array('date_combo_validate'),
-    '#theme_wrappers' => array('date_combo'),
-  );
+    '#columns' => ['value', 'value2', 'timezone', 'offset', 'offset2'],
+    '#process' => ['date_combo_element_process'],
+    '#element_validate' => ['date_combo_validate'],
+    '#theme_wrappers' => ['date_combo'],
+  ];
   return $type;
 }
 
@@ -186,31 +186,31 @@ function date_default_date($element) {
 function date_year_range_element_process($element, &$form_state, $form) {
   // Year range is stored in the -3:+3 format, but collected as two separate
   // textfields.
-  $element['years_back'] = array(
+  $element['years_back'] = [
     '#type' => 'textfield',
     '#title' => t('Starting year'),
     '#default_value' => $element['#value']['years_back'],
     '#size' => 10,
     '#maxsize' => 10,
-    '#attributes' => array('class' => array('select-list-with-custom-option', 'back')),
+    '#attributes' => ['class' => ['select-list-with-custom-option', 'back']],
     '#description' => t('Enter a relative value (-9, +9) or an absolute year such as 2015.'),
-  );
-  $element['years_forward'] = array(
+  ];
+  $element['years_forward'] = [
     '#type' => 'textfield',
     '#title' => t('Ending year'),
     '#default_value' => $element['#value']['years_forward'],
     '#size' => 10,
     '#maxsize' => 10,
-    '#attributes' => array('class' => array('select-list-with-custom-option', 'forward')),
+    '#attributes' => ['class' => ['select-list-with-custom-option', 'forward']],
     '#description' => t('Enter a relative value (-9, +9) or an absolute year such as 2015.'),
-  );
+  ];
 
   $element['#tree'] = TRUE;
   $element['#attached']['js'][] = backdrop_get_path('module', 'date') . '/js/date-year-range.js';
 
-  $context = array(
+  $context = [
     'form' => $form,
-  );
+  ];
   backdrop_alter('date_year_range_process', $element, $form_state, $context);
 
   return $element;
@@ -219,15 +219,15 @@ function date_year_range_element_process($element, &$form_state, $form) {
 /**
  * Element value callback for the date_year_range form element.
  */
-function date_year_range_element_value_callback($element, $input = FALSE, &$form_state = array()) {
+function date_year_range_element_value_callback($element, $input = FALSE, &$form_state = []) {
   // Convert the element's default value from a string to an array (to match
   // what we will get from the two textfields when the form is submitted).
   if ($input === FALSE) {
     list($years_back, $years_forward) = explode(':', $element['#default_value']);
-    return array(
+    return [
       'years_back' => $years_back,
       'years_forward' => $years_forward,
-    );
+    ];
   }
   return NULL;
 }
@@ -250,13 +250,13 @@ function date_year_range_validate(&$element, &$form_state) {
 /**
  * Element value callback for date_timezone element.
  */
-function date_timezone_element_value_callback($element, $input = FALSE, &$form_state = array()) {
+function date_timezone_element_value_callback($element, $input = FALSE, &$form_state = []) {
   $return = '';
   if ($input !== FALSE) {
     $return = $input;
   }
   elseif (!empty($element['#default_value'])) {
-    $return = array('timezone' => $element['#default_value']);
+    $return = ['timezone' => $element['#default_value']];
   }
   return $return;
 }
@@ -276,7 +276,7 @@ function date_timezone_element_process($element, &$form_state, $form) {
   }
 
   $element['#tree'] = TRUE;
-  $element['timezone'] = array(
+  $element['timezone'] = [
     '#type' => 'select',
     '#title' => t('Timezone'),
     '#title_display' => $element['#date_label_position'] == 'above' ? 'before' : 'invisible',
@@ -285,18 +285,18 @@ function date_timezone_element_process($element, &$form_state, $form) {
     '#weight' => $element['#weight'],
     '#required' => $element['#required'],
     '#theme' => 'date_select_element',
-    '#theme_wrappers' => array('form_element'),
-  );
+    '#theme_wrappers' => ['form_element'],
+  ];
   if (isset($element['#element_validate'])) {
     array_push($element['#element_validate'], 'date_timezone_validate');
   }
   else {
-    $element['#element_validate'] = array('date_timezone_validate');
+    $element['#element_validate'] = ['date_timezone_validate'];
   }
 
-  $context = array(
+  $context = [
     'form' => $form,
-  );
+  ];
   backdrop_alter('date_timezone_process', $element, $form_state, $context);
 
   return $element;
@@ -318,8 +318,8 @@ function date_timezone_validate($element, &$form_state) {
 /**
  * Element value callback for date_text element.
  */
-function date_text_element_value_callback($element, $input = FALSE, &$form_state = array()) {
-  $return = array('date' => '');
+function date_text_element_value_callback($element, $input = FALSE, &$form_state = []) {
+  $return = ['date' => ''];
   $date = NULL;
 
   // Normal input from submitting the form element.
@@ -353,12 +353,12 @@ function date_text_element_process($element, &$form_state, $form) {
   }
 
   $element['#tree'] = TRUE;
-  $element['#theme_wrappers'] = array('date_text');
+  $element['#theme_wrappers'] = ['date_text'];
   $element['date']['#value'] = isset($element['#value']['date']) ? $element['#value']['date'] : '';
   $element['date']['#type'] = 'textfield';
   $element['date']['#weight'] = !empty($element['date']['#weight']) ? $element['date']['#weight'] : $element['#weight'];
-  $element['date']['#attributes'] = array('class' => isset($element['#attributes']['class']) ? $element['#attributes']['class'] += array('date-date') : array('date-date'));
-  $element['date']['#description'] = ' ' . t('Format: @date', array('@date' => date_format_date(date_example_date(), 'custom', $element['#date_format'])));
+  $element['date']['#attributes'] = ['class' => isset($element['#attributes']['class']) ? $element['#attributes']['class'] += ['date-date'] : ['date-date']];
+  $element['date']['#description'] = ' ' . t('Format: @date', ['@date' => date_format_date(date_example_date(), 'custom', $element['#date_format'])]);
   $element['date']['#ajax'] = !empty($element['#ajax']) ? $element['#ajax'] : FALSE;
   $element['date']['#title_display'] = $element['#date_label_position'] == 'above' ? 'before' : 'invisible';
 
@@ -383,15 +383,15 @@ function date_text_element_process($element, &$form_state, $form) {
     array_push($element['#element_validate'], 'date_text_validate');
   }
   else {
-    $element['#element_validate'] = array('date_text_validate');
+    $element['#element_validate'] = ['date_text_validate'];
   }
   if (!empty($element['#force_value'])) {
     $element['date']['#value'] = $element['date']['#default_value'];
   }
 
-  $context = array(
+  $context = [
     'form' => $form,
-  );
+  ];
   backdrop_alter('date_text_process', $element, $form_state, $context);
 
   return $element;
@@ -435,20 +435,20 @@ function date_text_validate($element, &$form_state) {
         $error_list = ' ' . reset($date->errors);
       }
       else {
-        $error_list = theme('item_list', array('items' => $date->errors));
+        $error_list = theme('item_list', ['items' => $date->errors]);
       }
-      $message = t('The value input for field %field is invalid:', array('%field' => $label)) . $error_list;
+      $message = t('The value input for field %field is invalid:', ['%field' => $label]) . $error_list;
       form_set_error($error_field, $message);
       return;
     }
     if (!empty($element['#required'])) {
-      $message = t('A valid date is required for %title.', array('%title' => $label));
+      $message = t('A valid date is required for %title.', ['%title' => $label]);
       form_set_error($error_field, $message);
       return;
     }
     // Fall through, some other error.
     if (!empty($input['date'])) {
-      form_error($element, t('%title is invalid.', array('%title' => $label)));
+      form_error($element, t('%title is invalid.', ['%title' => $label]));
       return;
     }
   }
@@ -480,15 +480,15 @@ function date_text_input_date($element, $input) {
 /**
  * Element value callback for date_select element.
  */
-function date_select_element_value_callback($element, $input = FALSE, &$form_state = array()) {
-  $return = array(
+function date_select_element_value_callback($element, $input = FALSE, &$form_state = []) {
+  $return = [
     'year' => '',
     'month' => '',
     'day' => '',
     'hour' => '',
     'minute' => '',
     'second' => '',
-  );
+  ];
   $date = NULL;
   if ($input !== FALSE) {
     $return = $input;
@@ -498,14 +498,14 @@ function date_select_element_value_callback($element, $input = FALSE, &$form_sta
     $date = date_default_date($element);
   }
   $granularity = date_format_order($element['#date_format']);
-  $formats = array(
+  $formats = [
     'year' => 'Y',
     'month' => 'n',
     'day' => 'j',
     'hour' => 'H',
     'minute' => 'i',
     'second' => 's',
-  );
+  ];
   foreach ($granularity as $field) {
     if ($field != 'timezone') {
       $return[$field] = date_is_date($date) ? $date->format($formats[$field]) : '';
@@ -538,7 +538,7 @@ function date_select_element_process($element, &$form_state, $form) {
   }
 
   $element['#tree'] = TRUE;
-  $element['#theme_wrappers'] = array('date_select');
+  $element['#theme_wrappers'] = ['date_select'];
   $element['#attached']['css'][] = backdrop_get_path('module', 'date') . '/css/date.css';
   $element += (array) date_parts_element($element, $date, $element['#date_format']);
 
@@ -546,22 +546,22 @@ function date_select_element_process($element, &$form_state, $form) {
   $granularity = date_format_order($element['#date_format']);
   foreach (date_nongranularity($granularity) as $field) {
     if ($field != 'timezone') {
-      $element[$field] = array(
+      $element[$field] = [
         '#type' => 'value',
         '#value' => 0,
-      );
+      ];
     }
   }
   if (isset($element['#element_validate'])) {
     array_push($element['#element_validate'], 'date_select_validate');
   }
   else {
-    $element['#element_validate'] = array('date_select_validate');
+    $element['#element_validate'] = ['date_select_validate'];
   }
 
-  $context = array(
+  $context = [
     'form' => $form,
-  );
+  ];
   backdrop_alter('date_select_process', $element, $form_state, $context);
 
   return $element;
@@ -588,7 +588,7 @@ function date_select_element_process($element, &$form_state, $form) {
  */
 function date_parts_element($element, $date, $format) {
   $granularity = date_format_order($format);
-  $sub_element = array('#granularity' => $granularity);
+  $sub_element = ['#granularity' => $granularity];
   $order = array_flip($granularity);
 
   $hours_format  = strpos(strtolower($element['#date_format']), 'a') ? 'g' : 'G';
@@ -598,12 +598,12 @@ function date_parts_element($element, $date, $format) {
   $part_required = (bool) $element['#required'] && is_object($date);
   foreach ($granularity as $field) {
     $part_type = in_array($field, $element['#date_text_parts']) ? 'textfield' : 'select';
-    $sub_element[$field] = array(
+    $sub_element[$field] = [
       '#weight' => $order[$field],
       '#required' => $part_required,
-      '#attributes' => array('class' => isset($element['#attributes']['class']) ? $element['#attributes']['class'] += array('date-' . $field) : array('date-' . $field)),
+      '#attributes' => ['class' => isset($element['#attributes']['class']) ? $element['#attributes']['class'] += ['date-' . $field] : ['date-' . $field]],
       '#ajax' => !empty($element['#ajax']) ? $element['#ajax'] : FALSE,
-    );
+    ];
     switch ($field) {
       case 'year':
         $range = date_range_years($element['#date_year_range'], $date);
@@ -673,19 +673,19 @@ function date_parts_element($element, $date, $format) {
       $sub_element[$field]['#type'] = 'textfield';
       $sub_element[$field]['#theme'] = 'date_textfield_element';
       $sub_element[$field]['#size'] = 7;
-      $sub_element[$field]['#title_display'] = in_array($element['#date_label_position'], array('within', 'none')) ? 'invisible' : 'before';
+      $sub_element[$field]['#title_display'] = in_array($element['#date_label_position'], ['within', 'none']) ? 'invisible' : 'before';
       if ($element['#date_label_position'] == 'within') {
         if (!empty($sub_element[$field]['#options']) && is_array($sub_element[$field]['#options'])) {
-          $sub_element[$field]['#options'] = array('' => $label) + $sub_element[$field]['#options'];
+          $sub_element[$field]['#options'] = ['' => $label] + $sub_element[$field]['#options'];
         }
       }
     }
     else {
       $sub_element[$field]['#type'] = 'select';
       $sub_element[$field]['#theme'] = 'date_select_element';
-      $sub_element[$field]['#title_display'] = in_array($element['#date_label_position'], array('within', 'none')) ? 'invisible' : 'before';
+      $sub_element[$field]['#title_display'] = in_array($element['#date_label_position'], ['within', 'none']) ? 'invisible' : 'before';
       if ($element['#date_label_position'] == 'within') {
-        $sub_element[$field]['#options'] = array('' => $label) + $sub_element[$field]['#options'];
+        $sub_element[$field]['#options'] = ['' => $label] + $sub_element[$field]['#options'];
       }
     }
 
@@ -701,17 +701,17 @@ function date_parts_element($element, $date, $format) {
 
   if (($hours_format == 'g' || $hours_format == 'h') && date_has_time($granularity)) {
     $label = '&nbsp;';
-    $sub_element['ampm'] = array(
+    $sub_element['ampm'] = [
       '#type' => 'select',
       '#theme' => 'date_select_element',
       '#title' => $label,
-      '#title_display' => in_array($element['#date_label_position'], array('within', 'none')) ? 'invisible' : 'before',
+      '#title_display' => in_array($element['#date_label_position'], ['within', 'none']) ? 'invisible' : 'before',
       '#default_value' => is_object($date) ? (date_format($date, 'G') >= 12 ? 'pm' : 'am') : '',
       '#options' => backdrop_map_assoc(date_ampm($part_required)),
       '#required' => $part_required,
       '#weight' => 8,
-      '#attributes' => array('class' => array('date-ampm')),
-    );
+      '#attributes' => ['class' => ['date-ampm']],
+    ];
   }
 
   return $sub_element;
@@ -759,21 +759,21 @@ function date_select_validate($element, &$form_state) {
         $error_list = ' ' . reset($date->errors);
       }
       else {
-        $error_list = theme('item_list', array('items' => $date->errors));
+        $error_list = theme('item_list', ['items' => $date->errors]);
       }
-      $message = t('The value input for field %field is invalid:', array('%field' => $label)) . $error_list;
+      $message = t('The value input for field %field is invalid:', ['%field' => $label]) . $error_list;
       form_set_error($error_field, $message);
       return;
     }
     // Nothing was entered but the date is required.
     elseif (empty($entered) && $element['#required']) {
-      $message = t('A valid date is required for %title.', array('%title' => $label));
+      $message = t('A valid date is required for %title.', ['%title' => $label]);
       form_set_error($error_field, $message);
       return;
     }
     // Something was input but it wasn't enough to create a valid date.
     elseif (!empty($entered)) {
-      $message = t('The value input for field %field is invalid.', array('%field' => $label));
+      $message = t('The value input for field %field is invalid.', ['%field' => $label]);
       form_set_error($error_field, $message);
       return;
     }
@@ -854,7 +854,7 @@ function date_local_date($item, $timezone, $field, $instance, $part = 'value') {
  * The callback for setting a default value for an empty date field.
  */
 function date_default_value($field, $instance, $langcode) {
-  $item = array();
+  $item = [];
   $db_format = date_type_format($field['type']);
   $date = date_default_value_part($item, $field, $instance, $langcode, 'value');
   if (is_object($date) && empty($date->errors)) {
@@ -940,7 +940,7 @@ function date_popup_element_value_callback($element, $input, &$form_state) {
   $granularity = date_format_order($element['#date_format']);
   $has_time = date_has_time($granularity);
   $date = NULL;
-  $return = $has_time ? array('date' => '', 'time' => '') : array('date' => '');
+  $return = $has_time ? ['date' => '', 'time' => ''] : ['date' => ''];
   // Normal input from submitting the form element.
   // Check is_array() to skip the string input values created by Views pagers.
   // Those string values, if present, should be interpreted as empty input.
@@ -977,16 +977,16 @@ function date_popup_element_process($element, &$form_state, $form) {
   module_load_include('inc', 'date', 'date.elements');
 
   $element['#tree'] = TRUE;
-  $element['#theme_wrappers'] = array('date_popup');
-  $element['#attached']['library'][] = array('date_popup', 'date_popup');
+  $element['#theme_wrappers'] = ['date_popup'];
+  $element['#attached']['library'][] = ['date_popup', 'date_popup'];
 
   if (!empty($element['#ajax'])) {
-    $element['#ajax'] += array(
-      'trigger_as' => array(
+    $element['#ajax'] += [
+      'trigger_as' => [
         'name' => $element['#name'],
-      ),
+      ],
       'event' => 'change',
-    );
+    ];
   }
 
   $element['date'] = _date_popup_process_date_part($element);
@@ -1024,12 +1024,12 @@ function date_popup_element_process($element, &$form_state, $form) {
     array_push($element['#element_validate'], 'date_popup_validate');
   }
   else {
-    $element['#element_validate'] = array('date_popup_validate');
+    $element['#element_validate'] = ['date_popup_validate'];
   }
 
-  $context = array(
+  $context = [
     'form' => $form,
-  );
+  ];
   backdrop_alter('date_popup_process', $element, $form_state, $context);
 
   return $element;
@@ -1041,7 +1041,7 @@ function date_popup_element_process($element, &$form_state, $form) {
 function _date_popup_process_date_part(&$element) {
   $date_granularity = _date_popup_date_granularity($element);
   if (empty($date_granularity)) {
-    return array();
+    return [];
   }
 
   // When used as a Views exposed filter widget, $element['#value'] contains an
@@ -1065,7 +1065,7 @@ function _date_popup_process_date_part(&$element) {
 
   // Add the dynamic datepicker options. Allow element-specific datepicker
   // preferences to override these options for whatever reason they see fit.
-  $settings = $element['#datepicker_options'] + array(
+  $settings = $element['#datepicker_options'] + [
     'changeMonth' => TRUE,
     'changeYear' => TRUE,
     'autoPopUp' => 'focus',
@@ -1074,7 +1074,7 @@ function _date_popup_process_date_part(&$element) {
     'firstDay' => intval(config_get('system.date','first_day')),
     'dateFormat' => _date_popup_format_to_popup(_date_popup_date_format($element)),
     'yearRange' => $year_range,
-  );
+  ];
 
   // Make sure that any defaultDate is within the yearRange.
   if (!empty($settings['yearRange'])) {
@@ -1083,13 +1083,13 @@ function _date_popup_process_date_part(&$element) {
     // the date ranges do not include the current year.
     // Necessary for the datepicker to render and select dates correctly.
     $default_date = ($parts[0] > 0 || 0 > $parts[1]) ? $parts[0] : 0;
-    $settings += array('defaultDate' => (string) $default_date . 'y');
+    $settings += ['defaultDate' => (string) $default_date . 'y'];
   }
 
   // Manually build this element and set the value -
   // this will prevent corrupting the parent value.
-  $parents = array_merge($element['#parents'], array('date'));
-  $sub_element = array(
+  $parents = array_merge($element['#parents'], ['date']);
+  $sub_element = [
     '#type' => 'textfield',
     '#title' => $element['#title'],
     '#title_display' => $element['#date_label_position'] == 'above' ? 'before' : 'invisible',
@@ -1097,25 +1097,25 @@ function _date_popup_process_date_part(&$element) {
     '#input' => FALSE,
     '#size' => !empty($element['#size']) ? $element['#size'] : 20,
     '#maxlength' => !empty($element['#maxlength']) ? $element['#maxlength'] : 30,
-    '#attributes' => $element['#attributes'] + array('data-date-popup' => json_encode($settings)),
+    '#attributes' => $element['#attributes'] + ['data-date-popup' => json_encode($settings)],
     '#parents' => $parents,
     '#name' => array_shift($parents) . '[' . implode('][', $parents) . ']',
     '#ajax' => !empty($element['#ajax']) ? $element['#ajax'] : FALSE,
-    '#attached' => array('library' => array(
-      array('system', 'ui.datepicker')
-    )),
-  );
+    '#attached' => ['library' => [
+      ['system', 'ui.datepicker']
+    ]],
+  ];
   $sub_element['#value'] = $sub_element['#default_value'];
 
   // Add an example placeholder to the date field.
   if (!isset($sub_element['#attributes']['placeholder'])) {
-    $sub_element['#attributes']['placeholder'] = t('e.g. @date', array(
+    $sub_element['#attributes']['placeholder'] = t('e.g. @date', [
       '@date' => date_format_date(
         date_example_date(),
         'custom',
         _date_popup_date_format($element)
         ),
-      )
+      ]
     );
   }
 
@@ -1129,7 +1129,7 @@ function _date_popup_process_time_part(&$element) {
   $granularity = date_format_order($element['#date_format']);
   $has_time = date_has_time($granularity);
   if (empty($has_time)) {
-    return array();
+    return [];
   }
 
   // When used as a Views exposed filter widget, $element['#value'] contains an
@@ -1142,10 +1142,10 @@ function _date_popup_process_time_part(&$element) {
 
   // Manually build this element and set the value -
   // this will prevent corrupting the parent value.
-  $parents = array_merge($element['#parents'], array('time'));
-  $sub_element = array(
+  $parents = array_merge($element['#parents'], ['time']);
+  $sub_element = [
     '#type' => 'textfield',
-    '#title' => isset($element['#title']) ? t('Time for @label', array('@label' => $element['#title'])) : t('Time'),
+    '#title' => isset($element['#title']) ? t('Time for @label', ['@label' => $element['#title']]) : t('Time'),
     '#title_display' => 'invisible',
     '#default_value' => $element['#value']['time'],
     '#size' => 15,
@@ -1153,11 +1153,11 @@ function _date_popup_process_time_part(&$element) {
     '#parents' => $parents,
     '#name' => array_shift($parents) . '[' . implode('][', $parents) . ']',
     '#ajax' => !empty($element['#ajax']) ? $element['#ajax'] : FALSE,
-    '#attached' => array('library' => array(
-      array('system', 'jquery.timeentry')
-    )),
+    '#attached' => ['library' => [
+      ['system', 'jquery.timeentry']
+    ]],
     '#attributes' => $element['#attributes'],
-  );
+  ];
 
   $sub_element['#value'] = $sub_element['#default_value'];
 
@@ -1165,35 +1165,35 @@ function _date_popup_process_time_part(&$element) {
   if (!isset($sub_element['#attributes']['placeholder'])) {
     $example_date = date_now();
     date_increment_round($example_date, $element['#date_increment']);
-    $sub_element['#attributes']['placeholder'] = t('e.g. @date', array(
+    $sub_element['#attributes']['placeholder'] = t('e.g. @date', [
       '@date' => date_format_date(
         $example_date,
         'custom',
         _date_popup_time_format($element)
-      )));
+      )]);
   }
 
   // Add in the timepicker if set.
   if ($element['#timepicker']) {
-    $settings = array(
+    $settings = [
       'show24Hours' => (strpos($element['#date_format'], 'H') !== FALSE || strpos($element['#date_format'], 'G') !== FALSE) ? TRUE : FALSE,
       'showSeconds' => (in_array('second', $granularity) ? TRUE : FALSE),
-      'timeSteps' => array(1, intval($element['#date_increment']), (in_array('second', $granularity) ? $element['#date_increment'] : 0)),
+      'timeSteps' => [1, intval($element['#date_increment']), (in_array('second', $granularity) ? $element['#date_increment'] : 0)],
       'fromTo' => isset($fromto),
       'spinnerImage' => '',
-    );
+    ];
     // Determine if we are using lowercase or uppercase am/pm and translate.
     if (strpos($element['#date_format'], 'a') !== FALSE) {
-      $settings['ampmNames'] = array(t('am'), t('pm'));
+      $settings['ampmNames'] = [t('am'), t('pm')];
     }
     else {
-      $settings['ampmNames'] = array(t('AM'), t('PM'));
+      $settings['ampmNames'] = [t('AM'), t('PM')];
     }
     // Determine if we should have a leading space before the am/pm.
     if (strpos($element['#date_format'], ' A') !== FALSE || strpos($element['#date_format'], ' a') !== FALSE) {
       $settings['ampmPrefix'] = ' ';
     }
-    $sub_element['#attributes'] += array('data-timeentry' => json_encode($settings));
+    $sub_element['#attributes'] += ['data-timeentry' => json_encode($settings)];
   }
 
   return ($sub_element);
@@ -1244,19 +1244,19 @@ function date_popup_validate($element, &$form_state) {
         $error_list = ' ' . reset($date->errors);
       }
       else {
-        $error_list = theme('item_list', array('items' => $date->errors));
+        $error_list = theme('item_list', ['items' => $date->errors]);
       }
-      $message = t('The value input for field %field is invalid:', array('%field' => $label)) . $error_list;
+      $message = t('The value input for field %field is invalid:', ['%field' => $label]) . $error_list;
       form_set_error($error_field, $message);
       return;
     }
     if (!empty($input['date'])) {
-      $message = t('The value input for field %field is invalid.', array('%field' => $label));
+      $message = t('The value input for field %field is invalid.', ['%field' => $label]);
       form_set_error($error_field, $message);
       return;
     }
     if ($element['#required']) {
-      $message = t('A valid date is required for %title.', array('%title' => $label));
+      $message = t('A valid date is required for %title.', ['%title' => $label]);
       form_set_error($error_field, $message);
       return;
     }
@@ -1302,7 +1302,7 @@ function date_popup_input_date($element, $input, $auto_complete = FALSE) {
  */
 function _date_popup_date_granularity($element) {
   $granularity = date_format_order($element['#date_format']);
-  return array_intersect($granularity, array('month', 'day', 'year'));
+  return array_intersect($granularity, ['month', 'day', 'year']);
 }
 
 /**
@@ -1310,7 +1310,7 @@ function _date_popup_date_granularity($element) {
  */
 function _date_popup_time_granularity($element) {
   $granularity = date_format_order($element['#date_format']);
-  return array_intersect($granularity, array('hour', 'minute', 'second'));
+  return array_intersect($granularity, ['hour', 'minute', 'second']);
 }
 
 /**
@@ -1331,10 +1331,10 @@ function _date_popup_time_format($element) {
  * Allowable time formats.
  */
 function _date_popup_time_formats($with_seconds = FALSE) {
-  return array(
+  return [
     'H:i:s',
     'h:i:sA',
-  );
+  ];
 }
 
 /**
@@ -1369,7 +1369,7 @@ function _date_popup_format_to_popup_time($format) {
   if (empty($format)) {
     $format = 'H:i';
   }
-  $symbols = array(
+  $symbols = [
     '/',
     '-',
     ' .',
@@ -1386,9 +1386,9 @@ function _date_popup_format_to_popup_time($format) {
     'n',
     'y',
     'Y',
-  );
+  ];
   $format = str_replace($symbols, '', $format);
-  $format = strtr($format, array('G' => 'H', 'g' => 'h'));
+  $format = strtr($format, ['G' => 'H', 'g' => 'h']);
   return $format;
 }
 
@@ -1396,7 +1396,7 @@ function _date_popup_format_to_popup_time($format) {
  * The format replacement patterns for the new datepicker.
  */
 function _date_popup_datepicker_format_replacements() {
-  return array(
+  return [
     'd' => 'dd',
     'j' => 'd',
     'l' => 'DD',
@@ -1408,7 +1408,7 @@ function _date_popup_datepicker_format_replacements() {
     'Y' => 'yy',
     'y' => 'y',
     'S' => '',
-  );
+  ];
 }
 
 /**
@@ -1444,7 +1444,7 @@ function date_combo_element_process($element, &$form_state, $form) {
   // in the formatters.
   $process = date_process_values($field, $instance);
   if (empty($element['#default_value'])) {
-    $element['#default_value'] = array();
+    $element['#default_value'] = [];
   }
   foreach ($process as $processed) {
     if (!isset($element['#default_value'][$processed])) {
@@ -1463,16 +1463,16 @@ function date_combo_element_process($element, &$form_state, $form) {
   }
 
   $show_todate = !empty($form_state['values']['show_todate']) || !empty($element['#default_value'][$to_field]) || $field['settings']['todate'] == 'required';
-  $element['show_todate'] = array(
+  $element['show_todate'] = [
     '#title' => t('Show end date'),
     '#type' => 'checkbox',
     '#default_value' => $show_todate,
     '#weight' => -20,
-    '#attributes' => array('data-toggle-todate' => TRUE),
+    '#attributes' => ['data-toggle-todate' => TRUE],
     '#access' => $field['settings']['todate'] == 'optional',
-  );
+  ];
 
-  $element[$from_field] = array(
+  $element[$from_field] = [
     '#field'         => $field,
     '#instance'      => $instance,
     '#weight'        => $instance['widget']['weight'],
@@ -1486,7 +1486,7 @@ function date_combo_element_process($element, &$form_state, $form) {
     '#date_increment'   => $instance['widget']['settings']['increment'],
     '#date_year_range'  => $instance['widget']['settings']['year_range'],
     '#date_label_position' => $instance['widget']['settings']['label_position'],
-  );
+  ];
 
   $description = !empty($element['#description']) ? t($element['#description']) : '';
   unset($element['#description']);
@@ -1494,19 +1494,19 @@ function date_combo_element_process($element, &$form_state, $form) {
   switch ($instance['widget']['type']) {
     case 'date_select':
       $element[$from_field]['#type'] = 'date_select';
-      $element[$from_field]['#theme_wrappers'] = array('date_select');
+      $element[$from_field]['#theme_wrappers'] = ['date_select'];
       $element[$from_field]['#ajax'] = !empty($element['#ajax']) ? $element['#ajax'] : FALSE;
       break;
 
     case 'date_popup':
       $element[$from_field]['#type'] = 'date_popup';
-      $element[$from_field]['#theme_wrappers'] = array('date_popup');
+      $element[$from_field]['#theme_wrappers'] = ['date_popup'];
       $element[$from_field]['#ajax'] = !empty($element['#ajax']) ? $element['#ajax'] : FALSE;
       break;
 
     default:
       $element[$from_field]['#type'] = 'date_text';
-      $element[$from_field]['#theme_wrappers'] = array('date_text');
+      $element[$from_field]['#theme_wrappers'] = ['date_text'];
       $element[$from_field]['#ajax'] = !empty($element['#ajax']) ? $element['#ajax'] : FALSE;
       break;
   }
@@ -1541,9 +1541,9 @@ function date_combo_element_process($element, &$form_state, $form) {
   }
   // Single value with from and to dates.
   elseif (!empty($field['settings']['todate'])) {
-    $element[$from_field]['#title'] = t('@field_name start date', array('@field_name' => $instance['label']));
+    $element[$from_field]['#title'] = t('@field_name start date', ['@field_name' => $instance['label']]);
     $element[$from_field]['#date_title_printed'] = $element['#date_title_printed'];
-    $element[$to_field]['#title'] = t('@field_name end date', array('@field_name' => $instance['label']));
+    $element[$to_field]['#title'] = t('@field_name end date', ['@field_name' => $instance['label']]);
     $element[$to_field]['#date_title_printed'] = $element['#date_title_printed'];
   }
   // Single value with just a single date.
@@ -1552,11 +1552,11 @@ function date_combo_element_process($element, &$form_state, $form) {
     $element[$from_field]['#date_title_printed'] = $element['#date_title_printed'];
   }
 
-  $context = array(
+  $context = [
     'field'     => $field,
     'instance'  => $instance,
     'form'      => $form,
-  );
+  ];
   backdrop_alter('date_combo_process', $element, $form_state, $context);
 
   return $element;
@@ -1566,7 +1566,7 @@ function date_combo_element_process($element, &$form_state, $form) {
  * Empty a date element.
  */
 function date_element_empty($element, &$form_state) {
-  $item = array();
+  $item = [];
   $item['value'] = NULL;
   $item['value2']   = NULL;
   $item['timezone']   = NULL;
@@ -1595,7 +1595,7 @@ function date_combo_validate($element, &$form_state) {
 
   // Related issue: https://drupal.org/node/2279831.
   if (!is_array($element['#field_parents'])) {
-    $element['#field_parents'] = array();
+    $element['#field_parents'] = [];
   }
   $form_input = backdrop_array_get_nested_value($form_state['input'], $element['#field_parents']);
 
@@ -1610,11 +1610,11 @@ function date_combo_validate($element, &$form_state) {
   $field = field_widget_field($element, $form_state);
   $instance = field_widget_instance($element, $form_state);
 
-  $context = array(
+  $context = [
     'field' => $field,
     'instance' => $instance,
     'item' => $item,
-  );
+  ];
 
   backdrop_alter('date_combo_pre_validate', $element, $form_state, $context);
 
@@ -1624,7 +1624,7 @@ function date_combo_validate($element, &$form_state) {
   $offset_field = 'offset';
   $offset_field2 = 'offset2';
 
-  $errors = array();
+  $errors = [];
 
   // Check for empty 'Start date', which could either be an empty
   // value or an array of empty values, depending on the widget.
@@ -1646,18 +1646,18 @@ function date_combo_validate($element, &$form_state) {
   // An 'End' date without a 'Start' date is a validation error.
   if ($empty && !empty($item[$to_field])) {
     if (!is_array($item[$to_field])) {
-      $errors[] = t("A start date is required if an end date is supplied.", array(
+      $errors[] = t("A start date is required if an end date is supplied.", [
         '%field' => $instance['label'],
-      ));
+      ]);
       $empty = FALSE;
     }
     else {
       foreach ($item[$to_field] as $key => $value) {
         if (!empty($value)) {
-          $errors[] = t("A start date is required if an end date is supplied for field %field #@delta.", array(
+          $errors[] = t("A start date is required if an end date is supplied for field %field #@delta.", [
             '@delta' => $field['cardinality'] ? intval($delta + 1) : '',
             '%field' => $instance['label'],
-          ));
+          ]);
           $empty = FALSE;
           break;
         }
@@ -1755,18 +1755,18 @@ function date_combo_validate($element, &$form_state) {
       $error_list = ' ' . reset($errors);
     }
     else {
-      $error_list = theme('item_list', array('items' => $errors));
+      $error_list = theme('item_list', ['items' => $errors]);
     }
     if ($field['cardinality'] != 1) {
-      form_error($element, t('There are errors in %field_name value #@delta:', array(
+      form_error($element, t('There are errors in %field_name value #@delta:', [
         '%field_name' => $instance['label'],
         '@delta' => $delta + 1,
-      )) . $error_list);
+      ]) . $error_list);
     }
     else {
-      form_error($element, t('There are errors in %field_name:', array(
+      form_error($element, t('There are errors in %field_name:', [
         '%field_name' => $instance['label'],
-      )) . $error_list);
+      ]) . $error_list);
     }
   }
 }
@@ -1819,7 +1819,7 @@ function date_empty_end_date(&$element, &$form_state, &$input) {
   if ($parent == 'value2') {
     $parent_values = backdrop_array_get_nested_value($form_state['values'], $parents);
     if (isset($parent_values['show_todate']) && $parent_values['show_todate'] != 1) {
-      $input = array();
+      $input = [];
       form_set_value($element, NULL, $form_state);
     }
   }
@@ -1842,7 +1842,7 @@ function date_empty_end_date(&$element, &$form_state, &$input) {
 function date_hidden_element($element) {
   if ((isset($element['#access']) && empty($element['#access']))
     || !empty($element['#programmed'])
-    || in_array($element['#type'], array('hidden', 'value'))) {
+    || in_array($element['#type'], ['hidden', 'value'])) {
     return TRUE;
   }
   return FALSE;
@@ -1862,7 +1862,7 @@ function date_html5_element_validate(array $element, array &$form_state) {
   $field_name = $element['#field_name'];
 
   if (!empty(backdrop_array_get_nested_value($form_state['values'], $element['#parents']))) {
-    $values = array();
+    $values = [];
     $trimmed_parents = array_slice($element['#parents'], 0, -1);
     $items = backdrop_array_get_nested_value($form_state['values'], $trimmed_parents);
     $field_type = $element['#field_type'];
@@ -1881,22 +1881,22 @@ function date_html5_element_validate(array $element, array &$form_state) {
       $date_only = (is_string($date_values['value']) && strlen($date_values['value']) == 10);
       if ($date_only) {
         $start = $date_values['value'];
-        $date_values['value'] = array(
+        $date_values['value'] = [
           'date' => $start,
-        );
+        ];
       }
 
       if (empty($date_values['value']['date'])) {
         if (!empty($element['value']['#required']) && $delta < 1) {
           if ($multi_value) {
-            form_set_error($item_parents . '][value', t('A start date for value #1 is required in %field.', array(
+            form_set_error($item_parents . '][value', t('A start date for value #1 is required in %field.', [
               '%field' => $field_label,
-            )));
+            ]));
           }
           else {
-            form_set_error($item_parents . '][value', t('A start date is required in %field.', array(
+            form_set_error($item_parents . '][value', t('A start date is required in %field.', [
               '%field' => $field_label,
-            )));
+            ]));
           }
         }
         // Value has been emptied.
@@ -1928,17 +1928,17 @@ function date_html5_element_validate(array $element, array &$form_state) {
         $min_date = new BackdropDateTime($element['value']['#min'], $timezone);
         if ($date < $min_date) {
           if ($multi_value) {
-            form_set_error($item_parents . '][value', t('The date of value #!delta in %field may not be before @date.', array(
+            form_set_error($item_parents . '][value', t('The date of value #!delta in %field may not be before @date.', [
               '!delta' => $delta + 1,
               '%field' => $field_label,
               '@date' => $element['value']['#min'],
-            )));
+            ]));
           }
           else {
-            form_set_error($item_parents . '][value', t('The date in %field may not be before @date.', array(
+            form_set_error($item_parents . '][value', t('The date in %field may not be before @date.', [
               '%field' => $field_label,
               '@date' => $element['value']['#min'],
-            )));
+            ]));
           }
         }
       }
@@ -1946,17 +1946,17 @@ function date_html5_element_validate(array $element, array &$form_state) {
         $max_date = new BackdropDateTime($element['value']['#max'], $timezone);
         if ($date > $max_date) {
           if ($multi_value) {
-            form_set_error($item_parents . '][value', t('The date of value #!delta in %field may not be after @date.', array(
+            form_set_error($item_parents . '][value', t('The date of value #!delta in %field may not be after @date.', [
               '!delta' => $delta + 1,
               '%field' => $field_label,
               '@date' => $element['value']['#max'],
-            )));
+            ]));
           }
           else {
-            form_set_error($item_parents . '][value', t('The date in %field may not be after @date.', array(
+            form_set_error($item_parents . '][value', t('The date in %field may not be after @date.', [
               '%field' => $field_label,
               '@date' => $element['value']['#max'],
-            )));
+            ]));
           }
         }
       }
@@ -1969,9 +1969,9 @@ function date_html5_element_validate(array $element, array &$form_state) {
 
       if (!empty($date_values['value2']) && $date_only) {
         $end = $date_values['value2'];
-        $date_values['value2'] = array(
+        $date_values['value2'] = [
           'date' => $end,
-        );
+        ];
       }
       if (!empty($date_values['value2']['date'])) {
         $string2 = implode(' ', array_values($date_values['value2']));
@@ -1979,32 +1979,32 @@ function date_html5_element_validate(array $element, array &$form_state) {
         // Compare to limit range, if set.
         if (isset($min_date) && $date2 < $min_date) {
           if ($multi_value) {
-            form_set_error($item_parents . '][value2', t('The end date of value #!delta in %field may not be before @date.', array(
+            form_set_error($item_parents . '][value2', t('The end date of value #!delta in %field may not be before @date.', [
               '!delta' => $delta + 1,
               '%field' => $field_label,
               '@date' => $element['value']['#min'],
-            )));
+            ]));
           }
           else {
-            form_set_error($item_parents . '][value2', t('The end date in %field may not be before @date.', array(
+            form_set_error($item_parents . '][value2', t('The end date in %field may not be before @date.', [
               '%field' => $field_label,
               '@date' => $element['value']['#min'],
-            )));
+            ]));
           }
         }
         if (isset($max_date) && $date2 > $max_date) {
           if ($multi_value) {
-            form_set_error($item_parents . '][value2', t('The end date of value #!delta in %field may not be after @date.', array(
+            form_set_error($item_parents . '][value2', t('The end date of value #!delta in %field may not be after @date.', [
               '!delta' => $delta + 1,
               '%field' => $field_label,
               '@date' => $element['value']['#max'],
-            )));
+            ]));
           }
           else {
-            form_set_error($item_parents . '][value2', t('The end date in %field may not be after @date.', array(
+            form_set_error($item_parents . '][value2', t('The end date in %field may not be after @date.', [
               '%field' => $field_label,
               '@date' => $element['value']['#max'],
-            )));
+            ]));
           }
         }
         $values[$delta]['offset2'] = $date2->getOffset();
@@ -2012,29 +2012,29 @@ function date_html5_element_validate(array $element, array &$form_state) {
         $values[$delta]['value2'] = _date_html5_format_value_db($date2, $field_type);
         if ($date2 <= $date) {
           if ($multi_value) {
-            form_set_error($item_parents . '][value2', t('The end date of value #!delta in %field must be greater than the start date.', array(
+            form_set_error($item_parents . '][value2', t('The end date of value #!delta in %field must be greater than the start date.', [
               '!delta' => ($delta + 1),
               '%field' => $field_label,
-            )));
+            ]));
           }
           else {
-            form_set_error($item_parents . '][value2', t('The end date in %field must be greater than the start date.', array(
+            form_set_error($item_parents . '][value2', t('The end date in %field must be greater than the start date.', [
               '%field' => $field_label,
-            )));
+            ]));
           }
         }
       }
       else {
         if (!empty($element['value2']['#required']) && $delta < 1) {
           if ($multi_value) {
-            form_set_error($item_parents . '][value2', t('An end date for value #1 is required in %field.', array(
+            form_set_error($item_parents . '][value2', t('An end date for value #1 is required in %field.', [
               '%field' => $field_label,
-            )));
+            ]));
           }
           else {
-            form_set_error($item_parents . '][value2', t('An end date is required in %field.', array(
+            form_set_error($item_parents . '][value2', t('An end date is required in %field.', [
               '%field' => $field_label,
-            )));
+            ]));
           }
         }
         // Function date_field_validate chokes otherwise.
@@ -2078,9 +2078,9 @@ function _date_html5_get_form_value($value_orig, $type, $timestep, $timezone_db,
     $datetime->setTimezone(new DateTimeZone($timezone));
   }
 
-  $value = array(
+  $value = [
     'date' => $datetime->format('Y-m-d'),
-  );
+  ];
   if ($type == 'html_datetime') {
     $pattern = ($timestep > 1) ? 'H:i' : 'H:i:s';
     $value['time'] = $datetime->format($pattern);
@@ -2102,10 +2102,10 @@ function _date_html5_get_form_value($value_orig, $type, $timestep, $timezone_db,
  * @return array
  */
 function _date_html5_get_default_value(array $field, array $instance, $langcode) {
-  $default = array(
+  $default = [
     'start' => NULL,
     'end' => NULL,
-  );
+  ];
   $granularity = $field['settings']['granularity'];
   $date_defaults = date_default_value($field, $instance, $langcode);
   $values = reset($date_defaults);
@@ -2162,10 +2162,10 @@ function _date_html5_format_value_db(BackdropDateTime $datetime, $field_type) {
  * @return array
  */
 function _date_html5_get_date_limits(array $limit_settings) {
-  $date_limits = array(
+  $date_limits = [
     'min' => NULL,
     'max' => NULL,
-  );
+  ];
   if ($limit_settings['mode'] == 'byyear') {
     $now = date_now();
     if ($limit_settings['years_back'] !== '') {
@@ -2194,7 +2194,7 @@ function _date_html5_get_date_limits(array $limit_settings) {
  * @return array
  */
 function _date_html5_get_attributes(array $date_limits, array $granularity) {
-  $attributes = array();
+  $attributes = [];
   $has_time = !empty($granularity['hour']);
 
   if (!empty($date_limits['min'])) {
@@ -2281,34 +2281,34 @@ function _date_default_field_widget_form(array $field, array $instance, $langcod
     $timezone = $timezone['timezone'];
   }
 
-  $element += array(
+  $element += [
     '#type' => 'date_combo',
-    '#theme_wrappers' => array('date_combo'),
+    '#theme_wrappers' => ['date_combo'],
     '#weight' => $delta,
     '#default_value' => isset($items[$delta]) ? $items[$delta] : '',
     '#date_timezone' => $timezone,
-    '#element_validate' => array('date_combo_validate'),
+    '#element_validate' => ['date_combo_validate'],
     '#date_is_default' => $is_default,
 
     // Store the original values, for use with disabled and hidden fields.
     '#date_items' => isset($items[$delta]) ? $items[$delta] : '',
-  );
+  ];
 
   if ($field['settings']['tz_handling'] == 'date') {
-    $element['timezone'] = array(
+    $element['timezone'] = [
       '#type' => 'date_timezone',
-      '#theme_wrappers' => array('date_timezone'),
+      '#theme_wrappers' => ['date_timezone'],
       '#delta' => $delta,
       '#default_value' => $timezone,
       '#weight' => $instance['widget']['weight'] + 1,
       '#date_label_position' => $instance['widget']['settings']['label_position'],
-    );
+    ];
   }
 
   // Make changes if instance is set to be rendered as a regular field.
   if ($instance['widget']['settings']['no_fieldset']) {
     $element['#title'] = NULL;
-    $element['#theme_wrappers'] = array();
+    $element['#theme_wrappers'] = [];
     $element['#date_title_printed'] = FALSE;
   } else {
     $element['#title'] = $instance['label'];
@@ -2367,7 +2367,7 @@ function _date_html5_field_widget_form(array $field, array $instance, $langcode,
   } elseif ($delta == 0) {
     $value = $default['start'];
   }
-  $element['value'] = array(
+  $element['value'] = [
     '#type' => $type,
     '#title' => ($has_todate) ? t('Start date') : t('Date'),
     '#default_value' => $value,
@@ -2377,7 +2377,7 @@ function _date_html5_field_widget_form(array $field, array $instance, $langcode,
     '#timezone_db' => $timezone_db,
     '#min' => $date_limits['min'],
     '#max' => $date_limits['max'],
-  );
+  ];
 
   if ($has_todate) {
     $value2 = '';
@@ -2386,27 +2386,27 @@ function _date_html5_field_widget_form(array $field, array $instance, $langcode,
     } elseif ($delta == 0) {
       $value2 = $default['end'];
     }
-    $element['value2'] = array(
+    $element['value2'] = [
       '#type' => $type,
       '#title' => t('End date'),
       '#default_value' => $value2,
       '#required' => (($field_settings['todate'] != 'optional') && $delta == 0),
       '#attributes' => $attributes,
       '#date_timezone' => $timezone,
-    );
+    ];
   }
   if ($field_settings['tz_handling'] == 'date') {
-    $element['timezone'] = array(
+    $element['timezone'] = [
       '#type' => 'date_timezone',
       '#title' => t('Timezone'),
       '#date_label_position' => NULL,
       '#default_value' => isset($items[$delta]['timezone']) ? $items[$delta]['timezone'] : '',
-    );
+    ];
   }
 
   // Prevent running again for every additional field item.
   if ($delta == 0) {
-    $element['#element_validate'] = array('date_html5_element_validate');
+    $element['#element_validate'] = ['date_html5_element_validate'];
     $element['#attached']['css'][] = backdrop_get_path('module', 'date') . '/css/date-html5.css';
   }
 

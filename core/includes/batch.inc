@@ -24,10 +24,10 @@
  *   An array representing the batch, or FALSE if no batch was found.
  */
 function batch_load($id) {
-  $batch = db_query("SELECT batch FROM {batch} WHERE bid = :bid AND token = :token", array(
+  $batch = db_query("SELECT batch FROM {batch} WHERE bid = :bid AND token = :token", [
     ':bid' => $id,
     ':token' => backdrop_get_token($id),
-  ))->fetchField();
+  ])->fetchField();
   if ($batch) {
     return unserialize($batch);
   }
@@ -93,7 +93,7 @@ function _batch_page() {
 
   // Save updated data for the next page request.
   db_update('batch')
-    ->fields(array('batch' => serialize($batch)))
+    ->fields(['batch' => serialize($batch)])
     ->condition('bid', $batch['id'])
     ->execute();
 
@@ -110,7 +110,7 @@ function _batch_do() {
   // Perform actual processing.
   list($percentage, $message) = _batch_process();
 
-  backdrop_json_output(array('status' => TRUE, 'percentage' => $percentage, 'message' => $message));
+  backdrop_json_output(['status' => TRUE, 'percentage' => $percentage, 'message' => $message]);
 }
 
 /**
@@ -140,7 +140,7 @@ function _batch_progress_page() {
     // the error message.
     ob_start();
     $fallback = $current_set['error_message'] . '<br />' . $batch['error_message'];
-    $fallback = theme('maintenance_page', array('content' => $fallback, 'show_messages' => FALSE));
+    $fallback = theme('maintenance_page', ['content' => $fallback, 'show_messages' => FALSE]);
 
     // We strip the end of the page using a marker in the template, so any
     // additional HTML output by PHP shows up inside the page rather than below
@@ -165,30 +165,30 @@ function _batch_progress_page() {
   $batch['url_options']['query']['op'] = $new_op;
 
   $url = url($batch['url'], $batch['url_options']);
-  $element = array(
+  $element = [
     // Redirect through a 'Refresh' meta tag if JavaScript is disabled.
     '#prefix' => '<noscript>',
     '#suffix' => '</noscript>',
     '#tag' => 'meta',
-    '#attributes' => array(
+    '#attributes' => [
       'http-equiv' => 'Refresh',
       'content' => '0; URL=' . $url,
-    ),
-  );
+    ],
+  ];
   backdrop_add_html_head($element, 'batch_progress_meta_refresh');
 
   // Adds JavaScript code and settings for clients where JavaScript is enabled.
-  $js_setting = array(
-    'batch' => array(
+  $js_setting = [
+    'batch' => [
       'errorMessage' => $current_set['error_message'] . '<br />' . $batch['error_message'],
       'initMessage' => $current_set['init_message'],
       'uri' => $url,
-    ),
-  );
+    ],
+  ];
   backdrop_add_js($js_setting, 'setting');
   backdrop_add_library('system', 'backdrop.batch');
 
-  return theme('progress_bar', array('percent' => $percentage, 'message' => $message));
+  return theme('progress_bar', ['percent' => $percentage, 'message' => $message]);
 }
 
 /**
@@ -205,7 +205,7 @@ function _batch_progress_page() {
 function _batch_process() {
   $batch       = &batch_get();
   $current_set = &_batch_current_set();
-  $old_set     = array();
+  $old_set     = [];
 
   // Indicate that this batch set needs to be initialized.
   $set_changed = TRUE;
@@ -242,13 +242,13 @@ function _batch_process() {
       list($function, $args) = $item->data;
 
       // Build the 'context' array and execute the function call.
-      $batch_context = array(
+      $batch_context = [
         'sandbox'  => &$current_set['sandbox'],
         'results'  => &$current_set['results'],
         'finished' => &$finished,
         'message'  => &$task_message,
-      );
-      call_user_func_array($function, array_merge($args, array(&$batch_context)));
+      ];
+      call_user_func_array($function, array_merge($args, [&$batch_context]));
 
       if ($finished >= 1) {
         // Make sure this step is not counted twice when computing $current.
@@ -256,7 +256,7 @@ function _batch_process() {
         // Remove the processed operation and clear the sandbox.
         $queue->deleteItem($item);
         $current_set['count']--;
-        $current_set['sandbox'] = array();
+        $current_set['sandbox'] = [];
       }
     }
 
@@ -311,7 +311,7 @@ function _batch_process() {
     $current    = $total - $remaining + $finished;
     $percentage = _batch_api_percentage($total, $current);
     $elapsed    = isset($current_set['elapsed']) ? $current_set['elapsed'] : 0;
-    $values     = array(
+    $values     = [
       '@remaining'  => $remaining,
       '@total'      => $total,
       '@current'    => floor($current),
@@ -319,7 +319,7 @@ function _batch_process() {
       '@elapsed'    => format_interval($elapsed / 1000),
       // If possible, estimate remaining processing time.
       '@estimate'   => ($current > 0) ? format_interval(($elapsed * ($total - $current) / $current) / 1000) : '-',
-    );
+    ];
     $message = strtr($progress_message, $values);
     if (!empty($message)) {
       $message .= '<br />';
@@ -328,12 +328,12 @@ function _batch_process() {
       $message .= $task_message;
     }
 
-    return array($percentage, $message);
+    return [$percentage, $message];
   }
   else {
     // If we are not in progressive mode, the entire batch has been processed.
     _batch_finished();
-    return array('100', '');
+    return ['100', ''];
   }
 }
 
@@ -486,7 +486,7 @@ function _batch_finished() {
     }
     $function = $_batch['redirect_callback'];
     if (function_exists($function)) {
-      $function($_batch['source_url'], array('query' => array('op' => 'finish', 'id' => $_batch['id'])));
+      $function($_batch['source_url'], ['query' => ['op' => 'finish', 'id' => $_batch['id']]]);
     }
   }
 }

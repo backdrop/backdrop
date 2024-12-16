@@ -39,7 +39,7 @@ class views_plugin_row extends views_plugin {
   function option_definition() {
     $options = parent::option_definition();
     if (isset($this->base_table)) {
-      $options['relationship'] = array('default' => 'none');
+      $options['relationship'] = ['default' => 'none'];
     }
 
     return $options;
@@ -56,7 +56,7 @@ class views_plugin_row extends views_plugin {
       // A whole bunch of code to figure out what relationships are valid for
       // this item.
       $relationships = $view->display_handler->get_option('relationships');
-      $relationship_options = array();
+      $relationship_options = [];
 
       foreach ($relationships as $relationship) {
         $relationship_handler = views_get_handler($relationship['table'], $relationship['field'], 'relationship');
@@ -71,25 +71,25 @@ class views_plugin_row extends views_plugin {
       }
 
       if (!empty($relationship_options)) {
-        $relationship_options = array_merge(array('none' => t('Do not use a relationship')), $relationship_options);
+        $relationship_options = array_merge(['none' => t('Do not use a relationship')], $relationship_options);
         $rel = empty($this->options['relationship']) ? 'none' : $this->options['relationship'];
         if (empty($relationship_options[$rel])) {
           // Pick the first relationship.
           $rel = key($relationship_options);
         }
 
-        $form['relationship'] = array(
+        $form['relationship'] = [
           '#type' => 'select',
           '#title' => t('Relationship'),
           '#options' => $relationship_options,
           '#default_value' => $rel,
-        );
+        ];
       }
       else {
-        $form['relationship'] = array(
+        $form['relationship'] = [
           '#type' => 'value',
           '#value' => 'none',
-        );
+        ];
       }
     }
   }
@@ -137,12 +137,12 @@ class views_plugin_row extends views_plugin {
    */
   function render($row) {
     return theme($this->theme_functions(),
-      array(
+      [
         'view' => $this->view,
         'options' => $this->options,
         'row' => $row,
         'field_alias' => isset($this->field_alias) ? $this->field_alias : '',
-      ));
+      ]);
   }
 }
 

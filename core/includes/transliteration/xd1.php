@@ -1,6 +1,6 @@
 <?php
 
-$base = array(
+$base = [
   0x00 => 'tyal', 'tyalg', 'tyalm', 'tyalb', 'tyals', 'tyalt', 'tyalp', 'tyalh', 'tyam', 'tyab', 'tyabs', 'tyas', 'tyass', 'tyang', 'tyaj', 'tyach',
   0x10 => 'tyak', 'tyat', 'tyap', 'tyah', 'tyae', 'tyaeg', 'tyaekk', 'tyaegs', 'tyaen', 'tyaenj', 'tyaenh', 'tyaed', 'tyael', 'tyaelg', 'tyaelm', 'tyaelb',
   0x20 => 'tyaels', 'tyaelt', 'tyaelp', 'tyaelh', 'tyaem', 'tyaeb', 'tyaebs', 'tyaes', 'tyaess', 'tyaeng', 'tyaej', 'tyaech', 'tyaek', 'tyaet', 'tyaep', 'tyaeh',
@@ -17,4 +17,4 @@ $base = array(
   0xD0 => 'twass', 'twang', 'twaj', 'twach', 'twak', 'twat', 'twap', 'twah', 'twae', 'twaeg', 'twaekk', 'twaegs', 'twaen', 'twaenj', 'twaenh', 'twaed',
   0xE0 => 'twael', 'twaelg', 'twaelm', 'twaelb', 'twaels', 'twaelt', 'twaelp', 'twaelh', 'twaem', 'twaeb', 'twaebs', 'twaes', 'twaess', 'twaeng', 'twaej', 'twaech',
   0xF0 => 'twaek', 'twaet', 'twaep', 'twaeh', 'toe', 'toeg', 'toekk', 'toegs', 'toen', 'toenj', 'toenh', 'toed', 'toel', 'toelg', 'toelm', 'toelb',
-);
+];

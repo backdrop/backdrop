@@ -23,7 +23,7 @@ class NodeBlock extends Block {
       return filter_xss($this->settings['admin_description']);
     }
 
-    return t('Displays content of node ID: @nid', array('@nid' => $this->settings['nid']));
+    return t('Displays content of node ID: @nid', ['@nid' => $this->settings['nid']]);
   }
 
   /**
@@ -123,44 +123,44 @@ class NodeBlock extends Block {
     $form['title_display']['title_display']['#weight'] = -50;
     $settings = $this->settings;
 
-    $form['link_node_title'] = array(
+    $form['link_node_title'] = [
       '#type' => 'checkbox',
       '#default_value' => !empty($settings['link_node_title']),
       '#title' => t('Link block title to full-page display of embedded content.'),
-      '#states' => array(
-        'invisible' => array(
-          ':input[name="title_display"]' => array('value' => LAYOUT_TITLE_NONE),
-        ),
-      ),
-    );
+      '#states' => [
+        'invisible' => [
+          ':input[name="title_display"]' => ['value' => LAYOUT_TITLE_NONE],
+        ],
+      ],
+    ];
 
-    $form['leave_node_title'] = array(
+    $form['leave_node_title'] = [
       '#type' => 'checkbox',
       '#default_value' => !empty($settings['leave_node_title']),
       '#title' => t('Show the content title inside of the block.'),
-      '#states' => array(
-        'invisible' => array(
-          ':input[name="title_display"]' => array('value' => LAYOUT_TITLE_DEFAULT),
-        ),
-      ),
-    );
+      '#states' => [
+        'invisible' => [
+          ':input[name="title_display"]' => ['value' => LAYOUT_TITLE_DEFAULT],
+        ],
+      ],
+    ];
 
     $nid_default = '';
     if (!empty($settings['nid'])) {
-      $title = db_query("SELECT title FROM {node} WHERE nid = :nid", array(':nid' => $settings['nid']))->fetchField();
+      $title = db_query("SELECT title FROM {node} WHERE nid = :nid", [':nid' => $settings['nid']])->fetchField();
       $nid_default = $title . ' [' . $settings['nid'] . ']';
     }
 
-    $form['nid'] = array(
+    $form['nid'] = [
       '#title' => t('Content title or ID'),
       '#type' => 'textfield',
       '#maxlength' => 512,
       '#default_value' => $nid_default,
       '#autocomplete_path' => 'node/autocomplete',
-    );
+    ];
 
     $entity = entity_get_info('node');
-    $view_mode_options = array();
+    $view_mode_options = [];
     foreach ($entity['view modes'] as $mode => $option) {
       $view_mode_options[$mode] = $option['label'];
     }
@@ -169,31 +169,31 @@ class NodeBlock extends Block {
     unset($view_mode_options['search_index']);
     unset($view_mode_options['search_result']);
 
-    $form['view_mode'] = array(
+    $form['view_mode'] = [
       '#title' => t('Display mode'),
       '#type' => 'select',
       '#options' => $view_mode_options,
       '#default_value' => isset($settings['view_mode']) ? $settings['view_mode'] : 'full',
-    );
+    ];
 
-    $form['display_submitted'] = array(
+    $form['display_submitted'] = [
       '#type' => 'checkbox',
       '#default_value' => !empty($settings['display_submitted']),
       '#title' => t('Show author and date information'),
-    );
+    ];
 
-    $form['links'] = array(
+    $form['links'] = [
       '#type' => 'checkbox',
       '#default_value' => !empty($settings['links']),
       '#title' => t('Include the links "add comment", "read more" etc.'),
-    );
+    ];
 
     if (module_exists('translation')) {
-      $form['translate'] = array(
+      $form['translate'] = [
         '#type' => 'checkbox',
         '#default_value' => !empty($settings['translate']),
         '#title' => t('Load translated version of the content if available'),
-      );
+      ];
     }
   }
 
@@ -208,7 +208,7 @@ class NodeBlock extends Block {
       $form_state['values']['nid'] = $nid;
     }
     else {
-      form_error($form['nid'], t('Sorry, no content matching <em>%title</em> was found.', array('%title' => $form_state['values']['nid'])));
+      form_error($form['nid'], t('Sorry, no content matching <em>%title</em> was found.', ['%title' => $form_state['values']['nid']]));
     }
   }
 

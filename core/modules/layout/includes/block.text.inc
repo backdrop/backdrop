@@ -12,10 +12,10 @@ class BlockText extends Block {
   function __construct($plugin_name, array $data) {
     parent::__construct($plugin_name, $data);
 
-    $this->settings += array(
+    $this->settings += [
       'content' => '',
       'format' => NULL,
-    );
+    ];
   }
 
   /**
@@ -59,77 +59,77 @@ class BlockText extends Block {
 
     $form['#attached']['js'][] = backdrop_get_path('module', 'layout') . '/js/layout.admin.js';
 
-    $form['title_display']['title'] = array(
+    $form['title_display']['title'] = [
       '#type' => 'textfield',
       '#title' => t('Display title'),
       '#default_value' => $this->settings['title'],
       '#maxlength' => 255,
-    );
-    $form['content'] = array(
+    ];
+    $form['content'] = [
       '#type' => 'text_format',
       '#title' => t('Block content'),
       '#default_value' => $this->settings['content'],
       '#format' => $this->settings['format'],
       '#editor_uploads' => TRUE,
       '#rows' => 5,
-    );
+    ];
 
     if (module_exists('block')) {
-      $form['convert'] = array(
+      $form['convert'] = [
         '#weight' => 2,
-        '#parents' => array(),
-      );
-      $form['convert']['reusable'] = array(
+        '#parents' => [],
+      ];
+      $form['convert']['reusable'] = [
         '#type' => 'checkbox',
         '#title' => t('Make this block reusable'),
-        '#description' => t('If enabled, this block will be made reusable across different layouts and be listed in on the !block_link page.', array('!block_link' => l(t('Custom blocks'), 'admin/structure/block'))),
+        '#description' => t('If enabled, this block will be made reusable across different layouts and be listed in on the !block_link page.', ['!block_link' => l(t('Custom blocks'), 'admin/structure/block')]),
         '#weight' => 1,
-      );
+      ];
       // Add a notice for translation.
       if (module_exists('locale')) {
         $form['convert']['reusable']['#description'] .= ' ' . t('Reusable blocks may also be translated.');
       }
     }
-    $form['admin_label'] = array(
+    $form['admin_label'] = [
       '#type' => 'fieldset',
       '#title' => t('Admin label'),
       '#tree' => FALSE,
       '#collapsed' => empty($this->settings['admin_label']),
-      '#states' => array(
-        'collapsed' => array(
-          ':input[name="reusable"]' => array('checked' => FALSE),
-        ),
-      ),
+      '#states' => [
+        'collapsed' => [
+          ':input[name="reusable"]' => ['checked' => FALSE],
+        ],
+      ],
       '#collapsible' => TRUE,
       '#weight' => 4,
-    );
-    $form['admin_label']['admin_label'] = array(
+    ];
+    $form['admin_label']['admin_label'] = [
       '#type' => 'textfield',
       '#default_value' => isset($this->settings['admin_label']) ? $this->settings['admin_label'] : '',
       '#title' => t('Admin label'),
       '#description' => t('Used to identify the block on layout pages. Required for reusable blocks.'),
       '#maxlength' => 255,
-    );
-    $form['admin_label']['delta'] = array(
+    ];
+    $form['admin_label']['delta'] = [
       '#type' => 'machine_name',
       '#title' => t('Internal name'),
       '#maxlength' => 64,
-      '#machine_name' => array(
-        'source' => array('admin_label', 'admin_label'),
+      '#machine_name' => [
+        'source' => ['admin_label', 'admin_label'],
         'exists' => 'block_custom_block_load',
-      ),
+      ],
       '#description' => t('A unique machine-readable name containing letters, numbers, and underscores.'),
       '#weight' => 3,
       '#required' => FALSE,
-    );
-    $form['admin_label']['admin_description'] = array(
+    ];
+    $form['admin_label']['admin_description'] = [
       '#type' => 'textfield',
       '#title' => t('Admin description'),
       '#maxlength' => 128,
       '#default_value' => isset($this->settings['admin_description']) ? $this->settings['admin_description'] : '',
-      '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.<br />Allowed HTML tags: @tags', array('@tags' => _filter_xss_display_allowed_tags())),
+      '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.<br />Allowed HTML tags: @tags', ['@tags' => _filter_xss_display_allowed_tags()]),
       '#weight' => 4,
-    );
+    ];
   }
 
   /**
@@ -160,15 +160,15 @@ class BlockText extends Block {
 
     if (module_exists('block') && $form_state['values']['reusable']) {
       $delta = $form_state['values']['delta'];
-      $this->settings = array_diff_key($this->settings, array('title' => '', 'content' => '', 'format' => ''));
+      $this->settings = array_diff_key($this->settings, ['title' => '', 'content' => '', 'format' => '']);
       $this->plugin = 'block:' . $delta;
 
-      $edit = array(
+      $edit = [
         'info' => $form_state['values']['admin_label'],
         'title' => $form_state['values']['title'],
         'description' => $form_state['values']['admin_description'],
         'body' => $form_state['values']['content'],
-      );
+      ];
       block_custom_block_save($edit, $delta);
     }
     else {

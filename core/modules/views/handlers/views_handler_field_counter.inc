@@ -12,18 +12,18 @@
 class views_handler_field_counter extends views_handler_field {
   function option_definition() {
     $options = parent::option_definition();
-    $options['counter_start'] = array('default' => 1);
+    $options['counter_start'] = ['default' => 1];
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
-    $form['counter_start'] = array(
+    $form['counter_start'] = [
       '#type' => 'textfield',
       '#title' => t('Starting value'),
       '#default_value' => $this->options['counter_start'],
       '#description' => t('Specify the number the counter should start at.'),
       '#size' => 2,
-    );
+    ];
 
     parent::options_form($form, $form_state);
   }

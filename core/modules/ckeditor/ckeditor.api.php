@@ -79,24 +79,24 @@
  * @see hook_ckeditor_PLUGIN_plugin_check()
  */
 function hook_ckeditor_plugins() {
-  $plugins['myplugin'] = array(
+  $plugins['myplugin'] = [
     'path' => backdrop_get_path('module', 'my_module') . '/js/myplugin',
     'file' => 'plugin.js',
-    'css' => array(backdrop_get_path('module', 'my_module') . '/css/myplugin.css'),
+    'css' => [backdrop_get_path('module', 'my_module') . '/css/myplugin.css'],
     'enabled callback' => 'my_module_myplugin_plugin_check',
-    'buttons' => array(
-      'MyPlugin' => array(
+    'buttons' => [
+      'MyPlugin' => [
         'label' => t('My custom button'),
-        'required_html' => array(
-          'tags' => array('a'),
-          'attributes' => array('href', 'alt'),
-          'styles' => array('color', 'text-decoration'),
-          'classes' => array('external', 'internal'),
-        ),
-        'dependencies' => array('contextmenu'),
-      ),
-    ),
-  );
+        'required_html' => [
+          'tags' => ['a'],
+          'attributes' => ['href', 'alt'],
+          'styles' => ['color', 'text-decoration'],
+          'classes' => ['external', 'internal'],
+        ],
+        'dependencies' => ['contextmenu'],
+      ],
+    ],
+  ];
 
   return $plugins;
 }

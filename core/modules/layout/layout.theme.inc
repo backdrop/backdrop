@@ -9,30 +9,30 @@
  */
 function theme_layout_reorder_layouts($variables) {
   $element = $variables['element'];
-  $rows = array();
+  $rows = [];
 
   // Assemble the data for a table from everything in $form['handlers']
   foreach (element_children($element) as $layout_name) {
     if (isset($element[$layout_name]['title'])) {
-      $row = array();
-      $row[] = array(
+      $row = [];
+      $row[] = [
         'data' => render($element[$layout_name]['title']),
-        'class' => array('layout-name'),
-      );
+        'class' => ['layout-name'],
+      ];
       $element[$layout_name]['weight']['#attributes']['class'][] = 'weight';
       $row[] = render($element[$layout_name]['weight']);
-      $rows[] = array('data' => $row, 'class' => array('draggable'));
+      $rows[] = ['data' => $row, 'class' => ['draggable']];
     }
   }
 
-  $header = array(
-    array('data' => t('Layout'), 'class' => array('layout-name')),
+  $header = [
+    ['data' => t('Layout'), 'class' => ['layout-name']],
     t('Weight'),
-  );
+  ];
 
   backdrop_add_tabledrag('layout-reorder', 'order', 'sibling', 'weight');
 
-  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'layout-reorder')));
+  $output = theme('table', ['header' => $header, 'rows' => $rows, 'attributes' => ['id' => 'layout-reorder']]);
   $output .= backdrop_render_children($element);
   return $output;
 }
@@ -51,14 +51,14 @@ function theme_layout_info($variables) {
 
   // Build template thumbnail preview
   $preview_path = $info['path'] . '/' . $info['preview'];
-  $preview_img = theme('image', array('path' => $preview_path));
-  $preview = l($preview_img, 'admin/structure/layouts/manage/' . $layout->name, array('html' => TRUE));
+  $preview_img = theme('image', ['path' => $preview_path]);
+  $preview = l($preview_img, 'admin/structure/layouts/manage/' . $layout->name, ['html' => TRUE]);
 
   // Get the label and machine name.
-  $label = theme('label_machine_name__layout', array(
+  $label = theme('label_machine_name__layout', [
     'label' => $layout->title,
     'machine_name' => $layout->name,
-  ));
+  ]);
 
   $output = '<div class="layout-info">';
   $output .= $preview;
@@ -81,7 +81,7 @@ function theme_layout_condition_info($variables) {
   /* @var Layout $layout */
   $layout = $variables['layout'];
   // Build a list of visibility conditions on this layout
-  $conditions = array();
+  $conditions = [];
   if (isset($layout->conditions)) {
     foreach ($layout->conditions as $access_key => $layout_access) {
       $conditions[] = $layout_access->summary();
@@ -93,7 +93,7 @@ function theme_layout_condition_info($variables) {
     $output .= t('No conditions set.');
   }
   else {
-    $output .= theme('item_list', array('items' => $conditions));
+    $output .= theme('item_list', ['items' => $conditions]);
   }
   $output .= '</div>';
 
@@ -109,10 +109,10 @@ function theme_layout_template_option($variables) {
 
   $output = '';
   $output .= '<div class="layout-icon">';
-  $output .= theme('image', array(
+  $output .= theme('image', [
     'uri' => $icon_path,
-    'attributes' => array('title' => $template_info['title']),
-  ));
+    'attributes' => ['title' => $template_info['title']],
+  ]);
   $output .= '<div class="layout-caption">' . check_plain($template_info['title']) . '</div>';
   $output .= '</div>';
   return $output;
@@ -133,13 +133,13 @@ function theme_layout_template_info($variables) {
 
   // Build template thumbnail preview.
   $preview_path = $template_info['path'] . '/' . $template_info['preview'];
-  $preview_img = theme('image', array('path' => $preview_path));
+  $preview_img = theme('image', ['path' => $preview_path]);
 
   // Get the label and machine name.
-  $label = theme('label_machine_name__layout_template', array(
+  $label = theme('label_machine_name__layout_template', [
     'label' => $template_info['title'],
     'machine_name' => $template_info['name'],
-  ));
+  ]);
 
   $output = '<div class="layout-info">';
   $output .= $preview_img;
@@ -156,8 +156,8 @@ function theme_layout_template_info($variables) {
 function theme_layout_flexible_template_style_option($variables) {
   $row_style = $variables['row_style'];
   if ($row_style['region_count'] == 1) {
-    $regions = array('12');
-    $percent = array('100');
+    $regions = ['12'];
+    $percent = ['100'];
   }
   else {
     $regions = explode(':', $row_style['bootstrap']);
@@ -181,22 +181,22 @@ function theme_layout_menu_item_arguments_table($variables) {
   $element = $variables['element'];
   $path = $element['#layout_path'];
   $parts = explode('/', $path);
-  $header = array(
+  $header = [
     t('Argument position'),
     t('Context'),
     t('Operations'),
-  );
-  $rows = array();
+  ];
+  $rows = [];
   foreach (element_children($element) as $key) {
     $argument_parts = $parts;
     $argument_parts[$key] = '<strong>' . $argument_parts[$key] . '</strong>';
-    $row = array();
-    $row[] = t('Position @index:', array('@index' => $key + 1)) . ' ' . implode('/', $argument_parts);
+    $row = [];
+    $row[] = t('Position @index:', ['@index' => $key + 1]) . ' ' . implode('/', $argument_parts);
     $row[] = backdrop_render($element[$key]['context']);
     $row[] = backdrop_render($element[$key]['operations']);
     $rows[] = $row;
   }
-  return theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'layout-arguments')));
+  return theme('table', ['header' => $header, 'rows' => $rows, 'attributes' => ['id' => 'layout-arguments']]);
 }
 
 /**
@@ -206,32 +206,32 @@ function theme_layout_settings_context_table($variables) {
   $element = $variables['element'];
   $path = $element['#layout_path'];
   $parts = explode('/', $path);
-  $header = array(
+  $header = [
     t('Context'),
     t('Type'),
     t('Operations'),
-  );
-  $rows = array();
+  ];
+  $rows = [];
   foreach (element_children($element) as $key) {
     $argument_parts = $parts;
-    $row = array();
+    $row = [];
     $row[] = backdrop_render($element[$key]['summary']);
     $row[] = backdrop_render($element[$key]['plugin']);
     if (isset($element[$key]['operations'])) {
       $row[] = backdrop_render($element[$key]['operations']);
     }
     else {
-      $row[] = array();
+      $row[] = [];
     }
 
     $rows[] = $row;
   }
-  return theme('table', array(
+  return theme('table', [
     'header' => $header,
     'rows' => $rows,
-    'attributes' => array('id' => 'layout-context-table'),
+    'attributes' => ['id' => 'layout-context-table'],
     'empty' => t('No contexts'),
-  ));
+  ]);
 }
 
 /**
@@ -239,7 +239,7 @@ function theme_layout_settings_context_table($variables) {
  */
 function theme_layout_action_links($variables) {
   $element = $variables['element'];
-  $attributes = array('class' => array('action-links', 'layout-action-links'));
+  $attributes = ['class' => ['action-links', 'layout-action-links']];
 
   $output = '<ul ' . backdrop_attributes($attributes) . '>';
   foreach (element_children($element) as $key) {
@@ -286,7 +286,7 @@ function theme_layout_region_inner($variables) {
  */
 function theme_layout_hero_background_image($variables) {
   $element = $variables['element'];
-  $attributes = array();
+  $attributes = [];
   if (isset($element['#id'])) {
     $attributes['id'] = $element['#id'];
   }
@@ -300,12 +300,12 @@ function theme_layout_hero_background_image($variables) {
   if (isset($element['#file']->uri)) {
     $output .= '<div class="layout-hero-background-preview">';
     $output .= theme('image_style',
-      array(
+      [
         'style_name' => $element['#image_style'],
         'uri' => $element['#file']->uri,
         'width' => '200',
         'height' => '250',
-      ));
+      ]);
     $output .= '</div>';
   }
   else {
@@ -334,12 +334,12 @@ function layout_preprocess_layout(&$variables) {
   // the variables here.
   $block_exists = _layout_page_component_blocks_exist($variables);
 
-  $variables += array(
+  $variables += [
     'action_links' => NULL,
     'tabs' => NULL,
     'messages' => NULL,
     'title' => NULL,
-  );
+  ];
 
   if (!$variables['admin']) {
     if (!isset($variables['title']) && !$block_exists['title']) {
@@ -380,7 +380,7 @@ function layout_preprocess_layout(&$variables) {
       $variables['flexible_editor'] = FALSE;
       $flexible_layout = layout_flexible_template_load($variables['layout_info']['name']);
     }
-    $variables['region_buttons'] = array();
+    $variables['region_buttons'] = [];
     if (isset($variables['renderer']->region_buttons)) {
       $variables['region_buttons'] = $variables['renderer']->region_buttons;
     }
@@ -388,19 +388,19 @@ function layout_preprocess_layout(&$variables) {
     $variables['column_data'] = layout_flexible_row_styles();
 
     $variables['rows'] = $flexible_layout->rows;
-    $variables['row_data'] = array();
+    $variables['row_data'] = [];
 
-    $variables['row_widths'] = array(
+    $variables['row_widths'] = [
       'container' => t('Fixed maximum width'),
       'container_fluid' => t('Fluid width'),
       'no_container' => t('Full width'),
-    );
+    ];
     foreach ($variables['rows'] as $name => $row) {
       $container = ($row['container'] == 'container') ? 'container container-fluid' : (($row['container'] == 'container_fluid') ? 'container-fluid' : 'no-container');
       $row['row_class'] = $container . ' flexible-row--' . $name . ' ' . $row['contains'] . ' ' . $row['classes'];
       $row['row_id'] = $variables['flexible_editor'] ? 'id = "flexible-row--' . $name . '"' : '';
       $row['element'] = !empty($row['element']) ? $row['element'] : 'div';
-      $row['row_label'] = t('@element row', array('@element' => "<$row[element]>"));
+      $row['row_label'] = t('@element row', ['@element' => "<$row[element]>"]);
       if ($row['contains'] == 'region_12') {
         $region_classes = '';
         if (!empty($row['region_names']['region_0'])) {
@@ -436,12 +436,12 @@ function layout_preprocess_layout(&$variables) {
             $region_name = $name . ' ' . $i;
             $region_classes .= 'l-region--' . backdrop_html_class($name . ' ' . $i);
           }
-          $row['regions'][] = array(
+          $row['regions'][] = [
             'region_md' => $col,
             'region_name' => $region_name,
             'region_classes' => $region_classes,
             'content_key' => $variables['flexible_editor'] ? $name : $name . '--' . $i,
-          );
+          ];
           $i++;
         }
       }
@@ -455,7 +455,7 @@ function layout_preprocess_layout(&$variables) {
  * Utility function to return if a title component block is in a layout.
  */
 function _layout_page_component_blocks_exist($variables) {
-  $active_component_blocks = array();
+  $active_component_blocks = [];
   foreach ($variables['layout']->content as $block) {
     if ($block->delta == 'page_components') {
       $active_component_blocks[] = $block->childDelta;
@@ -478,8 +478,8 @@ function template_preprocess_block(&$variables) {
   $block = $variables['block'];
   $style = $block->style;
 
-  $variables['classes'] = array();
-  $variables['attributes'] = array();
+  $variables['classes'] = [];
+  $variables['attributes'] = [];
   $variables['title_prefix'] = '';
   $variables['title_suffix'] = '';
 
@@ -505,13 +505,13 @@ function template_preprocess_block(&$variables) {
   if (!empty($style->settings['classes'])) {
     $new_classes = explode(' ', $style->settings['classes']);
     foreach ($new_classes as $class) {
-      $variables['classes'][] = backdrop_clean_css_identifier($class, array());
+      $variables['classes'][] = backdrop_clean_css_identifier($class, []);
     }
     $variables['classes'] = array_filter($variables['classes']);
   }
 
   if (module_exists('contextual') && user_access('access contextual links')) {
-    $links = array();
+    $links = [];
     // These are specified by the content.
     if (!empty($content->admin_links)) {
       $links += $content->admin_links;
@@ -520,11 +520,11 @@ function template_preprocess_block(&$variables) {
     // Take and contextual links that may have been returned in the block render
     // array and move them up into the block wrapper's contextual links.
     if (is_array($content->content) && isset($content->content['#contextual_links'])) {
-      $element = array(
+      $element = [
         '#type' => 'contextual_links',
         '#contextual_links' => $content->content['#contextual_links'],
         '#element' => $content->content,
-      );
+      ];
       unset($content->content['#contextual_links']);
 
       $element = contextual_pre_render_links($element);
@@ -532,16 +532,16 @@ function template_preprocess_block(&$variables) {
     }
 
     if ($links) {
-      $build = array(
+      $build = [
         '#prefix' => '<div class="contextual-links-wrapper">',
         '#suffix' => '</div>',
         '#theme' => 'links__contextual',
         '#links' => $links,
-        '#attributes' => array('class' => array('contextual-links')),
-        '#attached' => array(
-          'library' => array(array('contextual', 'contextual-links')),
-        ),
-      );
+        '#attributes' => ['class' => ['contextual-links']],
+        '#attached' => [
+          'library' => [['contextual', 'contextual-links']],
+        ],
+      ];
       $variables['classes'][] = 'contextual-links-region';
       $variables['title_prefix'] = backdrop_render($build);
     }
@@ -579,11 +579,11 @@ function template_preprocess_block_dynamic(&$variables) {
   // Add title tag and classes.
   $title_classes = explode(' ', $style->settings['title_classes']);
   foreach ($title_classes as $n => $class) {
-    $title_classes[$n] = backdrop_clean_css_identifier($class, array());
+    $title_classes[$n] = backdrop_clean_css_identifier($class, []);
   }
   $title_classes = array_filter($title_classes);
   $variables['title_tag'] = $style->settings['title_tag'];
-  $variables['title_attributes'] = array();
+  $variables['title_attributes'] = [];
   if (!empty($title_classes)) {
     $variables['title_attributes']['class'] = $title_classes;
   }
@@ -591,11 +591,11 @@ function template_preprocess_block_dynamic(&$variables) {
   // Add content tag and classes.
   $content_classes = explode(' ', $style->settings['content_classes']);
   foreach ($content_classes as $n => $class) {
-    $content_classes[$n] = backdrop_clean_css_identifier($class, array());
+    $content_classes[$n] = backdrop_clean_css_identifier($class, []);
   }
   $content_classes = array_filter($content_classes);
   $variables['content_tag'] = $style->settings['content_tag'];
-  $variables['content_attributes'] = array();
+  $variables['content_attributes'] = [];
   if (!empty($content_classes)) {
     $variables['content_attributes']['class'] = $content_classes;
   }

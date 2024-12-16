@@ -24,9 +24,9 @@ class views_handler_sort_group_by_numeric extends views_handler_sort {
   function query() {
     $this->ensure_my_table();
 
-    $params = array(
+    $params = [
       'function' => $this->options['group_type'],
-    );
+    ];
 
     $this->query->add_orderby($this->table_alias, $this->real_field, $this->options['order'], NULL, $params);
   }

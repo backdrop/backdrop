@@ -36,18 +36,18 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['type'] = array('default' => 'textfield');
-    $options['limit'] = array('default' => TRUE, 'bool' => TRUE);
-    $options['vocabulary'] = array('default' => 0);
-    $options['hierarchy'] = array('default' => 0);
-    $options['error_message'] = array('default' => TRUE, 'bool' => TRUE);
+    $options['type'] = ['default' => 'textfield'];
+    $options['limit'] = ['default' => TRUE, 'bool' => TRUE];
+    $options['vocabulary'] = ['default' => 0];
+    $options['hierarchy'] = ['default' => 0];
+    $options['error_message'] = ['default' => TRUE, 'bool' => TRUE];
 
     return $options;
   }
 
   function extra_options_form(&$form, &$form_state) {
     $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
-    $options = array();
+    $options = [];
     foreach ($vocabularies as $voc) {
       $options[$voc->machine_name] = check_plain($voc->name);
     }
@@ -60,41 +60,41 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
       }
 
       if (empty($this->definition['vocabulary'])) {
-        $form['vocabulary'] = array(
+        $form['vocabulary'] = [
           '#type' => 'radios',
           '#title' => t('Vocabulary'),
           '#options' => $options,
           '#description' => t('Select which vocabulary to show terms for in the regular options.'),
           '#default_value' => $this->options['vocabulary'],
-        );
+        ];
       }
     }
 
-    $form['type'] = array(
+    $form['type'] = [
       '#type' => 'radios',
       '#title' => t('Selection type'),
-      '#options' => array('select' => t('Dropdown'), 'textfield' => t('Autocomplete')),
+      '#options' => ['select' => t('Dropdown'), 'textfield' => t('Autocomplete')],
       '#default_value' => $this->options['type'],
-    );
+    ];
 
-    $form['hierarchy'] = array(
+    $form['hierarchy'] = [
       '#type' => 'checkbox',
       '#title' => t('Show hierarchy in dropdown'),
       '#default_value' => !empty($this->options['hierarchy']),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[type]"]' => array('value' => 'select'),
-        ),
-      ),
-    );
+      '#states' => [
+        'visible' => [
+          ':input[name="options[type]"]' => ['value' => 'select'],
+        ],
+      ],
+    ];
   }
 
   function value_form(&$form, &$form_state) {
     $vocabulary = taxonomy_vocabulary_load($this->options['vocabulary']);
     if (empty($vocabulary) && $this->options['limit']) {
-      $form['markup'] = array(
+      $form['markup'] = [
         '#markup' => '<div class="form-item">' . t('An invalid vocabulary is selected. Please change it in the options.') . '</div>',
-      );
+      ];
       return;
     }
 
@@ -113,11 +113,11 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
         }
       }
 
-      $form['value'] = array(
-        '#title' => $this->options['limit'] ? t('Select terms from vocabulary @voc', array('@voc' => $vocabulary->name)) : t('Select terms'),
+      $form['value'] = [
+        '#title' => $this->options['limit'] ? t('Select terms from vocabulary @voc', ['@voc' => $vocabulary->name]) : t('Select terms'),
         '#type' => 'textfield',
         '#default_value' => $default,
-      );
+      ];
 
       if ($this->options['limit']) {
         $form['value']['#autocomplete_path'] = 'admin/views/ajax/autocomplete/taxonomy/' . $vocabulary->machine_name;
@@ -126,18 +126,18 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     else {
       if (!empty($this->options['hierarchy']) && $this->options['limit']) {
         $tree = taxonomy_get_tree($vocabulary->machine_name);
-        $options = array();
+        $options = [];
 
         if ($tree) {
           foreach ($tree as $term) {
             $choice = new stdClass();
-            $choice->option = array($term->tid => str_repeat('· ', $term->depth) . $term->name);
+            $choice->option = [$term->tid => str_repeat('· ', $term->depth) . $term->name];
             $options[] = $choice;
           }
         }
       }
       else {
-        $options = array();
+        $options = [];
         $query = db_select('taxonomy_term_data', 'td');
         $query->fields('td');
         $query->orderby('td.vocabulary');
@@ -162,7 +162,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
           $options = $this->reduce_value_options($options);
 
           if (!empty($this->options['expose']['multiple']) && empty($this->options['expose']['required'])) {
-            $default_value = array();
+            $default_value = [];
           }
         }
 
@@ -176,7 +176,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
           }
           // Due to #1464174 there is a chance that array('') was saved in the
           // admin ui. Let's choose a safe default value.
-          elseif ($default_value == array('')) {
+          elseif ($default_value == ['']) {
             $default_value = 'All';
           }
           else {
@@ -185,14 +185,14 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
           }
         }
       }
-      $form['value'] = array(
+      $form['value'] = [
         '#type' => 'select',
-        '#title' => $this->options['limit'] ? t('Select terms from vocabulary @voc', array('@voc' => $vocabulary->name)) : t('Select terms'),
+        '#title' => $this->options['limit'] ? t('Select terms from vocabulary @voc', ['@voc' => $vocabulary->name]) : t('Select terms'),
         '#multiple' => TRUE,
         '#options' => $options,
         '#size' => min(9, count($options)),
         '#default_value' => $default_value,
-      );
+      ];
 
       if (!empty($form_state['exposed']) && isset($identifier) && !isset($form_state['input'][$identifier])) {
         $form_state['input'][$identifier] = $default_value;
@@ -305,12 +305,12 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
    */
   function validate_term_strings(&$form, $values) {
     if (empty($values)) {
-      return array();
+      return [];
     }
 
-    $tids = array();
-    $names = array();
-    $missing = array();
+    $tids = [];
+    $names = [];
+    $missing = [];
     foreach ($values as $value) {
       $missing[strtolower($value)] = TRUE;
       $names[] = $value;
@@ -332,10 +332,10 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     }
 
     if ($missing && !empty($this->options['error_message'])) {
-      form_error($form, format_plural(count($missing), 'Unable to find term: @terms', 'Unable to find terms: @terms', array('@terms' => implode(', ', array_keys($missing)))));
+      form_error($form, format_plural(count($missing), 'Unable to find term: @terms', 'Unable to find terms: @terms', ['@terms' => implode(', ', array_keys($missing))]));
     }
     elseif ($missing && empty($this->options['error_message'])) {
-      $tids = array(0);
+      $tids = [0];
     }
 
     return $tids;
@@ -350,16 +350,16 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     if ($this->options['type'] != 'select') {
       unset($form['expose']['reduce']);
     }
-    $form['error_message'] = array(
+    $form['error_message'] = [
       '#type' => 'checkbox',
       '#title' => t('Display error message'),
       '#default_value' => !empty($this->options['error_message']),
-    );
+    ];
   }
 
   function admin_summary() {
     // Set up $this->value_options for the parent summary.
-    $this->value_options = array();
+    $this->value_options = [];
 
     if ($this->value) {
       $this->value = array_filter($this->value);

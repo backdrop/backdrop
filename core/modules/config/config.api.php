@@ -32,17 +32,17 @@ function hook_config_info() {
   // If there are a large number of configuration files prefixed with this
   // string, provide a "name_key" that will be read from the configuration file
   // and used when listing the configuration file.
-  $prefixes['image.style'] = array(
+  $prefixes['image.style'] = [
     'name_key' => 'name',
     'label_key' => 'name',
     'group' => t('Image styles'),
-  );
+  ];
   // If this configuration file points to one particular file, a "name" key
   // will display that exact string for that file.
-  $prefixes['system.core'] = array(
+  $prefixes['system.core'] = [
     'label' => t('System performance'),
     'group' => t('Configuration'),
-  );
+  ];
   return $prefixes;
 }
 
@@ -64,7 +64,7 @@ function hook_config_info() {
 function hook_config_data_validate(Config $config, array $config_info) {
   if ($config->getName() === 'my_module.settings') {
     if (!module_exists($config->get('module'))) {
-      throw new ConfigValidateException(t('The configuration "@file" could not be imported because the module "@module" is not enabled.', array('@file' => $config->getName(), '@module' => $config->get('module'))));
+      throw new ConfigValidateException(t('The configuration "@file" could not be imported because the module "@module" is not enabled.', ['@file' => $config->getName(), '@module' => $config->get('module')]));
     }
   }
 }
@@ -90,7 +90,7 @@ function hook_config_create_validate(Config $staging_config, $all_changes) {
   if ($staging_config->getName() === 'my_module.settings') {
     // Ensure that the name key is no longer than 64 characters.
     if (strlen($staging_config->get('name')) > 64) {
-      throw new ConfigValidateException(t('The configuration "@file" must have a "name" attribute less than 64 characters.', array('@file' => $staging_config->getName())));
+      throw new ConfigValidateException(t('The configuration "@file" must have a "name" attribute less than 64 characters.', ['@file' => $staging_config->getName()]));
     }
   }
 }
@@ -118,7 +118,7 @@ function hook_config_update_validate(Config $staging_config, Config $active_conf
   if ($staging_config->getName() === 'my_module.settings') {
     // Ensure that the name key is no longer than 64 characters.
     if (strlen($staging_config->get('name')) > 64) {
-      throw new ConfigValidateException(t('The configuration "@file" must have a "name" attribute less than 64 characters.', array('@file' => $staging_config->getName())));
+      throw new ConfigValidateException(t('The configuration "@file" must have a "name" attribute less than 64 characters.', ['@file' => $staging_config->getName()]));
     }
   }
 }
@@ -147,11 +147,11 @@ function hook_config_delete_validate(Config $active_config, $all_changes) {
       $my_config = config('my_module.settings');
       $image_style_name = $active_config->get('name');
       if ($my_config->get('image_style') === $image_style_name) {
-        throw new ConfigValidateException(t('The configuration "@file" cannot be deleted because the image style "@style" is in use by "@my_module".', array(
+        throw new ConfigValidateException(t('The configuration "@file" cannot be deleted because the image style "@style" is in use by "@my_module".', [
           '@file' => $active_config->getName(),
           '@style' => $image_style_name,
           '@my_module' => $my_config->getName(),
-        )));
+        ]));
       }
     }
   }

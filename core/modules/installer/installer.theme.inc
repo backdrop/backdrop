@@ -21,19 +21,19 @@ function template_preprocess_installer_browser_install(&$variables) {
  * Add some variables for the projects install queue theme.
  */
 function template_preprocess_installer_browser_install_queue(&$variables) {
-  $build = array();
+  $build = [];
   if (empty($variables['projects'])) {
-    $build['empty_text'] = array(
+    $build['empty_text'] = [
       '#markup' => t('Installation queue is empty.'),
-    );
+    ];
   }
   else {
     foreach ($variables['projects'] as $project) {
-      $build['queued-item-' . $project['name']] = array(
+      $build['queued-item-' . $project['name']] = [
         '#prefix' => "<div class='installer-browser-install-queue-item'>",
         '#markup' => installer_browser_add_remove_queue_link($project['name'], $project['title'], 'remove-queue-link'),
         '#suffix' => "</div>",
-      );
+      ];
     }
     $build['install-link'] = backdrop_get_form('installer_browser_install_button_form');
   }
@@ -66,7 +66,7 @@ function template_preprocess_installer_browser_list(&$variables) {
 
   if (is_array($variables['projects_list']) && !empty($variables['projects_list'])) {
     $content = '';
-    $rows = array();
+    $rows = [];
     switch ($variables['type']) {
       case 'module':
         $title = t('Modules');
@@ -81,16 +81,16 @@ function template_preprocess_installer_browser_list(&$variables) {
         $title = t('Projects');
         break;
     }
-    $headers = array(
+    $headers = [
       $title,
-    );
+    ];
     // Theme each individual project and add to the list.
     foreach ($variables['projects_list'] as $project) {
-      $row = array();
-      $row[] = theme('installer_browser_project', array('project' => $project, 'first' => NULL));
+      $row = [];
+      $row[] = theme('installer_browser_project', ['project' => $project, 'first' => NULL]);
       $rows[] = $row;
     }
-    $content .= theme('table', array('header' => $headers, 'rows' => $rows));
+    $content .= theme('table', ['header' => $headers, 'rows' => $rows]);
   }
   else {
     $content = t('No results found.');
@@ -99,14 +99,14 @@ function template_preprocess_installer_browser_list(&$variables) {
   $variables['main_content'] = render($content);
 
   // Add the pager.
-  $variables['pager'] = theme('pager', array('tags' => NULL));
+  $variables['pager'] = theme('pager', ['tags' => NULL]);
 
   // Add the install list.
-  $install_list['installer_browser_install_list_block'] = array(
+  $install_list['installer_browser_install_list_block'] = [
     '#theme' => 'installer_browser_block',
     '#title' => t('Installation queue'),
     '#content' => installer_browser_get_install_list($variables['type']),
-  );
+  ];
   $variables['install_list'] = render($install_list);
 
   // Add the advanced options block.
@@ -125,16 +125,16 @@ function template_preprocess_installer_browser_project_dialog(&$variables) {
   template_preprocess_installer_browser_project($variables);
   $project = $variables['project'];
   $variables['project_page'] = l(t('View on BackdropCMS.org'), 'https://backdropcms.org/project/' . $project['name']);
-  $variables['description'] = _filter_htmlcorrector(filter_xss($project['description'], array('h2', 'p', 'a', 'ul', 'li', 'pre')));
+  $variables['description'] = _filter_htmlcorrector(filter_xss($project['description'], ['h2', 'p', 'a', 'ul', 'li', 'pre']));
   $variables['title'] = $project['title'];
   $variables['image'] = FALSE;
 
   // If the project has an image, render it.
   if (!empty($project['image'])) {
-    $variables['image'] = theme('image', array(
+    $variables['image'] = theme('image', [
       'path' => $project['image'],
       'alt' => $project['title'],
-    ));
+    ]);
   }
 }
 
@@ -149,22 +149,22 @@ function template_preprocess_installer_browser_project(&$variables) {
   module_load_include('inc', 'installer', 'installer.browser');
   $project = $variables['project'];
 
-  $dialog_attributes = array(
-    'class' => array('use-ajax'),
+  $dialog_attributes = [
+    'class' => ['use-ajax'],
     'id' => 'title-ajax',
     'data-dialog' => 'true',
-    'data-dialog-options' => json_encode(array('width' => 700, 'dialogClass' => 'project-dialog')),
-  );
+    'data-dialog-options' => json_encode(['width' => 700, 'dialogClass' => 'project-dialog']),
+  ];
 
   // If the project has an image, render it.
   $variables['image'] = FALSE;
 
   if ($project['type'] == 'theme') {
     if (!empty($project['image'])) {
-      $image = theme('image', array(
+      $image = theme('image', [
         'path' => $project['image'],
         'alt' => $project['title'],
-      ));
+      ]);
     }
     else {
       // Add an element with a solid color a la google contacts.
@@ -174,17 +174,17 @@ function template_preprocess_installer_browser_project(&$variables) {
 
     $variables['image'] = l($image,
       'admin/installer/project/' . $project['name'],
-      array('attributes' => $dialog_attributes, 'html' => TRUE));
+      ['attributes' => $dialog_attributes, 'html' => TRUE]);
   }
 
   $variables['title'] = l(
     $project['title'],
     'admin/installer/project/' . $project['name'],
-    array('attributes' => $dialog_attributes));
-  $variables['description'] = theme('installer_browser_project_description', array('project' => $project));
-  $variables['last_updated'] = ($project['last updated']) ? t('Last Updated: @date', array('@date' => format_date($project['last updated'], 'long'))) : '';
+    ['attributes' => $dialog_attributes]);
+  $variables['description'] = theme('installer_browser_project_description', ['project' => $project]);
+  $variables['last_updated'] = ($project['last updated']) ? t('Last Updated: @date', ['@date' => format_date($project['last updated'], 'long')]) : '';
 
-  $extras = array();
+  $extras = [];
 
   if ($project['maintenance status']) {
     $extras[] = check_plain($project['maintenance status']);
@@ -225,20 +225,20 @@ function theme_installer_browser_project_description($variables) {
   backdrop_add_library('system', 'backdrop.ajax');
 
   $project = $variables['project'];
-  $form['project_description'] = array(
+  $form['project_description'] = [
     '#markup' => truncate_utf8(strip_tags(_filter_htmlcorrector(filter_xss($project['description']))), 280, TRUE, TRUE, 150),
-  );
-  $form['project_dialog_link'] = array(
+  ];
+  $form['project_dialog_link'] = [
     '#type' => 'link',
     '#href' => 'admin/installer/project/' . $project['name'],
     '#title' => ' ' . t('details'),
     '#value' => t('details'),
-    '#attributes' => array(
-      'class' => array('use-ajax more-link'),
-      'id' => array('title-link'),
+    '#attributes' => [
+      'class' => ['use-ajax more-link'],
+      'id' => ['title-link'],
       'data-dialog' => 'true',
-      'data-dialog-options' => json_encode(array('width' => 700, 'dialogClass' => 'project-dialog')),
-    ),
-  );
+      'data-dialog-options' => json_encode(['width' => 700, 'dialogClass' => 'project-dialog']),
+    ],
+  ];
   return backdrop_render($form);
 }

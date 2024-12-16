@@ -16,47 +16,47 @@ class views_handler_argument_term_node_tid_depth extends views_handler_argument 
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['depth'] = array('default' => 0);
-    $options['break_phrase'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['set_breadcrumb'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['use_taxonomy_term_path'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['depth'] = ['default' => 0];
+    $options['break_phrase'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['set_breadcrumb'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['use_taxonomy_term_path'] = ['default' => FALSE, 'bool' => TRUE];
 
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
-    $form['depth'] = array(
+    $form['depth'] = [
       '#type' => 'weight',
       '#title' => t('Depth'),
       '#default_value' => $this->options['depth'],
       '#description' => t('The depth will match nodes tagged with terms in the hierarchy. For example, if you have the term "fruit" and a child term "apple", with a depth of 1 (or higher) then filtering for the term "fruit" will get nodes that are tagged with "apple" as well as "fruit". If negative, the reverse is true; searching for "apple" will also pick up nodes tagged with "fruit" if depth is -1 (or lower).'),
-    );
+    ];
 
-    $form['break_phrase'] = array(
+    $form['break_phrase'] = [
       '#type' => 'checkbox',
       '#title' => t('Allow multiple values'),
       '#description' => t('If selected, users can enter multiple values in the form of 1+2+3. Due to the number of JOINs it would require, AND will be treated as OR with this filter.'),
       '#default_value' => !empty($this->options['break_phrase']),
-    );
+    ];
 
-    $form['set_breadcrumb'] = array(
+    $form['set_breadcrumb'] = [
       '#type' => 'checkbox',
       '#title' => t("Set the breadcrumb for the term parents"),
       '#description' => t('If selected, the breadcrumb trail will include all parent terms, each one linking to this view. Note that this only works if just one term was received.'),
       '#default_value' => !empty($this->options['set_breadcrumb']),
-    );
+    ];
 
-    $form['use_taxonomy_term_path'] = array(
+    $form['use_taxonomy_term_path'] = [
       '#type' => 'checkbox',
       '#title' => t("Use Backdrop's taxonomy term path to create breadcrumb links"),
       '#description' => t('If selected, the links in the breadcrumb trail will be created using the standard Backdrop method instead of the custom views method. This is useful if you are using modules like taxonomy redirect to modify your taxonomy term links.'),
       '#default_value' => !empty($this->options['use_taxonomy_term_path']),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[set_breadcrumb]"]' => array('checked' => TRUE),
-        ),
-      ),
-    );
+      '#states' => [
+        'visible' => [
+          ':input[name="options[set_breadcrumb]"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
     parent::options_form($form, $form_state);
   }
 
@@ -73,7 +73,7 @@ class views_handler_argument_term_node_tid_depth extends views_handler_argument 
    */
   function default_actions($which = NULL) {
     if ($which) {
-      if (in_array($which, array('ignore', 'not found', 'empty', 'default'))) {
+      if (in_array($which, ['ignore', 'not found', 'empty', 'default'])) {
         return parent::default_actions($which);
       }
       return;
@@ -93,7 +93,7 @@ class views_handler_argument_term_node_tid_depth extends views_handler_argument 
       $tids = new stdClass();
       $tids->value = $this->argument;
       $tids = views_break_phrase($this->argument, $tids);
-      if ($tids->value == array(-1)) {
+      if ($tids->value == [-1]) {
         return FALSE;
       }
 

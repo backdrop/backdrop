@@ -79,15 +79,15 @@ function hook_language_switch_links_alter(array &$links, $type, $path) {
  * @ingroup language_negotiation
  */
 function hook_language_types_info() {
-  return array(
-    'custom_language_type' => array(
+  return [
+    'custom_language_type' => [
       'name' => t('Custom language'),
       'description' => t('A custom language type.'),
-    ),
-    'fixed_custom_language_type' => array(
-      'fixed' => array('custom_language_provider'),
-    ),
-  );
+    ],
+    'fixed_custom_language_type' => [
+      'fixed' => ['custom_language_provider'],
+    ],
+  ];
 }
 
 /**
@@ -137,21 +137,21 @@ function hook_language_types_info_alter(array &$language_types) {
  * @ingroup language_negotiation
  */
 function hook_language_negotiation_info() {
-  return array(
-    'custom_language_provider' => array(
-      'callbacks' => array(
+  return [
+    'custom_language_provider' => [
+      'callbacks' => [
         'language' => 'custom_language_provider_callback',
         'switcher' => 'custom_language_switcher_callback',
         'url_rewrite' => 'custom_language_url_rewrite_callback',
-      ),
+      ],
       'file' => backdrop_get_path('module', 'custom') . '/custom.module',
       'weight' => -4,
-      'types' => array('custom_language_type'),
+      'types' => ['custom_language_type'],
       'name' => t('Custom language negotiation provider'),
       'description' => t('This is a custom language negotiation provider.'),
       'cache' => 0,
-    ),
-  );
+    ],
+  ];
 }
 
 /**

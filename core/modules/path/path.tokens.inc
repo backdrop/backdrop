@@ -8,12 +8,12 @@
  * Implements hook_token_info().
  */
 function path_token_info() {
-  $info = array();
+  $info = [];
 
-  $info['tokens']['array']['join-path'] = array(
+  $info['tokens']['array']['join-path'] = [
     'name' => t('Joined path'),
     'description' => t('The array values each cleaned according to the current Path module settings and then joined with the slash into a string that resembles an URL.'),
-  );
+  ];
 
   return $info;
 }
@@ -21,8 +21,8 @@ function path_token_info() {
 /**
  * Implements hook_tokens().
  */
-function path_tokens($type, $tokens, array $data = array(), array $options = array()) {
-  $replacements = array();
+function path_tokens($type, $tokens, array $data = [], array $options = []) {
+  $replacements = [];
 
   if ($type == 'array' && !empty($data['array'])) {
     $array = $data['array'];
@@ -31,7 +31,7 @@ function path_tokens($type, $tokens, array $data = array(), array $options = arr
       switch ($name) {
         case 'join-path':
           module_load_include('inc', 'path');
-          $values = array();
+          $values = [];
           foreach ($array as $key => $value) {
             $value = path_clean_string((string) $array[$key], $options);
             $values[] = $value;

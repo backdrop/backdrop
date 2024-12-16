@@ -18,17 +18,17 @@ class views_handler_field_locale_link_edit extends views_handler_field {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['text'] = array('default' => '', 'translatable' => TRUE);
+    $options['text'] = ['default' => '', 'translatable' => TRUE];
 
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
-    $form['text'] = array(
+    $form['text'] = [
       '#type' => 'textfield',
       '#title' => t('Text to display'),
       '#default_value' => $this->options['text'],
-    );
+    ];
     parent::options_form($form, $form_state);
   }
 

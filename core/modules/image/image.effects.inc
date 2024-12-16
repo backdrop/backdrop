@@ -8,54 +8,54 @@
  * Implements hook_image_effect_info().
  */
 function image_image_effect_info() {
-  $effects = array(
-    'image_resize' => array(
+  $effects = [
+    'image_resize' => [
       'label' => t('Resize'),
       'help' => t('Resizing will make images an exact set of dimensions. This may cause images to be stretched or shrunk disproportionately.'),
       'effect callback' => 'image_resize_effect',
       'dimensions callback' => 'image_resize_dimensions',
       'form callback' => 'image_resize_form',
       'summary theme' => 'image_resize_summary',
-    ),
-    'image_scale' => array(
+    ],
+    'image_scale' => [
       'label' => t('Scale'),
       'help' => t('Scaling will maintain the aspect-ratio of the original image. If only a single dimension is specified, the other dimension will be calculated.'),
       'effect callback' => 'image_scale_effect',
       'dimensions callback' => 'image_scale_dimensions',
       'form callback' => 'image_scale_form',
       'summary theme' => 'image_scale_summary',
-    ),
-    'image_scale_and_crop' => array(
+    ],
+    'image_scale_and_crop' => [
       'label' => t('Scale and crop'),
       'help' => t('Scale and crop will maintain the aspect-ratio of the original image, then crop the larger dimension based on the type of anchor selected.'),
       'effect callback' => 'image_scale_and_crop_effect',
       'dimensions callback' => 'image_resize_dimensions',
       'form callback' => 'image_crop_form',
       'summary theme' => 'image_crop_summary',
-    ),
-    'image_crop' => array(
+    ],
+    'image_crop' => [
       'label' => t('Crop'),
       'help' => t('Cropping will remove portions of an image to make it the specified dimensions.'),
       'effect callback' => 'image_crop_effect',
       'dimensions callback' => 'image_resize_dimensions',
       'form callback' => 'image_crop_form',
       'summary theme' => 'image_crop_summary',
-    ),
-    'image_desaturate' => array(
+    ],
+    'image_desaturate' => [
       'label' => t('Desaturate'),
       'help' => t('Desaturate converts an image to grayscale.'),
       'effect callback' => 'image_desaturate_effect',
       'dimensions passthrough' => TRUE,
-    ),
-    'image_rotate' => array(
+    ],
+    'image_rotate' => [
       'label' => t('Rotate'),
       'help' => t('Rotating an image may cause the dimensions of an image to increase to fit the diagonal.'),
       'effect callback' => 'image_rotate_effect',
       'dimensions callback' => 'image_rotate_dimensions',
       'form callback' => 'image_rotate_form',
       'summary theme' => 'image_rotate_summary',
-    ),
-  );
+    ],
+  ];
 
   return $effects;
 }
@@ -78,7 +78,7 @@ function image_image_effect_info() {
  */
 function image_resize_effect(&$image, $data) {
   if (!image_resize($image, $data['width'], $data['height'])) {
-    watchdog('image', 'Image resize failed using the %toolkit toolkit on %path (%mimetype, %dimensions)', array('%toolkit' => $image->toolkit, '%path' => $image->source, '%mimetype' => $image->info['mime_type'], '%dimensions' => $image->info['width'] . 'x' . $image->info['height']), WATCHDOG_ERROR);
+    watchdog('image', 'Image resize failed using the %toolkit toolkit on %path (%mimetype, %dimensions)', ['%toolkit' => $image->toolkit, '%path' => $image->source, '%mimetype' => $image->info['mime_type'], '%dimensions' => $image->info['width'] . 'x' . $image->info['height']], WATCHDOG_ERROR);
     return FALSE;
   }
   return TRUE;
@@ -122,14 +122,14 @@ function image_resize_dimensions(array &$dimensions, array $data) {
  */
 function image_scale_effect(&$image, $data) {
   // Set sane default values.
-  $data += array(
+  $data += [
     'width' => NULL,
     'height' => NULL,
     'upscale' => FALSE,
-  );
+  ];
 
   if (!image_scale($image, $data['width'], $data['height'], $data['upscale'])) {
-    watchdog('image', 'Image scale failed using the %toolkit toolkit on %path (%mimetype, %dimensions)', array('%toolkit' => $image->toolkit, '%path' => $image->source, '%mimetype' => $image->info['mime_type'], '%dimensions' => $image->info['width'] . 'x' . $image->info['height']), WATCHDOG_ERROR);
+    watchdog('image', 'Image scale failed using the %toolkit toolkit on %path (%mimetype, %dimensions)', ['%toolkit' => $image->toolkit, '%path' => $image->source, '%mimetype' => $image->info['mime_type'], '%dimensions' => $image->info['width'] . 'x' . $image->info['height']], WATCHDOG_ERROR);
     return FALSE;
   }
   return TRUE;
@@ -177,15 +177,15 @@ function image_scale_dimensions(array &$dimensions, array $data) {
  */
 function image_crop_effect(&$image, $data) {
   // Set sane default values.
-  $data += array(
+  $data += [
     'anchor' => 'center-center',
-  );
+  ];
 
   list($x, $y) = explode('-', $data['anchor']);
   $x = image_filter_keyword($x, $image->info['width'], $data['width']);
   $y = image_filter_keyword($y, $image->info['height'], $data['height']);
   if (!image_crop($image, $x, $y, $data['width'], $data['height'])) {
-    watchdog('image', 'Image crop failed using the %toolkit toolkit on %path (%mimetype, %dimensions)', array('%toolkit' => $image->toolkit, '%path' => $image->source, '%mimetype' => $image->info['mime_type'], '%dimensions' => $image->info['width'] . 'x' . $image->info['height']), WATCHDOG_ERROR);
+    watchdog('image', 'Image crop failed using the %toolkit toolkit on %path (%mimetype, %dimensions)', ['%toolkit' => $image->toolkit, '%path' => $image->source, '%mimetype' => $image->info['mime_type'], '%dimensions' => $image->info['width'] . 'x' . $image->info['height']], WATCHDOG_ERROR);
     return FALSE;
   }
   return TRUE;
@@ -209,12 +209,12 @@ function image_crop_effect(&$image, $data) {
  */
 function image_scale_and_crop_effect(&$image, $data) {
   // Set sane default values.
-  $data += array(
+  $data += [
     'anchor' => 'center-center',
-  );
+  ];
 
   if (!image_scale_and_crop($image, $data['width'], $data['height'], $data['anchor'])) {
-    watchdog('image', 'Image scale and crop failed using the %toolkit toolkit on %path (%mimetype, %dimensions)', array('%toolkit' => $image->toolkit, '%path' => $image->source, '%mimetype' => $image->info['mime_type'], '%dimensions' => $image->info['width'] . 'x' . $image->info['height']), WATCHDOG_ERROR);
+    watchdog('image', 'Image scale and crop failed using the %toolkit toolkit on %path (%mimetype, %dimensions)', ['%toolkit' => $image->toolkit, '%path' => $image->source, '%mimetype' => $image->info['mime_type'], '%dimensions' => $image->info['width'] . 'x' . $image->info['height']], WATCHDOG_ERROR);
     return FALSE;
   }
   return TRUE;
@@ -233,7 +233,7 @@ function image_scale_and_crop_effect(&$image, $data) {
  */
 function image_desaturate_effect(&$image, $data) {
   if (!image_desaturate($image)) {
-    watchdog('image', 'Image desaturate failed using the %toolkit toolkit on %path (%mimetype, %dimensions)', array('%toolkit' => $image->toolkit, '%path' => $image->source, '%mimetype' => $image->info['mime_type'], '%dimensions' => $image->info['width'] . 'x' . $image->info['height']), WATCHDOG_ERROR);
+    watchdog('image', 'Image desaturate failed using the %toolkit toolkit on %path (%mimetype, %dimensions)', ['%toolkit' => $image->toolkit, '%path' => $image->source, '%mimetype' => $image->info['mime_type'], '%dimensions' => $image->info['width'] . 'x' . $image->info['height']], WATCHDOG_ERROR);
     return FALSE;
   }
   return TRUE;
@@ -260,11 +260,11 @@ function image_desaturate_effect(&$image, $data) {
  */
 function image_rotate_effect(stdClass $image, $data) {
   // Set sane default values.
-  $data += array(
+  $data += [
     'degrees' => 0,
     'bgcolor' => NULL,
     'random' => FALSE,
-  );
+  ];
 
   // Convert any syntax to hexadecimal colors.
   if ($data['bgcolor'] != '') {
@@ -280,7 +280,7 @@ function image_rotate_effect(stdClass $image, $data) {
   }
 
   if (!image_rotate($image, $data['degrees'], $data['bgcolor'])) {
-    watchdog('image', 'Image rotate failed using the %toolkit toolkit on %path (%mimetype, %dimensions)', array('%toolkit' => $image->toolkit, '%path' => $image->source, '%mimetype' => $image->info['mime_type'], '%dimensions' => $image->info['width'] . 'x' . $image->info['height']), WATCHDOG_ERROR);
+    watchdog('image', 'Image rotate failed using the %toolkit toolkit on %path (%mimetype, %dimensions)', ['%toolkit' => $image->toolkit, '%path' => $image->source, '%mimetype' => $image->info['mime_type'], '%dimensions' => $image->info['width'] . 'x' . $image->info['height']], WATCHDOG_ERROR);
     return FALSE;
   }
   return TRUE;

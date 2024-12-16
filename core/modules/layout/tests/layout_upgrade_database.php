@@ -12,52 +12,52 @@
 // Add various core blocks to test that their positioning is upgraded.
 // Note that the search block is already positioned in the sidebar_first.
 db_update('block')
-  ->fields(array(
+  ->fields([
     'region' => 'triptych_middle',
     'status' => '1',
-  ))
+  ])
   ->condition('module', 'node')
   ->condition('delta', 'syndicate')
   ->condition('theme', 'bartik')
   ->execute();
 
 db_update('block')
-  ->fields(array(
+  ->fields([
     'region' => 'triptych_last',
     'status' => '1',
     'visibility' => '1',
     'pages' => "<front>\nnode*",
-  ))
+  ])
   ->condition('module', 'comment')
   ->condition('delta', 'recent')
   ->condition('theme', 'bartik')
   ->execute();
 
 db_update('block')
-  ->fields(array(
+  ->fields([
     'region' => 'footer_firstcolumn',
     'status' => '1',
-  ))
+  ])
   ->condition('module', 'system')
   ->condition('delta', 'main-menu')
   ->condition('theme', 'bartik')
   ->execute();
 
 db_update('block')
-  ->fields(array(
+  ->fields([
     'region' => 'footer_secondcolumn',
     'status' => '1',
-  ))
+  ])
   ->condition('module', 'system')
   ->condition('delta', 'management')
   ->condition('theme', 'bartik')
   ->execute();
 
 db_update('block')
-  ->fields(array(
+  ->fields([
     'region' => 'footer_thirdcolumn',
     'status' => '1',
-  ))
+  ])
   ->condition('module', 'system')
   ->condition('delta', 'user-menu')
   ->condition('theme', 'bartik')
@@ -66,10 +66,10 @@ db_update('block')
 // The navigation block will not exist in Backdrop 1.x, add it to test the
 // handling of a non-existent block (using the BlockBroken class).
 db_update('block')
-  ->fields(array(
+  ->fields([
     'region' => 'footer_fourthcolumn',
     'status' => '1',
-  ))
+  ])
   ->condition('module', 'system')
   ->condition('delta', 'navigation')
   ->condition('theme', 'bartik')
@@ -77,38 +77,38 @@ db_update('block')
 
 // Node-specific blocks.
 db_update('block')
-  ->fields(array(
+  ->fields([
     'region' => 'sidebar_second',
     'status' => '1',
-  ))
+  ])
   ->condition('module', 'node')
   ->condition('delta', 'recent')
   ->condition('theme', 'bartik')
   ->execute();
 
 db_insert('block_node_type')
-  ->fields(array(
+  ->fields([
     'module',
     'delta',
     'type',
-  ))
-  ->values(array(
+  ])
+  ->values([
     'module' => 'node',
     'delta' => 'recent',
     'type' => 'post',
-  ))
+  ])
   ->execute();
 
 // Role-specific blocks.
 db_insert('block_role')
-  ->fields(array(
+  ->fields([
     'module',
     'delta',
     'rid',
-  ))
-  ->values(array(
+  ])
+  ->values([
     'module' => 'system',
     'delta' => 'user-menu',
     'rid' => 2,
-  ))
+  ])
   ->execute();

@@ -4,11 +4,11 @@
  * Displays a view listing as a block, with overriding options.
  */
 class ViewsBlock extends Block {
-  protected $viewOutput = array(
+  protected $viewOutput = [
     'content' => '',
     'subject' => '',
     'path' => NULL,
-  );
+  ];
 
   /**
    * {@inheritdoc}
@@ -16,10 +16,10 @@ class ViewsBlock extends Block {
   function __construct($plugin_name, array $data) {
     parent::__construct($plugin_name, $data);
 
-    $this->settings += array(
-      'allowed' => array(),
+    $this->settings += [
+      'allowed' => [],
       'path_override' => FALSE,
-    );
+    ];
   }
 
   /**
@@ -31,7 +31,7 @@ class ViewsBlock extends Block {
   protected function setDefaultsFromView(View $view) {
     $pager = $view->display_handler->get_option('pager');
 
-    $this->settings = array_merge(array(
+    $this->settings = array_merge([
       'link_to_view' => $view->display_handler->get_option('link_to_view'),
       'more_link' => $view->display_handler->get_option('use_more'),
       'use_pager' => $pager['type'] != 'none' && $pager['type'] != 'some',
@@ -40,7 +40,7 @@ class ViewsBlock extends Block {
       'offset' => !empty($pager['options']['offset']) ? $pager['options']['offset'] : 0,
       'path' => $view->get_path(),
       'fields_override' => $view->display_handler->get_option('fields_override'),
-    ), $this->settings);
+    ], $this->settings);
   }
 
   /**
@@ -58,10 +58,10 @@ class ViewsBlock extends Block {
         $info = t($block_description);
       }
       elseif ($view->display[$display_id]->display_title == $view->display_handler->definition['title']) {
-        $info = t('View: @view', array('@view' => $view->get_human_name()));
+        $info = t('View: @view', ['@view' => $view->get_human_name()]);
       }
       else {
-        $info = t('View: @view (@display)', array('@view' => $view->get_human_name(), '@display' => $view->display[$display_id]->display_title));
+        $info = t('View: @view (@display)', ['@view' => $view->get_human_name(), '@display' => $view->display[$display_id]->display_title]);
       }
 
     }
@@ -86,7 +86,7 @@ class ViewsBlock extends Block {
       $view->set_display($display_id);
       $view->display_handler->set_override_options($this->settings);
 
-      $args = array();
+      $args = [];
       $arguments = $view->display_handler->get_option('arguments');
 
       foreach ($view->display_handler->get_argument_input() as $id => $argument) {
@@ -205,9 +205,9 @@ class ViewsBlock extends Block {
       $output = $view->execute_display($display_id);
       if ($output) {
         if (is_string($output['content'])) {
-          $output['content'] = array(
+          $output['content'] = [
             '#markup' => $output['content'],
-          );
+          ];
         }
 
         if (($allow['link_to_view'] && !empty($this->settings['link_to_view'])) ||
@@ -238,7 +238,7 @@ class ViewsBlock extends Block {
 
     // Link to the view if a path is provided in ViewsBlock::prepare().
     if ($title && isset($this->viewOutput['path'])) {
-      $title = l($title, $this->viewOutput['path'], array('html' => TRUE));
+      $title = l($title, $this->viewOutput['path'], ['html' => TRUE]);
     }
 
     return $title;
@@ -261,7 +261,7 @@ class ViewsBlock extends Block {
     $view = views_get_view($name);
 
     if (empty($view)) {
-      $form['markup'] = array('#markup' => t('Broken/missing/deleted view.'));
+      $form['markup'] = ['#markup' => t('Broken/missing/deleted view.')];
       return;
     }
 
@@ -270,7 +270,7 @@ class ViewsBlock extends Block {
     // If it couldn't set the display and we got the default display instead,
     // fail.
     if ($view->current_display == 'default') {
-      $form['markup'] = array('#markup' => t('Broken/missing/deleted view display.'));
+      $form['markup'] = ['#markup' => t('Broken/missing/deleted view display.')];
       return;
     }
 
@@ -284,78 +284,78 @@ class ViewsBlock extends Block {
 
     foreach ($view->display_handler->get_argument_input() as $id => $argument) {
       if ($argument['type'] == 'user') {
-        $form['arguments'][$id] = array(
+        $form['arguments'][$id] = [
           '#type' => 'textfield',
           '#default_value' => isset($this->settings['arguments'][$id]) ? $this->settings['arguments'][$id] : '',
           '#title' => check_plain($argument['label']),
-        );
+        ];
       }
     }
     if ($allow['link_to_view'] ) {
-      $form['link_to_view'] = array(
+      $form['link_to_view'] = [
         '#type' => 'checkbox',
         '#default_value' => isset($this->settings['link_to_view']) ? $this->settings['link_to_view'] : $view->display_handler->get_option('link_to_view'),
         '#title' => t('Link title to view page path'),
-        '#states' => array(
-          'visible' => array(
-            'form.layout-block-configure-form :input[name="title_display"]' => array('!value' => LAYOUT_TITLE_NONE),
-          ),
-        ),
-      );
+        '#states' => [
+          'visible' => [
+            'form.layout-block-configure-form :input[name="title_display"]' => ['!value' => LAYOUT_TITLE_NONE],
+          ],
+        ],
+      ];
     }
     if ($allow['more_link']) {
-      $form['more_link'] = array(
+      $form['more_link'] = [
         '#type' => 'checkbox',
         '#default_value' => isset($this->settings['more_link']) ? $this->settings['more_link'] : $view->display_handler->get_option('use_more'),
-        '#description' => t('The text of this link will be "@more". The text can be modified within the view configuration.', array('@more' => $view->display_handler->use_more_text())),
+        '#description' => t('The text of this link will be "@more". The text can be modified within the view configuration.', ['@more' => $view->display_handler->use_more_text()]),
         '#title' => t('Provide a "more" link.'),
-      );
+      ];
     }
 
     if ($allow['path_override']) {
-      $form['path_override'] = array(
+      $form['path_override'] = [
         '#type' => 'checkbox',
         '#default_value' => $this->settings['path_override'],
         '#title' => t('Override path'),
         '#description' => t('Use a different path for the more link, pager, and other links.')
-      );
-      $form['path'] = array(
+      ];
+      $form['path'] = [
         '#type' => 'textfield',
         '#default_value' => isset($this->settings['path']) ? $this->settings['path'] : $view->get_path(),
         '#title' => t('Override path'),
-        '#size' => 30,        '#states' => array(
-          'visible' => array(
-            ':input[name="path_override"]' => array('checked' => TRUE),
-          ),
-        ),
-      );
+        '#size' => 30,        '#states' => [
+          'visible' => [
+            ':input[name="path_override"]' => ['checked' => TRUE],
+          ],
+        ],
+      ];
     }
 
     $view->init_style();
     if (empty($this->settings['exposed'])) {
-      $this->settings['exposed'] = array();
+      $this->settings['exposed'] = [];
     }
 
     if ($allow['exposed_form']) {
       // If the exposed form is part of block configuration, get the exposed
       // form re-tool it for our use.
-      $exposed_form_state = array(
+      $exposed_form_state = [
         'view' => &$view,
         'display' => &$view->display[$display_id],
-      );
+      ];
 
       $view->set_exposed_input($this->settings['exposed']);
 
       $exposed_form_state['exposed_form_plugin'] = $view->display_handler->get_plugin('exposed_form');
       $view->init_handlers();
-      $exposed_form = array();
+      $exposed_form = [];
       $exposed_form = views_exposed_form($exposed_form, $exposed_form_state);
 
       foreach ($exposed_form['#info'] as $id => $info) {
-        $form['exposed'][$id] = array(
+        $form['exposed'][$id] = [
           '#type' => 'item',
           '#id' => 'views-exposed-block',
-        );
+        ];
 
         if (!empty($info['label'])) {
           $form['exposed'][$id]['#title'] = $info['label'];
@@ -363,11 +363,11 @@ class ViewsBlock extends Block {
 
         if (!empty($info['operator']) && !empty($exposed_form[$info['operator']])) {
           $form['exposed'][$id][$info['operator']] = $exposed_form[$info['operator']];
-          $form['exposed'][$id][$info['operator']]['#parents'] = array('exposed', $info['operator']);
+          $form['exposed'][$id][$info['operator']]['#parents'] = ['exposed', $info['operator']];
           $form['exposed'][$id][$info['operator']]['#default_value'] = isset($this->settings['exposed'][$info['operator']]) ? $this->settings['exposed'][$info['operator']] : '';
         }
         $form['exposed'][$id][$info['value']] = $exposed_form[$info['value']];
-        $form['exposed'][$id][$info['value']]['#parents'] = array('exposed', $info['value']);
+        $form['exposed'][$id][$info['value']]['#parents'] = ['exposed', $info['value']];
         $form['exposed'][$id][$info['value']]['#default_value'] = isset($this->settings['exposed'][$info['value']]) ? $this->settings['exposed'][$info['value']] : '';
       }
     }
@@ -383,84 +383,84 @@ class ViewsBlock extends Block {
     }
 
     if (!empty($form['exposed'])) {
-      $form['exposed'] += array(
+      $form['exposed'] += [
         '#title' => t('Filter options'),
         '#type' => 'fieldset',
         '#collapsible' => TRUE,
         '#collapsed' => TRUE,
         '#tree' => TRUE,
-      );
+      ];
     }
 
     if ($allow['fields_override'] && $view->style_plugin->uses_fields()) {
-      $form['fields_override'] = array(
+      $form['fields_override'] = [
         '#type' => 'fieldset',
         '#title' => t('Fields to display'),
         '#collapsible' => TRUE,
         '#collapsed' => TRUE,
         '#tree' => TRUE,
-      );
+      ];
       foreach ($view->display_handler->get_handlers('field') as $field => $handler) {
         $title = $handler->ui_name();
         if ($handler->options['label']) {
           $title .= ' (' . check_plain($handler->options['label']) . ')';
         }
 
-        $form['fields_override'][$field] = array(
+        $form['fields_override'][$field] = [
           '#type' => 'checkbox',
           '#title' => $title,
           '#default_value' => isset($this->settings['fields_override'][$field]) ? $this->settings['fields_override'][$field] : !$handler->options['exclude'],
-        );
+        ];
       }
     }
 
     if ($allow['use_pager']) {
-      $form['pager']['use_pager'] = array(
+      $form['pager']['use_pager'] = [
         '#type' => 'checkbox',
         '#title' => t('Use pager'),
         '#default_value' => $this->settings['use_pager'],
-      );
-      $form['pager']['pager_id'] = array(
+      ];
+      $form['pager']['pager_id'] = [
         '#type' => 'number',
         '#default_value' => $this->settings['pager_id'],
         '#title' => t('Pager ID'),
         '#step' => 1,
         '#min' => 0,
         '#max' => 999,
-        '#states' => array(
-          'visible' => array(
-            'input[name="use_pager"]' => array('checked' => TRUE),
-          ),
-        ),
-      );
+        '#states' => [
+          'visible' => [
+            'input[name="use_pager"]' => ['checked' => TRUE],
+          ],
+        ],
+      ];
     }
     if ($allow['items_per_page']) {
-      $form['pager']['items_per_page'] = array(
+      $form['pager']['items_per_page'] = [
         '#type' => 'number',
         '#default_value' => $this->settings['items_per_page'],
         '#title' => t('Number of items'),
         '#min' => 0,
         '#max' => 1000,
         '#description' => t('Select the number of items to display, or 0 to display all results.'),
-      );
+      ];
     }
     if ($allow['offset']) {
-      $form['pager']['offset'] = array(
+      $form['pager']['offset'] = [
         '#type' => 'textfield',
         '#default_value' => $this->settings['offset'],
         '#title' => t('Offset'),
         '#size' => 4,
         '#description' => t('Enter the number of items to skip; enter 0 to skip no items.'),
-      );
+      ];
     }
     if (!empty($form['pager'])) {
-      $form['pager'] += array(
+      $form['pager'] += [
         '#type' => 'fieldset',
         '#title' => t('Pager options'),
         '#collapsible' => TRUE,
         '#collapsed' => TRUE,
         '#tree' => FALSE,
-      );
+      ];
     }
   }
 
@@ -478,7 +478,7 @@ class ViewsBlock extends Block {
     parent::formSubmit($form, $form_state);
 
     // Copy everything from our defaults.
-    $keys = array(
+    $keys = [
       'link_to_view',
       'more_link',
       'use_pager',
@@ -490,7 +490,7 @@ class ViewsBlock extends Block {
       'arguments',
       'fields_override',
       'exposed',
-    );
+    ];
 
     foreach ($keys as $key) {
       if (isset($form_state['values'][$key])) {

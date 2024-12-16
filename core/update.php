@@ -65,42 +65,42 @@ function update_selection_page() {
 function update_script_selection_form($form, &$form_state) {
   $count = 0;
   $incompatible_count = 0;
-  $form['start'] = array(
+  $form['start'] = [
     '#tree' => TRUE,
     '#type' => 'fieldset',
     '#collapsed' => TRUE,
     '#collapsible' => TRUE,
-  );
+  ];
 
   // Ensure system.module's updates appear first.
-  $form['start']['system'] = array();
+  $form['start']['system'] = [];
 
   $updates = update_get_update_list();
-  $starting_updates = array();
+  $starting_updates = [];
   $incompatible_updates_exist = FALSE;
   foreach ($updates as $module => $update) {
     if (!isset($update['start'])) {
-      $form['start'][$module] = array(
+      $form['start'][$module] = [
         '#type' => 'item',
         '#title' => $module . ' module',
         '#markup'  => $update['warning'],
         '#prefix' => '<div class="messages warning">',
         '#suffix' => '</div>',
-      );
+      ];
       $incompatible_updates_exist = TRUE;
       continue;
     }
     if (!empty($update['pending'])) {
       $starting_updates[$module] = $update['start'];
-      $form['start'][$module] = array(
+      $form['start'][$module] = [
         '#type' => 'hidden',
         '#value' => $update['start'],
-      );
-      $form['start'][$module . '_updates'] = array(
+      ];
+      $form['start'][$module . '_updates'] = [
         '#theme' => 'item_list',
         '#items' => $update['pending'],
         '#title' => $module . ' module',
-      );
+      ];
     }
     if (isset($update['pending'])) {
       $count = $count + count($update['pending']);
@@ -118,7 +118,7 @@ function update_script_selection_form($form, &$form_state) {
         $form['start'][$module_update_key]['#items'][$data['number']] .= '<div class="warning">' . $text . '</div>';
       }
       // Move the module containing this update to the top of the list.
-      $form['start'] = array($module_update_key => $form['start'][$module_update_key]) + $form['start'];
+      $form['start'] = [$module_update_key => $form['start'][$module_update_key]] + $form['start'];
     }
   }
 
@@ -130,41 +130,41 @@ function update_script_selection_form($form, &$form_state) {
   if (empty($count)) {
     backdrop_set_message(t('No pending updates.'));
     unset($form);
-    $form['links'] = array(
+    $form['links'] = [
       '#theme' => 'links',
       '#links' => update_helpful_links(),
-    );
+    ];
 
     // No updates to run, so caches won't get flushed later.  Clear them now.
     backdrop_flush_all_caches();
   }
   else {
-    $form['help'] = array(
+    $form['help'] = [
       '#type' => 'help',
       '#markup' => 'Updates have been found that need to be applied. You may review the updates below before executing them.',
       '#weight' => -5,
-    );
+    ];
     if ($incompatible_count) {
       $form['start']['#title'] = format_plural(
         $count,
         '1 pending update (@number_applied to be applied, @number_incompatible skipped)',
         '@count pending updates (@number_applied to be applied, @number_incompatible skipped)',
-        array('@number_applied' => $count - $incompatible_count, '@number_incompatible' => $incompatible_count)
+        ['@number_applied' => $count - $incompatible_count, '@number_incompatible' => $incompatible_count]
       );
     }
     else {
       $form['start']['#title'] = format_plural($count, '1 pending update', '@count pending updates');
     }
-    $form['actions'] = array('#type' => 'actions');
-    $form['actions']['submit'] = array(
+    $form['actions'] = ['#type' => 'actions'];
+    $form['actions']['submit'] = [
       '#type' => 'submit',
       '#value' => t('Apply pending updates'),
-    );
-    $form['actions']['cancel'] = array(
+    ];
+    $form['actions']['cancel'] = [
       '#type' => 'link',
       '#href' => '<front>',
       '#title' => t('Cancel'),
-    );
+    ];
   }
   return $form;
 }
@@ -173,27 +173,27 @@ function update_script_selection_form($form, &$form_state) {
  * Provides links to the homepage and administration pages.
  */
 function update_helpful_links() {
-  $links['front'] = array(
+  $links['front'] = [
     'title' => t('Home page'),
     'href' => '<front>',
-  );
+  ];
   if (module_exists('dashboard') && user_access('access dashboard')) {
-    $links['dashboard'] = array(
+    $links['dashboard'] = [
       'title' => t('Dashboard'),
       'href' => 'admin/dashboard',
-    );
+    ];
   }
   elseif (user_access('access administration pages')) {
-    $links['admin-pages'] = array(
+    $links['admin-pages'] = [
       'title' => t('Administration pages'),
       'href' => 'admin',
-    );
+    ];
   }
   if (user_access('administer site configuration')) {
-    $links['status-report'] = array(
+    $links['status-report'] = [
       'title' => t('Status report'),
       'href' => 'admin/reports/status',
-    );
+    ];
   }
   return $links;
 }
@@ -231,7 +231,7 @@ function update_results_page() {
     backdrop_set_message("Reminder: Don't forget to set the <code>\$settings['update_free_access']</code> value in your <code>settings.php</code> file back to <code>FALSE</code>.", 'warning');
   }
 
-  $output .= theme('links', array('links' => update_helpful_links()));
+  $output .= theme('links', ['links' => update_helpful_links()]);
 
   // Output a list of queries executed.
   if (!empty($_SESSION['update_results'])) {
@@ -241,7 +241,7 @@ function update_results_page() {
         $module_has_message = FALSE;
         $query_messages = '';
         foreach ($updates as $number => $queries) {
-          $messages = array();
+          $messages = [];
           foreach ($queries as $query) {
             // If there is no message for this update, don't show anything.
             if (empty($query['query'])) {
@@ -331,7 +331,7 @@ function update_info_page() {
   if (!empty($module_status_report)) {
     $output .= $module_status_report;
   }
-  $form_action = check_url(backdrop_current_script_url(array('op' => 'selection', 'token' => $token)));
+  $form_action = check_url(backdrop_current_script_url(['op' => 'selection', 'token' => $token]));
   $output .= '<form method="post" action="' . $form_action . '">
   <div class="form-actions">
     <input type="submit" value="Continue" class="form-submit button-primary" />
@@ -354,7 +354,7 @@ function update_access_denied_page() {
   backdrop_set_title(t('Access denied'));
 
   $output = '';
-  $steps = array();
+  $steps = [];
 
   $output .= t('You are not authorized to access this page. Log in using either an account with the <em>administer software updates</em> permission, or the site maintenance account (the account you created during installation). If you cannot log in, you will have to edit <code>settings.php</code> to bypass this access check. To do this:');
   $output = '<p>' . $output . '</p>';
@@ -364,7 +364,7 @@ function update_access_denied_page() {
   $steps[] = t('Reload this page. The site update script should be able to run now.');
   $steps[] = t('As soon as the update script is done, you must change the <code>update_free_access</code> setting in the <code>settings.php</code> file back to <code>FALSE</code>: <code>$settings[\'update_free_access\'] = FALSE;</code>.');
 
-  $output .= theme('item_list', array('items' => $steps, 'type' => 'ol'));
+  $output .= theme('item_list', ['items' => $steps, 'type' => 'ol']);
 
   return $output;
 }
@@ -403,19 +403,19 @@ function update_task_list($set_active = NULL) {
   }
 
   // Default list of tasks.
-  $tasks = array(
+  $tasks = [
     'requirements' => 'Verify requirements',
     'info' => 'Overview',
     'select' => 'Review updates',
     'run' => 'Run updates',
     'finished' => 'Review log',
-  );
+  ];
 
   // Only show the task list on the left sidebar if the logged-in user is has
   // permission to perform updates, or if the update_free_access' setting in
   // settings.php has been set to TRUE.
   if (settings_get('update_free_access') || user_access('administer software updates')) {
-    return theme('task_list', array('items' => $tasks, 'active' => $active));
+    return theme('task_list', ['items' => $tasks, 'active' => $active]);
   }
 }
 
@@ -423,7 +423,7 @@ function update_task_list($set_active = NULL) {
  * Returns and stores extra requirements that apply during the update process.
  */
 function update_extra_requirements($requirements = NULL) {
-  static $extra_requirements = array();
+  static $extra_requirements = [];
   if (isset($requirements)) {
     $extra_requirements += $requirements;
   }
@@ -451,8 +451,8 @@ function update_check_requirements($skip_warnings = FALSE) {
     $task_list = update_task_list('requirements');
     $status_report = 'Resolve the problems and <a href="' . check_url(backdrop_requirements_url($severity)) . '">try again</a>.';
     $status_report .= '<br><br>';
-    $status_report .= theme('status_report', array('requirements' => $requirements, 'phase' => 'update'));
-    print theme('update_page', array('content' => $status_report, 'sidebar' => $task_list));
+    $status_report .= theme('status_report', ['requirements' => $requirements, 'phase' => 'update']);
+    print theme('update_page', ['content' => $status_report, 'sidebar' => $task_list]);
     exit();
   }
 }
@@ -560,7 +560,7 @@ if (update_access_allowed()) {
         // since the batch API will pass them to url() which does not handle
         // update.php correctly by default.
         $batch_url = $base_root . backdrop_current_script_url();
-        $redirect_url = $base_root . backdrop_current_script_url(array('op' => 'results'));
+        $redirect_url = $base_root . backdrop_current_script_url(['op' => 'results']);
         // Set a state indicating we are upgrading a Drupal 7 site.
         if (backdrop_get_installed_schema_version('system') > 7000) {
           state_set('update_d7_upgrade', TRUE);
@@ -595,5 +595,5 @@ if (isset($output) && $output) {
   // We defer the display of messages until all updates are done.
   $progress_page = ($batch = batch_get()) && isset($batch['running']);
   $task_list = update_task_list();
-  print theme('update_page', array('content' => $output, 'sidebar' => $task_list, 'show_messages' => !$progress_page));
+  print theme('update_page', ['content' => $output, 'sidebar' => $task_list, 'show_messages' => !$progress_page]);
 }

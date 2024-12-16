@@ -15,8 +15,8 @@ function template_preprocess_ckeditor_settings_toolbar(&$variables) {
   // Create lists of active and disabled buttons.
   $format = $variables['format'];
   $plugins = $variables['plugins'];
-  $buttons = array();
-  $multiple_buttons = array();
+  $buttons = [];
+  $multiple_buttons = [];
   foreach ($plugins as $plugin_info) {
     if (isset($plugin_info['buttons'])) {
       foreach ($plugin_info['buttons'] as $button_name => $button) {
@@ -28,11 +28,11 @@ function template_preprocess_ckeditor_settings_toolbar(&$variables) {
       }
     }
   }
-  $button_groups = array();
-  $active_buttons = array();
+  $button_groups = [];
+  $active_buttons = [];
   $settings = $format->editor_settings;
   foreach ($settings['toolbar'] as $row_number => $row) {
-    $button_groups[$row_number] = array();
+    $button_groups[$row_number] = [];
     foreach ($row as $group) {
       foreach ($group['items'] as $button_name) {
         if (isset($buttons[$button_name])) {
@@ -77,10 +77,10 @@ function template_preprocess_ckeditor_settings_toolbar(&$variables) {
     }
 
     // Build the button attributes.
-    $attributes = array(
+    $attributes = [
       'data-button-name' => $button['name'],
-      'class' => array('ckeditor-button'),
-    );
+      'class' => ['ckeditor-button'],
+    ];
     if (!empty($button['attributes'])) {
       $attributes = backdrop_array_merge_deep($attributes, $button['attributes']);
     }
@@ -92,10 +92,10 @@ function template_preprocess_ckeditor_settings_toolbar(&$variables) {
     }
 
     // Build the button item.
-    $button_item = array(
+    $button_item = [
       'contents' => $value,
       'attributes' => $attributes,
-    );
+    ];
     // If this button has group information, add it to the attributes.
     if (!empty($button['group'])) {
       $button_item['group'] = $button['group'];
@@ -110,14 +110,14 @@ function template_preprocess_ckeditor_settings_toolbar(&$variables) {
   };
 
   // Assemble list of disabled buttons (which are always a single row).
-  $variables['active_buttons'] = array();
+  $variables['active_buttons'] = [];
   foreach ($active_buttons as $row_number => $button_row) {
     foreach ($button_groups[$row_number] as $group_name) {
       $group_name = (string) $group_name;
-      $variables['active_buttons'][$row_number][$group_name] = array(
+      $variables['active_buttons'][$row_number][$group_name] = [
         'group_name_class' => backdrop_clean_css_identifier($group_name),
-        'buttons' => array(),
-      );
+        'buttons' => [],
+      ];
       $buttons = array_filter($button_row, function ($button) use ($group_name) {
         return (string) $button['group'] === $group_name;
       });
@@ -127,12 +127,12 @@ function template_preprocess_ckeditor_settings_toolbar(&$variables) {
     }
   }
   // Assemble list of disabled buttons (which are always a single row).
-  $variables['disabled_buttons'] = array();
+  $variables['disabled_buttons'] = [];
   foreach ($disabled_buttons as $button) {
     $variables['disabled_buttons'][] = $build_button_item($button, $rtl);
   }
   // Assemble list of multiple buttons that may be added multiple times.
-  $variables['multiple_buttons'] = array();
+  $variables['multiple_buttons'] = [];
   foreach ($multiple_buttons as $button) {
     $variables['multiple_buttons'][] = $build_button_item($button, $rtl);
   }
@@ -211,11 +211,11 @@ function theme_ckeditor_settings_toolbar($variables) {
   $output .= '</div>';
 
   // Wrap the whole thing in a fieldset.
-  $fieldset = array(
+  $fieldset = [
     '#type' => 'fieldset',
     '#children' => $output,
     '#title' => t('CKEditor Toolbar'),
-  );
+  ];
 
   return backdrop_render($fieldset);
 }

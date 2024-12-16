@@ -41,28 +41,28 @@
  *
  * @since 1.28.0 Function added.
  */
-function icon($icon_name, array $options = array()) {
+function icon($icon_name, array $options = []) {
   // Populate default options.
-  $options += array(
+  $options += [
     'alt' => NULL,
-    'attributes' => array(),
+    'attributes' => [],
     'immutable' => FALSE,
-  );
+  ];
 
   $immutable = !empty($options['immutable']);
   $icon_path = icon_get_path($icon_name, $immutable);
 
   if ($icon_path) {
     unset($options['immutable']);
-    return theme('icon', array(
+    return theme('icon', [
       'name' => $icon_name,
       'path' => $icon_path,
       'alt' => $options['alt'],
       'attributes' => $options['attributes'],
-    ));
+    ]);
   }
 
-  return '<!-- ' . t('Icon @name not found.', array('@name' => $icon_name)) . ' -->';
+  return '<!-- ' . t('Icon @name not found.', ['@name' => $icon_name]) . ' -->';
 }
 
 /**
@@ -95,10 +95,10 @@ function icon($icon_name, array $options = array()) {
  */
 function icon_get_path($icon_name, $immutable = FALSE) {
   // Save into a static cache with both normal and immutable paths.
-  $icon_paths = &backdrop_static(__FUNCTION__, array(
-    'normal' => array(),
-    'immutable' => array(),
-  ));
+  $icon_paths = &backdrop_static(__FUNCTION__, [
+    'normal' => [],
+    'immutable' => [],
+  ]);
 
   $immutable_type = $immutable ? 'immutable' : 'normal';
   if (isset($icon_paths[$immutable_type][$icon_name])) {
@@ -106,11 +106,11 @@ function icon_get_path($icon_name, $immutable = FALSE) {
   }
 
   // Normal search order searches themes, then modules, then core.
-  $search_functions = array(
+  $search_functions = [
     '_icon_from_theme',
     '_icon_from_module',
     '_icon_from_core',
-  );
+  ];
   // Immutable searches core, then modules, then themes.
   if ($immutable) {
     $search_functions = array_reverse($search_functions);
@@ -246,7 +246,7 @@ function icon_get_info($icon_name = NULL) {
   $icon_info = &backdrop_static(__FUNCTION__);
 
   if (!isset($icon_info)) {
-    $icon_info = array();
+    $icon_info = [];
     foreach (module_implements('icon_info') as $module) {
       $module_icon_info = module_invoke($module, 'icon_info');
       // Populate the 'module' key for each returned item.
@@ -296,18 +296,18 @@ function theme_icon(array $variables) {
     if (strpos($svg_contents, '<svg') === 0) {
       // Allow basic shapes. See:
       // https://developer.mozilla.org/en-US/docs/Web/SVG/Element#basic_shapes.
-      $allowed_svg_basic_shapes = array(
+      $allowed_svg_basic_shapes = [
         'circle',
         'ellipse',
         'line',
         'polygon',
         'polyline',
         'rect',
-      );
+      ];
 
       // Allow some other elements. This very-restrictive set of options should
       // be adequate for icons.
-      $allowed_svg_other = array(
+      $allowed_svg_other = [
         'defs',
         'desc',
         'linearGradient',
@@ -316,7 +316,7 @@ function theme_icon(array $variables) {
         'svg',
         'title',
         'use',
-      );
+      ];
 
       $allowed_svg_elements = array_merge($allowed_svg_basic_shapes, $allowed_svg_other);
 
@@ -333,8 +333,8 @@ function theme_icon(array $variables) {
 
       // Add default icon classes.
       $variables['attributes']['class'] = array_merge(
-        array('icon', 'icon--' . $variables['name']),
-        isset($variables['attributes']['class']) ? $variables['attributes']['class'] : array()
+        ['icon', 'icon--' . $variables['name']],
+        isset($variables['attributes']['class']) ? $variables['attributes']['class'] : []
       );
 
       return image_add_svg_attributes($svg_contents, $variables['attributes']);

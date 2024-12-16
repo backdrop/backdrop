@@ -14,10 +14,10 @@ class views_handler_field_term_node_tid extends views_handler_field_prerender_li
     parent::init($view, $options);
     // @todo: Wouldn't it be possible to use $this->base_table and no if here?
     if ($view->base_table == 'node_revision') {
-      $this->additional_fields['nid'] = array('table' => 'node_revision', 'field' => 'nid');
+      $this->additional_fields['nid'] = ['table' => 'node_revision', 'field' => 'nid'];
     }
     else {
-      $this->additional_fields['nid'] = array('table' => 'node', 'field' => 'nid');
+      $this->additional_fields['nid'] = ['table' => 'node', 'field' => 'nid'];
     }
 
     // Convert legacy vids option to machine name vocabularies.
@@ -34,9 +34,9 @@ class views_handler_field_term_node_tid extends views_handler_field_prerender_li
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['link_to_taxonomy'] = array('default' => TRUE, 'bool' => TRUE);
-    $options['limit'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['vocabularies'] = array('default' => array());
+    $options['link_to_taxonomy'] = ['default' => TRUE, 'bool' => TRUE];
+    $options['limit'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['vocabularies'] = ['default' => []];
 
     return $options;
   }
@@ -45,36 +45,36 @@ class views_handler_field_term_node_tid extends views_handler_field_prerender_li
    * Provide "link to term" option.
    */
   function options_form(&$form, &$form_state) {
-    $form['link_to_taxonomy'] = array(
+    $form['link_to_taxonomy'] = [
       '#title' => t('Link this field to its term page'),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['link_to_taxonomy']),
-    );
+    ];
 
-    $form['limit'] = array(
+    $form['limit'] = [
       '#type' => 'checkbox',
       '#title' => t('Limit terms by vocabulary'),
       '#default_value'=> $this->options['limit'],
-    );
+    ];
 
-    $options = array();
+    $options = [];
     $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
     foreach ($vocabularies as $voc) {
       $options[$voc->machine_name] = check_plain($voc->name);
     }
 
-    $form['vocabularies'] = array(
+    $form['vocabularies'] = [
       '#type' => 'checkboxes',
       '#title' => t('Vocabularies'),
       '#options' => $options,
       '#default_value' => $this->options['vocabularies'],
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[limit]"]' => array('checked' => TRUE),
-        ),
-      ),
+      '#states' => [
+        'visible' => [
+          ':input[name="options[limit]"]' => ['checked' => TRUE],
+        ],
+      ],
 
-    );
+    ];
 
     parent::options_form($form, $form_state);
   }
@@ -88,7 +88,7 @@ class views_handler_field_term_node_tid extends views_handler_field_prerender_li
 
   function pre_render(&$values) {
     $this->field_alias = $this->aliases['nid'];
-    $nids = array();
+    $nids = [];
     foreach ($values as $result) {
       if (!empty($result->{$this->aliases['nid']})) {
         $nids[] = $result->{$this->aliases['nid']};
@@ -136,7 +136,7 @@ class views_handler_field_term_node_tid extends views_handler_field_prerender_li
   }
 
   function add_self_tokens(&$tokens, $item) {
-    foreach(array('tid', 'name', 'vocabulary_machine_name') as $token) {
+    foreach(['tid', 'name', 'vocabulary_machine_name'] as $token) {
       // Replace _ with - for the vocabulary machine name.
       $tokens['[' . $this->options['id'] . '-' . str_replace('_', '-', $token). ']'] = isset($item[$token]) ? $item[$token] : '';
     }

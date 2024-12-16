@@ -35,30 +35,30 @@
  */
 function hook_options_list($field, $instance, $entity_type, $entity) {
   // Sample structure.
-  $options = array(
+  $options = [
     0 => t('Zero'),
     1 => t('One'),
     2 => t('Two'),
     3 => t('Three'),
-  );
+  ];
 
   // Sample structure with groups. Only one level of nesting is allowed. This
   // is only supported by the 'options_select' widget. Other widgets will
   // flatten the array.
-  $options = array(
-    t('First group') => array(
+  $options = [
+    t('First group') => [
       0 => t('Zero'),
-    ),
-    t('Second group') => array(
+    ],
+    t('Second group') => [
       1 => t('One'),
       2 => t('Two'),
-    ),
+    ],
     3 => t('Three'),
-  );
+  ];
 
   // In actual implementations, the array of options will most probably depend
   // on properties of the field. Example from taxonomy.module:
-  $options = array();
+  $options = [];
   foreach ($field['settings']['allowed_values'] as $tree) {
     $terms = taxonomy_get_tree($tree['vid'], $tree['parent']);
     if ($terms) {

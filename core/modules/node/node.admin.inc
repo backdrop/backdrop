@@ -13,7 +13,7 @@
  * @ingroup forms
  */
 function node_configure_rebuild_confirm() {
-  return confirm_form(array(), t('Are you sure you want to rebuild the permissions on site content?'),
+  return confirm_form([], t('Are you sure you want to rebuild the permissions on site content?'),
                   'admin/reports/status', t('This action rebuilds all permissions on site content, and may be a lengthy process. This action cannot be undone.'), t('Rebuild permissions'), t('Cancel'));
 }
 
@@ -46,10 +46,10 @@ function node_mass_update($nodes, $updates) {
   // We use batch processing to prevent timeout when updating a large number
   // of nodes.
   if (count($nodes) > 10) {
-    $batch = array(
-      'operations' => array(
-        array('_node_mass_update_batch_process', array($nodes, $updates))
-      ),
+    $batch = [
+      'operations' => [
+        ['_node_mass_update_batch_process', [$nodes, $updates]]
+      ],
       'finished' => '_node_mass_update_batch_finished',
       'title' => t('Processing'),
       // We use a single multi-pass operation, so the default
@@ -59,7 +59,7 @@ function node_mass_update($nodes, $updates) {
       // The operations do not live in the .module file, so we need to
       // tell the batch engine which file to load before calling them.
       'file' => backdrop_get_path('module', 'node') . '/node.admin.inc',
-    );
+    ];
     batch_set($batch);
   }
   else {
@@ -150,7 +150,7 @@ function _node_mass_update_batch_finished($success, $results, $operations) {
   else {
     backdrop_set_message(t('An error occurred and processing did not complete.'), 'error');
     $message = format_plural(count($results), '1 item successfully processed:', '@count items successfully processed:');
-    $message .= theme('item_list', array('items' => $results));
+    $message .= theme('item_list', ['items' => $results]);
     backdrop_set_message($message);
   }
 }
@@ -173,29 +173,29 @@ function node_multiple_delete_confirm($form, &$form_state) {
     unset($_SESSION['node_delete_action']);
   }
   else {
-    $nids = array();
+    $nids = [];
   }
 
   $form['#tree'] = TRUE;
 
   if (empty($nids)) {
     $destination = isset($_GET['destination']) ? $_GET['destination'] : 'admin/content/node';
-    $form['empty']['#markup'] = '<p>' . t('Return to the <a href="!url">content administration page</a>.', array('!url' => url($destination))) . '</p>';
+    $form['empty']['#markup'] = '<p>' . t('Return to the <a href="!url">content administration page</a>.', ['!url' => url($destination)]) . '</p>';
     backdrop_set_message(t('No content has been selected for deletion.'), 'error');
     return $form;
   }
 
-  $form['node_list'] = array(
+  $form['node_list'] = [
     '#theme' => 'item_list',
-    '#items' => array(),
-  );
+    '#items' => [],
+  ];
 
-  $rows = db_query('SELECT nid, title FROM {node} WHERE nid IN (:nids)', array(':nids' => $nids))->fetchAllKeyed();
+  $rows = db_query('SELECT nid, title FROM {node} WHERE nid IN (:nids)', [':nids' => $nids])->fetchAllKeyed();
   foreach ($rows as $nid => $title) {
-    $form['nodes'][$nid] = array(
+    $form['nodes'][$nid] = [
       '#type' => 'hidden',
       '#value' => $nid,
-    );
+    ];
     $form['node_list']['#items'][] = check_plain($title);
   }
 
@@ -210,7 +210,7 @@ function node_multiple_delete_confirm_submit($form, &$form_state) {
   node_delete_multiple(array_keys($form_state['values']['nodes']));
   cache_clear_all();
   $count = count($form_state['values']['nodes']);
-  watchdog('content', 'Deleted @count content items.', array('@count' => $count));
+  watchdog('content', 'Deleted @count content items.', ['@count' => $count]);
 
   backdrop_set_message(format_plural($count, 'Deleted 1 content item.', 'Deleted @count content items.'));
   $form_state['redirect'] = 'admin/content';

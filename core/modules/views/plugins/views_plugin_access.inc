@@ -39,7 +39,7 @@ class views_plugin_access extends views_plugin {
    * Retrieve the options when this is a new access
    * control plugin
    */
-  function option_definition() { return array(); }
+  function option_definition() { return []; }
 
   /**
    * Provide the default form for setting options.

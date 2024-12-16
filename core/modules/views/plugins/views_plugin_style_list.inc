@@ -16,9 +16,9 @@ class views_plugin_style_list extends views_plugin_style {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['type'] = array('default' => 'ul');
-    $options['class'] = array('default' => '');
-    $options['wrapper_class'] = array('default' => 'item-list');
+    $options['type'] = ['default' => 'ul'];
+    $options['class'] = ['default' => ''];
+    $options['wrapper_class'] = ['default' => 'item-list'];
 
     return $options;
   }
@@ -28,25 +28,25 @@ class views_plugin_style_list extends views_plugin_style {
    */
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
-    $form['type'] = array(
+    $form['type'] = [
       '#type' => 'radios',
       '#title' => t('List type'),
-      '#options' => array('ul' => t('Unordered list'), 'ol' => t('Ordered list')),
+      '#options' => ['ul' => t('Unordered list'), 'ol' => t('Ordered list')],
       '#default_value' => $this->options['type'],
-    );
-    $form['wrapper_class'] = array(
+    ];
+    $form['wrapper_class'] = [
       '#title' => t('Wrapper class'),
       '#description' => t('The class to provide on the wrapper, outside the list.'),
       '#type' => 'textfield',
       '#size' => '30',
       '#default_value' => $this->options['wrapper_class'],
-    );
-    $form['class'] = array(
+    ];
+    $form['class'] = [
       '#title' => t('List class'),
       '#description' => t('The class to provide on the list element itself.'),
       '#type' => 'textfield',
       '#size' => '30',
       '#default_value' => $this->options['class'],
-    );
+    ];
   }
 }

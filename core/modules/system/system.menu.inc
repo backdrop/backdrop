@@ -8,7 +8,7 @@
 /**
  * Implements hook_block_configure().
  */
-function _system_block_configure($delta = '', $settings = array()) {
+function _system_block_configure($delta = '', $settings = []) {
   // Merge in the default configuration.
   $settings += system_menu_block_defaults($delta);
   return system_menu_block_form($settings);
@@ -20,7 +20,7 @@ function _system_block_configure($delta = '', $settings = array()) {
  * @return array
  */
 function system_menu_block_defaults($menu_name) {
-  $defaults = array(
+  $defaults = [
     'level' => 1,
     'menu_name' => $menu_name,
     'style' => NULL,
@@ -28,7 +28,7 @@ function system_menu_block_defaults($menu_name) {
     'clickdown' => FALSE,
     'collapse' => 'default',
     'toggle_text' => 'Menu',
-  );
+  ];
   if ($menu_name == 'main-menu') {
     $defaults['depth'] = 1;
     $defaults['toggle'] = TRUE;
@@ -50,27 +50,27 @@ function system_menu_block_defaults($menu_name) {
  *   The form array. This is a form fragment and not in full Form API format.
  */
 function system_menu_block_form($config) {
-  $form['menu_name'] = array(
+  $form['menu_name'] = [
     '#type' => 'value',
     '#value' => $config['menu_name'],
-  );
+  ];
 
-  $form['style'] = array(
+  $form['style'] = [
     '#type' => 'select',
     '#title' => t('Menu style'),
-    '#options' => array(
+    '#options' => [
       'top_only' => t('Top level only'),
       'dropdown' => t('Dropdown menu'),
       'tree' => t('Hierarchical tree'),
-    ),
+    ],
     '#default_value' => empty($config['style']) ? 'tree' : $config['style'],
-  );
+  ];
 
-  $form['level'] = array(
+  $form['level'] = [
     '#type' => 'select',
     '#title' => t('Starting level'),
     '#default_value' => $config['level'],
-    '#options' => array(
+    '#options' => [
       '1' => t('1st level (primary)'),
       '2' => t('2nd level (secondary)'),
       '3' => t('3rd level (tertiary)'),
@@ -80,19 +80,19 @@ function system_menu_block_form($config) {
       '7' => t('7th level'),
       '8' => t('8th level'),
       '9' => t('9th level'),
-    ),
+    ],
     '#description' => t('The block will be visible only if the current page has its menu item at or below the level set here.'),
-    '#states' => array(
-      'visible' => array(
-        'select[name="block_settings[style]"]' => array('value' => 'tree'),
-      ),
-    ),
-  );
-  $form['depth'] = array(
+    '#states' => [
+      'visible' => [
+        'select[name="block_settings[style]"]' => ['value' => 'tree'],
+      ],
+    ],
+  ];
+  $form['depth'] = [
     '#type' => 'select',
     '#title' => t('Maximum depth'),
     '#default_value' => $config['depth'],
-    '#options' => array(
+    '#options' => [
       '1' => '1',
       '2' => '2',
       '3' => '3',
@@ -103,95 +103,95 @@ function system_menu_block_form($config) {
       '8' => '8',
       '9' => '9',
       '0' => t('Unlimited'),
-    ),
+    ],
     '#description' => t('The maximum depth of the menu tree from the starting level (if available).'),
-    '#states' => array(
-      'invisible' => array(
-        'select[name="block_settings[style]"]' => array('value' => 'top_only'),
-      ),
-    ),
-  );
-  $form['expand_all'] = array(
+    '#states' => [
+      'invisible' => [
+        'select[name="block_settings[style]"]' => ['value' => 'top_only'],
+      ],
+    ],
+  ];
+  $form['expand_all'] = [
     '#type' => 'checkbox',
     '#title' => t('Show all menu links'),
     '#default_value' => $config['expand_all'],
     '#description' => t('When unchecked, only expanded or active trail menu links will be displayed.'),
-    '#states' => array(
-      'visible' => array(
-        'select[name="block_settings[style]"]' => array('value' => 'tree'),
-      ),
-    ),
-  );
-  $form['clickdown'] = array(
+    '#states' => [
+      'visible' => [
+        'select[name="block_settings[style]"]' => ['value' => 'tree'],
+      ],
+    ],
+  ];
+  $form['clickdown'] = [
     '#type' => 'checkbox',
     '#title' => t('Use a click to open, instead of a hover'),
     '#default_value' => $config['clickdown'],
     '#description' => t('Menus that don\'t appear or disappear on hover can be better for usability in some cases.'),
-    '#states' => array(
-      'visible' => array(
-        'select[name="block_settings[style]"]' => array('value' => 'dropdown'),
-      ),
-    ),
-  );
+    '#states' => [
+      'visible' => [
+        'select[name="block_settings[style]"]' => ['value' => 'dropdown'],
+      ],
+    ],
+  ];
   $link = t('menu settings');
   if (user_access('administer menu')) {
-    $link = l($link, 'admin/structure/menu/settings', array(
-      'attributes' => array('target' => '_blank'),
-    ));
+    $link = l($link, 'admin/structure/menu/settings', [
+      'attributes' => ['target' => '_blank'],
+    ]);
   }
-  $form['toggle'] = array(
+  $form['toggle'] = [
     '#type' => 'checkbox',
     '#title' => t('Display menu toggle button on small screens'),
     '#default_value' => $config['toggle'],
-    '#description' => t('On devices with small screens, this option reduces the menu to a toggle button, commonly known as <a href="https://en.wikipedia.org/wiki/Hamburger_button" target="_blank"><em>hamburger button</em></a>. Clicking the icon reveals or hides the menu, saving screen space. The breakpoint for small screens can be configured in the global !menu_settings.', array(
+    '#description' => t('On devices with small screens, this option reduces the menu to a toggle button, commonly known as <a href="https://en.wikipedia.org/wiki/Hamburger_button" target="_blank"><em>hamburger button</em></a>. Clicking the icon reveals or hides the menu, saving screen space. The breakpoint for small screens can be configured in the global !menu_settings.', [
       '!menu_settings' => $link,
-    )),
-  );
+    ]),
+  ];
   $toggle_text_default = system_menu_block_defaults($config['menu_name'])['toggle_text'];
-  $form['toggle_text'] = array(
+  $form['toggle_text'] = [
     '#type' => 'textfield',
     '#title' => t('Toggle button text'),
     '#default_value' => $config['toggle_text'],
-    '#description' => t('Text to display beside the toggle button. Default: %toggle_text.', array(
+    '#description' => t('Text to display beside the toggle button. Default: %toggle_text.', [
       '%toggle_text' => $toggle_text_default,
-    )),
+    ]),
     '#indentation' => 1,
-    '#states' => array(
-      'visible' => array(
-        'input[name="block_settings[toggle]"]' => array('checked' => TRUE),
-      ),
-    ),
-  );
-  $form['collapse'] = array(
+    '#states' => [
+      'visible' => [
+        'input[name="block_settings[toggle]"]' => ['checked' => TRUE],
+      ],
+    ],
+  ];
+  $form['collapse'] = [
     '#type' => 'radios',
     '#title' => t('Collapsible behavior'),
     '#default_value' => (!empty($config['collapse'])) ? $config['collapse'] : 'default',
-    '#options' => array(
+    '#options' => [
       'default' => t('Default'),
       'toggle' => t('Toggle'),
       'link' => t('Link'),
-    ),
+    ],
     '#description' => t('Determines how parent menu items behave when the menu is shown on small screens.'),
-    '#states' => array(
-      'visible' => array(
-        'select[name="block_settings[style]"]' => array('value' => 'dropdown'),
-      ),
-    ),
-  );
+    '#states' => [
+      'visible' => [
+        'select[name="block_settings[style]"]' => ['value' => 'dropdown'],
+      ],
+    ],
+  ];
   $form['collapse']['default']['#description'] = t('Parent expands on first tap, acts as a link on second tap.');
   $form['collapse']['toggle']['#description'] = t('Parent expands or collapses on each tap and does not act as a link.');
   $form['collapse']['link']['#description'] = t('Parent text acts as a link and the +/- element expands or collapses.');
 
-  $form['accordion'] = array('#type' => 'checkbox',
+  $form['accordion'] = ['#type' => 'checkbox',
     '#title' => t('Accordion-style'),
     '#default_value' => (!empty($config['accordion'])) ? $config['accordion'] : FALSE,
     '#description' => t('Close all sub-menus when closing parent menu items.'),
-    '#states' => array(
-      'visible' => array(
-        'select[name="block_settings[style]"]' => array('value' => 'dropdown'),
-      ),
-    ),
-  );
+    '#states' => [
+      'visible' => [
+        'select[name="block_settings[style]"]' => ['value' => 'dropdown'],
+      ],
+    ],
+  ];
 
   return $form;
 }
@@ -244,9 +244,9 @@ function system_menu_block_build(array $config) {
   $tree = system_menu_tree_block_data($config);
   $title = system_menu_block_get_title();
 
-  $data = array();
+  $data = [];
   $data['subject'] = $title;
-  $data['content'] = array();
+  $data['content'] = [];
   // Create a renderable tree.
   if (!empty($tree) && $output = menu_tree_output($tree)) {
     $data['content'] = $output;
@@ -262,30 +262,30 @@ function system_menu_block_build(array $config) {
         $collapsible_behavior = (empty($config['collapse'])) ? 'default' : $config['collapse'];
       }
       $data['content']['#wrapper_attributes']['data-collapse'] = $collapsible_behavior;
-      $data['content']['#attached']['library'][] = array(
+      $data['content']['#attached']['library'][] = [
         'system',
         'backdrop.menus',
-      );
+      ];
       if ($config['style'] === 'dropdown') {
-        $data['content']['#attached']['library'][] = array(
+        $data['content']['#attached']['library'][] = [
           'system',
           'smartmenus',
-        );
+        ];
       }
     }
     if (!empty($config['toggle']) && $config['toggle'] == TRUE) {
       $id = backdrop_html_id('menu-toggle-state');
       $data['content']['#wrapper_attributes']['data-menu-toggle-id'] = $id;
-      $data['content']['#prefix'] = theme('menu_toggle', array(
+      $data['content']['#prefix'] = theme('menu_toggle', [
         'enabled' => $config['toggle'],
         'id' => $id,
         // Allow the user-entered menu toggle text to be translated.
         'text' => t(trim($config['toggle_text'])),
-      ));
-      $data['content']['#attached']['library'][] = array(
+      ]);
+      $data['content']['#attached']['library'][] = [
         'system',
         'backdrop.menu-toggle',
-      );
+      ];
     }
     if (!empty($config['style_settings'])) {
       $data['content']['#wrapper_attributes']['data-menu-style'] = backdrop_json_encode($config['style_settings']);
@@ -378,14 +378,14 @@ function system_menu_tree_prune_tree(array &$tree, $level, array $parent_item = 
         if ($tree[$key]['link']['mlid'] == $plid) {
           system_menu_block_set_title($tree[$key]['link']);
           // Prune the tree to the children of this ancestor.
-          $tree = $tree[$key]['below'] ? $tree[$key]['below'] : array();
+          $tree = $tree[$key]['below'] ? $tree[$key]['below'] : [];
           $found_active_trail = TRUE;
           break;
         }
       }
       // If we don't find the ancestor, bail out.
       if (!$found_active_trail) {
-        $tree = array();
+        $tree = [];
         break;
       }
     }
@@ -402,14 +402,14 @@ function system_menu_tree_prune_tree(array &$tree, $level, array $parent_item = 
         // Get the title for the pruned tree.
         system_menu_block_set_title($tree[$key]['link']);
         // Prune the tree to the children of the item in the active trail.
-        $tree = $tree[$key]['below'] ? $tree[$key]['below'] : array();
+        $tree = $tree[$key]['below'] ? $tree[$key]['below'] : [];
         $found_active_trail = TRUE;
         break;
       }
     }
     // If we don't find the active trail, the active item isn't in the tree we want.
     if (!$found_active_trail) {
-      $tree = array();
+      $tree = [];
       break;
     }
   }

@@ -99,14 +99,14 @@ class Layout {
    *
    * @var LayoutAccess[]
    */
-  var $conditions = array();
+  var $conditions = [];
 
   /**
    * An array of all relationships used by this layout.
    *
    * @var array
    */
-  var $relationships = array();
+  var $relationships = [];
 
   /**
    * A LayoutMenuItem containing menu properties for this layout.
@@ -123,14 +123,14 @@ class Layout {
    *
    * @var array
    */
-  var $settings = array();
+  var $settings = [];
 
   /**
    * The main array of configured blocks, keyed by a generated ID per instance.
    *
    * @var Block[]
    */
-  var $content = array();
+  var $content = [];
 
   /**
    * Nested array that stores the arrangement of the configured blocks.
@@ -140,7 +140,7 @@ class Layout {
    *
    * @var array
    */
-  var $positions = array();
+  var $positions = [];
 
   /**
    * If editing a layout, general storage of in-progress changes.
@@ -161,7 +161,7 @@ class Layout {
    *
    * @var array
    */
-  var $orphaned_blocks = array();
+  var $orphaned_blocks = [];
 
   /**
    * The region where orphaned blocks are placed in new template.
@@ -175,7 +175,7 @@ class Layout {
    *
    * @var LayoutContext[]
    */
-  private $contexts = array();
+  private $contexts = [];
 
   /**
    * An array of removed blocks, keyed by their UUID.
@@ -191,7 +191,7 @@ class Layout {
    * @see removeBlock()
    * @see layout_layout_presave()
    */
-  var $removed_blocks = array();
+  var $removed_blocks = [];
 
   /**
    * @var bool
@@ -209,17 +209,17 @@ class Layout {
    * @param array $config
    *   An array of configuration data.
    */
-  function __construct(array $config = array()) {
+  function __construct(array $config = []) {
     foreach ($config as $property => $property_value) {
       $this->{$property} = $property_value;
     }
 
     // Specify default settings.
-    $this->settings += array(
+    $this->settings += [
       'title' => '',
       'title_display' => LAYOUT_TITLE_DEFAULT,
       'title_block' => NULL,
-    );
+    ];
 
     // Adjust for the renaming of "layout" to "layout_template".
     // See https://github.com/backdrop/backdrop-issues/issues/998
@@ -244,13 +244,13 @@ class Layout {
 
     // Convert all stored contexts, conditions, and relationships to their
     // handler equivalents.
-    $handlers = array(
+    $handlers = [
       // Items are key => handler_type.
       'content' => 'block',
       'conditions' => 'layout_access',
       'contexts' => 'layout_context',
       'relationships' => 'layout_relationship',
-    );
+    ];
     foreach ($handlers as $property_key => $plugin_type) {
       foreach ($this->{$property_key} as $plugin_type_key => $plugin_data) {
         // Set the storage property for contexts stored in config.
@@ -263,7 +263,7 @@ class Layout {
 
     // Ensure contexts is always set to an array.
     if (is_null($this->contexts)) {
-      $this->contexts = array();
+      $this->contexts = [];
     }
   }
 
@@ -289,7 +289,7 @@ class Layout {
       $function($this);
     }
 
-    $data = array(
+    $data = [
       'path' => $this->path,
       'name' => $this->name,
       'title' => $this->title,
@@ -304,7 +304,7 @@ class Layout {
       'positions' => $this->positions,
       'contexts' => $this->contexts,
       'relationships' => $this->relationships,
-    );
+    ];
 
     // Basic validation to prevent data corruption.
     if (empty($this->name)) {
@@ -313,19 +313,19 @@ class Layout {
 
     // Convert all stored conditions to arrays.
     // @todo: Save per-layout contexts and relationships.
-    $sub_parts = array(
+    $sub_parts = [
       'content',
       'conditions',
       'contexts',
       'relationships',
-    );
+    ];
     foreach ($sub_parts as $config_type) {
       foreach ($this->$config_type as $config_type_key => $config_type_data) {
         unset($config_type_data->is_new);
-        $data[$config_type][$config_type_key] = array(
+        $data[$config_type][$config_type_key] = [
           'plugin' => $config_type_data->plugin,
           'data' => $config_type_data->toArray(),
-        );
+        ];
       }
     }
 
@@ -337,7 +337,7 @@ class Layout {
       ->save();
 
     // Parse each BlockText block for file IDs.
-    $fids = array();
+    $fids = [];
     foreach ($this->content as $content) {
       if (is_a($content, 'BlockText')) {
         $block_content = $content->settings['content'];
@@ -484,8 +484,8 @@ class Layout {
     $clone->storage = LAYOUT_STORAGE_NORMAL;
 
     // Copy over blocks with new UUIDs.
-    $clone->content = array();
-    $clone->positions = array();
+    $clone->content = [];
+    $clone->positions = [];
     foreach ($this->positions as $region => $block_uuids) {
       foreach ($block_uuids as $block_uuid) {
         $new_block = $this->content[$block_uuid]->getClone();
@@ -535,7 +535,7 @@ class Layout {
 
     // Move the block into the correct position.
     if (is_numeric($position)) {
-      $positions = array();
+      $positions = [];
       foreach ($this->positions[$region_name] as $n => $uuid) {
         if ($position == $n) {
           $positions[] = $block->uuid;
@@ -620,7 +620,7 @@ class Layout {
 
     // Add the block to the new region in the correct position.
     if (isset($region_position)) {
-      $new_positions = array();
+      $new_positions = [];
       foreach (array_values($this->positions[$region_name]) as $region_position => $existing_uuid) {
         if ($region_position === $position) {
           $new_positions[] = $block_uuid;
@@ -661,10 +661,10 @@ class Layout {
       // provided by another module, no menu item is necessary.
       elseif (layout_provides_path($path) === NULL) {
         if (empty($this->menu_item)) {
-          $menu_item_settings = array(
+          $menu_item_settings = [
             'path' => $path,
             'name' => $this->name,
-          );
+          ];
           $this->menu_item = new LayoutMenuItem($menu_item_settings);
         }
         else {
@@ -710,7 +710,7 @@ class Layout {
    *   one to the other. To discard the contents of a region, set the value
    *   to FALSE.
    */
-  function setLayoutTemplate($layout_name, $region_mapping = array()) {
+  function setLayoutTemplate($layout_name, $region_mapping = []) {
     // If not changing anything, return as a no-op.
     if ($layout_name === $this->layout_template && empty($region_mapping)) {
       return;
@@ -724,10 +724,10 @@ class Layout {
     $old_layout_template_info = layout_get_layout_template_info($this->layout_template);
     $new_layout_template_info = layout_get_layout_template_info($layout_name);
     // Set up the array with region names for the new layout.
-    $new_positions = array();
+    $new_positions = [];
     $new_regions = array_keys($new_layout_template_info['regions']);
     foreach ($new_regions as $new_region_name) {
-      $new_positions[$new_region_name] = array();
+      $new_positions[$new_region_name] = [];
     }
 
     // Do the mapping in the order provided (if any).
@@ -797,14 +797,14 @@ class Layout {
    * @return LayoutContext[]
    */
   function getContexts($include_types = LayoutContext::USAGE_TYPE_ALL) {
-    $contexts_cache = &backdrop_static(__METHOD__, array());
+    $contexts_cache = &backdrop_static(__METHOD__, []);
     if (isset($contexts_cache[$this->name])) {
       return $this->getContextsByType($contexts_cache[$this->name], $include_types);
     }
 
     // Initialize a list of contexts if not defined.
     if (is_null($this->contexts)) {
-      $this->contexts = array();
+      $this->contexts = [];
     }
 
     // Load objects for stored contexts.
@@ -841,10 +841,10 @@ class Layout {
 
     // Add on the overrides path context, which is always available.
     if (empty($this->menu_item) && !isset($this->contexts['overrides_path'])) {
-      $this->contexts['overrides_path'] = layout_create_context('overrides_path', array(
+      $this->contexts['overrides_path'] = layout_create_context('overrides_path', [
         'name' => 'overrides_path',
         'locked' => TRUE,
-      ));
+      ]);
     }
 
     $contexts_cache[$this->name] = $this->contexts;
@@ -868,7 +868,7 @@ class Layout {
     }
 
     // Otherwise filter down the list of contexts to only those requested.
-    $return_contexts = array();
+    $return_contexts = [];
     foreach ($contexts as $key => $context) {
       if ($context->usageType & $include_types) {
         $return_contexts[$key] = $context;
@@ -957,8 +957,8 @@ class Layout {
    * Load the contexts based on this Layout's relationship configuration.
    */
   private function getContextsFromRelationships() {
-    $contexts = array();
-    $contexts_from_relationships_list = array();
+    $contexts = [];
+    $contexts_from_relationships_list = [];
     foreach ($this->relationships as $relationship_name => $relationship_data) {
       $key = 'relationship_' . $relationship_name;
       if (!isset($contexts_from_relationships_list[$key])) {
@@ -987,7 +987,7 @@ class Layout {
    * Check if this layout is a fallback default layout.
    */
   function isDefault() {
-    return in_array($this->name, array('default', 'admin_default'));
+    return in_array($this->name, ['default', 'admin_default']);
   }
 
   /**

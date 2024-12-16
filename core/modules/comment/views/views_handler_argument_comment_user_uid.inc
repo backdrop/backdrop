@@ -16,7 +16,7 @@ class views_handler_argument_comment_user_uid extends views_handler_argument {
       $title = config_get_translated('system.core', 'anonymous');
     }
     else {
-      $title = db_query('SELECT u.name FROM {users} u WHERE u.uid = :uid', array(':uid' => $this->argument))->fetchField();
+      $title = db_query('SELECT u.name FROM {users} u WHERE u.uid = :uid', [':uid' => $this->argument])->fetchField();
     }
     if (empty($title)) {
       return t('No user');
@@ -55,6 +55,6 @@ class views_handler_argument_comment_user_uid extends views_handler_argument {
   }
 
   function get_sort_name() {
-    return t('Numerical', array(), array('context' => 'Sort order'));
+    return t('Numerical', [], ['context' => 'Sort order']);
   }
 }

@@ -39,23 +39,23 @@ class DashboardWelcomeBlock extends Block {
    */
   function getContent() {
     $site_config = config('system.core');
-    $build = array(
+    $build = [
       '#theme' => 'dashboard_panel__welcome',
-    );
-    $build['welcome'] = array(
+    ];
+    $build['welcome'] = [
       '#type' => 'help',
       '#markup' => t('Here are some links to help get you started:'),
-    );
+    ];
 
-    $build['steps'] = array(
+    $build['steps'] = [
       '#type' => 'container',
-      '#attributes' => array(
-        'class' => array('dashboard-welcome-steps', 'row'),
-      ),
-    );
+      '#attributes' => [
+        'class' => ['dashboard-welcome-steps', 'row'],
+      ],
+    ];
 
     // Add the first column of links.
-    $links_col1 = array();
+    $links_col1 = [];
     $links_col1['<front>'] = t('View the home page');
     $links_col1['admin/config/system/site-information'] = t('Add a logo or change the site name');
     $default_theme = $site_config->get('theme_default');
@@ -68,33 +68,33 @@ class DashboardWelcomeBlock extends Block {
     $links_col1 = $this->filterAvailableLinks($links_col1);
 
     if ($links_col1) {
-      $welcome_start_content = theme('item_list', array('items' => $links_col1));
-      $build['steps']['start'] = array(
+      $welcome_start_content = theme('item_list', ['items' => $links_col1]);
+      $build['steps']['start'] = [
         '#type' => 'container',
-        '#attributes' => array(
-          'class' => array('dashboard-welcome-step', 'dashboard-welcome-start', 'col-md-4'),
-        ),
-      );
-      $build['steps']['start']['content'] = array(
+        '#attributes' => [
+          'class' => ['dashboard-welcome-step', 'dashboard-welcome-start', 'col-md-4'],
+        ],
+      ];
+      $build['steps']['start']['content'] = [
         '#type' => 'markup',
         '#prefix' => '<h3>' . t('Get started') . '</h3>',
         '#markup' => $welcome_start_content,
-      );
+      ];
     }
 
     // Add the second column of links.
-    $links_col2 = array();
+    $links_col2 = [];
     $about_node = node_load(2);
     if ($about_node) {
-      $links_col2['node/2/edit'] = t('Edit the %title page', array('%title' => $about_node->title));
+      $links_col2['node/2/edit'] = t('Edit the %title page', ['%title' => $about_node->title]);
     }
     $node_types = node_type_get_types();
     if (isset($node_types['post'])) {
-      $links_col2['node/add/post'] = t('Create a new @post_label', array('@post_label' => $node_types['post']->name));
+      $links_col2['node/add/post'] = t('Create a new @post_label', ['@post_label' => $node_types['post']->name]);
     }
     $system_menus = menu_list_system_menus();
     if (isset($system_menus['main-menu'])) {
-      $links_col2['admin/structure/menu/manage/main-menu'] = t('Update the %menu_name menu', array('%menu_name' => $system_menus['main-menu']));
+      $links_col2['admin/structure/menu/manage/main-menu'] = t('Update the %menu_name menu', ['%menu_name' => $system_menus['main-menu']]);
     }
     $home_page_path = $site_config->get('site_frontpage');
     $home_layout = layout_load('home');
@@ -103,22 +103,22 @@ class DashboardWelcomeBlock extends Block {
     }
     $links_col2 = $this->filterAvailableLinks($links_col2);
     if ($links_col2) {
-      $welcome_next_content = theme('item_list', array('items' => $links_col2));
-      $build['steps']['next'] = array(
+      $welcome_next_content = theme('item_list', ['items' => $links_col2]);
+      $build['steps']['next'] = [
         '#type' => 'container',
-        '#attributes' => array(
-          'class' => array('dashboard-welcome-step', 'dashboard-welcome-next', 'col-md-4'),
-        ),
-      );
-      $build['steps']['next']['content'] = array(
+        '#attributes' => [
+          'class' => ['dashboard-welcome-step', 'dashboard-welcome-next', 'col-md-4'],
+        ],
+      ];
+      $build['steps']['next']['content'] = [
         '#type' => 'markup',
         '#prefix' => '<h3>' . t('Next steps') . '</h3>',
         '#markup' => $welcome_next_content,
-      );
+      ];
     }
 
     // Add the third column of links.
-    $links_col3 = array();
+    $links_col3 = [];
     $links_col3['admin/modules'] = t('Turn existing modules on or off');
     if (module_exists('installer')) {
       $links_col3['admin/modules/install'] = t('Add new modules for more functionality');
@@ -128,18 +128,18 @@ class DashboardWelcomeBlock extends Block {
     $links_col3 = $this->filterAvailableLinks($links_col3);
 
     if ($links_col3) {
-      $welcome_more_content = theme('item_list', array('items' => $links_col3));
-      $build['steps']['more'] = array(
+      $welcome_more_content = theme('item_list', ['items' => $links_col3]);
+      $build['steps']['more'] = [
         '#type' => 'container',
-        '#attributes' => array(
-          'class' => array('dashboard-welcome-step', 'dashboard-welcome-more', 'col-md-4'),
-        ),
-      );
-      $build['steps']['more']['content'] = array(
+        '#attributes' => [
+          'class' => ['dashboard-welcome-step', 'dashboard-welcome-more', 'col-md-4'],
+        ],
+      ];
+      $build['steps']['more']['content'] = [
         '#type' => 'markup',
         '#prefix' => '<h3>' . t('More actions') . '</h3>',
         '#markup' => $welcome_more_content,
-      );
+      ];
     }
 
     return $build;
@@ -155,7 +155,7 @@ class DashboardWelcomeBlock extends Block {
    *   An array of HTML anchor tags for items the user may access.
    */
   private function filterAvailableLinks(array $links) {
-    $html_links = array();
+    $html_links = [];
     foreach ($links as $path => $label) {
       if (url_is_external($path) || $path === '<front>') {
         if ($path !== '<front>') {
@@ -168,7 +168,7 @@ class DashboardWelcomeBlock extends Block {
         $access = $router_item && $router_item['access'];
       }
       if ($access) {
-        $html_links[] = l($label, $path, array('html' => TRUE));
+        $html_links[] = l($label, $path, ['html' => TRUE]);
       }
     }
     return $html_links;

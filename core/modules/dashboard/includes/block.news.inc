@@ -41,11 +41,11 @@ class DashboardNewsBlock extends Block {
   public function getContent() {
     $news = $this->getNews();
 
-    $links = array();
+    $links = [];
     if ($news) {
       foreach ($news as $key => $notifications) {
         $notification_date = format_date($notifications['timestamp'], 'custom', 'M j, Y');
-        $date_classes = array('class' => array('notification-date'));
+        $date_classes = ['class' => ['notification-date']];
         // A notification is considered new, if no more than 14 days (1209600
         // seconds) have lapsed.
         $is_new = (time() - $notifications['timestamp']) < 1209600;
@@ -53,33 +53,33 @@ class DashboardNewsBlock extends Block {
           $date_classes['class'][] = 'marker';
         }
         $notification_date = '<span ' . backdrop_attributes($date_classes) . '>' . $notification_date . '</span>';
-        $notification_link = l($notifications['title'], $notifications['url'], array('attributes' => array('target'=>'_blank')));
+        $notification_link = l($notifications['title'], $notifications['url'], ['attributes' => ['target'=>'_blank']]);
         $notification_summary = filter_xss($notifications['summary']);
 
-        $notification = array(
+        $notification = [
           'data' => '<p>' . $notification_date . ': ' . $notification_link . ' - ' . $notification_summary . '</p>',
-        );
+        ];
 
         if ($is_new) {
-          $notification['class'] = array('is-new');
+          $notification['class'] = ['is-new'];
         }
 
         $links[] = $notification;
       }
     }
 
-    $build = array();
+    $build = [];
     if (empty($links)) {
-      $build['list'] = array(
+      $build['list'] = [
         '#type' => 'markup',
         '#markup' => t('No news at this time.'),
-      );
+      ];
     }
     else {
-      $build['list'] = array(
+      $build['list'] = [
         '#theme' => 'item_list',
         '#items' => $links,
-      );
+      ];
     }
 
     return $build;
@@ -91,12 +91,12 @@ class DashboardNewsBlock extends Block {
   public function form(&$form, &$form_state) {
     parent::form($form, $form_state);
 
-    $form['url'] = array(
+    $form['url'] = [
       '#type' => 'help',
       '#markup' => t(
         'This block provides a news feed from BackdropCMS.org. Its contents can not be edited.'
       ),
-    );
+    ];
   }
 
   /**
@@ -133,9 +133,9 @@ class DashboardNewsBlock extends Block {
     // A short timeout means that we won't delay loading the dashboard if the
     // cache is cleared and no network is available.
     if ($feed_url) {
-      $feed = backdrop_http_request($feed_url, array(
+      $feed = backdrop_http_request($feed_url, [
         'timeout' => 2,
-      ));
+      ]);
       if ($feed->code === '200') {
         $news = json_decode($feed->data, TRUE);
       }

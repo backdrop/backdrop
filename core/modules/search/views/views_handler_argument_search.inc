@@ -20,7 +20,7 @@ class views_handler_argument_search extends views_handler_argument {
    */
   function query_parse_search_expression($input) {
     if (!isset($this->search_query)) {
-      $this->search_query = db_select('search_index', 'i', array('target' => 'replica'))->extend('viewsSearchQuery');
+      $this->search_query = db_select('search_index', 'i', ['target' => 'replica'])->extend('viewsSearchQuery');
       $this->search_query->searchExpression($input, $this->view->base_table);
       $this->search_query->publicParseSearchExpression();
     }
@@ -56,7 +56,7 @@ class views_handler_argument_search extends views_handler_argument {
       $join->construct('search_total', $search_index, 'word', 'word');
       $search_total = $this->query->add_relationship('search_total', $join, $search_index);
 
-      $this->search_score = $this->query->add_field('', "$search_index.score * $search_total.count", 'score', array('aggregate' => TRUE, 'function' => 'sum'));
+      $this->search_score = $this->query->add_field('', "$search_index.score * $search_total.count", 'score', ['aggregate' => TRUE, 'function' => 'sum']);
 
       if (empty($this->query->relationships[$this->relationship])) {
         $base_table = $this->query->base_table;
@@ -94,7 +94,7 @@ class views_handler_argument_search extends views_handler_argument {
       $this->query->add_groupby("$search_index.sid");
       $matches = $this->search_query->matches();
       $placeholder = $this->placeholder();
-      $this->query->add_having_expression(0, "COUNT(*) >= $placeholder", array($placeholder => $matches));
+      $this->query->add_having_expression(0, "COUNT(*) >= $placeholder", [$placeholder => $matches]);
     }
   }
 }

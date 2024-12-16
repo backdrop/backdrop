@@ -42,10 +42,10 @@ class DrupalWebTestCase extends BackdropWebTestCase {
   function drupalGetNodeByTitle($title, $reset) {
     return $this->backdropGetNodeByTitle($title, $reset);
   }
-  protected function drupalCreateNode($settings = array()) {
+  protected function drupalCreateNode($settings = []) {
     return $this->backdropCreateNode($settings);
   }
-  protected function drupalCreateContentType($settings = array()) {
+  protected function drupalCreateContentType($settings = []) {
     return $this->backdropCreateContentType($settings);
   }
   protected function drupalGetTestFiles($type, $size = NULL) {
@@ -54,7 +54,7 @@ class DrupalWebTestCase extends BackdropWebTestCase {
   protected function drupalCompareFiles($file1, $file2) {
     return $this->backdropCompareFiles($file1, $file2);
   }
-  protected function drupalCreateUser(array $permissions = array()) {
+  protected function drupalCreateUser(array $permissions = []) {
     return $this->backdropCreateUser($permissions);
   }
   protected function drupalCreateRole(array $permissions, $name = NULL) {
@@ -69,16 +69,16 @@ class DrupalWebTestCase extends BackdropWebTestCase {
   protected function drupalLogout() {
     $this->backdropLogout();
   }
-  protected function drupalGet($path, array $options = array(), array $headers = array()) {
+  protected function drupalGet($path, array $options = [], array $headers = []) {
     return $this->backdropGet($path, $options, $headers);
   }
-  protected function drupalGetAJAX($path, array $options = array(), array $headers = array()) {
+  protected function drupalGetAJAX($path, array $options = [], array $headers = []) {
     return $this->backdropGetAJAX($path, $options, $headers);
   }
-  protected function drupalPost($path, $edit, $submit, array $options = array(), array $headers = array(), $form_html_id = NULL, $extra_post = NULL) {
+  protected function drupalPost($path, $edit, $submit, array $options = [], array $headers = [], $form_html_id = NULL, $extra_post = NULL) {
     return $this->backdropPost($path, $edit, $submit, $options, $headers, $form_html_id, $extra_post);
   }
-  protected function drupalPostAJAX($path, $edit, $triggering_element, $ajax_path = NULL, array $options = array(), array $headers = array(), $form_html_id = NULL, $ajax_settings = NULL) {
+  protected function drupalPostAJAX($path, $edit, $triggering_element, $ajax_path = NULL, array $options = [], array $headers = [], $form_html_id = NULL, $ajax_settings = NULL) {
     return $this->backdropPostAJAX($path, $edit, $triggering_element, $ajax_path, $options, $headers, $form_html_id, $ajax_settings);
   }
   protected function drupalGetHeaders($all_requests = FALSE) {
@@ -93,7 +93,7 @@ class DrupalWebTestCase extends BackdropWebTestCase {
   protected function drupalGetSettings() {
     return $this->backdropGetSettings();
   }
-  protected function drupalGetMails($filter = array()) {
+  protected function drupalGetMails($filter = []) {
     return $this->backdropGetMails($filter);
   }
   protected function drupalSetContent($content, $url = 'internal:') {
@@ -102,7 +102,7 @@ class DrupalWebTestCase extends BackdropWebTestCase {
   protected function drupalSetSettings($settings) {
     $this->backdropSetSettings($settings);
   }
-  protected function drupalHead($path, array $options = array(), array $headers = array()) {
+  protected function drupalHead($path, array $options = [], array $headers = []) {
     return $this->backdropHead($path, $options, $headers);
   }
 }

@@ -54,7 +54,7 @@ function seven_node_add_list($variables) {
     $output .= '</ul>';
   }
   else {
-    $output = '<p>' . t('You have not created any content types yet. Go to the <a href="@create-content">content type creation page</a> to add a new content type.', array('@create-content' => url('admin/structure/types/add'))) . '</p>';
+    $output = '<p>' . t('You have not created any content types yet. Go to the <a href="@create-content">content type creation page</a> to add a new content type.', ['@create-content' => url('admin/structure/types/add')]) . '</p>';
   }
   return $output;
 }
@@ -66,7 +66,7 @@ function seven_node_add_list($variables) {
  */
 function seven_admin_block_content($variables) {
   $content = $variables['content'];
-  backdrop_sort($content, array('link_title' => SORT_STRING));
+  backdrop_sort($content, ['link_title' => SORT_STRING]);
   $output = '';
   if (!empty($content)) {
     $output = '<ul class="admin-list">';
@@ -92,10 +92,10 @@ function seven_tablesort_indicator($variables) {
   $style = $variables['style'];
   $theme_path = backdrop_get_path('theme', 'seven');
   if ($style == 'asc') {
-    return theme('image', array('path' => $theme_path . '/images/sort-amount-up--white--64.png', 'alt' => t('sort ascending'), 'width' => 16, 'height' => 16, 'title' => t('sort ascending')));
+    return theme('image', ['path' => $theme_path . '/images/sort-amount-up--white--64.png', 'alt' => t('sort ascending'), 'width' => 16, 'height' => 16, 'title' => t('sort ascending')]);
   }
   else {
-    return theme('image', array('path' => $theme_path . '/images/sort-amount-down-alt--white--64.png', 'alt' => t('sort descending'), 'width' => 16, 'height' => 16, 'title' => t('sort descending')));
+    return theme('image', ['path' => $theme_path . '/images/sort-amount-down-alt--white--64.png', 'alt' => t('sort descending'), 'width' => 16, 'height' => 16, 'title' => t('sort descending')]);
   }
 }
 
@@ -128,7 +128,7 @@ function seven_breadcrumb($variables) {
     // IE8 does not support :first-child and :last-child selectors, so we need
     // to add classes.
     foreach ($breadcrumb as $n => $item) {
-      $classes = array();
+      $classes = [];
       if ($n === 0) {
         $classes[] = 'first';
       }

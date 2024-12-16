@@ -23,7 +23,7 @@ function file_file_presave($file) {
  * Implements hook_file_type().
  */
 function file_file_type($file) {
-  $types = array();
+  $types = [];
   foreach (file_type_get_types() as $type) {
     if (file_match_mimetypes($type->mimetypes, $file->filemime)) {
       $types[] = $type->type;
@@ -39,13 +39,13 @@ function file_file_type($file) {
 function file_file_insert($file) {
   // Save file metadata.
   if (!empty($file->metadata)) {
-    $query = db_insert('file_metadata')->fields(array('fid', 'name', 'value'));
+    $query = db_insert('file_metadata')->fields(['fid', 'name', 'value']);
     foreach ($file->metadata as $name => $value) {
-      $query->values(array(
+      $query->values([
         'fid' => $file->fid,
         'name' => $name,
         'value' => serialize($value),
-      ));
+      ]);
     }
     $query->execute();
   }
@@ -64,34 +64,34 @@ function file_file_update($file) {
   // Save file metadata.
   db_delete('file_metadata')->condition('fid', $file->fid)->execute();
   if (!empty($file->metadata)) {
-    $query = db_insert('file_metadata')->fields(array('fid', 'name', 'value'));
+    $query = db_insert('file_metadata')->fields(['fid', 'name', 'value']);
     foreach ($file->metadata as $name => $value) {
-      $query->values(array(
+      $query->values([
         'fid' => $file->fid,
         'name' => $name,
         'value' => serialize($value),
-      ));
+      ]);
     }
     $query->execute();
   }
 
   if (module_exists('image') && file_get_mimetype_type($file) == 'image' && $file->filesize && isset($file->original)) {
     if (!isset($file->metadata)) {
-      $file->metadata = array();
+      $file->metadata = [];
     }
 
     if (!isset($file->original->metadata)) {
       if (!is_object($file->original)) {
         $file->original = new stdClass();
       }
-      $file->original->metadata = array();
+      $file->original->metadata = [];
     }
 
     // If the file has changed dimensions or a new file has been uploaded,
     // update any image field reference to this file and flush image style
     // derivatives.
-    $file->metadata += array('width' => NULL, 'height' => NULL);
-    $file->original->metadata += array('width' => NULL, 'height' => NULL);
+    $file->metadata += ['width' => NULL, 'height' => NULL];
+    $file->original->metadata += ['width' => NULL, 'height' => NULL];
     if ($file->filesize != $file->original->filesize || $file->metadata['width'] != $file->original->metadata['width'] || $file->metadata['height'] != $file->original->metadata['height']) {
       _file_update_image_field_dimensions($file);
     }
@@ -160,13 +160,13 @@ function file_file_load($files) {
   // Add alt and title text to images.
   $config = config('file.settings');
 
-  $replace_options = array(
+  $replace_options = [
     'clear' => TRUE,
     'sanitize' => FALSE,
-  );
+  ];
 
   // Load and unserialize metadata.
-  $results = db_query("SELECT * FROM {file_metadata} WHERE fid IN (:fids)", array(':fids' => array_keys($files)));
+  $results = db_query("SELECT * FROM {file_metadata} WHERE fid IN (:fids)", [':fids' => array_keys($files)]);
 
   foreach ($results as $result) {
     $name = $result->name;
@@ -277,14 +277,14 @@ function _file_fields_update($entity_type, $entity) {
   field_attach_update($entity_type, $entity);
 
   // Clear the cache for this entity now.
-  entity_get_controller($entity_type)->resetCache(array($id));
+  entity_get_controller($entity_type)->resetCache([$id]);
 }
 
 /**
  * Implements hook_file_metadata_info().
  */
 function file_file_metadata_info() {
-  $info['width'] = array('label' => t('Width'), 'type' => 'integer');
-  $info['height'] = array('label' => t('Height'), 'type' => 'integer');
+  $info['width'] = ['label' => t('Width'), 'type' => 'integer'];
+  $info['height'] = ['label' => t('Height'), 'type' => 'integer'];
   return $info;
 }

@@ -46,49 +46,49 @@ function theme_menu_overview_form($variables) {
   backdrop_add_tabledrag('menu-overview', 'match', 'parent', 'menu-plid', 'menu-plid', 'menu-mlid', TRUE, MENU_MAX_DEPTH - 1);
   backdrop_add_tabledrag('menu-overview', 'order', 'sibling', 'menu-weight');
 
-  $header = array();
+  $header = [];
   $header[] = t('Menu link');
   if (module_exists('language')) {
     $header[] = t('Language');
   }
-  $header[] = array('data' => t('Enabled'), 'class' => array('checkbox'));
+  $header[] = ['data' => t('Enabled'), 'class' => ['checkbox']];
   $header[] = t('Weight');
   $header[] = t('Operations');
 
-  $rows = array();
+  $rows = [];
   foreach (element_children($form) as $mlid) {
     if (isset($form[$mlid]['hidden'])) {
       $element = &$form[$mlid];
 
       // Add special classes to be used for tabledrag.js.
-      $element['plid']['#attributes']['class'] = array('menu-plid');
-      $element['mlid']['#attributes']['class'] = array('menu-mlid');
-      $element['weight']['#attributes']['class'] = array('menu-weight');
+      $element['plid']['#attributes']['class'] = ['menu-plid'];
+      $element['mlid']['#attributes']['class'] = ['menu-mlid'];
+      $element['weight']['#attributes']['class'] = ['menu-weight'];
 
       // Change the parent field to a hidden. This allows any value but hides the field.
       $element['plid']['#type'] = 'hidden';
 
-      $row = array();
-      $row[] = theme('indentation', array('size' => $element['#item']['depth'] - 1)) . backdrop_render($element['title']);
+      $row = [];
+      $row[] = theme('indentation', ['size' => $element['#item']['depth'] - 1]) . backdrop_render($element['title']);
       if (module_exists('language')) {
         $row[] = backdrop_render($element['langcode']);
       }
-      $row[] = array('data' => backdrop_render($element['hidden']), 'class' => array('checkbox', 'menu-enabled'));
+      $row[] = ['data' => backdrop_render($element['hidden']), 'class' => ['checkbox', 'menu-enabled']];
       $row[] = backdrop_render($element['weight']) . backdrop_render($element['plid']) . backdrop_render($element['mlid']);
       $row[] = backdrop_render($element['operations']);
 
-      $row = array_merge(array('data' => $row), $element['#attributes']);
+      $row = array_merge(['data' => $row], $element['#attributes']);
       $row['class'][] = 'draggable';
       $rows[] = $row;
     }
   }
 
-  $output .= theme('table', array(
+  $output .= theme('table', [
     'header' => $header,
     'rows' => $rows,
-    'attributes' => array('id' => 'menu-overview'),
-    'empty' => t('There are no menu links yet. <a href="@link">Add link</a>.', array('@link' => url('admin/structure/menu/manage/' . $form['#menu']['menu_name'] . '/add'))),
-  ));
+    'attributes' => ['id' => 'menu-overview'],
+    'empty' => t('There are no menu links yet. <a href="@link">Add link</a>.', ['@link' => url('admin/structure/menu/manage/' . $form['#menu']['menu_name'] . '/add')]),
+  ]);
   $output .= backdrop_render_children($form);
   return $output;
 }

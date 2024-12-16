@@ -24,16 +24,16 @@
 function hook_admin_bar_map() {
   // Expand content types below Structure > Content types.
   // The key denotes the dynamic path to expand to multiple menu items.
-  $map['admin/structure/types/manage/%node_type'] = array(
+  $map['admin/structure/types/manage/%node_type'] = [
     // Link generated items directly to the "Content types" item.
     'parent' => 'admin/structure/types',
     // Create expansion arguments for the '%node_type' placeholder.
-    'arguments' => array(
-      array(
+    'arguments' => [
+      [
         '%node_type' => array_keys(node_type_get_types()),
-      ),
-    ),
-  );
+      ],
+    ],
+  ];
   return $map;
 }
 
@@ -72,28 +72,28 @@ function hook_admin_bar_output_build(&$content) {
 
   // Add new top-level item to the menu.
   if (isset($content['menu']['menu'])) {
-    $content['menu']['menu']['myitem'] = array(
+    $content['menu']['menu']['myitem'] = [
       '#title' => t('My item'),
       // #attributes are used for list items (LI).
-      '#attributes' => array('class' => array('my_module-myitem')),
+      '#attributes' => ['class' => ['my_module-myitem']],
       '#href' => 'my_module/path',
       // #options are passed to l().
-      '#options' => array(
+      '#options' => [
         'query' => backdrop_get_destination(),
         // Apply a class on the link (anchor).
-        'attributes' => array('class' => array('myitem-link-anchor')),
-      ),
+        'attributes' => ['class' => ['myitem-link-anchor']],
+      ],
       // #weight controls the order of links in the resulting item list.
       '#weight' => 50,
-    );
+    ];
   }
   // Add link to the icon menu to manually run cron.
   if (isset($content['icon'])) {
-    $content['icon']['myitem']['cron'] = array(
+    $content['icon']['myitem']['cron'] = [
       '#title' => t('Run cron'),
       '#access' => user_access('administer site configuration'),
       '#href' => 'admin/reports/status/run-cron',
-    );
+    ];
   }
 }
 
@@ -123,7 +123,7 @@ function hook_admin_bar_output_alter(&$content) {
  *   strings containing the replacement content.
  */
 function hook_admin_bar_replacements($complete) {
-  $items = array();
+  $items = [];
   // If the complete menu is output, then it is uncached and will contain the
   // current counts already.
   if (!$complete) {
@@ -155,9 +155,9 @@ function hook_admin_bar_replacements($complete) {
  *   - callback: The name of a function to invoke to flush the individual cache.
  */
 function hook_admin_bar_cache_info() {
-  $caches['update'] = array(
+  $caches['update'] = [
     'title' => t('Update data'),
     'callback' => '_update_cache_clear',
-  );
+  ];
   return $caches;
 }

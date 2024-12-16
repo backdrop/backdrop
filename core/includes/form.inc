@@ -121,7 +121,7 @@
  * @see backdrop_build_form()
  */
 function backdrop_get_form($form_id) {
-  $form_state = array();
+  $form_state = [];
 
   $args = func_get_args();
   // Remove $form_id from the arguments.
@@ -365,7 +365,7 @@ function backdrop_build_form($form_id, &$form_state) {
     // - temporary: Any assigned data is expected to survives within the same
     //   page request.
     if ($check_cache) {
-      $uncacheable_keys = array_flip(array_diff(form_state_keys_no_cache(), array('always_process', 'temporary')));
+      $uncacheable_keys = array_flip(array_diff(form_state_keys_no_cache(), ['always_process', 'temporary']));
       $form_state = array_diff_key($form_state, $uncacheable_keys);
       $form_state += $form_state_before_retrieval;
     }
@@ -399,26 +399,26 @@ function backdrop_build_form($form_id, &$form_state) {
  * Retrieves default values for the $form_state array.
  */
 function form_state_defaults() {
-  return array(
+  return [
     'rebuild' => FALSE,
-    'rebuild_info' => array(),
+    'rebuild_info' => [],
     'redirect' => NULL,
     // @todo 'args' is usually set, so no other default 'build_info' keys are
     //   appended via += form_state_defaults().
-    'build_info' => array(
-      'args' => array(),
-      'files' => array(),
-    ),
-    'temporary' => array(),
+    'build_info' => [
+      'args' => [],
+      'files' => [],
+    ],
+    'temporary' => [],
     'submitted' => FALSE,
     'executed' => FALSE,
     'programmed' => FALSE,
     'programmed_bypass_access_check' => TRUE,
     'cache'=> FALSE,
     'method' => 'post',
-    'groups' => array(),
-    'buttons' => array(),
-  );
+    'groups' => [],
+    'buttons' => [],
+  ];
 }
 
 /**
@@ -504,7 +504,7 @@ function backdrop_rebuild_form($form_id, &$form_state, $old_form = NULL) {
 
   // Clear out all group associations as these might be different when
   // re-rendering the form.
-  $form_state['groups'] = array();
+  $form_state['groups'] = [];
 
   // Return a fully built form that is ready for rendering.
   return form_builder($form_id, $form, $form_state);
@@ -527,10 +527,10 @@ function form_get_cache($form_build_id, &$form_state) {
 
         // If the original form is contained in include files, load the files.
         // @see form_load_include()
-        $form_state['build_info'] += array('files' => array());
+        $form_state['build_info'] += ['files' => []];
         foreach ($form_state['build_info']['files'] as $file) {
           if (is_array($file)) {
-            $file += array('type' => 'inc', 'name' => $file['module']);
+            $file += ['type' => 'inc', 'name' => $file['module']];
             module_load_include($file['type'], $file['module'], $file['name']);
           }
           elseif (file_exists($file)) {
@@ -574,7 +574,7 @@ function form_set_cache($form_build_id, $form, $form_state) {
   // prevent legacy code operating directly with form_get_cache and
   // form_set_cache from accidentally overwriting immutable form state.
   if ($form['#build_id'] != $form_build_id) {
-    watchdog('form', 'Form build-id mismatch detected while attempting to store a form in the cache.', array(), WATCHDOG_ERROR);
+    watchdog('form', 'Form build-id mismatch detected while attempting to store a form in the cache.', [], WATCHDOG_ERROR);
     return;
   }
 
@@ -601,7 +601,7 @@ function form_set_cache($form_build_id, $form, $form_state) {
  * Returns an array of $form_state keys that shouldn't be cached.
  */
 function form_state_keys_no_cache() {
-  return array(
+  return [
     // Public properties defined by form constructors and form handlers.
     'always_process',
     'must_validate',
@@ -623,7 +623,7 @@ function form_state_keys_no_cache() {
     'executed',
     'validate_handlers',
     'values',
-  );
+  ];
 }
 
 /**
@@ -664,11 +664,11 @@ function form_load_include(&$form_state, $type, $module, $name = NULL) {
   if (!isset($form_state['build_info']['files']["$module:$name.$type"])) {
     // Only add successfully included files to the form state.
     if ($result = module_load_include($type, $module, $name)) {
-      $form_state['build_info']['files']["$module:$name.$type"] = array(
+      $form_state['build_info']['files']["$module:$name.$type"] = [
         'type' => $type,
         'module' => $module,
         'name' => $name,
-      );
+      ];
       return $result;
     }
   }
@@ -834,7 +834,7 @@ function backdrop_retrieve_form($form_id, &$form_state) {
     }
   }
 
-  $form = array();
+  $form = [];
   // Assign a default CSS class name based on $form_id.
   // This happens here and not in backdrop_prepare_form() in order to allow the
   // form constructor function to override or remove the default class.
@@ -847,7 +847,7 @@ function backdrop_retrieve_form($form_id, &$form_state) {
   // We need to pass $form_state by reference in order for forms to modify it,
   // since call_user_func_array() requires that referenced variables are passed
   // explicitly.
-  $args = array_merge(array($form, &$form_state), $args);
+  $args = array_merge([$form, &$form_state], $args);
 
   // When the passed $form_state (not using backdrop_get_form()) defines a
   // 'wrapper_callback', then it requests to invoke a separate (wrapping) form
@@ -887,7 +887,7 @@ function backdrop_retrieve_form($form_id, &$form_state) {
  *   data, is also accumulated here.
  */
 function backdrop_process_form($form_id, &$form, &$form_state) {
-  $form_state['values'] = array();
+  $form_state['values'] = [];
 
   // With $_GET, these forms are always submitted if requested.
   if ($form_state['method'] == 'get' && !empty($form_state['always_process'])) {
@@ -951,7 +951,7 @@ function backdrop_process_form($form_id, &$form, &$form_state) {
           $batch['form_state'] = $form_state;
         }
         else {
-          $batch['form_state'] = array_intersect_key($form_state, array_flip(array('programmed', 'rebuild', 'storage', 'no_redirect', 'redirect')));
+          $batch['form_state'] = array_intersect_key($form_state, array_flip(['programmed', 'rebuild', 'storage', 'no_redirect', 'redirect']));
         }
 
         $batch['progressive'] = !$form_state['programmed'];
@@ -1046,7 +1046,7 @@ function backdrop_prepare_form($form_id, &$form, &$form_state) {
   if (!isset($form['#build_id'])) {
     $form['#build_id'] = 'form-' . backdrop_random_key();
   }
-  $form['form_build_id'] = array(
+  $form['form_build_id'] = [
     '#type' => 'hidden',
     '#value' => $form['#build_id'],
     '#id' => $form['#build_id'],
@@ -1054,8 +1054,8 @@ function backdrop_prepare_form($form_id, &$form, &$form_state) {
     // Form processing and validation requires this value, so ensure the
     // submitted form value appears literally, regardless of custom #tree
     // and #parents being set elsewhere.
-    '#parents' => array('form_build_id'),
-  );
+    '#parents' => ['form_build_id'],
+  ];
 
   // Add a token, based on either #token or form_id, to any form displayed to
   // authenticated users. This ensures that any submitted form was actually
@@ -1074,39 +1074,39 @@ function backdrop_prepare_form($form_id, &$form, &$form_state) {
     // Otherwise, generate a public token based on the form id.
     else {
       $form['#token'] = $form_id;
-      $form['form_token'] = array(
+      $form['form_token'] = [
         '#id' => backdrop_html_id('edit-' . $form_id . '-form-token'),
         '#type' => 'token',
         '#default_value' => backdrop_get_token($form['#token']),
         // Form processing and validation requires this value, so ensure the
         // submitted form value appears literally, regardless of custom #tree
         // and #parents being set elsewhere.
-        '#parents' => array('form_token'),
-      );
+        '#parents' => ['form_token'],
+      ];
     }
   }
 
   if (isset($form_id)) {
-    $form['form_id'] = array(
+    $form['form_id'] = [
       '#type' => 'hidden',
       '#value' => $form_id,
       '#id' => backdrop_html_id("edit-$form_id"),
       // Form processing and validation requires this value, so ensure the
       // submitted form value appears literally, regardless of custom #tree
       // and #parents being set elsewhere.
-      '#parents' => array('form_id'),
-    );
+      '#parents' => ['form_id'],
+    ];
   }
   if (!isset($form['#id'])) {
     $form['#id'] = backdrop_html_id($form_id);
   }
 
   $form += element_info('form');
-  $form += array('#tree' => FALSE, '#parents' => array());
+  $form += ['#tree' => FALSE, '#parents' => []];
 
   if (!isset($form['#validate'])) {
     // Ensure that modules can rely on #validate being set.
-    $form['#validate'] = array();
+    $form['#validate'] = [];
     // Check for a handler specific to $form_id.
     if (function_exists($form_id . '_validate')) {
       $form['#validate'][] = $form_id . '_validate';
@@ -1120,7 +1120,7 @@ function backdrop_prepare_form($form_id, &$form, &$form_state) {
 
   if (!isset($form['#submit'])) {
     // Ensure that modules can rely on #submit being set.
-    $form['#submit'] = array();
+    $form['#submit'] = [];
     // Check for a handler specific to $form_id.
     if (function_exists($form_id . '_submit')) {
       $form['#submit'][] = $form_id . '_submit';
@@ -1137,7 +1137,7 @@ function backdrop_prepare_form($form_id, &$form, &$form_state) {
   // #theme function only has to care for rendering the inner form elements,
   // not the form itself.
   if (!isset($form['#theme'])) {
-    $form['#theme'] = array($form_id);
+    $form['#theme'] = [$form_id];
     if (isset($form_state['build_info']['base_form_id'])) {
       $form['#theme'][] = $form_state['build_info']['base_form_id'];
     }
@@ -1145,7 +1145,7 @@ function backdrop_prepare_form($form_id, &$form, &$form_state) {
 
   // Invoke hook_form_alter(), hook_form_BASE_FORM_ID_alter(), and
   // hook_form_FORM_ID_alter() implementations.
-  $hooks = array('form');
+  $hooks = ['form'];
   if (isset($form_state['build_info']['base_form_id'])) {
     $hooks[] = 'form_' . $form_state['build_info']['base_form_id'];
   }
@@ -1187,7 +1187,7 @@ function _backdrop_invalid_token_set_form_error() {
  *   not be repeated in the submission step.
  */
 function backdrop_validate_form($form_id, &$form, &$form_state) {
-  $validated_forms = &backdrop_static(__FUNCTION__, array());
+  $validated_forms = &backdrop_static(__FUNCTION__, []);
 
   if (isset($validated_forms[$form_id]) && empty($form_state['must_validate'])) {
     return;
@@ -1200,10 +1200,10 @@ function backdrop_validate_form($form_id, &$form, &$form_state) {
     if (!backdrop_valid_token($form_state['values']['form_token'], $form['#token']) || !empty($form_state['invalid_token'])) {
       _backdrop_invalid_token_set_form_error();
       // Ignore all submitted values.
-      $form_state['input'] = array();
-      $_POST = array();
+      $form_state['input'] = [];
+      $_POST = [];
       // Make sure file uploads do not get processed.
-      $_FILES = array();
+      $_FILES = [];
       // Stop here and don't run any further validation handlers, because they
       // could invoke non-safe operations which opens the door for CSRF
       // vulnerabilities.
@@ -1218,7 +1218,7 @@ function backdrop_validate_form($form_id, &$form, &$form_state) {
   // If validation errors are limited then remove any non validated form values,
   // so that only values that passed validation are left for submit callbacks.
   if (isset($form_state['triggering_element']['#limit_validation_errors']) && $form_state['triggering_element']['#limit_validation_errors'] !== FALSE) {
-    $values = array();
+    $values = [];
     foreach ($form_state['triggering_element']['#limit_validation_errors'] as $section) {
       // If the section exists within $form_state['values'], even if the value
       // is NULL, copy it to $values.
@@ -1340,7 +1340,7 @@ function backdrop_redirect_form($form_state) {
         $function($form_state['redirect']);
       }
     }
-    backdrop_goto(current_path(), array('query' => backdrop_get_query_parameters()));
+    backdrop_goto(current_path(), ['query' => backdrop_get_query_parameters()]);
   }
 }
 
@@ -1384,7 +1384,7 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
     if (isset($elements['#needs_validation'])) {
       // Verify that the value is not longer than #maxlength.
       if (isset($elements['#maxlength']) && is_string($elements['#value']) && backdrop_strlen($elements['#value']) > $elements['#maxlength']) {
-        form_error($elements, $t('!name cannot be longer than %max characters but is currently %length characters long.', array('!name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title'], '%max' => $elements['#maxlength'], '%length' => backdrop_strlen($elements['#value']))));
+        form_error($elements, $t('!name cannot be longer than %max characters but is currently %length characters long.', ['!name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title'], '%max' => $elements['#maxlength'], '%length' => backdrop_strlen($elements['#value'])]));
       }
 
       if (isset($elements['#options']) && isset($elements['#value'])) {
@@ -1395,11 +1395,11 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
           $options = $elements['#options'];
         }
         if (is_array($elements['#value'])) {
-          $value = in_array($elements['#type'], array('checkboxes', 'tableselect')) ? array_keys($elements['#value']) : $elements['#value'];
+          $value = in_array($elements['#type'], ['checkboxes', 'tableselect']) ? array_keys($elements['#value']) : $elements['#value'];
           foreach ($value as $v) {
             if (!isset($options[$v])) {
-              form_error($elements, $t('Invalid option %choice in %name element.', array('%choice' => $v, '%name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title'])));
-              watchdog('form', 'Invalid option %choice in %name element.', array('%choice' => $v, '%name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title']), WATCHDOG_ERROR);
+              form_error($elements, $t('Invalid option %choice in %name element.', ['%choice' => $v, '%name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title']]));
+              watchdog('form', 'Invalid option %choice in %name element.', ['%choice' => $v, '%name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title']], WATCHDOG_ERROR);
             }
           }
         }
@@ -1417,8 +1417,8 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
           form_set_value($elements, NULL, $form_state);
         }
         elseif (!isset($options[$elements['#value']])) {
-          form_error($elements, $t('Invalid option %choice in %name element.', array('%choice' => $elements['#value'], '%name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title'])));
-          watchdog('form', 'Invalid option %choice in %name element.', array('%choice' => $elements['#value'], '%name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title']), WATCHDOG_ERROR);
+          form_error($elements, $t('Invalid option %choice in %name element.', ['%choice' => $elements['#value'], '%name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title']]));
+          watchdog('form', 'Invalid option %choice in %name element.', ['%choice' => $elements['#value'], '%name' => empty($elements['#title']) ? $elements['#parents'][0] : $elements['#title']], WATCHDOG_ERROR);
         }
       }
     }
@@ -1446,7 +1446,7 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
     // #limit_validation_errors defaults to FALSE (via system_element_info()),
     // so that full validation is their default behavior.
     elseif (isset($form_state['triggering_element']) && !isset($form_state['triggering_element']['#limit_validation_errors']) && !$form_state['submitted']) {
-      form_set_error(NULL, '', array());
+      form_set_error(NULL, '', []);
     }
     // As an extra security measure, explicitly turn off error suppression if
     // one of the above conditions wasn't met. Since this is also done at the
@@ -1478,7 +1478,7 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
         // form constructors are encouraged to set #title anyway, and then set
         // #title_display to 'invisible'. This improves accessibility.
         elseif (isset($elements['#title'])) {
-          form_error($elements, $t('!name field is required.', array('!name' => $elements['#title'])));
+          form_error($elements, $t('!name field is required.', ['!name' => $elements['#title']]));
         }
         else {
           form_error($elements);
@@ -1494,7 +1494,7 @@ function _form_validate(&$elements, &$form_state, $form_id = NULL) {
     // #value data.
     elseif (isset($elements['#element_validate'])) {
       foreach ($elements['#element_validate'] as $function) {
-        call_user_func_array($function, array(&$elements, &$form_state, $form_state['complete_form']));
+        call_user_func_array($function, [&$elements, &$form_state, $form_state['complete_form']]);
       }
     }
 
@@ -1540,7 +1540,7 @@ function form_execute_handlers($type, &$form, &$form_state) {
     $handlers = $form['#' . $type];
   }
   else {
-    $handlers = array();
+    $handlers = [];
   }
 
   foreach ($handlers as $function) {
@@ -1551,7 +1551,7 @@ function form_execute_handlers($type, &$form, &$form_state) {
       // Some previous submit handler has set a batch. To ensure correct
       // execution order, store the call in a special 'control' batch set.
       // See _batch_next_set().
-      $batch['sets'][] = array('form_submit' => $function);
+      $batch['sets'][] = ['form_submit' => $function];
       $batch['has_form_submits'] = TRUE;
     }
     else {
@@ -1659,7 +1659,7 @@ function form_execute_handlers($type, &$form, &$form_state) {
  * @see http://drupal.org/node/763376
  */
 function form_set_error($name = NULL, $message = '', $limit_validation_errors = NULL) {
-  $form = &backdrop_static(__FUNCTION__, array());
+  $form = &backdrop_static(__FUNCTION__, []);
   $sections = &backdrop_static(__FUNCTION__ . ':limit_validation_errors');
   if (isset($limit_validation_errors)) {
     $sections = $limit_validation_errors;
@@ -1733,7 +1733,7 @@ function form_get_errors() {
  */
 function form_get_error($element) {
   $errors = form_set_error();
-  $parents = array();
+  $parents = [];
   foreach ($element['#parents'] as $parent) {
     $parents[] = $parent;
     $key = implode('][', $parents);
@@ -1859,12 +1859,12 @@ function form_builder($form_id, &$element, &$form_state) {
   }
 
   // Assign basic defaults common for all form elements.
-  $element += array(
+  $element += [
     '#required' => FALSE,
-    '#attributes' => array(),
+    '#attributes' => [],
     '#title_display' => 'before',
     '#description_display' => 'after',
-  );
+  ];
 
   // Special handling if we're on the top level form element.
   if (isset($element['#type']) && $element['#type'] == 'form') {
@@ -1897,10 +1897,10 @@ function form_builder($form_id, &$element, &$form_state) {
           // This value is checked in _form_builder_handle_input_element().
           $form_state['invalid_token'] = TRUE;
           // Ignore all submitted values.
-          $form_state['input'] = array();
-          $_POST = array();
+          $form_state['input'] = [];
+          $_POST = [];
           // Make sure file uploads do not get processed.
-          $_FILES = array();
+          $_FILES = [];
         }
       }
     }
@@ -1909,7 +1909,7 @@ function form_builder($form_id, &$element, &$form_state) {
     }
 
     // All form elements should have an #array_parents property.
-    $element['#array_parents'] = array();
+    $element['#array_parents'] = [];
   }
 
   if (!array_key_exists('#id', $element)) {
@@ -1953,7 +1953,7 @@ function form_builder($form_id, &$element, &$form_state) {
 
     // Make child elements inherit their parent's #disabled and #allow_focus
     // values unless they specify their own.
-    foreach (array('#disabled', '#allow_focus') as $property) {
+    foreach (['#disabled', '#allow_focus'] as $property) {
       if (isset($element[$property]) && !isset($element[$key][$property])) {
         $element[$key][$property] = $element[$property];
       }
@@ -1963,7 +1963,7 @@ function form_builder($form_id, &$element, &$form_state) {
     if (!isset($element[$key]['#parents'])) {
       // Check to see if a tree of child elements is present. If so,
       // continue down the tree if required.
-      $element[$key]['#parents'] = $element[$key]['#tree'] && $element['#tree'] ? array_merge($element['#parents'], array($key)) : array($key);
+      $element[$key]['#parents'] = $element[$key]['#tree'] && $element['#tree'] ? array_merge($element['#parents'], [$key]) : [$key];
     }
     // Ensure #array_parents follows the actual form structure.
     $array_parents = $element['#array_parents'];
@@ -2009,14 +2009,14 @@ function form_builder($form_id, &$element, &$form_state) {
     // Allow Ajax submissions to the form action to bypass verification. This is
     // especially useful for multipart forms, which cannot be verified via a
     // response header.
-    $element['#attached']['js'][] = array(
+    $element['#attached']['js'][] = [
       'type' => 'setting',
-      'data' => array(
-        'urlIsAjaxTrusted' => array(
+      'data' => [
+        'urlIsAjaxTrusted' => [
           $element['#action'] => TRUE,
-        ),
-      ),
-    );
+        ],
+      ],
+    ];
 
     // If a form contains a single textfield, and the ENTER key is pressed
     // within it, Internet Explorer submits the form with no POST data
@@ -2031,7 +2031,7 @@ function form_builder($form_id, &$element, &$form_state) {
     // If the triggering element specifies "button-level" validation and submit
     // handlers to run instead of the default form-level ones, then add those to
     // the form state.
-    foreach (array('validate', 'submit') as $type) {
+    foreach (['validate', 'submit'] as $type) {
       if (isset($form_state['triggering_element']['#' . $type])) {
         $form_state[$type . '_handlers'] = $form_state['triggering_element']['#' . $type];
       }
@@ -2066,7 +2066,7 @@ function form_builder($form_id, &$element, &$form_state) {
  * Adds the #name and #value properties of an input element before rendering.
  */
 function _form_builder_handle_input_element($form_id, &$element, &$form_state) {
-  static $safe_core_value_callbacks = array(
+  static $safe_core_value_callbacks = [
     'form_type_token_value',
     'form_type_textarea_value',
     'form_type_textfield_value',
@@ -2077,7 +2077,7 @@ function _form_builder_handle_input_element($form_id, &$element, &$form_state) {
     'form_type_select_value',
     'form_type_tableselect_value',
     'list_boolean_allowed_values_callback',
-  );
+  ];
 
   if (!isset($element['#name'])) {
     if ($element['#type'] == 'file') {
@@ -2445,8 +2445,8 @@ function form_type_checkbox_value($element, $input = FALSE) {
  */
 function form_type_checkboxes_value($element, $input = FALSE) {
   if ($input === FALSE) {
-    $value = array();
-    $element += array('#default_value' => array());
+    $value = [];
+    $element += ['#default_value' => []];
     foreach ($element['#default_value'] as $key) {
       $value[$key] = $key;
     }
@@ -2467,7 +2467,7 @@ function form_type_checkboxes_value($element, $input = FALSE) {
     return backdrop_map_assoc($input);
   }
   else {
-    return array();
+    return [];
   }
 }
 
@@ -2531,8 +2531,8 @@ function form_type_tableselect_value($element, $input = FALSE) {
     // keys of the #default_value property. This differs from the checkboxes
     // element which uses the array values.
     if ($input === FALSE) {
-      $value = array();
-      $element += array('#default_value' => array());
+      $value = [];
+      $element += ['#default_value' => []];
       foreach ($element['#default_value'] as $key => $flag) {
         if ($flag) {
           $value[$key] = $key;
@@ -2541,7 +2541,7 @@ function form_type_tableselect_value($element, $input = FALSE) {
       return $value;
     }
     else {
-      return is_array($input) ? backdrop_map_assoc($input) : array();
+      return is_array($input) ? backdrop_map_assoc($input) : [];
     }
   }
 }
@@ -2561,8 +2561,8 @@ function form_type_tableselect_value($element, $input = FALSE) {
  */
 function form_type_password_confirm_value($element, $input = FALSE) {
   if ($input === FALSE) {
-    $element += array('#default_value' => array());
-    return $element['#default_value'] + array('pass1' => '', 'pass2' => '');
+    $element += ['#default_value' => []];
+    return $element['#default_value'] + ['pass1' => '', 'pass2' => ''];
   }
 }
 
@@ -2586,10 +2586,10 @@ function form_type_select_value($element, $input = FALSE) {
       // unselected. A disabled multi-select always submits NULL, and the
       // default value should be used.
       if (empty($element['#disabled'])) {
-        return (is_array($input)) ? backdrop_map_assoc($input) : array();
+        return (is_array($input)) ? backdrop_map_assoc($input) : [];
       }
       else {
-        return (isset($element['#default_value']) && is_array($element['#default_value'])) ? $element['#default_value'] : array();
+        return (isset($element['#default_value']) && is_array($element['#default_value'])) ? $element['#default_value'] : [];
       }
     }
     // Non-multiple select elements may have an empty option prepended to them
@@ -2645,7 +2645,7 @@ function form_type_textfield_value($element, $input = FALSE) {
   if ($input !== FALSE && $input !== NULL) {
     // Equate $input to the form value to ensure it's marked for
     // validation.
-    return str_replace(array("\r", "\n"), '', $input);
+    return str_replace(["\r", "\n"], '', $input);
   }
 }
 
@@ -2792,14 +2792,14 @@ function form_process_select($element) {
     // make a choice. Also, if there's a value for #empty_value or
     // #empty_option, then add an option that represents emptiness.
     if (($required && !isset($element['#default_value'])) || isset($element['#empty_value']) || isset($element['#empty_option'])) {
-      $element += array(
+      $element += [
         '#empty_value' => '',
         '#empty_option' => $required ? t('- Select -') : t('- None -'),
-      );
+      ];
       // The empty option is prepended to #options and purposively not merged
       // to prevent another option in #options mistakenly using the same value
       // as #empty_value.
-      $empty_option = array($element['#empty_value'] => $element['#empty_option']);
+      $empty_option = [$element['#empty_value'] => $element['#empty_option']];
       $element['#options'] = $empty_option + $element['#options'];
     }
   }
@@ -2823,8 +2823,8 @@ function form_process_select($element) {
  */
 function theme_select($variables) {
   $element = $variables['element'];
-  element_set_attributes($element, array('id', 'name', 'size'));
-  _form_set_class($element, array('form-select'));
+  element_set_attributes($element, ['id', 'name', 'size']);
+  _form_set_class($element, ['form-select']);
 
   return '<select' . backdrop_attributes($element['#attributes']) . '>' . form_select_options($element) . '</select>';
 }
@@ -2888,7 +2888,7 @@ function form_select_options($element, $choices = NULL) {
     }
     else {
       $key = (string) $key;
-      $option_attributes = array();
+      $option_attributes = [];
       $option_attributes['value'] = $key;
       if ($value_valid && (!$value_is_array && (string) $element['#value'] === $key || ($value_is_array && in_array($key, $element['#value'])))) {
         $option_attributes['selected'] = 'selected';
@@ -2938,7 +2938,7 @@ function form_select_options($element, $choices = NULL) {
  *   empty if no elements were found. FALSE if optgroups were found.
  */
 function form_get_options($element, $key) {
-  $keys = array();
+  $keys = [];
   foreach ($element['#options'] as $index => $choice) {
     if (is_array($choice)) {
       return FALSE;
@@ -2968,8 +2968,8 @@ function form_get_options($element, $key) {
  */
 function theme_fieldset($variables) {
   $element = $variables['element'];
-  element_set_attributes($element, array('id'));
-  _form_set_class($element, array('form-wrapper'));
+  element_set_attributes($element, ['id']);
+  _form_set_class($element, ['form-wrapper']);
 
   $output = '<fieldset' . backdrop_attributes($element['#attributes']) . '>';
   if (!empty($element['#title'])) {
@@ -3023,12 +3023,12 @@ function theme_fieldset($variables) {
 function theme_radio($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'radio';
-  element_set_attributes($element, array('id', 'name', '#return_value' => 'value'));
+  element_set_attributes($element, ['id', 'name', '#return_value' => 'value']);
 
   if (isset($element['#return_value']) && $element['#value'] !== FALSE && $element['#value'] == $element['#return_value']) {
     $element['#attributes']['checked'] = 'checked';
   }
-  _form_set_class($element, array('form-radio'));
+  _form_set_class($element, ['form-radio']);
 
   return '<input' . backdrop_attributes($element['#attributes']) . ' />';
 }
@@ -3037,27 +3037,27 @@ function theme_radio($variables) {
  * Expand a password_confirm field into two text boxes.
  */
 function form_process_password_confirm($element) {
-  $element['pass1'] =  array(
+  $element['pass1'] =  [
     '#type' => 'password',
     '#title' => t('New password'),
     '#value' => empty($element['#value']) ? NULL : $element['#value']['pass1'],
     '#required' => $element['#required'],
-    '#attributes' => $element['#attributes'] + array('class' => array('password-field')),
+    '#attributes' => $element['#attributes'] + ['class' => ['password-field']],
     '#password_strength' => TRUE,
     '#password_shown' => FALSE,
     '#password_toggle' => FALSE,
-  );
-  $element['pass2'] =  array(
+  ];
+  $element['pass2'] =  [
     '#type' => 'password',
     '#title' => t('Confirm new password'),
     '#value' => empty($element['#value']) ? NULL : $element['#value']['pass2'],
     '#required' => $element['#required'],
-    '#attributes' => $element['#attributes'] + array('class' => array('password-confirm')),
+    '#attributes' => $element['#attributes'] + ['class' => ['password-confirm']],
     '#password_strength' => FALSE,
     '#password_shown' => FALSE,
     '#password_toggle' => FALSE,
-  );
-  $element['#element_validate'] = array('password_confirm_validate');
+  ];
+  $element['#element_validate'] = ['password_confirm_validate'];
   $element['#tree'] = TRUE;
 
   if (isset($element['#size'])) {
@@ -3106,7 +3106,7 @@ function password_confirm_validate($element, &$element_state) {
 function theme_date($variables) {
   $element = $variables['element'];
 
-  $attributes = array();
+  $attributes = [];
   if (isset($element['#id'])) {
     $attributes['id'] = $element['#id'];
   }
@@ -3124,18 +3124,18 @@ function theme_date($variables) {
 function form_process_date($element) {
   // Default to current date
   if (empty($element['#value'])) {
-    $element['#value'] = array(
+    $element['#value'] = [
       'day' => format_date(REQUEST_TIME, 'custom', 'j'),
       'month' => format_date(REQUEST_TIME, 'custom', 'n'),
       'year' => format_date(REQUEST_TIME, 'custom', 'Y'),
-    );
+    ];
   }
 
   $element['#tree'] = TRUE;
 
   // Determine the order of day, month, year in the site's chosen date format.
   $format = system_date_format_load('short');
-  $sort = array();
+  $sort = [];
   $sort['day'] = max(strpos($format['pattern'], 'd'), strpos($format['pattern'], 'j'));
   $sort['month'] = max(strpos($format['pattern'], 'm'), strpos($format['pattern'], 'M'));
   $sort['year'] = strpos($format['pattern'], 'Y');
@@ -3161,14 +3161,14 @@ function form_process_date($element) {
         break;
     }
 
-    $element[$type] = array(
+    $element[$type] = [
       '#type' => 'select',
       '#title' => $title,
       '#title_display' => 'invisible',
       '#value' => $element['#value'][$type],
       '#attributes' => $element['#attributes'],
       '#options' => $options,
-    );
+    ];
   }
 
   return $element;
@@ -3189,7 +3189,7 @@ function date_validate($element) {
  * Callback for backdrop_map_assoc() within form_process_date().
  */
 function map_month($month) {
-  $months = &backdrop_static(__FUNCTION__, array(
+  $months = &backdrop_static(__FUNCTION__, [
     1 => 'Jan',
     2 => 'Feb',
     3 => 'Mar',
@@ -3202,7 +3202,7 @@ function map_month($month) {
     10 => 'Oct',
     11 => 'Nov',
     12 => 'Dec',
-  ));
+  ]);
   return t($months[$month]);
 }
 
@@ -3211,7 +3211,7 @@ function map_month($month) {
  */
 function theme_html_date($variables) {
   $element = $variables['element'];
-  $attributes = array();
+  $attributes = [];
   if (isset($element['#attributes'])) {
     $attributes = $element['#attributes'];
   }
@@ -3232,7 +3232,7 @@ function theme_html_date($variables) {
  */
 function theme_html_time($variables) {
   $element = $variables['element'];
-  $attributes = array();
+  $attributes = [];
   if (isset($element['#attributes'])) {
     $attributes = $element['#attributes'];
   }
@@ -3260,7 +3260,7 @@ function theme_html_time($variables) {
  */
 function theme_html_datetime($variables) {
   $element = $variables['element'];
-  $attributes = array();
+  $attributes = [];
   if (isset($element['#id'])) {
     $attributes['id'] = $element['#id'];
   }
@@ -3279,32 +3279,32 @@ function form_process_html_datetime($element) {
   // Conversion to a timestamp has happened, possibly in a preview.
   // Get it back into an array for the form.
   if (is_numeric($value) && (int) $value == $value) {
-    $value = array(
+    $value = [
       'date' => format_date($value, 'custom', DATE_FORMAT_DATE),
       'time' => format_date($value, 'custom', DATE_FORMAT_TIME),
-    );
+    ];
   }
   // Catch possible problems.
   if (!is_array($value) || !isset($value['date']) || !isset($value['time'])) {
-    $value = array(
+    $value = [
       'date' => '',
       'time' => '',
-    );
+    ];
   }
   $element['#tree'] = TRUE;
-  $element['date'] = array(
+  $element['date'] = [
     '#type' => 'html_date',
     '#default_value' => $value['date'],
-  );
+  ];
   $attributes = $element['#attributes'];
   if (isset($attributes['date'])) {
     $element['date']['#attributes'] = $attributes['date'];
   }
 
-  $element['time'] = array(
+  $element['time'] = [
     '#type' => 'html_time',
     '#default_value' => $value['time'],
-  );
+  ];
   if (isset($attributes['time'])) {
     $element['time']['#attributes'] = $attributes['time'];
   }
@@ -3327,7 +3327,7 @@ function html_date_validate($element, &$form_state) {
       }
     }
     if (!$valid_date) {
-      form_error($element, t('%date is not a valid date.', array('%date' => $date)));
+      form_error($element, t('%date is not a valid date.', ['%date' => $date]));
     }
   }
 }
@@ -3335,7 +3335,7 @@ function html_date_validate($element, &$form_state) {
 /**
  * Element value callback for html_date and html_time elements.
  */
-function html_date_or_time_value_callback($element, $input = FALSE, &$form_state = array()) {
+function html_date_or_time_value_callback($element, $input = FALSE, &$form_state = []) {
   $return = '';
   if ($input !== FALSE) {
     $return = $input;
@@ -3375,7 +3375,7 @@ function html_time_validate($element, &$form_state) {
       }
     }
     if (!$valid_time) {
-      form_error($element, t('%time is not a valid time.', array('%time' => $time)));
+      form_error($element, t('%time is not a valid time.', ['%time' => $time]));
     }
   }
 }
@@ -3422,11 +3422,11 @@ function form_process_radios($element) {
       // sub-elements.
       $weight += 0.001;
 
-      $element += array($key => array());
+      $element += [$key => []];
       // Generate the parents as the autogenerator does, so we will have a
       // unique id for each radio button.
-      $parents_for_id = array_merge($element['#parents'], array($key));
-      $element[$key] += array(
+      $parents_for_id = array_merge($element['#parents'], [$key]);
+      $element[$key] += [
         '#type' => 'radio',
         '#title' => $choice,
         // The key is sanitized in backdrop_attributes() during output from the
@@ -3440,7 +3440,7 @@ function form_process_radios($element) {
         '#id' => backdrop_html_id('edit-' . implode('-', $parents_for_id)),
         '#ajax' => isset($element['#ajax']) ? $element['#ajax'] : NULL,
         '#weight' => $weight,
-      );
+      ];
     }
   }
   return $element;
@@ -3459,13 +3459,13 @@ function form_process_radios($element) {
 function theme_checkbox($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'checkbox';
-  element_set_attributes($element, array('id', 'name', '#return_value' => 'value'));
+  element_set_attributes($element, ['id', 'name', '#return_value' => 'value']);
 
   // Unchecked checkbox has #value of integer 0.
   if (!empty($element['#checked'])) {
     $element['#attributes']['checked'] = 'checked';
   }
-  _form_set_class($element, array('form-checkbox'));
+  _form_set_class($element, ['form-checkbox']);
 
   return '<input' . backdrop_attributes($element['#attributes']) . ' />';
 }
@@ -3543,11 +3543,11 @@ function form_process_checkbox($element, $form_state) {
  * Processes a checkboxes form element.
  */
 function form_process_checkboxes($element) {
-  $value = is_array($element['#value']) ? $element['#value'] : array();
+  $value = is_array($element['#value']) ? $element['#value'] : [];
   $element['#tree'] = TRUE;
   if (count($element['#options']) > 0) {
     if (!isset($element['#default_value']) || $element['#default_value'] == 0) {
-      $element['#default_value'] = array();
+      $element['#default_value'] = [];
     }
     $weight = 0;
     foreach ($element['#options'] as $key => $choice) {
@@ -3563,8 +3563,8 @@ function form_process_checkboxes($element) {
       // sub-elements.
       $weight += 0.001;
 
-      $element += array($key => array());
-      $element[$key] += array(
+      $element += [$key => []];
+      $element[$key] += [
         '#type' => 'checkbox',
         '#title' => $choice,
         '#return_value' => $key,
@@ -3572,7 +3572,7 @@ function form_process_checkboxes($element) {
         '#attributes' => $element['#attributes'],
         '#ajax' => isset($element['#ajax']) ? $element['#ajax'] : NULL,
         '#weight' => $weight,
-      );
+      ];
     }
   }
   return $element;
@@ -3597,7 +3597,7 @@ function form_process_actions($element, &$form_state) {
   $primary_set = FALSE;
   foreach (element_children($element, TRUE) as $key) {
     // Don't add automatic classes to non-buttons.
-    if (!isset($element[$key]['#type']) || !in_array($element[$key]['#type'], array('button', 'submit'))) {
+    if (!isset($element[$key]['#type']) || !in_array($element[$key]['#type'], ['button', 'submit'])) {
       continue;
     }
 
@@ -3617,7 +3617,7 @@ function form_process_actions($element, &$form_state) {
   // Add the primary class to the first button found if no others are primary.
   if (!$primary_set && $first_button) {
     $element[$first_button]['#attributes']['class'][] = 'button-primary';
-    $element[$first_button]['#attributes']['class'] = array_diff($element[$first_button]['#attributes']['class'], array('button-secondary'));
+    $element[$first_button]['#attributes']['class'] = array_diff($element[$first_button]['#attributes']['class'], ['button-secondary']);
   }
 
   return $element;
@@ -3638,7 +3638,7 @@ function form_process_actions($element, &$form_state) {
 function form_process_button($element, &$form_state) {
   // We normally want to add backdrop.form so that the double submit protection
   // can be added to the site.
-  $element['#attached']['library'][] = array('system', 'backdrop.form');
+  $element['#attached']['library'][] = ['system', 'backdrop.form'];
   return $element;
 }
 
@@ -3685,7 +3685,7 @@ function form_process_container($element, &$form_state) {
 function theme_container($variables) {
   $element = $variables['element'];
   // Ensure #attributes is set, while preserving any existing attribute(s).
-  $element += array('#attributes' => array());
+  $element += ['#attributes' => []];
 
   // Special handling for form elements.
   if (isset($element['#array_parents'])) {
@@ -3700,7 +3700,7 @@ function theme_container($variables) {
     if (isset($element['#type']) && $element['#type'] == 'container') {
       // Ensure that the class attribute is set, while preserving any existing
       // classes.
-      $element['#attributes'] += array('class' => array());
+      $element['#attributes'] += ['class' => []];
       if (!in_array('form-wrapper', $element['#attributes']['class'])) {
         $element['#attributes']['class'][] = 'form-wrapper';
       }
@@ -3709,7 +3709,7 @@ function theme_container($variables) {
   if (isset($element['#indentation'])) {
       // Ensure that the class attribute is set, while preserving any existing
       // classes.
-      $element['#attributes'] += array('class' => array());
+      $element['#attributes'] += ['class' => []];
       $element['#attributes']['class'][] = 'form-item-indentation';
       $element['#attributes']['class'][] = 'form-item-indentation-' . $element['#indentation'];
       $element['#attributes']['data-indentation-depth'] = $element['#indentation'];
@@ -3757,7 +3757,7 @@ function form_process_details($element, &$form_state) {
 function theme_details($variables) {
   $element = $variables['element'];
   // Ensure #attributes is set.
-  $element += array('#attributes' => array());
+  $element += ['#attributes' => []];
 
   // Special handling for form elements.
   if (isset($element['#array_parents'])) {
@@ -3841,14 +3841,14 @@ function theme_details($variables) {
  */
 function theme_tableselect($variables) {
   $element = $variables['element'];
-  $rows = array();
+  $rows = [];
   $header = $element['#header'];
   if (!empty($element['#options'])) {
     // Generate a table row for each selectable item in #options.
     foreach (element_children($element) as $key) {
-      $row = array();
+      $row = [];
 
-      $row['data'] = array();
+      $row['data'] = [];
       if (isset($element['#options'][$key]['#attributes'])) {
         $row += $element['#options'][$key]['#attributes'];
       }
@@ -3870,7 +3870,7 @@ function theme_tableselect($variables) {
     if ($element['#js_select']) {
       // Add a "Select all" checkbox.
       backdrop_add_js('core/misc/tableselect.js');
-      array_unshift($header, array('class' => array('select-all')));
+      array_unshift($header, ['class' => ['select-all']]);
     }
     else {
       // Add an empty header when radio buttons are displayed or a "Select all"
@@ -3878,7 +3878,7 @@ function theme_tableselect($variables) {
       array_unshift($header, '');
     }
   }
-  return theme('table', array('header' => $header, 'rows' => $rows, 'empty' => $element['#empty'], 'attributes' => $element['#attributes']));
+  return theme('table', ['header' => $header, 'rows' => $rows, 'empty' => $element['#empty'], 'attributes' => $element['#attributes']]);
 }
 
 /**
@@ -3894,7 +3894,7 @@ function theme_tableselect($variables) {
 function form_process_tableselect($element) {
 
   if ($element['#multiple']) {
-    $value = is_array($element['#value']) ? $element['#value'] : array();
+    $value = is_array($element['#value']) ? $element['#value'] : [];
   }
   else {
     // Advanced selection behavior makes no sense for radios.
@@ -3905,7 +3905,7 @@ function form_process_tableselect($element) {
 
   if (count($element['#options']) > 0) {
     if (!isset($element['#default_value']) || $element['#default_value'] === 0) {
-      $element['#default_value'] = array();
+      $element['#default_value'] = [];
     }
 
     // Create a checkbox or radio for each item in #options in such a way that
@@ -3917,11 +3917,11 @@ function form_process_tableselect($element) {
         if ($element['#multiple']) {
           $title = '';
           if (!empty($element['#options'][$key]['title']['data']['#title'])) {
-            $title = t('Update @title', array(
+            $title = t('Update @title', [
               '@title' => $element['#options'][$key]['title']['data']['#title'],
-            ));
+            ]);
           }
-          $element[$key] = array(
+          $element[$key] = [
             '#type' => 'checkbox',
             '#title' => $title,
             '#title_display' => 'invisible',
@@ -3930,13 +3930,13 @@ function form_process_tableselect($element) {
             '#attributes' => $element['#attributes'],
             '#ajax' => isset($element['#ajax']) ? $element['#ajax'] : NULL,
             '#disabled' => !empty($element['#options'][$key]['#disabled']),
-          );
+          ];
         }
         else {
           // Generate the parents as the autogenerator does, so we will have a
           // unique id for each radio button.
-          $parents_for_id = array_merge($element['#parents'], array($key));
-          $element[$key] = array(
+          $parents_for_id = array_merge($element['#parents'], [$key]);
+          $element[$key] = [
             '#type' => 'radio',
             '#title' => '',
             '#return_value' => $key,
@@ -3946,7 +3946,7 @@ function form_process_tableselect($element) {
             '#id' => backdrop_html_id('edit-' . implode('-', $parents_for_id)),
             '#ajax' => isset($element['#ajax']) ? $element['#ajax'] : NULL,
             '#disabled' => !empty($element['#options'][$key]['#disabled']),
-          );
+          ];
         }
         $element[$key]['#attributes']['data-tableselect-id'] = implode('-', $element['#parents']);
         if (isset($element['#options'][$key]['#weight'])) {
@@ -3956,7 +3956,7 @@ function form_process_tableselect($element) {
     }
   }
   else {
-    $element['#value'] = array();
+    $element['#value'] = [];
   }
   return $element;
 }
@@ -4000,19 +4000,19 @@ function form_process_tableselect($element) {
  */
 function form_process_machine_name($element, &$form_state) {
   // Apply default form element properties.
-  $element += array(
+  $element += [
     '#title' => t('Machine-readable name'),
     '#description' => t('A unique machine-readable name. Can only contain lowercase letters, numbers, and underscores.'),
-    '#machine_name' => array(),
+    '#machine_name' => [],
     '#field_prefix' => '',
     '#field_suffix' => '',
     '#suffix' => '',
-  );
+  ];
   // A form element that only wants to set one #machine_name property (usually
   // 'source' only) would leave all other properties undefined, if the defaults
   // were defined in hook_element_info(). Therefore, we apply the defaults here.
-  $element['#machine_name'] += array(
-    'source' => array('name'),
+  $element['#machine_name'] += [
+    'source' => ['name'],
     'label' => t('Machine name'),
     'replace_pattern' => '[^a-z0-9_]+',
     'replace' => '_',
@@ -4020,14 +4020,14 @@ function form_process_machine_name($element, &$form_state) {
     'standalone' => FALSE,
     'field_prefix' => $element['#field_prefix'],
     'field_suffix' => $element['#field_suffix'],
-  );
+  ];
 
   // By default, machine names are restricted to Latin alphanumeric characters.
   // So, default to LTR directionality.
   if (!isset($element['#attributes'])) {
-    $element['#attributes'] = array();
+    $element['#attributes'] = [];
   }
-  $element['#attributes'] += array('dir' => 'ltr');
+  $element['#attributes'] += ['dir' => 'ltr'];
 
   // The source element defaults to array('name'), but may have been overridden.
   if (empty($element['#machine_name']['source'])) {
@@ -4052,10 +4052,10 @@ function form_process_machine_name($element, &$form_state) {
   else {
     // Append a field suffix to the source form element, which will contain
     // the live preview of the machine name.
-    $source += array('#field_suffix' => '');
+    $source += ['#field_suffix' => ''];
     $source['#field_suffix'] .= ' <small id="' . $suffix_id . '">&nbsp;</small>';
 
-    $parents = array_merge($element['#machine_name']['source'], array('#field_suffix'));
+    $parents = array_merge($element['#machine_name']['source'], ['#field_suffix']);
     backdrop_array_set_nested_value($form_state['complete_form'], $parents, $source['#field_suffix']);
   }
 
@@ -4135,17 +4135,17 @@ function form_process_fieldset(&$element, &$form_state) {
   }
 
   // Contains form element summary functionalities.
-  $element['#attached']['library'][] = array('system', 'backdrop.form');
+  $element['#attached']['library'][] = ['system', 'backdrop.form'];
 
   // The .form-wrapper class is required for #states to treat fieldsets like
   // containers.
   if (!isset($element['#attributes']['class'])) {
-    $element['#attributes']['class'] = array();
+    $element['#attributes']['class'] = [];
   }
 
   // Collapsible fieldsets
   if (!empty($element['#collapsible'])) {
-    $element['#attached']['library'][] = array('system', 'backdrop.collapse');
+    $element['#attached']['library'][] = ['system', 'backdrop.collapse'];
     $element['#attributes']['class'][] = 'collapsible';
     if (!empty($element['#collapsed'])) {
       $element['#attributes']['class'][] = 'collapsed';
@@ -4226,11 +4226,11 @@ function form_pre_render_fieldset($element) {
 function form_process_vertical_tabs($element, &$form_state) {
   // Inject a new fieldset as child, so that form_process_fieldset() processes
   // this fieldset like any other fieldset.
-  $element['group'] = array(
+  $element['group'] = [
     '#type' => 'fieldset',
-    '#theme_wrappers' => array(),
+    '#theme_wrappers' => [],
     '#parents' => $element['#parents'],
-  );
+  ];
 
   // The JavaScript stores the currently selected tab in this hidden
   // field so that the active tab can be restored the next time the
@@ -4239,11 +4239,11 @@ function form_process_vertical_tabs($element, &$form_state) {
   if (isset($form_state['values'][$name . '__active_tab'])) {
     $element['#default_tab'] = $form_state['values'][$name . '__active_tab'];
   }
-  $element[$name . '__active_tab'] = array(
+  $element[$name . '__active_tab'] = [
     '#type' => 'hidden',
     '#default_value' => $element['#default_tab'],
-    '#attributes' => array('class' => array('vertical-tabs-active-tab')),
-  );
+    '#attributes' => ['class' => ['vertical-tabs-active-tab']],
+  ];
 
   return $element;
 }
@@ -4295,7 +4295,7 @@ function theme_submit($variables) {
 function theme_button($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'submit';
-  element_set_attributes($element, array('id', 'name', 'value'));
+  element_set_attributes($element, ['id', 'name', 'value']);
 
   $element['#attributes']['class'][] = 'form-' . $element['#button_type'];
   if (!empty($element['#attributes']['disabled'])) {
@@ -4318,7 +4318,7 @@ function theme_button($variables) {
 function theme_image_button($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'image';
-  element_set_attributes($element, array('id', 'name', 'value'));
+  element_set_attributes($element, ['id', 'name', 'value']);
 
   $element['#attributes']['src'] = file_create_url($element['#src']);
   if (!empty($element['#title'])) {
@@ -4347,7 +4347,7 @@ function theme_image_button($variables) {
 function theme_hidden($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'hidden';
-  element_set_attributes($element, array('name', 'value'));
+  element_set_attributes($element, ['name', 'value']);
   return '<input' . backdrop_attributes($element['#attributes']) . " />\n";
 }
 
@@ -4361,7 +4361,7 @@ function theme_hidden($variables) {
  *   The processed form element.
  */
 function form_process_autocomplete($element) {
-  $element['#autocomplete_input'] = array();
+  $element['#autocomplete_input'] = [];
   if ($element['#autocomplete_path'] && backdrop_valid_path($element['#autocomplete_path'])) {
     $element['#autocomplete_input']['#id'] = $element['#id'] .'-autocomplete';
     // Force the script path to 'index.php', in case the server is not
@@ -4369,7 +4369,7 @@ function form_process_autocomplete($element) {
     // of the site to do this themselves using hook_url_outbound_alter() (see
     // url()) but since this code is forcing non-clean URLs on sites that don't
     // normally use them, it is done here instead.
-    $element['#autocomplete_input']['#url_value'] = url($element['#autocomplete_path'], array('absolute' => TRUE, 'clean' => FALSE, 'script' => 'index.php'));
+    $element['#autocomplete_input']['#url_value'] = url($element['#autocomplete_path'], ['absolute' => TRUE, 'clean' => FALSE, 'script' => 'index.php']);
   }
   return $element;
 }
@@ -4388,15 +4388,15 @@ function form_process_autocomplete($element) {
 function theme_textfield($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'text';
-  element_set_attributes($element, array('id', 'name', 'value', 'size', 'maxlength', 'placeholder'));
-  _form_set_class($element, array('form-text'));
+  element_set_attributes($element, ['id', 'name', 'value', 'size', 'maxlength', 'placeholder']);
+  _form_set_class($element, ['form-text']);
 
   $extra = '';
   if ($element['#autocomplete_path'] && !empty($element['#autocomplete_input'])) {
     backdrop_add_library('system', 'backdrop.autocomplete');
     $element['#attributes']['class'][] = 'form-autocomplete';
 
-    $attributes = array();
+    $attributes = [];
     $attributes['type'] = 'hidden';
     $attributes['id'] = $element['#autocomplete_input']['#id'];
     $attributes['value'] = $element['#autocomplete_input']['#url_value'];
@@ -4424,18 +4424,18 @@ function theme_textfield($variables) {
 function theme_email($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'email';
-  element_set_attributes($element, array('id', 'name', 'value', 'size', 'maxlength', 'placeholder'));
-  _form_set_class($element, array('form-email'));
+  element_set_attributes($element, ['id', 'name', 'value', 'size', 'maxlength', 'placeholder']);
+  _form_set_class($element, ['form-email']);
 
   $extra = '';
   if ($element['#autocomplete_path'] && backdrop_valid_path($element['#autocomplete_path'])) {
     backdrop_add_library('system', 'backdrop.autocomplete');
     $element['#attributes']['class'][] = 'form-autocomplete';
 
-    $attributes = array();
+    $attributes = [];
     $attributes['type'] = 'hidden';
     $attributes['id'] = $element['#attributes']['id'] . '-autocomplete';
-    $attributes['value'] = url($element['#autocomplete_path'], array('absolute' => TRUE));
+    $attributes['value'] = url($element['#autocomplete_path'], ['absolute' => TRUE]);
     $attributes['disabled'] = 'disabled';
     $attributes['class'][] = 'autocomplete';
     $extra = '<input' . backdrop_attributes($attributes) . ' />';
@@ -4456,7 +4456,7 @@ function form_validate_email(&$element, &$form_state) {
   form_set_value($element, $value, $form_state);
 
   if ($value !== '' && !valid_email_address($value)) {
-    form_error($element, t('The email address %mail is not valid.', array('%mail' => $value)));
+    form_error($element, t('The email address %mail is not valid.', ['%mail' => $value]));
   }
 }
 
@@ -4474,18 +4474,18 @@ function form_validate_email(&$element, &$form_state) {
 function theme_search($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'search';
-  element_set_attributes($element, array('id', 'name', 'value', 'size', 'maxlength', 'placeholder'));
-  _form_set_class($element, array('form-search'));
+  element_set_attributes($element, ['id', 'name', 'value', 'size', 'maxlength', 'placeholder']);
+  _form_set_class($element, ['form-search']);
 
   $extra = '';
   if ($element['#autocomplete_path'] && backdrop_valid_path($element['#autocomplete_path'])) {
     backdrop_add_library('system', 'backdrop.autocomplete');
     $element['#attributes']['class'][] = 'form-autocomplete';
 
-    $attributes = array();
+    $attributes = [];
     $attributes['type'] = 'hidden';
     $attributes['id'] = $element['#attributes']['id'] . '-autocomplete';
-    $attributes['value'] = url($element['#autocomplete_path'], array('absolute' => TRUE));
+    $attributes['value'] = url($element['#autocomplete_path'], ['absolute' => TRUE]);
     $attributes['disabled'] = 'disabled';
     $attributes['class'][] = 'autocomplete';
     $extra = '<input' . backdrop_attributes($attributes) . ' />';
@@ -4510,18 +4510,18 @@ function theme_search($variables) {
 function theme_tel($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'tel';
-  element_set_attributes($element, array('id', 'name', 'value', 'size', 'maxlength', 'placeholder'));
-  _form_set_class($element, array('form-tel'));
+  element_set_attributes($element, ['id', 'name', 'value', 'size', 'maxlength', 'placeholder']);
+  _form_set_class($element, ['form-tel']);
 
   $extra = '';
   if ($element['#autocomplete_path'] && backdrop_valid_path($element['#autocomplete_path'])) {
     backdrop_add_library('system', 'backdrop.autocomplete');
     $element['#attributes']['class'][] = 'form-autocomplete';
 
-    $attributes = array();
+    $attributes = [];
     $attributes['type'] = 'hidden';
     $attributes['id'] = $element['#attributes']['id'] . '-autocomplete';
-    $attributes['value'] = url($element['#autocomplete_path'], array('absolute' => TRUE));
+    $attributes['value'] = url($element['#autocomplete_path'], ['absolute' => TRUE]);
     $attributes['disabled'] = 'disabled';
     $attributes['class'][] = 'autocomplete';
     $extra = '<input' . backdrop_attributes($attributes) . ' />';
@@ -4546,18 +4546,18 @@ function theme_tel($variables) {
 function theme_url($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'url';
-  element_set_attributes($element, array('id', 'name', 'value', 'size', 'maxlength', 'placeholder'));
-  _form_set_class($element, array('form-url'));
+  element_set_attributes($element, ['id', 'name', 'value', 'size', 'maxlength', 'placeholder']);
+  _form_set_class($element, ['form-url']);
 
   $extra = '';
   if ($element['#autocomplete_path'] && backdrop_valid_path($element['#autocomplete_path'])) {
     backdrop_add_library('system', 'backdrop.autocomplete');
     $element['#attributes']['class'][] = 'form-autocomplete';
 
-    $attributes = array();
+    $attributes = [];
     $attributes['type'] = 'hidden';
     $attributes['id'] = $element['#attributes']['id'] . '-autocomplete';
-    $attributes['value'] = url($element['#autocomplete_path'], array('absolute' => TRUE));
+    $attributes['value'] = url($element['#autocomplete_path'], ['absolute' => TRUE]);
     $attributes['disabled'] = 'disabled';
     $attributes['class'][] = 'autocomplete';
     $extra = '<input' . backdrop_attributes($attributes) . ' />';
@@ -4578,7 +4578,7 @@ function form_validate_url(&$element, &$form_state) {
   form_set_value($element, $value, $form_state);
 
   if ($value !== '' && !valid_url($value, TRUE)) {
-    form_error($element, t('The URL %url is not valid.', array('%url' => $value)));
+    form_error($element, t('The URL %url is not valid.', ['%url' => $value]));
   }
 }
 
@@ -4599,7 +4599,7 @@ function form_validate_color(&$element, &$form_state) {
       form_set_value($element, Color::rgbToHex(Color::hexToRgb($value)), $form_state);
     }
     catch (InvalidArgumentException $e) {
-      form_error($element, t('%name must be a valid color.', array('%name' => empty($element['#title']) ? $element['#parents'][0] : $element['#title'])));
+      form_error($element, t('%name must be a valid color.', ['%name' => empty($element['#title']) ? $element['#parents'][0] : $element['#title']]));
     }
   }
 }
@@ -4617,8 +4617,8 @@ function form_validate_color(&$element, &$form_state) {
 function theme_color($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'color';
-  element_set_attributes($element, array('id', 'name', 'value'));
-  _form_set_class($element, array('form-color'));
+  element_set_attributes($element, ['id', 'name', 'value']);
+  _form_set_class($element, ['form-color']);
 
   return '<input' . backdrop_attributes($element['#attributes']) . ' />' . backdrop_render_children($element);
 }
@@ -4637,8 +4637,8 @@ function theme_color($variables) {
 function theme_number($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'number';
-  element_set_attributes($element, array('id', 'name', 'value', 'size', 'step', 'min', 'max', 'maxlength', 'placeholder'));
-  _form_set_class($element, array('form-number'));
+  element_set_attributes($element, ['id', 'name', 'value', 'size', 'step', 'min', 'max', 'maxlength', 'placeholder']);
+  _form_set_class($element, ['form-number']);
 
   return '<input' . backdrop_attributes($element['#attributes']) . ' />' . backdrop_render_children($element);
 }
@@ -4660,18 +4660,18 @@ function form_validate_number(&$element, &$form_state) {
   // should prevent this but themers could override element implementation. Same
   // goes for min/max/step validation below.
   if (!is_numeric($value)) {
-    form_error($element, t('The value for %name must be numeric.', array('%name' => $name)));
+    form_error($element, t('The value for %name must be numeric.', ['%name' => $name]));
     return;
   }
 
   // Ensure that the input is greater than the #min property, if set.
   if (isset($element['#min']) && $value < $element['#min']) {
-    form_error($element, t('The value for %name must be greater than or equal to %min.', array('%name' => $name, '%min' => $element['#min'])));
+    form_error($element, t('The value for %name must be greater than or equal to %min.', ['%name' => $name, '%min' => $element['#min']]));
   }
 
   // Ensure that the input is less than the #max property, if set.
   if (isset($element['#max']) && $value > $element['#max']) {
-    form_error($element, t('The value for %name must be less than or equal to %max.', array('%name' => $name, '%max' => $element['#max'])));
+    form_error($element, t('The value for %name must be less than or equal to %max.', ['%name' => $name, '%max' => $element['#max']]));
   }
 
   if (isset($element['#step']) && strtolower($element['#step']) != 'any') {
@@ -4682,10 +4682,10 @@ function form_validate_number(&$element, &$form_state) {
     if (!valid_number_step($value, $element['#step'], $offset)) {
       // Integer steps are the most common use case, so give a specific message.
       if ($element['#step'] == 1 && is_numeric($offset) && $offset == round($offset)) {
-        form_error($element, t('The value for %name must be a whole number.', array('%name' => $name)));
+        form_error($element, t('The value for %name must be a whole number.', ['%name' => $name]));
       }
       else {
-        form_error($element, t('The value for %name must be a whole number of steps of size %step, starting from %offset.', array('%name' => $name, '%step' => $element['#step'], '%offset' => $offset)));
+        form_error($element, t('The value for %name must be a whole number of steps of size %step, starting from %offset.', ['%name' => $name, '%step' => $element['#step'], '%offset' => $offset]));
       }
     }
   }
@@ -4706,8 +4706,8 @@ function theme_range($variables) {
   $element = $variables['element'];
 
   $element['#attributes']['type'] = 'range';
-  element_set_attributes($element, array('id', 'name', 'value', 'step', 'min', 'max', 'placeholder'));
-  _form_set_class($element, array('form-range'));
+  element_set_attributes($element, ['id', 'name', 'value', 'step', 'min', 'max', 'placeholder']);
+  _form_set_class($element, ['form-range']);
 
   $output = '<input' . backdrop_attributes($element['#attributes']) . ' />';
 
@@ -4729,7 +4729,7 @@ function theme_form($variables) {
   if (isset($element['#action'])) {
     $element['#attributes']['action'] = backdrop_strip_dangerous_protocols($element['#action']);
   }
-  element_set_attributes($element, array('method', 'id'));
+  element_set_attributes($element, ['method', 'id']);
   if (empty($element['#attributes']['accept-charset'])) {
     $element['#attributes']['accept-charset'] = "UTF-8";
   }
@@ -4750,16 +4750,16 @@ function theme_form($variables) {
  */
 function theme_textarea($variables) {
   $element = $variables['element'];
-  element_set_attributes($element, array('id', 'name', 'rows', 'cols', 'placeholder'));
-  _form_set_class($element, array('form-textarea'));
+  element_set_attributes($element, ['id', 'name', 'rows', 'cols', 'placeholder']);
+  _form_set_class($element, ['form-textarea']);
 
-  $wrapper_attributes = array(
-    'class' => array('form-textarea-wrapper'),
-  );
+  $wrapper_attributes = [
+    'class' => ['form-textarea-wrapper'],
+  ];
 
   // Add resizable behavior.
   if (isset($element['#resizable'])) {
-    $valid_values = array('none', 'both', 'horizontal', 'vertical');
+    $valid_values = ['none', 'both', 'horizontal', 'vertical'];
     // Transform previously used boolean value to new string value.
     if ($element['#resizable'] === TRUE) {
       $element['#resizable'] = 'vertical';
@@ -4797,8 +4797,8 @@ function theme_password($variables) {
   $element['#attributes']['type'] = 'password';
   $element['#attributes']['spellcheck'] = !empty($element['#attributes']['spellcheck']) ? $element['#attributes']['spellcheck'] : 'false';
 
-  element_set_attributes($element, array('id', 'name', 'size', 'maxlength', 'placeholder'));
-  _form_set_class($element, array('form-text'));
+  element_set_attributes($element, ['id', 'name', 'size', 'maxlength', 'placeholder']);
+  _form_set_class($element, ['form-text']);
 
   return '<input' . backdrop_attributes($element['#attributes']) . ' />';
 }
@@ -4846,8 +4846,8 @@ function form_process_weight($element) {
 function theme_file($variables) {
   $element = $variables['element'];
   $element['#attributes']['type'] = 'file';
-  element_set_attributes($element, array('id', 'name', 'size'));
-  _form_set_class($element, array('form-file'));
+  element_set_attributes($element, ['id', 'name', 'size']);
+  _form_set_class($element, ['form-file']);
 
   return '<input' . backdrop_attributes($element['#attributes']) . ' />';
 }
@@ -4912,11 +4912,11 @@ function theme_form_element($variables) {
 
   // This function is invoked as theme wrapper, but the rendered form element
   // may not necessarily have been processed by form_builder().
-  $element += array(
+  $element += [
     '#title_display' => 'before',
     '#description_display' => 'after',
-    '#wrapper_attributes' => array(),
-  );
+    '#wrapper_attributes' => [],
+  ];
   $attributes = $element['#wrapper_attributes'];
 
   // Add element #id for #type 'item'.
@@ -4932,7 +4932,7 @@ function theme_form_element($variables) {
     }
   }
   if (!empty($element['#name'])) {
-    $attributes['class'][] = 'form-item-' . strtr($element['#name'], array(' ' => '-', '_' => '-', '[' => '-', ']' => ''));
+    $attributes['class'][] = 'form-item-' . strtr($element['#name'], [' ' => '-', '_' => '-', '[' => '-', ']' => '']);
   }
   // Add a class for disabled elements to facilitate cross-browser styling.
   if (!empty($element['#attributes']['disabled'])) {
@@ -5009,10 +5009,10 @@ function theme_form_element($variables) {
 function theme_form_required_marker($variables) {
   // This is also used in the installer, pre-database setup.
   $t = get_t();
-  $attributes = array(
+  $attributes = [
     'class' => 'form-required',
     'title' => $t('This field is required.'),
-  );
+  ];
   return '<abbr' . backdrop_attributes($attributes) . '>*</abbr>';
 }
 
@@ -5051,11 +5051,11 @@ function theme_form_element_label($variables) {
   }
 
   // If the element is required, a required marker is appended to the label.
-  $required = !empty($element['#required']) ? theme('form_required_marker', array('element' => $element)) : '';
+  $required = !empty($element['#required']) ? theme('form_required_marker', ['element' => $element]) : '';
 
   $title = filter_xss_admin($element['#title']);
 
-  $attributes = array();
+  $attributes = [];
   // Style the label as class option to display inline with the element.
   if ($element['#title_display'] == 'after') {
     $attributes['class'] = 'option';
@@ -5077,7 +5077,7 @@ function theme_form_element_label($variables) {
   }
 
   // The leading whitespace helps visually separate fields from inline labels.
-  return ' <label' . backdrop_attributes($attributes) . '>' . $t('!title !required', array('!title' => $title, '!required' => $required)) . "</label>\n";
+  return ' <label' . backdrop_attributes($attributes) . '>' . $t('!title !required', ['!title' => $title, '!required' => $required]) . "</label>\n";
 }
 
 /**
@@ -5106,7 +5106,7 @@ function theme_form_element_description(array $variables) {
     return '';
   }
 
-  $attributes = array('class' => array('description'));
+  $attributes = ['class' => ['description']];
   if (isset($element['#description_display']) && $element['#description_display'] === 'invisible') {
     $attributes['class'][] = 'element-invisible';
   }
@@ -5124,10 +5124,10 @@ function theme_form_element_description(array $variables) {
  * @param $name
  *   Array of new class names to be added.
  */
-function _form_set_class(&$element, $class = array()) {
+function _form_set_class(&$element, $class = []) {
   if (!empty($class)) {
     if (!isset($element['#attributes']['class'])) {
-      $element['#attributes']['class'] = array();
+      $element['#attributes']['class'] = [];
     }
     $element['#attributes']['class'] = array_merge($element['#attributes']['class'], $class);
   }
@@ -5312,29 +5312,29 @@ function batch_set($batch_definition) {
 
     // Initialize the batch if needed.
     if (empty($batch)) {
-      $batch = array(
-        'sets' => array(),
+      $batch = [
+        'sets' => [],
         'has_form_submits' => FALSE,
-      );
+      ];
     }
 
     // Base and default properties for the batch set.
     // Use get_t() to allow batches during installation.
     $t = get_t();
-    $init = array(
-      'sandbox' => array(),
-      'results' => array(),
+    $init = [
+      'sandbox' => [],
+      'results' => [],
       'success' => FALSE,
       'start' => 0,
       'elapsed' => 0,
-    );
-    $defaults = array(
+    ];
+    $defaults = [
       'title' => $t('Processing'),
       'init_message' => $t('Initializing.'),
       'progress_message' => $t('Completed @current of @total.'),
       'error_message' => $t('An error has occurred.'),
-      'css' => array(),
-    );
+      'css' => [],
+    ];
     $batch_set = $init + $batch_definition + $defaults;
 
     // Tweak init_message to avoid the bottom of the page flickering down after
@@ -5358,7 +5358,7 @@ function batch_set($batch_definition) {
       $index = $batch['current_set'] + 1;
       $slice1 = array_slice($batch['sets'], 0, $index);
       $slice2 = array_slice($batch['sets'], $index);
-      $batch['sets'] = array_merge($slice1, array($batch_set), $slice2);
+      $batch['sets'] = array_merge($slice1, [$batch_set], $slice2);
       _batch_populate_queue($batch, $index);
     }
   }
@@ -5391,16 +5391,16 @@ function batch_process($redirect = NULL, $url = 'batch', $redirect_callback = 'b
 
   if (isset($batch)) {
     // Add process information
-    $process_info = array(
+    $process_info = [
       'current_set' => 0,
       'progressive' => TRUE,
       'url' => $url,
-      'url_options' => array(),
+      'url_options' => [],
       'source_url' => $_GET['q'],
       'redirect' => $redirect,
       'theme' => $GLOBALS['theme_key'],
       'redirect_callback' => $redirect_callback,
-    );
+    ];
     $batch += $process_info;
 
     // The batch is now completely built. Allow other modules to make changes
@@ -5423,7 +5423,7 @@ function batch_process($redirect = NULL, $url = 'batch', $redirect_callback = 'b
       // Now that we have a batch id, we can generate the redirection link in
       // the generic error message.
       $t = get_t();
-      $batch['error_message'] = $t('Please continue to <a href="@error_url">the error page</a>', array('@error_url' => url($url, array('query' => array('id' => $batch['id'], 'op' => 'finished')))));
+      $batch['error_message'] = $t('Please continue to <a href="@error_url">the error page</a>', ['@error_url' => url($url, ['query' => ['id' => $batch['id'], 'op' => 'finished']])]);
 
       // Clear the way for the backdrop_goto() redirection to the batch processing
       // page, by saving and unsetting the 'destination', if there is any.
@@ -5434,12 +5434,12 @@ function batch_process($redirect = NULL, $url = 'batch', $redirect_callback = 'b
 
       // Store the batch.
       db_insert('batch')
-        ->fields(array(
+        ->fields([
           'bid' => $batch['id'],
           'timestamp' => REQUEST_TIME,
           'token' => backdrop_get_token($batch['id']),
           'batch' => serialize($batch),
-        ))
+        ])
         ->execute();
 
       // Set the batch number in the session to guarantee that it will stay alive.
@@ -5447,7 +5447,7 @@ function batch_process($redirect = NULL, $url = 'batch', $redirect_callback = 'b
 
       // Redirect for processing.
       if ($function = $batch['redirect_callback']) {
-        $function($batch['url'], array('query' => array('op' => 'start', 'id' => $batch['id'])));
+        $function($batch['url'], ['query' => ['op' => 'start', 'id' => $batch['id']]]);
       }
     }
     else {
@@ -5469,7 +5469,7 @@ function &batch_get() {
   // that are part of the Batch API and need to reset the batch information may
   // call batch_get() and manipulate the result by reference. Functions that are
   // not part of the Batch API can also do this, but shouldn't.
-  static $batch = array();
+  static $batch = [];
   return $batch;
 }
 
@@ -5491,12 +5491,12 @@ function _batch_populate_queue(&$batch, $set_id) {
   $batch_set = &$batch['sets'][$set_id];
 
   if (isset($batch_set['operations'])) {
-    $batch_set += array(
-      'queue' => array(
+    $batch_set += [
+      'queue' => [
         'name' => 'backdrop_batch:' . $batch['id'] . ':' . $set_id,
         'class' => $batch['progressive'] ? 'BatchQueue' : 'BatchMemoryQueue',
-      ),
-    );
+      ],
+    ];
 
     $queue = _batch_queue($batch_set);
     $queue->createQueue();
@@ -5523,7 +5523,7 @@ function _batch_queue($batch_set) {
   // The class autoloader is not available when running update.php, so make
   // sure the files are manually included.
   if (!isset($queues)) {
-    $queues = array();
+    $queues = [];
     require_once BACKDROP_ROOT . '/core/modules/system/system.queue.inc';
     require_once BACKDROP_ROOT . '/core/includes/batch.queue.inc';
   }

@@ -13,7 +13,7 @@
 class views_handler_relationship_translation extends views_handler_relationship {
   function option_definition() {
     $options = parent::option_definition();
-    $options['language'] = array('default' => 'current');
+    $options['language'] = ['default' => 'current'];
 
     return $options;
   }
@@ -24,19 +24,19 @@ class views_handler_relationship_translation extends views_handler_relationship 
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
-    $options = array(
+    $options = [
       'all' => t('All'),
       'current' => t('Current language'),
       'default' => t('Default language'),
-    );
+    ];
     $options = array_merge($options, views_language_list());
-    $form['language'] = array(
+    $form['language'] = [
       '#type' => 'select',
       '#options' => $options,
       '#default_value' => $this->options['language'],
       '#title' => t('Translation option'),
       '#description' => t('The translation options allows you to select which translation or translations in a translation set join on. Select "Current language" or "Default language" to join on the translation in the current or default language respectively. Select a specific language to join on a translation in that language. If you select "All", each translation will create a new row, which may appear to cause duplicates.'),
-    );
+    ];
   }
 
   /**
@@ -58,27 +58,27 @@ class views_handler_relationship_translation extends views_handler_relationship 
       $def['type'] = 'INNER';
     }
 
-    $def['extra'] = array();
+    $def['extra'] = [];
     if ($this->options['language'] != 'all') {
       switch ($this->options['language']) {
         case 'current':
-          $def['extra'][] = array(
+          $def['extra'][] = [
             'field' => 'langcode',
             'value' => '***CURRENT_LANGUAGE***',
-          );
+          ];
           break;
         case 'default':
-          $def['extra'][] = array(
+          $def['extra'][] = [
             'field' => 'langcode',
             'value' => '***DEFAULT_LANGUAGE***',
-          );
+          ];
           break;
         // Other values will be the language codes.
         default:
-          $def['extra'][] = array(
+          $def['extra'][] = [
             'field' => 'langcode',
             'value' => $this->options['language'],
-          );
+          ];
           break;
       }
     }

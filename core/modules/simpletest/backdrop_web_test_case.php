@@ -69,20 +69,20 @@ abstract class BackdropTestCase {
    *
    * @var array
    */
-  public $results = array(
+  public $results = [
     '#pass' => 0,
     '#fail' => 0,
     '#exception' => 0,
     '#debug' => 0,
     '#duration' => 0,
-  );
+  ];
 
   /**
    * Assertions thrown in that test case.
    *
    * @var array
    */
-  protected $assertions = array();
+  protected $assertions = [];
 
   /**
    * This class is skipped when looking for the source of an assertion.
@@ -92,7 +92,7 @@ abstract class BackdropTestCase {
    * that called it. So we need to skip the classes defining these helper
    * methods.
    */
-  protected $skipClasses = array(__CLASS__ => TRUE);
+  protected $skipClasses = [__CLASS__ => TRUE];
 
   /**
    * Flag to indicate whether the test has been set up.
@@ -137,7 +137,7 @@ abstract class BackdropTestCase {
    *   Array of errors containing a list of unmet requirements.
    */
   protected function checkRequirements() {
-    $errors = array();
+    $errors = [];
 
     if (!extension_loaded('curl')) {
       $errors[] = 'PHP curl extension is not present.';
@@ -166,7 +166,7 @@ abstract class BackdropTestCase {
     db_transaction();
     do {
       $prefix = 'simpletest' . mt_rand(100000, 999999);
-      $prefix_exists = db_query("SELECT COUNT(*) FROM {simpletest_prefix} WHERE prefix = :prefix", array(':prefix' => $prefix))->fetchField();
+      $prefix_exists = db_query("SELECT COUNT(*) FROM {simpletest_prefix} WHERE prefix = :prefix", [':prefix' => $prefix])->fetchField();
     } while ($prefix_exists);
     $this->databasePrefix = $prefix;
     $this->fileDirectoryName = substr($prefix, 10);
@@ -175,10 +175,10 @@ abstract class BackdropTestCase {
     // All assertions as well as the SimpleTest batch operations are associated
     // with the testId, so the database prefix has to be associated with it.
     db_insert('simpletest_prefix')
-      ->fields(array(
+      ->fields([
         'test_id' => $this->testId,
         'prefix' => $this->databasePrefix,
-      ))
+      ])
       ->execute();
   }
 
@@ -217,7 +217,7 @@ abstract class BackdropTestCase {
     }
 
     // Creation assertion array that can be displayed while tests are running.
-    $this->assertions[] = $assertion = array(
+    $this->assertions[] = $assertion = [
       'test_id' => $this->testId,
       'test_class' => get_class($this),
       'status' => $status,
@@ -226,7 +226,7 @@ abstract class BackdropTestCase {
       'function' => $caller['function'],
       'line' => $caller['line'],
       'file' => $caller['file'],
-    );
+    ];
 
     // Store assertion for display after the test has completed.
     self::getDatabaseConnection()
@@ -279,19 +279,19 @@ abstract class BackdropTestCase {
    * @see BackdropTestCase::assert()
    * @see BackdropTestCase::deleteAssert()
    */
-  public static function insertAssert($test_id, $test_class, $status, $message = '', $group = 'Other', array $caller = array()) {
+  public static function insertAssert($test_id, $test_class, $status, $message = '', $group = 'Other', array $caller = []) {
     // Convert boolean status to string status.
     if (is_bool($status)) {
       $status = $status ? 'pass' : 'fail';
     }
 
-    $caller += array(
+    $caller += [
       'function' => t('Unknown'),
       'line' => 0,
       'file' => t('Unknown'),
-    );
+    ];
 
-    $assertion = array(
+    $assertion = [
       'test_id' => $test_id,
       'test_class' => $test_class,
       'status' => $status,
@@ -300,7 +300,7 @@ abstract class BackdropTestCase {
       'function' => $caller['function'],
       'line' => $caller['line'],
       'file' => $caller['file'],
-    );
+    ];
 
     return self::getDatabaseConnection()
       ->insert('simpletest')
@@ -360,7 +360,7 @@ abstract class BackdropTestCase {
    *   TRUE if the assertion succeeded, FALSE otherwise.
    */
   protected function assertTrue($value, $message = '', $group = 'Other') {
-    return $this->assert((bool) $value, $message ? $message : t('Value @value is TRUE.', array('@value' => var_export($value, TRUE))), $group);
+    return $this->assert((bool) $value, $message ? $message : t('Value @value is TRUE.', ['@value' => var_export($value, TRUE)]), $group);
   }
 
   /**
@@ -376,7 +376,7 @@ abstract class BackdropTestCase {
    *   TRUE if the assertion succeeded, FALSE otherwise.
    */
   protected function assertFalse($value, $message = '', $group = 'Other') {
-    return $this->assert(!$value, $message ? $message : t('Value @value is FALSE.', array('@value' => var_export($value, TRUE))), $group);
+    return $this->assert(!$value, $message ? $message : t('Value @value is FALSE.', ['@value' => var_export($value, TRUE)]), $group);
   }
 
   /**
@@ -392,7 +392,7 @@ abstract class BackdropTestCase {
    *   TRUE if the assertion succeeded, FALSE otherwise.
    */
   protected function assertNull($value, $message = '', $group = 'Other') {
-    return $this->assert(!isset($value), $message ? $message : t('Value @value is NULL.', array('@value' => var_export($value, TRUE))), $group);
+    return $this->assert(!isset($value), $message ? $message : t('Value @value is NULL.', ['@value' => var_export($value, TRUE)]), $group);
   }
 
   /**
@@ -408,7 +408,7 @@ abstract class BackdropTestCase {
    *   TRUE if the assertion succeeded, FALSE otherwise.
    */
   protected function assertNotNull($value, $message = '', $group = 'Other') {
-    return $this->assert(isset($value), $message ? $message : t('Value @value is not NULL.', array('@value' => var_export($value, TRUE))), $group);
+    return $this->assert(isset($value), $message ? $message : t('Value @value is not NULL.', ['@value' => var_export($value, TRUE)]), $group);
   }
 
   /**
@@ -426,7 +426,7 @@ abstract class BackdropTestCase {
    *   TRUE if the assertion succeeded, FALSE otherwise.
    */
   protected function assertEqual($first, $second, $message = '', $group = 'Other') {
-    return $this->assert($first == $second, $message ? $message : t('Value @first is equal to value @second.', array('@first' => var_export($first, TRUE), '@second' => var_export($second, TRUE))), $group);
+    return $this->assert($first == $second, $message ? $message : t('Value @first is equal to value @second.', ['@first' => var_export($first, TRUE), '@second' => var_export($second, TRUE)]), $group);
   }
 
   /**
@@ -444,7 +444,7 @@ abstract class BackdropTestCase {
    *   TRUE if the assertion succeeded, FALSE otherwise.
    */
   protected function assertNotEqual($first, $second, $message = '', $group = 'Other') {
-    return $this->assert($first != $second, $message ? $message : t('Value @first is not equal to value @second.', array('@first' => var_export($first, TRUE), '@second' => var_export($second, TRUE))), $group);
+    return $this->assert($first != $second, $message ? $message : t('Value @first is not equal to value @second.', ['@first' => var_export($first, TRUE), '@second' => var_export($second, TRUE)]), $group);
   }
 
   /**
@@ -462,7 +462,7 @@ abstract class BackdropTestCase {
    *   TRUE if the assertion succeeded, FALSE otherwise.
    */
   protected function assertIdentical($first, $second, $message = '', $group = 'Other') {
-    return $this->assert($first === $second, $message ? $message : t('Value @first is identical to value @second.', array('@first' => var_export($first, TRUE), '@second' => var_export($second, TRUE))), $group);
+    return $this->assert($first === $second, $message ? $message : t('Value @first is identical to value @second.', ['@first' => var_export($first, TRUE), '@second' => var_export($second, TRUE)]), $group);
   }
 
   /**
@@ -480,7 +480,7 @@ abstract class BackdropTestCase {
    *   TRUE if the assertion succeeded, FALSE otherwise.
    */
   protected function assertNotIdentical($first, $second, $message = '', $group = 'Other') {
-    return $this->assert($first !== $second, $message ? $message : t('Value @first is not identical to value @second.', array('@first' => var_export($first, TRUE), '@second' => var_export($second, TRUE))), $group);
+    return $this->assert($first !== $second, $message ? $message : t('Value @first is not identical to value @second.', ['@first' => var_export($first, TRUE), '@second' => var_export($second, TRUE)]), $group);
   }
 
   /**
@@ -567,7 +567,7 @@ abstract class BackdropTestCase {
    *   taken into account, but it can be useful to only run a few selected test
    *   methods during debugging.
    */
-  public function run(array $methods = array()) {
+  public function run(array $methods = []) {
     // Get start time so that we can see how long tests are taking.
     $start = microtime(TRUE);
 
@@ -584,7 +584,7 @@ abstract class BackdropTestCase {
       $this->httpauth_credentials = $username . ':' . $password;
     }
 
-    set_error_handler(array($this, 'errorHandler'));
+    set_error_handler([$this, 'errorHandler']);
     $class = get_class($this);
     // Iterate through all the methods in this class, unless a specific list of
     // methods to run was passed.
@@ -605,11 +605,11 @@ abstract class BackdropTestCase {
           // Insert a fail record. This will be deleted on completion to ensure
           // that testing completed.
           $method_info = new ReflectionMethod($class, $method);
-          $caller = array(
+          $caller = [
             'file' => $method_info->getFileName(),
             'line' => $method_info->getStartLine(),
             'function' => $class . '->' . $method . '()',
-          );
+          ];
           $completion_check_id = BackdropTestCase::insertAssert($this->testId, $class, FALSE, t('The test did not complete due to a fatal error.'), 'Completion check', $caller);
           $this->setUp();
           if ($this->setup) {
@@ -661,7 +661,7 @@ abstract class BackdropTestCase {
    */
   public function errorHandler($severity, $message, $file = NULL, $line = NULL) {
     if ($severity & error_reporting()) {
-      $error_map = array(
+      $error_map = [
         E_STRICT => 'Run-time notice',
         E_WARNING => 'Warning',
         E_NOTICE => 'Notice',
@@ -673,7 +673,7 @@ abstract class BackdropTestCase {
         E_RECOVERABLE_ERROR => 'Recoverable error',
         E_DEPRECATED => 'Deprecated',
         E_USER_DEPRECATED => 'User deprecated',
-      );
+      ];
 
       $backtrace = debug_backtrace();
       $this->error($message, $error_map[$severity], _backdrop_get_last_caller($backtrace));
@@ -689,10 +689,10 @@ abstract class BackdropTestCase {
   protected function exceptionHandler(Exception $exception) {
     $backtrace = $exception->getTrace();
     // Push on top of the backtrace the call that generated the exception.
-    array_unshift($backtrace, array(
+    array_unshift($backtrace, [
       'line' => $exception->getLine(),
       'file' => $exception->getFile(),
-    ));
+    ]);
     require_once BACKDROP_ROOT . '/core/includes/errors.inc';
     // The exception message is run through check_plain() by _backdrop_decode_exception().
     $this->error(t('%type: !message in %function (line %line of %file).', _backdrop_decode_exception($exception)), 'Uncaught exception', _backdrop_get_last_caller($backtrace));
@@ -787,15 +787,15 @@ abstract class BackdropTestCase {
    *   single value only.
    */
   public static function generatePermutations($parameters) {
-    $all_permutations = array(array());
+    $all_permutations = [[]];
     foreach ($parameters as $parameter => $values) {
-      $new_permutations = array();
+      $new_permutations = [];
       // Iterate over all values of the parameter.
       foreach ($values as $value) {
         // Iterate over all existing permutations.
         foreach ($all_permutations as $permutation) {
           // Add the new parameter value to existing permutations.
-          $new_permutations[] = $permutation + array($parameter => $value);
+          $new_permutations[] = $permutation + [$parameter => $value];
         }
       }
       // Replace the old permutations with the new permutations.
@@ -851,13 +851,13 @@ class BackdropUnitTestCase extends BackdropTestCase {
     // Set to English to prevent any use of the database in t() calls.
     // The following array/object conversion is copied from language_default().
     $this->originalLanguage = $language;
-    $language = (object) array(
+    $language = (object) [
       'langcode' => 'en',
       'name' => 'English',
       'direction' => 0,
       'enabled' => TRUE,
       'weight' => 0,
-    );
+    ];
 
     $this->prepareDatabasePrefix();
 
@@ -873,9 +873,9 @@ class BackdropUnitTestCase extends BackdropTestCase {
     $connection_info = Database::getConnectionInfo('default');
     Database::renameConnection('default', 'simpletest_original_default');
     foreach ($connection_info as $target => $value) {
-      $connection_info[$target]['prefix'] = array(
+      $connection_info[$target]['prefix'] = [
         'default' => $value['prefix']['default'] . $this->databasePrefix,
-      );
+      ];
     }
     Database::addConnectionInfo('default', 'default', $connection_info['default']);
 
@@ -888,7 +888,7 @@ class BackdropUnitTestCase extends BackdropTestCase {
     if (isset($module_list['locale'])) {
       // Transform the list into the format expected as input to module_list().
       foreach ($module_list as &$module) {
-        $module = array('filename' => backdrop_get_filename('module', $module));
+        $module = ['filename' => backdrop_get_filename('module', $module)];
       }
       $this->originalModuleList = $module_list;
       unset($module_list['locale']);
@@ -1002,14 +1002,14 @@ class BackdropWebTestCase extends BackdropTestCase {
    *
    * @var array
    */
-  protected $cookies = array();
+  protected $cookies = [];
 
   /**
    * Additional cURL options.
    *
    * BackdropWebTestCase itself never sets this but always obeys what is set.
    */
-  protected $additionalCurlOptions = array();
+  protected $additionalCurlOptions = [];
 
   /**
    * The original user, before it was changed to a clean uid = 1 for testing purposes.
@@ -1043,7 +1043,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    *
    * @var array
    */
-  protected $originalShutdownCallbacks = array();
+  protected $originalShutdownCallbacks = [];
 
   /**
    * The current session name, if available.
@@ -1058,7 +1058,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   /**
    * Whether the files were copied to the test files directory.
    */
-  protected $generatedTestFiles = array();
+  protected $generatedTestFiles = [];
 
   /**
    * The maximum number of redirects to follow when handling responses.
@@ -1104,7 +1104,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   A node entity matching $title.
    */
   function backdropGetNodeByTitle($title, $reset = FALSE) {
-    $nodes = node_load_multiple(array(), array('title' => $title), $reset);
+    $nodes = node_load_multiple([], ['title' => $title], $reset);
     // Load the first node returned from the database.
     $returned_node = reset($nodes);
     return $returned_node;
@@ -1119,10 +1119,10 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @return Node
    *   Created node entity.
    */
-  protected function backdropCreateNode($settings = array()) {
+  protected function backdropCreateNode($settings = []) {
     // Populate defaults array.
-    $settings += array(
-      'body'      => array(LANGUAGE_NONE => array(array())),
+    $settings += [
+      'body'      => [LANGUAGE_NONE => [[]]],
       'title'     => $this->randomName(8),
       'comment'   => 2,
       'changed'   => REQUEST_TIME,
@@ -1135,7 +1135,7 @@ class BackdropWebTestCase extends BackdropTestCase {
       'type'      => 'page',
       'revisions' => NULL,
       'langcode'  => LANGUAGE_NONE,
-    );
+    ];
 
     // Use the original node's created time for existing nodes.
     if (isset($settings['created']) && !isset($settings['date'])) {
@@ -1155,10 +1155,10 @@ class BackdropWebTestCase extends BackdropTestCase {
     }
 
     // Merge body field value and format separately.
-    $body = array(
+    $body = [
       'value' => $this->randomName(32),
       'format' => filter_default_format(),
-    );
+    ];
     $settings['body'][$settings['langcode']][0] += $body;
 
     $node = new Node($settings);
@@ -1166,7 +1166,7 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     // Small hack to link revisions to our test user.
     db_update('node_revision')
-      ->fields(array('uid' => $node->uid))
+      ->fields(['uid' => $node->uid])
       ->condition('vid', $node->vid)
       ->execute();
     return $node;
@@ -1181,14 +1181,14 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @return
    *   Created content type.
    */
-  protected function backdropCreateContentType($settings = array()) {
+  protected function backdropCreateContentType($settings = []) {
     // Find a non-existent random type name.
     do {
       $name = strtolower($this->randomName(8));
     } while (node_type_get_type($name));
 
     // Populate defaults array.
-    $defaults = array(
+    $defaults = [
       'type' => $name,
       'name' => $name,
       'base' => 'node_content',
@@ -1197,16 +1197,16 @@ class BackdropWebTestCase extends BackdropTestCase {
       'title_label' => 'Title',
       'has_title' => 1,
       'is_new' => TRUE,
-    );
+    ];
     // Imposed values for a custom type.
-    $forced = array(
+    $forced = [
       'orig_type' => '',
       'old_type' => '',
       'module' => 'node',
       'custom' => 1,
       'modified' => 1,
       'locked' => 0,
-    );
+    ];
     $type = $forced + $settings + $defaults;
     $type = (object) $type;
 
@@ -1214,10 +1214,10 @@ class BackdropWebTestCase extends BackdropTestCase {
     menu_rebuild();
     node_add_body_field($type);
 
-    $this->assertEqual($saved_type, SAVED_NEW, t('Created content type %type.', array('%type' => $type->type)));
+    $this->assertEqual($saved_type, SAVED_NEW, t('Created content type %type.', ['%type' => $type->type]));
 
     // Reset permissions so that permissions for this content type are available.
-    $this->checkPermissions(array(), TRUE);
+    $this->checkPermissions([], TRUE);
 
     return $type;
   }
@@ -1233,16 +1233,16 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   List of files that match filter.
    */
   protected function backdropGetTestFiles($type, $size = NULL) {
-    $files = array();
+    $files = [];
     // Make sure type is valid.
-    $possible_types = array('binary', 'html', 'image', 'svg', 'javascript', 'php', 'sql', 'text');
+    $possible_types = ['binary', 'html', 'image', 'svg', 'javascript', 'php', 'sql', 'text'];
     if (in_array($type, $possible_types)) {
 
       if (!in_array($type, $this->generatedTestFiles)) {
         switch ($type) {
           case 'binary':
             // Generate binary test files.
-            $lines = array(64, 1024);
+            $lines = [64, 1024];
             $count = 0;
             foreach ($lines as $line) {
               simpletest_generate_file('binary-' . $count++, 64, $line, 'binary');
@@ -1252,7 +1252,7 @@ class BackdropWebTestCase extends BackdropTestCase {
 
           case 'text':
             // Generate text test files.
-            $lines = array(16, 256, 1024, 2048, 20480);
+            $lines = [16, 256, 1024, 2048, 20480];
             $count = 0;
             foreach ($lines as $line) {
               simpletest_generate_file('text-' . $count++, 64, $line, 'text');
@@ -1284,7 +1284,7 @@ class BackdropWebTestCase extends BackdropTestCase {
         }
       }
     }
-    usort($files, array($this, 'backdropCompareFiles'));
+    usort($files, [$this, 'backdropCompareFiles']);
     return $files;
   }
 
@@ -1314,7 +1314,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   A fully loaded user object with pass_raw property, or FALSE if account
    *   creation fails.
    */
-  protected function backdropCreateUser(array $permissions = array()) {
+  protected function backdropCreateUser(array $permissions = []) {
     // Create a role with the given permission set, if any.
     $role_name = FALSE;
     if ($permissions) {
@@ -1325,19 +1325,19 @@ class BackdropWebTestCase extends BackdropTestCase {
     }
 
     // Create a user assigned to that role.
-    $edit = array();
+    $edit = [];
     $edit['name']   = $this->randomName();
     $edit['mail']   = $edit['name'] . '@example.com';
     $edit['pass']   = user_password();
     $edit['status'] = 1;
     if ($role_name) {
-      $edit['roles'] = array($role_name);
+      $edit['roles'] = [$role_name];
     }
 
     $account = entity_create('user', $edit);
     $account->save();
 
-    $this->assertTrue(!empty($account->uid), t('User created with name %name and pass %pass', array('%name' => $edit['name'], '%pass' => $edit['pass'])), t('User login'));
+    $this->assertTrue(!empty($account->uid), t('User created with name %name and pass %pass', ['%name' => $edit['name'], '%pass' => $edit['pass']]), t('User login'));
     if (empty($account->uid)) {
       return FALSE;
     }
@@ -1375,9 +1375,9 @@ class BackdropWebTestCase extends BackdropTestCase {
     user_role_save($role);
     user_role_grant_permissions($role->name, $permissions);
     $role = user_role_load($role->name);
-    $this->assertTrue(isset($role->name), t('Created role of name: @name', array('@name' => $name)), t('Role'));
+    $this->assertTrue(isset($role->name), t('Created role of name: @name', ['@name' => $name]), t('Role'));
     if ($role && !empty($role->name)) {
-      $this->assertTrue(count($role->permissions) == count($permissions), t('Created permissions: @perms', array('@perms' => implode(', ', $permissions))), t('Role'));
+      $this->assertTrue(count($role->permissions) == count($permissions), t('Created permissions: @perms', ['@perms' => implode(', ', $permissions)]), t('Role'));
       return $role->name;
     }
     else {
@@ -1405,7 +1405,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     $valid = TRUE;
     foreach ($permissions as $permission) {
       if (!in_array($permission, $available)) {
-        $this->fail(t('Invalid permission %permission.', array('%permission' => $permission)), t('Role'));
+        $this->fail(t('Invalid permission %permission.', ['%permission' => $permission]), t('Role'));
         $valid = FALSE;
       }
     }
@@ -1451,15 +1451,15 @@ class BackdropWebTestCase extends BackdropTestCase {
       $this->backdropLogout();
     }
 
-    $edit = array(
+    $edit = [
       'name' => $by_email ? $account->mail : $account->name,
       'pass' => $account->pass_raw
-    );
+    ];
     $this->backdropPost('user/login', $edit, t('Log in'));
 
     // Check for the logged-in class.
     $result = $this->xpath('/html/body[contains(@class, "logged-in")]');
-    $pass = $this->assertEqual(count($result), 1, t('User %name successfully logged in.', array('%name' => $account->name)), t('User login'));
+    $pass = $this->assertEqual(count($result), 1, t('User %name successfully logged in.', ['%name' => $account->name]), t('User login'));
 
     if ($pass) {
       $this->loggedInUser = $account;
@@ -1510,9 +1510,9 @@ class BackdropWebTestCase extends BackdropTestCase {
     $connection_info = Database::getConnectionInfo('default');
     Database::renameConnection('default', 'simpletest_original_default');
     foreach ($connection_info as $target => $value) {
-      $connection_info[$target]['prefix'] = array(
+      $connection_info[$target]['prefix'] = [
         'default' => $value['prefix']['default'] . $this->databasePrefix,
-      );
+      ];
     }
 
     Database::addConnectionInfo('default', 'default', $connection_info['default']);
@@ -1552,12 +1552,12 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Set to English to prevent exceptions from utf8_truncate() from t()
     // during install if the current language is not 'en'.
     // The following array/object conversion is copied from language_default().
-    $language_url = $language = (object) array(
+    $language_url = $language = (object) [
       'langcode' => 'en',
       'name' => 'English',
       'enabled' => 1,
       'weight' => 0,
-    );
+    ];
 
     // Save and clean the shutdown callbacks array because it is static cached
     // and will be changed by the test run. Otherwise it will contain callbacks
@@ -1565,7 +1565,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     // handlers defined by the original one.
     $callbacks = &backdrop_register_shutdown_function();
     $this->originalShutdownCallbacks = $callbacks;
-    $callbacks = array();
+    $callbacks = [];
 
     // Create test directory ahead of installation so fatal errors and debug
     // information can be logged during installation process.
@@ -1578,7 +1578,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     file_prepare_directory($this->public_files_directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
     file_prepare_directory($this->private_files_directory, FILE_CREATE_DIRECTORY);
     file_prepare_directory($this->temp_files_directory, FILE_CREATE_DIRECTORY);
-    $this->generatedTestFiles = array();
+    $this->generatedTestFiles = [];
 
     // Set the new config directories. During test execution, these values are
     // manually set directly in config_get_config_directory().
@@ -1617,7 +1617,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     if (is_dir($config_cache_dir)) {
       $prefix = 'simpletest_cache_' . $this->profile . '_';
 
-      $tables = db_query("SHOW TABLES LIKE :prefix", array(':prefix' => db_like($prefix) . '%' ))->fetchCol();
+      $tables = db_query("SHOW TABLES LIKE :prefix", [':prefix' => db_like($prefix) . '%' ])->fetchCol();
 
       foreach ($tables as $table_prefix) {
         $table = substr($table_prefix, strlen($prefix));
@@ -1694,7 +1694,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     }
 
     // Reset all statics and variables to perform tests in a clean environment.
-    $conf = array();
+    $conf = [];
     backdrop_static_reset();
 
     // Change the database prefix.
@@ -1748,9 +1748,9 @@ class BackdropWebTestCase extends BackdropTestCase {
       // Install the modules specified by the testing profile.
       module_enable($profile_details['dependencies'], FALSE);
       // Run the profile tasks.
-      $install_profile_module_exists = db_query("SELECT 1 FROM {system} WHERE type = 'module' AND name = :name", array(':name' => $this->profile))->fetchField();
+      $install_profile_module_exists = db_query("SELECT 1 FROM {system} WHERE type = 'module' AND name = :name", [':name' => $this->profile])->fetchField();
       if ($install_profile_module_exists) {
-        module_enable(array($this->profile), FALSE);
+        module_enable([$this->profile], FALSE);
       }
     }
     else {
@@ -1778,7 +1778,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     }
     if ($modules) {
       $success = module_enable($modules, TRUE);
-      $this->assertTrue($success, t('Enabled modules: %modules', array('%modules' => implode(', ', $modules))));
+      $this->assertTrue($success, t('Enabled modules: %modules', ['%modules' => implode(', ', $modules)]));
     }
 
     // Reset/rebuild all data structures after enabling the modules.
@@ -1843,7 +1843,7 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     // Reload global $conf array and permissions.
     $this->refreshVariables();
-    $this->checkPermissions(array(), TRUE);
+    $this->checkPermissions([], TRUE);
   }
 
   /**
@@ -1877,7 +1877,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     // log to pick up any fatal errors.
     simpletest_log_read($this->testId, $this->databasePrefix, get_class($this), TRUE);
 
-    $emailCount = count(state_get('test_email_collector', array()));
+    $emailCount = count(state_get('test_email_collector', []));
     if ($emailCount) {
       $message = format_plural($emailCount, '1 email was sent during this test.', '@count emails were sent during this test.');
       $this->pass($message, t('Email'));
@@ -1939,7 +1939,7 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     // Ensure that internal logged in variable and cURL options are reset.
     $this->loggedInUser = FALSE;
-    $this->additionalCurlOptions = array();
+    $this->additionalCurlOptions = [];
 
     // Reload module list and implementations to ensure that test module hooks
     // aren't called after tests.
@@ -1956,7 +1956,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Close the CURL handler and reset the cookies array, so that test classes
     // containing multiple tests are not polluted.
     $this->curlClose();
-    $this->cookies = array();
+    $this->cookies = [];
   }
 
   /**
@@ -1979,16 +1979,16 @@ class BackdropWebTestCase extends BackdropTestCase {
         $this->cookieFile = $this->public_files_directory . '/cookie.jar';
       }
 
-      $curl_options = array(
+      $curl_options = [
         CURLOPT_COOKIEJAR => $this->cookieFile,
         CURLOPT_URL => $base_url,
         CURLOPT_FOLLOWLOCATION => FALSE,
         CURLOPT_RETURNTRANSFER => TRUE,
         CURLOPT_SSL_VERIFYPEER => FALSE, // Required to make the tests run on HTTPS.
         CURLOPT_SSL_VERIFYHOST => FALSE, // Required to make the tests run on HTTPS.
-        CURLOPT_HEADERFUNCTION => array(&$this, 'curlHeaderCallback'),
+        CURLOPT_HEADERFUNCTION => [&$this, 'curlHeaderCallback'],
         CURLOPT_USERAGENT => $this->databasePrefix,
-      );
+      ];
       if (isset($this->httpauth_credentials)) {
         $curl_options[CURLOPT_HTTPAUTH] = $this->httpauth_method;
         $curl_options[CURLOPT_USERPWD] = $this->httpauth_credentials;
@@ -2054,7 +2054,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     if (!$redirect) {
       // Reset headers, the session ID and the redirect counter.
       $this->session_id = NULL;
-      $this->headers = array();
+      $this->headers = [];
       $this->redirect_count = 0;
     }
 
@@ -2066,10 +2066,10 @@ class BackdropWebTestCase extends BackdropTestCase {
     // to prevent fragments being sent to the web server as part
     // of the request.
     // TODO: Remove this; fixed in curl 7.20.0.
-    if (in_array($status, array(300, 301, 302, 303, 305, 307)) && $this->redirect_count < $this->maximumRedirects) {
+    if (in_array($status, [300, 301, 302, 303, 305, 307]) && $this->redirect_count < $this->maximumRedirects) {
       if ($this->backdropGetHeader('location')) {
         $this->redirect_count++;
-        $curl_options = array();
+        $curl_options = [];
         $curl_options[CURLOPT_URL] = $this->backdropGetHeader('location');
         $curl_options[CURLOPT_HTTPGET] = TRUE;
         return $this->curlExec($curl_options, TRUE);
@@ -2077,12 +2077,12 @@ class BackdropWebTestCase extends BackdropTestCase {
     }
 
     $this->backdropSetContent($content, isset($original_url) ? $original_url : curl_getinfo($this->curlHandle, CURLINFO_EFFECTIVE_URL));
-    $message_vars = array(
+    $message_vars = [
       '!method' => !empty($curl_options[CURLOPT_NOBODY]) ? 'HEAD' : (empty($curl_options[CURLOPT_POSTFIELDS]) ? 'GET' : 'POST'),
       '@url' => isset($original_url) ? $original_url : $url,
       '@status' => $status,
       '!length' => format_size(strlen($this->backdropGetContent()))
-    );
+    ];
     $message = t('!method @url returned @status (!length).', $message_vars);
     $this->assertTrue($this->backdropGetContent() !== FALSE, $message, t('Browser'));
     return $this->backdropGetContent();
@@ -2118,7 +2118,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     // by BackdropWebTestCase::error().
     if (preg_match('/^X-Backdrop-Assertion-[0-9]+: (.*)$/', trim($header), $matches)) {
       // Call BackdropWebTestCase::error() with the parameters from the header.
-      call_user_func_array(array(&$this, 'error'), unserialize(urldecode($matches[1])));
+      call_user_func_array([&$this, 'error'], unserialize(urldecode($matches[1])));
     }
 
     // Save cookies.
@@ -2126,7 +2126,7 @@ class BackdropWebTestCase extends BackdropTestCase {
       $name = $matches[1];
       $parts = array_map('trim', explode(';', $matches[2]));
       $value = array_shift($parts);
-      $this->cookies[$name] = array('value' => $value, 'secure' => in_array('secure', $parts));
+      $this->cookies[$name] = ['value' => $value, 'secure' => in_array('secure', $parts)];
       if ($name == $this->session_name) {
         if ($value != 'deleted') {
           $this->session_id = $value;
@@ -2163,7 +2163,7 @@ class BackdropWebTestCase extends BackdropTestCase {
       // DOM can load HTML soup, which can throw warnings. Suppress them here.
       @$htmlDom->loadHTML('<?xml encoding="UTF-8">' . $this->backdropGetContent());
       if ($htmlDom) {
-        $this->pass(t('Valid HTML found on "@path"', array('@path' => $this->getUrl())), t('Browser'));
+        $this->pass(t('Valid HTML found on "@path"', ['@path' => $this->getUrl()]), t('Browser'));
         // Import our DOM tree.
         $this->elements = simplexml_import_dom($htmlDom);
       }
@@ -2188,13 +2188,13 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @return
    *   The retrieved HTML string, also available as $this->backdropGetContent()
    */
-  protected function backdropGet($path, array $options = array(), array $headers = array()) {
+  protected function backdropGet($path, array $options = [], array $headers = []) {
     $options['absolute'] = TRUE;
 
     // We re-using a CURL connection here. If that connection still has certain
     // options set, it might change the GET into a POST. Make sure we clear out
     // previous options.
-    $out = $this->curlExec(array(CURLOPT_HTTPGET => TRUE, CURLOPT_URL => url($path, $options), CURLOPT_NOBODY => FALSE, CURLOPT_HTTPHEADER => $headers));
+    $out = $this->curlExec([CURLOPT_HTTPGET => TRUE, CURLOPT_URL => url($path, $options), CURLOPT_NOBODY => FALSE, CURLOPT_HTTPHEADER => $headers]);
     $this->refreshVariables(); // Ensure that any changes to variables in the other thread are picked up.
 
     // Replace original page output with new output from redirected page(s).
@@ -2210,7 +2210,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   /**
    * Retrieve a Backdrop path or an absolute path and JSON decode the result.
    */
-  protected function backdropGetAJAX($path, array $options = array(), array $headers = array()) {
+  protected function backdropGetAJAX($path, array $options = [], array $headers = []) {
     $headers[] = 'X-Requested-With: XMLHttpRequest';
     $headers[] = 'Accept: application/vnd.backdrop-ajax, */*; q=0.01';
     return backdrop_json_decode($this->backdropGet($path, $options, $headers));
@@ -2294,7 +2294,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @return string|FALSE
    *   The returned HTML content from the response.
    */
-  protected function backdropPost($path, $edit, $submit, array $options = array(), array $headers = array(), $form_html_id = NULL, $extra_post = NULL) {
+  protected function backdropPost($path, $edit, $submit, array $options = [], array $headers = [], $form_html_id = NULL, $extra_post = NULL) {
     $submit_matches = FALSE;
     $ajax = is_array($submit);
     if (isset($path)) {
@@ -2311,8 +2311,8 @@ class BackdropWebTestCase extends BackdropTestCase {
       foreach ($forms as $form) {
         // We try to set the fields of this form as specified in $edit.
         $edit = $edit_save;
-        $post = array();
-        $upload = array();
+        $post = [];
+        $upload = [];
         $submit_matches = $this->handleForm($post, $edit, $upload, $ajax ? NULL : $submit, $form);
         $action = isset($form['action']) ? $this->getAbsoluteUrl((string) $form['action']) : $this->getUrl();
         if ($ajax) {
@@ -2347,7 +2347,7 @@ class BackdropWebTestCase extends BackdropTestCase {
             }
             $post = implode('&', $post) . $extra_post;
           }
-          $out = $this->curlExec(array(CURLOPT_URL => $action, CURLOPT_POST => TRUE, CURLOPT_POSTFIELDS => $post, CURLOPT_HTTPHEADER => $headers));
+          $out = $this->curlExec([CURLOPT_URL => $action, CURLOPT_POST => TRUE, CURLOPT_POSTFIELDS => $post, CURLOPT_HTTPHEADER => $headers]);
           // Ensure that any changes to variables in the other thread are picked up.
           $this->refreshVariables();
 
@@ -2364,12 +2364,12 @@ class BackdropWebTestCase extends BackdropTestCase {
       }
       // We have not found a form which contained all fields of $edit.
       foreach ($edit as $name => $value) {
-        $this->fail(t('Failed to set field @name to @value', array('@name' => $name, '@value' => $value)));
+        $this->fail(t('Failed to set field @name to @value', ['@name' => $name, '@value' => $value]));
       }
       if (!$ajax && isset($submit)) {
-        $this->assertTrue($submit_matches, t('Found the @submit button', array('@submit' => $submit)));
+        $this->assertTrue($submit_matches, t('Found the @submit button', ['@submit' => $submit]));
       }
-      $this->fail(t('Found the requested form fields at @path', array('@path' => $path)));
+      $this->fail(t('Found the requested form fields at @path', ['@path' => $path]));
     }
     return FALSE;
   }
@@ -2417,7 +2417,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @see backdropPost()
    * @see ajax.js
    */
-  protected function backdropPostAJAX($path, $edit, $triggering_element, $ajax_path = NULL, array $options = array(), array $headers = array(), $form_html_id = NULL, $ajax_settings = NULL) {
+  protected function backdropPostAJAX($path, $edit, $triggering_element, $ajax_path = NULL, array $options = [], array $headers = [], $form_html_id = NULL, $ajax_settings = NULL) {
     // Get the content of the initial page prior to calling backdropPost(), since
     // backdropPost() replaces $this->content.
     if (isset($path)) {
@@ -2473,16 +2473,16 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Submit the POST request.
     $headers[] = 'X-Requested-With: XMLHttpRequest';
     $headers[] = 'Accept: application/vnd.backdrop-ajax, */*; q=0.01';
-    $return = backdrop_json_decode($this->backdropPost(NULL, $edit, array('path' => $ajax_path, 'triggering_element' => $triggering_element), $options, $headers, $form_html_id, $extra_post));
+    $return = backdrop_json_decode($this->backdropPost(NULL, $edit, ['path' => $ajax_path, 'triggering_element' => $triggering_element], $options, $headers, $form_html_id, $extra_post));
     $this->assertIdentical($this->backdropGetHeader('X-Backdrop-Ajax-Token'), '1', 'Ajax response header found.');
 
     // Change the page content by applying the returned commands.
     if (!empty($ajax_settings) && !empty($return)) {
       // ajax.js applies some defaults to the settings object, so do the same
       // for what's used by this function.
-      $ajax_settings += array(
+      $ajax_settings += [
         'method' => 'replaceWith',
-      );
+      ];
       // DOM can load HTML soup. But, HTML soup can throw warnings, suppress
       // them.
       $dom = new DOMDocument();
@@ -2505,7 +2505,7 @@ class BackdropWebTestCase extends BackdropTestCase {
             // @todo Ajax commands can target any jQuery selector, but these are
             //   hard to fully emulate with XPath. For now, just handle 'head'
             //   and 'body', since these are used by ajax_render().
-            elseif (in_array($command['selector'], array('head', 'body'))) {
+            elseif (in_array($command['selector'], ['head', 'body'])) {
               $wrapperNode = $xpath->query('//' . $command['selector'])->item(0);
             }
             if ($wrapperNode) {
@@ -2592,7 +2592,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * Runs cron in the Backdrop installed by SimpleTest.
    */
   protected function cronRun() {
-    $this->backdropGet($GLOBALS['base_url'] . '/core/cron.php', array('external' => TRUE, 'query' => array('cron_key' => state_get('cron_key'))));
+    $this->backdropGet($GLOBALS['base_url'] . '/core/cron.php', ['external' => TRUE, 'query' => ['cron_key' => state_get('cron_key')]]);
   }
 
   /**
@@ -2630,9 +2630,9 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @return
    *   The retrieved headers, also available as $this->backdropGetContent()
    */
-  protected function backdropHead($path, array $options = array(), array $headers = array()) {
+  protected function backdropHead($path, array $options = [], array $headers = []) {
     $options['absolute'] = TRUE;
-    $out = $this->curlExec(array(CURLOPT_NOBODY => TRUE, CURLOPT_URL => url($path, $options), CURLOPT_HTTPHEADER => $headers));
+    $out = $this->curlExec([CURLOPT_NOBODY => TRUE, CURLOPT_URL => url($path, $options), CURLOPT_HTTPHEADER => $headers]);
     $this->refreshVariables(); // Ensure that any changes to variables in the other thread are picked up.
     return $out;
   }
@@ -2812,7 +2812,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @return
    *   An XPath query with arguments replaced.
    */
-  protected function buildXPathQuery($xpath, array $args = array()) {
+  protected function buildXPathQuery($xpath, array $args = []) {
     // Replace placeholders.
     foreach ($args as $placeholder => $value) {
       // XPath 1.0 doesn't support a way to escape single or double quotes in a
@@ -2852,14 +2852,14 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   format and return values see the SimpleXML documentation,
    *   http://us.php.net/manual/function.simplexml-element-xpath.php.
    */
-  protected function xpath($xpath, array $arguments = array()) {
+  protected function xpath($xpath, array $arguments = []) {
     if ($this->parse()) {
       $xpath = $this->buildXPathQuery($xpath, $arguments);
       $result = $this->elements->xpath($xpath);
       // Some combinations of PHP / libxml versions return an empty array
       // instead of the documented FALSE. Forcefully convert any false-ish
       // values to an empty array to allow foreach(...) constructions.
-      return $result ? $result : array();
+      return $result ? $result : [];
     }
     else {
       return FALSE;
@@ -2875,7 +2875,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   Option elements in select.
    */
   protected function getAllOptions(SimpleXMLElement $element) {
-    $options = array();
+    $options = [];
     // Add all options items.
     foreach ($element->option as $option) {
       $options[] = $option;
@@ -2906,8 +2906,8 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   TRUE if the assertion succeeded, FALSE otherwise.
    */
   protected function assertLink($label, $index = 0, $message = '', $group = 'Other') {
-    $links = $this->xpath('//a[normalize-space(text())=:label]', array(':label' => $label));
-    $message = ($message ?  $message : t('Link with label %label found.', array('%label' => $label)));
+    $links = $this->xpath('//a[normalize-space(text())=:label]', [':label' => $label]);
+    $message = ($message ?  $message : t('Link with label %label found.', ['%label' => $label]));
     return $this->assert(isset($links[$index]), $message, $group);
   }
 
@@ -2926,8 +2926,8 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   TRUE if the assertion succeeded, FALSE otherwise.
    */
   protected function assertNoLink($label, $message = '', $group = 'Other') {
-    $links = $this->xpath('//a[normalize-space(text())=:label]', array(':label' => $label));
-    $message = ($message ?  $message : t('Link with label %label not found.', array('%label' => $label)));
+    $links = $this->xpath('//a[normalize-space(text())=:label]', [':label' => $label]);
+    $message = ($message ?  $message : t('Link with label %label not found.', ['%label' => $label]));
     return $this->assert(empty($links), $message, $group);
   }
 
@@ -2947,8 +2947,8 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   TRUE if the assertion succeeded, FALSE otherwise.
    */
   protected function assertLinkByHref($href, $index = 0, $message = '', $group = 'Other') {
-    $links = $this->xpath('//a[contains(@href, :href)]', array(':href' => $href));
-    $message = ($message ?  $message : t('Link containing href %href found.', array('%href' => $href)));
+    $links = $this->xpath('//a[contains(@href, :href)]', [':href' => $href]);
+    $message = ($message ?  $message : t('Link containing href %href found.', ['%href' => $href]));
     return $this->assert(isset($links[$index]), $message, $group);
   }
 
@@ -2966,8 +2966,8 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   TRUE if the assertion succeeded, FALSE otherwise.
    */
   protected function assertNoLinkByHref($href, $message = '', $group = 'Other') {
-    $links = $this->xpath('//a[contains(@href, :href)]', array(':href' => $href));
-    $message = ($message ?  $message : t('No link containing href %href found.', array('%href' => $href)));
+    $links = $this->xpath('//a[contains(@href, :href)]', [':href' => $href]);
+    $message = ($message ?  $message : t('No link containing href %href found.', ['%href' => $href]));
     return $this->assert(empty($links), $message, $group);
   }
 
@@ -2989,13 +2989,13 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function clickLink($label, $index = 0) {
     $url_before = $this->getUrl();
-    $urls = $this->xpath('//a[normalize-space(text())=:label]', array(':label' => $label));
+    $urls = $this->xpath('//a[normalize-space(text())=:label]', [':label' => $label]);
     if (isset($urls[$index])) {
       $url_target = $this->getAbsoluteUrl($urls[$index]['href']);
-      $this->pass(t('Clicked link %label (@url_target) from @url_before', array('%label' => $label, '@url_target' => $url_target, '@url_before' => $url_before)), 'Browser');
+      $this->pass(t('Clicked link %label (@url_target) from @url_before', ['%label' => $label, '@url_target' => $url_target, '@url_before' => $url_before]), 'Browser');
       return $this->backdropGet($url_target);
     }
-    $this->fail(t('Link %label does not exist on @url_before', array('%label' => $label, '@url_before' => $url_before)), 'Browser');
+    $this->fail(t('Link %label does not exist on @url_before', ['%label' => $label, '@url_before' => $url_before]), 'Browser');
     return FALSE;
   }
 
@@ -3060,7 +3060,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function backdropGetHeaders($all_requests = FALSE) {
     $request = 0;
-    $headers = array($request => array());
+    $headers = [$request => []];
     foreach ($this->headers as $header) {
       $header = trim($header);
       if ($header === '') {
@@ -3147,9 +3147,9 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @return
    *   An array containing email messages captured during the current test.
    */
-  protected function backdropGetMails($filter = array()) {
-    $captured_emails = state_get('test_email_collector', array());
-    $filtered_emails = array();
+  protected function backdropGetMails($filter = []) {
+    $captured_emails = state_get('test_email_collector', []);
+    $filtered_emails = [];
 
     foreach ($captured_emails as $message) {
       foreach ($filter as $key => $value) {
@@ -3177,7 +3177,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     $this->url = $url;
     $this->plainTextContent = FALSE;
     $this->elements = FALSE;
-    $this->backdropSettings = array();
+    $this->backdropSettings = [];
     if (preg_match('/window.Backdrop[ ]?=[ ]?{settings:[ ]?(.*)}/', $content, $matches)) {
       $this->backdropSettings = backdrop_json_decode($matches[1]);
     }
@@ -3205,11 +3205,11 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @return
    *   TRUE on pass, FALSE on fail.
    */
-  protected function assertUrl($path, array $options = array(), $message = '', $group = 'Other') {
+  protected function assertUrl($path, array $options = [], $message = '', $group = 'Other') {
     if (!$message) {
-      $message = t('Current URL is @url.', array(
+      $message = t('Current URL is @url.', [
         '@url' => var_export(url($path, $options), TRUE),
-      ));
+      ]);
     }
     $options['absolute'] = TRUE;
     return $this->assertEqual($this->getUrl(), url($path, $options), $message, $group);
@@ -3230,7 +3230,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function assertRaw($raw, $message = '', $group = 'Other') {
     if (!$message) {
-      $message = t('Raw "@raw" found', array('@raw' => $raw));
+      $message = t('Raw "@raw" found', ['@raw' => $raw]);
     }
     return $this->assert(strpos($this->backdropGetContent(), (string) $raw) !== FALSE, $message, $group);
   }
@@ -3250,7 +3250,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function assertNoRaw($raw, $message = '', $group = 'Other') {
     if (!$message) {
-      $message = t('Raw "@raw" not found', array('@raw' => $raw));
+      $message = t('Raw "@raw" not found', ['@raw' => $raw]);
     }
     return $this->assert(strpos($this->backdropGetContent(), (string) $raw) === FALSE, $message, $group);
   }
@@ -3309,10 +3309,10 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function assertTextHelper($text, $message, $group, $not_exists) {
     if ($this->plainTextContent === FALSE) {
-      $this->plainTextContent = filter_xss($this->backdropGetContent(), array());
+      $this->plainTextContent = filter_xss($this->backdropGetContent(), []);
     }
     if (!$message) {
-      $message = !$not_exists ? t('"@text" found', array('@text' => $text)) : t('"@text" not found', array('@text' => $text));
+      $message = !$not_exists ? t('"@text" found', ['@text' => $text]) : t('"@text" not found', ['@text' => $text]);
     }
     return $this->assert($not_exists == (strpos($this->plainTextContent, $text) === FALSE), $message, $group);
   }
@@ -3375,7 +3375,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function assertUniqueTextHelper($text, $message, $group, $be_unique) {
     if ($this->plainTextContent === FALSE) {
-      $this->plainTextContent = filter_xss($this->backdropGetContent(), array());
+      $this->plainTextContent = filter_xss($this->backdropGetContent(), []);
     }
     if (!$message) {
       $message = '"' . $text . '"' . ($be_unique ? ' found only once' : ' found more than once');
@@ -3403,7 +3403,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function assertPattern($pattern, $message = '', $group = 'Other') {
     if (!$message) {
-      $message = t('Pattern "@pattern" found', array('@pattern' => $pattern));
+      $message = t('Pattern "@pattern" found', ['@pattern' => $pattern]);
     }
     return $this->assert((bool) preg_match($pattern, $this->backdropGetContent()), $message, $group);
   }
@@ -3422,7 +3422,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function assertNoPattern($pattern, $message = '', $group = 'Other') {
     if (!$message) {
-      $message = t('Pattern "@pattern" not found', array('@pattern' => $pattern));
+      $message = t('Pattern "@pattern" not found', ['@pattern' => $pattern]);
     }
     return $this->assert(!preg_match($pattern, $this->backdropGetContent()), $message, $group);
   }
@@ -3442,10 +3442,10 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected function assertTitle($title, $message = '', $group = 'Other') {
     $actual = (string) current($this->xpath('//title'));
     if (!$message) {
-      $message = t('Page title @actual is equal to @expected.', array(
+      $message = t('Page title @actual is equal to @expected.', [
         '@actual' => var_export($actual, TRUE),
         '@expected' => var_export($title, TRUE),
-      ));
+      ]);
     }
     return $this->assertEqual($actual, $title, $message, $group);
   }
@@ -3465,10 +3465,10 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected function assertNoTitle($title, $message = '', $group = 'Other') {
     $actual = (string) current($this->xpath('//title'));
     if (!$message) {
-      $message = t('Page title @actual is not equal to @unexpected.', array(
+      $message = t('Page title @actual is not equal to @unexpected.', [
         '@actual' => var_export($actual, TRUE),
         '@unexpected' => var_export($title, TRUE),
-      ));
+      ]);
     }
     return $this->assertNotEqual($actual, $title, $message, $group);
   }
@@ -3505,7 +3505,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     if (!$message) {
       $message = '%callback rendered correctly.';
     }
-    $message = format_string($message, array('%callback' => 'theme_' . $callback . '()'));
+    $message = format_string($message, ['%callback' => 'theme_' . $callback . '()']);
     return $this->assertIdentical($output, $expected, $message, $group);
   }
 
@@ -3632,15 +3632,15 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected function assertFieldByName($name, $value = NULL, $message = NULL) {
     if (!isset($message)) {
       if (!isset($value)) {
-        $message = t('Found field with name @name', array(
+        $message = t('Found field with name @name', [
           '@name' => var_export($name, TRUE),
-        ));
+        ]);
       }
       else {
-        $message = t('Found field with name @name and value @value', array(
+        $message = t('Found field with name @name and value @value', [
           '@name' => var_export($name, TRUE),
           '@value' => var_export($value, TRUE),
-        ));
+        ]);
       }
     }
     return $this->assertFieldByXPath($this->constructFieldXpath('name', $name), $value, $message, t('Browser'));
@@ -3661,7 +3661,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertNoFieldByName($name, $value = '', $message = '') {
-    return $this->assertNoFieldByXPath($this->constructFieldXpath('name', $name), $value, $message ? $message : t('Did not find field by name @name', array('@name' => $name)), t('Browser'));
+    return $this->assertNoFieldByXPath($this->constructFieldXpath('name', $name), $value, $message ? $message : t('Did not find field by name @name', ['@name' => $name]), t('Browser'));
   }
 
   /**
@@ -3679,7 +3679,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertFieldById($id, $value = '', $message = '') {
-    return $this->assertFieldByXPath($this->constructFieldXpath('id', $id), $value, $message ? $message : t('Found field by id @id', array('@id' => $id)), t('Browser'));
+    return $this->assertFieldByXPath($this->constructFieldXpath('id', $id), $value, $message ? $message : t('Found field by id @id', ['@id' => $id]), t('Browser'));
   }
 
   /**
@@ -3697,7 +3697,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertNoFieldById($id, $value = '', $message = '') {
-    return $this->assertNoFieldByXPath($this->constructFieldXpath('id', $id), $value, $message ? $message : t('Did not find field by id @id', array('@id' => $id)), t('Browser'));
+    return $this->assertNoFieldByXPath($this->constructFieldXpath('id', $id), $value, $message ? $message : t('Did not find field by id @id', ['@id' => $id]), t('Browser'));
   }
 
   /**
@@ -3711,8 +3711,8 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertFieldChecked($id, $message = '') {
-    $elements = $this->xpath('//input[@id=:id]', array(':id' => $id));
-    return $this->assertTrue(isset($elements[0]) && !empty($elements[0]['checked']), $message ? $message : t('Checkbox field @id is checked.', array('@id' => $id)), t('Browser'));
+    $elements = $this->xpath('//input[@id=:id]', [':id' => $id]);
+    return $this->assertTrue(isset($elements[0]) && !empty($elements[0]['checked']), $message ? $message : t('Checkbox field @id is checked.', ['@id' => $id]), t('Browser'));
   }
 
   /**
@@ -3726,8 +3726,8 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertNoFieldChecked($id, $message = '') {
-    $elements = $this->xpath('//input[@id=:id]', array(':id' => $id));
-    return $this->assertTrue(isset($elements[0]) && empty($elements[0]['checked']), $message ? $message : t('Checkbox field @id is not checked.', array('@id' => $id)), t('Browser'));
+    $elements = $this->xpath('//input[@id=:id]', [':id' => $id]);
+    return $this->assertTrue(isset($elements[0]) && empty($elements[0]['checked']), $message ? $message : t('Checkbox field @id is not checked.', ['@id' => $id]), t('Browser'));
   }
 
   /**
@@ -3743,8 +3743,8 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertOption($id, $option, $message = '') {
-    $options = $this->xpath('//select[@id=:id]//option[@value=:option]', array(':id' => $id, ':option' => $option));
-    return $this->assertTrue(isset($options[0]), $message ? $message : t('Option @option for field @id exists.', array('@option' => $option, '@id' => $id)), t('Browser'));
+    $options = $this->xpath('//select[@id=:id]//option[@value=:option]', [':id' => $id, ':option' => $option]);
+    return $this->assertTrue(isset($options[0]), $message ? $message : t('Option @option for field @id exists.', ['@option' => $option, '@id' => $id]), t('Browser'));
   }
 
   /**
@@ -3760,9 +3760,9 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertNoOption($id, $option, $message = '') {
-    $selects = $this->xpath('//select[@id=:id]', array(':id' => $id));
-    $options = $this->xpath('//select[@id=:id]/option[@value=:option]', array(':id' => $id, ':option' => $option));
-    return $this->assertTrue(isset($selects[0]) && !isset($options[0]), $message ? $message : t('Option @option for field @id does not exist.', array('@option' => $option, '@id' => $id)), t('Browser'));
+    $selects = $this->xpath('//select[@id=:id]', [':id' => $id]);
+    $options = $this->xpath('//select[@id=:id]/option[@value=:option]', [':id' => $id, ':option' => $option]);
+    return $this->assertTrue(isset($selects[0]) && !isset($options[0]), $message ? $message : t('Option @option for field @id does not exist.', ['@option' => $option, '@id' => $id]), t('Browser'));
   }
 
   /**
@@ -3780,8 +3780,8 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @todo $id is unusable. Replace with $name.
    */
   protected function assertOptionSelected($id, $option, $message = '') {
-    $elements = $this->xpath('//select[@id=:id]//option[@value=:option]', array(':id' => $id, ':option' => $option));
-    return $this->assertTrue(isset($elements[0]) && !empty($elements[0]['selected']), $message ? $message : t('Option @option for field @id is selected.', array('@option' => $option, '@id' => $id)), t('Browser'));
+    $elements = $this->xpath('//select[@id=:id]//option[@value=:option]', [':id' => $id, ':option' => $option]);
+    return $this->assertTrue(isset($elements[0]) && !empty($elements[0]['selected']), $message ? $message : t('Option @option for field @id is selected.', ['@option' => $option, '@id' => $id]), t('Browser'));
   }
 
   /**
@@ -3797,8 +3797,8 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertNoOptionSelected($id, $option, $message = '') {
-    $elements = $this->xpath('//select[@id=:id]//option[@value=:option]', array(':id' => $id, ':option' => $option));
-    return $this->assertTrue(isset($elements[0]) && empty($elements[0]['selected']), $message ? $message : t('Option @option for field @id is not selected.', array('@option' => $option, '@id' => $id)), t('Browser'));
+    $elements = $this->xpath('//select[@id=:id]//option[@value=:option]', [':id' => $id, ':option' => $option]);
+    return $this->assertTrue(isset($elements[0]) && empty($elements[0]['selected']), $message ? $message : t('Option @option for field @id is not selected.', ['@option' => $option, '@id' => $id]), t('Browser'));
   }
 
   /**
@@ -3850,12 +3850,12 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @return
    *   TRUE on pass, FALSE on fail.
    */
-  protected function assertNoDuplicateIds($message = '', $group = 'Other', $ids_to_skip = array()) {
+  protected function assertNoDuplicateIds($message = '', $group = 'Other', $ids_to_skip = []) {
     $status = TRUE;
     foreach ($this->xpath('//*[@id]') as $element) {
       $id = (string) $element['id'];
       if (isset($seen_ids[$id]) && !in_array($id, $ids_to_skip)) {
-        $this->fail(t('The HTML ID %id is unique.', array('%id' => $id)), $group);
+        $this->fail(t('The HTML ID %id is unique.', ['%id' => $id]), $group);
         $status = FALSE;
       }
       $seen_ids[$id] = TRUE;
@@ -3875,7 +3875,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function constructFieldXpath($attribute, $value) {
     $xpath = '//textarea[@' . $attribute . '=:value]|//input[@' . $attribute . '=:value]|//select[@' . $attribute . '=:value]';
-    return $this->buildXPathQuery($xpath, array(':value' => $value));
+    return $this->buildXPathQuery($xpath, [':value' => $value]);
   }
 
   /**
@@ -3892,7 +3892,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected function assertResponse($code, $message = '') {
     $curl_code = curl_getinfo($this->curlHandle, CURLINFO_HTTP_CODE);
     $match = is_array($code) ? in_array($curl_code, $code) : $curl_code == $code;
-    return $this->assertTrue($match, $message ? $message : t('HTTP response expected !code, actual !curl_code', array('!code' => $code, '!curl_code' => $curl_code)), t('Browser'));
+    return $this->assertTrue($match, $message ? $message : t('HTTP response expected !code, actual !curl_code', ['!code' => $code, '!curl_code' => $curl_code]), t('Browser'));
   }
 
   /**
@@ -3910,7 +3910,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected function assertNoResponse($code, $message = '') {
     $curl_code = curl_getinfo($this->curlHandle, CURLINFO_HTTP_CODE);
     $match = is_array($code) ? in_array($curl_code, $code) : $curl_code == $code;
-    return $this->assertFalse($match, $message ? $message : t('HTTP response not expected !code, actual !curl_code', array('!code' => $code, '!curl_code' => $curl_code)), t('Browser'));
+    return $this->assertFalse($match, $message ? $message : t('HTTP response not expected !code, actual !curl_code', ['!code' => $code, '!curl_code' => $curl_code]), t('Browser'));
   }
 
   /**
@@ -3929,7 +3929,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   TRUE on pass, FALSE on fail.
    */
   protected function assertMail($name, $value = '', $message = '') {
-    $captured_emails = state_get('test_email_collector', array());
+    $captured_emails = state_get('test_email_collector', []);
     $email = end($captured_emails);
     return $this->assertTrue($email && isset($email[$name]) && $email[$name] == $value, $message, t('Email'));
   }
@@ -3961,7 +3961,7 @@ class BackdropWebTestCase extends BackdropTestCase {
         break;
       }
     }
-    return $this->assertTrue($string_found, t('Expected text found in @field of email message: "@expected".', array('@field' => $field_name, '@expected' => $string)));
+    return $this->assertTrue($string_found, t('Expected text found in @field of email message: "@expected".', ['@field' => $field_name, '@expected' => $string]));
   }
 
   /**
@@ -3979,7 +3979,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     $mails = $this->backdropGetMails();
     $mail = end($mails);
     $regex_found = preg_match("/$regex/", $mail[$field_name]);
-    return $this->assertTrue($regex_found, t('Expected text found in @field of email message: "@expected".', array('@field' => $field_name, '@expected' => $regex)));
+    return $this->assertTrue($regex_found, t('Expected text found in @field of email message: "@expected".', ['@field' => $field_name, '@expected' => $regex]));
   }
 
   /**
@@ -4009,11 +4009,11 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @since 1.19.0 Method added.
    */
   protected function assertWatchdogMessage($watchdog_message, array $variables, $message) {
-    $status = (bool) db_query_range("SELECT 1 FROM {watchdog} WHERE message = :message AND variables = :variables", 0, 1, array(
+    $status = (bool) db_query_range("SELECT 1 FROM {watchdog} WHERE message = :message AND variables = :variables", 0, 1, [
       ':message' => $watchdog_message,
       ':variables' => serialize($variables),
-    ))->fetchField();
-    return $this->assert($status, format_string('@message', array('@message' => $message)));
+    ])->fetchField();
+    return $this->assert($status, format_string('@message', ['@message' => $message]));
   }
 
   /**

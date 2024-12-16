@@ -1,6 +1,6 @@
 <?php
 
-$base = array(
+$base = [
   0x00 => 'poss', 'pong', 'poj', 'poch', 'pok', 'pot', 'pop', 'poh', 'pwa', 'pwag', 'pwakk', 'pwags', 'pwan', 'pwanj', 'pwanh', 'pwad',
   0x10 => 'pwal', 'pwalg', 'pwalm', 'pwalb', 'pwals', 'pwalt', 'pwalp', 'pwalh', 'pwam', 'pwab', 'pwabs', 'pwas', 'pwass', 'pwang', 'pwaj', 'pwach',
   0x20 => 'pwak', 'pwat', 'pwap', 'pwah', 'pwae', 'pwaeg', 'pwaekk', 'pwaegs', 'pwaen', 'pwaenj', 'pwaenh', 'pwaed', 'pwael', 'pwaelg', 'pwaelm', 'pwaelb',
@@ -17,4 +17,4 @@ $base = array(
   0xD0 => 'pwin', 'pwinj', 'pwinh', 'pwid', 'pwil', 'pwilg', 'pwilm', 'pwilb', 'pwils', 'pwilt', 'pwilp', 'pwilh', 'pwim', 'pwib', 'pwibs', 'pwis',
   0xE0 => 'pwiss', 'pwing', 'pwij', 'pwich', 'pwik', 'pwit', 'pwip', 'pwih', 'pyu', 'pyug', 'pyukk', 'pyugs', 'pyun', 'pyunj', 'pyunh', 'pyud',
   0xF0 => 'pyul', 'pyulg', 'pyulm', 'pyulb', 'pyuls', 'pyult', 'pyulp', 'pyulh', 'pyum', 'pyub', 'pyubs', 'pyus', 'pyuss', 'pyung', 'pyuj', 'pyuch',
-);
+];

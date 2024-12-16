@@ -80,7 +80,7 @@ class date_views_plugin_pager extends views_plugin_pager {
    * Tell Views what this pager's setting is.
    */
   public function summary_title() {
-    return t("Position: @position, format: @format.", array('@position' => $this->options['pager_position'], '@format' => $this->options['link_format']));
+    return t("Position: @position, format: @format.", ['@position' => $this->options['pager_position'], '@format' => $this->options['link_format']]);
   }
 
   /**
@@ -88,12 +88,12 @@ class date_views_plugin_pager extends views_plugin_pager {
    */
   public function option_definition() {
     $options = parent::option_definition();
-    $options['date_id'] = array('default' => 'date');
-    $options['pager_position'] = array('default' => 'top');
-    $options['link_format'] = array('default' => 'pager');
-    $options['date_argument'] = array('default' => 'Unknown');
-    $options['granularity'] = array('default' => 'Unknown');
-    $options['skip_empty_pages'] = array('default' => FALSE);
+    $options['date_id'] = ['default' => 'date'];
+    $options['pager_position'] = ['default' => 'top'];
+    $options['link_format'] = ['default' => 'pager'];
+    $options['date_argument'] = ['default' => 'Unknown'];
+    $options['granularity'] = ['default' => 'Unknown'];
+    $options['skip_empty_pages'] = ['default' => FALSE];
     return $options;
   }
 
@@ -102,39 +102,39 @@ class date_views_plugin_pager extends views_plugin_pager {
    */
   public function options_form(&$form, &$form_state) {
     $form['markup']['#markup'] = t('This pager works together with a Date or Content date field contextual filter. If a Date filter has been added to the view, this pager will provide back/next paging to match the granularity of that filter (i.e. paging by year, month, week, or day). The filter must also be configured to use a DATE default value. If there is no Date contextual filter on this view, or if it has not been set to use a default date, the pager will not appear.');
-    $form['date_id'] = array(
+    $form['date_id'] = [
       '#title' => t('Date identifier'),
       '#type' => 'textfield',
       '#description' => t('The query identifier to use when fetching date data from in the URL. Note that if you have more than one display in the same view that uses the date pager (like a page and a block), the pager id must be different for each one or both will change when the pager value changes.'),
       '#default_value' => $this->options['date_id'],
       '#required' => TRUE,
-    );
-    $form['pager_position'] = array(
+    ];
+    $form['pager_position'] = [
       '#title' => t('Pager position'),
       '#type' => 'select',
-      '#options' => array(
+      '#options' => [
         'bottom' => t('Bottom'),
         'top' => t('Top'),
         'both' => t('Both'),
-      ),
+      ],
       '#description' => t('Where to place the date pager, on the top, bottom, or both top and bottom of the content.'),
       '#default_value' => $this->options['pager_position'],
       '#required' => TRUE,
-    );
-    $form['link_format'] = array(
+    ];
+    $form['link_format'] = [
       '#title' => t('Link format'),
       '#type' => 'select',
-      '#options' => array('pager' => t('Pager'), 'clean' => t('Clean URL')),
+      '#options' => ['pager' => t('Pager'), 'clean' => t('Clean URL')],
       '#description' => t("The format for pager link urls. With the Pager format, the links look like 'calendar/?date=2020-05'. The Clean URL format links look like 'calendar/2020-05'. The Clean format links look nicer but the Pager format links are likely to work better if the calendar is used in blocks or panels."),
       '#default_value' => $this->options['link_format'],
       '#required' => TRUE,
-    );
-    $form['skip_empty_pages'] = array(
+    ];
+    $form['skip_empty_pages'] = [
       '#title' => t('Skip empty pages'),
       '#type' => 'checkbox',
       '#description' => t('When selected, the pager will not display pages with no result for the given date. This causes a slight performance degradation because two additional queries need to be executed.'),
       '#default_value' => $this->options['skip_empty_pages'],
-    );
+    ];
     $form['date_argument']['#type'] = 'hidden';
     $form['date_argument']['#value'] = $this->options['date_argument'];
     $form['granularity']['#type'] = 'hidden';
@@ -210,7 +210,7 @@ class date_views_plugin_pager extends views_plugin_pager {
           $fieldsql = $date_handler->sql_field($field);
           $fieldsql = $date_handler->sql_format($format, $fieldsql);
           $q->clear_fields();
-          $q->orderby = array();
+          $q->orderby = [];
           $q->set_distinct(TRUE, TRUE);
           // Date limits of this argument.
           $datelimits = $argument->date_handler->arg_range($argument->limit[0] . '--' . $argument->limit[1]);
@@ -359,7 +359,7 @@ class date_views_plugin_pager extends views_plugin_pager {
     // This adds all of our template suggestions based upon the view name
     // and display id.
     $pager_theme = views_theme_functions('date_views_pager', $this->view, $this->display);
-    return theme($pager_theme, array('plugin' => $this, 'input' => $input));
+    return theme($pager_theme, ['plugin' => $this, 'input' => $input]);
   }
 
 }

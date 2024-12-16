@@ -17,7 +17,7 @@ class views_handler_field_ncs_last_comment_name extends views_handler_field {
     // join 'users' to this table via vid
     $join = new views_join();
     $join->construct('users', $this->table_alias, 'last_comment_uid', 'uid');
-    $join->extra = array(array('field' => 'uid', 'operator' => '!=', 'value' => '0'));
+    $join->extra = [['field' => 'uid', 'operator' => '!=', 'value' => '0']];
 
     // ncs_user alias so this can work with the sort handler, below.
 //    $this->user_table = $this->query->add_relationship(NULL, $join, 'users', $this->relationship);
@@ -32,7 +32,7 @@ class views_handler_field_ncs_last_comment_name extends views_handler_field {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['link_to_user'] = array('default' => TRUE, 'bool' => TRUE);
+    $options['link_to_user'] = ['default' => TRUE, 'bool' => TRUE];
 
     return $options;
   }
@@ -42,9 +42,9 @@ class views_handler_field_ncs_last_comment_name extends views_handler_field {
       $account = new stdClass();
       $account->name = $this->get_value($values);
       $account->uid = $values->{$this->uid};
-      return theme('username', array(
+      return theme('username', [
         'account' => $account
-      ));
+      ]);
     }
     else {
       return $this->sanitize_value($this->get_value($values));

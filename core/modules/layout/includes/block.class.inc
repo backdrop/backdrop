@@ -56,14 +56,14 @@ class Block extends LayoutHandler {
    *
    * @var LayoutAccess[]
    */
-  var $conditions = array();
+  var $conditions = [];
 
   /**
    * An array of LayoutContext instances used by this block.
    *
    * @var LayoutContext[]
    */
-  var $contexts = array();
+  var $contexts = [];
 
   /**
    * The Layout's title a block is used in.
@@ -84,26 +84,26 @@ class Block extends LayoutHandler {
    *   Settings that provide current configuration of the block, such as
    *   access rules, style settings, block settings, etc.
    */
-  function __construct($plugin_name, array $data = array()) {
+  function __construct($plugin_name, array $data = []) {
     parent::__construct($plugin_name, $data);
     $this->plugin = $plugin_name;
 
     // Provide defaults.
-    $data += array(
-      'settings' => array(),
-      'style' => array(
+    $data += [
+      'settings' => [],
+      'style' => [
         'plugin' => 'default',
-        'data' => array(),
-      ),
-      'conditions' => array(),
-    );
-    $data['settings'] += array(
+        'data' => [],
+      ],
+      'conditions' => [],
+    ];
+    $data['settings'] += [
       'title_display' => LAYOUT_TITLE_DEFAULT,
       'title' => '',
       'style' => 'default',
-      'block_settings' => array(),
-      'contexts' => array(),
-    );
+      'block_settings' => [],
+      'contexts' => [],
+    ];
 
     // Initialize basics, module, delta, UUID, status, and childDelta.
     list($this->module, $this->delta) = explode(':', $plugin_name);
@@ -216,20 +216,20 @@ class Block extends LayoutHandler {
     $preview = '';
 
     if (!empty($this->conditions)) {
-      $condition_list = array();
+      $condition_list = [];
       foreach ($this->conditions as $condition) {
         $condition_list[] = $condition->summary();
       }
-      $conditions = theme('item_list', array('items' => $condition_list, 'attributes' => array('class' => array('block-conditions'))));
-      $fieldset = array(
+      $conditions = theme('item_list', ['items' => $condition_list, 'attributes' => ['class' => ['block-conditions']]]);
+      $fieldset = [
         '#type' => 'fieldset',
         '#collapsible' => TRUE,
         '#collapsed' => TRUE,
         '#title' => t('Conditions'),
         '#children' => $conditions,
-        '#parents' => array(),
-      );
-      $form_state = array();
+        '#parents' => [],
+      ];
+      $form_state = [];
       form_process_fieldset($fieldset, $form_state);
 
       $preview = backdrop_render($fieldset);
@@ -246,34 +246,34 @@ class Block extends LayoutHandler {
     $contexts = $layout->getContexts();
 
     $block_info = $this->getBlockInfo();
-    $current_context_settings = isset($this->settings['contexts']) ? $this->settings['contexts'] : array();
+    $current_context_settings = isset($this->settings['contexts']) ? $this->settings['contexts'] : [];
 
     $form['contexts'] = layout_contexts_form_element($contexts, $current_context_settings, $block_info);
 
     $form['title_display']['#tree'] = FALSE;
-    $form['title_display']['title_display'] = array(
+    $form['title_display']['title_display'] = [
       '#type' => 'select',
       '#title' => t('Block title type'),
-      '#options' => array(
+      '#options' => [
         LAYOUT_TITLE_DEFAULT => t('Default'),
         LAYOUT_TITLE_CUSTOM => t('Custom'),
         LAYOUT_TITLE_NONE => t('None'),
-      ),
+      ],
       '#default_value' => $this->settings['title_display'],
-    );
-    $form['title_display']['title'] = array(
+    ];
+    $form['title_display']['title'] = [
       '#type' => 'textfield',
       '#default_value' => $this->settings['title'],
       '#title' => t('Custom title'),
-      '#states' => array(
-        'visible' => array(
-          'form.layout-block-configure-form :input[name="title_display"]' => array('value' => LAYOUT_TITLE_CUSTOM),
-        ),
-      ),
+      '#states' => [
+        'visible' => [
+          'form.layout-block-configure-form :input[name="title_display"]' => ['value' => LAYOUT_TITLE_CUSTOM],
+        ],
+      ],
       '#maxlength' => 255,
-    );
+    ];
     $actions_weight = $form['actions']['#weight'];
-    $form['admin_label'] = array(
+    $form['admin_label'] = [
       '#type' => 'fieldset',
       '#title' => t('Admin label'),
       '#tree' => FALSE,
@@ -281,21 +281,21 @@ class Block extends LayoutHandler {
       '#collapsible' => TRUE,
       '#weight' => $actions_weight - 1,
       '#access' => $this->module != 'block',
-    );
-    $form['admin_label']['admin_label'] = array(
+    ];
+    $form['admin_label']['admin_label'] = [
       '#type' => 'textfield',
       '#default_value' => isset($this->settings['admin_label']) ? $this->settings['admin_label'] : '',
       '#title' => t('Admin label'),
       '#description' => t('Used to identify the block on layout pages.'),
       '#maxlength' => 255,
-    );
-    $form['admin_label']['admin_description'] = array(
+    ];
+    $form['admin_label']['admin_description'] = [
       '#type' => 'textfield',
       '#title' => t('Admin description'),
       '#default_value' => isset($this->settings['admin_description']) ? $this->settings['admin_description'] : '',
       '#maxlength' => 128,
-      '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.<br />Allowed HTML tags: @tags', array('@tags' => _filter_xss_display_allowed_tags())),
-    );
+      '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.<br />Allowed HTML tags: @tags', ['@tags' => _filter_xss_display_allowed_tags()]),
+    ];
   }
 
   /**
@@ -319,7 +319,7 @@ class Block extends LayoutHandler {
     }
     // Remove contexts if none are visible in the form.
     else {
-      $this->settings['contexts'] = array();
+      $this->settings['contexts'] = [];
     }
   }
 
@@ -338,22 +338,22 @@ class Block extends LayoutHandler {
    * Convert the configuration of this block to an array for storage.
    */
   function toArray() {
-    $array = array(
+    $array = [
       'status' => $this->status,
       'module' => $this->module,
       'delta' => $this->delta,
       'settings' => $this->settings,
       'uuid' => $this->uuid,
-      'style' => array(
+      'style' => [
         'plugin' => $this->style->plugin,
         'data' => $this->style->toArray(),
-      ),
-    );
+      ],
+    ];
     foreach ($this->conditions as $condition) {
-      $array['conditions'][] = array(
+      $array['conditions'][] = [
         'plugin' => $condition->plugin,
         'data' => $condition->toArray(),
-      );
+      ];
     }
     return $array;
   }
@@ -365,7 +365,7 @@ class Block extends LayoutHandler {
    *   An unindexed array of context plugin names.
    */
   function getRequiredContexts() {
-    $required_contexts = array();
+    $required_contexts = [];
     $block_info = $this->getBlockInfo();
     if (!empty($block_info['required contexts'])) {
       $required_contexts = $block_info['required contexts'];
@@ -441,10 +441,10 @@ class BlockBroken extends Block {
   function getAdminPreview() {
     $preview = '';
     if (!module_exists($this->module)) {
-      $preview .= t('This block requires the %module module. Either re-enable the module, or remove this block.', array('%module' => $this->module));
+      $preview .= t('This block requires the %module module. Either re-enable the module, or remove this block.', ['%module' => $this->module]);
     }
     else {
-      $preview .= t('This block provided by the %module module is missing. The block has an identifier of %delta, which may have been deleted or is no longer valid.', array('%module' => $this->module, '%delta' => $this->delta));
+      $preview .= t('This block provided by the %module module is missing. The block has an identifier of %delta, which may have been deleted or is no longer valid.', ['%module' => $this->module, '%delta' => $this->delta]);
     }
     $preview = '<p class="error">' . $preview . '</p>';
     return $preview;

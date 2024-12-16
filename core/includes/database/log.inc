@@ -33,7 +33,7 @@ class DatabaseLog {
    *
    * @var array
    */
-  protected $queryLog = array();
+  protected $queryLog = [];
 
   /**
    * The connection key for which this object is logging.
@@ -90,7 +90,7 @@ class DatabaseLog {
    *   The logging key to empty.
    */
   public function clear($logging_key) {
-    $this->queryLog[$logging_key] = array();
+    $this->queryLog[$logging_key] = [];
   }
 
   /**
@@ -115,13 +115,13 @@ class DatabaseLog {
    */
   public function log(DatabaseStatementInterface $statement, $args, $time) { // phpcs:ignore -- No type hint on $args, add in 2.x.
     foreach (array_keys($this->queryLog) as $key) {
-      $this->queryLog[$key][] = array(
+      $this->queryLog[$key][] = [
         'query' => $statement->getQueryString(),
         'args' => $args,
         'target' => $statement->dbh->getTarget(),
         'caller' => $this->findCaller(),
         'time' => $time,
-      );
+      ];
     }
   }
 
@@ -148,17 +148,17 @@ class DatabaseLog {
     $stack_count = count($stack);
     for ($i = 0; $i < $stack_count; ++$i) {
       if (!empty($stack[$i]['file']) && strpos($stack[$i]['file'], 'includes' . DIRECTORY_SEPARATOR . 'database') === FALSE) {
-        $stack[$i] += array('args' => array());
+        $stack[$i] += ['args' => []];
         break;
       }
     }
-    return array(
+    return [
       'file' => $stack[$i]['file'],
       'line' => $stack[$i]['line'],
       'function' => $stack[$i + 1]['function'],
       'class' => isset($stack[$i + 1]['class']) ? $stack[$i + 1]['class'] : NULL,
       'type' => isset($stack[$i + 1]['type']) ? $stack[$i + 1]['type'] : NULL,
       'args' => $stack[$i + 1]['args'],
-    );
+    ];
   }
 }

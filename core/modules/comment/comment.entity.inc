@@ -127,10 +127,10 @@ class Comment extends Entity {
    * Implements EntityInterface::uri().
    */
   public function uri() {
-    return array(
+    return [
       'path' => 'comment/' . $this->cid,
-      'options' => array('fragment' => 'comment-' . $this->cid),
-    );
+      'options' => ['fragment' => 'comment-' . $this->cid],
+    ];
   }
 
   /**
@@ -164,12 +164,12 @@ class Comment extends Entity {
   public function access($op, $account = NULL) {
     // Casting class with private property causes errors due to added prefix.
     // e.g. "\0" . 'Comment' . "\0". So use static array instead.
-    $rights = &backdrop_static(__METHOD__, array());
+    $rights = &backdrop_static(__METHOD__, []);
 
     if ($op == 'create') {
       return self::createAccess(NULL, $account);
     }
-    elseif (!in_array($op, array('view', 'update', 'approve', 'delete'), TRUE)) {
+    elseif (!in_array($op, ['view', 'update', 'approve', 'delete'], TRUE)) {
       // If the $op was not one of the supported ones, we return access denied.
       return FALSE;
     }
@@ -220,7 +220,7 @@ class CommentStorageController extends EntityDatabaseStorageController {
   /**
    * Overrides DefaultEntityController::load().
    */
-  public function load($ids = array(), $conditions = array()) {
+  public function load($ids = [], $conditions = []) {
     $comments = parent::load($ids, $conditions);
 
     foreach ($comments as $key => $comment) {
@@ -232,14 +232,14 @@ class CommentStorageController extends EntityDatabaseStorageController {
   /**
    * Overrides EntityDatabaseStorageController::buildQuery().
    */
-  protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
+  protected function buildQuery($ids, $conditions = [], $revision_id = FALSE) {
     $query = parent::buildQuery($ids, $conditions, $revision_id);
     // Specify additional fields from the user and node tables.
     $query->innerJoin('node', 'n', 'base.nid = n.nid');
     $query->addField('n', 'type', 'node_type');
     $query->innerJoin('users', 'u', 'base.uid = u.uid');
     $query->addField('u', 'name', 'registered_name');
-    $query->fields('u', array('uid', 'signature', 'signature_format', 'picture'));
+    $query->fields('u', ['uid', 'signature', 'signature_format', 'picture']);
     return $query;
   }
 
@@ -283,7 +283,7 @@ class CommentStorageController extends EntityDatabaseStorageController {
       elseif ($comment->pid == 0) {
         // This is a comment with no parent comment (depth 0): we start
         // by retrieving the maximum thread level.
-        $max = db_query('SELECT MAX(thread) FROM {comment} WHERE nid = :nid', array(':nid' => $comment->nid))->fetchField();
+        $max = db_query('SELECT MAX(thread) FROM {comment} WHERE nid = :nid', [':nid' => $comment->nid])->fetchField();
         // Strip the "/" from the end of the thread.
         $max = rtrim((string) $max, '/');
         // We need to get the value at the correct depth.
@@ -301,10 +301,10 @@ class CommentStorageController extends EntityDatabaseStorageController {
         // Strip the "/" from the end of the parent thread.
         $parent->thread = (string) rtrim((string) $parent->thread, '/');
         // Get the max value in *this* thread.
-        $max = db_query("SELECT MAX(thread) FROM {comment} WHERE thread LIKE :thread AND nid = :nid", array(
+        $max = db_query("SELECT MAX(thread) FROM {comment} WHERE thread LIKE :thread AND nid = :nid", [
           ':thread' => $parent->thread . '.%',
           ':nid' => $comment->nid,
-        ))->fetchField();
+        ])->fetchField();
 
         if ($max == '') {
           // First child of this parent.
@@ -361,8 +361,8 @@ class CommentStorageController extends EntityDatabaseStorageController {
   protected function postDelete($comments) {
     // Delete the comments' replies.
     $query = db_select('comment', 'c')
-      ->fields('c', array('cid'))
-      ->condition('pid', array(array_keys($comments)), 'IN');
+      ->fields('c', ['cid'])
+      ->condition('pid', [array_keys($comments)], 'IN');
     $child_cids = $query->execute()->fetchCol();
     comment_delete_multiple($child_cids);
 
@@ -405,39 +405,39 @@ class CommentStorageController extends EntityDatabaseStorageController {
       return;
     }
 
-    $count = db_query('SELECT COUNT(cid) FROM {comment} WHERE nid = :nid AND status = :status', array(
+    $count = db_query('SELECT COUNT(cid) FROM {comment} WHERE nid = :nid AND status = :status', [
       ':nid' => $nid,
       ':status' => COMMENT_PUBLISHED,
-    ))->fetchField();
+    ])->fetchField();
 
     if ($count > 0) {
       // Comments exist.
-      $last_reply = db_query_range('SELECT cid, name, changed, uid FROM {comment} WHERE nid = :nid AND status = :status ORDER BY cid DESC', 0, 1, array(
+      $last_reply = db_query_range('SELECT cid, name, changed, uid FROM {comment} WHERE nid = :nid AND status = :status ORDER BY cid DESC', 0, 1, [
         ':nid' => $nid,
         ':status' => COMMENT_PUBLISHED,
-      ))->fetchObject();
+      ])->fetchObject();
       db_update('node_comment_statistics')
-        ->fields(array(
+        ->fields([
           'cid' => $last_reply->cid,
           'comment_count' => $count,
           'last_comment_timestamp' => $last_reply->changed,
           'last_comment_name' => $last_reply->uid ? '' : $last_reply->name,
           'last_comment_uid' => $last_reply->uid,
-        ))
+        ])
         ->condition('nid', $nid)
         ->execute();
     }
     else {
       // Comments do not exist.
-      $node = db_query('SELECT uid, created FROM {node} WHERE nid = :nid', array(':nid' => $nid))->fetchObject();
+      $node = db_query('SELECT uid, created FROM {node} WHERE nid = :nid', [':nid' => $nid])->fetchObject();
       db_update('node_comment_statistics')
-        ->fields(array(
+        ->fields([
           'cid' => 0,
           'comment_count' => 0,
           'last_comment_timestamp' => $node->created,
           'last_comment_name' => '',
           'last_comment_uid' => $node->uid,
-        ))
+        ])
         ->condition('nid', $nid)
         ->execute();
     }
@@ -453,27 +453,27 @@ class CommentStorageController extends EntityDatabaseStorageController {
     $node = node_load($comment->nid);
 
     // Remove previously built content, if exists.
-    $comment->content = array();
+    $comment->content = [];
 
     // Allow modules to change the display mode.
-    $view_mode = key(entity_view_mode_prepare('comment', array($comment->cid => $comment), $view_mode, $langcode));
+    $view_mode = key(entity_view_mode_prepare('comment', [$comment->cid => $comment], $view_mode, $langcode));
 
     // Build fields content.
-    field_attach_prepare_view('comment', array($comment->cid => $comment), $view_mode, $langcode);
-    entity_prepare_view('comment', array($comment->cid => $comment), $langcode);
+    field_attach_prepare_view('comment', [$comment->cid => $comment], $view_mode, $langcode);
+    entity_prepare_view('comment', [$comment->cid => $comment], $langcode);
     $comment->content += field_attach_view('comment', $comment, $view_mode, $langcode);
 
-    $comment->content['links'] = array(
+    $comment->content['links'] = [
       '#theme' => 'links__comment',
-      '#pre_render' => array('backdrop_pre_render_links'),
-      '#attributes' => array('class' => array('links', 'inline')),
-    );
+      '#pre_render' => ['backdrop_pre_render_links'],
+      '#attributes' => ['class' => ['links', 'inline']],
+    ];
     if (empty($comment->in_preview)) {
-      $comment->content['links']['comment'] = array(
+      $comment->content['links']['comment'] = [
         '#theme' => 'links__comment__comment',
         '#links' => comment_links($comment, $node),
-        '#attributes' => array('class' => array('links', 'inline')),
-      );
+        '#attributes' => ['class' => ['links', 'inline']],
+      ];
     }
 
     // Allow modules to make their own additions to the comment.
@@ -482,7 +482,7 @@ class CommentStorageController extends EntityDatabaseStorageController {
 
     // Make sure the current display mode is stored if no module has already
     // populated the related key.
-    $comment->content += array('#view_mode' => $view_mode);
+    $comment->content += ['#view_mode' => $view_mode];
   }
 
   /**
@@ -492,7 +492,7 @@ class CommentStorageController extends EntityDatabaseStorageController {
     global $language_content;
     $langcode = $langcode ? $langcode : $language_content->langcode;
 
-    $view = array();
+    $view = [];
     foreach ($comments as $comment) {
       /* @var Comment $comment */
       // Populate $comment->content with a render() array.
@@ -504,14 +504,14 @@ class CommentStorageController extends EntityDatabaseStorageController {
       // We don't need duplicate rendering info in comment->content.
       unset($comment->content);
 
-      $build += array(
+      $build += [
         '#theme' => 'comment__node_' . $node->type . '__' . $view_mode,
         '#comment' => $comment,
         '#node' => $node,
         '#view_mode' => $view_mode,
         '#language' => $langcode,
         '#page' => $page,
-      );
+      ];
       $node_type = node_type_get_type($node->type);
 
       if (empty($comment->in_preview)) {
@@ -540,7 +540,7 @@ class CommentStorageController extends EntityDatabaseStorageController {
 
       // Allow modules to modify the structured comment.
       $type = 'comment';
-      backdrop_alter(array('comment_view', 'entity_view'), $build, $type);
+      backdrop_alter(['comment_view', 'entity_view'], $build, $type);
       $view[$type][$comment->id()] = $build;
     }
 

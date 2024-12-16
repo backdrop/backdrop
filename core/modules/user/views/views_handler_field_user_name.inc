@@ -23,39 +23,39 @@ class views_handler_field_user_name extends views_handler_field_user {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['overwrite_anonymous'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['anonymous_text'] = array('default' => '', 'translatable' => TRUE);
-    $options['format_username'] = array('default' => TRUE, 'bool' => TRUE);
+    $options['overwrite_anonymous'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['anonymous_text'] = ['default' => '', 'translatable' => TRUE];
+    $options['format_username'] = ['default' => TRUE, 'bool' => TRUE];
 
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
-    $form['format_username'] = array(
+    $form['format_username'] = [
       '#title' => t('Use formatted username'),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['format_username']),
       '#description' => t('If checked, the username will be formatted by the system. If unchecked, it will be displayed raw.'),
       '#fieldset' => 'more',
-    );
-    $form['overwrite_anonymous'] = array(
+    ];
+    $form['overwrite_anonymous'] = [
       '#title' => t('Overwrite the value to display for anonymous users'),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['overwrite_anonymous']),
       '#description' => t('Enable to display different text for anonymous users.'),
       '#fieldset' => 'more',
-    );
-    $form['anonymous_text'] = array(
+    ];
+    $form['anonymous_text'] = [
       '#title' => t('Text to display for anonymous users'),
       '#type' => 'textfield',
       '#default_value' => $this->options['anonymous_text'],
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[overwrite_anonymous]"]' => array('checked' => TRUE),
-        ),
-      ),
+      '#states' => [
+        'visible' => [
+          ':input[name="options[overwrite_anonymous]"]' => ['checked' => TRUE],
+        ],
+      ],
       '#fieldset' => 'more',
-    );
+    ];
 
     parent::options_form($form, $form_state);
   }
@@ -71,7 +71,7 @@ class views_handler_field_user_name extends views_handler_field_user {
       }
       elseif (!empty($this->options['link_to_user'])) {
         $account->name = $this->get_value($values);
-        return theme('username', array('account' => $account));
+        return theme('username', ['account' => $account]);
       }
     }
     // If we want a formatted username, do that.

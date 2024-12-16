@@ -12,10 +12,10 @@ class BlockHero extends BlockText {
   function __construct($plugin_name, array $data) {
     parent::__construct($plugin_name, $data);
 
-    $this->settings += array(
+    $this->settings += [
       'image' => '',
       'image_path' => '',
-    );
+    ];
   }
 
   /**
@@ -54,16 +54,16 @@ class BlockHero extends BlockText {
 
     $supported_extensions = image_get_supported_extensions();
 
-    $upload_validators = array(
-      'file_validate_extensions' => array(implode(' ', $supported_extensions)),
-      'file_validate_image_resolution' => array('3200x1600', '1200x300'),
-    );
-    $upload_description = theme('file_upload_help', array(
+    $upload_validators = [
+      'file_validate_extensions' => [implode(' ', $supported_extensions)],
+      'file_validate_image_resolution' => ['3200x1600', '1200x300'],
+    ];
+    $upload_description = theme('file_upload_help', [
       'upload_validators' => $upload_validators,
-    ));
+    ]);
 
     // Add an image field at the top of the settings form.
-    $form['image'] = array(
+    $form['image'] = [
       '#type' => 'managed_file',
       '#title' => t('Background image'),
       '#description' => $upload_description,
@@ -71,16 +71,16 @@ class BlockHero extends BlockText {
       '#upload_location' => 'public://hero/',
       '#upload_validators' => $upload_validators,
       '#weight' => -10,
-      '#attributes' => array('class' => array('layout-hero-image-upload')),
+      '#attributes' => ['class' => ['layout-hero-image-upload']],
       '#theme' => 'layout_hero_background_image',
       '#image_style' => 'medium',
       '#browser_view' => 'image_library',
-    );
+    ];
     // Store the image path separately.
-    $form['image_path'] = array(
+    $form['image_path'] = [
       '#type' => 'value',
       '#value' => $this->settings['image_path'],
-    );
+    ];
 
     // Disable reusable until a later date.
     $form['convert']['#access'] = FALSE;

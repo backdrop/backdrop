@@ -24,15 +24,15 @@ class views_handler_filter_date extends views_handler_filter_numeric {
    */
   function value_form(&$form, &$form_state) {
     if (empty($form_state['exposed'])) {
-      $form['value']['type'] = array(
+      $form['value']['type'] = [
         '#type' => 'radios',
         '#title' => t('Value type'),
-        '#options' => array(
+        '#options' => [
           'date' => t('A date in any machine readable format. CCYY-MM-DD HH:MM:SS is preferred.'),
-          'offset' => t('An offset from the current time such as "!example1" or "!example2"', array('!example1' => '+1 day', '!example2' => '-2 hours -30 minutes')),
-        ),
+          'offset' => t('An offset from the current time such as "!example1" or "!example2"', ['!example1' => '+1 day', '!example2' => '-2 hours -30 minutes']),
+        ],
         '#default_value' => !empty($this->value['type']) ? $this->value['type'] : 'date',
-      );
+      ];
     }
     parent::value_form($form, $form_state);
   }

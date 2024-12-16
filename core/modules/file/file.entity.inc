@@ -89,7 +89,7 @@ class File extends Entity {
   /**
    * Constructor for file entities.
    */
-  public function __construct(array $values = array()) {
+  public function __construct(array $values = []) {
     // Automatically detect filename if not set.
     if (!isset($values['filename']) && isset($values['uri'])) {
       $values['filename'] = backdrop_basename($values['uri']);
@@ -135,17 +135,17 @@ class File extends Entity {
    * Implements EntityInterface::uri().
    */
   public function uri() {
-    return array(
+    return [
       'path' => 'file/' . $this->fid,
-      'options' => array(),
-    );
+      'options' => [],
+    ];
   }
 
   /**
    * Overrides Entity::createAccess().
    */
   public static function createAccess($bundle = NULL, $account = NULL) {
-    $rights = &backdrop_static('file_access', array());
+    $rights = &backdrop_static('file_access', []);
 
     // If no user object is supplied, the access check is for the current user.
     if (empty($account)) {
@@ -201,12 +201,12 @@ class File extends Entity {
    *   TRUE if access is granted, FALSE otherwise.
    */
   public function access($op, $account = NULL) {
-    $rights = &backdrop_static('file_access', array());
+    $rights = &backdrop_static('file_access', []);
 
     if ($op == 'create') {
       return self::createAccess($this->bundle(), $account);
     }
-    elseif (!in_array($op, array('view', 'update', 'delete', 'download'), TRUE)) {
+    elseif (!in_array($op, ['view', 'update', 'delete', 'download'], TRUE)) {
       // If the $op was not one of the supported ones, we return access denied.
       return FALSE;
     }
@@ -337,15 +337,15 @@ class FileStorageController extends EntityDatabaseStorageController {
     $langcode = $langcode ? $langcode : $language_content->langcode;
 
     // Remove previously built content, if exists.
-    $file->content = array();
+    $file->content = [];
 
     // In case of a multiple view, file_view_multiple() already ran the
     // 'prepare_view' step. An internal flag prevents the operation from running
     // twice.
     // Allow modules to change the view mode.
-    $view_mode = key(entity_view_mode_prepare('file', array($file->fid => $file), $view_mode, $langcode));
-    field_attach_prepare_view('file', array($file->fid => $file), $view_mode, $langcode);
-    entity_prepare_view('file', array($file->fid => $file), $langcode);
+    $view_mode = key(entity_view_mode_prepare('file', [$file->fid => $file], $view_mode, $langcode));
+    field_attach_prepare_view('file', [$file->fid => $file], $view_mode, $langcode);
+    entity_prepare_view('file', [$file->fid => $file], $langcode);
 
     // Build the actual file display.
     $file->content['file'] = file_view_file($file, $view_mode, $langcode);
@@ -353,17 +353,17 @@ class FileStorageController extends EntityDatabaseStorageController {
     // Build fields content.
     $file->content += field_attach_view('file', $file, $view_mode, $langcode);
 
-    $links = array();
-    $file->content['links'] = array(
+    $links = [];
+    $file->content['links'] = [
       '#theme' => 'links__file',
-      '#pre_render' => array('backdrop_pre_render_links'),
-      '#attributes' => array('class' => array('links', 'inline')),
-    );
-    $file->content['links']['file'] = array(
+      '#pre_render' => ['backdrop_pre_render_links'],
+      '#attributes' => ['class' => ['links', 'inline']],
+    ];
+    $file->content['links']['file'] = [
       '#theme' => 'links__file__file',
       '#links' => $links,
-      '#attributes' => array('class' => array('links', 'inline')),
-    );
+      '#attributes' => ['class' => ['links', 'inline']],
+    ];
 
     // Allow modules to make their own additions to the file.
     module_invoke_all('file_view', $file, $view_mode, $langcode);
@@ -377,7 +377,7 @@ class FileStorageController extends EntityDatabaseStorageController {
     global $language_content;
     $langcode = $langcode ? $langcode : $language_content->langcode;
 
-    $view = array();
+    $view = [];
     foreach ($files as $file) {
       /* @var File $file */
       // Populate $file->content with a render() array.
@@ -387,25 +387,25 @@ class FileStorageController extends EntityDatabaseStorageController {
       // We don't need duplicate rendering info in $file->content.
       unset($file->content);
 
-      $build += array(
+      $build += [
         '#theme' => 'file_entity',
         '#file' => $file,
         '#view_mode' => $view_mode,
         '#language' => $langcode,
         '#page' => $page,
-      );
+      ];
 
       // Add contextual links for this file, except when the file is already
       // being displayed on its own page. Modules may alter this behavior (for
       // example, to restrict contextual links to certain view modes) by
       // implementing hook_file_view_alter().
       if (!empty($file->fid) && !($view_mode == 'full' && file_is_page($file))) {
-        $build['#contextual_links']['file'] = array('file', array($file->fid));
+        $build['#contextual_links']['file'] = ['file', [$file->fid]];
       }
 
       // Allow modules to modify the structured file.
       $type = 'file';
-      backdrop_alter(array('file_view', 'entity_view'), $build, $type);
+      backdrop_alter(['file_view', 'entity_view'], $build, $type);
       $view[$type][$file->id()] = $build;
     }
 

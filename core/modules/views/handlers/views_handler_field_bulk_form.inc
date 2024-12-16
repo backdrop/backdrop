@@ -18,12 +18,12 @@ class views_handler_field_bulk_form extends views_handler_field {
    */
   function option_definition() {
     $options = parent::option_definition();
-    $options['include_exclude'] = array(
+    $options['include_exclude'] = [
       'default' => 'exclude',
-    );
-    $options['selected_actions'] = array(
-      'default' => array(),
-    );
+    ];
+    $options['selected_actions'] = [
+      'default' => [],
+    ];
     return $options;
   }
 
@@ -33,21 +33,21 @@ class views_handler_field_bulk_form extends views_handler_field {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
-    $form['include_exclude'] = array(
+    $form['include_exclude'] = [
       '#type' => 'radios',
       '#title' => t('Available actions'),
-      '#options' => array(
+      '#options' => [
         'exclude' => t('All actions, except selected'),
         'include' => t('Only selected actions'),
-      ),
+      ],
       '#default_value' => $this->options['include_exclude'],
-    );
-    $form['selected_actions'] = array(
+    ];
+    $form['selected_actions'] = [
       '#type' => 'checkboxes',
       '#title' => t('Selected actions'),
       '#options' => $this->get_bulk_options(FALSE),
       '#default_value' => $this->options['selected_actions'],
-    );
+    ];
   }
 
   /**
@@ -97,7 +97,7 @@ class views_handler_field_bulk_form extends views_handler_field {
     // Render checkboxes for all rows.
     $form[$this->options['id']]['#tree'] = TRUE;
     foreach ($this->view->result as $row_index => $row) {
-      $form[$this->options['id']][$row_index] = array(
+      $form[$this->options['id']][$row_index] = [
         '#type' => 'checkbox',
         // We are not able to determine a main "title" for each row, so we can
         // only output a generic label.
@@ -105,35 +105,35 @@ class views_handler_field_bulk_form extends views_handler_field {
         '#title_display' => 'invisible',
         '#return_value' => $row->{$this->field_alias},
         '#default_value' => !empty($form_state['values'][$this->options['id']][$row_index]) ? 1 : NULL,
-        '#attributes' => array('data-tableselect-id' => $this->options['id'])
-      );
+        '#attributes' => ['data-tableselect-id' => $this->options['id']]
+      ];
     }
 
     // Ensure a consistent container for filters/operations in the view header.
-    $form['header'] = array(
+    $form['header'] = [
       '#weight' => -100,
-    );
+    ];
 
     // Build the bulk operations action widget for the header.
     // Allow themes to apply .container-inline on this separate container.
-    $form['header'][$this->options['id']] = array(
+    $form['header'][$this->options['id']] = [
       '#type' => 'container',
-      '#attributes' => array('class' => array('views-bulk-form')),
-    );
-    $form['header'][$this->options['id']]['action'] = array(
+      '#attributes' => ['class' => ['views-bulk-form']],
+    ];
+    $form['header'][$this->options['id']]['action'] = [
       '#title' => t('Action'),
       '#title_display' => 'none',
       '#type' => 'select',
       '#options' => $this->get_bulk_options(),
       '#empty_option' => '- ' . t('Choose an action') . ' -',
       '#required' => TRUE,
-    );
+    ];
 
     // Set the form actions container in the header.
-    $actions['submit'] = array(
+    $actions['submit'] = [
       '#type' => 'submit',
       '#value' => t('Execute'),
-    );
+    ];
     $form['header'][$this->options['id']]['actions'] = $actions;
   }
 
@@ -156,7 +156,7 @@ class views_handler_field_bulk_form extends views_handler_field {
       if (!empty($selected)) {
         $entity_type = $this->get_entity_type();
         $entities = entity_load($entity_type, $selected);
-        $context = array();
+        $context = [];
         foreach ($entities as $entity) {
           if (actions_execute($action_name, $entity, $context) !== FALSE) {
             $count++;
@@ -173,7 +173,7 @@ class views_handler_field_bulk_form extends views_handler_field {
       }
 
       if ($count) {
-        backdrop_set_message(format_plural($count, '%action was applied to @count item.', '%action was applied to @count items.', array('%action' => $action_info['label'])));
+        backdrop_set_message(format_plural($count, '%action was applied to @count item.', '%action was applied to @count items.', ['%action' => $action_info['label']]));
       }
     }
   }
@@ -192,7 +192,7 @@ class views_handler_field_bulk_form extends views_handler_field {
     $actions = actions_get_info();
 
     $entity_type = $this->get_entity_type();
-    $options = array();
+    $options = [];
     // Filter the action list.
     foreach ($actions as $action_name => $action_info) {
       if ($filtered) {

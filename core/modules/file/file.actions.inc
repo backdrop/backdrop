@@ -26,10 +26,10 @@ function file_delete_action(File $file, &$context) {
     $last_action_time = $_SESSION['file_delete_action']['timestamp'];
   }
   if (REQUEST_TIME - $last_action_time > 60) {
-    $_SESSION['file_delete_action'] = array(
+    $_SESSION['file_delete_action'] = [
       'timestamp' => REQUEST_TIME,
-      'fids' => array(),
-    );
+      'fids' => [],
+    ];
   }
 
   $_SESSION['file_delete_action']['fids'][] = $file->fid;

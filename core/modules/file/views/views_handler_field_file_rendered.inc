@@ -12,7 +12,7 @@
 class views_handler_field_file_rendered extends views_handler_field_entity {
   function option_definition() {
     $options = parent::option_definition();
-    $options['file_view_mode'] = array('default' => 'default');
+    $options['file_view_mode'] = ['default' => 'default'];
     return $options;
   }
 
@@ -23,18 +23,18 @@ class views_handler_field_file_rendered extends views_handler_field_entity {
     parent::options_form($form, $form_state);
 
     $entity_info = entity_get_info('file');
-    $options = array('default' => t('Default'));
+    $options = ['default' => t('Default')];
     foreach ($entity_info['view modes'] as $file_view_mode => $file_view_mode_info) {
       $options[$file_view_mode] = $file_view_mode_info['label'];
     }
 
-    $form['file_view_mode'] = array(
+    $form['file_view_mode'] = [
       '#title' => t('File view mode'),
       '#description' => t('Select a view mode. Note that only the file will be rendered and not any of its fields.'),
       '#type' => 'select',
       '#default_value' => $this->options['file_view_mode'],
       '#options' => $options,
-    );
+    ];
   }
 
   function render($values) {

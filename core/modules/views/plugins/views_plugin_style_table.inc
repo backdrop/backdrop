@@ -26,15 +26,15 @@ class views_plugin_style_table extends views_plugin_style {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['columns'] = array('default' => array());
-    $options['default'] = array('default' => '');
-    $options['info'] = array('default' => array());
-    $options['override'] = array('default' => TRUE, 'bool' => TRUE);
-    $options['sticky'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['order'] = array('default' => 'asc');
-    $options['caption'] = array('default' => '', 'translatable' => TRUE);
-    $options['summary'] = array('default' => '', 'translatable' => TRUE);
-    $options['empty_table'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['columns'] = ['default' => []];
+    $options['default'] = ['default' => ''];
+    $options['info'] = ['default' => []];
+    $options['override'] = ['default' => TRUE, 'bool' => TRUE];
+    $options['sticky'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['order'] = ['default' => 'asc'];
+    $options['caption'] = ['default' => '', 'translatable' => TRUE];
+    $options['summary'] = ['default' => '', 'translatable' => TRUE];
+    $options['empty_table'] = ['default' => FALSE, 'bool' => TRUE];
 
     return $options;
   }
@@ -123,7 +123,7 @@ class views_plugin_style_table extends views_plugin_style {
    *    An array of all the sanitized columns.
    */
   function sanitize_columns($columns, $fields = NULL) {
-    $sanitized = array();
+    $sanitized = [];
     if ($fields === NULL) {
       $fields = $this->display->handler->get_option('fields');
     }
@@ -160,40 +160,40 @@ class views_plugin_style_table extends views_plugin_style {
     parent::options_form($form, $form_state);
     $handlers = $this->display->handler->get_handlers('field');
     if (empty($handlers)) {
-      $form['error_markup'] = array(
+      $form['error_markup'] = [
         '#markup' => '<div class="error messages">' . t('You need at least one field before you can configure your table settings') . '</div>',
-      );
+      ];
       return;
     }
 
-    $form['override'] = array(
+    $form['override'] = [
       '#type' => 'checkbox',
       '#title' => t('Override normal sorting if click sorting is used'),
       '#default_value' => !empty($this->options['override']),
-    );
+    ];
 
-    $form['sticky'] = array(
+    $form['sticky'] = [
       '#type' => 'checkbox',
       '#title' => t('Enable Backdrop style "sticky" table headers (Javascript)'),
       '#default_value' => !empty($this->options['sticky']),
       '#description' => t('(Sticky header effects will not be active for preview below, only on live output.)'),
-    );
+    ];
 
-    $form['caption'] = array(
+    $form['caption'] = [
       '#type' => 'textfield',
       '#title' => t('Short description of table'),
       '#description' => t('Include a caption for better accessibility of your table.'),
       '#default_value' => $this->options['caption'],
       '#maxlength' => 255,
-    );
+    ];
 
-    $form['summary'] = array(
+    $form['summary'] = [
       '#type' => 'textfield',
       '#title' => t('Table summary'),
       '#description' => t('This value will be displayed as table-summary attribute in the html. Use this to give a summary of complex tables.'),
       '#default_value' => $this->options['summary'],
       '#maxlength' => 255,
-    );
+    ];
 
     // Note: views UI registers this theme handler on our behalf. Your module
     // will have to register your theme handlers if you do stuff like this.
@@ -217,109 +217,109 @@ class views_plugin_style_table extends views_plugin_style {
     foreach ($columns as $field => $column) {
       $column_selector = ':input[name="style_options[columns][' . $field . ']"]';
 
-      $form['columns'][$field] = array(
+      $form['columns'][$field] = [
         '#type' => 'select',
         '#options' => $field_names,
         '#default_value' => $column,
-      );
+      ];
       if ($handlers[$field]->click_sortable()) {
-        $form['info'][$field]['sortable'] = array(
+        $form['info'][$field]['sortable'] = [
           '#type' => 'checkbox',
           '#default_value' => !empty($this->options['info'][$field]['sortable']),
-          '#states' => array(
-            'visible' => array(
-              $column_selector => array('value' => $field),
-            ),
-          ),
-        );
-        $form['info'][$field]['default_sort_order'] = array(
+          '#states' => [
+            'visible' => [
+              $column_selector => ['value' => $field],
+            ],
+          ],
+        ];
+        $form['info'][$field]['default_sort_order'] = [
           '#type' => 'select',
-          '#options' => array('asc' => t('Ascending'), 'desc' => t('Descending')),
+          '#options' => ['asc' => t('Ascending'), 'desc' => t('Descending')],
           '#default_value' => !empty($this->options['info'][$field]['default_sort_order']) ? $this->options['info'][$field]['default_sort_order'] : 'asc',
-          '#states' => array(
-            'visible' => array(
-              $column_selector => array('value' => $field),
-              ':input[name="style_options[info][' . $field . '][sortable]"]' => array('checked' => TRUE),
-            ),
-          ),
-        );
+          '#states' => [
+            'visible' => [
+              $column_selector => ['value' => $field],
+              ':input[name="style_options[info][' . $field . '][sortable]"]' => ['checked' => TRUE],
+            ],
+          ],
+        ];
         // Provide an ID so we can have such things.
         $radio_id = backdrop_html_id('edit-default-' . $field);
-        $form['default'][$field] = array(
+        $form['default'][$field] = [
           '#type' => 'radio',
           '#return_value' => $field,
-          '#parents' => array('style_options', 'default'),
+          '#parents' => ['style_options', 'default'],
           '#id' => $radio_id,
           // because 'radio' doesn't fully support '#id' =(
-          '#attributes' => array('id' => $radio_id),
+          '#attributes' => ['id' => $radio_id],
           '#default_value' => $default,
-          '#states' => array(
-            'visible' => array(
-              $column_selector => array('value' => $field),
-            ),
-          ),
-        );
+          '#states' => [
+            'visible' => [
+              $column_selector => ['value' => $field],
+            ],
+          ],
+        ];
       }
-      $form['info'][$field]['align'] = array(
+      $form['info'][$field]['align'] = [
         '#type' => 'select',
         '#default_value' => !empty($this->options['info'][$field]['align']) ? $this->options['info'][$field]['align'] : '',
-        '#options' => array(
+        '#options' => [
           '' => t('None'),
           'views-align-left' => t('Left'),
           'views-align-center' => t('Center'),
           'views-align-right' => t('Right'),
-          ),
-        '#states' => array(
-          'visible' => array(
-            $column_selector => array('value' => $field),
-          ),
-        ),
-      );
-      $form['info'][$field]['separator'] = array(
+          ],
+        '#states' => [
+          'visible' => [
+            $column_selector => ['value' => $field],
+          ],
+        ],
+      ];
+      $form['info'][$field]['separator'] = [
         '#type' => 'textfield',
         '#size' => 10,
         '#default_value' => isset($this->options['info'][$field]['separator']) ? $this->options['info'][$field]['separator'] : '',
-        '#states' => array(
-          'visible' => array(
-            $column_selector => array('value' => $field),
-          ),
-        ),
-      );
-      $form['info'][$field]['empty_column'] = array(
+        '#states' => [
+          'visible' => [
+            $column_selector => ['value' => $field],
+          ],
+        ],
+      ];
+      $form['info'][$field]['empty_column'] = [
         '#type' => 'checkbox',
         '#default_value' => isset($this->options['info'][$field]['empty_column']) ? $this->options['info'][$field]['empty_column'] : FALSE,
-        '#states' => array(
-          'visible' => array(
-            $column_selector => array('value' => $field),
-          ),
-        ),
-      );
+        '#states' => [
+          'visible' => [
+            $column_selector => ['value' => $field],
+          ],
+        ],
+      ];
 
       // markup for the field name
-      $form['info'][$field]['name'] = array(
+      $form['info'][$field]['name'] = [
         '#markup' => $field_names[$field],
-      );
+      ];
     }
 
     // Provide a radio for no default sort
-    $form['default'][-1] = array(
+    $form['default'][-1] = [
       '#type' => 'radio',
       '#return_value' => -1,
-      '#parents' => array('style_options', 'default'),
+      '#parents' => ['style_options', 'default'],
       '#id' => 'edit-default-0',
       '#default_value' => $default,
-    );
+    ];
 
-    $form['empty_table'] = array(
+    $form['empty_table'] = [
       '#type' => 'checkbox',
       '#title' => t('Show the empty text in the table'),
       '#default_value' => $this->options['empty_table'],
       '#description' => t('Per default the table is hidden for an empty view. With this option it is possible to show an empty table with the text in it.'),
-    );
+    ];
 
-    $form['description_markup'] = array(
+    $form['description_markup'] = [
       '#markup' => '<div class="description form-item">' . t('Place fields into columns; you may combine multiple fields into the same column. If you do, the separator in the column specified will be used to separate the fields. Check the sortable box to make that column click sortable, and check the default sort radio to determine which column will be sorted by default, if any. You may control column order and field labels in the fields section.') . '</div>',
-    );
+    ];
   }
 
   function even_empty() {

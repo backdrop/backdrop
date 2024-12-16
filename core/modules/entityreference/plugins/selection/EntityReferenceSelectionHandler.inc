@@ -84,14 +84,14 @@ class EntityReferenceSelectionHandlerBroken implements EntityReferenceSelectionH
   }
 
   public static function settingsForm($field, $instance) {
-    $form['selection_handler'] = array(
+    $form['selection_handler'] = [
       '#markup' => t('The selected selection handler is broken.'),
-    );
+    ];
     return $form;
   }
 
   public function getReferencableEntities($match = NULL, $match_operator = 'CONTAINS', $limit = 0) {
-    return array();
+    return [];
   }
 
   public function countReferencableEntities($match = NULL, $match_operator = 'CONTAINS') {
@@ -99,7 +99,7 @@ class EntityReferenceSelectionHandlerBroken implements EntityReferenceSelectionH
   }
 
   public function validateReferencableEntities(array $ids) {
-    return array();
+    return [];
   }
 
   public function validateAutocompleteInput($input, &$element, &$form_state, $form) {

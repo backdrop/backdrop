@@ -26,7 +26,7 @@ class BackdropFakeCache extends BackdropDatabaseCache implements BackdropCacheIn
    * Overrides BackdropDatabaseCache::getMultiple().
    */
   function getMultiple(array &$cids) {
-    return array();
+    return [];
   }
 
   /**

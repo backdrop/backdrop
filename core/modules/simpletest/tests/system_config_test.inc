@@ -38,16 +38,16 @@ class SystemConfigFormCase extends BackdropWebTestCase {
     foreach ($this->values as $form_key => $data) {
       $values[$form_key] = $data['#value'];
     }
-    $form_state = array('values' => $values);
+    $form_state = ['values' => $values];
     backdrop_form_submit($this->form_id, $form_state);
 
     // Check that the form returns an error when expected, and vice versa.
     $errors = form_get_errors();
     $valid_form = empty($errors);
-    $args = array(
+    $args = [
       '%values' => print_r($values, TRUE),
       '%errors' => $valid_form ? t('None') : implode(' ', $errors),
-    );
+    ];
     $this->assertTrue($valid_form, t('Input values: %values<br/>Validation handler errors: %errors', $args));
 
     foreach ($this->values as $form_key => $data) {

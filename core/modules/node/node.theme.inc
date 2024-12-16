@@ -66,18 +66,18 @@ function theme_node_preview($variables) {
 function theme_node_search_factors($variables) {
   $element = $variables['element'];
 
-  $rows = array();
-  $header = array(t('Factor'), t('Influence'));
+  $rows = [];
+  $header = [t('Factor'), t('Influence')];
   foreach (element_children($element) as $key) {
-    $row = array();
+    $row = [];
     $row[] = $element[$key]['#title'];
     $element[$key]['#title_display'] = 'invisible';
     $row[] = backdrop_render($element[$key]);
     $rows[] = $row;
   }
   $output = '';
-  $output .= theme('help', array('markup' => $element['#help']));
-  $output .= theme('table', array('header' => $header, 'rows' => $rows));
+  $output .= theme('help', ['markup' => $element['#help']]);
+  $output .= theme('table', ['header' => $header, 'rows' => $rows]);
   $output .= backdrop_render_children($element);
   return $output;
 }
@@ -105,7 +105,7 @@ function theme_node_add_list($variables) {
     $output .= '</dl>';
   }
   else {
-    $output = '<p>' . t('You have not created any content types yet. Go to the <a href="@create-content">content type creation page</a> to add a new content type.', array('@create-content' => url('admin/structure/types/add'))) . '</p>';
+    $output = '<p>' . t('You have not created any content types yet. Go to the <a href="@create-content">content type creation page</a> to add a new content type.', ['@create-content' => url('admin/structure/types/add')]) . '</p>';
   }
   return $output;
 }
@@ -131,7 +131,7 @@ function theme_node_admin_overview($variables) {
   $type = $variables['type'];
 
   $output = check_plain($name);
-  $output .= ' <small>' . t('(Machine name: @type)', array('@type' => $type->type)) . '</small>';
+  $output .= ' <small>' . t('(Machine name: @type)', ['@type' => $type->type]) . '</small>';
   $output .= '<div class="description">' . filter_xss_admin($type->description) . '</div>';
   return $output;
 }
@@ -159,10 +159,10 @@ function template_preprocess_node(&$variables) {
   $node = $variables['node'];
 
   $variables['date']      = format_date($node->created);
-  $variables['name']      = theme('username', array(
+  $variables['name']      = theme('username', [
     'account' => $node,
-    'link_attributes' => array('rel' => 'author'),
-  ));
+    'link_attributes' => ['rel' => 'author'],
+  ]);
 
   $uri = entity_uri('node', $node);
   $variables['node_url']  = url($uri['path'], $uri['options']);
@@ -173,7 +173,7 @@ function template_preprocess_node(&$variables) {
   $variables = array_merge((array) $node, $variables);
 
   // Helpful $content variable for templates.
-  $variables += array('content' => array());
+  $variables += ['content' => []];
   foreach (element_children($variables['elements']) as $key) {
     $variables['content'][$key] = $variables['elements'][$key];
   }
@@ -196,10 +196,10 @@ function template_preprocess_node(&$variables) {
   if ($node_type->settings['node_submitted']) {
     if (!isset($variables['elements']['#display_submitted']) || $variables['elements']['#display_submitted'] == TRUE) {
       $variables['display_submitted'] = TRUE;
-      $variables['submitted'] = token_replace($node_type->settings['node_submitted_format'], array('node' => $node));
+      $variables['submitted'] = token_replace($node_type->settings['node_submitted_format'], ['node' => $node]);
       $variables['user_picture'] = '';
       if ($node_type->settings['node_user_picture']) {
-        $variables['user_picture'] = theme('user_picture', array('account' => $node));
+        $variables['user_picture'] = theme('user_picture', ['account' => $node]);
       }
     }
   }

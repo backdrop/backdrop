@@ -20,7 +20,7 @@
  */
 function hook_taxonomy_vocabulary_load(array $vocabularies) {
   $result = db_select('mytable', 'm')
-    ->fields('m', array('vocabulary', 'foo'))
+    ->fields('m', ['vocabulary', 'foo'])
     ->condition('m.vocabulary', array_keys($vocabularies), 'IN')
     ->execute();
   foreach ($result as $record) {
@@ -53,10 +53,10 @@ function hook_taxonomy_vocabulary_presave(TaxonomyVocabulary $vocabulary) {
 function hook_taxonomy_vocabulary_insert(TaxonomyVocabulary $vocabulary) {
   if ($vocabulary->machine_name == 'my_vocabulary') {
     db_insert('mytable')
-      ->fields(array(
+      ->fields([
         'vocabulary' => $vocabulary->machine_name,
         'foo' => $vocabulary->foo,
-      ))
+      ])
       ->execute();
   }
 }
@@ -71,7 +71,7 @@ function hook_taxonomy_vocabulary_insert(TaxonomyVocabulary $vocabulary) {
  */
 function hook_taxonomy_vocabulary_update(TaxonomyVocabulary $vocabulary) {
   db_update('mytable')
-    ->fields(array('foo' => $vocabulary->foo))
+    ->fields(['foo' => $vocabulary->foo])
     ->condition('vocabulary', $vocabulary->machine_name)
     ->execute();
 }
@@ -132,7 +132,7 @@ function hook_taxonomy_vocabulary_delete(TaxonomyVocabulary $vocabulary) {
  */
 function hook_taxonomy_term_load(array $terms) {
   $result = db_select('mytable', 'm')
-    ->fields('m', array('tid', 'foo'))
+    ->fields('m', ['tid', 'foo'])
     ->condition('m.tid', array_keys($terms), 'IN')
     ->execute();
   foreach ($result as $record) {
@@ -164,10 +164,10 @@ function hook_taxonomy_term_presave(TaxonomyTerm $term) {
  */
 function hook_taxonomy_term_insert(TaxonomyTerm $term) {
   db_insert('mytable')
-    ->fields(array(
+    ->fields([
       'tid' => $term->tid,
       'foo' => $term->foo,
-    ))
+    ])
     ->execute();
 }
 
@@ -181,7 +181,7 @@ function hook_taxonomy_term_insert(TaxonomyTerm $term) {
  */
 function hook_taxonomy_term_update(TaxonomyTerm $term) {
   db_update('mytable')
-    ->fields(array('foo' => $term->foo))
+    ->fields(['foo' => $term->foo])
     ->condition('tid', $term->tid)
     ->execute();
 }
@@ -236,11 +236,11 @@ function hook_taxonomy_term_delete(TaxonomyTerm $term) {
  * @see hook_entity_view()
  */
 function hook_taxonomy_term_view($term, $view_mode, $langcode) {
-  $term->content['my_additional_field'] = array(
+  $term->content['my_additional_field'] = [
     '#markup' => $additional_field,
     '#weight' => 10,
     '#theme' => 'my_module_my_additional_field',
-  );
+  ];
 }
 
 /**

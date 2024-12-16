@@ -17,7 +17,7 @@ function user_block_user_action(User $account, &$context) {
 
   // Don't block User 1, or the user performing the action.
   if ($account->uid === '1') {
-    backdrop_set_message(t('The user account %admin_name (user with ID 1) cannot be blocked.', array('%admin_name' => $account->name)), 'warning');
+    backdrop_set_message(t('The user account %admin_name (user with ID 1) cannot be blocked.', ['%admin_name' => $account->name]), 'warning');
     return FALSE;
   }
   elseif ($account->uid == $user->uid) {
@@ -63,10 +63,10 @@ function user_cancel_user_action($account, &$context) {
     $last_action_time = $_SESSION['user_cancel_action']['timestamp'];
   }
   if (REQUEST_TIME - $last_action_time > 60) {
-    $_SESSION['user_cancel_action'] = array(
+    $_SESSION['user_cancel_action'] = [
       'timestamp' => REQUEST_TIME,
-      'uids' => array(),
-    );
+      'uids' => [],
+    ];
   }
 
   $_SESSION['user_cancel_action']['uids'][] = $account->uid;

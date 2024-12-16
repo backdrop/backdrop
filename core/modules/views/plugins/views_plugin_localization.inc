@@ -67,7 +67,7 @@ class views_plugin_localization extends views_plugin {
    * @param string $format
    *   The input format of the string. This is optional.
    */
-  public function translate_string($string, $keys = array(), $format = '') {}
+  public function translate_string($string, $keys = [], $format = '') {}
 
   /**
    * Save string source for translation.
@@ -95,7 +95,7 @@ class views_plugin_localization extends views_plugin {
    * @param string $format
    *   The input format of the string. This is optional.
    */
-  public function save_string($string, $keys = array(), $format = '') {}
+  public function save_string($string, $keys = [], $format = '') {}
 
   /**
    * Delete a string.
@@ -113,7 +113,7 @@ class views_plugin_localization extends views_plugin {
    * by reference and fetching return values.
    */
   public function invoke_translation_process(&$value, $op) {
-    $return = array();
+    $return = [];
     $hook = 'translation_' . $op . '_process';
     foreach (module_implements($hook) as $module) {
       $function = $module . '_' . $hook;
@@ -135,17 +135,17 @@ class views_plugin_localization extends views_plugin {
     $this->view->init_display();
 
     foreach ($this->view->display as $display_id => $display) {
-      $translatable = array();
+      $translatable = [];
       // Special handling for display title.
       if (isset($display->display_title)) {
-        $translatable[] = array('value' => $display->display_title, 'keys' => array('display_title'));
+        $translatable[] = ['value' => $display->display_title, 'keys' => ['display_title']];
       }
       // Unpack handlers.
       if (is_object($this->view->display[$display_id]->handler)) {
         $this->view->display[$display_id]->handler->unpack_translatables($translatable);
       }
       foreach ($translatable as $data) {
-        $data['keys'] = array_merge(array($this->view->name, $display_id), $data['keys']);
+        $data['keys'] = array_merge([$this->view->name, $display_id], $data['keys']);
         switch ($op) {
           case 'save':
             $this->save($data);

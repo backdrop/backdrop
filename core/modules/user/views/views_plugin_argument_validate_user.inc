@@ -14,46 +14,46 @@
 class views_plugin_argument_validate_user extends views_plugin_argument_validate {
   function option_definition() {
     $options = parent::option_definition();
-    $options['type'] = array('default' => 'uid');
-    $options['restrict_roles'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['roles'] = array('default' => array());
+    $options['type'] = ['default' => 'uid'];
+    $options['restrict_roles'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['roles'] = ['default' => []];
 
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
-    $form['type'] = array(
+    $form['type'] = [
       '#type' => 'radios',
       '#title' => t('Type of user filter value to allow'),
-      '#options' => array(
+      '#options' => [
         'uid' => t('Only allow numeric UIDs'),
         'name' => t('Only allow string usernames'),
         'either' => t('Allow both numeric UIDs and string usernames'),
-      ),
+      ],
       '#default_value' => $this->options['type'],
-    );
+    ];
 
-    $form['restrict_roles'] = array(
+    $form['restrict_roles'] = [
       '#type' => 'checkbox',
       '#title' => t('Restrict user based on role'),
       '#default_value' => $this->options['restrict_roles'],
-    );
+    ];
 
-    $form['roles'] = array(
+    $form['roles'] = [
       '#type' => 'checkboxes',
       '#title' => t('Restrict to the selected roles'),
       '#options' => array_map('check_plain', user_roles(TRUE)),
       '#default_value' => $this->options['roles'],
       '#description' => t('If no roles are selected, users from any role will be allowed.'),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[validate][options][user][restrict_roles]"]' => array('checked' => TRUE),
-        ),
-      ),
-    );
+      '#states' => [
+        'visible' => [
+          ':input[name="options[validate][options][user][restrict_roles]"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
   }
 
-  function options_submit(&$form, &$form_state, &$options = array()) {
+  function options_submit(&$form, &$form_state, &$options = []) {
     // filter trash out of the options so we don't store giant unnecessary arrays
     $options['roles'] = array_filter($options['roles']);
   }
@@ -99,7 +99,7 @@ class views_plugin_argument_validate_user extends views_plugin_argument_validate
 
     if (!isset($account)) {
       $query = "SELECT uid, name FROM {users} WHERE $where";
-      $account = db_query($query, array(':argument' => $argument))->fetchObject();
+      $account = db_query($query, [':argument' => $argument])->fetchObject();
     }
     if (empty($account)) {
       // User not found.
@@ -109,9 +109,9 @@ class views_plugin_argument_validate_user extends views_plugin_argument_validate
     // See if we're filtering users based on roles.
     if (!empty($this->options['restrict_roles']) && !empty($this->options['roles'])) {
       $roles = $this->options['roles'];
-      $account->roles = array();
+      $account->roles = [];
       $account->roles[] = $account->uid ? BACKDROP_AUTHENTICATED_ROLE : BACKDROP_ANONYMOUS_ROLE;
-      $result = db_query('SELECT role FROM {users_roles} WHERE uid = :uid', array(':uid' => $account->uid));
+      $result = db_query('SELECT role FROM {users_roles} WHERE uid = :uid', [':uid' => $account->uid]);
       foreach ($result as $role) {
         $account->roles[] = $role->role;
       }

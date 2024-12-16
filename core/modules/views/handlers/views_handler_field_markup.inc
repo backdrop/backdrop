@@ -24,7 +24,7 @@ class views_handler_field_markup extends views_handler_field {
 
     $this->format = $this->definition['format'];
 
-    $this->additional_fields = array();
+    $this->additional_fields = [];
     if (is_array($this->format)) {
       $this->additional_fields['format'] = $this->format;
     }

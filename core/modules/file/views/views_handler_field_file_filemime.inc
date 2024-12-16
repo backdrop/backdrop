@@ -12,16 +12,16 @@
 class views_handler_field_file_filemime extends views_handler_field_file {
   function option_definition() {
     $options = parent::option_definition();
-    $options['filemime_image'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['filemime_image'] = ['default' => FALSE, 'bool' => TRUE];
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
-    $form['filemime_image'] = array(
+    $form['filemime_image'] = [
       '#title' => t('Display an icon representing the file type, instead of the MIME text (such as "image/jpeg")'),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['filemime_image']),
-    );
+    ];
     parent::options_form($form, $form_state);
   }
 
@@ -30,7 +30,7 @@ class views_handler_field_file_filemime extends views_handler_field_file {
     if (!empty($this->options['filemime_image']) && $data !== NULL && $data !== '') {
       $fake_file = new File();
       $fake_file->filemime = $data;
-      $data = theme('file_icon', array('file' => $fake_file));
+      $data = theme('file_icon', ['file' => $fake_file]);
     }
 
     return $this->render_link($data, $values);

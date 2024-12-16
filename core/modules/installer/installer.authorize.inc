@@ -26,7 +26,7 @@
  *   - local_url: The locally installed location of new code to update with.
  */
 function installer_authorize_run_update($filetransfer, $projects) {
-  $operations = array();
+  $operations = [];
   foreach ($projects as $project => $project_info) {
     if ($project_info['project'] == 'backdrop') {
       $updater_name = 'CoreUpdater';
@@ -35,24 +35,24 @@ function installer_authorize_run_update($filetransfer, $projects) {
       $updater_name = $project_info['updater_name'];
     }
 
-    $operations[] = array(
+    $operations[] = [
       'installer_authorize_batch_copy_project',
-      array(
+      [
         $project_info['project'],
         $updater_name,
         $project_info['local_url'],
         $filetransfer,
-      ),
-    );
+      ],
+    ];
   }
 
-  $batch = array(
+  $batch = [
     'title' => t('Installing updates'),
     'init_message' => t('Preparing to update your site'),
     'operations' => $operations,
     'finished' => 'installer_authorize_update_batch_finished',
     'file' => backdrop_get_path('module', 'installer') . '/installer.authorize.inc',
-  );
+  ];
 
   batch_set($batch);
   // Invoke the batch via authorize.php.
@@ -79,25 +79,25 @@ function installer_authorize_run_update($filetransfer, $projects) {
  *   Callback to handle the redirection to the authorize.php file.
  */
 function installer_authorize_run_install($filetransfer, $project, $updater_name, $project_realpath, $redirect_callback = 'backdrop_goto') {
-  $operations[] = array(
+  $operations[] = [
     'installer_authorize_batch_copy_project',
-    array(
+    [
       $project,
       $updater_name,
       $project_realpath,
       $filetransfer,
-    ),
-  );
+    ],
+  ];
 
   // @todo Instantiate our Updater to set the human-readable title?
-  $batch = array(
-    'title' => t('Installing %project', array('%project' => $project)),
+  $batch = [
+    'title' => t('Installing %project', ['%project' => $project]),
     'init_message' => t('Preparing to install'),
     'operations' => $operations,
     // @todo Use a different finished callback for different messages?
     'finished' => 'installer_authorize_install_batch_finished',
     'file' => backdrop_get_path('module', 'installer') . '/installer.authorize.inc',
-  );
+  ];
   batch_set($batch);
 
   // Invoke the batch via authorize.php.
@@ -123,14 +123,14 @@ function installer_authorize_batch_copy_project($project, $updater_name, $projec
 
   // Initialize some variables in the Batch API $context array.
   if (!isset($context['results']['log'])) {
-    $context['results']['log'] = array();
+    $context['results']['log'] = [];
   }
   if (!isset($context['results']['log'][$project])) {
-    $context['results']['log'][$project] = array();
+    $context['results']['log'][$project] = [];
   }
 
   if (!isset($context['results']['tasks'])) {
-    $context['results']['tasks'] = array();
+    $context['results']['tasks'] = [];
   }
 
   // The batch API uses a session, and since all the arguments are serialized
@@ -166,7 +166,7 @@ function installer_authorize_batch_copy_project($project, $updater_name, $projec
     return;
   }
 
-  _installer_batch_create_message($context['results']['log'][$project], t('Installed %project_name successfully', array('%project_name' => $project)));
+  _installer_batch_create_message($context['results']['log'][$project], t('Installed %project_name successfully', ['%project_name' => $project]));
   if (!empty($tasks)) {
     $context['results']['tasks'] += $tasks;
   }
@@ -203,34 +203,34 @@ function installer_authorize_update_batch_finished($success, $results) {
     // Take the site out of maintenance mode if it was previously that way.
     if ($offline && isset($_SESSION['maintenance_mode']) && $_SESSION['maintenance_mode'] == FALSE) {
       state_set('maintenance_mode', FALSE);
-      $page_message = array(
+      $page_message = [
         'message' => t('Update was completed successfully. Your site has been taken out of maintenance mode.'),
         'type' => 'status',
-      );
+      ];
     }
     else {
-      $page_message = array(
+      $page_message = [
         'message' => t('Update was completed successfully.'),
         'type' => 'status',
-      );
+      ];
     }
   }
   elseif (!$offline) {
-    $page_message = array(
+    $page_message = [
       'message' => t('Update failed! See the log below for more information.'),
       'type' => 'error',
-    );
+    ];
   }
   else {
-    $page_message = array(
+    $page_message = [
       'message' => t('Update failed! See the log below for more information. Your site is still in maintenance mode.'),
       'type' => 'error',
-    );
+    ];
   }
   // Since we're doing an update of existing code, always add a task for
   // running update.php.
   $results['tasks'][] = t('Your projects have been downloaded and updated.');
-  $results['tasks'][] = t('<a href="@update">Run site updates</a>', array('@update' => base_path() . 'core/update.php'));
+  $results['tasks'][] = t('<a href="@update">Run site updates</a>', ['@update' => base_path() . 'core/update.php']);
 
   // Unset the variable since it is no longer needed.
   unset($_SESSION['maintenance_mode']);
@@ -266,29 +266,29 @@ function installer_authorize_install_batch_finished($success, $results) {
     // Take the site out of maintenance mode if it was previously that way.
     if ($offline && isset($_SESSION['maintenance_mode']) && $_SESSION['maintenance_mode'] == FALSE) {
       state_set('maintenance_mode', FALSE);
-      $page_message = array(
+      $page_message = [
         'message' => t('Installation was completed successfully. Your site has been taken out of maintenance mode.'),
         'type' => 'status',
-      );
+      ];
     }
     else {
-      $page_message = array(
+      $page_message = [
         'message' => t('Installation was completed successfully.'),
         'type' => 'status',
-      );
+      ];
     }
   }
   elseif (!$success && !$offline) {
-    $page_message = array(
+    $page_message = [
       'message' => t('Installation failed! See the log below for more information.'),
       'type' => 'error',
-    );
+    ];
   }
   else {
-    $page_message = array(
+    $page_message = [
       'message' => t('Installation failed! See the log below for more information. Your site is still in maintenance mode.'),
       'type' => 'error',
-    );
+    ];
   }
 
   // Unset the variable since it is no longer needed.
@@ -314,7 +314,7 @@ function installer_authorize_install_batch_finished($success, $results) {
  *   if there were errors. Defaults to TRUE.
  */
 function _installer_batch_create_message(&$project_results, $message, $success = TRUE) {
-  $project_results[] = array('message' => $message, 'success' => $success);
+  $project_results[] = ['message' => $message, 'success' => $success];
 }
 
 /**

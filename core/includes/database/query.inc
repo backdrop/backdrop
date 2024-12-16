@@ -324,7 +324,7 @@ abstract class Query implements QueryPlaceholderInterface {
    *
    * @var array
    */
-  protected $comments = array();
+  protected $comments = [];
 
   /**
    * Constructs a Query object.
@@ -462,14 +462,14 @@ class InsertQuery extends Query {
    *
    * @var array
    */
-  protected $insertFields = array();
+  protected $insertFields = [];
 
   /**
    * An array of fields that should be set to their database-defined defaults.
    *
    * @var array
    */
-  protected $defaultFields = array();
+  protected $defaultFields = [];
 
   /**
    * A nested array of values to insert.
@@ -486,7 +486,7 @@ class InsertQuery extends Query {
    *
    * @var array
    */
-  protected $insertValues = array();
+  protected $insertValues = [];
 
   /**
    * A SelectQuery object to fetch the rows that should be inserted.
@@ -505,7 +505,7 @@ class InsertQuery extends Query {
    * @param array $options
    *   Array of database options.
    */
-  public function __construct(DatabaseConnection $connection, $table, array $options = array()) {
+  public function __construct(DatabaseConnection $connection, $table, array $options = []) {
     if (!isset($options['return'])) {
       $options['return'] = Database::RETURN_INSERT_ID;
     }
@@ -533,7 +533,7 @@ class InsertQuery extends Query {
    * @return InsertQuery
    *   The called object.
    */
-  public function fields(array $fields, array $values = array()) {
+  public function fields(array $fields, array $values = []) {
     if (empty($this->insertFields)) {
       if (empty($values)) {
         if (!is_numeric(key($fields))) {
@@ -570,7 +570,7 @@ class InsertQuery extends Query {
     }
     else {
       // Reorder the submitted values to match the fields array.
-      $insert_values = array();
+      $insert_values = [];
       foreach ($this->insertFields as $key) {
         $insert_values[$key] = $values[$key];
       }
@@ -667,7 +667,7 @@ class InsertQuery extends Query {
     }
 
     // Re-initialize the values array so that we can re-use this query.
-    $this->insertValues = array();
+    $this->insertValues = [];
 
     // Transaction commits here where $transaction looses scope.
     return $last_insert_id;
@@ -698,7 +698,7 @@ class InsertQuery extends Query {
     // For simplicity, we will use the $placeholders array to inject
     // default keywords even though they are not, strictly speaking,
     // placeholders for prepared statements.
-    $placeholders = array();
+    $placeholders = [];
     $placeholders = array_pad($placeholders, count($this->defaultFields), 'default');
     $placeholders = array_pad($placeholders, count($this->insertFields), '?');
 
@@ -777,7 +777,7 @@ class DeleteQuery extends Query implements QueryConditionInterface {
    * @param array $options
    *   Array of database options.
    */
-  public function __construct(DatabaseConnection $connection, $table, array $options = array()) {
+  public function __construct(DatabaseConnection $connection, $table, array $options = []) {
     $options['return'] = Database::RETURN_AFFECTED;
     parent::__construct($connection, $options);
     $this->table = $table;
@@ -854,7 +854,7 @@ class DeleteQuery extends Query implements QueryConditionInterface {
    *
    * @return DeleteQuery
    */
-  public function where($snippet, $args = array()) {
+  public function where($snippet, $args = []) {
     $this->condition->where($snippet, $args);
     return $this;
   }
@@ -880,7 +880,7 @@ class DeleteQuery extends Query implements QueryConditionInterface {
    *   The number of rows affected by the delete query.
    */
   public function execute() {
-    $values = array();
+    $values = [];
     if (count($this->condition)) {
       $this->condition->compile($this->connection, $this);
       $values = $this->condition->arguments();
@@ -930,7 +930,7 @@ class TruncateQuery extends Query {
    * @param array $options
    *   Array of database options.
    */
-  public function __construct(DatabaseConnection $connection, $table, array $options = array()) {
+  public function __construct(DatabaseConnection $connection, $table, array $options = []) {
     $options['return'] = Database::RETURN_AFFECTED;
     parent::__construct($connection, $options);
     $this->table = $table;
@@ -943,7 +943,7 @@ class TruncateQuery extends Query {
    *   Return value is dependent on the database type.
    */
   public function execute() {
-    return $this->connection->query((string) $this, array(), $this->queryOptions);
+    return $this->connection->query((string) $this, [], $this->queryOptions);
   }
 
   /**
@@ -982,14 +982,14 @@ class UpdateQuery extends Query implements QueryConditionInterface {
    *
    * @var array
    */
-  protected $fields = array();
+  protected $fields = [];
 
   /**
    * An array of values to update to.
    *
    * @var array
    */
-  protected $arguments = array();
+  protected $arguments = [];
 
   /**
    * The condition object for this query.
@@ -1013,7 +1013,7 @@ class UpdateQuery extends Query implements QueryConditionInterface {
    *
    * @var array
    */
-  protected $expressionFields = array();
+  protected $expressionFields = [];
 
   /**
    * Constructs an UpdateQuery object.
@@ -1025,7 +1025,7 @@ class UpdateQuery extends Query implements QueryConditionInterface {
    * @param array $options
    *   Array of database options.
    */
-  public function __construct(DatabaseConnection $connection, $table, array $options = array()) {
+  public function __construct(DatabaseConnection $connection, $table, array $options = []) {
     $options['return'] = Database::RETURN_AFFECTED;
     parent::__construct($connection, $options);
     $this->table = $table;
@@ -1102,7 +1102,7 @@ class UpdateQuery extends Query implements QueryConditionInterface {
    *
    * @return UpdateQuery
    */
-  public function where($snippet, $args = array()) {
+  public function where($snippet, $args = []) {
     $this->condition->where($snippet, $args);
     return $this;
   }
@@ -1155,10 +1155,10 @@ class UpdateQuery extends Query implements QueryConditionInterface {
    *   The called object.
    */
   public function expression($field, $expression, array $arguments = NULL) {
-    $this->expressionFields[$field] = array(
+    $this->expressionFields[$field] = [
       'expression' => $expression,
       'arguments' => $arguments,
-    );
+    ];
 
     return $this;
   }
@@ -1174,7 +1174,7 @@ class UpdateQuery extends Query implements QueryConditionInterface {
     // Expressions take priority over literal fields, so we process those first
     // and remove any literal fields that conflict.
     $fields = $this->fields;
-    $update_values = array();
+    $update_values = [];
     foreach ($this->expressionFields as $field => $data) {
       if (!empty($data['arguments'])) {
         $update_values += $data['arguments'];
@@ -1220,7 +1220,7 @@ class UpdateQuery extends Query implements QueryConditionInterface {
     // Expressions take priority over literal fields, so we process those first
     // and remove any literal fields that conflict.
     $fields = $this->fields;
-    $update_fields = array();
+    $update_fields = [];
     foreach ($this->expressionFields as $field => $data) {
       unset($fields[$field]);
       $field = $this->connection->escapeField($field);
@@ -1309,7 +1309,7 @@ class MergeQuery extends Query implements QueryConditionInterface {
    *
    * @var array
    */
-  protected $insertFields = array();
+  protected $insertFields = [];
 
   /**
    * An array of fields which should be set to their database-defined defaults.
@@ -1318,21 +1318,21 @@ class MergeQuery extends Query implements QueryConditionInterface {
    *
    * @var array
    */
-  protected $defaultFields = array();
+  protected $defaultFields = [];
 
   /**
    * An array of values to be inserted.
    *
    * @var string
    */
-  protected $insertValues = array();
+  protected $insertValues = [];
 
   /**
    * An array of fields that will be updated.
    *
    * @var array
    */
-  protected $updateFields = array();
+  protected $updateFields = [];
 
   /**
    * Array of fields to update to an expression in case of a duplicate record.
@@ -1347,7 +1347,7 @@ class MergeQuery extends Query implements QueryConditionInterface {
    *
    * @var array
    */
-  protected $expressionFields = array();
+  protected $expressionFields = [];
 
   /**
    * Flag indicating whether an UPDATE is necessary.
@@ -1375,7 +1375,7 @@ class MergeQuery extends Query implements QueryConditionInterface {
   * @param array $options
   *   Array of database options.
   */
-  public function __construct(DatabaseConnection $connection, $table, array $options = array()) {
+  public function __construct(DatabaseConnection $connection, $table, array $options = []) {
     $options['return'] = Database::RETURN_AFFECTED;
     parent::__construct($connection, $options);
     $this->table = $table;
@@ -1418,10 +1418,10 @@ class MergeQuery extends Query implements QueryConditionInterface {
    *   The called object.
    */
   public function expression($field, $expression, array $arguments = NULL) {
-    $this->expressionFields[$field] = array(
+    $this->expressionFields[$field] = [
       'expression' => $expression,
       'arguments' => $arguments,
-    );
+    ];
     $this->needsUpdate = TRUE;
     return $this;
   }
@@ -1442,7 +1442,7 @@ class MergeQuery extends Query implements QueryConditionInterface {
    * @return MergeQuery
    *   The called object.
    */
-  public function insertFields(array $fields, array $values = array()) {
+  public function insertFields(array $fields, array $values = []) {
     if ($values) {
       $fields = array_combine($fields, $values);
     }
@@ -1495,7 +1495,7 @@ class MergeQuery extends Query implements QueryConditionInterface {
    * @return MergeQuery
    *   The called object.
    */
-  public function fields(array $fields, array $values = array()) {
+  public function fields(array $fields, array $values = []) {
     if ($values) {
       $fields = array_combine($fields, $values);
     }
@@ -1529,7 +1529,7 @@ class MergeQuery extends Query implements QueryConditionInterface {
    * @return MergeQuery
    *   The called object.
    */
-  public function key(array $fields, array $values = array()) {
+  public function key(array $fields, array $values = []) {
     if ($values) {
       $fields = array_combine($fields, $values);
     }
@@ -1597,7 +1597,7 @@ class MergeQuery extends Query implements QueryConditionInterface {
   /**
    * {@inheritdoc}
    */
-  public function where($snippet, $args = array()) {
+  public function where($snippet, $args = []) {
     $this->condition->where($snippet, $args);
     return $this;
   }
@@ -1712,14 +1712,14 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
    *
    * @var array
    */
-  protected $conditions = array();
+  protected $conditions = [];
 
   /**
    * Array of arguments.
    *
    * @var array
    */
-  protected $arguments = array();
+  protected $arguments = [];
 
   /**
    * Whether the conditions have been changed.
@@ -1779,11 +1779,11 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
         $operator = '=';
       }
     }
-    $this->conditions[] = array(
+    $this->conditions[] = [
       'field' => $field,
       'value' => $value,
       'operator' => $operator,
-    );
+    ];
 
     $this->changed = TRUE;
 
@@ -1793,12 +1793,12 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
   /**
    * {@inheritdoc}
    */
-  public function where($snippet, $args = array()) {
-    $this->conditions[] = array(
+  public function where($snippet, $args = []) {
+    $this->conditions[] = [
       'field' => $snippet,
       'value' => $args,
       'operator' => NULL,
-    );
+    ];
     $this->changed = TRUE;
 
     return $this;
@@ -1859,8 +1859,8 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
     if ($this->changed || isset($this->queryPlaceholderIdentifier) && ($this->queryPlaceholderIdentifier != $queryPlaceholder->uniqueIdentifier())) {
       $this->queryPlaceholderIdentifier = $queryPlaceholder->uniqueIdentifier();
 
-      $condition_fragments = array();
-      $arguments = array();
+      $condition_fragments = [];
+      $arguments = [];
 
       $conditions = $this->conditions;
       $conjunction = $conditions['#conjunction'];
@@ -1884,20 +1884,20 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
           else {
             // For simplicity, treat all operators as the same data structure.
             // In the typical degenerate case, this won't get changed.
-            $operator_defaults = array(
+            $operator_defaults = [
               'prefix' => '',
               'postfix' => '',
               'delimiter' => '',
               'operator' => $condition['operator'],
               'use_value' => TRUE,
-            );
+            ];
             $operator = $connection->mapConditionOperator($condition['operator']);
             if (!isset($operator)) {
               $operator = $this->mapConditionOperator($condition['operator']);
             }
             $operator += $operator_defaults;
 
-            $placeholders = array();
+            $placeholders = [];
             if ($condition['value'] instanceof SelectQueryInterface) {
               $operator = $this->ensureBrackets($operator);
               $condition['value']->compile($connection, $queryPlaceholder);
@@ -1911,7 +1911,7 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
             // array. If not, it is a scalar. For simplicity, we first convert
             // to an array so that placeholders can be built in the same way.
             elseif (!$operator['delimiter']) {
-              $condition['value'] = array($condition['value']);
+              $condition['value'] = [$condition['value']];
             }
             if ($operator['use_value']) {
               foreach ($condition['value'] as $value) {
@@ -1987,24 +1987,24 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
    */
   protected function mapConditionOperator($operator) {
     // $specials does not use backdrop_static as its value never changes.
-    static $specials = array(
-      'BETWEEN' => array('delimiter' => ' AND '),
-      'IN' => array('delimiter' => ', ', 'prefix' => ' (', 'postfix' => ')'),
-      'NOT IN' => array('delimiter' => ', ', 'prefix' => ' (', 'postfix' => ')'),
-      'EXISTS' => array('prefix' => ' (', 'postfix' => ')'),
-      'NOT EXISTS' => array('prefix' => ' (', 'postfix' => ')'),
-      'IS NULL' => array('use_value' => FALSE),
-      'IS NOT NULL' => array('use_value' => FALSE),
+    static $specials = [
+      'BETWEEN' => ['delimiter' => ' AND '],
+      'IN' => ['delimiter' => ', ', 'prefix' => ' (', 'postfix' => ')'],
+      'NOT IN' => ['delimiter' => ', ', 'prefix' => ' (', 'postfix' => ')'],
+      'EXISTS' => ['prefix' => ' (', 'postfix' => ')'],
+      'NOT EXISTS' => ['prefix' => ' (', 'postfix' => ')'],
+      'IS NULL' => ['use_value' => FALSE],
+      'IS NOT NULL' => ['use_value' => FALSE],
       // Use backslash for escaping wildcard characters.
-      'LIKE' => array('postfix' => " ESCAPE '\\\\'"),
-      'NOT LIKE' => array('postfix' => " ESCAPE '\\\\'"),
+      'LIKE' => ['postfix' => " ESCAPE '\\\\'"],
+      'NOT LIKE' => ['postfix' => " ESCAPE '\\\\'"],
       // These ones are here for performance reasons.
-      '=' => array(),
-      '<' => array(),
-      '>' => array(),
-      '>=' => array(),
-      '<=' => array(),
-    );
+      '=' => [],
+      '<' => [],
+      '>' => [],
+      '>=' => [],
+      '<=' => [],
+    ];
     if (isset($specials[$operator])) {
       $return = $specials[$operator];
     }
@@ -2013,10 +2013,10 @@ class DatabaseCondition implements QueryConditionInterface, Countable {
       // do not need the more expensive backdrop_strtoupper because SQL
       // statements are ASCII.
       $operator = strtoupper($operator);
-      $return = isset($specials[$operator]) ? $specials[$operator] : array();
+      $return = isset($specials[$operator]) ? $specials[$operator] : [];
     }
 
-    $return += array('operator' => $operator);
+    $return += ['operator' => $operator];
 
     return $return;
   }

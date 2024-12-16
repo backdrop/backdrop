@@ -36,7 +36,7 @@ class LayoutRendererFlexible {
    *
    * @var array
    */
-  var $rendered_editor = array();
+  var $rendered_editor = [];
 
   /**
    * TRUE if this renderer is rendering in administrative mode.
@@ -64,7 +64,7 @@ class LayoutRendererFlexible {
    *
    * @var array
    */
-  var $region_buttons = array();
+  var $region_buttons = [];
 
   /**
    * Construct the object that will be used to render the editor.
@@ -81,7 +81,7 @@ class LayoutRendererFlexible {
     $template_data = layout_flexible_tempstore_load($template_id);
 
     foreach ($template_data->rows as $position => $info) {
-      $layout->positions[$position] = array();
+      $layout->positions[$position] = [];
       $template_info['regions'][$position] = $position;
     }
 
@@ -131,7 +131,7 @@ class LayoutRendererFlexible {
       $theme = str_replace('-', '_', $this->layout_template_info['template']);
     }
 
-    $this->rendered_editor = theme($theme, array('content' => array(), 'settings' => array(), 'layout' => $this->layout, 'layout_info' => $this->layout_template_info, 'renderer' => $this, 'admin' => $this->admin));
+    $this->rendered_editor = theme($theme, ['content' => [], 'settings' => [], 'layout' => $this->layout, 'layout_info' => $this->layout_template_info, 'renderer' => $this, 'admin' => $this->admin]);
     return $this->prefix . $this->rendered_editor . $this->suffix;
   }
 
@@ -161,31 +161,31 @@ class LayoutRendererFlexible {
    * Render the links to display when editing a region.
    */
   protected function getRowButtons($region_id) {
-    $links = array();
-    $links['configure'] = array(
+    $links = [];
+    $links['configure'] = [
       'title' => t('Configure'),
       'href' => 'admin/structure/layouts/settings/flexible-template/' . $this->layout_template_info['name'] . '/row/' . $region_id . '/configure',
-      'attributes' => array(
-        'class' => array('use-ajax'),
+      'attributes' => [
+        'class' => ['use-ajax'],
         'data-dialog' => TRUE,
-        'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
-      ),
-    );
-    $links['delete'] = array(
+        'data-dialog-options' => json_encode(['dialogClass' => 'layout-dialog']),
+      ],
+    ];
+    $links['delete'] = [
       'title' => t('Delete row'),
       'href' => 'admin/structure/layouts/settings/flexible-template/' . $this->layout_template_info['name'] . '/row/' . $region_id . '/delete',
-      'query' => array(
+      'query' => [
         'token' => backdrop_get_token('layout-region-' . $region_id),
-      ),
-      'attributes' => array(
-        'class' => array('use-ajax'),
-      ),
-    );
+      ],
+      'attributes' => [
+        'class' => ['use-ajax'],
+      ],
+    ];
 
-    $dropbutton = array(
+    $dropbutton = [
       '#type' => 'dropbutton',
       '#links' => $links,
-    );
+    ];
 
     return backdrop_render($dropbutton);
   }

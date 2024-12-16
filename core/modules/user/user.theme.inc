@@ -18,14 +18,14 @@
 function theme_user_list($variables) {
   $users = $variables['users'];
   $title = $variables['title'];
-  $items = array();
+  $items = [];
 
   if (!empty($users)) {
     foreach ($users as $user) {
-      $items[] = theme('username', array('account' => $user));
+      $items[] = theme('username', ['account' => $user]);
     }
   }
-  return theme('item_list', array('items' => $items, 'title' => $title));
+  return theme('item_list', ['items' => $items, 'title' => $title]);
 }
 
 /**
@@ -108,9 +108,9 @@ function theme_user_admin_permissions($variables) {
 
   $roles = user_roles();
   foreach (element_children($form['permission']) as $key) {
-    $row = array(
-      'data' => array(),
-    );
+    $row = [
+      'data' => [],
+    ];
 
     // Hide the permission (or module) name and description element, since the
     // individual properties will be pulled out in each row.
@@ -119,41 +119,41 @@ function theme_user_admin_permissions($variables) {
     // Module name row.
     if (is_numeric($key)) {
       $module_text = '<div class="permission-module-name table-filter-text-source">' . $form['permission'][$key]['#markup'] . '</div>';
-      $row['class'] = array('module-row');
-      $row['data'][] = array(
+      $row['class'] = ['module-row'];
+      $row['data'][] = [
         'data' => $module_text,
-        'class' => array('module'),
+        'class' => ['module'],
         'id' => 'module-' . $form['permission'][$key]['#id'],
         'colspan' => count($form['roles']['#value']) + 1,
-      );
+      ];
     }
     // Permission row.
     else {
       $permission_text = '<div class="permission-name table-filter-text-source">' . $form['permission'][$key]['#markup'] . '</div>';
       $permission_text .= $form['permission'][$key]['#description'];
 
-      $row['data'][] = array(
+      $row['data'][] = [
         'data' => $permission_text,
-        'class' => array('permission', 'table-filter-text'),
+        'class' => ['permission', 'table-filter-text'],
         'id' => $form['permission'][$key]['#id'],
-      );
+      ];
       foreach (element_children($form['checkboxes']) as $role_name) {
         $form['checkboxes'][$role_name][$key]['#title'] = $roles[$role_name] . ': ' . $form['permission'][$key]['#markup'];
         $form['checkboxes'][$role_name][$key]['#title_display'] = 'attribute';
-        $row['data'][] = array(
+        $row['data'][] = [
           'data' => backdrop_render($form['checkboxes'][$role_name][$key]),
-          'class' => array('checkbox'),
-        );
+          'class' => ['checkbox'],
+        ];
       }
     }
     $rows[] = $row;
   }
   $header[] = (t('Permission'));
   foreach (element_children($form['role_names']) as $role_name) {
-    $header_cell = array(
+    $header_cell = [
       'data' => backdrop_render($form['role_names'][$role_name]),
-      'class' => array('checkbox'),
-    );
+      'class' => ['checkbox'],
+    ];
     // Output a role description if present as a title attribute on the cell.
     if (isset($form['role_names'][$role_name]['#description'])) {
       $header_cell['title'] = check_plain(strip_tags($form['role_names'][$role_name]['#description']));
@@ -165,7 +165,7 @@ function theme_user_admin_permissions($variables) {
   // Wrap the table in its own class so that we can make it horizontally
   // scrollable.
   $output .= '<div class="permissions-matrix">';
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'permissions')));
+  $output .= theme('table', ['header' => $header, 'rows' => $rows, 'attributes' => ['id' => 'permissions']]);
   $output .= '</div>';
   $output .= backdrop_render_children($form);
   return $output;
@@ -185,7 +185,7 @@ function theme_user_admin_permissions($variables) {
  * @ingroup themeable
  */
 function theme_user_permission_description($variables) {
-  $description = array();
+  $description = [];
   $permission_item = $variables['permission_item'];
   if (!empty($permission_item['description'])) {
     $description[] = '<div class="permission-description description table-filter-text-source">' . $permission_item['description'] . '</div>';
@@ -214,47 +214,47 @@ function theme_user_permission_description($variables) {
 function theme_user_admin_roles($variables) {
   $form = $variables['form'];
 
-  $header = array(
-    array('data' => t('Name'), 'class' => array('role-name')),
-    array(
+  $header = [
+    ['data' => t('Name'), 'class' => ['role-name']],
+    [
       'data' => t('Description'),
-      'class' => array('role-description', 'priority-low'),
-    ),
-    array('data' => t('Weight')),
-    array('data' => t('Operations'), 'class' => array('role-operations')),
-  );
+      'class' => ['role-description', 'priority-low'],
+    ],
+    ['data' => t('Weight')],
+    ['data' => t('Operations'), 'class' => ['role-operations']],
+  ];
   foreach (element_children($form['roles']) as $role_name) {
     $label = $form['roles'][$role_name]['#role']->label;
-    if (in_array($role_name, array(BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE))) {
+    if (in_array($role_name, [BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE])) {
       $label .= ' ' . t('(required)');
     }
 
-    $row = array();
-    $row[] = array(
-      'data' => theme('label_machine_name__role', array(
+    $row = [];
+    $row[] = [
+      'data' => theme('label_machine_name__role', [
         'label' => $label,
         'machine_name' => $form['roles'][$role_name]['#role']->name,
-      )),
-      'class' => array('role-name'),
-    );
-    $row[] = array(
+      ]),
+      'class' => ['role-name'],
+    ];
+    $row[] = [
       'data' => filter_xss_admin($form['roles'][$role_name]['#role']->description),
-      'class' => array('role-description', 'priority-low'),
-    );
-    $row[] = array(
+      'class' => ['role-description', 'priority-low'],
+    ];
+    $row[] = [
       'data' => backdrop_render($form['roles'][$role_name]['weight']),
-    );
-    $row[] = array(
+    ];
+    $row[] = [
       'data' => backdrop_render($form['roles'][$role_name]['operations']),
-      'class' => array('role-operations'),
-    );
-    $rows[] = array('data' => $row, 'class' => array('draggable'));
+      'class' => ['role-operations'],
+    ];
+    $rows[] = ['data' => $row, 'class' => ['draggable']];
   }
 
   backdrop_add_tabledrag('user-roles', 'order', 'sibling', 'role-weight');
 
   $output = backdrop_render($form['roles_help']);
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'user-roles')));
+  $output .= theme('table', ['header' => $header, 'rows' => $rows, 'attributes' => ['id' => 'user-roles']]);
   $output .= backdrop_render_children($form);
 
   return $output;
@@ -293,17 +293,17 @@ function template_preprocess_user_picture(&$variables) {
       $filepath = $site_config->get('user_picture_default');
     }
     if (isset($filepath)) {
-      $alt = t("@user's picture", array('@user' => user_format_name($account)));
+      $alt = t("@user's picture", ['@user' => user_format_name($account)]);
       // If the image does not have a valid Backdrop scheme (for eg. HTTP),
       // don't load image styles.
       if (module_exists('image') && file_valid_uri($filepath) && $style = $site_config->get('user_picture_style')) {
-        $variables['user_picture'] = theme('image_style', array('style_name' => $style, 'uri' => $filepath, 'alt' => $alt, 'title' => $alt));
+        $variables['user_picture'] = theme('image_style', ['style_name' => $style, 'uri' => $filepath, 'alt' => $alt, 'title' => $alt]);
       }
       else {
-        $variables['user_picture'] = theme('image', array('path' => $filepath, 'alt' => $alt, 'title' => $alt));
+        $variables['user_picture'] = theme('image', ['path' => $filepath, 'alt' => $alt, 'title' => $alt]);
       }
       if (!empty($account->uid) && user_access('access user profiles')) {
-        $attributes = array('attributes' => array('title' => t('View user profile.')), 'html' => TRUE);
+        $attributes = ['attributes' => ['title' => t('View user profile.')], 'html' => TRUE];
         $variables['user_picture'] = l($variables['user_picture'], "user/$account->uid", $attributes);
       }
     }
@@ -358,7 +358,7 @@ function template_preprocess_username(&$variables) {
   // We do not want the l() function to check_plain() a second time.
   $variables['link_options']['html'] = TRUE;
   // Set a default class.
-  $variables['attributes'] = array('class' => array('username'));
+  $variables['attributes'] = ['class' => ['username']];
 }
 
 /**

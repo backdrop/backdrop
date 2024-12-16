@@ -33,9 +33,9 @@ function bartik_css_alter(&$css) {
  */
 function bartik_preprocess_layout(&$variables) {
   if (isset($variables['content']['header'])) {
-    $extra_header_classes = array();
+    $extra_header_classes = [];
     $extra_header_classes[] = theme_get_setting('main_menu_tabs');
-    $legacy = array('one_column', 'two_column', 'two_column_flipped', 'three_three_four_column');
+    $legacy = ['one_column', 'two_column', 'two_column_flipped', 'three_three_four_column'];
     if (in_array($variables['layout']->layout_template, $legacy)) {
       $extra_header_classes[] = 'l-header-inner';
     }

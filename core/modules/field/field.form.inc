@@ -47,9 +47,9 @@ function field_default_form($entity_type, $entity, $field, $instance, $langcode,
 
   $parents = $form['#parents'];
 
-  $addition = array();
+  $addition = [];
   $field_name = $field['field_name'];
-  $addition[$field_name] = array();
+  $addition[$field_name] = [];
 
   // Populate widgets with default values when creating a new entity.
   if (empty($items) && empty($id)) {
@@ -57,26 +57,26 @@ function field_default_form($entity_type, $entity, $field, $instance, $langcode,
   }
 
   // Let modules alter the widget properties.
-  $context = array(
+  $context = [
     'entity_type' => $entity_type,
     'entity' => $entity,
     'field' => $field,
     'instance' => $instance,
-  );
-  backdrop_alter(array('field_widget_properties', 'field_widget_properties_' . $entity_type), $instance['widget'], $context);
+  ];
+  backdrop_alter(['field_widget_properties', 'field_widget_properties_' . $entity_type], $instance['widget'], $context);
 
   // Collect widget elements.
-  $elements = array();
+  $elements = [];
 
   // Store field information in $form_state.
   if (!field_form_get_state($parents, $field_name, $langcode, $form_state)) {
-    $field_state = array(
+    $field_state = [
       'field' => $field,
       'instance' => $instance,
       'items_count' => count($items),
-      'array_parents' => array(),
-      'errors' => array(),
-    );
+      'array_parents' => [],
+      'errors' => [],
+    ];
     field_form_set_state($parents, $field_name, $langcode, $form_state, $field_state);
   }
 
@@ -94,7 +94,7 @@ function field_default_form($entity_type, $entity, $field, $instance, $langcode,
     $delta = isset($get_delta) ? $get_delta : 0;
     $function = $instance['widget']['module'] . '_field_widget_form';
     if (function_exists($function)) {
-      $element = array(
+      $element = [
         '#entity' => $entity,
         '#entity_type' => $instance['entity_type'],
         '#bundle' => $instance['bundle'],
@@ -107,18 +107,18 @@ function field_default_form($entity_type, $entity, $field, $instance, $langcode,
         // Only the first widget should be required.
         '#required' => $delta == 0 && $instance['required'],
         '#delta' => $delta,
-      );
+      ];
       if ($element = $function($form, $form_state, $field, $instance, $langcode, $items, $delta, $element)) {
         // Allow modules to alter the field widget form element.
-        $context = array(
+        $context = [
           'form' => $form,
           'field' => $field,
           'instance' => $instance,
           'langcode' => $langcode,
           'items' => $items,
           'delta' => $delta,
-        );
-        backdrop_alter(array('field_widget_form', 'field_widget_' . $instance['widget']['type'] . '_form'), $element, $form_state, $context);
+        ];
+        backdrop_alter(['field_widget_form', 'field_widget_' . $instance['widget']['type'] . '_form'], $element, $form_state, $context);
 
         // If we're processing a specific delta value for a field where the
         // field module handles multiples, set the delta in the result.
@@ -136,17 +136,17 @@ function field_default_form($entity_type, $entity, $field, $instance, $langcode,
   }
 
   // Also aids in theming of field widgets by rendering a classified container.
-  $addition[$field_name] = array(
+  $addition[$field_name] = [
     '#type' => 'container',
-    '#attributes' => array(
-      'class' => array(
+    '#attributes' => [
+      'class' => [
         'field-type-' . backdrop_html_class($field['type']),
         'field-name-' . backdrop_html_class($field_name),
         'field-widget-' . backdrop_html_class($instance['widget']['type']),
-      ),
-    ),
+      ],
+    ],
     '#weight' => $instance['widget']['weight'],
-  );
+  ];
 
   // Populate the 'array_parents' information in $form_state['field'] after
   // the form is built, so that we catch changes in the form structure performed
@@ -156,14 +156,14 @@ function field_default_form($entity_type, $entity, $field, $instance, $langcode,
   $elements['#language'] = $langcode;
   $elements['#field_parents'] = $parents;
 
-  $addition[$field_name] += array(
+  $addition[$field_name] += [
     '#tree' => TRUE,
     // The '#language' key can be used to access the field's form element
     // when $langcode is unknown.
     '#language' => $langcode,
     $langcode => $elements,
     '#access' => field_access('edit', $field, $entity_type, $entity),
-  );
+  ];
 
   return $addition;
 }
@@ -195,16 +195,16 @@ function field_multiple_value_form($field, $instance, $langcode, $items, &$form,
   $title = check_plain($instance['label']);
   $description = field_filter_xss(token_replace($instance['description']));
 
-  $id_prefix = implode('-', array_merge($parents, array($field_name)));
+  $id_prefix = implode('-', array_merge($parents, [$field_name]));
   $wrapper_id = backdrop_html_id($id_prefix . '-add-more-wrapper');
 
-  $field_elements = array();
+  $field_elements = [];
 
   $function = $instance['widget']['module'] . '_field_widget_form';
   if (function_exists($function)) {
     for ($delta = 0; $delta <= $max; $delta++) {
       $multiple = $field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED;
-      $element = array(
+      $element = [
         '#entity_type' => $instance['entity_type'],
         '#entity' => $form['#entity'],
         '#bundle' => $instance['bundle'],
@@ -218,15 +218,15 @@ function field_multiple_value_form($field, $instance, $langcode, $items, &$form,
         '#required' => $delta == 0 && $instance['required'],
         '#delta' => $delta,
         '#weight' => $delta,
-      );
+      ];
       // For multiple fields, title and description are handled by the wrapping
       // table.
       if ($multiple) {
         if ($delta == 0) {
-          $element['#title'] = t('!title', array('!title' => $title));
+          $element['#title'] = t('!title', ['!title' => $title]);
         }
         else {
-          $element['#title'] = t('!title (value @number)', array('!title' => $title, '@number' => $delta + 1));
+          $element['#title'] = t('!title (value @number)', ['!title' => $title, '@number' => $delta + 1]);
         }
         $element['#title_display'] = 'invisible';
         $element['#description'] = '';
@@ -236,34 +236,34 @@ function field_multiple_value_form($field, $instance, $langcode, $items, &$form,
         if ($multiple) {
           // We name the element '_weight' to avoid clashing with elements
           // defined by widget.
-          $element['_weight'] = array(
+          $element['_weight'] = [
             '#type' => 'weight',
-            '#title' => t('Weight for row @number', array('@number' => $delta + 1)),
+            '#title' => t('Weight for row @number', ['@number' => $delta + 1]),
             '#title_display' => 'invisible',
              // Note: this 'delta' is the FAPI 'weight' element's property.
             '#delta' => $max,
             '#default_value' => isset($items[$delta]['_weight']) ? $items[$delta]['_weight'] : $delta,
             '#weight' => 100,
-          );
+          ];
         }
 
         // Allow modules to alter the field widget form element.
-        $context = array(
+        $context = [
           'form' => $form,
           'field' => $field,
           'instance' => $instance,
           'langcode' => $langcode,
           'items' => $items,
           'delta' => $delta,
-        );
-        backdrop_alter(array('field_widget_form', 'field_widget_' . $instance['widget']['type'] . '_form'), $element, $form_state, $context);
+        ];
+        backdrop_alter(['field_widget_form', 'field_widget_' . $instance['widget']['type'] . '_form'], $element, $form_state, $context);
 
         $field_elements[$delta] = $element;
       }
     }
 
     if ($field_elements) {
-      $field_elements += array(
+      $field_elements += [
         '#theme' => 'field_multiple_value_form',
         '#field_name' => $field['field_name'],
         '#cardinality' => $field['cardinality'],
@@ -271,26 +271,26 @@ function field_multiple_value_form($field, $instance, $langcode, $items, &$form,
         '#required' => $instance['required'],
         '#description' => $description,
         '#max_delta' => $max,
-      );
+      ];
       if ($field['cardinality'] != 1) {
         $field_elements['#prefix'] = '<div id="' . $wrapper_id . '">';
         $field_elements['#suffix'] = '</div>';
       }
       // Add 'add more' button, if not working with a programmed form.
       if ($field['cardinality'] == FIELD_CARDINALITY_UNLIMITED && empty($form_state['programmed'])) {
-        $field_elements['add_more'] = array(
+        $field_elements['add_more'] = [
           '#type' => 'submit',
           '#name' => strtr($id_prefix, '-', '_') . '_add_more',
           '#value' => t('Add another'),
-          '#attributes' => array('class' => array('field-add-more-submit')),
-          '#limit_validation_errors' => array(array_merge($parents, array($field_name, $langcode))),
-          '#submit' => array('field_add_more_submit'),
-          '#ajax' => array(
+          '#attributes' => ['class' => ['field-add-more-submit']],
+          '#limit_validation_errors' => [array_merge($parents, [$field_name, $langcode])],
+          '#submit' => ['field_add_more_submit'],
+          '#ajax' => [
             'callback' => 'field_add_more_js',
             'wrapper' => $wrapper_id,
             'effect' => 'fade',
-          ),
-        );
+          ],
+        ];
       }
     }
   }
@@ -350,7 +350,7 @@ function field_default_form_errors($entity_type, $entity, $field, $instance, $la
         }
       }
       // Reinitialize the errors list for the next submit.
-      $field_state['errors'] = array();
+      $field_state['errors'] = [];
       field_form_set_state($form['#parents'], $field['field_name'], $langcode, $form_state, $field_state);
     }
   }
@@ -479,12 +479,12 @@ function _field_form_state_parents($parents, $field_name, $langcode) {
   // @todo Remove backwards compatibility and use a unique
   // $form_state['field'][...$parents...]['#fields'][$field_name] structure.
   if (!empty($parents)) {
-    $form_state_parents = array_merge(array('#parents'), $parents, array('#fields'));
+    $form_state_parents = array_merge(['#parents'], $parents, ['#fields']);
   }
   else {
-    $form_state_parents = array();
+    $form_state_parents = [];
   }
-  $form_state_parents = array_merge(array('field'), $form_state_parents, array($field_name, $langcode));
+  $form_state_parents = array_merge(['field'], $form_state_parents, [$field_name, $langcode]);
 
   return $form_state_parents;
 }

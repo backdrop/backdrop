@@ -10,73 +10,73 @@
  * Implements hook_views_data().
  */
 function taxonomy_views_data() {
-  $data = array();
+  $data = [];
 
   $data['term_data']['moved to'] = 'taxonomy_term_data';
   $data['taxonomy_term_data']['table']['group']  = t('Taxonomy term');
-  $data['taxonomy_term_data']['table']['base'] = array(
+  $data['taxonomy_term_data']['table']['base'] = [
     'field' => 'tid',
     'title' => t('Term'),
     'help' => t('Taxonomy terms are attached to nodes.'),
     'access query tag' => 'term_access',
-  );
+  ];
   $data['taxonomy_term_data']['table']['entity type'] = 'taxonomy_term';
 
 
-  $data['taxonomy_term_data']['table']['join'] = array(
+  $data['taxonomy_term_data']['table']['join'] = [
     // This is provided for many_to_one argument
-    'taxonomy_index' => array(
+    'taxonomy_index' => [
       'field' => 'tid',
       'left_field' => 'tid',
-    ),
-  );
+    ],
+  ];
 
   // Provide a "default relationship" to keep older views from choking.
-  $data['taxonomy_term_data']['table']['default_relationship'] = array(
-    'node' => array(
+  $data['taxonomy_term_data']['table']['default_relationship'] = [
+    'node' => [
       'table' => 'node',
       'field' => 'term_node_tid',
-    ),
-  );
+    ],
+  ];
 
   // tid field
-  $data['taxonomy_term_data']['tid'] = array(
+  $data['taxonomy_term_data']['tid'] = [
     'title' => t('Term ID'),
     'help' => t('The tid of a taxonomy term.'),
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_numeric',
       'click sortable' => TRUE,
-    ),
-    'sort' => array(
+    ],
+    'sort' => [
       'handler' => 'views_handler_sort',
-    ),
-    'argument' => array(
+    ],
+    'argument' => [
       'handler' => 'views_handler_argument_taxonomy',
       'name field' => 'name',
       'zero is null' => TRUE,
-    ),
-    'filter' => array(
+    ],
+    'filter' => [
       'title' => t('Term'),
       'help' => t('Taxonomy term chosen from autocomplete or select widget.'),
       'handler' => 'views_handler_filter_term_node_tid',
       'hierarchy table' => 'taxonomy_term_hierarchy',
       'numeric' => TRUE,
-    ),
-  );
+    ],
+  ];
 
   // raw tid field
-  $data['taxonomy_term_data']['tid_raw'] = array(
+  $data['taxonomy_term_data']['tid_raw'] = [
     'title' => t('Term ID'),
     'help' => t('The tid of a taxonomy term.'),
     'real field' => 'tid',
-    'filter' => array(
+    'filter' => [
       'handler' => 'views_handler_filter_numeric',
       'allow empty' => TRUE,
-    ),
-  );
+    ],
+  ];
 
-  $data['taxonomy_term_data']['tid_representative'] = array(
-    'relationship' => array(
+  $data['taxonomy_term_data']['tid_representative'] = [
+    'relationship' => [
       'title' => t('Representative node'),
       'label'  => t('Representative node'),
       'help' => t('Obtains a single representative node for each term, according to a chosen sort criterion.'),
@@ -87,111 +87,111 @@ function taxonomy_views_data() {
       'argument field' =>  'tid',
       'base'   => 'node',
       'field'  => 'nid',
-    ),
-  );
+    ],
+  ];
 
   // Term name field
-  $data['taxonomy_term_data']['name'] = array(
+  $data['taxonomy_term_data']['name'] = [
     'title' => t('Name'),
     'help' => t('The taxonomy term name.'),
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_taxonomy',
       'click sortable' => TRUE,
-    ),
-    'sort' => array(
+    ],
+    'sort' => [
       'handler' => 'views_handler_sort',
-    ),
-    'filter' => array(
+    ],
+    'filter' => [
       'handler' => 'views_handler_filter_string',
       'help' => t('Taxonomy term name.'),
-    ),
-    'argument' => array(
+    ],
+    'argument' => [
       'handler' => 'views_handler_argument_string',
       'help' => t('Taxonomy term name.'),
       'many to one' => TRUE,
       'empty field name' => t('Uncategorized'),
-    ),
-  );
+    ],
+  ];
 
   // Aliased path to term.
-  $data['taxonomy_term_data']['term_path'] = array(
+  $data['taxonomy_term_data']['term_path'] = [
     'title' => t('Path'),
     'help' => t('The aliased path to this taxonomy term.'),
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_term_path',
-    ),
-  );
+    ],
+  ];
 
   // taxonomy weight
-  $data['taxonomy_term_data']['weight'] = array(
+  $data['taxonomy_term_data']['weight'] = [
     'title' => t('Weight'),
     'help' => t('The term weight field'),
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_numeric',
       'click sortable' => TRUE,
-    ),
-    'sort' => array(
+    ],
+    'sort' => [
       'handler' => 'views_handler_sort',
-    ),
-    'filter' => array(
+    ],
+    'filter' => [
       'handler' => 'views_handler_filter_numeric',
-    ),
-    'argument' => array(
+    ],
+    'argument' => [
       'handler' => 'views_handler_argument_numeric',
-    ),
-  );
+    ],
+  ];
 
   // Term description
-  $data['taxonomy_term_data']['description'] = array(
+  $data['taxonomy_term_data']['description'] = [
     'title' => t('Term description'),
     'help' => t('The description associated with a taxonomy term.'),
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_markup',
-      'format' => array('field' => 'format'),
-    ),
-    'filter' => array(
+      'format' => ['field' => 'format'],
+    ],
+    'filter' => [
       'handler' => 'views_handler_filter_string',
-    ),
-  );
+    ],
+  ];
 
   // Term vocabulary
-  $data['taxonomy_term_data']['vocabulary'] = array(
+  $data['taxonomy_term_data']['vocabulary'] = [
     'title' => t('Vocabulary'),
-    'filter' => array(
+    'filter' => [
       'help' => t('Filter the results of "Taxonomy: Term" to a particular vocabulary.'),
       'handler' => 'views_handler_filter_vocabulary',
-    ),
-    'argument' => array(
+    ],
+    'argument' => [
       'help' => t('Filter the results of "Taxonomy: Term" to a particular vocabulary.'),
       'handler' => 'views_handler_argument_vocabulary',
-    ),
-    'field' => array(
+    ],
+    'field' => [
       'title' => t('Vocabulary name'),
       'help' => t('Machine-Name of the vocabulary of which a term is a member.'),
       'handler' => 'views_handler_field',
       'click sortable' => TRUE,
-    ),
-  );
+    ],
+  ];
 
-  $data['taxonomy_term_data']['vocabulary_label'] = array(
+  $data['taxonomy_term_data']['vocabulary_label'] = [
     'title' => t('Vocabulary'),
     'real field' => 'vocabulary',
     'title' => t('Vocabulary label'),
-    'field' => array(
+    'field' => [
       'help' => t('Human readable label of the vocabulary of which a term is a member.'),
       'handler' => 'views_handler_field_vocabulary',
       'click sortable' => TRUE,
-    ),
-  );
+    ],
+  ];
 
   // Link to edit the term
-  $data['taxonomy_term_data']['edit_term'] = array(
-    'field' => array(
+  $data['taxonomy_term_data']['edit_term'] = [
+    'field' => [
       'title' => t('Term edit link'),
       'help' => t('Provide a simple link to edit the term.'),
       'handler' => 'views_handler_field_term_link_edit',
-    ),
-  );
+    ],
+  ];
 
   // ----------------------------------------------------------------------
   // taxonomy_index table
@@ -199,59 +199,59 @@ function taxonomy_views_data() {
   $data['term_node']['moved to'] = 'taxonomy_index';
   $data['taxonomy_index']['table']['group']  = t('Taxonomy term');
 
-  $data['taxonomy_index']['table']['join'] = array(
-    'taxonomy_term_data' => array(
+  $data['taxonomy_index']['table']['join'] = [
+    'taxonomy_term_data' => [
       // links directly to taxonomy_term_data via tid
       'left_field' => 'tid',
       'field' => 'tid',
-    ),
-    'node' => array(
+    ],
+    'node' => [
       // links directly to node via nid
       'left_field' => 'nid',
       'field' => 'nid',
-    ),
-    'taxonomy_term_hierarchy' => array(
+    ],
+    'taxonomy_term_hierarchy' => [
       'left_field' => 'tid',
       'field' => 'tid',
-    ),
-  );
+    ],
+  ];
 
-  $data['taxonomy_index']['nid'] = array(
+  $data['taxonomy_index']['nid'] = [
     'title' => t('Content with term'),
     'help' => t('Relate all content tagged with a term.'),
-    'relationship' => array(
+    'relationship' => [
       'handler' => 'views_handler_relationship',
       'base' => 'node',
       'base field' => 'nid',
       'label' => t('node'),
       'skip base' => 'node',
-    ),
-  );
+    ],
+  ];
 
   // @todo This stuff needs to move to a node field since
   // really it's all about nodes.
   // tid field
-  $data['taxonomy_index']['tid'] = array(
+  $data['taxonomy_index']['tid'] = [
     'group' => t('Content'),
     'title' => t('Has taxonomy term ID'),
     'help' => t('Display content if it has the selected taxonomy terms.'),
-    'argument' => array(
+    'argument' => [
       'handler' => 'views_handler_argument_term_node_tid',
       'name table' => 'taxonomy_term_data',
       'name field' => 'name',
       'empty field name' => t('Uncategorized'),
       'numeric' => TRUE,
       'skip base' => 'taxonomy_term_data',
-    ),
-    'filter' => array(
+    ],
+    'filter' => [
       'title' => t('Has taxonomy term'),
       'handler' => 'views_handler_filter_term_node_tid',
       'hierarchy table' => 'taxonomy_term_hierarchy',
       'numeric' => TRUE,
       'skip base' => 'taxonomy_term_data',
       'allow empty' => TRUE,
-    ),
-  );
+    ],
+  ];
 
   // ----------------------------------------------------------------------
   // term_hierarchy table
@@ -259,44 +259,44 @@ function taxonomy_views_data() {
   $data['taxonomy_term_hierarchy']['table']['group']  = t('Taxonomy term');
 
   $data['term_hierarchy']['moved to'] = 'taxonomy_term_hierarchy';
-  $data['taxonomy_term_hierarchy']['table']['join'] = array(
-    'taxonomy_term_hierarchy' => array(
+  $data['taxonomy_term_hierarchy']['table']['join'] = [
+    'taxonomy_term_hierarchy' => [
       // links to self through left.parent = right.tid (going down in depth)
       'left_field' => 'tid',
       'field' => 'parent',
-    ),
-    'taxonomy_term_data' => array(
+    ],
+    'taxonomy_term_data' => [
       // links directly to taxonomy_term_data via tid
       'left_field' => 'tid',
       'field' => 'tid',
-    ),
-  );
+    ],
+  ];
 
   // Provide a "default relationship" to keep older views from choking.
-  $data['taxonomy_term_hierarchy']['table']['default_relationship'] = array(
-    'node' => array(
+  $data['taxonomy_term_hierarchy']['table']['default_relationship'] = [
+    'node' => [
       'table' => 'node',
       'field' => 'term_node_tid',
-    ),
-  );
+    ],
+  ];
 
-  $data['taxonomy_term_hierarchy']['parent'] = array(
+  $data['taxonomy_term_hierarchy']['parent'] = [
     'title' => t('Parent term'),
     'help' => t('The parent term of the term. This can produce duplicate entries if you are using a vocabulary that allows multiple parents.'),
-    'relationship' => array(
+    'relationship' => [
       'base' => 'taxonomy_term_data',
       'field' => 'parent',
       'label' => t('Parent'),
-    ),
-    'filter' => array(
+    ],
+    'filter' => [
       'help' => t('Filter the results of "Taxonomy: Term" by the parent pid.'),
       'handler' => 'views_handler_filter_numeric',
-    ),
-    'argument' => array(
+    ],
+    'argument' => [
       'help' => t('The parent term of the term.'),
       'handler' => 'views_handler_argument_taxonomy',
-    ),
-  );
+    ],
+  ];
 
   return $data;
 }
@@ -305,43 +305,43 @@ function taxonomy_views_data() {
  * Implements hook_views_data_alter().
  */
 function taxonomy_views_data_alter(&$data) {
-  $data['node']['term_node_tid'] = array(
+  $data['node']['term_node_tid'] = [
     'title' => t('Taxonomy terms on node'),
     'help' => t('Relate nodes to taxonomy terms, specifying which vocabulary or vocabularies to use. This relationship will cause duplicated records if there are multiple terms.'),
-    'relationship' => array(
+    'relationship' => [
       'handler' => 'views_handler_relationship_node_term_data',
       'label' => t('term'),
       'base' => 'taxonomy_term_data',
-    ),
-    'field' => array(
+    ],
+    'field' => [
       'title' => t('All taxonomy terms'),
       'help' => t('Display all taxonomy terms associated with a node from specified vocabularies.'),
       'handler' => 'views_handler_field_term_node_tid',
       'no group by' => TRUE,
-    ),
-  );
+    ],
+  ];
 
-  $data['node']['term_node_tid_depth'] = array(
+  $data['node']['term_node_tid_depth'] = [
     'help' => t('Display content if it has the selected taxonomy terms, or children of the selected terms. Due to additional complexity, this has fewer options than the versions without depth.'),
     'real field' => 'nid',
-    'argument' => array(
+    'argument' => [
       'title' => t('Has taxonomy term ID (with depth)'),
       'handler' => 'views_handler_argument_term_node_tid_depth',
       'accept depth modifier' => TRUE,
-    ),
-    'filter' => array(
+    ],
+    'filter' => [
       'title' => t('Has taxonomy terms (with depth)'),
       'handler' => 'views_handler_filter_term_node_tid_depth',
-    ),
-  );
+    ],
+  ];
 
-  $data['node']['term_node_tid_depth_modifier'] = array(
+  $data['node']['term_node_tid_depth_modifier'] = [
     'title' => t('Has taxonomy term ID depth modifier'),
     'help' => t('Allows the "depth" for Taxonomy: Term ID (with depth) to be modified via an additional contextual filter value.'),
-    'argument' => array(
+    'argument' => [
       'handler' => 'views_handler_argument_term_node_tid_depth_modifier',
-    ),
-  );
+    ],
+  ];
 }
 
 /**
@@ -363,12 +363,12 @@ function taxonomy_field_views_data($field) {
     }
 
     // Add the relationship only on the tid field.
-    $data[$table_name][$field['field_name'] . '_tid']['relationship'] = array(
+    $data[$table_name][$field['field_name'] . '_tid']['relationship'] = [
       'handler' => 'views_handler_relationship',
       'base' => 'taxonomy_term_data',
       'base field' => 'tid',
-      'label' => t('term from !field_name', array('!field_name' => $field['field_name'])),
-    );
+      'label' => t('term from !field_name', ['!field_name' => $field['field_name']]),
+    ];
 
   }
 
@@ -391,28 +391,28 @@ function taxonomy_field_views_data_views_data_alter(&$data, $field) {
       $entity = t('Content');
     }
 
-    $data['taxonomy_term_data'][$pseudo_field_name]['relationship'] = array(
-      'title' => t('@entity using @field', array('@entity' => $entity, '@field' => $label)),
-      'help' => t('Relate each @entity with a @field set to the term.', array('@entity' => $entity, '@field' => $label)),
+    $data['taxonomy_term_data'][$pseudo_field_name]['relationship'] = [
+      'title' => t('@entity using @field', ['@entity' => $entity, '@field' => $label]),
+      'help' => t('Relate each @entity with a @field set to the term.', ['@entity' => $entity, '@field' => $label]),
       'handler' => 'views_handler_relationship_entity_reverse',
       'field_name' => $field['field_name'],
       'field table' => _field_sql_storage_tablename($field),
       'field field' => $field['field_name'] . '_tid',
       'base' => $entity_info['base table'],
       'base field' => $entity_info['entity keys']['id'],
-      'label' => t('!field_name', array('!field_name' => $field['field_name'])),
-      'join_extra' => array(
-        0 => array(
+      'label' => t('!field_name', ['!field_name' => $field['field_name']]),
+      'join_extra' => [
+        0 => [
           'field' => 'entity_type',
           'value' => $entity_type,
-        ),
-        1 => array(
+        ],
+        1 => [
           'field' => 'deleted',
           'value' => 0,
           'numeric' => TRUE,
-        ),
-      ),
-    );
+        ],
+      ],
+    ];
   }
 }
 
@@ -420,24 +420,24 @@ function taxonomy_field_views_data_views_data_alter(&$data, $field) {
  * Implements hook_views_plugins().
  */
 function taxonomy_views_plugins() {
-  return array(
+  return [
     'module' => 'views', // This just tells our themes are elsewhere.
-    'argument validator' => array(
-      'taxonomy_term' => array(
+    'argument validator' => [
+      'taxonomy_term' => [
         'title' => t('Taxonomy term'),
         'handler' => 'views_plugin_argument_validate_taxonomy_term',
         'path' => backdrop_get_path('module', 'views') . '/modules/taxonomy', // not necessary for most modules
-      ),
-    ),
-    'argument default' => array(
-      'taxonomy_tid' => array(
+      ],
+    ],
+    'argument default' => [
+      'taxonomy_tid' => [
         'title' => t('Taxonomy term ID from URL'),
         'handler' => 'views_plugin_argument_default_taxonomy_tid',
         'path' => backdrop_get_path('module', 'views') . '/modules/taxonomy',
         'parent' => 'fixed',
-      ),
-    ),
-  );
+      ],
+    ],
+  ];
 }
 
 /**

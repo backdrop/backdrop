@@ -13,7 +13,7 @@ class views_handler_field_node_revision_link extends views_handler_field_node_li
 
   function construct() {
     parent::construct();
-    $this->additional_fields['node_vid'] = array('table' => 'node_revision', 'field' => 'vid');
+    $this->additional_fields['node_vid'] = ['table' => 'node_revision', 'field' => 'vid'];
   }
 
   function access() {
@@ -58,8 +58,8 @@ class views_handler_field_node_revision_link extends views_handler_field_node_li
     $node->status = 1;
     // Ensure user has access to perform the operation on this node.
     if (!node_access($op, $node)) {
-      return array($node, NULL);
+      return [$node, NULL];
     }
-    return array($node, $vid);
+    return [$node, $vid];
   }
 }

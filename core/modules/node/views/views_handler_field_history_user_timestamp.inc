@@ -17,10 +17,10 @@ class views_handler_field_history_user_timestamp extends views_handler_field_nod
     parent::init($view, $options);
     global $user;
     if ($user->uid) {
-      $this->additional_fields['created'] = array('table' => 'node', 'field' => 'created');
-      $this->additional_fields['changed'] = array('table' => 'node', 'field' => 'changed');
+      $this->additional_fields['created'] = ['table' => 'node', 'field' => 'created'];
+      $this->additional_fields['changed'] = ['table' => 'node', 'field' => 'changed'];
       if (module_exists('comment') && !empty($this->options['comments'])) {
-        $this->additional_fields['last_comment'] = array('table' => 'node_comment_statistics', 'field' => 'last_comment_timestamp');
+        $this->additional_fields['last_comment'] = ['table' => 'node_comment_statistics', 'field' => 'last_comment_timestamp'];
       }
     }
   }
@@ -28,7 +28,7 @@ class views_handler_field_history_user_timestamp extends views_handler_field_nod
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['comments'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['comments'] = ['default' => FALSE, 'bool' => TRUE];
 
     return $options;
   }
@@ -36,12 +36,12 @@ class views_handler_field_history_user_timestamp extends views_handler_field_nod
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
     if (module_exists('comment')) {
-      $form['comments'] = array(
+      $form['comments'] = [
         '#type' => 'checkbox',
         '#title' => t('Check for new comments as well'),
         '#default_value' => !empty($this->options['comments']),
         '#fieldset' => 'more',
-      );
+      ];
     }
   }
 
@@ -75,7 +75,7 @@ class views_handler_field_history_user_timestamp extends views_handler_field_nod
       elseif ($last_comment > $last_read && $last_comment > NODE_NEW_LIMIT) {
         $mark = MARK_UPDATED;
       }
-      return $this->render_link(theme('mark', array('type' => $mark)), $values);
+      return $this->render_link(theme('mark', ['type' => $mark]), $values);
     }
   }
 }

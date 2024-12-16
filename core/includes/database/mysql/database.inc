@@ -30,7 +30,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
   /**
    * Constructs a MySQL-based DatabaseConnection.
    */
-  public function __construct(array $connection_options = array()) {
+  public function __construct(array $connection_options = []) {
     // Default to transaction support, unless explicitly set FALSE.
     $this->transactionSupport = !isset($connection_options['transactions']) || ($connection_options['transactions'] !== FALSE);
 
@@ -61,10 +61,10 @@ class DatabaseConnection_mysql extends DatabaseConnection {
       $dsn .= ';dbname=' . $connection_options['database'];
     }
     // Allow PDO options to be overridden.
-    $connection_options += array(
-      'pdo' => array(),
-    );
-    $connection_options['pdo'] += array(
+    $connection_options += [
+      'pdo' => [],
+    ];
+    $connection_options['pdo'] += [
       // Make sure MySQL returns all matched rows on update queries including
       // rows that actually didn't have to be updated because the values didn't
       // change. This matches common behaviour among other database systems.
@@ -80,7 +80,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
       PDO::ATTR_STRINGIFY_FETCHES => TRUE,
       // Limit SQL to a single statement like mysqli.
       PDO::MYSQL_ATTR_MULTI_STATEMENTS => FALSE,
-    );
+    ];
 
     parent::__construct($dsn, $connection_options['username'], $connection_options['password'], $connection_options['pdo']);
 
@@ -99,12 +99,12 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     // to run almost seamlessly on many different kinds of database systems.
     // Also, as MySQL 5.5 changed the meaning of TRADITIONAL we need to spell
     // out the modes one by one.
-    $connection_options += array(
-      'init_commands' => array(),
-    );
-    $connection_options['init_commands'] += array(
+    $connection_options += [
+      'init_commands' => [],
+    ];
+    $connection_options['init_commands'] += [
       'sql_mode' => "SET sql_mode = 'REAL_AS_FLOAT,PIPES_AS_CONCAT,ANSI_QUOTES,IGNORE_SPACE,STRICT_TRANS_TABLES,STRICT_ALL_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO'",
-    );
+    ];
     // Execute initial commands.
     foreach ($connection_options['init_commands'] as $sql) {
       $this->pdo->exec($sql);
@@ -116,16 +116,16 @@ class DatabaseConnection_mysql extends DatabaseConnection {
    */
   protected function setPrefix($prefix) {
     if (is_array($prefix)) {
-      $this->prefixes = $prefix + array('default' => '');
+      $this->prefixes = $prefix + ['default' => ''];
     }
     else {
-      $this->prefixes = array('default' => $prefix);
+      $this->prefixes = ['default' => $prefix];
     }
 
     // This differs from the parent class implementation in that all tables
     // are escaped with back-ticks. First, do table-specific replacements.
-    $this->prefixSearch = array();
-    $this->prefixReplace = array();
+    $this->prefixSearch = [];
+    $this->prefixReplace = [];
     foreach ($this->prefixes as $key => $val) {
       if ($key != 'default') {
         $this->prefixSearch[] = '{' . $key . '}';
@@ -197,14 +197,14 @@ class DatabaseConnection_mysql extends DatabaseConnection {
   /**
    * {@inheritdoc}
    */
-  public function queryRange($query, $from, $count, array $args = array(), array $options = array()) {
+  public function queryRange($query, $from, $count, array $args = [], array $options = []) {
     return $this->query($query . ' LIMIT ' . (int) $from . ', ' . (int) $count, $args, $options);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function queryTemporary($query, array $args = array(), array $options = array()) {
+  public function queryTemporary($query, array $args = [], array $options = []) {
     $tablename = $this->generateTemporaryTableName();
     $this->query('CREATE TEMPORARY TABLE {' . $tablename . '} Engine=MEMORY ' . $query, $args, $options);
     return $tablename;
@@ -273,7 +273,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
    * {@inheritdoc}
    */
   public function nextId($existing_id = 0) {
-    $new_id = $this->query('INSERT INTO {sequences} () VALUES ()', array(), array('return' => Database::RETURN_INSERT_ID));
+    $new_id = $this->query('INSERT INTO {sequences} () VALUES ()', [], ['return' => Database::RETURN_INSERT_ID]);
     // This should only happen after an import or similar event.
     if ($existing_id >= $new_id) {
       // If we INSERT a value manually into the sequences table, on the next
@@ -283,8 +283,8 @@ class DatabaseConnection_mysql extends DatabaseConnection {
       // other than duplicate keys. Instead, we use INSERT ... ON DUPLICATE KEY
       // UPDATE in such a way that the UPDATE does not do anything. This way,
       // duplicate keys do not generate errors but everything else does.
-      $this->query('INSERT INTO {sequences} (value) VALUES (:value) ON DUPLICATE KEY UPDATE value = value', array(':value' => $existing_id));
-      $new_id = $this->query('INSERT INTO {sequences} () VALUES ()', array(), array('return' => Database::RETURN_INSERT_ID));
+      $this->query('INSERT INTO {sequences} (value) VALUES (:value) ON DUPLICATE KEY UPDATE value = value', [':value' => $existing_id]);
+      $new_id = $this->query('INSERT INTO {sequences} () VALUES ()', [], ['return' => Database::RETURN_INSERT_ID]);
     }
     $this->needsCleanup = TRUE;
     return $new_id;
@@ -307,7 +307,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     try {
       $max_id = $this->query('SELECT MAX(value) FROM {sequences}')->fetchField();
       // We know we are using MySQL here, no need for the slower db_delete().
-      $this->query('DELETE FROM {sequences} WHERE value < :value', array(':value' => $max_id));
+      $this->query('DELETE FROM {sequences} WHERE value < :value', [':value' => $max_id]);
     }
     // During testing, this function is called from shutdown with the
     // simpletest prefix stored in $this->connection, and those tables are gone
@@ -355,7 +355,7 @@ class DatabaseConnection_mysql extends DatabaseConnection {
           if ($e->errorInfo[1] == '1305') {
             // If one SAVEPOINT was released automatically, then all were.
             // Therefore, clean the transaction stack.
-            $this->transactionLayers = array();
+            $this->transactionLayers = [];
             // We also have to explain to PDO that the transaction stack has
             // been cleaned-up.
             $this->doCommit();

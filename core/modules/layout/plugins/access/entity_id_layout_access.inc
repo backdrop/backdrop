@@ -18,11 +18,11 @@ class EntityIDLayoutAccess extends LayoutAccessNegatable {
   /**
    * Constructor for a Layout access rule.
    */
-  function __construct($plugin_name, array $data = array()) {
+  function __construct($plugin_name, array $data = []) {
     parent::__construct($plugin_name, $data);
-    $this->settings += array(
+    $this->settings += [
       'entity_id' => NULL
-    );
+    ];
 
     // Set entity info.
     $info = layout_get_access_info($plugin_name);
@@ -36,17 +36,17 @@ class EntityIDLayoutAccess extends LayoutAccessNegatable {
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
 
-    $form['entity_id'] = array(
-      '#title' => t('@entity @entity_id_key', array(
+    $form['entity_id'] = [
+      '#title' => t('@entity @entity_id_key', [
         '@entity' => $this->entity_info['label'],
         '@entity_id_key' => strtoupper($this->entity_info['entity keys']['id']),
-      )),
+      ]),
       '#type' => 'number',
       '#required' => TRUE,
       '#min' => 1,
       '#default_value' => is_null($this->settings['entity_id']) ? NULL : (int) $this->settings['entity_id'],
       '#weight' => 100,
-    );
+    ];
   }
 
   /**
@@ -60,10 +60,10 @@ class EntityIDLayoutAccess extends LayoutAccessNegatable {
       $entity = entity_load($this->entity_type, $entity_id);
       if (!$entity) {
         $label = $this->entity_info['label'];
-        form_set_error('entity_id', t('There is no @label with ID @entity_id.', array(
+        form_set_error('entity_id', t('There is no @label with ID @entity_id.', [
           '@label' => $label,
           '@entity_id' => $entity_id,
-        )));
+        ]));
       }
     }
   }
@@ -81,16 +81,16 @@ class EntityIDLayoutAccess extends LayoutAccessNegatable {
    */
   function summary() {
     if ($this->settings['negate']) {
-      return t('@entity ID is NOT: @entity_id', array(
+      return t('@entity ID is NOT: @entity_id', [
         '@entity' => $this->entity_info['label'],
         '@entity_id' => $this->settings['entity_id'],
-      ));
+      ]);
     }
     else {
-      return t('@entity ID is: @entity_id', array(
+      return t('@entity ID is: @entity_id', [
         '@entity' => $this->entity_info['label'],
         '@entity_id' => $this->settings['entity_id'],
-      ));
+      ]);
     }
   }
 

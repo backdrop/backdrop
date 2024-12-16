@@ -12,19 +12,19 @@
 class views_plugin_argument_default_php extends views_plugin_argument_default {
   function option_definition() {
     $options = parent::option_definition();
-    $options['code'] = array('default' => '');
+    $options['code'] = ['default' => ''];
 
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
-    $form['code'] = array(
+    $form['code'] = [
       '#type' => 'textarea',
       '#title' => t('PHP contextual filter code'),
       '#default_value' => $this->options['code'],
       '#description' => t('Enter PHP code that returns a value to use for this filter. Do not use &lt;?php ?&gt;. You must return only a single value for just this filter. Some variables are available: the view object will be "$view". The argument handler will be "$argument", for example you may change the title used for substitutions for this argument by setting "argument->validated_title"".'),
-    );
+    ];
 
     // Only do this if using one simple standard form gadget
     $this->check_access($form, 'code');

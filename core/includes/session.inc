@@ -92,17 +92,17 @@ function _backdrop_session_read($sid) {
   // a HTTPS session or we are about to log in so we check the sessions table
   // for an anonymous session with the non-HTTPS-only cookie.
   if ($is_https) {
-    $user = db_query("SELECT u.*, s.* FROM {users} u INNER JOIN {sessions} s ON u.uid = s.uid WHERE s.ssid = :ssid", array(':ssid' => $sid))->fetchObject();
+    $user = db_query("SELECT u.*, s.* FROM {users} u INNER JOIN {sessions} s ON u.uid = s.uid WHERE s.ssid = :ssid", [':ssid' => $sid])->fetchObject();
     if (!$user) {
       if (isset($_COOKIE[$insecure_session_name])) {
-        $user = db_query("SELECT u.*, s.* FROM {users} u INNER JOIN {sessions} s ON u.uid = s.uid WHERE s.sid = :sid AND s.uid = 0", array(
-        ':sid' => $_COOKIE[$insecure_session_name]))
+        $user = db_query("SELECT u.*, s.* FROM {users} u INNER JOIN {sessions} s ON u.uid = s.uid WHERE s.sid = :sid AND s.uid = 0", [
+        ':sid' => $_COOKIE[$insecure_session_name]])
         ->fetchObject();
       }
     }
   }
   else {
-    $user = db_query("SELECT u.*, s.* FROM {users} u INNER JOIN {sessions} s ON u.uid = s.uid WHERE s.sid = :sid", array(':sid' => $sid))->fetchObject();
+    $user = db_query("SELECT u.*, s.* FROM {users} u INNER JOIN {sessions} s ON u.uid = s.uid WHERE s.sid = :sid", [':sid' => $sid])->fetchObject();
   }
 
   // We found the client's session record and they are an authenticated,
@@ -112,7 +112,7 @@ function _backdrop_session_read($sid) {
     $user->data = unserialize((string) $user->data);
 
     // Add roles element to $user.
-    $user->roles = db_query("SELECT role FROM {users_roles} WHERE uid = :uid", array(':uid' => $user->uid))->fetchCol();
+    $user->roles = db_query("SELECT role FROM {users_roles} WHERE uid = :uid", [':uid' => $user->uid])->fetchCol();
     array_unshift($user->roles, BACKDROP_AUTHENTICATED_ROLE);
   }
   elseif ($user) {
@@ -131,10 +131,10 @@ function _backdrop_session_read($sid) {
 
   // Store the session that was read for comparison in _backdrop_session_write().
   $last_read = &backdrop_static('backdrop_session_last_read');
-  $last_read = array(
+  $last_read = [
     'sid' => $sid,
     'value' => $user->session,
-  );
+  ];
 
   return $user->session;
 }
@@ -178,17 +178,17 @@ function _backdrop_session_write($sid, $value) {
     // $_SESSION has changed or more than 180 has passed since the last update.
     if ($is_changed || !isset($user->timestamp) || REQUEST_TIME - $user->timestamp > settings_get('session_write_interval', 180)) {
       // Either ssid or sid or both will be added from $key below.
-      $fields = array(
+      $fields = [
         'uid' => $user->uid,
         'hostname' => ip_address(),
         'session' => $value,
         'timestamp' => REQUEST_TIME,
-      );
+      ];
 
       // Use the session ID as 'sid' and an empty string as 'ssid' by default.
       // _backdrop_session_read() does not allow empty strings so that's a safe
       // default.
-      $key = array('sid' => $sid, 'ssid' => '');
+      $key = ['sid' => $sid, 'ssid' => ''];
       // On HTTPS connections, use the session ID as both 'sid' and 'ssid'.
       if ($is_https) {
         $key['ssid'] = $sid;
@@ -215,9 +215,9 @@ function _backdrop_session_write($sid, $value) {
     // Likewise, do not update access time more than once per 180 seconds.
     if ($user->uid && REQUEST_TIME - $user->access > settings_get('session_write_interval', 180)) {
       db_update('users')
-        ->fields(array(
+        ->fields([
           'access' => REQUEST_TIME
-        ))
+        ])
         ->condition('uid', $user->uid)
         ->execute();
     }
@@ -389,7 +389,7 @@ function backdrop_session_regenerate() {
     $params = session_get_cookie_params();
     $expire = $params['lifetime'] ? REQUEST_TIME + $params['lifetime'] : 0;
     setcookie(session_name(), session_id(), $expire, $params['path'], $params['domain'], $params['secure'], $params['httponly']);
-    $fields = array('sid' => session_id());
+    $fields = ['sid' => session_id()];
     if ($is_https) {
       $fields['ssid'] = session_id();
       // If the "secure pages" setting is enabled, use the newly-created
@@ -408,7 +408,7 @@ function backdrop_session_regenerate() {
     // secure site but a session was active on the insecure site, update the
     // insecure session with the new session identifiers.
     db_update('sessions')
-      ->fields(array('sid' => $session_id, 'ssid' => session_id()))
+      ->fields(['sid' => $session_id, 'ssid' => session_id()])
       ->condition('sid', $old_insecure_session_id)
       ->execute();
   }
@@ -469,7 +469,7 @@ function _backdrop_session_destroy($sid) {
 
   // Reset $_SESSION and $user to prevent a new session from being started
   // in backdrop_session_commit().
-  $_SESSION = array();
+  $_SESSION = [];
   $user = backdrop_anonymous_user();
 
   // Unset the session cookies.

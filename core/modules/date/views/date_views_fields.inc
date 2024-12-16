@@ -28,12 +28,12 @@ function _date_views_fields($base = 'node') {
   $all_fields = views_fetch_fields($base, 'filter');
 
   // Iterate over all the fields that Views knows about.
-  $fields = array();
+  $fields = [];
   foreach ((array) $all_fields as $alias => $val) {
     // Set up some default values.
-    $granularity = array('year', 'month', 'day', 'hour', 'minute', 'second');
+    $granularity = ['year', 'month', 'day', 'hour', 'minute', 'second'];
     $tz_handling = 'site';
-    $related_fields = array();
+    $related_fields = [];
     $timezone_field = '';
     $offset_field = '';
     $delta_field = '';
@@ -50,7 +50,7 @@ function _date_views_fields($base = 'node') {
       continue;
     }
 
-    $fromto = array($name, $name);
+    $fromto = [$name, $name];
 
     // If we don't have a filter handler, we don't need to do anything more.
     if (!$handler = views_get_handler($table_name, $field_name, 'filter')) {
@@ -65,7 +65,7 @@ function _date_views_fields($base = 'node') {
     $is_field = FALSE;
 
     // For Field module fields, get the date type.
-    $custom = array();
+    $custom = [];
     if (isset($handler->definition['field_name'])) {
       $field = field_info_field($handler->definition['field_name']);
       $is_field = TRUE;
@@ -85,16 +85,16 @@ function _date_views_fields($base = 'node') {
           // If this is not a date field, nothing more to do.
       }
 
-      $revision = in_array($base, array('node_revision')) ? FIELD_LOAD_REVISION : FIELD_LOAD_CURRENT;
+      $revision = in_array($base, ['node_revision']) ? FIELD_LOAD_REVISION : FIELD_LOAD_CURRENT;
       $db_info = date_database_info($field, $revision);
       $name = $table_name . "." . $field_name;
-      $grans = array('year', 'month', 'day', 'hour', 'minute', 'second');
+      $grans = ['year', 'month', 'day', 'hour', 'minute', 'second'];
       $granularity = !empty($field['granularity']) ? $field['granularity'] : $grans;
 
-      $fromto = array(
+      $fromto = [
         $table_name . '.' . $db_info['columns'][$table_name]['value'],
         $table_name . '.' . (!empty($field['settings']['todate']) ? $db_info['columns'][$table_name]['value2'] : $db_info['columns'][$table_name]['value']),
-      );
+      ];
 
       if (isset($field['settings']['tz_handling'])) {
         $tz_handling = $field['settings']['tz_handling'];
@@ -102,14 +102,14 @@ function _date_views_fields($base = 'node') {
         if ($tz_handling == 'date') {
           $offset_field = $table_name . '.' . $db_info['columns'][$table_name]['offset'];
         }
-        $related_fields = array(
+        $related_fields = [
           $table_name . '.' . $db_info['columns'][$table_name]['value']
-        );
+        ];
         if (isset($db_info['columns'][$table_name]['value2'])) {
-          $related_fields = array_merge($related_fields, array($table_name . '.' . $db_info['columns'][$table_name]['value2']));
+          $related_fields = array_merge($related_fields, [$table_name . '.' . $db_info['columns'][$table_name]['value2']]);
         }
         if (isset($db_info['columns'][$table_name]['timezone'])) {
-          $related_fields = array_merge($related_fields, array($table_name . '.' . $db_info['columns'][$table_name]['timezone']));
+          $related_fields = array_merge($related_fields, [$table_name . '.' . $db_info['columns'][$table_name]['timezone']]);
           $timezone_field = $table_name . '.' . $db_info['columns'][$table_name]['timezone'];
         }
       }
@@ -133,7 +133,7 @@ function _date_views_fields($base = 'node') {
     // Don't do anything if this is not a date field we can handle.
     if (!empty($type) || empty($custom)) {
       $alias = str_replace('.', '_', $alias);
-      $fields['name'][$name] = array(
+      $fields['name'][$name] = [
         'is_field' => $is_field,
         'sql_type' => $sql_type,
         'label' => $val['group'] . ': ' . $val['title'],
@@ -148,7 +148,7 @@ function _date_views_fields($base = 'node') {
         'timezone_field' => $timezone_field,
         'related_fields' => $related_fields,
         'delta_field' => $delta_field,
-      );
+      ];
 
       // Allow the custom fields to over-write values.
       if (!empty($custom)) {

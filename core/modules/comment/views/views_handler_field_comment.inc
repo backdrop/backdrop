@@ -23,8 +23,8 @@ class views_handler_field_comment extends views_handler_field {
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['link_to_comment'] = array('default' => TRUE, 'bool' => TRUE);
-    $options['link_to_node'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['link_to_comment'] = ['default' => TRUE, 'bool' => TRUE];
+    $options['link_to_node'] = ['default' => FALSE, 'bool' => TRUE];
 
     return $options;
   }
@@ -33,17 +33,17 @@ class views_handler_field_comment extends views_handler_field {
    * Provide link-to-comment option
    */
   function options_form(&$form, &$form_state) {
-    $form['link_to_comment'] = array(
+    $form['link_to_comment'] = [
       '#title' => t('Link this field to its comment'),
       '#description' => t("Enable to override this field's links."),
       '#type' => 'checkbox',
       '#default_value' => $this->options['link_to_comment'],
-    );
-    $form['link_to_node'] = array(
+    ];
+    $form['link_to_node'] = [
       '#title' => t('Link field to the node if there is no comment.'),
       '#type' => 'checkbox',
       '#default_value' => $this->options['link_to_node'],
-    );
+    ];
     parent::options_form($form, $form_state);
   }
 

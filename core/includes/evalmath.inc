@@ -88,16 +88,16 @@ class EvalMath {
   var $suppress_errors = false;
   var $last_error = null;
 
-  var $v = array('e'=>2.71,'pi'=>3.14); // variables (and constants)
-  var $f = array(); // user-defined functions
-  var $vb = array('e', 'pi'); // constants
-  var $fb = array(  // built-in functions
+  var $v = ['e'=>2.71,'pi'=>3.14]; // variables (and constants)
+  var $f = []; // user-defined functions
+  var $vb = ['e', 'pi']; // constants
+  var $fb = [  // built-in functions
     'sin','sinh','arcsin','asin','arcsinh','asinh',
     'cos','cosh','arccos','acos','arccosh','acosh',
     'tan','tanh','arctan','atan','arctanh','atanh',
     'pow', 'exp',
     'sqrt','abs','ln','log',
-    'time', 'ceil', 'floor', 'min', 'max', 'round');
+    'time', 'ceil', 'floor', 'min', 'max', 'round'];
 
   function __construct() {
     // make the variables a little more accurate
@@ -141,7 +141,7 @@ class EvalMath {
           }
         }
       }
-      $this->f[$fnn] = array('args'=>$args, 'func'=>$stack);
+      $this->f[$fnn] = ['args'=>$args, 'func'=>$stack];
       return true;
       //===============
     } else {
@@ -157,7 +157,7 @@ class EvalMath {
   }
 
   function funcs() {
-    $output = array();
+    $output = [];
     foreach ($this->f as $fnn=>$dat)
       $output[] = $fnn . '(' . implode(',', $dat['args']) . ')';
     return $output;
@@ -170,12 +170,12 @@ class EvalMath {
 
     $index = 0;
     $stack = new EvalMathStack;
-    $output = array(); // postfix form of expression, to be passed to pfx()
+    $output = []; // postfix form of expression, to be passed to pfx()
     $expr = trim(strtolower($expr));
 
-    $ops   = array('+', '-', '*', '/', '^', '_');
-    $ops_r = array('+'=>0,'-'=>0,'*'=>0,'/'=>0,'^'=>1); // right-associative operator?
-    $ops_p = array('+'=>0,'-'=>0,'*'=>1,'/'=>1,'_'=>1,'^'=>2); // operator precedence
+    $ops   = ['+', '-', '*', '/', '^', '_'];
+    $ops_r = ['+'=>0,'-'=>0,'*'=>0,'/'=>0,'^'=>1]; // right-associative operator?
+    $ops_p = ['+'=>0,'-'=>0,'*'=>1,'/'=>1,'_'=>1,'^'=>2]; // operator precedence
 
     $expecting_op = false; // we use this in syntax-checking the expression
     // and determining when a - is a negation
@@ -291,7 +291,7 @@ class EvalMath {
   }
 
   // evaluate postfix notation
-  function pfx($tokens, $vars = array()) {
+  function pfx($tokens, $vars = []) {
 
     if ($tokens == false) return false;
 
@@ -299,7 +299,7 @@ class EvalMath {
 
     foreach ($tokens as $token) { // nice and easy
       // if the token is a binary operator, pop two values off the stack, do the operation, and push the result back on
-      if (in_array($token, array('+', '-', '*', '/', '^'))) {
+      if (in_array($token, ['+', '-', '*', '/', '^'])) {
         if (is_null($op2 = $stack->pop())) return $this->trigger("internal error");
         if (is_null($op1 = $stack->pop())) return $this->trigger("internal error");
         switch ($token) {
@@ -328,7 +328,7 @@ class EvalMath {
           eval('$stack->push(' . $fnn . '($op1));'); // perfectly safe eval()
         } elseif (array_key_exists($fnn, $this->f)) { // user function
           // get args
-          $args = array();
+          $args = [];
           for ($i = count($this->f[$fnn]['args'])-1; $i >= 0; $i--) {
             if (is_null($args[$this->f[$fnn]['args'][$i]] = $stack->pop())) return $this->trigger("internal error");
           }
@@ -363,7 +363,7 @@ class EvalMath {
 // for internal use
 class EvalMathStack {
 
-  var $stack = array();
+  var $stack = [];
   var $count = 0;
 
   function push($val) {

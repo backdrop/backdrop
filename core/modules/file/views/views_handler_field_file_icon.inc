@@ -14,9 +14,9 @@ class views_handler_field_file_icon extends views_handler_field {
    */
   public function option_definition() {
     $options = parent::option_definition();
-    $options['icon_size'] = array('default' => 32);
-    $options['display_type'] = array('default' => 'svg');
-    $options['add_alt_text'] = array('default' => TRUE);
+    $options['icon_size'] = ['default' => 32];
+    $options['display_type'] = ['default' => 'svg'];
+    $options['add_alt_text'] = ['default' => TRUE];
     return $options;
   }
 
@@ -25,35 +25,35 @@ class views_handler_field_file_icon extends views_handler_field {
    */
   public function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
-    $form['icon_size'] = array(
+    $form['icon_size'] = [
       '#type' => 'number',
       '#title' => t('Icon size'),
       '#min' => 8,
       '#max' => 300,
       '#default_value' => $this->options['icon_size'],
       '#field_suffix' => 'px',
-    );
-    $form['display_type'] = array(
+    ];
+    $form['display_type'] = [
       '#type' => 'radios',
       '#title' => t('Display type'),
-      '#options' => array(
-        'svg' => t('Embedded with !svg tag', array(
+      '#options' => [
+        'svg' => t('Embedded with !svg tag', [
           '!svg' => '<code>&lt;svg&gt;</code>',
-        )),
-        'img' => t('Referenced with !img tag', array(
+        ]),
+        'img' => t('Referenced with !img tag', [
           '!img' => '<code>&lt;img&gt;</code>',
-        )),
-      ),
+        ]),
+      ],
       '#default_value' => $this->options['display_type'],
-    );
+    ];
     $form['display_type']['svg']['#description'] = t('Inline SVG icons are efficient and easier to recolor and style.');
     $form['display_type']['img']['#description'] = t('Referenced images can be more efficient when showing the same icon many times.');
-    $form['add_alt_text'] = array(
+    $form['add_alt_text'] = [
       '#type' => 'checkbox',
       '#title' => t('Include text alternative'),
       '#default_value' => $this->options['add_alt_text'],
       '#description' => t('Adds descriptive text. Do not enable for icons that are decorative only.'),
-    );
+    ];
   }
 
   /**
@@ -79,16 +79,16 @@ class views_handler_field_file_icon extends views_handler_field {
    * Render the icon as svg tag.
    */
   protected function renderSvg($icon_name, $extension) {
-    $options = array(
-      'attributes' => array(
+    $options = [
+      'attributes' => [
         'width' => $this->options['icon_size'],
         'height' => $this->options['icon_size'],
-      ),
-    );
+      ],
+    ];
     if ($this->options['add_alt_text']) {
-      $options['alt'] = t('File icon for @extension extension', array(
+      $options['alt'] = t('File icon for @extension extension', [
         '@extension' => $extension,
-      ));
+      ]);
     }
     return icon($icon_name, $options);
   }
@@ -97,16 +97,16 @@ class views_handler_field_file_icon extends views_handler_field {
    * Render the icon as img tag.
    */
   protected function renderImg($icon_name, $extension) {
-    $attributes = array(
+    $attributes = [
       'width' => $this->options['icon_size'],
       'height' => $this->options['icon_size'],
       'alt' => '',
       'src' => base_path() . icon_get_path($icon_name),
-    );
+    ];
     if ($this->options['add_alt_text']) {
-      $attributes['alt'] = t('File icon for @extension extension', array(
+      $attributes['alt'] = t('File icon for @extension extension', [
         '@extension' => $extension,
-      ));
+      ]);
     }
     else {
       // Add aria-hidden if this is a purely decorative situation.
@@ -129,7 +129,7 @@ class views_handler_field_file_icon extends views_handler_field {
     // If there's no 1:1 icon name match for the extension, map to one. It's
     // possible that modules or themes provide additional file icons, so this
     // only acts as a fallback for some common types.
-    $mapping = array(
+    $mapping = [
       'docx' => 'doc',
       'gz' => 'archive',
       'jpeg' => 'jpg',
@@ -137,7 +137,7 @@ class views_handler_field_file_icon extends views_handler_field {
       'pptx' => 'ppt',
       'tar' => 'archive',
       'xlsx' => 'xls',
-    );
+    ];
     $extension = pathinfo($uri, PATHINFO_EXTENSION);
     if (icon_get_path('file-' . $extension)) {
       $icon_name = 'file-' . $extension;
@@ -149,12 +149,12 @@ class views_handler_field_file_icon extends views_handler_field {
       // If the extension has a more specific mimetype, use that type prefix.
       $mime_type = file_get_mimetype($uri);
       $mime_parts = explode('/', $mime_type);
-      if (count($mime_parts) && in_array($mime_parts[0], array(
+      if (count($mime_parts) && in_array($mime_parts[0], [
         'image',
         'video',
         'audio',
         'text',
-      ))) {
+      ])) {
         $icon_name = 'file-' . $mime_parts[0];
       };
     }

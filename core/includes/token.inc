@@ -75,13 +75,13 @@
  * @return
  *   Text with tokens replaced.
  */
-function token_replace($text, array $data = array(), array $options = array()) {
+function token_replace($text, array $data = [], array $options = []) {
   $text_tokens = token_scan($text);
   if (empty($text_tokens)) {
     return $text;
   }
 
-  $replacements = array();
+  $replacements = [];
   foreach ($text_tokens as $type => $tokens) {
     $replacements += token_generate($type, $tokens, $data, $options);
     if (!empty($options['clear'])) {
@@ -128,7 +128,7 @@ function token_scan($text) {
   // Iterate through the matches, building an associative array containing
   // $tokens grouped by $types, pointing to the version of the token found in
   // the source text. For example, $results['node']['title'] = '[node:title]';
-  $results = array();
+  $results = [];
   for ($i = 0; $i < count($tokens); $i++) {
     $results[$types[$i]][$tokens[$i]] = $matches[0][$i];
   }
@@ -172,17 +172,17 @@ function token_scan($text) {
  * @see hook_tokens()
  * @see hook_tokens_alter()
  */
-function token_generate($type, array $tokens, array $data = array(), array $options = array()) {
-  $options += array('sanitize' => TRUE);
+function token_generate($type, array $tokens, array $data = [], array $options = []) {
+  $options += ['sanitize' => TRUE];
   $replacements = module_invoke_all('tokens', $type, $tokens, $data, $options);
 
   // Allow other modules to alter the replacements.
-  $context = array(
+  $context = [
     'type' => $type,
     'tokens' => $tokens,
     'data' => $data,
     'options' => $options,
-  );
+  ];
   backdrop_alter('tokens', $replacements, $context);
 
   return $replacements;
@@ -216,7 +216,7 @@ function token_generate($type, array $tokens, array $data = array(), array $opti
  *   stripped from the key.
  */
 function token_find_with_prefix(array $tokens, $prefix, $delimiter = ':') {
-  $results = array();
+  $results = [];
   foreach ($tokens as $token => $raw) {
     $parts = explode($delimiter, $token, 2);
     if (count($parts) == 2 && $parts[0] == $prefix) {
@@ -305,7 +305,7 @@ function token_get_info($token_type = NULL, $token_name = NULL) {
           // If this token type extends another token type, then merge in
           // the base token type's tokens.
           if (isset($token_info['tokens'][$base_type])) {
-            $token_info['tokens'] += array($type_key => array());
+            $token_info['tokens'] += [$type_key => []];
             $token_info['tokens'][$type_key] += $token_info['tokens'][$base_type];
           }
         }
@@ -317,7 +317,7 @@ function token_get_info($token_type = NULL, $token_name = NULL) {
       }
 
       // Pre-sort tokens.
-      backdrop_sort($token_info['types'], array('name' => SORT_STRING));
+      backdrop_sort($token_info['types'], ['name' => SORT_STRING]);
 
       // Store info in cache for future use.
       $cache_token->set($cid, $token_info);
@@ -359,7 +359,7 @@ function token_get_module($token_type, $token_name) {
  *   An array of global token types.
  */
 function token_get_global_token_types() {
-  $global_types = &backdrop_static(__FUNCTION__, array());
+  $global_types = &backdrop_static(__FUNCTION__, []);
 
   if (empty($global_types)) {
     $token_info = token_get_info();
@@ -403,23 +403,23 @@ function token_cache_clear() {
  */
 function token_get_token_problems() {
   $token_info = token_info();
-  $token_problems = array(
-    'not-array' => array(
+  $token_problems = [
+    'not-array' => [
       'label' => t('The following tokens or token types are not defined as arrays:'),
-    ),
-    'missing-info' => array(
+    ],
+    'missing-info' => [
       'label' => t('The following tokens or token types are missing required name and/or description information:'),
-    ),
-    'type-no-tokens' => array(
+    ],
+    'type-no-tokens' => [
       'label' => t('The following token types do not have any tokens defined:'),
-    ),
-    'tokens-no-type' => array(
+    ],
+    'tokens-no-type' => [
       'label' => t('The following token types are not defined but have tokens:'),
-    ),
-    'duplicate' => array(
+    ],
+    'duplicate' => [
       'label' => t('The following token or token types are defined by multiple modules:')
-    ),
-  );
+    ],
+  ];
 
   // Check token types for problems.
   foreach ($token_info['types'] as $type => $type_info) {
@@ -504,21 +504,21 @@ function token_type_load($token_type) {
  *   - token: The last portion of the token. e.g. in [node:nid], the value would
  *     be nid.
  */
-function token_build_tree($token_type, array $options = array()) {
+function token_build_tree($token_type, array $options = []) {
   global $language_content;
 
   $cache_token = cache('token');
 
   // Static cache of already built token trees.
-  $trees = &backdrop_static(__FUNCTION__, array());
+  $trees = &backdrop_static(__FUNCTION__, []);
 
-  $options += array(
+  $options += [
     'restricted' => FALSE,
     'depth' => 4,
-    'data' => array(),
+    'data' => [],
     'values' => FALSE,
     'flat' => FALSE,
-  );
+  ];
 
   // Do not allow past the maximum token information depth.
   $options['depth'] = min($options['depth'], TOKEN_MAX_DEPTH);
@@ -532,7 +532,7 @@ function token_build_tree($token_type, array $options = array()) {
       $trees[$tree_cid] = $cache->data;
     }
     else {
-      $options['parents'] = array();
+      $options['parents'] = [];
       $trees[$tree_cid] = _token_build_tree($token_type, $options);
       cache_set($tree_cid, $trees[$tree_cid], 'cache', CACHE_PERMANENT);
     }
@@ -547,7 +547,7 @@ function token_build_tree($token_type, array $options = array()) {
 
   // Fill in token values.
   if (!empty($options['values'])) {
-    $token_values = array();
+    $token_values = [];
     foreach ($tree as $token => $token_info) {
       if (!empty($token_info['dynamic']) || !empty($token_info['restricted'])) {
         continue;
@@ -576,7 +576,7 @@ function token_build_tree($token_type, array $options = array()) {
  *   The array of tokens as flat array.
  */
 function token_flatten_tree($tree) {
-  $result = array();
+  $result = [];
   foreach ($tree as $token => $token_info) {
     $result[$token] = $token_info;
     if (isset($token_info['children']) && is_array($token_info['children'])) {
@@ -591,16 +591,16 @@ function token_flatten_tree($tree) {
  * Recursive helper for token_build_tree().
  */
 function _token_build_tree($token_type, array $options, $parent_restricted = FALSE) {
-  $options += array(
-    'parents' => array(),
-  );
+  $options += [
+    'parents' => [],
+  ];
 
   $info = token_get_info();
   if ($options['depth'] <= 0 || !isset($info['types'][$token_type]) || !isset($info['tokens'][$token_type])) {
-    return array();
+    return [];
   }
 
-  $tree = array();
+  $tree = [];
   foreach ($info['tokens'][$token_type] as $token => $token_info) {
     // Build the raw token string.
     $token_parents = $options['parents'];
@@ -688,13 +688,13 @@ function token_element_validate(&$element, &$form_state) {
 
   // Validate if an element must have a minimum number of tokens.
   if (isset($element['#min_tokens']) && count($tokens) < $element['#min_tokens']) {
-    $error = format_plural($element['#min_tokens'], 'The !element-title cannot contain fewer than one token.', 'The !element-title must contain at least @count tokens.', array('!element-title' => $title));
+    $error = format_plural($element['#min_tokens'], 'The !element-title cannot contain fewer than one token.', 'The !element-title must contain at least @count tokens.', ['!element-title' => $title]);
     form_error($element, $error);
   }
 
   // Validate if an element must have a maximum number of tokens.
   if (isset($element['#max_tokens']) && count($tokens) > $element['#max_tokens']) {
-    $error = format_plural($element['#max_tokens'], 'The !element-title may not contain more than one token.', 'The !element-title may not contain more than @count tokens.', array('!element-title' => $title));
+    $error = format_plural($element['#max_tokens'], 'The !element-title may not contain more than one token.', 'The !element-title may not contain more than @count tokens.', ['!element-title' => $title]);
     form_error($element, $error);
   }
 
@@ -702,7 +702,7 @@ function token_element_validate(&$element, &$form_state) {
   if (isset($element['#token_types'])) {
     $invalid_tokens = token_get_invalid_tokens_by_context($tokens, $element['#token_types']);
     if ($invalid_tokens) {
-      form_error($element, t('The !element-title is using the following invalid tokens: @invalid-tokens.', array('!element-title' => $title, '@invalid-tokens' => implode(', ', $invalid_tokens))));
+      form_error($element, t('The !element-title is using the following invalid tokens: @invalid-tokens.', ['!element-title' => $title, '@invalid-tokens' => implode(', ', $invalid_tokens)]));
     }
   }
 
@@ -718,10 +718,10 @@ function token_element_validate(&$element, &$form_state) {
  *   The cleaned token name.
  */
 function token_clean_token_name($name) {
-  static $names = array();
+  static $names = [];
 
   if (!isset($names[$name])) {
-    $cleaned_name = strtr($name, array(' ' => '-', '_' => '-', '/' => '-', '[' => '-', ']' => ''));
+    $cleaned_name = strtr($name, [' ' => '-', '_' => '-', '/' => '-', '[' => '-', ']' => '']);
     $cleaned_name = preg_replace('/[^\w\-]/i', '', $cleaned_name);
     $cleaned_name = trim($cleaned_name, '-');
     $names[$name] = $cleaned_name;
@@ -742,7 +742,7 @@ function token_clean_token_name($name) {
  * @return array
  *   An array with the invalid tokens in their original raw forms.
  */
-function token_get_invalid_tokens_by_context($value, array $valid_types = array()) {
+function token_get_invalid_tokens_by_context($value, array $valid_types = []) {
   if (in_array('all', $valid_types)) {
     $info = token_get_info();
     $valid_types = array_keys($info['types']);
@@ -752,7 +752,7 @@ function token_get_invalid_tokens_by_context($value, array $valid_types = array(
     $valid_types = array_merge($valid_types, token_get_global_token_types());
   }
 
-  $invalid_tokens = array();
+  $invalid_tokens = [];
   $value_tokens = is_string($value) ? token_scan($value) : $value;
 
   foreach ($value_tokens as $type => $tokens) {
@@ -782,7 +782,7 @@ function token_get_invalid_tokens_by_context($value, array $valid_types = array(
  */
 function token_get_invalid_tokens($type, array $tokens) {
   $token_info = token_get_info();
-  $invalid_tokens = array();
+  $invalid_tokens = [];
 
   foreach ($tokens as $token => $full_token) {
     // Split token up if it has chains.
@@ -804,7 +804,7 @@ function token_get_invalid_tokens($type, array $tokens) {
       }
       else {
         // Recursively check the chained tokens.
-        $sub_tokens = token_find_with_prefix(array($token => $full_token), $parts[0]);
+        $sub_tokens = token_find_with_prefix([$token => $full_token], $parts[0]);
         $invalid_tokens = array_merge($invalid_tokens, token_get_invalid_tokens($sub_token_info['type'], $sub_tokens));
       }
     }
@@ -828,8 +828,8 @@ function token_get_invalid_tokens($type, array $tokens) {
  *
  * @see token_render_array_value()
  */
-function token_render_array(array $array, array $options = array()) {
-  $rendered = array();
+function token_render_array(array $array, array $options = []) {
+  $rendered = [];
   foreach ($array as $key => $value) {
     if (substr($key, 0, 1) === '#') {
       continue;
@@ -857,7 +857,7 @@ function token_render_array(array $array, array $options = array()) {
  *
  * @see token_render_array_value()
  */
-function token_render_array_value($value, array $options = array()) {
+function token_render_array_value($value, array $options = []) {
   $rendered = is_array($value) ? render($value) : (string) $value;
   if (!empty($options['sanitize'])) {
     $rendered = check_plain($rendered);

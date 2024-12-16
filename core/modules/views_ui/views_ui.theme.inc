@@ -64,53 +64,53 @@ function theme_views_ui_view_storage($variables) {
  */
 function theme_views_ui_reorder_displays_form($variables) {
   $form = $variables['form'];
-  $rows = array();
+  $rows = [];
   foreach (element_children($form) as $key) {
     if (isset($form[$key]['#display'])) {
       $display = &$form[$key];
 
-      $row = array();
+      $row = [];
       $row[] = backdrop_render($display['title']);
-      $form[$key]['weight']['#attributes']['class'] = array('weight');
+      $form[$key]['weight']['#attributes']['class'] = ['weight'];
       $row[] = backdrop_render($form[$key]['weight']);
       if (isset($display['removed'])) {
         $row[] = backdrop_render($form[$key]['removed']) .
           l('<span>' . t('Remove') . '</span>',
             'javascript:void()',
-            array(
-              'attributes' => array(
+            [
+              'attributes' => [
                 'id' => 'display-remove-link-' . $key,
-                'class' => array('views-button-remove display-remove-link'),
+                'class' => ['views-button-remove display-remove-link'],
                 'alt' => t('Remove this display'),
-                'title' => t('Remove this display')),
-              'html' => TRUE));
+                'title' => t('Remove this display')],
+              'html' => TRUE]);
       }
       else {
         $row[] = '';
       }
-      $class = array();
-      $styles = array();
+      $class = [];
+      $styles = [];
       if (isset($form[$key]['weight']['#type'])) {
         $class[] = 'draggable';
       }
       if (isset($form[$key]['deleted']['#value']) && $form[$key]['deleted']['#value']) {
         $styles[] = 'display: none;';
       }
-      $rows[] = array('data' => $row, 'class' => $class, 'id' => 'display-row-' . $key, 'style' => $styles);
+      $rows[] = ['data' => $row, 'class' => $class, 'id' => 'display-row-' . $key, 'style' => $styles];
     }
   }
 
-  $header = array(t('Display'), t('Weight'), t('Remove'));
+  $header = [t('Display'), t('Weight'), t('Remove')];
   $output = '';
   backdrop_add_tabledrag('reorder-displays', 'order', 'sibling', 'weight');
 
   $output = backdrop_render($form['override']);
   $output .= '<div class="scroll">';
   $output .= theme('table',
-    array('header' => $header,
+    ['header' => $header,
     'rows' => $rows,
-    'attributes' => array('id' => 'reorder-displays'),
-  ));
+    'attributes' => ['id' => 'reorder-displays'],
+  ]);
   $output .= '</div>';
   $output .= backdrop_render_children($form);
 
@@ -123,27 +123,27 @@ function theme_views_ui_reorder_displays_form($variables) {
 function theme_views_ui_rearrange_form($variables) {
   $form = $variables['form'];
 
-  $rows = array();
+  $rows = [];
   foreach (element_children($form['fields']) as $id) {
     if (isset($form['fields'][$id]['name'])) {
-      $row = array();
+      $row = [];
       $row[] = backdrop_render($form['fields'][$id]['name']);
-      $form['fields'][$id]['weight']['#attributes']['class'] = array('weight');
+      $form['fields'][$id]['weight']['#attributes']['class'] = ['weight'];
       $row[] = backdrop_render($form['fields'][$id]['weight']);
-      $row[] = backdrop_render($form['fields'][$id]['removed']) . l('<span>' . t('Remove') . '</span>', 'javascript:void()', array('attributes' => array('id' => 'views-remove-link-' . $id, 'class' => array('views-hidden', 'views-button-remove', 'views-remove-link'), 'alt' => t('Remove this item'), 'title' => t('Remove this item')), 'html' => TRUE));
-      $rows[] = array('data' => $row, 'class' => array('draggable'), 'id' => 'views-row-' . $id);
+      $row[] = backdrop_render($form['fields'][$id]['removed']) . l('<span>' . t('Remove') . '</span>', 'javascript:void()', ['attributes' => ['id' => 'views-remove-link-' . $id, 'class' => ['views-hidden', 'views-button-remove', 'views-remove-link'], 'alt' => t('Remove this item'), 'title' => t('Remove this item')], 'html' => TRUE]);
+      $rows[] = ['data' => $row, 'class' => ['draggable'], 'id' => 'views-row-' . $id];
     }
   }
 
-  $header = array('', t('Weight'), t('Remove'));
+  $header = ['', t('Weight'), t('Remove')];
   $output = backdrop_render($form['override']);
   $output .= '<div class="scroll" data-backdrop-views-scroll>';
-  $output .= theme('table', array(
+  $output .= theme('table', [
     'header' => $header,
     'rows' => $rows,
     'empty' => t('No fields available.'),
-    'attributes' => array('id' => 'arrange'),
-  ));
+    'attributes' => ['id' => 'arrange'],
+  ]);
   $output .= '</div>';
   $output .= backdrop_render_children($form);
   backdrop_add_tabledrag('arrange', 'order', 'sibling', 'weight');
@@ -219,43 +219,43 @@ function theme_views_ui_build_group_filter_form($variables) {
   $output .= backdrop_render($form['description']);
   $output .= '</div>';
 
-  $header = array(
+  $header = [
     t('Default'),
     t('Weight'),
     t('Label'),
     t('Operator'),
     t('Value'),
     t('Operations'),
-  );
+  ];
 
   $form['default_group'] = form_process_radios($form['default_group']);
   $form['default_group_multiple'] = form_process_checkboxes($form['default_group_multiple']);
   $form['default_group']['All']['#title'] = '';
 
   backdrop_render($form['default_group_multiple']['All']); // Don't render
-  $rows[] = array(
+  $rows[] = [
     backdrop_render($form['default_group']['All']),
     '',
-    array(
+    [
       'data' => config_get('views.settings', 'exposed_filter_any_label') == 'old_any' ? t('&lt;Any&gt;') : t('- Any -'),
       'colspan' => 4,
-      'class' => array('class' => 'any-default-radios-row'),
-    ),
-  );
+      'class' => ['class' => 'any-default-radios-row'],
+    ],
+  ];
 
   foreach (element_children($form['group_items']) as $group_id) {
     $form['group_items'][$group_id]['value']['#title'] = '';
-    $data = array(
+    $data = [
       'default' => backdrop_render($form['default_group'][$group_id]) . backdrop_render($form['default_group_multiple'][$group_id]),
       'weight' => backdrop_render($form['group_items'][$group_id]['weight']),
       'title' => backdrop_render($form['group_items'][$group_id]['title']),
       'operator' => backdrop_render($form['group_items'][$group_id]['operator']),
       'value' => backdrop_render($form['group_items'][$group_id]['value']),
-      'remove' => backdrop_render($form['group_items'][$group_id]['remove']) . l('<span>' . t('Remove') . '</span>', 'javascript:void()', array('attributes' => array('id' => 'views-remove-link-' . $group_id, 'class' => array('views-hidden', 'views-button-remove', 'views-groups-remove-link', 'views-remove-link'), 'alt' => t('Remove this item'), 'title' => t('Remove this item')), 'html' => true)),
-    );
-    $rows[] = array('data' => $data, 'id' => 'views-row-' . $group_id, 'class' => array('draggable'));
+      'remove' => backdrop_render($form['group_items'][$group_id]['remove']) . l('<span>' . t('Remove') . '</span>', 'javascript:void()', ['attributes' => ['id' => 'views-remove-link-' . $group_id, 'class' => ['views-hidden', 'views-button-remove', 'views-groups-remove-link', 'views-remove-link'], 'alt' => t('Remove this item'), 'title' => t('Remove this item')], 'html' => true]),
+    ];
+    $rows[] = ['data' => $data, 'id' => 'views-row-' . $group_id, 'class' => ['draggable']];
   }
-  $table = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('class' => array('views-filter-groups'), 'id' => 'views-filter-groups'))) . backdrop_render($form['add_group']);
+  $table = theme('table', ['header' => $header, 'rows' => $rows, 'attributes' => ['class' => ['views-filter-groups'], 'id' => 'views-filter-groups']]) . backdrop_render($form['add_group']);
   backdrop_add_tabledrag('views-filter-groups', 'order', 'sibling', 'weight');
   $render_form = backdrop_render_children($form);
   return $output . $render_form . $table . $more;
@@ -266,7 +266,7 @@ function theme_views_ui_build_group_filter_form($variables) {
  */
 function theme_views_ui_rearrange_filter_form(&$variables) {
   $form = $variables['form'];
-  $rows = $ungroupable_rows = array();
+  $rows = $ungroupable_rows = [];
   // Enable grouping only if > 1 group.
   $grouping = count(array_keys($form['#group_options'])) > 1;
   // Sort groups to ensure they're rendered in the right order, regardless of
@@ -281,15 +281,15 @@ function theme_views_ui_rearrange_filter_form(&$variables) {
       backdrop_add_tabledrag('views-rearrange-filters', 'match', 'sibling', 'views-group-select', 'views-group-select-' . $group_id);
 
       // Title row, spanning all columns.
-      $row = array();
+      $row = [];
       // Add a cell to the first row, containing the group operator.
-      $row[] = array('class' => array('group', 'group-operator', 'container-inline'), 'data' => backdrop_render($form['filter_groups']['groups'][$group_id]), 'rowspan' => max(array(2, count($contents) + 1)));
+      $row[] = ['class' => ['group', 'group-operator', 'container-inline'], 'data' => backdrop_render($form['filter_groups']['groups'][$group_id]), 'rowspan' => max([2, count($contents) + 1])];
       // Title.
-      $row[] = array('class' => array('group', 'group-title'), 'data' => '<span>' . $form['#group_options'][$group_id] . '</span>', 'colspan' => 4);
-      $rows[] = array('class' => array('views-group-title'), 'data' => $row, 'id' => 'views-group-title-' . $group_id);
+      $row[] = ['class' => ['group', 'group-title'], 'data' => '<span>' . $form['#group_options'][$group_id] . '</span>', 'colspan' => 4];
+      $rows[] = ['class' => ['views-group-title'], 'data' => $row, 'id' => 'views-group-title-' . $group_id];
 
       // Row which will only appear if the group has nothing in it.
-      $row = array();
+      $row = [];
       $class = 'group-' . (count($contents) ? 'populated' : 'empty');
       $instructions = '<span>' . t('No filters have been added.') . '</span> <span class="js-show">' . t('Drag to add filters.') . '</span>';
       // When JavaScript is enabled, the button for removing the group (if it's
@@ -298,22 +298,22 @@ function theme_views_ui_rearrange_filter_form(&$variables) {
       if (!empty($form['remove_groups'][$group_id]['#type']) && $form['remove_groups'][$group_id]['#type'] == 'submit') {
         $form['remove_groups'][$group_id]['#attributes']['class'][] = 'js-hide';
       }
-      $row[] = array('colspan' => 5, 'data' => $instructions . backdrop_render($form['remove_groups'][$group_id]));
-      $rows[] = array('class' => array("group-message", "group-$group_id-message", $class), 'data' => $row, 'id' => 'views-group-' . $group_id);
+      $row[] = ['colspan' => 5, 'data' => $instructions . backdrop_render($form['remove_groups'][$group_id])];
+      $rows[] = ['class' => ["group-message", "group-$group_id-message", $class], 'data' => $row, 'id' => 'views-group-' . $group_id];
     }
 
     foreach ($contents as $id) {
       if (isset($form['filters'][$id]['name'])) {
-        $row = array();
+        $row = [];
         $row[] = backdrop_render($form['filters'][$id]['name']);
-        $form['filters'][$id]['weight']['#attributes']['class'] = array('weight');
+        $form['filters'][$id]['weight']['#attributes']['class'] = ['weight'];
         $row[] = backdrop_render($form['filters'][$id]['weight']);
-        $form['filters'][$id]['group']['#attributes']['class'] = array('views-group-select views-group-select-' . $group_id);
+        $form['filters'][$id]['group']['#attributes']['class'] = ['views-group-select views-group-select-' . $group_id];
         $row[] = backdrop_render($form['filters'][$id]['group']);
         $form['filters'][$id]['removed']['#attributes']['class'][] = 'js-hide';
-        $row[] = backdrop_render($form['filters'][$id]['removed']) . l('<span>' . t('Remove') . '</span>', 'javascript:void()', array('attributes' => array('id' => 'views-remove-link-' . $id, 'class' => array('views-hidden', 'views-button-remove', 'views-groups-remove-link', 'views-remove-link'), 'alt' => t('Remove this item'), 'title' => t('Remove this item')), 'html' => true));
+        $row[] = backdrop_render($form['filters'][$id]['removed']) . l('<span>' . t('Remove') . '</span>', 'javascript:void()', ['attributes' => ['id' => 'views-remove-link-' . $id, 'class' => ['views-hidden', 'views-button-remove', 'views-groups-remove-link', 'views-remove-link'], 'alt' => t('Remove this item'), 'title' => t('Remove this item')], 'html' => true]);
 
-        $row = array('data' => $row, 'class' => array('draggable'), 'id' => 'views-row-' . $id);
+        $row = ['data' => $row, 'class' => ['draggable'], 'id' => 'views-row-' . $id];
         if ($group_id !== 'ungroupable') {
           $rows[] = $row;
         }
@@ -336,21 +336,21 @@ function theme_views_ui_rearrange_filter_form(&$variables) {
 
   if (!empty($ungroupable_rows)) {
     backdrop_add_tabledrag('views-rearrange-filters-ungroupable', 'order', 'sibling', 'weight');
-    $header = array(t('Ungroupable filters'), t('Weight'), array('class' => array('views-hide-label'), 'data' => t('Group')), array('class' => array('views-hide-label'), 'data' => t('Remove')));
-    $output .= theme('table', array(
+    $header = [t('Ungroupable filters'), t('Weight'), ['class' => ['views-hide-label'], 'data' => t('Group')], ['class' => ['views-hide-label'], 'data' => t('Remove')]];
+    $output .= theme('table', [
       'header' => $header,
       'rows' => $ungroupable_rows,
       'empty' => t('No fields available.'),
-      'attributes' => array(
+      'attributes' => [
         'id' => 'views-rearrange-filters-ungroupable',
-        'class' => array('arrange'),
-      ),
-    ));
+        'class' => ['arrange'],
+      ],
+    ]);
   }
 
   // Set up tabledrag so that the weights are changed when rows are dragged.
   backdrop_add_tabledrag('views-rearrange-filters', 'order', 'sibling', 'weight');
-  $output .= theme('table', array('rows' => $rows, 'attributes' => array('id' => 'views-rearrange-filters', 'class' => array('arrange'))));
+  $output .= theme('table', ['rows' => $rows, 'attributes' => ['id' => 'views-rearrange-filters', 'class' => ['arrange']]]);
   $output .= '</div>';
 
   // When JavaScript is enabled, the button for adding a new group should be
@@ -370,65 +370,65 @@ function theme_views_ui_style_plugin_table($variables) {
 
   $output = backdrop_render($form['description_markup']);
 
-  $header = array(
+  $header = [
     t('Field'),
     t('Column'),
     t('Align'),
     t('Separator'),
-    array(
+    [
       'data' => t('Sortable'),
       'align' => 'center',
-    ),
-    array(
+    ],
+    [
       'data' => t('Default order'),
       'align' => 'center',
-    ),
-    array(
+    ],
+    [
       'data' => t('Default sort'),
       'align' => 'center',
-    ),
-    array(
+    ],
+    [
       'data' => t('Hide empty column'),
       'align' => 'center',
-    ),
-  );
-  $rows = array();
+    ],
+  ];
+  $rows = [];
   foreach (element_children($form['columns']) as $id) {
-    $row = array();
+    $row = [];
     $row[] = check_plain(backdrop_render($form['info'][$id]['name']));
     $row[] = backdrop_render($form['columns'][$id]);
     $row[] = backdrop_render($form['info'][$id]['align']);
     $row[] = backdrop_render($form['info'][$id]['separator']);
     if (!empty($form['info'][$id]['sortable'])) {
-      $row[] = array(
+      $row[] = [
         'data' => backdrop_render($form['info'][$id]['sortable']),
         'align' => 'center',
-      );
-      $row[] = array(
+      ];
+      $row[] = [
         'data' => backdrop_render($form['info'][$id]['default_sort_order']),
         'align' => 'center',
-      );
-      $row[] = array(
+      ];
+      $row[] = [
         'data' => backdrop_render($form['default'][$id]),
         'align' => 'center',
-      );
+      ];
     }
     else {
       $row[] = '';
       $row[] = '';
       $row[] = '';
     }
-    $row[] = array(
+    $row[] = [
       'data' => backdrop_render($form['info'][$id]['empty_column']),
       'align' => 'center',
-    );
+    ];
     $rows[] = $row;
   }
 
   // Add the special 'None' row.
-  $rows[] = array(t('None'), '', '', '', '', '', array('align' => 'center', 'data' => backdrop_render($form['default'][-1])), '');
+  $rows[] = [t('None'), '', '', '', '', '', ['align' => 'center', 'data' => backdrop_render($form['default'][-1])], ''];
 
-  $output .= theme('table', array('header' => $header, 'rows' => $rows));
+  $output .= theme('table', ['header' => $header, 'rows' => $rows]);
   $output .= backdrop_render_children($form);
   return $output;
 }
@@ -545,16 +545,16 @@ function template_preprocess_views_ui_view_preview_section(&$variables) {
   }
 
   if (isset($links)) {
-    $build = array(
+    $build = [
       '#prefix' => '<div class="contextual-links-wrapper">',
       '#suffix' => '</div>',
       '#theme' => 'links__contextual',
       '#links' => $links,
-      '#attributes' => array('class' => array('contextual-links')),
-      '#attached' => array(
-        'library' => array(array('contextual', 'contextual-links')),
-      ),
-    );
+      '#attributes' => ['class' => ['contextual-links']],
+      '#attached' => [
+        'library' => [['contextual', 'contextual-links']],
+      ],
+    ];
     $variables['links'] = backdrop_render($build);
   }
   $variables['theme_hook_suggestions'][] = 'views_ui_view_preview_section__' . $variables['section'];

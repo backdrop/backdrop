@@ -12,39 +12,39 @@
 class views_plugin_pager_full extends views_plugin_pager {
   function summary_title() {
     if (!empty($this->options['offset'])) {
-      return format_plural($this->options['items_per_page'], '@count item, skip @skip', 'Paged, @count items, skip @skip', array('@count' => $this->options['items_per_page'], '@skip' => $this->options['offset']));
+      return format_plural($this->options['items_per_page'], '@count item, skip @skip', 'Paged, @count items, skip @skip', ['@count' => $this->options['items_per_page'], '@skip' => $this->options['offset']]);
     }
-      return format_plural($this->options['items_per_page'], '@count item', 'Paged, @count items', array('@count' => $this->options['items_per_page']));
+      return format_plural($this->options['items_per_page'], '@count item', 'Paged, @count items', ['@count' => $this->options['items_per_page']]);
   }
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['items_per_page'] = array('default' => 10);
-    $options['offset'] = array('default' => 0);
-    $options['id'] = array('default' => 0);
-    $options['total_pages'] = array('default' => '');
+    $options['items_per_page'] = ['default' => 10];
+    $options['offset'] = ['default' => 0];
+    $options['id'] = ['default' => 0];
+    $options['total_pages'] = ['default' => ''];
     // Use the same default quantity that core uses by default.
-    $options['quantity'] = array('default' => 9);
-    $options['expose'] = array(
-      'contains' => array(
-        'items_per_page' => array('default' => FALSE, 'bool' => TRUE),
-        'items_per_page_label' => array('default' => 'Items per page', 'translatable' => TRUE),
-        'items_per_page_options' => array('default' => '5, 10, 20, 40, 60'),
-        'items_per_page_options_all' => array('default' => FALSE, 'bool' => TRUE),
-        'items_per_page_options_all_label' => array('default' => '- All -', 'translatable' => TRUE),
+    $options['quantity'] = ['default' => 9];
+    $options['expose'] = [
+      'contains' => [
+        'items_per_page' => ['default' => FALSE, 'bool' => TRUE],
+        'items_per_page_label' => ['default' => 'Items per page', 'translatable' => TRUE],
+        'items_per_page_options' => ['default' => '5, 10, 20, 40, 60'],
+        'items_per_page_options_all' => ['default' => FALSE, 'bool' => TRUE],
+        'items_per_page_options_all_label' => ['default' => '- All -', 'translatable' => TRUE],
 
-        'offset' => array('default' => FALSE, 'bool' => TRUE),
-        'offset_label' => array('default' => 'Offset', 'translatable' => TRUE),
-      ),
-    );
-    $options['tags'] = array(
-      'contains' => array(
-        'first' => array('default' => '« first', 'translatable' => TRUE),
-        'previous' => array('default' => '‹ previous', 'translatable' => TRUE),
-        'next' => array('default' => 'next ›', 'translatable' => TRUE),
-        'last' => array('default' => 'last »', 'translatable' => TRUE),
-      ),
-    );
+        'offset' => ['default' => FALSE, 'bool' => TRUE],
+        'offset_label' => ['default' => 'Offset', 'translatable' => TRUE],
+      ],
+    ];
+    $options['tags'] = [
+      'contains' => [
+        'first' => ['default' => '« first', 'translatable' => TRUE],
+        'previous' => ['default' => '‹ previous', 'translatable' => TRUE],
+        'next' => ['default' => 'next ›', 'translatable' => TRUE],
+        'last' => ['default' => 'last »', 'translatable' => TRUE],
+      ],
+    ];
     return $options;
   }
 
@@ -54,44 +54,44 @@ class views_plugin_pager_full extends views_plugin_pager {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
     $pager_text = $this->display->handler->get_pager_text();
-    $form['items_per_page'] = array(
+    $form['items_per_page'] = [
       '#title' => $pager_text['items per page title'],
       '#type' => 'number',
       '#min' => '0',
       '#description' => $pager_text['items per page description'],
       '#default_value' => $this->options['items_per_page'],
-    );
+    ];
 
-    $form['offset'] = array(
+    $form['offset'] = [
       '#type' => 'number',
       '#min' => '0',
       '#title' => t('Offset'),
       '#description' => t('The number of items to skip. For example, if this field is 3, the first 3 items will be skipped and not displayed.'),
       '#default_value' => $this->options['offset'],
-    );
+    ];
 
-    $form['id'] = array(
+    $form['id'] = [
       '#type' => 'textfield',
       '#title' => t('Pager ID'),
       '#description' => t("Unless you're experiencing problems with pagers related to this view, you should leave this at 0. If using multiple pagers on one page you may need to set this number to a higher value so as not to conflict within the ?page= array. Large values will add a lot of commas to your URLs, so avoid if possible."),
       '#default_value' => $this->options['id'],
-    );
+    ];
 
-    $form['total_pages'] = array(
+    $form['total_pages'] = [
       '#type' => 'textfield',
       '#title' => t('Number of pages'),
       '#description' => t('The total number of pages. Leave empty to show all pages.'),
       '#default_value' => $this->options['total_pages'],
-    );
+    ];
 
-    $form['quantity'] = array(
+    $form['quantity'] = [
       '#type' => 'textfield',
       '#title' => t('Number of pager links visible'),
       '#description' => t('Specify the number of links to pages to display in the pager.'),
       '#default_value' => $this->options['quantity'],
-    );
+    ];
 
-    $form['tags'] = array (
+    $form['tags'] =  [
       '#type' => 'fieldset',
       '#collapsible' => FALSE,
       '#collapsed' => FALSE,
@@ -99,37 +99,37 @@ class views_plugin_pager_full extends views_plugin_pager {
       '#title' => t('Tags'),
       '#input' => TRUE,
       '#description' => t('A lists of labels for the controls in the pager'),
-    );
+    ];
 
-    $form['tags']['first'] = array(
+    $form['tags']['first'] = [
       '#type' => 'textfield',
       '#title' => t('Text for "first"-link'),
       '#description' => t('Text for "first"-link'),
       '#default_value' => $this->options['tags']['first'],
-    );
+    ];
 
-    $form['tags']['previous'] = array(
+    $form['tags']['previous'] = [
       '#type' => 'textfield',
       '#title' => t('Text for "previous"-link'),
       '#description' => t('Text for "previous"-link'),
       '#default_value' => $this->options['tags']['previous'],
-    );
+    ];
 
-    $form['tags']['next'] = array(
+    $form['tags']['next'] = [
       '#type' => 'textfield',
       '#title' => t('Text for "next"-link'),
       '#description' => t('Text for "next"-link'),
       '#default_value' => $this->options['tags']['next'],
-    );
+    ];
 
-    $form['tags']['last'] = array(
+    $form['tags']['last'] = [
       '#type' => 'textfield',
       '#title' => t('Text for "last"-link'),
       '#description' => t('Text for "last"-link'),
       '#default_value' => $this->options['tags']['last'],
-    );
+    ];
 
-    $form['expose'] = array (
+    $form['expose'] =  [
       '#type' => 'fieldset',
       '#collapsible' => FALSE,
       '#collapsed' => FALSE,
@@ -137,80 +137,80 @@ class views_plugin_pager_full extends views_plugin_pager {
       '#title' => t('Exposed options'),
       '#input' => TRUE,
       '#description' => t('Exposing this options allows users to define their values in a exposed form when view is displayed'),
-    );
+    ];
 
-    $form['expose']['items_per_page'] = array(
+    $form['expose']['items_per_page'] = [
       '#type' => 'checkbox',
       '#title' => t('Expose items per page'),
       '#description' => t('When checked, users can determine how many items per page show in a view'),
       '#default_value' => $this->options['expose']['items_per_page'],
-    );
+    ];
 
-    $form['expose']['items_per_page_label'] = array(
+    $form['expose']['items_per_page_label'] = [
       '#type' => 'textfield',
       '#title' => t('Items per page label'),
       '#required' => TRUE,
       '#description' => t('Label to use in the exposed items per page form element.'),
       '#default_value' => $this->options['expose']['items_per_page_label'],
-      '#states' => array(
-        'invisible' => array(
-          'input[name="pager_options[expose][items_per_page]"]' => array('checked' => FALSE),
-        ),
-      ),
-    );
+      '#states' => [
+        'invisible' => [
+          'input[name="pager_options[expose][items_per_page]"]' => ['checked' => FALSE],
+        ],
+      ],
+    ];
 
-    $form['expose']['items_per_page_options'] = array(
+    $form['expose']['items_per_page_options'] = [
       '#type' => 'textfield',
       '#title' => t('Exposed items per page options'),
       '#required' => TRUE,
       '#description' => t('Set between which values the user can choose when determining the items per page. Separated by comma.'),
       '#default_value' => $this->options['expose']['items_per_page_options'],
-      '#states' => array(
-        'invisible' => array(
-          'input[name="pager_options[expose][items_per_page]"]' => array('checked' => FALSE),
-        ),
-      ),
-    );
+      '#states' => [
+        'invisible' => [
+          'input[name="pager_options[expose][items_per_page]"]' => ['checked' => FALSE],
+        ],
+      ],
+    ];
 
 
-    $form['expose']['items_per_page_options_all'] = array(
+    $form['expose']['items_per_page_options_all'] = [
       '#type' => 'checkbox',
       '#title' => t('Include all items option'),
       '#description' => t('If checked, an extra item will be included to items per page to display all items'),
       '#default_value' => $this->options['expose']['items_per_page_options_all'],
-    );
+    ];
 
-    $form['expose']['items_per_page_options_all_label'] = array(
+    $form['expose']['items_per_page_options_all_label'] = [
       '#type' => 'textfield',
       '#title' => t('All items label'),
       '#description' => t('Which label will be used to display all items'),
       '#default_value' => $this->options['expose']['items_per_page_options_all_label'],
-      '#states' => array(
-        'invisible' => array(
-          'input[name="pager_options[expose][items_per_page_options_all]"]' => array('checked' => FALSE),
-        ),
-      ),
-    );
+      '#states' => [
+        'invisible' => [
+          'input[name="pager_options[expose][items_per_page_options_all]"]' => ['checked' => FALSE],
+        ],
+      ],
+    ];
 
-    $form['expose']['offset'] = array(
+    $form['expose']['offset'] = [
       '#type' => 'checkbox',
       '#title' => t('Expose Offset'),
       '#description' => t('When checked, users can determine how many items should be skipped at the beginning.'),
       '#default_value' => $this->options['expose']['offset'],
-    );
+    ];
 
-    $form['expose']['offset_label'] = array(
+    $form['expose']['offset_label'] = [
       '#type' => 'textfield',
       '#title' => t('Offset label'),
       '#required' => TRUE,
       '#description' => t('Label to use in the exposed offset form element.'),
       '#default_value' => $this->options['expose']['offset_label'],
-      '#states' => array(
-        'invisible' => array(
-          'input[name="pager_options[expose][offset]"]' => array('checked' => FALSE),
-        ),
-      ),
-    );
+      '#states' => [
+        'invisible' => [
+          'input[name="pager_options[expose][offset]"]' => ['checked' => FALSE],
+        ],
+      ],
+    ];
   }
 
   function options_validate(&$form, &$form_state) {
@@ -240,7 +240,7 @@ class views_plugin_pager_full extends views_plugin_pager {
       $items_per_page = $form_state['values']['pager_options']['items_per_page'];
       if (array_search($items_per_page, $options) === FALSE) {
         form_set_error('pager_options][expose][items_per_page_options', t('Please insert the items per page (@items_per_page) from above.',
-          array('@items_per_page' => $items_per_page))
+          ['@items_per_page' => $items_per_page])
         );
       }
     }
@@ -277,18 +277,18 @@ class views_plugin_pager_full extends views_plugin_pager {
   function render($input) {
     $pager_theme = views_theme_functions('pager', $this->view, $this->display);
     // The 0, 1, 3, 4 index are correct. See theme_pager documentation.
-    $tags = array(
+    $tags = [
       0 => $this->options['tags']['first'],
       1 => $this->options['tags']['previous'],
       3 => $this->options['tags']['next'],
       4 => $this->options['tags']['last'],
-    );
-    $output = theme($pager_theme, array(
+    ];
+    $output = theme($pager_theme, [
       'tags' => $tags,
       'element' => $this->get_pager_id(),
       'parameters' => $input,
       'quantity' => $this->options['quantity'],
-    ));
+    ]);
     return $output;
   }
 
@@ -310,12 +310,12 @@ class views_plugin_pager_full extends views_plugin_pager {
     global $pager_page_array;
 
     if (empty($pager_page_array)) {
-      $pager_page_array = array();
+      $pager_page_array = [];
     }
 
     // Fill in missing values in the global page array, in case the global page
     // array hasn't been initialized before.
-    $page = isset($_GET['page']) ? explode(',', $_GET['page']) : array();
+    $page = isset($_GET['page']) ? explode(',', $_GET['page']) : [];
 
     $pager_id = $this->get_pager_id();
     for ($i = 0; $i <= $pager_id || $i < count($pager_page_array); $i++) {
@@ -395,7 +395,7 @@ class views_plugin_pager_full extends views_plugin_pager {
   function exposed_form_alter(&$form, &$form_state) {
     if ($this->items_per_page_exposed()) {
       $options = explode(',', $this->options['expose']['items_per_page_options']);
-      $sanitized_options = array();
+      $sanitized_options = [];
       if (is_array($options)) {
         foreach ($options as $option) {
           $sanitized_options[intval($option)] = intval($option);
@@ -403,23 +403,23 @@ class views_plugin_pager_full extends views_plugin_pager {
         if (!empty($this->options['expose']['items_per_page_options_all']) && !empty($this->options['expose']['items_per_page_options_all_label'])) {
           $sanitized_options['All'] = $this->options['expose']['items_per_page_options_all_label'];
         }
-        $form['items_per_page'] = array(
+        $form['items_per_page'] = [
           '#type' => 'select',
           '#title' => $this->options['expose']['items_per_page_label'],
           '#options' => $sanitized_options,
           '#default_value' => $this->get_items_per_page(),
-        );
+        ];
       }
     }
 
     if ($this->offset_exposed()) {
-      $form['offset'] = array(
+      $form['offset'] = [
         '#type' => 'textfield',
         '#size' => 10,
         '#maxlength' => 10,
         '#title' => $this->options['expose']['offset_label'],
         '#default_value' => $this->get_offset(),
-      );
+      ];
     }
   }
 

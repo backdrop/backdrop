@@ -22,7 +22,7 @@ class views_handler_field_user extends views_handler_field {
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['link_to_user'] = array('default' => TRUE, 'bool' => TRUE);
+    $options['link_to_user'] = ['default' => TRUE, 'bool' => TRUE];
     return $options;
   }
 
@@ -30,12 +30,12 @@ class views_handler_field_user extends views_handler_field {
    * Provide link to node option
    */
   function options_form(&$form, &$form_state) {
-    $form['link_to_user'] = array(
+    $form['link_to_user'] = [
       '#title' => t('Link this field to its user'),
       '#description' => t("Enable to override this field's links."),
       '#type' => 'checkbox',
       '#default_value' => $this->options['link_to_user'],
-    );
+    ];
     parent::options_form($form, $form_state);
   }
 

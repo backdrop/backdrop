@@ -24,21 +24,21 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['vocabularies'] = array('default' => array());
-    $options['type'] = array('default' => 'tid');
-    $options['transform'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['vocabularies'] = ['default' => []];
+    $options['type'] = ['default' => 'tid'];
+    $options['transform'] = ['default' => FALSE, 'bool' => TRUE];
 
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
     $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
-    $options = array();
+    $options = [];
     foreach ($vocabularies as $voc) {
       $options[$voc->machine_name] = check_plain($voc->name);
     }
 
-    $form['vocabularies'] = array(
+    $form['vocabularies'] = [
       '#type' => 'checkboxes',
       '#prefix' => '<div id="edit-options-validate-argument-vocabulary-wrapper">',
       '#suffix' => '</div>',
@@ -46,29 +46,29 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
       '#options' => $options,
       '#default_value' => $this->options['vocabularies'],
       '#description' => t('If you wish to validate for specific vocabularies, check them; if none are checked, all terms will pass.'),
-    );
+    ];
 
-    $form['type'] = array(
+    $form['type'] = [
       '#type' => 'select',
       '#title' => t('Filter value type'),
-      '#options' => array(
+      '#options' => [
         'tid' => t('Term ID'),
         'tids' => t('Term IDs separated by , or +'),
         'name' => t('Term name'),
         'convert' => t('Term name converted to Term ID'),
-      ),
+      ],
       '#default_value' => $this->options['type'],
       '#description' => t('Select the form of this filter value; if using term name, it is generally more efficient to convert it to a term ID and use Taxonomy: Term ID rather than Taxonomy: Term Name" as the filter.'),
-    );
+    ];
 
-    $form['transform'] = array(
+    $form['transform'] = [
       '#type' => 'checkbox',
       '#title' => t('Transform dashes in URL to spaces in term name filter values'),
       '#default_value' => $this->options['transform'],
-    );
+    ];
   }
 
-  function options_submit(&$form, &$form_state, &$options = array()) {
+  function options_submit(&$form, &$form_state, &$options = []) {
     // Filter unselected items so we don't unnecessarily store giant arrays.
     $options['vocabularies'] = array_filter($options['vocabularies']);
   }
@@ -113,15 +113,15 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
         $tids = new stdClass();
         $tids->value = $argument;
         $tids = views_break_phrase($argument, $tids);
-        if ($tids->value == array(-1)) {
+        if ($tids->value == [-1]) {
           return FALSE;
         }
 
         $test = backdrop_map_assoc($tids->value);
-        $titles = array();
+        $titles = [];
 
         // check, if some tids already verified
-        static $validated_cache = array();
+        static $validated_cache = [];
         foreach ($test as $tid) {
           if (isset($validated_cache[$tid])) {
             if ($validated_cache[$tid] === FALSE) {
@@ -170,7 +170,7 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
           $query->condition('td.vocabulary', $vocabularies);
         }
         if ($transform) {
-          $query->where("replace(td.name, ' ', '-') = :name", array(':name' => $argument));
+          $query->where("replace(td.name, ' ', '-') = :name", [':name' => $argument]);
         }
         else {
           $query->condition('td.name', $argument);

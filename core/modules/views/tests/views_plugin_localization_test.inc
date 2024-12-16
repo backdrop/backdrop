@@ -13,13 +13,13 @@ class views_plugin_localization_test extends views_plugin_localization {
    * Store the strings which was translated.
    */
   public $translated_strings;
-  public $exportStrings = array();
+  public $exportStrings = [];
 
   /**
    * Return the string and take sure that the test can find out whether the
    * string got translated.
    */
-  public function translate_string($string, $keys = array(), $format = '') {
+  public function translate_string($string, $keys = [], $format = '') {
     $this->translated_strings[] = $string;
     return $string . "-translated";
   }

@@ -18,12 +18,12 @@ function image_field_views_data($field) {
   $data = field_views_field_default_views_data($field);
   foreach ($data as $table_name => $table_data) {
     // Add the relationship only on the fid field.
-    $data[$table_name][$field['field_name'] . '_fid']['relationship'] = array(
+    $data[$table_name][$field['field_name'] . '_fid']['relationship'] = [
       'handler' => 'views_handler_relationship',
       'base' => 'file_managed',
       'base field' => 'fid',
-      'label' => t('image from !field_name', array('!field_name' => $field['field_name'])),
-    );
+      'label' => t('image from !field_name', ['!field_name' => $field['field_name']]),
+    ];
   }
 
   return $data;
@@ -45,27 +45,27 @@ function image_field_views_data_views_data_alter(&$data, $field) {
       $entity = t('Content');
     }
 
-    $data['file_managed'][$pseudo_field_name]['relationship'] = array(
-      'title' => t('@entity using @field', array('@entity' => $entity, '@field' => $label)),
-      'help' => t('Relate each @entity with a @field set to the image.', array('@entity' => $entity, '@field' => $label)),
+    $data['file_managed'][$pseudo_field_name]['relationship'] = [
+      'title' => t('@entity using @field', ['@entity' => $entity, '@field' => $label]),
+      'help' => t('Relate each @entity with a @field set to the image.', ['@entity' => $entity, '@field' => $label]),
       'handler' => 'views_handler_relationship_entity_reverse',
       'field_name' => $field['field_name'],
       'field table' => _field_sql_storage_tablename($field),
       'field field' => $field['field_name'] . '_fid',
       'base' => $entity_info['base table'],
       'base field' => $entity_info['entity keys']['id'],
-      'label' => t('!field_name', array('!field_name' => $field['field_name'])),
-      'join_extra' => array(
-        0 => array(
+      'label' => t('!field_name', ['!field_name' => $field['field_name']]),
+      'join_extra' => [
+        0 => [
           'field' => 'entity_type',
           'value' => $entity_type,
-        ),
-        1 => array(
+        ],
+        1 => [
           'field' => 'deleted',
           'value' => 0,
           'numeric' => TRUE,
-        ),
-      ),
-    );
+        ],
+      ],
+    ];
   }
 }

@@ -26,12 +26,12 @@ class views_handler_relationship_entity_reverse extends views_handler_relationsh
     $views_data = views_fetch_data($this->table);
     $left_field = $views_data['table']['base']['field'];
 
-    $first = array(
+    $first = [
       'left_table' => $this->table_alias,
       'left_field' => $left_field,
       'table' => $this->definition['field table'],
       'field' => $this->definition['field field'],
-    );
+    ];
     if (!empty($this->options['required'])) {
       $first['type'] = 'INNER';
     }
@@ -54,12 +54,12 @@ class views_handler_relationship_entity_reverse extends views_handler_relationsh
 
     // Second, relate the field table to the entity specified using
     // the entity id on the field table and the entity's id field.
-    $second = array(
+    $second = [
       'left_table' => $this->first_alias,
       'left_field' => 'entity_id',
       'table' => $this->definition['base'],
       'field' => $this->definition['base field'],
-    );
+    ];
 
     if (!empty($this->options['required'])) {
       $second['type'] = 'INNER';

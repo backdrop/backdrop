@@ -17,16 +17,16 @@ class views_handler_field_node extends views_handler_field {
     parent::init($view, $options);
     // Don't add the additional fields to groupby
     if (!empty($this->options['link_to_node'])) {
-      $this->additional_fields['nid'] = array('table' => 'node', 'field' => 'nid');
+      $this->additional_fields['nid'] = ['table' => 'node', 'field' => 'nid'];
       if (module_exists('translation')) {
-        $this->additional_fields['langcode'] = array('table' => 'node', 'field' => 'langcode');
+        $this->additional_fields['langcode'] = ['table' => 'node', 'field' => 'langcode'];
       }
     }
   }
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['link_to_node'] = array('default' => isset($this->definition['link_to_node default']) ? $this->definition['link_to_node default'] : FALSE, 'bool' => TRUE);
+    $options['link_to_node'] = ['default' => isset($this->definition['link_to_node default']) ? $this->definition['link_to_node default'] : FALSE, 'bool' => TRUE];
     return $options;
   }
 
@@ -34,12 +34,12 @@ class views_handler_field_node extends views_handler_field {
    * Provide link to node option
    */
   function options_form(&$form, &$form_state) {
-    $form['link_to_node'] = array(
+    $form['link_to_node'] = [
       '#title' => t('Link this field to the original piece of content'),
       '#description' => t("Enable to override this field's links."),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['link_to_node']),
-    );
+    ];
 
     parent::options_form($form, $form_state);
   }

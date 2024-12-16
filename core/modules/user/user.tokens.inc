@@ -8,107 +8,107 @@
  * Implements hook_token_info().
  */
 function user_token_info() {
-  $types['user'] = array(
+  $types['user'] = [
     'name' => t('Users'),
     'description' => t('Tokens related to individual user accounts.'),
     'needs-data' => 'user',
-  );
-  $types['current-user'] = array(
+  ];
+  $types['current-user'] = [
     'name' => t('Current user'),
     'description' => t('Tokens related to the currently logged in user.'),
     'type' => 'user',
-  );
+  ];
 
-  $user['uid'] = array(
+  $user['uid'] = [
     'name' => t('User ID'),
     'description' => t('The unique ID of the user account.'),
-  );
-  $user['name'] = array(
+  ];
+  $user['name'] = [
     'name' => t('Name'),
     'description' => t('The account username.'),
-  );
-  $user['link'] = array(
+  ];
+  $user['link'] = [
     'name' => t("Name (linked)"),
     'description' => t("The account username (for users with the <em>View user profiles</em> permission it's displayed as a link to the profile page)."),
-  );
-  $user['mail'] = array(
+  ];
+  $user['mail'] = [
     'name' => t('Email'),
     'description' => t('The email address of the user account.'),
-  );
-  $user['ip-address'] = array(
+  ];
+  $user['ip-address'] = [
     'name' => t('IP address'),
     'description' => 'The IP address of the user.',
-  );
-  $user['roles'] = array(
+  ];
+  $user['roles'] = [
     'name' => t('Roles'),
     'description' => t('The user roles associated with the user account.'),
     'type' => 'array',
-  );
+  ];
 
   if (config_get('system.core', 'user_pictures')) {
-    $user['picture'] = array(
+    $user['picture'] = [
       'name' => t('Picture'),
       'description' => t('The picture of the user.'),
       'type' => 'file',
-    );
+    ];
   }
 
-  $user['last-login'] = array(
+  $user['last-login'] = [
     'name' => t('Last login'),
     'description' => t('The date the user last logged in to the site.'),
     'type' => 'date',
-  );
-  $user['created'] = array(
+  ];
+  $user['created'] = [
     'name' => t('Created'),
     'description' => t('The date the user account was created.'),
     'type' => 'date',
-  );
-  $user['changed'] = array(
+  ];
+  $user['changed'] = [
     'name' => t('Changed'),
     'description' => t('The date the user account was changed.'),
     'type' => 'date',
-  );
-  $user['url'] = array(
+  ];
+  $user['url'] = [
     'name' => t('URL'),
     'description' => t('The URL of the account profile page.'),
     'type' => 'url',
-  );
-  $user['edit-url'] = array(
+  ];
+  $user['edit-url'] = [
     'name' => t('Edit URL'),
     'description' => t('The URL of the account edit page.'),
     'type' => 'url',
-  );
+  ];
 
   // This token is replaced only when an Account Cancellation email is sent.
   // @see user_mail_tokens()
-  $user['cancel-url'] = array(
+  $user['cancel-url'] = [
     'name' => t('Account cancellation URL'),
     'description' => t('The URL of the confirm delete page for the user account. This token is only available when an Account Cancellation email is sent.'),
     'restricted' => TRUE,
     'type' => 'url',
-  );
+  ];
 
   // This token is replaced only when a Password Recovery email is sent.
   // @see user_mail_tokens()
-  $user['one-time-login-url'] = array(
+  $user['one-time-login-url'] = [
     'name' => t('One-time login URL'),
     'description' => t('The URL of the one-time login page for the user account. This token is only available when a Password Recovery email is sent.'),
     'restricted' => TRUE,
     'type' => 'url',
-  );
+  ];
 
-  return array(
+  return [
     'types' => $types,
-    'tokens' => array('user' => $user),
-  );
+    'tokens' => ['user' => $user],
+  ];
 }
 
 /**
  * Implements hook_tokens().
  */
-function user_tokens($type, $tokens, array $data = array(), array $options = array()) {
+function user_tokens($type, $tokens, array $data = [], array $options = []) {
   $user_pictures = config_get('system.core', 'user_pictures');
-  $url_options = array('absolute' => TRUE);
+  $url_options = ['absolute' => TRUE];
   if (isset($options['language'])) {
     $url_options['language'] = $options['language'];
     $language_code = $options['language']->langcode;
@@ -118,7 +118,7 @@ function user_tokens($type, $tokens, array $data = array(), array $options = arr
   }
   $sanitize = !empty($options['sanitize']);
 
-  $replacements = array();
+  $replacements = [];
 
   if ($type == 'user' && !empty($data['user'])) {
     $account = $data['user'];
@@ -136,7 +136,7 @@ function user_tokens($type, $tokens, array $data = array(), array $options = arr
           break;
 
         case 'link':
-          $replacements[$original] = theme('username', array('account' => $account));
+          $replacements[$original] = theme('username', ['account' => $account]);
           break;
 
         case 'mail':
@@ -160,7 +160,7 @@ function user_tokens($type, $tokens, array $data = array(), array $options = arr
 
         case 'picture':
           if ($user_pictures) {
-            $replacements[$original] = theme('user_picture', array('account' => $account));
+            $replacements[$original] = theme('user_picture', ['account' => $account]);
           }
           break;
 
@@ -184,19 +184,19 @@ function user_tokens($type, $tokens, array $data = array(), array $options = arr
 
     // Chained token relationships.
     if ($login_tokens = token_find_with_prefix($tokens, 'last-login')) {
-      $replacements += token_generate('date', $login_tokens, array('date' => $account->login), $options);
+      $replacements += token_generate('date', $login_tokens, ['date' => $account->login], $options);
     }
 
     if ($registered_tokens = token_find_with_prefix($tokens, 'created')) {
-      $replacements += token_generate('date', $registered_tokens, array('date' => $account->created), $options);
+      $replacements += token_generate('date', $registered_tokens, ['date' => $account->created], $options);
     }
 
     if ($changed_tokens = token_find_with_prefix($tokens, 'changed')) {
-      $replacements += token_generate('date', $changed_tokens, array('date' => $account->changed), $options);
+      $replacements += token_generate('date', $changed_tokens, ['date' => $account->changed], $options);
     }
 
     if (!empty($account->picture) && $user_pictures && ($picture_tokens = token_find_with_prefix($tokens, 'picture'))) {
-      $replacements += token_generate('file', $picture_tokens, array('file' => $account->picture), $options);
+      $replacements += token_generate('file', $picture_tokens, ['file' => $account->picture], $options);
     }
 
     if ($url_tokens = token_find_with_prefix($tokens, 'url')) {
@@ -207,13 +207,13 @@ function user_tokens($type, $tokens, array $data = array(), array $options = arr
       // The roles array may be set from checkbox values so ensure it always
       // has 'proper' data with the role names.
       $roles = array_intersect_key(user_roles(), backdrop_map_assoc($account->roles));
-      $replacements += token_generate('array', $role_tokens, array('array' => $roles), $options);
+      $replacements += token_generate('array', $role_tokens, ['array' => $roles], $options);
     }
   }
 
   if ($type == 'current-user') {
     $account = user_load($GLOBALS['user']->uid);
-    $replacements += token_generate('user', $tokens, array('user' => $account), $options);
+    $replacements += token_generate('user', $tokens, ['user' => $account], $options);
 
     // Current user tokens.
     if ($type == 'current-user') {

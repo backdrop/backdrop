@@ -109,8 +109,8 @@ class view {
   var $executed = FALSE;
   var $editing = FALSE;
 
-  var $args = array();
-  var $build_info = array();
+  var $args = [];
+  var $build_info = [];
 
   var $use_ajax = FALSE;
 
@@ -121,7 +121,7 @@ class view {
    *
    * @var array
    */
-  var $result = array();
+  var $result = [];
 
   // May be used to override the current pager info.
   var $current_page = NULL;
@@ -134,16 +134,16 @@ class view {
   var $attachment_after = '';
 
   // Exposed widget input
-  var $exposed_data = array();
-  var $exposed_input = array();
+  var $exposed_data = [];
+  var $exposed_input = [];
   // Exposed widget input directly from the $form_state['values'].
-  var $exposed_raw_input = array();
+  var $exposed_raw_input = [];
 
   // Used to store views that were previously running if we recurse.
-  var $old_view = array();
+  var $old_view = [];
 
   // To avoid recursion in views embedded into areas.
-  var $parent_views = array();
+  var $parent_views = [];
 
   // Whether or not the current stored view is an attachment to another view.
   var $is_attachment = NULL;
@@ -279,7 +279,7 @@ class view {
    * Constructor
    */
   function __construct($view_data = NULL) {
-    $this->display = array();
+    $this->display = [];
     if ($view_data) {
       foreach ($view_data as $key => $value) {
         $this->$key = $value;
@@ -327,7 +327,7 @@ class view {
    * stored on the display, and are used in the build process.
    */
   function display_objects() {
-    return array('argument', 'field', 'sort', 'filter', 'relationship', 'header', 'footer', 'empty');
+    return ['argument', 'field', 'sort', 'filter', 'relationship', 'header', 'footer', 'empty'];
   }
 
   /**
@@ -452,7 +452,7 @@ class view {
     if (empty($this->exposed_input)) {
       $this->exposed_input = $_GET;
       // unset items that are definitely not our input:
-      foreach (array('page', 'q') as $key) {
+      foreach (['page', 'q'] as $key) {
         if (isset($this->exposed_input[$key])) {
           unset($this->exposed_input[$key]);
         }
@@ -497,7 +497,7 @@ class view {
       }
       $this->display[$id]->handler = views_get_plugin('display', $this->display[$id]->display_plugin);
       if (!empty($this->display[$id]->handler)) {
-        $this->display[$id]->handler->localization_keys = array($id);
+        $this->display[$id]->handler->localization_keys = [$id];
         // Initialize the new display handler with data.
         $this->display[$id]->handler->init($this, $this->display[$id]);
         // If this is NOT the default display handler, let it know which is
@@ -567,7 +567,7 @@ class view {
     if (empty($this->display[$display_id])) {
       $display_id = 'default';
       if (empty($this->display[$display_id])) {
-        watchdog('views', 'set_display() called with invalid display id @display.', array('@display' => $display_id));
+        watchdog('views', 'set_display() called with invalid display id @display.', ['@display' => $display_id]);
         return FALSE;
       }
     }
@@ -629,10 +629,10 @@ class view {
     // Go through all of our handler types and test them to see if they
     // are missing relationships. Missing relationships can cause fatally
     // broken Views.
-    $base_tables = array(
+    $base_tables = [
       $this->base_table => TRUE,
       '#global' => TRUE,
-    );
+    ];
 
     // For each relationship we have, make sure we mark the base it provides as
     // available.
@@ -645,7 +645,7 @@ class view {
     }
 
     $base_tables = array_keys($base_tables);
-    $missing_base_tables = array();
+    $missing_base_tables = [];
 
     $types = views_object_types();
     foreach ($types as $key => $info) {
@@ -653,14 +653,14 @@ class view {
         $options['table'] = views_move_table($options['table']);
         $data = views_fetch_data($options['table'], FALSE);
 
-        $valid_bases = array($options['table']);
+        $valid_bases = [$options['table']];
         if (isset($data['table']['join'])) {
           $valid_bases = array_merge($valid_bases, array_keys($data['table']['join']));
         }
 
         // If the base table is missing, record it so we can try to fix it.
         if (!array_intersect($valid_bases, $base_tables)) {
-          $missing_base_tables[$options['table']][] = array('type' => $key, 'id' => $id);
+          $missing_base_tables[$options['table']][] = ['type' => $key, 'id' => $id];
         }
       }
     }
@@ -668,7 +668,7 @@ class view {
     if (!empty($missing_base_tables)) {
       // This will change handlers, so make sure any existing handlers get
       // tossed.
-      $this->display_handler->handlers = array();
+      $this->display_handler->handlers = [];
       $this->relationships_changed = TRUE;
       $this->changed = TRUE;
 
@@ -683,7 +683,7 @@ class view {
           // Create the relationship.
           $info = $data['table']['default_relationship'][$this->base_table];
 
-          $relationship_options = isset($info['options']) ? $info['options'] : array();
+          $relationship_options = isset($info['options']) ? $info['options'] : [];
           $relationship = $this->add_item($this->current_display, 'relationship', $info['table'], $info['field'], $relationship_options);
         }
         foreach ($handlers as $handler) {
@@ -744,10 +744,10 @@ class view {
    * for the UI. Display must be already initialized.
    */
   function get_base_tables() {
-    $base_tables = array(
+    $base_tables = [
       $this->base_table => TRUE,
       '#global' => TRUE,
-    );
+    ];
 
     foreach ($this->display_handler->get_handlers('relationship') as $handler) {
       $base_tables[$handler->definition['base']] = TRUE;
@@ -821,9 +821,9 @@ class view {
     // Create a title for use in the breadcrumb trail.
     $title = $this->display_handler->get_option('title');
 
-    $this->build_info['breadcrumb'] = array();
-    $breadcrumb_args = array();
-    $substitutions = array();
+    $this->build_info['breadcrumb'] = [];
+    $breadcrumb_args = [];
+    $substitutions = [];
 
     $status = TRUE;
 
@@ -975,11 +975,11 @@ class view {
 
     $start = microtime(TRUE);
     // If that fails, let's build!
-    $this->build_info = array(
+    $this->build_info = [
       'query' => '',
       'count_query' => '',
-      'query_args' => array(),
-    );
+      'query_args' => [],
+    ];
 
     $this->init_query();
 
@@ -1117,7 +1117,7 @@ class view {
     foreach ($handlers as $id => $data) {
 
       if (!empty($handlers[$id]) && is_object($handlers[$id])) {
-        $multiple_exposed_input = array(0 => NULL);
+        $multiple_exposed_input = [0 => NULL];
         if ($handlers[$id]->multiple_exposed_input()) {
           $multiple_exposed_input = $handlers[$id]->group_multiple_exposed_input($this->exposed_data);
         }
@@ -1368,7 +1368,7 @@ class view {
    *
    * If you only want to view the display, use view::preview() instead.
    */
-  function execute_display($display_id = NULL, $args = array()) {
+  function execute_display($display_id = NULL, $args = []) {
     if (empty($this->current_display) || $this->current_display != $this->choose_display($display_id)) {
       if (!$this->set_display($display_id)) {
         return FALSE;
@@ -1391,7 +1391,7 @@ class view {
    * Can also be called when views are embedded, as this guarantees
    * normalized output.
    */
-  function preview($display_id = NULL, $args = array()) {
+  function preview($display_id = NULL, $args = []) {
     if (empty($this->current_display) || ((!empty($display_id)) && $this->current_display != $display_id)) {
       if (!$this->set_display($display_id)) {
         return FALSE;
@@ -1411,7 +1411,7 @@ class view {
    * Run attachments and let the display do what it needs to do prior
    * to running.
    */
-  function pre_execute($args = array()) {
+  function pre_execute($args = []) {
     $this->old_view[] = views_get_current_view();
     views_set_current_view($this);
     $display_id = $this->current_display;
@@ -1479,7 +1479,7 @@ class view {
    * @param $callbacks
    *   A menu callback array passed from views_menu_alter().
    */
-  function execute_hook_menu($display_id = NULL, &$callbacks = array()) {
+  function execute_hook_menu($display_id = NULL, &$callbacks = []) {
     // Prepare the view with the information we have.
 
     // This was probably already called, but it's good to be safe.
@@ -1641,8 +1641,8 @@ class view {
       return $path;
     }
 
-    $pieces = array();
-    $argument_keys = isset($this->argument) ? array_keys($this->argument) : array();
+    $pieces = [];
+    $argument_keys = isset($this->argument) ? array_keys($this->argument) : [];
     $id = current($argument_keys);
     foreach (explode('/', $path) as $piece) {
       if ($piece != '%') {
@@ -1700,7 +1700,7 @@ class view {
   function get_breadcrumb($set = FALSE) {
     // Now that we've built the view, extract the breadcrumb.
     $base = TRUE;
-    $breadcrumb = array();
+    $breadcrumb = [];
 
     if (!empty($this->build_info['breadcrumb'])) {
       foreach ($this->build_info['breadcrumb'] as $path => $title) {
@@ -1711,7 +1711,7 @@ class view {
           $title = t('Home');
         }
         if ($title) {
-          $breadcrumb[] = l($title, $path, array('html' => TRUE));
+          $breadcrumb[] = l($title, $path, ['html' => TRUE]);
         }
       }
 
@@ -1791,30 +1791,30 @@ class view {
    * Save the view to a configuration file.
    */
   function save() {
-    $config_data = array(
+    $config_data = [
       'name' => $this->name,
       'description' => $this->description,
-    );
+    ];
     // Storage settings are only saved if this view was provided by a module.
     // Otherwise VIEWS_STORAGE_NORMAL is assumed on load.
     if ($this->module) {
       $config_data['module'] = $this->module;
       $config_data['storage'] = VIEWS_STORAGE_OVERRIDE;
     }
-    $config_data += array(
+    $config_data += [
       'tag' => $this->tag,
       'disabled' => (boolean) $this->disabled,
       'base_table' => $this->base_table,
       'human_name' => $this->human_name,
       'core' => $this->core,
-      'display' => array(),
-    );
+      'display' => [],
+    ];
     foreach ($this->display as $display) {
-      $display_config_data = array(
+      $display_config_data = [
         'display_title' => $display->display_title,
         'display_plugin' => $display->display_plugin,
         'display_options' => $display->display_options,
-      );
+      ];
       $config_data['display'][$display->id] = $display_config_data;
     }
     // Ensure we don't include the lock information in the saved config.
@@ -1872,21 +1872,21 @@ class view {
   function clone_view() {
     $clone = clone($this);
 
-    $keys = array('current_display', 'display_handler', 'build_info', 'built', 'executed', 'attachment_before', 'attachment_after', 'field', 'argument', 'filter', 'sort', 'relationship', 'header', 'footer', 'empty', 'query', 'inited', 'style_plugin', 'plugin_name', 'exposed_data', 'exposed_input', 'exposed_widgets', 'many_to_one_tables', 'feed_icon');
+    $keys = ['current_display', 'display_handler', 'build_info', 'built', 'executed', 'attachment_before', 'attachment_after', 'field', 'argument', 'filter', 'sort', 'relationship', 'header', 'footer', 'empty', 'query', 'inited', 'style_plugin', 'plugin_name', 'exposed_data', 'exposed_input', 'exposed_widgets', 'many_to_one_tables', 'feed_icon'];
     foreach ($keys as $key) {
       if (isset($clone->$key)) {
         unset($clone->$key);
       }
     }
     $clone->built = $clone->executed = FALSE;
-    $clone->build_info = array();
+    $clone->build_info = [];
     $clone->attachment_before = '';
     $clone->attachment_after = '';
-    $clone->result = array();
+    $clone->result = [];
 
     // shallow cloning means that all the display objects
     // *were not cloned*. We must clone them ourselves.
-    $displays = array();
+    $displays = [];
     foreach ($clone->display as $id => $display) {
       $displays[$id] = clone $display;
       if (isset($displays[$id]->handler)) {
@@ -1938,7 +1938,7 @@ class view {
       unset($this->query);
     }
 
-    $keys = array('current_display', 'display_handler', 'build_info', 'built', 'executed', 'attachment_before', 'attachment_after', 'field', 'argument', 'filter', 'sort', 'relationship', 'header', 'footer', 'empty', 'query', 'result', 'inited', 'style_plugin', 'plugin_name', 'exposed_data', 'exposed_input', 'many_to_one_tables');
+    $keys = ['current_display', 'display_handler', 'build_info', 'built', 'executed', 'attachment_before', 'attachment_after', 'field', 'argument', 'filter', 'sort', 'relationship', 'header', 'footer', 'empty', 'query', 'result', 'inited', 'style_plugin', 'plugin_name', 'exposed_data', 'exposed_input', 'many_to_one_tables'];
     foreach ($keys as $key) {
       if (isset($this->$key)) {
         unset($this->$key);
@@ -1947,7 +1947,7 @@ class view {
 
     // These keys are checked by the next init, so instead of unsetting them,
     // just set the default values.
-    $keys = array('items_per_page', 'offset', 'current_page');
+    $keys = ['items_per_page', 'offset', 'current_page'];
     foreach ($keys as $key) {
       if (isset($this->$key)) {
         $this->$key = NULL;
@@ -1955,7 +1955,7 @@ class view {
     }
 
     $this->built = $this->executed = FALSE;
-    $this->build_info = array();
+    $this->build_info = [];
     $this->attachment_before = '';
     $this->attachment_after = '';
   }
@@ -1969,7 +1969,7 @@ class view {
   function validate() {
     $this->init_display();
 
-    $errors = array();
+    $errors = [];
     $this->display_errors = NULL;
 
     $current_display = $this->current_display;
@@ -2033,7 +2033,7 @@ class view {
   function is_translatable() {
     // If the view is normal or overridden, use admin string translation.
     // A newly created view won't have a type. Accept this.
-    return (!isset($this->type) || in_array($this->type, array(t('Normal'), t('Overridden')))) ? TRUE : FALSE;
+    return (!isset($this->type) || in_array($this->type, [t('Normal'), t('Overridden')])) ? TRUE : FALSE;
   }
 
   /**
@@ -2201,7 +2201,7 @@ class view {
    *
    * These items may be fields, filters, sort criteria, or arguments.
    */
-  function add_item($display_id, $type, $table, $field, $options = array(), $id = NULL) {
+  function add_item($display_id, $type, $table, $field, $options = [], $id = NULL) {
     $types = views_object_types();
     $this->set_display($display_id);
 
@@ -2211,11 +2211,11 @@ class view {
       $id = $this->generate_item_id($field, $fields);
     }
 
-    $new_item = array(
+    $new_item = [
         'id' => $id,
         'table' => $table,
         'field' => $field,
-      ) + $options;
+      ] + $options;
 
     if (!empty($types[$type]['type'])) {
       $handler_type = $types[$type]['type'];
@@ -2343,7 +2343,7 @@ class views_display {
    */
   var $position = 0;
 
-  function __construct($type, $id, $title, $display_options = array()) {
+  function __construct($type, $id, $title, $display_options = []) {
     $this->display_plugin = $type;
     $this->id = $id;
     $this->display_title = $title;

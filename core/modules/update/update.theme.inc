@@ -16,7 +16,7 @@
 function theme_update_manager_update_form($variables) {
   $form = $variables['form'];
   $last = state_get('update_last_check', 0);
-  $output = theme('update_last_check', array('last' => $last));
+  $output = theme('update_last_check', ['last' => $last]);
   $output .= backdrop_render_children($form);
   return $output;
 }
@@ -41,9 +41,9 @@ function theme_update_last_check($variables) {
 
   $output = '<div class="update checked">';
 
-  $output .= $last ? t('Last checked: @time ago', array('@time' => format_interval(REQUEST_TIME - $last))) : t('Last checked: never') . ' ';
+  $output .= $last ? t('Last checked: @time ago', ['@time' => format_interval(REQUEST_TIME - $last)]) : t('Last checked: never') . ' ';
   if (user_access('administer site configuration')) {
-    $output .= l(t('Check manually'), 'admin/reports/updates/check', array('attributes' => array('class' => array('button', 'button-secondary')), 'query' => backdrop_get_destination()));
+    $output .= l(t('Check manually'), 'admin/reports/updates/check', ['attributes' => ['class' => ['button', 'button-secondary']], 'query' => backdrop_get_destination()]);
   }
   if (module_exists('installer') && user_access('access_site_reports')) {
     // Link to the updates installation page from the available updates report
@@ -71,15 +71,15 @@ function theme_update_report($variables) {
   $data = $variables['data'];
 
   $last = state_get('update_last_check', 0);
-  $output = theme('update_last_check', array('last' => $last));
+  $output = theme('update_last_check', ['last' => $last]);
 
   if (!is_array($data)) {
     $output .= '<p>' . $data . '</p>';
     return $output;
   }
 
-  $header = array();
-  $rows = array();
+  $header = [];
+  $rows = [];
 
   // Create an array of status values keyed by module, theme, or layout name,
   // since we'll need this while generating the report if we have to
@@ -121,12 +121,12 @@ function theme_update_report($variables) {
         break;
     }
 
-    $status_label = theme('update_status_label', array('status' => $project['status']));
+    $status_label = theme('update_status_label', ['status' => $project['status']]);
     if (empty($status_label)) {
       $status_label = check_plain($project['reason']);
     }
     if ($update_link && module_exists('installer')) {
-      $status_label = l($status_label, 'admin/config/system/updates', array('html' => TRUE));
+      $status_label = l($status_label, 'admin/config/system/updates', ['html' => TRUE]);
     }
 
     $project_section = '';
@@ -147,8 +147,8 @@ function theme_update_report($variables) {
     }
 
     $versions_inner = '';
-    $security_class = array();
-    $version_class = array();
+    $security_class = [];
+    $version_class = [];
     if (isset($project['recommended'])) {
       if ($project['status'] != UPDATE_CURRENT || $project['existing_version'] !== $project['recommended']) {
 
@@ -175,32 +175,32 @@ function theme_update_report($variables) {
               ) {
             $version_class[] = 'version-recommended-strong';
           }
-          $versions_inner .= theme('update_version', array('version' => $project['releases'][$project['recommended']], 'tag' => t('Recommended version:'), 'class' => $version_class));
+          $versions_inner .= theme('update_version', ['version' => $project['releases'][$project['recommended']], 'tag' => t('Recommended version:'), 'class' => $version_class]);
         }
 
         // Now, print any security updates.
         if (!empty($project['security updates'])) {
           $security_class[] = 'version-security';
           foreach ($project['security updates'] as $security_update) {
-            $versions_inner .= theme('update_version', array('version' => $security_update, 'tag' => t('Security update:'), 'class' => $security_class));
+            $versions_inner .= theme('update_version', ['version' => $security_update, 'tag' => t('Security update:'), 'class' => $security_class]);
           }
         }
       }
 
       if ($project['recommended'] !== $project['latest_version']) {
-        $versions_inner .= theme('update_version', array('version' => $project['releases'][$project['latest_version']], 'tag' => t('Latest version:'), 'class' => array('version-latest')));
+        $versions_inner .= theme('update_version', ['version' => $project['releases'][$project['latest_version']], 'tag' => t('Latest version:'), 'class' => ['version-latest']]);
       }
       if ($project['install_type'] == 'dev'
           && $project['status'] != UPDATE_CURRENT
           && isset($project['dev_version'])
           && $project['recommended'] !== $project['dev_version']) {
-        $versions_inner .= theme('update_version', array('version' => $project['releases'][$project['dev_version']], 'tag' => t('Development version:'), 'class' => array('version-latest')));
+        $versions_inner .= theme('update_version', ['version' => $project['releases'][$project['dev_version']], 'tag' => t('Development version:'), 'class' => ['version-latest']]);
       }
     }
 
     if (isset($project['also'])) {
       foreach ($project['also'] as $also) {
-        $versions_inner .= theme('update_version', array('version' => $project['releases'][$also], 'tag' => t('Also available:'), 'class' => array('version-also-available')));
+        $versions_inner .= theme('update_version', ['version' => $project['releases'][$also], 'tag' => t('Also available:'), 'class' => ['version-also-available']]);
       }
     }
 
@@ -233,15 +233,15 @@ function theme_update_report($variables) {
           sort($project['disabled']);
           // Make sure we start with a clean slate for each project in the
           // report.
-          $includes_items = array();
+          $includes_items = [];
           $includes_section .= t('Includes:');
-          $includes_items[] = t('Enabled: %includes', array('%includes' => implode(', ', $project['includes'])));
-          $includes_items[] = t('Disabled: %disabled', array('%disabled' => implode(', ', $project['disabled'])));
-          $includes_section .= theme('item_list', array('items' => $includes_items));
+          $includes_items[] = t('Enabled: %includes', ['%includes' => implode(', ', $project['includes'])]);
+          $includes_items[] = t('Disabled: %disabled', ['%disabled' => implode(', ', $project['disabled'])]);
+          $includes_section .= theme('item_list', ['items' => $includes_items]);
         }
         // ...otherwise, render the included modules in a single row.
         else {
-          $includes_section .= t('Includes: %includes', array('%includes' => implode(', ', $project['includes'])));
+          $includes_section .= t('Includes: %includes', ['%includes' => implode(', ', $project['includes'])]);
         }
         $includes_section .= "</div>\n";  // .includes div
       }
@@ -249,27 +249,27 @@ function theme_update_report($variables) {
       if (!empty($project['base_themes'])) {
         $base_section = '<div class="basethemes">';
         asort($project['base_themes']);
-        $base_themes = array();
+        $base_themes = [];
         foreach ($project['base_themes'] as $base_key => $base_theme) {
           switch ($status[$base_key]) {
             case UPDATE_NOT_SECURE:
             case UPDATE_REVOKED:
             case UPDATE_NOT_SUPPORTED:
-              $base_themes[] = t('%base_theme (!base_label)', array('%base_theme' => $base_theme, '!base_label' => theme('update_status_label', array('status' => $status[$base_key]))));
+              $base_themes[] = t('%base_theme (!base_label)', ['%base_theme' => $base_theme, '!base_label' => theme('update_status_label', ['status' => $status[$base_key]])]);
               break;
 
             default:
               $base_themes[] = backdrop_placeholder($base_theme);
           }
         }
-        $base_section .= t('Depends on: !basethemes', array('!basethemes' => implode(', ', $base_themes)));
+        $base_section .= t('Depends on: !basethemes', ['!basethemes' => implode(', ', $base_themes)]);
         $base_section .= "</div>\n";  // .basethemes div
       }
 
       if (!empty($project['sub_themes'])) {
         $sub_section = '<div class="subthemes">';
         sort($project['sub_themes']);
-        $sub_section .= t('Required by: %subthemes', array('%subthemes' => implode(', ', $project['sub_themes'])));
+        $sub_section .= t('Required by: %subthemes', ['%subthemes' => implode(', ', $project['sub_themes'])]);
         $sub_section .= "</div>\n";  // .subthemes div
       }
 
@@ -285,31 +285,31 @@ function theme_update_report($variables) {
     $row .= $info_section;
 
     if (!isset($rows[$project['project_type']])) {
-      $rows[$project['project_type']] = array();
+      $rows[$project['project_type']] = [];
     }
     $row_key = isset($project['title']) ? backdrop_strtolower($project['title']) : backdrop_strtolower($project['name']);
     // Insert project status ID in front of key for sorting purposes.
     $row_key = $project['status'] . $row_key;
-    $rows[$project['project_type']][$row_key] = array(
-      'class' => array($class),
-      'data' => array(
-        array('data' => '<div title="' . $title . '"><span class="element-invisible">' . $title . '</span></div>', 'class' => 'report-icon'),
-        array('data' => $row, 'class' => 'update-data'),
-      ),
-    );
+    $rows[$project['project_type']][$row_key] = [
+      'class' => [$class],
+      'data' => [
+        ['data' => '<div title="' . $title . '"><span class="element-invisible">' . $title . '</span></div>', 'class' => 'report-icon'],
+        ['data' => $row, 'class' => 'update-data'],
+      ],
+    ];
   }
 
-  $project_types = array(
+  $project_types = [
     'core' => t('Backdrop CMS'),
     'module' => t('Modules'),
     'theme' => t('Themes'),
     'layout' => t('Layout templates'),
-  );
+  ];
   foreach ($project_types as $type_name => $type_label) {
     if (!empty($rows[$type_name])) {
       ksort($rows[$type_name]);
       $output .= "\n<h3>" . $type_label . "</h3>\n";
-      $output .= theme('table', array('header' => $header, 'rows' => $rows[$type_name], 'attributes' => array('class' => array('update'))));
+      $output .= theme('table', ['header' => $header, 'rows' => $rows[$type_name], 'attributes' => ['class' => ['update']]]);
     }
   }
   backdrop_add_css(backdrop_get_path('module', 'update') . '/css/update.css');
@@ -340,16 +340,16 @@ function theme_update_version($variables) {
   $version_details = '<span class="version-details">' . l($version['version'], $version['release_link']) . ' ' . $version_date . '</span></span>';
   $version_title = '<span class="version-title">' . $tag . '</span>';
 
-  $links = array();
-  $links['update-download'] = array(
+  $links = [];
+  $links['update-download'] = [
     'title' => t('Download'),
     'href' => $version['download_link'],
-  );
-  $links['update-release-notes'] = array(
+  ];
+  $links['update-release-notes'] = [
     'title' => t('Release notes'),
     'href' => $version['release_link'],
-  );
-  $update_links = theme('links__update_version', array('links' => $links));
+  ];
+  $update_links = theme('links__update_version', ['links' => $links]);
 
   $output  = '<div class="version ' . $class . '">';
   $output .= '  <div class="version-info">' . $version_title . ' ' . $version_details . '</div>';

@@ -17,113 +17,113 @@ function search_views_data() {
   $data['search_index']['table']['group']  = t('Search');
 
   // For other base tables, explain how we join
-  $data['search_index']['table']['join'] = array(
-    'node' => array(
+  $data['search_index']['table']['join'] = [
+    'node' => [
       'left_field' => 'nid',
       'field' => 'sid',
-    ),
-  );
+    ],
+  ];
 
-  $data['search_total']['table']['join'] = array(
-    'node' => array(
+  $data['search_total']['table']['join'] = [
+    'node' => [
       'left_table' => 'search_index',
       'left_field' => 'word',
       'field' => 'word',
-    ),
-    'users' => array(
+    ],
+    'users' => [
       'left_table' => 'search_index',
       'left_field' => 'word',
       'field' => 'word',
-    )
-  );
+    ]
+  ];
 
-  $data['search_dataset']['table']['join'] = array(
-    'node' => array(
+  $data['search_dataset']['table']['join'] = [
+    'node' => [
       'left_table' => 'search_index',
       'left_field' => 'sid',
       'field' => 'sid',
       'extra' => 'search_index.type = search_dataset.type',
       'type' => 'INNER',
-    ),
-    'users' => array(
+    ],
+    'users' => [
       'left_table' => 'search_index',
       'left_field' => 'sid',
       'field' => 'sid',
       'extra' => 'search_index.type = search_dataset.type',
       'type' => 'INNER',
-    ),
-  );
+    ],
+  ];
 
   // ----------------------------------------------------------------
   // Fields
 
   // score
-  $data['search_index']['score'] = array(
+  $data['search_index']['score'] = [
     'title' => t('Score'),
     'help' => t('The score of the search item. This will not be used if the search filter is not also present.'),
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_search_score',
       'click sortable' => TRUE,
       'float' => TRUE,
       'no group by' => TRUE,
-    ),
+    ],
     // Information for sorting on a search score.
-    'sort' => array(
+    'sort' => [
       'handler' => 'views_handler_sort_search_score',
       'no group by' => TRUE,
-    ),
-  );
+    ],
+  ];
 
   // Search node links: forward links.
   $data['search_node_links_from']['table']['group'] = t('Search');
-  $data['search_node_links_from']['table']['join'] = array(
-    'node' => array(
-      'arguments' => array('search_node_links', 'node', 'nid', 'nid', NULL, 'INNER'),
-    ),
-  );
-  $data['search_node_links_from']['sid'] = array(
+  $data['search_node_links_from']['table']['join'] = [
+    'node' => [
+      'arguments' => ['search_node_links', 'node', 'nid', 'nid', NULL, 'INNER'],
+    ],
+  ];
+  $data['search_node_links_from']['sid'] = [
     'title' => t('Links from'),
     'help' => t('Other nodes that are linked from the node.'),
-    'argument' => array(
+    'argument' => [
       'handler' => 'views_handler_argument_node_nid',
-    ),
-    'filter' => array(
+    ],
+    'filter' => [
       'handler' => 'views_handler_filter_equality',
-    ),
-  );
+    ],
+  ];
 
   // Search node links: backlinks.
   $data['search_node_links_to']['table']['group'] = t('Search');
-  $data['search_node_links_to']['table']['join'] = array(
-    'node' => array(
-      'arguments' => array('search_node_links', 'node', 'nid', 'sid', NULL, 'INNER'),
-    ),
-  );
-  $data['search_node_links_to']['nid'] = array(
+  $data['search_node_links_to']['table']['join'] = [
+    'node' => [
+      'arguments' => ['search_node_links', 'node', 'nid', 'sid', NULL, 'INNER'],
+    ],
+  ];
+  $data['search_node_links_to']['nid'] = [
     'title' => t('Links to'),
     'help' => t('Other nodes that link to the node.'),
-    'argument' => array(
+    'argument' => [
       'handler' => 'views_handler_argument_node_nid',
-    ),
-    'filter' => array(
+    ],
+    'filter' => [
       'handler' => 'views_handler_filter_equality',
-    ),
-  );
+    ],
+  ];
 
   // search filter
-  $data['search_index']['keys'] = array(
+  $data['search_index']['keys'] = [
     'title' => t('Search Terms'), // The item it appears as on the UI,
     'help' => t('The terms to search for.'), // The help that appears on the UI,
     // Information for searching terms using the full search syntax
-    'filter' => array(
+    'filter' => [
       'handler' => 'views_handler_filter_search',
       'no group by' => TRUE,
-    ),
-    'argument' => array(
+    ],
+    'argument' => [
       'handler' => 'views_handler_argument_search',
       'no group by' => TRUE,
-    ),
-  );
+    ],
+  ];
 
   return $data;
 }
@@ -134,23 +134,23 @@ function search_views_data() {
 function search_views_plugins() {
   return;
   // DISABLED. This currently doesn't work.
-  return array(
+  return [
     'module' => 'views', // This just tells our themes are elsewhere.
-    'row' => array(
-      'search' => array(
+    'row' => [
+      'search' => [
         'title' => t('Search'),
         'help' => t('Display the results with standard search view.'),
         'handler' => 'views_plugin_row_search_view',
         'theme' => 'views_view_row_search',
         'path' => backdrop_get_path('module', 'views') . '/modules/search', // not necessary for most modules
-        'base' => array('node'), // only works with 'node' as base.
+        'base' => ['node'], // only works with 'node' as base.
         'type' => 'normal',
-      ),
-      'views_handler_argument_search' => array(
+      ],
+      'views_handler_argument_search' => [
         'parent' => 'views_handler_argument',
-      ),
-    ),
-  );
+      ],
+    ],
+  ];
 }
 
 /**
@@ -183,9 +183,9 @@ function template_preprocess_views_view_row_search(&$variables) {
   $variables['url'] = url('node/' . $nid);
   $variables['title'] = check_plain($node->title);
 
-  $info = array();
+  $info = [];
   $info['type'] = node_type_get_name($node);
-  $info['user'] = theme('username', array('account' => $node));
+  $info['user'] = theme('username', ['account' => $node]);
   $info['date'] = format_date($node->changed, 'short');
   $extra = module_invoke_all('node_search_result', $node);
   if (isset($extra) && is_array($extra)) {

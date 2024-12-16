@@ -47,7 +47,7 @@ class views_handler_field_contact_link extends views_handler_field_user_link {
 
     $this->options['alter']['make_link'] = TRUE;
     $this->options['alter']['path'] = 'user/' . $account->uid . '/contact';
-    $this->options['alter']['attributes'] = array('title' => t('Contact %user', array('%user' => $account->name)));
+    $this->options['alter']['attributes'] = ['title' => t('Contact %user', ['%user' => $account->name])];
 
     $text = $this->options['text'];
 

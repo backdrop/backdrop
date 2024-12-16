@@ -67,10 +67,10 @@ function module_load_all($bootstrap = FALSE) {
  *   the list.
  */
 function module_list($refresh = FALSE, $bootstrap_refresh = FALSE, $sort = FALSE, $fixed_list = NULL) {
-  static $list = array(), $sorted_list;
+  static $list = [], $sorted_list;
 
   if (empty($list) || $refresh || $fixed_list) {
-    $list = array();
+    $list = [];
     $sorted_list = NULL;
     if ($fixed_list) {
       foreach ($fixed_list as $name => $module) {
@@ -90,7 +90,7 @@ function module_list($refresh = FALSE, $bootstrap_refresh = FALSE, $sort = FALSE
       else {
         // Not using backdrop_map_assoc() here as that requires common.inc.
         $list = array_keys(system_list('module_enabled'));
-        $list = (!empty($list) ? array_combine($list, $list) : array());
+        $list = (!empty($list) ? array_combine($list, $list) : []);
         // Remove modules that have been moved into core. This prevents loading
         // these .module files, which may otherwise cause duplicate function
         // fatal errors.
@@ -159,11 +159,11 @@ function system_list($type) {
       $lists = $cached->data;
     }
     else {
-      $lists = array(
-        'module_enabled' => array(),
-        'theme' => array(),
-        'filepaths' => array(),
-      );
+      $lists = [
+        'module_enabled' => [],
+        'theme' => [],
+        'filepaths' => [],
+      ];
       // The module name (rather than the filename) is used as the fallback
       // weighting in order to guarantee consistent behavior across different
       // Backdrop installations, which might have modules installed in different
@@ -182,7 +182,7 @@ function system_list($type) {
         }
         // Build a list of filenames so backdrop_get_filename can use it.
         if ($record->status) {
-          $lists['filepaths'][] = array('type' => $record->type, 'name' => $record->name, 'filepath' => $record->filename);
+          $lists['filepaths'][] = ['type' => $record->type, 'name' => $record->name, 'filepath' => $record->filename];
         }
       }
       foreach ($lists['theme'] as $key => $theme) {
@@ -229,7 +229,7 @@ function system_list_reset() {
   backdrop_static_reset('system_list');
   backdrop_static_reset('system_rebuild_module_data');
   backdrop_static_reset('list_themes');
-  cache('bootstrap')->deleteMultiple(array('bootstrap_modules', 'system_list'));
+  cache('bootstrap')->deleteMultiple(['bootstrap_modules', 'system_list']);
 }
 
 /**
@@ -248,7 +248,7 @@ function system_list_reset() {
 function _module_build_dependencies($files) {
   require_once BACKDROP_ROOT . '/core/includes/graph.inc';
   foreach ($files as $filename => $file) {
-    $graph[$file->name]['edges'] = array();
+    $graph[$file->name]['edges'] = [];
     if (isset($file->info['dependencies']) && is_array($file->info['dependencies'])) {
       foreach ($file->info['dependencies'] as $dependency) {
         $dependency_data = backdrop_parse_dependency($dependency);
@@ -258,8 +258,8 @@ function _module_build_dependencies($files) {
   }
   backdrop_depth_first_search($graph);
   foreach ($graph as $module => $data) {
-    $files[$module]->required_by = isset($data['reverse_paths']) ? $data['reverse_paths'] : array();
-    $files[$module]->requires = isset($data['paths']) ? $data['paths'] : array();
+    $files[$module]->required_by = isset($data['reverse_paths']) ? $data['reverse_paths'] : [];
+    $files[$module]->requires = isset($data['paths']) ? $data['paths'] : [];
     $files[$module]->sort = $data['weight'];
   }
   return $files;
@@ -323,7 +323,7 @@ function module_load_install($module) {
  *   The name of the included file, if successful; FALSE otherwise.
  */
 function module_load_include($type, $module, $name = NULL) {
-  static $files = array();
+  static $files = [];
 
   if (!isset($name)) {
     $name = $module;
@@ -450,13 +450,13 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
   // Required for module installation checks.
   include_once BACKDROP_ROOT . '/core/includes/install.inc';
 
-  $modules_installed = array();
-  $modules_enabled = array();
+  $modules_installed = [];
+  $modules_enabled = [];
   foreach ($module_list as $module) {
     // Only process modules that are not already enabled.
-    $existing = db_query("SELECT status FROM {system} WHERE type = :type AND name = :name", array(
+    $existing = db_query("SELECT status FROM {system} WHERE type = :type AND name = :name", [
       ':type' => 'module',
-      ':name' => $module))
+      ':name' => $module])
       ->fetchObject();
     if ($existing->status == 0) {
       // Load the module's code.
@@ -468,7 +468,7 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
       // hook_schema() in particular, can be called while it is being
       // installed.
       db_update('system')
-        ->fields(array('status' => 1))
+        ->fields(['status' => 1])
         ->condition('type', 'module')
         ->condition('name', $module)
         ->execute();
@@ -487,7 +487,7 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
       entity_info_cache_clear();
 
       // Allow modules to react prior to the installation of a module.
-      module_invoke_all('modules_preinstall', array($module));
+      module_invoke_all('modules_preinstall', [$module]);
 
       // Now install the module if necessary.
       if (backdrop_get_installed_schema_version($module, TRUE) == SCHEMA_UNINSTALLED) {
@@ -512,18 +512,18 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
         module_invoke($module, 'install');
         // Record the fact that it was installed.
         $modules_installed[] = $module;
-        watchdog('system', '%module module installed.', array('%module' => $module), WATCHDOG_INFO);
+        watchdog('system', '%module module installed.', ['%module' => $module], WATCHDOG_INFO);
       }
 
       // Allow modules to react prior to the enabling of a module.
-      module_invoke_all('modules_preenable', array($module));
+      module_invoke_all('modules_preenable', [$module]);
 
       // Enable the module.
       module_invoke($module, 'enable');
 
       // Record the fact that it was enabled.
       $modules_enabled[] = $module;
-      watchdog('system', '%module module enabled.', array('%module' => $module), WATCHDOG_INFO);
+      watchdog('system', '%module module enabled.', ['%module' => $module], WATCHDOG_INFO);
     }
   }
 
@@ -596,19 +596,19 @@ function module_disable($module_list, $disable_dependents = TRUE) {
   // Refresh Entity info static cache.
   entity_info_cache_clear();
 
-  $invoke_modules = array();
+  $invoke_modules = [];
 
   foreach ($module_list as $module) {
     if (module_exists($module)) {
       module_load_install($module);
       module_invoke($module, 'disable');
       db_update('system')
-        ->fields(array('status' => 0))
+        ->fields(['status' => 0])
         ->condition('type', 'module')
         ->condition('name', $module)
         ->execute();
       $invoke_modules[] = $module;
-      watchdog('system', '%module module disabled.', array('%module' => $module), WATCHDOG_INFO);
+      watchdog('system', '%module module disabled.', ['%module' => $module], WATCHDOG_INFO);
     }
   }
 
@@ -737,7 +737,7 @@ function module_implements($hook, $sort = FALSE) {
   // Use the advanced backdrop_static() pattern, since this is called very often.
   static $backdrop_static_fast;
   if (!isset($backdrop_static_fast)) {
-    $backdrop_static_fast['implementations'] = &backdrop_static(__FUNCTION__, array());
+    $backdrop_static_fast['implementations'] = &backdrop_static(__FUNCTION__, []);
     $backdrop_static_fast['verified'] = &backdrop_static(__FUNCTION__ . ':verified');
   }
   $implementations = &$backdrop_static_fast['implementations'];
@@ -754,7 +754,7 @@ function module_implements($hook, $sort = FALSE) {
     // Forget all previously "verified" hooks, in case that $implementations
     // were cleared via backdrop_static_reset('module_implements') instead of
     // module_implements(*, *, TRUE).
-    $verified = array();
+    $verified = [];
   }
 
   if (!isset($implementations[$hook])) {
@@ -763,7 +763,7 @@ function module_implements($hook, $sort = FALSE) {
     $implementations['#write_cache'] = TRUE;
     // Discover implementations for this hook.
     $hook_info = module_hook_info();
-    $implementations[$hook] = array();
+    $implementations[$hook] = [];
     $list = module_list(FALSE, FALSE, $sort);
     foreach ($list as $module) {
       $include_file = isset($hook_info[$hook]['group']) && module_load_include('inc', $module, $module . '.' . $hook_info[$hook]['group']);
@@ -838,7 +838,7 @@ function module_implements_reset() {
   // this can quickly lead to module_hook() being called several thousand times
   // per request.
   backdrop_static_reset('module_implements');
-  cache('bootstrap')->set('module_implements', array());
+  cache('bootstrap')->set('module_implements', []);
   backdrop_static_reset('module_hook_info');
   backdrop_static_reset('backdrop_alter');
   cache('bootstrap')->delete('hook_info');
@@ -860,12 +860,12 @@ function module_hook_info() {
   // make sense to support hook groups resp. lazy-loaded include files prior to
   // full bootstrap.
   if (backdrop_bootstrap(NULL, FALSE) != BACKDROP_BOOTSTRAP_FULL) {
-    return array();
+    return [];
   }
   $hook_info = &backdrop_static(__FUNCTION__);
 
   if (!isset($hook_info)) {
-    $hook_info = array();
+    $hook_info = [];
     $cache = cache('bootstrap')->get('hook_info');
     if ($cache === FALSE) {
       // Rebuild the cache and save it.
@@ -968,7 +968,7 @@ function module_invoke_all($hook) {
   $args = func_get_args();
   // Remove $hook from the arguments.
   unset($args[0]);
-  $return = array();
+  $return = [];
   foreach (module_implements($hook) as $module) {
     $function = $module . '_' . $hook;
     if (function_exists($function)) {
@@ -1000,7 +1000,7 @@ function module_invoke_all($hook) {
  * Including it would prevent the core module from being enabled.
  */
 function backdrop_merged_modules() {
-  return array(
+  return [
     'token', // Backdrop 1.1.0.
     'pathauto', // Backdrop 1.1.0.
     'transliteration', // Backdrop 1.3.0.
@@ -1010,7 +1010,7 @@ function backdrop_merged_modules() {
     'field_formatter_settings', // Backdrop 1.13.0.
     'imagecache_token', // Backdrop 1.17.0.
     'fast_token_browser', // Backdrop 1.30.0.
-  );
+  ];
 }
 
 /**
@@ -1018,7 +1018,7 @@ function backdrop_merged_modules() {
  */
 function backdrop_required_modules() {
   $files = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'modules', 'name', 0);
-  $required = array();
+  $required = [];
 
   // An installation profile is required and one must always be loaded.
   $required[] = backdrop_get_profile();
@@ -1116,7 +1116,7 @@ function backdrop_alter($type, &$data, &$context1 = NULL, &$context2 = NULL, &$c
   // cache the list of functions to call, and on subsequent calls, iterate
   // through them quickly.
   if (!isset($functions[$cid])) {
-    $functions[$cid] = array();
+    $functions[$cid] = [];
     $hook = $type . '_alter';
     $modules = module_implements($hook);
     if (!isset($extra_types)) {
@@ -1130,7 +1130,7 @@ function backdrop_alter($type, &$data, &$context1 = NULL, &$context2 = NULL, &$c
     else {
       // For multiple hooks, we need $modules to contain every module that
       // implements at least one of them.
-      $extra_modules = array();
+      $extra_modules = [];
       foreach ($extra_types as $extra_type) {
         $extra_modules = array_merge($extra_modules, module_implements($extra_type . '_alter'));
       }
@@ -1175,7 +1175,7 @@ function backdrop_alter($type, &$data, &$context1 = NULL, &$context2 = NULL, &$c
     // initialized.
     global $theme, $base_theme_info;
     if (isset($theme)) {
-      $theme_keys = array();
+      $theme_keys = [];
       foreach ($base_theme_info as $base) {
         $theme_keys[] = $base->name;
       }
@@ -1215,7 +1215,7 @@ function backdrop_alter($type, &$data, &$context1 = NULL, &$context2 = NULL, &$c
  */
 function module_set_weight($module, $weight) {
   db_update('system')
-    ->fields(array('weight' => $weight))
+    ->fields(['weight' => $weight])
     ->condition('type', 'module')
     ->condition('name', $module)
     ->execute();

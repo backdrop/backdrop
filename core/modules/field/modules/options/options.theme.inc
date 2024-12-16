@@ -39,8 +39,8 @@ function theme_options_none($variables) {
 function theme_options($variables) {
   $element = $variables['element'];
 
-  element_set_attributes($element, array('id'));
-  _form_set_class($element, array('form-options'));
+  element_set_attributes($element, ['id']);
+  _form_set_class($element, ['form-options']);
 
   $classes = &$element['#attributes']['class'];
   $classes[] = 'options-key-type-'. $element['#key_type'];
@@ -85,20 +85,20 @@ function theme_options($variables) {
 
   $output = '';
   $output .= '<div' . backdrop_attributes($element['#attributes']) . '>';
-  $output .= theme('container', array('element' => array(
+  $output .= theme('container', ['element' => [
     '#title' => t('Options'),
     '#collapsible' => FALSE,
     '#children' => $options,
-    '#attributes' => array('class' => array('options')),
-  )));
+    '#attributes' => ['class' => ['options']],
+  ]]);
 
   if (!empty($settings)) {
-    $output .= theme('fieldset', array('element' => array(
+    $output .= theme('fieldset', ['element' => [
       '#title' => t('Option settings'),
       '#collapsible' => FALSE,
       '#children' => $settings,
-      '#attributes' => array('class' => array('option-settings')),
-    )));
+      '#attributes' => ['class' => ['option-settings']],
+    ]]);
   }
   $output .= '</div>';
 

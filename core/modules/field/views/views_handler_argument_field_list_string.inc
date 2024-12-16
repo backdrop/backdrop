@@ -27,7 +27,7 @@ class views_handler_argument_field_list_string extends views_handler_argument_st
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['summary']['contains']['human'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['summary']['contains']['human'] = ['default' => FALSE, 'bool' => TRUE];
 
     return $options;
   }
@@ -35,16 +35,16 @@ class views_handler_argument_field_list_string extends views_handler_argument_st
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
-    $form['summary']['human'] = array(
+    $form['summary']['human'] = [
       '#title' => t('Display list value as human readable'),
       '#type' => 'checkbox',
       '#default_value' => $this->options['summary']['human'],
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[default_action]"]' => array('value' => 'summary'),
-        ),
-      ),
-    );
+      '#states' => [
+        'visible' => [
+          ':input[name="options[default_action]"]' => ['value' => 'summary'],
+        ],
+      ],
+    ];
   }
 
 

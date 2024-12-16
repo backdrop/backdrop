@@ -6,7 +6,7 @@
  * @see http://www.w3.org/TR/html401/sgml/entities.html
  */
 
-$html_entities = array(
+$html_entities = [
   '&Aacute;' => 'Á',
   '&aacute;' => 'á',
   '&Acirc;' => 'Â',
@@ -261,4 +261,4 @@ $html_entities = array(
   '&quot;' => '"',
   // Add apostrophe (XML).
   '&apos;' => "'",
-);
+];

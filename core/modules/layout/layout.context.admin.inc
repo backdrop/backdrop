@@ -49,10 +49,10 @@ function layout_context_add_form($form, &$form_state, Layout $layout = NULL, $co
   $form_state['layout'] = $layout;
   $form_state['context_id'] = $context_id;
 
-  $form['help'] = array(
+  $form['help'] = [
     '#type' => 'help',
     '#markup' => 'Contexts provide additional information to blocks in the layout to display. For example, information from node 5, or the user "administrator" could be made available.',
-  );
+  ];
 
   $contexts = $layout->getContexts();
   if (isset($contexts[$context_id])) {
@@ -64,68 +64,68 @@ function layout_context_add_form($form, &$form_state, Layout $layout = NULL, $co
   }
 
   $all_context_info = _layout_get_all_info('layout_context');
-  backdrop_sort($all_context_info, array('title'));
-  $form['context'] = array(
+  backdrop_sort($all_context_info, ['title']);
+  $form['context'] = [
     '#type' => 'select',
     '#title' => t('Available contexts'),
-    '#options' => array(),
+    '#options' => [],
     '#required' => TRUE,
-    '#parents' => array('context'),
-    '#ajax' => array(
+    '#parents' => ['context'],
+    '#ajax' => [
       'wrapper' => 'context_settings',
       'callback' => 'layout_context_ajax_style',
-    ),
-  );
+    ],
+  ];
   foreach ($all_context_info as $key => $context_info) {
     // @todo: add a "configurable" key to hook_context_info () instead?
-    if (!in_array($key, array('string', 'overrides_path', 'dashboard'))) {
+    if (!in_array($key, ['string', 'overrides_path', 'dashboard'])) {
       $form['context']['#options'][$context_info['name']] = $context_info['title'];
       $form['context']['#default_value'] = isset($handler->plugin) ? $handler->plugin : NULL;
     }
   }
 
-  $form['context_settings'] = array(
+  $form['context_settings'] = [
     '#type' => 'container',
     '#id' => 'context_settings',
-    '#parents' => array('context_settings'),
-  );
+    '#parents' => ['context_settings'],
+  ];
   $form['context_settings']['content'] = layout_context_return_form($form['context_settings'], $form_state);
-  $form['actions'] = array(
+  $form['actions'] = [
     '#type' => 'actions',
-  );
-  $form['load_context_nojs'] = array(
+  ];
+  $form['load_context_nojs'] = [
     '#type' => 'submit',
     '#value' => t('Load context'),
-    '#submit' => array(
+    '#submit' => [
       'layout_context_add_load_context_nojs',
-    ),
-    '#attributes' => array(
-      'class' => array('js-hide'),
-    ),
-  );
-  $form['actions']['add'] = array(
+    ],
+    '#attributes' => [
+      'class' => ['js-hide'],
+    ],
+  ];
+  $form['actions']['add'] = [
     '#type' => 'submit',
     '#name' => 'context_add_button',
     '#value' => $is_new_context ? t('Add context') : t('Save context'),
-    '#submit' => array(
+    '#submit' => [
       'layout_context_add_form_submit',
-    ),
-    '#validate' => array(
+    ],
+    '#validate' => [
       'layout_context_add_form_validate',
-    ),
-    '#ajax' => array(
+    ],
+    '#ajax' => [
       'callback' => 'layout_ajax_form_save_dialog',
-    ),
-  );
-  $form['actions']['cancel'] = array(
+    ],
+  ];
+  $form['actions']['cancel'] = [
     '#type' => 'submit',
     '#value' => t('Cancel'),
-    '#limit_validation_errors' => array(),
-    '#submit' => array('layout_context_add_form_cancel'),
-    '#ajax' => array(
+    '#limit_validation_errors' => [],
+    '#submit' => ['layout_context_add_form_cancel'],
+    '#ajax' => [
       'callback' => 'layout_ajax_context_cancel_dialog',
-    ),
-  );
+    ],
+  ];
   return $form;
 }
 
@@ -150,8 +150,8 @@ function layout_context_relationship_add_form($form, &$form_state, Layout $layou
   // Get contexts from relationships
   $form_state['relevant_info'] = layout_relationships_get_relevant_info($contexts);
 
-  $relevant_relationships = array();
-  $parent_relationship = array();
+  $relevant_relationships = [];
+  $parent_relationship = [];
 
   foreach ($form_state['relevant_info'] as $rid => $info) {
     $relevant_relationships[$rid] = $info['title'];
@@ -174,10 +174,10 @@ function layout_context_relationship_add_form($form, &$form_state, Layout $layou
     $form_state['relationship_id'] = $form_state['values']['context'];
   }
 
-  $form['help'] = array(
+  $form['help'] = [
     '#type' => 'help',
     '#markup' => 'Relationships create contexts from data provided by existing contexts, like the author from node context.',
-  );
+  ];
 
   $current_relationships = $layout->relationships;
   $form_state['relationships'] = $current_relationships;
@@ -189,69 +189,69 @@ function layout_context_relationship_add_form($form, &$form_state, Layout $layou
     $handler = NULL;
   }
   if (!empty($relevant_relationships)) {
-    backdrop_sort($relevant_relationships, array('title'));
-    $form['relationship'] = array(
+    backdrop_sort($relevant_relationships, ['title']);
+    $form['relationship'] = [
       '#type' => 'select',
       '#title' => t('Available context relationships'),
       '#options' => $relevant_relationships,
       '#required' => TRUE,
       '#default_value' => !empty($handler) ? $handler->plugin : NULL,
-      '#parents' => array('relationship'),
-      '#ajax' => array(
+      '#parents' => ['relationship'],
+      '#ajax' => [
         'wrapper' => 'context_settings',
         'callback' => 'layout_context_ajax_style',
-      ),
-    );
+      ],
+    ];
   }
   else {
-    $form['no_relationship'] = array(
+    $form['no_relationship'] = [
       '#markup' => t('No relevant relationships available'),
-    );
+    ];
   }
 
-  $form['context_settings'] = array(
+  $form['context_settings'] = [
     '#type' => 'container',
     '#id' => 'context_settings',
-    '#parents' => array('context_settings'),
-  );
+    '#parents' => ['context_settings'],
+  ];
   $form['context_settings']['content'] = layout_context_return_form($form['context_settings'], $form_state);
-  $form['actions'] = array(
+  $form['actions'] = [
     '#type' => 'actions',
-  );
-  $form['load_relationship_nojs'] = array(
+  ];
+  $form['load_relationship_nojs'] = [
     '#type' => 'submit',
     '#value' => t('Load relationship'),
-    '#submit' => array(
+    '#submit' => [
       'layout_context_add_load_context_nojs',
-    ),
-    '#attributes' => array(
-      'class' => array('js-hide'),
-    ),
-  );
-  $form['actions']['add'] = array(
+    ],
+    '#attributes' => [
+      'class' => ['js-hide'],
+    ],
+  ];
+  $form['actions']['add'] = [
     '#type' => 'submit',
     '#name' => 'relationship_add_button',
     '#access' => !empty($relevant_relationships),
     '#value' => $is_new_context ? t('Add relationship') : t('Save relationship'),
-    '#submit' => array(
+    '#submit' => [
       'layout_context_add_form_submit',
-    ),
-    '#validate' => array(
+    ],
+    '#validate' => [
       'layout_context_add_form_validate',
-    ),
-    '#ajax' => array(
+    ],
+    '#ajax' => [
       'callback' => 'layout_ajax_form_save_dialog',
-    ),
-  );
-  $form['actions']['cancel'] = array(
+    ],
+  ];
+  $form['actions']['cancel'] = [
     '#type' => 'submit',
     '#value' => t('Cancel'),
-    '#limit_validation_errors' => array(),
-    '#submit' => array('layout_context_add_form_cancel'),
-    '#ajax' => array(
+    '#limit_validation_errors' => [],
+    '#submit' => ['layout_context_add_form_cancel'],
+    '#ajax' => [
       'callback' => 'layout_ajax_context_cancel_dialog',
-    ),
-  );
+    ],
+  ];
   return $form;
 }
 
@@ -287,7 +287,7 @@ function layout_context_return_form($form, &$form_state) {
 
   // If no context or relationship has yet been selected, there is no sub-form to display.
   if (!isset($form_state['values']['context']) && !isset($form_state['values']['relationship']) && !isset($form_state['handler'])) {
-    return array();
+    return [];
   }
 
   if (isset($form_state['values']['context'])) {
@@ -352,8 +352,8 @@ function layout_context_add_form_submit($form, &$form_state) {
   layout_set_layout_tempstore($layout);
 
   $form_state['ajax_rebuild_form'] = 'layout_settings_form';
-  $form_state['ajax_rebuild_args'] = array($layout);
-  $form_state['ajax_update'] = array('context_wrapper');
+  $form_state['ajax_rebuild_args'] = [$layout];
+  $form_state['ajax_update'] = ['context_wrapper'];
   $form_state['redirect'] = 'admin/structure/layouts/manage/' . $layout->name . '/configure';
 }
 
@@ -393,7 +393,7 @@ function layout_settings_form_context_remove($form, &$form_state) {
 
   layout_set_layout_tempstore($form_state['layout']);
 
-  $form_state['ajax_update'] = array('context_wrapper');
+  $form_state['ajax_update'] = ['context_wrapper'];
 }
 
 /**
@@ -404,19 +404,19 @@ function layout_settings_form_context_relationship_remove($form, &$form_state) {
   unset($form_state['layout']->relationships[$removed_relationship]);
   layout_set_layout_tempstore($form_state['layout']);
 
-  $form_state['ajax_update'] = array('context_wrapper');
+  $form_state['ajax_update'] = ['context_wrapper'];
 }
 
 /**
  * AJAX handler that cancels the context edit dialog.
  */
 function layout_ajax_context_cancel_dialog($form, $form_state) {
-  $commands = array();
+  $commands = [];
   $commands[] = ajax_command_close_modal_dialog();
 
-  return array(
+  return [
     '#type' => 'ajax',
     '#commands' => $commands,
-  );
+  ];
 }
 

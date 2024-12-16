@@ -16,10 +16,10 @@ class views_plugin_row_fields extends views_plugin_row {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['inline'] = array('default' => array());
-    $options['separator'] = array('default' => '');
-    $options['hide_empty'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['default_field_elements'] = array('default' => TRUE, 'bool' => TRUE);
+    $options['inline'] = ['default' => []];
+    $options['separator'] = ['default' => ''];
+    $options['hide_empty'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['default_field_elements'] = ['default' => TRUE, 'bool' => TRUE];
     return $options;
   }
 
@@ -31,48 +31,48 @@ class views_plugin_row_fields extends views_plugin_row {
     $options = $this->display->handler->get_field_labels();
 
     if (empty($this->options['inline'])) {
-      $this->options['inline'] = array();
+      $this->options['inline'] = [];
     }
 
-    $form['default_field_elements'] = array(
+    $form['default_field_elements'] = [
       '#type' => 'checkbox',
       '#title' => t('Provide default field wrapper elements'),
       '#default_value' => $this->options['default_field_elements'],
       '#description' => t('If not checked, fields that are not configured to customize their HTML elements will get no wrappers at all for their field, label and field + label wrappers. You can use this to quickly reduce the amount of markup the view provides by default, at the cost of making it more difficult to apply CSS.'),
-    );
+    ];
 
-    $form['inline'] = array(
+    $form['inline'] = [
       '#type' => 'checkboxes',
       '#title' => t('Inline fields'),
       '#options' => $options,
       '#default_value' => $this->options['inline'],
       '#description' => t('Inline fields will be displayed next to each other rather than one after another. Note that some fields will ignore this if they are block elements, particularly body fields and other formatted HTML.'),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="row_options[default_field_elements]"]' => array('checked' => TRUE),
-        ),
-      ),
-    );
+      '#states' => [
+        'visible' => [
+          ':input[name="row_options[default_field_elements]"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
 
-    $form['separator'] = array(
+    $form['separator'] = [
       '#title' => t('Separator'),
       '#type' => 'textfield',
       '#size' => 10,
       '#default_value' => isset($this->options['separator']) ? $this->options['separator'] : '',
       '#description' => t('The separator may be placed between inline fields to keep them from squishing up next to each other. You can use HTML in this field.'),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="row_options[default_field_elements]"]' => array('checked' => TRUE),
-        ),
-      ),
-    );
+      '#states' => [
+        'visible' => [
+          ':input[name="row_options[default_field_elements]"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
 
-    $form['hide_empty'] = array(
+    $form['hide_empty'] = [
       '#type' => 'checkbox',
       '#title' => t('Hide empty fields'),
       '#default_value' => $this->options['hide_empty'],
       '#description' => t('Do not display fields, labels or markup for fields that are empty.'),
-    );
+    ];
 
   }
 

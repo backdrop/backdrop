@@ -26,10 +26,10 @@ class LayoutRelationshipAuthorFromNode extends LayoutRelationship {
       $uid = $source_context->data->uid;
       $account = user_load($uid);
     }
-    $user_context = layout_create_context('user', array(
+    $user_context = layout_create_context('user', [
       'position' => $source_context->position,
       'label' => $this->getAdminSummary(),
-    ));
+    ]);
     $user_context->setData($account);
 
     return $user_context;
@@ -42,10 +42,10 @@ class LayoutRelationshipAuthorFromNode extends LayoutRelationship {
     if (!empty($this->settings['context_parent'])) {
       list($label, $value) = explode(':', $this->settings['context_parent']);
       if ($label == 'position') {
-        return t('Author of content in position @position', array('@position' => $value+1));
+        return t('Author of content in position @position', ['@position' => $value+1]);
       }
       else {
-        return t('Author of content @id', array('@id' => $value));
+        return t('Author of content @id', ['@id' => $value]);
       }
     }
     return t('Author of content');

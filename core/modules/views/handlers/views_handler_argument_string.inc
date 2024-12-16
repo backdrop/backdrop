@@ -18,22 +18,22 @@ class views_handler_argument_string extends views_handler_argument {
 
       // Ensure defaults for these, during summaries and stuff:
       $this->operator = 'or';
-      $this->value = array();
+      $this->value = [];
     }
   }
 
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['glossary'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['limit'] = array('default' => 0);
-    $options['case'] = array('default' => 'none');
-    $options['transform_dash'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['break_phrase'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['glossary'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['limit'] = ['default' => 0];
+    $options['case'] = ['default' => 'none'];
+    $options['transform_dash'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['break_phrase'] = ['default' => FALSE, 'bool' => TRUE];
 
     if (!empty($this->definition['many to one'])) {
-      $options['add_table'] = array('default' => FALSE, 'bool' => TRUE);
-      $options['require_value'] = array('default' => FALSE, 'bool' => TRUE);
+      $options['add_table'] = ['default' => FALSE, 'bool' => TRUE];
+      $options['require_value'] = ['default' => FALSE, 'bool' => TRUE];
     }
 
     return $options;
@@ -42,74 +42,74 @@ class views_handler_argument_string extends views_handler_argument {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
-    $form['glossary'] = array(
+    $form['glossary'] = [
       '#type' => 'checkbox',
       '#title' => t('Glossary mode'),
       '#description' => t('Glossary mode applies a limit to the number of characters used in the filter value, which allows the summary view to act as a glossary.'),
       '#default_value' => $this->options['glossary'],
       '#fieldset' => 'more',
-    );
+    ];
 
-    $form['limit'] = array(
+    $form['limit'] = [
       '#type' => 'textfield',
       '#title' => t('Character limit'),
       '#description' => t('How many characters of the filter value to filter against. If set to 1, all fields starting with the first letter in the filter value would be matched.'),
       '#default_value' => $this->options['limit'],
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[glossary]"]' => array('checked' => TRUE),
-        ),
-      ),
+      '#states' => [
+        'visible' => [
+          ':input[name="options[glossary]"]' => ['checked' => TRUE],
+        ],
+      ],
       '#fieldset' => 'more',
-    );
+    ];
 
-    $form['case'] = array(
+    $form['case'] = [
       '#type' => 'select',
       '#title' => t('Case'),
       '#description' => t('When printing the title and summary, how to transform the case of the filter value.'),
-      '#options' => array(
+      '#options' => [
         'none' => t('No transform'),
         'upper' => t('Upper case'),
         'lower' => t('Lower case'),
         'ucfirst' => t('Capitalize first letter'),
         'ucwords' => t('Capitalize each word'),
-      ),
+      ],
       '#default_value' => $this->options['case'],
       '#fieldset' => 'more',
-    );
+    ];
 
-    $form['transform_dash'] = array(
+    $form['transform_dash'] = [
       '#type' => 'checkbox',
       '#title' => t('Transform spaces to dashes in URL'),
       '#default_value' => $this->options['transform_dash'],
       '#fieldset' => 'more',
-    );
+    ];
 
     if (!empty($this->definition['many to one'])) {
-      $form['add_table'] = array(
+      $form['add_table'] = [
         '#type' => 'checkbox',
         '#title' => t('Allow multiple filter values to work together'),
         '#description' => t('If selected, multiple instances of this filter can work together, as though multiple values were supplied to the same filter. This setting is not compatible with the "Reduce duplicates" setting.'),
         '#default_value' => !empty($this->options['add_table']),
         '#fieldset' => 'more',
-      );
+      ];
 
-      $form['require_value'] = array(
+      $form['require_value'] = [
         '#type' => 'checkbox',
         '#title' => t('Do not display items with no value in summary'),
         '#default_value' => !empty($this->options['require_value']),
         '#fieldset' => 'more',
-      );
+      ];
     }
 
     // allow + for or, , for and
-    $form['break_phrase'] = array(
+    $form['break_phrase'] = [
       '#type' => 'checkbox',
       '#title' => t('Allow multiple values'),
       '#description' => t('If selected, users can enter multiple values in the form of 1+2+3 (for OR) or 1,2,3 (for AND).'),
       '#default_value' => !empty($this->options['break_phrase']),
       '#fieldset' => 'more',
-    );
+    ];
   }
 
   /**
@@ -161,7 +161,7 @@ class views_handler_argument_string extends views_handler_argument {
       views_break_phrase_string($argument, $this);
     }
     else {
-      $this->value = array($argument);
+      $this->value = [$argument];
       $this->operator = 'or';
     }
 
@@ -200,9 +200,9 @@ class views_handler_argument_string extends views_handler_argument {
       else {
         $field .= ' = ' . $placeholder;
       }
-      $placeholders = array(
+      $placeholders = [
         $placeholder => $argument,
-      );
+      ];
       $this->query->add_where_expression(0, $field, $placeholders);
     }
     else {
@@ -219,7 +219,7 @@ class views_handler_argument_string extends views_handler_argument {
   }
 
   function get_sort_name() {
-    return t('Alphabetical', array(), array('context' => 'Sort order'));
+    return t('Alphabetical', [], ['context' => 'Sort order']);
   }
 
   function title() {
@@ -232,7 +232,7 @@ class views_handler_argument_string extends views_handler_argument {
       views_break_phrase_string($this->argument, $this);
     }
     else {
-      $this->value = array($this->argument);
+      $this->value = [$this->argument];
       $this->operator = 'or';
     }
 
@@ -240,7 +240,7 @@ class views_handler_argument_string extends views_handler_argument {
       return !empty($this->definition['empty field name']) ? $this->definition['empty field name'] : t('Uncategorized');
     }
 
-    if ($this->value === array(-1)) {
+    if ($this->value === [-1]) {
       return !empty($this->definition['invalid input']) ? $this->definition['invalid input'] : t('Invalid input');
     }
 

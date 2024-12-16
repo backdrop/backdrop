@@ -10,17 +10,17 @@
 class views_plugin_argument_default_user extends views_plugin_argument_default {
   function option_definition() {
     $options = parent::option_definition();
-    $options['user'] = array('default' => '', 'bool' => TRUE, 'translatable' => FALSE);
+    $options['user'] = ['default' => '', 'bool' => TRUE, 'translatable' => FALSE];
 
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
-    $form['user'] = array(
+    $form['user'] = [
       '#type' => 'checkbox',
       '#title' => t('Also look for a node and use the node author'),
       '#default_value' => $this->options['user'],
-    );
+    ];
   }
 
   function convert_options(&$options) {

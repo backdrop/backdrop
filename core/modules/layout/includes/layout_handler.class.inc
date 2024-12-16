@@ -28,13 +28,13 @@ abstract class LayoutHandler {
    *
    * @var array
    */
-  var $settings = array();
+  var $settings = [];
 
-  function __construct($plugin_name, array $data = array()) {
+  function __construct($plugin_name, array $data = []) {
     // Provide a settings array default for all plugins.
-    $data += array(
-      'settings' => array(),
-    );
+    $data += [
+      'settings' => [],
+    ];
 
     $this->plugin = $plugin_name;
     $this->settings = $data['settings'];
@@ -58,9 +58,9 @@ abstract class LayoutHandler {
    * array, such as to be stored by the config management system as JSON.
    */
   function toArray() {
-    return array(
+    return [
       'settings' => $this->settings,
-    );
+    ];
   }
 }
 

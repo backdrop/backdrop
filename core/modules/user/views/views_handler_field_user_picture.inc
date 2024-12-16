@@ -41,34 +41,34 @@ class views_handler_field_user_picture extends views_handler_field {
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['link_photo_to_profile'] = array('default' => TRUE, 'bool' => TRUE);
-    $options['image_style'] = array('default' => '');
+    $options['link_photo_to_profile'] = ['default' => TRUE, 'bool' => TRUE];
+    $options['image_style'] = ['default' => ''];
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
-    $form['link_photo_to_profile'] = array(
+    $form['link_photo_to_profile'] = [
       '#title' => t("Link to user's profile"),
       '#description' => t("Link the user picture to the user's profile"),
       '#type' => 'checkbox',
       '#default_value' => $this->options['link_photo_to_profile'],
-    );
+    ];
 
     if (module_exists('image')) {
       $styles = image_styles();
-      $style_options = array('' => t('Default'));
+      $style_options = ['' => t('Default')];
       foreach ($styles as $style) {
         $style_options[$style['name']] = $style['name'];
       }
 
-      $form['image_style'] = array(
+      $form['image_style'] = [
         '#title' => t('Image style'),
-        '#description' => t('Using <em>Default</em> will use the site-wide image style for user pictures set in the <a href="!account-settings">Account settings</a>.', array('!account-settings' => url('admin/config/people/accounts', array('fragment' => 'edit-personalization')))),
+        '#description' => t('Using <em>Default</em> will use the site-wide image style for user pictures set in the <a href="!account-settings">Account settings</a>.', ['!account-settings' => url('admin/config/people/accounts', ['fragment' => 'edit-personalization'])]),
         '#type' => 'select',
         '#options' => $style_options,
         '#default_value' => $this->options['image_style'],
-      );
+      ];
     }
   }
 
@@ -84,10 +84,10 @@ class views_handler_field_user_picture extends views_handler_field {
         $picture_filepath = config_get('system.core', 'user_picture_default');
       }
       if (file_valid_uri($picture_filepath)) {
-        $output = theme('image_style', array('style_name' => $this->options['image_style'], 'uri' => $picture_filepath));
+        $output = theme('image_style', ['style_name' => $this->options['image_style'], 'uri' => $picture_filepath]);
         if ($this->options['link_photo_to_profile'] && user_access('access user profiles')) {
           $uid = $this->get_value($values, 'uid');
-          $output = l($output, "user/$uid", array('html' => TRUE));
+          $output = l($output, "user/$uid", ['html' => TRUE]);
         }
       }
       else {
@@ -105,7 +105,7 @@ class views_handler_field_user_picture extends views_handler_field {
       $account->name = $this->get_value($values, 'name');
       $account->mail = $this->get_value($values, 'mail');
       $account->picture = $this->get_value($values);
-      $output = theme('user_picture', array('account' => $account));
+      $output = theme('user_picture', ['account' => $account]);
     }
 
     return $output;

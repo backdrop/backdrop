@@ -148,7 +148,7 @@ function config_get($config_file, $option = NULL) {
  * @see t()
  * @see config_get()
  */
-function config_get_translated($config_file, $option = NULL, $args = array(), $options = array()) {
+function config_get_translated($config_file, $option = NULL, $args = [], $options = []) {
   $config = config($config_file);
   return $config->getTranslated($option, $args, $options);
 }
@@ -227,12 +227,12 @@ function config_get_config_directory($type = 'active') {
     // If the path starts with a slash or dot, assume a normal path. If just
     // a directory name is provided, make it relative to the settings.php file.
     $first_character = substr($path, 0, 1);
-    if (!in_array($first_character, array('.', '/', '\\'))) {
+    if (!in_array($first_character, ['.', '/', '\\'])) {
       $path = conf_path() . '/' . $path;
     }
   }
   else {
-    throw new ConfigException(format_string('The configuration directory type "@type" does not exist.', array('@type' => $type)));
+    throw new ConfigException(format_string('The configuration directory type "@type" does not exist.', ['@type' => $type]));
   }
   return $path;
 }
@@ -282,7 +282,7 @@ function config_load_multiple($names, $type = 'active') {
  */
 function config_install_default_config($project, $config_name = NULL) {
   $project_path = NULL;
-  foreach (array('module', 'theme') as $project_type) {
+  foreach (['module', 'theme'] as $project_type) {
     if ($project_path = backdrop_get_path($project_type, $project)) {
       break;
     }
@@ -550,24 +550,24 @@ class Config {
   public static function validateName($name) {
     // The name must be namespaced by owner.
     if (strpos($name, '.') === FALSE) {
-      throw new ConfigNameException(format_string('Missing namespace in Config object name @name.', array(
+      throw new ConfigNameException(format_string('Missing namespace in Config object name @name.', [
         '@name' => $name,
-      )));
+      ]));
     }
     // The name must be shorter than Config::MAX_NAME_LENGTH characters.
     if (strlen($name) > self::MAX_NAME_LENGTH) {
-      throw new ConfigNameException(format_string('Config object name @name exceeds maximum allowed length of @length characters.', array(
+      throw new ConfigNameException(format_string('Config object name @name exceeds maximum allowed length of @length characters.', [
         '@name' => $name,
         '@length' => self::MAX_NAME_LENGTH,
-      )));
+      ]));
     }
 
     // The name must not contain any of the following characters:
     // ? * < > " ' / \ :
     if (preg_match('/[:?*<>"\'\/\\\\]/', $name)) {
-      throw new ConfigNameException(format_string('Invalid character in Config object name @name.', array(
+      throw new ConfigNameException(format_string('Invalid character in Config object name @name.', [
         '@name' => $name,
-      )));
+      ]));
     }
   }
 
@@ -743,7 +743,7 @@ class Config {
   public function getOverride($key) {
     $value = NULL;
     $parts = explode('.', (string) $key);
-    $popped_parts = array();
+    $popped_parts = [];
     while ($parts) {
       $assembled_key = implode('.', $parts);
       if (isset($this->overrides[$assembled_key])) {
@@ -756,7 +756,7 @@ class Config {
           }
           else {
             $value = NULL;
-            $popped_parts = array();
+            $popped_parts = [];
           }
         }
       }
@@ -803,7 +803,7 @@ class Config {
    * @see t()
    * @see get()
    */
-  public function getTranslated($key = '', $args = array(), $options = array()) {
+  public function getTranslated($key = '', $args = [], $options = []) {
     if (empty($key)) {
       return NULL;
     }
@@ -905,7 +905,7 @@ class Config {
       $last_key = array_pop($parts);
       foreach ($parts as $part) {
         if (!isset($data)) {
-          $data[$part] = array();
+          $data[$part] = [];
         }
         $data = &$data[$part];
       }
@@ -984,7 +984,7 @@ class Config {
     $data = $this->storage->read($this->name);
     if ($data === FALSE) {
       $this->isNew = TRUE;
-      $this->replaceData(array());
+      $this->replaceData([]);
     }
     else {
       $this->isNew = FALSE;
@@ -1007,7 +1007,7 @@ class Config {
       $this->load();
     }
     // Ensure config name is saved in the result.
-    $this->data = array_merge(array('_config_name' => $this->name), $this->data);
+    $this->data = array_merge(['_config_name' => $this->name], $this->data);
     $this->storage->write($this->name, $this->data);
     $this->isNew = FALSE;
 
@@ -1030,7 +1030,7 @@ class Config {
    *   The configuration object.
    */
   public function delete() {
-    $this->data = array();
+    $this->data = [];
     $this->storage->delete($this->name);
     $this->isNew = TRUE;
     return $this;
@@ -1278,30 +1278,30 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    * The database schema.
    */
   protected function schema($name) {
-    $schema = array(
+    $schema = [
       'description' => 'Stores the configuration of the site in database tables.',
-      'fields' => array(
-        'name' => array(
+      'fields' => [
+        'name' => [
           'type' => 'varchar',
           'length' => 255,
           'not null' => TRUE,
           'description' => 'The top-level name for the config item. Would be the filename in the ConfigFileStore, minus the .json extension.',
-        ),
-        'data' => array(
+        ],
+        'data' => [
           'type' => 'text',
           'size' => 'big',
           'not null' => TRUE,
           'description' => 'The JSON encoded value of the config item. Same as the contents of a config .json file.',
-        ),
-        'changed' => array(
+        ],
+        'changed' => [
           'type' => 'int',
           'not null' => TRUE,
           'default' => 0,
           'description' => 'The timestamp this config item was last changed',
-        ),
-      ),
-      'primary key' => array('name'),
-    );
+        ],
+      ],
+      'primary key' => ['name'],
+    ];
 
     return $schema;
   }
@@ -1320,10 +1320,10 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    * @throws ConfigStorageException
    */
   public function __construct($db_url) {
-    $matches = array();
+    $matches = [];
     preg_match('/^db:(\/\/(\w*)\/)?(\w+)$/', trim($db_url), $matches);
     if (count($matches) != 4) {
-      throw new ConfigStorageException(t('Invalid database specifier: @db', array('@db' => $db_url)));
+      throw new ConfigStorageException(t('Invalid database specifier: @db', ['@db' => $db_url]));
     }
     $this->table = $matches[3];
     $this->database = $matches[2] ? $matches[2] : 'default';
@@ -1353,10 +1353,10 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
         db_create_table($this->table, $this->schema($this->table));
       }
       catch (\Exception $e) {
-        throw new ConfigStorageException(format_string('The database table %table could not be created: @error', array(
+        throw new ConfigStorageException(format_string('The database table %table could not be created: @error', [
           '%table' => $this->table,
           '@error' => $e->getMessage(),
-        )), 0, $e);
+        ]), 0, $e);
       }
     }
     return TRUE;
@@ -1366,7 +1366,7 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    * {@inheritdoc}
    */
   public function isInitialized() {
-    return db_table_exists($this->table, array('target' => $this->database));
+    return db_table_exists($this->table, ['target' => $this->database]);
   }
 
   /**
@@ -1374,7 +1374,7 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    */
   public function exists($name) {
     try {
-      $query = db_select($this->table, 'c', array('target' => $this->database))
+      $query = db_select($this->table, 'c', ['target' => $this->database])
         ->condition('c.name', $name);
       $query->addExpression('1');
       $value = $query->execute()
@@ -1395,8 +1395,8 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
     if (!$this->exists($name)) {
       return FALSE;
     }
-    $data = db_select($this->table, 'c', array('target' => $this->database))
-      ->fields('c', array('data'))
+    $data = db_select($this->table, 'c', ['target' => $this->database])
+      ->fields('c', ['data'])
       ->condition('c.name', $name)
       ->execute()
       ->fetchField();
@@ -1409,10 +1409,10 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
     }
     // If an error occurs, catch and rethrow with the file name in the message.
     catch (ConfigStorageException $e) {
-      throw new ConfigStorageReadException(format_string("The configuration file \"@filename\" is not properly formatted JSON.\n\nContents:\n<pre>@contents</pre>\n", array(
+      throw new ConfigStorageReadException(format_string("The configuration file \"@filename\" is not properly formatted JSON.\n\nContents:\n<pre>@contents</pre>\n", [
         '@filename' => $name,
         '@contents' => $data,
-      )));
+      ]));
     }
     return $data;
   }
@@ -1421,7 +1421,7 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    * {@inheritdoc}
    */
   public function readMultiple(array $names) {
-    $list = array();
+    $list = [];
     foreach ($names as $name) {
       if ($data = $this->read($name)) {
         $list[$name] = $data;
@@ -1435,16 +1435,16 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    */
   public function write($name, array $data) {
     // Ensure that the config name is included in the written file.
-    $data = array_merge(array('_config_name' => $name), $data);
+    $data = array_merge(['_config_name' => $name], $data);
     $data = $this->encode($data) . "\n";
     try {
-      db_merge($this->table, array('target' => $this->database))
-        ->key(array('name' => $name))
-        ->fields(array(
+      db_merge($this->table, ['target' => $this->database])
+        ->key(['name' => $name])
+        ->fields([
           'name' => $name,
           'data' => $data,
           'changed' => REQUEST_TIME,
-        ))
+        ])
         ->execute();
     }
     catch (\Exception $e) {
@@ -1460,7 +1460,7 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
     if (!$this->exists($name)) {
       return FALSE;
     }
-    db_delete($this->table, array('target' => $this->database))
+    db_delete($this->table, ['target' => $this->database])
       ->condition('name', $name)
       ->execute();
     return TRUE;
@@ -1471,11 +1471,11 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    */
   public function rename($name, $new_name) {
     try {
-      db_delete($this->table, array('target' => $this->database))
+      db_delete($this->table, ['target' => $this->database])
         ->condition('name', $new_name)
         ->execute();
-      db_update($this->table, array('target' => $this->database))
-        ->fields(array('name' => $new_name))
+      db_update($this->table, ['target' => $this->database])
+        ->fields(['name' => $new_name])
         ->condition('name', $name)
         ->execute();
     }
@@ -1489,8 +1489,8 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    * {@inheritdoc}
    */
   public function getModifiedTime($name) {
-    $data = db_select($this->table, 'c', array('target' => $this->database))
-      ->fields('c', array('changed'))
+    $data = db_select($this->table, 'c', ['target' => $this->database])
+      ->fields('c', ['changed'])
       ->condition('c.name', $name)
       ->execute()
       ->fetchField();
@@ -1525,8 +1525,8 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    * {@inheritdoc}
    */
   public function listAll($prefix = '') {
-    $results = db_select($this->table, 'c', array('target' => $this->database))
-      ->fields('c', array('name'))
+    $results = db_select($this->table, 'c', ['target' => $this->database])
+      ->fields('c', ['name'])
       ->condition('c.name', $prefix . '%', 'LIKE')
       ->execute()
       ->fetchAllAssoc('name', PDO::FETCH_ASSOC);
@@ -1537,7 +1537,7 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    * {@inheritdoc}
    */
   public function deleteAll($prefix = '') {
-    $query = db_delete($this->table, array('target' => $this->database));
+    $query = db_delete($this->table, ['target' => $this->database]);
     if ($prefix) {
       $query->condition('name', $prefix . '%', 'LIKE');
     }
@@ -1569,10 +1569,10 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
       file_unmanaged_delete_recursive($temp_directory);
     }
     catch (\Exception $e) {
-      watchdog('config', 'Could not extract the archive @uri: @error', array(
+      watchdog('config', 'Could not extract the archive @uri: @error', [
         '@uri' => $file_uri,
         '@error' => $e->getMessage(),
-      ), WATCHDOG_ERROR);
+      ], WATCHDOG_ERROR);
       throw new ConfigStorageException($e->getMessage(), 0, $e);
     }
     return TRUE;
@@ -1584,7 +1584,7 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
   public function exportArchive($archive_file_uri) {
     $temp_directory = file_create_filename('config', file_directory_temp());
     file_prepare_directory($temp_directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS);
-    $data = db_select($this->table, 'c', array('target' => $this->database))
+    $data = db_select($this->table, 'c', ['target' => $this->database])
       ->fields('c')
       ->execute()
       ->fetchAllAssoc('name', PDO::FETCH_ASSOC);
@@ -1594,7 +1594,7 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
 
     // And tar it up.
     $archiver = new ArchiverTar($archive_file_uri);
-    $config_files = array();
+    $config_files = [];
     foreach (array_keys($data) as $config_name) {
       $config_files[] = $temp_directory . '/' . $config_name . '.json';
     }
@@ -1636,9 +1636,9 @@ class ConfigFileStorage implements ConfigStorageInterface {
    */
   public function initializeStorage() {
     if (!file_prepare_directory($this->directory, FILE_CREATE_DIRECTORY | FILE_MODIFY_PERMISSIONS)) {
-      throw new ConfigStorageException(format_string('The directory <code>@directory</code> could not be created or could not be made writable.', array(
+      throw new ConfigStorageException(format_string('The directory <code>@directory</code> could not be created or could not be made writable.', [
         '@directory' => $this->directory,
-      )));
+      ]));
     }
     // No need to create htaccess files if not running Apache.
     if (backdrop_is_apache()) {
@@ -1687,10 +1687,10 @@ class ConfigFileStorage implements ConfigStorageInterface {
     }
     // If an error occurs, catch and rethrow with the file name in the message.
     catch (ConfigStorageException $e) {
-      throw new ConfigStorageReadException(format_string("The configuration file \"@filename\" is not properly formatted JSON.\n\nContents:\n<pre>@contents</pre>\n", array(
+      throw new ConfigStorageReadException(format_string("The configuration file \"@filename\" is not properly formatted JSON.\n\nContents:\n<pre>@contents</pre>\n", [
         '@filename' => $name,
         '@contents' => $data,
-      )));
+      ]));
     }
     return $data;
   }
@@ -1699,7 +1699,7 @@ class ConfigFileStorage implements ConfigStorageInterface {
    * {@inheritdoc}
    */
   public function readMultiple(array $names) {
-    $list = array();
+    $list = [];
     foreach ($names as $name) {
       if ($data = $this->read($name)) {
         $list[$name] = $data;
@@ -1713,7 +1713,7 @@ class ConfigFileStorage implements ConfigStorageInterface {
    */
   public function write($name, array $data) {
     // Ensure that the config name is included in the written file.
-    $data = array_merge(array('_config_name' => $name), $data);
+    $data = array_merge(['_config_name' => $name], $data);
     $data = $this->encode($data) . "\n";
     $file_path = $this->getFilePath($name);
     $status = @file_put_contents($file_path, $data);
@@ -1828,7 +1828,7 @@ class ConfigFileStorage implements ConfigStorageInterface {
       }
     }
     catch (\Exception $e) {
-      watchdog('config', 'Could not extract the archive @uri: @error', array('@uri' => $file_uri, '@error' => $e->getMessage()), WATCHDOG_ERROR);
+      watchdog('config', 'Could not extract the archive @uri: @error', ['@uri' => $file_uri, '@error' => $e->getMessage()], WATCHDOG_ERROR);
       throw new ConfigStorageException($e->getMessage(), 0, $e);
     }
     return TRUE;
@@ -1839,7 +1839,7 @@ class ConfigFileStorage implements ConfigStorageInterface {
    */
   public function exportArchive($file_uri) {
     $archiver = new ArchiverTar($file_uri);
-    $config_files = array();
+    $config_files = [];
     foreach ($this->listAll() as $config_name) {
       $config_files[] = $this->directory . '/' . $config_name . '.json';
     }

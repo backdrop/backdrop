@@ -105,10 +105,10 @@ class TaxonomyTerm extends Entity {
    * Implements EntityInterface::uri()
    */
   public function uri() {
-    return array(
+    return [
       'path' => 'taxonomy/term/' . $this->tid,
-      'options' => array(),
-    );
+      'options' => [],
+    ];
   }
 
   /**
@@ -147,7 +147,7 @@ class TaxonomyTerm extends Entity {
     if ($op == 'create') {
       return self::createAccess($this->bundle(), $account);
     }
-    elseif (!in_array($op, array('view', 'update', 'delete'), TRUE)) {
+    elseif (!in_array($op, ['view', 'update', 'delete'], TRUE)) {
       // If the $op was not one of the supported ones, we return access denied.
       return FALSE;
     }
@@ -189,7 +189,7 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
 
     // Save new terms with no parents by default.
     if (!isset($entity->parent)) {
-      $entity->parent = array(0);
+      $entity->parent = [0];
     }
     return $entity;
   }
@@ -197,7 +197,7 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
   /**
    * Overrides EntityDatabaseStorageController::buildQuery().
    */
-  protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
+  protected function buildQuery($ids, $conditions = [], $revision_id = FALSE) {
     $query = parent::buildQuery($ids, $conditions, $revision_id);
     $query->addTag('translatable');
     $query->addTag('taxonomy_term_access');
@@ -217,7 +217,7 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
   /**
    * Overrides EntityDatabaseStorageController::cacheGet().
    */
-  protected function cacheGet($ids, $conditions = array()) {
+  protected function cacheGet($ids, $conditions = []) {
     $terms = parent::cacheGet($ids, $conditions);
     // Name matching is case insensitive, note that with some collations
     // LOWER() and backdrop_strtolower() may return different results.
@@ -237,7 +237,7 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
    */
   protected function postDelete($entities) {
     // See if any of the term's children are about to be become orphans.
-    $orphans = array();
+    $orphans = [];
     foreach (array_keys($entities) as $tid) {
       if ($children = taxonomy_term_load_children($tid)) {
         foreach ($children as $child) {
@@ -276,13 +276,13 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
         ->execute();
 
       $query = db_insert('taxonomy_term_hierarchy')
-        ->fields(array('tid', 'parent'));
+        ->fields(['tid', 'parent']);
 
       foreach ($entity->parent as $parent) {
-        $query->values(array(
+        $query->values([
           'tid' => $entity->tid,
           'parent' => $parent
-        ));
+        ]);
       }
       $query->execute();
     }
@@ -310,10 +310,10 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
     $langcode = $langcode ? $langcode : $language_content->langcode;
 
     // Remove previously built content, if exists.
-    $term->content = array();
+    $term->content = [];
 
     // Allow modules to change the display mode.
-    $view_mode = key(entity_view_mode_prepare('taxonomy_term', array($term->tid => $term), $view_mode, $langcode));
+    $view_mode = key(entity_view_mode_prepare('taxonomy_term', [$term->tid => $term], $view_mode, $langcode));
 
     // Add the term description if the term has one and it is visible.
     $type = 'taxonomy_term';
@@ -321,20 +321,20 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
     $settings = field_view_mode_settings($type, $entity_ids[2]);
     $fields = field_extra_fields_get_display($type, $entity_ids[2], $view_mode);
     if (!empty($term->description) && isset($fields['description']) && $fields['description']['visible']) {
-      $term->content['description'] = array(
+      $term->content['description'] = [
         '#markup' => check_markup($term->description, $term->format, '', TRUE),
         '#weight' => $fields['description']['weight'],
         '#prefix' => '<div class="taxonomy-term-description">',
         '#suffix' => '</div>',
-      );
+      ];
     }
 
     // Build fields content.
     // In case of a multiple view, taxonomy_term_view_multiple() already ran the
     // 'prepare_view' step. An internal flag prevents the operation from running
     // twice.
-    field_attach_prepare_view('taxonomy_term', array($term->tid => $term), $view_mode, $langcode);
-    entity_prepare_view('taxonomy_term', array($term->tid => $term), $langcode);
+    field_attach_prepare_view('taxonomy_term', [$term->tid => $term], $view_mode, $langcode);
+    entity_prepare_view('taxonomy_term', [$term->tid => $term], $langcode);
     $term->content += field_attach_view('taxonomy_term', $term, $view_mode, $langcode);
 
     // Allow modules to make their own additions to the taxonomy term.
@@ -343,7 +343,7 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
 
     // Make sure the current display mode is stored if no module has already
     // populated the related key.
-    $term->content += array('#view_mode' => $view_mode);
+    $term->content += ['#view_mode' => $view_mode];
   }
 
   /**
@@ -353,7 +353,7 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
     global $language_content;
     $langcode = $langcode ? $langcode : $language_content->langcode;
 
-    $view = array();
+    $view = [];
     foreach ($terms as $term) {
       /* @var TaxonomyTerm $term */
       // Populate $term->content with a render() array.
@@ -363,19 +363,19 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
       // We don't need duplicate rendering info in $term->content.
       unset($term->content);
 
-      $build += array(
+      $build += [
         '#theme' => 'taxonomy_term',
         '#term' => $term,
         '#view_mode' => $view_mode,
         '#language' => $langcode,
         '#page' => $page,
-      );
+      ];
 
       $build['#attached']['css'][] = backdrop_get_path('module', 'taxonomy') . '/css/taxonomy.css';
 
       // Allow modules to modify the structured taxonomy term.
       $type = 'taxonomy_term';
-      backdrop_alter(array('taxonomy_term_view', 'entity_view'), $build, $type);
+      backdrop_alter(['taxonomy_term_view', 'entity_view'], $build, $type);
       $view[$type][$term->id()] = $build;
     }
 

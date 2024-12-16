@@ -23,15 +23,15 @@ class views_handler_filter_node_tnid extends views_handler_filter {
    * Provide simple boolean operator
    */
   function operator_form(&$form, &$form_state) {
-    $form['operator'] = array(
+    $form['operator'] = [
       '#type' => 'radios',
       '#title' => t('Include untranslated content'),
       '#default_value' => $this->operator,
-      '#options' => array(
+      '#options' => [
         1 => t('Yes'),
         0 => t('No'),
-      ),
-    );
+      ],
+    ];
   }
 
   function can_expose() { return FALSE; }

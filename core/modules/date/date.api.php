@@ -79,7 +79,7 @@ function hook_date_formatter_dates_alter(&$dates, $context) {
   $all_day1 = '';
   $all_day2 = '';
   if ($format != 'format_interval' && $is_all_day) {
-    $all_day1 = theme('date_all_day', array(
+    $all_day1 = theme('date_all_day', [
       'field' => $field,
       'instance' => $instance,
       'which' => 'date1',
@@ -87,8 +87,8 @@ function hook_date_formatter_dates_alter(&$dates, $context) {
       'date2' => $date2,
       'format' => $format,
       'entity_type' => $entity_type,
-      'entity' => $entity));
-    $all_day2 = theme('date_all_day', array(
+      'entity' => $entity]);
+    $all_day2 = theme('date_all_day', [
       'field' => $field,
       'instance' => $instance,
       'which' => 'date2',
@@ -96,7 +96,7 @@ function hook_date_formatter_dates_alter(&$dates, $context) {
       'date2' => $date2,
       'format' => $format,
       'entity_type' => $entity_type,
-      'entity' => $entity));
+      'entity' => $entity]);
     $dates['value']['formatted_time'] = theme('date_all_day_label');
     $dates['value2']['formatted_time'] = theme('date_all_day_label');
     $dates['value']['formatted'] = $all_day1;
@@ -271,13 +271,13 @@ function hook_date_select_process_alter(&$element, &$form_state, $context) {
   // Hide or show the element in reaction to the all_day status for the element.
   $all_day_id = !empty($element['#date_all_day_id']) ? $element['#date_all_day_id'] : '';
   if ($all_day_id != '') {
-    foreach (array('hour', 'minute', 'second', 'ampm') as $field) {
+    foreach (['hour', 'minute', 'second', 'ampm'] as $field) {
       if (array_key_exists($field, $element)) {
-        $element[$field]['#states'] = array(
-          'visible' => array(
-            'input[name="' . $all_day_id . '"]' => array('checked' => FALSE),
-          ),
-        );
+        $element[$field]['#states'] = [
+          'visible' => [
+            'input[name="' . $all_day_id . '"]' => ['checked' => FALSE],
+          ],
+        ];
       }
     }
   }
@@ -300,11 +300,11 @@ function hook_date_popup_process_alter(&$element, &$form_state, $context) {
   // Hide or show the element in reaction to the all_day status for the element.
   $all_day_id = !empty($element['#date_all_day_id']) ? $element['#date_all_day_id'] : '';
   if ($all_day_id != '' && array_key_exists('time', $element)) {
-    $element['time']['#states'] = array(
-      'visible' => array(
-        'input[name="' . $all_day_id . '"]' => array('checked' => FALSE),
-      ),
-    );
+    $element['time']['#states'] = [
+      'visible' => [
+        'input[name="' . $all_day_id . '"]' => ['checked' => FALSE],
+      ],
+    ];
   }
 }
 
@@ -330,10 +330,10 @@ function hook_date_combo_process_alter(&$element, &$form_state, $context) {
   // Add a date repeat form element, if needed.
   // We delayed until this point so we don't bother adding it to hidden fields.
   if ($instance['settings']['extend']) {
-    $element['another_element'] = array(
+    $element['another_element'] = [
       '#type' => 'checkbox',
       '#title' => t('New option on the date field'),
-    );
+    ];
   }
 }
 
@@ -389,15 +389,15 @@ function hook_date_field_settings_form_alter(&$form, $context) {
   $instance = $context['instance'];
   $has_data = $context['has_data'];
 
-  $form['repeat'] = array(
+  $form['repeat'] = [
     '#type' => 'select',
     '#title' => t('Repeating date'),
     '#default_value' => $field['settings']['repeat'],
-    '#options' => array(0 => t('No'), 1 => t('Yes')),
-    '#attributes' => array('class' => array('container-inline')),
+    '#options' => [0 => t('No'), 1 => t('Yes')],
+    '#attributes' => ['class' => ['container-inline']],
     '#description' => t("Repeating dates use an 'Unlimited' number of values. Instead of the 'Add more' button, they include a form to select when and how often the date should repeat."),
     '#disabled' => $has_data,
-  );
+  ];
 }
 
 /**
@@ -415,11 +415,11 @@ function hook_date_field_settings_form_alter(&$form, $context) {
 function hook_date_field_instance_settings_form_alter(&$form, $context) {
   $field = $context['field'];
   $instance = $context['instance'];
-  $form['new_setting'] = array(
+  $form['new_setting'] = [
     '#type' => 'textfield',
     '#default_value' => '',
     '#title' => t('My new setting'),
-  );
+  ];
 }
 
 /**
@@ -437,11 +437,11 @@ function hook_date_field_instance_settings_form_alter(&$form, $context) {
 function hook_date_field_widget_settings_form_alter(&$form, $context) {
   $field = $context['field'];
   $instance = $context['instance'];
-  $form['new_setting'] = array(
+  $form['new_setting'] = [
     '#type' => 'textfield',
     '#default_value' => '',
     '#title' => t('My new setting'),
-  );
+  ];
 }
 
 /**
@@ -466,16 +466,16 @@ function hook_date_field_formatter_settings_form_alter(&$form, &$form_state, $co
   $display = $instance['display'][$view_mode];
   $formatter = $display['type'];
   if ($formatter == 'date_default') {
-    $form['show_repeat_rule'] = array(
+    $form['show_repeat_rule'] = [
       '#title' => t('Repeat rule:'),
       '#type' => 'select',
-      '#options' => array(
+      '#options' => [
         'show' => t('Show repeat rule'),
-        'hide' => t('Hide repeat rule')),
+        'hide' => t('Hide repeat rule')],
       '#default_value' => $field['settings']['show_repeat_rule'],
       '#access' => $field['settings']['repeat'],
       '#weight' => 5,
-    );
+    ];
   }
 }
 

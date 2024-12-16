@@ -11,7 +11,7 @@
  */
 class views_plugin_pager_none extends views_plugin_pager {
 
-  function init(&$view, &$display, $options = array()) {
+  function init(&$view, &$display, $options = []) {
     parent::init($view, $display, $options);
 
     // If the pager is set to none, then it should show all items.
@@ -20,14 +20,14 @@ class views_plugin_pager_none extends views_plugin_pager {
 
   function summary_title() {
     if (!empty($this->options['offset'])) {
-      return t('All items, skip @skip', array('@skip' => $this->options['offset']));
+      return t('All items, skip @skip', ['@skip' => $this->options['offset']]);
     }
     return t('All items');
   }
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['offset'] = array('default' => 0);
+    $options['offset'] = ['default' => 0];
 
     return $options;
   }
@@ -37,13 +37,13 @@ class views_plugin_pager_none extends views_plugin_pager {
    */
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
-    $form['offset'] = array(
+    $form['offset'] = [
       '#type' => 'number',
       '#min' => '0',
       '#title' => t('Offset'),
       '#description' => t('The number of items to skip. For example, if this field is 3, the first 3 items will be skipped and not displayed.'),
       '#default_value' => $this->options['offset'],
-    );
+    ];
   }
 
   function use_pager() {

@@ -31,11 +31,11 @@ function field_token_info_alter(&$info) {
         continue;
       }
 
-      $info['tokens'][$token_type][$field_name] = array(
+      $info['tokens'][$token_type][$field_name] = [
         // Note that label and description have already been sanitized by _field_token_info().
         'name' => $field['label'],
         'description' => $field['description'],
-      );
+      ];
     }
   }
 }
@@ -43,8 +43,8 @@ function field_token_info_alter(&$info) {
 /**
  * Implements hook_tokens().
  */
-function field_tokens($type, $tokens, array $data = array(), array $options = array()) {
-  $replacements = array();
+function field_tokens($type, $tokens, array $data = [], array $options = []) {
+  $replacements = [];
   $sanitize = !empty($options['sanitize']);
   $langcode = isset($options['language']) ? $options['language']->langcode : NULL;
 
@@ -108,7 +108,7 @@ function field_pre_render_token(&$elements) {
     foreach ($deltas as $index => $delta) {
       // Do not add a suffix to the last item.
       if ($index < ($count - 1)) {
-        $elements[$delta] += array('#suffix' => $join);
+        $elements[$delta] += ['#suffix' => $join];
       }
     }
   }
@@ -128,7 +128,7 @@ function _field_token_info($field_name = NULL) {
       $info = $cached->data;
     }
     else {
-      $info = array();
+      $info = [];
 
       $fields = field_info_fields();
       $instances = field_info_instances();
@@ -146,7 +146,7 @@ function _field_token_info($field_name = NULL) {
             }
 
             $info[$key]['token types'][] = $token_type;
-            $info[$key] += array('labels' => array(), 'bundles' => array());
+            $info[$key] += ['labels' => [], 'bundles' => []];
 
             // Find which label is most commonly used.
             foreach ($field['bundles'][$entity_type] as $bundle) {
@@ -170,9 +170,9 @@ function _field_token_info($field_name = NULL) {
           $info[$key]['label'] = check_plain(key($labels));
 
           // Generate a description for the token.
-          $info[$key]['description'] = t('@type field.', array('@type' => $type_info[$field['type']]['label']));
-          if ($also_known_as = array_unique(array_diff($info[$key]['labels'], array($info[$key]['label'])))) {
-            $info[$key]['description'] .= ' ' . t('Also known as %labels.', array('%labels' => implode(', ', $also_known_as)));
+          $info[$key]['description'] = t('@type field.', ['@type' => $type_info[$field['type']]['label']]);
+          if ($also_known_as = array_unique(array_diff($info[$key]['labels'], [$info[$key]['label']]))) {
+            $info[$key]['description'] .= ' ' . t('Also known as %labels.', ['%labels' => implode(', ', $also_known_as)]);
           }
         }
       }

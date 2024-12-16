@@ -25,16 +25,16 @@
  */
 function hook_telemetry_info() {
   // If this were in my_module.module, "project" would assume to be "my_module".
-  $info['my_module_setting_1'] = array(
+  $info['my_module_setting_1'] = [
     'label' => t('My module setting 1'),
     'description' => t('Some information about what setting 1 is.'),
-  );
+  ];
   // If this were in submodule.module, specify the project name explicitly.
-  $info['my_module_submodule_setting_2'] = array(
+  $info['my_module_submodule_setting_2'] = [
     'label' => t('Submodule setting 2'),
     'description' => t('A description describing this setting of a sub-module.'),
     'project' => 'my_module',
-  );
+  ];
   return $info;
 }
 

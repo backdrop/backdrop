@@ -80,7 +80,7 @@ function date_type_format($type) {
 function date_month_names_untranslated() {
   static $month_names;
   if (empty($month_names)) {
-    $month_names = array(
+    $month_names = [
       1 => 'January',
       2 => 'February',
       3 => 'March',
@@ -93,7 +93,7 @@ function date_month_names_untranslated() {
       10 => 'October',
       11 => 'November',
       12 => 'December',
-    );
+    ];
   }
   return $month_names;
 }
@@ -109,11 +109,11 @@ function date_month_names_untranslated() {
  *   An array of month names.
  */
 function date_month_names($required = FALSE) {
-  $month_names = array();
+  $month_names = [];
   foreach (date_month_names_untranslated() as $key => $month) {
-    $month_names[$key] = t($month, array(), array('context' => 'Long month name'));
+    $month_names[$key] = t($month, [], ['context' => 'Long month name']);
   }
-  $none = array('' => '');
+  $none = ['' => ''];
   return !$required ? $none + $month_names : $month_names;
 }
 
@@ -130,16 +130,16 @@ function date_month_names($required = FALSE) {
  *   An array of month abbreviations.
  */
 function date_month_names_abbr($required = FALSE, $length = 3) {
-  $month_names = array();
+  $month_names = [];
   foreach (date_month_names_untranslated() as $key => $month) {
     if ($length == 3) {
-      $month_names[$key] = t(substr($month, 0, $length), array());
+      $month_names[$key] = t(substr($month, 0, $length), []);
     }
     else {
-      $month_names[$key] = t(substr($month, 0, $length), array(), array('context' => 'month_abbr'));
+      $month_names[$key] = t(substr($month, 0, $length), [], ['context' => 'month_abbr']);
     }
   }
-  $none = array('' => '');
+  $none = ['' => ''];
   return !$required ? $none + $month_names : $month_names;
 }
 
@@ -155,7 +155,7 @@ function date_month_names_abbr($required = FALSE, $length = 3) {
 function date_week_days_untranslated() {
   static $weekdays;
   if (empty($weekdays)) {
-    $weekdays = array(
+    $weekdays = [
       'Sunday',
       'Monday',
       'Tuesday',
@@ -163,7 +163,7 @@ function date_week_days_untranslated() {
       'Thursday',
       'Friday',
       'Saturday',
-    );
+    ];
   }
   return $weekdays;
 }
@@ -179,11 +179,11 @@ function date_week_days_untranslated() {
  *   An array of week day names
  */
 function date_week_days($required = FALSE) {
-  $weekdays = array();
+  $weekdays = [];
   foreach (date_week_days_untranslated() as $key => $day) {
-    $weekdays[$key] = t($day, array(), array('context' => ''));
+    $weekdays[$key] = t($day, [], ['context' => '']);
   }
-  $none = array('' => '');
+  $none = ['' => ''];
   return !$required ? $none + $weekdays : $weekdays;
 }
 
@@ -200,7 +200,7 @@ function date_week_days($required = FALSE) {
  *   An array of week day abbreviations
  */
 function date_week_days_abbr($required = FALSE, $length = 3) {
-  $weekdays = array();
+  $weekdays = [];
   switch ($length) {
     case 1:
       $context = 'day_abbr1';
@@ -215,9 +215,9 @@ function date_week_days_abbr($required = FALSE, $length = 3) {
       break;
   }
   foreach (date_week_days_untranslated() as $key => $day) {
-    $weekdays[$key] = t(substr($day, 0, $length), array(), array('context' => $context));
+    $weekdays[$key] = t(substr($day, 0, $length), [], ['context' => $context]);
   }
-  $none = array('' => '');
+  $none = ['' => ''];
   return !$required ? $none + $weekdays : $weekdays;
 }
 
@@ -263,7 +263,7 @@ function date_years($start = 0, $end = 0, $required = FALSE) {
   if (empty($end)) {
     $end = intval(date('Y', REQUEST_TIME) + 3);
   }
-  $none = array(0 => '');
+  $none = [0 => ''];
   return !$required ? $none + backdrop_map_assoc(range($start, $end)) : backdrop_map_assoc(range($start, $end));
 }
 
@@ -291,7 +291,7 @@ function date_days($required = FALSE, $month = NULL, $year = NULL) {
   if (empty($max)) {
     $max = 31;
   }
-  $none = array(0 => '');
+  $none = [0 => ''];
   return !$required ? $none + backdrop_map_assoc(range(1, $max)) : backdrop_map_assoc(range(1, $max));
 }
 
@@ -308,7 +308,7 @@ function date_days($required = FALSE, $month = NULL, $year = NULL) {
  *   An array of hours in the selected format.
  */
 function date_hours($format = 'H', $required = FALSE) {
-  $hours = array();
+  $hours = [];
   if ($format == 'h' || $format == 'g') {
     $min = 1;
     $max = 12;
@@ -320,7 +320,7 @@ function date_hours($format = 'H', $required = FALSE) {
   for ($i = $min; $i <= $max; $i++) {
     $hours[$i] = $i < 10 && ($format == 'H' || $format == 'h') ? "0$i" : $i;
   }
-  $none = array('' => '');
+  $none = ['' => ''];
   return !$required ? $none + $hours : $hours;
 }
 
@@ -340,7 +340,7 @@ function date_hours($format = 'H', $required = FALSE) {
  *   An array of minutes in the selected format.
  */
 function date_minutes($format = 'i', $required = FALSE, $increment = 1) {
-  $minutes = array();
+  $minutes = [];
   // Ensure $increment has a value so we don't loop endlessly.
   if (empty($increment)) {
     $increment = 1;
@@ -348,7 +348,7 @@ function date_minutes($format = 'i', $required = FALSE, $increment = 1) {
   for ($i = 0; $i < 60; $i += $increment) {
     $minutes[$i] = $i < 10 && $format == 'i' ? "0$i" : $i;
   }
-  $none = array('' => '');
+  $none = ['' => ''];
   return !$required ? $none + $minutes : $minutes;
 }
 
@@ -368,7 +368,7 @@ function date_minutes($format = 'i', $required = FALSE, $increment = 1) {
  *   An array of seconds in the selected format.
  */
 function date_seconds($format = 's', $required = FALSE, $increment = 1) {
-  $seconds = array();
+  $seconds = [];
   // Ensure $increment has a value so we don't loop endlessly.
   if (empty($increment)) {
     $increment = 1;
@@ -376,7 +376,7 @@ function date_seconds($format = 's', $required = FALSE, $increment = 1) {
   for ($i = 0; $i < 60; $i += $increment) {
     $seconds[$i] = $i < 10 && $format == 's' ? "0$i" : $i;
   }
-  $none = array('' => '');
+  $none = ['' => ''];
   return !$required ? $none + $seconds : $seconds;
 }
 
@@ -391,11 +391,11 @@ function date_seconds($format = 's', $required = FALSE, $increment = 1) {
  *   An array of AM and PM options.
  */
 function date_ampm($required = FALSE) {
-  $none = array('' => '');
-  $ampm = array(
-    'am' => t('am', array(), array('context' => 'ampm')),
-    'pm' => t('pm', array(), array('context' => 'ampm')),
-  );
+  $none = ['' => ''];
+  $ampm = [
+    'am' => t('am', [], ['context' => 'ampm']),
+    'pm' => t('pm', [], ['context' => 'ampm']),
+  ];
   return !$required ? $none + $ampm : $ampm;
 }
 
@@ -410,7 +410,7 @@ function date_ampm($required = FALSE) {
  *   An array of date() format letters and their regex equivalents.
  */
 function date_format_patterns($strict = FALSE) {
-  return array(
+  return [
     'd' => '\d{' . ($strict ? '2' : '1,2') . '}',
     'm' => '\d{' . ($strict ? '2' : '1,2') . '}',
     'h' => '\d{' . ($strict ? '2' : '1,2') . '}',
@@ -447,7 +447,7 @@ function date_format_patterns($strict = FALSE) {
     'O' => '[+-]\d{4}',
     'c' => '(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})([+-]?\d{2}\:\d{2})',
     'r' => '(\w{3}), (\d{2})\s(\w{3})\s(\d{2,4})\s(\d{2}):(\d{2}):(\d{2})([+-]?\d{4})?',
-  );
+  ];
 }
 
 /**
@@ -457,14 +457,14 @@ function date_format_patterns($strict = FALSE) {
  *   An array of translated date parts, keyed by their machine name.
  */
 function date_granularity_names() {
-  return array(
-    'year' => t('Year', array(), array('context' => 'datetime')),
-    'month' => t('Month', array(), array('context' => 'datetime')),
-    'day' => t('Day', array(), array('context' => 'datetime')),
-    'hour' => t('Hour', array(), array('context' => 'datetime')),
-    'minute' => t('Minute', array(), array('context' => 'datetime')),
-    'second' => t('Second', array(), array('context' => 'datetime')),
-  );
+  return [
+    'year' => t('Year', [], ['context' => 'datetime']),
+    'month' => t('Month', [], ['context' => 'datetime']),
+    'day' => t('Day', [], ['context' => 'datetime']),
+    'hour' => t('Hour', [], ['context' => 'datetime']),
+    'minute' => t('Minute', [], ['context' => 'datetime']),
+    'second' => t('Second', [], ['context' => 'datetime']),
+  ];
 }
 
 /**
@@ -477,14 +477,14 @@ function date_granularity_names() {
  *   The list of date parts sorted from largest to smallest granularity.
  */
 function date_granularity_sorted($granularity) {
-  return array_intersect(array(
+  return array_intersect([
     'year',
     'month',
     'day',
     'hour',
     'minute',
     'second',
-  ), $granularity);
+  ], $granularity);
 }
 
 /**
@@ -498,7 +498,7 @@ function date_granularity_sorted($granularity) {
  *   For example, passing in 'month' will return array('year', 'month').
  */
 function date_granularity_array_from_precision($precision) {
-  $granularity_array = array('year', 'month', 'day', 'hour', 'minute', 'second');
+  $granularity_array = ['year', 'month', 'day', 'hour', 'minute', 'second'];
   switch ($precision) {
     case 'year':
       return array_slice($granularity_array, -6, 1);
@@ -552,7 +552,7 @@ function date_timezone_names($required = FALSE, $refresh = FALSE) {
   static $zone_names;
   if (empty($zone_names) || $refresh) {
     $cached = cache_get('date_timezone_identifiers_list');
-    $zone_names = !empty($cached) ? $cached->data : array();
+    $zone_names = !empty($cached) ? $cached->data : [];
     if ($refresh || empty($cached) || empty($zone_names)) {
       $data = timezone_identifiers_list();
       asort($data);
@@ -570,10 +570,10 @@ function date_timezone_names($required = FALSE, $refresh = FALSE) {
       }
     }
     foreach ($zone_names as $zone) {
-      $zone_names[$zone] = t('!timezone', array('!timezone' => t($zone)));
+      $zone_names[$zone] = t('!timezone', ['!timezone' => t($zone)]);
     }
   }
-  $none = array('' => '');
+  $none = ['' => ''];
   return !$required ? $none + $zone_names : $zone_names;
 }
 
@@ -592,7 +592,7 @@ function date_timezone_names($required = FALSE, $refresh = FALSE) {
  */
 function date_timezone_abbr($refresh = FALSE) {
   $cached = cache_get('date_timezone_abbreviations');
-  $data = isset($cached->data) ? $cached->data : array();
+  $data = isset($cached->data) ? $cached->data : [];
   if (empty($data) || $refresh) {
     $data = array_keys(timezone_abbreviations_list());
     cache_set('date_timezone_abbreviations', $data);
@@ -647,24 +647,24 @@ function date_format_date($date, $type = 'medium', $format = '', $langcode = NUL
     $c = $format[$i];
     switch ($c) {
       case 'l':
-        $date_string .= t($date->format('l'), array(), array('context' => '', 'langcode' => $langcode));
+        $date_string .= t($date->format('l'), [], ['context' => '', 'langcode' => $langcode]);
         break;
 
       case 'D':
-        $date_string .= t($date->format('D'), array(), array('context' => '', 'langcode' => $langcode));
+        $date_string .= t($date->format('D'), [], ['context' => '', 'langcode' => $langcode]);
         break;
 
       case 'F':
-        $date_string .= t($date->format('F'), array(), array('context' => 'Long month name', 'langcode' => $langcode));
+        $date_string .= t($date->format('F'), [], ['context' => 'Long month name', 'langcode' => $langcode]);
         break;
 
       case 'M':
-        $date_string .= t($date->format('M'), array(), array('langcode' => $langcode));
+        $date_string .= t($date->format('M'), [], ['langcode' => $langcode]);
         break;
 
       case 'A':
       case 'a':
-        $date_string .= t($date->format($c), array(), array('context' => 'ampm', 'langcode' => $langcode));
+        $date_string .= t($date->format($c), [], ['context' => 'ampm', 'langcode' => $langcode]);
         break;
 
       // The timezone name translations can use t().
@@ -728,8 +728,8 @@ function date_format_interval($date, $granularity = 2, $display_ago = TRUE) {
 
   $interval = REQUEST_TIME - $date->format('U');
   if ($interval > 0) {
-    return $display_ago ? t('!time ago', array('!time' => format_interval($interval, $granularity))) :
-      t('!time', array('!time' => format_interval($interval, $granularity)));
+    return $display_ago ? t('!time ago', ['!time' => format_interval($interval, $granularity)]) :
+      t('!time', ['!time' => format_interval($interval, $granularity)]);
   }
   else {
     return format_interval(abs($interval), $granularity);
@@ -961,7 +961,7 @@ function date_week_range($week, $year) {
   if (date_format($min_date, 'Y') != $year) {
     $min_date = new BackdropDateTime($year . '-01-01 00:00:00');
   }
-  return array($min_date, $max_date);
+  return [$min_date, $max_date];
 }
 
 /**
@@ -993,7 +993,7 @@ function date_iso_week_range($week, $year) {
   // Move forwards to the last day of the week.
   $max_date = clone($min_date);
   date_modify($max_date, '+6 days');
-  return array($min_date, $max_date);
+  return [$min_date, $max_date];
 }
 
 /**
@@ -1099,9 +1099,9 @@ function date_pad($value, $size = 2) {
  */
 function date_has_time($granularity) {
   if (!is_array($granularity)) {
-    $granularity = array();
+    $granularity = [];
   }
-  $options = array('hour', 'minute', 'second');
+  $options = ['hour', 'minute', 'second'];
   return (bool) count(array_intersect($granularity, $options));
 }
 
@@ -1116,9 +1116,9 @@ function date_has_time($granularity) {
  */
 function date_has_date($granularity) {
   if (!is_array($granularity)) {
-    $granularity = array();
+    $granularity = [];
   }
-  $options = array('year', 'month', 'day');
+  $options = ['year', 'month', 'day'];
   return (bool) count(array_intersect($granularity, $options));
 }
 
@@ -1136,13 +1136,13 @@ function date_has_date($granularity) {
 function date_part_format($part, $format) {
   switch ($part) {
     case 'date':
-      return date_limit_format($format, array('year', 'month', 'day'));
+      return date_limit_format($format, ['year', 'month', 'day']);
 
     case 'time':
-      return date_limit_format($format, array('hour', 'minute', 'second'));
+      return date_limit_format($format, ['hour', 'minute', 'second']);
 
     default:
-      return date_limit_format($format, array($part));
+      return date_limit_format($format, [$part]);
   }
 }
 
@@ -1177,13 +1177,13 @@ function date_limit_format($format, $granularity) {
   // If punctuation has been escaped, remove the escaping. Done using strtr()
   // because it is easier than getting the escape character extracted using
   // preg_replace().
-  $replace = array(
+  $replace = [
     '\-' => '-',
     '\:' => ':',
     "\'" => "'",
     '\. ' => ' . ',
     '\,' => ',',
-  );
+  ];
   $format = strtr($format, $replace);
 
   // Get the 'T' out of ISO date formats that don't have both date and time.
@@ -1192,7 +1192,7 @@ function date_limit_format($format, $granularity) {
     $format = str_replace('T', ' ', $format);
   }
 
-  $regex = array();
+  $regex = [];
   if (!date_has_time($granularity)) {
     $regex[] = '((?<!\\\\)[a|A])';
   }
@@ -1236,7 +1236,7 @@ function date_limit_format($format, $granularity) {
   $regex[] = '(\|\|)';
 
   // Remove selected values from string.
-  $format = trim(preg_replace($regex, array(), $format));
+  $format = trim(preg_replace($regex, [], $format));
   // Remove orphaned punctuation at the beginning of the string.
   $format = preg_replace('`^([\-/\.,:\'])`', '', $format);
   // Remove orphaned punctuation at the end of the string.
@@ -1281,7 +1281,7 @@ function date_limit_format($format, $granularity) {
  *   An array of ordered granularity elements from the given format string.
  */
 function date_format_order($format) {
-  $order = array();
+  $order = [];
   if (empty($format)) {
     return $order;
   }
@@ -1338,7 +1338,7 @@ function date_format_order($format) {
  *   A reduced set of granularity elements.
  */
 function date_nongranularity($granularity) {
-  $options = array(
+  $options = [
     'year',
     'month',
     'day',
@@ -1346,7 +1346,7 @@ function date_nongranularity($granularity) {
     'minute',
     'second',
     'timezone',
-  );
+  ];
   return array_diff($options, (array) $granularity);
 }
 
@@ -1479,7 +1479,7 @@ function date_range_years($string, $date = NULL) {
       $end_year = min($value_year, $end_year);
     }
   }
-  return array($start_year, $end_year);
+  return [$start_year, $end_year];
 }
 
 /**
@@ -1531,7 +1531,7 @@ function date_is_all_day($string1, $string2, $granularity = 'second', $increment
   if (empty($string1) || empty($string2)) {
     return FALSE;
   }
-  elseif (!in_array($granularity, array('hour', 'minute', 'second'))) {
+  elseif (!in_array($granularity, ['hour', 'minute', 'second'])) {
     return FALSE;
   }
 
@@ -1568,7 +1568,7 @@ function date_is_all_day($string1, $string2, $granularity = 'second', $increment
       $min_match = $time1 == '00:00:00'
         || ($hour1 == 0 && $min1 == 0 && $sec1 == 0);
       $max_match = $time2 == '00:00:00'
-        || ($hour2 == 23 && in_array($min2, array($max_minutes, 59)) && in_array($sec2, array($max_seconds, 59)))
+        || ($hour2 == 23 && in_array($min2, [$max_minutes, 59]) && in_array($sec2, [$max_seconds, 59]))
         || ($hour1 == 0 && $hour2 == 0 && $min1 == 0 && $min2 == 0 && $sec1 == 0 && $sec2 == 0);
       break;
 
@@ -1576,7 +1576,7 @@ function date_is_all_day($string1, $string2, $granularity = 'second', $increment
       $min_match = $time1 == '00:00:00'
         || ($hour1 == 0 && $min1 == 0);
       $max_match = $time2 == '00:00:00'
-        || ($hour2 == 23 && in_array($min2, array($max_minutes, 59)))
+        || ($hour2 == 23 && in_array($min2, [$max_minutes, 59]))
         || ($hour1 == 0 && $hour2 == 0 && $min1 == 0 && $min2 == 0);
       break;
 

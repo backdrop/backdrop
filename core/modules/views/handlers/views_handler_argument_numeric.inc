@@ -26,8 +26,8 @@ class views_handler_argument_numeric extends views_handler_argument {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['break_phrase'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['not'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['break_phrase'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['not'] = ['default' => FALSE, 'bool' => TRUE];
 
     return $options;
   }
@@ -36,21 +36,21 @@ class views_handler_argument_numeric extends views_handler_argument {
     parent::options_form($form, $form_state);
 
     // allow + for or, , for and
-    $form['break_phrase'] = array(
+    $form['break_phrase'] = [
       '#type' => 'checkbox',
       '#title' => t('Allow multiple values'),
       '#description' => t('If selected, users can enter multiple values in the form of 1+2+3 (for OR) or 1,2,3 (for AND).'),
       '#default_value' => !empty($this->options['break_phrase']),
       '#fieldset' => 'more',
-    );
+    ];
 
-    $form['not'] = array(
+    $form['not'] = [
       '#type' => 'checkbox',
       '#title' => t('Exclude'),
       '#description' => t('If selected, the numbers entered for the filter will be excluded rather than limiting the view.'),
       '#default_value' => !empty($this->options['not']),
       '#fieldset' => 'more',
-    );
+    ];
   }
 
   function title() {
@@ -62,7 +62,7 @@ class views_handler_argument_numeric extends views_handler_argument {
       views_break_phrase($this->argument, $this);
     }
     else {
-      $this->value = array($this->argument);
+      $this->value = [$this->argument];
       $this->operator = 'or';
     }
 
@@ -70,7 +70,7 @@ class views_handler_argument_numeric extends views_handler_argument {
       return !empty($this->definition['empty field name']) ? $this->definition['empty field name'] : t('Uncategorized');
     }
 
-    if ($this->value === array(-1)) {
+    if ($this->value === [-1]) {
       return !empty($this->definition['invalid input']) ? $this->definition['invalid input'] : t('Invalid input');
     }
 
@@ -93,7 +93,7 @@ class views_handler_argument_numeric extends views_handler_argument {
       views_break_phrase($this->argument, $this);
     }
     else {
-      $this->value = array($this->argument);
+      $this->value = [$this->argument];
     }
 
     $placeholder = $this->placeholder();
@@ -101,15 +101,15 @@ class views_handler_argument_numeric extends views_handler_argument {
 
     if (count($this->value) > 1) {
       $operator = empty($this->options['not']) ? 'IN' : 'NOT IN';
-      $this->query->add_where_expression(0, "$this->table_alias.$this->real_field $operator($placeholder) $null_check", array($placeholder => $this->value));
+      $this->query->add_where_expression(0, "$this->table_alias.$this->real_field $operator($placeholder) $null_check", [$placeholder => $this->value]);
     }
     else {
       $operator = empty($this->options['not']) ? '=' : '!=';
-      $this->query->add_where_expression(0, "$this->table_alias.$this->real_field $operator $placeholder $null_check", array($placeholder => $this->argument));
+      $this->query->add_where_expression(0, "$this->table_alias.$this->real_field $operator $placeholder $null_check", [$placeholder => $this->argument]);
     }
   }
 
   function get_sort_name() {
-    return t('Numerical', array(), array('context' => 'Sort order'));
+    return t('Numerical', [], ['context' => 'Sort order']);
   }
 }

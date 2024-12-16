@@ -116,14 +116,14 @@ define('MAIL_LINE_ENDINGS', isset($_SERVER['WINDIR']) || (isset($_SERVER['SERVER
  *   written to the watchdog. (Success means nothing more than the message being
  *   accepted at php-level, which still doesn't guarantee it to be delivered.)
  */
-function backdrop_mail($module, $key, $to, $language, $params = array(), $reply = NULL, $send = TRUE) {
+function backdrop_mail($module, $key, $to, $language, $params = [], $reply = NULL, $send = TRUE) {
   $from = config_get('system.core', 'site_mail');
   if (empty($from))  {
     $from = ini_get('sendmail_from');
   }
 
   // Bundle up the variables into a structured array for altering.
-  $message = array(
+  $message = [
     'id'       => $module . '_' . $key,
     'module'   => $module,
     'key'      => $key,
@@ -134,17 +134,17 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
     'params'   => $params,
     'send'     => TRUE,
     'subject'  => '',
-    'body'     => array()
-  );
+    'body'     => []
+  ];
 
   // Build the default headers. Note that the first letter of each word is
   // always capitalized. See: https://tools.ietf.org/html/rfc5322
-  $headers = array(
+  $headers = [
     'MIME-Version'              => '1.0',
     'Content-Type'              => 'text/plain; charset=UTF-8; format=flowed; delsp=yes',
     'Content-Transfer-Encoding' => '8Bit',
     'X-Mailer'                  => 'Backdrop CMS'
-  );
+  ];
   if ($from) {
     // To prevent email from looking like spam, the addresses in the Sender and
     // Return-Path headers should have a domain authorized to use the originating
@@ -185,7 +185,7 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
       $message['result'] = $system->mail($message);
       // Log errors.
       if (!$message['result']) {
-        watchdog('mail', 'Error sending email (from %from to %to).', array('%from' => $message['from'], '%to' => $message['to']), WATCHDOG_ERROR);
+        watchdog('mail', 'Error sending email (from %from to %to).', ['%from' => $message['from'], '%to' => $message['to']], WATCHDOG_ERROR);
         backdrop_set_message(t('Unable to send email.'), 'error');
       }
     }
@@ -260,7 +260,7 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
  * @throws Exception
  */
 function backdrop_mail_system($module, $key) {
-  $instances = &backdrop_static(__FUNCTION__, array());
+  $instances = &backdrop_static(__FUNCTION__, []);
 
   $id = $module . '_' . $key;
 
@@ -287,7 +287,7 @@ function backdrop_mail_system($module, $key) {
       $instances[$class] = new $class();
     }
     else {
-      throw new Exception(t('Class %class does not implement interface %interface', array('%class' => $class, '%interface' => 'MailSystemInterface')));
+      throw new Exception(t('Class %class does not implement interface %interface', ['%class' => $class, '%interface' => 'MailSystemInterface']));
     }
   }
   return $instances[$class];
@@ -366,12 +366,12 @@ function backdrop_wrap_mail($text, $indent = '') {
     $text = preg_replace('/(?(?<!^--) +\n|  +\n)/m', "\n", $text);
     // Wrap each line at the needed width.
     $lines = explode("\n", $text);
-    array_walk($lines, '_backdrop_wrap_mail_line', array('soft' => $soft, 'length' => strlen($indent)));
+    array_walk($lines, '_backdrop_wrap_mail_line', ['soft' => $soft, 'length' => strlen($indent)]);
     $text = implode("\n", $lines);
   }
   else {
     // Wrap this line.
-    _backdrop_wrap_mail_line($text, 0, array('soft' => $soft, 'length' => strlen($indent)));
+    _backdrop_wrap_mail_line($text, 0, ['soft' => $soft, 'length' => strlen($indent)]);
   }
   // Empty lines with nothing but spaces.
   $text = preg_replace('/^ +\n/m', "\n", $text);
@@ -408,7 +408,7 @@ function backdrop_html_to_text($string, $allowed_tags = NULL) {
   // Cache list of supported tags.
   static $supported_tags;
   if (empty($supported_tags)) {
-    $supported_tags = array('a', 'em', 'i', 'strong', 'b', 'br', 'p', 'blockquote', 'ul', 'ol', 'li', 'dl', 'dt', 'dd', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr');
+    $supported_tags = ['a', 'em', 'i', 'strong', 'b', 'br', 'p', 'blockquote', 'ul', 'ol', 'li', 'dl', 'dt', 'dd', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr'];
   }
 
   // Make sure only supported tags are kept.
@@ -444,8 +444,8 @@ function backdrop_html_to_text($string, $allowed_tags = NULL) {
   $tag = FALSE; // Odd/even counter (tag or no tag)
   $casing = NULL; // Case conversion function
   $output = '';
-  $indent = array(); // All current indentation string chunks
-  $lists = array(); // Array of counters for opened lists
+  $indent = []; // All current indentation string chunks
+  $lists = []; // Array of counters for opened lists
   foreach ($split as $value) {
     $chunk = NULL; // Holds a string ready to be formatted and output.
 
@@ -581,11 +581,11 @@ function _backdrop_wrap_mail_line(&$line, $key, $values) {
  */
 function _backdrop_html_to_mail_urls($match = NULL, $reset = FALSE) {
   global $base_url, $base_path;
-  static $urls = array(), $regexp;
+  static $urls = [], $regexp;
 
   if ($reset) {
     // Reset internal URL list.
-    $urls = array();
+    $urls = [];
   }
   else {
     if (empty($regexp)) {

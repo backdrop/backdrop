@@ -35,24 +35,24 @@ function _user_password_policy_help() {
   $strength_threshold = config_get('system.core', 'user_password_strength_threshold');
 
   if ($strength_threshold < USER_PASSWORD_STRENGTH_FAIR) {
-    $threshold_label = array('weak' => t('weak'));
+    $threshold_label = ['weak' => t('weak')];
   }
   elseif ($strength_threshold < USER_PASSWORD_STRENGTH_GOOD) {
-    $threshold_label = array('fair' => t('fair'));
+    $threshold_label = ['fair' => t('fair')];
   }
   elseif ($strength_threshold < USER_PASSWORD_STRENGTH_STRONG) {
-    $threshold_label = array('good' => t('good'));
+    $threshold_label = ['good' => t('good')];
   }
   else {
-    $threshold_label = array('strong' => t('excellent'));
+    $threshold_label = ['strong' => t('excellent')];
   }
 
-  $criteria = array();
+  $criteria = [];
   $criteria[] = t('The password cannot be the same as the username or email address.');
   $criteria[] = t('The password must be sufficiently long or complex.');
 
-  $help = '<div class="password-strength-help-text ' . key($threshold_label) . '">' . t('The password strength indicator must be %threshold or better.', array('%threshold' => current($threshold_label)));
-  $help .= ' ' . t('The following criteria must be met:') . '</div>' . theme('item_list', array('items' => $criteria, 'type' => 'ul'));
+  $help = '<div class="password-strength-help-text ' . key($threshold_label) . '">' . t('The password strength indicator must be %threshold or better.', ['%threshold' => current($threshold_label)]);
+  $help .= ' ' . t('The following criteria must be met:') . '</div>' . theme('item_list', ['items' => $criteria, 'type' => 'ul']);
 
   return $help;
 }

@@ -48,7 +48,7 @@ interface EntityControllerInterface {
    * @return
    *   An array of entity objects indexed by their ids.
    */
-  public function load($ids = array(), $conditions = array());
+  public function load($ids = [], $conditions = []);
 
   /**
    * Builds a structured array representing the entity's content.
@@ -184,8 +184,8 @@ class DefaultEntityController implements EntityControllerInterface {
   public function __construct($entityType) {
     $this->entityType = $entityType;
     $this->entityInfo = entity_get_info($entityType);
-    $this->entityCache = array();
-    $this->hookLoadArguments = array();
+    $this->entityCache = [];
+    $this->hookLoadArguments = [];
     $this->idKey = $this->entityInfo['entity keys']['id'];
 
     // Check if the entity type supports revisions.
@@ -240,15 +240,15 @@ class DefaultEntityController implements EntityControllerInterface {
       }
     }
     else {
-      $this->entityCache = array();
+      $this->entityCache = [];
     }
   }
 
   /**
    * Implements EntityControllerInterface::load().
    */
-  public function load($ids = array(), $conditions = array()) {
-    $entities = array();
+  public function load($ids = [], $conditions = []) {
+    $entities = [];
 
     // Revisions are not statically cached, and require a different query to
     // other conditions, so separate the revision id into its own variable.
@@ -291,7 +291,7 @@ class DefaultEntityController implements EntityControllerInterface {
       }
       else {
         // No results found.
-        return array();
+        return [];
       }
     }
 
@@ -307,7 +307,7 @@ class DefaultEntityController implements EntityControllerInterface {
 
     // Try to load entities from the persistent cache.
     if ($this->persistentCache && !$revision_id && $ids && !$conditions) {
-      $cached_entities = array();
+      $cached_entities = [];
       if ($ids && !$conditions) {
         $cached = cache_get_multiple($ids, 'cache_entity_' . $this->entityType);
 
@@ -342,7 +342,7 @@ class DefaultEntityController implements EntityControllerInterface {
         // We provide the necessary arguments for PDO to create objects of the
         // specified entity class.
         // @see EntityInterface::__construct()
-        $query_result->setFetchMode(PDO::FETCH_CLASS, $this->entityInfo['entity class'], array(array(), $this->entityType));
+        $query_result->setFetchMode(PDO::FETCH_CLASS, $this->entityInfo['entity class'], [[], $this->entityType]);
       }
       $queried_entities = $query_result->fetchAllAssoc($this->idKey);
     }
@@ -420,13 +420,13 @@ class DefaultEntityController implements EntityControllerInterface {
    * @return SelectQuery
    *   A SelectQuery object for loading the entity.
    */
-  protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
+  protected function buildQuery($ids, $conditions = [], $revision_id = FALSE) {
     $query = db_select($this->entityInfo['base table'], 'base');
 
     $query->addTag($this->entityType . '_load_multiple');
 
     if ($revision_id) {
-      $query->join($this->revisionTable, 'revision', "revision.{$this->idKey} = base.{$this->idKey} AND revision.{$this->revisionKey} = :revisionId", array(':revisionId' => $revision_id));
+      $query->join($this->revisionTable, 'revision', "revision.{$this->idKey} = base.{$this->idKey} AND revision.{$this->revisionKey} = :revisionId", [':revisionId' => $revision_id]);
     }
     elseif ($this->revisionKey) {
       $query->join($this->revisionTable, 'revision', "revision.{$this->revisionKey} = base.{$this->revisionKey}");
@@ -505,7 +505,7 @@ class DefaultEntityController implements EntityControllerInterface {
     // Call hook_TYPE_load(). The first argument for hook_TYPE_load() are
     // always the queried entities, followed by additional arguments set in
     // $this->hookLoadArguments.
-    $args = array_merge(array($queried_entities), $this->hookLoadArguments);
+    $args = array_merge([$queried_entities], $this->hookLoadArguments);
     foreach (module_implements($this->entityInfo['load hook']) as $module) {
       call_user_func_array($module . '_' . $this->entityInfo['load hook'], $args);
     }
@@ -522,8 +522,8 @@ class DefaultEntityController implements EntityControllerInterface {
    * @return
    *   Array of entities from the entity cache.
    */
-  protected function cacheGet($ids, $conditions = array()) {
-    $entities = array();
+  protected function cacheGet($ids, $conditions = []) {
+    $entities = [];
     // Load any available entities from the internal cache.
     if (!empty($this->entityCache)) {
       if ($ids) {
@@ -581,20 +581,20 @@ class DefaultEntityController implements EntityControllerInterface {
     $langcode = $langcode ? $langcode : $language_content->langcode;
 
     // Remove previously built content, if exists.
-    $entity->content = array();
+    $entity->content = [];
 
     // Allow modules to change the display mode.
-    $view_mode = key(entity_view_mode_prepare($entity->entityType(), array($entity->id() => $entity), $view_mode, $langcode));
+    $view_mode = key(entity_view_mode_prepare($entity->entityType(), [$entity->id() => $entity], $view_mode, $langcode));
 
     // Make sure the used view-mode gets stored.
-    $entity->content += array('#view_mode' => $view_mode);
+    $entity->content += ['#view_mode' => $view_mode];
 
     // Add in fields.
     if (!empty($this->entityInfo['fieldable'])) {
       // Perform the preparation tasks if they have not been performed yet.
       // An internal flag prevents the operation from running twice.
       $key = isset($entity->{$this->idKey}) ? $entity->{$this->idKey} : NULL;
-      field_attach_prepare_view($this->entityType, array($key => $entity), $view_mode);
+      field_attach_prepare_view($this->entityType, [$key => $entity], $view_mode);
       $entity->content += field_attach_view($this->entityType, $entity, $view_mode, $langcode);
     }
     // Invoke hook_ENTITY_view() to allow modules to add their additions.
@@ -617,7 +617,7 @@ class DefaultEntityController implements EntityControllerInterface {
     }
     entity_prepare_view($this->entityType, $entities);
 
-    $view = array();
+    $view = [];
     foreach ($entities as $entity) {
       /* @var EntityInterface $entity */
       $this->buildContent($entity, $view_mode, $langcode);
@@ -626,7 +626,7 @@ class DefaultEntityController implements EntityControllerInterface {
       // We don't need duplicate rendering info in entity->content.
       unset($entity->content);
 
-      $build += array(
+      $build += [
         // @see template_preprocess_entity()
         '#theme' => 'entity',
         '#entity_type' => $this->entityType,
@@ -634,9 +634,9 @@ class DefaultEntityController implements EntityControllerInterface {
         '#view_mode' => $view_mode,
         '#language' => $langcode,
         '#page' => $page,
-      );
+      ];
       // Allow modules to modify the structured entity.
-      backdrop_alter(array($this->entityType . '_view', 'entity_view'), $build, $this->entityType);
+      backdrop_alter([$this->entityType . '_view', 'entity_view'], $build, $this->entityType);
 
       $view[$this->entityType][$entity->id()] = $build;
     }
@@ -705,7 +705,7 @@ class EntityDatabaseStorageController extends DefaultEntityController implements
   public function create(array $values) {
     $class = isset($this->entityInfo['entity class']) ? $this->entityInfo['entity class'] : NULL;
     if (empty($class)) {
-      throw new EntityMalformedException(t('Missing "entity class" property on @entity_type entity.', array('@entity_type' => $this->entityType)));
+      throw new EntityMalformedException(t('Missing "entity class" property on @entity_type entity.', ['@entity_type' => $this->entityType]));
     }
     return new $class($values);
   }
@@ -764,14 +764,14 @@ class EntityDatabaseStorageController extends DefaultEntityController implements
 
       if (!$entity->isNew()) {
         $return = backdrop_write_record($this->entityInfo['base table'], $entity, $this->idKey);
-        $this->resetCache(array($entity->{$this->idKey}));
+        $this->resetCache([$entity->{$this->idKey}]);
         $this->postSave($entity, TRUE);
         $this->invokeHook('update', $entity);
       }
       else {
         $return = backdrop_write_record($this->entityInfo['base table'], $entity);
         // Reset general caches, but keep caches specific to certain entities.
-        $this->resetCache(array());
+        $this->resetCache([]);
         $this->postSave($entity, FALSE);
         $this->invokeHook('insert', $entity);
       }

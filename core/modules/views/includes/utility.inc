@@ -10,7 +10,7 @@
 function _views_create_handler($definition, $type = 'handler', $handler_type = NULL) {
   if (empty($definition['handler'])) {
     watchdog('views', '_views_create_handler - type: @type - failed: handler has not been provided.',
-      array('@type' => isset($handler_type) ? ( $type . '(handler type: ' . $handler_type . ')' ) : $type)
+      ['@type' => isset($handler_type) ? ( $type . '(handler type: ' . $handler_type . ')' ) : $type]
     );
     return;
   }
@@ -20,10 +20,10 @@ function _views_create_handler($definition, $type = 'handler', $handler_type = N
     watchdog('views',
       '_views_create_handler - loading override handler @type failed: class @override_handler could not be loaded. ' .
       'Verify that the class has been declared and the class file has been registered in a <a href="https://docs.backdropcms.org/api/backdrop/1/search/hook_autoload_info">hook_autoload_info()</a> implementation.',
-      array(
+      [
         '@type' => isset($handler_type) ? ( $type . '(handler type: ' . $handler_type . ')' ) : $type,
         '@override_handler' => $definition['override handler']
-      )
+      ]
     );
     return;
   }
@@ -32,10 +32,10 @@ function _views_create_handler($definition, $type = 'handler', $handler_type = N
     watchdog('views',
       '_views_create_handler - loading handler @type failed: class @handler could not be loaded. ' .
       'Verify that the class has been declared and the class file has been registered in a <a href="https://docs.backdropcms.org/api/backdrop/1/search/hook_autoload_info">hook_autoload_info()</a> implementation.',
-      array(
+      [
         '@type' => isset($handler_type) ? ( $type . '(handler type: ' . $handler_type . ')' ) : $type,
         '@handler' => $definition['handler']
-      )
+      ]
     );
     return;
   }
@@ -68,7 +68,7 @@ function _views_create_handler($definition, $type = 'handler', $handler_type = N
  * Prepare a handler's data by checking defaults and such.
  */
 function _views_prepare_handler($definition, $data, $field, $type) {
-  foreach (array('group', 'title', 'title short', 'help', 'real field') as $key) {
+  foreach (['group', 'title', 'title short', 'help', 'real field'] as $key) {
     if (!isset($definition[$key])) {
       // First check the field level
       if (!empty($data[$field][$key])) {
@@ -114,7 +114,7 @@ function views_get_table_join($table, $base_table) {
     }
 
     if (isset($h['arguments'])) {
-      call_user_func_array(array(&$handler, 'construct'), $h['arguments']);
+      call_user_func_array([&$handler, 'construct'], $h['arguments']);
     }
     else {
       $handler->construct();
@@ -126,7 +126,7 @@ function views_get_table_join($table, $base_table) {
   // DEBUG: Identify missing handlers unless both tables are the same, because
   // no join is needed in that case.
   if ($table != $base_table) {
-    watchdog('views', "Missing join: @table @base_table", array('@table' => $table, '@base_table' => $base_table));
+    watchdog('views', "Missing join: @table @base_table", ['@table' => $table, '@base_table' => $base_table]);
   }
 }
 
@@ -151,7 +151,7 @@ function views_break_phrase_string($str, &$handler = NULL) {
 
   // Set up defaults:
   if (!isset($handler->value)) {
-    $handler->value = array();
+    $handler->value = [];
   }
 
   if (!isset($handler->operator)) {
@@ -179,7 +179,7 @@ function views_break_phrase_string($str, &$handler = NULL) {
 
   // Keep an 'error' value if invalid strings were given.
   if (!empty($str) && (empty($handler->value) || !is_array($handler->value))) {
-    $handler->value = array(-1);
+    $handler->value = [-1];
     return $handler;
   }
 
@@ -211,7 +211,7 @@ function views_break_phrase($str, &$handler = NULL) {
   // Set up defaults:
 
   if (!isset($handler->value)) {
-    $handler->value = array();
+    $handler->value = [];
   }
 
   if (!isset($handler->operator)) {
@@ -234,7 +234,7 @@ function views_break_phrase($str, &$handler = NULL) {
 
   // Keep an 'error' value if invalid strings were given.
   if (!empty($str) && (empty($handler->value) || !is_array($handler->value))) {
-    $handler->value = array(-1);
+    $handler->value = [-1];
     return $handler;
   }
 
@@ -377,7 +377,7 @@ function views_date_sql_field($field, $field_type = 'int', $set_offset = NULL) {
  */
 function views_date_sql_format($format, $field, $field_type = 'int', $set_offset = NULL) {
   $field = views_date_sql_field($field, $field_type, $set_offset);
-  $replace = array(
+  $replace = [
     'Y' => '%Y',
     'y' => '%y',
     'M' => '%b',
@@ -394,7 +394,7 @@ function views_date_sql_format($format, $field, $field_type = 'int', $set_offset
     'i' => '%i',
     's' => '%s',
     'A' => '%p',
-  );
+  ];
   $format = strtr($format, $replace);
   return "DATE_FORMAT($field, '$format')";
 }
@@ -452,7 +452,7 @@ function views_date_sql_extract($extract_type, $field, $field_type = 'int', $set
  * @return Nested array of plugins, grouped by type.
  */
 function views_discover_plugins() {
-  $cache = array('display' => array(), 'style' => array(), 'row' => array(), 'argument default' => array(), 'argument validator' => array(), 'access' => array(), 'cache' => array(), 'exposed_form' => array());
+  $cache = ['display' => [], 'style' => [], 'row' => [], 'argument default' => [], 'argument validator' => [], 'access' => [], 'cache' => [], 'exposed_form' => []];
   // Get plugins from all modules.
   foreach (module_implements('views_plugins') as $module) {
     $function = $module . '_views_plugins';
@@ -537,7 +537,7 @@ function views_get_enabled_display_extenders() {
  *   A keyed array of in the form of 'base_table' => 'Description'.
  */
 function views_fetch_fields($base, $type, $grouping = FALSE) {
-  static $fields = array();
+  static $fields = [];
   if (empty($fields)) {
     $data = views_fetch_data();
     $start = microtime(TRUE);
@@ -552,9 +552,9 @@ function views_fetch_fields($base, $type, $grouping = FALSE) {
     // each field have a cheap kind of inheritance.
 
     foreach ($data as $table => $table_data) {
-      $bases = array();
-      $strings = array();
-      $skip_bases = array();
+      $bases = [];
+      $strings = [];
+      $skip_bases = [];
       foreach ($table_data as $field => $info) {
         // Collect table data from this table...
         if ($field == 'table') {
@@ -566,7 +566,7 @@ function views_fetch_fields($base, $type, $grouping = FALSE) {
           $bases[] = $table;
           continue;
         }
-        foreach (array('field', 'sort', 'filter', 'argument', 'relationship', 'area') as $key) {
+        foreach (['field', 'sort', 'filter', 'argument', 'relationship', 'area'] as $key) {
           if (!empty($info[$key])) {
             if ($grouping && !empty($info[$key]['no group by'])) {
               continue;
@@ -585,7 +585,7 @@ function views_fetch_fields($base, $type, $grouping = FALSE) {
             if (isset($info[$key]['moved to'])) {
               continue;
             }
-            foreach (array('title', 'group', 'help', 'base', 'aliases') as $string) {
+            foreach (['title', 'group', 'help', 'base', 'aliases'] as $string) {
               // First, try the lowest possible level
               if (!empty($info[$key][$string])) {
                 $strings[$field][$key][$string] = $info[$key][$string];
@@ -600,7 +600,7 @@ function views_fetch_fields($base, $type, $grouping = FALSE) {
               }
               else {
                 if ($string != 'base') {
-                  $strings[$field][$key][$string] = t("Error: missing @component", array('@component' => $string));
+                  $strings[$field][$key][$string] = t("Error: missing @component", ['@component' => $string]);
                 }
               }
             }
@@ -624,7 +624,7 @@ function views_fetch_fields($base, $type, $grouping = FALSE) {
   // all and add them together. Duplicate keys will be lost and that's
   // Just Fine.
   if (is_array($base)) {
-    $strings = array();
+    $strings = [];
     foreach ($base as $base_table) {
       if (isset($fields[$base_table][$type])) {
         $strings += $fields[$base_table][$type];
@@ -638,5 +638,5 @@ function views_fetch_fields($base, $type, $grouping = FALSE) {
     uasort($fields[$base][$type], '_views_sort_types');
     return $fields[$base][$type];
   }
-  return array();
+  return [];
 }

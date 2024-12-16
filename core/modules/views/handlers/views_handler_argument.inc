@@ -90,7 +90,7 @@ class views_handler_argument extends views_handler {
     }
 
     // Setup default value.
-    $options['style_options'] = isset($options['style_options']) ? $options['style_options'] : array();
+    $options['style_options'] = isset($options['style_options']) ? $options['style_options'] : [];
 
     if (!isset($options['summary']['sort_order']) && !empty($options['default_action']) && $options['default_action'] == 'summary asc') {
       $this->options['default_action'] = 'summary';
@@ -182,37 +182,37 @@ class views_handler_argument extends views_handler {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['default_action'] = array('default' => 'ignore');
-    $options['exception'] = array(
-      'contains' => array(
-        'value' => array('default' => 'all'),
-        'title_enable' => array('default' => FALSE, 'bool' => TRUE),
-        'title' => array('default' => 'All', 'translatable' => TRUE),
-      ),
-    );
-    $options['title_enable'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['title'] = array('default' => '', 'translatable' => TRUE);
-    $options['breadcrumb_enable'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['breadcrumb'] = array('default' => '', 'translatable' => TRUE);
-    $options['default_argument_type'] = array('default' => 'fixed');
-    $options['default_argument_options'] = array('default' => array());
-    $options['default_argument_skip_url'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['summary_options'] = array('default' => array());
-    $options['summary'] = array(
-      'contains' => array(
-        'sort_order' => array('default' => 'asc'),
-        'number_of_records' => array('default' => 0),
-        'format' => array('default' => 'default_summary'),
-      ),
-    );
-    $options['specify_validation'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['validate'] = array(
-      'contains' => array(
-        'type' => array('default' => 'none'),
-        'fail' => array('default' => 'not found'),
-      ),
-    );
-    $options['validate_options'] = array('default' => array());
+    $options['default_action'] = ['default' => 'ignore'];
+    $options['exception'] = [
+      'contains' => [
+        'value' => ['default' => 'all'],
+        'title_enable' => ['default' => FALSE, 'bool' => TRUE],
+        'title' => ['default' => 'All', 'translatable' => TRUE],
+      ],
+    ];
+    $options['title_enable'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['title'] = ['default' => '', 'translatable' => TRUE];
+    $options['breadcrumb_enable'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['breadcrumb'] = ['default' => '', 'translatable' => TRUE];
+    $options['default_argument_type'] = ['default' => 'fixed'];
+    $options['default_argument_options'] = ['default' => []];
+    $options['default_argument_skip_url'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['summary_options'] = ['default' => []];
+    $options['summary'] = [
+      'contains' => [
+        'sort_order' => ['default' => 'asc'],
+        'number_of_records' => ['default' => 0],
+        'format' => ['default' => 'default_summary'],
+      ],
+    ];
+    $options['specify_validation'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['validate'] = [
+      'contains' => [
+        'type' => ['default' => 'none'],
+        'fail' => ['default' => 'not found'],
+      ],
+    ];
+    $options['validate_options'] = ['default' => []];
 
     return $options;
   }
@@ -224,65 +224,65 @@ class views_handler_argument extends views_handler {
 
     $form['#pre_render'][] = 'views_ui_pre_render_move_argument_options';
 
-    $form['description'] = array(
+    $form['description'] = [
       '#markup' => $argument_text['description'],
-      '#theme_wrappers' => array('container'),
-      '#attributes' => array('class' => array('description')),
-    );
+      '#theme_wrappers' => ['container'],
+      '#attributes' => ['class' => ['description']],
+    ];
 
-    $form['no_argument'] = array(
+    $form['no_argument'] = [
       '#type' => 'fieldset',
       '#title' => $argument_text['filter value not present'],
-    );
+    ];
     // Everything in the fieldset is floated, so the last element needs to
     // clear those floats.
-    $form['no_argument']['clearfix'] = array(
+    $form['no_argument']['clearfix'] = [
       '#weight' => 1000,
       '#markup' => '<div class="clearfix"></div>',
-    );
-    $form['default_action'] = array(
+    ];
+    $form['default_action'] = [
       '#type' => 'radios',
-      '#process' => array('views_ui_process_container_radios'),
+      '#process' => ['views_ui_process_container_radios'],
       '#default_value' => $this->options['default_action'],
       '#fieldset' => 'no_argument',
-    );
+    ];
 
-    $form['exception'] = array(
+    $form['exception'] = [
       '#type' => 'fieldset',
       '#title' => t('Exceptions'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
       '#fieldset' => 'no_argument',
-    );
-    $form['exception']['value'] = array(
+    ];
+    $form['exception']['value'] = [
       '#type' => 'textfield',
       '#title' => t('Exception value'),
       '#size' => 20,
       '#default_value' => $this->options['exception']['value'],
       '#description' => t('If this value is received, the filter will be ignored; i.e, "all values"'),
-    );
-    $form['exception']['title_enable'] = array(
+    ];
+    $form['exception']['title_enable'] = [
       '#type' => 'checkbox',
       '#title' => t('Override title'),
       '#default_value' => $this->options['exception']['title_enable'],
-    );
-    $form['exception']['title'] = array(
+    ];
+    $form['exception']['title'] = [
       '#type' => 'textfield',
       '#title' => t('Override title'),
       '#title_display' => 'invisible',
       '#size' => 20,
       '#default_value' => $this->options['exception']['title'],
       '#description' => t('Override the view and other argument titles. Use "%1" for the first argument, "%2" for the second, etc.'),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[exception][title_enable]"]' => array('checked' => TRUE),
-        ),
-      ),
-    );
+      '#states' => [
+        'visible' => [
+          ':input[name="options[exception][title_enable]"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
 
-    $options = array();
+    $options = [];
     $defaults = $this->default_actions();
-    $validate_options = array();
+    $validate_options = [];
     foreach ($defaults as $id => $info) {
       $options[$id] = $info['title'];
       if (empty($info['default only'])) {
@@ -294,75 +294,75 @@ class views_handler_argument extends views_handler {
     }
     $form['default_action']['#options'] = $options;
 
-    $form['argument_present'] = array(
+    $form['argument_present'] = [
       '#type' => 'fieldset',
       '#title' => $argument_text['filter value present'],
-    );
-    $form['title_enable'] = array(
+    ];
+    $form['title_enable'] = [
       '#type' => 'checkbox',
       '#title' => t('Override title'),
       '#default_value' => $this->options['title_enable'],
       '#fieldset' => 'argument_present',
-    );
-    $form['title'] = array(
+    ];
+    $form['title'] = [
       '#type' => 'textfield',
       '#title' => t('Provide title'),
       '#title_display' => 'invisible',
       '#default_value' => $this->options['title'],
       '#description' => t('Override the view and other argument titles. Use "%1" for the first argument, "%2" for the second, etc.'),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[title_enable]"]' => array('checked' => TRUE),
-        ),
-      ),
+      '#states' => [
+        'visible' => [
+          ':input[name="options[title_enable]"]' => ['checked' => TRUE],
+        ],
+      ],
       '#fieldset' => 'argument_present',
-    );
+    ];
 
-    $form['breadcrumb_enable'] = array(
+    $form['breadcrumb_enable'] = [
       '#type' => 'checkbox',
       '#title' => t('Override breadcrumb'),
       '#default_value' => $this->options['breadcrumb_enable'],
       '#fieldset' => 'argument_present',
-    );
-    $form['breadcrumb'] = array(
+    ];
+    $form['breadcrumb'] = [
       '#type' => 'textfield',
       '#title' => t('Provide breadcrumb'),
       '#title_display' => 'invisible',
       '#default_value' => $this->options['breadcrumb'],
       '#description' => t('Enter a breadcrumb name you would like to use. See "Title" for percent substitutions.'),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[breadcrumb_enable]"]' => array('checked' => TRUE),
-        ),
-      ),
+      '#states' => [
+        'visible' => [
+          ':input[name="options[breadcrumb_enable]"]' => ['checked' => TRUE],
+        ],
+      ],
       '#fieldset' => 'argument_present',
-    );
+    ];
 
-    $form['specify_validation'] = array(
+    $form['specify_validation'] = [
       '#type' => 'checkbox',
       '#title' => t('Specify validation criteria'),
       '#default_value' => $this->options['specify_validation'],
       '#fieldset' => 'argument_present',
-    );
+    ];
 
-    $form['validate'] = array(
+    $form['validate'] = [
       '#type' => 'container',
       '#fieldset' => 'argument_present',
-    );
+    ];
     // @todo The mockup wanted to use "Validate using" here, but it doesn't
     // work well with many options (they'd need to be changed as well)
-    $form['validate']['type'] = array(
+    $form['validate']['type'] = [
       '#type' => 'select',
       '#title' => t('Validator'),
       '#default_value' => $this->options['validate']['type'],
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[specify_validation]"]' => array('checked' => TRUE),
-        ),
-      ),
-    );
+      '#states' => [
+        'visible' => [
+          ':input[name="options[specify_validation]"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
 
-    $validate_types = array('none' => t('- Basic validation -'));
+    $validate_types = ['none' => t('- Basic validation -')];
     $plugins = views_fetch_plugin_data('argument validator');
     foreach ($plugins as $id => $info) {
       if (!empty($info['no ui'])) {
@@ -388,20 +388,20 @@ class views_handler_argument extends views_handler {
         $plugin = $this->get_plugin('argument validator', $id);
         if ($plugin) {
           if ($plugin->access() || $this->options['validate']['type'] == $id) {
-            $form['validate']['options'][$id] = array(
+            $form['validate']['options'][$id] = [
               '#prefix' => '<div id="edit-options-validate-options-' . $id . '-wrapper">',
               '#suffix' => '</div>',
               '#type' => 'item',
               // Even if the plugin has no options add the key to the form_state.
               '#input' => TRUE, // trick it into checking input to make #process run
-              '#states' => array(
-                'visible' => array(
-                  ':input[name="options[specify_validation]"]' => array('checked' => TRUE),
-                  ':input[name="options[validate][type]"]' => array('value' => $id),
-                ),
-              ),
+              '#states' => [
+                'visible' => [
+                  ':input[name="options[specify_validation]"]' => ['checked' => TRUE],
+                  ':input[name="options[validate][type]"]' => ['value' => $id],
+                ],
+              ],
               '#id' => 'edit-options-validate-options-' . $id,
-            );
+            ];
             $plugin->options_form($form['validate']['options'][$id], $form_state);
             $validate_types[$id] = $info['title'];
           }
@@ -412,18 +412,18 @@ class views_handler_argument extends views_handler {
     asort($validate_types);
     $form['validate']['type']['#options'] = $validate_types;
 
-    $form['validate']['fail'] = array(
+    $form['validate']['fail'] = [
       '#type' => 'select',
       '#title' => t('Action to take if filter value does not validate'),
       '#default_value' => $this->options['validate']['fail'],
       '#options' => $validate_options,
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[specify_validation]"]' => array('checked' => TRUE),
-        ),
-      ),
+      '#states' => [
+        'visible' => [
+          ':input[name="options[specify_validation]"]' => ['checked' => TRUE],
+        ],
+      ],
       '#fieldset' => 'argument_present',
-    );
+    ];
   }
 
   function options_validate(&$form, &$form_state) {
@@ -501,43 +501,43 @@ class views_handler_argument extends views_handler {
    * Override this method to provide additional (or fewer) default behaviors.
    */
   function default_actions($which = NULL) {
-    $defaults = array(
-      'ignore' => array(
+    $defaults = [
+      'ignore' => [
         'title' => t('Display all results for the specified field'),
         'method' => 'default_ignore',
         'breadcrumb' => TRUE, // generate a breadcrumb to here
-      ),
-      'default' => array(
+      ],
+      'default' => [
         'title' => t('Provide default value'),
         'method' => 'default_default',
         'form method' => 'default_argument_form',
         'has default argument' => TRUE,
         'default only' => TRUE, // this can only be used for missing argument, not validation failure
         'breadcrumb' => TRUE, // generate a breadcrumb to here
-      ),
-      'not found' => array(
+      ],
+      'not found' => [
         'title' => t('Hide view'),
         'method' => 'default_not_found',
         'hard fail' => TRUE, // This is a hard fail condition
-      ),
-      'summary' => array(
+      ],
+      'summary' => [
         'title' => t('Display a summary'),
         'method' => 'default_summary',
         'form method' => 'default_summary_form',
         'style plugin' => TRUE,
         'breadcrumb' => TRUE, // generate a breadcrumb to here
-      ),
-      'empty' => array(
+      ],
+      'empty' => [
         'title' => t('Display contents of "No results found"'),
         'method' => 'default_empty',
         'breadcrumb' => TRUE, // generate a breadcrumb to here
-      ),
-      'access denied' => array(
+      ],
+      'access denied' => [
         'title' => t('Display "Access Denied"'),
         'method' => 'default_access_denied',
         'breadcrumb' => FALSE, // generate a breadcrumb to here
-      ),
-    );
+      ],
+    ];
 
     if ($this->view->display_handler->has_path()) {
       $defaults['not found']['title'] = t('Show "Page not found"');
@@ -559,31 +559,31 @@ class views_handler_argument extends views_handler {
    */
   function default_argument_form(&$form, &$form_state) {
     $plugins = views_fetch_plugin_data('argument default');
-    $options = array();
+    $options = [];
 
-    $form['default_argument_skip_url'] = array(
+    $form['default_argument_skip_url'] = [
       '#type' => 'checkbox',
       '#title' => t('Skip default argument for view URL'),
       '#default_value' => $this->options['default_argument_skip_url'],
       '#description' => t('Select whether to include this default argument when constructing the URL for this view. Skipping default arguments is useful e.g. in the case of feeds.')
-    );
+    ];
 
-    $form['default_argument_type'] = array(
+    $form['default_argument_type'] = [
       '#prefix' => '<div id="edit-options-default-argument-type-wrapper">',
       '#suffix' => '</div>',
       '#type' => 'select',
       '#id' => 'edit-options-default-argument-type',
       '#title' => t('Type'),
       '#default_value' => $this->options['default_argument_type'],
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[default_action]"]' => array('value' => 'default'),
-        ),
-      ),
+      '#states' => [
+        'visible' => [
+          ':input[name="options[default_action]"]' => ['value' => 'default'],
+        ],
+      ],
       // Views custom key, moves this element to the appropriate container
       // under the radio button.
       '#argument_option' => 'default',
-    );
+    ];
 
     foreach ($plugins as $id => $info) {
       if (!empty($info['no ui'])) {
@@ -593,20 +593,20 @@ class views_handler_argument extends views_handler {
       if ($plugin) {
         if ($plugin->access() || $this->options['default_argument_type'] == $id) {
           $form['argument_default']['#argument_option'] = 'default';
-          $form['argument_default'][$id] = array(
+          $form['argument_default'][$id] = [
             '#prefix' => '<div id="edit-options-argument-default-options-' . $id . '-wrapper">',
             '#suffix' => '</div>',
             '#id' => 'edit-options-argument-default-options-' . $id,
             '#type' => 'item',
             // Even if the plugin has no options add the key to the form_state.
             '#input' => TRUE,
-            '#states' => array(
-              'visible' => array(
-                ':input[name="options[default_action]"]' => array('value' => 'default'),
-                ':input[name="options[default_argument_type]"]' => array('value' => $id),
-              ),
-            ),
-          );
+            '#states' => [
+              'visible' => [
+                ':input[name="options[default_action]"]' => ['value' => 'default'],
+                ':input[name="options[default_argument_type]"]' => ['value' => $id],
+              ],
+            ],
+          ];
           $options[$id] = $info['title'];
           $plugin->options_form($form['argument_default'][$id], $form_state);
         }
@@ -623,8 +623,8 @@ class views_handler_argument extends views_handler {
    */
   function default_summary_form(&$form, &$form_state) {
     $style_plugins = views_fetch_plugin_data('style');
-    $summary_plugins = array();
-    $format_options = array();
+    $summary_plugins = [];
+    $format_options = [];
     foreach ($style_plugins as $key => $plugin) {
       if (isset($plugin['type']) && $plugin['type'] == 'summary') {
         $summary_plugins[$key] = $plugin;
@@ -632,48 +632,48 @@ class views_handler_argument extends views_handler {
       }
     }
 
-    $form['summary'] = array(
+    $form['summary'] = [
       // Views custom key, moves this element to the appropriate container
       // under the radio button.
       '#argument_option' => 'summary',
-    );
-    $form['summary']['sort_order'] = array(
+    ];
+    $form['summary']['sort_order'] = [
       '#type' => 'radios',
       '#title' => t('Sort order'),
-      '#options' => array('asc' => t('Ascending'), 'desc' => t('Descending')),
+      '#options' => ['asc' => t('Ascending'), 'desc' => t('Descending')],
       '#default_value' => $this->options['summary']['sort_order'],
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[default_action]"]' => array('value' => 'summary'),
-        ),
-      ),
-    );
-    $form['summary']['number_of_records'] = array(
+      '#states' => [
+        'visible' => [
+          ':input[name="options[default_action]"]' => ['value' => 'summary'],
+        ],
+      ],
+    ];
+    $form['summary']['number_of_records'] = [
       '#type' => 'radios',
       '#title' => t('Sort by'),
       '#default_value' => $this->options['summary']['number_of_records'],
-      '#options' => array(
+      '#options' => [
         0 => $this->get_sort_name(),
         1 => t('Number of records')
-      ),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[default_action]"]' => array('value' => 'summary'),
-        ),
-      ),
-    );
+      ],
+      '#states' => [
+        'visible' => [
+          ':input[name="options[default_action]"]' => ['value' => 'summary'],
+        ],
+      ],
+    ];
 
-    $form['summary']['format'] = array(
+    $form['summary']['format'] = [
       '#type' => 'radios',
       '#title' => t('Format'),
       '#options' => $format_options,
       '#default_value' => $this->options['summary']['format'],
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[default_action]"]' => array('value' => 'summary'),
-        ),
-      ),
-    );
+      '#states' => [
+        'visible' => [
+          ':input[name="options[default_action]"]' => ['value' => 'summary'],
+        ],
+      ],
+    ];
 
     foreach ($summary_plugins as $id => $info) {
       if (empty($info['uses options'])) {
@@ -681,19 +681,19 @@ class views_handler_argument extends views_handler {
       }
       $plugin = $this->get_plugin('style', $id);
       if ($plugin) {
-        $form['summary']['options'][$id] = array(
+        $form['summary']['options'][$id] = [
           '#prefix' => '<div id="edit-options-summary-options-' . $id . '-wrapper">',
           '#suffix' => '</div>',
           '#id' => 'edit-options-summary-options-' . $id,
           '#type' => 'item',
           '#input' => TRUE, // trick it into checking input to make #process run
-          '#states' => array(
-            'visible' => array(
-              ':input[name="options[default_action]"]' => array('value' => 'summary'),
-              ':input[name="options[summary][format]"]' => array('value' => $id),
-            ),
-          ),
-        );
+          '#states' => [
+            'visible' => [
+              ':input[name="options[default_action]"]' => ['value' => 'summary'],
+              ':input[name="options[summary][format]"]' => ['value' => $id],
+            ],
+          ],
+        ];
         $options[$id] = $info['title'];
         $plugin->options_form($form['summary']['options'][$id], $form_state);
       }
@@ -719,7 +719,7 @@ class views_handler_argument extends views_handler {
     }
 
     if (!empty($info['method args'])) {
-      return call_user_func_array(array(&$this, $info['method']), $info['method args']);
+      return call_user_func_array([&$this, $info['method']], $info['method args']);
     }
     else {
       return $this->{$info['method']}();
@@ -775,7 +775,7 @@ class views_handler_argument extends views_handler {
     // We return with no query; this will force the empty text.
     $this->view->built = TRUE;
     $this->view->executed = TRUE;
-    $this->view->result = array();
+    $this->view->result = [];
     return FALSE;
   }
 
@@ -913,7 +913,7 @@ class views_handler_argument extends views_handler {
     $distinct = ($this->view->display_handler->get_option('distinct') && empty($this->query->no_distinct));
 
     $count_alias = $this->query->add_field($this->query->base_table, $this->query->base_field, 'num_records',
-                                           array('count' => TRUE, 'distinct' => $distinct));
+                                           ['count' => TRUE, 'distinct' => $distinct]);
     $this->query->add_groupby($this->name_alias);
 
     if ($count_field) {
@@ -1118,7 +1118,7 @@ class views_handler_argument extends views_handler {
    * Get the display or row plugin, if it exists.
    */
   function get_plugin($type = 'argument default', $name = NULL) {
-    $options = array();
+    $options = [];
     $plugin_name = NULL;
     switch ($type) {
       case 'argument default':
@@ -1164,7 +1164,7 @@ class views_handler_argument extends views_handler {
    * their argument is (e.g. alphabetical, numeric, date).
    */
   function get_sort_name() {
-    return t('Default sort', array(), array('context' => 'Sort order'));
+    return t('Default sort', [], ['context' => 'Sort order']);
   }
 }
 
@@ -1181,9 +1181,9 @@ class views_handler_argument_broken extends views_handler_argument {
   function ensure_my_table() { /* No table to ensure! */ }
   function query($group_by = FALSE) { /* No query to run */ }
   function options_form(&$form, &$form_state) {
-    $form['markup'] = array(
+    $form['markup'] = [
       '#markup' => '<div class="form-item description">' . t('The handler for this item is broken or missing and cannot be used. If a module provided the handler and was disabled, re-enabling the module may restore it. Otherwise, you should probably delete this item.') . '</div>',
-    );
+    ];
   }
 
   /**

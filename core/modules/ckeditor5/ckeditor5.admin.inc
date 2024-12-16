@@ -9,106 +9,106 @@
  */
 function ckeditor5_settings_form(&$form, $form_state, $format) {
   $plugins = ckeditor5_plugins();
-  $toolbar_element = theme('ckeditor5_settings_toolbar', array(
+  $toolbar_element = theme('ckeditor5_settings_toolbar', [
     'format' => $format,
     'plugins' => $plugins,
-  ));
-  $elements = array(
-    '#attached' => array(
-      'library' => array(
-        array('ckeditor5', 'backdrop.ckeditor5.admin'),
-      ),
-      'js' => array(
-        array(
-          'data' => array(
-            'ckeditor5' => array(
+  ]);
+  $elements = [
+    '#attached' => [
+      'library' => [
+        ['ckeditor5', 'backdrop.ckeditor5.admin'],
+      ],
+      'js' => [
+        [
+          'data' => [
+            'ckeditor5' => [
               'toolbarAdmin' => $toolbar_element,
-            ),
-          ),
+            ],
+          ],
           'type' => 'setting',
-        ),
-      ),
-    ),
-    '#attributes' => array('class' => array('ckeditor5-toolbar-configuration')),
-  );
-  $elements['toolbar'] = array(
+        ],
+      ],
+    ],
+    '#attributes' => ['class' => ['ckeditor5-toolbar-configuration']],
+  ];
+  $elements['toolbar'] = [
     '#type' => 'textarea',
     '#title' => t('Toolbar configuration'),
     '#default_value' => json_encode($format->editor_settings['toolbar']),
-    '#attributes' => array('class' => array('ckeditor5-toolbar-textarea')),
-  );
+    '#attributes' => ['class' => ['ckeditor5-toolbar-textarea']],
+  ];
 
-  $elements['plugins'] = array(
+  $elements['plugins'] = [
     '#type' => 'vertical_tabs',
-  );
+  ];
 
   // @todo: Have this settings form be provided via a plugin hook.
   $elements['plugins']['image'] = filter_editor_image_upload_settings_form($format);
-  $elements['plugins']['image'] += array(
+  $elements['plugins']['image'] += [
     '#type' => 'fieldset',
     '#title' => t('Image uploading'),
-    '#attributes' => array(
-      'class' => array('ckeditor5-plugin-backdropimage'),
+    '#attributes' => [
+      'class' => ['ckeditor5-plugin-backdropimage'],
       'data-ckeditor5-feature-dependency' => 'backdropImage',
-    ),
-    '#parents' => array('editor_settings', 'image_upload'),
-  );
+    ],
+    '#parents' => ['editor_settings', 'image_upload'],
+  ];
 
   $elements['plugins']['file'] = filter_editor_file_upload_settings_form($format);
-  $elements['plugins']['file'] += array(
+  $elements['plugins']['file'] += [
     '#type' => 'fieldset',
     '#title' => t('File uploading'),
-    '#attributes' => array(
-      'class' => array('ckeditor5-plugin-link'),
+    '#attributes' => [
+      'class' => ['ckeditor5-plugin-link'],
       'data-ckeditor5-feature-dependency' => 'backdropLink',
-    ),
-    '#parents' => array('editor_settings', 'file_upload'),
-  );
+    ],
+    '#parents' => ['editor_settings', 'file_upload'],
+  ];
 
-  $elements['plugins']['style'] = array(
+  $elements['plugins']['style'] = [
     '#type' => 'fieldset',
     '#title' => t('Style list'),
-    '#attributes' => array(
-      'class' => array('ckeditor5-plugin-style'),
+    '#attributes' => [
+      'class' => ['ckeditor5-plugin-style'],
       'data-ckeditor5-feature-dependency' => 'style',
-    ),
-  );
+    ],
+  ];
   $style_list = '';
   if (isset($format->editor_settings['style_list'])) {
     $style_list = _ckeditor5_settings_stringify_style_list($format->editor_settings['style_list']);
   }
-  $elements['plugins']['style']['style_list'] = array(
+  $elements['plugins']['style']['style_list'] = [
     '#type' => 'textarea',
     '#rows' => 4,
     '#default_value' => $style_list,
     '#description' => t('A list of classes that will be provided in the "Styles" dropdown. Enter one class on each line in the format: element.class|Label. Example: h1.title|Title.') . '<br />' . t('Each style should be in your theme\'s main CSS as well as in your theme\'s ckeditor5-styles.css file.'),
-    '#parents' => array('editor_settings', 'style_list'),
-  );
+    '#parents' => ['editor_settings', 'style_list'],
+  ];
 
-  $elements['plugins']['heading'] = array(
+  $elements['plugins']['heading'] = [
     '#type' => 'fieldset',
     '#title' => t('Headings'),
-    '#attributes' => array(
-      'class' => array('ckeditor5-plugin-heading'),
+    '#attributes' => [
+      'class' => ['ckeditor5-plugin-heading'],
       'data-ckeditor5-feature-dependency' => 'heading',
-    ),
-  );
-  $elements['plugins']['heading']['heading_list'] = array(
+    ],
+  ];
+  $elements['plugins']['heading']['heading_list'] = [
     '#type' => 'checkboxes',
     '#title' => t('Enabled headings'),
     '#default_value' => $format->editor_settings['heading_list'],
-    '#options' => array(
+    '#options' => [
       'h1' => t('Heading 1'),
       'h2' => t('Heading 2'),
       'h3' => t('Heading 3'),
       'h4' => t('Heading 4'),
       'h5' => t('Heading 5'),
       'h6' => t('Heading 6'),
-    ),
+    ],
     '#description' => t('Select heading tags that are shown in the Headings toolbar button. Usually Heading 1 is reserved for the page title and is not shown in the editor.'),
-    '#attributes' => array('class' => array('ckeditor5-heading-list')),
-    '#parents' => array('editor_settings', 'heading_list'),
-  );
+    '#attributes' => ['class' => ['ckeditor5-heading-list']],
+    '#parents' => ['editor_settings', 'heading_list'],
+  ];
 
   array_unshift($form['#validate'], 'ckeditor5_settings_form_validate');
   array_unshift($form['#submit'], 'ckeditor5_settings_form_submit');
@@ -167,13 +167,13 @@ function ckeditor5_settings_form_submit($form, &$form_state) {
  *   - classes: An array of classes to be applied to the element.
  */
 function _ckeditor5_settings_parse_style_list($style_list_string) {
-  $styles = array();
+  $styles = [];
   foreach (explode("\n", $style_list_string) as $style) {
     $style = trim($style);
     if ($style) {
       @list($element, $label) = explode('|', $style, 2);
       @list($element, $classes) = explode('.', $element, 2);
-      $styles[] = array(
+      $styles[] = [
         'name' => $label,
         'element' => $element,
         // Note: CKEditor 4 used 'attributes' => array('class' => $class).
@@ -181,7 +181,7 @@ function _ckeditor5_settings_parse_style_list($style_list_string) {
         // We are casting $classes to a string in order to avoid deprecation
         // warnings for the second parameter of explode() in PHP >= 8.1.
         'classes' => explode(' ', (string) $classes),
-      );
+      ];
     }
   }
   return $styles;

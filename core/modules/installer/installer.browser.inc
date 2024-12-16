@@ -40,14 +40,14 @@ function installer_browser_get_listed_projects() {
     return $_SESSION['installer_browser_listed_projects'];
   }
 
-  return array();
+  return [];
 }
 
 /**
  * Gets the currently queued projects from the session.
  */
 function installer_browser_get_queued_projects($type = NULL) {
-  $projects = array();
+  $projects = [];
 
   if (isset($_SESSION['installer_browser_install_list'])) {
     foreach ($_SESSION['installer_browser_install_list'] as $project) {
@@ -78,7 +78,7 @@ function installer_browser_get_release($release_name, $project) {
  * Gets the newly installed projects from the session.
  */
 function installer_browser_get_installed_projects() {
-  $projects = array();
+  $projects = [];
 
   if (isset($_SESSION['installer_browser_installed_projects'])) {
     foreach ($_SESSION['installer_browser_installed_projects'] as $project) {
@@ -132,9 +132,9 @@ function installer_browser_installed_projects_remove($project_names) {
  *   If TRUE, also clear the list of recently installed projects.
  */
 function installer_browser_install_queue_clear($include_installed = FALSE) {
-  $_SESSION['installer_browser_install_list'] = array();
+  $_SESSION['installer_browser_install_list'] = [];
   if ($include_installed) {
-    $_SESSION['installer_browser_installed_projects'] = array();
+    $_SESSION['installer_browser_installed_projects'] = [];
   }
 }
 
@@ -142,7 +142,7 @@ function installer_browser_install_queue_clear($include_installed = FALSE) {
  * Gets the currently queued releases from the session.
  */
 function installer_browser_get_queued_releases() {
-  $releases = array();
+  $releases = [];
 
   if (isset($_SESSION['installer_browser_install_releases_list'])) {
     foreach ($_SESSION['installer_browser_install_releases_list'] as $release_name => $project) {
@@ -253,8 +253,8 @@ function installer_browser_fetch_results($filters) {
   }
   else {
     backdrop_set_message(t("Encountered an error when trying to fetch results from @name. Error @code : @message",
-      array('@name' => $server['name'], '@code' => $response->code, '@message' => $response->error)));
-    return array();
+      ['@name' => $server['name'], '@code' => $response->code, '@message' => $response->error]));
+    return [];
   }
 
   // Set the cached version of the results.
@@ -327,8 +327,8 @@ function _installer_browser_batch_install_release($release_name, $project, &$con
   $result = installer_manager_download_project($url, TRUE);
 
   if ($result['success']) {
-    $context['results']['successes'][] = t('Successfully installed %project.', array('%project' => $project['title']));
-    $context['message'] = t('Installed %project...', array('%project' => $project['title']));
+    $context['results']['successes'][] = t('Successfully installed %project.', ['%project' => $project['title']]);
+    $context['message'] = t('Installed %project...', ['%project' => $project['title']]);
 
     // Add this to the session variable and remove it from the install_queue
     // variable.
@@ -338,11 +338,11 @@ function _installer_browser_batch_install_release($release_name, $project, &$con
   else {
     watchdog('installer', 'There was an error while installing %project.
       !message',
-      array('%project' => $project['title'], '!message' => $result['message']), WATCHDOG_ERROR);
+      ['%project' => $project['title'], '!message' => $result['message']], WATCHDOG_ERROR);
     $context['results']['failures'][] = t('Error installing %project. !message',
-      array('%project' => $project['title'], '!message' => $result['message']));
+      ['%project' => $project['title'], '!message' => $result['message']]);
     $context['message'] = t('Error installing %project. Errors have been logged.',
-      array('%project' => $project['title']));
+      ['%project' => $project['title']]);
   }
 }
 
@@ -392,7 +392,7 @@ function _installer_browser_batch_install_releases_finished($success, $results, 
  * Determines the types of installed projects.
  */
 function installer_browser_get_installed_types() {
-  $types = array();
+  $types = [];
   $projects = installer_browser_get_installed_projects();
   foreach ($projects as $project) {
     $types[$project['type']] = $project['type'];
@@ -411,7 +411,7 @@ function installer_browser_get_destination_after_install() {
   $theme = in_array('theme', $types);
   $module = in_array('module', $types);
 
-  $layout_message = t('Installation finished successfully. All newly-added layout templates have been enabled and are available for use in your layouts. You can manage them on the <a href="@link">Layout templates</a> page.', array('@link' => url('admin/structure/layouts/settings')));
+  $layout_message = t('Installation finished successfully. All newly-added layout templates have been enabled and are available for use in your layouts. You can manage them on the <a href="@link">Layout templates</a> page.', ['@link' => url('admin/structure/layouts/settings')]);
 
   if ($layout) {
     // Installed a layout and other project(s), continue the wizard. There's no
@@ -453,11 +453,11 @@ function installer_browser_get_destination_after_install() {
 function installer_browser_get_missing_dependencies($projects) {
   $modules = system_rebuild_module_data();
 
-  $missing = array();
+  $missing = [];
 
   foreach ($projects as $project) {
     if ($project['type'] == 'module') {
-      $dependencies = array();
+      $dependencies = [];
       if (isset($modules[$project['name']])) {
         foreach ($modules[$project['name']]->requires as $requires) {
           $dependency = $requires['name'];
@@ -471,7 +471,7 @@ function installer_browser_get_missing_dependencies($projects) {
       }
       else {
         backdrop_set_message(t('There was an error getting information for @module',
-          array('@module' => $project['name'])), 'error');
+          ['@module' => $project['name']]), 'error');
       }
     }
   }
@@ -494,22 +494,22 @@ function installer_browser_add_remove_queue_link($project_name, $title = NULL, $
     return backdrop_render($form);
   }
   else {
-    $build['ajax_link'] = array(
+    $build['ajax_link'] = [
       '#type' => 'link',
       '#title' => $title,
       '#href' => 'admin/installer/queue/nojs/' . $op . '/'. $project_name,
-      '#options' => array(
+      '#options' => [
         'query' => backdrop_get_destination(),
-      ),
+      ],
       '#id' => $id_prefix . '-' . $project_name,
-      '#ajax' => array(
+      '#ajax' => [
         'effect' => 'fade',
         'speed' => 1000,
-        'progress' => array(
+        'progress' => [
           'type' => 'throbber',
-        ),
-      ),
-    );
+        ],
+      ],
+    ];
 
   }
 
@@ -530,17 +530,17 @@ function installer_browser_add_remove_queue_dialog_link($form, &$form_state, $pr
     $form_state['title'] = $title;
   }
 
-  $form['ajax_link'] = array(
+  $form['ajax_link'] = [
     '#type' => 'submit',
     '#value' => $form_state['title'],
-    '#attributes' => array('class' => array('layout-link-button')),
-    '#ajax' => array(
+    '#attributes' => ['class' => ['layout-link-button']],
+    '#ajax' => [
       'callback' => 'installer_browser_add_remove_queue_dialog_link_ajax',
-    ),
-    '#submit' => array(
+    ],
+    '#submit' => [
       'installer_browser_add_remove_queue_dialog_link_submit',
-    ),
-  );
+    ],
+  ];
 
   return $form;
 }
@@ -549,7 +549,7 @@ function installer_browser_add_remove_queue_dialog_link($form, &$form_state, $pr
  * AJAX submit handler for installer_browser_add_remove_queue_dialog_link().
  */
 function installer_browser_add_remove_queue_dialog_link_ajax($form, &$form_state) {
-  $commands = array();
+  $commands = [];
   // Refresh the install queue.
   $commands[] = ajax_command_replace('.installer-browser-install-queue', installer_browser_get_install_list());
   // Refresh the add to queue link.
@@ -557,7 +557,7 @@ function installer_browser_add_remove_queue_dialog_link_ajax($form, &$form_state
   // Refresh the add/remove link in the dialog.
   $form_html = backdrop_render($form);
   $commands[] = ajax_command_replace('.installer-browser-add-remove-queue-dialog-link', $form_html);
-  return array('#type' => 'ajax', '#commands' => $commands);
+  return ['#type' => 'ajax', '#commands' => $commands];
 }
 
 /**

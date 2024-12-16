@@ -28,13 +28,13 @@ function field_ui_fields_list() {
   $bundles = field_info_bundles();
   $modules = system_rebuild_module_data();
 
-  $header = array(
-    array('data' => t('Field name'), 'field' => 'field_name', 'sort' => 'asc'),
-    array('data' => t('Field type'), 'field' => 'field_type', 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
-    array('data' => t('Module'), 'field' => 'module', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
+  $header = [
+    ['data' => t('Field name'), 'field' => 'field_name', 'sort' => 'asc'],
+    ['data' => t('Field type'), 'field' => 'field_type', 'class' => [RESPONSIVE_PRIORITY_MEDIUM]],
+    ['data' => t('Module'), 'field' => 'module', 'class' => [RESPONSIVE_PRIORITY_LOW]],
     t('Used as'),
-  );
-  $rows = array();
+  ];
+  $rows = [];
   foreach ($instances as $entity_type => $type_bundles) {
     foreach ($type_bundles as $bundle => $bundle_instances) {
       foreach ($bundle_instances as $field_name => $instance) {
@@ -43,8 +43,8 @@ function field_ui_fields_list() {
         // Initialize the row if we encounter the field for the first time.
         if (!isset($rows[$field_name])) {
           $module_name = $field_types[$field['type']]['module'];
-          $rows[$field_name]['class'] = $field['locked'] ? array('menu-disabled') : array('');
-          $rows[$field_name]['data']['field_name'] = $field['locked'] ? t('@field_name (Locked)', array('@field_name' => $field_name)) : $field_name;
+          $rows[$field_name]['class'] = $field['locked'] ? ['menu-disabled'] : [''];
+          $rows[$field_name]['data']['field_name'] = $field['locked'] ? t('@field_name (Locked)', ['@field_name' => $field_name]) : $field_name;
           $rows[$field_name]['data']['field_type'] = $field_types[$field['type']]['label'];
           $rows[$field_name]['data']['module'] = $modules[$module_name]->info['name'];
         }
@@ -56,10 +56,10 @@ function field_ui_fields_list() {
         if ($admin_path) {
           $bundle_manage_fields_link = $admin_path . '/fields';
           $field_configure_link = $bundle_manage_fields_link . '/' . $field_name;
-          $rows[$field_name]['data']['used_as'][] = t('<a href="@field_configure_link">%field_label</a> in <a href="@bundle_manage_fields_link">@bundle_label</a>', array('@field_configure_link' => url($field_configure_link), '%field_label' => $field_label, '@bundle_manage_fields_link' => url($bundle_manage_fields_link), '@bundle_label' => $bundle_label));
+          $rows[$field_name]['data']['used_as'][] = t('<a href="@field_configure_link">%field_label</a> in <a href="@bundle_manage_fields_link">@bundle_label</a>', ['@field_configure_link' => url($field_configure_link), '%field_label' => $field_label, '@bundle_manage_fields_link' => url($bundle_manage_fields_link), '@bundle_label' => $bundle_label]);
         }
         else {
-          $rows[$field_name]['data']['used_as'][] = t('%field_label in @bundle_label', array('%field_label' => $field_label, '@bundle_label' => $bundle_label));
+          $rows[$field_name]['data']['used_as'][] = t('%field_label in @bundle_label', ['%field_label' => $field_label, '@bundle_label' => $bundle_label]);
         }
 
       }
@@ -68,7 +68,7 @@ function field_ui_fields_list() {
   foreach ($rows as $field_name => $cell) {
     // A reused field can have different labels across the various bundles it is
     // being used in. So we render the items of the "Used as" column as a list.
-    $rows[$field_name]['data']['used_as'] = theme('item_list', array('items' => $rows[$field_name]['data']['used_as']));
+    $rows[$field_name]['data']['used_as'] = theme('item_list', ['items' => $rows[$field_name]['data']['used_as']]);
   }
 
   // Sort columns.
@@ -95,7 +95,7 @@ function field_ui_fields_list() {
     $rows = array_reverse($rows);
   }
 
-  $output = theme('table', array('header' => $header, 'rows' => $rows, 'empty' => t('No fields have been defined yet.'),));
+  $output = theme('table', ['header' => $header, 'rows' => $rows, 'empty' => t('No fields have been defined yet.'),]);
 
   return $output;
 }
@@ -110,14 +110,14 @@ function field_ui_inactive_message($entity_type, $bundle) {
     $widget_types = field_info_widget_types();
 
     foreach ($inactive_instances as $field_name => $instance) {
-      $list[] = t('%field (@field_name) field requires the %widget_type widget provided by %widget_module module', array(
+      $list[] = t('%field (@field_name) field requires the %widget_type widget provided by %widget_module module', [
       '%field' => $instance['label'],
       '@field_name' => $instance['field_name'],
       '%widget_type' => isset($widget_types[$instance['widget']['type']]) ? $widget_types[$instance['widget']['type']]['label'] : $instance['widget']['type'],
       '%widget_module' => $instance['widget']['module'],
-      ));
+      ]);
     }
-    backdrop_set_message(t('Inactive fields are not shown unless their providing modules are enabled. The following fields are not enabled: !list', array('!list' => theme('item_list', array('items' => $list)))), 'error');
+    backdrop_set_message(t('Inactive fields are not shown unless their providing modules are enabled. The following fields are not enabled: !list', ['!list' => theme('item_list', ['items' => $list])]), 'error');
   }
 }
 
@@ -127,7 +127,7 @@ function field_ui_inactive_message($entity_type, $bundle) {
  * Callback for array_reduce() within field_ui_table_pre_render().
  */
 function _field_ui_reduce_order($array, $a) {
-  $array = !isset($array) ? array() : $array;
+  $array = !isset($array) ? [] : $array;
   if ($a['name']) {
     $array[] = $a['name'];
   }
@@ -181,16 +181,16 @@ function field_ui_display_overview_row_region($row) {
  * @see backdrop_render().
  */
 function field_ui_table_pre_render($elements) {
-  $js_settings = array();
+  $js_settings = [];
 
   // For each region, build the tree structure from the weight and parenting
   // data contained in the flat form structure, to determine row order and
   // indentation.
   $regions = $elements['#regions'];
-  $tree = array('' => array('name' => '', 'children' => array()));
+  $tree = ['' => ['name' => '', 'children' => []]];
   $trees = array_fill_keys(array_keys($regions), $tree);
 
-  $parents = array();
+  $parents = [];
   $list = backdrop_map_assoc(element_children($elements));
 
   // Iterate on rows until we can build a known tree path for all of them.
@@ -201,7 +201,7 @@ function field_ui_table_pre_render($elements) {
       // Proceed if parent is known.
       if (empty($parent) || isset($parents[$parent])) {
         // Grab parent, and remove the row from the next iteration.
-        $parents[$name] = $parent ? array_merge($parents[$parent], array($parent)) : array();
+        $parents[$name] = $parent ? array_merge($parents[$parent], [$parent]) : [];
         unset($list[$name]);
 
         // Determine the region for the row.
@@ -213,24 +213,24 @@ function field_ui_table_pre_render($elements) {
         foreach ($parents[$name] as $key) {
           $target = &$target['children'][$key];
         }
-        $target['children'][$name] = array('name' => $name, 'weight' => $row['weight']['#value']);
+        $target['children'][$name] = ['name' => $name, 'weight' => $row['weight']['#value']];
 
         // Add tabledrag indentation to the first row cell.
         if ($depth = count($parents[$name])) {
           $children = element_children($row);
           $cell = current($children);
-          $row[$cell]['#prefix'] = theme('indentation', array('size' => $depth)) . (isset($row[$cell]['#prefix']) ? $row[$cell]['#prefix'] : '');
+          $row[$cell]['#prefix'] = theme('indentation', ['size' => $depth]) . (isset($row[$cell]['#prefix']) ? $row[$cell]['#prefix'] : '');
         }
 
         // Add row id and associate JS settings.
         $id = backdrop_html_class($name);
         $row['#attributes']['id'] = $id;
         if (isset($row['#js_settings'])) {
-          $row['#js_settings'] += array(
+          $row['#js_settings'] += [
             'rowHandler' => $row['#row_type'],
             'name' => $name,
             'region' => $region_name,
-          );
+          ];
           $js_settings[$id] = $row['#js_settings'];
         }
       }
@@ -241,10 +241,10 @@ function field_ui_table_pre_render($elements) {
     $elements['#regions'][$region_name]['rows_order'] = array_reduce($trees[$region_name], '_field_ui_reduce_order');
   }
 
-  $elements['#attached']['js'][] = array(
+  $elements['#attached']['js'][] = [
     'type' => 'setting',
-    'data' => array('fieldUIRowsData' => $js_settings),
-  );
+    'data' => ['fieldUIRowsData' => $js_settings],
+  ];
 
   return $elements;
 }
@@ -277,17 +277,17 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
 
   $extra_fields = field_info_extra_fields($entity_type, $bundle, 'form');
 
-  $form += array(
+  $form += [
     '#entity_type' => $entity_type,
     '#bundle' => $bundle,
     '#fields' => array_keys($instances),
     '#extra' => array_keys($extra_fields),
-  );
+  ];
 
-  $table = array(
+  $table = [
     '#type' => 'field_ui_table',
     '#tree' => TRUE,
-    '#header' => array(
+    '#header' => [
       t('Label'),
       t('Weight'),
       t('Parent'),
@@ -295,139 +295,139 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
       t('Field type'),
       t('Widget'),
       t('Operations'),
-    ),
-    '#parent_options' => array(),
-    '#regions' => array(
-      'main' => array('message' => t('No fields are present yet.')),
-      'add_new' => array('title' => '&nbsp;'),
-    ),
-    '#attributes' => array(
-      'class' => array('field-ui-overview'),
+    ],
+    '#parent_options' => [],
+    '#regions' => [
+      'main' => ['message' => t('No fields are present yet.')],
+      'add_new' => ['title' => '&nbsp;'],
+    ],
+    '#attributes' => [
+      'class' => ['field-ui-overview'],
       'id' => 'field-overview',
-    ),
-  );
+    ],
+  ];
 
   // Fields.
   foreach ($instances as $name => $instance) {
     $field = field_info_field($instance['field_name']);
     $admin_field_path = $admin_path . '/fields/' . $instance['field_name'];
-    $table[$name] = array(
-      '#attributes' => array('class' => array('draggable', 'tabledrag-leaf')),
+    $table[$name] = [
+      '#attributes' => ['class' => ['draggable', 'tabledrag-leaf']],
       '#row_type' => 'field',
       '#region_callback' => 'field_ui_field_overview_row_region',
-      'label' => array(
-        '#markup' => theme('label_machine_name__node_fields__' . $bundle, array(
+      'label' => [
+        '#markup' => theme('label_machine_name__node_fields__' . $bundle, [
           'label' => $instance['label'],
-        )),
-      ),
-      'weight' => array(
+        ]),
+      ],
+      'weight' => [
         '#type' => 'textfield',
-        '#title' => t('Weight for @title', array('@title' => $instance['label'])),
+        '#title' => t('Weight for @title', ['@title' => $instance['label']]),
         '#title_display' => 'invisible',
         '#default_value' => $instance['widget']['weight'],
         '#size' => 3,
-        '#attributes' => array('class' => array('field-weight')),
-       ),
-      'parent_wrapper' => array(
-        'parent' => array(
+        '#attributes' => ['class' => ['field-weight']],
+       ],
+      'parent_wrapper' => [
+        'parent' => [
           '#type' => 'select',
-          '#title' => t('Parent for @title', array('@title' => $instance['label'])),
+          '#title' => t('Parent for @title', ['@title' => $instance['label']]),
           '#title_display' => 'invisible',
           '#options' => $table['#parent_options'],
           '#empty_value' => '',
-          '#attributes' => array('class' => array('field-parent')),
-          '#parents' => array('fields', $name, 'parent'),
-        ),
-        'hidden_name' => array(
+          '#attributes' => ['class' => ['field-parent']],
+          '#parents' => ['fields', $name, 'parent'],
+        ],
+        'hidden_name' => [
           '#type' => 'hidden',
           '#default_value' => $name,
-          '#attributes' => array('class' => array('field-name')),
-        ),
-      ),
-      'field_name' => array(
+          '#attributes' => ['class' => ['field-name']],
+        ],
+      ],
+      'field_name' => [
         '#markup' => $instance['field_name'],
-      ),
-      'type' => array(
+      ],
+      'type' => [
         '#type' => 'link',
         '#title' => t($field_types[$field['type']]['label']),
         '#href' => $admin_field_path . '/field-settings',
-        '#options' => array('attributes' => array('title' => t('Configure field settings.'))),
-      ),
-      'widget_type' => array(
+        '#options' => ['attributes' => ['title' => t('Configure field settings.')]],
+      ],
+      'widget_type' => [
         '#type' => 'link',
         '#title' => t($widget_types[$instance['widget']['type']]['label']),
         '#href' => $admin_field_path . '/widget-type',
-        '#options' => array('attributes' => array('title' => t('Change widget type.'))),
-      ),
-    );
-    $links = array();
-    $links['edit'] = array(
+        '#options' => ['attributes' => ['title' => t('Change widget type.')]],
+      ],
+    ];
+    $links = [];
+    $links['edit'] = [
       'title' => t('Configure'),
       'href' => $admin_field_path,
-      'attributes' => array('title' => t('Configure instance settings.')),
-    );
-    $links['delete'] = array(
+      'attributes' => ['title' => t('Configure instance settings.')],
+    ];
+    $links['delete'] = [
       'title' => t('Delete'),
       'href' => "$admin_field_path/delete",
-      'attributes' => array('title' => t('Delete instance.')),
-    );
-    $table[$name]['operations']['data'] = array(
+      'attributes' => ['title' => t('Delete instance.')],
+    ];
+    $table[$name]['operations']['data'] = [
       '#type' => 'operations',
       '#links' => $links,
-    );
+    ];
 
     if (!empty($instance['locked'])) {
-      $table[$name]['operations'] = array('#value' => t('Locked'));
+      $table[$name]['operations'] = ['#value' => t('Locked')];
       $table[$name]['#attributes']['class'][] = 'menu-disabled';
     }
   }
 
   // Non-field elements.
   foreach ($extra_fields as $name => $extra_field) {
-    $table[$name] = array(
-      '#attributes' => array('class' => array('draggable', 'tabledrag-leaf')),
+    $table[$name] = [
+      '#attributes' => ['class' => ['draggable', 'tabledrag-leaf']],
       '#row_type' => 'extra_field',
       '#region_callback' => 'field_ui_field_overview_row_region',
-      'label' => array(
-        '#markup' => theme('label_machine_name__node_type__' . $bundle, array(
+      'label' => [
+        '#markup' => theme('label_machine_name__node_type__' . $bundle, [
           'label' => $extra_field['label'],
-        )),
-      ),
-      'weight' => array(
+        ]),
+      ],
+      'weight' => [
         '#type' => 'textfield',
         '#default_value' => $extra_field['weight'],
         '#size' => 3,
-        '#attributes' => array('class' => array('field-weight')),
+        '#attributes' => ['class' => ['field-weight']],
         '#title_display' => 'invisible',
-        '#title' => t('Weight for @title', array('@title' => $extra_field['label'])),
-      ),
-      'parent_wrapper' => array(
-        'parent' => array(
+        '#title' => t('Weight for @title', ['@title' => $extra_field['label']]),
+      ],
+      'parent_wrapper' => [
+        'parent' => [
           '#type' => 'select',
-          '#title' => t('Parent for @title', array('@title' => $extra_field['label'])),
+          '#title' => t('Parent for @title', ['@title' => $extra_field['label']]),
           '#title_display' => 'invisible',
           '#options' => $table['#parent_options'],
           '#empty_value' => '',
-          '#attributes' => array('class' => array('field-parent')),
-          '#parents' => array('fields', $name, 'parent'),
-        ),
-        'hidden_name' => array(
+          '#attributes' => ['class' => ['field-parent']],
+          '#parents' => ['fields', $name, 'parent'],
+        ],
+        'hidden_name' => [
           '#type' => 'hidden',
           '#default_value' => $name,
-          '#attributes' => array('class' => array('field-name')),
-        ),
-      ),
-      'field_name' => array(
+          '#attributes' => ['class' => ['field-name']],
+        ],
+      ],
+      'field_name' => [
         '#markup' => $name,
-      ),
-      'type' => array(
+      ],
+      'type' => [
         '#markup' => isset($extra_field['description']) ? $extra_field['description'] : '',
-        '#cell_attributes' => array('colspan' => 2),
-      ),
-      'operations' => array(
+        '#cell_attributes' => ['colspan' => 2],
+      ],
+      'operations' => [
         '#markup' => '',
-      ),
-    );
+      ],
+    ];
   }
 
   // Additional row: add new field.
@@ -436,11 +436,11 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
   $widget_type_options = field_ui_widget_type_options(NULL, TRUE);
   if ($field_type_options && $widget_type_options) {
     $name = '_add_new_field';
-    $table[$name] = array(
-      '#attributes' => array('class' => array('draggable', 'tabledrag-leaf', 'add-new')),
+    $table[$name] = [
+      '#attributes' => ['class' => ['draggable', 'tabledrag-leaf', 'add-new']],
       '#row_type' => 'add_new_field',
       '#region_callback' => 'field_ui_field_overview_row_region',
-      'label' => array(
+      'label' => [
         '#type' => 'textfield',
         '#title' => t('New field label'),
         '#title_display' => 'invisible',
@@ -448,34 +448,34 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
         '#description' => t('Label'),
         '#prefix' => '<div class="label-input"><div class="add-new-placeholder">' . t('Add new field') .'</div>',
         '#suffix' => '</div>',
-      ),
-      'weight' => array(
+      ],
+      'weight' => [
         '#type' => 'textfield',
         '#default_value' => $max_weight + 1,
         '#size' => 3,
         '#title_display' => 'invisible',
         '#title' => t('Weight for new field'),
-        '#attributes' => array('class' => array('field-weight')),
+        '#attributes' => ['class' => ['field-weight']],
         '#prefix' => '<div class="add-new-placeholder">&nbsp;</div>',
-      ),
-      'parent_wrapper' => array(
-        'parent' => array(
+      ],
+      'parent_wrapper' => [
+        'parent' => [
           '#type' => 'select',
           '#title' => t('Parent for new field'),
           '#title_display' => 'invisible',
           '#options' => $table['#parent_options'],
           '#empty_value' => '',
-          '#attributes' => array('class' => array('field-parent')),
+          '#attributes' => ['class' => ['field-parent']],
           '#prefix' => '<div class="add-new-placeholder">&nbsp;</div>',
-          '#parents' => array('fields', $name, 'parent'),
-        ),
-        'hidden_name' => array(
+          '#parents' => ['fields', $name, 'parent'],
+        ],
+        'hidden_name' => [
           '#type' => 'hidden',
           '#default_value' => $name,
-          '#attributes' => array('class' => array('field-name')),
-        ),
-      ),
-      'field_name' => array(
+          '#attributes' => ['class' => ['field-name']],
+        ],
+      ],
+      'field_name' => [
         '#type' => 'machine_name',
         '#title' => t('New field name'),
         '#title_display' => 'invisible',
@@ -487,138 +487,138 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
         // 32 characters minus the 'field_' prefix.
         '#maxlength' => 26,
         '#prefix' => '<div class="add-new-placeholder element-invisible">&nbsp;</div>',
-        '#machine_name' => array(
-          'source' => array('fields', $name, 'label'),
+        '#machine_name' => [
+          'source' => ['fields', $name, 'label'],
           'exists' => '_field_ui_field_name_exists',
           'standalone' => TRUE,
           'label' => '',
-        ),
+        ],
         '#required' => FALSE,
-      ),
-      'type' => array(
+      ],
+      'type' => [
         '#type' => 'select',
         '#title' => t('Type of new field'),
         '#title_display' => 'invisible',
         '#options' => $field_type_options,
         '#empty_option' => t('- Select a field type -'),
         '#description' => t('Type of data to store.'),
-        '#attributes' => array('class' => array('field-type-select')),
+        '#attributes' => ['class' => ['field-type-select']],
         '#prefix' => '<div class="add-new-placeholder">&nbsp;</div>',
-      ),
-      'widget_type' => array(
+      ],
+      'widget_type' => [
         '#type' => 'select',
         '#title' => t('Widget for new field'),
         '#title_display' => 'invisible',
         '#options' => $widget_type_options,
         '#empty_option' => t('- Select a widget -'),
         '#description' => t('Form element to edit the data.'),
-        '#attributes' => array('class' => array('widget-type-select')),
-        '#cell_attributes' => array('colspan' => 3),
+        '#attributes' => ['class' => ['widget-type-select']],
+        '#cell_attributes' => ['colspan' => 3],
         '#prefix' => '<div class="add-new-placeholder">&nbsp;</div>',
-      ),
+      ],
       // Place the 'translatable' property as an explicit value so that contrib
       // modules can form_alter() the value for newly created fields.
-      'translatable' => array(
+      'translatable' => [
         '#type' => 'value',
         '#value' => FALSE,
-      ),
-    );
+      ],
+    ];
   }
 
   // Additional row: add existing field.
   $existing_fields = field_ui_existing_field_options($entity_type, $bundle);
   if ($existing_fields && $widget_type_options) {
     // Build list of options.
-    $existing_field_options = array();
+    $existing_field_options = [];
     foreach ($existing_fields as $field_name => $info) {
-      $text = t('@type: @field (@label)', array(
+      $text = t('@type: @field (@label)', [
         '@type' => $info['type_label'],
         '@label' => $info['label'],
         '@field' => $info['field'],
-      ));
+      ]);
       $existing_field_options[$field_name] = truncate_utf8($text, 80, FALSE, TRUE);
     }
     asort($existing_field_options);
     $name = '_add_existing_field';
-    $table[$name] = array(
-      '#attributes' => array('class' => array('draggable', 'tabledrag-leaf', 'add-new')),
+    $table[$name] = [
+      '#attributes' => ['class' => ['draggable', 'tabledrag-leaf', 'add-new']],
       '#row_type' => 'add_new_field',
       '#region_callback' => 'field_ui_field_overview_row_region',
-      'label' => array(
+      'label' => [
         '#type' => 'textfield',
         '#title' => t('Existing field label'),
         '#title_display' => 'invisible',
         '#size' => 15,
         '#description' => t('Label'),
-        '#attributes' => array('class' => array('label-textfield')),
+        '#attributes' => ['class' => ['label-textfield']],
         '#prefix' => '<div class="label-input"><div class="add-new-placeholder">' . t('Add existing field') .'</div>',
         '#suffix' => '</div>',
-      ),
-      'weight' => array(
+      ],
+      'weight' => [
         '#type' => 'textfield',
         '#default_value' => $max_weight + 2,
         '#size' => 3,
         '#title_display' => 'invisible',
         '#title' => t('Weight for added field'),
-        '#attributes' => array('class' => array('field-weight')),
+        '#attributes' => ['class' => ['field-weight']],
         '#prefix' => '<div class="add-new-placeholder">&nbsp;</div>',
-      ),
-      'parent_wrapper' => array(
-        'parent' => array(
+      ],
+      'parent_wrapper' => [
+        'parent' => [
           '#type' => 'select',
           '#title' => t('Parent for existing field'),
           '#title_display' => 'invisible',
           '#options' => $table['#parent_options'],
           '#empty_value' => '',
-          '#attributes' => array('class' => array('field-parent')),
+          '#attributes' => ['class' => ['field-parent']],
           '#prefix' => '<div class="add-new-placeholder">&nbsp;</div>',
-          '#parents' => array('fields', $name, 'parent'),
-        ),
-        'hidden_name' => array(
+          '#parents' => ['fields', $name, 'parent'],
+        ],
+        'hidden_name' => [
           '#type' => 'hidden',
           '#default_value' => $name,
-          '#attributes' => array('class' => array('field-name')),
-        ),
-      ),
-      'field_name' => array(
+          '#attributes' => ['class' => ['field-name']],
+        ],
+      ],
+      'field_name' => [
         '#type' => 'select',
         '#title' => t('Existing field to share'),
         '#title_display' => 'invisible',
         '#options' => $existing_field_options,
         '#empty_option' => t('- Select an existing field -'),
         '#description' => t('Field to share'),
-        '#attributes' => array('class' => array('field-select')),
-        '#cell_attributes' => array('colspan' => 2),
+        '#attributes' => ['class' => ['field-select']],
+        '#cell_attributes' => ['colspan' => 2],
         '#prefix' => '<div class="add-new-placeholder">&nbsp;</div>',
-      ),
-      'widget_type' => array(
+      ],
+      'widget_type' => [
         '#type' => 'select',
         '#title' => t('Widget for existing field'),
         '#title_display' => 'invisible',
         '#options' => $widget_type_options,
         '#empty_option' => t('- Select a widget -'),
         '#description' => t('Form element to edit the data.'),
-        '#attributes' => array('class' => array('widget-type-select')),
-        '#cell_attributes' => array('colspan' => 3),
+        '#attributes' => ['class' => ['widget-type-select']],
+        '#cell_attributes' => ['colspan' => 3],
         '#prefix' => '<div class="add-new-placeholder">&nbsp;</div>',
-      ),
-    );
+      ],
+    ];
   }
   $form['fields'] = $table;
 
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
+  $form['actions'] = ['#type' => 'actions'];
+  $form['actions']['submit'] = ['#type' => 'submit', '#value' => t('Save')];
 
   $form['#attached']['css'][] = backdrop_get_path('module', 'field_ui') . '/css/field_ui.css';
   $form['#attached']['js'][] = backdrop_get_path('module', 'field_ui') . '/js/field_ui.js';
 
   // Add settings for the update selects behavior.
-  $js_fields = array();
+  $js_fields = [];
   foreach ($existing_fields as $field_name => $info) {
-    $js_fields[$field_name] = array('label' => $info['label'], 'type' => $info['type'], 'widget' => $info['widget_type']);
+    $js_fields[$field_name] = ['label' => $info['label'], 'type' => $info['type'], 'widget' => $info['widget_type']];
   }
 
-  $field_info = array();
+  $field_info = [];
   foreach ($field_types as $machine => $type) {
     $field_info[$machine]['label'] = $type['label'];
     $field_info[$machine]['defaultWidget'] = $type['default_widget'];
@@ -626,18 +626,18 @@ function field_ui_field_overview_form($form, &$form_state, $entity_type, $bundle
     $field_info[$machine]['module'] = $type['module'];
   }
 
-  $form['#attached']['js'][] = array(
+  $form['#attached']['js'][] = [
     'type' => 'setting',
-    'data' => array(
+    'data' => [
       'fields' => $js_fields,
       'fieldWidgetTypes' => field_ui_widget_type_options(),
       'fieldInfo' => $field_info,
-    ),
-  );
+    ],
+  ];
 
   // Add tabledrag behavior.
-  $form['#attached']['backdrop_add_tabledrag'][] = array('field-overview', 'order', 'sibling', 'field-weight');
-  $form['#attached']['backdrop_add_tabledrag'][] = array('field-overview', 'match', 'parent', 'field-parent', 'field-parent', 'field-name');
+  $form['#attached']['backdrop_add_tabledrag'][] = ['field-overview', 'order', 'sibling', 'field-weight'];
+  $form['#attached']['backdrop_add_tabledrag'][] = ['field-overview', 'match', 'parent', 'field-parent', 'field-parent', 'field-name'];
 
   return $form;
 }
@@ -661,7 +661,7 @@ function _field_ui_field_overview_form_validate_add_new($form, &$form_state) {
   $field = $form_state['values']['fields']['_add_new_field'];
 
   // Validate if any information was provided in the 'add new field' row.
-  if (array_filter(array($field['label'], $field['field_name'], $field['type'], $field['widget_type']))) {
+  if (array_filter([$field['label'], $field['field_name'], $field['type'], $field['widget_type']])) {
     // Missing label.
     if (!$field['label']) {
       form_set_error('fields][_add_new_field][label', t('Add new field: you need to provide a label.'));
@@ -711,7 +711,7 @@ function _field_ui_field_overview_form_validate_add_new($form, &$form_state) {
 function _field_ui_field_name_exists($value) {
   if (!empty($value)) {
     // field_info_fields() does not include inactive fields.
-    return (bool) field_read_fields(array('field_name' => 'field_' . $value), array('include_inactive' => TRUE, 'include_deleted' => TRUE));
+    return (bool) field_read_fields(['field_name' => 'field_' . $value], ['include_inactive' => TRUE, 'include_deleted' => TRUE]);
   }
 }
 
@@ -727,7 +727,7 @@ function _field_ui_field_overview_form_validate_add_existing($form, &$form_state
     $field = $form_state['values']['fields']['_add_existing_field'];
 
     // Validate if any information was provided in the 'add existing field' row.
-    if (array_filter(array($field['label'], $field['field_name'], $field['widget_type']))) {
+    if (array_filter([$field['label'], $field['field_name'], $field['widget_type']])) {
       // Missing label.
       if (!$field['label']) {
         form_set_error('fields][_add_existing_field][label', t('Add existing field: you need to provide a label.'));
@@ -780,28 +780,28 @@ function field_ui_field_overview_form_submit($form, &$form_state) {
 
   field_bundle_settings($entity_type, $bundle, $bundle_settings);
 
-  $destinations = array();
+  $destinations = [];
 
   // Create new field.
-  $field = array();
+  $field = [];
   if (!empty($form_values['_add_new_field']['field_name'])) {
     $values = $form_values['_add_new_field'];
 
-    $field = array(
+    $field = [
       'field_name' => $values['field_name'],
       'type' => $values['type'],
       'translatable' => $values['translatable'],
-    );
-    $instance = array(
+    ];
+    $instance = [
       'field_name' => $field['field_name'],
       'entity_type' => $entity_type,
       'bundle' => $bundle,
       'label' => $values['label'],
-      'widget' => array(
+      'widget' => [
         'type' => $values['widget_type'],
         'weight' => $values['weight'],
-      ),
-    );
+      ],
+    ];
 
     // Create the field and instance.
     try {
@@ -815,7 +815,7 @@ function field_ui_field_overview_form_submit($form, &$form_state) {
       $form_state['fields_added']['_add_new_field'] = $field['field_name'];
     }
     catch (Exception $e) {
-      backdrop_set_message(t('There was a problem creating field %label: !message', array('%label' => $instance['label'], '!message' => $e->getMessage())), 'error');
+      backdrop_set_message(t('There was a problem creating field %label: !message', ['%label' => $instance['label'], '!message' => $e->getMessage()]), 'error');
     }
   }
 
@@ -824,19 +824,19 @@ function field_ui_field_overview_form_submit($form, &$form_state) {
     $values = $form_values['_add_existing_field'];
     $field = field_info_field($values['field_name']);
     if (!empty($field['locked'])) {
-      backdrop_set_message(t('The field %label cannot be added because it is locked.', array('%label' => $values['label'])), 'error');
+      backdrop_set_message(t('The field %label cannot be added because it is locked.', ['%label' => $values['label']]), 'error');
     }
     else {
-      $instance = array(
+      $instance = [
         'field_name' => $field['field_name'],
         'entity_type' => $entity_type,
         'bundle' => $bundle,
         'label' => $values['label'],
-        'widget' => array(
+        'widget' => [
           'type' => $values['widget_type'],
           'weight' => $values['weight'],
-        ),
-      );
+        ],
+      ];
 
       try {
         field_create_instance($instance);
@@ -845,7 +845,7 @@ function field_ui_field_overview_form_submit($form, &$form_state) {
         $form_state['fields_added']['_add_existing_field'] = $instance['field_name'];
       }
       catch (Exception $e) {
-        backdrop_set_message(t('There was a problem creating field instance %label: @message.', array('%label' => $instance['label'], '@message' => $e->getMessage())), 'error');
+        backdrop_set_message(t('There was a problem creating field instance %label: @message.', ['%label' => $instance['label'], '@message' => $e->getMessage()]), 'error');
       }
     }
   }
@@ -882,21 +882,21 @@ function field_ui_display_overview($entity_type, $bundle) {
   $custom_view_modes = config_get('entity.view_modes', 'view_modes');
   $view_modes = $entity_info['view modes'];
   if (is_array($view_modes)) {
-    backdrop_sort($view_modes, array('label' => SORT_STRING));
+    backdrop_sort($view_modes, ['label' => SORT_STRING]);
   }
 
-  $custom = array();
-  $default = array();
+  $custom = [];
+  $default = [];
   // Sort display modes into active/default, and merge in display mode settings.
   foreach ($view_modes as $view_mode_name => $mode) {
     $custom_settings = isset($view_mode_settings[$view_mode_name]['custom_settings']) ? (bool) $view_mode_settings[$view_mode_name]['custom_settings'] : (bool) $mode['custom settings'];
 
-    $custom[$view_mode_name] = array(
+    $custom[$view_mode_name] = [
       'label' => $mode['label'],
       'custom settings' => $custom_settings,
       'storage' => !empty($custom_view_modes[$entity_type][$view_mode_name]) ? 'Custom' : 'Default (module-provided)',
       'status' => $custom_settings ? 'Customized' : 'Using the <em>Default display</em>',
-    );
+    ];
 
     if (!($custom_settings)) {
       $default[$view_mode_name] = $custom[$view_mode_name];
@@ -904,18 +904,18 @@ function field_ui_display_overview($entity_type, $bundle) {
     }
   }
 
-  $build = array(
+  $build = [
     '#entity_type' => $entity_type,
     '#bundle' => $bundle,
-    '#attached' => array(
-      'css' => array(backdrop_get_path('module', 'field_ui') . '/css/field_ui.css'),
-    ),
-  );
-  $build['help'] = array(
+    '#attached' => [
+      'css' => [backdrop_get_path('module', 'field_ui') . '/css/field_ui.css'],
+    ],
+  ];
+  $build['help'] = [
     '#type' => 'help',
-    '#markup' => t('<strong>Display modes</strong> are variations of how an item can be displayed. Each @label display mode can be configured differently. For example: individual fields can be displayed using a different format, or hidden entirely.', array('@label' => $bundle_label)),
-  );
-  $build['view_modes'] = array(
+    '#markup' => t('<strong>Display modes</strong> are variations of how an item can be displayed. Each @label display mode can be configured differently. For example: individual fields can be displayed using a different format, or hidden entirely.', ['@label' => $bundle_label]),
+  ];
+  $build['view_modes'] = [
     '#theme' => 'field_ui_view_modes',
     '#tree' => TRUE,
     '#view_modes' => $custom + $default,
@@ -923,7 +923,7 @@ function field_ui_display_overview($entity_type, $bundle) {
     '#bundle' => $bundle,
     '#bundle_label' => $bundle_label,
     '#admin_path' => $admin_path,
-  );
+  ];
 
   return $build;
 }
@@ -953,9 +953,9 @@ function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view
 
   // Function backdrop_set_title() also sanitizes the raw title components with
   // check_plain().
-  backdrop_set_title(t('!page: !teaser display', array(
+  backdrop_set_title(t('!page: !teaser display', [
     '!page' => $bundle_name,
-    '!teaser' => $page_title)));
+    '!teaser' => $page_title]));
 
   $bundle = field_extract_bundle($entity_type, $bundle);
 
@@ -967,119 +967,119 @@ function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view
   $field_types = field_info_field_types();
   $extra_fields = field_info_extra_fields($entity_type, $bundle, 'display');
 
-  $form_state += array(
+  $form_state += [
     'formatter_settings_edit' => NULL,
-  );
+  ];
 
-  $form += array(
+  $form += [
     '#entity_type' => $entity_type,
     '#bundle' => $bundle,
     '#view_mode' => $view_mode,
     '#fields' => array_keys($instances),
     '#extra' => array_keys($extra_fields),
-  );
+  ];
 
   if (empty($instances) && empty($extra_fields)) {
-    backdrop_set_message(t('There are no fields added yet. You can add new fields on the <a href="@link">Manage fields</a> page.', array('@link' => url($admin_path . '/fields'))), 'warning');
+    backdrop_set_message(t('There are no fields added yet. You can add new fields on the <a href="@link">Manage fields</a> page.', ['@link' => url($admin_path . '/fields')]), 'warning');
     return $form;
   }
 
-  $table = array(
+  $table = [
     '#type' => 'field_ui_table',
     '#tree' => TRUE,
-    '#header' => array(
+    '#header' => [
       t('Field'),
       t('Weight'),
       t('Parent'),
       t('Label'),
-      array('data' => t('Format'), 'colspan' => 3),
-    ),
-    '#regions' => array(
-      'visible' => array('message' => t('No field is displayed.')),
-      'hidden' => array('title' => t('Hidden'), 'message' => t('No field is hidden.')),
-    ),
-    '#parent_options' => array(),
-    '#attributes' => array(
-      'class' => array('field-ui-overview'),
+      ['data' => t('Format'), 'colspan' => 3],
+    ],
+    '#regions' => [
+      'visible' => ['message' => t('No field is displayed.')],
+      'hidden' => ['title' => t('Hidden'), 'message' => t('No field is hidden.')],
+    ],
+    '#parent_options' => [],
+    '#attributes' => [
+      'class' => ['field-ui-overview'],
       'id' => 'field-display-overview',
-    ),
+    ],
     // Add Ajax wrapper.
     '#prefix' => '<div id="field-display-overview-wrapper">',
     '#suffix' => '</div>',
-  );
+  ];
 
-  $field_label_options = array(
+  $field_label_options = [
     'above' => t('Above'),
     'inline' => t('Inline'),
     'hidden' => t('Hidden'),
-  );
-  $extra_visibility_options = array(
+  ];
+  $extra_visibility_options = [
     'visible' => t('Visible'),
     'hidden' => t('Hidden'),
-  );
+  ];
 
   // Field rows.
   foreach ($instances as $name => $instance) {
     $field = field_info_field($instance['field_name']);
     $display = $instance['display'][$view_mode];
-    $table[$name] = array(
-      '#attributes' => array('class' => array('draggable', 'tabledrag-leaf')),
+    $table[$name] = [
+      '#attributes' => ['class' => ['draggable', 'tabledrag-leaf']],
       '#row_type' => 'field',
       '#region_callback' => 'field_ui_display_overview_row_region',
-      '#js_settings' => array(
+      '#js_settings' => [
         'rowHandler' => 'field',
         'defaultFormatter' => $field_types[$field['type']]['default_formatter'],
-      ),
-      'human_name' => array(
+      ],
+      'human_name' => [
         '#markup' => check_plain($instance['label']),
-      ),
-      'weight' => array(
+      ],
+      'weight' => [
         '#type' => 'textfield',
-        '#title' => t('Weight for @title', array('@title' => $instance['label'])),
+        '#title' => t('Weight for @title', ['@title' => $instance['label']]),
         '#title_display' => 'invisible',
         '#default_value' => $display['weight'],
         '#size' => 3,
-        '#attributes' => array('class' => array('field-weight')),
-      ),
-      'parent_wrapper' => array(
-        'parent' => array(
+        '#attributes' => ['class' => ['field-weight']],
+      ],
+      'parent_wrapper' => [
+        'parent' => [
           '#type' => 'select',
-          '#title' => t('Label display for @title', array('@title' => $instance['label'])),
+          '#title' => t('Label display for @title', ['@title' => $instance['label']]),
           '#title_display' => 'invisible',
           '#options' => $table['#parent_options'],
           '#empty_value' => '',
-          '#attributes' => array('class' => array('field-parent')),
-          '#parents' => array('fields', $name, 'parent'),
-        ),
-        'hidden_name' => array(
+          '#attributes' => ['class' => ['field-parent']],
+          '#parents' => ['fields', $name, 'parent'],
+        ],
+        'hidden_name' => [
           '#type' => 'hidden',
           '#default_value' => $name,
-          '#attributes' => array('class' => array('field-name')),
-        ),
-      ),
-      'label' => array(
+          '#attributes' => ['class' => ['field-name']],
+        ],
+      ],
+      'label' => [
         '#type' => 'select',
-        '#title' => t('Label display for @title', array('@title' => $instance['label'])),
+        '#title' => t('Label display for @title', ['@title' => $instance['label']]),
         '#title_display' => 'invisible',
         '#options' => $field_label_options,
         '#default_value' => $display['label'],
-      ),
-    );
+      ],
+    ];
 
     $formatter_options = field_ui_formatter_options($field['type']);
     $formatter_options['hidden'] = t('Hidden');
-    $table[$name]['format'] = array(
-      'type' => array(
+    $table[$name]['format'] = [
+      'type' => [
         '#type' => 'select',
-        '#title' => t('Formatter for @title', array('@title' => $instance['label'])),
+        '#title' => t('Formatter for @title', ['@title' => $instance['label']]),
         '#title_display' => 'invisible',
         '#options' => $formatter_options,
         '#default_value' => $display['type'],
-        '#parents' => array('fields', $name, 'type'),
-        '#attributes' => array('class' => array('field-formatter-type')),
-      ),
-      'settings_edit_form' => array(),
-    );
+        '#parents' => ['fields', $name, 'type'],
+        '#attributes' => ['class' => ['field-formatter-type']],
+      ],
+      'settings_edit_form' => [],
+    ];
 
     // Formatter settings.
 
@@ -1105,29 +1105,29 @@ function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view
     $instance['display'][$view_mode]['settings'] = $settings;
 
     // Base button element for the various formatter settings actions.
-    $base_button = array(
-      '#submit' => array('field_ui_display_overview_multistep_submit'),
-      '#ajax' => array(
+    $base_button = [
+      '#submit' => ['field_ui_display_overview_multistep_submit'],
+      '#ajax' => [
         'callback' => 'field_ui_display_overview_multistep_js',
         'wrapper' => 'field-display-overview-wrapper',
         'effect' => 'fade',
-      ),
+      ],
       '#field_name' => $name,
-    );
+    ];
 
     if ($form_state['formatter_settings_edit'] == $name) {
       // We are currently editing this field's formatter settings. Display the
       // settings form and submit buttons.
-      $table[$name]['format']['settings_edit_form'] = array();
+      $table[$name]['format']['settings_edit_form'] = [];
 
-      $settings_form = array();
+      $settings_form = [];
       $function = $formatter['module'] . '_field_formatter_settings_form';
       if (function_exists($function)) {
         $settings_form = $function($field, $instance, $view_mode, $form, $form_state);
       }
 
       // Allow other modules to alter the formatter settings form.
-      $context = array(
+      $context = [
         'module' => $formatter['module'],
         'formatter' => $formatter,
         'field' => $field,
@@ -1135,38 +1135,38 @@ function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view
         'view_mode' => $view_mode,
         'form' => $form,
         'form_state' => $form_state,
-      );
+      ];
       backdrop_alter('field_formatter_settings_form', $settings_form, $context);
 
       if ($settings_form) {
-        $table[$name]['format']['#cell_attributes'] = array('colspan' => 3);
-        $table[$name]['format']['settings_edit_form'] = array(
+        $table[$name]['format']['#cell_attributes'] = ['colspan' => 3];
+        $table[$name]['format']['settings_edit_form'] = [
           '#type' => 'container',
-          '#attributes' => array('class' => array('field-formatter-settings-edit-form')),
-          '#parents' => array('fields', $name, 'settings_edit_form'),
-          'label' => array(
+          '#attributes' => ['class' => ['field-formatter-settings-edit-form']],
+          '#parents' => ['fields', $name, 'settings_edit_form'],
+          'label' => [
             '#markup' => t('Format settings:') . ' <span class="formatter-name">' . $formatter['label'] . '</span>',
-          ),
+          ],
           'settings' => $settings_form,
-          'actions' => array(
+          'actions' => [
             '#type' => 'actions',
-            'save_settings' => $base_button + array(
+            'save_settings' => $base_button + [
               '#type' => 'submit',
               '#name' => $name . '_formatter_settings_update',
               '#value' => t('Update'),
               '#op' => 'update',
-            ),
-            'cancel_settings' => $base_button + array(
+            ],
+            'cancel_settings' => $base_button + [
               '#type' => 'submit',
               '#name' => $name . '_formatter_settings_cancel',
               '#value' => t('Cancel'),
               '#op' => 'cancel',
               // Do not check errors for the 'Cancel' button, but make sure we
               // get the value of the 'formatter type' select.
-              '#limit_validation_errors' => array(array('fields', $name, 'type')),
-            ),
-          ),
-        );
+              '#limit_validation_errors' => [['fields', $name, 'type']],
+            ],
+          ],
+        ];
         $table[$name]['#attributes']['class'][] = 'field-formatter-settings-editing';
       }
     }
@@ -1178,37 +1178,37 @@ function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view
       }
 
       // Allow other modules to alter the formatter summary.
-      $context = array(
+      $context = [
         'field' => $field,
         'instance' => $instance,
         'view_mode' => $view_mode,
-      );
+      ];
       backdrop_alter('field_formatter_settings_summary', $summary, $context);
 
-      $table[$name]['settings_summary'] = array();
-      $table[$name]['settings_edit'] = array();
+      $table[$name]['settings_summary'] = [];
+      $table[$name]['settings_edit'] = [];
       if ($summary) {
-        $table[$name]['settings_summary'] = array(
+        $table[$name]['settings_summary'] = [
           '#markup' => '<div class="field-formatter-summary">' . $summary . '</div>',
-          '#cell_attributes' => array('class' => array('field-formatter-summary-cell')),
-        );
-        $table[$name]['settings_edit'] = $base_button + array(
+          '#cell_attributes' => ['class' => ['field-formatter-summary-cell']],
+        ];
+        $table[$name]['settings_edit'] = $base_button + [
           '#type' => 'submit',
           '#name' => $name . '_formatter_settings_edit',
           '#value' => t('Configure'),
-          '#attributes' => array(
-            'class' => array(
+          '#attributes' => [
+            'class' => [
               'field-formatter-settings-edit',
               'button-secondary',
-            ),
-          ),
+            ],
+          ],
           '#op' => 'edit',
           // Do not check errors for the 'Configure' button, but make sure we get
           // the value of the 'formatter type' select.
-          '#limit_validation_errors' => array(array('fields', $name, 'type')),
+          '#limit_validation_errors' => [['fields', $name, 'type']],
           '#prefix' => '<div class="field-formatter-settings-edit-wrapper">',
           '#suffix' => '</div>',
-        );
+        ];
       }
     }
   }
@@ -1216,55 +1216,55 @@ function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view
   // Non-field elements.
   foreach ($extra_fields as $name => $extra_field) {
     $display = $extra_field['display'][$view_mode];
-    $table[$name] = array(
-      '#attributes' => array('class' => array('draggable', 'tabledrag-leaf')),
+    $table[$name] = [
+      '#attributes' => ['class' => ['draggable', 'tabledrag-leaf']],
       '#row_type' => 'extra_field',
       '#region_callback' => 'field_ui_display_overview_row_region',
-      '#js_settings' => array('rowHandler' => 'field'),
-      'human_name' => array(
+      '#js_settings' => ['rowHandler' => 'field'],
+      'human_name' => [
         '#markup' => check_plain($extra_field['label']),
-      ),
-      'weight' => array(
+      ],
+      'weight' => [
         '#type' => 'textfield',
-        '#title' => t('Weight for @title', array('@title' => $extra_field['label'])),
+        '#title' => t('Weight for @title', ['@title' => $extra_field['label']]),
         '#title_display' => 'invisible',
         '#default_value' => $display['weight'],
         '#size' => 3,
-        '#attributes' => array('class' => array('field-weight')),
-      ),
-      'parent_wrapper' => array(
-        'parent' => array(
+        '#attributes' => ['class' => ['field-weight']],
+      ],
+      'parent_wrapper' => [
+        'parent' => [
           '#type' => 'select',
-          '#title' => t('Parents for @title', array('@title' => $extra_field['label'])),
+          '#title' => t('Parents for @title', ['@title' => $extra_field['label']]),
           '#title_display' => 'invisible',
           '#options' => $table['#parent_options'],
           '#empty_value' => '',
-          '#attributes' => array('class' => array('field-parent')),
-          '#parents' => array('fields', $name, 'parent'),
-        ),
-        'hidden_name' => array(
+          '#attributes' => ['class' => ['field-parent']],
+          '#parents' => ['fields', $name, 'parent'],
+        ],
+        'hidden_name' => [
           '#type' => 'hidden',
           '#default_value' => $name,
-          '#attributes' => array('class' => array('field-name')),
-        ),
-      ),
-      'empty_cell' => array(
+          '#attributes' => ['class' => ['field-name']],
+        ],
+      ],
+      'empty_cell' => [
         '#markup' => '&nbsp;',
-      ),
-      'format' => array(
-        'type' => array(
+      ],
+      'format' => [
+        'type' => [
           '#type' => 'select',
-          '#title' => t('Visibility for @title', array('@title' => $extra_field['label'])),
+          '#title' => t('Visibility for @title', ['@title' => $extra_field['label']]),
           '#title_display' => 'invisible',
           '#options' => $extra_visibility_options,
           '#default_value' => $display['visible'] ? 'visible' : 'hidden',
-          '#parents' => array('fields', $name, 'type'),
-          '#attributes' => array('class' => array('field-formatter-type')),
-        ),
-      ),
-      'settings_summary' => array(),
-      'settings_edit' => array(),
-    );
+          '#parents' => ['fields', $name, 'type'],
+          '#attributes' => ['class' => ['field-formatter-type']],
+        ],
+      ],
+      'settings_summary' => [],
+      'settings_edit' => [],
+    ];
   }
 
   $form['fields'] = $table;
@@ -1275,32 +1275,32 @@ function field_ui_display_form($form, &$form_state, $entity_type, $bundle, $view
   // selects, but triggered by the client-side script through a hidden #ajax
   // 'Refresh' button. A hidden 'refresh_rows' input tracks the name of
   // affected rows.
-  $form['refresh_rows'] = array('#type' => 'hidden');
-  $form['refresh'] = array(
+  $form['refresh_rows'] = ['#type' => 'hidden'];
+  $form['refresh'] = [
     '#type' => 'submit',
     '#value' => t('Refresh'),
     '#op' => 'refresh_table',
-    '#submit' => array('field_ui_display_overview_multistep_submit'),
-    '#ajax' => array(
+    '#submit' => ['field_ui_display_overview_multistep_submit'],
+    '#ajax' => [
       'callback' => 'field_ui_display_overview_multistep_js',
       'wrapper' => 'field-display-overview-wrapper',
       'effect' => 'fade',
       // The button stays hidden, so we hide the Ajax spinner too. Ad-hoc
       // spinners will be added manually by the client-side script.
       'progress' => 'none',
-    ),
-    '#attributes' => array('class' => array('element-invisible'))
-  );
+    ],
+    '#attributes' => ['class' => ['element-invisible']]
+  ];
 
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save'));
+  $form['actions'] = ['#type' => 'actions'];
+  $form['actions']['submit'] = ['#type' => 'submit', '#value' => t('Save')];
 
   $form['#attached']['js'][] = backdrop_get_path('module', 'field_ui') . '/js/field_ui.js';
   $form['#attached']['css'][] = backdrop_get_path('module', 'field_ui') . '/css/field_ui.css';
 
   // Add tabledrag behavior.
-  $form['#attached']['backdrop_add_tabledrag'][] = array('field-display-overview', 'order', 'sibling', 'field-weight');
-  $form['#attached']['backdrop_add_tabledrag'][] = array('field-display-overview', 'match', 'parent', 'field-parent', 'field-parent', 'field-name');
+  $form['#attached']['backdrop_add_tabledrag'][] = ['field-display-overview', 'order', 'sibling', 'field-weight'];
+  $form['#attached']['backdrop_add_tabledrag'][] = ['field-display-overview', 'match', 'parent', 'field-parent', 'field-parent', 'field-name'];
 
   return $form;
 }
@@ -1323,7 +1323,7 @@ function field_ui_display_form_submit($form, &$form_state) {
     // values (if the whole form was submitted while some formatter
     // settings were being edited), or have been persisted in
     // $form_state.
-    $settings = array();
+    $settings = [];
     if (isset($values['settings_edit_form']['settings'])) {
       $settings = $values['settings_edit_form']['settings'];
     }
@@ -1338,12 +1338,12 @@ function field_ui_display_form_submit($form, &$form_state) {
     $default_settings = field_info_formatter_settings($values['type']);
     $settings = array_intersect_key($settings, $default_settings);
 
-    $instance['display'][$view_mode] = array(
+    $instance['display'][$view_mode] = [
       'label' => $values['label'],
       'type' => $values['type'],
       'weight' => $values['weight'],
       'settings' => $settings,
-    );
+    ];
     field_update_instance($instance);
   }
 
@@ -1352,10 +1352,10 @@ function field_ui_display_form_submit($form, &$form_state) {
 
   // Save data for 'extra' fields.
   foreach ($form['#extra'] as $name) {
-    $bundle_settings['extra_fields']['display'][$name][$view_mode] = array(
+    $bundle_settings['extra_fields']['display'][$name][$view_mode] = [
       'weight' => $form_values['fields'][$name]['weight'],
       'visible' => $form_values['fields'][$name]['type'] == 'visible',
-    );
+    ];
   }
 
   // Save updated bundle settings.
@@ -1414,19 +1414,19 @@ function field_ui_display_overview_multistep_js($form, &$form_state) {
   // Pick the elements that need to receive the ajax-new-content effect.
   switch ($op) {
     case 'edit':
-      $updated_rows = array($trigger['#field_name']);
-      $updated_columns = array('format');
+      $updated_rows = [$trigger['#field_name']];
+      $updated_columns = ['format'];
       break;
 
     case 'update':
     case 'cancel':
-      $updated_rows = array($trigger['#field_name']);
-      $updated_columns = array('format', 'settings_summary', 'settings_edit');
+      $updated_rows = [$trigger['#field_name']];
+      $updated_columns = ['format', 'settings_summary', 'settings_edit'];
       break;
 
     case 'refresh_table':
       $updated_rows = array_values(explode(' ', $form_state['values']['refresh_rows']));
-      $updated_columns = array('settings_summary', 'settings_edit');
+      $updated_columns = ['settings_summary', 'settings_edit'];
       break;
   }
 
@@ -1467,7 +1467,7 @@ function field_ui_display_overview_multistep_js($form, &$form_state) {
  */
 function _field_ui_add_default_view_mode_settings($entity_type, $bundle, $view_mode, &$settings) {
   // Update display settings for field instances.
-  $instances = field_read_instances(array('entity_type' => $entity_type, 'bundle' => $bundle));
+  $instances = field_read_instances(['entity_type' => $entity_type, 'bundle' => $bundle]);
   foreach ($instances as $instance) {
     // If this field instance has display settings defined for this Display
     // mode, respect those settings.
@@ -1494,9 +1494,9 @@ function field_ui_field_type_options() {
   $options = &backdrop_static(__FUNCTION__);
 
   if (!isset($options)) {
-    $options = array();
+    $options = [];
     $field_types = field_info_field_types();
-    $field_type_options = array();
+    $field_type_options = [];
     foreach ($field_types as $name => $field_type) {
       // Skip field types which have no widget types, or should not be added via
       // the user interface.
@@ -1519,7 +1519,7 @@ function field_ui_widget_type_options($field_type = NULL, $by_label = FALSE) {
   $options = &backdrop_static(__FUNCTION__);
 
   if (!isset($options)) {
-    $options = array();
+    $options = [];
     $field_types = field_info_field_types();
     foreach (field_info_widget_types() as $name => $widget_type) {
       foreach ($widget_type['field types'] as $widget_field_type) {
@@ -1535,11 +1535,11 @@ function field_ui_widget_type_options($field_type = NULL, $by_label = FALSE) {
   }
 
   if (isset($field_type)) {
-    return !empty($options[$field_type]) ? $options[$field_type] : array();
+    return !empty($options[$field_type]) ? $options[$field_type] : [];
   }
   if ($by_label) {
     $field_types = field_info_field_types();
-    $options_by_label = array();
+    $options_by_label = [];
     foreach ($options as $field_type => $widgets) {
       $options_by_label[$field_types[$field_type]['label']] = $widgets;
     }
@@ -1559,7 +1559,7 @@ function field_ui_formatter_options($field_type = NULL) {
 
   if (!isset($options)) {
     $field_types = field_info_field_types();
-    $options = array();
+    $options = [];
     foreach (field_info_formatter_types() as $name => $formatter) {
       foreach ($formatter['field types'] as $formatter_field_type) {
         // Check that the field type exists.
@@ -1571,7 +1571,7 @@ function field_ui_formatter_options($field_type = NULL) {
   }
 
   if ($field_type) {
-    return !empty($options[$field_type]) ? $options[$field_type] : array();
+    return !empty($options[$field_type]) ? $options[$field_type] : [];
   }
   return $options;
 }
@@ -1580,7 +1580,7 @@ function field_ui_formatter_options($field_type = NULL) {
  * Returns an array of existing fields to be added to a bundle.
  */
 function field_ui_existing_field_options($entity_type, $bundle) {
-  $info = array();
+  $info = [];
   $field_types = field_info_field_types();
 
   foreach (field_info_instances() as $existing_entity_type => $bundles) {
@@ -1599,13 +1599,13 @@ function field_ui_existing_field_options($entity_type, $bundle) {
             && !field_info_instance($entity_type, $field['field_name'], $bundle)
             && (empty($field['entity_types']) || in_array($entity_type, $field['entity_types']))
             && empty($field_types[$field['type']]['no_ui'])) {
-            $info[$instance['field_name']] = array(
+            $info[$instance['field_name']] = [
               'type' => $field['type'],
               'type_label' => $field_types[$field['type']]['label'],
               'field' => $field['field_name'],
               'label' => $instance['label'],
               'widget_type' => $instance['widget']['type'],
-            );
+            ];
           }
         }
       }
@@ -1628,30 +1628,30 @@ function field_ui_field_settings_form($form, &$form_state, $instance) {
 
   backdrop_set_title($instance['label']);
 
-  $description = '<p>' . t('These settings apply to the %field field everywhere it is used. These settings impact the way that data is stored in the database and cannot be changed once data has been created.', array('%field' => $instance['label'])) . '</p>';
+  $description = '<p>' . t('These settings apply to the %field field everywhere it is used. These settings impact the way that data is stored in the database and cannot be changed once data has been created.', ['%field' => $instance['label']]) . '</p>';
 
   // Create a form structure for the field values.
-  $form['field'] = array(
+  $form['field'] = [
     '#type' => 'fieldset',
     '#title' => t('Field settings'),
     '#description' => $description,
     '#tree' => TRUE,
-  );
+  ];
 
   // See if data already exists for this field.
   // If so, prevent changes to the field settings.
   $has_data = field_has_data($field);
 
   // Build the non-configurable field values.
-  $form['field']['field_name'] = array('#type' => 'value', '#value' => $field['field_name']);
-  $form['field']['type'] = array('#type' => 'value', '#value' => $field['type']);
-  $form['field']['module'] = array('#type' => 'value', '#value' => $field['module']);
-  $form['field']['active'] = array('#type' => 'value', '#value' => $field['active']);
+  $form['field']['field_name'] = ['#type' => 'value', '#value' => $field['field_name']];
+  $form['field']['type'] = ['#type' => 'value', '#value' => $field['type']];
+  $form['field']['module'] = ['#type' => 'value', '#value' => $field['module']];
+  $form['field']['active'] = ['#type' => 'value', '#value' => $field['active']];
 
   // Add settings provided by the field module. The field module is
   // responsible for not returning settings that cannot be changed if
   // the field already has data.
-  $form['field']['settings'] = array();
+  $form['field']['settings'] = [];
   $additions = module_invoke($field['module'], 'field_settings_form', $field, $instance, $has_data);
   if (is_array($additions)) {
     if ($has_data) {
@@ -1667,15 +1667,15 @@ function field_ui_field_settings_form($form, &$form_state, $instance) {
     if (is_array($redirect)) {
       call_user_func_array('backdrop_goto', $redirect);
     }
-    $form['field']['settings'] = array(
-      '#markup' => t('%field has no field settings.', array('%field' => $instance['label'])),
-    );
+    $form['field']['settings'] = [
+      '#markup' => t('%field has no field settings.', ['%field' => $instance['label']]),
+    ];
   }
   $form['#entity_type'] = $entity_type;
   $form['#bundle'] = $bundle;
 
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save field settings'));
+  $form['actions'] = ['#type' => 'actions'];
+  $form['actions']['submit'] = ['#type' => 'submit', '#value' => t('Save field settings')];
 
   return $form;
 }
@@ -1699,11 +1699,11 @@ function field_ui_field_settings_form_submit($form, &$form_state) {
 
   try {
     field_update_field($field);
-    backdrop_set_message(t('Updated field %label field settings.', array('%label' => $instance['label'])));
+    backdrop_set_message(t('Updated field %label field settings.', ['%label' => $instance['label']]));
     $form_state['redirect'] = field_ui_next_destination($entity_type, $bundle);
   }
   catch (Exception $e) {
-    backdrop_set_message(t('Attempt to update field %label failed: %message.', array('%label' => $instance['label'], '%message' => $e->getMessage())), 'error');
+    backdrop_set_message(t('Attempt to update field %label failed: %message.', ['%label' => $instance['label'], '%message' => $e->getMessage()]), 'error');
   }
 }
 
@@ -1727,30 +1727,30 @@ function field_ui_widget_type_form($form, &$form_state, $instance) {
   $bundles = field_info_bundles();
   $bundle_label = $bundles[$entity_type][$bundle]['label'];
 
-  $form = array(
+  $form = [
     '#bundle' => $bundle,
     '#entity_type' => $entity_type,
     '#field_name' => $field_name,
-  );
+  ];
 
-  $form['basic'] = array(
+  $form['basic'] = [
     '#type' => 'fieldset',
     '#title' => t('Change widget'),
-  );
-  $form['basic']['widget_type'] = array(
+  ];
+  $form['basic']['widget_type'] = [
     '#type' => 'select',
     '#title' => t('Widget type'),
     '#required' => TRUE,
     '#options' => field_ui_widget_type_options($field['type']),
     '#default_value' => $instance['widget']['type'],
-    '#description' => t('The type of form element you would like to present to the user when creating this field in the %type type.', array('%type' => $bundle_label)),
-  );
+    '#description' => t('The type of form element you would like to present to the user when creating this field in the %type type.', ['%type' => $bundle_label]),
+  ];
 
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Continue'));
+  $form['actions'] = ['#type' => 'actions'];
+  $form['actions']['submit'] = ['#type' => 'submit', '#value' => t('Continue')];
 
-  $form['#validate'] = array();
-  $form['#submit'] = array('field_ui_widget_type_form_submit');
+  $form['#validate'] = [];
+  $form['#submit'] = ['field_ui_widget_type_form_submit'];
 
   return $form;
 }
@@ -1776,10 +1776,10 @@ function field_ui_widget_type_form_submit($form, &$form_state) {
 
   try {
     field_update_instance($instance);
-    backdrop_set_message(t('Changed the widget for field %label.', array('%label' => $instance['label'])));
+    backdrop_set_message(t('Changed the widget for field %label.', ['%label' => $instance['label']]));
   }
   catch (Exception $e) {
-    backdrop_set_message(t('There was a problem changing the widget for field %label.', array('%label' => $instance['label'])), 'error');
+    backdrop_set_message(t('There was a problem changing the widget for field %label.', ['%label' => $instance['label']]), 'error');
   }
 
   $form_state['redirect'] = field_ui_next_destination($entity_type, $bundle);
@@ -1799,12 +1799,12 @@ function field_ui_field_delete_form($form, &$form_state, $instance) {
 
   $admin_path = _field_ui_bundle_admin_path($entity_type, $bundle);
 
-  $form['entity_type'] = array('#type' => 'value', '#value' => $entity_type);
-  $form['bundle'] = array('#type' => 'value', '#value' => $bundle);
-  $form['field_name'] = array('#type' => 'value', '#value' => $instance['field_name']);
+  $form['entity_type'] = ['#type' => 'value', '#value' => $entity_type];
+  $form['bundle'] = ['#type' => 'value', '#value' => $bundle];
+  $form['field_name'] = ['#type' => 'value', '#value' => $instance['field_name']];
 
   $output = confirm_form($form,
-    t('Are you sure you want to delete the field %field?', array('%field' => $instance['label'])),
+    t('Are you sure you want to delete the field %field?', ['%field' => $instance['label']]),
     $admin_path . '/fields',
     t('If you have any content left in this field, it will be lost. This action cannot be undone.'),
     t('Delete'), t('Cancel'),
@@ -1838,14 +1838,14 @@ function field_ui_field_delete_form_submit($form, &$form_state) {
 
   if (!empty($bundle) && $field && !$field['locked'] && $form_values['confirm']) {
     field_delete_instance($instance);
-    backdrop_set_message(t('The field %field has been deleted from the %type content type.', array('%field' => $instance['label'], '%type' => $bundle_label)));
+    backdrop_set_message(t('The field %field has been deleted from the %type content type.', ['%field' => $instance['label'], '%type' => $bundle_label]));
   }
   else {
-    backdrop_set_message(t('There was a problem removing the field %field from the %type content type.', array('%field' => $instance['label'], '%type' => $bundle_label)), 'error');
+    backdrop_set_message(t('There was a problem removing the field %field from the %type content type.', ['%field' => $instance['label'], '%type' => $bundle_label]), 'error');
   }
 
   $admin_path = _field_ui_bundle_admin_path($entity_type, $bundle);
-  $form_state['redirect'] = field_ui_get_destinations(array($admin_path . '/fields'));
+  $form_state['redirect'] = field_ui_get_destinations([$admin_path . '/fields']);
 
   // Fields are purged on cron. However field module prevents disabling modules
   // when field types they provided are used in a field until it is fully
@@ -1879,9 +1879,9 @@ function field_ui_field_edit_form($form, &$form_state, $instance) {
   $form['#instance'] = $instance;
 
   if (!empty($field['locked'])) {
-    $form['locked'] = array(
-      '#markup' => t('The field %field is locked and cannot be edited.', array('%field' => $instance['label'])),
-    );
+    $form['locked'] = [
+      '#markup' => t('The field %field is locked and cannot be edited.', ['%field' => $instance['label']]),
+    ];
     return $form;
   }
 
@@ -1889,77 +1889,77 @@ function field_ui_field_edit_form($form, &$form_state, $instance) {
   $bundles = field_info_bundles();
 
   // Create a form structure for the instance values.
-  $form['instance'] = array(
+  $form['instance'] = [
     '#tree' => TRUE,
     '#type' => 'fieldset',
-    '#title' => t('%type settings', array('%type' => $bundles[$entity_type][$bundle]['label'])),
-    '#description' => t('These settings apply only to the %field field when used in the %type type.', array(
+    '#title' => t('%type settings', ['%type' => $bundles[$entity_type][$bundle]['label']]),
+    '#description' => t('These settings apply only to the %field field when used in the %type type.', [
       '%field' => $instance['label'],
       '%type' => $bundles[$entity_type][$bundle]['label'],
-    )),
+    ]),
     // Ensure field_ui_field_edit_instance_pre_render() gets called in addition
     // to, not instead of, the #pre_render function(s) needed by all fieldsets.
-    '#pre_render' => array_merge(array('field_ui_field_edit_instance_pre_render'), element_info_property('fieldset', '#pre_render', array())),
-  );
+    '#pre_render' => array_merge(['field_ui_field_edit_instance_pre_render'], element_info_property('fieldset', '#pre_render', [])),
+  ];
 
   // Build the non-configurable instance values.
-  $form['instance']['field_name'] = array(
+  $form['instance']['field_name'] = [
     '#type' => 'value',
     '#value' => $instance['field_name'],
-  );
-  $form['instance']['entity_type'] = array(
+  ];
+  $form['instance']['entity_type'] = [
     '#type' => 'value',
     '#value' => $entity_type,
-  );
-  $form['instance']['bundle'] = array(
+  ];
+  $form['instance']['bundle'] = [
     '#type' => 'value',
     '#value' => $bundle,
-  );
-  $form['instance']['widget']['weight'] = array(
+  ];
+  $form['instance']['widget']['weight'] = [
     '#type' => 'value',
     '#value' => !empty($instance['widget']['weight']) ? $instance['widget']['weight'] : 0,
-  );
+  ];
 
   // Build the configurable instance values.
-  $form['instance']['label'] = array(
+  $form['instance']['label'] = [
     '#type' => 'textfield',
     '#title' => t('Label'),
     '#default_value' => !empty($instance['label']) ? $instance['label'] : $field['field_name'],
     '#required' => TRUE,
     '#weight' => -20,
-  );
+  ];
 
-  $form['instance']['description'] = array(
+  $form['instance']['description'] = [
     '#type' => 'textarea',
     '#title' => t('Help text'),
     '#default_value' => !empty($instance['description']) ? $instance['description'] : '',
     '#rows' => 5,
-    '#description' => t('Instructions to present to the user below this field on the editing form.<br />Allowed HTML tags: @tags <br />This field supports tokens.', array('@tags' => _field_filter_xss_display_allowed_tags())) . $token_link,
+    '#description' => t('Instructions to present to the user below this field on the editing form.<br />Allowed HTML tags: @tags <br />This field supports tokens.', ['@tags' => _field_filter_xss_display_allowed_tags()]) . $token_link,
     '#weight' => -10,
-    '#element_validate' => array('token_element_validate'),
-    '#token_types' => array(),
-  );
+    '#element_validate' => ['token_element_validate'],
+    '#token_types' => [],
+  ];
 
-  $form['instance']['required'] = array(
+  $form['instance']['required'] = [
     '#type' => 'checkbox',
     '#title' => t('Required field'),
     '#default_value' => !empty($instance['required']),
     '#weight' => -5,
-  );
+  ];
 
   // Build the widget component of the instance.
-  $form['instance']['widget']['type'] = array(
+  $form['instance']['widget']['type'] = [
     '#type' => 'value',
     '#value' => $instance['widget']['type'],
-  );
-  $form['instance']['widget']['module'] = array(
+  ];
+  $form['instance']['widget']['module'] = [
     '#type' => 'value',
     '#value' => $widget_type['module'],
-  );
-  $form['instance']['widget']['active'] = array(
+  ];
+  $form['instance']['widget']['active'] = [
     '#type' => 'value',
     '#value' => !empty($field['instance']['widget']['active']) ? 1 : 0,
-  );
+  ];
 
   // Add additional field instance settings from the field module.
   $additions = module_invoke($field['module'], 'field_instance_settings_form', $field, $instance);
@@ -1981,54 +1981,54 @@ function field_ui_field_edit_form($form, &$form_state, $instance) {
 
   $has_data = field_has_data($field);
   if ($has_data) {
-    $description = '<p>' . t('These settings apply to the %field field everywhere it is used. Because the field already has data, some settings can no longer be changed.', array('%field' => $instance['label'])) . '</p>';
+    $description = '<p>' . t('These settings apply to the %field field everywhere it is used. Because the field already has data, some settings can no longer be changed.', ['%field' => $instance['label']]) . '</p>';
   }
   else {
-    $description = '<p>' . t('These settings apply to the %field field everywhere it is used.', array('%field' => $instance['label'])) . '</p>';
+    $description = '<p>' . t('These settings apply to the %field field everywhere it is used.', ['%field' => $instance['label']]) . '</p>';
   }
 
   // Create a form structure for the field values.
-  $form['field'] = array(
+  $form['field'] = [
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#title' => t('Global settings'),
     '#description' => $description,
     '#tree' => TRUE,
-  );
+  ];
 
   // Build the configurable field values.
   $cardinality = $field['cardinality'];
-  $form['field']['cardinality_container'] = array(
+  $form['field']['cardinality_container'] = [
     '#type' => 'item',
     // Reset #parents to 'field', so the additional container does not appear.
-    '#parents' => array('field'),
+    '#parents' => ['field'],
     '#field_prefix' => '<div class="container-inline">',
     '#field_suffix' => '</div>',
     '#title' => t('Number of values'),
-  );
+  ];
 
-  $form['field']['cardinality_container']['cardinality'] = array(
+  $form['field']['cardinality_container']['cardinality'] = [
     '#type' => 'select',
-    '#options' => array(
+    '#options' => [
       'number' => t('Limited'),
       FIELD_CARDINALITY_UNLIMITED => t('Unlimited'),
-    ),
+    ],
     '#default_value' => ($cardinality == FIELD_CARDINALITY_UNLIMITED) ? FIELD_CARDINALITY_UNLIMITED : 'number',
-  );
-  $form['field']['cardinality_container']['cardinality_number'] = array(
+  ];
+  $form['field']['cardinality_container']['cardinality_number'] = [
     '#type' => 'number',
     '#default_value' => $cardinality != FIELD_CARDINALITY_UNLIMITED ? $cardinality : 1,
     '#min' => 1,
     '#step' => 1,
     '#title' => t('Number'),
     '#title_display' => 'invisible',
-    '#states' => array(
-      'visible' => array(
-        ':input[name="field[cardinality]"]' => array('value' => 'number'),
-      ),
-    ),
-  );
+    '#states' => [
+      'visible' => [
+        ':input[name="field[cardinality]"]' => ['value' => 'number'],
+      ],
+    ],
+  ];
   $description = t('Maximum number of values users can enter for this field.');
   if (field_behaviors_widget('multiple values', $instance) == FIELD_BEHAVIOR_DEFAULT) {
     $description .= '<br/>' . t("'Unlimited' will provide an 'Add more' button so the users can add as many values as they like.");
@@ -2043,16 +2043,16 @@ function field_ui_field_edit_form($form, &$form_state, $instance) {
     $form['field']['settings'] = $additions;
   }
 
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
+  $form['actions'] = ['#type' => 'actions'];
+  $form['actions']['submit'] = [
     '#type' => 'submit',
     '#value' => t('Save settings')
-  );
-  $form['actions']['delete'] = array(
+  ];
+  $form['actions']['delete'] = [
     '#type' => 'submit',
     '#value' => t('Delete field'),
-    '#submit' => array('field_ui_field_edit_form_delete_submit'),
-  );
+    '#submit' => ['field_ui_field_edit_form_delete_submit'],
+  ];
   return $form;
 }
 
@@ -2060,7 +2060,7 @@ function field_ui_field_edit_form($form, &$form_state, $instance) {
  * Form submission handler for 'Delete' button in field_ui_field_edit_form().
  */
 function field_ui_field_edit_form_delete_submit($form, &$form_state) {
-  $destination = array();
+  $destination = [];
   if (isset($_GET['destination'])) {
     $destination = backdrop_get_destination();
     unset($_GET['destination']);
@@ -2070,12 +2070,12 @@ function field_ui_field_edit_form_delete_submit($form, &$form_state) {
   $bundle = field_extract_bundle($entity_type, $instance['bundle']);
   $admin_path = _field_ui_bundle_admin_path($entity_type, $bundle);
   $admin_field_path = $admin_path . '/fields/' . $instance['field_name'] . '/delete';
-  $form_state['redirect'] = array(
+  $form_state['redirect'] = [
     $admin_field_path,
-    array(
+    [
       'query' => $destination,
-    ),
-  );
+    ],
+  ];
 }
 
 /**
@@ -2114,7 +2114,7 @@ function field_ui_field_edit_instance_pre_render($element) {
 function field_ui_default_value_widget($field, $instance, &$form, &$form_state) {
   $field_name = $field['field_name'];
 
-  $element = array(
+  $element = [
     '#type' => 'fieldset',
     '#title' => t('Default value'),
     '#collapsible' => FALSE,
@@ -2123,8 +2123,8 @@ function field_ui_default_value_widget($field, $instance, &$form, &$form_state) 
     // Stick to an empty 'parents' on this form in order not to breaks widgets
     // that do not use field_widget_[field|instance]() and still access
     // $form_state['field'] directly.
-    '#parents' => array(),
-  );
+    '#parents' => [],
+  ];
 
   // Insert the widget.
   $items = $instance['default_value'];
@@ -2163,11 +2163,11 @@ function field_ui_field_edit_form_validate($form, &$form_state) {
     $field = $field_state['field'];
 
     // Extract the 'default value'.
-    $items = array();
+    $items = [];
     field_default_extract_form_values(NULL, NULL, $field, $instance, LANGUAGE_NONE, $items, $element, $form_state);
 
     // Validate the value and report errors.
-    $errors = array();
+    $errors = [];
     $function = $field['module'] . '_field_validate';
     if (function_exists($function)) {
       $function(NULL, NULL, $field, $instance, LANGUAGE_NONE, $items, $errors);
@@ -2206,7 +2206,7 @@ function field_ui_field_edit_form_submit($form, &$form_state) {
     field_update_field($field);
   }
   catch (Exception $e) {
-    backdrop_set_message(t('Attempt to update field %label failed: %message.', array('%label' => $instance['label'], '%message' => $e->getMessage())), 'error');
+    backdrop_set_message(t('Attempt to update field %label failed: %message.', ['%label' => $instance['label'], '%message' => $e->getMessage()]), 'error');
     return;
   }
 
@@ -2215,7 +2215,7 @@ function field_ui_field_edit_form_submit($form, &$form_state) {
     $element = $form['instance']['default_value_widget'];
 
     // Extract field values.
-    $items = array();
+    $items = [];
     field_default_extract_form_values(NULL, NULL, $field, $instance, LANGUAGE_NONE, $items, $element, $form_state);
     field_default_submit(NULL, NULL, $field, $instance, LANGUAGE_NONE, $items, $element, $form_state);
 
@@ -2227,7 +2227,7 @@ function field_ui_field_edit_form_submit($form, &$form_state) {
   $instance = array_merge($instance_source, $instance);
   field_update_instance($instance);
 
-  backdrop_set_message(t('Saved %label configuration.', array('%label' => $instance['label'])));
+  backdrop_set_message(t('Saved %label configuration.', ['%label' => $instance['label']]));
 
   $form_state['redirect'] = field_ui_next_destination($instance['entity_type'], $instance['bundle']);
 }
@@ -2243,14 +2243,14 @@ function field_ui_get_destinations($destinations) {
   if ($destinations) {
     $options['query']['destinations'] = $destinations;
   }
-  return array($options['path'], $options);
+  return [$options['path'], $options];
 }
 
 /**
  * Returns the next redirect path in a multipage sequence.
  */
 function field_ui_next_destination($entity_type, $bundle) {
-  $destinations = !empty($_REQUEST['destinations']) ? $_REQUEST['destinations'] : array();
+  $destinations = !empty($_REQUEST['destinations']) ? $_REQUEST['destinations'] : [];
   if (!empty($destinations)) {
     unset($_REQUEST['destinations']);
   }
@@ -2282,19 +2282,19 @@ function field_ui_view_mode_form($form, &$form_state, $entity_type = NULL, $bund
     $form['#new'] = FALSE;
   }
 
-  $form['label'] = array(
+  $form['label'] = [
     '#type' => 'textfield',
     '#title' => t('Display mode label'),
     '#default_value' => isset($view_mode['label']) ? $view_mode['label'] : '',
     '#size' => 20,
-    '#states' => array(
-      'visible' => array(
-        ':input[name="existing"]' => array('value' => 'new'),
-      ),
-    ),
-  );
+    '#states' => [
+      'visible' => [
+        ':input[name="existing"]' => ['value' => 'new'],
+      ],
+    ],
+  ];
 
-  $form['machine_name'] = array(
+  $form['machine_name'] = [
     '#type' => 'machine_name',
     '#title' => t('Machine name'),
     '#default_value' => $machine_name,
@@ -2303,25 +2303,25 @@ function field_ui_view_mode_form($form, &$form_state, $entity_type = NULL, $bund
     '#required' => FALSE,
     '#description' => t('A unique machine-readable name containing letters, numbers, and underscores.'),
     '#size' => 15,
-    '#machine_name' => array(
-      'source' => array('label'),
+    '#machine_name' => [
+      'source' => ['label'],
       'exists' => 'entity_view_mode_exists',
-    ),
-  );
+    ],
+  ];
   if (!$form['#new']) {
     // Cannot change existing machine names.
     $form['machine_name']['#disabled'] = TRUE;
   }
 
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['save'] = array(
+  $form['actions'] = ['#type' => 'actions'];
+  $form['actions']['save'] = [
     '#type' => 'submit',
     '#value' => t('Save'),
-  );
-  $form['actions']['cancel'] = array(
+  ];
+  $form['actions']['cancel'] = [
     '#type' => 'markup',
     '#markup' => l(t('Cancel'), $path),
-  );
+  ];
 
   return $form;
 }
@@ -2335,11 +2335,11 @@ function field_ui_view_mode_form_submit($form, &$form_state) {
   $path = $form['#path'];
   $view_mode_name = $form_state['values']['machine_name'];
 
-  $view_mode = array(
+  $view_mode = [
     'label' => $form_state['values']['label'],
     'machine_name' => $view_mode_name,
     'is_new' => $form['#new'],
-  );
+  ];
 
   // Save the new display mode.
   entity_view_mode_save($entity_type, $view_mode);
@@ -2348,9 +2348,9 @@ function field_ui_view_mode_form_submit($form, &$form_state) {
     field_ui_view_mode_enable($entity_type, $bundle, $view_mode_name, FALSE);
   }
   else {
-    backdrop_set_message(t('Saved the %view-mode display mode.', array(
+    backdrop_set_message(t('Saved the %view-mode display mode.', [
       '%view-mode' => $view_mode['label']
-    )));
+    ]));
   }
 
   $form_state['redirect'] = $path;
@@ -2371,7 +2371,7 @@ function field_ui_view_mode_delete_form($form, &$form_state, $entity_type = NULL
   $form['#path'] = $path;
 
   // Check to see if this display mode is in use on any other bundles.
-  $active = array();
+  $active = [];
   $entity_info = entity_get_info($entity_type);
   foreach ($entity_info['bundles'] as $machine => $bundle) {
     $settings = field_view_mode_settings($entity_type, $machine);
@@ -2382,14 +2382,14 @@ function field_ui_view_mode_delete_form($form, &$form_state, $entity_type = NULL
 
   $message = '';
   if (!empty($active)) {
-    $message .= '<p>' . t('The <em>%view-mode</em> display mode has been customized in the following places:', array('%view-mode' => $view_mode['label'])) . '</p>';
-    $message .= theme('item_list', array('items' => $active));
+    $message .= '<p>' . t('The <em>%view-mode</em> display mode has been customized in the following places:', ['%view-mode' => $view_mode['label']]) . '</p>';
+    $message .= theme('item_list', ['items' => $active]);
   }
   $message .= '<p>' . t('Deleting a display mode will cause any content still using it to display using the <em>Default</em> settings.') . '</p>';
 
   return confirm_form(
     $form,
-    t('Are you sure you want to delete the %view-mode display mode?', array('%view-mode' => $view_mode['label'])),
+    t('Are you sure you want to delete the %view-mode display mode?', ['%view-mode' => $view_mode['label']]),
     $path,
     $message,
     t('Delete'),
@@ -2403,9 +2403,9 @@ function field_ui_view_mode_delete_form($form, &$form_state, $entity_type = NULL
 function field_ui_view_mode_delete_form_submit($form, &$form_state) {
   entity_view_mode_delete($form['#entity_type'], $form['#machine_name']);
 
-  backdrop_set_message(t('Deleted the %view-mode display mode.', array(
+  backdrop_set_message(t('Deleted the %view-mode display mode.', [
     '%view-mode' => $form['#view_mode']['label'],
-  )));
+  ]));
 
   $form_state['redirect'] = $form['#path'];
 }
@@ -2443,7 +2443,7 @@ function field_ui_view_mode_enable($entity_type, $bundle, $view_mode_name, $redi
   $label = $entity_info['view modes'][$view_mode_name]['label'];
   $path = _field_ui_bundle_admin_path($entity_type, $bundle) . '/display';
   $url = url($path . '/' . $view_mode_name);
-  $message = t('The display mode %name can now be <a href="@url">customized</a>.', array('%name' => $label, '@url' => $url));
+  $message = t('The display mode %name can now be <a href="@url">customized</a>.', ['%name' => $label, '@url' => $url]);
   backdrop_set_message($message);
 
   // Clear the menu cache to add display mode to administration menu.
@@ -2471,7 +2471,7 @@ function field_ui_view_mode_reset_form($form, &$form_state, $entity_type = NULL,
   $message = '';
 
   // Check to see if this display mode is in use on any other bundles.
-  $active = array();
+  $active = [];
   $entity_info = entity_get_info($entity_type);
   foreach ($entity_info['bundles'] as $machine => $bundle) {
     $settings = field_view_mode_settings($entity_type, $machine);
@@ -2481,15 +2481,15 @@ function field_ui_view_mode_reset_form($form, &$form_state, $entity_type = NULL,
   }
 
   if (!empty($active)) {
-    $message .= '<p>' . t('The %view-mode display mode has been customized in the following places:', array('%view-mode' => $view_mode['label'])) . '</p>';
-    $message .= theme('item_list', array('items' => $active));
+    $message .= '<p>' . t('The %view-mode display mode has been customized in the following places:', ['%view-mode' => $view_mode['label']]) . '</p>';
+    $message .= theme('item_list', ['items' => $active]);
   }
 
   $message .= '<p>' . t('A reset will cause all customizations to be lost. The <em>Default</em> display mode will be used instead.') . '</p>';
 
   return confirm_form(
     $form,
-    t('Are you sure you want to reset the %view-mode display mode?', array('%view-mode' => $view_mode['label'])),
+    t('Are you sure you want to reset the %view-mode display mode?', ['%view-mode' => $view_mode['label']]),
     $path,
     $message,
     t('Reset'),
@@ -2515,7 +2515,7 @@ function field_ui_view_mode_reset_form_submit($form, &$form_state) {
   // Set a friendly message.
   $entity_info = entity_get_info($entity_type);
   $label = $entity_info['view modes'][$view_mode_name]['label'];
-  $message = t('The display mode %name will now use the <em>Default</em> settings.', array('%name' => $label));
+  $message = t('The display mode %name will now use the <em>Default</em> settings.', ['%name' => $label]);
   backdrop_set_message($message);
   state_set('menu_rebuild_needed', TRUE);
 

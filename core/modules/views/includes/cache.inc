@@ -45,7 +45,7 @@ function _views_fetch_data($table = NULL, $move = TRUE, $reset = FALSE) {
         else {
           // If there is still no information about that table, it is missing.
           // Write an empty array to avoid repeated rebuilds.
-          views_cache_set($cid, array(), TRUE);
+          views_cache_set($cid, [], TRUE);
         }
       }
     }
@@ -58,7 +58,7 @@ function _views_fetch_data($table = NULL, $move = TRUE, $reset = FALSE) {
         }
         $recursion_protection[$table] = TRUE;
         $data = _views_fetch_data($moved_table);
-        $recursion_protection = array();
+        $recursion_protection = [];
         return $data;
       }
       return $cache[$table];
@@ -78,7 +78,7 @@ function _views_fetch_data($table = NULL, $move = TRUE, $reset = FALSE) {
     return $cache;
   }
   // Return an empty array if there is no match.
-  return array();
+  return [];
 }
 
 /**
@@ -108,9 +108,9 @@ function _views_data_process_entity_types(&$data) {
     if (!empty($table_info['table']['entity type'])) {
       $entity_table = 'views_entity_' . $table_info['table']['entity type'];
 
-      $data[$entity_table]['table']['join'][$table_name] = array(
+      $data[$entity_table]['table']['join'][$table_name] = [
         'left_table' => $table_name,
-      );
+      ];
       $data[$entity_table]['table']['entity type'] = $table_info['table']['entity type'];
       // Copy over the default table group if we have none yet.
       if (!empty($table_info['table']['group']) && empty($data[$entity_table]['table']['group'])) {
@@ -163,7 +163,7 @@ function _views_fetch_plugin_data($type = NULL, $plugin = NULL, $reset = FALSE) 
   }
 
   // Return an empty array if there is no match.
-  return array();
+  return [];
 }
 
 /**

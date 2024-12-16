@@ -9,51 +9,51 @@
  */
 function image_token_info() {
   $styles = image_styles();
-  $field_tokens = array();
-  $style_tokens = array();
+  $field_tokens = [];
+  $style_tokens = [];
 
   foreach ($styles as $style => $definition) {
-    $field_tokens[$style] = array(
+    $field_tokens[$style] = [
       'name' => $style,
-      'description' => t('@style image style', array('@style' => $style)),
+      'description' => t('@style image style', ['@style' => $style]),
       'type' => 'image-style',
-    );
+    ];
     foreach (_image_style_token_image_attributes() as $attribute => $none) {
-      $style_tokens[$attribute] = array(
+      $style_tokens[$attribute] = [
         'name' => $attribute,
-        'description' => t('@style image style attribute: @attribute', array('@style' => $style, '@attribute' => $attribute)),
-      );
+        'description' => t('@style image style attribute: @attribute', ['@style' => $style, '@attribute' => $attribute]),
+      ];
     }
   }
 
-  return array(
-    'types' => array(
-      'image-field' => array(
+  return [
+    'types' => [
+      'image-field' => [
         'name' => 'Image field',
         'description' => 'Image field',
         'needs-data' => 'image-field',
-      ),
-      'image-style' => array(
+      ],
+      'image-style' => [
         'name' => 'Image style',
         'description' => 'Image style',
         'needs-data' => 'image-style',
-      ),
-    ),
-    'tokens' => array(
+      ],
+    ],
+    'tokens' => [
       'image-field' => $field_tokens,
       'image-style' => $style_tokens,
-    ),
-  );
+    ],
+  ];
 }
 
 /**
  * Implements hook_tokens().
  */
-function image_tokens($type, $tokens, array $data = array(), array $options = array()) {
-  $replacements = array();
+function image_tokens($type, $tokens, array $data = [], array $options = []) {
+  $replacements = [];
 
   if (isset($data[$type]) && $entity = $data[$type]) {
-    $supported_types = array();
+    $supported_types = [];
     $entity_info = entity_get_info();
     foreach ($entity_info as $machine => $details) {
       if ($details['fieldable']) {
@@ -72,7 +72,7 @@ function image_tokens($type, $tokens, array $data = array(), array $options = ar
 
           $field_object = field_get_items($type, $entity, $field['field_name']);
           if ($image_field_tokens && $field_object) {
-            $replacements += token_generate('image-field', $image_field_tokens, array('image-field' => $field_object), $options);
+            $replacements += token_generate('image-field', $image_field_tokens, ['image-field' => $field_object], $options);
           }
         }
       }
@@ -82,7 +82,7 @@ function image_tokens($type, $tokens, array $data = array(), array $options = ar
 
     if ($type == 'image-field' && !empty($data['image-field'])) {
       foreach ($tokens as $token => $original) {
-        $output = array();
+        $output = [];
 
         // The token will be in the format "[style]:[attribute]" so split into
         // the individual pieces.
@@ -92,7 +92,7 @@ function image_tokens($type, $tokens, array $data = array(), array $options = ar
 
         // Special handling for the 'first', 'second', 'third', and 'last' tokens.
         // Support for index of multi-value fields.
-        if (in_array($attribute, array('first', 'second', 'third', 'last')) || is_numeric($attribute)) {
+        if (in_array($attribute, ['first', 'second', 'third', 'last']) || is_numeric($attribute)) {
           switch ($attribute) {
             case 'first':
               $index = 0;
@@ -143,7 +143,7 @@ function image_tokens($type, $tokens, array $data = array(), array $options = ar
 
               switch ($attribute) {
                 case 'render':
-                  $output[] = theme('image_formatter', array('item' => $field, 'image_style' => $type));
+                  $output[] = theme('image_formatter', ['item' => $field, 'image_style' => $type]);
                   break;
 
                 case 'mimetype':
@@ -221,7 +221,7 @@ function image_tokens($type, $tokens, array $data = array(), array $options = ar
  *   All of the available image attributes.
  */
 function _image_style_token_image_attributes() {
-  return array(
+  return [
     'style_name' => NULL,
     'uri' => '',
     'path' => NULL,
@@ -237,7 +237,7 @@ function _image_style_token_image_attributes() {
     'second' => '',
     'third' => '',
     'last' => '',
-  );
+  ];
 }
 
 /**
@@ -268,7 +268,7 @@ function _image_token_generate_image($styled_uri, $type, $field_uri) {
  *   human-readable name of the field.
  */
 function _image_token_get_image_fields() {
-  $image_fields = array();
+  $image_fields = [];
 
   $fields = field_info_fields();
   foreach ($fields as $field) {

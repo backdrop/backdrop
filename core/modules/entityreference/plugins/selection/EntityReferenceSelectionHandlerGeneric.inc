@@ -61,20 +61,20 @@ class EntityReferenceSelectionHandlerGeneric implements EntityReferenceSelection
     $entity_info = entity_get_info($field['settings']['target_type']);
 
     // Merge-in default values.
-    $field['settings']['handler_settings'] += array(
-      'target_bundles' => array(),
-      'sort' => array(
+    $field['settings']['handler_settings'] += [
+      'target_bundles' => [],
+      'sort' => [
         'type' => 'none',
-      )
-    );
+      ]
+    ];
 
     if (!empty($entity_info['entity keys']['bundle'])) {
-      $bundles = array();
+      $bundles = [];
       foreach ($entity_info['bundles'] as $bundle_name => $bundle_info) {
         $bundles[$bundle_name] = $bundle_info['label'];
       }
 
-      $form['target_bundles'] = array(
+      $form['target_bundles'] = [
         '#type' => 'checkboxes',
         '#title' => t('Target bundles'),
         '#options' => $bundles,
@@ -82,90 +82,90 @@ class EntityReferenceSelectionHandlerGeneric implements EntityReferenceSelection
         '#size' => 6,
         '#multiple' => TRUE,
         '#description' => t('The bundles of the entity type that can be referenced. Optional, leave empty for all bundles.'),
-        '#element_validate' => array('_entityreference_element_validate_filter'),
-      );
+        '#element_validate' => ['_entityreference_element_validate_filter'],
+      ];
     }
     else {
-      $form['target_bundles'] = array(
+      $form['target_bundles'] = [
         '#type' => 'value',
-        '#value' => array(),
-      );
+        '#value' => [],
+      ];
     }
 
-    $form['sort']['type'] = array(
+    $form['sort']['type'] = [
       '#type' => 'select',
       '#title' => t('Sort by'),
-      '#options' => array(
+      '#options' => [
         'none' => t("Don't sort"),
         'property' => t('A property of the base table of the entity'),
         'field' => t('A field attached to this entity'),
-      ),
+      ],
       '#ajax' => TRUE,
-      '#limit_validation_errors' => array(),
+      '#limit_validation_errors' => [],
       '#default_value' => $field['settings']['handler_settings']['sort']['type'],
-    );
+    ];
 
-    $form['sort']['settings'] = array(
+    $form['sort']['settings'] = [
       '#type' => 'container',
-      '#attributes' => array('class' => array('entityreference-settings')),
-      '#process' => array('_entityreference_form_process_merge_parent'),
-    );
+      '#attributes' => ['class' => ['entityreference-settings']],
+      '#process' => ['_entityreference_form_process_merge_parent'],
+    ];
 
     if ($field['settings']['handler_settings']['sort']['type'] == 'property') {
       // Merge-in default values.
-      $field['settings']['handler_settings']['sort'] += array(
+      $field['settings']['handler_settings']['sort'] += [
         'property' => NULL,
-      );
+      ];
 
-      $form['sort']['settings']['property'] = array(
+      $form['sort']['settings']['property'] = [
         '#type' => 'select',
         '#title' => t('Sort property'),
         '#required' => TRUE,
         '#options' => backdrop_map_assoc($entity_info['schema_fields_sql']['base table']),
         '#default_value' => $field['settings']['handler_settings']['sort']['property'],
-      );
+      ];
     }
     elseif ($field['settings']['handler_settings']['sort']['type'] == 'field') {
       // Merge-in default values.
-      $field['settings']['handler_settings']['sort'] += array(
+      $field['settings']['handler_settings']['sort'] += [
         'field' => NULL,
-      );
+      ];
 
-      $fields = array();
+      $fields = [];
       foreach (field_info_instances($field['settings']['target_type']) as $bundle_name => $bundle_instances) {
         foreach ($bundle_instances as $instance_name => $instance_info) {
           $field_info = field_info_field($instance_name);
           foreach ($field_info['columns'] as $column_name => $column_info) {
-            $fields[$instance_name . ':' . $column_name] = t('@label (column @column)', array('@label' => $instance_info['label'], '@column' => $column_name));
+            $fields[$instance_name . ':' . $column_name] = t('@label (column @column)', ['@label' => $instance_info['label'], '@column' => $column_name]);
           }
         }
       }
 
-      $form['sort']['settings']['field'] = array(
+      $form['sort']['settings']['field'] = [
         '#type' => 'select',
         '#title' => t('Sort field'),
         '#required' => TRUE,
         '#options' => $fields,
         '#default_value' => $field['settings']['handler_settings']['sort']['field'],
-      );
+      ];
     }
 
     if ($field['settings']['handler_settings']['sort']['type'] != 'none') {
       // Merge-in default values.
-      $field['settings']['handler_settings']['sort'] += array(
+      $field['settings']['handler_settings']['sort'] += [
         'direction' => 'ASC',
-      );
+      ];
 
-      $form['sort']['settings']['direction'] = array(
+      $form['sort']['settings']['direction'] = [
         '#type' => 'select',
         '#title' => t('Sort direction'),
         '#required' => TRUE,
-        '#options' => array(
+        '#options' => [
           'ASC' => t('Ascending'),
           'DESC' => t('Descending'),
-        ),
+        ],
         '#default_value' => $field['settings']['handler_settings']['sort']['direction'],
-      );
+      ];
     }
 
     return $form;
@@ -175,7 +175,7 @@ class EntityReferenceSelectionHandlerGeneric implements EntityReferenceSelection
    * Implements EntityReferenceHandler::getReferencableEntities().
    */
   public function getReferencableEntities($match = '', $match_operator = 'CONTAINS', $limit = 0) {
-    $options = array();
+    $options = [];
     $entity_type = $this->field['settings']['target_type'];
 
     if (is_null($match)) {
@@ -226,7 +226,7 @@ class EntityReferenceSelectionHandlerGeneric implements EntityReferenceSelection
       }
     }
 
-    return array();
+    return [];
   }
 
   /**
@@ -234,29 +234,29 @@ class EntityReferenceSelectionHandlerGeneric implements EntityReferenceSelection
    */
   public function validateAutocompleteInput($input, &$element, &$form_state, $form) {
       $bundled_entities = $this->getReferencableEntities($input, '=', 6);
-      $entities = array();
+      $entities = [];
       foreach($bundled_entities as $entities_list) {
         $entities += $entities_list;
       }
       if (empty($entities)) {
         // Error if there are no entities available for a required field.
-        form_error($element, t('There are no entities matching "%value"', array('%value' => $input)));
+        form_error($element, t('There are no entities matching "%value"', ['%value' => $input]));
       }
       elseif (count($entities) > 5) {
         // Error if there are more than 5 matching entities.
-        form_error($element, t('Many entities are called %value. Specify the one you want by appending the id in parentheses, like "@value (@id)"', array(
+        form_error($element, t('Many entities are called %value. Specify the one you want by appending the id in parentheses, like "@value (@id)"', [
           '%value' => $input,
           '@value' => $input,
           '@id' => key($entities),
-        )));
+        ]));
       }
       elseif (count($entities) > 1) {
         // More helpful error if there are only a few matching entities.
-        $multiples = array();
+        $multiples = [];
         foreach ($entities as $id => $name) {
           $multiples[] = $name . ' (' . $id . ')';
         }
-        form_error($element, t('Multiple entities match this reference; "%multiple"', array('%multiple' => implode('", "', $multiples))));
+        form_error($element, t('Multiple entities match this reference; "%multiple"', ['%multiple' => implode('", "', $multiples)]));
       }
       else {
         // Take the one and only matching entity.
@@ -316,7 +316,7 @@ class EntityReferenceSelectionHandlerGeneric implements EntityReferenceSelection
   protected function reAlterQuery(SelectQueryInterface $query, $tag, $base_table) {
     $query->addTag($tag);
     $query->addMetaData('base_table', $base_table);
-    backdrop_alter(array('query', 'query_' . $tag), $query);
+    backdrop_alter(['query', 'query_' . $tag], $query);
   }
 
   /**
@@ -429,7 +429,7 @@ class EntityReferenceSelectionHandlerGeneric_user extends EntityReferenceSelecti
           $value_part->condition('anonymous_name', $condition['value'], $condition['operator']);
           $value_part->compile(Database::getConnection(), $query);
           $or->condition(db_and()
-            ->where(str_replace('`anonymous_name`', ':anonymous_name', (string) $value_part), $value_part->arguments() + array(':anonymous_name' => user_format_name(user_load(0))))
+            ->where(str_replace('`anonymous_name`', ':anonymous_name', (string) $value_part), $value_part->arguments() + [':anonymous_name' => user_format_name(user_load(0))])
             ->condition('users.uid', 0)
           );
           $query->condition($or);
@@ -523,7 +523,7 @@ class EntityReferenceSelectionHandlerGeneric_taxonomy_term extends EntityReferen
     $base_table = $this->ensureBaseTable($query);
     $tag = 'taxonomy_vocabulary_access';
     $query->addTag($tag);
-    backdrop_alter(array('query', 'query_' . $tag), $query);
+    backdrop_alter(['query', 'query_' . $tag], $query);
   }
 
   /**
@@ -534,7 +534,7 @@ class EntityReferenceSelectionHandlerGeneric_taxonomy_term extends EntityReferen
       return parent::getReferencableEntities($match , $match_operator, $limit);
     }
 
-    $options = array();
+    $options = [];
     $entity_type = $this->field['settings']['target_type'];
 
     $entity_info = entity_get_info('taxonomy_term');

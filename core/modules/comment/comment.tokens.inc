@@ -8,104 +8,104 @@
  * Implements hook_token_info().
  */
 function comment_token_info() {
-  $type = array(
+  $type = [
     'name' => t('Comments'),
     'description' => t('Tokens for comments posted on the site.'),
     'needs-data' => 'comment',
-  );
+  ];
 
   // Comment-related tokens for nodes
-  $node['comment-count'] = array(
+  $node['comment-count'] = [
     'name' => t('Comment count'),
     'description' => t('The number of comments posted on a node.'),
-  );
-  $node['comment-count-new'] = array(
+  ];
+  $node['comment-count-new'] = [
     'name' => t('New comment count'),
     'description' => t('The number of comments posted on a node since the reader last viewed it.'),
-  );
+  ];
 
   // Core comment tokens
-  $comment['cid'] = array(
+  $comment['cid'] = [
     'name' => t('Comment ID'),
     'description' => t('The unique ID of the comment.'),
-  );
-  $comment['hostname'] = array(
+  ];
+  $comment['hostname'] = [
     'name' => t('IP Address'),
     'description' => t('The IP address of the computer the comment was posted from.'),
-  );
-  $comment['name'] = array(
+  ];
+  $comment['name'] = [
     'name' => t('Name'),
     'description' => t('The name left by the comment author.'),
     'deprecated' => TRUE,
-  );
-  $comment['mail'] = array(
+  ];
+  $comment['mail'] = [
     'name' => t('Email address'),
     'description' => t('The email address left by the comment author.'),
-  );
-  $comment['homepage'] = array(
+  ];
+  $comment['homepage'] = [
     'name' => t('Home page'),
     'description' => t('The home page URL left by the comment author.'),
-  );
-  $comment['title'] = array(
+  ];
+  $comment['title'] = [
     'name' => t('Title'),
     'description' => t('The title of the comment.'),
-  );
-  $comment['body'] = array(
+  ];
+  $comment['body'] = [
     'name' => t('Content'),
     'description' => t('The formatted content of the comment itself.'),
-  );
-  $comment['url'] = array(
+  ];
+  $comment['url'] = [
     'name' => t('URL'),
     'description' => t('The URL of the comment.'),
     'type' => 'url',
-  );
-  $comment['edit-url'] = array(
+  ];
+  $comment['edit-url'] = [
     'name' => t("Edit URL"),
     'description' => t("The URL of the comment's edit page."),
     'type' => 'url',
-  );
+  ];
 
   // Chained tokens for comments
-  $comment['created'] = array(
+  $comment['created'] = [
     'name' => t('Date created'),
     'description' => t('The date the comment was posted.'),
     'type' => 'date',
-  );
-  $comment['changed'] = array(
+  ];
+  $comment['changed'] = [
     'name' => t('Date changed'),
     'description' => t('The date the comment was most recently updated.'),
     'type' => 'date',
-  );
-  $comment['parent'] = array(
+  ];
+  $comment['parent'] = [
     'name' => t('Parent'),
     'description' => t("The comment's parent, if comment threading is active."),
     'type' => 'comment',
-  );
-  $comment['node'] = array(
+  ];
+  $comment['node'] = [
     'name' => t('Node'),
     'description' => t('The node the comment was posted to.'),
     'type' => 'node',
-  );
-  $comment['author'] = array(
+  ];
+  $comment['author'] = [
     'name' => t('Author'),
     'description' => t('The author of the comment, if they were logged in.'),
     'type' => 'user',
-  );
+  ];
 
-  return array(
-    'types' => array('comment' => $type),
-    'tokens' => array(
+  return [
+    'types' => ['comment' => $type],
+    'tokens' => [
       'node' => $node,
       'comment' => $comment,
-    ),
-  );
+    ],
+  ];
 }
 
 /**
  * Implements hook_tokens().
  */
-function comment_tokens($type, $tokens, array $data = array(), array $options = array()) {
-  $url_options = array('absolute' => TRUE);
+function comment_tokens($type, $tokens, array $data = [], array $options = []) {
+  $url_options = ['absolute' => TRUE];
   if (isset($options['language'])) {
     $url_options['language'] = $options['language'];
     $langcode = $options['language']->langcode;
@@ -115,7 +115,7 @@ function comment_tokens($type, $tokens, array $data = array(), array $options = 
   }
   $sanitize = !empty($options['sanitize']);
 
-  $replacements = array();
+  $replacements = [];
 
   if ($type == 'comment' && !empty($data['comment'])) {
     $comment = $data['comment'];
@@ -133,7 +133,7 @@ function comment_tokens($type, $tokens, array $data = array(), array $options = 
           break;
 
         case 'name':
-          $name = ($comment->uid == 0) ? config_get_translated('system.core', 'anonymous', array(), array('langcode' => $langcode)) : $comment->name;
+          $name = ($comment->uid == 0) ? config_get_translated('system.core', 'anonymous', [], ['langcode' => $langcode]) : $comment->name;
           $replacements[$original] = $sanitize ? filter_xss($name) : $name;
           break;
 
@@ -206,15 +206,15 @@ function comment_tokens($type, $tokens, array $data = array(), array $options = 
     // Chained token relationships.
     if ($node_tokens = token_find_with_prefix($tokens, 'node')) {
       $node = node_load($comment->nid);
-      $replacements += token_generate('node', $node_tokens, array('node' => $node), $options);
+      $replacements += token_generate('node', $node_tokens, ['node' => $node], $options);
     }
 
     if ($date_tokens = token_find_with_prefix($tokens, 'created')) {
-      $replacements += token_generate('date', $date_tokens, array('date' => $comment->created), $options);
+      $replacements += token_generate('date', $date_tokens, ['date' => $comment->created], $options);
     }
 
     if ($date_tokens = token_find_with_prefix($tokens, 'changed')) {
-      $replacements += token_generate('date', $date_tokens, array('date' => $comment->changed), $options);
+      $replacements += token_generate('date', $date_tokens, ['date' => $comment->changed], $options);
     }
 
     if (($url_tokens = token_find_with_prefix($tokens, 'url'))) {
@@ -222,11 +222,11 @@ function comment_tokens($type, $tokens, array $data = array(), array $options = 
     }
 
     if (($parent_tokens = token_find_with_prefix($tokens, 'parent')) && $parent = comment_load($comment->pid)) {
-      $replacements += token_generate('comment', $parent_tokens, array('comment' => $parent), $options);
+      $replacements += token_generate('comment', $parent_tokens, ['comment' => $parent], $options);
     }
 
     if (($author_tokens = token_find_with_prefix($tokens, 'author')) && $account = user_load($comment->uid)) {
-      $replacements += token_generate('user', $author_tokens, array('user' => $account), $options);
+      $replacements += token_generate('user', $author_tokens, ['user' => $account], $options);
     }
   }
   elseif ($type == 'node' & !empty($data['node'])) {

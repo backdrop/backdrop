@@ -1,7 +1,7 @@
 <?php
-$info = array(
+$info = [
   // Available colors and color labels used in theme.
-  'fields' => array(
+  'fields' => [
     'header' => t('Header background'),
     'base' => t('Mobile site name background'),
     'slogan' => t('Slogan background'),
@@ -22,12 +22,12 @@ $info = array(
     'footer' => t('Footer background'),
     'footertext' => t('Footer text'),
     'footerborder' => t('Footer Border'),
-  ),
+  ],
   // Pre-defined color schemes.
-  'schemes' => array(
-    'default' => array(
+  'schemes' => [
+    'default' => [
       'title' => t('Basis (default)'),
-      'colors' => array(
+      'colors' => [
         'header' => '#20252e',
         'base' => '#0074bd',
         'slogan' => '#000000',
@@ -48,11 +48,11 @@ $info = array(
         'footer' => '#fffeff',
         'footertext' => '#000100',
         'footerborder' => '#bbbbbc',
-      ),
-    ),
-    'ice' => array(
+      ],
+    ],
+    'ice' => [
       'title' => t('Ice'),
-      'colors' => array(
+      'colors' => [
         'header' => '#d0d0d0',
         'base' => '#999999',
         'slogan' => '#d0d0d1',
@@ -73,11 +73,11 @@ $info = array(
         'footer' => '#ffffff',
         'footertext' => '#000100',
         'footerborder' => '#c5c5c5',
-      ),
-    ),
-    'plum' => array(
+      ],
+    ],
+    'plum' => [
       'title' => t('Plum'),
-      'colors' => array(
+      'colors' => [
         'header' => '#4c1c58',
         'base' => '#000100',
         'slogan' => '#4c1c59',
@@ -98,11 +98,11 @@ $info = array(
         'footer' => '#e7e7e7',
         'footertext' => '#000100',
         'footerborder' => '#89297a',
-      ),
-    ),
-    'goldfish' => array(
+      ],
+    ],
+    'goldfish' => [
       'title' => t('Goldfish'),
-      'colors' => array(
+      'colors' => [
         'header' => '#e0e4cc',
         'base' => '#fffeff',
         'slogan' => '#e0e4cd',
@@ -123,11 +123,11 @@ $info = array(
         'footer' => '#f0f1e3',
         'footertext' => '#000100',
         'footerborder' => '#cfd7b2',
-      ),
-    ),
-    'mocha' => array(
+      ],
+    ],
+    'mocha' => [
       'title' => t('Mocha'),
-      'colors' => array(
+      'colors' => [
         'header' => '#c63d0f',
         'base' => '#3b3738',
         'slogan' => '#c63d0e',
@@ -148,14 +148,14 @@ $info = array(
         'footer' => '#7e8f7c',
         'footertext' => '#000100',
         'footerborder' => '#6b7d68',
-      ),
-    ),
-  ),
+      ],
+    ],
+  ],
 
   'blend_target' => '#ffffff',
 
   // CSS files (excluding @import) to rewrite with new color scheme.
-  'css' => array(
+  'css' => [
     'css/base.css',
     'css/layout.css',
     'css/component/small-text-components.css',
@@ -177,5 +177,5 @@ $info = array(
     'css/component/comment.css',
     'css/component/caption.css',
     'css/skin.css',
-  ),
-);
+  ],
+];

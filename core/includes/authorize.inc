@@ -15,7 +15,7 @@
  */
 function authorize_filetransfer_form($form, &$form_state) {
   global $is_https;
-  $form = array();
+  $form = [];
 
   // If possible, we want to post this form securely via HTTPS.
   $form['#https'] = TRUE;
@@ -23,16 +23,16 @@ function authorize_filetransfer_form($form, &$form_state) {
   // Get all the available ways to transfer files.
   if (empty($_SESSION['authorize_filetransfer_info'])) {
     backdrop_set_message(t('Unable to continue, no available methods of file transfer'), 'error');
-    return array();
+    return [];
   }
   $available_backends = $_SESSION['authorize_filetransfer_info'];
 
   if (!$is_https) {
-    $form['information']['https_warning'] = array(
+    $form['information']['https_warning'] = [
       '#prefix' => '<div class="messages error">',
-      '#markup' => t('WARNING: You are not using an encrypted connection, so your password will be sent in plain text. <a href="@https-link">Learn more</a>.', array('@https-link' => 'http://drupal.org/https-information')),
+      '#markup' => t('WARNING: You are not using an encrypted connection, so your password will be sent in plain text. <a href="@https-link">Learn more</a>.', ['@https-link' => 'http://drupal.org/https-information']),
       '#suffix' => '</div>',
-    );
+    ];
   }
 
   // Decide on a default backend.
@@ -44,19 +44,19 @@ function authorize_filetransfer_form($form, &$form_state) {
     $authorize_filetransfer_default = key($available_backends);
   }
 
-  $form['information']['main_header'] = array(
+  $form['information']['main_header'] = [
     '#prefix' => '<h3>',
     '#markup' => t('To continue, provide your server connection details'),
     '#suffix' => '</h3>',
-  );
+  ];
 
   $form['connection_settings']['#tree'] = TRUE;
-  $form['connection_settings']['authorize_filetransfer_default'] = array(
+  $form['connection_settings']['authorize_filetransfer_default'] = [
     '#type' => 'select',
     '#title' => t('Connection method'),
     '#default_value' => $authorize_filetransfer_default,
     '#weight' => -10,
-  );
+  ];
 
   /*
    * Here we create two submit buttons. For a JS enabled client, they will
@@ -65,38 +65,38 @@ function authorize_filetransfer_form($form, &$form_state) {
    * what filetransfer type to use, and submit_process on the second one (which
    * leads to the actual operation).
    */
-  $form['submit_connection'] = array(
+  $form['submit_connection'] = [
     '#prefix' => "<br style='clear:both'/>",
     '#name' => 'enter_connection_settings',
     '#type' => 'submit',
     '#value' => t('Enter connection settings'),
     '#weight' => 100,
-  );
+  ];
 
-  $form['submit_process'] = array(
+  $form['submit_process'] = [
     '#name' => 'process_updates',
     '#type' => 'submit',
     '#value' => t('Continue'),
     '#weight' => 100,
-  );
+  ];
 
   // Build a container for each connection type.
   foreach ($available_backends as $name => $backend) {
     $form['connection_settings']['authorize_filetransfer_default']['#options'][$name] = $backend['title'];
-    $form['connection_settings'][$name] = array(
+    $form['connection_settings'][$name] = [
       '#type' => 'container',
-      '#attributes' => array('class' => array("filetransfer-$name", 'filetransfer', 'form-wrapper')),
-      '#states' => array(
-        'visible' => array(
-          'select[name="connection_settings[authorize_filetransfer_default]"]' => array('value' => $name),
-        ),
-      ),
-    );
+      '#attributes' => ['class' => ["filetransfer-$name", 'filetransfer', 'form-wrapper']],
+      '#states' => [
+        'visible' => [
+          'select[name="connection_settings[authorize_filetransfer_default]"]' => ['value' => $name],
+        ],
+      ],
+    ];
     // We can't use #prefix on the container itself since then the header won't
     // be hidden and shown when the containers are being manipulated via JS.
-    $form['connection_settings'][$name]['header'] = array(
-      '#markup' => '<h4>' . t('@backend connection settings', array('@backend' => $backend['title'])) . '</h4>',
-    );
+    $form['connection_settings'][$name]['header'] = [
+      '#markup' => '<h4>' . t('@backend connection settings', ['@backend' => $backend['title']]) . '</h4>',
+    ];
 
     $form['connection_settings'][$name] += _authorize_filetransfer_connection_settings($name);
 
@@ -104,7 +104,7 @@ function authorize_filetransfer_form($form, &$form_state) {
     if (isset($form_state['values']['connection_settings']['authorize_filetransfer_default']) && $form_state['values']['connection_settings']['authorize_filetransfer_default'] == $name) {
 
       // Change the submit button to the submit_process one.
-      $form['submit_process']['#attributes'] = array();
+      $form['submit_process']['#attributes'] = [];
       unset($form['submit_connection']);
 
       // Activate the proper filetransfer settings form.
@@ -113,13 +113,13 @@ function authorize_filetransfer_form($form, &$form_state) {
       $form['connection_settings']['authorize_filetransfer_default']['#disabled'] = TRUE;
 
       // Create a button for changing the type of connection.
-      $form['connection_settings']['change_connection_type'] = array(
+      $form['connection_settings']['change_connection_type'] = [
         '#name' => 'change_connection_type',
         '#type' => 'submit',
         '#value' => t('Change connection type'),
         '#weight' => -5,
-        '#attributes' => array('class' => array('filetransfer-change-connection-type')),
-      );
+        '#attributes' => ['class' => ['filetransfer-change-connection-type']],
+      ];
     }
     // End non-JS code.
   }
@@ -139,8 +139,8 @@ function authorize_filetransfer_form($form, &$form_state) {
  */
 function _authorize_filetransfer_connection_settings($backend) {
   $auth_connection_config = config_get('system.authorize', 'authorize_filetransfer_connection_settings_' . $backend);
-  $defaults = $auth_connection_config ? $auth_connection_config : array();
-  $form = array();
+  $defaults = $auth_connection_config ? $auth_connection_config : [];
+  $form = [];
 
   // Create an instance of the file transfer class to get its settings form.
   $filetransfer = authorize_get_filetransfer($backend);
@@ -203,17 +203,17 @@ function authorize_filetransfer_form_validate($form, &$form_state) {
     $filetransfer = authorize_get_filetransfer($backend, $form_state['values']['connection_settings'][$backend]);
     try {
       if (!$filetransfer) {
-        throw new Exception(t('Error, this type of connection protocol (%backend) does not exist.', array('%backend' => $backend)));
+        throw new Exception(t('Error, this type of connection protocol (%backend) does not exist.', ['%backend' => $backend]));
       }
       $filetransfer->connect();
     }
     catch (Exception $e) {
       // The format of this error message is similar to that used on the
       // database connection form in the installer.
-      form_set_error('connection_settings', t('Failed to connect to the server. The server reports the following message: !message For more help installing or updating code on your server, see the <a href="@handbook_url">Installation Instructions</a> page.', array(
+      form_set_error('connection_settings', t('Failed to connect to the server. The server reports the following message: !message For more help installing or updating code on your server, see the <a href="@handbook_url">Installation Instructions</a> page.', [
         '!message' => '<p class="error">' . $e->getMessage()  . '</p>',
         '@handbook_url' => 'https://backdropcms.org/installation',
-      )));
+      ]));
     }
   }
 }
@@ -236,7 +236,7 @@ function authorize_filetransfer_form_submit($form, &$form_state) {
       // likely) be called during the installation process, before the
       // database is set up.
       try {
-        $connection_settings = array();
+        $connection_settings = [];
         foreach ($form_state['values']['connection_settings'][$filetransfer_backend] as $key => $value) {
           // We do *not* want to store passwords in the database, unless the
           // backend explicitly says so via the magic #filetransfer_save form
@@ -295,7 +295,7 @@ function authorize_run_operation($filetransfer) {
   }
 
   require_once BACKDROP_ROOT . '/' . $operation['file'];
-  call_user_func_array($operation['callback'], array_merge(array($filetransfer), $operation['arguments']));
+  call_user_func_array($operation['callback'], array_merge([$filetransfer], $operation['arguments']));
 }
 
 /**
@@ -310,7 +310,7 @@ function authorize_run_operation($filetransfer) {
  *   An instantiated FileTransfer object for the requested method and settings,
  *   or FALSE if there was an error finding or instantiating it.
  */
-function authorize_get_filetransfer($backend, $settings = array()) {
+function authorize_get_filetransfer($backend, $settings = []) {
   $filetransfer = FALSE;
   if (!empty($_SESSION['authorize_filetransfer_info'][$backend])) {
     $backend_info = $_SESSION['authorize_filetransfer_info'][$backend];

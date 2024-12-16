@@ -32,7 +32,7 @@ function theme_admin_bar_links($variables) {
   // everything again. Sorting by the key #weight is not sufficient here, as it
   // intentionally retains the order of elements having the same #weight,
   // whereas menu links are supposed to be ordered by #weight and #title.
-  backdrop_sort($elements, array('#weight' => SORT_NUMERIC, '#title' => SORT_STRING));
+  backdrop_sort($elements, ['#weight' => SORT_NUMERIC, '#title' => SORT_STRING]);
   $elements['#sorted'] = TRUE;
 
   $output = '';
@@ -41,11 +41,11 @@ function theme_admin_bar_links($variables) {
     if (isset($elements[$path]['#access']) && !$elements[$path]['#access']) {
       continue;
     }
-    $elements[$path] += array(
-      '#attributes' => array(),
-      '#options' => array(),
+    $elements[$path] += [
+      '#attributes' => [],
+      '#options' => [],
       '#title' => NULL,
-    );
+    ];
 
     // Increment the level for children items.
     $elements[$path]['#level'] = $elements['#level'] + 1;
@@ -55,7 +55,7 @@ function theme_admin_bar_links($variables) {
       $elements[$path]['#children'] = backdrop_render($elements[$path]);
     }
     else {
-      $elements[$path]['#children'] = theme('admin_bar_links', array('elements' => $elements[$path]));
+      $elements[$path]['#children'] = theme('admin_bar_links', ['elements' => $elements[$path]]);
       if (!empty($elements[$path]['#children'])) {
         $elements[$path]['#attributes']['class'][] = 'expandable';
       }
@@ -75,12 +75,12 @@ function theme_admin_bar_links($variables) {
       if (isset($elements[$path]['#options']['icon'])) {
         // If 'icon' is set to an empty string or FALSE, do not add an icon.
         if ($elements[$path]['#options']['icon']) {
-          $icon = icon($elements[$path]['#options']['icon'], array('immutable' => TRUE));
+          $icon = icon($elements[$path]['#options']['icon'], ['immutable' => TRUE]);
         }
       }
       else {
         $arrow_direction = $GLOBALS['language']->direction ? 'left' : 'right';
-        $icon = icon('caret-circle-' . $arrow_direction . '-fill', array('immutable' => TRUE));
+        $icon = icon('caret-circle-' . $arrow_direction . '-fill', ['immutable' => TRUE]);
       }
     }
 

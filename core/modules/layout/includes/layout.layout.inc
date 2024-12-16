@@ -12,15 +12,15 @@
  * @see taxonomy_layout_context_info().
  */
 function layout_layout_context_info() {
-  $info['node'] = array(
+  $info['node'] = [
     'title' => t('Node'),
     // Define the class which is used to handle this context.
     'class' => 'EntityLayoutContext',
     // Define menu paths where the node ID is a "known" context.
-    'menu paths' => array(
+    'menu paths' => [
       'node/%node',
       'node/%node/view',
-    ),
+    ],
     // Given the menu paths defined above, identify the part of the path that
     // is needed to generate this context.
     'path placeholder' => '%node',
@@ -28,51 +28,51 @@ function layout_layout_context_info() {
     // Given an argument, the callback that will be responsible for loading the
     // main context data.
     'load callback' => 'node_load',
-  );
-  $info['user'] = array(
+  ];
+  $info['user'] = [
     'title' => t('User account'),
     'class' => 'EntityLayoutContext',
-    'menu paths' => array(
+    'menu paths' => [
       'user/%user',
       'user/%user/view',
-    ),
+    ],
     'path placeholder' => '%user',
     'load callback' => 'user_load',
-  );
-  $info['taxonomy_term'] = array(
+  ];
+  $info['taxonomy_term'] = [
     'title' => t('Term'),
     'class' => 'EntityLayoutContext',
-    'menu paths' => array(
+    'menu paths' => [
       'taxonomy/term/%term',
       'taxonomy/term/%term/view',
-    ),
+    ],
     'path placeholder' => '%term',
     'load callback' => 'taxonomy_term_load',
-  );
-  $info['file'] = array(
+  ];
+  $info['file'] = [
     'title' => t('File'),
     'class' => 'EntityLayoutContext',
-    'menu paths' => array(
+    'menu paths' => [
       'file/%file',
       'file/%file/view',
-    ),
+    ],
     'path placeholder' => '%file',
     'load callback' => 'file_load',
-  );
-  $info['overrides_path'] = array(
+  ];
+  $info['overrides_path'] = [
     'title' => t('Overrides path'),
     'description' => t('Layout overrides existing path provided by another module.'),
     'class' => 'LayoutOverridesPathContext',
     'path placeholder' => NULL,
-    'menu paths' => array(),
+    'menu paths' => [],
     'hidden' => TRUE,
-  );
-  $info['string'] = array(
+  ];
+  $info['string'] = [
     'title' => t('String pass-through'),
     'class' => 'LayoutStringContext',
     'path placeholder' => NULL,
-    'menu paths' => array(),
-  );
+    'menu paths' => [],
+  ];
   return $info;
 }
 
@@ -80,13 +80,13 @@ function layout_layout_context_info() {
  * Implements hook_layout_relationship_info().
  */
 function layout_layout_relationship_info() {
-  $info['author_from_node'] = array(
+  $info['author_from_node'] = [
     'title' => t('Author of content'),
     'class' => 'LayoutRelationshipAuthorFromNode',
     'context' => 'node',
     'context_label' => t('Content'),
     'description' => t('Creates a user account context based on the author of content.'),
-  );
+  ];
 
   return $info;
 }
@@ -105,91 +105,91 @@ function layout_layout_access_info() {
     if (!empty($entity_info['entity keys']['bundle'])) {
       $key = $entity_type . '_' . $entity_info['entity keys']['bundle'];
       $bundle_label = array_key_exists('bundle label', $entity_info) ? $entity_info['bundle label'] : 'Type';
-      $info[$key] = array(
-        'title' => t('@entity: @bundle', array('@entity' => $entity_info['label'], '@bundle' => $bundle_label)),
-        'description' => t('Control access by @entity_type @bundle_label.', array('@entity_type' => $entity_type, '@bundle_label' => backdrop_strtolower($bundle_label))),
+      $info[$key] = [
+        'title' => t('@entity: @bundle', ['@entity' => $entity_info['label'], '@bundle' => $bundle_label]),
+        'description' => t('Control access by @entity_type @bundle_label.', ['@entity_type' => $entity_type, '@bundle_label' => backdrop_strtolower($bundle_label)]),
         'entity_type' => $entity_type,
         'class' => 'EntityBundleLayoutAccess',
-        'required contexts' => array(
+        'required contexts' => [
           $entity_type => $entity_type,
-        ),
-      );
+        ],
+      ];
     }
 
     // Create a entity id key such as "nid" or "cid".
     $key = $entity_type . '_' . $entity_info['entity keys']['id'];
     $key_label = strtoupper($entity_info['entity keys']['id']);
-    $info[$key] = array(
-      'title' => t('@entity: @entity_id_key', array('@entity' => $entity_info['label'], '@entity_id_key' => $key_label)),
-      'description' => t('Control access by @entity_type @entity_id_key.', array('@entity_type' => $entity_type, '@entity_id_key' => $key_label)),
+    $info[$key] = [
+      'title' => t('@entity: @entity_id_key', ['@entity' => $entity_info['label'], '@entity_id_key' => $key_label]),
+      'description' => t('Control access by @entity_type @entity_id_key.', ['@entity_type' => $entity_type, '@entity_id_key' => $key_label]),
       'entity_type' => $entity_type,
       'class' => 'EntityIDLayoutAccess',
-      'required contexts' => array(
+      'required contexts' => [
         $entity_type => $entity_type,
-      ),
-    );
+      ],
+    ];
   }
 
-  $info['front'] = array(
+  $info['front'] = [
     'title' => t('Home page'),
     'description' => t('Is this the home page.'),
     'class' => 'FrontLayoutAccess',
-  );
-  $info['language'] = array(
+  ];
+  $info['language'] = [
     'title' => t('Site language'),
     'description' => t('Control access by the currently active interface language.'),
     'class' => 'LanguageLayoutAccess',
-  );
-  $info['user_permission'] = array(
+  ];
+  $info['user_permission'] = [
     'title' => t('User account: Permission'),
     'description' => t('Control access by permission string.'),
     'class' => 'UserPermissionLayoutAccess',
-    'required contexts' => array(
+    'required contexts' => [
       'user' => 'user',
-    ),
-  );
-  $info['user_role'] = array(
+    ],
+  ];
+  $info['user_role'] = [
     'title' => t('User account: Role'),
     'description' => t('Control access by role.'),
     'class' => 'UserRoleLayoutAccess',
     // Contexts are specified as context key => context type. The key will be
     // used in the $contexts array passed to the access class methods. The type
     // references a context provided by hook_layout_context_info().
-    'required contexts' => array(
+    'required contexts' => [
       'user' => 'user',
-    ),
+    ],
     // Optional if needing to clarify between contexts of the same type.
-    'required contexts labels' => array(
+    'required contexts labels' => [
       'user' => t('User account'),
-    ),
-  );
-  $info['user_compare'] = array(
+    ],
+  ];
+  $info['user_compare'] = [
     'title' => t('User account: Compare'),
     'description' => t('Compare two user accounts. For example: logged-in vs profile being viewed.'),
     'class' => 'UserCompareLayoutAccess',
     // Contexts are specified as context key => context type. The key will be
     // used in the $contexts array passed to the access class methods. The type
     // references a context provided by hook_layout_context_info().
-    'required contexts' => array(
+    'required contexts' => [
       'user1' => 'user',
       'user2' => 'user',
-    ),
+    ],
     // Optional if needing to clarify between contexts of the same type.
-    'required contexts labels' => array(
+    'required contexts labels' => [
       'user1' => t('The logged-in user account'),
       'user2' => t('User account to compare to the logged-in user account'),
-    ),
-  );
-  $info['path'] = array(
+    ],
+  ];
+  $info['path'] = [
     'title' => t('URL path'),
     'description' => t('Control access by the current path.'),
     'class' => 'PathLayoutAccess',
-  );
-  $info['http_response_code'] = array(
+  ];
+  $info['http_response_code'] = [
     'title' => t('Server response'),
     'description' => t('Control access by the HTTP response status code returned by the server.'),
     'class' => 'HttpResponseCodeLayoutAccess',
-  );
+  ];
   return $info;
 }
 
@@ -197,18 +197,18 @@ function layout_layout_access_info() {
  * Implements hook_layout_renderer_info().
  */
 function layout_layout_renderer_info() {
-  $info['broken'] = array(
+  $info['broken'] = [
     'class' => 'LayoutRendererBroken',
-  );
-  $info['editor'] = array(
+  ];
+  $info['editor'] = [
     'class' => 'LayoutRendererEditor',
-  );
-  $info['standard'] = array(
+  ];
+  $info['standard'] = [
     'class' => 'LayoutRendererStandard',
-  );
-  $info['flexible'] = array(
+  ];
+  $info['flexible'] = [
     'class' => 'LayoutRendererFlexible',
-  );
+  ];
   return $info;
 }
 
@@ -216,21 +216,21 @@ function layout_layout_renderer_info() {
  * Implements hook_layout_style_info().
  */
 function layout_layout_style_info() {
-  $info['default'] = array(
+  $info['default'] = [
     'title' => t('Default'),
     'description' => t('The default block rendering style with predictable tags provided by the site template.'),
     'block theme' => 'block',
     'class' => 'LayoutStyle',
     'template' => 'templates/block',
     'file' => 'layout.theme.inc',
-  );
-  $info['dynamic'] = array(
+  ];
+  $info['dynamic'] = [
     'title' => t('Dynamic'),
     'description' => t('Customizable rendering style in which every HTML tag can be configured.'),
     'block theme' => 'block_dynamic',
     'class' => 'LayoutStyleDynamic',
     'template' => 'templates/block-dynamic',
     'file' => 'layout.theme.inc',
-  );
+  ];
   return $info;
 }

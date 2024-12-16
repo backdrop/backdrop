@@ -16,22 +16,22 @@ class views_handler_field_comment_link extends views_handler_field_entity {
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['text'] = array('default' => '', 'translatable' => TRUE);
-    $options['link_to_node'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['text'] = ['default' => '', 'translatable' => TRUE];
+    $options['link_to_node'] = ['default' => FALSE, 'bool' => TRUE];
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
-    $form['text'] = array(
+    $form['text'] = [
       '#type' => 'textfield',
       '#title' => t('Text to display'),
       '#default_value' => $this->options['text'],
-    );
-    $form['link_to_node'] = array(
+    ];
+    $form['link_to_node'] = [
       '#title' => t('Link field to the node if there is no comment.'),
       '#type' => 'checkbox',
       '#default_value' => $this->options['link_to_node'],
-    );
+    ];
     parent::options_form($form, $form_state);
   }
 

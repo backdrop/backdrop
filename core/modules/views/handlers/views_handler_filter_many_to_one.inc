@@ -31,7 +31,7 @@ class views_handler_filter_many_to_one extends views_handler_filter_in_operator 
     $options = parent::option_definition();
 
     $options['operator']['default'] = 'or';
-    $options['value']['default'] = array();
+    $options['value']['default'] = [];
 
     if (isset($this->helper)) {
       $this->helper->option_definition($options);
@@ -45,48 +45,48 @@ class views_handler_filter_many_to_one extends views_handler_filter_in_operator 
   }
 
   function operators() {
-    $operators = array(
-      'or' => array(
+    $operators = [
+      'or' => [
         'title' => t('Is one of'),
         'short' => t('or'),
         'short_single' => t('='),
         'method' => 'op_helper',
         'values' => 1,
         'ensure_my_table' => 'helper',
-      ),
-      'and' => array(
+      ],
+      'and' => [
         'title' => t('Is all of'),
         'short' => t('and'),
         'short_single' => t('='),
         'method' => 'op_helper',
         'values' => 1,
         'ensure_my_table' => 'helper',
-      ),
-      'not' => array(
+      ],
+      'not' => [
         'title' => t('Is none of'),
         'short' => t('not'),
         'short_single' => t('<>'),
         'method' => 'op_helper',
         'values' => 1,
         'ensure_my_table' => 'helper',
-      ),
-    );
+      ],
+    ];
     // if the definition allows for the empty operator, add it.
     if (!empty($this->definition['allow empty'])) {
-      $operators += array(
-        'empty' => array(
+      $operators += [
+        'empty' => [
           'title' => t('Is empty (NULL)'),
           'method' => 'op_empty',
           'short' => t('empty'),
           'values' => 0,
-        ),
-        'not empty' => array(
+        ],
+        'not empty' => [
           'title' => t('Is not empty (NOT NULL)'),
           'method' => 'op_empty',
           'short' => t('not empty'),
           'values' => 0,
-        ),
-      );
+        ],
+      ];
     }
 
     return $operators;

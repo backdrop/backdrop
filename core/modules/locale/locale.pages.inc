@@ -25,26 +25,26 @@ function _locale_translate_seek() {
 
   // We have at least one criterion to match
   if (!($query = _locale_translate_seek_query())) {
-    $query = array(
+    $query = [
       'translation' => 'all',
       'language' => 'all',
       'string' => '',
-    );
+    ];
   }
 
   $sql_query = db_select('locales_source', 's');
 
   $limit_language = NULL;
   if ($query['language'] != 'en' && $query['language'] != 'all') {
-    $sql_query->leftJoin('locales_target', 't', "t.lid = s.lid AND t.language = :langcode", array(':langcode' => $query['language']));
+    $sql_query->leftJoin('locales_target', 't', "t.lid = s.lid AND t.language = :langcode", [':langcode' => $query['language']]);
     $limit_language = $query['language'];
   }
   else {
     $sql_query->leftJoin('locales_target', 't', 't.lid = s.lid');
   }
 
-  $sql_query->fields('s', array('source', 'location', 'context', 'lid'));
-  $sql_query->fields('t', array('translation', 'language'));
+  $sql_query->fields('s', ['source', 'location', 'context', 'lid']);
+  $sql_query->fields('t', ['translation', 'language']);
 
   // Compute LIKE section.
   switch ($query['translation']) {
@@ -74,47 +74,47 @@ function _locale_translate_seek() {
   $sql_query = $sql_query->extend('PagerDefault')->limit(50);
   $locales = $sql_query->execute();
 
-  $header = array(t('String'), t('Context'), ($limit_language) ? t('Language') : t('Languages'), array('data' => t('Operations'), 'colspan' => '2'));
+  $header = [t('String'), t('Context'), ($limit_language) ? t('Language') : t('Languages'), ['data' => t('Operations'), 'colspan' => '2']];
 
-  $strings = array();
+  $strings = [];
   foreach ($locales as $locale) {
     if (!isset($strings[$locale->lid])) {
-      $strings[$locale->lid] = array(
-        'languages' => array(),
+      $strings[$locale->lid] = [
+        'languages' => [],
         'location' => $locale->location,
         'source' => $locale->source,
         'context' => $locale->context,
-      );
+      ];
     }
     if (isset($locale->language)) {
       $strings[$locale->lid]['languages'][$locale->language] = $locale->translation;
     }
   }
 
-  $rows = array();
+  $rows = [];
   foreach ($strings as $lid => $string) {
-    $links = array();
-    $links['edit'] = array(
+    $links = [];
+    $links['edit'] = [
       'title' => t('Edit'),
       'href' => "admin/config/regional/translate/edit/$lid",
       'query' => backdrop_get_destination(),
-      'class' => array('nowrap'),
-    );
-    $links['delete'] = array(
+      'class' => ['nowrap'],
+    ];
+    $links['delete'] = [
       'title' => t('Delete'),
       'href' => "admin/config/regional/translate/delete/$lid",
       'query' => backdrop_get_destination(),
-      'class' => array('nowrap'),
-    );
-    $rows[] = array(
-      array('data' => check_plain(truncate_utf8($string['source'], 150, FALSE, TRUE)) . '<br /><small>' . $string['location'] . '</small>'),
+      'class' => ['nowrap'],
+    ];
+    $rows[] = [
+      ['data' => check_plain(truncate_utf8($string['source'], 150, FALSE, TRUE)) . '<br /><small>' . $string['location'] . '</small>'],
       $string['context'],
-      array('data' => _locale_translate_language_list($string, $limit_language), 'align' => 'center'),
-      array('data' => array('#type' => 'operations', '#links' => $links)),
-    );
+      ['data' => _locale_translate_language_list($string, $limit_language), 'align' => 'center'],
+      ['data' => ['#type' => 'operations', '#links' => $links]],
+    ];
   }
 
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'empty' => t('No strings available.')));
+  $output .= theme('table', ['header' => $header, 'rows' => $rows, 'empty' => t('No strings available.')]);
   $output .= theme('pager');
 
   return $output;
@@ -149,8 +149,8 @@ function _locale_translate_language_list($string, $limit_language) {
 function _locale_translate_seek_query() {
   $query = &backdrop_static(__FUNCTION__);
   if (!isset($query)) {
-    $query = array();
-    $fields = array('string', 'language', 'translation');
+    $query = [];
+    $fields = ['string', 'language', 'translation'];
     foreach ($fields as $field) {
       if (isset($_SESSION['locale_translation_filter'][$field])) {
         $query[$field] = $_SESSION['locale_translation_filter'][$field];
@@ -164,7 +164,7 @@ function _locale_translate_seek_query() {
  * List locale translation filters that can be applied.
  */
 function locale_translation_filters() {
-  $filters = array();
+  $filters = [];
 
   // Get all languages, except English
   backdrop_static_reset('language_list');
@@ -173,20 +173,20 @@ function locale_translation_filters() {
     unset($language_options['en']);
   }
 
-  $filters['string'] = array(
+  $filters['string'] = [
     'title' => t('String contains'),
     'description' => t('Leave blank to show all strings.'),
-  );
+  ];
 
-  $filters['language'] = array(
+  $filters['language'] = [
     'title' => t('Language'),
-    'options' => array_merge(array('all' => t('All languages'), LANGUAGE_SYSTEM => t('System (English)')), $language_options),
-  );
+    'options' => array_merge(['all' => t('All languages'), LANGUAGE_SYSTEM => t('System (English)')], $language_options),
+  ];
 
-  $filters['translation'] = array(
+  $filters['translation'] = [
     'title' => t('Search in'),
-    'options' => array('all' => t('Both translated and untranslated strings'), 'translated' => t('Only translated strings'), 'untranslated' => t('Only untranslated strings')),
-  );
+    'options' => ['all' => t('Both translated and untranslated strings'), 'translated' => t('Only translated strings'), 'untranslated' => t('Only untranslated strings')],
+  ];
 
   return $filters;
 }
@@ -199,51 +199,51 @@ function locale_translation_filters() {
 function locale_translation_filter_form() {
   $filters = locale_translation_filters();
 
-  $form['filters'] = array(
+  $form['filters'] = [
     '#type' => 'fieldset',
     '#title' => t('Filter translatable strings'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
-  );
+  ];
   foreach ($filters as $key => $filter) {
     // Special case for 'string' filter.
     if ($key == 'string') {
-      $form['filters']['status']['string'] = array(
+      $form['filters']['status']['string'] = [
         '#type' => 'search',
         '#title' => $filter['title'],
         '#description' => $filter['description'],
-      );
+      ];
     }
     else {
-      $form['filters']['status'][$key] = array(
+      $form['filters']['status'][$key] = [
         '#title' => $filter['title'],
         '#type' => 'select',
         '#empty_value' => 'all',
         '#empty_option' => $filter['options']['all'],
         '#size' => 0,
         '#options' => $filter['options'],
-      );
+      ];
     }
     if (!empty($_SESSION['locale_translation_filter'][$key])) {
       $form['filters']['status'][$key]['#default_value'] = $_SESSION['locale_translation_filter'][$key];
     }
   }
 
-  $form['#attributes']['class'] = array('locale-translation-filter-form');
+  $form['#attributes']['class'] = ['locale-translation-filter-form'];
 
-  $form['filters']['actions'] = array(
+  $form['filters']['actions'] = [
     '#type' => 'actions',
-    '#attributes' => array('class' => array('container-inline')),
-  );
-  $form['filters']['actions']['submit'] = array(
+    '#attributes' => ['class' => ['container-inline']],
+  ];
+  $form['filters']['actions']['submit'] = [
     '#type' => 'submit',
     '#value' => t('Filter'),
-  );
+  ];
   if (!empty($_SESSION['locale_translation_filter'])) {
-    $form['filters']['actions']['reset'] = array(
+    $form['filters']['actions']['reset'] = [
       '#type' => 'submit',
       '#value' => t('Reset')
-    );
+    ];
   }
 
   return $form;
@@ -273,7 +273,7 @@ function locale_translation_filter_form_submit($form, &$form_state) {
       }
       break;
     case t('Reset'):
-      $_SESSION['locale_translation_filter'] = array();
+      $_SESSION['locale_translation_filter'] = [];
       break;
   }
 
@@ -288,33 +288,33 @@ function locale_translation_filter_form_submit($form, &$form_state) {
  */
 function locale_translate_edit_form($form, &$form_state, $lid) {
   // Fetch source string, if possible.
-  $source = db_query('SELECT source, context, location FROM {locales_source} WHERE lid = :lid', array(':lid' => $lid))->fetchObject();
+  $source = db_query('SELECT source, context, location FROM {locales_source} WHERE lid = :lid', [':lid' => $lid])->fetchObject();
   if (!$source) {
     backdrop_set_message(t('String not found.'), 'error');
     backdrop_goto('admin/config/regional/translate/translate');
   }
 
   // Add original text to the top and some values for form altering.
-  $form['original'] = array(
+  $form['original'] = [
     '#type'  => 'item',
     '#title' => t('Original text'),
     '#markup' => check_plain(wordwrap($source->source, 0)),
-  );
+  ];
   if (!empty($source->context)) {
-    $form['context'] = array(
+    $form['context'] = [
       '#type' => 'item',
       '#title' => t('Context'),
       '#markup' => check_plain($source->context),
-    );
+    ];
   }
-  $form['lid'] = array(
+  $form['lid'] = [
     '#type'  => 'value',
     '#value' => $lid
-  );
-  $form['location'] = array(
+  ];
+  $form['location'] = [
     '#type'  => 'value',
     '#value' => $source->location
-  );
+  ];
 
   // Include both translated and not yet translated target languages in the
   // list. The source language is English for built-in strings and the default
@@ -323,26 +323,26 @@ function locale_translate_edit_form($form, &$form_state, $lid) {
   if (!locale_translate_english()) {
     unset($languages['en']);
   }
-  $form['translations'] = array('#tree' => TRUE);
+  $form['translations'] = ['#tree' => TRUE];
   // Approximate the number of rows to use in the default textarea.
   $rows = min(ceil(str_word_count($source->source) / 12), 10);
   foreach ($languages as $langcode => $language) {
-    $form['translations'][$langcode] = array(
+    $form['translations'][$langcode] = [
       '#type' => 'textarea',
       '#title' => $language->name,
       '#rows' => $rows,
       '#default_value' => '',
-    );
+    ];
   }
 
   // Fetch translations and fill in default values in the form.
-  $result = db_query("SELECT DISTINCT translation, language FROM {locales_target} WHERE lid = :lid", array(':lid' => $lid));
+  $result = db_query("SELECT DISTINCT translation, language FROM {locales_target} WHERE lid = :lid", [':lid' => $lid]);
   foreach ($result as $translation) {
     $form['translations'][$translation->language]['#default_value'] = $translation->translation;
   }
 
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save translations'));
+  $form['actions'] = ['#type' => 'actions'];
+  $form['actions']['submit'] = ['#type' => 'submit', '#value' => t('Save translations')];
   return $form;
 }
 
@@ -354,8 +354,8 @@ function locale_translate_edit_form_validate($form, &$form_state) {
 
   foreach ($form_state['values']['translations'] as $key => $value) {
     if (!locale_string_is_safe($value)) {
-      form_set_error('translations', t('The submitted string contains disallowed HTML: %string', array('%string' => $value)));
-      watchdog('locale', 'Attempted submission of a translation string with disallowed HTML: %string', array('%string' => $value), WATCHDOG_WARNING);
+      form_set_error('translations', t('The submitted string contains disallowed HTML: %string', ['%string' => $value]));
+      watchdog('locale', 'Attempted submission of a translation string with disallowed HTML: %string', ['%string' => $value], WATCHDOG_WARNING);
     }
   }
 }
@@ -370,25 +370,25 @@ function locale_translate_edit_form_submit($form, &$form_state) {
 
   $lid = $form_state['values']['lid'];
   foreach ($form_state['values']['translations'] as $key => $value) {
-    $translation = db_query("SELECT translation FROM {locales_target} WHERE lid = :lid AND language = :language", array(':lid' => $lid, ':language' => $key))->fetchField();
+    $translation = db_query("SELECT translation FROM {locales_target} WHERE lid = :lid AND language = :language", [':lid' => $lid, ':language' => $key])->fetchField();
     if (!empty($value)) {
       // Only update or insert if we have a value to use.
       if (is_string($translation)) {
         db_update('locales_target')
-          ->fields(array(
+          ->fields([
             'translation' => $value,
-          ))
+          ])
           ->condition('lid', $lid)
           ->condition('language', $key)
           ->execute();
       }
       else {
         db_insert('locales_target')
-          ->fields(array(
+          ->fields([
             'lid' => $lid,
             'translation' => $value,
             'language' => $key,
-          ))
+          ])
           ->execute();
       }
     }
@@ -418,7 +418,7 @@ function locale_translate_edit_form_submit($form, &$form_state) {
  * String deletion confirmation page.
  */
 function locale_translate_delete_page($lid) {
-  if ($source = db_query('SELECT lid, source FROM {locales_source} WHERE lid = :lid', array(':lid' => $lid))->fetchObject()) {
+  if ($source = db_query('SELECT lid, source FROM {locales_source} WHERE lid = :lid', [':lid' => $lid])->fetchObject()) {
     return backdrop_get_form('locale_translate_delete_form', $source);
   }
   else {
@@ -432,8 +432,8 @@ function locale_translate_delete_page($lid) {
  * @ingroup forms
  */
 function locale_translate_delete_form($form, &$form_state, $source) {
-  $form['lid'] = array('#type' => 'value', '#value' => $source->lid);
-  return confirm_form($form, t('Are you sure you want to delete the string "%source"?', array('%source' => $source->source)), 'admin/config/regional/translate/translate', t('Deleting the string will remove all translations of this string in all languages. This action cannot be undone.'), t('Delete'), t('Cancel'));
+  $form['lid'] = ['#type' => 'value', '#value' => $source->lid];
+  return confirm_form($form, t('Are you sure you want to delete the string "%source"?', ['%source' => $source->source]), 'admin/config/regional/translate/translate', t('Deleting the string will remove all translations of this string in all languages. This action cannot be undone.'), t('Delete'), t('Cancel'));
 }
 
 /**

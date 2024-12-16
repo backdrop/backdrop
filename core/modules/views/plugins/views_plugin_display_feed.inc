@@ -18,7 +18,7 @@ class views_plugin_display_feed extends views_plugin_display_page {
     // Set the default row style. Ideally this would be part of the option
     // definition, but in this case it's dependent on the view's base table,
     // which we don't know until init().
-    $row_plugins = views_fetch_plugin_names('row', $this->get_style_type(), array($view->base_table));
+    $row_plugins = views_fetch_plugin_names('row', $this->get_style_type(), [$view->base_table]);
     $default_row_plugin = key($row_plugins);
     if ($this->options['row_plugin'] == '') {
       $this->options['row_plugin'] = $default_row_plugin;
@@ -61,7 +61,7 @@ class views_plugin_display_feed extends views_plugin_display_page {
   }
 
   function defaultable_sections($section = NULL) {
-    if (in_array($section, array('style_options', 'style_plugin', 'row_options', 'row_plugin',))) {
+    if (in_array($section, ['style_options', 'style_plugin', 'row_options', 'row_plugin',])) {
       return FALSE;
     }
 
@@ -80,11 +80,11 @@ class views_plugin_display_feed extends views_plugin_display_page {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['displays'] = array('default' => array());
+    $options['displays'] = ['default' => []];
 
     // Overrides for standard stuff:
     $options['style_plugin']['default'] = 'rss';
-    $options['style_options']['default']  = array('description' => '');
+    $options['style_options']['default']  = ['description' => ''];
     $options['sitename_title']['default'] = FALSE;
     $options['row_plugin']['default'] = '';
     $options['defaults']['default']['style_plugin'] = FALSE;
@@ -101,13 +101,13 @@ class views_plugin_display_feed extends views_plugin_display_page {
 
     // Since we're childing off the 'page' type, we'll still *call* our
     // category 'page' but let's override it so it says feed settings.
-    $categories['page'] = array(
+    $categories['page'] = [
       'title' => t('Feed settings'),
       'column' => 'second',
-      'build' => array(
+      'build' => [
         '#weight' => -10,
-      ),
-    );
+      ],
+    ];
 
     if ($this->get_option('sitename_title')) {
       $options['title']['value'] = t('Using the site name');
@@ -131,11 +131,11 @@ class views_plugin_display_feed extends views_plugin_display_page {
       $attach_to = t('None');
     }
 
-    $options['displays'] = array(
+    $options['displays'] = [
       'category' => 'page',
       'title' => t('Attach to'),
       'value' => $attach_to,
-    );
+    ];
   }
 
   /**
@@ -150,32 +150,32 @@ class views_plugin_display_feed extends views_plugin_display_page {
         $title = $form['title'];
         // A little juggling to move the 'title' field beyond our checkbox.
         unset($form['title']);
-        $form['sitename_title'] = array(
+        $form['sitename_title'] = [
           '#type' => 'checkbox',
           '#title' => t('Use the site name for the title'),
           '#default_value' => $this->get_option('sitename_title'),
-        );
+        ];
         $form['title'] = $title;
-        $form['title']['#states'] = array(
-          'visible' => array(
-            ':input[name="sitename_title"]' => array('checked' => FALSE),
-          ),
-        );
+        $form['title']['#states'] = [
+          'visible' => [
+            ':input[name="sitename_title"]' => ['checked' => FALSE],
+          ],
+        ];
         break;
       case 'displays':
         $form['#title'] .= t('Attach to');
-        $displays = array();
+        $displays = [];
         foreach ($this->view->display as $display_id => $display) {
           if (!empty($display->handler) && $display->handler->accept_attachments()) {
             $displays[$display_id] = $display->display_title;
           }
         }
-        $form['displays'] = array(
+        $form['displays'] = [
           '#type' => 'checkboxes',
           '#description' => t('The feed icon will be available only to the selected displays.'),
           '#options' => $displays,
           '#default_value' => $this->get_option('displays'),
-        );
+        ];
         break;
       case 'path':
         $form['path']['#description'] = t('This view will be displayed by visiting this path on your site. It is recommended that the path be something like "path/%/%/feed" or "path/%/%/rss.xml", putting one % in the path for each contextual filter you have defined in the view.');

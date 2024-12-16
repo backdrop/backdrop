@@ -19,7 +19,7 @@ class views_handler_filter_user_permissions extends views_handler_filter_many_to
     $needed_permissions = array_values(array_filter($this->value));
     $needed_count = count($needed_permissions);
 
-    $roles_with_permissions = array();
+    $roles_with_permissions = [];
     foreach ($all_roles as $role) {
       $matching_count = count(array_intersect($needed_permissions, $role->permissions));
       if (($this->operator !== 'and' && $matching_count) || ($this->operator === 'and' && $matching_count === $needed_count)) {
@@ -34,7 +34,7 @@ class views_handler_filter_user_permissions extends views_handler_filter_many_to
         // Block the display of any users at all.
         // @todo: Use a more graceful way to eliminate the query.
         $this->operator = 'and';
-        $this->value = array('*NO_ROLES*');
+        $this->value = ['*NO_ROLES*'];
       }
       else {
         // No action at all necessary to list all users.
@@ -54,17 +54,17 @@ class views_handler_filter_user_permissions extends views_handler_filter_many_to
 
     // Get a list of all the modules implementing a hook_permission() and sort by
     // display name.
-    $modules = array();
+    $modules = [];
     foreach (module_implements('permission') as $module) {
       $modules[$module] = $module_info[$module]['name'];
     }
     asort($modules);
 
-    $this->value_options = array();
+    $this->value_options = [];
     foreach ($modules as $module => $display_name) {
       if ($permissions = module_invoke($module, 'permission')) {
         foreach ($permissions as $perm => $perm_item) {
-          $this->value_options[t('@module module', array('@module' => $module))][$perm] = check_plain(strip_tags($perm_item['title']));
+          $this->value_options[t('@module module', ['@module' => $module])][$perm] = check_plain(strip_tags($perm_item['title']));
         }
       }
     }

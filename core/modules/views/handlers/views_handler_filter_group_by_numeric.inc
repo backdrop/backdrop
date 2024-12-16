@@ -23,17 +23,17 @@ class views_handler_filter_group_by_numeric extends views_handler_filter_numeric
     $placeholder_min = $this->placeholder();
     $placeholder_max = $this->placeholder();
     if ($this->operator == 'between') {
-      $this->query->add_having_expression($this->options['group'], "$field >= $placeholder_min", array($placeholder_min => $this->value['min']));
-      $this->query->add_having_expression($this->options['group'], "$field <= $placeholder_max", array($placeholder_max => $this->value['max']));
+      $this->query->add_having_expression($this->options['group'], "$field >= $placeholder_min", [$placeholder_min => $this->value['min']]);
+      $this->query->add_having_expression($this->options['group'], "$field <= $placeholder_max", [$placeholder_max => $this->value['max']]);
     }
     else {
-      $this->query->add_having_expression($this->options['group'], "$field <= $placeholder_min OR $field >= $placeholder_max", array($placeholder_min => $this->value['min'], $placeholder_max => $this->value['max']));
+      $this->query->add_having_expression($this->options['group'], "$field <= $placeholder_min OR $field >= $placeholder_max", [$placeholder_min => $this->value['min'], $placeholder_max => $this->value['max']]);
     }
   }
 
   function op_simple($field) {
     $placeholder = $this->placeholder();
-    $this->query->add_having_expression($this->options['group'], "$field $this->operator $placeholder", array($placeholder => $this->value['value']));
+    $this->query->add_having_expression($this->options['group'], "$field $this->operator $placeholder", [$placeholder => $this->value['value']]);
   }
 
   function op_empty($field) {

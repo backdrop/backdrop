@@ -132,7 +132,7 @@ function pager_default_initialize($total, $limit, $element = 0) {
 function pager_get_query_parameters() {
   $query = &backdrop_static(__FUNCTION__);
   if (!isset($query)) {
-    $query = backdrop_get_query_parameters($_GET, array('q', 'page'));
+    $query = backdrop_get_query_parameters($_GET, ['q', 'page']);
   }
   return $query;
 }
@@ -194,78 +194,78 @@ function theme_pager($variables) {
   }
   // End of generation loop preparation.
 
-  $li_first = theme('pager_first', array('text' => (isset($tags[0]) ? $tags[0] : t('« first')), 'element' => $element, 'parameters' => $parameters));
-  $li_previous = theme('pager_previous', array('text' => (isset($tags[1]) ? $tags[1] : t('‹ previous')), 'element' => $element, 'interval' => 1, 'parameters' => $parameters));
-  $li_next = theme('pager_next', array('text' => (isset($tags[3]) ? $tags[3] : t('next ›')), 'element' => $element, 'interval' => 1, 'parameters' => $parameters));
-  $li_last = theme('pager_last', array('text' => (isset($tags[4]) ? $tags[4] : t('last »')), 'element' => $element, 'parameters' => $parameters));
+  $li_first = theme('pager_first', ['text' => (isset($tags[0]) ? $tags[0] : t('« first')), 'element' => $element, 'parameters' => $parameters]);
+  $li_previous = theme('pager_previous', ['text' => (isset($tags[1]) ? $tags[1] : t('‹ previous')), 'element' => $element, 'interval' => 1, 'parameters' => $parameters]);
+  $li_next = theme('pager_next', ['text' => (isset($tags[3]) ? $tags[3] : t('next ›')), 'element' => $element, 'interval' => 1, 'parameters' => $parameters]);
+  $li_last = theme('pager_last', ['text' => (isset($tags[4]) ? $tags[4] : t('last »')), 'element' => $element, 'parameters' => $parameters]);
 
   if ($pager_total[$element] > 1) {
     if ($li_first) {
-      $items[] = array(
-        'class' => array('pager-first'),
+      $items[] = [
+        'class' => ['pager-first'],
         'data' => $li_first,
-      );
+      ];
     }
     if ($li_previous) {
-      $items[] = array(
-        'class' => array('pager-previous'),
+      $items[] = [
+        'class' => ['pager-previous'],
         'data' => $li_previous,
-      );
+      ];
     }
 
     // When there is more than one page, create the pager list.
     if ($i != $pager_max) {
       if ($i > 1) {
-        $items[] = array(
-          'class' => array('pager-ellipsis'),
+        $items[] = [
+          'class' => ['pager-ellipsis'],
           'data' => '…',
-        );
+        ];
       }
       // Now generate the actual pager piece.
       for (; $i <= $pager_last && $i <= $pager_max; $i++) {
         if ($i < $pager_current) {
-          $items[] = array(
-            'class' => array('pager-item'),
-            'data' => theme('pager_previous', array('text' => $i, 'element' => $element, 'interval' => ($pager_current - $i), 'parameters' => $parameters)),
-          );
+          $items[] = [
+            'class' => ['pager-item'],
+            'data' => theme('pager_previous', ['text' => $i, 'element' => $element, 'interval' => ($pager_current - $i), 'parameters' => $parameters]),
+          ];
         }
         if ($i == $pager_current) {
-          $items[] = array(
-            'class' => array('pager-current'),
+          $items[] = [
+            'class' => ['pager-current'],
             'data' => $i,
-          );
+          ];
         }
         if ($i > $pager_current) {
-          $items[] = array(
-            'class' => array('pager-item'),
-            'data' => theme('pager_next', array('text' => $i, 'element' => $element, 'interval' => ($i - $pager_current), 'parameters' => $parameters)),
-          );
+          $items[] = [
+            'class' => ['pager-item'],
+            'data' => theme('pager_next', ['text' => $i, 'element' => $element, 'interval' => ($i - $pager_current), 'parameters' => $parameters]),
+          ];
         }
       }
       if ($i < $pager_max) {
-        $items[] = array(
-          'class' => array('pager-ellipsis'),
+        $items[] = [
+          'class' => ['pager-ellipsis'],
           'data' => '…',
-        );
+        ];
       }
     }
     // End generation.
     if ($li_next) {
-      $items[] = array(
-        'class' => array('pager-next'),
+      $items[] = [
+        'class' => ['pager-next'],
         'data' => $li_next,
-      );
+      ];
     }
     if ($li_last) {
-      $items[] = array(
-        'class' => array('pager-last'),
+      $items[] = [
+        'class' => ['pager-last'],
         'data' => $li_last,
-      );
+      ];
     }
-    return '<h2 class="element-invisible">' . t('Pages') . '</h2>' . theme('item_list', array(
+    return '<h2 class="element-invisible">' . t('Pages') . '</h2>' . theme('item_list', [
       'items' => $items,
-      'attributes' => array('class' => array('pager')),
-    ));
+      'attributes' => ['class' => ['pager']],
+    ]);
   }
 
   // Single page of contents, no pager needed.
@@ -303,7 +303,7 @@ function theme_pager_first($variables) {
 
   // If we are anywhere but the first page
   if ($pager_page_array[$element] > 0) {
-    $output = theme('pager_link', array('text' => $text, 'page_new' => pager_load_array(0, $element, $pager_page_array), 'element' => $element, 'parameters' => $parameters));
+    $output = theme('pager_link', ['text' => $text, 'page_new' => pager_load_array(0, $element, $pager_page_array), 'element' => $element, 'parameters' => $parameters]);
   }
 
   return $output;
@@ -337,11 +337,11 @@ function theme_pager_previous($variables) {
 
     // If the previous page is the first page, mark the link as such.
     if ($page_new[$element] == 0) {
-      $output = theme('pager_first', array('text' => $text, 'element' => $element, 'parameters' => $parameters));
+      $output = theme('pager_first', ['text' => $text, 'element' => $element, 'parameters' => $parameters]);
     }
     // The previous page is not the first page.
     else {
-      $output = theme('pager_link', array('text' => $text, 'page_new' => $page_new, 'element' => $element, 'parameters' => $parameters));
+      $output = theme('pager_link', ['text' => $text, 'page_new' => $page_new, 'element' => $element, 'parameters' => $parameters]);
     }
   }
 
@@ -375,11 +375,11 @@ function theme_pager_next($variables) {
     $page_new = pager_load_array($pager_page_array[$element] + $interval, $element, $pager_page_array);
     // If the next page is the last page, mark the link as such.
     if ($page_new[$element] == ($pager_total[$element] - 1)) {
-      $output = theme('pager_last', array('text' => $text, 'element' => $element, 'parameters' => $parameters));
+      $output = theme('pager_last', ['text' => $text, 'element' => $element, 'parameters' => $parameters]);
     }
     // The next page is not the last page.
     else {
-      $output = theme('pager_link', array('text' => $text, 'page_new' => $page_new, 'element' => $element, 'parameters' => $parameters));
+      $output = theme('pager_link', ['text' => $text, 'page_new' => $page_new, 'element' => $element, 'parameters' => $parameters]);
     }
   }
 
@@ -408,7 +408,7 @@ function theme_pager_last($variables) {
 
   // If we are anywhere but the last page
   if ($pager_page_array[$element] < ($pager_total[$element] - 1)) {
-    $output = theme('pager_link', array('text' => $text, 'page_new' => pager_load_array($pager_total[$element] - 1, $element, $pager_page_array), 'element' => $element, 'parameters' => $parameters));
+    $output = theme('pager_link', ['text' => $text, 'page_new' => pager_load_array($pager_total[$element] - 1, $element, $pager_page_array), 'element' => $element, 'parameters' => $parameters]);
   }
 
   return $output;
@@ -449,9 +449,9 @@ function theme_pager_link($variables) {
     $parameters['page'] = $new_page;
   }
 
-  $query = array();
+  $query = [];
   if (count($parameters)) {
-    $query = backdrop_get_query_parameters($parameters, array());
+    $query = backdrop_get_query_parameters($parameters, []);
   }
   if ($query_pager = pager_get_query_parameters()) {
     $query = array_merge($query, $query_pager);
@@ -461,18 +461,18 @@ function theme_pager_link($variables) {
   if (!isset($attributes['title'])) {
     static $titles = NULL;
     if (!isset($titles)) {
-      $titles = array(
+      $titles = [
         t('« first') => t('Go to first page'),
         t('‹ previous') => t('Go to previous page'),
         t('next ›') => t('Go to next page'),
         t('last »') => t('Go to last page'),
-      );
+      ];
     }
     if (isset($titles[$text])) {
       $attributes['title'] = $titles[$text];
     }
     elseif (is_numeric($text)) {
-      $attributes['title'] = t('Go to page @number', array('@number' => $text));
+      $attributes['title'] = t('Go to page @number', ['@number' => $text]);
     }
   }
 
@@ -481,7 +481,7 @@ function theme_pager_link($variables) {
   //   none of the pager links is active at any time - but it should still be
   //   possible to use l() here.
   // @see http://drupal.org/node/1410574
-  $attributes['href'] = url($_GET['q'], array('query' => $query));
+  $attributes['href'] = url($_GET['q'], ['query' => $query]);
   return '<a' . backdrop_attributes($attributes) . '>' . check_plain($text) . '</a>';
 }
 

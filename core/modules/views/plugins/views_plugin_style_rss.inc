@@ -12,7 +12,7 @@
 class views_plugin_style_rss extends views_plugin_style {
   function attach_to($display_id, $path, $title) {
     $display = $this->view->display[$display_id]->handler;
-    $url_options = array();
+    $url_options = [];
     $input = $this->view->get_exposed_input();
     if ($input) {
       $url_options['query'] = $input;
@@ -31,22 +31,22 @@ class views_plugin_style_rss extends views_plugin_style {
       }
 
       if ($this->options['icon']) {
-        $this->view->feed_icon .= theme('feed_icon', array('url' => $url, 'title' => $title));
+        $this->view->feed_icon .= theme('feed_icon', ['url' => $url, 'title' => $title]);
       }
-      backdrop_add_html_head_link(array(
+      backdrop_add_html_head_link([
         'rel' => 'alternate',
         'type' => 'application/rss+xml',
         'title' => $title,
         'href' => $url
-      ));
+      ]);
     }
   }
 
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['description'] = array('default' => '', 'translatable' => TRUE);
-    $options['icon'] = array('default' => TRUE, 'translatable' => TRUE);
+    $options['description'] = ['default' => '', 'translatable' => TRUE];
+    $options['icon'] = ['default' => TRUE, 'translatable' => TRUE];
 
     return $options;
   }
@@ -54,20 +54,20 @@ class views_plugin_style_rss extends views_plugin_style {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
-    $form['description'] = array(
+    $form['description'] = [
       '#type' => 'textfield',
       '#title' => t('RSS description'),
       '#default_value' => $this->options['description'],
       '#description' => t('This will appear in the RSS feed itself.'),
       '#maxlength' => 1024,
-    );
+    ];
 
-    $form['icon'] = array(
+    $form['icon'] = [
       '#type' => 'checkbox',
       '#title' => t('Add RSS icon to displays'),
       '#default_value' => $this->options['icon'],
       '#description' => t('Show an RSS icon on the displays to which this RSS feed is attached.'),
-    );
+    ];
   }
 
   /**
@@ -77,7 +77,7 @@ class views_plugin_style_rss extends views_plugin_style {
    *   An array that can be passed to format_xml_elements().
    */
   function get_channel_elements() {
-    return array();
+    return [];
   }
 
   /**
@@ -90,24 +90,24 @@ class views_plugin_style_rss extends views_plugin_style {
    *   An array that can be passed to format_xml_elements().
    */
   function get_channel_elements_atom_link() {
-    $url_options = array('absolute' => TRUE);
+    $url_options = ['absolute' => TRUE];
     $input = $this->view->get_exposed_input();
     if ($input) {
       $url_options['query'] = $input;
     }
     $url = url($this->view->get_url(), $url_options);
 
-    return array(
-      array(
-        'namespace' => array('xmlns:atom' => 'http://www.w3.org/2005/Atom'),
+    return [
+      [
+        'namespace' => ['xmlns:atom' => 'http://www.w3.org/2005/Atom'],
         'key' => 'atom:link',
-        'attributes' => array(
+        'attributes' => [
           'href' => $url,
           'rel' => 'self',
           'type' => 'application/rss+xml',
-        ),
-      ),
-    );
+        ],
+      ],
+    ];
   }
 
   /**
@@ -134,10 +134,10 @@ class views_plugin_style_rss extends views_plugin_style {
 
     // This will be filled in by the row plugin, and will be used later on in
     // the theme process.
-    $this->namespaces = array(
+    $this->namespaces = [
       'xmlns:dc' => 'http://purl.org/dc/elements/1.1/',
       'xmlns:atom' => 'http://www.w3.org/2005/Atom',
-    );
+    ];
 
     // Fetch any additional elements for the channel and merge in their
     // namespaces.
@@ -157,11 +157,11 @@ class views_plugin_style_rss extends views_plugin_style {
     }
 
     $output = theme($this->theme_functions(),
-      array(
+      [
         'view' => $this->view,
         'options' => $this->options,
         'rows' => $rows
-      ));
+      ]);
     unset($this->view->row_index);
     return $output;
   }

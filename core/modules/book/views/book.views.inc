@@ -14,88 +14,88 @@ function book_views_data() {
   // book table
 
   $data['book']['table']['group']  = t('Book');
-  $data['book']['table']['join'] = array(
-    'node' => array(
+  $data['book']['table']['join'] = [
+    'node' => [
       'left_field' => 'nid',
       'field' => 'nid',
-    ),
-  );
+    ],
+  ];
 
-  $data['book']['bid'] = array(
+  $data['book']['bid'] = [
     'title' => t('Top level book'),
     'help' => t('The book the node is in.'),
-    'relationship' => array(
+    'relationship' => [
       'base' => 'node',
       'handler' => 'views_handler_relationship',
       'label' => t('Book'),
-    ),
+    ],
     // There is no argument here; if you need an argument, add the relationship
     // and use the node: nid argument.
-  );
+  ];
 
   // ----------------------------------------------------------------------
   // menu_links table -- this is aliased so we can get just book relations
 
   // Book hierarchy and weight data are now in {menu_links}.
   $data['book_menu_links']['table']['group'] = t('Book');
-  $data['book_menu_links']['table']['join'] = array(
-    'node' => array(
+  $data['book_menu_links']['table']['join'] = [
+    'node' => [
       'table' => 'menu_links',
       'left_table' => 'book',
       'left_field' => 'mlid',
       'field' => 'mlid',
-    ),
-  );
+    ],
+  ];
 
-  $data['book_menu_links']['mlid'] = array(
+  $data['book_menu_links']['mlid'] = [
     'title' => t('Menu link ID'),
     'help' => t('The menu link ID of the book page.'),
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_numeric',
       'click sortable' => TRUE,
-    ),
-    'sort' => array(
+    ],
+    'sort' => [
       'handler' => 'views_handler_sort',
-    ),
-  );
+    ],
+  ];
 
-  $data['book_menu_links']['weight'] = array(
+  $data['book_menu_links']['weight'] = [
     'title' => t('Weight'),
     'help' => t('The weight of the book page.'),
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_numeric',
       'click sortable' => TRUE,
-    ),
-    'sort' => array(
+    ],
+    'sort' => [
       'handler' => 'views_handler_sort',
-    ),
-  );
+    ],
+  ];
 
-  $data['book_menu_links']['depth'] = array(
+  $data['book_menu_links']['depth'] = [
     'title' => t('Depth'),
     'help' => t('The depth of the book page in the hierarchy; top level books have a depth of 1.'),
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_numeric',
       'click sortable' => TRUE,
-    ),
-    'sort' => array(
+    ],
+    'sort' => [
       'handler' => 'views_handler_sort',
-    ),
-    'filter' => array(
+    ],
+    'filter' => [
       'handler' => 'views_handler_filter_numeric',
-    ),
-    'argument' => array(
+    ],
+    'argument' => [
       'handler' => 'views_handler_argument',
-    ),
-  );
+    ],
+  ];
 
-  $data['book_menu_links']['p'] = array(
+  $data['book_menu_links']['p'] = [
     'title' => t('Hierarchy'),
     'help' => t('The order of pages in the book hierarchy.'),
-    'sort' => array(
+    'sort' => [
       'handler' => 'views_handler_sort_menu_hierarchy',
-    ),
-  );
+    ],
+  ];
 
   // ----------------------------------------------------------------------
   // book_parent table -- this is an alias of the book table which
@@ -103,25 +103,25 @@ function book_views_data() {
 
   // The {book} record for the parent node.
   $data['book_parent']['table']['group'] = t('Book');
-  $data['book_parent']['table']['join'] = array(
-    'node' => array(
+  $data['book_parent']['table']['join'] = [
+    'node' => [
       'table' => 'book',
       'left_table' => 'book_menu_links',
       'left_field' => 'plid',
       'field' => 'mlid',
-    ),
-  );
+    ],
+  ];
 
-  $data['book_parent']['nid'] = array(
+  $data['book_parent']['nid'] = [
     'title' => t('Parent'),
     'help' => t('The parent book node.'),
-    'relationship' => array(
+    'relationship' => [
       'base' => 'node',
       'base field' => 'nid',
       'handler' => 'views_handler_relationship',
       'label' => t('Book parent'),
-    ),
-  );
+    ],
+  ];
 
   return $data;
 }
@@ -130,13 +130,13 @@ function book_views_data() {
  * Implements hook_views_plugins().
  */
 function book_views_plugins() {
- return array(
+ return [
    'module' => 'views',
-   'argument default' => array(
-     'book_root' => array(
+   'argument default' => [
+     'book_root' => [
        'title' => t('Book root from current node'),
        'handler' => 'views_plugin_argument_default_book_root'
-     ),
-   ),
- );
+     ],
+   ],
+ ];
 }

@@ -19,7 +19,7 @@ class views_plugin_cache extends views_plugin {
   /**
    * Contains all data that should be written/read from cache.
    */
-  var $storage = array();
+  var $storage = [];
 
   /**
    * What bin to store data in.
@@ -88,11 +88,11 @@ class views_plugin_cache extends views_plugin {
         // Not supported currently, but this is certainly where we'd put it.
         break;
       case 'results':
-        $data = array(
+        $data = [
           'result' => $this->view->result,
           'total_rows' => isset($this->view->total_rows) ? $this->view->total_rows : 0,
           'current_page' => $this->view->get_current_page(),
-        );
+        ];
         cache($this->bin)->set($this->get_results_key(), $data, $this->cache_set_expire($type));
         break;
       case 'output':
@@ -199,19 +199,19 @@ class views_plugin_cache extends views_plugin {
 
     // Slightly less simple for CSS:
     $css = backdrop_add_css();
-    $css_start = isset($this->storage['css']) ? $this->storage['css'] : array();
+    $css_start = isset($this->storage['css']) ? $this->storage['css'] : [];
     $this->storage['css'] = $this->assetDiff($css, $css_start, $array_mapping_func);
 
     // Get javascript after/before views renders.
     $js = backdrop_add_js();
-    $js_start = isset($this->storage['js']) ? $this->storage['js'] : array();
+    $js_start = isset($this->storage['js']) ? $this->storage['js'] : [];
     // If there are any differences between the old and the new javascript then
     // store them to be added later.
     $this->storage['js'] = $this->assetDiff($js, $js_start, $array_mapping_func);
 
     // Special case the settings key and get the difference of the data.
-    $settings = isset($js['settings']['data']) ? $js['settings']['data'] : array();
-    $settings_start = isset($js_start['settings']['data']) ? $js_start['settings']['data'] : array();
+    $settings = isset($js['settings']['data']) ? $js['settings']['data'] : [];
+    $settings_start = isset($js_start['settings']['data']) ? $js_start['settings']['data'] : [];
     $this->storage['js']['settings'] = $array_mapping_func($settings, $settings_start);
 
     // Get difference of HTTP headers.
@@ -285,8 +285,8 @@ class views_plugin_cache extends views_plugin {
 
   public function get_results_key() {
     if (!isset($this->_results_key)) {
-      $key_data = array();
-      foreach (array('exposed_info', 'page', 'sort', 'order', 'items_per_page', 'offset') as $key) {
+      $key_data = [];
+      foreach (['exposed_info', 'page', 'sort', 'order', 'items_per_page', 'offset'] as $key) {
         if (isset($_GET[$key])) {
           $key_data[$key] = $_GET[$key];
         }
@@ -300,10 +300,10 @@ class views_plugin_cache extends views_plugin {
 
   public function get_output_key() {
     if (!isset($this->_output_key)) {
-      $key_data = array(
+      $key_data = [
         'result' => $this->view->result,
         'theme' => $GLOBALS['theme'],
-      );
+      ];
       $this->_output_key = $this->view->name . ':' . $this->display->id . ':output:' . $this->get_cache_key($key_data);
     }
 
@@ -319,21 +319,21 @@ class views_plugin_cache extends views_plugin {
    *
    * @return string
    */
-  public function get_cache_key($key_data = array()) {
+  public function get_cache_key($key_data = []) {
     global $user;
 
-    $key_data += array(
+    $key_data += [
       'roles' => array_keys($user->roles),
       'super-user' => $user->uid == 1, // Special caching for super user.
       'language' => $GLOBALS['language']->langcode,
       'language_content' => $GLOBALS['language_content']->langcode,
       'base_url' => $GLOBALS['base_url'],
       'display_options' => $this->display->display_options,
-    );
+    ];
 
     if (empty($key_data['build_info'])) {
       $build_info = $this->view->build_info;
-      foreach (array('query', 'count_query') as $index) {
+      foreach (['query', 'count_query'] as $index) {
         // If the default query back-end is used generate SQL query strings from
         // the query objects.
         if ($build_info[$index] instanceof SelectQueryInterface) {
@@ -346,10 +346,10 @@ class views_plugin_cache extends views_plugin {
             $query->preExecute();
           }
 
-          $key_data['build_info'][$index] = array(
+          $key_data['build_info'][$index] = [
             'sql' => (string) $query,
             'arguments' => $query->getArguments(),
-          );
+          ];
         }
       }
     }

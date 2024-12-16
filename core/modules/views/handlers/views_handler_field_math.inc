@@ -16,21 +16,21 @@
 class views_handler_field_math extends views_handler_field_numeric {
   function option_definition() {
     $options = parent::option_definition();
-    $options['expression'] = array('default' => '');
+    $options['expression'] = ['default' => ''];
 
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
-    $form['expression'] = array(
+    $form['expression'] = [
       '#type' => 'textarea',
       '#title' => t('Expression'),
       '#description' => t("Enter mathematical expressions such as <code>2 + 2</code> or <code>sqrt(5)</code>. You may assign variables and create mathematical functions and evaluate them. Use the <code>;</code> to separate these. For example: <code>f(x) = x + 2; f(2)</code>. The result of the mathematical expression of the previous row can be accessed by using the <code>[expression]</code> token itself."),
       '#default_value' => $this->options['expression'],
-    );
+    ];
 
     // Create a place for the help
-    $form['expression_help'] = array();
+    $form['expression_help'] = [];
     parent::options_form($form, $form_state);
 
     // Then move the existing help:
@@ -41,7 +41,7 @@ class views_handler_field_math extends views_handler_field_numeric {
 
   function render($values) {
     include_once BACKDROP_ROOT . '/core/includes/evalmath.inc';
-    $tokens = array_map('floatval', $this->get_render_tokens(array()));
+    $tokens = array_map('floatval', $this->get_render_tokens([]));
     $value = strtr($this->options['expression'], $tokens);
     $expressions = explode(';', $value);
     $math = new EvalMath;

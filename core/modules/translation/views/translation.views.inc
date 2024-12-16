@@ -14,48 +14,48 @@
 function translation_views_data_alter(&$data) {
 
   // Joins
-  $data['node']['table']['join']['node'] = array(
+  $data['node']['table']['join']['node'] = [
     'left_field' => 'tnid',
     'field' => 'tnid',
-  );
+  ];
 
   // The translation ID (nid of the "source" translation)
-  $data['node']['tnid'] = array(
+  $data['node']['tnid'] = [
     'group' => t('Content translation'),
     'title' => t('Translation set node ID'),
     'help' => t('The ID of the translation set the content belongs to.'),
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_node',
       'click sortable' => TRUE,
-    ),
-    'filter' => array(
+    ],
+    'filter' => [
       'handler' => 'views_handler_filter_numeric',
-    ),
-    'argument' => array(
+    ],
+    'argument' => [
       'handler' => 'views_handler_argument_node_tnid',
       'name field' => 'title', // the field to display in the summary.
       'numeric' => TRUE,
       'validate type' => 'tnid',
-    ),
-    'sort' => array(
+    ],
+    'sort' => [
       'handler' => 'views_handler_sort',
-    ),
-    'relationship' => array(
+    ],
+    'relationship' => [
       'title' => t('Source translation'),
       'help' => t('The source that this content was translated from.'),
       'base' => 'node',
       'base field' => 'nid',
       'handler' => 'views_handler_relationship',
       'label' => t('Source translation'),
-    ),
-  );
+    ],
+  ];
 
   // All translations.
-  $data['node']['translation'] = array(
+  $data['node']['translation'] = [
     'group' => t('Content translation'),
     'title' => t('Translations'),
     'help' => t('Versions of content in different languages.'),
-    'relationship' => array(
+    'relationship' => [
       'title' => t('Translations'),
       'help' => t('Versions of content in different languages.'),
       'base' => 'node',
@@ -64,57 +64,57 @@ function translation_views_data_alter(&$data) {
       'relationship field' => 'tnid',
       'handler' => 'views_handler_relationship_translation',
       'label' => t('Translations'),
-    ),
-  );
+    ],
+  ];
 
   // The source translation.
-  $data['node']['source_translation'] = array(
+  $data['node']['source_translation'] = [
     'group' => t('Content translation'),
     'title' => t('Source translation'),
     'help' => t('Content that is either untranslated or is the original version of a translation set.'),
-    'filter' => array(
+    'filter' => [
       'handler' => 'views_handler_filter_node_tnid',
-    ),
-  );
+    ],
+  ];
 
   // Child translation.
-  $data['node']['child_translation'] = array(
+  $data['node']['child_translation'] = [
     'group' => t('Node translation'),
     'title' => t('Child translation'),
     'help' => t('Content that is a translation of a source translation.'),
-    'filter' => array(
+    'filter' => [
       'handler' => 'views_handler_filter_node_tnid_child',
-    ),
-  );
+    ],
+  ];
 
   // Translation status
-  $data['node']['translate'] = array(
+  $data['node']['translate'] = [
     'group' => t('Content translation'),
     'title' => t('Translation status'),
     'help' => t('The translation status of the content - whether or not the translation needs to be updated.'),
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_boolean',
       'click sortable' => TRUE,
-    ),
-    'filter' => array(
+    ],
+    'filter' => [
       'handler' => 'views_handler_filter_boolean_operator',
       'label' => t('Outdated'),
       'type' => 'yes-no',
-    ),
-    'sort' => array(
+    ],
+    'sort' => [
       'handler' => 'views_handler_sort',
-    ),
-  );
+    ],
+  ];
 
   // Translate node link.
-  $data['node']['translate_node'] = array(
+  $data['node']['translate_node'] = [
     'group' => t('Content translation'),
     'title' => t('Translate link'),
     'help' => t('Provide a simple link to translate the node.'),
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_node_link_translate',
-    ),
-  );
+    ],
+  ];
 
 
 }

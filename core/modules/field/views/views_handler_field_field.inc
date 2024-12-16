@@ -14,7 +14,7 @@ function _field_view_formatter_options($field_type = NULL) {
 
   if (!isset($options)) {
     $field_types = field_info_field_types();
-    $options = array();
+    $options = [];
     foreach (field_info_formatter_types() as $name => $formatter) {
       foreach ($formatter['field types'] as $formatter_field_type) {
         // Check that the field type exists.
@@ -26,7 +26,7 @@ function _field_view_formatter_options($field_type = NULL) {
   }
 
   if ($field_type) {
-    return !empty($options[$field_type]) ? $options[$field_type] : array();
+    return !empty($options[$field_type]) ? $options[$field_type] : [];
   }
   return $options;
 }
@@ -42,14 +42,14 @@ class views_handler_field_field extends views_handler_field {
    *
    * @var array
    */
-  public $items = array();
+  public $items = [];
 
   /**
    * Store the field information.
    *
    * @var array
    */
-  public $field_info = array();
+  public $field_info = [];
 
 
   /**
@@ -167,14 +167,14 @@ class views_handler_field_field extends views_handler_field {
   function query($use_groupby = FALSE) {
     $this->get_base_table();
 
-    $params = array();
+    $params = [];
     if ($use_groupby) {
       // When grouping on a "field API" field (whose "real_field" is set to
       // entity_id), retrieve the minimum entity_id to have a valid entity_id to
       // pass to field_view_field().
-      $params = array(
+      $params = [
         'function' => 'min',
-      );
+      ];
 
       $this->ensure_my_table();
     }
@@ -215,16 +215,16 @@ class views_handler_field_field extends views_handler_field {
 
     if ($use_groupby) {
       // Add the fields that we're actually grouping on.
-      $options = array();
+      $options = [];
 
       if ($this->options['group_column'] != 'entity_id') {
-        $options = array($this->options['group_column'] => $this->options['group_column']);
+        $options = [$this->options['group_column'] => $this->options['group_column']];
       }
 
-      $options += is_array($this->options['group_columns']) ? $this->options['group_columns'] : array();
+      $options += is_array($this->options['group_columns']) ? $this->options['group_columns'] : [];
 
 
-      $fields = array();
+      $fields = [];
       $rkey = $this->definition['is revision'] ? 'FIELD_LOAD_REVISION' : 'FIELD_LOAD_CURRENT';
       // Go through the list and determine the actual column name from field api.
       foreach ($options as $column) {
@@ -252,11 +252,11 @@ class views_handler_field_field extends views_handler_field {
         // @see this::field_language()
         global $language_content;
         $default_language = language_default();
-        $language = str_replace(array('***CURRENT_LANGUAGE***', '***DEFAULT_LANGUAGE***'),
-                                array($language_content->langcode, $default_language->langcode),
+        $language = str_replace(['***CURRENT_LANGUAGE***', '***DEFAULT_LANGUAGE***'],
+                                [$language_content->langcode, $default_language->langcode],
                                 $this->view->display_handler->options['field_language']);
         $placeholder = $this->placeholder();
-        $language_fallback_candidates = array($language);
+        $language_fallback_candidates = [$language];
         if (config_get('locale.settings', 'field_language_fallback')) {
           require_once BACKDROP_ROOT . '/core/includes/language.inc';
           $language_fallback_candidates = array_merge($language_fallback_candidates, language_fallback_get_candidates());
@@ -264,7 +264,7 @@ class views_handler_field_field extends views_handler_field {
         else {
           $language_fallback_candidates[] = LANGUAGE_NONE;
         }
-        $this->query->add_where_expression(0, "$column IN($placeholder) OR $column IS NULL", array($placeholder => $language_fallback_candidates));
+        $this->query->add_where_expression(0, "$column IN($placeholder) OR $column IS NULL", [$placeholder => $language_fallback_candidates]);
       }
     }
 
@@ -275,7 +275,7 @@ class views_handler_field_field extends views_handler_field {
       return;
     }
 
-    $this->add_additional_fields(array('revision_id'));
+    $this->add_additional_fields(['revision_id']);
   }
 
   /**
@@ -345,55 +345,55 @@ class views_handler_field_field extends views_handler_field {
     }
 
     // If the field has a "value" column, we probably need that one.
-    $options['click_sort_column'] = array(
+    $options['click_sort_column'] = [
       'default' => $default_column,
-    );
-    $options['type'] = array(
+    ];
+    $options['type'] = [
       'default' => $field_type['default_formatter'],
-    );
-    $options['settings'] = array(
-      'default' => array(),
-    );
-    $options['group_column'] = array(
+    ];
+    $options['settings'] = [
+      'default' => [],
+    ];
+    $options['group_column'] = [
       'default' => $default_column,
-    );
-    $options['group_columns'] = array(
-      'default' => array(),
-    );
+    ];
+    $options['group_columns'] = [
+      'default' => [],
+    ];
 
     // Options used for multiple value fields.
-    $options['group_rows'] = array(
+    $options['group_rows'] = [
       'default' => TRUE,
       'bool' => TRUE,
-    );
+    ];
     // If we know the exact number of allowed values, then that can be
     // the default. Otherwise, default to 'all'.
-    $options['delta_limit'] = array(
+    $options['delta_limit'] = [
       'default' => ($field['cardinality'] > 1) ? $field['cardinality'] : 'all',
-    );
-    $options['delta_offset'] = array(
+    ];
+    $options['delta_offset'] = [
       'default' => 0,
-    );
-    $options['delta_reversed'] = array(
+    ];
+    $options['delta_reversed'] = [
       'default' => FALSE,
       'bool' => TRUE,
-    );
-    $options['delta_first_last'] = array(
+    ];
+    $options['delta_first_last'] = [
       'default' => FALSE,
       'bool' => TRUE,
-    );
+    ];
 
-    $options['multi_type'] = array(
+    $options['multi_type'] = [
       'default' => 'separator'
-    );
-    $options['separator'] = array(
+    ];
+    $options['separator'] = [
       'default' => ', '
-    );
+    ];
 
-    $options['field_api_classes'] = array(
+    $options['field_api_classes'] = [
       'default' => FALSE,
       'bool' => TRUE,
-    );
+    ];
 
     return $options;
   }
@@ -412,42 +412,42 @@ class views_handler_field_field extends views_handler_field {
 
     // No need to ask the user anything if the field has only one column.
     if (count($field['columns']) == 1) {
-      $form['click_sort_column'] = array(
+      $form['click_sort_column'] = [
         '#type' => 'value',
         '#value' => isset($column_names[0]) ? $column_names[0] : '',
-      );
+      ];
     }
     else {
-      $form['click_sort_column'] = array(
+      $form['click_sort_column'] = [
         '#type' => 'select',
         '#title' => t('Column used for click sorting'),
         '#options' => backdrop_map_assoc($column_names),
         '#default_value' => $this->options['click_sort_column'],
         '#description' => t('Used by Style: Table to determine the actual column to click sort the field on. The default is usually fine.'),
         '#fieldset' => 'more',
-      );
+      ];
     }
 
-    $form['type'] = array(
+    $form['type'] = [
       '#type' => 'select',
       '#title' => t('Formatter'),
       '#options' => $formatters,
       '#default_value' => $this->options['type'],
-      '#ajax' => array(
+      '#ajax' => [
         'path' => views_ui_build_form_path($form_state),
-      ),
-      '#submit' => array('views_ui_config_item_form_submit_temporary'),
+      ],
+      '#submit' => ['views_ui_config_item_form_submit_temporary'],
       '#executes_submit_callback' => TRUE,
-    );
+    ];
 
-    $form['field_api_classes'] = array(
+    $form['field_api_classes'] = [
       '#title' => t('Use field template'),
       '#type' => 'checkbox',
       '#default_value' => $this->options['field_api_classes'],
       '#description' => t('If checked, field api classes will be added using field.tpl.php (or equivalent). This is not recommended unless your CSS depends upon these classes. If not checked, template will not be used.'),
       '#fieldset' => 'style_settings',
       '#weight' => 20,
-    );
+    ];
 
     if ($this->multiple) {
       $form['field_api_classes']['#description'] .= ' ' . t('Checking this option will cause the group Display Type and Separator values to be ignored.');
@@ -462,7 +462,7 @@ class views_handler_field_field extends views_handler_field {
     // Provide an instance array for hook_field_formatter_settings_form().
     $field = field_read_field($this->definition['field_name']);
     $field_type = field_info_field_types($field['type']);
-    $this->instance = array(
+    $this->instance = [
       // Build a fake entity type and bundle.
       'field_name' => $this->definition['field_name'],
       'entity_type' => 'views',
@@ -470,18 +470,18 @@ class views_handler_field_field extends views_handler_field {
 
       // Use the default field settings for settings and widget.
       'settings' => field_info_instance_settings($field['type']),
-      'widget' => array(
+      'widget' => [
         'type' => $field_type['default_widget'],
-        'settings' => array(),
-      ),
+        'settings' => [],
+      ],
 
       // Build a dummy display mode.
-      'display' => array(
-        '_custom' => array(
+      'display' => [
+        '_custom' => [
           'type' => $formatter,
           'settings' => $settings,
-        ),
-      ),
+        ],
+      ],
 
       // Set the other fields to their default values.
       // @see _field_write_instance().
@@ -489,19 +489,19 @@ class views_handler_field_field extends views_handler_field {
       'label' => $field['field_name'],
       'description' => '',
       'deleted' => 0,
-    );
+    ];
 
     // Store the settings in a '_custom' display mode.
-    $this->instance['display']['_custom'] = array(
+    $this->instance['display']['_custom'] = [
       'type' => $format,
       'settings' => $settings,
-    );
+    ];
 
     // Get the settings form.
-    $settings_form = array(
+    $settings_form = [
       '#type' => 'value',
-      '#value' => array(),
-    );
+      '#value' => [],
+    ];
     $function = $formatter['module'] . '_field_formatter_settings_form';
     if (function_exists($function)) {
       $settings_form = $function($field, $this->instance, '_custom', $form, $form_state);
@@ -515,21 +515,21 @@ class views_handler_field_field extends views_handler_field {
   function multiple_options_form(&$form, &$form_state) {
     $field = $this->field_info;
 
-    $form['multiple_field_settings'] = array(
+    $form['multiple_field_settings'] = [
       '#type' => 'fieldset',
       '#title' => t('Multiple field settings'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
       '#weight' => 5,
-    );
+    ];
 
-    $form['group_rows'] = array(
+    $form['group_rows'] = [
       '#title' => t('Display all values in the same row'),
       '#type' => 'checkbox',
       '#default_value' => $this->options['group_rows'],
       '#description' => t('If checked, multiple values for this field will be shown in the same row. If not checked, each value in this field will create a new row. If using group by, please make sure to group by "Entity ID" for this setting to have any effect.'),
       '#fieldset' => 'multiple_field_settings',
-    );
+    ];
 
     // Make the string translatable by keeping it as a whole rather than
     // translating prefix and suffix separately.
@@ -545,37 +545,37 @@ class views_handler_field_field extends views_handler_field {
       $options = backdrop_map_assoc(range(1, $field['cardinality']));
       $size = 1;
     }
-    $form['multi_type'] = array(
+    $form['multi_type'] = [
       '#type' => 'radios',
       '#title' => t('Display type'),
-      '#options' => array(
+      '#options' => [
         'ul' => t('Unordered list'),
         'ol' => t('Ordered list'),
         'separator' => t('Simple separator'),
-      ),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[group_rows]"]' => array('checked' => TRUE),
-        ),
-      ),
+      ],
+      '#states' => [
+        'visible' => [
+          ':input[name="options[group_rows]"]' => ['checked' => TRUE],
+        ],
+      ],
       '#default_value' => $this->options['multi_type'],
       '#fieldset' => 'multiple_field_settings',
-    );
+    ];
 
-    $form['separator'] = array(
+    $form['separator'] = [
       '#type' => 'textfield',
       '#title' => t('Separator'),
       '#default_value' => $this->options['separator'],
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[group_rows]"]' => array('checked' => TRUE),
-          ':input[name="options[multi_type]"]' => array('value' => 'separator'),
-        ),
-      ),
+      '#states' => [
+        'visible' => [
+          ':input[name="options[group_rows]"]' => ['checked' => TRUE],
+          ':input[name="options[multi_type]"]' => ['value' => 'separator'],
+        ],
+      ],
       '#fieldset' => 'multiple_field_settings',
-    );
+    ];
 
-    $form['delta_limit'] = array(
+    $form['delta_limit'] = [
       '#type' => $type,
       '#size' => $size,
       '#field_prefix' => $prefix,
@@ -583,54 +583,54 @@ class views_handler_field_field extends views_handler_field {
       '#options' => $options,
       '#default_value' => $this->options['delta_limit'],
       '#prefix' => '<div class="container-inline">',
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[group_rows]"]' => array('checked' => TRUE),
-        ),
-      ),
+      '#states' => [
+        'visible' => [
+          ':input[name="options[group_rows]"]' => ['checked' => TRUE],
+        ],
+      ],
       '#fieldset' => 'multiple_field_settings',
-    );
+    ];
 
     list($prefix, $suffix) = explode('@count', t('starting from @count'));
-    $form['delta_offset'] = array(
+    $form['delta_offset'] = [
       '#type' => 'textfield',
       '#size' => 5,
       '#field_prefix' => $prefix,
       '#field_suffix' => $suffix,
       '#default_value' => $this->options['delta_offset'],
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[group_rows]"]' => array('checked' => TRUE),
-        ),
-      ),
+      '#states' => [
+        'visible' => [
+          ':input[name="options[group_rows]"]' => ['checked' => TRUE],
+        ],
+      ],
       '#description' => t('(first item is 0)'),
       '#fieldset' => 'multiple_field_settings',
-    );
-    $form['delta_reversed'] = array(
+    ];
+    $form['delta_reversed'] = [
       '#title' => t('Reversed'),
       '#type' => 'checkbox',
       '#default_value' => $this->options['delta_reversed'],
       '#suffix' => $suffix,
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[group_rows]"]' => array('checked' => TRUE),
-        ),
-      ),
+      '#states' => [
+        'visible' => [
+          ':input[name="options[group_rows]"]' => ['checked' => TRUE],
+        ],
+      ],
       '#description' => t('(start from last values)'),
       '#fieldset' => 'multiple_field_settings',
-    );
-    $form['delta_first_last'] = array(
+    ];
+    $form['delta_first_last'] = [
       '#title' => t('First and last only'),
       '#type' => 'checkbox',
       '#default_value' => $this->options['delta_first_last'],
       '#suffix' => '</div>',
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[group_rows]"]' => array('checked' => TRUE),
-        ),
-      ),
+      '#states' => [
+        'visible' => [
+          ':input[name="options[group_rows]"]' => ['checked' => TRUE],
+        ],
+      ],
       '#fieldset' => 'multiple_field_settings',
-    );
+    ];
   }
 
   /**
@@ -640,28 +640,28 @@ class views_handler_field_field extends views_handler_field {
     parent::groupby_form($form, $form_state);
     // With "field API" fields, the column target of the grouping function
     // and any additional grouping columns must be specified.
-    $group_columns = array(
+    $group_columns = [
       'entity_id' => t('Entity ID'),
-    ) + backdrop_map_assoc(array_keys($this->field_info['columns']), 'ucfirst');
+    ] + backdrop_map_assoc(array_keys($this->field_info['columns']), 'ucfirst');
 
-    $form['group_column'] = array(
+    $form['group_column'] = [
       '#type' => 'select',
       '#title' => t('Group column'),
       '#default_value' => $this->options['group_column'],
       '#description' => t('Select the column of this field to apply the grouping function selected above.'),
       '#options' => $group_columns,
-    );
+    ];
 
-    $options = backdrop_map_assoc(array('bundle', 'language', 'entity_type'), 'ucfirst');
+    $options = backdrop_map_assoc(['bundle', 'language', 'entity_type'], 'ucfirst');
 
     // Add on defined fields, noting that they're prefixed with the field name.
-    $form['group_columns'] = array(
+    $form['group_columns'] = [
       '#type' => 'checkboxes',
       '#title' => t('Group columns (additional)'),
       '#default_value' => $this->options['group_columns'],
       '#description' => t('Select any additional columns of this field to include in the query and to group on.'),
       '#options' => $options + $group_columns,
-    );
+    ];
   }
 
   function groupby_form_submit(&$form, &$form_state) {
@@ -679,8 +679,8 @@ class views_handler_field_field extends views_handler_field {
   function post_execute(&$values) {
     if (!empty($values)) {
       // Divide the entity ids by entity type, so they can be loaded in bulk.
-      $entities_by_type = array();
-      $revisions_by_type = array();
+      $entities_by_type = [];
+      $revisions_by_type = [];
       foreach ($values as $key => $object) {
         if (isset($this->aliases['entity_type']) && isset($object->{$this->aliases['entity_type']}) && isset($object->{$this->field_alias}) && !isset($values[$key]->_field_data[$this->field_alias])) {
           $entity_type = $object->{$this->aliases['entity_type']};
@@ -691,7 +691,7 @@ class views_handler_field_field extends views_handler_field {
           else {
             $revision_id = $object->{$this->field_alias};
             $entity_id = $object->{$this->aliases['entity_id']};
-            $entities_by_type[$entity_type][$key] = array($entity_id, $revision_id);
+            $entities_by_type[$entity_type][$key] = [$entity_id, $revision_id];
           }
         }
       }
@@ -706,11 +706,11 @@ class views_handler_field_field extends views_handler_field {
         else {
           // Revisions can't be loaded multiple, so we have to load them
           // one by one.
-          $entities = array();
-          $keys = array();
+          $entities = [];
+          $keys = [];
           foreach ($entity_ids as $key => $combined) {
             list($entity_id, $revision_id) = $combined;
-            $entity = entity_load($entity_type, array($entity_id), array($entity_info['entity keys']['revision'] => $revision_id));
+            $entity = entity_load($entity_type, [$entity_id], [$entity_info['entity keys']['revision'] => $revision_id]);
             if ($entity) {
               $entities[$revision_id] = array_shift($entity);
               $keys[$key] = $revision_id;
@@ -721,10 +721,10 @@ class views_handler_field_field extends views_handler_field {
         foreach ($keys as $key => $entity_id) {
           // If this is a revision, load the revision instead.
           if (isset($entities[$entity_id])) {
-            $values[$key]->_field_data[$this->field_alias] = array(
+            $values[$key]->_field_data[$this->field_alias] = [
               'entity_type' => $entity_type,
               'entity' => $entities[$entity_id],
-            );
+            ];
           }
         }
       }
@@ -753,11 +753,11 @@ class views_handler_field_field extends views_handler_field {
       }
       else {
         return theme('item_list',
-          array(
+          [
             'items' => $items,
             'title' => NULL,
             'type' => $this->options['multi_type']
-          ));
+          ]);
       }
     }
   }
@@ -768,7 +768,7 @@ class views_handler_field_field extends views_handler_field {
 
   function get_value($values, $field = NULL) {
     if (!isset($values->_field_data[$this->field_alias]['entity']) || !is_object($values->_field_data[$this->field_alias]['entity'])) {
-      return array();
+      return [];
     }
 
     // Go ahead and render and store in $this->items.
@@ -781,7 +781,7 @@ class views_handler_field_field extends views_handler_field {
     // so much we can hope to do.
     if (!empty($this->group_fields)) {
       // first, test to see if we have a base value.
-      $base_value = array();
+      $base_value = [];
       // Note: We would copy original values here, but it can cause problems.
       // For example, text fields store cached filtered values as
       // 'safe_value' which doesn't appear anywhere in the field definition
@@ -800,21 +800,21 @@ class views_handler_field_field extends views_handler_field {
       if ($data) {
         // Now, overwrite the original value with our aggregated value.
         // This overwrites it so there is always just one entry.
-        $entity->{$this->definition['field_name']}[$langcode] = array($base_value);
+        $entity->{$this->definition['field_name']}[$langcode] = [$base_value];
       }
       else {
-        $entity->{$this->definition['field_name']}[$langcode] = array();
+        $entity->{$this->definition['field_name']}[$langcode] = [];
       }
     }
 
     // The field we are trying to display doesn't exist on this entity.
     if (!isset($entity->{$this->definition['field_name']})) {
-      return array();
+      return [];
     }
 
     // We are supposed to show only certain deltas.
     if ($this->limit_values && !empty($entity->{$this->definition['field_name']})) {
-      $all_values = !empty($entity->{$this->definition['field_name']}[$langcode]) ? $entity->{$this->definition['field_name']}[$langcode] : array();
+      $all_values = !empty($entity->{$this->definition['field_name']}[$langcode]) ? $entity->{$this->definition['field_name']}[$langcode] : [];
       if ($this->options['delta_reversed']) {
         $all_values = array_reverse($all_values);
       }
@@ -845,7 +845,7 @@ class views_handler_field_field extends views_handler_field {
       // Determine if only the first and last values should be shown
       $delta_first_last = $this->options['delta_first_last'];
 
-      $new_values = array();
+      $new_values = [];
       for ($i = 0; $i < $delta_limit; $i++) {
         $new_delta = $offset + $i;
 
@@ -867,7 +867,7 @@ class views_handler_field_field extends views_handler_field {
       return $entity;
     }
     else {
-      return !empty($entity->{$this->definition['field_name']}[$langcode]) ? $entity->{$this->definition['field_name']}[$langcode] : array();
+      return !empty($entity->{$this->definition['field_name']}[$langcode]) ? $entity->{$this->definition['field_name']}[$langcode] : [];
     }
   }
 
@@ -879,10 +879,10 @@ class views_handler_field_field extends views_handler_field {
     // https://drupal.org/node/1161708 and https://drupal.org/node/1461536 for
     // more information.
     if (empty($values->_field_data[$this->field_alias]) || empty($values->_field_data[$this->field_alias]['entity']) || !isset($values->_field_data[$this->field_alias]['entity']->{$this->definition['field_name']})) {
-      return array();
+      return [];
     }
 
-    $display = array(
+    $display = [
       'type' => $this->options['type'],
       'settings' => $this->options['settings'],
       'label' => 'hidden',
@@ -890,23 +890,23 @@ class views_handler_field_field extends views_handler_field {
       'views_view' => $this->view,
       'views_field' => $this,
       'views_row_id' => $row_id,
-    );
+    ];
 
 
     $entity_type = $values->_field_data[$this->field_alias]['entity_type'];
     $entity = $this->get_value($values, 'entity');
     if (!$entity) {
-      return array();
+      return [];
     }
 
     $langcode = $this->field_language($entity_type, $entity);
     $render_array = field_view_field($entity_type, $entity, $this->definition['field_name'], $display, $langcode);
 
-    $items = array();
+    $items = [];
     if ($this->options['field_api_classes']) {
       // Make a copy.
       $array = $render_array;
-      return array(array('rendered' => backdrop_render($render_array)));
+      return [['rendered' => backdrop_render($render_array)]];
     }
 
     foreach (element_children($render_array) as $count) {
@@ -935,7 +935,7 @@ class views_handler_field_field extends views_handler_field {
   function document_self_tokens(&$tokens) {
     $field = $this->field_info;
     foreach ($field['columns'] as $id => $column) {
-      $tokens['[' . $this->options['id'] . '-' . $id . ']'] = t('Raw @column', array('@column' => $id));
+      $tokens['[' . $this->options['id'] . '-' . $id . ']'] = t('Raw @column', ['@column' => $id]);
     }
   }
 
@@ -970,8 +970,8 @@ class views_handler_field_field extends views_handler_field {
 
     if (field_is_translatable($entity_type, $this->field_info)) {
       $default_language = language_default();
-      $language = str_replace(array('***CURRENT_LANGUAGE***', '***DEFAULT_LANGUAGE***'),
-                              array($language_content->langcode, $default_language->langcode),
+      $language = str_replace(['***CURRENT_LANGUAGE***', '***DEFAULT_LANGUAGE***'],
+                              [$language_content->langcode, $default_language->langcode],
                               $this->view->display_handler->options['field_language']);
 
       // Give the Field Language API a chance to fallback to a different language

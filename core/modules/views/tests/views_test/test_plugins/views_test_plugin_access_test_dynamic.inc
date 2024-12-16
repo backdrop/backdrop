@@ -10,7 +10,7 @@
 class views_test_plugin_access_test_dynamic extends views_plugin_access {
   function option_definition() {
     $options = parent::option_definition();
-    $options['access'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['access'] = ['default' => FALSE, 'bool' => TRUE];
 
     return $options;
   }
@@ -20,6 +20,6 @@ class views_test_plugin_access_test_dynamic extends views_plugin_access {
   }
 
   function get_access_callback() {
-    return array('views_test_test_dynamic_access_callback', array(!empty($options['access']), 1, 2));
+    return ['views_test_test_dynamic_access_callback', [!empty($options['access']), 1, 2]];
   }
 }

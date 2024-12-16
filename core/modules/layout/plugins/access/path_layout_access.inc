@@ -7,12 +7,12 @@ class PathLayoutAccess extends LayoutAccess {
   /**
    * Constructor for a Layout access rule.
    */
-  function __construct($plugin_name, array $data = array()) {
+  function __construct($plugin_name, array $data = []) {
     parent::__construct($plugin_name, $data);
-    $this->settings += array(
+    $this->settings += [
       'visibility_setting' => 1,
       'paths' => '',
-    );
+    ];
   }
 
   /**
@@ -21,10 +21,10 @@ class PathLayoutAccess extends LayoutAccess {
   function summary() {
     $paths = explode("\n", $this->settings['paths']);
     if ($this->settings['visibility_setting']) {
-      return format_plural(count($paths), 'Current path is "@paths"', 'Current path is one of "@paths"', array('@paths' => implode(', ', $paths)));
+      return format_plural(count($paths), 'Current path is "@paths"', 'Current path is one of "@paths"', ['@paths' => implode(', ', $paths)]);
     }
     else {
-      return format_plural(count($paths), 'Current path is not "@paths"', 'Current path is not one of "@paths"', array('@paths' => implode(', ', $paths)));
+      return format_plural(count($paths), 'Current path is not "@paths"', 'Current path is not one of "@paths"', ['@paths' => implode(', ', $paths)]);
     }
   }
 
@@ -59,20 +59,20 @@ class PathLayoutAccess extends LayoutAccess {
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
 
-    $form['visibility_setting'] = array(
+    $form['visibility_setting'] = [
       '#type' => 'radios',
-      '#options' => array(
+      '#options' => [
         1 => t('Allow access on the following pages'),
         0 => t('Allow access on all pages except the following pages'),
-      ),
+      ],
       '#default_value' => $this->settings['visibility_setting'],
-    );
-    $form['paths'] = array(
+    ];
+    $form['paths'] = [
       '#type' => 'textarea',
       '#title' => t('Paths'),
       '#default_value' => $this->settings['paths'],
-      '#description' => t('Enter one path per line. The "*" character is a wildcard. Example paths are "node/1" for an individual piece of content or "node/*" for every piece of content. "@front" is the home page.', array('@front' => '<front>')),
+      '#description' => t('Enter one path per line. The "*" character is a wildcard. Example paths are "node/1" for an individual piece of content or "node/*" for every piece of content. "@front" is the home page.', ['@front' => '<front>']),
       '#required' => TRUE,
-    );
+    ];
   }
 }

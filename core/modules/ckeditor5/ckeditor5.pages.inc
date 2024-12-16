@@ -10,10 +10,10 @@
 function ckeditor5_image_upload($format) {
   $upload_settings = $format->editor_settings['image_upload'];
   if (!$upload_settings['status']) {
-    return array(
+    return [
       'uploaded' => 0,
-      'error' => array('message' => t('Image uploading is not enabled for this text format.')),
-    );
+      'error' => ['message' => t('Image uploading is not enabled for this text format.')],
+    ];
   }
 
   // Uploading through CKEditor sends POST data with the file in an "upload"
@@ -27,14 +27,14 @@ function ckeditor5_image_upload($format) {
   }
 
   $destination = $upload_settings['scheme'] . '://' .  $upload_settings['directory'];
-  $validators = array(
-    'file_validate_is_image' => array(),
-  );
+  $validators = [
+    'file_validate_is_image' => [],
+  ];
   if ($upload_settings['max_size']) {
-    $validators['file_validate_size'] = array(parse_size($upload_settings['max_size']));
+    $validators['file_validate_size'] = [parse_size($upload_settings['max_size'])];
   }
   if (!empty($upload_settings['max_dimensions']['width'])) {
-    $validators['file_validate_image_resolution'] = array($upload_settings['max_dimensions']['width'] . 'x' . $upload_settings['max_dimensions']['height']);
+    $validators['file_validate_image_resolution'] = [$upload_settings['max_dimensions']['width'] . 'x' . $upload_settings['max_dimensions']['height']];
   }
 
   file_prepare_directory($destination, FILE_CREATE_DIRECTORY);
@@ -45,19 +45,19 @@ function ckeditor5_image_upload($format) {
     $url = file_create_url($file->uri);
     $url = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
     $image_info = image_get_info($file->uri);
-    $response = array(
+    $response = [
       'uploaded' => 1,
       'fileName' => $file->filename,
       'url' => $url,
       'fileId' => $file->fid,
       'width' => $image_info['width'],
       'height' => $image_info['height'],
-    );
+    ];
   }
   else {
-    $response = array(
+    $response = [
       'uploaded' => 0,
-    );
+    ];
   }
 
   // file_save_upload() sets messages via backdrop_set_message(). Pull the

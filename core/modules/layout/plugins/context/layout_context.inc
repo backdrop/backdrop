@@ -57,7 +57,7 @@ abstract class LayoutContext extends LayoutHandler {
    *
    * @see EntityLayoutContext
    */
-  var $aliases = array();
+  var $aliases = [];
 
   /**
    * Indicator whether this context is required and cannot be removed.
@@ -134,7 +134,7 @@ abstract class LayoutContext extends LayoutHandler {
    *
    * @var array
    */
-  var $restrictions = array();
+  var $restrictions = [];
 
   /**
    * The storage state of the context.
@@ -170,10 +170,10 @@ abstract class LayoutContext extends LayoutHandler {
   /**
    * Constructor for LayoutContext objects.
    */
-  function __construct($plugin_name, $config = array()) {
+  function __construct($plugin_name, $config = []) {
     parent::__construct($plugin_name, $config);
     $this->plugin = $plugin_name;
-    $properties = array(
+    $properties = [
       'required',
       'locked',
       'position',
@@ -181,7 +181,7 @@ abstract class LayoutContext extends LayoutHandler {
       'label',
       'storage',
       'usageType',
-    );
+    ];
     foreach ($properties as $property) {
       if (isset($config[$property])) {
         $this->$property = $config[$property];
@@ -203,10 +203,10 @@ abstract class LayoutContext extends LayoutHandler {
     }
     $info = layout_get_context_info($this->plugin);
     if (isset($this->position)) {
-      $substitutions = array(
+      $substitutions = [
         '@label' => $info['title'], 
         '@position' => $this->position + 1,
-      );
+      ];
       return t('@label from the path (in position @position)', $substitutions);
     }
     else {
@@ -349,7 +349,7 @@ abstract class LayoutContext extends LayoutHandler {
    * Submit handler for the settings form for this context item.
    */
   function formSubmit($form, &$form_state) {
-    $excluded = backdrop_map_assoc(array('cancel', 'submit', 'form_build_id', 'form_token', 'form_id', 'op', 'add', 'context'));
+    $excluded = backdrop_map_assoc(['cancel', 'submit', 'form_build_id', 'form_token', 'form_id', 'op', 'add', 'context']);
     $settings = array_diff_key($form_state['values'], $excluded);
     $this->settings = array_merge($this->settings, $settings);
   }
@@ -371,7 +371,7 @@ class LayoutContextBroken extends LayoutContext {
   }
 
   function label() {
-    return t('Broken or missing context (@plugin)', array('@plugin' => $this->plugin));
+    return t('Broken or missing context (@plugin)', ['@plugin' => $this->plugin]);
   }
 }
 
@@ -409,6 +409,6 @@ class LayoutStringContext extends LayoutContext {
     $argument_parts = explode('/', $path);
     $argument_parts[$this->position] = '<strong>' . $argument_parts[$this->position] . '</strong>';
 
-    return t('Position @index:', array('@index' => $this->position + 1)) . ' ' . implode('/', $argument_parts);
+    return t('Position @index:', ['@index' => $this->position + 1]) . ' ' . implode('/', $argument_parts);
   }
 }

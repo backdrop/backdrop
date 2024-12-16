@@ -13,8 +13,8 @@ class redirect_handler_field_redirect_redirect extends views_handler_field {
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['text'] = array('default' => '', 'translatable' => TRUE);
-    $options['absolute'] = array('default' => FALSE);
+    $options['text'] = ['default' => '', 'translatable' => TRUE];
+    $options['absolute'] = ['default' => FALSE];
     $options['alter']['contains']['make_link']['default'] = TRUE;
     return $options;
   }
@@ -31,17 +31,17 @@ class redirect_handler_field_redirect_redirect extends views_handler_field {
     $form['alter']['absolute']['#access'] = FALSE;
     $form['alter']['path']['#access'] = FALSE;
 
-    $form['text'] = array(
+    $form['text'] = [
       '#type' => 'textfield',
       '#title' => t('Text to display'),
       '#default_value' => $this->options['text'],
-    );
-    $form['absolute'] = array(
+    ];
+    $form['absolute'] = [
       '#type' => 'checkbox',
       '#title' => t('Use absolute link (begins with "http://")'),
       '#default_value' => $this->options['absolute'],
       '#description' => t('If you want to use this as in "output this field as link" in "link path", you have to enabled this option.'),
-    );
+    ];
   }
 
   function query() {

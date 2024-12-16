@@ -14,21 +14,21 @@ class views_plugin_exposed_form_input_required extends views_plugin_exposed_form
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['text_input_required'] = array('default' => 'Select any filter and click on Apply to see results', 'translatable' => TRUE);
-    $options['text_input_required_format'] = array('default' => NULL);
+    $options['text_input_required'] = ['default' => 'Select any filter and click on Apply to see results', 'translatable' => TRUE];
+    $options['text_input_required_format'] = ['default' => NULL];
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
-    $form['text_input_required'] = array(
+    $form['text_input_required'] = [
       '#type' => 'text_format',
       '#title' => t('Text on demand'),
       '#description' => t('Text to display instead of results until the user selects and applies an exposed filter.'),
       '#default_value' => $this->options['text_input_required'],
       '#format' => isset($this->options['text_input_required_format']) ? $this->options['text_input_required_format'] : filter_default_format(),
-    );
+    ];
   }
 
   function options_submit(&$form, &$form_state) {
@@ -60,7 +60,7 @@ class views_plugin_exposed_form_input_required extends views_plugin_exposed_form
 
   function pre_render($values) {
     if (!$this->exposed_filter_applied()) {
-      $options = array(
+      $options = [
         'id' => 'area',
         'table' => 'views',
         'field' => 'area',
@@ -70,13 +70,13 @@ class views_plugin_exposed_form_input_required extends views_plugin_exposed_form
         'content' => $this->options['text_input_required'],
         'format' => $this->options['text_input_required_format'],
         'empty' => TRUE,
-      );
+      ];
       $handler = views_get_handler('views', 'area', 'area');
       $handler->init($this->view, $options);
-      $this->display->handler->handlers['empty'] = array(
+      $this->display->handler->handlers['empty'] = [
         'area' => $handler,
-      );
-      $this->display->handler->set_option('empty', array('text' => $options));
+      ];
+      $this->display->handler->set_option('empty', ['text' => $options]);
     }
   }
 
@@ -85,7 +85,7 @@ class views_plugin_exposed_form_input_required extends views_plugin_exposed_form
       // We return with no query; this will force the empty text.
       $this->view->built = TRUE;
       $this->view->executed = TRUE;
-      $this->view->result = array();
+      $this->view->result = [];
     }
     else {
       parent::query();

@@ -11,11 +11,11 @@ class UserCompareLayoutAccess extends LayoutAccess {
   /**
    * Constructor for a Layout access rule.
    */
-  public function __construct($plugin_name, array $data = array()) {
+  public function __construct($plugin_name, array $data = []) {
     parent::__construct($plugin_name, $data);
-    $this->settings += array(
+    $this->settings += [
       'equality' => 1,
-    );
+    ];
   }
 
   /**
@@ -27,13 +27,13 @@ class UserCompareLayoutAccess extends LayoutAccess {
       return t('Compares two user accounts');
     }
 
-    $labels = array();
+    $labels = [];
     foreach ($this->settings['contexts'] as $key => $source) {
       if ($source == 'current_user') {
         $labels[$key] = t('The logged-in user account');
       }
       elseif (is_numeric($source)) {
-        $substitutions = array('@position' => $source + 1);
+        $substitutions = ['@position' => $source + 1];
         $labels[$key] = t('The user account from the path (in position @position)', $substitutions);
       }
       else {
@@ -41,7 +41,7 @@ class UserCompareLayoutAccess extends LayoutAccess {
       }
     }
 
-    $substitutions = array('@user' => $labels['user2']);
+    $substitutions = ['@user' => $labels['user2']];
     if (!empty($this->settings['equality'])) {
       return t('@user is the same as the Logged-in user account.', $substitutions);
     }
@@ -72,27 +72,27 @@ class UserCompareLayoutAccess extends LayoutAccess {
    */
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
-    $form['help_text'] = array(
+    $form['help_text'] = [
       '#type' => 'help',
       '#value' => t('Compare a user account to the currently logged-in user account. For someone viewing their own profile page, for example, choose "User account being viewed" and say "Display if the above user account is" and "the same as the logged-in user account".'),
-    );
+    ];
     // Always assume the first context is the logged-in user account.
-    $form['contexts']['user1'] = array(
+    $form['contexts']['user1'] = [
       '#type' => 'value',
       '#value' => 'current_user',
-    );
+    ];
     // Remove logged-in user account from list of comparison options.
     if (isset($form['contexts']['user2']['#options']['current_user'])) {
       unset($form['contexts']['user2']['#options']['current_user']);
     }
-    $form['equality'] = array(
+    $form['equality'] = [
       '#type' => 'radios',
       '#title' => t('Comparison mode '),
-      '#options' => array(
+      '#options' => [
         1 => t('Display if this account is the logged-in user account.'),
         0 => t('Display if this account is different from the logged-in user account.'),
-      ),
+      ],
       '#default_value' => $this->settings['equality'],
-    );
+    ];
   }
 }

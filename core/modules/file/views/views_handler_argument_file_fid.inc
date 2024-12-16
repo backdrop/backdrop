@@ -15,7 +15,7 @@ class views_handler_argument_file_fid extends views_handler_argument_numeric {
    */
   function title_query() {
     $titles = db_select('file_managed', 'f')
-      ->fields('f', array('filename'))
+      ->fields('f', ['filename'])
       ->condition('fid', $this->value)
       ->execute()
       ->fetchCol();

@@ -20,13 +20,13 @@ class views_handler_field_node_revision extends views_handler_field_node {
       $this->additional_fields['vid'] = 'vid';
       $this->additional_fields['nid'] = 'nid';
       if (module_exists('translation')) {
-        $this->additional_fields['langcode'] = array('table' => 'node', 'field' => 'langcode');
+        $this->additional_fields['langcode'] = ['table' => 'node', 'field' => 'langcode'];
       }
     }
   }
   function option_definition() {
     $options = parent::option_definition();
-    $options['link_to_node_revision'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['link_to_node_revision'] = ['default' => FALSE, 'bool' => TRUE];
     return $options;
   }
 
@@ -34,12 +34,12 @@ class views_handler_field_node_revision extends views_handler_field_node {
    * Provide link to revision option.
    */
   function options_form(&$form, &$form_state) {
-    $form['link_to_node_revision'] = array(
+    $form['link_to_node_revision'] = [
       '#title' => t('Link this field to its content revision'),
       '#description' => t('This will override any other link you have set.'),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['link_to_node_revision']),
-    );
+    ];
     parent::options_form($form, $form_state);
   }
 

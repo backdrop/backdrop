@@ -45,22 +45,22 @@
  * @ingroup field_types
  */
 function hook_field_extra_fields() {
-  $extra['node']['example'] = array(
-    'form' => array(
-      'settings' => array(
+  $extra['node']['example'] = [
+    'form' => [
+      'settings' => [
         'label' => t('settings'),
         'description' => t('Example module settings'),
         'weight' => -3,
-      ),
-    ),
-    'display' => array(
-      'example_data' => array(
+      ],
+    ],
+    'display' => [
+      'example_data' => [
         'label' => t('Data'),
         'description' => t('Example module data'),
         'weight' => 0,
-      ),
-    )
-  );
+      ],
+    ]
+  ];
 
   return $extra;
 }
@@ -148,32 +148,32 @@ function hook_field_extra_fields_alter(&$info) {
  * @see hook_field_info_alter()
  */
 function hook_field_info() {
-  return array(
-    'text' => array(
+  return [
+    'text' => [
       'label' => t('Text'),
       'description' => t('This field stores varchar text in the database.'),
-      'settings' => array('max_length' => 255),
-      'instance_settings' => array('text_processing' => 0),
+      'settings' => ['max_length' => 255],
+      'instance_settings' => ['text_processing' => 0],
       'default_widget' => 'text_textfield',
       'default_formatter' => 'text_default',
-    ),
-    'text_long' => array(
+    ],
+    'text_long' => [
       'label' => t('Long text'),
       'description' => t('This field stores long text in the database.'),
-      'settings' => array('max_length' => ''),
-      'instance_settings' => array('text_processing' => 0),
+      'settings' => ['max_length' => ''],
+      'instance_settings' => ['text_processing' => 0],
       'default_widget' => 'text_textarea',
       'default_formatter' => 'text_default',
-    ),
-    'text_with_summary' => array(
+    ],
+    'text_with_summary' => [
       'label' => t('Long text and summary'),
       'description' => t('This field stores long text in the database along with optional summary text.'),
-      'settings' => array('max_length' => ''),
-      'instance_settings' => array('text_processing' => 1, 'display_summary' => 0),
+      'settings' => ['max_length' => ''],
+      'instance_settings' => ['text_processing' => 1, 'display_summary' => 0],
       'default_widget' => 'text_textarea_with_summary',
       'default_formatter' => 'text_summary_or_trimmed',
-    ),
-  );
+    ],
+  ];
 }
 
 /**
@@ -186,9 +186,9 @@ function hook_field_info() {
 function hook_field_info_alter(&$info) {
   // Add a setting to all field types.
   foreach ($info as $field_type => $field_type_info) {
-    $info[$field_type]['settings'] += array(
+    $info[$field_type]['settings'] += [
       'my_module_additional_setting' => 'default value',
-    );
+    ];
   }
 
   // Change the default widget for fields of type 'foo'.
@@ -230,36 +230,36 @@ function hook_field_info_alter(&$info) {
  */
 function hook_field_schema($field) {
   if ($field['type'] == 'text_long') {
-    $columns = array(
-      'value' => array(
+    $columns = [
+      'value' => [
         'type' => 'text',
         'size' => 'big',
         'not null' => FALSE,
-      ),
-    );
+      ],
+    ];
   }
   else {
-    $columns = array(
-      'value' => array(
+    $columns = [
+      'value' => [
         'type' => 'varchar',
         'length' => $field['settings']['max_length'],
         'not null' => FALSE,
-      ),
-    );
+      ],
+    ];
   }
-  $columns += array(
-    'format' => array(
+  $columns += [
+    'format' => [
       'type' => 'varchar',
       'length' => 255,
       'not null' => FALSE,
-    ),
-  );
-  return array(
+    ],
+  ];
+  return [
     'columns' => $columns,
-    'indexes' => array(
-      'format' => array('format'),
-    ),
-  );
+    'indexes' => [
+      'format' => ['format'],
+    ],
+  ];
 }
 
 /**
@@ -279,14 +279,14 @@ function hook_field_schema_alter(&$schema, $field) {
     // Alter the length of a field.
     $schema['columns']['alt']['length'] = 2048;
     // Add an additional column of data.
-    $schema['columns']['additional_column'] = array(
+    $schema['columns']['additional_column'] = [
       'description' => "Additional column added to image field table.",
       'type' => 'varchar',
       'length' => 128,
       'not null' => FALSE,
-    );
+    ];
     // Add an additional index.
-    $schema['indexes']['fid_additional_column'] = array('fid', 'additional_column');
+    $schema['indexes']['fid_additional_column'] = ['fid', 'additional_column'];
   }
 }
 
@@ -377,11 +377,11 @@ function hook_field_prepare_view($entity_type, $entities, $field, $instances, $l
   foreach ($entities as $id => $entity) {
     if (empty($items[$id]) && $field['settings']['default_image']) {
       if ($file = file_load($field['settings']['default_image'])) {
-        $items[$id][0] = (array) $file + array(
+        $items[$id][0] = (array) $file + [
           'is_default' => TRUE,
           'alt' => '',
           'title' => '',
-        );
+        ];
       }
     }
   }
@@ -417,10 +417,10 @@ function hook_field_validate($entity_type, $entity, $field, $instance, $langcode
   foreach ($items as $delta => $item) {
     if (!empty($item['value'])) {
       if (!empty($field['settings']['max_length']) && backdrop_strlen($item['value']) > $field['settings']['max_length']) {
-        $errors[$field['field_name']][$langcode][$delta][] = array(
+        $errors[$field['field_name']][$langcode][$delta][] = [
           'error' => 'text_max_length',
-          'message' => t('%name: the value may not be longer than %max characters.', array('%name' => $instance['label'], '%max' => $field['settings']['max_length'])),
-        );
+          'message' => t('%name: the value may not be longer than %max characters.', ['%name' => $instance['label'], '%max' => $field['settings']['max_length']]),
+        ];
       }
     }
   }
@@ -485,14 +485,14 @@ function hook_field_presave($entity_type, $entity, $field, $instance, $langcode,
  */
 function hook_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
   if (config_get('taxonomy.settings', 'maintain_index_table') && $field['storage']['type'] == 'field_sql_storage' && $entity_type == 'node' && $entity->status) {
-    $query = db_insert('taxonomy_index')->fields(array('nid', 'tid', 'sticky', 'created', ));
+    $query = db_insert('taxonomy_index')->fields(['nid', 'tid', 'sticky', 'created', ]);
     foreach ($items as $item) {
-      $query->values(array(
+      $query->values([
         'nid' => $entity->nid,
         'tid' => $item['tid'],
         'sticky' => $entity->sticky,
         'created' => $entity->created,
-      ));
+      ]);
     }
     $query->execute();
   }
@@ -526,7 +526,7 @@ function hook_field_insert($entity_type, $entity, $field, $instance, $langcode, 
  */
 function hook_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
   if (config_get('taxonomy.settings', 'maintain_index_table') && $field['storage']['type'] == 'field_sql_storage' && $entity_type == 'node') {
-    $first_call = &backdrop_static(__FUNCTION__, array());
+    $first_call = &backdrop_static(__FUNCTION__, []);
 
     // We don't maintain data for old revisions, so clear all previous values
     // from the table. Since this hook runs once per field, per object, make
@@ -537,14 +537,14 @@ function hook_field_update($entity_type, $entity, $field, $instance, $langcode, 
     }
     // Only save data to the table if the node is published.
     if ($entity->status) {
-      $query = db_insert('taxonomy_index')->fields(array('nid', 'tid', 'sticky', 'created'));
+      $query = db_insert('taxonomy_index')->fields(['nid', 'tid', 'sticky', 'created']);
       foreach ($items as $item) {
-        $query->values(array(
+        $query->values([
           'nid' => $entity->nid,
           'tid' => $item['tid'],
           'sticky' => $entity->sticky,
           'created' => $entity->created,
-        ));
+        ]);
       }
       $query->execute();
     }
@@ -686,7 +686,7 @@ function hook_field_prepare_translation($entity_type, $entity, $field, $instance
   $formats = filter_formats();
   $format_id = $source_entity->{$field_name}[$source_langcode][0]['format'];
   if (!filter_access($formats[$format_id])) {
-    $items = array();
+    $items = [];
   }
 }
 
@@ -774,37 +774,37 @@ function hook_field_is_empty($item, $field) {
  * @see hook_field_widget_settings_form()
  */
 function hook_field_widget_info() {
-  return array(
-    'text_textfield' => array(
+  return [
+    'text_textfield' => [
       'label' => t('Text field'),
-      'field types' => array('text'),
-      'settings' => array('size' => 60),
-      'behaviors' => array(
+      'field types' => ['text'],
+      'settings' => ['size' => 60],
+      'behaviors' => [
         'multiple values' => FIELD_BEHAVIOR_DEFAULT,
         'default value' => FIELD_BEHAVIOR_DEFAULT,
-      ),
-    ),
-    'text_textarea' => array(
+      ],
+    ],
+    'text_textarea' => [
       'label' => t('Text area (multiple rows)'),
-      'field types' => array('text_long'),
-      'settings' => array('rows' => 5),
-      'behaviors' => array(
+      'field types' => ['text_long'],
+      'settings' => ['rows' => 5],
+      'behaviors' => [
         'multiple values' => FIELD_BEHAVIOR_DEFAULT,
         'default value' => FIELD_BEHAVIOR_DEFAULT,
-      ),
-    ),
-    'text_textarea_with_summary' => array(
+      ],
+    ],
+    'text_textarea_with_summary' => [
       'label' => t('Text area with a summary'),
-      'field types' => array('text_with_summary'),
-      'settings' => array('rows' => 10, 'summary_rows' => 5),
-      'behaviors' => array(
+      'field types' => ['text_with_summary'],
+      'settings' => ['rows' => 10, 'summary_rows' => 5],
+      'behaviors' => [
         'multiple values' => FIELD_BEHAVIOR_DEFAULT,
         'default value' => FIELD_BEHAVIOR_DEFAULT,
-      ),
+      ],
       // As an advanced widget, force it to sink to the bottom of the choices.
       'weight' => 2,
-    ),
-  );
+    ],
+  ];
 }
 
 /**
@@ -816,9 +816,9 @@ function hook_field_widget_info() {
  */
 function hook_field_widget_info_alter(&$info) {
   // Add a setting to a widget type.
-  $info['text_textfield']['settings'] += array(
+  $info['text_textfield']['settings'] += [
     'my_module_additional_setting' => 'default value',
-  );
+  ];
 
   // Let a new field type re-use an existing widget.
   $info['options_select']['field types'][] = 'my_field_type';
@@ -902,11 +902,11 @@ function hook_field_widget_info_alter(&$info) {
  * @see hook_field_widget_WIDGET_TYPE_form_alter()
  */
 function hook_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
-  $element += array(
+  $element += [
     '#type' => $instance['widget']['type'],
     '#default_value' => isset($items[$delta]) ? $items[$delta] : '',
-  );
-  return array('value' => $element);
+  ];
+  return ['value' => $element];
 }
 
 /**
@@ -1074,35 +1074,35 @@ function hook_field_widget_error($element, $error, $form, &$form_state) {
  * @see hook_field_formatter_prepare_view()
  */
 function hook_field_formatter_info() {
-  return array(
-    'text_default' => array(
+  return [
+    'text_default' => [
       'label' => t('Default'),
-      'field types' => array('text', 'text_long', 'text_with_summary'),
-    ),
-    'text_plain' => array(
+      'field types' => ['text', 'text_long', 'text_with_summary'],
+    ],
+    'text_plain' => [
       'label' => t('Plain text'),
-      'field types' => array('text', 'text_long', 'text_with_summary'),
-    ),
+      'field types' => ['text', 'text_long', 'text_with_summary'],
+    ],
 
     // The text_trimmed formatter displays the trimmed version of the
     // full element of the field. It is intended to be used with text
     // and text_long fields. It also works with text_with_summary
     // fields though the text_summary_or_trimmed formatter makes more
     // sense for that field type.
-    'text_trimmed' => array(
+    'text_trimmed' => [
       'label' => t('Trimmed'),
-      'field types' => array('text', 'text_long', 'text_with_summary'),
-    ),
+      'field types' => ['text', 'text_long', 'text_with_summary'],
+    ],
 
     // The 'summary or trimmed' field formatter for text_with_summary
     // fields displays returns the summary element of the field or, if
     // the summary is empty, the trimmed version of the full element
     // of the field.
-    'text_summary_or_trimmed' => array(
+    'text_summary_or_trimmed' => [
       'label' => t('Summary or trimmed'),
-      'field types' => array('text_with_summary'),
-    ),
-  );
+      'field types' => ['text_with_summary'],
+    ],
+  ];
 }
 
 /**
@@ -1114,9 +1114,9 @@ function hook_field_formatter_info() {
  */
 function hook_field_formatter_info_alter(&$info) {
   // Add a setting to a formatter type.
-  $info['text_default']['settings'] += array(
+  $info['text_default']['settings'] += [
     'my_module_additional_setting' => 'default value',
-  );
+  ];
 
   // Let a new field type re-use an existing formatter.
   $info['text_default']['field types'][] = 'my_field_type';
@@ -1158,7 +1158,7 @@ function hook_field_formatter_info_alter(&$info) {
  *   parameter by reference.
  */
 function hook_field_formatter_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items, $displays) {
-  $tids = array();
+  $tids = [];
 
   // Collect every possible term attached to any of the fieldable entities.
   foreach ($entities as $id => $entity) {
@@ -1223,7 +1223,7 @@ function hook_field_formatter_prepare_view($entity_type, $entities, $field, $ins
  *   by numeric indexes starting from 0.
  */
 function hook_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
-  $element = array();
+  $element = [];
   $settings = $display['settings'];
 
   switch ($display['type']) {
@@ -1232,7 +1232,7 @@ function hook_field_formatter_view($entity_type, $entity, $field, $instance, $la
       // keyed by delta. The field.tpl.php template specifies the markup
       // wrapping each value.
       foreach ($items as $delta => $item) {
-        $element[$delta] = array('#markup' => $settings['some_setting'] . $item['value']);
+        $element[$delta] = ['#markup' => $settings['some_setting'] . $item['value']];
       }
       break;
 
@@ -1240,26 +1240,26 @@ function hook_field_formatter_view($entity_type, $entity, $field, $instance, $la
       // More elaborate formatters can defer to a theme function for easier
       // customization.
       foreach ($items as $delta => $item) {
-        $element[$delta] = array(
+        $element[$delta] = [
           '#theme' => 'my_module_theme_sample_field_formatter_themeable',
           '#data' => $item['value'],
           '#some_setting' => $settings['some_setting'],
-        );
+        ];
       }
       break;
 
     case 'sample_field_formatter_combined':
       // Some formatters might need to display all values within a single piece
       // of markup.
-      $rows = array();
+      $rows = [];
       foreach ($items as $delta => $item) {
-        $rows[] = array($delta, $item['value']);
+        $rows[] = [$delta, $item['value']];
       }
-      $element[0] = array(
+      $element[0] = [
         '#theme' => 'table',
-        '#header' => array(t('Delta'), t('Value')),
+        '#header' => [t('Delta'), t('Value')],
         '#rows' => $rows,
-      );
+      ];
       break;
   }
 
@@ -1348,10 +1348,10 @@ function hook_field_formatter_settings_summary_alter(&$summary, array $context) 
 function hook_field_attach_form($entity_type, $entity, &$form, &$form_state, $langcode) {
   // Add a checkbox allowing a given field to be emptied.
   // See hook_field_attach_submit() for the corresponding processing code.
-  $form['empty_field_foo'] = array(
+  $form['empty_field_foo'] = [
     '#type' => 'checkbox',
     '#title' => t("Empty the 'field_foo' field"),
-  );
+  ];
 }
 
 /**
@@ -1398,10 +1398,10 @@ function hook_field_attach_validate($entity_type, $entity, &$errors) {
     foreach ($entity->field_image as $langcode => $items) {
       foreach ($items as $delta => $item) {
         if (!empty($item['fid']) && empty($item['alt'])) {
-          $errors['field_image'][$langcode][$delta][] = array(
+          $errors['field_image'][$langcode][$delta][] = [
             'error' => 'field_example_invalid',
             'message' => t('All images in posts need to have an alternative text set.'),
-          );
+          ];
         }
       }
     }
@@ -1713,13 +1713,13 @@ function hook_field_attach_delete_bundle($entity_type, $bundle, $instances) {
  *     those settings.
  */
 function hook_field_storage_info() {
-  return array(
-    'field_sql_storage' => array(
+  return [
+    'field_sql_storage' => [
       'label' => t('Default SQL storage'),
       'description' => t('Stores fields in the local SQL database, using per-field tables.'),
-      'settings' => array(),
-    ),
-  );
+      'settings' => [],
+    ],
+  ];
 }
 
 /**
@@ -1731,9 +1731,9 @@ function hook_field_storage_info() {
  */
 function hook_field_storage_info_alter(&$info) {
   // Add a setting to a storage type.
-  $info['field_sql_storage']['settings'] += array(
+  $info['field_sql_storage']['settings'] += [
     'my_module_additional_setting' => 'default value',
-  );
+  ];
 }
 
 /**
@@ -1759,23 +1759,23 @@ function hook_field_storage_info_alter(&$info) {
  * @see hook_field_storage_details_alter()
  */
 function hook_field_storage_details($field) {
-  $details = array();
+  $details = [];
 
   // Add field columns.
   foreach ((array) $field['columns'] as $column_name => $attributes) {
     $real_name = _field_sql_storage_columnname($field['field_name'], $column_name);
     $columns[$column_name] = $real_name;
   }
-  return array(
-    'sql' => array(
-      FIELD_LOAD_CURRENT => array(
+  return [
+    'sql' => [
+      FIELD_LOAD_CURRENT => [
         _field_sql_storage_tablename($field) => $columns,
-      ),
-      FIELD_LOAD_REVISION => array(
+      ],
+      FIELD_LOAD_REVISION => [
         _field_sql_storage_revision_tablename($field) => $columns,
-      ),
-    ),
-  );
+      ],
+    ],
+  ];
 }
 
 /**
@@ -1791,18 +1791,18 @@ function hook_field_storage_details($field) {
  */
 function hook_field_storage_details_alter(&$details, $field) {
   if ($field['field_name'] == 'field_of_interest') {
-    $columns = array();
+    $columns = [];
     foreach ((array) $field['columns'] as $column_name => $attributes) {
       $columns[$column_name] = $column_name;
     }
-    $details['backdrop_variables'] = array(
-      FIELD_LOAD_CURRENT => array(
+    $details['backdrop_variables'] = [
+      FIELD_LOAD_CURRENT => [
         'moon' => $columns,
-      ),
-      FIELD_LOAD_REVISION => array(
+      ],
+      FIELD_LOAD_REVISION => [
         'mars' => $columns,
-      ),
-    );
+      ],
+    ];
   }
 }
 
@@ -1857,14 +1857,14 @@ function hook_field_storage_load($entity_type, $entities, $age, $fields, $option
 
     $results = $query->execute();
 
-    $delta_count = array();
+    $delta_count = [];
     foreach ($results as $row) {
       if (!isset($delta_count[$row->entity_id][$row->language])) {
         $delta_count[$row->entity_id][$row->language] = 0;
       }
 
       if ($field['cardinality'] == FIELD_CARDINALITY_UNLIMITED || $delta_count[$row->entity_id][$row->language] < $field['cardinality']) {
-        $item = array();
+        $item = [];
         // For each column declared by the field, populate the item
         // from the prefixed database column.
         foreach ($field['columns'] as $column => $attributes) {
@@ -1934,7 +1934,7 @@ function hook_field_storage_write($entity_type, $entity, $op, $fields) {
 
     // Prepare the multi-insert query.
     $do_insert = FALSE;
-    $columns = array('entity_type', 'entity_id', 'revision_id', 'bundle', 'delta', 'language');
+    $columns = ['entity_type', 'entity_id', 'revision_id', 'bundle', 'delta', 'language'];
     foreach ($field['columns'] as $column => $attributes) {
       $columns[] = _field_sql_storage_columnname($field_name, $column);
     }
@@ -1947,14 +1947,14 @@ function hook_field_storage_write($entity_type, $entity, $op, $fields) {
       foreach ($items as $delta => $item) {
         // We now know we have something to insert.
         $do_insert = TRUE;
-        $record = array(
+        $record = [
           'entity_type' => $entity_type,
           'entity_id' => $id,
           'revision_id' => $vid,
           'bundle' => $bundle,
           'delta' => $delta,
           'language' => $langcode,
-        );
+        ];
         foreach ($field['columns'] as $column => $attributes) {
           $record[_field_sql_storage_columnname($field_name, $column)] = isset($item[$column]) ? $item[$column] : NULL;
         }
@@ -2052,7 +2052,7 @@ function hook_field_storage_delete_revision($entity_type, $entity, $fields) {
  *   See EntityFieldQuery::execute() for the return values.
  */
 function hook_field_storage_query($query) {
-  $groups = array();
+  $groups = [];
   if ($query->age == FIELD_LOAD_CURRENT) {
     $tablename_function = '_field_sql_storage_tablename';
     $id_key = 'entity_id';
@@ -2061,7 +2061,7 @@ function hook_field_storage_query($query) {
     $tablename_function = '_field_sql_storage_revision_tablename';
     $id_key = 'revision_id';
   }
-  $table_aliases = array();
+  $table_aliases = [];
   // Add tables for the fields used.
   foreach ($query->fields as $key => $field) {
     $tablename = $tablename_function($field);
@@ -2075,7 +2075,7 @@ function hook_field_storage_query($query) {
       $select_query = db_select($tablename, $table_alias);
       $select_query->addTag('entity_field_access');
       $select_query->addMetaData('base_table', $tablename);
-      $select_query->fields($table_alias, array('entity_type', 'entity_id', 'revision_id', 'bundle'));
+      $select_query->fields($table_alias, ['entity_type', 'entity_id', 'revision_id', 'bundle']);
       $field_base_table = $table_alias;
     }
     if ($field['cardinality'] != 1) {
@@ -2091,7 +2091,7 @@ function hook_field_storage_query($query) {
     $sql_field = "$table_alias." . _field_sql_storage_columnname($field['field_name'], $condition['column']);
     $query->addCondition($select_query, $sql_field, $condition);
     // Add delta / language group conditions.
-    foreach (array('delta', 'language') as $column) {
+    foreach (['delta', 'language'] as $column) {
       if (isset($condition[$column . '_group'])) {
         $group_name = $condition[$column . '_group'];
         if (!isset($groups[$column][$group_name])) {
@@ -2185,7 +2185,7 @@ function hook_field_storage_delete_field($field) {
   $table = _field_sql_storage_tablename($field);
   $revision_table = _field_sql_storage_revision_tablename($field);
   db_update($table)
-    ->fields(array('deleted' => 1))
+    ->fields(['deleted' => 1])
     ->execute();
 
   // Move the table to a unique name while the table contents are being deleted.
@@ -2211,12 +2211,12 @@ function hook_field_storage_delete_instance($instance) {
   $table_name = _field_sql_storage_tablename($field);
   $revision_name = _field_sql_storage_revision_tablename($field);
   db_update($table_name)
-    ->fields(array('deleted' => 1))
+    ->fields(['deleted' => 1])
     ->condition('entity_type', $instance['entity_type'])
     ->condition('bundle', $instance['bundle'])
     ->execute();
   db_update($revision_name)
-    ->fields(array('deleted' => 1))
+    ->fields(['deleted' => 1])
     ->condition('entity_type', $instance['entity_type'])
     ->condition('bundle', $instance['bundle'])
     ->execute();
@@ -2278,10 +2278,10 @@ function hook_field_storage_pre_load($entity_type, $entities, $age, &$skip_field
  */
 function hook_field_storage_pre_insert($entity_type, $entity, &$skip_fields) {
   if ($entity_type == 'node' && $entity->status) {
-    $query = db_insert('custom_index')->fields(array('nid', 'title', 'tid', 'sticky', 'created', 'comment_count', 'last_comment_timestamp'));
+    $query = db_insert('custom_index')->fields(['nid', 'title', 'tid', 'sticky', 'created', 'comment_count', 'last_comment_timestamp']);
     foreach ($entity->custom as $language) {
       foreach ($language as $delta) {
-        $query->values(array(
+        $query->values([
           'nid' => $entity->nid,
           'title' => $entity->title,
           'tid' => $delta['value'],
@@ -2289,7 +2289,7 @@ function hook_field_storage_pre_insert($entity_type, $entity, &$skip_fields) {
           'created' => $entity->created,
           'comment_count' => 0,
           'last_comment_timestamp' => $entity->created,
-        ));
+        ]);
       }
     }
     $query->execute();
@@ -2314,7 +2314,7 @@ function hook_field_storage_pre_insert($entity_type, $entity, &$skip_fields) {
  *   Saved field IDs are set set as keys in $skip_fields.
  */
 function hook_field_storage_pre_update($entity_type, $entity, &$skip_fields) {
-  $first_call = &backdrop_static(__FUNCTION__, array());
+  $first_call = &backdrop_static(__FUNCTION__, []);
 
   if ($entity_type == 'node' && $entity->status) {
     // We don't maintain data for old revisions, so clear all previous values
@@ -2326,10 +2326,10 @@ function hook_field_storage_pre_update($entity_type, $entity, &$skip_fields) {
     }
     // Only save data to the table if the node is published.
     if ($entity->status) {
-      $query = db_insert('custom_index')->fields(array('nid', 'title', 'tid', 'sticky', 'created', 'comment_count', 'last_comment_timestamp'));
+      $query = db_insert('custom_index')->fields(['nid', 'title', 'tid', 'sticky', 'created', 'comment_count', 'last_comment_timestamp']);
       foreach ($entity->custom as $language) {
         foreach ($language as $delta) {
-          $query->values(array(
+          $query->values([
             'nid' => $entity->nid,
             'title' => $entity->title,
             'tid' => $delta['value'],
@@ -2337,7 +2337,7 @@ function hook_field_storage_pre_update($entity_type, $entity, &$skip_fields) {
             'created' => $entity->created,
             'comment_count' => 0,
             'last_comment_timestamp' => $entity->created,
-          ));
+          ]);
         }
       }
       $query->execute();
@@ -2369,7 +2369,7 @@ function hook_field_storage_pre_update($entity_type, $entity, &$skip_fields) {
  * @ingroup field_info
  */
 function hook_field_info_max_weight($entity_type, $bundle, $context) {
-  $weights = array();
+  $weights = [];
 
   foreach (my_module_entity_additions($entity_type, $bundle, $context) as $addition) {
     $weights[] = $addition['weight'];

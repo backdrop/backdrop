@@ -23,8 +23,8 @@ class views_handler_field_file extends views_handler_field {
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['link_to_file'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['link_to_file_options'] = array('default' => 'download');
+    $options['link_to_file'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['link_to_file_options'] = ['default' => 'download'];
     return $options;
   }
 
@@ -32,26 +32,26 @@ class views_handler_field_file extends views_handler_field {
    * Provide link to file option
    */
   function options_form(&$form, &$form_state) {
-    $form['link_to_file'] = array(
+    $form['link_to_file'] = [
       '#title' => t('Link this field to the file'),
       '#description' => t("Enable to override this field's links."),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['link_to_file']),
-    );
-    $form['link_to_file_options'] = array(
+    ];
+    $form['link_to_file_options'] = [
       '#title' => t('Link type'),
       '#type' => 'radios',
-      '#options' => array(
+      '#options' => [
         'download' => 'Download link',
         'page' => t('Link to the file page'),
-      ),
+      ],
       '#default_value' => !empty($this->options['link_to_file_options']) ? $this->options['link_to_file_options'] : 'download',
-      '#states' => array(
-        'visible' => array(
-         ':input[name="options[link_to_file]"]' => array('checked' => TRUE),
-        ),
-      ),
-    );
+      '#states' => [
+        'visible' => [
+         ':input[name="options[link_to_file]"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
     parent::options_form($form, $form_state);
   }
 

@@ -14,11 +14,11 @@
  */
 function theme_color_preview($variables) {
 
-  $preview_link = l(t('Open preview in a new window'), $variables['preview_url'], array(
-      'attributes' => array(
+  $preview_link = l(t('Open preview in a new window'), $variables['preview_url'], [
+      'attributes' => [
         'target' => '_blank'
-      )
-    ));
+      ]
+    ]);
 
   $output  = '<div class="color-preview">';
   $output .= $preview_link;

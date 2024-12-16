@@ -133,7 +133,7 @@ class User extends Entity implements UserInterface {
    *
    * @var array
    */
-  public $roles = array();
+  public $roles = [];
 
   /**
    * Implements EntityInterface::id().
@@ -163,10 +163,10 @@ class User extends Entity implements UserInterface {
     // Anonymous users do not have a URI.
     $uri = FALSE;
     if ($this->uid) {
-      $uri = array(
+      $uri = [
         'path' => 'user/' . $this->uid,
-        'options' => array(),
-      );
+        'options' => [],
+      ];
     }
     return $uri;
   }
@@ -202,7 +202,7 @@ class User extends Entity implements UserInterface {
   public function access($op, $account = NULL) {
     // Casting class with private property causes errors due to added prefix.
     // e.g. "\0" . 'User' . "\0". So use static array instead.
-    $rights = &backdrop_static(__METHOD__, array());
+    $rights = &backdrop_static(__METHOD__, []);
 
     // We can't always count on Backdrop to provide an AnonymousUser for
     // anonymous users, so test explicitly.
@@ -213,7 +213,7 @@ class User extends Entity implements UserInterface {
     if ($op == 'create') {
       return self::createAccess(NULL, $account);
     }
-    elseif (!in_array($op, array('view', 'update', 'delete'), TRUE)) {
+    elseif (!in_array($op, ['view', 'update', 'delete'], TRUE)) {
       // If the $op was not one of the supported ones, we return access denied.
       return FALSE;
     }
@@ -289,13 +289,13 @@ class UserStorageController extends EntityDatabaseStorageController {
    */
   function attachLoad(&$queried_users, $revision_id = FALSE) {
     // Build an array of user picture IDs so that these can be fetched later.
-    $picture_fids = array();
+    $picture_fids = [];
     foreach ($queried_users as $key => $record) {
       if ($record->picture) {
         $picture_fids[] = $record->picture;
       }
       $queried_users[$key]->data = unserialize((string) $record->data);
-      $queried_users[$key]->roles = array();
+      $queried_users[$key]->roles = [];
       if ($record->uid) {
         $queried_users[$record->uid]->roles[] = BACKDROP_AUTHENTICATED_ROLE;
       }
@@ -305,7 +305,7 @@ class UserStorageController extends EntityDatabaseStorageController {
     }
 
     // Add any additional roles from the database.
-    $result = db_query('SELECT role, uid FROM {users_roles} WHERE uid IN (:uids)', array(':uids' => array_keys($queried_users)));
+    $result = db_query('SELECT role, uid FROM {users_roles} WHERE uid IN (:uids)', [':uids' => array_keys($queried_users)]);
     foreach ($result as $record) {
       $queried_users[$record->uid]->roles[] = $record->role;
     }
@@ -435,10 +435,10 @@ class UserStorageController extends EntityDatabaseStorageController {
     }
 
     // Move account cancellation information into $entity->data.
-    foreach (array('user_cancel_method', 'user_cancel_notify') as $key) {
+    foreach (['user_cancel_method', 'user_cancel_notify'] as $key) {
       if (isset($entity->{$key})) {
         if (!$entity->data) {
-          $entity->data = array();
+          $entity->data = [];
         }
         $entity->data[$key] = $entity->{$key};
       }
@@ -471,13 +471,13 @@ class UserStorageController extends EntityDatabaseStorageController {
           ->condition('uid', $entity->uid)
           ->execute();
 
-        $query = db_insert('users_roles')->fields(array('uid', 'role'));
+        $query = db_insert('users_roles')->fields(['uid', 'role']);
         foreach ($entity->roles as $role_name) {
-          if (!in_array($role_name, array(BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE))) {
-            $query->values(array(
+          if (!in_array($role_name, [BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE])) {
+            $query->values([
               'uid' => $entity->uid,
               'role' => $role_name,
-            ));
+            ]);
           }
         }
         $query->execute();
@@ -498,14 +498,14 @@ class UserStorageController extends EntityDatabaseStorageController {
     else {
       // Save user roles. Skip built-in roles, and ones that were already saved
       // to the database during hook calls.
-      $role_names_to_skip = array_merge(array(BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE), db_query('SELECT role FROM {users_roles} WHERE uid = :uid', array(':uid' => $entity->uid))->fetchCol());
+      $role_names_to_skip = array_merge([BACKDROP_ANONYMOUS_ROLE, BACKDROP_AUTHENTICATED_ROLE], db_query('SELECT role FROM {users_roles} WHERE uid = :uid', [':uid' => $entity->uid])->fetchCol());
       if ($roles_to_save = array_diff($entity->roles, $role_names_to_skip)) {
-        $query = db_insert('users_roles')->fields(array('uid', 'role'));
+        $query = db_insert('users_roles')->fields(['uid', 'role']);
         foreach ($roles_to_save as $role_name) {
-          $query->values(array(
+          $query->values([
             'uid' => $entity->uid,
             'role' => $role_name,
-          ));
+          ]);
         }
         $query->execute();
       }
@@ -520,14 +520,14 @@ class UserStorageController extends EntityDatabaseStorageController {
     $langcode = $langcode ? $langcode : $language_content->langcode;
 
     // Remove previously built content, if exists.
-    $account->content = array();
+    $account->content = [];
 
     // Allow modules to change the display mode.
-    $view_mode = key(entity_view_mode_prepare('user', array($account->uid => $account), $view_mode, $langcode));
+    $view_mode = key(entity_view_mode_prepare('user', [$account->uid => $account], $view_mode, $langcode));
 
     // Build fields content.
-    field_attach_prepare_view('user', array($account->uid => $account), $view_mode, $langcode);
-    entity_prepare_view('user', array($account->uid => $account), $langcode);
+    field_attach_prepare_view('user', [$account->uid => $account], $view_mode, $langcode);
+    entity_prepare_view('user', [$account->uid => $account], $langcode);
     $account->content += field_attach_view('user', $account, $view_mode, $langcode);
 
     // Populate $account->content with a render() array.
@@ -536,7 +536,7 @@ class UserStorageController extends EntityDatabaseStorageController {
 
     // Make sure the current display mode is stored if no module has already
     // populated the related key.
-    $account->content += array('#view_mode' => $view_mode);
+    $account->content += ['#view_mode' => $view_mode];
   }
 
   /**
@@ -546,7 +546,7 @@ class UserStorageController extends EntityDatabaseStorageController {
     global $language_content;
     $langcode = $langcode ? $langcode : $language_content->langcode;
 
-    $view = array();
+    $view = [];
     foreach ($accounts as $account) {
       /* @var User $account */
       // Retrieve all profile fields and attach to $account->content.
@@ -556,17 +556,17 @@ class UserStorageController extends EntityDatabaseStorageController {
       // We don't need duplicate rendering info in account->content.
       unset($account->content);
 
-      $build += array(
+      $build += [
         '#theme' => 'user_profile',
         '#account' => $account,
         '#view_mode' => $view_mode,
         '#language' => $langcode,
         '#page' => $page,
-      );
+      ];
 
       // Allow modules to modify the structured user.
       $type = 'user';
-      backdrop_alter(array('user_view', 'entity_view'), $build, $type);
+      backdrop_alter(['user_view', 'entity_view'], $build, $type);
       $view[$type][$account->id()] = $build;
     }
 

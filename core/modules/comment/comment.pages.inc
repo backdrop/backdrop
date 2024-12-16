@@ -31,14 +31,14 @@
  */
 function comment_reply(Node $node, $pid = NULL) {
   // Set the breadcrumb trail.
-  backdrop_set_breadcrumb(array(l(t('Home'), NULL), l($node->title, 'node/' . $node->nid)));
+  backdrop_set_breadcrumb([l(t('Home'), NULL), l($node->title, 'node/' . $node->nid)]);
   $op = isset($_POST['op']) ? $_POST['op'] : '';
-  $build = array();
+  $build = [];
 
   // The user is previewing a comment prior to submitting it.
   if ($op == t('Preview')) {
     if (user_access('post comments')) {
-      $comment = entity_create('comment', array('nid' => $node->nid, 'pid' => $pid));
+      $comment = entity_create('comment', ['nid' => $node->nid, 'pid' => $pid]);
       $build['comment_form'] = backdrop_get_form("comment_node_{$node->type}_form", $comment);
     }
     else {
@@ -86,7 +86,7 @@ function comment_reply(Node $node, $pid = NULL) {
       backdrop_goto("node/$node->nid");
     }
     elseif (user_access('post comments')) {
-      $comment = entity_create('comment', array('nid' => $node->nid, 'pid' => $pid));
+      $comment = entity_create('comment', ['nid' => $node->nid, 'pid' => $pid]);
       $build['comment_form'] = backdrop_get_form("comment_node_{$node->type}_form", $comment);
     }
     else {

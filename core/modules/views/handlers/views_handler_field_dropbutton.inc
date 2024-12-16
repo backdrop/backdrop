@@ -16,10 +16,10 @@ class views_handler_field_dropbutton extends views_handler_field_links {
   function render($values) {
     $links = $this->get_links();
     if (!empty($links)) {
-      $build = array(
+      $build = [
         '#type' => 'dropbutton',
         '#links' => $links,
-      );
+      ];
       return backdrop_render($build);
     }
     else {

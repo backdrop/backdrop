@@ -226,14 +226,14 @@ abstract class DatabaseConnection {
    *
    * @var array
    */
-  protected $transactionLayers = array();
+  protected $transactionLayers = [];
 
   /**
    * Index of what driver-specific class to use for various operations.
    *
    * @var array
    */
-  protected $driverClasses = array();
+  protected $driverClasses = [];
 
   /**
    * The name of the Statement class for this connection.
@@ -270,7 +270,7 @@ abstract class DatabaseConnection {
    *
    * @var array
    */
-  protected $connectionOptions = array();
+  protected $connectionOptions = [];
 
   /**
    * The schema object for this connection.
@@ -284,35 +284,35 @@ abstract class DatabaseConnection {
    *
    * @var array
    */
-  protected $prefixes = array();
+  protected $prefixes = [];
 
   /**
    * List of search values for use in prefixTables().
    *
    * @var array
    */
-  protected $prefixSearch = array();
+  protected $prefixSearch = [];
 
   /**
    * List of replacement values for use in prefixTables().
    *
    * @var array
    */
-  protected $prefixReplace = array();
+  protected $prefixReplace = [];
 
   /**
    * List of escaped database, table, and field names, keyed by unescaped names.
    *
    * @var array
    */
-  protected $escapedNames = array();
+  protected $escapedNames = [];
 
   /**
    * List of escaped aliases names, keyed by unescaped aliases.
    *
    * @var array
    */
-  protected $escapedAliases = array();
+  protected $escapedAliases = [];
 
   /**
    * Creates a database connection object.
@@ -344,10 +344,10 @@ abstract class DatabaseConnection {
 
     // Set a Statement class, unless the driver opted out.
     if (!empty($this->statementClass)) {
-      $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, array(
+      $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, [
         $this->statementClass,
-        array($this),
-      ));
+        [$this],
+      ]);
     }
   }
 
@@ -363,10 +363,10 @@ abstract class DatabaseConnection {
     // Destroy all references to this connection by setting them to NULL.
     // The Statement class attribute only accepts a new value that presents a
     // proper callable, so we reset it to PDOStatement.
-    $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, array(
+    $this->pdo->setAttribute(PDO::ATTR_STATEMENT_CLASS, [
       'PDOStatement',
-      array(),
-    ));
+      [],
+    ]);
     $this->schema = NULL;
   }
 
@@ -415,12 +415,12 @@ abstract class DatabaseConnection {
    *   An array of default query options.
    */
   protected function defaultOptions() {
-    return array(
+    return [
       'target' => 'default',
       'fetch' => PDO::FETCH_OBJ,
       'return' => Database::RETURN_STATEMENT,
       'throw_exception' => TRUE,
-    );
+    ];
   }
 
   /**
@@ -447,16 +447,16 @@ abstract class DatabaseConnection {
    */
   protected function setPrefix($prefix) {
     if (is_array($prefix)) {
-      $this->prefixes = $prefix + array('default' => '');
+      $this->prefixes = $prefix + ['default' => ''];
     }
     else {
-      $this->prefixes = array('default' => $prefix);
+      $this->prefixes = ['default' => $prefix];
     }
 
     // Set up variables for use in prefixTables(). Replace table-specific
     // prefixes first.
-    $this->prefixSearch = array();
-    $this->prefixReplace = array();
+    $this->prefixSearch = [];
+    $this->prefixReplace = [];
     foreach ($this->prefixes as $key => $val) {
       if ($key != 'default') {
         $this->prefixSearch[] = '{' . $key . '}';
@@ -688,7 +688,7 @@ abstract class DatabaseConnection {
    *   A sanitized version of the query comment string.
    */
   protected function filterComment($comment = '') {
-    return strtr($comment, array('*' => ' * '));
+    return strtr($comment, ['*' => ' * ']);
   }
 
   /**
@@ -796,7 +796,7 @@ abstract class DatabaseConnection {
     // If the placeholder value to insert is an array, assume that we need
     // to expand it out into a comma-delimited set of placeholders.
     foreach (array_filter($args, 'is_array') as $key => $data) {
-      $new_keys = array();
+      $new_keys = [];
       foreach (array_values($data) as $i => $value) {
         // This assumes that there are no other placeholders that use the same
         // name.  For example, if the array placeholder is defined as :example
@@ -838,7 +838,7 @@ abstract class DatabaseConnection {
    * @return string
    *   The name of the class that should be used for this driver.
    */
-  public function getDriverClass($class, array $files = array(), $use_autoload = FALSE) {
+  public function getDriverClass($class, array $files = [], $use_autoload = FALSE) {
     if (empty($this->driverClasses[$class])) {
       $driver = $this->driver();
       $this->driverClasses[$class] = $class . '_' . $driver;
@@ -869,11 +869,11 @@ abstract class DatabaseConnection {
    *
    * @see SelectQuery
    */
-  public function select($table, $alias = NULL, array $options = array()) {
-    $class = $this->getDriverClass('SelectQuery', array(
+  public function select($table, $alias = NULL, array $options = []) {
+    $class = $this->getDriverClass('SelectQuery', [
       'query.inc',
       'select.inc',
-    ));
+    ]);
     return new $class($table, $alias, $this, $options);
   }
 
@@ -890,8 +890,8 @@ abstract class DatabaseConnection {
    *
    * @see InsertQuery
    */
-  public function insert($table, array $options = array()) {
-    $class = $this->getDriverClass('InsertQuery', array('query.inc'));
+  public function insert($table, array $options = []) {
+    $class = $this->getDriverClass('InsertQuery', ['query.inc']);
     return new $class($this, $table, $options);
   }
 
@@ -908,8 +908,8 @@ abstract class DatabaseConnection {
    *
    * @see MergeQuery
    */
-  public function merge($table, array $options = array()) {
-    $class = $this->getDriverClass('MergeQuery', array('query.inc'));
+  public function merge($table, array $options = []) {
+    $class = $this->getDriverClass('MergeQuery', ['query.inc']);
     return new $class($this, $table, $options);
   }
 
@@ -927,8 +927,8 @@ abstract class DatabaseConnection {
    *
    * @see UpdateQuery
    */
-  public function update($table, array $options = array()) {
-    $class = $this->getDriverClass('UpdateQuery', array('query.inc'));
+  public function update($table, array $options = []) {
+    $class = $this->getDriverClass('UpdateQuery', ['query.inc']);
     return new $class($this, $table, $options);
   }
 
@@ -945,8 +945,8 @@ abstract class DatabaseConnection {
    *
    * @see DeleteQuery
    */
-  public function delete($table, array $options = array()) {
-    $class = $this->getDriverClass('DeleteQuery', array('query.inc'));
+  public function delete($table, array $options = []) {
+    $class = $this->getDriverClass('DeleteQuery', ['query.inc']);
     return new $class($this, $table, $options);
   }
 
@@ -963,8 +963,8 @@ abstract class DatabaseConnection {
    *
    * @see TruncateQuery
    */
-  public function truncate($table, array $options = array()) {
-    $class = $this->getDriverClass('TruncateQuery', array('query.inc'));
+  public function truncate($table, array $options = []) {
+    $class = $this->getDriverClass('TruncateQuery', ['query.inc']);
     return new $class($this, $table, $options);
   }
 
@@ -978,7 +978,7 @@ abstract class DatabaseConnection {
    */
   public function schema() {
     if (empty($this->schema)) {
-      $class = $this->getDriverClass('DatabaseSchema', array('schema.inc'));
+      $class = $this->getDriverClass('DatabaseSchema', ['schema.inc']);
       if (class_exists($class)) {
         $this->schema = new $class($this);
       }
@@ -1289,7 +1289,7 @@ abstract class DatabaseConnection {
    *   A database query result resource, or NULL if the query was not executed
    *   correctly.
    */
-  abstract public function queryRange($query, $from, $count, array $args = array(), array $options = array());
+  abstract public function queryRange($query, $from, $count, array $args = [], array $options = []);
 
   /**
    * Generates a temporary table name.
@@ -1324,7 +1324,7 @@ abstract class DatabaseConnection {
    * @return string
    *   The name of the temporary table.
    */
-  abstract public function queryTemporary($query, array $args = array(), array $options = array());
+  abstract public function queryTemporary($query, array $args = [], array $options = []);
 
   /**
    * Returns the type of database driver.
@@ -1501,7 +1501,7 @@ abstract class Database {
    *
    * @var array
    */
-  static protected $connections = array();
+  static protected $connections = [];
 
   /**
    * A processed copy of the database connection information from settings.php.
@@ -1515,7 +1515,7 @@ abstract class Database {
    *
    * @var array
    */
-  static protected $ignoreTargets = array();
+  static protected $ignoreTargets = [];
 
   /**
    * The key of the currently active database connection.
@@ -1536,7 +1536,7 @@ abstract class Database {
    *
    * @var array
    */
-  static protected $logs = array();
+  static protected $logs = [];
 
   /**
    * Starts logging a given logging key on the specified connection.
@@ -1678,7 +1678,7 @@ abstract class Database {
   final public static function parseConnectionInfo() {
     global $databases;
 
-    $database_info = is_array($databases) ? $databases : array();
+    $database_info = is_array($databases) ? $databases : [];
     foreach ($database_info as $index => $info) {
       foreach ($database_info[$index] as $target => $value) {
         // If there is no "driver" property, then we assume it's an array of
@@ -1691,15 +1691,15 @@ abstract class Database {
         // Parse the prefix information.
         if (!isset($database_info[$index][$target]['prefix'])) {
           // Default to an empty prefix.
-          $database_info[$index][$target]['prefix'] = array(
+          $database_info[$index][$target]['prefix'] = [
             'default' => '',
-          );
+          ];
         }
         elseif (!is_array($database_info[$index][$target]['prefix'])) {
           // Transform the flat form into an array form.
-          $database_info[$index][$target]['prefix'] = array(
+          $database_info[$index][$target]['prefix'] = [
             'default' => $database_info[$index][$target]['prefix'],
-          );
+          ];
         }
       }
     }
@@ -1930,7 +1930,7 @@ abstract class Database {
    * @param array $files
    *   The name of the files the driver specific class can be.
    */
-  public static function loadDriverFile($driver, array $files = array()) {
+  public static function loadDriverFile($driver, array $files = []) {
     static $base_path;
 
     if (empty($base_path)) {
@@ -1941,7 +1941,7 @@ abstract class Database {
     foreach ($files as $file) {
       // Load the base file first so that classes extending base classes will
       // have the base class loaded.
-      foreach (array("$base_path/$file", "$driver_base_path/$file") as $filename) {
+      foreach (["$base_path/$file", "$driver_base_path/$file"] as $filename) {
         // The OS caches file_exists() and PHP caches require_once(), so
         // we'll let both of those take care of performance here.
         if (file_exists($filename)) {
@@ -2353,7 +2353,7 @@ class DatabaseStatementBase extends PDOStatement implements DatabaseStatementInt
    * {@inheritdoc}
    */
   #[\ReturnTypeWillChange]
-  public function execute($args = array(), $options = array()) {
+  public function execute($args = [], $options = []) {
     if (isset($options['fetch'])) {
       if (is_string($options['fetch'])) {
         // Default to an object. Note: db fields will be added to the object
@@ -2399,7 +2399,7 @@ class DatabaseStatementBase extends PDOStatement implements DatabaseStatementInt
    * {@inheritdoc}
    */
   public function fetchAllAssoc($key, $fetch = NULL) {
-    $return = array();
+    $return = [];
     if (isset($fetch)) {
       if (is_string($fetch)) {
         $this->setFetchMode(PDO::FETCH_CLASS, $fetch);
@@ -2421,7 +2421,7 @@ class DatabaseStatementBase extends PDOStatement implements DatabaseStatementInt
    * {@inheritdoc}
    */
   public function fetchAllKeyed($key_index = 0, $value_index = 1) {
-    $return = array();
+    $return = [];
     $this->setFetchMode(PDO::FETCH_NUM);
     foreach ($this as $record) {
       $return[$record[$key_index]] = $record[$value_index];
@@ -2462,7 +2462,7 @@ class DatabaseStatementEmpty implements Iterator, DatabaseStatementInterface {
   /**
    * {@inheritdoc}
    */
-  public function execute($args = array(), $options = array()) {
+  public function execute($args = [], $options = []) {
     return FALSE;
   }
 
@@ -2483,7 +2483,7 @@ class DatabaseStatementEmpty implements Iterator, DatabaseStatementInterface {
   /**
    * {@inheritdoc}
    */
-  public function setFetchMode($mode, $a1 = NULL, $a2 = array()) {
+  public function setFetchMode($mode, $a1 = NULL, $a2 = []) {
     return NULL;
   }
 
@@ -2518,29 +2518,29 @@ class DatabaseStatementEmpty implements Iterator, DatabaseStatementInterface {
   /**
    * {@inheritdoc}
    */
-  public function fetchAll($mode = NULL, $column_index = NULL, $constructor_arguments = array()) {
-    return array();
+  public function fetchAll($mode = NULL, $column_index = NULL, $constructor_arguments = []) {
+    return [];
   }
 
   /**
    * {@inheritdoc}
    */
   public function fetchCol($index = 0) {
-    return array();
+    return [];
   }
 
   /**
    * {@inheritdoc}
    */
   public function fetchAllKeyed($key_index = 0, $value_index = 1) {
-    return array();
+    return [];
   }
 
   /**
    * {@inheritdoc}
    */
   public function fetchAllAssoc($key, $fetch = NULL) {
-    return array();
+    return [];
   }
 
   /* Implementations of Iterator. */
@@ -2618,7 +2618,7 @@ class DatabaseStatementEmpty implements Iterator, DatabaseStatementInterface {
  *
  * @see DatabaseConnection::defaultOptions()
  */
-function db_query($query, array $args = array(), array $options = array()) {
+function db_query($query, array $args = [], array $options = []) {
   if (empty($options['target'])) {
     $options['target'] = 'default';
   }
@@ -2650,7 +2650,7 @@ function db_query($query, array $args = array(), array $options = array()) {
  *
  * @see DatabaseConnection::defaultOptions()
  */
-function db_query_range($query, $from, $count, array $args = array(), array $options = array()) {
+function db_query_range($query, $from, $count, array $args = [], array $options = []) {
   if (empty($options['target'])) {
     $options['target'] = 'default';
   }
@@ -2680,7 +2680,7 @@ function db_query_range($query, $from, $count, array $args = array(), array $opt
  *
  * @see DatabaseConnection::defaultOptions()
  */
-function db_query_temporary($query, array $args = array(), array $options = array()) {
+function db_query_temporary($query, array $args = [], array $options = []) {
   if (empty($options['target'])) {
     $options['target'] = 'default';
   }
@@ -2699,7 +2699,7 @@ function db_query_temporary($query, array $args = array(), array $options = arra
  * @return InsertQuery
  *   A new InsertQuery object for this connection.
  */
-function db_insert($table, array $options = array()) {
+function db_insert($table, array $options = []) {
   if (_db_is_replica($options)) {
     $options['target'] = 'default';
   }
@@ -2717,7 +2717,7 @@ function db_insert($table, array $options = array()) {
  * @return MergeQuery
  *   A new MergeQuery object for this connection.
  */
-function db_merge($table, array $options = array()) {
+function db_merge($table, array $options = []) {
   if (_db_is_replica($options)) {
     $options['target'] = 'default';
   }
@@ -2735,7 +2735,7 @@ function db_merge($table, array $options = array()) {
  * @return UpdateQuery
  *   A new UpdateQuery object for this connection.
  */
-function db_update($table, array $options = array()) {
+function db_update($table, array $options = []) {
   if (_db_is_replica($options)) {
     $options['target'] = 'default';
   }
@@ -2753,7 +2753,7 @@ function db_update($table, array $options = array()) {
  * @return DeleteQuery
  *   A new DeleteQuery object for this connection.
  */
-function db_delete($table, array $options = array()) {
+function db_delete($table, array $options = []) {
   if (_db_is_replica($options)) {
     $options['target'] = 'default';
   }
@@ -2771,7 +2771,7 @@ function db_delete($table, array $options = array()) {
  * @return TruncateQuery
  *   A new TruncateQuery object for this connection.
  */
-function db_truncate($table, array $options = array()) {
+function db_truncate($table, array $options = []) {
   if (_db_is_replica($options)) {
     $options['target'] = 'default';
   }
@@ -2792,7 +2792,7 @@ function db_truncate($table, array $options = array()) {
  * @return SelectQuery
  *   A new SelectQuery object for this connection.
  */
-function db_select($table, $alias = NULL, array $options = array()) {
+function db_select($table, $alias = NULL, array $options = []) {
   if (empty($options['target'])) {
     $options['target'] = 'default';
   }
@@ -2811,7 +2811,7 @@ function db_select($table, $alias = NULL, array $options = array()) {
  * @return DatabaseTransaction
  *   A new DatabaseTransaction object for this connection.
  */
-function db_transaction($name = NULL, array $options = array()) {
+function db_transaction($name = NULL, array $options = []) {
   if (empty($options['target'])) {
     $options['target'] = 'default';
   }
@@ -2913,7 +2913,7 @@ function db_driver() {
  *   An array of options to control which connection is closed. Only the target
  *   key has any meaning in this case.
  */
-function db_close(array $options = array()) {
+function db_close(array $options = []) {
   if (empty($options['target'])) {
     $options['target'] = NULL;
   }
@@ -3125,7 +3125,7 @@ function db_drop_table($table) {
  *
  * @see db_change_field()
  */
-function db_add_field($table, $field, array $spec, array $keys_new = array()) {
+function db_add_field($table, $field, array $spec, array $keys_new = []) {
   Database::getConnection()->schema()->addField($table, $field, $spec, $keys_new);
 }
 
@@ -3319,7 +3319,7 @@ function db_drop_index($table, $name) {
  *
  * @return void
  */
-function db_change_field($table, $field, $field_new, array $spec, array $keys_new = array()) {
+function db_change_field($table, $field, $field_new, array $spec, array $keys_new = []) {
   Database::getConnection()->schema()->changeField($table, $field, $field_new, $spec, $keys_new);
 }
 

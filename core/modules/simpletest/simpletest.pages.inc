@@ -8,68 +8,68 @@
  * List tests arranged in groups that can be selected and run.
  */
 function simpletest_test_form($form) {
-  $form['filter'] = array(
+  $form['filter'] = [
     '#type' => 'container',
-    '#attributes' => array(
-      'class' => array('table-filter', 'js-show'),
-    ),
-  );
-  $form['filter']['search'] = array(
+    '#attributes' => [
+      'class' => ['table-filter', 'js-show'],
+    ],
+  ];
+  $form['filter']['search'] = [
     '#type' => 'textfield',
     '#title' => t('Filter'),
     '#size' => 30,
     '#placeholder' => t('Search...'),
-    '#attributes' => array(
-      'class' => array('simpletest-filter-text'),
+    '#attributes' => [
+      'class' => ['simpletest-filter-text'],
       'autocomplete' => 'off',
       'title' => t('Enter a part of the test name or description to filter.'),
-    ),
-  );
+    ],
+  ];
 
-  $form['tests'] = array(
+  $form['tests'] = [
     '#type' => 'fieldset',
     '#title' => t('Tests'),
     '#description' => t('Select the test(s) or test group(s) you would like to run, and click <em>Run tests</em>.'),
-  );
+  ];
 
-  $form['tests']['table'] = array(
+  $form['tests']['table'] = [
     '#theme' => 'simpletest_test_table',
-  );
+  ];
 
   // Generate the list of tests arranged by group.
   $groups = simpletest_test_get_all();
   foreach ($groups as $group => $tests) {
-    $form['tests']['table'][$group] = array(
+    $form['tests']['table'][$group] = [
       '#collapsed' => TRUE,
-    );
+    ];
 
     foreach ($tests as $class => $info) {
-      $form['tests']['table'][$group][$class] = array(
+      $form['tests']['table'][$group][$class] = [
         '#type' => 'checkbox',
         '#title' => $info['name'],
         '#description' => $info['description'],
-        '#parents' => array('tests', $class),
-      );
+        '#parents' => ['tests', $class],
+      ];
     }
   }
 
   // Operation buttons.
-  $form['tests']['op'] = array(
+  $form['tests']['op'] = [
     '#type' => 'submit',
     '#value' => t('Run tests'),
-  );
-  $form['clean'] = array(
+  ];
+  $form['clean'] = [
     '#type' => 'fieldset',
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
     '#title' => t('Clean test environment'),
     '#description' => t('Remove tables with the prefix "simpletest" and temporary directories that are left over from tests that crashed. This is intended for developers when creating tests.'),
-  );
-  $form['clean']['op'] = array(
+  ];
+  $form['clean']['op'] = [
     '#type' => 'submit',
     '#value' => t('Clean environment'),
-    '#submit' => array('simpletest_clean_environment'),
-  );
+    '#submit' => ['simpletest_clean_environment'],
+  ];
 
   return $form;
 }
@@ -93,7 +93,7 @@ function simpletest_test_form_submit($form, &$form_state) {
  */
 function simpletest_result_form($form, &$form_state, $test_id) {
   // Make sure there are test results to display and a re-run is not being performed.
-  $results = array();
+  $results = [];
   if (is_numeric($test_id) && !$results = simpletest_result_get($test_id)) {
     backdrop_set_message(t('No test results to display.'), 'error');
     backdrop_goto('admin/config/development/testing');
@@ -104,43 +104,43 @@ function simpletest_result_form($form, &$form_state, $test_id) {
   backdrop_add_css(backdrop_get_path('module', 'simpletest') . '/css/simpletest.css');
 
   // Keep track of which test cases passed or failed.
-  $filter = array(
-    'pass' => array(),
-    'fail' => array(),
-  );
+  $filter = [
+    'pass' => [],
+    'fail' => [],
+  ];
 
   // Summary result fieldset.
-  $form['result'] = array(
+  $form['result'] = [
     '#type' => 'fieldset',
     '#title' => t('Results'),
-  );
-  $form['result']['summary'] = $summary = array(
+  ];
+  $form['result']['summary'] = $summary = [
     '#theme' => 'simpletest_result_summary',
     '#pass' => 0,
     '#fail' => 0,
     '#exception' => 0,
     '#debug' => 0,
-  );
+  ];
 
   // Cycle through each test group.
-  $header = array(t('Message'), t('Group'), t('Filename'), t('Line'), t('Function'), array('colspan' => 2, 'data' => t('Status')));
-  $form['result']['results'] = array();
+  $header = [t('Message'), t('Group'), t('Filename'), t('Line'), t('Function'), ['colspan' => 2, 'data' => t('Status')]];
+  $form['result']['results'] = [];
   foreach ($results as $group => $assertions) {
     // Create group fieldset with summary information.
     $info = simpletest_test_get_by_class($group);
-    $form['result']['results'][$group] = array(
+    $form['result']['results'][$group] = [
       '#type' => 'fieldset',
       '#title' => $info['name'],
       '#description' => $info['description'],
       '#collapsible' => TRUE,
-    );
+    ];
     $form['result']['results'][$group]['summary'] = $summary;
     $group_summary = &$form['result']['results'][$group]['summary'];
 
     // Create table of assertions for the group.
-    $rows = array();
+    $rows = [];
     foreach ($assertions as $assertion) {
-      $row = array();
+      $row = [];
       $row[] = strtoupper(str_replace('simpletest-', '', $assertion->status)) . ': ' . $assertion->message;
       $row[] = $assertion->message_group;
       $row[] = backdrop_basename($assertion->file);
@@ -152,16 +152,16 @@ function simpletest_result_form($form, &$form_state, $test_id) {
       if ($assertion->message_group == 'Debug') {
         $class = 'simpletest-debug';
       }
-      $rows[] = array('data' => $row, 'class' => array($class));
+      $rows[] = ['data' => $row, 'class' => [$class]];
 
       $group_summary['#' . $assertion->status]++;
       $form['result']['summary']['#' . $assertion->status]++;
     }
-    $form['result']['results'][$group]['table'] = array(
+    $form['result']['results'][$group]['table'] = [
       '#theme' => 'table',
       '#header' => $header,
       '#rows' => $rows,
-    );
+    ];
 
     // Set summary information.
     $group_summary['#ok'] = $group_summary['#fail'] + $group_summary['#exception'] == 0;
@@ -176,44 +176,44 @@ function simpletest_result_form($form, &$form_state, $test_id) {
 
   // Actions.
   $form['#action'] = url('admin/config/development/testing/results/re-run');
-  $form['action'] = array(
+  $form['action'] = [
     '#type' => 'fieldset',
     '#title' => t('Actions'),
-    '#attributes' => array('class' => array('container-inline')),
+    '#attributes' => ['class' => ['container-inline']],
     '#weight' => -11,
-  );
+  ];
 
-  $form['action']['filter'] = array(
+  $form['action']['filter'] = [
     '#type' => 'select',
     '#title' => t('Filter'),
-    '#options' => array(
-      'all' => t('All (@count)', array('@count' => count($filter['pass']) + count($filter['fail']))),
-      'pass' => t('Pass (@count)', array('@count' => count($filter['pass']))),
-      'fail' => t('Fail (@count)', array('@count' => count($filter['fail']))),
-    ),
-  );
+    '#options' => [
+      'all' => t('All (@count)', ['@count' => count($filter['pass']) + count($filter['fail'])]),
+      'pass' => t('Pass (@count)', ['@count' => count($filter['pass'])]),
+      'fail' => t('Fail (@count)', ['@count' => count($filter['fail'])]),
+    ],
+  ];
   $form['action']['filter']['#default_value'] = ($filter['fail'] ? 'fail' : 'all');
 
   // Categorized test classes for to be used with selected filter value.
-  $form['action']['filter_pass'] = array(
+  $form['action']['filter_pass'] = [
     '#type' => 'hidden',
     '#default_value' => implode(',', $filter['pass']),
-  );
-  $form['action']['filter_fail'] = array(
+  ];
+  $form['action']['filter_fail'] = [
     '#type' => 'hidden',
     '#default_value' => implode(',', $filter['fail']),
-  );
+  ];
 
-  $form['action']['op'] = array(
+  $form['action']['op'] = [
     '#type' => 'submit',
     '#value' => t('Run tests'),
-  );
+  ];
 
-  $form['action']['return'] = array(
+  $form['action']['return'] = [
     '#type' => 'link',
     '#title' => t('Return to list'),
     '#href' => 'admin/config/development/testing',
-  );
+  ];
 
   if (is_numeric($test_id)) {
     simpletest_clean_results_table($test_id);
@@ -226,8 +226,8 @@ function simpletest_result_form($form, &$form_state, $test_id) {
  * Re-run the tests that match the filter.
  */
 function simpletest_result_form_submit($form, &$form_state) {
-  $pass = $form_state['values']['filter_pass'] ? explode(',', $form_state['values']['filter_pass']) : array();
-  $fail = $form_state['values']['filter_fail'] ? explode(',', $form_state['values']['filter_fail']) : array();
+  $pass = $form_state['values']['filter_pass'] ? explode(',', $form_state['values']['filter_pass']) : [];
+  $fail = $form_state['values']['filter_fail'] ? explode(',', $form_state['values']['filter_fail']) : [];
 
   if ($form_state['values']['filter'] == 'all') {
     $classes = array_merge($pass, $fail);
@@ -244,12 +244,12 @@ function simpletest_result_form_submit($form, &$form_state) {
     return;
   }
 
-  $form_state_execute = array('values' => array());
+  $form_state_execute = ['values' => []];
   foreach ($classes as $class) {
     $form_state_execute['values']['tests'][$class] = 1;
   }
 
-  simpletest_test_form_submit(array(), $form_state_execute);
+  simpletest_test_form_submit([], $form_state_execute);
   $form_state['redirect'] = $form_state_execute['redirect'];
 }
 
@@ -267,10 +267,10 @@ function simpletest_result_get($test_id) {
     ->orderBy('message_id')
     ->execute();
 
-  $test_results = array();
+  $test_results = [];
   foreach ($results as $result) {
     if (!isset($test_results[$result->test_class])) {
-      $test_results[$result->test_class] = array();
+      $test_results[$result->test_class] = [];
     }
     $test_results[$result->test_class][] = $result;
   }
@@ -288,12 +288,12 @@ function simpletest_result_status_image($status) {
   static $map;
 
   if (!isset($map)) {
-    $map = array(
-      'pass' => theme('image', array('path' => 'core/misc/watchdog-ok.png', 'width' => 18, 'height' => 18, 'alt' => t('Pass'))),
-      'fail' => theme('image', array('path' => 'core/misc/watchdog-error.png', 'width' => 18, 'height' => 18, 'alt' => t('Fail'))),
-      'exception' => theme('image', array('path' => 'core/misc/watchdog-warning.png', 'width' => 18, 'height' => 18, 'alt' => t('Exception'))),
-      'debug' => theme('image', array('path' => 'core/misc/watchdog-warning.png', 'width' => 18, 'height' => 18, 'alt' => t('Debug'))),
-    );
+    $map = [
+      'pass' => theme('image', ['path' => 'core/misc/watchdog-ok.png', 'width' => 18, 'height' => 18, 'alt' => t('Pass')]),
+      'fail' => theme('image', ['path' => 'core/misc/watchdog-error.png', 'width' => 18, 'height' => 18, 'alt' => t('Fail')]),
+      'exception' => theme('image', ['path' => 'core/misc/watchdog-warning.png', 'width' => 18, 'height' => 18, 'alt' => t('Exception')]),
+      'debug' => theme('image', ['path' => 'core/misc/watchdog-warning.png', 'width' => 18, 'height' => 18, 'alt' => t('Debug')]),
+    ];
   }
   if (isset($map[$status])) {
     return $map[$status];
@@ -310,73 +310,73 @@ function simpletest_result_status_image($status) {
  */
 function simpletest_settings_form($form, &$form_state) {
   $config = config('simpletest.settings');
-  $form['general'] = array(
+  $form['general'] = [
     '#type' => 'fieldset',
     '#title' => t('General'),
-  );
-  $form['general']['simpletest_clear_results'] = array(
+  ];
+  $form['general']['simpletest_clear_results'] = [
     '#type' => 'checkbox',
     '#title' => t('Clear results after each complete test suite run'),
     '#description' => t('By default SimpleTest will clear the results after they have been viewed on the results page, but in some cases it may be useful to leave the results in the database. The results can then be viewed at <em>admin/config/development/testing/[test_id]</em>. The test ID can be found in the database, simpletest table, or kept track of when viewing the results the first time. Additionally, some modules may provide more analysis or features that require this setting to be disabled.'),
     '#default_value' => $config->get('simpletest_clear_results'),
-  );
-  $form['general']['simpletest_verbose'] = array(
+  ];
+  $form['general']['simpletest_verbose'] = [
     '#type' => 'checkbox',
     '#title' => t('Provide verbose information when running tests'),
     '#description' => t('The verbose data will be printed along with the standard assertions and is useful for debugging. The verbose data will be erased between each test suite run. The verbose data output is very detailed and should only be used when debugging.'),
     '#default_value' => $config->get('simpletest_verbose'),
-  );
-  $form['general']['simpletest_cache'] = array(
+  ];
+  $form['general']['simpletest_cache'] = [
     '#type' => 'checkbox',
     '#title' => t('Cache installation profiles'),
     '#description' => t('Instead of multiple installations of Backdrop once for each test, each installation profile is installed only once, and its initial state (database tables and config files) is cached and reused. If you are making database changes, you will need to clean the test environment for the changes to show up in the tests.'),
     '#default_value' => $config->get('simpletest_cache'),
-  );
+  ];
 
-  $form['httpauth'] = array(
+  $form['httpauth'] = [
     '#type' => 'fieldset',
     '#title' => t('HTTP authentication'),
     '#description' => t('HTTP auth settings to be used by the SimpleTest browser during testing. Useful when the site requires basic HTTP authentication.'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
-  );
-  $form['httpauth']['simpletest_httpauth_method'] = array(
+  ];
+  $form['httpauth']['simpletest_httpauth_method'] = [
     '#type' => 'select',
     '#title' => t('Method'),
-    '#options' => array(
+    '#options' => [
       CURLAUTH_BASIC => t('Basic'),
       CURLAUTH_DIGEST => t('Digest'),
       CURLAUTH_GSSNEGOTIATE => t('GSS negotiate'),
       CURLAUTH_NTLM => t('NTLM'),
       CURLAUTH_ANY => t('Any'),
       CURLAUTH_ANYSAFE => t('Any safe'),
-    ),
+    ],
     '#default_value' => $config->get('simpletest_method'),
-  );
+  ];
   $username = $config->get('simpletest_username');
   $password = $config->get('simpletest_password');
-  $form['httpauth']['simpletest_httpauth_username'] = array(
+  $form['httpauth']['simpletest_httpauth_username'] = [
     '#type' => 'textfield',
     '#title' => t('Username'),
     '#default_value' => $username,
-  );
+  ];
   if (!empty($username) && !empty($password)) {
     $form['httpauth']['simpletest_httpauth_username']['#description'] = t('Leave this blank to delete both the existing username and password.');
   }
-  $form['httpauth']['simpletest_httpauth_password'] = array(
+  $form['httpauth']['simpletest_httpauth_password'] = [
     '#type' => 'password',
     '#title' => t('Password'),
     '#password_toggle' => TRUE,
-  );
+  ];
   if ($password) {
     $form['httpauth']['simpletest_httpauth_password']['#description'] = t('To change the password, enter the new password here.');
   }
 
   $form['actions']['#type'] = 'actions';
-  $form['actions']['submit'] = array(
+  $form['actions']['submit'] = [
     '#type' => 'submit',
     '#value' => t('Save configuration')
-  );
+  ];
   return $form;
 }
 

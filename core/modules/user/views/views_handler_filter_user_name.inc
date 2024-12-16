@@ -13,9 +13,9 @@ class views_handler_filter_user_name extends views_handler_filter_in_operator {
   var $always_multiple = TRUE;
 
   function value_form(&$form, &$form_state) {
-    $values = array();
+    $values = [];
     if ($this->value) {
-      $result = db_query("SELECT * FROM {users} u WHERE uid IN (:uids)", array(':uids' => $this->value));
+      $result = db_query("SELECT * FROM {users} u WHERE uid IN (:uids)", [':uids' => $this->value]);
       foreach ($result as $account) {
         if ($account->uid) {
           $values[] = $account->name;
@@ -28,12 +28,12 @@ class views_handler_filter_user_name extends views_handler_filter_in_operator {
 
     sort($values);
     $default_value = implode(', ', $values);
-    $form['value'] = array(
+    $form['value'] = [
       '#type' => 'textfield',
       '#title' => t('Usernames'),
       '#default_value' => $default_value,
       '#autocomplete_path' => 'admin/views/ajax/autocomplete/user',
-    );
+    ];
 
     if (!empty($form_state['exposed']) && !isset($form_state['input'][$this->options['expose']['identifier']])) {
       $form_state['input'][$this->options['expose']['identifier']] = $default_value;
@@ -102,10 +102,10 @@ class views_handler_filter_user_name extends views_handler_filter_in_operator {
    * handle the multiple input sources.
    */
   function validate_user_strings(&$form, $values) {
-    $uids = array();
-    $placeholders = array();
-    $args = array();
-    $results = array();
+    $uids = [];
+    $placeholders = [];
+    $args = [];
+    $results = [];
     foreach ($values as $value) {
       if (strtolower($value) == 'anonymous') {
         $uids[] = 0;
@@ -121,14 +121,14 @@ class views_handler_filter_user_name extends views_handler_filter_in_operator {
       return $uids;
     }
 
-    $result = db_query("SELECT * FROM {users} WHERE name IN (:names)", array(':names' => $args));
+    $result = db_query("SELECT * FROM {users} WHERE name IN (:names)", [':names' => $args]);
     foreach ($result as $account) {
       unset($missing[strtolower($account->name)]);
       $uids[] = $account->uid;
     }
 
     if ($missing) {
-      form_error($form, format_plural(count($missing), 'Unable to find user: @users', 'Unable to find users: @users', array('@users' => implode(', ', array_keys($missing)))));
+      form_error($form, format_plural(count($missing), 'Unable to find user: @users', 'Unable to find users: @users', ['@users' => implode(', ', array_keys($missing))]));
     }
 
     return $uids;
@@ -143,10 +143,10 @@ class views_handler_filter_user_name extends views_handler_filter_in_operator {
 
   function admin_summary() {
     // set up $this->value_options for the parent summary
-    $this->value_options = array();
+    $this->value_options = [];
 
     if ($this->value) {
-      $result = db_query("SELECT * FROM {users} u WHERE uid IN (:uids)", array(':uids' => $this->value));
+      $result = db_query("SELECT * FROM {users} u WHERE uid IN (:uids)", [':uids' => $this->value]);
 
       foreach ($result as $account) {
         if ($account->uid) {

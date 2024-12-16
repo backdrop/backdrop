@@ -23,39 +23,39 @@ class views_handler_field_prerender_list extends views_handler_field {
    *
    * @var array
    */
-  var $items = array();
+  var $items = [];
 
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['type'] = array('default' => 'separator');
-    $options['separator'] = array('default' => ', ');
+    $options['type'] = ['default' => 'separator'];
+    $options['separator'] = ['default' => ', '];
 
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
-    $form['type'] = array(
+    $form['type'] = [
       '#type' => 'radios',
       '#title' => t('Display type'),
-      '#options' => array(
+      '#options' => [
         'ul' => t('Unordered list'),
         'ol' => t('Ordered list'),
         'separator' => t('Simple separator'),
-      ),
+      ],
       '#default_value' => $this->options['type'],
-    );
+    ];
 
-    $form['separator'] = array(
+    $form['separator'] = [
       '#type' => 'textfield',
       '#title' => t('Separator'),
       '#default_value' => $this->options['separator'],
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[type]"]' => array('value' => 'separator'),
-        ),
-      ),
-    );
+      '#states' => [
+        'visible' => [
+          ':input[name="options[type]"]' => ['value' => 'separator'],
+        ],
+      ],
+    ];
     parent::options_form($form, $form_state);
   }
 
@@ -74,11 +74,11 @@ class views_handler_field_prerender_list extends views_handler_field {
       }
       else {
         return theme('item_list',
-          array(
+          [
             'items' => $this->items[$field],
             'title' => NULL,
             'type' => $this->options['type']
-          ));
+          ]);
       }
     }
   }
@@ -96,11 +96,11 @@ class views_handler_field_prerender_list extends views_handler_field {
       }
       else {
         return theme('item_list',
-          array(
+          [
             'items' => $items,
             'title' => NULL,
             'type' => $this->options['type']
-          ));
+          ]);
       }
     }
   }
@@ -122,7 +122,7 @@ class views_handler_field_prerender_list extends views_handler_field {
       return $this->items[$field];
     }
 
-    return array();
+    return [];
   }
 
   /**

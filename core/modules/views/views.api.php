@@ -317,25 +317,25 @@ function hook_views_data() {
   // views (and not just being brought in as a relationship). In reality this
   // is not very useful for this table, as it isn't really a distinct object of
   // its own, but it makes a good example.
-  $data['example_table']['table']['base'] = array(
+  $data['example_table']['table']['base'] = [
     'field' => 'nid', // This is the identifier field for the view.
     'title' => t('Example table'),
     'help' => t('Example table contains example content and can be related to nodes.'),
     'weight' => -10,
-  );
+  ];
 
   // This table references the {node} table. The declaration below creates an
   // 'implicit' relationship to the node table, so that when 'node' is the base
   // table, the fields are automatically available.
-  $data['example_table']['table']['join'] = array(
+  $data['example_table']['table']['join'] = [
     // Index this array by the table name to which this table refers.
     // 'left_field' is the primary key in the referenced table.
     // 'field' is the foreign key in this table.
-    'node' => array(
+    'node' => [
       'left_field' => 'nid',
       'field' => 'nid',
-    ),
-  );
+    ],
+  ];
 
   // Next, describe each of the individual fields in this table to Views. This
   // is done by describing $data['example_table']['FIELD_NAME']. All text should
@@ -355,14 +355,14 @@ function hook_views_data() {
   // The handler descriptions are described with examples below.
 
   // Node ID table field.
-  $data['example_table']['nid'] = array(
+  $data['example_table']['nid'] = [
     'title' => t('Example content'),
     'help' => t('Some example content that references a node.'),
     // Define a relationship to the {node} table, so example_table views can add
     // a relationship to nodes. If you want to define a relationship the other
     // direction, use hook_views_data_alter(), or use the 'implicit' join method
     // described above.
-    'relationship' => array(
+    'relationship' => [
       'base' => 'node', // The name of the table to join with.
       'base field' => 'nid', // The name of the field on the joined table.
       // 'field' => 'nid' -- see hook_views_data_alter(); not needed here.
@@ -370,53 +370,53 @@ function hook_views_data() {
       'label' => t('Default label for the relationship'),
       'title' => t('Title shown when adding the relationship'),
       'help' => t('More information on this relationship'),
-    ),
-  );
+    ],
+  ];
 
   // Example plain text field.
-  $data['example_table']['plain_text_field'] = array(
+  $data['example_table']['plain_text_field'] = [
     'title' => t('Plain text field'),
     'help' => t('Just a plain text field.'),
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field',
       'click sortable' => TRUE, // This is use by the table display plugin.
-    ),
-    'sort' => array(
+    ],
+    'sort' => [
       'handler' => 'views_handler_sort',
-    ),
-    'filter' => array(
+    ],
+    'filter' => [
       'handler' => 'views_handler_filter_string',
-    ),
-    'argument' => array(
+    ],
+    'argument' => [
       'handler' => 'views_handler_argument_string',
-    ),
-  );
+    ],
+  ];
 
   // Example numeric text field.
-  $data['example_table']['numeric_field'] = array(
+  $data['example_table']['numeric_field'] = [
     'title' => t('Numeric field'),
     'help' => t('Just a numeric field.'),
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_numeric',
       'click sortable' => TRUE,
-     ),
-    'filter' => array(
+     ],
+    'filter' => [
       'handler' => 'views_handler_filter_numeric',
-    ),
-    'sort' => array(
+    ],
+    'sort' => [
       'handler' => 'views_handler_sort',
-    ),
-  );
+    ],
+  ];
 
   // Example boolean field.
-  $data['example_table']['boolean_field'] = array(
+  $data['example_table']['boolean_field'] = [
     'title' => t('Boolean field'),
     'help' => t('Just an on/off field.'),
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_boolean',
       'click sortable' => TRUE,
-    ),
-    'filter' => array(
+    ],
+    'filter' => [
       'handler' => 'views_handler_filter_boolean_operator',
       // Note that you can override the field-wide label:
       'label' => t('Published'),
@@ -424,27 +424,27 @@ function hook_views_data() {
       'type' => 'yes-no',
       // Use boolean_field = 1 instead of boolean_field <> 0 in WHERE statement.
       'use equal' => TRUE,
-    ),
-    'sort' => array(
+    ],
+    'sort' => [
       'handler' => 'views_handler_sort',
-    ),
-  );
+    ],
+  ];
 
   // Example timestamp field.
-  $data['example_table']['timestamp_field'] = array(
+  $data['example_table']['timestamp_field'] = [
     'title' => t('Timestamp field'),
     'help' => t('Just a timestamp field.'),
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_date',
       'click sortable' => TRUE,
-    ),
-    'sort' => array(
+    ],
+    'sort' => [
       'handler' => 'views_handler_sort_date',
-    ),
-    'filter' => array(
+    ],
+    'filter' => [
       'handler' => 'views_handler_filter_date',
-    ),
-  );
+    ],
+  ];
 
   return $data;
 }
@@ -470,13 +470,13 @@ function hook_views_data_alter(&$data) {
   $data['node']['nid']['title'] = t('Node-Nid');
 
   // This example adds an example field to the users table.
-  $data['users']['example_field'] = array(
+  $data['users']['example_field'] = [
     'title' => t('Example field'),
     'help' => t('Some example content that references a user'),
-    'field' => array(
+    'field' => [
       'handler' => 'modulename_handler_field_example_field',
-    ),
-  );
+    ],
+  ];
 
   // This example changes the handler of the node title field. In this handler
   // you could do stuff, like preview of the node when clicking the node title.
@@ -486,10 +486,10 @@ function hook_views_data_alter(&$data) {
   // add this table using a relationship. Because we don't want to write over
   // the primary key field definition for the {foo}.fid field, we use a dummy
   // field name as the key.
-  $data['foo']['dummy_name'] = array(
+  $data['foo']['dummy_name'] = [
     'title' => t('Example relationship'),
     'help' => t('Example help'),
-    'relationship' => array(
+    'relationship' => [
       'base' => 'example_table', // Table we're joining to.
       'base field' => 'eid', // Field on the joined table.
       'field' => 'fid', // Real field name on the 'foo' table.
@@ -497,8 +497,8 @@ function hook_views_data_alter(&$data) {
       'label' => t('Default label for relationship'),
       'title' => t('Title seen when adding relationship'),
       'help' => t('More information about relationship.'),
-    ),
-  );
+    ],
+  ];
 
   // Note that the $data array is not returned – it is modified by reference.
 }
@@ -590,34 +590,34 @@ function hook_views_data_alter(&$data) {
  *     - uses fields: Set to TRUE to have the row plugin accept field handlers.
  */
 function hook_views_plugins() {
-  $plugins = array();
-  $plugins['argument validator'] = array(
-    'taxonomy_term' => array(
+  $plugins = [];
+  $plugins['argument validator'] = [
+    'taxonomy_term' => [
       'title' => t('Taxonomy term'),
       'handler' => 'views_plugin_argument_validate_taxonomy_term',
       // Declaring path explicitly not necessary for most modules.
       'path' => backdrop_get_path('module', 'views') . '/modules/taxonomy',
-    ),
-  );
+    ],
+  ];
 
-  return array(
+  return [
     'module' => 'views', // This just tells our themes are elsewhere.
-    'argument validator' => array(
-      'taxonomy_term' => array(
+    'argument validator' => [
+      'taxonomy_term' => [
         'title' => t('Taxonomy term'),
         'handler' => 'views_plugin_argument_validate_taxonomy_term',
         'path' => backdrop_get_path('module', 'views') . '/modules/taxonomy', // not necessary for most modules
-      ),
-    ),
-    'argument default' => array(
-      'taxonomy_tid' => array(
+      ],
+    ],
+    'argument default' => [
+      'taxonomy_tid' => [
         'title' => t('Taxonomy term ID from URL'),
         'handler' => 'views_plugin_argument_default_taxonomy_tid',
         'path' => backdrop_get_path('module', 'views') . '/modules/taxonomy',
         'parent' => 'fixed',
-      ),
-    ),
-  );
+      ],
+    ],
+  ];
 }
 
 /**
@@ -646,11 +646,11 @@ function hook_views_plugins_alter(&$plugins) {
  *     conventions like for normal views template files.
  */
 function hook_views_api() {
-  return array(
+  return [
     'api' => 3,
     'path' => backdrop_get_path('module', 'example') . '/includes/views',
     'template path' => backdrop_get_path('module', 'example') . '/templates',
-  );
+  ];
 }
 
 /**
@@ -666,12 +666,12 @@ function hook_views_api() {
 function hook_views_query_substitutions($view) {
   // Example from views_views_query_substitutions().
   global $language_content;
-  return array(
+  return [
     '***CURRENT_VERSION***' => BACKDROP_VERSION,
     '***CURRENT_TIME***' => REQUEST_TIME,
     '***CURRENT_LANGUAGE***' => $language_content->langcode,
     '***DEFAULT_LANGUAGE***' => language_default()->langcode,
-  );
+  ];
 }
 
 /**
@@ -683,9 +683,9 @@ function hook_views_query_substitutions($view) {
  *   to replace them with.
  */
 function hook_views_form_substitutions() {
-  return array(
+  return [
     '<!--views-form-example-substitutions-->' => 'Example Substitution',
-  );
+  ];
 }
 
 /**
@@ -771,7 +771,7 @@ function hook_views_pre_execute(&$view) {
   // view administrators that the query might be heavy. This action could be
   // performed later in the execution process, but not earlier.
   if (count($view->query->tables) > 2 && user_access('administer views')) {
-    backdrop_set_message(t('The view %view may be heavy to execute.', array('%view' => $view->name)), 'warning');
+    backdrop_set_message(t('The view %view may be heavy to execute.', ['%view' => $view->name]), 'warning');
   }
 }
 
@@ -875,11 +875,11 @@ function hook_views_query_alter(&$view, &$query) {
         // If this is the part of the query filtering on title, change the
         // condition to filter on node ID.
         if ($condition['field'] == 'node.title') {
-          $condition = array(
+          $condition = [
             'field' => 'node.nid',
             'value' => $view->exposed_raw_input['title'],
             'operator' => '=',
-          );
+          ];
         }
       }
     }
@@ -911,10 +911,10 @@ function hook_views_query_alter(&$view, &$query) {
 function hook_views_preview_info_alter(&$rows, $view) {
   // Adds information about the tables being queried by the view to the query
   // part of the info box.
-  $rows['query'][] = array(
+  $rows['query'][] = [
     t('<strong>Table queue</strong>'),
     count($view->query->table_queue) . ': (' . implode(', ', array_keys($view->query->table_queue)) . ')',
-  );
+  ];
 }
 
 /**
@@ -933,7 +933,7 @@ function hook_views_preview_info_alter(&$rows, $view) {
 function hook_views_ui_display_top_links_alter(&$links, $view, $display_id) {
   // Put the clone link first in the list.
   if (isset($links['clone'])) {
-    $links = array('clone' => $links['clone']) + $links;
+    $links = ['clone' => $links['clone']] + $links;
   }
 }
 

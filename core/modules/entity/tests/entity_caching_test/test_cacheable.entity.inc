@@ -35,9 +35,9 @@ class TestCacheable extends Entity {
    * Implements EntityInterface::uri().
    */
   public function uri() {
-    return array(
+    return [
       'path' => 'test_cacheable/' . $this->id,
-    );
+    ];
   }
 
   /**

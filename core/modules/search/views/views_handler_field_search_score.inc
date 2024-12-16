@@ -13,8 +13,8 @@ class views_handler_field_search_score extends views_handler_field_numeric {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['alternate_sort'] = array('default' => '');
-    $options['alternate_order'] = array('default' => 'asc');
+    $options['alternate_sort'] = ['default' => ''];
+    $options['alternate_order'] = ['default' => 'asc'];
 
     return $options;
   }
@@ -23,25 +23,25 @@ class views_handler_field_search_score extends views_handler_field_numeric {
     $style_options = $this->view->display_handler->get_option('style_options');
     if (isset($style_options['default']) && $style_options['default'] == $this->options['id']) {
       $handlers = $this->view->display_handler->get_handlers('field');
-      $options = array('' => t('No alternate'));
+      $options = ['' => t('No alternate')];
       foreach ($handlers as $id => $handler) {
         $options[$id] = $handler->ui_name();
       }
 
-      $form['alternate_sort'] = array(
+      $form['alternate_sort'] = [
         '#type' => 'select',
         '#title' => t('Alternative sort'),
         '#description' => t('Pick an alternative default table sort field to use when the search score field is unavailable.'),
         '#options' => $options,
         '#default_value' => $this->options['alternate_sort'],
-      );
+      ];
 
-      $form['alternate_order'] = array(
+      $form['alternate_order'] = [
         '#type' => 'select',
         '#title' => t('Alternate sort order'),
-        '#options' => array('asc' => t('Ascending'), 'desc' => t('Descending')),
+        '#options' => ['asc' => t('Ascending'), 'desc' => t('Descending')],
         '#default_value' => $this->options['alternate_order'],
-      );
+      ];
     }
 
     parent::options_form($form, $form_state);

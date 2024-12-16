@@ -14,12 +14,12 @@ class views_plugin_row_comment_view extends views_plugin_row {
   /**
    * Stores all comments which are preloaded.
    */
-  var $comments = array();
+  var $comments = [];
 
   /**
    * Stores all nodes of all comments which are preloaded.
    */
-  var $nodes = array();
+  var $nodes = [];
 
   function summary_title() {
     return t('Settings');
@@ -27,8 +27,8 @@ class views_plugin_row_comment_view extends views_plugin_row {
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['links'] = array('default' => TRUE, 'bool' => TRUE);
-    $options['view_mode'] = array('default' => 'full');
+    $options['links'] = ['default' => TRUE, 'bool' => TRUE];
+    $options['view_mode'] = ['default' => 'full'];
     return $options;
   }
 
@@ -36,18 +36,18 @@ class views_plugin_row_comment_view extends views_plugin_row {
     parent::options_form($form, $form_state);
 
     $options = $this->options_form_summary_options();
-    $form['view_mode'] = array(
+    $form['view_mode'] = [
       '#type' => 'select',
       '#options' => $options,
       '#title' => t('Display mode'),
       '#default_value' => $this->options['view_mode'],
-     );
+     ];
 
-    $form['links'] = array(
+    $form['links'] = [
       '#type' => 'checkbox',
       '#title' => t('Display links'),
       '#default_value' => $this->options['links'],
-    );
+    ];
   }
 
 
@@ -56,23 +56,23 @@ class views_plugin_row_comment_view extends views_plugin_row {
    */
   function options_form_summary_options() {
     $entity_info = entity_get_info('comment');
-    $options = array();
+    $options = [];
     if (!empty($entity_info['view modes'])) {
       foreach ($entity_info['view modes'] as $mode => $settings) {
         $options[$mode] = $settings['label'];
       }
     }
     if (empty($options)) {
-      $options = array(
+      $options = [
         'full' => t('Full content')
-      );
+      ];
     }
 
     return $options;
   }
 
   function pre_render($result) {
-    $cids = array();
+    $cids = [];
 
     foreach ($result as $row) {
       $cids[] = $row->cid;
@@ -80,7 +80,7 @@ class views_plugin_row_comment_view extends views_plugin_row {
 
     // Load all comments.
     $cresult = comment_load_multiple($cids);
-    $nids = array();
+    $nids = [];
     foreach ($cresult as $comment) {
       $comment->depth = count(explode('.', $comment->thread)) - 1;
       $this->comments[$comment->cid] = $comment;

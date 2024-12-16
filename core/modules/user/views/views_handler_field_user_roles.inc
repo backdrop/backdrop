@@ -12,7 +12,7 @@
 class views_handler_field_user_roles extends views_handler_field_prerender_list {
   function construct() {
     parent::construct();
-    $this->additional_fields['uid'] = array('table' => 'users', 'field' => 'uid');
+    $this->additional_fields['uid'] = ['table' => 'users', 'field' => 'uid'];
   }
 
   function query() {
@@ -21,15 +21,15 @@ class views_handler_field_user_roles extends views_handler_field_prerender_list 
   }
 
   function pre_render(&$values) {
-    $uids = array();
-    $this->items = array();
+    $uids = [];
+    $this->items = [];
 
     foreach ($values as $result) {
       $uids[] = $this->get_value($result, NULL, TRUE);
     }
 
     if ($uids) {
-      $result = db_query("SELECT uid, role FROM {users_roles} WHERE uid IN (:uids)", array(':uids' => $uids));
+      $result = db_query("SELECT uid, role FROM {users_roles} WHERE uid IN (:uids)", [':uids' => $uids]);
       $role_names = user_roles();
       foreach ($result as $role) {
         $this->items[$role->uid][$role->role]['role_label'] = $role_names[$role->role];

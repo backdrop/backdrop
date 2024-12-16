@@ -47,7 +47,7 @@ class SearchQuery extends SelectQueryExtender {
    *
    * @var array
    */
-  protected $keys = array('positive' => array(), 'negative' => array());
+  protected $keys = ['positive' => [], 'negative' => []];
 
   /**
    * Indicates whether the first pass query requires complex conditions (LIKE).
@@ -80,7 +80,7 @@ class SearchQuery extends SelectQueryExtender {
    *
    * @var array
    */
-  protected $words = array();
+  protected $words = [];
 
   /**
    * Multiplier for the normalized search score.
@@ -107,21 +107,21 @@ class SearchQuery extends SelectQueryExtender {
    *
    * @see addScore()
    */
-  protected $scores = array();
+  protected $scores = [];
 
   /**
    * Stores arguments for score expressions.
    *
    * @var array
    */
-  protected $scoresArguments = array();
+  protected $scoresArguments = [];
 
   /**
    * Stores multipliers for score expressions.
    *
    * @var array
    */
-  protected $multiply = array();
+  protected $multiply = [];
 
   /**
    * Whether or not search expressions were ignored.
@@ -218,7 +218,7 @@ class SearchQuery extends SelectQueryExtender {
       $words = search_simplify($match[2]);
       // Re-explode in case simplification added more words, except when
       // matching a phrase.
-      $words = $phrase ? array($words) : preg_split('/ /', $words, -1, PREG_SPLIT_NO_EMPTY);
+      $words = $phrase ? [$words] : preg_split('/ /', $words, -1, PREG_SPLIT_NO_EMPTY);
       // Negative matches.
       if ($match[1] == '-') {
         $this->keys['negative'] = array_merge($this->keys['negative'], $words);
@@ -229,7 +229,7 @@ class SearchQuery extends SelectQueryExtender {
         $last = array_pop($this->keys['positive']);
         // Starting a new OR?
         if (!is_array($last)) {
-          $last = array($last);
+          $last = [$last];
         }
         $this->keys['positive'][] = $last;
         $or = TRUE;
@@ -326,7 +326,7 @@ class SearchQuery extends SelectQueryExtender {
       }
     }
     // Return matching snippet and number of added words.
-    return array($num_new_scores, $num_valid_words);
+    return [$num_new_scores, $num_valid_words];
   }
 
   /**
@@ -348,7 +348,7 @@ class SearchQuery extends SelectQueryExtender {
       return FALSE;
     }
     if ($this->expressionsIgnored) {
-      backdrop_set_message(t('Your search used too many AND/OR expressions. Only the first @count terms were included in this search.', array('@count' => $search_settings_config->get('search_and_or_limit'))), 'warning');
+      backdrop_set_message(t('Your search used too many AND/OR expressions. Only the first @count terms were included in this search.', ['@count' => $search_settings_config->get('search_and_or_limit')]), 'warning');
     }
     $this->executedFirstPass = TRUE;
 
@@ -365,7 +365,7 @@ class SearchQuery extends SelectQueryExtender {
       ->condition('i.type', $this->type)
       ->groupBy('i.type')
       ->groupBy('i.sid')
-      ->having('COUNT(*) >= :matches', array(':matches' => $this->matches));
+      ->having('COUNT(*) >= :matches', [':matches' => $this->matches]);
 
     // Clone the query object to do the firstPass query;
     $first = clone $this->query;
@@ -417,7 +417,7 @@ class SearchQuery extends SelectQueryExtender {
    * @return object
    *   The updated query object.
    */
-  public function addScore($score, $arguments = array(), $multiply = FALSE) {
+  public function addScore($score, $arguments = [], $multiply = FALSE) {
     if ($multiply) {
       $i = count($this->multiply);
       // Modify the score expression so it is multiplied by the multiplier,
@@ -498,7 +498,7 @@ class SearchQuery extends SelectQueryExtender {
     $this
       ->addTag('search_' . $this->type)
       ->addMetaData('normalize', $this->normalize)
-      ->fields('i', array('type', 'sid'));
+      ->fields('i', ['type', 'sid']);
 
     return $this->query->execute();
   }
@@ -521,12 +521,12 @@ class SearchQuery extends SelectQueryExtender {
     // Remove existing fields and expressions, they are not needed for a count
     // query.
     $fields =& $inner->getFields();
-    $fields = array();
+    $fields = [];
     $expressions =& $inner->getExpressions();
-    $expressions = array();
+    $expressions = [];
 
     // Add the sid as the only field and count them as a subquery.
-    $count = db_select($inner->fields('i', array('sid')), NULL, array('target' => 'replica'));
+    $count = db_select($inner->fields('i', ['sid']), NULL, ['target' => 'replica']);
 
     // Add the COUNT() expression.
     $count->addExpression('COUNT(*)');

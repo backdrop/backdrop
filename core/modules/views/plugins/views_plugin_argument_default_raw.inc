@@ -12,8 +12,8 @@
 class views_plugin_argument_default_raw extends views_plugin_argument_default {
   function option_definition() {
     $options = parent::option_definition();
-    $options['index'] = array('default' => '');
-    $options['use_alias'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['index'] = ['default' => ''];
+    $options['use_alias'] = ['default' => FALSE, 'bool' => TRUE];
 
     return $options;
   }
@@ -22,19 +22,19 @@ class views_plugin_argument_default_raw extends views_plugin_argument_default {
     parent::options_form($form, $form_state);
     // Using range(1, 10) will create an array keyed 0-9, which allows arg() to
     // properly function since it is also zero-based.
-    $form['index'] = array(
+    $form['index'] = [
       '#type' => 'select',
       '#title' => t('Path component'),
       '#default_value' => $this->options['index'],
       '#options' => range(1, 10),
       '#description' => t('The numbering starts from 1, e.g. on the page admin/structure/types, the 3rd path component is "types".'),
-    );
-    $form['use_alias'] = array(
+    ];
+    $form['use_alias'] = [
       '#type' => 'checkbox',
       '#title' => t('Use URL alias'),
       '#default_value' => $this->options['use_alias'],
       '#description' => t('Use URL alias instead of internal path.'),
-    );
+    ];
   }
 
   function get_argument() {

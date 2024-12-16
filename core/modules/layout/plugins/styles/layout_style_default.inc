@@ -20,11 +20,11 @@ class LayoutStyle extends LayoutHandler {
    * @param array $data
    *   An array of configuration data.
    */
-  function __construct($plugin_name, array $data = array(), $is_region = FALSE) {
+  function __construct($plugin_name, array $data = [], $is_region = FALSE) {
     parent::__construct($plugin_name, $data);
-    $this->settings += array(
+    $this->settings += [
       'classes' => '',
-    );
+    ];
     $this->is_region = $is_region;
   }
 
@@ -33,12 +33,12 @@ class LayoutStyle extends LayoutHandler {
    */
   function form(&$form, &$form_state) {
     if (!$this->is_region) {
-      $form['classes'] = array(
+      $form['classes'] = [
         '#title' => t('Additional CSS classes'),
         '#type' => 'textfield',
         '#default_value' => $this->settings['classes'],
         '#description' => t('Separate class names with spaces. Example: <code>wrapper clearfix</code>'),
-      );
+      ];
     }
   }
 

@@ -15,7 +15,7 @@
  *   The display being rendered, if applicable.
  */
 function _views_theme_functions($hook, $view, $display = NULL) {
-  $themes = array();
+  $themes = [];
 
   if ($display) {
     $themes[] = $hook . '__' . $view->name . '__' . $display->id;
@@ -54,7 +54,7 @@ function template_preprocess_views_view(&$variables) {
   // Basic classes
   $variables['css_class'] = '';
 
-  $variables['classes'] = array();
+  $variables['classes'] = [];
   $variables['classes'][] = 'view';
   $variables['classes'][] = 'view-' . $variables['css_name'];
   $variables['classes'][] = 'view-id-' . $variables['name'];
@@ -118,11 +118,11 @@ function template_preprocess_views_view(&$variables) {
 
   // If using AJAX, send identifying data about this view.
   if ($view->use_ajax && empty($view->is_attachment) && empty($view->live_preview)) {
-    $settings = array(
-      'views' => array(
+    $settings = [
+      'views' => [
         'ajax_path' => url('views/ajax'),
-        'ajaxViews' => array(
-          'views_dom_id:' . $variables['dom_id'] => array(
+        'ajaxViews' => [
+          'views_dom_id:' . $variables['dom_id'] => [
             'view_name' => $view->name,
             'view_display_id' => $view->current_display,
             'view_args' => check_plain(implode('/', $view->args)),
@@ -134,10 +134,10 @@ function template_preprocess_views_view(&$variables) {
             // To fit multiple views on a page, the programmer may have
             // overridden the display's pager_element.
             'pager_element' => isset($view->query->pager) ? $view->query->pager->get_pager_id() : 0,
-          ),
-        ),
-      ),
-    );
+          ],
+        ],
+      ],
+    ];
 
     backdrop_add_js($settings, 'setting');
     views_add_js('ajax_view');
@@ -169,7 +169,7 @@ function template_preprocess_views_view_fields(&$variables) {
 
   // Loop through the fields for this view.
   $previous_inline = FALSE;
-  $variables['fields'] = array(); // ensure it's at least an empty array.
+  $variables['fields'] = []; // ensure it's at least an empty array.
   foreach ($view->field as $id => $field) {
     // render this even if set to exclude so it can be used elsewhere.
     $field_output = $view->style_plugin->get_field($view->row_index, $id);
@@ -347,22 +347,22 @@ function template_preprocess_views_view_field(&$variables) {
 function template_preprocess_views_view_summary(&$variables) {
   $view     = $variables['view'];
   $argument = $view->argument[$view->build_info['summary_level']];
-  $variables['row_classes'] = array();
+  $variables['row_classes'] = [];
 
-  $url_options = array();
+  $url_options = [];
 
   if (!empty($view->exposed_raw_input)) {
     $url_options['query'] = $view->exposed_raw_input;
   }
 
-  $active_urls = backdrop_map_assoc(array(
-    url($_GET['q'], array('alias' => TRUE)), // force system path
+  $active_urls = backdrop_map_assoc([
+    url($_GET['q'], ['alias' => TRUE]), // force system path
     url($_GET['q']), // could be an alias
-  ));
+  ]);
 
   // Collect all arguments foreach row, to be able to alter them for example by the validator.
   // This is not done per single argument value, because this could cause performance problems.
-  $row_args = array();
+  $row_args = [];
 
   foreach ($variables['rows'] as $id => $row) {
     $row_args[$id] = $argument->summary_argument($row);
@@ -395,23 +395,23 @@ function template_preprocess_views_view_summary(&$variables) {
 function template_preprocess_views_view_summary_unformatted(&$variables) {
   $view     = $variables['view'];
   $argument = $view->argument[$view->build_info['summary_level']];
-  $variables['row_classes'] = array();
+  $variables['row_classes'] = [];
 
-  $url_options = array();
+  $url_options = [];
 
   if (!empty($view->exposed_raw_input)) {
     $url_options['query'] = $view->exposed_raw_input;
   }
 
   $count = 0;
-  $active_urls = backdrop_map_assoc(array(
-    url($_GET['q'], array('alias' => TRUE)), // force system path
+  $active_urls = backdrop_map_assoc([
+    url($_GET['q'], ['alias' => TRUE]), // force system path
     url($_GET['q']), // could be an alias
-  ));
+  ]);
 
   // Collect all arguments foreach row, to be able to alter them for example by the validator.
   // This is not done per single argument value, because this could cause performance problems.
-  $row_args = array();
+  $row_args = [];
   foreach ($variables['rows'] as $id => $row) {
     $row_args[$id] = $argument->summary_argument($row);
   }
@@ -450,9 +450,9 @@ function template_preprocess_views_view_table(&$variables) {
   // so that it can get rebuilt.
   // Store rows so that they may be used by further preprocess functions.
   $result   = $variables['result'] = $variables['rows'];
-  $variables['rows'] = array();
-  $variables['field_classes'] = array();
-  $variables['header'] = array();
+  $variables['rows'] = [];
+  $variables['field_classes'] = [];
+  $variables['header'] = [];
 
   $options  = $view->style_plugin->options;
   $handler  = $view->style_plugin;
@@ -465,7 +465,7 @@ function template_preprocess_views_view_table(&$variables) {
 
   $active   = !empty($handler->active) ? $handler->active : '';
   $order    = !empty($handler->order) ? $handler->order : 'asc';
-  $responsive_columns = array();
+  $responsive_columns = [];
 
   $query    = tablesort_get_query_parameters();
   if (isset($view->exposed_raw_input)) {
@@ -497,22 +497,22 @@ function template_preprocess_views_view_table(&$variables) {
           $initial = ($order == 'asc') ? 'desc' : 'asc';
         }
 
-        $title = t('sort by @s', array('@s' => $label));
+        $title = t('sort by @s', ['@s' => $label]);
         if ($active == $field) {
-          $label .= theme('tablesort_indicator', array('style' => $initial));
+          $label .= theme('tablesort_indicator', ['style' => $initial]);
         }
 
         $query['order'] = $field;
         $query['sort'] = $initial;
-        $link_options = array(
+        $link_options = [
           'html' => TRUE,
-          'attributes' => array('title' => $title),
+          'attributes' => ['title' => $title],
           'query' => $query,
-        );
+        ];
         $variables['header'][$field] = l($label, $_GET['q'], $link_options);
       }
 
-      $variables['header_classes'][$field] = array();
+      $variables['header_classes'][$field] = [];
       // Set up the header label class.
       if ($fields[$field]->options['element_default_classes']) {
         $variables['header_classes'][$field][] = "views-field";
@@ -559,8 +559,8 @@ function template_preprocess_views_view_table(&$variables) {
     // Render each field into its appropriate column.
     foreach ($result as $num => $row) {
       // Add field classes and attributes.
-      $variables['field_attributes'][$field][$num] = array();
-      $variables['field_classes'][$field][$num] = array();
+      $variables['field_attributes'][$field][$num] = [];
+      $variables['field_classes'][$field][$num] = [];
       if ($fields[$field]->options['element_default_classes']) {
         $variables['field_classes'][$field][$num][] = "views-field";
         $variables['field_classes'][$field][$num][] = "views-field-" . $variables['fields'][$field];
@@ -618,12 +618,12 @@ function template_preprocess_views_view_table(&$variables) {
 
   // Hide table header if all labels are empty.
   if (!array_filter($variables['header'])) {
-    $variables['header'] = array();
+    $variables['header'] = [];
   }
 
   $count = 0;
   foreach ($variables['rows'] as $num => $row) {
-    $variables['row_classes'][$num] = array();
+    $variables['row_classes'][$num] = [];
     if ($row_class_special) {
       $variables['row_classes'][$num][] = ($count++ % 2 == 0) ? 'odd' : 'even';
     }
@@ -637,12 +637,12 @@ function template_preprocess_views_view_table(&$variables) {
     $variables['row_classes'][count($variables['row_classes']) - 1][] = 'last';
   }
 
-  $variables['classes'] = array('views-table');
+  $variables['classes'] = ['views-table'];
   if (empty($variables['rows']) && !empty($options['empty_table'])) {
     $variables['rows'][0][0] = $view->display_handler->render_area('empty');
     // Calculate the amounts of rows with output.
     $variables['field_attributes'][0][0]['colspan'] = count($variables['header']);
-    $variables['field_classes'][0][0] = array('views-empty');
+    $variables['field_classes'][0][0] = ['views-empty'];
   }
 
 
@@ -662,7 +662,7 @@ function template_preprocess_views_view_table(&$variables) {
 
   // Add the summary to the list if set.
   if (!empty($handler->options['summary'])) {
-    $variables['attributes'] = array('summary' => filter_xss_admin($handler->options['summary']));
+    $variables['attributes'] = ['summary' => filter_xss_admin($handler->options['summary'])];
   }
 
   // Add the caption to the list if set.
@@ -687,8 +687,8 @@ function template_preprocess_views_view_grid(&$variables) {
 
   $columns  = $options['columns'];
 
-  $rows = array();
-  $row_indexes = array();
+  $rows = [];
+  $row_indexes = [];
 
   // For old view default to table if view settings haven't been updated.
   $variables['deprecated_table'] = (!isset($options['deprecated_table']) || $options['deprecated_table']) ? TRUE : FALSE;
@@ -702,8 +702,8 @@ function template_preprocess_views_view_grid(&$variables) {
 
     // Reorder based on vertical alignment.
     if ($options['alignment'] == 'vertical') {
-      $rows = array();
-      $rows_reorder = array();
+      $rows = [];
+      $rows_reorder = [];
       $num_rows = floor(count($variables['rows']) / $columns);
       // The remainders are the 'odd' columns that are slightly longer.
       $remainders = count($variables['rows']) % $columns;
@@ -743,7 +743,7 @@ function template_preprocess_views_view_grid(&$variables) {
     $col_count = 1;
     foreach ($rows as $id => $row) {
       $count++;
-      $variables['row_classes'][$id] = array();
+      $variables['row_classes'][$id] = [];
       if ($default_row_class) {
         $variables['row_classes'][$id][] = 'views-grid-box';
         $variables['row_classes'][$id][] = 'views-grid-box-' . $count;
@@ -772,11 +772,11 @@ function template_preprocess_views_view_grid(&$variables) {
         $col_count++;
       }
     }
-    $variables['classes'] = array('views-view-grid', 'views-view-grid-cols-' . $columns);
+    $variables['classes'] = ['views-view-grid', 'views-view-grid-cols-' . $columns];
   }
   else {
     if ($options['alignment'] == 'horizontal') {
-      $row = array();
+      $row = [];
       $col_count = 0;
       $row_count = 0;
       $count = 0;
@@ -787,7 +787,7 @@ function template_preprocess_views_view_grid(&$variables) {
         $col_count++;
         if ($count % $columns == 0) {
           $rows[] = $row;
-          $row = array();
+          $row = [];
           $col_count = 0;
           $row_count++;
         }
@@ -833,7 +833,7 @@ function template_preprocess_views_view_grid(&$variables) {
 
     // Apply the row classes
     foreach ($rows as $row_number => $row) {
-      $row_classes = array();
+      $row_classes = [];
       if ($default_row_class) {
         $row_classes[] =  'row-' . ($row_number + 1);
       }
@@ -847,7 +847,7 @@ function template_preprocess_views_view_grid(&$variables) {
       }
       $variables['row_classes'][$row_number] = $row_classes;
       foreach ($rows[$row_number] as $column_number => $item) {
-        $column_classes = array();
+        $column_classes = [];
         if ($default_row_class) {
           $column_classes[] = 'col-'. ($column_number + 1);
         }
@@ -866,11 +866,11 @@ function template_preprocess_views_view_grid(&$variables) {
       }
     }
 
-    $variables['classes'] = array('views-view-grid', 'cols-' . $columns);
+    $variables['classes'] = ['views-view-grid', 'cols-' . $columns];
 
     // Add the summary to the list if set.
     if (!empty($handler->options['summary'])) {
-      $variables['attributes'] = array('summary' => filter_xss_admin($handler->options['summary']));
+      $variables['attributes'] = ['summary' => filter_xss_admin($handler->options['summary'])];
     }
 
     // Add the caption to the list if set.
@@ -894,7 +894,7 @@ function template_preprocess_views_view_unformatted(&$variables) {
   $style = $view->style_plugin;
   $options = $style->options;
 
-  $variables['row_classes'] = array();
+  $variables['row_classes'] = [];
   $default_row_class = isset($options['default_row_class']) ? $options['default_row_class'] : FALSE;
   $row_class_special = isset($options['row_class_special']) ? $options['row_class_special'] : FALSE;
   // Set up striping values.
@@ -902,7 +902,7 @@ function template_preprocess_views_view_unformatted(&$variables) {
   $max = count($rows);
   foreach ($rows as $id => $row) {
     $count++;
-    $variables['row_classes'][$id] = array();
+    $variables['row_classes'][$id] = [];
     if ($default_row_class) {
       $variables['row_classes'][$id][] = 'views-row';
       $variables['row_classes'][$id][] = 'views-row-' . $count;
@@ -931,12 +931,12 @@ function template_preprocess_views_view_list(&$variables) {
 
   $classes = explode(' ', $handler->options['class']);
   foreach ($classes as $key => $class) {
-    $classes[$key] = backdrop_clean_css_identifier($class, array());
+    $classes[$key] = backdrop_clean_css_identifier($class, []);
   }
 
   $wrapper_classes = explode(' ', $handler->options['wrapper_class']);
   foreach ($wrapper_classes as $key => $class) {
-    $wrapper_classes[$key] = backdrop_clean_css_identifier($class, array());
+    $wrapper_classes[$key] = backdrop_clean_css_identifier($class, []);
   }
 
   $variables['class'] = implode(' ', $classes);
@@ -995,7 +995,7 @@ function template_preprocess_views_view_rss(&$variables) {
 
   if ($path) {
     $path = $view->get_url(NULL, $path);
-    $url_options = array('absolute' => TRUE);
+    $url_options = ['absolute' => TRUE];
     if (!empty($view->exposed_raw_input)) {
       $url_options['query'] = $view->exposed_raw_input;
     }
@@ -1047,7 +1047,7 @@ function template_preprocess_views_exposed_form(&$variables) {
     $variables['q'] = backdrop_render($form['q']);
   }
 
-  $variables['widgets'] = array();
+  $variables['widgets'] = [];
   foreach ($form['#info'] as $id => $info) {
     // Set aside checkboxes.
     if (isset($form[$info['value']]['#type']) && $form[$info['value']]['#type'] == 'checkbox') {
@@ -1110,8 +1110,8 @@ function theme_views_form_views_form($variables) {
   $form = $variables['form'];
 
   // Placeholders and their substitutions (usually rendered form elements).
-  $search = array();
-  $replace = array();
+  $search = [];
+  $replace = [];
 
   // Add in substitutions provided by the form.
   foreach ($form['#substitutions']['#value'] as $substitution) {
@@ -1155,48 +1155,48 @@ function theme_views_mini_pager($variables) {
 
   if ($pager_total[$element] > 1) {
     $li_previous = theme('pager_previous',
-      array(
+      [
         'text' => isset($tags[1]) ? $tags[1] : t('‹‹'),
         'element' => $element,
         'interval' => 1,
         'parameters' => $parameters,
-      )
+      ]
     );
 
     $li_next = theme('pager_next',
-      array(
+      [
         'text' => isset($tags[3]) ? $tags[3] : t('››'),
         'element' => $element,
         'interval' => 1,
         'parameters' => $parameters,
-      )
+      ]
     );
 
     if ($li_previous) {
-      $items[] = array(
-        'class' => array('pager-previous'),
+      $items[] = [
+        'class' => ['pager-previous'],
         'data' => $li_previous,
-      );
+      ];
     }
-    $items[] = array(
-      'class' => array('pager-current'),
-      'data' => t('@current of @max', array('@current' => $pager_current, '@max' => $pager_max)),
-    );
+    $items[] = [
+      'class' => ['pager-current'],
+      'data' => t('@current of @max', ['@current' => $pager_current, '@max' => $pager_max]),
+    ];
 
     if ($li_next) {
-      $items[] = array(
-        'class' => array('pager-next'),
+      $items[] = [
+        'class' => ['pager-next'],
         'data' => $li_next,
-      );
+      ];
     }
 
     return theme('item_list',
-      array(
+      [
         'items' => $items,
         'title' => NULL,
         'type' => 'ul',
-        'attributes' => array('class' => array('pager')),
-      )
+        'attributes' => ['class' => ['pager']],
+      ]
     );
   }
 }

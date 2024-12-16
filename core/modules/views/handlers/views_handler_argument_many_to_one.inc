@@ -24,18 +24,18 @@ class views_handler_argument_many_to_one extends views_handler_argument {
 
     // Ensure defaults for these, during summaries and stuff:
     $this->operator = 'or';
-    $this->value = array();
+    $this->value = [];
   }
 
   function option_definition() {
     $options = parent::option_definition();
 
     if (!empty($this->definition['numeric'])) {
-      $options['break_phrase'] = array('default' => FALSE, 'bool' => TRUE);
+      $options['break_phrase'] = ['default' => FALSE, 'bool' => TRUE];
     }
 
-    $options['add_table'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['require_value'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['add_table'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['require_value'] = ['default' => FALSE, 'bool' => TRUE];
 
     if (isset($this->helper)) {
       $this->helper->option_definition($options);
@@ -53,29 +53,29 @@ class views_handler_argument_many_to_one extends views_handler_argument {
 
     // allow + for or, , for and
     if (!empty($this->definition['numeric'])) {
-      $form['break_phrase'] = array(
+      $form['break_phrase'] = [
         '#type' => 'checkbox',
         '#title' => t('Allow multiple values'),
         '#description' => t('If selected, users can enter multiple values in the form of 1+2+3 (for OR) or 1,2,3 (for AND).'),
         '#default_value' => !empty($this->options['break_phrase']),
         '#fieldset' => 'more',
-      );
+      ];
     }
 
-    $form['add_table'] = array(
+    $form['add_table'] = [
       '#type' => 'checkbox',
       '#title' => t('Allow multiple filter values to work together'),
       '#description' => t('If selected, multiple instances of this filter can work together, as though multiple values were supplied to the same filter. This setting is not compatible with the "Reduce duplicates" setting.'),
       '#default_value' => !empty($this->options['add_table']),
       '#fieldset' => 'more',
-    );
+    ];
 
-    $form['require_value'] = array(
+    $form['require_value'] = [
       '#type' => 'checkbox',
       '#title' => t('Do not display items with no value in summary'),
       '#default_value' => !empty($this->options['require_value']),
       '#fieldset' => 'more',
-    );
+    ];
 
     $this->helper->options_form($form, $form_state);
   }
@@ -110,7 +110,7 @@ class views_handler_argument_many_to_one extends views_handler_argument {
       views_break_phrase($this->argument, $this);
     }
     else {
-      $this->value = array($this->argument);
+      $this->value = [$this->argument];
       $this->operator = 'or';
     }
 
@@ -126,7 +126,7 @@ class views_handler_argument_many_to_one extends views_handler_argument {
       views_break_phrase($this->argument, $this);
     }
     else {
-      $this->value = array($this->argument);
+      $this->value = [$this->argument];
       $this->operator = 'or';
     }
 
@@ -136,7 +136,7 @@ class views_handler_argument_many_to_one extends views_handler_argument {
       return !empty($this->definition['empty field name']) ? $this->definition['empty field name'] : t('Uncategorized');
     }
 
-    if ($this->value === array(-1)) {
+    if ($this->value === [-1]) {
       return !empty($this->definition['invalid input']) ? $this->definition['invalid input'] : t('Invalid input');
     }
 

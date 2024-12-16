@@ -9,52 +9,52 @@
  */
 function menu_token_info() {
   // Menu tokens.
-  $info['types']['menu'] = array(
+  $info['types']['menu'] = [
     'name' => t('Menus'),
     'description' => t('Tokens related to menus.'),
     'needs-data' => 'menu',
-  );
-  $info['types']['menu-link'] = array(
+  ];
+  $info['types']['menu-link'] = [
     'name' => t('Menu links'),
     'description' => t('Tokens related to menu links.'),
     'needs-data' => 'menu-link',
-  );
+  ];
 
-  $info['tokens']['menu']['name'] = array(
+  $info['tokens']['menu']['name'] = [
     'name' => t('Name'),
     'description' => t("The name of the menu."),
-  );
-  $info['tokens']['menu']['machine-name'] = array(
+  ];
+  $info['tokens']['menu']['machine-name'] = [
     'name' => t('Machine-readable name'),
     'description' => t("The unique machine-readable name of the menu."),
-  );
-  $info['tokens']['menu']['description'] = array(
+  ];
+  $info['tokens']['menu']['description'] = [
     'name' => t('Description'),
     'description' => t('The optional description of the menu.'),
-  );
-  $info['tokens']['menu']['menu-link-count'] = array(
+  ];
+  $info['tokens']['menu']['menu-link-count'] = [
     'name' => t('Menu link count'),
     'description' => t('The number of menu links belonging to the menu.'),
-  );
-  $info['tokens']['menu']['edit-url'] = array(
+  ];
+  $info['tokens']['menu']['edit-url'] = [
     'name' => t('Edit URL'),
     'description' => t("The URL of the menu's edit page."),
-  );
+  ];
 
-  $info['tokens']['menu-link']['menu'] = array(
+  $info['tokens']['menu-link']['menu'] = [
     'name' => t('Menu'),
     'description' => t('The menu of the menu link.'),
     'type' => 'menu',
-  );
-  $info['tokens']['menu-link']['edit-url'] = array(
+  ];
+  $info['tokens']['menu-link']['edit-url'] = [
     'name' => t('Edit URL'),
     'description' => t("The URL of the menu link's edit page."),
-  );
-  $info['tokens']['node']['menu-link'] = array(
+  ];
+  $info['tokens']['node']['menu-link'] = [
     'name' => t('Menu link'),
     'description' => t("The menu link for this node."),
     'type' => 'menu-link',
-  );
+  ];
 
   return $info;
 }
@@ -62,10 +62,10 @@ function menu_token_info() {
 /**
  * Implements hook_tokens() on behalf of menu.module.
  */
-function menu_tokens($type, $tokens, array $data = array(), array $options = array()) {
-  $replacements = array();
+function menu_tokens($type, $tokens, array $data = [], array $options = []) {
+  $replacements = [];
 
-  $url_options = array('absolute' => TRUE);
+  $url_options = ['absolute' => TRUE];
   $sanitize = !empty($options['sanitize']);
 
   // Node tokens.
@@ -84,7 +84,7 @@ function menu_tokens($type, $tokens, array $data = array(), array $options = arr
       // Chained token relationships.
       if ($menu_tokens = token_find_with_prefix($tokens, 'menu-link')) {
         if ($link = _menu_token_node_link_load($node)) {
-          $replacements += token_generate('menu-link', $menu_tokens, array('menu-link' => $link), $options);
+          $replacements += token_generate('menu-link', $menu_tokens, ['menu-link' => $link], $options);
         }
       }
     }
@@ -95,7 +95,7 @@ function menu_tokens($type, $tokens, array $data = array(), array $options = arr
     $link = (array) $data['menu-link'];
 
     // Set options for menu link tokens.
-    $url_options = array('absolute' => TRUE);
+    $url_options = ['absolute' => TRUE];
     $sanitize = !empty($options['sanitize']);
 
     if (!isset($link['title'])) {
@@ -142,24 +142,24 @@ function menu_tokens($type, $tokens, array $data = array(), array $options = arr
 
     // Chained token relationships.
     if (!empty($link['plid']) && ($source_tokens = token_find_with_prefix($tokens, 'parent')) && $parent = _menu_token_link_load($link['plid'])) {
-      $replacements += token_generate('menu-link', $source_tokens, array('menu-link' => $parent), $options);
+      $replacements += token_generate('menu-link', $source_tokens, ['menu-link' => $parent], $options);
     }
     // [menu-link:parents:*] chained tokens.
     if ($parents_tokens = token_find_with_prefix($tokens, 'parents')) {
       if ($parents = _menu_token_link_load_all_parents($link['mlid'])) {
-        $replacements += token_generate('array', $parents_tokens, array('array' => $parents), $options);
+        $replacements += token_generate('array', $parents_tokens, ['array' => $parents], $options);
       }
     }
     if (!empty($link['p1']) && $link['p1'] != $link['mlid'] && ($root_tokens = token_find_with_prefix($tokens, 'root')) && $root = _menu_token_link_load($link['p1'])) {
-      $replacements += token_generate('menu-link', $root_tokens, array('menu-link' => $root), $options);
+      $replacements += token_generate('menu-link', $root_tokens, ['menu-link' => $root], $options);
     }
     if ($url_tokens = token_find_with_prefix($tokens, 'url')) {
-      $replacements += token_generate('url', $url_tokens, array('path' => $link['href']), $options);
+      $replacements += token_generate('url', $url_tokens, ['path' => $link['href']], $options);
     }
 
     // Chained token relationships.
     if (($menu_tokens = token_find_with_prefix($tokens, 'menu')) && $menu = menu_load($link['menu_name'])) {
-      $replacements += token_generate('menu', $menu_tokens, array('menu' => $menu), $options);
+      $replacements += token_generate('menu', $menu_tokens, ['menu' => $menu], $options);
     }
   }
 
@@ -210,7 +210,7 @@ function menu_tokens($type, $tokens, array $data = array(), array $options = arr
  * @see menu_link_load()
  */
 function _menu_token_link_load($mlid) {
-  $cache = &backdrop_static(__FUNCTION__, array());
+  $cache = &backdrop_static(__FUNCTION__, []);
 
   if (!is_numeric($mlid)) {
     return FALSE;
@@ -233,17 +233,17 @@ function _menu_token_link_load($mlid) {
  *   Array of link titles keyed by menu link ID.
  */
 function _menu_token_link_load_all_parents($mlid) {
-  $cache = &backdrop_static(__FUNCTION__, array());
+  $cache = &backdrop_static(__FUNCTION__, []);
 
   if (!is_numeric($mlid)) {
-    return array();
+    return [];
   }
 
   if (!isset($cache[$mlid])) {
-    $cache[$mlid] = array();
-    $plid = db_query("SELECT plid FROM {menu_links} WHERE mlid = :mlid", array(':mlid' => $mlid))->fetchField();
+    $cache[$mlid] = [];
+    $plid = db_query("SELECT plid FROM {menu_links} WHERE mlid = :mlid", [':mlid' => $mlid])->fetchField();
     while ($plid && $parent = _menu_token_link_load($plid)) {
-      $cache[$mlid] = array($plid => $parent['title']) + $cache[$mlid];
+      $cache[$mlid] = [$plid => $parent['title']] + $cache[$mlid];
       $plid = $parent['plid'];
     }
   }
@@ -265,7 +265,7 @@ function _menu_token_link_load_all_parents($mlid) {
  * @see _menu_token_link_load()
  */
 function _menu_token_node_link_load(Node $node) {
-  $cache = &backdrop_static(__FUNCTION__, array());
+  $cache = &backdrop_static(__FUNCTION__, []);
 
   if (!isset($cache[$node->nid])) {
     // Nodes do not have their menu links loaded via menu_node_load().

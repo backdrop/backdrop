@@ -237,11 +237,11 @@ function backdrop_get_breadcrumb() {
  *   An array containing "path", "width", and "height".
  */
 function backdrop_get_logo_info() {
-  $info = array(
+  $info = [
     'path' => '',
     'width' => NULL,
     'height' => NULL,
-  );
+  ];
 
   // The logo may be needed on pages prior to config being ready, e.g. during
   // installer or on maintenance pages. Default to an empty string if unable to
@@ -268,7 +268,7 @@ function backdrop_get_logo_info() {
     }
     // Set the logo dimensions if not set.
     elseif ($info['path'] && $dimensions = @getimagesize($info['path'])) {
-      $attributes = array();
+      $attributes = [];
       list($attributes['width'], $attributes['height']) = $dimensions;
       $site_config->set('site_logo_attributes', $attributes);
       $info = array_merge($info, $attributes);
@@ -312,10 +312,10 @@ function backdrop_get_logo() {
  *   - type: mime type for the icon being used.
  */
 function backdrop_get_favicon() {
-  $favicon = array(
+  $favicon = [
     'path' => file_create_url('core/misc/favicon.ico'),
     'type' => 'image/vnd.microsoft.icon',
-  );
+  ];
 
   // Load the config and update, if we can.
   try {
@@ -387,28 +387,28 @@ function _backdrop_default_html_head() {
   // Add default elements. Make sure the Content-Type comes first because the
   // IE browser may be vulnerable to XSS via encoding attacks from any content
   // that comes before this META tag, such as a TITLE tag.
-  $elements['system_meta_content_type'] = array(
+  $elements['system_meta_content_type'] = [
     '#type' => 'head_tag',
     '#tag' => 'meta',
-    '#attributes' => array(
+    '#attributes' => [
       'charset' => 'utf-8',
-    ),
+    ],
     // Security: This always has to be output first.
     '#weight' => -1000,
-  );
+  ];
   // Show Backdrop and the major version number in the META GENERATOR tag.
   // Get the major version.
   list($version, ) = explode('.', BACKDROP_VERSION);
-  $elements['system_meta_generator'] = array(
+  $elements['system_meta_generator'] = [
     '#type' => 'head_tag',
     '#tag' => 'meta',
-    '#attributes' => array(
+    '#attributes' => [
       'name' => 'Generator',
       'content' => 'Backdrop CMS ' . $version . ' (https://backdropcms.org)',
-    ),
-  );
+    ],
+  ];
   // Also send the generator in the HTTP header.
-  $elements['system_meta_generator']['#attached']['backdrop_add_http_header'][] = array('X-Generator', $elements['system_meta_generator']['#attributes']['content']);
+  $elements['system_meta_generator']['#attached']['backdrop_add_http_header'][] = ['X-Generator', $elements['system_meta_generator']['#attributes']['content']];
   return $elements;
 }
 
@@ -419,14 +419,14 @@ function backdrop_get_html_head() {
   $elements = backdrop_add_html_head();
 
   // Always add the default mobile meta tags.
-  $elements['viewport'] = array(
+  $elements['viewport'] = [
     '#type' => 'head_tag',
     '#tag' => 'meta',
-    '#attributes' => array(
+    '#attributes' => [
       'name' => 'viewport',
       'content' => 'width=device-width, initial-scale=1',
-    ),
-  );
+    ],
+  ];
 
   backdrop_alter('html_head', $elements);
   return backdrop_render($elements);
@@ -443,19 +443,19 @@ function backdrop_get_html_head() {
  *   The title of the feed.
  */
 function backdrop_add_feed($url = NULL, $title = '') {
-  $stored_feed_links = &backdrop_static(__FUNCTION__, array());
+  $stored_feed_links = &backdrop_static(__FUNCTION__, []);
 
   if (isset($url)) {
-    $stored_feed_links[$url] = theme('feed_icon', array('url' => $url, 'title' => $title));
+    $stored_feed_links[$url] = theme('feed_icon', ['url' => $url, 'title' => $title]);
 
-    backdrop_add_html_head_link(array(
+    backdrop_add_html_head_link([
       'rel' => 'alternate',
       'type' => 'application/rss+xml',
       'title' => $title,
       // Force the URL to be absolute, for consistency with other <link> tags
       // output by Backdrop.
-      'href' => url($url, array('absolute' => TRUE)),
-    ));
+      'href' => url($url, ['absolute' => TRUE]),
+    ]);
   }
   return $stored_feed_links;
 }
@@ -494,7 +494,7 @@ function backdrop_get_feeds($delimiter = "\n") {
  * @return
  *   An array containing query parameters, which can be used for url().
  */
-function backdrop_get_query_parameters(array $query = NULL, array $exclude = array('q'), $parent = '') {
+function backdrop_get_query_parameters(array $query = NULL, array $exclude = ['q'], $parent = '') {
   // Set defaults, if none given.
   if (!isset($query)) {
     $query = $_GET;
@@ -507,7 +507,7 @@ function backdrop_get_query_parameters(array $query = NULL, array $exclude = arr
     $exclude = array_flip($exclude);
   }
 
-  $params = array();
+  $params = [];
   foreach ($query as $key => $value) {
     $string_key = ($parent ? $parent . '[' . $key . ']' : $key);
     if (isset($exclude[$string_key])) {
@@ -535,7 +535,7 @@ function backdrop_get_query_parameters(array $query = NULL, array $exclude = arr
  *   An array of URL decoded couples $param_name => $value.
  */
 function backdrop_get_query_array($query) {
-  $result = array();
+  $result = [];
   if (!empty($query)) {
     foreach (explode('&', $query) as $param) {
       $param = explode('=', $param, 2);
@@ -616,7 +616,7 @@ function backdrop_get_bare_domain($url) {
  * @ingroup php_wrappers
  */
 function backdrop_http_build_query(array $query, $parent = '') {
-  $params = array();
+  $params = [];
 
   foreach ($query as $key => $value) {
     $key = $parent ? $parent . rawurlencode('[' . $key . ']') : rawurlencode($key);
@@ -659,7 +659,7 @@ function backdrop_get_destination() {
   }
 
   if (isset($_GET['destination'])) {
-    $destination = array('destination' => $_GET['destination']);
+    $destination = ['destination' => $_GET['destination']];
   }
   else {
     $path = $_GET['q'];
@@ -667,7 +667,7 @@ function backdrop_get_destination() {
     if ($query != '') {
       $path .= '?' . $query;
     }
-    $destination = array('destination' => $path);
+    $destination = ['destination' => $path];
   }
   return $destination;
 }
@@ -707,11 +707,11 @@ function backdrop_get_destination() {
  * @ingroup php_wrappers
  */
 function backdrop_parse_url($url) {
-  $options = array(
+  $options = [
     'path' => NULL,
-    'query' => array(),
+    'query' => [],
     'fragment' => '',
-  );
+  ];
 
   // External URLs: not using parse_url() here, so we do not have to rebuild
   // the scheme, host, and path without having any use for it.
@@ -787,8 +787,8 @@ function backdrop_encode_path($path) {
  *
  * @since 1.5.0
  */
-function backdrop_goto_deprecated($path = '', array $options = array(), $http_response_code = 302) {
-  watchdog('system', 'The path %path has been deprecated and will be removed in the next major release of Backdrop. This path was called from %referrer. It is recommended to remove it from any existing links.', array('%path' => $_GET['q'], '%referrer' => $_SERVER['HTTP_REFERER']), WATCHDOG_DEPRECATED);
+function backdrop_goto_deprecated($path = '', array $options = [], $http_response_code = 302) {
+  watchdog('system', 'The path %path has been deprecated and will be removed in the next major release of Backdrop. This path was called from %referrer. It is recommended to remove it from any existing links.', ['%path' => $_GET['q'], '%referrer' => $_SERVER['HTTP_REFERER']], WATCHDOG_DEPRECATED);
   backdrop_goto($path, $options, $http_response_code);
 }
 
@@ -836,7 +836,7 @@ function backdrop_goto_deprecated($path = '', array $options = array(), $http_re
  * @see backdrop_get_destination()
  * @see url()
  */
-function backdrop_goto($path = '', array $options = array(), $http_response_code = 302) {
+function backdrop_goto($path = '', array $options = [], $http_response_code = 302) {
   // A destination in $_GET always overrides the function arguments.
   // We do not allow absolute URLs to be passed via $_GET, as this can be an attack vector.
   if (isset($_GET['destination']) && !url_is_external($_GET['destination'])) {
@@ -959,7 +959,7 @@ function backdrop_access_denied() {
  *   a redirect. See the 'strip_sensitive_headers_on_host_change' setting in
  *   settings.php for details.
  */
-function backdrop_http_request($url, array $options = array()) {
+function backdrop_http_request($url, array $options = []) {
   // Allow an alternate HTTP client library to replace Backdrop's default
   // implementation.
   $alternate_http_system = &backdrop_static('__FUNCTION__');
@@ -992,19 +992,19 @@ function backdrop_http_request($url, array $options = array()) {
   timer_start(__FUNCTION__);
 
   // Merge the default options.
-  $options += array(
-    'headers' => array(),
+  $options += [
+    'headers' => [],
     'method' => 'GET',
     'data' => NULL,
     'max_redirects' => 3,
     'timeout' => 30.0,
     'context' => NULL,
-  );
+  ];
 
   // Merge the default headers.
-  $options['headers'] += array(
+  $options['headers'] += [
     'User-Agent' => 'Backdrop CMS (+https://backdropcms.org)',
-  );
+  ];
 
   // stream_socket_client() requires timeout to be a float.
   $options['timeout'] = (float) $options['timeout'];
@@ -1087,7 +1087,7 @@ function backdrop_http_request($url, array $options = array()) {
     // When a network error occurs, we use a negative number so it does not
     // clash with the HTTP status codes.
     $result->code = -$errno;
-    $result->error = trim($errstr) ? trim($errstr) : t('Error opening socket @socket', array('@socket' => $socket));
+    $result->error = trim($errstr) ? trim($errstr) : t('Error opening socket @socket', ['@socket' => $socket]);
 
     return $result;
   }
@@ -1180,7 +1180,7 @@ function backdrop_http_request($url, array $options = array()) {
   $result->status_message = $response_status_array['reason_phrase'];
   $code = $response_status_array['response_code'];
 
-  $result->headers = array();
+  $result->headers = [];
 
   // Parse the response headers.
   while ($line = trim((string) array_shift($response))) {
@@ -1196,7 +1196,7 @@ function backdrop_http_request($url, array $options = array()) {
     }
   }
 
-  $responses = array(
+  $responses = [
     100 => 'Continue',
     101 => 'Switching Protocols',
     200 => 'OK',
@@ -1238,7 +1238,7 @@ function backdrop_http_request($url, array $options = array()) {
     503 => 'Service Unavailable',
     504 => 'Gateway Time-out',
     505 => 'HTTP Version not supported',
-  );
+  ];
   // RFC 2616 states that all unknown HTTP codes must be treated the same as the
   // base code in their class.
   if (!isset($responses[$code])) {
@@ -1347,9 +1347,9 @@ function _backdrop_should_strip_sensitive_headers_on_http_redirect($url, $locati
 function _backdrop_parse_response_status($response) {
   $response_array = explode(' ', trim($response), 3);
   // Set up empty values.
-  $result = array(
+  $result = [
     'reason_phrase' => '',
-  );
+  ];
   $result['http_version'] = $response_array[0];
   $result['response_code'] = $response_array[1];
   if (isset($response_array[2])) {
@@ -1365,7 +1365,7 @@ function _backdrop_parse_response_status($response) {
  *   TRUE if a proxy should be used for this host.
  */
 function _backdrop_http_use_proxy($host) {
-  $proxy_exceptions = settings_get('proxy_exceptions', array('localhost', '127.0.0.1'));
+  $proxy_exceptions = settings_get('proxy_exceptions', ['localhost', '127.0.0.1']);
   return !in_array(strtolower($host), $proxy_exceptions, TRUE);
 }
 
@@ -1588,12 +1588,12 @@ function flood_register_event($name, $window = 3600, $identifier = NULL) {
     $identifier = ip_address();
   }
   db_insert('flood')
-    ->fields(array(
+    ->fields([
       'event' => $name,
       'identifier' => $identifier,
       'timestamp' => REQUEST_TIME,
       'expiration' => REQUEST_TIME + $window,
-    ))
+    ])
     ->execute();
 }
 
@@ -1640,10 +1640,10 @@ function flood_is_allowed($name, $threshold, $window = 3600, $identifier = NULL)
   if (!isset($identifier)) {
     $identifier = ip_address();
   }
-  $number = db_query("SELECT COUNT(*) FROM {flood} WHERE event = :event AND identifier = :identifier AND timestamp > :timestamp", array(
+  $number = db_query("SELECT COUNT(*) FROM {flood} WHERE event = :event AND identifier = :identifier AND timestamp > :timestamp", [
     ':event' => $name,
     ':identifier' => $identifier,
-    ':timestamp' => REQUEST_TIME - $window))
+    ':timestamp' => REQUEST_TIME - $window])
     ->fetchField();
   return ($number < $threshold);
 }
@@ -1677,7 +1677,7 @@ function flood_is_allowed($name, $threshold, $window = 3600, $identifier = NULL)
  *   The data that was stored.
  */
 function tempstore_get($collection, $name) {
-  $data = db_query('SELECT * FROM {tempstore} WHERE collection = :collection AND name = :name', array(':collection' => $collection, ':name' => $name))->fetchObject();
+  $data = db_query('SELECT * FROM {tempstore} WHERE collection = :collection AND name = :name', [':collection' => $collection, ':name' => $name])->fetchObject();
   if ($data) {
     $data = unserialize($data->value);
   }
@@ -1700,12 +1700,12 @@ function tempstore_get($collection, $name) {
 function tempstore_set($collection, $name, $value, $expire) {
   tempstore_clear($collection, $name);
   db_insert('tempstore')
-    ->fields(array(
+    ->fields([
       'collection' => $collection,
       'name' => $name,
       'value' => serialize($value),
       'expire' => $expire,
-    ))
+    ])
     ->execute();
 }
 
@@ -1774,7 +1774,7 @@ function backdrop_strip_dangerous_protocols($uri) {
   static $allowed_protocols;
 
   if (!isset($allowed_protocols)) {
-    $allowed_protocols = array_flip(settings_get('filter_allowed_protocols', array('ftp', 'http', 'https', 'irc', 'mailto', 'news', 'nntp', 'rtsp', 'sftp', 'ssh', 'tel', 'telnet', 'webcal')));
+    $allowed_protocols = array_flip(settings_get('filter_allowed_protocols', ['ftp', 'http', 'https', 'irc', 'mailto', 'news', 'nntp', 'rtsp', 'sftp', 'ssh', 'tel', 'telnet', 'webcal']));
   }
 
   // Iteratively remove any invalid protocol found.
@@ -1832,7 +1832,7 @@ function check_url($uri) {
  * for scripts and styles.
  */
 function filter_xss_admin($string) {
-  return filter_xss($string, array('a', 'abbr', 'acronym', 'address', 'article', 'aside', 'b', 'bdi', 'bdo', 'big', 'blockquote', 'br', 'caption', 'cite', 'code', 'col', 'colgroup', 'command', 'dd', 'del', 'details', 'dfn', 'div', 'dl', 'dt', 'em', 'figcaption', 'figure', 'footer', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'hgroup', 'hr', 'i', 'img', 'ins', 'kbd', 'li', 'mark', 'menu', 'meter', 'nav', 'ol', 'output', 'p', 'pre', 'progress', 'q', 'rp', 'rt', 'ruby', 's', 'samp', 'section', 'small', 'span', 'strong', 'sub', 'summary', 'sup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'time', 'tr', 'tt', 'u', 'ul', 'var', 'wbr'));
+  return filter_xss($string, ['a', 'abbr', 'acronym', 'address', 'article', 'aside', 'b', 'bdi', 'bdo', 'big', 'blockquote', 'br', 'caption', 'cite', 'code', 'col', 'colgroup', 'command', 'dd', 'del', 'details', 'dfn', 'div', 'dl', 'dt', 'em', 'figcaption', 'figure', 'footer', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'header', 'hgroup', 'hr', 'i', 'img', 'ins', 'kbd', 'li', 'mark', 'menu', 'meter', 'nav', 'ol', 'output', 'p', 'pre', 'progress', 'q', 'rp', 'rt', 'ruby', 's', 'samp', 'section', 'small', 'span', 'strong', 'sub', 'summary', 'sup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'time', 'tr', 'tt', 'u', 'ul', 'var', 'wbr']);
 }
 
 /**
@@ -1904,7 +1904,7 @@ function filter_xss($string, $allowed_tags = NULL) {
  * List of the default tags allowed by filter_xss().
  */
 function _filter_xss_allowed_tags() {
-  return array('a', 'em', 'strong', 'cite', 'blockquote', 'code', 'ul', 'ol', 'li', 'dl', 'dt', 'dd');
+  return ['a', 'em', 'strong', 'cite', 'blockquote', 'code', 'ul', 'ol', 'li', 'dl', 'dt', 'dd'];
 }
 
 /**
@@ -1994,7 +1994,7 @@ function _filter_xss_split($m, $store = FALSE) {
  *   Cleaned up version of the HTML attributes.
  */
 function _filter_xss_attributes($attr) {
-  $attrarr = array();
+  $attrarr = [];
   $skip = FALSE;
   $mode = 0;
   $attrname = '';
@@ -2148,7 +2148,7 @@ function filter_xss_bad_protocol($string, $decode = TRUE) {
  *
  * Arbitrary elements may be added using the $args associative array.
  */
-function format_rss_channel($title, $link, $description, $items, $langcode = NULL, $args = array()) {
+function format_rss_channel($title, $link, $description, $items, $langcode = NULL, $args = []) {
   global $language_content;
   $langcode = $langcode ? $langcode : $language_content->langcode;
 
@@ -2173,7 +2173,7 @@ function format_rss_channel($title, $link, $description, $items, $langcode = NUL
  *
  * Arbitrary elements may be added using the $args associative array.
  */
-function format_rss_item($title, $link, $description, $args = array()) {
+function format_rss_item($title, $link, $description, $args = []) {
   $output = "<item>\n";
   $output .= ' <title>' . check_plain($title) . "</title>\n";
   $output .= ' <link>' . check_url($link) . "</link>\n";
@@ -2307,7 +2307,7 @@ function format_xml_elements(array $array, $indentation_level = 0) {
  * @see t()
  * @see format_string()
  */
-function format_plural($count, $singular, $plural, array $args = array(), array $options = array()) {
+function format_plural($count, $singular, $plural, array $args = [], array $options = []) {
   $args['@count'] = $count;
   if ($count == 1) {
     return t($singular, $args, $options);
@@ -2329,7 +2329,7 @@ function format_plural($count, $singular, $plural, array $args = array(), array 
       default:
         unset($args['@count']);
         $args['@count[' . $index . ']'] = $count;
-        return t(strtr($plural, array('@count' => '@count[' . $index . ']')), $args, $options);
+        return t(strtr($plural, ['@count' => '@count[' . $index . ']']), $args, $options);
     }
   }
 }
@@ -2370,20 +2370,20 @@ function parse_size($size) {
  */
 function format_size($size, $langcode = NULL) {
   if ($size < BACKDROP_KILOBYTE) {
-    return format_plural($size, '1 byte', '@count bytes', array(), array('langcode' => $langcode));
+    return format_plural($size, '1 byte', '@count bytes', [], ['langcode' => $langcode]);
   }
   else {
     $size = $size / BACKDROP_KILOBYTE; // Convert bytes to kilobytes.
-    $units = array(
-      t('@size KB', array(), array('langcode' => $langcode)),
-      t('@size MB', array(), array('langcode' => $langcode)),
-      t('@size GB', array(), array('langcode' => $langcode)),
-      t('@size TB', array(), array('langcode' => $langcode)),
-      t('@size PB', array(), array('langcode' => $langcode)),
-      t('@size EB', array(), array('langcode' => $langcode)),
-      t('@size ZB', array(), array('langcode' => $langcode)),
-      t('@size YB', array(), array('langcode' => $langcode)),
-    );
+    $units = [
+      t('@size KB', [], ['langcode' => $langcode]),
+      t('@size MB', [], ['langcode' => $langcode]),
+      t('@size GB', [], ['langcode' => $langcode]),
+      t('@size TB', [], ['langcode' => $langcode]),
+      t('@size PB', [], ['langcode' => $langcode]),
+      t('@size EB', [], ['langcode' => $langcode]),
+      t('@size ZB', [], ['langcode' => $langcode]),
+      t('@size YB', [], ['langcode' => $langcode]),
+    ];
     $unit = reset($units);
     foreach ($units as $unit) {
       if (round($size, 2) >= BACKDROP_KILOBYTE) {
@@ -2412,7 +2412,7 @@ function format_size($size, $langcode = NULL) {
  *   A translated string representation of the interval.
  */
 function format_interval($interval, $granularity = 2, $langcode = NULL) {
-  $units = array(
+  $units = [
     '1 year|@count years' => 31536000,
     '1 month|@count months' => 2592000,
     '1 week|@count weeks' => 604800,
@@ -2420,12 +2420,12 @@ function format_interval($interval, $granularity = 2, $langcode = NULL) {
     '1 hour|@count hours' => 3600,
     '1 min|@count min' => 60,
     '1 sec|@count sec' => 1
-  );
+  ];
   $output = '';
   foreach ($units as $key => $value) {
     $key = explode('|', $key);
     if ($interval >= $value) {
-      $output .= ($output ? ' ' : '') . format_plural(floor($interval / $value), $key[0], $key[1], array(), array('langcode' => $langcode));
+      $output .= ($output ? ' ' : '') . format_plural(floor($interval / $value), $key[0], $key[1], [], ['langcode' => $langcode]);
       $interval = (int) $interval % $value;
       $granularity--;
     }
@@ -2434,7 +2434,7 @@ function format_interval($interval, $granularity = 2, $langcode = NULL) {
       break;
     }
   }
-  return $output ? $output : t('0 sec', array(), array('langcode' => $langcode));
+  return $output ? $output : t('0 sec', [], ['langcode' => $langcode]);
 }
 
 /**
@@ -2512,7 +2512,7 @@ function format_date($timestamp, $date_format_name = 'medium', $pattern = '', $t
   // input string.
   // Paired backslashes are isolated to prevent errors in read-ahead evaluation.
   // The read-ahead expression ensures that A matches, but not \A.
-  $pattern = preg_replace(array('/\\\\\\\\/', '/(?<!\\\\)([AaeDlMTF])/'), array("\xEF\\\\\\\\\xFF", "\xEF\\\\\$1\$1\xFF"), $pattern);
+  $pattern = preg_replace(['/\\\\\\\\/', '/(?<!\\\\)([AaeDlMTF])/'], ["\xEF\\\\\\\\\xFF", "\xEF\\\\\$1\$1\xFF"], $pattern);
 
   // Call date_format().
   $formatted_date_time = date_format($date_time, $pattern);
@@ -2551,9 +2551,9 @@ function _format_date_callback(array $matches = NULL, $new_langcode = NULL) {
   $string = $matches[2];
 
   if (!isset($cache[$langcode][$code][$string])) {
-    $options = array(
+    $options = [
       'langcode' => $langcode,
-    );
+    ];
 
     if ($code == 'F') {
       $options['context'] = 'Long month name';
@@ -2563,7 +2563,7 @@ function _format_date_callback(array $matches = NULL, $new_langcode = NULL) {
       $cache[$langcode][$code][$string] = $string;
     }
     else {
-      $cache[$langcode][$code][$string] = t($string, array(), $options);
+      $cache[$langcode][$code][$string] = t($string, [], $options);
     }
   }
   return $cache[$langcode][$code][$string];
@@ -2640,15 +2640,15 @@ function _format_date_callback(array $matches = NULL, $new_langcode = NULL) {
  * @return
  *   A string containing a URL to the given path.
  */
-function url($path = NULL, array $options = array()) {
+function url($path = NULL, array $options = []) {
   // Merge in defaults.
-  $options += array(
+  $options += [
     'fragment' => '',
-    'query' => array(),
+    'query' => [],
     'absolute' => FALSE,
     'alias' => FALSE,
     'prefix' => ''
-  );
+  ];
 
   // Determine whether this is an external link, but ensure that the current
   // path is always treated as internal by default (to prevent external link
@@ -2769,7 +2769,7 @@ function url($path = NULL, array $options = array()) {
   // Without Clean URLs.
   else {
     $path = $prefix . $path;
-    $query = array();
+    $query = [];
     if (!empty($path)) {
       $query['q'] = $path;
     }
@@ -2829,7 +2829,7 @@ function url_is_external($path) {
  *
  * @see backdrop_add_http_header()
  */
-function backdrop_http_header_attributes(array $attributes = array()) {
+function backdrop_http_header_attributes(array $attributes = []) {
   foreach ($attributes as $attribute => &$data) {
     if (is_array($data)) {
       $data = implode(' ', $data);
@@ -2875,7 +2875,7 @@ function backdrop_http_header_attributes(array $attributes = array()) {
  *
  * @ingroup sanitization
  */
-function backdrop_attributes(array $attributes = array()) {
+function backdrop_attributes(array $attributes = []) {
   foreach ($attributes as $attribute => &$data) {
     $data = implode(' ', (array) $data);
     $data = $attribute . '="' . check_plain($data) . '"';
@@ -2931,16 +2931,16 @@ function backdrop_attributes(array $attributes = array()) {
  * @see url()
  * @see theme_link()
  */
-function l($text, $path, array $options = array()) {
+function l($text, $path, array $options = []) {
   global $language_url;
 
   // Merge in default options.
-  $options += array(
-    'attributes' => array(),
-    'query' => array(),
+  $options += [
+    'attributes' => [],
+    'query' => [],
     'html' => FALSE,
     'language' => NULL,
-  );
+  ];
 
   // Append active class.
   if (($path == $_GET['q'] || ($path == '<front>' && backdrop_is_front_page())) &&
@@ -2960,12 +2960,12 @@ function l($text, $path, array $options = array()) {
   unset($options['attributes']);
 
   $url = url($path, $options);
-  $skip_js_paths = array(
+  $skip_js_paths = [
     'javascript:void()',
     'javascript:void();',
     'javascript:void(0)',
     'javascript:void(0);',
-  );
+  ];
   if (!(is_null($path) || in_array(strtolower($path), $skip_js_paths))) {
     $url = check_url($url);
   }
@@ -3059,7 +3059,7 @@ function backdrop_deliver_page($page_callback_result, $default_delivery_callback
     // If a delivery callback is specified, but doesn't exist as a function,
     // something is wrong, but don't print anything, since it's not known
     // what format the response needs to be in.
-    watchdog('delivery callback not found', 'callback %callback not found: %q.', array('%callback' => $delivery_callback, '%q' => $_GET['q']), WATCHDOG_ERROR);
+    watchdog('delivery callback not found', 'callback %callback not found: %q.', ['%callback' => $delivery_callback, '%q' => $_GET['q']], WATCHDOG_ERROR);
   }
 }
 
@@ -3157,7 +3157,7 @@ function backdrop_deliver_html_page($page_callback_result) {
         // Print a 503 page.
         backdrop_add_http_header('Status', '503 Service unavailable');
         backdrop_set_title(t('Site under maintenance'));
-        print theme('maintenance_page', array('content' => filter_xss_admin(token_replace(config_get_translated('system.core', 'maintenance_mode_message')))));
+        print theme('maintenance_page', ['content' => filter_xss_admin(token_replace(config_get_translated('system.core', 'maintenance_mode_message')))]);
         break;
     }
   }
@@ -3280,7 +3280,7 @@ function backdrop_exit($destination = NULL) {
 function backdrop_map_assoc($array, $function = NULL) {
   // array_combine() fails with empty arrays:
   // http://bugs.php.net/bug.php?id=34857.
-  $array = !empty($array) ? array_combine($array, $array) : array();
+  $array = !empty($array) ? array_combine($array, $array) : [];
   if (is_callable($function)) {
     $array = array_map($function, $array);
   }
@@ -3369,17 +3369,17 @@ function base_path() {
  *   Optional flag to determine if a HTTP 'Link:' header should be sent.
  */
 function backdrop_add_html_head_link($attributes, $header = FALSE) {
-  $element = array(
+  $element = [
     '#tag' => 'link',
     '#attributes' => $attributes,
-  );
+  ];
   $href = $attributes['href'];
 
   if ($header) {
     // Also add a HTTP header "Link:".
     $href = '<' . check_plain($attributes['href']) . '>;';
     unset($attributes['href']);
-    $element['#attached']['backdrop_add_http_header'][] = array('Link',  $href . backdrop_http_header_attributes($attributes));
+    $element['#attached']['backdrop_add_http_header'][] = ['Link',  $href . backdrop_http_header_attributes($attributes)];
   }
 
   backdrop_add_html_head($element, 'backdrop_add_html_head_link:' . $attributes['rel'] . ':' . $href);
@@ -3400,7 +3400,7 @@ function backdrop_add_html_head_link($attributes, $header = FALSE) {
  * @since 1.19.0 Function added.
 */
 function backdrop_css_defaults($data = NULL) {
-  return array(
+  return [
     'type' => 'file',
     'group' => CSS_DEFAULT,
     'weight' => 0,
@@ -3408,9 +3408,9 @@ function backdrop_css_defaults($data = NULL) {
     'media' => 'all',
     'preprocess' => TRUE,
     'data' => $data,
-    'browsers' => array(),
-    'attributes' => array(),
-  );
+    'browsers' => [],
+    'attributes' => [],
+  ];
 }
 
 /**
@@ -3530,7 +3530,7 @@ function backdrop_css_defaults($data = NULL) {
  * @see backdrop_get_css()
  */
 function backdrop_add_css($data = NULL, $options = NULL) {
-  $css = &backdrop_static(__FUNCTION__, array());
+  $css = &backdrop_static(__FUNCTION__, []);
   $count = &backdrop_static(__FUNCTION__ . '_count', 0);
 
   // Reset the order counter every time the number of entries in $css is 0.
@@ -3541,11 +3541,11 @@ function backdrop_add_css($data = NULL, $options = NULL) {
   // Construct the options, taking the defaults into consideration.
   if (isset($options)) {
     if (!is_array($options)) {
-      $options = array('type' => $options);
+      $options = ['type' => $options];
     }
   }
   else {
-    $options = array();
+    $options = [];
   }
 
   $defaults = backdrop_css_defaults($data);
@@ -3558,10 +3558,10 @@ function backdrop_add_css($data = NULL, $options = NULL) {
   // Create an array of CSS files for each media type first, since each type needs to be served
   // to the browser differently.
   if (isset($data)) {
-    $options['browsers'] += array(
+    $options['browsers'] += [
       'IE' => TRUE,
       '!IE' => TRUE,
-    );
+    ];
 
     // Files with a query string cannot be preprocessed.
     if ($options['type'] === 'file' && $options['preprocess'] && strpos($options['data'], '?') !== FALSE) {
@@ -3635,7 +3635,7 @@ function backdrop_get_css($css = NULL, $skip_alter = FALSE) {
   }
 
   // Sort CSS items, so that they appear in the correct order.
-  backdrop_sort($css, array('group', 'every_page_weight', 'weight'));
+  backdrop_sort($css, ['group', 'every_page_weight', 'weight']);
 
   // Provide the page with information about the individual CSS files used,
   // information not otherwise available when CSS aggregation is enabled. The
@@ -3650,7 +3650,7 @@ function backdrop_get_css($css = NULL, $skip_alter = FALSE) {
   }
 
   // Remove the overridden CSS files. Later CSS files override former ones.
-  $previous_item = array();
+  $previous_item = [];
   foreach ($css as $key => $item) {
     if ($item['type'] == 'file') {
       // If defined, force a unique basename for this file.
@@ -3664,12 +3664,12 @@ function backdrop_get_css($css = NULL, $skip_alter = FALSE) {
   }
 
   // Render the HTML needed to load the CSS.
-  $styles = array(
+  $styles = [
     '#type' => 'styles',
     '#items' => $css,
-  );
+  ];
   if (!empty($setting)) {
-    $styles['#attached']['js'][] = array('type' => 'setting', 'data' => $setting);
+    $styles['#attached']['js'][] = ['type' => 'setting', 'data' => $setting];
   }
 
   return backdrop_render($styles);
@@ -3710,7 +3710,7 @@ function backdrop_get_css($css = NULL, $skip_alter = FALSE) {
  * @see system_element_info()
  */
 function backdrop_group_css($css) {
-  $groups = array();
+  $groups = [];
   // If a group can contain multiple items, we track the information that must
   // be the same for each item in the group, so that when we iterate the next
   // item, we can determine if it can be put into the current group, or if a
@@ -3743,11 +3743,11 @@ function backdrop_group_css($css) {
         // Help ensure maximum reuse of aggregate files by only grouping
         // together items that share the same 'group' value and 'every_page'
         // flag. See backdrop_add_css() for details about that.
-        $group_keys = $item['preprocess'] ? array($item['type'], $item['group'], $item['every_page'], $item['media'], $item['browsers']) : FALSE;
+        $group_keys = $item['preprocess'] ? [$item['type'], $item['group'], $item['every_page'], $item['media'], $item['browsers']] : FALSE;
         break;
       case 'inline':
         // Always group inline items.
-        $group_keys = array($item['type'], $item['media'], $item['browsers']);
+        $group_keys = [$item['type'], $item['media'], $item['browsers']];
         break;
       case 'external':
         // Do not group external items.
@@ -3764,7 +3764,7 @@ function backdrop_group_css($css) {
       // unique to the item and should not be carried over to the group.
       $groups[$i] = $item;
       unset($groups[$i]['data'], $groups[$i]['weight']);
-      $groups[$i]['items'] = array();
+      $groups[$i]['items'] = [];
       $current_group_keys = $group_keys ? $group_keys : NULL;
     }
 
@@ -3894,17 +3894,17 @@ function backdrop_pre_render_styles($elements) {
   $query_string = !defined('MAINTENANCE_MODE') ? state_get('css_js_query_string', '0') : '';
 
   // Defaults for LINK and STYLE elements.
-  $link_element_defaults = array(
+  $link_element_defaults = [
     '#type' => 'head_tag',
     '#tag' => 'link',
-    '#attributes' => array(
+    '#attributes' => [
       'rel' => 'stylesheet',
-    ),
-  );
-  $style_element_defaults = array(
+    ],
+  ];
+  $style_element_defaults = [
     '#type' => 'head_tag',
     '#tag' => 'style',
-  );
+  ];
 
   // Loop through each group.
   foreach ($elements['#groups'] as $group) {
@@ -3933,7 +3933,7 @@ function backdrop_pre_render_styles($elements) {
         // The group can be aggregated, but hasn't been: combine multiple items
         // into as few STYLE tags as possible.
         elseif ($group['preprocess']) {
-          $import = array();
+          $import = [];
           foreach ($group['items'] as $item) {
             // A theme's .info file may have an entry for a file that doesn't
             // exist as a way of overriding a module or base theme CSS file from
@@ -4067,10 +4067,10 @@ function backdrop_pre_render_styles($elements) {
 function backdrop_build_css_cache($css) {
   $data = '';
   $uri = '';
-  $map = state_get('css_cache_files', array());
+  $map = state_get('css_cache_files', []);
   // Create a new array so that only the file names are used to create the hash.
   // This prevents new aggregates from being created unnecessarily.
-  $css_data = array();
+  $css_data = [];
   foreach ($css as $css_file) {
     $css_data[] = $css_file['data'];
   }
@@ -4308,7 +4308,7 @@ function _backdrop_load_stylesheet($matches) {
  */
 function backdrop_clear_css_cache() {
   state_del('css_cache_files');
-  file_scan_directory('public://css', '/.*/', array('callback' => 'backdrop_delete_file_if_stale'));
+  file_scan_directory('public://css', '/.*/', ['callback' => 'backdrop_delete_file_if_stale']);
 }
 
 /**
@@ -4339,7 +4339,7 @@ function backdrop_delete_file_if_stale($uri) {
  * @return
  *   The cleaned identifier.
  */
-function backdrop_clean_css_identifier($identifier, $filter = array(' ' => '-', '_' => '-', '/' => '-', '[' => '-', ']' => '')) {
+function backdrop_clean_css_identifier($identifier, $filter = [' ' => '-', '_' => '-', '/' => '-', '[' => '-', ']' => '']) {
   // By default, we filter using Backdrop's coding standards.
   $identifier = strtr($identifier, $filter);
 
@@ -4354,7 +4354,7 @@ function backdrop_clean_css_identifier($identifier, $filter = array(' ' => '-', 
   $identifier = preg_replace('/[^\x{002D}\x{0030}-\x{0039}\x{0041}-\x{005A}\x{005F}\x{0061}-\x{007A}\x{00A1}-\x{FFFF}]/u', '', $identifier);
 
   // Identifiers cannot start with a digit, two hyphens, or a hyphen followed by a digit.
-  $identifier = preg_replace(array('/^[0-9]/', '/^(-[0-9])|^(--)/'), array('_', '__') , $identifier);
+  $identifier = preg_replace(['/^[0-9]/', '/^(-[0-9])|^(--)/'], ['_', '__'] , $identifier);
 
   return $identifier;
 }
@@ -4374,7 +4374,7 @@ function backdrop_clean_css_identifier($identifier, $filter = array(' ' => '-', 
 function backdrop_html_class($class) {
   // The output of this function will never change, so this uses a normal
   // static instead of backdrop_static().
-  static $classes = array();
+  static $classes = [];
 
   if (!isset($classes[$class])) {
     $classes[$class] = backdrop_clean_css_identifier(backdrop_strtolower($class));
@@ -4430,7 +4430,7 @@ function backdrop_html_id($id) {
     // the raw POST data is cast to a number before being returned by this
     // function, this usage is safe.
     if (empty($_POST['ajax_html_ids'])) {
-      $seen_ids_init = array();
+      $seen_ids_init = [];
     }
     else {
       // This function ensures uniqueness by appending a counter to the base id
@@ -4468,7 +4468,7 @@ function backdrop_html_id($id) {
   }
   $seen_ids = &$backdrop_static_fast['seen_ids'];
 
-  $id = strtr(backdrop_strtolower($id), array(' ' => '-', '_' => '-', '[' => '-', ']' => ''));
+  $id = strtr(backdrop_strtolower($id), [' ' => '-', '_' => '-', '[' => '-', ']' => '']);
 
   // As defined in http://www.w3.org/TR/html4/types.html#type-name, HTML IDs can
   // only contain letters, digits ([0-9]), hyphens ("-"), underscores ("_"),
@@ -4678,16 +4678,16 @@ function backdrop_region_class($region) {
  * @see backdrop_get_js()
  */
 function backdrop_add_js($data = NULL, $options = NULL) {
-  $javascript = &backdrop_static(__FUNCTION__, array());
+  $javascript = &backdrop_static(__FUNCTION__, []);
 
   // Construct the options, taking the defaults into consideration.
   if (isset($options)) {
     if (!is_array($options)) {
-      $options = array('type' => $options);
+      $options = ['type' => $options];
     }
   }
   else {
-    $options = array();
+    $options = [];
   }
   $options += backdrop_js_defaults($data);
 
@@ -4710,21 +4710,21 @@ function backdrop_add_js($data = NULL, $options = NULL) {
       // running the hook_url_outbound_alter() again here, extract the prefix
       // from url().
       $prefix = '';
-      url('', array('prefix' => &$prefix));
-      $javascript = array(
-        'settings' => array(
-          'data' => array(
-            array('basePath' => base_path()),
-            array('pathPrefix' => empty($prefix) ? '' : $prefix),
-          ),
+      url('', ['prefix' => &$prefix]);
+      $javascript = [
+        'settings' => [
+          'data' => [
+            ['basePath' => base_path()],
+            ['pathPrefix' => empty($prefix) ? '' : $prefix],
+          ],
           'type' => 'setting',
           'scope' => 'header',
           'group' => JS_SETTING,
           'every_page' => TRUE,
           'weight' => 0,
-          'browsers' => array(),
-        ),
-        'core/misc/backdrop.js' => array(
+          'browsers' => [],
+        ],
+        'core/misc/backdrop.js' => [
           'data' => 'core/misc/backdrop.js',
           'type' => 'file',
           'scope' => 'header',
@@ -4734,14 +4734,14 @@ function backdrop_add_js($data = NULL, $options = NULL) {
           'preprocess' => TRUE,
           'cache' => TRUE,
           'defer' => FALSE,
-          'attributes' => array(),
-          'browsers' => array(),
+          'attributes' => [],
+          'browsers' => [],
           'version' => BACKDROP_VERSION,
-        ),
-      );
+        ],
+      ];
       // Backwards-compatibility for JavaScript.
       if (!empty($GLOBALS['settings']['backdrop_drupal_compatibility'])) {
-        $javascript['settings']['data'][] = array('drupalCompatibility' => TRUE);
+        $javascript['settings']['data'][] = ['drupalCompatibility' => TRUE];
       }
 
       // Register all required libraries.
@@ -4792,7 +4792,7 @@ function backdrop_add_js($data = NULL, $options = NULL) {
  * @see backdrop_add_js()
  */
 function backdrop_js_defaults($data = NULL) {
-  return array(
+  return [
     'type' => 'file',
     'group' => JS_DEFAULT,
     'every_page' => FALSE,
@@ -4803,9 +4803,9 @@ function backdrop_js_defaults($data = NULL) {
     'preprocess' => TRUE,
     'version' => NULL,
     'data' => $data,
-    'attributes' => array(),
-    'browsers' => array(),
-  );
+    'attributes' => [],
+    'browsers' => [],
+  ];
 }
 
 /**
@@ -4855,7 +4855,7 @@ function backdrop_get_js($scope = 'header', $javascript = NULL, $skip_alter = FA
   }
 
   // Filter out elements of the given scope.
-  $items = array();
+  $items = [];
   foreach ($javascript as $key => $item) {
     if ($item['scope'] == $scope) {
       $items[$key] = $item;
@@ -4870,7 +4870,7 @@ function backdrop_get_js($scope = 'header', $javascript = NULL, $skip_alter = FA
   }
 
   // Sort the JavaScript so that it appears in the correct order.
-  backdrop_sort($items, array('group', 'every_page_weight', 'weight'));
+  backdrop_sort($items, ['group', 'every_page_weight', 'weight']);
 
   // Provide the page with information about the individual JavaScript files
   // used, information not otherwise available when aggregation is enabled.
@@ -4889,10 +4889,10 @@ function backdrop_get_js($scope = 'header', $javascript = NULL, $skip_alter = FA
   }
 
   // Render the HTML needed to load the JavaScript.
-  $elements = array(
+  $elements = [
     '#type' => 'scripts',
     '#items' => $items,
-  );
+  ];
 
   return backdrop_render($elements);
 }
@@ -4939,11 +4939,11 @@ function backdrop_pre_render_scripts($elements) {
   $default_query_string = !defined('MAINTENANCE_MODE') ? state_get('css_js_query_string', '0') : '';
 
   // Defaults for each SCRIPT element.
-  $element_defaults = array(
+  $element_defaults = [
     '#type' => 'head_tag',
     '#tag' => 'script',
     '#value' => '',
-  );
+  ];
 
   // Loop through each group.
   foreach ($elements['#groups'] as $group) {
@@ -5033,7 +5033,7 @@ function backdrop_pre_render_scripts($elements) {
  * @see backdrop_pre_render_scripts()
  */
 function backdrop_group_js($javascript) {
-  $groups = array();
+  $groups = [];
   // If a group can contain multiple items, we track the information that must
   // be the same for each item in the group, so that when we iterate the next
   // item, we can determine if it can be put into the current group, or if a
@@ -5054,7 +5054,7 @@ function backdrop_group_js($javascript) {
         // Help ensure maximum reuse of aggregate files by only grouping
         // together items that share the same 'group' value and 'every_page'
         // flag. See backdrop_add_js() for details about that.
-        $group_keys = $item['preprocess'] ? array($item['type'], $item['group'], $item['every_page'], $item['browsers']) : FALSE;
+        $group_keys = $item['preprocess'] ? [$item['type'], $item['group'], $item['every_page'], $item['browsers']] : FALSE;
         break;
 
       case 'external':
@@ -5074,7 +5074,7 @@ function backdrop_group_js($javascript) {
       // unique to the item and should not be carried over to the group.
       $groups[$index] = $item;
       unset($groups[$index]['data'], $groups[$index]['weight']);
-      $groups[$index]['items'] = array();
+      $groups[$index]['items'] = [];
       $current_group_keys = $group_keys ? $group_keys : NULL;
     }
 
@@ -5173,12 +5173,12 @@ function backdrop_aggregate_js(&$js_groups) {
  */
 function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_check = FALSE, $every_page = NULL) {
   // Add defaults to the special attached structures that should be processed differently.
-  $elements['#attached'] += array(
-    'library' => array(),
-    'js' => array(),
-    'css' => array(),
-    'icons' => array(),
-  );
+  $elements['#attached'] += [
+    'library' => [],
+    'js' => [],
+    'css' => [],
+    'icons' => [],
+  ];
 
   // Add the libraries first.
   $success = TRUE;
@@ -5196,7 +5196,7 @@ function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_c
   // Add both the JavaScript and the CSS.
   // The parameters for backdrop_add_js() and backdrop_add_css() require special
   // handling.
-  foreach (array('js', 'css') as $type) {
+  foreach (['js', 'css'] as $type) {
     foreach ($elements['#attached'][$type] as $data => $options) {
       // If the value is not an array, it's a filename and passed as first
       // (and only) argument.
@@ -5404,11 +5404,11 @@ function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_c
  * @see form_example_states_form()
  */
 function backdrop_process_states(&$elements) {
-  $elements['#attached']['library'][] = array('system', 'backdrop.states');
-  $elements['#attached']['js'][] = array(
+  $elements['#attached']['library'][] = ['system', 'backdrop.states'];
+  $elements['#attached']['js'][] = [
     'type' => 'setting',
-    'data' => array('states' => array('#' . $elements['#id'] => $elements['#states'])),
-  );
+    'data' => ['states' => ['#' . $elements['#id'] => $elements['#states']]],
+  ];
 }
 
 /**
@@ -5438,18 +5438,18 @@ function backdrop_process_states(&$elements) {
  * @see hook_library_info_alter()
  */
 function backdrop_add_library($module, $name, $every_page = NULL) {
-  $added = &backdrop_static(__FUNCTION__, array());
+  $added = &backdrop_static(__FUNCTION__, []);
 
   // Only process the library if it exists and it was not added already.
   if (!isset($added[$module][$name])) {
     if ($library = backdrop_get_library($module, $name)) {
       // Add all components within the library.
-      $elements['#attached'] = array(
+      $elements['#attached'] = [
         'library' => $library['dependencies'],
         'js' => $library['js'],
         'css' => $library['css'],
         'icons' => $library['icons'],
-      );
+      ];
       $added[$module][$name] = backdrop_process_attached($elements, JS_LIBRARY, TRUE, $every_page);
     }
     else {
@@ -5493,13 +5493,13 @@ function backdrop_add_library($module, $name, $every_page = NULL) {
  *   requisite API functions; find and use a different name.
  */
 function backdrop_get_library($module, $name = NULL) {
-  $libraries = &backdrop_static(__FUNCTION__, array());
+  $libraries = &backdrop_static(__FUNCTION__, []);
 
   if (!isset($libraries[$module])) {
     // Retrieve all libraries associated with the module.
     $module_libraries = module_invoke($module, 'library_info');
     if (empty($module_libraries)) {
-      $module_libraries = array();
+      $module_libraries = [];
     }
     // Allow modules to alter the module's registered libraries.
     backdrop_alter('library_info', $module_libraries, $module);
@@ -5507,12 +5507,12 @@ function backdrop_get_library($module, $name = NULL) {
     foreach ($module_libraries as $key => $data) {
       if (is_array($data)) {
         // Add default elements to allow for easier processing.
-        $module_libraries[$key] += array(
-          'dependencies' => array(),
-          'js' => array(),
-          'css' => array(),
-          'icons' => array(),
-        );
+        $module_libraries[$key] += [
+          'dependencies' => [],
+          'js' => [],
+          'css' => [],
+          'icons' => [],
+        ];
         foreach ($module_libraries[$key]['js'] as $file => $options) {
           $module_libraries[$key]['js'][$file]['version'] = $module_libraries[$key]['version'];
         }
@@ -5551,7 +5551,7 @@ function backdrop_get_library($module, $name = NULL) {
  * @since 1.28.0 Function added.
  */
 function backdrop_add_icons(array $icon_names) {
-  $icon_paths = array();
+  $icon_paths = [];
   foreach ($icon_names as $icon_key => $icon_options) {
     $icon_name = is_array($icon_options) ? $icon_key : $icon_options;
     $immutable = is_array($icon_options) && !empty($icon_options['immutable']);
@@ -5560,7 +5560,7 @@ function backdrop_add_icons(array $icon_names) {
     }
   }
   if ($icon_paths) {
-    backdrop_add_js(array('icons' => $icon_paths), 'setting');
+    backdrop_add_js(['icons' => $icon_paths], 'setting');
     backdrop_add_library('system', 'backdrop.icons');
   }
 }
@@ -5679,21 +5679,21 @@ function backdrop_add_tabledrag($table_id, $action, $relationship, $group, $subg
     // to ensure that table drag behaviors are registered before any module
     // uses it.
     backdrop_add_library('system', 'jquery.cookie');
-    backdrop_add_js('core/misc/tabledrag.js', array('weight' => -1));
+    backdrop_add_js('core/misc/tabledrag.js', ['weight' => -1]);
     $js_added = TRUE;
   }
 
   // If a subgroup or source isn't set, assume it is the same as the group.
   $target = isset($subgroup) ? $subgroup : $group;
   $source = isset($source) ? $source : $target;
-  $settings['tableDrag'][$table_id][$group][] = array(
+  $settings['tableDrag'][$table_id][$group][] = [
     'target' => $target,
     'source' => $source,
     'relationship' => $relationship,
     'action' => $action,
     'hidden' => $hidden,
     'limit' => $limit,
-  );
+  ];
   backdrop_add_js($settings, 'setting');
 }
 
@@ -5724,10 +5724,10 @@ function backdrop_add_tabledrag($table_id, $action, $relationship, $group, $subg
 function backdrop_build_js_cache($files) {
   $contents = '';
   $uri = '';
-  $map = state_get('js_cache_files', array());
+  $map = state_get('js_cache_files', []);
   // Create a new array so that only the file names are used to create the hash.
   // This prevents new aggregates from being created unnecessarily.
-  $js_data = array();
+  $js_data = [];
   foreach ($files as $file) {
     $js_data[] = $file['data'];
   }
@@ -5765,7 +5765,7 @@ function backdrop_build_js_cache($files) {
       }
     }
     if (!$map) {
-      $map = array();
+      $map = [];
     }
     $map[$key] = $uri;
     state_set('js_cache_files', $map);
@@ -5779,7 +5779,7 @@ function backdrop_build_js_cache($files) {
 function backdrop_clear_js_cache() {
   state_del('locale_javascript_parsed');
   state_set('js_cache_files', FALSE);
-  file_scan_directory('public://js', '/.*/', array('callback' => 'backdrop_delete_file_if_stale'));
+  file_scan_directory('public://js', '/.*/', ['callback' => 'backdrop_delete_file_if_stale']);
 }
 
 /**
@@ -5968,19 +5968,19 @@ function backdrop_json_deliver($page_callback_result) {
       case MENU_NOT_FOUND:
         backdrop_add_http_header('Status', '404 Not Found');
         watchdog('page not found', check_plain($_GET['q']), NULL, WATCHDOG_WARNING);
-        $output = array('error' => t('Page not found'));
+        $output = ['error' => t('Page not found')];
         break;
 
       case MENU_ACCESS_DENIED:
         backdrop_add_http_header('Status', '403 Forbidden');
         watchdog('access denied', check_plain($_GET['q']), NULL, WATCHDOG_WARNING);
-        $output = array('error' => t('Access denied'));
+        $output = ['error' => t('Access denied')];
         break;
 
       case MENU_SITE_OFFLINE:
         backdrop_add_http_header('Status', '503 Service unavailable');
         backdrop_set_title(t('Site under maintenance'));
-        $output = array('error' => t('Site is offline.'));
+        $output = ['error' => t('Site is offline.')];
         break;
     }
   }
@@ -6196,20 +6196,20 @@ function backdrop_page_create_cache($page_content) {
     $cache_lifetime = $config->get('page_cache_maximum_age');
   }
 
-  $cache = (object) array(
+  $cache = (object) [
     'cid' => $base_root . request_uri(),
-    'data' => array(
+    'data' => [
       'path' => $_GET['q'],
       'body' => $page_content,
       'title' => backdrop_get_title(),
-      'headers' => array(),
+      'headers' => [],
       // We need to store whether page was compressed or not,
       // because by the time it is read, the configuration might change.
       'page_compressed' => $page_compressed,
-    ),
+    ],
     'expire' => REQUEST_TIME + $cache_lifetime,
     'created' => REQUEST_TIME,
-  );
+  ];
 
   if ($page_compressed) {
     $cache->data['body'] = gzencode($cache->data['body'], 9, FORCE_GZIP);
@@ -6222,7 +6222,7 @@ function backdrop_page_create_cache($page_content) {
     $cache->data['headers'][$header_names[$name_lower]] = $value;
     if ($name_lower == 'cache-control') {
       // Set page cache expiration time based on Cache-Control header.
-      $matches = array();
+      $matches = [];
       if (preg_match('/max-age=(\d+)/', $value, $matches)) {
         $cache->expire = REQUEST_TIME + $matches[1];
       }
@@ -6276,7 +6276,7 @@ function backdrop_cron_run() {
   // Try to acquire cron lock.
   if (!lock_acquire('cron', 240.0)) {
     // Cron is still running normally.
-    watchdog('cron', 'Attempting to re-run cron while it is already running.', array(), WATCHDOG_WARNING);
+    watchdog('cron', 'Attempting to re-run cron while it is already running.', [], WATCHDOG_WARNING);
   }
   else {
     // Make sure every queue exists. There is no harm in trying to recreate an
@@ -6298,7 +6298,7 @@ function backdrop_cron_run() {
 
     // Record cron time.
     state_set('cron_last', REQUEST_TIME);
-    watchdog('cron', 'Cron run completed.', array(), WATCHDOG_NOTICE);
+    watchdog('cron', 'Cron run completed.', [], WATCHDOG_NOTICE);
 
     // Release cron lock.
     lock_release('cron');
@@ -6389,17 +6389,17 @@ function backdrop_cron_run() {
  */
 function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 1) {
   $config = conf_path();
-  $files = array();
+  $files = [];
 
   // Search for the directory in core.
-  $searchdir = array('core/' . $directory);
+  $searchdir = ['core/' . $directory];
 
   // For the case of searching for profiles, scan top-level directories.
   // Always search for contributed and custom extensions in the profile
   // directories as well as in the root directories. If the same extension is
   // located in both directories, then the latter wins for legacy/historical
   // reasons.
-  $profiles = array();
+  $profiles = [];
   $profile = backdrop_get_profile();
   // For SimpleTest to be able to test modules packaged together with a
   // distribution we need to include the profile of the parent site (in which
@@ -6428,7 +6428,7 @@ function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 
   }
 
   // Do not check for system files in common special-purpose directories.
-  $ignore_directories = array(
+  $ignore_directories = [
     'assets',
     'css',
     'scss',
@@ -6438,7 +6438,7 @@ function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 
     'templates',
     'node_modules',
     'bower_components',
-  );
+  ];
   $no_mask = '/^((\..*)|' . implode('|', $ignore_directories) .  ')$/';
 
   // Get current list of items.
@@ -6446,7 +6446,7 @@ function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 
     require_once BACKDROP_ROOT . '/core/includes/file.inc';
   }
   foreach ($searchdir as $dir) {
-    $files_to_add = file_scan_directory($dir, $mask, array('key' => $key, 'min_depth' => $min_depth, 'nomask' => $no_mask));
+    $files_to_add = file_scan_directory($dir, $mask, ['key' => $key, 'min_depth' => $min_depth, 'nomask' => $no_mask]);
 
     // Duplicate files found in later search directories take precedence over
     // earlier ones, so we want them to overwrite keys in our resulting
@@ -6497,18 +6497,18 @@ function backdrop_system_listing($mask, $directory, $key = 'name', $min_depth = 
  * @since 1.27.0 Conditional comments are no longer rendered.
  */
 function backdrop_pre_render_conditional_comments($elements) {
-  $browsers = isset($elements['#browsers']) ? $elements['#browsers'] : array();
-  $browsers += array(
+  $browsers = isset($elements['#browsers']) ? $elements['#browsers'] : [];
+  $browsers += [
     'IE' => TRUE,
     '!IE' => TRUE,
-  );
+  ];
 
   // If not allowed to output to non-IE browsers, suppress the element entirely.
   if ($browsers['!IE'] === FALSE) {
-    return array(
+    return [
       '#type' => NULL,
       '#value' => 'Element removed, the "browsers" property targeting only IE browsers is no longer supported.',
-    );
+    ];
   }
 
   return $elements;
@@ -6530,12 +6530,12 @@ function backdrop_pre_render_conditional_comments($elements) {
  */
 function backdrop_pre_render_link($element) {
   // By default, link options to pass to l() are normally set in #options.
-  $element += array('#options' => array());
+  $element += ['#options' => []];
   // However, within the scope of renderable elements, #attributes is a valid
   // way to specify attributes, too. Take them into account, but do not override
   // attributes from #options.
   if (isset($element['#attributes'])) {
-    $element['#options'] += array('attributes' => array());
+    $element['#options'] += ['attributes' => []];
     $element['#options']['attributes'] += $element['#attributes'];
   }
 
@@ -6644,7 +6644,7 @@ function backdrop_pre_render_link($element) {
  * properties of the parent are used.
  */
 function backdrop_pre_render_links($element) {
-  $element += array('#links' => array());
+  $element += ['#links' => []];
   foreach (element_children($element) as $key) {
     $child = &$element[$key];
     // If the child has links which have not been printed yet and the user has
@@ -6684,10 +6684,10 @@ function backdrop_pre_render_markup($elements) {
  * Pre-render callback: Attaches the dropbutton library and required markup.
  */
 function backdrop_pre_render_dropbutton($element) {
-  $element['#attached']['library'][] = array('system', 'backdrop.dropbutton');
+  $element['#attached']['library'][] = ['system', 'backdrop.dropbutton'];
   $element['#attributes']['class'][] = 'dropbutton';
   if (!isset($element['#theme_wrappers'])) {
-    $element['#theme_wrappers'] = array();
+    $element['#theme_wrappers'] = [];
   }
   array_unshift($element['#theme_wrappers'], 'dropbutton_wrapper');
 
@@ -6709,7 +6709,7 @@ function backdrop_pre_render_dropbutton($element) {
  *   The rendered full HTML page.
  */
 function backdrop_render_page($page) {
-  return theme('page', array('page' => render($page)));
+  return theme('page', ['page' => render($page)]);
 }
 
 /**
@@ -7031,7 +7031,7 @@ function show(&$element) {
  * @see backdrop_render_cache_set()
  */
 function backdrop_render_cache_get($elements) {
-  if (!in_array($_SERVER['REQUEST_METHOD'], array('GET', 'HEAD')) || !$cid = backdrop_render_cid_create($elements)) {
+  if (!in_array($_SERVER['REQUEST_METHOD'], ['GET', 'HEAD']) || !$cid = backdrop_render_cid_create($elements)) {
     return FALSE;
   }
   $bin = isset($elements['#cache']['bin']) ? $elements['#cache']['bin'] : 'cache';
@@ -7066,7 +7066,7 @@ function backdrop_render_cache_get($elements) {
  */
 function backdrop_render_cache_set(&$markup, $elements) {
   // Create the cache ID for the element.
-  if (!in_array($_SERVER['REQUEST_METHOD'], array('GET', 'HEAD')) || !$cid = backdrop_render_cid_create($elements)) {
+  if (!in_array($_SERVER['REQUEST_METHOD'], ['GET', 'HEAD']) || !$cid = backdrop_render_cid_create($elements)) {
     return FALSE;
   }
 
@@ -7107,13 +7107,13 @@ function backdrop_render_cache_set(&$markup, $elements) {
  *   internally so they do not have to be collected again.
  */
 function backdrop_render_collect_attached($elements, $return = FALSE) {
-  $attached = &backdrop_static(__FUNCTION__, array());
+  $attached = &backdrop_static(__FUNCTION__, []);
 
   // Collect all #attached for this element.
   if (isset($elements['#attached'])) {
     foreach ($elements['#attached'] as $key => $value) {
       if (!isset($attached[$key])) {
-        $attached[$key] = array();
+        $attached[$key] = [];
       }
       $attached[$key] = array_merge($attached[$key], $value);
     }
@@ -7128,7 +7128,7 @@ function backdrop_render_collect_attached($elements, $return = FALSE) {
   // and reset the static cache.
   if ($return) {
     $return = $attached;
-    $attached = array();
+    $attached = [];
     return $return;
   }
   else {
@@ -7164,17 +7164,17 @@ function backdrop_render_collect_attached($elements, $return = FALSE) {
  *   - #cache: An associative array prepared for backdrop_render_cache_set().
  */
 function backdrop_render_cache_by_query($query, $function, $expire = CACHE_TEMPORARY, $granularity = NULL) {
-  $cache_keys = array_merge(array($function), backdrop_render_cid_parts($granularity));
+  $cache_keys = array_merge([$function], backdrop_render_cid_parts($granularity));
   $query->preExecute();
-  $cache_keys[] = hash('sha256', serialize(array((string) $query, $query->getArguments())));
-  return array(
+  $cache_keys[] = hash('sha256', serialize([(string) $query, $query->getArguments()]));
+  return [
     '#query' => $query,
-    '#pre_render' => array($function . '_pre_render'),
-    '#cache' => array(
+    '#pre_render' => [$function . '_pre_render'],
+    '#cache' => [
       'keys' => $cache_keys,
       'expire' => $expire,
-    ),
-  );
+    ],
+  ];
 }
 
 /**
@@ -7285,7 +7285,7 @@ function element_info($type) {
     backdrop_alter('element_info', $cache);
   }
 
-  return isset($cache[$type]) ? $cache[$type] : array();
+  return isset($cache[$type]) ? $cache[$type] : [];
 }
 
 /**
@@ -7332,7 +7332,7 @@ function element_info_property($type, $property_name, $default = NULL) {
  *
  * @since 1.9.0 The $dir parameter was added.
  */
-function backdrop_sort(array &$array, array $keys = array('weight'), $dir = SORT_ASC) {
+function backdrop_sort(array &$array, array $keys = ['weight'], $dir = SORT_ASC) {
   // Don't sort empty arrays.
   if (empty($array)) {
     return;
@@ -7347,7 +7347,7 @@ function backdrop_sort(array &$array, array $keys = array('weight'), $dir = SORT
   unset($prefixed);
 
   // Ensure all keys have a sort value.
-  $new_keys = array();
+  $new_keys = [];
   foreach ($keys as $key => $key_sort) {
     if (is_string($key_sort) && is_int($key)) {
       $new_keys[$key_sort] = SORT_NUMERIC;
@@ -7367,7 +7367,7 @@ function backdrop_sort(array &$array, array $keys = array('weight'), $dir = SORT
   $keys = $new_keys;
 
   // Create an array to use for sorting by each key.
-  $sort = array();
+  $sort = [];
   foreach ($array as $k => $v) {
     $v = (array) $v;
     foreach ($keys as $key => $key_sort) {
@@ -7381,7 +7381,7 @@ function backdrop_sort(array &$array, array $keys = array('weight'), $dir = SORT
   }
 
   // Prepare an array of parameters for use with array_multisort().
-  $param = array();
+  $param = [];
   foreach ($keys as $key => $key_sort) {
     $param[] = $sort[$key];
     $param[] = $dir;
@@ -7441,7 +7441,7 @@ function element_children(&$elements, $sort = FALSE) {
   $sort = isset($elements['#sorted']) ? !$elements['#sorted'] : $sort;
 
   // Filter out properties from the element, leaving only children.
-  $children = array();
+  $children = [];
   $sortable = FALSE;
   foreach ($elements as $key => $value) {
     if ($key === '' || substr($key, 0, 1) !== '#') {
@@ -7454,13 +7454,13 @@ function element_children(&$elements, $sort = FALSE) {
       // Only trigger an error if the value is not null.
       // @see http://drupal.org/node/1283892
       elseif (isset($value)) {
-        trigger_error(t('"@key" is an invalid render array key', array('@key' => $key)), E_USER_ERROR);
+        trigger_error(t('"@key" is an invalid render array key', ['@key' => $key]), E_USER_ERROR);
       }
     }
   }
   // Sort the children if necessary.
   if ($sort && $sortable) {
-    backdrop_sort($children, array('#weight'));
+    backdrop_sort($children, ['#weight']);
     // Put the sorted children back into $elements in the correct order, to
     // preserve sorting if the same element is passed through
     // element_children() twice.
@@ -7484,7 +7484,7 @@ function element_children(&$elements, $sort = FALSE) {
  *   The array keys of the element's visible children.
  */
 function element_get_visible_children(array $elements) {
-  $visible_children = array();
+  $visible_children = [];
 
   foreach (element_children($elements) as $key) {
     $child = $elements[$key];
@@ -7495,7 +7495,7 @@ function element_get_visible_children(array $elements) {
     }
 
     // Skip value and hidden elements, since they are not rendered.
-    if (isset($child['#type']) && in_array($child['#type'], array('value', 'hidden'))) {
+    if (isset($child['#type']) && in_array($child['#type'], ['value', 'hidden'])) {
       continue;
     }
 
@@ -7618,7 +7618,7 @@ function &backdrop_array_get_nested_value(array &$array, array $parents, &$key_e
  *   in array2.
  */
 function backdrop_array_diff_assoc_recursive($array1, $array2) {
-  $difference = array();
+  $difference = [];
 
   foreach ($array1 as $key => $value) {
     if (is_array($value)) {
@@ -7707,7 +7707,7 @@ function backdrop_array_set_nested_value(array &$array, array $parents, $value, 
     // PHP auto-creates container arrays and NULL entries without error if $ref
     // is NULL, but throws an error if $ref is set, but not an array.
     if ($force && isset($ref) && !is_array($ref)) {
-      $ref = array();
+      $ref = [];
     }
     $ref = &$ref[$parent];
   }
@@ -7824,49 +7824,49 @@ function backdrop_array_nested_key_exists(array $array, array $parents) {
  * Provides theme registration for themes across .inc files.
  */
 function backdrop_common_theme() {
-  return array(
+  return [
     // From theme.inc.
-    'page' => array(
-      'variables' => array('page' => '', 'page_bottom' => ''),
+    'page' => [
+      'variables' => ['page' => '', 'page_bottom' => ''],
       'template' => 'templates/page',
-    ),
-    'header' => array(
-      'variables' => array(
+    ],
+    'header' => [
+      'variables' => [
         'logo' => NULL,
         'site_name' => NULL,
         'site_slogan' => NULL,
         'menu' => NULL,
-      ),
+      ],
       'template' => 'templates/header',
-    ),
-    'datetime' => array(
-      'variables' => array(
+    ],
+    'datetime' => [
+      'variables' => [
         'timestamp' => NULL,
         'text' => NULL,
-        'attributes' => array(),
-        'html' => FALSE),
-    ),
-    'status_messages' => array(
-      'variables' => array('display' => NULL, 'messages' => array()),
-    ),
-    'link' => array(
-      'variables' => array(
+        'attributes' => [],
+        'html' => FALSE],
+    ],
+    'status_messages' => [
+      'variables' => ['display' => NULL, 'messages' => []],
+    ],
+    'link' => [
+      'variables' => [
         'text' => NULL,
         'path' => NULL,
-        'options' => array(),
-      ),
-    ),
-    'links' => array(
-      'variables' => array(
-        'links' => array(),
-        'attributes' => array('class' => array('links')),
-        'heading' => array(),
-      ),
-    ),
-    'dropbutton_wrapper' => array(
-      'variables' => array('children' => NULL),
-    ),
-    'image' => array(
+        'options' => [],
+      ],
+    ],
+    'links' => [
+      'variables' => [
+        'links' => [],
+        'attributes' => ['class' => ['links']],
+        'heading' => [],
+      ],
+    ],
+    'dropbutton_wrapper' => [
+      'variables' => ['children' => NULL],
+    ],
+    'image' => [
       // Both a "path" and "uri" are supported for specifying image paths.
       // Path should be used for images relative to Backdrop installation root.
       // URIs should be used for images within the public or private files
@@ -7884,279 +7884,279 @@ function backdrop_common_theme() {
       // - http://dev.w3.org/html5/spec/Overview.html#alt
       // The title attribute is optional in all cases, so it is omitted by
       // default.
-      'variables' => array(
+      'variables' => [
         'uri' => NULL,
         'path' => NULL,
         'width' => NULL,
         'height' => NULL,
         'alt' => '',
         'title' => NULL,
-        'attributes' => array(),
-      ),
-    ),
-    'breadcrumb' => array(
-      'variables' => array('breadcrumb' => NULL),
-    ),
-    'help' => array(
-      'variables' => array('markup' => NULL),
-    ),
-    'table' => array(
-      'variables' => array(
+        'attributes' => [],
+      ],
+    ],
+    'breadcrumb' => [
+      'variables' => ['breadcrumb' => NULL],
+    ],
+    'help' => [
+      'variables' => ['markup' => NULL],
+    ],
+    'table' => [
+      'variables' => [
         'header' => NULL,
         'footer' => NULL,
         'rows' => NULL,
-        'attributes' => array(),
+        'attributes' => [],
         'caption' => NULL,
-        'colgroups' => array(),
+        'colgroups' => [],
         'sticky' => TRUE,
         'empty' => '',
-      ),
-    ),
-    'tablesort_indicator' => array(
-      'variables' => array('style' => NULL),
-    ),
-    'mark' => array(
-      'variables' => array('type' => MARK_NEW),
-    ),
-    'item_list' => array(
-      'variables' => array(
-        'items' => array(),
+      ],
+    ],
+    'tablesort_indicator' => [
+      'variables' => ['style' => NULL],
+    ],
+    'mark' => [
+      'variables' => ['type' => MARK_NEW],
+    ],
+    'item_list' => [
+      'variables' => [
+        'items' => [],
         'title' => '',
         'type' => 'ul',
-        'attributes' => array(),
-        'wrapper_attributes' => array(),
+        'attributes' => [],
+        'wrapper_attributes' => [],
         'empty' => NULL,
-      ),
-    ),
-    'more_help_link' => array(
-      'variables' => array('url' => NULL),
-    ),
-    'feed_icon' => array(
-      'variables' => array('url' => NULL, 'title' => NULL),
-    ),
-    'more_link' => array(
-      'variables' => array('url' => NULL, 'title' => NULL)
-    ),
-    'progress_bar' => array(
-      'variables' => array('percent' => NULL, 'message' => NULL),
-    ),
-    'indentation' => array(
-      'variables' => array('size' => 1),
-    ),
-    'head_tag' => array(
+      ],
+    ],
+    'more_help_link' => [
+      'variables' => ['url' => NULL],
+    ],
+    'feed_icon' => [
+      'variables' => ['url' => NULL, 'title' => NULL],
+    ],
+    'more_link' => [
+      'variables' => ['url' => NULL, 'title' => NULL]
+    ],
+    'progress_bar' => [
+      'variables' => ['percent' => NULL, 'message' => NULL],
+    ],
+    'indentation' => [
+      'variables' => ['size' => 1],
+    ],
+    'head_tag' => [
       'render element' => 'element',
-    ),
+    ],
     // From theme.maintenance.inc.
-    'maintenance_page' => array(
-      'variables' => array(
+    'maintenance_page' => [
+      'variables' => [
         'content' => NULL,
         'sidebar' => NULL,
         'footer' => NULL,
         'show_messages' => TRUE,
-      ),
+      ],
       'template' => 'templates/maintenance-page',
-    ),
-    'update_page' => array(
-      'variables' => array(
+    ],
+    'update_page' => [
+      'variables' => [
         'content' => NULL,
         'sidebar' => NULL,
         'footer' => NULL,
         'show_messages' => TRUE,
-      ),
-    ),
-    'install_page' => array(
-      'variables' => array(
+      ],
+    ],
+    'install_page' => [
+      'variables' => [
         'content' => NULL,
         'sidebar' => NULL,
         'footer' => NULL,
-      ),
-    ),
-    'task_list' => array(
-      'variables' => array('items' => NULL, 'active' => NULL),
-    ),
-    'authorize_message' => array(
-      'variables' => array('message' => NULL, 'success' => TRUE),
-    ),
-    'authorize_report' => array(
-      'variables' => array('messages' => array()),
-    ),
+      ],
+    ],
+    'task_list' => [
+      'variables' => ['items' => NULL, 'active' => NULL],
+    ],
+    'authorize_message' => [
+      'variables' => ['message' => NULL, 'success' => TRUE],
+    ],
+    'authorize_report' => [
+      'variables' => ['messages' => []],
+    ],
     // From pager.inc.
-    'pager' => array(
-      'variables' => array(
-        'tags' => array(),
+    'pager' => [
+      'variables' => [
+        'tags' => [],
         'element' => 0,
-        'parameters' => array(),
+        'parameters' => [],
         'quantity' => 9,
-      ),
-    ),
-    'pager_first' => array(
-      'variables' => array(
+      ],
+    ],
+    'pager_first' => [
+      'variables' => [
         'text' => NULL,
         'element' => 0,
-        'parameters' => array(),
-      ),
-    ),
-    'pager_previous' => array(
-      'variables' => array(
-        'text' => NULL,
-        'element' => 0,
-        'interval' => 1,
-        'parameters' => array(),
-      ),
-    ),
-    'pager_next' => array(
-      'variables' => array(
+        'parameters' => [],
+      ],
+    ],
+    'pager_previous' => [
+      'variables' => [
         'text' => NULL,
         'element' => 0,
         'interval' => 1,
-        'parameters' => array(),
-      ),
-    ),
-    'pager_last' => array(
-      'variables' => array(
+        'parameters' => [],
+      ],
+    ],
+    'pager_next' => [
+      'variables' => [
         'text' => NULL,
         'element' => 0,
-        'parameters' => array(),
-      ),
-    ),
-    'pager_link' => array(
-      'variables' => array(
+        'interval' => 1,
+        'parameters' => [],
+      ],
+    ],
+    'pager_last' => [
+      'variables' => [
+        'text' => NULL,
+        'element' => 0,
+        'parameters' => [],
+      ],
+    ],
+    'pager_link' => [
+      'variables' => [
         'text' => NULL,
         'page_new' => NULL,
         'element' => NULL,
-        'parameters' => array(),
-        'attributes' => array(),
-      ),
-    ),
+        'parameters' => [],
+        'attributes' => [],
+      ],
+    ],
     // From menu.inc.
-    'menu_link' => array(
+    'menu_link' => [
       'render element' => 'element',
-    ),
-    'menu_tree' => array(
+    ],
+    'menu_tree' => [
       'render element' => 'tree',
-    ),
-    'menu_local_task' => array(
+    ],
+    'menu_local_task' => [
       'render element' => 'element',
-    ),
-    'menu_local_action' => array(
+    ],
+    'menu_local_action' => [
       'render element' => 'element',
-    ),
-    'menu_local_actions' => array(
-      'variables' => array('actions' => array()),
-    ),
-    'menu_local_tasks' => array(
-      'variables' => array('primary' => array(), 'secondary' => array()),
-    ),
-    'menu_toggle' => array(
-      'variables' => array('enabled' => NULL, 'id' => NULL, 'text' => ''),
-    ),
+    ],
+    'menu_local_actions' => [
+      'variables' => ['actions' => []],
+    ],
+    'menu_local_tasks' => [
+      'variables' => ['primary' => [], 'secondary' => []],
+    ],
+    'menu_toggle' => [
+      'variables' => ['enabled' => NULL, 'id' => NULL, 'text' => ''],
+    ],
     // From form.inc.
-    'select' => array(
+    'select' => [
       'render element' => 'element',
-    ),
-    'fieldset' => array(
+    ],
+    'fieldset' => [
       'render element' => 'element',
-    ),
-    'radio' => array(
+    ],
+    'radio' => [
       'render element' => 'element',
-    ),
-    'date' => array(
+    ],
+    'date' => [
       'render element' => 'element',
-    ),
-    'html_date' => array(
+    ],
+    'html_date' => [
       'render element' => 'element',
-    ),
-    'html_time' => array(
+    ],
+    'html_time' => [
       'render element' => 'element',
-    ),
-    'html_datetime' => array(
+    ],
+    'html_datetime' => [
       'render element' => 'element',
-    ),
-    'exposed_filters' => array(
+    ],
+    'exposed_filters' => [
       'render element' => 'form',
-    ),
-    'checkbox' => array(
+    ],
+    'checkbox' => [
       'render element' => 'element',
-    ),
-    'button' => array(
+    ],
+    'button' => [
       'render element' => 'element',
-    ),
-    'image_button' => array(
+    ],
+    'image_button' => [
       'render element' => 'element',
-    ),
-    'hidden' => array(
+    ],
+    'hidden' => [
       'render element' => 'element',
-    ),
-    'textfield' => array(
+    ],
+    'textfield' => [
       'render element' => 'element',
-    ),
-    'tel' => array(
+    ],
+    'tel' => [
       'render element' => 'element',
-    ),
-    'email' => array(
+    ],
+    'email' => [
       'render element' => 'element',
-    ),
-    'url' => array(
+    ],
+    'url' => [
       'render element' => 'element',
-    ),
-    'color' => array(
+    ],
+    'color' => [
       'render element' => 'element',
-    ),
-    'number' => array(
+    ],
+    'number' => [
       'render element' => 'element',
-    ),
-    'range' => array(
+    ],
+    'range' => [
       'render element' => 'element',
-    ),
-    'form' => array(
+    ],
+    'form' => [
       'render element' => 'element',
-    ),
-    'textarea' => array(
+    ],
+    'textarea' => [
       'render element' => 'element',
-    ),
-    'search' => array(
+    ],
+    'search' => [
       'render element' => 'element',
-    ),
-    'password' => array(
+    ],
+    'password' => [
       'render element' => 'element',
-    ),
-    'file' => array(
+    ],
+    'file' => [
       'render element' => 'element',
-    ),
-    'tableselect' => array(
+    ],
+    'tableselect' => [
       'render element' => 'element',
-    ),
-    'form_element' => array(
+    ],
+    'form_element' => [
       'render element' => 'element',
-    ),
-    'form_required_marker' => array(
+    ],
+    'form_required_marker' => [
       'render element' => 'element',
-    ),
-    'form_element_label' => array(
+    ],
+    'form_element_label' => [
       'render element' => 'element',
-    ),
-    'form_element_description' => array(
+    ],
+    'form_element_description' => [
       'render element' => 'element',
-    ),
-    'vertical_tabs' => array(
+    ],
+    'vertical_tabs' => [
       'render element' => 'element',
-    ),
-    'container' => array(
+    ],
+    'container' => [
       'render element' => 'element',
-    ),
-    'details' => array(
+    ],
+    'details' => [
       'render element' => 'element',
-    ),
+    ],
     // From icon.inc.
-    'icon' => array(
-      'variables' => array(
+    'icon' => [
+      'variables' => [
         'name' => NULL,
         'path' => NULL,
-        'attributes' => array('class' => array()),
-        'wrapper_attributes' => array('class' => array()),
-      ),
-    ),
-  );
+        'attributes' => ['class' => []],
+        'wrapper_attributes' => ['class' => []],
+      ],
+    ],
+  ];
 }
 
 /**
@@ -8248,7 +8248,7 @@ function backdrop_get_schema_unprocessed($module, $table = NULL) {
   elseif (!empty($schema)) {
     return $schema;
   }
-  return array();
+  return [];
 }
 
 /**
@@ -8298,7 +8298,7 @@ function backdrop_schema_fields_sql($table, $prefix = NULL) {
   $schema = backdrop_get_schema($table);
   $fields = array_keys($schema['fields']);
   if ($prefix) {
-    $columns = array();
+    $columns = [];
     foreach ($fields as $field) {
       $columns[] = "$prefix.$field";
     }
@@ -8336,10 +8336,10 @@ function backdrop_schema_fields_sql($table, $prefix = NULL) {
  *   If the record insert or update failed, returns FALSE. If it succeeded,
  *   returns SAVED_NEW or SAVED_UPDATED, depending on the operation performed.
  */
-function backdrop_write_record($table, &$record, $primary_keys = array()) {
+function backdrop_write_record($table, &$record, $primary_keys = []) {
   // Standardize $primary_keys to an array.
   if (is_string($primary_keys)) {
-    $primary_keys = array($primary_keys);
+    $primary_keys = [$primary_keys];
   }
 
   $schema = backdrop_get_schema($table);
@@ -8348,8 +8348,8 @@ function backdrop_write_record($table, &$record, $primary_keys = array()) {
   }
 
   $object = (object) $record;
-  $fields = array();
-  $default_fields = array();
+  $fields = [];
+  $default_fields = [];
 
   // Go through the schema to determine fields to write.
   foreach ($schema['fields'] as $field => $info) {
@@ -8415,7 +8415,7 @@ function backdrop_write_record($table, &$record, $primary_keys = array()) {
   // Build the SQL.
   if (empty($primary_keys)) {
     // We are doing an insert.
-    $options = array('return' => Database::RETURN_INSERT_ID);
+    $options = ['return' => Database::RETURN_INSERT_ID];
     if (isset($serial) && isset($fields[$serial])) {
       // If the serial column has been explicitly set with an ID, then we don't
       // require the database to return the last insert id.
@@ -8523,11 +8523,11 @@ function backdrop_write_record($table, &$record, $primary_keys = array()) {
  * @see backdrop_parse_info_format()
  */
 function backdrop_parse_info_file($filename, $process_sections = FALSE) {
-  $info = &backdrop_static(__FUNCTION__, array());
+  $info = &backdrop_static(__FUNCTION__, []);
 
   if (!isset($info[$filename])) {
     if (!file_exists($filename)) {
-      $info[$filename] = array();
+      $info[$filename] = [];
     }
     else {
       $data = file_get_contents($filename);
@@ -8577,7 +8577,7 @@ function backdrop_parse_info_file($filename, $process_sections = FALSE) {
  * @see backdrop_parse_info_file()
  */
 function backdrop_parse_info_format($data, $process_sections = FALSE) {
-  $info = array();
+  $info = [];
 
   // Separate by sections and parse individually if requested.
   if ($process_sections) {
@@ -8590,7 +8590,7 @@ function backdrop_parse_info_format($data, $process_sections = FALSE) {
 
     // If sections are found, parse each individually and add to the result.
     if ($split_count > 1) {
-      $info_sections = array();
+      $info_sections = [];
       for ($n = 0; $n < $split_count; $n = $n + 2) {
         $info_sections[$split[$n]] = backdrop_parse_info_format($split[$n + 1], FALSE);
       }
@@ -8614,8 +8614,8 @@ function backdrop_parse_info_format($data, $process_sections = FALSE) {
     foreach ($matches as $match) {
       // Fetch the key and value string.
       $i = 0;
-      $parts = array();
-      foreach (array('key', 'value1', 'value2', 'value3') as $var) {
+      $parts = [];
+      foreach (['key', 'value1', 'value2', 'value3'] as $var) {
         $parts[$var] = isset($match[++$i]) ? $match[$i] : '';
       }
       $value = stripslashes(substr($parts['value1'], 1, -1)) . stripslashes(substr($parts['value2'], 1, -1)) . $parts['value3'];
@@ -8631,7 +8631,7 @@ function backdrop_parse_info_format($data, $process_sections = FALSE) {
           $key = count($parent);
         }
         if (!isset($parent[$key]) || !is_array($parent[$key])) {
-          $parent[$key] = array();
+          $parent[$key] = [];
         }
         $parent = &$parent[$key];
       }
@@ -8673,53 +8673,53 @@ function backdrop_parse_info_format($data, $process_sections = FALSE) {
  * @ingroup logging_severity_levels
  */
 function watchdog_severity_levels($return = 'label') {
-  $levels = array(
-    WATCHDOG_EMERGENCY => array(
+  $levels = [
+    WATCHDOG_EMERGENCY => [
       'name' => 'emergency',
       'label' => t('Emergency'),
       'description' => t('System is unusable'),
-    ),
-    WATCHDOG_ALERT => array(
+    ],
+    WATCHDOG_ALERT => [
       'name' => 'alert',
       'label' => t('Alert'),
       'description' => t('Action must be taken immediately'),
-    ),
-    WATCHDOG_CRITICAL => array(
+    ],
+    WATCHDOG_CRITICAL => [
       'name' => 'critical',
       'label' => t('Critical'),
       'description' => t('Critical conditions'),
-    ),
-    WATCHDOG_ERROR => array(
+    ],
+    WATCHDOG_ERROR => [
       'name' => 'error',
       'label' => t('Error'),
       'description' => t('Error conditions'),
-    ),
-    WATCHDOG_WARNING => array(
+    ],
+    WATCHDOG_WARNING => [
       'name' => 'warning',
       'label' => t('Warning'),
       'description' => t('Warning conditions'),
-    ),
-    WATCHDOG_NOTICE => array(
+    ],
+    WATCHDOG_NOTICE => [
       'name' => 'notice',
       'label' => t('Notice'),
       'description' => t('Normal but significant conditions'),
-    ),
-    WATCHDOG_INFO => array(
+    ],
+    WATCHDOG_INFO => [
       'name' => 'info',
       'label' => t('Info'),
       'description' => t('Informational messages'),
-    ),
-    WATCHDOG_DEBUG => array(
+    ],
+    WATCHDOG_DEBUG => [
       'name' => 'debug',
       'label' => t('Debug'),
       'description' => t('Debug-level messages'),
-    ),
-    WATCHDOG_DEPRECATED => array(
+    ],
+    WATCHDOG_DEPRECATED => [
       'name' => 'deprecated',
       'label' => t('Deprecated'),
       'description' => t('Deprecated function/feature notices'),
-    ),
-  );
+    ],
+  ];
 
   switch ($return) {
     case 'name':
@@ -8740,7 +8740,7 @@ function watchdog_severity_levels($return = 'label') {
  */
 function backdrop_explode_tags($tags) {
   if (empty($tags)) {
-    return array();
+    return [];
   }
   // This regexp allows the following types of user input:
   // this, "somecompany, llc", "and ""this"" w,o.rks", foo bar
@@ -8748,7 +8748,7 @@ function backdrop_explode_tags($tags) {
   preg_match_all($regexp, $tags, $matches);
   $typed_tags = array_unique($matches[1]);
 
-  $tags = array();
+  $tags = [];
   foreach ($typed_tags as $tag) {
     // If a user has escaped a term (to demonstrate that it is a group,
     // or includes a comma or quote character), we remove the escape
@@ -8768,7 +8768,7 @@ function backdrop_explode_tags($tags) {
  * @see backdrop_explode_tags()
  */
 function backdrop_implode_tags($tags) {
-  $encoded_tags = array();
+  $encoded_tags = [];
   foreach ($tags as $tag) {
     // Commas and quotes in tag names are special cases, so encode them.
     if (strpos($tag, ',') !== FALSE || strpos($tag, '"') !== FALSE) {
@@ -8805,7 +8805,7 @@ function backdrop_flush_all_caches() {
   menu_rebuild();
 
   // Ordered so clearing the page cache will always be the last action.
-  $core = array('cache', 'path', 'filter', 'bootstrap', 'token', 'page');
+  $core = ['cache', 'path', 'filter', 'bootstrap', 'token', 'page'];
   $cache_bins = array_merge(module_invoke_all('flush_caches'), $core);
   foreach ($cache_bins as $bin) {
     cache($bin)->flush();
@@ -8878,7 +8878,7 @@ function debug($data, $label = NULL, $print_r = FALSE) {
  * @see backdrop_check_incompatibility()
  */
 function backdrop_parse_dependency($dependency) {
-  $value = array();
+  $value = [];
   // Split out the optional project name.
   if (strpos($dependency, ':')) {
     list($project_name, $dependency) = explode(':', $dependency);
@@ -8912,7 +8912,7 @@ function backdrop_parse_dependency($dependency) {
           }
           // Equivalence can be checked by adding two restrictions.
           if ($op == '=' || $op == '==') {
-            $value['versions'][] = array('op' => '<', 'version' => ($matches['major'] + 1) . '.x');
+            $value['versions'][] = ['op' => '<', 'version' => ($matches['major'] + 1) . '.x'];
             $op = '>=';
           }
         }
@@ -8925,17 +8925,17 @@ function backdrop_parse_dependency($dependency) {
               $matches['minor']++;
             }
             if ($op == '=' || $op == '==') {
-              $value['versions'][] = array(
+              $value['versions'][] = [
                 'op' => '<',
                 'version' => $matches['major'] . '.' . ($matches['minor'] + 1) . '.x',
-              );
+              ];
               $op = '>=';
             }
           }
         }
         $version = $matches['major'] . '.' . $matches['minor'];
         $version .= (isset($matches['patch']) && ($matches['patch'] === '0' || $matches['patch'])) ? '.' . $matches['patch'] : '';
-        $value['versions'][] = array('op' => $op, 'version' => $version);
+        $value['versions'][] = ['op' => $op, 'version' => $version];
       }
     }
   }
@@ -8991,12 +8991,12 @@ function _backdrop_version_compare_convert($version_string) {
   $version_string = str_replace('.x-dev', '.99999', $version_string);
 
   // Replace common indicators with numeric equivalents for version_compare().
-  $indicator_order = array(
+  $indicator_order = [
     1 => 'alpha',
     2 => 'beta',
     3 => 'preview',
     4 => 'rc',
-  );
+  ];
   foreach ($indicator_order as $order => $indicator) {
     // Replace both before and after the indicator with dots, so that multiple
     // alphas, betas, etc. would be ordered properly. For example, version
@@ -9014,7 +9014,7 @@ function _backdrop_version_compare_convert($version_string) {
  * @see hook_archiver_info_alter()
  */
 function archiver_get_info() {
-  $archiver_info = &backdrop_static(__FUNCTION__, array());
+  $archiver_info = &backdrop_static(__FUNCTION__, []);
 
   if (empty($archiver_info)) {
     $cache = cache()->get('archiver_info');
@@ -9041,7 +9041,7 @@ function archiver_get_info() {
  *   validation system.
  */
 function archiver_get_extensions() {
-  $valid_extensions = array();
+  $valid_extensions = [];
   foreach (archiver_get_info() as $archive) {
     foreach ($archive['extensions'] as $extension) {
       foreach (explode('.', $extension) as $part) {
@@ -9072,7 +9072,7 @@ function archiver_get_archiver($file) {
   // Archivers can only work on local paths
   $filepath = backdrop_realpath($file);
   if (!is_file($filepath)) {
-    throw new Exception(t('Archivers can only operate on local files: %file not supported', array('%file' => $file)));
+    throw new Exception(t('Archivers can only operate on local files: %file not supported', ['%file' => $file]));
   }
   $archiver_info = archiver_get_info();
 
@@ -9131,7 +9131,7 @@ function backdrop_get_filetransfer_info() {
   if (!isset($info)) {
     // Since we have to manually set the 'file path' default for each
     // module separately, we can't use module_invoke_all().
-    $info = array();
+    $info = [];
     foreach (module_implements('filetransfer_info') as $module) {
       $function = $module . '_filetransfer_info';
       $result = $function();

@@ -12,7 +12,7 @@
 class views_handler_argument_null extends views_handler_argument {
   function option_definition() {
     $options = parent::option_definition();
-    $options['must_not_be'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['must_not_be'] = ['default' => FALSE, 'bool' => TRUE];
     return $options;
   }
 
@@ -22,13 +22,13 @@ class views_handler_argument_null extends views_handler_argument {
    */
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
-    $form['must_not_be'] = array(
+    $form['must_not_be'] = [
       '#type' => 'checkbox',
       '#title' => t('Fail basic validation if any argument is given'),
       '#default_value' => !empty($this->options['must_not_be']),
       '#description' => t('By checking this field, you can use this to make sure views with more arguments than necessary fail validation.'),
       '#fieldset' => 'more',
-    );
+    ];
 
     unset($form['exception']);
   }
@@ -39,7 +39,7 @@ class views_handler_argument_null extends views_handler_argument {
    */
   function default_actions($which = NULL) {
     if ($which) {
-      if (in_array($which, array('ignore', 'not found', 'empty', 'default', 'access denied'))) {
+      if (in_array($which, ['ignore', 'not found', 'empty', 'default', 'access denied'])) {
         return parent::default_actions($which);
       }
       return;

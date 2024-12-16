@@ -24,7 +24,7 @@ class date_views_argument_handler extends date_views_argument_handler_simple {
       $this->view->date_info = new stdClass();
     }
     if (empty($this->view->date_info->date_fields)) {
-      $this->view->date_info->date_fields = array();
+      $this->view->date_info->date_fields = [];
     }
     $this->view->date_info->date_fields = array_merge($this->view->date_info->date_fields, $this->options['date_fields']);
   }
@@ -34,9 +34,9 @@ class date_views_argument_handler extends date_views_argument_handler_simple {
    */
   function option_definition() {
     $options = parent::option_definition();
-    $options['date_fields'] = array('default' => array());
-    $options['date_method'] = array('default' => 'OR');
-    $options['date_group'] = array('default' => 'date');
+    $options['date_fields'] = ['default' => []];
+    $options['date_method'] = ['default' => 'OR'];
+    $options['date_group'] = ['default' => 'date'];
     return $options;
   }
 
@@ -46,37 +46,37 @@ class date_views_argument_handler extends date_views_argument_handler_simple {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
     $fields = date_views_fields($this->base_table);
-    $options = array();
+    $options = [];
     foreach ($fields['name'] as $name => $field) {
       $options[$name] = $field['label'];
     }
 
-    $form['date_fields'] = array(
+    $form['date_fields'] = [
       '#title' => t('Date field(s)'),
       '#type' => 'checkboxes',
       '#options' => $options,
       '#default_value' => $this->options['date_fields'],
       '#multiple' => TRUE,
       '#description' => t("Select one or more date fields to filter with this argument."),
-    );
-    $form['date_method'] = array(
+    ];
+    $form['date_method'] = [
       '#title' => t('Method'),
       '#type' => 'radios',
-      '#options' => array('OR' => t('OR'), 'AND' => t('AND')),
+      '#options' => ['OR' => t('OR'), 'AND' => t('AND')],
       '#default_value' => $this->options['date_method'],
       '#description' => t('Method of handling multiple date fields in the same query. Return items that have any matching date field (date = field_1 OR field_2), or only those with matches in all selected date fields (date = field_1 AND field_2). '),
-      );
-    $form['date_group'] = array(
+      ];
+    $form['date_group'] = [
       '#type' => 'hidden',
       '#value' => $this->options['date_group'],
-    );
+    ];
   }
 
   function options_validate(&$form, &$form_state) {
 
     // Views will whine if we don't have something for the these values even though we removed the option for summaries.
     $form_state['values']['options']['summary']['format'] = 'none';
-    $form_state['values']['options']['summary']['options']['none'] = array();
+    $form_state['values']['options']['summary']['options']['none'] = [];
 
     // It is very important to call the parent function here:
     parent::options_validate($form, $form_state);
@@ -101,7 +101,7 @@ class date_views_argument_handler extends date_views_argument_handler_simple {
   function admin_summary() {
     $fields = date_views_fields($this->base_table);
     if (!empty($this->options['date_fields'])) {
-      $output = array();
+      $output = [];
       foreach ($this->options['date_fields'] as $field) {
         if (array_key_exists($field, $fields['name'])) {
           $output[] = $fields['name'][$field]['label'];
@@ -151,7 +151,7 @@ class date_views_argument_handler extends date_views_argument_handler_simple {
     $this->granularity = $this->date_handler->arg_granularity($this->argument);
     $format = $this->date_handler->views_formats($this->granularity, 'sql');
 
-    $this->placeholders = array();
+    $this->placeholders = [];
 
     if (!empty($this->query_fields)) {
       // Use set_where_group() with the selected date_method
@@ -184,7 +184,7 @@ class date_views_argument_handler extends date_views_argument_handler_simple {
   function get_query_fields() {
     $fields = date_views_fields($this->base_table);
     $fields = $fields['name'];
-    $this->query_fields = array();
+    $this->query_fields = [];
     foreach ($this->options['date_fields'] as $delta => $name) {
       if (array_key_exists($name, $fields) && $field = $fields[$name]) {
         $date_handler = new date_sql_handler($field['sql_type'], date_default_timezone());
@@ -192,7 +192,7 @@ class date_views_argument_handler extends date_views_argument_handler_simple {
         $date_handler->db_timezone = date_get_timezone_db($field['tz_handling']);
         $date_handler->local_timezone = date_get_timezone($field['tz_handling']);
         date_views_set_timezone($date_handler, $this, $field);
-        $this->query_fields[] = array('field' => $field, 'date_handler' => $date_handler);
+        $this->query_fields[] = ['field' => $field, 'date_handler' => $date_handler];
       }
     }
   }

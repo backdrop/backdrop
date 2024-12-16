@@ -25,74 +25,74 @@ class views_plugin_argument_default_taxonomy_tid extends views_plugin_argument_d
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['term_page'] = array('default' => TRUE, 'bool' => TRUE);
-    $options['node'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['anyall'] = array('default' => ',');
-    $options['limit'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['vocabularies'] = array('default' => array());
+    $options['term_page'] = ['default' => TRUE, 'bool' => TRUE];
+    $options['node'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['anyall'] = ['default' => ','];
+    $options['limit'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['vocabularies'] = ['default' => []];
 
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
-    $form['term_page'] = array(
+    $form['term_page'] = [
       '#type' => 'checkbox',
       '#title' => t('Load default filter from term page'),
       '#default_value' => $this->options['term_page'],
-    );
-    $form['node'] = array(
+    ];
+    $form['node'] = [
       '#type' => 'checkbox',
       '#title' => t('Load default filter from node page, that\'s good for related taxonomy blocks'),
       '#default_value' => $this->options['node'],
-    );
+    ];
 
-    $form['limit'] = array(
+    $form['limit'] = [
       '#type' => 'checkbox',
       '#title' => t('Limit terms by vocabulary'),
       '#default_value'=> $this->options['limit'],
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[argument_default][taxonomy_tid][node]"]' => array('checked' => TRUE),
-        ),
-      ),
-    );
+      '#states' => [
+        'visible' => [
+          ':input[name="options[argument_default][taxonomy_tid][node]"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
 
-    $options = array();
+    $options = [];
     $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
     foreach ($vocabularies as $voc) {
       $options[$voc->machine_name] = check_plain($voc->name);
     }
 
-    $form['vocabularies'] = array(
+    $form['vocabularies'] = [
       '#type' => 'checkboxes',
       '#title' => t('Vocabularies'),
       '#options' => $options,
       '#default_value' => $this->options['vocabularies'],
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[argument_default][taxonomy_tid][limit]"]' => array('checked' => TRUE),
-          ':input[name="options[argument_default][taxonomy_tid][node]"]' => array('checked' => TRUE),
-        ),
-      ),
-    );
+      '#states' => [
+        'visible' => [
+          ':input[name="options[argument_default][taxonomy_tid][limit]"]' => ['checked' => TRUE],
+          ':input[name="options[argument_default][taxonomy_tid][node]"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
 
-    $form['anyall'] = array(
+    $form['anyall'] = [
       '#type' => 'radios',
       '#title' => t('Multiple-value handling'),
       '#default_value'=> $this->options['anyall'],
-      '#options' => array(
+      '#options' => [
         ',' => t('Filter to items that share all terms'),
         '+' => t('Filter to items that share any term'),
-      ),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[argument_default][taxonomy_tid][node]"]' => array('checked' => TRUE),
-        ),
-      ),
-    );
+      ],
+      '#states' => [
+        'visible' => [
+          ':input[name="options[argument_default][taxonomy_tid][node]"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
   }
 
-  function options_submit(&$form, &$form_state, &$options = array()) {
+  function options_submit(&$form, &$form_state, &$options = []) {
     // Filter unselected items so we don't unnecessarily store giant arrays.
     $options['vocabularies'] = array_filter($options['vocabularies']);
   }
@@ -114,7 +114,7 @@ class views_plugin_argument_default_taxonomy_tid extends views_plugin_argument_d
       }
       // Just check, if a node could be detected.
       if ($node) {
-        $taxonomy = array();
+        $taxonomy = [];
         $fields = field_info_instances('node', $node->type);
         foreach ($fields as $name => $info) {
           $field_info = field_info_field($name);
@@ -128,7 +128,7 @@ class views_plugin_argument_default_taxonomy_tid extends views_plugin_argument_d
           }
         }
         if (!empty($this->options['limit'])) {
-          $tids = array();
+          $tids = [];
           // filter by vocabulary
           foreach ($taxonomy as $tid => $vocab) {
             if (!empty($this->options['vocabularies'][$vocab])) {

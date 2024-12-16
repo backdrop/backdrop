@@ -18,15 +18,15 @@ class DashboardOverviewContentBlock extends Block {
     $all_types = array_keys(node_type_get_names());
 
     // Default status for comment types.
-    $enabled_comment_types = array('post', 'article', 'blog');
+    $enabled_comment_types = ['post', 'article', 'blog'];
     $enabled_comment_types = array_intersect_key($enabled_comment_types, $all_types);
 
-    $this->settings += array(
-      'types' => array(),
+    $this->settings += [
+      'types' => [],
       'comment_enabled' => TRUE,
       'comment_include_unapproved' => TRUE,
       'comment_types' => $enabled_comment_types,
-    );
+    ];
   }
 
   /**
@@ -66,25 +66,25 @@ class DashboardOverviewContentBlock extends Block {
 
     // Not cached since comment and node CRUD operations are likely to be more
     // frequent than Dashboard access events.
-    $items = array();
+    $items = [];
     $types = node_type_get_types();
     $comment_enabled = module_exists('comment') && $settings['comment_enabled'];
 
     foreach ($types as $machine => $node_type) {
       // Compare against node type option on block settings.
       if (in_array($machine, $settings['types']) || empty($settings['types'])) {
-        $type_count = db_query("SELECT count(*) FROM {node} WHERE type = :type and status = 1", array(':type' => $machine))->fetchField();
-        $content_data[$machine] = format_plural($type_count, '1 @type item', '@count @type items', array('@type' => t($node_type->name)));
+        $type_count = db_query("SELECT count(*) FROM {node} WHERE type = :type and status = 1", [':type' => $machine])->fetchField();
+        $content_data[$machine] = format_plural($type_count, '1 @type item', '@count @type items', ['@type' => t($node_type->name)]);
 
         // Check if Comment module is enabled.
         if ($comment_enabled) {
           // Compare against comment options on block settings.
           if (in_array($machine, $settings['comment_types'])) {
-            $comment_count = db_query("SELECT count(DISTINCT cid) FROM {comment} c INNER JOIN {node} n ON c.nid = n.nid WHERE n.type = :type and c.status = 1 AND n.status = 1", array(':type' => $machine))->fetchField();
+            $comment_count = db_query("SELECT count(DISTINCT cid) FROM {comment} c INNER JOIN {node} n ON c.nid = n.nid WHERE n.type = :type and c.status = 1 AND n.status = 1", [':type' => $machine])->fetchField();
 
             // Compare against unapproved option checkbox on block settings.
             if ($settings['comment_include_unapproved']) {
-              $unapproved_count = db_query("SELECT count(DISTINCT c.cid) FROM {comment} c INNER JOIN {node} n ON c.nid = n.nid WHERE n.type = :type and c.status = 0 AND n.status = 1", array(':type' => $machine))->fetchField();
+              $unapproved_count = db_query("SELECT count(DISTINCT c.cid) FROM {comment} c INNER JOIN {node} n ON c.nid = n.nid WHERE n.type = :type and c.status = 0 AND n.status = 1", [':type' => $machine])->fetchField();
               $content_data[$machine . '_comments_unapproved'] = format_plural($unapproved_count, '1 unapproved', '@count unapproved');
               $comment_count += $unapproved_count;
             }
@@ -99,19 +99,19 @@ class DashboardOverviewContentBlock extends Block {
       }
     }
 
-    $panel = array(
+    $panel = [
       '#theme' => 'dashboard_panel__overview_content',
-    );
-    $panel['list'] = array(
+    ];
+    $panel['list'] = [
       '#theme' => 'item_list',
       '#items' => $items,
-    );
+    ];
     if (user_access('administer nodes') || user_access('access content overview')) {
-      $panel['link'] = array(
+      $panel['link'] = [
         '#theme' => 'link',
         '#path' => 'admin/content',
         '#text' => t('Manage content'),
-      );
+      ];
     }
 
     return $panel;
@@ -125,51 +125,51 @@ class DashboardOverviewContentBlock extends Block {
     $settings = $this->settings;
 
     $node_types = node_type_get_types();
-    $options = array();
+    $options = [];
     foreach ($node_types as $machine_name => $node_type) {
       $options[$machine_name] = check_plain(t($node_type->name));
     }
 
-    $form['types'] = array(
+    $form['types'] = [
       '#type' => 'checkboxes',
       '#title' => t('Display <strong>post</strong> counts for the following content types'),
       '#options' => $options,
       '#default_value' => empty($settings['types']) ? array_keys($options) : $settings['types'],
-    );
+    ];
 
     if (module_exists('comment')) {
-      $form['comment'] = array(
+      $form['comment'] = [
         '#type' => 'fieldset',
         '#title' => t('Comment counts'),
         '#tree' => FALSE,
         '#collapsible' => TRUE,
-      );
-      $form['comment']['comment_enabled'] = array(
+      ];
+      $form['comment']['comment_enabled'] = [
         '#type' => 'checkbox',
         '#title' => t('Display comment counts'),
         '#default_value' => $settings['comment_enabled'],
-      );
-      $form['comment']['comment_include_unapproved'] = array(
+      ];
+      $form['comment']['comment_include_unapproved'] = [
         '#type' => 'checkbox',
         '#title' => t('Include unapproved comments in comment counts'),
         '#default_value' => $settings['comment_include_unapproved'],
-        '#states' => array(
-          'visible' => array(
-            '[name="comment_enabled"]' => array('checked' => TRUE),
-          ),
-        ),
-      );
-      $form['comment']['comment_types'] = array(
+        '#states' => [
+          'visible' => [
+            '[name="comment_enabled"]' => ['checked' => TRUE],
+          ],
+        ],
+      ];
+      $form['comment']['comment_types'] = [
         '#type' => 'checkboxes',
         '#title' => t('Display <strong>comment</strong> counts for the following content types'),
         '#options' => $options,
         '#default_value' => empty($settings['comment_types']) ? array_keys($options) : $settings['comment_types'],
-        '#states' => array(
-          'visible' => array(
-            '[name="comment_enabled"]' => array('checked' => TRUE),
-          ),
-        ),
-      );
+        '#states' => [
+          'visible' => [
+            '[name="comment_enabled"]' => ['checked' => TRUE],
+          ],
+        ],
+      ];
     }
   }
 
@@ -187,10 +187,10 @@ class DashboardOverviewContentBlock extends Block {
     // If all options are selected, save an empty array.
     $type_count = count($form['types']['#options']);
     if ($type_count == count($this->settings['types'])) {
-      $this->settings['types'] = array();
+      $this->settings['types'] = [];
     }
     if ($type_count == count($this->settings['comment_types'])) {
-      $this->settings['comment_types'] = array();
+      $this->settings['comment_types'] = [];
     }
   }
 }

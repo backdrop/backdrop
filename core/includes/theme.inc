@@ -105,7 +105,7 @@ function backdrop_theme_initialize() {
   $theme_key = $theme;
 
   // Find all our ancestor themes and put them in an array.
-  $base_themes = array();
+  $base_themes = [];
   $ancestor = $theme;
   while ($ancestor && isset($themes[$ancestor]->base_theme)) {
     $ancestor = $themes[$ancestor]->base_theme;
@@ -119,10 +119,10 @@ function backdrop_theme_initialize() {
   // Provide the page with information about the theme that's used, so that a
   // later Ajax request can be rendered using the same theme.
   // @see ajax_base_page_theme()
-  $setting['ajaxPageState'] = array(
+  $setting['ajaxPageState'] = [
     'theme' => $theme_key,
     'theme_token' => backdrop_get_token($theme_key),
-  );
+  ];
   backdrop_add_js($setting, 'setting');
 }
 
@@ -147,7 +147,7 @@ function backdrop_theme_initialize() {
  * @param string $registry_callback
  *   The callback to invoke to set the theme registry.
  */
-function _backdrop_theme_initialize($theme, $base_themes = array(), $registry_callback = '_theme_load_registry') {
+function _backdrop_theme_initialize($theme, $base_themes = [], $registry_callback = '_theme_load_registry') {
   global $theme_info, $base_theme_info, $theme_engine, $theme_path;
   $theme_info = $theme;
   $base_theme_info = $base_themes;
@@ -157,7 +157,7 @@ function _backdrop_theme_initialize($theme, $base_themes = array(), $registry_ca
   // Prepare stylesheets from this theme as well as all ancestor themes.
   // We work it this way so that we can have child themes override parent
   // theme stylesheets.
-  $final_stylesheets = array();
+  $final_stylesheets = [];
 
   // Grab stylesheets from base theme.
   foreach ($base_themes as $base) {
@@ -182,12 +182,12 @@ function _backdrop_theme_initialize($theme, $base_themes = array(), $registry_ca
   // And now add the stylesheets properly.
   foreach ($final_stylesheets as $media => $stylesheets) {
     foreach ($stylesheets as $stylesheet) {
-      backdrop_add_css($stylesheet, array('group' => CSS_THEME, 'every_page' => TRUE, 'media' => $media));
+      backdrop_add_css($stylesheet, ['group' => CSS_THEME, 'every_page' => TRUE, 'media' => $media]);
     }
   }
 
   // Do basically the same as the above for scripts.
-  $final_scripts = array();
+  $final_scripts = [];
 
   // Grab scripts from base theme.
   foreach ($base_themes as $base) {
@@ -224,7 +224,7 @@ function _backdrop_theme_initialize($theme, $base_themes = array(), $registry_ca
   // Add scripts used by this theme.
   foreach ($final_scripts as $scope => $scripts) {
     foreach ($scripts as $script) {
-      backdrop_add_js($script, array('group' => JS_THEME, 'every_page' => TRUE, 'scope' => $scope));
+      backdrop_add_js($script, ['group' => JS_THEME, 'every_page' => TRUE, 'scope' => $scope]);
     }
   }
 
@@ -258,7 +258,7 @@ function _backdrop_theme_initialize($theme, $base_themes = array(), $registry_ca
   }
 
   if (isset($registry_callback)) {
-    _theme_registry_callback($registry_callback, array($theme, $base_themes, $theme_engine));
+    _theme_registry_callback($registry_callback, [$theme, $base_themes, $theme_engine]);
   }
 }
 
@@ -291,7 +291,7 @@ function theme_get_registry($complete = TRUE) {
   // static variables have been reset.
   if (!is_array($theme_registry)) {
     backdrop_theme_initialize();
-    $theme_registry = array();
+    $theme_registry = [];
   }
 
   $key = (int) $complete;
@@ -318,10 +318,10 @@ function theme_get_registry($complete = TRUE) {
  * @return array
  *   The currently set theme registry callback and arguments.
  */
-function _theme_registry_callback($callback = NULL, array $arguments = array()) {
+function _theme_registry_callback($callback = NULL, array $arguments = []) {
   static $stored;
   if (isset($callback)) {
-    $stored = array($callback, $arguments);
+    $stored = [$callback, $arguments];
   }
   return $stored;
 }
@@ -542,14 +542,14 @@ class ThemeRegistry Extends BackdropCacheArray {
  * @see list_themes()
  */
 function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
-  $result = array();
+  $result = [];
 
-  $hook_defaults = array(
+  $hook_defaults = [
     'variables' => TRUE,
     'render element' => TRUE,
     'pattern' => TRUE,
     'base hook' => TRUE,
-  );
+  ];
 
   // Invoke the hook_theme() implementation, process what is returned, and
   // merge it into $cache.
@@ -607,8 +607,8 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
       // Check for existing variable preprocessors and ensure they're in the
       // expected format.
       if (!isset($info['preprocess functions']) || !is_array($info['preprocess functions'])) {
-        $info['preprocess functions'] = array();
-        $prefixes = array();
+        $info['preprocess functions'] = [];
+        $prefixes = [];
 
         if ($type == 'module') {
           // Default variable preprocessor prefix.
@@ -667,7 +667,7 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
       // Check only if not registered by the theme or engine.
       if (empty($result[$hook])) {
         if (!isset($info['preprocess functions'])) {
-          $cache[$hook]['preprocess functions'] = array();
+          $cache[$hook]['preprocess functions'] = [];
         }
         // Only use non-hook-specific variable preprocessors for theme hooks
         // implemented as templates. See theme().
@@ -700,7 +700,7 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
  *   The completely built theme registry.
  */
 function _theme_build_registry($theme, $base_themes, $theme_engine) {
-  $cache = array();
+  $cache = [];
   $modules_loaded = module_load_all(NULL);
 
   // First, process the theme hooks advertised by modules. This will
@@ -796,16 +796,16 @@ function _theme_build_registry($theme, $base_themes, $theme_engine) {
  *     declare this theme as their base theme.
 */
 function list_themes($refresh = FALSE) {
-  $list = &backdrop_static(__FUNCTION__, array());
+  $list = &backdrop_static(__FUNCTION__, []);
 
   if ($refresh) {
-    $list = array();
+    $list = [];
     system_list_reset();
   }
 
   if (empty($list)) {
-    $list = array();
-    $themes = array();
+    $list = [];
+    $themes = [];
     // Extract from the database only when it is available.
     // Also check that the site is not in the middle of an install or update.
     if (!defined('MAINTENANCE_MODE')) {
@@ -864,14 +864,14 @@ function list_themes($refresh = FALSE) {
  *   Returns an array of all of the theme's ancestors; the first element's value
  *   will be NULL if an error occurred.
  */
-function backdrop_find_base_themes($themes, $key, $used_keys = array()) {
+function backdrop_find_base_themes($themes, $key, $used_keys = []) {
   $base_key = $themes[$key]->info['base theme'];
   // Does the base theme exist?
   if (!isset($themes[$base_key])) {
-    return array($base_key => NULL);
+    return [$base_key => NULL];
   }
 
-  $current_base_theme = array($base_key => $themes[$base_key]->info['name']);
+  $current_base_theme = [$base_key => $themes[$base_key]->info['name']];
 
   // Is the base theme itself a child of another theme?
   if (isset($themes[$base_key]->info['base theme'])) {
@@ -881,7 +881,7 @@ function backdrop_find_base_themes($themes, $key, $used_keys = array()) {
     }
     // Prevent loops.
     if (!empty($used_keys[$base_key])) {
-      return array($base_key => NULL);
+      return [$base_key => NULL];
     }
     $used_keys[$base_key] = TRUE;
     return backdrop_find_base_themes($themes, $base_key, $used_keys) + $current_base_theme;
@@ -1013,7 +1013,7 @@ function backdrop_find_base_themes($themes, $key, $used_keys = array()) {
  *   been removed.
  *   See https://docs.backdropcms.org/change-records/removed-the-theme-process-layer
  */
-function theme($hook, $variables = array()) {
+function theme($hook, $variables = []) {
   // If called before all modules are loaded, we do not necessarily have a full
   // theme registry to work with, and therefore cannot process the theme request
   // properly. See also _theme_load_registry().
@@ -1050,16 +1050,16 @@ function theme($hook, $variables = array()) {
       // Only log a message when not trying theme suggestions ($hook being an
       // array).
       if (!isset($candidate)) {
-        watchdog('theme', 'Theme hook "@hook" not found.', array('@hook' => $hook), WATCHDOG_WARNING);
+        watchdog('theme', 'Theme hook "@hook" not found.', ['@hook' => $hook], WATCHDOG_WARNING);
       }
       return '';
     }
   }
 
-  $info = $hooks[$hook] + array(
-    'includes' => array(),
-    'preprocess functions' => array(),
-  );
+  $info = $hooks[$hook] + [
+    'includes' => [],
+    'preprocess functions' => [],
+  ];
 
   global $theme_path;
   $temp = $theme_path;
@@ -1076,7 +1076,7 @@ function theme($hook, $variables = array()) {
   // the arguments expected by the theme function.
   if (isset($variables['#theme']) || isset($variables['#theme_wrappers'])) {
     $element = $variables;
-    $variables = array();
+    $variables = [];
     if (isset($info['variables'])) {
       foreach (array_keys($info['variables']) as $name) {
         if (isset($element["#$name"])) {
@@ -1094,7 +1094,7 @@ function theme($hook, $variables = array()) {
     $variables += $info['variables'];
   }
   elseif (!empty($info['render element'])) {
-    $variables += array($info['render element'] => array());
+    $variables += [$info['render element'] => []];
   }
 
   $variables['theme_hook_original'] = $theme_hook_original;
@@ -1106,11 +1106,11 @@ function theme($hook, $variables = array()) {
   // be used unless overridden by a variable preprocessor function.
   if (isset($info['base hook'])) {
     $base_hook = $info['base hook'];
-    $base_hook_info = isset($hooks[$base_hook]) ? $hooks[$base_hook] : array();
-    $base_hook_info += array(
-      'includes' => array(),
-      'preprocess functions' => array(),
-    );
+    $base_hook_info = isset($hooks[$base_hook]) ? $hooks[$base_hook] : [];
+    $base_hook_info += [
+      'includes' => [],
+      'preprocess functions' => [],
+    ];
     // Include files required by the base hook, since its variable preprocessors
     // might reside there.
     foreach ($base_hook_info['includes'] as $include_file) {
@@ -1123,7 +1123,7 @@ function theme($hook, $variables = array()) {
     $info['preprocess functions'] = array_unique(array_merge($base_hook_info['preprocess functions'], $info['preprocess functions']));
   }
   if (isset($info['preprocess functions'])) {
-    $variables['theme_hook_suggestions'] = array();
+    $variables['theme_hook_suggestions'] = [];
     foreach ($info['preprocess functions'] as $processor_function) {
       if (function_exists($processor_function)) {
         // We don't want a poorly behaved preprocess function changing $hook.
@@ -1143,7 +1143,7 @@ function theme($hook, $variables = array()) {
     // - The 'theme_hook_suggestions' variable is checked in FILO order, so the
     //   last suggestion added to the array takes precedence over suggestions
     //   added earlier.
-    $suggestions = array();
+    $suggestions = [];
     if (!empty($variables['theme_hook_suggestions'])) {
       $suggestions = $variables['theme_hook_suggestions'];
     }
@@ -1195,7 +1195,7 @@ function theme($hook, $variables = array()) {
     // completely intuitive, is reasonably safe, and allows us to save on the
     // overhead of adding some new variable to track that.
     if (!isset($variables['directory'])) {
-      $default_template_variables = array();
+      $default_template_variables = [];
       template_preprocess($default_template_variables, $hook);
       $variables += $default_template_variables;
     }
@@ -1259,7 +1259,7 @@ function path_to_theme() {
  *   Keyed by the theme hook and includes the function that implements it.
  */
 function backdrop_find_theme_functions($cache, $prefixes) {
-  $implementations = array();
+  $implementations = [];
   $all_functions = get_defined_functions();
   $theme_functions = preg_grep('/^(' . implode(')|(', $prefixes) . ')_/', $all_functions['user']);
 
@@ -1283,11 +1283,11 @@ function backdrop_find_theme_functions($cache, $prefixes) {
           foreach ($matches as $match) {
             $new_hook = substr($match, strlen($prefix) + 1);
             $arg_name = isset($info['variables']) ? 'variables' : 'render element';
-            $implementations[$new_hook] = array(
+            $implementations[$new_hook] = [
               'function' => $match,
               $arg_name => $info[$arg_name],
               'base hook' => $hook,
-            );
+            ];
           }
         }
       }
@@ -1295,9 +1295,9 @@ function backdrop_find_theme_functions($cache, $prefixes) {
       // that in what is returned so that the registry knows that the theme has
       // this implementation.
       if (function_exists($prefix . '_' . $hook)) {
-        $implementations[$hook] = array(
+        $implementations[$hook] = [
           'function' => $prefix . '_' . $hook,
-        );
+        ];
       }
     }
   }
@@ -1325,12 +1325,12 @@ function backdrop_find_theme_functions($cache, $prefixes) {
  *     callback.
  */
 function backdrop_find_theme_templates($cache, $extension, $path) {
-  $implementations = array();
+  $implementations = [];
 
   // Collect paths to all sub-themes grouped by base themes. These will be
   // used for filtering. This allows base themes to have sub-themes in its
   // folder hierarchy without affecting the base themes template discovery.
-  $theme_paths = array();
+  $theme_paths = [];
   foreach (list_themes() as $theme_info) {
     if (!empty($theme_info->base_theme)) {
       $theme_paths[$theme_info->base_theme][$theme_info->name] = dirname($theme_info->filename);
@@ -1344,13 +1344,13 @@ function backdrop_find_theme_templates($cache, $extension, $path) {
     }
   }
   global $theme;
-  $subtheme_paths = isset($theme_paths[$theme]) ? $theme_paths[$theme] : array();
+  $subtheme_paths = isset($theme_paths[$theme]) ? $theme_paths[$theme] : [];
 
   // Escape the periods in the extension.
   $regex = '/' . str_replace('.', '\.', $extension) . '$/';
 
   // Save effort by skipping directories that should not contain templates.
-  $ignore_directories = array(
+  $ignore_directories = [
     'assets',
     'css',
     'scss',
@@ -1359,11 +1359,11 @@ function backdrop_find_theme_templates($cache, $extension, $path) {
     'images',
     'node_modules',
     'bower_components',
-  );
+  ];
   $no_mask = '/^((\..*)|' . implode('|', $ignore_directories) .  ')$/';
 
   // Get a listing of all template files in the path to search.
-  $files = file_scan_directory($path, $regex, array('key' => 'name', 'nomask' => $no_mask));
+  $files = file_scan_directory($path, $regex, ['key' => 'name', 'nomask' => $no_mask]);
 
   // Find templates that implement registered theme hooks and include that in
   // what is returned so that the registry knows that the theme has this
@@ -1383,21 +1383,21 @@ function backdrop_find_theme_templates($cache, $extension, $path) {
     // for the purposes of searching.
     $hook = strtr($template, '-', '_');
     if (isset($cache[$hook])) {
-      $implementations[$hook] = array(
+      $implementations[$hook] = [
         'template' => $template,
         'path' => dirname($file->uri),
-      );
+      ];
     }
 
     // Match templates based on the 'template' filename.
     foreach ($cache as $hook => $info) {
       if (isset($info['template'])) {
-        $template_candidates = array($info['template'], str_replace($info['theme path'] . '/', '', $info['template']));
+        $template_candidates = [$info['template'], str_replace($info['theme path'] . '/', '', $info['template'])];
         if (in_array($template, $template_candidates)) {
-          $implementations[$hook] = array(
+          $implementations[$hook] = [
             'template' => $template,
             'path' => dirname($file->uri),
-          );
+          ];
         }
       }
     }
@@ -1422,12 +1422,12 @@ function backdrop_find_theme_templates($cache, $extension, $path) {
           // Put the underscores back in for the hook name and register this
           // pattern.
           $arg_name = isset($info['variables']) ? 'variables' : 'render element';
-          $implementations[strtr($file, '-', '_')] = array(
+          $implementations[strtr($file, '-', '_')] = [
             'template' => $file,
             'path' => dirname($files[$match]->uri),
             $arg_name => $info[$arg_name],
             'base hook' => $hook,
-          );
+          ];
         }
       }
     }
@@ -1453,7 +1453,7 @@ function backdrop_find_theme_templates($cache, $extension, $path) {
  *   The value of the requested setting, NULL if the setting does not exist.
  */
 function theme_get_setting($setting_name, $theme = NULL) {
-  $configs = &backdrop_static(__FUNCTION__, array());
+  $configs = &backdrop_static(__FUNCTION__, []);
 
   // If no key is given, use the current theme if we can determine it.
   if (!isset($theme)) {
@@ -1585,12 +1585,12 @@ function theme_render_template($template_file, $variables) {
  *   The output generated by the template including debug information.
  */
 function _theme_render_template_debug($template_function, $template_file, $variables, $extension) {
-  $output = array(
+  $output = [
     'debug_prefix' => '',
     'debug_info' => '',
     'rendered_markup' => call_user_func($template_function, $template_file, $variables),
     'debug_suffix' => '',
-  );
+  ];
   $output['debug_prefix'] .= "\n\n<!-- THEME DEBUG -->";
   $output['debug_prefix'] .= "\n<!-- CALL: theme('" . check_plain($variables['theme_hook_original']) . "') -->";
   // If there are theme suggestions, reverse the array so more specific
@@ -1643,7 +1643,7 @@ function theme_enable($theme_list) {
 
   foreach ($theme_list as $key) {
     db_update('system')
-      ->fields(array('status' => 1))
+      ->fields(['status' => 1])
       ->condition('type', 'theme')
       ->condition('name', $key)
       ->execute();
@@ -1679,7 +1679,7 @@ function theme_disable($theme_list) {
 
   foreach ($theme_list as $key) {
     db_update('system')
-      ->fields(array('status' => 0))
+      ->fields(['status' => 0])
       ->condition('type', 'theme')
       ->condition('name', $key)
       ->execute();
@@ -1777,12 +1777,12 @@ function theme_status_messages($variables) {
   $message_types = (empty($variables['messages']))? backdrop_get_messages($display) : $variables['messages'];
   $output = '';
 
-  $status_heading = array(
+  $status_heading = [
     'status' => t('Status message'),
     'error' => t('Error message'),
     'warning' => t('Warning message'),
     'info' => t('Info message'),
-  );
+  ];
 
   foreach ($message_types as $type => $messages) {
     $output .= "<div class=\"messages $type\">\n";
@@ -1897,13 +1897,13 @@ function theme_links($variables) {
     if (!empty($heading)) {
       // Convert a string heading into an array, using a H2 tag by default.
       if (is_string($heading)) {
-        $heading = array('text' => $heading);
+        $heading = ['text' => $heading];
       }
       // Merge in default array properties into $heading.
-      $heading += array(
+      $heading += [
         'level' => 'h2',
-        'attributes' => array(),
-      );
+        'attributes' => [],
+      ];
       // @todo Remove backwards compatibility for $heading['class'].
       if (isset($heading['class'])) {
         $heading['attributes']['class'] = $heading['class'];
@@ -1921,7 +1921,7 @@ function theme_links($variables) {
     foreach ($links as $key => $link) {
       $i++;
 
-      $class = array();
+      $class = [];
       // Use the array key as class name.
       $class[] = backdrop_html_class($key);
       // Add odd/even, first, and last classes.
@@ -1946,16 +1946,16 @@ function theme_links($variables) {
       // Handle title-only text items.
       else {
         // Merge in default array properties into $link.
-        $link += array(
+        $link += [
           'html' => FALSE,
-          'attributes' => array(),
-        );
+          'attributes' => [],
+        ];
         $item = '<span' . backdrop_attributes($link['attributes']) . '>';
         $item .= ($link['html'] ? $link['title'] : check_plain($link['title']));
         $item .= '</span>';
       }
 
-      $output .= '<li' . backdrop_attributes(array('class' => $class)) . '>';
+      $output .= '<li' . backdrop_attributes(['class' => $class]) . '>';
       $output .= $item;
       $output .= '</li>';
     }
@@ -1995,7 +1995,7 @@ function template_preprocess_image(&$variables) {
   $variables['attributes']['src'] = file_create_url($path_or_uri);
 
   // Convert all other variables into the attributes array.
-  foreach (array('width', 'height', 'alt', 'title') as $key) {
+  foreach (['width', 'height', 'alt', 'title'] as $key) {
     if (isset($variables[$key])) {
       $variables['attributes'][$key] = $variables[$key];
     }
@@ -2170,7 +2170,7 @@ function theme_table(array $variables) {
   // Format the table columns:
   if (!empty($colgroups)) {
     foreach ($colgroups as $colgroup) {
-      $colgroup_attributes = array();
+      $colgroup_attributes = [];
 
       // Check if we're dealing with a simple or complex column.
       if (isset($colgroup['data'])) {
@@ -2214,10 +2214,10 @@ function theme_table(array $variables) {
         }
       }
     }
-    $rows[] = array(array('data' => $empty, 'colspan' => $header_count, 'class' => array('empty', 'message')));
+    $rows[] = [['data' => $empty, 'colspan' => $header_count, 'class' => ['empty', 'message']]];
   }
 
-  $responsive_columns = array();
+  $responsive_columns = [];
   // Format the table header.
   if (!empty($header)) {
     $ts = tablesort_init($header);
@@ -2247,11 +2247,11 @@ function theme_table(array $variables) {
     $output .= (!empty($rows) ? " </tr></thead>\n" : "</tr>\n");
   }
   else {
-    $ts = array();
+    $ts = [];
   }
 
   // Format the table and footer rows.
-  $sections = array();
+  $sections = [];
 
   if (!empty($rows)) {
     $sections['tbody'] = $rows;
@@ -2265,7 +2265,7 @@ function theme_table(array $variables) {
   // using the same procedure.
   foreach ($sections as $tag => $content) {
     $output .= "<$tag>\n";
-    $flip = array('even' => 'odd', 'odd' => 'even');
+    $flip = ['even' => 'odd', 'odd' => 'even'];
     $class = 'even';
     $default_no_striping = ($tag === 'tfoot');
 
@@ -2283,7 +2283,7 @@ function theme_table(array $variables) {
       }
       else {
         $cells = $row;
-        $tr_attributes = array();
+        $tr_attributes = [];
         $no_striping = $default_no_striping;
       }
 
@@ -2308,7 +2308,7 @@ function theme_table(array $variables) {
               $cell['class'][] = $responsive_columns[$i];
             }
             else {
-              $cell = array('data' => $cell, 'class' => array($responsive_columns[$i]));
+              $cell = ['data' => $cell, 'class' => [$responsive_columns[$i]]];
             }
           }
           $output .= _theme_table_cell($cell);
@@ -2352,10 +2352,10 @@ function theme_table(array $variables) {
  */
 function theme_tablesort_indicator($variables) {
   if ($variables['style'] == "asc") {
-    return theme('image', array('path' => 'core/misc/arrow-asc.png', 'width' => 13, 'height' => 13, 'alt' => t('sort ascending'), 'title' => t('sort ascending')));
+    return theme('image', ['path' => 'core/misc/arrow-asc.png', 'width' => 13, 'height' => 13, 'alt' => t('sort ascending'), 'title' => t('sort ascending')]);
   }
   else {
-    return theme('image', array('path' => 'core/misc/arrow-desc.png', 'width' => 13, 'height' => 13, 'alt' => t('sort descending'), 'title' => t('sort descending')));
+    return theme('image', ['path' => 'core/misc/arrow-desc.png', 'width' => 13, 'height' => 13, 'alt' => t('sort descending'), 'title' => t('sort descending')]);
   }
 }
 
@@ -2420,32 +2420,32 @@ function theme_item_list($variables) {
     $i = 0;
     foreach ($items as $key => $item) {
       $i++;
-      $attributes = array();
+      $attributes = [];
 
       if (is_array($item)) {
         $value = '';
         if (isset($item['data'])) {
           $value .= $item['data'];
         }
-        $attributes = array_diff_key($item, array('data' => 0, 'children' => 0));
+        $attributes = array_diff_key($item, ['data' => 0, 'children' => 0]);
 
         // Append nested child list, if any.
         if (isset($item['children'])) {
           // HTML attributes for the outer list are defined in the 'attributes'
           // theme variable, but not inherited by children. For nested lists,
           // all non-numeric keys in 'children' are used as list attributes.
-          $child_list_attributes = array();
+          $child_list_attributes = [];
           foreach ($item['children'] as $child_key => $child_item) {
             if (is_string($child_key)) {
               $child_list_attributes[$child_key] = $child_item;
               unset($item['children'][$child_key]);
             }
           }
-          $value .= theme('item_list', array(
+          $value .= theme('item_list', [
             'items' => $item['children'],
             'type' => $type,
             'attributes' => $child_list_attributes,
-          ));
+          ]);
         }
       }
       else {
@@ -2479,7 +2479,7 @@ function theme_item_list($variables) {
     // Add any attributes specified for the wrapper div tag.
     if (!isset($wrapper_attributes['class'])) {
       // Make sure that the 'class' key exists in the array.
-      $wrapper_attributes['class'] = array();
+      $wrapper_attributes['class'] = [];
     }
     elseif (is_string($wrapper_attributes['class'])) {
       // Do not choke if 'class' was provided as a string which may include
@@ -2528,9 +2528,9 @@ function theme_more_help_link($variables) {
  *   - title: A descriptive title of the feed.
  */
 function theme_feed_icon($variables) {
-  $text = t('Subscribe to !feed-title', array('!feed-title' => $variables['title']));
-  if ($image = theme('image', array('path' => 'core/misc/feed.png', 'width' => 16, 'height' => 16, 'alt' => $text))) {
-    return l($image, $variables['url'], array('html' => TRUE, 'attributes' => array('class' => array('feed-icon'), 'title' => $text)));
+  $text = t('Subscribe to !feed-title', ['!feed-title' => $variables['title']]);
+  if ($image = theme('image', ['path' => 'core/misc/feed.png', 'width' => 16, 'height' => 16, 'alt' => $text])) {
+    return l($image, $variables['url'], ['html' => TRUE, 'attributes' => ['class' => ['feed-icon'], 'title' => $text]]);
   }
 }
 
@@ -2588,7 +2588,7 @@ function theme_head_tag($variables) {
  *   - title: A descriptive verb for the link, like 'Read more'.
  */
 function theme_more_link($variables) {
-  return '<div class="more-link">' . l(t('More'), $variables['url'], array('attributes' => array('title' => $variables['title']))) . '</div>';
+  return '<div class="more-link">' . l(t('More'), $variables['url'], ['attributes' => ['title' => $variables['title']]]) . '</div>';
 }
 
 /**
@@ -2684,7 +2684,7 @@ function _theme_table_cell($cell, $header = FALSE) {
  */
 function template_preprocess(&$variables, $hook) {
   global $user;
-  static $count = array();
+  static $count = [];
 
   // Track run count for each hook to provide zebra striping. See
   // "template_preprocess_block()" which provides the same feature specific to
@@ -2697,10 +2697,10 @@ function template_preprocess(&$variables, $hook) {
   $variables['directory'] = path_to_theme();
 
   // Initialize html class attribute for the current hook.
-  $variables['classes'] = array(backdrop_html_class($hook));
+  $variables['classes'] = [backdrop_html_class($hook)];
 
   // Initialize additional attribute placeholder for the current hook.
-  $variables['attributes'] = array();
+  $variables['attributes'] = [];
 
   // Merge in variables that don't depend on hook and don't change during a
   // single page request.
@@ -2726,16 +2726,16 @@ function _template_preprocess_default_variables() {
   global $user;
 
   // Variables that don't depend on a database connection.
-  $variables = array(
-    'attributes' => array(),
-    'content_attributes' => array(),
-    'title_prefix' => array(),
-    'title_suffix' => array(),
+  $variables = [
+    'attributes' => [],
+    'content_attributes' => [],
+    'title_prefix' => [],
+    'title_suffix' => [],
     'user' => $user,
     'db_is_active' => !defined('MAINTENANCE_MODE'),
     'is_admin' => FALSE,
     'logged_in' => FALSE,
-  );
+  ];
 
   // The user object has no uid property when the database does not exist during
   // install. The user_access() check deals with issues when in maintenance mode
@@ -2794,25 +2794,25 @@ function template_preprocess_page(&$variables) {
   }
 
   // Initialize attributes which are specific to the html and body elements.
-  $variables['html_attributes'] = array();
+  $variables['html_attributes'] = [];
   $variables['html_attributes']['lang'] = $GLOBALS['language']->langcode;
   $variables['html_attributes']['dir'] = $GLOBALS['language']->direction ? 'rtl' : 'ltr';
-  $variables['body_attributes'] = array();
+  $variables['body_attributes'] = [];
 
   // Add favicon.
   $favicon = backdrop_get_favicon();
-  backdrop_add_html_head_link(array('rel' => 'shortcut icon', 'href' => $favicon['path'], 'type' => $favicon['type']));
+  backdrop_add_html_head_link(['rel' => 'shortcut icon', 'href' => $favicon['path'], 'type' => $favicon['type']]);
 
   $site_config = config('system.core');
   // Construct head <title>.
   if (backdrop_get_title()) {
-    $head_title = array(
+    $head_title = [
       'title' => strip_tags(backdrop_get_title()),
       'name' => check_plain($site_config->getTranslated('site_name')),
-    );
+    ];
   }
   else {
-    $head_title = array('name' => check_plain($site_config->getTranslated('site_name')));
+    $head_title = ['name' => check_plain($site_config->getTranslated('site_name'))];
     if ($slogan = $site_config->getTranslated('site_slogan')) {
       $head_title['slogan'] = check_plain($slogan);
     }
@@ -2856,7 +2856,7 @@ function theme_get_suggestions($args, $base, $delimiter = '__') {
   // page__node__1           page-node-1
   // page__node__edit        page-node-edit
 
-  $suggestions = array();
+  $suggestions = [];
   $prefix = $base;
   foreach ($args as $arg) {
     // Remove slashes or null per SA-CORE-2009-003 and change - (hyphen) to _
@@ -2871,7 +2871,7 @@ function theme_get_suggestions($args, $base, $delimiter = '__') {
     // converted to underscores so here we must convert any hyphens in path
     // arguments to underscores here before fetching theme hook suggestions
     // to ensure the templates are appropriately recognized.
-    $arg = str_replace(array("/", "\\", "\0", '-'), array('', '', '', '_'), $arg);
+    $arg = str_replace(["/", "\\", "\0", '-'], ['', '', '', '_'], $arg);
     // The percent acts as a wildcard for numeric arguments since
     // asterisks are not valid filename characters on many filesystems.
     if (is_numeric($arg)) {
@@ -2918,10 +2918,10 @@ function template_preprocess_maintenance_page(&$variables) {
 
   // Add favicon to the page.
   $favicon = backdrop_get_favicon();
-  backdrop_add_html_head_link(array('rel' => 'shortcut icon', 'href' => $favicon['path'], 'type' => $favicon['type']));
+  backdrop_add_html_head_link(['rel' => 'shortcut icon', 'href' => $favicon['path'], 'type' => $favicon['type']]);
 
   // Construct head <title>.
-  $head_title = array();
+  $head_title = [];
   if (backdrop_get_title()) {
     $head_title['title'] = strip_tags(backdrop_get_title());
   }
@@ -2934,7 +2934,7 @@ function template_preprocess_maintenance_page(&$variables) {
   $language = isset($GLOBALS['language']) ? $GLOBALS['language'] : language_default();
 
   // Initialize attributes which are specific to the html element.
-  $variables['html_attributes'] = array();
+  $variables['html_attributes'] = [];
   $variables['html_attributes']['lang'] = $language->langcode;
   $variables['html_attributes']['dir'] = $language->direction ? 'rtl' : 'ltr';
 
@@ -2945,8 +2945,8 @@ function template_preprocess_maintenance_page(&$variables) {
   $variables['breadcrumb']        = '';
   $variables['feed_icons']        = '';
   $variables['messages']          = $variables['show_messages'] ? theme('status_messages') : '';
-  $variables['main_menu']         = array();
-  $variables['secondary_menu']    = array();
+  $variables['main_menu']         = [];
+  $variables['secondary_menu']    = [];
   $variables['logo']              = backdrop_get_logo();
   $variables['site_name']         = $site_name;
   $variables['site_slogan']       = $site_slogan;

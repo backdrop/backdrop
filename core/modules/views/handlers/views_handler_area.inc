@@ -46,8 +46,8 @@ class views_handler_area extends views_handler {
 
     $this->definition['field'] = !empty($this->definition['field']) ? $this->definition['field'] : '';
     $label = !empty($this->definition['label']) ? $this->definition['label'] : $this->definition['field'];
-    $options['label'] = array('default' => $label, 'translatable' => TRUE);
-    $options['empty'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['label'] = ['default' => $label, 'translatable' => TRUE];
+    $options['empty'] = ['default' => FALSE, 'bool' => TRUE];
 
     return $options;
   }
@@ -65,19 +65,19 @@ class views_handler_area extends views_handler {
    */
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
-    $form['label'] = array(
+    $form['label'] = [
       '#type' => 'textfield',
       '#title' => t('Label'),
       '#default_value' => isset($this->options['label']) ? $this->options['label'] : '',
       '#description' => t('The label for this area that will be displayed only administratively.'),
-    );
+    ];
 
     if ($form_state['type'] != 'empty') {
-      $form['empty'] = array(
+      $form['empty'] = [
         '#type' => 'checkbox',
         '#title' => t('Display even if view has no result'),
         '#default_value' => isset($this->options['empty']) ? $this->options['empty'] : 0,
-      );
+      ];
     }
   }
 
@@ -115,10 +115,10 @@ class views_handler_area_broken extends views_handler_area {
   function query($group_by = FALSE) { /* No query to run */ }
   function render($empty = FALSE) { return ''; }
   function options_form(&$form, &$form_state) {
-    $form['markup'] = array(
+    $form['markup'] = [
       '#prefix' => '<div class="form-item description">',
       '#value' => t('The handler for this item is broken or missing and cannot be used. If a module provided the handler and was disabled, re-enabling the module may restore it. Otherwise, you should probably delete this item.'),
-    );
+    ];
   }
 
   /**

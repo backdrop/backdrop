@@ -154,7 +154,7 @@ class views_plugin_query extends views_plugin {
 
     // Create an empty group
     if (empty($groups[$group])) {
-      $groups[$group] = array('conditions' => array(), 'args' => array());
+      $groups[$group] = ['conditions' => [], 'args' => []];
     }
 
     $groups[$group]['type'] = strtoupper($type);

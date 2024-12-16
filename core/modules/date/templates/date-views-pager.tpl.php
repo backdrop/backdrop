@@ -33,14 +33,14 @@
       <li class="date-prev">
         <?php
         $text = '&laquo;';
-        $text .= $mini ? '' : ' ' . t('Prev', array(), array('context' => 'date_nav'));
+        $text .= $mini ? '' : ' ' . t('Prev', [], ['context' => 'date_nav']);
         print l(t($text), $prev_url, $prev_options);
         ?>
       </li>
     <?php endif; ?>
     <?php if (!empty($next_url)) : ?>
       <li class="date-next">
-        <?php print l(($mini ? '' : t('Next', array(), array('context' => 'date_nav')) . ' ') . '&raquo;', $next_url, $next_options); ?>
+        <?php print l(($mini ? '' : t('Next', [], ['context' => 'date_nav']) . ' ') . '&raquo;', $next_url, $next_options); ?>
       </li>
     <?php endif; ?>
     </ul>

@@ -73,8 +73,8 @@ class views_handler_relationship extends views_handler {
       $label = !empty($this->definition['field']) ? $this->definition['field'] : $this->definition['base field'];
     }
 
-    $options['label'] = array('default' => $label, 'translatable' => TRUE);
-    $options['required'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['label'] = ['default' => $label, 'translatable' => TRUE];
+    $options['required'] = ['default' => FALSE, 'bool' => TRUE];
 
     return $options;
   }
@@ -85,20 +85,20 @@ class views_handler_relationship extends views_handler {
    */
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
-    $form['label'] = array(
+    $form['label'] = [
       '#type' => 'textfield',
       '#title' => t('Identifier'),
       '#default_value' => isset($this->options['label']) ? $this->options['label'] : '',
       '#description' => t('Edit the administrative label displayed when referencing this relationship from filters, etc.'),
       '#required' => TRUE,
-    );
+    ];
 
-    $form['required'] = array(
+    $form['required'] = [
       '#type' => 'checkbox',
       '#title' => t('Require this relationship'),
       '#description' => t('Enable to hide items that do not contain this relationship'),
       '#default_value' => !empty($this->options['required']),
-    );
+    ];
   }
 
   /**
@@ -169,9 +169,9 @@ class views_handler_relationship_broken extends views_handler_relationship {
   function ensure_my_table() { /* No table to ensure! */ }
   function query() { /* No query to run */ }
   function options_form(&$form, &$form_state) {
-    $form['markup'] = array(
+    $form['markup'] = [
       '#markup' => '<div class="form-item description">' . t('The handler for this item is broken or missing and cannot be used. If a module provided the handler and was disabled, re-enabling the module may restore it. Otherwise, you should probably delete this item.') . '</div>',
-    );
+    ];
   }
 
   /**

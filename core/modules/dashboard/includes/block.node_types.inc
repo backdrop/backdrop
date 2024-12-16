@@ -10,9 +10,9 @@ class DashboardContentTypesBlock extends Block {
   function __construct($plugin_name, array $data) {
     parent::__construct($plugin_name, $data);
     // Set defaults.
-    $this->settings += array(
-      'types' => array(),
-    );
+    $this->settings += [
+      'types' => [],
+    ];
   }
 
   /**
@@ -50,12 +50,12 @@ class DashboardContentTypesBlock extends Block {
   function getContent() {
     $node_types = node_type_get_types();
     $access = user_access('administer content types');
-    $options = array('destination' => current_path());
-    $header = array(
-      array('data' => t('Content type')),
-      array('data' => t('Operations')),
-    );
-    $rows = array();
+    $options = ['destination' => current_path()];
+    $header = [
+      ['data' => t('Content type')],
+      ['data' => t('Operations')],
+    ];
+    $rows = [];
 
     // Check access, then add a link to create content.
     if ($access) {
@@ -63,54 +63,54 @@ class DashboardContentTypesBlock extends Block {
         // If no types are specified, show all types.
         if (empty($this->settings['types']) || in_array($machine, $this->settings['types'])) {
           $type_url_string = str_replace('_', '-', $node_type->type);
-          $links['configure'] = array(
+          $links['configure'] = [
             'title' => t('Configure'),
             'href' => 'admin/structure/types/manage/' . $type_url_string,
             'query' => $options,
-          );
-          $links['manage'] = array(
+          ];
+          $links['manage'] = [
             'title' => t('Manage fields'),
             'href' => 'admin/structure/types/manage/' . $type_url_string . '/fields',
             'query' => $options,
-          );
-          $links['add'] = array(
+          ];
+          $links['add'] = [
             'title' => t('Manage display'),
             'href' => 'admin/structure/types/manage/' . $type_url_string . '/display',
             'query' => $options,
-          );
-          $operations = array(
+          ];
+          $operations = [
             '#type' => 'dropbutton',
             '#links' => $links,
-          );
-          $rows[] = array(
-            'data' => array(
+          ];
+          $rows[] = [
+            'data' => [
               check_plain(t($node_type->name)),
               backdrop_render($operations),
-            ),
-          );
+            ],
+          ];
         }
       }
     }
     else {
-      return array();
+      return [];
     }
 
-    $panel = array(
+    $panel = [
       '#theme' => 'dashboard_panel__node_types',
-    );
-    $panel['table'] = array(
+    ];
+    $panel['table'] = [
       '#theme' => 'table',
       '#header' => $header,
       '#rows' => $rows,
       '#empty' => t('There are no content types to display.'),
-    );
+    ];
 
     if ($access) {
-      $panel['link'] = array(
+      $panel['link'] = [
         '#theme' => 'link',
         '#path' => 'admin/structure/types',
         '#text' => t('Manage content types'),
-      );
+      ];
     }
 
     return $panel;
@@ -123,8 +123,8 @@ class DashboardContentTypesBlock extends Block {
     parent::form($form, $form_state);
 
     $node_types = node_type_get_types();
-    $type_options = array();
-    $type_defaults = array();
+    $type_options = [];
+    $type_defaults = [];
 
     foreach ($node_types as $machine => $node_type) {
       $type_options[$machine] = check_plain(t($node_type->name));
@@ -133,12 +133,12 @@ class DashboardContentTypesBlock extends Block {
       }
     }
 
-    $form['types'] = array(
+    $form['types'] = [
       '#type' => 'checkboxes',
       '#title' => t('Display links for the following content types'),
       '#options' => $type_options,
       '#default_value' => $type_defaults,
-    );
+    ];
   }
 
   /**
@@ -150,7 +150,7 @@ class DashboardContentTypesBlock extends Block {
     // If all types are checked, save nothing, indicating all types are allowed.
     $checked_types = array_filter($form_state['values']['types']);
     if (count($form['types']['#options']) === count($checked_types)) {
-      $this->settings['types'] = array();
+      $this->settings['types'] = [];
     }
     else {
       $this->settings['types'] = array_values($checked_types);

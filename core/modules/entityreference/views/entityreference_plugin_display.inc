@@ -84,7 +84,7 @@ class entityreference_plugin_display extends views_plugin_display {
           }
           else {
             $field_table = $this->view->query->ensure_table($this->view->field[$field_alias]->table, $this->view->field[$field_alias]->relationship);
-            $this->view->query->add_field($field_table, $this->view->field[$field_alias]->real_field, $this->view->field[$field_alias]->field, array());
+            $this->view->query->add_field($field_table, $this->view->field[$field_alias]->real_field, $this->view->field[$field_alias]->field, []);
             $field = $this->view->query->fields[$this->view->field[$field_alias]->field];
           }
           // Add an OR condition for the field
@@ -111,7 +111,7 @@ class entityreference_plugin_display extends views_plugin_display {
     // Verify that search fields are set up.
     $style_options = $this->get_option('style_options');
     if (!isset($style_options['search_fields'])) {
-      $errors[] = t('Display "@display" needs a selected search fields to work properly. See the settings for the Entity Reference list format.', array('@display' => $this->display->display_title));
+      $errors[] = t('Display "@display" needs a selected search fields to work properly. See the settings for the Entity Reference list format.', ['@display' => $this->display->display_title]);
     }
     else {
       // Verify that the search fields used actually exist.
@@ -119,7 +119,7 @@ class entityreference_plugin_display extends views_plugin_display {
       $fields = array_keys($this->handlers['field']);
       foreach ($style_options['search_fields'] as $field_alias => $enabled) {
         if ($enabled && !in_array($field_alias, $fields)) {
-          $errors[] = t('Display "@display" uses field %field as search field, but the field is no longer present. See the settings for the Entity Reference list format.', array('@display' => $this->display->display_title, '%field' => $field_alias));
+          $errors[] = t('Display "@display" uses field %field as search field, but the field is no longer present. See the settings for the Entity Reference list format.', ['@display' => $this->display->display_title, '%field' => $field_alias]);
         }
       }
     }

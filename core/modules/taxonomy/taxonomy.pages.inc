@@ -18,12 +18,12 @@ function taxonomy_term_page(TaxonomyTerm $term) {
   backdrop_set_title($term->name);
 
   // Build breadcrumb based on the hierarchy of the term.
-  $current = (object) array(
+  $current = (object) [
     'tid' => $term->tid,
-  );
+  ];
   // @todo This overrides any other possible breadcrumb and is a pure hard-coded
   //   presumption. Make this behavior configurable per vocabulary or term.
-  $breadcrumb = array();
+  $breadcrumb = [];
   while ($parents = taxonomy_term_load_parents($current->tid)) {
     $current = array_shift($parents);
     $breadcrumb[] = l($current->name, 'taxonomy/term/' . $current->tid);
@@ -36,34 +36,34 @@ function taxonomy_term_page(TaxonomyTerm $term) {
   // Set the term path as the canonical URL to prevent duplicate content.
   $uri = entity_uri('taxonomy_term', $term);
   $canonical_secure = $site_config->get('canonical_secure') == 1 ? TRUE : FALSE;
-  $uri_options = array('absolute' => TRUE, 'https' => $canonical_secure);
-  backdrop_add_html_head_link(array('rel' => 'canonical', 'href' => url($uri['path'], array_merge($uri['options'], $uri_options))), TRUE);
+  $uri_options = ['absolute' => TRUE, 'https' => $canonical_secure];
+  backdrop_add_html_head_link(['rel' => 'canonical', 'href' => url($uri['path'], array_merge($uri['options'], $uri_options))], TRUE);
 
   // Normally we would call taxonomy_term_show() here, but for backwards
   // compatibility in Drupal 7 we do not want to do that (it produces different
   // data structures and HTML markup than what Drupal 7 released with). Calling
   // taxonomy_term_view() directly provides essentially the same thing, but
   // allows us to wrap the rendered term in our desired array structure.
-  $build['term_heading'] = array(
+  $build['term_heading'] = [
     '#prefix' => '<div class="term-listing-heading">',
     '#suffix' => '</div>',
     'term' => taxonomy_term_view($term, 'full'),
-  );
+  ];
 
   if ($nids = taxonomy_select_nodes($term->tid, TRUE, $site_config->get('default_nodes_main'))) {
     $nodes = node_load_multiple($nids);
     $build += node_view_multiple($nodes);
-    $build['pager'] = array(
+    $build['pager'] = [
       '#theme' => 'pager',
       '#weight' => 5,
-    );
+    ];
   }
   else {
-    $build['no_content'] = array(
+    $build['no_content'] = [
       '#prefix' => '<p>',
       '#markup' => t('There is currently no content classified with this term.'),
       '#suffix' => '</p>',
-    );
+    ];
   }
 
   backdrop_alter('taxonomy_term_page', $build);
@@ -78,7 +78,7 @@ function taxonomy_term_page(TaxonomyTerm $term) {
  *   The taxonomy term entity.
  */
 function taxonomy_term_feed(TaxonomyTerm $term) {
-  $channel['link'] = url('taxonomy/term/' . $term->tid, array('absolute' => TRUE));
+  $channel['link'] = url('taxonomy/term/' . $term->tid, ['absolute' => TRUE]);
   $channel['title'] = config_get_translated('system.core', 'site_name') . ' - ' . $term->name;
   // Only display the description if we have a single term, to avoid clutter and confusion.
   // HTML will be removed from feed description.
@@ -122,7 +122,7 @@ function taxonomy_autocomplete($field_name = '', $tags_typed = '') {
   if (!($field = field_info_field($field_name)) || $field['type'] !== 'taxonomy_term_reference') {
     // Error string. The JavaScript handler will realize this is not JSON and
     // will display it as debugging information.
-    print t('Taxonomy field @field_name not found.', array('@field_name' => $field_name));
+    print t('Taxonomy field @field_name not found.', ['@field_name' => $field_name]);
     exit;
   }
 
@@ -130,7 +130,7 @@ function taxonomy_autocomplete($field_name = '', $tags_typed = '') {
   $tags_typed = backdrop_explode_tags($tags_typed);
   $tag_last = backdrop_strtolower(array_pop($tags_typed));
 
-  $term_matches = array();
+  $term_matches = [];
   if ($tag_last != '') {
     $query = db_select('taxonomy_term_data', 't');
     $query->addTag('translatable');
@@ -141,9 +141,9 @@ function taxonomy_autocomplete($field_name = '', $tags_typed = '') {
       $query->condition('t.name', $tags_typed, 'NOT IN');
     }
     // Select rows that match by term name.
-    $vocabulary_list = isset($field['settings']['allowed_values']) ? $field['settings']['allowed_values'] : array();
+    $vocabulary_list = isset($field['settings']['allowed_values']) ? $field['settings']['allowed_values'] : [];
     $tags_return = $query
-      ->fields('t', array('tid', 'name'))
+      ->fields('t', ['tid', 'name'])
       ->condition('t.vocabulary', $vocabulary_list)
       ->condition('t.name', '%' . db_like($tag_last) . '%', 'LIKE')
       ->range(0, 10)

@@ -8,29 +8,29 @@ class LanguageLayoutAccess extends LayoutAccess {
   /**
    * Constructor for a Layout access rule.
    */
-  function __construct($plugin_name, array $data = array()) {
+  function __construct($plugin_name, array $data = []) {
     parent::__construct($plugin_name, $data);
-    $this->settings += array(
-      'language' => array(),
-    );
+    $this->settings += [
+      'language' => [],
+    ];
   }
 
   /**
    * {@inheritdoc}
    */
   function summary() {
-    $languages = array(
+    $languages = [
       'default' => t('Default site language'),
-    );
+    ];
     $languages += language_list(FALSE, TRUE);
-    $names = array();
+    $names = [];
     foreach ($this->settings['language'] as $langcode) {
       $names[] = $languages[$langcode];
     }
     if (empty($names)) {
       return t('Site language is any language');
     }
-    return format_plural(count($names), 'Site language is "@languages"', 'Site language is one of "@languages"', array('@languages' => implode(', ', $names)));
+    return format_plural(count($names), 'Site language is "@languages"', 'Site language is one of "@languages"', ['@languages' => implode(', ', $names)]);
   }
 
   /**
@@ -56,17 +56,17 @@ class LanguageLayoutAccess extends LayoutAccess {
    */
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
-    $options = array(
+    $options = [
       'default' => t('Default site language'),
-    );
+    ];
     $options += language_list(FALSE, TRUE);
-    $form['language'] = array(
+    $form['language'] = [
       '#title' => t('Language'),
       '#type' => 'checkboxes',
       '#options' => $options,
       '#description' => t('Pass only if the current site language is one of the selected languages.'),
       '#default_value' => $this->settings['language'],
-    );
+    ];
   }
 
   /**

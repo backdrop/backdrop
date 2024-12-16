@@ -10,30 +10,30 @@
 class views_handler_field_file_uri extends views_handler_field_file {
   function option_definition() {
     $options = parent::option_definition();
-    $options['file_download_path'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['image_style'] = array('default' => '');
+    $options['file_download_path'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['image_style'] = ['default' => ''];
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
-    $form['file_download_path'] = array(
+    $form['file_download_path'] = [
       '#title' => t('Use full URL instead of file storage URI'),
       '#description' => t('An internal file path is usually <code>public://example.png</code>. Enabling this option will display the URL instead, such as <code>http://example.com/files/example.png</code>.'),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['file_download_path']),
-    );
-    $form['image_style'] = array(
+    ];
+    $form['image_style'] = [
       '#type' => 'select',
       '#options' => image_style_options(TRUE, PASS_THROUGH),
       '#default_value' => $this->options['image_style'],
       '#title' => t('Apply image style to URL'),
       '#description' => t('Select an available image style and the URL will be modified.'),
-      '#states' => array(
-        'visible' => array(
-          '[name="options[file_download_path]"]' => array('checked' => TRUE),
-        ),
-      ),
-    );
+      '#states' => [
+        'visible' => [
+          '[name="options[file_download_path]"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
     parent::options_form($form, $form_state);
   }
 

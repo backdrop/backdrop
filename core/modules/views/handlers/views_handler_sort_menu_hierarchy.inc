@@ -18,18 +18,18 @@
 class views_handler_sort_menu_hierarchy extends views_handler_sort {
   function option_definition() {
     $options = parent::option_definition();
-    $options['sort_within_level'] = array('default' => FALSE);
+    $options['sort_within_level'] = ['default' => FALSE];
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
-    $form['sort_within_level'] = array(
+    $form['sort_within_level'] = [
       '#type' => 'checkbox',
       '#title' => t('Sort within each hierarchy level'),
       '#description' => t('Enable this to sort the items within each level of the hierarchy by weight and title.  Warning: this may produce a slow query.'),
       '#default_value' => $this->options['sort_within_level'],
-    );
+    ];
   }
 
   function query() {

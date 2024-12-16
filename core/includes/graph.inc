@@ -44,13 +44,13 @@
  * @see _backdrop_depth_first_search()
  */
 function backdrop_depth_first_search(&$graph) {
-  $state = array(
+  $state = [
     // The order of last visit of the depth first search. This is the reverse
     // of the topological order if the graph is acyclic.
-    'last_visit_order' => array(),
+    'last_visit_order' => [],
     // The components of the graph.
-    'components' => array(),
-  );
+    'components' => [],
+  ];
   // Perform the actual search.
   foreach ($graph as $start => $data) {
     _backdrop_depth_first_search($graph, $state, $start);
@@ -59,7 +59,7 @@ function backdrop_depth_first_search(&$graph) {
   // We do such a numbering that every component starts with 0. This is useful
   // for module installs as we can install every 0 weighted module in one
   // request, and then every 1 weighted etc.
-  $component_weights = array();
+  $component_weights = [];
 
   foreach ($state['last_visit_order'] as $vertex) {
     $component = $graph[$vertex]['component'];
@@ -96,7 +96,7 @@ function _backdrop_depth_first_search(&$graph, &$state, $start, &$component = NU
     return;
   }
   // Mark $start as visited.
-  $graph[$start]['paths'] = array();
+  $graph[$start]['paths'] = [];
 
   // Assign $start to the current component.
   $graph[$start]['component'] = $component;

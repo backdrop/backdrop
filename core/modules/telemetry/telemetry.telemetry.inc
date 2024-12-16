@@ -8,56 +8,56 @@
  * Implements hook_telemetry_info().
  */
 function telemetry_telemetry_info() {
-  $info['php_version'] = array(
+  $info['php_version'] = [
     'label' => t('PHP version'),
     'description' => t('The current version of PHP running on your server.'),
     'project' => 'backdrop',
-  );
-  $info['mysql_version'] = array(
+  ];
+  $info['mysql_version'] = [
     'label' => t('MySQL version'),
     'description' => t('The version number of your database (either MySQL or MariaDB).'),
     'project' => 'backdrop',
-  );
-  $info['server_os'] = array(
+  ];
+  $info['server_os'] = [
     'label' => t('Server OS'),
     'description' => t('The operating system of your server, such as RedHat Linux, Debian, Windows, etc.'),
     'project' => 'backdrop',
-  );
-  $info['web_server'] = array(
+  ];
+  $info['web_server'] = [
     'label' => t('Web server'),
     'description' => t('The web server that delivers HTTP pages to the web browser, such as Apache or nginx.'),
     'project' => 'backdrop',
-  );
-  $info['install_profile'] = array(
+  ];
+  $info['install_profile'] = [
     'label' => t('Installation profile'),
     'description' => t('The profile that was used to install your site.'),
     'project' => 'backdrop',
-  );
-  $info['multisite'] = array(
+  ];
+  $info['multisite'] = [
     'label' => t('Multisite'),
     'description' => t('Is this Backdrop installation set up as a multisite?'),
     'project' => 'backdrop',
-  );
-  $info['ckeditor_module_version'] = array(
+  ];
+  $info['ckeditor_module_version'] = [
     'label' => t('CKEditor Module Version'),
     'description' => t('The CKEditor module version that your site uses (either 4, 5, both, or neither).'),
     'project' => 'backdrop',
-  );
-  $info['drupal_compatibility'] = array(
+  ];
+  $info['drupal_compatibility'] = [
     'label' => t('Drupal compatibility layer'),
     'description' => t('Is the Drupal compatibility layer enabled?'),
     'project' => 'backdrop',
-  );
-  $info['jquery_version'] = array(
+  ];
+  $info['jquery_version'] = [
     'label' => t('jQuery version'),
     'description' => t('The version of jQuery configured on your site.'),
     'project' => 'backdrop',
-  );
-  $info['update_module'] = array(
+  ];
+  $info['update_module'] = [
     'label' => t('Update module enabled'),
     'description' => t('Whether this site has Update module enabled to check for project updates.'),
     'project' => 'backdrop',
-  );
+  ];
   return $info;
 }
 

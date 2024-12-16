@@ -44,11 +44,11 @@ function hook_search_info() {
   // string below.
   t('Content');
 
-  return array(
+  return [
     'title' => 'Content',
     'path' => 'node',
     'conditions_callback' => 'callback_search_conditions',
-  );
+  ];
 }
 
 /**
@@ -73,7 +73,7 @@ function hook_search_access() {
  */
 function hook_search_reset() {
   db_update('search_dataset')
-    ->fields(array('reindex' => REQUEST_TIME))
+    ->fields(['reindex' => REQUEST_TIME])
     ->condition('type', 'node')
     ->execute();
 }
@@ -95,7 +95,7 @@ function hook_search_reset() {
 function hook_search_status() {
   $total = db_query('SELECT COUNT(*) FROM {node} WHERE status = 1')->fetchField();
   $remaining = db_query("SELECT COUNT(*) FROM {node} n LEFT JOIN {search_dataset} d ON d.type = 'node' AND d.sid = n.nid WHERE n.status = 1 AND d.sid IS NULL OR d.reindex <> 0")->fetchField();
-  return array('remaining' => $remaining, 'total' => $total);
+  return ['remaining' => $remaining, 'total' => $total];
 }
 
 /**
@@ -108,25 +108,25 @@ function hook_search_status() {
  */
 function hook_search_admin() {
   // Output form for defining rank factor weights.
-  $form['content_ranking'] = array(
+  $form['content_ranking'] = [
     '#type' => 'fieldset',
     '#title' => t('Content ranking'),
-  );
+  ];
   $form['content_ranking']['#theme'] = 'node_search_admin';
-  $form['content_ranking']['info'] = array(
+  $form['content_ranking']['info'] = [
     '#markup' => '<p><em>' . t('Influence is a numeric multiplier used in ordering search results. A higher number means the corresponding factor has more influence on search results; zero means the factor is ignored. Changing these numbers does not require the search index to be rebuilt. Changes take effect immediately.') . '</em></p>'
-  );
+  ];
 
   // Note: reversed to reflect that higher number = higher ranking.
   $config = config('search.settings');
   $options = backdrop_map_assoc(range(0, 10));
   foreach (module_invoke_all('ranking') as $var => $values) {
-    $form['content_ranking']['factors']['node_rank_' . $var] = array(
+    $form['content_ranking']['factors']['node_rank_' . $var] = [
       '#title' => $values['title'],
       '#type' => 'select',
       '#options' => $options,
       '#default_value' => $config->get('node_rank_' . $var),
-    );
+    ];
   }
   return $form;
 }
@@ -172,7 +172,7 @@ function hook_search_admin() {
  */
 function hook_search_execute($keys = NULL, $conditions = NULL) {
   // Build matching conditions
-  $query = db_select('search_index', 'i', array('target' => 'replica'))->extend('SearchQuery')->extend('PagerDefault');
+  $query = db_select('search_index', 'i', ['target' => 'replica'])->extend('SearchQuery')->extend('PagerDefault');
   $query->join('node', 'n', 'n.nid = i.sid');
   $query
     ->condition('n.status', 1)
@@ -187,7 +187,7 @@ function hook_search_execute($keys = NULL, $conditions = NULL) {
   }
   // Only continue if the first pass query matches.
   if (!$query->executeFirstPass()) {
-    return array();
+    return [];
   }
 
   // Add the ranking expressions.
@@ -197,7 +197,7 @@ function hook_search_execute($keys = NULL, $conditions = NULL) {
   $find = $query
     ->limit(10)
     ->execute();
-  $results = array();
+  $results = [];
   foreach ($find as $item) {
     // Build the node body.
     $node = node_load($item->sid);
@@ -211,17 +211,17 @@ function hook_search_execute($keys = NULL, $conditions = NULL) {
 
     $extra = module_invoke_all('node_search_result', $node);
 
-    $results[] = array(
-      'link' => url('node/' . $item->sid, array('absolute' => TRUE)),
+    $results[] = [
+      'link' => url('node/' . $item->sid, ['absolute' => TRUE]),
       'type' => check_plain(node_type_get_name($node)),
       'title' => $node->title,
-      'user' => theme('username', array('account' => $node)),
+      'user' => theme('username', ['account' => $node]),
       'date' => $node->changed,
       'node' => $node,
       'extra' => $extra,
       'score' => $item->calculated_score,
       'snippet' => search_excerpt($keys, $node->body),
-    );
+    ];
   }
   return $results;
 }
@@ -243,12 +243,12 @@ function hook_search_execute($keys = NULL, $conditions = NULL) {
  * @see search-results.tpl.php
  */
 function hook_search_page($results) {
-  return array(
+  return [
     '#prefix' => '<h2>Test page text is here</h2>',
     '#theme' => 'search_results',
     '#results' => $results,
     '#module' => 'search_extra_type',
-  );
+  ];
 }
 
 /**
@@ -357,7 +357,7 @@ function hook_update_index() {
  * @ingroup search
  */
 function callback_search_conditions($keys) {
-  $conditions = array();
+  $conditions = [];
 
   if (!empty($_REQUEST['keys'])) {
     $conditions['keys'] = $_REQUEST['keys'];

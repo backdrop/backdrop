@@ -63,8 +63,8 @@ define('PATH_PUNCTUATION_DO_NOTHING', 2);
  *   - alias: The URL alias.
  */
 function _path_load_loosely_by_source($source, $langcode = LANGUAGE_NONE) {
-  $pid = db_query_range("SELECT pid FROM {url_alias} WHERE source = :source AND langcode IN (:langcode, :language_none) ORDER BY langcode DESC, pid DESC", 0, 1, array(':source' => $source, ':langcode' => $langcode, ':language_none' => LANGUAGE_NONE))->fetchField();
-  return path_load(array('pid' => $pid));
+  $pid = db_query_range("SELECT pid FROM {url_alias} WHERE source = :source AND langcode IN (:langcode, :language_none) ORDER BY langcode DESC, pid DESC", 0, 1, [':source' => $source, ':langcode' => $langcode, ':language_none' => LANGUAGE_NONE])->fetchField();
+  return path_load(['pid' => $pid]);
 }
 
 /**
@@ -95,7 +95,7 @@ function _path_load_loosely_by_source($source, $langcode = LANGUAGE_NONE) {
  * @return
  *   The cleaned string.
  */
-function path_clean_string($string, array $options = array()) {
+function path_clean_string($string, array $options = []) {
   // Use the advanced backdrop_static() pattern, since this is called very often.
   static $backdrop_static_fast;
   if (!isset($backdrop_static_fast)) {
@@ -107,16 +107,16 @@ function path_clean_string($string, array $options = array()) {
   // call to path_clean_string() we focus on processing.
   if (!isset($cache)) {
     $config = config('path.settings');
-    $cache = array(
+    $cache = [
       'separator' => $config->get('separator'),
-      'strings' => array(),
+      'strings' => [],
       'transliterate' => $config->get('transliterate'),
-      'punctuation' => array(),
+      'punctuation' => [],
       'reduce_ascii' => (bool) $config->get('reduce_ascii'),
       'ignore_words_regex' => FALSE,
       'lowercase' => (bool) $config->get('case'),
       'maxlength' => min($config->get('max_component_length'), _path_get_schema_alias_maxlength()),
-    );
+    ];
 
     // Generate and cache the punctuation replacements for strtr().
     $punctuation = path_punctuation_chars();
@@ -136,7 +136,7 @@ function path_clean_string($string, array $options = array()) {
     }
 
     // Copy settings from hyphen, single, and double-quotes to simple versions.
-    $fancy_character_map = array(
+    $fancy_character_map = [
       '‘' => '\'', // Single opening curly quote.
       '’' => '\'', // Single closing curly quote.
       '‚' => '\'', // Single low-quote.
@@ -147,7 +147,7 @@ function path_clean_string($string, array $options = array()) {
       '″' => '"', // Double prime.
       '–' => '-', // En dash.
       '—' => '-', // Em dash.
-    );
+    ];
     foreach ($fancy_character_map as $fancy_character => $simple_character) {
       if (!isset($cache['punctuation'][$fancy_character])) {
         $cache['punctuation'][$fancy_character] =  $cache['punctuation'][$simple_character];
@@ -156,7 +156,7 @@ function path_clean_string($string, array $options = array()) {
 
     // Generate and cache the ignored words regular expression.
     $ignore_words = $config->get('ignore_words');
-    $ignore_words_regex = preg_replace(array('/^[,\s]+|[,\s]+$/', '/[,\s]+/'), array('', '\b|\b'), $ignore_words);
+    $ignore_words_regex = preg_replace(['/^[,\s]+|[,\s]+$/', '/[,\s]+/'], ['', '\b|\b'], $ignore_words);
     if ($ignore_words_regex) {
       $cache['ignore_words_regex'] = '\b' . $ignore_words_regex . '\b';
       if (function_exists('mb_eregi_replace')) {
@@ -311,9 +311,9 @@ function path_clean_alias($alias) {
   $cache = &backdrop_static(__FUNCTION__);
 
   if (!isset($cache)) {
-    $cache = array(
+    $cache = [
       'maxlength' => min($config->get('max_length'), _path_get_schema_alias_maxlength()),
-    );
+    ];
   }
 
   $output = $alias;
@@ -428,11 +428,11 @@ function path_generate_entity_alias(Entity $entity, $source = NULL, $langcode = 
   $pattern = path_get_pattern_by_entity_type($entity_type_name, $bundle, $langcode);
 
   // Allow other modules to alter the pattern.
-  $context = array(
+  $context = [
     'entity' => $entity,
     'source' => $source,
     'langcode' => $langcode,
-  );
+  ];
   backdrop_alter('path_pattern', $pattern, $context);
 
   if (empty($pattern)) {
@@ -455,16 +455,16 @@ function path_generate_entity_alias(Entity $entity, $source = NULL, $langcode = 
 
   // Replace any tokens in the pattern. Uses callback option to clean
   // replacements. No sanitization.
-  $data = array();
+  $data = [];
   if ($token_type) {
     $data[$token_type] = $entity;
   }
-  $alias = token_replace($pattern, $data, array(
+  $alias = token_replace($pattern, $data, [
     'sanitize' => FALSE,
     'clear' => TRUE,
     'callback' => 'path_clean_token_values',
     'langcode' => $langcode,
-  ));
+  ]);
 
   // Check if the token replacement has not actually replaced any values. If
   // that is the case, then stop because we should not generate an alias.
@@ -491,10 +491,10 @@ function path_generate_entity_alias(Entity $entity, $source = NULL, $langcode = 
   path_alias_uniquify($alias, $source, $langcode);
   if ($original_alias != $alias) {
     // Alert the user why this happened.
-    path_verbose_message(t('The automatically generated alias %original_alias conflicted with an existing alias. Alias changed to %alias.', array(
+    path_verbose_message(t('The automatically generated alias %original_alias conflicted with an existing alias. Alias changed to %alias.', [
       '%original_alias' => $original_alias,
       '%alias' => $alias,
-    )), $entity->isNew() ? 'insert' : 'update');
+    ]), $entity->isNew() ? 'insert' : 'update');
   }
 
   return $alias;
@@ -542,19 +542,19 @@ function path_save_automatic_alias($source, $alias, $langcode) {
   // internal path.
   if ($source == $alias) {
     if ($verbose) {
-      path_verbose_message(t('Ignoring alias %alias because it is the same as the internal path.', array('%alias' => $alias)));
+      path_verbose_message(t('Ignoring alias %alias because it is the same as the internal path.', ['%alias' => $alias]));
     }
     return FALSE;
   }
 
   // Assemble a path array to be saved.
-  $path = array(
+  $path = [
     'source' => $source,
     'alias' => $alias,
     'langcode' => $langcode,
     'auto' => TRUE,
     'original' => $existing_path,
-  );
+  ];
 
   // Skip replacing the current alias with an identical alias.
   if (empty($existing_path) || $existing_path['alias'] != $path['alias'] || empty($existing_path['auto'])) {
@@ -580,10 +580,10 @@ function path_save_automatic_alias($source, $alias, $langcode) {
 
     if ($verbose) {
       if (!empty($existing_path['pid'])) {
-        path_verbose_message(t('Created new alias %alias for %source, replacing %old_alias.', array('%alias' => $path['alias'], '%source' => $path['source'], '%old_alias' => $existing_path['alias'])));
+        path_verbose_message(t('Created new alias %alias for %source, replacing %old_alias.', ['%alias' => $path['alias'], '%source' => $path['source'], '%old_alias' => $existing_path['alias']]));
       }
       else {
-        path_verbose_message(t('Created new alias %alias for %source.', array('%alias' => $path['alias'], '%source' => $path['source'])));
+        path_verbose_message(t('Created new alias %alias for %source.', ['%alias' => $path['alias'], '%source' => $path['source']]));
       }
     }
 
@@ -609,7 +609,7 @@ function path_save_automatic_alias($source, $alias, $langcode) {
  * @see path_generate_entity_alias()
  * @see token_replace()
  */
-function path_clean_token_values(array &$replacements, array $data = array(), array $options = array()) {
+function path_clean_token_values(array &$replacements, array $data = [], array $options = []) {
   foreach ($replacements as $token => $value) {
     // Only clean non-path tokens.
     if (!preg_match('/(path|alias|url|url-brief)\]$/', $token)) {
@@ -640,39 +640,39 @@ function path_punctuation_chars() {
       $punctuation = $cache->data;
     }
     else {
-      $punctuation = array();
-      $punctuation['double_quotes']      = array('value' => '"', 'name' => t('Double quotation marks'));
-      $punctuation['quotes']             = array('value' => '\'', 'name' => t("Single quotation marks (apostrophe)"));
-      $punctuation['backtick']           = array('value' => '`', 'name' => t('Back tick'));
-      $punctuation['comma']              = array('value' => ',', 'name' => t('Comma'));
-      $punctuation['period']             = array('value' => '.', 'name' => t('Period'));
-      $punctuation['hyphen']             = array('value' => '-', 'name' => t('Hyphen'));
-      $punctuation['underscore']         = array('value' => '_', 'name' => t('Underscore'));
-      $punctuation['colon']              = array('value' => ':', 'name' => t('Colon'));
-      $punctuation['semicolon']          = array('value' => ';', 'name' => t('Semicolon'));
-      $punctuation['pipe']               = array('value' => '|', 'name' => t('Vertical bar (pipe)'));
-      $punctuation['left_curly']         = array('value' => '{', 'name' => t('Left curly bracket'));
-      $punctuation['left_square']        = array('value' => '[', 'name' => t('Left square bracket'));
-      $punctuation['right_curly']        = array('value' => '}', 'name' => t('Right curly bracket'));
-      $punctuation['right_square']       = array('value' => ']', 'name' => t('Right square bracket'));
-      $punctuation['plus']               = array('value' => '+', 'name' => t('Plus sign'));
-      $punctuation['equal']              = array('value' => '=', 'name' => t('Equal sign'));
-      $punctuation['asterisk']           = array('value' => '*', 'name' => t('Asterisk'));
-      $punctuation['ampersand']          = array('value' => '&', 'name' => t('Ampersand'));
-      $punctuation['percent']            = array('value' => '%', 'name' => t('Percent sign'));
-      $punctuation['caret']              = array('value' => '^', 'name' => t('Caret'));
-      $punctuation['dollar']             = array('value' => '$', 'name' => t('Dollar sign'));
-      $punctuation['hash']               = array('value' => '#', 'name' => t('Number sign (pound sign, hash)'));
-      $punctuation['at']                 = array('value' => '@', 'name' => t('At sign'));
-      $punctuation['exclamation']        = array('value' => '!', 'name' => t('Exclamation mark'));
-      $punctuation['tilde']              = array('value' => '~', 'name' => t('Tilde'));
-      $punctuation['left_parenthesis']   = array('value' => '(', 'name' => t('Left parenthesis'));
-      $punctuation['right_parenthesis']  = array('value' => ')', 'name' => t('Right parenthesis'));
-      $punctuation['question_mark']      = array('value' => '?', 'name' => t('Question mark'));
-      $punctuation['less_than']          = array('value' => '<', 'name' => t('Less-than sign'));
-      $punctuation['greater_than']       = array('value' => '>', 'name' => t('Greater-than sign'));
-      $punctuation['slash']              = array('value' => '/', 'name' => t('Slash'));
-      $punctuation['back_slash']         = array('value' => '\\', 'name' => t('Backslash'));
+      $punctuation = [];
+      $punctuation['double_quotes']      = ['value' => '"', 'name' => t('Double quotation marks')];
+      $punctuation['quotes']             = ['value' => '\'', 'name' => t("Single quotation marks (apostrophe)")];
+      $punctuation['backtick']           = ['value' => '`', 'name' => t('Back tick')];
+      $punctuation['comma']              = ['value' => ',', 'name' => t('Comma')];
+      $punctuation['period']             = ['value' => '.', 'name' => t('Period')];
+      $punctuation['hyphen']             = ['value' => '-', 'name' => t('Hyphen')];
+      $punctuation['underscore']         = ['value' => '_', 'name' => t('Underscore')];
+      $punctuation['colon']              = ['value' => ':', 'name' => t('Colon')];
+      $punctuation['semicolon']          = ['value' => ';', 'name' => t('Semicolon')];
+      $punctuation['pipe']               = ['value' => '|', 'name' => t('Vertical bar (pipe)')];
+      $punctuation['left_curly']         = ['value' => '{', 'name' => t('Left curly bracket')];
+      $punctuation['left_square']        = ['value' => '[', 'name' => t('Left square bracket')];
+      $punctuation['right_curly']        = ['value' => '}', 'name' => t('Right curly bracket')];
+      $punctuation['right_square']       = ['value' => ']', 'name' => t('Right square bracket')];
+      $punctuation['plus']               = ['value' => '+', 'name' => t('Plus sign')];
+      $punctuation['equal']              = ['value' => '=', 'name' => t('Equal sign')];
+      $punctuation['asterisk']           = ['value' => '*', 'name' => t('Asterisk')];
+      $punctuation['ampersand']          = ['value' => '&', 'name' => t('Ampersand')];
+      $punctuation['percent']            = ['value' => '%', 'name' => t('Percent sign')];
+      $punctuation['caret']              = ['value' => '^', 'name' => t('Caret')];
+      $punctuation['dollar']             = ['value' => '$', 'name' => t('Dollar sign')];
+      $punctuation['hash']               = ['value' => '#', 'name' => t('Number sign (pound sign, hash)')];
+      $punctuation['at']                 = ['value' => '@', 'name' => t('At sign')];
+      $punctuation['exclamation']        = ['value' => '!', 'name' => t('Exclamation mark')];
+      $punctuation['tilde']              = ['value' => '~', 'name' => t('Tilde')];
+      $punctuation['left_parenthesis']   = ['value' => '(', 'name' => t('Left parenthesis')];
+      $punctuation['right_parenthesis']  = ['value' => ')', 'name' => t('Right parenthesis')];
+      $punctuation['question_mark']      = ['value' => '?', 'name' => t('Question mark')];
+      $punctuation['less_than']          = ['value' => '<', 'name' => t('Less-than sign')];
+      $punctuation['greater_than']       = ['value' => '>', 'name' => t('Greater-than sign')];
+      $punctuation['slash']              = ['value' => '/', 'name' => t('Slash')];
+      $punctuation['back_slash']         = ['value' => '\\', 'name' => t('Backslash')];
 
       // Allow modules to alter the punctuation list and cache the result.
       backdrop_alter('path_punctuation_chars', $punctuation);

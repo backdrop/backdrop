@@ -126,7 +126,7 @@ function file_get_stream_wrappers($filter = STREAM_WRAPPERS_ALL) {
     $wrappers = module_invoke_all('stream_wrappers');
     foreach ($wrappers as $scheme => $info) {
       // Add defaults.
-      $wrappers[$scheme] += array('type' => STREAM_WRAPPERS_NORMAL);
+      $wrappers[$scheme] += ['type' => STREAM_WRAPPERS_NORMAL];
     }
     backdrop_alter('stream_wrappers', $wrappers);
     $existing = stream_get_wrappers();
@@ -157,7 +157,7 @@ function file_get_stream_wrappers($filter = STREAM_WRAPPERS_ALL) {
   }
 
   if (!isset($wrappers_storage[$filter])) {
-    $wrappers_storage[$filter] = array();
+    $wrappers_storage[$filter] = [];
     foreach ($wrappers_storage[STREAM_WRAPPERS_ALL] as $scheme => $info) {
       // Bit-wise filter.
       if (($info['type'] & $filter) == $filter) {
@@ -519,7 +519,7 @@ function file_save_htaccess($directory, $private = TRUE, $force_overwrite = FALS
     backdrop_chmod($htaccess_path, 0444);
   }
   else {
-    $variables = array('%directory' => $directory, '!htaccess' => '<br />' . nl2br(check_plain($htaccess_lines)));
+    $variables = ['%directory' => $directory, '!htaccess' => '<br />' . nl2br(check_plain($htaccess_lines))];
     watchdog('security', "Security warning: Couldn't write .htaccess file. Please create a .htaccess file in your %directory directory which contains the following lines: <code>!htaccess</code>", $variables, WATCHDOG_ERROR);
   }
 }
@@ -604,7 +604,7 @@ EOF;
  * @see entity_load()
  * @see EntityFieldQuery
  */
-function file_load_multiple($fids = array(), $conditions = array()) {
+function file_load_multiple($fids = [], $conditions = []) {
   return entity_load('file', $fids, $conditions);
 }
 
@@ -621,7 +621,7 @@ function file_load_multiple($fids = array(), $conditions = array()) {
  * @see file_load_multiple()
  */
 function file_load($fid) {
-  $files = file_load_multiple(array($fid), array());
+  $files = file_load_multiple([$fid], []);
   return reset($files);
 }
 
@@ -658,11 +658,11 @@ function file_save(File $file) {
  */
 function file_usage_list(File $file) {
   $result = db_select('file_usage', 'f')
-    ->fields('f', array('module', 'type', 'id', 'count'))
+    ->fields('f', ['module', 'type', 'id', 'count'])
     ->condition('fid', $file->fid)
     ->condition('count', 0, '>')
     ->execute();
-  $references = array();
+  $references = [];
   foreach ($result as $usage) {
     $references[$usage->module][$usage->type][$usage->id] = $usage->count;
   }
@@ -695,14 +695,14 @@ function file_usage_list(File $file) {
  */
 function file_usage_add(File $file, $module, $type, $id, $count = 1) {
   db_merge('file_usage')
-    ->key(array(
+    ->key([
       'fid' => $file->fid,
       'module' => $module,
       'type' => $type,
       'id' => $id,
-    ))
-    ->fields(array('count' => $count))
-    ->expression('count', 'count + :count', array(':count' => $count))
+    ])
+    ->fields(['count' => $count])
+    ->expression('count', 'count + :count', [':count' => $count])
     ->execute();
 
   // Make sure that a used file is permanent.
@@ -758,7 +758,7 @@ function file_usage_delete(File $file, $module, $type = NULL, $id = NULL, $count
         ->condition('type', $type)
         ->condition('id', $id);
     }
-    $query->expression('count', 'count - :count', array(':count' => $count));
+    $query->expression('count', 'count - :count', [':count' => $count]);
     $query->execute();
   }
 
@@ -810,12 +810,12 @@ function file_usage_delete(File $file, $module, $type = NULL, $id = NULL, $count
 function file_copy(File $source, $destination = NULL, $replace = FILE_EXISTS_RENAME) {
   if (!file_valid_uri($destination)) {
     if (($realpath = backdrop_realpath($source->uri)) !== FALSE) {
-      watchdog('file', 'File %file (%realpath) could not be copied because the destination %destination is invalid. This is often caused by improper use of file_copy() or a missing stream wrapper.', array('%file' => $source->uri, '%realpath' => $realpath, '%destination' => $destination));
+      watchdog('file', 'File %file (%realpath) could not be copied because the destination %destination is invalid. This is often caused by improper use of file_copy() or a missing stream wrapper.', ['%file' => $source->uri, '%realpath' => $realpath, '%destination' => $destination]);
     }
     else {
-      watchdog('file', 'File %file could not be copied because the destination %destination is invalid. This is often caused by improper use of file_copy() or a missing stream wrapper.', array('%file' => $source->uri, '%destination' => $destination));
+      watchdog('file', 'File %file could not be copied because the destination %destination is invalid. This is often caused by improper use of file_copy() or a missing stream wrapper.', ['%file' => $source->uri, '%destination' => $destination]);
     }
-    backdrop_set_message(t('The specified file %file could not be copied because the destination is invalid. More information is available in the system log.', array('%file' => $source->uri)), 'error');
+    backdrop_set_message(t('The specified file %file could not be copied because the destination is invalid. More information is available in the system log.', ['%file' => $source->uri]), 'error');
     return FALSE;
   }
 
@@ -826,7 +826,7 @@ function file_copy(File $source, $destination = NULL, $replace = FILE_EXISTS_REN
     $file->filename = backdrop_basename($uri);
     // If we are replacing an existing file re-use its database record.
     if ($replace == FILE_EXISTS_REPLACE) {
-      $existing_files = file_load_multiple(array(), array('uri' => $uri));
+      $existing_files = file_load_multiple([], ['uri' => $uri]);
       if (count($existing_files)) {
         $existing = reset($existing_files);
         $file->fid = $existing->fid;
@@ -911,7 +911,7 @@ function file_unmanaged_copy($source, $destination = NULL, $replace = FILE_EXIST
   $real_destination = ($real_destination = backdrop_realpath($destination)) ? $real_destination : $destination;
   // Perform the copy operation.
   if (!@copy($real_source, $real_destination)) {
-    watchdog('file', 'The specified file %file could not be copied to %destination.', array('%file' => $source, '%destination' => $destination), WATCHDOG_ERROR);
+    watchdog('file', 'The specified file %file could not be copied to %destination.', ['%file' => $source, '%destination' => $destination], WATCHDOG_ERROR);
     return FALSE;
   }
   // Set the permissions on the new file.
@@ -955,12 +955,12 @@ function file_unmanaged_prepare($source, &$destination = NULL, $replace = FILE_E
   // Assert that the source file actually exists.
   if (!file_exists($source)) {
     // @todo Replace backdrop_set_message() calls with exceptions instead.
-    backdrop_set_message(t('The specified file %file could not be moved/copied because no file by that name exists. Please check that you supplied the correct filename.', array('%file' => $original_source)), 'error');
+    backdrop_set_message(t('The specified file %file could not be moved/copied because no file by that name exists. Please check that you supplied the correct filename.', ['%file' => $original_source]), 'error');
     if (($realpath = backdrop_realpath($original_source)) !== FALSE) {
-      watchdog('file', 'File %file (%realpath) could not be copied because it does not exist.', array('%file' => $original_source, '%realpath' => $realpath));
+      watchdog('file', 'File %file (%realpath) could not be copied because it does not exist.', ['%file' => $original_source, '%realpath' => $realpath]);
     }
     else {
-      watchdog('file', 'File %file could not be moved/copied because it does not exist.', array('%file' => $original_source));
+      watchdog('file', 'File %file could not be moved/copied because it does not exist.', ['%file' => $original_source]);
     }
     return FALSE;
   }
@@ -980,8 +980,8 @@ function file_unmanaged_prepare($source, &$destination = NULL, $replace = FILE_E
     $dirname = backdrop_dirname($destination);
     if (!file_prepare_directory($dirname)) {
       // The destination is not valid.
-      watchdog('file', 'File %file could not be moved/copied because the destination directory %destination is not configured correctly.', array('%file' => $original_source, '%destination' => $dirname));
-      backdrop_set_message(t('The specified file %file could not be moved/copied because the destination directory is not properly configured. This may be caused by a problem with file or directory permissions. More information is available in the system log.', array('%file' => $original_source)), 'error');
+      watchdog('file', 'File %file could not be moved/copied because the destination directory %destination is not configured correctly.', ['%file' => $original_source, '%destination' => $dirname]);
+      backdrop_set_message(t('The specified file %file could not be moved/copied because the destination directory is not properly configured. This may be caused by a problem with file or directory permissions. More information is available in the system log.', ['%file' => $original_source]), 'error');
       return FALSE;
     }
   }
@@ -989,8 +989,8 @@ function file_unmanaged_prepare($source, &$destination = NULL, $replace = FILE_E
   // Determine whether we can perform this operation based on overwrite rules.
   $destination = file_destination($destination, $replace);
   if ($destination === FALSE) {
-    backdrop_set_message(t('The file %file could not be moved/copied because a file by that name already exists in the destination directory.', array('%file' => $original_source)), 'error');
-    watchdog('file', 'File %file could not be moved/copied because a file by that name already exists in the destination directory (%directory)', array('%file' => $original_source, '%directory' => $destination));
+    backdrop_set_message(t('The file %file could not be moved/copied because a file by that name already exists in the destination directory.', ['%file' => $original_source]), 'error');
+    watchdog('file', 'File %file could not be moved/copied because a file by that name already exists in the destination directory (%directory)', ['%file' => $original_source, '%directory' => $destination]);
     return FALSE;
   }
 
@@ -998,8 +998,8 @@ function file_unmanaged_prepare($source, &$destination = NULL, $replace = FILE_E
   $real_source = backdrop_realpath($source);
   $real_destination = backdrop_realpath($destination);
   if ($source == $destination || ($real_source !== FALSE) && ($real_source == $real_destination)) {
-    backdrop_set_message(t('The specified file %file was not moved/copied because it would overwrite itself.', array('%file' => $source)), 'error');
-    watchdog('file', 'File %file could not be moved/copied because it would overwrite itself.', array('%file' => $source));
+    backdrop_set_message(t('The specified file %file was not moved/copied because it would overwrite itself.', ['%file' => $source]), 'error');
+    watchdog('file', 'File %file could not be moved/copied because it would overwrite itself.', ['%file' => $source]);
     return FALSE;
   }
   // Make sure the .htaccess files are present.
@@ -1093,12 +1093,12 @@ function file_destination($destination, $replace) {
 function file_move(File $source, $destination = NULL, $replace = FILE_EXISTS_RENAME) {
   if (!file_valid_uri($destination)) {
     if (($realpath = backdrop_realpath($source->uri)) !== FALSE) {
-      watchdog('file', 'File %file (%realpath) could not be moved because the destination %destination is invalid. This may be caused by improper use of file_move() or a missing stream wrapper.', array('%file' => $source->uri, '%realpath' => $realpath, '%destination' => $destination));
+      watchdog('file', 'File %file (%realpath) could not be moved because the destination %destination is invalid. This may be caused by improper use of file_move() or a missing stream wrapper.', ['%file' => $source->uri, '%realpath' => $realpath, '%destination' => $destination]);
     }
     else {
-      watchdog('file', 'File %file could not be moved because the destination %destination is invalid. This may be caused by improper use of file_move() or a missing stream wrapper.', array('%file' => $source->uri, '%destination' => $destination));
+      watchdog('file', 'File %file could not be moved because the destination %destination is invalid. This may be caused by improper use of file_move() or a missing stream wrapper.', ['%file' => $source->uri, '%destination' => $destination]);
     }
-    backdrop_set_message(t('The specified file %file could not be moved because the destination is invalid. More information is available in the system log.', array('%file' => $source->uri)), 'error');
+    backdrop_set_message(t('The specified file %file could not be moved because the destination is invalid. More information is available in the system log.', ['%file' => $source->uri]), 'error');
     return FALSE;
   }
 
@@ -1109,7 +1109,7 @@ function file_move(File $source, $destination = NULL, $replace = FILE_EXISTS_REN
     $file->uri = $uri;
     // If we are replacing an existing file re-use its database record.
     if ($replace == FILE_EXISTS_REPLACE) {
-      $existing_files = file_load_multiple(array(), array('uri' => $uri));
+      $existing_files = file_load_multiple([], ['uri' => $uri]);
       if (count($existing_files)) {
         $existing = reset($existing_files);
         $delete_source = TRUE;
@@ -1182,7 +1182,7 @@ function file_unmanaged_move($source, $destination = NULL, $replace = FILE_EXIST
     // renames across schemes that are not local, or where rename() has not been
     // implemented.
     if (!@copy($real_source, $real_destination) || !@unlink($real_source)) {
-      watchdog('file', 'The specified file %file could not be moved to %destination.', array('%file' => $source, '%destination' => $destination), WATCHDOG_ERROR);
+      watchdog('file', 'The specified file %file could not be moved to %destination.', ['%file' => $source, '%destination' => $destination], WATCHDOG_ERROR);
       return FALSE;
     }
   }
@@ -1256,7 +1256,7 @@ function file_munge_filename($filename, $extensions, $alerts = TRUE) {
     $filename = $new_filename . '.' . $final_extension;
 
     if ($alerts && $original != $filename) {
-      backdrop_set_message(t('For security reasons, your upload has been renamed to %filename.', array('%filename' => $filename)));
+      backdrop_set_message(t('For security reasons, your upload has been renamed to %filename.', ['%filename' => $filename]));
     }
   }
 
@@ -1306,7 +1306,7 @@ function file_create_filename($basename, $directory) {
 
   if (substr(PHP_OS, 0, 3) == 'WIN') {
     // These characters are not allowed in Windows filenames
-    $basename = str_replace(array(':', '*', '?', '"', '<', '>', '|'), '_', $basename);
+    $basename = str_replace([':', '*', '?', '"', '<', '>', '|'], '_', $basename);
   }
 
   // A URI or path may already have a trailing slash or look like "public://".
@@ -1354,7 +1354,7 @@ function file_create_filename($basename, $directory) {
  * @see file_usage_list()
  */
 function file_delete($fid) {
-  file_delete_multiple(array($fid));
+  file_delete_multiple([$fid]);
 }
 
 /**
@@ -1392,7 +1392,7 @@ function file_delete_multiple(array $fids) {
  */
 function file_unmanaged_delete($path) {
   if (is_dir($path)) {
-    watchdog('file', '%path is a directory and cannot be removed using file_unmanaged_delete().', array('%path' => $path), WATCHDOG_ERROR);
+    watchdog('file', '%path is a directory and cannot be removed using file_unmanaged_delete().', ['%path' => $path], WATCHDOG_ERROR);
     return FALSE;
   }
   if (is_file($path)) {
@@ -1401,12 +1401,12 @@ function file_unmanaged_delete($path) {
   // Return TRUE for non-existent file, but log that nothing was actually
   // deleted, as the current state is the intended result.
   if (!file_exists($path)) {
-    watchdog('file', 'The file %path was not deleted because it does not exist.', array('%path' => $path), WATCHDOG_NOTICE);
+    watchdog('file', 'The file %path was not deleted because it does not exist.', ['%path' => $path], WATCHDOG_NOTICE);
     return TRUE;
   }
   // We cannot handle anything other than files and directories. Log an error
   // for everything else (sockets, symbolic links, etc).
-  watchdog('file', 'The file %path is not of a recognized type so it was not deleted.', array('%path' => $path), WATCHDOG_ERROR);
+  watchdog('file', 'The file %path is not of a recognized type so it was not deleted.', ['%path' => $path], WATCHDOG_ERROR);
   return FALSE;
 }
 
@@ -1511,7 +1511,7 @@ function file_space_used($uid = NULL, $status = FILE_STATUS_PERMANENT) {
  *   - source: Path to the file before it is moved.
  *   - destination: Path to the file after it is moved (same as 'uri').
  */
-function file_save_upload($form_field_name, $validators = array(), $destination = FALSE, $replace = FILE_EXISTS_RENAME) {
+function file_save_upload($form_field_name, $validators = [], $destination = FALSE, $replace = FILE_EXISTS_RENAME) {
   global $user;
   static $upload_cache;
 
@@ -1532,12 +1532,12 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
   switch ($_FILES['files']['error'][$form_field_name]) {
     case UPLOAD_ERR_INI_SIZE:
     case UPLOAD_ERR_FORM_SIZE:
-      backdrop_set_message(t('The file %file could not be saved because it exceeds %maxsize, the maximum allowed size for uploads.', array('%file' => $_FILES['files']['name'][$form_field_name], '%maxsize' => format_size(file_upload_max_size()))), 'error');
+      backdrop_set_message(t('The file %file could not be saved because it exceeds %maxsize, the maximum allowed size for uploads.', ['%file' => $_FILES['files']['name'][$form_field_name], '%maxsize' => format_size(file_upload_max_size())]), 'error');
       return FALSE;
 
     case UPLOAD_ERR_PARTIAL:
     case UPLOAD_ERR_NO_FILE:
-      backdrop_set_message(t('The file %file could not be saved because the upload did not complete.', array('%file' => $_FILES['files']['name'][$form_field_name])), 'error');
+      backdrop_set_message(t('The file %file could not be saved because the upload did not complete.', ['%file' => $_FILES['files']['name'][$form_field_name]]), 'error');
       return FALSE;
 
     case UPLOAD_ERR_OK:
@@ -1549,17 +1549,17 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
 
     // Unknown error
     default:
-      backdrop_set_message(t('The file %file could not be saved. An unknown error has occurred.', array('%file' => $_FILES['files']['name'][$form_field_name])), 'error');
+      backdrop_set_message(t('The file %file could not be saved. An unknown error has occurred.', ['%file' => $_FILES['files']['name'][$form_field_name]]), 'error');
       return FALSE;
   }
   // Begin building file entity.
-  $values = array(
+  $values = [
     'uid' => $user->uid,
     'status' => 0,
     'filename' => trim(backdrop_basename($_FILES['files']['name'][$form_field_name]), '.'),
     'uri' => $_FILES['files']['tmp_name'][$form_field_name],
     'filesize' => $_FILES['files']['size'][$form_field_name],
-  );
+  ];
   $values['filemime'] = file_get_mimetype($values['filename']);
   $file = new File($values);
 
@@ -1581,7 +1581,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     // Build a default non-munged safe list for file_munge_filename().
     $extensions = implode(' ', image_get_supported_extensions()) . ' txt doc xls pdf ppt pps odt ods odp docx docm pptx pptm xlsx xlsm';
 
-    $validators['file_validate_extensions'] = array();
+    $validators['file_validate_extensions'] = [];
     $validators['file_validate_extensions'][0] = $extensions;
   }
 
@@ -1608,7 +1608,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
           $file->filename .= '.txt';
         }
         $file->filename = file_munge_filename($file->filename, $extensions, FALSE);
-        backdrop_set_message(t('For security reasons, your upload has been renamed to %filename.', array('%filename' => $file->filename)));
+        backdrop_set_message(t('For security reasons, your upload has been renamed to %filename.', ['%filename' => $file->filename]));
         // The .txt extension may not be in the allowed list of extensions. We have
         // to add it here or else the file upload will fail.
         if (!empty($validators['file_validate_extensions'][0])) {
@@ -1626,7 +1626,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
   // Assert that the destination contains a valid stream.
   $destination_scheme = file_uri_scheme($destination);
   if (!$destination_scheme || !file_stream_wrapper_valid_scheme($destination_scheme)) {
-    backdrop_set_message(t('The file could not be uploaded because the destination %destination is invalid.', array('%destination' => $destination)), 'error');
+    backdrop_set_message(t('The file could not be uploaded because the destination %destination is invalid.', ['%destination' => $destination]), 'error');
     return FALSE;
   }
 
@@ -1639,30 +1639,30 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     $file->destination = file_destination($destination . $file->filename, $replace);
   }
   catch (RuntimeException $e) {
-    backdrop_set_message(t('The file %source could not be uploaded because the name is invalid.', array('%source' => $form_field_name)), 'error');
+    backdrop_set_message(t('The file %source could not be uploaded because the name is invalid.', ['%source' => $form_field_name]), 'error');
     return FALSE;
   }
   // If file_destination() returns FALSE then $replace == FILE_EXISTS_ERROR and
   // there's an existing file so we need to bail.
   if ($file->destination === FALSE) {
-    backdrop_set_message(t('The file %source could not be uploaded because a file by that name already exists in the destination %directory.', array('%source' => $form_field_name, '%directory' => $destination)), 'error');
+    backdrop_set_message(t('The file %source could not be uploaded because a file by that name already exists in the destination %directory.', ['%source' => $form_field_name, '%directory' => $destination]), 'error');
     return FALSE;
   }
 
   // Add in our check of the the file name length.
-  $validators['file_validate_name_length'] = array();
+  $validators['file_validate_name_length'] = [];
 
   // Add in check for valid SVG.
-  $validators['file_validate_svg'] = array();
+  $validators['file_validate_svg'] = [];
 
   // Call the validation functions specified by this function's caller.
   $errors = file_validate($file, $validators);
 
   // Check for errors.
   if (!empty($errors)) {
-    $message = t('The specified file %name could not be uploaded.', array('%name' => $file->filename));
+    $message = t('The specified file %name could not be uploaded.', ['%name' => $file->filename]);
     if (count($errors) > 1) {
-      $message .= theme('item_list', array('items' => $errors));
+      $message .= theme('item_list', ['items' => $errors]);
     }
     else {
       $message .= ' ' . array_pop($errors);
@@ -1677,7 +1677,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
   $file->uri = $file->destination;
   if (!backdrop_move_uploaded_file($_FILES['files']['tmp_name'][$form_field_name], $file->uri)) {
     form_set_error($form_field_name, t('File upload error. Could not move uploaded file.'));
-    watchdog('file', 'Upload error. Could not move uploaded file %file to destination %destination.', array('%file' => $file->filename, '%destination' => $file->uri));
+    watchdog('file', 'Upload error. Could not move uploaded file %file to destination %destination.', ['%file' => $file->filename, '%destination' => $file->uri]);
     return FALSE;
   }
 
@@ -1686,7 +1686,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
 
   // If we are replacing an existing file re-use its database record.
   if ($replace == FILE_EXISTS_REPLACE) {
-    $existing_files = file_load_multiple(array(), array('uri' => $file->uri));
+    $existing_files = file_load_multiple([], ['uri' => $file->uri]);
     if (count($existing_files)) {
       $existing = reset($existing_files);
       $file->fid = $existing->fid;
@@ -1766,9 +1766,9 @@ function backdrop_move_uploaded_file($filename, $uri) {
  *
  * @see hook_file_validate()
  */
-function file_validate(File $file, $validators = array()) {
+function file_validate(File $file, $validators = []) {
   // Call the validation functions specified by this function's caller.
-  $errors = array();
+  $errors = [];
   foreach ($validators as $function => $args) {
     if (function_exists($function)) {
       array_unshift($args, $file);
@@ -1801,7 +1801,7 @@ function file_validate(File $file, $validators = array()) {
  *   An array. If the file name is too long, it will contain an error message.
  */
 function file_validate_name_length(File $file) {
-  $errors = array();
+  $errors = [];
 
   if (empty($file->filename)) {
     $errors[] = t("The file's name is empty. Please give a name to the file.");
@@ -1827,11 +1827,11 @@ function file_validate_name_length(File $file) {
  * @see hook_file_validate()
  */
 function file_validate_extensions(File $file, $extensions) {
-  $errors = array();
+  $errors = [];
 
   $regex = '/\.(' . preg_replace('/ +/', '|', preg_quote($extensions)) . ')$/i';
   if (!preg_match($regex, $file->filename)) {
-    $errors[] = t('Only files with the following extensions are allowed: %files-allowed.', array('%files-allowed' => $extensions));
+    $errors[] = t('Only files with the following extensions are allowed: %files-allowed.', ['%files-allowed' => $extensions]);
   }
   return $errors;
 }
@@ -1857,15 +1857,15 @@ function file_validate_extensions(File $file, $extensions) {
 function file_validate_size(File $file, $file_limit = 0, $user_limit = 0) {
   global $user;
 
-  $errors = array();
+  $errors = [];
 
   if ($file_limit && $file->filesize > $file_limit) {
-    $errors[] = t('The file is %filesize exceeding the maximum file size of %maxsize.', array('%filesize' => format_size($file->filesize), '%maxsize' => format_size($file_limit)));
+    $errors[] = t('The file is %filesize exceeding the maximum file size of %maxsize.', ['%filesize' => format_size($file->filesize), '%maxsize' => format_size($file_limit)]);
   }
 
   // Save a query by only calling file_space_used() when a limit is provided.
   if ($user_limit && (file_space_used($user->uid) + $file->filesize) > $user_limit) {
-      $errors[] = t('The file is %filesize which would exceed your disk quota of %quota.', array('%filesize' => format_size($file->filesize), '%quota' => format_size($user_limit)));
+      $errors[] = t('The file is %filesize which would exceed your disk quota of %quota.', ['%filesize' => format_size($file->filesize), '%quota' => format_size($user_limit)]);
   }
 
   return $errors;
@@ -1883,12 +1883,12 @@ function file_validate_size(File $file, $file_limit = 0, $user_limit = 0) {
  * @see hook_file_validate()
  */
 function file_validate_is_image(File $file) {
-  $errors = array();
+  $errors = [];
 
   $info = image_get_info($file->uri);
   if (!$info || empty($info['extension'])) {
     $supported_extensions = image_get_supported_extensions();
-    $errors[] = t('Only images with the following extensions are allowed: @formats.', array('@formats' => implode(', ', $supported_extensions)));
+    $errors[] = t('Only images with the following extensions are allowed: @formats.', ['@formats' => implode(', ', $supported_extensions)]);
   }
 
   return $errors;
@@ -1918,7 +1918,7 @@ function file_validate_is_image(File $file) {
  * @see hook_file_validate()
  */
 function file_validate_image_resolution(File $file, $maximum_dimensions = 0, $minimum_dimensions = 0) {
-  $errors = array();
+  $errors = [];
   // Check first that the file is an image.
   if ($info = image_get_info($file->uri)) {
     if ($maximum_dimensions) {
@@ -1933,17 +1933,17 @@ function file_validate_image_resolution(File $file, $maximum_dimensions = 0, $mi
           image_save($image);
           $file->filesize = $image->info['file_size'];
           if (!$height) {
-            backdrop_set_message(t('The image was resized to fit within the maximum allowed width of %width pixels.', array('%width' => $width)));
+            backdrop_set_message(t('The image was resized to fit within the maximum allowed width of %width pixels.', ['%width' => $width]));
           }
           elseif (!$width) {
-            backdrop_set_message(t('The image was resized to fit within the maximum allowed height of %height pixels.', array('%height' => $height)));
+            backdrop_set_message(t('The image was resized to fit within the maximum allowed height of %height pixels.', ['%height' => $height]));
           }
           else {
-            backdrop_set_message(t('The image was resized to fit within the maximum allowed dimensions of %dimensions pixels.', array('%dimensions' => $maximum_dimensions)));
+            backdrop_set_message(t('The image was resized to fit within the maximum allowed dimensions of %dimensions pixels.', ['%dimensions' => $maximum_dimensions]));
           }
         }
         else {
-          $errors[] = t('The image is too large; the maximum dimensions are %dimensions pixels.', array('%dimensions' => $maximum_dimensions));
+          $errors[] = t('The image is too large; the maximum dimensions are %dimensions pixels.', ['%dimensions' => $maximum_dimensions]);
         }
       }
     }
@@ -1953,14 +1953,14 @@ function file_validate_image_resolution(File $file, $maximum_dimensions = 0, $mi
       list($width, $height) = explode('x', $minimum_dimensions);
       if ($width > 0 && $height > 0) {
         if ($info['width'] < $width || $info['height'] < $height) {
-          $errors[] = t('The image is too small; the minimum dimensions are %dimensions pixels.', array('%dimensions' => $minimum_dimensions));
+          $errors[] = t('The image is too small; the minimum dimensions are %dimensions pixels.', ['%dimensions' => $minimum_dimensions]);
         }
       }
       elseif ($width > 0 && $info['width'] < $width) {
-        $errors[] = t('The image is too small; the minimum width is %width pixels.', array('%width' => $width));
+        $errors[] = t('The image is too small; the minimum width is %width pixels.', ['%width' => $width]);
       }
       elseif ($info['height'] < $height) {
-        $errors[] = t('The image is too small; the minimum height is %height pixels.', array('%height' => $height));
+        $errors[] = t('The image is too small; the minimum height is %height pixels.', ['%height' => $height]);
       }
     }
   }
@@ -1982,7 +1982,7 @@ function file_validate_image_resolution(File $file, $maximum_dimensions = 0, $mi
  * @see hook_file_validate()
  */
 function file_validate_image_orientation(File $file, $orientation = 0) {
-  $errors = array();
+  $errors = [];
 
   // Check first that the file is an image.
   if ($info = image_get_info($file->uri)) {
@@ -2012,7 +2012,7 @@ function file_validate_image_orientation(File $file, $orientation = 0) {
           if (image_rotate($file_image, $degrees, 0xffffff)) {
             image_save($file_image);
           }
-          backdrop_set_message(t('The image was rotated by @degrees degrees.', array('@degrees' => $degrees)));
+          backdrop_set_message(t('The image was rotated by @degrees degrees.', ['@degrees' => $degrees]));
         }
       }
     }
@@ -2034,7 +2034,7 @@ function file_validate_image_orientation(File $file, $orientation = 0) {
  * @see hook_file_validate()
  */
 function file_validate_svg(File $file) {
-  $errors = array();
+  $errors = [];
 
   if ($file->filemime == 'image/svg+xml') {
     $file_contents = file_get_contents($file->uri);
@@ -2046,16 +2046,16 @@ function file_validate_svg(File $file) {
     $errors = libxml_get_errors();
 
     if (!$xml || !empty($errors)) {
-      return array(t('Invalid SVG file.'));
+      return [t('Invalid SVG file.')];
     }
     else {
-      $errors = array();
+      $errors = [];
       $namespaces = $xml->getNamespaces();
       if (!in_array('http://www.w3.org/2000/svg', $namespaces)) {
         $errors[] = t('Invalid SVG namespace.');
       }
 
-      $search_patterns = array(
+      $search_patterns = [
         // @see https://developer.mozilla.org/en-US/docs/Web/SVG/Element
         '//svg:foreignobject',
         '//svg:script',
@@ -2066,7 +2066,7 @@ function file_validate_svg(File $file) {
         '//svg:a[starts-with(normalize-space(@xlink:href), "javascript:")]',
         '//svg:a[starts-with(normalize-space(@href), "data:")]',
         '//svg:a[starts-with(normalize-space(@xlink:href), "data:")]',
-      );
+      ];
 
       $xml->registerXPathNamespace('svg', 'http://www.w3.org/2000/svg');
       $xml->registerXPathNamespace('html', 'http://www.w3.org/1999/xhtml');
@@ -2115,21 +2115,21 @@ function file_save_data($data, $destination = NULL, $replace = FILE_EXISTS_RENAM
     $destination = file_default_scheme() . '://';
   }
   if (!file_valid_uri($destination)) {
-    watchdog('file', 'The data could not be saved because the destination %destination is invalid. This may be caused by improper use of file_save_data() or a missing stream wrapper.', array('%destination' => $destination));
+    watchdog('file', 'The data could not be saved because the destination %destination is invalid. This may be caused by improper use of file_save_data() or a missing stream wrapper.', ['%destination' => $destination]);
     backdrop_set_message(t('The data could not be saved because the destination is invalid. More information is available in the system log.'), 'error');
     return FALSE;
   }
 
   if ($uri = file_unmanaged_save_data($data, $destination, $replace)) {
     // Create a file entity.
-    $file = new File(array(
+    $file = new File([
       'uri' => $uri,
       'uid' => $user->uid,
       'status' => FILE_STATUS_PERMANENT,
-    ));
+    ]);
     // If we are replacing an existing file re-use its database record.
     if ($replace == FILE_EXISTS_REPLACE) {
-      $existing_files = file_load_multiple(array(), array('uri' => $uri));
+      $existing_files = file_load_multiple([], ['uri' => $uri]);
       if (count($existing_files)) {
         $existing = reset($existing_files);
         $file->fid = $existing->fid;
@@ -2275,13 +2275,13 @@ function file_download_headers($uri) {
   // module_invoke_all() uses array_merge_recursive() which merges header
   // values into a new array. To avoid that and allow modules to override
   // headers instead, use array_merge() to merge the returned arrays.
-  $headers = array();
+  $headers = [];
   foreach (module_implements('file_download') as $module) {
     $function = $module . '_file_download';
     $result = $function($uri);
     if ($result == -1) {
       // Throw away the headers received so far.
-      $headers = array();
+      $headers = [];
       break;
     }
     if (isset($result) && is_array($result)) {
@@ -2350,25 +2350,25 @@ function file_download_access($uri) {
  *   An associative array (keyed on the chosen key) of objects with 'uri',
  *   'filename', and 'name' members corresponding to the matching files.
  */
-function file_scan_directory($dir, $mask, $options = array(), $depth = 0) {
+function file_scan_directory($dir, $mask, $options = [], $depth = 0) {
   // By default, do not check for files in common special-purpose directories.
-  $ignore_directories = array(
+  $ignore_directories = [
     'node_modules',
     'bower_components',
-  );
+  ];
   $no_mask = '/^((\..*)|' . implode('|', $ignore_directories) .  ')$/';
 
   // Merge in defaults.
-  $options += array(
+  $options += [
     'nomask' => $no_mask,
     'callback' => 0,
     'recurse' => TRUE,
     'key' => 'uri',
     'min_depth' => 0,
-  );
+  ];
 
-  $options['key'] = in_array($options['key'], array('uri', 'filename', 'name')) ? $options['key'] : 'uri';
-  $files = array();
+  $options['key'] = in_array($options['key'], ['uri', 'filename', 'name']) ? $options['key'] : 'uri';
+  $files = [];
   if (is_dir($dir) && $handle = opendir($dir)) {
     while (FALSE !== ($filename = readdir($handle))) {
       if (!preg_match($options['nomask'], $filename) && $filename !== '.' && $filename !== '..') {
@@ -2504,7 +2504,7 @@ function backdrop_chmod($uri, $mode = NULL) {
     }
   }
 
-  watchdog('file', 'The file permissions could not be set on %uri.', array('%uri' => $uri), WATCHDOG_ERROR);
+  watchdog('file', 'The file permissions could not be set on %uri.', ['%uri' => $uri], WATCHDOG_ERROR);
   return FALSE;
 }
 
@@ -2747,7 +2747,7 @@ function file_directory_temp() {
   $temporary_directory = $site_config->get('file_temporary_path');
 
   if (empty($temporary_directory)) {
-    $directories = array();
+    $directories = [];
 
     // Has PHP been set with an upload_tmp_dir?
     if (ini_get('upload_tmp_dir')) {
@@ -2799,11 +2799,11 @@ function file_directory_temp() {
 function file_get_content_headers(File $file) {
   $type = mime_header_encode($file->filemime);
 
-  return array(
+  return [
     'Content-Type' => $type,
     'Content-Length' => $file->filesize,
     'Cache-Control' => 'private',
-  );
+  ];
 }
 
 /**
@@ -2831,7 +2831,7 @@ function file_uri_normalize_dot_segments($uri) {
 
           // Remove '.' and '..' from the path.
           $parts = explode('/', $target);
-          $normalized = array();
+          $normalized = [];
           foreach ($parts as $part) {
             if ($part === '' || $part === '.') {
               continue;

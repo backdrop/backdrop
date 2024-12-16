@@ -435,7 +435,7 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
    * @see http://php.net/manual/streamwrapper.stream-lock.php
    */
   public function stream_lock($operation) {
-    if (in_array($operation, array(LOCK_SH, LOCK_EX, LOCK_UN, LOCK_NB))) {
+    if (in_array($operation, [LOCK_SH, LOCK_EX, LOCK_UN, LOCK_NB])) {
       return flock($this->handle, $operation);
     }
 
@@ -972,7 +972,7 @@ class BackdropPrivateStreamWrapper extends BackdropLocalStreamWrapper {
    */
   function getExternalUrl() {
     $path = str_replace('\\', '/', $this->getTarget());
-    return url('system/files/' . $path, array('absolute' => TRUE));
+    return url('system/files/' . $path, ['absolute' => TRUE]);
   }
 }
 
@@ -1001,6 +1001,6 @@ class BackdropTemporaryStreamWrapper extends BackdropLocalStreamWrapper {
    */
   public function getExternalUrl() {
     $path = str_replace('\\', '/', $this->getTarget());
-    return url('system/temporary/' . $path, array('absolute' => TRUE));
+    return url('system/temporary/' . $path, ['absolute' => TRUE]);
   }
 }

@@ -17,7 +17,7 @@ class views_handler_filter_string extends views_handler_filter {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['expose']['contains']['required'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['expose']['contains']['required'] = ['default' => FALSE, 'bool' => TRUE];
 
     return $options;
   }
@@ -28,107 +28,107 @@ class views_handler_filter_string extends views_handler_filter {
    * adding/removing items from this array.
    */
   function operators() {
-    $operators = array(
-      '=' => array(
+    $operators = [
+      '=' => [
         'title' => t('Is equal to'),
         'short' => t('='),
         'method' => 'op_equal',
         'values' => 1,
-      ),
-      '!=' => array(
+      ],
+      '!=' => [
         'title' => t('Is not equal to'),
         'short' => t('!='),
         'method' => 'op_equal',
         'values' => 1,
-      ),
-      'contains' => array(
+      ],
+      'contains' => [
         'title' => t('Contains'),
         'short' => t('contains'),
         'method' => 'op_contains',
         'values' => 1,
-      ),
-      'word' => array(
+      ],
+      'word' => [
         'title' => t('Contains any word'),
         'short' => t('has word'),
         'method' => 'op_word',
         'values' => 1,
-      ),
-      'allwords' => array(
+      ],
+      'allwords' => [
         'title' => t('Contains all words'),
         'short' => t('has all'),
         'method' => 'op_word',
         'values' => 1,
-      ),
-      'starts' => array(
+      ],
+      'starts' => [
         'title' => t('Starts with'),
         'short' => t('begins'),
         'method' => 'op_starts',
         'values' => 1,
-      ),
-      'not_starts' => array(
+      ],
+      'not_starts' => [
         'title' => t('Does not start with'),
         'short' => t('not_begins'),
         'method' => 'op_not_starts',
         'values' => 1,
-      ),
-      'ends' => array(
+      ],
+      'ends' => [
         'title' => t('Ends with'),
         'short' => t('ends'),
         'method' => 'op_ends',
         'values' => 1,
-      ),
-      'not_ends' => array(
+      ],
+      'not_ends' => [
         'title' => t('Does not end with'),
         'short' => t('not_ends'),
         'method' => 'op_not_ends',
         'values' => 1,
-      ),
-      'not' => array(
+      ],
+      'not' => [
         'title' => t('Does not contain'),
         'short' => t('!has'),
         'method' => 'op_not',
         'values' => 1,
-      ),
-      'shorterthan' => array(
+      ],
+      'shorterthan' => [
         'title' => t('Length is shorter than'),
         'short' => t('shorter than'),
         'method' => 'op_shorter',
         'values' => 1,
-      ),
-      'longerthan' => array(
+      ],
+      'longerthan' => [
         'title' => t('Length is longer than'),
         'short' => t('longer than'),
         'method' => 'op_longer',
         'values' => 1,
-      ),
-    );
+      ],
+    ];
     // if the definition allows for the empty operator, add it.
     if (!empty($this->definition['allow empty'])) {
-      $operators += array(
-        'empty' => array(
+      $operators += [
+        'empty' => [
           'title' => t('Is empty (NULL)'),
           'method' => 'op_empty',
           'short' => t('empty'),
           'values' => 0,
-        ),
-        'not empty' => array(
+        ],
+        'not empty' => [
           'title' => t('Is not empty (NOT NULL)'),
           'method' => 'op_empty',
           'short' => t('not empty'),
           'values' => 0,
-        ),
-      );
+        ],
+      ];
     }
     // Add regexp support for MySQL.
     if (Database::getConnection()->databaseType() == 'mysql') {
-      $operators += array(
-        'regular_expression' => array(
+      $operators += [
+        'regular_expression' => [
           'title' => t('Regular expression'),
           'short' => t('regex'),
           'method' => 'op_regex',
           'values' => 1,
-        ),
-      );
+        ],
+      ];
     }
 
     return $operators;
@@ -138,7 +138,7 @@ class views_handler_filter_string extends views_handler_filter {
    * Build strings from the operators() for 'select' options
    */
   function operator_options($which = 'title') {
-    $options = array();
+    $options = [];
     foreach ($this->operators() as $id => $info) {
       $options[$id] = $info[$which];
     }
@@ -166,7 +166,7 @@ class views_handler_filter_string extends views_handler_filter {
   }
 
   function operator_values($values = 1) {
-    $options = array();
+    $options = [];
     foreach ($this->operators() as $id => $info) {
       if (isset($info['values']) && $info['values'] == $values) {
         $options[] = $id;
@@ -201,12 +201,12 @@ class views_handler_filter_string extends views_handler_filter {
     }
 
     if ($which == 'all' || $which == 'value') {
-      $form['value'] = array(
+      $form['value'] = [
         '#type' => 'textfield',
         '#title' => t('Value'),
         '#size' => 30,
         '#default_value' => $this->value,
-      );
+      ];
       if (!empty($form_state['exposed']) && !isset($form_state['input'][$identifier])) {
         $form_state['input'][$identifier] = $this->value;
       }
@@ -214,19 +214,19 @@ class views_handler_filter_string extends views_handler_filter {
       if ($which == 'all') {
         // Setup #states for all operators with one value.
         foreach ($this->operator_values(1) as $operator) {
-          $form['value']['#states']['visible'][] = array(
-            $source => array('value' => $operator),
-          );
+          $form['value']['#states']['visible'][] = [
+            $source => ['value' => $operator],
+          ];
         }
       }
     }
 
     if (!isset($form['value'])) {
       // Ensure there is something in the 'value'.
-      $form['value'] = array(
+      $form['value'] = [
         '#type' => 'value',
         '#value' => NULL
-      );
+      ];
     }
   }
 
@@ -276,7 +276,7 @@ class views_handler_filter_string extends views_handler_filter {
         $phrase = true;
       }
       $words = trim($match[2], ',?!();:-');
-      $words = $phrase ? array($words) : preg_split('/ /', $words, -1, PREG_SPLIT_NO_EMPTY);
+      $words = $phrase ? [$words] : preg_split('/ /', $words, -1, PREG_SPLIT_NO_EMPTY);
       foreach ($words as $word) {
         $placeholder = $this->placeholder();
         $where->condition($field, '%' . db_like(trim($word, " ,!?")) . '%', 'LIKE');
@@ -314,12 +314,12 @@ class views_handler_filter_string extends views_handler_filter {
 
   function op_shorter($field) {
     $placeholder = $this->placeholder();
-    $this->query->add_where_expression($this->options['group'], "LENGTH($field) < $placeholder", array($placeholder => $this->value));
+    $this->query->add_where_expression($this->options['group'], "LENGTH($field) < $placeholder", [$placeholder => $this->value]);
   }
 
   function op_longer($field) {
     $placeholder = $this->placeholder();
-    $this->query->add_where_expression($this->options['group'], "LENGTH($field) > $placeholder", array($placeholder => $this->value));
+    $this->query->add_where_expression($this->options['group'], "LENGTH($field) > $placeholder", [$placeholder => $this->value]);
   }
 
   function op_regex($field) {

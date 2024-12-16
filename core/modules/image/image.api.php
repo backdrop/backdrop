@@ -35,16 +35,16 @@
  * @see hook_image_effect_info_alter()
  */
 function hook_image_effect_info() {
-  $effects = array();
+  $effects = [];
 
-  $effects['my_module_resize'] = array(
+  $effects['my_module_resize'] = [
     'label' => t('Resize'),
     'help' => t('Resize an image to an exact set of dimensions, ignoring aspect ratio.'),
     'effect callback' => 'my_module_resize_effect',
     'dimensions callback' => 'my_module_resize_dimensions',
     'form callback' => 'my_module_resize_form',
     'summary theme' => 'my_module_resize_summary',
-  );
+  ];
 
   return $effects;
 }
@@ -140,12 +140,12 @@ function hook_image_styles_alter(&$styles) {
   // Check that we only affect a default style.
   if ($styles['thumbnail']['storage'] == IMAGE_STORAGE_DEFAULT) {
     // Add an additional effect to the thumbnail style.
-    $styles['thumbnail']['effects'][] = array(
+    $styles['thumbnail']['effects'][] = [
       'name' => 'image_desaturate',
-      'data' => array(),
+      'data' => [],
       'weight' => 1,
       'effect callback' => 'image_desaturate_effect',
-    );
+    ];
   }
 }
 

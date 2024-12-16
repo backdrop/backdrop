@@ -63,7 +63,7 @@ class BackdropWebTestCaseCache extends BackdropWebTestCase {
     }
 
     // Reset all statics and variables to perform tests in a clean environment.
-    $conf = array();
+    $conf = [];
     backdrop_static_reset();
 
     // Change the database prefix.
@@ -111,9 +111,9 @@ class BackdropWebTestCaseCache extends BackdropWebTestCase {
     module_enable($profile_details['dependencies'], FALSE);
 
     // Install the profile itself.
-    $install_profile_module_exists = db_query("SELECT 1 FROM {system} WHERE type = 'module' AND name = :name", array(':name' => $this->profile))->fetchField();
+    $install_profile_module_exists = db_query("SELECT 1 FROM {system} WHERE type = 'module' AND name = :name", [':name' => $this->profile])->fetchField();
     if ($install_profile_module_exists) {
-      module_enable(array($this->profile), FALSE);
+      module_enable([$this->profile], FALSE);
     }
     return TRUE;
   }
@@ -144,7 +144,7 @@ class BackdropWebTestCaseCache extends BackdropWebTestCase {
 
     // Ensure that internal logged in variable and cURL options are reset.
     $this->loggedInUser = FALSE;
-    $this->additionalCurlOptions = array();
+    $this->additionalCurlOptions = [];
 
     // Reload module list and implementations to ensure that test module hooks
     // aren't called after tests.
@@ -172,13 +172,13 @@ class BackdropWebTestCaseCache extends BackdropWebTestCase {
     if (Database::getConnection()->driver() != 'mysql') {
       return;
     }
-    $skip_alter = array(
+    $skip_alter = [
       'taxonomy_term_data',
       'node',
       'node_access',
       'node_revision',
       'node_comment_statistics',
-    );
+    ];
     $tables = db_find_tables($this->databasePrefix . '%');
     foreach ($tables as $table) {
       $original_table_name = substr($table, strlen($this->databasePrefix));

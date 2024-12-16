@@ -8,32 +8,32 @@
  * Implements hook_field_formatter_info().
  */
 function date_field_formatter_info() {
-  $formatters = array(
-    'date_default' => array(
+  $formatters = [
+    'date_default' => [
       'label' => t('Date and time'),
-      'field types' => array('date', 'datestamp', 'datetime'),
-      'settings' => array(
+      'field types' => ['date', 'datestamp', 'datetime'],
+      'settings' => [
         'format_type' => 'long',
         'multiple_number' => '',
         'multiple_from' => '',
         'multiple_to' => '',
         'fromto' => 'both',
         'show_remaining_days' => FALSE,
-      ),
-    ),
-    'format_interval' => array(
+      ],
+    ],
+    'format_interval' => [
       'label' => t('Time ago'),
-      'field types' => array('date', 'datestamp', 'datetime'),
-      'settings' => array(
+      'field types' => ['date', 'datestamp', 'datetime'],
+      'settings' => [
         'interval' => 2,
         'interval_display' => 'time ago',
-      ),
-    ),
-    'date_plain' => array(
+      ],
+    ],
+    'date_plain' => [
       'label' => t('Plain'),
-      'field types' => array('date', 'datestamp', 'datetime'),
-    ),
-  );
+      'field types' => ['date', 'datestamp', 'datetime'],
+    ],
+  ];
   return $formatters;
 }
 
@@ -53,11 +53,11 @@ function date_field_formatter_settings_form($field, $instance, $view_mode, $form
       $form = date_default_formatter_settings_form($field, $instance, $view_mode, $form, $form_state);
       break;
   }
-  $context = array(
+  $context = [
     'field' => $field,
     'instance' => $instance,
     'view_mode' => $view_mode,
-  );
+  ];
   backdrop_alter('date_field_formatter_settings_form', $form, $form_state, $context);
   return $form;
 }
@@ -78,11 +78,11 @@ function date_field_formatter_settings_summary($field, $instance, $view_mode) {
       $summary = date_default_formatter_settings_summary($field, $instance, $view_mode);
       break;
   }
-  $context = array(
+  $context = [
     'field' => $field,
     'instance' => $instance,
     'view_mode' => $view_mode,
-  );
+  ];
   backdrop_alter('date_field_formatter_settings_summary', $summary, $context);
 
   return implode('<br />', $summary);
@@ -112,10 +112,10 @@ function date_field_formatter_settings_summary($field, $instance, $view_mode) {
  *     start date and the repeat rule will be displayed.
  */
 function date_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
-  $element = array();
+  $element = [];
   $settings = $display['settings'];
   $formatter = $display['type'];
-  $variables = array(
+  $variables = [
     'entity' => $entity,
     'entity_type' => $entity_type,
     'field' => $field,
@@ -123,16 +123,16 @@ function date_field_formatter_view($entity_type, $entity, $field, $instance, $la
     'langcode' => $langcode,
     'items' => $items,
     'display' => $display,
-    'dates' => array(),
-    'attributes' => array(),
-  );
+    'dates' => [],
+    'attributes' => [],
+  ];
 
   // Give other modules a chance to prepare the entity before formatting it.
   backdrop_alter('date_formatter_pre_view', $entity, $variables);
 
   // See if we are only supposed to display a selected
   // item from multiple value date fields.
-  $selected_deltas = array();
+  $selected_deltas = [];
   if (!empty($entity->date_id)) {
     foreach ((array) $entity->date_id as $key => $id) {
       list($module, $nid, $field_name, $selected_delta, $other) = explode('.', $id . '.');
@@ -150,14 +150,14 @@ function date_field_formatter_view($entity_type, $entity, $field, $instance, $la
         }
         else {
           if (empty($item['value2']) || $item['value'] == $item['value2']) {
-            $element[$delta] = array('#markup' => $item['value']);
+            $element[$delta] = ['#markup' => $item['value']];
           }
           else {
-            $element[$delta] = array(
-              '#markup' => t('!start-date to !end-date', array(
+            $element[$delta] = [
+              '#markup' => t('!start-date to !end-date', [
                 '!start-date' => $item['value'],
                 '!end-date' => $item['value2']
-              )));
+              ])];
           }
         }
       }
@@ -172,8 +172,8 @@ function date_field_formatter_view($entity_type, $entity, $field, $instance, $la
           $variables['delta'] = $delta;
           $variables['item'] = $item;
           $variables['dates'] = date_formatter_process($formatter, $entity_type, $entity, $field, $instance, $langcode, $item, $display);
-          $variables['attributes'] = array();
-          $element[$delta] = array('#markup' => theme('date_display_interval', $variables));
+          $variables['attributes'] = [];
+          $element[$delta] = ['#markup' => theme('date_display_interval', $variables)];
         }
       }
       break;
@@ -187,11 +187,11 @@ function date_field_formatter_view($entity_type, $entity, $field, $instance, $la
           $variables['delta'] = $delta;
           $variables['item'] = $item;
           $variables['dates'] = date_formatter_process($formatter, $entity_type, $entity, $field, $instance, $langcode, $item, $display);
-          $variables['attributes'] = array();
+          $variables['attributes'] = [];
           $variables['show_remaining_days'] = $display['settings']['show_remaining_days'];
           $output = theme('date_display_combination', $variables);
           if (!empty($output)) {
-            $element[$delta] = array('#markup' => $output);
+            $element[$delta] = ['#markup' => $output];
           }
         }
       }
@@ -222,97 +222,97 @@ function date_field_is_empty($item, $field) {
  * Implements hook_field_info().
  */
 function date_field_info() {
-  $granularity = array('year', 'month', 'day', 'hour', 'minute');
-  $settings = array(
-    'settings' => array(
+  $granularity = ['year', 'month', 'day', 'hour', 'minute'];
+  $settings = [
+    'settings' => [
       'todate' => '',
       'granularity' => backdrop_map_assoc($granularity),
       'tz_handling' => 'site',
       'timezone_db' => 'UTC',
-    ),
-    'instance_settings' => array(
+    ],
+    'instance_settings' => [
       'default_value' => 'blank',
       'default_value_code' => '',
       'default_value2' => 'same',
       'default_value_code2' => '',
-    ),
-  );
-  return array(
-    'datetime' => array(
+    ],
+  ];
+  return [
+    'datetime' => [
       'label' => 'Date',
       'description' => t('Store a date in the database as a datetime field, recommended for complete dates and times that may need timezone conversion.'),
       'default_widget' => 'date_select',
       'default_formatter' => 'date_default',
       'default_token_formatter' => 'date_plain',
-    ) + $settings,
-    'date' => array(
+    ] + $settings,
+    'date' => [
       'label' => 'Date (ISO format)',
       'description' => t('Store a date in the database as an ISO date, recommended for historical or partial dates.'),
       'default_widget' => 'date_select',
       'default_formatter' => 'date_default',
       'default_token_formatter' => 'date_plain',
-    ) + $settings,
-    'datestamp' => array(
+    ] + $settings,
+    'datestamp' => [
       'label' => 'Date (Unix timestamp)',
       'description' => t('Store a date in the database as a timestamp, deprecated format to support legacy data.'),
       'default_widget' => 'date_select',
       'default_formatter' => 'date_default',
       'default_token_formatter' => 'date_plain',
-    ) + $settings,
-  );
+    ] + $settings,
+  ];
 }
 
 /**
  * Implements hook_field_widget_info().
  */
 function date_field_widget_info() {
-  $settings = array(
-    'settings' => array(
+  $settings = [
+    'settings' => [
       'input_format' => date_default_format('date_select'),
       'input_format_custom' => '',
       'increment' => 1,
-      'text_parts' => array(),
+      'text_parts' => [],
       'year_range' => '-3:+3',
       'label_position' => 'none',
       'no_fieldset' => TRUE,
-    ),
-    'behaviors' => array(
+    ],
+    'behaviors' => [
       'multiple values' => FIELD_BEHAVIOR_DEFAULT,
       'default value' => FIELD_BEHAVIOR_NONE,
-    ),
-  );
+    ],
+  ];
 
-  $info = array(
-    'date_popup' => array(
+  $info = [
+    'date_popup' => [
       'label' => t('Pop-up calendar'),
-      'field types' => array('date', 'datestamp', 'datetime'),
-    ) + $settings,
-    'date_select' => array(
+      'field types' => ['date', 'datestamp', 'datetime'],
+    ] + $settings,
+    'date_select' => [
       'label' => t('Select list'),
-      'field types' => array('date', 'datestamp', 'datetime'),
-    ) + $settings,
-    'date_text' => array(
+      'field types' => ['date', 'datestamp', 'datetime'],
+    ] + $settings,
+    'date_text' => [
       'label' => t('Text field'),
-      'field types' => array('date', 'datestamp', 'datetime'),
-    ) + $settings,
-  );
+      'field types' => ['date', 'datestamp', 'datetime'],
+    ] + $settings,
+  ];
 
   // Add the fieldset option for select fields only.
   $info['date_select']['settings']['no_fieldset'] = FALSE;
 
   // HTML5 widget with slightly different settings.
-  $info['date_html5'] = array(
+  $info['date_html5'] = [
     'label' => t('HTML5 widget'),
-    'field types' => array('date', 'datetime', 'datestamp'),
-    'settings' => array(
-      'limits' => array(
+    'field types' => ['date', 'datetime', 'datestamp'],
+    'settings' => [
+      'limits' => [
         'mode' => 'none',
         'years_back' => -3,
         'years_forward' => 3,
-      ),
+      ],
       'no_fieldset' => TRUE,
-    ),
-  );
+    ],
+  ];
 
   return $info;
 }
@@ -430,16 +430,16 @@ function date_field_validate($entity_type, $entity, $field, $instance, $langcode
 
         foreach ($process as $processed) {
           if ($processed == 'value' && $field['settings']['todate'] && !$valid1 && $valid2) {
-            $errors[$field['field_name']][$langcode][$delta][] = array(
+            $errors[$field['field_name']][$langcode][$delta][] = [
               'error' => 'value',
-              'message' => t("A 'Start date' date is required for field %field #%delta.", array('%delta' => $field['cardinality'] ? intval($delta + 1) : '', '%field' => $instance['label'])),
-            );
+              'message' => t("A 'Start date' date is required for field %field #%delta.", ['%delta' => $field['cardinality'] ? intval($delta + 1) : '', '%field' => $instance['label']]),
+            ];
           }
           if ($processed == 'value2' && $field['settings']['todate'] == 'required' && ($instance['required'] && $valid1 && !$valid2)) {
-            $errors[$field['field_name']][$langcode][$delta][] = array(
+            $errors[$field['field_name']][$langcode][$delta][] = [
               'error' => 'value2',
-              'message' => t("An 'End date' is required for field %field #%delta.", array('%delta' => $field['cardinality'] ? intval($delta + 1) : '', '%field' => $instance['label'])),
-            );
+              'message' => t("An 'End date' is required for field %field #%delta.", ['%delta' => $field['cardinality'] ? intval($delta + 1) : '', '%field' => $instance['label']]),
+            ];
           }
         }
       }
@@ -471,13 +471,13 @@ function date_field_presave($entity_type, $entity, $field, $instance, $langcode,
  * Implements hook_field_insert().
  */
 function date_field_insert($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  $context = array(
+  $context = [
     'entity_type' => $entity_type,
     'entity' => $entity,
     'field' => $field,
     'instance' => $instance,
     'langcode' => $langcode,
-  );
+  ];
   backdrop_alter('date_field_insert', $items, $context);
 }
 
@@ -485,13 +485,13 @@ function date_field_insert($entity_type, $entity, $field, $instance, $langcode, 
  * Implements hook_field_update().
  */
 function date_field_update($entity_type, $entity, $field, $instance, $langcode, &$items) {
-  $context = array(
+  $context = [
     'entity_type' => $entity_type,
     'entity' => $entity,
     'field' => $field,
     'instance' => $instance,
     'langcode' => $langcode,
-  );
+  ];
   backdrop_alter('date_field_update', $items, $context);
 }
 

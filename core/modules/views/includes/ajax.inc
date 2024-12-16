@@ -17,15 +17,15 @@ function views_ajax() {
   if (isset($_REQUEST['view_name']) && isset($_REQUEST['view_display_id'])) {
     $name = $_REQUEST['view_name'];
     $display_id = $_REQUEST['view_display_id'];
-    $args = isset($_REQUEST['view_args']) && $_REQUEST['view_args'] !== '' ? explode('/', $_REQUEST['view_args']) : array();
+    $args = isset($_REQUEST['view_args']) && $_REQUEST['view_args'] !== '' ? explode('/', $_REQUEST['view_args']) : [];
     $path = isset($_REQUEST['view_path']) ? rawurldecode($_REQUEST['view_path']) : NULL;
     $dom_id = isset($_REQUEST['view_dom_id']) ? preg_replace('/[^a-zA-Z0-9_-]+/', '-', $_REQUEST['view_dom_id']) : NULL;
     $pager_element = isset($_REQUEST['pager_element']) ? intval($_REQUEST['pager_element']) : NULL;
 
-    $commands = array();
+    $commands = [];
 
     // Remove all of this stuff from $_GET so it doesn't end up in pagers and tablesort URLs.
-    foreach (array('view_name', 'view_display_id', 'view_args', 'view_path', 'view_dom_id', 'pager_element', 'view_base_path', 'ajax_html_ids', 'ajax_page_state') as $key) {
+    foreach (['view_name', 'view_display_id', 'view_args', 'view_path', 'view_dom_id', 'pager_element', 'view_base_path', 'ajax_html_ids', 'ajax_page_state'] as $key) {
       if (isset($_GET[$key])) {
         unset($_GET[$key]);
       }
@@ -57,7 +57,7 @@ function views_ajax() {
         $origin_destination .= '?' . $query;
       }
       $destination = &backdrop_static('backdrop_get_destination');
-      $destination = array('destination' => $origin_destination);
+      $destination = ['destination' => $origin_destination];
 
       // Override the display's pager_element with the one actually used.
       if (isset($pager_element)) {
@@ -70,7 +70,7 @@ function views_ajax() {
       $commands[] = ajax_command_replace('.view-dom-id-' . $dom_id, $view->preview($display_id, $args));
     }
     backdrop_alter('views_ajax_data', $commands, $view);
-    return array('#type' => 'ajax', '#commands' => $commands);
+    return ['#type' => 'ajax', '#commands' => $commands];
   }
 }
 
@@ -84,10 +84,10 @@ function views_ajax() {
  *   An array suitable for use with the ajax_render() function.
  */
 function views_ajax_command_hilite($selector) {
-  return array(
+  return [
     'command' => 'viewsHilite',
     'selector' => $selector,
-  );
+  ];
 }
 
 /**
@@ -104,12 +104,12 @@ function views_ajax_command_hilite($selector) {
  *   An array suitable for use with the ajax_render() function.
  */
 function views_ajax_command_add_tab($id, $title, $body) {
-  $command = array(
+  $command = [
     'command' => 'viewsAddTab',
     'id' => $id,
     'title' => $title,
     'body' => $body,
-  );
+  ];
   return $command;
 }
 
@@ -120,10 +120,10 @@ function views_ajax_command_add_tab($id, $title, $body) {
  *   An array suitable for use with the ajax_render() function.
  */
 function views_ajax_command_scroll_top($selector) {
-  $command = array(
+  $command = [
     'command' => 'viewsScrollTop',
     'selector' => $selector,
-  );
+  ];
   return $command;
 }
 
@@ -134,9 +134,9 @@ function views_ajax_command_scroll_top($selector) {
  *   An array suitable for use with the ajax_render() function.
  */
 function views_ajax_command_show_buttons() {
-  $command = array(
+  $command = [
     'command' => 'viewsShowButtons',
-  );
+  ];
   return $command;
 }
 
@@ -147,9 +147,9 @@ function views_ajax_command_show_buttons() {
  *   An array suitable for use with the ajax_render() function.
  */
 function views_ajax_command_trigger_preview() {
-  $command = array(
+  $command = [
     'command' => 'viewsTriggerPreview',
-  );
+  ];
   return $command;
 }
 
@@ -160,11 +160,11 @@ function views_ajax_command_trigger_preview() {
  *   An array suitable for use with the ajax_render() function.
  */
 function views_ajax_command_replace_title($title) {
-  $command = array(
+  $command = [
     'command' => 'viewsReplaceTitle',
     'title' => $title,
     'siteName' => config_get_translated('system.core', 'site_name'),
-  );
+  ];
   return $command;
 }
 
@@ -172,7 +172,7 @@ function views_ajax_command_replace_title($title) {
  * Return an AJAX error.
  */
 function views_ajax_error($message) {
-  $commands = array();
+  $commands = [];
   $commands[] = ajax_command_open_modal_dialog(t('Error'), $message);
   return $commands;
 }
@@ -183,14 +183,14 @@ function views_ajax_error($message) {
  */
 function views_ajax_form_wrapper($form_id, &$form_state) {
   // This won't override settings already in.
-  $form_state += array(
+  $form_state += [
     'rerender' => FALSE,
     'no_redirect' => !empty($form_state['ajax']),
     'no_cache' => TRUE,
-    'build_info' => array(
-      'args' => array(),
-    ),
-  );
+    'build_info' => [
+      'args' => [],
+    ],
+  ];
 
   $form = backdrop_build_form($form_id, $form_state);
   $output = backdrop_render($form);
@@ -204,7 +204,7 @@ function views_ajax_form_wrapper($form_id, &$form_state) {
   if (!empty($form_state['ajax']) && (empty($form_state['executed']) || !empty($form_state['rerender']))) {
     // If the form didn't execute and we're using ajax, build up a
     // Ajax command list to execute.
-    $commands = array();
+    $commands = [];
 
     $display = '';
     if ($messages = theme('status_messages')) {
@@ -213,9 +213,9 @@ function views_ajax_form_wrapper($form_id, &$form_state) {
     $display .= $output;
 
     $title = empty($form_state['title']) ? '' : $form_state['title'];
-    $options = array(
+    $options = [
       'dialogClass' => 'views-ui-dialog',
-    );
+    ];
     $commands[] = ajax_command_open_modal_dialog($title, $display, $options);
 
     if (!empty($form_state['#section'])) {
@@ -243,7 +243,7 @@ function views_ajax_autocomplete_user($string = '') {
 
   // Fetch last name
   $last_string = trim(array_pop($array));
-  $matches = array();
+  $matches = [];
   if ($last_string != '') {
     $prefix = count($array) ? implode(', ', $array) . ', ' : '';
 
@@ -252,7 +252,7 @@ function views_ajax_autocomplete_user($string = '') {
     }
 
     $result = db_select('users', 'u')
-      ->fields('u', array('uid', 'name'))
+      ->fields('u', ['uid', 'name'])
       ->condition('u.name', db_like($last_string) . '%', 'LIKE')
       ->range(0, 10)
       ->execute()
@@ -287,7 +287,7 @@ function views_ajax_autocomplete_taxonomy($vocabulary_name, $tags_typed = '') {
   $tags_typed = backdrop_explode_tags($tags_typed);
   $tag_last = backdrop_strtolower(array_pop($tags_typed));
 
-  $matches = array();
+  $matches = [];
   if ($tag_last != '') {
 
     $query = db_select('taxonomy_term_data', 't');
@@ -300,7 +300,7 @@ function views_ajax_autocomplete_taxonomy($vocabulary_name, $tags_typed = '') {
     }
     // Select rows that match by term name.
     $tags_return = $query
-      ->fields('t', array('tid', 'name'))
+      ->fields('t', ['tid', 'name'])
       ->condition('t.vocabulary', $vocabulary_name)
       ->condition('t.name', '%' . db_like($tag_last) . '%', 'LIKE')
       ->range(0, 10)
@@ -309,7 +309,7 @@ function views_ajax_autocomplete_taxonomy($vocabulary_name, $tags_typed = '') {
 
     $prefix = count($tags_typed) ? backdrop_implode_tags($tags_typed) . ', ' : '';
 
-    $term_matches = array();
+    $term_matches = [];
     foreach ($tags_return as $tid => $name) {
       $n = $name;
       // Term names containing commas or quotes must be wrapped in quotes.

@@ -16,7 +16,7 @@ class views_handler_sort_date extends views_handler_sort {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['granularity'] = array('default' => 'second');
+    $options['granularity'] = ['default' => 'second'];
 
     return $options;
   }
@@ -24,20 +24,20 @@ class views_handler_sort_date extends views_handler_sort {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
-    $form['granularity'] = array(
+    $form['granularity'] = [
       '#type' => 'radios',
       '#title' => t('Granularity'),
-      '#options' => array(
+      '#options' => [
         'second' => t('Second'),
         'minute' => t('Minute'),
         'hour'   => t('Hour'),
         'day'    => t('Day'),
         'month'  => t('Month'),
         'year'   => t('Year'),
-      ),
+      ],
       '#description' => t('The granularity is the smallest unit to use when determining whether two dates are the same; for example, if the granularity is "Year" then all dates in 1999, regardless of when they fall in 1999, will be considered the same date.'),
       '#default_value' => $this->options['granularity'],
-    );
+    ];
   }
 
   /**

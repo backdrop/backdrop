@@ -17,7 +17,7 @@ class BlockLegacy extends Block {
   protected function buildBlock() {
     if (!isset($this->content)) {
       // Simply contexts down to their raw data.
-      $context_data = array();
+      $context_data = [];
       foreach ($this->contexts as $context_name => $context) {
         $context_data[$context_name] = $context->data;
       }
@@ -72,10 +72,10 @@ class BlockLegacy extends Block {
     // Load the legacy block form into block_settings.
     $block_form = module_invoke($this->module, 'block_configure', $this->delta, $this->settings['block_settings']);
     if ($block_form) {
-      $form['block_settings'] = array(
+      $form['block_settings'] = [
         '#type' => 'container',
         '#id' => 'layout-block-settings',
-      );
+      ];
       $form['block_settings'] = array_merge($form['block_settings'], $block_form);
     }
   }

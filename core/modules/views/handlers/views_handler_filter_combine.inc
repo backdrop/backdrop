@@ -17,7 +17,7 @@ class views_handler_filter_combine extends views_handler_filter_string {
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['fields'] = array('default' => array());
+    $options['fields'] = ['default' => []];
 
     return $options;
   }
@@ -28,19 +28,19 @@ class views_handler_filter_combine extends views_handler_filter_string {
 
     // Allow to choose all fields as possible.
     if ($this->view->style_plugin->uses_fields()) {
-      $options = array();
+      $options = [];
       foreach ($this->view->display_handler->get_handlers('field') as $name => $field) {
         $options[$name] = $field->ui_name(TRUE);
       }
       if ($options) {
-        $form['fields'] = array(
+        $form['fields'] = [
           '#type' => 'select',
           '#title' => t('Choose fields to combine for filtering'),
           '#description' => t("This filter doesn't work for very special field handlers."),
           '#multiple' => TRUE,
           '#options' => $options,
           '#default_value' => $this->options['fields'],
-        );
+        ];
       }
       else {
         form_set_error('', t('You have to add some fields to be able to use this filter.'));
@@ -50,7 +50,7 @@ class views_handler_filter_combine extends views_handler_filter_string {
 
   function query() {
     $this->view->_build('field');
-    $fields = array();
+    $fields = [];
     // Only add the fields if they have a proper field and table alias.
     foreach ($this->options['fields'] as $id) {
       // Field access checks may have removed this handler.
@@ -68,7 +68,7 @@ class views_handler_filter_combine extends views_handler_filter_string {
     }
     if ($fields) {
       $count = count($fields);
-      $separated_fields = array();
+      $separated_fields = [];
       foreach ($fields as $key => $field) {
         $separated_fields[] = $field;
         if ($key < $count - 1) {
@@ -90,12 +90,12 @@ class views_handler_filter_combine extends views_handler_filter_string {
   function op_equal($field) {
     $placeholder = $this->placeholder();
     $operator = $this->operator();
-    $this->query->add_where_expression($this->options['group'], "$field $operator $placeholder", array($placeholder => $this->value));
+    $this->query->add_where_expression($this->options['group'], "$field $operator $placeholder", [$placeholder => $this->value]);
   }
 
   function op_contains($field) {
     $placeholder = $this->placeholder();
-    $this->query->add_where_expression($this->options['group'], "$field LIKE $placeholder", array($placeholder => '%' . db_like($this->value) . '%'));
+    $this->query->add_where_expression($this->options['group'], "$field LIKE $placeholder", [$placeholder => '%' . db_like($this->value) . '%']);
   }
 
   function op_word($field) {
@@ -115,10 +115,10 @@ class views_handler_filter_combine extends views_handler_filter_string {
         $phrase = TRUE;
       }
       $words = trim($match[2], ',?!();:-');
-      $words = $phrase ? array($words) : preg_split('/ /', $words, -1, PREG_SPLIT_NO_EMPTY);
+      $words = $phrase ? [$words] : preg_split('/ /', $words, -1, PREG_SPLIT_NO_EMPTY);
       $placeholder = $this->placeholder();
       foreach ($words as $word) {
-        $where->where($field . " LIKE $placeholder", array($placeholder => '%' . db_like(trim($word, " ,!?")) . '%'));
+        $where->where($field . " LIKE $placeholder", [$placeholder => '%' . db_like(trim($word, " ,!?")) . '%']);
       }
     }
 
@@ -133,32 +133,32 @@ class views_handler_filter_combine extends views_handler_filter_string {
 
   function op_starts($field) {
     $placeholder = $this->placeholder();
-    $this->query->add_where_expression($this->options['group'], "$field LIKE $placeholder", array($placeholder => db_like($this->value) . '%'));
+    $this->query->add_where_expression($this->options['group'], "$field LIKE $placeholder", [$placeholder => db_like($this->value) . '%']);
   }
 
   function op_not_starts($field) {
     $placeholder = $this->placeholder();
-    $this->query->add_where_expression($this->options['group'], "$field NOT LIKE $placeholder", array($placeholder => db_like($this->value) . '%'));
+    $this->query->add_where_expression($this->options['group'], "$field NOT LIKE $placeholder", [$placeholder => db_like($this->value) . '%']);
   }
 
   function op_ends($field) {
     $placeholder = $this->placeholder();
-    $this->query->add_where_expression($this->options['group'], "$field LIKE $placeholder", array($placeholder => '%' . db_like($this->value)));
+    $this->query->add_where_expression($this->options['group'], "$field LIKE $placeholder", [$placeholder => '%' . db_like($this->value)]);
   }
 
   function op_not_ends($field) {
     $placeholder = $this->placeholder();
-    $this->query->add_where_expression($this->options['group'], "$field NOT LIKE $placeholder", array($placeholder => '%' . db_like($this->value)));
+    $this->query->add_where_expression($this->options['group'], "$field NOT LIKE $placeholder", [$placeholder => '%' . db_like($this->value)]);
   }
 
   function op_not($field) {
     $placeholder = $this->placeholder();
-    $this->query->add_where_expression($this->options['group'], "$field NOT LIKE $placeholder", array($placeholder => '%' . db_like($this->value) . '%'));
+    $this->query->add_where_expression($this->options['group'], "$field NOT LIKE $placeholder", [$placeholder => '%' . db_like($this->value) . '%']);
   }
 
   function op_regex($field) {
     $placeholder = $this->placeholder();
-    $this->query->add_where_expression($this->options['group'], "$field RLIKE $placeholder", array($placeholder => $this->value));
+    $this->query->add_where_expression($this->options['group'], "$field RLIKE $placeholder", [$placeholder => $this->value]);
   }
 
   function op_empty($field) {

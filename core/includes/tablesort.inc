@@ -36,7 +36,7 @@ function tablesort_init($header) {
 function tablesort_header($cell, $header, $ts) {
   // Special formatting for the currently sorted column header.
   if (is_array($cell) && isset($cell['field'])) {
-    $title = t('sort by @s', array('@s' => $cell['data']));
+    $title = t('sort by @s', ['@s' => $cell['data']]);
     if ($cell['data'] == $ts['name']) {
       // aria-sort is a WAI-ARIA property that indicates if items in a table
       // or grid are sorted in ascending or descending order. See
@@ -44,14 +44,14 @@ function tablesort_header($cell, $header, $ts) {
       $cell['aria-sort'] = ($ts['sort'] == 'asc') ? 'ascending' : 'descending';
       $ts['sort'] = (($ts['sort'] == 'asc') ? 'desc' : 'asc');
       $cell['class'][] = 'active';
-      $image = theme('tablesort_indicator', array('style' => $ts['sort']));
+      $image = theme('tablesort_indicator', ['style' => $ts['sort']]);
     }
     else {
       // If the user clicks a different header, we want to sort ascending initially.
       $ts['sort'] = 'asc';
       $image = '';
     }
-    $cell['data'] = l($cell['data'] . $image, $_GET['q'], array('attributes' => array('title' => $title), 'query' => array_merge($ts['query'], array('sort' => $ts['sort'], 'order' => $cell['data'])), 'html' => TRUE));
+    $cell['data'] = l($cell['data'] . $image, $_GET['q'], ['attributes' => ['title' => $title], 'query' => array_merge($ts['query'], ['sort' => $ts['sort'], 'order' => $cell['data']]), 'html' => TRUE]);
 
     unset($cell['field'], $cell['sort']);
   }
@@ -81,7 +81,7 @@ function tablesort_cell($cell, $header, $ts, $i) {
       $cell['class'][] = 'active';
     }
     else {
-      $cell = array('data' => $cell, 'class' => array('active'));
+      $cell = ['data' => $cell, 'class' => ['active']];
     }
   }
   return $cell;
@@ -95,7 +95,7 @@ function tablesort_cell($cell, $header, $ts, $i) {
  *   page request except for those pertaining to table sorting.
  */
 function tablesort_get_query_parameters() {
-  return backdrop_get_query_parameters($_GET, array('q', 'sort', 'order'));
+  return backdrop_get_query_parameters($_GET, ['q', 'sort', 'order']);
 }
 
 /**
@@ -127,12 +127,12 @@ function tablesort_get_order($headers) {
   if (!isset($default)) {
     $default = reset($headers);
     if (!is_array($default)) {
-      $default = array('data' => $default);
+      $default = ['data' => $default];
     }
   }
 
-  $default += array('data' => NULL, 'field' => NULL);
-  return array('name' => $default['data'], 'sql' => $default['field']);
+  $default += ['data' => NULL, 'field' => NULL];
+  return ['name' => $default['data'], 'sql' => $default['field']];
 }
 
 /**

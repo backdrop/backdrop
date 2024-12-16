@@ -16,7 +16,7 @@
 function theme_file_managed_file($variables) {
   $element = $variables['element'];
 
-  $attributes = array();
+  $attributes = [];
   if (isset($element['#id'])) {
     $attributes['id'] = $element['#id'];
   }
@@ -52,7 +52,7 @@ function theme_file_link($variables) {
   $url = file_create_url($file->uri);
 
   // Human-readable names, for use as text-alternatives to icons.
-  $mime_name = array(
+  $mime_name = [
     'application/msword' => t('Microsoft Office document icon'),
     'application/vnd.ms-excel' => t('Office spreadsheet icon'),
     'application/vnd.ms-powerpoint' => t('Office presentation icon'),
@@ -67,16 +67,16 @@ function theme_file_link($variables) {
     'text/html' => t('HTML icon'),
     'text/plain' => t('Plain text icon'),
     'application/octet-stream' => t('Binary Data'),
-  );
+  ];
 
   $mimetype = file_get_mimetype($file->uri);
 
-  $icon = theme('file_icon', array(
+  $icon = theme('file_icon', [
     // Requires a file entity, make sure it gets one.
     'file' => ($file instanceof File) ? $file : file_load($file->fid),
     'icon_directory' => $icon_directory,
     'alt' => !empty($mime_name[$mimetype]) ? $mime_name[$mimetype] : t('File'),
-  ));
+  ]);
 
   // Set "type" attribute per anchor format described at
   // http://microformats.org/wiki/file-format-examples
@@ -84,12 +84,12 @@ function theme_file_link($variables) {
     $attributes['type'] = $file->filemime . '; length=' . $file->filesize;
   }
 
-  $options = array(
-    'attributes' => array(
+  $options = [
+    'attributes' => [
       'type' => $file->filemime . '; length=' . $file->filesize,
-    ),
+    ],
     'attributes' => $attributes,
-  );
+  ];
 
   // Use the description as the link text if available.
   if (empty($file->description)) {
@@ -168,26 +168,26 @@ function theme_file_widget_multiple($variables) {
   $table_id = $element['#id'] . '-table';
 
   // Build up a table of applicable fields.
-  $headers = array();
+  $headers = [];
   $headers[] = t('File information');
   if ($element['#display_field']) {
-    $headers[] = array(
+    $headers[] = [
       'data' => t('Display'),
-      'class' => array('checkbox'),
-    );
+      'class' => ['checkbox'],
+    ];
   }
   $headers[] = t('Weight');
   $headers[] = t('Operations');
 
   // Get our list of widgets in order (needed when the form comes back after
   // preview or failed validation).
-  $widgets = array();
+  $widgets = [];
   foreach (element_children($element) as $key) {
     $widgets[] = &$element[$key];
   }
   usort($widgets, '_field_sort_items_value_helper');
 
-  $rows = array();
+  $rows = [];
   foreach ($widgets as $key => &$widget) {
     // Save the uploading row for last.
     if ($widget['#file'] == FALSE) {
@@ -198,7 +198,7 @@ function theme_file_widget_multiple($variables) {
 
     // Delay rendering of the buttons, so that they can be rendered later in the
     // "operations" column.
-    $operations_elements = array();
+    $operations_elements = [];
     foreach (element_children($widget) as $sub_key) {
       if (isset($widget[$sub_key]['#type']) && $widget[$sub_key]['#type'] == 'submit') {
         hide($widget[$sub_key]);
@@ -214,7 +214,7 @@ function theme_file_widget_multiple($variables) {
     hide($widget['_weight']);
 
     // Render everything else together in a column, without the normal wrappers.
-    $widget['#theme_wrappers'] = array();
+    $widget['#theme_wrappers'] = [];
     $information = backdrop_render($widget);
 
     // Render the previously hidden elements, using render() instead of
@@ -226,32 +226,32 @@ function theme_file_widget_multiple($variables) {
     $display = '';
     if ($element['#display_field']) {
       unset($widget['display']['#title']);
-      $display = array(
+      $display = [
         'data' => render($widget['display']),
-        'class' => array('checkbox'),
-      );
+        'class' => ['checkbox'],
+      ];
     }
-    $widget['_weight']['#attributes']['class'] = array($weight_class);
+    $widget['_weight']['#attributes']['class'] = [$weight_class];
     $weight = render($widget['_weight']);
 
     // Arrange the row with all of the rendered columns.
-    $row = array();
+    $row = [];
     $row[] = $information;
     if ($element['#display_field']) {
       $row[] = $display;
     }
     $row[] = $weight;
     $row[] = $operations;
-    $rows[] = array(
+    $rows[] = [
       'data' => $row,
-      'class' => isset($widget['#attributes']['class']) ? array_merge($widget['#attributes']['class'], array('draggable')) : array('draggable'),
-    );
+      'class' => isset($widget['#attributes']['class']) ? array_merge($widget['#attributes']['class'], ['draggable']) : ['draggable'],
+    ];
   }
 
   backdrop_add_tabledrag($table_id, 'order', 'sibling', $weight_class);
 
   $output = '';
-  $output = empty($rows) ? '' : theme('table', array('header' => $headers, 'rows' => $rows, 'attributes' => array('id' => $table_id)));
+  $output = empty($rows) ? '' : theme('table', ['header' => $headers, 'rows' => $rows, 'attributes' => ['id' => $table_id]]);
   $output .= backdrop_render_children($element);
   return $output;
 }
@@ -273,16 +273,16 @@ function theme_file_upload_help($variables) {
   $description = (string) $variables['description'];
   $upload_validators = $variables['upload_validators'];
 
-  $descriptions = array();
+  $descriptions = [];
 
   if (strlen($description)) {
     $descriptions[] = token_replace($description);
   }
   if (isset($upload_validators['file_validate_size'])) {
-    $descriptions[] = t('Files must be less than !size.', array('!size' => '<strong>' . format_size($upload_validators['file_validate_size'][0]) . '</strong>'));
+    $descriptions[] = t('Files must be less than !size.', ['!size' => '<strong>' . format_size($upload_validators['file_validate_size'][0]) . '</strong>']);
   }
   if (isset($upload_validators['file_validate_extensions'])) {
-    $descriptions[] = t('Allowed file types: !extensions.', array('!extensions' => '<strong>' . check_plain($upload_validators['file_validate_extensions'][0]) . '</strong>'));
+    $descriptions[] = t('Allowed file types: !extensions.', ['!extensions' => '<strong>' . check_plain($upload_validators['file_validate_extensions'][0]) . '</strong>']);
   }
   if (isset($upload_validators['file_validate_image_resolution'])) {
     $max = $upload_validators['file_validate_image_resolution'][0];
@@ -291,25 +291,25 @@ function theme_file_upload_help($variables) {
     if ($min) {
       list($width, $height) = explode('x', $min);
       if (empty($height)) {
-        $descriptions[] = t('Images must be at least !width pixels wide.', array('!width' => '<strong>' . $width . '</strong>'));
+        $descriptions[] = t('Images must be at least !width pixels wide.', ['!width' => '<strong>' . $width . '</strong>']);
       }
       elseif (empty($width)) {
-        $descriptions[] = t('Images must be at least !height pixels tall.', array('!height' => '<strong>' . $height . '</strong>'));
+        $descriptions[] = t('Images must be at least !height pixels tall.', ['!height' => '<strong>' . $height . '</strong>']);
       }
       else {
-        $descriptions[] = t('Images must be at least !min pixels.', array('!min' => '<strong>' . $min . '</strong>'));
+        $descriptions[] = t('Images must be at least !min pixels.', ['!min' => '<strong>' . $min . '</strong>']);
       }
     }
     if ($max) {
       list($width, $height) = explode('x', $max);
       if (empty($height)) {
-        $descriptions[] = t('Images wider than !width pixels will be scaled down.', array('!width' => '<strong>' . $width . '</strong>'));
+        $descriptions[] = t('Images wider than !width pixels will be scaled down.', ['!width' => '<strong>' . $width . '</strong>']);
       }
       elseif (empty($width)) {
-        $descriptions[] = t('Images taller than !height pixels will be scaled down.', array('!height' => '<strong>' . $height . '</strong>'));
+        $descriptions[] = t('Images taller than !height pixels will be scaled down.', ['!height' => '<strong>' . $height . '</strong>']);
       }
       else {
-        $descriptions[] = t('Images larger than !size pixels will be scaled down.', array('!size' => '<strong>' . $max . '</strong>'));
+        $descriptions[] = t('Images larger than !size pixels will be scaled down.', ['!size' => '<strong>' . $max . '</strong>']);
       }
     }
   }
@@ -329,16 +329,16 @@ function theme_file_upload_help($variables) {
  * @ingroup themeable
  */
 function theme_file_formatter_table($variables) {
-  $header = array(t('Attachment'), t('Size'));
-  $rows = array();
+  $header = [t('Attachment'), t('Size')];
+  $rows = [];
   foreach ($variables['items'] as $delta => $item) {
-    $rows[] = array(
-      theme('file_link', array('file' => (object) $item)),
+    $rows[] = [
+      theme('file_link', ['file' => (object) $item]),
       format_size($item['filesize']),
-    );
+    ];
   }
 
-  return empty($rows) ? '' : theme('table', array('header' => $header, 'rows' => $rows));
+  return empty($rows) ? '' : theme('table', ['header' => $header, 'rows' => $rows]);
 }
 
 /**
@@ -361,19 +361,19 @@ function theme_file_type_overview($variables) {
 function theme_file_display_order($variables) {
   $element = $variables['element'];
 
-  $rows = array();
+  $rows = [];
   foreach (element_children($element, TRUE) as $name) {
     $element[$name]['weight']['#attributes']['class'][] = 'file-display-order-weight';
-    $rows[] = array(
-      'data' => array(
+    $rows[] = [
+      'data' => [
         backdrop_render($element[$name]['label']),
         backdrop_render($element[$name]['weight']),
-      ),
-      'class' => array('draggable'),
-    );
+      ],
+      'class' => ['draggable'],
+    ];
   }
   $output = backdrop_render_children($element);
-  $output .= theme('table', array('rows' => $rows, 'attributes' => array('id' => 'file-displays-order')));
+  $output .= theme('table', ['rows' => $rows, 'attributes' => ['id' => 'file-displays-order']]);
   backdrop_add_tabledrag('file-displays-order', 'order', 'sibling', 'file-display-order-weight', NULL, NULL, TRUE);
 
   return $output;
@@ -389,7 +389,7 @@ function theme_file_download_link($variables) {
   $uri = file_download_uri($file);
 
   // Human-readable names, for use as text-alternatives to icons.
-  $mime_name = array(
+  $mime_name = [
     'application/msword' => t('Microsoft Office document icon'),
     'application/vnd.ms-excel' => t('Office spreadsheet icon'),
     'application/vnd.ms-powerpoint' => t('Office presentation icon'),
@@ -404,15 +404,15 @@ function theme_file_download_link($variables) {
     'text/html' => t('HTML icon'),
     'text/plain' => t('Plain text icon'),
     'application/octet-stream' => t('Binary Data'),
-  );
+  ];
 
   $mimetype = file_get_mimetype($file->uri);
 
-  $icon = theme('file_icon', array(
+  $icon = theme('file_icon', [
     'file' => $file,
     'icon_directory' => $variables['icon_directory'],
     'alt' => !empty($mime_name[$mimetype]) ? $mime_name[$mimetype] : t('File'),
-  ));
+  ]);
 
   // Set options as per anchor format described at
   // http://microformats.org/wiki/file-format-examples
@@ -425,7 +425,7 @@ function theme_file_download_link($variables) {
 
   // Perform unsanitized token replacement if $uri['options']['html'] is empty
   // since then l() will escape the link text.
-  $variables['text'] = token_replace($variables['text'], array('file' => $file), array('clear' => TRUE, 'sanitize' => !empty($uri['options']['html'])));
+  $variables['text'] = token_replace($variables['text'], ['file' => $file], ['clear' => TRUE, 'sanitize' => !empty($uri['options']['html'])]);
 
   $output = '<span class="file">' . $icon . ' ' . l($variables['text'], $uri['path'], $uri['options']);
   $output .= ' <span class="file-size">(' . format_size($file->filesize) . ')</span>';
@@ -451,7 +451,7 @@ function theme_file_audio($variables) {
   $files = $variables['files'];
   $output = '';
 
-  $audio_attributes = array();
+  $audio_attributes = [];
   if ($variables['controls']) {
     $audio_attributes['controls'] = 'controls';
   }
@@ -467,10 +467,10 @@ function theme_file_audio($variables) {
 
   $output .= '<audio' . backdrop_attributes($audio_attributes) . '>';
   foreach ($files as $delta => $file) {
-    $source_attributes = array(
+    $source_attributes = [
       'src' => file_create_url($file['uri']),
       'type' => $file['filemime'],
-    );
+    ];
     $output .= '<source' . backdrop_attributes($source_attributes) . ' />';
   }
   $output .= '</audio>';
@@ -497,7 +497,7 @@ function theme_file_video($variables) {
   $files = $variables['files'];
   $output = '';
 
-  $video_attributes = array();
+  $video_attributes = [];
   if ($variables['controls']) {
     $video_attributes['controls'] = 'controls';
   }
@@ -522,10 +522,10 @@ function theme_file_video($variables) {
 
   $output .= '<video' . backdrop_attributes($video_attributes) . '>';
   foreach ($files as $delta => $file) {
-    $source_attributes = array(
+    $source_attributes = [
       'src' => file_create_url($file['uri']),
       'type' => $file['filemime'],
-    );
+    ];
     $output .= '<source' . backdrop_attributes($source_attributes) . ' />';
   }
   $output .= '</video>';

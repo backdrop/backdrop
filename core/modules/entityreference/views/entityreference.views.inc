@@ -19,8 +19,8 @@ function entityreference_field_views_data($field) {
       }
 
       $field_name = $field['field_name'] . '_target_id';
-      $parameters = array('@entity' => $entity, '!field_name' => $field['field_name']);
-      $data[$table_name][$field_name]['relationship'] = array(
+      $parameters = ['@entity' => $entity, '!field_name' => $field['field_name']];
+      $data[$table_name][$field_name]['relationship'] = [
         'handler' => 'views_handler_relationship',
         'base' => $entity_info['base table'],
         'base field' => $entity_info['entity keys']['id'],
@@ -28,7 +28,7 @@ function entityreference_field_views_data($field) {
         'group' => t('Entity Reference'),
         'title' => t('Referenced Entity'),
         'help' => t('A bridge to the @entity entity that is referenced via !field_name', $parameters),
-      );
+      ];
     }
   }
 
@@ -62,7 +62,7 @@ function entityreference_field_views_data_views_data_alter(&$data, $field) {
         watchdog(
           'entityreference',
           'Field %field_name refers to nonexistent entity type %type. You might want to remove this broken field instance. <a href="https://www.drupal.org/docs/7/modules/views/data-fix-field-field-refers-to-nonexistent-entity-type-type">See documentation.</a>',
-          array('%field_name' => $field['field_name'], '%type' => $entity_type),
+          ['%field_name' => $field['field_name'], '%type' => $entity_type],
           WATCHDOG_WARNING
         );
         continue;
@@ -77,8 +77,8 @@ function entityreference_field_views_data_views_data_alter(&$data, $field) {
       }
 
       $pseudo_field_name = 'reverse_' . $field['field_name'] . '_' . $entity_type;
-      $replacements = array('@entity' => $entity, '@target_entity' => $target_entity, '!field_name' => $field['field_name']);
-      $data[$target_entity_info['base table']][$pseudo_field_name]['relationship'] = array(
+      $replacements = ['@entity' => $entity, '@target_entity' => $target_entity, '!field_name' => $field['field_name']];
+      $data[$target_entity_info['base table']][$pseudo_field_name]['relationship'] = [
         'handler' => 'views_handler_relationship_entity_reverse',
         'field_name' => $field['field_name'],
         'field table' => _field_sql_storage_tablename($field),
@@ -89,18 +89,18 @@ function entityreference_field_views_data_views_data_alter(&$data, $field) {
         'group' => t('Entity Reference'),
         'title' => t('Referencing entity'),
         'help' => t('A bridge to the @entity entity that is referencing @target_entity via !field_name', $replacements),
-        'join_extra' => array(
-          0 => array(
+        'join_extra' => [
+          0 => [
             'field' => 'entity_type',
             'value' => $entity_type,
-          ),
-          1 => array(
+          ],
+          1 => [
             'field' => 'deleted',
             'value' => 0,
             'numeric' => TRUE,
-          ),
-        ),
-      );
+          ],
+        ],
+      ];
     }
   }
 }
@@ -109,9 +109,9 @@ function entityreference_field_views_data_views_data_alter(&$data, $field) {
  * Implements hook_views_plugins().
  */
 function entityreference_views_plugins() {
-  $plugins = array(
-    'display' => array(
-      'entityreference' => array(
+  $plugins = [
+    'display' => [
+      'entityreference' => [
         'title' => t('Entity Reference'),
         'admin' => t('Reference Source'),
         'help' => 'Selects referenceable entities for a reference field',
@@ -123,10 +123,10 @@ function entityreference_views_plugins() {
         // Custom property, used with views_get_applicable_views() to retrieve
         // all views with a 'Entity Reference' display.
         'entityreference display' => TRUE,
-      ),
-    ),
-    'style' => array(
-      'entityreference_style' => array(
+      ],
+    ],
+    'style' => [
+      'entityreference_style' => [
         'title' => t('Entity Reference list'),
         'help' => 'Returns results as a list of labels and rendered rows.',
         'handler' => 'entityreference_plugin_style',
@@ -138,10 +138,10 @@ function entityreference_views_plugins() {
         'uses options' => TRUE,
         'type' => 'entityreference',
         'even empty' => TRUE,
-      ),
-    ),
-    'row' => array(
-      'entityreference_fields' => array(
+      ],
+    ],
+    'row' => [
+      'entityreference_fields' => [
         'title' => t('Inline fields'),
         'help' => t('Displays the fields with an optional template.'),
         'handler' => 'entityreference_plugin_row_fields',
@@ -151,9 +151,9 @@ function entityreference_views_plugins() {
         'uses fields' => TRUE,
         'uses options' => TRUE,
         'type' => 'entityreference',
-      ),
-    ),
-  );
+      ],
+    ],
+  ];
   return $plugins;
 }
 
@@ -175,13 +175,13 @@ function entityreference_view_settings_validate($element, &$form_state, $form) {
   // instead.
   $args_string = trim($element['args']['#value']);
   if ($args_string === '') {
-    $args = array();
+    $args = [];
   }
   else {
     // array_map is called to trim whitespaces from the arguments.
     $args = array_map('trim', explode(',', $args_string));
   }
 
-  $value = array('view_name' => $view, 'display_name' => $display, 'args' => $args);
+  $value = ['view_name' => $view, 'display_name' => $display, 'args' => $args];
   form_set_value($element, $value, $form_state);
 }

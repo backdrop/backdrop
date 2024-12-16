@@ -60,12 +60,12 @@ class views_handler_relationship_groupwise_max extends views_handler_relationshi
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['subquery_sort'] = array('default' => NULL);
+    $options['subquery_sort'] = ['default' => NULL];
     // Descending more useful.
-    $options['subquery_order'] = array('default' => 'DESC');
-    $options['subquery_regenerate'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['subquery_view'] = array('default' => FALSE);
-    $options['subquery_namespace'] = array('default' => FALSE);
+    $options['subquery_order'] = ['default' => 'DESC'];
+    $options['subquery_regenerate'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['subquery_view'] = ['default' => FALSE];
+    $options['subquery_namespace'] = ['default' => FALSE];
 
     return $options;
   }
@@ -84,35 +84,35 @@ class views_handler_relationship_groupwise_max extends views_handler_relationshi
     }
     $base_table_data = views_fetch_data($this->definition['base']);
 
-    $form['subquery_sort'] = array(
+    $form['subquery_sort'] = [
       '#type' => 'select',
       '#title' => t('Representative sort criteria'),
       // Provide the base field as sane default sort option.
       '#default_value' => !empty($this->options['subquery_sort']) ? $this->options['subquery_sort'] : $this->definition['base'] . '.' . $base_table_data['table']['base']['field'],
       '#options' => $sort_options,
-      '#description' => theme('advanced_help_topic', array('module' => 'views', 'topic' => 'relationship-representative')) .
+      '#description' => theme('advanced_help_topic', ['module' => 'views', 'topic' => 'relationship-representative']) .
         t("The sort criteria is applied to the data brought in by the relationship to determine how a representative item is obtained for each row. For example, to show the most recent node for each user, pick 'Content: Updated date'."),
-    );
+    ];
 
-    $form['subquery_order'] = array(
+    $form['subquery_order'] = [
       '#type' => 'radios',
       '#title' => t('Representative sort order'),
       '#description' => t("The ordering to use for the sort criteria selected above."),
-      '#options' => array('ASC' => t('Ascending'), 'DESC' => t('Descending')),
+      '#options' => ['ASC' => t('Ascending'), 'DESC' => t('Descending')],
       '#default_value' => $this->options['subquery_order'],
-    );
+    ];
 
-    $form['subquery_namespace'] = array(
+    $form['subquery_namespace'] = [
       '#type' => 'textfield',
       '#title' => t('Subquery namespace'),
       '#description' => t('Advanced. Enter a namespace for the subquery used by this relationship.'),
       '#default_value' => $this->options['subquery_namespace'],
-    );
+    ];
 
 
     // WIP: This stuff doesn't work yet: namespacing issues.
     // A list of suitable views to pick one as the subview.
-    $views = array('' => '<none>');
+    $views = ['' => '<none>'];
     $all_views = views_get_all_views();
     foreach ($all_views as $view) {
       // Only get views that are suitable:
@@ -130,20 +130,20 @@ class views_handler_relationship_groupwise_max extends views_handler_relationshi
       }
     }
 
-    $form['subquery_view'] = array(
+    $form['subquery_view'] = [
       '#type' => 'select',
       '#title' => t('Representative view'),
       '#default_value' => $this->options['subquery_view'],
       '#options' => $views,
       '#description' => t('Advanced. Use another view to generate the relationship subquery. This allows you to use filtering and more than one sort. If you pick a view here, the sort options above are ignored. Your view must have the ID of its base as its only field, and should have some kind of sorting.'),
-    );
+    ];
 
-    $form['subquery_regenerate'] = array(
+    $form['subquery_regenerate'] = [
       '#type' => 'checkbox',
       '#title' => t('Generate subquery each time view is run.'),
       '#default_value' => $this->options['subquery_regenerate'],
       '#description' => t('Will re-generate the subquery for this relationship every time the view is run, instead of only when these options are saved. Use for testing if you are making changes elsewhere. WARNING: seriously impairs performance.'),
-    );
+    ];
   }
 
   /**
@@ -198,7 +198,7 @@ class views_handler_relationship_groupwise_max extends views_handler_relationshi
       // We work around this further down.
       $sort = $options['subquery_sort'];
       list($sort_table, $sort_field) = explode('.', $sort);
-      $sort_options = array('order' => $options['subquery_order']);
+      $sort_options = ['order' => $options['subquery_order']];
       $temp_view->add_item('default', 'sort', $sort_table, $sort_field, $sort_options);
     }
 

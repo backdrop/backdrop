@@ -18,12 +18,12 @@ class views_handler_argument_user_uid extends views_handler_argument_numeric {
    */
   function title_query() {
     if (!$this->argument) {
-      return array(config_get('system.core', 'anonymous'));
+      return [config_get('system.core', 'anonymous')];
     }
 
-    $titles = array();
+    $titles = [];
 
-    $result = db_query("SELECT u.name FROM {users} u WHERE u.uid IN (:uids)", array(':uids' => $this->value));
+    $result = db_query("SELECT u.name FROM {users} u WHERE u.uid IN (:uids)", [':uids' => $this->value]);
     foreach ($result as $term) {
       $titles[] = check_plain($term->name);
     }

@@ -21,26 +21,26 @@ function theme_simpletest_test_table($variables) {
   backdrop_add_js('core/misc/tableselect.js');
 
   // Create header for test selection table.
-  $header = array(
-    array('class' => array('select-all')),
-    array('data' => t('Test'), 'class' => array('simpletest-test')),
-    array('data' => t('Description'), 'class' => array('simpletest_description')),
-  );
+  $header = [
+    ['class' => ['select-all']],
+    ['data' => t('Test'), 'class' => ['simpletest-test']],
+    ['data' => t('Description'), 'class' => ['simpletest_description']],
+  ];
 
   // Define the images used to expand/collapse the test groups.
-  $js = array(
-    'images' => array(
-      theme('image', array('path' => 'core/misc/menu-collapsed.png', 'width' => 7, 'height' => 7, 'alt' => t('Expand'), 'title' => t('Expand'))) . ' <a href="#" class="simpletest-collapse">(' . t('Expand') . ')</a>',
-      theme('image', array('path' => 'core/misc/menu-expanded.png', 'width' => 7, 'height' => 7, 'alt' => t('Collapse'), 'title' => t('Collapse'))) . ' <a href="#" class="simpletest-collapse">(' . t('Collapse') . ')</a>',
-    ),
-  );
-  backdrop_add_js(array('simpleTest' => $js), 'setting');
+  $js = [
+    'images' => [
+      theme('image', ['path' => 'core/misc/menu-collapsed.png', 'width' => 7, 'height' => 7, 'alt' => t('Expand'), 'title' => t('Expand')]) . ' <a href="#" class="simpletest-collapse">(' . t('Expand') . ')</a>',
+      theme('image', ['path' => 'core/misc/menu-expanded.png', 'width' => 7, 'height' => 7, 'alt' => t('Collapse'), 'title' => t('Collapse')]) . ' <a href="#" class="simpletest-collapse">(' . t('Collapse') . ')</a>',
+    ],
+  ];
+  backdrop_add_js(['simpleTest' => $js], 'setting');
 
   // Cycle through each test group and create a row.
-  $rows = array();
+  $rows = [];
   foreach (element_children($table) as $key) {
     $element = &$table[$key];
-    $row = array();
+    $row = [];
 
     // Make the class name safe for output on the page by replacing all
     // non-word/decimal characters with a dash (-).
@@ -52,29 +52,29 @@ function theme_simpletest_test_table($variables) {
     $image_index = $collapsed ? 0 : 1;
 
     // Place-holder for checkboxes to select group of tests.
-    $row[] = array('id' => $test_class, 'class' => array('simpletest-group-select-all'));
+    $row[] = ['id' => $test_class, 'class' => ['simpletest-group-select-all']];
 
     // Expand/collapse image and group title.
-    $row[] = array(
+    $row[] = [
       'data' => '<span class="simpletest-image" id="simpletest-test-group-' . $test_class . '"></span>' .
         '<label for="' . $test_class . '-group-select-all">' . $key . '</label>',
-      'class' => array('simpletest-group-label'),
-    );
+      'class' => ['simpletest-group-label'],
+    ];
 
-    $row[] = array(
+    $row[] = [
       'data' => '&nbsp;',
-      'class' => array('simpletest-group-description'),
-    );
+      'class' => ['simpletest-group-description'],
+    ];
 
-    $rows[] = array('data' => $row, 'class' => array('simpletest-group'));
+    $rows[] = ['data' => $row, 'class' => ['simpletest-group']];
 
     // Sorting $element by children's #title attribute instead of by class name.
-    backdrop_sort($element, array('#title' => SORT_STRING));
+    backdrop_sort($element, ['#title' => SORT_STRING]);
 
     // Cycle through each test within the current group.
     foreach (element_children($element) as $test_name) {
       $test = $element[$test_name];
-      $row = array();
+      $row = [];
 
       // Store test title and description so that checkbox won't render them.
       $title = $test['#title'];
@@ -83,30 +83,30 @@ function theme_simpletest_test_table($variables) {
       $test['#title_display'] = 'invisible';
       unset($test['#description']);
 
-      $row[] = array(
+      $row[] = [
         'data' => backdrop_render($test),
-        'class' => array('simpletest-test-select'),
-      );
-      $row[] = array(
+        'class' => ['simpletest-test-select'],
+      ];
+      $row[] = [
         'data' => '<label for="' . $test['#id'] . '">' . $title . '</label><span class="description test-name"> (' . $test_name . ')</span>',
-        'class' => array('simpletest-test-label'),
-      );
-      $row[] = array(
+        'class' => ['simpletest-test-label'],
+      ];
+      $row[] = [
         'data' => '<div class="description">' . $description . '</div>',
-        'class' => array('simpletest-test-description'),
-      );
+        'class' => ['simpletest-test-description'],
+      ];
 
-      $rows[] = array('data' => $row, 'class' => array($test_class . '-test', ($collapsed ? 'js-hide' : '')));
+      $rows[] = ['data' => $row, 'class' => [$test_class . '-test', ($collapsed ? 'js-hide' : '')]];
     }
     unset($table[$key]);
   }
 
-  return theme('table', array(
+  return theme('table', [
     'header' => $header,
     'rows' => $rows,
     'empty' => '<strong>' . t('No tests to display.') . '</strong>',
-    'attributes' => array('id' => 'simpletest-form-table'),
-  ));
+    'attributes' => ['id' => 'simpletest-form-table'],
+  ]);
 }
 
 /**

@@ -282,7 +282,7 @@ abstract class FileTransfer {
     $full_path = backdrop_realpath(substr($this->chroot . $path, 0, strlen($full_jail)));
     $full_path = $this->fixRemotePath($full_path, FALSE);
     if ($full_jail !== $full_path) {
-      throw new FileTransferException('@directory is outside of the @jail', NULL, array('@directory' => $path, '@jail' => $this->jail));
+      throw new FileTransferException('@directory is outside of the @jail', NULL, ['@directory' => $path, '@jail' => $this->jail]);
     }
   }
 
@@ -460,33 +460,33 @@ abstract class FileTransfer {
    *   An array that contains a Form API definition.
    */
   public function getSettingsForm() {
-    $form['username'] = array(
+    $form['username'] = [
       '#type' => 'textfield',
       '#title' => t('Username'),
-    );
-    $form['password'] = array(
+    ];
+    $form['password'] = [
       '#type' => 'password',
       '#title' => t('Password'),
       '#description' => t('Your password is not saved in the database and is only used to establish a connection.'),
       '#password_toggle' => TRUE,
-    );
-    $form['advanced'] = array(
+    ];
+    $form['advanced'] = [
       '#type' => 'fieldset',
       '#title' => t('Advanced settings'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
-    );
-    $form['advanced']['hostname'] = array(
+    ];
+    $form['advanced']['hostname'] = [
       '#type' => 'textfield',
       '#title' => t('Host'),
       '#default_value' => 'localhost',
       '#description' => t('The connection will be created between your web server and the machine hosting the web server files. In the vast majority of cases, this will be the same machine, and "localhost" is correct.'),
-    );
-    $form['advanced']['port'] = array(
+    ];
+    $form['advanced']['port'] = [
       '#type' => 'textfield',
       '#title' => t('Port'),
       '#default_value' => NULL,
-    );
+    ];
     return $form;
   }
 }
@@ -497,7 +497,7 @@ abstract class FileTransfer {
 class FileTransferException extends Exception {
   public $arguments;
 
-  function __construct($message, $code = 0, $arguments = array()) {
+  function __construct($message, $code = 0, $arguments = []) {
     parent::__construct($message, (int) $code);
     $this->arguments = $arguments;
   }

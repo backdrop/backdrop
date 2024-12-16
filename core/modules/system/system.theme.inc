@@ -10,7 +10,7 @@
  * @ingroup themeable
  */
 function theme_system_powered_by() {
-  return '<span>' . t('Powered by <a href="@url">Backdrop CMS</a>', array('@url' => 'https://backdropcms.org')) . '</span>';
+  return '<span>' . t('Powered by <a href="@url">Backdrop CMS</a>', ['@url' => 'https://backdropcms.org']) . '</span>';
 }
 
 /**
@@ -62,11 +62,11 @@ function theme_exposed_filters($variables) {
   $output = '';
 
   if (isset($form['current'])) {
-    $items = array();
+    $items = [];
     foreach (element_children($form['current']) as $key) {
       $items[] = backdrop_render($form['current'][$key]);
     }
-    $output .= theme('item_list', array('items' => $items, 'attributes' => array('class' => array('clearfix', 'current-filters'))));
+    $output .= theme('item_list', ['items' => $items, 'attributes' => ['class' => ['clearfix', 'current-filters']]]);
   }
 
   $output .= backdrop_render_children($form);
@@ -112,16 +112,16 @@ function theme_system_themes_page($variables) {
 
       // Make sure to provide feedback on compatibility.
       if (!empty($theme->incompatible_core)) {
-        $output .= '<div class="incompatible">' . t('This version is not compatible with Backdrop CMS !core_version.', array('!core_version' => BACKDROP_CORE_COMPATIBILITY)) . '</div>';
+        $output .= '<div class="incompatible">' . t('This version is not compatible with Backdrop CMS !core_version.', ['!core_version' => BACKDROP_CORE_COMPATIBILITY]) . '</div>';
       }
       elseif (!empty($theme->incompatible_php)) {
         if (substr_count($theme->info['php'], '.') < 2) {
           $theme->info['php'] .= '.*';
         }
-        $output .= '<div class="incompatible">' . t('This theme requires PHP version @php_required and is incompatible with PHP version !php_version.', array('@php_required' => $theme->info['php'], '!php_version' => phpversion())) . '</div>';
+        $output .= '<div class="incompatible">' . t('This theme requires PHP version @php_required and is incompatible with PHP version !php_version.', ['@php_required' => $theme->info['php'], '!php_version' => phpversion()]) . '</div>';
       }
       else {
-        $output .= theme('links', array('links' => $theme->operations, 'attributes' => array('class' => array('operations', 'clearfix'))));
+        $output .= theme('links', ['links' => $theme->operations, 'attributes' => ['class' => ['operations', 'clearfix']]]);
       }
       $output .= '</div></div>';
     }
@@ -145,14 +145,14 @@ function theme_system_modules_fieldset($variables) {
   $form = $variables['form'];
 
   // Individual table headers.
-  $rows = array();
+  $rows = [];
   // Iterate through all the modules, which are
   // children of this fieldset.
   foreach (element_children($form) as $key) {
     // Stick the key into $module for easier access.
     $module = $form[$key];
     // Create the row for the table.
-    $row = array();
+    $row = [];
     unset($module['enable']['#title']);
     $module['#requires'] = array_filter($module['#requires']);
     $module['#required_by'] = array_filter($module['#required_by']);
@@ -163,13 +163,13 @@ function theme_system_modules_fieldset($variables) {
     $toggle = '';
 
     // Add the first column: the checkbox.
-    $row[] = array('class' => array('checkbox'), 'data' => backdrop_render($module['enable']));
+    $row[] = ['class' => ['checkbox'], 'data' => backdrop_render($module['enable'])];
 
     // Add the second column: module label and expand/collapse functionality.
-    $row[] = array('class' => array('module'), 'data' => '<label id="module-' . $key . '" for="' . $module['enable']['#id'] . '" class="module-name table-filter-text-source">' . backdrop_render($module['name']) . '</label>');
+    $row[] = ['class' => ['module'], 'data' => '<label id="module-' . $key . '" for="' . $module['enable']['#id'] . '" class="module-name table-filter-text-source">' . backdrop_render($module['name']) . '</label>'];
 
     // Add the third column: module version number.
-    $row[] = array('class' => array('version'), 'data' => backdrop_render($module['version']));
+    $row[] = ['class' => ['version'], 'data' => backdrop_render($module['version'])];
 
     $requirements .= '<div class="requirements">';
     if ($requires) {
@@ -191,10 +191,10 @@ function theme_system_modules_fieldset($variables) {
     $details = '<div class="text table-filter-text-source"> ' . backdrop_render($module['description']) . $toggle . '</div>' . $requirements;
 
     // Add the fourth column: description, along with any modules it requires.
-    $row[] = array('class' => array('description'), 'data' => $details);
+    $row[] = ['class' => ['description'], 'data' => $details];
 
     // Add the fifth column: links (such as configure or permissions) in their own columns.
-    $row[] = array('data' => backdrop_render($module['links']), 'class' => array('operations'));
+    $row[] = ['data' => backdrop_render($module['links']), 'class' => ['operations']];
 
     // Hide modules that can't be disabled at all.
     if (!$module["#required_by_distribution"]) {
@@ -202,7 +202,7 @@ function theme_system_modules_fieldset($variables) {
     }
   }
 
-  return theme('table', array('header' => $form['#header'], 'rows' => $rows));
+  return theme('table', ['header' => $form['#header'], 'rows' => $rows]);
 }
 
 /**
@@ -236,46 +236,46 @@ function theme_system_modules_uninstall($variables) {
   }
 
   // Table headers.
-  $header = array(t('Uninstall'),
+  $header = [t('Uninstall'),
     t('Name'),
     t('Description'),
-  );
+  ];
 
   // Display table.
-  $rows = array();
+  $rows = [];
   foreach (element_children($form['modules']) as $module) {
     if (!empty($form['modules'][$module]['#required_by'])) {
       $disabled_message = format_plural(count($form['modules'][$module]['#required_by']),
         'To uninstall @module, the following module must be uninstalled first: @required_modules',
         'To uninstall @module, the following modules must be uninstalled first: @required_modules',
-        array(
+        [
           '@module' => $form['modules'][$module]['#module_name'],
           '@required_modules' => implode(', ', $form['modules'][$module]['#required_by']),
-        ));
+        ]);
       $disabled_message = '<div class="admin-requirements">' . $disabled_message . '</div>';
     }
     else {
       $disabled_message = '';
     }
-    $rows[] = array(
-      array(
+    $rows[] = [
+      [
         'data' => backdrop_render($form['uninstall'][$module]),
         'align' => 'center',
-      ),
+      ],
       '<strong><label for="' . $form['uninstall'][$module]['#id'] . '">' . backdrop_render($form['modules'][$module]['name']) . '</label></strong>',
-      array(
+      [
         'data' => backdrop_render($form['modules'][$module]['description']) . $disabled_message,
-        'class' => array('description'),
-      ),
-    );
+        'class' => ['description'],
+      ],
+    ];
   }
 
-  $form['modules'] = array(
+  $form['modules'] = [
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
     '#empty' => t('No modules are available to uninstall.'),
-  );
+  ];
 
   return backdrop_render_children($form);
 }
@@ -309,13 +309,13 @@ function theme_system_modules_uninstall($variables) {
 function theme_status_report($variables) {
   $requirements = $variables['requirements'];
   $phase = isset($variables['phase']) ? $variables['phase'] : 'runtime';
-  backdrop_sort($requirements, array('title' => SORT_STRING));
+  backdrop_sort($requirements, ['title' => SORT_STRING]);
 
   // Separate requirements by severity.
-  $errors = array();
-  $warnings = array();
-  $infos = array();
-  $okays = array();
+  $errors = [];
+  $warnings = [];
+  $infos = [];
+  $okays = [];
   foreach ($requirements as $requirement) {
     if (!isset($requirement['severity'])) {
       $requirement['severity'] = REQUIREMENT_OK;
@@ -338,36 +338,36 @@ function theme_status_report($variables) {
   // Put them back together in the desired order.
   $requirements = array_merge($errors, $warnings, $infos, $okays);
 
-  $severities = array(
-    REQUIREMENT_INFO => array(
+  $severities = [
+    REQUIREMENT_INFO => [
       'title' => t('Info'),
-      'class' => array('report-info'),
-    ),
-    REQUIREMENT_OK => array(
+      'class' => ['report-info'],
+    ],
+    REQUIREMENT_OK => [
       'title' => t('OK'),
-      'class' => array('report-status'),
-    ),
-    REQUIREMENT_WARNING => array(
+      'class' => ['report-status'],
+    ],
+    REQUIREMENT_WARNING => [
       'title' => t('Warning'),
-      'class' => array('report-warning'),
-    ),
-    REQUIREMENT_ERROR => array(
+      'class' => ['report-warning'],
+    ],
+    REQUIREMENT_ERROR => [
       'title' => t('Error'),
-      'class' => array('report-error'),
-    ),
-  );
+      'class' => ['report-error'],
+    ],
+  ];
 
-  $system_status_report_table = array(
-    'header' => array(),
-    'rows' => array(),
-    'attributes' => array('class' => array('system-status-report', 'phase-' . $phase)),
+  $system_status_report_table = [
+    'header' => [],
+    'rows' => [],
+    'attributes' => ['class' => ['system-status-report', 'phase-' . $phase]],
     'caption' => '',
-    'colgroups' => array(),
+    'colgroups' => [],
     'sticky' => FALSE,
     'empty' => 'No status report. Something is definitely wrong.',
-  );
+  ];
 
-  $rows = array();
+  $rows = [];
   foreach ($requirements as $requirement) {
     $severity = $severities[isset($requirement['severity']) ? (int) $requirement['severity'] : REQUIREMENT_OK];
     $severity['icon'] = '<div title="' . $severity['title'] . '"><span class="element-invisible">' . $severity['title'] . '</span></div>';
@@ -389,25 +389,25 @@ function theme_status_report($variables) {
     // the description of each check/row in a single table cell.
     if ($phase == 'install') {
       $description = '<div class="status-summary status-value">' . $requirement['value'] . $more . '</div>' . $details;
-      $data = array(
-        array('data' => $severity['icon'], 'class' => 'report-icon'),
-        array('data' => $title . $description, 'class' => 'status-title'),
-      );
+      $data = [
+        ['data' => $severity['icon'], 'class' => 'report-icon'],
+        ['data' => $title . $description, 'class' => 'status-title'],
+      ];
     }
     // For the site status report page, place the label and the description of
     // each check in separate table cells in the same row.
     else {
       $description = '<div class="status-summary">' . $requirement['value'] . $more . '</div>' . $details;
-      $data = array(
-        array('data' => $severity['icon'], 'class' => 'report-icon'),
-        array('data' => $title, 'class' => 'status-title'),
-        array('data' => $description, 'class' => array('status-value', 'priority-low')),
-      );
+      $data = [
+        ['data' => $severity['icon'], 'class' => 'report-icon'],
+        ['data' => $title, 'class' => 'status-title'],
+        ['data' => $description, 'class' => ['status-value', 'priority-low']],
+      ];
     }
-    $row = array(
+    $row = [
       'data' => $data,
       'class' => $severity['class'],
-    );
+    ];
 
     $rows[] = $row;
   }
@@ -431,10 +431,10 @@ function theme_status_report($variables) {
  */
 function theme_admin_page($variables) {
   $blocks = $variables['blocks'];
-  $container = array();
+  $container = [];
 
   foreach ($blocks as $block) {
-    if ($block_output = theme('admin_block', array('block' => $block))) {
+    if ($block_output = theme('admin_block', ['block' => $block])) {
       $container[] = $block_output;
     }
   }
@@ -469,7 +469,7 @@ function theme_admin_page($variables) {
  */
 function theme_admin_block($variables) {
   $block = $variables['block'];
-  $classes = array('admin-panel');
+  $classes = ['admin-panel'];
   // Construct a more specific class.
   if (isset($variables['block']['path'])) {
     $path_parts = explode('/', $variables['block']['path']);
@@ -541,7 +541,7 @@ function theme_admin_block_content($variables) {
  */
 function theme_system_admin_index($variables) {
   $menu_items = $variables['menu_items'];
-  $blocks = array();
+  $blocks = [];
 
   // Iterate over all modules.
   foreach ($menu_items as $module => $block) {
@@ -549,13 +549,13 @@ function theme_system_admin_index($variables) {
 
     // Output links.
     if (count($items)) {
-      $block = array();
+      $block = [];
       $block['title'] = $module;
-      $block['content'] = theme('admin_block_content', array('content' => $items));
+      $block['content'] = theme('admin_block_content', ['content' => $items]);
       $block['description'] = t($description);
       $block['show'] = TRUE;
 
-      if ($block_output = theme('admin_block', array('block' => $block))) {
+      if ($block_output = theme('admin_block', ['block' => $block])) {
         $blocks[] = $block_output;
       }
     }
@@ -574,13 +574,13 @@ function theme_system_admin_index($variables) {
  * Theme a link to a token tree either as a regular link or a dialog.
  */
 function theme_token_tree_link($variables) {
-  $options = array(
-    'attributes' => array(),
-    'query' => array(
+  $options = [
+    'attributes' => [],
+    'query' => [
       'token' => backdrop_get_token('token-browser'),
       'show_restricted' => $variables['show_restricted'] ? 1 : 0,
-    ),
-  );
+    ],
+  ];
 
   if (!empty($variables['token_types'])) {
     $options['query']['token_types'] = backdrop_json_encode($variables['token_types']);
@@ -596,11 +596,11 @@ function theme_token_tree_link($variables) {
     $options['attributes']['target'] = '_blank';
   }
   // Create a security token.
-  $settings['tokenBrowser'] = array(
+  $settings['tokenBrowser'] = [
     'token' => backdrop_get_token('token-browser-endpoint'),
     'restricted' => $variables['show_restricted'],
     'click_insert' => $variables['click_insert'],
-  );
+  ];
   backdrop_add_js($settings, 'setting');
   return l($variables['text'], 'token/tree', $options);
 }
@@ -617,11 +617,11 @@ function theme_token_tree($variables) {
   module_load_include('inc', 'system', 'system.pages');
   $content = system_token_browser_tree_build_content($variables['token_types'], $variables['global_types'], $variables['show_restricted']);
   // Create a security token.
-  $settings['tokenBrowser'] = array(
+  $settings['tokenBrowser'] = [
     'token' => backdrop_get_token('token-browser-endpoint'),
     'restricted' => $variables['show_restricted'],
     'click_insert' => $variables['click_insert'],
-  );
+  ];
   backdrop_add_js($settings, 'setting');
 
   return backdrop_render($content);
@@ -633,39 +633,39 @@ function theme_token_tree($variables) {
 function system_preprocess_page_components(&$variables) {
   $settings = $variables['settings'];
   $child_delta = $variables['child_delta'];
-  $variables += array(
+  $variables += [
     'action_links' => NULL,
     'tabs' => NULL,
     'messages' => NULL,
     'title' => NULL,
-  );
+  ];
 
   if ($child_delta == 'title' || $child_delta == 'title_combo') {
     $variables['title'] = $settings['title'];
     $variables['title_tag'] = $settings['title_tag'];
     $variables['title_classes'] = $settings['title_classes'];
-    $variables['title_attributes'] = array(
+    $variables['title_attributes'] = [
       'class' => array_filter(explode(' ', $settings['title_classes'])),
-    );
+    ];
   }
   if ($child_delta == 'tabs' || $child_delta == 'title_combo') {
-    $menus =  array();
+    $menus =  [];
     switch ($settings['tab_type']) {
       case 'primary':
-        $menus =  array(
+        $menus =  [
           'primary' => menu_primary_local_tasks(),
-        );
+        ];
         break;
       case 'secondary':
-        $menus =  array(
+        $menus =  [
           'secondary' => menu_secondary_local_tasks(),
-        );
+        ];
         break;
       case 'both':
-        $menus =  array(
+        $menus =  [
           'primary' => menu_primary_local_tasks(),
           'secondary' => menu_secondary_local_tasks(),
-        );
+        ];
         break;
     }
     if ($settings['tab_type'] == 'hidden') {
@@ -684,9 +684,9 @@ function system_preprocess_page_components(&$variables) {
   }
 
   // Add specific suggestions that can override the default implementation.
-  $variables['theme_hook_suggestions'] = array(
+  $variables['theme_hook_suggestions'] = [
     'page_components__' . $child_delta,
-  );
+  ];
 }
 
 /**
@@ -703,7 +703,7 @@ function theme_label_machine_name($variables) {
   $output = '<div class="label">' . check_plain($variables['label']) . '</div>';
 
   if (!empty($variables['machine_name'])) {
-    $machine_name = t('Machine name: @machine_name', array('@machine_name' => $variables['machine_name']));
+    $machine_name = t('Machine name: @machine_name', ['@machine_name' => $variables['machine_name']]);
     $output .= '<div class="machine-name">(' . $machine_name . ')</div>';
   }
 

@@ -17,7 +17,7 @@ class views_plugin_row_node_view extends views_plugin_row {
   var $base_field = 'nid';
 
   // Stores the nodes loaded with pre_render.
-  var $nodes = array();
+  var $nodes = [];
 
   function init(&$view, &$display, $options = NULL) {
     parent::init($view, $display, $options);
@@ -34,10 +34,10 @@ class views_plugin_row_node_view extends views_plugin_row {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['view_mode'] = array('default' => 'teaser');
-    $options['title'] = array('default' => TRUE, 'bool' => TRUE);
-    $options['links'] = array('default' => TRUE, 'bool' => TRUE);
-    $options['comments'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['view_mode'] = ['default' => 'teaser'];
+    $options['title'] = ['default' => TRUE, 'bool' => TRUE];
+    $options['links'] = ['default' => TRUE, 'bool' => TRUE];
+    $options['comments'] = ['default' => FALSE, 'bool' => TRUE];
 
     return $options;
   }
@@ -46,29 +46,29 @@ class views_plugin_row_node_view extends views_plugin_row {
     parent::options_form($form, $form_state);
 
     $options = $this->options_form_summary_options();
-    $form['view_mode'] = array(
+    $form['view_mode'] = [
       '#type' => 'select',
       '#options' => $options,
       '#title' => t('Display mode'),
       '#default_value' => $this->options['view_mode'],
-    );
-    $form['title'] = array(
+    ];
+    $form['title'] = [
       '#type' => 'checkbox',
       '#title' => t('Display title'),
       '#description' => t('The title will display as a link to each item.'),
       '#default_value' => $this->options['title'],
-    );
-    $form['links'] = array(
+    ];
+    $form['links'] = [
       '#type' => 'checkbox',
       '#title' => t('Display links'),
       '#description' => t("e.g. 'Read more', 'Add comment', etc."),
       '#default_value' => $this->options['links'],
-    );
-    $form['comments'] = array(
+    ];
+    $form['comments'] = [
       '#type' => 'checkbox',
       '#title' => t('Display comments'),
       '#default_value' => $this->options['comments'],
-    );
+    ];
   }
 
   /**
@@ -76,17 +76,17 @@ class views_plugin_row_node_view extends views_plugin_row {
    */
   function options_form_summary_options() {
     $entity_info = entity_get_info('node');
-    $options = array();
+    $options = [];
     if (!empty($entity_info['view modes'])) {
       foreach ($entity_info['view modes'] as $mode => $settings) {
         $options[$mode] = $settings['label'];
       }
     }
     if (empty($options)) {
-      $options = array(
+      $options = [
         'teaser' => t('Teaser'),
         'full' => t('Full content')
-      );
+      ];
     }
 
     return $options;
@@ -98,7 +98,7 @@ class views_plugin_row_node_view extends views_plugin_row {
   }
 
   function pre_render($values) {
-    $nids = array();
+    $nids = [];
     foreach ($values as $row) {
       $nids[] = $row->{$this->field_alias};
     }

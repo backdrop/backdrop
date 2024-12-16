@@ -8,9 +8,9 @@
  * Menu callback; retrieve a JSON object containing autocomplete suggestions for existing users.
  */
 function user_autocomplete($string = '') {
-  $matches = array();
+  $matches = [];
   if ($string) {
-    $result = db_select('users')->fields('users', array('name'))->condition('name', db_like($string) . '%', 'LIKE')->range(0, 10)->execute();
+    $result = db_select('users')->fields('users', ['name'])->condition('name', db_like($string) . '%', 'LIKE')->range(0, 10)->execute();
     foreach ($result as $user) {
       $matches[$user->name] = check_plain($user->name);
     }
@@ -42,34 +42,34 @@ function user_pass_page() {
 function user_pass() {
   global $user;
 
-  $form['name'] = array(
+  $form['name'] = [
     '#type' => 'textfield',
     '#title' => t('Username or email address'),
     '#size' => 60,
     '#maxlength' => max(USERNAME_MAX_LENGTH, EMAIL_MAX_LENGTH),
     '#required' => TRUE,
     '#default_value' => isset($_GET['name']) ? $_GET['name'] : '',
-    '#attributes' => array(
+    '#attributes' => [
       // Add attributes to field to prevent spell-jacking and unwanted
       // automatic changes caused by the browser.
       'autocapitalize' => 'none',
       'autocorrect' => 'off',
       'spellcheck' => 'false',
-    ),
-  );
+    ],
+  ];
 
   // Allow logged in users to request this also.
   if ($user->uid > 0) {
     $form['name']['#type'] = 'value';
     $form['name']['#value'] = $user->mail;
-    $form['mail'] = array(
+    $form['mail'] = [
       '#prefix' => '<p>',
-      '#markup' => t('Password reset instructions will be mailed to %email. You must log out to use the password reset link in the email.', array('%email' => $user->mail)),
+      '#markup' => t('Password reset instructions will be mailed to %email. You must log out to use the password reset link in the email.', ['%email' => $user->mail]),
       '#suffix' => '</p>',
-    );
+    ];
   }
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Reset password'));
+  $form['actions'] = ['#type' => 'actions'];
+  $form['actions']['submit'] = ['#type' => 'submit', '#value' => t('Reset password')];
 
   return $form;
 }
@@ -93,11 +93,11 @@ function user_pass_validate($form, &$form_state) {
 
   $name = trim($form_state['values']['name']);
   // Try to load by email.
-  $users = user_load_multiple(array(), array('mail' => $name, 'status' => '1'));
+  $users = user_load_multiple([], ['mail' => $name, 'status' => '1']);
   $account = reset($users);
   if (!$account) {
     // No success, try to load by name.
-    $users = user_load_multiple(array(), array('name' => $name, 'status' => '1'));
+    $users = user_load_multiple([], ['name' => $name, 'status' => '1']);
     $account = reset($users);
   }
   if (isset($account->uid)) {
@@ -113,10 +113,10 @@ function user_pass_validate($form, &$form_state) {
     // Register a per-user event.
     flood_register_event('pass_reset_user', $config->get('flood_user_window'), $identifier);
 
-    form_set_value(array('#parents' => array('account')), $account, $form_state);
+    form_set_value(['#parents' => ['account']], $account, $form_state);
   }
   else {
-    form_set_error('name', t('Sorry, %name is not recognized as a user name or an email address.', array('%name' => $name)));
+    form_set_error('name', t('Sorry, %name is not recognized as a user name or an email address.', ['%name' => $name]));
   }
 }
 
@@ -132,7 +132,7 @@ function user_pass_submit($form, &$form_state) {
   // Mail one time login URL and instructions using current language.
   $mail = _user_mail_notify('password_reset', $account, $language);
   if (!empty($mail)) {
-    watchdog('user', 'Password reset instructions mailed to %name at %email.', array('%name' => $account->name, '%email' => $account->mail));
+    watchdog('user', 'Password reset instructions mailed to %name at %email.', ['%name' => $account->name, '%email' => $account->mail]);
     backdrop_set_message(t('Further instructions have been sent to your email address.'));
   }
 
@@ -166,13 +166,13 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
       // back to the current page; any custom destination set in
       // hook_user_logout() and intended for regular logouts would not be
       // appropriate here.
-      $destination = array();
+      $destination = [];
       if (isset($_GET['destination'])) {
         $destination = backdrop_get_destination();
       }
       user_logout_current_user();
       unset($_GET['destination']);
-      backdrop_goto(current_path(), array('query' => backdrop_get_query_parameters() + $destination));
+      backdrop_goto(current_path(), ['query' => backdrop_get_query_parameters() + $destination]);
     }
     // A different user is already logged in on the computer.
     else {
@@ -185,7 +185,7 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
       }
       if ($is_valid) {
         backdrop_set_message(t('You cannot use a password reset link while logged into the site. Please <a href="!logout">logout</a> and try using the link again.',
-          array('!logout' => url('user/logout'))), 'warning');
+          ['!logout' => url('user/logout')]), 'warning');
       } else {
         // Invalid one-time link specifies an unknown user.
         backdrop_set_message(t('The one-time login link you clicked is invalid.'), 'error');
@@ -198,7 +198,7 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
     $timeout = config_get('system.core', 'user_password_reset_timeout');
     $current = REQUEST_TIME;
     // Some redundant checks for extra security ?
-    $users = user_load_multiple(array($uid), array('status' => '1'));
+    $users = user_load_multiple([$uid], ['status' => '1']);
     if ($timestamp <= $current && $account = reset($users)) {
       // No time out for first time login.
       if ($account->login && $current - $timestamp > $timeout) {
@@ -226,7 +226,7 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
           // Clear any password reset flood events for this user.
           flood_clear_event('pass_reset_user', $account->uid);
           backdrop_set_message(t('You have used your one-time log-in link and are now logged-in.'));
-          watchdog('user', 'User %name used one-time password reset link at time %timestamp.', array('%name' => $account->name, '%timestamp' => format_date(REQUEST_TIME, 'long')));
+          watchdog('user', 'User %name used one-time password reset link at time %timestamp.', ['%name' => $account->name, '%timestamp' => format_date(REQUEST_TIME, 'long')]);
           backdrop_goto();
         }
         else {
@@ -262,21 +262,21 @@ function user_pass_reset_form($form, &$form_state, $account) {
     $form['#validate'][] = 'user_password_policy_validate';
     $description = _user_password_policy_help();
   }
-  $form['message'] = array(
+  $form['message'] = [
     '#markup' => t('<p>Please enter a new password to access your account.</p>'),
-  );
-  $form['pass'] = array(
+  ];
+  $form['pass'] = [
     '#type' => 'password_confirm',
     '#required' => TRUE,
     '#description' => $description,
-  );
-  $form['actions'] = array(
+  ];
+  $form['actions'] = [
     '#type' => 'actions',
-  );
-  $form['actions']['submit'] = array(
+  ];
+  $form['actions']['submit'] = [
     '#type' => 'submit',
     '#value' => t('Save password & log in'),
-  );
+  ];
 
   return $form;
 }
@@ -295,7 +295,7 @@ function user_pass_reset_form_submit($form, &$form_state) {
   // Clear any password reset flood events for this user.
   flood_clear_event('pass_reset_user', $user->uid);
   backdrop_set_message(t('Your account password has been updated.'));
-  watchdog('user', 'User %name used one-time password reset link at time %timestamp.', array('%name' => $form['#account']->name, '%timestamp' => format_date(REQUEST_TIME, 'long')));
+  watchdog('user', 'User %name used one-time password reset link at time %timestamp.', ['%name' => $form['#account']->name, '%timestamp' => format_date(REQUEST_TIME, 'long')]);
   backdrop_goto();
 }
 
@@ -313,7 +313,7 @@ function user_logout() {
 function user_logout_current_user() {
   global $user;
 
-  watchdog('user', 'Session closed for %name.', array('%name' => $user->name));
+  watchdog('user', 'Session closed for %name.', ['%name' => $user->name]);
 
   module_invoke_all('user_logout', $user);
 
@@ -374,24 +374,24 @@ function user_profile_form($form, &$form_state, $account) {
   $options = backdrop_parse_url($path);
   $options['attributes']['class'][] = 'form-cancel';
 
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
+  $form['actions'] = ['#type' => 'actions'];
+  $form['actions']['submit'] = [
     '#type' => 'submit',
     '#value' => t('Save'),
-  );
-  $form['actions']['cancel'] = array(
+  ];
+  $form['actions']['cancel'] = [
     '#type' => 'submit',
     '#value' => t('Cancel account'),
-    '#submit' => array('user_edit_cancel_submit'),
+    '#submit' => ['user_edit_cancel_submit'],
     '#access' => $account->uid > 1 && (($account->uid == $user->uid && user_access('cancel account')) || user_access('administer users')),
-  );
-  $form['actions']['cancel_form'] = array(
+  ];
+  $form['actions']['cancel_form'] = [
     '#type' => 'link',
     '#title' => t('Cancel'),
     '#href' => $options['path'],
     '#options' => $options,
     '#weight' => 1,
-  );
+  ];
 
   $form['#validate'][] = 'user_profile_form_validate';
   // Add the final user profile form submit handler.
@@ -441,13 +441,13 @@ function user_profile_form_submit($form, &$form_state) {
  * Submit handler for user_edit_cancel().
  */
 function user_edit_cancel_submit($form, &$form_state) {
-  $destination = array();
+  $destination = [];
   if (isset($_GET['destination'])) {
     $destination = backdrop_get_destination();
     unset($_GET['destination']);
   }
   // Note: We redirect from user/uid/edit to user/uid/cancel to make the tabs disappear.
-  $form_state['redirect'] = array("user/" . $form['#user']->uid . "/cancel", array('query' => $destination));
+  $form_state['redirect'] = ["user/" . $form['#user']->uid . "/cancel", ['query' => $destination]];
 }
 
 /**
@@ -460,45 +460,45 @@ function user_edit_cancel_submit($form, &$form_state) {
 function user_cancel_confirm_form($form, &$form_state, $account) {
   global $user;
 
-  $form['_account'] = array('#type' => 'value', '#value' => $account);
+  $form['_account'] = ['#type' => 'value', '#value' => $account];
 
   // Display account cancellation method selection, if allowed.
   $admin_access = user_access('administer users');
   $can_select_method = $admin_access || user_access('select account cancellation method');
-  $form['user_cancel_method'] = array(
+  $form['user_cancel_method'] = [
     '#type' => 'item',
     '#title' => ($account->uid == $user->uid ? t('When cancelling your account') : t('When cancelling the account')),
     '#access' => $can_select_method,
-  );
+  ];
   $form['user_cancel_method'] += user_cancel_methods();
 
   // Allow user administrators to skip the account cancellation confirmation
   // mail (by default), as long as they do not attempt to cancel their own
   // account.
   $override_access = $admin_access && ($account->uid != $user->uid);
-  $form['user_cancel_confirm'] = array(
+  $form['user_cancel_confirm'] = [
     '#type' => 'checkbox',
     '#title' => t('Require email confirmation to cancel account.'),
     '#default_value' => ($override_access ? FALSE : TRUE),
     '#access' => $override_access,
     '#description' => t('When enabled, the user must confirm the account cancellation via email.'),
-  );
+  ];
   // Also allow to send account canceled notification mail, if enabled.
   $default_notify = config_get('system.core', 'user_mail_status_canceled_notify');
-  $form['user_cancel_notify'] = array(
+  $form['user_cancel_notify'] = [
     '#type' => 'checkbox',
     '#title' => t('Notify user when account is canceled.'),
     '#default_value' => ($override_access ? FALSE : $default_notify),
     '#access' => $override_access && $default_notify,
     '#description' => t('When enabled, the user will receive an email notification after the account has been cancelled.'),
-  );
+  ];
 
   // Prepare confirmation form page title and description.
   if ($account->uid == $user->uid) {
     $question = t('Are you sure you want to cancel your account?');
   }
   else {
-    $question = t('Are you sure you want to cancel the account %name?', array('%name' => $account->name));
+    $question = t('Are you sure you want to cancel the account %name?', ['%name' => $account->name]);
   }
   $description = '';
   if ($can_select_method) {
@@ -519,7 +519,7 @@ function user_cancel_confirm_form($form, &$form_state, $account) {
   }
 
   // Always provide entity id in the same form key as in the entity edit form.
-  $form['uid'] = array('#type' => 'value', '#value' => $account->uid);
+  $form['uid'] = ['#type' => 'value', '#value' => $account->uid];
   return confirm_form($form,
     $question,
     'user/' . $account->uid,
@@ -552,7 +552,7 @@ function user_cancel_confirm_form_submit($form, &$form_state) {
     $account->save();
     _user_mail_notify('cancel_confirm', $account);
     backdrop_set_message(t('A confirmation request to cancel your account has been sent to your email address.'));
-    watchdog('user', 'Sent account cancellation request to %name %email.', array('%name' => $account->name, '%email' => '<' . $account->mail . '>'), WATCHDOG_NOTICE);
+    watchdog('user', 'Sent account cancellation request to %name %email.', ['%name' => $account->name, '%email' => '<' . $account->mail . '>'], WATCHDOG_NOTICE);
 
     $form_state['redirect'] = "user/$account->uid";
   }
@@ -572,39 +572,39 @@ function user_cancel_confirm_form_submit($form, &$form_state) {
 function user_cancel_methods() {
   $site_config = config('system.core');
   $anonymous_name = $site_config->get('anonymous');
-  $methods = array(
-    'user_cancel_block' => array(
+  $methods = [
+    'user_cancel_block' => [
       'title' => t('Disable the account and keep its content'),
       'description' => t('Your account will be blocked and you will no longer be able to log in. All of your content will remain attributed to your user name.'),
-    ),
-    'user_cancel_block_unpublish' => array(
+    ],
+    'user_cancel_block_unpublish' => [
       'title' => t('Disable the account and unpublish its content'),
       'description' => t('Your account will be blocked and you will no longer be able to log in. All of your content will be hidden from everyone but administrators.'),
-    ),
-    'user_cancel_reassign' => array(
-      'title' => t('Delete the account and make its content belong to the %anonymous-name user', array('%anonymous-name' => $anonymous_name)),
-      'description' => t('Your account will be removed and all account information deleted. All of your content will be assigned to the %anonymous-name user.', array('%anonymous-name' => $anonymous_name)),
-    ),
-    'user_cancel_delete' => array(
+    ],
+    'user_cancel_reassign' => [
+      'title' => t('Delete the account and make its content belong to the %anonymous-name user', ['%anonymous-name' => $anonymous_name]),
+      'description' => t('Your account will be removed and all account information deleted. All of your content will be assigned to the %anonymous-name user.', ['%anonymous-name' => $anonymous_name]),
+    ],
+    'user_cancel_delete' => [
       'title' => t('Delete the account and its content'),
       'description' => t('Your account will be removed and all account information deleted. All of your content will also be deleted.'),
       'access' => user_access('administer users'),
-    ),
-  );
+    ],
+  ];
   // Allow modules to customize account cancellation methods.
   backdrop_alter('user_cancel_methods', $methods);
 
   // Turn all methods into real form elements.
   $default_method = $site_config->get('user_cancel_method');
   foreach ($methods as $name => $method) {
-    $form[$name] = array(
+    $form[$name] = [
       '#type' => 'radio',
       '#title' => $method['title'],
       '#description' => (isset($method['description']) ? $method['description'] : NULL),
       '#return_value' => $name,
       '#default_value' => $default_method,
-      '#parents' => array('user_cancel_method'),
-    );
+      '#parents' => ['user_cancel_method'],
+    ];
   }
   return $form;
 }
@@ -624,9 +624,9 @@ function user_cancel_confirm($account, $timestamp = 0, $hashed_pass = '') {
   if (isset($account->data['user_cancel_method']) && !empty($timestamp) && !empty($hashed_pass)) {
     // Validate expiration and hashed password/login.
     if ($timestamp <= $current && $current - $timestamp < $timeout && $account->uid && $timestamp >= $account->login && $hashed_pass == user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid, $account->mail)) {
-      $edit = array(
+      $edit = [
         'user_cancel_notify' => isset($account->data['user_cancel_notify']) ? $account->data['user_cancel_notify'] : config_get('system.core', 'user_mail_status_canceled_notify'),
-      );
+      ];
       user_cancel($edit, $account->uid, $account->data['user_cancel_method']);
       // Since user_cancel() is not invoked via Form API, batch processing needs
       // to be invoked manually and should redirect to the home page after

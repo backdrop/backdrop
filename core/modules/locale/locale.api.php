@@ -51,7 +51,7 @@ function hook_locale_language_update($language) {
 function hook_locale_language_delete($language) {
   // On nodes with this language, unset the language
   db_update('node')
-    ->fields(array('language' => ''))
+    ->fields(['language' => ''])
     ->condition('language', $language->langcode)
     ->execute();
 }

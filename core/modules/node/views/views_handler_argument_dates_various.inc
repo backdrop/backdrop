@@ -171,6 +171,6 @@ class views_handler_argument_node_created_week extends views_handler_argument_da
    */
   function summary_name($data) {
     $created = $data->{$this->name_alias};
-    return t('Week @week', array('@week' => $created));
+    return t('Week @week', ['@week' => $created]);
   }
 }

@@ -13,13 +13,13 @@ class views_plugin_style_jump_menu extends views_plugin_style {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['hide'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['path'] = array('default' => '');
-    $options['text'] = array('default' => 'Go', 'translatable' => TRUE);
-    $options['label'] = array('default' => '', 'translatable' => TRUE);
-    $options['choose'] = array('default' => '- Choose -', 'translatable' => TRUE);
-    $options['inline'] = array('default' => TRUE, 'bool' => TRUE);
-    $options['default_value'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['hide'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['path'] = ['default' => ''];
+    $options['text'] = ['default' => 'Go', 'translatable' => TRUE];
+    $options['label'] = ['default' => '', 'translatable' => TRUE];
+    $options['choose'] = ['default' => '- Choose -', 'translatable' => TRUE];
+    $options['inline'] = ['default' => TRUE, 'bool' => TRUE];
+    $options['default_value'] = ['default' => FALSE, 'bool' => TRUE];
 
     return $options;
   }
@@ -31,70 +31,70 @@ class views_plugin_style_jump_menu extends views_plugin_style {
     parent::options_form($form, $form_state);
     $handlers = $this->display->handler->get_handlers('field');
     if (empty($handlers)) {
-      $form['error_markup'] = array(
+      $form['error_markup'] = [
         '#markup' => t('You need at least one field before you can configure your jump menu settings'),
         '#prefix' => '<div class="error messages">',
         '#suffix' => '</div>',
-      );
+      ];
       return;
     }
 
-    $form['markup'] = array(
+    $form['markup'] = [
       '#markup' => t('To properly configure a jump menu, you must select one field that will represent the path to utilize. You should then set that field to exclude. All other displayed fields will be part of the menu. Please note that all HTML will be stripped from this output as select boxes cannot show HTML.'),
       '#prefix' => '<div class="form-item description">',
       '#suffix' => '</div>',
-    );
+    ];
 
     foreach ($handlers as $id => $handler) {
       $options[$id] = $handler->ui_name();
     }
 
-    $form['path'] = array(
+    $form['path'] = [
       '#type' => 'select',
       '#title' => t('Path field'),
       '#options' => $options,
       '#default_value' => $this->options['path'],
-    );
+    ];
 
-    $form['hide'] = array(
+    $form['hide'] = [
       '#type' => 'checkbox',
       '#title' => t('Hide the "Go" button'),
       '#default_value' => !empty($this->options['hide']),
       '#description' => t('If hidden, this button will only be hidden for users with javascript and the page will automatically jump when the select is changed.'),
-    );
+    ];
 
-    $form['text'] = array(
+    $form['text'] = [
       '#type' => 'textfield',
       '#title' => t('Button text'),
       '#default_value' => $this->options['text'],
-    );
+    ];
 
-    $form['label'] = array(
+    $form['label'] = [
       '#type' => 'textfield',
       '#title' => t('Selector label'),
       '#default_value' => $this->options['label'],
       '#description' => t('The text that will appear as the the label of the selector element. If blank no label tag will be used.'),
-    );
+    ];
 
-    $form['choose'] = array(
+    $form['choose'] = [
       '#type' => 'textfield',
       '#title' => t('Choose text'),
       '#default_value' => $this->options['choose'],
       '#description' => t('The text that will appear as the selected option in the jump menu.'),
-    );
+    ];
 
-    $form['inline'] = array(
+    $form['inline'] = [
       '#type' => 'checkbox',
       '#title' => t('Set this field to display inline'),
       '#default_value' => !empty($this->options['inline']),
-    );
+    ];
 
-    $form['default_value'] = array(
+    $form['default_value'] = [
       '#type' => 'checkbox',
       '#title' => t('Select the current contextual filter value'),
       '#default_value' => !empty($this->options['default_value']),
       '#description' => t('If checked, the current path will be displayed as the default option in the jump menu, if applicable.'),
-    );
+    ];
   }
 
   /**
@@ -107,8 +107,8 @@ class views_plugin_style_jump_menu extends views_plugin_style {
 
     // Turn this all into an $options array for the jump menu.
     $this->view->row_index = 0;
-    $options = array();
-    $paths = array();
+    $options = [];
+    $paths = [];
 
     foreach ($sets as $title => $records) {
       foreach ($records as $row_index => $row) {
@@ -142,7 +142,7 @@ class views_plugin_style_jump_menu extends views_plugin_style {
 
     $default_value = '';
     if ($this->options['default_value']) {
-      $lookup_options = array();
+      $lookup_options = [];
       // We need to check if the path is absolute, or else language is not taken
       // into account.
       if (!empty($this->view->display[$this->view->current_display]->display_options['fields'][$this->options['path']]['absolute'])) {
@@ -154,21 +154,21 @@ class views_plugin_style_jump_menu extends views_plugin_style {
       }
     }
 
-    $settings = array(
+    $settings = [
       'hide' => $this->options['hide'],
       'button' => $this->options['text'],
       'title' => $this->options['label'],
       'choose' => $this->options['choose'],
       'inline' => $this->options['inline'],
       'default_value' => $default_value,
-    );
+    ];
 
     $form = backdrop_get_form('system_jump_menu', $options, $settings);
     return $form;
   }
 
   function render_set($title, $records) {
-    $options = array();
+    $options = [];
     $fields = $this->rendered_fields;
   }
 }

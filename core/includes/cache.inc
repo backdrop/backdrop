@@ -379,7 +379,7 @@ class BackdropNullCache implements BackdropCacheInterface {
    * Implements BackdropCacheInterface::getMultiple().
    */
   function getMultiple(array &$cids) {
-    return array();
+    return [];
   }
 
   /**
@@ -455,7 +455,7 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
    * Implements BackdropCacheInterface::get().
    */
   function get($cid) {
-    $cids = array($cid);
+    $cids = [$cid];
     $cache = $this->getMultiple($cids);
     return reset($cache);
   }
@@ -472,8 +472,8 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
       // is used here only due to the performance overhead we would incur
       // otherwise. When serving an uncached page, the overhead of using
       // db_select() is a much smaller proportion of the request.
-      $result = db_query('SELECT cid, data, created, expire, serialized FROM {' . db_escape_table($this->bin) . '} WHERE cid IN (:cids)', array(':cids' => $cids));
-      $cache = array();
+      $result = db_query('SELECT cid, data, created, expire, serialized FROM {' . db_escape_table($this->bin) . '} WHERE cid IN (:cids)', [':cids' => $cids]);
+      $cache = [];
       foreach ($result as $item) {
         $item = $this->prepareItem($item);
         if ($item) {
@@ -486,7 +486,7 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
     catch (Exception $e) {
       // If the database is never going to be available, cache requests should
       // return FALSE in order to allow exception handling to occur.
-      return array();
+      return [];
     }
   }
 
@@ -519,11 +519,11 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
    * Implements BackdropCacheInterface::set().
    */
   function set($cid, $data, $expire = CACHE_PERMANENT) {
-    $fields = array(
+    $fields = [
       'serialized' => 0,
       'created' => REQUEST_TIME,
       'expire' => $expire,
-    );
+    ];
     if (!is_string($data)) {
       $fields['data'] = serialize($data);
       $fields['serialized'] = 1;
@@ -535,7 +535,7 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
 
     try {
       db_merge($this->bin)
-        ->key(array('cid' => $cid))
+        ->key(['cid' => $cid])
         ->fields($fields)
         ->execute();
     }

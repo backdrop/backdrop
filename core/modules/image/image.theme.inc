@@ -26,10 +26,10 @@
  */
 function theme_image_style($variables) {
   // Determine the dimensions of the styled image.
-  $dimensions = array(
+  $dimensions = [
     'width' => $variables['width'],
     'height' => $variables['height'],
-  );
+  ];
 
   image_style_transform_dimensions($variables['style_name'], $dimensions);
 
@@ -54,62 +54,62 @@ function theme_image_style($variables) {
 function theme_image_style_list($variables) {
   $styles = $variables['styles'];
 
-  $header = array(t('Style name'), t('Storage state'), array('data' => t('Operations'), 'colspan' => 3));
-  $rows = array();
+  $header = [t('Style name'), t('Storage state'), ['data' => t('Operations'), 'colspan' => 3]];
+  $rows = [];
   foreach ($styles as $style) {
-    $row = array();
-    $row[] = theme('label_machine_name__image_style', array(
+    $row = [];
+    $row[] = theme('label_machine_name__image_style', [
       'label' => $style['label'],
       'machine_name' => $style['name'],
-    ));
+    ]);
 
-    $links = array();
-    $links['configure'] = array(
+    $links = [];
+    $links['configure'] = [
       'title' => t('Configure'),
       'href' => 'admin/config/media/image-styles/configure/' . $style['name'],
-    );
+    ];
     if (module_exists('config') && user_access('synchronize configuration')) {
-      $links['export'] = array(
+      $links['export'] = [
         'title' => t('Export'),
         'href' => 'admin/config/development/configuration/single/export',
-        'query' => array(
+        'query' => [
           'group' => 'Image styles',
           'name' => 'image.style.' . $style['name'],
-        ),
-      );
+        ],
+      ];
     }
 
     if ($style['storage'] == IMAGE_STORAGE_NORMAL) {
       $row[] = t('Custom');
-      $links['delete'] = array(
+      $links['delete'] = [
         'title' => t('Delete'),
         'href' => 'admin/config/media/image-styles/delete/' . $style['name'],
-      );
+      ];
     }
     elseif ($style['storage'] == IMAGE_STORAGE_OVERRIDE) {
       $row[] = t('Overridden');
-      $links['delete'] = array(
+      $links['delete'] = [
         'title' => t('Revert'),
         'href' => 'admin/config/media/image-styles/revert/' . $style['name'],
-      );
+      ];
     }
     else {
       $row[] = t('Default (module-provided)');
     }
-    $row[] = array(
-      'data' => array(
+    $row[] = [
+      'data' => [
         '#type' => 'operations',
         '#links' => $links,
-      ),
-    );
+      ],
+    ];
     $rows[] = $row;
   }
 
-  return theme('table', array(
+  return theme('table', [
     'header' => $header,
     'rows' => $rows,
-    'empty' => t('There are currently no styles. <a href="!url">Add a new one</a>.', array('!url' => url('admin/config/media/image-styles/add'))),
-  ));
+    'empty' => t('There are currently no styles. <a href="!url">Add a new one</a>.', ['!url' => url('admin/config/media/image-styles/add')]),
+  ]);
 }
 
 /**
@@ -124,11 +124,11 @@ function theme_image_style_list($variables) {
 function theme_image_style_effects($variables) {
   $form = $variables['form'];
 
-  $rows = array();
+  $rows = [];
 
   foreach (element_children($form) as $key) {
-    $row = array();
-    $form[$key]['weight']['#attributes']['class'] = array('image-effect-order-weight');
+    $row = [];
+    $form[$key]['weight']['#attributes']['class'] = ['image-effect-order-weight'];
     if (is_numeric($key)) {
       $summary = backdrop_render($form[$key]['summary']);
       $row[] = backdrop_render($form[$key]['label']) . (empty($summary) ? '' : ' ' . $summary);
@@ -143,27 +143,27 @@ function theme_image_style_effects($variables) {
     }
 
     if (!isset($form[$key]['#access']) || $form[$key]['#access']) {
-      $rows[] = array(
+      $rows[] = [
         'data' => $row,
-        'class' => array('draggable'),
-      );
+        'class' => ['draggable'],
+      ];
     }
   }
 
-  $header = array(
+  $header = [
     t('Effect'),
     t('Weight'),
     t('Operations'),
-  );
+  ];
 
   if (count($rows) == 1) {
-    array_unshift($rows, array(array(
+    array_unshift($rows, [[
       'data' => t('There are currently no effects in this style. Add one by selecting an option below.'),
       'colspan' => 3,
-    )));
+    ]]);
   }
 
-  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'image-style-effects')));
+  $output = theme('table', ['header' => $header, 'rows' => $rows, 'attributes' => ['id' => 'image-style-effects']]);
   backdrop_add_tabledrag('image-style-effects', 'order', 'sibling', 'image-effect-order-weight');
   return $output;
 }
@@ -195,7 +195,7 @@ function theme_image_style_preview($variables) {
     $original_height = min($original_image['height'], $sample_height);
     $original_width = round($original_height / $original_image['height'] * $original_image['width']);
   }
-  $original_attributes = array_intersect_key($original_image, array('width' => '', 'height' => ''));
+  $original_attributes = array_intersect_key($original_image, ['width' => '', 'height' => '']);
   $original_attributes['style'] = 'width: ' . $original_width . 'px; height: ' . $original_height . 'px;';
 
   // Set up preview file information.
@@ -212,7 +212,7 @@ function theme_image_style_preview($variables) {
     $preview_height = min($preview_image['height'], $sample_height);
     $preview_width = round($preview_height / $preview_image['height'] * $preview_image['width']);
   }
-  $preview_attributes = array_intersect_key($preview_image, array('width' => '', 'height' => ''));
+  $preview_attributes = array_intersect_key($preview_image, ['width' => '', 'height' => '']);
   $preview_attributes['style'] = 'width: ' . $preview_width . 'px; height: ' . $preview_height . 'px;';
 
   // In the previews, timestamps are added to prevent caching of images.
@@ -223,7 +223,7 @@ function theme_image_style_preview($variables) {
   $output .= '<div class="preview-image-wrapper">';
   $output .= t('original') . ' (' . l(t('view actual size'), $original_url) . ')';
   $output .= '<div class="preview-image original-image" style="' . $original_attributes['style'] . '">';
-  $output .= '<a href="' . $original_url . '">' . theme('image', array('path' => $original_path, 'alt' => t('Sample original image'), 'title' => '', 'attributes' => $original_attributes)) . '</a>';
+  $output .= '<a href="' . $original_url . '">' . theme('image', ['path' => $original_path, 'alt' => t('Sample original image'), 'title' => '', 'attributes' => $original_attributes]) . '</a>';
   $output .= '<div class="height" style="height: ' . $original_height . 'px"><span>' . $original_image['height'] . 'px</span></div>';
   $output .= '<div class="width" style="width: ' . $original_width . 'px"><span>' . $original_image['width'] . 'px</span></div>';
   $output .= '</div>'; // End preview-image.
@@ -234,7 +234,7 @@ function theme_image_style_preview($variables) {
   $output .= '<div class="preview-image-wrapper">';
   $output .= check_plain($style['label']) . ' (' . l(t('view actual size'), file_create_url($preview_file) . '?' . time()) . ')';
   $output .= '<div class="preview-image modified-image" style="' . $preview_attributes['style'] . '">';
-  $output .= '<a href="' . file_create_url($preview_file) . '?' . time() . '">' . theme('image', array('uri' => $preview_url, 'alt' => t('Sample modified image'), 'title' => '', 'attributes' => $preview_attributes)) . '</a>';
+  $output .= '<a href="' . file_create_url($preview_file) . '?' . time() . '">' . theme('image', ['uri' => $preview_url, 'alt' => t('Sample modified image'), 'title' => '', 'attributes' => $preview_attributes]) . '</a>';
   $output .= '<div class="height" style="height: ' . $preview_height . 'px"><span>' . $preview_image['height'] . 'px</span></div>';
   $output .= '<div class="width" style="width: ' . $preview_width . 'px"><span>' . $preview_image['width'] . 'px</span></div>';
   $output .= '</div>'; // End preview-image.
@@ -257,19 +257,19 @@ function theme_image_style_preview($variables) {
 function theme_image_anchor($variables) {
   $element = $variables['element'];
 
-  $rows = array();
-  $row = array();
+  $rows = [];
+  $row = [];
   foreach (element_children($element) as $n => $key) {
     $element[$key]['#attributes']['title'] = $element[$key]['#title'];
     unset($element[$key]['#title']);
     $row[] = backdrop_render($element[$key]);
     if ($n % 3 == 3 - 1) {
       $rows[] = $row;
-      $row = array();
+      $row = [];
     }
   }
 
-  return theme('table', array('header' => array(), 'rows' => $rows, 'attributes' => array('class' => array('image-anchor'))));
+  return theme('table', ['header' => [], 'rows' => $rows, 'attributes' => ['class' => ['image-anchor']]]);
 }
 
 /**
@@ -288,7 +288,7 @@ function theme_image_resize_summary($variables) {
     return check_plain($data['width']) . 'x' . check_plain($data['height']);
   }
   else {
-    return ($data['width']) ? t('width @width', array('@width' => $data['width'])) : t('height @height', array('@height' => $data['height']));
+    return ($data['width']) ? t('width @width', ['@width' => $data['width']]) : t('height @height', ['@height' => $data['height']]);
   }
 }
 
@@ -303,7 +303,7 @@ function theme_image_resize_summary($variables) {
  */
 function theme_image_scale_summary($variables) {
   $data = $variables['data'];
-  return theme('image_resize_summary', array('data' => $data)) . ' ' . ($data['upscale'] ? '(' . t('upscaling allowed') . ')' : '');
+  return theme('image_resize_summary', ['data' => $data]) . ' ' . ($data['upscale'] ? '(' . t('upscaling allowed') . ')' : '');
 }
 
 /**
@@ -330,7 +330,7 @@ function theme_image_crop_summary($variables) {
  */
 function theme_image_rotate_summary($variables) {
   $data = $variables['data'];
-  return ($data['random']) ? t('random between -@degrees&deg and @degrees&deg', array('@degrees' => str_replace('-', '', $data['degrees']))) : t('@degrees&deg', array('@degrees' => $data['degrees']));
+  return ($data['random']) ? t('random between -@degrees&deg and @degrees&deg', ['@degrees' => str_replace('-', '', $data['degrees'])]) : t('@degrees&deg', ['@degrees' => $data['degrees']]);
 }
 
 /**
@@ -395,7 +395,7 @@ function theme_image_formatter($variables) {
   // processed, the link path must at least be an empty string.
   if (isset($variables['path']['path'])) {
     $path = $variables['path']['path'];
-    $options = isset($variables['path']['options']) ? $variables['path']['options'] : array();
+    $options = isset($variables['path']['options']) ? $variables['path']['options'] : [];
     // When displaying an image inside a link, the html option must be TRUE.
     $options['html'] = TRUE;
     $output = l($output, $path, $options);

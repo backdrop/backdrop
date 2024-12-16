@@ -12,9 +12,9 @@ class DashboardTaxonomyBlock extends Block {
     parent::__construct($plugin_name, $data);
 
     // Set defaults.
-    $this->settings += array(
-      'vocabularies' => array(),
-    );
+    $this->settings += [
+      'vocabularies' => [],
+    ];
   }
 
   /**
@@ -59,18 +59,18 @@ class DashboardTaxonomyBlock extends Block {
     // vocabularies.
     $vocabularies = taxonomy_vocabulary_load_multiple($allowed_vocabularies);
 
-    $rows = array();
+    $rows = [];
     // Flag that determines whether the block should be rendered or not.
     $no_access = TRUE;
     foreach ($vocabularies as $vocabulary) {
-      $term_count = db_query("SELECT count(*) FROM {taxonomy_term_data} WHERE vocabulary = :name", array(':name' => $vocabulary->machine_name))->fetchField();
+      $term_count = db_query("SELECT count(*) FROM {taxonomy_term_data} WHERE vocabulary = :name", [':name' => $vocabulary->machine_name])->fetchField();
       $terms = format_plural($term_count, '1 term', '@count terms');
 
       module_load_include('inc', 'taxonomy', 'taxonomy.admin');
       $operations = _vocabulary_get_operations($vocabulary);
       foreach ($operations as $operation => $link) {
         // We only need a specific set of operations in the Taxonomy block.
-        if (!in_array($operation, array('list', 'add', 'configure'))) {
+        if (!in_array($operation, ['list', 'add', 'configure'])) {
           // Remove the rest.
           unset($operations[$operation]);
         }
@@ -86,47 +86,47 @@ class DashboardTaxonomyBlock extends Block {
         $no_access = FALSE;
       }
 
-      $operations = array(
+      $operations = [
         '#type' => 'operations',
         '#links' => $operations,
-      );
+      ];
 
-      $rows[] = array(
-        'data' => array(
+      $rows[] = [
+        'data' => [
           check_plain(t($vocabulary->name)),
           $terms,
           backdrop_render($operations),
-        ),
-      );
+        ],
+      ];
     }
 
     // If there are existing vocabularies, but the user has no access to perform
     // any operation to any of them, hide the block completely.
     if ($no_access) {
-      return array();
+      return [];
     }
 
-    $header = array(
-      array('data' => t('Vocabulary')),
-      array('data' => t('Terms')),
-      array('data' => t('Operations')),
-    );
+    $header = [
+      ['data' => t('Vocabulary')],
+      ['data' => t('Terms')],
+      ['data' => t('Operations')],
+    ];
 
-    $panel = array(
+    $panel = [
       '#theme' => 'dashboard_panel__taxonomy',
-    );
-    $panel['table'] = array(
+    ];
+    $panel['table'] = [
       '#theme' => 'table',
       '#header' => $header,
       '#rows' => $rows,
       '#empty' => t('There are no vocabularies to display.'),
-    );
+    ];
     if (user_access('administer taxonomy')) {
-      $panel['link'] = array(
+      $panel['link'] = [
         '#theme' => 'link',
         '#path' => 'admin/structure/taxonomy',
         '#text' => t('Manage taxonomy'),
-      );
+      ];
     }
 
     return $panel;
@@ -143,19 +143,19 @@ class DashboardTaxonomyBlock extends Block {
     }
 
     $vocabularies = taxonomy_get_vocabularies();
-    $options = array();
+    $options = [];
     foreach ($vocabularies as $machine => $vocabulary) {
       $options[$machine] = check_plain(t($vocabulary->name));
     }
 
-    $form['vocabularies'] = array(
+    $form['vocabularies'] = [
       '#type' => 'checkboxes',
       '#title' => t('Display the following Vocabularies'),
       '#multiple' => TRUE,
       '#options' => $options,
       // An empty array indicates enabled on all.
       '#default_value' => empty($this->settings['vocabularies']) ? array_keys($options) : $this->settings['vocabularies'],
-    );
+    ];
   }
 
   /**
@@ -167,7 +167,7 @@ class DashboardTaxonomyBlock extends Block {
     // If all types are checked, save nothing, indicating all types are allowed.
     $checked_vocabularies = array_filter($form_state['values']['vocabularies']);
     if (count($form['vocabularies']['#options']) === count($checked_vocabularies)) {
-      $this->settings['vocabularies'] = array();
+      $this->settings['vocabularies'] = [];
     }
     else {
       $this->settings['vocabularies'] = array_values($checked_vocabularies);

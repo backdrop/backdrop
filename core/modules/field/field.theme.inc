@@ -106,29 +106,29 @@ function theme_field_multiple_value_form($variables) {
     $order_class = $element['#field_name'] . '-delta-order';
     $required = !empty($element['#required']) ? theme('form_required_marker', $variables) : '';
 
-    $header = array(
-      array(
-        'data' => '<label>' . t('!title !required', array('!title' => $element['#title'], '!required' => $required)) . "</label>",
+    $header = [
+      [
+        'data' => '<label>' . t('!title !required', ['!title' => $element['#title'], '!required' => $required]) . "</label>",
         'colspan' => 2,
-        'class' => array('field-label'),
-      ),
+        'class' => ['field-label'],
+      ],
       t('Order'),
-    );
-    $rows = array();
+    ];
+    $rows = [];
 
     if ($element['#description']) {
       $description = '<div class="description">' . $element['#description'] . '</div>';
-      $rows[] = array(
-        'data' => array(
-          array('data' => ''),
-          array('data' => $description, 'colspan' => 3),
-        ),
-      );
+      $rows[] = [
+        'data' => [
+          ['data' => ''],
+          ['data' => $description, 'colspan' => 3],
+        ],
+      ];
     }
 
     // Sort items according to '_weight' (needed when the form comes back after
     // preview or failed validation)
-    $items = array();
+    $items = [];
     foreach (element_children($element) as $key) {
       if ($key === 'add_more') {
         $add_more_button = &$element[$key];
@@ -141,29 +141,29 @@ function theme_field_multiple_value_form($variables) {
 
     // Add the items as table rows.
     foreach ($items as $key => $item) {
-      $item['_weight']['#attributes']['class'] = array($order_class);
+      $item['_weight']['#attributes']['class'] = [$order_class];
       $delta_element = backdrop_render($item['_weight']);
-      $cells = array(
-        array('data' => '', 'class' => array('field-multiple-drag')),
+      $cells = [
+        ['data' => '', 'class' => ['field-multiple-drag']],
         backdrop_render($item),
-        array('data' => $delta_element, 'class' => array('delta-order')),
-      );
-      $rows[] = array(
+        ['data' => $delta_element, 'class' => ['delta-order']],
+      ];
+      $rows[] = [
         'data' => $cells,
-        'class' => array('draggable'),
-      );
+        'class' => ['draggable'],
+      ];
     }
 
     $add_more = backdrop_render($add_more_button);
-    $rows[] = array(
-      'data' => array(
-        array('data' => ''),
-        array('data' => $add_more, 'colspan' => 2),
-      ),
-    );
+    $rows[] = [
+      'data' => [
+        ['data' => ''],
+        ['data' => $add_more, 'colspan' => 2],
+      ],
+    ];
 
     $output = '<div class="form-item">';
-    $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => $table_id, 'class' => array('field-multiple-table'))));
+    $output .= theme('table', ['header' => $header, 'rows' => $rows, 'attributes' => ['id' => $table_id, 'class' => ['field-multiple-table']]]);
     $output .= '</div>';
 
     backdrop_add_tabledrag($table_id, 'order', 'sibling', $order_class);
@@ -185,9 +185,9 @@ function theme_field_multiple_value_form($variables) {
  */
 function template_preprocess_field(&$variables, $hook) {
   $element = $variables['element'];
-  $variables['attributes'] = array();
-  $variables['content_attributes'] = array();
-  $variables['item_attributes'] = array();
+  $variables['attributes'] = [];
+  $variables['content_attributes'] = [];
+  $variables['item_attributes'] = [];
 
   // There's some overhead in calling check_plain() so only call it if the label
   // variable is being displayed. Otherwise, set it to NULL to avoid PHP
@@ -203,11 +203,11 @@ function template_preprocess_field(&$variables, $hook) {
   // (deltas) should always be a subset of the keys in #items, and looping on
   // those keys is faster than calling element_children() or looping on all keys
   // within $element, since that requires traversal of all element properties.
-  $variables['items'] = array();
+  $variables['items'] = [];
   foreach ($element['#items'] as $delta => $item) {
     if (!empty($element[$delta])) {
       $variables['items'][$delta] = $element[$delta];
-      $variables['item_attributes'][$delta] = array();
+      $variables['item_attributes'][$delta] = [];
     }
   }
 
@@ -216,12 +216,12 @@ function template_preprocess_field(&$variables, $hook) {
   // backdrop_html_class().
   $variables['field_name_css'] = strtr($element['#field_name'], '_', '-');
   $variables['field_type_css'] = strtr($element['#field_type'], '_', '-');
-  $variables['classes'] = array(
+  $variables['classes'] = [
     'field',
     'field-name-' . $variables['field_name_css'],
     'field-type-' . $variables['field_type_css'],
     'field-label-' . $element['#label_display'],
-  );
+  ];
   // Add a "clearfix" class to the wrapper since we float the label and the
   // field items in field.css if the label is inline.
   if ($element['#label_display'] == 'inline') {
@@ -229,11 +229,11 @@ function template_preprocess_field(&$variables, $hook) {
   }
 
   // Add specific suggestions that can override the default implementation.
-  $variables['theme_hook_suggestions'] = array(
+  $variables['theme_hook_suggestions'] = [
     'field__' . $element['#field_type'],
     'field__' . $element['#field_name'],
     'field__' . $element['#bundle'],
     'field__' . $element['#field_name'] . '__' . $element['#bundle'],
-  );
+  ];
 }
 

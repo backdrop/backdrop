@@ -14,8 +14,8 @@ class views_plugin_row_comment_rss extends views_plugin_row {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['item_length'] = array('default' => 'default');
-    $options['links'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['item_length'] = ['default' => 'default'];
+    $options['links'] = ['default' => FALSE, 'bool' => TRUE];
 
     return $options;
   }
@@ -23,23 +23,23 @@ class views_plugin_row_comment_rss extends views_plugin_row {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
-    $form['item_length'] = array(
+    $form['item_length'] = [
       '#type' => 'select',
       '#title' => t('Display type'),
       '#options' => $this->options_form_summary_options(),
       '#default_value' => $this->options['item_length'],
-    );
-    $form['links'] = array(
+    ];
+    $form['links'] = [
       '#type' => 'checkbox',
       '#title' => t('Display links'),
       '#default_value' => $this->options['links'],
-    );
+    ];
   }
 
 
   function pre_render($result) {
-    $cids = array();
-    $nids = array();
+    $cids = [];
+    $nids = [];
 
     foreach ($result as $row) {
       $cids[] = $row->cid;
@@ -63,7 +63,7 @@ class views_plugin_row_comment_rss extends views_plugin_row {
    */
   function options_form_summary_options() {
     $entity_info = entity_get_info('node');
-    $options = array();
+    $options = [];
     if (!empty($entity_info['view modes'])) {
       foreach ($entity_info['view modes'] as $mode => $settings) {
         $options[$mode] = $settings['label'];
@@ -97,23 +97,23 @@ class views_plugin_row_comment_rss extends views_plugin_row {
     $item_text = '';
 
     $uri = entity_uri('comment', $comment);
-    $comment->link = url($uri['path'], $uri['options'] + array('absolute' => TRUE));
-    $comment->rss_namespaces = array();
-    $comment->rss_elements = array(
-      array(
+    $comment->link = url($uri['path'], $uri['options'] + ['absolute' => TRUE]);
+    $comment->rss_namespaces = [];
+    $comment->rss_elements = [
+      [
         'key' => 'pubDate',
         'value' => gmdate('r', $comment->created),
-      ),
-      array(
+      ],
+      [
         'key' => 'dc:creator',
         'value' => user_format_name($comment),
-      ),
-      array(
+      ],
+      [
         'key' => 'guid',
         'value' => 'comment ' . $comment->cid . ' at ' . $base_url,
-        'attributes' => array('isPermaLink' => 'false'),
-      ),
-    );
+        'attributes' => ['isPermaLink' => 'false'],
+      ],
+    ];
 
     // The comment gets built and modules add to or modify
     // $comment->rss_elements and $comment->rss_namespaces.
@@ -142,10 +142,10 @@ class views_plugin_row_comment_rss extends views_plugin_row {
     $item->elements = $comment->rss_elements;
     $item->cid = $comment->cid;
 
-    return theme($this->theme_functions(), array(
+    return theme($this->theme_functions(), [
       'view' => $this->view,
       'options' => $this->options,
       'row' => $item
-    ));
+    ]);
   }
 }

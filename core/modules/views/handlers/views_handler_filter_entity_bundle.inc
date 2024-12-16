@@ -59,9 +59,9 @@ class views_handler_filter_entity_bundle extends views_handler_filter_in_operato
     if (!isset($this->value_options)) {
       $info = entity_get_info($this->entity_type);
       $types = $info['bundles'];
-      $this->value_title = t('@entity types', array('@entity' => $info['label']));
+      $this->value_title = t('@entity types', ['@entity' => $info['label']]);
 
-      $options = array();
+      $options = [];
       foreach ($types as $type => $info) {
         $options[$type] = t($info['label']);
       }
@@ -81,12 +81,12 @@ class views_handler_filter_entity_bundle extends views_handler_filter_in_operato
     // Adjust the join for the comment case.
     if ($this->entity_type == 'comment') {
       $join = new views_join();
-      $def = array(
+      $def = [
         'table' => 'node',
         'field' => 'nid',
         'left_table' => $this->table_alias,
         'left_field' => 'nid',
-      );
+      ];
       $join->definition = $def;
       $join->construct();
       $join->adjusted = TRUE;
@@ -100,12 +100,12 @@ class views_handler_filter_entity_bundle extends views_handler_filter_in_operato
     }
     elseif ($this->entity_type == 'taxonomy_term') {
       $join = new views_join();
-      $def = array(
+      $def = [
         'table' => 'taxonomy_vocabulary',
         'field' => 'vid',
         'left_table' => $this->table_alias,
         'left_field' => 'vid',
-      );
+      ];
       $join->definition = $def;
       $join->construct();
       $join->adjusted = TRUE;

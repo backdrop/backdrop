@@ -17,22 +17,22 @@ class views_handler_filter_equality extends views_handler_filter {
    * Provide simple equality operator
    */
   function operator_options() {
-    return array(
+    return [
       '=' => t('Is equal to'),
       '!=' => t('Is not equal to'),
-    );
+    ];
   }
 
   /**
    * Provide a simple textfield for equality
    */
   function value_form(&$form, &$form_state) {
-    $form['value'] = array(
+    $form['value'] = [
       '#type' => 'textfield',
       '#title' => t('Value'),
       '#size' => 30,
       '#default_value' => $this->value,
-    );
+    ];
 
     if (!empty($form_state['exposed'])) {
       $identifier = $this->options['expose']['identifier'];

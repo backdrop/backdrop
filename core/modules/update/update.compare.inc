@@ -53,7 +53,7 @@
  * @see update_project_cache()
  */
 function update_get_projects() {
-  $projects = &backdrop_static(__FUNCTION__, array());
+  $projects = &backdrop_static(__FUNCTION__, []);
   if (empty($projects)) {
     // Retrieve the projects from cache, if present.
     $projects = update_project_cache('update_project_projects');
@@ -208,14 +208,14 @@ function _update_process_info_list(&$projects, $list, $project_type, $status) {
     // themes that are "required by" the project.
     if ($project_name == 'backdrop') {
       // Backdrop core is always required, so this extra info would be noise.
-      $sub_themes = array();
-      $base_themes = array();
+      $sub_themes = [];
+      $base_themes = [];
     }
     else {
       // Add list of enabled sub-themes.
-      $sub_themes = !empty($file->enabled_sub_themes) ? $file->enabled_sub_themes : array();
+      $sub_themes = !empty($file->enabled_sub_themes) ? $file->enabled_sub_themes : [];
       // Add list of base themes.
-      $base_themes = !empty($file->base_themes) ? $file->base_themes : array();
+      $base_themes = !empty($file->base_themes) ? $file->base_themes : [];
     }
 
     // The file info arrays for modules and themes have the human-readable name
@@ -228,18 +228,18 @@ function _update_process_info_list(&$projects, $list, $project_type, $status) {
     if (!isset($projects[$project_name])) {
       // Only process this if we haven't done this project, since a single
       // project can have multiple modules, themes, or layout templates.
-      $projects[$project_name] = array(
+      $projects[$project_name] = [
         'name' => $project_name,
         // Only save attributes from the .info file we care about, so we do not
         // bloat our RAM usage needlessly.
         'info' => update_filter_project_info($file->info),
         'datestamp' => $file->info['datestamp'],
-        'includes' => array($file->name => $includes_name),
+        'includes' => [$file->name => $includes_name],
         'project_type' => $project_name == 'backdrop' ? 'core' : $project_display_type,
         'project_status' => $status,
         'sub_themes' => $sub_themes,
         'base_themes' => $base_themes,
-      );
+      ];
     }
     elseif ($projects[$project_name]['project_type'] == $project_display_type) {
       // Only add the file we're processing to the 'includes' array for this
@@ -315,7 +315,7 @@ function update_process_project_info(&$projects) {
       // Figure out what the currently installed major version is. We need
       // to handle both contribution (e.g. "5.x-1.3", major = 1) and core
       // (e.g. "5.1", major = 5) version strings.
-      $matches = array();
+      $matches = [];
       if (preg_match('/^(\d+\.x-)?(\d+)\..*$/', $info['version'], $matches)) {
         $info['major'] = $matches[2];
       }
@@ -458,7 +458,7 @@ function update_calculate_project_data($available) {
  *   Data about available project releases of a specific project.
  */
 function update_calculate_project_update_status(&$project_data, $available) {
-  foreach (array('title', 'link') as $attribute) {
+  foreach (['title', 'link'] as $attribute) {
     if (!isset($project_data[$attribute]) && isset($available[$attribute])) {
       $project_data[$attribute] = $available[$attribute];
     }
@@ -471,36 +471,36 @@ function update_calculate_project_update_status(&$project_data, $available) {
       case 'insecure':
         $project_data['status'] = UPDATE_NOT_SECURE;
         if (empty($project_data['extra'])) {
-          $project_data['extra'] = array();
+          $project_data['extra'] = [];
         }
-        $project_data['extra'][] = array(
-          'class' => array('project-not-secure'),
+        $project_data['extra'][] = [
+          'class' => ['project-not-secure'],
           'label' => t('Project not secure'),
           'data' => t('This project has been labeled insecure by the Backdrop security team, and is no longer available for download. Immediately disabling everything included by this project is strongly recommended!'),
-        );
+        ];
         break;
       case 'unpublished':
       case 'revoked':
         $project_data['status'] = UPDATE_REVOKED;
         if (empty($project_data['extra'])) {
-          $project_data['extra'] = array();
+          $project_data['extra'] = [];
         }
-        $project_data['extra'][] = array(
-          'class' => array('project-revoked'),
+        $project_data['extra'][] = [
+          'class' => ['project-revoked'],
           'label' => t('Project revoked'),
           'data' => t('This project has been revoked, and is no longer available for download. Disabling everything included by this project is strongly recommended!'),
-        );
+        ];
         break;
       case 'unsupported':
         $project_data['status'] = UPDATE_NOT_SUPPORTED;
         if (empty($project_data['extra'])) {
-          $project_data['extra'] = array();
+          $project_data['extra'] = [];
         }
-        $project_data['extra'][] = array(
-          'class' => array('project-not-supported'),
+        $project_data['extra'][] = [
+          'class' => ['project-not-supported'],
           'label' => t('Project not supported'),
           'data' => t('This project is no longer supported, and is no longer available for download. Disabling everything included by this project is strongly recommended!'),
-        );
+        ];
         break;
       case 'not-fetched':
         $project_data['status'] = UPDATE_NOT_FETCHED;
@@ -509,11 +509,11 @@ function update_calculate_project_update_status(&$project_data, $available) {
       case 'not-implemented':
         $project_data['status'] = UPDATE_NOT_IMPLEMENTED;
         $project_data['reason'] = t('Update server is not yet implemented.');
-        $project_data['extra'][] = array(
-          'class' => array('project-not-implemented'),
+        $project_data['extra'][] = [
+          'class' => ['project-not-implemented'],
           'label' => t('Status unknown'),
           'data' => t('The update server for this project is not yet implemented. Once completed, the update server will start reporting available updates here. Until then, please check for updates manually.'),
-        );
+        ];
         break;
 
       default:
@@ -532,7 +532,7 @@ function update_calculate_project_update_status(&$project_data, $available) {
 
   // Figure out the target major version.
   $existing_major = $project_data['existing_major'];
-  $supported_majors = array();
+  $supported_majors = [];
   if (isset($available['supported_majors'])) {
     $supported_majors = explode(',', $available['supported_majors']);
   }
@@ -602,25 +602,25 @@ function update_calculate_project_update_status(&$project_data, $available) {
       elseif ($release['status'] == 'unpublished') {
         $project_data['status'] = UPDATE_REVOKED;
         if (empty($project_data['extra'])) {
-          $project_data['extra'] = array();
+          $project_data['extra'] = [];
         }
-        $project_data['extra'][] = array(
-          'class' => array('release-revoked'),
+        $project_data['extra'][] = [
+          'class' => ['release-revoked'],
           'label' => t('Release revoked'),
           'data' => t('Your currently installed release has been revoked, and is no longer available for download. Disabling everything included in this release or upgrading is strongly recommended!'),
-        );
+        ];
       }
       elseif (isset($release['terms']['Release type']) &&
               in_array('Unsupported', $release['terms']['Release type'])) {
         $project_data['status'] = UPDATE_NOT_SUPPORTED;
         if (empty($project_data['extra'])) {
-          $project_data['extra'] = array();
+          $project_data['extra'] = [];
         }
-        $project_data['extra'][] = array(
-          'class' => array('release-not-supported'),
+        $project_data['extra'][] = [
+          'class' => ['release-not-supported'],
           'label' => t('Release not supported'),
           'data' => t('Your currently installed release is now unsupported, and is no longer available for download. Disabling everything included in this release or upgrading is strongly recommended!'),
-        );
+        ];
       }
     }
 
@@ -640,7 +640,7 @@ function update_calculate_project_update_status(&$project_data, $available) {
     if (isset($release['version_major']) && $release['version_major'] > $target_major) {
       if (in_array($release['version_major'], $supported_majors)) {
         if (!isset($project_data['also'])) {
-          $project_data['also'] = array();
+          $project_data['also'] = [];
         }
         if (!isset($project_data['also'][$release['version_major']])) {
           $project_data['also'][$release['version_major']] = $version;
@@ -827,12 +827,12 @@ function update_calculate_project_update_status(&$project_data, $available) {
  *   when the cache is cleared.
  */
 function update_project_cache($cid) {
-  $projects = array();
+  $projects = [];
 
   // On certain paths, we should clear the cache and recompute the projects for
   // update status of the site to avoid presenting stale information.
   $q = $_GET['q'];
-  $paths = array(
+  $paths = [
     'admin/config/system/updates',
     'admin/modules',
     'admin/appearance',
@@ -842,7 +842,7 @@ function update_project_cache($cid) {
     'admin/reports/updates/update',
     'admin/reports/status',
     'admin/reports/updates/check',
-  );
+  ];
   if (in_array($q, $paths)) {
     _update_cache_clear($cid);
   }
@@ -867,7 +867,7 @@ function update_project_cache($cid) {
  * @see _update_process_info_list()
  */
 function update_filter_project_info($info) {
-  $allowlist = array(
+  $allowlist = [
     '_info_file_ctime',
     'datestamp',
     'major',
@@ -876,6 +876,6 @@ function update_filter_project_info($info) {
     'project',
     'project status url',
     'version',
-  );
+  ];
   return array_intersect_key($info, backdrop_map_assoc($allowlist));
 }

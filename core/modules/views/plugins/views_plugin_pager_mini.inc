@@ -12,9 +12,9 @@
 class views_plugin_pager_mini extends views_plugin_pager_full {
   function summary_title() {
     if (!empty($this->options['offset'])) {
-      return format_plural($this->options['items_per_page'], 'Mini pager, @count item, skip @skip', 'Mini pager, @count items, skip @skip', array('@count' => $this->options['items_per_page'], '@skip' => $this->options['offset']));
+      return format_plural($this->options['items_per_page'], 'Mini pager, @count item, skip @skip', 'Mini pager, @count items, skip @skip', ['@count' => $this->options['items_per_page'], '@skip' => $this->options['offset']]);
     }
-      return format_plural($this->options['items_per_page'], 'Mini pager, @count item', 'Mini pager, @count items', array('@count' => $this->options['items_per_page']));
+      return format_plural($this->options['items_per_page'], 'Mini pager, @count item', 'Mini pager, @count items', ['@count' => $this->options['items_per_page']]);
   }
 
   /**
@@ -59,14 +59,14 @@ class views_plugin_pager_mini extends views_plugin_pager_full {
     $pager_theme = views_theme_functions('views_mini_pager', $this->view, $this->display);
     // The 1, 3 index are correct.
     // @see theme_pager().
-    $tags = array(
+    $tags = [
       1 => $this->options['tags']['previous'],
       3 => $this->options['tags']['next'],
-    );
-    return theme($pager_theme, array(
+    ];
+    return theme($pager_theme, [
       'tags' => $tags,
       'element' => $this->get_pager_id(),
       'parameters' => $input,
-    ));
+    ]);
   }
 }

@@ -9,7 +9,7 @@ class entityreference_plugin_row_fields extends views_plugin_row_fields {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['separator'] = array('default' => '-');
+    $options['separator'] = ['default' => '-'];
 
     return $options;
   }

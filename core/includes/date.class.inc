@@ -7,8 +7,8 @@
  * slightly more flexible initialization parameters.
  */
 class BackdropDateTime extends DateTime {
-  public $granularity = array();
-  public $errors = array();
+  public $granularity = [];
+  public $errors = [];
 
   /**
    * @var bool
@@ -27,7 +27,7 @@ class BackdropDateTime extends DateTime {
    */
   public $originalTime;
 
-  protected static $allgranularity = array(
+  protected static $allgranularity = [
     'year',
     'month',
     'day',
@@ -35,7 +35,7 @@ class BackdropDateTime extends DateTime {
     'minute',
     'second',
     'timezone'
-  );
+  ];
 
   /**
    * Returns the date object as a string.
@@ -138,7 +138,7 @@ class BackdropDateTime extends DateTime {
         parent::__construct($time, $tz);
       }
       else {
-        $this->errors['date'] = t('The date "!date" does not match the expected format.', array('!date' => $time));
+        $this->errors['date'] = t('The date "!date" does not match the expected format.', ['!date' => $time]);
         return;
       }
       if (empty($this->granularity)) {
@@ -330,13 +330,13 @@ class BackdropDateTime extends DateTime {
     $true = $this->hasGranularity() && (!$granularity || $flexible || $this->hasGranularity($granularity));
     if (!$true && $granularity) {
       foreach ((array) $granularity as $part) {
-        if (!$this->hasGranularity($part) && in_array($part, array(
+        if (!$this->hasGranularity($part) && in_array($part, [
               'second',
               'minute',
               'hour',
               'day',
               'month',
-              'year')
+              'year']
           )) {
           switch ($part) {
             case 'second':
@@ -406,18 +406,18 @@ class BackdropDateTime extends DateTime {
    *   TRUE if the date has a timezone, FALSE otherwise.
    */
   protected function setGranularityFromTime($time, $tz) {
-    $this->granularity = array();
+    $this->granularity = [];
     $temp = date_parse($time);
     // Special case for 'now'.
     if ($time == 'now') {
-      $this->granularity = array(
+      $this->granularity = [
         'year',
         'month',
         'day',
         'hour',
         'minute',
         'second',
-      );
+      ];
     }
     else {
       // This PHP date_parse() method currently doesn't have resolution down to
@@ -476,18 +476,18 @@ class BackdropDateTime extends DateTime {
     array_shift($values);
     // If we did not find all the values for the patterns in the format, abort.
     if (count($letters) != count($values)) {
-      $this->errors['invalid'] = t('The value @date does not match the expected format.', array('@date' => $date));
+      $this->errors['invalid'] = t('The value @date does not match the expected format.', ['@date' => $date]);
       return FALSE;
     }
-    $this->granularity = array();
-    $final_date = array(
+    $this->granularity = [];
+    $final_date = [
       'hour' => 0,
       'minute' => 0,
       'second' => 0,
       'month' => 1,
       'day' => 1,
       'year' => 0,
-    );
+    ];
     foreach ($letters as $i => $letter) {
       $value = $values[$i];
       switch ($letter) {
@@ -630,7 +630,7 @@ class BackdropDateTime extends DateTime {
    *   An array of formatted date part values, keyed by date parts.
    */
   public function toArray($force = FALSE) {
-    return array(
+    return [
       'year' => $this->format('Y', $force),
       'month' => $this->format('n', $force),
       'day' => $this->format('j', $force),
@@ -638,7 +638,7 @@ class BackdropDateTime extends DateTime {
       'minute' => intval($this->format('i', $force)),
       'second' => intval($this->format('s', $force)),
       'timezone' => $this->format('e', $force),
-    );
+    ];
   }
 
   /**
@@ -658,24 +658,24 @@ class BackdropDateTime extends DateTime {
     // date or we will get date slippage, i.e. a value of 2011-00-00 will get
     // interpreted as November of 2010 by PHP.
     if ($full) {
-      $arr += array(
+      $arr += [
         'year' => 0,
         'month' => 1,
         'day' => 1,
         'hour' => 0,
         'minute' => 0,
         'second' => 0,
-      );
+      ];
     }
     else {
-      $arr += array(
+      $arr += [
         'year' => '',
         'month' => '',
         'day' => '',
         'hour' => '',
         'minute' => '',
         'second' => '',
-      );
+      ];
     }
     $datetime = '';
     if ($arr['year'] !== '') {
@@ -791,12 +791,12 @@ class BackdropDateTime extends DateTime {
    *   An array of error messages, keyed by date part.
    */
   public function arrayErrors($arr) {
-    $errors = array();
+    $errors = [];
     $now = date_now();
     $default_month = !empty($arr['month']) ? $arr['month'] : $now->format('n');
     $default_year = !empty($arr['year']) ? $arr['year'] : $now->format('Y');
 
-    $this->granularity = array();
+    $this->granularity = [];
     foreach ($arr as $part => $value) {
       // Explicitly set the granularity to the values in the input array.
       if (is_numeric($value)) {

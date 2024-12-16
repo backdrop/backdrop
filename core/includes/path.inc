@@ -51,14 +51,14 @@ function backdrop_lookup_path($action, $path = '', $langcode = NULL) {
   $cache = &$backdrop_static_fast['cache'];
 
   if (!isset($cache)) {
-    $cache = array(
-      'map' => array(),
-      'no_source' => array(),
+    $cache = [
+      'map' => [],
+      'no_source' => [],
       'allowlist' => NULL,
-      'system_paths' => array(),
-      'no_aliases' => array(),
+      'system_paths' => [],
+      'no_aliases' => [],
       'first_call' => TRUE,
-    );
+    ];
   }
 
   // If no language is explicitly specified we default to the current URL
@@ -68,7 +68,7 @@ function backdrop_lookup_path($action, $path = '', $langcode = NULL) {
   $langcode = $langcode ? $langcode : $language_url->langcode;
 
   if ($action == 'wipe') {
-    $cache = array();
+    $cache = [];
   }
   elseif ($path != '') {
     if ($action == 'alias') {
@@ -77,17 +77,17 @@ function backdrop_lookup_path($action, $path = '', $langcode = NULL) {
       if (!empty($cache['first_call'])) {
         $cache['first_call'] = FALSE;
 
-        $cache['map'][$langcode] = array();
+        $cache['map'][$langcode] = [];
         // Load system paths from cache.
         $cid = current_path();
         if ($cached = cache('path')->get($cid)) {
           $cache['system_paths'] = $cached->data;
           // Now fetch the aliases corresponding to these system paths.
-          $args = array(
+          $args = [
             ':system' => $cache['system_paths'],
             ':langcode' => $langcode,
             ':language_none' => LANGUAGE_NONE,
-          );
+          ];
           // Always get the language-specific alias before the language-neutral
           // one. For example 'de' is less than 'und' so the order needs to be
           // ASC, while 'xx-lolspeak' is more than 'und' so the order needs to
@@ -117,11 +117,11 @@ function backdrop_lookup_path($action, $path = '', $langcode = NULL) {
       }
       // For system paths which were not cached, query aliases individually.
       elseif (!isset($cache['no_aliases'][$langcode][$path])) {
-        $args = array(
+        $args = [
           ':source' => $path,
           ':langcode' => $langcode,
           ':language_none' => LANGUAGE_NONE,
-        );
+        ];
         // See the queries above.
         if ($langcode == LANGUAGE_NONE) {
           unset($args[':langcode']);
@@ -142,11 +142,11 @@ function backdrop_lookup_path($action, $path = '', $langcode = NULL) {
     elseif ($action == 'source' && !isset($cache['no_source'][$langcode][$path])) {
       // Look for the value $path within the cached $map
       if (!isset($cache['map'][$langcode]) || !($source = array_search($path, $cache['map'][$langcode]))) {
-        $args = array(
+        $args = [
           ':alias' => $path,
           ':langcode' => $langcode,
           ':language_none' => LANGUAGE_NONE,
-        );
+        ];
         // See the queries above.
         if ($langcode == LANGUAGE_NONE) {
           unset($args[':langcode']);
@@ -186,7 +186,7 @@ function backdrop_lookup_path($action, $path = '', $langcode = NULL) {
 function backdrop_cache_system_paths() {
   // Check if the system paths for this page were loaded from cache in this
   // request to avoid writing to cache on every request.
-  $cache = &backdrop_static('backdrop_lookup_path', array());
+  $cache = &backdrop_static('backdrop_lookup_path', []);
   if (empty($cache['system_paths']) && !empty($cache['map'])) {
     // Generate a cache ID (cid) specifically for this page.
     $cid = current_path();
@@ -298,16 +298,16 @@ function backdrop_match_path($path, $patterns) {
   if (!isset($regexps[$patterns])) {
     // Convert path settings to a regular expression.
     // Therefore replace newlines with a logical or, /* with asterisks and the <front> with the frontpage.
-    $to_replace = array(
+    $to_replace = [
       '/(\r\n?|\n)/', // newlines
       '/\\\\\*/',     // asterisks
       '/(^|\|)\\\\<front\\\\>($|\|)/' // <front>
-    );
-    $replacements = array(
+    ];
+    $replacements = [
       '|',
       '.*',
       '\1' . preg_quote(config_get('system.core', 'site_frontpage'), '/') . '\2'
-    );
+    ];
     $patterns_quoted = preg_quote($patterns, '/');
     $regexps[$patterns] = '/^(' . preg_replace($to_replace, $replacements, $patterns_quoted) . ')$/';
   }
@@ -359,10 +359,10 @@ function current_path() {
  */
 function path_load($conditions) {
   if (is_numeric($conditions)) {
-    $conditions = array('pid' => $conditions);
+    $conditions = ['pid' => $conditions];
   }
   elseif (is_string($conditions)) {
-    $conditions = array('source' => $conditions);
+    $conditions = ['source' => $conditions];
   }
   elseif (!is_array($conditions)) {
     return FALSE;
@@ -431,7 +431,7 @@ function path_load_multiple(array $keys, $field, $langcode) {
  *   - langcode: (optional) The language code of the alias.
  */
 function path_save(&$path) {
-  $path += array('langcode' => LANGUAGE_NONE);
+  $path += ['langcode' => LANGUAGE_NONE];
 
   // Load the stored alias, if any.
   if (!empty($path['pid']) && !isset($path['original'])) {
@@ -443,7 +443,7 @@ function path_save(&$path) {
     module_invoke_all('path_insert', $path);
   }
   else {
-    backdrop_write_record('url_alias', $path, array('pid'));
+    backdrop_write_record('url_alias', $path, ['pid']);
     module_invoke_all('path_update', $path);
   }
 
@@ -462,7 +462,7 @@ function path_save(&$path) {
  */
 function path_delete($criteria) {
   if (!is_array($criteria)) {
-    $criteria = array('pid' => $criteria);
+    $criteria = ['pid' => $criteria];
   }
   // Load and then delete each path until there are no more aliases left.
   while ($path = path_load($criteria)) {
@@ -519,9 +519,9 @@ function path_get_admin_paths() {
     backdrop_alter('admin_paths', $paths);
     // Combine all admin paths into one array, and likewise for non-admin paths,
     // for easier handling.
-    $patterns = array();
-    $patterns['admin'] = array();
-    $patterns['non_admin'] = array();
+    $patterns = [];
+    $patterns['admin'] = [];
+    $patterns['non_admin'] = [];
     foreach ($paths as $path => $enabled) {
       if ($enabled) {
         $patterns['admin'][] = $path;
@@ -553,11 +553,11 @@ function backdrop_valid_path($path, $dynamic_allowed = FALSE) {
   // We indicate that a menu administrator is running the menu access check.
   $menu_admin = TRUE;
   if ($path == '<front>' || url_is_external($path)) {
-    $item = array('access' => TRUE);
+    $item = ['access' => TRUE];
   }
   elseif ($dynamic_allowed && preg_match('/\/\%/', $path)) {
     // Path is dynamic (ie 'user/%'), so check directly against menu_router table.
-    if ($item = db_query("SELECT * FROM {menu_router} where path = :path", array(':path' => $path))->fetchAssoc()) {
+    if ($item = db_query("SELECT * FROM {menu_router} where path = :path", [':path' => $path])->fetchAssoc()) {
       $item['link_path']  = $item['path'];
       $item['link_title'] = $item['title'];
       $item['external']   = FALSE;

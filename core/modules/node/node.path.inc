@@ -8,7 +8,7 @@
  * Implements hook_path_info().
  */
 function node_path_info() {
-  $info['node'] = array(
+  $info['node'] = [
     'entity type' => 'node',
     'label' => t('Content'),
     'pattern label' => t('Default URL alias pattern for content'),
@@ -19,29 +19,29 @@ function node_path_info() {
     'batch file' => 'node.path.inc',
     'batch file path' => backdrop_get_path('module', 'node'),
     'source prefix' => 'node/',
-  );
+  ];
 
-  $languages = array();
+  $languages = [];
   if (module_exists('locale')) {
-    $languages = array(LANGUAGE_NONE => (object) array(
+    $languages = [LANGUAGE_NONE => (object) [
       'name' => t('Language neutral'),
       'langcode' => LANGUAGE_NONE,
-    )) + language_list();
+    ]] + language_list();
   }
 
   $node_types = node_type_get_types();
   if (count($node_types)) {
-    $info['node']['pattern items'] = array();
+    $info['node']['pattern items'] = [];
     $info['node']['pattern items label'] = t('URL alias patterns for specific content types');
     foreach ($node_types as $node_type_name => $node_type) {
       if (count($languages) && !empty($node_type->settings['language'])) {
-        $info['node']['pattern items'][$node_type_name] = t('Default URL alias pattern for all content of type %node_type (any language)', array('%node_type' => $node_type->name));
+        $info['node']['pattern items'][$node_type_name] = t('Default URL alias pattern for all content of type %node_type (any language)', ['%node_type' => $node_type->name]);
         foreach ($languages as $langcode => $language) {
-          $info['node']['pattern items'][$node_type_name . '_' . $langcode] = t('Content of type %node_type in %language', array('%node_type' => $node_type->name, '%language' => $language->name));
+          $info['node']['pattern items'][$node_type_name . '_' . $langcode] = t('Content of type %node_type in %language', ['%node_type' => $node_type->name, '%language' => $language->name]);
         }
       }
       else {
-        $info['node']['pattern items'][$node_type_name] = t('Content of type %node_type', array('%node_type' => $node_type->name));
+        $info['node']['pattern items'][$node_type_name] = t('Content of type %node_type', ['%node_type' => $node_type->name]);
       }
     }
   }
@@ -58,7 +58,7 @@ function node_path_type_delete_callback($types) {
   $query->condition('n.type', $types, 'IN');
   $nids = $query->execute()->fetchCol();
 
-  $sources = array();
+  $sources = [];
   foreach ($nids as $nid) {
     $sources[] = 'node/' . $nid;
   }
@@ -121,7 +121,7 @@ function node_path_bulk_update_batch_process(&$context) {
 
   $context['sandbox']['count'] += count($nids);
   $context['sandbox']['current'] = max($nids);
-  $context['message'] = t('Updated alias for node @nid.', array('@nid' => end($nids)));
+  $context['message'] = t('Updated alias for node @nid.', ['@nid' => end($nids)]);
 
   if ($context['sandbox']['count'] != $context['sandbox']['total']) {
     $context['finished'] = $context['sandbox']['count'] / $context['sandbox']['total'];

@@ -105,26 +105,26 @@ class views_handler_filter extends views_handler {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['operator'] = array('default' => '=');
-    $options['value'] = array('default' => '');
-    $options['group'] = array('default' => '1');
-    $options['exposed'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['expose'] = array(
-      'contains' => array(
-        'operator_id' => array('default' => FALSE),
-        'label' => array('default' => '', 'translatable' => TRUE),
-        'description' => array('default' => '', 'translatable' => TRUE),
-        'use_operator' => array('default' => FALSE, 'bool' => TRUE),
-        'operator' => array('default' => ''),
-        'identifier' => array('default' => ''),
-        'required' => array('default' => FALSE, 'bool' => TRUE),
-        'remember' => array('default' => FALSE, 'bool' => TRUE),
-        'multiple' => array('default' => FALSE, 'bool' => TRUE),
-        'remember_roles' => array('default' => array(
+    $options['operator'] = ['default' => '='];
+    $options['value'] = ['default' => ''];
+    $options['group'] = ['default' => '1'];
+    $options['exposed'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['expose'] = [
+      'contains' => [
+        'operator_id' => ['default' => FALSE],
+        'label' => ['default' => '', 'translatable' => TRUE],
+        'description' => ['default' => '', 'translatable' => TRUE],
+        'use_operator' => ['default' => FALSE, 'bool' => TRUE],
+        'operator' => ['default' => ''],
+        'identifier' => ['default' => ''],
+        'required' => ['default' => FALSE, 'bool' => TRUE],
+        'remember' => ['default' => FALSE, 'bool' => TRUE],
+        'multiple' => ['default' => FALSE, 'bool' => TRUE],
+        'remember_roles' => ['default' => [
           BACKDROP_AUTHENTICATED_ROLE => BACKDROP_AUTHENTICATED_ROLE,
-        )),
-      ),
-    );
+        ]],
+      ],
+    ];
 
     // A group is a combination of a filter, an operator and a value
     // operating like a single filter.
@@ -134,21 +134,21 @@ class views_handler_filter extends views_handler {
     // an identifier and other settings like the widget and the label.
     // This settings are saved in another array to allow users to switch
     // between a normal filter and a group of filters with a single click.
-    $options['is_grouped'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['group_info'] = array(
-      'contains' => array(
-        'label' => array('default' => '', 'translatable' => TRUE),
-        'description' => array('default' => '', 'translatable' => TRUE),
-        'identifier' => array('default' => ''),
-        'optional' => array('default' => TRUE, 'bool' => TRUE),
-        'widget' => array('default' => 'select'),
-        'multiple' => array('default' => FALSE, 'bool' => TRUE),
-        'remember' => array('default' => 0),
-        'default_group' => array('default' => 'All'),
-        'default_group_multiple' => array('default' => array()),
-        'group_items' => array('default' => array()),
-      ),
-    );
+    $options['is_grouped'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['group_info'] = [
+      'contains' => [
+        'label' => ['default' => '', 'translatable' => TRUE],
+        'description' => ['default' => '', 'translatable' => TRUE],
+        'identifier' => ['default' => ''],
+        'optional' => ['default' => TRUE, 'bool' => TRUE],
+        'widget' => ['default' => 'select'],
+        'multiple' => ['default' => FALSE, 'bool' => TRUE],
+        'remember' => ['default' => 0],
+        'default_group' => ['default' => 'All'],
+        'default_group_multiple' => ['default' => []],
+        'group_items' => ['default' => []],
+      ],
+    ];
 
     return $options;
   }
@@ -194,19 +194,19 @@ class views_handler_filter extends views_handler {
     if ($this->can_build_group()) {
       $this->show_build_group_button($form, $form_state);
     }
-    $form['clear_markup_start'] = array(
+    $form['clear_markup_start'] = [
       '#markup' => '<div class="clearfix">',
-    );
+    ];
     if ($this->is_a_group()) {
       if ($this->can_build_group()) {
-        $form['clear_markup_start'] = array(
+        $form['clear_markup_start'] = [
           '#markup' => '<div class="clearfix">',
-        );
+        ];
         // Render the build group form.
         $this->show_build_group_form($form, $form_state);
-        $form['clear_markup_end'] = array(
+        $form['clear_markup_end'] = [
           '#markup' => '</div>',
-        );
+        ];
       }
     }
     else {
@@ -214,9 +214,9 @@ class views_handler_filter extends views_handler {
       $this->show_operator_form($form, $form_state);
       // Add the subform from value_form().
       $this->show_value_form($form, $form_state);
-      $form['clear_markup_end'] = array(
+      $form['clear_markup_end'] = [
         '#markup' => '</div>',
-      );
+      ];
       if ($this->can_expose()) {
         // Add the subform from expose_form().
         $this->show_expose_form($form, $form_state);
@@ -276,12 +276,12 @@ class views_handler_filter extends views_handler {
   function operator_form(&$form, &$form_state) {
     $options = $this->operator_options();
     if (!empty($options)) {
-      $form['operator'] = array(
+      $form['operator'] = [
         '#type' => count($options) < 10 ? 'radios' : 'select',
         '#title' => t('Operator'),
         '#default_value' => $this->operator,
         '#options' => $options,
-      );
+      ];
     }
   }
 
@@ -289,7 +289,7 @@ class views_handler_filter extends views_handler {
    * Provide a list of options for the default operator form.
    * Should be overridden by classes that don't override operator_form
    */
-  function operator_options() { return array(); }
+  function operator_options() { return []; }
 
   /**
    * Validate the operator form.
@@ -321,7 +321,7 @@ class views_handler_filter extends views_handler {
    *
    * @see options_form()
    */
-  function value_form(&$form, &$form_state) { $form['value'] = array(); }
+  function value_form(&$form, &$form_state) { $form['value'] = []; }
 
   /**
    * Validate the options form.
@@ -362,53 +362,53 @@ class views_handler_filter extends views_handler {
    */
   function show_build_group_button(&$form, &$form_state) {
 
-    $form['group_button'] = array(
+    $form['group_button'] = [
       '#prefix' => '<div class="views-grouped clearfix">',
       '#suffix' => '</div>',
       // Should always come after the description and the relationship.
       '#weight' => -190,
-    );
+    ];
 
     $grouped_description = t('Grouped filters allow a choice between predefined operator|value pairs.');
-    $form['group_button']['radios'] = array(
-      '#theme_wrappers' => array('container'),
-      '#attributes' => array('class' => array('js-show')),
-    );
-    $form['group_button']['radios']['radios'] = array(
+    $form['group_button']['radios'] = [
+      '#theme_wrappers' => ['container'],
+      '#attributes' => ['class' => ['js-show']],
+    ];
+    $form['group_button']['radios']['radios'] = [
       '#title' => t('Filter type to expose'),
       '#description' => $grouped_description,
       '#type' => 'radios',
-      '#options' => array(
+      '#options' => [
         t('Single filter'),
         t('Grouped filters'),
-      ),
-    );
+      ],
+    ];
 
     if (empty($this->options['is_grouped'])) {
-      $form['group_button']['markup'] = array(
+      $form['group_button']['markup'] = [
         '#markup' => '<div class="description grouped-description">' . $grouped_description . '</div>',
-      );
-      $form['group_button']['button'] = array(
-        '#limit_validation_errors' => array(),
+      ];
+      $form['group_button']['button'] = [
+        '#limit_validation_errors' => [],
         '#type' => 'submit',
         '#value' => t('Grouped filters'),
-        '#submit' => array('views_ui_config_item_form_build_group'),
-        '#ajax' => array(
+        '#submit' => ['views_ui_config_item_form_build_group'],
+        '#ajax' => [
           'path' => empty($form_state['path']) ? current_path() : $form_state['path'],
-        ),
-      );
+        ],
+      ];
       $form['group_button']['radios']['radios']['#default_value'] = 0;
     }
     else {
-      $form['group_button']['button'] = array(
-        '#limit_validation_errors' => array(),
+      $form['group_button']['button'] = [
+        '#limit_validation_errors' => [],
         '#type' => 'submit',
         '#value' => t('Single filter'),
-        '#submit' => array('views_ui_config_item_form_build_group'),
-        '#ajax' => array(
+        '#submit' => ['views_ui_config_item_form_build_group'],
+        '#ajax' => [
           'path' => empty($form_state['path']) ? current_path() : $form_state['path'],
-        ),
-      );
+        ],
+      ];
       $form['group_button']['radios']['radios']['#default_value'] = 1;
     }
   }
@@ -416,53 +416,53 @@ class views_handler_filter extends views_handler {
    * Shortcut to display the expose/hide button.
    */
   function show_expose_button(&$form, &$form_state) {
-    $form['expose_button'] = array(
+    $form['expose_button'] = [
       '#prefix' => '<div class="views-expose clearfix">',
       '#suffix' => '</div>',
       // Should always come after the description and the relationship.
       '#weight' => -200,
-    );
+    ];
 
     // Add a checkbox for JS users, which will have behavior attached to it
     // so it can replace the button.
-    $form['expose_button']['checkbox'] = array(
-      '#theme_wrappers' => array('container'),
-      '#attributes' => array('class' => array('js-show')),
-    );
-    $form['expose_button']['checkbox']['checkbox'] = array(
+    $form['expose_button']['checkbox'] = [
+      '#theme_wrappers' => ['container'],
+      '#attributes' => ['class' => ['js-show']],
+    ];
+    $form['expose_button']['checkbox']['checkbox'] = [
       '#title' => t('Expose this filter to visitors, to allow them to change it'),
       '#type' => 'checkbox',
-    );
+    ];
 
     // Then add the button itself.
     if (empty($this->options['exposed'])) {
-      $form['expose_button']['markup'] = array(
+      $form['expose_button']['markup'] = [
         '#markup' => '<div class="description exposed-description">' . t('This filter is not exposed. Expose it to allow the users to change it.') . '</div>',
-      );
-      $form['expose_button']['button'] = array(
-        '#limit_validation_errors' => array(),
+      ];
+      $form['expose_button']['button'] = [
+        '#limit_validation_errors' => [],
         '#type' => 'submit',
         '#value' => t('Expose filter'),
-        '#submit' => array('views_ui_config_item_form_expose'),
-        '#ajax' => array(
+        '#submit' => ['views_ui_config_item_form_expose'],
+        '#ajax' => [
           'path' => empty($form_state['path']) ? current_path() : $form_state['path'],
-        ),
-      );
+        ],
+      ];
       $form['expose_button']['checkbox']['checkbox']['#default_value'] = 0;
     }
     else {
-      $form['expose_button']['markup'] = array(
+      $form['expose_button']['markup'] = [
         '#markup' => '<div class="description exposed-description">' . t('This filter is exposed. If you hide it, users will not be able to change it.') . '</div>',
-      );
-      $form['expose_button']['button'] = array(
-        '#limit_validation_errors' => array(),
+      ];
+      $form['expose_button']['button'] = [
+        '#limit_validation_errors' => [],
         '#type' => 'submit',
         '#value' => t('Hide filter'),
-        '#submit' => array('views_ui_config_item_form_expose'),
-        '#ajax' => array(
+        '#submit' => ['views_ui_config_item_form_expose'],
+        '#ajax' => [
           'path' => empty($form_state['path']) ? current_path() : $form_state['path'],
-        ),
-      );
+        ],
+      ];
       $form['expose_button']['checkbox']['checkbox']['#default_value'] = 1;
     }
   }
@@ -482,31 +482,31 @@ class views_handler_filter extends views_handler {
     $form['expose']['#flatten'] = TRUE;
 
     if (empty($this->always_required)) {
-      $form['expose']['required'] = array(
+      $form['expose']['required'] = [
         '#type' => 'checkbox',
         '#title' => t('Required'),
         '#default_value' => $this->options['expose']['required'],
-      );
+      ];
     }
     else {
-      $form['expose']['required'] = array(
+      $form['expose']['required'] = [
         '#type' => 'value',
         '#value' => TRUE,
-      );
+      ];
     }
-    $form['expose']['label'] = array(
+    $form['expose']['label'] = [
       '#type' => 'textfield',
       '#default_value' => $this->options['expose']['label'],
       '#title' => t('Label'),
       '#size' => 40,
-    );
+    ];
 
-    $form['expose']['description'] = array(
+    $form['expose']['description'] = [
       '#type' => 'textfield',
       '#default_value' => $this->options['expose']['description'],
       '#title' => t('Description'),
       '#size' => 60,
-    );
+    ];
 
     if (!empty($form['operator']['#type'])) {
        // Increase the width of the left (operator) column.
@@ -515,70 +515,70 @@ class views_handler_filter extends views_handler {
       $form['value']['#prefix'] = '<div class="views-group-box views-right-60">';
       $form['value']['#suffix'] = '</div>';
 
-      $form['expose']['use_operator'] = array(
+      $form['expose']['use_operator'] = [
         '#type' => 'checkbox',
         '#title' => t('Expose operator'),
         '#description' => t('Allow the user to choose the operator.'),
         '#default_value' => !empty($this->options['expose']['use_operator']),
-      );
-      $form['expose']['operator_id'] = array(
+      ];
+      $form['expose']['operator_id'] = [
         '#type' => 'textfield',
         '#default_value' => $this->options['expose']['operator_id'],
         '#title' => t('Operator identifier'),
         '#size' => 40,
         '#description' => t('This will appear in the URL after the ? to identify this operator.'),
-        '#states' => array(
-          'visible' => array(
-            ':input[name="options[expose][use_operator]"]' => array('checked' => TRUE),
-          ),
-        ),
+        '#states' => [
+          'visible' => [
+            ':input[name="options[expose][use_operator]"]' => ['checked' => TRUE],
+          ],
+        ],
         '#fieldset' => 'more',
-      );
+      ];
     }
     else {
-      $form['expose']['operator_id'] = array(
+      $form['expose']['operator_id'] = [
         '#type' => 'value',
         '#value' => '',
-      );
+      ];
     }
 
     if (empty($this->always_multiple)) {
-      $form['expose']['multiple'] = array(
+      $form['expose']['multiple'] = [
         '#type' => 'checkbox',
         '#title' => t('Allow multiple selections'),
         '#description' => t('Enable to allow users to select multiple items.'),
         '#default_value' => $this->options['expose']['multiple'],
-      );
+      ];
     }
-    $form['expose']['remember'] = array(
+    $form['expose']['remember'] = [
       '#type' => 'checkbox',
       '#title' => t('Remember the last selection'),
       '#description' => t('Enable to remember the last selection made by the user.'),
       '#default_value' => $this->options['expose']['remember'],
-    );
+    ];
 
     $role_options = array_map('check_plain', user_roles());
-    $form['expose']['remember_roles'] = array(
+    $form['expose']['remember_roles'] = [
       '#type' => 'checkboxes',
       '#title' => t('User roles'),
       '#description' => t('Remember exposed selection only for the selected user role(s). If you select no roles, the exposed data will never be stored.'),
       '#default_value' => $this->options['expose']['remember_roles'],
       '#options' => $role_options,
-      '#states' => array(
-        'invisible' => array(
-          ':input[name="options[expose][remember]"]' => array('checked' => FALSE),
-        ),
-      ),
-    );
+      '#states' => [
+        'invisible' => [
+          ':input[name="options[expose][remember]"]' => ['checked' => FALSE],
+        ],
+      ],
+    ];
 
-    $form['expose']['identifier'] = array(
+    $form['expose']['identifier'] = [
       '#type' => 'textfield',
       '#default_value' => $this->options['expose']['identifier'],
       '#title' => t('Filter identifier'),
       '#size' => 40,
       '#description' => t('This will appear in the URL after the ? to identify this filter. Cannot be blank.'),
       '#fieldset' => 'more',
-    );
+    ];
   }
 
   /**
@@ -646,7 +646,7 @@ class views_handler_filter extends views_handler {
    * Save new group items, re-enumerates and remove groups marked to delete.
    */
   function build_group_submit($form, &$form_state) {
-    $groups = array();
+    $groups = [];
     backdrop_sort($form_state['values']['options']['group_info']['group_items']);
     // Filter out removed items.
 
@@ -679,7 +679,7 @@ class views_handler_filter extends views_handler {
    * Provide default options for exposed filters.
    */
   function expose_options() {
-    $this->options['expose'] = array(
+    $this->options['expose'] = [
       'use_operator' => FALSE,
       'operator' => $this->options['id'] . '_op',
       'identifier' => $this->options['id'],
@@ -688,14 +688,14 @@ class views_handler_filter extends views_handler {
       'remember' => FALSE,
       'multiple' => FALSE,
       'required' => FALSE,
-    );
+    ];
   }
 
    /**
    * Provide default options for exposed filters.
    */
   function build_group_options() {
-    $this->options['group_info'] = array(
+    $this->options['group_info'] = [
       'label' => $this->definition['title'],
       'description' => NULL,
       'identifier' => $this->options['id'],
@@ -704,9 +704,9 @@ class views_handler_filter extends views_handler {
       'multiple' => FALSE,
       'remember' => FALSE,
       'default_group' => 'All',
-      'default_group_multiple' => array(),
-      'group_items' => array(),
-    );
+      'default_group_multiple' => [],
+      'group_items' => [],
+    ];
   }
 
   /**
@@ -718,7 +718,7 @@ class views_handler_filter extends views_handler {
 
       $old_any = $this->options['group_info']['widget'] == 'select' ? '<Any>' : '&lt;Any&gt;';
       $any_label = config_get('views.settings', 'exposed_filter_any_label') == 'old_any' ? $old_any : t('- Any -');
-      $groups = array('All' => $any_label);
+      $groups = ['All' => $any_label];
     }
     foreach ($this->options['group_info']['group_items'] as $id => $group) {
       if (!empty($group['title'])) {
@@ -729,11 +729,11 @@ class views_handler_filter extends views_handler {
     if (count($groups)) {
       $value = $this->options['group_info']['identifier'];
 
-      $form[$value] = array(
+      $form[$value] = [
         '#type' => $this->options['group_info']['widget'],
         '#default_value' => $this->group_info,
         '#options' => $groups,
-      );
+      ];
       if (!empty($this->options['group_info']['multiple'])) {
         if (count($groups) < 5) {
           $form[$value]['#type'] = 'checkboxes';
@@ -828,49 +828,49 @@ class views_handler_filter extends views_handler {
     else {
       $identifier = 'group_' . $this->options['expose']['identifier'];
     }
-    $form['group_info']['identifier'] = array(
+    $form['group_info']['identifier'] = [
       '#type' => 'textfield',
       '#default_value' => $identifier,
       '#title' => t('Filter identifier'),
       '#size' => 40,
       '#description' => t('This will appear in the URL after the ? to identify this filter. Cannot be blank.'),
       '#fieldset' => 'more',
-    );
-    $form['group_info']['label'] = array(
+    ];
+    $form['group_info']['label'] = [
       '#type' => 'textfield',
       '#default_value' => $this->options['group_info']['label'],
       '#title' => t('Label'),
       '#size' => 40,
-    );
+    ];
 
-    $form['group_info']['optional'] = array(
+    $form['group_info']['optional'] = [
       '#type' => 'checkbox',
       '#title' => t('Optional'),
       '#description' => t('This exposed filter is optional and will have added options to allow it not to be set.'),
       '#default_value' => $this->options['group_info']['optional'],
-    );
-    $form['group_info']['multiple'] = array(
+    ];
+    $form['group_info']['multiple'] = [
       '#type' => 'checkbox',
       '#title' => t('Allow multiple selections'),
       '#description' => t('Enable to allow users to select multiple items.'),
       '#default_value' => $this->options['group_info']['multiple'],
-    );
-    $form['group_info']['widget'] = array(
+    ];
+    $form['group_info']['widget'] = [
       '#type' => 'radios',
       '#default_value' => $this->options['group_info']['widget'],
       '#title' => t('Widget type'),
-      '#options' => array(
+      '#options' => [
         'radios' => t('Radios'),
         'select' => t('Select'),
-      ),
+      ],
       '#description' => t('Select which kind of widget will be used to render the group of filters'),
-    );
-    $form['group_info']['remember'] = array(
+    ];
+    $form['group_info']['remember'] = [
       '#type' => 'checkbox',
       '#title' => t('Remember'),
       '#description' => t('Remember the last setting the user gave this filter.'),
       '#default_value' => $this->options['group_info']['remember'],
-    );
+    ];
 
     if (!empty($this->options['group_info']['identifier'])) {
       $identifier = $this->options['group_info']['identifier'];
@@ -878,54 +878,54 @@ class views_handler_filter extends views_handler {
     else {
       $identifier = 'group_' . $this->options['expose']['identifier'];
     }
-    $form['group_info']['identifier'] = array(
+    $form['group_info']['identifier'] = [
       '#type' => 'textfield',
       '#default_value' => $identifier,
       '#title' => t('Filter identifier'),
       '#size' => 40,
       '#description' => t('This will appear in the URL after the ? to identify this filter. Cannot be blank.'),
       '#fieldset' => 'more',
-    );
-    $form['group_info']['label'] = array(
+    ];
+    $form['group_info']['label'] = [
       '#type' => 'textfield',
       '#default_value' => $this->options['group_info']['label'],
       '#title' => t('Label'),
       '#size' => 40,
-    );
-    $form['group_info']['description'] = array(
+    ];
+    $form['group_info']['description'] = [
       '#type' => 'textfield',
       '#default_value' => $this->options['group_info']['description'],
       '#title' => t('Description'),
       '#size' => 60,
-    );
-    $form['group_info']['optional'] = array(
+    ];
+    $form['group_info']['optional'] = [
       '#type' => 'checkbox',
       '#title' => t('Optional'),
       '#description' => t('This exposed filter is optional and will have added options to allow it not to be set.'),
       '#default_value' => $this->options['group_info']['optional'],
-    );
-    $form['group_info']['widget'] = array(
+    ];
+    $form['group_info']['widget'] = [
       '#type' => 'radios',
       '#default_value' => $this->options['group_info']['widget'],
       '#title' => t('Widget type'),
-      '#options' => array(
+      '#options' => [
         'radios' => t('Radios'),
         'select' => t('Select'),
-      ),
+      ],
       '#description' => t('Select which kind of widget will be used to render the group of filters'),
-    );
-    $form['group_info']['remember'] = array(
+    ];
+    $form['group_info']['remember'] = [
       '#type' => 'checkbox',
       '#title' => t('Remember'),
       '#description' => t('Remember the last setting the user gave this filter.'),
       '#default_value' => $this->options['group_info']['remember'],
-    );
+    ];
 
-    $groups = array('All' => '- Any -'); // The string '- Any -' will not be rendered see @theme_views_ui_build_group_filter_form
+    $groups = ['All' => '- Any -']; // The string '- Any -' will not be rendered see @theme_views_ui_build_group_filter_form
 
     // Provide 3 options to start when we are in a new group.
     if (count($this->options['group_info']['group_items']) == 0) {
-      $this->options['group_info']['group_items'] = array_fill(1, 3, array());
+      $this->options['group_info']['group_items'] = array_fill(1, 3, []);
     }
 
     // After the general settings, comes a table with all the existent groups.
@@ -941,7 +941,7 @@ class views_handler_filter extends views_handler {
 
       // In each row, we have to display the operator form and the value from
       // $row acts as a fake form to render each widget in a row.
-      $row = array();
+      $row = [];
       $groups[$item_id] = '';
       $this->operator_form($row, $form_state);
       // Force the operator form to be a select box. Some handlers uses
@@ -958,7 +958,7 @@ class views_handler_filter extends views_handler {
       $without_children = TRUE;
       foreach (element_children($row['value']) as $children) {
         $has_state = FALSE;
-        $states = array();
+        $states = [];
         foreach ($row['value'][$children]['#states']['visible'] as $key => $state) {
           if (isset($state[':input[name="options[operator]"]'])) {
             $has_state = TRUE;
@@ -967,9 +967,9 @@ class views_handler_filter extends views_handler {
         }
         if ($has_state) {
           foreach ($states as $key => $state) {
-            $row['value'][$children]['#states']['visible'][$key] = array(
-              ':input[name="options[group_info][group_items][' . $item_id . '][operator]"]' => array('value' => $state),
-            );
+            $row['value'][$children]['#states']['visible'][$key] = [
+              ':input[name="options[group_info][group_items][' . $item_id . '][operator]"]' => ['value' => $state],
+            ];
           }
 
           $row['value'][$children]['#title_display'] = 'invisible';
@@ -998,68 +998,68 @@ class views_handler_filter extends views_handler {
       }
 
       // Per item group, we have a title that identifies it.
-      $form['group_info']['group_items'][$item_id] = array(
-        'title' => array(
+      $form['group_info']['group_items'][$item_id] = [
+        'title' => [
           '#type' => 'textfield',
           '#size' => 20,
           '#default_value' => $default_title,
-        ),
+        ],
         'operator' => $row['operator'],
         'value' => $row['value'],
-        'remove' => array(
+        'remove' => [
           '#type' => 'checkbox',
           '#id' => 'views-removed-' . $item_id,
-          '#attributes' => array('class' => array('views-remove-checkbox')),
+          '#attributes' => ['class' => ['views-remove-checkbox']],
           '#default_value' => 0,
-        ),
-        'weight' => array(
+        ],
+        'weight' => [
           '#type' => 'weight',
           '#delta' => 10,
           '#default_value' => $default_weight++,
-          '#attributes' => array('class' => array('weight')),
-        ),
-      );
+          '#attributes' => ['class' => ['weight']],
+        ],
+      ];
     }
     // From all groups, let chose which is the default.
-    $form['group_info']['default_group'] = array(
+    $form['group_info']['default_group'] = [
       '#type' => 'radios',
       '#options' => $groups,
       '#default_value' => $this->options['group_info']['default_group'],
       '#required' => TRUE,
-      '#attributes' => array(
-        'class' => array('default-radios'),
-      )
-    );
+      '#attributes' => [
+        'class' => ['default-radios'],
+      ]
+    ];
     // From all groups, let chose which is the default.
-    $form['group_info']['default_group_multiple'] = array(
+    $form['group_info']['default_group_multiple'] = [
       '#type' => 'checkboxes',
       '#options' => $groups,
       '#default_value' => $this->options['group_info']['default_group_multiple'],
-      '#attributes' => array(
-        'class' => array('default-checkboxes'),
-      )
-    );
+      '#attributes' => [
+        'class' => ['default-checkboxes'],
+      ]
+    ];
 
-    $form['group_info']['add_group'] = array(
+    $form['group_info']['add_group'] = [
       '#prefix' => '<div class="views-build-group clear-block">',
       '#suffix' => '</div>',
       '#type' => 'submit',
       '#value' => t('Add another item'),
-      '#submit' => array('views_ui_config_item_form_add_group'),
-      '#attributes' => array(
-        'class' => array('use-ajax-submit'),
-      ),
-    );
+      '#submit' => ['views_ui_config_item_form_add_group'],
+      '#attributes' => [
+        'class' => ['use-ajax-submit'],
+      ],
+    ];
 
-    $js = array();
-    $js['tableDrag']['views-filter-groups']['weight'][0] = array(
+    $js = [];
+    $js['tableDrag']['views-filter-groups']['weight'][0] = [
       'target' => 'weight',
       'source' => NULL,
       'relationship' => 'sibling',
       'action' => 'order',
       'hidden' => TRUE,
       'limit' => 0,
-    );
+    ];
     if (!empty($form_state['js settings']) && is_array($js)) {
       $form_state['js settings'] = array_merge($form_state['js settings'], $js);
     }
@@ -1102,7 +1102,7 @@ class views_handler_filter extends views_handler {
 
     if ($type == 'value' && empty($this->always_required) && empty($this->options['expose']['required']) && $form['#type'] == 'select' && empty($form['#multiple'])) {
       $any_label = config_get('views.settings', 'exposed_filter_any_label') == 'old_any' ? t('<Any>') : t('- Any -');
-      $form['#options'] = array('All' => $any_label) + $form['#options'];
+      $form['#options'] = ['All' => $any_label] + $form['#options'];
       $form['#default_value'] = 'All';
     }
 
@@ -1154,19 +1154,19 @@ class views_handler_filter extends views_handler {
     }
 
     if ($this->is_a_group()) {
-      return array(
+      return [
         'value' => $this->options['group_info']['identifier'],
         'label' => $this->options['group_info']['label'],
         'description' => $this->options['group_info']['description'],
-      );
+      ];
     }
 
-    return array(
+    return [
       'operator' => $this->options['expose']['operator_id'],
       'value' => $this->options['expose']['identifier'],
       'label' => $this->options['expose']['label'],
       'description' => $this->options['expose']['description'],
-    );
+    ];
   }
 
   /*
@@ -1223,7 +1223,7 @@ class views_handler_filter extends views_handler {
     if (!empty($input[$this->options['group_info']['identifier']])) {
       return array_filter($input[$this->options['group_info']['identifier']]);
     }
-    return array();
+    return [];
   }
 
   /**
@@ -1264,7 +1264,7 @@ class views_handler_filter extends views_handler {
 
     if ($status !== FALSE) {
       if (!isset($_SESSION['views'][$this->view->name][$display_id])) {
-        $_SESSION['views'][$this->view->name][$display_id] = array();
+        $_SESSION['views'][$this->view->name][$display_id] = [];
       }
 
       $session = &$_SESSION['views'][$this->view->name][$display_id];
@@ -1297,7 +1297,7 @@ class views_handler_filter extends views_handler {
         }
 
         if ($this->operator != 'empty' && $this->operator != 'not empty') {
-          if ($value === 'All' || $value === array() || $value === 0) {
+          if ($value === 'All' || $value === [] || $value === 0) {
             return FALSE;
           }
         }
@@ -1311,7 +1311,7 @@ class views_handler_filter extends views_handler {
       if (isset($value)) {
         $this->value = $value;
         if (empty($this->always_multiple) && empty($this->options['expose']['multiple'])) {
-          $this->value = array($value);
+          $this->value = [$value];
         }
       }
       else {
@@ -1333,7 +1333,7 @@ class views_handler_filter extends views_handler {
 
     // Check if we store exposed value for current user.
     global $user;
-    $allowed_rids = empty($this->options['expose']['remember_roles']) ? array() : array_filter($this->options['expose']['remember_roles']);
+    $allowed_rids = empty($this->options['expose']['remember_roles']) ? [] : array_filter($this->options['expose']['remember_roles']);
     $intersect_rids = array_intersect($allowed_rids, $user->roles);
     if (empty($intersect_rids)) {
       return;
@@ -1361,7 +1361,7 @@ class views_handler_filter extends views_handler {
 
     if ($status) {
       if (!isset($_SESSION['views'][$this->view->name][$display_id])) {
-        $_SESSION['views'][$this->view->name][$display_id] = array();
+        $_SESSION['views'][$this->view->name][$display_id] = [];
       }
 
       $session = &$_SESSION['views'][$this->view->name][$display_id];
@@ -1415,9 +1415,9 @@ class views_handler_filter_broken extends views_handler_filter {
   function ensure_my_table() { /* No table to ensure! */ }
   function query($group_by = FALSE) { /* No query to run */ }
   function options_form(&$form, &$form_state) {
-    $form['markup'] = array(
+    $form['markup'] = [
       '#markup' => '<div class="form-item description">' . t('The handler for this item is broken or missing and cannot be used. If a module provided the handler and was disabled, re-enabling the module may restore it. Otherwise, you should probably delete this item.') . '</div>',
-    );
+    ];
   }
 
   /**

@@ -32,7 +32,7 @@
  *   The form state.
  */
 function field_default_extract_form_values($entity_type, $entity, $field, $instance, $langcode, &$items, $form, &$form_state) {
-  $path = array_merge($form['#parents'], array($field['field_name'], $langcode));
+  $path = array_merge($form['#parents'], [$field['field_name'], $langcode]);
   $key_exists = NULL;
   $values = backdrop_array_get_nested_value($form_state['values'], $path, $key_exists);
   if ($key_exists) {
@@ -78,10 +78,10 @@ function field_default_validate($entity_type, $entity, $field, $instance, $langc
   // For form submitted values, this can only happen with 'multiple value'
   // widgets.
   if ($field['cardinality'] != FIELD_CARDINALITY_UNLIMITED && count($items) > $field['cardinality']) {
-    $errors[$field['field_name']][$langcode][0][] = array(
+    $errors[$field['field_name']][$langcode][0][] = [
       'error' => 'field_cardinality',
-      'message' => t('%name: this field cannot hold more than @count values.', array('%name' => $instance['label'], '@count' => $field['cardinality'])),
-    );
+      'message' => t('%name: this field cannot hold more than @count values.', ['%name' => $instance['label'], '@count' => $field['cardinality']]),
+    ];
   }
 }
 
@@ -142,7 +142,7 @@ function field_default_insert($entity_type, $entity, $field, $instance, $langcod
  */
 function field_default_prepare_view($entity_type, $entities, $field, $instances, $langcode, &$items, $display) {
   // Group entities, instances and items by formatter module.
-  $modules = array();
+  $modules = [];
   foreach ($instances as $id => $instance) {
     if (is_string($display)) {
       $view_mode = $display;
@@ -196,7 +196,7 @@ function field_default_prepare_view($entity_type, $entities, $field, $instances,
 function field_default_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
 
-  $addition = array();
+  $addition = [];
 
   // Prepare incoming display specifications.
   if (is_string($display)) {
@@ -215,7 +215,7 @@ function field_default_view($entity_type, $entity, $field, $instance, $langcode,
       $elements = $function($entity_type, $entity, $field, $instance, $langcode, $items, $display);
 
       if ($elements) {
-        $info = array(
+        $info = [
           '#theme' => 'field',
           '#weight' => $display['weight'],
           '#title' => $instance['label'],
@@ -231,7 +231,7 @@ function field_default_view($entity_type, $entity, $field, $instance, $langcode,
           '#object' => $entity,
           '#items' => $items,
           '#formatter' => $display['type']
-        );
+        ];
 
         $addition[$field['field_name']] = array_merge($info, $elements);
       }

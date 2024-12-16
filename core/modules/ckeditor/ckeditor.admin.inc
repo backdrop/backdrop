@@ -9,66 +9,66 @@
  */
 function ckeditor_settings_form(&$form, $form_state, $format) {
   $plugins = ckeditor_plugins();
-  $toolbar_element = theme('ckeditor_settings_toolbar', array('format' => $format, 'plugins' => $plugins));
-  $elements = array(
-    '#attached' => array(
-      'library' => array(
-        array('ckeditor', 'backdrop.ckeditor.admin'),
-      ),
-      'js' => array(
-        array('data' => array('ckeditor' => array('toolbarAdmin' => $toolbar_element)), 'type' => 'setting')
-      ),
-    ),
-    '#attributes' => array('class' => array('ckeditor-toolbar-configuration')),
-  );
-  $elements['toolbar'] = array(
+  $toolbar_element = theme('ckeditor_settings_toolbar', ['format' => $format, 'plugins' => $plugins]);
+  $elements = [
+    '#attached' => [
+      'library' => [
+        ['ckeditor', 'backdrop.ckeditor.admin'],
+      ],
+      'js' => [
+        ['data' => ['ckeditor' => ['toolbarAdmin' => $toolbar_element]], 'type' => 'setting']
+      ],
+    ],
+    '#attributes' => ['class' => ['ckeditor-toolbar-configuration']],
+  ];
+  $elements['toolbar'] = [
     '#type' => 'textarea',
     '#title' => t('Toolbar configuration'),
     '#default_value' => json_encode($format->editor_settings['toolbar']),
-    '#attributes' => array('class' => array('ckeditor-toolbar-textarea')),
-  );
+    '#attributes' => ['class' => ['ckeditor-toolbar-textarea']],
+  ];
 
   // @todo: Have this settings form be provided via a plugin hook.
   $elements['plugins']['image'] = filter_editor_image_upload_settings_form($format);
-  $elements['plugins']['image'] += array(
+  $elements['plugins']['image'] += [
     '#type' => 'fieldset',
     '#title' => t('Image uploading'),
-    '#attributes' => array(
-      'class' => array('ckeditor-plugin-backdropimage'),
+    '#attributes' => [
+      'class' => ['ckeditor-plugin-backdropimage'],
       'data-ckeditor-feature-dependency' => 'BackdropImage',
-    ),
-    '#parents' => array('editor_settings', 'image_upload'),
-  );
+    ],
+    '#parents' => ['editor_settings', 'image_upload'],
+  ];
 
   $elements['plugins']['file'] = filter_editor_file_upload_settings_form($format);
-  $elements['plugins']['file'] += array(
+  $elements['plugins']['file'] += [
     '#type' => 'fieldset',
     '#title' => t('File uploading'),
-    '#attributes' => array(
-      'class' => array('ckeditor-plugin-backdroplink'),
+    '#attributes' => [
+      'class' => ['ckeditor-plugin-backdroplink'],
       'data-ckeditor-feature-dependency' => 'BackdropLink',
-    ),
-    '#parents' => array('editor_settings', 'file_upload'),
-  );
+    ],
+    '#parents' => ['editor_settings', 'file_upload'],
+  ];
 
-  $elements['plugins']['style'] = array(
+  $elements['plugins']['style'] = [
     '#type' => 'fieldset',
     '#title' => t('Style list'),
-    '#attributes' => array(
-      'class' => array('ckeditor-plugin-style'),
+    '#attributes' => [
+      'class' => ['ckeditor-plugin-style'],
       'data-ckeditor-feature-dependency' => 'Styles',
-    ),
-  );
+    ],
+  ];
   $style_list = '';
   if (isset($format->editor_settings['plugins']['style']['style_list'])) {
     $style_list = _ckeditor_settings_stringify_style_list($format->editor_settings['plugins']['style']['style_list']);
   }
-  $elements['plugins']['style']['style_list'] = array(
+  $elements['plugins']['style']['style_list'] = [
     '#type' => 'textarea',
     '#rows' => 4,
     '#default_value' => $style_list,
     '#description' => t('A list of classes that will be provided in the "Styles" dropdown. Enter one class on each line in the format: element.class|Label. Example: h1.title|Title.') . '<br />' . t('Each style should be in your theme\'s main CSS as well as in your theme\'s ckeditor-iframe.css file.'),
-  );
+  ];
 
   array_unshift($form['#validate'], 'ckeditor_settings_form_validate');
   array_unshift($form['#submit'], 'ckeditor_settings_form_submit');
@@ -120,17 +120,17 @@ function ckeditor_settings_form_submit($form, &$form_state) {
  *     directly to CKEditor.
  */
 function _ckeditor_settings_parse_style_list($style_list_string) {
-  $styles = array();
+  $styles = [];
   foreach (explode("\n", $style_list_string) as $style) {
     $style = trim($style);
     if ($style) {
       @list($element, $label) = explode('|', $style, 2);
       @list($element, $class) = explode('.', $element, 2);
-      $styles[] = array(
+      $styles[] = [
         'name' => $label,
         'element' => $element,
-        'attributes' => array('class' => $class),
-      );
+        'attributes' => ['class' => $class],
+      ];
     }
   }
   return $styles;

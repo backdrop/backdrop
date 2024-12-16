@@ -139,7 +139,7 @@ function locale_language_from_browser($languages) {
   //                  1#( language-range [ ";" "q" "=" qvalue ] )
   //   language-range  = ( ( 1*8ALPHA *( "-" 1*8ALPHA ) ) | "*" )
   // Samples: "hu, en-us;q=0.66, en;q=0.33", "hu,en-us;q=0.5"
-  $browser_langcodes = array();
+  $browser_langcodes = [];
   if (preg_match_all('@(?<=[, ]|^)([a-zA-Z-]+|\*)(?:;q=([0-9.]+))?(?:$|\s*,\s*)@', trim($_SERVER['HTTP_ACCEPT_LANGUAGE']), $matches, PREG_SET_ORDER)) {
     foreach ($matches as $match) {
       // We can safely use strtolower() here, tags are ASCII.
@@ -290,7 +290,7 @@ function locale_language_from_url($languages) {
         if (!empty($domains[$language->langcode])) {
           // Only compare the domains not the protocols or ports.
           // Remove protocol and add http:// so parse_url works
-          $host = 'http://' . str_replace(array('http://', 'https://'), '', $domains[$language->langcode]);
+          $host = 'http://' . str_replace(['http://', 'https://'], '', $domains[$language->langcode]);
           $host = parse_url($host, PHP_URL_HOST);
           if ($http_host == $host) {
             $language_url = $language->langcode;
@@ -361,15 +361,15 @@ function locale_language_url_fallback($languages = NULL, $language_type = LANGUA
 function locale_language_switcher_url($type, $path) {
   // Get the enabled languages only.
   $language_list = language_list(TRUE, TRUE, TRUE);
-  $links = array();
+  $links = [];
 
   foreach ($language_list as $langcode => $label) {
-    $links[$langcode] = array(
+    $links[$langcode] = [
       'href'       => $path,
       'title'      => $label,
       'language'   => language_load($langcode),
-      'attributes' => array('class' => array('language-link')),
-    );
+      'attributes' => ['class' => ['language-link']],
+    ];
   }
 
   return $links;
@@ -386,18 +386,18 @@ function locale_language_switcher_session($type, $path) {
 
   // Get the enabled languages only.
   $language_list = language_list(TRUE, TRUE, TRUE);
-  $links = array();
+  $links = [];
 
   $query = $_GET;
   unset($query['q']);
 
   foreach ($language_list as $langcode => $label) {
-    $links[$langcode] = array(
+    $links[$langcode] = [
       'href'       => $path,
       'title'      => $label,
-      'attributes' => array('class' => array('language-link')),
+      'attributes' => ['class' => ['language-link']],
       'query'      => $query,
-    );
+    ];
     if ($language_query != $langcode) {
       $links[$langcode]['query'][$param] = $langcode;
     }
@@ -451,7 +451,7 @@ function locale_language_url_rewrite_url(&$path, &$options) {
           // retain it below.
           if (!empty($options['base_url'])) {
             // The colon in the URL scheme messes up the port checking below.
-            $normalized_base_url = str_replace(array('https://', 'http://'), '', $options['base_url']);
+            $normalized_base_url = str_replace(['https://', 'http://'], '', $options['base_url']);
           }
 
           // Ask for an absolute URL with our modified base_url.
@@ -591,7 +591,7 @@ function locale_string_is_safe($string) {
   //   alter the string. https://www.drupal.org/node/2372127
   $string = preg_replace('/\[[a-z0-9_-]+(:[a-z0-9_-]+)+\]/i', '', $string);
 
-  return decode_entities($string) == decode_entities(filter_xss($string, array('a', 'abbr', 'acronym', 'address', 'b', 'bdo', 'big', 'blockquote', 'br', 'caption', 'cite', 'code', 'col', 'colgroup', 'dd', 'del', 'dfn', 'dl', 'dt', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'i', 'ins', 'kbd', 'li', 'ol', 'p', 'pre', 'q', 'samp', 'small', 'span', 'strong', 'sub', 'sup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'tt', 'ul', 'var')));
+  return decode_entities($string) == decode_entities(filter_xss($string, ['a', 'abbr', 'acronym', 'address', 'b', 'bdo', 'big', 'blockquote', 'br', 'caption', 'cite', 'code', 'col', 'colgroup', 'dd', 'del', 'dfn', 'dl', 'dt', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'i', 'ins', 'kbd', 'li', 'ol', 'p', 'pre', 'q', 'samp', 'small', 'span', 'strong', 'sub', 'sup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'tt', 'ul', 'var']));
 }
 
 /**
@@ -640,29 +640,29 @@ function _locale_parse_js_file($filepath) {
     [,\)]
     ~sx', $file, $plural_matches);
 
-  $matches = array();
+  $matches = [];
 
   // Add strings from Backdrop.t().
   foreach ($t_matches[1] as $key => $string) {
-    $matches[] = array(
+    $matches[] = [
       'string'  => $string,
       'context' => $t_matches[2][$key],
-    );
+    ];
   }
 
   // Add string from Backdrop.formatPlural().
   foreach ($plural_matches[1] as $key => $string) {
-    $matches[] = array(
+    $matches[] = [
       'string'  => $string,
       'context' => $plural_matches[3][$key],
-    );
+    ];
 
     // If there is also a plural version of this string, add it to the strings array.
     if (isset($plural_matches[2][$key])) {
-      $matches[] = array(
+      $matches[] = [
         'string'  => $plural_matches[2][$key],
         'context' => $plural_matches[3][$key],
-      );
+      ];
     }
   }
 
@@ -673,7 +673,7 @@ function _locale_parse_js_file($filepath) {
     $string =  implode('', preg_split('~(?<!\\\\)[\'"]\s*\+\s*[\'"]~s', substr($match['string'], 1, -1)));
     $context = implode('', preg_split('~(?<!\\\\)[\'"]\s*\+\s*[\'"]~s', substr($match['context'], 1, -1)));
 
-    $source = db_query("SELECT lid, location FROM {locales_source} WHERE source = :source AND context = :context", array(':source' => $string, ':context' => $context))->fetchObject();
+    $source = db_query("SELECT lid, location FROM {locales_source} WHERE source = :source AND context = :context", [':source' => $string, ':context' => $context])->fetchObject();
     if ($source) {
       // We already have this source string and now have to add the location
       // to the location column, if this file is not yet present in there.
@@ -685,9 +685,9 @@ function _locale_parse_js_file($filepath) {
 
         // Save the new locations string to the database.
         db_update('locales_source')
-          ->fields(array(
+          ->fields([
             'location' => $locations,
-          ))
+          ])
           ->condition('lid', $source->lid)
           ->execute();
       }
@@ -695,11 +695,11 @@ function _locale_parse_js_file($filepath) {
     else {
       // We don't have the source string yet, thus we insert it into the database.
       db_insert('locales_source')
-        ->fields(array(
+        ->fields([
           'location'  => $filepath,
           'source'    => $string,
           'context'   => $context,
-        ))
+        ])
         ->execute();
     }
   }
@@ -720,7 +720,7 @@ function _locale_parse_js_file($filepath) {
  *   New content of the 'javascript_parsed' variable.
  */
 function _locale_invalidate_js($langcode = NULL) {
-  $parsed = state_get('locale_javascript_parsed', array());
+  $parsed = state_get('locale_javascript_parsed', []);
 
   if (empty($langcode)) {
     // Invalidate all languages.
@@ -762,9 +762,9 @@ function _locale_rebuild_js($langcode = NULL) {
 
   // Construct the array for JavaScript translations.
   // Only add strings with a translation to the translations array.
-  $result = db_query("SELECT s.lid, s.source, s.context, t.translation FROM {locales_source} s INNER JOIN {locales_target} t ON s.lid = t.lid AND t.language = :language WHERE s.location LIKE '%.js%'", array(':language' => $language->langcode));
+  $result = db_query("SELECT s.lid, s.source, s.context, t.translation FROM {locales_source} s INNER JOIN {locales_target} t ON s.lid = t.lid AND t.language = :language WHERE s.location LIKE '%.js%'", [':language' => $language->langcode]);
 
-  $translations = array();
+  $translations = [];
   foreach ($result as $data) {
     $translations[$data->context][$data->source] = $data->translation;
   }
@@ -776,7 +776,7 @@ function _locale_rebuild_js($langcode = NULL) {
 
     $data = "Backdrop.locale = { ";
 
-    $locale_plurals = state_get('locale_translation_plurals', array());
+    $locale_plurals = state_get('locale_translation_plurals', []);
     if (!empty($locale_plurals[$language->langcode])) {
       $data .= "'pluralFormula': function (\$n) { return Number({$locale_plurals[$language->langcode]['formula']}); }, ";
     }
@@ -789,7 +789,7 @@ function _locale_rebuild_js($langcode = NULL) {
   $dir = 'public://' . settings_get('locale_js_directory', 'languages');
 
   // Delete old file, if we have no translations anymore, or a different file to be saved.
-  $locale_javascripts = state_get('locale_translation_javascript', array());
+  $locale_javascripts = state_get('locale_translation_javascript', []);
   $changed_hash = !isset($locale_javascripts[$language->langcode]) || ($locale_javascripts[$language->langcode] != $data_hash);
   if (!empty($locale_javascripts[$language->langcode]) && (!$data || $changed_hash)) {
     file_unmanaged_delete($dir . '/' . $language->langcode . '_' . $locale_javascripts[$language->langcode] . '.js');
@@ -839,20 +839,20 @@ function _locale_rebuild_js($langcode = NULL) {
   // Log the operation and return success flag.
   switch ($status) {
     case 'updated':
-      watchdog('locale', 'Updated JavaScript translation file for the language %language.', array('%language' => $language->name));
+      watchdog('locale', 'Updated JavaScript translation file for the language %language.', ['%language' => $language->name]);
       return TRUE;
     case 'rebuilt':
-      watchdog('locale', 'JavaScript translation file %file.js was lost.', array('%file' => $locale_javascripts[$language->langcode]), WATCHDOG_WARNING);
+      watchdog('locale', 'JavaScript translation file %file.js was lost.', ['%file' => $locale_javascripts[$language->langcode]], WATCHDOG_WARNING);
       // Proceed to the 'created' case as the JavaScript translation file has
       // been created again.
     case 'created':
-      watchdog('locale', 'Created JavaScript translation file for the language %language.', array('%language' => $language->name));
+      watchdog('locale', 'Created JavaScript translation file for the language %language.', ['%language' => $language->name]);
       return TRUE;
     case 'deleted':
-      watchdog('locale', 'Removed JavaScript translation file for the language %language because no translations currently exist for that language.', array('%language' => $language->name));
+      watchdog('locale', 'Removed JavaScript translation file for the language %language because no translations currently exist for that language.', ['%language' => $language->name]);
       return TRUE;
     case 'error':
-      watchdog('locale', 'An error occurred during creation of the JavaScript translation file for the language %language.', array('%language' => $language->name), WATCHDOG_ERROR);
+      watchdog('locale', 'An error occurred during creation of the JavaScript translation file for the language %language.', ['%language' => $language->name], WATCHDOG_ERROR);
       return FALSE;
     default:
       // No operation needed.

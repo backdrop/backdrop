@@ -22,22 +22,22 @@ function entity_token_info_alter(&$info) {
 
     // Add [entity:url] tokens if they do not already exist.
     if (!isset($info['tokens'][$token_type]['url']) && !empty($entity_info['uri callback'])) {
-      $info['tokens'][$token_type]['url'] = array(
+      $info['tokens'][$token_type]['url'] = [
         'name' => t('URL'),
-        'description' => t('The URL of the @entity.', array('@entity' => backdrop_strtolower($entity_info['label']))),
+        'description' => t('The URL of the @entity.', ['@entity' => backdrop_strtolower($entity_info['label'])]),
         'module' => 'token',
         'type' => 'url',
-      );
+      ];
     }
 
     // Add [entity:original] tokens if they do not already exist.
     if (!isset($info['tokens'][$token_type]['original'])) {
-      $info['tokens'][$token_type]['original'] = array(
-        'name' => t('Original @entity', array('@entity' => backdrop_strtolower($entity_info['label']))),
-        'description' => t('The original @entity data if the @entity is being updated or saved.', array('@entity' => backdrop_strtolower($entity_info['label']))),
+      $info['tokens'][$token_type]['original'] = [
+        'name' => t('Original @entity', ['@entity' => backdrop_strtolower($entity_info['label'])]),
+        'description' => t('The original @entity data if the @entity is being updated or saved.', ['@entity' => backdrop_strtolower($entity_info['label'])]),
         'module' => 'token',
         'type' => $token_type,
-      );
+      ];
     }
   }
 }
@@ -45,9 +45,9 @@ function entity_token_info_alter(&$info) {
 /**
  * Implements hook_tokens().
  */
-function entity_tokens($type, $tokens, array $data = array(), array $options = array()) {
+function entity_tokens($type, $tokens, array $data = [], array $options = []) {
   $sanitize = !empty($options['sanitize']);
-  $replacements = array();
+  $replacements = [];
   if (!empty($data[$type]) && is_a($data[$type], 'Entity')) {
     $entity = $data[$type];
 
@@ -76,7 +76,7 @@ function entity_tokens($type, $tokens, array $data = array(), array $options = a
 
     // [entity:original:*] chained tokens.
     if (($original_tokens = token_find_with_prefix($tokens, 'original')) && !empty($entity->original)) {
-      $replacements += token_generate($type, $original_tokens, array($type => $entity->original), $options);
+      $replacements += token_generate($type, $original_tokens, [$type => $entity->original], $options);
     }
   }
 

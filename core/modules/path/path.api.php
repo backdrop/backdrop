@@ -50,10 +50,10 @@
  */
 function hook_path_insert($path) {
   db_insert('mytable')
-    ->fields(array(
+    ->fields([
       'alias' => $path['alias'],
       'pid' => $path['pid'],
-    ))
+    ])
     ->execute();
 }
 
@@ -71,7 +71,7 @@ function hook_path_insert($path) {
  */
 function hook_path_update($path) {
   db_update('mytable')
-    ->fields(array('alias' => $path['alias']))
+    ->fields(['alias' => $path['alias']])
     ->condition('pid', $path['pid'])
     ->execute();
 }
@@ -140,7 +140,7 @@ function hook_path_delete($path) {
 function hook_path_info() {
   // Aliases on files are not normally supported, this would add support for
   // auto-aliasing files.
-  $info['file'] = array(
+  $info['file'] = [
     'entity type' => 'file',
     'label' => t('File paths'),
     'pattern label' => t('Default path pattern for files'),
@@ -149,10 +149,10 @@ function hook_path_info() {
     'type delete callback' => 'node_path_type_delete_callback',
     'batch update callback' => 'file_entity_path_bulk_update_batch_process',
     'batch file' => 'file.path.inc',
-  );
+  ];
 
   foreach (file_type_get_enabled_types() as $file_type => $type) {
-    $info['file']['pattern items'][$file_type] = t('Pattern for all @file_type paths.', array('@file_type' => $type->label));
+    $info['file']['pattern items'][$file_type] = t('Pattern for all @file_type paths.', ['@file_type' => $type->label]);
   }
   return $info;
 }
@@ -179,7 +179,7 @@ function hook_path_info() {
 function hook_path_is_alias_reserved($alias, $source, $langcode) {
   // Check our module's list of paths and return TRUE if $alias matches any of
   // them.
-  return (bool) db_query("SELECT 1 FROM {mytable} WHERE path = :path", array(':path' => $alias))->fetchField();
+  return (bool) db_query("SELECT 1 FROM {mytable} WHERE path = :path", [':path' => $alias])->fetchField();
 }
 
 /**
@@ -233,7 +233,7 @@ function hook_path_alias_alter(&$alias, array &$context) {
  */
 function hook_path_punctuation_chars_alter(array &$punctuation) {
   // Add the trademark symbol.
-  $punctuation['trademark'] = array('value' => '™', 'name' => t('Trademark symbol'));
+  $punctuation['trademark'] = ['value' => '™', 'name' => t('Trademark symbol')];
 
   // Remove the dollar sign.
   unset($punctuation['dollar']);

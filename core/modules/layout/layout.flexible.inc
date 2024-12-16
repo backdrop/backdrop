@@ -30,45 +30,45 @@ function layout_flexible_template_settings_edit_form($form, &$form_state, Layout
   $form_state['flexible_template'] = $flexible_template;
   $template_exists = layout_flexible_template_load($flexible_template->name);
 
-  $form['name'] = array(
+  $form['name'] = [
     '#title' => t('Template name'),
     '#type' => 'textfield',
     '#maxlength' => 128,
     '#default_value' => $flexible_template->title,
     '#required' => TRUE,
-  );
-  $form['machine_name'] = array(
+  ];
+  $form['machine_name'] = [
     '#type' => 'machine_name',
     '#maxlength' => 21,
     '#default_value' => $flexible_template->name,
     '#disabled' => ($template_exists && empty($flexible_template->is_new)),
-    '#machine_name' => array(
+    '#machine_name' => [
       'exists' => 'layout_flexible_template_load',
-    ),
-  );
-  $form['description'] = array(
+    ],
+  ];
+  $form['description'] = [
     '#title' => t('Description'),
     '#type' => 'textfield',
     '#default_value' => $flexible_template->description,
-  );
+  ];
 
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
+  $form['actions'] = ['#type' => 'actions'];
+  $form['actions']['submit'] = [
     '#type' => 'submit',
-    '#submit' => array(
+    '#submit' => [
       'layout_flexible_template_settings_form_submit',
-    ),
+    ],
     '#value' => t('Save and configure'),
-  );
-  $form['actions']['cancel'] = array(
+  ];
+  $form['actions']['cancel'] = [
     '#type' => 'submit',
     '#value' => t('Cancel'),
-    '#validate' => array(),
-    '#limit_validation_errors' => array(array('name', 'machine_name')),
-    '#submit' => array(
+    '#validate' => [],
+    '#limit_validation_errors' => [['name', 'machine_name']],
+    '#submit' => [
       'layout_flexible_template_settings_form_cancel',
-    ),
-  );
+    ],
+  ];
 
   return $form;
 }
@@ -99,7 +99,7 @@ function layout_flexible_template_settings_form_submit($form, &$form_state) {
 
   layout_flexible_tempstore_set($flexible_template);
 
-  backdrop_set_message(t('Layout template "@title" saved.', array('@title' => $flexible_template->title)));
+  backdrop_set_message(t('Layout template "@title" saved.', ['@title' => $flexible_template->title]));
   $form_state['redirect'] = 'admin/structure/layouts/settings/flexible-template/' . $form_state['values']['machine_name'] . '/configure';
 }
 
@@ -115,28 +115,28 @@ function layout_flexible_template_configure_form($form, &$form_state, LayoutFlex
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   form_load_include($form_state, 'inc', 'layout', 'layout.flexible');
 
-  $form['help'] = array(
+  $form['help'] = [
     '#type' => 'help',
     '#markup' => t('This page allows you to add or remove rows, and change the order of rows by dragging them up and down. You can also change the number of regions within each row, and adjust the width of each region.'),
-  );
+  ];
 
-  $messages = array();
-  $form['messages'] = array(
+  $messages = [];
+  $form['messages'] = [
     '#theme' => 'status_messages',
     '#messages' => $messages,
     '#weight' => -100,
     // Prefix/suffix used to identify in AJAX requests.
     '#prefix' => '<div id="layout-messages">',
     '#suffix' => '</div>',
-  );
+  ];
 
   $form_state['flexible_template'] = &$flexible_template;
   $flexible_template_name = $flexible_template->name;
 
-  $config = array(
+  $config = [
     'is_new' => TRUE,
     'layout_template' => $flexible_template_name,
-  );
+  ];
   $layout = new Layout($config);
   $template = layout_get_layout_template_info($flexible_template_name);
 
@@ -145,53 +145,53 @@ function layout_flexible_template_configure_form($form, &$form_state, LayoutFlex
   $form_state['flexible_template_name'] = $flexible_template_name;
 
   if (empty($form_state['flexible_template'])) {
-    return array();
+    return [];
   }
 
   $renderer = layout_create_renderer('flexible', $layout);
 
-  $form['content'] = array(
+  $form['content'] = [
     '#type' => 'item',
     '#id' => 'layout-flexible-content',
-  );
-  $form['content']['display'] = array(
+  ];
+  $form['content']['display'] = [
     '#markup' => $renderer->render(),
-  );
+  ];
 
-  $form['content']['row_positions'] = array(
+  $form['content']['row_positions'] = [
     // Use 'hidden' instead of 'value' so the JS can access it.
     '#type' => 'hidden',
     '#default_value' => implode(',', array_keys($flexible_template->rows)),
-  );
+  ];
 
-  $form['content']['add_row'] = array(
+  $form['content']['add_row'] = [
     '#type' => 'submit',
     '#value' => t('Add row'),
-    '#attributes' => array('class' => array('layout-flexible-add-row', 'button-secondary')),
-    '#submit' => array(
+    '#attributes' => ['class' => ['layout-flexible-add-row', 'button-secondary']],
+    '#submit' => [
       'layout_flexible_template_add_row',
-    ),
-    '#ajax' => array(
+    ],
+    '#ajax' => [
       'callback' => 'layout_ajax_form_open_dialog',
-    ),
-  );
-  $form['actions'] = array(
+    ],
+  ];
+  $form['actions'] = [
     '#type' => 'actions',
-  );
-  $form['actions']['submit'] = array(
+  ];
+  $form['actions']['submit'] = [
     '#type' => 'submit',
     '#value' => t('Save layout template'),
-    '#submit' => array(
+    '#submit' => [
       'layout_flexible_template_configure_form_submit',
-    ),
-  );
-  $form['actions']['cancel'] = array(
+    ],
+  ];
+  $form['actions']['cancel'] = [
     '#type' => 'submit',
     '#value' => t('Cancel'),
-    '#submit' => array(
+    '#submit' => [
       'layout_flexible_template_configure_form_cancel',
-    ),
-  );
+    ],
+  ];
 
   return $form;
 }
@@ -222,7 +222,7 @@ function layout_flexible_template_configure_form_submit($form, &$form_state) {
   // Load from tempstore rather than using $form_state, in the event a row
   // has been removed in an AJAX request.
   $flexible_template = layout_flexible_tempstore_load($form_state['flexible_template_name']);
-  $positions = array();
+  $positions = [];
 
   if (!empty($form_state['values']['row_positions'])) {
     $rows = array_filter(explode(',', $form_state['values']['row_positions']));
@@ -238,7 +238,7 @@ function layout_flexible_template_configure_form_submit($form, &$form_state) {
 
   tempstore_clear('layout.flexible', $form_state['flexible_template_name']);
 
-  backdrop_set_message(t('Layout template "@title" saved.', array('@title' => $flexible_template->title)));
+  backdrop_set_message(t('Layout template "@title" saved.', ['@title' => $flexible_template->title]));
 }
 
 /**
@@ -259,7 +259,7 @@ function layout_flexible_template_region_style_select($form, &$form_state, Layou
   $form_state['original_row'] = $original_row;
 
   $row_styles = layout_flexible_row_styles();
-  $count_options = array();
+  $count_options = [];
   foreach ($row_styles as $name => $row_style) {
     $count_options[$row_style['region_count']] = $row_style['region_count'];
   }
@@ -275,44 +275,44 @@ function layout_flexible_template_region_style_select($form, &$form_state, Layou
     }
     $default_region_count = $row_styles[$row_style_in_use]['region_count'];
   }
-  $form['region_count'] = array(
+  $form['region_count'] = [
     '#title' => t('Number of regions'),
     '#type' => 'radios',
     '#default_value' => $default_region_count,
-    '#parents' => array('region_count'),
+    '#parents' => ['region_count'],
     '#options' => $count_options,
-    '#ajax' => array(
+    '#ajax' => [
       'callback' => 'layout_flexible_template_edit_region_style_ajax',
       'wrapper' => 'row_settings',
-      'trigger_as' => array('name' => 'region_count_update'),
-    ),
-  );
-  $form['region_count_update'] = array(
+      'trigger_as' => ['name' => 'region_count_update'],
+    ],
+  ];
+  $form['region_count_update'] = [
     '#type' => 'submit',
     '#value' => t('Update regions'),
-    '#attributes' => array('class' => array('js-hide')),
+    '#attributes' => ['class' => ['js-hide']],
     '#name' => 'region_count_update',
-    '#validate' => array(),
-    '#submit' => array('layout_flexible_template_edit_region_style_submit'),
-    '#ajax' => array(
+    '#validate' => [],
+    '#submit' => ['layout_flexible_template_edit_region_style_submit'],
+    '#ajax' => [
       'callback' => 'layout_flexible_template_edit_region_style_ajax',
       'wrapper' => 'row_settings',
-    ),
-  );
+    ],
+  ];
 
-  $form['row_settings'] = array(
+  $form['row_settings'] = [
     '#type' => 'container',
     '#id' => 'row_settings',
-    '#parents' => array('row_settings'),
-  );
+    '#parents' => ['row_settings'],
+  ];
 
   $region_count = isset($form_state['values']['region_count']) ? $form_state['values']['region_count'] : $default_region_count;
 
-  $options = array();
+  $options = [];
   $row_styles = layout_flexible_row_styles();
   foreach ($row_styles as $name => $row_style) {
     if ($row_style['region_count'] == $region_count) {
-      $options[$name] = theme('layout_flexible_template_style_option', array('row_style' => $row_style));
+      $options[$name] = theme('layout_flexible_template_style_option', ['row_style' => $row_style]);
     }
   }
 
@@ -324,38 +324,38 @@ function layout_flexible_template_region_style_select($form, &$form_state, Layou
   if (!isset($options[$row_style_in_use])) {
     $default_region_style = key($options);
   }
-  $form['row_settings']['region_style'] = array(
+  $form['row_settings']['region_style'] = [
     '#title' => t('Region widths'),
     '#type' => 'radios',
     '#default_value' => $default_region_style,
     '#options' => $options,
-  );
+  ];
 
-  $form['submit_region_style'] = array(
+  $form['submit_region_style'] = [
     '#type' => 'submit',
     '#value' => t('Choose region widths'),
-    '#attributes' => array(
-      'class' => array('js-hide'),
-    ),
-    '#submit' => array(
+    '#attributes' => [
+      'class' => ['js-hide'],
+    ],
+    '#submit' => [
       'layout_flexible_template_region_count_load',
-    ),
-  );
+    ],
+  ];
 
   $submit_button_value = $new_row ? t('Continue') : t('Save region widths');
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
+  $form['actions'] = ['#type' => 'actions'];
+  $form['actions']['submit'] = [
     '#type' => 'submit',
     '#name' => 'submit',
     '#value' => $submit_button_value,
-    '#attributes' => array('class' => array('layout-title-button')),
-    '#submit' => array(
+    '#attributes' => ['class' => ['layout-title-button']],
+    '#submit' => [
       'layout_flexible_template_region_style_select_submit',
-    ),
-    '#ajax' => array(
+    ],
+    '#ajax' => [
       'callback' => 'layout_ajax_form_open_dialog',
-    ),
-  );
+    ],
+  ];
   if (isset($flexible_template->rows[$original_row]['in_progress'])) {
     $cancel_submit_callback = 'layout_flexible_template_region_style_select_cancel';
     $cancel_ajax_callback = 'layout_ajax_form_open_dialog';
@@ -364,17 +364,17 @@ function layout_flexible_template_region_style_select($form, &$form_state, Layou
     $cancel_submit_callback = 'layout_flexible_template_cancel';
     $cancel_ajax_callback = 'layout_flexible_template_cancel_ajax';
   }
-  $form['actions']['cancel'] = array(
+  $form['actions']['cancel'] = [
     '#type' => 'submit',
     '#value' => t('Cancel'),
-    '#validate' => array(),
-    '#submit' => array(
+    '#validate' => [],
+    '#submit' => [
       $cancel_submit_callback,
-    ),
-    '#ajax' => array(
+    ],
+    '#ajax' => [
       'callback' => $cancel_ajax_callback,
-    ),
-  );
+    ],
+  ];
 
   return $form;
 }
@@ -394,13 +394,13 @@ function layout_flexible_template_cancel($form, &$form_state) {
  * @see layout_flexible_template_region_style_select().
  */
 function layout_flexible_template_cancel_ajax($form, $form_state) {
-  $commands = array();
+  $commands = [];
   $commands[] = ajax_command_close_modal_dialog();
 
-  return array(
+  return [
     '#type' => 'ajax',
     '#commands' => $commands,
-  );
+  ];
 }
 
 /**
@@ -442,7 +442,7 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
   $form_state['flexible_template_name'] = $flexible_template_name;
   $form_state['original_row'] = $original_row;
 
-  $row_data = array();
+  $row_data = [];
   if ($original_row != 'add') {
     if (isset($flexible_template->rows[$original_row]['in_progress'])) {
       $row_data = $flexible_template->rows[$original_row]['in_progress'];
@@ -463,51 +463,51 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
     backdrop_set_title(t('Add new row'));
   }
   else {
-    backdrop_set_title(t('Configure row !original_row', array('!original_row' => $original_row)));
+    backdrop_set_title(t('Configure row !original_row', ['!original_row' => $original_row]));
   }
 
-  $form['region_style'] = array(
+  $form['region_style'] = [
     '#type' => 'item',
     '#title' => t('Selected region widths'),
     '#markup' => $selected_style,
-  );
+  ];
 
   if ($original_row != 'add') {
-    $form['change_region_style'] = array(
+    $form['change_region_style'] = [
       '#type' => 'submit',
       '#value' => t('Change region widths'),
-      '#attributes' => array('class' => array('layout-link-button')),
-      '#submit' => array(
+      '#attributes' => ['class' => ['layout-link-button']],
+      '#submit' => [
         'layout_flexible_template_change_region_style',
-      ),
-      '#ajax' => array(
+      ],
+      '#ajax' => [
         'callback' => 'layout_ajax_form_open_dialog',
-      ),
-    );
+      ],
+    ];
   }
 
-  $form['region_names'] = array(
+  $form['region_names'] = [
     '#type' => 'fieldset',
     '#title' => t('Regions'),
     '#collapsed' => $original_row != 'add',
     '#collapsible' => TRUE,
     '#tree' => TRUE,
-  );
+  ];
 
   $form_state['last_region_number'] = layout_flexible_template_get_last_region_number($flexible_template);
   for ($i = 0; $i < $region_count; $i++) {
-    $form['region_names']['region_' . $i] = array(
+    $form['region_names']['region_' . $i] = [
       '#type' => 'container',
-    );
+    ];
     if (isset($row_data['region_names']['region_' . $i]['label'])) {
       $region_name = $row_data['region_names']['region_' . $i]['label'];
     }
-    $form['region_names']['region_' . $i]['label'] = array(
+    $form['region_names']['region_' . $i]['label'] = [
       '#type' => 'textfield',
       '#title' => t('Region name') . ' ' . ($i + 1),
       '#default_value' => !empty($region_name) ? $region_name : t('Region') . ' ' . ($form_state['last_region_number'] + $i + 1),
-    );
-    $form['region_names']['region_' . $i]['name'] = array(
+    ];
+    $form['region_names']['region_' . $i]['name'] = [
       '#type' => 'machine_name',
       '#description' => t('A machine name to be used as the default CSS class. It must only contain uppercase letters, lowercase letters, numbers, hyphens and underscores.'),
       '#default_value' => !empty($row_data['region_names']['region_' . $i]['name']) ? $row_data['region_names']['region_' . $i]['name'] : '',
@@ -516,47 +516,47 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
       '#field_suffix' => '</span>&lrm;',
       '#size' => 15,
       '#disabled' => FALSE,
-      '#machine_name' => array(
+      '#machine_name' => [
         'exists' => '_layout_flexible_template_region_name_exists',
-        'source' => array('region_names', 'region_' . $i, 'label'),
+        'source' => ['region_names', 'region_' . $i, 'label'],
         'standalone' => TRUE,
         'label' => t('Name'),
         'replace_pattern' => '[^a-z0-9-]+',
         'replace' => '-',
-      ),
-    );
+      ],
+    ];
     if (isset($row_data['region_names']['region_' . $i]['region_class_enable'])){
       $region_class_enable = $row_data['region_names']['region_' . $i]['region_class_enable'];
     }
-    $form['region_names']['region_' . $i]['region_class_enable'] = array(
+    $form['region_names']['region_' . $i]['region_class_enable'] = [
       '#type' => 'checkbox',
       '#title' => t('Add CSS classes'),
       '#default_value' => !empty($region_class_enable) ? $region_class_enable : 0,
-    );
+    ];
     if (isset($row_data['region_names']['region_' . $i]['classes'])) {
       $classes = $row_data['region_names']['region_' . $i]['classes'];
     }
-    $form['region_names']['region_' . $i]['classes'] = array(
+    $form['region_names']['region_' . $i]['classes'] = [
       '#type' => 'textfield',
       '#title' => t('Additional region CSS classes'),
       '#description' => t('Separate multiple classes with spaces.'),
       '#default_value' => !empty($classes) ? $classes : '',
-      '#states' => array(
-        'visible' => array(
-          ':input[name="region_names[region_' . $i . '][region_class_enable]"]' => array('checked' => TRUE),
-        ),
-      ),
-    );
+      '#states' => [
+        'visible' => [
+          ':input[name="region_names[region_' . $i . '][region_class_enable]"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
   }
 
-  $form['region_styles'] = array(
+  $form['region_styles'] = [
     '#type' => 'fieldset',
     '#title' => t('Row Style'),
     '#collapsed' => $original_row != 'add',
     '#collapsible' => TRUE,
-  );
+  ];
 
-  $options = array(
+  $options = [
     'div' => 'DIV',
     'nav' => 'NAV',
     'aside' => 'ASIDE',
@@ -564,62 +564,62 @@ function layout_flexible_template_edit_row_form($form, &$form_state, LayoutFlexi
     'header' => 'HEADER',
     'footer' => 'FOOTER',
     'main' => 'MAIN',
-  );
-  $form['region_styles']['element'] = array(
+  ];
+  $form['region_styles']['element'] = [
     '#title' => t('Row wrapper tag'),
     '#type' => 'select',
     '#options' => $options,
     '#default_value' => isset($row_data['element']) ? $row_data['element'] : '',
-  );
+  ];
 
-  $form['region_styles']['container'] = array(
+  $form['region_styles']['container'] = [
     '#title' => t('Row width behavior'),
     '#type' => 'radios',
-    '#options' => array(
+    '#options' => [
       'container' => t('Fixed maximum width'),
       'container_fluid' => t('Fluid width'),
       'no_container' => t('Full width'),
-    ),
+    ],
     '#default_value' => isset($row_data['container']) ? $row_data['container'] : 'container_fluid',
-  );
+  ];
   $form['region_styles']['container']['container']['#description'] = t('Adds the <code>container</code> class to the row.');
   $form['region_styles']['container']['container_fluid']['#description'] = t('Adds the <code>container-fluid</code> class to the row (no <code>max-width</code>, but <code>padding</code>).');
   $form['region_styles']['container']['no_container']['#description'] = t('No container-related classes added to the row (e.g. for Hero blocks).');
 
-  $form['region_styles']['row_classes'] = array(
+  $form['region_styles']['row_classes'] = [
     '#title' => t('Additional row CSS classes'),
     '#type' => 'textfield',
     '#default_value' => isset($row_data['classes']) ? $row_data['classes'] : '',
     '#description' => t('Separate multiple classes with spaces.'),
-  );
+  ];
 
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
+  $form['actions'] = ['#type' => 'actions'];
+  $form['actions']['submit'] = [
     '#type' => 'submit',
     '#name' => 'submit',
     '#value' => t('Save configuration'),
-    '#attributes' => array('class' => array('layout-title-button')),
-    '#validate' => array(
+    '#attributes' => ['class' => ['layout-title-button']],
+    '#validate' => [
       'layout_flexible_template_edit_row_validate',
-    ),
-    '#submit' => array(
+    ],
+    '#submit' => [
       'layout_flexible_template_edit_row_form_submit',
-    ),
-    '#ajax' => array(
+    ],
+    '#ajax' => [
       'callback' => 'layout_flexible_template_edit_row_ajax',
-    ),
-  );
-  $form['actions']['cancel'] = array(
+    ],
+  ];
+  $form['actions']['cancel'] = [
     '#type' => 'submit',
     '#value' => t('Cancel'),
-    '#validate' => array(),
-    '#submit' => array(
+    '#validate' => [],
+    '#submit' => [
       'layout_flexible_template_cancel',
-    ),
-    '#ajax' => array(
+    ],
+    '#ajax' => [
       'callback' => 'layout_flexible_template_cancel_ajax',
-    ),
-  );
+    ],
+  ];
 
   return $form;
 }
@@ -658,7 +658,7 @@ function _layout_flexible_template_region_name_exists($machine_name, $element, $
  */
 function layout_flexible_template_get_last_region_number(LayoutFlexibleTemplate $flexible_template, $form_state = NULL) {
   $last = 0;
-  $region_names = array();
+  $region_names = [];
   if ($form_state) {
     $regions = array_filter($form_state['values']['region_names']);
     $last = $form_state['last_region_number'];
@@ -689,13 +689,13 @@ function layout_flexible_template_get_last_region_number(LayoutFlexibleTemplate 
  * layout_flexible_template_edit_row_form().
  */
 function layout_flexible_template_change_region_style($form, &$form_state) {
-  $old_row = array(
+  $old_row = [
     'contains' => $form_state['region_style'],
     'element' => $form_state['values']['element'],
     'classes' => $form_state['values']['row_classes'],
     'container' => $form_state['values']['container'],
     'region_names' => $form_state['values']['region_names'],
-  );
+  ];
   $form_state['flexible_template']->rows[$form_state['original_row']]['in_progress'] = $old_row;
 
   layout_flexible_tempstore_set($form_state['flexible_template']);
@@ -736,13 +736,13 @@ function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
   $flexible_template = $form_state['flexible_template'];
   $original_row = $form_state['original_row'];
 
-  $new_row = array(
+  $new_row = [
     'contains' => $form_state['region_style'],
     'element' => $form_state['values']['element'],
     'classes' => $form_state['values']['row_classes'],
     'container' => $form_state['values']['container'],
     'region_names' => $form_state['values']['region_names'],
-  );
+  ];
 
   if ($original_row == 'add') {
     $uuid = new Uuid();
@@ -754,8 +754,8 @@ function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
   $form_state['flexible_template'] = $flexible_template;
 
   $form_state['ajax_rebuild_form'] = 'layout_flexible_template_configure_form';
-  $form_state['ajax_rebuild_args'] = array($flexible_template);
-  $form_state['ajax_update'] = array('content');
+  $form_state['ajax_rebuild_args'] = [$flexible_template];
+  $form_state['ajax_update'] = ['content'];
   layout_flexible_tempstore_set($flexible_template);
   layout_flexible_reset_caches();
   if (!backdrop_is_ajax()) {
@@ -789,14 +789,14 @@ function layout_flexible_template_edit_region_style_submit($form, &$form_state) 
  * @see layout_flexible_template_edit_row_form().
  */
 function layout_flexible_template_edit_row_ajax($form, $form_state) {
-  $commands = array();
+  $commands = [];
   // Display error messages in the form if any.
   if (form_get_errors()) {
     $html = '';
     $html .= theme('status_messages');
     $html .= backdrop_render($form);
     $title = isset($form['#title']) ? $form['#title'] : backdrop_get_title();
-    $commands[] = ajax_command_open_modal_dialog($title, $html, array('dialogClass' => 'layout-dialog'));
+    $commands[] = ajax_command_open_modal_dialog($title, $html, ['dialogClass' => 'layout-dialog']);
   }
   else {
     $commands[] = ajax_command_close_modal_dialog();
@@ -809,10 +809,10 @@ function layout_flexible_template_edit_row_ajax($form, $form_state) {
   $commands[] = ajax_command_remove('#messages');
   $commands[] = ajax_command_html('#layout-messages', theme('status_messages'));
 
-  return array(
+  return [
     '#type' => 'ajax',
     '#commands' => $commands,
-  );
+  ];
 }
 
 /**
@@ -830,7 +830,7 @@ function layout_flexible_template_delete_row(LayoutFlexibleTemplate $flexible_te
     return MENU_ACCESS_DENIED;
   }
 
-  $commands = array();
+  $commands = [];
   $flexible_template_name = $flexible_template->name;
 
   unset($flexible_template->rows[$original_row]);
@@ -839,15 +839,15 @@ function layout_flexible_template_delete_row(LayoutFlexibleTemplate $flexible_te
   if (backdrop_is_ajax()) {
     $commands[] = ajax_command_remove('#flexible-row--' . $original_row);
 
-    return array(
+    return [
       '#type' => 'ajax',
       '#commands' => $commands,
-    );
+    ];
   }
   else {
-    backdrop_set_message(t('Row "@title" removed.', array('@title' => $flexible_template->title)));
+    backdrop_set_message(t('Row "@title" removed.', ['@title' => $flexible_template->title]));
     backdrop_goto('admin/structure/layouts/settings/flexible-template/' . $flexible_template_name . '/configure');
-    return array();
+    return [];
   }
 }
 
@@ -858,12 +858,12 @@ function layout_flexible_template_delete_row(LayoutFlexibleTemplate $flexible_te
  */
 function layout_flexible_template_delete_form($form, &$form_state, LayoutFlexibleTemplate $flexible_template) {
   $form_state['flexible_template'] = &$flexible_template;
-  $question = t('Delete flexible template @title?', array('@title' => $flexible_template->title));
+  $question = t('Delete flexible template @title?', ['@title' => $flexible_template->title]);
   $description = t('This action cannot be undone.');
   backdrop_set_title($question, PASS_THROUGH);
 
   // Check if this template is in use.
-  $errors = array();
+  $errors = [];
   foreach (layout_load_all() as $layout) {
     if ($layout->layout_template == $flexible_template->name) {
       $errors[] = check_plain($layout->title);
@@ -871,28 +871,28 @@ function layout_flexible_template_delete_form($form, &$form_state, LayoutFlexibl
   }
 
   if (!empty($errors)) {
-    backdrop_set_message(t('The "@title" layout template is currently in use in the following layouts and may not be deleted: !list', array('@title' => $flexible_template->title, '!list' => theme('item_list', array('items' => $errors)))), 'error');
+    backdrop_set_message(t('The "@title" layout template is currently in use in the following layouts and may not be deleted: !list', ['@title' => $flexible_template->title, '!list' => theme('item_list', ['items' => $errors])]), 'error');
   }
   else {
-    $form['description'] = array(
+    $form['description'] = [
       '#markup' => $description
-    );
+    ];
   }
 
-  $form['actions'] = array(
+  $form['actions'] = [
     '#type' => 'actions'
-  );
-  $form['actions']['submit'] = array(
+  ];
+  $form['actions']['submit'] = [
     '#type' => 'submit',
     '#disabled' => !empty($errors),
     '#value' => t('Delete template'),
-    '#attributes' => array('class' => array('button-danger')),
-  );
-  $form['actions']['cancel'] = array(
+    '#attributes' => ['class' => ['button-danger']],
+  ];
+  $form['actions']['cancel'] = [
     '#type' => 'link',
     '#title' => t('Cancel'),
     '#href' => 'admin/structure/layouts/settings',
-  );
+  ];
 
   $form['#attributes']['class'][] = 'confirmation';
   $form['#theme'] = 'confirm_form';
@@ -910,6 +910,6 @@ function layout_flexible_template_delete_form_submit(&$form, &$form_state) {
   $flexible_template = &$form_state['flexible_template'];
   $flexible_template->delete();
 
-  backdrop_set_message(t('The layout template "@title" has been deleted.', array('@title' => $flexible_template->title)));
+  backdrop_set_message(t('The layout template "@title" has been deleted.', ['@title' => $flexible_template->title]));
   $form_state['redirect'] = 'admin/structure/layouts/settings';
 }

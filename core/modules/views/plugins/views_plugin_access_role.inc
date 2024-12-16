@@ -15,7 +15,7 @@ class views_plugin_access_role extends views_plugin_access {
   }
 
   function get_access_callback() {
-    return array('views_check_roles', array(array_filter($this->options['role'])));
+    return ['views_check_roles', [array_filter($this->options['role'])]];
   }
 
   function summary_title() {
@@ -36,20 +36,20 @@ class views_plugin_access_role extends views_plugin_access {
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['role'] = array('default' => array());
+    $options['role'] = ['default' => []];
 
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
-    $form['role'] = array(
+    $form['role'] = [
       '#type' => 'checkboxes',
       '#title' => t('Role'),
       '#default_value' => $this->options['role'],
       '#options' => array_map('check_plain', user_roles()),
       '#description' => t('Only the checked roles will be able to access this display. Note that users with "access all views" can see any view, regardless of role.'),
-    );
+    ];
   }
 
   function options_validate(&$form, &$form_state) {

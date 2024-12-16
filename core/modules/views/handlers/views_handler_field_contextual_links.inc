@@ -38,17 +38,17 @@ class views_handler_field_contextual_links extends views_handler_field_links {
   function render($values) {
     $links = $this->get_links();
     if (!empty($links)) {
-      $build = array(
+      $build = [
         '#prefix' => '<div class="contextual-links-wrapper">',
         '#suffix' => '</div>',
         '#theme' => 'links__contextual',
         '#links' => $links,
-        '#attributes' => array('class' => array('contextual-links')),
-        '#attached' => array(
-          'library' => array(array('contextual', 'contextual-links')),
-        ),
+        '#attributes' => ['class' => ['contextual-links']],
+        '#attached' => [
+          'library' => [['contextual', 'contextual-links']],
+        ],
         '#access' => user_access('access contextual links'),
-      );
+      ];
       return backdrop_render($build);
     }
     else {

@@ -35,9 +35,9 @@ class TestEntity extends Entity {
    * Implements EntityInterface::uri().
    */
   public function uri() {
-    return array(
+    return [
       'path' => 'test/' . $this->id,
-    );
+    ];
   }
 
   /**

@@ -28,7 +28,7 @@ class views_handler_filter_search extends views_handler_filter {
     $options = parent::option_definition();
 
     $options['operator']['default'] = 'optional';
-    $options['remove_score'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['remove_score'] = ['default' => FALSE, 'bool' => TRUE];
 
     return $options;
   }
@@ -41,12 +41,12 @@ class views_handler_filter_search extends views_handler_filter {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
-    $form['remove_score'] = array(
+    $form['remove_score'] = [
       '#type' => 'checkbox',
       '#title' => t('Remove search score'),
       '#description' => t('Check this box to remove the search score from the query. This can help reduce help reduce duplicate search results when using this filter.'),
       '#default_value' => $this->options['remove_score'],
-    );
+    ];
   }
 
 
@@ -54,28 +54,28 @@ class views_handler_filter_search extends views_handler_filter {
    * Provide simple equality operator
    */
   function operator_form(&$form, &$form_state) {
-    $form['operator'] = array(
+    $form['operator'] = [
       '#type' => 'radios',
       '#title' => t('On empty input'),
       '#default_value' => $this->operator,
-      '#options' => array(
+      '#options' => [
         'optional' => t('Show All'),
         'required' => t('Show None'),
-      ),
-    );
+      ],
+    ];
   }
 
   /**
    * Provide a simple textfield for equality
    */
   function value_form(&$form, &$form_state) {
-    $form['value'] = array(
+    $form['value'] = [
       '#type' => 'textfield',
       '#size' => 15,
       '#default_value' => $this->value,
-      '#attributes' => array('title' => t('Enter the terms you wish to search for.')),
+      '#attributes' => ['title' => t('Enter the terms you wish to search for.')],
       '#title' => empty($form_state['exposed']) ? t('Value') : '',
-    );
+    ];
   }
 
   /**
@@ -105,7 +105,7 @@ class views_handler_filter_search extends views_handler_filter {
   function query_parse_search_expression($input) {
     if (!isset($this->search_query)) {
       $this->parsed = TRUE;
-      $this->search_query = db_select('search_index', 'i', array('target' => 'replica'))->extend('viewsSearchQuery');
+      $this->search_query = db_select('search_index', 'i', ['target' => 'replica'])->extend('viewsSearchQuery');
       $this->search_query->searchExpression($input, $this->view->base_table);
       $this->search_query->publicParseSearchExpression();
     }
@@ -150,7 +150,7 @@ class views_handler_filter_search extends views_handler_filter {
         $join->construct('search_total', $search_index, 'word', 'word');
         $search_total = $this->query->add_relationship('search_total', $join, $search_index);
 
-        $this->search_score = $this->query->add_field('', "$search_index.score * $search_total.count", 'score', array('aggregate' => TRUE, 'function' => 'sum'));
+        $this->search_score = $this->query->add_field('', "$search_index.score * $search_total.count", 'score', ['aggregate' => TRUE, 'function' => 'sum']);
       }
 
       if (empty($this->query->relationships[$this->relationship])) {
@@ -188,7 +188,7 @@ class views_handler_filter_search extends views_handler_filter {
       $this->query->add_groupby("$search_index.sid");
       $matches = $this->search_query->matches();
       $placeholder = $this->placeholder();
-      $this->query->add_having_expression($this->options['group'], "COUNT(*) >= $placeholder", array($placeholder => $matches));
+      $this->query->add_having_expression($this->options['group'], "COUNT(*) >= $placeholder", [$placeholder => $matches]);
     }
     // Set to NULL to prevent PDO exception when views object is cached.
     $this->search_query = NULL;

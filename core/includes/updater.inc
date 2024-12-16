@@ -127,7 +127,7 @@ abstract class Updater implements BackdropUpdaterInterface {
     $updaters = backdrop_get_updaters();
     foreach ($updaters as $updater) {
       $class = $updater['class'];
-      if (call_user_func(array($class, 'canUpdateDirectory'), $directory)) {
+      if (call_user_func([$class, 'canUpdateDirectory'], $directory)) {
         return $class;
       }
     }
@@ -201,7 +201,7 @@ abstract class Updater implements BackdropUpdaterInterface {
         return 'core';
       }
       else {
-        $message = t('Updating core from @directory was attempted, but either it doesn\'t contain a "core" directory, or it isn\'t accessible. You may need to update manually.', array('@directory' => $directory));
+        $message = t('Updating core from @directory was attempted, but either it doesn\'t contain a "core" directory, or it isn\'t accessible. You may need to update manually.', ['@directory' => $directory]);
         throw new UpdaterException($message);
       }
     }
@@ -209,10 +209,10 @@ abstract class Updater implements BackdropUpdaterInterface {
       $info_file = self::findInfoFile($directory);
       $info = backdrop_parse_info_file($info_file);
       if (empty($info)) {
-        throw new UpdaterException(t('Unable to parse info file: %info_file.', array('%info_file' => $info_file)));
+        throw new UpdaterException(t('Unable to parse info file: %info_file.', ['%info_file' => $info_file]));
       }
       if (empty($info['type'])) {
-        throw new UpdaterException(t("The info file (%info_file) does not define a 'type' attribute.", array('%info_file' => $info_file)));
+        throw new UpdaterException(t("The info file (%info_file) does not define a 'type' attribute.", ['%info_file' => $info_file]));
       }
 
       return $info['type'];
@@ -234,10 +234,10 @@ abstract class Updater implements BackdropUpdaterInterface {
     $info_file = self::findInfoFile($directory);
     $info = backdrop_parse_info_file($info_file);
     if (empty($info)) {
-      throw new UpdaterException(t('Unable to parse info file: %info_file.', array('%info_file' => $info_file)));
+      throw new UpdaterException(t('Unable to parse info file: %info_file.', ['%info_file' => $info_file]));
     }
     if (empty($info['name'])) {
-      throw new UpdaterException(t("The info file (%info_file) does not define a 'name' attribute.", array('%info_file' => $info_file)));
+      throw new UpdaterException(t("The info file (%info_file) does not define a 'name' attribute.", ['%info_file' => $info_file]));
     }
     return $info['name'];
   }
@@ -251,12 +251,12 @@ abstract class Updater implements BackdropUpdaterInterface {
    * @return array
    *   An array of configuration parameters for an update or install operation.
    */
-  protected function getInstallArgs($overrides = array()) {
-    $args = array(
+  protected function getInstallArgs($overrides = []) {
+    $args = [
       'make_backup' => FALSE,
       'install_dir' => $this->getInstallDirectory(),
       'backup_dir'  => $this->getBackupDir(),
-    );
+    ];
     return array_merge($args, $overrides);
   }
 
@@ -275,7 +275,7 @@ abstract class Updater implements BackdropUpdaterInterface {
    * @throws UpdaterException
    * @throws UpdaterFileTransferException
    */
-  public function update(&$filetransfer, $overrides = array()) {
+  public function update(&$filetransfer, $overrides = []) {
     try {
       // Establish arguments with possible overrides.
       $args = $this->getInstallArgs($overrides);
@@ -324,7 +324,7 @@ abstract class Updater implements BackdropUpdaterInterface {
       return $this->postUpdateTasks();
     }
     catch (FileTransferException $e) {
-      throw new UpdaterFileTransferException(t('File Transfer failed, reason: !reason', array('!reason' => strtr($e->getMessage(), $e->arguments))));
+      throw new UpdaterFileTransferException(t('File Transfer failed, reason: !reason', ['!reason' => strtr($e->getMessage(), $e->arguments)]));
     }
   }
 
@@ -341,7 +341,7 @@ abstract class Updater implements BackdropUpdaterInterface {
    *
    * @throws UpdaterFileTransferException
    */
-  public function install(&$filetransfer, $overrides = array()) {
+  public function install(&$filetransfer, $overrides = []) {
     try {
       // Establish arguments with possible overrides.
       $args = $this->getInstallArgs($overrides);
@@ -362,7 +362,7 @@ abstract class Updater implements BackdropUpdaterInterface {
       return $this->postInstallTasks();
     }
     catch (FileTransferException $e) {
-      throw new UpdaterFileTransferException(t('File Transfer failed, reason: !reason', array('!reason' => strtr($e->getMessage(), $e->arguments))));
+      throw new UpdaterFileTransferException(t('File Transfer failed, reason: !reason', ['!reason' => strtr($e->getMessage(), $e->arguments)]));
     }
   }
 
@@ -401,7 +401,7 @@ abstract class Updater implements BackdropUpdaterInterface {
           }
           catch (FileTransferException $e) {
             $message = t($e->getMessage(), $e->arguments);
-            $throw_message = t('Unable to create %directory due to the following: %reason', array('%directory' => $directory, '%reason' => $message));
+            $throw_message = t('Unable to create %directory due to the following: %reason', ['%directory' => $directory, '%reason' => $message]);
             throw new UpdaterException($throw_message);
           }
         }
@@ -463,7 +463,7 @@ abstract class Updater implements BackdropUpdaterInterface {
    *   Links which provide actions to take after the install is finished.
    */
   public function postInstallTasks() {
-    return array();
+    return [];
   }
 
   /**
@@ -473,7 +473,7 @@ abstract class Updater implements BackdropUpdaterInterface {
    *   Links which provide actions to take after the update is finished.
    */
   public function postUpdateTasks() {
-    return array();
+    return [];
   }
 }
 

@@ -1,6 +1,6 @@
 <?php
 
-$base = array(
+$base = [
   0x00 => NULL, 'N', 'N', 'h', NULL, 'a', 'a', 'i', 'i', 'u', 'u', 'r', 'l', 'e', 'e', 'e',
   0x10 => 'ai', 'o', 'o', 'o', 'au', 'ka', 'kha', 'ga', 'gha', 'na', 'ca', 'cha', 'ja', 'jha', 'na', 'ta',
   0x20 => 'tha', 'da', 'dha', 'na', 'ta', 'tha', 'da', 'dha', 'na', 'na', 'pa', 'pha', 'ba', 'bha', 'ma', 'ya',
@@ -17,4 +17,4 @@ $base = array(
   0xD0 => NULL, NULL, NULL, NULL, NULL, NULL, NULL, '+', NULL, NULL, NULL, NULL, 'da', 'dha', NULL, 'ya',
   0xE0 => 'r', 'l', 'L', 'LL', NULL, NULL, '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
   0xF0 => 'ra', 'ra', 'Rs', 'Rs', '1/', '2/', '3/', '4/', ' 1 - 1/', '/16', '', NULL, NULL, NULL, NULL, NULL,
-);
+];

@@ -54,7 +54,7 @@ function hook_file_download_access($field, $entity_type, $entity) {
 function hook_file_download_access_alter(&$grants, $field, $entity_type, $entity) {
   // For our example module, we always enforce the rules set by node module.
   if (isset($grants['node'])) {
-    $grants = array('node' => $grants['node']);
+    $grants = ['node' => $grants['node']];
   }
 }
 
@@ -88,16 +88,16 @@ function hook_file_default_types_alter(&$types) {
 function hook_file_formatter_info() {
   // Add a simple file formatter for displaying an image in a chosen style.
   if (module_exists('image')) {
-    $formatters['file_image'] = array(
+    $formatters['file_image'] = [
       'label' => t('Image'),
-      'default settings' => array(
+      'default settings' => [
         'image_style' => '',
-      ),
+      ],
       'view callback' => 'file_file_formatter_file_image_view',
       'settings callback' => 'file_file_formatter_file_image_settings',
       'hidden' => TRUE,
-      'mime types' => array('image/*'),
-    );
+      'mime types' => ['image/*'],
+    ];
   }
   return $formatters;
 }
@@ -128,14 +128,14 @@ function hook_file_formatter_info_alter(array &$info) {
  *   A language code indicating the language used to render the file.
  */
 function hook_file_formatter_FORMATTER_view($file, $display, $langcode) {
-  $element = array(
+  $element = [
     '#theme' => 'image',
     '#path' => $file->uri,
     '#width' => isset($file->override['attributes']['width']) ? $file->override['attributes']['width'] : $file->metadata['width'],
     '#height' => isset($file->override['attributes']['height']) ? $file->override['attributes']['height'] : $file->metadata['height'],
-    '#alt' => token_replace($display['settings']['alt'], array('file' => $file), $replace_options),
-    '#title' => token_replace($display['settings']['title'], array('file' => $file), $replace_options),
-  );
+    '#alt' => token_replace($display['settings']['alt'], ['file' => $file], $replace_options),
+    '#title' => token_replace($display['settings']['title'], ['file' => $file], $replace_options),
+  ];
   return $element;
 }
 
@@ -154,13 +154,13 @@ function hook_file_formatter_FORMATTER_view($file, $display, $langcode) {
  *   An array containing default settings for the form elements.
  */
 function hook_file_formatter_FORMATTER_settings($form, &$form_state, $settings) {
-  $element['image_style'] = array(
+  $element['image_style'] = [
     '#title' => t('Image style'),
     '#type' => 'select',
     '#options' => image_style_options(FALSE),
     '#default_value' => $settings['image_style'],
     '#empty_option' => t('None (original image)'),
-  );
+  ];
   return $element;
 }
 
@@ -210,12 +210,12 @@ function hook_file_view_alter(&$build, $type) {
  *     to the callback function.
  */
 function hook_file_operations() {
-  $operations = array(
-    'delete' => array(
+  $operations = [
+    'delete' => [
       'label' => t('Delete selected files'),
       'callback' => NULL,
-    ),
-  );
+    ],
+  ];
   return $operations;
 }
 
@@ -303,10 +303,10 @@ function hook_query_file_access_alter(QueryAlterableInterface $query) {
  * @ingroup file_api_hooks
  */
 function hook_file_search_result($file) {
-  $file_usage_count = db_query('SELECT count FROM {file_usage} WHERE fid = :fid', array('fid' => $file->fid))->fetchField();
-  return array(
+  $file_usage_count = db_query('SELECT count FROM {file_usage} WHERE fid = :fid', ['fid' => $file->fid])->fetchField();
+  return [
     'file_usage_count' => format_plural($file_usage_count, '1 use', '@count uses'),
-  );
+  ];
 }
 
 /**
@@ -325,7 +325,7 @@ function hook_file_search_result($file) {
  */
 function hook_file_update_index($file) {
   $text = '';
-  $uses = db_query('SELECT module, count FROM {file_usage} WHERE fid = :fid', array(':fid' => $file->fid));
+  $uses = db_query('SELECT module, count FROM {file_usage} WHERE fid = :fid', [':fid' => $file->fid]);
   foreach ($uses as $use) {
     $text .= '<h2>' . check_plain($use->module) . '</h2>' . check_plain($use->count);
   }
@@ -379,8 +379,8 @@ function hook_file_update_index($file) {
 function hook_file_ranking() {
   // If voting is disabled, we can avoid returning the array, no hard feelings.
   if (variable_get('vote_file_enabled', TRUE)) {
-    return array(
-      'vote_average' => array(
+    return [
+      'vote_average' => [
         'title' => t('Average vote'),
         // Note that we use i.sid, the search index's search item id, rather
         // than fm.fid.
@@ -389,9 +389,9 @@ function hook_file_ranking() {
         // and the lowest possible score, always 0, should be 0.
         'score' => 'vote_file_data.average / CAST(%f AS DECIMAL)',
         // Pass in the highest possible voting score as a decimal argument.
-        'arguments' => array(variable_get('vote_score_max', 5)),
-      ),
-    );
+        'arguments' => [variable_get('vote_score_max', 5)],
+      ],
+    ];
   }
 }
 
@@ -436,7 +436,7 @@ function hook_file_transfer($uri, array $headers) {
 function hook_file_type($file) {
   // Assign all files uploaded by anonymous users to a special file type.
   if (user_is_anonymous()) {
-    return array('untrusted_files');
+    return ['untrusted_files'];
   }
 }
 
@@ -450,7 +450,7 @@ function hook_file_type($file) {
  */
 function hook_file_type_alter(array &$types, $file) {
   // Choose a specific, non-first, file type.
-  $types = array($types[4]);
+  $types = [$types[4]];
 }
 
 /**

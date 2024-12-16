@@ -53,25 +53,25 @@ class LayoutMenuItem {
    *
    * @var array
    */
-  var $menu = array(
+  var $menu = [
     'title' => NULL,
     'weight' => 0,
     'type' => 'none',
     'name' => 'main-menu',
-    'parent' => array(
+    'parent' => [
       'title' => NULL,
       'weight' => 0,
       'type' => 'none',
       'name' => 'main-menu',
-    ),
-  );
+    ],
+  ];
 
   /**
    * An array of all conditional rules used by this menu item.
    *
    * @var LayoutAccess[]
    */
-  var $conditions = array();
+  var $conditions = [];
 
   /**
    * An array of context configurations.
@@ -82,7 +82,7 @@ class LayoutMenuItem {
    *   - name: The automatically generated name for this context.
    *   - position: The position in the path for this context.
    */
-  var $arguments = array();
+  var $arguments = [];
 
   /**
    * Whether this menu item is locked (being currently edited).
@@ -110,7 +110,7 @@ class LayoutMenuItem {
    *
    * @var LayoutContext[]
    */
-  private $contexts = array();
+  private $contexts = [];
 
   /**
    * Constructor for LayoutMenuItems.
@@ -122,23 +122,23 @@ class LayoutMenuItem {
 
     // Ensure defaults for menu settings.
     if (empty($this->menu)) {
-      $this->menu = array();
+      $this->menu = [];
     }
-    $this->menu += array(
+    $this->menu += [
       'type' => 'none',
       'title' => '',
       'weight' => 0,
       'name' => 'main-menu',
-    );
+    ];
     if (!isset($this->menu['parent'])) {
-      $this->menu['parent'] = array();
+      $this->menu['parent'] = [];
     }
-    $this->menu['parent'] += array(
+    $this->menu['parent'] += [
       'type' => 'none',
       'title' => '',
       'weight' => 0,
       'name' => 'main-menu',
-    );
+    ];
 
     // Load conditions.
     foreach ($this->conditions as $key => $condition) {
@@ -147,7 +147,7 @@ class LayoutMenuItem {
 
     // Ensure contexts is always set to an array.
     if (is_null($this->contexts)) {
-      $this->contexts = array();
+      $this->contexts = [];
     }
   }
 
@@ -156,22 +156,22 @@ class LayoutMenuItem {
    */
   function save() {
     // Convert all properties to an array.
-    $data = array(
+    $data = [
       'name' => $this->name,
       'title' => $this->title,
       'path' => $this->path,
       'menu' => $this->menu,
-      'conditions' => array(),
+      'conditions' => [],
       'arguments' => $this->arguments,
-    );
+    ];
 
     // Convert all conditions.
     foreach ($this->conditions as $condition) {
       unset($condition->is_new);
-      $data['conditions'][] = array(
+      $data['conditions'][] = [
         'plugin' => $condition->plugin,
         'data' => $condition->toArray(),
-      );
+      ];
     }
 
     config('layout.menu_item.' . $this->name)
@@ -242,7 +242,7 @@ class LayoutMenuItem {
    */
   function getContexts() {
     if (is_null($this->contexts)) {
-      $this->contexts = array();
+      $this->contexts = [];
     }
 
     $this->resetContexts();
@@ -254,10 +254,10 @@ class LayoutMenuItem {
     // Add in configured arguments.
     foreach ($this->arguments as $position => $argument_config) {
       if (isset($path_parts[$position]) && $path_parts[$position] === '%') {
-        $context_config = $argument_config + array(
+        $context_config = $argument_config + [
           'required' => TRUE,
           'usageType' => LayoutContext::USAGE_TYPE_MENU,
-        );
+        ];
         $contexts[$position] = layout_create_context($argument_config['plugin'], $context_config);
       }
     }

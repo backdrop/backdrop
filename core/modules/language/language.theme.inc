@@ -16,12 +16,12 @@
 function theme_language_admin_overview_form_table($variables) {
   $form = $variables['form'];
 
-  $rows = array();
+  $rows = [];
   foreach (element_children($form, TRUE) as $langcode) {
     $element = &$form[$langcode];
-    $row = array(
-      'class' => array('draggable'),
-    );
+    $row = [
+      'class' => ['draggable'],
+    ];
     foreach (element_children($element, TRUE) as $column) {
       $cell = &$element[$column];
       $row['data'][] = backdrop_render($cell);
@@ -29,11 +29,11 @@ function theme_language_admin_overview_form_table($variables) {
     $rows[] = $row;
   }
 
-  $output = theme('table', array(
+  $output = theme('table', [
     'header' => $form['#header'],
     'rows' => $rows,
-    'attributes' => array('id' => 'language-order'),
-  ));
+    'attributes' => ['id' => 'language-order'],
+  ]);
   $output .= backdrop_render_children($form);
 
   backdrop_add_tabledrag('language-order', 'order', 'sibling', 'language-order-weight');

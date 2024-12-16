@@ -13,12 +13,12 @@
  * @see book_menu()
  */
 function book_render() {
-  $book_list = array();
+  $book_list = [];
   foreach (book_get_books() as $book) {
     $book_list[] = l($book['title'], $book['href'], $book['options']);
   }
 
-  return theme('item_list', array('items' => $book_list));
+  return theme('item_list', ['items' => $book_list]);
 }
 
 /**
@@ -33,7 +33,7 @@ function book_render() {
  */
 function book_remove_form($form, &$form_state, Node $node) {
   $form['#node'] = $node;
-  $title = array('%title' => $node->title);
+  $title = ['%title' => $node->title];
 
   if ($node->book['has_children']) {
     $description = t('%title has associated child pages, which will be relocated automatically to maintain their connection to the book. To recreate the hierarchy (as it was before removing this page), %title may be added again using the Outline tab, and each of its former child pages will need to be relocated manually.', $title);

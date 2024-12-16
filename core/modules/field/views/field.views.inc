@@ -13,7 +13,7 @@
  * the default behavior for adding fields.
  */
 function field_views_data() {
-  $data = array();
+  $data = [];
   foreach (field_info_fields() as $field) {
     if ($field['storage']['type'] != 'field_sql_storage') {
       continue;
@@ -62,8 +62,8 @@ function field_views_data_alter(&$data) {
  * Therefore it looks up in all bundles to find the most used instance.
  */
 function field_views_field_label($field_name) {
-  $label_counter = array();
-  $all_labels = array();
+  $label_counter = [];
+  $all_labels = [];
   // Count the amount of instances per label per field.
   $instances = field_info_instances();
   foreach ($instances as $entity_name => $entity_type) {
@@ -75,12 +75,12 @@ function field_views_field_label($field_name) {
     }
   }
   if (empty($label_counter)) {
-    return array($field_name, $all_labels);
+    return [$field_name, $all_labels];
   }
   // Sort the field labels by it most used label and return the most used one.
   arsort($label_counter);
   $label_counter = array_keys($label_counter);
-  return array($label_counter[0], $all_labels);
+  return [$label_counter[0], $all_labels];
 }
 
 /**
@@ -94,18 +94,18 @@ function field_views_field_default_views_data($field) {
     return;
   }
 
-  $data = array();
+  $data = [];
 
   $current_table = _field_sql_storage_tablename($field);
   $revision_table = _field_sql_storage_revision_tablename($field);
 
   // The list of entity:bundle that this field is used in.
-  $bundles_names = array();
+  $bundles_names = [];
   $supports_revisions = FALSE;
-  $entity_tables = array();
-  $current_tables = array();
-  $revision_tables = array();
-  $groups = array();
+  $entity_tables = [];
+  $current_tables = [];
+  $revision_tables = [];
+  $groups = [];
 
   $group_name = count($field['bundles']) > 1 ? t('Field') : NULL;
 
@@ -135,40 +135,40 @@ function field_views_field_default_views_data($field) {
       $revision_tables[$entity] = $entity_info['revision table'];
     }
 
-    $data[$current_table]['table']['join'][$entity_info['base table']] = array(
+    $data[$current_table]['table']['join'][$entity_info['base table']] = [
       'left_field' => $entity_info['entity keys']['id'],
       'field' => 'entity_id',
-      'extra' => array(
-        array('field' => 'entity_type', 'value' => $entity),
-        array('field' => 'deleted', 'value' => 0, 'numeric' => TRUE),
-      ),
-    );
+      'extra' => [
+        ['field' => 'entity_type', 'value' => $entity],
+        ['field' => 'deleted', 'value' => 0, 'numeric' => TRUE],
+      ],
+    ];
 
     if (!empty($entity_info['entity keys']['revision']) && !empty($entity_info['revision table'])) {
-      $data[$revision_table]['table']['join'][$entity_info['revision table']] = array(
+      $data[$revision_table]['table']['join'][$entity_info['revision table']] = [
         'left_field' => $entity_info['entity keys']['revision'],
         'field' => 'revision_id',
-        'extra' => array(
-          array('field' => 'entity_type', 'value' => $entity),
-          array('field' => 'deleted', 'value' => 0, 'numeric' => TRUE),
-        ),
-      );
+        'extra' => [
+          ['field' => 'entity_type', 'value' => $entity],
+          ['field' => 'deleted', 'value' => 0, 'numeric' => TRUE],
+        ],
+      ];
 
       $supports_revisions = TRUE;
     }
 
     foreach ($bundles as $bundle) {
-      $bundles_names[] = t('@entity:@bundle', array('@entity' => $entity, '@bundle' => $bundle));
+      $bundles_names[] = t('@entity:@bundle', ['@entity' => $entity, '@bundle' => $bundle]);
     }
   }
 
-  $tables = array();
+  $tables = [];
   $tables[FIELD_LOAD_CURRENT] = $current_table;
   if ($supports_revisions) {
     $tables[FIELD_LOAD_REVISION] = $revision_table;
   }
 
-  $add_fields = array('delta', 'language', 'bundle');
+  $add_fields = ['delta', 'language', 'bundle'];
   foreach ($field['columns'] as $column_name => $attributes) {
     $add_fields[] = _field_sql_storage_columnname($field['field_name'], $column_name);
   }
@@ -185,23 +185,23 @@ function field_views_field_default_views_data($field) {
       $column = $field['field_name'];
     }
     else {
-      $group = t('@group (historical data)', array('@group' => $group_name));
+      $group = t('@group (historical data)', ['@group' => $group_name]);
       $old_column = 'revision_id';
       $column = $field['field_name'] . '-' . $old_column;
     }
 
-    $data[$table][$old_column]['field']['moved to'] = array($table, $column);
-    $data[$table][$column] = array(
+    $data[$table][$old_column]['field']['moved to'] = [$table, $column];
+    $data[$table][$column] = [
       'group' => $group,
       'title' => check_plain($label),
       'title short' => check_plain($label),
-      'help' =>  t('Appears in: @bundles.', array('@bundles' => implode(', ', $bundles_names))),
-    );
+      'help' =>  t('Appears in: @bundles.', ['@bundles' => implode(', ', $bundles_names)]),
+    ];
 
     // Go through and create a list of aliases for all possible combinations of
     // entity type + name.
-    $aliases = array();
-    $also_known = array();
+    $aliases = [];
+    $also_known = [];
     foreach ($all_labels as $entity_name => $labels) {
       if (empty($groups[$entity_name])) {
         continue;
@@ -209,36 +209,36 @@ function field_views_field_default_views_data($field) {
       foreach ($labels as $label_name => $true) {
         if ($type == FIELD_LOAD_CURRENT) {
           if ($group_name != $groups[$entity_name] || $label != $label_name) {
-            $aliases[] = array(
+            $aliases[] = [
               'base' => $current_tables[$entity_name],
               'group' => $groups[$entity_name],
               'title' => check_plain($label_name),
-              'help' => t('This is an alias of @group: @field.', array('@group' => $group_name, '@field' => $label)),
-            );
+              'help' => t('This is an alias of @group: @field.', ['@group' => $group_name, '@field' => $label]),
+            ];
           }
-          $also_known[] = t('@group: @field', array('@group' => $groups[$entity_name], '@field' => $label_name));
+          $also_known[] = t('@group: @field', ['@group' => $groups[$entity_name], '@field' => $label_name]);
         }
         else {
           if ($group_name != $groups[$entity_name] && $label != $label_name && isset($revision_tables[$entity_name])) {
-            $aliases[] = array(
+            $aliases[] = [
               'base' => $revision_tables[$entity_name],
-              'group' => t('@group (historical data)', array('@group' => $groups[$entity_name])),
+              'group' => t('@group (historical data)', ['@group' => $groups[$entity_name]]),
               'title' => $label_name,
-              'help' => t('This is an alias of @group: @field.', array('@group' => $group_name, '@field' => $label)),
-            );
+              'help' => t('This is an alias of @group: @field.', ['@group' => $group_name, '@field' => $label]),
+            ];
           }
-          $also_known[] = t('@group (historical data): @field', array('@group' => $groups[$entity_name], '@field' => $label_name));
+          $also_known[] = t('@group (historical data): @field', ['@group' => $groups[$entity_name], '@field' => $label_name]);
         }
       }
     }
     if ($aliases) {
       $data[$table][$column]['aliases'] = $aliases;
-      $data[$table][$column]['help'] .= ' ' . t('Also known as: !also.', array('!also' => implode(', ', $also_known)));
+      $data[$table][$column]['help'] .= ' ' . t('Also known as: !also.', ['!also' => implode(', ', $also_known)]);
     }
 
     $keys = array_keys($field['columns']);
     $real_field = reset($keys);
-    $data[$table][$column]['field'] = array(
+    $data[$table][$column]['field'] = [
       'table' => $table,
       'handler' => 'views_handler_field_field',
       'click sortable' => TRUE,
@@ -250,7 +250,7 @@ function field_views_field_default_views_data($field) {
       // Default the element type to div, let the UI change it if necessary.
       'element type' => 'div',
       'is revision' => $type == FIELD_LOAD_REVISION,
-    );
+    ];
   }
 
   foreach ($field['columns'] as $column => $attributes) {
@@ -282,13 +282,13 @@ function field_views_field_default_views_data($field) {
 
 
     if (count($field['columns']) == 1 || $column == 'value') {
-      $title = t('@label (!name)', array('@label' => $label, '!name' => $field['field_name']));
+      $title = t('@label (!name)', ['@label' => $label, '!name' => $field['field_name']]);
       // CCK used the first 10 characters of $label. Probably doesn't matter.
       $title_short = $label;
     }
     else {
-      $title = t('@label (!name:!column)', array('@label' => $label, '!name' => $field['field_name'], '!column' => $column));
-      $title_short = t('@label:!column', array('@label' => $label, '!column' => $column));
+      $title = t('@label (!name:!column)', ['@label' => $label, '!name' => $field['field_name'], '!column' => $column]);
+      $title_short = t('@label:!column', ['@label' => $label, '!column' => $column]);
     }
 
     foreach ($tables as $type => $table) {
@@ -296,24 +296,24 @@ function field_views_field_default_views_data($field) {
         $group = $group_name;
       }
       else {
-        $group = t('@group (historical data)', array('@group' => $group_name));
+        $group = t('@group (historical data)', ['@group' => $group_name]);
       }
       $column_real_name = $field['storage']['details']['sql'][$type][$table][$column];
 
       // Load all the fields from the table by default.
       $additional_fields = array_values($field['storage']['details']['sql'][$type][$table]);
 
-      $data[$table][$column_real_name] = array(
+      $data[$table][$column_real_name] = [
         'group' => $group,
         'title' => $title,
         'title short' => $title_short,
-        'help' =>  t('Appears in: @bundles.', array('@bundles' => implode(', ', $bundles_names))),
-      );
+        'help' =>  t('Appears in: @bundles.', ['@bundles' => implode(', ', $bundles_names)]),
+      ];
 
       // Go through and create a list of aliases for all possible combinations of
       // entity type + name.
-      $aliases = array();
-      $also_known = array();
+      $aliases = [];
+      $also_known = [];
       foreach ($all_labels as $entity_name => $labels) {
         if (empty($groups[$entity_name])) {
           continue;
@@ -321,167 +321,167 @@ function field_views_field_default_views_data($field) {
         foreach ($labels as $label_name => $true) {
           if ($group_name != $groups[$entity_name] || $label != $label_name) {
             if (count($field['columns']) == 1 || $column == 'value') {
-              $alias_title = t('@label (!name)', array('@label' => $label_name, '!name' => $field['field_name']));
+              $alias_title = t('@label (!name)', ['@label' => $label_name, '!name' => $field['field_name']]);
               // CCK used the first 10 characters of $label. Probably doesn't matter.
             }
             else {
-              $alias_title = t('@label (!name:!column)', array('@label' => $label_name, '!name' => $field['field_name'], '!column' => $column));
+              $alias_title = t('@label (!name:!column)', ['@label' => $label_name, '!name' => $field['field_name'], '!column' => $column]);
             }
-            $aliases[] = array(
+            $aliases[] = [
               'group' => $groups[$entity_name],
               'title' => $alias_title,
-              'help' => t('This is an alias of @group: @field.', array('@group' => $group_name, '@field' => $title)),
-            );
+              'help' => t('This is an alias of @group: @field.', ['@group' => $group_name, '@field' => $title]),
+            ];
           }
-          $also_known[] = t('@group: @field', array('@group' => $groups[$entity_name], '@field' => $title));
+          $also_known[] = t('@group: @field', ['@group' => $groups[$entity_name], '@field' => $title]);
         }
       }
       if ($aliases) {
         $data[$table][$column_real_name]['aliases'] = $aliases;
-        $data[$table][$column_real_name]['help'] .= ' ' . t('Also known as: !also.', array('!also' => implode(', ', $also_known)));
+        $data[$table][$column_real_name]['help'] .= ' ' . t('Also known as: !also.', ['!also' => implode(', ', $also_known)]);
       }
 
-      $data[$table][$column_real_name]['argument'] = array(
+      $data[$table][$column_real_name]['argument'] = [
         'field' => $column_real_name,
         'table' => $table,
         'handler' => $argument,
         'additional fields' => $additional_fields,
         'field_name' => $field['field_name'],
         'empty field name' => t('- No value -'),
-      );
-      $data[$table][$column_real_name]['filter'] = array(
+      ];
+      $data[$table][$column_real_name]['filter'] = [
         'field' => $column_real_name,
         'table' => $table,
         'handler' => $filter,
         'additional fields' => $additional_fields,
         'field_name' => $field['field_name'],
         'allow empty' => TRUE,
-      );
+      ];
       if (!empty($allow_sort)) {
-        $data[$table][$column_real_name]['sort'] = array(
+        $data[$table][$column_real_name]['sort'] = [
           'field' => $column_real_name,
           'table' => $table,
           'handler' => $sort,
           'additional fields' => $additional_fields,
           'field_name' => $field['field_name'],
-        );
+        ];
       }
 
       // Expose additional delta column for multiple value fields.
       if ($field['cardinality'] > 1 || $field['cardinality'] == FIELD_CARDINALITY_UNLIMITED) {
-        $title_delta = t('@label (!name:delta)', array('@label' => $label, '!name' => $field['field_name']));
-        $title_short_delta = t('@label:delta', array('@label' => $label));
+        $title_delta = t('@label (!name:delta)', ['@label' => $label, '!name' => $field['field_name']]);
+        $title_short_delta = t('@label:delta', ['@label' => $label]);
 
-        $data[$table]['delta'] = array(
+        $data[$table]['delta'] = [
           'group' => $group,
           'title' => $title_delta,
           'title short' => $title_short_delta,
-          'help' => t('Delta - Appears in: @bundles.', array('@bundles' => implode(', ', $bundles_names))),
-        );
-        $data[$table]['delta']['field'] = array(
+          'help' => t('Delta - Appears in: @bundles.', ['@bundles' => implode(', ', $bundles_names)]),
+        ];
+        $data[$table]['delta']['field'] = [
           'handler' => 'views_handler_field_numeric',
-        );
-        $data[$table]['delta']['argument'] = array(
+        ];
+        $data[$table]['delta']['argument'] = [
           'field' => 'delta',
           'table' => $table,
           'handler' => 'views_handler_argument_numeric',
           'additional fields' => $additional_fields,
           'empty field name' => t('- No value -'),
           'field_name' => $field['field_name'],
-        );
-        $data[$table]['delta']['filter'] = array(
+        ];
+        $data[$table]['delta']['filter'] = [
           'field' => 'delta',
           'table' => $table,
           'handler' => 'views_handler_filter_numeric',
           'additional fields' => $additional_fields,
           'field_name' => $field['field_name'],
           'allow empty' => TRUE,
-        );
-        $data[$table]['delta']['sort'] = array(
+        ];
+        $data[$table]['delta']['sort'] = [
           'field' => 'delta',
           'table' => $table,
           'handler' => 'views_handler_sort',
           'additional fields' => $additional_fields,
           'field_name' => $field['field_name'],
-        );
+        ];
       }
 
       // Expose additional language column for translatable fields.
       if (!empty($field['translatable'])) {
-        $title_language = t('@label (!name:language)', array('@label' => $label, '!name' => $field['field_name']));
-        $title_short_language = t('@label:language', array('@label' => $label));
+        $title_language = t('@label (!name:language)', ['@label' => $label, '!name' => $field['field_name']]);
+        $title_short_language = t('@label:language', ['@label' => $label]);
 
-        $data[$table]['language'] = array(
+        $data[$table]['language'] = [
           'group' => $group,
           'title' => $title_language,
           'title short' => $title_short_language,
-          'help' => t('Language - Appears in: @bundles.', array('@bundles' => implode(', ', $bundles_names))),
-        );
-        $data[$table]['language']['field'] = array(
+          'help' => t('Language - Appears in: @bundles.', ['@bundles' => implode(', ', $bundles_names)]),
+        ];
+        $data[$table]['language']['field'] = [
           'handler' => 'views_handler_field_locale_language',
-        );
-        $data[$table]['language']['argument'] = array(
+        ];
+        $data[$table]['language']['argument'] = [
           'field' => 'language',
           'table' => $table,
           'handler' => 'views_handler_argument_locale_language',
           'additional fields' => $additional_fields,
           'empty field name' => t('<No value>'),
           'field_name' => $field['field_name'],
-        );
-        $data[$table]['language']['filter'] = array(
+        ];
+        $data[$table]['language']['filter'] = [
           'field' => 'language',
           'table' => $table,
           'handler' => 'views_handler_filter_locale_language',
           'additional fields' => $additional_fields,
           'field_name' => $field['field_name'],
           'allow empty' => TRUE,
-        );
-        $data[$table]['language']['sort'] = array(
+        ];
+        $data[$table]['language']['sort'] = [
           'field' => 'language',
           'table' => $table,
           'handler' => 'views_handler_sort',
           'additional fields' => $additional_fields,
           'field_name' => $field['field_name'],
-        );
+        ];
       }
 
       // Expose additional language column for translatable fields.
       if (!empty($field['translatable'])) {
-        $title_language = t('@label (!name:language)', array('@label' => $label, '!name' => $field['field_name']));
-        $title_short_language = t('@label:language', array('@label' => $label));
+        $title_language = t('@label (!name:language)', ['@label' => $label, '!name' => $field['field_name']]);
+        $title_short_language = t('@label:language', ['@label' => $label]);
 
-        $data[$table]['language'] = array(
+        $data[$table]['language'] = [
           'group' => $group,
           'title' => $title_language,
           'title short' => $title_short_language,
-          'help' => t('Language - Appears in: @bundles.', array('@bundles' => implode(', ', $bundles_names))),
-        );
-        $data[$table]['language']['field'] = array(
+          'help' => t('Language - Appears in: @bundles.', ['@bundles' => implode(', ', $bundles_names)]),
+        ];
+        $data[$table]['language']['field'] = [
           'handler' => 'views_handler_field_locale_language',
-        );
-        $data[$table]['language']['argument'] = array(
+        ];
+        $data[$table]['language']['argument'] = [
           'field' => 'language',
           'table' => $table,
           'handler' => 'views_handler_argument_locale_language',
           'additional fields' => $additional_fields,
           'empty field name' => t('<No value>'),
           'field_name' => $field['field_name'],
-        );
-        $data[$table]['language']['filter'] = array(
+        ];
+        $data[$table]['language']['filter'] = [
           'field' => 'language',
           'table' => $table,
           'handler' => 'views_handler_filter_locale_language',
           'additional fields' => $additional_fields,
           'field_name' => $field['field_name'],
           'allow empty' => TRUE,
-        );
-        $data[$table]['language']['sort'] = array(
+        ];
+        $data[$table]['language']['sort'] = [
           'field' => 'language',
           'table' => $table,
           'handler' => 'views_handler_sort',
           'additional fields' => $additional_fields,
           'field_name' => $field['field_name'],
-        );
+        ];
       }
     }
   }

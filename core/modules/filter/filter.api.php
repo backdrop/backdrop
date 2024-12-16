@@ -83,25 +83,25 @@
  * @see hook_filter_info_alter()
  */
 function hook_filter_info() {
-  $filters['filter_html'] = array(
+  $filters['filter_html'] = [
     'title' => t('Limit allowed HTML tags'),
     'description' => t('Allows you to restrict the HTML tags the user can use. It will also remove harmful content such as JavaScript events, JavaScript URLs and CSS styles from those tags that are not removed.'),
     'process callback' => '_filter_html',
     'settings callback' => '_filter_html_settings',
     'allowed html callback' => '_filter_html_allowed_html',
-    'default settings' => array(
+    'default settings' => [
       'allowed_html' => '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <h3> <h4> <h5> <p>',
       'filter_html_help' => 1,
       'filter_html_nofollow' => 0,
-    ),
+    ],
     'tips callback' => '_filter_html_tips',
-  );
-  $filters['filter_autop'] = array(
+  ];
+  $filters['filter_autop'] = [
     'title' => t('Convert line breaks'),
     'description' => t('Converts line breaks into HTML (i.e. &lt;br&gt; and &lt;p&gt;) tags.'),
     'process callback' => '_filter_autop',
     'tips callback' => '_filter_autop_tips',
-  );
+  ];
   return $filters;
 }
 
@@ -117,9 +117,9 @@ function hook_filter_info_alter(&$info) {
   $info['filter_image_caption']['process callback'] = 'my_module_custom_caption';
 
   // Alter the default settings of the URL filter provided by core.
-  $info['filter_url']['default settings'] = array(
+  $info['filter_url']['default settings'] = [
     'filter_url_length' => 100,
-  );
+  ];
 }
 
 /**
@@ -154,19 +154,19 @@ function hook_filter_info_alter(&$info) {
  * @since 1.28.0 Added "library_version" key to specify editor version.
  */
 function hook_editor_info() {
-  $editors['myeditor'] = array(
+  $editors['myeditor'] = [
     'label' => t('My Editor'),
     'settings callback' => '_myeditor_settings',
-    'default settings' => array(
+    'default settings' => [
       'enable_toolbar' => TRUE,
-      'toolbar_buttons' => array('bold', 'italic', 'underline', 'link', 'image'),
+      'toolbar_buttons' => ['bold', 'italic', 'underline', 'link', 'image'],
       'resizeable' => TRUE,
-    ),
+    ],
     'file' => 'myeditor.admin.inc',
-    'library' => array('my_module', 'myeditor'),
+    'library' => ['my_module', 'myeditor'],
     'library_version' => '2.0.0',
     'js settings callback' => '_myeditor_js_settings',
-  );
+  ];
   return $editors;
 }
 
@@ -235,12 +235,12 @@ function hook_filter_js_settings_alter(&$settings) {
  * @ingroup callbacks
  */
 function callback_filter_settings($form, &$form_state, $filter, $format) {
-  $elements = array();
-  $elements['nofollow'] = array(
+  $elements = [];
+  $elements['nofollow'] = [
     '#type' => 'checkbox',
     '#title' => t('Add rel="nofollow" to all links'),
     '#default_value' => $filter->settings['nofollow'],
-  );
+  ];
   return $elements;
 }
 
@@ -412,14 +412,14 @@ function callback_filter_process($text, $filter, $format, $langcode, $cache, $ca
  */
 function callback_filter_allowed_html($filter, $format) {
   // This example is pulled from "filter_html" filter provided by core.
-  $restrictions = array('allowed' => array());
+  $restrictions = ['allowed' => []];
   $tags = preg_split('/\s+|<|>/', $filter->settings['allowed_html'], -1, PREG_SPLIT_NO_EMPTY);
   // List the allowed HTML tags.
   foreach ($tags as $tag) {
     $restrictions['allowed'][$tag] = TRUE;
   }
   // The 'style' and 'on*' ('onClick' etc.) attributes are always forbidden.
-  $restrictions['allowed']['*'] = array('style' => FALSE, 'on*' => FALSE);
+  $restrictions['allowed']['*'] = ['style' => FALSE, 'on*' => FALSE];
   return $restrictions;
 }
 
@@ -483,9 +483,9 @@ function callback_filter_tips($filter, $format, $long) {
  *   filter's JavaScript integration.
  */
 function hook_filter_FILTER_js_settings($filter, $format, $filters) {
-  return array(
+  return [
     'myFilterSetting' => $filter->settings['my_filter_setting'],
-  );
+  ];
 }
 
 /**
@@ -524,29 +524,29 @@ function hook_filter_FILTER_js_settings($filter, $format, $filters) {
 function hook_editor_EDITOR_settings($form, &$form_state, $format, $defaults, $filters) {
   $format->settings += $defaults;
 
-  $elements = array();
-  $elements['enable_toolbar'] = array(
+  $elements = [];
+  $elements['enable_toolbar'] = [
     '#type' => 'checkbox',
     '#title' => t('Enable toolbar'),
     '#default_value' => $format->settings['enable_toolbar'],
-  );
-  $elements['buttons'] = array(
+  ];
+  $elements['buttons'] = [
     '#type' => 'checkboxes',
     '#title' => t('Enabled buttons'),
-    '#options' => array(
+    '#options' => [
       'bold' => t('Bold'),
       'italic' => t('Italic'),
       'underline' => t('Underline'),
       'link' => t('Link'),
       'image' => t('Image'),
-    ),
+    ],
     '#default_value' => $format->settings['buttons'],
-  );
-  $elements['resizeable'] = array(
+  ];
+  $elements['resizeable'] = [
     '#type' => 'checkbox',
     '#title' => t('Resizeable'),
     '#default_value' => $format->settings['resizeable'],
-  );
+  ];
   return $elements;
 }
 
@@ -576,11 +576,11 @@ function hook_editor_EDITOR_settings($form, &$form_state, $format, $defaults, $f
  *   editor's JavaScript integration.
  */
 function hook_editor_EDITOR_js_settings($format, $filters, $existing_settings) {
-  return array(
+  return [
     'toolbar' => $format->settings['enable_toolbar'],
     'buttons' => $format->settings['buttons'],
     'resizeable' => $format->settings['resizeable'],
-  );
+  ];
 }
 
 /**

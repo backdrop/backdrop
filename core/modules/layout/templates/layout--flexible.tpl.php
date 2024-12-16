@@ -29,7 +29,7 @@
   <div class="layout-flexible-content <?php $region_buttons ? print 'layout-flexible-editor' : ''; ?>">
     <?php foreach ($row_data as $name => $row): ?>
       <?php
-        $row_classes = array('flexible-row', 'l-' . $name);
+        $row_classes = ['flexible-row', 'l-' . $name];
         if ($row['element'] == 'header' || $row['element'] == 'footer') {
           $row_classes[] = 'l-' . $row['element'];
         }

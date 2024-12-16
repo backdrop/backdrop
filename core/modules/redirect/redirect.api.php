@@ -124,7 +124,7 @@ function hook_redirect_load_by_source_alter(array &$redirects, $source, array $c
 function hook_redirect_access($op, $redirect, $account) {
   $type = is_string($redirect) ? $redirect : $redirect->type;
 
-  if (in_array($type, array('normal', 'special'))) {
+  if (in_array($type, ['normal', 'special'])) {
     if ($op == 'create' && user_access('create ' . $type . ' redirects', $account)) {
       return REDIRECT_ACCESS_ALLOW;
     }
@@ -289,12 +289,12 @@ function hook_redirect_alter($redirect) {
  */
 function hook_redirect_operations() {
   // Example from redirect_redirect_operations():
-  $operations['delete'] = array(
+  $operations['delete'] = [
     'action' => t('Delete'),
     'action_past' => t('Deleted'),
     'callback' => 'redirect_delete_multiple',
     'confirm' => TRUE,
-  );
+  ];
   return $operations;
 }
 

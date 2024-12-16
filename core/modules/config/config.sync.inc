@@ -7,17 +7,17 @@ function config_sync_batch($config_statuses = NULL) {
   if (empty($config_statuses)) {
     $config_statuses = config_get_statuses();
   }
-  $operations[] = array('_config_sync_start', array($config_statuses));
-  $operations[] = array('_config_sync_validate', array());
-  $operations[] = array('_config_sync_import', array());
-  $batch = array(
+  $operations[] = ['_config_sync_start', [$config_statuses]];
+  $operations[] = ['_config_sync_validate', []];
+  $operations[] = ['_config_sync_import', []];
+  $batch = [
     'operations' => $operations,
     'title' => t('Importing configuration'),
     'init_message' => t('Starting import'),
     'error_message' => t('An error occurred while importing the configuration.'),
     'file' => backdrop_get_path('module', 'config') . '/config.sync.inc',
     'finished' => '_config_sync_finished',
-  );
+  ];
   return $batch;
 }
 
@@ -31,7 +31,7 @@ function _config_sync_start($config_statuses, &$context) {
   // these values available in all subsequent batch callbacks.
   $context['results']['all_configs'] = $config_statuses;
   $context['results']['pending_changes'] = array_filter($config_statuses);
-  $context['results']['completed_changes'] = array();
+  $context['results']['completed_changes'] = [];
 }
 
 /**
@@ -94,10 +94,10 @@ function _config_sync_finished($status, $results, $operations) {
     backdrop_set_message(t('Configuration sync failed. Check that the configuration files are properly formatted.'), 'error');
   }
   if (!empty($results['errors'])) {
-    backdrop_set_message(t('Configuration sync failed. The following errors were reported:') . ' ' . theme('item_list', array('items' => $results['errors'])), 'error');
+    backdrop_set_message(t('Configuration sync failed. The following errors were reported:') . ' ' . theme('item_list', ['items' => $results['errors']]), 'error');
   }
   if (!empty($results['completed_changes'])) {
-    backdrop_set_message(t('Configuration sync completed. @files configuration files synced.', array('@files' => count($results['completed_changes']))));
+    backdrop_set_message(t('Configuration sync completed. @files configuration files synced.', ['@files' => count($results['completed_changes'])]));
     if (config_get('system.core', 'config_sync_clear_staging')) {
       // Clean up the staging directory.
       $config_dir = config_get_config_directory('staging');
@@ -156,10 +156,10 @@ function config_sync_validate_file($config_name, $config_change_type, $all_chang
   $config_info = config_get_info($config_name);
   if (empty($config_info)) {
     if ($config_change_type === 'delete') {
-      $message = t('The configuration "@name" is not owned by any enabled module, so it cannot be deleted. If you have disabled this module, either <a href="!enable">enable the module</a> and try the import again, or <a href="!uninstall">uninstall the module entirely</a> to clean up left-over configuration.', array('@name' => $config_name, '!enable' => url('admin/modules'), '!uninstall' => url('admin/modules/uninstall')));
+      $message = t('The configuration "@name" is not owned by any enabled module, so it cannot be deleted. If you have disabled this module, either <a href="!enable">enable the module</a> and try the import again, or <a href="!uninstall">uninstall the module entirely</a> to clean up left-over configuration.', ['@name' => $config_name, '!enable' => url('admin/modules'), '!uninstall' => url('admin/modules/uninstall')]);
     }
     else {
-      $message = t('The configuration "@name" is not owned by any module. Try enabling the module that provides this configuration, then importing again.', array('@name' => $config_name));
+      $message = t('The configuration "@name" is not owned by any module. Try enabling the module that provides this configuration, then importing again.', ['@name' => $config_name]);
     }
     throw new ConfigValidateException($message);
   }

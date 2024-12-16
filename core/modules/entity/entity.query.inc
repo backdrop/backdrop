@@ -67,7 +67,7 @@ class EntityFieldQuery {
    *
    * @see EntityFieldQuery::entityCondition()
    */
-  public $entityConditions = array();
+  public $entityConditions = [];
 
   /**
    * List of field conditions.
@@ -76,7 +76,7 @@ class EntityFieldQuery {
    *
    * @see EntityFieldQuery::fieldCondition()
    */
-  public $fieldConditions = array();
+  public $fieldConditions = [];
 
   /**
    * List of field meta conditions (language and delta).
@@ -91,7 +91,7 @@ class EntityFieldQuery {
    * @see EntityFieldQuery::fieldLanguageCondition()
    * @see EntityFieldQuery::fieldDeltaCondition()
    */
-  public $fieldMetaConditions = array();
+  public $fieldMetaConditions = [];
 
   /**
    * List of property conditions.
@@ -100,14 +100,14 @@ class EntityFieldQuery {
    *
    * @see EntityFieldQuery::propertyCondition()
    */
-  public $propertyConditions = array();
+  public $propertyConditions = [];
 
   /**
    * List of order clauses.
    *
    * @var array
    */
-  public $order = array();
+  public $order = [];
 
   /**
    * The query range.
@@ -116,7 +116,7 @@ class EntityFieldQuery {
    *
    * @see EntityFieldQuery::range()
    */
-  public $range = array();
+  public $range = [];
 
   /**
    * The query pager data.
@@ -125,7 +125,7 @@ class EntityFieldQuery {
    *
    * @see EntityFieldQuery::pager()
    */
-  public $pager = array();
+  public $pager = [];
 
   /**
    * Query behavior for deleted data.
@@ -147,7 +147,7 @@ class EntityFieldQuery {
    *
    * @var array
    */
-  public $fields = array();
+  public $fields = [];
 
   /**
    * TRUE if this is a count query, FALSE if it isn't.
@@ -172,7 +172,7 @@ class EntityFieldQuery {
    *
    * @see EntityFieldQuery::addTag()
    */
-  public $tags = array();
+  public $tags = [];
 
   /**
    * A list of metadata added to this query.
@@ -181,7 +181,7 @@ class EntityFieldQuery {
    *
    * @see EntityFieldQuery::addMetaData()
    */
-  public $metaData = array();
+  public $metaData = [];
 
   /**
    * The ordered results.
@@ -190,7 +190,7 @@ class EntityFieldQuery {
    *
    * @see EntityFieldQuery::execute().
    */
-  public $orderedResults = array();
+  public $orderedResults = [];
 
   /**
    * The method executing the query, if it is overriding the default.
@@ -239,10 +239,10 @@ class EntityFieldQuery {
    *   The called object.
    */
   public function entityCondition($name, $value, $operator = NULL) {
-    $this->entityConditions[$name] = array(
+    $this->entityConditions[$name] = [
       'value' => $value,
       'operator' => $operator,
-    );
+    ];
     return $this;
   }
 
@@ -400,7 +400,7 @@ class EntityFieldQuery {
     if (is_scalar($field)) {
       $field_definition = field_info_field($field);
       if (empty($field_definition)) {
-        throw new EntityFieldQueryException(t('Unknown field: @field_name', array('@field_name' => $field)));
+        throw new EntityFieldQueryException(t('Unknown field: @field_name', ['@field_name' => $field]));
       }
       $field = $field_definition;
     }
@@ -408,14 +408,14 @@ class EntityFieldQuery {
     $index = count($this->fields);
     $this->fields[$index] = $field;
     if (isset($column)) {
-      $conditions[$index] = array(
+      $conditions[$index] = [
         'field' => $field,
         'column' => $column,
         'value' => $value,
         'operator' => $operator,
         'delta_group' => $delta_group,
         'language_group' => $language_group,
-      );
+      ];
     }
     return $this;
   }
@@ -451,11 +451,11 @@ class EntityFieldQuery {
    *   The called object.
    */
   public function propertyCondition($column, $value, $operator = NULL) {
-    $this->propertyConditions[] = array(
+    $this->propertyConditions[] = [
       'column' => $column,
       'value' => $value,
       'operator' => $operator,
-    );
+    ];
     return $this;
   }
 
@@ -477,11 +477,11 @@ class EntityFieldQuery {
    *   The called object.
    */
   public function entityOrderBy($name, $direction = 'ASC') {
-    $this->order[] = array(
+    $this->order[] = [
       'type' => 'entity',
       'specifier' => $name,
       'direction' => $direction,
-    );
+    ];
     return $this;
   }
 
@@ -508,22 +508,22 @@ class EntityFieldQuery {
     if (is_scalar($field)) {
       $field_definition = field_info_field($field);
       if (empty($field_definition)) {
-        throw new EntityFieldQueryException(t('Unknown field: @field_name', array('@field_name' => $field)));
+        throw new EntityFieldQueryException(t('Unknown field: @field_name', ['@field_name' => $field]));
       }
       $field = $field_definition;
     }
     // Save the index used for the new field, for later use in field storage.
     $index = count($this->fields);
     $this->fields[$index] = $field;
-    $this->order[] = array(
+    $this->order[] = [
       'type' => 'field',
-      'specifier' => array(
+      'specifier' => [
         'field' => $field,
         'index' => $index,
         'column' => $column,
-      ),
+      ],
       'direction' => $direction,
-    );
+    ];
     return $this;
   }
 
@@ -546,11 +546,11 @@ class EntityFieldQuery {
    *   The called object.
    */
   public function propertyOrderBy($column, $direction = 'ASC') {
-    $this->order[] = array(
+    $this->order[] = [
       'type' => 'property',
       'specifier' => $column,
       'direction' => $direction,
-    );
+    ];
     return $this;
   }
 
@@ -578,10 +578,10 @@ class EntityFieldQuery {
    *   The called object.
    */
   public function range($start = NULL, $length = NULL) {
-    $this->range = array(
+    $this->range = [
       'start' => $start,
       'length' => $length,
-    );
+    ];
     return $this;
   }
 
@@ -606,10 +606,10 @@ class EntityFieldQuery {
       PagerDefault::$maxElement = $element + 1;
     }
 
-    $this->pager = array(
+    $this->pager = [
       'limit' => $limit,
       'element' => $element,
-    );
+    ];
     return $this;
   }
 
@@ -791,7 +791,7 @@ class EntityFieldQuery {
     // If there are no field conditions and sorts, and no execute callback
     // then we default to querying entity tables in SQL.
     if (empty($this->fields)) {
-      return array($this, 'propertyQuery');
+      return [$this, 'propertyQuery'];
     }
     // If no override, find the storage engine to be used.
     foreach ($this->fields as $field) {
@@ -826,12 +826,12 @@ class EntityFieldQuery {
     $entity_type = $this->entityConditions['entity_type']['value'];
     $entity_info = entity_get_info($entity_type);
     if (empty($entity_info['base table'])) {
-      throw new EntityFieldQueryException(t('Entity %entity has no base table.', array('%entity' => $entity_type)));
+      throw new EntityFieldQueryException(t('Entity %entity has no base table.', ['%entity' => $entity_type]));
     }
     $base_table = $entity_info['base table'];
     $base_table_schema = backdrop_get_schema($base_table);
     $select_query = db_select($base_table);
-    $select_query->addExpression(':entity_type', 'entity_type', array(':entity_type' => $entity_type));
+    $select_query->addExpression(':entity_type', 'entity_type', [':entity_type' => $entity_type]);
     // Process the property conditions.
     foreach ($this->propertyConditions as $property_condition) {
       $this->addCondition($select_query, $base_table . '.' . $property_condition['column'], $property_condition);
@@ -870,7 +870,7 @@ class EntityFieldQuery {
     }
     else {
       $sql_field = 'bundle';
-      $select_query->addExpression(':bundle', 'bundle', array(':bundle' => $entity_type));
+      $select_query->addExpression(':bundle', 'bundle', [':bundle' => $entity_type]);
       $having = TRUE;
     }
     $id_map['bundle'] = $sql_field;
@@ -889,7 +889,7 @@ class EntityFieldQuery {
       if ($order['type'] == 'entity') {
         $key = $order['specifier'];
         if (!isset($id_map[$key])) {
-          throw new EntityFieldQueryException(t('Do not know how to order on @key for @entity_type', array('@key' => $key, '@entity_type' => $entity_type)));
+          throw new EntityFieldQueryException(t('Do not know how to order on @key for @entity_type', ['@key' => $key, '@entity_type' => $entity_type]));
         }
         $select_query->orderBy($id_map[$key], $order['direction']);
       }
@@ -946,8 +946,8 @@ class EntityFieldQuery {
     if ($this->count) {
       return $select_query->countQuery()->execute()->fetchField();
     }
-    $return = array();
-    $this->orderedResults = array();
+    $return = [];
+    $this->orderedResults = [];
     foreach ($select_query->execute() as $ids) {
       if (!isset($ids->bundle)) {
         $ids->bundle = NULL;

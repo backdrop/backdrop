@@ -173,7 +173,7 @@ function language_types_get_configurable() {
   $configurable = &backdrop_static(__FUNCTION__);
 
   if (!isset($configurable)) {
-    $configurable = array();
+    $configurable = [];
     foreach (language_types_info() as $type => $info) {
       if (!isset($info['fixed'])) {
         $configurable[] = $type;
@@ -274,7 +274,7 @@ function language_negotiation_get_switch_links($type, $path) {
       if (!empty($result)) {
         // Allow modules to provide translations for specific links.
         backdrop_alter('language_switch_links', $result, $type, $path);
-        $links = (object) array('links' => $result, 'provider' => $id);
+        $links = (object) ['links' => $result, 'provider' => $id];
         break;
       }
     }
@@ -333,7 +333,7 @@ function language_negotiation_purge() {
 function language_negotiation_set($type, $negotiation) {
   $defined_providers = language_negotiation_info();
   $default_types = language_types_get_configurable();
-  $negotiation_data = array();
+  $negotiation_data = [];
 
   foreach ($negotiation as $id) {
     if (isset($defined_providers[$id])) {
@@ -368,7 +368,7 @@ function language_negotiation_order($type) {
     return $configured_order;
   }
   else {
-    return array();
+    return [];
   }
 }
 
@@ -386,13 +386,13 @@ function language_negotiation_info() {
     $language_providers = module_invoke_all('language_negotiation_info');
 
     // Add the default language negotiation provider.
-    $language_providers[LANGUAGE_NEGOTIATION_DEFAULT] = array(
-      'callbacks' => array('language' => 'language_from_default'),
+    $language_providers[LANGUAGE_NEGOTIATION_DEFAULT] = [
+      'callbacks' => ['language' => 'language_from_default'],
       'weight' => 10,
       'name' => t('Default language'),
-      'description' => t('Use the default site language (@language_name).', array('@language_name' => language_default()->name)),
+      'description' => t('Use the default site language (@language_name).', ['@language_name' => language_default()->name]),
       'config' => 'admin/config/regional/language',
-    );
+    ];
 
     // Let other modules alter the list of language negotiation providers.
     backdrop_alter('language_negotiation_info', $language_providers);
@@ -477,7 +477,7 @@ function language_from_default() {
  *    - The path without the prefix on success, the given path otherwise.
  */
 function language_url_split_prefix($path, $languages) {
-  $args = empty($path) ? array() : explode('/', $path);
+  $args = empty($path) ? [] : explode('/', $path);
   $prefix = array_shift($args);
 
   // Search prefix within enabled languages.
@@ -485,11 +485,11 @@ function language_url_split_prefix($path, $languages) {
   foreach ($languages as $language) {
     if (isset($prefixes[$language->langcode]) && $prefixes[$language->langcode] == $prefix) {
       // Rebuild $path with the language removed.
-      return array($language, implode('/', $args));
+      return [$language, implode('/', $args)];
     }
   }
 
-  return array(FALSE, $path);
+  return [FALSE, $path];
 }
 
 /**

@@ -14,30 +14,30 @@ class views_handler_field_comment_node_link extends views_handler_field_entity {
     parent::construct();
 
     // Add the node fields that comment_link will need..
-    $this->additional_fields['nid'] = array(
+    $this->additional_fields['nid'] = [
       'field' => 'nid',
-    );
-    $this->additional_fields['type'] = array(
+    ];
+    $this->additional_fields['type'] = [
       'field' => 'type',
-    );
-    $this->additional_fields['comment'] = array(
+    ];
+    $this->additional_fields['comment'] = [
       'field' => 'comment',
-    );
+    ];
   }
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['teaser'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['teaser'] = ['default' => FALSE, 'bool' => TRUE];
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
-    $form['teaser'] = array(
+    $form['teaser'] = [
       '#type' => 'checkbox',
       '#title' => t('Show teaser-style link'),
       '#default_value' => $this->options['teaser'],
       '#description' => t('Show the comment link in the form used on standard node teasers, rather than the full node form.'),
-    );
+    ];
 
     parent::options_form($form, $form_state);
   }

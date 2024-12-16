@@ -85,12 +85,12 @@
  */
 function hook_form_system_theme_settings_alter(&$form, &$form_state) {
   // Add a checkbox to toggle the breadcrumb trail.
-  $form['toggle_breadcrumb'] = array(
+  $form['toggle_breadcrumb'] = [
     '#type' => 'checkbox',
     '#title' => t('Display the breadcrumb'),
     '#default_value' => theme_get_setting('toggle_breadcrumb'),
     '#description'   => t('Show a trail of links from the homepage to the current page.'),
-  );
+  ];
 }
 
 /**
@@ -157,7 +157,7 @@ function hook_preprocess(&$variables, $hook) {
  */
 function hook_preprocess_HOOK(&$variables) {
   // This example adds an RDF attribute to the image hook's variables.
-  $variables['attributes']['typeof'] = array('foaf:Image');
+  $variables['attributes']['typeof'] = ['foaf:Image'];
 }
 
 /**

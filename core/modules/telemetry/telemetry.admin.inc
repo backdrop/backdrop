@@ -9,30 +9,30 @@ function telemetry_report() {
 
   $module_path = backdrop_get_path('module', 'telemetry');
   backdrop_add_css($module_path . '/css/telemetry.admin.css');
-  $page = array(
+  $page = [
     '#type' => 'container',
-    '#attributes' => array('class' => array('telemetry-report')),
-  );
+    '#attributes' => ['class' => ['telemetry-report']],
+  ];
 
   $help = '<p>' . t('Help us improve Backdrop CMS by sending anonymous, untracked information about what features your site uses.') . '</p>';
   $help .= '<p>' . t('Below is a list of all data collected by the enabled modules on your site. Only projects that are publicly available on BackdropCMS.org will store usage information.') . '</p>';
-  $help .= '<p>' . t('If you prefer to not send usage information, you can disable the Telemetry module from the <a href="!modules">modules page</a>.', array('!modules' => url('admin/modules'))) . '</p>';
+  $help .= '<p>' . t('If you prefer to not send usage information, you can disable the Telemetry module from the <a href="!modules">modules page</a>.', ['!modules' => url('admin/modules')]) . '</p>';
 
-  $page['help'] = array(
+  $page['help'] = [
     '#type' => 'help',
     '#markup' => $help
-  );
+  ];
 
-  $header = array(
+  $header = [
     t('Metric'),
-    array('data' => t('Description'), 'class' => array('priority-low')),
+    ['data' => t('Description'), 'class' => ['priority-low']],
     t('Value'),
-  );
+  ];
 
-  $rows = array();
+  $rows = [];
   foreach ($telemetry_info as $project => $project_data) {
     foreach ($project_data as $key => $info) {
-      $row = array();
+      $row = [];
       if (!isset($telemetry_data[$project][$key])) {
         $value = '<span class="error">Missing value</span>';
       }
@@ -49,24 +49,24 @@ function telemetry_report() {
       $module_info['name'] = $info['module'] === 'telemetry' ? t('System') : $module_info['name'];
 
       $row[] = '<div class="telemetry-item-label">' . check_plain($info['label']) . '</div><div class="telemetry-item-project">' . check_plain($module_info['name']) . '</div>';
-      $row[] = array(
+      $row[] = [
         'data' => '<div class="telemetry-item-description">' . check_plain($info['description']) . '</div>',
-        'class' => array('priority-low'),
-      );
-      $row[] = array(
+        'class' => ['priority-low'],
+      ];
+      $row[] = [
         'data' => $value,
-        'class' => array('telemetry-item-value'),
-      );
+        'class' => ['telemetry-item-value'],
+      ];
       $rows[] = $row;
     }
   }
 
-  $page['items'] = array(
+  $page['items'] = [
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
     '#sticky' => FALSE,
-  );
+  ];
 
   return $page;
 }

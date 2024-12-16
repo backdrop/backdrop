@@ -10,7 +10,7 @@
 class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
 
   protected function row_style_options($type) {
-    $options = array();
+    $options = [];
     $options['teasers'] = t('teasers');
     $options['full_posts'] = t('full posts');
     $options['titles'] = t('titles');
@@ -31,23 +31,23 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
     switch ($row_plugin) {
       case 'full_posts':
       case 'teasers':
-        $style_form['row_options']['title'] = array(
+        $style_form['row_options']['title'] = [
           '#type' => 'checkbox',
           '#title' => t('Display title'),
           '#description' => t('The title will display as a link to each item.'),
           '#default_value' => TRUE,
-        );
-        $style_form['row_options']['links'] = array(
+        ];
+        $style_form['row_options']['links'] = [
           '#type' => 'checkbox',
           '#title' => t('Display links'),
           '#description' => t("e.g. 'Read more', 'Add comment', etc."),
           '#default_value' => TRUE,
-        );
-        $style_form['row_options']['comments'] = array(
+        ];
+        $style_form['row_options']['comments'] = [
           '#type' => 'checkbox',
           '#title' => t('Display comments'),
           '#default_value' => FALSE,
-        );
+        ];
         break;
     }
   }
@@ -90,7 +90,7 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
   protected function page_display_options($form, $form_state) {
     $display_options = parent::page_display_options($form, $form_state);
     $row_plugin = isset($form_state['values']['page']['style']['row_plugin']) ? $form_state['values']['page']['style']['row_plugin'] : NULL;
-    $row_options = isset($form_state['values']['page']['style']['row_options']) ? $form_state['values']['page']['style']['row_options'] : array();
+    $row_options = isset($form_state['values']['page']['style']['row_options']) ? $form_state['values']['page']['style']['row_options'] : [];
     $this->display_options_row($display_options, $row_plugin, $row_options);
     return $display_options;
   }
@@ -98,7 +98,7 @@ class ViewsUiNodeViewsWizard extends ViewsUiBaseViewsWizard {
   protected function block_display_options($form, $form_state) {
     $display_options = parent::block_display_options($form, $form_state);
     $row_plugin = isset($form_state['values']['block']['style']['row_plugin']) ? $form_state['values']['block']['style']['row_plugin'] : NULL;
-    $row_options = isset($form_state['values']['block']['style']['row_options']) ? $form_state['values']['block']['style']['row_options'] : array();
+    $row_options = isset($form_state['values']['block']['style']['row_options']) ? $form_state['values']['block']['style']['row_options'] : [];
     $this->display_options_row($display_options, $row_plugin, $row_options);
     return $display_options;
   }

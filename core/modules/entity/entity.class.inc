@@ -252,7 +252,7 @@ abstract class Entity extends stdClass implements EntityInterface {
   /**
    * Constructs a new entity object.
    */
-  public function __construct(array $values = array()) {
+  public function __construct(array $values = []) {
     // Set initial values.
     foreach ($values as $key => $value) {
       $this->$key = $value;
@@ -304,7 +304,7 @@ abstract class Entity extends stdClass implements EntityInterface {
    */
   public function delete() {
     if (!$this->isNew()) {
-      entity_get_controller($this->entityType())->delete(array($this->id()));
+      entity_get_controller($this->entityType())->delete([$this->id()]);
     }
   }
 
@@ -319,7 +319,7 @@ abstract class Entity extends stdClass implements EntityInterface {
    * Implements EntityInterface::view().
    */
   public function view($view_mode = 'full', $langcode = NULL, $page = NULL) {
-    $view = entity_get_controller($this->entityType())->view(array($this->id() => $this), $view_mode, $langcode, $page);
+    $view = entity_get_controller($this->entityType())->view([$this->id() => $this], $view_mode, $langcode, $page);
     return $view[$this->entityType()][$this->id()];
   }
 
@@ -348,7 +348,7 @@ abstract class Entity extends stdClass implements EntityInterface {
    * Implements EntityInterface::getFieldValues().
    */
   public function getFieldValues($field_name, $value_key = 'value', $langcode = NULL) {
-    $values = array();
+    $values = [];
     if ($field_items = field_get_items($this->entityType(), $this, $field_name, $langcode)) {
       foreach ($field_items as $item) {
         if (isset($item[$value_key])) {

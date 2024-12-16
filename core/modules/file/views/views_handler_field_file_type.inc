@@ -10,7 +10,7 @@
 class views_handler_field_file_type extends views_handler_field_file {
   function option_definition() {
     $options = parent::option_definition();
-    $options['machine_name'] = array('default' => FALSE);
+    $options['machine_name'] = ['default' => FALSE];
 
     return $options;
   }
@@ -21,13 +21,13 @@ class views_handler_field_file_type extends views_handler_field_file {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
-    $form['machine_name'] = array(
+    $form['machine_name'] = [
       '#title' => t('Output machine name'),
       '#description' => t('Display field as the file type machine name.'),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['machine_name']),
       '#fieldset' => 'more',
-    );
+    ];
   }
 
   /**

@@ -8,35 +8,35 @@
  * Implements hook_field_storage_info().
  */
 function field_test_field_storage_info() {
-  return array(
-    'field_test_storage' => array(
+  return [
+    'field_test_storage' => [
       'label' => t('Test storage'),
       'description' => t('Dummy test storage backend. Stores field values in the variable table.'),
-    ),
-    'field_test_storage_failure' => array(
+    ],
+    'field_test_storage_failure' => [
       'label' => t('Test storage failure'),
       'description' => t('Dummy test storage backend. Always fails to create fields.'),
-    ),
-  );
+    ],
+  ];
 }
 
 /**
  * Implements hook_field_storage_details().
  */
 function field_test_field_storage_details($field) {
-  $details = array();
+  $details = [];
 
   // Add field columns.
-  $columns = array();
+  $columns = [];
   foreach ((array) $field['columns'] as $column_name => $attributes) {
     $columns[$column_name] = $column_name;
   }
-  return array(
-    'backdrop_variables' => array(
+  return [
+    'backdrop_variables' => [
       'field_test_storage_data[FIELD_LOAD_CURRENT]' => $columns,
       'field_test_storage_data[FIELD_LOAD_REVISION]' => $columns,
-    ),
-  );
+    ],
+  ];
 }
 
 /**
@@ -48,18 +48,18 @@ function field_test_field_storage_details_alter(&$details, $field) {
 
   // For testing, storage details are changed only because of the field name.
   if ($field['field_name'] == 'field_test_change_my_details') {
-    $columns = array();
+    $columns = [];
     foreach ((array) $field['columns'] as $column_name => $attributes) {
       $columns[$column_name] = $column_name;
     }
-    $details['backdrop_variables'] = array(
-      FIELD_LOAD_CURRENT => array(
+    $details['backdrop_variables'] = [
+      FIELD_LOAD_CURRENT => [
         'moon' => $columns,
-      ),
-      FIELD_LOAD_REVISION => array(
+      ],
+      FIELD_LOAD_REVISION => [
         'mars' => $columns,
-      ),
-    );
+      ],
+    ];
   }
 }
 
@@ -68,7 +68,7 @@ function field_test_field_storage_details_alter(&$details, $field) {
  */
 function _field_test_storage_data($data = NULL) {
   if (!isset($data)) {
-    return state_get('field_test_storage_data', array());
+    return state_get('field_test_storage_data', []);
   }
   else {
     state_set('field_test_storage_data', $data);
@@ -88,7 +88,7 @@ function field_test_field_storage_load($entity_type, $entities, $age, $fields, $
     $field_name = $field['field_name'];
     $field_data = $data[$field_name];
     $sub_table = $load_current ? 'current' : 'revisions';
-    $delta_count = array();
+    $delta_count = [];
     foreach ($field_data[$sub_table] as $row) {
       if ($row->type == $entity_type && (!$row->deleted || $options['deleted'])) {
         if (($load_current && in_array($row->entity_id, $entity_ids)) || (!$load_current && in_array($row->revision_id, $entity_ids))) {
@@ -97,7 +97,7 @@ function field_test_field_storage_load($entity_type, $entities, $age, $fields, $
               $delta_count[$row->entity_id][$row->language] = 0;
             }
             if ($field['cardinality'] == FIELD_CARDINALITY_UNLIMITED || $delta_count[$row->entity_id][$row->language] < $field['cardinality']) {
-              $item = array();
+              $item = [];
               foreach ($field['columns'] as $column => $attributes) {
                 $item[$column] = $row->{$column};
               }
@@ -151,7 +151,7 @@ function field_test_field_storage_write($entity_type, $entity, $op, $fields) {
       $items = (array) $entity->{$field_name}[$langcode];
       $delta_count = 0;
       foreach ($items as $delta => $item) {
-        $row = (object) array(
+        $row = (object) [
           'field_name' => $field_name,
           'type' => $entity_type,
           'entity_id' => $id,
@@ -160,7 +160,7 @@ function field_test_field_storage_write($entity_type, $entity, $op, $fields) {
           'delta' => $delta,
           'deleted' => FALSE,
           'language' => $langcode,
-        );
+        ];
         foreach ($field['columns'] as $column => $attributes) {
           $row->{$column} = isset($item[$column]) ? $item[$column] : NULL;
         }
@@ -205,7 +205,7 @@ function field_test_field_storage_purge($entity_type, $entity, $field, $instance
   list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
 
   $field_data = &$data[$field['field_name']];
-  foreach (array('current', 'revisions') as $sub_table) {
+  foreach (['current', 'revisions'] as $sub_table) {
     foreach ($field_data[$sub_table] as $key => $row) {
       if ($row->type == $entity_type && $row->entity_id == $id) {
         unset($field_data[$sub_table][$key]);
@@ -225,7 +225,7 @@ function field_test_field_storage_delete_revision($entity_type, $entity, $fields
   list($id, $vid, $bundle) = entity_extract_ids($entity_type, $entity);
   foreach ($fields as $field_name) {
     $field_data = &$data[$field_name];
-    foreach (array('current', 'revisions') as $sub_table) {
+    foreach (['current', 'revisions'] as $sub_table) {
       foreach ($field_data[$sub_table] as $key => $row) {
         if ($row->type == $entity_type && $row->entity_id == $id && $row->revision_id == $vid) {
           unset($field_data[$sub_table][$key]);
@@ -254,7 +254,7 @@ function field_test_field_storage_query($field_name, $conditions, $count, &$curs
   usort($field_data[$sub_table], '_field_test_field_storage_query_sort_helper');
 
     // Initialize results array.
-  $return = array();
+  $return = [];
   $entity_count = 0;
   $rows_count = 0;
   $rows_total = count($field_data[$sub_table]);
@@ -322,7 +322,7 @@ function field_test_field_storage_query($field_name, $conditions, $count, &$curs
           $id = ($load_current || empty($entity_type['entity keys']['revision'])) ? $row->entity_id : $row->revision_id;
 
           if (!isset($return[$row->type][$id])) {
-            $return[$row->type][$id] = (object) array('entity_id' => $row->entity_id, 'revision_id' => $row->revision_id, 'bundle' => $row->bundle);
+            $return[$row->type][$id] = (object) ['entity_id' => $row->entity_id, 'revision_id' => $row->revision_id, 'bundle' => $row->bundle];
             $entity_count++;
           }
         }
@@ -371,10 +371,10 @@ function field_test_field_storage_create_field($field) {
 
   $data = _field_test_storage_data();
 
-  $data[$field['field_name']] = array(
-    'current' => array(),
-    'revisions' => array(),
-  );
+  $data[$field['field_name']] = [
+    'current' => [],
+    'revisions' => [],
+  ];
 
   _field_test_storage_data($data);
 }
@@ -386,7 +386,7 @@ function field_test_field_storage_delete_field($field) {
   $data = _field_test_storage_data();
 
   $field_data = &$data[$field['field_name']];
-  foreach (array('current', 'revisions') as $sub_table) {
+  foreach (['current', 'revisions'] as $sub_table) {
     foreach ($field_data[$sub_table] as &$row) {
       $row->deleted = TRUE;
     }
@@ -403,7 +403,7 @@ function field_test_field_storage_delete_instance($instance) {
 
   $field = field_info_field($instance['field_name']);
   $field_data = &$data[$field['field_name']];
-  foreach (array('current', 'revisions') as $sub_table) {
+  foreach (['current', 'revisions'] as $sub_table) {
     foreach ($field_data[$sub_table] as &$row) {
       if ($row->bundle == $instance['bundle']) {
         $row->deleted = TRUE;
@@ -428,12 +428,12 @@ function field_test_field_attach_rename_bundle($bundle_old, $bundle_new) {
   $data = _field_test_storage_data();
 
   // We need to account for deleted or inactive fields and instances.
-  $instances = field_read_instances(array('bundle' => $bundle_new), array('include_deleted' => TRUE, 'include_inactive' => TRUE));
+  $instances = field_read_instances(['bundle' => $bundle_new], ['include_deleted' => TRUE, 'include_inactive' => TRUE]);
   foreach ($instances as $field_name => $instance) {
     $field = field_info_field($field_name);
     if ($field['storage']['type'] == 'field_test_storage') {
       $field_data = &$data[$field['field_name']];
-      foreach (array('current', 'revisions') as $sub_table) {
+      foreach (['current', 'revisions'] as $sub_table) {
         foreach ($field_data[$sub_table] as &$row) {
           if ($row->bundle == $bundle_old) {
             $row->bundle = $bundle_new;
@@ -456,7 +456,7 @@ function field_test_field_attach_delete_bundle($entity_type, $bundle, $instances
     $field = field_info_field($field_name);
     if (isset($field['storage']['type']) && $field['storage']['type'] == 'field_test_storage') {
       $field_data = &$data[$field['field_name']];
-      foreach (array('current', 'revisions') as $sub_table) {
+      foreach (['current', 'revisions'] as $sub_table) {
         foreach ($field_data[$sub_table] as &$row) {
           if ($row->bundle == $bundle_old) {
             $row->deleted = TRUE;

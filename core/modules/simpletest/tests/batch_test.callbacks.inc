@@ -77,7 +77,7 @@ function _batch_test_nested_batch_callback() {
  * Common 'finished' callbacks for batches 1 to 4.
  */
 function _batch_test_finished_helper($batch_id, $success, $results, $operations) {
-  $messages = array("results for batch $batch_id");
+  $messages = ["results for batch $batch_id"];
   if ($results) {
     foreach ($results as $op => $op_results) {
       $messages[] = 'op '. $op . ': processed ' . count($op_results) . ' elements';
@@ -90,7 +90,7 @@ function _batch_test_finished_helper($batch_id, $success, $results, $operations)
   if (!$success) {
     // A fatal error occurred during the processing.
     $error_operation = reset($operations);
-    $messages[] = t('An error occurred while processing @op with arguments:<br/>@args', array('@op' => $error_operation[0], '@args' => print_r($error_operation[1], TRUE)));
+    $messages[] = t('An error occurred while processing @op with arguments:<br/>@args', ['@op' => $error_operation[0], '@args' => print_r($error_operation[1], TRUE)]);
   }
 
   backdrop_set_message(implode('<br />', $messages));

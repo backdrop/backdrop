@@ -19,29 +19,29 @@ class views_plugin_display_page extends views_plugin_display {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['path'] = array('default' => '');
-    $options['menu'] = array(
-      'contains' => array(
-        'type' => array('default' => 'none'),
+    $options['path'] = ['default' => ''];
+    $options['menu'] = [
+      'contains' => [
+        'type' => ['default' => 'none'],
         // Do not translate menu and title as menu system will.
-        'title' => array('default' => '', 'translatable' => FALSE),
-        'description' => array('default' => '', 'translatable' => FALSE),
-        'weight' => array('default' => 0),
-        'name' => array('default' => 'main-menu'),
-        'context' => array('default' => ''),
-        'context_only_inline' => array('default' => FALSE),
-       ),
-    );
-    $options['tab_options'] = array(
-      'contains' => array(
-        'type' => array('default' => 'none'),
+        'title' => ['default' => '', 'translatable' => FALSE],
+        'description' => ['default' => '', 'translatable' => FALSE],
+        'weight' => ['default' => 0],
+        'name' => ['default' => 'main-menu'],
+        'context' => ['default' => ''],
+        'context_only_inline' => ['default' => FALSE],
+       ],
+    ];
+    $options['tab_options'] = [
+      'contains' => [
+        'type' => ['default' => 'none'],
         // Do not translate menu and title as menu system will.
-        'title' => array('default' => '', 'translatable' => FALSE),
-        'description' => array('default' => '', 'translatable' => FALSE),
-        'weight' => array('default' => 0),
-        'name' => array('default' => 'main-menu'),
-       ),
-    );
+        'title' => ['default' => '', 'translatable' => FALSE],
+        'description' => ['default' => '', 'translatable' => FALSE],
+        'weight' => ['default' => 0],
+        'name' => ['default' => 'main-menu'],
+       ],
+    ];
 
     return $options;
   }
@@ -50,12 +50,12 @@ class views_plugin_display_page extends views_plugin_display {
    * Add this display's path information to Backdrop's menu system.
    */
   function execute_hook_menu($callbacks) {
-    $items = array();
+    $items = [];
     // Replace % with the link to our standard views argument loader
     // views_arg_load -- which lives in views.module
 
     $bits = explode('/', $this->get_option('path'));
-    $page_arguments = array($this->view->name, $this->display->id);
+    $page_arguments = [$this->view->name, $this->display->id];
     $this->view->init_handlers();
     $view_arguments = $this->view->argument;
 
@@ -82,16 +82,16 @@ class views_plugin_display_page extends views_plugin_display {
     $access_plugin_callback = $access_plugin->get_access_callback();
 
     if (is_array($access_plugin_callback)) {
-      $access_arguments = array();
+      $access_arguments = [];
 
       // Find the plugin arguments.
       $access_plugin_method = array_shift($access_plugin_callback);
       $access_plugin_arguments = array_shift($access_plugin_callback);
       if (!is_array($access_plugin_arguments)) {
-        $access_plugin_arguments = array();
+        $access_plugin_arguments = [];
       }
 
-      $access_arguments[0] = array($access_plugin_method, &$access_plugin_arguments);
+      $access_arguments[0] = [$access_plugin_method, &$access_plugin_arguments];
 
       // Move the plugin arguments to the access arguments array.
       $i = 1;
@@ -104,11 +104,11 @@ class views_plugin_display_page extends views_plugin_display {
       }
     }
     else {
-      $access_arguments = array($access_plugin_callback);
+      $access_arguments = [$access_plugin_callback];
     }
 
     if ($path) {
-      $items[$path] = array(
+      $items[$path] = [
         // default views page entry
         'page callback' => 'views_page',
         'page arguments' => $page_arguments,
@@ -116,11 +116,11 @@ class views_plugin_display_page extends views_plugin_display {
         'access callback' => 'views_access',
         'access arguments' => $access_arguments,
         // Identify URL embedded arguments and correlate them to a handler
-        'load arguments'  => array($this->view->name, $this->display->id, '%index'),
-      );
+        'load arguments'  => [$this->view->name, $this->display->id, '%index'],
+      ];
       $menu = $this->get_option('menu');
       if (empty($menu)) {
-        $menu = array('type' => 'none');
+        $menu = ['type' => 'none'];
       }
       // Set the title and description if we have one.
       if ($menu['type'] != 'none') {
@@ -169,7 +169,7 @@ class views_plugin_display_page extends views_plugin_display {
           // @todo: We can validate this.
           if ($bit != '%views_arg' && !empty($bits)) {
             $default_path = implode('/', $bits);
-            $items[$default_path] = array(
+            $items[$default_path] = [
               // default views page entry
               'page callback' => 'views_page',
               'page arguments' => $page_arguments,
@@ -177,11 +177,11 @@ class views_plugin_display_page extends views_plugin_display {
               'access callback' => 'views_access',
               'access arguments' => $access_arguments,
               // Identify URL embedded arguments and correlate them to a handler
-              'load arguments'  => array($this->view->name, $this->display->id, '%index'),
+              'load arguments'  => [$this->view->name, $this->display->id, '%index'],
               'title' => $tab_options['title'],
               'description' => $tab_options['description'],
               'menu_name' => $tab_options['name'],
-            );
+            ];
             switch ($tab_options['type']) {
               default:
               case 'normal':
@@ -245,13 +245,13 @@ class views_plugin_display_page extends views_plugin_display {
     // It is very important to call the parent function here:
     parent::options_summary($categories, $options);
 
-    $categories['page'] = array(
+    $categories['page'] = [
       'title' => t('Page settings'),
       'column' => 'second',
-      'build' => array(
+      'build' => [
         '#weight' => -10,
-      ),
-    );
+      ],
+    ];
 
     $path = strip_tags($this->get_option('path'));
     if (empty($path)) {
@@ -261,15 +261,15 @@ class views_plugin_display_page extends views_plugin_display {
       $path = '/' . $path;
     }
 
-    $options['path'] = array(
+    $options['path'] = [
       'category' => 'page',
       'title' => t('Path'),
       'value' => $path,
-    );
+    ];
 
     $menu = $this->get_option('menu');
     if (!is_array($menu)) {
-      $menu = array('type' => 'none');
+      $menu = ['type' => 'none'];
     }
     switch($menu['type']) {
       case 'none':
@@ -277,19 +277,19 @@ class views_plugin_display_page extends views_plugin_display {
         $menu_str = t('No menu');
         break;
       case 'normal':
-        $menu_str = t('Normal: @title', array('@title' => $menu['title']));
+        $menu_str = t('Normal: @title', ['@title' => $menu['title']]);
         break;
       case 'tab':
       case 'default tab':
-        $menu_str = t('Tab: @title', array('@title' => $menu['title']));
+        $menu_str = t('Tab: @title', ['@title' => $menu['title']]);
         break;
     }
 
-    $options['menu'] = array(
+    $options['menu'] = [
       'category' => 'page',
       'title' => t('Menu'),
       'value' => $menu_str,
-    );
+    ];
 
     // This adds a 'Settings' link to the style_options setting if the style has options.
     if ($menu['type'] == 'default tab') {
@@ -309,256 +309,256 @@ class views_plugin_display_page extends views_plugin_display {
       case 'path':
         $form['#title'] .= t('The menu path or URL of this view');
         $form['#help_topic'] = 'path';
-        $form['path'] = array(
+        $form['path'] = [
           '#type' => 'textfield',
           '#description' => t('This view will be displayed by visiting this path on your site. You may use "%" in your URL to represent values that will be used for contextual filters: For example, "node/%/feed".'),
           '#default_value' => $this->get_option('path'),
-	  '#field_prefix' => '<span dir="ltr">' . url(NULL, array('absolute' => TRUE)) . (config_get('system.core', 'clean_url') ? '' : '?q='),
+	  '#field_prefix' => '<span dir="ltr">' . url(NULL, ['absolute' => TRUE]) . (config_get('system.core', 'clean_url') ? '' : '?q='),
 	  '#field_suffix' => '</span>&lrm;',
-	  '#attributes' => array('dir'=>'ltr'),
-        );
+	  '#attributes' => ['dir'=>'ltr'],
+        ];
         break;
       case 'menu':
         $form['#title'] .= t('Menu item entry');
         $form['#help_topic'] = 'menu';
-        $form['menu'] = array(
+        $form['menu'] = [
           '#prefix' => '<div class="clearfix">',
           '#suffix' => '</div>',
           '#tree' => TRUE,
-        );
+        ];
         $menu = $this->get_option('menu');
         if (empty($menu)) {
-          $menu = array('type' => 'none', 'title' => '', 'weight' => 0);
+          $menu = ['type' => 'none', 'title' => '', 'weight' => 0];
         }
-        $form['menu']['type'] = array(
+        $form['menu']['type'] = [
           '#prefix' => '<div class="views-left-30">',
           '#suffix' => '</div>',
           '#title' => t('Type'),
           '#type' => 'radios',
-          '#options' => array(
+          '#options' => [
             'none' => t('No menu entry'),
             'normal' => t('Normal menu entry'),
             'tab' => t('Menu tab'),
             'default tab' => t('Default menu tab')
-          ),
+          ],
           '#default_value' => $menu['type'],
-        );
+        ];
 
-        $form['menu']['title'] = array(
+        $form['menu']['title'] = [
           '#prefix' => '<div class="views-left-50">',
           '#title' => t('Title'),
           '#type' => 'textfield',
           '#default_value' => $menu['title'],
           '#description' => t('If set to normal or tab, enter the text to use for the menu item.'),
-          '#states' => array(
-            'visible' => array(
-              array(
-                ':input[name="menu[type]"]' => array('value' => 'normal'),
-              ),
-              array(
-                ':input[name="menu[type]"]' => array('value' => 'tab'),
-              ),
-              array(
-                ':input[name="menu[type]"]' => array('value' => 'default tab'),
-              ),
-            ),
-          ),
-        );
-        $form['menu']['description'] = array(
+          '#states' => [
+            'visible' => [
+              [
+                ':input[name="menu[type]"]' => ['value' => 'normal'],
+              ],
+              [
+                ':input[name="menu[type]"]' => ['value' => 'tab'],
+              ],
+              [
+                ':input[name="menu[type]"]' => ['value' => 'default tab'],
+              ],
+            ],
+          ],
+        ];
+        $form['menu']['description'] = [
           '#title' => t('Description'),
           '#type' => 'textfield',
           '#default_value' => $menu['description'],
           '#description' => t("If set to normal or tab, enter the text to use for the menu item's description."),
-          '#states' => array(
-            'visible' => array(
-              array(
-                ':input[name="menu[type]"]' => array('value' => 'normal'),
-              ),
-              array(
-                ':input[name="menu[type]"]' => array('value' => 'tab'),
-              ),
-              array(
-                ':input[name="menu[type]"]' => array('value' => 'default tab'),
-              ),
-            ),
-          ),
-        );
+          '#states' => [
+            'visible' => [
+              [
+                ':input[name="menu[type]"]' => ['value' => 'normal'],
+              ],
+              [
+                ':input[name="menu[type]"]' => ['value' => 'tab'],
+              ],
+              [
+                ':input[name="menu[type]"]' => ['value' => 'default tab'],
+              ],
+            ],
+          ],
+        ];
 
         // Only display the menu selector if menu module is enabled.
         if (module_exists('menu')) {
-          $form['menu']['name'] = array(
+          $form['menu']['name'] = [
             '#title' => t('Menu'),
             '#type' => 'select',
             '#options' => menu_get_menus(),
             '#default_value' => $menu['name'],
             '#description' => t('Insert item into an available menu.'),
-            '#states' => array(
-              'visible' => array(
-                array(
-                  ':input[name="menu[type]"]' => array('value' => 'normal'),
-                ),
-                array(
-                  ':input[name="menu[type]"]' => array('value' => 'tab'),
-                ),
-              ),
-            ),
-          );
+            '#states' => [
+              'visible' => [
+                [
+                  ':input[name="menu[type]"]' => ['value' => 'normal'],
+                ],
+                [
+                  ':input[name="menu[type]"]' => ['value' => 'tab'],
+                ],
+              ],
+            ],
+          ];
         }
         else {
-          $form['menu']['name'] = array(
+          $form['menu']['name'] = [
             '#type' => 'value',
             '#value' => $menu['name'],
-          );
-          $form['menu']['markup'] = array(
+          ];
+          $form['menu']['markup'] = [
             '#markup' => t('Menu selection requires the activation of menu module.'),
-          );
+          ];
         }
-        $form['menu']['weight'] = array(
+        $form['menu']['weight'] = [
           '#title' => t('Weight'),
           '#type' => 'number',
           '#default_value' => isset($menu['weight']) ? $menu['weight'] : 0,
           '#description' => t('This number sets the order of the menu item or tab, with lower weights coming first. Negative values are allowed.'),
-          '#states' => array(
-            'visible' => array(
-              array(
-                ':input[name="menu[type]"]' => array('value' => 'normal'),
-              ),
-              array(
-                ':input[name="menu[type]"]' => array('value' => 'tab'),
-              ),
-              array(
-                ':input[name="menu[type]"]' => array('value' => 'default tab'),
-              ),
-            ),
-          ),
-        );
-        $form['menu']['context'] = array(
+          '#states' => [
+            'visible' => [
+              [
+                ':input[name="menu[type]"]' => ['value' => 'normal'],
+              ],
+              [
+                ':input[name="menu[type]"]' => ['value' => 'tab'],
+              ],
+              [
+                ':input[name="menu[type]"]' => ['value' => 'default tab'],
+              ],
+            ],
+          ],
+        ];
+        $form['menu']['context'] = [
           '#title' => t('Context'),
           '#type' => 'checkbox',
           '#default_value' => !empty($menu['context']),
           '#description' => t('Displays the link in contextual links'),
-          '#states' => array(
-            'visible' => array(
-              ':input[name="menu[type]"]' => array('value' => 'tab'),
-            ),
-          ),
-        );
-        $form['menu']['context_only_inline'] = array(
+          '#states' => [
+            'visible' => [
+              ':input[name="menu[type]"]' => ['value' => 'tab'],
+            ],
+          ],
+        ];
+        $form['menu']['context_only_inline'] = [
           '#title' => t('Hide menu tab'),
           '#suffix' => '</div>',
           '#type' => 'checkbox',
           '#default_value' => !empty($menu['context_only_inline']),
           '#description' => t('Only display menu item entry in contextual links. Menu tab should not be displayed.'),
-          '#states' => array(
-            'visible' => array(
-              ':input[name="menu[type]"]' => array('value' => 'tab'),
-              ':input[name="menu[context]"]' => array('checked' => TRUE),
-            ),
-          ),
-        );
+          '#states' => [
+            'visible' => [
+              ':input[name="menu[type]"]' => ['value' => 'tab'],
+              ':input[name="menu[context]"]' => ['checked' => TRUE],
+            ],
+          ],
+        ];
         break;
       case 'tab_options':
         $form['#title'] .= t('Default tab options');
         $tab_options = $this->get_option('tab_options');
         if (empty($tab_options)) {
-          $tab_options = array('type' => 'none', 'title' => '', 'weight' => 0);
+          $tab_options = ['type' => 'none', 'title' => '', 'weight' => 0];
         }
 
-        $form['tab_markup'] = array(
+        $form['tab_markup'] = [
           '#markup' => '<div class="form-item description">' . t('When providing a menu item as a tab, Backdrop needs to know what the parent menu item of that tab will be. Sometimes the parent will already exist, but other times you will need to have one created. The path of a parent item will always be the same path with the last part left off. i.e, if the path to this view is <em>foo/bar/baz</em>, the parent path would be <em>foo/bar</em>.') . '</div>',
-        );
+        ];
 
-        $form['tab_options'] = array(
+        $form['tab_options'] = [
           '#prefix' => '<div class="clearfix">',
           '#suffix' => '</div>',
           '#tree' => TRUE,
-        );
-        $form['tab_options']['type'] = array(
+        ];
+        $form['tab_options']['type'] = [
           '#prefix' => '<div class="views-left-25">',
           '#suffix' => '</div>',
           '#title' => t('Parent menu item'),
           '#type' => 'radios',
-          '#options' => array('none' => t('Already exists'), 'normal' => t('Normal menu item'), 'tab' => t('Menu tab')),
+          '#options' => ['none' => t('Already exists'), 'normal' => t('Normal menu item'), 'tab' => t('Menu tab')],
           '#default_value' => $tab_options['type'],
-        );
-        $form['tab_options']['title'] = array(
+        ];
+        $form['tab_options']['title'] = [
           '#prefix' => '<div class="views-left-75">',
           '#title' => t('Title'),
           '#type' => 'textfield',
           '#default_value' => $tab_options['title'],
           '#description' => t('If creating a parent menu item, enter the title of the item.'),
-          '#states' => array(
-            'visible' => array(
-              array(
-                ':input[name="tab_options[type]"]' => array('value' => 'normal'),
-              ),
-              array(
-                ':input[name="tab_options[type]"]' => array('value' => 'tab'),
-              ),
-            ),
-          ),
-        );
-        $form['tab_options']['description'] = array(
+          '#states' => [
+            'visible' => [
+              [
+                ':input[name="tab_options[type]"]' => ['value' => 'normal'],
+              ],
+              [
+                ':input[name="tab_options[type]"]' => ['value' => 'tab'],
+              ],
+            ],
+          ],
+        ];
+        $form['tab_options']['description'] = [
           '#title' => t('Description'),
           '#type' => 'textfield',
           '#default_value' => $tab_options['description'],
           '#description' => t('If creating a parent menu item, enter the description of the item.'),
-          '#states' => array(
-            'visible' => array(
-              array(
-                ':input[name="tab_options[type]"]' => array('value' => 'normal'),
-              ),
-              array(
-                ':input[name="tab_options[type]"]' => array('value' => 'tab'),
-              ),
-            ),
-          ),
-        );
+          '#states' => [
+            'visible' => [
+              [
+                ':input[name="tab_options[type]"]' => ['value' => 'normal'],
+              ],
+              [
+                ':input[name="tab_options[type]"]' => ['value' => 'tab'],
+              ],
+            ],
+          ],
+        ];
         // Only display the menu selector if menu module is enabled.
         if (module_exists('menu')) {
-          $form['tab_options']['name'] = array(
+          $form['tab_options']['name'] = [
             '#title' => t('Menu'),
             '#type' => 'select',
             '#options' => menu_get_menus(),
             '#default_value' => $tab_options['name'],
             '#description' => t('Insert item into an available menu.'),
-            '#states' => array(
-              'visible' => array(
-                ':input[name="tab_options[type]"]' => array('value' => 'normal'),
-              ),
-            ),
-          );
+            '#states' => [
+              'visible' => [
+                ':input[name="tab_options[type]"]' => ['value' => 'normal'],
+              ],
+            ],
+          ];
         }
         else {
-          $form['tab_options']['name'] = array(
+          $form['tab_options']['name'] = [
             '#type' => 'value',
             '#value' => $tab_options['name'],
-          );
-          $form['tab_options']['markup'] = array(
+          ];
+          $form['tab_options']['markup'] = [
             '#markup' => t('Menu selection requires the activation of menu module.'),
-          );
+          ];
         }
-        $form['tab_options']['weight'] = array(
+        $form['tab_options']['weight'] = [
           '#suffix' => '</div>',
           '#title' => t('Item weight'),
           '#type' => 'textfield',
           '#default_value' => $tab_options['weight'],
           '#size' => 5,
           '#description' => t('Enter the weight of the menu item or tab. The lower the number, the earlier in the list it will be.'),
-          '#states' => array(
-            'visible' => array(
-              array(
-                ':input[name="menu[parent][type]"]' => array('value' => 'normal'),
-              ),
-              array(
-                ':input[name="menu[parent][type]"]' => array('value' => 'tab'),
-              ),
-              array(
-                ':input[name="menu[parent][type]"]' => array('value' => 'default tab'),
-              ),
-            ),
-          ),
-        );
+          '#states' => [
+            'visible' => [
+              [
+                ':input[name="menu[parent][type]"]' => ['value' => 'normal'],
+              ],
+              [
+                ':input[name="menu[parent][type]"]' => ['value' => 'tab'],
+              ],
+              [
+                ':input[name="menu[parent][type]"]' => ['value' => 'default tab'],
+              ],
+            ],
+          ],
+        ];
         break;
     }
   }
@@ -611,7 +611,7 @@ class views_plugin_display_page extends views_plugin_display {
         $this->set_option('menu', $form_state['values']['menu']);
         // send ajax form to options page if we use it.
         if ($form_state['values']['menu']['type'] == 'default tab') {
-          views_ui_add_form_to_stack('display', $this->view, $this->display->id, array('tab_options'));
+          views_ui_add_form_to_stack('display', $this->view, $this->display->id, ['tab_options']);
         }
         break;
       case 'tab_options':
@@ -625,13 +625,13 @@ class views_plugin_display_page extends views_plugin_display {
 
     $menu = $this->get_option('menu');
     if (!empty($menu['type']) && $menu['type'] != 'none' && empty($menu['title'])) {
-      $errors[] = t('Display @display is set to use a menu but the menu link text is not set.', array('@display' => $this->display->display_title));
+      $errors[] = t('Display @display is set to use a menu but the menu link text is not set.', ['@display' => $this->display->display_title]);
     }
 
     if ($menu['type'] == 'default tab') {
       $tab_options = $this->get_option('tab_options');
       if (!empty($tab_options['type']) && $tab_options['type'] != 'none' && empty($tab_options['title'])) {
-        $errors[] = t('Display @display is set to use a parent menu but the parent menu link text is not set.', array('@display' => $this->display->display_title));
+        $errors[] = t('Display @display is set to use a parent menu but the parent menu link text is not set.', ['@display' => $this->display->display_title]);
       }
     }
 
@@ -639,17 +639,17 @@ class views_plugin_display_page extends views_plugin_display {
   }
 
   function get_argument_text() {
-    return array(
+    return [
       'filter value not present' => t('When the filter value is <em>NOT</em> in the URL'),
       'filter value present' => t('When the filter value <em>IS</em> in the URL or a default is provided'),
       'description' => t('The contextual filter values is provided by the URL.'),
-    );
+    ];
   }
 
   function get_pager_text() {
-    return array(
+    return [
       'items per page title' => t('Items per page'),
       'items per page description' => t('The number of items to display per page. Enter 0 for no limit.')
-    );
+    ];
   }
 }

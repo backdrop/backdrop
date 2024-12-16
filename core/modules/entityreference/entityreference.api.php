@@ -18,14 +18,14 @@
   *   - force enabled: used for disabled property of element.
   */
 function hook_entityreference_behavior_plugins() {
-  $plugins['views'] = array(
+  $plugins['views'] = [
     'title' => t('Render Views filters as select list'),
     'description' => t('Provides a select list for Views filters on this field. This should not be used when there are over 100 entities, as it might cause an out of memory error.'),
     'class' => 'EntityReferenceBehaviorHandlerViewsFilterSelect',
     'behavior type' => 'field',
     'access callback' => FALSE,
     'force enabled' => FALSE,
-  );
+  ];
   return $plugins;
 }
 
@@ -39,10 +39,10 @@ function hook_entityreference_behavior_plugins() {
  *   - weight: a value to rank which classes get called first.
  */
 function hook_entityreference_selection_plugins() {
-  $plugins['base'] = array(
+  $plugins['base'] = [
     'title' => t('Simple (with optional filter by bundle)'),
     'class' => 'EntityReferenceSelectionHandlerGeneric',
     'weight' => -100,
-  );
+  ];
   return $plugins;
 }

@@ -16,7 +16,7 @@ class views_handler_field_node_path extends views_handler_field {
    */
   public function option_definition() {
     $options = parent::option_definition();
-    $options['absolute'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['absolute'] = ['default' => FALSE, 'bool' => TRUE];
 
     return $options;
   }
@@ -28,10 +28,10 @@ class views_handler_field_node_path extends views_handler_field {
     parent::construct();
     $this->additional_fields['nid'] = 'nid';
     if (module_exists('translation')) {
-      $this->additional_fields['langcode'] = array(
+      $this->additional_fields['langcode'] = [
         'table' => 'node',
         'field' => 'langcode',
-      );
+      ];
     }
   }
 
@@ -40,13 +40,13 @@ class views_handler_field_node_path extends views_handler_field {
    */
   public function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
-    $form['absolute'] = array(
+    $form['absolute'] = [
       '#type' => 'checkbox',
       '#title' => t('Use absolute link (begins with "http://")'),
       '#default_value' => $this->options['absolute'],
       '#description' => t('Enable this option to output an absolute link. Required if you want to use the path as a link destination (as in "output this field as a link" above).'),
       '#fieldset' => 'alter',
-    );
+    ];
   }
 
   /**
@@ -62,7 +62,7 @@ class views_handler_field_node_path extends views_handler_field {
    */
   public function render($values) {
     $nid = $this->get_value($values, 'nid');
-    $options = array();
+    $options = [];
     $options['absolute'] = $this->options['absolute'];
     if (isset($this->aliases['langcode'])) {
       $languages = language_list();

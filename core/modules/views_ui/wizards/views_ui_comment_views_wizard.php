@@ -10,7 +10,7 @@
 class ViewsUiCommentViewsWizard extends ViewsUiBaseViewsWizard {
 
   protected function row_style_options($type) {
-    $options = array();
+    $options = [];
     $options['comment'] = t('comments');
     $options['fields'] = t('fields');
     return $options;
@@ -27,16 +27,16 @@ class ViewsUiCommentViewsWizard extends ViewsUiBaseViewsWizard {
     $row_plugin = $style_form['row_plugin']['#default_value'];
     switch ($row_plugin) {
       case 'comment':
-        $style_form['row_options']['links'] = array(
+        $style_form['row_options']['links'] = [
           '#type' => 'select',
           '#title_display' => 'invisible',
           '#title' => t('Should links be displayed below each comment'),
-          '#options' => array(
+          '#options' => [
             1 => t('with links (allow users to reply to the comment, etc.)'),
             0 => t('without links'),
-          ),
+          ],
           '#default_value' => 1,
-        );
+        ];
         break;
     }
   }
@@ -44,7 +44,7 @@ class ViewsUiCommentViewsWizard extends ViewsUiBaseViewsWizard {
   protected function page_display_options($form, $form_state) {
     $display_options = parent::page_display_options($form, $form_state);
     $row_plugin = isset($form_state['values']['page']['style']['row_plugin']) ? $form_state['values']['page']['style']['row_plugin'] : NULL;
-    $row_options = isset($form_state['values']['page']['style']['row_options']) ? $form_state['values']['page']['style']['row_options'] : array();
+    $row_options = isset($form_state['values']['page']['style']['row_options']) ? $form_state['values']['page']['style']['row_options'] : [];
     $this->display_options_row($display_options, $row_plugin, $row_options);
     return $display_options;
   }
@@ -52,7 +52,7 @@ class ViewsUiCommentViewsWizard extends ViewsUiBaseViewsWizard {
   protected function block_display_options($form, $form_state) {
     $display_options = parent::block_display_options($form, $form_state);
     $row_plugin = isset($form_state['values']['block']['style']['row_plugin']) ? $form_state['values']['block']['style']['row_plugin'] : NULL;
-    $row_options = isset($form_state['values']['block']['style']['row_options']) ? $form_state['values']['block']['style']['row_options'] : array();
+    $row_options = isset($form_state['values']['block']['style']['row_options']) ? $form_state['values']['block']['style']['row_options'] : [];
     $this->display_options_row($display_options, $row_plugin, $row_options);
     return $display_options;
   }

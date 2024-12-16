@@ -7,11 +7,11 @@ class UserRoleLayoutAccess extends LayoutAccessNegatable {
   /**
    * Constructor for a Layout access rule.
    */
-  function __construct($plugin_name, array $data = array()) {
+  function __construct($plugin_name, array $data = []) {
     parent::__construct($plugin_name, $data);
-    $this->settings += array(
-      'roles' => array(),
-    );
+    $this->settings += [
+      'roles' => [],
+    ];
   }
 
   /**
@@ -24,10 +24,10 @@ class UserRoleLayoutAccess extends LayoutAccessNegatable {
       return t('User can have any role');
     }
     if ($this->settings['negate']) {
-      return format_plural(count($roles), 'User does not have the role @role', 'User does not have one of the following roles: @role', array('@role' => implode(', ', $roles)));
+      return format_plural(count($roles), 'User does not have the role @role', 'User does not have one of the following roles: @role', ['@role' => implode(', ', $roles)]);
     }
     else {
-      return format_plural(count($roles), 'User has the role @role', 'User has one of the following roles: @role', array('@role' => implode(', ', $roles)));
+      return format_plural(count($roles), 'User has the role @role', 'User has one of the following roles: @role', ['@role' => implode(', ', $roles)]);
     }
   }
 
@@ -51,13 +51,13 @@ class UserRoleLayoutAccess extends LayoutAccessNegatable {
    */
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
-    $form['roles'] = array(
+    $form['roles'] = [
       '#type' => 'checkboxes',
       '#title' => t('Role'),
       '#default_value' => $this->settings['roles'],
       '#options' => user_roles(),
       '#description' => t('Only the checked roles will be granted access (or denied access, if "Reverse" is checked).'),
-    );
+    ];
   }
 
   /**

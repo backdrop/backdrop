@@ -34,13 +34,13 @@ class views_handler_sort extends views_handler {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['order'] = array('default' => 'ASC');
-    $options['exposed'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['expose'] = array(
-      'contains' => array(
-        'label' => array('default' => '', 'translatable' => TRUE),
-      ),
-    );
+    $options['order'] = ['default' => 'ASC'];
+    $options['exposed'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['expose'] = [
+      'contains' => [
+        'label' => ['default' => '', 'translatable' => TRUE],
+      ],
+    ];
     return $options;
   }
 
@@ -72,9 +72,9 @@ class views_handler_sort extends views_handler {
     if ($this->can_expose()) {
       $this->show_expose_button($form, $form_state);
     }
-    $form['op_val_start'] = array('#value' => '<div class="clearfix">');
+    $form['op_val_start'] = ['#value' => '<div class="clearfix">'];
     $this->show_sort_form($form, $form_state);
-    $form['op_val_end'] = array('#value' => '</div>');
+    $form['op_val_end'] = ['#value' => '</div>'];
     if ($this->can_expose()) {
       $this->show_expose_form($form, $form_state);
     }
@@ -84,53 +84,53 @@ class views_handler_sort extends views_handler {
    * Shortcut to display the expose/hide button.
    */
   function show_expose_button(&$form, &$form_state) {
-    $form['expose_button'] = array(
+    $form['expose_button'] = [
       '#prefix' => '<div class="views-expose clearfix">',
       '#suffix' => '</div>',
       // Should always come first
       '#weight' => -1000,
-    );
+    ];
 
     // Add a checkbox for JS users, which will have behavior attached to it
     // so it can replace the button.
-    $form['expose_button']['checkbox'] = array(
-      '#theme_wrappers' => array('container'),
-      '#attributes' => array('class' => array('js-show')),
-    );
-    $form['expose_button']['checkbox']['checkbox'] = array(
+    $form['expose_button']['checkbox'] = [
+      '#theme_wrappers' => ['container'],
+      '#attributes' => ['class' => ['js-show']],
+    ];
+    $form['expose_button']['checkbox']['checkbox'] = [
       '#title' => t('Expose this sort to visitors, to allow them to change it'),
       '#type' => 'checkbox',
-    );
+    ];
 
     // Then add the button itself.
     if (empty($this->options['exposed'])) {
-      $form['expose_button']['markup'] = array(
+      $form['expose_button']['markup'] = [
         '#markup' => '<div class="description exposed-description" style="float: left; margin-right:10px">' . t('This sort is not exposed. Expose it to allow the users to change it.') . '</div>',
-      );
-      $form['expose_button']['button'] = array(
-        '#limit_validation_errors' => array(),
+      ];
+      $form['expose_button']['button'] = [
+        '#limit_validation_errors' => [],
         '#type' => 'submit',
         '#value' => t('Expose sort'),
-        '#submit' => array('views_ui_config_item_form_expose'),
-        '#ajax' => array(
+        '#submit' => ['views_ui_config_item_form_expose'],
+        '#ajax' => [
           'path' => empty($form_state['path']) ? current_path() : $form_state['path'],
-        ),
-      );
+        ],
+      ];
       $form['expose_button']['checkbox']['checkbox']['#default_value'] = 0;
     }
     else {
-      $form['expose_button']['markup'] = array(
+      $form['expose_button']['markup'] = [
         '#markup' => '<div class="description exposed-description">' . t('This sort is exposed. If you hide it, users will not be able to change it.') . '</div>',
-      );
-      $form['expose_button']['button'] = array(
-        '#limit_validation_errors' => array(),
+      ];
+      $form['expose_button']['button'] = [
+        '#limit_validation_errors' => [],
         '#type' => 'submit',
         '#value' => t('Hide sort'),
-        '#submit' => array('views_ui_config_item_form_expose'),
-        '#ajax' => array(
+        '#submit' => ['views_ui_config_item_form_expose'],
+        '#ajax' => [
           'path' => empty($form_state['path']) ? current_path() : $form_state['path'],
-        ),
-      );
+        ],
+      ];
       $form['expose_button']['checkbox']['checkbox']['#default_value'] = 1;
     }
   }
@@ -163,11 +163,11 @@ class views_handler_sort extends views_handler {
   function show_sort_form(&$form, &$form_state) {
     $options = $this->sort_options();
     if (!empty($options)) {
-      $form['order'] = array(
+      $form['order'] = [
         '#type' => 'radios',
         '#options' => $options,
         '#default_value' => $this->options['order'],
-      );
+      ];
     }
   }
 
@@ -180,10 +180,10 @@ class views_handler_sort extends views_handler {
    * Should be overridden by classes that don't override sort_form
    */
   function sort_options() {
-    return array(
+    return [
       'ASC' => t('Sort ascending'),
       'DESC' => t('Sort descending'),
-    );
+    ];
   }
 
   function expose_form(&$form, &$form_state) {
@@ -194,24 +194,24 @@ class views_handler_sort extends views_handler {
     array_unshift($form['#pre_render'], 'views_ui_pre_render_flatten_data');
     $form['expose']['#flatten'] = TRUE;
 
-    $form['expose']['label'] = array(
+    $form['expose']['label'] = [
       '#type' => 'textfield',
       '#default_value' => $this->options['expose']['label'],
       '#title' => t('Label'),
       '#required' => TRUE,
       '#size' => 40,
       '#weight' => -1,
-   );
+   ];
   }
 
   /**
    * Provide default options for exposed sorts.
    */
   function expose_options() {
-    $this->options['expose'] = array(
+    $this->options['expose'] = [
       'order' => $this->options['order'],
       'label' => $this->definition['title'],
-    );
+    ];
   }
 }
 
@@ -228,9 +228,9 @@ class views_handler_sort_broken extends views_handler_sort {
   function ensure_my_table() { /* No table to ensure! */ }
   function query($group_by = FALSE) { /* No query to run */ }
   function options_form(&$form, &$form_state) {
-    $form['markup'] = array(
+    $form['markup'] = [
       '#markup' => '<div class="form-item description">' . t('The handler for this item is broken or missing and cannot be used. If a module provided the handler and was disabled, re-enabling the module may restore it. Otherwise, you should probably delete this item.') . '</div>',
-    );
+    ];
   }
 
   /**

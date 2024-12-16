@@ -40,7 +40,7 @@ class Redirect {
    *
    * @var array
    */
-  public $source_options = array();
+  public $source_options = [];
 
   /**
    * The path to which the source will be redirected.
@@ -54,7 +54,7 @@ class Redirect {
    *
    * @var array
    */
-  public $redirect_options = array();
+  public $redirect_options = [];
 
   /**
    * The function callback that will execute the redirect.
@@ -114,7 +114,7 @@ class Redirect {
    * @param array $values
    *   An array of values to populate the redirect object.
    */
-  public function __construct(array $values = array()) {
+  public function __construct(array $values = []) {
     // Set initial values.
     foreach ($values as $key => $value) {
       $this->$key = $value;

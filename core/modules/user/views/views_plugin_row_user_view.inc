@@ -14,11 +14,11 @@ class views_plugin_row_user_view extends views_plugin_row {
   var $base_field = 'uid';
 
   // Store the user accounts to be used for pre_render.
-  var $users = array();
+  var $users = [];
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['view_mode'] = array('default' => 'full');
+    $options['view_mode'] = ['default' => 'full'];
 
     return $options;
   }
@@ -27,14 +27,14 @@ class views_plugin_row_user_view extends views_plugin_row {
     parent::options_form($form, $form_state);
 
     $options = $this->options_form_summary_options();
-    $form['view_mode'] = array(
+    $form['view_mode'] = [
       '#type' => 'select',
       '#options' => $options,
       '#title' => t('Display mode'),
       '#default_value' => $this->options['view_mode'],
-     );
+     ];
     $form['help']['#type'] = 'help';
-    $form['help']['#markup'] = t("Display the user account using the standard user account view. It might be necessary to add a user-profile.tpl.php file in your themes template folder, because the default <a href=\"@user-profile-api-link\">user-profile</a> template doesn't show the username.", array('@user-profile-api-link' => url('https://docs.backdropcms.org/api/backdrop/core%21modules%21user%21templates%21user-profile.tpl.php/1')));
+    $form['help']['#markup'] = t("Display the user account using the standard user account view. It might be necessary to add a user-profile.tpl.php file in your themes template folder, because the default <a href=\"@user-profile-api-link\">user-profile</a> template doesn't show the username.", ['@user-profile-api-link' => url('https://docs.backdropcms.org/api/backdrop/core%21modules%21user%21templates%21user-profile.tpl.php/1')]);
   }
 
 
@@ -43,16 +43,16 @@ class views_plugin_row_user_view extends views_plugin_row {
      */
     function options_form_summary_options() {
       $entity_info = entity_get_info('user');
-      $options = array();
+      $options = [];
       if (!empty($entity_info['view modes'])) {
         foreach ($entity_info['view modes'] as $mode => $settings) {
           $options[$mode] = $settings['label'];
         }
       }
       if (empty($options)) {
-        $options = array(
+        $options = [
           'full' => t('User account')
-        );
+        ];
       }
 
       return $options;
@@ -64,7 +64,7 @@ class views_plugin_row_user_view extends views_plugin_row {
     }
 
   function pre_render($values) {
-    $uids = array();
+    $uids = [];
     foreach ($values as $row) {
       $uids[] = $row->{$this->field_alias};
     }

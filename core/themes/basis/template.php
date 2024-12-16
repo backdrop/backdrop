@@ -41,15 +41,15 @@ function basis_preprocess_page(&$variables) {
   // Add breakpoint-specific CSS for dropdown menus.
   $config = config('menu.settings');
   if ($config->get('menu_breakpoint') == 'custom') {
-    backdrop_add_css(backdrop_get_path('theme', 'basis') . '/css/component/menu-dropdown.breakpoint.css', array(
+    backdrop_add_css(backdrop_get_path('theme', 'basis') . '/css/component/menu-dropdown.breakpoint.css', [
       'group' => CSS_THEME,
       'every_page' => TRUE,
-    ));
-    backdrop_add_css(backdrop_get_path('theme', 'basis') . '/css/component/menu-dropdown.breakpoint-queries.css', array(
+    ]);
+    backdrop_add_css(backdrop_get_path('theme', 'basis') . '/css/component/menu-dropdown.breakpoint-queries.css', [
       'group' => CSS_THEME,
       'every_page' => TRUE,
       'media' => 'all and (min-width: ' . $config->get('menu_breakpoint_custom') . ')',
-    ));
+    ]);
   }
 }
 
@@ -87,10 +87,10 @@ function basis_preprocess_layout(&$variables) {
 function basis_preprocess_node(&$variables) {
   if ($variables['status'] == NODE_NOT_PUBLISHED) {
     $name = node_type_get_name($variables['type']);
-    $variables['title_suffix']['unpublished_indicator'] = array(
+    $variables['title_suffix']['unpublished_indicator'] = [
       '#type' => 'markup',
-      '#markup' => '<div class="unpublished-indicator">' . t('This @type is unpublished.', array('@type' => $name)) . '</div>',
-    );
+      '#markup' => '<div class="unpublished-indicator">' . t('This @type is unpublished.', ['@type' => $name]) . '</div>',
+    ];
   }
 }
 
@@ -105,7 +105,7 @@ function basis_preprocess_header(&$variables) {
 
   // Add classes and height/width to logo.
   if ($logo) {
-    $logo_wrapper_classes = array();
+    $logo_wrapper_classes = [];
     $logo_wrapper_classes[] = 'header-logo-wrapper';
     if ($logo_attributes['width'] <= $logo_attributes['height']) {
       $logo_wrapper_classes[] = 'header-logo-tall';

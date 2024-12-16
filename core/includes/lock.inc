@@ -66,7 +66,7 @@
 function lock_initialize() {
   global $locks;
 
-  $locks = array();
+  $locks = [];
 }
 
 /**
@@ -107,7 +107,7 @@ function lock_acquire($name, $timeout = 30.0) {
   if (isset($locks[$name])) {
     // Try to extend the expiration of a lock we already acquired.
     $success = (bool) db_update('semaphore')
-      ->fields(array('expire' => $expire))
+      ->fields(['expire' => $expire])
       ->condition('name', $name)
       ->condition('value', _lock_id())
       ->execute();
@@ -125,11 +125,11 @@ function lock_acquire($name, $timeout = 30.0) {
     do {
       try {
         db_insert('semaphore')
-          ->fields(array(
+          ->fields([
             'name' => $name,
             'value' => _lock_id(),
             'expire' => $expire,
-          ))
+          ])
           ->execute();
         // We track all acquired locks in the global variable.
         $locks[$name] = TRUE;
@@ -163,7 +163,7 @@ function lock_acquire($name, $timeout = 30.0) {
  *   TRUE if there is no lock or it was removed, FALSE otherwise.
  */
 function lock_may_be_available($name) {
-  $lock = db_query('SELECT expire, value FROM {semaphore} WHERE name = :name', array(':name' => $name))->fetchAssoc();
+  $lock = db_query('SELECT expire, value FROM {semaphore} WHERE name = :name', [':name' => $name])->fetchAssoc();
   if (!$lock) {
     return TRUE;
   }
@@ -259,7 +259,7 @@ function lock_release($name) {
 function lock_release_all($lock_id = NULL) {
   global $locks;
 
-  $locks = array();
+  $locks = [];
   if (empty($lock_id)) {
     $lock_id = _lock_id();
   }

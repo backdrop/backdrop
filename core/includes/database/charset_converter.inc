@@ -134,10 +134,10 @@ class DatabaseCharsetConverter {
    */
   public function convertDatabase($database_name, $charset = NULL, $collation = NULL) {
     $sql = "ALTER DATABASE `$database_name` CHARACTER SET = :charset COLLATE = :collation;";
-    return $this->connection->query($sql, array(
+    return $this->connection->query($sql, [
       ':charset' => $charset ?: $this->charset,
       ':collation' => $collation ?: $this->collation,
-    ));
+    ]);
   }
 
   /**
@@ -181,10 +181,10 @@ class DatabaseCharsetConverter {
   public function convertTable($table_name, $charset = NULL, $collation = NULL) {
     $this->connection->query("ALTER TABLE `$table_name` ROW_FORMAT=DYNAMIC ENGINE=INNODB");
     $sql = "ALTER TABLE `$table_name` CHARACTER SET = :charset COLLATE = :collation";
-    $result = $this->connection->query($sql, array(
+    $result = $this->connection->query($sql, [
       ':charset' => $charset ?: $this->charset,
       ':collation' => $collation ?: $this->collation,
-    ));
+    ]);
     if ($result) {
       $result = $this->convertTableFields($table_name, $charset, $collation);
       $this->connection->query("OPTIMIZE TABLE `$table_name`");
@@ -240,11 +240,11 @@ class DatabaseCharsetConverter {
         $row->Extra . " " . // phpcs:ignore -- Separate concat string for clarity.
         "COMMENT :comment";
 
-      $params = array(
+      $params = [
         ':charset' => $charset,
         ':collation' => $collation,
         ':comment' => $row->Comment,
-      );
+      ];
       if (strstr($default, ':default')) {
         $params[':default'] = $row->Default;
       }

@@ -10,45 +10,45 @@
 function taxonomy_overview_vocabularies() {
   $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
 
-  $header = array(
-    array('data' => t('Vocabulary name'), 'class' => array('vocabulary-name')),
-    array('data' => t('Description'), 'class' => array('vocabulary-description', 'priority-low')),
-    array('data' => t('Number of terms'), 'class' => array('vocabulary-term-count', 'priority-medium')),
-    array('data' => t('Operations'), 'class' => array('vocabulary-operations')),
-  );
+  $header = [
+    ['data' => t('Vocabulary name'), 'class' => ['vocabulary-name']],
+    ['data' => t('Description'), 'class' => ['vocabulary-description', 'priority-low']],
+    ['data' => t('Number of terms'), 'class' => ['vocabulary-term-count', 'priority-medium']],
+    ['data' => t('Operations'), 'class' => ['vocabulary-operations']],
+  ];
 
-  $rows = array();
+  $rows = [];
 
   foreach ($vocabularies as $vocabulary) {
-    $term_count = db_query("SELECT count(tid) FROM {taxonomy_term_data} WHERE vocabulary = :vocab", array(':vocab' => $vocabulary->machine_name))->fetchField();
+    $term_count = db_query("SELECT count(tid) FROM {taxonomy_term_data} WHERE vocabulary = :vocab", [':vocab' => $vocabulary->machine_name])->fetchField();
     if (taxonomy_vocabulary_access(FALSE, $vocabulary)) {
-      $row = array();
-      $row[] = array(
-        'data' => theme('label_machine_name__vocabulary', array(
+      $row = [];
+      $row[] = [
+        'data' => theme('label_machine_name__vocabulary', [
           'label' => $vocabulary->name,
           'machine_name' => $vocabulary->machine_name,
-        )),
-        'class' => array('vocabulary-name'),
+        ]),
+        'class' => ['vocabulary-name'],
         'data-label' => t('Vocabulary name'),
-      );
-      $row[] = array(
-        'data' => theme('taxonomy_vocabulary_description', array('vocabulary' => $vocabulary)),
-        'class' => array('vocabulary-description'),
+      ];
+      $row[] = [
+        'data' => theme('taxonomy_vocabulary_description', ['vocabulary' => $vocabulary]),
+        'class' => ['vocabulary-description'],
         'data-label' => t('Description'),
-      );
-      $row[] = array(
+      ];
+      $row[] = [
         'data' => $term_count,
-        'class' => array('vocabulary-term-count'),
+        'class' => ['vocabulary-term-count'],
         'data-label' => t('Number of terms'),
-      );
-      $row[] = array(
-        'data' => array(
+      ];
+      $row[] = [
+        'data' => [
           '#type' => 'operations',
           '#links' => _vocabulary_get_operations($vocabulary),
-        ),
-        'class' => array('vocabulary-operations'),
+        ],
+        'class' => ['vocabulary-operations'],
         'data-label' => t('Operations'),
-      );
+      ];
 
       $rows[] = $row;
     }
@@ -56,15 +56,15 @@ function taxonomy_overview_vocabularies() {
 
   backdrop_add_css(backdrop_get_path('module', 'taxonomy') . '/css/taxonomy.css');
 
-  $table = array(
+  $table = [
     'header' => $header,
     'rows' => $rows,
-    'empty' => t('No vocabularies available. <a href="@link">Add vocabulary</a>.', array('@link' => url('admin/structure/taxonomy/add'))),
-    'attributes' => array(
+    'empty' => t('No vocabularies available. <a href="@link">Add vocabulary</a>.', ['@link' => url('admin/structure/taxonomy/add')]),
+    'attributes' => [
       'id' => 'vocabulary-list',
-      'class' => array('vocabulary-list'),
-    ),
-  );
+      'class' => ['vocabulary-list'],
+    ],
+  ];
 
   return theme('table', $table);
 }
@@ -73,62 +73,62 @@ function taxonomy_overview_vocabularies() {
  * Given a vocabulary, return a list of operations that can be performed on it.
  */
 function _vocabulary_get_operations($vocabulary) {
-  $links = array();
+  $links = [];
 
   // Allow access to the terms listing for the vocabulary if the user has:
   // - any of the create/update (edit)/delete permissions,
   // - or the the 'administer taxonomy' permission.
   if (taxonomy_vocabulary_access(FALSE, $vocabulary)) {
-    $links['list'] = array(
+    $links['list'] = [
       'title' => t('List terms'),
       'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name,
-    );
+    ];
   }
   if (taxonomy_vocabulary_access('create', $vocabulary)) {
-    $links['add'] = array(
+    $links['add'] = [
       'title' => t('Add terms'),
       'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/add',
-    );
+    ];
   }
   if (user_access('administer taxonomy')) {
-    $links['configure'] = array(
+    $links['configure'] = [
       'title' => t('Configure'),
       'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/configure',
-    );
+    ];
   }
   if (module_exists('field_ui') && user_access('administer fields')) {
-    $links['fields'] = array(
+    $links['fields'] = [
       'title' => t('Manage fields'),
       'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/fields',
       'weight' => 5,
-    );
-    $links['display'] = array(
+    ];
+    $links['display'] = [
       'title' => t('Manage displays'),
       'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/display',
       'weight' => 10,
-    );
+    ];
   }
   if (user_access('administer layouts')) {
-    $links['taxonomy_layouts'] = array(
+    $links['taxonomy_layouts'] = [
       'title' => t('Manage layout'),
       'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/layouts',
-    );
+    ];
   }
   if (module_exists('config') && user_access('synchronize configuration')) {
-    $links['export'] = array(
+    $links['export'] = [
       'title' => t('Export'),
       'href' => 'admin/config/development/configuration/single/export',
-      'query' => array(
+      'query' => [
         'group' => 'Vocabularies',
         'name' => 'taxonomy.vocabulary.' . $vocabulary->machine_name,
-      ),
-    );
+      ],
+    ];
   }
   if (user_access('administer taxonomy')) {
-    $links['delete'] = array(
+    $links['delete'] = [
       'title' => t('Delete'),
       'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/delete',
-    );
+    ];
   }
 
   return $links;
@@ -159,92 +159,92 @@ function taxonomy_form_vocabulary($form, &$form_state, TaxonomyVocabulary $vocab
 
   $form['#vocabulary'] = $form_state['vocabulary'];
 
-  $form['name'] = array(
+  $form['name'] = [
     '#type' => 'textfield',
     '#title' => t('Name'),
     '#default_value' => $vocabulary->name,
     '#maxlength' => 255,
     '#required' => TRUE,
-  );
-  $form['machine_name'] = array(
+  ];
+  $form['machine_name'] = [
     '#type' => 'machine_name',
     '#default_value' => $vocabulary->machine_name,
     '#maxlength' => 255,
     '#disabled' => !empty($vocabulary->machine_name),
-    '#machine_name' => array(
+    '#machine_name' => [
       'exists' => 'taxonomy_vocabulary_load',
-    ),
-  );
-  $form['description'] = array(
+    ],
+  ];
+  $form['description'] = [
     '#type' => 'textfield',
     '#title' => t('Description'),
     '#default_value' => $vocabulary->description,
-  );
+  ];
   // Set the hierarchy to "multiple parents" by default. This simplifies the
   // vocabulary form and standardizes the term form.
-  $form['hierarchy'] = array(
+  $form['hierarchy'] = [
     '#type' => 'value',
     '#value' => '0',
-  );
+  ];
 
-  $form['additional_settings'] = array(
+  $form['additional_settings'] = [
     '#type' => 'vertical_tabs',
-    '#attached' => array(
-      'js' => array(backdrop_get_path('module', 'taxonomy') . '/js/taxonomy.vocabulary.js'),
-    ),
+    '#attached' => [
+      'js' => [backdrop_get_path('module', 'taxonomy') . '/js/taxonomy.vocabulary.js'],
+    ],
     '#weight' => 99,
-  );
+  ];
 
   // Vocabulary permissions.
-  $form['permissions'] = array(
+  $form['permissions'] = [
     '#type' => 'fieldset',
     '#title' => t('Permissions'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
     '#access' => user_access('administer permissions'),
-  );
+  ];
   $form['permissions']['permissions'] = taxonomy_vocabulary_form_permissions($vocabulary);
 
   if (module_exists('language')) {
-    $form['multilingual'] = array(
+    $form['multilingual'] = [
       '#type' => 'fieldset',
       '#title' => t('Multilingual support'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
       '#group' => 'additional_settings',
-    );
-    $form['multilingual']['language'] = array(
+    ];
+    $form['multilingual']['language'] = [
       '#type' => 'checkbox',
       '#title' => t('Multilingual support'),
       '#default_value' => $vocabulary->language,
-      '#description' => t('Add a language selection field to the editing form, allowing you to select from one of the <a href="!languages">enabled languages</a>. If disabled, new terms are saved with no defined language. Existing terms will not be affected by changing this option.', array('!languages' => url('admin/config/regional/language'))),
-    );
+      '#description' => t('Add a language selection field to the editing form, allowing you to select from one of the <a href="!languages">enabled languages</a>. If disabled, new terms are saved with no defined language. Existing terms will not be affected by changing this option.', ['!languages' => url('admin/config/regional/language')]),
+    ];
   }
 
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
+  $form['actions'] = ['#type' => 'actions'];
+  $form['actions']['submit'] = [
     '#type' => 'submit',
     '#value' => t('Save vocabulary'),
     '#weight' => 2,
-  );
+  ];
 
   // Only show 'Save and add terms' button when creating new vocabulary.
   if ($vocabulary->machine_name == NULL) {
-    $form['actions']['continue'] = array(
+    $form['actions']['continue'] = [
       '#type' => 'submit',
       '#value' => t('Save and add terms'),
       '#weight' => 1,
-    );
+    ];
   }
 
-  $form['actions']['cancel'] = array(
+  $form['actions']['cancel'] = [
     '#type' => 'link',
     '#title' => t('Cancel'),
     '#href' => 'admin/structure/taxonomy',
-    '#options' => array('attributes' => array('class' => array('form-cancel'))),
+    '#options' => ['attributes' => ['class' => ['form-cancel']]],
     '#weight' => 15,
-  );
+  ];
 
   return $form;
 }
@@ -265,36 +265,36 @@ function taxonomy_vocabulary_form_permissions($vocabulary) {
   // Note that in taxonomy_theme() the 'node_type_form_permissions' theme
   // callback reuses theme_user_admin_permissions(), to make it identical to
   // the user module permissions page.
-  $form['#theme'] = array('node_type_form_permissions');
+  $form['#theme'] = ['node_type_form_permissions'];
 
   // Wrap the table in a form element to make margins match other form elements.
-  $form['#theme_wrappers'] = array('form_element');
+  $form['#theme_wrappers'] = ['form_element'];
 
-  $form['roles'] = array(
+  $form['roles'] = [
     '#type' => 'value',
     '#value' => $roles,
-  );
+  ];
 
   // Render role/permission overview:
-  $options = array();
+  $options = [];
 
   $permissions = taxonomy_vocabulary_list_permissions($vocabulary);
 
-  $status = array();
+  $status = [];
   foreach ($permissions as $perm => $perm_item) {
     // Fill in default values for the permission.
-    $perm_item += array(
+    $perm_item += [
       'description' => '',
       'restrict access' => FALSE,
       'warning' => '',
-    );
+    ];
     $options[$perm] = '';
     $parts = explode(': ', $perm_item['title']);
-    $form['permission'][$perm] = array(
+    $form['permission'][$perm] = [
       '#type' => 'item',
       '#markup' => $parts[1],
-      '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
-    );
+      '#description' => theme('user_permission_description', ['permission_item' => $perm_item]),
+    ];
     foreach ($roles as $role_name => $role) {
       // Builds arrays for checked boxes for each role. Always select the Admin
       // role on new forms.
@@ -306,17 +306,17 @@ function taxonomy_vocabulary_form_permissions($vocabulary) {
 
   // Have to build checkboxes here after checkbox arrays are built.
   foreach ($roles as $role_name => $role) {
-    $form['checkboxes'][$role_name] = array(
+    $form['checkboxes'][$role_name] = [
       '#type' => 'checkboxes',
       '#options' => $options,
-      '#default_value' => isset($status[$role_name]) ? $status[$role_name] : array(),
-      '#attributes' => array('class' => array('role-' . $role_name)),
-    );
-    $form['role_names'][$role_name] = array(
+      '#default_value' => isset($status[$role_name]) ? $status[$role_name] : [],
+      '#attributes' => ['class' => ['role-' . $role_name]],
+    ];
+    $form['role_names'][$role_name] = [
       '#markup' => check_plain($role->label),
       '#description' => filter_xss_admin($role->description),
       '#tree' => TRUE,
-    );
+    ];
   }
 
   $form['#attached']['js'][] = backdrop_get_path('module', 'user') . '/js/user.permissions.js';
@@ -339,7 +339,7 @@ function taxonomy_form_vocabulary_validate($form, &$form_state) {
   if (isset($form_state['values']['machine_name'])) {
     // Do not allow machine names to conflict with taxonomy path arguments.
     $machine_name = $form_state['values']['machine_name'];
-    $disallowed = array('add', 'list');
+    $disallowed = ['add', 'list'];
     if (in_array($machine_name, $disallowed)) {
       form_set_error('machine_name', t('The machine-readable name cannot be "add" or "list".'));
     }
@@ -373,12 +373,12 @@ function taxonomy_form_vocabulary_submit($form, &$form_state) {
 
   switch (taxonomy_vocabulary_save($vocabulary)) {
     case SAVED_NEW:
-      backdrop_set_message(t('Created new vocabulary %name.', array('%name' => $vocabulary->name)));
-      watchdog('taxonomy', 'Created new vocabulary %name.', array('%name' => $vocabulary->name), WATCHDOG_NOTICE, l(t('configure'), 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/configure'));
+      backdrop_set_message(t('Created new vocabulary %name.', ['%name' => $vocabulary->name]));
+      watchdog('taxonomy', 'Created new vocabulary %name.', ['%name' => $vocabulary->name], WATCHDOG_NOTICE, l(t('configure'), 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/configure'));
       $form_state['redirect'] = 'admin/structure/taxonomy';
       // Save new permissions
       foreach ($form_state['values']['roles'] as $role_name => $role) {
-        $valid_perms = array();
+        $valid_perms = [];
         // Create the permissions string in the format 'edit terms in $vocab'.
         foreach ($form_state['values'][$role->name] as $string => $perm) {
           if ($perm) {
@@ -395,8 +395,8 @@ function taxonomy_form_vocabulary_submit($form, &$form_state) {
       break;
 
     case SAVED_UPDATED:
-      backdrop_set_message(t('Updated vocabulary %name.', array('%name' => $vocabulary->name)));
-      watchdog('taxonomy', 'Updated vocabulary %name.', array('%name' => $vocabulary->name), WATCHDOG_NOTICE, l(t('configure'), 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/configure'));
+      backdrop_set_message(t('Updated vocabulary %name.', ['%name' => $vocabulary->name]));
+      watchdog('taxonomy', 'Updated vocabulary %name.', ['%name' => $vocabulary->name], WATCHDOG_NOTICE, l(t('configure'), 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/configure'));
       $form_state['redirect'] = 'admin/structure/taxonomy';
       // Update permissions.
       foreach ($form_state['values']['roles'] as $role_name => $role) {
@@ -429,7 +429,7 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
 
   $filter_langcode = isset($_GET['langcode_term']) ? $_GET['langcode_term'] : $language->langcode;
   if (module_exists('language') && $vocabulary->language == TAXONOMY_LANGUAGE_ENABLED) {
-    $form['langcode_term'] = array(
+    $form['langcode_term'] = [
       '#title' => t('Show terms in language'),
       '#type' => 'select',
       '#options' => language_list(TRUE, TRUE),
@@ -439,13 +439,13 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
       '#access' => module_exists('language') && $vocabulary->language == TAXONOMY_LANGUAGE_ENABLED,
       '#weight' => -20,
       '#description' => t('Show terms for a given language. Terms with the "All" language will be shown in every language.'),
-    );
-    $form['langcode_filter'] = array(
+    ];
+    $form['langcode_filter'] = [
       '#type' => 'submit',
       '#value' => t('Filter'),
-      '#attributes' => array('class' => array('button-primary')),
-      '#submit' => array('term_overview_form_language_filter_submit'),
-    );
+      '#attributes' => ['class' => ['button-primary']],
+      '#submit' => ['term_overview_form_language_filter_submit'],
+    ];
   }
 
   $form['#vocabulary'] = $vocabulary;
@@ -466,10 +466,10 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
   $forward_step = 0;
 
   // An array of the terms to be displayed on this page.
-  $current_page = array();
+  $current_page = [];
 
   $delta = 0;
-  $term_deltas = array();
+  $term_deltas = [];
   $tree = taxonomy_get_tree($vocabulary->machine_name);
   $term = current($tree);
   do {
@@ -571,61 +571,61 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
       unset($form[$key]['#term']['parents'], $term->parents);
     }
 
-    $form[$key]['view'] = array('#type' => 'link', '#title' => $term->name, '#href' => "taxonomy/term/$term->tid");
+    $form[$key]['view'] = ['#type' => 'link', '#title' => $term->name, '#href' => "taxonomy/term/$term->tid"];
     if ($vocabulary->hierarchy != TAXONOMY_HIERARCHY_MULTIPLE && count($tree) > 1) {
       $form['#parent_fields'] = TRUE;
-      $form[$key]['tid'] = array(
+      $form[$key]['tid'] = [
         '#type' => 'hidden',
         '#value' => $term->tid
-      );
-      $form[$key]['parent'] = array(
+      ];
+      $form[$key]['parent'] = [
         '#type' => 'hidden',
         // Yes, default_value on a hidden. It needs to be changeable by the javascript.
         '#default_value' => $term->parent,
-      );
-      $form[$key]['depth'] = array(
+      ];
+      $form[$key]['depth'] = [
         '#type' => 'hidden',
         // Same as above, the depth is modified by javascript, so it's a default_value.
         '#default_value' => $term->depth,
-      );
+      ];
       // Language
       $langcode_label = isset($language_options[$term->langcode]) ? $language_options[$term->langcode] : $term->langcode;
       if (module_exists('language') && $vocabulary->language == TAXONOMY_LANGUAGE_ENABLED) {
-        $form[$key]['langcode'] = array(
+        $form[$key]['langcode'] = [
           '#type' => 'markup',
           '#markup' => check_plain($langcode_label),
           '#access' => module_exists('language') && $vocabulary->language == TAXONOMY_LANGUAGE_ENABLED,
-        );
+        ];
       }
       if (taxonomy_vocabulary_access('update', $vocabulary)) {
-        $form[$key]['weight'] = array(
+        $form[$key]['weight'] = [
           '#type' => 'weight',
           '#delta' => $delta,
           '#title_display' => 'invisible',
           '#title' => t('Weight for added term'),
           '#default_value' => $term->weight,
-        );
+        ];
       }
     }
-    $links = array();
+    $links = [];
     if (taxonomy_vocabulary_access('update', $vocabulary)) {
-      $links['edit'] = array(
+      $links['edit'] = [
         'title' => t('Edit'),
         'href' => 'taxonomy/term/' . $term->tid . '/edit',
         'query' => backdrop_get_destination(),
-      );
+      ];
     }
     if (taxonomy_vocabulary_access('delete', $vocabulary)) {
-      $links['delete'] = array(
+      $links['delete'] = [
         'title' => t('Delete'),
         'href' => 'taxonomy/term/' . $term->tid . '/delete',
         'query' => backdrop_get_destination(),
-      );
+      ];
     }
-    $form[$key]['operations'] = array(
+    $form[$key]['operations'] = [
       '#type' => 'operations',
       '#links' => $links,
-    );
+    ];
   }
 
   $form['#total_entries'] = $total_entries;
@@ -635,20 +635,20 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
   $form['#forward_step'] = $forward_step;
   $form['#empty_text'] = t('No terms available.');
   if (taxonomy_vocabulary_access('create', $vocabulary)) {
-    $form['#empty_text'] = t('No terms available. <a href="@link">Add term</a>.', array('@link' => url('admin/structure/taxonomy/' . $vocabulary->machine_name . '/add')));
+    $form['#empty_text'] = t('No terms available. <a href="@link">Add term</a>.', ['@link' => url('admin/structure/taxonomy/' . $vocabulary->machine_name . '/add')]);
   }
 
   if ($vocabulary->hierarchy != TAXONOMY_HIERARCHY_MULTIPLE && count($tree) > 1 && taxonomy_vocabulary_access('edit', $vocabulary)) {
-    $form['actions'] = array('#type' => 'actions', '#tree' => FALSE);
-    $form['actions']['submit'] = array(
+    $form['actions'] = ['#type' => 'actions', '#tree' => FALSE];
+    $form['actions']['submit'] = [
       '#type' => 'submit',
       '#value' => t('Save')
-    );
-    $form['actions']['reset_alphabetical'] = array(
+    ];
+    $form['actions']['reset_alphabetical'] = [
       '#type' => 'submit',
       '#value' => t('Reset to alphabetical')
-    );
-    $form_state['redirect'] = array($_GET['q'], (isset($_GET['page']) ? array('query' => array('page' => $_GET['page'])) : array()));
+    ];
+    $form_state['redirect'] = [$_GET['q'], (isset($_GET['page']) ? ['query' => ['page' => $_GET['page']]] : [])];
   }
 
   return $form;
@@ -664,7 +664,7 @@ function term_overview_form_language_filter_submit($form, &$form_state) {
   if (isset($_GET['destination'])) {
     $query['destination'] = $_GET['destination'];
   }
-  backdrop_goto($_GET['q'], array('query' => $query));
+  backdrop_goto($_GET['q'], ['query' => $query]);
 }
 
 /**
@@ -696,13 +696,13 @@ function taxonomy_overview_terms_submit($form, &$form_state) {
 
   // Sort term order based on weight of values submitted.
   form_state_values_clean($form_state);
-  backdrop_sort($form_state['values'], array('weight' => SORT_NUMERIC));
+  backdrop_sort($form_state['values'], ['weight' => SORT_NUMERIC]);
 
   $vocabulary = $form['#vocabulary'];
   // Update the current hierarchy type as we go.
   $hierarchy = TAXONOMY_HIERARCHY_DISABLED;
 
-  $changed_terms = array();
+  $changed_terms = [];
   $tree = taxonomy_get_tree($vocabulary->machine_name);
 
   if (empty($tree)) {
@@ -724,7 +724,7 @@ function taxonomy_overview_terms_submit($form, &$form_state) {
   }
 
   // Renumber the current page weights and assign any new parents.
-  $level_weights = array();
+  $level_weights = [];
   foreach ($form_state['values'] as $tid => $values) {
     if (isset($form[$tid]['#term'])) {
       $term = $form[$tid]['#term'];
@@ -768,12 +768,12 @@ function taxonomy_overview_terms_submit($form, &$form_state) {
     // Update term_hierarchy and term_data directly since we don't have a
     // fully populated term object to save.
     db_update('taxonomy_term_hierarchy')
-      ->fields(array('parent' => $term->parent))
+      ->fields(['parent' => $term->parent])
       ->condition('tid', $term->tid, '=')
       ->execute();
 
     db_update('taxonomy_term_data')
-      ->fields(array('weight' => $term->weight))
+      ->fields(['weight' => $term->weight])
       ->condition('tid', $term->tid, '=')
       ->execute();
   }
@@ -812,13 +812,13 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
   if (!isset($form_state['term'])) {
     // Create a new TaxonomyTerm entity for the add form.
     if (!isset($term)) {
-      $term = entity_create('taxonomy_term', array(
+      $term = entity_create('taxonomy_term', [
         'vocabulary' => $vocabulary->machine_name,
-      ));
-      backdrop_set_title(t('@vocab_name: Add term', array('@vocab_name' => $vocabulary->name)), PASS_THROUGH);
+      ]);
+      backdrop_set_title(t('@vocab_name: Add term', ['@vocab_name' => $vocabulary->name]), PASS_THROUGH);
     }
     else {
-      backdrop_set_title(t('@vocab_name: Edit term %term_name', array('@vocab_name' => $vocabulary->name, '%term_name' => $term->name)), PASS_THROUGH);
+      backdrop_set_title(t('@vocab_name: Edit term %term_name', ['@vocab_name' => $vocabulary->name, '%term_name' => $term->name]), PASS_THROUGH);
     }
     $form_state['term'] = $term;
   }
@@ -831,19 +831,19 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
   $form['#term']['parent'] = $parent;
   $form['#vocabulary'] = $vocabulary;
 
-  $form['name'] = array(
+  $form['name'] = [
     '#type' => 'textfield',
     '#title' => t('Name'),
     '#default_value' => $term->name,
     '#maxlength' => 255,
     '#required' => TRUE,
     '#weight' => -5,
-    '#attributes' => array(
+    '#attributes' => [
       'autofocus' => TRUE,
-    ),
-  );
+    ],
+  ];
   if (module_exists('language') && $vocabulary->language == TAXONOMY_LANGUAGE_ENABLED) {
-    $form['langcode'] = array(
+    $form['langcode'] = [
       '#type' => 'select',
       '#title' => t('Language'),
       '#default_value' => isset($_GET['langcode_term']) ? $_GET['langcode_term'] : $term->langcode,
@@ -851,47 +851,47 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
       '#empty_value' => LANGUAGE_NONE,
       '#empty_option' => t('- All (always shown) -'),
       '#description' => t('Set a language for this term. The term will only be visible in that language.')
-    );
+    ];
   }
   else {
     // Maintain langcode settings if Language module is not present.
-    $form['langcode'] = array(
+    $form['langcode'] = [
       '#type' => 'value',
       '#value' => $term->langcode,
-    );
+    ];
   }
 
-  $form['description'] = array(
+  $form['description'] = [
     '#type' => 'text_format',
     '#title' => t('Description'),
     '#default_value' => $term->description,
     '#format' => $term->format,
     '#weight' => 0,
-  );
+  ];
 
-  $form['vocabulary'] = array(
+  $form['vocabulary'] = [
     '#type' => 'value',
     '#value' => isset($term->vocabulary) ? $term->vocabulary : $vocabulary->machine_name,
-  );
+  ];
 
-  $form['additional_settings'] = array(
+  $form['additional_settings'] = [
     '#type' => 'vertical_tabs',
-    '#attached' => array(
-      'js' => array(backdrop_get_path('module', 'taxonomy') . '/js/taxonomy.term.js'),
-    ),
+    '#attached' => [
+      'js' => [backdrop_get_path('module', 'taxonomy') . '/js/taxonomy.term.js'],
+    ],
     '#weight' => 99,
-  );
+  ];
 
   field_attach_form('taxonomy_term', $term, $form, $form_state);
 
-  $form['relations'] = array(
+  $form['relations'] = [
     '#type' => 'fieldset',
     '#title' => t('Relations'),
     '#collapsible' => TRUE,
     '#collapsed' => ($vocabulary->hierarchy != TAXONOMY_HIERARCHY_MULTIPLE),
     '#weight' => -10,
     '#group' => 'additional_settings',
-  );
+  ];
 
   $parent = array_keys(taxonomy_term_load_parents($term->tid));
   $children = taxonomy_get_tree($vocabulary->machine_name, $term->tid);
@@ -903,30 +903,30 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
   $exclude[] = $term->tid;
 
   $tree = taxonomy_get_tree($vocabulary->machine_name);
-  $options = array('<' . t('root') . '>');
+  $options = ['<' . t('root') . '>'];
   if (empty($parent)) {
-    $parent = array(0);
+    $parent = [0];
   }
   foreach ($tree as $item) {
     if (!in_array($item->tid, $exclude)) {
       $options[$item->tid] = str_repeat('· ', $item->depth) . $item->name;
     }
   }
-  $form['relations']['parent'] = array(
+  $form['relations']['parent'] = [
     '#type' => 'select',
     '#title' => t('Parent terms'),
     '#options' => $options,
     '#default_value' => $parent,
     '#multiple' => TRUE,
-  );
+  ];
 
-  $form['relations']['weight'] = array(
+  $form['relations']['weight'] = [
     '#type' => 'number',
     '#title' => t('Weight'),
     '#default_value' => $term->weight,
     '#description' => t('Terms are displayed in ascending order by weight.'),
     '#required' => TRUE,
-  );
+  ];
 
   // Prepare cancel link.
   if (isset($_GET['destination'])) {
@@ -948,32 +948,32 @@ function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, Taxo
   $cancel_options = backdrop_parse_url($path);
   $cancel_options['attributes']['class'][] = 'form-cancel';
 
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
+  $form['actions'] = ['#type' => 'actions'];
+  $form['actions']['submit'] = [
     '#type' => 'submit',
     '#value' => t('Save'),
     '#weight' => 5,
-  );
+  ];
 
   if ($term->tid) {
-    $form['actions']['delete'] = array(
+    $form['actions']['delete'] = [
       '#type' => 'submit',
       '#value' => t('Delete'),
       '#access' => taxonomy_term_access('delete', $term),
       '#weight' => 10,
-      '#submit' => array('taxonomy_form_term_delete_submit'),
-    );
+      '#submit' => ['taxonomy_form_term_delete_submit'],
+    ];
   }
   else {
     $form_state['redirect'] = $_GET['q'];
   }
-  $form['actions']['cancel'] = array(
+  $form['actions']['cancel'] = [
     '#type' => 'link',
     '#title' => t('Cancel'),
     '#href' => $cancel_options['path'],
     '#options' => $cancel_options,
     '#weight' => 15,
-  );
+  ];
 
   return $form;
 }
@@ -998,12 +998,12 @@ function taxonomy_form_term_submit($form, &$form_state) {
   $status = taxonomy_term_save($term);
   switch ($status) {
     case SAVED_NEW:
-      backdrop_set_message(t('Created new term %term.', array('%term' => $term->name)));
-      watchdog('taxonomy', 'Created new term %term.', array('%term' => $term->name), WATCHDOG_NOTICE, l(t('edit'), 'taxonomy/term/' . $term->tid . '/edit'));
+      backdrop_set_message(t('Created new term %term.', ['%term' => $term->name]));
+      watchdog('taxonomy', 'Created new term %term.', ['%term' => $term->name], WATCHDOG_NOTICE, l(t('edit'), 'taxonomy/term/' . $term->tid . '/edit'));
       break;
     case SAVED_UPDATED:
-      backdrop_set_message(t('Updated term %term.', array('%term' => $term->name)));
-      watchdog('taxonomy', 'Updated term %term.', array('%term' => $term->name), WATCHDOG_NOTICE, l(t('edit'), 'taxonomy/term/' . $term->tid . '/edit'));
+      backdrop_set_message(t('Updated term %term.', ['%term' => $term->name]));
+      watchdog('taxonomy', 'Updated term %term.', ['%term' => $term->name], WATCHDOG_NOTICE, l(t('edit'), 'taxonomy/term/' . $term->tid . '/edit'));
       break;
   }
 
@@ -1012,7 +1012,7 @@ function taxonomy_form_term_submit($form, &$form_state) {
   // Root doesn't count if it's the only parent.
   if ($current_parent_count == 1 && isset($form_state['values']['parent'][0])) {
     $current_parent_count = 0;
-    $form_state['values']['parent'] = array();
+    $form_state['values']['parent'] = [];
   }
 
   // If the number of parents has been reduced to one or none, do a check on the
@@ -1055,13 +1055,13 @@ function taxonomy_form_term_submit_build_taxonomy_term($form, &$form_state) {
  * @see taxonomy_form_term_submit()
  */
 function taxonomy_form_term_delete_submit($form, &$form_state) {
-  $destination = array();
+  $destination = [];
   if (isset($_GET['destination'])) {
     $destination = backdrop_get_destination();
     unset($_GET['destination']);
   }
   $term = $form['#term'];
-  $form_state['redirect'] = array('taxonomy/term/' . $term['tid'] . '/delete', array('query' => $destination));
+  $form_state['redirect'] = ['taxonomy/term/' . $term['tid'] . '/delete', ['query' => $destination]];
 }
 
 /**
@@ -1072,16 +1072,16 @@ function taxonomy_form_term_delete_submit($form, &$form_state) {
  */
 function taxonomy_term_confirm_delete($form, &$form_state, $term) {
   // Always provide entity id in the same form key as in the entity edit form.
-  $form['tid'] = array('#type' => 'value', '#value' => $term->tid);
+  $form['tid'] = ['#type' => 'value', '#value' => $term->tid];
 
   $form['#term'] = $term;
   $form['#vocabulary'] = taxonomy_vocabulary_load($term->vocabulary);
-  $form['type'] = array('#type' => 'value', '#value' => 'term');
-  $form['name'] = array('#type' => 'value', '#value' => $term->name);
-  $form['delete'] = array('#type' => 'value', '#value' => TRUE);
+  $form['type'] = ['#type' => 'value', '#value' => 'term'];
+  $form['name'] = ['#type' => 'value', '#value' => $term->name];
+  $form['delete'] = ['#type' => 'value', '#value' => TRUE];
   return confirm_form($form,
     t('Are you sure you want to delete the term %title?',
-    array('%title' => $term->name)),
+    ['%title' => $term->name]),
     'admin/structure/taxonomy',
     t('Deleting a term will delete all its children if there are any. This action cannot be undone.'),
     t('Delete'),
@@ -1096,8 +1096,8 @@ function taxonomy_term_confirm_delete($form, &$form_state, $term) {
 function taxonomy_term_confirm_delete_submit($form, &$form_state) {
   taxonomy_term_delete($form_state['values']['tid']);
   taxonomy_check_vocabulary_hierarchy($form['#vocabulary'], $form_state['values']);
-  backdrop_set_message(t('Deleted term %name.', array('%name' => $form_state['values']['name'])));
-  watchdog('taxonomy', 'Deleted term %name.', array('%name' => $form_state['values']['name']), WATCHDOG_NOTICE);
+  backdrop_set_message(t('Deleted term %name.', ['%name' => $form_state['values']['name']]));
+  watchdog('taxonomy', 'Deleted term %name.', ['%name' => $form_state['values']['name']], WATCHDOG_NOTICE);
   if (!isset($_GET['destination'])) {
     $form_state['redirect'] = 'admin/structure/taxonomy';
   }
@@ -1111,12 +1111,12 @@ function taxonomy_term_confirm_delete_submit($form, &$form_state) {
  */
 function taxonomy_vocabulary_confirm_delete($form, &$form_state, $vocabulary) {
   $form['#vocabulary'] = $vocabulary;
-  $form['type'] = array('#type' => 'value', '#value' => 'vocabulary');
-  $form['name'] = array('#type' => 'value', '#value' => $vocabulary->name);
-  $form['#submit'] = array('taxonomy_vocabulary_confirm_delete_submit');
+  $form['type'] = ['#type' => 'value', '#value' => 'vocabulary'];
+  $form['name'] = ['#type' => 'value', '#value' => $vocabulary->name];
+  $form['#submit'] = ['taxonomy_vocabulary_confirm_delete_submit'];
   return confirm_form($form,
     t('Are you sure you want to delete the vocabulary %title?',
-    array('%title' => $vocabulary->name)),
+    ['%title' => $vocabulary->name]),
     'admin/structure/taxonomy',
     t('Deleting a vocabulary will delete all the terms in it. This action cannot be undone.'),
     t('Delete'),
@@ -1131,8 +1131,8 @@ function taxonomy_vocabulary_confirm_delete($form, &$form_state, $vocabulary) {
 function taxonomy_vocabulary_confirm_delete_submit($form, &$form_state) {
   $vocabulary = $form['#vocabulary'];
   $vocabulary->delete();
-  backdrop_set_message(t('Deleted vocabulary %name.', array('%name' => $form_state['values']['name'])));
-  watchdog('taxonomy', 'Deleted vocabulary %name.', array('%name' => $form_state['values']['name']), WATCHDOG_NOTICE);
+  backdrop_set_message(t('Deleted vocabulary %name.', ['%name' => $form_state['values']['name']]));
+  watchdog('taxonomy', 'Deleted vocabulary %name.', ['%name' => $form_state['values']['name']], WATCHDOG_NOTICE);
   $form_state['redirect'] = 'admin/structure/taxonomy';
 }
 
@@ -1145,13 +1145,13 @@ function taxonomy_vocabulary_confirm_delete_submit($form, &$form_state) {
 function taxonomy_vocabulary_confirm_reset_alphabetical($form, &$form_state, $vocabulary_name) {
   $vocabulary = taxonomy_vocabulary_load($vocabulary_name);
 
-  $form['type'] = array('#type' => 'value', '#value' => 'vocabulary');
-  $form['machine_name'] = array('#type' => 'value', '#value' => $vocabulary->machine_name);
-  $form['name'] = array('#type' => 'value', '#value' => $vocabulary->name);
-  $form['reset_alphabetical'] = array('#type' => 'value', '#value' => TRUE);
+  $form['type'] = ['#type' => 'value', '#value' => 'vocabulary'];
+  $form['machine_name'] = ['#type' => 'value', '#value' => $vocabulary->machine_name];
+  $form['name'] = ['#type' => 'value', '#value' => $vocabulary->name];
+  $form['reset_alphabetical'] = ['#type' => 'value', '#value' => TRUE];
   return confirm_form($form,
                   t('Are you sure you want to reset the vocabulary %title to alphabetical order?',
-                  array('%title' => $vocabulary->name)),
+                  ['%title' => $vocabulary->name]),
                   'admin/structure/taxonomy/' . $vocabulary->machine_name,
                   t('Resetting a vocabulary will discard all custom ordering and sort items alphabetically.'),
                   t('Reset to alphabetical'),
@@ -1165,10 +1165,10 @@ function taxonomy_vocabulary_confirm_reset_alphabetical($form, &$form_state, $vo
  */
 function taxonomy_vocabulary_confirm_reset_alphabetical_submit($form, &$form_state) {
   db_update('taxonomy_term_data')
-    ->fields(array('weight' => 0))
+    ->fields(['weight' => 0])
     ->condition('vocabulary', $form_state['values']['machine_name'])
     ->execute();
-  backdrop_set_message(t('Reset vocabulary %name to alphabetical order.', array('%name' => $form_state['values']['name'])));
-  watchdog('taxonomy', 'Reset vocabulary %name to alphabetical order.', array('%name' => $form_state['values']['name']), WATCHDOG_NOTICE);
+  backdrop_set_message(t('Reset vocabulary %name to alphabetical order.', ['%name' => $form_state['values']['name']]));
+  watchdog('taxonomy', 'Reset vocabulary %name to alphabetical order.', ['%name' => $form_state['values']['name']], WATCHDOG_NOTICE);
   $form_state['redirect'] = 'admin/structure/taxonomy/' . $form_state['values']['machine_name'];
 }

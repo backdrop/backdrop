@@ -12,14 +12,14 @@ class DashboardUpdateBlock extends Block {
     parent::__construct($plugin_name, $data);
 
     // Set defaults.
-    $this->settings += array(
-      'project_types' => array(
+    $this->settings += [
+      'project_types' => [
         'core',
         'modules',
         'themes',
         'layouts',
-      ),
-    );
+      ],
+    ];
   }
 
   /**
@@ -62,47 +62,47 @@ class DashboardUpdateBlock extends Block {
    * {@inheritdoc}
    */
   function getContent() {
-    $panel = array(
+    $panel = [
       '#theme' => 'dashboard_panel__update',
-    );
+    ];
 
     if (!module_exists('update')) {
-      $panel['last_check'] = array(
+      $panel['last_check'] = [
         '#markup' => t('The Update Manager module is not enabled.'),
-      );
+      ];
       if (user_access('administer modules')) {
-        $panel['link'] = array(
+        $panel['link'] = [
           '#theme' => 'link',
           '#path' => 'admin/modules',
           '#text' => t('Enable'),
-          '#options' => array(
-            'query' => array(
+          '#options' => [
+            'query' => [
               'search' => 'update',
-            ),
-          ),
-        );
+            ],
+          ],
+        ];
       }
 
       return $panel;
     }
 
-    $header = array(
-      array('data' => t('Project')),
-      array('data' => t('Type')),
-      array('data' => t('Update')),
-    );
-    $updates = array();
+    $header = [
+      ['data' => t('Project')],
+      ['data' => t('Type')],
+      ['data' => t('Update')],
+    ];
+    $updates = [];
 
     $available = update_get_available();
     module_load_include('inc', 'update', 'update.compare');
     $data = update_calculate_project_data($available);
 
-    $project_types = array(
+    $project_types = [
       'core' => t('Core'),
       'module' => t('Module'),
       'theme' => t('Theme'),
       'layout' => t('Layout template'),
-    );
+    ];
 
     foreach ($data as $key => $project) {
       // Skip projects that are up to date already.
@@ -121,10 +121,10 @@ class DashboardUpdateBlock extends Block {
         if (isset($project['recommended'])) {
           $update = $project['recommended'];
 
-          $update_types = array(
+          $update_types = [
             'security' => t('security update'),
             'unsupported' => t('unsupported version'),
-          );
+          ];
 
           switch ($project['status']) {
             case UPDATE_NOT_SECURE:
@@ -150,47 +150,47 @@ class DashboardUpdateBlock extends Block {
           if (isset($type) && isset($update_types[$type])) {
             $update .= ' <span class="update-type">(' . $update_types[$type] . ')</span>';
           }
-          $class = array('update-' . $type);
+          $class = ['update-' . $type];
 
-          $updates[] = array(
-            'data' => array(
+          $updates[] = [
+            'data' => [
               $project['title'],
               $project_type,
               $update,
-            ),
+            ],
             'class' => $class,
             'weight' => $weight,
-          );
+          ];
         }
       }
     }
 
     if (empty($updates)) {
-      $panel['up_to_date'] = array(
+      $panel['up_to_date'] = [
         '#type' => 'container',
-        '#attributes' => array('class' => array('messages', 'status')),
-      );
-      $panel['up_to_date']['message'] = array(
+        '#attributes' => ['class' => ['messages', 'status']],
+      ];
+      $panel['up_to_date']['message'] = [
         '#markup' => t('Your site is up to date.'),
-      );
+      ];
     }
 
     backdrop_add_css(backdrop_get_path('module', 'installer') . '/css/installer.css');
     $last = state_get('update_last_check', 0);
-    $panel['last_check'] = array(
-      '#markup' => theme('update_last_check__block', array('last' => $last)),
-    );
+    $panel['last_check'] = [
+      '#markup' => theme('update_last_check__block', ['last' => $last]),
+    ];
 
     if (!empty($updates)) {
       // Ensure that entries with security updates or unsupported versions
       // bubble up to the top of the table.
       backdrop_sort($updates);
 
-      $panel['table'] = array(
+      $panel['table'] = [
         '#theme' => 'table',
         '#header' => $header,
         '#rows' => $updates,
-      );
+      ];
     }
 
     if (!empty($updates) && module_exists('installer') && user_access('administer software updates')) {
@@ -202,11 +202,11 @@ class DashboardUpdateBlock extends Block {
       $link_text = t('More info');
     }
     if (isset($link_path) && isset($link_text)) {
-      $panel['link'] = array(
+      $panel['link'] = [
         '#theme' => 'link',
         '#path' => $link_path,
         '#text' => $link_text,
-      );
+      ];
     }
 
     return $panel;
@@ -222,18 +222,18 @@ class DashboardUpdateBlock extends Block {
       return $form;
     }
 
-    $form['project_types'] = array(
+    $form['project_types'] = [
       '#type' => 'checkboxes',
       '#title' => t('Display information about updates to the following'),
       '#multiple' => TRUE,
-      '#options' => array(
+      '#options' => [
         'core' => t('Backdrop core'),
         'module' => t('Modules'),
         'theme' => t('Themes'),
         'layout' => t('Layout templates'),
-      ),
+      ],
       '#default_value' => $this->settings['project_types'],
-    );
+    ];
   }
 
   /**

@@ -48,7 +48,7 @@ class DefaultMailSystem implements MailSystemInterface {
         unset($message['headers']['Return-Path']);
       }
     }
-    $mimeheaders = array();
+    $mimeheaders = [];
     foreach ($message['headers'] as $name => $value) {
       $mimeheaders[] = $name . ': ' . mime_header_encode($value);
     }
@@ -122,7 +122,7 @@ class DefaultMailSystem implements MailSystemInterface {
    *   location for this helper.
    */
   protected static function _isShellSafe($string) {
-    if (escapeshellcmd($string) !== $string || !in_array(escapeshellarg($string), array("'$string'", "\"$string\""))) {
+    if (escapeshellcmd($string) !== $string || !in_array(escapeshellarg($string), ["'$string'", "\"$string\""])) {
       return FALSE;
     }
     if (preg_match('/[^a-zA-Z0-9@_\-.]/', $string) !== 0) {
@@ -145,7 +145,7 @@ class TestingMailSystem extends DefaultMailSystem implements MailSystemInterface
    *   An email message.
    */
   public function mail(array $message) {
-    $captured_emails = state_get('test_email_collector', array());
+    $captured_emails = state_get('test_email_collector', []);
     $captured_emails[] = $message;
     state_set('test_email_collector', $captured_emails);
     return TRUE;

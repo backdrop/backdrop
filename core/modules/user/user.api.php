@@ -23,7 +23,7 @@
  * @see profile_user_load()
  */
 function hook_user_load($users) {
-  $result = db_query('SELECT uid, foo FROM {my_table} WHERE uid IN (:uids)', array(':uids' => array_keys($users)));
+  $result = db_query('SELECT uid, foo FROM {my_table} WHERE uid IN (:uids)', [':uids' => array_keys($users)]);
   foreach ($result as $record) {
     $users[$record->uid]->foo = $record->foo;
   }
@@ -67,7 +67,7 @@ function hook_user_predelete($account) {
  * @see user_delete_multiple()
  */
 function hook_user_delete($account) {
-  backdrop_set_message(t('User: @name has been deleted.', array('@name' => $account->name)));
+  backdrop_set_message(t('User: @name has been deleted.', ['@name' => $account->name]));
 }
 
 /**
@@ -104,25 +104,25 @@ function hook_user_cancel($edit, $account, $method) {
       // Unpublish nodes (current revisions).
       module_load_include('inc', 'node', 'node.admin');
       $nodes = db_select('node', 'n')
-        ->fields('n', array('nid'))
+        ->fields('n', ['nid'])
         ->condition('uid', $account->uid)
         ->execute()
         ->fetchCol();
-      node_mass_update($nodes, array('status' => 0));
+      node_mass_update($nodes, ['status' => 0]);
       break;
 
     case 'user_cancel_reassign':
       // Anonymize nodes (current revisions).
       module_load_include('inc', 'node', 'node.admin');
       $nodes = db_select('node', 'n')
-        ->fields('n', array('nid'))
+        ->fields('n', ['nid'])
         ->condition('uid', $account->uid)
         ->execute()
         ->fetchCol();
-      node_mass_update($nodes, array('uid' => 0));
+      node_mass_update($nodes, ['uid' => 0]);
       // Anonymize old revisions.
       db_update('node_revision')
-        ->fields(array('uid' => 0))
+        ->fields(['uid' => 0])
         ->condition('uid', $account->uid)
         ->execute();
       // Clean history.
@@ -163,12 +163,12 @@ function hook_user_cancel_methods_alter(&$methods) {
   unset($methods['user_cancel_reassign']);
 
   // Add a custom zero-out method.
-  $methods['my_module_zero_out'] = array(
+  $methods['my_module_zero_out'] = [
     'title' => t('Delete the account and remove all content.'),
     'description' => t('All your content will be replaced by empty strings.'),
     // access should be used for administrative methods only.
     'access' => user_access('access zero-out account cancellation method'),
-  );
+  ];
 }
 
 /**
@@ -189,7 +189,7 @@ function hook_user_cancel_methods_alter(&$methods) {
 function hook_user_format_name_alter(&$name, $account) {
   // Display the user's uid instead of name.
   if (isset($account->uid)) {
-    $name = t('User !uid', array('!uid' => $account->uid));
+    $name = t('User !uid', ['!uid' => $account->uid]);
   }
 }
 
@@ -228,10 +228,10 @@ function hook_user_presave($account) {
  */
 function hook_user_insert($account) {
   db_insert('mytable')
-    ->fields(array(
+    ->fields([
       'uid' => $account->uid,
       'created' => REQUEST_TIME,
-    ))
+    ])
     ->execute();
 }
 
@@ -246,10 +246,10 @@ function hook_user_insert($account) {
  */
 function hook_user_update($account) {
   db_insert('user_changes')
-    ->fields(array(
+    ->fields([
       'uid' => $account->uid,
       'changed' => REQUEST_TIME,
-    ))
+    ])
     ->execute();
 }
 
@@ -265,7 +265,7 @@ function hook_user_login(&$edit, $account) {
   $config = config('system.date');
   // If the user has a NULL time zone, notify them to set a time zone.
   if (!$account->timezone && $config->get('user_configurable_timezones') && $config->get('user_empty_timezone_message')) {
-    backdrop_set_message(t('Configure your <a href="@user-edit">account time zone setting</a>.', array('@user-edit' => url("user/$account->uid/edit", array('query' => backdrop_get_destination(), 'fragment' => 'edit-timezone')))));
+    backdrop_set_message(t('Configure your <a href="@user-edit">account time zone setting</a>.', ['@user-edit' => url("user/$account->uid/edit", ['query' => backdrop_get_destination(), 'fragment' => 'edit-timezone'])]));
   }
 }
 
@@ -276,10 +276,10 @@ function hook_user_login(&$edit, $account) {
  */
 function hook_user_logout($account) {
   db_insert('logouts')
-    ->fields(array(
+    ->fields([
       'uid' => $account->uid,
       'time' => time(),
-    ))
+    ])
     ->execute();
 }
 
@@ -308,15 +308,15 @@ function hook_user_logout($account) {
  * @see hook_entity_view()
  */
 function hook_user_view($account, $view_mode, $langcode) {
-  $account->content['user_picture'] = array(
-    '#markup' => theme('user_picture', array('account' => $account)),
+  $account->content['user_picture'] = [
+    '#markup' => theme('user_picture', ['account' => $account]),
     '#weight' => -10,
-  );
-  $account->content['member_for'] = array(
+  ];
+  $account->content['member_for'] = [
     '#type' => 'item',
     '#title' => t('Member for'),
     '#markup' => format_interval(REQUEST_TIME - $account->created),
-  );
+  ];
 }
 
 /**
@@ -381,10 +381,10 @@ function hook_user_role_presave($role) {
 function hook_user_role_insert($role) {
   // Save extra fields provided by the module to user roles.
   db_insert('my_module_table')
-    ->fields(array(
+    ->fields([
       'role' => $role->name,
       'role_description' => $role->description,
-    ))
+    ])
     ->execute();
 }
 
@@ -402,10 +402,10 @@ function hook_user_role_insert($role) {
 function hook_user_role_update($role) {
   // Save extra fields provided by the module to user roles.
   db_merge('my_module_table')
-    ->key(array('role' => $role->name))
-    ->fields(array(
+    ->key(['role' => $role->name])
+    ->fields([
       'role_description' => $role->description
-    ))
+    ])
     ->execute();
 }
 
@@ -471,13 +471,13 @@ function hook_user_flood_control($ip, $username = FALSE) {
     // e-mail to the user and/or site administrator.
 
     // Backdrop core uses this hook to log the event:
-    watchdog('user', 'Flood control blocked login attempt for %user from %ip.', array('%user' => $username, '%ip' => $ip));
+    watchdog('user', 'Flood control blocked login attempt for %user from %ip.', ['%user' => $username, '%ip' => $ip]);
   }
   else {
     // Do something with the blocked $ip. For example, add it to a block-list.
 
     // Backdrop core uses this hook to log the event:
-    watchdog('user', 'Flood control blocked login attempt from %ip.', array('%ip' => $ip));
+    watchdog('user', 'Flood control blocked login attempt from %ip.', ['%ip' => $ip]);
   }
 }
 

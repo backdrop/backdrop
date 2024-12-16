@@ -210,9 +210,9 @@ class EntityReferenceBehaviorHandlerBroken extends EntityReferenceBehaviorHandle
   public $plugin;
 
   public function settingsForm($field, $instance) {
-    $form['behavior_handler'] = array(
+    $form['behavior_handler'] = [
       '#markup' => t('The selected behavior handler is broken.'),
-    );
+    ];
     return $form;
   }
 }

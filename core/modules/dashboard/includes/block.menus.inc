@@ -11,11 +11,11 @@ class DashboardMenuBlock extends Block {
     parent::__construct($plugin_name, $data);
 
     // Set defaults.
-    $all_menus = module_exists('menu') ? array_keys(menu_get_menus()) : array();
-    $excluded_menus = array('management', 'user-menu', 'devel');
-    $this->settings += array(
+    $all_menus = module_exists('menu') ? array_keys(menu_get_menus()) : [];
+    $excluded_menus = ['management', 'user-menu', 'devel'];
+    $this->settings += [
       'menus' => array_diff($all_menus, $excluded_menus),
-    );
+    ];
   }
 
   /**
@@ -57,41 +57,41 @@ class DashboardMenuBlock extends Block {
 
     $menus = menu_get_menus();
     $current_path = current_path();
-    $options = array('destination' => $current_path);
-    $header = array(
-      array('data' => t('Menu')),
-      array('data' => t('Operations')),
-    );
-    $rows = array();
+    $options = ['destination' => $current_path];
+    $header = [
+      ['data' => t('Menu')],
+      ['data' => t('Operations')],
+    ];
+    $rows = [];
 
     if (user_access('administer menu')) {
       foreach ($menus as $machine => $menu_label) {
         if (in_array($machine, $this->settings['menus'])) {
-          $links['manage'] = array(
+          $links['manage'] = [
             'title' => t('Edit links'),
             'href' => 'admin/structure/menu/manage/' . $machine,
             'query' => $options,
-          );
-          $links['add'] = array(
+          ];
+          $links['add'] = [
             'title' => t('Add new link'),
             'href' => 'admin/structure/menu/manage/' . $machine . '/add',
             'query' => $options,
-          );
-          $links['configure'] = array(
+          ];
+          $links['configure'] = [
             'title' => t('Configure'),
             'href' => 'admin/structure/menu/manage/' . $machine . '/edit',
             'query' => $options,
-          );
-          $operations = array(
+          ];
+          $operations = [
             '#type' => 'dropbutton',
             '#links' => $links,
-          );
-          $rows[] = array(
-            'data' => array(
+          ];
+          $rows[] = [
+            'data' => [
               check_plain(t($menu_label)),
               backdrop_render($operations),
-            ),
-          );
+            ],
+          ];
         }
       }
     }
@@ -102,22 +102,22 @@ class DashboardMenuBlock extends Block {
       return;
     }
 
-    $panel = array(
+    $panel = [
       '#theme' => 'dashboard_panel__menus',
-    );
-    $panel['table'] = array(
+    ];
+    $panel['table'] = [
       '#theme' => 'table',
       '#header' => $header,
       '#rows' => $rows,
       '#empty' => t('There are no menus to display.'),
-    );
+    ];
 
     if (user_access('administer menu')) {
-      $panel['link'] = array(
+      $panel['link'] = [
         '#theme' => 'link',
         '#path' => 'admin/structure/menu',
         '#text' => t('Manage menus'),
-      );
+      ];
     }
 
     return $panel;
@@ -138,12 +138,12 @@ class DashboardMenuBlock extends Block {
       $menus[$menu_key] = check_plain(t($menu_label));
     }
 
-    $form['menus'] = array(
+    $form['menus'] = [
       '#type' => 'checkboxes',
       '#title' => t('Display links for the following menus'),
       '#options' => $menus,
       '#default_value' => $this->settings['menus'],
-    );
+    ];
   }
 
   /**

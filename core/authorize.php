@@ -152,20 +152,20 @@ if (authorize_access_allowed()) {
       backdrop_set_message($results['page_message']['message'], $results['page_message']['type']);
     }
 
-    $output = theme('authorize_report', array('messages' => $results['messages']));
+    $output = theme('authorize_report', ['messages' => $results['messages']]);
 
-    $links = array();
+    $links = [];
     if (is_array($results['tasks'])) {
       $links += $results['tasks'];
     }
     else {
-      $links = array_merge($links, array(
+      $links = array_merge($links, [
         l(t('Administration pages'), 'admin'),
         l(t('Home page'), '<front>'),
-      ));
+      ]);
     }
 
-    $output .= theme('item_list', array('items' => $links, 'title' => t('Next steps')));
+    $output .= theme('item_list', ['items' => $links, 'title' => t('Next steps')]);
   }
   // If a batch is running, let it run.
   elseif (isset($_GET['batch'])) {
@@ -189,5 +189,5 @@ else {
 }
 
 if (!empty($output)) {
-  print theme('update_page', array('content' => $output, 'show_messages' => $show_messages));
+  print theme('update_page', ['content' => $output, 'show_messages' => $show_messages]);
 }

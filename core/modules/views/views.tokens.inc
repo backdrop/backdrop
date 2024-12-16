@@ -8,32 +8,32 @@
  * Implements hook_token_info().
  */
 function views_token_info() {
-  $info['types']['view'] = array(
+  $info['types']['view'] = [
     'name' => t('View'),
     'description' => t('Tokens related to views.'),
     'needs-data' => 'view',
-  );
-  $info['tokens']['view']['name'] = array(
+  ];
+  $info['tokens']['view']['name'] = [
     'name' => t('Name'),
     'description' => t('The human-readable name of the view.'),
-  );
-  $info['tokens']['view']['description'] = array(
+  ];
+  $info['tokens']['view']['description'] = [
     'name' => t('Description'),
     'description' => t('The description of the view.'),
-  );
-  $info['tokens']['view']['machine-name'] = array(
+  ];
+  $info['tokens']['view']['machine-name'] = [
     'name' => t('Machine name'),
     'description' => t('The machine-readable name of the view.'),
-  );
-  $info['tokens']['view']['title'] = array(
+  ];
+  $info['tokens']['view']['title'] = [
     'name' => t('Title'),
     'description' => t('The title of current display of the view.'),
-  );
-  $info['tokens']['view']['url'] = array(
+  ];
+  $info['tokens']['view']['url'] = [
     'name' => t('URL'),
     'description' => t('The URL of the view.'),
     'type' => 'url',
-  );
+  ];
 
   return $info;
 }
@@ -41,15 +41,15 @@ function views_token_info() {
 /**
  * Implements hook_tokens().
  */
-function views_tokens($type, $tokens, array $data = array(), array $options = array()) {
-  $url_options = array('absolute' => TRUE);
+function views_tokens($type, $tokens, array $data = [], array $options = []) {
+  $url_options = ['absolute' => TRUE];
   if (isset($options['language'])) {
     $url_options['language'] = $options['language'];
   }
   $sanitize = !empty($options['sanitize']);
   $langcode = isset($options['language']) ? $options['language']->langcode : NULL;
 
-  $replacements = array();
+  $replacements = [];
 
   if ($type == 'view' && !empty($data['view'])) {
     $view = $data['view'];
@@ -84,7 +84,7 @@ function views_tokens($type, $tokens, array $data = array(), array $options = ar
     // [view:url:*] nested tokens. This only works if Token module is installed.
     if ($url_tokens = token_find_with_prefix($tokens, 'url')) {
       if ($path = $view->get_url()) {
-        $replacements += token_generate('url', $url_tokens, array('path' => $path), $options);
+        $replacements += token_generate('url', $url_tokens, ['path' => $path], $options);
       }
     }
   }

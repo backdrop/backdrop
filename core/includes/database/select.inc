@@ -231,7 +231,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * @return SelectQueryInterface
    *   The called object.
    */
-  public function fields($table_alias, array $fields = array());
+  public function fields($table_alias, array $fields = []);
 
   /**
    * Adds an expression to the list of "fields" to be selected.
@@ -640,14 +640,14 @@ class SelectQueryExtender implements SelectQueryInterface {
    * {@inheritdoc}
    */
   public function hasAllTags(...$tags) {
-    return call_user_func_array(array($this->query, 'hasAllTags'), $tags);
+    return call_user_func_array([$this->query, 'hasAllTags'], $tags);
   }
 
   /**
    * {@inheritdoc}
    */
   public function hasAnyTag(...$tags) {
-    return call_user_func_array(array($this->query, 'hasAnyTag'), $tags);
+    return call_user_func_array([$this->query, 'hasAnyTag'], $tags);
   }
 
   /**
@@ -692,7 +692,7 @@ class SelectQueryExtender implements SelectQueryInterface {
   /**
    * {@inheritdoc}
    */
-  public function where($snippet, $args = array()) {
+  public function where($snippet, $args = []) {
     $this->query->where($snippet, $args);
     return $this;
   }
@@ -738,7 +738,7 @@ class SelectQueryExtender implements SelectQueryInterface {
   /**
    * {@inheritdoc}
    */
-  public function having($snippet, $args = array()) {
+  public function having($snippet, $args = []) {
     $this->query->having($snippet, $args);
     return $this;
   }
@@ -758,7 +758,7 @@ class SelectQueryExtender implements SelectQueryInterface {
   public function extend($extender_name) {
     // The extender can be anywhere so this needs to go to the registry, which
     // is surely loaded by now.
-    $class = $this->connection->getDriverClass($extender_name, array(), TRUE);
+    $class = $this->connection->getDriverClass($extender_name, [], TRUE);
     return new $class($this, $this->connection);
   }
 
@@ -866,7 +866,7 @@ class SelectQueryExtender implements SelectQueryInterface {
   /**
    * {@inheritdoc}
    */
-  public function fields($table_alias, array $fields = array()) {
+  public function fields($table_alias, array $fields = []) {
     $this->query->fields($table_alias, $fields);
     return $this;
   }
@@ -874,42 +874,42 @@ class SelectQueryExtender implements SelectQueryInterface {
   /**
    * {@inheritdoc}
    */
-  public function addExpression($expression, $alias = NULL, $arguments = array()) {
+  public function addExpression($expression, $alias = NULL, $arguments = []) {
     return $this->query->addExpression($expression, $alias, $arguments);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function join($table, $alias = NULL, $condition = NULL, $arguments = array()) {
+  public function join($table, $alias = NULL, $condition = NULL, $arguments = []) {
     return $this->query->join($table, $alias, $condition, $arguments);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function innerJoin($table, $alias = NULL, $condition = NULL, $arguments = array()) {
+  public function innerJoin($table, $alias = NULL, $condition = NULL, $arguments = []) {
     return $this->query->innerJoin($table, $alias, $condition, $arguments);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function leftJoin($table, $alias = NULL, $condition = NULL, $arguments = array()) {
+  public function leftJoin($table, $alias = NULL, $condition = NULL, $arguments = []) {
     return $this->query->leftJoin($table, $alias, $condition, $arguments);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function rightJoin($table, $alias = NULL, $condition = NULL, $arguments = array()) {
+  public function rightJoin($table, $alias = NULL, $condition = NULL, $arguments = []) {
     return $this->query->rightJoin($table, $alias, $condition, $arguments);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function addJoin($type, $table, $alias = NULL, $condition = NULL, $arguments = array()) {
+  public function addJoin($type, $table, $alias = NULL, $condition = NULL, $arguments = []) {
     return $this->query->addJoin($type, $table, $alias, $condition, $arguments);
   }
 
@@ -1028,7 +1028,7 @@ class SelectQueryExtender implements SelectQueryInterface {
    * catch-all method to handle any additional methods.
    */
   public function __call($method, $args) {
-    $return = call_user_func_array(array($this->query, $method), $args);
+    $return = call_user_func_array([$this->query, $method], $args);
 
     // Some methods will return the called object as part of a fluent interface.
     // Others will return some useful value. If it's a value, then the caller
@@ -1054,14 +1054,14 @@ class SelectQuery extends Query implements SelectQueryInterface {
    *
    * @var array
    */
-  protected $fields = array();
+  protected $fields = [];
 
   /**
    * The expressions to SELECT as virtual fields.
    *
    * @var array
    */
-  protected $expressions = array();
+  protected $expressions = [];
 
   /**
    * The tables against which to JOIN.
@@ -1085,7 +1085,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
    *
    * @var array
    */
-  protected $tables = array();
+  protected $tables = [];
 
   /**
    * The fields by which to order this query.
@@ -1095,14 +1095,14 @@ class SelectQuery extends Query implements SelectQueryInterface {
    *
    * @var array
    */
-  protected $order = array();
+  protected $order = [];
 
   /**
    * The fields by which to group.
    *
    * @var array
    */
-  protected $group = array();
+  protected $group = [];
 
   /**
    * The conditional object for the WHERE clause.
@@ -1143,7 +1143,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
    *
    * @var array
    */
-  protected $union = array();
+  protected $union = [];
 
   /**
    * Indicates if preExecute() has already been called.
@@ -1156,14 +1156,14 @@ class SelectQuery extends Query implements SelectQueryInterface {
    *
    * @var array
    */
-  protected $alterTags = array();
+  protected $alterTags = [];
 
   /**
    * A list of arbitrary metadata that may be attached to the query.
    *
    * @var array
    */
-  protected $alterMetaData = array();
+  protected $alterMetaData = [];
 
   /**
    * The FOR UPDATE status
@@ -1173,7 +1173,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
   /**
    * {@inheritdoc}
    */
-  public function __construct($table, $alias, DatabaseConnection $connection, $options = array()) {
+  public function __construct($table, $alias, DatabaseConnection $connection, $options = []) {
     $options['return'] = Database::RETURN_STATEMENT;
     parent::__construct($connection, $options);
     $this->where = new DatabaseCondition('AND');
@@ -1292,7 +1292,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
    *
    * @return SelectQuery
    */
-  public function where($snippet, $args = array()) {
+  public function where($snippet, $args = []) {
     $this->where->where($snippet, $args);
     return $this;
   }
@@ -1420,7 +1420,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
    *
    * @return SelectQuery
    */
-  public function having($snippet, $args = array()) {
+  public function having($snippet, $args = []) {
     $this->having->where($snippet, $args);
     return $this;
   }
@@ -1587,11 +1587,11 @@ class SelectQuery extends Query implements SelectQueryInterface {
       // - Extract this mechanism into a hook as part of a public (non-security)
       //   issue.
       // - Emit E_USER_DEPRECATED if term_access is used.
-      $term_access_tags = array('term_access' => 1, 'taxonomy_term_access' => 1);
+      $term_access_tags = ['term_access' => 1, 'taxonomy_term_access' => 1];
       if (array_intersect_key($this->alterTags, $term_access_tags)) {
         $this->alterTags += $term_access_tags;
       }
-      $hooks = array('query');
+      $hooks = ['query'];
       foreach ($this->alterTags as $tag => $value) {
         $hooks[] = 'query_' . $tag;
       }
@@ -1658,11 +1658,11 @@ class SelectQuery extends Query implements SelectQueryInterface {
     }
     $alias = $alias_candidate;
 
-    $this->fields[$alias] = array(
+    $this->fields[$alias] = [
       'field' => $field,
       'table' => $table_alias,
       'alias' => $alias,
-    );
+    ];
 
     return $alias;
   }
@@ -1672,7 +1672,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
    *
    * @return SelectQuery
    */
-  public function fields($table_alias, array $fields = array()) {
+  public function fields($table_alias, array $fields = []) {
 
     if ($fields) {
       foreach ($fields as $field) {
@@ -1691,7 +1691,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
   /**
    * {@inheritdoc}
    */
-  public function addExpression($expression, $alias = NULL, $arguments = array()) {
+  public function addExpression($expression, $alias = NULL, $arguments = []) {
     if (empty($alias)) {
       $alias = 'expression';
     }
@@ -1703,11 +1703,11 @@ class SelectQuery extends Query implements SelectQueryInterface {
     }
     $alias = $alias_candidate;
 
-    $this->expressions[$alias] = array(
+    $this->expressions[$alias] = [
       'expression' => $expression,
       'alias' => $alias,
       'arguments' => $arguments,
-    );
+    ];
 
     return $alias;
   }
@@ -1715,35 +1715,35 @@ class SelectQuery extends Query implements SelectQueryInterface {
   /**
    * {@inheritdoc}
    */
-  public function join($table, $alias = NULL, $condition = NULL, $arguments = array()) {
+  public function join($table, $alias = NULL, $condition = NULL, $arguments = []) {
     return $this->addJoin('INNER', $table, $alias, $condition, $arguments);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function innerJoin($table, $alias = NULL, $condition = NULL, $arguments = array()) {
+  public function innerJoin($table, $alias = NULL, $condition = NULL, $arguments = []) {
     return $this->addJoin('INNER', $table, $alias, $condition, $arguments);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function leftJoin($table, $alias = NULL, $condition = NULL, $arguments = array()) {
+  public function leftJoin($table, $alias = NULL, $condition = NULL, $arguments = []) {
     return $this->addJoin('LEFT OUTER', $table, $alias, $condition, $arguments);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function rightJoin($table, $alias = NULL, $condition = NULL, $arguments = array()) {
+  public function rightJoin($table, $alias = NULL, $condition = NULL, $arguments = []) {
     return $this->addJoin('RIGHT OUTER', $table, $alias, $condition, $arguments);
   }
 
   /**
    * {@inheritdoc}
    */
-  public function addJoin($type, $table, $alias = NULL, $condition = NULL, $arguments = array()) {
+  public function addJoin($type, $table, $alias = NULL, $condition = NULL, $arguments = []) {
 
     if (empty($alias)) {
       if ($table instanceof SelectQueryInterface) {
@@ -1765,13 +1765,13 @@ class SelectQuery extends Query implements SelectQueryInterface {
       $condition = str_replace('%alias', $alias, $condition);
     }
 
-    $this->tables[$alias] = array(
+    $this->tables[$alias] = [
       'join type' => $type,
       'table' => $table,
       'alias' => $alias,
       'condition' => $condition,
       'arguments' => $arguments,
-    );
+    ];
 
     return $alias;
   }
@@ -1805,10 +1805,10 @@ class SelectQuery extends Query implements SelectQueryInterface {
    * @return SelectQuery
    */
   public function range($start = NULL, $length = NULL) {
-    $this->range = func_num_args() ? array(
+    $this->range = func_num_args() ? [
       'start' => $start,
       'length' => $length,
-    ) : array();
+    ] : [];
     return $this;
   }
 
@@ -1831,10 +1831,10 @@ class SelectQuery extends Query implements SelectQueryInterface {
       default:
     }
 
-    $this->union[] = array(
+    $this->union[] = [
       'type' => $type,
       'query' => $query,
-    );
+    ];
 
     return $this;
   }
@@ -1894,7 +1894,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
     // Ordering a count query is a waste of cycles, and breaks on some
     // databases anyway.
     $orders = &$count->getOrderBy();
-    $orders = array();
+    $orders = [];
 
     if ($count->distinct && !empty($group_by)) {
       // If the query is distinct and contains a GROUP BY, we need to remove the
@@ -1931,7 +1931,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
     }
 
     // FIELDS and EXPRESSIONS:
-    $fields = array();
+    $fields = [];
     foreach ($this->tables as $alias => $table) {
       if (!empty($table['all_fields'])) {
         $fields[] = $this->connection->escapeTable($alias) . '.*';
@@ -1995,7 +1995,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
     // ORDER BY:
     if ($this->order) {
       $query .= "\nORDER BY ";
-      $fields = array();
+      $fields = [];
       foreach ($this->order as $field => $direction) {
         $fields[] = $field . ' ' . $direction;
       }

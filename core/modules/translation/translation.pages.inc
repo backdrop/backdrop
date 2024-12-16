@@ -26,15 +26,15 @@ function translation_node_overview(Node $node) {
   else {
     // We have no translation source nid, this could be a new set, emulate that.
     $tnid = $node->nid;
-    $translations = array($node->langcode => $node);
+    $translations = [$node->langcode => $node];
   }
 
   $type = config_get('translation.settings', 'language_type');
-  $header = array(t('Language'), t('Title'), t('Status'), t('Operations'));
-  $rows = array();
+  $header = [t('Language'), t('Title'), t('Status'), t('Operations')];
+  $rows = [];
 
   foreach (language_list(TRUE, TRUE) as $langcode => $language_name) {
-    $options = array();
+    $options = [];
     if (isset($translations[$langcode])) {
       // Existing translation in the translation set: display status.
       // We load the full node to check whether the user can edit it.
@@ -46,15 +46,15 @@ function translation_node_overview(Node $node) {
         $path = 'node/' . $translation_node->nid . '/edit';
         $links = language_negotiation_get_switch_links($type, $path);
         if (!empty($links->links[$langcode]['href'])) {
-          $options['edit'] = array(
+          $options['edit'] = [
             'title' => t('Edit'),
-          ) + $links->links[$langcode];
+          ] + $links->links[$langcode];
         }
       }
       $status = $translation_node->status ? t('Published') : t('Not published');
       $status .= $translation_node->translate ? ' - <span class="marker">' . t('outdated') . '</span>' : '';
       if ($translation_node->nid == $tnid) {
-        $language_name = t('<strong>@language_name</strong> (source)', array('@language_name' => $language_name));
+        $language_name = t('<strong>@language_name</strong> (source)', ['@language_name' => $language_name]);
       }
     }
     else {
@@ -63,36 +63,36 @@ function translation_node_overview(Node $node) {
       if (node_access('create', $node)) {
         $path = 'node/add/' . str_replace('_', '-', $node->type);
         $links = language_negotiation_get_switch_links($type, $path);
-        $query = array('query' => array('translation' => $node->nid, 'target' => $langcode));
+        $query = ['query' => ['translation' => $node->nid, 'target' => $langcode]];
         if (!empty($links->links[$langcode]['href'])) {
-          $options['add'] = array(
+          $options['add'] = [
             'title' => t('Add translation'),
-          ) + $links->links[$langcode];
+          ] + $links->links[$langcode];
           $options['add'] = array_merge_recursive($options['add'], $query);
         }
       }
       $status = t('Not translated');
     }
-    $row = array();
+    $row = [];
     $row[] = $language_name;
     $row[] = $title;
     $row[] = $status;
-    $row[] = array(
-      'data' => array(
+    $row[] = [
+      'data' => [
         '#type' => 'operations',
         '#links' => $options,
-      ),
-    );
+      ],
+    ];
     $rows[] = $row;
   }
 
-  backdrop_set_title(t('Translations of %title', array('%title' => $node->title)), PASS_THROUGH);
+  backdrop_set_title(t('Translations of %title', ['%title' => $node->title]), PASS_THROUGH);
 
-  $build['translation_node_overview'] = array(
+  $build['translation_node_overview'] = [
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
-  );
+  ];
 
   return $build;
 }

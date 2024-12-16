@@ -23,32 +23,32 @@ class views_plugin_display_block extends views_plugin_display {
     $description = '';
     if (isset($this->view)) {
       if ($this->display->display_title == $this->definition['title']) {
-        $description = t('View: @view', array('@view' => t($this->view->get_human_name())));
+        $description = t('View: @view', ['@view' => t($this->view->get_human_name())]);
       }
       else {
-        $description = t('View: @view (@display)', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
+        $description = t('View: @view (@display)', ['@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)]);
       }
     }
 
-    $options['block_description'] = array('default' => $description, 'translatable' => TRUE);
-    $options['block_caching'] = array('default' => BACKDROP_NO_CACHE);
+    $options['block_description'] = ['default' => $description, 'translatable' => TRUE];
+    $options['block_caching'] = ['default' => BACKDROP_NO_CACHE];
 
-    $options['allow'] = array(
-      'contains' => array(
-        'use_pager'       => array('default' => FALSE),
-        'items_per_page'  => array('default' => FALSE),
-        'offset'          => array('default' => FALSE),
-        'link_to_view'    => array('default' => FALSE),
-        'more_link'       => array('default' => FALSE),
-        'path_override'   => array('default' => FALSE),
-        'exposed_form'    => array('default' => FALSE),
-        'fields_override' => array('default' => FALSE),
-      ),
-    );
+    $options['allow'] = [
+      'contains' => [
+        'use_pager'       => ['default' => FALSE],
+        'items_per_page'  => ['default' => FALSE],
+        'offset'          => ['default' => FALSE],
+        'link_to_view'    => ['default' => FALSE],
+        'more_link'       => ['default' => FALSE],
+        'path_override'   => ['default' => FALSE],
+        'exposed_form'    => ['default' => FALSE],
+        'fields_override' => ['default' => FALSE],
+      ],
+    ];
 
-    $options['argument_input'] = array('default' => array());
-    $options['link_to_view'] = array('default' => 0);
-    $options['inherit_path'] = array('default' => 0);
+    $options['argument_input'] = ['default' => []];
+    $options['link_to_view'] = ['default' => 0];
+    $options['inherit_path'] = ['default' => 0];
 
     return $options;
   }
@@ -78,17 +78,17 @@ class views_plugin_display_block extends views_plugin_display {
   /**
    * Return a list of blocks provided by this display plugin.
    */
-  function execute_hook_block_list($delta = 0, $edit = array()) {
+  function execute_hook_block_list($delta = 0, $edit = []) {
     $delta = $this->view->name . '-' . $this->display->id;
 
     if (!empty($this->get_option('block_description'))) {
       $info = $this->get_option('block_description');
     }
     else {
-      $info = t('View: @view (@display)', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
+      $info = t('View: @view (@display)', ['@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)]);
     }
 
-    $required_contexts = array();
+    $required_contexts = [];
     if (!empty($this->display->display_options['argument_input'])) {
       foreach ($this->display->display_options['argument_input'] as $key => $value) {
         if ($value['type'] == 'layout') {
@@ -97,15 +97,15 @@ class views_plugin_display_block extends views_plugin_display {
       }
     }
 
-    return array(
-      $delta => array(
+    return [
+      $delta => [
         'info' => $info,
-        'description' => $this->view->description ? check_plain(t($this->view->description)) : t('Block display from the "@view" view.', array('@view' => t($this->view->get_human_name()))),
+        'description' => $this->view->description ? check_plain(t($this->view->description)) : t('Block display from the "@view" view.', ['@view' => t($this->view->get_human_name())]),
         'cache' => $this->get_cache_type(),
         'class' => 'ViewsBlock',
         'required contexts' => $required_contexts,
-      ),
-    );
+      ],
+    ];
   }
 
   /**
@@ -117,10 +117,10 @@ class views_plugin_display_block extends views_plugin_display {
     // display, and arguments should be set on the view.
     $rendered_view = $this->view->render();
     if (!empty($this->view->result) || $this->get_option('empty') || !empty($this->view->style_plugin->definition['even empty'])) {
-      $output = array(
+      $output = [
         'content' => $rendered_view,
         'subject' => filter_xss_admin($this->view->get_title()),
-      );
+      ];
     }
     return $output;
   }
@@ -134,70 +134,70 @@ class views_plugin_display_block extends views_plugin_display {
     // It is very important to call the parent function here:
     parent::options_summary($categories, $options);
 
-    $categories['block'] = array(
+    $categories['block'] = [
       'title' => t('Block settings'),
       'column' => 'second',
-      'build' => array(
+      'build' => [
         '#weight' => -10,
-      ),
-    );
+      ],
+    ];
 
     $block_description = strip_tags($this->get_option('block_description'));
     if (empty($block_description)) {
       if ($this->display->display_title == $this->definition['title']) {
-        $block_description = t('View: @view', array('@view' => t($this->view->get_human_name())));
+        $block_description = t('View: @view', ['@view' => t($this->view->get_human_name())]);
       }
       else {
-        $block_description = t('View: @view (@display)', array('@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)));
+        $block_description = t('View: @view (@display)', ['@view' => t($this->view->get_human_name()), '@display' => t($this->display->display_title)]);
       }
     }
 
-    $options['block_description'] = array(
+    $options['block_description'] = [
       'category' => 'block',
       'title' => t('Block admin label'),
       'value' => views_ui_truncate($block_description, 24),
-    );
+    ];
 
-    $options['link_to_view'] = array(
+    $options['link_to_view'] = [
       'category' => 'block',
       'title' => t('Link title to page display'),
       'value' => $this->get_option('link_to_view') ? t('Yes') : t('No'),
-    );
+    ];
 
-    $options['inherit_path'] = array(
+    $options['inherit_path'] = [
       'category' => 'block',
       'title' => t('Inherits path'),
       'value' => $this->get_option('inherit_path') ? t('Yes') : t('No'),
-    );
+    ];
 
-    $options['argument_input'] = array(
+    $options['argument_input'] = [
       'category' => 'block',
       'title' => t('Contextual filter input'),
       'value' => t('Edit'),
-    );
+    ];
 
     $allow = $this->get_option('allow');
     $filtered_allow = array_filter($allow);
 
-    $options['allow'] = array(
+    $options['allow'] = [
       'category' => 'block',
       'title' => t('Allow settings override'),
       'value' => empty($filtered_allow) ? t('None') : ($allow === $filtered_allow ? t('All') : t('Some')),
-    );
+    ];
 
     $types = $this->block_caching_modes();
-    $options['block_caching'] = array(
+    $options['block_caching'] = [
       'category' => 'other',
       'title' => t('Block caching'),
       'value' => $types[$this->get_cache_type()],
-    );
+    ];
   }
 
   /**
    * Provide a list of core's block caching modes.
    */
   function block_caching_modes() {
-    return array(
+    return [
       BACKDROP_NO_CACHE => t('Do not cache'),
       BACKDROP_CACHE_GLOBAL => t('Cache once for everything (global)'),
       BACKDROP_CACHE_PER_PAGE => t('Per page'),
@@ -205,7 +205,7 @@ class views_plugin_display_block extends views_plugin_display {
       BACKDROP_CACHE_PER_ROLE | BACKDROP_CACHE_PER_PAGE => t('Per role per page'),
       BACKDROP_CACHE_PER_USER => t('Per user'),
       BACKDROP_CACHE_PER_USER | BACKDROP_CACHE_PER_PAGE => t('Per user per page'),
-    );
+    ];
   }
 
   /**
@@ -230,21 +230,21 @@ class views_plugin_display_block extends views_plugin_display {
     switch ($form_state['section']) {
       case 'block_description':
         $form['#title'] .= t('Block admin label');
-        $form['block_description'] = array(
+        $form['block_description'] = [
           '#type' => 'textfield',
           '#description' => t('This text is used only in administrative interfaces. It will not be shown to site visitors.'),
           '#default_value' => $this->get_option('block_description'),
-        );
+        ];
         break;
 
       case 'allow':
         $form['#title'] .= t('Allow settings');
-        $form['help'] = array(
+        $form['help'] = [
           '#type' => 'help',
           '#markup' => t('Checked settings will be available in the Block configuration dialog for modification by the administrator configuring the layout. Unchecked settings will not be available and will only use the settings in this display.'),
-        );
+        ];
 
-        $options = array(
+        $options = [
           'use_pager' => t('Use pager'),
           'items_per_page' => t('Items per page'),
           'offset' => t('Pager offset'),
@@ -253,36 +253,36 @@ class views_plugin_display_block extends views_plugin_display {
           'path_override' => t('Path override'),
           'exposed_form' => t('Use exposed widgets form as block configuration'),
           'fields_override' => t('Fields override'),
-        );
+        ];
 
         $allow = array_filter($this->get_option('allow'));
-        $form['allow'] = array(
+        $form['allow'] = [
           '#type' => 'checkboxes',
           '#default_value' => $allow,
           '#options' => $options,
-        );
+        ];
         break;
 
       case 'link_to_view':
         $form['#title'] .= t('Link block title to view page');
 
-        $form['link_to_view'] = array(
+        $form['link_to_view'] = [
           '#type' => 'radios',
-          '#options' => array(1 => t('Yes'), 0 => t('No')),
+          '#options' => [1 => t('Yes'), 0 => t('No')],
           '#default_value' => $this->get_option('link_to_view'),
           '#description' => t('Linking the block title to the view will make an anchor tag to the view page display (if one is exists).'),
-        );
+        ];
         break;
 
       case 'inherit_path':
         $form['#title'] .= t('Inherit path from the page.');
 
-        $form['inherit_path'] = array(
+        $form['inherit_path'] = [
           '#type' => 'radios',
-          '#options' => array(1 => t('Yes'), 0 => t('No')),
+          '#options' => [1 => t('Yes'), 0 => t('No')],
           '#default_value' => $this->get_option('inherit_path'),
           '#description' => t('If yes, all links generated by Views, such as more links, summary links, and exposed input links will go to the current page path, not the view, if the display has a path.'),
-        );
+        ];
         break;
 
       case 'argument_input':
@@ -292,7 +292,7 @@ class views_plugin_display_block extends views_plugin_display {
         // Retrieve all available contexts for the user to select from
         // when using layout with contextual filter input.
         $layout_context_info = _layout_get_all_info('layout_context');
-        $layout_context_options = array();
+        $layout_context_options = [];
 
         foreach ($layout_context_info as $key => $value) {
           // Only process contexts with definitions where hidden is not true.
@@ -304,33 +304,33 @@ class views_plugin_display_block extends views_plugin_display {
         $form['argument_input']['#tree'] = TRUE;
 
         foreach ($argument_input as $id => $argument) {
-          $form['argument_input'][$id] = array(
+          $form['argument_input'][$id] = [
             '#tree' => TRUE,
-          );
+          ];
 
-          $safe = str_replace(array('][', '_', ' '), '-', $id);
+          $safe = str_replace(['][', '_', ' '], '-', $id);
 
-          $form['argument_input'][$id]['type'] = array(
+          $form['argument_input'][$id]['type'] = [
             '#type' => 'select',
-            '#options' => array(
+            '#options' => [
               'none' => t('No filter'),
               'url' => t('From URL'),
               'layout' => t('From layout'),
               'fixed' => t('Fixed'),
               'user' => t('Input in block settings'),
               'wildcard' => t('Wildcard (*)'),
-            ),
-            '#attributes' => array('class' => array('argument-type-' . $safe)),
-            '#title' => t('@arg source', array('@arg' => $argument['name'])),
+            ],
+            '#attributes' => ['class' => ['argument-type-' . $safe]],
+            '#title' => t('@arg source', ['@arg' => $argument['name']]),
             '#default_value' => $argument['type'],
-          );
+          ];
 
-          $form['argument_input'][$id]['position'] = array(
+          $form['argument_input'][$id]['position'] = [
             '#type' => 'select',
             '#title' => t('URL position'),
             '#description' => t('In the url http://example.com/foo/bar/baz, for example, foo would be in position 1, bar 2, and baz 3.'),
             '#default_value' => $argument['position'],
-            '#options' => array(
+            '#options' => [
               // Humans don't count from zero, adjust by one.
               0 => 1,
               1 => 2,
@@ -338,50 +338,50 @@ class views_plugin_display_block extends views_plugin_display {
               3 => 4,
               4 => 5,
               5 => 6
-            ),
-            '#states' => array(
-              'visible' => array(
-                'select.argument-type-' . $safe => array('value' => 'url'),
-              ),
-            ),
-          );
+            ],
+            '#states' => [
+              'visible' => [
+                'select.argument-type-' . $safe => ['value' => 'url'],
+              ],
+            ],
+          ];
 
-          $form['argument_input'][$id]['layout'] = array(
+          $form['argument_input'][$id]['layout'] = [
             '#type' => 'select',
             '#title' => t('Required context'),
             '#description' => t('Select which type of context to use that best matches the contextual filter.'),
             '#default_value' => $argument['layout'],
             '#options' => $layout_context_options,
-            '#states' => array(
-              'visible' => array(
-                'select.argument-type-' . $safe => array('value' => 'layout'),
-              ),
-            ),
-          );
+            '#states' => [
+              'visible' => [
+                'select.argument-type-' . $safe => ['value' => 'layout'],
+              ],
+            ],
+          ];
 
-          $form['argument_input'][$id]['fixed'] = array(
+          $form['argument_input'][$id]['fixed'] = [
             '#type' => 'textfield',
             '#title' => t('Fixed argument'),
             '#description' => t('This value will be set permanently as the filter value.'),
             '#default_value' => $argument['fixed'],
-            '#states' => array(
-              'visible' => array(
-                'select.argument-type-' . $safe => array('value' => 'fixed'),
-              ),
-            ),
-          );
+            '#states' => [
+              'visible' => [
+                'select.argument-type-' . $safe => ['value' => 'fixed'],
+              ],
+            ],
+          ];
 
-          $form['argument_input'][$id]['label'] = array(
+          $form['argument_input'][$id]['label'] = [
             '#type' => 'textfield',
             '#title' => t('Label'),
             '#description' => t('Label to apply to the filter when it is presented to the person configuring a layout.'),
             '#default_value' => empty($argument['label']) ? $argument['name'] : $argument['label'],
-            '#states' => array(
-              'visible' => array(
-                'select.argument-type-' . $safe => array('value' => 'user'),
-              ),
-            ),
-          );
+            '#states' => [
+              'visible' => [
+                'select.argument-type-' . $safe => ['value' => 'user'],
+              ],
+            ],
+          ];
         }
 
         if (empty($argument_input)) {
@@ -393,22 +393,22 @@ class views_plugin_display_block extends views_plugin_display {
       case 'exposed_form_options':
         $this->view->init_handlers();
         if (!$this->uses_exposed() && parent::uses_exposed()) {
-          $form['exposed_form_options']['warning'] = array(
+          $form['exposed_form_options']['warning'] = [
             '#weight' => -10,
             '#markup' => '<div class="messages warning">' . t('Exposed filters in block displays require "Use AJAX" to be set to work correctly.') . '</div>',
-          );
+          ];
         }
         break;
 
       case 'block_caching':
         $form['#title'] .= t('Block caching type');
 
-        $form['block_caching'] = array(
+        $form['block_caching'] = [
           '#type' => 'radios',
           '#description' => t("This sets the default status for Backdrop's built-in block caching method; this requires that caching be turned on in block administration, and be careful because you have little control over when this cache is flushed."),
           '#options' => $this->block_caching_modes(),
           '#default_value' => $this->get_cache_type(),
-        );
+        ];
         break;
     }
   }
@@ -444,17 +444,17 @@ class views_plugin_display_block extends views_plugin_display {
 
     // We use a separate output to seamlessly discard info for
     // arguments that no longer exist.
-    $output = array();
+    $output = [];
 
     foreach ($handlers as $id => $handler) {
       if (empty($arguments[$id])) {
-        $output[$id] = array(
+        $output[$id] = [
           'type' => 'none',
           'layout' => '',
           'fixed' => '',
           'name' => $handler->ui_name(),
           'position' => '',
-        );
+        ];
       }
       else {
         $output[$id] = $arguments[$id];

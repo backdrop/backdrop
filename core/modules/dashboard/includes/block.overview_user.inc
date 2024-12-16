@@ -19,12 +19,12 @@ class DashboardOverviewUserBlock extends Block {
     unset($role_options[BACKDROP_AUTHENTICATED_ROLE]);
 
     // Set defaults.
-    $this->settings += array(
+    $this->settings += [
       'user_counts' => TRUE,
       'user_counts_active' => TRUE,
       'user_counts_blocked' => TRUE,
       'roles' => $role_options,
-    );
+    ];
   }
 
   /**
@@ -79,18 +79,18 @@ class DashboardOverviewUserBlock extends Block {
 
     // Roles overview.
     $roles = user_roles(TRUE);
-    $user_data['roles'] = array();
+    $user_data['roles'] = [];
     foreach ($roles as $role_name => $role_label) {
       if (($role_name != BACKDROP_AUTHENTICATED_ROLE) && (in_array($role_name, $settings['roles']))) {
-        $user_role_count = db_query("SELECT count(*) FROM {users} u INNER JOIN {users_roles} r on u.uid = r.uid WHERE r.role = :rid", array(':rid' => $role_name))->fetchField();
-        $user_data['roles'][$role_name] = array();
+        $user_role_count = db_query("SELECT count(*) FROM {users} u INNER JOIN {users_roles} r on u.uid = r.uid WHERE r.role = :rid", [':rid' => $role_name])->fetchField();
+        $user_data['roles'][$role_name] = [];
         $user_data['roles'][$role_name]['name'] = t($role_label);
         $user_data['roles'][$role_name]['count'] = $user_role_count;
       }
     }
 
     // Assemble the overview from the collected data.
-    $overview = array();
+    $overview = [];
     if (isset($user_data['all'])) {
       $overview['all'] = format_plural($user_data['all'], '1 user account', '@count total user accounts');
     }
@@ -105,23 +105,23 @@ class DashboardOverviewUserBlock extends Block {
         $user_data['roles'][$role_name]['count'],
         '1 user account with the role @role',
         '@count user accounts with the role @role',
-        array('@role' => $user_data['roles'][$role_name]['name'])
+        ['@role' => $user_data['roles'][$role_name]['name']]
       );
     }
 
-    $panel = array(
+    $panel = [
       '#theme' => 'dashboard_panel__overview_user',
-    );
-    $panel['list'] = array(
+    ];
+    $panel['list'] = [
       '#theme' => 'item_list',
       '#items' => $overview,
-    );
+    ];
     if (user_access('administer users')) {
-      $panel['link'] = array(
+      $panel['link'] = [
         '#theme' => 'link',
         '#path' => 'admin/people',
         '#text' => t('Manage user accounts'),
-      );
+      ];
     }
 
     return $panel;
@@ -134,21 +134,21 @@ class DashboardOverviewUserBlock extends Block {
     parent::form($form, $form_state);
     $settings = $this->settings;
 
-    $form['user_counts'] = array(
+    $form['user_counts'] = [
       '#type' => 'checkbox',
       '#title' => t('Display the <strong>total</strong> number of user accounts.'),
       '#default_value' => $settings['user_counts'],
-    );
-    $form['user_counts_active'] = array(
+    ];
+    $form['user_counts_active'] = [
       '#type' => 'checkbox',
       '#title' => t('Display the number of <strong>active</strong> user accounts.'),
       '#default_value' => $settings['user_counts_active'],
-    );
-    $form['user_counts_blocked'] = array(
+    ];
+    $form['user_counts_blocked'] = [
       '#type' => 'checkbox',
       '#title' => t('Display the number of <strong>blocked</strong> user accounts.'),
       '#default_value' => $settings['user_counts_blocked'],
-    );
+    ];
 
     $options = user_roles(TRUE);
     unset($options[BACKDROP_AUTHENTICATED_ROLE]);
@@ -157,12 +157,12 @@ class DashboardOverviewUserBlock extends Block {
     }
 
     if (!empty($options)) {
-      $form['roles'] = array(
+      $form['roles'] = [
         '#type' => 'checkboxes',
         '#title' => t('List the number of accounts with the following roles'),
         '#options' => $options,
         '#default_value' => $settings['roles'],
-      );
+      ];
     }
   }
 

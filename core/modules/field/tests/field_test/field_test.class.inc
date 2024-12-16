@@ -29,9 +29,9 @@ class TestFieldEntity extends Entity {
    * Implements EntityInterface::uri().
    */
   public function uri() {
-    return array(
+    return [
       'path' => 'test/' . $this->id,
-    );
+    ];
   }
 
   /**
@@ -69,8 +69,8 @@ class TestEntity extends Entity {
   }
 
   function uri() {
-    return array(
+    return [
       'path' => 'test/' . $this->id,
-    );
+    ];
   }
 }

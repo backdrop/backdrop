@@ -8,19 +8,19 @@
  * Implements hook_token_info().
  */
 function book_token_info() {
-  $info['tokens']['node']['book'] = array(
+  $info['tokens']['node']['book'] = [
     'name' => t('Book'),
     'description' => t('The book page associated with the node.'),
     'type' => 'menu-link',
-  );
+  ];
   return $info;
 }
 
 /**
  * Implements hook_tokens() on behalf of book.module.
  */
-function book_tokens($type, $tokens, array $data = array(), array $options = array()) {
-  $replacements = array();
+function book_tokens($type, $tokens, array $data = [], array $options = []) {
+  $replacements = [];
   $sanitize = !empty($options['sanitize']);
 
   // Node tokens.
@@ -41,7 +41,7 @@ function book_tokens($type, $tokens, array $data = array(), array $options = arr
 
       // Chained token relationships.
       if ($book_tokens = token_find_with_prefix($tokens, 'book')) {
-        $replacements += token_generate('menu-link', $book_tokens, array('menu-link' => $link), $options);
+        $replacements += token_generate('menu-link', $book_tokens, ['menu-link' => $link], $options);
       }
     }
   }

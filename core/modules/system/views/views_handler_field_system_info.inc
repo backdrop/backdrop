@@ -18,13 +18,13 @@ class views_handler_field_system_info extends views_handler_field {
    */
   public function option_definition() {
     $options = parent::option_definition();
-    $options['info_property'] = array('default' => '');
-    $options['custom_label'] = array('default' => 'default');
-    $options['other'] = array('default' => '');
-    $options['list_separator'] = array('default' => ', ');
-    $options['multi_type'] = array('default' => 'separator');
-    $options['separator'] = array('default' => ', ');
-    $options['dependencies_display'] = array('default' => 'project_names');
+    $options['info_property'] = ['default' => ''];
+    $options['custom_label'] = ['default' => 'default'];
+    $options['other'] = ['default' => ''];
+    $options['list_separator'] = ['default' => ', '];
+    $options['multi_type'] = ['default' => 'separator'];
+    $options['separator'] = ['default' => ', '];
+    $options['dependencies_display'] = ['default' => 'project_names'];
     return $options;
   }
 
@@ -35,96 +35,96 @@ class views_handler_field_system_info extends views_handler_field {
     parent::options_form($form, $form_state);
 
     $form['custom_label']['#type'] = 'radios';
-    $form['custom_label']['#options'] = array(
+    $form['custom_label']['#options'] = [
       'default' => t('Use human-readable label shown in the "Property" select field below'),
       'custom' => t('Custom label'),
       'none' => t('No label'),
-    );
+    ];
     unset($form['custom_label']['#description']);
 
     $form['custom_label']['#default_value'] = $this->options['custom_label'];
-    $form['label']['#states'] = array(
-      'visible' => array(
-        ':input[name="options[custom_label]"]' => array('value' => 'custom'),
-      ),
-    );
+    $form['label']['#states'] = [
+      'visible' => [
+        ':input[name="options[custom_label]"]' => ['value' => 'custom'],
+      ],
+    ];
     $form['label']['#title'] = t('Custom label');
 
-    $properties = array();
+    $properties = [];
     foreach ($this->_getPropertyOptions() as $key => $label) {
       $properties[$key] = $label . ' (machine name: '. $key .')';
     }
     $properties['other'] = t('Other');
 
-    $form['info_property'] = array(
+    $form['info_property'] = [
       '#type' => 'select',
       '#title' => t('Property'),
       '#options' => $properties,
       '#default_value' => $this->options['info_property'],
-    );
+    ];
 
-    $form['other'] = array(
+    $form['other'] = [
       '#type' => 'textfield',
       '#title' => t('Property name'),
       '#description' => t('The machine name of the property found in the .info file. If the property doesn\'t exist, the output will be empty.'),
       '#default_value' => $this->options['other'],
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[info_property]"]' => array('value' => 'other'),
-        ),
-      ),
-    );
+      '#states' => [
+        'visible' => [
+          ':input[name="options[info_property]"]' => ['value' => 'other'],
+        ],
+      ],
+    ];
 
-    $form['dependencies_display'] = array(
+    $form['dependencies_display'] = [
       '#type' => 'radios',
       '#title' => t('Dependency display'),
       '#description' => t('Select how to display dependencies.'),
-      '#options' => array(
+      '#options' => [
         'machine_names' => t('As machine names'),
         'project_names' => t('As project names'),
-      ),
+      ],
       '#default_value' => $this->options['dependencies_display'],
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[info_property]"]' => array('value' => 'dependencies'),
-        ),
-      ),
-    );
+      '#states' => [
+        'visible' => [
+          ':input[name="options[info_property]"]' => ['value' => 'dependencies'],
+        ],
+      ],
+    ];
 
-    $form['multi_type'] = array(
+    $form['multi_type'] = [
       '#type' => 'radios',
       '#title' => t('Display type'),
-      '#options' => array(
+      '#options' => [
         'ul' => t('Unordered list'),
         'ol' => t('Ordered list'),
         'separator' => t('Simple separator'),
-      ),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[info_property]"]' => array(
-            array('value' => 'tags'),
-            array('value' => 'dependencies'),
-            array('value' => 'scripts'),
-          ),
-        ),
-      ),
+      ],
+      '#states' => [
+        'visible' => [
+          ':input[name="options[info_property]"]' => [
+            ['value' => 'tags'],
+            ['value' => 'dependencies'],
+            ['value' => 'scripts'],
+          ],
+        ],
+      ],
       '#default_value' => $this->options['multi_type'],
-    );
+    ];
 
-    $form['separator'] = array(
+    $form['separator'] = [
       '#type' => 'textfield',
       '#title' => t('Separator'),
       '#default_value' => $this->options['separator'],
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[info_property]"]' => array(
-            array('value' => 'tags'),
-            array('value' => 'dependencies'),
-          ),
-          ':input[name="options[multi_type]"]' => array('value' => 'separator'),
-        ),
-      ),
-    );
+      '#states' => [
+        'visible' => [
+          ':input[name="options[info_property]"]' => [
+            ['value' => 'tags'],
+            ['value' => 'dependencies'],
+          ],
+          ':input[name="options[multi_type]"]' => ['value' => 'separator'],
+        ],
+      ],
+    ];
   }
 
   /**
@@ -150,7 +150,7 @@ class views_handler_field_system_info extends views_handler_field {
         if ($info_property == 'dependencies' && $this->options['dependencies_display'] == 'project_names' && ($info_array['type'] == 'module' || $info_array['type'] == 'profile')) {
           // Display human names for projects.
           $modules = system_rebuild_module_data();
-          $module_labels = array();
+          $module_labels = [];
           foreach ($items as $item) {
             $module_labels[] = check_plain($modules[$item]->info['name']);
           }
@@ -166,8 +166,8 @@ class views_handler_field_system_info extends views_handler_field {
             break;
 
           default:
-            $output = theme('item_list', array('items' => $items,
-                                               'type' => $multi_type));
+            $output = theme('item_list', ['items' => $items,
+                                               'type' => $multi_type]);
             break;
         }
         return $output;
@@ -175,7 +175,7 @@ class views_handler_field_system_info extends views_handler_field {
       default:
         $output = $info_array[$info_property];
         if (is_array($output)) {
-          $output = theme('item_list', array('items' => $this->_array2list($output)));
+          $output = theme('item_list', ['items' => $this->_array2list($output)]);
         }
         return $output;
     }
@@ -200,7 +200,7 @@ class views_handler_field_system_info extends views_handler_field {
    * Helper function to return the options array.
    */
   protected function _getPropertyOptions() {
-    return array(
+    return [
       'name' => t('Name'),
       'description' => t('Description'),
       'package' => t('Package'),
@@ -213,25 +213,25 @@ class views_handler_field_system_info extends views_handler_field {
       'base theme' => t('Base theme'),
       'scripts' => t('Scripts'),
       'stylesheets' => t('Stylesheets'),
-    );
+    ];
   }
 
   /**
    * Helper to convert multilevel array to multilevel item list.
    */
   protected function _array2list($array) {
-    $return = array();
+    $return = [];
     foreach ($array as $key => $item) {
       if (is_array($item)) {
-        $return[] = array(
+        $return[] = [
           'data' => $key,
           'children' => $this->_array2list($item),
-        );
+        ];
       }
       else {
-        $return[] = array(
+        $return[] = [
           'data' => $key . ' = ' . $item,
-        );
+        ];
       }
     }
     return $return;

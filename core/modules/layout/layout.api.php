@@ -44,24 +44,24 @@
  *     functions to prepare variables for the use of the layout template.
  */
 function hook_layout_template_info() {
-  $layout_templates['my_layout_template'] = array(
+  $layout_templates['my_layout_template'] = [
     'title' => t('A custom layout template'),
     'path' => 'layouts/my-layout-template',
-    'regions' => array(
+    'regions' => [
       'header' => t('Header'),
       'content' => t('Content'),
       'sidebar' => t('Sidebar'),
       'footer' => t('Footer'),
-    ),
+    ],
 
     // Optional information that populates using defaults.
     'preview' => 'preview.png',
-    'stylesheets' => array('all' => array('one-column.css')),
+    'stylesheets' => ['all' => ['one-column.css']],
     'template' => 'layout--my-layout-template',
 
     // Specify a file containing preprocess functions if needed.
     'file' => 'my_layout_template.php',
-  );
+  ];
   return $layout_templates;
 }
 
@@ -71,15 +71,15 @@ function hook_layout_template_info() {
    * @deprecated since 1.30.0
    */
 function hook_layout_info() {
-  $layouts['my_layout'] = array(
+  $layouts['my_layout'] = [
     'title' => t('A custom layout'),
     'path' => 'layouts/my_layout',
-    'regions' => array(
+    'regions' => [
       'header' => t('Header'),
       'content' => t('Content'),
       'sidebar' => t('Sidebar'),
       'footer' => t('Footer'),
-    ),
+    ],
 
     // Optional information that populates using defaults.
     // 'preview' => 'preview.png',
@@ -88,7 +88,7 @@ function hook_layout_info() {
 
     // Specify a file containing preprocess functions if needed.
     // 'file' => 'my_layout.php',
-  );
+  ];
   return $layouts;
 }
 
@@ -128,15 +128,15 @@ function hook_layout_info() {
  * @see LayoutContext
  */
 function hook_layout_context_info() {
-  $info['node'] = array(
+  $info['node'] = [
     'title' => t('Node'),
     // Define the class which is used to handle this context.
     'class' => 'EntityLayoutContext',
     // Define menu paths where the node ID is a "known" context.
-    'menu paths' => array(
+    'menu paths' => [
       'node/%node',
       'node/%node/view',
-    ),
+    ],
     // Given the menu paths defined above, identify the part of the path that
     // is needed to generate this context.
     'path placeholder' => '%node',
@@ -144,7 +144,7 @@ function hook_layout_context_info() {
     // Given an argument, the callback that will be responsible for loading the
     // main context data.
     'load callback' => 'node_load',
-  );
+  ];
   return $info;
 }
 
@@ -189,7 +189,7 @@ function hook_layout_context_info() {
  * @see layout_layout_style_info()
  */
 function hook_layout_style_info() {
-  $info['custom_style'] = array(
+  $info['custom_style'] = [
     'title' => t('A new style'),
     'description' => t('An advanced style with settings.'),
     // The theme key for rendering an individual block.
@@ -201,7 +201,7 @@ function hook_layout_style_info() {
     'path' => 'templates/subdirectory',
     // Name of template file (with or without path).
     'template' => 'templates/my-filename',
-  );
+  ];
   return $info;
 }
 
@@ -224,9 +224,9 @@ function hook_layout_style_info() {
  * @see layout_layout_renderer_info()
  */
 function hook_layout_renderer_info() {
-  $info['my_renderer'] = array(
+  $info['my_renderer'] = [
     'class' => 'MyModuleLayoutRenderer',
-  );
+  ];
 
   return $info;
 }
@@ -511,34 +511,34 @@ function hook_layout_load_by_router_item_alter(&$layouts, $router_item) {
  * @see hook_block_info_alter()
  */
 function hook_block_info() {
-  $blocks['syndicate'] = array(
+  $blocks['syndicate'] = [
     'info' => t('Syndicate'),
     'description' => t('An RSS icon linking to the feed for the current page (if any).'),
-  );
+  ];
 
-  $blocks['recent'] = array(
+  $blocks['recent'] = [
     'info' => t('Recent content'),
     'description' => t('A list of recently published content.'),
-  );
+  ];
 
-  $blocks['author_picture'] = array(
+  $blocks['author_picture'] = [
     'info' => t('Author picture'),
     'description' => t('The user picture for the current content author.'),
     // A context of type "node" (the value here) will be given the key "node"
     // (specified as the key here) in hook_block_view() in the $context
     // parameter.
-    'required contexts' => array('node' => 'node'),
-  );
+    'required contexts' => ['node' => 'node'],
+  ];
 
-  $blocks['my_node_field'] = array(
+  $blocks['my_node_field'] = [
     'info' => t('My node field'),
     'description' => t('An arbitrary field from a node.'),
     // Instead of using hook_block_view(), use a class that sub-classes the
     // Block class. Note that this class would also need to be registered in
     // hook_autoload_info().
     'class' => 'MyNodeFieldBlock',
-    'required contexts' => array('node' => 'node'),
-  );
+    'required contexts' => ['node' => 'node'],
+  ];
 
   return $blocks;
 }
@@ -580,19 +580,19 @@ function hook_block_info_alter(&$blocks) {
  *
  * @since 1.0.6 $settings parameter added.
  */
-function hook_block_configure($delta = '', $settings = array()) {
+function hook_block_configure($delta = '', $settings = []) {
   // This example comes from node.module.
-  $form = array();
+  $form = [];
   if ($delta == 'recent') {
-    $settings += array(
+    $settings += [
       'node_count' => 10,
-    );
-    $form['node_count'] = array(
+    ];
+    $form['node_count'] = [
       '#type' => 'select',
       '#title' => t('Number of recent content items to display'),
       '#default_value' => $settings['node_count'],
       '#options' => range(2, 30),
-    );
+    ];
   }
   return $form;
 }
@@ -619,7 +619,7 @@ function hook_block_configure($delta = '', $settings = array()) {
  * @see hook_block_configure()
  * @see hook_block_info()
  */
-function hook_block_save($delta, &$edit = array()) {
+function hook_block_save($delta, &$edit = []) {
   if ($delta == 'my_block_delta') {
     config_set('my_module.settings', 'my_global_value', $edit['my_global_value']);
     // Remove the value so it is not saved by Layout module.
@@ -655,31 +655,31 @@ function hook_block_save($delta, &$edit = array()) {
  * @see hook_block_view_alter()
  * @see hook_block_view_MODULE_DELTA_alter()
  */
-function hook_block_view($delta = '', $settings = array(), $contexts = array()) {
+function hook_block_view($delta = '', $settings = [], $contexts = []) {
   // This example is adapted from node.module.
-  $block = array();
+  $block = [];
 
   switch ($delta) {
     case 'syndicate':
       $block['subject'] = t('Syndicate');
-      $block['content'] = array(
+      $block['content'] = [
         '#theme' => 'feed_icon',
         '#url' => 'rss.xml',
         '#title' => t('Syndicate'),
-      );
+      ];
       break;
 
     case 'recent':
       if (user_access('access content')) {
-        $settings += array(
+        $settings += [
           'node_count' => 10,
-        );
+        ];
         $block['subject'] = t('Recent content');
         if ($nodes = node_get_recent($settings['node_count'])) {
-          $block['content'] = array(
+          $block['content'] = [
             '#theme' => 'node_recent_block',
             '#nodes' => $nodes,
-          );
+          ];
         }
         else {
           $block['content'] = t('No content available.');
@@ -690,7 +690,7 @@ function hook_block_view($delta = '', $settings = array(), $contexts = array()) 
     case 'author_picture':
       $author_account = user_load($contexts['node']->uid);
       $block['subject'] = '';
-      $block['content'] = theme('user_picture', array('account' => $author_account));
+      $block['content'] = theme('user_picture', ['account' => $author_account]);
       return $block;
   }
   return $block;

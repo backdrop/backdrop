@@ -13,29 +13,29 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['base_path'] = array('default' => '');
-    $options['count'] = array('default' => TRUE, 'bool' => TRUE);
-    $options['hide'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['text'] = array('default' => 'Go', 'translatable' => TRUE);
-    $options['label'] = array('default' => '', 'translatable' => TRUE);
-    $options['choose'] = array('default' => '- Choose -', 'translatable' => TRUE);
-    $options['inline'] = array('default' => TRUE, 'bool' => TRUE);
-    $options['default_value'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['base_path'] = ['default' => ''];
+    $options['count'] = ['default' => TRUE, 'bool' => TRUE];
+    $options['hide'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['text'] = ['default' => 'Go', 'translatable' => TRUE];
+    $options['label'] = ['default' => '', 'translatable' => TRUE];
+    $options['choose'] = ['default' => '- Choose -', 'translatable' => TRUE];
+    $options['inline'] = ['default' => TRUE, 'bool' => TRUE];
+    $options['default_value'] = ['default' => FALSE, 'bool' => TRUE];
 
     return $options;
   }
 
   function query() {
     // Copy the offset option.
-    $pager = array(
+    $pager = [
       'type' => 'none',
       'options' => $this->display->handler->options['pager']['options'],
-    );
+    ];
     $this->display->handler->set_option('pager', $pager);
   }
 
   function options_form(&$form, &$form_state) {
-    $form['base_path'] = array(
+    $form['base_path'] = [
       '#type' => 'textfield',
       '#title' => t('Base path'),
       '#default_value' => $this->options['base_path'],
@@ -44,66 +44,66 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
         Do not include beginning and ending forward slash. If this value
         is empty, views will use the first path found as the base path,
         in page displays, or / if no path could be found.'),
-    );
-    $form['count'] = array(
+    ];
+    $form['count'] = [
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['count']),
       '#title' => t('Display record count with link'),
-    );
+    ];
 
-    $form['hide'] = array(
+    $form['hide'] = [
       '#type' => 'checkbox',
       '#title' => t('Hide the "Go" button'),
       '#default_value' => !empty($this->options['hide']),
       '#description' => t('If hidden, this button will only be hidden for users with javascript and the page will automatically jump when the select is changed.'),
-    );
+    ];
 
-    $form['text'] = array(
+    $form['text'] = [
       '#type' => 'textfield',
       '#title' => t('Button text'),
       '#default_value' => $this->options['text'],
-    );
+    ];
 
-    $form['label'] = array(
+    $form['label'] = [
       '#type' => 'textfield',
       '#title' => t('Selector label'),
       '#default_value' => $this->options['label'],
       '#description' => t('The text that will appear as the the label of the selector element. If blank no label tag will be used.'),
-    );
+    ];
 
-    $form['choose'] = array(
+    $form['choose'] = [
       '#type' => 'textfield',
       '#title' => t('Choose text'),
       '#default_value' => $this->options['choose'],
       '#description' => t('The text that will appear as the selected option in the jump menu.'),
-    );
+    ];
 
-    $form['inline'] = array(
+    $form['inline'] = [
       '#type' => 'checkbox',
       '#title' => t('Set this field to display inline'),
       '#default_value' => !empty($this->options['inline']),
-    );
+    ];
 
-    $form['default_value'] = array(
+    $form['default_value'] = [
       '#type' => 'checkbox',
       '#title' => t('Select the current contextual filter value'),
       '#default_value' => !empty($this->options['default_value']),
       '#description' => t('If checked, the current contextual filter value will be displayed as the default option in the jump menu, if applicable.'),
-    );
+    ];
   }
 
   function render() {
     $argument = $this->view->argument[$this->view->build_info['summary_level']];
 
-    $url_options = array();
+    $url_options = [];
 
     if (!empty($this->view->exposed_raw_input)) {
       $url_options['query'] = $this->view->exposed_raw_input;
     }
 
-    $options = array();
+    $options = [];
     $default_value = '';
-    $row_args = array();
+    $row_args = [];
     foreach ($this->view->result as $id => $row) {
       $row_args[$id] = $argument->summary_argument($row);
     }
@@ -129,14 +129,14 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
       }
     }
 
-    $settings = array(
+    $settings = [
       'hide' => $this->options['hide'],
       'button' => $this->options['text'],
       'title' => $this->options['label'],
       'choose' => $this->options['choose'],
       'inline' => $this->options['inline'],
       'default_value' => $default_value,
-    );
+    ];
 
     $form = backdrop_get_form('system_jump_menu', $options, $settings);
     return backdrop_render($form);

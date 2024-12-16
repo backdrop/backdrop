@@ -78,7 +78,7 @@ function _backdrop_maintenance_theme() {
   $theme_key = $theme;
 
   // Find all our ancestor themes and put them in an array.
-  $base_theme = array();
+  $base_theme = [];
   $ancestor = $theme;
   while ($ancestor && isset($themes[$ancestor]->base_theme)) {
     $base_theme[] = $new_base_theme = $themes[$themes[$ancestor]->base_theme];
@@ -89,11 +89,11 @@ function _backdrop_maintenance_theme() {
   // These are usually added from system_init() -except maintenance.css.
   // When the database is inactive it's not called so we add it here.
   $path = backdrop_get_path('module', 'system');
-  backdrop_add_css('core/misc/normalize.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
+  backdrop_add_css('core/misc/normalize.css', ['group' => CSS_SYSTEM, 'every_page' => TRUE]);
   backdrop_add_css($path . '/css/system.css');
   backdrop_add_css($path . '/css/system.admin.css');
   backdrop_add_css($path . '/css/system.theme.css');
-  backdrop_add_css($path . '/css/messages.theme.css', array('group' => CSS_SYSTEM, 'every_page' => TRUE));
+  backdrop_add_css($path . '/css/messages.theme.css', ['group' => CSS_SYSTEM, 'every_page' => TRUE]);
   backdrop_add_css($path . '/css/system.maintenance.css');
 }
 
@@ -145,7 +145,7 @@ function theme_task_list($variables) {
   }
 
   $output = '<h2 class="element-invisible">Installation tasks</h2>';
-  $output .= '<div class="step-indicator">' . t('Step !current of !total', array('!current' => $current, '!total' => $total)) . '</div>';
+  $output .= '<div class="step-indicator">' . t('Step !current of !total', ['!current' => $current, '!total' => $total]) . '</div>';
   $output .= '<ol class="task-list">' . $list . '</ol>';
 
   return $output;
@@ -196,14 +196,14 @@ function theme_authorize_report($variables) {
   if (!empty($messages)) {
     $output .= '<div id="authorize-results">';
     foreach ($messages as $heading => $logs) {
-      $items = array();
+      $items = [];
       foreach ($logs as $number => $log_message) {
         if ($number === '#abort') {
           continue;
         }
-        $items[] = theme('authorize_message', array('message' => $log_message['message'], 'success' => $log_message['success']));
+        $items[] = theme('authorize_message', ['message' => $log_message['message'], 'success' => $log_message['success']]);
       }
-      $output .= theme('item_list',  array('items' => $items, 'title' => $heading));
+      $output .= theme('item_list',  ['items' => $items, 'title' => $heading]);
     }
     $output .= '</div>';
   }
@@ -224,10 +224,10 @@ function theme_authorize_message($variables) {
   $message = $variables['message'];
   $success = $variables['success'];
   if ($success) {
-    $item = array('data' => $message, 'class' => array('success'));
+    $item = ['data' => $message, 'class' => ['success']];
   }
   else {
-    $item = array('data' => '<strong>' . $message . '</strong>', 'class' => array('failure'));
+    $item = ['data' => '<strong>' . $message . '</strong>', 'class' => ['failure']];
   }
   return $item;
 }

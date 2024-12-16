@@ -35,7 +35,7 @@ function _transliteration_process($string, $unknown = '?', $source_langcode = NU
 
   if (!isset($tail_bytes)) {
     // Each UTF-8 head byte is followed by a certain number of tail bytes.
-    $tail_bytes = array();
+    $tail_bytes = [];
     for ($n = 0; $n < 256; $n++) {
       if ($n < 0xc0) {
         $remaining = 0;
@@ -175,8 +175,8 @@ function _transliteration_process($string, $unknown = '?', $source_langcode = NU
  *   ASCII replacement character.
  */
 function _transliteration_replace($ord, $unknown = '?', $langcode = NULL) {
-  static $map = array();
-  static $language_overrides = array();
+  static $map = [];
+  static $language_overrides = [];
 
   if (!isset($langcode)) {
     global $language;
@@ -189,7 +189,7 @@ function _transliteration_replace($ord, $unknown = '?', $langcode = NULL) {
     if (file_exists($file)) {
       include $file;
       if (!isset($overrides[$langcode]) || !is_array($overrides[$langcode])) {
-        $overrides[$langcode] = array();
+        $overrides[$langcode] = [];
       }
       $language_overrides[$langcode] = $overrides[$langcode];
     }
@@ -201,14 +201,14 @@ function _transliteration_replace($ord, $unknown = '?', $langcode = NULL) {
   $bank = $ord >> 8;
 
   if (!isset($map[$bank][$langcode])) {
-    $base = array(); // Populated from the include.
+    $base = []; // Populated from the include.
     $file = BACKDROP_ROOT . '/core/includes/transliteration/' . sprintf('x%02x', $bank) . '.php';
     if (file_exists($file)) {
       include $file;
       $map[$bank][$langcode] = $base;
     }
     else {
-      $map[$bank][$langcode] = array();
+      $map[$bank][$langcode] = [];
     }
   }
 
@@ -299,9 +299,9 @@ function transliteration_remove_diacritics($string) {
     // few characters that aren't accented letters mixed in. So define the
     // ranges and the excluded characters.
     $range1 = $code > 0x00bf && $code < 0x017f;
-    $exclusions_range1 = array(0x00d0, 0x00d7, 0x00f0, 0x00f7, 0x0138, 0x014a, 0x014b);
+    $exclusions_range1 = [0x00d0, 0x00d7, 0x00f0, 0x00f7, 0x0138, 0x014a, 0x014b];
     $range2 = $code > 0x01cc && $code < 0x0250;
-    $exclusions_range2 = array(0x01DD, 0x01f7, 0x021c, 0x021d, 0x0220, 0x0221, 0x0241, 0x0242, 0x0245);
+    $exclusions_range2 = [0x01DD, 0x01f7, 0x021c, 0x021d, 0x0220, 0x0221, 0x0241, 0x0242, 0x0245];
 
     $replacement = $character;
     if (($range1 && !in_array($code, $exclusions_range1)) || ($range2 && !in_array($code, $exclusions_range2))) {

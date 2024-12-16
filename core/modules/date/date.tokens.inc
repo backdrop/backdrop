@@ -9,24 +9,24 @@
  */
 function date_token_info() {
   // All date types can share the same date value type.
-  $info['types']['date-field-value'] = array(
+  $info['types']['date-field-value'] = [
     'name' => t('Date field values'),
     'description' => t('Tokens related to date field values.'),
     'needs-data' => 'date-field-value',
     'field-value' => TRUE,
-  );
+  ];
 
   // Provide two tokens: 'date' (the date or start-date), and 'end-date'.
-  $info['tokens']['date-field-value']['date'] = array(
+  $info['tokens']['date-field-value']['date'] = [
     'name' => t('Date'),
     'description' => t('The date value.'),
     'type' => 'date',
-  );
-  $info['tokens']['date-field-value']['end-date'] = array(
+  ];
+  $info['tokens']['date-field-value']['end-date'] = [
     'name' => t('End Date'),
     'description' => t('The End date value.'),
     'type' => 'date',
-  );
+  ];
 
   return $info;
 }
@@ -40,11 +40,11 @@ function date_token_info_alter(&$info) {
   $fields = _field_token_info();
 
   foreach ($fields as $field_name => $field) {
-    if (in_array($field_info[$field_name]['type'], array(
+    if (in_array($field_info[$field_name]['type'], [
       'date',
       'datetime',
       'datestamp',
-    ))) {
+    ])) {
       foreach (array_keys($field['bundles']) as $token_type) {
         // If a token already exists for this field, then don't add it.
         if (isset($info['tokens'][$token_type][$field_name])) {
@@ -56,14 +56,14 @@ function date_token_info_alter(&$info) {
           continue;
         }
 
-        $info['tokens'][$token_type][$field_name] = array(
+        $info['tokens'][$token_type][$field_name] = [
           // Note that label and description have already been
           // sanitized by _field_token_info().
           'name' => $field['label'],
           'description' => $field['description'],
           'module' => 'date',
           'type' => 'date-field-value',
-        );
+        ];
 
         if ($field_info[$field_name]['cardinality'] != 1) {
           $info['tokens'][$token_type][$field_name]['dynamic'] = TRUE;
@@ -82,8 +82,8 @@ function date_token_info_alter(&$info) {
 /**
  * Implements hook_tokens().
  */
-function date_tokens($type, $tokens, array $data = array(), array $options = array()) {
-  $replacements = array();
+function date_tokens($type, $tokens, array $data = [], array $options = []) {
+  $replacements = [];
   $language_code = isset($options['language']) ? $options['language']->langcode : NULL;
 
   // Process date fields attached to entities.
@@ -97,11 +97,11 @@ function date_tokens($type, $tokens, array $data = array(), array $options = arr
 
       // Check to see which fields are supported.
       foreach ($fields as $field_name => $field) {
-        if (in_array($field['type'], array('date', 'datetime', 'datestamp'))) {
+        if (in_array($field['type'], ['date', 'datetime', 'datestamp'])) {
           $date_field_tokens = token_find_with_prefix($tokens, $field_name);
           $field_items = field_get_items($entity_type, $entity, $field_name);
           if ($date_field_tokens && $field_items) {
-            $replacements += token_generate('date-field', $date_field_tokens, array('date-field' => $field_items), $options);
+            $replacements += token_generate('date-field', $date_field_tokens, ['date-field' => $field_items], $options);
           }
         }
       }
@@ -116,17 +116,17 @@ function date_tokens($type, $tokens, array $data = array(), array $options = arr
 
       if (is_numeric($explode[0]) && !empty($field_items[$explode[0]])) {
         $delta = $explode[0];
-        $chained_token = token_find_with_prefix(array($token => $original), $delta);
+        $chained_token = token_find_with_prefix([$token => $original], $delta);
 
         // If there is no arguments after delta, send date:medium as default.
         if (empty($chained_token)) {
-          $chained_token = array('date:medium' => $original);
+          $chained_token = ['date:medium' => $original];
         }
-        $replacements += token_generate('date-field-value', $chained_token, array('date-field-value' => $field_items[$delta]), $options);
+        $replacements += token_generate('date-field-value', $chained_token, ['date-field-value' => $field_items[$delta]], $options);
 
       } else {
         // If no delta is specified, send the first item of the field.
-        $replacements += token_generate('date-field-value', array($token => $original), array('date-field-value' => $field_items[0]), $options);
+        $replacements += token_generate('date-field-value', [$token => $original], ['date-field-value' => $field_items[0]], $options);
       }
     }
   }
@@ -147,7 +147,7 @@ function date_tokens($type, $tokens, array $data = array(), array $options = arr
       $timestamp = !empty($date) ? date_format_date($date, 'custom', 'U') : '';
       // Generate the token replacements, using the date token type provided
       // by system.module.
-      $replacements += token_generate('date', $date_tokens, array('date' => $timestamp), $options);
+      $replacements += token_generate('date', $date_tokens, ['date' => $timestamp], $options);
     }
 
     // Create tokens for the field's "End date".
@@ -160,15 +160,15 @@ function date_tokens($type, $tokens, array $data = array(), array $options = arr
       $timestamp = !empty($date) ? date_format_date($date, 'custom', 'U') : '';
       // Generate the token replacements, using the date token type provided
       // by system.module.
-      $replacements += token_generate('date', $date_tokens, array('date' => $timestamp), $options);
+      $replacements += token_generate('date', $date_tokens, ['date' => $timestamp], $options);
     }
 
     // Handle token chains that do not contain 'date' or 'end-date'.
     // Defaults to "starting date".
-    $short_tokens = array();
+    $short_tokens = [];
     foreach ($tokens as $token => $original) {
       if (strpos($token, 'date') === FALSE && strpos($token, 'end-date') === FALSE && !empty($item['value'])) {
-        $short_tokens = array_merge($short_tokens, array($token => $original));
+        $short_tokens = array_merge($short_tokens, [$token => $original]);
       }
     }
     if (!empty($short_tokens)) {
@@ -177,7 +177,7 @@ function date_tokens($type, $tokens, array $data = array(), array $options = arr
         date_timezone_set($date, timezone_open($item['timezone']));
       }
       $timestamp = !empty($date) ? date_format_date($date, 'custom', 'U') : '';
-      $replacements += token_generate('date', $short_tokens, array('date' => $timestamp), $options);
+      $replacements += token_generate('date', $short_tokens, ['date' => $timestamp], $options);
     }
   }
 

@@ -227,7 +227,7 @@
  * @return string
  *   A JSON string of the AJAX commands.
  */
-function ajax_render($commands = array()) {
+function ajax_render($commands = []) {
   // Although ajax_deliver() does this, some contributed and custom modules
   // render Ajax responses without using that delivery callback.
   ajax_set_verification_header();
@@ -237,13 +237,13 @@ function ajax_render($commands = array()) {
   // added during this request to be loaded by the page. We only want to send
   // back files that the page hasn't already loaded, so we implement simple
   // diffing logic using array_diff_key().
-  foreach (array('css', 'js') as $type) {
+  foreach (['css', 'js'] as $type) {
     // It is highly suspicious if $_POST['ajax_page_state'][$type] is empty,
     // since the base page ought to have at least one JS file and one CSS file
     // loaded. It probably indicates an error, and rather than making the page
     // reload all of the files, instead we return no new files.
     if (empty($_POST['ajax_page_state'][$type])) {
-      $items[$type] = array();
+      $items[$type] = [];
     }
     else {
       $function = 'backdrop_add_' . $type;
@@ -276,7 +276,7 @@ function ajax_render($commands = array()) {
   $scripts_footer = backdrop_get_js('footer', $items['js'], TRUE);
   $scripts_header = backdrop_get_js('header', $items['js'], TRUE);
 
-  $extra_commands = array();
+  $extra_commands = [];
   if (!empty($styles)) {
     $extra_commands[] = ajax_command_add_css($styles);
   }
@@ -336,7 +336,7 @@ function ajax_get_form() {
     // system/ajax without actually viewing the concerned form in the browser.
     // This is likely a hacking attempt as it never happens under normal
     // circumstances, so we just do nothing.
-    watchdog('ajax', 'Invalid form POST data.', array(), WATCHDOG_WARNING);
+    watchdog('ajax', 'Invalid form POST data.', [], WATCHDOG_WARNING);
     backdrop_exit();
   }
 
@@ -344,7 +344,7 @@ function ajax_get_form() {
   // replaced from within form_get_cache. If this is the case, it is also
   // necessary to update it in the browser by issuing an appropriate Ajax
   // command.
-  $commands = array();
+  $commands = [];
   if (isset($form['#build_id_old']) && $form['#build_id_old'] != $form['#build_id']) {
     // If the form build ID has changed, issue an Ajax command to update it.
     $commands[] = ajax_command_update_build_id($form);
@@ -365,7 +365,7 @@ function ajax_get_form() {
   $form_state['input'] = $_POST;
   $form_id = $form['#form_id'];
 
-  return array($form, $form_state, $form_id, $form_build_id, $commands);
+  return [$form, $form_state, $form_id, $form_build_id, $commands];
 }
 
 /**
@@ -399,14 +399,14 @@ function ajax_form_callback() {
     $callback = $form_state['triggering_element']['#ajax']['callback'];
   }
   if (!empty($callback) && is_callable($callback)) {
-    $result = call_user_func_array($callback, array(&$form, &$form_state));
+    $result = call_user_func_array($callback, [&$form, &$form_state]);
 
     if (!(is_array($result) && isset($result['#type']) && $result['#type'] == 'ajax')) {
       // Turn the response into a #type=ajax array if it isn't one already.
-      $result = array(
+      $result = [
         '#type' => 'ajax',
         '#commands' => ajax_prepare_response($result),
-      );
+      ];
     }
 
     $result['#commands'] = array_merge($commands, $result['#commands']);
@@ -537,7 +537,7 @@ function ajax_deliver_dialog($page_callback_result) {
   }
   $html = backdrop_render($page_callback_result);
 
-  $dialog_options = isset($_POST['dialogOptions']) ? $_POST['dialogOptions'] : array('modal' => TRUE);
+  $dialog_options = isset($_POST['dialogOptions']) ? $_POST['dialogOptions'] : ['modal' => TRUE];
   if (isset($dialog_options['target'])) {
     $selector = $dialog_options['target'];
   }
@@ -556,12 +556,12 @@ function ajax_deliver_dialog($page_callback_result) {
     }
   }
 
-  $commands = array();
+  $commands = [];
   $commands[] = ajax_command_open_dialog($selector, $title, $html, $dialog_options);
-  $return = array(
+  $return = [
     '#type' => 'ajax',
     '#commands' => $commands,
-  );
+  ];
   ajax_deliver($return);
 }
 
@@ -579,7 +579,7 @@ function ajax_deliver_dialog($page_callback_result) {
  *   An Ajax commands array that can be passed to ajax_render().
  */
 function ajax_prepare_response($page_callback_result) {
-  $commands = array();
+  $commands = [];
   if (!isset($page_callback_result)) {
     // Simply delivering an empty commands array is sufficient. This results
     // in the Ajax request being completed, but nothing being done to the page.
@@ -782,8 +782,8 @@ function ajax_pre_render_element($element) {
 
   // Attach JavaScript settings to the element.
   if (isset($element['#ajax']['event'])) {
-    $element['#attached']['library'][] = array('system', 'jquery.form');
-    $element['#attached']['library'][] = array('system', 'backdrop.ajax');
+    $element['#attached']['library'][] = ['system', 'jquery.form'];
+    $element['#attached']['library'][] = ['system', 'backdrop.ajax'];
 
     $settings = $element['#ajax'];
 
@@ -797,10 +797,10 @@ function ajax_pre_render_element($element) {
     // One such substantial difference is form elements that use
     // #ajax['callback'] for determining which part of the form needs
     // re-rendering. For that, we have a special 'system/ajax' route.
-    $settings += array(
+    $settings += [
       'path' => isset($settings['callback']) ? 'system/ajax' : NULL,
-      'options' => array(),
-    );
+      'options' => [],
+    ];
 
     if (isset($settings['method']) && $settings['method'] == 'replace') {
       $settings['method'] = 'replaceWith';
@@ -846,7 +846,7 @@ function ajax_pre_render_element($element) {
 
     // Convert a simple #ajax['progress'] string into an array.
     if (isset($settings['progress']) && is_string($settings['progress'])) {
-      $settings['progress'] = array('type' => $settings['progress']);
+      $settings['progress'] = ['type' => $settings['progress']];
     }
     // Change progress path to a full URL.
     if (isset($settings['progress']['path'])) {
@@ -854,15 +854,15 @@ function ajax_pre_render_element($element) {
       unset($settings['progress']['path']);
     }
 
-    $element['#attached']['js'][] = array(
+    $element['#attached']['js'][] = [
       'type' => 'setting',
-      'data' => array(
-        'ajax' => array($element['#id'] => $settings),
-        'urlIsAjaxTrusted' => array(
+      'data' => [
+        'ajax' => [$element['#id'] => $settings],
+        'urlIsAjaxTrusted' => [
           $settings['url'] => TRUE,
-        ),
-      ),
-    );
+        ],
+      ],
+    ];
 
     // Indicate that Ajax processing was successful.
     $element['#ajax_processed'] = TRUE;
@@ -899,10 +899,10 @@ function ajax_pre_render_element($element) {
  *   An array suitable for use with the ajax_render() function.
  */
 function ajax_command_alert($text) {
-  return array(
+  return [
     'command' => 'alert',
     'text' => $text,
-  );
+  ];
 }
 
 /**
@@ -927,13 +927,13 @@ function ajax_command_alert($text) {
  *   An array suitable for use with the ajax_render() function.
  */
 function ajax_command_insert($selector, $html, $settings = NULL) {
-  return array(
+  return [
     'command' => 'insert',
     'method' => NULL,
     'selector' => $selector,
     'data' => $html,
     'settings' => $settings,
-  );
+  ];
 }
 
 /**
@@ -961,13 +961,13 @@ function ajax_command_insert($selector, $html, $settings = NULL) {
  * @link http://docs.jquery.com/Manipulation/replaceWith#content jQuery replaceWith command @endlink
  */
 function ajax_command_replace($selector, $html, $settings = NULL) {
-  return array(
+  return [
     'command' => 'insert',
     'method' => 'replaceWith',
     'selector' => $selector,
     'data' => $html,
     'settings' => $settings,
-  );
+  ];
 }
 
 /**
@@ -994,13 +994,13 @@ function ajax_command_replace($selector, $html, $settings = NULL) {
  * @see http://docs.jquery.com/Attributes/html#val
  */
 function ajax_command_html($selector, $html, $settings = NULL) {
-  return array(
+  return [
     'command' => 'insert',
     'method' => 'html',
     'selector' => $selector,
     'data' => $html,
     'settings' => $settings,
-  );
+  ];
 }
 
 /**
@@ -1027,13 +1027,13 @@ function ajax_command_html($selector, $html, $settings = NULL) {
  * @see http://docs.jquery.com/Manipulation/prepend#content
  */
 function ajax_command_prepend($selector, $html, $settings = NULL) {
-  return array(
+  return [
     'command' => 'insert',
     'method' => 'prepend',
     'selector' => $selector,
     'data' => $html,
     'settings' => $settings,
-  );
+  ];
 }
 
 /**
@@ -1060,13 +1060,13 @@ function ajax_command_prepend($selector, $html, $settings = NULL) {
  * @see http://docs.jquery.com/Manipulation/append#content
  */
 function ajax_command_append($selector, $html, $settings = NULL) {
-  return array(
+  return [
     'command' => 'insert',
     'method' => 'append',
     'selector' => $selector,
     'data' => $html,
     'settings' => $settings,
-  );
+  ];
 }
 
 /**
@@ -1093,13 +1093,13 @@ function ajax_command_append($selector, $html, $settings = NULL) {
  * @see http://docs.jquery.com/Manipulation/after#content
  */
 function ajax_command_after($selector, $html, $settings = NULL) {
-  return array(
+  return [
     'command' => 'insert',
     'method' => 'after',
     'selector' => $selector,
     'data' => $html,
     'settings' => $settings,
-  );
+  ];
 }
 
 /**
@@ -1126,13 +1126,13 @@ function ajax_command_after($selector, $html, $settings = NULL) {
  * @see http://docs.jquery.com/Manipulation/before#content
  */
 function ajax_command_before($selector, $html, $settings = NULL) {
-  return array(
+  return [
     'command' => 'insert',
     'method' => 'before',
     'selector' => $selector,
     'data' => $html,
     'settings' => $settings,
-  );
+  ];
 }
 
 /**
@@ -1155,10 +1155,10 @@ function ajax_command_before($selector, $html, $settings = NULL) {
  * @see http://docs.jquery.com/Manipulation/remove#expr
  */
 function ajax_command_remove($selector) {
-  return array(
+  return [
     'command' => 'remove',
     'selector' => $selector,
-  );
+  ];
 }
 
 /**
@@ -1181,11 +1181,11 @@ function ajax_command_remove($selector) {
  *   An array suitable for use with the ajax_render() function.
  */
 function ajax_command_changed($selector, $asterisk = '') {
-  return array(
+  return [
     'command' => 'changed',
     'selector' => $selector,
     'asterisk' => $asterisk,
-  );
+  ];
 }
 
 /**
@@ -1209,11 +1209,11 @@ function ajax_command_changed($selector, $asterisk = '') {
  * @see http://docs.jquery.com/CSS/css#properties
  */
 function ajax_command_css($selector, $argument) {
-  return array(
+  return [
     'command' => 'css',
     'selector' => $selector,
     'argument' => $argument,
-  );
+  ];
 }
 
 /**
@@ -1240,11 +1240,11 @@ function ajax_command_css($selector, $argument) {
  *   An array suitable for use with the ajax_render() function.
  */
 function ajax_command_settings($argument, $merge = FALSE) {
-  return array(
+  return [
     'command' => 'settings',
     'settings' => $argument,
     'merge' => $merge,
-  );
+  ];
 }
 
 /**
@@ -1271,12 +1271,12 @@ function ajax_command_settings($argument, $merge = FALSE) {
  * @see http://docs.jquery.com/Core/data#namevalue
  */
 function ajax_command_data($selector, $name, $value) {
-  return array(
+  return [
     'command' => 'data',
     'selector' => $selector,
     'name' => $name,
     'value' => $value,
-  );
+  ];
 }
 
 /**
@@ -1301,13 +1301,13 @@ function ajax_command_data($selector, $name, $value) {
  * @return
  *   An array suitable for use with the ajax_render() function.
  */
-function ajax_command_invoke($selector, $method, array $args = array()) {
-  return array(
+function ajax_command_invoke($selector, $method, array $args = []) {
+  return [
     'command' => 'invoke',
     'selector' => $selector,
     'method' => $method,
     'args' => $args,
-  );
+  ];
 }
 
 /**
@@ -1326,10 +1326,10 @@ function ajax_command_invoke($selector, $method, array $args = array()) {
  *   An array suitable for use with the ajax_render() function.
  */
 function ajax_command_restripe($selector) {
-  return array(
+  return [
     'command' => 'restripe',
     'selector' => $selector,
-  );
+  ];
 }
 
 /**
@@ -1350,7 +1350,7 @@ function ajax_command_restripe($selector) {
  * @return array
  *   An array suitable for use with the ajax_render() function.
  */
-function ajax_command_open_dialog($selector, $title, $html, array $dialog_options = array()) {
+function ajax_command_open_dialog($selector, $title, $html, array $dialog_options = []) {
   // Add the library for handling the dialog in the response.
   backdrop_add_library('system', 'backdrop.dialog.ajax');
 
@@ -1364,12 +1364,12 @@ function ajax_command_open_dialog($selector, $title, $html, array $dialog_option
   // For consistency ensure the modal option is set to TRUE or FALSE.
   $dialog_options['modal'] = isset($dialog_options['modal']) && $dialog_options['modal'];
 
-  return array(
+  return [
     'command' => 'openDialog',
     'selector' => $selector,
     'data' => $html,
     'dialogOptions' => $dialog_options,
-  );
+  ];
 }
 
 /**
@@ -1382,7 +1382,7 @@ function ajax_command_open_dialog($selector, $title, $html, array $dialog_option
  *
  * @see ajax_command_open_dialog()
  */
-function ajax_command_open_modal_dialog($title, $html, array $dialog_options = array()) {
+function ajax_command_open_modal_dialog($title, $html, array $dialog_options = []) {
   $dialog_options['modal'] = TRUE;
   return ajax_command_open_dialog('#backdrop-modal', $title, $html, $dialog_options);
 }
@@ -1400,10 +1400,10 @@ function ajax_command_open_modal_dialog($title, $html, array $dialog_options = a
  *   An array suitable for use with the ajax_render() function.
  */
 function ajax_command_close_dialog($selector) {
-  return array(
+  return [
     'command' => 'closeDialog',
     'selector' => $selector,
-  );
+  ];
 }
 
 /**
@@ -1435,12 +1435,12 @@ function ajax_command_close_modal_dialog() {
 function ajax_command_set_dialog_option($selector, $option_name, $option_value) {
   $selector = empty($selector) ? '#backdrop-modal' : $selector;
 
-  return array(
+  return [
     'command' => 'setDialogOption',
     'selector' => $selector,
     'optionName' => $option_name,
     'optionValue' => $option_value,
-  );
+  ];
 }
 
 /**
@@ -1471,10 +1471,10 @@ function ajax_command_set_dialog_title($selector, $title) {
  *   An array suitable for use with the ajax_render() function.
  */
 function ajax_command_redirect($url) {
-  return array(
+  return [
     'command' => 'redirect',
     'url' => $url,
-  );
+  ];
 }
 
 /**
@@ -1496,11 +1496,11 @@ function ajax_command_redirect($url) {
  *   An array with properties to be passed to updateBuildId() in ajax.js.
  */
 function ajax_command_update_build_id($form) {
-  return array(
+  return [
     'command' => 'updateBuildId',
     'old' => $form['#build_id_old'],
     'new' => $form['#build_id'],
-  );
+  ];
 }
 
 /**
@@ -1520,8 +1520,8 @@ function ajax_command_update_build_id($form) {
  * @see misc/ajax.js
  */
 function ajax_command_add_css($styles) {
-  return array(
+  return [
     'command' => 'addCss',
     'data' => $styles,
-  );
+  ];
 }

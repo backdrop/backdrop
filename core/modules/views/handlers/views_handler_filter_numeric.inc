@@ -14,97 +14,97 @@ class views_handler_filter_numeric extends views_handler_filter {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['value'] = array(
-      'contains' => array(
-        'min' => array('default' => ''),
-        'max' => array('default' => ''),
-        'value' => array('default' => ''),
-      ),
-    );
+    $options['value'] = [
+      'contains' => [
+        'min' => ['default' => ''],
+        'max' => ['default' => ''],
+        'value' => ['default' => ''],
+      ],
+    ];
 
     return $options;
   }
 
   function operators() {
-    $operators = array(
-      '<' => array(
+    $operators = [
+      '<' => [
         'title' => t('Is less than'),
         'method' => 'op_simple',
         'short' => t('<'),
         'values' => 1,
-      ),
-      '<=' => array(
+      ],
+      '<=' => [
         'title' => t('Is less than or equal to'),
         'method' => 'op_simple',
         'short' => t('<='),
         'values' => 1,
-      ),
-      '=' => array(
+      ],
+      '=' => [
         'title' => t('Is equal to'),
         'method' => 'op_simple',
         'short' => t('='),
         'values' => 1,
-      ),
-      '!=' => array(
+      ],
+      '!=' => [
         'title' => t('Is not equal to'),
         'method' => 'op_simple',
         'short' => t('!='),
         'values' => 1,
-      ),
-      '>=' => array(
+      ],
+      '>=' => [
         'title' => t('Is greater than or equal to'),
         'method' => 'op_simple',
         'short' => t('>='),
         'values' => 1,
-      ),
-      '>' => array(
+      ],
+      '>' => [
         'title' => t('Is greater than'),
         'method' => 'op_simple',
         'short' => t('>'),
         'values' => 1,
-      ),
-      'between' => array(
+      ],
+      'between' => [
         'title' => t('Is between'),
         'method' => 'op_between',
         'short' => t('between'),
         'values' => 2,
-      ),
-      'not between' => array(
+      ],
+      'not between' => [
         'title' => t('Is not between'),
         'method' => 'op_between',
         'short' => t('not between'),
         'values' => 2,
-      ),
-    );
+      ],
+    ];
 
     // if the definition allows for the empty operator, add it.
     if (!empty($this->definition['allow empty'])) {
-      $operators += array(
-        'empty' => array(
+      $operators += [
+        'empty' => [
           'title' => t('Is empty (NULL)'),
           'method' => 'op_empty',
           'short' => t('empty'),
           'values' => 0,
-        ),
-        'not empty' => array(
+        ],
+        'not empty' => [
           'title' => t('Is not empty (NOT NULL)'),
           'method' => 'op_empty',
           'short' => t('not empty'),
           'values' => 0,
-        ),
-      );
+        ],
+      ];
     }
 
     // Add regexp support for MySQL.
     if (Database::getConnection()->databaseType() == 'mysql') {
-      $operators += array(
-        'regular_expression' => array(
+      $operators += [
+        'regular_expression' => [
           'title' => t('Regular expression'),
           'short' => t('regex'),
           'method' => 'op_regex',
           'values' => 1,
-        ),
-      );
+        ],
+      ];
     }
 
     return $operators;
@@ -114,7 +114,7 @@ class views_handler_filter_numeric extends views_handler_filter {
    * Provide a list of all the numeric operators
    */
   function operator_options($which = 'title') {
-    $options = array();
+    $options = [];
     foreach ($this->operators() as $id => $info) {
       $options[$id] = $info[$which];
     }
@@ -123,7 +123,7 @@ class views_handler_filter_numeric extends views_handler_filter {
   }
 
   function operator_values($values = 1) {
-    $options = array();
+    $options = [];
     foreach ($this->operators() as $id => $info) {
       if ($info['values'] == $values) {
         $options[] = $id;
@@ -160,18 +160,18 @@ class views_handler_filter_numeric extends views_handler_filter {
     }
 
     if ($which == 'all') {
-      $form['value']['value'] = array(
+      $form['value']['value'] = [
         '#type' => 'textfield',
         '#title' => empty($form_state['exposed']) ? t('Value') : '',
         '#size' => 30,
         '#default_value' => $this->value['value'],
-      );
+      ];
       // Setup #states for all operators with one value.
       if (isset($source)) {
         foreach ($this->operator_values(1) as $operator) {
-          $form['value']['value']['#states']['visible'][] = array(
-            $source => array('value' => $operator),
-          );
+          $form['value']['value']['#states']['visible'][] = [
+            $source => ['value' => $operator],
+          ];
         }
       }
       if (isset($identifier) && !empty($form_state['exposed']) && !isset($form_state['input'][$identifier]['value'])) {
@@ -181,38 +181,38 @@ class views_handler_filter_numeric extends views_handler_filter {
     elseif ($which == 'value') {
       // When exposed we drop the value-value and just do value if
       // the operator is locked.
-      $form['value'] = array(
+      $form['value'] = [
         '#type' => 'textfield',
         '#title' => empty($form_state['exposed']) ? t('Value') : '',
         '#size' => 30,
         '#default_value' => $this->value['value'],
-      );
+      ];
       if (isset($identifier) && !empty($form_state['exposed']) && !isset($form_state['input'][$identifier])) {
         $form_state['input'][$identifier] = $this->value['value'];
       }
     }
 
     if ($which == 'all' || $which == 'minmax') {
-      $form['value']['min'] = array(
+      $form['value']['min'] = [
         '#type' => 'textfield',
         '#title' => empty($form_state['exposed']) ? t('Min') : '',
         '#size' => 30,
         '#default_value' => $this->value['min'],
-      );
-      $form['value']['max'] = array(
+      ];
+      $form['value']['max'] = [
         '#type' => 'textfield',
         '#title' => empty($form_state['exposed']) ? t('And max') : t('And'),
         '#size' => 30,
         '#default_value' => $this->value['max'],
-      );
+      ];
       if ($which == 'all') {
-        $states = array();
+        $states = [];
         // Setup #states for all operators with two values.
         if (isset($source)) {
           foreach ($this->operator_values(2) as $operator) {
-            $states['#states']['visible'][] = array(
-              $source => array('value' => $operator),
-            );
+            $states['#states']['visible'][] = [
+              $source => ['value' => $operator],
+            ];
           }
         }
         $form['value']['min'] += $states;
@@ -227,10 +227,10 @@ class views_handler_filter_numeric extends views_handler_filter {
 
       if (!isset($form['value'])) {
         // Ensure there is something in the 'value'.
-        $form['value'] = array(
+        $form['value'] = [
           '#type' => 'value',
           '#value' => NULL
-        );
+        ];
       }
     }
   }
@@ -247,7 +247,7 @@ class views_handler_filter_numeric extends views_handler_filter {
 
   function op_between($field) {
     if ($this->operator == 'between') {
-      $this->query->add_where($this->options['group'], $field, array($this->value['min'], $this->value['max']), 'BETWEEN');
+      $this->query->add_where($this->options['group'], $field, [$this->value['min'], $this->value['max']], 'BETWEEN');
     }
     else {
       $this->query->add_where($this->options['group'], db_or()->condition($field, $this->value['min'], '<=')->condition($field, $this->value['max'], '>='));
@@ -284,7 +284,7 @@ class views_handler_filter_numeric extends views_handler_filter {
     $options = $this->operator_options('short');
     $output = check_plain($options[$this->operator]);
     if (in_array($this->operator, $this->operator_values(2))) {
-      $output .= ' ' . t('@min and @max', array('@min' => $this->value['min'], '@max' => $this->value['max']));
+      $output .= ' ' . t('@min and @max', ['@min' => $this->value['min'], '@max' => $this->value['max']]);
     }
     elseif (in_array($this->operator, $this->operator_values(1))) {
       $output .= ' ' . check_plain($this->value['value']);
@@ -305,17 +305,17 @@ class views_handler_filter_numeric extends views_handler_filter {
     if (!empty($this->options['expose']['identifier'])) {
       $value = &$input[$this->options['expose']['identifier']];
       if (!is_array($value)) {
-        $value = array(
+        $value = [
           'value' => $value,
-        );
+        ];
       }
     }
     else {
-      $value = array(
+      $value = [
         'value' => NULL,
         'min' => NULL,
         'max' => NULL,
-      );
+      ];
     }
 
     $rc = parent::accept_exposed_input($input);

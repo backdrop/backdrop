@@ -109,12 +109,12 @@ class views_handler extends views_object {
       $display_id = 'default';
     }
 
-    $this->localization_keys = array(
+    $this->localization_keys = [
       $display_id,
       $this->handler_type,
       $options['table'],
       $options['id']
-    );
+    ];
 
     $this->unpack_options($this->options, $options);
 
@@ -144,12 +144,12 @@ class views_handler extends views_object {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['id'] = array('default' => '');
-    $options['table'] = array('default' => '');
-    $options['field'] = array('default' => '');
-    $options['relationship'] = array('default' => 'none');
-    $options['group_type'] = array('default' => 'group');
-    $options['ui_name'] = array('default' => '');
+    $options['id'] = ['default' => ''];
+    $options['table'] = ['default' => ''];
+    $options['field'] = ['default' => ''];
+    $options['relationship'] = ['default' => 'none'];
+    $options['group_type'] = ['default' => 'group'];
+    $options['ui_name'] = ['default' => ''];
 
     return $options;
   }
@@ -163,7 +163,7 @@ class views_handler extends views_object {
       return $title;
     }
     $title = ($short && isset($this->definition['title short'])) ? $this->definition['title short'] : $this->definition['title'];
-    return t('!group: !title', array('!group' => $this->definition['group'], '!title' => $title));
+    return t('!group: !title', ['!group' => $this->definition['group'], '!title' => $title]);
   }
 
   /**
@@ -278,23 +278,23 @@ class views_handler extends views_object {
     // be moved to their fieldset during pre_render.
     $form['#pre_render'][] = 'views_ui_pre_render_add_fieldset_markup';
 
-    $form['ui_name'] = array(
+    $form['ui_name'] = [
       '#type' => 'textfield',
       '#title' => t('Administrative title'),
       '#description' => t('This title will be displayed on the views edit page instead of the default one. This might be useful if you have the same item twice.'),
       '#default_value' => $this->options['ui_name'],
       '#fieldset' => 'more',
-    );
+    ];
 
     // This form is long and messy enough that the "Administrative title" option
     // belongs in a "more options" fieldset at the bottom of the form.
-    $form['more'] = array(
+    $form['more'] = [
       '#type' => 'fieldset',
       '#title' => t('More'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
       '#weight' => 150,
-    );
+    ];
     // Allow to alter the default values brought into the form.
     backdrop_alter('views_handler_options', $this->options, $view);
   }
@@ -322,7 +322,7 @@ class views_handler extends views_object {
     $id = $form_state['id'];
 
     $form['#title'] = check_plain($view->display[$display_id]->display_title) . ': ';
-    $form['#title'] .= t('Configure aggregation settings for @type %item', array('@type' => $types[$type]['lstitle'], '%item' => $this->ui_name()));
+    $form['#title'] .= t('Configure aggregation settings for @type %item', ['@type' => $types[$type]['lstitle'], '%item' => $this->ui_name()]);
 
     $form['#section'] = $display_id . '-' . $type . '-' . $id;
 
@@ -332,13 +332,13 @@ class views_handler extends views_object {
       $group_types[$id] = $aggregate['title'];
     }
 
-    $form['group_type'] = array(
+    $form['group_type'] = [
       '#type' => 'select',
       '#title' => t('Aggregation type'),
       '#default_value' => $this->options['group_type'],
       '#description' => t('Select the aggregation function to use on this field.'),
       '#options' => $group_types,
-    );
+    ];
   }
 
   /**
@@ -616,7 +616,7 @@ class views_handler extends views_object {
    * @return
    *   Empty array if the handler is valid; an array of error strings if it is not.
    */
-  function validate() { return array(); }
+  function validate() { return []; }
 
   /**
    * Determine if the handler is considered 'broken', meaning it's a
@@ -646,24 +646,24 @@ class views_many_to_one_helper {
    *
    * @var array
    */
-  public $placeholders = array();
+  public $placeholders = [];
 
   function __construct(&$handler) {
     $this->handler = &$handler;
   }
 
   static function option_definition(&$options) {
-    $options['reduce_duplicates'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['reduce_duplicates'] = ['default' => FALSE, 'bool' => TRUE];
   }
 
   function options_form(&$form, &$form_state) {
-    $form['reduce_duplicates'] = array(
+    $form['reduce_duplicates'] = [
       '#type' => 'checkbox',
       '#title' => t('Reduce duplicates'),
       '#description' => t('This filter can cause items that have more than one of the selected options to appear as duplicate results. If this filter causes duplicate results to occur, this checkbox can reduce those duplicates; however, the more terms it has to search for, the less performant the query will be, so use this with caution. Shouldn\'t be set on single-value fields, as it may cause values to disappear from display, if used on an incompatible field.'),
       '#default_value' => !empty($this->handler->options['reduce_duplicates']),
       '#weight' => 4,
-    );
+    ];
   }
 
   /**
@@ -761,14 +761,14 @@ class views_many_to_one_helper {
     else {
       if (!empty($view->many_to_one_tables[$field])) {
         foreach ($view->many_to_one_tables[$field] as $value) {
-          $join->extra = array(
-            array(
+          $join->extra = [
+            [
               'field' => $this->handler->real_field,
               'operator' => '!=',
               'value' => $value,
               'numeric' => !empty($this->definition['numeric']),
-            ),
-          );
+            ],
+          ];
         }
       }
       return $this->add_table($join);
@@ -807,14 +807,14 @@ class views_many_to_one_helper {
           $join->type = 'LEFT';
           if (!empty($this->handler->view->many_to_one_tables[$field])) {
             foreach ($this->handler->view->many_to_one_tables[$field] as $value) {
-              $join->extra = array(
-                array(
+              $join->extra = [
+                [
                   'field' => $this->handler->real_field,
                   'operator' => '!=',
                   'value' => $value,
                   'numeric' => !empty($this->handler->definition['numeric']),
-                ),
-              );
+                ],
+              ];
             }
           }
 
@@ -826,21 +826,21 @@ class views_many_to_one_helper {
 
       // Case 2: it's anything but an 'or'.
       // Clone the join for each table:
-      $this->handler->table_aliases = array();
-      $values = $this->handler->operator === 'not' ? array($this->handler->value) : $this->handler->value;
+      $this->handler->table_aliases = [];
+      $values = $this->handler->operator === 'not' ? [$this->handler->value] : $this->handler->value;
       foreach ($values as $value) {
         $join = $this->get_join();
         if ($this->handler->operator == 'and') {
           $join->type = 'INNER';
         }
         if (empty($join->extra)) {
-          $join->extra = array();
+          $join->extra = [];
         }
-        $join->extra[] = array(
+        $join->extra[] = [
           'field' => $this->handler->real_field,
           'value' => $value,
           'numeric' => !empty($this->handler->definition['numeric']),
-        );
+        ];
         if (($this->handler->is_a_group() && is_array($value)) || $this->handler->operator === 'not') {
           $value = serialize($value);
         }
@@ -922,9 +922,9 @@ class views_many_to_one_helper {
         else {
           $operator = "$operator $placeholder";
         }
-        $placeholders = array(
+        $placeholders = [
           $placeholder => $value,
-        ) + $this->placeholders;
+        ] + $this->placeholders;
         $this->handler->query->add_where_expression($options['group'], "$field $operator", $placeholders);
       }
       else {
@@ -1008,12 +1008,12 @@ class views_join {
   var $field = NULL;
   var $extra = NULL;
   var $type = NULL;
-  var $definition = array();
+  var $definition = [];
 
   /**
    * Construct the views_join object.
    */
-  function construct($table = NULL, $left_table = NULL, $left_field = NULL, $field = NULL, $extra = array(), $type = 'LEFT') {
+  function construct($table = NULL, $left_table = NULL, $left_field = NULL, $field = NULL, $extra = [], $type = 'LEFT') {
     $this->extra_type = 'AND';
     if (!empty($table)) {
       $this->table = $table;
@@ -1072,17 +1072,17 @@ class views_join {
     }
 
     $condition = "$left_field = $table[alias].$this->field";
-    $arguments = array();
+    $arguments = [];
 
     // Tack on the extra.
     if (isset($this->extra)) {
       // If extra has been provided as string instead of an array, convert it
       // to an array.
       if (!is_array($this->extra)) {
-        $this->extra = array($this->extra);
+        $this->extra = [$this->extra];
       }
 
-      $extras = array();
+      $extras = [];
       foreach ($this->extra as $info) {
         if (is_array($info)) {
           $extra = '';
@@ -1116,7 +1116,7 @@ class views_join {
           }
 
           if (is_array($info['value'])) {
-            $value_placeholders = array();
+            $value_placeholders = [];
 
             // With an array of values, we need multiple placeholders and the
             // 'IN' operator is implicit.
@@ -1166,7 +1166,7 @@ class views_join {
  *   - left_query: The subquery to use in the left side of the join clause.
  */
 class views_join_subquery extends views_join {
-  function construct($table = NULL, $left_table = NULL, $left_field = NULL, $field = NULL, $extra = array(), $type = 'LEFT') {
+  function construct($table = NULL, $left_table = NULL, $left_field = NULL, $field = NULL, $extra = [], $type = 'LEFT') {
     parent::construct($table, $left_table, $left_field, $field, $extra, $type);
     $this->left_query = $this->definition['left_query'];
   }
@@ -1193,7 +1193,7 @@ class views_join_subquery extends views_join {
 
     // Add our join condition, using a subquery on the left instead of a field.
     $condition = "($this->left_query) = $table[alias].$this->field";
-    $arguments = array();
+    $arguments = [];
 
     // Tack on the extra.
     // This is just copied verbatim from the parent class, which itself has a
@@ -1203,10 +1203,10 @@ class views_join_subquery extends views_join {
       // If extra has been provided as string instead of an array, convert it
       // to an array.
       if (!is_array($this->extra)) {
-        $this->extra = array($this->extra);
+        $this->extra = [$this->extra];
       }
 
-      $extras = array();
+      $extras = [];
       foreach ($this->extra as $info) {
         if (is_array($info)) {
           $extra = '';

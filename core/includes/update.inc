@@ -21,7 +21,7 @@ define('REQUIRED_D7_SCHEMA_VERSION', '7069');
  * Disable any items in the {system} table that are not core compatible.
  */
 function update_fix_compatibility() {
-  $incompatible = array();
+  $incompatible = [];
   $result = db_query("SELECT name, type, status FROM {system} WHERE status = 1 AND type IN ('module','theme')");
   foreach ($result as $row) {
     if (update_check_incompatibility($row->name, $row->type)) {
@@ -30,7 +30,7 @@ function update_fix_compatibility() {
   }
   if (!empty($incompatible)) {
     db_update('system')
-      ->fields(array('status' => 0))
+      ->fields(['status' => 0])
       ->condition('name', $incompatible, 'IN')
       ->execute();
   }
@@ -98,7 +98,7 @@ function update_prepare_bootstrap() {
     if (!$staging_config->isInitialized()) {
       $t = get_t();
       backdrop_set_message($t('The staging configuration directory (%directory) could not be found. Please make sure it exists and is properly referenced in settings.php.',
-        array('%directory' => config_get_config_directory('staging'))), 'warning', FALSE);
+        ['%directory' => config_get_config_directory('staging')]), 'warning', FALSE);
     }
   }
 
@@ -109,16 +109,16 @@ function update_prepare_bootstrap() {
     $writable = backdrop_verify_install_file($settings_file, FILE_EXIST | FILE_READABLE | FILE_WRITABLE);
     $requirements['settings file']['title'] = 'Settings file';
     if ($writable) {
-      $requirements['settings file'] += array(
+      $requirements['settings file'] += [
         'value' => 'settings.php is writable.',
-      );
+      ];
     }
     else {
-      $requirements['settings file'] += array(
+      $requirements['settings file'] += [
         'value' => 'settings.php is not writable.',
         'severity' => REQUIREMENT_ERROR,
         'description' => 'Backdrop CMS requires write permissions to <em>' . $settings_file . '</em> during the update process. If you are unsure how to grant file permissions, consult the <a href="https://backdropcms.org/installation">Installation Instructions</a> page.',
-      );
+      ];
     }
     update_extra_requirements($requirements);
   }
@@ -133,14 +133,14 @@ function update_prepare_bootstrap() {
   $system_schema = backdrop_get_installed_schema_version('system');
   if ($system_schema > 7000 || $system_schema < 6000) {
     $has_required_schema = $system_schema >= REQUIRED_D7_SCHEMA_VERSION || $system_schema < 6000;
-    $requirements = array(
-      'drupal 7 version' => array(
+    $requirements = [
+      'drupal 7 version' => [
         'title' => 'Drupal 7 version',
         'value' => $has_required_schema ? 'You are running a current version of Drupal 7.' : 'You are not running a current version of Drupal 7',
         'severity' => $has_required_schema ? REQUIREMENT_OK : REQUIREMENT_ERROR,
         'description' => $has_required_schema ? '' : 'Please update your Drupal 7 installation to the most recent version before attempting to upgrade to Backdrop',
-      ),
-    );
+      ],
+    ];
     update_extra_requirements($requirements);
 
     if ($has_required_schema) {
@@ -152,54 +152,54 @@ function update_prepare_bootstrap() {
       if (db_table_exists('url_alias') && db_field_exists('url_alias', 'language')) {
         db_drop_index('url_alias', 'alias_language_pid');
         db_drop_index('url_alias', 'source_language_pid');
-        $langcode_spec = array(
+        $langcode_spec = [
           'description' => "The language code this alias is for; if 'und', the alias will be used for unknown languages. Each Backdrop path can have an alias for each supported language.",
           'type' => 'varchar',
           'length' => 12,
           'not null' => TRUE,
           'default' => '',
-        );
-        $langcode_indexes = array(
-          'indexes' => array(
-            'alias_langcode_pid' => array('alias', 'langcode', 'pid'),
-            'source_langcode_pid' => array('source', 'langcode', 'pid'),
-          ),
-        );
+        ];
+        $langcode_indexes = [
+          'indexes' => [
+            'alias_langcode_pid' => ['alias', 'langcode', 'pid'],
+            'source_langcode_pid' => ['source', 'langcode', 'pid'],
+          ],
+        ];
         db_change_field('url_alias', 'language', 'langcode', $langcode_spec, $langcode_indexes);
       }
 
       // Create the state table.
       if (!db_table_exists('state')) {
-        $schema = array(
+        $schema = [
           'description' => 'Stores environment-specific state values.',
-          'fields' => array(
-            'name' => array(
+          'fields' => [
+            'name' => [
               'description' => 'The name of the state.',
               'type' => 'varchar',
               'length' => 128,
               'not null' => TRUE,
               'default' => '',
-            ),
-            'value' => array(
+            ],
+            'value' => [
               'description' => 'The value of the state.',
               'type' => 'blob',
               'not null' => TRUE,
               'size' => 'big',
-            ),
-          ),
-          'primary key' => array('name'),
-        );
+            ],
+          ],
+          'primary key' => ['name'],
+        ];
         db_create_table('state', $schema);
       }
 
       // Update role ID to be a varchar instead of an integer.
-      $role_column = array(
+      $role_column = [
         'type' => 'varchar',
         'length' => 64,
         'description' => 'Primary Key: The name of the role.',
         'not null' => TRUE,
         'default' => '',
-      );
+      ];
       if (!db_field_exists('users_roles', 'role')) {
         db_add_field('users_roles', 'role', $role_column);
       }
@@ -219,15 +219,15 @@ function update_prepare_language() {
     $languages = db_select('languages', 'l')
       ->fields('l')
       ->execute();
-    $plurals = array();
-    $javascript = array();
-    $prefixes = array();
-    $domains = array();
+    $plurals = [];
+    $javascript = [];
+    $prefixes = [];
+    $domains = [];
     foreach ($languages as $language) {
-      $plurals[$language->language] = array(
+      $plurals[$language->language] = [
         'plurals' => $language->plurals,
         'formula' => $language->formula,
-      );
+      ];
       $javascript[$language->language] = $language->javascript;
       $prefixes[$language->language] = $language->prefix;
       $domains[$language->language] = $language->domain;
@@ -251,7 +251,7 @@ function update_prepare_language() {
     // Finally install/enable the language module. We need to use the update
     // specific version of this function to ensure schema conflicts don't happen
     // due to our updated data.
-    $modules = array('language');
+    $modules = ['language'];
     update_module_add_to_system($modules);
     update_module_enable($modules);
 
@@ -267,22 +267,22 @@ function update_prepare_language() {
  * @param $modules
  *   Array of module names.
  */
-function update_module_add_to_system($modules = array()) {
+function update_module_add_to_system($modules = []) {
   // Insert module data, so we can enable the module. Calling a full module
   // list rebuild so early is costly and complex, so we just have a stop-gap.
-  $info_defaults = array(
-    'dependencies' => array(),
+  $info_defaults = [
+    'dependencies' => [],
     'description' => '',
     'package' => 'Other',
     'version' => NULL,
     'php' => BACKDROP_MINIMUM_PHP,
-    'files' => array(),
+    'files' => [],
     'bootstrap' => 0,
-  );
+  ];
   foreach ($modules as $module) {
     $module_info = backdrop_parse_info_file('core/modules/' . $module . '/' . $module . '.info');
     db_insert('system')
-      ->fields(array(
+      ->fields([
         'filename' => 'core/modules/' . $module . '/' . $module . '.module',
         'name' => $module,
         'type' => 'module',
@@ -291,7 +291,7 @@ function update_module_add_to_system($modules = array()) {
         'schema_version' => -1,
         'weight' => 0,
         'info' => serialize($module_info + $info_defaults),
-      ))
+      ])
       ->execute();
   }
 }
@@ -316,7 +316,7 @@ function update_upgrade_check_dependencies() {
     $module_list = '';
     foreach ($modules_to_enable as $module_to_enable => $dependents) {
       $module_list .= '<strong>' . $files[$module_to_enable]->info['name'] . '. ' . t('Required by:') . '</strong>';
-      $module_list .= theme('item_list', array('items' => $dependents));
+      $module_list .= theme('item_list', ['items' => $dependents]);
     }
     $status_report = '<h4>' . t('Some modules need to be enabled') . '</h4>';
     $status_report .= '<p>The following Backdrop modules will be enabled in order for the site to be upgraded successfully:</p>';
@@ -347,19 +347,19 @@ function update_upgrade_enable_dependencies() {
  */
 function update_upgrade_modules_to_enable() {
   // Get list of enabled modules.
-  $result = db_query("SELECT name FROM {system} WHERE type = :type AND status = :status", array(':type' => 'module', ':status' => 1));
+  $result = db_query("SELECT name FROM {system} WHERE type = :type AND status = :status", [':type' => 'module', ':status' => 1]);
 
   // Get list of modules to be enabled.
   $enabled_modules = array_keys($result->fetchAllAssoc('name'));
 
   // Do not include any core module required by the Standard or Minimal
   // installations. Any needed modules from those will be taken care of later.
-  $enabled_modules = array_diff($enabled_modules, array('standard', 'minimal'));
+  $enabled_modules = array_diff($enabled_modules, ['standard', 'minimal']);
 
   // Get information about all modules available.
   $files = system_rebuild_module_data();
 
-  $modules_to_enable = array();
+  $modules_to_enable = [];
   foreach ($enabled_modules as $enabled_module) {
     if (!empty($files[$enabled_module]->requires)) {
       $required_modules = array_keys($files[$enabled_module]->requires);
@@ -406,13 +406,13 @@ function update_fix_requirements() {
       if (!db_table_exists('cache_views_data')) {
         db_create_table('cache_views_data', $schema_cache_views_data);
       }
-      update_module_enable(array('views'));
+      update_module_enable(['views']);
     }
 
     // Enable the File module if necessary, as it is a required module in
     // Backdrop, but may be off in Drupal.
     if (!db_query("SELECT name FROM {system} WHERE name = 'file' AND type = 'module' AND status = 1")->fetchField()) {
-      update_module_enable(array('file'));
+      update_module_enable(['file']);
     }
 
     // Empty a few basic caches.
@@ -444,7 +444,7 @@ function update_module_enable(array $modules) {
     db_update('system')
       ->condition('type', 'module')
       ->condition('name', $module)
-      ->fields(array('schema_version' => 0, 'status' => 1))
+      ->fields(['schema_version' => 0, 'status' => 1])
       ->execute();
 
     // system_list_reset() is in module.inc but that would only be available
@@ -468,7 +468,7 @@ function update_module_enable(array $modules) {
  *   The value of the variable in the database unserialized, or NULL if not set.
  */
 function update_variable_get($name, $default = NULL) {
-  $result = db_query('SELECT value FROM {variable} WHERE name = :name', array(':name' => $name))->fetchField();
+  $result = db_query('SELECT value FROM {variable} WHERE name = :name', [':name' => $name])->fetchField();
   if ($result !== FALSE) {
     return unserialize($result);
   }
@@ -487,12 +487,12 @@ function update_variable_get($name, $default = NULL) {
  */
 function update_variable_set($name, $value) {
   db_merge('variable')
-    ->key(array(
+    ->key([
       'name' => $name,
-    ))
-    ->fields(array(
+    ])
+    ->fields([
       'value' => serialize($value),
-    ))
+    ])
     ->execute();
 }
 
@@ -556,11 +556,11 @@ function update_do_one($module, $number, $dependency_map, &$context) {
 
   // If this update was aborted in a previous step, or has a dependency that
   // was aborted in a previous step, go no further.
-  if (!empty($context['results']['#abort']) && array_intersect($context['results']['#abort'], array_merge($dependency_map, array($function)))) {
+  if (!empty($context['results']['#abort']) && array_intersect($context['results']['#abort'], array_merge($dependency_map, [$function]))) {
     return;
   }
 
-  $ret = array();
+  $ret = [];
   if (function_exists($function)) {
     try {
       $ret['results']['query'] = $function($context['sandbox']);
@@ -575,7 +575,7 @@ function update_do_one($module, $number, $dependency_map, &$context) {
       require_once BACKDROP_ROOT . '/core/includes/errors.inc';
       $variables = _backdrop_decode_exception($e);
       // The exception message is run through check_plain() by _backdrop_decode_exception().
-      $ret['#abort'] = array('success' => FALSE, 'query' => t('%type: !message in %function (line %line of %file).', $variables));
+      $ret['#abort'] = ['success' => FALSE, 'query' => t('%type: !message in %function (line %line of %file).', $variables)];
     }
   }
 
@@ -585,10 +585,10 @@ function update_do_one($module, $number, $dependency_map, &$context) {
   }
 
   if (!isset($context['results'][$module])) {
-    $context['results'][$module] = array();
+    $context['results'][$module] = [];
   }
   if (!isset($context['results'][$module][$number])) {
-    $context['results'][$module][$number] = array();
+    $context['results'][$module][$number] = [];
   }
   $context['results'][$module][$number] = array_merge($context['results'][$module][$number], $ret);
 
@@ -632,7 +632,7 @@ class BackdropUpdateException extends Exception { }
  *
  * @see update_resolve_dependencies()
  */
-function update_batch($start, $redirect = NULL, $url = NULL, $batch = array(), $redirect_callback = 'backdrop_goto') {
+function update_batch($start, $redirect = NULL, $url = NULL, $batch = [], $redirect_callback = 'backdrop_goto') {
   // During the update, bring the site offline so that schema changes do not
   // affect visiting users.
   $_SESSION['maintenance_mode'] = state_get('maintenance_mode', FALSE);
@@ -648,12 +648,12 @@ function update_batch($start, $redirect = NULL, $url = NULL, $batch = array(), $
   // batch API can pass in to the batch operation each time it is called. (We
   // do not store the entire update dependency array here because it is
   // potentially very large.)
-  $dependency_map = array();
+  $dependency_map = [];
   foreach ($updates as $function => $update) {
-    $dependency_map[$function] = !empty($update['reverse_paths']) ? array_keys($update['reverse_paths']) : array();
+    $dependency_map[$function] = !empty($update['reverse_paths']) ? array_keys($update['reverse_paths']) : [];
   }
 
-  $operations = array();
+  $operations = [];
   foreach ($updates as $update) {
     if ($update['allowed']) {
       // Set the installed version of each module so updates will start at the
@@ -665,17 +665,17 @@ function update_batch($start, $redirect = NULL, $url = NULL, $batch = array(), $
       }
       // Add this update function to the batch.
       $function = $update['module'] . '_update_' . $update['number'];
-      $operations[] = array('update_do_one', array($update['module'], $update['number'], $dependency_map[$function]));
+      $operations[] = ['update_do_one', [$update['module'], $update['number'], $dependency_map[$function]]];
     }
   }
   $batch['operations'] = $operations;
-  $batch += array(
+  $batch += [
     'title' => 'Updating',
     'init_message' => 'Starting updates',
     'error_message' => 'An unrecoverable error has occurred. You can find the error message below. It is advised to copy it to the clipboard for reference.',
     'finished' => 'update_finished',
     'file' => 'core/includes/update.inc',
-  );
+  ];
   batch_set($batch);
   batch_process($redirect, $url, $redirect_callback);
 }
@@ -733,7 +733,7 @@ function update_finished($success, $results, $operations) {
  */
 function update_get_update_list() {
   // Make sure that the system module is first in the list of updates.
-  $ret = array('system' => array());
+  $ret = ['system' => []];
 
   $modules = backdrop_get_installed_schema_version(NULL, FALSE, TRUE);
   foreach ($modules as $module => $schema_version) {
@@ -775,7 +775,7 @@ function update_get_update_list() {
           // The description for an update comes from its Doxygen.
           $func = new ReflectionFunction($module . '_update_' . $update);
           // The order of the items in the replace array is important.
-          $description = preg_replace(array('#^\s*\/\*\*\s*#m', '#^\s*\*\/\s*$#m', '#^\s*\*\s*#m'), '', $func->getDocComment());
+          $description = preg_replace(['#^\s*\/\*\*\s*#m', '#^\s*\*\/\s*$#m', '#^\s*\*\s*#m'], '', $func->getDocComment());
           $ret[$module]['pending'][$update] = $update . ' - ' . trim($description);
           if (!isset($ret[$module]['start'])) {
             $ret[$module]['start'] = $update;
@@ -858,7 +858,7 @@ function update_resolve_dependencies($starting_updates) {
     }
     elseif (!isset($data['allowed'])) {
       $data['allowed'] = TRUE;
-      $data['missing_dependencies'] = array();
+      $data['missing_dependencies'] = [];
     }
     // Now that we have finished processing this function, remove it from the
     // graph if it was not part of the original list. This ensures that we
@@ -890,9 +890,9 @@ function update_resolve_dependencies($starting_updates) {
 function update_get_update_function_list($starting_updates) {
   // Go through each module and find all updates that we need (including the
   // first update that was requested and any updates that run after it).
-  $update_functions = array();
+  $update_functions = [];
   foreach ($starting_updates as $module => $version) {
-    $update_functions[$module] = array();
+    $update_functions[$module] = [];
     $updates = backdrop_get_schema_versions($module);
     if ($updates !== FALSE) {
       $start_key = array_search($version, $updates);
@@ -951,7 +951,7 @@ function update_get_update_function_list($starting_updates) {
 function update_build_dependency_graph($update_functions) {
   // Initialize an array that will define a directed graph representing the
   // dependencies between update functions.
-  $graph = array();
+  $graph = [];
 
   // Go through each update function and build an initial list of dependencies.
   foreach ($update_functions as $module => $functions) {
@@ -1039,10 +1039,10 @@ function update_already_performed($module, $number) {
  * @see hook_update_dependencies()
  */
 function update_retrieve_dependencies() {
-  $return = array();
+  $return = [];
   // Get a list of installed modules, arranged so that we invoke their hooks in
   // the same order that module_invoke_all() does.
-  $modules = db_query("SELECT name FROM {system} WHERE type = 'module' AND schema_version <> :schema ORDER BY weight ASC, name ASC", array(':schema' => SCHEMA_UNINSTALLED))->fetchCol();
+  $modules = db_query("SELECT name FROM {system} WHERE type = 'module' AND schema_version <> :schema ORDER BY weight ASC, name ASC", [':schema' => SCHEMA_UNINSTALLED])->fetchCol();
   foreach ($modules as $module) {
     $function = $module . '_update_dependencies';
     if (function_exists($function)) {

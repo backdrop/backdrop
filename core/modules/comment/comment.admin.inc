@@ -39,15 +39,15 @@ function comment_admin($type = 'new') {
  */
 function comment_admin_overview($form, &$form_state, $arg) {
   // Build the 'Operations' form.
-  $form['operations'] = array(
+  $form['operations'] = [
     '#type' => 'fieldset',
     '#title' => t('Operations'),
     '#prefix' => '<div class="container-inline">',
     '#suffix' => '</div>',
-    '#attributes' => array(
-      'class' => array('comment-operations')
-    ),
-  );
+    '#attributes' => [
+      'class' => ['comment-operations']
+    ],
+  ];
 
   if ($arg == 'approval') {
     $options['publish'] = t('Publish the selected comments');
@@ -57,40 +57,40 @@ function comment_admin_overview($form, &$form_state, $arg) {
   }
   $options['delete'] = t('Delete the selected comments');
 
-  $form['operations']['operation'] = array(
+  $form['operations']['operation'] = [
     '#type' => 'select',
     '#title' => t('Operations'),
     '#title_display' => 'invisible',
     '#options' => $options,
     '#empty_option' => '- ' . t('Choose an action') . ' -',
-  );
-  $form['operations']['submit'] = array(
+  ];
+  $form['operations']['submit'] = [
     '#type' => 'submit',
     '#value' => t('Execute'),
-  );
+  ];
 
   // Load the comments that need to be displayed.
   $status = ($arg == 'approval') ? COMMENT_NOT_PUBLISHED : COMMENT_PUBLISHED;
-  $header = array(
-    'subject' => array('data' => t('Title'), 'field' => 'subject'),
-    'author' => array('data' => t('Author'), 'field' => 'name', 'class' => array(RESPONSIVE_PRIORITY_MEDIUM)),
-    'posted_in' => array('data' => t('Posted in'), 'field' => 'node_title', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
-    'changed' => array('data' => t('Updated'), 'field' => 'c.changed', 'sort' => 'desc', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
+  $header = [
+    'subject' => ['data' => t('Title'), 'field' => 'subject'],
+    'author' => ['data' => t('Author'), 'field' => 'name', 'class' => [RESPONSIVE_PRIORITY_MEDIUM]],
+    'posted_in' => ['data' => t('Posted in'), 'field' => 'node_title', 'class' => [RESPONSIVE_PRIORITY_LOW]],
+    'changed' => ['data' => t('Updated'), 'field' => 'c.changed', 'sort' => 'desc', 'class' => [RESPONSIVE_PRIORITY_LOW]],
     'operations' => t('Operations'),
-  );
+  ];
 
   $query = db_select('comment', 'c')->extend('PagerDefault')->extend('TableSort');
   $query->join('node', 'n', 'n.nid = c.nid');
   $query->addField('n', 'title', 'node_title');
   $query->addTag('node_access');
   $result = $query
-    ->fields('c', array('cid', 'subject', 'name', 'changed'))
+    ->fields('c', ['cid', 'subject', 'name', 'changed'])
     ->condition('c.status', $status)
     ->limit(50)
     ->orderByHeader($header)
     ->execute();
 
-  $cids = array();
+  $cids = [];
 
   // We collect a sorted list of node_titles during the query to attach to the
   // comments later.
@@ -101,7 +101,7 @@ function comment_admin_overview($form, &$form_state, $arg) {
   $comments = comment_load_multiple($cids);
 
   // Build a table listing the appropriate comments.
-  $options = array();
+  $options = [];
   $destination = backdrop_get_destination();
 
   foreach ($comments as $comment) {
@@ -112,45 +112,45 @@ function comment_admin_overview($form, &$form_state, $arg) {
     if (isset($comment->comment_body) && !empty($comment->comment_body[LANGUAGE_NONE][0])) {
       $title = truncate_utf8($comment->comment_body[LANGUAGE_NONE][0]['value'], 128);
     }
-    $options[$comment->cid] = array(
-      'subject' => array(
-        'data' => array(
+    $options[$comment->cid] = [
+      'subject' => [
+        'data' => [
           '#type' => 'link',
           '#title' => $comment->subject,
           '#href' => 'comment/' . $comment->cid,
-          '#options' => array('attributes' => array('title' => $title), 'fragment' => 'comment-' . $comment->cid),
-        ),
-      ),
-      'author' => theme('username', array('account' => $comment)),
-      'posted_in' => array(
-        'data' => array(
+          '#options' => ['attributes' => ['title' => $title], 'fragment' => 'comment-' . $comment->cid],
+        ],
+      ],
+      'author' => theme('username', ['account' => $comment]),
+      'posted_in' => [
+        'data' => [
           '#type' => 'link',
           '#title' => $comment->node_title,
           '#href' => 'node/' . $comment->nid,
-        ),
-      ),
+        ],
+      ],
       'changed' => format_date($comment->changed, 'short'),
-    );
-    $links = array();
-    $links['edit'] = array(
+    ];
+    $links = [];
+    $links['edit'] = [
       'title' => t('Edit'),
       'href' => 'comment/' . $comment->cid . '/edit',
       'query' => $destination,
-    );
-    $options[$comment->cid]['operations']['data'] = array(
+    ];
+    $options[$comment->cid]['operations']['data'] = [
       '#type' => 'operations',
       '#links' => $links,
-    );
+    ];
   }
 
-  $form['comments'] = array(
+  $form['comments'] = [
     '#type' => 'tableselect',
     '#header' => $header,
     '#options' => $options,
     '#empty' => t('No comments available.'),
-  );
+  ];
 
-  $form['pager'] = array('#theme' => 'pager');
+  $form['pager'] = ['#theme' => 'pager'];
 
   return $form;
 }
@@ -161,7 +161,7 @@ function comment_admin_overview($form, &$form_state, $arg) {
  * @see comment_admin_overview_submit()
  */
 function comment_admin_overview_validate($form, &$form_state) {
-  $form_state['values']['comments'] = array_diff($form_state['values']['comments'], array(0));
+  $form_state['values']['comments'] = array_diff($form_state['values']['comments'], [0]);
   // We can't execute any of the available operations if no comments were
   // selected.
   if (count($form_state['values']['comments']) == 0) {
@@ -212,22 +212,22 @@ function comment_admin_overview_submit($form, &$form_state) {
 function comment_multiple_delete_confirm($form, &$form_state) {
   $edit = $form_state['input'];
 
-  $form['comments'] = array(
+  $form['comments'] = [
     '#prefix' => '<ul>',
     '#suffix' => '</ul>',
     '#tree' => TRUE,
-  );
+  ];
   // array_filter() returns only elements with actual values.
   $comment_counter = 0;
   foreach (array_filter($edit['comments']) as $cid => $value) {
     $comment = comment_load($cid);
     if (is_object($comment) && is_numeric($comment->cid)) {
-      $subject = db_query('SELECT subject FROM {comment} WHERE cid = :cid', array(':cid' => $cid))->fetchField();
-      $form['comments'][$cid] = array('#type' => 'hidden', '#value' => $cid, '#prefix' => '<li>', '#suffix' => check_plain($subject) . '</li>');
+      $subject = db_query('SELECT subject FROM {comment} WHERE cid = :cid', [':cid' => $cid])->fetchField();
+      $form['comments'][$cid] = ['#type' => 'hidden', '#value' => $cid, '#prefix' => '<li>', '#suffix' => check_plain($subject) . '</li>'];
       $comment_counter++;
     }
   }
-  $form['operation'] = array('#type' => 'hidden', '#value' => 'delete');
+  $form['operation'] = ['#type' => 'hidden', '#value' => 'delete'];
 
   if (!$comment_counter) {
     backdrop_set_message(t('There do not appear to be any comments to delete, or your selected comment was deleted by another administrator.'));
@@ -249,7 +249,7 @@ function comment_multiple_delete_confirm_submit($form, &$form_state) {
     comment_delete_multiple(array_keys($form_state['values']['comments']));
     cache_clear_all();
     $count = count($form_state['values']['comments']);
-    watchdog('content', 'Deleted @count comments.', array('@count' => $count));
+    watchdog('content', 'Deleted @count comments.', ['@count' => $count]);
     backdrop_set_message(format_plural($count, 'Deleted 1 comment.', 'Deleted @count comments.'));
   }
   $form_state['redirect'] = 'admin/content/comment';
@@ -285,10 +285,10 @@ function comment_confirm_delete_page($cid) {
 function comment_confirm_delete($form, &$form_state, $comment) {
   $form['#comment'] = $comment;
   // Always provide entity id in the same form key as in the entity edit form.
-  $form['cid'] = array('#type' => 'value', '#value' => $comment->cid);
+  $form['cid'] = ['#type' => 'value', '#value' => $comment->cid];
   return confirm_form(
     $form,
-    t('Are you sure you want to delete the comment %title?', array('%title' => $comment->subject)),
+    t('Are you sure you want to delete the comment %title?', ['%title' => $comment->subject]),
     'node/' . $comment->nid,
     t('Any replies to this comment will be lost. This action cannot be undone.'),
     t('Delete'),
@@ -304,7 +304,7 @@ function comment_confirm_delete_submit($form, &$form_state) {
   // Delete the comment and its replies.
   comment_delete($comment->cid);
   backdrop_set_message(t('The comment and all its replies have been deleted.'));
-  watchdog('content', 'Deleted comment @cid and its replies.', array('@cid' => $comment->cid));
+  watchdog('content', 'Deleted comment @cid and its replies.', ['@cid' => $comment->cid]);
 
   $form_state['redirect'] = "node/$comment->nid";
 }

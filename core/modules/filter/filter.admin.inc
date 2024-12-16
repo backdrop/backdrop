@@ -17,29 +17,29 @@ function filter_admin_overview($form) {
   $fallback_format = filter_fallback_format();
   $editors = filter_get_editors();
 
-  $form['help'] = array(
+  $form['help'] = [
     '#type' => 'help',
     '#markup' => t('The order of the text formats below determines the order in which they will appear in the <em>Editor</em> selector when creating content (depending on permissions for the text formats).'),
-  );
+  ];
 
   $form['#tree'] = TRUE;
   foreach ($formats as $id => $format) {
-    $links = array();
-    $links['configure'] = array(
+    $links = [];
+    $links['configure'] = [
       'title' => t('Configure'),
       'href' => "admin/config/content/formats/$id",
       'weight' => 0,
-    );
+    ];
     if (module_exists('config') && user_access('synchronize configuration')) {
-      $links['export'] = array(
+      $links['export'] = [
         'title' => t('Export'),
         'href' => 'admin/config/development/configuration/single/export',
-        'query' => array(
+        'query' => [
           'group' => 'Text formats',
           'name' => 'filter.format.' . $id,
-        ),
+        ],
         'weight' => 5,
-      );
+      ];
     }
 
     // Add status so we can group by enabled/disabled. If disabled, add 100
@@ -54,68 +54,68 @@ function filter_admin_overview($form) {
     // to all roles and cannot be disabled via the admin interface.
     $form['formats'][$id]['#is_fallback'] = ($id == $fallback_format);
     if ($form['formats'][$id]['#is_fallback']) {
-      $label = theme('label_machine_name__filter', array(
+      $label = theme('label_machine_name__filter', [
         'label' => $format->name,
         'machine_name' => $id,
-      ));
-      $form['formats'][$id]['name'] = array('#markup' => $label);
+      ]);
+      $form['formats'][$id]['name'] = ['#markup' => $label];
       $roles_markup = t('Fallback format. Used if a role has access to no other formats.');
     }
     else {
       if ($form['formats'][$id]['#status']) {
-        $links['disable'] = array(
+        $links['disable'] = [
           'title' => t('Disable'),
           'href' => 'admin/config/content/formats/' . $id . '/disable',
-          'query' => array(
+          'query' => [
             'token' => backdrop_get_token('format-' . $format->format)
-          ),
+          ],
           'weight' => 10,
-        );
+        ];
       }
       else {
-        $links['enable'] = array(
+        $links['enable'] = [
           'title' => t('Enable'),
           'href' => 'admin/config/content/formats/' . $id . '/enable',
-          'query' => array(
+          'query' => [
             'token' => backdrop_get_token('format-' . $format->format)
-          ),
+          ],
           'weight' => -10,
-        );
+        ];
       }
-      $label = theme('label_machine_name__filter', array(
+      $label = theme('label_machine_name__filter', [
         'label' => $format->name,
         'machine_name' => $id,
-      ));
-      $form['formats'][$id]['name'] = array('#markup' => $label);
-      $roles = array();
+      ]);
+      $form['formats'][$id]['name'] = ['#markup' => $label];
+      $roles = [];
       foreach (filter_get_roles_by_format($format) as $role_name) {
         $role = user_role_load($role_name);
         $roles[] = check_plain($role->label);
       }
       $roles_markup = $roles ? implode(', ', $roles) : t('No roles may use this format');
     }
-    $form['formats'][$id]['editor'] = array(
+    $form['formats'][$id]['editor'] = [
       '#markup' => isset($editors[$format->editor]) ? check_plain($editors[$format->editor]['label']) : t('None'),
-    );
-    $form['formats'][$id]['roles'] = array(
+    ];
+    $form['formats'][$id]['roles'] = [
       '#markup' => $roles_markup,
-    );
-    backdrop_sort($links, array('weight'));
-    $form['formats'][$id]['operations'] = array(
+    ];
+    backdrop_sort($links, ['weight']);
+    $form['formats'][$id]['operations'] = [
       '#type' => 'operations',
       '#links' => $links,
-    );
-    $form['formats'][$id]['weight'] = array(
+    ];
+    $form['formats'][$id]['weight'] = [
       '#type' => 'weight',
-      '#title' => t('Weight for @title', array('@title' => $format->name)),
+      '#title' => t('Weight for @title', ['@title' => $format->name]),
       '#title_display' => 'invisible',
       '#default_value' => $format->weight,
-    );
+    ];
   }
-  backdrop_sort($form['formats'], array('#weight'));
+  backdrop_sort($form['formats'], ['#weight']);
 
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Save changes'));
+  $form['actions'] = ['#type' => 'actions'];
+  $form['actions']['submit'] = ['#type' => 'submit', '#value' => t('Save changes')];
   return $form;
 }
 
@@ -160,16 +160,16 @@ function filter_admin_overview_submit($form, &$form_state) {
 function filter_admin_format_page($format = NULL) {
   if (!isset($format->name)) {
     backdrop_set_title(t('Add text format'));
-    $format = (object) array(
+    $format = (object) [
       'format' => NULL,
       'name' => '',
       'editor' => '',
-      'editor_settings' => array(),
+      'editor_settings' => [],
       'cache' => 1,
       'status' => 1,
       'is_new' => TRUE,
-      'filters' => array(),
-    );
+      'filters' => [],
+    ];
   }
   return backdrop_get_form('filter_admin_format_form', $format);
 }
@@ -209,53 +209,53 @@ function filter_admin_format_form($form, &$form_state, $format) {
     $current_editor = $form_state['values']['editor'];
     if ($format->editor != $current_editor && isset($editors[$current_editor])) {
       $format->editor = $current_editor;
-      $format->editor_settings = array();
+      $format->editor_settings = [];
     }
   }
   else {
     $editor_info = ($format->editor && isset($editors[$format->editor])) ? $editors[$format->editor] : NULL;
   }
 
-  $form['messages'] = array(
+  $form['messages'] = [
     '#theme' => 'status_messages',
     '#messages' => '',
     '#weight' => -100,
     // Prefix/suffix used to identify in AJAX requests.
     '#prefix' => '<div id="filter-messages">',
     '#suffix' => '</div>',
-  );
+  ];
 
   $form_state['format'] = $format;
   $form_state['editor_info'] = $editor_info;
 
-  $form['#validate'] = array();
-  $form['#submit'] = array();
+  $form['#validate'] = [];
+  $form['#submit'] = [];
   $form['#tree'] = TRUE;
-  $form['#attached']['library'][] = array('filter', 'filter.admin');
-  $form['#attached']['library'][] = array('filter', 'filter.filtered_html.admin');
-  $form['#attached']['library'][] = array('system', 'backdrop.dialog');
+  $form['#attached']['library'][] = ['filter', 'filter.admin'];
+  $form['#attached']['library'][] = ['filter', 'filter.filtered_html.admin'];
+  $form['#attached']['library'][] = ['system', 'backdrop.dialog'];
 
-  $form['name'] = array(
+  $form['name'] = [
     '#type' => 'textfield',
     '#title' => t('Name'),
     '#default_value' => $format->name,
     '#required' => TRUE,
     '#weight' => -20,
-  );
-  $form['format'] = array(
+  ];
+  $form['format'] = [
     '#type' => 'machine_name',
     '#required' => TRUE,
     '#default_value' => $format->format,
     '#maxlength' => 255,
     '#disabled' => !empty($format->format),
-    '#machine_name' => array(
+    '#machine_name' => [
       'exists' => 'filter_format_exists',
-    ),
+    ],
     '#weight' => -19,
-  );
+  ];
 
   // Build the list of all available editors.
-  $editor_options = array('' => t('None'));
+  $editor_options = ['' => t('None')];
   foreach ($editors as $editor_name => $editor) {
     $editor_options[$editor_name] = $editor['label'];
   }
@@ -271,35 +271,35 @@ function filter_admin_format_form($form, &$form_state, $format) {
     }
   }
 
-  $form['editor'] = array(
+  $form['editor'] = [
     '#weight' => -9,
-  );
-  $form['editor']['editor'] = array(
+  ];
+  $form['editor']['editor'] = [
     '#type' => 'select',
     '#title' => t('Text editor'),
     '#options' => $editor_options,
     '#empty_option' => t('None'),
     '#default_value' => $format->editor ? $format->editor : '',
-    '#ajax' => array(
-      'trigger_as' => array('name' => 'editor_configure'),
+    '#ajax' => [
+      'trigger_as' => ['name' => 'editor_configure'],
       'callback' => 'filter_admin_format_editor_ajax',
       'wrapper' => 'editor-settings-wrapper',
-    ),
-    '#parents' => array('editor'),
-  );
-  $form['editor']['configure'] = array(
+    ],
+    '#parents' => ['editor'],
+  ];
+  $form['editor']['configure'] = [
     '#type' => 'submit',
     '#name' => 'editor_configure',
     '#value' => t('Configure editor'),
-    '#limit_validation_errors' => array(array('editor')),
-    '#submit' => array('filter_admin_format_editor_submit'),
-    '#ajax' => array(
+    '#limit_validation_errors' => [['editor']],
+    '#submit' => ['filter_admin_format_editor_submit'],
+    '#ajax' => [
       'callback' => 'filter_admin_format_editor_ajax',
       'wrapper' => 'editor-settings-wrapper',
-    ),
-    '#attributes' => array('class' => array('js-hide')),
-    '#parents' => array('editor_configure'),
-  );
+    ],
+    '#attributes' => ['class' => ['js-hide']],
+    '#parents' => ['editor_configure'],
+  ];
 
   // If there aren't any options (other than "None"), disable the select list.
   if (empty($editor_options)) {
@@ -307,12 +307,12 @@ function filter_admin_format_form($form, &$form_state, $format) {
     $form['editor']['editor']['#description'] = t('This option is disabled because no modules that provide a text editor are currently enabled.');
   }
 
-  $form['editor_settings'] = array(
+  $form['editor_settings'] = [
     '#tree' => TRUE,
     '#weight' => -8,
     '#type' => 'container',
     '#id' => 'editor-settings-wrapper',
-  );
+  ];
 
   // Populate editor defaults.
   if (!empty($editor_info['default settings'])) {
@@ -323,16 +323,16 @@ function filter_admin_format_form($form, &$form_state, $format) {
   if (!empty($editor_info['settings callback'])) {
     $function = $editor_info['settings callback'];
     $form['editor_settings'] = array_merge($function($form, $form_state, $format), $form['editor_settings']);
-    $form['editor_settings']['#parents'] = array('editor_settings');
+    $form['editor_settings']['#parents'] = ['editor_settings'];
   }
 
   // Add user role access selection.
-  $form['roles'] = array(
+  $form['roles'] = [
     '#type' => 'checkboxes',
     '#title' => t('Roles'),
     '#options' => array_map('check_plain', user_roles()),
     '#disabled' => $is_fallback,
-  );
+  ];
   if ($is_fallback) {
     $form['roles']['#description'] = t('All roles for this text format must be enabled and cannot be changed.');
   }
@@ -344,7 +344,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
     // If adding a new text format and the site has an administrative role,
     // pre-select that role so as to grant administrators access to the new
     // text format permission by default.
-    $form['roles']['#default_value'] = array($admin_role);
+    $form['roles']['#default_value'] = [$admin_role];
   }
 
   // Retrieve available filters and load all configured filters for existing
@@ -354,61 +354,61 @@ function filter_admin_format_form($form, &$form_state, $format) {
   // Create an empty filter object for new/unconfigured filters.
   foreach ($all_filter_info as $name => $filter_info) {
     if (!isset($format->filters[$name])) {
-      $format->filters[$name] = (object) array(
+      $format->filters[$name] = (object) [
         'format' => $format->format,
         'module' => $filter_info['module'],
         'name' => $name,
         'status' => 0,
         'weight' => $filter_info['weight'],
         'settings' => $filter_info['default settings'],
-      );
+      ];
     }
   }
 
   // Filter order (tabledrag).
-  $form['filters'] = array(
+  $form['filters'] = [
     '#type' => 'item',
     '#title' => t('Filter settings'),
     '#theme' => 'filter_admin_format_filter_order',
-  );
+  ];
   foreach ($all_filter_info as $name => $filter_info) {
     $filter_config = $format->filters[$name];
-    $form['filters'][$name]['status'] = array(
+    $form['filters'][$name]['status'] = [
       '#type' => 'checkbox',
       '#default_value' => $filter_config->status,
-      '#attributes' => array('class' => array('filter-status')),
-    );
+      '#attributes' => ['class' => ['filter-status']],
+    ];
     if (isset($filter_info['settings callback'])) {
-      $form['filters'][$name]['configure_button'] = array(
+      $form['filters'][$name]['configure_button'] = [
         '#type' => 'submit',
         '#name' => $name,
-        '#validate' => array('filter_admin_format_filter_settings_form_redirect_validate'),
-        '#submit' => array('filter_admin_format_filter_settings_form_redirect'),
-        '#ajax' => array(
+        '#validate' => ['filter_admin_format_filter_settings_form_redirect_validate'],
+        '#submit' => ['filter_admin_format_filter_settings_form_redirect'],
+        '#ajax' => [
           'callback' => 'filter_admin_format_filter_settings_form_ajax',
           'effect' => 'fade',
-        ),
+        ],
         '#value' => t('Configure'),
-      );
+      ];
     }
-    $form['filters'][$name]['filter'] = array(
+    $form['filters'][$name]['filter'] = [
       '#type' => 'item',
       '#title' => $filter_info['title'],
       '#description' => _filter_admin_format_get_tips($format, $name),
-      '#wrapper_attributes' => array(
-        'class' => array('filter-info'),
+      '#wrapper_attributes' => [
+        'class' => ['filter-info'],
         'data-filter-name' => $name,
-      ),
-    );
+      ],
+    ];
 
-    $form['filters'][$name]['weight'] = array(
+    $form['filters'][$name]['weight'] = [
       '#type' => 'weight',
-      '#title' => t('Weight for @title', array('@title' => $filter_info['title'])),
+      '#title' => t('Weight for @title', ['@title' => $filter_info['title']]),
       '#title_display' => 'invisible',
       '#delta' => 50,
       '#default_value' => $filter_config->weight,
-      '#parents' => array('filters', $name, 'weight'),
-    );
+      '#parents' => ['filters', $name, 'weight'],
+    ];
     $form['filters'][$name]['#weight'] = $filter_config->weight;
   }
 
@@ -416,27 +416,27 @@ function filter_admin_format_form($form, &$form_state, $format) {
   // filter. This is necessary to allow JS to respond to changes in editor
   // buttons, changing allowed tags in response.
   $filter_html = $format->filters['filter_html'];
-  $form['allowed_html'] = array(
+  $form['allowed_html'] = [
     '#type' => 'hidden',
     '#maxlength' => 1024,
-    '#attributes' => array('id' => array('allowed-html')),
+    '#attributes' => ['id' => ['allowed-html']],
     '#default_value' => $filter_html->settings['allowed_html'],
-  );
+  ];
 
   $form['#validate'][] = 'filter_admin_format_form_validate';
   $form['#submit'][] = 'filter_admin_format_form_submit';
 
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
+  $form['actions'] = ['#type' => 'actions'];
+  $form['actions']['submit'] = [
     '#type' => 'submit',
     '#value' => t('Save configuration'),
-  );
-  $form['actions']['cancel'] = array(
+  ];
+  $form['actions']['cancel'] = [
     '#type' => 'submit',
     '#value' => t('Cancel'),
-    '#validate' => array(),
-    '#submit' => array('filter_admin_format_form_cancel'),
-  );
+    '#validate' => [],
+    '#submit' => ['filter_admin_format_form_cancel'],
+  ];
 
   return $form;
 }
@@ -506,10 +506,10 @@ function filter_admin_format_filter_settings_form_ajax($form, &$form_state) {
 
     $configure_form = backdrop_get_form('filter_admin_format_filter_settings_form', $format, $name);
     $title = t('Configure filter');
-    $options = array(
+    $options = [
       'dialogClass' => 'filter-dialog',
       'width' => '90%',
-    );
+    ];
 
     $html = '';
     $html .= theme('status_messages');
@@ -517,12 +517,12 @@ function filter_admin_format_filter_settings_form_ajax($form, &$form_state) {
     $html .= backdrop_render($configure_form);
     $html .= '</div>';
 
-    $commands = array();
+    $commands = [];
     $commands[] = ajax_command_html('#filter-messages', '');
     $commands[] = ajax_command_open_modal_dialog($title, $html, $options);
   }
 
-  return array('#type' => 'ajax', '#commands' => $commands);
+  return ['#type' => 'ajax', '#commands' => $commands];
 }
 
 /**
@@ -548,35 +548,35 @@ function filter_admin_format_filter_settings_form($form, &$form_state, $format, 
     $settings_form = $function($form, $form_state, $filter, $format);
   }
 
-  $settings_form['filter'] = array(
+  $settings_form['filter'] = [
     '#type' => 'value',
     '#value' => $filter->name,
-  );
+  ];
   $settings_form['actions']['#type'] = 'actions';
-  $settings_form['actions']['submit'] = array(
+  $settings_form['actions']['submit'] = [
     '#type' => 'submit',
     '#value' => t('Update'),
-    '#validate' => array(),
-    '#submit' => array('filter_admin_format_filter_settings_update'),
-    '#ajax' => array(
+    '#validate' => [],
+    '#submit' => ['filter_admin_format_filter_settings_update'],
+    '#ajax' => [
       'callback' => 'filter_admin_format_filter_settings_ajax',
-      'progress' => array(
+      'progress' => [
         'type' => 'throbber',
         'message' => NULL,
-      ),
-    ),
-  );
+      ],
+    ],
+  ];
 
-  $settings_form['actions']['cancel'] = array(
+  $settings_form['actions']['cancel'] = [
     '#type' => 'link',
     '#title' => t('Cancel'),
     '#href' => '',
-    '#attributes' => array(
+    '#attributes' => [
       // Adding button classes puts the link in the button area of the dialog,
       // while the special "dialog-cancel" class closes the dialog.
-      'class' => array('button', 'button-secondary', 'form-submit', 'dialog-cancel'),
-    ),
-  );
+      'class' => ['button', 'button-secondary', 'form-submit', 'dialog-cancel'],
+    ],
+  ];
 
   return $settings_form;
 }
@@ -605,7 +605,7 @@ function filter_admin_format_filter_settings_ajax($form, &$form_state) {
   $filter_name = $form_state['filter_name'];
   $format = $form_state['format'];
 
-  $commands = array();
+  $commands = [];
 
   // Update the filter tips for the configured filter.
   $cloned_format = clone($format);
@@ -617,12 +617,12 @@ function filter_admin_format_filter_settings_ajax($form, &$form_state) {
 
   if (isset($form_state['values']['allowed_html'])) {
     // Update the tag list stored in the main form hidden element.
-    $commands[] = ajax_command_invoke('#allowed-html', 'val', array($form_state['values']['allowed_html']));
-    $commands[] = ajax_command_invoke('#allowed-html', 'trigger', array('change.filter-update'));
+    $commands[] = ajax_command_invoke('#allowed-html', 'val', [$form_state['values']['allowed_html']]);
+    $commands[] = ajax_command_invoke('#allowed-html', 'trigger', ['change.filter-update']);
   }
   $commands[] = ajax_command_html('#filter-messages', theme('status_messages'));
   $commands[] = ajax_command_close_modal_dialog();
-  return array('#type' => 'ajax', '#commands' => $commands);
+  return ['#type' => 'ajax', '#commands' => $commands];
 }
 
 /**
@@ -641,7 +641,7 @@ function filter_admin_format_form_validate($form, &$form_state) {
   $formats = filter_formats();
   foreach ($formats as $format) {
     if ($format->format !== $format_format && $format->name === $format_name) {
-      form_set_error('name', t('Text format names must be unique. A format named %name already exists.', array('%name' => $format_name)));
+      form_set_error('name', t('Text format names must be unique. A format named %name already exists.', ['%name' => $format_name]));
     }
   }
 }
@@ -650,12 +650,12 @@ function filter_admin_format_form_validate($form, &$form_state) {
  * AJAX callback for filter_admin_format_form().
  */
 function filter_admin_format_editor_ajax($form, $form_state) {
-  $commands = array();
+  $commands = [];
   $commands[] = ajax_command_replace('#editor-settings-wrapper', backdrop_render($form['editor_settings']));
-  return array(
+  return [
     '#type' => 'ajax',
     '#commands' => $commands,
-  );
+  ];
 }
 
 /**
@@ -670,7 +670,7 @@ function filter_admin_format_editor_submit($form, &$form_state) {
     $form_state['editor_info'] = $editors[$editor_name];
   }
   else {
-    $form_state['editor_info'] = array();
+    $form_state['editor_info'] = [];
   }
   $form_state['rebuild'] = TRUE;
 }
@@ -718,7 +718,7 @@ function filter_admin_format_form_submit($form, &$form_state) {
 
   // If not saving an editor, do not save any settings.
   if (!$format->editor) {
-    $format->editor_settings = array();
+    $format->editor_settings = [];
   }
 
   $status = filter_format_save($format);
@@ -726,17 +726,17 @@ function filter_admin_format_form_submit($form, &$form_state) {
   // Save user permissions.
   if ($permission = filter_permission_name($format)) {
     foreach ($format->roles as $rid => $enabled) {
-      user_role_change_permissions($rid, array($permission => $enabled));
+      user_role_change_permissions($rid, [$permission => $enabled]);
     }
   }
 
   switch ($status) {
     case SAVED_NEW:
-      backdrop_set_message(t('Added text format %format.', array('%format' => $format->name)));
+      backdrop_set_message(t('Added text format %format.', ['%format' => $format->name]));
       break;
 
     case SAVED_UPDATED:
-      backdrop_set_message(t('Updated text format %format.', array('%format' => $format->name)));
+      backdrop_set_message(t('Updated text format %format.', ['%format' => $format->name]));
       break;
   }
 
@@ -753,7 +753,7 @@ function filter_admin_enable($format = NULL) {
   }
   if (isset($format)) {
     filter_format_enable($format);
-    backdrop_set_message(t('Enabled text format %format.', array('%format' => $format->name)));
+    backdrop_set_message(t('Enabled text format %format.', ['%format' => $format->name]));
   }
   else {
     backdrop_set_message(t('No text format provided.'), 'error');
@@ -775,7 +775,7 @@ function filter_admin_disable($form, &$form_state, $format) {
   $form_state['format'] = $format;
 
   return confirm_form($form,
-    t('Are you sure you want to disable the text format %format?', array('%format' => $format->name)),
+    t('Are you sure you want to disable the text format %format?', ['%format' => $format->name]),
     'admin/config/content/formats',
     t('Any content stored with that format may not be rendered properly.'),
     t('Disable')
@@ -789,7 +789,7 @@ function filter_admin_disable_submit($form, &$form_state) {
   $format = $form_state['format'];
 
   filter_format_disable($format);
-  backdrop_set_message(t('Disabled text format %format.', array('%format' => $format->name)));
+  backdrop_set_message(t('Disabled text format %format.', ['%format' => $format->name]));
   $form_state['redirect'] = 'admin/config/content/formats';
 }
 
@@ -811,29 +811,29 @@ function filter_admin_disable_submit($form, &$form_state) {
  */
 function filter_editor_image_upload_settings_form($format) {
   // Defaults.
-  $settings = isset($format->editor_settings['image_upload']) ? $format->editor_settings['image_upload'] : array();
-  $settings += array(
+  $settings = isset($format->editor_settings['image_upload']) ? $format->editor_settings['image_upload'] : [];
+  $settings += [
     'status' => FALSE,
     'scheme' => file_default_scheme(),
     'alt_required' => FALSE,
     'directory' => 'inline-images',
     'max_size' => '',
-    'max_dimensions' => array('width' => '', 'height' => ''),
+    'max_dimensions' => ['width' => '', 'height' => ''],
     'orientate' => FALSE,
-  );
-  $form['status'] = array(
+  ];
+  $form['status'] = [
     '#type' => 'checkbox',
     '#title' => t('Enable image uploads'),
     '#default_value' => $settings['status'],
-    '#attributes' => array(
+    '#attributes' => [
       'data-editor-image-upload' => 'status',
-    ),
-  );
-  $show_if_image_uploads_enabled = array(
-    'visible' => array(
-      ':input[data-editor-image-upload="status"]' => array('checked' => TRUE),
-    ),
-  );
+    ],
+  ];
+  $show_if_image_uploads_enabled = [
+    'visible' => [
+      ':input[data-editor-image-upload="status"]' => ['checked' => TRUE],
+    ],
+  ];
 
   // Any visible, writable wrapper can potentially be used for uploads,
   // including a remote file system that integrates with a CDN.
@@ -842,72 +842,72 @@ function filter_editor_image_upload_settings_form($format) {
     $options[$scheme] = $info['description'];
   }
 
-  $form['orientate'] = array(
+  $form['orientate'] = [
     '#type' => 'checkbox',
     '#title' => t('Enable image re-orientation'),
     '#description' => t('If EXIF data indicates the need, the image will be rotated appropriately before being saved.'),
     '#default_value' => $settings['orientate'],
-    '#attributes' => array(
+    '#attributes' => [
       'data-editor-image-rotate' => 'orientate',
-    ),
+    ],
     '#states' => $show_if_image_uploads_enabled,
     '#access' => function_exists('exif_read_data'),
-  );
+  ];
 
   if (!empty($options)) {
-    $form['scheme'] = array(
+    $form['scheme'] = [
       '#type' => 'radios',
       '#title' => t('File storage'),
       '#default_value' => $settings['scheme'],
       '#options' => $options,
       '#states' => $show_if_image_uploads_enabled,
       '#access' => count($options) > 1,
-    );
+    ];
   }
   // Set data- attributes with human-readable names for all possible stream
   // wrappers, so that backdrop.ckeditor.backdropimage.admin's summary rendering
   // can use that.
   foreach ($stream_wrappers as $scheme => $info) {
-    $form['scheme'][$scheme]['#attributes']['data-label'] = t('Storage: @name', array('@name' => $info['name']));
+    $form['scheme'][$scheme]['#attributes']['data-label'] = t('Storage: @name', ['@name' => $info['name']]);
   }
 
-  $form['alt_required'] = array(
+  $form['alt_required'] = [
     '#type' => 'checkbox',
     '#title' => t('<em>Alt</em> text required'),
     '#description' => t('Requiring alternative text is strongly encouraged to improve accessibility.'),
     '#default_value' => $settings['alt_required'],
     '#states' => $show_if_image_uploads_enabled,
-  );
+  ];
 
-  $form['directory'] = array(
+  $form['directory'] = [
     '#type' => 'textfield',
     '#default_value' => $settings['directory'],
     '#title' => t('Upload directory'),
     '#description' => t("A directory relative to the files directory where uploaded images will be stored."),
     '#states' => $show_if_image_uploads_enabled,
-  );
+  ];
 
   $default_max_size = format_size(file_upload_max_size());
-  $form['max_size'] = array(
+  $form['max_size'] = [
     '#type' => 'textfield',
     '#default_value' => $settings['max_size'],
     '#title' => t('Maximum file size'),
-    '#description' => t('If this is left empty, then the file size will be limited by the PHP maximum upload size of @size.', array('@size' => $default_max_size)),
+    '#description' => t('If this is left empty, then the file size will be limited by the PHP maximum upload size of @size.', ['@size' => $default_max_size]),
     '#maxlength' => 20,
     '#size' => 10,
     '#placeholder' => $default_max_size,
     '#states' => $show_if_image_uploads_enabled,
-  );
+  ];
 
-  $form['max_dimensions'] = array(
+  $form['max_dimensions'] = [
     '#type' => 'item',
     '#title' => t('Maximum dimensions'),
     '#field_prefix' => '<div class="container-inline clearfix">',
     '#field_suffix' => '</div>',
     '#description' => t('Images larger than these dimensions will be scaled down.'),
     '#states' => $show_if_image_uploads_enabled,
-  );
-  $form['max_dimensions']['width'] = array(
+  ];
+  $form['max_dimensions']['width'] = [
     '#title' => t('Width'),
     '#title_display' => 'invisible',
     '#type' => 'number',
@@ -919,8 +919,8 @@ function filter_editor_image_upload_settings_form($format) {
     '#placeholder' => 'width',
     '#field_suffix' => ' x ',
     '#states' => $show_if_image_uploads_enabled,
-  );
-  $form['max_dimensions']['height'] = array(
+  ];
+  $form['max_dimensions']['height'] = [
     '#title' => t('Height'),
     '#title_display' => 'invisible',
     '#type' => 'number',
@@ -932,7 +932,7 @@ function filter_editor_image_upload_settings_form($format) {
     '#placeholder' => 'height',
     '#field_suffix' => 'pixels',
     '#states' => $show_if_image_uploads_enabled,
-  );
+  ];
 
   return $form;
 }
@@ -956,28 +956,28 @@ function filter_editor_image_upload_settings_form($format) {
  */
 function filter_editor_file_upload_settings_form($format) {
   // Defaults.
-  $settings = isset($format->editor_settings['file_upload']) ? $format->editor_settings['file_upload'] : array();
-  $settings += array(
+  $settings = isset($format->editor_settings['file_upload']) ? $format->editor_settings['file_upload'] : [];
+  $settings += [
     'status' => FALSE,
     'scheme' => file_default_scheme(),
     'directory' => 'inline-files',
     'max_size' => '',
     'file_extensions' => 'txt pdf',
-  );
+  ];
 
-  $form['status'] = array(
+  $form['status'] = [
     '#type' => 'checkbox',
     '#title' => t('Enable file uploads'),
     '#default_value' => $settings['status'],
-    '#attributes' => array(
+    '#attributes' => [
       'data-editor-file-upload' => 'status',
-    ),
-  );
-  $show_if_file_uploads_enabled = array(
-    'visible' => array(
-      ':input[data-editor-file-upload="status"]' => array('checked' => TRUE),
-    ),
-  );
+    ],
+  ];
+  $show_if_file_uploads_enabled = [
+    'visible' => [
+      ':input[data-editor-file-upload="status"]' => ['checked' => TRUE],
+    ],
+  ];
 
   // Any visible, writable wrapper can potentially be used for uploads,
   // including a remote file system that integrates with a CDN.
@@ -986,55 +986,55 @@ function filter_editor_file_upload_settings_form($format) {
     $options[$scheme] = $info['description'];
   }
   if (!empty($options)) {
-    $form['scheme'] = array(
+    $form['scheme'] = [
       '#type' => 'radios',
       '#title' => t('File storage'),
       '#default_value' => $settings['scheme'],
       '#options' => $options,
       '#states' => $show_if_file_uploads_enabled,
       '#access' => count($options) > 1,
-    );
+    ];
   }
   // Set data- attributes with human-readable names for all possible stream
   // wrappers, so that backdrop.ckeditor.backdropimage.admin's summary rendering
   // can use that.
   foreach ($stream_wrappers as $scheme => $info) {
-    $form['scheme'][$scheme]['#attributes']['data-label'] = t('Storage: @name', array('@name' => $info['name']));
+    $form['scheme'][$scheme]['#attributes']['data-label'] = t('Storage: @name', ['@name' => $info['name']]);
   }
 
-  $form['directory'] = array(
+  $form['directory'] = [
     '#type' => 'textfield',
     '#default_value' => $settings['directory'],
     '#title' => t('Upload directory'),
     '#description' => t("A directory relative to the files directory where uploaded files will be stored."),
     '#states' => $show_if_file_uploads_enabled,
-  );
+  ];
 
   $default_max_size = format_size(file_upload_max_size());
-  $form['max_size'] = array(
+  $form['max_size'] = [
     '#type' => 'textfield',
     '#default_value' => $settings['max_size'],
     '#title' => t('Maximum file size'),
-    '#description' => t('If this is left empty, then the file size will be limited by the PHP maximum upload size of @size.', array('@size' => $default_max_size)),
+    '#description' => t('If this is left empty, then the file size will be limited by the PHP maximum upload size of @size.', ['@size' => $default_max_size]),
     '#maxlength' => 20,
     '#size' => 10,
     '#placeholder' => $default_max_size,
     '#states' => $show_if_file_uploads_enabled,
-  );
+  ];
 
-  $form['file_extensions'] = array(
+  $form['file_extensions'] = [
     '#type' => 'textfield',
     '#title' => t('Allowed file extensions'),
     '#default_value' => $settings['file_extensions'],
     '#description' => t('Separate extensions with a space or comma and do not include the leading dot.'),
-    '#element_validate' => array('_file_generic_settings_extensions'),
+    '#element_validate' => ['_file_generic_settings_extensions'],
     '#weight' => 1,
     '#maxlength' => 256,
     // By making this field required, we prevent a potential security issue
     // that would allow files of any type to be uploaded.
     '#required' => TRUE,
     '#states' => $show_if_file_uploads_enabled,
-  );
+  ];
 
   return $form;
 }

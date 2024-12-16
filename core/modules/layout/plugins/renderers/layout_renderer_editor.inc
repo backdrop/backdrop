@@ -106,18 +106,18 @@ class LayoutRendererEditor extends LayoutRendererStandard {
     $buttons = $this->getBlockLinks($block);
     $content = $block->getAdminPreview();
 
-    $attributes = array(
+    $attributes = [
       'tabindex' => '0',
       'aria-label' => $aria_label,
-      'class' => array('layout-editor-block clearfix'),
+      'class' => ['layout-editor-block clearfix'],
       'id' => 'layout-editor-block-' . $block->uuid,
       'data-block-id' => $block->uuid,
-    );
+    ];
 
     $block_admin_title = $block->getAdminTitle();
     if (!$block->status) {
       $attributes['class'][] = 'layout-editor-block-disabled';
-      $block_admin_title = t('!title (Disabled)', array('!title' => $block_admin_title));
+      $block_admin_title = t('!title (Disabled)', ['!title' => $block_admin_title]);
     }
 
     $output = '<div ' . backdrop_attributes($attributes) . '>';
@@ -138,7 +138,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
    * {@inheritdoc}
    */
   function renderBlocks() {
-    $this->rendered['blocks'] = array();
+    $this->rendered['blocks'] = [];
     foreach ($this->prepared['blocks'] as $uuid => $block) {
       $this->rendered['blocks'][$uuid] = $this->renderBlock($block);
     }
@@ -149,7 +149,7 @@ class LayoutRendererEditor extends LayoutRendererStandard {
    * Returns an aria label for a block.
    */
   function getAriaLabel($block) {
-    return t('Draggable block !title', array('!title' => strip_tags($block->getAdminTitle())));
+    return t('Draggable block !title', ['!title' => strip_tags($block->getAdminTitle())]);
   }
 
   /**
@@ -178,43 +178,43 @@ class LayoutRendererEditor extends LayoutRendererStandard {
    * Render the links to display when editing a region.
    */
   protected function getRegionLinks($region_id) {
-    $links = array();
+    $links = [];
     if ($region_id == 'title') {
-      $links['title'] = array(
+      $links['title'] = [
         'title' => t('Configure'),
         'href' => $this->getUrl('edit-title', $region_id),
-        'attributes' => array(
-          'class' => array('use-ajax'),
+        'attributes' => [
+          'class' => ['use-ajax'],
           'data-dialog' => TRUE,
-          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
-        ),
-      );
+          'data-dialog-options' => json_encode(['dialogClass' => 'layout-dialog']),
+        ],
+      ];
     }
     else {
-      $links['add'] = array(
+      $links['add'] = [
         'title' => t('Add block'),
         'href' => $this->getUrl('add-block', $region_id),
-        'attributes' => array(
-          'class' => array('use-ajax'),
+        'attributes' => [
+          'class' => ['use-ajax'],
           'data-dialog' => TRUE,
-          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
-        ),
-      );
-      $links['configure'] = array(
+          'data-dialog-options' => json_encode(['dialogClass' => 'layout-dialog']),
+        ],
+      ];
+      $links['configure'] = [
         'title' => t('Configure region'),
         'href' => $this->getUrl('configure-region', $region_id),
-        'attributes' => array(
-          'class' => array('use-ajax'),
+        'attributes' => [
+          'class' => ['use-ajax'],
           'data-dialog' => TRUE,
-          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
-        ),
-      );
+          'data-dialog-options' => json_encode(['dialogClass' => 'layout-dialog']),
+        ],
+      ];
     }
 
-    $dropbutton = array(
+    $dropbutton = [
       '#type' => 'dropbutton',
       '#links' => $links,
-    );
+    ];
 
     return backdrop_render($dropbutton);
   }
@@ -223,68 +223,68 @@ class LayoutRendererEditor extends LayoutRendererStandard {
    * Render the links to display when editing a block.
    */
   protected function getBlockLinks($block) {
-    $links = array();
+    $links = [];
 
     if (!$block->status) {
-      $links['enable'] = array(
+      $links['enable'] = [
         'title' => t('Enable'),
         'href' => $this->getUrl('toggle-block-status', $block->uuid),
-        'query' => array('token' => backdrop_get_token('layout-' . $this->layout->name)),
-        'attributes' => array(
-          'class' => array('enable-block', 'use-ajax'),
-        ),
-      );
+        'query' => ['token' => backdrop_get_token('layout-' . $this->layout->name)],
+        'attributes' => [
+          'class' => ['enable-block', 'use-ajax'],
+        ],
+      ];
     }
 
     // Only render the "Configure" link if the block is not broken.
     if (!is_a($block, 'BlockBroken')) {
-      $links['configure'] = array(
+      $links['configure'] = [
         'title' => t('Configure'),
         'href' => $this->getUrl('configure-block', $block->uuid),
-        'attributes' => array(
-          'class' => array('use-ajax'),
+        'attributes' => [
+          'class' => ['use-ajax'],
           'data-dialog' => TRUE,
-          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
-        ),
-      );
+          'data-dialog-options' => json_encode(['dialogClass' => 'layout-dialog']),
+        ],
+      ];
     }
 
     if ($block->module == 'system' && $block->delta == 'page_components' && ($block->childDelta == 'title' || $block->childDelta =='title_combo')) {
-      $links['title'] = array(
+      $links['title'] = [
         'title' => t('Page title settings'),
         'href' => $this->getUrl('edit-title', 'title'),
-        'attributes' => array(
-          'class' => array('use-ajax'),
+        'attributes' => [
+          'class' => ['use-ajax'],
           'data-dialog' => TRUE,
-          'data-dialog-options' => json_encode(array('dialogClass' => 'layout-dialog')),
-        ),
-      );
+          'data-dialog-options' => json_encode(['dialogClass' => 'layout-dialog']),
+        ],
+      ];
     }
 
-    $links['remove'] = array(
+    $links['remove'] = [
       'title' => t('Remove'),
       'href' => $this->getUrl('remove-block', $block->uuid),
-      'query' => array('token' => backdrop_get_token('layout-' . $this->layout->name)),
-      'attributes' => array(
-        'class' => array('remove-block', 'use-ajax'),
-      ),
-    );
+      'query' => ['token' => backdrop_get_token('layout-' . $this->layout->name)],
+      'attributes' => [
+        'class' => ['remove-block', 'use-ajax'],
+      ],
+    ];
 
     if ($block->status) {
-      $links['disable'] = array(
+      $links['disable'] = [
         'title' => t('Disable'),
         'href' => $this->getUrl('toggle-block-status', $block->uuid),
-        'query' => array('token' => backdrop_get_token('layout-' . $this->layout->name)),
-        'attributes' => array(
-          'class' => array('disable-block', 'use-ajax'),
-        ),
-      );
+        'query' => ['token' => backdrop_get_token('layout-' . $this->layout->name)],
+        'attributes' => [
+          'class' => ['disable-block', 'use-ajax'],
+        ],
+      ];
     }
 
-    $dropbutton = array(
+    $dropbutton = [
       '#type' => 'dropbutton',
       '#links' => $links,
-    );
+    ];
 
     return backdrop_render($dropbutton);
   }

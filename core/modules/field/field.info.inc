@@ -87,22 +87,22 @@ function _field_info_collate_types() {
       $info = $cached->data;
     }
     else {
-      $info = array(
-        'field types' => array(),
-        'widget types' => array(),
-        'formatter types' => array(),
-        'storage types' => array(),
-      );
+      $info = [
+        'field types' => [],
+        'widget types' => [],
+        'formatter types' => [],
+        'storage types' => [],
+      ];
 
       // Populate field types.
       foreach (module_implements('field_info') as $module) {
         $field_types = (array) module_invoke($module, 'field_info');
         foreach ($field_types as $name => $field_info) {
           // Provide defaults.
-          $field_info += array(
-            'settings' => array(),
-            'instance_settings' => array(),
-          );
+          $field_info += [
+            'settings' => [],
+            'instance_settings' => [],
+          ];
           $info['field types'][$name] = $field_info;
           $info['field types'][$name]['module'] = $module;
         }
@@ -114,9 +114,9 @@ function _field_info_collate_types() {
         $widget_types = (array) module_invoke($module, 'field_widget_info');
         foreach ($widget_types as $name => $widget_info) {
           // Provide defaults.
-          $widget_info += array(
-            'settings' => array(),
-          );
+          $widget_info += [
+            'settings' => [],
+          ];
           $info['widget types'][$name] = $widget_info;
           $info['widget types'][$name]['module'] = $module;
         }
@@ -129,9 +129,9 @@ function _field_info_collate_types() {
         $formatter_types = (array) module_invoke($module, 'field_formatter_info');
         foreach ($formatter_types as $name => $formatter_info) {
           // Provide defaults.
-          $formatter_info += array(
-            'settings' => array(),
-          );
+          $formatter_info += [
+            'settings' => [],
+          ];
           $info['formatter types'][$name] = $formatter_info;
           $info['formatter types'][$name]['module'] = $module;
         }
@@ -143,9 +143,9 @@ function _field_info_collate_types() {
         $storage_types = (array) module_invoke($module, 'field_storage_info');
         foreach ($storage_types as $name => $storage_info) {
           // Provide defaults.
-          $storage_info += array(
-            'settings' => array(),
-          );
+          $storage_info += [
+            'settings' => [],
+          ];
           $info['storage types'][$name] = $storage_info;
           $info['storage types'][$name]['module'] = $module;
         }
@@ -201,22 +201,22 @@ function _field_info_collate_fields() {
       $info = $cached->data;
     }
     else {
-      $definitions = array(
+      $definitions = [
         'fields' => _field_read_fields_cache(),
         'instances' => field_read_instances(),
-      );
+      ];
 
       // Populate 'fields' with all fields, keyed by field name.
-      $info['fields'] = array();
+      $info['fields'] = [];
       foreach ($definitions['fields'] as $field_name => $field) {
         $info['fields'][$field_name] = $definitions['fields'][$field_name] = _field_info_prepare_field($field);
       }
 
       // Populate 'instances'. Only non-deleted instances are considered.
-      $info['instances'] = array();
+      $info['instances'] = [];
       foreach (field_info_bundles() as $entity_type => $bundles) {
         foreach ($bundles as $bundle => $bundle_info) {
-          $info['instances'][$entity_type][$bundle] = array();
+          $info['instances'][$entity_type][$bundle] = [];
         }
       }
       foreach ($definitions['instances'] as $instance) {
@@ -272,7 +272,7 @@ function _field_read_fields_cache() {
   $definitions = &backdrop_static(__FUNCTION__);
 
   if (!isset($definitions)) {
-    $definitions = field_read_fields(array(), array('include_deleted' => 1));
+    $definitions = field_read_fields([], ['include_deleted' => 1]);
   }
 
   return $definitions;
@@ -289,11 +289,11 @@ function _field_read_fields_cache() {
  */
 function _field_info_prepare_field($field) {
   // Make sure all expected field settings are present.
-  $field += array(
-    'settings' => array(),
-    'storage' => array(),
-    'bundles' => array(),
-  );
+  $field += [
+    'settings' => [],
+    'storage' => [],
+    'bundles' => [],
+  ];
   $field['settings'] += field_info_field_settings($field['type']);
   $field['storage']['settings'] += field_info_storage_settings($field['storage']['type']);
 
@@ -338,17 +338,17 @@ function _field_info_prepare_instance($instance, $field) {
   // Fallback to 'hidden' for display modes configured to use custom display
   // settings, and for which the instance has no explicit settings.
   $entity_info = entity_get_info($instance['entity_type']);
-  $view_modes = array_merge(array('default'), array_keys($entity_info['view modes']));
+  $view_modes = array_merge(['default'], array_keys($entity_info['view modes']));
   $view_mode_settings = field_view_mode_settings($instance['entity_type'], $instance['bundle']);
   foreach ($view_modes as $view_mode) {
     if ($view_mode == 'default' || !empty($view_mode_settings[$view_mode]['custom_settings'])) {
       if (!isset($instance['display'][$view_mode])) {
-        $instance['display'][$view_mode] = array(
+        $instance['display'][$view_mode] = [
           'type' => 'hidden',
           'label' => 'hidden',
-          'settings' => array(),
+          'settings' => [],
           'weight' => 0,
-        );
+        ];
       }
     }
   }
@@ -369,12 +369,12 @@ function _field_info_prepare_instance_display($field, $display) {
   $field_type = field_info_field_types($field['type']);
 
   // Fill in default values.
-  $display += array(
+  $display += [
     'label' => 'hidden',
     'type' => $field_type['default_formatter'],
-    'settings' => array(),
+    'settings' => [],
     'weight' => 0,
-  );
+  ];
   if ($display['type'] != 'hidden') {
     $formatter_type = field_info_formatter_types($display['type']);
     // Fallback to default formatter if formatter type is not available.
@@ -402,11 +402,11 @@ function _field_info_prepare_instance_widget($field, $widget) {
   $field_type = field_info_field_types($field['type']);
 
   // Fill in default values.
-  $widget += array(
+  $widget += [
     'type' => $field_type['default_widget'],
-    'settings' => array(),
+    'settings' => [],
     'weight' => 0,
-  );
+  ];
 
   $widget_type = field_info_widget_types($widget['type']);
   // Fallback to default formatter if formatter type is not available.
@@ -434,12 +434,12 @@ function _field_info_prepare_instance_widget($field, $widget) {
 function _field_info_prepare_extra_fields($extra_fields, $entity_type, $bundle) {
   $entity_type_info = entity_get_info($entity_type);
   $bundle_settings = field_bundle_settings($entity_type, $bundle);
-  $extra_fields += array('form' => array(), 'display' => array());
+  $extra_fields += ['form' => [], 'display' => []];
 
-  $result = array();
+  $result = [];
   // Extra fields in forms.
   foreach ($extra_fields['form'] as $name => $field_data) {
-    $settings = isset($bundle_settings['extra_fields']['form'][$name]) ? $bundle_settings['extra_fields']['form'][$name] : array();
+    $settings = isset($bundle_settings['extra_fields']['form'][$name]) ? $bundle_settings['extra_fields']['form'][$name] : [];
     if (isset($settings['weight'])) {
       $field_data['weight'] = $settings['weight'];
     }
@@ -449,17 +449,17 @@ function _field_info_prepare_extra_fields($extra_fields, $entity_type, $bundle) 
   // Extra fields in displayed entities.
   $data = $extra_fields['display'];
   foreach ($extra_fields['display'] as $name => $field_data) {
-    $settings = isset($bundle_settings['extra_fields']['display'][$name]) ? $bundle_settings['extra_fields']['display'][$name] : array();
-    $view_modes = array_merge(array('default'), array_keys($entity_type_info['view modes']));
+    $settings = isset($bundle_settings['extra_fields']['display'][$name]) ? $bundle_settings['extra_fields']['display'][$name] : [];
+    $view_modes = array_merge(['default'], array_keys($entity_type_info['view modes']));
     foreach ($view_modes as $view_mode) {
       if (isset($settings[$view_mode])) {
         $field_data['display'][$view_mode] = $settings[$view_mode];
       }
       else {
-        $field_data['display'][$view_mode] = array(
+        $field_data['display'][$view_mode] = [
           'weight' => $field_data['weight'],
           'visible' => TRUE,
-        );
+        ];
       }
     }
     unset($field_data['weight']);
@@ -634,10 +634,10 @@ function field_info_bundles($entity_type = NULL) {
   $info = entity_get_info();
 
   if ($entity_type) {
-    return isset($info[$entity_type]['bundles']) ? $info[$entity_type]['bundles'] : array();
+    return isset($info[$entity_type]['bundles']) ? $info[$entity_type]['bundles'] : [];
   }
 
-  $bundles = array();
+  $bundles = [];
   foreach ($info as $type => $entity_info) {
     $bundles[$type] = $entity_info['bundles'];
   }
@@ -670,14 +670,14 @@ function field_info_bundles($entity_type = NULL) {
  */
 function field_info_field_map() {
   // Read from the "static" cache.
-  $field_info_cache = &backdrop_static(__FUNCTION__, array());
+  $field_info_cache = &backdrop_static(__FUNCTION__, []);
 
   if (!empty($field_info_cache)) {
     return $field_info_cache;
   }
 
   // Rebuild static cache
-  $field_info_cache = array();
+  $field_info_cache = [];
   $field_info_fields = field_info_fields();
 
   foreach ($field_info_fields as $field_name => $field_info) {
@@ -697,7 +697,7 @@ function field_info_field_map() {
  *   which this field belongs keyed by entity type.
  */
 function field_info_fields($include_deleted = FALSE) {
-  $fields = array();
+  $fields = [];
   $info = _field_info_collate_fields();
   foreach ($info['fields'] as $key => $field) {
     if (!$field['deleted'] || $include_deleted) {
@@ -746,10 +746,10 @@ function field_info_instances($entity_type = NULL, $bundle_name = NULL) {
   $info = _field_info_collate_fields();
 
   if (isset($entity_type) && isset($bundle_name)) {
-    return isset($info['instances'][$entity_type][$bundle_name]) ? $info['instances'][$entity_type][$bundle_name] : array();
+    return isset($info['instances'][$entity_type][$bundle_name]) ? $info['instances'][$entity_type][$bundle_name] : [];
   }
   elseif (isset($entity_type)) {
-    return isset($info['instances'][$entity_type]) ? $info['instances'][$entity_type] : array();
+    return isset($info['instances'][$entity_type]) ? $info['instances'][$entity_type] : [];
   }
   else {
     return $info['instances'];
@@ -835,7 +835,7 @@ function field_info_extra_fields($entity_type, $bundle, $context) {
   if (isset($info['extra_fields'][$entity_type][$bundle][$context])) {
     return $info['extra_fields'][$entity_type][$bundle][$context];
   }
-  return array();
+  return [];
 }
 
 /**
@@ -856,7 +856,7 @@ function field_info_extra_fields($entity_type, $bundle, $context) {
  *   were found.
  */
 function field_info_max_weight($entity_type, $bundle, $context) {
-  $weights = array();
+  $weights = [];
 
   // Collect weights for fields.
   foreach (field_info_instances($entity_type, $bundle) as $instance) {
@@ -891,7 +891,7 @@ function field_info_max_weight($entity_type, $bundle, $context) {
  */
 function field_info_field_settings($type) {
   $info = field_info_field_types($type);
-  return isset($info['settings']) ? $info['settings'] : array();
+  return isset($info['settings']) ? $info['settings'] : [];
 }
 
 /**
@@ -906,7 +906,7 @@ function field_info_field_settings($type) {
  */
 function field_info_instance_settings($type) {
   $info = field_info_field_types($type);
-  return isset($info['instance_settings']) ? $info['instance_settings'] : array();
+  return isset($info['instance_settings']) ? $info['instance_settings'] : [];
 }
 
 /**
@@ -922,7 +922,7 @@ function field_info_instance_settings($type) {
  */
 function field_info_widget_settings($type) {
   $info = field_info_widget_types($type);
-  return isset($info['settings']) ? $info['settings'] : array();
+  return isset($info['settings']) ? $info['settings'] : [];
 }
 
 /**
@@ -938,7 +938,7 @@ function field_info_widget_settings($type) {
  */
 function field_info_formatter_settings($type) {
   $info = field_info_formatter_types($type);
-  return isset($info['settings']) ? $info['settings'] : array();
+  return isset($info['settings']) ? $info['settings'] : [];
 }
 
 /**
@@ -954,7 +954,7 @@ function field_info_formatter_settings($type) {
  */
 function field_info_storage_settings($type) {
   $info = field_info_storage_types($type);
-  return isset($info['settings']) ? $info['settings'] : array();
+  return isset($info['settings']) ? $info['settings'] : [];
 }
 
 /**

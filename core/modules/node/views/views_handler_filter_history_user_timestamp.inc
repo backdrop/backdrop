@@ -35,11 +35,11 @@ class views_handler_filter_history_user_timestamp extends views_handler_filter {
       else {
         $label = t('Has new content');
       }
-      $form['value'] = array(
+      $form['value'] = [
         '#type' => 'checkbox',
         '#title' => $label,
         '#default_value' => $this->value,
-      );
+      ];
     }
   }
 

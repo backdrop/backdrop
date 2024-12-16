@@ -11,17 +11,17 @@ class views_plugin_row_search_view extends views_plugin_row {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['score'] = array('default' => TRUE, 'bool' => TRUE);
+    $options['score'] = ['default' => TRUE, 'bool' => TRUE];
 
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
-    $form['score'] = array(
+    $form['score'] = [
       '#type' => 'checkbox',
       '#title' => t('Display score'),
       '#default_value' => $this->options['score'],
-    );
+    ];
   }
 
   /**
@@ -29,10 +29,10 @@ class views_plugin_row_search_view extends views_plugin_row {
    */
   function render($row) {
     return theme($this->theme_functions(),
-      array(
+      [
         'view' => $this->view,
         'options' => $this->options,
         'row' => $row
-      ));
+      ]);
   }
 }

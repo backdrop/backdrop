@@ -18,236 +18,236 @@ function node_views_data() {
   $data['node']['table']['group'] = t('Content');
 
   // Advertise this table as a possible base table
-  $data['node']['table']['base'] = array(
+  $data['node']['table']['base'] = [
     'field' => 'nid',
     'title' => t('Content'),
     'weight' => -10,
     'access query tag' => 'node_access',
-    'defaults' => array(
+    'defaults' => [
       'field' => 'title',
-    ),
-  );
+    ],
+  ];
   $data['node']['table']['entity type'] = 'node';
 
-  $data['node']['table']['default_relationship'] = array(
-    'node_revision' => array(
+  $data['node']['table']['default_relationship'] = [
+    'node_revision' => [
       'table' => 'node_revision',
       'field' => 'vid',
-    ),
-  );
+    ],
+  ];
 
   // ----------------------------------------------------------------
   // node table -- fields
 
   // nid
-  $data['node']['nid'] = array(
+  $data['node']['nid'] = [
     'title' => t('Nid'),
     'help' => t('The node ID.'), // The help that appears on the UI,
     // Information for displaying the nid
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_node',
       'click sortable' => TRUE,
-    ),
+    ],
     // Information for accepting a nid as an argument
-    'argument' => array(
+    'argument' => [
       'handler' => 'views_handler_argument_node_nid',
       'name field' => 'title', // the field to display in the summary.
       'numeric' => TRUE,
       'validate type' => 'nid',
-    ),
+    ],
     // Information for accepting a nid as a filter
-    'filter' => array(
+    'filter' => [
       'handler' => 'views_handler_filter_numeric',
-    ),
+    ],
     // Information for sorting on a nid.
-    'sort' => array(
+    'sort' => [
       'handler' => 'views_handler_sort',
-    ),
-  );
+    ],
+  ];
 
   // title
   // This definition has more items in it than it needs to as an example.
-  $data['node']['title'] = array(
+  $data['node']['title'] = [
     'title' => t('Title'), // The item it appears as on the UI,
     'help' => t('The content title.'), // The help that appears on the UI,
      // Information for displaying a title as a field
-    'field' => array(
+    'field' => [
       'field' => 'title', // the real field. This could be left out since it is the same.
       'group' => t('Content'), // The group it appears in on the UI. Could be left out.
       'handler' => 'views_handler_field_node',
       'click sortable' => TRUE,
       'link_to_node default' => TRUE,
-     ),
-    'sort' => array(
+     ],
+    'sort' => [
       'handler' => 'views_handler_sort',
-    ),
+    ],
     // Information for accepting a title as a filter
-    'filter' => array(
+    'filter' => [
       'handler' => 'views_handler_filter_string',
-    ),
-    'argument' => array(
+    ],
+    'argument' => [
       'handler' => 'views_handler_argument_string',
-    ),
-  );
+    ],
+  ];
 
   // Created date.
-  $data['node']['created'] = array(
+  $data['node']['created'] = [
     'title' => t('Post date'), // The item it appears as on the UI,
     'help' => t('The date the content was posted.'), // The help that appears on the UI,
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_date',
       'click sortable' => TRUE,
-    ),
-    'sort' => array(
+    ],
+    'sort' => [
       'handler' => 'views_handler_sort_date',
-    ),
-    'filter' => array(
+    ],
+    'filter' => [
       'handler' => 'views_handler_filter_date',
-    ),
-  );
+    ],
+  ];
 
   // Changed date.
-  $data['node']['changed'] = array(
+  $data['node']['changed'] = [
     'title' => t('Updated date'), // The item it appears as on the UI,
     'help' => t('The date the content was last updated.'), // The help that appears on the UI,
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_date',
       'click sortable' => TRUE,
-    ),
-    'sort' => array(
+    ],
+    'sort' => [
       'handler' => 'views_handler_sort_date',
-    ),
-    'filter' => array(
+    ],
+    'filter' => [
       'handler' => 'views_handler_filter_date',
-    ),
-  );
+    ],
+  ];
 
   // Scheduled date.
-  $data['node']['scheduled'] = array(
+  $data['node']['scheduled'] = [
     'title' => t('Scheduled date'),
     'help' => t('The date content is scheduled to be published in the future.'),
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_date',
       'click sortable' => TRUE,
-    ),
-    'sort' => array(
+    ],
+    'sort' => [
       'handler' => 'views_handler_sort_date',
-    ),
-    'filter' => array(
+    ],
+    'filter' => [
       'handler' => 'views_handler_filter_date',
-    ),
-  );
+    ],
+  ];
 
   // Content type
-  $data['node']['type'] = array(
+  $data['node']['type'] = [
     'title' => t('Type'), // The item it appears as on the UI,
     'help' => t('The content type (for example, "blog entry", "forum post", "story", etc).'), // The help that appears on the UI,
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_node_type',
       'click sortable' => TRUE,
-    ),
-    'sort' => array(
+    ],
+    'sort' => [
       'handler' => 'views_handler_sort',
-    ),
-    'filter' => array(
+    ],
+    'filter' => [
       'handler' => 'views_handler_filter_node_type',
-    ),
-    'argument' => array(
+    ],
+    'argument' => [
       'handler' => 'views_handler_argument_node_type',
-    ),
-  );
+    ],
+  ];
 
   // published status
-  $data['node']['status'] = array(
+  $data['node']['status'] = [
     'title' => t('Published'),
     'help' => t('Whether or not the content is published.'),
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_boolean',
       'click sortable' => TRUE,
-      'output formats' => array(
-        'published-notpublished' => array(t('Published'), t('Not published')),
-      ),
-    ),
-    'filter' => array(
+      'output formats' => [
+        'published-notpublished' => [t('Published'), t('Not published')],
+      ],
+    ],
+    'filter' => [
       'handler' => 'views_handler_filter_boolean_operator',
       'label' => t('Published'),
       'type' => 'yes-no',
       // Use status = 1 instead of status <> 0 in WHERE statement.
       'use equal' => TRUE,
-    ),
-    'sort' => array(
+    ],
+    'sort' => [
       'handler' => 'views_handler_sort',
-    ),
-  );
+    ],
+  ];
 
   // hidden path
-  $data['node']['hidden_path'] = array(
+  $data['node']['hidden_path'] = [
     'title' => t('Hidden path'),
     'help' => t('Whether or not the content has a hidden path.'),
-    'filter' => array(
+    'filter' => [
       'handler' => 'views_handler_filter_node_hidden_path',
       'label' => t('Paths are hidden'),
       'type' => 'yes-no',
-    ),
-    'sort' => array(
+    ],
+    'sort' => [
       'handler' => 'views_handler_sort',
-    ),
-  );
+    ],
+  ];
 
   // published status + extra
-  $data['node']['status_extra'] = array(
+  $data['node']['status_extra'] = [
     'title' => t('Published or admin'),
     'help' => t('Filters out unpublished content if the current user cannot view it.'),
-    'filter' => array(
+    'filter' => [
       'field' => 'status',
       'handler' => 'views_handler_filter_node_status',
       'label' => t('Published or admin'),
-    ),
-  );
+    ],
+  ];
 
   // promote status
-  $data['node']['promote'] = array(
+  $data['node']['promote'] = [
     'title' => t('Promoted'),
     'help' => t('Whether or not the content is promoted.'),
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_boolean',
       'click sortable' => TRUE,
-      'output formats' => array(
-        'promoted-notpromoted' => array(t('Promoted'), t('Not promoted')),
-      ),
-    ),
-    'filter' => array(
+      'output formats' => [
+        'promoted-notpromoted' => [t('Promoted'), t('Not promoted')],
+      ],
+    ],
+    'filter' => [
       'handler' => 'views_handler_filter_boolean_operator',
       'label' => t('Promoted'),
       'type' => 'yes-no',
-    ),
-    'sort' => array(
+    ],
+    'sort' => [
       'handler' => 'views_handler_sort',
-    ),
-  );
+    ],
+  ];
 
   // sticky
-  $data['node']['sticky'] = array(
+  $data['node']['sticky'] = [
     'title' => t('Sticky'), // The item it appears as on the UI,
     'help' => t('Whether or not the content is sticky.'), // The help that appears on the UI,
      // Information for displaying a title as a field
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_boolean',
       'click sortable' => TRUE,
-      'output formats' => array(
-        'sticky' => array(t('Sticky'), t('Not sticky')),
-      ),
-    ),
-    'filter' => array(
+      'output formats' => [
+        'sticky' => [t('Sticky'), t('Not sticky')],
+      ],
+    ],
+    'filter' => [
       'handler' => 'views_handler_filter_boolean_operator',
       'label' => t('Sticky'),
       'type' => 'yes-no',
-    ),
-    'sort' => array(
+    ],
+    'sort' => [
       'handler' => 'views_handler_sort',
       'help' => t('Whether or not the content is sticky. To list sticky content first, set this to descending.'),
-    ),
-  );
+    ],
+  ];
 
   // Define some fields based upon views_handler_field_entity in the entity
   // table so they can be re-used with other query backends.
@@ -255,196 +255,196 @@ function node_views_data() {
 
   $data['views_entity_node']['table']['group'] = t('Content');
 
-  $data['node']['view_node']['moved to'] = array('views_entity_node', 'view_node');
-  $data['views_entity_node']['view_node'] = array(
-    'field' => array(
+  $data['node']['view_node']['moved to'] = ['views_entity_node', 'view_node'];
+  $data['views_entity_node']['view_node'] = [
+    'field' => [
       'title' => t('Link'),
       'help' => t('Provide a simple link to the content.'),
       'handler' => 'views_handler_field_node_link',
-    ),
-  );
+    ],
+  ];
 
-  $data['node']['edit_node']['moved to'] = array('views_entity_node', 'edit_node');
-  $data['views_entity_node']['edit_node'] = array(
-    'field' => array(
+  $data['node']['edit_node']['moved to'] = ['views_entity_node', 'edit_node'];
+  $data['views_entity_node']['edit_node'] = [
+    'field' => [
       'title' => t('Edit link'),
       'help' => t('Provide a simple link to edit the content.'),
       'handler' => 'views_handler_field_node_link_edit',
-    ),
-  );
+    ],
+  ];
 
-  $data['node']['delete_node']['moved to'] = array('views_entity_node', 'delete_node');
-  $data['views_entity_node']['delete_node'] = array(
-    'field' => array(
+  $data['node']['delete_node']['moved to'] = ['views_entity_node', 'delete_node'];
+  $data['views_entity_node']['delete_node'] = [
+    'field' => [
       'title' => t('Delete link'),
       'help' => t('Provide a simple link to delete the content.'),
       'handler' => 'views_handler_field_node_link_delete',
-    ),
-  );
+    ],
+  ];
 
-  $data['node']['path'] = array(
-    'field' => array(
+  $data['node']['path'] = [
+    'field' => [
       'title' => t('Path'),
       'help' => t('The aliased path to this content.'),
       'handler' => 'views_handler_field_node_path',
-    ),
-  );
+    ],
+  ];
 
 
   // Bogus fields for aliasing purposes.
 
-  $data['node']['created_fulldate'] = array(
+  $data['node']['created_fulldate'] = [
     'title' => t('Created date'),
     'help' => t('Date in the form of CCYYMMDD.'),
-    'argument' => array(
+    'argument' => [
       'field' => 'created',
       'handler' => 'views_handler_argument_node_created_fulldate',
-    ),
-  );
+    ],
+  ];
 
-  $data['node']['created_year_month'] = array(
+  $data['node']['created_year_month'] = [
     'title' => t('Created year + month'),
     'help' => t('Date in the form of YYYYMM.'),
-    'argument' => array(
+    'argument' => [
       'field' => 'created',
       'handler' => 'views_handler_argument_node_created_year_month',
-    ),
-  );
+    ],
+  ];
 
-  $data['node']['created_year'] = array(
+  $data['node']['created_year'] = [
     'title' => t('Created year'),
     'help' => t('Date in the form of YYYY.'),
-    'argument' => array(
+    'argument' => [
       'field' => 'created',
       'handler' => 'views_handler_argument_node_created_year',
-    ),
-  );
+    ],
+  ];
 
-  $data['node']['created_month'] = array(
+  $data['node']['created_month'] = [
     'title' => t('Created month'),
     'help' => t('Date in the form of MM (01 - 12).'),
-    'argument' => array(
+    'argument' => [
       'field' => 'created',
       'handler' => 'views_handler_argument_node_created_month',
-    ),
-  );
+    ],
+  ];
 
-  $data['node']['created_day'] = array(
+  $data['node']['created_day'] = [
     'title' => t('Created day'),
     'help' => t('Date in the form of DD (01 - 31).'),
-    'argument' => array(
+    'argument' => [
       'field' => 'created',
       'handler' => 'views_handler_argument_node_created_day',
-    ),
-  );
+    ],
+  ];
 
-  $data['node']['created_week'] = array(
+  $data['node']['created_week'] = [
     'title' => t('Created week'),
     'help' => t('Date in the form of WW (01 - 53).'),
-    'argument' => array(
+    'argument' => [
       'field' => 'created',
       'handler' => 'views_handler_argument_node_created_week',
-    ),
-  );
+    ],
+  ];
 
-  $data['node']['changed_fulldate'] = array(
+  $data['node']['changed_fulldate'] = [
     'title' => t('Updated date'),
     'help' => t('Date in the form of CCYYMMDD.'),
-    'argument' => array(
+    'argument' => [
       'field' => 'changed',
       'handler' => 'views_handler_argument_node_created_fulldate',
-    ),
-  );
+    ],
+  ];
 
-  $data['node']['changed_year_month'] = array(
+  $data['node']['changed_year_month'] = [
     'title' => t('Updated year + month'),
     'help' => t('Date in the form of YYYYMM.'),
-    'argument' => array(
+    'argument' => [
       'field' => 'changed',
       'handler' => 'views_handler_argument_node_created_year_month',
-    ),
-  );
+    ],
+  ];
 
-  $data['node']['changed_year'] = array(
+  $data['node']['changed_year'] = [
     'title' => t('Updated year'),
     'help' => t('Date in the form of YYYY.'),
-    'argument' => array(
+    'argument' => [
       'field' => 'changed',
       'handler' => 'views_handler_argument_node_created_year',
-    ),
-  );
+    ],
+  ];
 
-  $data['node']['changed_month'] = array(
+  $data['node']['changed_month'] = [
     'title' => t('Updated month'),
     'help' => t('Date in the form of MM (01 - 12).'),
-    'argument' => array(
+    'argument' => [
       'field' => 'changed',
       'handler' => 'views_handler_argument_node_created_month',
-    ),
-  );
+    ],
+  ];
 
-  $data['node']['changed_day'] = array(
+  $data['node']['changed_day'] = [
     'title' => t('Updated day'),
     'help' => t('Date in the form of DD (01 - 31).'),
-    'argument' => array(
+    'argument' => [
       'field' => 'changed',
       'handler' => 'views_handler_argument_node_created_day',
-    ),
-  );
+    ],
+  ];
 
-  $data['node']['changed_week'] = array(
+  $data['node']['changed_week'] = [
     'title' => t('Updated week'),
     'help' => t('Date in the form of WW (01 - 53).'),
-    'argument' => array(
+    'argument' => [
       'field' => 'changed',
       'handler' => 'views_handler_argument_node_created_week',
-    ),
-  );
+    ],
+  ];
 
   // uid field
-  $data['node']['uid'] = array(
+  $data['node']['uid'] = [
     'title' => t('Author uid'),
     'help' => t('The user authoring the content. If you need more fields than the uid add the content: author relationship'),
-    'relationship' => array(
+    'relationship' => [
       'title' => t('Author'),
       'help' => t('Relate content to the user who created it.'),
       'handler' => 'views_handler_relationship',
       'base' => 'users',
       'field' => 'uid',
       'label' => t('author'),
-    ),
-    'filter' => array(
+    ],
+    'filter' => [
       'handler' => 'views_handler_filter_user_name',
-    ),
-    'argument' => array(
+    ],
+    'argument' => [
       'handler' => 'views_handler_argument_numeric',
-    ),
-    'field' => array(
+    ],
+    'field' => [
       'handler' => 'views_handler_field_user',
-    ),
-  );
+    ],
+  ];
 
-  $data['node']['uid_revision'] = array(
+  $data['node']['uid_revision'] = [
     'title' => t('User has a revision'),
     'help' => t('All nodes where a certain user has a revision'),
     'real field' => 'nid',
-    'filter' => array(
+    'filter' => [
       'handler' => 'views_handler_filter_node_uid_revision',
-    ),
-    'argument' => array(
+    ],
+    'argument' => [
       'handler' => 'views_handler_argument_node_uid_revision',
-    ),
-  );
+    ],
+  ];
 
-  $data['node']['bulk_form'] = array(
+  $data['node']['bulk_form'] = [
     'title' => t('Bulk operations'),
     'help' => t('Provides a checkbox on each row and a form for executing bulk actions on nodes.'),
     'real field' => 'nid',
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_bulk_form',
       'click sortable' => FALSE,
-    ),
-  );
+    ],
+  ];
 
   // ----------------------------------------------------------------------
   // Content revision table
@@ -456,184 +456,184 @@ function node_views_data() {
   $data['node_revision']['table']['revision'] = TRUE;
   $data['node_revision']['table']['group']  = t('Content revision');
   // Support the conversion of the field body
-  $data['node_revisions']['body']['moved to'] = array('field_revision_data', 'body-revision_id');
+  $data['node_revisions']['body']['moved to'] = ['field_revision_data', 'body-revision_id'];
 
   // Advertise this table as a possible base table
-  $data['node_revision']['table']['base'] = array(
+  $data['node_revision']['table']['base'] = [
     'field' => 'vid',
     'title' => t('Content revision'),
     'help' => t('Content revision is a history of changes to content.'),
-    'defaults' => array(
+    'defaults' => [
       'field' => 'title',
-    ),
-  );
+    ],
+  ];
 
   // For other base tables, explain how we join
-  $data['node_revision']['table']['join'] = array(
+  $data['node_revision']['table']['join'] = [
     // Directly links to node table.
-    'node' => array(
+    'node' => [
       'left_field' => 'vid',
       'field' => 'vid',
-    ),
-  );
+    ],
+  ];
 
-  $data['node_revision']['table']['default_relationship'] = array(
-    'node' => array(
+  $data['node_revision']['table']['default_relationship'] = [
+    'node' => [
       'table' => 'node',
       'field' => 'nid',
-    ),
-  );
+    ],
+  ];
 
   // uid field for node revision
-  $data['node_revision']['uid'] = array(
+  $data['node_revision']['uid'] = [
     'title' => t('User'),
     'help' => t('Relate a content revision to the user who created the revision.'),
-    'relationship' => array(
+    'relationship' => [
       'handler' => 'views_handler_relationship',
       'base' => 'users',
       'base field' => 'uid',
       'label' => t('revision user'),
-    ),
-  );
+    ],
+  ];
 
   // nid
-  $data['node_revision']['nid'] = array(
+  $data['node_revision']['nid'] = [
     'title' => t('Nid'),
     // The help that appears on the UI.
     'help' => t('The revision NID of the content revision.'),
     // Information for displaying the nid.
-    'field' => array(
+    'field' => [
       'click sortable' => TRUE,
-    ),
+    ],
     // Information for accepting a nid as an argument.
-    'argument' => array(
+    'argument' => [
       'handler' => 'views_handler_argument_node_nid',
       'click sortable' => TRUE,
       'numeric' => TRUE,
-    ),
+    ],
     // Information for accepting a nid as a filter.
-    'filter' => array(
+    'filter' => [
       'handler' => 'views_handler_filter_numeric',
-    ),
+    ],
     // Information for sorting on a nid.
-    'sort' => array(
+    'sort' => [
       'handler' => 'views_handler_sort',
-    ),
-    'relationship' => array(
+    ],
+    'relationship' => [
       'handler' => 'views_handler_relationship',
       'base' => 'node',
       'base field' => 'nid',
       'title' => t('Content'),
       'label' => t('Get the actual content from a content revision.'),
-    ),
-  );
+    ],
+  ];
 
   // vid
-  $data['node_revision']['vid'] = array(
+  $data['node_revision']['vid'] = [
     'title' => t('Vid'),
     // The help that appears on the UI.
     'help' => t('The revision ID of the content revision.'),
     // Information for displaying the vid.
-    'field' => array(
+    'field' => [
       'click sortable' => TRUE,
-    ),
+    ],
     // Information for accepting a vid as an argument.
-    'argument' => array(
+    'argument' => [
       'handler' => 'views_handler_argument_node_vid',
       'click sortable' => TRUE,
       'numeric' => TRUE,
-    ),
+    ],
     // Information for accepting a vid as a filter.
-    'filter' => array(
+    'filter' => [
       'handler' => 'views_handler_filter_numeric',
-    ),
+    ],
     // Information for sorting on a vid.
-    'sort' => array(
+    'sort' => [
       'handler' => 'views_handler_sort',
-    ),
-    'relationship' => array(
+    ],
+    'relationship' => [
       'handler' => 'views_handler_relationship',
       'base' => 'node',
       'base field' => 'vid',
       'title' => t('Content'),
       'label' => t('Get the actual content from a content revision.'),
-    ),
-  );
+    ],
+  ];
 
   // title
-  $data['node_revision']['title'] = array(
+  $data['node_revision']['title'] = [
     'title' => t('Title'), // The item it appears as on the UI,
     'help' => t('The content title.'), // The help that appears on the UI,
      // Information for displaying a title as a field
-    'field' => array(
+    'field' => [
       'field' => 'title', // the real field
       'handler' => 'views_handler_field_node_revision',
       'click sortable' => TRUE,
-     ),
-    'sort' => array(
+     ],
+    'sort' => [
       'handler' => 'views_handler_sort',
-    ),
-    'filter' => array(
+    ],
+    'filter' => [
       'handler' => 'views_handler_filter_string',
-    ),
-    'argument' => array(
+    ],
+    'argument' => [
       'handler' => 'views_handler_argument_string',
-    ),
-  );
+    ],
+  ];
 
   // log field
-  $data['node_revision']['log'] = array(
+  $data['node_revision']['log'] = [
     'title' => t('Log message'), // The item it appears as on the UI,
     'help' => t('The log message entered when the revision was created.'), // The help that appears on the UI,
      // Information for displaying a title as a field
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_xss',
-     ),
-    'filter' => array(
+     ],
+    'filter' => [
       'handler' => 'views_handler_filter_string',
-    ),
-  );
+    ],
+  ];
 
   // revision timestamp
   // changed field
-  $data['node_revision']['timestamp'] = array(
+  $data['node_revision']['timestamp'] = [
     'title' => t('Updated date'), // The item it appears as on the UI,
     'help' => t('The date the node was last updated.'), // The help that appears on the UI,
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_date',
       'click sortable' => TRUE,
-    ),
-    'sort' => array(
+    ],
+    'sort' => [
       'handler' => 'views_handler_sort_date',
-    ),
-    'filter' => array(
+    ],
+    'filter' => [
       'handler' => 'views_handler_filter_date',
-    ),
-  );
+    ],
+  ];
 
-  $data['node_revision']['link_to_revision'] = array(
-    'field' => array(
+  $data['node_revision']['link_to_revision'] = [
+    'field' => [
       'title' => t('Link'),
       'help' => t('Provide a simple link to the revision.'),
       'handler' => 'views_handler_field_node_revision_link',
-    ),
-  );
+    ],
+  ];
 
-  $data['node_revision']['revert_revision'] = array(
-    'field' => array(
+  $data['node_revision']['revert_revision'] = [
+    'field' => [
       'title' => t('Revert link'),
       'help' => t('Provide a simple link to revert to the revision.'),
       'handler' => 'views_handler_field_node_revision_link_revert',
-    ),
-  );
+    ],
+  ];
 
-  $data['node_revision']['delete_revision'] = array(
-    'field' => array(
+  $data['node_revision']['delete_revision'] = [
+    'field' => [
       'title' => t('Delete link'),
       'help' => t('Provide a simple link to delete the content revision.'),
       'handler' => 'views_handler_field_node_revision_link_delete',
-    ),
-  );
+    ],
+  ];
 
   // ----------------------------------------------------------------------
   // Node access table
@@ -643,22 +643,22 @@ function node_views_data() {
   $data['node_access']['table']['group']  = t('Content access');
 
   // For other base tables, explain how we join
-  $data['node_access']['table']['join'] = array(
+  $data['node_access']['table']['join'] = [
     // Directly links to node table.
-    'node' => array(
+    'node' => [
       'left_field' => 'nid',
       'field' => 'nid',
-    ),
-  );
+    ],
+  ];
   // nid field
-  $data['node_access']['nid'] = array(
+  $data['node_access']['nid'] = [
     'title' => t('Access'),
     'help' => t('Filter by access.'),
-    'filter' => array(
+    'filter' => [
       'handler' => 'views_handler_filter_node_access',
       'help' => t('Filter for content by view access. <strong>Not necessary if you are using node as your base table.</strong>'),
-    ),
-  );
+    ],
+  ];
 
   // ----------------------------------------------------------------------
   // History table
@@ -670,29 +670,29 @@ function node_views_data() {
   $data['history']['table']['group']  = t('Content');
 
   // Explain how this table joins to others.
-  $data['history']['table']['join'] = array(
+  $data['history']['table']['join'] = [
      // Directly links to node table.
-    'node' => array(
+    'node' => [
       'table' => 'history',
       'left_field' => 'nid',
       'field' => 'nid',
-      'extra' => array(
-        array('field' => 'uid', 'value' => '***CURRENT_USER***', 'numeric' => TRUE),
-      ),
-    ),
-  );
+      'extra' => [
+        ['field' => 'uid', 'value' => '***CURRENT_USER***', 'numeric' => TRUE],
+      ],
+    ],
+  ];
 
-  $data['history']['timestamp'] = array(
+  $data['history']['timestamp'] = [
     'title' => t('Has new content'),
-    'field' => array(
+    'field' => [
       'handler' => 'views_handler_field_history_user_timestamp',
       'help' => t('Show a marker if the content is new or updated.'),
-    ),
-    'filter' => array(
+    ],
+    'filter' => [
       'help' => t('Show only content that is new or updated.'),
       'handler' => 'views_handler_filter_history_user_timestamp',
-    ),
-  );
+    ],
+  ];
   return $data;
 }
 
@@ -700,44 +700,44 @@ function node_views_data() {
  * Implements hook_views_plugins().
  */
 function node_views_plugins() {
-  return array(
+  return [
     'module' => 'views', // This just tells our themes are elsewhere.
-    'row' => array(
-      'node' => array(
+    'row' => [
+      'node' => [
         'title' => t('Content'),
         'help' => t('Display the content with standard node view.'),
         'handler' => 'views_plugin_row_node_view',
         'path' => backdrop_get_path('module', 'node') . '/views', // not necessary for most modules
-        'base' => array('node'), // only works with 'node' as base.
+        'base' => ['node'], // only works with 'node' as base.
         'uses options' => TRUE,
         'type' => 'normal',
         'help topic' => 'style-node',
-      ),
-      'node_rss' => array(
+      ],
+      'node_rss' => [
         'title' => t('Content'),
         'help' => t('Display the content with standard node view.'),
         'handler' => 'views_plugin_row_node_rss',
         'path' => backdrop_get_path('module', 'node') . '/views', // not necessary for most modules
         'theme' => 'views_view_row_rss',
-        'base' => array('node'), // only works with 'node' as base.
+        'base' => ['node'], // only works with 'node' as base.
         'uses options' => TRUE,
         'type' => 'feed',
         'help topic' => 'style-node-rss',
-      ),
-    ),
-    'argument validator' => array(
-      'node' => array(
+      ],
+    ],
+    'argument validator' => [
+      'node' => [
         'title' => t('Content'),
         'handler' => 'views_plugin_argument_validate_node',
-      ),
-    ),
-    'argument default' => array(
-      'node' => array(
+      ],
+    ],
+    'argument default' => [
+      'node' => [
         'title' => t('Content ID from URL'),
         'handler' => 'views_plugin_argument_default_node'
-      ),
-    ),
-  );
+      ],
+    ],
+  ];
 }
 
 /**
@@ -769,19 +769,19 @@ function node_row_node_view_preprocess_node(&$variables) {
  * Implements hook_views_query_substitutions().
  */
 function node_views_query_substitutions() {
-  return array(
+  return [
     '***ADMINISTER_NODES***' => intval(user_access('administer nodes')),
     '***VIEW_OWN_UNPUBLISHED_NODES***' => intval(user_access('view own unpublished content')),
     '***VIEW_ANY_UNPUBLISHED_NODES***' => intval(user_access('view any unpublished content')),
     '***BYPASS_NODE_ACCESS***' =>  intval(user_access('bypass node access')),
-  );
+  ];
 }
 
 /**
  * Implements hook_views_analyze().
  */
 function node_views_analyze($view) {
-  $ret = array();
+  $ret = [];
   // Check for something other than the default display:
   if ($view->base_table == 'node') {
     foreach ($view->display as $id => $display) {
@@ -794,7 +794,7 @@ function node_views_analyze($view) {
         if (empty($access['type']) || $access['type'] == 'none') {
           $roles = user_roles(FALSE, NULL, TRUE);
           if (!in_array('access content', $roles[BACKDROP_ANONYMOUS_ROLE]->permissions) || !in_array('access content', $roles[BACKDROP_AUTHENTICATED_ROLE]->permissions)) {
-            $ret[] = views_ui_analysis(t('Some roles lack permission to access content, but display %display has no access control.', array('%display' => $display->display_title)), 'warning');
+            $ret[] = views_ui_analysis(t('Some roles lack permission to access content, but display %display has no access control.', ['%display' => $display->display_title]), 'warning');
           }
           $filters = $display->handler->get_option('filters');
           foreach ($filters as $filter) {
@@ -802,7 +802,7 @@ function node_views_analyze($view) {
               continue 2;
             }
           }
-          $ret[] = views_ui_analysis(t('Display %display has no access control but does not contain a filter for published nodes.', array('%display' => $display->display_title)), 'warning');
+          $ret[] = views_ui_analysis(t('Display %display has no access control but does not contain a filter for published nodes.', ['%display' => $display->display_title]), 'warning');
         }
       }
     }
@@ -810,7 +810,7 @@ function node_views_analyze($view) {
   foreach ($view->display as $id => $display) {
     if ($display->display_plugin == 'page') {
       if ($display->handler->get_option('path') == 'node/%') {
-        $ret[] = views_ui_analysis(t('Display %display has set node/% as path. This will not produce what you want. If you want to have multiple versions of the node view, use panels.', array('%display' => $display->display_title)), 'warning');
+        $ret[] = views_ui_analysis(t('Display %display has set node/% as path. This will not produce what you want. If you want to have multiple versions of the node view, use panels.', ['%display' => $display->display_title]), 'warning');
       }
     }
   }

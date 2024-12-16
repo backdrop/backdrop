@@ -239,10 +239,10 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    *   A keyed array with information about the schema, table name and prefix.
    */
   protected function getPrefixInfo($table = 'default', $add_prefix = TRUE) {
-    $info = array(
+    $info = [
       'schema' => $this->defaultSchema,
       'prefix' => $this->connection->tablePrefix($table),
-    );
+    ];
     if ($add_prefix) {
       $table = $info['prefix'] . $table;
     }
@@ -681,7 +681,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    */
   public function createTable($name, $table) { // phpcs:ignore -- No type hint on $table, add in 2.x.
     if ($this->tableExists($name)) {
-      throw new DatabaseSchemaObjectExistsException(t('Table @name already exists.', array('@name' => $name)));
+      throw new DatabaseSchemaObjectExistsException(t('Table @name already exists.', ['@name' => $name]));
     }
     $statements = $this->createTableSql($name, $table);
     foreach ($statements as $statement) {
@@ -715,7 +715,7 @@ abstract class DatabaseSchema implements QueryPlaceholderInterface {
    *   An array of field names.
    */
   public function fieldNames(array $fields) {
-    $return = array();
+    $return = [];
     foreach ($fields as $field) {
       if (is_array($field)) {
         $return[] = $field[0];

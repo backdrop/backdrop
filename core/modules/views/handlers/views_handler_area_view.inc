@@ -14,8 +14,8 @@ class views_handler_area_view extends views_handler_area {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['view_to_insert'] = array('default' => '');
-    $options['inherit_arguments'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['view_to_insert'] = ['default' => ''];
+    $options['inherit_arguments'] = ['default' => FALSE, 'bool' => TRUE];
     return $options;
   }
 
@@ -28,22 +28,22 @@ class views_handler_area_view extends views_handler_area {
 
     $view_display = $this->view->name . ':' . $this->view->current_display;
 
-    $options = array('' => t('-Select-'));
+    $options = ['' => t('-Select-')];
     $options += views_get_views_as_options(FALSE, 'all', $view_display, FALSE, TRUE);
-    $form['view_to_insert'] = array(
+    $form['view_to_insert'] = [
       '#type' => 'select',
       '#title' => t('View to insert'),
       '#default_value' => $this->options['view_to_insert'],
       '#description' => t('The view to insert into this area.'),
       '#options' => $options,
-    );
+    ];
 
-    $form['inherit_arguments'] = array(
+    $form['inherit_arguments'] = [
       '#type' => 'checkbox',
       '#title' => t('Inherit contextual filters'),
       '#default_value' => $this->options['inherit_arguments'],
       '#description' => t('If checked, this view will receive the same contextual filters as its parent.'),
-    );
+    ];
   }
 
   /**
@@ -87,7 +87,7 @@ class views_handler_area_view extends views_handler_area {
     // Check if the view is part of the parent views of this view.
     $search = "$view_name:$display_id";
     if (in_array($search, $this->view->parent_views)) {
-      backdrop_set_message(t("Recursion detected in view @view display @display.", array('@view' => $view_name, '@display' => $display_id)), 'error');
+      backdrop_set_message(t("Recursion detected in view @view display @display.", ['@view' => $view_name, '@display' => $display_id]), 'error');
       return NULL;
     }
 

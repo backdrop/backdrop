@@ -9,16 +9,16 @@ class FrontLayoutAccess extends LayoutAccessNegatable {
    */
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
-    $form['negate'] = array(
+    $form['negate'] = [
       '#type' => 'radios',
       '#title' => t('Current path is'),
-      '#options' => array(
+      '#options' => [
         0 => t('The home page'),
         1 => t('Any page except the home page'),
-      ),
+      ],
       '#weight' => 100,
       '#default_value' => (int) $this->settings['negate'],
-    );
+    ];
   }
 
   /**

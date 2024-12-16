@@ -12,7 +12,7 @@ class views_object {
   /**
    * Except for displays, options for the object will be held here.
    */
-  var $options = array();
+  var $options = [];
 
   /**
    * The top object of a view.
@@ -46,7 +46,7 @@ class views_object {
    *
    * @see views_object::unpack_translatable()
    */
-  function option_definition() { return array(); }
+  function option_definition() { return []; }
 
   /**
    * Views handlers use a special construct function so that we can more easily
@@ -77,7 +77,7 @@ class views_object {
   function _set_option_defaults(&$storage, $options, $level = 0) {
     foreach ($options as $option => $definition) {
       if (isset($definition['contains']) && is_array($definition['contains'])) {
-        $storage[$option] = array();
+        $storage[$option] = [];
         $this->_set_option_defaults($storage[$option], $definition['contains'], $level++);
       }
       elseif (!empty($definition['translatable']) && !empty($definition['default'])) {
@@ -93,7 +93,7 @@ class views_object {
    * Unpack options over our existing defaults, drilling down into arrays
    * so that defaults don't get totally blown away.
    */
-  function unpack_options(&$storage, $options, $definition = NULL, $all = TRUE, $check = TRUE, $localization_keys = array()) {
+  function unpack_options(&$storage, $options, $definition = NULL, $all = TRUE, $check = TRUE, $localization_keys = []) {
     if ($check && !is_array($options)) {
       return;
     }
@@ -113,7 +113,7 @@ class views_object {
       // but plugins don't because there isn't a common init() these days.
       elseif (!empty($this->is_plugin) && empty($localization_keys)) {
         if ($this->plugin_type != 'display') {
-          $localization_keys = array($this->view->current_display);
+          $localization_keys = [$this->view->current_display];
           $localization_keys[] = $this->plugin_type;
         }
       }
@@ -127,7 +127,7 @@ class views_object {
         }
 
         if (!isset($storage[$key]) || !is_array($storage[$key])) {
-          $storage[$key] = array();
+          $storage[$key] = [];
         }
 
         // If we're just unpacking our known options, and we're dropping an
@@ -138,7 +138,7 @@ class views_object {
           continue;
         }
 
-        $this->unpack_options($storage[$key], $value, isset($definition[$key]['contains']) ? $definition[$key]['contains'] : array(), $all, FALSE, array_merge($localization_keys, array($key)));
+        $this->unpack_options($storage[$key], $value, isset($definition[$key]['contains']) ? $definition[$key]['contains'] : [], $all, FALSE, array_merge($localization_keys, [$key]));
       }
       // Don't localize strings during editing. When editing, we need to work
       // with the original data, not the translated version.
@@ -152,11 +152,11 @@ class views_object {
           if (isset($definition[$key]['format_key']) && isset($options[$definition[$key]['format_key']])) {
             $format = $options[$definition[$key]['format_key']];
           }
-          $translation_data = array(
+          $translation_data = [
             'value' => $value,
             'format' => $format,
-            'keys' => array_merge(array($this->view->name), $localization_keys, array($key)),
-          );
+            'keys' => array_merge([$this->view->name], $localization_keys, [$key]),
+          ];
           $storage[$key] = $this->view->localization_plugin->translate($translation_data);
         }
         // Otherwise, this is a code-based string, so we can use t().
@@ -198,9 +198,9 @@ class views_object {
   /**
    * Unpacks each handler to store translatable texts.
    */
-  public function unpack_translatables(&$translatable, $parents = array()) {
+  public function unpack_translatables(&$translatable, $parents = []) {
     foreach ($this->option_definition() as $option => $definition) {
-      $this->unpack_translatable($translatable, $this->options, $option, $definition, $parents, array());
+      $this->unpack_translatable($translatable, $this->options, $option, $definition, $parents, []);
     }
   }
 
@@ -217,7 +217,7 @@ class views_object {
    * @param array $parents
    * @param array $keys
    */
-  public function unpack_translatable(&$translatable, $storage, $option, $definition, $parents, $keys = array()) {
+  public function unpack_translatable(&$translatable, $storage, $option, $definition, $parents, $keys = []) {
     // Do not export options for which we have no settings.
     if (!isset($storage[$option])) {
       return;
@@ -239,14 +239,14 @@ class views_object {
     // If it has child items, unpack those separately.
     if (isset($definition['contains'])) {
       foreach ($definition['contains'] as $sub_option => $sub_definition) {
-        $translation_keys = array_merge($keys, array($sub_option));
+        $translation_keys = array_merge($keys, [$sub_option]);
         $this->unpack_translatable($translatable, $storage[$option], $sub_option, $sub_definition, $parents, $translation_keys);
       }
     }
     $options = $storage[$option];
     if (is_array($options)) {
       foreach ($options as $key => $value) {
-        $translation_keys = array_merge($keys, array($key));
+        $translation_keys = array_merge($keys, [$key]);
         if (is_array($value)) {
           $this->unpack_translatable($translatable, $options, $key, $definition, $parents, $translation_keys);
         }
@@ -256,11 +256,11 @@ class views_object {
           if (isset($definition['format_key']) && isset($options[$definition['format_key']])) {
             $format = $options[$definition['format_key']];
           }
-          $translatable[] = array(
+          $translatable[] = [
             'value' => $value,
             'keys' => $translation_keys,
             'format' => $format,
-          );
+          ];
         }
       }
     }
@@ -271,11 +271,11 @@ class views_object {
       if (isset($definition['format_key']) && isset($storage[$definition['format_key']])) {
         $format = $storage[$definition['format_key']];
       }
-      $translatable[] = array(
+      $translatable[] = [
         'value' => $value,
         'keys' => isset($translation_keys) ? $translation_keys : $parents,
         'format' => $format,
-      );
+      ];
     }
   }
 

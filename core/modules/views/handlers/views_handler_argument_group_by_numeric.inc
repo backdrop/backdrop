@@ -15,7 +15,7 @@ class views_handler_argument_group_by_numeric extends views_handler_argument  {
     $field = $this->get_field();
     $placeholder = $this->placeholder();
 
-    $this->query->add_having_expression(0, "$field = $placeholder", array($placeholder => $this->argument));
+    $this->query->add_having_expression(0, "$field = $placeholder", [$placeholder => $this->argument]);
   }
 
   function ui_name($short = FALSE) {
@@ -23,6 +23,6 @@ class views_handler_argument_group_by_numeric extends views_handler_argument  {
   }
 
   function get_sort_name() {
-    return t('Numerical', array(), array('context' => 'Sort order'));
+    return t('Numerical', [], ['context' => 'Sort order']);
   }
 }

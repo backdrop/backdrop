@@ -42,7 +42,7 @@ function search_view($module = NULL, $keys = '') {
   }
 
   // Default results output is an empty string.
-  $results = array('#markup' => '');
+  $results = ['#markup' => ''];
   // Process the search form. Note that if there is $_POST data,
   // search_form_submit() will cause a redirect to search/[module path]/[keys],
   // which will get us back to this page callback. In other words, the search
@@ -59,7 +59,7 @@ function search_view($module = NULL, $keys = '') {
     if ($keys || !empty($conditions)) {
       if (config_get('search.settings', 'search_logging')) {
         // Log the search keys.
-        watchdog('search', 'Searched %type for %keys.', array('%keys' => $keys, '%type' => $info['title']), WATCHDOG_NOTICE, l(t('results'), 'search/' . $info['path'] . '/' . $keys));
+        watchdog('search', 'Searched %type for %keys.', ['%keys' => $keys, '%type' => $info['title']], WATCHDOG_NOTICE, l(t('results'), 'search/' . $info['path'] . '/' . $keys));
       }
 
       // Collect the search results.

@@ -60,7 +60,7 @@ class TaxonomyVocabulary extends stdClass {
    */
   public $original;
 
-  function __construct($config = array()) {
+  function __construct($config = []) {
     foreach ($config as $key => $value) {
       $this->$key = $value;
     }
@@ -114,12 +114,12 @@ class TaxonomyVocabulary extends stdClass {
     module_invoke_all('taxonomy_vocabulary_predelete', $this);
 
     // Only load terms without a parent, child terms will get deleted too.
-    $tids = db_query('SELECT t.tid FROM {taxonomy_term_data} t INNER JOIN {taxonomy_term_hierarchy} th ON th.tid = t.tid WHERE t.vocabulary = :vocabulary AND th.parent = 0', array(':vocabulary' => $this->machine_name))->fetchCol();
+    $tids = db_query('SELECT t.tid FROM {taxonomy_term_data} t INNER JOIN {taxonomy_term_hierarchy} th ON th.tid = t.tid WHERE t.vocabulary = :vocabulary AND th.parent = 0', [':vocabulary' => $this->machine_name])->fetchCol();
     taxonomy_term_delete_multiple($tids);
 
     // Load all Taxonomy module fields and delete those which use only this
     // vocabulary.
-    $taxonomy_fields = field_read_fields(array('module' => 'taxonomy'));
+    $taxonomy_fields = field_read_fields(['module' => 'taxonomy']);
     foreach ($taxonomy_fields as $field_name => $taxonomy_field) {
       $modified_field = FALSE;
       // Term reference fields may reference terms from more than one

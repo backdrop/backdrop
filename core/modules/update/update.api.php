@@ -39,11 +39,11 @@ function hook_update_projects_alter(&$projects) {
 
   // Add a disabled module to the list.
   // The key for the array should be the machine-readable project "short name".
-  $projects['disabled_project_name'] = array(
+  $projects['disabled_project_name'] = [
     // Machine-readable project short name (same as the array key above).
     'name' => 'disabled_project_name',
     // Array of values from the main .info file for this project.
-    'info' => array(
+    'info' => [
       'name' => 'Some disabled module',
       'description' => 'A module not enabled on the site that you want to see in the available updates report.',
       'version' => '1.x-1.0',
@@ -51,7 +51,7 @@ function hook_update_projects_alter(&$projects) {
       // The maximum file change time (the "ctime" returned by the filectime()
       // PHP method) for all of the .info files included in this project.
       '_info_file_ctime' => 1243888165,
-    ),
+    ],
     // The date stamp when the project was released, if known. If the disabled
     // project was an officially packaged release from drupal.org, this will
     // be included in the .info file as the 'datestamp' field. This only
@@ -61,15 +61,15 @@ function hook_update_projects_alter(&$projects) {
     // Any modules (or themes) included in this project. Keyed by machine-
     // readable "short name", value is the human-readable project name printed
     // in the UI.
-    'includes' => array(
+    'includes' => [
       'disabled_project' => 'Disabled module',
       'disabled_project_helper' => 'Disabled module helper module',
       'disabled_project_foo' => 'Disabled module foo add-on module',
-    ),
+    ],
     // Does this project contain a 'module', 'theme', 'disabled-module', or
     // 'disabled-theme'?
     'project_type' => 'disabled-module',
-  );
+  ];
 }
 
 /**
@@ -91,11 +91,11 @@ function hook_update_status_alter(&$projects) {
       $projects[$project]['status'] = UPDATE_NOT_CHECKED;
       $projects[$project]['reason'] = t('Ignored from settings');
       if (!empty($settings[$project]['notes'])) {
-        $projects[$project]['extra'][] = array(
-          'class' => array('admin-note'),
+        $projects[$project]['extra'][] = [
+          'class' => ['admin-note'],
           'label' => t('Administrator note'),
           'data' => $settings[$project]['notes'],
-        );
+        ];
       }
     }
   }
@@ -119,9 +119,9 @@ function hook_update_status_alter(&$projects) {
  * @ingroup update_manager_file
  */
 function hook_verify_update_archive($project, $archive_file, $directory) {
-  $errors = array();
+  $errors = [];
   if (!file_exists($directory)) {
-    $errors[] = t('The %directory does not exist.', array('%directory' => $directory));
+    $errors[] = t('The %directory does not exist.', ['%directory' => $directory]);
   }
   // Add other checks on the archive integrity here.
   return $errors;

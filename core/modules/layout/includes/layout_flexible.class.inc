@@ -37,7 +37,7 @@ class LayoutFlexibleTemplate {
    *
    * @var array
    */
-  var $rows = array();
+  var $rows = [];
 
   /**
    * @var bool
@@ -50,34 +50,34 @@ class LayoutFlexibleTemplate {
    * @param array $config
    *   An array of configuration data.
    */
-  function __construct(array $config = array()) {
+  function __construct(array $config = []) {
     foreach ($config as $property => $property_value) {
       $this->{$property} = $property_value;
     }
 
     if (empty($this->rows)) {
       $uuid = new Uuid();
-      $this->rows[$uuid->generate()] = array(
+      $this->rows[$uuid->generate()] = [
         'contains' => 'region_12',
         'element' => 'header',
         'classes' => '',
         'container' => 'container',
-        'region_names' => array('region_0' => array('label' => t('Header'), 'name' => 'header', 'classes' => '')),
-      );
-      $this->rows[$uuid->generate()] = array(
+        'region_names' => ['region_0' => ['label' => t('Header'), 'name' => 'header', 'classes' => '']],
+      ];
+      $this->rows[$uuid->generate()] = [
         'contains' => 'region_12',
         'element' => '',
         'classes' => '',
         'container' => 'container',
-        'region_names' => array('region_0' => array('label' => t('Content'), 'name' => 'content', 'classes' => '')),
-      );
-      $this->rows[$uuid->generate()] = array(
+        'region_names' => ['region_0' => ['label' => t('Content'), 'name' => 'content', 'classes' => '']],
+      ];
+      $this->rows[$uuid->generate()] = [
         'contains' => 'region_12',
         'element' => 'footer',
         'classes' => '',
         'container' => 'container',
-        'region_names' => array('region_0' => array('label' => t('Footer'), 'name' => 'footer', 'classes' => '')),
-      );
+        'region_names' => ['region_0' => ['label' => t('Footer'), 'name' => 'footer', 'classes' => '']],
+      ];
     }
   }
 
@@ -85,12 +85,12 @@ class LayoutFlexibleTemplate {
    * Save a flexible layout template to config.
    */
   function save() {
-    $data = array(
+    $data = [
       'name' => $this->name,
       'title' => $this->title,
       'description' => $this->description,
       'rows' => $this->rows,
-    );
+    ];
 
     config('layout.flexible.' . $this->name)
       ->setData($data)

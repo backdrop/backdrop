@@ -71,20 +71,20 @@
  * @see hook_ckeditor5_PLUGIN_plugin_check()
  */
 function hook_ckeditor5_plugins() {
-  $plugins['myPlugin.MyPlugin'] = array(
-    'library' => array('my_module', 'my_module.ckeditor5.myplugin'),
-    'css' => array(backdrop_get_path('module', 'my_module') . '/css/myplugin.css'),
+  $plugins['myPlugin.MyPlugin'] = [
+    'library' => ['my_module', 'my_module.ckeditor5.myplugin'],
+    'css' => [backdrop_get_path('module', 'my_module') . '/css/myplugin.css'],
     'enabled_callback' => 'my_module_myplugin_plugin_check',
-    'buttons' => array(
-      'myButton' => array(
-        'library' => array('my_module', 'my-module-ckeditor5-plugin'),
+    'buttons' => [
+      'myButton' => [
+        'library' => ['my_module', 'my-module-ckeditor5-plugin'],
         'label' => t('My custom button'),
-        'required_html' => array(
+        'required_html' => [
           '<a href alt class="external internal">',
-        ),
-      ),
-    ),
-  );
+        ],
+      ],
+    ],
+  ];
 
   return $plugins;
 }
@@ -188,7 +188,7 @@ function hook_ckeditor5_settings_alter(array &$settings, $format) {
  * @see hook_ckeditor5_upgrade_button_mapping_alter()
  */
 function hook_ckeditor5_upgrade_button_mapping() {
-  return array(
+  return [
     // The key is the CKEditor 4 button name, while the value is the CKEditor 5
     // button name.
     'Maximize' => 'maximize',
@@ -196,7 +196,7 @@ function hook_ckeditor5_upgrade_button_mapping() {
     'Cut' => NULL,
     'Copy' => NULL,
     'Paste' => NULL,
-  );
+  ];
 }
 
 /**

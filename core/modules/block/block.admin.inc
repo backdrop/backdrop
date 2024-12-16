@@ -10,68 +10,68 @@
 function block_admin_list() {
   $custom_blocks_info = block_block_info();
 
-  $help_text = array(
+  $help_text = [
     '#theme' => 'help',
-    '#markup' => t('These blocks are available to be placed in any layout in the <a href="@link">Layouts</a> page.', array('@link' => url('admin/structure/layouts'))),
-  );
+    '#markup' => t('These blocks are available to be placed in any layout in the <a href="@link">Layouts</a> page.', ['@link' => url('admin/structure/layouts')]),
+  ];
 
-  $header = array(
+  $header = [
     t('Block'),
-    array('data' => t('Description'), 'class' => array('priority-low')),
+    ['data' => t('Description'), 'class' => ['priority-low']],
     t('Operations'),
-  );
+  ];
 
-  $rows = array();
+  $rows = [];
   foreach ($custom_blocks_info as $delta => $block_info) {
     $block = block_custom_block_load($delta);
-    $row = array();
-    $row[] = theme('label_machine_name__block', array(
+    $row = [];
+    $row[] = theme('label_machine_name__block', [
       'label' => $block_info['info'],
       'machine_name' => $delta,
-    ));
+    ]);
     $row[] = filter_xss($block_info['description']);
-    $links = array();
-    $links['configure'] = array(
+    $links = [];
+    $links['configure'] = [
       'title' => t('Configure'),
       'href' => 'admin/structure/block/manage/' . $delta . '/configure',
-    );
-    $links['delete'] = array(
+    ];
+    $links['delete'] = [
       'title' => t('Delete'),
       'href' => 'admin/structure/block/manage/' . $delta . '/delete',
-    );
+    ];
     if (module_exists('locale') && $block['default_langcode'] != LANGUAGE_NONE) {
-      $links['translate'] = array(
+      $links['translate'] = [
         'title' => t('Translate'),
         'href' => 'admin/structure/block/manage/' . $delta . '/translation',
-      );
+      ];
     }
     if (module_exists('config') && user_access('synchronize configuration')) {
-      $links['export'] = array(
+      $links['export'] = [
         'title' => t('Export'),
         'href' => 'admin/config/development/configuration/single/export',
-        'query' => array(
+        'query' => [
           'group' => 'Custom Blocks',
           'name' => 'block.custom.' . $delta,
-        ),
-      );
+        ],
+      ];
     }
-    $operations = array(
+    $operations = [
       '#type' => 'operations',
       '#links' => $links,
-    );
-    $row[] = array('data' => $operations);
+    ];
+    $row[] = ['data' => $operations];
 
     $rows[] = $row;
   }
 
-  $block_admin_list = array(
+  $block_admin_list = [
     '#theme' => 'table__block_admin_list',
     '#header' => $header,
     '#rows' => $rows,
     '#empty' => t('No custom blocks have been created yet.'),
-  );
+  ];
 
-  return array('help_text' => $help_text, 'block_admin_list' => $block_admin_list);
+  return ['help_text' => $help_text, 'block_admin_list' => $block_admin_list];
 }
 
 /**
@@ -105,15 +105,15 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
     }
   }
   else {
-    $custom_block = array(
+    $custom_block = [
       'info' => '',
       'title' => '',
-      'body' => array('value' => '', 'format' => NULL),
+      'body' => ['value' => '', 'format' => NULL],
       'default_langcode' => LANGUAGE_NONE,
-    );
+    ];
   }
   if ($custom_block['info']) {
-    backdrop_set_title(t("'%name' block", array('%name' => $custom_block['info'])), PASS_THROUGH);
+    backdrop_set_title(t("'%name' block", ['%name' => $custom_block['info']]), PASS_THROUGH);
   }
   else {
     backdrop_set_title(t('Add custom block'));
@@ -122,7 +122,7 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
   // Set title for translate block form.
   if (isset($form['langcode'])) {
     $language = $language = language_load($form['langcode']['#value']);
-    backdrop_set_title(t("Translate '%name' block to %language", array('%name' => $custom_block['info'], '%language' => $language->name)), PASS_THROUGH);
+    backdrop_set_title(t("Translate '%name' block to %language", ['%name' => $custom_block['info'], '%language' => $language->name]), PASS_THROUGH);
   }
 
   // Call our own block configuration form (also used by Layout module).
@@ -143,26 +143,26 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
   }
   $options = backdrop_parse_url($path);
   $options['attributes']['class'][] = 'form-cancel';
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
+  $form['actions'] = ['#type' => 'actions'];
+  $form['actions']['submit'] = [
     '#type' => 'submit',
     '#value' => t('Save block'),
-  );
+  ];
   if ($delta) {
-    $form['actions']['delete'] = array(
+    $form['actions']['delete'] = [
       '#type' => 'link',
       '#title' => t('Delete'),
       '#href' => 'admin/structure/block/manage/' . $delta . '/delete',
-      '#attributes' => array('class' => array('button', 'button-secondary', 'form-delete')),
-    );
+      '#attributes' => ['class' => ['button', 'button-secondary', 'form-delete']],
+    ];
   }
-  $form['actions']['cancel'] = array(
+  $form['actions']['cancel'] = [
     '#type' => 'link',
     '#title' => t('Cancel'),
     '#href' => $options['path'],
     '#options' => $options,
     '#weight' => 1,
-  );
+  ];
 
   return $form;
 }
@@ -272,10 +272,10 @@ function block_add_block_form_submit($form, &$form_state) {
  */
 function block_custom_block_delete($form, &$form_state, $delta) {
   $custom_block = block_custom_block_load($delta);
-  $form['info'] = array('#type' => 'hidden', '#value' => $custom_block['info']);
-  $form['delta'] = array('#type' => 'hidden', '#value' => $delta);
+  $form['info'] = ['#type' => 'hidden', '#value' => $custom_block['info']];
+  $form['delta'] = ['#type' => 'hidden', '#value' => $delta];
 
-  return confirm_form($form, t('Are you sure you want to delete the block %name?', array('%name' => $custom_block['info'])), 'admin/structure/block', '', t('Delete'), t('Cancel'));
+  return confirm_form($form, t('Are you sure you want to delete the block %name?', ['%name' => $custom_block['info']]), 'admin/structure/block', '', t('Delete'), t('Cancel'));
 }
 
 /**
@@ -290,7 +290,7 @@ function block_custom_block_delete($form, &$form_state, $delta) {
  */
 function block_custom_block_delete_submit($form, &$form_state) {
   config('block.custom.' . $form_state['values']['delta'])->delete();
-  backdrop_set_message(t('The block %name has been removed.', array('%name' => $form_state['values']['info'])));
+  backdrop_set_message(t('The block %name has been removed.', ['%name' => $form_state['values']['info']]));
   $form_state['redirect'] = 'admin/structure/block';
 }
 
@@ -311,57 +311,57 @@ function block_custom_block_translate_list($form, &$form_state, $delta) {
 
   $language_list = language_list();
 
-  $header = array(
+  $header = [
     t('Language'),
     t('Title'),
     t('Status'),
     t('Operations'),
-  );
+  ];
 
-  $rows = array();
+  $rows = [];
 
   foreach ($language_list as $langcode => $item) {
-    $row = array();
-    $links = array();
+    $row = [];
+    $links = [];
 
     // Check if this is the source language.
     if (isset($custom_block['default_langcode']) && ($langcode == $custom_block['default_langcode'])) {
       $row[] = t($item->name) . ' ' . t('(source)');
       $row[] = isset($custom_block['title']) ? check_plain($custom_block['title']) : t('N/A');
       $row[] = t('Source');
-      $links['edit'] = array(
+      $links['edit'] = [
         'title' => t('EDIT'),
         'href' => 'admin/structure/block/manage/' . $delta . '/translate/' . $langcode,
-      );
+      ];
     }
     else {
       $row[] = t($item->name);
       $row[] = isset($custom_block['translations'][$langcode]['title']) ? check_plain($custom_block['translations'][$langcode]['title']) : t('N/A');
       $row[] = isset($custom_block['translations'][$langcode]) ? t('Translated') : t('Not Translated');
-      $links['edit'] = array(
+      $links['edit'] = [
         'title' => isset($custom_block['translations'][$langcode]) ? t('EDIT') : t('ADD TRANSLATION'),
         'href' => 'admin/structure/block/manage/' . $delta . '/translate/' . $langcode,
-      );
+      ];
     }
 
-    $operations = array(
+    $operations = [
       '#type' => 'operations',
       '#links' => $links,
-    );
-    $row[] = array('data' => $operations);
+    ];
+    $row[] = ['data' => $operations];
     $rows[] = $row;
   }
 
   if ($custom_block['info']) {
-    backdrop_set_title(t("Translate '%name' block", array('%name' => $custom_block['info'])), PASS_THROUGH);
+    backdrop_set_title(t("Translate '%name' block", ['%name' => $custom_block['info']]), PASS_THROUGH);
   }
 
-  return array(
+  return [
     '#theme' => 'table__block_admin_list',
     '#rows' => $rows,
     '#header' => $header,
     '#empty' => t('No languages found to translate to.'),
-  );
+  ];
 }
 
 /**
@@ -397,7 +397,7 @@ function block_custom_block_translate_access($delta, $langcode = NULL) {
  *   The configuration form.
  */
 function block_custom_block_translate($form, &$form_state, $delta, $langcode) {
-  $form['langcode'] = array('#type' => 'hidden', '#value' => $langcode);
+  $form['langcode'] = ['#type' => 'hidden', '#value' => $langcode];
 
   return block_admin_configure($form, $form_state, $delta);
 }

@@ -12,18 +12,18 @@
 class views_handler_argument_term_node_tid extends views_handler_argument_many_to_one {
   function option_definition() {
     $options = parent::option_definition();
-    $options['set_breadcrumb'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['set_breadcrumb'] = ['default' => FALSE, 'bool' => TRUE];
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
-    $form['set_breadcrumb'] = array(
+    $form['set_breadcrumb'] = [
       '#type' => 'checkbox',
       '#title' => t("Set the breadcrumb for the term parents"),
       '#description' => t('If selected, the breadcrumb trail will include all parent terms, each one linking to this view. Note that this only works if just one term was received.'),
       '#default_value' => !empty($this->options['set_breadcrumb']),
-    );
+    ];
   }
 
   function set_breadcrumb(&$breadcrumb) {
@@ -35,10 +35,10 @@ class views_handler_argument_term_node_tid extends views_handler_argument_many_t
   }
 
   function title_query() {
-    $titles = array();
+    $titles = [];
     $result = db_select('taxonomy_term_data', 'td')
       ->addTag('taxonomy_term_access')
-      ->fields('td', array('name'))
+      ->fields('td', ['name'])
       ->condition('td.tid', $this->value)
       ->execute();
     foreach ($result as $term) {

@@ -112,10 +112,10 @@ function node_delete_action(Node $node, &$context) {
     $last_action_time = $_SESSION['node_delete_action']['timestamp'];
   }
   if (REQUEST_TIME - $last_action_time > 60) {
-    $_SESSION['node_delete_action'] = array(
+    $_SESSION['node_delete_action'] = [
       'timestamp' => REQUEST_TIME,
-      'nids' => array(),
-    );
+      'nids' => [],
+    ];
   }
 
   $_SESSION['node_delete_action']['nids'][] = $node->nid;

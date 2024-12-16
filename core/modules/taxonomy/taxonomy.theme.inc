@@ -68,28 +68,28 @@ function theme_taxonomy_overview_terms($variables) {
       backdrop_add_tabledrag('taxonomy', 'match', 'parent', 'term-parent', 'term-parent', 'term-id', FALSE);
       backdrop_add_tabledrag('taxonomy', 'depth', 'group', 'term-depth', NULL, NULL, FALSE);
       backdrop_add_js(backdrop_get_path('module', 'taxonomy') . '/js/taxonomy.admin.js');
-      backdrop_add_js(array('taxonomy' => array('backStep' => $back_step, 'forwardStep' => $forward_step)), 'setting');
+      backdrop_add_js(['taxonomy' => ['backStep' => $back_step, 'forwardStep' => $forward_step]], 'setting');
       backdrop_add_css(backdrop_get_path('module', 'taxonomy') . '/css/taxonomy.css');
     }
     backdrop_add_tabledrag('taxonomy', 'order', 'sibling', 'term-weight');
   }
 
-  $errors = form_get_errors() != FALSE ? form_get_errors() : array();
-  $rows = array();
+  $errors = form_get_errors() != FALSE ? form_get_errors() : [];
+  $rows = [];
   foreach (element_children($form) as $key) {
     if (isset($form[$key]['#term'])) {
       $term = &$form[$key];
 
-      $row = array();
-      $row[] = (isset($term['#term']['depth']) && $term['#term']['depth'] > 0 ? theme('indentation', array('size' => $term['#term']['depth'])) : ''). backdrop_render($term['view']);
+      $row = [];
+      $row[] = (isset($term['#term']['depth']) && $term['#term']['depth'] > 0 ? theme('indentation', ['size' => $term['#term']['depth']]) : ''). backdrop_render($term['view']);
       if ($form['#parent_fields']) {
-        $term['tid']['#attributes']['class'] = array('term-id');
-        $term['parent']['#attributes']['class'] = array('term-parent');
-        $term['depth']['#attributes']['class'] = array('term-depth');
+        $term['tid']['#attributes']['class'] = ['term-id'];
+        $term['parent']['#attributes']['class'] = ['term-parent'];
+        $term['depth']['#attributes']['class'] = ['term-depth'];
         $row[0] .= backdrop_render($term['parent']) . backdrop_render($term['tid']) . backdrop_render($term['depth']);
       }
       if (taxonomy_vocabulary_access('update', $form['#vocabulary'])) {
-        $term['weight']['#attributes']['class'] = array('term-weight');
+        $term['weight']['#attributes']['class'] = ['term-weight'];
       }
       if (module_exists('language') && $form['#vocabulary']->language == TAXONOMY_LANGUAGE_ENABLED) {
         $row[] = backdrop_render($term['langcode']);
@@ -98,7 +98,7 @@ function theme_taxonomy_overview_terms($variables) {
         $row[] = backdrop_render($term['weight']);
       }
       $row[] = backdrop_render($term['operations']);
-      $row = array('data' => $row);
+      $row = ['data' => $row];
       $rows[$key] = $row;
     }
   }
@@ -106,7 +106,7 @@ function theme_taxonomy_overview_terms($variables) {
   // Add necessary classes to rows.
   $row_position = 0;
   foreach ($rows as $key => $row) {
-    $rows[$key]['class'] = array();
+    $rows[$key]['class'] = [];
     if (isset($form['#parent_fields'])) {
       $rows[$key]['class'][] = 'draggable';
     }
@@ -141,7 +141,7 @@ function theme_taxonomy_overview_terms($variables) {
     $output .= backdrop_render($form['langcode_term']);
   }
 
-  $header = array();
+  $header = [];
   $header[] = t('Name');
   if (module_exists('language') && $form['#vocabulary']->language == TAXONOMY_LANGUAGE_ENABLED) {
     $header[] = t('Language');
@@ -150,12 +150,12 @@ function theme_taxonomy_overview_terms($variables) {
     $header[] = t('Weight');
   }
   $header[] = t('Operations');
-  $output .= theme('table', array(
+  $output .= theme('table', [
     'header' => $header,
     'rows' => $rows,
     'empty' => $form['#empty_text'],
-    'attributes' => array('id' => 'taxonomy'),
-  ));
+    'attributes' => ['id' => 'taxonomy'],
+  ]);
   $output .= backdrop_render_children($form);
   $output .= theme('pager');
 
@@ -179,7 +179,7 @@ function template_preprocess_taxonomy_term(&$variables) {
   $variables = array_merge((array) $term, $variables);
 
   // Helpful $content variable for templates.
-  $variables['content'] = array();
+  $variables['content'] = [];
   foreach (element_children($variables['elements']) as $key) {
     $variables['content'][$key] = $variables['elements'][$key];
   }

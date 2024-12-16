@@ -13,11 +13,11 @@ class EntityBundleLayoutAccess extends LayoutAccess {
   /**
    * Constructor for a Layout access rule.
    */
-  function __construct($plugin_name, array $data = array()) {
+  function __construct($plugin_name, array $data = []) {
     parent::__construct($plugin_name, $data);
-    $this->settings += array(
-      'bundles' => array()
-    );
+    $this->settings += [
+      'bundles' => []
+    ];
 
     // Set entity type.
     $info = layout_get_access_info($plugin_name);
@@ -30,18 +30,18 @@ class EntityBundleLayoutAccess extends LayoutAccess {
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
 
-    $options = array();
+    $options = [];
     $entity_info = entity_get_info($this->entity_type);
     foreach ($entity_info['bundles'] as $type => $info) {
       $options[$type] = check_plain($info['label']);
     }
 
-    $form['bundles'] = array(
-      '#title' => t('@entity @bundle', array('@entity' => $entity_info['label'], '@bundle' => $entity_info['bundle label'])),
+    $form['bundles'] = [
+      '#title' => t('@entity @bundle', ['@entity' => $entity_info['label'], '@bundle' => $entity_info['bundle label']]),
       '#type' => 'checkboxes',
       '#options' => $options,
       '#default_value' => $this->settings['bundles'],
-    );
+    ];
   }
 
   /**
@@ -58,7 +58,7 @@ class EntityBundleLayoutAccess extends LayoutAccess {
   function summary() {
     $entity_info = entity_get_info($this->entity_type);
 
-    $names = array();
+    $names = [];
     foreach (array_filter($this->settings['bundles']) as $bundle) {
       $names[] = check_plain($entity_info['bundles'][$bundle]['label']);
     }
@@ -67,7 +67,7 @@ class EntityBundleLayoutAccess extends LayoutAccess {
       return t('Entity is a specific type.');
     }
 
-    return format_plural(count($names), '@entity is %bundles', '@entity is one of: %bundles', array('@entity' => $entity_info['bundle label'], '%bundles' => implode(', ', $names)));
+    return format_plural(count($names), '@entity is %bundles', '@entity is one of: %bundles', ['@entity' => $entity_info['bundle label'], '%bundles' => implode(', ', $names)]);
   }
 
   /**

@@ -16,7 +16,7 @@ class EntityReferenceBehaviorHandlerViewsFilterSelect extends EntityReferenceBeh
         // own callback to return the values.
         $table_data[$field_name]['filter']['handler'] = 'views_handler_filter_in_operator';
         $table_data[$field_name]['filter']['options callback'] = 'entityreference_views_handler_options_list';
-        $table_data[$field_name]['filter']['options arguments'] = array($field['field_name']);
+        $table_data[$field_name]['filter']['options arguments'] = [$field['field_name']];
       }
     }
   }

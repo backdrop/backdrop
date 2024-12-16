@@ -8,7 +8,7 @@ function backdrop_class_list() {
   $path = BACKDROP_ROOT . '/core/includes/';
 
   // Classes in /core/includes.
-  $classes = array(
+  $classes = [
     'AnonymousUser' => $path . 'anonymous.inc',
     'ArchiverInterface' => $path . 'archiver.inc',
     'BatchQueue' => $path . 'batch.queue.inc',
@@ -110,11 +110,11 @@ function backdrop_class_list() {
     'FileTransferFTPExtension' => $path . 'filetransfer/ftp.inc',
     'FileTransferLocal' => $path . 'filetransfer/local.inc',
     'FileTransferSSH' => $path . 'filetransfer/ssh.inc',
-  );
+  ];
 
   // Add in Drupal 7 class name wrappers if compatibility is enabled.
   if (!empty($GLOBALS['settings']['backdrop_drupal_compatibility'])) {
-    $classes += array(
+    $classes += [
       'DrupalQueue' => $path . 'drupal.classes.inc',
       'DrupalQueueInterface' => $path . 'drupal.classes.inc',
       'DrupalReliableQueueInterface' => $path . 'drupal.classes.inc',
@@ -134,7 +134,7 @@ function backdrop_class_list() {
       'DrupalWebTestCase' => $path . 'drupal.classes.inc',
       'DrupalDefaultEntityController' => $path . 'drupal.classes.inc',
       'DrupalEntityControllerInterface' => $path . 'drupal.classes.inc',
-    );
+    ];
   }
 
   return $classes;

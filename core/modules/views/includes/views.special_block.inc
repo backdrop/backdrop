@@ -8,9 +8,9 @@ class ViewsSpecialBlock extends Block {
    * {@inheritdoc}
    */
   function getContent() {
-    $output = array(
+    $output = [
       '#markup' => '',
-    );
+    ];
 
     list(, $type, $name, $display_id) = explode('-', $this->delta);
     // Put the - back on.

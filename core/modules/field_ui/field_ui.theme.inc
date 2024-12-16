@@ -16,11 +16,11 @@
  */
 function theme_field_ui_table($variables) {
   $elements = $variables['elements'];
-  $table = array();
-  $js_settings = array();
+  $table = [];
+  $js_settings = [];
 
   // Add table headers and attributes.
-  foreach (array('header', 'attributes') as $key) {
+  foreach (['header', 'attributes'] as $key) {
     if (isset($elements["#$key"])) {
       $table[$key] = $elements["#$key"];
     }
@@ -39,30 +39,30 @@ function theme_field_ui_table($variables) {
 
     // Add region rows.
     if (isset($region['title'])) {
-      $table['rows'][] = array(
-        'class' => array('region-title', 'region-' . $region_name_class . '-title'),
+      $table['rows'][] = [
+        'class' => ['region-title', 'region-' . $region_name_class . '-title'],
         'no_striping' => TRUE,
-        'data' => array(
-          array('data' => $region['title'], 'colspan' => $columns_count),
-        ),
-      );
+        'data' => [
+          ['data' => $region['title'], 'colspan' => $columns_count],
+        ],
+      ];
     }
     if (isset($region['message'])) {
       $class = (empty($region['rows_order']) ? 'region-empty' : 'region-populated');
-      $table['rows'][] = array(
-        'class' => array('region-message', 'region-' . $region_name_class . '-message', $class),
+      $table['rows'][] = [
+        'class' => ['region-message', 'region-' . $region_name_class . '-message', $class],
         'no_striping' => TRUE,
-        'data' => array(
-          array('data' => $region['message'], 'colspan' => $columns_count),
-        ),
-      );
+        'data' => [
+          ['data' => $region['message'], 'colspan' => $columns_count],
+        ],
+      ];
     }
 
     // Add form rows, in the order determined at pre-render time.
     foreach ($region['rows_order'] as $name) {
       $element = $elements[$name];
 
-      $row = array('data' => array());
+      $row = ['data' => []];
       if (isset($element['#attributes'])) {
         $row += $element['#attributes'];
       }
@@ -72,7 +72,7 @@ function theme_field_ui_table($variables) {
         $child = &$element[$cell_key];
         // Do not render a cell for children of #type 'value'.
         if (!(isset($child['#type']) && $child['#type'] == 'value')) {
-          $cell = array('data' => backdrop_render($child));
+          $cell = ['data' => backdrop_render($child)];
           if (isset($child['#cell_attributes'])) {
             $cell += $child['#cell_attributes'];
           }
@@ -104,113 +104,113 @@ function theme_field_ui_view_modes($variables) {
   $bundle_machine_name = $element['#bundle'];
   $path = $element['#admin_path'] . '/display';
 
-  $rows = array();
+  $rows = [];
 
-  $header = array(
-    array('data' => t('Display modes')),
-    array('data' => t('Description'), 'class' => array('priority-low')),
-    array('data' => t('Operations'), 'class' => array('operations')),
-  );
+  $header = [
+    ['data' => t('Display modes')],
+    ['data' => t('Description'), 'class' => ['priority-low']],
+    ['data' => t('Operations'), 'class' => ['operations']],
+  ];
 
   // Add the row for the default display mode.
-  $row = array();
-  $row['label'] = theme('label_machine_name__node_display__' . $bundle_machine_name, array(
+  $row = [];
+  $row['label'] = theme('label_machine_name__node_display__' . $bundle_machine_name, [
     'label' => t('Default'),
     'machine_name' => 'default',
-  ));
+  ]);
   $row['description'] = t('Used for all display modes which are not customized');
-  $row['operations'] = array(
-    'data' => array(
+  $row['operations'] = [
+    'data' => [
       '#type' => 'dropbutton',
-      '#links' => array(
-        'manage' => array(
+      '#links' => [
+        'manage' => [
           'title' => t('Manage display'),
           'href' => "$path/default",
-        ),
-      ),
-    ),
-  );
-  $rows[] = array(
+        ],
+      ],
+    ],
+  ];
+  $rows[] = [
     'data' => $row,
-    'class' => array('default-view-mode'),
-  );
+    'class' => ['default-view-mode'],
+  ];
 
   $customized_count = 0;
   $default_count = 0;
   foreach ($view_modes as $view_mode_name => $view_mode_info) {
-    $row_classes = array('view-mode--' . str_replace('_', '-', $view_mode_name));
-    $row = array();
+    $row_classes = ['view-mode--' . str_replace('_', '-', $view_mode_name)];
+    $row = [];
 
-    $row['label'] = theme('label_machine_name__node_display__' . $bundle_machine_name, array(
+    $row['label'] = theme('label_machine_name__node_display__' . $bundle_machine_name, [
       'label' => $view_mode_info['label'],
       'machine_name' => $view_mode_name,
-    ));
+    ]);
 
-    $operations = array();
+    $operations = [];
     if ($view_modes[$view_mode_name]['custom settings']) {
       $row[] = '';
       $customized_count++;
-      $operations['manage'] = array(
+      $operations['manage'] = [
         'title' => t('Manage display'),
         'href' => "$path/$view_mode_name",
-        'query' => array('destination' => $path),
-      );
-      $operations['reset'] = array(
+        'query' => ['destination' => $path],
+      ];
+      $operations['reset'] = [
         'title' => t('Reset to default'),
         'href' => "$path/{$view_mode_name}/reset",
-      );
+      ];
     }
     else {
       $default_count++;
       $row_classes[] = 'uses-default';
       $row['description'] = '<em>' . t('Uses the Default display mode') . '</em>';
       if (user_access('administer view modes')) {
-        $operations['enable'] = array(
+        $operations['enable'] = [
           'title' => t('Customize'),
           'href' => "$path/{$view_mode_name}/enable",
-          'query' => array(
+          'query' => [
             'token' => backdrop_get_token('view_mode_enable'),
-          ),
-        );
+          ],
+        ];
       }
     }
 
     if ($view_mode_info['storage'] == 'Custom' && user_access('administer view modes')) {
-      $operations['configure'] = array(
+      $operations['configure'] = [
         'title' => t('Configure'),
         'href' => "$path/{$view_mode_name}/configure",
-      );
-      $operations['delete'] = array(
+      ];
+      $operations['delete'] = [
         'title' => t('Delete'),
         'href' => "$path/{$view_mode_name}/delete",
-      );
+      ];
     }
 
-    $row['operations'] = array(
-      'data' => array(
+    $row['operations'] = [
+      'data' => [
         '#type' => 'dropbutton',
         '#links' => $operations,
-      ),
-    );
+      ],
+    ];
 
     // Add descriptive headers.
     if ($default_count == 1) {
-      $text = t('Not customized for !bundle', array('!bundle' => $element['#bundle']));
-      $header_row = array($text, '', '');
-      $rows[] = array('data' => $header_row, 'class' => array('header'));
+      $text = t('Not customized for !bundle', ['!bundle' => $element['#bundle']]);
+      $header_row = [$text, '', ''];
+      $rows[] = ['data' => $header_row, 'class' => ['header']];
       $default_count++; // Ensure header only prints once.
     }
     if ($customized_count == 1) {
-      $text = t('Customized for !bundle', array('!bundle' => $element['#bundle']));
-      $header_row = array($text, '', '');
-      $rows[] = array('data' => $header_row, 'class' => array('header'));
+      $text = t('Customized for !bundle', ['!bundle' => $element['#bundle']]);
+      $header_row = [$text, '', ''];
+      $rows[] = ['data' => $header_row, 'class' => ['header']];
       $customized_count++; // Ensure header only prints once.
     }
 
-    $rows[] = array('data' => $row, 'class' => $row_classes);
+    $rows[] = ['data' => $row, 'class' => $row_classes];
   }
 
-  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('class' => array('field-ui-view-modes'))));
+  $output = theme('table', ['header' => $header, 'rows' => $rows, 'attributes' => ['class' => ['field-ui-view-modes']]]);
 
   return $output;
 }

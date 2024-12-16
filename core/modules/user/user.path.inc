@@ -8,7 +8,7 @@
  * Implements hook_path_info().
  */
 function user_path_info() {
-  $info['user'] = array(
+  $info['user'] = [
     'entity type' => 'user',
     'label' => t('User account'),
     'pattern label' => t('URL alias pattern for user accounts'),
@@ -17,7 +17,7 @@ function user_path_info() {
     'batch file' => 'user.path.inc',
     'batch file path' => backdrop_get_path('module', 'user'),
     'source prefix' => 'user/',
-  );
+  ];
 
   return $info;
 }
@@ -71,7 +71,7 @@ function user_path_bulk_update_batch_process(&$context) {
 
   $context['sandbox']['count'] += count($uids);
   $context['sandbox']['current'] = max($uids);
-  $context['message'] = t('Updated alias for user @uid.', array('@uid' => end($uids)));
+  $context['message'] = t('Updated alias for user @uid.', ['@uid' => end($uids)]);
 
   if ($context['sandbox']['count'] != $context['sandbox']['total']) {
     $context['finished'] = $context['sandbox']['count'] / $context['sandbox']['total'];

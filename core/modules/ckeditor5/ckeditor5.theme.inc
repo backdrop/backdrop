@@ -15,8 +15,8 @@ function template_preprocess_ckeditor5_settings_toolbar(&$variables) {
   // Create lists of active and disabled buttons.
   $format = $variables['format'];
   $plugins = $variables['plugins'];
-  $buttons = array();
-  $multiple_buttons = array();
+  $buttons = [];
+  $multiple_buttons = [];
   foreach ($plugins as $plugin_info) {
     if (isset($plugin_info['buttons'])) {
       foreach ($plugin_info['buttons'] as $button_name => $button) {
@@ -29,7 +29,7 @@ function template_preprocess_ckeditor5_settings_toolbar(&$variables) {
     }
   }
 
-  $active_buttons = array();
+  $active_buttons = [];
   $settings = $format->editor_settings;
   foreach ($settings['toolbar'] as $button_name) {
     if (isset($buttons[$button_name])) {
@@ -66,12 +66,12 @@ function template_preprocess_ckeditor5_settings_toolbar(&$variables) {
     }
 
     // Build the button attributes.
-    $attributes = array(
+    $attributes = [
       'data-button-name' => $button['name'],
-      'class' => array('ckeditor5-button'),
+      'class' => ['ckeditor5-button'],
       // Setting a tabindex makes the item receive keyboard focus.
       'tabindex' => '0',
-    );
+    ];
     if (!empty($button['multiple'])) {
       $attributes['class'][] = 'ckeditor5-multiple-button';
     }
@@ -86,10 +86,10 @@ function template_preprocess_ckeditor5_settings_toolbar(&$variables) {
     }
 
     // Build the button item.
-    $button_item = array(
+    $button_item = [
       'contents' => $value,
       'attributes' => $attributes,
-    );
+    ];
 
     // Set additional flag on the button if it can occur multiple times.
     if (!empty($button['multiple'])) {
@@ -100,18 +100,18 @@ function template_preprocess_ckeditor5_settings_toolbar(&$variables) {
   };
 
   // Assemble list of active buttons.
-  $variables['active_buttons'] = array();
+  $variables['active_buttons'] = [];
   foreach ($active_buttons as $button) {
     $variables['active_buttons'][] = $build_button_item($button, $rtl);
   }
 
   // Assemble list of disabled buttons.
-  $variables['disabled_buttons'] = array();
+  $variables['disabled_buttons'] = [];
   foreach ($disabled_buttons as $button) {
     $variables['disabled_buttons'][] = $build_button_item($button, $rtl);
   }
   // Assemble list of multiple buttons that may be added multiple times.
-  $variables['multiple_buttons'] = array();
+  $variables['multiple_buttons'] = [];
   foreach ($multiple_buttons as $button_name => $button) {
     if ($button_name != '-') {
       $variables['multiple_buttons'][] = $build_button_item($button, $rtl);
@@ -131,13 +131,13 @@ function theme_ckeditor5_settings_toolbar($variables) {
 
   // theme_item_list() is avoided here because it cannot output an empty <ul>
   // tag, and the wrapping <div class="item-list"> can cause styling issues.
-  $button_row = array();
-  $button_rows = array();
+  $button_row = [];
+  $button_rows = [];
 
   // Add a line break at the end of the list.
-  $variables['active_buttons'][] = array(
-    'attributes' => array('data-button-name' => '-'),
-  );
+  $variables['active_buttons'][] = [
+    'attributes' => ['data-button-name' => '-'],
+  ];
   foreach ($variables['active_buttons'] as $button) {
     // CKEditor 5 uses a dash to indicate a line break in the toolbar.
     if ($button['attributes']['data-button-name'] === '-') {
@@ -148,7 +148,7 @@ function theme_ckeditor5_settings_toolbar($variables) {
 
       // Start a new row and go to the next item.
       $button_rows[] = $rendered_row;
-      $button_row = array();
+      $button_row = [];
     }
     else {
       $button_row[] = '<li' . backdrop_attributes($button['attributes']) . '>' . $button['contents'] . '</li>';
@@ -185,11 +185,11 @@ function theme_ckeditor5_settings_toolbar($variables) {
   $output .= '</div>';
 
   // Wrap the whole thing in a fieldset.
-  $fieldset = array(
+  $fieldset = [
     '#type' => 'fieldset',
     '#children' => $output,
     '#title' => t('CKEditor Toolbar'),
-  );
+  ];
 
   return backdrop_render($fieldset);
 }

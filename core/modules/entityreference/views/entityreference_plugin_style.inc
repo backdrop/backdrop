@@ -8,7 +8,7 @@ class entityreference_plugin_style extends views_plugin_style {
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['search_fields'] = array('default' => NULL);
+    $options['search_fields'] = ['default' => NULL];
 
     return $options;
   }
@@ -16,20 +16,20 @@ class entityreference_plugin_style extends views_plugin_style {
   // Create the options form.
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
-    $options = array();
+    $options = [];
 
     if (isset($form['grouping'])) {
       $options = $form['grouping'][0]['field']['#options'];
       unset($options['']);
-      $form['search_fields'] = array(
+      $form['search_fields'] = [
         '#type' => 'checkboxes',
         '#title' => t('Search fields'),
         '#options' => $options,
         '#required' => TRUE,
-        '#default_value' => isset($this->options['search_fields']) ? $this->options['search_fields'] : array(),
+        '#default_value' => isset($this->options['search_fields']) ? $this->options['search_fields'] : [],
         '#description' => t('Select the field(s) that will be searched when using the autocomplete widget.'),
         '#weight' => -3,
-      );
+      ];
     }
   }
 
@@ -50,7 +50,7 @@ class entityreference_plugin_style extends views_plugin_style {
 
     // @todo We don't display grouping info for now. Could be useful for select
     // widget, though.
-    $results = array();
+    $results = [];
     foreach ($sets as $records) {
       foreach ($records as $index => $values) {
         $this->view->row_index = $index;

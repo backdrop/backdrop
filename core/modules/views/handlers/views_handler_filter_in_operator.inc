@@ -61,7 +61,7 @@ class views_handler_filter_in_operator extends views_handler_filter {
       }
     }
     else {
-      $this->value_options = array(t('Yes'), t('No'));
+      $this->value_options = [t('Yes'), t('No')];
     }
 
     return $this->value_options;
@@ -74,20 +74,20 @@ class views_handler_filter_in_operator extends views_handler_filter {
 
   function expose_form(&$form, &$form_state) {
     parent::expose_form($form, $form_state);
-    $form['expose']['reduce'] = array(
+    $form['expose']['reduce'] = [
       '#type' => 'checkbox',
       '#title' => t('Limit list to selected items'),
       '#description' => t('If checked, the only items presented to the user will be the ones selected here.'),
       '#default_value' => !empty($this->options['expose']['reduce']), // safety
-    );
+    ];
   }
 
   function option_definition() {
     $options = parent::option_definition();
 
     $options['operator']['default'] = 'in';
-    $options['value']['default'] = array();
-    $options['expose']['contains']['reduce'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['value']['default'] = [];
+    $options['expose']['contains']['reduce'] = ['default' => FALSE, 'bool' => TRUE];
 
     return $options;
   }
@@ -98,38 +98,38 @@ class views_handler_filter_in_operator extends views_handler_filter {
    * adding/removing items from this array.
    */
   function operators() {
-    $operators = array(
-      'in' => array(
+    $operators = [
+      'in' => [
         'title' => t('Is one of'),
         'short' => t('in'),
         'short_single' => t('='),
         'method' => 'op_simple',
         'values' => 1,
-      ),
-      'not in' => array(
+      ],
+      'not in' => [
         'title' => t('Is not one of'),
         'short' => t('not in'),
         'short_single' => t('<>'),
         'method' => 'op_simple',
         'values' => 1,
-      ),
-    );
+      ],
+    ];
     // if the definition allows for the empty operator, add it.
     if (!empty($this->definition['allow empty'])) {
-      $operators += array(
-        'empty' => array(
+      $operators += [
+        'empty' => [
           'title' => t('Is empty (NULL)'),
           'method' => 'op_empty',
           'short' => t('empty'),
           'values' => 0,
-        ),
-        'not empty' => array(
+        ],
+        'not empty' => [
           'title' => t('Is not empty (NOT NULL)'),
           'method' => 'op_empty',
           'short' => t('not empty'),
           'values' => 0,
-        ),
-      );
+        ],
+      ];
     }
 
     return $operators;
@@ -139,7 +139,7 @@ class views_handler_filter_in_operator extends views_handler_filter {
    * Build strings from the operators() for 'select' options
    */
   function operator_options($which = 'title') {
-    $options = array();
+    $options = [];
     foreach ($this->operators() as $id => $info) {
       $options[$id] = $info[$which];
     }
@@ -148,7 +148,7 @@ class views_handler_filter_in_operator extends views_handler_filter {
   }
 
   function operator_values($values = 1) {
-    $options = array();
+    $options = [];
     foreach ($this->operators() as $id => $info) {
       if (isset($info['values']) && $info['values'] == $values) {
         $options[] = $id;
@@ -159,12 +159,12 @@ class views_handler_filter_in_operator extends views_handler_filter {
   }
 
   function value_form(&$form, &$form_state) {
-    $form['value'] = array();
-    $options = array();
+    $form['value'] = [];
+    $options = [];
 
     if (empty($form_state['exposed'])) {
       // Add a select all option to the value form.
-      $options = array('all' => t('Select all'));
+      $options = ['all' => t('Select all')];
     }
 
     $this->get_value_options();
@@ -190,7 +190,7 @@ class views_handler_filter_in_operator extends views_handler_filter {
         $options = $this->reduce_value_options();
 
         if (!empty($this->options['expose']['multiple']) && empty($this->options['expose']['required'])) {
-          $default_value = array();
+          $default_value = [];
         }
       }
 
@@ -210,7 +210,7 @@ class views_handler_filter_in_operator extends views_handler_filter {
     }
 
     if ($which == 'all' || $which == 'value') {
-      $form['value'] = array(
+      $form['value'] = [
         '#type' => $this->value_form_type,
         '#title' => $this->value_title,
         '#options' => $options,
@@ -218,21 +218,21 @@ class views_handler_filter_in_operator extends views_handler_filter {
         // These are only valid for 'select' type, but do no harm to checkboxes.
         '#multiple' => TRUE,
         '#size' => count($options) > 8 ? 8 : count($options),
-      );
+      ];
       if (!empty($form_state['exposed']) && !isset($form_state['input'][$identifier])) {
         $form_state['input'][$identifier] = $default_value;
       }
 
       if ($which == 'all') {
-        if (empty($form_state['exposed']) && (in_array($this->value_form_type, array('checkbox', 'checkboxes', 'radios', 'select')))) {
+        if (empty($form_state['exposed']) && (in_array($this->value_form_type, ['checkbox', 'checkboxes', 'radios', 'select']))) {
           $form['value']['#prefix'] = '<div id="edit-options-value-wrapper">';
           $form['value']['#suffix'] = '</div>';
         }
         // Setup #states for all operators with one value.
         foreach ($this->operator_values(1) as $operator) {
-          $form['value']['#states']['visible'][] = array(
-            $source => array('value' => $operator),
-          );
+          $form['value']['#states']['visible'][] = [
+            $source => ['value' => $operator],
+          ];
         }
       }
     }
@@ -249,7 +249,7 @@ class views_handler_filter_in_operator extends views_handler_filter {
     // Because options may be an array of strings, or an array of mixed arrays
     // and strings (optgroups) or an array of objects, we have to
     // step through and handle each one individually.
-    $options = array();
+    $options = [];
     foreach ($input as $id => $option) {
       if (is_array($option)) {
         $options[$id] = $this->reduce_value_options($option);
@@ -398,16 +398,16 @@ class views_handler_filter_in_operator extends views_handler_filter {
 
   function validate() {
     $this->get_value_options();
-    $errors = array();
+    $errors = [];
 
     // If the operator is an operator which doesn't require a value, there is
     // no need for additional validation.
     if (in_array($this->operator, $this->operator_values(0))) {
-      return array();
+      return [];
     }
 
     if (!in_array($this->operator, $this->operator_values(1))) {
-      $errors[] = t('The operator is invalid on filter: @filter.', array('@filter' => $this->ui_name(TRUE)));
+      $errors[] = t('The operator is invalid on filter: @filter.', ['@filter' => $this->ui_name(TRUE)]);
     }
     if (is_array($this->value)) {
       if (!isset($this->value_options)) {
@@ -430,11 +430,11 @@ class views_handler_filter_in_operator extends views_handler_filter {
       }
       // Choose different kind of output for 0, a single and multiple values.
       if (count($this->value) == 0) {
-        $errors[] = t('No valid values found on filter: @filter.', array('@filter' => $this->ui_name(TRUE)));
+        $errors[] = t('No valid values found on filter: @filter.', ['@filter' => $this->ui_name(TRUE)]);
       }
     }
     elseif (!empty($this->value) && ($this->operator == 'in' || $this->operator == 'not in')) {
-      $errors[] = t('The value @value is not an array for @operator on filter: @filter', array('@value' => print_r($this->value, 1), '@operator' => $this->operator, '@filter' => $this->ui_name(TRUE)));
+      $errors[] = t('The value @value is not an array for @operator on filter: @filter', ['@value' => print_r($this->value, 1), '@operator' => $this->operator, '@filter' => $this->ui_name(TRUE)]);
     }
     return $errors;
   }

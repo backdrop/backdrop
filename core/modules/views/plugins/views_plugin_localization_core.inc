@@ -22,7 +22,7 @@ class views_plugin_localization_core extends views_plugin_localization {
    * @param string $format
    *   The input format of the string. This is optional.
    */
-  public function translate_string($string, $keys = array(), $format = '') {
+  public function translate_string($string, $keys = [], $format = '') {
     return t($string);
   }
 
@@ -37,7 +37,7 @@ class views_plugin_localization_core extends views_plugin_localization {
    * @param string $format
    *   The input format of the string. This is optional.
    */
-  public function save_string($string, $keys = array(), $format = '') {
+  public function save_string($string, $keys = [], $format = '') {
     // Find a language that is not "en" (if available) to trigger an entry
     // in module locale's db tables, even if current language is "en".
     $langcode = 'en';
@@ -47,7 +47,7 @@ class views_plugin_localization_core extends views_plugin_localization {
       $other_language = reset($languages);
       $langcode = $other_language->langcode;
     }
-    t($string, array(), array('langcode' => $langcode));
+    t($string, [], ['langcode' => $langcode]);
 
     return TRUE;
   }

@@ -15,69 +15,69 @@ function contact_settings_form($form, &$form_state) {
   $config = config('contact.settings');
   $form['#config'] = 'contact.settings';
 
-  $form['fields'] = array(
+  $form['fields'] = [
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#title' => t("Fields"),
-  );
-  $form['fields']['phone'] = array(
+  ];
+  $form['fields']['phone'] = [
     '#type' => 'select',
     '#title' => t('Phone number'),
     '#description' => t('Allow users to enter their phone number.'),
-    '#options' => array(
+    '#options' => [
       'optional' => t('Optional'),
       'required' => t('Required'),
-    ),
+    ],
     '#empty_value' => '',
     '#default_value' => $config->get('phone'),
-  );
-  $form['fields']['copy'] = array(
+  ];
+  $form['fields']['copy'] = [
     '#type' => 'checkbox',
     '#title' => t("Allow users to send themselves a copy of the submission."),
     '#description' => t("Include a 'Send yourself a copy' checkbox on site-wide and personal contact forms."),
     '#default_value' => contact_show_personal_copy_checkbox()
-  );
+  ];
 
-  $form['permissions_wrapper'] = array(
+  $form['permissions_wrapper'] = [
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#title' => t("Permissions"),
-  );
+  ];
   $form['permissions_wrapper']['permissions'] = contact_form_permissions();
   $form['permissions_wrapper']['permissions']['#tree'] = TRUE;
 
-  $form['threshold'] = array(
+  $form['threshold'] = [
     '#type' => 'fieldset',
     '#title' => t("Spam prevention"),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
-  );
-  $form['threshold']['wrapper'] = array(
+  ];
+  $form['threshold']['wrapper'] = [
     '#type' => 'container',
-    '#attributes' => array('class' => array('container-inline')),
-  );
-  $form['threshold']['wrapper']['contact_threshold_limit'] = array(
+    '#attributes' => ['class' => ['container-inline']],
+  ];
+  $form['threshold']['wrapper']['contact_threshold_limit'] = [
     '#type' => 'select',
     '#title' => t('Email send limit'),
     '#title_display' => 'invisible',
-    '#options' => backdrop_map_assoc(array(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 75, 100, 125, 150, 200, 250, 500)),
+    '#options' => backdrop_map_assoc([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 20, 30, 40, 50, 75, 100, 125, 150, 200, 250, 500]),
     '#default_value' => $config->get('contact_threshold_limit'),
     '#prefix' => '<span aria-hidden="true">' . t('Limit to') . '</span>',
-  );
-  $form['threshold']['wrapper']['contact_threshold_window'] = array(
+  ];
+  $form['threshold']['wrapper']['contact_threshold_window'] = [
     '#type' => 'select',
     '#title' => t('Email send time window'),
     '#title_display' => 'invisible',
-    '#options' => array(0 => t('None (disabled)')) + backdrop_map_assoc(array(60, 180, 300, 600, 900, 1800, 2700, 3600, 10800, 21600, 32400, 43200, 86400), 'format_interval'),
+    '#options' => [0 => t('None (disabled)')] + backdrop_map_assoc([60, 180, 300, 600, 900, 1800, 2700, 3600, 10800, 21600, 32400, 43200, 86400], 'format_interval'),
     '#default_value' => $config->get('contact_threshold_window'),
     '#prefix' => '<span aria-hidden="true">' . t('messages per') . '</span>',
-  );
-  $form['threshold']['help'] = array(
+  ];
+  $form['threshold']['help'] = [
     '#type' => 'item',
     '#description' => t("Limit the amount of emails that can be sent from contact forms, from the same IP, within a specific window of time. This helps prevent malicious users from sending multiple emails."),
-  );
+  ];
 
   $form['#submit'][] = 'contact_settings_form_submit';
   return system_settings_form($form);
@@ -111,35 +111,35 @@ function contact_form_permissions() {
   // Note that in contact_theme(), the 'contact_form_permissions' theme callback
   // reuses theme_user_admin_permissions(), to make it identical to the user
   // module permissions page.
-  $form['#theme'] = array('contact_form_permissions');
+  $form['#theme'] = ['contact_form_permissions'];
 
   // Wrap the table in a form element to make margins match other form elements.
-  $form['#theme_wrappers'] = array('form_element');
+  $form['#theme_wrappers'] = ['form_element'];
 
-  $form['roles'] = array(
+  $form['roles'] = [
     '#type' => 'value',
     '#value' => $roles,
-  );
+  ];
 
   // Retrieve contact related permissions.
   $permissions = contact_permission();
 
   // Render role/permission overview:
-  $options = array();
-  $status = array();
+  $options = [];
+  $status = [];
   foreach ($permissions as $perm => $perm_item) {
     // Fill in default values for the permission.
-    $perm_item += array(
+    $perm_item += [
       'description' => '',
       'restrict access' => FALSE,
       'warning' => '',
-    );
+    ];
     $options[$perm] = '';
-    $form['permission'][$perm] = array(
+    $form['permission'][$perm] = [
       '#type' => 'item',
       '#markup' => $perm_item['title'],
-      '#description' => theme('user_permission_description', array('permission_item' => $perm_item)),
-    );
+      '#description' => theme('user_permission_description', ['permission_item' => $perm_item]),
+    ];
     foreach ($roles as $role_name => $role) {
       // Builds arrays for checked boxes for each role.
       if (in_array($perm, $role->permissions)) {
@@ -150,17 +150,17 @@ function contact_form_permissions() {
 
   // Have to build checkboxes here after checkbox arrays are built.
   foreach ($roles as $role_name => $role) {
-    $form['checkboxes'][$role_name] = array(
+    $form['checkboxes'][$role_name] = [
       '#type' => 'checkboxes',
       '#options' => $options,
-      '#default_value' => isset($status[$role_name]) ? $status[$role_name] : array(),
-      '#attributes' => array('class' => array('role-' . $role_name)),
-    );
-    $form['role_names'][$role_name] = array(
+      '#default_value' => isset($status[$role_name]) ? $status[$role_name] : [],
+      '#attributes' => ['class' => ['role-' . $role_name]],
+    ];
+    $form['role_names'][$role_name] = [
       '#markup' => check_plain($role->label),
       '#description' => filter_xss_admin($role->description),
       '#tree' => TRUE,
-    );
+    ];
   }
 
   $form['#attached']['js'][] = backdrop_get_path('module', 'user') . '/js/user.permissions.js';
@@ -174,66 +174,66 @@ function contact_form_permissions() {
  * @see contact_menu()
  */
 function contact_category_list($form, $form_state) {
-  $form['help'] = array(
+  $form['help'] = [
     '#type' => 'markup',
-    '#markup' => t('Configure the categories shown in the site-wide contact form available at <a href="!url">!url</a>. All categories are shown in a select list on the contact form, which will send to different addresses when selected.', array('!url' => url('contact'))),
+    '#markup' => t('Configure the categories shown in the site-wide contact form available at <a href="!url">!url</a>. All categories are shown in a select list on the contact form, which will send to different addresses when selected.', ['!url' => url('contact')]),
     '#weight' => -20,
-  );
+  ];
 
   $config_data = contact_config_data();
   $default_category = $config_data['contact_default_category'];
   $categories = (array) $config_data['categories'];
 
-  $form['categories'] = array(
+  $form['categories'] = [
     '#theme' => 'contact_category_list_table',
     '#tree' => TRUE,
-  );
+  ];
 
   // Loop through the categories and add them to the table.
   foreach ($categories as $cat) {
     $cid = $cat['cid'];
 
-    $links = array();
-    $links['configure'] = array(
+    $links = [];
+    $links['configure'] = [
       'title' => t('Configure'),
       'href' => 'admin/structure/contact/configure/' . $cid,
-    );
-    $links['delete'] = array(
+    ];
+    $links['delete'] = [
       'title' => t('Delete'),
       'href' => 'admin/structure/contact/delete/' . $cid,
-    );
+    ];
 
-    $form['categories'][$cid]['weight'] = array(
+    $form['categories'][$cid]['weight'] = [
       '#type' => 'weight',
-      '#title' => t('Weight for @title', array('@title' => $cat['category'])),
+      '#title' => t('Weight for @title', ['@title' => $cat['category']]),
       '#title_display' => 'invisible',
       '#default_value' => $cat['weight'],
       '#delta' => max(10, count($categories)),
-    );
-    $form['categories'][$cid]['name'] = array(
+    ];
+    $form['categories'][$cid]['name'] = [
       '#markup' => check_plain($cat['category']),
-    );
+    ];
     $recipients = explode(',', check_plain($cat['recipients']));
-    $form['categories'][$cid]['recipients'] = array(
-      '#markup' => theme('item_list', array('items' => $recipients)),
-    );
-    $form['categories'][$cid]['default'] = array(
+    $form['categories'][$cid]['recipients'] = [
+      '#markup' => theme('item_list', ['items' => $recipients]),
+    ];
+    $form['categories'][$cid]['default'] = [
       '#markup' => ($cid == $default_category) ? t('Yes') : t('No'),
-    );
-    $form['categories'][$cid]['operations'] = array(
+    ];
+    $form['categories'][$cid]['operations'] = [
       '#type' => 'operations',
       '#links' => $links,
-    );
+    ];
   }
 
-  $form['actions'] = array(
+  $form['actions'] = [
     '#type' => 'actions',
     '#access' => count($categories) > 1,
-  );
-  $form['actions']['submit'] = array(
+  ];
+  $form['actions']['submit'] = [
     '#type' => 'submit',
     '#value' => t('Save order')
-  );
+  ];
 
   return $form;
 }
@@ -281,34 +281,34 @@ function contact_category_list_submit($form, &$form_state) {
  * @see contact_category_edit_form_submit()
  * @ingroup forms
  */
-function contact_category_edit_form($form, &$form_state, array $category = array()) {
+function contact_category_edit_form($form, &$form_state, array $category = []) {
   if (empty($category)) {
     backdrop_set_title(t('Add contact form category'));
   }
 
   // If this is a new category, add the default values.
-  $category += array(
+  $category += [
     'category' => '',
     'recipients' => '',
     'reply' => '',
     'weight' => 0,
     'selected' => 0,
     'cid' => NULL,
-  );
+  ];
 
   // Get contact_default_category.
   $config_data = contact_config_data();
   $default_category = $config_data['contact_default_category'];
 
-  $form['category'] = array(
+  $form['category'] = [
     '#type' => 'textfield',
     '#title' => t('Category'),
     '#maxlength' => 255,
     '#default_value' => $category['category'],
     '#description' => t("Example: 'website feedback' or 'product information'."),
     '#required' => TRUE,
-  );
-  $form['recipients'] = array(
+  ];
+  $form['recipients'] = [
     '#type' => 'textarea',
     '#title' => t('Recipients'),
     // Recipients are stored comma-separated, but display with new lines for
@@ -318,46 +318,46 @@ function contact_category_edit_form($form, &$form_state, array $category = array
     '#placeholder' => t("admin@example.com\nsales@example.com"),
     '#required' => TRUE,
     '#rows' => max(5, sizeof(explode(',', $category['recipients'])) + 2),
-  );
-  $form['reply'] = array(
+  ];
+  $form['reply'] = [
     '#type' => 'textarea',
     '#title' => t('Auto-reply'),
     '#default_value' => $category['reply'],
     '#description' => t('Optional auto-reply. Leave empty if you do not want to send the user an auto-reply message.'),
-  );
-  $form['weight'] = array(
+  ];
+  $form['weight'] = [
     '#type' => 'hidden',
     '#value' => $category['weight'],
-  );
-  $form['selected'] = array(
+  ];
+  $form['selected'] = [
     '#type' => 'select',
     '#title' => t('Selected'),
-    '#options' => array(
+    '#options' => [
       0 => t('No'),
       1 => t('Yes'),
-    ),
+    ],
     '#default_value' => (isset($category['cid']) && $default_category == $category['cid']),
     '#description' => t('Set this to <em>Yes</em> if you would like this category to be selected by default.'),
-  );
-  $form['cid'] = array(
+  ];
+  $form['cid'] = [
     '#type' => 'hidden',
     '#value' => $category['cid'],
-  );
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
+  ];
+  $form['actions'] = ['#type' => 'actions'];
+  $form['actions']['submit'] = [
     '#type' => 'submit',
     '#value' => t('Save'),
-  );
-  $form['actions']['cancel'] = array(
+  ];
+  $form['actions']['cancel'] = [
     '#type' => 'link',
     '#title' => t('Cancel'),
     '#href' => 'admin/structure/contact',
-    '#options' => array(
-      'attributes' => array(
-        'class' => array('form-cancel')
-      ),
-    ),
-  );
+    '#options' => [
+      'attributes' => [
+        'class' => ['form-cancel']
+      ],
+    ],
+  ];
 
   return $form;
 }
@@ -380,7 +380,7 @@ function contact_category_edit_form_validate($form, &$form_state) {
     foreach ($categories as $cat) {
       if ($form_state['values']['cid'] != $cat['cid'] AND $category == $cat['category']) {
         if (empty($form_state['values']['cid'])) {
-          form_set_error('category', t('A contact form with category %category already exists.', array('%category' => $category)));
+          form_set_error('category', t('A contact form with category %category already exists.', ['%category' => $category]));
         }
       }
     }
@@ -392,14 +392,14 @@ function contact_category_edit_form_validate($form, &$form_state) {
   $recipients = array_filter(array_map('trim', $recipients));
 
   // Check recipients are valid email.
-  $invalid_recipients = array();
+  $invalid_recipients = [];
   foreach ($recipients as &$recipient) {
     if (!valid_email_address($recipient)) {
       $invalid_recipients[] = $recipient;
     }
   }
   if (!empty($invalid_recipients)) {
-    $message = format_plural(sizeof($invalid_recipients), '%recipient is an invalid email address.', 'The following email addresses are invalid: %recipient.', array('%recipient' => implode(', ', $invalid_recipients)));
+    $message = format_plural(sizeof($invalid_recipients), '%recipient is an invalid email address.', 'The following email addresses are invalid: %recipient.', ['%recipient' => implode(', ', $invalid_recipients)]);
     form_set_error('recipients', $message);
   }
 
@@ -418,13 +418,13 @@ function contact_category_edit_form_submit($form, &$form_state) {
 
   $cid = $form_state['values']['cid'];
 
-  $contact = array(
+  $contact = [
     'cid' => $cid,
     'category' => $form_state['values']['category'],
     'recipients' => $form_state['values']['recipients'],
     'reply' => $form_state['values']['reply'],
     'weight' => $form_state['values']['weight'],
-  );
+  ];
 
   // Get Categories Data stored in $form_state.
   $config_data = $form_state['categories_data'];
@@ -467,8 +467,8 @@ function contact_category_edit_form_submit($form, &$form_state) {
   $config->setData($config_data);
   $config->save();
 
-  backdrop_set_message(t('Contact form category %category has been saved.', array('%category' => $form_state['values']['category'])));
-  watchdog('contact', 'Contact form category %category has been saved.', array('%category' => $form_state['values']['category']), WATCHDOG_NOTICE, l(t('Configure'), 'admin/structure/contact/configure/' . $form_state['values']['cid']));
+  backdrop_set_message(t('Contact form category %category has been saved.', ['%category' => $form_state['values']['category']]));
+  watchdog('contact', 'Contact form category %category has been saved.', ['%category' => $form_state['values']['category']], WATCHDOG_NOTICE, l(t('Configure'), 'admin/structure/contact/configure/' . $form_state['values']['cid']));
   $form_state['redirect'] = 'admin/structure/contact';
 }
 
@@ -483,14 +483,14 @@ function contact_category_edit_form_submit($form, &$form_state) {
  * @see contact_category_delete_form_submit()
  */
 function contact_category_delete_form($form, &$form_state, array $contact) {
-  $form['contact'] = array(
+  $form['contact'] = [
     '#type' => 'value',
     '#value' => $contact,
-  );
+  ];
 
   return confirm_form(
     $form,
-    t('Are you sure you want to delete %category?', array('%category' => $contact['category'])),
+    t('Are you sure you want to delete %category?', ['%category' => $contact['category']]),
     'admin/structure/contact',
     t('This action cannot be undone.'),
     t('Delete'),
@@ -529,8 +529,8 @@ function contact_category_delete_form_submit($form, &$form_state) {
   $config->setData($config_data);
   $config->save();
 
-  backdrop_set_message(t('Contact form category %category has been deleted.', array('%category' => $contact['category'])));
-  watchdog('contact', 'Contact form category %category has been deleted.', array('%category' => $contact['category']), WATCHDOG_NOTICE);
+  backdrop_set_message(t('Contact form category %category has been deleted.', ['%category' => $contact['category']]));
+  watchdog('contact', 'Contact form category %category has been deleted.', ['%category' => $contact['category']], WATCHDOG_NOTICE);
 
   $form_state['redirect'] = 'admin/structure/contact';
 }

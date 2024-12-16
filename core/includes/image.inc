@@ -50,7 +50,7 @@ function image_get_available_toolkits() {
   // hook_image_toolkits returns an array of toolkit names.
   $toolkits = module_invoke_all('image_toolkits');
 
-  $output = array();
+  $output = [];
   foreach ($toolkits as $name => $info) {
     // Only allow modules that aren't marked as unavailable.
     if ($info['available']) {
@@ -97,13 +97,13 @@ function image_get_toolkit() {
  * @return
  *   Mixed values (typically Boolean indicating successful operation).
  */
-function image_toolkit_invoke($method, stdClass $image, array $params = array()) {
+function image_toolkit_invoke($method, stdClass $image, array $params = []) {
   $function = 'image_' . $image->toolkit . '_' . $method;
   if (function_exists($function)) {
     array_unshift($params, $image);
     return call_user_func_array($function, $params);
   }
-  watchdog('image', 'The selected image handling toolkit %toolkit can not correctly process %function.', array('%toolkit' => $image->toolkit, '%function' => $function), WATCHDOG_ERROR);
+  watchdog('image', 'The selected image handling toolkit %toolkit can not correctly process %function.', ['%toolkit' => $image->toolkit, '%function' => $function], WATCHDOG_ERROR);
   return FALSE;
 }
 
@@ -127,13 +127,13 @@ function image_get_supported_extensions() {
     return $extensions;
   }
   watchdog('image', 'The selected image handling toolkit %toolkit should provide a %function callback.',
-    array(
+    [
       '%toolkit' => $toolkit,
-      '%function' => $function),
+      '%function' => $function],
     WATCHDOG_ERROR
   );
   // Provide a fallback list of extensions.
-  return array('jpg', 'jpeg', 'gif', 'png');
+  return ['jpg', 'jpeg', 'gif', 'png'];
 }
 
 /**
@@ -178,13 +178,13 @@ function image_get_info($filepath, $toolkit = FALSE) {
       // Dimensions could be FALSE if the SVG is invalid, although we should
       // have caught that on upload.
       $dimensions = image_get_svg_dimensions($filepath);
-      $details = array(
+      $details = [
         'width'     => isset($dimensions['width']) ? $dimensions['width'] : IMAGE_SVG_DEFAULT_WIDTH,
         'height'    => isset($dimensions['height']) ? $dimensions['height'] : IMAGE_SVG_DEFAULT_HEIGHT,
         'extension' => 'svg',
         'mime_type' => 'image/svg+xml',
         'file_size' => filesize($filepath),
-      );
+      ];
     }
   }
 
@@ -335,7 +335,7 @@ function image_resize(stdClass $image, $width, $height) {
   $width = (int) round($width);
   $height = (int) round($height);
 
-  return image_toolkit_invoke('resize', $image, array($width, $height));
+  return image_toolkit_invoke('resize', $image, [$width, $height]);
 }
 
 /**
@@ -380,7 +380,7 @@ function image_rotate(stdClass $image, $degrees, $background = NULL) {
     $degrees = 360 - $degrees;
   }
 
-  return image_toolkit_invoke('rotate', $image, array($degrees, $background));
+  return image_toolkit_invoke('rotate', $image, [$degrees, $background]);
 }
 
 /**
@@ -412,7 +412,7 @@ function image_crop(stdClass $image, $x, $y, $width, $height) {
   $width = (int) round($width);
   $height = (int) round($height);
 
-  return image_toolkit_invoke('crop', $image, array($x, $y, $width, $height));
+  return image_toolkit_invoke('crop', $image, [$x, $y, $width, $height]);
 }
 
 /**
@@ -494,7 +494,7 @@ function image_save(stdClass $image, $destination = NULL) {
   if (empty($destination)) {
     $destination = $image->source;
   }
-  if ($return = image_toolkit_invoke('save', $image, array($destination))) {
+  if ($return = image_toolkit_invoke('save', $image, [$destination])) {
     // Clear the cached file size and refresh the image information.
     clearstatcache();
     $image->info = image_get_info($destination, $image->toolkit);
@@ -542,12 +542,12 @@ function image_hex2rgba(&$hex) {
     return FALSE;
   }
 
-  return array(
+  return [
     'red' => hexdec($colors[1]),
     'green' => hexdec($colors[2]),
     'blue' => hexdec($colors[3]),
     'alpha' => isset($colors[4]) ? hexdec($colors[4]) : 0,
-  );
+  ];
 }
 
 /**
@@ -591,9 +591,9 @@ function image_add_svg_attributes($svg_content, array $attributes) {
   libxml_use_internal_errors(FALSE);
   if (empty($svg_tag)) {
     $message = $last_error ? trim($last_error->message) : '';
-    watchdog('image', 'Failed to parse SVG content. %message', array(
+    watchdog('image', 'Failed to parse SVG content. %message', [
       '%message' => $message,
-    ), WATCHDOG_ERROR);
+    ], WATCHDOG_ERROR);
     return '';
   }
 
@@ -646,14 +646,14 @@ function image_get_svg_dimensions($uri) {
   }
 
   // Return cached dimensions if already retrieved once this request.
-  $cached_images = &backdrop_static(__FUNCTION__, array());
+  $cached_images = &backdrop_static(__FUNCTION__, []);
   if (isset($cached_images[$uri])) {
     return $cached_images[$uri];
   }
 
   // If there are no dimensions, store the dimensions as zero.
   // Required for compatibility with image field storage.
-  $svg_dimensions = array();
+  $svg_dimensions = [];
   $file_contents = file_get_contents($uri);
   if ($file_contents && $svg = simplexml_load_string($file_contents)) {
     foreach ($svg->attributes() as $attribute => $value) {

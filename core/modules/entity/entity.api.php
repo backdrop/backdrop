@@ -119,70 +119,70 @@
  * @see hook_entity_info_alter()
  */
 function hook_entity_info() {
-  $return = array(
-    'node' => array(
+  $return = [
+    'node' => [
       'label' => t('Node'),
       'controller class' => 'NodeController',
       'entity class' => 'Node',
       'base table' => 'node',
       'revision table' => 'node_revision',
       'fieldable' => TRUE,
-      'translation' => array(
+      'translation' => [
         'locale' => TRUE,
-      ),
-      'entity keys' => array(
+      ],
+      'entity keys' => [
         'id' => 'nid',
         'revision' => 'vid',
         'bundle' => 'type',
-      ),
-      'bundle keys' => array(
+      ],
+      'bundle keys' => [
         'bundle' => 'type',
-      ),
-      'bundles' => array(),
-      'view modes' => array(
-        'full' => array(
+      ],
+      'bundles' => [],
+      'view modes' => [
+        'full' => [
           'label' => t('Full content'),
           'custom settings' => FALSE,
-        ),
-        'teaser' => array(
+        ],
+        'teaser' => [
           'label' => t('Teaser'),
           'custom settings' => TRUE,
-        ),
-        'rss' => array(
+        ],
+        'rss' => [
           'label' => t('RSS'),
           'custom settings' => FALSE,
-        ),
-      ),
-    ),
-  );
+        ],
+      ],
+    ],
+  ];
 
   // Search integration is provided by node.module, so search-related
   // display modes for nodes are defined here and not in search.module.
   if (module_exists('search')) {
-    $return['node']['view modes'] += array(
-      'search_index' => array(
+    $return['node']['view modes'] += [
+      'search_index' => [
         'label' => t('Search index'),
         'custom settings' => FALSE,
-      ),
-      'search_result' => array(
+      ],
+      'search_result' => [
         'label' => t('Search result highlighting input'),
         'custom settings' => FALSE,
-      ),
-    );
+      ],
+    ];
   }
 
   // Bundles must provide a human readable name so we can create help and error
   // messages, and the path to attach Field admin pages to.
   foreach (node_type_get_names() as $type => $name) {
-    $return['node']['bundles'][$type] = array(
+    $return['node']['bundles'][$type] = [
       'label' => $name,
-      'admin' => array(
+      'admin' => [
         'path' => 'admin/structure/types/manage/%node_type',
         'real path' => 'admin/structure/types/manage/' . str_replace('_', '-', $type),
         'bundle argument' => 4,
-        'access arguments' => array('administer content types'),
-      ),
-    );
+        'access arguments' => ['administer content types'],
+      ],
+    ];
   }
 
   return $return;
@@ -248,12 +248,12 @@ function hook_entity_insert($entity, $type) {
   $info = entity_get_info($type);
   list($id) = entity_extract_ids($type, $entity);
   db_insert('example_entity')
-    ->fields(array(
+    ->fields([
       'type' => $type,
       'id' => $id,
       'created' => REQUEST_TIME,
       'updated' => REQUEST_TIME,
-    ))
+    ])
     ->execute();
 }
 
@@ -270,9 +270,9 @@ function hook_entity_update($entity, $type) {
   $info = entity_get_info($type);
   list($id) = entity_extract_ids($type, $entity);
   db_update('example_entity')
-    ->fields(array(
+    ->fields([
       'updated' => REQUEST_TIME,
-    ))
+    ])
     ->condition('type', $type)
     ->condition('id', $id)
     ->execute();
@@ -300,11 +300,11 @@ function hook_entity_predelete($entity, $type) {
     ->fetchField();
 
   // Log the count in a table that records this statistic for deleted entities.
-  $ref_count_record = (object) array(
+  $ref_count_record = (object) [
     'count' => $count,
     'type' => $type,
     'id' => $id,
-  );
+  ];
   backdrop_write_record('example_deleted_entity_statistics', $ref_count_record);
 }
 
@@ -376,11 +376,11 @@ function hook_entity_query_alter($query) {
  * @see hook_user_view()
  */
 function hook_entity_view($entity, $type, $view_mode, $langcode) {
-  $entity->content['my_additional_field'] = array(
+  $entity->content['my_additional_field'] = [
     '#markup' => $additional_field,
     '#weight' => 10,
     '#theme' => 'my_module_my_additional_field',
-  );
+  ];
 }
 
 /**
@@ -472,13 +472,13 @@ function hook_entity_prepare_view($entities, $type) {
  * @see hook_entity_view_mode_info_alter()
  */
 function hook_entity_view_mode_info() {
-  $view_modes['user']['full'] = array(
+  $view_modes['user']['full'] = [
     'label' => t('User account'),
-  );
-  $view_modes['user']['compact'] = array(
+  ];
+  $view_modes['user']['compact'] = [
     'label' => t('Compact'),
     'custom_settings' => TRUE,
-  );
+  ];
   return $view_modes;
 }
 
@@ -543,7 +543,7 @@ function hook_entity_view_mode_presave($view_mode, $entity_type) {
  *   The type of entity being saved (i.e. node, user, comment).
  */
 function hook_entity_view_mode_insert($view_mode, $entity_type) {
-  config_set('my_module.view_modes', 'view_mode_list', array($entity_type => $view_mode));
+  config_set('my_module.view_modes', 'view_mode_list', [$entity_type => $view_mode]);
 }
 
 /**
@@ -555,7 +555,7 @@ function hook_entity_view_mode_insert($view_mode, $entity_type) {
  *   The type of entity being saved (i.e. node, user, comment).
  */
 function hook_entity_view_mode_update($view_mode, $entity_type) {
-  config_set('my_module.view_modes', 'view_mode_list', array($entity_type => $view_mode));
+  config_set('my_module.view_modes', 'view_mode_list', [$entity_type => $view_mode]);
 }
 
 /**

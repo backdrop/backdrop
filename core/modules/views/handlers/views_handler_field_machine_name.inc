@@ -32,13 +32,13 @@ class views_handler_field_machine_name extends views_handler_field {
       }
     }
     else {
-      $this->value_options = array();
+      $this->value_options = [];
     }
   }
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['machine_name'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['machine_name'] = ['default' => FALSE, 'bool' => TRUE];
 
     return $options;
   }
@@ -46,12 +46,12 @@ class views_handler_field_machine_name extends views_handler_field {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
-    $form['machine_name'] = array(
+    $form['machine_name'] = [
       '#title' => t('Output machine name'),
       '#description' => t('Display field as machine name.'),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['machine_name']),
-    );
+    ];
   }
 
   function pre_render(&$values) {

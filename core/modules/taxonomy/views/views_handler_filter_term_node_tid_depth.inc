@@ -14,15 +14,15 @@
  */
 class views_handler_filter_term_node_tid_depth extends views_handler_filter_term_node_tid {
   function operator_options($which = 'title') {
-    return array(
+    return [
       'or' => t('Is one of'),
-    );
+    ];
   }
 
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['depth'] = array('default' => 0);
+    $options['depth'] = ['default' => 0];
 
     return $options;
   }
@@ -30,12 +30,12 @@ class views_handler_filter_term_node_tid_depth extends views_handler_filter_term
   function extra_options_form(&$form, &$form_state) {
     parent::extra_options_form($form, $form_state);
 
-    $form['depth'] = array(
+    $form['depth'] = [
       '#type' => 'weight',
       '#title' => t('Depth'),
       '#default_value' => $this->options['depth'],
       '#description' => t('The depth will match nodes tagged with terms in the hierarchy. For example, if you have the term "fruit" and a child term "apple", with a depth of 1 (or higher) then filtering for the term "fruit" will get nodes that are tagged with "apple" as well as "fruit". If negative, the reverse is true; searching for "apple" will also pick up nodes tagged with "fruit" if depth is -1 (or lower).'),
-    );
+    ];
   }
 
   function query() {

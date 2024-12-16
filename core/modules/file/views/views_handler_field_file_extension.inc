@@ -11,18 +11,18 @@
 class views_handler_field_file_extension extends views_handler_field {
   public function option_definition() {
     $options = parent::option_definition();
-    $options['extension_detect_tar'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['extension_detect_tar'] = ['default' => FALSE, 'bool' => TRUE];
     return $options;
   }
 
   public function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
-    $form['extension_detect_tar'] = array(
+    $form['extension_detect_tar'] = [
       '#type' => 'checkbox',
       '#title' => t('Detect if tar is part of the extension'),
       '#description' => t("See if the previous extension is '.tar' and if so, add that, so we see 'tar.gz' or 'tar.bz2' instead of just 'gz'."),
       '#default_value' => $this->options['extension_detect_tar'],
-    );
+    ];
   }
 
   function render($values) {

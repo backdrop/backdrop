@@ -16,12 +16,12 @@
  */
 function template_preprocess_search_results(&$variables) {
   global $language;
-  $variables['search_results'] = array();
+  $variables['search_results'] = [];
   if (!empty($variables['module'])) {
     $variables['module'] = check_plain($variables['module']);
   }
   foreach ($variables['results'] as $result) {
-    $info = array();
+    $info = [];
     if (empty($result['attributes']))  {
       $attributes = '';
     }
@@ -41,7 +41,7 @@ function template_preprocess_search_results(&$variables) {
       $info = array_merge($info, $result['extra']);
     }
 
-    $variables['search_results'][] = array(
+    $variables['search_results'][] = [
       'result' => $result,
       'module' => $variables['module'],
       'url' => check_url($result['link']),
@@ -50,7 +50,7 @@ function template_preprocess_search_results(&$variables) {
       'info_split' => $info,
       'info' => implode(' - ', $info),
       'attributes' => $attributes,
-    );
+    ];
 
     if (isset($result['language']) && $result['language'] != $language->langcode && $result['language'] != LANGUAGE_NONE) {
       $variables['content_attributes']['lang'] = $result['language'];
@@ -66,7 +66,7 @@ function template_preprocess_search_results(&$variables) {
   else {
     $pager_theme = 'pager';
   }
-  $variables['pager'] = theme($pager_theme, array('tags' => NULL));
+  $variables['pager'] = theme($pager_theme, ['tags' => NULL]);
   $variables['theme_hook_suggestions'][] = 'search_results__' . $variables['module'];
 }
 

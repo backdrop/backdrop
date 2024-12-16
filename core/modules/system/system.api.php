@@ -34,12 +34,12 @@
  * @see hook_hook_info_alter().
  */
 function hook_hook_info() {
-  $hooks['token_info'] = array(
+  $hooks['token_info'] = [
     'group' => 'tokens',
-  );
-  $hooks['tokens'] = array(
+  ];
+  $hooks['tokens'] = [
     'group' => 'tokens',
-  );
+  ];
   return $hooks;
 }
 
@@ -79,10 +79,10 @@ function hook_hook_info_alter(&$hooks) {
  * @see hook_admin_paths_alter()
  */
 function hook_admin_paths() {
-  $paths = array(
+  $paths = [
     'my_module/*/add' => TRUE,
     'my_module/*/edit' => TRUE,
-  );
+  ];
   return $paths;
 }
 
@@ -152,10 +152,10 @@ function hook_cron() {
  * @see hook_cron_queue_info_alter()
  */
 function hook_cron_queue_info() {
-  $queues['aggregator_feeds'] = array(
+  $queues['aggregator_feeds'] = [
     'worker callback' => 'aggregator_refresh',
     'time' => 60,
-  );
+  ];
   return $queues;
 }
 
@@ -246,9 +246,9 @@ function callback_queue_worker($queue_item_data) {
  * @see system_element_info()
  */
 function hook_element_info() {
-  $types['filter_format'] = array(
+  $types['filter_format'] = [
     '#input' => TRUE,
-  );
+  ];
   return $types;
 }
 
@@ -353,50 +353,50 @@ function hook_js_alter(&$javascript) {
  */
 function hook_library_info() {
   // Library One.
-  $libraries['library-1'] = array(
+  $libraries['library-1'] = [
     'title' => 'Library One',
     'website' => 'http://example.com/library-1',
     'version' => '1.2',
-    'js' => array(
-      backdrop_get_path('module', 'my_module') . '/library-1.js' => array(),
-    ),
-    'css' => array(
-      backdrop_get_path('module', 'my_module') . '/library-2.css' => array(
+    'js' => [
+      backdrop_get_path('module', 'my_module') . '/library-1.js' => [],
+    ],
+    'css' => [
+      backdrop_get_path('module', 'my_module') . '/library-2.css' => [
         'type' => 'file',
         'media' => 'screen',
-      ),
-    ),
+      ],
+    ],
     // A full list of icons available from core can be found in the
     // core/misc/icons directory.
-    'icons' => array(
+    'icons' => [
       'pencil',
       'image',
       // If needing to use an icon that cannot be overridden by a module or
       // theme, pass an array of options with "immutable" set to TRUE.
-      'gear' => array('immutable' => TRUE),
-    ),
-  );
+      'gear' => ['immutable' => TRUE],
+    ],
+  ];
   // Library Two.
-  $libraries['library-2'] = array(
+  $libraries['library-2'] = [
     'title' => 'Library Two',
     'website' => 'http://example.com/library-2',
     'version' => '3.1-beta1',
-    'js' => array(
+    'js' => [
       // JavaScript settings may use the 'data' key.
-      array(
+      [
         'type' => 'setting',
-        'data' => array('library2' => TRUE),
-      ),
-    ),
-    'dependencies' => array(
+        'data' => ['library2' => TRUE],
+      ],
+    ],
+    'dependencies' => [
       // Require jQuery UI core by System module.
-      array('system', 'ui'),
+      ['system', 'ui'],
       // Require our other library.
-      array('my_module', 'library-1'),
+      ['my_module', 'library-1'],
       // Require another library.
-      array('other_module', 'library-3'),
-    ),
-  );
+      ['other_module', 'library-3'],
+    ],
+  ];
   return $libraries;
 }
 
@@ -423,9 +423,9 @@ function hook_library_info_alter(&$libraries, $module) {
     if (version_compare($libraries['farbtastic']['version'], '2.0', '<')) {
       // Update the existing Farbtastic to version 2.0.
       $libraries['farbtastic']['version'] = '2.0';
-      $libraries['farbtastic']['js'] = array(
-        backdrop_get_path('module', 'farbtastic_update') . '/farbtastic-2.0.js' => array(),
-      );
+      $libraries['farbtastic']['js'] = [
+        backdrop_get_path('module', 'farbtastic_update') . '/farbtastic-2.0.js' => [],
+      ];
     }
   }
 }
@@ -473,30 +473,30 @@ function hook_icon_info() {
   // name of the file (minus ".svg") as the array key. This can be used to
   // override core icons if the name of the icon matches a core one, or provide
   // new ones if the name is unique.
-  $icons['my-module-icon1'] = array();
+  $icons['my-module-icon1'] = [];
 
   // If a module is overriding a core-provided icon but the module uses a
   // different name, it can specify the core name as the key and provide a
   // "name" property to map to the module's icon file name (minus .svg).
-  $icons['pencil'] = array(
+  $icons['pencil'] = [
     'name' => 'pen',
-  );
+  ];
 
   // A module could use an externally provided list of icons by specifying
   // a "directory" property, relative to the root of the Backdrop installation.
-  $icons['my-module-icon2'] = array(
+  $icons['my-module-icon2'] = [
     'directory' => 'libraries/my_icon_set/standard',
-  );
+  ];
 
   // If a module wants to separate icons into different directories for
   // variations, it can use the "directory" option to use the same icon name in
   // different directories. For example, this would map
   //"pencil-filled" to "icons/filled/pencil.svg".
   $module_path = backdrop_get_path('module', 'my_module');
-  $icons['pencil-fill'] = array(
+  $icons['pencil-fill'] = [
     'name' => 'pencil',
     'directory' => $module_path . '/icons/filled',
-  );
+  ];
 
   return $icons;
 }
@@ -913,18 +913,18 @@ function hook_menu_get_item_alter(&$router_item, $path, $original_map) {
  * @since 1.28.0 Added "icon" key.
  */
 function hook_menu() {
-  $items['example'] = array(
+  $items['example'] = [
     'title' => 'Example Page',
     'page callback' => 'example_page',
-    'access arguments' => array('access content'),
+    'access arguments' => ['access content'],
     'type' => MENU_SUGGESTED_ITEM,
-  );
-  $items['example/feed'] = array(
+  ];
+  $items['example/feed'] = [
     'title' => 'Example RSS feed',
     'page callback' => 'example_feed',
-    'access arguments' => array('access content'),
+    'access arguments' => ['access content'],
     'type' => MENU_CALLBACK,
-  );
+  ];
 
   return $items;
 }
@@ -1037,10 +1037,10 @@ function hook_menu_link_insert($link) {
  */
 function hook_menu_link_update($link) {
   // If the parent menu has changed, update our record.
-  $menu_name = db_query("SELECT menu_name FROM {menu_example} WHERE mlid = :mlid", array(':mlid' => $link['mlid']))->fetchField();
+  $menu_name = db_query("SELECT menu_name FROM {menu_example} WHERE mlid = :mlid", [':mlid' => $link['mlid']])->fetchField();
   if ($menu_name != $link['menu_name']) {
     db_update('menu_example')
-      ->fields(array('menu_name' => $link['menu_name']))
+      ->fields(['menu_name' => $link['menu_name']])
       ->condition('mlid', $link['mlid'])
       ->execute();
   }
@@ -1101,36 +1101,36 @@ function hook_menu_link_delete($link) {
  */
 function hook_menu_local_tasks_alter(&$data, $router_item, $root_path) {
   // Add an action linking to node/add to all pages.
-  $data['actions']['output'][] = array(
+  $data['actions']['output'][] = [
     '#theme' => 'menu_local_task',
-    '#link' => array(
+    '#link' => [
       'title' => t('Add content'),
       'href' => 'node/add',
-      'localized_options' => array(
-        'attributes' => array(
+      'localized_options' => [
+        'attributes' => [
           'title' => t('Add content'),
-        ),
-      ),
-    ),
-  );
+        ],
+      ],
+    ],
+  ];
 
   // Add a tab linking to node/add to all pages.
-  $data['tabs'][0]['output'][] = array(
+  $data['tabs'][0]['output'][] = [
     '#theme' => 'menu_local_task',
-    '#link' => array(
+    '#link' => [
       'title' => t('Example tab'),
       'href' => 'node/add',
-      'localized_options' => array(
-        'attributes' => array(
+      'localized_options' => [
+        'attributes' => [
           'title' => t('Add content'),
-        ),
-      ),
-    ),
+        ],
+      ],
+    ],
     // Define whether this link is active. This can be omitted for
     // implementations that add links to pages outside of the current page
     // context.
     '#active' => ($router_item['path'] == $root_path),
-  );
+  ];
 }
 
 /**
@@ -1212,15 +1212,15 @@ function hook_menu_breadcrumb_alter(&$active_trail, $item) {
 function hook_menu_contextual_links_alter(&$links, $router_item, $root_path) {
   // Add a link to all contextual links for nodes.
   if ($root_path == 'node/%') {
-    $links['foo'] = array(
+    $links['foo'] = [
       'title' => t('Do fu'),
       'href' => 'foo/do',
-      'localized_options' => array(
-        'query' => array(
+      'localized_options' => [
+        'query' => [
           'foo' => 'bar',
-        ),
-      ),
-    );
+        ],
+      ],
+    ];
   }
 }
 
@@ -1262,12 +1262,12 @@ function hook_menu_contextual_links_alter(&$links, $router_item, $root_path) {
  */
 function hook_form_alter(&$form, &$form_state, $form_id) {
   if (isset($form['type']) && $form['type']['#value'] . '_node_settings' == $form_id) {
-    $form['workflow']['upload_' . $form['type']['#value']] = array(
+    $form['workflow']['upload_' . $form['type']['#value']] = [
       '#type' => 'radios',
       '#title' => t('Attachments'),
       '#default_value' => config_get('my_module.settings', 'upload_' . $form['type']['#value']),
-      '#options' => array(t('Disabled'), t('Enabled')),
-    );
+      '#options' => [t('Disabled'), t('Enabled')],
+    ];
   }
 }
 
@@ -1303,11 +1303,11 @@ function hook_form_FORM_ID_alter(&$form, &$form_state, $form_id) {
   // registration form.
 
   // Add a checkbox to registration form about agreeing to terms of use.
-  $form['terms_of_use'] = array(
+  $form['terms_of_use'] = [
     '#type' => 'checkbox',
     '#title' => t("I agree with the website's terms and conditions."),
     '#required' => TRUE,
-  );
+  ];
 }
 
 /**
@@ -1352,11 +1352,11 @@ function hook_form_BASE_FORM_ID_alter(&$form, &$form_state, $form_id) {
   // node form, regardless of node type.
 
   // Add a checkbox to the node form about agreeing to terms of use.
-  $form['terms_of_use'] = array(
+  $form['terms_of_use'] = [
     '#type' => 'checkbox',
     '#title' => t("I agree with the website's terms and conditions."),
     '#required' => TRUE,
-  );
+  ];
 }
 
 /**
@@ -1421,33 +1421,33 @@ function hook_form_BASE_FORM_ID_alter(&$form, &$form_state, $form_id) {
 function hook_forms($form_id, $args) {
   // Reroute the (non-existing) $form_id 'my_module_first_form' to
   // 'my_module_main_form'.
-  $forms['my_module_first_form'] = array(
+  $forms['my_module_first_form'] = [
     'callback' => 'my_module_main_form',
-  );
+  ];
 
   // Reroute the $form_id and prepend an additional argument that gets passed to
   // the 'my_module_main_form' form builder function.
-  $forms['my_module_second_form'] = array(
+  $forms['my_module_second_form'] = [
     'callback' => 'my_module_main_form',
-    'callback arguments' => array('some parameter'),
-  );
+    'callback arguments' => ['some parameter'],
+  ];
 
   // Reroute the $form_id, but invoke the form builder function
   // 'my_module_main_form_wrapper' first, so we can prepopulate the $form array
   // that is passed to the actual form builder 'my_module_main_form'.
-  $forms['my_module_wrapped_form'] = array(
+  $forms['my_module_wrapped_form'] = [
     'callback' => 'my_module_main_form',
     'wrapper_callback' => 'my_module_main_form_wrapper',
-  );
+  ];
 
   // Build a form with a static class callback.
-  $forms['my_module_class_generated_form'] = array(
+  $forms['my_module_class_generated_form'] = [
     // This will call: MyClass::generateMainForm().
-    'callback' => array('MyClass', 'generateMainForm'),
+    'callback' => ['MyClass', 'generateMainForm'],
     // The base_form_id is required when the callback is a static function in
     // a class. This can also be used to keep newer code backwards compatible.
     'base_form_id' => 'my_module_main_form',
-  );
+  ];
 
   return $forms;
 }
@@ -1520,16 +1520,16 @@ function hook_init() {
  * @see system_image_toolkits()
  */
 function hook_image_toolkits() {
-  return array(
-    'working' => array(
+  return [
+    'working' => [
       'title' => t('A toolkit that works.'),
       'available' => TRUE,
-    ),
-    'broken' => array(
+    ],
+    'broken' => [
       'title' => t('A toolkit that is "broken" and will not be listed.'),
       'available' => FALSE,
-    ),
-  );
+    ],
+  ];
 }
 
 /**
@@ -1701,18 +1701,18 @@ function hook_system_info_alter(&$info, $file, $type) {
  * @see theme_user_permission_description()
  */
 function hook_permission() {
-  return array(
-    'configure my module' => array(
+  return [
+    'configure my module' => [
       'title' => t('Configure my module'),
       'description' => t('Configure settings for my module.'),
-    ),
-    'administer my module' =>  array(
+    ],
+    'administer my module' =>  [
       'title' => t('Administer my module'),
       'description' => t('Perform administration tasks for my module.'),
       'restrict access' => TRUE,
       'warning' => t('Allows people to perform actions that could lead to data loss.'),
-    ),
-  );
+    ],
+  ];
 }
 
 /**
@@ -1822,15 +1822,15 @@ function hook_permission() {
  * @see hook_theme_registry_alter()
  */
 function hook_theme($existing, $type, $theme, $path) {
-  return array(
-    'feed_icon' => array(
-      'variables' => array('url' => NULL, 'title' => NULL),
-    ),
-    'status_report' => array(
+  return [
+    'feed_icon' => [
+      'variables' => ['url' => NULL, 'title' => NULL],
+    ],
+    'status_report' => [
       'render element' => 'requirements',
       'file' => 'system.admin.inc',
-    ),
-  );
+    ],
+  ];
 }
 
 /**
@@ -1944,11 +1944,11 @@ function hook_watchdog(array $log_entry) {
 
   $severity_list = watchdog_severity_levels();
   $to = 'someone@example.com';
-  $params = array();
-  $params['subject'] = t('[@site_name] @severity_desc: Alert from your web site', array(
+  $params = [];
+  $params['subject'] = t('[@site_name] @severity_desc: Alert from your web site', [
     '@site_name' => config_get('system.core', 'site_name'),
     '@severity_desc' => $severity_list[$log_entry['severity']],
-  ));
+  ]);
 
   $params['message']  = "\nSite:         @base_url";
   $params['message'] .= "\nSeverity:     (@severity) @severity_desc";
@@ -1961,7 +1961,7 @@ function hook_watchdog(array $log_entry) {
   $params['message'] .= "\nLink:         @link";
   $params['message'] .= "\nMessage:      \n\n@message";
 
-  $params['message'] = t($params['message'], array(
+  $params['message'] = t($params['message'], [
     '@base_url'      => $base_url,
     '@severity'      => $log_entry['severity'],
     '@severity_desc' => $severity_list[$log_entry['severity']],
@@ -1974,7 +1974,7 @@ function hook_watchdog(array $log_entry) {
     '@name'          => $log_entry['user']->name,
     '@link'          => strip_tags($log_entry['link']),
     '@message'       => strip_tags($log_entry['message']),
-  ));
+  ]);
 
   backdrop_mail('email_log', 'entry', $to, $language, $params);
 }
@@ -2011,38 +2011,38 @@ function hook_watchdog(array $log_entry) {
 function hook_mail($key, &$message, $params) {
   $account = $params['account'];
   $context = $params['context'];
-  $variables = array(
+  $variables = [
     '%site_name' => config_get('system.core', 'site_name'),
     '%username' => user_format_name($account),
-  );
+  ];
   if ($context['hook'] == 'taxonomy') {
     $entity = $params['entity'];
     $vocabulary = taxonomy_vocabulary_load($entity->vocabulary);
-    $variables += array(
+    $variables += [
       '%term_name' => $entity->name,
       '%term_description' => $entity->description,
       '%term_id' => $entity->tid,
       '%vocabulary_name' => $vocabulary->name,
       '%vocabulary_description' => $vocabulary->description,
       '%vocabulary_machine_name' => $vocabulary->machine_name,
-    );
+    ];
   }
 
   // Node-based variable translation is only available if we have a node.
   if (isset($params['node'])) {
     $node = $params['node'];
-    $variables += array(
+    $variables += [
       '%uid' => $node->uid,
-      '%node_url' => url('node/' . $node->nid, array('absolute' => TRUE)),
+      '%node_url' => url('node/' . $node->nid, ['absolute' => TRUE]),
       '%node_type' => node_type_get_name($node),
       '%title' => $node->title,
       '%teaser' => $node->teaser,
       '%body' => $node->body,
-    );
+    ];
   }
   $subject = strtr($context['subject'], $variables);
   $body = strtr($context['message'], $variables);
-  $message['subject'] .= str_replace(array("\r", "\n"), '', $subject);
+  $message['subject'] .= str_replace(["\r", "\n"], '', $subject);
   $message['body'][] = backdrop_html_to_text($body);
 }
 
@@ -2059,7 +2059,7 @@ function hook_mail($key, &$message, $params) {
  * @see backdrop_flush_all_caches()
  */
 function hook_flush_caches() {
-  return array('example');
+  return ['example'];
 }
 
 /**
@@ -2208,32 +2208,32 @@ function hook_modules_uninstalled($modules) {
  * @see system_stream_wrappers()
  */
 function hook_stream_wrappers() {
-  return array(
-    'public' => array(
+  return [
+    'public' => [
       'name' => t('Public files'),
       'class' => 'BackdropPublicStreamWrapper',
       'description' => t('Public local files served by the webserver'),
       'type' => STREAM_WRAPPERS_LOCAL_NORMAL,
-    ),
-    'private' => array(
+    ],
+    'private' => [
       'name' => t('Private files'),
       'class' => 'BackdropPrivateStreamWrapper',
       'description' => t('Private local files served by Backdrop'),
       'type' => STREAM_WRAPPERS_LOCAL_NORMAL,
-    ),
-    'temp' => array(
+    ],
+    'temp' => [
       'name' => t('Temporary files'),
       'class' => 'BackdropTempStreamWrapper',
       'description' => t('Temporary local files for upload and previews'),
       'type' => STREAM_WRAPPERS_LOCAL_HIDDEN,
-    ),
-    'cdn' => array(
+    ],
+    'cdn' => [
       'name' => t('Content delivery network files'),
       'class' => 'MyModuleCDNStreamWrapper',
       'description' => t('Files served by a content delivery network'),
       // 'type' can be omitted to use the default of STREAM_WRAPPERS_NORMAL
-    ),
-    'youtube' => array(
+    ],
+    'youtube' => [
       'name' => t('YouTube video'),
       'class' => 'MyModuleYouTubeStreamWrapper',
       'description' => t('Video streamed from YouTube'),
@@ -2241,8 +2241,8 @@ function hook_stream_wrappers() {
       // the YouTube API for uploading video, but here, we assume that this
       // particular module only supports playing YouTube video.
       'type' => STREAM_WRAPPERS_READ_VISIBLE,
-    ),
-  );
+    ],
+  ];
 }
 
 /**
@@ -2270,7 +2270,7 @@ function hook_stream_wrappers_alter(&$wrappers) {
  */
 function hook_file_load($files) {
   // Add the upload specific data into the file entity.
-  $result = db_query('SELECT * FROM {upload} u WHERE u.fid IN (:fids)', array(':fids' => array_keys($files)))->fetchAll(PDO::FETCH_ASSOC);
+  $result = db_query('SELECT * FROM {upload} u WHERE u.fid IN (:fids)', [':fids' => array_keys($files)])->fetchAll(PDO::FETCH_ASSOC);
   foreach ($result as $record) {
     foreach ($record as $key => $value) {
       $files[$record['fid']]->$key = $value;
@@ -2293,7 +2293,7 @@ function hook_file_load($files) {
  * @see file_validate()
  */
 function hook_file_validate(File $file) {
-  $errors = array();
+  $errors = [];
 
   if (empty($file->filename)) {
     $errors[] = t("The file's name is empty. Please give a name to the file.");
@@ -2354,7 +2354,7 @@ function hook_file_update(File $file) {
     $file->filename = $file_user->name . '_' . $file->filename;
     $file->save();
 
-    watchdog('file', t('%source has been renamed to %destination', array('%source' => $old_filename, '%destination' => $file->filename)));
+    watchdog('file', t('%source has been renamed to %destination', ['%source' => $old_filename, '%destination' => $file->filename]));
   }
 }
 
@@ -2375,7 +2375,7 @@ function hook_file_copy(File $file, File $source) {
     $file->filename = $file_user->name . '_' . $file->filename;
     $file->save();
 
-    watchdog('file', t('Copied file %source has been renamed to %destination', array('%source' => $source->filename, '%destination' => $file->filename)));
+    watchdog('file', t('Copied file %source has been renamed to %destination', ['%source' => $source->filename, '%destination' => $file->filename]));
   }
 }
 
@@ -2396,7 +2396,7 @@ function hook_file_move(File $file, File $source) {
     $file->filename = $file_user->name . '_' . $file->filename;
     $file->save();
 
-    watchdog('file', t('Moved file %source has been renamed to %destination', array('%source' => $source->filename, '%destination' => $file->filename)));
+    watchdog('file', t('Moved file %source has been renamed to %destination', ['%source' => $source->filename, '%destination' => $file->filename]));
   }
 }
 
@@ -2464,7 +2464,7 @@ function hook_file_download($uri) {
     }
     else {
       $info = image_get_info($uri);
-      return array('Content-Type' => $info['mime_type']);
+      return ['Content-Type' => $info['mime_type']];
     }
   }
 }
@@ -2494,11 +2494,11 @@ function hook_file_url_alter(&$uri) {
 
   $cdn1 = 'http://cdn1.example.com';
   $cdn2 = 'http://cdn2.example.com';
-  $cdn_extensions = array('css', 'js', 'gif', 'jpg', 'jpeg', 'png');
+  $cdn_extensions = ['css', 'js', 'gif', 'jpg', 'jpeg', 'png'];
 
   // Most CDNs don't support private file transfers without a lot of hassle,
   // so don't support this in the common case.
-  $schemes = array('public');
+  $schemes = ['public'];
 
   $scheme = file_uri_scheme($uri);
 
@@ -2586,26 +2586,26 @@ function hook_file_url_alter(&$uri) {
  *     - REQUIREMENT_ERROR: The requirement failed with an error.
  */
 function hook_requirements($phase) {
-  $requirements = array();
+  $requirements = [];
   // Ensure translations don't break during installation.
   $t = get_t();
 
   // Report Backdrop version
   if ($phase == 'runtime') {
-    $requirements['backdrop'] = array(
+    $requirements['backdrop'] = [
       'title' => $t('Backdrop CMS'),
       'value' => BACKDROP_VERSION,
       'severity' => REQUIREMENT_INFO
-    );
+    ];
   }
 
   // Test PHP version
-  $requirements['php'] = array(
+  $requirements['php'] = [
     'title' => $t('PHP'),
     'value' => ($phase == 'runtime') ? l(phpversion(), 'admin/reports/status/php') : phpversion(),
-  );
+  ];
   if (version_compare(phpversion(), BACKDROP_MINIMUM_PHP) < 0) {
-    $requirements['php']['description'] = $t('Your PHP installation is too old. Backdrop CMS requires at least PHP %version.', array('%version' => BACKDROP_MINIMUM_PHP));
+    $requirements['php']['description'] = $t('Your PHP installation is too old. Backdrop CMS requires at least PHP %version.', ['%version' => BACKDROP_MINIMUM_PHP]);
     $requirements['php']['severity'] = REQUIREMENT_ERROR;
   }
 
@@ -2614,17 +2614,17 @@ function hook_requirements($phase) {
     $cron_last = state_get('cron_last');
 
     if (is_numeric($cron_last)) {
-      $requirements['cron']['value'] = $t('Last run !time ago', array('!time' => format_interval(REQUEST_TIME - $cron_last)));
+      $requirements['cron']['value'] = $t('Last run !time ago', ['!time' => format_interval(REQUEST_TIME - $cron_last)]);
     }
     else {
-      $requirements['cron'] = array(
-        'description' => $t('Cron has not run. It appears cron jobs have not been setup on your system. Check the help pages for <a href="@url">configuring cron jobs</a>.', array('@url' => 'https://backdropcms.org/cron')),
+      $requirements['cron'] = [
+        'description' => $t('Cron has not run. It appears cron jobs have not been setup on your system. Check the help pages for <a href="@url">configuring cron jobs</a>.', ['@url' => 'https://backdropcms.org/cron']),
         'severity' => REQUIREMENT_ERROR,
         'value' => $t('Never run'),
-      );
+      ];
     }
 
-    $requirements['cron']['description'] .= ' ' . $t('You can <a href="@cron">run cron manually</a>.', array('@cron' => url('admin/reports/status/run-cron')));
+    $requirements['cron']['description'] .= ' ' . $t('You can <a href="@cron">run cron manually</a>.', ['@cron' => url('admin/reports/status/run-cron')]);
 
     $requirements['cron']['title'] = $t('Cron maintenance tasks');
   }
@@ -2669,60 +2669,60 @@ function hook_requirements($phase) {
  * @ingroup schemaapi
  */
 function hook_schema() {
-  $schema['node'] = array(
+  $schema['node'] = [
     // Example (partial) specification for table "node".
     'description' => 'The base table for nodes.',
-    'fields' => array(
-      'nid' => array(
+    'fields' => [
+      'nid' => [
         'description' => 'The primary identifier for a node.',
         'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
-      ),
-      'vid' => array(
+      ],
+      'vid' => [
         'description' => 'The current {node_revision}.vid version identifier.',
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
-      ),
-      'type' => array(
+      ],
+      'type' => [
         'description' => 'The {node_type} of this node.',
         'type' => 'varchar',
         'length' => 32,
         'not null' => TRUE,
         'default' => '',
-      ),
-      'title' => array(
+      ],
+      'title' => [
         'description' => 'The title of this node, always treated as non-markup plain text.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
         'default' => '',
-      ),
-    ),
-    'indexes' => array(
-      'node_changed'        => array('changed'),
-      'node_created'        => array('created'),
-    ),
-    'unique keys' => array(
-      'nid_vid' => array('nid', 'vid'),
-      'vid'     => array('vid')
-    ),
+      ],
+    ],
+    'indexes' => [
+      'node_changed'        => ['changed'],
+      'node_created'        => ['created'],
+    ],
+    'unique keys' => [
+      'nid_vid' => ['nid', 'vid'],
+      'vid'     => ['vid']
+    ],
     // For documentation purposes only; foreign keys are not created in the
     // database.
-    'foreign keys' => array(
-      'node_revision' => array(
+    'foreign keys' => [
+      'node_revision' => [
         'table' => 'node_revision',
-        'columns' => array('vid' => 'vid'),
-      ),
-      'node_author' => array(
+        'columns' => ['vid' => 'vid'],
+      ],
+      'node_author' => [
         'table' => 'users',
-        'columns' => array('uid' => 'uid'),
-      ),
-    ),
-    'primary key' => array('nid'),
-  );
+        'columns' => ['uid' => 'uid'],
+      ],
+    ],
+    'primary key' => ['nid'],
+  ];
   return $schema;
 }
 
@@ -2748,12 +2748,12 @@ function hook_schema() {
  */
 function hook_schema_alter(&$schema) {
   // Add field to existing schema.
-  $schema['users']['fields']['timezone_id'] = array(
+  $schema['users']['fields']['timezone_id'] = [
     'type' => 'int',
     'not null' => TRUE,
     'default' => 0,
     'description' => 'Per-user timezone configuration.',
-  );
+  ];
 }
 
 /**
@@ -2781,32 +2781,32 @@ function hook_schema_alter(&$schema) {
  * @ingroup schemaapi
  */
 function hook_schema_0() {
-  $schema['my_module'] = array(
+  $schema['my_module'] = [
     'description' => 'The base table for my_module.',
-    'fields' => array(
-      'my_module_id' => array(
+    'fields' => [
+      'my_module_id' => [
         'description' => 'The primary identifier for my_module.',
         'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
-      ),
-      'title' => array(
+      ],
+      'title' => [
         'description' => 'The title column of my_module.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
         'default' => '',
-      ),
-      'description' => array(
+      ],
+      'description' => [
         'description' => 'The description column of my_module.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
         'default' => '',
-      ),
-    ),
-    'primary key' => array('my_module_id'),
-  );
+      ],
+    ],
+    'primary key' => ['my_module_id'],
+  ];
   return $schema;
 }
 
@@ -2909,14 +2909,14 @@ function hook_query_TAG_alter(QueryAlterableInterface $query) {
 function hook_install() {
   // Populate the default {node_access} record.
   db_insert('node_access')
-    ->fields(array(
+    ->fields([
       'nid' => 0,
       'gid' => 0,
       'realm' => 'all',
       'grant_view' => 1,
       'grant_update' => 0,
       'grant_delete' => 0,
-    ))
+    ])
     ->execute();
 }
 
@@ -3038,7 +3038,7 @@ function hook_update_N(&$sandbox) {
   config_set('my_module.settings', 'three', '3.33');
 
   // For most site updates, the following is sufficient.
-  db_add_field('mytable1', 'newcol', array('type' => 'int', 'not null' => TRUE, 'description' => 'My new integer column.'));
+  db_add_field('mytable1', 'newcol', ['type' => 'int', 'not null' => TRUE, 'description' => 'My new integer column.']);
 
   // However, for more complex operations that may take a long time, you may
   // hook into Batch API as in the following example.
@@ -3052,7 +3052,7 @@ function hook_update_N(&$sandbox) {
   }
 
   $users = db_select('users', 'u')
-    ->fields('u', array('uid', 'name'))
+    ->fields('u', ['uid', 'name'])
     ->condition('uid', $sandbox['current_uid'], '>')
     ->range(0, 3)
     ->orderBy('uid', 'ASC')
@@ -3061,7 +3061,7 @@ function hook_update_N(&$sandbox) {
   foreach ($users as $user) {
     $user->name .= '!';
     db_update('users')
-      ->fields(array('name' => $user->name))
+      ->fields(['name' => $user->name])
       ->condition('uid', $user->uid)
       ->execute();
 
@@ -3108,9 +3108,9 @@ function hook_update_dependencies() {
   // Indicate that the my_module_update_1000() function provided by this module
   // must run after the another_module_update_1002() function provided by the
   // 'another_module' module.
-  $dependencies['my_module'][1000] = array(
+  $dependencies['my_module'][1000] = [
     'another_module' => 1002,
-  );
+  ];
   // Indicate that the my_module_update_1001() function provided by this module
   // must run before the yet_another_module_update_1004() function provided by
   // the 'yet_another_module' module. (Note that declaring dependencies in this
@@ -3118,9 +3118,9 @@ function hook_update_dependencies() {
   // following problem: If a site has already run the yet_another_module
   // module's site update(s) before it updates its codebase to pick up the
   // newest my_module code, then the dependency declared here will be ignored.)
-  $dependencies['yet_another_module'][1004] = array(
+  $dependencies['yet_another_module'][1004] = [
     'my_module' => 1001,
-  );
+  ];
   return $dependencies;
 }
 
@@ -3242,11 +3242,11 @@ function hook_disable() {
  * @see hook_autoload_info_alter()
  */
 function hook_autoload_info() {
-  return array(
+  return [
     'MyModuleClassName' => 'includes/my_module.class_name.inc',
     'MyModuleOtherName' => 'includes/my_module.other_name.inc',
     'MyModuleSomeInterface' => 'includes/my_module.some_interface.inc',
-  );
+  ];
 }
 
 /**
@@ -3376,7 +3376,7 @@ function hook_install_tasks(&$install_state) {
   // processor-intensive batch process needs to be triggered later on in the
   // installation.
   $myprofile_needs_batch_processing = state_get('myprofile_needs_batch_processing', FALSE);
-  $tasks = array(
+  $tasks = [
     // This is an example of a task that defines a form which the user who is
     // installing the site will be asked to fill out. To implement this task,
     // your profile would define a function named myprofile_data_import_form()
@@ -3386,10 +3386,10 @@ function hook_install_tasks(&$install_state) {
     // state_set('myprofile_needs_batch_processing', TRUE) if the user has
     // entered data which requires that batch processing will need to occur
     // later on.
-    'myprofile_data_import_form' => array(
+    'myprofile_data_import_form' => [
       'display_name' => st('Data import options'),
       'type' => 'form',
-    ),
+    ],
     // Similarly, to implement this task, your profile would define a function
     // named myprofile_settings_form() with associated validation and submit
     // handlers. This form might be used to collect and save additional
@@ -3397,10 +3397,10 @@ function hook_install_tasks(&$install_state) {
     // steps required for your profile to act as an "installation wizard"; you
     // can define as many tasks of type 'form' as you wish to execute, and the
     // forms will be presented to the user, one after another.
-    'myprofile_settings_form' => array(
+    'myprofile_settings_form' => [
       'display_name' => st('Additional options'),
       'type' => 'form',
-    ),
+    ],
     // This is an example of a task that performs batch operations. To
     // implement this task, your profile would define a function named
     // myprofile_batch_processing() which returns a batch API array definition
@@ -3408,12 +3408,12 @@ function hook_install_tasks(&$install_state) {
     // 'myprofile_needs_batch_processing' variable used here, this task will be
     // hidden and skipped unless your profile set it to TRUE in one of the
     // previous tasks.
-    'myprofile_batch_processing' => array(
+    'myprofile_batch_processing' => [
       'display_name' => st('Import additional data'),
       'display' => $myprofile_needs_batch_processing,
       'type' => 'batch',
       'run' => $myprofile_needs_batch_processing ? INSTALL_TASK_RUN_IF_NOT_COMPLETED : INSTALL_TASK_SKIP,
-    ),
+    ],
     // This is an example of a task that will not be displayed in the list that
     // the user sees. To implement this task, your profile would define a
     // function named myprofile_final_site_setup(), in which additional,
@@ -3426,9 +3426,9 @@ function hook_install_tasks(&$install_state) {
     // example, a confirmation page explaining that your profile's tasks are
     // complete, with a link to reload the current page and therefore pass on
     // to the final Backdrop installation tasks when the user is ready to do so).
-    'myprofile_final_site_setup' => array(
-    ),
-  );
+    'myprofile_final_site_setup' => [
+    ],
+  ];
   return $tasks;
 }
 
@@ -3545,13 +3545,13 @@ function hook_file_mimetype_mapping_alter(&$mapping) {
  * @ingroup actions
  */
 function hook_action_info() {
-  return array(
-    'comment_unpublish_action' => array(
+  return [
+    'comment_unpublish_action' => [
       'type' => 'comment',
       'label' => t('Unpublish comment'),
       'callback' => 'comment_unpublish_action',
-    ),
-  );
+    ],
+  ];
 }
 
 /**
@@ -3587,12 +3587,12 @@ function hook_action_info_alter(&$actions) {
  * @see hook_archiver_info_alter()
  */
 function hook_archiver_info() {
-  return array(
-    'tar' => array(
+  return [
+    'tar' => [
       'class' => 'ArchiverTar',
-      'extensions' => array('tar', 'tar.gz', 'tar.bz2'),
-    ),
-  );
+      'extensions' => ['tar', 'tar.gz', 'tar.bz2'],
+    ],
+  ];
 }
 
 /**
@@ -3666,12 +3666,12 @@ function hook_system_themes_page_alter(&$theme_groups) {
     foreach ($theme_groups[$state] as &$theme) {
       // Add a foo link to each list of theme operations. 'foo' is also added as
       // an additional class to the operation link's <li> HTML tag.
-      $theme->operations['foo'] = array(
+      $theme->operations['foo'] = [
         'title' => t('Foo'),
         'href' => 'admin/appearance/foo',
-        'query' => array('theme' => $theme->name),
-        'attributes' => array('title' => t('Perform operation foo')),
-      );
+        'query' => ['theme' => $theme->name],
+        'attributes' => ['title' => t('Perform operation foo')],
+      ];
     }
   }
 }
@@ -3766,8 +3766,8 @@ function hook_url_outbound_alter(&$path, &$options, $original_path) {
  * @see hook_token_info()
  * @see hook_tokens_alter()
  */
-function hook_tokens($type, $tokens, array $data = array(), array $options = array()) {
-  $url_options = array('absolute' => TRUE);
+function hook_tokens($type, $tokens, array $data = [], array $options = []) {
+  $url_options = ['absolute' => TRUE];
   if (isset($options['language'])) {
     $url_options['language'] = $options['language'];
     $language_code = $options['language']->langcode;
@@ -3777,7 +3777,7 @@ function hook_tokens($type, $tokens, array $data = array(), array $options = arr
   }
   $sanitize = !empty($options['sanitize']);
 
-  $replacements = array();
+  $replacements = [];
 
   if ($type == 'node' && !empty($data['node'])) {
     $node = $data['node'];
@@ -3811,11 +3811,11 @@ function hook_tokens($type, $tokens, array $data = array(), array $options = arr
 
     if ($author_tokens = token_find_with_prefix($tokens, 'author')) {
       $author = user_load($node->uid);
-      $replacements += token_generate('user', $author_tokens, array('user' => $author), $options);
+      $replacements += token_generate('user', $author_tokens, ['user' => $author], $options);
     }
 
     if ($created_tokens = token_find_with_prefix($tokens, 'created')) {
-      $replacements += token_generate('date', $created_tokens, array('date' => $node->created), $options);
+      $replacements += token_generate('date', $created_tokens, ['date' => $node->created], $options);
     }
   }
 
@@ -3910,42 +3910,42 @@ function hook_tokens_alter(array &$replacements, array $context) {
  * @see hook_tokens()
  */
 function hook_token_info() {
-  $type = array(
+  $type = [
     'name' => t('Nodes'),
     'description' => t('Tokens related to individual nodes.'),
     'needs-data' => 'node',
-  );
+  ];
 
   // Core tokens for nodes.
-  $node['nid'] = array(
+  $node['nid'] = [
     'name' => t('Node ID'),
     'description' => t('The unique ID of the node.'),
-  );
-  $node['title'] = array(
+  ];
+  $node['title'] = [
     'name' => t('Title'),
     'description' => t('The title of the node.'),
-  );
-  $node['edit-url'] = array(
+  ];
+  $node['edit-url'] = [
     'name' => t('Edit URL'),
     'description' => t("The URL of the node's edit page."),
-  );
+  ];
 
   // Chained tokens for nodes.
-  $node['created'] = array(
+  $node['created'] = [
     'name' => t('Date created'),
     'description' => t('The date the node was posted.'),
     'type' => 'date',
-  );
-  $node['author'] = array(
+  ];
+  $node['author'] = [
     'name' => t('Author'),
     'description' => t('The author of the node.'),
     'type' => 'user',
-  );
+  ];
 
-  return array(
-    'types' => array('node' => $type),
-    'tokens' => array('node' => $node),
-  );
+  return [
+    'types' => ['node' => $type],
+    'tokens' => ['node' => $node],
+  ];
 }
 
 /**
@@ -3958,21 +3958,21 @@ function hook_token_info() {
  */
 function hook_token_info_alter(&$data) {
   // Modify description of node tokens for our site.
-  $data['tokens']['node']['nid'] = array(
+  $data['tokens']['node']['nid'] = [
     'name' => t("Node ID"),
     'description' => t("The unique ID of the post."),
-  );
-  $data['tokens']['node']['title'] = array(
+  ];
+  $data['tokens']['node']['title'] = [
     'name' => t("Title"),
     'description' => t("The title of the post."),
-  );
+  ];
 
   // Chained tokens for nodes.
-  $data['tokens']['node']['created'] = array(
+  $data['tokens']['node']['created'] = [
     'name' => t("Date created"),
     'description' => t("The date the post was posted."),
     'type' => 'date',
-  );
+  ];
 }
 
 /**
@@ -4022,18 +4022,18 @@ function hook_batch_alter(&$batch) {
  * @see hook_updater_info_alter()
  */
 function hook_updater_info() {
-  return array(
-    'module' => array(
+  return [
+    'module' => [
       'class' => 'ModuleUpdater',
       'name' => t('Update modules'),
       'weight' => 0,
-    ),
-    'theme' => array(
+    ],
+    'theme' => [
       'class' => 'ThemeUpdater',
       'name' => t('Update themes'),
       'weight' => 0,
-    ),
-  );
+    ],
+  ];
 }
 
 /**
@@ -4145,12 +4145,12 @@ function hook_menu_site_status_alter(&$menu_site_status, $path) {
  * @see backdrop_get_filetransfer_info()
  */
 function hook_filetransfer_info() {
-  $info['sftp'] = array(
+  $info['sftp'] = [
     'title' => t('SFTP (Secure FTP)'),
     'file' => 'sftp.filetransfer.inc',
     'class' => 'FileTransferSFTP',
     'weight' => 10,
-  );
+  ];
   return $info;
 }
 

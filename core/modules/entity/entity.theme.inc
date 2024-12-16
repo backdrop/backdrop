@@ -19,7 +19,7 @@ function template_preprocess_entity(&$variables) {
   $variables['title'] = check_plain(entity_label($entity_type, $entity));
 
   $uri = entity_uri($entity_type, $entity);
-  $uri += array('options' => array());
+  $uri += ['options' => []];
   $variables['url'] = $uri && !empty($uri['path']) ? url($uri['path'], $uri['options']) : FALSE;
 
   if (isset($variables['elements']['#page'])) {
@@ -32,7 +32,7 @@ function template_preprocess_entity(&$variables) {
   }
 
   // Helpful $content variable for templates.
-  $variables['content'] = array();
+  $variables['content'] = [];
   foreach (element_children($variables['elements']) as $key) {
     $variables['content'][$key] = $variables['elements'][$key];
   }

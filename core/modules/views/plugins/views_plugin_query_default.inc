@@ -14,31 +14,31 @@ class views_plugin_query_default extends views_plugin_query {
   /**
    * A list of tables in the order they should be added, keyed by alias.
    */
-  var $table_queue = array();
+  var $table_queue = [];
 
   /**
    * Holds an array of tables and counts added so that we can create aliases
    */
-  var $tables = array();
+  var $tables = [];
 
   /**
    * Holds an array of relationships, which are aliases of the primary
    * table that represent different ways to join the same table in.
    */
-  var $relationships = array();
+  var $relationships = [];
 
   /**
    * An array of sections of the WHERE query. Each section is in itself
    * an array of pieces and a flag as to whether or not it should be AND
    * or OR.
    */
-  var $where = array();
+  var $where = [];
   /**
    * An array of sections of the HAVING query. Each section is in itself
    * an array of pieces and a flag as to whether or not it should be AND
    * or OR.
    */
-  var $having = array();
+  var $having = [];
   /**
    * The default operator to use when connecting the WHERE groups. May be
    * AND or OR.
@@ -48,25 +48,25 @@ class views_plugin_query_default extends views_plugin_query {
   /**
    * A simple array of order by clauses.
    */
-  var $orderby = array();
+  var $orderby = [];
 
   /**
    * A simple array of group by clauses.
    */
-  var $groupby = array();
+  var $groupby = [];
 
 
   /**
    * An array of fields.
    */
-  var $fields = array();
+  var $fields = [];
 
 
   /**
    * The table header to use for tablesort. This matters because tablesort
    * needs to modify the query and needs the header.
    */
-  var $header = array();
+  var $header = [];
 
   /**
    * A flag as to whether or not to make the primary field distinct.
@@ -90,12 +90,12 @@ class views_plugin_query_default extends views_plugin_query {
    /**
     * An array mapping table aliases and field names to field aliases.
     */
-   var $field_aliases = array();
+   var $field_aliases = [];
 
    /**
     * Query tags which will be passed over to the dbtng query object.
     */
-   var $tags = array();
+   var $tags = [];
 
   /**
    * Is the view marked as not distinct.
@@ -120,33 +120,33 @@ class views_plugin_query_default extends views_plugin_query {
     parent::init($base_table, $base_field, $options);
     $this->base_table = $base_table;  // Predefine these above, for clarity.
     $this->base_field = $base_field;
-    $this->relationships[$base_table] = array(
+    $this->relationships[$base_table] = [
       'link' => NULL,
       'table' => $base_table,
       'alias' => $base_table,
       'base' => $base_table
-    );
+    ];
 
     // init the table queue with our primary table.
-    $this->table_queue[$base_table] = array(
+    $this->table_queue[$base_table] = [
       'alias' => $base_table,
       'table' => $base_table,
       'relationship' => $base_table,
       'join' => NULL,
-    );
+    ];
 
     // init the tables with our primary table
-    $this->tables[$base_table][$base_table] = array(
+    $this->tables[$base_table][$base_table] = [
       'count' => 1,
       'alias' => $base_table,
-    );
+    ];
 
-    $this->count_field = array(
+    $this->count_field = [
       'table' => $base_table,
       'field' => $base_field,
       'alias' => $base_field,
       'count' => TRUE,
-    );
+    ];
   }
 
   // ----------------------------------------------------------------
@@ -177,12 +177,12 @@ class views_plugin_query_default extends views_plugin_query {
     if (empty($alias)) {
       $alias = $table . '_' . $field;
     }
-    $this->count_field = array(
+    $this->count_field = [
       'table' => $table,
       'field' => $field,
       'alias' => $alias,
       'count' => TRUE,
-    );
+    ];
   }
 
   /**
@@ -195,29 +195,29 @@ class views_plugin_query_default extends views_plugin_query {
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['disable_sql_rewrite'] = array(
+    $options['disable_sql_rewrite'] = [
       'default' => FALSE,
       'translatable' => FALSE,
       'bool' => TRUE,
-    );
-    $options['distinct'] = array(
+    ];
+    $options['distinct'] = [
       'default' => FALSE,
       'bool' => TRUE,
-    );
-    $options['pure_distinct'] = array(
+    ];
+    $options['pure_distinct'] = [
       'default' => FALSE,
       'bool' => TRUE,
-    );
-    $options['replica'] = array(
+    ];
+    $options['replica'] = [
       'default' => FALSE,
       'bool' => TRUE,
-    );
-    $options['query_comment'] = array(
+    ];
+    $options['query_comment'] = [
       'default' => '',
-    );
-    $options['query_tags'] = array(
-      'default' => array(),
-    );
+    ];
+    $options['query_tags'] = [
+      'default' => [],
+    ];
 
     return $options;
   }
@@ -228,56 +228,56 @@ class views_plugin_query_default extends views_plugin_query {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
-    $form['disable_sql_rewrite'] = array(
+    $form['disable_sql_rewrite'] = [
       '#title' => t('Disable SQL rewriting'),
       '#description' => t('Disabling SQL rewriting will disable node_access checks as well as other modules that implement hook_query_alter().'),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['disable_sql_rewrite']),
       '#suffix' => '<div class="messages warning sql-rewrite-warning js-hide">' . t('WARNING: Disabling SQL rewriting means that node access security is disabled. This may allow users to see data they should not be able to see if your view is misconfigured. Please use this option only if you understand and accept this security risk.') . '</div>',
-    );
-    $form['distinct'] = array(
+    ];
+    $form['distinct'] = [
       '#type' => 'checkbox',
       '#title' => t('Distinct'),
       '#description' => t('This will make the view display only distinct items. If there are multiple identical items, each will be displayed only once. You can use this to try and remove duplicates from a view, though it does not always work. Note that this can slow queries down, so use it with caution.'),
       '#default_value' => !empty($this->options['distinct']),
-    );
-    $form['pure_distinct'] = array(
+    ];
+    $form['pure_distinct'] = [
       '#type' => 'checkbox',
       '#title' => t('Pure Distinct'),
       '#description' => t('This will prevent views from adding the base column to the distinct field. If this is not selected and the base column is a primary key, then a non-pure distinct will not function properly because the primary key is always unique.'),
       '#default_value' => !empty($this->options['pure_distinct']),
-      '#states' => array(
-        'visible' => array(
-          ':input[name="query[options][distinct]"]' => array('checked' => TRUE),
-        ),
-      ),
-    );
-    $form['replica'] = array(
+      '#states' => [
+        'visible' => [
+          ':input[name="query[options][distinct]"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
+    $form['replica'] = [
       '#type' => 'checkbox',
       '#title' => t('Use replica server'),
       '#description' => t('This will make the query attempt to connect to a replica server if available. If no replica server is defined or available, it will fall back to the default server.'),
       '#default_value' => !empty($this->options['replica']),
-    );
-    $form['query_comment'] = array(
+    ];
+    $form['query_comment'] = [
       '#type' => 'textfield',
       '#title' => t('Query Comment'),
       '#description' => t('If set, this comment will be embedded in the query and passed to the SQL server. This can be helpful for logging or debugging.'),
       '#default_value' => $this->options['query_comment'],
-    );
-    $form['query_tags'] = array(
+    ];
+    $form['query_tags'] = [
       '#type' => 'textfield',
       '#title' => t('Query Tags'),
       '#description' => t('If set, these tags will be appended to the query and can be used to identify the query in a module. This can be helpful for altering queries.'),
       '#default_value' => implode(', ', $this->options['query_tags']),
-      '#element_validate' => array('views_element_validate_tags'),
-    );
+      '#element_validate' => ['views_element_validate_tags'],
+    ];
   }
 
   /**
    * Special submit handling.
    */
   function options_submit(&$form, &$form_state) {
-    $element = array('#parents' => array('query', 'options', 'query_tags'));
+    $element = ['#parents' => ['query', 'options', 'query_tags']];
     $value = backdrop_array_get_nested_value($form_state['values'], $element['#parents']);
     // This method may be called more than once. When called for the first time,
     // it receives a string from the form element. That string must be exploded
@@ -342,24 +342,24 @@ class views_plugin_query_default extends views_plugin_query {
 
     // Add the table directly to the queue to avoid accidentally marking
     // it.
-    $this->table_queue[$alias] = array(
+    $this->table_queue[$alias] = [
       'table' => $join->table,
       'num' => 1,
       'alias' => $alias,
       'join' => $join,
       'relationship' => $link_point,
-    );
+    ];
 
-    $this->relationships[$alias] = array(
+    $this->relationships[$alias] = [
       'link' => $link_point,
       'table' => $join->table,
       'base' => $base,
-    );
+    ];
 
-    $this->tables[$this->base_table][$alias] = array(
+    $this->tables[$this->base_table][$alias] = [
       'count' => 1,
       'alias' => $alias,
-    );
+    ];
 
     return $alias;
   }
@@ -485,13 +485,13 @@ class views_plugin_query_default extends views_plugin_query {
       $join = $this->adjust_join($join, $relationship);
     }
 
-    $this->table_queue[$alias] = array(
+    $this->table_queue[$alias] = [
       'table' => $table,
       'num' => $this->tables[$relationship][$table]['count'],
       'alias' => $alias,
       'join' => $join,
       'relationship' => $relationship,
-    );
+    ];
 
     return $alias;
   }
@@ -508,10 +508,10 @@ class views_plugin_query_default extends views_plugin_query {
         }
         $alias .= $table;
       }
-      $this->tables[$relationship][$table] = array(
+      $this->tables[$relationship][$table] = [
         'count' => 1,
         'alias' => $alias,
-      );
+      ];
     }
     else {
       $this->tables[$relationship][$table]['count']++;
@@ -617,7 +617,7 @@ class views_plugin_query_default extends views_plugin_query {
    * query they will be added, but additional copies will NOT be added
    * if the table is already there.
    */
-  function ensure_path($table, $relationship = NULL, $join = NULL, $traced = array(), $add = array()) {
+  function ensure_path($table, $relationship = NULL, $join = NULL, $traced = [], $add = []) {
     if (!isset($relationship)) {
       $relationship = $this->base_table;
     }
@@ -772,7 +772,7 @@ class views_plugin_query_default extends views_plugin_query {
    * @return $name
    *   The name that this field can be referred to as. Usually this is the alias.
    */
-  function add_field($table, $field, $alias = '', $params = array()) {
+  function add_field($table, $field, $alias = '', $params = []) {
     // We check for this specifically because it gets a special alias.
     if ($table == $this->base_table && $field == $this->base_field && empty($alias)) {
       $alias = $this->base_field;
@@ -794,11 +794,11 @@ class views_plugin_query_default extends views_plugin_query {
     $alias = strtolower(substr($alias, 0, 60));
 
     // Create a field info array.
-    $field_info = array(
+    $field_info = [
       'field' => $field,
       'table' => $table,
       'alias' => $alias,
-    ) + $params;
+    ] + $params;
 
     // Test to see if the field is actually the same or not. Due to
     // differing parameters changing the aggregation function, we need
@@ -824,7 +824,7 @@ class views_plugin_query_default extends views_plugin_query {
    * mode where we're changing the query because we didn't get data we needed.
    */
   function clear_fields() {
-    $this->fields = array();
+    $this->fields = [];
   }
 
   /**
@@ -873,11 +873,11 @@ class views_plugin_query_default extends views_plugin_query {
       $this->set_where_group('AND', $group);
     }
 
-    $this->where[$group]['conditions'][] = array(
+    $this->where[$group]['conditions'][] = [
       'field' => $field,
       'value' => $value,
       'operator' => $operator,
-    );
+    ];
   }
 
   /**
@@ -899,7 +899,7 @@ class views_plugin_query_default extends views_plugin_query {
    *
    * @see QueryConditionInterface::where()
    */
-  function add_where_expression($group, $snippet, $args = array()) {
+  function add_where_expression($group, $snippet, $args = []) {
     // Ensure all variants of 0 are actually 0. Thus '', 0 and NULL are all
     // the default group.
     if (empty($group)) {
@@ -911,11 +911,11 @@ class views_plugin_query_default extends views_plugin_query {
       $this->set_where_group('AND', $group);
     }
 
-    $this->where[$group]['conditions'][] = array(
+    $this->where[$group]['conditions'][] = [
       'field' => $snippet,
       'value' => $args,
       'operator' => 'formula',
-    );
+    ];
   }
 
   /**
@@ -955,11 +955,11 @@ class views_plugin_query_default extends views_plugin_query {
     }
 
     // Add the clause and the args.
-    $this->having[$group]['conditions'][] = array(
+    $this->having[$group]['conditions'][] = [
       'field' => $field,
       'value' => $value,
       'operator' => $operator,
-    );
+    ];
   }
 
   /**
@@ -980,7 +980,7 @@ class views_plugin_query_default extends views_plugin_query {
    *
    * @see QueryConditionInterface::having()
    */
-  function add_having_expression($group, $snippet, $args = array()) {
+  function add_having_expression($group, $snippet, $args = []) {
     // Ensure all variants of 0 are actually 0. Thus '', 0 and NULL are all
     // the default group.
     if (empty($group)) {
@@ -993,11 +993,11 @@ class views_plugin_query_default extends views_plugin_query {
     }
 
     // Add the clause and the args.
-    $this->having[$group]['conditions'][] = array(
+    $this->having[$group]['conditions'][] = [
       'field' => $snippet,
       'value' => $args,
       'operator' => 'formula',
-    );
+    ];
   }
 
   /**
@@ -1019,7 +1019,7 @@ class views_plugin_query_default extends views_plugin_query {
    * @param $params
    *   Any params that should be passed through to the add_field.
    */
-  function add_orderby($table, $field = NULL, $order = 'ASC', $alias = '', $params = array()) {
+  function add_orderby($table, $field = NULL, $order = 'ASC', $alias = '', $params = []) {
     // Only ensure the table if it's not the special random key.
     // @todo: Maybe it would make sense to just add a add_orderby_rand or something similar.
     if ($table && $table != 'rand') {
@@ -1039,10 +1039,10 @@ class views_plugin_query_default extends views_plugin_query {
       $as = $this->add_field($table, $field, $as, $params);
     }
 
-    $this->orderby[] = array(
+    $this->orderby[] = [
       'field' => $as,
       'direction' => strtoupper($order)
-    );
+    ];
 
 	/**
  	 * -- removing, this should be taken care of by field adding now.
@@ -1090,7 +1090,7 @@ class views_plugin_query_default extends views_plugin_query {
    * Generates a unique placeholder used in the db query.
    */
   function placeholder($base = 'views') {
-    static $placeholders = array();
+    static $placeholders = [];
     if (!isset($placeholders[$base])) {
       $placeholders[$base] = 0;
       return ':' . $base;
@@ -1168,7 +1168,7 @@ class views_plugin_query_default extends views_plugin_query {
    * Build fields array.
    */
   function compile_fields($fields_array, $query) {
-    $non_aggregates = array();
+    $non_aggregates = [];
     foreach ($fields_array as $field) {
       $string = '';
       if (!empty($field['table'])) {
@@ -1192,7 +1192,7 @@ class views_plugin_query_default extends views_plugin_query {
         $info = $this->get_aggregation_info();
         if (!empty($info[$field['function']]['method']) && function_exists($info[$field['function']]['method'])) {
           $string = $info[$field['function']]['method']($field['function'], $string);
-          $placeholders = !empty($field['placeholders']) ? $field['placeholders'] : array();
+          $placeholders = !empty($field['placeholders']) ? $field['placeholders'] : [];
           $query->addExpression($string, $fieldname, $placeholders);
         }
 
@@ -1201,7 +1201,7 @@ class views_plugin_query_default extends views_plugin_query {
       // This is a formula, using no tables.
       elseif (empty($field['table'])) {
         $non_aggregates[] = $fieldname;
-        $placeholders = !empty($field['placeholders']) ? $field['placeholders'] : array();
+        $placeholders = !empty($field['placeholders']) ? $field['placeholders'] : [];
         $query->addExpression($string, $fieldname, $placeholders);
       }
 
@@ -1226,9 +1226,9 @@ class views_plugin_query_default extends views_plugin_query {
         break;
       }
     }
-    return array(
+    return [
       $non_aggregates,
-    );
+    ];
   }
 
   /**
@@ -1268,7 +1268,7 @@ class views_plugin_query_default extends views_plugin_query {
       $this->get_count_optimized = TRUE;
     }
 
-    $options = array();
+    $options = [];
     $target = 'default';
     $key = 'default';
     // Detect an external database and set the
@@ -1298,7 +1298,7 @@ class views_plugin_query_default extends views_plugin_query {
     }
 
     $joins = $where = $having = $orderby = $groupby = '';
-    $fields = $distinct = array();
+    $fields = $distinct = [];
 
     // Add all the tables to the query via joins. We assume all LEFT joins.
     foreach ($this->table_queue as $table) {
@@ -1308,7 +1308,7 @@ class views_plugin_query_default extends views_plugin_query {
     }
 
     $this->has_aggregate = FALSE;
-    $non_aggregates = array();
+    $non_aggregates = [];
 
     list($non_aggregates) = $this->compile_fields($fields_array, $query);
 
@@ -1379,7 +1379,7 @@ class views_plugin_query_default extends views_plugin_query {
    * Get the arguments attached to the WHERE and HAVING clauses of this query.
    */
   function get_where_args() {
-    $args = array();
+    $args = [];
     foreach ($this->where as $group => $where) {
       $args = array_merge($args, $where['args']);
     }
@@ -1444,7 +1444,7 @@ class views_plugin_query_default extends views_plugin_query {
       }
     }
 
-    $items = array();
+    $items = [];
     if ($query) {
       $additional_arguments = module_invoke_all('views_query_substitutions', $view);
 
@@ -1480,7 +1480,7 @@ class views_plugin_query_default extends views_plugin_query {
 
         $result = $query->execute();
 
-        $view->result = array();
+        $view->result = [];
         foreach ($result as $item) {
           $view->result[] = $item;
         }
@@ -1492,12 +1492,12 @@ class views_plugin_query_default extends views_plugin_query {
         }
       }
       catch (Exception $e) {
-        $view->result = array();
+        $view->result = [];
         if (!empty($view->live_preview)) {
           backdrop_set_message($e->getMessage(), 'error');
         }
         else {
-          watchdog('views', 'Exception in @human_name[@view_name]: @message', array('@human_name' => $view->human_name, '@view_name' => $view->name, '@message' => $e->getMessage()));
+          watchdog('views', 'Exception in @human_name[@view_name]: @message', ['@human_name' => $view->human_name, '@view_name' => $view->name, '@message' => $e->getMessage()]);
         }
       }
 
@@ -1515,77 +1515,77 @@ class views_plugin_query_default extends views_plugin_query {
   function get_aggregation_info() {
     // @todo -- need a way to get database specific and customized aggregation
     // functions into here.
-    return array(
-      'group' => array(
+    return [
+      'group' => [
         'title' => t('Group results together'),
         'is aggregate' => FALSE,
-      ),
-      'count' => array(
+      ],
+      'count' => [
         'title' => t('Count'),
         'method' => 'views_query_default_aggregation_method_simple',
-        'handler' => array(
+        'handler' => [
           'argument' => 'views_handler_argument_group_by_numeric',
           'field' => 'views_handler_field_numeric',
           'filter' => 'views_handler_filter_group_by_numeric',
           'sort' => 'views_handler_sort_group_by_numeric',
-        ),
-      ),
-      'count_distinct' => array(
+        ],
+      ],
+      'count_distinct' => [
         'title' => t('Count DISTINCT'),
         'method' => 'views_query_default_aggregation_method_distinct',
-        'handler' => array(
+        'handler' => [
           'argument' => 'views_handler_argument_group_by_numeric',
           'field' => 'views_handler_field_numeric',
           'filter' => 'views_handler_filter_group_by_numeric',
           'sort' => 'views_handler_sort_group_by_numeric',
-        ),
-      ),
-      'sum' => array(
+        ],
+      ],
+      'sum' => [
         'title' => t('Sum'),
         'method' => 'views_query_default_aggregation_method_simple',
-        'handler' => array(
+        'handler' => [
           'argument' => 'views_handler_argument_group_by_numeric',
           'filter' => 'views_handler_filter_group_by_numeric',
           'sort' => 'views_handler_sort_group_by_numeric',
-        ),
-      ),
-      'avg' => array(
+        ],
+      ],
+      'avg' => [
         'title' => t('Average'),
         'method' => 'views_query_default_aggregation_method_simple',
-        'handler' => array(
+        'handler' => [
           'argument' => 'views_handler_argument_group_by_numeric',
           'filter' => 'views_handler_filter_group_by_numeric',
           'sort' => 'views_handler_sort_group_by_numeric',
-        ),
-      ),
-      'min' => array(
+        ],
+      ],
+      'min' => [
         'title' => t('Minimum'),
         'method' => 'views_query_default_aggregation_method_simple',
-        'handler' => array(
+        'handler' => [
           'argument' => 'views_handler_argument_group_by_numeric',
           'filter' => 'views_handler_filter_group_by_numeric',
           'sort' => 'views_handler_sort_group_by_numeric',
-        ),
-      ),
-      'max' => array(
+        ],
+      ],
+      'max' => [
         'title' => t('Maximum'),
         'method' => 'views_query_default_aggregation_method_simple',
-        'handler' => array(
+        'handler' => [
           'argument' => 'views_handler_argument_group_by_numeric',
           'filter' => 'views_handler_filter_group_by_numeric',
           'sort' => 'views_handler_sort_group_by_numeric',
-        ),
-      ),
-      'stddev_pop' => array(
+        ],
+      ],
+      'stddev_pop' => [
         'title' => t('Standard deviation'),
         'method' => 'views_query_default_aggregation_method_simple',
-        'handler' => array(
+        'handler' => [
           'argument' => 'views_handler_argument_group_by_numeric',
           'filter' => 'views_handler_filter_group_by_numeric',
           'sort' => 'views_handler_sort_group_by_numeric',
-        ),
-      )
-    );
+        ],
+      ]
+    ];
   }
 
   /**
@@ -1617,7 +1617,7 @@ class views_plugin_query_default extends views_plugin_query {
     $id_alias = $this->get_field_alias($base_table_alias, $info['entity keys'][$is_revision ? 'revision' : 'id']);
 
     // Assemble the ids of the entities to load.
-    $ids = array();
+    $ids = [];
     foreach ($results as $key => $result) {
       if (isset($result->$id_alias)) {
         $ids[$key] = $result->$id_alias;
@@ -1628,21 +1628,21 @@ class views_plugin_query_default extends views_plugin_query {
       $entities = entity_load($entity_type, $ids);
 
       // Re-key the array by row-index.
-      $result = array();
+      $result = [];
       foreach ($ids as $key => $id) {
         $result[$key] = isset($entities[$id]) ? $entities[$id] : FALSE;
       }
     }
     else {
       // There's no way in core to load revisions in bulk.
-      $result = array();
+      $result = [];
       foreach ($ids as $key => $id) {
         // @todo: Switch this to entity_revision_load() if that function gets
         // into core.
         // See: https://github.com/backdrop/backdrop-issues/issues/3777
         $entity_info = entity_get_info($entity_type);
         if (!empty($entity_info['entity keys']['revision'])) {
-          $entity_revisions = entity_load_multiple($entity_type, FALSE, array($entity_info['entity keys']['revision'] => $id));
+          $entity_revisions = entity_load_multiple($entity_type, FALSE, [$entity_info['entity keys']['revision'] => $id]);
           $result[$key] = reset($entity_revisions);
         }
         else {
@@ -1651,7 +1651,7 @@ class views_plugin_query_default extends views_plugin_query {
       }
     }
 
-    return array($entity_type, $result);
+    return [$entity_type, $result];
   }
 }
 

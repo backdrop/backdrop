@@ -35,9 +35,9 @@ class TestDisableCache extends Entity {
    * Implements EntityInterface::uri().
    */
   public function uri() {
-    return array(
+    return [
       'path' => 'test_disable_cache/' . $this->id,
-    );
+    ];
   }
 
   /**

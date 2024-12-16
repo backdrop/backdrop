@@ -25,7 +25,7 @@ class InsertQuery_mysql extends InsertQuery {
     // pass it back, as any remaining options are irrelevant.
     if (empty($this->fromQuery)) {
       $max_placeholder = 0;
-      $values = array();
+      $values = [];
       foreach ($this->insertValues as $insert_values) {
         foreach ($insert_values as $value) {
           $values[':db_insert_placeholder_' . ($max_placeholder++)] = $value;
@@ -39,7 +39,7 @@ class InsertQuery_mysql extends InsertQuery {
     $last_insert_id = $this->connection->query((string) $this, $values, $this->queryOptions);
 
     // Re-initialize the values array so that we can re-use this query.
-    $this->insertValues = array();
+    $this->insertValues = [];
 
     return $last_insert_id;
   }
@@ -69,7 +69,7 @@ class InsertQuery_mysql extends InsertQuery {
     $query = $comments . 'INSERT INTO {' . $this->table . '} (' . implode(', ', $insert_fields) . ') VALUES ';
 
     $max_placeholder = 0;
-    $values = array();
+    $values = [];
     if (!is_array($this->insertValues)) {
       // Older PHP versions cannot throw an exception within __toString().
       if (version_compare(PHP_VERSION, '7.4', '>=')) {
@@ -81,7 +81,7 @@ class InsertQuery_mysql extends InsertQuery {
     }
     if (count($this->insertValues)) {
       foreach ($this->insertValues as $insert_values) {
-        $placeholders = array();
+        $placeholders = [];
 
         // Default fields aren't really placeholders, but this is the most
         // convenient way to handle them.

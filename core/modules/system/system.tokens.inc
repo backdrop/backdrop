@@ -8,276 +8,276 @@
  * Implements hook_token_info().
  */
 function system_token_info() {
-  $types['site'] = array(
+  $types['site'] = [
     'name' => t('Site information'),
     'description' => t('Tokens for site-wide settings and other global information.'),
-  );
-  $types['current-page'] = array(
+  ];
+  $types['current-page'] = [
     'name' => t('Current page'),
     'description' => t('Tokens related to the current page request.'),
-  );
-  $types['current-date'] = array(
+  ];
+  $types['current-date'] = [
     'name' => t('Current date'),
     'description' => t('Tokens related to the current date and time.'),
     'type' => 'date',
-  );
-  $types['date'] = array(
+  ];
+  $types['date'] = [
     'name' => t('Dates'),
     'description' => t('Tokens related to times and dates.'),
     'needs-data' => 'date',
-  );
-  $types['file'] = array(
+  ];
+  $types['file'] = [
     'name' => t('Files'),
     'description' => t('Tokens related to uploaded files.'),
     'needs-data' => 'file',
-  );
-  $types['url'] = array(
+  ];
+  $types['url'] = [
     'name' => t('URL'),
     'description' => t('Tokens related to URLs.'),
     'needs-data' => 'path',
-  );
-  $types['array'] = array(
+  ];
+  $types['array'] = [
     'name' => t('Array'),
     'description' => t('Tokens related to arrays of strings.'),
     'needs-data' => 'array',
-  );
-  $types['random'] = array(
+  ];
+  $types['random'] = [
     'name' => t('Random'),
     'description' => ('Tokens related to random data.'),
-  );
+  ];
 
   // Site-wide global tokens.
-  $site['name'] = array(
+  $site['name'] = [
     'name' => t('Name'),
     'description' => t('The name of the site.'),
-  );
-  $site['slogan'] = array(
+  ];
+  $site['slogan'] = [
     'name' => t('Slogan'),
     'description' => t('The slogan of the site.'),
-  );
-  $site['mail'] = array(
+  ];
+  $site['mail'] = [
     'name' => t('Email'),
     'description' => t('The administrative email address for the site.'),
-  );
-  $site['url'] = array(
+  ];
+  $site['url'] = [
     'name' => t('URL'),
     'description' => t("The URL of the site's home page."),
     'type' => 'url',
-  );
+  ];
   // @deprecated: Replaced by url:brief.
-  $site['url-brief'] = array(
+  $site['url-brief'] = [
     'name' => t('URL (brief)'),
     'description' => t("The URL of the site's home page without the protocol."),
     'deprecated' => TRUE,
-  );
-  $site['login-url'] = array(
+  ];
+  $site['login-url'] = [
     'name' => t("Login page"),
     'description' => t("The URL of the site's login page."),
     'type' => 'url',
-  );
+  ];
 
   // Current page tokens.
-  $current_page['title'] = array(
+  $current_page['title'] = [
     'name' => t('Title'),
     'description' => t('The title of the current page.'),
-  );
-  $current_page['url'] = array(
+  ];
+  $current_page['url'] = [
     'name' => t('URL'),
     'description' => t('The URL of the current page.'),
     'type' => 'url',
-  );
-  $current_page['page-number'] = array(
+  ];
+  $current_page['page-number'] = [
     'name' => t('Page number'),
     'description' => t('The page number of the current page when viewing paged lists.'),
-  );
-  $current_page['query'] = array(
+  ];
+  $current_page['query'] = [
     'name' => t('Query string value'),
     'description' => t('The value of a specific query string field of the current page.'),
     'dynamic' => TRUE,
-  );
+  ];
 
   // URL tokens.
-  $url['path'] = array(
+  $url['path'] = [
     'name' => t('Path'),
     'description' => t('The path component of the URL.'),
-  );
-  $url['relative'] = array(
+  ];
+  $url['relative'] = [
     'name' => t('Relative URL'),
     'description' => t('The relative URL.'),
-  );
-  $url['absolute'] = array(
+  ];
+  $url['absolute'] = [
     'name' => t('Absolute URL'),
     'description' => t('The absolute URL.'),
-  );
-  $url['brief'] = array(
+  ];
+  $url['brief'] = [
     'name' => t('Brief URL'),
     'description' => t('The URL without the protocol and trailing backslash.'),
-  );
-  $url['unaliased'] = array(
+  ];
+  $url['unaliased'] = [
     'name' => t('Unaliased URL'),
     'description' => t('The unaliased URL.'),
     'type' => 'url',
-  );
-  $url['args'] = array(
+  ];
+  $url['args'] = [
     'name' => t('Arguments'),
     'description' => t("The specific argument of the current page (e.g. 'args:value:1' on the page 'node/123' returns '123')."),
     'type' => 'array',
-  );
+  ];
 
   // Menu link tokens.
-  $menu_link['mlid'] = array(
+  $menu_link['mlid'] = [
     'name' => t('Link ID'),
     'description' => t('The unique ID of the menu link.'),
-  );
-  $menu_link['title'] = array(
+  ];
+  $menu_link['title'] = [
     'name' => t('Title'),
     'description' => t('The title of the menu link.'),
-  );
-  $menu_link['url'] = array(
+  ];
+  $menu_link['url'] = [
     'name' => t('URL'),
     'description' => t('The URL of the menu link.'),
     'type' => 'url',
-  );
-  $menu_link['parent'] = array(
+  ];
+  $menu_link['parent'] = [
     'name' => t('Parent'),
     'description' => t("The menu link's parent."),
     'type' => 'menu-link',
-  );
-  $menu_link['parents'] = array(
+  ];
+  $menu_link['parents'] = [
     'name' => t('Parents'),
     'description' => t("An array of all the menu link's parents, starting with the root."),
     'type' => 'array',
-  );
-  $menu_link['root'] = array(
+  ];
+  $menu_link['root'] = [
     'name' => t('Root'),
     'description' => t("The menu link's root."),
     'type' => 'menu-link',
-  );
+  ];
 
   // Array tokens.
-  $array['first'] = array(
+  $array['first'] = [
     'name' => t('First'),
     'description' => t('The first element of the array.'),
-  );
-  $array['last'] = array(
+  ];
+  $array['last'] = [
     'name' => t('Last'),
     'description' => t('The last element of the array.'),
-  );
-  $array['count'] = array(
+  ];
+  $array['count'] = [
     'name' => t('Count'),
     'description' => t('The number of elements in the array.'),
-  );
-  $array['reversed'] = array(
+  ];
+  $array['reversed'] = [
     'name' => t('Reversed'),
     'description' => t('The array reversed.'),
     'type' => 'array',
-  );
-  $array['keys'] = array(
+  ];
+  $array['keys'] = [
     'name' => t('Keys'),
     'description' => t('The array of keys of the array.'),
     'type' => 'array',
-  );
-  $array['join'] = array(
+  ];
+  $array['join'] = [
     'name' => t('Imploded'),
     'description' => t('The values of the array joined together with a custom string in-between each value.'),
     'dynamic' => TRUE,
-  );
-  $array['value'] = array(
+  ];
+  $array['value'] = [
     'name' => t('Value'),
     'description' => t('The specific value of the array.'),
     'dynamic' => TRUE,
-  );
+  ];
 
   // Date related tokens.
   $date_format_types = system_get_date_formats();
   foreach ($date_format_types as $machine_name => $date_format_type_info) {
     if (!isset($date_format_type_info['hidden']) || $date_format_type_info['hidden'] == FALSE) {
-      $date[$machine_name] = array(
+      $date[$machine_name] = [
          'name' => check_plain($date_format_type_info['label']),
-         'description' => t("A date in '@type' format. (%date)", array('@type' => $machine_name, '%date' => format_date(REQUEST_TIME, $machine_name))),
-       );
+         'description' => t("A date in '@type' format. (%date)", ['@type' => $machine_name, '%date' => format_date(REQUEST_TIME, $machine_name)]),
+       ];
     }
   }
-  $date['custom'] = array(
+  $date['custom'] = [
     'name' => t('Custom format'),
-    'description' => t('A date in a custom format. See the <a href="@url" target="_blank">PHP manual</a> for available options.', array('@url' => 'https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters')),
+    'description' => t('A date in a custom format. See the <a href="@url" target="_blank">PHP manual</a> for available options.', ['@url' => 'https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters']),
     'dynamic' => TRUE,
-  );
-  $date['since'] = array(
+  ];
+  $date['since'] = [
     'name' => t('Time-since'),
-    'description' => t("A date in 'time-since' format. (%date)", array('%date' => format_interval(REQUEST_TIME - 360, 2))),
-  );
-  $date['raw'] = array(
+    'description' => t("A date in 'time-since' format. (%date)", ['%date' => format_interval(REQUEST_TIME - 360, 2)]),
+  ];
+  $date['raw'] = [
     'name' => t('Raw timestamp'),
-    'description' => t("A date in UNIX timestamp format (%date)", array('%date' => REQUEST_TIME)),
-  );
+    'description' => t("A date in UNIX timestamp format (%date)", ['%date' => REQUEST_TIME]),
+  ];
 
   // File related tokens.
-  $file['fid'] = array(
+  $file['fid'] = [
     'name' => t('File ID'),
     'description' => t('The unique ID of the uploaded file.'),
-  );
-  $file['name'] = array(
+  ];
+  $file['name'] = [
     'name' => t('File name'),
     'description' => t('The name of the file on disk.'),
-  );
-  $file['basename'] = array(
+  ];
+  $file['basename'] = [
     'name' => t('Base name'),
     'description' => t('The base name of the file.'),
-  );
-  $file['path'] = array(
+  ];
+  $file['path'] = [
     'name' => t('Path'),
     'description' => t('The location of the file relative to the Backdrop root.'),
-  );
-  $file['url'] = array(
+  ];
+  $file['url'] = [
     'name' => t('URL'),
     'description' => t('The web-accessible URL for the file.'),
-  );
-  $file['mime'] = array(
+  ];
+  $file['mime'] = [
     'name' => t('MIME type'),
     'description' => t('The MIME type of the file.'),
-  );
-  $file['extension'] = array(
+  ];
+  $file['extension'] = [
     'name' => t('Extension'),
     'description' => t('The extension of the file.'),
-  );
-  $file['size'] = array(
+  ];
+  $file['size'] = [
     'name' => t('File size'),
     'description' => t('The size of the file.'),
-  );
-  $file['size-raw'] = array(
+  ];
+  $file['size-raw'] = [
     'name' => t('File byte size'),
     'description' => t('The size of the file, in bytes.'),
-  );
-  $file['timestamp'] = array(
+  ];
+  $file['timestamp'] = [
     'name' => t('Timestamp'),
     'description' => t('The date the file was most recently changed.'),
     'type' => 'date',
-  );
-  $file['owner'] = array(
+  ];
+  $file['owner'] = [
     'name' => t('Owner'),
     'description' => t('The user who originally uploaded the file.'),
     'type' => 'user',
-  );
+  ];
 
   // Random tokens.
-  $random['number'] = array(
+  $random['number'] = [
     'name' => t('Number'),
-    'description' => t('A random number from 0 to @max.', array(
+    'description' => t('A random number from 0 to @max.', [
       '@max' => mt_getrandmax(),
-    )),
-  );
-  $random['hash'] = array(
+    ]),
+  ];
+  $random['hash'] = [
     'name' => t('Hash'),
-    'description' => t('A random hash. The possible hashing algorithms are: @hash-algos.', array(
+    'description' => t('A random hash. The possible hashing algorithms are: @hash-algos.', [
       '@hash-algos' => implode(', ', hash_algos()),
-    )),
+    ]),
     'dynamic' => TRUE,
-  );
+  ];
 
-  return array(
+  return [
     'types' => $types,
-    'tokens' => array(
+    'tokens' => [
       'site' => $site,
       'current-page' => $current_page,
       'url' => $url,
@@ -286,15 +286,15 @@ function system_token_info() {
       'date' => $date,
       'file' => $file,
       'random' => $random,
-    ),
-  );
+    ],
+  ];
 }
 
 /**
  * Implements hook_tokens().
  */
-function system_tokens($type, $tokens, array $data = array(), array $options = array()) {
-  $url_options = array('absolute' => TRUE);
+function system_tokens($type, $tokens, array $data = [], array $options = []) {
+  $url_options = ['absolute' => TRUE];
   if (isset($options['language'])) {
     $url_options['language'] = $options['language'];
     $language_code = $options['language']->langcode;
@@ -304,7 +304,7 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
   }
   $sanitize = !empty($options['sanitize']);
 
-  $replacements = array();
+  $replacements = [];
 
   if ($type == 'site') {
     foreach ($tokens as $name => $original) {
@@ -329,7 +329,7 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
 
         // @deprecated: Use url:brief instead.
         case 'url-brief':
-          $replacements[$original] = preg_replace(array('!^https?://!', '!/$!'), '', url('<front>', $url_options));
+          $replacements[$original] = preg_replace(['!^https?://!', '!/$!'], '', url('<front>', $url_options));
           break;
 
         case 'login-url':
@@ -340,7 +340,7 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
 
     // Chained token relationships.
     if ($url_tokens = token_find_with_prefix($tokens, 'url')) {
-      $replacements += token_generate('url', $url_tokens, array('path' => '<front>'), $options);
+      $replacements += token_generate('url', $url_tokens, ['path' => '<front>'], $options);
     }
   }
 
@@ -390,13 +390,13 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
 
     // Chained token relationships.
     if ($url_tokens = token_find_with_prefix($tokens, 'url')) {
-      $replacements += token_generate('url', $url_tokens, array('path' => $current_path), $options);
+      $replacements += token_generate('url', $url_tokens, ['path' => $current_path], $options);
     }
   }
 
   // Current date tokens.
   elseif ($type == 'current-date') {
-    $replacements += token_generate('date', $tokens, array('date' => REQUEST_TIME), $options);
+    $replacements += token_generate('date', $tokens, ['date' => REQUEST_TIME], $options);
   }
 
   // URL tokens.
@@ -423,13 +423,13 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
           $replacements[$original] = url($path, $url_options);
           break;
         case 'relative':
-          $replacements[$original] = url($path, array('absolute' => FALSE) + $url_options);
+          $replacements[$original] = url($path, ['absolute' => FALSE] + $url_options);
           break;
         case 'brief':
-          $replacements[$original] = preg_replace(array('!^https?://!', '!/$!'), '', url($path, $url_options));
+          $replacements[$original] = preg_replace(['!^https?://!', '!/$!'], '', url($path, $url_options));
           break;
         case 'unaliased':
-          $replacements[$original] = url($path, array('alias' => TRUE) + $url_options);
+          $replacements[$original] = url($path, ['alias' => TRUE] + $url_options);
           break;
         case 'args':
           $value = empty($url_options['alias']) ? backdrop_get_path_alias($path, $language_code) : $path;
@@ -441,13 +441,13 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
     // [url:arg:*] chained tokens.
     if ($arg_tokens = token_find_with_prefix($tokens, 'args')) {
       $value = empty($url_options['alias']) ? backdrop_get_path_alias($path, $language_code) : $path;
-      $replacements += token_generate('array', $arg_tokens, array('array' => arg(NULL, $value)), $options);
+      $replacements += token_generate('array', $arg_tokens, ['array' => arg(NULL, $value)], $options);
     }
 
     // [url:unaliased:*] chained tokens.
     if ($unaliased_tokens = token_find_with_prefix($tokens, 'unaliased')) {
       $unaliased_token_data['path'] = $path;
-      $unaliased_token_data['options'] = isset($data['options']) ? $data['options'] : array();
+      $unaliased_token_data['options'] = isset($data['options']) ? $data['options'] : [];
       $unaliased_token_data['options']['alias'] = TRUE;
       $replacements += token_generate('url', $unaliased_tokens, $unaliased_token_data, $options);
     }
@@ -457,9 +457,9 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
     $array = $data['array'];
 
     if (isset($options['array sort']) ? $options['array sort'] : FALSE) {
-      backdrop_sort($array, array('#weight' => SORT_NUMERIC));
+      backdrop_sort($array, ['#weight' => SORT_NUMERIC]);
     };
-    $keys = array();
+    $keys = [];
     foreach ($array as $key => $value) {
       if (substr($key, 0, 1) !== '#') {
         $keys[] = $key;
@@ -489,7 +489,7 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
           $replacements[$original] = token_render_array($reversed, $options);
           break;
         case 'join':
-          $replacements[$original] = token_render_array($array, array('join' => '') + $options);
+          $replacements[$original] = token_render_array($array, ['join' => ''] + $options);
           break;
       }
     }
@@ -506,19 +506,19 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
     // [array:join:*] dynamic tokens.
     if ($join_tokens = token_find_with_prefix($tokens, 'join')) {
       foreach ($join_tokens as $join => $original) {
-        $replacements[$original] = token_render_array($array, array('join' => $join) + $options);
+        $replacements[$original] = token_render_array($array, ['join' => $join] + $options);
       }
     }
 
     // [array:keys:*] chained tokens.
     if ($key_tokens = token_find_with_prefix($tokens, 'keys')) {
       $options['array sort'] = FALSE;
-      $replacements += token_generate('array', $key_tokens, array('array' => $keys), $options);
+      $replacements += token_generate('array', $key_tokens, ['array' => $keys], $options);
     }
 
     // [array:reversed:*] chained tokens.
     if ($reversed_tokens = token_find_with_prefix($tokens, 'reversed')) {
-      $replacements += token_generate('array', $reversed_tokens, array('array' => array_reverse($array, TRUE)) + $options);
+      $replacements += token_generate('array', $reversed_tokens, ['array' => array_reverse($array, TRUE)] + $options);
     }
   }
 
@@ -609,11 +609,11 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
     }
 
     if ($date_tokens = token_find_with_prefix($tokens, 'timestamp')) {
-      $replacements += token_generate('date', $date_tokens, array('date' => $file->timestamp), $options);
+      $replacements += token_generate('date', $date_tokens, ['date' => $file->timestamp], $options);
     }
 
     if (($owner_tokens = token_find_with_prefix($tokens, 'owner')) && $account = user_load($file->uid)) {
-      $replacements += token_generate('user', $owner_tokens, array('user' => $account), $options);
+      $replacements += token_generate('user', $owner_tokens, ['user' => $account], $options);
     }
 
     if (($url_tokens = token_find_with_prefix($tokens, 'url'))) {
@@ -648,7 +648,7 @@ function system_tokens($type, $tokens, array $data = array(), array $options = a
     // Only check when tests are running.
     $type_info = token_get_info($type);
     if (!empty($type_info['needs-data']) && !isset($data[$type_info['needs-data']])) {
-      trigger_error(t('Attempting to perform token replacement for token type %type without required data', array('%type' => $type)), E_USER_WARNING);
+      trigger_error(t('Attempting to perform token replacement for token type %type without required data', ['%type' => $type]), E_USER_WARNING);
     }
   }
 

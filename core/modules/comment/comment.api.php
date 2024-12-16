@@ -52,7 +52,7 @@ function hook_comment_update($comment) {
  *  An array of comment objects indexed by cid.
  */
 function hook_comment_load($comments) {
-  $result = db_query('SELECT cid, foo FROM {mytable} WHERE cid IN (:cids)', array(':cids' => array_keys($comments)));
+  $result = db_query('SELECT cid, foo FROM {mytable} WHERE cid IN (:cids)', [':cids' => array_keys($comments)]);
   foreach ($result as $record) {
     $comments[$record->cid]->foo = $record->foo;
   }
@@ -111,7 +111,7 @@ function hook_comment_view_alter(&$build) {
  *   The comment the action is being performed on.
  */
 function hook_comment_publish($comment) {
-  backdrop_set_message(t('Comment: @subject has been published', array('@subject' => $comment->subject)));
+  backdrop_set_message(t('Comment: @subject has been published', ['@subject' => $comment->subject]));
 }
 
 /**
@@ -121,7 +121,7 @@ function hook_comment_publish($comment) {
  *   The comment the action is being performed on.
  */
 function hook_comment_unpublish($comment) {
-  backdrop_set_message(t('Comment: @subject has been unpublished', array('@subject' => $comment->subject)));
+  backdrop_set_message(t('Comment: @subject has been unpublished', ['@subject' => $comment->subject]));
 }
 
 /**
@@ -160,7 +160,7 @@ function hook_comment_predelete($comment) {
  * @see entity_delete_multiple()
  */
 function hook_comment_delete($comment) {
-  backdrop_set_message(t('Comment: @subject has been deleted', array('@subject' => $comment->subject)));
+  backdrop_set_message(t('Comment: @subject has been deleted', ['@subject' => $comment->subject]));
 }
 
 /**

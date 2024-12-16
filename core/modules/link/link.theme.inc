@@ -46,7 +46,7 @@ function theme_link_formatter_link_default($variables) {
   unset($link_options['url']);
 
   if (isset($link_options['attributes']['class'])) {
-    $link_options['attributes']['class'] = array($link_options['attributes']['class']);
+    $link_options['attributes']['class'] = [$link_options['attributes']['class']];
   }
   // Display a normal link if both title and URL are available.
   if (!empty($variables['element']['title']) && !empty($variables['element']['url'])) {
@@ -81,7 +81,7 @@ function theme_link_formatter_link_plain($variables) {
  * Formats a link as an absolute URL.
  */
 function theme_link_formatter_link_absolute($variables) {
-  $absolute = array('absolute' => TRUE);
+  $absolute = ['absolute' => TRUE];
   return empty($variables['element']['url']) ? '' : url($variables['element']['url'], $absolute + $variables['element']);
 }
 

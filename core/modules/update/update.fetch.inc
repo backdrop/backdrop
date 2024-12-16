@@ -19,16 +19,16 @@ function update_manual_status() {
   }
 
   _update_refresh();
-  $batch = array(
-    'operations' => array(
-      array('update_fetch_data_batch', array()),
-    ),
+  $batch = [
+    'operations' => [
+      ['update_fetch_data_batch', []],
+    ],
     'finished' => 'update_fetch_data_finished',
     'title' => t('Checking available update data'),
     'progress_message' => t('Trying to check available update data ...'),
     'error_message' => t('Error checking available update data.'),
     'file' => backdrop_get_path('module', 'update') . '/update.fetch.inc',
-  );
+  ];
   batch_set($batch);
   batch_process('admin/reports/updates');
 }
@@ -56,10 +56,10 @@ function update_fetch_data_batch(&$context) {
     if ($item = $queue->claimItem()) {
       if (_update_process_fetch_task($item->data)) {
         $context['results']['updated']++;
-        $context['message'] = t('Checked available update data for %title.', array('%title' => $item->data['info']['name']));
+        $context['message'] = t('Checked available update data for %title.', ['%title' => $item->data['info']['name']]);
       }
       else {
-        $context['message'] = t('Failed to check available update data for %title.', array('%title' => $item->data['info']['name']));
+        $context['message'] = t('Failed to check available update data for %title.', ['%title' => $item->data['info']['name']]);
         $context['results']['failures']++;
       }
       $context['sandbox']['progress']++;
@@ -134,7 +134,7 @@ function _update_fetch_data() {
 function _update_process_fetch_task(array $project) {
   global $base_url;
   $config = config('update.settings');
-  $fail = &backdrop_static(__FUNCTION__, array());
+  $fail = &backdrop_static(__FUNCTION__, []);
   // This can be in the middle of a long-running batch, so REQUEST_TIME won't
   // necessarily be valid.
   $now = time();
@@ -151,7 +151,7 @@ function _update_process_fetch_task(array $project) {
   $success = FALSE;
   $response = NULL;
   $response_code = NULL;
-  $available = array();
+  $available = [];
   $site_key = backdrop_hmac_base64($base_url, backdrop_get_private_key());
   $url = _update_build_fetch_url($project, $site_key);
   $fetch_url_base = _update_get_fetch_url_base($project);
@@ -161,7 +161,7 @@ function _update_process_fetch_task(array $project) {
     $response = backdrop_http_request($url);
     $response_code = (int) $response->code;
     if (isset($response->error)) {
-      watchdog('update', 'HTTP request to @url failed with error: @error.', array('@url' => $url, '@error' => $response->error));
+      watchdog('update', 'HTTP request to @url failed with error: @error.', ['@url' => $url, '@error' => $response->error]);
     }
     elseif (!isset($response->error) && isset($response->data)) {
       $data = $response->data;
@@ -252,7 +252,7 @@ function _update_refresh() {
  * @see _update_process_fetch_task()
  */
 function _update_create_fetch_task($project) {
-  $fetch_tasks = &backdrop_static(__FUNCTION__, array());
+  $fetch_tasks = &backdrop_static(__FUNCTION__, []);
   if (empty($fetch_tasks)) {
     $fetch_tasks = _update_get_cache_multiple('fetch_task');
   }
@@ -267,10 +267,10 @@ function _update_create_fetch_task($project) {
     // enforces unique items.
     try {
       db_insert('cache_update')
-        ->fields(array(
+        ->fields([
           'cid' => $cid,
           'created' => REQUEST_TIME,
-        ))
+        ])
         ->execute();
     }
     catch (Exception $e) {
@@ -380,9 +380,9 @@ function _update_cron_notify() {
   $config = config('update.settings');
   module_load_install('update');
   $status = update_requirements('runtime');
-  $params = array();
+  $params = [];
   $notify_all = ($config->get('update_threshold') == 'all');
-  foreach (array('core', 'contrib') as $report_type) {
+  foreach (['core', 'contrib'] as $report_type) {
     $type = 'update_' . $report_type;
     if (isset($status[$type]['severity'])
         && ($status[$type]['severity'] == REQUIREMENT_ERROR || ($notify_all && $status[$type]['reason'] == UPDATE_NOT_CURRENT))) {
@@ -436,23 +436,23 @@ function update_parse_xml($raw_xml) {
     return;
   }
   $short_name = (string) $xml->short_name;
-  $data = array();
+  $data = [];
   foreach ($xml as $k => $v) {
     $data[$k] = (string) $v;
   }
-  $data['releases'] = array();
+  $data['releases'] = [];
   if (isset($xml->releases)) {
     foreach ($xml->releases->children() as $release) {
       $version = (string) $release->version;
-      $data['releases'][$version] = array();
+      $data['releases'][$version] = [];
       foreach ($release->children() as $k => $v) {
         $data['releases'][$version][$k] = (string) $v;
       }
-      $data['releases'][$version]['terms'] = array();
+      $data['releases'][$version]['terms'] = [];
       if ($release->terms) {
         foreach ($release->terms->children() as $term) {
           if (!isset($data['releases'][$version]['terms'][(string) $term->name])) {
-            $data['releases'][$version]['terms'][(string) $term->name] = array();
+            $data['releases'][$version]['terms'][(string) $term->name] = [];
           }
           $data['releases'][$version]['terms'][(string) $term->name][] = (string) $term->value;
         }

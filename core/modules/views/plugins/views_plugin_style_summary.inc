@@ -13,10 +13,10 @@ class views_plugin_style_summary extends views_plugin_style {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['base_path'] = array('default' => '');
-    $options['count'] = array('default' => TRUE, 'bool' => TRUE);
-    $options['override'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['items_per_page'] = array('default' => 25);
+    $options['base_path'] = ['default' => ''];
+    $options['count'] = ['default' => TRUE, 'bool' => TRUE];
+    $options['override'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['items_per_page'] = ['default' => 25];
 
     return $options;
   }
@@ -28,7 +28,7 @@ class views_plugin_style_summary extends views_plugin_style {
   }
 
   function options_form(&$form, &$form_state) {
-    $form['base_path'] = array(
+    $form['base_path'] = [
       '#type' => 'textfield',
       '#title' => t('Base path'),
       '#default_value' => $this->options['base_path'],
@@ -37,41 +37,41 @@ class views_plugin_style_summary extends views_plugin_style {
         Do not include beginning and ending forward slash. If this value
         is empty, views will use the first path found as the base path,
         in page displays, or / if no path could be found.'),
-    );
-    $form['count'] = array(
+    ];
+    $form['count'] = [
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['count']),
       '#title' => t('Display record count with link'),
-    );
-    $form['override'] = array(
+    ];
+    $form['override'] = [
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['override']),
       '#title' => t('Override number of items to display'),
-    );
+    ];
 
-    $form['items_per_page'] = array(
+    $form['items_per_page'] = [
       '#type' => 'textfield',
       '#title' => t('Items to display'),
       '#default_value' => $this->options['items_per_page'],
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[summary][options][' . $this->definition['name'] . '][override]"]' => array('checked' => TRUE),
-        ),
-      ),
-    );
+      '#states' => [
+        'visible' => [
+          ':input[name="options[summary][options][' . $this->definition['name'] . '][override]"]' => ['checked' => TRUE],
+        ],
+      ],
+    ];
   }
 
   function render() {
-    $rows = array();
+    $rows = [];
     foreach ($this->view->result as $row) {
       // @todo: Include separator as an option.
       $rows[] = $row;
     }
 
-    return theme($this->theme_functions(), array(
+    return theme($this->theme_functions(), [
       'view' => $this->view,
       'options' => $this->options,
       'rows' => $rows
-    ));
+    ]);
   }
 }

@@ -169,7 +169,7 @@ class Node extends Entity {
   /**
    * Create a new Node instance.
    */
-  function __construct(array $values = array()) {
+  function __construct(array $values = []) {
     parent::__construct($values);
 
     // Set the created time to now.
@@ -210,17 +210,17 @@ class Node extends Entity {
    * Implements EntityInterface::uri().
    */
   public function uri() {
-    return array(
+    return [
       'path' => 'node/' . $this->nid,
-      'options' => array(),
-    );
+      'options' => [],
+    ];
   }
 
   /**
    * Overrides Entity::createAccess().
    */
   public static function createAccess($bundle = NULL, $account = NULL) {
-    $rights = &backdrop_static('node_access', array());
+    $rights = &backdrop_static('node_access', []);
 
     // If no user object is supplied, the access check is for the current user.
     if (empty($account)) {
@@ -280,12 +280,12 @@ class Node extends Entity {
   public function access($op, $account = NULL) {
     // Casting class with private property causes errors due to added prefix.
     // e.g. "\0" . 'Node' . "\0". So use static array instead.
-    $rights = &backdrop_static('node_access', array());
+    $rights = &backdrop_static('node_access', []);
 
     if ($op == 'create') {
       return self::createAccess($this->bundle(), $account);
     }
-    elseif (!in_array($op, array('view', 'update', 'delete'), TRUE)) {
+    elseif (!in_array($op, ['view', 'update', 'delete'], TRUE)) {
       // If the $op was not one of the supported ones, we return access denied.
       return FALSE;
     }
@@ -494,7 +494,7 @@ class NodeStorageController extends EntityDatabaseStorageController {
 
       // Reset the persistent and static cache for this node.
       if ($op == 'update') {
-        $this->resetCache(array($entity->{$this->idKey}));
+        $this->resetCache([$entity->{$this->idKey}]);
       }
 
       $this->postSave($entity, $op == 'update');
@@ -530,7 +530,7 @@ class NodeStorageController extends EntityDatabaseStorageController {
       // revision.
       if ($entity->isActiveRevision()) {
         db_update($this->entityInfo['base table'])
-          ->fields(array($this->revisionKey => $record->{$this->revisionKey}))
+          ->fields([$this->revisionKey => $record->{$this->revisionKey}])
           ->condition($this->idKey, $entity->{$this->idKey})
           ->execute();
       }
@@ -551,7 +551,7 @@ class NodeStorageController extends EntityDatabaseStorageController {
   protected function attachLoad(&$nodes, $revision_id = FALSE) {
     // Create an array of nodes for each content type and pass this to the
     // object type specific callback.
-    $typed_nodes = array();
+    $typed_nodes = [];
     foreach ($nodes as $id => $entity) {
       $typed_nodes[$entity->type][$id] = $entity;
     }
@@ -566,14 +566,14 @@ class NodeStorageController extends EntityDatabaseStorageController {
     // Besides the list of nodes, pass one additional argument to
     // hook_node_load(), containing a list of node types that were loaded.
     $argument = array_keys($typed_nodes);
-    $this->hookLoadArguments = array($argument);
+    $this->hookLoadArguments = [$argument];
     parent::attachLoad($nodes, $revision_id);
   }
 
   /**
    * Overrides DefaultEntityController::buildQuery().
    */
-  protected function buildQuery($ids, $conditions = array(), $revision_id = FALSE) {
+  protected function buildQuery($ids, $conditions = [], $revision_id = FALSE) {
     // Ensure that uid is taken from the {node} table,
     // alias timestamp to revision_timestamp and add revision_uid.
     $query = parent::buildQuery($ids, $conditions, $revision_id);
@@ -713,10 +713,10 @@ class NodeStorageController extends EntityDatabaseStorageController {
     $langcode = $langcode ? $langcode : $language_content->langcode;
 
     // Remove previously built content, if exists.
-    $node->content = array();
+    $node->content = [];
 
     // Allow modules to change the display mode.
-    $view_mode = key(entity_view_mode_prepare('node', array($node->nid => $node), $view_mode, $langcode));
+    $view_mode = key(entity_view_mode_prepare('node', [$node->nid => $node], $view_mode, $langcode));
 
     // The 'view' hook can be implemented to overwrite the default function
     // to display nodes.
@@ -728,36 +728,36 @@ class NodeStorageController extends EntityDatabaseStorageController {
     // In case of a multiple view, node_view_multiple() already ran the
     // 'prepare_view' step. An internal flag prevents the operation from running
     // twice.
-    field_attach_prepare_view('node', array($node->nid => $node), $view_mode, $langcode);
-    entity_prepare_view('node', array($node->nid => $node));
+    field_attach_prepare_view('node', [$node->nid => $node], $view_mode, $langcode);
+    entity_prepare_view('node', [$node->nid => $node]);
     $node->content += field_attach_view('node', $node, $view_mode, $langcode);
 
     // Always display a read more link on teasers because we have no way
     // to know when a teaser view is different than a full view.
-    $links = array();
-    $node->content['links'] = array(
+    $links = [];
+    $node->content['links'] = [
       '#theme' => 'links__node',
-      '#pre_render' => array('backdrop_pre_render_links'),
-      '#attributes' => array('class' => array('links', 'inline')),
-    );
+      '#pre_render' => ['backdrop_pre_render_links'],
+      '#attributes' => ['class' => ['links', 'inline']],
+    ];
     if ($view_mode == 'teaser') {
       $type = node_type_get_type($node);
       // Don't add the "read more" link to the node if the type has a hidden path.
       if (!($type->settings['hidden_path'] && !user_access('view hidden paths'))) {
         $node_title_stripped = strip_tags($node->title);
-        $links['node-readmore'] = array(
-          'title' => t('Read more<span class="element-invisible"> about @title</span>', array('@title' => $node_title_stripped)),
+        $links['node-readmore'] = [
+          'title' => t('Read more<span class="element-invisible"> about @title</span>', ['@title' => $node_title_stripped]),
           'href' => 'node/' . $node->nid,
           'html' => TRUE,
-          'attributes' => array('rel' => 'tag', 'title' => $node_title_stripped),
-        );
+          'attributes' => ['rel' => 'tag', 'title' => $node_title_stripped],
+        ];
       }
     }
-    $node->content['links']['node'] = array(
+    $node->content['links']['node'] = [
       '#theme' => 'links__node__node',
       '#links' => $links,
-      '#attributes' => array('class' => array('links', 'inline')),
-    );
+      '#attributes' => ['class' => ['links', 'inline']],
+    ];
 
     // Allow modules to make their own additions to the node.
     module_invoke_all('node_view', $node, $view_mode, $langcode);
@@ -765,7 +765,7 @@ class NodeStorageController extends EntityDatabaseStorageController {
 
     // Make sure the current display mode is stored if no module has already
     // populated the related key.
-    $node->content += array('#view_mode' => $view_mode);
+    $node->content += ['#view_mode' => $view_mode];
   }
 
   /**
@@ -775,7 +775,7 @@ class NodeStorageController extends EntityDatabaseStorageController {
     global $language_content;
     $langcode = $langcode ? $langcode : $language_content->langcode;
 
-    $view = array();
+    $view = [];
     foreach ($nodes as $node) {
       /* @var Node $node */
       if (isset($node->preview) && ($node->preview == 'Preview')) {
@@ -790,25 +790,25 @@ class NodeStorageController extends EntityDatabaseStorageController {
       // We don't need duplicate rendering info in node->content.
       unset($node->content);
 
-      $build += array(
+      $build += [
         '#theme' => 'node',
         '#node' => $node,
         '#view_mode' => $view_mode,
         '#langcode' => $langcode,
         '#page' => $page,
-      );
+      ];
 
       // Add contextual links for this node, except when the node is already
       // being displayed on its own page. Modules may alter this behavior (for
       // example, to restrict contextual links to certain display modes) by
       // implementing hook_node_view_alter().
       if (!empty($node->nid) && !($view_mode == 'full' && node_is_page($node))) {
-        $build['#contextual_links']['node'] = array('node', array($node->nid));
+        $build['#contextual_links']['node'] = ['node', [$node->nid]];
       }
 
       // Allow modules to modify the structured node.
       $type = 'node';
-      backdrop_alter(array('node_view', 'entity_view'), $build, $type);
+      backdrop_alter(['node_view', 'entity_view'], $build, $type);
       $view[$type][$node->id()] = $build;
     }
 

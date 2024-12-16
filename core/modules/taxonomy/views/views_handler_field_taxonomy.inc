@@ -25,8 +25,8 @@ class views_handler_field_taxonomy extends views_handler_field {
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['link_to_taxonomy'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['convert_spaces'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['link_to_taxonomy'] = ['default' => FALSE, 'bool' => TRUE];
+    $options['convert_spaces'] = ['default' => FALSE, 'bool' => TRUE];
     return $options;
   }
 
@@ -34,18 +34,18 @@ class views_handler_field_taxonomy extends views_handler_field {
    * Provide link to taxonomy option
    */
   function options_form(&$form, &$form_state) {
-    $form['link_to_taxonomy'] = array(
+    $form['link_to_taxonomy'] = [
       '#title' => t('Link this field to its taxonomy term page'),
       '#description' => t("Enable to override this field's links."),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['link_to_taxonomy']),
-    );
-     $form['convert_spaces'] = array(
+    ];
+     $form['convert_spaces'] = [
       '#title' => t('Convert spaces in term names to hyphens'),
       '#description' => t('This allows links to work with Views taxonomy term arguments.'),
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['convert_spaces']),
-    );
+    ];
     parent::options_form($form, $form_state);
   }
 
@@ -57,10 +57,10 @@ class views_handler_field_taxonomy extends views_handler_field {
   function render_link($data, $values) {
     $tid = $this->get_value($values, 'tid');
     if (!empty($this->options['link_to_taxonomy']) && !empty($tid) && $data !== NULL && $data !== '') {
-      $term = entity_create('taxonomy_term', array(
+      $term = entity_create('taxonomy_term', [
         'tid' => $tid,
         'vocabulary' => $this->get_value($values, 'vocabulary'),
-      ));
+      ]);
       $this->options['alter']['make_link'] = TRUE;
       $uri = entity_uri('taxonomy_term', $term);
       $this->options['alter']['path'] = $uri['path'];

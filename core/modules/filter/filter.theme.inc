@@ -43,7 +43,7 @@ function theme_filter_caption($variables) {
  * @ingroup themeable
  */
 function theme_filter_tips_more_info() {
-  return '<p>' . l(t('More information about text editors'), 'filter/tips', array('attributes' => array('target' => '_blank'))) . '</p>';
+  return '<p>' . l(t('More information about text editors'), 'filter/tips', ['attributes' => ['target' => '_blank']]) . '</p>';
 }
 
 /**
@@ -61,7 +61,7 @@ function theme_filter_guidelines($variables) {
   $attributes['class'][] = 'filter-guidelines-' . $format->format;
   $output = '<div' . backdrop_attributes($attributes) . '>';
   $output .= '<h3>' . check_plain($format->name) . '</h3>';
-  $output .= theme('filter_tips', array('tips' => _filter_tips($format->format, FALSE)));
+  $output .= theme('filter_tips', ['tips' => _filter_tips($format->format, FALSE)]);
   $output .= '</div>';
   return $output;
 }
@@ -78,44 +78,44 @@ function theme_filter_guidelines($variables) {
 function theme_filter_admin_overview($variables) {
   $form = $variables['form'];
 
-  $rows = array();
+  $rows = [];
   $first_disabled_row = TRUE;
   foreach (element_children($form['formats']) as $id) {
-    $form['formats'][$id]['weight']['#attributes']['class'] = array('text-format-order-weight');
-    $row = array(
-      'data' => array(
+    $form['formats'][$id]['weight']['#attributes']['class'] = ['text-format-order-weight'];
+    $row = [
+      'data' => [
         backdrop_render($form['formats'][$id]['name']),
         backdrop_render($form['formats'][$id]['editor']),
         backdrop_render($form['formats'][$id]['roles']),
         backdrop_render($form['formats'][$id]['weight']),
         backdrop_render($form['formats'][$id]['operations']),
-      ),
-    );
+      ],
+    ];
     if ($form['formats'][$id]['#status']) {
-      $row['class'] = array('draggable', 'enabled');
+      $row['class'] = ['draggable', 'enabled'];
     }
     else {
       // Add a heading above the first disabled row.
       if ($first_disabled_row) {
         $first_disabled_row = FALSE;
         // Create a row that spans all columns.
-        $rows[] = array(
-          'data' => array(
-            array(
+        $rows[] = [
+          'data' => [
+            [
               'data' => t('Disabled'),
               'colspan' => 5,
               'header' => TRUE,
-            ),
-          ),
-        );
+            ],
+          ],
+        ];
       }
-      $row['class'] = array('disabled');
+      $row['class'] = ['disabled'];
     }
     $rows[] = $row;
   }
-  $header = array(t('Name'), t('Editor'), t('Roles'), t('Weight'), t('Operations'));
+  $header = [t('Name'), t('Editor'), t('Roles'), t('Weight'), t('Operations')];
   $output = backdrop_render($form['help']);
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'text-format-order')));
+  $output .= theme('table', ['header' => $header, 'rows' => $rows, 'attributes' => ['id' => 'text-format-order']]);
   $output .= backdrop_render_children($form);
 
   backdrop_add_tabledrag('text-format-order', 'order', 'sibling', 'text-format-order-weight');
@@ -136,24 +136,24 @@ function theme_filter_admin_format_filter_order($variables) {
   $element = $variables['element'];
 
   // Filter order (tabledrag).
-  $rows = array();
+  $rows = [];
   foreach (element_children($element, TRUE) as $name) {
     $element[$name]['weight']['#attributes']['class'][] = 'filter-order-weight';
     $row_class =  $element[$name]['status']['#default_value'] ? 'draggable' : 'draggable disabled-row';
 
-    $rows[] = array(
-      'data' => array(
+    $rows[] = [
+      'data' => [
         backdrop_render($element[$name]['filter']),
         backdrop_render($element[$name]['status']),
         backdrop_render($element[$name]['configure_button']),
         backdrop_render($element[$name]['weight']),
-      ),
-      'class' => array($row_class),
-    );
+      ],
+      'class' => [$row_class],
+    ];
   }
   $output = backdrop_render_children($element);
-  $header = array(t('Filter'), t('Enabled'), t('Configure'), '');
-  $output .= theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'filter-order')));
+  $header = [t('Filter'), t('Enabled'), t('Configure'), ''];
+  $output .= theme('table', ['header' => $header, 'rows' => $rows, 'attributes' => ['id' => 'filter-order']]);
   backdrop_add_tabledrag('filter-order', 'order', 'sibling', 'filter-order-weight', NULL, NULL, TRUE);
 
   return $output;

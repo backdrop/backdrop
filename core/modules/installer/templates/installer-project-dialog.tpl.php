@@ -17,7 +17,7 @@
  * @see installer_browser_preprocess_installer_browser_project().
  */
 
-$classes = array('project-item');
+$classes = ['project-item'];
 if ($image) {
   $classes[] = 'has-image';
 }

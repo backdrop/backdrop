@@ -113,12 +113,12 @@ function field_available_languages($entity_type, $field) {
     if (field_is_translatable($entity_type, $field)) {
       $languages = field_content_languages();
       // Let other modules alter the available languages.
-      $context = array('entity_type' => $entity_type, 'field' => $field);
+      $context = ['entity_type' => $entity_type, 'field' => $field];
       backdrop_alter('field_available_languages', $languages, $context);
       $field_languages[$entity_type][$field_name] = $languages;
     }
     else {
-      $field_languages[$entity_type][$field_name] = array(LANGUAGE_NONE);
+      $field_languages[$entity_type][$field_name] = [LANGUAGE_NONE];
     }
   }
 
@@ -152,7 +152,7 @@ function _field_language_suggestion($available_languages, $language_suggestion, 
     // If we have a language suggestion and the suggested language is available,
     // we return only it.
     if (in_array($language_suggestion, $available_languages)) {
-      $available_languages = array($language_suggestion);
+      $available_languages = [$language_suggestion];
     }
   }
 
@@ -168,7 +168,7 @@ function _field_language_suggestion($available_languages, $language_suggestion, 
  *   An array of language codes.
  */
 function field_content_languages() {
-  return array_keys(language_list() + array(LANGUAGE_NONE => NULL));
+  return array_keys(language_list() + [LANGUAGE_NONE => NULL]);
 }
 
 /**
@@ -277,12 +277,12 @@ function field_valid_language($langcode, $default = TRUE) {
  *   keyed by field name otherwise.
  */
 function field_language($entity_type, $entity, $field_name = NULL, $langcode = NULL) {
-  $display_languages = &backdrop_static(__FUNCTION__, array());
+  $display_languages = &backdrop_static(__FUNCTION__, []);
   list($id, , $bundle) = entity_extract_ids($entity_type, $entity);
   $langcode = field_valid_language($langcode, FALSE);
 
   if (!isset($display_languages[$entity_type][$id][$langcode])) {
-    $display_language = array();
+    $display_language = [];
 
     // By default display language is set to LANGUAGE_NONE if the field
     // translation is not available. It is up to translation handlers to
@@ -292,11 +292,11 @@ function field_language($entity_type, $entity, $field_name = NULL, $langcode = N
     }
 
     if (field_has_translation_handler($entity_type)) {
-      $context = array(
+      $context = [
         'entity_type' => $entity_type,
         'entity' => $entity,
         'language' => $langcode,
-      );
+      ];
       backdrop_alter('field_language', $display_language, $context);
     }
 

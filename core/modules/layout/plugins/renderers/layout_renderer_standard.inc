@@ -53,7 +53,7 @@ class LayoutRendererStandard {
    *
    * @var array
    */
-  var $rendered = array();
+  var $rendered = [];
 
   /**
    * A multilevel array of data prepared for rendering. The first level of the
@@ -67,7 +67,7 @@ class LayoutRendererStandard {
    *
    * @var array
    */
-  var $prepared = array();
+  var $prepared = [];
 
   /**
    * Boolean state variable, indicating whether or not the prepare() method has
@@ -159,7 +159,7 @@ class LayoutRendererStandard {
     $this->layout = &$layout;
 
     if (empty($layout_template_info)) {
-      throw new LayoutMissingException(t('The layout plugin "@plugin" could not been found to display the "@title" layout.', array('@plugin' => $layout->layout_template, '@title' => $layout->title)));
+      throw new LayoutMissingException(t('The layout plugin "@plugin" could not been found to display the "@title" layout.', ['@plugin' => $layout->layout_template, '@title' => $layout->title]));
     }
     else {
       $this->layout_template_info = $layout_template_info;
@@ -216,7 +216,7 @@ class LayoutRendererStandard {
    */
   function prepareBlocks(array $blocks) {
     // Use local variables as writing to them is very slightly faster
-    $first = $normal = $last = array();
+    $first = $normal = $last = [];
 
     // Prepare the list of blocks to be rendered
     foreach ($blocks as $uuid => $block) {
@@ -313,16 +313,16 @@ class LayoutRendererStandard {
   function prepareRegions(array $region_block_list, array $settings) {
     // Initialize defaults to be used for regions without their own explicit
     // settings. Use display settings if they exist, else hardcoded defaults.
-    $default = array(
+    $default = [
       'style' => !empty($settings['style']) ? $settings['style'] : 'default',
-      'style settings' => isset($settings['style_settings']['default']) ? $settings['style_settings']['default'] : array(),
-    );
-    $regions = array();
+      'style settings' => isset($settings['style_settings']['default']) ? $settings['style_settings']['default'] : [],
+    ];
+    $regions = [];
     if (empty($settings)) {
       // No region settings exist, init all with the defaults.
       foreach ($this->layout_template_info['regions'] as $region_id => $title) {
         // Ensure this region has at least an empty block array.
-        $blocks = array();
+        $blocks = [];
         if (isset($region_block_list[$region_id])) {
           $blocks = $region_block_list[$region_id];
         }
@@ -335,7 +335,7 @@ class LayoutRendererStandard {
       // Some settings exist; iterate through each region and set individually.
       foreach ($this->layout_template_info['regions'] as $region_id => $title) {
         // Ensure this region has at least an empty blocks array.
-        $blocks = !empty($region_block_list[$region_id]) ? $region_block_list[$region_id] : array();
+        $blocks = !empty($region_block_list[$region_id]) ? $region_block_list[$region_id] : [];
 
         if (empty($settings[$region_id]['style']) || $settings[$region_id]['style'] == -1) {
           $regions[$region_id] = $default;
@@ -344,7 +344,7 @@ class LayoutRendererStandard {
           $regions[$region_id]['style'] = $settings[$region_id]['style'];
         }
 
-        $regions[$region_id]['style settings'] = isset($settings[$region_id]) ? $settings[$region_id] : array();
+        $regions[$region_id]['style settings'] = isset($settings[$region_id]) ? $settings[$region_id] : [];
         $regions[$region_id]['uuids'] = $blocks;
       }
     }
@@ -401,7 +401,7 @@ class LayoutRendererStandard {
     else {
       $theme = str_replace('-', '_', $this->layout_template_info['template']);
     }
-    $this->rendered['layout'] = theme($theme, array('content' => $this->rendered['regions'], 'settings' => $this->layout->settings, 'layout' => $this->layout, 'layout_info' => $this->layout_template_info, 'renderer' => $this, 'admin' => $this->admin));
+    $this->rendered['layout'] = theme($theme, ['content' => $this->rendered['regions'], 'settings' => $this->layout->settings, 'layout' => $this->layout, 'layout_info' => $this->layout_template_info, 'renderer' => $this, 'admin' => $this->admin]);
     return $this->prefix . $this->rendered['layout'] . $this->suffix;
   }
 
@@ -415,7 +415,7 @@ class LayoutRendererStandard {
     if (!empty($this->layout_template_info['stylesheets'])) {
       foreach ($this->layout_template_info['stylesheets'] as $media => $file_names) {
         foreach ($file_names as $file_name) {
-          $this->addCss($this->layout_template_info['path'] . '/' . $file_name, array('media' => $media));
+          $this->addCss($this->layout_template_info['path'] . '/' . $file_name, ['media' => $media]);
         }
       }
     }
@@ -438,7 +438,7 @@ class LayoutRendererStandard {
    *
    * @see backdrop_add_css
    */
-  function addCss($filename, $options = array()) {
+  function addCss($filename, $options = []) {
     switch ($this->meta_location) {
       case 'standard':
         backdrop_add_css($filename, $options);
@@ -465,7 +465,7 @@ class LayoutRendererStandard {
    *   The array of rendered blocks, keyed on block UUID.
    */
   function renderBlocks() {
-    $this->rendered['blocks'] = array();
+    $this->rendered['blocks'] = [];
 
     // Do a pass through all blocks to check for the main system content block.
     // This serves a dual-purpose of rendering the system block first, allowing
@@ -480,7 +480,7 @@ class LayoutRendererStandard {
         // page will generate its own replacement content.
         if ($response_code === MENU_NOT_FOUND || $response_code === MENU_ACCESS_DENIED) {
           $this->menu_response = $response_code;
-          return array();
+          return [];
         }
       }
     }
@@ -525,13 +525,13 @@ class LayoutRendererStandard {
 
       // Ensure block content is a renderable array for contextual links.
       if (is_string($content)) {
-        $content = array(
+        $content = [
           '#markup' => $content,
-        );
+        ];
       }
       // Add the contextual links.
       if (!($block->module === 'system' && $block->delta === 'main')) {
-        $content['#contextual_links']['layout'] = array('admin/structure/layouts/manage/' . $this->layout->name . '/modal', array($block->uuid));
+        $content['#contextual_links']['layout'] = ['admin/structure/layouts/manage/' . $this->layout->name . '/modal', [$block->uuid]];
       }
 
       $title = '';
@@ -539,26 +539,26 @@ class LayoutRendererStandard {
         $title = $block->getTitle();
       }
 
-      $data = array(
+      $data = [
         'title' => $title,
         'content' => $content,
-      );
+      ];
 
       // Allow altering of the title and content by other modules.
-      backdrop_alter(array('block_view', 'block_view_' . $block->module . '_' . str_replace('-', '_', $block->delta)), $data, $block);
+      backdrop_alter(['block_view', 'block_view_' . $block->module . '_' . str_replace('-', '_', $block->delta)], $data, $block);
 
       // Assemble a structured content array.
-      $content = (object) array(
+      $content = (object) [
         'title' => $data['title'],
         'content' => $data['content'],
-      );
+      ];
 
       if (isset($style) && isset($style['block theme'])) {
-        $output = theme($style['block theme'] . '__' . $block->module . '__' . strtr($block->delta, '-', '_'), array('content' => $content, 'layout' => $this->layout, 'block' => $block, 'style' => $style, 'settings' => $block->style->settings));
+        $output = theme($style['block theme'] . '__' . $block->module . '__' . strtr($block->delta, '-', '_'), ['content' => $content, 'layout' => $this->layout, 'block' => $block, 'style' => $style, 'settings' => $block->style->settings]);
       }
       else {
         // Fallback.
-        $output = theme('block', array('content' => $content, 'layout' => $this->layout, 'block' => $block));
+        $output = theme('block', ['content' => $content, 'layout' => $this->layout, 'block' => $block]);
       }
     }
     return $output;
@@ -572,13 +572,13 @@ class LayoutRendererStandard {
    *   An array of rendered layout regions, keyed on the region name.
    */
   function renderRegions() {
-    $this->rendered['regions'] = array();
+    $this->rendered['regions'] = [];
 
     // Loop through all layout regions, put all blocks that belong to the
     // current region in an array, then render the region. Primarily this
     // ensures that the blocks are arranged in the proper order.
     foreach ($this->prepared['regions'] as $region_id => $conf) {
-      $region_blocks = array();
+      $region_blocks = [];
       foreach ($conf['uuids'] as $uuid) {
         // Only include blocks for region rendering if they had some output.
         if (!empty($this->rendered['blocks'][$uuid])) {
@@ -609,16 +609,16 @@ class LayoutRendererStandard {
   function renderRegion($region_id, $blocks) {
     $style_settings = $this->prepared['regions'][$region_id]['style settings'];
     $tag = isset($style_settings['element']) ? $style_settings['element'] : '';
-    $classes = array();
+    $classes = [];
     if (isset($style_settings['classes'])) {
       $classes = explode(' ', $style_settings['classes']);
       foreach ($classes as $n => $class) {
-        $classes[$n] = backdrop_clean_css_identifier($class, array());
+        $classes[$n] = backdrop_clean_css_identifier($class, []);
       }
       $classes = array_filter($classes);
     }
 
-    return theme('layout_region_inner', array('blocks' => $blocks, 'tag' => $tag, 'classes' => $classes));
+    return theme('layout_region_inner', ['blocks' => $blocks, 'tag' => $tag, 'classes' => $classes]);
   }
 
   /**
@@ -650,7 +650,7 @@ class LayoutRendererStandard {
 
     // Add the page content block to the default region in the first position.
     if (!isset($this->layout->positions[$default_region])) {
-      $this->layout->positions[$default_region] = array();
+      $this->layout->positions[$default_region] = [];
     }
     if (!in_array($page_content_uuid, $this->layout->positions[$default_region])) {
       array_unshift($this->layout->positions[$default_region], $page_content_uuid);

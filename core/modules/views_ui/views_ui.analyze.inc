@@ -32,13 +32,13 @@ function views_ui_analyze_view(&$view) {
  */
 function views_ui_analyze_format_result($view, $messages) {
   if (empty($messages)) {
-    $messages = array(views_ui_analysis(t('View analysis can find nothing to report.'), 'ok'));
+    $messages = [views_ui_analysis(t('View analysis can find nothing to report.'), 'ok')];
   }
 
-  $types = array('ok' => array(), 'warning' => array(), 'error' => array());
+  $types = ['ok' => [], 'warning' => [], 'error' => []];
   foreach ($messages as $message) {
     if (empty($types[$message['type']])) {
-      $types[$message['type']] = array();
+      $types[$message['type']] = [];
     }
     $types[$message['type']][] = $message['message'];
   }
@@ -48,7 +48,7 @@ function views_ui_analyze_format_result($view, $messages) {
     $type .= ' messages';
     $message = '';
     if (count($messages) > 1) {
-      $message = theme('item_list', array('items' => $messages));
+      $message = theme('item_list', ['items' => $messages]);
     }
     elseif ($messages) {
       $message = array_shift($messages);
@@ -87,7 +87,7 @@ function views_ui_analyze_format_result($view, $messages) {
  *   An array containing the message.
  */
 function views_ui_analysis($message, $type = 'error') {
-  return array('message' => $message, 'type' => $type);
+  return ['message' => $message, 'type' => $type];
 }
 
 /**
@@ -98,7 +98,7 @@ function views_ui_analysis($message, $type = 'error') {
  * node.views.inc as well.
  */
 function views_ui_views_analyze($view) {
-  $ret = array();
+  $ret = [];
   // Check for something other than the default display:
   if (count($view->display) < 2) {
     $ret[] = views_ui_analysis(t('This view has only a default display and therefore will not be placed anywhere on your site; perhaps you want to add a page or a block display.'), 'warning');
@@ -113,7 +113,7 @@ function views_ui_views_analyze($view) {
     if ($display->handler->has_path() && $path = $display->handler->get_option('path')) {
       $normal_path = backdrop_get_normal_path($path);
       if ($path != $normal_path) {
-        $ret[] = views_ui_analysis(t('You have configured display %display with a path which is a URL alias as well. This might lead to unwanted effects so better use an internal path.', array('%display' => $display->display_title)), 'warning');
+        $ret[] = views_ui_analysis(t('You have configured display %display with a path which is a URL alias as well. This might lead to unwanted effects so better use an internal path.', ['%display' => $display->display_title]), 'warning');
       }
     }
   }

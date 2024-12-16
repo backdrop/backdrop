@@ -11,9 +11,9 @@ class DashboardCreateBlock extends Block {
     parent::__construct($plugin_name, $data);
 
     // Set defaults.
-    $this->settings += array(
-      'types' => array(),
-    );
+    $this->settings += [
+      'types' => [],
+    ];
   }
 
   /**
@@ -51,7 +51,7 @@ class DashboardCreateBlock extends Block {
   function getContent() {
     $node_types = node_type_get_types();
     $no_access = TRUE;
-    $create = array();
+    $create = [];
 
     foreach ($node_types as $machine => $node_type) {
       // If enabled or all types are enabled.
@@ -59,7 +59,7 @@ class DashboardCreateBlock extends Block {
         // Check access, then add a link to create content.
         if (node_access('create', $machine)) {
           $type_url_str = str_replace('_', '-', $node_type->type);
-          $create[] = l(t('Add new @type', array('@type' => t($node_type->name))), 'node/add/' . $type_url_str, array('html' => TRUE));
+          $create[] = l(t('Add new @type', ['@type' => t($node_type->name)]), 'node/add/' . $type_url_str, ['html' => TRUE]);
           $no_access = FALSE;
         }
       }
@@ -68,23 +68,23 @@ class DashboardCreateBlock extends Block {
     // If there are existing content types, but user has no access to create any
     // of them, hide the block completely.
     if ($no_access) {
-      return array();
+      return [];
     }
 
-    $build = array(
+    $build = [
       '#theme' => 'dashboard_panel__create',
-    );
+    ];
     if (empty($create)) {
-      $build['list'] = array(
+      $build['list'] = [
         '#type' => 'markup',
         '#markup' => t('No content types have been configured yet.'),
-      );
+      ];
     }
     else {
-      $build['list'] = array(
+      $build['list'] = [
         '#theme' => 'item_list',
         '#items' => $create,
-      );
+      ];
     }
 
     return $build;
@@ -101,13 +101,13 @@ class DashboardCreateBlock extends Block {
       $options[$machine_name] = check_plain(t($type_label));
     }
 
-    $form['types'] = array(
+    $form['types'] = [
       '#type' => 'checkboxes',
       '#title' => t('Display links to create content of the following types'),
       '#options' => $options,
       // All types are enabled if types is an empty array.
       '#default_value' => $this->settings['types'] ? $this->settings['types'] : array_keys($options),
-    );
+    ];
   }
 
   /**
@@ -119,7 +119,7 @@ class DashboardCreateBlock extends Block {
     // If all types are checked, save nothing, indicating all types are allowed.
     $checked_types = array_filter($form_state['values']['types']);
     if (count($form['types']['#options']) === count($checked_types)) {
-      $this->settings['types'] = array();
+      $this->settings['types'] = [];
     }
     else {
       $this->settings['types'] = array_values($checked_types);

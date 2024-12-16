@@ -35,54 +35,54 @@ function date_views_plugins() {
   $path = backdrop_get_path('module', 'date');
   module_load_include('inc', 'date', 'date.theme');
 
-  return array(
+  return [
     'module' => 'date',
-    'pager' => array(
-      'date_views_pager' => array(
+    'pager' => [
+      'date_views_pager' => [
         'title' => t('Page by date'),
         'help' => t('Page using the value of a date field.'),
         'handler' => 'date_views_plugin_pager',
         'path' => "$path/includes",
         'help topic' => 'date-views-pager',
         'uses options' => TRUE,
-      ),
-    ),
-  );
+      ],
+    ],
+  ];
 }
 
 /**
  * Implements hook_views_data().
  */
 function date_views_data() {
-  $data = array();
+  $data = [];
 
   $tables = date_views_base_tables();
 
   foreach ($tables as $base_table => $entity) {
     // The flexible date argument.
-    $data[$base_table]['date_argument'] = array(
+    $data[$base_table]['date_argument'] = [
       'group' => t('Date'),
-      'title' => t('Date (!base_table)', array('!base_table' => $base_table)),
-      'help' => t('Filter any Views !base_table date field by a date argument, using any common ISO date/period format (i.e. YYYY, YYYY-MM, YYYY-MM-DD, YYYY-W99, YYYY-MM-DD--P3M, P90D, etc).', array('!base_table' => $base_table)),
-      'argument' => array(
+      'title' => t('Date (!base_table)', ['!base_table' => $base_table]),
+      'help' => t('Filter any Views !base_table date field by a date argument, using any common ISO date/period format (i.e. YYYY, YYYY-MM, YYYY-MM-DD, YYYY-W99, YYYY-MM-DD--P3M, P90D, etc).', ['!base_table' => $base_table]),
+      'argument' => [
         'handler' => 'date_views_argument_handler',
         'empty field name' => t('Undated'),
         'is date' => TRUE,
         // 'skip base' => $base_table,
-      ),
-    );
+      ],
+    ];
     // The flexible date filter.
-    $data[$base_table]['date_filter'] = array(
+    $data[$base_table]['date_filter'] = [
       'group' => t('Date'),
-      'title' => t('Date (!base_table)', array('!base_table' => $base_table)),
-      'help' => t('Filter any Views !base_table date field.', array('!base_table' => $base_table)),
-      'filter' => array(
+      'title' => t('Date (!base_table)', ['!base_table' => $base_table]),
+      'help' => t('Filter any Views !base_table date field.', ['!base_table' => $base_table]),
+      'filter' => [
         'handler' => 'date_views_filter_handler',
         'empty field name' => t('Undated'),
         'is date' => TRUE,
         // 'skip base' => $base_table,
-      ),
-    );
+      ],
+    ];
   }
 
   return $data;
@@ -98,7 +98,7 @@ function date_views_data_alter(&$data) {
   // will not pick up any that extend those handlers.
   foreach ($data as $base_table => &$table) {
     foreach ($table as $id => &$field) {
-      foreach (array('field', 'sort', 'filter', 'argument') as $type) {
+      foreach (['field', 'sort', 'filter', 'argument'] as $type) {
         if (isset($field[$type]) && isset($field[$type]['handler']) && ($field[$type]['handler'] == 'views_handler_' . $type . '_date')) {
           $field[$type]['is date'] = TRUE;
         }
@@ -156,7 +156,7 @@ function date_views_set_timezone(&$date_handler, &$view, $field) {
  * @return null/string
  *   Return a query or NULL.
  */
-function date_views_querystring($view, $extra_params = array()) {
+function date_views_querystring($view, $extra_params = []) {
   $query_params = array_merge($_GET, $extra_params);
   // Allow NULL params to be removed from the query string.
   foreach ($extra_params as $key => $value) {
@@ -165,7 +165,7 @@ function date_views_querystring($view, $extra_params = array()) {
     }
   }
   // Filter the special "q" and "view" variables out of the query string.
-  $exclude = array('q');
+  $exclude = ['q'];
   // If we don't explicitly add a value for "view", filter it out.
   if (empty($extra_params['view'])) {
     $exclude[] = 'view';
@@ -199,7 +199,7 @@ function date_views_querystring($view, $extra_params = array()) {
  *   $entity_type = $table_data['table']['base']['entity type'];
  */
 function date_views_base_tables() {
-  $base_tables = &backdrop_static(__FILE__, array());
+  $base_tables = &backdrop_static(__FILE__, []);
 
   if (empty($base_tables)) {
 
@@ -307,18 +307,18 @@ function date_pager_url($view, $date_type = NULL, $date_arg = NULL, $force_view_
     $url = $args[$pos];
     $key = date_block_identifier($view);
     if (!empty($key)) {
-      return url($_GET['q'], array(
-        'query' => date_views_querystring($view, array($key => $url)),
-        'absolute' => $absolute));
+      return url($_GET['q'], [
+        'query' => date_views_querystring($view, [$key => $url]),
+        'absolute' => $absolute]);
     }
   }
 
   // Normal views may need query strings appended to them if they use exposed
   // filters.
-  return url($view->get_url($args), array(
+  return url($view->get_url($args), [
     'query' => date_views_querystring($view),
     'absolute' => $absolute,
-    )
+    ]
   );
 }
 

@@ -112,21 +112,21 @@ function _unicode_check() {
 
   // Check for mbstring extension
   if (!function_exists('mb_strlen')) {
-    return array(UNICODE_SINGLEBYTE, $t('Operations on Unicode strings are emulated on a best-effort basis. Install the <a href="@url">PHP mbstring extension</a> for improved Unicode support.', array('@url' => 'http://www.php.net/mbstring')));
+    return [UNICODE_SINGLEBYTE, $t('Operations on Unicode strings are emulated on a best-effort basis. Install the <a href="@url">PHP mbstring extension</a> for improved Unicode support.', ['@url' => 'http://www.php.net/mbstring'])];
   }
 
   // Check mbstring configuration
   if (ini_get('mbstring.func_overload') != 0) {
-    return array(UNICODE_ERROR, $t('Multibyte string function overloading in PHP is active and must be disabled. Check the php.ini <em>mbstring.func_overload</em> setting. Please refer to the <a href="@url">PHP mbstring documentation</a> for more information.', array('@url' => 'http://www.php.net/mbstring')));
+    return [UNICODE_ERROR, $t('Multibyte string function overloading in PHP is active and must be disabled. Check the php.ini <em>mbstring.func_overload</em> setting. Please refer to the <a href="@url">PHP mbstring documentation</a> for more information.', ['@url' => 'http://www.php.net/mbstring'])];
   }
   if (ini_get('mbstring.encoding_translation') != 0) {
-    return array(UNICODE_ERROR, $t('Multibyte string input conversion in PHP is active and must be disabled. Check the php.ini <em>mbstring.encoding_translation</em> setting. Please refer to the <a href="@url">PHP mbstring documentation</a> for more information.', array('@url' => 'http://www.php.net/mbstring')));
+    return [UNICODE_ERROR, $t('Multibyte string input conversion in PHP is active and must be disabled. Check the php.ini <em>mbstring.encoding_translation</em> setting. Please refer to the <a href="@url">PHP mbstring documentation</a> for more information.', ['@url' => 'http://www.php.net/mbstring'])];
   }
 
   // Set appropriate configuration
   mb_internal_encoding('utf-8');
   mb_language('uni');
-  return array(UNICODE_MULTIBYTE, '');
+  return [UNICODE_MULTIBYTE, ''];
 }
 
 /**
@@ -136,22 +136,22 @@ function unicode_requirements() {
   // Ensure translations don't break during installation.
   $t = get_t();
 
-  $libraries = array(
+  $libraries = [
     UNICODE_SINGLEBYTE => $t('Standard PHP'),
     UNICODE_MULTIBYTE => $t('PHP Mbstring Extension'),
     UNICODE_ERROR => $t('Error'),
-  );
-  $severities = array(
+  ];
+  $severities = [
     UNICODE_SINGLEBYTE => REQUIREMENT_WARNING,
     UNICODE_MULTIBYTE => REQUIREMENT_OK,
     UNICODE_ERROR => REQUIREMENT_ERROR,
-  );
+  ];
   list($library, $description) = _unicode_check();
 
-  $requirements['unicode'] = array(
+  $requirements['unicode'] = [
     'title' => $t('Unicode library'),
     'value' => $libraries[$library],
-  );
+  ];
   if ($description) {
     $requirements['unicode']['description'] = $description;
   }
@@ -199,7 +199,7 @@ function backdrop_xml_parser_create(&$data) {
   }
 
   // Unsupported encodings are converted here into UTF-8.
-  $php_supported = array('utf-8', 'iso-8859-1', 'us-ascii');
+  $php_supported = ['utf-8', 'iso-8859-1', 'us-ascii'];
   if (!in_array(strtolower($encoding), $php_supported)) {
     $out = backdrop_convert_to_utf8($data, $encoding);
     if ($out !== FALSE) {
@@ -207,7 +207,7 @@ function backdrop_xml_parser_create(&$data) {
       $data = preg_replace('/^(<\?xml[^>]+encoding)="(.+?)"/', '\\1="utf-8"', $out);
     }
     else {
-      watchdog('php', 'Could not convert XML encoding %s to UTF-8.', array('%s' => $encoding), WATCHDOG_WARNING);
+      watchdog('php', 'Could not convert XML encoding %s to UTF-8.', ['%s' => $encoding], WATCHDOG_WARNING);
       return FALSE;
     }
   }
@@ -241,7 +241,7 @@ function backdrop_convert_to_utf8($data, $encoding) {
     $out = @recode_string($encoding . '..utf-8', $data);
   }
   else {
-    watchdog('php', 'Unsupported encoding %s. Please install iconv, GNU recode or mbstring for PHP.', array('%s' => $encoding), WATCHDOG_ERROR);
+    watchdog('php', 'Unsupported encoding %s. Please install iconv, GNU recode or mbstring for PHP.', ['%s' => $encoding], WATCHDOG_ERROR);
     return FALSE;
   }
 
@@ -339,7 +339,7 @@ function truncate_utf8($string, $max_length, $wordsafe = FALSE, $add_ellipsis = 
   }
 
   if ($wordsafe) {
-    $matches = array();
+    $matches = [];
     // Find the last word boundary, if there is one within $min_wordsafe_length
     // to $max_length characters. preg_match() is always greedy, so it will
     // find the longest string possible.

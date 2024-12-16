@@ -14,7 +14,7 @@ class TableSort extends SelectQueryExtender {
    *
    * @var array
    */
-  protected $header = array();
+  protected $header = [];
 
   public function __construct(SelectQueryInterface $query, DatabaseConnection $connection) {
     parent::__construct($query, $connection);

@@ -13,8 +13,8 @@ class views_handler_field_serialized extends views_handler_field {
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['format'] = array('default' => 'unserialized');
-    $options['key'] = array('default' => '');
+    $options['format'] = ['default' => 'unserialized'];
+    $options['key'] = ['default' => ''];
     return $options;
   }
 
@@ -22,27 +22,27 @@ class views_handler_field_serialized extends views_handler_field {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
-    $form['format'] = array(
+    $form['format'] = [
       '#type' => 'select',
       '#title' => t('Display format'),
       '#description' => t('How should the serialized data be displayed. You can choose a custom array/object key or a print_r on the full output.'),
-      '#options' => array(
+      '#options' => [
         'unserialized' => t('Full data (unserialized)'),
         'serialized' => t('Full data (serialized)'),
         'key' => t('A certain key'),
-      ),
+      ],
       '#default_value' => $this->options['format'],
-    );
-    $form['key'] = array(
+    ];
+    $form['key'] = [
       '#type' => 'textfield',
       '#title' => t('Which key should be displayed'),
       '#default_value' => $this->options['key'],
-      '#states' => array(
-        'visible' => array(
-          ':input[name="options[format]"]' => array('value' => 'key'),
-        ),
-      ),
-    );
+      '#states' => [
+        'visible' => [
+          ':input[name="options[format]"]' => ['value' => 'key'],
+        ],
+      ],
+    ];
   }
 
   function options_validate(&$form, &$form_state) {

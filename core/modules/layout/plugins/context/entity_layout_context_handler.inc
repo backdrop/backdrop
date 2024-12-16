@@ -11,11 +11,11 @@ class EntityLayoutContext extends LayoutContext {
    */
   protected $entity_type;
 
-  function __construct($plugin_name, $config = array()) {
+  function __construct($plugin_name, $config = []) {
     parent::__construct($plugin_name, $config);
 
     $this->entity_type = $plugin_name;
-    $this->aliases = array('entity');
+    $this->aliases = ['entity'];
   }
 
   function type() {
@@ -26,10 +26,10 @@ class EntityLayoutContext extends LayoutContext {
     $info = entity_get_info($this->entity_type);
     if (isset($this->settings['id'])) {
       if ($entity = entity_load($this->entity_type, $this->settings['id'])) {
-        return t('@type: @id (@title)', array('@type' => $info['label'], '@id' => $entity->id(), '@title' => $entity->label()));
+        return t('@type: @id (@title)', ['@type' => $info['label'], '@id' => $entity->id(), '@title' => $entity->label()]);
       }
       else {
-        return t('Unknown @type: @id', array('@type' => $info['label'], '@id' =>$this->settings['id']));
+        return t('Unknown @type: @id', ['@type' => $info['label'], '@id' =>$this->settings['id']]);
       }
     }
     if ($this->entity_type === 'user' && isset($this->name) && $this->name === 'current_user') {
@@ -46,8 +46,8 @@ class EntityLayoutContext extends LayoutContext {
     $info = entity_get_info($this->entity_type);
     $input = isset($form_state['handler']->settings['id']) ? $form_state['handler']->settings['id'] : NULL;
     $form_state['input']['id'] = $input;
-    $form['id'] = array(
-      '#title' => t('Enter the ID of a @entity', array('@entity' => $info['label'])),
+    $form['id'] = [
+      '#title' => t('Enter the ID of a @entity', ['@entity' => $info['label']]),
       '#type' => 'number',
       '#default_value' => $input,
       '#step' => 1,
@@ -58,7 +58,7 @@ class EntityLayoutContext extends LayoutContext {
       // rather than just for this code.
       // '#autocomplete_path' => 'node/autocomplete',
       '#weight' => -10,
-    );
+    ];
   }
 
   /**
@@ -70,7 +70,7 @@ class EntityLayoutContext extends LayoutContext {
     }
     elseif (!entity_load($this->entity_type, $form_state['values']['id'])) {
       $info = entity_get_info($this->entity_type);
-      form_set_error('id', t('The selected @entity does not exist.', array('@entity' => $info['label'])));
+      form_set_error('id', t('The selected @entity does not exist.', ['@entity' => $info['label']]));
     }
   }
 
@@ -78,7 +78,7 @@ class EntityLayoutContext extends LayoutContext {
    * Submit handler for the settings form for this context item.
    */
   function formSubmit($form, &$form_state) {
-    $excluded = backdrop_map_assoc(array('cancel', 'submit', 'form_build_id', 'form_token', 'form_id', 'op', 'add', 'context', 'load_context_nojs', 'context_add_button'));
+    $excluded = backdrop_map_assoc(['cancel', 'submit', 'form_build_id', 'form_token', 'form_id', 'op', 'add', 'context', 'load_context_nojs', 'context_add_button']);
     $settings = array_diff_key($form_state['values'], $excluded);
     // This produces config keys for contexts in the format "node1" or "user3".
     $this->name = $this->plugin . $settings['id'];
@@ -94,10 +94,10 @@ class EntityLayoutContext extends LayoutContext {
       $argument_parts = explode('/', $path);
       $argument_parts[$this->position] = '<strong>' . $argument_parts[$this->position] . '</strong>';
 
-      return t('Position @index:', array('@index' => $this->position + 1)) . ' ' . implode('/', $argument_parts);
+      return t('Position @index:', ['@index' => $this->position + 1]) . ' ' . implode('/', $argument_parts);
     }
     else {
-      return t('@entity ID: @id', array('@id' => $this->settings['id'], '@entity' => $info['label']));
+      return t('@entity ID: @id', ['@id' => $this->settings['id'], '@entity' => $info['label']]);
     }
   }
 }

@@ -73,7 +73,7 @@ define('DRUPAL_WEIGHT_SELECT_MAX', 100);
  * @deprecated since 1.0.0
  * @see backdrop_override_server_variables()
  */
-function drupal_override_server_variables($variables = array()) {
+function drupal_override_server_variables($variables = []) {
   backdrop_override_server_variables($variables);
 }
 
@@ -173,7 +173,7 @@ function drupal_get_http_header($name = NULL) {
  * @deprecated since 1.0.0
  * @see backdrop_send_headers()
  */
-function drupal_send_headers($default_headers = array(), $only_default = FALSE) {
+function drupal_send_headers($default_headers = [], $only_default = FALSE) {
   backdrop_send_headers($default_headers, $only_default);
 }
 
@@ -596,7 +596,7 @@ function drupal_get_feeds($delimiter = "\n") {
  * @deprecated since 1.0.0
  * @see backdrop_get_query_parameters()
  */
-function drupal_get_query_parameters(array $query = NULL, array $exclude = array('q'), $parent = '') {
+function drupal_get_query_parameters(array $query = NULL, array $exclude = ['q'], $parent = '') {
   return backdrop_get_query_parameters($query, $exclude, $parent);
 }
 
@@ -656,7 +656,7 @@ function drupal_encode_path($path) {
  * @deprecated since 1.0.0
  * @see backdrop_goto()
  */
-function drupal_goto($path = '', array $options = array(), $http_response_code = 302) {
+function drupal_goto($path = '', array $options = [], $http_response_code = 302) {
   backdrop_goto($path, $options, $http_response_code);
 }
 
@@ -696,7 +696,7 @@ function drupal_access_denied() {
  * @deprecated since 1.0.0
  * @see backdrop_http_request()
  */
-function drupal_http_request($url, array $options = array()) {
+function drupal_http_request($url, array $options = []) {
   return backdrop_http_request($url, $options);
 }
 
@@ -716,7 +716,7 @@ function drupal_strip_dangerous_protocols($uri) {
  * @deprecated since 1.0.0
  * @see backdrop_http_header_attributes()
  */
-function drupal_http_header_attributes(array $attributes = array()) {
+function drupal_http_header_attributes(array $attributes = []) {
   return backdrop_http_header_attributes($attributes);
 }
 
@@ -726,7 +726,7 @@ function drupal_http_header_attributes(array $attributes = array()) {
  * @deprecated since 1.0.0
  * @see backdrop_attributes()
  */
-function drupal_attributes(array $attributes = array()) {
+function drupal_attributes(array $attributes = []) {
   return backdrop_attributes($attributes);
 }
 
@@ -916,7 +916,7 @@ function drupal_delete_file_if_stale($uri) {
  * @deprecated since 1.0.0
  * @see backdrop_clean_css_identifier()
  */
-function drupal_clean_css_identifier($identifier, $filter = array(' ' => '-', '_' => '-', '/' => '-', '[' => '-', ']' => '')) {
+function drupal_clean_css_identifier($identifier, $filter = [' ' => '-', '_' => '-', '/' => '-', '[' => '-', ']' => '']) {
   return backdrop_clean_css_identifier($identifier, $filter);
 }
 
@@ -1479,7 +1479,7 @@ function drupal_schema_fields_sql($table, $prefix = NULL) {
  * @deprecated since 1.0.0
  * @see backdrop_write_record()
  */
-function drupal_write_record($table, &$record, $primary_keys = array()) {
+function drupal_write_record($table, &$record, $primary_keys = []) {
   watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_write_record($table, $record, $primary_keys);
 }
@@ -1923,7 +1923,7 @@ function drupal_detect_baseurl($file = 'core/install.php') {
 function drupal_detect_database_types() {
   watchdog_deprecated_function('drupal', __FUNCTION__);
   $installer = backdrop_load_database_driver();
-  return array('mysql' => $installer->name());
+  return ['mysql' => $installer->name()];
 }
 
 /**
@@ -1935,7 +1935,7 @@ function drupal_detect_database_types() {
 function drupal_get_database_types() {
   watchdog_deprecated_function('drupal', __FUNCTION__);
   $mysql = backdrop_load_database_driver();
-  return array('mysql' => $mysql);
+  return ['mysql' => $mysql];
 }
 
 /**
@@ -1944,7 +1944,7 @@ function drupal_get_database_types() {
  * @deprecated since 1.0.0
  * @see backdrop_rewrite_settings()
  */
-function drupal_rewrite_settings($settings = array()) {
+function drupal_rewrite_settings($settings = []) {
   watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_rewrite_settings($settings);
 }
@@ -1977,7 +1977,7 @@ function drupal_install_system() {
  * @deprecated since 1.0.0
  * @see backdrop_uninstall_modules()
  */
-function drupal_uninstall_modules($module_list = array(), $uninstall_dependents = TRUE) {
+function drupal_uninstall_modules($module_list = [], $uninstall_dependents = TRUE) {
   watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_uninstall_modules($module_list, $uninstall_dependents);
 }
@@ -2010,7 +2010,7 @@ function drupal_install_mkdir($file, $mask, $message = TRUE) {
  * @deprecated since 1.0.0
  * @see backdrop_current_script_url()
  */
-function drupal_current_script_url($query = array()) {
+function drupal_current_script_url($query = []) {
   watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_current_script_url($query);
 }
@@ -2067,7 +2067,7 @@ function drupal_check_module($module) {
  * @deprecated since 1.0.0
  * @see backdrop_mail()
  */
-function drupal_mail($module, $key, $to, $language, $params = array(), $from = NULL, $send = TRUE) {
+function drupal_mail($module, $key, $to, $language, $params = [], $from = NULL, $send = TRUE) {
   watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_mail($module, $key, $to, $language, $params, $from, $send);
 }
@@ -2216,7 +2216,7 @@ function drupal_match_path($path, $patterns) {
 // cspell:disable-next-line
 function drupal_path_alias_whitelist_rebuild($source = NULL) {
   watchdog_deprecated_function('drupal', __FUNCTION__);
-  return array();
+  return [];
 }
 
 /**
@@ -2372,7 +2372,7 @@ function drupal_theme_rebuild() {
  * @deprecated since 1.0.0
  * @see backdrop_find_base_themes()
  */
-function drupal_find_base_themes($themes, $key, $used_keys = array()) {
+function drupal_find_base_themes($themes, $key, $used_keys = []) {
   watchdog_deprecated_function('drupal', __FUNCTION__);
   return backdrop_find_base_themes($themes, $key, $used_keys);
 }
@@ -2509,7 +2509,7 @@ function drupal_var_export($var, $prefix = '') {
  * @deprecated since 1.0.0
  */
 function element_validate_integer() {
-  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://docs.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
+  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://docs.backdropcms.org/node/43955', ['attributes' => ['target' => '_blank']]));
 }
 
 /**
@@ -2519,7 +2519,7 @@ function element_validate_integer() {
  * @deprecated since 1.0.0
  */
 function element_validate_integer_positive() {
-  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://docs.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
+  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://docs.backdropcms.org/node/43955', ['attributes' => ['target' => '_blank']]));
 }
 
 /**
@@ -2529,7 +2529,7 @@ function element_validate_integer_positive() {
  * @deprecated since 1.0.0
  */
 function element_validate_number() {
-  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://docs.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
+  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://docs.backdropcms.org/node/43955', ['attributes' => ['target' => '_blank']]));
 }
 
 /**
@@ -2587,7 +2587,7 @@ function system_get_date_types($type = NULL) {
  * @deprecated since 1.0.0
  * @since 1.13.1 Function added.
  */
-function views_clean_css_identifier($identifier, $filter = array(' ' => '-', '/' => '-', '[' => '-', ']' => '')) {
+function views_clean_css_identifier($identifier, $filter = [' ' => '-', '/' => '-', '[' => '-', ']' => '']) {
   watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_clean_css_identifier($identifier, $filter);
 }
@@ -2614,7 +2614,7 @@ function node_get_recent($limit = 10) {
     // Note: this query still ignores unpublished by type permissions.
     // See: https://github.com/backdrop/backdrop-issues/issues/146.
     $own_unpublished = db_query('SELECT nid FROM {node} WHERE uid = :uid AND status = :status',
-      array(':uid' => $GLOBALS['user']->uid, ':status' => NODE_NOT_PUBLISHED))->fetchCol();
+      [':uid' => $GLOBALS['user']->uid, ':status' => NODE_NOT_PUBLISHED])->fetchCol();
     if (user_access('view own unpublished content') && $own_unpublished) {
       $query->condition(db_or()
         ->condition('n.status', NODE_PUBLISHED)
@@ -2627,7 +2627,7 @@ function node_get_recent($limit = 10) {
     }
   }
   $nids = $query
-    ->fields('n', array('nid'))
+    ->fields('n', ['nid'])
     ->orderBy('n.changed', 'DESC')
     ->range(0, $limit)
     ->addTag('node_access')
@@ -2636,7 +2636,7 @@ function node_get_recent($limit = 10) {
 
   $nodes = node_load_multiple($nids);
 
-  return $nodes ? $nodes : array();
+  return $nodes ? $nodes : [];
 }
 
 /**

@@ -19,8 +19,8 @@ class views_handler_field_links extends views_handler_field {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['fields'] = array('default' => array());
-    $options['destination'] = array('default' => TRUE, 'bool' => TRUE);
+    $options['fields'] = ['default' => []];
+    $options['destination'] = ['default' => TRUE, 'bool' => TRUE];
 
     return $options;
   }
@@ -35,26 +35,26 @@ class views_handler_field_links extends views_handler_field {
     $all_fields = $this->view->display_handler->get_field_labels();
     // Offer to include only those fields that follow this one.
     $field_options = array_slice($all_fields, 0, array_search($this->options['id'], array_keys($all_fields)));
-    $form['fields'] = array(
+    $form['fields'] = [
       '#type' => 'checkboxes',
       '#title' => t('Fields'),
       '#description' => t('Fields to be included as links.'),
       '#options' => $field_options,
       '#default_value' => $this->options['fields'],
-    );
-    $form['destination'] = array(
+    ];
+    $form['destination'] = [
       '#type' => 'checkbox',
       '#title' => t('Include destination'),
       '#description' => t('Include a "destination" parameter in the link to return the user to the original view upon completing the action.'),
       '#default_value' => $this->options['destination'],
-    );
+    ];
   }
 
   /**
    * Internal function to get a list of links for this field.
    */
   function get_links() {
-    $links = array();
+    $links = [];
     foreach ($this->options['fields'] as $field) {
       if (empty($this->view->style_plugin->rendered_fields[$this->view->row_index][$field])) {
         continue;
@@ -66,13 +66,13 @@ class views_handler_field_links extends views_handler_field {
       }
       if (!empty($title) && !empty($path)) {
         // Make sure that tokens are replaced for this paths as well.
-        $tokens = $this->get_render_tokens(array());
+        $tokens = $this->get_render_tokens([]);
         $path = strip_tags(decode_entities(strtr($path, $tokens)));
 
-        $links[$field] = array(
+        $links[$field] = [
           'href' => $path,
           'title' => $title,
-        );
+        ];
         if (!empty($this->options['destination'])) {
           $links[$field]['query'] = backdrop_get_destination();
         }
@@ -87,10 +87,10 @@ class views_handler_field_links extends views_handler_field {
   function render($values) {
     $links = $this->get_links();
     if (!empty($links)) {
-      $build = array(
+      $build = [
         '#theme' => 'links',
         '#links' => $links,
-      );
+      ];
       return backdrop_render($build);
     }
     else {

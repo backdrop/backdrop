@@ -15,41 +15,41 @@ class FileTransferLocal extends FileTransfer implements FileTransferChmodInterfa
 
   protected function copyFileJailed($source, $destination) {
     if (@!copy($source, $destination)) {
-      throw new FileTransferException('Cannot copy %source to %destination.', NULL, array('%source' => $source, '%destination' => $destination));
+      throw new FileTransferException('Cannot copy %source to %destination.', NULL, ['%source' => $source, '%destination' => $destination]);
     }
   }
 
   protected function createDirectoryJailed($directory) {
     if (!is_dir($directory) && @!mkdir($directory, 0777, TRUE)) {
-      throw new FileTransferException('Cannot create directory %directory.', NULL, array('%directory' => $directory));
+      throw new FileTransferException('Cannot create directory %directory.', NULL, ['%directory' => $directory]);
     }
   }
 
   protected function removeDirectoryJailed($directory) {
     if (!is_dir($directory)) {
       // Programmer error assertion, not something we expect users to see.
-      throw new FileTransferException('removeDirectoryJailed() called with a path (%directory) that is not a directory.', NULL, array('%directory' => $directory));
+      throw new FileTransferException('removeDirectoryJailed() called with a path (%directory) that is not a directory.', NULL, ['%directory' => $directory]);
     }
     foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($directory,  FilesystemIterator::SKIP_DOTS ), RecursiveIteratorIterator::CHILD_FIRST) as $filename => $file) {
       if ($file->isDir()) {
         if (@!backdrop_rmdir($filename)) {
-          throw new FileTransferException('Cannot remove directory %directory.', NULL, array('%directory' => $filename));
+          throw new FileTransferException('Cannot remove directory %directory.', NULL, ['%directory' => $filename]);
         }
       }
       elseif ($file->isFile()) {
         if (@!backdrop_unlink($filename)) {
-          throw new FileTransferException('Cannot remove file %file.', NULL, array('%file' => $filename));
+          throw new FileTransferException('Cannot remove file %file.', NULL, ['%file' => $filename]);
         }
       }
     }
     if (@!backdrop_rmdir($directory)) {
-      throw new FileTransferException('Cannot remove directory %directory.', NULL, array('%directory' => $directory));
+      throw new FileTransferException('Cannot remove directory %directory.', NULL, ['%directory' => $directory]);
     }
   }
 
   protected function removeFileJailed($file) {
     if (@!backdrop_unlink($file)) {
-      throw new FileTransferException('Cannot remove file %file.', NULL, array('%file' => $file));
+      throw new FileTransferException('Cannot remove file %file.', NULL, ['%file' => $file]);
     }
   }
 
@@ -65,12 +65,12 @@ class FileTransferLocal extends FileTransfer implements FileTransferChmodInterfa
     if ($recursive && is_dir($path)) {
       foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path, FilesystemIterator::SKIP_DOTS), RecursiveIteratorIterator::SELF_FIRST) as $filename => $file) {
         if (@!chmod($filename, $mode)) {
-          throw new FileTransferException('Cannot chmod %path.', NULL, array('%path' => $filename));
+          throw new FileTransferException('Cannot chmod %path.', NULL, ['%path' => $filename]);
         }
       }
     }
     elseif (@!chmod($path, $mode)) {
-      throw new FileTransferException('Cannot chmod %path.', NULL, array('%path' => $path));
+      throw new FileTransferException('Cannot chmod %path.', NULL, ['%path' => $path]);
     }
   }
 }

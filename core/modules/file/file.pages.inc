@@ -14,44 +14,44 @@
  * - Edit scheme
  * - Edit fields (Skip this step if there are no fields on this entity type.)
  */
-function file_add_form($form, &$form_state, $options = array()) {
+function file_add_form($form, &$form_state, $options = []) {
   if (!is_array($options)) {
-    $options = array($options);
+    $options = [$options];
   }
-  $step = (isset($form_state['step']) && in_array($form_state['step'], array(1, 2, 3, 4))) ? $form_state['step'] : 1;
+  $step = (isset($form_state['step']) && in_array($form_state['step'], [1, 2, 3, 4])) ? $form_state['step'] : 1;
 
   $form['#step'] = $step;
-  $form['#options'] = $options + array(
-    'types' => array(),
-    'enabledPlugins' => array(),
-    'schemes' => array(),
+  $form['#options'] = $options + [
+    'types' => [],
+    'enabledPlugins' => [],
+    'schemes' => [],
     'max_filesize' => '',
     'uri_scheme' => 'public',
-  );
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['cancel'] = array(
+  ];
+  $form['actions'] = ['#type' => 'actions'];
+  $form['actions']['cancel'] = [
     '#type' => 'link',
     '#title' => t('Cancel'),
     '#href' => 'admin/content/files',
     '#weight' => 15,
-  );
+  ];
 
   switch ($step) {
     case 1:
-      $form['upload'] = array(
+      $form['upload'] = [
         '#type' => 'managed_file',
         '#title' => t('Upload a new file'),
         '#upload_location' => file_upload_destination_uri($options),
         '#upload_validators' => file_get_upload_validators($options),
         '#progress_indicator' => 'bar',
-        '#pre_render' => array('file_managed_file_pre_render', 'file_upload_validators_pre_render'),
+        '#pre_render' => ['file_managed_file_pre_render', 'file_upload_validators_pre_render'],
         '#default_value' => isset($form_state['storage']['upload']) ? $form_state['storage']['upload'] : NULL,
-      );
+      ];
 
-      $form['actions']['next'] = array(
+      $form['actions']['next'] = [
         '#type' => 'submit',
         '#value' => t('Next'),
-      );
+      ];
 
       form_load_include($form_state, 'inc', 'file', 'file.pages');
 
@@ -71,29 +71,29 @@ function file_add_form($form, &$form_state, $options = array()) {
 /**
  * Generate form fields for the second step in the add file wizard.
  */
-function file_add_upload_step_filetype($form, &$form_state, array $options = array()) {
+function file_add_upload_step_filetype($form, &$form_state, array $options = []) {
   backdrop_set_title(t('Configure file type'));
   $file = file_load($form_state['storage']['upload']);
   $selected_files = $form['#options']['types'];
 
-  $form['type'] = array(
+  $form['type'] = [
     '#type' => 'radios',
     '#title' => t('File type'),
     '#options' => file_get_filetype_candidates($file, $selected_files),
     '#default_value' => isset($form_state['storage']['type']) ? $form_state['storage']['type'] : NULL,
     '#required' => TRUE,
-  );
+  ];
 
-  $form['actions']['previous'] = array(
+  $form['actions']['previous'] = [
     '#type' => 'submit',
     '#value' => t('Previous'),
-    '#limit_validation_errors' => array(),
-    '#submit' => array('file_add_form_submit'),
-  );
-  $form['actions']['next'] = array(
+    '#limit_validation_errors' => [],
+    '#submit' => ['file_add_form_submit'],
+  ];
+  $form['actions']['next'] = [
     '#type' => 'submit',
     '#value' => t('Next'),
-  );
+  ];
 
   return $form;
 }
@@ -101,11 +101,11 @@ function file_add_upload_step_filetype($form, &$form_state, array $options = arr
 /**
  * Generate form fields for the third step in the add file wizard.
  */
-function file_add_upload_step_scheme($form, &$form_state, array $options = array()) {
+function file_add_upload_step_scheme($form, &$form_state, array $options = []) {
   backdrop_set_title(t('Configure file scheme'));
   $file = file_load($form_state['storage']['upload']);
 
-  $schemes = array();
+  $schemes = [];
   foreach (file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $info) {
     $schemes[$scheme] = check_plain($info['description']);
   }
@@ -126,24 +126,24 @@ function file_add_upload_step_scheme($form, &$form_state, array $options = array
     $fallback_scheme = file_default_scheme();
   }
 
-  $form['scheme'] = array(
+  $form['scheme'] = [
     '#type' => 'radios',
     '#title' => t('Destination'),
     '#options' => $schemes,
     '#default_value' => $fallback_scheme,
     '#required' => TRUE,
-  );
+  ];
 
-  $form['actions']['previous'] = array(
+  $form['actions']['previous'] = [
     '#type' => 'submit',
     '#value' => t('Previous'),
-    '#limit_validation_errors' => array(),
-    '#submit' => array('file_add_form_submit'),
-  );
-  $form['actions']['next'] = array(
+    '#limit_validation_errors' => [],
+    '#submit' => ['file_add_form_submit'],
+  ];
+  $form['actions']['next'] = [
     '#type' => 'submit',
     '#value' => t('Next'),
-  );
+  ];
 
   return $form;
 }
@@ -151,35 +151,35 @@ function file_add_upload_step_scheme($form, &$form_state, array $options = array
 /**
  * Generate form fields for the fourth step in the add file wizard.
  */
-function file_add_upload_step_fields($form, &$form_state, array $options = array()) {
+function file_add_upload_step_fields($form, &$form_state, array $options = []) {
   backdrop_set_title(t('Configure file fields'));
   // Load the file and overwrite the filetype set on the previous screen.
   $file = file_load($form_state['storage']['upload']);
   $file->type = $form_state['storage']['type'];
 
   // Let users modify the filename here.
-  $form['filename'] = array(
+  $form['filename'] = [
     '#type' => 'textfield',
     '#title' => t('Name'),
     '#default_value' => $file->filename,
     '#required' => TRUE,
     '#maxlength' => 255,
     '#weight' => -10,
-  );
+  ];
 
   // Add fields.
   field_attach_form('file', $file, $form, $form_state);
 
-  $form['actions']['previous'] = array(
+  $form['actions']['previous'] = [
     '#type' => 'submit',
     '#value' => t('Previous'),
-    '#limit_validation_errors' => array(),
-    '#submit' => array('file_add_form_submit'),
-  );
-  $form['actions']['submit'] = array(
+    '#limit_validation_errors' => [],
+    '#submit' => ['file_add_form_submit'],
+  ];
+  $form['actions']['submit'] = [
     '#type' => 'submit',
     '#value' => t('Save'),
-  );
+  ];
 
   return $form;
 }
@@ -204,7 +204,7 @@ function file_add_form_validate($form, &$form_state) {
  * @return array
  *   An array of file type bundles that support the file's mime type.
  */
-function file_get_filetype_candidates(File $file, $selected_files = array()) {
+function file_get_filetype_candidates(File $file, $selected_files = []) {
   $types = module_invoke_all('file_type', $file);
   backdrop_alter('file_type', $types, $file);
 
@@ -215,7 +215,7 @@ function file_get_filetype_candidates(File $file, $selected_files = array()) {
     $types = array_intersect($types, $selected_files);
   }
 
-  $candidates = array();
+  $candidates = [];
   foreach ($types as $type) {
     $file->type = $type;
     if (file_access('create', $file)) {
@@ -230,7 +230,7 @@ function file_get_filetype_candidates(File $file, $selected_files = array()) {
  */
 function file_add_form_submit($form, &$form_state) {
   $config = config('file.settings');
-  $form_state['storage'] = isset($form_state['storage']) ? $form_state['storage'] : array();
+  $form_state['storage'] = isset($form_state['storage']) ? $form_state['storage'] : [];
   $form_state['storage'] = array_merge($form_state['storage'], $form_state['values']);
 
   // Field selected allowed types.
@@ -243,7 +243,7 @@ function file_add_form_submit($form, &$form_state) {
   $triggered_previous = $trigger == 'edit-previous' || (strpos($trigger, 'edit-previous--') === 0);
   $step_delta = ($triggered_previous) ? -1 : 1;
 
-  $steps_to_check = array(2, 3);
+  $steps_to_check = [2, 3];
   if ($triggered_previous) {
     // If the previous button was hit,
     // the step checking order should be reversed 3, 2.
@@ -364,10 +364,10 @@ function file_add_form_submit($form, &$form_state) {
         $file_in_final_location = TRUE;
       }
 
-      $substitutions = array(
+      $substitutions = [
         '@type' => file_type_get_name($file),
         '%name' => $file->filename,
-      );
+      ];
 
       // Only save the file if any necessary move was successful.
       if ($file_in_final_location) {
@@ -424,11 +424,11 @@ function file_add_form_submit($form, &$form_state) {
  *
  * @see token_replace()
  */
-function file_upload_destination_uri(array $params, array $data = array()) {
-  $params += array(
+function file_upload_destination_uri(array $params, array $data = []) {
+  $params += [
     'uri_scheme' => file_default_scheme(),
     'file_directory' => '',
-  );
+  ];
 
   $destination = trim($params['file_directory'], '/');
 
@@ -446,9 +446,9 @@ function file_view_page($file) {
 
   $uri = entity_uri('file', $file);
   // Set the file path as the canonical URL to prevent duplicate content.
-  backdrop_add_html_head_link(array('rel' => 'canonical', 'href' => url($uri['path'], $uri['options'])), TRUE);
+  backdrop_add_html_head_link(['rel' => 'canonical', 'href' => url($uri['path'], $uri['options'])], TRUE);
   // Set the non-aliased path as a default shortlink.
-  backdrop_add_html_head_link(array('rel' => 'shortlink', 'href' => url($uri['path'], array_merge($uri['options'], array('alias' => TRUE)))), TRUE);
+  backdrop_add_html_head_link(['rel' => 'shortlink', 'href' => url($uri['path'], array_merge($uri['options'], ['alias' => TRUE]))], TRUE);
 
   return file_view($file, 'full');
 }
@@ -461,7 +461,7 @@ function file_download_page($file) {
   if (!is_file($file->uri)) {
     return MENU_NOT_FOUND;
   }
-  $headers = array(
+  $headers = [
     'Content-Type' => mime_header_encode($file->filemime),
     'Content-Disposition' => 'attachment; filename="' . mime_header_encode(basename($file->uri)) . '"',
     'Content-Length' => $file->filesize,
@@ -469,7 +469,7 @@ function file_download_page($file) {
     'Pragma' => 'no-cache',
     'Cache-Control' => 'must-revalidate, post-check=0, pre-check=0',
     'Expires' => '0',
-  );
+  ];
 
   // Let other modules alter the download headers.
   backdrop_alter('file_download_headers', $headers, $file);
@@ -499,7 +499,7 @@ function file_download_page($file) {
  *   A file object from file_load().
  */
 function file_manage_form($form, &$form_state, File $file) {
-  backdrop_set_title(t('Manage file %title', array('%title' => $file->filename)), PASS_THROUGH);
+  backdrop_set_title(t('Manage file %title', ['%title' => $file->filename]), PASS_THROUGH);
 
   $form_state['file'] = $file;
   $form_state['temporary_upload'] = NULL;
@@ -512,21 +512,21 @@ function file_manage_form($form, &$form_state, File $file) {
   // Basic file information.
   // These elements are just values so they are not even sent to the client.
   // @todo Add type w/ https://github.com/backdrop/backdrop-issues/issues/2632
-  foreach (array('fid', 'uid', 'timestamp', 'type') as $key) {
-    $form[$key] = array(
+  foreach (['fid', 'uid', 'timestamp', 'type'] as $key) {
+    $form[$key] = [
       '#type' => 'value',
       '#value' => isset($file->$key) ? $file->$key : NULL,
-    );
+    ];
   }
 
-  $form['name'] = array(
+  $form['name'] = [
     '#type' => 'item',
     '#title' => t('Filename'),
     '#markup' => check_plain($file->filename),
     '#weight' => -11,
-  );
+  ];
 
-  $form['filename'] = array(
+  $form['filename'] = [
     '#type' => 'textfield',
     '#title' => t('File display title'),
     '#description' => t('This text will be used in links to the uploaded file.'),
@@ -534,122 +534,122 @@ function file_manage_form($form, &$form_state, File $file) {
     '#required' => TRUE,
     '#maxlength' => 255,
     '#weight' => -10,
-  );
+  ];
 
   // Add a 'replace this file' upload field if the file is writeable.
   if (file_is_writeable($file)) {
     // Set up replacement file validation.
-    $replacement_options = array();
+    $replacement_options = [];
 
     // The replacement file must have the same extension as the original file.
     $replacement_options['file_extensions'] = pathinfo($file->uri, PATHINFO_EXTENSION);
 
-    $form['replace_upload'] = array(
+    $form['replace_upload'] = [
       '#type' => 'managed_file',
       '#title' => t('Replace file'),
       '#description' => t('This file will replace the existing file. This action cannot be undone.'),
       '#upload_validators' => file_get_upload_validators($replacement_options),
-    );
+    ];
   }
 
-  $form['additional_settings'] = array(
+  $form['additional_settings'] = [
     '#type' => 'vertical_tabs',
     '#weight' => 99,
-  );
+  ];
 
   // File destination information for administrators.
-  $form['destination'] = array(
+  $form['destination'] = [
     '#type' => 'fieldset',
     '#access' => user_access('manage files'),
     '#title' => t('File location'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
-    '#attributes' => array(
-      'class' => array('file-form-destination'),
-    ),
-    '#attached' => array(
-      'js' => array(
+    '#attributes' => [
+      'class' => ['file-form-destination'],
+    ],
+    '#attached' => [
+      'js' => [
         backdrop_get_path('module', 'file') . '/js/file.js',
-      ),
-    ),
-  );
+      ],
+    ],
+  ];
 
-  $options = array();
+  $options = [];
   foreach (file_get_stream_wrappers(STREAM_WRAPPERS_WRITE_VISIBLE) as $scheme => $info) {
     $options[$scheme] = check_plain($info['name']);
   }
 
-  $form['destination']['scheme'] = array(
+  $form['destination']['scheme'] = [
     '#type' => 'radios',
     '#title' => t('Destination'),
     '#options' => $options,
     '#default_value' => file_uri_scheme($file->uri),
-  );
+  ];
 
   if (!empty($file->uri)) {
     $directory_path = file_stream_wrapper_get_instance_by_uri($file->uri)->getDirectoryPath();
     $filename = file_uri_target($file->uri);
     $filepath = $directory_path . '/' . $filename;
-    $url = url($filepath, array('absolute' => TRUE));
-    $form['destination']['url'] = array(
+    $url = url($filepath, ['absolute' => TRUE]);
+    $form['destination']['url'] = [
       '#type' => 'item',
       '#title' => t('File URL'),
-      '#markup' => l($url, $url, array(
-        'attributes' => array('class' => array('file-preview-link')),
-      )),
-    );
+      '#markup' => l($url, $url, [
+        'attributes' => ['class' => ['file-preview-link']],
+      ]),
+    ];
   }
 
   // File user information for administrators.
   $anonymous = config_get_translated('system.core', 'anonymous');
-  $form['user'] = array(
+  $form['user'] = [
     '#type' => 'fieldset',
     '#access' => user_access('administer files'),
     '#title' => t('Authoring information'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
-    '#attributes' => array(
-      'class' => array('file-form-user'),
-    ),
-    '#attached' => array(
-      'js' => array(
+    '#attributes' => [
+      'class' => ['file-form-user'],
+    ],
+    '#attached' => [
+      'js' => [
         backdrop_get_path('module', 'file') . '/js/file.js',
-        array(
+        [
           'type' => 'setting',
-          'data' => array('anonymous' => $anonymous),
-        ),
-      ),
-    ),
+          'data' => ['anonymous' => $anonymous],
+        ],
+      ],
+    ],
     '#weight' => 90,
-  );
-  $form['user']['name'] = array(
+  ];
+  $form['user']['name'] = [
     '#type' => 'textfield',
     '#title' => t('Authored by'),
     '#maxlength' => 60,
     '#autocomplete_path' => 'user/autocomplete',
     '#default_value' => !empty($file->uid) ? user_load($file->uid)->name : '',
     '#weight' => -1,
-    '#description' => t('Leave blank for %anonymous.', array('%anonymous' => $anonymous)),
-  );
+    '#description' => t('Leave blank for %anonymous.', ['%anonymous' => $anonymous]),
+  ];
 
   // Add the buttons.
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
+  $form['actions'] = ['#type' => 'actions'];
+  $form['actions']['submit'] = [
     '#type' => 'submit',
     '#value' => t('Save'),
     '#weight' => 5,
-    '#submit' => array('file_manage_form_submit'),
-    '#validate' => array('file_manage_form_validate'),
-  );
-  $form['actions']['delete'] = array(
+    '#submit' => ['file_manage_form_submit'],
+    '#validate' => ['file_manage_form_validate'],
+  ];
+  $form['actions']['delete'] = [
     '#type' => 'submit',
     '#value' => t('Delete'),
     '#weight' => 10,
-    '#submit' => array('file_delete_redirect_form'),
+    '#submit' => ['file_delete_redirect_form'],
     '#access' => user_access('delete files'),
-  );
+  ];
 
   // Build the URL for the cancel button taking into account that there might be
   // a "destination" that includes query string variables.
@@ -657,13 +657,13 @@ function file_manage_form($form, &$form_state, File $file) {
   $destination = isset($parameters['destination']) ? $parameters['destination'] : 'admin/content/files';
   $url = backdrop_parse_url($destination);
 
-  $form['actions']['cancel'] = array(
+  $form['actions']['cancel'] = [
     '#type' => 'link',
     '#title' => t('Cancel'),
     '#href' => $url['path'],
-    '#options' => array('query' => $url['query']),
+    '#options' => ['query' => $url['query']],
     '#weight' => 15,
-  );
+  ];
 
   field_attach_form('file', $file, $form, $form_state, $file->langcode);
 
@@ -679,7 +679,7 @@ function file_manage_form_validate($form, &$form_state) {
     // The use of empty() is mandatory in the context of usernames
     // as the empty string denotes the anonymous user. In case we
     // are dealing with an anonymous user we set the user ID to 0.
-    form_set_error('name', t('The username %name does not exist.', array('%name' => $form_state['values']['name'])));
+    form_set_error('name', t('The username %name does not exist.', ['%name' => $form_state['values']['name']]));
   }
 
   // Run entity form validation.
@@ -764,9 +764,9 @@ function file_manage_form_submit($form, &$form_state) {
   // Save all the modifications to the file.
   $file->save();
 
-  $args = array(
+  $args = [
     '%title' => entity_label('file', $file),
-  );
+  ];
   watchdog('file', 'File: updated %title.', $args);
   backdrop_set_message(t('File: %title has been updated.', $args));
 
@@ -806,10 +806,10 @@ function file_delete_redirect_form($form, &$form_state) {
 function file_delete_form($form, &$form_state, File $file) {
   $form_state['file'] = $file;
 
-  $form['fid'] = array(
+  $form['fid'] = [
     '#type' => 'value',
     '#value' => $file->fid,
-  );
+  ];
 
   $description = '';
   $known_count = 0;
@@ -826,7 +826,7 @@ function file_delete_form($form, &$form_state, File $file) {
     }
     $description .= ' ' . t('Content referencing this file includes:');
     $description = '<p>' . $description . '</p>';
-    $description .= theme('item_list', array('items' => $entity_list));
+    $description .= theme('item_list', ['items' => $entity_list]);
   }
   elseif ($unknown_count) {
     $description .= ' ' . t('However, this content is either missing or you do not have access to it.');
@@ -839,9 +839,9 @@ function file_delete_form($form, &$form_state, File $file) {
   $description .= '<p>' . t('Deleting this file may cause content to display improperly.') . '</p>';
 
   return confirm_form($form,
-    t('Are you sure you want to delete the file %title?', array(
+    t('Are you sure you want to delete the file %title?', [
       '%title' => entity_label('file', $file),
-    )),
+    ]),
     'admin/content/files',
     $description,
     t('Delete')
@@ -854,8 +854,8 @@ function file_delete_form($form, &$form_state, File $file) {
 function file_delete_form_submit($form, &$form_state) {
   if ($form_state['values']['confirm'] && ($file = file_load($form_state['values']['fid']))) {
     file_delete($file->fid);
-    watchdog('file', 'Administrator deleted file %title.', array('%title' => $file->label()));
-    backdrop_set_message(t('%title has been deleted.', array('%title' => $file->label())));
+    watchdog('file', 'Administrator deleted file %title.', ['%title' => $file->label()]);
+    backdrop_set_message(t('%title has been deleted.', ['%title' => $file->label()]));
   }
 
   $form_state['redirect'] = 'admin/content/files';
@@ -882,33 +882,33 @@ function file_multiple_delete_confirm($form, &$form_state) {
     unset($_SESSION['file_delete_action']);
   }
   else {
-    $fids = array();
+    $fids = [];
   }
 
   $form['#tree'] = TRUE;
 
   if (empty($fids)) {
     $destination = isset($_GET['destination']) ? $_GET['destination'] : 'admin/content/files';
-    $form['empty']['#markup'] = '<p>' . t('Return to the <a href="!url">manage files administration page</a>.', array('!url' => url($destination))) . '</p>';
+    $form['empty']['#markup'] = '<p>' . t('Return to the <a href="!url">manage files administration page</a>.', ['!url' => url($destination)]) . '</p>';
     backdrop_set_message(t('No files have been selected for deletion.'), 'error');
     return $form;
   }
 
-  $form['file_list'] = array(
+  $form['file_list'] = [
     '#theme' => 'item_list',
-    '#items' => array(),
-  );
+    '#items' => [],
+  ];
 
-  $items = array();
+  $items = [];
   $files = file_load_multiple($fids);
   $usage_count_total = 0;
   foreach ($files as $fid => $file) {
     $usage_count = _file_usage_get_total($file);
     $usage_count_total += $usage_count;
-    $form['files'][$fid] = array(
+    $form['files'][$fid] = [
       '#type' => 'hidden',
       '#value' => $fid,
-    );
+    ];
     $uri = $file->uri();
     $url = file_create_url($uri['path']);
     $label = l($file->label(), $url);
@@ -927,7 +927,7 @@ function file_multiple_delete_confirm($form, &$form_state) {
     $description = '<p>' . format_plural(count($files), 'This file has no known content referencing it, although it may still be in use.', 'These files have no known content referencing them, although they may still be in use.') . '</p>';
   }
 
-  $description .= theme('item_list', array('items' => $items));
+  $description .= theme('item_list', ['items' => $items]);
 
   $description .= '<p>' . format_plural(count($files), 'Deleting this file may cause content to display improperly.', 'Deleting these files may cause content to display improperly.') . '</p>';
 
@@ -941,7 +941,7 @@ function file_multiple_delete_confirm_submit($form, &$form_state) {
   file_delete_multiple(array_keys($form_state['values']['files']));
   cache_clear_all();
   $count = count($form_state['values']['files']);
-  watchdog('content', 'Administrator deleted @count files.', array('@count' => $count));
+  watchdog('content', 'Administrator deleted @count files.', ['@count' => $count]);
 
   backdrop_set_message(format_plural($count, 'Deleted 1 file.', 'Deleted @count files.'));
   $form_state['redirect'] = 'admin/content/files';
@@ -969,12 +969,12 @@ function _file_usage_list_links(File $file, &$known_count, &$unknown_count) {
   // shown.
   $known_count = 0;
   $unknown_count = 0;
-  $entity_list = array();
+  $entity_list = [];
   if ($file_usage_list = file_usage_list($file)) {
     foreach ($file_usage_list as $module_name => $module_usages) {
       foreach ($module_usages as $entity_type => $entity_usages) {
         $entity_type_info = entity_get_info($entity_type);
-        $entity_ids = array();
+        $entity_ids = [];
         foreach ($entity_usages as $entity_id => $usage_count) {
           if ($entity_type_info) {
             $entity_ids[] = $entity_id;
@@ -1038,8 +1038,8 @@ function _file_usage_get_total(File $file) {
  * Page callback to show file usage information.
  */
 function file_usage_page($file) {
-  $rows = array();
-  $occurred_entities = array();
+  $rows = [];
+  $occurred_entities = [];
 
   // Determine all of the locations where a file is used, then loop through the
   // occurrences and filter out any duplicates.
@@ -1072,7 +1072,7 @@ function file_usage_page($file) {
           $entity_label = check_plain($label);
         }
 
-        $rows[] = array($entity_label, $entity_type, $count);
+        $rows[] = [$entity_label, $entity_type, $count];
 
         // Record the occurrence of the entity to ensure that it isn't listed in
         // the table again.
@@ -1081,17 +1081,17 @@ function file_usage_page($file) {
     }
   }
 
-  $header = array(t('Entity'), t('Entity type'), t('Use count'));
-  $build['caption'] = array(
+  $header = [t('Entity'), t('Entity type'), t('Use count')];
+  $build['caption'] = [
     '#type' => 'help',
-    '#markup' => t('This table lists all of the places where @filename is used.', array('@filename' => $file->filename)),
-  );
-  $build['usage_table'] = array(
+    '#markup' => t('This table lists all of the places where @filename is used.', ['@filename' => $file->filename]),
+  ];
+  $build['usage_table'] = [
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
     '#empty' => t('This file is not currently used.'),
-  );
+  ];
 
   return $build;
 }
@@ -1106,18 +1106,18 @@ function file_usage_page($file) {
  *   An array suitable for passing to file_save_upload() or for a managed_file
  *   or upload element's '#upload_validators' property.
  */
-function file_get_upload_validators(array $options = array()) {
+function file_get_upload_validators(array $options = []) {
   $config = config('file.settings');
   // Set up file upload validators.
-  $validators = array();
+  $validators = [];
 
   // Validate file extensions. If there are no file extensions in $params and
   // there are no Media defaults, there is no file extension validation.
   if (!empty($options['file_extensions'])) {
-    $validators['file_validate_extensions'] = array($options['file_extensions']);
+    $validators['file_validate_extensions'] = [$options['file_extensions']];
   }
   else {
-    $validators['file_validate_extensions'] = array($config->get('default_allowed_extensions'));
+    $validators['file_validate_extensions'] = [$config->get('default_allowed_extensions')];
   }
 
   // Cap the upload size according to the system or user defined limit.
@@ -1134,12 +1134,12 @@ function file_get_upload_validators(array $options = array()) {
   }
 
   // There is always a file size limit due to the PHP server limit.
-  $validators['file_validate_size'] = array($max_filesize);
+  $validators['file_validate_size'] = [$max_filesize];
 
   // Add image validators.
-  $options += array('min_resolution' => 0, 'max_resolution' => 0);
+  $options += ['min_resolution' => 0, 'max_resolution' => 0];
   if ($options['min_resolution'] || $options['max_resolution']) {
-    $validators['file_validate_image_resolution'] = array($options['max_resolution'], $options['min_resolution']);
+    $validators['file_validate_image_resolution'] = [$options['max_resolution'], $options['min_resolution']];
   }
 
   // Add other custom upload validators from options.

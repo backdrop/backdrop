@@ -19,17 +19,17 @@ class views_handler_field_term_link_edit extends views_handler_field {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['text'] = array('default' => '', 'translatable' => TRUE);
+    $options['text'] = ['default' => '', 'translatable' => TRUE];
 
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
-    $form['text'] = array(
+    $form['text'] = [
       '#type' => 'textfield',
       '#title' => t('Text to display'),
       '#default_value' => $this->options['text'],
-    );
+    ];
     parent::options_form($form, $form_state);
   }
 
@@ -42,14 +42,14 @@ class views_handler_field_term_link_edit extends views_handler_field {
     // Check there is an actual value, as on a relationship there may not be.
     if ($tid = $this->get_value($values, 'tid')) {
       // Mock a term object for taxonomy_term_access().
-      $term = new TaxonomyTerm(array(
+      $term = new TaxonomyTerm([
         'tid' => $tid,
         'vocabulary' => $this->get_value($values, 'vocabulary')
-      ));
+      ]);
       if (taxonomy_term_access('update', $term)) {
         $text = !empty($this->options['text']) ? $this->options['text'] : t('edit');
         $tid = $this->get_value($values, 'tid');
-        return l($text, 'taxonomy/term/'. $tid . '/edit', array('query' => backdrop_get_destination()));
+        return l($text, 'taxonomy/term/'. $tid . '/edit', ['query' => backdrop_get_destination()]);
       }
     }
   }

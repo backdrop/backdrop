@@ -7,11 +7,11 @@ class TaxonomyTermDepthLayoutAccess extends LayoutAccess {
   /**
    * Constructor for a Layout access rule.
    */
-  public function __construct($plugin_name, array $data = array()) {
+  public function __construct($plugin_name, array $data = []) {
     parent::__construct($plugin_name, $data);
-    $this->settings += array(
-      'depth' => array()
-    );
+    $this->settings += [
+      'depth' => []
+    ];
   }
 
   /**
@@ -20,12 +20,12 @@ class TaxonomyTermDepthLayoutAccess extends LayoutAccess {
   public function form(&$form, &$form_state) {
     parent::form($form, $form_state);
 
-    $form['depth'] = array(
+    $form['depth'] = [
       '#type' => 'number',
       '#title' => t('Depth'),
       '#description' => t('Depth is the level of nesting for a taxonomy term. See example below.'),
       '#default_value' => $this->settings['depth'],
-    );
+    ];
 
     $code  = '<code>';
     $code .= t('State (1st level, <strong>depth 1</strong>)') . '<br />';
@@ -33,10 +33,10 @@ class TaxonomyTermDepthLayoutAccess extends LayoutAccess {
     $code .= '&nbsp; - ' . t('Neighborhood (3rd level, <strong>depth 3</strong>)');
     $code .= '</code>';
 
-    $form['depth_example'] = array(
+    $form['depth_example'] = [
       '#type' => 'markup',
       '#markup' => $code,
-    );
+    ];
   }
 
   /**
@@ -52,7 +52,7 @@ class TaxonomyTermDepthLayoutAccess extends LayoutAccess {
    */
   public function summary() {
     if (isset($this->settings['depth'])) {
-      return t('Taxonomy term depth: @depth', array('@depth' => $this->settings['depth']));
+      return t('Taxonomy term depth: @depth', ['@depth' => $this->settings['depth']]);
     }
 
     return '';
@@ -86,7 +86,7 @@ class TaxonomyTermDepthLayoutAccess extends LayoutAccess {
    *   An integer representing how many levels deep your term is nested.
    */
   protected function getTermDepth($tid) {
-    $parent = db_query("SELECT parent FROM {taxonomy_term_hierarchy} WHERE tid = :tid", array(':tid' => $tid))->fetchField();
+    $parent = db_query("SELECT parent FROM {taxonomy_term_hierarchy} WHERE tid = :tid", [':tid' => $tid])->fetchField();
     if ($parent == 0) {
       return 1;
     }

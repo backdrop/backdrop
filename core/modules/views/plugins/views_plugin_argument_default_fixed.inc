@@ -12,18 +12,18 @@
 class views_plugin_argument_default_fixed extends views_plugin_argument_default {
   function option_definition() {
     $options = parent::option_definition();
-    $options['argument'] = array('default' => '');
+    $options['argument'] = ['default' => ''];
 
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
-    $form['argument'] = array(
+    $form['argument'] = [
       '#type' => 'textfield',
       '#title' => t('Fixed value'),
       '#default_value' => $this->options['argument'],
-    );
+    ];
   }
 
   /**

@@ -14,18 +14,18 @@ class views_handler_area_result extends views_handler_area {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['content'] = array(
+    $options['content'] = [
       'default' => 'Displaying @start - @end of @total',
       'translatable' => TRUE,
-    );
+    ];
 
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
-    $variables = array(
-      'items' => array(
+    $variables = [
+      'items' => [
         '@start -- the initial record number in the set',
         '@end -- the last record number in the set',
         '@total -- the total records in the set',
@@ -34,16 +34,16 @@ class views_handler_area_result extends views_handler_area {
         '@current_page -- the current page number',
         '@current_record_count -- the current page record count',
         '@page_count -- the total page count',
-      ),
-    );
+      ],
+    ];
     $list = theme('item_list', $variables);
-    $form['content'] = array(
+    $form['content'] = [
       '#title' => t('Display'),
       '#type' => 'textarea',
       '#rows' => 3,
       '#default_value' => $this->options['content'],
       '#description' => t('You may use HTML code in this field. The following tokens are supported:') . $list,
-    );
+    ];
   }
 
 
@@ -81,8 +81,8 @@ class views_handler_area_result extends views_handler_area {
     }
     $current_record_count = ($end - $start) + 1;
     // Get the search information.
-    $items = array('start', 'end', 'total', 'name', 'per_page', 'current_page', 'current_record_count', 'page_count');
-    $replacements = array();
+    $items = ['start', 'end', 'total', 'name', 'per_page', 'current_page', 'current_record_count', 'page_count'];
+    $replacements = [];
     foreach ($items as $item) {
       $replacements["@$item"] = ${$item};
     }

@@ -72,7 +72,7 @@ class views_plugin extends views_object {
    * Provide a list of additional theme functions for the theme information page
    */
   function additional_theme_functions() {
-    $funcs = array();
+    $funcs = [];
     if (!empty($this->definition['additional themes'])) {
       foreach ($this->definition['additional themes'] as $theme => $type) {
         $funcs[] = views_theme_functions($theme, $this->view, $this->display);
@@ -88,7 +88,7 @@ class views_plugin extends views_object {
    *   An array of error strings to tell the user what is wrong with this
    *   plugin.
    */
-  function validate() { return array(); }
+  function validate() { return []; }
 
   /**
    * Returns the summary of the settings in the display.

@@ -1,11 +1,11 @@
 <?php
 
 // Put the logo path into JavaScript for the live preview.
-backdrop_add_js(array('color' => array('logo' => theme_get_setting('logo', 'bartik'))), 'setting');
+backdrop_add_js(['color' => ['logo' => theme_get_setting('logo', 'bartik')]], 'setting');
 
-$info = array(
+$info = [
   // Available colors and color labels used in theme.
-  'fields' => array(
+  'fields' => [
     'top' => t('Header background top'),
     'bottom' => t('Header background bottom'),
     'bg' => t('Main background'),
@@ -17,12 +17,12 @@ $info = array(
     'link' => t('Link color'),
     'menu' => 'Menu link',
     'activemenu' => t('Active menu link color'),
-  ),
+  ],
   // Pre-defined color schemes.
-  'schemes' => array(
-    'default' => array(
+  'schemes' => [
+    'default' => [
       'title' => t('Blackdrop (default)'),
-      'colors' => array(
+      'colors' => [
         'top' => '#000000',
         'bottom' => '#000001',
         'bg' => '#ffffff',
@@ -34,11 +34,11 @@ $info = array(
         'link' => '#27ace2',
         'menu' => '#e3e3e3',
         'activemenu' => '#fefeff',
-      ),
-    ),
-    'blue_lagoon' => array(
+      ],
+    ],
+    'blue_lagoon' => [
       'title' => t('Blue Lagoon'),
-      'colors' => array(
+      'colors' => [
         'top' => '#0779bf',
         'bottom' => '#48a9e4',
         'bg' => '#ffffff',
@@ -50,11 +50,11 @@ $info = array(
         'link' => '#0071b3',
         'menu' => '#f3f7fa',
         'activemenu' => '#fefeff',
-      ),
-    ),
-    'ice' => array(
+      ],
+    ],
+    'ice' => [
       'title' => t('Ice'),
-      'colors' => array(
+      'colors' => [
         'top' => '#d0d0d0',
         'bottom' => '#d0d0d0',
         'bg' => '#ffffff',
@@ -66,11 +66,11 @@ $info = array(
         'link' => '#019dbf',
         'menu' => '#fefeff',
         'activemenu' => '#ffffff',
-      ),
-    ),
-    'plum' => array(
+      ],
+    ],
+    'plum' => [
       'title' => t('Plum'),
-      'colors' => array(
+      'colors' => [
         'top' => '#4c1c58',
         'bottom' => '#4c1c58',
         'bg' => '#fffdf7',
@@ -82,11 +82,11 @@ $info = array(
         'link' => '#9d408d',
         'menu' => '#f3f7fa',
         'activemenu' => '#fefeff',
-      ),
-    ),
-    'goldfish' => array(
+      ],
+    ],
+    'goldfish' => [
       'title' => t('Goldfish'),
-      'colors' => array(
+      'colors' => [
         'top' => '#e0e4cc',
         'bottom' => '#e0e4cc',
         'bg' => '#ffffff',
@@ -98,11 +98,11 @@ $info = array(
         'link' => '#fa6900',
         'menu' => '#798053',
         'activemenu' => '#4c5037',
-      ),
-    ),
-    'mocha' => array(
+      ],
+    ],
+    'mocha' => [
       'title' => t('Mocha'),
-      'colors' => array(
+      'colors' => [
         'top' => '#c63d0f',
         'bottom' => '#c63d0f',
         'bg' => '#faf8f8',
@@ -114,36 +114,36 @@ $info = array(
         'link' => '#c63d0f',
         'menu' => '#fefeff',
         'activemenu' => '#ffffff',
-      ),
-    ),
-  ),
+      ],
+    ],
+  ],
 
   // CSS files (excluding @import) to rewrite with new color scheme.
-  'css' => array(
+  'css' => [
     'css/colors.css',
-  ),
+  ],
 
   // Files to copy.
-  'copy' => array(),
+  'copy' => [],
 
   // Gradient definitions.
-  'gradients' => array(
-    array(
+  'gradients' => [
+    [
       // (x, y, width, height).
-      'dimension' => array(0, 0, 0, 0),
+      'dimension' => [0, 0, 0, 0],
       // Direction of gradient ('vertical' or 'horizontal').
       'direction' => 'vertical',
       // Keys of colors to use for the gradient.
-      'colors' => array('top', 'bottom'),
-    ),
-  ),
+      'colors' => ['top', 'bottom'],
+    ],
+  ],
 
   // Color areas to fill (x, y, width, height).
-  'fill' => array(),
+  'fill' => [],
 
   // Coordinates of all the theme slices (x, y, width, height)
   // with their filename as used in the stylesheet.
-  'slices' => array(),
+  'slices' => [],
 
   // Reference color used for blending. Matches the base.png's colors.
   'blend_target' => '#ffffff',
@@ -155,4 +155,4 @@ $info = array(
 
   // Base file for image generation.
   'base_image' => 'color/base.png',
-);
+];

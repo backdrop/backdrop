@@ -31,9 +31,9 @@ class views_handler_argument_date extends views_handler_argument_formula {
    */
   function default_argument_form(&$form, &$form_state) {
     parent::default_argument_form($form, $form_state);
-    $form['default_argument_type']['#options'] += array('date' => t('Current date'));
-    $form['default_argument_type']['#options'] += array('node_created' => t("Current node's creation time"));
-    $form['default_argument_type']['#options'] += array('node_changed' => t("Current node's update time"));  }
+    $form['default_argument_type']['#options'] += ['date' => t('Current date')];
+    $form['default_argument_type']['#options'] += ['node_created' => t("Current node's creation time")];
+    $form['default_argument_type']['#options'] += ['node_changed' => t("Current node's update time")];  }
 
   /**
    * Set the empty argument value to the current date,
@@ -43,7 +43,7 @@ class views_handler_argument_date extends views_handler_argument_formula {
     if (!$raw && $this->options['default_argument_type'] == 'date') {
       return date($this->arg_format, REQUEST_TIME);
     }
-    elseif (!$raw && in_array($this->options['default_argument_type'], array('node_created', 'node_changed'))) {
+    elseif (!$raw && in_array($this->options['default_argument_type'], ['node_created', 'node_changed'])) {
       foreach (range(1, 3) as $i) {
         $node = menu_get_object('node', $i);
         if (!empty($node)) {
@@ -70,6 +70,6 @@ class views_handler_argument_date extends views_handler_argument_formula {
   }
 
   function get_sort_name() {
-    return t('Date', array(), array('context' => 'Sort order'));
+    return t('Date', [], ['context' => 'Sort order']);
   }
 }

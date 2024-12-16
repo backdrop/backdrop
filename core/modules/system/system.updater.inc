@@ -32,7 +32,7 @@ class CoreUpdater extends Updater {
    * List of post install actions.
    */
   public function postInstall() {
-    $project = array();
+    $project = [];
     $project['name'] = $this->name;
     $project['type'] = 'core';
     $_SESSION['project_browser_installed_projects'][$this->name] = $project;
@@ -42,7 +42,7 @@ class CoreUpdater extends Updater {
    * List of post install actions.
    */
   public function postInstallTasks() {
-    return array();
+    return [];
   }
 
   public function postUpdateTasks() {
@@ -98,7 +98,7 @@ class ModuleUpdater extends Updater {
    * List of post install actions.
    */
   public function postInstall() {
-    $project = array();
+    $project = [];
     $project['name'] = $this->name;
     $project['type'] = 'module';
     $_SESSION['project_browser_installed_projects'][$this->name] = $project;
@@ -108,10 +108,10 @@ class ModuleUpdater extends Updater {
    * List of post install actions.
    */
   public function postInstallTasks() {
-    return array(
+    return [
       l(t('Enable newly added modules'), 'admin/modules'),
       l(t('Browse more modules'), 'admin/modules/install'),
-    );
+    ];
   }
 
   public function postUpdateTasks() {
@@ -170,10 +170,10 @@ class ThemeUpdater extends Updater {
   }
 
   public function postInstallTasks() {
-    return array(
+    return [
       l(t('Enable newly added themes'), 'admin/appearance'),
       l(t('Browse more themes'), 'admin/appearance/install'),
-    );
+    ];
   }
 }
 
@@ -225,9 +225,9 @@ class LayoutUpdater extends Updater {
   }
 
   public function postInstallTasks() {
-    return array(
+    return [
       l(t('Use newly added layouts'), 'admin/structure/layouts'),
       l(t('Browse more layouts'), 'admin/structure/layouts/install'),
-    );
+    ];
   }
 }

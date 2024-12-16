@@ -35,7 +35,7 @@ class EntityReferenceSelectionHandlerViews implements EntityReferenceSelectionHa
     // Filter views that list the entity type we want, and group the separate
     // displays by view.
     $entity_info = entity_get_info($field['settings']['target_type']);
-    $options = array();
+    $options = [];
     foreach ($displays as $data) {
       list($view, $display_id) = $data;
       if ($view->base_table == $entity_info['base table']) {
@@ -47,48 +47,48 @@ class EntityReferenceSelectionHandlerViews implements EntityReferenceSelectionHa
     // into 'view_name' and 'view_display' in the final submitted values, so
     // massage the data at validate time on the wrapping element (not
     // ideal).
-    $form['view']['#element_validate'] = array('entityreference_view_settings_validate');
+    $form['view']['#element_validate'] = ['entityreference_view_settings_validate'];
 
     if ($options) {
       $default = !empty($view_settings['view_name']) ? $view_settings['view_name'] . ':' . $view_settings['display_name'] : NULL;
-      $form['view']['view_and_display'] = array(
+      $form['view']['view_and_display'] = [
         '#type' => 'select',
         '#title' => t('View used to select the entities'),
         '#required' => TRUE,
         '#options' => $options,
         '#default_value' => $default,
         '#description' => '<p>' . t('Choose the view and display that select the entities that can be referenced.<br />Only views with a display of type "Entity Reference" are eligible.') . '</p>',
-      );
+      ];
 
       $default = !empty($view_settings['args']) ? implode(', ', $view_settings['args']) : '';
       $description = t('Provide a comma separated list of arguments to pass to the view.') . '<br />' . t('This field supports tokens.');
 
-      $form['view']['args'] = array(
+      $form['view']['args'] = [
         '#type' => 'textfield',
         '#title' => t('View arguments'),
         '#default_value' => $default,
         '#required' => FALSE,
         '#description' => $description,
         '#maxlength' => '512',
-      );
+      ];
       // Get the token type for the entity type our field is in (a type 'taxonomy_term' has a 'term' type token).
       $info = entity_get_info($instance['entity_type']);
 
-      $form['view']['tokens'] = array(
+      $form['view']['tokens'] = [
         '#theme' => 'token_tree',
-        '#token_types' => array($info['token type']),
+        '#token_types' => [$info['token type']],
         '#global_types' => TRUE,
         '#click_insert' => TRUE,
         '#dialog' => TRUE,
-      );
+      ];
     }
     else {
-      $form['view']['no_view_help'] = array(
-        '#markup' => '<p>' . t('No eligible views were found. <a href="@create">Create a view</a> with an <em>Reference</em> display, or add such a display to an <a href="@existing">existing view</a>.', array(
+      $form['view']['no_view_help'] = [
+        '#markup' => '<p>' . t('No eligible views were found. <a href="@create">Create a view</a> with an <em>Reference</em> display, or add such a display to an <a href="@existing">existing view</a>.', [
           '@create' => url('admin/structure/views/add'),
           '@existing' => url('admin/structure/views'),
-        )) . '</p>',
-      );
+        ]) . '</p>',
+      ];
     }
     return $form;
   }
@@ -102,7 +102,7 @@ class EntityReferenceSelectionHandlerViews implements EntityReferenceSelectionHa
     // Check that the view is valid and the display still exists.
     $this->view = views_get_view($view_name);
     if (!$this->view || !isset($this->view->display[$display_name]) || !$this->view->access($display_name)) {
-      watchdog('entityreference', 'The view %view_name is no longer eligible for the %field_name field.', array('%view_name' => $view_name, '%field_name' => $this->instance['label']), WATCHDOG_WARNING);
+      watchdog('entityreference', 'The view %view_name is no longer eligible for the %field_name field.', ['%view_name' => $view_name, '%field_name' => $this->instance['label']], WATCHDOG_WARNING);
       return FALSE;
     }
     $this->view->set_display($display_name);
@@ -112,12 +112,12 @@ class EntityReferenceSelectionHandlerViews implements EntityReferenceSelectionHa
     $this->view->is_cacheable = FALSE;
 
     // Pass options to the display handler to make them available later.
-    $entityreference_options = array(
+    $entityreference_options = [
       'match' => $match,
       'match_operator' => $match_operator,
       'limit' => $limit,
       'ids' => $ids,
-    );
+    ];
     $this->view->display_handler->set_option('entityreference_options', $entityreference_options);
     return TRUE;
   }
@@ -128,13 +128,13 @@ class EntityReferenceSelectionHandlerViews implements EntityReferenceSelectionHa
   public function getReferencableEntities($match = NULL, $match_operator = 'CONTAINS', $limit = 0) {
     $display_name = $this->field['settings']['handler_settings']['view']['display_name'];
     $args = $this->handleArgs($this->field['settings']['handler_settings']['view']['args']);
-    $result = array();
+    $result = [];
     if ($this->initializeView($match, $match_operator, $limit)) {
       // Get the results.
       $result = $this->view->execute_display($display_name, $args);
     }
 
-    $return = array();
+    $return = [];
     if ($result) {
       $target_type = $this->field['settings']['target_type'];
       $entities = entity_load($target_type, array_keys($result));
@@ -157,7 +157,7 @@ class EntityReferenceSelectionHandlerViews implements EntityReferenceSelectionHa
   function validateReferencableEntities(array $ids) {
     $display_name = $this->field['settings']['handler_settings']['view']['display_name'];
     $args = $this->handleArgs($this->field['settings']['handler_settings']['view']['args']);
-    $result = array();
+    $result = [];
     if ($this->initializeView(NULL, 'CONTAINS', 0, $ids)) {
       // Get the results.
       $entities = $this->view->execute_display($display_name, $args);
@@ -173,32 +173,32 @@ class EntityReferenceSelectionHandlerViews implements EntityReferenceSelectionHa
    */
   public function validateAutocompleteInput($input, &$element, &$form_state, $form) {
     $bundled_entities = $this->getReferencableEntities($input, '=', 6);
-    $entities = array();
+    $entities = [];
     foreach ($bundled_entities as $entities_list) {
       $entities += $entities_list;
     }
     if (empty($entities)) {
       // Error if there are no entities available for a required field.
-      form_error($element, t('No items found for %label', array('%label' => $element['#title'])));
+      form_error($element, t('No items found for %label', ['%label' => $element['#title']]));
     }
     elseif (count($entities) > 5) {
       // Error if there are more than 5 matching entities.
-      form_error($element, t('Too many items found for %label. Specify the one you want by appending the id in parentheses, like "@value (@id)"', array(
+      form_error($element, t('Too many items found for %label. Specify the one you want by appending the id in parentheses, like "@value (@id)"', [
         '%label' => $element['#title'],
         '@value' => $input,
         '@id' => key($entities),
-      )));
+      ]));
     }
     elseif (count($entities) > 1) {
       // More helpful error if there are only a few matching entities.
-      $multiples = array();
+      $multiples = [];
       foreach ($entities as $id => $name) {
-        $multiples[] = filter_xss($name, array()) . ' (' . (int) $id . ')';
+        $multiples[] = filter_xss($name, []) . ' (' . (int) $id . ')';
       }
-      form_error($element, t('Multiple items found for %label: !multiple', array(
+      form_error($element, t('Multiple items found for %label: !multiple', [
         '%label' => $element['#title'],
-        '!multiple' => theme('item_list', array('items' => $multiples)),
-      )));
+        '!multiple' => theme('item_list', ['items' => $multiples]),
+      ]));
     }
     else {
       // Take the one and only matching entity.
@@ -233,8 +233,8 @@ class EntityReferenceSelectionHandlerViews implements EntityReferenceSelectionHa
    */
   protected function handleArgs($args) {
     // Parameters for token_replace().
-    $data = array();
-    $options = array('clear' => TRUE);
+    $data = [];
+    $options = ['clear' => TRUE];
 
     if ($entity = $this->entity) {
       // For new entities, entity and revision id are not set. This leads to

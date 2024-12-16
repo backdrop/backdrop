@@ -23,16 +23,16 @@ class LayoutAccess extends LayoutHandler {
    *
    * @var array
    */
-  var $contexts = array();
+  var $contexts = [];
 
   /**
    * Constructor for a Layout access rule.
    */
-  function __construct($plugin_name, array $data = array()) {
+  function __construct($plugin_name, array $data = []) {
     parent::__construct($plugin_name, $data);
-    $this->settings += array(
-      'contexts' => array(),
-    );
+    $this->settings += [
+      'contexts' => [],
+    ];
   }
 
   /**
@@ -70,7 +70,7 @@ class LayoutAccess extends LayoutHandler {
     }
     $access_info = layout_get_access_info($this->plugin);
     $contexts = $item->getContexts();
-    $current_context_settings = isset($this->settings['contexts']) ? $this->settings['contexts'] : array();
+    $current_context_settings = isset($this->settings['contexts']) ? $this->settings['contexts'] : [];
     $form['contexts'] = layout_contexts_form_element($contexts, $current_context_settings, $access_info);
   }
 
@@ -86,7 +86,7 @@ class LayoutAccess extends LayoutHandler {
    * Submit handler for the settings form for this access item.
    */
   function formSubmit($form, &$form_state) {
-    $excluded = backdrop_map_assoc(array('cancel', 'submit', 'form_build_id', 'form_token', 'form_id', 'op', 'add', 'condition'));
+    $excluded = backdrop_map_assoc(['cancel', 'submit', 'form_build_id', 'form_token', 'form_id', 'op', 'add', 'condition']);
     $settings = array_diff_key($form_state['values'], $excluded);
     $this->settings = array_merge($this->settings, $settings);
   }
@@ -121,7 +121,7 @@ class LayoutAccess extends LayoutHandler {
    */
   function getRequiredContexts() {
     $access_info = layout_get_access_info($this->plugin);
-    return isset($access_info['required contexts']) ? $access_info['required contexts'] : array();
+    return isset($access_info['required contexts']) ? $access_info['required contexts'] : [];
   }
 
   /**
@@ -141,12 +141,12 @@ class LayoutAccess extends LayoutHandler {
  * A common base class used for access handlers that may be negated.
  */
 class LayoutAccessNegatable extends LayoutAccess {
-  function __construct($plugin_name, array $data = array()) {
+  function __construct($plugin_name, array $data = []) {
     parent::__construct($plugin_name, $data);
     // Ensure a setting always exists for negation.
-    $this->settings += array(
+    $this->settings += [
       'negate' => FALSE,
-    );
+    ];
   }
 
   /**
@@ -154,12 +154,12 @@ class LayoutAccessNegatable extends LayoutAccess {
    */
   function form(&$form, &$form_state) {
     parent::form($form, $form_state);
-    $form['negate'] = array(
+    $form['negate'] = [
       '#type' => 'checkbox',
       '#title' => t('Reverse (NOT)'),
       '#weight' => 100,
       '#default_value' => $this->settings['negate'],
-    );
+    ];
   }
 
   /**
@@ -184,8 +184,8 @@ class LayoutAccessBroken extends LayoutAccess {
   function form(&$form, &$form_state) {
     $info = layout_get_access_info($this->plugin);
     $class = isset($info['class']) ? $info['class'] : t('Unknown');
-    $form['error'] = array(
-      '#markup' => t('The class "@class" for the "@plugin" plugin could not be found.', array('@class' => $class, '@plugin' => $this->plugin)),
-    );
+    $form['error'] = [
+      '#markup' => t('The class "@class" for the "@plugin" plugin could not be found.', ['@class' => $class, '@plugin' => $this->plugin]),
+    ];
   }
 }

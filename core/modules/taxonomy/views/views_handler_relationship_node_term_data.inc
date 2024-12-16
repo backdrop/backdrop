@@ -26,24 +26,24 @@ class views_handler_relationship_node_term_data extends views_handler_relationsh
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['vocabularies'] = array('default' => array());
+    $options['vocabularies'] = ['default' => []];
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
     $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
-    $options = array();
+    $options = [];
     foreach ($vocabularies as $voc) {
       $options[$voc->machine_name] = check_plain($voc->name);
     }
 
-    $form['vocabularies'] = array(
+    $form['vocabularies'] = [
       '#type' => 'checkboxes',
       '#title' => t('Vocabularies'),
       '#options' => $options,
       '#default_value' => $this->options['vocabularies'],
       '#description' => t('Choose which vocabularies you wish to relate. Remember that every term found will create a new record, so this relationship is best used on just one vocabulary that has only one term per node.'),
-    );
+    ];
     parent::options_form($form, $form_state);
   }
 
@@ -77,7 +77,7 @@ class views_handler_relationship_node_term_data extends views_handler_relationsh
         $query->addTag('taxonomy_term_access');
       }
       $query->fields('td');
-      $query->fields('tn', array('nid'));
+      $query->fields('tn', ['nid']);
       $def['table formula'] = $query;
     }
 

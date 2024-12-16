@@ -33,7 +33,7 @@ class views_plugin_argument_validate extends views_plugin {
    * Retrieve the options when this is a new access
    * control plugin
    */
-  function option_definition() { return array(); }
+  function option_definition() { return []; }
 
   /**
    * Provide the default form for setting options.
@@ -48,7 +48,7 @@ class views_plugin_argument_validate extends views_plugin {
   /**
    * Provide the default form form for submitting options
    */
-  function options_submit(&$form, &$form_state, &$options = array()) { }
+  function options_submit(&$form, &$form_state, &$options = []) { }
 
   /**
    * Convert options from the older style.

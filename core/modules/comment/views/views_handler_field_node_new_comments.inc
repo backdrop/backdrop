@@ -24,24 +24,24 @@ class views_handler_field_node_new_comments extends views_handler_field_numeric 
     parent::construct();
     $this->additional_fields['nid'] = 'nid';
     $this->additional_fields['type'] = 'type';
-    $this->additional_fields['comment_count'] = array('table' => 'node_comment_statistics', 'field' => 'comment_count');
+    $this->additional_fields['comment_count'] = ['table' => 'node_comment_statistics', 'field' => 'comment_count'];
   }
 
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['link_to_comment'] = array('default' => TRUE, 'bool' => TRUE);
+    $options['link_to_comment'] = ['default' => TRUE, 'bool' => TRUE];
 
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
-    $form['link_to_comment'] = array(
+    $form['link_to_comment'] = [
       '#title' => t('Link this field to new comments'),
       '#description' => t("Enable to override this field's links."),
       '#type' => 'checkbox',
       '#default_value' => $this->options['link_to_comment'],
-    );
+    ];
 
     parent::options_form($form, $form_state);
   }
@@ -58,14 +58,14 @@ class views_handler_field_node_new_comments extends views_handler_field_numeric 
       return;
     }
 
-    $nids = array();
-    $ids = array();
+    $nids = [];
+    $ids = [];
     foreach ($values as $id => $result) {
       $nids[] = $result->{$this->aliases['nid']};
       $values[$id]->{$this->field_alias} = 0;
       // Create a reference so we can find this record in the values again.
       if (empty($ids[$result->{$this->aliases['nid']}])) {
-        $ids[$result->{$this->aliases['nid']}] = array();
+        $ids[$result->{$this->aliases['nid']}] = [];
       }
       $ids[$result->{$this->aliases['nid']}][] = $id;
     }
@@ -73,12 +73,12 @@ class views_handler_field_node_new_comments extends views_handler_field_numeric 
     if ($nids) {
       $result = db_query("SELECT n.nid, COUNT(c.cid) as num_comments FROM {node} n INNER JOIN {comment} c ON n.nid = c.nid
         LEFT JOIN {history} h ON h.nid = n.nid AND h.uid = :h_uid WHERE n.nid IN (:nids)
-        AND c.changed > GREATEST(COALESCE(h.timestamp, :timestamp), :timestamp) AND c.status = :status GROUP BY n.nid  ", array(
+        AND c.changed > GREATEST(COALESCE(h.timestamp, :timestamp), :timestamp) AND c.status = :status GROUP BY n.nid  ", [
           ':status' => COMMENT_PUBLISHED,
           ':h_uid' => $user->uid,
           ':nids' => $nids,
           ':timestamp' => NODE_NEW_LIMIT,
-        ));
+        ]);
 
       foreach ($result as $node) {
         foreach ($ids[$node->nid] as $id) {

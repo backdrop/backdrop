@@ -58,22 +58,22 @@ class views_handler_filter_boolean_operator extends views_handler_filter {
   function get_value_options() {
     if (isset($this->definition['type'])) {
       if ($this->definition['type'] == 'yes-no') {
-        $this->value_options = array(1 => t('Yes'), 0 => t('No'));
+        $this->value_options = [1 => t('Yes'), 0 => t('No')];
       }
       if ($this->definition['type'] == 'on-off') {
-        $this->value_options = array(1 => t('On'), 0 => t('Off'));
+        $this->value_options = [1 => t('On'), 0 => t('Off')];
       }
       if ($this->definition['type'] == 'enabled-disabled') {
-        $this->value_options = array(1 => t('Enabled'), 0 => t('Disabled'));
+        $this->value_options = [1 => t('Enabled'), 0 => t('Disabled')];
       }
       if ($this->definition['type'] == 'active-blocked') {
-        $this->value_options = array(1 => t('Active'), 0 => t('Blocked'));
+        $this->value_options = [1 => t('Active'), 0 => t('Blocked')];
       }
     }
 
     // Provide a fallback if the above didn't set anything.
     if (!isset($this->value_options)) {
-      $this->value_options = array(1 => t('True'), 0 => t('False'));
+      $this->value_options = [1 => t('True'), 0 => t('False')];
     }
   }
 
@@ -86,7 +86,7 @@ class views_handler_filter_boolean_operator extends views_handler_filter {
   }
 
   function operator_form(&$form, &$form_state) {
-    $form['operator'] = array();
+    $form['operator'] = [];
   }
 
   function value_form(&$form, &$form_state) {
@@ -102,12 +102,12 @@ class views_handler_filter_boolean_operator extends views_handler_filter {
       // Configuring a filter: use radios for clarity.
       $filter_form_type = 'radios';
     }
-    $form['value'] = array(
+    $form['value'] = [
       '#type' => $filter_form_type,
       '#title' => $this->value_value,
       '#options' => $this->value_options,
       '#default_value' => $this->value,
-    );
+    ];
     if (!empty($this->options['exposed'])) {
       $identifier = $this->options['expose']['identifier'];
       if (!empty($form_state['exposed']) && !isset($form_state['input'][$identifier])) {
@@ -119,7 +119,7 @@ class views_handler_filter_boolean_operator extends views_handler_filter {
         if ($form['value']['#type'] != 'select') {
           $any_label = check_plain($any_label);
         }
-        $form['value']['#options'] = array('All' => $any_label) + $form['value']['#options'];
+        $form['value']['#options'] = ['All' => $any_label] + $form['value']['#options'];
       }
     }
   }

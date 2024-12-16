@@ -22,7 +22,7 @@ class views_handler_filter_fields_compare extends views_handler_filter {
   function option_definition() {
     $options = parent::option_definition();
 
-    $options['left_field'] = $options['right_field'] = array('default' => '');
+    $options['left_field'] = $options['right_field'] = ['default' => ''];
 
     return $options;
   }
@@ -31,21 +31,21 @@ class views_handler_filter_fields_compare extends views_handler_filter {
    * Provide a list of all operators.
    */
   function fields_operator_options() {
-    return array(
+    return [
       '<' => t('Is less than'),
       '<=' => t('Is less than or equal to'),
       '=' => t('Is equal to'),
       '<>' =>  t('Is not equal to'),
       '>=' => t('Is greater than or equal to'),
       '>' => t('Is greater than')
-    );
+    ];
   }
 
   /**
    * Provide a list of available fields.
    */
   function field_options() {
-    $options = array();
+    $options = [];
 
     $field_handlers = $this->view->display_handler->get_handlers('field');
     foreach ($field_handlers as $field => $handler) {
@@ -65,29 +65,29 @@ class views_handler_filter_fields_compare extends views_handler_filter {
 
     $field_options = $this->field_options();
 
-    $form['left_field'] = array(
+    $form['left_field'] = [
       '#type' => 'select',
       '#title' => t('Left field'),
       '#default_value' => $this->options['left_field'],
       '#options' => $field_options,
       '#weight' => -3,
-    );
+    ];
 
-    $form['operator'] = array(
+    $form['operator'] = [
       '#type' => 'select',
       '#title' => t('Operator'),
       '#default_value' => $this->options['operator'],
       '#options' => $this->fields_operator_options(),
       '#weight' => -2,
-    );
+    ];
 
-    $form['right_field'] = array(
+    $form['right_field'] = [
       '#type' => 'select',
       '#title' => t('Right field'),
       '#default_value' => $this->options['right_field'],
       '#options' => $field_options,
       '#weight' => -1,
-    );
+    ];
 
   }
 

@@ -12,27 +12,27 @@ function file_list_types_page() {
   $types = file_type_get_types();
   $names = file_type_get_names();
   $field_ui = module_exists('field_ui') && user_access('administer fields');
-  $header = array(t('Name'), t('Description'), t('Storage state'), t('Operations'));
-  $rows_enabled = array();
-  $rows_disabled = array();
+  $header = [t('Name'), t('Description'), t('Storage state'), t('Operations')];
+  $rows_enabled = [];
+  $rows_disabled = [];
   $weight = 0;
 
   // Sort the list of content types by name instead of machine name.
   natcasesort($names);
 
   foreach ($names as $key => $type) {
-    $links = array();
+    $links = [];
     $type = $types[$key];
     $weight++;
-    $row = array(
-      array(
-        'data' => theme('label_machine_name__file', array(
+    $row = [
+      [
+        'data' => theme('label_machine_name__file', [
           'label' => $type->name,
           'machine_name' => $type->type,
-        )),
-      ),
+        ]),
+      ],
       filter_xss_admin($type->description),
-    );
+    ];
 
 
     if ($type->storage === FILE_TYPE_STORAGE_OVERRIDE) {
@@ -49,92 +49,92 @@ function file_list_types_page() {
 
     $path = isset($file_entity_info['bundles'][$type->type]['admin']['real path']) ? $file_entity_info['bundles'][$type->type]['admin']['real path'] : NULL;
 
-    $links['configure'] = array(
+    $links['configure'] = [
       'title' => t('Configure'),
       'href' => $path,
       'weight' => 0,
-    );
+    ];
 
     if ($field_ui) {
-      $links['fields'] = array(
+      $links['fields'] = [
         'title' => t('Manage fields'),
         'href' => $path . '/fields',
         'weight' => 5,
-      );
-      $links['display'] = array(
+      ];
+      $links['display'] = [
         'title' => t('Manage display'),
         'href' => $path . '/display',
         'weight' => 10,
-      );
+      ];
     }
-    $links['file-display'] = array(
+    $links['file-display'] = [
       'title' => t('Manage file display'),
       'href' => $path . '/file-display',
       'weight' => 11,
-    );
+    ];
 
     if ($type->disabled) {
-      $links['enable'] = array(
+      $links['enable'] = [
         'title' => t('Enable'),
         'href' => $path . '/enable',
-        'query' => array('token' => backdrop_get_token($type->type)),
+        'query' => ['token' => backdrop_get_token($type->type)],
         'weight' => -10,
-      );
+      ];
     }
     else {
-      $links['disable'] = array(
+      $links['disable'] = [
         'title' => t('Disable'),
         'href' => $path . '/disable',
-        'query' => array('token' => backdrop_get_token($type->type)),
+        'query' => ['token' => backdrop_get_token($type->type)],
         'weight' => 20,
-      );
+      ];
     }
 
     if ($type->storage == FILE_TYPE_STORAGE_OVERRIDE) {
-      $links['revert'] = array(
+      $links['revert'] = [
         'title' => t('Revert'),
         'href' => $path . '/revert',
         'weight' => 15,
-      );
+      ];
     }
     elseif ($type->storage == FILE_TYPE_STORAGE_NORMAL) {
-      $links['delete'] = array(
+      $links['delete'] = [
         'title' => t('Delete'),
         'href' => $path . '/delete',
         'weight' => 25,
-      );
+      ];
     }
 
     backdrop_sort($links);
-    $row[] = array(
-      'data' => array(
+    $row[] = [
+      'data' => [
         '#type' => 'operations',
         '#links' => $links,
-      ),
-    );
+      ],
+    ];
 
     if ($type->disabled) {
-      $rows_disabled[] = array(
+      $rows_disabled[] = [
         'data' => $row,
-        'class' => array('disabled'),
-      );
+        'class' => ['disabled'],
+      ];
     }
     else {
-      $rows_enabled[] = array(
+      $rows_enabled[] = [
         'data' => $row,
-        'class' => array('enabled'),
-      );
+        'class' => ['enabled'],
+      ];
     }
   }
 
   $rows = array_merge($rows_enabled, $rows_disabled);
 
-  $build['file_table'] = array(
+  $build['file_table'] = [
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
-    '#empty' => t('No file types available. <a href="@link">Add file type</a>.', array('@link' => url('admin/structure/types/add'))),
-  );
+    '#empty' => t('No file types available. <a href="@link">Add file type</a>.', ['@link' => url('admin/structure/types/add')]),
+  ];
 
   return $build;
 }
@@ -151,88 +151,88 @@ function file_list_types_page() {
 function file_type_form($form, &$form_state, $type = NULL) {
   if (!isset($type->type)) {
     // This is a new type.
-    $type = array(
+    $type = [
       'type' => '',
       'name' => '',
       'description' => '',
       'module' => 'file',
-      'mimetypes' => array(),
-    );
+      'mimetypes' => [],
+    ];
     $type = (object) $type;
   }
   $form['#file_type'] = $type;
 
-  $form['module'] = array(
+  $form['module'] = [
     '#type' => 'hidden',
     '#value' => $type->module,
-  );
+  ];
 
-  $form['name'] = array(
+  $form['name'] = [
     '#type' => 'textfield',
     '#title' => t('Name'),
     '#description' => t('This is the human readable name of the file type.'),
     '#required' => TRUE,
     '#default_value' => $type->name,
     '#size' => 30,
-  );
+  ];
 
-  $form['type'] = array(
+  $form['type'] = [
     '#type' => 'machine_name',
     '#default_value' => $type->type,
     '#maxlength' => 255,
     '#disabled' => (bool) $type->type,
-    '#machine_name' => array(
+    '#machine_name' => [
       'exists' => 'file_type_load',
-      'source' => array('name'),
-    ),
+      'source' => ['name'],
+    ],
     '#description' => t('A unique machine-readable name for this file type. It must only contain lowercase letters, numbers, and underscores.'),
-  );
+  ];
 
-  $form['description'] = array(
+  $form['description'] = [
     '#type' => 'textarea',
     '#title' => t('Description'),
     '#description' => t('This is the description of the file type.'),
     '#default_value' => $type->description,
-  );
+  ];
 
   $mimetypes_description = t('The media (MIME) type(s) to be associated with this file type. When uploading a file, Backdrop automatically identifies the file type based on its media type. If multiple file types have the same media type, you will be prompted to manually select the file type.');
   $mimetypes_description .= ' ' . l(t('More information about media types'), 'https://en.wikipedia.org/wiki/Media_type') . '.';
-  $mimetypes_description .= theme('item_list', array('items' => array(
+  $mimetypes_description .= theme('item_list', ['items' => [
     t('Enter one media type per line'),
-    t('Asterisks can be used as wildcards (e.g.: !example)', array('!example' => '<code>image/*</code>')),
-  )));
-  $form['mimetypes'] = array(
+    t('Asterisks can be used as wildcards (e.g.: !example)', ['!example' => '<code>image/*</code>']),
+  ]]);
+  $form['mimetypes'] = [
     '#type' => 'textarea',
     '#title' => t('Media types'),
     '#description' => $mimetypes_description,
     '#default_value' => implode("\n", $type->mimetypes),
-  );
+  ];
 
   include_once BACKDROP_ROOT . '/core/includes/file.mimetypes.inc';
   $mimetypes = file_mimetype_mapping();
 
-  $form['mimetype_mapping'] = array(
+  $form['mimetype_mapping'] = [
     '#type' => 'fieldset',
     '#title' => t('Available media types'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
-  );
-  $form['mimetype_mapping']['mapping'] = array(
+  ];
+  $form['mimetype_mapping']['mapping'] = [
     '#theme' => 'item_list',
     '#items' => $mimetypes['mimetypes'],
-  );
+  ];
 
-  $form['actions'] = array('#type' => 'actions');
+  $form['actions'] = ['#type' => 'actions'];
 
-  $form['actions']['submit'] = array(
+  $form['actions']['submit'] = [
     '#type' => 'submit',
     '#value' => t('Save'),
-  );
+  ];
   if (!empty($type->type)) {
-    $form['actions']['delete'] = array(
+    $form['actions']['delete'] = [
       '#type' => 'submit',
       '#value' => t('Delete'),
-    );
+    ];
   }
 
   return $form;
@@ -250,7 +250,7 @@ function file_type_form_validate($form, &$form_state) {
   $valid_mimetypes = $mimetype_mapping['mimetypes'];
   $submitted_mimetypes = array_filter(array_map('trim', explode("\n", $form_state['values']['mimetypes'])));
 
-  $invalid_mimetypes = array();
+  $invalid_mimetypes = [];
   foreach ($submitted_mimetypes as $mimetype) {
     if (!file_match_mimetypes($mimetype, $valid_mimetypes)) {
       $invalid_mimetypes[] = $mimetype;
@@ -258,7 +258,7 @@ function file_type_form_validate($form, &$form_state) {
   }
 
   foreach ($invalid_mimetypes as $mimetype) {
-    form_set_error('mimetypes', t('The mimetype %mimetype is not a valid mimetype.', array('%mimetype' => $mimetype)));
+    form_set_error('mimetypes', t('The mimetype %mimetype is not a valid mimetype.', ['%mimetype' => $mimetype]));
   }
 }
 
@@ -275,9 +275,9 @@ function file_type_form_submit($form, &$form_state) {
     }
   }
   else {
-    $type = (object) array(
+    $type = (object) [
       'type' => $form_state['values']['type'],
-    );
+    ];
     $type->is_new = TRUE;
     $type->storage = FILE_TYPE_STORAGE_NORMAL;
   }
@@ -292,7 +292,7 @@ function file_type_form_submit($form, &$form_state) {
 
   file_type_save($type);
 
-  backdrop_set_message(t('The file type %type has been updated.', array('%type' => $type->name)));
+  backdrop_set_message(t('The file type %type has been updated.', ['%type' => $type->name]));
   $form_state['redirect'] = 'admin/structure/file-types';
 }
 
@@ -328,12 +328,12 @@ function file_display_form($form, &$form_state, $file_type, $view_mode) {
   $display = file_display_load($file_type->type, $view_mode);
 
   // Formatter type.
-  $form['display']['formatter'] = array(
+  $form['display']['formatter'] = [
     '#type' => 'radios',
     '#title' => t('Display type'),
-    '#options' => array(),
+    '#options' => [],
     '#default_value' => config_get('file_display.' . $file_type->type, $view_mode . '.formatter'),
-  );
+  ];
 
   $formatters = array_reverse($formatters);
 
@@ -343,33 +343,33 @@ function file_display_form($form, &$form_state, $file_type, $view_mode) {
 
     if (isset($formatter['settings callback']) && ($function = $formatter['settings callback']) && function_exists($function)) {
 
-      $defaults = !empty($formatter['default settings']) ? $formatter['default settings'] : array();
-      $settings = !empty($display['settings'][$name]) ? $display['settings'][$name] : array();
+      $defaults = !empty($formatter['default settings']) ? $formatter['default settings'] : [];
+      $settings = !empty($display['settings'][$name]) ? $display['settings'][$name] : [];
       $settings += $defaults;
 
       $settings_form = $function($form, $form_state, $settings, $name, $file_type->type, $view_mode);
 
       if (!empty($settings_form)) {
-        $form['display']['settings'][$name] = array(
+        $form['display']['settings'][$name] = [
           '#type' => 'fieldset',
-          '#title' => t('@label settings', array('@label' => $formatter['label'])),
-          '#parents' => array('display', 'settings', $name),
+          '#title' => t('@label settings', ['@label' => $formatter['label']]),
+          '#parents' => ['display', 'settings', $name],
           '#group' => 'display_settings',
-          '#states' => array(
-            'visible' => array(
-              ':input[name="display[formatter]"]' => array('value' => $name),
-            ),
-          ),
-        ) + $settings_form;
+          '#states' => [
+            'visible' => [
+              ':input[name="display[formatter]"]' => ['value' => $name],
+            ],
+          ],
+        ] + $settings_form;
       }
     }
   }
 
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
+  $form['actions'] = ['#type' => 'actions'];
+  $form['actions']['submit'] = [
     '#type' => 'submit',
     '#value' => t('Save configuration'),
-  );
+  ];
 
   return $form;
 }
@@ -381,13 +381,13 @@ function file_display_form_submit($form, &$form_state) {
   $file_type = $form['#file_type'];
   $view_mode = $form['#view_mode'];
   $formatter = $form_state['values']['display']['formatter'];
-  $settings = isset($form_state['values']['display']['settings'][$formatter]) ? $form_state['values']['display']['settings'] : array();
+  $settings = isset($form_state['values']['display']['settings'][$formatter]) ? $form_state['values']['display']['settings'] : [];
 
 
-  $display = array(
+  $display = [
     'formatter' => $formatter,
     'settings' => $settings,
-  );
+  ];
 
   file_display_save($form['#file_type'], $form['#view_mode'], $display);
   backdrop_set_message(t('Your settings have been saved.'));
@@ -404,10 +404,10 @@ function file_type_toggle_enable($type, $status) {
   $type->disabled = !$status;
   file_type_save($type);
   if ($status) {
-    $message = t('The file type %name has been enabled.', array('%name' => $type->name));
+    $message = t('The file type %name has been enabled.', ['%name' => $type->name]);
   }
   else {
-    $message = t('The file type %name has been disabled.', array('%name' => $type->name));
+    $message = t('The file type %name has been disabled.', ['%name' => $type->name]);
   }
   backdrop_set_message($message);
   backdrop_goto('admin/structure/file-types');
@@ -428,7 +428,7 @@ function file_type_status_confirm_submit($form, &$form_state) {
   file_type_save($type);
 
   $title = ($operation == 'enable') ? t('enabled') : t('disabled');
-  $t_args = array('%name' => $form_state['values']['name'], '@title' => $title);
+  $t_args = ['%name' => $form_state['values']['name'], '@title' => $title];
   backdrop_set_message(t('The file type %name has been @title.', $t_args));
   watchdog('file', '@title file type %name.', $t_args, WATCHDOG_NOTICE);
   $form_state['redirect'] = 'admin/structure/file-types';
@@ -438,9 +438,9 @@ function file_type_status_confirm_submit($form, &$form_state) {
  * Menu callback; revert a single file type.
  */
 function file_type_revert_confirm($form, &$form_state, $type) {
-  $form['type'] = array('#type' => 'value', '#value' => $type->type);
-  $form['name'] = array('#type' => 'value', '#value' => $type->name);
-  $message = t('Are you sure you want to revert the file type %type?', array('%type' => $type->name));
+  $form['type'] = ['#type' => 'value', '#value' => $type->type];
+  $form['name'] = ['#type' => 'value', '#value' => $type->name];
+  $message = t('Are you sure you want to revert the file type %type?', ['%type' => $type->name]);
   return confirm_form($form, $message, 'admin/structure/file-types', '', t('Revert'));
 }
 
@@ -453,7 +453,7 @@ function file_type_revert_confirm_submit($form, &$form_state) {
   config('file.type.' . $type)->delete();
   config_install_default_config('file', 'file.type.' . $type);
 
-  $t_args = array('%name' => $form_state['values']['name']);
+  $t_args = ['%name' => $form_state['values']['name']];
   backdrop_set_message(t('The file type %name has been reverted.', $t_args));
   watchdog('file', 'Reverted file type %name.', $t_args, WATCHDOG_NOTICE);
 
@@ -469,15 +469,15 @@ function file_type_revert_confirm_submit($form, &$form_state) {
  */
 function file_type_delete_confirm($form, &$form_state, $type) {
   $type = (array) $type;
-  $form['type'] = array('#type' => 'value', '#value' => $type['type']);
-  $form['name'] = array('#type' => 'value', '#value' => $type['name']);
+  $form['type'] = ['#type' => 'value', '#value' => $type['type']];
+  $form['name'] = ['#type' => 'value', '#value' => $type['name']];
 
-  $message = t('Are you sure you want to delete the file type %type?', array('%type' => $type['name']));
+  $message = t('Are you sure you want to delete the file type %type?', ['%type' => $type['name']]);
   $caption = '';
 
-  $num_files = db_query("SELECT COUNT(*) FROM {file_managed} WHERE type = :type", array(':type' => $type['type']))->fetchField();
+  $num_files = db_query("SELECT COUNT(*) FROM {file_managed} WHERE type = :type", [':type' => $type['type']])->fetchField();
   if ($num_files) {
-    $caption .= '<p>' . format_plural($num_files, '%type is used by 1 file on your site. If you remove this file type, you will not be able to edit the %type file and it may not display correctly.', '%type is used by @count pieces of file on your site. If you remove %type, you will not be able to edit the %type file and it may not display correctly.', array('%type' => $type['name'])) . '</p>';
+    $caption .= '<p>' . format_plural($num_files, '%type is used by 1 file on your site. If you remove this file type, you will not be able to edit the %type file and it may not display correctly.', '%type is used by @count pieces of file on your site. If you remove %type, you will not be able to edit the %type file and it may not display correctly.', ['%type' => $type['name']]) . '</p>';
   }
 
   $caption .= '<p>' . t('This action cannot be undone.') . '</p>';
@@ -491,7 +491,7 @@ function file_type_delete_confirm($form, &$form_state, $type) {
 function file_type_delete_confirm_submit($form, &$form_state) {
   file_type_delete($form_state['values']['type']);
 
-  $t_args = array('%name' => $form_state['values']['name']);
+  $t_args = ['%name' => $form_state['values']['name']];
   backdrop_set_message(t('The file type %name has been deleted.', $t_args));
   watchdog('file', 'Deleted file type %name.', $t_args, WATCHDOG_NOTICE);
 
@@ -505,83 +505,83 @@ function file_type_delete_confirm_submit($form, &$form_state) {
 function file_settings_form($form, &$form_state) {
   $config = config('file.settings');
 
-  $form = array('#config' => 'file.settings');
+  $form = ['#config' => 'file.settings'];
 
   $php_limit = format_size(file_upload_max_size());
-  $form['max_filesize'] = array(
+  $form['max_filesize'] = [
     '#type' => 'textfield',
     '#title' => t('Maximum upload size'),
     '#default_value' => $config->get('max_filesize'),
     '#description' => t('Enter a value like "512" (bytes), "80 KB" (kilobytes) or "50 MB" (megabytes). If left empty, the file sizes will be limited only by PHP\'s maximum post and file upload sizes.'),
     '#size' => 10,
-    '#element_validate' => array('_file_generic_settings_max_filesize'),
-    '#attributes' => array(
+    '#element_validate' => ['_file_generic_settings_max_filesize'],
+    '#attributes' => [
       'placeholder' => $php_limit,
-    ),
-  );
+    ],
+  ];
 
-  $form['default_file_directory'] = array(
+  $form['default_file_directory'] = [
     '#type' => 'textfield',
     '#title' => t('Default file directory'),
     '#description' => t('Subdirectory where files will be stored if the file is uploaded through the file/add page. This field supports tokens.') . ' ' . theme('token_tree_link'),
     '#default_value' => $config->get('default_file_directory'),
     '#maxlength' => NULL,
     '#field_prefix' => 'files/',
-  );
+  ];
 
-  $form['default_allowed_extensions'] = array(
+  $form['default_allowed_extensions'] = [
     '#type' => 'textfield',
     '#title' => t('Default allowed file extensions'),
     '#default_value' => $config->get('default_allowed_extensions'),
     '#description' => t('Separate extensions with a space and do not include the leading dot.'),
     '#maxlength' => NULL,
-  );
+  ];
 
-  $form['file_upload_wizard'] = array(
+  $form['file_upload_wizard'] = [
     '#type' => 'fieldset',
     '#title' => t('File upload wizard'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#description' => t('Configure the steps available when uploading a new file.'),
-  );
-  $form['file_upload_wizard']['upload_wizard_skip_file_type'] = array(
+  ];
+  $form['file_upload_wizard']['upload_wizard_skip_file_type'] = [
     '#type' => 'checkbox',
     '#title' => t('Skip filetype selection.'),
     '#default_value' => $config->get('upload_wizard_skip_file_type'),
     '#description' => t('The file type selection step is only available if the uploaded file falls into two or more file types. If this step is skipped, files with no available file type or two or more file types will not be assigned a file type.'),
-  );
-  $form['file_upload_wizard']['upload_wizard_skip_scheme'] = array(
+  ];
+  $form['file_upload_wizard']['upload_wizard_skip_scheme'] = [
     '#type' => 'checkbox',
     '#title' => t('Skip scheme selection.'),
     '#default_value' => $config->get('upload_wizard_skip_scheme'),
     '#description' => t('The scheme selection step is only available if two or more file destinations, such as public local files served by the webserver and private local files served by Drupal, are available. If this step is skipped, files will automatically be saved using the default download method.'),
-  );
-  $form['file_upload_wizard']['upload_wizard_skip_fields'] = array(
+  ];
+  $form['file_upload_wizard']['upload_wizard_skip_fields'] = [
     '#type' => 'checkbox',
     '#title' => t('Skip available fields.'),
     '#default_value' => $config->get('upload_wizard_skip_fields'),
     '#description' => t('The field selection step is only available if the file type the file belongs to has any available fields. If this step is skipped, any fields on the file will be left blank.'),
-  );
-  $form['file_replace_options'] = array(
+  ];
+  $form['file_replace_options'] = [
     '#type' => 'fieldset',
     '#title' => t('File replace options'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#description' => t('Default settings for how to handle file name changes during replace.'),
-  );
-  $form['file_replace_options']['keep_original_filename'] = array(
+  ];
+  $form['file_replace_options']['keep_original_filename'] = [
     '#type' => 'checkbox',
     '#title' => t('Keep original file name'),
     '#default_value' => $config->get('keep_original_filename'),
     '#description' => t('Rename the newly uploaded file to the name of the original file. This action cannot be undone.'),
-  );
+  ];
 
-  $form['protect_repeated_render'] = array(
+  $form['protect_repeated_render'] = [
     '#type' => 'checkbox',
     '#title' => t('Protect against repeat rendering'),
     '#default_value' => $config->get('protect_repeated_render'),
     '#description' => t('Avoid rendering the same file more than 10 times. This can be a sign of an image getting caught in a recursive render, but it can also be triggered when the same image is rendered more than 20 times, e.g. in an long content list or data feed.'),
-  );
+  ];
 
   return system_settings_form($form);
 }
@@ -700,7 +700,7 @@ function _file_sort_weight_label($a, $b) {
  */
 function file_type_classify_confirm($form, $form_state) {
   $form = confirm_form(
-    array(),
+    [],
     t('Are you sure you want to classify the file types?'),
     'admin/reports/status',
     t('This action will classify all files that are missing a type, and may be a lengthy process.'),
@@ -718,17 +718,17 @@ function file_type_classify_confirm($form, $form_state) {
  * @see file_type_classify_confirm()
  */
 function file_type_classify_confirm_submit($form, &$form_state) {
-  $result = db_query('SELECT fid FROM {file_managed} WHERE `type` = :db_condition_placeholder', array(':db_condition_placeholder' => 'undefined'));
+  $result = db_query('SELECT fid FROM {file_managed} WHERE `type` = :db_condition_placeholder', [':db_condition_placeholder' => 'undefined']);
   $fids = $result->fetchCol();
   if (!empty($fids)) {
-    $batch = array(
+    $batch = [
       'title' => t('Classifying files'),
-      'operations' => array(
-        array('file_type_classify_batch', array($fids)),
-      ),
+      'operations' => [
+        ['file_type_classify_batch', [$fids]],
+      ],
       'progress_message' => '',
       'finished' => 'file_type_classify_finished',
-    );
+    ];
     batch_set($batch);
   }
   else {

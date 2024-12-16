@@ -209,18 +209,18 @@ class SystemQueue implements BackdropReliableQueueInterface {
     // backdrop_get_schema() may not contain the queue table yet, so we cannot
     // rely on backdrop_write_record().
     $query = db_insert('queue')
-      ->fields(array(
+      ->fields([
         'name' => $this->name,
         'data' => serialize($data),
         // We cannot rely on REQUEST_TIME because many items might be created
         // by a single request which takes longer than 1 second.
         'created' => time(),
-      ));
+      ]);
     return (bool) $query->execute();
   }
 
   public function numberOfItems() {
-    return db_query('SELECT COUNT(item_id) FROM {queue} WHERE name = :name', array(':name' => $this->name))->fetchField();
+    return db_query('SELECT COUNT(item_id) FROM {queue} WHERE name = :name', [':name' => $this->name])->fetchField();
   }
 
   public function claimItem($lease_time = 30) {
@@ -229,7 +229,7 @@ class SystemQueue implements BackdropReliableQueueInterface {
     // until an item is successfully claimed or we are reasonably sure there
     // are no unclaimed items left.
     while (TRUE) {
-      $item = db_query_range('SELECT data, item_id FROM {queue} q WHERE expire = 0 AND name = :name ORDER BY created, item_id ASC', 0, 1, array(':name' => $this->name))->fetchObject();
+      $item = db_query_range('SELECT data, item_id FROM {queue} q WHERE expire = 0 AND name = :name ORDER BY created, item_id ASC', 0, 1, [':name' => $this->name])->fetchObject();
       if ($item) {
         // Try to update the item. Only one thread can succeed in UPDATEing the
         // same row. We cannot rely on REQUEST_TIME because items might be
@@ -238,9 +238,9 @@ class SystemQueue implements BackdropReliableQueueInterface {
         // time from the lease, and will tend to reset items before the lease
         // should really expire.
         $update = db_update('queue')
-          ->fields(array(
+          ->fields([
             'expire' => time() + $lease_time,
-          ))
+          ])
           ->condition('item_id', $item->item_id)
           ->condition('expire', 0);
         // If there are affected rows, this update succeeded.
@@ -258,9 +258,9 @@ class SystemQueue implements BackdropReliableQueueInterface {
 
   public function releaseItem($item) {
     $update = db_update('queue')
-      ->fields(array(
+      ->fields([
         'expire' => 0,
-      ))
+      ])
       ->condition('item_id', $item->item_id);
       return $update->execute();
   }
@@ -313,7 +313,7 @@ class MemoryQueue implements BackdropQueueInterface {
    *   Arbitrary string. The name of the queue to work with.
    */
   public function __construct($name) {
-    $this->queue = array();
+    $this->queue = [];
     $this->id_sequence = 0;
   }
 
@@ -359,7 +359,7 @@ class MemoryQueue implements BackdropQueueInterface {
   }
 
   public function deleteQueue() {
-    $this->queue = array();
+    $this->queue = [];
     $this->id_sequence = 0;
   }
 }

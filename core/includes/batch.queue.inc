@@ -25,7 +25,7 @@ class BatchQueue extends SystemQueue {
    * claimed repeatedly until it is deleted.
    */
   public function claimItem($lease_time = 0) {
-    $item = db_query_range('SELECT data, item_id FROM {queue} q WHERE name = :name ORDER BY item_id ASC', 0, 1, array(':name' => $this->name))->fetchObject();
+    $item = db_query_range('SELECT data, item_id FROM {queue} q WHERE name = :name ORDER BY item_id ASC', 0, 1, [':name' => $this->name])->fetchObject();
     if ($item) {
       $item->data = unserialize($item->data);
       return $item;
@@ -39,8 +39,8 @@ class BatchQueue extends SystemQueue {
    * This is specific to Batch API and is not part of the BackdropQueueInterface.
    */
   public function getAllItems() {
-    $result = array();
-    $items = db_query('SELECT data FROM {queue} q WHERE name = :name ORDER BY item_id ASC', array(':name' => $this->name))->fetchAll();
+    $result = [];
+    $items = db_query('SELECT data FROM {queue} q WHERE name = :name ORDER BY item_id ASC', [':name' => $this->name])->fetchAll();
     foreach ($items as $item) {
       $result[] = unserialize($item->data);
     }
@@ -74,7 +74,7 @@ class BatchMemoryQueue extends MemoryQueue {
    * This is specific to Batch API and is not part of the BackdropQueueInterface.
    */
   public function getAllItems() {
-    $result = array();
+    $result = [];
     foreach ($this->queue as $item) {
       $result[] = $item->data;
     }

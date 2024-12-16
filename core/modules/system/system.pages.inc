@@ -8,7 +8,7 @@
  * Page callback to output a token tree as an empty page.
  */
 function system_token_output() {
-  $types = isset($_GET['token_types']) ? backdrop_json_decode($_GET['token_types']) : array();
+  $types = isset($_GET['token_types']) ? backdrop_json_decode($_GET['token_types']) : [];
   $globals = isset($_GET['global_types']) ? backdrop_json_decode($_GET['global_types']) : TRUE;
   $query = backdrop_get_query_parameters();
   $show_restricted = $query['show_restricted'];
@@ -17,7 +17,7 @@ function system_token_output() {
   $out = backdrop_render($out);
 
   if (backdrop_is_ajax()) {
-    $dialog_options = array(
+    $dialog_options = [
       'dialogClass' => 'token-browser-dialog',
       'modal' => FALSE,
       'draggable' => TRUE,
@@ -25,14 +25,14 @@ function system_token_output() {
       'autoResize' => FALSE,
       'width' => '800',
       'height' => '600',
-    );
-    $commands = array(
+    ];
+    $commands = [
       ajax_command_open_dialog('#token-dialog', t('Token Browser'), $out, $dialog_options),
-    );
-    $return = array(
+    ];
+    $return = [
       '#type' => 'ajax',
       '#commands' => $commands,
-    );
+    ];
     return $return;
   }
   else {
@@ -58,15 +58,15 @@ function system_token_browser_tree_access() {
  * @since 1.30.0 Function added.
  */
 function system_token_browser($type) {
-  $definition = array(
-    'ancestors' => array(
+  $definition = [
+    'ancestors' => [
       'filter' => FILTER_CALLBACK,
       'options' => 'filter_xss',
-    ),
-  );
+    ],
+  ];
 
   $input = filter_input_array(INPUT_GET, $definition);
-  $ancestors = isset($input['ancestors']) ? backdrop_json_decode($input['ancestors']) : array();
+  $ancestors = isset($input['ancestors']) ? backdrop_json_decode($input['ancestors']) : [];
   $show_restricted = (isset($_GET['show_restricted']) && $_GET['show_restricted'] == 'true') ? TRUE : FALSE;
 
   return system_token_browser_build_level($type, $ancestors, $show_restricted);
@@ -116,7 +116,7 @@ function system_token_browser_tree_build_content($types, $global_types, $show_re
   global $language;
 
   $info = token_get_info();
-  $rows = array();
+  $rows = [];
   $posinset = 1;
 
   if ($types === 'all') {
@@ -126,12 +126,12 @@ function system_token_browser_tree_build_content($types, $global_types, $show_re
     $types = array_merge($types, token_get_global_token_types());
   }
 
-  $hash = hash('sha256', serialize(array(
+  $hash = hash('sha256', serialize([
     'token_types' => $types,
     'global_types' => $global_types,
     'language' => $language->langcode,
     'show_restricted' => $show_restricted,
-  )));
+  ]));
 
   $cid = 'token-browser-build:' . $hash;
 
@@ -144,60 +144,60 @@ function system_token_browser_tree_build_content($types, $global_types, $show_re
       continue;
     }
 
-    $rows[] = array(
-      'data' => array(
-        array(
+    $rows[] = [
+      'data' => [
+        [
           'data' => '<button aria-label="Expand">Expand</button>' . $type_info['name'],
           'data-type' => $type,
           'role' => 'gridcell',
-          'class' => array('token-name'),
-        ),
-        array(
+          'class' => ['token-name'],
+        ],
+        [
           'data' => $type,
           'role' => 'gridcell',
-          'class' => array('token-raw'),
-        ),
-        array(
+          'class' => ['token-raw'],
+        ],
+        [
           'data' => isset($type_info['description']) ? $type_info['description'] : '',
           'role' => 'gridcell',
-          'class' => array('token-description'),
-        ),
-      ),
+          'class' => ['token-description'],
+        ],
+      ],
       'role' => 'row',
       'aria-level' => '1',
       'aria-posinset' => $posinset++,
       'aria-expanded' => 'false',
       'aria-busy' => 'false',
-      'class' => array('tree-grid-parent'),
+      'class' => ['tree-grid-parent'],
       'no_striping' => TRUE,
-    );
+    ];
   }
 
-  $build = array(
+  $build = [
     '#theme' => 'table',
-    '#header' => array(
+    '#header' => [
       t('Name'),
       t('Token'),
       t('Description'),
-    ),
+    ],
     '#rows' => $rows,
-    '#attributes' => array(
+    '#attributes' => [
       'role' => 'treetable',
       'aria-label' => 'Token Browser',
-      'class' => array(
+      'class' => [
         'tree-grid',
-      ),
-    ),
-    '#attached' => array(
-      'library' => array(
-        array('system', 'token'),
-      ),
-    ),
-    '#cache' => array(
+      ],
+    ],
+    '#attached' => [
+      'library' => [
+        ['system', 'token'],
+      ],
+    ],
+    '#cache' => [
       'cid' => 'token-browser-render:' . $hash,
       'bin' => 'cache_token',
-    ),
-  );
+    ],
+  ];
 
   cache_set($cid, $build, 'cache_token');
 
@@ -223,7 +223,7 @@ function system_token_browser_tree_build_content($types, $global_types, $show_re
 function system_token_browser_build_level($type, array $ancestors, $show_restricted) {
   global $language;
 
-  $level = array();
+  $level = [];
   $info = token_get_info();
 
   if (!isset($info['types'][$type]) || !isset($info['tokens'][$type])) {
@@ -234,12 +234,12 @@ function system_token_browser_build_level($type, array $ancestors, $show_restric
     $type = $entity_token['token type'];
   }
 
-  $cid = 'token-browser-level:' . hash('sha256', serialize(array(
+  $cid = 'token-browser-level:' . hash('sha256', serialize([
     'type' => $type,
     'ancestors' => $ancestors,
     'language' => $language->langcode,
     'show_restricted' => $show_restricted,
-  )));
+  ]));
 
   if ($cache = cache_get($cid, 'cache_token')) {
     return $cache->data;

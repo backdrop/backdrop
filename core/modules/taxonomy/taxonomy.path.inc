@@ -8,7 +8,7 @@
  * Implements hook_path_info().
  */
 function taxonomy_path_info() {
-  $info['taxonomy_term'] = array(
+  $info['taxonomy_term'] = [
     'entity type' => 'taxonomy_term',
     'label' => t('Taxonomy term'),
     'pattern label' => t('Default URL alias pattern for taxonomy terms'),
@@ -19,29 +19,29 @@ function taxonomy_path_info() {
     'batch file' => 'taxonomy.path.inc',
     'batch file path' => backdrop_get_path('module', 'taxonomy'),
     'source prefix' => 'taxonomy/term/',
-  );
+  ];
 
-  $languages = array();
+  $languages = [];
   if (module_exists('language')) {
-    $languages = array(LANGUAGE_NONE => (object) array(
+    $languages = [LANGUAGE_NONE => (object) [
       'name' => t('Language neutral'),
       'langcode' => LANGUAGE_NONE,
-    )) + language_list();
+    ]] + language_list();
   }
 
   $vocabularies = taxonomy_get_vocabularies();
   if (count($vocabularies)) {
-    $info['taxonomy_term']['pattern items'] = array();
+    $info['taxonomy_term']['pattern items'] = [];
     $info['taxonomy_term']['pattern items label'] = t('URL alias patterns for specific vocabularies');
     foreach ($vocabularies as $vocabulary_name => $vocabulary) {
       if (count($languages) && !empty($vocabulary->language)) {
-        $info['taxonomy_term']['pattern items'][$vocabulary_name] = t('Default URL alias pattern for all taxonomy terms in the vocabulary %vocab-name (any language)', array('%vocab-name' => $vocabulary->name));
+        $info['taxonomy_term']['pattern items'][$vocabulary_name] = t('Default URL alias pattern for all taxonomy terms in the vocabulary %vocab-name (any language)', ['%vocab-name' => $vocabulary->name]);
         foreach ($languages as $langcode => $language) {
-          $info['taxonomy_term']['pattern items'][$vocabulary_name . '_' . $langcode] = t('Taxonomy terms in the vocabulary %vocab-name in %language', array('%vocab-name' => $vocabulary->name, '%language' => $language->name));
+          $info['taxonomy_term']['pattern items'][$vocabulary_name . '_' . $langcode] = t('Taxonomy terms in the vocabulary %vocab-name in %language', ['%vocab-name' => $vocabulary->name, '%language' => $language->name]);
         }
       }
       else {
-        $info['taxonomy_term']['pattern items'][$vocabulary_name] = t('Taxonomy terms in the vocabulary %vocab-name', array('%vocab-name' => $vocabulary->name));
+        $info['taxonomy_term']['pattern items'][$vocabulary_name] = t('Taxonomy terms in the vocabulary %vocab-name', ['%vocab-name' => $vocabulary->name]);
       }
     }
   }
@@ -58,7 +58,7 @@ function taxonomy_path_type_delete_callback($types) {
   $query->condition('td.vocabulary', $types, 'IN');
   $tids = $query->execute()->fetchCol();
 
-  $sources = array();
+  $sources = [];
   foreach ($tids as $tid) {
     $sources[] = 'taxonomy/term/' . $tid;
   }
@@ -121,7 +121,7 @@ function taxonomy_path_bulk_update_batch_process(&$context) {
 
   $context['sandbox']['count'] += count($tids);
   $context['sandbox']['current'] = max($tids);
-  $context['message'] = t('Updated alias for term @tid.', array('@tid' => end($tids)));
+  $context['message'] = t('Updated alias for term @tid.', ['@tid' => end($tids)]);
 
   if ($context['sandbox']['count'] != $context['sandbox']['total']) {
     $context['finished'] = $context['sandbox']['count'] / $context['sandbox']['total'];
