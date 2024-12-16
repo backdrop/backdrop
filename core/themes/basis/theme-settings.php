@@ -82,16 +82,16 @@ function basis_form_system_theme_settings_alter(&$form, &$form_state, $form_id =
   $install_version = config_get('system.core', 'install_version');
 
   $css_update_options = array(
-    'no_updates' => t('No updates'),
+    'no_updates' => t('Default'),
     'all_updates' => t('All updates'),
-    'custom' => t('Updates thru specific version.'),
+    'custom' => t('Specific version.'),
   );
 
   $form['css_updates'] = array(
     '#type' => 'details',
     '#open' => FALSE,
-    '#summary' => t('Advanced CSS Updates'),
-    '#details' => t('There are occasional updates to Basis that may affect existing sites. For more information and details, see the <a href="https://docs.backdropcms.org/documentation/layouts-and-templates" target="_blank">online documentation</a>.</br></br>Select which updates you would like to accept. '),
+    '#summary' => t('CSS Updates'),
+    '#details' => t('There are occasionally updates available for Basis that may affect existing sites, changing this setting may cause unexpected changes to your theme. For more information and details, see the <a href="https://docs.backdropcms.org/documentation/layouts-and-templates" target="_blank">online documentation</a>.</br></br>Select which updates you would like to accept. '),
     '#attributes' => array(
       'class' => array('description'),
     ),
@@ -124,7 +124,7 @@ function basis_form_system_theme_settings_alter(&$form, &$form_state, $form_id =
   $form['css_updates']['css_update_version'] = [
     '#type' => 'select',
     '#title' => t('Version'),
-    '#description' => t('Accept CSS changes through this specific version of Backdrop.'),
+    '#description' => t('Accept CSS changes up to this specific version of Backdrop.'),
     '#options' => $options,
     '#default_value' => $default_version_key,
     '#empty_option' => t('Default'),

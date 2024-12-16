@@ -70,7 +70,7 @@ function basis_preprocess_page(&$variables) {
  * Every time we add supplemental CSS we add the version number here.
  */
 function basis_supplemental_css_versions() {
-  return array('1.23', '1.28.4', '1.30','1.31.5');
+  return array('No updates', '1.23', '1.28.4', '1.30','1.31.5');
 }
 
 /**
