@@ -6,7 +6,7 @@
  * These implementations:
  * - Ensure FIFO ordering.
  * - Allow an item to be repeatedly claimed until it is actually deleted (no
- *   notion of lease time or 'expire' date), to allow multipass operations.
+ *   notion of lease time or 'expire' date), to allow multi-pass operations.
  */
 
 /**
