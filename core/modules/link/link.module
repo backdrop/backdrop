@@ -789,6 +789,8 @@ function link_theme() {
  *     ),
  *   ),
  * @endcode
+ *
+ * @since 1.30.0 The "#link_field_options" property added.
  */
 function link_element_info() {
   $elements = array();
