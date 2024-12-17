@@ -45,7 +45,7 @@ function basis_preprocess_page(&$variables) {
   // Process supplemental CSS versions.
   $update_css_versions = basis_css_versions_updated();
   foreach ($update_css_versions as $update_css_version) {
-    if ($update_css_version !== 'No updates') {
+    if ($update_css_version) {
       if ($update_preference === 'all_updates' || version_compare($update_version, $update_css_version, '>=')) {
         $update_css_version_class = 'update-' . str_replace('.', '-', $update_css_version);
         $variables['classes'][] = $update_css_version_class;
