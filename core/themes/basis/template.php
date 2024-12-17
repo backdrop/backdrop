@@ -11,9 +11,9 @@ function basis_css_alter(&$css) {
   // Remove Basis' `/css/component/menu-dropdown.css` and add breakpoint files
   // if using a custom breakpoint.
   $config = config('menu.settings');
+  $path = backdrop_get_path('theme', 'basis');
   if (isset($css[$path . '/css/component/menu-dropdown.css']) && $config->get('menu_breakpoint') == 'custom') {
     $dropdown_css = $css[$path . '/css/component/menu-dropdown.css'];
-    $path = backdrop_get_path('theme', 'basis');
     unset($css[$path . '/css/component/menu-dropdown.css']);
 
     $weight += 0.0001;
