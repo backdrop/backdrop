@@ -75,7 +75,7 @@ function basis_preprocess_page(&$variables) {
 
 // TODO: Before merging, we need to reset these values.
 function basis_css_versions_updated() {
-  return array('1.31.5', '1.30', '1.28.4', '1.23', 'No updates');
+  return array('1.31.5', '1.30', '1.28.4', '1.23');
 }
 
 /**
