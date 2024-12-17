@@ -91,7 +91,7 @@ function seven_admin_block_content($variables) {
 function seven_tablesort_indicator($variables) {
   $style = $variables['style'];
   if ($style == 'asc') {
-    return icon('seven-sort-up', array(
+    return icon('seven-sort-down', array(
       'alt' => t('sort ascending'),
       'attributes' => array(
         'class' => array('tablesort tablesort-asc'),
@@ -99,10 +99,10 @@ function seven_tablesort_indicator($variables) {
     ));
   }
   else {
-    return icon('seven-sort-down', array(
+    return icon('seven-sort-up', array(
       'alt' => t('sort descending'),
       'attributes' => array(
-        'class' => array('tablesort tablesort-asc'),
+        'class' => array('tablesort tablesort-desc'),
       ),
     ));
   }
