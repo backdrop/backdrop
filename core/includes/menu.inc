@@ -154,8 +154,11 @@ define('MENU_CALLBACK', 0x0000);
  *
  * Modules may "suggest" menu items that the administrator may enable. They act
  * just as callbacks do until enabled, at which time they act like normal items.
- * Note for the value: 0x0010 was a flag which is no longer used, but this way
- * the values of MENU_CALLBACK and MENU_SUGGESTED_ITEM are separate.
+ *
+ * Note: The value 0x0010 cannot be removed from the definition of
+ * MENU_SUGGESTED_ITEM. It is a flag (no longer used) that at one time ensured
+ * that the values of MENU_VISIBLE_IN_BREADCRUMB and MENU_SUGGESTED_ITEM were
+ * separate.
  */
 define('MENU_SUGGESTED_ITEM', MENU_VISIBLE_IN_BREADCRUMB | 0x0010);
 
@@ -730,7 +733,7 @@ function _menu_item_localize(&$item, $map, $link_translate = FALSE) {
   $item['localized_options'] = $item['options'];
   // All 'class' attributes are assumed to be an array during rendering, but
   // links stored in the database may use an old string value.
-  // @todo In order to remove this code we need to implement a database update
+  // @todo In order to remove this code we need to implement a site update,
   //   including unserializing all existing link options and running this code
   //   on them, as well as adding validation to menu_link_save().
   if (isset($item['options']['attributes']['class']) && is_string($item['options']['attributes']['class'])) {

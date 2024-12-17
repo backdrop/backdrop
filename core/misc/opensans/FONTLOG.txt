@@ -1,0 +1,23 @@
+FONTLOG for the Open Sans fonts
+
+This file provides detailed information on the Open Sans Font Software. This information should be distributed along with the Open Sans fonts and any derivative works.
+
+Basic Font Information
+
+Open Sans is a humanist sans serif typeface designed by Steve Matteson, Type Director of Ascender Corp. This version contains the complete 897 character set, which includes the standard ISO Latin 1, Latin CE, Greek and Cyrillic character sets. Open Sans was designed with an upright stress, open forms and a neutral, yet friendly appearance. It was optimized for print, web, and mobile interfaces, and has excellent legibility characteristics in its letterforms.
+
+To contribute to the project, see https://github.com/google/fonts/blob/master/CONTRIBUTING.md
+
+ChangeLog
+
+18 Jul 2018 (Micah Stupak) Open Sans VF v1.00 Open Sans v2.01
+- This document created
+
+Acknowledgements
+
+If you make modifications be sure to add your name (N), email (E), web-address (if you have one) (W) and description (D). This list is in alphabetical order.
+
+N: Micah Stupak
+E: micah@measureandfit.co
+W: http://www.measureandfit.co
+D: Engineer

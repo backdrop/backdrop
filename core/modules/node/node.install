@@ -825,7 +825,6 @@ function node_update_1008() {
                 'remember_roles' => array(
                   'anonymous' => 0,
                   'authenticated' => 0,
-                  'administrator' => 0,
                 ),
               ),
               'is_grouped' => FALSE,
@@ -854,7 +853,6 @@ function node_update_1008() {
                 'remember_roles' => array(
                   'anonymous' => 0,
                   'authenticated' => 0,
-                  'administrator' => 0,
                 ),
                 'reduce' => 0,
               ),
@@ -884,7 +882,6 @@ function node_update_1008() {
                 'remember_roles' => array(
                   'anonymous' => 0,
                   'authenticated' => 0,
-                  'administrator' => 0,
                 ),
               ),
               'is_grouped' => FALSE,
@@ -1206,45 +1203,36 @@ function node_update_1018() {
   if ($config->get('storage') == 2) {
     return;
   }
-  $data = array (
+  $data = array(
     'name' => 'node_admin_content',
     'description' => 'Administrative listing for managing content.',
     'module' => 'node',
     'storage' => 4,
     'tag' => 'default',
-    'disabled' => false,
+    'disabled' => FALSE,
     'base_table' => 'node',
     'human_name' => 'Administer content',
     'core' => '1.0',
-    'display' =>
-    array (
-      'default' =>
-      array (
+    'display' => array(
+      'default' => array(
         'display_title' => 'Default',
         'display_plugin' => 'default',
-        'display_options' =>
-        array (
-          'query' =>
-          array (
+        'display_options' => array(
+          'query' => array(
             'type' => 'views_query',
-            'options' =>
-            array (
+            'options' => array(
             ),
           ),
-          'access' =>
-          array (
+          'access' => array(
             'type' => 'perm',
             'perm' => 'access content overview',
           ),
-          'cache' =>
-          array (
+          'cache' => array(
             'type' => 'none',
           ),
-          'exposed_form' =>
-          array (
+          'exposed_form' => array(
             'type' => 'basic',
-            'options' =>
-            array (
+            'options' => array(
               'submit_button' => 'Filter',
               'reset_button' => 0,
               'reset_button_label' => 'Reset',
@@ -1256,25 +1244,21 @@ function node_update_1018() {
               'autosubmit_hide' => 1,
             ),
           ),
-          'pager' =>
-          array (
+          'pager' => array(
             'type' => 'full',
-            'options' =>
-            array (
+            'options' => array(
               'items_per_page' => '50',
               'offset' => '0',
               'id' => '0',
               'total_pages' => '',
               'quantity' => '9',
-              'tags' =>
-              array (
+              'tags' => array(
                 'first' => '« first',
                 'previous' => '‹ previous',
                 'next' => 'next ›',
                 'last' => 'last »',
               ),
-              'expose' =>
-              array (
+              'expose' => array(
                 'items_per_page' => 0,
                 'items_per_page_label' => 'Items per page',
                 'items_per_page_options' => '5, 10, 20, 40, 60',
@@ -1287,10 +1271,8 @@ function node_update_1018() {
           ),
           'style_plugin' => 'table',
           'row_plugin' => 'fields',
-          'fields' =>
-          array (
-            'scheduled_1' =>
-            array (
+          'fields' => array(
+            'scheduled_1' => array(
               'id' => 'scheduled_1',
               'table' => 'node',
               'field' => 'scheduled',
@@ -1299,8 +1281,7 @@ function node_update_1018() {
               'ui_name' => 'Scheduled status flag',
               'label' => '',
               'exclude' => 1,
-              'alter' =>
-              array (
+              'alter' => array(
                 'alter_text' => 1,
                 'text' => 'Not published (Scheduled)',
                 'make_link' => 0,
@@ -1332,7 +1313,7 @@ function node_update_1018() {
               'element_class' => '',
               'element_label_type' => '',
               'element_label_class' => '',
-              'element_label_colon' => false,
+              'element_label_colon' => FALSE,
               'element_wrapper_type' => '',
               'element_wrapper_class' => '',
               'element_default_classes' => 1,
@@ -1344,8 +1325,7 @@ function node_update_1018() {
               'custom_date_format' => '',
               'timezone' => '',
             ),
-            'bulk_form' =>
-            array (
+            'bulk_form' => array(
               'id' => 'bulk_form',
               'table' => 'node',
               'field' => 'bulk_form',
@@ -1358,7 +1338,7 @@ function node_update_1018() {
               'element_class' => '',
               'element_label_type' => '',
               'element_label_class' => '',
-              'element_label_colon' => false,
+              'element_label_colon' => FALSE,
               'element_wrapper_type' => '',
               'element_wrapper_class' => '',
               'element_default_classes' => 0,
@@ -1367,12 +1347,10 @@ function node_update_1018() {
               'empty_zero' => 0,
               'hide_alter_empty' => 1,
               'include_exclude' => 'exclude',
-              'selected_actions' =>
-              array (
+              'selected_actions' => array(
               ),
             ),
-            'title' =>
-            array (
+            'title' => array(
               'id' => 'title',
               'table' => 'node',
               'field' => 'title',
@@ -1380,8 +1358,7 @@ function node_update_1018() {
               'empty_zero' => 0,
               'link_to_node' => 1,
             ),
-            'type' =>
-            array (
+            'type' => array(
               'id' => 'type',
               'table' => 'node',
               'field' => 'type',
@@ -1405,8 +1382,7 @@ function node_update_1018() {
               'link_to_node' => 0,
               'machine_name' => 0,
             ),
-            'name' =>
-            array (
+            'name' => array(
               'id' => 'name',
               'table' => 'users',
               'field' => 'name',
@@ -1432,8 +1408,7 @@ function node_update_1018() {
               'anonymous_text' => '',
               'format_username' => 1,
             ),
-            'status' =>
-            array (
+            'status' => array(
               'id' => 'status',
               'table' => 'node',
               'field' => 'status',
@@ -1442,8 +1417,7 @@ function node_update_1018() {
               'ui_name' => '',
               'label' => 'Status',
               'exclude' => 0,
-              'alter' =>
-              array (
+              'alter' => array(
                 'alter_text' => 1,
                 'text' => 'Published',
                 'make_link' => 0,
@@ -1488,8 +1462,7 @@ function node_update_1018() {
               'type_custom_false' => '[scheduled]',
               'not' => 0,
             ),
-            'scheduled' =>
-            array (
+            'scheduled' => array(
               'id' => 'scheduled',
               'table' => 'node',
               'field' => 'scheduled',
@@ -1498,8 +1471,7 @@ function node_update_1018() {
               'ui_name' => '',
               'label' => 'Scheduled',
               'exclude' => 0,
-              'alter' =>
-              array (
+              'alter' => array(
                 'alter_text' => 0,
                 'text' => '',
                 'make_link' => 0,
@@ -1543,8 +1515,7 @@ function node_update_1018() {
               'custom_date_format' => '',
               'timezone' => '',
             ),
-            'changed' =>
-            array (
+            'changed' => array(
               'id' => 'changed',
               'table' => 'node',
               'field' => 'changed',
@@ -1569,8 +1540,7 @@ function node_update_1018() {
               'custom_date_format' => '',
               'timezone' => '',
             ),
-            'edit_node' =>
-            array (
+            'edit_node' => array(
               'id' => 'edit_node',
               'table' => 'views_entity_node',
               'field' => 'edit_node',
@@ -1583,7 +1553,7 @@ function node_update_1018() {
               'element_class' => '',
               'element_label_type' => '',
               'element_label_class' => '',
-              'element_label_colon' => false,
+              'element_label_colon' => FALSE,
               'element_wrapper_type' => '',
               'element_wrapper_class' => '',
               'element_default_classes' => 0,
@@ -1593,8 +1563,7 @@ function node_update_1018() {
               'hide_alter_empty' => 1,
               'text' => '',
             ),
-            'delete_node' =>
-            array (
+            'delete_node' => array(
               'id' => 'delete_node',
               'table' => 'views_entity_node',
               'field' => 'delete_node',
@@ -1607,7 +1576,7 @@ function node_update_1018() {
               'element_class' => '',
               'element_label_type' => '',
               'element_label_class' => '',
-              'element_label_colon' => false,
+              'element_label_colon' => FALSE,
               'element_wrapper_type' => '',
               'element_wrapper_class' => '',
               'element_default_classes' => 0,
@@ -1617,8 +1586,7 @@ function node_update_1018() {
               'hide_alter_empty' => 1,
               'text' => '',
             ),
-            'dropbutton' =>
-            array (
+            'dropbutton' => array(
               'id' => 'dropbutton',
               'table' => 'views',
               'field' => 'dropbutton',
@@ -1639,18 +1607,15 @@ function node_update_1018() {
               'hide_empty' => 0,
               'empty_zero' => 0,
               'hide_alter_empty' => 1,
-              'fields' =>
-              array (
+              'fields' => array(
                 'edit_node' => 'edit_node',
                 'delete_node' => 'delete_node',
               ),
               'destination' => 1,
             ),
           ),
-          'filters' =>
-          array (
-            'status' =>
-            array (
+          'filters' => array(
+            'status' => array(
               'id' => 'status',
               'table' => 'node',
               'field' => 'status',
@@ -1660,29 +1625,25 @@ function node_update_1018() {
               'operator' => '=',
               'value' => 'All',
               'group' => 1,
-              'exposed' => true,
-              'expose' =>
-              array (
+              'exposed' => TRUE,
+              'expose' => array(
                 'operator_id' => '',
                 'label' => 'Published',
                 'description' => '',
-                'use_operator' => false,
+                'use_operator' => FALSE,
                 'operator' => 'status_op',
                 'identifier' => 'status',
                 'required' => 0,
                 'remember' => 0,
-                'multiple' => false,
-                'remember_roles' =>
-                array (
+                'multiple' => FALSE,
+                'remember_roles' => array(
                   'anonymous' => 0,
                   'authenticated' => 0,
-                  'administrator' => 0,
                 ),
               ),
-              'is_grouped' => false,
+              'is_grouped' => FALSE,
             ),
-            'type' =>
-            array (
+            'type' => array(
               'id' => 'type',
               'table' => 'node',
               'field' => 'type',
@@ -1690,13 +1651,11 @@ function node_update_1018() {
               'group_type' => 'group',
               'ui_name' => '',
               'operator' => 'in',
-              'value' =>
-              array (
+              'value' => array(
               ),
               'group' => '1',
-              'exposed' => true,
-              'expose' =>
-              array (
+              'exposed' => TRUE,
+              'expose' => array(
                 'operator_id' => 'type_op',
                 'label' => 'Type',
                 'description' => '',
@@ -1706,18 +1665,15 @@ function node_update_1018() {
                 'required' => 0,
                 'remember' => 0,
                 'multiple' => 0,
-                'remember_roles' =>
-                array (
+                'remember_roles' => array(
                   'anonymous' => 0,
                   'authenticated' => 0,
-                  'administrator' => 0,
                 ),
                 'reduce' => 0,
               ),
-              'is_grouped' => false,
+              'is_grouped' => FALSE,
             ),
-            'title' =>
-            array (
+            'title' => array(
               'id' => 'title',
               'table' => 'node',
               'field' => 'title',
@@ -1727,9 +1683,8 @@ function node_update_1018() {
               'operator' => 'word',
               'value' => '',
               'group' => '1',
-              'exposed' => true,
-              'expose' =>
-              array (
+              'exposed' => TRUE,
+              'expose' => array(
                 'operator_id' => 'title_op',
                 'label' => 'Title contains',
                 'description' => '',
@@ -1738,18 +1693,15 @@ function node_update_1018() {
                 'identifier' => 'title',
                 'required' => 0,
                 'remember' => 0,
-                'multiple' => false,
-                'remember_roles' =>
-                array (
+                'multiple' => FALSE,
+                'remember_roles' => array(
                   'anonymous' => 0,
                   'authenticated' => 0,
-                  'administrator' => 0,
                 ),
               ),
-              'is_grouped' => false,
+              'is_grouped' => FALSE,
             ),
-            'status_extra' =>
-            array (
+            'status_extra' => array(
               'id' => 'status_extra',
               'table' => 'node',
               'field' => 'status_extra',
@@ -1759,14 +1711,12 @@ function node_update_1018() {
               'operator' => '=',
               'value' => '',
               'group' => '1',
-              'exposed' => false,
-              'is_grouped' => false,
+              'exposed' => FALSE,
+              'is_grouped' => FALSE,
             ),
           ),
-          'sorts' =>
-          array (
-            'changed' =>
-            array (
+          'sorts' => array(
+            'changed' => array(
               'id' => 'changed',
               'table' => 'node',
               'field' => 'changed',
@@ -1774,10 +1724,8 @@ function node_update_1018() {
             ),
           ),
           'title' => 'Content',
-          'relationships' =>
-          array (
-            'uid' =>
-            array (
+          'relationships' => array(
+            'uid' => array(
               'id' => 'uid',
               'table' => 'node',
               'field' => 'uid',
@@ -1789,10 +1737,8 @@ function node_update_1018() {
             ),
           ),
           'css_class' => 'node-admin-content',
-          'empty' =>
-          array (
-            'area_text_custom' =>
-            array (
+          'empty' => array(
+            'area_text_custom' => array(
               'id' => 'area_text_custom',
               'table' => 'views',
               'field' => 'area_text_custom',
@@ -1800,15 +1746,13 @@ function node_update_1018() {
               'group_type' => 'group',
               'ui_name' => '',
               'label' => '',
-              'empty' => true,
+              'empty' => TRUE,
               'content' => 'No content found.',
               'tokenize' => 0,
             ),
           ),
-          'style_options' =>
-          array (
-            'grouping' =>
-            array (
+          'style_options' => array(
+            'grouping' => array(
             ),
             'row_class' => '',
             'default_row_class' => 1,
@@ -1817,8 +1761,7 @@ function node_update_1018() {
             'sticky' => 0,
             'caption' => '',
             'summary' => '',
-            'columns' =>
-            array (
+            'columns' => array(
               'scheduled_1' => 'scheduled_1',
               'bulk_form' => 'bulk_form',
               'title' => 'title',
@@ -1831,84 +1774,72 @@ function node_update_1018() {
               'delete_node' => 'delete_node',
               'dropbutton' => 'dropbutton',
             ),
-            'info' =>
-            array (
-              'scheduled_1' =>
-              array (
+            'info' => array(
+              'scheduled_1' => array(
                 'sortable' => 0,
                 'default_sort_order' => 'asc',
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'bulk_form' =>
-              array (
+              'bulk_form' => array(
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'title' =>
-              array (
+              'title' => array(
                 'sortable' => 1,
                 'default_sort_order' => 'asc',
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'type' =>
-              array (
+              'type' => array(
                 'sortable' => 1,
                 'default_sort_order' => 'asc',
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'name' =>
-              array (
+              'name' => array(
                 'sortable' => 1,
                 'default_sort_order' => 'asc',
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'status' =>
-              array (
+              'status' => array(
                 'sortable' => 1,
                 'default_sort_order' => 'asc',
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'scheduled' =>
-              array (
+              'scheduled' => array(
                 'sortable' => 1,
                 'default_sort_order' => 'asc',
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 1,
               ),
-              'changed' =>
-              array (
+              'changed' => array(
                 'sortable' => 1,
                 'default_sort_order' => 'desc',
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'edit_node' =>
-              array (
+              'edit_node' => array(
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'delete_node' =>
-              array (
+              'delete_node' => array(
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
               ),
-              'dropbutton' =>
-              array (
+              'dropbutton' => array(
                 'align' => '',
                 'separator' => '',
                 'empty_column' => 0,
@@ -1919,22 +1850,17 @@ function node_update_1018() {
           ),
         ),
       ),
-      'page' =>
-      array (
+      'page' => array(
         'display_title' => 'Page',
         'display_plugin' => 'page',
-        'display_options' =>
-        array (
-          'query' =>
-          array (
+        'display_options' => array(
+          'query' => array(
             'type' => 'views_query',
-            'options' =>
-            array (
+            'options' => array(
             ),
           ),
           'path' => 'admin/content/node',
-          'menu' =>
-          array (
+          'menu' => array(
             'type' => 'default tab',
             'title' => 'Manage content',
             'description' => '',
@@ -1943,8 +1869,7 @@ function node_update_1018() {
             'context' => 0,
             'context_only_inline' => 0,
           ),
-          'tab_options' =>
-          array (
+          'tab_options' => array(
             'type' => 'normal',
             'title' => 'Content',
             'description' => 'Find and manage content.',
@@ -2104,6 +2029,725 @@ function node_update_1022() {
       'separator' => '',
       'empty_column' => 0,
     ));
+    $config->save();
+  }
+}
+
+/**
+ * Create the view replacement for recent content block.
+ */
+function node_update_1023() {
+  $data = array(
+    'name' => 'recent_content',
+    'description' => 'A list of recently published content.',
+    'module' => 'node',
+    'storage' => 2,
+    'tag' => '',
+    'disabled' => FALSE,
+    'base_table' => 'node',
+    'human_name' => 'Recent content',
+    'core' => '1.0',
+    'display' => array(
+      'default' => array(
+        'display_title' => 'Default',
+        'display_plugin' => 'default',
+        'display_options' => array(
+          'query' => array(
+            'type' => 'views_query',
+            'options' => array(
+            ),
+          ),
+          'access' => array(
+            'type' => 'perm',
+          ),
+          'cache' => array(
+            'type' => 'none',
+          ),
+          'exposed_form' => array(
+            'type' => 'basic',
+          ),
+          'pager' => array(
+            'type' => 'some',
+            'options' => array(
+              'items_per_page' => '10',
+              'offset' => '0',
+            ),
+          ),
+          'style_plugin' => 'table',
+          'row_plugin' => 'fields',
+          'fields' => array(
+            'timestamp' => array(
+              'id' => 'timestamp',
+              'table' => 'history',
+              'field' => 'timestamp',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => '',
+              'exclude' => 1,
+              'alter' => array(
+                'alter_text' => 0,
+                'text' => '',
+                'make_link' => 0,
+                'path' => '',
+                'absolute' => 0,
+                'external' => 0,
+                'replace_spaces' => 0,
+                'path_case' => 'none',
+                'trim_whitespace' => 0,
+                'alt' => '',
+                'rel' => '',
+                'link_class' => '',
+                'prefix' => '',
+                'suffix' => '',
+                'target' => '',
+                'nl2br' => 0,
+                'max_length' => '',
+                'word_boundary' => 1,
+                'ellipsis' => 1,
+                'more_link' => 0,
+                'more_link_text' => '',
+                'more_link_path' => '',
+                'strip_tags' => 0,
+                'trim' => 0,
+                'preserve_tags' => '',
+                'html' => 0,
+              ),
+              'element_type' => 'div',
+              'element_class' => '',
+              'element_label_type' => '',
+              'element_label_class' => '',
+              'element_label_colon' => FALSE,
+              'element_wrapper_type' => '',
+              'element_wrapper_class' => '',
+              'element_default_classes' => 1,
+              'empty' => '',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'hide_alter_empty' => 1,
+              'link_to_node' => 0,
+              'comments' => 0,
+            ),
+            'path' => array(
+              'id' => 'path',
+              'table' => 'node',
+              'field' => 'path',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => '',
+              'exclude' => 1,
+              'alter' => array(
+                'alter_text' => 0,
+                'text' => '',
+                'make_link' => 0,
+                'path' => '',
+                'absolute' => 0,
+                'external' => 0,
+                'replace_spaces' => 0,
+                'path_case' => 'none',
+                'trim_whitespace' => 0,
+                'alt' => '',
+                'rel' => '',
+                'link_class' => '',
+                'prefix' => '',
+                'suffix' => '',
+                'target' => '',
+                'nl2br' => 0,
+                'max_length' => '',
+                'word_boundary' => 1,
+                'ellipsis' => 1,
+                'more_link' => 0,
+                'more_link_text' => '',
+                'more_link_path' => '',
+                'strip_tags' => 0,
+                'trim' => 0,
+                'preserve_tags' => '',
+                'html' => 0,
+              ),
+              'element_type' => '',
+              'element_class' => '',
+              'element_label_type' => '',
+              'element_label_class' => '',
+              'element_label_colon' => FALSE,
+              'element_wrapper_type' => '',
+              'element_wrapper_class' => '',
+              'element_default_classes' => 1,
+              'empty' => '',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'hide_alter_empty' => 1,
+              'absolute' => 0,
+            ),
+            'title' => array(
+              'id' => 'title',
+              'table' => 'node',
+              'field' => 'title',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => '',
+              'exclude' => 0,
+              'alter' => array(
+                'alter_text' => 1,
+                'text' => '<div class="node-title"><a href="[path]">[title]</a> [timestamp]</div>',
+                'make_link' => 0,
+                'path' => '',
+                'absolute' => 0,
+                'external' => 0,
+                'replace_spaces' => 0,
+                'path_case' => 'none',
+                'trim_whitespace' => 0,
+                'alt' => '',
+                'rel' => '',
+                'link_class' => '',
+                'prefix' => '',
+                'suffix' => '',
+                'target' => '',
+                'nl2br' => 0,
+                'max_length' => '',
+                'word_boundary' => 0,
+                'ellipsis' => 0,
+                'more_link' => 0,
+                'more_link_text' => '',
+                'more_link_path' => '',
+                'strip_tags' => 0,
+                'trim' => 0,
+                'preserve_tags' => '',
+                'html' => 0,
+              ),
+              'element_type' => '',
+              'element_class' => 'title-author',
+              'element_label_type' => '',
+              'element_label_class' => '',
+              'element_label_colon' => FALSE,
+              'element_wrapper_type' => '',
+              'element_wrapper_class' => '',
+              'element_default_classes' => 1,
+              'empty' => '',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'hide_alter_empty' => 1,
+              'link_to_node' => 0,
+            ),
+            'created' => array(
+              'id' => 'created',
+              'table' => 'node',
+              'field' => 'created',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => '',
+              'exclude' => 1,
+              'alter' => array(
+                'alter_text' => 0,
+                'text' => '',
+                'make_link' => 0,
+                'path' => '',
+                'absolute' => 0,
+                'external' => 0,
+                'replace_spaces' => 0,
+                'path_case' => 'none',
+                'trim_whitespace' => 0,
+                'alt' => '',
+                'rel' => '',
+                'link_class' => '',
+                'prefix' => '',
+                'suffix' => '',
+                'target' => '',
+                'nl2br' => 0,
+                'max_length' => '',
+                'word_boundary' => 1,
+                'ellipsis' => 1,
+                'more_link' => 0,
+                'more_link_text' => '',
+                'more_link_path' => '',
+                'strip_tags' => 0,
+                'trim' => 0,
+                'preserve_tags' => '',
+                'html' => 0,
+              ),
+              'element_type' => 'div',
+              'element_class' => 'node-author',
+              'element_label_type' => '',
+              'element_label_class' => '',
+              'element_label_colon' => FALSE,
+              'element_wrapper_type' => '',
+              'element_wrapper_class' => '',
+              'element_default_classes' => 1,
+              'empty' => '',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'hide_alter_empty' => 1,
+              'date_format' => 'medium',
+              'custom_date_format' => '',
+              'timezone' => '',
+            ),
+            'name' => array(
+              'id' => 'name',
+              'table' => 'users',
+              'field' => 'name',
+              'relationship' => 'uid',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => '',
+              'exclude' => 0,
+              'alter' => array(
+                'alter_text' => 1,
+                'text' => '<div class="node-author">[created] by [name]</div>',
+                'make_link' => 0,
+                'path' => '',
+                'absolute' => 0,
+                'external' => 0,
+                'replace_spaces' => 0,
+                'path_case' => 'none',
+                'trim_whitespace' => 0,
+                'alt' => '',
+                'rel' => '',
+                'link_class' => '',
+                'prefix' => '',
+                'suffix' => '',
+                'target' => '',
+                'nl2br' => 0,
+                'max_length' => '',
+                'word_boundary' => 1,
+                'ellipsis' => 1,
+                'more_link' => 0,
+                'more_link_text' => '',
+                'more_link_path' => '',
+                'strip_tags' => 0,
+                'trim' => 0,
+                'preserve_tags' => '',
+                'html' => 0,
+              ),
+              'element_type' => '',
+              'element_class' => '',
+              'element_label_type' => '',
+              'element_label_class' => '',
+              'element_label_colon' => FALSE,
+              'element_wrapper_type' => '',
+              'element_wrapper_class' => '',
+              'element_default_classes' => 1,
+              'empty' => '',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'hide_alter_empty' => 1,
+              'link_to_user' => 1,
+              'overwrite_anonymous' => 0,
+              'anonymous_text' => '',
+              'format_username' => 1,
+            ),
+            'edit_node' => array(
+              'id' => 'edit_node',
+              'table' => 'views_entity_node',
+              'field' => 'edit_node',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => '',
+              'exclude' => 1,
+              'alter' => array(
+                'alter_text' => 0,
+                'text' => '',
+                'make_link' => 0,
+                'path' => '',
+                'absolute' => 0,
+                'external' => FALSE,
+                'replace_spaces' => 0,
+                'path_case' => 'none',
+                'trim_whitespace' => 0,
+                'alt' => '',
+                'rel' => '',
+                'link_class' => '',
+                'prefix' => '',
+                'suffix' => '',
+                'target' => '',
+                'nl2br' => 0,
+                'max_length' => '',
+                'word_boundary' => 1,
+                'ellipsis' => 1,
+                'more_link' => 0,
+                'more_link_text' => '',
+                'more_link_path' => '',
+                'strip_tags' => 0,
+                'trim' => 0,
+                'preserve_tags' => '',
+                'html' => 0,
+              ),
+              'element_type' => '',
+              'element_class' => '',
+              'element_label_type' => '',
+              'element_label_class' => '',
+              'element_label_colon' => FALSE,
+              'element_wrapper_type' => '',
+              'element_wrapper_class' => '',
+              'element_default_classes' => 1,
+              'empty' => '',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'hide_alter_empty' => 1,
+              'text' => '',
+            ),
+            'delete_node' => array(
+              'id' => 'delete_node',
+              'table' => 'views_entity_node',
+              'field' => 'delete_node',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => '',
+              'exclude' => 1,
+              'alter' => array(
+                'alter_text' => 0,
+                'text' => '',
+                'make_link' => 0,
+                'path' => '',
+                'absolute' => 0,
+                'external' => FALSE,
+                'replace_spaces' => 0,
+                'path_case' => 'none',
+                'trim_whitespace' => 0,
+                'alt' => '',
+                'rel' => '',
+                'link_class' => '',
+                'prefix' => '',
+                'suffix' => '',
+                'target' => '',
+                'nl2br' => 0,
+                'max_length' => '',
+                'word_boundary' => 1,
+                'ellipsis' => 1,
+                'more_link' => 0,
+                'more_link_text' => '',
+                'more_link_path' => '',
+                'strip_tags' => 0,
+                'trim' => 0,
+                'preserve_tags' => '',
+                'html' => 0,
+              ),
+              'element_type' => '',
+              'element_class' => '',
+              'element_label_type' => '',
+              'element_label_class' => '',
+              'element_label_colon' => FALSE,
+              'element_wrapper_type' => '',
+              'element_wrapper_class' => '',
+              'element_default_classes' => 1,
+              'empty' => '',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'hide_alter_empty' => 1,
+              'text' => '',
+            ),
+            'dropbutton' => array(
+              'id' => 'dropbutton',
+              'table' => 'views',
+              'field' => 'dropbutton',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => '',
+              'exclude' => 0,
+              'alter' => array(
+                'alter_text' => FALSE,
+                'text' => '',
+                'make_link' => FALSE,
+                'path' => '',
+                'absolute' => FALSE,
+                'external' => FALSE,
+                'replace_spaces' => FALSE,
+                'path_case' => 'none',
+                'trim_whitespace' => FALSE,
+                'alt' => '',
+                'rel' => '',
+                'link_class' => '',
+                'prefix' => '',
+                'suffix' => '',
+                'target' => '',
+                'nl2br' => FALSE,
+                'max_length' => '',
+                'word_boundary' => TRUE,
+                'ellipsis' => TRUE,
+                'more_link' => FALSE,
+                'more_link_text' => '',
+                'more_link_path' => '',
+                'strip_tags' => FALSE,
+                'trim' => FALSE,
+                'preserve_tags' => '',
+                'html' => FALSE,
+              ),
+              'element_type' => '',
+              'element_class' => '',
+              'element_label_type' => '',
+              'element_label_class' => '',
+              'element_label_colon' => FALSE,
+              'element_wrapper_type' => '',
+              'element_wrapper_class' => '',
+              'element_default_classes' => 0,
+              'empty' => '',
+              'hide_empty' => 0,
+              'empty_zero' => 0,
+              'hide_alter_empty' => 1,
+              'fields' => array(
+                'edit_node' => 'edit_node',
+                'delete_node' => 'delete_node',
+                'title' => 0,
+                'timestamp' => 0,
+                'name' => 0,
+              ),
+              'destination' => 1,
+            ),
+          ),
+          'filters' => array(
+            'status_extra' => array(
+              'id' => 'status_extra',
+              'table' => 'node',
+              'field' => 'status_extra',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'operator' => '=',
+              'value' => '',
+              'group' => '1',
+              'exposed' => FALSE,
+              'expose' => array(
+                'operator_id' => FALSE,
+                'label' => '',
+                'description' => '',
+                'use_operator' => FALSE,
+                'operator' => '',
+                'identifier' => '',
+                'required' => FALSE,
+                'remember' => FALSE,
+                'multiple' => FALSE,
+                'remember_roles' => array(
+                  2 => 2,
+                ),
+              ),
+              'is_grouped' => FALSE,
+              'group_info' => array(
+                'label' => '',
+                'description' => '',
+                'identifier' => '',
+                'optional' => TRUE,
+                'widget' => 'select',
+                'multiple' => FALSE,
+                'remember' => 0,
+                'default_group' => 'All',
+                'default_group_multiple' => array(
+                ),
+                'group_items' => array(
+                ),
+              ),
+            ),
+            'type' => array(
+              'id' => 'type',
+              'table' => 'node',
+              'field' => 'type',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'operator' => 'in',
+              'value' => array(
+              ),
+              'group' => '1',
+              'exposed' => TRUE,
+              'expose' => array(
+                'operator_id' => 'type_op',
+                'label' => 'Content types',
+                'description' => '',
+                'use_operator' => 0,
+                'operator' => 'type_op',
+                'identifier' => 'type',
+                'required' => 0,
+                'remember' => 0,
+                'multiple' => 1,
+                'remember_roles' => array(
+                  'authenticated' => 'authenticated',
+                  'anonymous' => 0,
+                ),
+                'reduce' => 0,
+              ),
+              'is_grouped' => FALSE,
+              'group_info' => array(
+                'label' => '',
+                'description' => '',
+                'identifier' => '',
+                'optional' => TRUE,
+                'widget' => 'select',
+                'multiple' => FALSE,
+                'remember' => 0,
+                'default_group' => 'All',
+                'default_group_multiple' => array(
+                ),
+                'group_items' => array(
+                ),
+              ),
+            ),
+          ),
+          'sorts' => array(
+            'changed' => array(
+              'id' => 'changed',
+              'table' => 'node',
+              'field' => 'changed',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'order' => 'DESC',
+              'exposed' => FALSE,
+              'expose' => array(
+                'label' => '',
+              ),
+              'granularity' => 'minute',
+            ),
+          ),
+          'title' => 'Recent content',
+          'relationships' => array(
+            'uid' => array(
+              'id' => 'uid',
+              'table' => 'node',
+              'field' => 'uid',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => 'author',
+              'required' => 0,
+            ),
+          ),
+          'empty' => array(
+            'area_text_custom' => array(
+              'id' => 'area_text_custom',
+              'table' => 'views',
+              'field' => 'area_text_custom',
+              'relationship' => 'none',
+              'group_type' => 'group',
+              'ui_name' => '',
+              'label' => '',
+              'empty' => TRUE,
+              'content' => 'No content available.',
+              'tokenize' => 0,
+            ),
+          ),
+          'use_more' => 1,
+          'use_more_always' => TRUE,
+          'use_more_text' => 'More',
+          'style_options' => array(
+            'grouping' => array(
+            ),
+            'row_class' => '',
+            'default_row_class' => 1,
+            'row_class_special' => 1,
+            'override' => 1,
+            'sticky' => 0,
+            'caption' => '',
+            'summary' => '',
+            'columns' => array(
+              'title' => 'title',
+              'timestamp' => 'title',
+              'name' => 'title',
+              'edit_node' => 'edit_node',
+              'delete_node' => 'delete_node',
+              'dropbutton' => 'dropbutton',
+            ),
+            'info' => array(
+              'title' => array(
+                'sortable' => 0,
+                'default_sort_order' => 'asc',
+                'align' => 'views-align-left',
+                'separator' => '',
+                'empty_column' => 0,
+              ),
+              'timestamp' => array(
+                'align' => '',
+                'separator' => '',
+                'empty_column' => 0,
+              ),
+              'name' => array(
+                'sortable' => 0,
+                'default_sort_order' => 'asc',
+                'align' => '',
+                'separator' => '',
+                'empty_column' => 0,
+              ),
+              'edit_node' => array(
+                'align' => '',
+                'separator' => '',
+                'empty_column' => 1,
+              ),
+              'delete_node' => array(
+                'align' => '',
+                'separator' => '',
+                'empty_column' => 1,
+              ),
+              'dropbutton' => array(
+                'align' => '',
+                'separator' => '',
+                'empty_column' => 1,
+              ),
+            ),
+            'default' => '-1',
+            'empty_table' => 0,
+          ),
+          'link_display' => 'custom_url',
+        ),
+      ),
+      'block' => array(
+        'display_title' => 'Block',
+        'display_plugin' => 'block',
+        'display_options' => array(
+          'query' => array(
+            'type' => 'views_query',
+            'options' => array(
+            ),
+          ),
+          'allow' => array(
+            'items_per_page' => 'items_per_page',
+            'exposed_form' => 'exposed_form',
+            'use_pager' => 0,
+            'offset' => 0,
+            'link_to_view' => 0,
+            'more_link' => 'more_link',
+            'path_override' => 0,
+            'fields_override' => 0,
+          ),
+          'link_url' => 'admin/content',
+        ),
+      ),
+    ),
+  );
+  $config = config('views.view.recent_content');
+  if ($config->isNew()) {
+    $config->setData($data);
+    $config->save();
+  }
+
+  // Upgrade recent content block to views.
+  $layouts = config_get_names_with_prefix('layout.layout.');
+  foreach ($layouts as $layout_name) {
+    $config = config($layout_name);
+    $configs = $config->get();
+    if (isset($configs['content'])) {
+      foreach ($configs['content'] as $uuid => $block) {
+        if ($block['data']['delta'] == 'recent' && $block['data']['module'] == 'node') {
+          $config->set('content.' . $uuid . '.plugin', 'views:recent_content-block');
+          $config->set('content.' . $uuid . '.data.module', 'views');
+          $config->set('content.' . $uuid . '.data.delta', 'recent_content-block');
+
+          // Carry over the node_count setting to items_per_page.
+          if (isset($block['data']['settings']['block_settings']['node_count'])) {
+            $node_count = $block['data']['settings']['block_settings']['node_count'];
+            $config->set('content.' . $uuid . '.data.settings.items_per_page', $node_count);
+            $config->clear('content.' . $uuid . '.data.settings.block_settings');
+          }
+
+          // Add "block-node-recent" class for styling consistency.
+          $existing_class = isset($block['data']['style']['data']['settings']['classes']) ? $block['data']['style']['data']['settings']['classes'] : '';
+          $new_class = trim($existing_class . ' block-node-recent');
+          $config->set('content.' . $uuid . '.data.style.plugin', 'default');
+          $config->set('content.' . $uuid . '.data.style.data.settings.classes', $new_class);
+        }
+      }
+    }
     $config->save();
   }
 }

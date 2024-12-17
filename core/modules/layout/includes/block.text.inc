@@ -110,18 +110,20 @@ class BlockText extends Block {
       '#description' => t('Used to identify the block on layout pages. Required for reusable blocks.'),
       '#maxlength' => 255,
     );
-    $form['admin_label']['delta'] = array(
-      '#type' => 'machine_name',
-      '#title' => t('Internal name'),
-      '#maxlength' => 64,
-      '#machine_name' => array(
-        'source' => array('admin_label', 'admin_label'),
-        'exists' => 'block_custom_block_load',
-      ),
-      '#description' => t('A unique machine-readable name containing letters, numbers, and underscores.'),
-      '#weight' => 3,
-      '#required' => FALSE,
-    );
+    if (module_exists('block')) {
+      $form['admin_label']['delta'] = array(
+        '#type' => 'machine_name',
+        '#title' => t('Internal name'),
+        '#maxlength' => 64,
+        '#machine_name' => array(
+          'source' => array('admin_label', 'admin_label'),
+          'exists' => 'block_custom_block_load',
+        ),
+        '#description' => t('A unique machine-readable name containing letters, numbers, and underscores.'),
+        '#weight' => 3,
+        '#required' => FALSE,
+      );
+    }
     $form['admin_label']['admin_description'] = array(
       '#type' => 'textfield',
       '#title' => t('Admin description'),
