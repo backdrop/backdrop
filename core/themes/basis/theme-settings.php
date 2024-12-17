@@ -69,20 +69,14 @@ if (module_exists('color')) {
   foreach ($fields as $field) {
     $form['footer'][$field] = color_get_color_element($form['theme']['#value'], $field, $form);
   }
-}
 
-/**
- * Altering the theme settings for CSS updates.
- */
-function basis_form_system_theme_settings_alter(&$form, &$form_state, $form_id = NULL) {
-  // Ensure template.php is included.
   $theme_name = $form['theme']['#value'];
   $theme_path = backdrop_get_path('theme', 'basis');
   require_once $theme_path . '/template.php';
   $install_version = config_get('system.core', 'install_version');
 
   $css_update_options = array(
-    'no_updates' => t('Default'),
+    'default' => t('Default'),
     'all_updates' => t('All updates'),
     'custom' => t('Specific version'),
   );
@@ -104,7 +98,7 @@ function basis_form_system_theme_settings_alter(&$form, &$form_state, $form_id =
     '#options' => $css_update_options,
     '#default_value' => theme_get_setting('css_update', $theme_name),
     '#config' => 'basis.settings',
-    'no_updates' => array(
+    'default' => array(
       '#description' => t('Accept no updates introduced after installation.'),
     ),
     'all_updates' => array(
@@ -114,14 +108,11 @@ function basis_form_system_theme_settings_alter(&$form, &$form_state, $form_id =
     ),
   );
 
+  // Custom select css update versions.
+  $options = basis_css_versions_updated();
   $default_version_value = theme_get_setting('css_update_version', $theme_name);
-
-  // Reverse lookup to get the correct key.
-  $options = basis_supplemental_css_versions();
   $default_version_key = array_search($default_version_value, $options, TRUE);
-
-  // Conditionally displayed CSS updates select element.
-  $form['css_updates']['css_update_version'] = [
+  $form['css_updates']['css_update_version'] = array(
     '#type' => 'select',
     '#title' => t('Version'),
     '#description' => t('Accept CSS changes up to this specific version of Backdrop.'),
@@ -135,7 +126,7 @@ function basis_form_system_theme_settings_alter(&$form, &$form_state, $form_id =
       ],
     ],
     '#process' => ['basis_process_css_update_value'],
-  ];
+  );
 }
 
 /**
@@ -143,12 +134,12 @@ function basis_form_system_theme_settings_alter(&$form, &$form_state, $form_id =
  */
 function basis_process_css_update_value($element, &$form_state, $form) {
   $css_update = $form_state['values']['css_update'] ?? 'installation';
-  $options = basis_supplemental_css_versions();
+  $options = basis_css_versions_updated();
   $install_version = config_get('basis.settings', 'default_version_clean');
 
   // Adjust version value based on preference.
   switch ($css_update) {
-    case 'no_updates':
+    case 'default':
       $form_state['values']['css_update_version'] = $install_version;
       break;
 

@@ -2,5 +2,5 @@
     "_config_name": "basis.settings",
     "default_version_clean": "1.30",
     "css_update_version": "1.30",
-    "css_update": "custom"
+    "css_update": "default"
 }

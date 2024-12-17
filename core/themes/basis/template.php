@@ -43,11 +43,13 @@ function basis_preprocess_page(&$variables) {
   $update_preference = config_get('basis.settings', 'css_update');
 
   // Process supplemental CSS versions.
-  $update_css_versions = basis_supplemental_css_versions();
+  $update_css_versions = basis_css_versions_updated();
   foreach ($update_css_versions as $update_css_version) {
-    if ($update_preference === 'all_updates' || version_compare($update_version, $update_css_version, '>=')) {
-      $update_css_version_class = 'update-' . str_replace('.', '-', $update_css_version);
-      $variables['classes'][] = $update_css_version_class;
+    if ($update_css_version !== 'No updates') {
+      if ($update_preference === 'all_updates' || version_compare($update_version, $update_css_version, '>=')) {
+        $update_css_version_class = 'update-' . str_replace('.', '-', $update_css_version);
+        $variables['classes'][] = $update_css_version_class;
+      }
     }
   }
 
@@ -72,7 +74,7 @@ function basis_preprocess_page(&$variables) {
  */
 
 // TODO: Before merging, we need to reset these values.
-function basis_supplemental_css_versions() {
+function basis_css_versions_updated() {
   return array('1.31.5', '1.30', '1.28.4', '1.23', 'No updates');
 }
 
