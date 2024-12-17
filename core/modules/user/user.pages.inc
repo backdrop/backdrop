@@ -43,8 +43,9 @@ function user_pass($form, &$form_state) {
   global $user;
 
   $user_is_logged_in = user_is_logged_in();
-  if (!$user_is_logged_in) {
-    $form['#theme'] = 'user_login_form';
+  $user_login_page_settings = user_login_page_settings();
+  if (!$user_is_logged_in && $user_login_page_settings === 'simplified') {
+    $form['#theme_wrappers'] = array('user_simplified_page');
   }
   $form['name'] = array(
     '#type' => 'textfield',

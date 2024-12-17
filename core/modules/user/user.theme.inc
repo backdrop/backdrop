@@ -395,8 +395,9 @@ function template_preprocess_user_profile(&$variables) {
  *
  * @see user-login-form.tpl.php
  */
-function template_preprocess_user_login_form(&$variables) {
-  $form = $variables['user_login_form'];
+function template_preprocess_user_simplified_page(&$variables) {
+  $form = $variables['element'];
+  $variables['form'] = $form['#children'];
 
   if ($form['#form_id'] == 'user_login') {
     $page_title = t('Login');
@@ -424,6 +425,5 @@ function template_preprocess_user_login_form(&$variables) {
     $variables['front_page'] = url();
     $variables['page_title'] = $page_title;
     $variables['messages'] = theme('status_messages');
-    $variables['classes'][] = 'user-login user-login-layout-suppress';
   }
 }

@@ -111,9 +111,9 @@ function user_theme() {
     'username' => array(
       'variables' => array('account' => NULL),
     ) + $base,
-    'user_login_form' => array(
-      'render element' => 'user_login_form',
-      'template' => 'templates/user-login-form',
+    'user_simplified_page' => array(
+      'render element' => 'element',
+      'template' => 'templates/user-simplified-page',
     ) + $base,
   );
 }
@@ -1821,8 +1821,9 @@ function user_custom_theme() {
 function user_preprocess_page(&$variables) {
   // Add a class that tells us whether we're on a login page or not.
   $current_path = current_path();
-  if ($current_path == 'user/login' || $current_path == 'user/password' || $current_path == 'user/register') {
-    $variables['classes'][] = 'user-login-page';
+  $user_login_page_settings = user_login_page_settings();
+  if ($user_login_page_settings === 'simplified' && ($current_path == 'user/login' || $current_path == 'user/password' || $current_path == 'user/register')) {
+    $variables['classes'][] = 'user-simplified-page-body';
   }
 }
 
@@ -1833,7 +1834,6 @@ function user_preprocess_page(&$variables) {
  */
 function user_login($form, &$form_state) {
   global $user;
-  $user_login_page_settings = user_login_page_settings();
 
   // If we are already logged on, go to the user page instead.
   if ($user->uid) {
@@ -1843,7 +1843,10 @@ function user_login($form, &$form_state) {
   backdrop_set_title(t('Log in'));
 
   // Display login form:
-  $form['#theme'] = 'user_login_form';
+  $user_login_page_settings = user_login_page_settings();
+  if ($user_login_page_settings === 'simplified') {
+    $form['#theme_wrappers'] = array('user_simplified_page');
+  }
   $credentials = config_get('system.core', 'user_login_method');
   $form['name'] = array('#type' => 'textfield',
     '#title' => $credentials === USER_LOGIN_EMAIL_ONLY ? t('Email address') : ($credentials === USER_LOGIN_USERNAME_OR_EMAIL ? t('Username or email address') : t('Username')),
@@ -3297,7 +3300,10 @@ function user_register_page() {
 function user_register_form($form, &$form_state) {
   global $user;
   $admin = user_access('administer users');
-  $form['#theme'] = 'user_login_form';
+  $user_login_page_settings = user_login_page_settings();
+  if ($user_login_page_settings === 'simplified') {
+    $form['#theme_wrappers'] = array('user_simplified_page');
+  }
 
   // Pass access information to the submit handler. Running an access check
   // inside the submit function interferes with form processing and breaks

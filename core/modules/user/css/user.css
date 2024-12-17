@@ -201,6 +201,6 @@ form:not(.user-admin-settings) .password-strength-help-text.strong em {
 .profile dd {
   margin: 0 0 1em 0;
 }
-.user-login.user-login-layout-suppress .login-page-logo {
+.user-simplified-page .user-simplified-page-logo {
   max-width: 150px;
 }

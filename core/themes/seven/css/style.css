@@ -1497,12 +1497,12 @@ table.update {
 
 /* Maintenance page styles */
 body.maintenance-page,
-body.user-login-page {
+body.user-simplified-page-body {
   background: #E8E6E5;
   padding: 1em;
 }
 body.maintenance-page #page,
-.user-login-form {
+.user-simplified-page-wrapper {
   padding: 2em;
   max-width: 770px;
   min-width: 255px;
@@ -1511,7 +1511,7 @@ body.maintenance-page #page,
   position: relative;
 }
 body.maintenance-page #page:after,
-.user-login-form:after {
+.user-simplified-page-wrapper:after {
   left: 100%; /* LTR */
   border: solid transparent;
   border-color: rgba(255, 255, 255, 0);
@@ -1783,21 +1783,21 @@ div.add-or-remove-shortcuts {
     width: 100%;
   }
   .maintenance-page-wrapper,
-  body.user-login-page  {
+  body.user-simplified-page-body  {
     width: 100%;
     display: table;
   }
-  body.user-login-page  {
+  body.user-simplified-page-body  {
     height: 100%;
     box-sizing: border-box;
   }
-  .user-login-page form {
+  body.user-simplified-page-body .user-simplified-page {
     height: 100%;
     width: 100%;
     display: table-cell;
     vertical-align: middle;
   }
-  .user-login-form  {
+  .user-simplified-page-wrapper  {
     width: 75%;
     margin: 0 auto;
     max-width: 500px;

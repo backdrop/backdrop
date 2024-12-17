@@ -15,11 +15,12 @@
  * @ingroup themeable
  */
 ?>
-<?php if ($user_login_page_simplified): ?>
-  <div class="<?php print implode(' ', $classes); ?>">
-    <div class="user-login-wrapper">
+
+<div class="<?php print implode(' ', $classes); ?>">
+  <div class="user-simplified-page-wrapper">
+    <div class="user-simplified-page-wrapper-inner">
       <?php if ($logo_image): ?>
-        <div class="login-page-logo">
+        <div class="user-simplified-page-logo">
           <a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>" rel="home" class="logo">
             <?php print $logo_image; ?>
           </a>
@@ -28,17 +29,15 @@
       <h1 class="site-name">
         <a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>" rel="home"><span><?php print $site_name; ?></span></a>
       </h1>
-      <h2 class="login-page-page-title">
+      <h2 class="user-simplified-page-title">
         <?php print $page_title; ?>
       </h2>
-      <div class="login-page-messages">
+      <div class="user-simplified-page-messages">
         <?php print $messages; ?>
       </div>
-<?php endif; ?>
 
-<?php print backdrop_render_children($user_login_form); ?>
+      <?php print $form; ?>
 
-<?php if ($user_login_page_simplified): ?>
     </div>
   </div>
-<?php endif; ?>
+</div>

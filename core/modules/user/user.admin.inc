@@ -447,7 +447,7 @@ function user_login_settings($form, &$form_state) {
 function user_login_settings_submit($form, &$form_state) {
   system_settings_form_submit($form, $form_state);
 
-  backdrop_flush_all_caches();
+  state_set('menu_rebuild_needed', TRUE);;
 }
 
 /**
