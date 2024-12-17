@@ -109,7 +109,8 @@ if (module_exists('color')) {
   );
 
   // Custom select css update versions.
-  $options = basis_css_versions_updated();
+  $options = backdrop_map_assoc(basis_css_versions_updated());
+  $options[''] = t('No updates');
   $default_version_value = theme_get_setting('css_update_version', $theme_name);
   $default_version_key = array_search($default_version_value, $options, TRUE);
   $form['css_updates']['css_update_version'] = array(
