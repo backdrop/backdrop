@@ -11,18 +11,18 @@ function basis_css_alter(&$css) {
   // Remove Basis' `/css/component/menu-dropdown.css` and add breakpoint files
   // if using a custom breakpoint.
   $config = config('menu.settings');
-  if ($config->get('menu_breakpoint') == 'custom') {
+  if (isset($css[$path . '/css/component/menu-dropdown.css']) && $config->get('menu_breakpoint') == 'custom') {
+    $dropdown_css = $css[$path . '/css/component/menu-dropdown.css'];
     $path = backdrop_get_path('theme', 'basis');
-    $weight = isset($css[$path . '/css/component/menu-dropdown.css']['weight']) ? $css[$path . '/css/component/menu-dropdown.css']['weight'] : 0;
     unset($css[$path . '/css/component/menu-dropdown.css']);
 
     $weight += 0.0001;
-    $css[$path . '/css/component/menu-dropdown.breakpoint.css'] = $css[$path . '/css/base.css'];
+$css[$path . '/css/component/menu-dropdown.breakpoint.css'] = $dropdown_css;
     $css[$path . '/css/component/menu-dropdown.breakpoint.css']['weight'] = $weight;
     $css[$path . '/css/component/menu-dropdown.breakpoint.css']['data'] = $path . '/css/component/menu-dropdown.breakpoint.css';
 
     $weight += 0.0001;
-    $css[$path . '/css/component/menu-dropdown.breakpoint-queries.css'] = $css[$path . '/css/base.css'];
+$css[$path . '/css/component/menu-dropdown.breakpoint-queries.css'] = $dropdown_css;
     $css[$path . '/css/component/menu-dropdown.breakpoint-queries.css']['weight'] = $weight;
     $css[$path . '/css/component/menu-dropdown.breakpoint-queries.css']['media'] = 'all and (min-width: ' . $config->get('menu_breakpoint_custom') . ')';
     $css[$path . '/css/component/menu-dropdown.breakpoint-queries.css']['data'] = $path . '/css/component/menu-dropdown.breakpoint-queries.css';
