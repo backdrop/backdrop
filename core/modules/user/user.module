@@ -1417,26 +1417,27 @@ function user_menu() {
 
   $user_login_page_settings = user_login_page_settings();
   $tabs = $user_login_page_settings == 'tabs';
+  $item_type = ($user_login_page_settings == 'tabs') ? MENU_DEFAULT_LOCAL_TASK : MENU_CALLBACK;
   $items['user/login'] = array(
     'title' => 'Log in',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('user_login'),
     'access callback' => 'user_is_anonymous',
-    'type' => ($tabs ? MENU_DEFAULT_LOCAL_TASK : MENU_CALLBACK),
+    'type' => $item_type,
   );
 
   $items['user/register'] = array(
     'title' => 'Create new account',
     'page callback' => 'user_register_page',
     'access callback' => 'user_register_access',
-    'type' => ($tabs ? MENU_LOCAL_TASK : MENU_CALLBACK),
+    'type' => $item_type,
   );
 
   $items['user/password'] = array(
     'title' => 'Reset password',
     'page callback' => 'user_pass_page',
     'access callback' => TRUE,
-    'type' => ($tabs ? MENU_LOCAL_TASK : MENU_CALLBACK),
+    'type' => $item_type,
     'file' => 'user.pages.inc',
   );
 
