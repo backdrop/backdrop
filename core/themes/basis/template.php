@@ -67,10 +67,13 @@ function basis_preprocess_page(&$variables) {
 }
 
 /**
- * Every time we add supplemental CSS we add the version number here.
+ * Every time we add supplemental CSS we add the version number here
+ * and update the default config file in Basis.
  */
+
+// TODO: Before merging, we need to reset these values.
 function basis_supplemental_css_versions() {
-  return array('No updates', '1.23', '1.28.4', '1.30','1.31.5');
+  return array('1.31.5', '1.30', '1.28.4', '1.23', 'No updates');
 }
 
 /**

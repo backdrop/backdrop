@@ -105,7 +105,7 @@ function basis_form_system_theme_settings_alter(&$form, &$form_state, $form_id =
     '#default_value' => theme_get_setting('css_update', $theme_name),
     '#config' => 'basis.settings',
     'no_updates' => array(
-      '#description' => t('Default: Accept no updates introduced after installation.'),
+      '#description' => t('Accept no updates introduced after installation.'),
     ),
     'all_updates' => array(
       '#description' => t('Warning: Some future changes may effect your site.'),
@@ -144,7 +144,7 @@ function basis_form_system_theme_settings_alter(&$form, &$form_state, $form_id =
 function basis_process_css_update_value($element, &$form_state, $form) {
   $css_update = $form_state['values']['css_update'] ?? 'installation';
   $options = basis_supplemental_css_versions();
-  $install_version = config_get('basis.settings', 'install_version_clean');
+  $install_version = config_get('basis.settings', 'default_version_clean');
 
   // Adjust version value based on preference.
   switch ($css_update) {
