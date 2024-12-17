@@ -84,7 +84,7 @@ function basis_form_system_theme_settings_alter(&$form, &$form_state, $form_id =
   $css_update_options = array(
     'no_updates' => t('Default'),
     'all_updates' => t('All updates'),
-    'custom' => t('Specific version.'),
+    'custom' => t('Specific version'),
   );
 
   $form['css_updates'] = array(
