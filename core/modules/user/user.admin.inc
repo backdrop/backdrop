@@ -399,7 +399,7 @@ function user_login_settings($form, &$form_state) {
     ),
   );
 
-  $form['user_login_page_settings'] = array(
+  $form['user_login_appearance_setting'] = array(
     '#type' => 'fieldset',
     '#title' => t('Login page settings'),
   );
@@ -408,8 +408,8 @@ function user_login_settings($form, &$form_state) {
     'links' => t('Use links'),
     'simplified' => t('Show simplified page'),
   );
-  $user_login_page_default_settings = $core_config->get('user_login_page_settings');
-  $form['user_login_page_settings']['user_login_page_settings'] = array(
+  $user_login_page_default_settings = $core_config->get('user_login_appearance_setting');
+  $form['user_login_appearance_setting']['user_login_appearance_setting'] = array(
     '#title' => t('Login page options'),
     '#type' => 'radios',
     '#options' => $user_login_page_tab_options,

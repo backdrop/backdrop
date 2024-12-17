@@ -1415,9 +1415,8 @@ function user_menu() {
     'menu_name' => 'user-menu',
   );
 
-  $user_login_page_settings = user_login_page_settings();
-  $tabs = $user_login_page_settings == 'tabs';
-  $item_type = ($user_login_page_settings == 'tabs') ? MENU_DEFAULT_LOCAL_TASK : MENU_CALLBACK;
+  $user_login_appearance_setting = user_login_appearance_setting();
+  $item_type = ($user_login_appearance_setting == 'tabs') ? MENU_DEFAULT_LOCAL_TASK : MENU_CALLBACK;
   $items['user/login'] = array(
     'title' => 'Log in',
     'page callback' => 'backdrop_get_form',
@@ -1640,14 +1639,8 @@ function user_menu_alter(&$items) {
 /**
  * Return the user page tabs setting.
  */
-function user_login_page_settings() {
-  static $user_login_page_settings;
-
-  if (!isset($user_login_page_settings)) {
-    $user_login_page_settings = config_get('system.core', 'user_login_page_settings');
-  }
-
-  return $user_login_page_settings;
+function user_login_appearance_setting() {
+  return config_get('system.core', 'user_login_appearance_setting');
 }
 
 /**
@@ -1797,9 +1790,9 @@ function user_page_title($account) {
  */
 function user_init() {
   $current_path = current_path();
-  $user_login_page_settings = user_login_page_settings();
+  $user_login_appearance_setting = user_login_appearance_setting();
   if (!user_is_logged_in() && ($current_path == 'user/login' || $current_path == 'user/password' || $current_path == 'user/register')) {
-    if ($user_login_page_settings == 'simplified') {
+    if ($user_login_appearance_setting == 'simplified') {
       layout_suppress(TRUE);
     }
   }
@@ -1810,8 +1803,8 @@ function user_init() {
  */
 function user_custom_theme() {
   $current_path = current_path();
-  $user_login_page_settings = user_login_page_settings();
-  if ($user_login_page_settings == 'simplified' && !user_is_logged_in() && ($current_path == 'user/login' || $current_path == 'user/password' || $current_path == 'user/register')) {
+  $user_login_appearance_setting = user_login_appearance_setting();
+  if ($user_login_appearance_setting == 'simplified' && !user_is_logged_in() && ($current_path == 'user/login' || $current_path == 'user/password' || $current_path == 'user/register')) {
     return config_get('system.core', 'admin_theme');
   }
 }
@@ -1822,8 +1815,8 @@ function user_custom_theme() {
 function user_preprocess_page(&$variables) {
   // Add a class that tells us whether we're on a login page or not.
   $current_path = current_path();
-  $user_login_page_settings = user_login_page_settings();
-  if ($user_login_page_settings === 'simplified' && ($current_path == 'user/login' || $current_path == 'user/password' || $current_path == 'user/register')) {
+  $user_login_appearance_setting = user_login_appearance_setting();
+  if ($user_login_appearance_setting === 'simplified' && ($current_path == 'user/login' || $current_path == 'user/password' || $current_path == 'user/register')) {
     $variables['classes'][] = 'user-simplified-page-body';
   }
 }
@@ -1844,8 +1837,8 @@ function user_login($form, &$form_state) {
   backdrop_set_title(t('Log in'));
 
   // Display login form:
-  $user_login_page_settings = user_login_page_settings();
-  if ($user_login_page_settings === 'simplified') {
+  $user_login_appearance_setting = user_login_appearance_setting();
+  if ($user_login_appearance_setting === 'simplified') {
     $form['#theme_wrappers'] = array('user_simplified_page');
   }
   $credentials = config_get('system.core', 'user_login_method');
@@ -1871,7 +1864,7 @@ function user_login($form, &$form_state) {
     '#password_toggle' => TRUE,
   );
 
-  if ($user_login_page_settings != 'tabs') {
+  if ($user_login_appearance_setting != 'tabs') {
     $links = array(
       'reset' => array(
         'title' => t('Reset password'),
@@ -3301,8 +3294,8 @@ function user_register_page() {
 function user_register_form($form, &$form_state) {
   global $user;
   $admin = user_access('administer users');
-  $user_login_page_settings = user_login_page_settings();
-  if ($user_login_page_settings === 'simplified') {
+  $user_login_appearance_setting = user_login_appearance_setting();
+  if ($user_login_appearance_setting === 'simplified') {
     $form['#theme_wrappers'] = array('user_simplified_page');
   }
 
@@ -3358,8 +3351,8 @@ function user_register_form($form, &$form_state) {
   $options = backdrop_parse_url($path);
   $options['attributes']['class'][] = 'form-cancel';
 
-  $user_login_page_settings = user_login_page_settings();
-  if ($user_login_page_settings != 'tabs') {
+  $user_login_appearance_setting = user_login_appearance_setting();
+  if ($user_login_appearance_setting != 'tabs') {
     $form['links'] = array(
       '#markup' => theme('links', array(
         'links' => array(

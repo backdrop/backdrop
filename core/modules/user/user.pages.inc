@@ -43,8 +43,8 @@ function user_pass($form, &$form_state) {
   global $user;
 
   $user_is_logged_in = user_is_logged_in();
-  $user_login_page_settings = user_login_page_settings();
-  if (!$user_is_logged_in && $user_login_page_settings === 'simplified') {
+  $user_login_appearance_setting = user_login_appearance_setting();
+  if (!$user_is_logged_in && $user_login_appearance_setting === 'simplified') {
     $form['#theme_wrappers'] = array('user_simplified_page');
   }
   $form['name'] = array(
@@ -74,8 +74,8 @@ function user_pass($form, &$form_state) {
     );
   }
 
-  $user_login_page_settings = user_login_page_settings();
-  if (!$user_is_logged_in && $user_login_page_settings != 'tabs') {
+  $user_login_appearance_setting = user_login_appearance_setting();
+  if (!$user_is_logged_in && $user_login_appearance_setting != 'tabs') {
     $form['links'] = array(
       '#markup' => theme('links', array(
         'links' => array(
