@@ -20,7 +20,7 @@ function telemetry_telemetry_info() {
   );
   $info['install_version'] = array(
     'label' => t('Backdrop initial version'),
-    'description' => t('The Backdrop version at the time Backdrop was first installed, or 1.30.0 if it was installed before then.'),
+    'description' => t('The Backdrop core version at the time Backdrop was first installed.'),
     'project' => 'backdrop',
   );
   $info['server_os'] = array(
