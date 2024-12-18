@@ -16,6 +16,7 @@ function basis_css_alter(&$css) {
     $dropdown_css = $css[$path . '/css/component/menu-dropdown.css'];
     unset($css[$path . '/css/component/menu-dropdown.css']);
 
+    $weight = $dropdown_css['weight'];
     $weight += 0.0001;
     $css[$path . '/css/component/menu-dropdown.breakpoint.css'] = $dropdown_css;
     $css[$path . '/css/component/menu-dropdown.breakpoint.css']['weight'] = $weight;
