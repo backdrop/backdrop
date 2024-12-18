@@ -1839,7 +1839,7 @@ function user_login($form, &$form_state) {
   // Display login form:
   $user_login_appearance_setting = user_login_appearance_setting();
   if ($user_login_appearance_setting === 'simplified') {
-    $form['#theme_wrappers'] = array('user_simplified_page');
+    $form['#theme_wrappers'] = array('form', 'user_simplified_page');
   }
   $credentials = config_get('system.core', 'user_login_method');
   $form['name'] = array('#type' => 'textfield',
@@ -3296,7 +3296,7 @@ function user_register_form($form, &$form_state) {
   $admin = user_access('administer users');
   $user_login_appearance_setting = user_login_appearance_setting();
   if ($user_login_appearance_setting === 'simplified') {
-    $form['#theme_wrappers'] = array('user_simplified_page');
+    $form['#theme_wrappers'] = array('form', 'user_simplified_page');
   }
 
   // Pass access information to the submit handler. Running an access check

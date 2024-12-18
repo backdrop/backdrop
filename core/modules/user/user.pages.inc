@@ -45,7 +45,7 @@ function user_pass($form, &$form_state) {
   $user_is_logged_in = user_is_logged_in();
   $user_login_appearance_setting = user_login_appearance_setting();
   if (!$user_is_logged_in && $user_login_appearance_setting === 'simplified') {
-    $form['#theme_wrappers'] = array('user_simplified_page');
+    $form['#theme_wrappers'] = array('form', 'user_simplified_page');
   }
   $form['name'] = array(
     '#type' => 'textfield',
