@@ -43,13 +43,11 @@ function basis_preprocess_page(&$variables) {
   $update_preference = config_get('basis.settings', 'css_update');
 
   // Process supplemental CSS versions.
-  $update_css_versions = basis_css_versions_updated();
+  $update_css_versions = basis_updated_css_versions();
   foreach ($update_css_versions as $update_css_version) {
-    if ($update_css_version) {
-      if ($update_preference === 'all_updates' || version_compare($update_version, $update_css_version, '>=')) {
-        $update_css_version_class = 'update-' . str_replace('.', '-', $update_css_version);
-        $variables['classes'][] = $update_css_version_class;
-      }
+    if ($update_preference === 'all_updates' || version_compare($update_version, $update_css_version, '>=')) {
+      $update_css_version_class = 'update-' . str_replace('.', '-', $update_css_version);
+      $variables['classes'][] = $update_css_version_class;
     }
   }
 
@@ -69,12 +67,14 @@ function basis_preprocess_page(&$variables) {
 }
 
 /**
- * Every time we add supplemental CSS we add the version number here
- * and update the default config file in Basis.
+ * Returns the versions of Backdrop that contain updated CSS for Basis.
+ *
+ * Every time a new supplemental CSS update is added to core, the core version
+ * should be added to this list. When a new version is added, the
+ * "css_update_version" in basis.settings.json should match the added value.
  */
-
-// TODO: Before merging, we need to reset these values.
-function basis_css_versions_updated() {
+function basis_updated_css_versions() {
+  // TODO: Before merging, we need to reset these values.
   return array('1.31.5', '1.30', '1.28.4', '1.23');
 }
 
