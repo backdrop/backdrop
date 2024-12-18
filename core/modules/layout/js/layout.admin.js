@@ -29,6 +29,37 @@ Backdrop.behaviors.layoutList = {
 };
 
 /**
+ * Behavior for configuring block settings.
+ */
+Backdrop.behaviors.blockConfigure = {
+  attach: function(context) {
+
+    /**
+     * Toggle handler for the reusable block notes.
+     */
+    function reusable_notes_toggle_handler(e) {
+      var $notes = $(this).next().toggle();
+      if ($notes.is(':visible')) {
+        $(this).text(Backdrop.t('Hide')).append('<span class="arrow close"></span>');
+      }
+      else {
+        $(this).text(Backdrop.t('Show')).append('<span class="arrow"></span>');
+      }
+      e.preventDefault();
+      e.stopPropagation();
+    };
+
+    var $form = $('.layout-block-configure-form').once('layout-block-configure');
+
+    // Hide the reusable block notes.
+    $form.find('.reusable-block-notes').hide();
+
+    // Handle toggling the reusable block notes.
+    $('a.reusable-block-notes-toggle').on('click', reusable_notes_toggle_handler);
+  }
+};
+
+/**
  * Behavior for creating/configuring layout settings.
  */
 Backdrop.behaviors.layoutConfigure = {

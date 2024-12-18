@@ -12,7 +12,7 @@ function block_admin_list() {
 
   $help_text = array(
     '#theme' => 'help',
-    '#markup' => t('These blocks are available to be placed in any layout in the <a href="@link">Layouts</a> page.', array('@link' => url('admin/structure/layouts'))),
+    '#markup' => t('These blocks are available to be placed in any layout in the <a href="@link">Layouts</a> page. <strong>Updating the content of these blocks will affect all layouts where they are placed!</strong>', array('@link' => url('admin/structure/layouts'))),
   );
 
   $header = array(
@@ -71,7 +71,10 @@ function block_admin_list() {
     '#empty' => t('No custom blocks have been created yet.'),
   );
 
-  return array('help_text' => $help_text, 'block_admin_list' => $block_admin_list);
+  return array(
+    'help_text' => $help_text,
+    'block_admin_list' => $block_admin_list,
+  );
 }
 
 /**
@@ -113,7 +116,7 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
     );
   }
   if ($custom_block['info']) {
-    backdrop_set_title(t("'%name' block", array('%name' => $custom_block['info'])), PASS_THROUGH);
+    backdrop_set_title(t('Configure %name block', array('%name' => check_plain($custom_block['info']))), PASS_THROUGH);
   }
   else {
     backdrop_set_title(t('Add custom block'));
@@ -122,7 +125,11 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
   // Set title for translate block form.
   if (isset($form['langcode'])) {
     $language = $language = language_load($form['langcode']['#value']);
-    backdrop_set_title(t("Translate '%name' block to %language", array('%name' => $custom_block['info'], '%language' => $language->name)), PASS_THROUGH);
+    $replacements = array(
+      '%name' => check_plain($custom_block['info']),
+      '%language' => check_plain($language->name),
+    );
+    backdrop_set_title(t('Translate %name block to %language', $replacements), PASS_THROUGH);
   }
 
   // Call our own block configuration form (also used by Layout module).
@@ -151,7 +158,7 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
   if ($delta) {
     $form['actions']['delete'] = array(
       '#type' => 'link',
-      '#title' => t('Delete'),
+      '#title' => t('Delete block'),
       '#href' => 'admin/structure/block/manage/' . $delta . '/delete',
       '#attributes' => array('class' => array('button', 'button-secondary', 'form-delete')),
     );
@@ -275,7 +282,17 @@ function block_custom_block_delete($form, &$form_state, $delta) {
   $form['info'] = array('#type' => 'hidden', '#value' => $custom_block['info']);
   $form['delta'] = array('#type' => 'hidden', '#value' => $delta);
 
-  return confirm_form($form, t('Are you sure you want to delete the block %name?', array('%name' => $custom_block['info'])), 'admin/structure/block', '', t('Delete'), t('Cancel'));
+  backdrop_set_message(t('This action cannot be undone!'), 'warning');
+
+  $question = t('Are you sure you want to delete the block %name?', array('%name' => $custom_block['info']));
+
+  $alternative_actions = array(
+    t('Use the "Remove" or "Disable" operations for this block in each individual layout.'),
+    t('Adjust the visibility of the block in each layout, so that it is shown only when certain conditions apply.'),
+  );
+  $alternative_actions_tip = t('<strong>Tip</strong>: You may consider the following alternatives instead:') . theme('item_list', array('items' => $alternative_actions));
+
+  return confirm_form($form, $question, 'admin/structure/block', $alternative_actions_tip, t('Delete this block from all layouts'), t('Cancel'));
 }
 
 /**
@@ -293,7 +310,6 @@ function block_custom_block_delete_submit($form, &$form_state) {
   backdrop_set_message(t('The block %name has been removed.', array('%name' => $form_state['values']['info'])));
   $form_state['redirect'] = 'admin/structure/block';
 }
-
 
 /**
  * Form constructor for the block translation list form.

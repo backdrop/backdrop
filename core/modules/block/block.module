@@ -254,6 +254,8 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     $edit['description'] = '';
   }
 
+  $is_new = is_null($edit['delta']);
+
   $form['info'] = array(
     '#type' => 'textfield',
     '#title' => t('Admin label'),
@@ -287,17 +289,40 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
     '#title' => t('Display title'),
     '#default_value' => $edit['title'],
     '#maxlength' => 255,
-    '#description' => t('The title of the block as shown to the user. This will affect all places where this block is used.'),
+    '#description' => t('Optional block title to be shown to site visitors.'),
   );
   $form['body'] = array(
     '#type' => 'text_format',
-    '#title' => t('Block content'),
+    '#title' => t('Block content (reusable)'),
     '#default_value' => $edit['body']['value'],
     '#format' => $edit['body']['format'],
     '#editor_uploads' => TRUE,
     '#rows' => 8,
     '#required' => TRUE,
   );
+  // In the "Add custom block" dialog specifically, provide a tip with a link
+  // to the "Custom blocks" listing.
+  if (!$stand_alone) {
+    $form['body']['#description'] = t('<strong>Tip</strong>: You may also edit this and all other reusable blocks on the <a href="@block_link" target="_blank">Custom blocks</a> page.', array('@block_link' => url('admin/structure/block')));
+  }
+
+  // Prepare a note to be placed between the label and the text area of the
+  // custom content field, using #field_prefix.
+  if ($is_new) {
+    $reusable_note = t('<strong>Note:</strong> The content below will be shared across all layouts where this reusable block will be placed.');
+  }
+  else {
+    $reusable_note = t('<strong>Note:</strong> Any changes to the content below will affect all layouts where this reusable block is placed!');
+  }
+  // Add the note, styled as an info message.
+  $reusable['reusable'] = array(
+    '#type' => 'container',
+    '#attributes' => array('class' => array('messages', 'info')),
+  );
+  $reusable['reusable']['info'] = array(
+    '#markup' => $reusable_note,
+  );
+  $form['body']['#field_prefix'] = render($reusable);
 
   // Add default language select dropdown on the stand-alone config form only.
   // Not shown on the translation forms at all.
@@ -332,14 +357,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
         '[name=title_display]' => array('value' => LAYOUT_TITLE_DEFAULT),
       ),
     );
-    $form['reusable'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Make this block reusable'),
-      '#description' => t('This option may not be unchecked once enabled. You may configure or delete this reusable block from the !block_link page.', array('!block_link' => l(t('Custom blocks'), 'admin/structure/block'))),
-      '#weight' => 4,
-      '#default_value' => TRUE,
-      '#disabled' => TRUE,
-    );
+
     $form['info']['#weight'] = 5;
     $form['delta']['#weight'] = 6;
     $form['delta']['#machine_name']['source'] = array('block_settings', 'info');
