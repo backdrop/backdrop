@@ -76,7 +76,7 @@ if (module_exists('color')) {
   $install_version = config_get('system.core', 'install_version');
 
   $css_update_options = array(
-    'default' => t('Default'),
+    'install_version' => t('Default'),
     'all_updates' => t('All updates'),
     'custom' => t('Specific version'),
   );
@@ -109,7 +109,7 @@ if (module_exists('color')) {
   );
 
   // Custom select css update versions.
-  $options = backdrop_map_assoc(basis_css_versions_updated());
+  $options = backdrop_map_assoc(basis_updated_css_versions());
   $options[''] = t('No updates');
   $default_version_value = theme_get_setting('css_update_version', $theme_name);
   $default_version_key = array_search($default_version_value, $options, TRUE);
@@ -134,20 +134,29 @@ if (module_exists('color')) {
  * Process function to adjust the CSS update version value before saving.
  */
 function basis_process_css_update_value($element, &$form_state, $form) {
-  $css_update = $form_state['values']['css_update'] ?? 'installation';
-  $options = basis_css_versions_updated();
-  $install_version = config_get('basis.settings', 'default_version_clean');
+  $css_update = isset($form_state['values']['css_update']) ? $form_state['values']['css_update'] : 'install_version';
+  $basis_css_versions = basis_updated_css_versions();
+  $install_version = config_get('system.core', 'install_version');
+
+  // Find the CSS update version within Basis that matches the install version.
+  $basis_install_version = '';
+  foreach ($basis_css_versions as $css_version) {
+    if (version_compare($css_version, $install_version, '<')) {
+      break;
+    }
+    $basis_install_version = $css_version;
+  }
 
   // Adjust version value based on preference.
   switch ($css_update) {
-    case 'default':
-      $form_state['values']['css_update_version'] = $install_version;
+    case 'install_version':
+      $form_state['values']['css_update_version'] = $basis_install_version;
       break;
 
     case 'custom':
-      $selected_key = $form_state['values']['css_update_version'] ?? NULL;
-      if (isset($options[$selected_key])) {
-        $form_state['values']['css_update_version'] = $options[$selected_key];
+      $selected_key = isset($form_state['values']['css_update_version']) ? $form_state['values']['css_update_version'] : NULL;
+      if (isset($basis_css_versions[$selected_key])) {
+        $form_state['values']['css_update_version'] = $basis_css_versions[$selected_key];
       }
       break;
   }

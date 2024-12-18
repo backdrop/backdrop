@@ -3704,7 +3704,9 @@ function system_update_1099() {
     }
     $config->set('install_version', $version);
     $config->save();
+    return t('Install version set to @version', array('@version' => $version));
   }
+  return t('Install version had already been set, no changes.');
 }
 
 
