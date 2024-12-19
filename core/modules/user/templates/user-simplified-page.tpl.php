@@ -1,17 +1,13 @@
 <?php
 /**
  * @file
- * Renders the user login form.
- *
- * Use render($user_login_form) to print all form items, or print a subset
- * such as render($user_login_form['name']). Always call
- * backdrop_render_children($user_login_form) at the end in order to print all
- * remaining items.
+ * Theme wrapper for the "Log in", "Reset password", and "Create new Account"
+ * forms when shown on simplified (layout suppressed) pages.
  *
  * Available variables:
- *   - $user_login_form: An array of form items. Use render() to print them.
+ *   - $form: The rendered HTML for the wrapped form.
  *
- * @since 1.29.0 template added
+ * @since 1.30.0 template added
  * @ingroup themeable
  */
 ?>
