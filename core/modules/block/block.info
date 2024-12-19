@@ -1,5 +1,5 @@
 type = module
-name = Reusable custom blocks
+name = Reusable Custom Blocks
 description = Allows custom blocks to be reused across different layouts.
 package = Layouts
 tags[] = Blocks
