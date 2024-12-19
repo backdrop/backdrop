@@ -324,7 +324,7 @@ function theme_icon(array $variables) {
       $svg_contents = filter_xss($svg_contents, $allowed_svg_elements);
 
       // Move the "alt" text to an attribute.
-      if ($variables['alt']) {
+      if (isset($variables['alt'])) {
         $variables['attributes']['alt'] = $variables['alt'];
       }
       else {
