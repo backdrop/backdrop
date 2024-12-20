@@ -38,14 +38,21 @@ function basis_preprocess_page(&$variables) {
     $variables['classes'][] = 'view-name-' . $view->name;
   }
 
-  // Get the installed version.
-  $update_version = config_get('basis.settings', 'css_update_version');
+  // CSS Update options can be one of the following:
+  // - install: Calculate the CSS update version based on core install_version.
+  // - all: Apply all CSS updates.
+  // - version: Select a specific update version (and all updates prior to it).
   $update_preference = config_get('basis.settings', 'css_update');
+
+  // Get the specified CSS update version.
+  // The version must be one of the values from basis_updated_css_versions().
+  // This may also be an empty string, to signify "No updates".
+  $update_version = config_get('basis.settings', 'css_update_version');
 
   // Process supplemental CSS versions.
   $update_css_versions = basis_updated_css_versions();
   foreach ($update_css_versions as $update_css_version) {
-    if ($update_preference === 'all_updates' || version_compare($update_version, $update_css_version, '>=')) {
+    if ($update_preference === 'all' || version_compare($update_version, $update_css_version, '>=')) {
       $update_css_version_class = 'update-' . str_replace('.', '-', $update_css_version);
       $variables['classes'][] = $update_css_version_class;
     }
@@ -74,8 +81,7 @@ function basis_preprocess_page(&$variables) {
  * "css_update_version" in basis.settings.json should match the added value.
  */
 function basis_updated_css_versions() {
-  // TODO: Before merging, we need to reset these values.
-  return array('1.31.5', '1.30', '1.28.4', '1.23');
+  return array('1.30');
 }
 
 /**

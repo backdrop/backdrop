@@ -108,9 +108,15 @@ file = ajax.test
 
 [AJAXDialogTest]
 name = AJAX dialog commands
-description = APerforms tests on opening and manipulating dialogs via AJAX commands.
+description = Performs tests on opening and manipulating dialogs via AJAX commands.
 group = AJAX
 file = ajax.test
+
+[BasisTestCase]
+name = Basis theme
+description = Test supplemental CSS update selectors in the Basis theme.
+group = Theme
+file = basis.test
 
 [BatchProcessingTestCase]
 name = Batch processing
