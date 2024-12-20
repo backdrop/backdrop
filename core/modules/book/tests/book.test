@@ -227,7 +227,7 @@ class BookTestCase extends BackdropWebTestCase {
    * @return string
    *   A regular expression that locates sub-nodes of the outline.
    */
-  protected function generateOutlinePattern($nodes) {
+  protected function generateOutlinePattern(array $nodes) {
     $outline = '';
     foreach ($nodes as $node) {
       $outline .= '(node\/' . $node->nid . ')(.*?)(' . $node->title . ')(.*?)';
