@@ -116,6 +116,7 @@ Enregistrer
 entityreference
 éøïвβ
 errorcode
+etag
 evalmath
 evid
 exitcode
@@ -267,10 +268,13 @@ mousedown
 mouton
 moutons
 msgbox
+msgid
+msgstr
 msword
 multibundle
 multilanguage
 multipage
+multipass
 multisite
 multisites
 Műveletek
@@ -504,6 +508,7 @@ unpackage
 unpermissioned
 unpromoted
 unrendered
+unsetting
 unshortened
 uploadimage
 uploadwidget

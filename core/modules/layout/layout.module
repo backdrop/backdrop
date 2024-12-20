@@ -832,6 +832,9 @@ function layout_theme() {
       'template' => 'templates/layout-content-form',
       'render element' => 'form',
     ) + $base,
+    'layout_hero_background_image' => array(
+      'render element' => 'element',
+    ) + $base,
     'layout_info' => array(
       'variables' => array('layout' => NULL),
     ) + $base,

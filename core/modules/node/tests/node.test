@@ -2742,18 +2742,16 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
 
     // Set the block to a region to confirm block is available.
     $layout = layout_load('home');
-    $block = $layout->addBlock('node', 'recent', 'content');
+    $block = $layout->addBlock('views', 'recent_content-block', 'content');
 
     // Set block title and variables.
     $block_title = $this->randomName();
     $block->settings['title'] = $block_title;
     $block->settings['title_display'] = LAYOUT_TITLE_CUSTOM;
-    $block->settings['block_settings'] = array(
-      'node_count' => 2,
-    );
+    $block->settings['items_per_page'] = 2;
     $layout->save();
 
-    // Test that block is not visible without nodes
+    // Test that block shows the no content available message with no nodes.
     $this->backdropGet('');
     $this->assertText(t('No content available.'), 'Block with "No content available." found.');
 
@@ -2791,15 +2789,13 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     $this->assertText($node3->title, t('Node found in block.'));
 
     // Check to make sure nodes are in the right order.
-    $this->assertTrue($this->xpath('//*[contains(@class,"block-node-recent")]/div/table/tbody/tr[position() = 1]/td/div/a[text() = "' . $node3->title . '"]'), t('Nodes were ordered correctly in block.'));
+    $this->assertTrue($this->xpath('//*[contains(@class,"block-views-recent-content-block")]/div/div/div/table/tbody/tr[position() = 1]/td/div/a[text() = "' . $node3->title . '"]'), t('Nodes were ordered correctly in block.'));
 
     // Set the number of recent nodes to show to 10.
     $this->backdropLogout();
     $this->backdropLogin($this->admin_user);
 
-    $block->settings['block_settings'] = array(
-      'node_count' => 10,
-    );
+    $block->settings['items_per_page'] = 10;
     $layout->save();
 
     // Post an additional node.
