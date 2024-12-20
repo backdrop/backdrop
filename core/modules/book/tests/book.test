@@ -37,6 +37,9 @@ class BookTestCase extends BackdropWebTestCase {
    */
   protected $admin_user;
 
+  /**
+   * {@inheritdoc}
+   */
   public function setUp() {
     parent::setUp(array('book', 'node_access_test'));
 
@@ -151,7 +154,7 @@ class BookTestCase extends BackdropWebTestCase {
    * @param array $breadcrumb
    *   The nodes that should be displayed in the breadcrumb.
    */
-  protected function checkBookNode(Node $node, $nodes, $previous = FALSE, $up = FALSE, $next = FALSE, array $breadcrumb) {
+  protected function checkBookNode(Node $node, array $nodes, $previous = FALSE, $up = FALSE, $next = FALSE, array $breadcrumb) {
     // $number does not use backdrop_static as it should not be reset
     // since it uniquely identifies each call to checkBookNode().
     static $number = 0;
@@ -309,72 +312,72 @@ class BookTestCase extends BackdropWebTestCase {
   /**
    * Tests the book navigation block when an access module is enabled.
    */
-   public function testNavigationBlockOnAccessModuleEnabled() {
-     $this->backdropLogin($this->admin_user);
+  public function testNavigationBlockOnAccessModuleEnabled() {
+    $this->backdropLogin($this->admin_user);
 
-     // Set the block title.
-     $block_title = $this->randomName(16);
+    // Set the block title.
+    $block_title = $this->randomName(16);
 
-     // Add the block to the sidebar region in the default layout.
-     $layout_name = 'default';
-     $region = 'sidebar';
-     $block = array(
-       'module' => 'book',
-       'delta' => 'navigation',
-     );
-     $block_title = $this->randomName(16);
-     $edit = array(
-       'region' => $region,
-       'title' => $block_title,
-       'title_display' => LAYOUT_TITLE_CUSTOM,
-       'block_settings[book_mode]' => 'book pages',
-     );
-     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/add-block/editor/' . $region . '/' . $block['module'] . ':' . $block['delta'], $edit, t('Add block'));
-     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name, array(), t('Save layout'));
+    // Add the block to the sidebar region in the default layout.
+    $layout_name = 'default';
+    $region = 'sidebar';
+    $block = array(
+      'module' => 'book',
+      'delta' => 'navigation',
+    );
+    $block_title = $this->randomName(16);
+    $edit = array(
+      'region' => $region,
+      'title' => $block_title,
+      'title_display' => LAYOUT_TITLE_CUSTOM,
+      'block_settings[book_mode]' => 'book pages',
+    );
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/add-block/editor/' . $region . '/' . $block['module'] . ':' . $block['delta'], $edit, t('Add block'));
+    $this->backdropPost('admin/structure/layouts/manage/' . $layout_name, array(), t('Save layout'));
 
-     // Give anonymous users the permission 'node test view'.
-     $edit = array();
-     $edit['anonymous[node test view]'] = TRUE;
-     $this->backdropPost('admin/config/people/permissions/anonymous', $edit, t('Save permissions'));
-     $this->assertText(t('The changes have been saved.'), "Permission 'node test view' successfully assigned to anonymous users.");
+    // Give anonymous users the permission 'node test view'.
+    $edit = array();
+    $edit['anonymous[node test view]'] = TRUE;
+    $this->backdropPost('admin/config/people/permissions/anonymous', $edit, t('Save permissions'));
+    $this->assertText(t('The changes have been saved.'), "Permission 'node test view' successfully assigned to anonymous users.");
 
-     // Create a book.
-     $this->createBook();
+    // Create a book.
+    $this->createBook();
 
-     // Test correct display of the block to registered users.
-     $this->backdropLogin($this->web_user);
-     $this->backdropGet('node/' . $this->book->nid);
-     $this->assertText($block_title, 'Book navigation block is displayed to registered users.');
-     $this->backdropLogout();
+    // Test correct display of the block to registered users.
+    $this->backdropLogin($this->web_user);
+    $this->backdropGet('node/' . $this->book->nid);
+    $this->assertText($block_title, 'Book navigation block is displayed to registered users.');
+    $this->backdropLogout();
 
-     // Test correct display of the block to anonymous users.
-     $this->backdropGet('node/' . $this->book->nid);
-     $this->assertText($block_title, 'Book navigation block is displayed to anonymous users.');
-   }
+    // Test correct display of the block to anonymous users.
+    $this->backdropGet('node/' . $this->book->nid);
+    $this->assertText($block_title, 'Book navigation block is displayed to anonymous users.');
+  }
 
   /**
    * Tests the access for deleting top-level book nodes.
    */
-   public function testBookDelete() {
-     $nodes = $this->createBook();
-     $this->backdropLogin($this->admin_user);
-     $edit = array();
+  public function testBookDelete() {
+    $nodes = $this->createBook();
+    $this->backdropLogin($this->admin_user);
+    $edit = array();
 
-     // Test access to delete top-level and child book nodes.
-     $this->backdropGet('node/' . $this->book->nid . '/outline-remove');
-     $this->assertResponse('403', 'Deleting top-level book node properly forbidden.');
-     $this->backdropPost('node/' . $nodes[4]->nid . '/outline-remove', $edit, t('Remove'));
-     $node4 = node_load($nodes[4]->nid, NULL, TRUE);
-     $this->assertTrue(empty($node4->book), 'Deleting child book node properly allowed.');
+    // Test access to delete top-level and child book nodes.
+    $this->backdropGet('node/' . $this->book->nid . '/outline-remove');
+    $this->assertResponse('403', 'Deleting top-level book node properly forbidden.');
+    $this->backdropPost('node/' . $nodes[4]->nid . '/outline-remove', $edit, t('Remove'));
+    $node4 = node_load($nodes[4]->nid, NULL, TRUE);
+    $this->assertTrue(empty($node4->book), 'Deleting child book node properly allowed.');
 
-     // Delete all child book nodes and retest top-level node deletion.
-     foreach ($nodes as $node) {
-       $nids[] = $node->nid;
-     }
-     node_delete_multiple($nids);
-     $this->backdropPost('node/' . $this->book->nid . '/outline-remove', $edit, t('Remove'));
-     $node = node_load($this->book->nid, NULL, TRUE);
-     $this->assertTrue(empty($node->book), 'Deleting childless top-level book node properly allowed.');
-   }
+    // Delete all child book nodes and retest top-level node deletion.
+    foreach ($nodes as $node) {
+      $nids[] = $node->nid;
+    }
+    node_delete_multiple($nids);
+    $this->backdropPost('node/' . $this->book->nid . '/outline-remove', $edit, t('Remove'));
+    $node = node_load($this->book->nid, NULL, TRUE);
+    $this->assertTrue(empty($node->book), 'Deleting childless top-level book node properly allowed.');
+  }
 }
 
