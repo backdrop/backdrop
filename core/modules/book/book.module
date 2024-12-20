@@ -1156,7 +1156,7 @@ function book_type_is_allowed($type) {
  *   otherwise, FALSE.
  */
 function book_all_types_allowed() {
-  return user_access('administer book outlines') && config_get('book.settings', 'book_allowed_all');
+  return user_access('administer book outlines') && config_get('book.settings', 'book_admin_allowed_all');
 }
 
 /**

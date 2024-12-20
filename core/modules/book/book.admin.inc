@@ -50,7 +50,7 @@ function book_admin_overview() {
 function book_admin_settings($form, &$form_state) {
   $types = node_type_get_names();
   $config = config('book.settings');
-  $form['book_allowed_all'] = array(
+  $form['book_admin_allowed_all'] = array(
     '#type' => 'checkbox',
     '#title' => t('Allow all content types in book outlines'),
     '#default_value' => $config->get('book_allowed_all'),
@@ -133,7 +133,7 @@ function book_admin_settings_validate($form, &$form_state) {
  */
 function book_admin_settings_submit($form, &$form_state) {
   config('book.settings')
-    ->set('book_allowed_all', $form_state['values']['book_allowed_all'])
+    ->set('book_allowed_all', $form_state['values']['book_admin_allowed_all'])
     ->set('book_allowed_types', $form_state['values']['book_allowed_types'])
     ->set('book_child_type', $form_state['values']['book_child_type'])
     ->set('book_navigation', $form_state['values']['book_navigation'])

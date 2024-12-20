@@ -143,8 +143,10 @@ function book_update_1002() {
  */
 function book_update_1003() {
   $config = config('book.settings');
-  $config->set('book_allowed_all', 1);
-  $config->save();
+  if ($config->get('book_admin_allowed_all') === NULL) {
+    $config->set('book_admin_allowed_all', 1);
+    $config->save();
+  }
 }
 
 /**
