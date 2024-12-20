@@ -1,16 +1,19 @@
 <?php
 /**
  * @file
- * Tests for the Basis core theme. Theme
+ * Tests for the Basis core theme.
  */
 
 /**
- * Test actions executing in a potential loop, and make sure they abort properly.
+ * Test the addition of supplemental CSS update selectors on the body class.
  */
 class BasisTestCase extends BackdropWebTestCase {
   protected $profile = 'standard';
 
-  function setUp() {
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
     theme_enable(array('basis'));
     config_set('system.core', 'theme_default', 'basis');
     parent::setUp();
@@ -70,6 +73,11 @@ class BasisTestCase extends BackdropWebTestCase {
     $this->assertTrue(in_array('update-1-30', $this->getBodyClasses()), 'The specific CSS update version exists as a body class.');
   }
 
+  /**
+   * Get all body classes on the current page as an array.
+   *
+   * @return string[]
+   */
   private function getBodyClasses() {
     $body = current($this->xpath('//body'));
     return explode(' ', (string) $body->attributes()->class);

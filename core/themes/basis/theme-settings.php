@@ -139,7 +139,7 @@ $form['css_updates']['css_update_version'] = array(
 function basis_process_css_update_value($element, &$form_state, $form) {
   $css_update = isset($form_state['values']['css_update']) ? $form_state['values']['css_update'] : 'install';
   $basis_css_versions = basis_updated_css_versions();
-  $install_version = config_get('system.core', 'install');
+  $install_version = config_get('system.core', 'install_version');
 
   // Find the CSS update version within Basis that matches the install version.
   $basis_install_version = '';
