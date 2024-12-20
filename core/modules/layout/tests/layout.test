@@ -817,7 +817,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   /**
    * Tests 403 and 404 visibility conditions.
    */
-  function testBlockHttpResponseCodeConditions() {
+  public function testBlockHttpResponseCodeConditions() {
     // Create a new layout at a custom path.
     $layout_title = 'Response Codes Test';
     $layout_name = 'response_codes_test';
@@ -2868,7 +2868,7 @@ class LayoutUpgradePathTest extends UpgradePathTestCase {
     ));
     $this->backdropGet('node/' . $article_node->nid);
     $article_blocks = $blocks;
-    $article_blocks['sidebar-second'][] = 'block-node-recent';
+    $article_blocks['sidebar-second'][] = 'block-views-recent-content-block';
     $this->assertBlocks($article_blocks);
 
     // Check that the blocks are NOT available on page content.
@@ -2881,7 +2881,7 @@ class LayoutUpgradePathTest extends UpgradePathTestCase {
     $this->assertBlocks($blocks);
     $this->assertNoBlocks(array(
       'l-sidebar-section' => array(
-        'block-node-recent'
+        'block-views-recent-content-block',
       ),
     ));
 
