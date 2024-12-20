@@ -882,9 +882,6 @@ nav.tabs:before {
   /* Background behind primary tabs */
   background-color: #586172;
 }
-.update-1-30 nav.tabs:before {
-  background-color: #dee2ea;
-}
 
 ul.primary {
   font-size: 0.9375em;
@@ -900,19 +897,7 @@ ul.primary li.active a,
 .responsive-tabs-mobile .expand-dropdown-tabs-label {
   border-color: #586172; /* Should be color of bg behind tabs */
   color: #010000;
-  background-color: #bbbbbc;
-}
-.update-1-30 ul.primary li a,
-.update-1-30 ul.primary li a:visited,
-.update-1-30 ul.primary li a:hover,
-.update-1-30 ul.primary li.active a,
-.update-1-30 .expand-dropdown-tabs-control,
-.update-1-30 .responsive-tabs-mobile .expand-dropdown-tabs-control:before,
-.update-1-30 .responsive-tabs-mobile .expand-dropdown-tabs-label {
-  background-color: #c5c5d0;
-}
-.update-1-30 ul.primary li a:hover {
-  background-color: #a7a7b0;
+  background-color: #dee2ea;
 }
 
 ul.primary li.active a,
