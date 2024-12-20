@@ -3722,7 +3722,7 @@ function system_update_1100() {
       '_config_static' => TRUE,
     ), $data);
     if (!isset($data['css_update'])) {
-      $data['css_update'] = 'install_version';
+      $data['css_update'] = 'install';
       // An empty version is sufficient, the same as "No updates" for existing
       // sites running Basis.
       $data['css_update_version'] = '';
