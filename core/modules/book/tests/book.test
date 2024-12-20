@@ -143,7 +143,7 @@ class BookTestCase extends BackdropWebTestCase {
    *
    * @param Node $node
    *   Node to check.
-   * @param array $nodes
+   * @param array|null $nodes
    *   Nodes that should be in outline.
    * @param Node|false $previous
    *   (optional) Previous link node. Defaults to FALSE.
@@ -154,7 +154,7 @@ class BookTestCase extends BackdropWebTestCase {
    * @param array $breadcrumb
    *   The nodes that should be displayed in the breadcrumb.
    */
-  protected function checkBookNode(Node $node, array $nodes, $previous = FALSE, $up = FALSE, $next = FALSE, array $breadcrumb) {
+  protected function checkBookNode(Node $node, $nodes, $previous = FALSE, $up = FALSE, $next = FALSE, array $breadcrumb) {
     // $number does not use backdrop_static as it should not be reset
     // since it uniquely identifies each call to checkBookNode().
     static $number = 0;
@@ -212,7 +212,7 @@ class BookTestCase extends BackdropWebTestCase {
     $this->backdropGet('node/add/page');
     $this->assertText('Book outline', 'Can add page to book outline.');
 
-    config_set('book.settings', 'book_allowed_all', 0);
+    config_set('book.settings', 'book_admin_allowed_all', 0);
 
     $this->backdropGet('node/add/page');
     $this->assertNoText('Book outline', 'Cannot add page to book outline.');
