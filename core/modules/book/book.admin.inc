@@ -52,9 +52,9 @@ function book_admin_settings($form, &$form_state) {
   $config = config('book.settings');
   $form['book_admin_allowed_all'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Allow all content types in book outlines'),
-    '#default_value' => $config->get('book_allowed_all'),
-    '#description' => t('Affects users with the %outline-perm permission.', array('%outline-perm' => t('Administer book outlines'))),
+    '#title' => t('Allow admins to use all content types in book outlines'),
+    '#default_value' => $config->get('book_admin_allowed_all'),
+    '#description' => t('Overrides the specific content type list and allows all content types for user accounts with the %outline-perm permission.', array('%outline-perm' => t('Administer book outlines'))),
   );
   $form['book_allowed_types'] = array(
     '#type' => 'checkboxes',
