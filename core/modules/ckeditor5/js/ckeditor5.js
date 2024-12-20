@@ -34,7 +34,7 @@
       // The source element value is managed manually to apply code formatting.
       editorSettings.updateSourceElementOnDestroy = false;
 
-      editorSettings.licenseKey = '';
+      editorSettings.licenseKey = 'GPL';
 
       // If filter_html is turned on, and the htmlSupport plugin is available,
       // we prevent on* attributes.
