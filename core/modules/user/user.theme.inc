@@ -388,12 +388,12 @@ function template_preprocess_user_profile(&$variables) {
 }
 
 /**
- * Process variables for user-login-form.tpl.php.
+ * Process variables for user-simplified-page.tpl.php.
  *
  * The $variables array contains the following arguments:
- * - $user_login_form
+ * - $element
  *
- * @see user-login-form.tpl.php
+ * @see user-simplified-page.tpl.php
  */
 function template_preprocess_user_simplified_page(&$variables) {
   $form = $variables['element'];
@@ -413,7 +413,6 @@ function template_preprocess_user_simplified_page(&$variables) {
   $variables['user_login_page_simplified'] = $variables['user_login_appearance_setting'] == 'simplified';
   $variables['logo_image'] = '';
 
-  // @todo: change logo alt and page title for other pages.
   if ($variables['user_login_page_simplified']) {
     if ($logo = backdrop_get_logo()) {
       $variables['logo_image'] = theme('image', array(

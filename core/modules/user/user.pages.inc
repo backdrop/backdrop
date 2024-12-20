@@ -39,7 +39,7 @@ function user_pass_page() {
  * @see user_pass_validate()
  * @see user_pass_submit()
  */
-function user_pass($form, &$form_state) {
+function user_pass() {
   global $user;
 
   $user_is_logged_in = user_is_logged_in();

@@ -1636,7 +1636,7 @@ function user_menu_alter(&$items) {
 }
 
 /**
- * Return the user page tabs setting.
+ * Return the login page appearance setting.
  */
 function user_login_appearance_setting() {
   return config_get('system.core', 'user_login_appearance_setting');
