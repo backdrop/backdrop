@@ -127,7 +127,7 @@ $form['css_updates']['css_update_version'] = array(
   '#empty_value' => NULL,
   '#states' => array(
     'visible' => array(
-      ':input[name="css_update"]' => array('value' => 'custom'),
+      ':input[name="css_update"]' => array('value' => 'version'),
     ),
   ),
   '#process' => array('basis_process_css_update_value'),
