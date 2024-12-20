@@ -38,10 +38,11 @@ function basis_preprocess_page(&$variables) {
     $variables['classes'][] = 'view-name-' . $view->name;
   }
 
-  // Get the specified CSS update version.
-  // The version must be one of the values from basis_updated_css_versions().
-  // This may also be an empty string, to signify "No updates".
-  $update_version = theme_get_setting('css_update_version');
+  // The CSS update option can be one of the following:
+  // - install: Calculate the CSS update version based on core install_version.
+  // - all: Apply all CSS updates.
+  // - version: Select a specific update version (and all updates prior to it).
+  $update_preference = theme_get_setting('css_update');
 
   // Get the specified CSS update version.
   // The version must be one of the values from basis_updated_css_versions().
