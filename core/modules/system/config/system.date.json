@@ -1,5 +1,6 @@
 {
     "_config_name": "system.date",
+    "_config_static": true,
     "first_day": 0,
     "default_country": "",
     "default_timezone": "UTC",

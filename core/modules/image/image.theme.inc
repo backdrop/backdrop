@@ -68,7 +68,7 @@ function theme_image_style_list($variables) {
       'title' => t('Configure'),
       'href' => 'admin/config/media/image-styles/configure/' . $style['name'],
     );
-    if (user_access('synchronize configuration')) {
+    if (module_exists('config') && user_access('synchronize configuration')) {
       $links['export'] = array(
         'title' => t('Export'),
         'href' => 'admin/config/development/configuration/single/export',
@@ -105,14 +105,11 @@ function theme_image_style_list($variables) {
     $rows[] = $row;
   }
 
-  if (empty($rows)) {
-    $rows[] = array(array(
-      'colspan' => 4,
-      'data' => t('There are currently no styles. <a href="!url">Add a new one</a>.', array('!url' => url('admin/config/media/image-styles/add'))),
-    ));
-  }
-
-  return theme('table', array('header' => $header, 'rows' => $rows));
+  return theme('table', array(
+    'header' => $header,
+    'rows' => $rows,
+    'empty' => t('There are currently no styles. <a href="!url">Add a new one</a>.', array('!url' => url('admin/config/media/image-styles/add'))),
+  ));
 }
 
 /**

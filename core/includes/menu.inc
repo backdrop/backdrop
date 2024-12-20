@@ -154,8 +154,11 @@ define('MENU_CALLBACK', 0x0000);
  *
  * Modules may "suggest" menu items that the administrator may enable. They act
  * just as callbacks do until enabled, at which time they act like normal items.
- * Note for the value: 0x0010 was a flag which is no longer used, but this way
- * the values of MENU_CALLBACK and MENU_SUGGESTED_ITEM are separate.
+ *
+ * Note: The value 0x0010 cannot be removed from the definition of
+ * MENU_SUGGESTED_ITEM. It is a flag (no longer used) that at one time ensured
+ * that the values of MENU_VISIBLE_IN_BREADCRUMB and MENU_SUGGESTED_ITEM were
+ * separate.
  */
 define('MENU_SUGGESTED_ITEM', MENU_VISIBLE_IN_BREADCRUMB | 0x0010);
 
@@ -512,7 +515,7 @@ function menu_get_item($path = NULL, $router_item = NULL) {
  */
 function menu_execute_active_handler($path = NULL, $deliver = TRUE, $route_handler = NULL) {
   $site_config = config('system.core');
-  
+
   // Check if site is offline.
   $site_status = _menu_site_status($path, TRUE);
 
@@ -593,7 +596,9 @@ function menu_default_route_handler($router_item) {
  *   An array of path arguments; for example, array('node', '5').
  *
  * @return
- *   Returns TRUE for success, FALSE if an object cannot be loaded.
+ *   Returns TRUE for success, FALSE if an object cannot be loaded, and NULL
+ *   if the $map contains the placeholders (e.g., '%node'), not arguments for
+ *   the load functions (e.g., '5').
  *   Names of object loading functions are placed in $item['load_functions'].
  *   Loaded objects are placed in $map[]; keys are the same as keys in the
  *   $item['load_functions'] array.
@@ -601,6 +606,12 @@ function menu_default_route_handler($router_item) {
  */
 function _menu_load_objects(&$item, &$map) {
   if ($load_functions = $item['load_functions']) {
+    // If the path map is the same as the router path, don't bother loading
+    // placeholders.
+    if (!empty($item['path']) && $item['path'] === implode('/', $map)) {
+      return NULL;
+    }
+
     // If someone calls this function twice, then unserialize will fail.
     if (!is_array($load_functions)) {
       $load_functions = unserialize($load_functions);
@@ -639,7 +650,7 @@ function _menu_load_objects(&$item, &$map) {
           $return = call_user_func_array($function, $args);
         }
         else {
-          $return = $function($value);
+          $return = (backdrop_substr($value, 0, 1) === '%') ? NULL : $function($value);
         }
         // If callback returned an error or there is no callback, trigger 404.
         if ($return === FALSE) {
@@ -722,7 +733,7 @@ function _menu_item_localize(&$item, $map, $link_translate = FALSE) {
   $item['localized_options'] = $item['options'];
   // All 'class' attributes are assumed to be an array during rendering, but
   // links stored in the database may use an old string value.
-  // @todo In order to remove this code we need to implement a database update
+  // @todo In order to remove this code we need to implement a site update,
   //   including unserializing all existing link options and running this code
   //   on them, as well as adding validation to menu_link_save().
   if (isset($item['options']['attributes']['class']) && is_string($item['options']['attributes']['class'])) {
@@ -1909,7 +1920,7 @@ function theme_menu_toggle($variables) {
     $output  = '<input id="' . $id . '" class="menu-toggle-state element-invisible" type="checkbox" aria-controls="' . $id . '" />';
     $output .= '<label class="menu-toggle-button" for="' . $id . '">';
     $output .= '<span class="menu-toggle-button-icon"></span>';
-    $output .= '<span class="menu-toggle-button-text">' . $variables['text'] . '</span>';
+    $output .= (!empty($variables['text'])) ? '<span class="menu-toggle-button-text">' . check_plain($variables['text']) . '</span>' : '';
     $output .= '<span class="menu-toggle-assistive-text element-invisible">' . t('Toggle menu visibility') . '</span>';
     $output .= '</label>';
   }
@@ -2974,6 +2985,16 @@ function _menu_link_build($item) {
   elseif (!($item['type'] & MENU_VISIBLE_IN_TREE)) {
     $item['hidden'] = -1;
   }
+
+  // Save icon and description to options.
+  $options = array();
+  if (!empty($item['icon'])) {
+    $options['icon'] = $item['icon'];
+  }
+  if (!empty($item['description'])) {
+    $options['attributes']['title'] = $item['description'];
+  }
+
   // Note, we set this as 'system', so that we can be sure to distinguish all
   // the menu links generated automatically from entries in {menu_router}.
   $item['module'] = 'system';
@@ -2982,7 +3003,7 @@ function _menu_link_build($item) {
     'link_title' => $item['title'],
     'link_path' => $item['path'],
     'hidden' => 0,
-    'options' => empty($item['description']) ? array() : array('attributes' => array('title' => $item['description'])),
+    'options' => $options,
   );
   return $item;
 }
@@ -3429,7 +3450,7 @@ function menu_link_save(&$item, $existing_item = array(), $parent_candidates = a
 function _menu_link_find_parent($menu_link, $parent_candidates = array()) {
   $parent = FALSE;
 
-  // This item is explicitely top-level, skip the rest of the parenting.
+  // This item is explicitly top-level, skip the rest of the parenting.
   if (isset($menu_link['plid']) && empty($menu_link['plid'])) {
     return $parent;
   }
@@ -3559,7 +3580,7 @@ function _menu_find_router_path($link_path) {
 }
 
 /**
- * Inserts, updates, or deletes an uncustomized menu link related to a module.
+ * Inserts, updates, or deletes an un-customized menu link related to a module.
  *
  * @param $module
  *   The name of the module.
@@ -3884,11 +3905,11 @@ function _menu_router_build($callbacks) {
             $item['theme arguments'] = $parent['theme arguments'];
           }
         }
-        // Same for load arguments: if a loader doesn't have any explict
+        // Same for load arguments: if a loader doesn't have any explicit
         // arguments, try to find arguments in the parent.
         if (!isset($item['load arguments'])) {
           foreach ($item['_load_functions'] as $k => $function) {
-            // This loader doesn't have any explict arguments...
+            // This loader doesn't have any explicit arguments...
             if (!is_array($function)) {
               // ... check the parent for a loader at the same position
               // using the same function name and defining arguments...
@@ -4059,17 +4080,19 @@ function _menu_site_status($path = NULL, $display_messages = FALSE) {
   // Check if site is in maintenance mode.
   if (state_get('maintenance_mode', FALSE)) {
     if (user_access('access site in maintenance mode')) {
-      // Ensure that the maintenance mode message is displayed only once
-      // (allowing for page redirects) and specifically suppress its display on
-      // the batch and maintenance mode settings pages. 'admin_bar/flush-cache'
-      // has been added to the list of excluded paths in order to suppress the
-      // warning on the maintenance mode settings page when clearing caches (see
+      // Ensure that the maintenance mode message is displayed only once and
+      // specifically suppress its display on the batch and maintenance mode
+      // settings pages. 'admin_bar/flush-cache' has been added to the list of
+      // excluded paths in order to suppress the warning on the maintenance mode
+      // settings page when clearing caches (see
       // https://github.com/backdrop/backdrop-issues/issues/3313).
       $excluded_paths = array('batch', 'admin/config/development/maintenance', 'admin_bar/flush-cache');
       if ($display_messages && !in_array(current_path(), $excluded_paths)) {
         $message = t('The site is currently in maintenance mode.');
         if (user_access('administer site configuration')) {
-          $message .= ' ' . l(t('Go online.'), 'admin/config/development/maintenance', array('query' => backdrop_get_destination()));
+          $message = t('The site is currently in <a href="@maintenance-url">maintenance mode</a>.', array(
+            '@maintenance-url' => url('admin/config/development/maintenance'),
+          ));
         }
         backdrop_set_message($message, 'warning', FALSE);
       }

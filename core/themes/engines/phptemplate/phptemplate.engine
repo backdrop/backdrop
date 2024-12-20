@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Handles integration of PHP templates with the Backdrop theme system.

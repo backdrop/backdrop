@@ -1711,6 +1711,7 @@ function drupal_tempnam($directory, $prefix) {
  * Creates a .htaccess file in the given directory.
  *
  * @deprecated since 1.0.0
+ * @see file_save_htaccess()
  */
 function file_create_htaccess($directory, $private = TRUE, $force_overwrite = FALSE) {
   watchdog_deprecated_function('drupal', __FUNCTION__);
@@ -2061,7 +2062,7 @@ function drupal_check_module($module) {
 // Functions from mail.inc.
 
 /**
- * Composes and optionally sends an e-mail message.
+ * Composes and optionally sends an email message.
  *
  * @deprecated since 1.0.0
  * @see backdrop_mail()
@@ -2212,6 +2213,7 @@ function drupal_match_path($path, $patterns) {
  *
  * @deprecated since 1.0.0
  */
+// cspell:disable-next-line
 function drupal_path_alias_whitelist_rebuild($source = NULL) {
   watchdog_deprecated_function('drupal', __FUNCTION__);
   return array();
@@ -2224,6 +2226,7 @@ function drupal_path_alias_whitelist_rebuild($source = NULL) {
  */
 function drupal_path_alias_allowlist_rebuild($source = NULL) {
   watchdog_deprecated_function('drupal', __FUNCTION__);
+  // cspell:disable-next-line
   return drupal_path_alias_whitelist_rebuild();
 }
 
@@ -2501,32 +2504,32 @@ function drupal_var_export($var, $prefix = '') {
 
 /**
  * This function has been removed with the inclusion of support for HTML5 number
- * elements. See https://api.backdropcms.org/node/43955
+ * elements. See https://docs.backdropcms.org/node/43955
  *
  * @deprecated since 1.0.0
  */
 function element_validate_integer() {
-  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://api.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
+  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://docs.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
 }
 
 /**
  * This function has been removed with the inclusion of support for HTML5 number
- * elements. See https://api.backdropcms.org/node/43955
+ * elements. See https://docs.backdropcms.org/node/43955
  *
  * @deprecated since 1.0.0
  */
 function element_validate_integer_positive() {
-  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://api.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
+  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://docs.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
 }
 
 /**
  * This function has been removed with the inclusion of support for HTML5 number
- * elements. See https://api.backdropcms.org/node/43955
+ * elements. See https://docs.backdropcms.org/node/43955
  *
  * @deprecated since 1.0.0
  */
 function element_validate_number() {
-  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://api.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
+  watchdog_deprecated_function('drupal', __FUNCTION__, l(t('Change record'), 'https://docs.backdropcms.org/node/43955', array('attributes' => array('target' => '_blank'))));
 }
 
 /**
@@ -2587,6 +2590,53 @@ function system_get_date_types($type = NULL) {
 function views_clean_css_identifier($identifier, $filter = array(' ' => '-', '/' => '-', '[' => '-', ']' => '')) {
   watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_clean_css_identifier($identifier, $filter);
+}
+
+/**
+ * Finds the most recently changed nodes that are available to the current user.
+ *
+ * @param (int) $limit
+ *   (optional) The maximum number of nodes to find. Defaults to 10.
+ *
+ * @return array
+ *   An array of node entities or an empty array if there are no recent nodes
+ *   visible to the current user.
+ *
+ * @deprecated since 1.30.0
+ */
+function node_get_recent($limit = 10) {
+  $query = db_select('node', 'n');
+
+  if (!user_access('bypass node access') && !user_access('view any unpublished content')) {
+    // If the user is able to view unpublished nodes, allow them to see these
+    // in addition to published nodes. Check that they actually have some
+    // unpublished nodes to view before adding the condition.
+    // Note: this query still ignores unpublished by type permissions.
+    // See: https://github.com/backdrop/backdrop-issues/issues/146.
+    $own_unpublished = db_query('SELECT nid FROM {node} WHERE uid = :uid AND status = :status',
+      array(':uid' => $GLOBALS['user']->uid, ':status' => NODE_NOT_PUBLISHED))->fetchCol();
+    if (user_access('view own unpublished content') && $own_unpublished) {
+      $query->condition(db_or()
+        ->condition('n.status', NODE_PUBLISHED)
+        ->condition('n.nid', $own_unpublished, 'IN')
+      );
+    }
+    else {
+      // If not, restrict the query to published nodes.
+      $query->condition('n.status', NODE_PUBLISHED);
+    }
+  }
+  $nids = $query
+    ->fields('n', array('nid'))
+    ->orderBy('n.changed', 'DESC')
+    ->range(0, $limit)
+    ->addTag('node_access')
+    ->execute()
+    ->fetchCol();
+
+  $nodes = node_load_multiple($nids);
+
+  return $nodes ? $nodes : array();
 }
 
 /**

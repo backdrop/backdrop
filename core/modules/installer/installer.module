@@ -50,7 +50,7 @@ function installer_menu() {
   // Add menu titles with += for the translation extractor.
   $items['admin/modules/install'] += array('title' => 'Install new modules');
   $items['admin/appearance/install'] += array('title' => 'Install new themes');
-  $items['admin/structure/layouts/install'] += array('title' => 'Install new layouts');
+  $items['admin/structure/layouts/install'] += array('title' => 'Install new layout templates');
 
   $items['admin/config/system/updates'] = array(
     'title' => 'System updates',

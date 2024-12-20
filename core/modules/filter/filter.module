@@ -50,6 +50,9 @@ function filter_element_info() {
   $type['text_format'] = array(
     // The text format selected by default for this element.
     '#format' => NULL,
+    // An array of text format names that are displayed. This list is further
+    // reduced to only those that the currently logged-in user has access.
+    '#allowed_formats' => array(),
     // Whether file uploads are permitted through the editor (if supported).
     // Disable by default, modules must specifically implement saving files as
     // permanent when they save their text data. See filter_entity_insert().
@@ -57,6 +60,7 @@ function filter_element_info() {
     '#process' => array('filter_process_format'),
     '#base_type' => 'textarea',
     '#theme_wrappers' => array('text_format_wrapper'),
+    '#description_display' => 'before',
   );
   return $type;
 }
@@ -582,7 +586,7 @@ function filter_format_allowed_html($format) {
     }
   }
 
-  // Simplification: if we have both a (intersected) allowlist and a (unioned)
+  // Simplification: if we have both an (intersected) allowlist and a (unioned)
   // denylist, then remove any tags from the allowlist that also exist in the
   // denylist. Now the allowlist alone expresses all tag-level restrictions,
   // and we can delete the denylist.
@@ -866,6 +870,12 @@ function filter_get_editors() {
       $module_editors = module_invoke($module, 'editor_info');
       foreach ($module_editors as $editor_name => $editor) {
         $editor['module'] = $module;
+        // Populate optional defaults.
+        $editor += array(
+          'settings callback' => NULL,
+          'default settings' => array(),
+          'file' => NULL,
+        );
         $editors[$editor_name] = $editor;
       }
     }
@@ -1058,6 +1068,7 @@ function filter_get_filters() {
           $info[$name] += array(
             'description' => '',
             'weight' => 0,
+            'default settings' => array(),
           );
         }
         $filters = array_merge($filters, $info);
@@ -1249,10 +1260,13 @@ function check_markup($text, $format_id = NULL, $langcode = '', $cache = FALSE) 
  *   The form element to process. Properties used:
  *   - #base_type: The form element #type to use for the 'value' element.
  *     'textarea' by default.
- *   - #format: (optional) The text format ID to preselect. If NULL or not set,
- *     the default format for the current user will be used.
+ *   - #format: (optional) The text format name to preselect. If NULL or not
+ *     set, the default format for the current user will be used.
+ *   - #allowed_formats: (optional) An array of format names that should be
+ *     available options. If none are specified, all available formats for the
+ *     current user are displayed.
  *
- * @return
+ * @return array
  *   The expanded element.
  */
 function filter_process_format($element) {
@@ -1268,8 +1282,6 @@ function filter_process_format($element) {
     // Do not copy this #process function to prevent form_builder() from
     // recursing infinitely.
     '#process',
-    // Description is handled by theme_text_format_wrapper().
-    '#description',
     // Ensure proper ordering of children.
     '#weight',
     // Properties already processed for the parent element.
@@ -1279,6 +1291,16 @@ function filter_process_format($element) {
     '#processed',
     '#theme_wrappers',
   );
+
+  // If the #description is set to be placed after the element (which is the
+  // default), let theme_text_format_wrapper() handle it. Otherwise, if the
+  // #description is set to be placed before the element, or set to invisible,
+  // then it would be rendered between the text-format-enabled area and the
+  // "Formatting options" fieldset.
+  if ($element['#description_display'] == 'after') {
+    $denylist[] = '#description';
+  }
+
   // Move this element into sub-element 'value'.
   unset($element['value']);
   foreach (element_properties($element) as $key) {
@@ -1290,15 +1312,27 @@ function filter_process_format($element) {
   $element['value']['#type'] = $element['#base_type'];
   $element['value'] += element_info($element['#base_type']);
 
-  // Get a list of formats to which the current user has access.
+  // Get a list of allowed formats to which the current user has access.
   $formats = filter_formats($user);
+  $fallback_format = filter_fallback_format();
 
-  // Turn original element into a text format wrapper.
+  // Turn original element into a text format wrapper. Settings for all
+  // available formats are added to make them available for all fields.
   if (isset($element['#attached'])) {
     $element['#attached'] = array_merge_recursive($element['#attached'], filter_get_attached($formats));
   }
   else {
     $element['#attached'] = filter_get_attached($formats);
+  }
+
+  // Reduce the list if a list of allowed formats was provided.
+  if (!empty($element['#allowed_formats'])) {
+    foreach ($formats as $format) {
+      if ($format->format !== $fallback_format &&
+        !in_array($format->format, $element['#allowed_formats'])) {
+        unset($formats[$format->format]);
+      }
+    }
   }
 
   // Specify if uploads are allowed by using a data attribute.
@@ -1310,7 +1344,6 @@ function filter_process_format($element) {
   }
 
   // Remove the Plain text format if not set and other options are available.
-  $fallback_format = config_get('system.core', 'filter_fallback_format');
   if (($element['#format'] != $fallback_format) && (count($formats) > 1) && array_key_exists($fallback_format, $formats)) {
     unset($formats[$fallback_format]);
   }
@@ -1330,8 +1363,9 @@ function filter_process_format($element) {
     '#attributes' => array('class' => array('filter-guidelines')),
     '#weight' => 20,
   );
+  $options = array();
   foreach ($formats as $format) {
-    $options[$format->format] = $format->name;
+    $options[$format->format] = check_plain($format->name);
     $element['format']['guidelines'][$format->format] = array(
       '#theme' => 'filter_guidelines',
       '#format' => $format,
@@ -1383,30 +1417,33 @@ function filter_process_format($element) {
     $element['format']['format']['#access'] = TRUE;
   }
   // Disable this widget, if the user is not allowed to use the stored format,
-  // or if the stored format does not exist. The 'administer filters' permission
-  // only grants access to the filter administration, not to all formats.
+  // or if the stored format does not exist, and only if the field is not empty.
+  // The 'administer filters' permission only grants access to the filter
+  // administration, not to all formats.
   elseif (!$user_has_access || !$format_exists) {
-    // Overload default values into #value to make them unalterable.
-    $element['value']['#value'] = $element['value']['#default_value'];
-    $element['format']['format']['#value'] = $element['format']['format']['#default_value'];
+    if (!empty($element['#default_value'])) {
+      // Overload default values into #value to make them unalterable.
+      $element['value']['#value'] = $element['value']['#default_value'];
+      $element['format']['format']['#value'] = $element['format']['format']['#default_value'];
 
-    // Prepend #pre_render callback to replace field value with user notice
-    // prior to rendering.
-    $element['value'] += array('#pre_render' => array());
-    array_unshift($element['value']['#pre_render'], 'filter_form_access_denied');
+      // Prepend #pre_render callback to replace field value with user notice
+      // prior to rendering.
+      $element['value'] += array('#pre_render' => array());
+      array_unshift($element['value']['#pre_render'], 'filter_form_access_denied');
 
-    // Cosmetic adjustments.
-    if (isset($element['value']['#rows'])) {
-      $element['value']['#rows'] = 3;
-    }
-    $element['value']['#disabled'] = TRUE;
-    $element['value']['#resizable'] = FALSE;
+      // Cosmetic adjustments.
+      if (isset($element['value']['#rows'])) {
+        $element['value']['#rows'] = 3;
+      }
+      $element['value']['#disabled'] = TRUE;
+      $element['value']['#resizable'] = 'none';
 
-    // Hide the text format selector and any other child element (such as text
-    // field's summary).
-    foreach (element_children($element) as $key) {
-      if ($key != 'value') {
-        $element[$key]['#access'] = FALSE;
+      // Hide the text format selector and any other child element (such as text
+      // field's summary).
+      foreach (element_children($element) as $key) {
+        if ($key != 'value') {
+          $element[$key]['#access'] = FALSE;
+        }
       }
     }
   }
@@ -1923,7 +1960,7 @@ function filter_filter_info() {
     'settings callback' => '_filter_html_settings',
     'allowed html callback' => '_filter_html_allowed_html',
     'default settings' => array(
-      'allowed_html' => '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <h3> <h4> <h5> <p> <img> <figure> <figcaption>',
+      'allowed_html' => '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <h3> <h4> <h5> <p> <br> <img> <figure> <figcaption>',
       'filter_html_help' => 1,
       'filter_html_nofollow' => 0,
     ),
@@ -2178,7 +2215,7 @@ function _filter_url_js_settings($filter, $format) {
  *
  * This filter identifies and makes clickable three types of "links".
  * - URLs like http://example.com.
- * - E-mail addresses like name@example.com.
+ * - email addresses like name@example.com.
  * - Web addresses without the "http://" protocol defined, like www.example.com.
  * Each type must be processed separately, as there is no one regular
  * expression that could possibly match all of the cases in one pass.
@@ -2210,9 +2247,14 @@ function _filter_url($text, $filter) {
 
   // Prepare domain name pattern.
   // The ICANN seems to be on track towards accepting more diverse top level
-  // domains, so this pattern has been "future-proofed" to allow for TLDs
+  // domains (TLDs), so this pattern has been "future-proofed" to allow for TLDs
   // of length 2-64.
   $domain = '(?:[A-Za-z0-9._+-]+\.)?[A-Za-z]{2,64}\b';
+
+  // Mail domains differ from the generic domain pattern; specifically, a .
+  // character must be present in the string that follows the @ character.
+  $email_domain = '(?:[\p{L}\p{M}\p{N}._+-]+\.)+[\p{L}\p{M}]{2,64}\b';
+
   $ip = '(?:[0-9]{1,3}\.){3}[0-9]{1,3}';
   $auth = '[a-zA-Z0-9:%_+*~#?&=.,/;-]+@';
   $trail = '[a-zA-Z0-9:%_+*~#&\[\]=/;?!\.,-]*[a-zA-Z0-9:%_+*~#&\[\]=/;-]';
@@ -2228,8 +2270,8 @@ function _filter_url($text, $filter) {
   $pattern = "`((?:$protocols)(?:$url_pattern))($punctuation)`";
   $tasks['_filter_url_parse_full_links'] = $pattern;
 
-  // Match e-mail addresses.
-  $url_pattern = "[A-Za-z0-9._+-]{1,254}@(?:$domain)";
+  // Match email addresses.
+  $url_pattern = "[\p{L}\p{M}\p{N}._+-]{1,254}@(?:$email_domain)";
   $pattern = "`($url_pattern)`";
   $tasks['_filter_url_parse_email_links'] = $pattern;
 
@@ -2323,7 +2365,7 @@ function _filter_url_parse_full_links($match) {
 }
 
 /**
- * Makes links out of e-mail addresses.
+ * Makes links out of email addresses.
  *
  * Callback for preg_replace_callback() within _filter_url().
  */
@@ -2376,7 +2418,7 @@ function _filter_url_escape_comments($match, $escape = NULL) {
     return;
   }
 
-  // Replace all HTML coments with a '<!-- [hash] -->' placeholder.
+  // Replace all HTML comments with a '<!-- [hash] -->' placeholder.
   if ($mode) {
     $content = $match[1];
     $hash = hash('sha256', $content);
@@ -2417,7 +2459,7 @@ function _filter_url_trim($text, $length = NULL) {
  * @see filter_filter_info()
  */
 function _filter_url_tips($filter, $format, $long = FALSE) {
-  return t("Web page addresses and e-mail addresses turn into links automatically, unless the parent tag has the 'nolink' class.");
+  return t("Web page addresses and email addresses turn into links automatically, unless the parent tag has the 'nolink' class.");
 }
 
 /**
@@ -2449,7 +2491,7 @@ function _filter_autop($text) {
   // Note: PHP ensures the array consists of alternating delimiters and literals
   // and begins and ends with a literal (inserting NULL as required).
   $ignore = FALSE;
-  $ignoretag = '';
+  $ignore_tag = '';
   $output = '';
   foreach ($chunks as $i => $chunk) {
     if ($i % 2) {
@@ -2465,16 +2507,17 @@ function _filter_autop($text) {
       if (!$ignore) {
         if ($open) {
           $ignore = TRUE;
-          $ignoretag = $tag;
+          $ignore_tag = $tag;
         }
       }
       // Only allow a matching tag to close it.
-      elseif (!$open && $ignoretag == $tag) {
+      elseif (!$open && $ignore_tag == $tag) {
         $ignore = FALSE;
-        $ignoretag = '';
+        $ignore_tag = '';
       }
     }
     elseif (!$ignore) {
+      $chunk = preg_replace('|<br>|', '<br />', $chunk); // Normalize break tags for consistency in matching
       $chunk = preg_replace('|\n*$|', '', $chunk) . "\n\n"; // just to make things a little easier, pad the end
       $chunk = preg_replace('|<br />\s*<br />|', "\n\n", $chunk);
       $chunk = preg_replace('!(<' . $block . '[^>]*>)!', "\n$1", $chunk); // Space things out a little
@@ -2490,7 +2533,7 @@ function _filter_autop($text) {
       $chunk = preg_replace('!(</?' . $block . '[^>]*>)\s*</p>!', "$1", $chunk);
       $chunk = preg_replace('|(?<!<br />)\s*\n|', "<br />\n", $chunk); // make line breaks
       $chunk = preg_replace('!(</?' . $block . '[^>]*>)\s*<br />!', "$1", $chunk);
-      $chunk = preg_replace('!<br />(\s*</?(?:p|li|div|th|pre|td|ul|ol)>)!', '$1', $chunk);
+      $chunk = preg_replace('!<br />(\s*</?(?:p|li|div|th|pre|td|ul|ol|h[1-6])>)!', '$1', $chunk); // Remove added break tags before closing block tags
       $chunk = preg_replace('/&([^#])(?![A-Za-z0-9]{1,8};)/', '&amp;$1', $chunk);
     }
     $output .= $chunk;
@@ -2642,6 +2685,11 @@ function _filter_image_align($text) {
       if ($parent && $parent->nodeName === 'figure') {
         $target = $parent;
       }
+      // Consider more deeply nested structures. A link wrapped around a
+      // captioned image.
+      elseif ($parent && $parent->nodeName === 'a' && $parent->parentNode && $parent->parentNode->nodeName === 'figure') {
+        $target = $parent->parentNode;
+      }
       else {
         $target = $node;
       }
@@ -2669,4 +2717,3 @@ function _filter_image_align($text) {
 /**
  * @} End of "Standard filters".
  */
-

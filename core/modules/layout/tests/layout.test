@@ -21,6 +21,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Create and login admin user.
     $this->admin_user = $this->backdropCreateUser(array(
+      'access user profiles',
       'access administration pages',
       'administer site configuration',
       'administer modules',
@@ -112,7 +113,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     // rather than the current user, should be available.
     // The current user is User 2.
     $this->backdropGet('node/' . $this->test_node2->nid);
-    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->web_user->name, '@title' => $this->test_node2->title)));
+    $this->assertText(format_string('The user email is @mail and the node title is @title', array('@mail' => $this->web_user->mail, '@title' => $this->test_node2->title)));
     $this->backdropGet('admin/structure/layouts/manage/' . $layout_name);
 
     // Change the user context on the test block to use the current user and
@@ -124,12 +125,12 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node2->nid);
-    $this->assertNoText(format_string('The user name is @name and the node title is @title', array('@name' => $this->web_user->name, '@title' => $this->test_node2->title)));
+    $this->assertNoText(format_string('The user email is @mail and the node title is @title', array('@mail' => $this->web_user->mail, '@title' => $this->test_node2->title)));
 
     // Visit a node created by the current user (User 2) and test that the
     // correct user is displayed.
     $this->backdropGet('node/' . $this->test_node1->nid);
-    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->admin_user->name, '@title' => $this->test_node1->title)));
+    $this->assertText(format_string('The user email is @mail and the node title is @title', array('@mail' => $this->admin_user->mail, '@title' => $this->test_node1->title)));
 
      // Remove the author from node relationship.
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', array(), t('Remove'));
@@ -198,6 +199,12 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   function testViewPageLink() {
     $this->backdropGet('admin/structure/layouts');
     $this->clickLink(t('Add layout'));
+
+    // Test the default value for layout template is set.
+    $this->assertFieldByXPath('//input[@name="layout_template"][@checked="checked"]', TRUE, 'The Layout template default value is set.');
+    $default_layout_template = config_get('layout.layout.default', 'layout_template');
+    $field_id = 'edit-layout-template-' . str_replace('_', '-', $default_layout_template);
+    $this->assertFieldChecked($field_id, 'The Layout template default value is the same as the default layout.');
 
     // Create a new layout at a new path.
     $layout_title = $this->randomName();
@@ -410,6 +417,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     // Try injecting XSS into the classes.
     $xss = '"><svg onload="alert(\'XSS hole\')">';
     // The filtered string after running through backdrop_html_class().
+    // cspell:disable-next-line
     $filtered_xss = 'svg onloadalertXSS hole';
     $edit = array(
       'style_settings[classes]' => $xss,
@@ -579,7 +587,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title_display' => LAYOUT_TITLE_CUSTOM,
       'title' => $block_title,
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
     $edit = array(
       'condition' => 'node_type',
     );
@@ -587,9 +595,9 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'bundles[page]' => TRUE,
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
-    $this->backdropPost(Null, array(), t('Update block'));
-    $this->backdropPost(Null, array(), t('Save layout'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
+    $this->backdropPost(NULL, array(), t('Update block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node1->nid);
     $this->assertNoText(check_plain($block_title), 'Block not shown on post content.');
@@ -616,8 +624,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'bundles[page]' => FALSE,
     );
     $this->backdropPost(NULL, $edit, t('Save visibility condition'));
-    $this->backdropPost(Null, array(), t('Update block'));
-    $this->backdropPost(Null, array(), t('Save layout'));
+    $this->backdropPost(NULL, array(), t('Update block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node1->nid);
     $this->assertText(check_plain($block_title), 'Block shown on post content.');
@@ -627,7 +635,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Add another condition to show this block only on a single node path.
     $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure-block/editor/' . $block_uuid);
-    $this->backdropPost(NULL, array(), t('Add visibility condition'));
+    $this->backdropPost(NULL, array(), t('Add condition'));
     $edit = array(
       'condition' => 'path',
     );
@@ -635,9 +643,9 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'paths' => 'node/' . $this->test_node1->nid,
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
     $this->backdropPost(NULL, array(), t('Update block'));
-    $this->backdropPost(Null, array(), t('Save layout'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
 
     // Create another post node and check the combination of conditions work.
     $second_post = $this->backdropCreateNode(array(
@@ -681,7 +689,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
       'title_display' => LAYOUT_TITLE_CUSTOM,
       'title' => $block_title,
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
     $edit = array(
       'condition' => 'node_nid',
     );
@@ -689,9 +697,9 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'entity_id' => $this->test_node1->nid,
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
-    $this->backdropPost(Null, array(), t('Update block'));
-    $this->backdropPost(Null, array(), t('Save layout'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
+    $this->backdropPost(NULL, array(), t('Update block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node1->nid);
     $this->assertText(check_plain($block_title), 'Block shown and node ID matches.');
@@ -706,7 +714,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Add another condition to show this block only for a particular user ID.
     $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure-block/editor/' . $block_uuid);
-    $this->backdropPost(NULL, array(), t('Add visibility condition'));
+    $this->backdropPost(NULL, array(), t('Add condition'));
     $edit = array(
       'condition' => 'user_uid',
     );
@@ -714,9 +722,9 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'entity_id' => $this->web_user->uid,
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
     $this->backdropPost(NULL, array(), t('Update block'));
-    $this->backdropPost(Null, array(), t('Save layout'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node1->nid);
     $this->assertNoText(check_plain($block_title), 'Block not shown when user ID does not match.');
@@ -732,6 +740,180 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     $this->backdropGet('node/' . $second_post->nid);
     $this->assertNoText(check_plain($block_title), 'Block not shown when user ID and node ID does not match.');
+  }
+
+  /**
+   * Tests user account comparison condition.
+   */
+  function testBlockUserCompareConditions() {
+    // Create a new layout overriding user/%.
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
+    $layout_url = 'user/%';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout_template' => 'moscone_flipped',
+      'path' => $layout_url,
+    );
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
+
+    // Add another testing block.
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Layout foo block'));
+    $block_title = $this->randomString();
+    $edit = array(
+      'title_display' => LAYOUT_TITLE_CUSTOM,
+      'title' => $block_title,
+    );
+    $this->backdropPost(NULL, $edit, t('Add condition'));
+    $edit = array(
+      'condition' => 'user_compare',
+    );
+    $this->backdropPost(NULL, $edit, t('Load condition'));
+
+    // The user account comparison form has some customizations. Verify the
+    // fields show as expected.
+    $this->assertOption('edit-contexts-user2', '1', 'User account from path in position 2 selected as second comparison user account.');
+    $this->assertNoOption('edit-contexts-user2', 'current_user');
+
+    $edit = array(
+      'contexts[user2]' => '1',
+      'equality' => '1',
+    );
+    $this->backdropPost(NULL, $edit, t('Add condition'));
+    $this->backdropPost(NULL, array(), t('Update block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $this->backdropGet('user/' . $this->admin_user->uid);
+    $this->assertText(check_plain($block_title), 'Block shown when user views own profile page.');
+
+    $this->backdropGet('user/' . $this->web_user->uid);
+    $this->assertNoText(check_plain($block_title), 'Block not shown when user views profile page of another user.');
+
+    // Get the block UUID.
+    layout_reset_caches();
+    $layout = layout_load($layout_name);
+    $block_uuid = end($layout->positions['sidebar']);
+
+    // Update the condition to do the opposite, where a block is only shown to
+    // a user viewing their own profile page.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure-block/editor/' . $block_uuid);
+    $this->backdropPost(NULL, array(), t('Configure'));
+    $edit = array(
+      'equality' => '0',
+    );
+    $this->backdropPost(NULL, $edit, t('Save visibility condition'));
+    $this->backdropPost(NULL, array(), t('Update block'));
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    $this->backdropGet('user/' . $this->admin_user->uid);
+    $this->assertNoText(check_plain($block_title), 'Block not shown when user views own profile page');
+
+    $this->backdropGet('user/' . $this->web_user->uid);
+    $this->assertText(check_plain($block_title), 'Block shown when user views profile page of another user.');
+  }
+
+  /**
+   * Tests 403 and 404 visibility conditions.
+   */
+  public function testBlockHttpResponseCodeConditions() {
+    // Create a new layout at a custom path.
+    $layout_title = 'Response Codes Test';
+    $layout_name = 'response_codes_test';
+    $layout_url = 'response-codes-test';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout_template' => 'moscone_flipped',
+      'path' => $layout_url,
+    );
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
+
+    // Add a test block that shows on 404 pages only.
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Layout foo block'));
+    $block_title_404 = $this->randomString();
+    $edit = array(
+      'title_display' => LAYOUT_TITLE_CUSTOM,
+      'title' => $block_title_404,
+    );
+    $this->backdropPost(NULL, $edit, t('Add condition'));
+    $edit = array(
+      'condition' => 'http_response_code',
+    );
+    $this->backdropPost(NULL, $edit, t('Load condition'));
+    $edit = array(
+      'http_response_codes[404]' => TRUE,
+    );
+    $this->backdropPost(NULL, $edit, t('Add condition'));
+    $this->backdropPost(NULL, array(), t('Update block'));
+
+    // Add another test block that shows on 403 pages only.
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Layout foo block'));
+    $block_title_403 = $this->randomString();
+    $edit = array(
+      'title_display' => LAYOUT_TITLE_CUSTOM,
+      'title' => $block_title_403,
+    );
+    $this->backdropPost(NULL, $edit, t('Add condition'));
+    $edit = array(
+      'condition' => 'http_response_code',
+    );
+    $this->backdropPost(NULL, $edit, t('Load condition'));
+    $edit = array(
+      'http_response_codes[403]' => TRUE,
+    );
+    $this->backdropPost(NULL, $edit, t('Add condition'));
+    $this->backdropPost(NULL, array(), t('Update block'));
+
+    // Add another test block that shows non-200 pages only.
+    $this->clickLink(t('Add block'), 3);
+    $this->clickLink(t('Layout foo block'));
+    $block_title_non_200 = $this->randomString();
+    $edit = array(
+      'title_display' => LAYOUT_TITLE_CUSTOM,
+      'title' => $block_title_non_200,
+    );
+    $this->backdropPost(NULL, $edit, t('Add condition'));
+    $edit = array(
+      'condition' => 'http_response_code',
+    );
+    $this->backdropPost(NULL, $edit, t('Load condition'));
+    $edit = array(
+      'http_response_codes[200]' => TRUE,
+      'negate' => TRUE,
+    );
+    $this->backdropPost(NULL, $edit, t('Add condition'));
+    $this->backdropPost(NULL, array(), t('Update block'));
+
+    // Save the entire layout.
+    $this->backdropPost(NULL, array(), t('Save layout'));
+
+    // Set this test layout as the 404 page.
+    $edit = array(
+      'site_404' => 'response-codes-test',
+      'site_403' => 'response-codes-test',
+    );
+    $this->backdropPost('admin/config/system/site-information', $edit, t('Save configuration'));
+
+    // When visiting the layout directly, none of the blocks should show.
+    $this->backdropGet('response-codes-test');
+    $this->assertNoText(check_plain($block_title_403), 'Block not shown when not on a 403 page.');
+    $this->assertNoText(check_plain($block_title_404), 'Block not shown when not on a 404 page.');
+    $this->assertNoText(check_plain($block_title_non_200), 'Block not shown when not on a non-200 page.');
+
+    // Now visit a non-existent page, which should show the 404 block.
+    $this->backdropGet('non-existent-page-test-url');
+    $this->assertText(check_plain($block_title_404), 'Block shown when on a 404 page.');
+    $this->assertText(check_plain($block_title_non_200), 'Block shown when on a non-200 page.');
+
+    // Log out and visit an access denied page.
+    $this->backdropLogout();
+    $this->backdropGet('admin');
+    $this->assertText(check_plain($block_title_403), 'Block shown when on a 403 page.');
+    $this->assertText(check_plain($block_title_non_200), 'Block shown when on a non-200 page.');
   }
 
   /**
@@ -776,7 +958,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet('node/' . $this->test_node1->nid . '/foo/' . $this->web_user->uid);
-    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->web_user->name, '@title' => $this->test_node1->title)));
+    $this->assertText(format_string('The user email is @mail and the node title is @title', array('@mail' => $this->web_user->mail, '@title' => $this->test_node1->title)));
 
     // Modify the layout path to remove "node/", removing the auto-selection.
     $edit = array(
@@ -790,7 +972,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Check that the block still works, even with the contexts changed.
     $this->backdropGet('foo/' . $this->test_node1->nid . '/bar/' . $this->web_user->uid);
-    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->web_user->name, '@title' => $this->test_node1->title)));
+    $this->assertText(format_string('The user email is @mail and the node title is @title', array('@mail' => $this->web_user->mail, '@title' => $this->test_node1->title)));
 
     // Change the second context to be a node context. The user context should
     // still work, as it will use the current user context.
@@ -801,7 +983,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Now the page should show the current user instead of the one in the URL.
     $this->backdropGet('foo/' . $this->test_node1->nid . '/bar/' . $this->test_node2->nid);
-    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->admin_user->name, '@title' => $this->test_node1->title)));
+    $this->assertText(format_string('The user email is @mail and the node title is @title', array('@mail' => $this->admin_user->mail, '@title' => $this->test_node1->title)));
 
     // Change the "my_node" context to use the argument in position 3 instead
     // of position 1.
@@ -817,7 +999,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Now the second node should be used as the title in the page.
     $this->backdropGet('foo/' . $this->test_node1->nid .  '/bar/' . $this->test_node2->nid);
-    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->admin_user->name, '@title' => $this->test_node2->title)));
+    $this->assertText(format_string('The user email is @mail and the node title is @title', array('@mail' => $this->admin_user->mail, '@title' => $this->test_node2->title)));
 
     // Delete the layout to prevent it interfering with following tests.
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/delete', array(), t('Delete layout'));
@@ -952,7 +1134,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     $this->backdropGet($layout_path);
-    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->admin_user->name, '@title' => $this->test_node1->title)));
+    $this->assertText(format_string('The user email is @mail and the node title is @title', array('@mail' => $this->admin_user->mail, '@title' => $this->test_node1->title)));
 
     // Add another custom node context to the layout.
     $edit = array();
@@ -984,7 +1166,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Now the second node should be used as the title in the page.
     $this->backdropGet($layout_path);
-    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->admin_user->name, '@title' => $this->test_node2->title)));
+    $this->assertText(format_string('The user email is @mail and the node title is @title', array('@mail' => $this->admin_user->mail, '@title' => $this->test_node2->title)));
 
     // Add a custom user context to the layout.
     $edit = array();
@@ -1016,7 +1198,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Now the web user's name should be used as the title in the page.
     $this->backdropGet($layout_path);
-    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->web_user->name, '@title' => $this->test_node2->title)));
+    $this->assertText(format_string('The user email is @mail and the node title is @title', array('@mail' => $this->web_user->mail, '@title' => $this->test_node2->title)));
 
     // Test that custom layouts and path layouts work together.
     $layout_title = $this->randomName();
@@ -1068,7 +1250,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     // Go to a node path and check that the block shows with the correct
     // content.
     $this->backdropGet('node/' . $this->test_node1->nid);
-    $this->assertText(format_string('The user name is @name and the node title is @title', array('@name' => $this->admin_user->name, '@title' => $this->test_node2->title)));
+    $this->assertText(format_string('The user email is @mail and the node title is @title', array('@mail' => $this->admin_user->mail, '@title' => $this->test_node2->title)));
 
   }
 
@@ -1125,7 +1307,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     );
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/clone', $edit, t('Clone layout'));
     $this->assertText('You may now configure the cloned layout.', 'Layout cloned and landed on settings page.');
-    $this->backdropPost(NULL, array(), t('Add visibility condition'));
+    $this->backdropPost(NULL, array(), t('Add condition'));
     $edit = array(
       'condition' => 'node_type',
     );
@@ -1133,7 +1315,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'bundles[post]' => TRUE,
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     // Record the UUID for the same block in this layout.
@@ -1333,7 +1515,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropGet('<front>');
     $this->assertLink($menu_title, 0, 'Menu link shown on the homepage.');
 
-    $this->backdropPost('admin/structure/layouts/menu/' . $layout_name, array(), t('Add visibility condition'));
+    $this->backdropPost('admin/structure/layouts/menu/' . $layout_name, array(), t('Add condition'));
     $edit = array(
       'condition' => 'path',
     );
@@ -1345,8 +1527,13 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $edit = array(
       'paths' => "<front>\n$layout_name*\n",
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
     $this->backdropPost(NULL, array(), t('Save menu settings'));
+    $vc_text = 'Current path is one of "' . str_replace("\n", ', ', $edit['paths']);
+    $vc = $this->xpath('//tr[contains(@class,"layout-group")]//ul//li[contains(., :vc_text)]', array(
+      ':vc_text' => $vc_text,
+    ));
+    $this->assertEqual(count($vc), 1, 'The visibility condition shows up properly.');
 
     $this->backdropGet('<front>');
     $this->assertLink($menu_title, 0, 'Menu link found on the homepage.');
@@ -1415,10 +1602,10 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
     $subtab_layout_title = $this->randomName();
-    $subsubtab_layout_title = $this->randomName();
+    $sub_subtab_layout_title = $this->randomName();
     $edit = array(
       'menu[type]' => 'default tab',
-      'menu[title]' => $subsubtab_layout_title,
+      'menu[title]' => $sub_subtab_layout_title,
       'menu[weight]' => 0,
       'menu[parent][type]' => 'tab',
       'menu[parent][title]' => $subtab_layout_title,
@@ -1577,7 +1764,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Change the layout to the test layout, which has identical regions.
     $edit = array(
-      'layout_template' => 'layout_test_layout',
+      'layout_template' => 'layout_test_layout_template',
     );
     $this->backdropPost('admin/structure/layouts/manage/' . $layout_name . '/configure', $edit, t('Save layout'));
 
@@ -1729,10 +1916,10 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
 
     // Try to add a condition to the layout itself to only show on the Tag
     // vocabulary.
-    $this->backdropPost(NULL, array(), t('Add visibility condition'));
+    $this->backdropPost(NULL, array(), t('Add condition'));
 
     $this->backdropPost(NULL, array('condition' => 'taxonomy_term_vocabulary'), t('Load condition'));
-    $this->backdropPost(NULL, array('bundles[tags]' => TRUE), t('Add visibility condition'));
+    $this->backdropPost(NULL, array('bundles[tags]' => TRUE), t('Add condition'));
     $this->backdropPost(NULL, array(), t('Create layout'));
 
     $this->assertText(t('Layout created. Blocks may now be added to this layout.'));
@@ -1742,8 +1929,8 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
    * Check that all the blocks in $layout match those in $copied_from_layout.
    */
   protected function assertBlocksMatch($layout, $copied_from_layout, $orphaned_uuids = array()) {
-    $layout_info = layout_get_layout_template_info($layout->layout_template);
-    $default_region = $layout_info['default region'];
+    $layout_template_info = layout_get_layout_template_info($layout->layout_template);
+    $default_region = $layout_template_info['default region'];
     foreach ($layout->positions as $region_name => $blocks) {
       // Don't compare if it's the default region since orphaned blocks might
       // get reassigned here, which throws off the numbers.
@@ -1978,10 +2165,10 @@ class LayoutBlockTest extends BackdropWebTestCase {
    * Test Hero blocks.
    */
   function testHeroBlocks() {
-    $hero_title_1 = 'Wonderwoman';
+    $hero_title_1 = 'Wonder Woman';
     $hero_content_1 = 'Youth is your greatest weapon, your greatest tool.';
     $hero_title_2 = 'Black Widow';
-    $hero_content_2 = "This isnt gonna end well...";
+    $hero_content_2 = "Whatever it takes.";
 
     // Create some sample images.
     $good_image = imagecreate(2400, 400);
@@ -2140,7 +2327,8 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $page_title = $this->xpath('(//div[contains(@class, "block-system-title")])//h1');
     $this->assertEqual((string) $page_title[0], 'Test node title');
 
-    // Configure the block to use a custom title that overrides the normal title.
+    // Configure the block to use a custom title that overrides the normal
+    // title.
     $data = array(
       'title_display' => 'custom',
       'title' => 'A & "custom" title',
@@ -2242,7 +2430,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
     $tabs = $this->xpath('(//nav[contains(@class, "tabs")])//div[contains(@class, "tabs")]');
     $this->assertEqual(count($tabs), 0, 'The tabs DIV was not found.');
 
-    // Edit the node to get a system mesage.
+    // Edit the node to get a system message.
     $this->backdropPost("node/1/edit", array(), t('Save'));
     $messages = $this->xpath('(//div[contains(@class, "l-wrapper")])//div[contains(@class, "l-messages")]');
     $this->assertEqual(count($messages), 0, 'The messages DIV was not found.');
@@ -2388,7 +2576,6 @@ class LayoutSelectionTest extends BackdropWebTestCase {
     $web_user = $this->backdropCreateUser(array('access user profiles', 'access content'));
 
     // Test ordinary role-based selection.
-
     // Create a layout at a custom path.
     $layout_name = strtolower($this->randomName());
     $layout_path = $layout_name;
@@ -2400,7 +2587,7 @@ class LayoutSelectionTest extends BackdropWebTestCase {
     );
 
     // This adds a condition, not saving the layout yet.
-    $this->backdropPost('admin/structure/layouts/add', $edit, t('Add visibility condition'));
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Add condition'));
 
     // Select the condition to add.
     $edit = array(
@@ -2412,7 +2599,7 @@ class LayoutSelectionTest extends BackdropWebTestCase {
     $edit = array(
       'roles[authenticated]' => TRUE,
     );
-    $this->backdropPost(NULL, $edit, t('Add visibility condition'));
+    $this->backdropPost(NULL, $edit, t('Add condition'));
 
     // Save the layout.
     $this->backdropPost(NULL, array(), t('Create layout'));
@@ -2618,6 +2805,10 @@ class LayoutCloneTest extends BackdropWebTestCase {
  * Tests the upgrade path from block-based regions to layouts.
  */
 class LayoutUpgradePathTest extends UpgradePathTestCase {
+
+  /**
+   * Set up environment.
+   */
   public function setUp() {
     // Path to the database dump files.
     $this->databaseDumpFiles = array(
@@ -2677,7 +2868,7 @@ class LayoutUpgradePathTest extends UpgradePathTestCase {
     ));
     $this->backdropGet('node/' . $article_node->nid);
     $article_blocks = $blocks;
-    $article_blocks['sidebar-second'][] = 'block-node-recent';
+    $article_blocks['sidebar-second'][] = 'block-views-recent-content-block';
     $this->assertBlocks($article_blocks);
 
     // Check that the blocks are NOT available on page content.
@@ -2690,7 +2881,7 @@ class LayoutUpgradePathTest extends UpgradePathTestCase {
     $this->assertBlocks($blocks);
     $this->assertNoBlocks(array(
       'l-sidebar-section' => array(
-        'block-node-recent'
+        'block-views-recent-content-block',
       ),
     ));
 
@@ -3077,6 +3268,11 @@ class LayoutRendererTest extends BackdropWebTestCase {
 class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
   protected $profile = 'testing';
   protected $admin_user;
+
+  /**
+   * @var User
+   */
+  protected $no_flex_user;
 
   function setUp() {
     parent::setUp('layout', 'layout_test');
@@ -3478,3 +3674,121 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
   }
 
 }
+
+/**
+ * Tests that default layout paths are handled properly.
+ */
+class LayoutPathTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+  protected $admin_user;
+
+  /**
+   * Set up environment.
+   */
+  public function setUp() {
+    parent::setUp(array('layout_test'));
+
+    // Create and login admin user.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access content',
+      'administer layouts',
+      'access user profiles',
+    ));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Tests that null paths (in default layouts) don't cause problems.
+   */
+  public function testLayoutPath() {
+    $layouts = layout_load_multiple_by_path('');
+    $default_layout = $layouts['default'];
+    $path = $default_layout->getPath(); // This will be NULL.
+    $this->assertNull($path, 'Default layout path is NULL.');
+
+    // Make sure path_is_admin() can handle a NULL path.
+    backdrop_static_reset('path_is_admin');
+    $result = path_is_admin($path);
+    $this->assertFalse($result, 'Default layout is not an admin path.');
+
+    // Make sure backdrop_match_path() can handle a NULL path.
+    backdrop_match_path($path, "foo\nbar");
+  }
+}
+
+/**
+ * Tests that ensures deletion messages are appropriate if layout page has
+ * any special role.
+ */
+class LayoutDeletionTest extends BackdropWebTestCase {
+  protected $profile = 'testing';
+  protected $admin_user;
+
+  /**
+   * Set up environment.
+   */
+  public function setUp() {
+    parent::setUp(array('layout_test'));
+
+    // Create and login admin user.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access content',
+      'administer layouts',
+      'access user profiles',
+    ));
+    $this->backdropLogin($this->admin_user);
+  }
+
+  /**
+   * Tests that layouts that have special roles issue warning messages upon
+   * attempted deletion.
+   */
+  public function testLayoutDeletion() {
+
+    // Create our new layout that we'll be attempting to delete.
+    $this->backdropGet('admin/structure/layouts');
+    $this->clickLink(t('Add layout'));
+
+    // Create a new layout at a new path.
+    $layout_title = $this->randomName();
+    $layout_name = strtolower($layout_title);
+    $layout_url = 'a-special-layout';
+    $edit = array(
+      'title' => $layout_title,
+      'name' => $layout_name,
+      'layout_template' => 'moscone_flipped',
+      'path' => $layout_url,
+    );
+    $this->backdropPost(NULL, $edit, t('Create layout'));
+    layout_reset_caches();
+
+    $deletion_path = 'admin/structure/layouts/manage/' . $layout_name . '/delete';
+
+    // First make sure there's no special message if the layout isn't special.
+    // The first sentence of all of our messages is the same.
+    $this->backdropGet($deletion_path);
+    $this->assertNoText(format_string('This layout creates a page at @path', array('@path' => $layout_url)));
+
+    // Make our layout the home page, try to delete it, and check for its
+    // message. Then restore the system setting.
+    config_set('system.core', 'site_frontpage', $layout_url);
+    $this->backdropGet($deletion_path);
+    $this->assertText(format_string('This layout creates a page at @path that is used as the home page of the site.', array('@path' => $layout_url)));
+    config_set('system.core', 'site_frontpage', '');
+
+    // Make our layout the 403 page, try to delete it, and check for its
+    // message. Then restore the system setting.
+    config_set('system.core', 'site_403', $layout_url);
+    $this->backdropGet($deletion_path);
+    $this->assertText(format_string('This layout creates a page at @path that is used as the default 403 (access denied) page of the site.', array('@path' => $layout_url)));
+    config_set('system.core', 'site_403', '');
+
+    // Make our layout the 404 page, try to delete it, and check for its
+    // message. Then restore the system setting.
+    config_set('system.core', 'site_404', $layout_url);
+    $this->backdropGet($deletion_path);
+    $this->assertText(format_string('This layout creates a page at @path that is used as the default 404 (not found) page of the site.', array('@path' => $layout_url)));
+    config_set('system.core', 'site_404', '');
+  }
+}
+

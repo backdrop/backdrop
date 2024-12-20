@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Test module for the entity API providing an entity type for testing.
