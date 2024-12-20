@@ -106,7 +106,7 @@ $form['css_updates']['css_update'] = array(
     '#description' => t('Accept no updates introduced after installation.'),
   ),
   'all' => array(
-    '#description' => t('Warning: Some future changes may effect your site.'),
+    '#description' => t('Warning: Some future changes may affect your site.'),
   ),
   'custom' => array(
   ),
