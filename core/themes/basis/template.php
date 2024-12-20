@@ -38,18 +38,18 @@ function basis_preprocess_page(&$variables) {
     $variables['classes'][] = 'view-name-' . $view->name;
   }
 
-  // CSS Update options can be one of the following:
+  // The CSS update option can be one of the following:
   // - install: Calculate the CSS update version based on core install_version.
   // - all: Apply all CSS updates.
   // - version: Select a specific update version (and all updates prior to it).
-  $update_preference = config_get('basis.settings', 'css_update');
+  $update_preference = theme_get_setting('css_update');
 
   // Get the specified CSS update version.
   // The version must be one of the values from basis_updated_css_versions().
   // This may also be an empty string, to signify "No updates".
-  $update_version = config_get('basis.settings', 'css_update_version');
+  $update_version = theme_get_setting('css_update_version');
 
-  // Process supplemental CSS versions.
+  // Process supplemental CSS versions as body classes.
   $update_css_versions = basis_updated_css_versions();
   foreach ($update_css_versions as $update_css_version) {
     if ($update_preference === 'all' || version_compare($update_version, $update_css_version, '>=')) {

@@ -63,6 +63,7 @@ class BasisTestCase extends BackdropWebTestCase {
     // Set the CSS update version to a specific value.
     $config->set('css_update', 'version');
     $config->set('css_update_version', '1.30');
+    $config->save();
 
     $this->backdropGet('<front>');
     // @todo Confirm multiple version strings are included once they exist.
