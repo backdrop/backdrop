@@ -84,6 +84,10 @@ function user_pass($form, &$form_state) {
             'href' => 'user/login',
           ),
         ),
+        'attributes' => array(
+          'class' => array(
+            'login-links',
+        )),
       )),
       '#weight' => 101,
     );

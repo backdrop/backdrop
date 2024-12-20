@@ -1879,7 +1879,10 @@ function user_login($form, &$form_state) {
     $form['links'] = array(
       '#markup' => theme('links', array(
         'links' => $links,
-      )),
+        'attributes' => array(
+          'class' => array(
+            'login-links'))
+        )),
       '#weight' => 101,
     );
   }
@@ -3360,6 +3363,10 @@ function user_register_form($form, &$form_state) {
             'href' => 'user/login',
           ),
         ),
+        'attributes' => array(
+          'class' => array(
+            'login-links',
+        )),
       )),
       '#weight' => 101,
     );
