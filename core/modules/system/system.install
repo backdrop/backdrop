@@ -3721,10 +3721,12 @@ function system_update_1100() {
     $data = array_merge(array(
       '_config_static' => TRUE,
     ), $data);
-    $data['css_update'] = 'install_version';
-    // An empty version is sufficient, the same as "No updates" for existing
-    // sites running Basis.
-    $data['css_update_version'] = '';
+    if (!isset($data['css_update'])) {
+      $data['css_update'] = 'install_version';
+      // An empty version is sufficient, the same as "No updates" for existing
+      // sites running Basis.
+      $data['css_update_version'] = '';
+    }
     $config->setData($data);
     $config->save();
   }
