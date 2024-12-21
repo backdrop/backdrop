@@ -360,56 +360,7 @@ function update_backup_form($form, &$form_state) {
     '#weight' => -5,
   );
 
-  $backup_targets = settings_get('backup_targets', array());
-  $backup_targets = array_merge($backup_targets, array(
-    'db:default',
-    'config:active',
-  ));
-
-  $form['backups'] = array(
-    '#tree' => TRUE,
-  );
-
-  foreach ($backup_targets as $backup_target) {
-    list($backup_plugin_id, $backup_subkey) = explode(':', $backup_target, 2);
-    $backup_class = backup_get_handler_name($backup_target);
-    if (!$backup_class) {
-      continue;
-    }
-
-    $backup_name = $backup_plugin_id . '_' . $backup_subkey;
-    // Show a checkbox if non-default targets are present.
-    if ($backup_target != 'db:default' && $backup_target != 'config:active') {
-      $form['backups'][$backup_name]['enabled'] = array(
-        '#type' => 'checkbox',
-        '#title' => t('Optional backup: @backup_name', array('@backup_name' => $backup_name)),
-        '#default_value' => TRUE,
-        '#weight' => -1,
-      );
-    }
-    else {
-      $form['backups'][$backup_name]['enabled'] = array(
-        '#type' => 'hidden',
-        '#value' => TRUE,
-      );
-    }
-
-    $form['backups'][$backup_name]['name'] = array(
-      '#type' => 'hidden',
-      '#value' => $backup_name,
-    );
-    $form['backups'][$backup_name]['target'] = array(
-      '#type' => 'hidden',
-      '#value' => $backup_target,
-    );
-  }
-
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
-    '#type' => 'submit',
-    '#value' => t('Create backup'),
-    '#disabled' => empty($backup_directory),
-  );
+  $form = backup_settings_form($form, $form_state);
 
   $query = backdrop_get_query_parameters();
   $query['op'] = 'selection';
@@ -689,7 +640,8 @@ if (update_access_allowed()) {
         $errors = array();
         $ready = backup_batch_prepare($backups, $errors);
         if ($ready) {
-          backup_batch($backups, $batch_redirect_url, $batch_url);
+          $options = array();
+          backup_batch($backups, $options, $batch_redirect_url, $batch_url);
           break;
         }
         else {

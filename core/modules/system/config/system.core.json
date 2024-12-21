@@ -15,6 +15,7 @@
       "strip_sensitive_headers_on_host_change": true,
       "strip_sensitive_headers_on_https_downgrade": true
     },
+    "backup_limit": 5,
     "cache": 0,
     "canonical_secure": 0,
     "clean_url": 0,

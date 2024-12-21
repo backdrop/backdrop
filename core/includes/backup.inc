@@ -76,7 +76,7 @@ function backup_directory_list() {
   $backup_file_list = file_scan_directory($backup_directory, '/\.backup\.json$/', array(
     'max_depth' => 2,
   ));
-  foreach ($backup_file_list as $backup_file_path => $backup_file) {
+  foreach ($backup_file_list as $backup_file) {
     $backup_file_directory = dirname($backup_file->uri);
     $backup_file_path = $backup_file->uri;
     if ($backup_file_directory != $current_directory) {
@@ -92,9 +92,10 @@ function backup_directory_list() {
 
     // Check if the JSON file is valid, if not, continue to the next file.
     $backup_info = @backdrop_json_decode(file_get_contents($backup_file_path));
+    $backup_name = basename($backup_file_directory);
     if (!$backup_info || !isset($backup_info['backups'])) {
-      $backups[$backup_file_directory] = array(
-        'label' => basename($backup_file_directory),
+      $backups[$backup_name] = array(
+        'label' => $backup_name,
         'valid' => FALSE,
       );
       $skip_this_directory = TRUE;
@@ -102,14 +103,155 @@ function backup_directory_list() {
     }
 
     // If valid, add to list of backups.
-    if (!isset($backups[$backup_file_directory])) {
-      $backups[$backup_file_directory] = array(
+    if (!isset($backups[$backup_name])) {
+      $backups[$backup_name] = array(
         'valid' => TRUE,
       ) + $backup_info;
+      // Overwrite the backup_directory value to be the current location.
+      $backups[$backup_name]['backup_directory'] = $backup_file_directory;
     }
   }
 
   return $backups;
+}
+
+/**
+ * A general-purpose form builder for creating a backup.
+ *
+ * This form builder is used by update.php to generate the backup form step
+ * of running system updates. It can also be used by contributed modules to
+ * quickly create a backup.
+ *
+ * See the backup_test.module for a demonstration of how this can be used.
+ *
+ * @param array $form
+ *   A form API array to which the backup settings should be added.
+ * @param array $form_state
+ *   The form state array.
+ * @param array $options
+ *   An array of options containing the following keys:
+ *   - show_settings: Whether each backup handler class should show the
+ *     advanced settings for that type of backup. Defaults to FALSE.
+ *   - show_default_targets: Whether the targets of the default database and the
+ *     default configuration location should be shown as checkboxes, allowing
+ *     them to not be backed up. If not shown, they are rendered as type =
+ *     "hidden" elements. Defaults to FALSE.
+ *
+ * @see update_backup_form()
+ * @see backup_test_settings_form()
+ */
+function backup_settings_form(array $form, array &$form_state, array $options = array()) {
+  $options += array(
+    'show_settings' => FALSE,
+    'show_default_targets' => FALSE,
+  );
+
+  $backup_directory = settings_get('backup_directory');
+  $backup_targets = settings_get('backup_targets', array());
+  $backup_targets = array_merge($backup_targets, array(
+    'db:default',
+    'config:active',
+  ));
+
+  $form['backups'] = array(
+    '#tree' => TRUE,
+  );
+
+  foreach ($backup_targets as $backup_target) {
+    list($backup_plugin_id, $backup_subkey) = explode(':', $backup_target, 2);
+    $backup_class = backup_get_handler_name($backup_target);
+    if (!$backup_class) {
+      continue;
+    }
+
+    $backup_name = $backup_plugin_id . '_' . $backup_subkey;
+    $backup_settings = array();
+    $backup_instance = new $backup_class($backup_name, $backup_target, $backup_settings);
+    $backup_form = $backup_instance->backupSettingsForm();
+
+    if ($options['show_settings'] && $backup_form) {
+      $form['backups'][$backup_name] = array(
+        '#type' => 'fieldset',
+        '#title' => t('@type backup settings', array(
+          '@type' => $backup_instance->typeLabel(),
+        )),
+        '#collapsible' => FALSE,
+      );
+
+      $form['backups'][$backup_name]['settings'] = $backup_form;
+      $form['backups'][$backup_name]['settings']['#type'] = 'container';
+    }
+
+    // Show a checkbox if non-default targets are present.
+    if ($options['show_default_targets'] || ($backup_target != 'db:default' && $backup_target != 'config:active')) {
+      $form['backups'][$backup_name]['enabled'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Optional backup: @backup_name', array('@backup_name' => $backup_name)),
+        '#default_value' => TRUE,
+        '#weight' => -1,
+      );
+    }
+    else {
+      $form['backups'][$backup_name]['enabled'] = array(
+        '#type' => 'hidden',
+        '#value' => TRUE,
+      );
+    }
+
+    $form['backups'][$backup_name]['name'] = array(
+      '#type' => 'hidden',
+      '#value' => $backup_name,
+    );
+    $form['backups'][$backup_name]['target'] = array(
+      '#type' => 'hidden',
+      '#value' => $backup_target,
+    );
+  }
+
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Create backup'),
+    '#disabled' => empty($backup_directory),
+  );
+
+  return $form;
+}
+
+/**
+ * Helper submit function for creating a backup.
+ *
+ * This is intended to help execute a backup as configured by
+ * backup_settings_form(). To add this submit handler to a custom form, it is
+ * recommended to add this to the form #submit property, such as:
+ *
+ * @code
+ * $form['#submit'] = array(
+ *   'backup_settings_form_submit',
+ *   'my_module_settings_form_submit,
+ * );
+ * @endcode
+ *
+ * @param array $form
+ *   The form array, as created by backdrop_settings_form().
+ * @param array $form_state
+ *   The form state, containing $form_state['values']['backups'].
+ *
+ * @return void
+ */
+function backup_settings_form_submit(array $form, array &$form_state) {
+  $backups = $form_state['values']['backups'];
+
+  $errors = array();
+  $ready = backup_batch_prepare($backups, $errors);
+  if ($ready) {
+    backup_batch($backups);
+  }
+  else {
+    foreach ($errors as $error) {
+      backdrop_set_message($error, 'error');
+    }
+  }
 }
 
 /**
@@ -122,6 +264,11 @@ function backup_directory_list() {
  *   - config:active
  *   The value of each array is another array of backup settings, as would be
  *   passed to backup_execute().
+ * @param array $options
+ *   Additional options to control the Backup process. Available keys:
+ *   - backup_limit: Integer indicating how many total backups should be
+ *     allowed. Backups exceeding this count will be removed, oldest first.
+ *     A value of FALSE will not enforce a limit.
  * @param string $redirect
  *   Path to redirect to when the batch has finished processing.
  * @param string $url
@@ -135,8 +282,14 @@ function backup_directory_list() {
  *
  * @see update_resolve_dependencies()
  */
-function backup_batch(array $backups, $redirect = NULL, $url = NULL, array $batch = array(), $redirect_callback = 'backdrop_goto') {
+function backup_batch(array $backups, array $options = array(), $redirect = NULL, $url = 'batch', array $batch = array(), $redirect_callback = 'backdrop_goto') {
   $operations = array();
+
+  // Ensure a default backup limit exists.
+  $backup_limit = config_get('system.core', 'backup_limit');
+  $options += array(
+    'backup_limit' => isset($backup_limit) ? $backup_limit : 5,
+  );
 
   foreach ($backups as $backup) {
     $settings = isset($backup['settings']) ? $backup['settings'] : array();
@@ -146,6 +299,13 @@ function backup_batch(array $backups, $redirect = NULL, $url = NULL, array $batc
       $settings,
     ));
   }
+
+  if ($options['backup_limit']) {
+    $operations[] = array('backup_limit_cleanup', array(
+      $options['backup_limit'],
+    ));
+  }
+
   $batch['operations'] = $operations;
   $batch += array(
     'title' => t('Creating backup'),
@@ -171,8 +331,12 @@ function backup_batch(array $backups, $redirect = NULL, $url = NULL, array $batc
  * @see backup_batch()
  */
 function backup_batch_finished($success, array $results, array $operations) {
-  $_SESSION['backup_results'] = $results;
-  $_SESSION['backup_success'] = $success;
+  if ($success) {
+    backdrop_set_message(t('Backup created successfully.'));
+  }
+  else {
+    backdrop_set_message(t('Backup failed.'));
+  }
 }
 
 /**
@@ -200,6 +364,12 @@ function backup_batch_prepare(array &$backups, array &$errors) {
       return FALSE;
     }
   }
+
+  if (empty($backups)) {
+    $errors[] = t('No backup targets selected.');
+    return FALSE;
+  }
+
   return TRUE;
 }
 
@@ -348,6 +518,69 @@ function backup_execute($backup_name, $backup_target, array $backup_settings) {
   }
 
   return $file;
+}
+
+/**
+ * Delete excess backups that exceed a certain count. Oldest first.
+ *
+ * @param int $backup_limit
+ *   The maximum number of backups to allow. Must be greater than 1. If deleting
+ *   all backups entirely, use backup_delete() instead.
+ *
+ * @return int
+ *   The number of backups removed.
+ */
+function backup_limit_cleanup($backup_limit) {
+  $backups = backup_directory_list();
+
+  if ($backup_limit <= 1) {
+    return 0;
+  }
+
+  // Sort by reverse date order.
+  backdrop_sort($backups, array('timestamp'), SORT_DESC);
+  $backup_count = 0;
+  $backups_deleted = 0;
+  foreach ($backups as $backup_name => $backup) {
+    if ($backup['valid']) {
+      $backup_count++;
+      if ($backup_count > $backup_limit) {
+        if (backup_delete($backup_name)) {
+          $backups_deleted++;
+        }
+      }
+    }
+  }
+  return $backups_deleted;
+}
+
+/**
+ * Delete a backup from the backup directory by its directory name.
+ *
+ * @param string $backup_name
+ *   The name of the backup (same as the backup directory).
+ *
+ * @return bool
+ *   TRUE if the backup was deleted, FALSE on failure.
+ */
+function backup_delete($backup_name) {
+  // Validate that the backup exists within the backup directory. This prevents
+  // deleting any kind of file with this function other than a backup.
+  $backups = backup_directory_list();
+  $success = FALSE;
+  if (!isset($backups[$backup_name])) {
+    return FALSE;
+  }
+
+  $backup = $backups[$backup_name];
+  // Final safety check, only delete valid backups (those with correct JSON
+  // files describing their contents). The "backup_directory" key is set
+  // specifically in backup_directory_list(), it is not read from the JSON.
+  if ($backup['valid'] && is_dir($backup['backup_directory'])) {
+    $success = file_unmanaged_delete_recursive($backup['backup_directory']);
+  }
+
+  return $success;
 }
 
 /**

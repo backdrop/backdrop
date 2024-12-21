@@ -3669,6 +3669,16 @@ function system_update_1098() {
 }
 
 /**
+ * Set the default backup count setting.
+ */
+function system_update_1099() {
+  $backup_count = config_get('system.core', 'backup_count');
+  if ($backup_count === NULL) {
+    config_set('system.core', 'backup_count', 5);
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

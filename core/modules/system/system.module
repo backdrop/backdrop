@@ -978,17 +978,6 @@ function system_menu() {
     'file' => 'system.admin.inc',
     'weight' => -20,
   );
-  if (settings_get('backup_directory') !== FALSE) {
-    $items['admin/config/system/backup-restore'] = array(
-      'title' => 'Site backups',
-      'description' => 'Change site backup settings and view current backups.',
-      'page callback' => 'backdrop_get_form',
-      'page arguments' => array('system_backup_settings'),
-      'access arguments' => array('administer site configuration'),
-      'file' => 'system.admin.inc',
-      'weight' => -20,
-    );
-  }
   $items['admin/config/system/cron'] = array(
     'title' => 'Cron',
     'description' => 'Manage automatic site maintenance tasks.',

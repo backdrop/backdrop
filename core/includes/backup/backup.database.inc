@@ -78,25 +78,15 @@ abstract class BackupDatabase extends Backup {
       }
     }
 
-    // Identify tables that should omit data by default.
-    $nodata_basic = array(
-      // Default core tables.
-      'accesslog',
-      // Devel module.
-      'devel_queries',
-      'devel_times',
-    );
-
     // Identify all cache tables as no-data tables.
-    $nodata_cache = array('cache');
+    $nodata_tables = array('cache');
     foreach ($all_tables as $table_name) {
       if (strpos($table_name, 'cache_') === 0) {
-        $nodata_cache[] = $table_name;
+        $nodata_tables[] = $table_name;
       }
     }
 
     // Prefix all the hard-coded no-data tables.
-    $nodata_tables = array_merge($nodata_basic, $nodata_cache);
     foreach ($nodata_tables as $index => $table) {
       $nodata_tables[$index] = $connection->tablePrefix($table) . $table;
     }
@@ -162,7 +152,7 @@ abstract class BackupDatabase extends Backup {
       '#type' => 'select',
       '#multiple' => TRUE,
       '#title' => t('Exclude the data from the following tables'),
-      '#options' => $objects,
+      '#options' => backdrop_map_assoc($objects),
       '#default_value' => $settings['nodata_tables'],
       '#description' => t('The selected tables will have their structure backed up but not their contents. This is useful for excluding cache data to reduce file size.'),
     );

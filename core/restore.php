@@ -360,15 +360,16 @@ if (restore_access_allowed()) {
         restore_goto('');
       }
       // Check that a backup directory is specified.
-      $backup_directory = $_GET['backup'];
+      $backup_directory_name = $_GET['backup'];
       $backups = backup_directory_list();
       $errors = array();
       $ready = FALSE;
-      if (!isset($backups[$backup_directory])) {
+      if (!isset($backups[$backup_directory_name])) {
         $errors[] = st('Backup directory does not exist.');
       }
       else {
-        $backup_info = $backups[$backup_directory];
+        $backup_info = $backups[$backup_directory_name];
+        $backup_directory = settings_get('backup_directory') . '/' . $backup_directory_name;
 
         foreach ($backup_info['backups'] as $backup_name => $backup) {
           backup_restore_prepare($backup_name, $backup['target'], $backup['settings'], $errors);

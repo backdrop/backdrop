@@ -112,6 +112,18 @@ description = APerforms tests on opening and manipulating dialogs via AJAX comma
 group = AJAX
 file = ajax.test
 
+[BackupSettingsTestCase]
+name = Backup settings form
+description = Confirm the settings forms provided by update handlers work properly.
+group = Backup
+file = backup.test
+
+[BackupUpdateTestCase]
+name = Backup during system updates
+description = Run update.php with a backup and then restore that backup.
+group = Backup
+file = backup.test
+
 [BatchProcessingTestCase]
 name = Batch processing
 description = Test batch processing in form and non-form workflow.
@@ -1293,12 +1305,6 @@ name = Update from Drupal 7 hook order
 description = Test that the 7xxx updates are run in proper order before 1xxx updates.
 group = Update API
 file = update.test
-
-[UpdateBackupTestCase]
-name = Update with backup and restore
-description = Run update.php with a backup and then restore that backup.
-group = Update API
-file = update_backup.test
 
 [BareUpgradePathTestCase]
 name = Bare upgrade test
