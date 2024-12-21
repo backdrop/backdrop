@@ -1616,6 +1616,12 @@ function _layout_get_all_info($data_type, $init = array()) {
 
     foreach (module_implements($data_type . '_info') as $module) {
       $function = $module . '_' . $data_type . '_info';
+      // Module implements deprecated hook_layout_info(), which has been renamed
+      // to hook_layout_template_info() in 1.30.0.
+      // @see layout_get_layout_template_info()
+      if ($data_type == 'layout') {
+        watchdog_deprecated_function('layout', $function);
+      }
       $data = $function();
       $module_path = backdrop_get_path('module', $module);
 
@@ -2488,20 +2494,6 @@ function layout_layout_template_info() {
   }
 
   return $layouts;
-}
-
-/**
- * Implements deprecated hook_layout_info().
- *
- * This hook has been replaced by hook_layout_template_info.
- *
- * @deprecated since 1.30.0
- * @see layout_layout_template_info()
- * @see https://docs.backdropcms.org/change-records/hook_layout_info-renamed-to-hook_layout_template_info
- */
-function layout_layout_info() {
-  watchdog_deprecated_function('layout', __FUNCTION__);
-  return layout_layout_template_info();
 }
 
 /**
