@@ -35,6 +35,9 @@ function book_theme() {
  */
 function book_permission() {
   return array(
+    'administer books' => array(
+      'title' => t('Administer books'),
+    ),
     'administer book outlines' => array(
       'title' => t('Administer book outlines'),
     ),
@@ -139,12 +142,13 @@ function book_menu() {
   $items['admin/content/book/list'] = array(
     'title' => 'List',
     'type' => MENU_DEFAULT_LOCAL_TASK,
+    'access arguments' => array('administer books'),
   );
   $items['admin/content/book/settings'] = array(
     'title' => 'Settings',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('book_admin_settings'),
-    'access arguments' => array('administer site configuration'),
+    'access arguments' => array('administer books'),
     'type' => MENU_LOCAL_TASK,
     'weight' => 8,
     'file' => 'book.admin.inc',
