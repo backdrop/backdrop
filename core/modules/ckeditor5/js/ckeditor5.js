@@ -6,7 +6,7 @@
 
     attach: function (element, format) {
       // Bail out if the editor has already been attached to the element.
-      if (typeof element.ckeditor5AttachedEditor != 'undefined') {
+      if (typeof element.ckeditor5Processed !== 'undefined') {
         return;
       }
 
@@ -34,7 +34,7 @@
       // The source element value is managed manually to apply code formatting.
       editorSettings.updateSourceElementOnDestroy = false;
 
-      editorSettings.licenseKey = '';
+      editorSettings.licenseKey = 'GPL';
 
       // If filter_html is turned on, and the htmlSupport plugin is available,
       // we prevent on* attributes.
@@ -69,8 +69,9 @@
         }
       });
 
-      // Hide the resizable grippie while CKEditor is active.
-      $(element).siblings('.grippie').hide();
+      // Indicate that this element is about to receive an editor. This prevents
+      // double-binding if the .attach() method is called twice very quickly.
+      element.ckeditor5Processed = true;
 
       const beforeAttachValue = element.value;
       CKEditor5.editorClassic.ClassicEditor
@@ -88,6 +89,7 @@
           return true;
         })
         .catch(error => {
+          element.ckeditor5Processed = false;
           console.error('The CKEditor instance could not be initialized.');
           console.error(error);
           return false;
@@ -117,14 +119,13 @@
         editor.destroy();
         Backdrop.ckeditor5.instances.delete(editor.id);
         delete element.ckeditor5AttachedEditor;
+        delete element.ckeditor5Processed;
       }
 
       // Save formatted value after destroying the editor, which can also
       // update the element value.
       element.value = newData;
 
-      // Restore the resize grippie.
-      $(element).siblings('.grippie').show();
       return !!editor;
     },
 

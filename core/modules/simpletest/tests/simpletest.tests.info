@@ -108,7 +108,7 @@ file = ajax.test
 
 [AJAXDialogTest]
 name = AJAX dialog commands
-description = APerforms tests on opening and manipulating dialogs via AJAX commands.
+description = Performs tests on opening and manipulating dialogs via AJAX commands.
 group = AJAX
 file = ajax.test
 
@@ -123,6 +123,12 @@ name = Backup during system updates
 description = Run update.php with a backup and then restore that backup.
 group = Backup
 file = backup.test
+
+[BasisTestCase]
+name = Basis theme
+description = Test supplemental CSS update selectors in the Basis theme.
+group = Theme
+file = basis.test
 
 [BatchProcessingTestCase]
 name = Batch processing

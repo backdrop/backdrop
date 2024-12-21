@@ -15,10 +15,10 @@ class FilterSettingsAttachedTestCase extends BackdropWebTestCase {
    * {@inheritdoc}
    */
   public function setUp() {
-    parent::setUp(
+    parent::setUp(array(
       'filter',
       'ckeditor5',
-    );
+    ));
 
     // Create additional format with an editor.
     $basic_format = array(

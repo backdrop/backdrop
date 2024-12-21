@@ -38,6 +38,26 @@ function basis_preprocess_page(&$variables) {
     $variables['classes'][] = 'view-name-' . $view->name;
   }
 
+  // The CSS update option can be one of the following:
+  // - install: Calculate the CSS update version based on core install_version.
+  // - all: Apply all CSS updates.
+  // - version: Select a specific update version (and all updates prior to it).
+  $update_preference = theme_get_setting('css_update');
+
+  // Get the specified CSS update version.
+  // The version must be one of the values from basis_updated_css_versions().
+  // This may also be an empty string, to signify "No updates".
+  $update_version = theme_get_setting('css_update_version');
+
+  // Process supplemental CSS versions as body classes.
+  $update_css_versions = basis_updated_css_versions();
+  foreach ($update_css_versions as $update_css_version) {
+    if ($update_preference === 'all' || version_compare($update_version, $update_css_version, '>=')) {
+      $update_css_version_class = 'update-' . str_replace('.', '-', $update_css_version);
+      $variables['classes'][] = $update_css_version_class;
+    }
+  }
+
   // Add breakpoint-specific CSS for dropdown menus.
   $config = config('menu.settings');
   if ($config->get('menu_breakpoint') == 'custom') {
@@ -51,6 +71,17 @@ function basis_preprocess_page(&$variables) {
       'media' => 'all and (min-width: ' . $config->get('menu_breakpoint_custom') . ')',
     ));
   }
+}
+
+/**
+ * Returns the versions of Backdrop that contain updated CSS for Basis.
+ *
+ * Every time a new supplemental CSS update is added to core, the core version
+ * should be added to this list. When a new version is added, the
+ * "css_update_version" in basis.settings.json should match the added value.
+ */
+function basis_updated_css_versions() {
+  return array('1.30');
 }
 
 /**
