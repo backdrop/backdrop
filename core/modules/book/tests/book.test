@@ -210,12 +210,12 @@ class BookTestCase extends BackdropWebTestCase {
   public function testBookAddToOutlineAccess() {
     $this->backdropLogin($this->admin_user);
     $this->backdropGet('node/add/page');
-    $this->assertText('Book outline', 'Can add page to book outline.');
+    $this->assertNoText('Book outline', 'Cannot add page to book outline.');
 
-    config_set('book.settings', 'book_admin_allowed_all', 0);
+    config_set('book.settings', 'book_admin_allowed_all', 1);
 
     $this->backdropGet('node/add/page');
-    $this->assertNoText('Book outline', 'Cannot add page to book outline.');
+    $this->assertText('Book outline', 'Can add page to book outline.');
   }
 
   /**
