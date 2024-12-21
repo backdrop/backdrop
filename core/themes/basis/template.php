@@ -8,7 +8,7 @@
  * Implements hook_css_alter().
  */
 function basis_css_alter(&$css) {
-  // Remove Basis' `/css/component/menu-dropdown.css` and add breakpoint files
+  // Remove the Basis css/component/menu-dropdown.css and add breakpoint files
   // if using a custom breakpoint.
   $config = config('menu.settings');
   $path = backdrop_get_path('theme', 'basis');
