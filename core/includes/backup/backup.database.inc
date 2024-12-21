@@ -125,7 +125,7 @@ abstract class BackupDatabase extends Backup {
     $settings += array(
       'nodata_tables' => $nodata_tables,
       'exclude_tables' => $excluded_tables,
-      'lock_tables' => TRUE,
+      'lock_tables' => FALSE,
       'compression' => self::COMPRESSION_GZIP,
     );
 

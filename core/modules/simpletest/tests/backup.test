@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Test classes for verifying Backup and Restore functionality.
+ */
 
 /**
  * Base class for testing Backup and Restore functionality.
@@ -76,7 +80,6 @@ class BackupBaseTestCase extends BackdropWebTestCase {
       file_unmanaged_delete_recursive($backup['backup_directory']);
     }
   }
-
 
   /**
    * Restore a backup via restore.php.
@@ -159,7 +162,7 @@ class BackupSettingsTestCase extends BackupBaseTestCase {
 
     // Verify defaults are as expected.
     $this->assertFieldChecked('edit-backups-db-default-enabled', 'Default database backup checked.');
-    $this->assertFieldChecked('edit-backups-db-default-settings-lock-tables', 'Lock tables on default database checked.');
+    $this->assertNoFieldChecked('edit-backups-db-default-settings-lock-tables', 'Lock tables on default database not checked.');
 
     // When running inside a test, only the simpletest prefix for this test run
     // should be included in the backup. This means that the "system" and all
@@ -233,7 +236,7 @@ class BackupSettingsTestCase extends BackupBaseTestCase {
     // Backups are listed alphabetically, and since that is also chronological,
     // the first item would be the oldest backup.
     $deleted_backup_key = key($two_backups1);
-    $this->assertTrue(!in_array($deleted_backup_key, $two_backups2), 'The oldest backup was deleted to keep within the backukp limit.');
+    $this->assertTrue(!in_array($deleted_backup_key, $two_backups2), 'The oldest backup was deleted to keep within the backup limit.');
   }
 }
 

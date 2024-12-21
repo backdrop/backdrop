@@ -188,10 +188,10 @@ function restore_results_page() {
       // Note this does not use backdrop_set_message() because session handling
       // is not initialized on restore.php.
       $output .= '<p>' . st("Reminder: Don't forget to set the !variable value in your !file file back to !value.", array(
-          '!variable' => "<code>\$settings['restore_free_access']</code>",
-          '!file' => '<code>settings.php</code>',
-          '!value' => '<code>FALSE</code>',
-        )) . '</p>';
+        '!variable' => "<code>\$settings['restore_free_access']</code>",
+        '!file' => '<code>settings.php</code>',
+        '!value' => '<code>FALSE</code>',
+      )) . '</p>';
     }
 
     $output .= '<p>' . l(st('Return to your site'), '<front>') . '</p>';
