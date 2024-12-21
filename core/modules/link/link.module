@@ -771,6 +771,9 @@ function link_theme() {
     'link_field' => array(
       'render element' => 'element',
     ) + $base,
+    'link_field_wrapper' => array(
+      'render element' => 'element',
+    ) + $base,
   );
 }
 
@@ -800,7 +803,7 @@ function link_element_info() {
     '#input' => TRUE,
     '#process' => array('link_field_process'),
     '#theme' => 'link_field',
-    '#theme_wrappers' => array('form_element'),
+    '#theme_wrappers' => array('link_field_wrapper'),
     '#element_validate' => array('link_field_element_validate'),
 
     // Custom options for link_field. Defaults are provided within
