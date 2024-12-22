@@ -212,11 +212,10 @@ class BackupSettingsTestCase extends BackupBaseTestCase {
     $config_value = config_get('backup_test.settings', 'test_setting');
     $this->assertEqual($config_value, 'foo', 'Initial config value present in backup_test.settings config file.');
 
-    // Set a backup limit of 2 while making a second backup.
-    $edit = array(
-      'backup_limit' => 2,
-    );
-    $this->backdropPost('backup-test/settings', $edit, t('Create backup'));
+    // Set a backup limit of 2 and create a second backup.
+    config_set('system.core', 'backup_limit', 2);
+    sleep(1);
+    $this->backdropPost('backup-test/settings', array(), t('Create backup'));
     $this->assertText(t('Backup created successfully.'));
 
     // Confirm that at least two backups exist.
@@ -224,6 +223,7 @@ class BackupSettingsTestCase extends BackupBaseTestCase {
     $this->assertTrue(count($two_backups1) == 2, 'Two backups created with backup limit of two.');
 
     // Create a 3rd backup, and confirm that the oldest one is deleted.
+    sleep(1);
     $this->backdropPost('backup-test/settings', array(), t('Create backup'));
     $this->assertText(t('Backup created successfully.'));
 
