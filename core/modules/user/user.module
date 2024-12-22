@@ -1791,6 +1791,9 @@ function user_page_title($account) {
 
 /**
  * Implements hook_init().
+ *
+ * Suppresses the use of layouts and blocks on the user login, register, and
+ * reset pages if configured to use the simple login page.
  */
 function user_init() {
   if (user_page_is_simplified_page()) {
@@ -1800,6 +1803,13 @@ function user_init() {
 
 /**
  * Implements hook_custom_theme().
+ *
+ * Activates the admin theme for login, register, and reset pages if
+ * configured to use the simple login page. Note this by-passes the
+ * "view the administration theme" permission to show the admin theme to
+ * anonymous users.
+ *
+ * @see user_init()
  */
 function user_custom_theme() {
   if (user_page_is_simplified_page()) {
