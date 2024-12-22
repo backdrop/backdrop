@@ -656,6 +656,7 @@ function _book_update_outline(Node $node) {
         ))
         ->execute();
       // Reset the cache of stored books.
+      _book_cache_clear($node->book['bid'], TRUE);
       backdrop_static_reset('book_get_books');
     }
     else {
@@ -665,6 +666,7 @@ function _book_update_outline(Node $node) {
         // Update the bid for this page and all children.
         book_update_bid($node->book);
         // Reset the cache of stored books.
+        _book_cache_clear($node->book['bid'], TRUE);
         backdrop_static_reset('book_get_books');
       }
     }
@@ -673,9 +675,6 @@ function _book_update_outline(Node $node) {
       ':bid' => $node->book['bid'],
     ))->fetchAllAssoc('nid');
     entity_get_controller('node')->resetCache(array_keys($affected_nids));
-    foreach ($affected_nids as $nid) {
-      _book_cache_clear($nid->nid, TRUE);
-    }
 
     return TRUE;
   }
@@ -949,6 +948,8 @@ function book_node_insert(Node $node) {
     if ($destination['destination'] != 'admin/content/book/' . $node->book['bid'] && _book_outline_access($node)) {
       backdrop_set_message(t('Reorder book pages from the <a href="@url">book outline</a>.', array('@url' => url('admin/content/book/' . $node->book['bid']))));
     }
+
+    _book_cache_clear($node->book['bid'], TRUE);
   }
 }
 
@@ -968,6 +969,8 @@ function book_node_update(Node $node) {
     if ($destination['destination'] != 'admin/content/book/' . $node->book['bid'] && _book_outline_access($node)) {
       backdrop_set_message(t('Reorder book pages from the <a href="@url">book outline</a>.', array('@url' => url('admin/content/book/' . $node->book['bid']))));
     }
+
+    _book_cache_clear($node->book['bid'], TRUE);
   }
 }
 
@@ -991,6 +994,7 @@ function book_node_predelete(Node $node) {
     db_delete('book')
       ->condition('mlid', $node->book['mlid'])
       ->execute();
+    _book_cache_clear($node->book['bid'], TRUE);
     backdrop_static_reset('book_get_books');
   }
 }
