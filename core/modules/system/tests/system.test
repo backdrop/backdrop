@@ -2205,7 +2205,7 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
     $this->clickLink('try again');
     $this->assertNoText('This is a requirements warning provided by the update_script_test module.');
     $this->backdropPost(NULL, array(), t('Continue'));
-    if (settings_get('backup_directory') !== FALSE) {
+    if (backup_get_backup_directory()) {
       $this->clickLink(t('Skip backup'));
     }
     $this->backdropPost(NULL, array(), t('Apply pending updates'));
@@ -2282,7 +2282,7 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
     // Click through update.php with 'administer software updates' permission.
     $this->backdropLogin($this->update_user);
     $this->backdropPost($this->update_url, array(), t('Continue'), array('external' => TRUE));
-    if (settings_get('backup_directory') !== FALSE) {
+    if (backup_get_backup_directory()) {
       $this->clickLink(t('Skip backup'));
     }
     $this->backdropPost(NULL, array(), t('Apply pending updates'));
@@ -2299,7 +2299,7 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
     $admin_user = $this->backdropCreateUser(array('administer software updates', 'access administration pages', 'access site reports'));
     $this->backdropLogin($admin_user);
     $this->backdropPost($this->update_url, array(), t('Continue'), array('external' => TRUE));
-    if (settings_get('backup_directory') !== FALSE) {
+    if (backup_get_backup_directory()) {
       $this->clickLink(t('Skip backup'));
     }
     $this->backdropPost(NULL, array(), t('Apply pending updates'));

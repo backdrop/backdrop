@@ -36,9 +36,6 @@ class BackupBaseTestCase extends BackdropWebTestCase {
     if (!function_exists('gzopen')) {
       $errors[] = 'Missing zlib requirement for update tests.';
     }
-    if (!settings_get('backup_directory')) {
-      $errors[] = 'Missing backup directory for update backup/restore tests.';
-    }
     return $errors;
   }
 
@@ -137,9 +134,6 @@ class BackupSettingsTestCase extends BackupBaseTestCase {
    * Tests the backup settings form.
    */
   public function testBackupSettingsForm() {
-    // Temporarily disabling test to prevent concurrent runs.
-    return;
-
     // Hit the homepage to ensure a cache entry exists in cache_page.
     $this->backdropGet('<front>');
     $cached_homepage = cache_get(url('<front>', array('absolute' => TRUE)), 'cache_page');

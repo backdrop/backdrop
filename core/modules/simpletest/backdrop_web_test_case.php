@@ -1586,6 +1586,10 @@ class BackdropWebTestCase extends BackdropTestCase {
     $config_directories['active'] = $config_base_path . 'active';
     $config_directories['staging'] = $config_base_path . 'staging';
 
+    // Set the new backup directories. During test execution, these values are
+    // manually set directly in backup_get_backup_directory().
+    $settings['backup_directory'] = 'files/simpletest/' . $this->fileDirectoryName . '/backups';
+
     // Log fatal errors.
     ini_set('log_errors', 1);
     ini_set('error_log', $this->public_files_directory . '/error.log');

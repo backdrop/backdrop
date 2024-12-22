@@ -172,7 +172,7 @@ function system_permission() {
     ),
   );
   // If backups are not configured, do not show related permission.
-  if (settings_get('backup_directory')) {
+  if (backup_get_backup_directory()) {
     $permissions += array(
       'restore site backups' => array(
         'title' => t('Restore site backups'),

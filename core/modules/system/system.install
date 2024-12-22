@@ -314,7 +314,7 @@ function system_requirements($phase) {
     }
 
     // Check/create the .htaccess file for the backup directory.
-    $backup_directory = settings_get('backup_directory');
+    $backup_directory = backup_get_backup_directory();
     $backup_directory_accessible = strstr(realpath($backup_directory), BACKDROP_ROOT);
     if ($backup_directory && $backup_directory_accessible) {
       file_save_htaccess($backup_directory);

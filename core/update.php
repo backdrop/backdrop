@@ -330,14 +330,13 @@ function update_backup_page() {
   return backdrop_render($elements);
 }
 
-
 /**
  * Form constructor for the list of available database module updates.
  */
 function update_backup_form($form, &$form_state) {
   // Check if Backup directory is specified. If FALSE, this form shouldn't even
   // be displayed. If NULL, link to documentation on setting up backups.
-  $backup_directory = settings_get('backup_directory');
+  $backup_directory = backup_get_backup_directory();
 
   $help = '<p>' . t('Before running updates, it is recommended to create a backup of your database and configuration.') . '</p>';
   $help .= '<p>' . t('If skipping the backup process, please ensure you create a backup through a different mechanism, such as through your hosting provider.') . '</p>';

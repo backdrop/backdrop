@@ -66,7 +66,7 @@ function backup_get_handler_name($target) {
  */
 function backup_directory_list() {
   $backups = array();
-  $backup_directory = settings_get('backup_directory');
+  $backup_directory = backup_get_backup_directory();
   if (empty($backup_directory)) {
     return $backups;
   }
@@ -146,7 +146,7 @@ function backup_settings_form(array $form, array &$form_state, array $options = 
     'show_default_targets' => FALSE,
   );
 
-  $backup_directory = settings_get('backup_directory');
+  $backup_directory = backup_get_backup_directory();
   $backup_targets = settings_get('backup_targets', array());
   $backup_targets = array_merge($backup_targets, array(
     'db:default',
@@ -393,7 +393,7 @@ function backup_batch_prepare(array &$backups, array &$errors) {
  */
 function backup_prepare($backup_name, $backup_target, array &$backup_settings, array &$errors) {
   // Populate the destination directory if not specified.
-  $default_directory = settings_get('backup_directory', '');
+  $default_directory = backup_get_backup_directory();
   $timestamp = isset($backup_settings['timestamp']) ? $backup_settings['timestamp'] : REQUEST_TIME;
   $date = date('Y-m-d\TH-i-s', $timestamp);
 

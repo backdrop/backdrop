@@ -369,7 +369,7 @@ if (restore_access_allowed()) {
       }
       else {
         $backup_info = $backups[$backup_directory_name];
-        $backup_directory = settings_get('backup_directory') . '/' . $backup_directory_name;
+        $backup_directory = backup_get_backup_directory() . '/' . $backup_directory_name;
 
         foreach ($backup_info['backups'] as $backup_name => $backup) {
           backup_restore_prepare($backup_name, $backup['target'], $backup['settings'], $errors);
