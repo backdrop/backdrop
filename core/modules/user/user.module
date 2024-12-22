@@ -1793,12 +1793,8 @@ function user_page_title($account) {
  * Implements hook_init().
  */
 function user_init() {
-  $current_path = current_path();
-  $user_login_appearance_setting = user_login_appearance_setting();
-  if (!user_is_logged_in() && ($current_path == 'user/login' || $current_path == 'user/password' || $current_path == 'user/register')) {
-    if ($user_login_appearance_setting == 'simplified') {
-      layout_suppress(TRUE);
-    }
+  if (user_page_is_simplified_page()) {
+    layout_suppress(TRUE);
   }
 }
 
@@ -1806,9 +1802,7 @@ function user_init() {
  * Implements hook_custom_theme().
  */
 function user_custom_theme() {
-  $current_path = current_path();
-  $user_login_appearance_setting = user_login_appearance_setting();
-  if ($user_login_appearance_setting == 'simplified' && !user_is_logged_in() && ($current_path == 'user/login' || $current_path == 'user/password' || $current_path == 'user/register')) {
+  if (user_page_is_simplified_page()) {
     return config_get('system.core', 'admin_theme');
   }
 }
@@ -1817,12 +1811,21 @@ function user_custom_theme() {
  * Implements hook_preprocess_page().
  */
 function user_preprocess_page(&$variables) {
-  // Add a class that tells us whether we're on a login page or not.
-  $current_path = current_path();
-  $user_login_appearance_setting = user_login_appearance_setting();
-  if ($user_login_appearance_setting === 'simplified' && ($current_path == 'user/login' || $current_path == 'user/password' || $current_path == 'user/register')) {
+  if (user_page_is_simplified_page()) {
     $variables['classes'][] = 'user-simplified-page-body';
   }
+}
+
+/**
+ * Determine whether the current page is simplified.
+ */
+function user_page_is_simplified_page() {
+  $current_path = current_path();
+  $user_login_appearance_setting = user_login_appearance_setting();
+  if (!user_is_logged_in() && $user_login_appearance_setting === 'simplified' && ($current_path == 'user/login' || $current_path == 'user/password' || $current_path == 'user/register')) {
+    return TRUE;
+  }
+  return FALSE;
 }
 
 /**
