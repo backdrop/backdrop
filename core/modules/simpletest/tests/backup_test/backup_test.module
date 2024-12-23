@@ -28,19 +28,16 @@ function backup_test_menu() {
 function backup_test_settings_form(array $form, array &$form_state) {
   include_once BACKDROP_ROOT . '/core/includes/backup.inc';
 
-  $form['backup_limit'] = array(
-    '#type' => 'number',
-    '#title' => t('Backup limit'),
-    '#default_value' => config_get('system.core', 'backup_limit'),
-    '#min' => 1,
-    '#max' => 100,
-  );
-
   // Add in the Backup settings form, with settings.
   $form = backup_settings_form($form, $form_state, array(
     'show_settings' => TRUE,
     'show_default_targets' => TRUE,
   ));
+
+  $form['options']['backup_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Backup name'),
+  );
 
   // Add our additional submit handler and the one provided by backup.inc.
   $form['#submit'] = array(
@@ -55,5 +52,5 @@ function backup_test_settings_form(array $form, array &$form_state) {
  * Submit handler for _backup_test_settings_form().
  */
 function backup_test_settings_form_submit(array $form, array &$form_state) {
-  config_set('system.core', 'backup_limit', $form_state['values']['backup_limit']);
+
 }
