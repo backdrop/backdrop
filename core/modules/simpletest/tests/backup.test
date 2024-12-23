@@ -149,17 +149,17 @@ class BackupSettingsTestCase extends BackupBaseTestCase {
     $this->assertEqual($config_value, 'foo', 'Initial config value present in backup_test.settings config file.');
 
     // Verify backup page requires permissions to view.
-    $this->backdropGet('backup-test/settings');
+    $this->backdropGet('backup-test');
     $this->assertResponse(403, 'Settings form not accessible to non-admins.');
 
     // Log in as admin account with "restore site backups" permission.
     $this->backdropLogin($this->adminUser);
-    $this->backdropGet('backup-test/settings');
+    $this->backdropGet('backup-test');
     $this->assertResponse(200, 'Settings form accessible to an admin.');
 
     // Verify defaults are as expected.
-    $this->assertFieldChecked('edit-backups-db-default-enabled', 'Default database backup checked.');
-    $this->assertNoFieldChecked('edit-backups-db-default-settings-lock-tables', 'Lock tables on default database not checked.');
+    $this->assertFieldChecked('edit-targets-db-default-enabled', 'Default database backup checked.');
+    $this->assertNoFieldChecked('edit-targets-db-default-settings-lock-tables', 'Lock tables on default database not checked.');
 
     // When running inside a test, only the simpletest prefix for this test run
     // should be included in the backup. This means that the "system" and all
@@ -167,7 +167,7 @@ class BackupSettingsTestCase extends BackupBaseTestCase {
     $original_connection = Database::getConnection('default', 'simpletest_original_default');
     $original_prefix = $original_connection->tablePrefix('system');
     $test_prefix = $this->databasePrefix;
-    $exclude_tables_id = 'edit-backups-db-default-settings-exclude-tables';
+    $exclude_tables_id = 'edit-targets-db-default-settings-exclude-tables';
     $this->assertOptionSelected($exclude_tables_id, $original_prefix . 'system');
     $this->assertOptionSelected($exclude_tables_id, $original_prefix . 'cache_page');
     $this->assertNoOptionSelected($exclude_tables_id, $test_prefix . 'system');
@@ -176,7 +176,7 @@ class BackupSettingsTestCase extends BackupBaseTestCase {
     // The cache tables for the test prefix should have their data excluded, but
     // the original prefix's table should not be data excluded (the entire table
     // is skipped per above).
-    $nodata_tables_id = 'edit-backups-db-default-settings-nodata-tables';
+    $nodata_tables_id = 'edit-targets-db-default-settings-nodata-tables';
     $this->assertNoOptionSelected($nodata_tables_id, $original_prefix . 'cache_page');
     $this->assertOptionSelected($nodata_tables_id, $test_prefix . 'cache_page');
 
@@ -215,16 +215,28 @@ class BackupSettingsTestCase extends BackupBaseTestCase {
     // Set a backup limit of 2 and create a second backup.
     config_set('system.core', 'backup_limit', 2);
     sleep(1);
-    $this->backdropPost('backup-test/settings', array(), t('Create backup'));
+
+    $edit = array(
+      'options[name]' => 'test_backup',
+      'options[label]' => 'Test Backup',
+      'options[description]' => 'Test backup description.',
+    );
+    $this->backdropPost('backup-test', $edit, t('Create backup'));
     $this->assertText(t('Backup created successfully.'));
 
     // Confirm that at least two backups exist.
     $two_backups1 = backup_directory_list();
     $this->assertTrue(count($two_backups1) == 2, 'Two backups created with backup limit of two.');
 
+    // And confirm the saved values are present.
+    $backup = $two_backups1['test_backup'];
+    $this->assertEqual($backup['name'],'test_backup');
+    $this->assertTrue($backup['label'], 'Test Backup');
+    $this->assertTrue($backup['description'], 'Test backup description.');
+
     // Create a 3rd backup, and confirm that the oldest one is deleted.
     sleep(1);
-    $this->backdropPost('backup-test/settings', array(), t('Create backup'));
+    $this->backdropPost('backup-test', array(), t('Create backup'));
     $this->assertText(t('Backup created successfully.'));
 
     $two_backups2 = backup_directory_list();

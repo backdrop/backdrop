@@ -17,6 +17,14 @@ abstract class BackupDatabase extends Backup {
    */
   protected $connection = NULL;
 
+
+  /**
+   * {@inheritdoc}
+   */
+  public function __construct($backup_name, $backup_target, array $settings) {
+    parent::__construct($backup_name, $backup_target, $settings);
+  }
+
   /**
    * {@inheritdoc}
    */

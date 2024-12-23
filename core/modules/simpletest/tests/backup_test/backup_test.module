@@ -10,7 +10,7 @@
 function backup_test_menu() {
   $items = array();
 
-  $items['backup-test/settings'] = array(
+  $items['backup-test'] = array(
     'title' => 'Backup test form',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('backup_test_settings_form'),
@@ -34,23 +34,24 @@ function backup_test_settings_form(array $form, array &$form_state) {
     'show_default_targets' => TRUE,
   ));
 
-  $form['options']['backup_name'] = array(
+  $form['options']['name'] = array(
     '#type' => 'textfield',
     '#title' => t('Backup name'),
+    '#description' => t('May include only letters, numbers, underscores and dashes.'),
+  );
+
+  $form['options']['label'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Backup label'),
+  );
+
+  $form['options']['description'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Description'),
   );
 
   // Add our additional submit handler and the one provided by backup.inc.
-  $form['#submit'] = array(
-    'backup_test_settings_form_submit',
-    'backup_settings_form_submit',
-  );
+  $form['#submit'] = array('backup_settings_form_submit');
 
   return $form;
-}
-
-/**
- * Submit handler for _backup_test_settings_form().
- */
-function backup_test_settings_form_submit(array $form, array &$form_state) {
-
 }

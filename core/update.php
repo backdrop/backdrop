@@ -635,12 +635,18 @@ if (update_access_allowed()) {
         $batch_redirect_url = $base_root . backdrop_current_script_url(array('op' => 'selection'));
 
         // Check that a backup directory is specified.
-        $backups = $_POST['backups'];
+        $backup_targets = $_POST['targets'];
         $errors = array();
-        $ready = backup_batch_prepare($backups, $errors);
+        $options = array(
+          // These values are escaped when output.
+          'label' => format_date(REQUEST_TIME),
+          'description' => t('Created by update.php. Contains: !targets.', array(
+            '!targets' => implode(', ', array_keys($backup_targets)),
+          )),
+        );
+        $ready = backup_batch_prepare($backup_targets, $options, $errors);
         if ($ready) {
-          $options = array();
-          backup_batch($backups, $options, $batch_redirect_url, $batch_url);
+          backup_batch($backup_targets, $options, $batch_redirect_url, $batch_url);
           break;
         }
         else {

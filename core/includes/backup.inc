@@ -93,7 +93,7 @@ function backup_directory_list() {
     // Check if the JSON file is valid, if not, continue to the next file.
     $backup_info = @backdrop_json_decode(file_get_contents($backup_file_path));
     $backup_name = basename($backup_file_directory);
-    if (!$backup_info || !isset($backup_info['backups'])) {
+    if (!$backup_info || !isset($backup_info['targets'])) {
       $backups[$backup_name] = array(
         'label' => $backup_name,
         'valid' => FALSE,
@@ -155,7 +155,7 @@ function backup_settings_form(array $form, array &$form_state, array $options = 
 
   // Two expected elements:
   $form['options']['#tree'] = TRUE;
-  $form['backups']['#tree'] = TRUE;
+  $form['targets']['#tree'] = TRUE;
 
   foreach ($backup_targets as $backup_target) {
     list($backup_plugin_id, $backup_subkey) = explode(':', $backup_target, 2);
@@ -170,7 +170,7 @@ function backup_settings_form(array $form, array &$form_state, array $options = 
     $backup_form = $backup_instance->backupSettingsForm();
 
     if ($options['show_settings'] && $backup_form) {
-      $form['backups'][$backup_target_name] = array(
+      $form['targets'][$backup_target_name] = array(
         '#type' => 'fieldset',
         '#title' => t('@type backup settings', array(
           '@type' => $backup_instance->typeLabel(),
@@ -178,13 +178,13 @@ function backup_settings_form(array $form, array &$form_state, array $options = 
         '#collapsible' => FALSE,
       );
 
-      $form['backups'][$backup_target_name]['settings'] = $backup_form;
-      $form['backups'][$backup_target_name]['settings']['#type'] = 'container';
+      $form['targets'][$backup_target_name]['settings'] = $backup_form;
+      $form['targets'][$backup_target_name]['settings']['#type'] = 'container';
     }
 
     // Show a checkbox if non-default targets are present.
     if ($options['show_default_targets'] || ($backup_target != 'db:default' && $backup_target != 'config:active')) {
-      $form['backups'][$backup_target_name]['enabled'] = array(
+      $form['targets'][$backup_target_name]['enabled'] = array(
         '#type' => 'checkbox',
         '#title' => t('Optional backup: @target_name', array('@target_name' => $backup_target_name)),
         '#default_value' => TRUE,
@@ -192,17 +192,17 @@ function backup_settings_form(array $form, array &$form_state, array $options = 
       );
     }
     else {
-      $form['backups'][$backup_target_name]['enabled'] = array(
+      $form['targets'][$backup_target_name]['enabled'] = array(
         '#type' => 'hidden',
         '#value' => TRUE,
       );
     }
 
-    $form['backups'][$backup_target_name]['name'] = array(
+    $form['targets'][$backup_target_name]['name'] = array(
       '#type' => 'hidden',
       '#value' => $backup_target_name,
     );
-    $form['backups'][$backup_target_name]['target'] = array(
+    $form['targets'][$backup_target_name]['target'] = array(
       '#type' => 'hidden',
       '#value' => $backup_target,
     );
@@ -235,7 +235,7 @@ function backup_settings_form(array $form, array &$form_state, array $options = 
  * @param array $form
  *   The form array, as created by backdrop_settings_form().
  * @param array $form_state
- *   The form state, containing $form_state['values']['backups'] and optionally
+ *   The form state, containing $form_state['values']['targets'] and optionally
  *   $form_state['values']['options'].
  *
  * @return void
@@ -243,13 +243,13 @@ function backup_settings_form(array $form, array &$form_state, array $options = 
  * @see backup_batch()
  */
 function backup_settings_form_submit(array $form, array &$form_state) {
-  $backups = $form_state['values']['backups'];
+  $backup_targets = $form_state['values']['targets'];
   $options = $form_state['values']['options'] ?: array();
 
   $errors = array();
-  $ready = backup_batch_prepare($backups, $options, $errors);
+  $ready = backup_batch_prepare($backup_targets, $options, $errors);
   if ($ready) {
-    backup_batch($backups, $options);
+    backup_batch($backup_targets, $options);
   }
   else {
     foreach ($errors as $error) {
@@ -261,7 +261,7 @@ function backup_settings_form_submit(array $form, array &$form_state) {
 /**
  * Starts a batch process to create a backup.
  *
- * @param array $backups
+ * @param array $backup_targets
  *   An array of backup settings, keyed by the backup type and key. For example
  *   a common set of keys would be:
  *   - mysql:default
@@ -273,8 +273,11 @@ function backup_settings_form_submit(array $form, array &$form_state) {
  *   - backup_limit: Integer indicating how many total backups should be
  *     allowed. Backups exceeding this count will be removed, oldest first.
  *     A value of FALSE will not enforce a limit.
- *   - backup_name: The name of the overall backup directory. If not provided,
+ *   - name: The name of the overall backup directory. If not provided,
  *     a timestamp-based directory name will be used.
+ *   - label: A human-readable label for this backup. If not provided, the name
+ *     will be used.
+ *   - description: A description of the backup.
  * @param string $redirect
  *   Path to redirect to when the batch has finished processing.
  * @param string $url
@@ -286,7 +289,7 @@ function backup_settings_form_submit(array $form, array &$form_state) {
  *   (optional) Specify a function to be called to redirect to the progressive
  *   processing page.
  */
-function backup_batch(array $backups, array $options = array(), $redirect = NULL, $url = 'batch', array $batch = array(), $redirect_callback = 'backdrop_goto') {
+function backup_batch(array $backup_targets, array $options = array(), $redirect = NULL, $url = 'batch', array $batch = array(), $redirect_callback = 'backdrop_goto') {
   $operations = array();
 
   // Ensure a default backup limit exists. Excess backups are removed upon
@@ -294,17 +297,19 @@ function backup_batch(array $backups, array $options = array(), $redirect = NULL
   $backup_limit = config_get('system.core', 'backup_limit');
   $options += array(
     'backup_limit' => isset($backup_limit) ? $backup_limit : 5,
-    'backup_name' => NULL,
+    'name' => NULL,
+    'label' => NULL,
+    'description' => NULL,
   );
 
-  foreach ($backups as $backup) {
-    $settings = isset($backup['settings']) ? $backup['settings'] : array();
-    if ($options['backup_name']) {
-      $settings['backup_directory'] = backup_get_backup_directory() . '/' . $options['backup_name'];
+  foreach ($backup_targets as $backup_target) {
+    $settings = isset($backup_target['settings']) ? $backup_target['settings'] : array();
+    if ($options['name']) {
+      $settings['backup_directory'] = backup_get_backup_directory() . '/' . $options['name'];
     }
     $operations[] = array('backup_execute', array(
-      $backup['name'],
-      $backup['target'],
+      $backup_target['name'],
+      $backup_target['target'],
       $settings,
     ));
   }
@@ -351,7 +356,7 @@ function backup_batch_finished($success, array $results, array $operations) {
 /**
  * Prepare for a batch backup process, ensuring requirements are met.
  *
- * @param array $backups
+ * @param array $backup_targets
  *   An array of backup configurations, keyed by backup ID. This value is
  *   modified by reference.
  * @param array $options
@@ -364,23 +369,30 @@ function backup_batch_finished($success, array $results, array $operations) {
  * @return boolean
  *   TRUE if the batch is ready to run, FALSE if errors were encountered.
  */
-function backup_batch_prepare(array &$backups, array $options, array &$errors) {
-  foreach ($backups as $backup_target_name => $backup) {
-    if (!isset($backups[$backup_target_name]['settings'])) {
-      $backups[$backup_target_name]['settings'] = array();
+function backup_batch_prepare(array &$backup_targets, array $options, array &$errors) {
+  foreach ($backup_targets as $backup_target_name => $backup) {
+    if (!isset($backup_targets[$backup_target_name]['settings'])) {
+      $backup_targets[$backup_target_name]['settings'] = array();
     }
-    if ($options['backup_name']) {
-      $backups[$backup_target_name]['settings']['backup_directory'] = backup_get_backup_directory() . '/' . $options['backup_name'];
+    $backup_targets[$backup_target_name]['settings'] += $options;
+    if (!empty($options['name'])) {
+      $clean_name = preg_replace('/[^a-z0-9_\-]+/', '_', $options['name']);
+      // Ensure the backup name is valid before proceeding.
+      if ($clean_name != $options['name']) {
+        $errors[] = t('Invalid backup name: "@name", only letters, numbers, underscores and dashes are allowed.', array('@name' => $options['name']));
+        return FALSE;
+      }
+      $backup_targets[$backup_target_name]['settings']['backup_directory'] = backup_get_backup_directory() . '/' . $options['name'];
     }
-    if (!$backup['enabled']) {
-      unset($backups[$backup_target_name]);
+    if (empty($backup['enabled'])) {
+      unset($backup_targets[$backup_target_name]);
     }
-    elseif (!backup_prepare($backup_target_name, $backup['target'], $backups[$backup_target_name]['settings'], $errors)) {
+    elseif (!backup_prepare($backup_target_name, $backup['target'], $backup_targets[$backup_target_name]['settings'], $errors)) {
       return FALSE;
     }
   }
 
-  if (empty($backups)) {
+  if (empty($backup_targets)) {
     $errors[] = t('No backup targets selected.');
     return FALSE;
   }
@@ -456,22 +468,18 @@ function backup_prepare($backup_target_name, $backup_target, array &$backup_sett
   else {
     $backup_info = array(
       'timestamp' => $timestamp,
+      'name' => $directory_name,
       'label' => isset($backup_settings['label']) ? $backup_settings['label'] : $directory_name,
       'description' => isset($backup_settings['description']) ? $backup_settings['description'] : '',
       'backup_directory' => $backup_directory,
-      'backups' => array(),
+      'targets' => array(),
     );
   }
 
   // Add information about this specific backup to the directory, excluding the
   // values that are shared.
-  $backup['settings'] = array_diff_key($backup['settings'], array(
-    'backup_directory' => NULL,
-    'label' => NULL,
-    'description' => NULL,
-    'timestamp' => NULL,
-  ));
-  $backup_info['backups'][$backup_target_name] = $backup;
+  $backup['settings'] = array_diff_key($backup['settings'], $backup_info);
+  $backup_info['targets'][$backup_target_name] = $backup;
 
   // Save the backup settings as a JSON file for restore.php to read later.
   // This also guarantees that the destination is writable by attempting to
@@ -537,7 +545,7 @@ function backup_execute($backup_target_name, $backup_target, array $backup_setti
     $directory_name = basename($backup_directory);
     $backup_info_file = $backup_directory . '/' . $directory_name . '.backup.json';
     $backup_info = backdrop_json_decode(file_get_contents($backup_info_file));
-    $backup_info['backups'][$backup_target_name]['completed'] = TRUE;
+    $backup_info['targets'][$backup_target_name]['completed'] = TRUE;
     file_put_contents($backup_info_file, backdrop_json_encode($backup_info, TRUE));
   }
 

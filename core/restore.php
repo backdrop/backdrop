@@ -93,10 +93,6 @@ function restore_backup_form($form, &$form_state) {
   if ($backups) {
     $form['help']['#markup'] = $help;
 
-    $form['backups'] = array(
-      '#tree' => TRUE,
-    );
-
     $form['backup'] = array(
       '#type' => 'radios',
       '#title' => st('Select backup'),
@@ -104,17 +100,22 @@ function restore_backup_form($form, &$form_state) {
     );
 
     $backups = backup_directory_list();
-    backdrop_sort($backups, array('label' => SORT_STRING), SORT_DESC);
+    backdrop_sort($backups, array('timestamp' => SORT_NUMERIC), SORT_DESC);
     foreach ($backups as $backup_directory => $backup_info) {
-      $form['backup']['#options'][$backup_directory] = $backup_info['label'];
+      $form['backup']['#options'][$backup_directory] = $backup_info['label'] ?: $backup_info['name'];
       if (!$backup_info['valid']) {
         $form['backup'][$backup_directory]['#disabled'] = TRUE;
         $form['backup'][$backup_directory]['#description'] = st('This backup is missing a backup information file and cannot be restored.');
       }
       else {
-        $form['backup'][$backup_directory]['#description'] = st('Contains backup files: @list', array(
-          '@list' => implode(', ', array_keys($backup_info['backups'])),
-        ));
+        if ($backup_info['description']) {
+          $form['backup'][$backup_directory]['#description'] = check_plain($backup_info['description']);
+        }
+        else {
+          $form['backup'][$backup_directory]['#description'] = st('Contains backup files: @list', array(
+            '@list' => implode(', ', array_keys($backup_info['targets'])),
+          ));
+        }
       }
     }
 
@@ -371,13 +372,13 @@ if (restore_access_allowed()) {
         $backup_info = $backups[$backup_directory_name];
         $backup_directory = backup_get_backup_directory() . '/' . $backup_directory_name;
 
-        foreach ($backup_info['backups'] as $backup_name => $backup) {
+        foreach ($backup_info['targets'] as $backup_name => $backup) {
           backup_restore_prepare($backup_name, $backup['target'], $backup['settings'], $errors);
         }
         if (empty($errors)) {
-          foreach ($backup_info['backups'] as $backup) {
-            $settings = isset($backup['settings']) ? $backup['settings'] : array();
-            backup_restore_execute($backup['name'], $backup['target'], $backup_directory, $settings);
+          foreach ($backup_info['targets'] as $backup_target) {
+            $settings = isset($backup_target['settings']) ? $backup_target['settings'] : array();
+            backup_restore_execute($backup_target['name'], $backup_target['target'], $backup_directory, $settings);
           }
         }
       }
