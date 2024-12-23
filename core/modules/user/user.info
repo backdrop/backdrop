@@ -10,3 +10,4 @@ required = TRUE
 configure = admin/config/people
 
 stylesheets[all][] = css/user.css
+stylesheets[all][] = css/user-simplified-page.css

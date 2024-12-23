@@ -1782,9 +1782,27 @@ div.add-or-remove-shortcuts {
     height: 100%;
     width: 100%;
   }
-  .maintenance-page-wrapper  {
+  .maintenance-page-wrapper,
+  body.user-simplified-page-body  {
     width: 100%;
     display: table;
+  }
+  body.user-simplified-page-body  {
+    height: 100%;
+    box-sizing: border-box;
+  }
+  body.user-simplified-page-body .user-simplified-page {
+    height: 100%;
+    width: 100%;
+    display: table-cell;
+    vertical-align: middle;
+  }
+  .user-simplified-page-wrapper  {
+    width: 75%;
+    margin: 0 auto;
+    max-width: 500px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    overflow: auto;
   }
   body.maintenance-page {
     height: 100%;
@@ -1798,9 +1816,6 @@ div.add-or-remove-shortcuts {
     max-width: 770px;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     overflow: auto;
-  }
-  .user-simplified-page-wrapper  {
-    max-width: 500px;
   }
 }
 
