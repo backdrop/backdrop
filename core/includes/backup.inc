@@ -499,8 +499,8 @@ function backup_prepare($backup_target_name, $backup_target, array &$backup_sett
  * Run a backup process.
  *
  * @param string $backup_target_name
- *  The name of the backup target, used as the base name of the created backup
- *  file, such as "db_default" or "config_active".
+ *   The name of the backup target, used as the base name of the created backup
+ *   file, such as "db_default" or "config_active".
  * @param string $backup_target
  *   The target to be backed up (the source). This is usually an indicator
  *   such as "db:default" (for the database) or "config:active" (for config).
@@ -527,9 +527,6 @@ function backup_execute($backup_target_name, $backup_target, array $backup_setti
 
   // Create the BackupFile instance to hold the backup output.
   $file = new BackupFile($backup_target_name, $backup_directory);
-
-  // @todo Register shutdown callback to deal with timeouts.
-  // register_shutdown_function('backup_restore_shutdown', $settings);
 
   /** @var Backup $backup_instance */
   $backup_instance = new $backup_class($backup_target_name, $backup_target, $backup_settings);
@@ -681,10 +678,6 @@ function backup_restore_execute($restore_target_name, $restore_target, $backup_d
     $file->pushExtension('tar');
     $file->pushExtension('gz');
   }
-
-  // Register shutdown callback to deal with timeouts.
-  // @todo: Register and implement shutdown handler.
-  // register_shutdown_function('backup_restore_shutdown', $settings);
 
   // Pre and post steps are separate to allow offloading compression and
   // decompression into separate requests (eventually).

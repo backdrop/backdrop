@@ -230,7 +230,7 @@ class BackupSettingsTestCase extends BackupBaseTestCase {
 
     // And confirm the saved values are present.
     $backup = $two_backups1['test_backup'];
-    $this->assertEqual($backup['name'],'test_backup');
+    $this->assertEqual($backup['name'], 'test_backup');
     $this->assertTrue($backup['label'], 'Test Backup');
     $this->assertTrue($backup['description'], 'Test backup description.');
 
