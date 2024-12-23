@@ -12,28 +12,28 @@ class BookTestCase extends BackdropWebTestCase {
   /**
    * A book node.
    *
-   * @var object
+   * @var Node
    */
   protected $book;
 
   /**
    * A user with permission to create and edit books.
    *
-   * @var object
+   * @var User
    */
   protected $book_author;
 
   /**
    * A user with permission to view a book.
    *
-   * @var object
+   * @var User
    */
   protected $web_user;
 
   /**
    * A user with permission to create and edit books and to administer blocks.
    *
-   * @var object
+   * @var User
    */
   protected $admin_user;
 
@@ -68,6 +68,9 @@ class BookTestCase extends BackdropWebTestCase {
 
   /**
    * Creates a new book with a page hierarchy.
+   *
+   * @return Node[]
+   *   An unindexed array of book nodes.
    */
   public function createBook() {
     // Create new book.
@@ -154,7 +157,7 @@ class BookTestCase extends BackdropWebTestCase {
    * @param array $breadcrumb
    *   The nodes that should be displayed in the breadcrumb.
    */
-  protected function checkBookNode(Node $node, $nodes, $previous = FALSE, $up = FALSE, $next = FALSE, array $breadcrumb) {
+  protected function checkBookNode(Node $node, $nodes, $previous = FALSE, $up = FALSE, $next = FALSE, array $breadcrumb = array()) {
     // $number does not use backdrop_static as it should not be reset
     // since it uniquely identifies each call to checkBookNode().
     static $number = 0;
@@ -243,6 +246,9 @@ class BookTestCase extends BackdropWebTestCase {
    *   A book node ID or set to 'new' to create a new book.
    * @param int|null $parent
    *   (optional) Parent book reference ID. Defaults to NULL.
+   *
+   * @return Node
+   *   The created book node.
    */
   protected function createBookNode($book_nid, $parent = NULL) {
     // $number does not use backdrop_static as it should not be reset
