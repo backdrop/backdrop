@@ -758,7 +758,7 @@ function _system_check_db_utf8mb4_requirements($phase) {
 
   $utf8mb4_active = $connection->utf8mb4IsActive();
   $utf8mb4_supported = $connection->utf8mb4IsSupported();
-  $documentation_url = 'https://docs.backdropcms.org/documentation/database-configuration';
+  $documentation_url = 'https://docs.backdropcms.org/documentation/database-configuration#utf8mb4';
   $upgrade_path = 'admin/config/development/utf8mb4-upgrade';
 
   $requirements['description'] = $t('4-byte UTF-8 support enables extended characters to be saved into the database, including emojis, Asian symbols and mathematical symbols.');
