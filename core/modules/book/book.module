@@ -1326,8 +1326,7 @@ function _book_cache_clear($cid = NULL, $wildcard = FALSE) {
  * Implements hook_flush_caches().
  */
 function book_flush_caches() {
-  cache_flush('cache_book');
-  return array();
+  return array('cache_book');
 }
 
 /**
