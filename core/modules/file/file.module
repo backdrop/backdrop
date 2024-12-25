@@ -1725,7 +1725,10 @@ function file_managed_file_browser_open($form, $form_state) {
   if (empty($view)) {
     $view = t('The view "@view_name" is not available.', array('@view_name' => $view_name));
     if (user_access('administer views')) {
-      $view .= ' ' . t('Check the <a href="!url">Views administration page</a> to enable or create the "@view_name" view as needed.', array('!url' => url('admin/structure/views'), '@view_name' => $view_name));
+      $view .= ' ' . t('Check the <a href="!url">Views administration page</a> to enable or create the "@view_name" view as needed.', array(
+        '!url' => url('admin/structure/views'),
+        '@view_name' => $view_name,
+      ));
     }
   }
 
@@ -1793,7 +1796,12 @@ function file_managed_file_browser_form($form, &$form_state) {
     '#attributes' => array(
       // Adding button classes puts the link in the button area of the dialog,
       // while the special "dialog-cancel" class closes the dialog.
-      'class' => array('button', 'button-secondary', 'form-submit', 'dialog-cancel'),
+      'class' => array(
+        'button',
+        'button-secondary',
+        'form-submit',
+        'dialog-cancel',
+      ),
     ),
   );
 
