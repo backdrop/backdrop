@@ -954,8 +954,9 @@ function install_config_location(&$install_state) {
 function install_backup_location(&$install_state) {
   global $settings, $databases;
 
+  $backup_directory = isset($settings['backup_directory']) ? $settings['backup_directory'] : '';
   // A value of FALSE disables backups and will not rewrite on install.
-  if (empty($settings['backup_directory']) && $settings['backup_directory'] !== FALSE) {
+  if (empty($backup_directory) && $backup_directory !== FALSE) {
     $backup_directory = 'files/backups_' . md5(json_encode($databases) . backdrop_random_bytes(10));
     $update_settings["settings['backup_directory']"] = array(
       'value' => $backup_directory,

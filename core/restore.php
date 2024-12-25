@@ -68,7 +68,7 @@ function restore_info_page() {
  */
 function restore_select_page() {
   restore_task_list('select');
-  backdrop_set_title('Select to backup restore');
+  backdrop_set_title('Select backup to restore');
 
   $elements = backdrop_get_form('restore_backup_form');
   return backdrop_render($elements);
@@ -219,15 +219,48 @@ function restore_access_denied_page() {
   $output = '';
   $steps = array();
 
-  $output .= st('You are not authorized to access this page. Log in using either an account with the <em>restore site backups</em> permission, or the site maintenance account (the account you created during installation). If you cannot log in, you will have to edit <code>settings.php</code> to bypass this access check. To do this:');
+  $output .= st('You are not authorized to access this page. Log in using either an account with the !permission permission, or the site maintenance account (the account you created during installation). If you cannot log in, you will have to edit !settings_file to bypass this access check. To do this:', array(
+    '!permission' => '<em>restore site backups</em>',
+    '!settings_file' => '<code>settings.php</code>',
+  ));
   $output = '<p>' . $output . '</p>';
 
-  $steps[] = st('Find the <code>settings.php</code> file on your system, and open it with a text editor.');
-  $steps[] = st('There is a line inside your <code>settings.php</code> file that says <code>$settings[\'restore_free_access\'] = FALSE;</code>. Change it to <code>$settings[\'restore_free_access\'] = TRUE;</code>.');
+  $steps[] = st('Find the !settings_file file on your system, and open it with a text editor.', array(
+    '!settings_file' => '<code>settings.php</code>',
+  ));
+  $steps[] = st('Find the line for !current_value. Change it to !new_value.', array(
+    '!settings_file' => '<code>settings.php</code>',
+    '!current_value' => '<code>$settings[\'restore_free_access\'] = FALSE;</code>',
+    '!new_value' => '<code>$settings[\'restore_free_access\'] = TRUE;</code>',
+  ));
   $steps[] = st('Reload this page. The site restore script should be able to run now.');
-  $steps[] = st('As soon as restoring a backup is complete, you must change the <code>restore_free_access</code> setting in the <code>settings.php</code> file back to <code>FALSE</code>: <code>$settings[\'restore_free_access\'] = FALSE;</code>.');
+  $steps[] = st('As soon as restoring a backup is complete, you must change the setting back to !value.', array(
+    '!value' => '<code>FALSE</code>',
+  ));
 
   $output .= theme('item_list', array('items' => $steps, 'type' => 'ol'));
+
+  return $output;
+}
+
+/**
+ * Renders a help page if access is allowed but backups are not enabled.
+ *
+ * @return string
+ *   Rendered HTML warning with 403 status.
+ */
+function restore_disabled_page() {
+  backdrop_set_title(st('Restore site backup'));
+
+  $output = '';
+  $output .= st('Backup and restore functionality is not enabled on this site. To enable creating and restoring backups, the !value value must be set in the !settings_file file.', array(
+    '!value' => '<code>$settings[\'backup_directory\']</code>',
+    '!settings_file' => '<code>settings.php</code>',
+  ));
+  $output .= ' ' . st('For more information, see the <a href="!url">online documentation on creating and restoring backups</a>.', array(
+    '!url' => 'https://docs.backdropcms.org/documentation/creating-backups',
+  ));
+  $output = '<p>' . $output . '</p>';
 
   return $output;
 }
@@ -284,7 +317,7 @@ function restore_task_list($set_active = NULL) {
   // Only show the task list on the left sidebar if the logged-in user has
   // permission to restore backups, or if the "restore_free_access" setting in
   // settings.php has been set to TRUE.
-  if (restore_access_allowed()) {
+  if (restore_access_allowed() && backup_get_backup_directory()) {
     return theme('task_list', array('items' => $tasks, 'active' => $active));
   }
 }
@@ -315,7 +348,15 @@ catch (Exception $e) {
 }
 
 // Only proceed if the user is allowed to restore backups.
-if (restore_access_allowed()) {
+if (!restore_access_allowed()) {
+  $output = restore_access_denied_page();
+}
+// If no backup directory, display help page.
+elseif (!backup_get_backup_directory()) {
+  $output = restore_disabled_page();
+}
+// Access is granted and backups are enabled, display restore operations.
+else {
   require_once BACKDROP_ROOT . '/core/includes/unicode.inc';
   require_once BACKDROP_ROOT . '/core/includes/form.inc';
   require_once BACKDROP_ROOT . '/core/includes/ajax.inc';
@@ -399,9 +440,6 @@ if (restore_access_allowed()) {
       $output = restore_info_page();
       break;
   }
-}
-else {
-  $output = restore_access_denied_page();
 }
 
 if (isset($output) && $output) {

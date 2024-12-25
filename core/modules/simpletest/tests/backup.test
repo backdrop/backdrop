@@ -167,11 +167,15 @@ class BackupSettingsTestCase extends BackupBaseTestCase {
     $original_connection = Database::getConnection('default', 'simpletest_original_default');
     $original_prefix = $original_connection->tablePrefix('system');
     $test_prefix = $this->databasePrefix;
-    $exclude_tables_id = 'edit-targets-db-default-settings-exclude-tables';
-    $this->assertOptionSelected($exclude_tables_id, $original_prefix . 'system');
-    $this->assertOptionSelected($exclude_tables_id, $original_prefix . 'cache_page');
-    $this->assertNoOptionSelected($exclude_tables_id, $test_prefix . 'system');
-    $this->assertNoOptionSelected($exclude_tables_id, $test_prefix . 'cache_page');
+
+    $include_exclude_id = 'edit-targets-db-default-settings-include-exclude';
+    $this->assertOptionSelected($include_exclude_id, 'include');
+
+    $exclude_tables_id = 'edit-targets-db-default-settings-include-tables';
+    $this->assertOptionSelected($exclude_tables_id, $test_prefix . 'system');
+    $this->assertOptionSelected($exclude_tables_id, $test_prefix . 'cache_page');
+    $this->assertNoOptionSelected($exclude_tables_id, $original_prefix . 'system');
+    $this->assertNoOptionSelected($exclude_tables_id, $original_prefix . 'cache_page');
 
     // The cache tables for the test prefix should have their data excluded, but
     // the original prefix's table should not be data excluded (the entire table

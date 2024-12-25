@@ -79,6 +79,7 @@ class BackupMySql extends BackupDatabase {
    */
   protected function backupDatabaseToFile(BackupFile $file) {
     $lines = 0;
+    $include = $this->settings['include_tables'];
     $exclude = $this->settings['exclude_tables'];
     $nodata = $this->settings['nodata_tables'];
     if ($file->open(TRUE)) {
@@ -90,7 +91,14 @@ class BackupMySql extends BackupDatabase {
         if ($this->timeoutCheck()) {
           return FALSE;
         }
-        if ($table['name'] && !in_array($table['name'], $exclude)) {
+        // If there are any included tables specified, they take precedence.
+        if ($include) {
+          $included_table = in_array($table['name'], $include);
+        }
+        else {
+          $included_table = !in_array($table['name'], $exclude);
+        }
+        if ($included_table) {
           $file->write($this->getTableStructureSql($table));
           $lines++;
           if (!in_array($table['name'], $nodata)) {

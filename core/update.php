@@ -389,13 +389,24 @@ function update_access_denied_page() {
   $output = '';
   $steps = array();
 
-  $output .= t('You are not authorized to access this page. Log in using either an account with the <em>administer software updates</em> permission, or the site maintenance account (the account you created during installation). If you cannot log in, you will have to edit <code>settings.php</code> to bypass this access check. To do this:');
+  $output .= t('You are not authorized to access this page. Log in using either an account with the !permission permission, or the site maintenance account (the account you created during installation). If you cannot log in, you will have to edit !settings_file to bypass this access check. To do this:', array(
+    '!permission' => '<em>administer software updates</em>',
+    '!settings_file' => '<code>settings.php</code>',
+  ));
   $output = '<p>' . $output . '</p>';
 
-  $steps[] = t('Find the <code>settings.php</code> file on your system, and open it with a text editor.');
-  $steps[] = t('There is a line inside your <code>settings.php</code> file that says <code>$settings[\'update_free_access\'] = FALSE;</code>. Change it to <code>$settings[\'update_free_access\'] = TRUE;</code>.');
-  $steps[] = t('Reload this page. The site update script should be able to run now.');
-  $steps[] = t('As soon as the update script is done, you must change the <code>update_free_access</code> setting in the <code>settings.php</code> file back to <code>FALSE</code>: <code>$settings[\'update_free_access\'] = FALSE;</code>.');
+  $steps[] = t('Find the !settings_file file on your system, and open it with a text editor.', array(
+    '!settings_file' => '<code>settings.php</code>',
+  ));
+  $steps[] = t('Find the line for !current_value. Change it to !new_value.', array(
+    '!settings_file' => '<code>settings.php</code>',
+    '!current_value' => '<code>$settings[\'update_free_access\'] = FALSE;</code>',
+    '!new_value' => '<code>$settings[\'update_free_access\'] = TRUE;</code>',
+  ));
+  $steps[] = t('Reload this page. The site restore script should be able to run now.');
+  $steps[] = t('As soon as the update script is done, you must change the setting back to !value.', array(
+    '!value' => '<code>FALSE</code>',
+  ));
 
   $output .= theme('item_list', array('items' => $steps, 'type' => 'ol'));
 

@@ -122,17 +122,19 @@ abstract class BackupDatabase extends Backup {
       }
     }
 
+    $included_tables = array();
     $excluded_tables = array();
     if ($prefixed_tables) {
-      $excluded_tables = array_diff($all_tables, $prefixed_tables);
+      $included_tables = $prefixed_tables;
     }
-    if ($simpletest_tables) {
-      $excluded_tables = array_merge($excluded_tables, $simpletest_tables);
+    elseif ($simpletest_tables) {
+      $excluded_tables = $simpletest_tables;
     }
 
     $settings += array(
       'nodata_tables' => $nodata_tables,
       'exclude_tables' => $excluded_tables,
+      'include_tables' => $included_tables,
       'lock_tables' => FALSE,
       'compression' => self::COMPRESSION_GZIP,
     );
@@ -147,14 +149,51 @@ abstract class BackupDatabase extends Backup {
     $objects = $this->getObjectNames();
     $settings = $this->settings;
 
-    $form['#description'] = t('You may omit specific tables, or specific table data from the backup file. Only omit data that you know you will not need such as cache data, or tables from other applications. Excluding tables can break your Backdrop install, so <strong>do not change these settings unless you know what you\'re doing</strong>.');
+    $form['help'] = array(
+      '#type' => 'help',
+      '#markup' => t('You may omit specific tables, or specific table data from the backup file. Only omit data that you know you will not need such as cache data, or tables from other applications. Restoring a partial backup can break your Backdrop install. It is usually best to leave the defaults.'),
+    );
+    $form['include_exclude'] = array(
+      '#type' => 'select',
+      '#title' => t('Include/exclude tables'),
+      '#options' => array(
+        'exclude' => t('Exclude specific tables'),
+        'include' => t('Include specific tables'),
+      ),
+      '#default_value' => $settings['include_tables'] ? 'include' : 'exclude',
+      '#attributes' => array(
+        'class' => array('backup-include-exclude-mode'),
+      ),
+    );
+    $form['include_tables'] = array(
+      '#type' => 'select',
+      '#multiple' => TRUE,
+      '#title' => t('Include only the following tables'),
+      '#options' => backdrop_map_assoc($objects),
+      '#default_value' => $settings['include_tables'],
+      '#description' => t('Only the selected tables will be added to the backup.'),
+      '#states' => array(
+        'visible' => array(
+          ':input.backup-include-exclude-mode' => array(
+            'value' => 'include',
+          ),
+        ),
+      ),
+    );
     $form['exclude_tables'] = array(
       '#type' => 'select',
       '#multiple' => TRUE,
       '#title' => t('Exclude the following tables altogether'),
       '#options' => backdrop_map_assoc($objects),
       '#default_value' => $settings['exclude_tables'],
-      '#description' => t('The selected tables will not be added to the backup file.'),
+      '#description' => t('The selected tables will not be added to the backup.'),
+      '#states' => array(
+        'visible' => array(
+          ':input.backup-include-exclude-mode' => array(
+            'value' => 'exclude',
+          ),
+        ),
+      ),
     );
     $form['nodata_tables'] = array(
       '#type' => 'select',
@@ -369,13 +408,16 @@ abstract class BackupDatabase extends Backup {
    *   The list of tables to be locked, if any.
    */
   protected function getLockedTables() {
-
     $tables = array();
     if ($this->settings['lock_tables']) {
       foreach ($this->getTableNames() as $table) {
-        // There's no need to lock excluded or structure only tables because it
-        // doesn't matter if they are updated during the backup.
-        if (!in_array($table, $this->settings['exclude_tables'])) {
+        // There's no need to lock excluded tables because it doesn't matter if
+        // they are updated during the backup. If the "include_tables" option is
+        // used, it takes precedence.
+        if ($this->settings['include_tables'] && in_array($table, $this->settings['include_tables'])) {
+          $tables[] = $table;
+        }
+        elseif (!in_array($table, $this->settings['exclude_tables'])) {
           $tables[] = $table;
         }
       }
