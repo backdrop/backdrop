@@ -3775,12 +3775,17 @@ function system_update_1100() {
 }
 
 /**
- * Set the default backup count setting.
+ * Create the default backup settings configuration.
  */
 function system_update_1101() {
-  $backup_count = config_get('system.core', 'backup_count');
-  if ($backup_count === NULL) {
-    config_set('system.core', 'backup_count', 5);
+  $config = config('system.backup');
+  if ($config->isNew()) {
+    $data = array(
+      '_config_static' => TRUE,
+      'backup_limit' => 5,
+    );
+    $config->setData($data);
+    $config->save();
   }
 }
 

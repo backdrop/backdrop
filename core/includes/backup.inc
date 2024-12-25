@@ -294,7 +294,7 @@ function backup_batch(array $backup_targets, array $options = array(), $redirect
 
   // Ensure a default backup limit exists. Excess backups are removed upon
   // completion.
-  $backup_limit = config_get('system.core', 'backup_limit');
+  $backup_limit = config_get('system.backup', 'backup_limit');
   $options += array(
     'backup_limit' => isset($backup_limit) ? $backup_limit : 5,
     'name' => NULL,

@@ -4187,6 +4187,10 @@ function system_config_info() {
     'label' => t('System authorize'),
     'group' => t('Configuration'),
   );
+  $prefixes['system.backup'] = array(
+    'label' => t('System backup'),
+    'group' => t('Configuration'),
+  );
   $prefixes['system.date'] = array(
     'label' => t('System date'),
     'group' => t('Configuration'),

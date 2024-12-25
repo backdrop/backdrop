@@ -217,7 +217,7 @@ class BackupSettingsTestCase extends BackupBaseTestCase {
     $this->assertEqual($config_value, 'foo', 'Initial config value present in backup_test.settings config file.');
 
     // Set a backup limit of 2 and create a second backup.
-    config_set('system.core', 'backup_limit', 2);
+    config_set('system.backup', 'backup_limit', 2);
     sleep(1);
 
     $edit = array(
