@@ -212,7 +212,7 @@ Backdrop.dateYearRange.SelectListWithCustomOption.prototype.hideTextfield = func
 /**
  * Copy the selected value of the dropdown to the textfield.
  *
- * FAPI doesn't know about the JS-only dropdown, so the textfield needs to
+ * Form API doesn't know about the JS-only dropdown, so the textfield needs to
  * reflect the value of the dropdown.
  */
 Backdrop.dateYearRange.SelectListWithCustomOption.prototype.syncTextfield = function () {

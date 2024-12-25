@@ -1111,8 +1111,8 @@ function file_file_download($uri, $field_type = 'file') {
  *
  * This rebuilds the form element for a particular field item. As long as the
  * form processing is properly encapsulated in the widget element the form
- * should rebuild correctly using FAPI without the need for additional callbacks
- * or processing.
+ * should rebuild correctly using Form API without the need for additional
+ * callbacks or processing.
  *
  * @see file_menu()
  */
@@ -1498,9 +1498,9 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
     }
     else {
       // Check for #filefield_value_callback values.
-      // Because FAPI does not allow multiple #value_callback values like it
+      // Because Form API does not allow multiple #value_callback values like it
       // does for #element_validate and #process, this fills the missing
-      // functionality to allow File fields to be extended through FAPI.
+      // functionality to allow File fields to be extended through Form API.
       if (isset($element['#file_value_callbacks'])) {
         foreach ($element['#file_value_callbacks'] as $callback) {
           $callback($element, $input, $form_state);
@@ -1645,7 +1645,7 @@ function file_managed_file_submit($form, &$form_state) {
  * Saves any files that have been uploaded into a managed_file element.
  *
  * @param $element
- *   The FAPI element whose values are being saved.
+ *   The Form API element whose values are being saved.
  *
  * @return
  *   The file entity representing the file that was saved, or FALSE if no file

@@ -1828,8 +1828,8 @@ function date_empty_end_date(&$element, &$form_state, &$input) {
 /**
  * Determines if the date element needs to be processed.
  *
- * Helper function to see if date element has been hidden by FAPI to see if it
- * needs to be processed or just pass the value through. This is needed since
+ * Helper function to see if date element has been hidden by Form API to see if
+ * it needs to be processed or just pass the value through. This is needed since
  * normal date processing expands the date element into parts and then
  * reconstructs it, which is not needed or desirable if the field is hidden.
  *

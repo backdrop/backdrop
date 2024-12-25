@@ -811,7 +811,7 @@ function link_element_info() {
     '#link_field_options' => array(),
 
     // #delta is typically passed by the widget form, but we provide a default
-    // value to help validations when link_field is used as a FAPI element.
+    // value to help validations when link_field is used as a Form API element.
     '#delta' => 0,
 
     // Attach the css by default.
@@ -865,7 +865,7 @@ function _link_field_options_defaults() {
 /**
  * Processes the link type element before displaying the field.
  *
- * Build the form element. When creating a form using FAPI #process,
+ * Build the form element. When creating a form using Form API #process,
  * note that $element['#value'] is already set.
  *
  * The $fields array is in $complete_form['#field_info'][$element['#field_name']].
