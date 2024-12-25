@@ -758,7 +758,7 @@ function _system_check_db_utf8mb4_requirements($phase) {
 
   $utf8mb4_active = $connection->utf8mb4IsActive();
   $utf8mb4_supported = $connection->utf8mb4IsSupported();
-  $documentation_url = 'https://docs.backdropcms.org/documentation/database-configuration';
+  $documentation_url = 'https://docs.backdropcms.org/documentation/database-configuration#utf8mb4';
   $upgrade_path = 'admin/config/development/utf8mb4-upgrade';
 
   $requirements['description'] = $t('4-byte UTF-8 support enables extended characters to be saved into the database, including emojis, Asian symbols and mathematical symbols.');
@@ -850,6 +850,9 @@ function system_install() {
   if (valid_email_address($site_mail)) {
     config_set('system.core', 'site_mail', $site_mail);
   }
+
+  // Set the install version to the current version of Backdrop.
+  config_set('system.core', 'install_version', BACKDROP_VERSION);
 }
 
 /**
@@ -3650,6 +3653,82 @@ function system_update_1098() {
   }
   else {
     return t('<em>Fast Token Browser</em> not found. Nothing to be done.');
+  }
+}
+
+/**
+ * Set the 'initial version' based on the system install time.
+ */
+function system_update_1099() {
+  $config = config('system.core');
+  $install_version = $config->get('install_version');
+  if (!isset($install_version)) {
+    $install_time = state_get('install_time');
+    $version_timestamps = array(
+      '1.0.x' => 1421280000, // 2015-01-15
+      '1.1.x' => 1431648000, // 2015-05-15
+      '1.2.x' => 1442275200, // 2015-09-15
+      '1.3.x' => 1452816000, // 2016-01-15
+      '1.4.x' => 1463270400, // 2016-05-15
+      '1.5.x' => 1473897600, // 2016-09-15
+      '1.6.x' => 1484438400, // 2017-01-15
+      '1.7.x' => 1494806400, // 2017-05-15
+      '1.8.x' => 1505433600, // 2017-09-15
+      '1.9.x' => 1515974400, // 2018-01-15
+      '1.10.x' => 1526342400, // 2018-05-15
+      '1.11.x' => 1536969600, // 2018-09-15
+      '1.12.x' => 1547510400, // 2019-01-15
+      '1.13.x' => 1557878400, // 2019-05-15
+      '1.14.x' => 1568505600, // 2019-09-15
+      '1.15.x' => 1579046400, // 2020-01-15
+      '1.16.x' => 1589500800, // 2020-05-15
+      '1.17.x' => 1600128000, // 2020-09-15
+      '1.18.x' => 1610668800, // 2021-01-15
+      '1.19.x' => 1621036800, // 2021-05-15
+      '1.20.x' => 1631664000, // 2021-09-15
+      '1.21.x' => 1642204800, // 2022-01-15
+      '1.22.x' => 1652572800, // 2022-05-15
+      '1.23.x' => 1663200000, // 2022-09-15
+      '1.24.x' => 1673740800, // 2023-01-15
+      '1.25.x' => 1684108800, // 2023-05-15
+      '1.26.x' => 1694736000, // 2023-09-15
+      '1.27.x' => 1705276800, // 2024-01-15
+      '1.28.x' => 1715731200, // 2024-05-15
+      '1.29.x' => 1726358400, // 2024-09-15
+    );
+    // Loop over the array and print version and timestamp.
+    foreach ($version_timestamps as $version => $timestamp) {
+      if ($install_time < $timestamp) {
+        break;
+      }
+    }
+    $config->set('install_version', $version);
+    $config->save();
+    return t('Install version set to @version', array('@version' => $version));
+  }
+  return t('Install version had already been set, no changes.');
+}
+
+/**
+ * Set the default Basis settings for CSS updates.
+ */
+function system_update_1100() {
+  $themes = system_list('theme');
+  if (!empty($themes['basis']->status)) {
+    $config = config('basis.settings');
+    $data = $config->getData();
+    // Put the _config_static option at the top of the file.
+    $data = array_merge(array(
+      '_config_static' => TRUE,
+    ), $data);
+    if (!isset($data['css_update'])) {
+      $data['css_update'] = 'install';
+      // An empty version is sufficient, the same as "No updates" for existing
+      // sites running Basis.
+      $data['css_update_version'] = '';
+    }
+    $config->setData($data);
+    $config->save();
   }
 }
 

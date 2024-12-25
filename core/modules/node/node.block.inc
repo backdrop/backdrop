@@ -22,8 +22,10 @@ class NodeBlock extends Block {
     if (!empty($this->settings['admin_description'])) {
       return filter_xss($this->settings['admin_description']);
     }
+    $preview = '<p>' . t('Displays content of node ID: @nid', array('@nid' => $this->settings['nid'])) . '</p>';
+    $preview .= $this->getAdminConditionsPreview();
 
-    return t('Displays content of node ID: @nid', array('@nid' => $this->settings['nid']));
+    return $preview;
   }
 
   /**
