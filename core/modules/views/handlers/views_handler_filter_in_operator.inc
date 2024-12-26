@@ -21,7 +21,7 @@ class views_handler_filter_in_operator extends views_handler_filter {
    *
    * @var string
    */
-  var $value_title;
+  public var $value_title;
 
   /**
    * Stores all operations which are available on the form.
