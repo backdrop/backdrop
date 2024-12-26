@@ -294,6 +294,10 @@ function update_results_page() {
 function update_info_page() {
   global $databases;
 
+  $output = '';
+  $steps = array();
+  $children = array();
+
   // Change query-strings on css/js files to enforce reload for all users.
   _backdrop_flush_css_js();
   // Flush the cache of all data for the update status module.
@@ -314,18 +318,29 @@ function update_info_page() {
   update_task_list('info');
   backdrop_set_title('Backdrop site update');
   $token = backdrop_get_token('update');
-  $output = '<p>Use this utility to update your site whenever you install a new version of Backdrop CMS or one of the site\'s modules.</p>';
-  $output .= '<p>For more detailed information, see the <a href="https://backdropcms.org/upgrade">Upgrading Backdrop CMS</a> page. If you are unsure of what these terms mean, contact your hosting provider.</p>';
-  $output .= '<p>Before running updates, the following steps are recommended.</p>';
-  $output .= "<ol>\n";
-  $output .= "<li><strong>Create backups.</strong> This update utility will alter your database and config files. In case of an emergency you may need to revert to a recent backup; make sure you have one.\n";
-  $output .= "<ul>\n";
-  $output .= "<li><strong>Database:</strong> Create a database dump of the '" . $db_name . "' database.</li>\n";
-  $output .= "<li><strong>Config files:</strong> Back up the entire directory at '" . $config_dir . "'.</li>\n";
-  $output .= "</ul>\n";
-  $output .= '<li>Put your site into <a href="' . base_path() . '?q=admin/config/development/maintenance">maintenance mode</a>.</li>' . "\n";
-  $output .= "<li>Install your new files into the appropriate location, as described in <a href=\"https://backdropcms.org/upgrade\">the handbook</a>.</li>\n";
-  $output .= "</ol>\n";
+  $output = '<p>' . t("Use this utility to update your site whenever you install a new version of Backdrop CMS or one of the site's modules.") . '</p>';
+  $output .= '<p>' . t('For more detailed information, see the <a href="https://backdropcms.org/upgrade" target="_blank">Upgrading Backdrop CMS</a> page. If you are unsure of what these terms mean, contact your hosting provider.') . '</p>';
+  $output .= '<p>' . t('Before running updates, the following steps are recommended:') . '</p>';
+
+  $steps[] = array(
+    'data' => t('<strong>Create backups.</strong> This update utility will alter your database and configuration files. In case of an emergency, you may need to revert to a recent backup; make sure you have one.'),
+    'children' => array(
+      array(
+        'data' => t('<strong>Database:</strong> Create a database dump of the %db_name database.', array('%db_name' => $db_name)),
+      ),
+      array(
+        'data' => t('<strong>Config files:</strong> Back up the entire directory at <code>@config_dir</code>.', array('config_dir' => $config_dir)),
+      ),
+    ),
+    // This needs https://github.com/backdrop/backdrop-issues/issues/5780 to
+    // work properly.
+    'type' => 'ul',
+  );
+  $steps[] = t('Put your site into <a href="admin/config/development/maintenance" target="_blank">maintenance mode</a>.');
+  $steps[] = t('Install your new files into the appropriate location, as described in <a href="https://backdropcms.org/upgrade" target="_blank">the handbook</a>.');
+
+  $output .= theme('item_list', array('items' => $steps, 'type' => 'ol'));
+
   $output .= "<p>After performing the above steps proceed using the continue button.</p>\n";
   $module_status_report = update_upgrade_check_dependencies();
   if (!empty($module_status_report)) {
@@ -451,7 +466,10 @@ function update_check_requirements($skip_warnings = FALSE) {
     $task_list = update_task_list('requirements');
     $status_report = 'Resolve the problems and <a href="' . check_url(backdrop_requirements_url($severity)) . '">try again</a>.';
     $status_report .= '<br><br>';
-    $status_report .= theme('status_report', array('requirements' => $requirements, 'phase' => 'update'));
+    $status_report .= theme('status_report', array(
+      'requirements' => $requirements,
+      'phase' => 'update',
+    ));
     print theme('update_page', array('content' => $status_report, 'sidebar' => $task_list));
     exit();
   }
