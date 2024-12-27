@@ -1,0 +1,10 @@
+type = module
+name = Link Custom Form Test
+description = Helper module to test custom forms and link fields.
+package = Testing
+backdrop = 1.x
+version = BACKDROP_VERSION
+
+dependencies[] = link
+
+hidden = TRUE

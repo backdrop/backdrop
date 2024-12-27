@@ -360,6 +360,14 @@
   font-size: 90%;
 }
 
+/* Hero block provided by Layout module. */
+.layout-hero-image-upload .layout-hero-background-preview-empty {
+  padding-bottom: 0.5em;
+}
+.layout-hero-image-upload .form-file {
+  max-width: 20em;
+}
+
 /* Layout Misc */
 .layout-access-list ul {
   list-style: none;

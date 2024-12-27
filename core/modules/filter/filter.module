@@ -1316,6 +1316,15 @@ function filter_process_format($element) {
   $formats = filter_formats($user);
   $fallback_format = filter_fallback_format();
 
+  // Turn original element into a text format wrapper. Settings for all
+  // available formats are added to make them available for all fields.
+  if (isset($element['#attached'])) {
+    $element['#attached'] = array_merge_recursive($element['#attached'], filter_get_attached($formats));
+  }
+  else {
+    $element['#attached'] = filter_get_attached($formats);
+  }
+
   // Reduce the list if a list of allowed formats was provided.
   if (!empty($element['#allowed_formats'])) {
     foreach ($formats as $format) {
@@ -1324,14 +1333,6 @@ function filter_process_format($element) {
         unset($formats[$format->format]);
       }
     }
-  }
-
-  // Turn original element into a text format wrapper.
-  if (isset($element['#attached'])) {
-    $element['#attached'] = array_merge_recursive($element['#attached'], filter_get_attached($formats));
-  }
-  else {
-    $element['#attached'] = filter_get_attached($formats);
   }
 
   // Specify if uploads are allowed by using a data attribute.
