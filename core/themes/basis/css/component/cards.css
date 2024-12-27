@@ -7,7 +7,7 @@
 .l-top .block-views-promoted-cards-block {
   margin-top: -2rem; /* Negative top margin collapses spacing under header */
 }
-.update-1-30 .l-top .block-hero + .block-views-promoted-cards-block {
+.update-1-30 .l-top .block-system-messages + .block-views-promoted-cards-block {
   margin-top: 0;
 }
 .block-views-promoted-cards-block {
