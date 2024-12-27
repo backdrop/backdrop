@@ -844,7 +844,7 @@ class Layout {
           }
         }
       }
-      if (!empty($this->orphaned_blocks)) {
+      if (!empty($this->orphaned_blocks) && empty($this->is_new)) {
         $this->setOrphanedBlockMessage();
       }
     }
