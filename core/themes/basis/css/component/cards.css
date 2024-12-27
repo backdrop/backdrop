@@ -8,9 +8,6 @@
   margin-top: -2rem; /* Negative top margin collapses spacing under header */
 }
 
-.update-1-30 .l-top .block-views-promoted-cards-block {
-  margin-top: 0;
-}
 .block-views-promoted-cards-block {
   padding-top: 2rem;
   padding-bottom: 2rem;
@@ -18,6 +15,7 @@
 }
 
 .update-1-30 .block-views-promoted-cards-block {
+  margin-top: 0;
   padding-top: 1rem;
   padding-bottom: 1rem;
   background-color: #ffffff;
