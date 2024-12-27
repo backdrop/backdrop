@@ -61,7 +61,7 @@ class views_handler_field_node_revision extends views_handler_field_node {
         $language = $this->get_value($values, 'langcode');
         $languages = language_list();
         if (isset($languages[$language])) {
-          $this->options['alter']['langcode'] = $languages[$language];
+          $this->options['alter']['language'] = $languages[$language];
         }
       }
     }

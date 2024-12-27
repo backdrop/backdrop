@@ -66,6 +66,9 @@ function file_default_mimetype_mapping() {
       26 => 'application/rtf',
       27 => 'application/smil',
       349 => 'application/vnd.amazon.ebook',
+      359 => 'application/vnd.apple.keynote',
+      360 => 'application/vnd.apple.numbers',
+      361 => 'application/vnd.apple.pages',
       28 => 'application/vnd.cinderella',
       29 => 'application/vnd.google-earth.kml+xml',
       30 => 'application/vnd.google-earth.kmz',
@@ -876,6 +879,9 @@ function file_default_mimetype_mapping() {
       'weba' => 356,
       'webm' => 357,
       'vtt' => 358,
+      'keynote' => 359,
+      'numbers' => 360,
+      'pages' => 361,
       // cspell:enable
     ),
   );

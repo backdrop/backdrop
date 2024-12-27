@@ -32,6 +32,7 @@ class LinkBaseTestClass extends BackdropWebTestCase {
     $modules[] = 'node';
     $modules[] = 'field_ui';
     $modules[] = 'link';
+    $modules[] = 'link_field_custom_form_test';
     parent::setUp($modules);
 
     // Create a page content type with no fields.

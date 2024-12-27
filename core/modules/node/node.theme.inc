@@ -83,69 +83,6 @@ function theme_node_search_factors($variables) {
 }
 
 /**
- * Returns HTML for a list of recent content.
- *
- * @param $variables
- *   An associative array containing:
- *   - nodes: An array of recent node entities.
- *
- * @ingroup themeable
- */
-function theme_node_recent_block($variables) {
-  $rows = array();
-  $output = '';
-
-  $l_options = array('query' => backdrop_get_destination());
-  foreach ($variables['nodes'] as $node) {
-    $row = array();
-    $row[] = array(
-      'data' => theme('node_recent_content', array('node' => $node)),
-      'class' => 'title-author',
-    );
-    $row[] = array(
-      'data' => node_access('update', $node) ? l(t('edit'), 'node/' . $node->nid . '/edit', $l_options) : '',
-      'class' => 'edit',
-    );
-    $row[] = array(
-      'data' => node_access('delete', $node) ? l(t('delete'), 'node/' . $node->nid . '/delete', $l_options) : '',
-      'class' => 'delete',
-    );
-    $rows[] = $row;
-  }
-
-  if ($rows) {
-    $output = theme('table', array('rows' => $rows));
-    if (user_access('access content overview')) {
-      $output .= theme('more_link', array('url' => 'admin/content', 'title' => t('Show more content')));
-    }
-  }
-
-  return $output;
-}
-
-/**
- * Returns HTML for a recent node to be displayed in the recent content block.
- *
- * @param $variables
- *   An associative array containing:
- *   - node: A node entity.
- *
- * @ingroup themeable
- */
-function theme_node_recent_content($variables) {
-  $node = $variables['node'];
-
-  $output = '<div class="node-title">';
-  $output .= l($node->title, 'node/' . $node->nid);
-  $output .= theme('mark', array('type' => node_mark($node->nid, $node->changed)));
-  $output .= '</div><div class="node-author">';
-  $output .= theme('username', array('account' => user_load($node->uid)));
-  $output .= '</div>';
-
-  return $output;
-}
-
-/**
  * Returns HTML for a list of available node types for node creation.
  *
  * @param $variables
