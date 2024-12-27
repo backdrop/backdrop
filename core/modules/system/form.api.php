@@ -52,37 +52,28 @@
  *     such as how many total items were processed.
  */
 function callback_batch_operation($MULTIPLE_PARAMS, &$context) {
-  if (!isset($context['sandbox']['progress'])) {
+  if (empty($context['sandbox'])) {
+    // Initiate multistep processing.
     $context['sandbox']['progress'] = 0;
     $context['sandbox']['current_node'] = 0;
-    $context['sandbox']['max'] = db_query('SELECT COUNT(DISTINCT nid) FROM {node}')->fetchField();
+    $context['sandbox']['max'] = db_query('SELECT COUNT(nid) FROM {node}')->fetchField();
   }
 
-  // For this example, we decide that we can safely process
-  // 5 nodes at a time without a timeout.
-  $limit = 5;
-
-  // With each pass through the callback, retrieve the next group of nids.
-  $result = db_query_range("SELECT nid FROM {node} WHERE nid > %d ORDER BY nid ASC", $context['sandbox']['current_node'], 0, $limit);
-  while ($row = db_fetch_array($result)) {
-
-    // Here we actually perform our processing on the current node.
-    $node = node_load($row['nid'], NULL, TRUE);
-    $node->value1 = $options1;
-    $node->value2 = $options2;
-    node_save($node);
-
-    // Store some result for post-processing in the finished callback.
-    $context['results'][] = check_plain($node->title);
-
-    // Update our progress information.
+  // Process the next 20 nodes.
+  $limit = 20;
+  $nids = db_query_range("SELECT nid FROM {node} WHERE nid > :nid ORDER BY nid ASC", 0, $limit, array(':nid' => $context['sandbox']['current_node']))->fetchCol();
+  $nodes = node_load_multiple($nids, array(), TRUE);
+  foreach ($nodes as $nid => $node) {
+    // To preserve database integrity, only acquire grants if the node
+    // loads successfully.
+    if (!empty($node)) {
+      node_access_acquire_grants($node);
+    }
     $context['sandbox']['progress']++;
-    $context['sandbox']['current_node'] = $node->nid;
-    $context['message'] = t('Now processing %node', array('%node' => $node->title));
+    $context['sandbox']['current_node'] = $nid;
   }
 
-  // Inform the batch engine that we are not finished,
-  // and provide an estimation of the completion level we reached.
+  // Multistep processing : report progress.
   if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
     $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
   }

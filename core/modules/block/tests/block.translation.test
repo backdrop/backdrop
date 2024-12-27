@@ -68,7 +68,7 @@ class BlockTranslationTestCase extends BackdropWebTestCase {
 
     // Confirm that the add block link appears on block overview pages.
     $this->backdropGet('admin/structure/block');
-    $this->assertRaw(l('Add custom block', 'admin/structure/block/add'), 'Add block link is present on block overview page for default theme.');
+    $this->assertRaw(l('Add reusable custom block', 'admin/structure/block/add'), 'Add block link is present on block overview page for default theme.');
 
     // Load the form and check that file uploads are enabled on the body field.
     $this->backdropGet('admin/structure/block/add');
