@@ -947,8 +947,6 @@ function book_node_insert(Node $node) {
     if ($destination['destination'] != 'admin/content/book/' . $node->book['bid'] && _book_outline_access($node)) {
       backdrop_set_message(t('Reorder book pages from the <a href="@url">book outline</a>.', array('@url' => url('admin/content/book/' . $node->book['bid']))));
     }
-
-    //_book_cache_clear($node->book['bid'], TRUE);
   }
 }
 
@@ -968,8 +966,6 @@ function book_node_update(Node $node) {
     if ($destination['destination'] != 'admin/content/book/' . $node->book['bid'] && _book_outline_access($node)) {
       backdrop_set_message(t('Reorder book pages from the <a href="@url">book outline</a>.', array('@url' => url('admin/content/book/' . $node->book['bid']))));
     }
-
-    //_book_cache_clear($node->book['bid'], TRUE);
   }
 }
 
