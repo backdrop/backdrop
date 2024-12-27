@@ -729,7 +729,7 @@ class Layout {
     foreach ($new_regions as $new_region_name) {
       $new_positions[$new_region_name] = array();
     }
-    $this->setRefugeRegion();
+    $this->setRefugeRegionFromTemplateInfo($new_layout_template_info);
 
     // Do the mapping in the order provided (if any).
     if ($region_mapping) {
@@ -777,9 +777,11 @@ class Layout {
 
   /**
    * Set a Refuge Region for orphan blocks.
+   *
+   * @param array $template_info
+   *   The template info as loaded by layout_get_layout_template_info().
    */
-  function setRefugeRegion() {
-    $template_info = layout_get_layout_template_info($this->layout_template);
+  protected function setRefugeRegionFromTemplateInfo(array $template_info) {
     // First check for a default region defined by the layout template.
     if (!empty($template_info['default region'])) {
       $this->refuge_region  = $template_info['default region'];
@@ -798,7 +800,7 @@ class Layout {
   /**
    * Set a message about orphan blocks being moved to the refuge region.
    */
-  function setOrphanedBlockMessage() {
+  protected function setOrphanedBlockMessage() {
     $orphaned_blocks_titles = array();
     $layout_template_info = layout_get_layout_template_info($this->layout_template);
     foreach ($this->orphaned_blocks as $uuid) {
@@ -813,7 +815,7 @@ class Layout {
   /**
    * Copy blocks from the Default layout into this layout.
    */
-  function setDefaultBlocks() {
+  public function setDefaultBlocks() {
     if (!empty($this->is_new)) {
       // Get the default layout.
       $default_layout_name = path_is_admin($this->getPath()) ? 'admin_default' : 'default';
@@ -821,7 +823,7 @@ class Layout {
       // Get the template being used by this layout.
       $template_info = layout_get_layout_template_info($this->layout_template);
       // Copy the blocks.
-      $this->setRefugeRegion();
+      $this->setRefugeRegionFromTemplateInfo($template_info);
       foreach ($default_layout->positions as $region => $region_block_list) {
         foreach ($region_block_list as $uuid) {
           if (isset($default_layout->content[$uuid])) {
@@ -998,7 +1000,7 @@ class Layout {
         }
       }
     }
-    
+
     return empty(array_filter($context_counts));
   }
 
