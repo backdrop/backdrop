@@ -25,7 +25,7 @@ Backdrop.behaviors.filterStatus = {
     }
 
     // Toggle class on row if checkbox changed.
-    $('#filter-order input.filter-status:checkbox', context).change(function (event) {
+    $('#filter-order input.filter-status:checkbox', context).on('change', function (event) {
       var isChecked = !$(this).prop('checked');
       $(this).closest('tr').toggleClass('disabled-row', isChecked);
       Backdrop.filterConfiguration.update();

@@ -1,10 +1,8 @@
 <?php
-
 /**
  * @file
  * Defines a field storage backend.
  */
-
 
 /**
  * Implements hook_field_storage_info().

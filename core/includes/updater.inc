@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Classes used for updating various files in the Backdrop webroot. These
@@ -72,6 +71,16 @@ abstract class Updater implements BackdropUpdaterInterface {
    * @var string $source Directory to install from.
    */
   public $source;
+
+  /**
+   * @var string
+   */
+  protected $name;
+
+  /**
+   * @var string
+   */
+  protected $title;
 
   public function __construct($source) {
     $this->source = $source;

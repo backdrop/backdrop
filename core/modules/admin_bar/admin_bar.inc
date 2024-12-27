@@ -54,10 +54,12 @@ function admin_bar_output($complete = FALSE) {
           'id' => 'admin-bar-menu',
         ),
         '#weight' => 0,
+        '#level' => -1,
       );
 
       $content['menu']['menu'] = admin_bar_links_menu(admin_bar_tree('management'));
       $content['menu']['menu']['#title'] = t('Admin bar');
+      $content['menu']['menu']['#options']['icon'] = 'list';
     }
 
     // Check for status report errors.
@@ -72,6 +74,9 @@ function admin_bar_output($complete = FALSE) {
     }
     if (in_array('admin_bar.search', $components) || $complete) {
       $content['extra']['extra'] += admin_bar_links_search();
+    }
+    if (in_array('admin_bar.locale', $components) || $complete) {
+      $content['extra']['extra'] += admin_bar_links_locale();
     }
     if (in_array('admin_bar.page', $components) || $complete) {
       $content['extra']['extra'] += admin_bar_links_page();
@@ -92,7 +97,9 @@ function admin_bar_output($complete = FALSE) {
 
     if ($content['extra']['extra']) {
       $content['extra']['#theme'] = 'admin_bar_links';
+      $content['extra']['#level'] = -1;
       $content['extra']['extra']['#title'] = t('More tasks');
+      $content['extra']['extra']['#options']['icon'] = 'list-checks';
       $content['extra']['#wrapper_attributes'] = array(
         'id' => 'admin-bar-extra',
       );
@@ -488,16 +495,19 @@ function admin_bar_links_menu($tree) {
       }
       continue;
     }
-    // Omit alias lookups.
-    $data['link']['localized_options']['alias'] = TRUE;
     // Remove description to prevent mouseover tooltip clashes.
     unset($data['link']['localized_options']['attributes']['title']);
 
-    // Make action links (typically "Add ...") appear first in dropdowns.
-    // They might appear first already, but only as long as there is no link
-    // that comes alphabetically first (e.g., a node type with label "Ad").
+    // Move local action links to the appropriate position based on the
+    // respective setting. Defaults to 'top'.
+    $local_actions_bottom = config_get('admin_bar.settings', 'local_actions_bottom');
     if ($data['link']['type'] & MENU_IS_LOCAL_ACTION) {
-      $data['link']['weight'] -= 1000;
+      if (config_get('admin_bar.settings', 'local_action_position') == 'bottom') {
+        $data['link']['weight'] += 9999;
+      }
+      else {
+        $data['link']['weight'] -= 9999;
+      }
     }
 
     $links[$data['link']['href']] = array(
@@ -543,13 +553,14 @@ function admin_bar_links_icon() {
       'id' => 'admin-bar-icon',
     ),
     '#weight' => -100,
+    '#level' => 0,
   );
   $links['icon'] = array(
-    '#title' => theme('admin_bar_icon'),
+    '#title' => t('Home'),
     '#attributes' => array('class' => array('admin-bar-icon')),
     '#href' => '<front>',
     '#options' => array(
-      'html' => TRUE,
+      'icon' => 'house-fill',
     ),
   );
   // Add link to manually run cron.
@@ -605,12 +616,18 @@ function admin_bar_links_account() {
     '#weight' => 50,
     '#attributes' => array('class' => array('admin-bar-account')),
     '#href' => 'user/' . $GLOBALS['user']->uid,
+    '#options' => array(
+      'icon' => 'user-circle-fill',
+    ),
   );
   $links['logout'] = array(
     '#title' => t('Log out'),
     '#weight' => 51,
     '#attributes' => array('class' => array('admin-bar-logout')),
     '#href' => 'user/logout',
+    '#options' => array(
+      'icon' => 'sign-out-fill',
+    ),
   );
   return $links;
 }
@@ -623,11 +640,17 @@ function admin_bar_links_account() {
 function admin_bar_links_users() {
   // Add link to show current authenticated/anonymous users.
   $links['user-counter'] = array(
-    '#title' => admin_bar_get_user_count(),
+    // This span is used by JavaScript to update the value while preserving the
+    // overall admin bar cache.
+    '#title' => '<span class="user-counter-value">' . admin_bar_get_user_count() . '</span>',
     '#description' => t('Current anonymous / authenticated users'),
     '#weight' => 20,
     '#attributes' => array('class' => array('admin-bar-action', 'admin-bar-users')),
     '#href' => (user_access('administer users') ? 'admin/people/list' : 'user'),
+    '#options' => array(
+      'icon' => 'user-list-fill',
+      'html' => TRUE,
+    ),
   );
   return $links;
 }
@@ -671,8 +694,12 @@ function admin_bar_links_page() {
   ));
 
   $links['page'] = array(
-    '#title' => theme('admin_bar_icon_page'),
+    '#title' => t('This page'),
     '#attributes' => array('class' => array('admin-bar-page-links')),
+    '#options' => array(
+      'html' => TRUE,
+      'icon' => 'file-text-fill',
+    ),
   );
   if (user_access('administer layouts')) {
     // Get the layout used by the current page/path.
@@ -721,6 +748,30 @@ function admin_bar_links_page() {
 }
 
 /**
+ * Build Locale links.
+ *
+ * @see theme_admin_bar_links()
+ */
+function admin_bar_links_locale() {
+  global $language;
+  $links['locale'] = array(
+    '#title' => isset($language->native) ? $language->native : $language->name,
+    '#attributes' => array('class' => array('admin-bar-locale-links')),
+    '#options' => array(
+      'icon' => 'translate-fill',
+    ),
+  ) + admin_bar_locale_links();
+
+  // Don't display an empty menu.
+  $locale_links = element_children($links['locale']);
+  if (empty($locale_links)) {
+    return array();
+  }
+
+  return $links;
+}
+
+/**
  * Build alert indicator.
  */
 function admin_bar_links_alert() {
@@ -742,6 +793,7 @@ function admin_bar_links_alert() {
         'id' => 'admin-bar-alert',
       ),
       '#weight' => 20,
+      '#level' => 0,
     );
 
     // Add a link to the status report.
@@ -753,7 +805,11 @@ function admin_bar_links_alert() {
       ),
       '#href' => 'admin/reports/status',
       '#access' => user_access('administer site configuration'),
-      '#options' => array('html' => TRUE),
+      '#options' => array(
+        // Suppress the automatic icon by specifying FALSE.
+        'icon' => FALSE,
+        'html' => TRUE,
+      ),
     );
   }
 
@@ -766,40 +822,95 @@ function admin_bar_links_alert() {
 function admin_bar_theme_settings() {
   $config = config('admin_bar.settings');
   $form['#config'] = 'admin_bar.settings';
-  $form['margin_top'] = array(
+
+  $form['settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Settings'),
+  );
+  $form['settings']['margin_top'] = array(
     '#type' => 'checkbox',
     '#title' => t('Adjust top margin'),
     '#default_value' => $config->get('margin_top'),
     '#description' => t('Shifts the entire site content down to make room for the administration bar. If disabled, absolute- or fixed-positioned page elements may be covered by the administration bar.'),
   );
-  $form['position_fixed'] = array(
+  $form['settings']['position_fixed'] = array(
     '#type' => 'checkbox',
     '#title' => t('Keep bar at top of page'),
     '#default_value' => $config->get('position_fixed'),
     '#description' => t('Displays the administration bar always at the top of the browser viewport, even when scrolling the page.'),
   );
+  $form['settings']['local_action_position'] = array(
+    '#type' => 'radios',
+    '#title' => t('Position of local action links'),
+    '#default_value' => $config->get('local_action_position'),
+    '#options' => array(
+      'top' => t('Top'),
+      'bottom' => t('Bottom'),
+    ),
+    '#description' => t('Where to display local action links (e.g. "<em>Add [something]</em>") within their respective sub-menus.'),
+  );
 
   $form['components'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Enabled components'),
+    '#description' => t('These features will be enabled/visible in the administration bar. Untick the boxes to disable/hide them.'),
+    '#tree' => TRUE,
+  );
+  $form['components']['options'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Enabled components'),
+    '#title_display' => 'invisible',
     '#options' => array(
       'admin_bar.icon' => t('Icon menu'),
+      'admin_bar.back_to_site_link' => t('Back to site link'),
       'admin_bar.menu' => t('Management menu'),
       'admin_bar.search' => t('Search bar'),
       'admin_bar.page' => t('Page links'),
       'admin_bar.users' => t('User counts'),
       'admin_bar.account' => t('Account links'),
+      'admin_bar.locale' => t('Language switcher'),
     ),
     '#default_value' => $config->get('components'),
-    '#description' => t('These features will be enabled/visible in the administration bar. Untick the boxes to disable/hide them.'),
+    'admin_bar.back_to_site_link' => array(
+      '#states' => array(
+        'visible' => array(
+          ':input[name="components[options][admin_bar.icon]"]' => array('checked' => TRUE),
+        ),
+      ),
+      '#indentation' => 1,
+    ),
     'admin_bar.search' => array(
       '#states' => array(
         'visible' => array(
-          ':input[name="components[admin_bar.menu]"]' => array('checked' => TRUE),
+          ':input[name="components[options][admin_bar.menu]"]' => array('checked' => TRUE),
         ),
       ),
+      '#indentation' => 1,
+    ),
+    'admin_bar.locale' => array(
+      '#disabled' => !module_exists('locale'),
     ),
   );
+
+  $form['components']['options']['admin_bar.icon']['#description'] = t('A specialized menu that links to the home page and provides links to perform various other admin tasks (e.g.: clear caches, run cron, etc.).');
+  $form['components']['options']['admin_bar.back_to_site_link']['#description'] = t('Replaces the "Home" link with a "Back to site" link that returns to the last non-admin page visited.');
+  $form['components']['options']['admin_bar.menu']['#description'] = t('Displays the various administrative menu options in the admin bar.');
+  $form['components']['options']['admin_bar.search']['#description'] = t('A search box for quickly finding specific items in the Administration Menu.');
+  $form['components']['options']['admin_bar.page']['#description'] = t('Links to edit items that make up the current page (e.g. layout, theme).');
+  $form['components']['options']['admin_bar.users']['#description'] = t('A count of the people currently logged into the site.');
+  $form['components']['options']['admin_bar.account']['#description'] = t('Links to view and log out of the current user account.');
+
+  $language_switcher_description = t('Links to switch the language of the user interface.');
+  if (!(module_exists('locale'))) {
+    if (user_access('administer modules')) {
+      $language_switcher_description .= ' ' . t('This option is available only when the <a href="@link">Locale module</a> is enabled.', array('@link' => url('admin/modules', array('query' => array('search' => 'locale')))));
+    }
+    else {
+      $language_switcher_description .= ' ' . t('This option is available only when the Locale module is enabled.');
+    }
+
+  }
+  $form['components']['options']['admin_bar.locale']['#description'] = $language_switcher_description;
 
   $form['actions'] = array(
     '#type' => 'actions',
@@ -817,8 +928,12 @@ function admin_bar_theme_settings() {
  * Submit handler for admin_bar_theme_settings().
  */
 function admin_bar_theme_settings_submit($form, &$form_state) {
-  $components = &$form_state['values']['components'];
+  $components = &$form_state['values']['components']['options'];
 
+  // Disable back to site if icon bar is also disabled.
+  if (!$components['admin_bar.icon']) {
+    $components['admin_bar.back_to_site_link'] = FALSE;
+  }
   // Disable the search bar if the management menu is also disabled.
   if (!$components['admin_bar.menu']) {
     $components['admin_bar.search'] = FALSE;

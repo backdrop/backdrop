@@ -183,7 +183,7 @@ Backdrop.adminBar.behaviors.destination = function (context, settings, $adminBar
 /**
  * Adjust the top level items based on the available viewport width.
  */
-Backdrop.adminBar.behaviors.collapseWidth = function (context, settings, $adminBar) {
+Backdrop.adminBar.behaviors.resizeCollapse = function (context, settings, $adminBar) {
   var $menu = $adminBar.find('#admin-bar-menu');
   var $extra = $adminBar.find('#admin-bar-extra');
   var menuWidth;
@@ -197,11 +197,11 @@ Backdrop.adminBar.behaviors.collapseWidth = function (context, settings, $adminB
 
     $adminBar.trigger('beforeResize');
 
-    menuWidth = $menu.width();
-    extraWidth = $extra.width();
+    menuWidth = $menu.width() || 0;
+    extraWidth = $extra.width() || 0;
 
     // Available width is anything except the menus that may be collapsed.
-    availableWidth = $adminBar.width();
+    availableWidth = $(window).width();
     $adminBar.children().children().not($menu).not($extra).each(function() {
       availableWidth -= $(this).width();
     });
@@ -209,20 +209,20 @@ Backdrop.adminBar.behaviors.collapseWidth = function (context, settings, $adminB
     // Collapse the extra items first if needed.
     if (availableWidth - menuWidth - extraWidth < 20) {
       $extra.addClass('dropdown').removeClass('top-level');
-      extraWidth = $extra.width();
+      extraWidth = $extra.width() || 0;
     }
     // See if the menu also needs to be collapsed.
     if (availableWidth - menuWidth - extraWidth < 20) {
       $menu.addClass('dropdown').removeClass('top-level');
     }
+
     $adminBar.trigger('afterResize');
   };
 
-
   adjustItems();
+
   // Adjust items when window is resized.
   Backdrop.optimizedResize.add(adjustItems);
-
 };
 
 /**
@@ -267,7 +267,7 @@ Backdrop.adminBar.behaviors.hover = function (context, settings, $adminBar) {
   });
 
   // Close all menus if clicking outside the menu.
-  $(document).bind('click', function (e) {
+  $(document).on('click', function (e) {
     if ($(e.target).closest($adminBar).length === 0) {
       $adminBar.find('ul').removeClass('expanded');
     }
@@ -428,7 +428,7 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
   function resultsHandler(e) {
     var $this = $(this);
     var show = e.type === 'mouseenter' || e.type === 'focusin' || e.type === 'touchstart';
-    // Supress the normal click handling on first touch, only highlighting.
+    // Suppress the normal click handling on first touch, only highlighting.
     if (e.type === 'touchstart' && !$(this).hasClass('active-search-item')) {
       e.preventDefault();
     }
@@ -490,7 +490,7 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
   $adminBar.on('beforeResize', resetSearchDisplay);
   $adminBar.on('afterResize searchChanged', updateSearchDisplay);
   // Attach the search input event handler.
-  $input.bind('focus keyup search', keyupHandler);
+  $input.on('focus keyup search', keyupHandler);
 
   // Close search if clicking outside the menu.
   $(document).on('click', function (e) {
@@ -500,6 +500,60 @@ Backdrop.adminBar.behaviors.search = function (context, settings, $adminBar) {
   });
 };
 
+/**
+ * Replaces the "Home" link with "Back to site" link.
+ *
+ * Back to site link points to the last non-administrative page the user visited
+ * within the same browser tab.
+ */
+Backdrop.adminBar.behaviors.escapeAdmin = function (context, settings) {
+  if (!settings.admin_bar.back_to_site_link) {
+    return;
+  }
+
+  // Grab the stored path of the last non-admin page.
+  var escapeAdminPath = sessionStorage.getItem("escapeAdminPath");
+
+  // Saves the last non-administrative page in the browser to be able to link back
+  // to it when browsing administrative pages. If there is a destination parameter
+  // there is not need to save the current path because the page is loaded within
+  // an existing "workflow".
+  if (
+    !settings.admin_bar.current_path_is_admin &&
+    !/destination=/.test(window.location.search)
+  ) {
+    sessionStorage.setItem(
+      "escapeAdminPath",
+      window.location
+    );
+  }
+
+  // We only want to change the first anchor tag in the admin bar icon sub-menu.
+  const $toolbarEscape = $(".admin-bar-icon a").first();
+
+  // If the current page is admin, then switch the path.
+  if (
+    $toolbarEscape.length &&
+    settings.admin_bar.current_path_is_admin &&
+    escapeAdminPath !== null
+  ) {
+    $toolbarEscape.addClass("escape");
+    $toolbarEscape.attr("href", escapeAdminPath);
+    $toolbarEscape.find('.admin-bar-link-text').text(Backdrop.t("Back to site"));
+
+    // Update the icon based on language direction.
+    if (window.fetch) {
+      const direction = $('html').attr('dir') === 'rtl' ? 'right' : 'left';
+      fetch(Backdrop.icons['caret-circle-' + direction + '-fill'])
+        .then(response => response.text())
+        .then(svgContents => {
+          const $svg = $(svgContents);
+          $svg.attr('class', 'icon');
+          $toolbarEscape.find('.admin-bar-link-icon').html($svg);
+        });
+    }
+  }
+};
 /**
  * @} End of "defgroup admin_behaviors".
  */

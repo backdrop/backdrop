@@ -5,7 +5,7 @@
  *
  * This allows site administrators with the 'administer software updates'
  * permission to either upgrade existing projects, or download and install new
- * ones, so long as the killswitch $settings['allow_authorize_operations'] is
+ * ones, so long as the kill switch $settings['allow_authorize_operations'] is
  * still TRUE.
  *
  * To install new code, the administrator is prompted for either the URL of an
@@ -25,7 +25,7 @@
  * batch operation is responsible for downloading a single file, extracting the
  * archive, and verifying the contents. If there are any errors, the user is
  * redirected back to the first page with the error messages. If all downloads
- * were extacted and verified, the user is instead redirected to
+ * were extracted and verified, the user is instead redirected to
  * admin/update/ready, a landing page which reminds them to backup their
  * database and asks if they want to put the site offline during the update.
  * Once the user presses the "Install updates" button, they are redirected to
@@ -69,7 +69,10 @@ function installer_manager_update_form($form, $form_state) {
   $update_interval_days = $update_config->get('update_interval_days');
   if ($update_interval_days != 0) {
     $frequency = array(1 => t('daily'), 7 => t('weekly'));
-    $frequency_message = t('<a href="@link">Automatic update checks are configured to run @frequency</a>.', array('@link' => $settings_link, '@frequency' => $frequency[$update_interval_days]));
+    $frequency_message = t('<a href="@link">Automatic update checks are configured to run @frequency</a>.', array(
+      '@link' => $settings_link,
+      '@frequency' => $frequency[$update_interval_days],
+    ));
     $message_type = 'info';
   }
   else {
@@ -91,7 +94,10 @@ function installer_manager_update_form($form, $form_state) {
     }
     else {
       $recipients = implode(', ', $update_emails);
-      $email_notifications_message = t('<a href="@link">Update notifications will be sent</a> to: @recipients', array('@link' => $settings_link, '@recipients' => $recipients));
+      $email_notifications_message = t('<a href="@link">Update notifications will be sent</a> to: @recipients', array(
+        '@link' => $settings_link,
+        '@recipients' => $recipients,
+      ));
       $message_type = 'info';
     }
   }
@@ -141,7 +147,7 @@ function installer_manager_update_form($form, $form_state) {
     // The project name to display can vary based on the info we have.
     if (!empty($project['title'])) {
       if (!empty($project['link'])) {
-        $project_name = l($project['title'], $project['link'], array('attributes' => array('target'=>'_blank')));
+        $project_name = l($project['title'], $project['link'], array('attributes' => array('target' => '_blank')));
       }
       else {
         $project_name = check_plain($project['title']);
@@ -162,7 +168,10 @@ function installer_manager_update_form($form, $form_state) {
 
     $recommended_release = $project['releases'][$project['recommended']];
     $title_attribute = t('Release notes for @project_title', array('@project_title' => $project['title']));
-    $link_attributes = array('attributes' => array('title' => $title_attribute, 'target'=>'_blank'));
+    $link_attributes = array('attributes' => array(
+      'title' => $title_attribute,
+      'target' => '_blank',
+    ));
     $release_notes_link = l(t('release notes'), $recommended_release['release_link'], $link_attributes);
     $recommended_version = $recommended_release['version'] . ' (' . $release_notes_link . ')';
     if ($recommended_release['version_major'] != $project['existing_major']) {
@@ -281,7 +290,10 @@ function installer_manager_update_form($form, $form_state) {
     $prefix .= '<p>' . t('You can update Backdrop CMS by replacing the old <code>/core</code> directory inside your docroot with the one included in the <a href="https://backdropcms.org" title="Home page with download option" target="_blank">latest release</a>. For detailed instructions, see the <a href="https://backdropcms.org/upgrade" target="_blank">Upgrading Backdrop CMS</a> document online.') . '</p>';
     $form['manual_updates'] = array(
       '#type' => 'markup',
-      '#markup' => theme('table', array('header' => $header, 'rows' => $projects['manual'])),
+      '#markup' => theme('table', array(
+        'header' => $header,
+        'rows' => $projects['manual'],
+      )),
       '#prefix' => $prefix,
       '#weight' => 120,
     );
@@ -456,12 +468,10 @@ function installer_manager_update_ready_form_submit($form, &$form_state) {
       );
     }
 
-    // If the owner of the last directory we extracted is the same as the
-    // owner of our configuration directory where we're trying to install the
-    // code, there's no need to prompt for FTP/SSH credentials. Instead, we
-    // instantiate a FileTransferLocal and invoke installer_authorize_run_update()
-    // directly.
-    if (fileowner($project_realpath) == fileowner(conf_path())) {
+    // If local transfers are allowed, there's no need to prompt for FTP/SSH
+    // credentials. Instead, we instantiate a FileTransferLocal and invoke
+    // installer_authorize_run_update() directly.
+    if (installer_manager_local_transfers_allowed()) {
       module_load_include('inc', 'installer', 'installer.authorize');
       $filetransfer = new FileTransferLocal(BACKDROP_ROOT);
       installer_authorize_run_update($filetransfer, $updates);
@@ -1129,11 +1139,11 @@ function installer_manager_batch_project_get($project, $url, &$context) {
 /**
  * Determines if file transfers will be performed locally.
  *
- * If the server is configured such that webserver-created files have the same
- * owner as the configuration directory where new code will eventually be
- * installed, the update manager can transfer files entirely locally, without
- * changing their ownership (in other words, without prompting the user for FTP,
- * SSH or other credentials).
+ * If the server is configured so that files can be written to the configuration
+ * directory where new code will eventually be installed, and the files have
+ * the right ownership, the update manager can transfer files entirely locally,
+ * without changing their ownership (in other words, without prompting the
+ * user for FTP, SSH or other credentials).
  *
  * This server configuration is an inherent security weakness because it allows
  * a malicious webserver process to append arbitrary PHP code and then execute
@@ -1149,10 +1159,10 @@ function installer_manager_batch_project_get($project, $url, &$context) {
  */
 function installer_manager_local_transfers_allowed() {
   // Compare the owner of a webserver-created temporary file to the owner of
-  // the configuration directory to determine if local transfers will be
-  // allowed.
+  // the settings file to determine if local transfers will be
+  // allowed. The conf_path() may be owned by a different user but writable.
   $temporary_file = backdrop_tempnam('temporary://', 'update_');
-  $local_transfers_allowed = fileowner($temporary_file) === fileowner(conf_path());
+  $local_transfers_allowed = (fileowner($temporary_file) === fileowner(conf_path() . "/settings.php")) && is_writable(conf_path());
 
   // Clean up. If this fails, we can ignore it (since this is just a temporary
   // file anyway).

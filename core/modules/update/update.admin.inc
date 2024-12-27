@@ -73,32 +73,34 @@ function update_settings($form, &$form_state) {
     ),
   );
 
-  $docs = l('File permissions and ownership', 'https://backdropcms.org/file-permissions-and-ownership');
-  $form['self_update'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Self-updates'),
-    '#description' => t('This website has the ability to update itself, but the file system permissions must be set properly. For more details, see !link.',
-      array('!link' => $docs)),
-  );
-  $core_update = config_get('installer.settings', 'core_update');
-  $form['self_update']['core_update'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Manual self-update'),
-    '#default_value' => $core_update,
-    '#description' => t('When updating manually, allow this website to delete the old version of core, and then replace it with the new version.'),
-  );
-  $form['self_update']['automatic_update'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Automatic self-update (coming soon!)'),
-    '#description' => t('When updates are available, allow this website to <strong>automatically</strong> delete the old version of core, and then replace it with the new version.'),
-    '#default_value' => FALSE, // @todo update when #414 goes in
-    '#disabled' => TRUE, // @todo update when #414 goes in
-    '#states' => array(
-      'visible' => array(
-        'input[name=update_check_frequency]' => array('!value' => 0),
+  if (module_exists('installer')) {
+    $docs = l('File permissions and ownership', 'https://backdropcms.org/file-permissions-and-ownership');
+    $form['self_update'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Self-updates'),
+      '#description' => t('This website has the ability to update itself, but the file system permissions must be set properly. For more details, see !link.',
+        array('!link' => $docs)),
+    );
+    $core_update = config_get('installer.settings', 'core_update');
+    $form['self_update']['core_update'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Manual self-update'),
+      '#default_value' => $core_update,
+      '#description' => t('When updating manually, allow this website to delete the old version of core, and then replace it with the new version.'),
+    );
+    $form['self_update']['automatic_update'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Automatic self-update (coming soon!)'),
+      '#description' => t('When updates are available, allow this website to <strong>automatically</strong> delete the old version of core, and then replace it with the new version.'),
+      '#default_value' => FALSE, // @todo update when #414 goes in
+      '#disabled' => TRUE, // @todo update when #414 goes in
+      '#states' => array(
+        'visible' => array(
+          'input[name=update_check_frequency]' => array('!value' => 0),
+        ),
       ),
-    ),
-  );
+    );
+  }
 
   $form['actions']['#type'] = 'actions';
   $form['actions']['submit'] = array(
@@ -172,8 +174,10 @@ function update_settings_submit($form, $form_state) {
     ->set('update_threshold', $form_state['values']['update_notification_threshold'])
     ->save();
 
-  // Save the installer setting.
-  config_set('installer.settings', 'core_update', $form_state['values']['core_update']);
+  if (module_exists('installer')) {
+    // Save the installer setting.
+    config_set('installer.settings', 'core_update', $form_state['values']['core_update']);
+  }
 
   // Display status messages for this form.
   backdrop_set_message(t('The configuration options have been saved.'));

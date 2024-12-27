@@ -386,7 +386,7 @@ function book_get_books() {
  */
 function book_form_node_form_alter(&$form, &$form_state, $form_id) {
   $node = $form['#node'];
-  $access = user_access('administer book outlines');
+  $access = book_all_types_allowed();
   if (!$access) {
     if (user_access('add content to books') && ((!empty($node->book['mlid']) && !empty($node->nid)) || book_type_is_allowed($node->type))) {
       // Already in the book hierarchy, or this node type is allowed.
@@ -662,6 +662,11 @@ function _book_update_outline(Node $node) {
         backdrop_static_reset('book_get_books');
       }
     }
+    // Get all nodes that are part of this book and flush their caches.
+    $affected_nids = db_query("SELECT nid FROM {book} WHERE bid = :bid", array(
+      ':bid' => $node->book['bid'],
+    ))->fetchAllAssoc('nid');
+    entity_get_controller('node')->resetCache(array_keys($affected_nids));
 
     return TRUE;
   }
@@ -1144,6 +1149,17 @@ function book_type_is_allowed($type) {
 }
 
 /**
+ * Determine if users are allowed to add any content type to books.
+ *
+ * @return bool
+ *   A Boolean TRUE if all node types can be included in books for this user;
+ *   otherwise, FALSE.
+ */
+function book_all_types_allowed() {
+  return user_access('administer book outlines') && config_get('book.settings', 'book_admin_allowed_all');
+}
+
+/**
  * Implements hook_node_type_update().
  *
  * Updates the Book module's persistent variables if the machine-readable name
@@ -1211,7 +1227,7 @@ function book_link_load($mlid, $skip_access_check = FALSE) {
  * Gets the data representing a subtree of the book hierarchy.
  *
  * The root of the subtree will be the link passed as a parameter, so the
- * returned tree will contain this item and all its descendents in the menu
+ * returned tree will contain this item and all its descendants in the menu
  * tree.
  *
  * @param $link

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Test module for Filter module hooks and functions not used in core.

@@ -254,6 +254,7 @@ function image_config_info() {
     'label_key' => 'name',
     'group' => t('Image styles'),
   );
+
   return $prefixes;
 }
 
@@ -296,6 +297,7 @@ function image_file_download($uri) {
 
     // Then the remaining parts are the path to the image.
     $original_uri = file_uri_scheme($uri) . '://' . implode('/', $args);
+    $original_uri = file_uri_normalize_dot_segments($original_uri);
 
     // Check that the file exists and is an image.
     if ($info = image_get_info($uri)) {
@@ -644,7 +646,7 @@ function image_style_delete($style, $replacement_style_name = '') {
  * Get an array of image styles suitable for using as select list options.
  *
  * @param $include_empty
- *   If TRUE a <none> option will be inserted in the options array.
+ *   If TRUE a "- None -" option will be inserted in the options array.
  * @param $output
  *   Optional flag determining how the options will be sanitized on output.
  *   Leave this at the default (CHECK_PLAIN) if you are using the output of
@@ -660,7 +662,7 @@ function image_style_options($include_empty = TRUE, $output = CHECK_PLAIN) {
   $styles = image_styles();
   $options = array();
   if ($include_empty && !empty($styles)) {
-    $options[''] = t('<none>');
+    $options[''] = t('- None -');
   }
   foreach ($styles as $name => $style) {
     $options[$name] = ($output == PASS_THROUGH) ? $style['label'] : check_plain($style['label']);
@@ -699,9 +701,11 @@ function image_style_deliver($style, $scheme) {
   array_shift($args);
   array_shift($args);
   $target = implode('/', $args);
-
   $image_uri = $scheme . '://' . $target;
+  $image_uri = file_uri_normalize_dot_segments($image_uri);
+
   $derivative_uri = image_style_path($style['name'], $image_uri);
+  $derivative_scheme = file_uri_scheme($derivative_uri);
 
   // Image styles are not allowed to modify previously generated style images.
   if (strpos($image_uri, $scheme . '://styles/') === 0) {
@@ -711,21 +715,25 @@ function image_style_deliver($style, $scheme) {
     backdrop_exit();
   }
 
-  // If using the private scheme, let other modules provide headers and
-  // control access to the file.
-  if ($scheme == 'private') {
-    if (file_exists($derivative_uri)) {
-      file_download($scheme, file_uri_target($derivative_uri));
+  $core_schemes = array('public', 'private', 'temporary');
+  $additional_public_schemes = array_diff((array) config_get('system.core', 'file_additional_public_schemes'), $core_schemes);
+  $public_schemes = array_merge(array('public'), $additional_public_schemes);
+  $is_public = in_array($derivative_scheme, $public_schemes, TRUE);
+
+  if ($scheme == 'private' && file_exists($derivative_uri)) {
+    file_download($scheme, file_uri_target($derivative_uri));
+  }
+
+  // Other non-public schemes may add additional headers and control access to
+  // the file.
+  if (!$is_public) {
+    $headers = file_download_headers($image_uri);
+    if (empty($headers)) {
+      return MENU_ACCESS_DENIED;
     }
-    else {
-      $headers = file_download_headers($image_uri);
-      if (empty($headers)) {
-        return MENU_ACCESS_DENIED;
-      }
-      if (count($headers)) {
-        foreach ($headers as $name => $value) {
-          backdrop_add_http_header($name, $value);
-        }
+    if (count($headers)) {
+      foreach ($headers as $name => $value) {
+        backdrop_add_http_header($name, $value);
       }
     }
   }
@@ -745,9 +753,12 @@ function image_style_deliver($style, $scheme) {
   }
 
   // Confirm that the original source image exists before trying to process it.
-  if (!is_file($image_uri)) {
+  if (!_image_source_image_exists($image_uri)) {
     watchdog('image', 'Source image at %source_image_path not found while trying to generate derivative image at %derivative_path.',  array('%source_image_path' => $image_uri, '%derivative_path' => $derivative_uri));
-    return MENU_NOT_FOUND;
+    backdrop_add_http_header('Status', '404 Not Found');
+    backdrop_add_http_header('Content-Type', 'text/html; charset=utf-8');
+    print t('Source image not found.');
+    backdrop_exit();
   }
 
   // Don't start generating the image if the derivative already exists or if
@@ -791,6 +802,39 @@ function image_style_deliver($style, $scheme) {
     print t('Error generating image.');
     backdrop_exit();
   }
+}
+
+/**
+ * Checks whether the provided source image exists.
+ *
+ * @param string $image_uri
+ *   The URI for the source image.
+ *
+ * @return bool
+ *   Whether the source image exists.
+ */
+function _image_source_image_exists($image_uri) {
+  $exists = file_exists($image_uri);
+
+  // If the file doesn't exist, we can stop here.
+  if (!$exists) {
+    return FALSE;
+  }
+
+  if (file_uri_scheme($image_uri) !== 'public') {
+    return TRUE;
+  }
+
+  $image_path = backdrop_realpath($image_uri);
+  $private_path = config_get('system.core', 'file_private_path');
+  if ($private_path) {
+    $private_path = realpath($private_path);
+    if ($private_path && strpos($image_path, $private_path) === 0) {
+      return FALSE;
+    }
+  }
+
+  return TRUE;
 }
 
 /**
@@ -919,7 +963,11 @@ function image_style_flush($style) {
  * @see image_style_deliver()
  */
 function image_style_url($style_name, $uri) {
+  if (image_is_svg($uri)) {
+    return file_create_url($uri);
+  }
   $uri = image_style_path($style_name, $uri);
+  $uri = file_uri_normalize_dot_segments($uri);
 
   $derivative_exists = file_exists($uri);
   if (!$derivative_exists) {
@@ -940,14 +988,14 @@ function image_style_url($style_name, $uri) {
 
 /**
  * This function was never included in Backdrop. See:
- * - https://api.backdropcms.org/change-records/image_style_path_token-does-not-exist-backdrop
+ * - https://docs.backdropcms.org/change-records/image_style_path_token-does-not-exist-backdrop
  * - https://github.com/backdrop/backdrop-issues/issues/34
  * - https://github.com/backdrop/backdrop-issues/issues/3989
  *
  * @deprecated since 1.0.0
  */
 function image_style_path_token($style_name, $uri) {
-  watchdog_deprecated_function('drupal', __FUNCTION__, t('Change record:') . ' ' . l(t('<code>image_style_path_token()</code> does not exist in Backdrop'), 'https://api.backdropcms.org/change-records/image_style_path_token-does-not-exist-backdrop', array('attributes' => array('target' => '_blank'))));
+  watchdog_deprecated_function('drupal', __FUNCTION__, t('Change record:') . ' ' . l(t('<code>image_style_path_token()</code> does not exist in Backdrop'), 'https://docs.backdropcms.org/change-records/image_style_path_token-does-not-exist-backdrop', array('attributes' => array('target' => '_blank'))));
 }
 
 /**
@@ -1138,7 +1186,6 @@ function image_effect_definitions() {
       include_once BACKDROP_ROOT . '/core/modules/image/image.effects.inc';
       foreach (module_implements('image_effect_info') as $module) {
         foreach (module_invoke($module, 'image_effect_info') as $name => $effect) {
-          // Ensure the current toolkit supports the effect.
           $effect['module'] = $module;
           $effect['name'] = $name;
           $effect['data'] = isset($effect['data']) ? $effect['data'] : array();
@@ -1289,7 +1336,7 @@ function image_effect_apply($image, $effect) {
  * @param $current_pixels
  * @param $new_pixels
  *
- * return int
+ * @return int
  */
 function image_filter_keyword($value, $current_pixels, $new_pixels) {
   switch ($value) {
@@ -1305,4 +1352,38 @@ function image_filter_keyword($value, $current_pixels, $new_pixels) {
       return (int) round($current_pixels / 2 - $new_pixels / 2);
   }
   return (int) $value;
+}
+
+/**
+ * Preprocess function for theme_image_style().
+ *
+ * If theme_image_style() is called without setting explicit height/width for
+ * an SVG image, attempt to set those dimensions. This helps in particular when
+ * uploading an image for the first time in a content form.
+ */
+function image_preprocess_image_style(&$variables) {
+  $uri = $variables['uri'];
+  // Only try to get file information if $uri is not empty.
+  if (!empty($uri) && image_is_svg($uri)) {
+    $original = array(
+      'width' => $variables['width'],
+      'height' => $variables['height'],
+    );
+    image_style_transform_dimensions($variables['style_name'], $original);
+  }
+}
+
+/**
+ * Implements hook_file_presave().
+ *
+ * Set the dimensions in the "metadata" property used by File entities.
+ */
+function image_file_presave($file) {
+  if (image_is_svg($file->uri) && isset($file->metadata)) {
+    $svg_dimensions = image_get_svg_dimensions($file->uri);
+    if ($svg_dimensions) {
+      $file->metadata['width'] = $svg_dimensions['width'];
+      $file->metadata['height'] = $svg_dimensions['height'];
+    }
+  }
 }

@@ -489,7 +489,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $view->name = $form_state['values']['name'];
     $view->human_name = $form_state['values']['human_name'];
     $view->description = $form_state['values']['description'];
-    $view->tag = 'default';
+    $view->tag = '';
     $view->core = BACKDROP_VERSION;
     $view->base_table = $this->base_table;
 
@@ -514,7 +514,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
    *   arrays of options for that display.
    */
   protected function build_display_options($form, $form_state) {
-    // Display: Master
+    // Display: Default
     $display_options['default'] = $this->default_display_options($form, $form_state);
     $display_options['default'] += array(
       'filters' => array(),
@@ -595,8 +595,8 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
    * Add the array of display options to the view, with appropriate overrides.
    */
   protected function add_displays($view, $display_options, $form, $form_state) {
-    // Display: Master
-    $default_display = $view->new_display('default', 'Master', 'default');
+    // Display: Default
+    $default_display = $view->new_display('default', 'Default', 'default');
     foreach ($display_options['default'] as $option => $value) {
       $default_display->set_option($option, $value);
     }
@@ -644,9 +644,10 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     $display_options['style_plugin'] = 'default';
     $display_options['row_plugin'] = 'fields';
 
-    // Add a least one field so the view validates and the user has already a preview.
-    // Therefore the basefield could provide 'defaults][field]' in it's base settings.
-    // If there is nothing like this choose the first field with a field handler.
+    // Add a least one field so the view validates and the user has already
+    // preview. Therefore the base field could provide '[defaults][field]' in
+    // it's base settings. If there is nothing like this choose the first field
+    // with a field handler.
     $data = views_fetch_data($this->base_table);
     if (isset($data['table']['base']['defaults']['field'])) {
       $field = $data['table']['base']['defaults']['field'];
@@ -763,7 +764,7 @@ class ViewsUiBaseViewsWizard implements ViewsWizardInterface {
     // Don't add a sort if there is no form value or the user selected none as sort.
     if (!empty($form_state['values']['show']['sort']) && $form_state['values']['show']['sort'] != 'none') {
       list($column, $sort) = explode(':', $form_state['values']['show']['sort']);
-      // Column either be a column-name or the table-columnn-ame.
+      // $column is either [column name] or [table]-[column name].
       $column = explode('-', $column);
       if (count($column) > 1) {
         $table = $column[0];

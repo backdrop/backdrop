@@ -198,13 +198,13 @@ function file_add_form_validate($form, &$form_state) {
  *
  * Only filetypes for which the user has access to create entities are returned.
  *
- * @param array $file
+ * @param File $file
  *   An upload file array from form_state.
  *
  * @return array
  *   An array of file type bundles that support the file's mime type.
  */
-function file_get_filetype_candidates($file, $selected_files = array()) {
+function file_get_filetype_candidates(File $file, $selected_files = array()) {
   $types = module_invoke_all('file_type', $file);
   backdrop_alter('file_type', $types, $file);
 
@@ -322,7 +322,7 @@ function file_add_form_submit($form, &$form_state) {
   }
 
   // Form id's can vary depending on how many other forms are displayed, so we
-  // need to do string comparissons. e.g edit-submit--2.
+  // need to do string comparisons. e.g edit-submit--2.
   if ($triggered_next) {
     $form_state['step'] = $form['#step'] + 1;
   }
@@ -336,19 +336,8 @@ function file_add_form_submit($form, &$form_state) {
   if ($save) {
     $file = file_load($form_state['storage']['upload']);
     if ($file) {
-      if (file_uri_scheme($file->uri) != $form_state['storage']['scheme']) {
-        $file_destination = $form_state['storage']['scheme'] . '://' . file_uri_target($file->uri);
-        $file_destination = file_stream_wrapper_uri_normalize($file_destination);
-        if ($moved_file = file_move($file, $file_destination, FILE_EXISTS_RENAME)) {
-          // Only re-assign the file object if file_move() did not fail.
-          $file = $moved_file;
-        }
-      }
       $file->type = $form_state['storage']['type'];
       $file->display = TRUE;
-
-      // Change the file from temporary to permanent.
-      $file->status = FILE_STATUS_PERMANENT;
 
       // Save the form fields.
       // Keep in mind that the values for the Field API fields must be in
@@ -356,14 +345,49 @@ function file_add_form_submit($form, &$form_state) {
       // the fields are on the last page of the multi step form.
       entity_form_submit_build_entity('file', $file, $form, $form_state);
 
-      file_save($file);
-      // Record that the module (in this case, the File module) is using the
-      // file. Without the call to file_usage_add, file_managed_file_validate()
-      // produces an error upon saving the form, saying that the uploaded file
-      // may not be referenced.
-      file_usage_add($file, 'file', 'file', $file->fid);
-      $form_state['file'] = $file;
-      backdrop_set_message(t('@type %name was uploaded.', array('@type' => file_type_get_name($file), '%name' => $file->filename)));
+      if (file_uri_scheme($file->uri) != $form_state['storage']['scheme']) {
+        $file_destination = $form_state['storage']['scheme'] . '://' . file_uri_target($file->uri);
+        $file_destination = file_stream_wrapper_uri_normalize($file_destination);
+        $file_destination_dirname = backdrop_dirname($file_destination);
+        // Create the directory in case it doesn't exist.
+        file_prepare_directory($file_destination_dirname, FILE_CREATE_DIRECTORY);
+        if ($moved_file = file_move($file, $file_destination, FILE_EXISTS_RENAME)) {
+          // Only re-assign the file object if file_move() did not fail.
+          $file = $moved_file;
+          $file_in_final_location = TRUE;
+        }
+        else {
+          $file_in_final_location = FALSE;
+        }
+      }
+      else {
+        $file_in_final_location = TRUE;
+      }
+
+      $substitutions = array(
+        '@type' => file_type_get_name($file),
+        '%name' => $file->filename,
+      );
+
+      // Only save the file if any necessary move was successful.
+      if ($file_in_final_location) {
+        // Change the file from temporary to permanent.
+        $file->status = FILE_STATUS_PERMANENT;
+
+        file_save($file);
+        // Record that the module (in this case, the File module) is using the
+        // file. Without the call to file_usage_add, file_managed_file_validate()
+        // produces an error upon saving the form, saying that the uploaded file
+        // may not be referenced.
+        file_usage_add($file, 'file', 'file', $file->fid);
+        $form_state['file'] = $file;
+
+        backdrop_set_message(t('@type %name was uploaded.', $substitutions));
+      }
+      else {
+        $file->delete();
+        backdrop_set_message(t('@type %name was not saved.', $substitutions), 'error');
+      }
     }
     else {
       backdrop_set_message(t('An error occurred and no file was uploaded.'), 'error');
@@ -495,6 +519,13 @@ function file_manage_form($form, &$form_state, File $file) {
     );
   }
 
+  $form['name'] = array(
+    '#type' => 'item',
+    '#title' => t('Filename'),
+    '#markup' => check_plain($file->filename),
+    '#weight' => -11,
+  );
+
   $form['filename'] = array(
     '#type' => 'textfield',
     '#title' => t('File display title'),
@@ -530,7 +561,7 @@ function file_manage_form($form, &$form_state, File $file) {
   $form['destination'] = array(
     '#type' => 'fieldset',
     '#access' => user_access('manage files'),
-    '#title' => t('Destination'),
+    '#title' => t('File location'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
@@ -555,6 +586,20 @@ function file_manage_form($form, &$form_state, File $file) {
     '#options' => $options,
     '#default_value' => file_uri_scheme($file->uri),
   );
+
+  if (!empty($file->uri)) {
+    $directory_path = file_stream_wrapper_get_instance_by_uri($file->uri)->getDirectoryPath();
+    $filename = file_uri_target($file->uri);
+    $filepath = $directory_path . '/' . $filename;
+    $url = url($filepath, array('absolute' => TRUE));
+    $form['destination']['url'] = array(
+      '#type' => 'item',
+      '#title' => t('File URL'),
+      '#markup' => l($url, $url, array(
+        'attributes' => array('class' => array('file-preview-link')),
+      )),
+    );
+  }
 
   // File user information for administrators.
   $anonymous = config_get_translated('system.core', 'anonymous');
@@ -994,7 +1039,7 @@ function _file_usage_get_total(File $file) {
  */
 function file_usage_page($file) {
   $rows = array();
-  $occured_entities = array();
+  $occurred_entities = array();
 
   // Determine all of the locations where a file is used, then loop through the
   // occurrences and filter out any duplicates.
@@ -1009,8 +1054,8 @@ function file_usage_page($file) {
         // If this entity has already been listed in the table, just add any
         // additional usage to the total count column in the table row and
         // continue on to the next iteration of the loop.
-        if (isset($occured_entities[$entity_type][$entity_id])) {
-          $rows[$occured_entities[$entity_type][$entity_id]][2] += $count;
+        if (isset($occurred_entities[$entity_type][$entity_id])) {
+          $rows[$occurred_entities[$entity_type][$entity_id]][2] += $count;
           continue;
         }
 
@@ -1020,16 +1065,7 @@ function file_usage_page($file) {
 
         // Link the label to the URI when possible.
         if (!empty($entity_uri['path'])) {
-          // Unlike Node or Term entities File entities have a stream wrapper
-          // to the file set as their path, but the path to the entities' page
-          // is "path/[fid]".
-          // @todo Fix in https://github.com/backdrop/backdrop-issues/issues/2300
-          if ($entity_type == 'file') {
-            $uri = 'file/' . $entity_id;
-          }
-          else {
-            $uri = $entity_uri['path'];
-          }
+          $uri = $entity_uri['path'];
           $entity_label = l($label, $uri);
         }
         else {
@@ -1040,7 +1076,7 @@ function file_usage_page($file) {
 
         // Record the occurrence of the entity to ensure that it isn't listed in
         // the table again.
-        $occured_entities[$entity_type][$entity_id] = count($rows) - 1;
+        $occurred_entities[$entity_type][$entity_id] = count($rows) - 1;
       }
     }
   }

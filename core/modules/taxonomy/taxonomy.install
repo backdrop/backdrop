@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Install, update and uninstall functions for the taxonomy module.
@@ -244,6 +243,7 @@ function taxonomy_update_1001() {
       $vid = $vocabulary_data['vid'];
       $machine_name = $vocabulary_data['machine_name'];
       unset($vocabulary_data['vid']);
+      unset($vocabulary_data['module']);
 
       // Save the vocabulary as config.
       $config = config('taxonomy.vocabulary.'. $machine_name);
@@ -384,8 +384,8 @@ function taxonomy_update_1009() {
   }
 
   $admin_role = config_get('system.core', 'user_admin_role');
-  
-  foreach (array($admin_role, 'editor') as $role_name) { 
+
+  foreach (array($admin_role, 'editor') as $role_name) {
     $config = config('user.role.' . $role_name);
     $permissions = $config->get('permissions');
     if ($permissions) {
@@ -400,6 +400,27 @@ function taxonomy_update_1009() {
       $config->set('permissions', $permissions);
       $config->save();
     }
+  }
+}
+
+/**
+ * Clean up extraneous language-related configuration setting.
+ */
+function taxonomy_update_1010() {
+  $config_names = config_get_names_with_prefix('field.bundle.taxonomy_term.');
+  foreach ($config_names as $config_name) {
+    $config = config($config_name);
+    $extra_fields_display_langcode = $config->get('extra_fields.display.language');
+    if (isset($extra_fields_display_langcode)) {
+      $config->set('extra_fields.display.langcode', $extra_fields_display_langcode);
+      $config->clear('extra_fields.display.language');
+    }
+    $extra_fields_form_langcode = $config->get('extra_fields.form.language');
+    if (isset($extra_fields_form_langcode)) {
+      $config->set('extra_fields.form.langcode', $extra_fields_form_langcode);
+      $config->clear('extra_fields.form.language');
+    }
+    $config->save();
   }
 }
 
