@@ -262,10 +262,10 @@ function backup_settings_form_submit(array $form, array &$form_state) {
  * Starts a batch process to create a backup.
  *
  * @param array $backup_targets
- *   An array of backup settings, keyed by the backup type and key. For example
- *   a common set of keys would be:
- *   - mysql:default
- *   - config:active
+ *   An array of backup settings, keyed by the backup name. For example a common
+ *   set of keys would be:
+ *   - db_default
+ *   - config_active
  *   The value of each array is another array of backup settings, as would be
  *   passed to backup_execute().
  * @param array $options
@@ -349,7 +349,7 @@ function backup_batch_finished($success, array $results, array $operations) {
     backdrop_set_message(t('Backup created successfully.'));
   }
   else {
-    backdrop_set_message(t('Backup failed.'));
+    backdrop_set_message(t('Backup failed.'), 'error');
   }
 }
 
@@ -357,8 +357,8 @@ function backup_batch_finished($success, array $results, array $operations) {
  * Prepare for a batch backup process, ensuring requirements are met.
  *
  * @param array $backup_targets
- *   An array of backup configurations, keyed by backup ID. This value is
- *   modified by reference.
+ *   An array of backup settings, keyed by backup name. This value is modified
+ *   by reference.
  * @param array $options
  *   Additional options to control the Backup process. See backup_batch() for
  *   the list of available keys.
@@ -634,7 +634,7 @@ function backup_delete($backup_name) {
  *   TRUE if the restore is ready to run, FALSE if errors were encountered.
  */
 function backup_restore_prepare($backup_file, $restore_target, array &$backup_settings, array &$errors) {
-  // @todo: check if anything is needed here.
+  // No operation here for now, but available and called if needed.
   return TRUE;
 }
 
