@@ -217,10 +217,13 @@ function book_admin_edit_submit($form, &$form_state) {
         $node->save();
         watchdog('content', 'book: updated %title.', array('%title' => $node->title), WATCHDOG_NOTICE, l(t('view'), 'node/' . $node->nid));
       }
-
-      // Assume it's been updated and clear the navigation cache for the item.
-      _book_cache_clear($row['#item']['bid'], TRUE);
     }
+  }
+
+  // Clear the navigation cache for the book.
+  // All items share the same bid so use the last item.
+  if (isset($row['#item']['bid'])) {
+    _book_cache_clear($row['#item']['bid'], TRUE);
   }
 
   backdrop_set_message(t('Updated book %title.', array('%title' => $form['#node']->title)));

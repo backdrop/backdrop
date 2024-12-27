@@ -655,9 +655,6 @@ function _book_update_outline(Node $node) {
           'bid' => $node->book['bid'],
         ))
         ->execute();
-      // Reset the cache of stored books.
-      _book_cache_clear($node->book['bid'], TRUE);
-      backdrop_static_reset('book_get_books');
     }
     else {
       if ($node->book['bid'] != db_query("SELECT bid FROM {book} WHERE nid = :nid", array(
@@ -665,11 +662,13 @@ function _book_update_outline(Node $node) {
         ))->fetchField()) {
         // Update the bid for this page and all children.
         book_update_bid($node->book);
-        // Reset the cache of stored books.
-        _book_cache_clear($node->book['bid'], TRUE);
-        backdrop_static_reset('book_get_books');
       }
     }
+
+    // Reset the cache of stored books.
+    _book_cache_clear($node->book['bid'], TRUE);
+    backdrop_static_reset('book_get_books');
+
     // Get all nodes that are part of this book and flush their caches.
     $affected_nids = db_query("SELECT nid FROM {book} WHERE bid = :bid", array(
       ':bid' => $node->book['bid'],
@@ -949,7 +948,7 @@ function book_node_insert(Node $node) {
       backdrop_set_message(t('Reorder book pages from the <a href="@url">book outline</a>.', array('@url' => url('admin/content/book/' . $node->book['bid']))));
     }
 
-    _book_cache_clear($node->book['bid'], TRUE);
+    //_book_cache_clear($node->book['bid'], TRUE);
   }
 }
 
@@ -970,7 +969,7 @@ function book_node_update(Node $node) {
       backdrop_set_message(t('Reorder book pages from the <a href="@url">book outline</a>.', array('@url' => url('admin/content/book/' . $node->book['bid']))));
     }
 
-    _book_cache_clear($node->book['bid'], TRUE);
+    //_book_cache_clear($node->book['bid'], TRUE);
   }
 }
 
@@ -1334,7 +1333,7 @@ function book_flush_caches() {
  */
 function book_admin_bar_cache_info() {
   $caches['book_cache'] = array(
-    'title' => t('Book pagination data'),
+    'title' => t('Book navigation data'),
     'callback' => '_book_cache_clear',
   );
   return $caches;
