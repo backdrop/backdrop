@@ -388,10 +388,12 @@ function template_preprocess_user_profile(&$variables) {
 }
 
 /**
- * Process variables for user-simplified-page.tpl.php.
+ * Preprocess variables for user-simplified-page.tpl.php.
  *
- * The $variables array contains the following arguments:
- * - $element
+ * @param array $variables
+ *   An associative array containing:
+ *   - form: The form structure to be rendered.
+ *   - links: A render array containing the links to other related forms.
  *
  * @see user-simplified-page.tpl.php
  */
