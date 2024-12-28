@@ -22,8 +22,18 @@
   overflow-wrap: break-word;
 }
 
+
 .l-top .block-hero {
   margin-top: -2rem;/* Negative top margin collapses spacing under header */
+}
+
+.update-1-30 .l-top .block-hero {
+  margin-top: 0;/* Negative top margin collapses spacing under header */
+}
+
+.update-1-30 .l-top .block-hero:first-child,
+.update-1-30 .l-top .block-system-messages:first-child {
+  margin-top: -2rem;
 }
 
 .container .block-hero {
