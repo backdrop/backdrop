@@ -3665,6 +3665,9 @@ function _user_local_tasks_to_list() {
   $links = array(
     '#theme' => 'item_list',
     '#items' => $items,
+    '#attributes' => array(
+      'class' => 'login-links',
+    )
   );
   return $links;
 }
