@@ -1,13 +1,14 @@
 <?php
 /**
  * @file
- * Theme wrapper for the "Log in", "Reset password", and "Create new Account"
+ * Theme template for the "Log in", "Reset password", and "Create new Account"
  * forms when shown on simplified (layout suppressed) pages.
  *
  * Available variables:
- *   - $form: The rendered HTML for the wrapped form.
+ *   - $form: The form render array.
+ *   - $links: A render array with related form links.
  *
- * @since 1.30.0 template added
+ * @since 1.30.0 Template added
  * @ingroup themeable
  */
 ?>
