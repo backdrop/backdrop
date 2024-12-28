@@ -34,7 +34,7 @@
 
       <?php print render($form); ?>
       <div class="user-tabs-links">
-        <?php print render($links) ?>
+        <?php print render($links); ?>
       </div>
 
     </div>
