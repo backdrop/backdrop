@@ -8152,6 +8152,7 @@ function backdrop_common_theme() {
       'variables' => array(
         'name' => NULL,
         'path' => NULL,
+        'alt' => NULL,
         'attributes' => array('class' => array()),
         'wrapper_attributes' => array('class' => array()),
       ),
