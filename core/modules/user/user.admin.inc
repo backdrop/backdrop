@@ -432,7 +432,17 @@ function user_login_settings($form, &$form_state) {
     '#description' => t('If there are excessive failed login attempts, the offending IP address or user account will be temporarily blocked. By default these events will be logged, as it helps identify brute force login attacks. You may want to disable logging them if for example, you are using the dblog module, and want to avoid database writes.'),
   );
 
-  return system_settings_form($form);
+  $form = system_settings_form($form);
+  // Add another submit handler to clear caches.
+  $form['#submit'][] = 'user_login_settings_submit';
+  return $form;
+}
+
+/**
+ * Second Form submission handler for user_login_settings().
+ */
+function user_login_settings_submit($form, &$form_state) {
+  cache_clear_all();
 }
 
 /**
