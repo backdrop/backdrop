@@ -689,7 +689,7 @@ function _link_parse_str($query) {
  * Punycode. This converts a URL into a fully escaped format so that it may be
  * validated using only ASCII characters.
  *
- * @param $url
+ * @param string $url
  *   The URL whose domain should be escaped.
  *
  * @return string
