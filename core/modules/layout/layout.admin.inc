@@ -919,7 +919,7 @@ function layout_settings_form_validate(&$form, &$form_state) {
         }
         switch (TRUE) {
           case ($num_placeholders != $num_additional_placeholders):
-            // E.g. Cannot have "node/%" and "node".
+            // For example, it cannot have "node/%" nor "node".
             form_set_error('additional_paths', t('Additional path %path should have the same number of placeholders as primary path %primary_path.',
               array(
                 '%path' => $path,
