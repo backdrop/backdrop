@@ -1145,7 +1145,19 @@ function link_cleanup_url($url, $protocol = 'http') {
  *   the LINK_(linktype) constants.
  */
 function link_validate_url($text) {
-  $allowed_protocols = settings_get('filter_allowed_protocols', array('http', 'https', 'ftp', 'news', 'nntp', 'telnet', 'mailto', 'irc', 'ssh', 'sftp', 'webcal'));
+  $allowed_protocols = settings_get('filter_allowed_protocols', array(
+    'http',
+    'https',
+    'ftp',
+    'news',
+    'nntp',
+    'telnet',
+    'mailto',
+    'irc',
+    'ssh',
+    'sftp',
+    'webcal',
+  ));
   $cleaned_text = _link_escape_domain($text);
 
   $protocol = '((?:' . implode("|", $allowed_protocols) . '):\/\/)';
