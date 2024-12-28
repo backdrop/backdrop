@@ -29,7 +29,38 @@ function user_autocomplete($string = '') {
  */
 function user_pass_page() {
   backdrop_set_title(t('Reset password'));
-  return backdrop_get_form('user_pass');
+  $user_register_form = backdrop_get_form('user_pass');
+
+  // If user is logged in, always display with tabs appearance.
+  if (user_is_logged_in()) {
+    return $user_register_form;
+  }
+
+  // For anonymous users, match with the selected appearance.
+  $user_login_appearance_setting = user_login_appearance_setting();
+  switch ($user_login_appearance_setting) {
+    case 'simplified':
+      $links = _user_local_tasks_to_list();
+      $output = theme('user_simplified_page', array(
+        'form' => $user_register_form,
+        'links' => $links,
+      ));
+      break;
+
+    case 'links':
+      $links = _user_local_tasks_to_list();
+      $output = theme('user_links_page', array(
+        'form' => $user_register_form,
+        'links' => $links,
+      ));
+      break;
+
+    case 'tabs':
+    default:
+      $output = $user_register_form;
+  }
+
+  return $output;
 }
 
 /**

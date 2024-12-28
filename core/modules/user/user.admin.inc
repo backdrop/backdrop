@@ -399,6 +399,32 @@ function user_login_settings($form, &$form_state) {
     ),
   );
 
+  $form['user_login_appearance_setting'] = array(
+    '#type' => 'fieldset',
+    '#title' => '',
+  );
+  $user_login_page_tab_options = array(
+    'tabs' => t('Use tabs'),
+    'links' => t('Use links'),
+    'simplified' => t('Show simplified page'),
+  );
+  $user_login_page_default_settings = $core_config->get('user_login_appearance_setting');
+  $form['user_login_appearance_setting']['user_login_appearance_setting'] = array(
+    '#title' => t('Login page options'),
+    '#type' => 'radios',
+    '#options' => $user_login_page_tab_options,
+    '#default_value' => $user_login_page_default_settings ? $user_login_page_default_settings : 'tabs',
+    '#config' => 'system.core',
+    'tabs' => array(
+      '#description' => t('Show tabs for "Create new account", "Log in", and "Reset password" links.'),
+    ),
+    'links' => array(
+      '#description' => t('Show plain links to these pages.'),
+    ),
+    'simplified' => array(
+      '#description' => t('Show plain links to these pages, and hide all layout regions, such as headers, footers, and sidebars.'),
+    ),
+  );
   $form['flood_log_failed_attempts'] = array(
     '#type' => 'checkbox',
     '#title' => t('Log excessive failed login attempts.'),

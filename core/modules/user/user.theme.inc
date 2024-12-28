@@ -386,3 +386,63 @@ function template_preprocess_user_profile(&$variables) {
   $variables['theme_hook_suggestions'][] = 'user_profile__' . $account->uid;
   $variables['theme_hook_suggestions'][] = 'user_profile__' . $account->uid . '__' . $view_mode;
 }
+
+/**
+ * Process variables for user-simplified-page.tpl.php.
+ *
+ * The $variables array contains the following arguments:
+ * - $element
+ *
+ * @see user-simplified-page.tpl.php
+ */
+function template_preprocess_user_simplified_page(&$variables) {
+  $form = $variables['form'];
+  if ($form['#form_id'] == 'user_login') {
+    $page_title = t('Login');
+  }
+  elseif ($form['#form_id'] == 'user_pass') {
+    $page_title = t('Reset password');
+  }
+  elseif ($form['#form_id'] == 'user_register_form') {
+    $page_title = t('Create new account');
+  }
+  
+  $variables['user_login_appearance_setting'] = user_login_appearance_setting();
+  $variables['user_login_page_simplified'] = $variables['user_login_appearance_setting'] == 'simplified';
+  $variables['logo_image'] = '';
+
+  if ($variables['user_login_page_simplified']) {
+    if ($logo = backdrop_get_logo()) {
+      $variables['logo_image'] = theme('image', array(
+        'path' => $logo,
+        'alt' => $page_title,
+      ));
+    }
+    $variables['site_name'] = config_get_translated('system.core', 'site_name');
+    $variables['front_page'] = url();
+    $variables['page_title'] = $page_title;
+    $variables['messages'] = theme('status_messages');
+  }
+  backdrop_add_css(backdrop_get_path('module', 'user', 'css/user-simplified-page.css'));
+}
+
+/**
+ * Returns HTML for user forms with links instead of tabs.
+ *
+ * @param $variables
+ *   An associative array containing:
+ *   - form: A renderable array of the form to be rendered
+ *     (e.g. login or password reset).
+ *   - links: An item_list renderable array with the local tasks as links. 
+ *
+ * @ingroup themeable
+ */
+function theme_user_links_page($variables) {
+  $output = '<div class="user-form">';
+  $output .= backdrop_render($variables['form']);
+  $output .= '</div>';
+  $output .= '<div class="user-links">';
+  $output .= backdrop_render($variables['links']);
+  $output .= '</div>';
+  return $output;
+}
