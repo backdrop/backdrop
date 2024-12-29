@@ -1634,6 +1634,19 @@ function user_menu_alter(&$items) {
     // Set "Manage fields" tab as the default tab.
     $items['admin/config/people/manage/fields']['type'] = MENU_DEFAULT_LOCAL_TASK;
   }
+
+  // If we are using the simplified look for login pages, suppress the layout by
+  // providing a delivery_callback value. See menu_execute_active_handler().
+  if (config_get('system.core', 'user_login_appearance_setting') == 'simplified') {
+    $items['user/login']['delivery callback'] = 'backdrop_deliver_html_page';
+    $items['user/password']['delivery callback'] = 'backdrop_deliver_html_page';
+    $items['user/register']['delivery callback'] = 'backdrop_deliver_html_page';
+  }
+  else {
+    unset($items['user/login']['delivery callback']);
+    unset($items['user/password']['delivery callback']);
+    unset($items['user/register']['delivery callback']);
+  }
 }
 
 /**
@@ -1738,6 +1751,11 @@ function user_admin_paths() {
     'user/*/edit' => TRUE,
     'user/*/edit/*' => TRUE,
   );
+  if (config_get('system.core', 'user_login_appearance_setting') == 'simplified') {
+    $paths[] = 'user/login';
+    $paths[] = 'user/password';
+    $paths[] = 'user/register';
+  }
   return $paths;
 }
 
@@ -1791,41 +1809,13 @@ function user_page_title($account) {
 }
 
 /**
- * Implements hook_init().
- *
- * Suppresses the use of layouts and blocks on the user login, register, and
- * reset pages if configured to use the simple login page.
- */
-function user_init() {
-  if (user_page_is_simplified_page()) {
-    layout_suppress(TRUE);
-  }
-}
-
-/**
- * Implements hook_custom_theme().
- *
- * Activates the admin theme for login, register, and reset pages if
- * configured to use the simple login page. Note this by-passes the
- * "view the administration theme" permission to show the admin theme to
- * anonymous users.
- *
- * @see user_init()
- */
-function user_custom_theme() {
-  if (user_page_is_simplified_page()) {
-    return config_get('system.core', 'admin_theme');
-  }
-}
-
-/**
  * Implements hook_preprocess_page().
  */
 function user_preprocess_page(&$variables) {
   if (user_is_logged_in()) {
     return;
   }
-  if (user_page_is_simplified_page()) {
+  if (config_get('system.core', 'user_login_appearance_setting') == 'simplified' && in_array(current_path(), array('user/login', 'user/password', 'user/register'))) {
     $variables['classes'][] = 'user-simplified-page-body';
   }
 }
@@ -1840,21 +1830,9 @@ function user_preprocess_page_components(&$variables) {
     return;
   }
   // Suppress tabs if for user forms when using "links" appearance.
-  if (in_array(current_path(), array('user/login', 'user/register', 'user/password')) &&  user_login_appearance_setting() == 'links') {
+  if (in_array(current_path(), array('user/login', 'user/register', 'user/password')) &&  config_get('system.core', 'user_login_appearance_setting') == 'links') {
     $variables['tabs'] = '';
   }
-}
-
-/**
- * Determines whether the current page is simplified.
- * 
- * @since 1.30.0 Function added.
- */
-function user_page_is_simplified_page() {
-  if (!user_is_logged_in() && user_login_appearance_setting() == 'simplified' && in_array(current_path(), array('user/login', 'user/password', 'user/register'))) {
-    return TRUE;
-  }
-  return FALSE;
 }
 
 /**
@@ -1865,7 +1843,7 @@ function user_page_is_simplified_page() {
 function user_login_page() {
   $user_login_form = backdrop_get_form('user_login');
 
-  switch (user_login_appearance_setting()) {
+  switch (config_get('system.core', 'user_login_appearance_setting')) {
     case 'simplified':
       $links = _user_local_tasks_to_list();
       $output = theme('user_simplified_page', array(
@@ -3323,7 +3301,7 @@ function user_form_field_ui_field_edit_form_submit($form, &$form_state) {
 function user_register_page() {
   // We need to set the page title because this menu entry is a local task.
   backdrop_set_title(t('Create new account'));
-  $user_login_appearance_setting = user_login_appearance_setting();
+  $user_login_appearance_setting = config_get('system.core', 'user_login_appearance_setting');
   $user_register_form = backdrop_get_form('user_register_form');
 
   switch ($user_login_appearance_setting) {

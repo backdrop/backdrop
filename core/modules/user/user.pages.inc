@@ -37,7 +37,7 @@ function user_pass_page() {
   }
 
   // For anonymous users, match with the selected appearance.
-  $user_login_appearance_setting = user_login_appearance_setting();
+  $user_login_appearance_setting = config_get('system.core', 'user_login_appearance_setting');
   switch ($user_login_appearance_setting) {
     case 'simplified':
       $links = _user_local_tasks_to_list();

@@ -433,16 +433,16 @@ function user_login_settings($form, &$form_state) {
   );
 
   $form = system_settings_form($form);
-  // Add another submit handler to clear caches.
+  // Add another submit handler to rebuild menus.
   $form['#submit'][] = 'user_login_settings_submit';
   return $form;
 }
 
 /**
- * Second Form submission handler for user_login_settings().
+ * Second form submission handler for user_login_settings().
  */
 function user_login_settings_submit($form, &$form_state) {
-  cache_clear_all();
+  state_set('menu_rebuild_needed', TRUE);
 }
 
 /**

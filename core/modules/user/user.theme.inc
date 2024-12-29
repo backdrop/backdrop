@@ -409,7 +409,7 @@ function template_preprocess_user_simplified_page(&$variables) {
     $page_title = t('Create new account');
   }
   
-  $variables['user_login_appearance_setting'] = user_login_appearance_setting();
+  $variables['user_login_appearance_setting'] = config_get('system.core', 'user_login_appearance_setting');
   $variables['user_login_page_simplified'] = $variables['user_login_appearance_setting'] == 'simplified';
   $variables['logo_image'] = '';
 
