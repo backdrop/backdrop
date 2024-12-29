@@ -194,6 +194,19 @@ class Layout {
   var $removed_blocks = array();
 
   /**
+   * An array of additional paths.
+   *
+   * This is being used to to keep track of additional paths in the layout being
+   * edited. If the layout edits are saved, this is used in
+   * layout_layout_presave() in order save the paths.
+   *
+   * @var array
+   * @see layout_settings_form_validate()
+   * @see layout_layout_presave()
+   */
+  public $additional_paths = array();
+
+  /**
    * @var bool
    */
   public $is_new;
@@ -929,7 +942,7 @@ class Layout {
         }
       }
     }
-    
+
     return empty(array_filter($context_counts));
   }
 

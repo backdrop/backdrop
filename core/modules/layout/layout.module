@@ -2512,9 +2512,8 @@ function layout_layout_template_info() {
  * Implements hook_layout_presave().
  */
 function layout_layout_presave($layout) {
-  global $_layout_additional_paths;
-  if (isset($_layout_additional_paths)) {
-    $layout->settings['additional_paths'] = $_layout_additional_paths;
+  if (!empty($layout->additional_paths)) {
+    $layout->settings['additional_paths'] = $layout->additional_paths;
   }
 
   if (!empty($layout->removed_blocks)) {

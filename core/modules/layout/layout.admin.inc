@@ -795,8 +795,8 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     );
   }
 
-  if (isset($form_state['build_info']['args'][0]->settings['additional_paths'])) {
-    $default_value = implode("\n", $form_state['build_info']['args'][0]->settings['additional_paths']);
+  if (isset($layout->settings['additional_paths'])) {
+    $default_value = implode("\n", $layout->settings['additional_paths']);
   }
   else {
     $default_value = '';
@@ -900,8 +900,7 @@ function layout_settings_form_validate(&$form, &$form_state) {
     }
   }
 
-  global $_layout_additional_paths;
-  $_layout_additional_paths = array();
+  $layout->additional_paths = array();
   if (isset($form_state['values']['additional_paths'])) {
     $primary_path = $form_state['values']['path'];
     $num_placeholders = count(_layout_placeholder_positions($primary_path));
@@ -965,7 +964,7 @@ function layout_settings_form_validate(&$form, &$form_state) {
           case (_layout_set_message_on_path_error($form, 'additional_paths', $path)):
             break;
           default:
-            $_layout_additional_paths[] = $path;
+            $layout->additional_paths[] = $path;
             break;
         }
       }
