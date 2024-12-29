@@ -30,22 +30,6 @@
   margin-top: 0; /* If hero is in a container don't collapse top spacing */
 }
 
-.update-1-30 .block-hero:first-of-type {
-  margin-top: -2rem;
-}
-
-.update-1-30 .block-hero {
-  margin: 0;
-}
-
-.update-1-30 .no-container .block {
-  margin-top: -1rem;
-}
-
-.update-1-30 .block-system-main-menu ~ .block {
-  margin-top: 0;
-}
-
 @media (min-width: 25em) {
   .block-hero {
     padding: 2rem 3rem 3rem;
@@ -109,4 +93,21 @@
   .block-hero .block-title {
     font-size: 2.625em;
   }
+}
+
+/**
+ * Some changes to fix problems with extra white space between blocks in Basis.
+ * Is there a better location?
+ **/
+
+.update-1-30 .block-hero {
+  margin-bottom: 0;
+}
+
+.update-1-30 .container .l-flexible-row {
+  padding-bottom: 2rem;
+}
+
+.update-1-30 .l-header {
+  margin-bottom: 0;
 }
