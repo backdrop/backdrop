@@ -30,6 +30,22 @@
   margin-top: 0; /* If hero is in a container don't collapse top spacing */
 }
 
+.update-1-30 .block-hero:first-of-type {
+  margin-top: -2rem;
+}
+
+.update-1-30 .block-hero {
+  margin: 0;
+}
+
+.update-1-30 .no-container .block {
+  margin-top: -1rem;
+}
+
+.update-1-30 .block-system-main-menu ~ .block {
+  margin-top: 0;
+}
+
 @media (min-width: 25em) {
   .block-hero {
     padding: 2rem 3rem 3rem;
