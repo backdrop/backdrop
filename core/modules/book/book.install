@@ -168,7 +168,7 @@ function book_update_1004() {
     db_query("DELETE FROM {system} WHERE name = 'book_cache' AND type = 'module'");
   }
   else {
-    return t('<em>Book Cache</em> not found. Nothing to be done.');
+    return t('<em>Book Cache</em> module not found. Nothing to be done.');
   }
 }
 
