@@ -3686,7 +3686,7 @@ class LayoutPathTest extends BackdropWebTestCase {
    * Set up environment.
    */
   public function setUp() {
-    parent::setUp(array('layout_test'));
+    parent::setUp(array('layout_test', 'path'));
 
     // Create content types for testing.
     $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
@@ -3701,6 +3701,7 @@ class LayoutPathTest extends BackdropWebTestCase {
       'edit any page content',
       'edit any post content',
       'administer nodes',
+      'create url aliases',
     ));
     $this->backdropLogin($this->admin_user);
   }
@@ -3729,14 +3730,33 @@ class LayoutPathTest extends BackdropWebTestCase {
   public function testAdditionalLayoutPaths() {
     config_set('system.core', 'node_admin_theme', 0);
 
+    $test_node1 = $this->backdropCreateNode(array(
+      'type' => 'page',
+      'title' => "Test page title",
+    ));
+
+    $test_node2 = $this->backdropCreateNode(array(
+      'type' => 'post',
+      'title' => "Test post title",
+    ));
+
     // Create a new layout using the UI.
     $layout_name = 'test_page_layout';
     $edit = array(
       'title' => 'Page test',
       'name' => $layout_name,
       'layout_template' => 'boxton',
-      'path' => 'node/%',
-      'additional_paths' => 'node/%/edit',
+      'path' => 'node',
+    );
+    $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
+
+    // Create a second layout using the UI.
+    $layout_name = 'second_page_layout';
+    $edit = array(
+      'title' => 'Page test2',
+      'name' => $layout_name,
+      'layout_template' => 'boxton',
+      'path' => 'second',
     );
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
@@ -3747,6 +3767,51 @@ class LayoutPathTest extends BackdropWebTestCase {
     $test_layout_1->save();
 
     $this->assertRaw($layout_name);
+
+    // Test validation.
+    $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure');
+    $edit = array(
+      'additional_paths' => 'foobar',
+    );
+    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->assertText('Additional path foobar cannot be used as an additional path. It does not exist in the system.', 'Error message: path route does not exist');
+
+    $edit = array(
+      'additional_paths' => 'foobar%',
+    );
+    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->assertText('Placeholders must be the only character in their part of the path i.e. "foobar%" should be "%".', 'Error message: placeholders must be separate');
+
+    $edit = array(
+      'additional_paths' => 'node/2',
+    );
+    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->assertText('Additional path node/2 cannot be used as an additional path. It requires a context in the primary path.', 'Error message: path requires context');
+
+    $edit = array(
+      'additional_paths' => 'second',
+    );
+    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->assertText('Additional path second is already used as the primary path of another layout.', 'Error message: path already used for other layout primary path');
+
+    $alias = backdrop_get_path_alias('node/' . $test_node1->nid);
+    $edit = array(
+      'additional_paths' => $alias,
+    );
+    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->assertText('Additional path ' . $alias . ' is currently assigned to be an alias for "node/1" and cannot be used.', 'Error message: cannot use an alias');
+
+    $edit = array(
+      'path' => 'node/%',
+      'additional_paths' => 'foobar',
+    );
+    $this->backdropPost(NULL, $edit, t('Save layout'));
+    $this->assertText('Additional path foobar should have the same number of placeholders as primary path node/%.', 'Error message: must have the same number of placeholders');
+
+    $edit = array(
+      'additional_paths' => 'node/%/edit',
+    );
+    $this->backdropPost(NULL, $edit, t('Save layout'));
 
     $this->backdropGet('admin/structure/layouts/manage/' . $layout_name . '/configure');
     $this->backdropPost(NULL, $edit, t('Add condition'));
@@ -3759,16 +3824,6 @@ class LayoutPathTest extends BackdropWebTestCase {
     );
     $this->backdropPost(NULL, $edit, t('Add condition'));
     $this->backdropPost(NULL, array(), t('Save layout'));
-
-    $test_node1 = $this->backdropCreateNode(array(
-      'type' => 'page',
-      'title' => "Test page title",
-    ));
-
-    $test_node2 = $this->backdropCreateNode(array(
-      'type' => 'post',
-      'title' => "Test post title",
-    ));
 
     $this->backdropGet('node/' . $test_node1->nid);
     $this->assertResponse(200);
