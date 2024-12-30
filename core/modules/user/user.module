@@ -1650,18 +1650,6 @@ function user_menu_alter(&$items) {
 }
 
 /**
- * Return the login page appearance setting.
- */
-function user_login_appearance_setting() {
-  $appearance_setting = config_get('system.core', 'user_login_appearance_setting');
-  // If Layout module is disabled, use links.
-  if ($appearance_setting == 'simplified' && !function_exists('layout_suppress')) {
-    $appearance_setting = 'links';
-  }
-  return $appearance_setting;
-}
-
-/**
  * Implements hook_admin_bar_output_alter().
  */
 function user_admin_bar_output_alter(&$content) {
