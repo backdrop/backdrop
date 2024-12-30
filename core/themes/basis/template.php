@@ -147,17 +147,6 @@ function basis_preprocess_header(&$variables) {
 }
 
 /**
- * Implements hook_preprocess_HOOK().
- */
-function basis_preprocess_block__layout__hero(&$variables) {
-  // Only new installs as of 1.30 get the new hero default background.
-  // @todo Fix timestamp, it's currently set to a past date (2024-11-01).
-  if (version_compare(BACKDROP_VERSION, '1.29.99', '>') && state_get('install_time') > 1730415600) {
-    $variables['classes'][] = 'block-hero-new';
-  }
-}
-
-/**
  * Overrides theme_breadcrumb(). Removes &raquo; from markup.
  *
  * @see theme_breadcrumb().
