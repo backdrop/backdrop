@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Theme template for the login forms (for example, "Log in" and "Create new 
+ * Theme template for the login forms (for example, "Log in" and "Create new
  * Account") when shown on simplified (layout suppressed) pages.
  *
  * Available variables:
