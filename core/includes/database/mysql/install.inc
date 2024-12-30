@@ -40,7 +40,7 @@ class DatabaseTasks_mysql extends DatabaseTasks {
    * Returns the minimum version for MySQL.
    */
   public function minimumVersion() {
-    return '5.0.15';
+    return '5.5.0';
   }
 }
 

@@ -27,7 +27,7 @@ Backdrop.behaviors.installerProjectList = {
     }
 
     // Update the table header after any AJAX event completes.
-    $(document).ajaxComplete(function() {
+    $(document).on('ajaxComplete', function() {
       updateTableHeader();
     });
 

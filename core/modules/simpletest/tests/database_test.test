@@ -1332,7 +1332,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
     }
 
     $query = (string)$query;
-    $expected = "/* Testing query comments */ SELECT test.`name` AS `name`, test.`age` AS `age`\nFROM \n{test} test";
+    $expected = "/* Testing query comments */ SELECT `test`.`name` AS `name`, `test`.`age` AS `age`\nFROM \n{test} `test`";
 
     $this->assertEqual($num_records, 4, 'Returned the correct number of rows.');
     $this->assertEqual($query, $expected, 'The flattened query contains the comment string.');
@@ -1354,7 +1354,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
     }
 
     $query = (string)$query;
-    $expected = "/* Testing query comments  * / SELECT nid FROM {node}; -- */ SELECT test.`name` AS `name`, test.`age` AS `age`\nFROM \n{test} test";
+    $expected = "/* Testing query comments  * / SELECT nid FROM {node}; -- */ SELECT `test`.`name` AS `name`, `test`.`age` AS `age`\nFROM \n{test} `test`";
 
     $this->assertEqual($num_records, 4, 'Returned the correct number of rows.');
     $this->assertEqual($query, $expected, 'The flattened query contains the sanitised comment string.');
