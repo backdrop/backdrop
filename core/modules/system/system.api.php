@@ -68,11 +68,12 @@ function hook_hook_info_alter(&$hooks) {
  * To change the administrative status of menu items defined in another module's
  * hook_menu(), modules should implement hook_admin_paths_alter().
  *
- * @return
- *   An associative array. For each item, the key is the path in question, in
- *   a format acceptable to backdrop_match_path(). The value for each item should
- *   be TRUE (for paths considered administrative) or FALSE (for non-
- *   administrative paths).
+ * @return array
+ *   An associative array. For each item:
+ *   - the key is the path in question, in a format suitable for
+ *       backdrop_match_path().
+ *   - the value should be TRUE (for paths considered administrative) or FALSE
+ *       (for non-administrative paths).
  *
  * @see hook_menu()
  * @see backdrop_match_path()
@@ -89,7 +90,7 @@ function hook_admin_paths() {
 /**
  * Redefine administrative paths defined by other modules.
  *
- * @param $paths
+ * @param array $paths
  *   An associative array of administrative paths, as defined by implementations
  *   of hook_admin_paths().
  *
@@ -101,6 +102,57 @@ function hook_admin_paths_alter(&$paths) {
   $paths['user/*'] = TRUE;
   // Treat the post node form as a non-administrative page.
   $paths['node/add/post'] = FALSE;
+}
+
+/**
+ * Define login paths.
+ *
+ * Modules may specify whether or not the paths they define in hook_menu() are
+ * to be considered as login paths. Other modules may use this information to
+ * display those pages differently (e.g. in a different theme).
+ *
+ * To change the path type for menu items defined in another module's
+ * hook_menu(), modules should implement hook_login_paths_alter().
+ *
+ * @return array
+ *   An associative array. For each item:
+ *   - the key is the path in question, in a format suitable for
+ *       backdrop_match_path().
+ *   - the value should be TRUE (for paths considered login paths) or FALSE (for
+ *       non-login paths).
+ *
+ * @see hook_menu()
+ * @see backdrop_match_path()
+ * @see hook_login_paths_alter()
+ *
+ * @since 1.29.0 hook added.
+ */
+function hook_login_paths() {
+  $paths = array(
+    'my_module/*/login' => TRUE,
+    'system/tfa/*' => TRUE,
+  );
+  return $paths;
+}
+
+/**
+ * Redefine login paths defined by other modules.
+ *
+ * @param array $paths
+ *   An associative array of login paths, as defined by implementations of
+ *   hook_login_paths().
+ *
+ * @see hook_login_paths()
+ *
+ * @since 1.29.0 hook added.
+ */
+function hook_login_paths_alter(&$paths) {
+  // Treat all login pages as login paths.
+  $paths['user/login'] = TRUE;
+  $paths['user/password'] = TRUE;
+  $paths['user/reset'] = TRUE;
+  // Treat all node paths as a non-login page.
+  $paths['node/*'] = FALSE;
 }
 
 /**
