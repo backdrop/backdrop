@@ -2691,6 +2691,8 @@ function node_access($op, $node, $account = NULL) {
  *
  * @return bool
  *   TRUE if the operation may be performed, FALSE otherwise.
+ *
+ * @since 1.30.0 Function added.
  */
 function node_add_node_grants_to_query($node_access_grants, $table_alias = '') {
   $grants = db_or();
