@@ -1290,6 +1290,7 @@ function layout_load_multiple_by_path($path, $skip_menu_items = NULL) {
     }
 
     $layouts = layout_load_multiple($layout_names, $skip_menu_items);
+    $layouts = layout_load_multiple_by_additional_path($layouts, $path);
     cache('layout_path')->set($path, $layouts);
   }
 
@@ -2774,10 +2775,12 @@ function layout_field_delete_instance($instance) {
 }
 
 /**
- * Implements hook_layout_load_by_router_item_alter().
+ * Load layouts that match additional paths.
+ *
+ * @param Layout[] $layouts
+ * @param string $path
  */
-function layout_layout_load_by_router_item_alter(&$layouts, $router_item) {
-  $path = $router_item['path'];
+function layout_load_multiple_by_additional_path($layouts, $path) {
   $placeholder_positions = _layout_placeholder_positions($path);
   $num_placeholders = count($placeholder_positions);
   $configs = layout_get_all_configs('layout');
@@ -2841,19 +2844,22 @@ function layout_layout_load_by_router_item_alter(&$layouts, $router_item) {
   }
 
   // Note that either default or admin default layouts should come last, so
-  // we'll check for those in the original list, pull them out if present, and
+  // check for those in the original list, pull them out if present, and
   // add them at the end.
-  $default_layouts = array();
-  if (isset($layouts['default'])) {
-    $default_layouts['default'] = $layouts['default'];
-    unset($layouts['default']);
-  }
-  if (isset($layouts['admin_default'])) {
-    $default_layouts['admin_default'] = $layouts['admin_default'];
-    unset($layouts['admin_default']);
+  if (!empty($added_layouts)) {
+    $default_layouts = array();
+    if (isset($layouts['default'])) {
+      $default_layouts['default'] = $layouts['default'];
+      unset($layouts['default']);
+    }
+    if (isset($layouts['admin_default'])) {
+      $default_layouts['admin_default'] = $layouts['admin_default'];
+      unset($layouts['admin_default']);
+    }
+    $layouts = array_merge($layouts, $added_layouts, $default_layouts);
   }
 
-  $layouts = array_merge($layouts, $added_layouts, $default_layouts);
+  return $layouts;
 }
 
 /**
