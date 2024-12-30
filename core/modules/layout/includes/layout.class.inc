@@ -161,14 +161,14 @@ class Layout {
    *
    * @var array
    */
-  var $orphaned_blocks = array();
+  public $orphaned_blocks = array();
 
   /**
    * The region where orphaned blocks are placed in new template.
    *
    * @var string
    */
-  var $refuge_region;
+  public $refuge_region;
 
   /**
    * An array of LayoutContext instances used by this menu item.
@@ -191,7 +191,7 @@ class Layout {
    * @see removeBlock()
    * @see layout_layout_presave()
    */
-  var $removed_blocks = array();
+  public $removed_blocks = array();
 
   /**
    * An array of additional paths.
