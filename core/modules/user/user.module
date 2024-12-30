@@ -1637,7 +1637,7 @@ function user_menu_alter(&$items) {
 
   // If we are using the simplified look for login pages, suppress the layout by
   // providing a delivery_callback value. See menu_execute_active_handler().
-  if (config_get('system.core', 'user_login_appearance_setting') == 'simplified') {
+  if (config_get('system.core', 'user_login_appearance') == 'simplified') {
     $items['user/login']['delivery callback'] = 'backdrop_deliver_html_page';
     $items['user/password']['delivery callback'] = 'backdrop_deliver_html_page';
     $items['user/register']['delivery callback'] = 'backdrop_deliver_html_page';
@@ -1748,8 +1748,8 @@ function user_custom_theme() {
   if (!in_array(current_path(), array('user/login', 'user/password', 'user/register')) || user_is_logged_in()) {
     return;
   }
-  $user_login_appearance_setting = config_get('system.core', 'user_login_appearance_setting');
-  if ($user_login_appearance_setting == 'simplified') {
+  $user_login_appearance = config_get('system.core', 'user_login_appearance');
+  if ($user_login_appearance == 'simplified') {
     return config_get('system.core', 'admin_theme');
   }
 }
@@ -1810,7 +1810,7 @@ function user_preprocess_page(&$variables) {
   if (user_is_logged_in()) {
     return;
   }
-  if (config_get('system.core', 'user_login_appearance_setting') == 'simplified' && in_array(current_path(), array('user/login', 'user/password', 'user/register'))) {
+  if (config_get('system.core', 'user_login_appearance') == 'simplified' && in_array(current_path(), array('user/login', 'user/password', 'user/register'))) {
     $variables['classes'][] = 'user-simplified-page-body';
   }
 }
@@ -1825,7 +1825,7 @@ function user_preprocess_page_components(&$variables) {
     return;
   }
   // Suppress tabs if for user forms when using "links" appearance.
-  if (in_array(current_path(), array('user/login', 'user/register', 'user/password')) &&  config_get('system.core', 'user_login_appearance_setting') == 'links') {
+  if (in_array(current_path(), array('user/login', 'user/register', 'user/password')) &&  config_get('system.core', 'user_login_appearance') == 'links') {
     $variables['tabs'] = '';
   }
 }
@@ -1838,7 +1838,7 @@ function user_preprocess_page_components(&$variables) {
 function user_login_page() {
   $user_login_form = backdrop_get_form('user_login');
 
-  switch (config_get('system.core', 'user_login_appearance_setting')) {
+  switch (config_get('system.core', 'user_login_appearance')) {
     case 'simplified':
       $links = _user_local_tasks_to_list();
       $output = theme('user_simplified_page', array(
@@ -3296,10 +3296,10 @@ function user_form_field_ui_field_edit_form_submit($form, &$form_state) {
 function user_register_page() {
   // We need to set the page title because this menu entry is a local task.
   backdrop_set_title(t('Create new account'));
-  $user_login_appearance_setting = config_get('system.core', 'user_login_appearance_setting');
+  $user_login_appearance = config_get('system.core', 'user_login_appearance');
   $user_register_form = backdrop_get_form('user_register_form');
 
-  switch ($user_login_appearance_setting) {
+  switch ($user_login_appearance) {
     case 'simplified':
       $links = _user_local_tasks_to_list();
       $output = theme('user_simplified_page', array(

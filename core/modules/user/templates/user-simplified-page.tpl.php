@@ -1,8 +1,8 @@
 <?php
 /**
  * @file
- * Theme template for the "Log in", "Reset password", and "Create new Account"
- * forms when shown on simplified (layout suppressed) pages.
+ * Theme template for the login forms (for example, "Log in" and "Create new 
+ * Account") when shown on simplified (layout suppressed) pages.
  *
  * Available variables:
  *   - $form: The form render array.

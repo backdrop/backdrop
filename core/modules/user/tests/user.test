@@ -2874,7 +2874,7 @@ class UserLoginAppearanceTestCase extends BackdropWebTestCase {
     // Set login appearance to tabs.
     $this->backdropLogin($this->admin_user);
     $edit = array();
-    $edit['user_login_appearance_setting'] = 'tabs';
+    $edit['user_login_appearance'] = 'tabs';
     $this->backdropPost('admin/config/people/login', $edit, t('Save configuration'));
     $this->backdropLogout();
     foreach ($login_pages as $page) {
@@ -2890,7 +2890,7 @@ class UserLoginAppearanceTestCase extends BackdropWebTestCase {
     // Set login appearance to links.
     $this->backdropLogin($this->admin_user);
     $edit = array();
-    $edit['user_login_appearance_setting'] = 'links';
+    $edit['user_login_appearance'] = 'links';
     $this->backdropPost('admin/config/people/login', $edit, t('Save configuration'));
     $this->backdropLogout();
     foreach ($login_pages as $page) {

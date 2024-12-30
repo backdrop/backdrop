@@ -408,12 +408,12 @@ function user_login_settings($form, &$form_state) {
     'links' => t('Use links'),
     'simplified' => t('Show simplified page'),
   );
-  $user_login_page_default_settings = $core_config->get('user_login_appearance_setting');
-  $form['user_login_appearance_setting']['user_login_appearance_setting'] = array(
+  $user_login_appearance = $core_config->get('user_login_appearance');
+  $form['user_login_appearance_setting']['user_login_appearance'] = array(
     '#title' => t('Login page options'),
     '#type' => 'radios',
     '#options' => $user_login_page_tab_options,
-    '#default_value' => $user_login_page_default_settings ? $user_login_page_default_settings : 'tabs',
+    '#default_value' => $user_login_appearance ? $user_login_appearance : 'tabs',
     '#config' => 'system.core',
     'tabs' => array(
       '#description' => t('Show tabs for "Create new account", "Log in", and "Reset password" links.'),
