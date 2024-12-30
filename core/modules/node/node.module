@@ -2769,12 +2769,12 @@ function node_access($op, $node, $account = NULL) {
 /**
  * Helper function to create the OR condition for a node grants check.
  *
- * @param $account
+ * @param array $node_access_grants
  *   The grants to add to the query, usually gotten via node_access_grants().
- * @param $table_alias
+ * @param string $table_alias
  *   Optional, the alias to the node access table.
  *
- * @return
+ * @return bool
  *   TRUE if the operation may be performed, FALSE otherwise.
  */
 function node_add_node_grants_to_query($node_access_grants, $table_alias = '') {
