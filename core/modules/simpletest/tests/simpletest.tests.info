@@ -112,6 +112,18 @@ description = Performs tests on opening and manipulating dialogs via AJAX comman
 group = AJAX
 file = ajax.test
 
+[BackupSettingsTestCase]
+name = Backup settings form
+description = Confirm the settings forms provided by update handlers work properly.
+group = Backup
+file = backup.test
+
+[BackupUpdateTestCase]
+name = Backup during system updates
+description = Run update.php with a backup and then restore that backup.
+group = Backup
+file = backup.test
+
 [BasisTestCase]
 name = Basis theme
 description = Test supplemental CSS update selectors in the Basis theme.
