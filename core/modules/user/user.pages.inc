@@ -29,11 +29,11 @@ function user_autocomplete($string = '') {
  */
 function user_pass_page() {
   backdrop_set_title(t('Reset password'));
-  $user_register_form = backdrop_get_form('user_pass');
+  $user_password_form = backdrop_get_form('user_pass');
 
   // If user is logged in, always display with tabs appearance.
   if (user_is_logged_in()) {
-    return $user_register_form;
+    return $user_password_form;
   }
 
   // For anonymous users, match with the selected appearance.
@@ -42,7 +42,7 @@ function user_pass_page() {
     case 'simplified':
       $links = _user_local_tasks_to_list();
       $output = theme('user_simplified_page', array(
-        'form' => $user_register_form,
+        'form' => $user_password_form,
         'links' => $links,
       ));
       break;
@@ -50,14 +50,14 @@ function user_pass_page() {
     case 'links':
       $links = _user_local_tasks_to_list();
       $output = theme('user_links_page', array(
-        'form' => $user_register_form,
+        'form' => $user_password_form,
         'links' => $links,
       ));
       break;
 
     case 'tabs':
     default:
-      $output = $user_register_form;
+      $output = $user_password_form;
   }
 
   return $output;

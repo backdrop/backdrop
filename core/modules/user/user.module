@@ -1642,11 +1642,6 @@ function user_menu_alter(&$items) {
     $items['user/password']['delivery callback'] = 'backdrop_deliver_html_page';
     $items['user/register']['delivery callback'] = 'backdrop_deliver_html_page';
   }
-  else {
-    unset($items['user/login']['delivery callback']);
-    unset($items['user/password']['delivery callback']);
-    unset($items['user/register']['delivery callback']);
-  }
 }
 
 /**
@@ -1739,12 +1734,24 @@ function user_admin_paths() {
     'user/*/edit' => TRUE,
     'user/*/edit/*' => TRUE,
   );
-  if (config_get('system.core', 'user_login_appearance_setting') == 'simplified') {
-    $paths[] = 'user/login';
-    $paths[] = 'user/password';
-    $paths[] = 'user/register';
-  }
   return $paths;
+}
+
+/**
+ * Implements hook_custom_theme().
+ *
+ * Activates the admin theme for login, register, and reset pages if configured
+ * to use the simple login page. Note this by-passes the "view the 
+ * administration theme" permission to show the admin theme to anonymous users.
+ */
+function user_custom_theme() {
+  if (!in_array(current_path(), array('user/login', 'user/password', 'user/register')) || user_is_logged_in()) {
+    return;
+  }
+  $user_login_appearance_setting = config_get('system.core', 'user_login_appearance_setting');
+  if ($user_login_appearance_setting == 'simplified') {
+    return config_get('system.core', 'admin_theme');
+  }
 }
 
 /**
