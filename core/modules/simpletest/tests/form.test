@@ -7,7 +7,7 @@
 include_once(dirname(__FILE__) . '/system_config_test.inc');
 
 class FormsTestCase extends BackdropWebTestCase {
-  function setUp() {
+  public function setUp() {
     parent::setUp('form_test');
   }
 
@@ -608,7 +608,7 @@ class FormsTestCase extends BackdropWebTestCase {
 class FormElementTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('form_test'));
   }
 
@@ -735,7 +735,7 @@ class FormElementTestCase extends BackdropWebTestCase {
 class FormAlterTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('form_test');
   }
 
@@ -762,7 +762,7 @@ class FormAlterTestCase extends BackdropWebTestCase {
 class FormValidationTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('form_test');
   }
 
@@ -928,7 +928,7 @@ class FormValidationTestCase extends BackdropWebTestCase {
 class FormsElementsLabelsTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('form_test');
   }
 
@@ -1084,7 +1084,7 @@ class FormsElementsDescriptionsTestCase extends BackdropWebTestCase {
 class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('form_test');
   }
 
@@ -1302,7 +1302,7 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
 class FormsElementsVerticalTabsFunctionalTest extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('form_test');
   }
 
@@ -1336,7 +1336,7 @@ class FormsFormStorageTestCase extends BackdropWebTestCase {
    */
   protected $web_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('form_test');
 
     $this->web_user = $this->backdropCreateUser();
@@ -1695,7 +1695,7 @@ class FormsFormCacheTestCase extends BackdropWebTestCase {
 class FormsFormWrapperTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('form_test');
   }
 
@@ -1715,7 +1715,7 @@ class FormsFormWrapperTestCase extends BackdropWebTestCase {
 class FormStateValuesCleanTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('form_test');
   }
 
@@ -1762,7 +1762,7 @@ class FormStateValuesCleanAdvancedTestCase extends BackdropWebTestCase {
    */
   protected $image;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('file', 'form_test');
   }
 
@@ -1802,7 +1802,7 @@ class FormsRebuildTestCase extends BackdropWebTestCase {
    */
   protected $web_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('form_test');
 
     $this->web_user = $this->backdropCreateUser();
@@ -1888,7 +1888,7 @@ class FormsRebuildTestCase extends BackdropWebTestCase {
 class FormsRedirectTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('form_test'));
   }
 
@@ -1956,7 +1956,7 @@ class FormsRedirectTestCase extends BackdropWebTestCase {
 class FormsProgrammaticTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('form_test');
   }
 
@@ -2062,7 +2062,7 @@ class FormsProgrammaticTestCase extends BackdropWebTestCase {
 class FormsTriggeringElementTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('form_test');
   }
 
@@ -2151,7 +2151,7 @@ class FormsTriggeringElementTestCase extends BackdropWebTestCase {
  * Tests rebuilding of arbitrary forms by altering them.
  */
 class FormsArbitraryRebuildTestCase extends BackdropWebTestCase {
-  function setUp() {
+  public function setUp() {
     parent::setUp('form_test');
     // Auto-create a field for testing.
     $field = array(
@@ -2211,7 +2211,7 @@ class FormsArbitraryRebuildTestCase extends BackdropWebTestCase {
 class FormsFileInclusionTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('form_test');
   }
 
@@ -2238,7 +2238,7 @@ class FormsFileInclusionTestCase extends BackdropWebTestCase {
 class FormCheckboxTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('form_test');
   }
 
@@ -2394,7 +2394,7 @@ class FormResizableTextareaTestCase extends BackdropWebTestCase {
 class FormEmailTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('form_test');
   }
 
@@ -2430,7 +2430,7 @@ class FormEmailTestCase extends BackdropWebTestCase {
 class FormH5datetimeTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('form_test');
   }
 
@@ -2484,7 +2484,7 @@ class FormH5datetimeTestCase extends BackdropWebTestCase {
 class HTMLIdTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('form_test');
   }
 

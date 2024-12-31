@@ -16,7 +16,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   protected $test_node2;
   protected $orphaned_blocks = FALSE;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('layout_test');
 
     // Create and login admin user.
@@ -57,7 +57,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   /**
    * Test the support for contexts within conditions and blocks.
    */
-  function testRelationships() {
+  public function testRelationships() {
     // Make a new layout that creates a custom path with wildcards.
     $layout_title = $this->randomName();
     $layout_name = strtolower($layout_title);
@@ -139,7 +139,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   /**
    * Test that layout templates may be enabled and disabled.
    */
-  function testLayoutTemplates() {
+  public function testLayoutTemplates() {
     // Attempt to disable the 1 column layout (should fail).
     $this->backdropGet('admin/structure/layouts/settings');
     $edit = array(
@@ -196,7 +196,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   /**
    * Test the path view page link.
    */
-  function testViewPageLink() {
+  public function testViewPageLink() {
     $this->backdropGet('admin/structure/layouts');
     $this->clickLink(t('Add layout'));
 
@@ -246,7 +246,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   /**
    * Add and remove blocks from a custom layout path.
    */
-  function testBlockBasics() {
+  public function testBlockBasics() {
     $this->backdropGet('admin/structure/layouts');
     $this->clickLink(t('Add layout'));
 
@@ -566,7 +566,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   /**
    * Test block path and type conditions.
    */
-  function testBlockPathTypeConditions() {
+  public function testBlockPathTypeConditions() {
     // Create a new layout overriding node/%.
     $layout_title = $this->randomName();
     $layout_name = strtolower($layout_title);
@@ -662,7 +662,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   /**
    * Test block entity ID conditions.
    */
-  function testBlockEntityIDConditions() {
+  public function testBlockEntityIDConditions() {
     // Create a new layout overriding node/%.
     $layout_title = $this->randomName();
     $layout_name = strtolower($layout_title);
@@ -745,7 +745,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   /**
    * Tests user account comparison condition.
    */
-  function testBlockUserCompareConditions() {
+  public function testBlockUserCompareConditions() {
     // Create a new layout overriding user/%.
     $layout_title = $this->randomName();
     $layout_name = strtolower($layout_title);
@@ -919,7 +919,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   /**
    * Test the support for contexts within conditions and blocks.
    */
-  function testContexts() {
+  public function testContexts() {
     // Make a new layout that creates a custom path with placeholders.
     $layout_title = $this->randomName();
     $layout_name = strtolower($layout_title);
@@ -1257,7 +1257,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   /**
    * Test the overriding of paths.
    */
-  function testOverriddenPaths() {
+  public function testOverriddenPaths() {
     // Make a new layout that creates a custom path with placeholders.
     $layout_name = 'node';
     $layout_title = 'Generic Node';
@@ -1367,7 +1367,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   /**
    * Check special conditions around the main content block.
    */
-  function testMainContentBlock() {
+  public function testMainContentBlock() {
     // Make a new layout that overrides an existing path.
     $layout_title = $this->randomName();
     $layout_name = strtolower($layout_title);
@@ -1474,7 +1474,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   /**
    * Tests conditions and menu item navigation.
    */
-  function testLayoutMenuItems() {
+  public function testLayoutMenuItems() {
     $layout_name = strtolower($this->randomName());
     $layout_path = $layout_name . '/' . strtolower($this->randomName());
     $edit = array(
@@ -1648,7 +1648,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   /**
    * Test region styles.
    */
-  function testRegionStyles() {
+  public function testRegionStyles() {
     $this->backdropGet('admin/structure/layouts/manage/default/configure-region/editor/header');
     $edit = array(
       'element' => 'aside',
@@ -1666,7 +1666,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   /**
    * Ensure that reassignment of menu items works when deleting layouts.
    */
-  function testMenuItemReassignment() {
+  public function testMenuItemReassignment() {
     // Create a layout that will generate a menu item automatically.
     $layout_name = strtolower($this->randomName());
     $layout_path = $layout_name;
@@ -1739,7 +1739,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   /**
    * Tests switching between different layouts, ensuring block copying.
    */
-  function testLayoutChange() {
+  public function testLayoutChange() {
     // Add blocks to the default layout for checking.
     $default_layout = layout_load('default');
     $default_layout->addBlock('layout_test', 'foo', 'content');
@@ -1806,7 +1806,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   /**
    * Tests current user custom field block
    */
-  function testCurrentUser() {
+  public function testCurrentUser() {
     $field_name = 'field_field1';
 
     $field_info = array('field_name' => $field_name, 'type' => 'text');
@@ -1863,7 +1863,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   /**
    * Tests Taxonomy contexts within layouts.
    */
-  function testTaxonomyContext() {
+  public function testTaxonomyContext() {
     module_enable(array('taxonomy'));
 
     // Create a default vocabulary named "Tags", enabled for the 'post' content type.
@@ -1971,7 +1971,7 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
   /**
    * Tests layout_modules_uninstalled().
    */
-  function testBlockUninstall() {
+  public function testBlockUninstall() {
     $this->backdropGet('admin/structure/layouts');
     $this->clickLink(t('Add layout'));
 
@@ -2061,7 +2061,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
   /**
    * Test Custom Text blocks.
    */
-  function testCustomTextBlocks() {
+  public function testCustomTextBlocks() {
     $this->backdropGet('admin/structure/layouts/manage/default');
     $block_title_1 = 'Title of block one';
     $block_content_1 = 'Content of block one';
@@ -2164,7 +2164,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
   /**
    * Test Hero blocks.
    */
-  function testHeroBlocks() {
+  public function testHeroBlocks() {
     $hero_title_1 = 'Wonder Woman';
     $hero_content_1 = 'Youth is your greatest weapon, your greatest tool.';
     $hero_title_2 = 'Black Widow';
@@ -2285,7 +2285,7 @@ class LayoutBlockTest extends BackdropWebTestCase {
   /**
    * Test Page component blocks.
    */
-  function testPageComponentBlocks() {
+  public function testPageComponentBlocks() {
     // Create a node page.
     $page_node = $this->backdropCreateNode(array(
       'type' => 'page',
@@ -2491,7 +2491,7 @@ class LayoutSelectionTest extends BackdropWebTestCase {
   protected $web_user;
   protected $admin_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('layout'));
     config_set('system.core', 'node_admin_theme', TRUE);
 
@@ -2519,7 +2519,7 @@ class LayoutSelectionTest extends BackdropWebTestCase {
   /**
    * Tests the correct layout is used on 404 and 403 pages.
    */
-  function testPages() {
+  public function testPages() {
     // Check that a known page is using the admin (one-column) layout.
     $this->backdropGet('admin/config/content/formats/plain_text');
     $this->assertIsAdminLayout();
@@ -2561,7 +2561,7 @@ class LayoutSelectionTest extends BackdropWebTestCase {
   /**
    * Test role-based selection of layouts.
    */
-  function testRoleSelection() {
+  public function testRoleSelection() {
     // Create and login admin user.
     $admin_user = $this->backdropCreateUser(array(
       'access administration pages',
@@ -2663,7 +2663,7 @@ class LayoutBlockTextTest extends BackdropWebTestCase {
   protected $profile = 'testing';
   protected $admin_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('layout', 'block'));
     // Create and login admin user.
     $this->admin_user = $this->backdropCreateUser(array(
@@ -2678,7 +2678,7 @@ class LayoutBlockTextTest extends BackdropWebTestCase {
   /**
    * Tests the BlockText class functionality.
    */
-  function testBlockText() {
+  public function testBlockText() {
     // Save a file to test file usage saving.
     $files = $this->backdropGetTestFiles('image');
     $file_info = (array) array_pop($files);
@@ -2745,7 +2745,7 @@ class LayoutCloneTest extends BackdropWebTestCase {
   protected $profile = 'testing';
   protected $admin_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('layout', 'layout_test'));
     // Create and login admin user.
     $this->admin_user = $this->backdropCreateUser(array(
@@ -2757,7 +2757,7 @@ class LayoutCloneTest extends BackdropWebTestCase {
     $this->backdropLogin($this->admin_user);
   }
 
-  function testLayoutClone() {
+  public function testLayoutClone() {
     // Create a new layout using the UI.
     $edit = array(
       'title' => 'Test layout 1',
@@ -2955,7 +2955,7 @@ class LayoutHookTestCase extends BackdropWebTestCase {
   protected $admin_user;
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('layout', 'layout_test');
 
     // Create and login admin user.
@@ -3093,7 +3093,7 @@ class LayoutBlockUsageTestCase extends BackdropWebTestCase {
   protected $admin_user;
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('layout', 'menu');
 
     // Create and login admin user.
@@ -3194,7 +3194,7 @@ class LayoutRendererTest extends BackdropWebTestCase {
   protected $profile = 'testing';
   protected $admin_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('layout', 'layout_test'));
 
     // Create and login admin user.
@@ -3209,7 +3209,7 @@ class LayoutRendererTest extends BackdropWebTestCase {
   /**
    * Test that the correct renderer is used
    */
-  function testRendererSelection() {
+  public function testRendererSelection() {
     // Create a new layout at a new path.
     $this->backdropGet('admin/structure/layouts');
     $this->clickLink(t('Add layout'));
@@ -3274,7 +3274,7 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
    */
   protected $no_flex_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('layout', 'layout_test');
 
     // Create and login admin user.
@@ -3290,7 +3290,7 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
   /**
    * Test that layout templates may be enabled and disabled.
    */
-  function testLayoutFlexibleTemplates() {
+  public function testLayoutFlexibleTemplates() {
     $this->backdropGet('admin/structure/layouts/settings');
     $this->clickLink(t('Add flexible layout template'));
 

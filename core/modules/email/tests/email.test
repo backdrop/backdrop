@@ -8,7 +8,7 @@ class EmailFieldTestCase extends BackdropWebTestCase {
   protected $field;
   protected $instance;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('field_test', 'email'));
 
     $this->web_user = $this->backdropCreateUser(array(
@@ -22,7 +22,7 @@ class EmailFieldTestCase extends BackdropWebTestCase {
   /**
    * Tests email field.
    */
-  function testEmailField() {
+  public function testEmailField() {
     // Create a field with settings to validate.
     $this->field = array(
       'field_name' => backdrop_strtolower($this->randomName()),

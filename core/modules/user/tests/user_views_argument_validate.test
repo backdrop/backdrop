@@ -21,7 +21,7 @@ class UserViewsArgumentValidate extends ViewsSqlTest {
     $this->account = $this->backdropCreateUser();
   }
 
-  function testArgumentValidateUserUid() {
+  public function testArgumentValidateUserUid() {
     $account = $this->account;
     // test 'uid' case
     $view = $this->view_argument_validate_user('uid');
@@ -39,7 +39,7 @@ class UserViewsArgumentValidate extends ViewsSqlTest {
     $this->assertFalse($view->argument['null']->validate_arg(32));
   }
 
-  function testArgumentValidateUserName() {
+  public function testArgumentValidateUserName() {
     $account = $this->account;
     // test 'name' case
     $view = $this->view_argument_validate_user('name');
@@ -57,7 +57,7 @@ class UserViewsArgumentValidate extends ViewsSqlTest {
     $this->assertFalse($view->argument['null']->validate_arg($this->randomName()));
   }
 
-  function testArgumentValidateUserEither() {
+  public function testArgumentValidateUserEither() {
     $account = $this->account;
     // test 'either' case
     $view = $this->view_argument_validate_user('either');
@@ -79,7 +79,7 @@ class UserViewsArgumentValidate extends ViewsSqlTest {
     $this->assertFalse($view->argument['null']->validate_arg(32));
   }
 
-  function view_argument_validate_user($argtype) {
+  private function view_argument_validate_user($argtype) {
     $view = new view;
     $view->name = 'view_argument_validate_user';
     $view->description = '';

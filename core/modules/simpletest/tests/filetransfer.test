@@ -12,12 +12,12 @@ class FileTransferTest extends BackdropWebTestCase {
    */
   protected $testConnection;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
     $this->testConnection = TestFileTransfer::factory(BACKDROP_ROOT, array('hostname' => $this->hostname, 'username' => $this->username, 'password' => $this->password, 'port' => $this->port));
   }
 
-  function _getFakeModuleFiles() {
+  private function _getFakeModuleFiles() {
     $files = array(
       'fake.module',
       'fake.info',
@@ -31,7 +31,7 @@ class FileTransferTest extends BackdropWebTestCase {
     return $files;
   }
 
-  function _buildFakeModule() {
+  private function _buildFakeModule() {
     $location = 'temporary://fake';
     if (is_dir($location)) {
       $ret = 0;
@@ -47,7 +47,7 @@ class FileTransferTest extends BackdropWebTestCase {
     return $location;
   }
 
-  function _writeDirectory($base, $files = array()) {
+  private function _writeDirectory($base, $files = array()) {
     mkdir($base);
     foreach ($files as $key => $file) {
       if (is_array($file)) {
@@ -60,7 +60,7 @@ class FileTransferTest extends BackdropWebTestCase {
     }
   }
 
-  function testJail() {
+  public function testJail() {
     $source = $this->_buildFakeModule();
 
     // This convoluted piece of code is here because our testing framework does
@@ -100,7 +100,7 @@ class TestFileTransfer extends FileTransfer {
    */
   public $shouldIsDirectoryReturnTrue = FALSE;
 
-  function __construct($jail, $username, $password, $hostname = 'localhost', $port = 9999) {
+  private function __construct($jail, $username, $password, $hostname = 'localhost', $port = 9999) {
     parent::__construct($jail, $username, $password, $hostname, $port);
   }
 
@@ -108,13 +108,13 @@ class TestFileTransfer extends FileTransfer {
     return new TestFileTransfer($jail, $settings['username'], $settings['password'], $settings['hostname'], $settings['port']);
   }
 
-  function connect() {
+  protected function connect() {
     $connection = new MockTestConnection();
     $connection->connectionString = 'test://' . urlencode((string) $this->username) . ':' . urlencode((string) $this->password) . "@$this->host:$this->port/";
     $this->connection = $connection;
   }
 
-  function copyFileJailed($source, $destination) {
+  protected function copyFileJailed($source, $destination) {
     $this->connection->run("copyFile $source $destination");
   }
 
@@ -122,25 +122,25 @@ class TestFileTransfer extends FileTransfer {
     $this->connection->run("rmdir $directory");
   }
 
-  function createDirectoryJailed($directory) {
+  protected function createDirectoryJailed($directory) {
     $this->connection->run("mkdir $directory");
   }
 
-  function removeFileJailed($destination) {
+  protected function removeFileJailed($destination) {
     if (!ftp_delete($this->connection, $item)) {
       throw new FileTransferException('Unable to remove to file @file.', NULL, array('@file' => $item));
     }
   }
 
-  function isDirectory($path) {
+  protected function isDirectory($path) {
     return $this->shouldIsDirectoryReturnTrue;
   }
 
-  function isFile($path) {
+  protected function isFile($path) {
     return FALSE;
   }
 
-  function chmodJailed($path, $mode, $recursive) {
+  protected function chmodJailed($path, $mode, $recursive) {
     return;
   }
 }
@@ -153,11 +153,11 @@ class MockTestConnection {
   var $commandsRun = array();
   var $connectionString;
 
-  function run($cmd) {
+  protected function run($cmd) {
     $this->commandsRun[] = $cmd;
   }
 
-  function flushCommands() {
+  protected function flushCommands() {
     $out = $this->commandsRun;
     $this->commandsRun = array();
     return $out;

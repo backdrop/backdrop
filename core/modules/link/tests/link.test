@@ -27,7 +27,7 @@ class LinkBaseTestClass extends BackdropWebTestCase {
     'create page content',
   );
 
-  function setUp() {
+  public function setUp() {
     $modules = func_get_args();
     $modules[] = 'node';
     $modules[] = 'field_ui';

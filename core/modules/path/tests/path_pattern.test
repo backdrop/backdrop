@@ -10,7 +10,7 @@
 class PathPatternTestHelper extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp(array $modules = array()) {
+  public function setUp(array $modules = array()) {
     $modules[] = 'path';
     $modules[] = 'taxonomy';
     parent::setUp($modules);
@@ -29,13 +29,13 @@ class PathPatternTestHelper extends BackdropWebTestCase {
       ->save();
   }
 
-  function assertToken($type, $object, $token, $expected) {
+  protected function assertToken($type, $object, $token, $expected) {
     $tokens = token_generate($type, array($token => $token), array($type => $object));
     $tokens += array($token => '');
     $this->assertIdentical($tokens[$token], $expected, format_string("Token value for [@type:@token] was '@actual', expected value '@expected'.", array('@type' => $type, '@token' => $token, '@actual' => $tokens[$token], '@expected' => $expected)));
   }
 
-  function saveAlias($source, $alias, $langcode = LANGUAGE_NONE) {
+  protected function saveAlias($source, $alias, $langcode = LANGUAGE_NONE) {
     $alias = array(
       'source' => $source,
       'alias' => $alias,
@@ -45,54 +45,54 @@ class PathPatternTestHelper extends BackdropWebTestCase {
     return $alias;
   }
 
-  function saveEntityAlias($entity_type, $entity, $alias, $language = LANGUAGE_NONE) {
+  protected function saveEntityAlias($entity_type, $entity, $alias, $language = LANGUAGE_NONE) {
     $uri = entity_uri($entity_type, $entity);
     return $this->saveAlias($uri['path'], $alias, $language);
   }
 
-  function assertEntityAlias($entity_type, $entity, $expected_alias, $language = LANGUAGE_NONE) {
+  protected function assertEntityAlias($entity_type, $entity, $expected_alias, $language = LANGUAGE_NONE) {
     $uri = entity_uri($entity_type, $entity);
     $this->assertAlias($uri['path'], $expected_alias, $language);
   }
 
-  function assertEntityAliasExists($entity_type, $entity) {
+  protected function assertEntityAliasExists($entity_type, $entity) {
     $uri = entity_uri($entity_type, $entity);
     return $this->assertAliasExists(array('source' => $uri['path']));
   }
 
-  function assertNoEntityAlias($entity_type, $entity, $language = LANGUAGE_NONE) {
+  protected function assertNoEntityAlias($entity_type, $entity, $language = LANGUAGE_NONE) {
     $uri = entity_uri($entity_type, $entity);
     $this->assertEntityAlias($entity_type, $entity, $uri['path'], $language);
   }
 
-  function assertNoEntityAliasExists($entity_type, $entity) {
+  protected function assertNoEntityAliasExists($entity_type, $entity) {
     $uri = entity_uri($entity_type, $entity);
     $this->assertNoAliasExists(array('source' => $uri['path']));
   }
 
-  function assertAlias($source, $expected_alias, $langcode = LANGUAGE_NONE) {
+  protected function assertAlias($source, $expected_alias, $langcode = LANGUAGE_NONE) {
     backdrop_clear_path_cache($source);
     $alias = backdrop_get_path_alias($source, $langcode);
     $this->assertIdentical($alias, $expected_alias, format_string("Alias for %source with language '@language' was %actual, expected %expected.", array('%source' => $source, '%actual' => $alias, '%expected' => $expected_alias, '@language' => $langcode)));
   }
 
-  function assertAliasExists($conditions) {
+  protected function assertAliasExists($conditions) {
     $path = path_load($conditions);
     $this->assertTrue($path, format_string('Alias with conditions @conditions found.', array('@conditions' => var_export($conditions, TRUE))));
     return $path;
   }
 
-  function assertNoAliasExists($conditions) {
+  protected function assertNoAliasExists($conditions) {
     $alias = path_load($conditions);
     $this->assertFalse($alias, format_string('Alias with conditions @conditions not found.', array('@conditions' => var_export($conditions, TRUE))));
   }
 
-  function deleteAllAliases() {
+  protected function deleteAllAliases() {
     db_delete('url_alias')->execute();
     backdrop_clear_path_cache();
   }
 
-  function addVocabulary(array $vocabulary = array()) {
+  protected function addVocabulary(array $vocabulary = array()) {
     $name = backdrop_strtolower($this->randomName(5));
     $vocabulary += array(
       'name' => $name,
@@ -103,7 +103,7 @@ class PathPatternTestHelper extends BackdropWebTestCase {
     return $vocabulary;
   }
 
-  function addTerm(TaxonomyVocabulary $vocabulary, array $term = array()) {
+  protected function addTerm(TaxonomyVocabulary $vocabulary, array $term = array()) {
     $term += array(
       'name' => backdrop_strtolower($this->randomName(5)),
       'vocabulary' => $vocabulary->machine_name,
@@ -114,14 +114,14 @@ class PathPatternTestHelper extends BackdropWebTestCase {
     return $term;
   }
 
-  function assertEntityPattern($entity_type, $bundle, $langcode, $expected) {
+  protected function assertEntityPattern($entity_type, $bundle, $langcode, $expected) {
     backdrop_static_reset('path_get_pattern_by_entity_type');
     $this->refreshVariables();
     $pattern = path_get_pattern_by_entity_type($entity_type, $bundle, $langcode);
     $this->assertIdentical($expected, $pattern);
   }
 
-  function backdropGetTermByName($name, $reset = FALSE) {
+  protected function backdropGetTermByName($name, $reset = FALSE) {
     $terms = entity_load('taxonomy_term', array(), array('name' => $name), $reset);
     return !empty($terms) ? reset($terms) : FALSE;
   }
@@ -131,7 +131,7 @@ class PathPatternTestHelper extends BackdropWebTestCase {
  * Unit tests for Path pattern functions.
  */
 class PathPatternUnitTestCase extends PathPatternTestHelper {
-  function setUp(array $modules = array()) {
+  public function setUp(array $modules = array()) {
     parent::setUp($modules);
     module_load_include('inc', 'path');
   }
@@ -139,14 +139,14 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
   /**
    * Test _path_get_schema_alias_maxlength().
    */
-  function testGetSchemaAliasMaxLength() {
+  public function testGetSchemaAliasMaxLength() {
     $this->assertIdentical(_path_get_schema_alias_maxlength(), 255);
   }
 
   /**
    * Test path_get_pattern_by_entity_type().
    */
-  function testPatternLoadByEntity() {
+  public function testPatternLoadByEntity() {
     $config = config('path.settings');
     $config->set('node_story_en_pattern', 'story/en/[node:title] ');
     $config->set('node_story_pattern', 'story/[node:title]');
@@ -171,7 +171,7 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
   /**
    * Test path_clean_string().
    */
-  function testCleanString() {
+  public function testCleanString() {
     $config = config('path.settings');
     $tests = array();
     $config->set('ignore_words', ', a, in, is,that, the  , this, with, ');
@@ -225,7 +225,7 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
   /**
    * Test path_clean_alias().
    */
-  function testCleanAlias() {
+  public function testCleanAlias() {
     $tests = array();
     $tests['one/two/three'] = 'one/two/three';
     $tests['/one/two/three/'] = 'one/two/three';
@@ -241,7 +241,7 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
   /**
    * Test path_delete_multiple().
    */
-  function testPathDeleteMultiple() {
+  public function testPathDeleteMultiple() {
     $this->saveAlias('node/1', 'node-1-alias');
     $this->saveAlias('node/1/view', 'node-1-alias/view');
     $this->saveAlias('node/1', 'node-1-alias-en', 'en');
@@ -257,7 +257,7 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
   /**
    * Test the different update actions in path_save_automatic_alias().
    */
-  function testUpdateActions() {
+  public function testUpdateActions() {
     $config = config('path.settings');
     // Test PATH_UPDATE_ACTION_NO_NEW with a new inserted, unaliased node.
     $config->set('update_action', PATH_UPDATE_ACTION_NO_NEW);
@@ -320,7 +320,7 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
    * Test that path_save_automatic_alias() will not create a URL alias for a
    * pattern that does not get any tokens replaced.
    */
-  function testNoTokensNoAlias() {
+  public function testNoTokensNoAlias() {
     $node = $this->backdropCreateNode(array('title' => ''));
     $this->assertNoEntityAliasExists('node', $node);
 
@@ -340,7 +340,7 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
   /**
    * Test the handling of path vs non-path tokens in path_clean_token_values().
    */
-  function testPathTokens() {
+  public function testPathTokens() {
     $config = config('path.settings');
     $config->set('taxonomy_term_pattern', '[term:parent:url:path]/[term:name]');
     $config->save();
@@ -357,7 +357,7 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
     $this->assertEntityAlias('taxonomy_term', $term2, 'My Crazy/Alias/child-term');
   }
 
-  function testEntityBundleRenamingDeleting() {
+  public function testEntityBundleRenamingDeleting() {
     $config = config('path.settings');
     // Create a vocabulary and test that it's pattern variable works.
     $vocab = $this->addVocabulary(array('machine_name' => 'old_name'));
@@ -380,7 +380,7 @@ class PathPatternUnitTestCase extends PathPatternTestHelper {
     $this->assertEntityPattern('taxonomy_term', 'new_name', LANGUAGE_NONE, 'base');
   }
 
-  function testNoExistingPathAliases() {
+  public function testNoExistingPathAliases() {
     $config = config('path.settings');
     $config->set('node_page_pattern', '[node:title]');
     $config->set('punctuation_period', PATH_PUNCTUATION_DO_NOTHING);
@@ -415,7 +415,7 @@ class PathPatternFunctionalTestHelper extends PathPatternTestHelper {
   protected $admin_user;
   protected $config;
 
-  function setUp(array $modules = array()) {
+  public function setUp(array $modules = array()) {
     parent::setUp($modules);
     $config = config('path.settings');
 
@@ -456,7 +456,7 @@ class PathPatternFunctionalTestHelper extends PathPatternTestHelper {
 class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
   protected $profile = 'standard';
 
-  function setUp(array $modules = array()) {
+  public function setUp(array $modules = array()) {
     parent::setUp($modules);
 
     // Delete all default content.
@@ -467,7 +467,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
   /**
    * Create a new content type with new path pattern.
    */
-  function testNodeTypeCreate() {
+  public function testNodeTypeCreate() {
     // Create a user with more permissions.
     $permissions = array(
       'administer path patterns',
@@ -508,7 +508,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
   /**
    * Basic functional testing of node Path patterns.
    */
-  function testNodeEditing() {
+  public function testNodeEditing() {
     $config = config('path.settings');
     // Delete the default node pattern. Only the page content type will have a pattern.
     $config->set('node_pattern', '');
@@ -611,7 +611,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
   /**
    * Test node operations.
    */
-  function testNodeOperations() {
+  public function testNodeOperations() {
     $node1 = $this->backdropCreateNode(array('title' => 'node1'));
     $node2 = $this->backdropCreateNode(array('title' => 'node2'));
 
@@ -632,7 +632,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
   /**
    * Basic functional testing of Path automatic aliases with taxonomy terms.
    */
-  function testTermEditing() {
+  public function testTermEditing() {
     $this->backdropGet('admin/structure');
     $this->backdropGet('admin/structure/taxonomy');
 
@@ -682,7 +682,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
   /**
    * Basic functional testing of Path automatic aliases with users.
    */
-  function testUserEditing() {
+  public function testUserEditing() {
     // There should be no auto checkbox on user forms.
     $this->backdropGet('user/' . $this->admin_user->uid . '/edit');
     $this->assertNoFieldById('edit-path-auto');
@@ -691,7 +691,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
   /**
    * Test user operations.
    */
-  function testUserOperations() {
+  public function testUserOperations() {
     $account = $this->backdropCreateUser();
 
     // Delete all current URL aliases.
@@ -713,7 +713,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $this->assertEntityAlias('user', $this->admin_user, 'user/' . $this->admin_user->uid);
   }
 
-  function testConfigurationUserInterfaces() {
+  public function testConfigurationUserInterfaces() {
     // Test validation.
     $edit = array();
     $edit['max_length'] = 'abc';
@@ -800,7 +800,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $this->assertFieldByName('user_pattern', 'accounts/[user:name]/foo', 'URL alias pattern set with user account settings appears on path config page.');
   }
 
-  function testPatternsValidation() {
+  public function testPatternsValidation() {
     $edit = array();
     $edit['node_pattern'] = '[node:title]/[user:name]/[term:name]';
     $edit['node_page_pattern'] = 'page';
@@ -819,7 +819,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
   /**
    * Test programmatic entity creation for aliases.
    */
-  function testProgrammaticEntityCreation() {
+  public function testProgrammaticEntityCreation() {
     $node = $this->backdropCreateNode(array('title' => 'Test node', 'path' => array('auto' => TRUE)));
     $this->assertEntityAlias('node', $node, 'content/test-node');
 
@@ -840,7 +840,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
 
 class PathPatternLocaleTestCase extends PathPatternFunctionalTestHelper {
 
-  function setUp(array $modules = array()) {
+  public function setUp(array $modules = array()) {
     $modules[] = 'language';
     $modules[] = 'locale';
     $modules[] = 'translation';
@@ -866,7 +866,7 @@ class PathPatternLocaleTestCase extends PathPatternFunctionalTestHelper {
    * Test that when an English node is updated, its old English URL alias is
    * updated and its newer French URL alias is left intact.
    */
-  function testLanguageAliases() {
+  public function testLanguageAliases() {
     $node = array(
       'title' => 'English node',
       'langcode' => 'en',
@@ -940,7 +940,7 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
   private $terms;
   private $users;
 
-  function testBulkUpdate() {
+  public function testBulkUpdate() {
     $this->nodes = array();
     $this->terms = array();
     $user1 = user_load(1, TRUE);
@@ -1131,7 +1131,7 @@ class PathPatternBulkUpdateTestCase extends PathPatternFunctionalTestHelper {
  */
 class PathPatternTokenTestCase extends PathPatternFunctionalTestHelper {
 
-  function testPathPatternTokens() {
+  public function testPathPatternTokens() {
     $array = array(
       'test first arg',
       'The Array / value',
@@ -1153,7 +1153,7 @@ class PathPatternTokenTestCase extends PathPatternFunctionalTestHelper {
   /**
    * Function copied from TokenTestHelper::assertTokens().
    */
-  function assertTokens($type, array $data, array $tokens, array $options = array()) {
+  protected function assertTokens($type, array $data, array $tokens, array $options = array()) {
     $input = $this->mapTokenNames($type, array_keys($tokens));
     $replacements = token_generate($type, $input, $data, $options);
     foreach ($tokens as $name => $expected) {
@@ -1175,7 +1175,7 @@ class PathPatternTokenTestCase extends PathPatternFunctionalTestHelper {
     return $replacements;
   }
 
-  function mapTokenNames($type, array $tokens = array()) {
+  protected function mapTokenNames($type, array $tokens = array()) {
     $return = array();
     foreach ($tokens as $token) {
       $return[$token] = "[$type:$token]";

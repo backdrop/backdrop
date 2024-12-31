@@ -5,11 +5,11 @@
  * Tests color conversion functions.
  */
 class ColorTest extends BackdropUnitTestCase {
-  
+
   /**
    * Tests Color::hexToRgb().
    */
-  function testHexToRgb() {
+  public function testHexToRgb() {
     // Any invalid arguments should throw an exception.
     $values = array('', '-1', '1', '12', '12345', '1234567', '123456789', '123456789a', 'foo');
     // Duplicate all invalid value tests with additional '#' prefix.
@@ -58,7 +58,7 @@ class ColorTest extends BackdropUnitTestCase {
   /**
    * Tests Color::rgbToHex().
    */
-  function testRgbToHex() {
+  public function testRgbToHex() {
     $tests = array(
       '#000000' => array('red' => 0, 'green' => 0, 'blue' => 0),
       '#ffffff' => array('red' => 255, 'green' => 255, 'blue' => 255),

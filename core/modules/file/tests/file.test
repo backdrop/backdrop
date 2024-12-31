@@ -167,7 +167,7 @@ class FileTestHelper extends BackdropWebTestCase {
    *   File size.
    * @return EntityInterface
    */
-  function getTestFile($type_name, $size = NULL) {
+  protected function getTestFile($type_name, $size = NULL) {
     // Get a file to upload.
     $file = current($this->backdropGetTestFiles($type_name, $size));
 
@@ -183,7 +183,7 @@ class FileTestHelper extends BackdropWebTestCase {
    * @return int
    *   File fid.
    */
-  function getLastFileId() {
+  protected function getLastFileId() {
     return (int) db_query('SELECT MAX(fid) FROM {file_managed}')->fetchField();
   }
 
@@ -201,7 +201,7 @@ class FileTestHelper extends BackdropWebTestCase {
    * @param array $widget_settings
    *   A list of widget settings that will be added to the widget defaults.
    */
-  function createFileField($name, $type_name, $field_settings = array(), $instance_settings = array(), $widget_settings = array()) {
+  protected function createFileField($name, $type_name, $field_settings = array(), $instance_settings = array(), $widget_settings = array()) {
     $cardinality = 1;
     if (isset($field_settings['cardinality'])) {
       $cardinality = $field_settings['cardinality'];
@@ -232,7 +232,7 @@ class FileTestHelper extends BackdropWebTestCase {
    * @param array $widget_settings
    *   A list of widget settings that will be added to the widget defaults.
    */
-  function attachFileField($name, $entity_type, $bundle, $instance_settings = array(), $widget_settings = array()) {
+  protected function attachFileField($name, $entity_type, $bundle, $instance_settings = array(), $widget_settings = array()) {
     $instance = array(
       'field_name' => $name,
       'label' => $name,
@@ -262,7 +262,7 @@ class FileTestHelper extends BackdropWebTestCase {
    * @param array $widget_settings
    *   A list of widget settings that will be added to the widget defaults.
    */
-  function updateFileField($name, $type_name, $instance_settings = array(), $widget_settings = array()) {
+  protected function updateFileField($name, $type_name, $instance_settings = array(), $widget_settings = array()) {
     $instance = field_info_instance('node', $name, $type_name);
     $instance['settings'] = array_merge($instance['settings'], $instance_settings);
     $instance['widget']['settings'] = array_merge($instance['widget']['settings'], $widget_settings);
@@ -287,7 +287,7 @@ class FileTestHelper extends BackdropWebTestCase {
    * @return int
    *   Node ID.
    */
-  function uploadNodeFile($file, $field_name, $nid_or_type, $new_revision = TRUE, $extras = array()) {
+  protected function uploadNodeFile($file, $field_name, $nid_or_type, $new_revision = TRUE, $extras = array()) {
     $langcode = LANGUAGE_NONE;
     $edit = array(
       "title" => $this->randomName(),
@@ -325,7 +325,7 @@ class FileTestHelper extends BackdropWebTestCase {
    * @param bool $new_revision
    *   If TRUE, create a new revision.
    */
-  function removeNodeFile($nid, $new_revision = TRUE) {
+  protected function removeNodeFile($nid, $new_revision = TRUE) {
     $edit = array(
       'revision' => (string) (int) $new_revision,
     );
@@ -346,7 +346,7 @@ class FileTestHelper extends BackdropWebTestCase {
    * @param bool $new_revision
    *   If TRUE, create a new revision.
    */
-  function replaceNodeFile($file, $field_name, $nid, $new_revision = TRUE) {
+  protected function replaceNodeFile($file, $field_name, $nid, $new_revision = TRUE) {
     $edit = array(
       'files[' . $field_name . '_' . LANGUAGE_NONE . '_0]' => backdrop_realpath($file->uri),
       'revision' => (string) (int) $new_revision,
@@ -364,7 +364,7 @@ class FileTestHelper extends BackdropWebTestCase {
    * @param string $message
    *   Message to display.
    */
-  function assertFileExists($file, $message = NULL) {
+  protected function assertFileExists($file, $message = NULL) {
     $message = isset($message) ? $message : format_string('File %file exists on the disk.', array('%file' => $file->uri));
     $this->assertTrue(is_file($file->uri), $message);
   }
@@ -377,7 +377,7 @@ class FileTestHelper extends BackdropWebTestCase {
    * @param string $message
    *   Message to display.
    */
-  function assertFileEntryExists($file, $message = NULL) {
+  protected function assertFileEntryExists($file, $message = NULL) {
     entity_get_controller('file')->resetCache();
     $db_file = file_load($file->fid);
     $message = isset($message) ? $message : format_string('File %file exists in database at the correct path.', array('%file' => $file->uri));
@@ -392,7 +392,7 @@ class FileTestHelper extends BackdropWebTestCase {
    * @param string $message
    *   Message to display.
    */
-  function assertFileNotExists($file, $message = NULL) {
+  protected function assertFileNotExists($file, $message = NULL) {
     $message = isset($message) ? $message : format_string('File %file exists on the disk.', array('%file' => $file->uri));
     $this->assertFalse(is_file($file->uri), $message);
   }
@@ -405,7 +405,7 @@ class FileTestHelper extends BackdropWebTestCase {
    * @param string $message
    *   Message to display.
    */
-  function assertFileEntryNotExists($file, $message) {
+  protected function assertFileEntryNotExists($file, $message) {
     entity_get_controller('file')->resetCache();
     $message = isset($message) ? $message : format_string('File %file exists in database at the correct path.', array('%file' => $file->uri));
     $this->assertFalse(file_load($file->fid), $message);
@@ -419,7 +419,7 @@ class FileTestHelper extends BackdropWebTestCase {
    * @param string $message
    *   Message to display.
    */
-  function assertFileIsPermanent($file, $message = NULL) {
+  protected function assertFileIsPermanent($file, $message = NULL) {
     $message = isset($message) ? $message : format_string('File %file is permanent.', array('%file' => $file->uri));
     $this->assertTrue($file->status == FILE_STATUS_PERMANENT, $message);
   }
@@ -435,7 +435,7 @@ class FileTestHelper extends BackdropWebTestCase {
    * @return File
    *   A file object, or FALSE on error.
    */
-  function createTemporaryFile($data, $uid = NULL) {
+  protected function createTemporaryFile($data, $uid = NULL) {
     $file = file_save_data($data);
 
     if ($file) {
@@ -592,7 +592,7 @@ class FileManagedFileElementTestCase extends FileTestHelper {
   /**
    * Tests the managed_file element type.
    */
-  function testManagedFile() {
+  public function testManagedFile() {
     // Check that $element['#size'] is passed to the child upload element.
     $this->backdropGet('file/test');
     $this->assertFieldByXpath('//input[@name="files[nested_file]" and @size="13"]', NULL, 'The custom #size attribute is passed to the child upload element.');
@@ -682,7 +682,7 @@ class FileManagedFileElementTestCase extends FileTestHelper {
   /**
    * Tests file_ajax_upload() parents_hash.
    */
-  function testManagedFileParentsHash() {
+  public function testManagedFileParentsHash() {
     // Perform the tests with all permutations of $form['#tree'] and
     // $element['#extended'].
     foreach (array(0, 1) as $tree) {
@@ -759,7 +759,7 @@ class FileFieldWidgetTestCase extends FileTestHelper {
   /**
    * Tests upload and remove buttons for a single-valued File field.
    */
-  function testSingleValuedWidget() {
+  public function testSingleValuedWidget() {
     // Use 'page' instead of 'post', so that the 'post' image field does
     // not conflict with this test. If in the future the 'page' type gets its
     // own default file or image field, this test can be made more robust by
@@ -816,7 +816,7 @@ class FileFieldWidgetTestCase extends FileTestHelper {
   /**
    * Tests exploiting the temporary file removal of another user using fid.
    */
-  function testTemporaryFileRemovalExploit() {
+  public function testTemporaryFileRemovalExploit() {
     // Create a victim user.
     $victim_user = $this->backdropCreateUser();
 
@@ -862,7 +862,7 @@ class FileFieldWidgetTestCase extends FileTestHelper {
   /**
    * Tests validation with the Upload button.
    */
-  function testWidgetValidation() {
+  public function testWidgetValidation() {
     $type_name = 'post';
     $field_name = strtolower($this->randomName());
     $this->createFileField($field_name, $type_name);
@@ -979,7 +979,7 @@ class FileFieldWidgetTestCase extends FileTestHelper {
   /**
    * Tests upload and remove buttons for multiple multi-valued File fields.
    */
-  function testMultiValuedWidget() {
+  public function testMultiValuedWidget() {
     // Use 'page' instead of 'post', so that the 'post' image field does
     // not conflict with this test. If in the future the 'page' type gets its
     // own default file or image field, this test can be made more robust by
@@ -1104,7 +1104,7 @@ class FileFieldWidgetTestCase extends FileTestHelper {
   /**
    * Tests a file field with a "Private files" upload destination setting.
    */
-  function testPrivateFileSetting() {
+  public function testPrivateFileSetting() {
     // Use 'page' instead of 'post', so that the 'post' image field does
     // not conflict with this test. If in the future the 'page' type gets its
     // own default file or image field, this test can be made more robust by
@@ -1143,7 +1143,7 @@ class FileFieldWidgetTestCase extends FileTestHelper {
   /**
    * Tests that download restrictions on private files work on comments.
    */
-  function testPrivateFileComment() {
+  public function testPrivateFileComment() {
     $user = $this->backdropCreateUser(array('access comments'));
 
     // Remove access comments permission from anonymous user.
@@ -1231,7 +1231,7 @@ class FileFieldRevisionTestCase extends FileTestHelper {
    *  - When the last revision that uses a file is deleted, the original file
    *    should be deleted also.
    */
-  function testRevisions() {
+  public function testRevisions() {
     $type_name = 'post';
     $field_name = strtolower($this->randomName());
     $this->createFileField($field_name, $type_name);
@@ -1349,7 +1349,7 @@ class FileFieldDisplayTestCase extends FileTestHelper {
   /**
    * Tests normal formatter display on node display.
    */
-  function testNodeDisplay() {
+  public function testNodeDisplay() {
     $field_name = strtolower($this->randomName());
     $type_name = 'post';
     $field_settings = array(
@@ -1411,7 +1411,7 @@ class FileFieldValidateTestCase extends FileTestHelper {
   /**
    * Tests the required property on file fields.
    */
-  function testRequired() {
+  public function testRequired() {
     $type_name = 'post';
     $field_name = strtolower($this->randomName());
     $this->createFileField($field_name, $type_name, array(), array('required' => '1'));
@@ -1460,7 +1460,7 @@ class FileFieldValidateTestCase extends FileTestHelper {
   /**
    * Tests the max file size validator.
    */
-  function testFileMaxSize() {
+  public function testFileMaxSize() {
     $type_name = 'post';
     $field_name = strtolower($this->randomName());
     $this->createFileField($field_name, $type_name, array(), array('required' => '1'));
@@ -1512,7 +1512,7 @@ class FileFieldValidateTestCase extends FileTestHelper {
   /**
    * Tests file extension checking.
    */
-  function testFileExtension() {
+  public function testFileExtension() {
     $type_name = 'post';
     $field_name = strtolower($this->randomName());
     $this->createFileField($field_name, $type_name);
@@ -1557,7 +1557,7 @@ class FileFieldValidateTestCase extends FileTestHelper {
   /**
    * Tests default display of File Field.
    */
-  function testDefaultFileFieldDisplay() {
+  public function testDefaultFileFieldDisplay() {
     $field_name = strtolower($this->randomName());
     $type_name = 'post';
     $field_settings = array(
@@ -1590,7 +1590,7 @@ class FileFieldPathTestCase extends FileTestHelper {
   /**
    * Tests the normal formatter display on node display.
    */
-  function testUploadPath() {
+  public function testUploadPath() {
     $field_name = strtolower($this->randomName());
     $type_name = 'post';
     $field = $this->createFileField($field_name, $type_name);
@@ -1643,7 +1643,7 @@ class FileFieldPathTestCase extends FileTestHelper {
    * @param $message
    *   The message to display with this assertion.
    */
-  function assertPathMatch($expected_path, $actual_path, $message) {
+  protected function assertPathMatch($expected_path, $actual_path, $message) {
     // Strip off the extension of the expected path to allow for _0, _1, etc.
     // suffixes when the file hits a duplicate name.
     $pos = strrpos($expected_path, '.');
@@ -1662,7 +1662,7 @@ class FileTokenReplaceTestCase extends FileTestHelper {
   /**
    * Creates a file, then tests the tokens generated from it.
    */
-  function testFileTokenReplacement() {
+  public function testFileTokenReplacement() {
     global $language;
 
     // Create file field.
@@ -1723,7 +1723,7 @@ class FileTokenReplaceTestCase extends FileTestHelper {
  * Tests file access on private nodes.
  */
 class FilePrivateTestCase extends FileTestHelper {
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('node_access_test', 'field_test'));
     node_access_rebuild();
     state_set('node_access_test_private', TRUE);
@@ -1735,7 +1735,7 @@ class FilePrivateTestCase extends FileTestHelper {
   /**
    * Tests file access for file uploaded to a private node.
    */
-  function testPrivateFile() {
+  public function testPrivateFile() {
     // Use 'page' instead of 'post', so that the 'post' image field does
     // not conflict with this test. If in the future the 'page' type gets its
     // own default file or image field, this test can be made more robust by
@@ -1859,7 +1859,7 @@ class FilePrivateTestCase extends FileTestHelper {
   /**
    * Tests file access for private nodes when file download access is granted.
    */
-  function testPrivateFileDownloadAccessGranted() {
+  public function testPrivateFileDownloadAccessGranted() {
     // Tell file_module_test to attempt to grant access to all private files,
     // and ensure that it is doing so correctly.
     $test_file = $this->getTestFile('text');
@@ -2105,14 +2105,14 @@ class FileFieldAnonymousSubmission extends FileTestHelper {
  */
 class FileFileTypeClassificationTestCase extends BackdropWebTestCase {
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
   }
 
   /**
    * Test that existing files are properly classified by file type.
    */
-  function testFileTypeClassification() {
+  public function testFileTypeClassification() {
     // Get test text and image files.
     $file = current($this->backdropGetTestFiles('text'));
     $text_file =  new File((array) $file);
@@ -2140,7 +2140,7 @@ class FileFileTypeClassificationTestCase extends BackdropWebTestCase {
    * @return
    *   The file's file type as a string.
    */
-  function getFileType($file) {
+  protected function getFileType($file) {
     $type = db_select('file_managed', 'fm')
       ->fields('fm', array('type'))
       ->condition('fid', $file->fid, '=')
@@ -2159,7 +2159,7 @@ class FileUnitTestCase extends FileTestHelper {
   /**
    * Regression tests for core issue https://www.drupal.org/node/1239376.
    */
-  function testMimeTypeMappings() {
+  public function testMimeTypeMappings() {
     $tests = array(
       'public://test.ogg' => 'audio/ogg',
       'public://test.mkv' => 'video/x-m4v',
@@ -2175,7 +2175,7 @@ class FileUnitTestCase extends FileTestHelper {
   /**
    * Tests basic file entity properties.
    */
-  function testFile() {
+  public function testFile() {
     // Save a raw file, turning it into a file entity.
     $file = $this->getTestFile('text');
     $file->uid = 1;
@@ -2195,7 +2195,7 @@ class FileUnitTestCase extends FileTestHelper {
   /**
    * Tests storing image height and width as file metadata.
    */
-  function testImageDimensions() {
+  public function testImageDimensions() {
     // Test hook_file_insert().
     $file = current($this->backdropGetTestFiles('image'));
     $image_file = new File((array) $file);
@@ -2257,7 +2257,7 @@ class FileEditTestCase extends FileTestHelper {
   protected $web_user;
   protected $admin_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     // todo use web_user but need to fix perms on the file overview View
@@ -2268,7 +2268,7 @@ class FileEditTestCase extends FileTestHelper {
   /**
    * Check file edit functionality.
    */
-  function testFileEdit() {
+  public function testFileEdit() {
     $this->backdropLogin($this->web_user);
     $name_key = "filename";
 
@@ -2308,7 +2308,7 @@ class FileEditTestCase extends FileTestHelper {
  */
 class FileUploadWizardTestCase extends FileTestHelper {
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     $this->private_files_directory = config_get('system.core', 'file_private_path');
@@ -2328,7 +2328,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
   /**
    * Test the basic file upload wizard functionality.
    */
-  function testFileUploadWizardBasic() {
+  public function testFileUploadWizardBasic() {
     $test_file = $this->getTestFile('text');
 
     // Step 1: Upload a basic document file.
@@ -2348,7 +2348,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
   /**
    * Test the file upload wizard type step.
    */
-  function testFileUploadWizardTypes() {
+  public function testFileUploadWizardTypes() {
     $test_file = $this->getTestFile('text');
 
     // Create multiple file types with the same mime types.
@@ -2377,7 +2377,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
   /**
    * Test the file upload wizard scheme step.
    */
-  function testFileUploadWizardSchemes() {
+  public function testFileUploadWizardSchemes() {
     $test_file = $this->getTestFile('text');
 
     // Enable the private file system.
@@ -2405,7 +2405,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
   /**
    * Test the file upload wizard when uploading a private file fails.
    */
-  function testFileUploadWizardPrivateFailure() {
+  public function testFileUploadWizardPrivateFailure() {
     $test_file = $this->getTestFile('text');
 
     // Record the last saved file ID.
@@ -2457,7 +2457,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
   /**
    * Test the file upload wizard field step.
    */
-  function testFileUploadWizardFields() {
+  public function testFileUploadWizardFields() {
     $test_file = $this->getTestFile('image');
     $filename = $this->randomName();
     $alt = $this->randomName();
@@ -2516,7 +2516,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
   /**
    * Test skipping each of the file upload wizard steps.
    */
-  function testFileUploadWizardStepSkipping() {
+  public function testFileUploadWizardStepSkipping() {
     $test_file = $this->getTestFile('image');
     $filename = $this->randomName();
 
@@ -2629,7 +2629,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
  */
 class FileUploadSvgTestCase extends FileTestHelper {
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     $this->private_files_directory = config_get('system.core', 'file_private_path');
@@ -2774,7 +2774,7 @@ class FileAdminTestCase extends FileTestHelper {
    */
   protected $base_user_3;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     // Remove the "view files" permission which is set
@@ -2798,7 +2798,7 @@ class FileAdminTestCase extends FileTestHelper {
   /**
    * Tests that the table sorting works on the files admin pages.
    */
-  function testFilesAdminSort() {
+  public function testFilesAdminSort() {
     $this->backdropLogin($this->admin_user);
     $i = 0;
     foreach (array('dd', 'aa', 'DD', 'bb', 'cc', 'CC', 'AA', 'BB') as $prefix) {
@@ -2839,7 +2839,7 @@ class FileAdminTestCase extends FileTestHelper {
   /**
    * Tests file overview with different user permissions.
    */
-  function testFileAdminPages() {
+  public function testFileAdminPages() {
     $this->backdropLogin($this->admin_user);
 
     // Create a file field to add files.
@@ -2984,7 +2984,7 @@ class FileAdminTestCase extends FileTestHelper {
  */
 class FileUsageTestCase extends FileTestHelper {
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     $web_user = $this->backdropCreateUser(array('create files', 'bypass file access', 'edit own post content'));
@@ -2994,7 +2994,7 @@ class FileUsageTestCase extends FileTestHelper {
   /**
    * Create a file and verify its usage information.
    */
-  function testFileUsagePage() {
+  public function testFileUsagePage() {
     $image_field = 'field_image';
     $image = $this->getTestFile('image');
 
@@ -3064,7 +3064,7 @@ class FileUsageTestCase extends FileTestHelper {
  */
 class FileChangeSchemeTestCase extends FileTestHelper {
 
-  function testChangeScheme() {
+  public function testChangeScheme() {
     // Select the first text test file to use.
     $file = $this->createFile(array('type' => 'document'));
     $this->assertEqual(file_uri_scheme($file->uri), 'public', 'File is public.');
@@ -3095,7 +3095,7 @@ class FileChangeSchemeTestCase extends FileTestHelper {
  */
 class FileReplaceTestCase extends FileTestHelper {
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
     $this->backdropLogin($this->admin_user);
   }
@@ -3104,7 +3104,7 @@ class FileReplaceTestCase extends FileTestHelper {
    * @todo Test image dimensions for an image field are reset when a file is replaced.
    * @todo Test image styles are cleared when an image is updated.
    */
-  function testReplaceFile() {
+  public function testReplaceFile() {
     // Select the first text test file to use.
     $file = $this->createFile(array('type' => 'document'));
 
@@ -3173,14 +3173,14 @@ class FileReplaceTestCase extends FileTestHelper {
  */
 class FileTypeTestCase extends FileTestHelper {
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
   }
 
   /**
    * Test admin pages access and functionality.
    */
-  function testAdminPages() {
+  public function testAdminPages() {
     // Create a user with file type administration access.
     $user = $this->backdropCreateUser(array('administer file types'));
     $this->backdropLogin($user);
@@ -3192,7 +3192,7 @@ class FileTypeTestCase extends FileTestHelper {
   /**
    * Test creating a new type. Basic CRUD.
    */
-  function testCreate() {
+  public function testCreate() {
     $type_machine_type = 'foo';
     $type_machine_label = 'foobar';
     $type = $this->createFileType(array('type' => $type_machine_type, 'name' => $type_machine_label));
@@ -3203,7 +3203,7 @@ class FileTypeTestCase extends FileTestHelper {
   /**
    * Test file types CRUD UI.
    */
-  function testTypesCrudUi() {
+  public function testTypesCrudUi() {
     $this->backdropGet('admin/structure/file-types');
     $this->assertResponse(403, 'File types UI page is not accessible to unauthorized users.');
 
@@ -3310,7 +3310,7 @@ class FileTypeTestCase extends FileTestHelper {
    *   The page content that results from clicking on the link, or FALSE on
    *   failure. Failure also results in a failed assertion.
    */
-  function clickFileTypeOperationLink($label, $unique_href_part) {
+  protected function clickFileTypeOperationLink($label, $unique_href_part) {
     $links = $this->xpath('//a[normalize-space(text())=:label]', array(':label' => $label));
     foreach ($links as $link_index => $link) {
       $position = strpos($link['href'], $unique_href_part);
@@ -3334,7 +3334,7 @@ class FileTypeTestCase extends FileTestHelper {
  */
 class FileAccessTestCase extends FileTestHelper {
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     // Remove the "view files" permission which is set by default for all users
@@ -3348,7 +3348,7 @@ class FileAccessTestCase extends FileTestHelper {
   /**
    * Runs basic tests for file_access function.
    */
-  function testFileAccess() {
+  public function testFileAccess() {
     $file = $this->createFile(array('type' => 'image'));
 
     // Ensures user with 'bypass file access' permission can do everything.
@@ -3429,7 +3429,7 @@ class FileAccessTestCase extends FileTestHelper {
    *  file/%/usage
    *  file/%/delete
    */
-  function testFilePageAccess() {
+  public function testFilePageAccess() {
     // Test creating files without permission.
     $web_user = $this->backdropCreateUser();
     $this->backdropLogin($web_user);
@@ -3560,7 +3560,7 @@ class FileAccessTestCase extends FileTestHelper {
   /**
    * Test to see if we have access to download private files when granted the permissions.
    */
-  function testFilePrivateDownloadAccess() {
+  public function testFilePrivateDownloadAccess() {
     foreach ($this->getPrivateDownloadAccessCases() as $case) {
       // Create users and login only if non-anonymous.
       $authenticated_user = !is_null($case['permissions']);
@@ -3594,7 +3594,7 @@ class FileAccessTestCase extends FileTestHelper {
   /**
    * Asserts file_access correctly grants or denies access.
    */
-  function assertFileAccess($ops, $file, $account) {
+  protected function assertFileAccess($ops, $file, $account) {
     backdrop_static_reset('file_access');
     backdrop_static_reset('user_access');
     foreach ($ops as $op => $result) {
@@ -3615,7 +3615,7 @@ class FileAccessTestCase extends FileTestHelper {
    *   - "expect" expected HTTP response code.
    *   - "owner" Optional boolean indicating if the user is a file owner.
    */
-  function getPrivateDownloadAccessCases() {
+  protected function getPrivateDownloadAccessCases() {
     return array(
       array(
         'message' => "File owners cannot download their own files unless they are granted the 'view own private files' permission.",
@@ -3764,7 +3764,7 @@ class FileAttributeOverrideTestCase extends FileTestHelper {
   /**
    * Test to see if file attributes can be overridden.
    */
-  function testFileFileAttributeOverrides() {
+  public function testFileFileAttributeOverrides() {
     $overrides = array(
       'width' => 40,
       'height' => 20,

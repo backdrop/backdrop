@@ -8,7 +8,7 @@
  * Defines a base class for testing the Node module.
  */
 class NodeWebTestCase extends BackdropWebTestCase {
-  function setUp() {
+  public function setUp() {
     $modules = func_get_args();
     if (isset($modules[0]) && is_array($modules[0])) {
       $modules = $modules[0];
@@ -30,7 +30,7 @@ class NodeWebTestCase extends BackdropWebTestCase {
 class NodeLoadMultipleUnitTest extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     // Create content types for testing.
@@ -45,7 +45,7 @@ class NodeLoadMultipleUnitTest extends BackdropWebTestCase {
   /**
    * Creates four nodes and ensures that they are loaded correctly.
    */
-  function testNodeMultipleLoad() {
+  public function testNodeMultipleLoad() {
     $node1 = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1));
     $node2 = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1));
     $node3 = $this->backdropCreateNode(array('type' => 'post', 'promote' => 0));
@@ -109,7 +109,7 @@ class NodeLoadMultipleUnitTest extends BackdropWebTestCase {
 class NodeLoadHooksTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('node_test');
     // Create content types for testing.
     $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
@@ -119,7 +119,7 @@ class NodeLoadHooksTestCase extends BackdropWebTestCase {
   /**
    * Tests that hook_node_load() is invoked correctly.
    */
-  function testHookNodeLoad() {
+  public function testHookNodeLoad() {
     // Create some sample posts and pages.
     $node1 = $this->backdropCreateNode(array('type' => 'post', 'status' => NODE_PUBLISHED));
     $node2 = $this->backdropCreateNode(array('type' => 'post', 'status' => NODE_PUBLISHED));
@@ -163,7 +163,7 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
    */
   protected $logs;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     // Make sure we're using UTC
@@ -214,7 +214,7 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
   /**
    * Checks node revision related operations.
    */
-  function testRevisions() {
+  public function testRevisions() {
     $nodes = $this->nodes;
     $logs = $this->logs;
 
@@ -304,7 +304,7 @@ class NodeRevisionsTestCase extends BackdropWebTestCase {
   /**
    * Checks that revisions are correctly saved without log messages.
    */
-  function testNodeRevisionWithoutLogMessage() {
+  public function testNodeRevisionWithoutLogMessage() {
     // Create a node with an initial log message.
     $log = $this->randomName(10);
     $node = $this->backdropCreateNode(array('log' => $log));
@@ -365,7 +365,7 @@ class PageEditTestCase extends BackdropWebTestCase {
    */
   protected $admin_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     $this->web_user = $this->backdropCreateUser(array('edit own page content', 'create page content'));
@@ -375,7 +375,7 @@ class PageEditTestCase extends BackdropWebTestCase {
   /**
    * Checks node edit functionality.
    */
-  function testPageEdit() {
+  public function testPageEdit() {
     $this->backdropLogin($this->web_user);
 
     $langcode = LANGUAGE_NONE;
@@ -442,7 +442,7 @@ class PageEditTestCase extends BackdropWebTestCase {
   /**
    * Tests changing a node's "authored by" field.
    */
-  function testPageAuthoredBy() {
+  public function testPageAuthoredBy() {
     $this->backdropLogin($this->admin_user);
 
     // Create node to edit.
@@ -504,7 +504,7 @@ class PagePreviewTestCase extends BackdropWebTestCase {
    */
   protected $term;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('taxonomy', 'node', 'email'));
 
     $web_user = $this->backdropCreateUser(array(
@@ -595,7 +595,7 @@ class PagePreviewTestCase extends BackdropWebTestCase {
   /**
    * Checks the node preview functionality.
    */
-  function testPagePreview() {
+  public function testPagePreview() {
     $langcode = LANGUAGE_NONE;
     $title_key = "title";
     $body_key = "body[$langcode][0][value]";
@@ -1091,7 +1091,7 @@ class NodeLayoutRevisionTestCase extends BackdropWebTestCase {
  * Tests creating and saving a node.
  */
 class NodeCreationTestCase extends BackdropWebTestCase {
-  function setUp() {
+  public function setUp() {
     // Enable dummy module that implements hook_node_insert for exceptions.
     parent::setUp('node_test_exception');
 
@@ -1102,7 +1102,7 @@ class NodeCreationTestCase extends BackdropWebTestCase {
   /**
    * Creates a "Page" node and verifies its consistency in the database.
    */
-  function testNodeCreation() {
+  public function testNodeCreation() {
     // Create a node.
     $edit = array();
     $langcode = LANGUAGE_NONE;
@@ -1121,7 +1121,7 @@ class NodeCreationTestCase extends BackdropWebTestCase {
   /**
    * Verifies that a transaction rolls back the failed creation.
    */
-  function testFailedPageCreation() {
+  public function testFailedPageCreation() {
     // Create a node.
     $edit = array(
       'uid'      => $this->loggedInUser->uid,
@@ -1171,7 +1171,7 @@ class NodeCreationTestCase extends BackdropWebTestCase {
   /**
    * Create an unpublished node and confirm correct redirect behavior.
    */
-  function testUnpublishedNodeCreation() {
+  public function testUnpublishedNodeCreation() {
     // Set "Page" content type to be unpublished by default.
     $node_type = node_type_get_type('page');
     $node_type->settings['status_default'] = 0;
@@ -1198,7 +1198,7 @@ class PageViewTestCase extends BackdropWebTestCase {
   /**
    * Tests an anonymous and unpermissioned user attempting to edit the node.
    */
-  function testPageView() {
+  public function testPageView() {
     // Create a node to view.
     $node = $this->backdropCreateNode();
     $this->assertTrue(node_load($node->nid), 'Node created.');
@@ -1233,7 +1233,7 @@ class SummaryLengthTestCase extends BackdropWebTestCase {
   /**
    * Tests the node summary length functionality.
    */
-  function testSummaryLength() {
+  public function testSummaryLength() {
     // Create a node to view.
     $settings = array(
       'body' => array(LANGUAGE_NONE => array(array('value' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam vitae arcu at leo cursus laoreet. Curabitur dui tortor, adipiscing malesuada tempor in, bibendum ac diam. Cras non tellus a libero pellentesque condimentum. What is a foobar? Suspendisse ac lacus libero. Ut non est vel nisl faucibus interdum nec sed leo. Pellentesque sem risus, vulputate eu semper eget, auctor in libero. Ut fermentum est vitae metus convallis scelerisque. Phasellus pellentesque rhoncus tellus, eu dignissim purus posuere id. Quisque eu fringilla ligula. Morbi ullamcorper, lorem et mattis egestas, tortor neque pretium velit, eget eleifend odio turpis eu purus. Donec vitae metus quis leo pretium tincidunt a pulvinar sem. Morbi adipiscing laoreet mauris vel placerat. Nullam elementum, nisl sit amet scelerisque malesuada, dolor nunc hendrerit quam, eu ultrices erat est in orci. Curabitur feugiat egestas nisl sed accumsan.'))),
@@ -1270,7 +1270,7 @@ class NodeTitleXSSTestCase extends BackdropWebTestCase {
   /**
    * Tests XSS functionality with a node entity.
    */
-  function testNodeTitleXSS() {
+  public function testNodeTitleXSS() {
     // Prepare a user to do the stuff.
     $web_user = $this->backdropCreateUser(array('create page content', 'edit any page content'));
     $this->backdropLogin($web_user);
@@ -1296,7 +1296,7 @@ class NodeTitleXSSTestCase extends BackdropWebTestCase {
  * Tests the availability of the syndicate block.
  */
 class NodeBlockTestCase extends BackdropWebTestCase {
-  function setUp() {
+  public function setUp() {
     parent::setUp('node_test');
 
     // Create and login user
@@ -1307,7 +1307,7 @@ class NodeBlockTestCase extends BackdropWebTestCase {
   /**
    * Tests the "Syndicate" block settings.
    */
-  function testSyndicateBlock() {
+  public function testSyndicateBlock() {
     // Test default promoted nodes feed shown if default block settings.
     $layout = layout_load('home');
     $layout->addBlock('node', 'syndicate', 'footer');
@@ -1368,7 +1368,7 @@ class NodeBlockTestCase extends BackdropWebTestCase {
  * Checks that the post information displays when enabled for a content type.
  */
 class NodePostSettingsTestCase extends BackdropWebTestCase {
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     // Use Stark for expected markup checking.
@@ -1382,7 +1382,7 @@ class NodePostSettingsTestCase extends BackdropWebTestCase {
   /**
    * Confirms "Page" content type and post information is on a new node.
    */
-  function testPagePostInfo() {
+  public function testPagePostInfo() {
 
     // Set "Page" content type to display post information.
     $edit = array();
@@ -1404,7 +1404,7 @@ class NodePostSettingsTestCase extends BackdropWebTestCase {
   /**
    * Confirms absence of post information on a new node.
    */
-  function testPageNotPostInfo() {
+  public function testPageNotPostInfo() {
 
     // Set "Page" content type to display post information.
     $edit = array();
@@ -1434,7 +1434,7 @@ class NodePostSettingsTestCase extends BackdropWebTestCase {
 class NodeRSSContentTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     // Enable dummy module that implements hook_node_view.
     parent::setUp('node_test');
     module_disable(array('views'));
@@ -1450,7 +1450,7 @@ class NodeRSSContentTestCase extends BackdropWebTestCase {
   /**
    * Ensures that a new node includes the custom data when added to an RSS feed.
    */
-  function testNodeRSSContent() {
+  public function testNodeRSSContent() {
     // Create a node.
     $node = $this->backdropCreateNode(array('type' => 'post', 'promote' => 1));
 
@@ -1502,14 +1502,14 @@ class NodeAccessUnitTest extends BackdropWebTestCase {
   /**
    * Asserts node_access() correctly grants or denies access.
    */
-  function assertNodeAccess($ops, $node, $account) {
+  protected function assertNodeAccess($ops, $node, $account) {
     foreach ($ops as $op => $result) {
       $msg = format_string("node_access returns @result with operation '@op'.", array('@result' => $result ? 'true' : 'false', '@op' => $op));
       $this->assertEqual($result, node_access($op, $node, $account), $msg);
     }
   }
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     // Create content types for testing.
@@ -1525,7 +1525,7 @@ class NodeAccessUnitTest extends BackdropWebTestCase {
   /**
    * Runs basic tests for node_access function.
    */
-  function testNodeAccess() {
+  public function testNodeAccess() {
     // Ensures user without 'access content' permission can do nothing.
     $web_user1 = $this->backdropCreateUser(array('create page content', 'edit any page content', 'delete any page content'));
     $node1 = $this->backdropCreateNode(array('type' => 'page'));
@@ -1571,7 +1571,7 @@ class NodeAccessUnitTest extends BackdropWebTestCase {
 class NodeAccessRecordsUnitTest extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     // Enable dummy module that implements hook_node_grants(),
     // hook_node_access_records(), hook_node_grants_alter() and
     // hook_node_access_records_alter().
@@ -1585,7 +1585,7 @@ class NodeAccessRecordsUnitTest extends BackdropWebTestCase {
   /**
    * Creates a node and tests the creation of node access rules.
    */
-  function testNodeAccessRecords() {
+  public function testNodeAccessRecords() {
     // Create a post node.
     $node1 = $this->backdropCreateNode(array('type' => 'post'));
     $this->assertTrue(node_load($node1->nid), 'Post node created.');
@@ -1699,7 +1699,7 @@ class NodeAccessBaseTableTestCase extends BackdropWebTestCase {
    * - Test that user 4 can view all content created above.
    * - Test that user 4 can view all content on taxonomy listing.
    */
-  function testNodeAccessBasic() {
+  public function testNodeAccessBasic() {
     $num_simple_users = 2;
     $simple_users = array();
 
@@ -1833,7 +1833,7 @@ class NodeSaveTestCase extends BackdropWebTestCase {
    */
   protected $web_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('node_test');
     $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
     // Create a user that is allowed to post; we'll use this to test the submission.
@@ -1850,7 +1850,7 @@ class NodeSaveTestCase extends BackdropWebTestCase {
    *  - save the content
    *  - check if node exists
    */
-  function testImport() {
+  public function testImport() {
     // Node ID must be a number that is not in the database.
     $max_nid = db_query('SELECT MAX(nid) FROM {node}')->fetchField();
     $test_nid = $max_nid + mt_rand(1000, 1000000);
@@ -1880,7 +1880,7 @@ class NodeSaveTestCase extends BackdropWebTestCase {
   /**
    * Verifies accuracy of the "created" and "changed" timestamp functionality.
    */
-  function testTimestamps() {
+  public function testTimestamps() {
     // Use the default timestamps.
     $edit = array(
       'uid' => $this->web_user->uid,
@@ -1937,7 +1937,7 @@ class NodeSaveTestCase extends BackdropWebTestCase {
    * Tests determining changes in hook_node_presave() and verifies the static
    * node load cache is cleared upon save.
    */
-  function testDeterminingChanges() {
+  public function testDeterminingChanges() {
     // Initial creation.
     $node = entity_create('node', array(
       'uid' => $this->web_user->uid,
@@ -1972,7 +1972,7 @@ class NodeSaveTestCase extends BackdropWebTestCase {
    *
    * @see node_test_node_insert()
    */
-  function testNodeSaveOnInsert() {
+  public function testNodeSaveOnInsert() {
     // node_test_node_insert() triggers a save on insert if the title equals
     // 'new'.
     $node = $this->backdropCreateNode(array('title' => 'new'));
@@ -1987,7 +1987,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
   /**
    * Tests creating a content type programmatically and via a form.
    */
-  function testNodeTypeCreation() {
+  public function testNodeTypeCreation() {
     // Ensure node type functions (node_type_get_*) work correctly.
     $node_types = node_type_get_types();
     $node_names = node_type_get_names();
@@ -2079,7 +2079,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
   /**
    * Tests editing a node type using the UI.
    */
-  function testNodeTypeEditing() {
+  public function testNodeTypeEditing() {
     $web_user = $this->backdropCreateUser(array('bypass node access', 'administer content types', 'administer fields'));
     $this->backdropLogin($web_user);
 
@@ -2132,7 +2132,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
   /**
    * Tests that node types permissions are correctly set from the Node Type UI.
    */
-  function testNodeTypePermissions() {
+  public function testNodeTypePermissions() {
     // Create admin user.
     $admin_user = $this->backdropCreateUser(array(
       'bypass node access',
@@ -2194,7 +2194,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
   /**
    * Tests that node types correctly handle the 'disabled' flag.
    */
-  function testNodeTypeStatus() {
+  public function testNodeTypeStatus() {
     // Enable all core node modules, and all types should be active.
     module_enable(array('book'), FALSE);
     $types = node_type_get_types();
@@ -2226,7 +2226,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
    * Add new node type and test function returns correct result with and
    * without content present.
    */
-  function testNodeTypeHasContent() {
+  public function testNodeTypeHasContent() {
     // Delete the two default nodes.
     node_delete_multiple(array(1, 2));
 
@@ -2252,7 +2252,7 @@ class NodeTypePersistenceTestCase extends BackdropWebTestCase {
   /**
    * Tests that node type customizations persist through disable and uninstall.
    */
-  function testNodeTypeCustomizationPersistence() {
+  public function testNodeTypeCustomizationPersistence() {
     $web_user = $this->backdropCreateUser(array('bypass node access', 'administer content types', 'administer modules'));
     $this->backdropLogin($web_user);
 
@@ -2317,7 +2317,7 @@ class NodeAccessRebuildTestCase extends BackdropWebTestCase {
    */
   protected $web_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     $web_user = $this->backdropCreateUser(array('administer site configuration', 'access administration pages', 'access site reports'));
@@ -2328,7 +2328,7 @@ class NodeAccessRebuildTestCase extends BackdropWebTestCase {
   /**
    * Tests rebuilding the node access permissions table.
    */
-  function testNodeAccessRebuild() {
+  public function testNodeAccessRebuild() {
     $this->backdropGet('admin/reports/status');
     $this->clickLink(t('Rebuild permissions'));
     $this->backdropPost(NULL, array(), t('Rebuild permissions'));
@@ -2367,7 +2367,7 @@ class NodeAdminTestCase extends BackdropWebTestCase {
    */
   protected $base_user_4;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     // Create content types for testing.
@@ -2394,7 +2394,7 @@ class NodeAdminTestCase extends BackdropWebTestCase {
   /**
    * Tests that the table sorting works on the content admin pages.
    */
-  function testContentAdminSort() {
+  public function testContentAdminSort() {
     $this->backdropLogin($this->admin_user);
     foreach (array('dd', 'aa', 'DD', 'bb', 'cc', 'CC', 'AA', 'BB') as $index => $prefix) {
       $node = $this->backdropCreateNode(array('title' => $prefix . $this->randomName(6)));
@@ -2443,7 +2443,7 @@ class NodeAdminTestCase extends BackdropWebTestCase {
    *
    * @see TaxonomyNodeFilterTestCase
    */
-  function testContentAdminPages() {
+  public function testContentAdminPages() {
     // Do not use any patterns for nodes in this test.
     config_set('path.settings', 'node_pattern', '');
     config_set('path.settings', 'node_page_pattern', '');
@@ -2560,7 +2560,7 @@ class NodeTitleTestCase extends BackdropWebTestCase {
    */
   protected $admin_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     // Use Stark for expected markup checking.
@@ -2580,7 +2580,7 @@ class NodeTitleTestCase extends BackdropWebTestCase {
   /**
    *  Creates one node and tests if the node title has the correct value.
    */
-  function testNodeTitle() {
+  public function testNodeTitle() {
     // Create "Page" content with title.
     // Add the node to the frontpage so we can test if teaser links are clickable.
     $settings = array(
@@ -2643,7 +2643,7 @@ class NodeFeedTestCase extends BackdropWebTestCase {
   /**
    * Ensures that node_feed() accepts and prints extra channel elements.
    */
-  function testNodeFeedExtraChannelElements() {
+  public function testNodeFeedExtraChannelElements() {
     ob_start();
     node_feed(array(), array('copyright' => 'Copyright Backdrop CMS.'));
     $output = ob_get_clean();
@@ -2662,7 +2662,7 @@ class NodeFrontPageCallback extends BackdropWebTestCase {
    */
   protected $admin_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('node', 'system');
 
     $this->admin_user = $this->backdropCreateUser(
@@ -2676,7 +2676,7 @@ class NodeFrontPageCallback extends BackdropWebTestCase {
     $this->backdropLogin($this->admin_user);
   }
 
-  function testCustomFrontPage() {
+  public function testCustomFrontPage() {
     $settings = array(
       'title' => $this->randomName(8),
       'promote' => 0,
@@ -2712,7 +2712,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
    */
   protected $web_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('node', 'block');
 
     // Create users and test node.
@@ -2732,7 +2732,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
   /**
    * Tests the recent content block.
    */
-  function testRecentNodeBlock() {
+  public function testRecentNodeBlock() {
     $this->backdropLogin($this->admin_user);
 
     // Disallow anonymous users to view content.
@@ -2851,7 +2851,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
   /**
    * Tests the Existing content block.
    */
-  function testNodeBlock() {
+  public function testNodeBlock() {
     $this->backdropLogin($this->admin_user);
 
     // Add some test nodes.
@@ -2936,7 +2936,7 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
  */
 class NodeTranslateBlockFunctionalTest extends BackdropWebTestCase {
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('node', 'block', 'locale', 'language', 'translation');
 
     // Create users and test node.
@@ -2958,7 +2958,7 @@ class NodeTranslateBlockFunctionalTest extends BackdropWebTestCase {
   /**
    * Tests the Existing content block.
    */
-  function testNodeTranslateBlock() {
+  public function testNodeTranslateBlock() {
     $this->backdropLogin($this->admin_user);
 
     $langcode = 'es';
@@ -3038,7 +3038,7 @@ class NodeBuildContent extends BackdropWebTestCase {
  /**
   * Ensures that content array is rebuilt on every call to node_build_content().
   */
-  function testNodeRebuildContent() {
+  public function testNodeRebuildContent() {
     $node = $this->backdropCreateNode();
 
     // Set a property in the content array so we can test for its existence later on.
@@ -3075,7 +3075,7 @@ class NodeQueryAlter extends BackdropWebTestCase {
    */
   protected $noAccessUser2;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('node_access_test');
 
     node_access_rebuild();
@@ -3096,7 +3096,7 @@ class NodeQueryAlter extends BackdropWebTestCase {
   /**
    * Tests that node access permissions are followed.
    */
-  function testNodeQueryAlterWithUI() {
+  public function testNodeQueryAlterWithUI() {
     // Verify that a user with access permission can see at least one node.
     $this->backdropLogin($this->accessUser);
     $this->backdropGet('node_access_test_page');
@@ -3124,7 +3124,7 @@ class NodeQueryAlter extends BackdropWebTestCase {
    * Verifies that a non-standard table alias can be used, and that a user with
    * node access can view the nodes.
    */
-  function testNodeQueryAlterLowLevelWithAccess() {
+  public function testNodeQueryAlterLowLevelWithAccess() {
     // User with access should be able to view 4 nodes.
     try {
       $query = db_select('node', 'mytab')
@@ -3147,7 +3147,7 @@ class NodeQueryAlter extends BackdropWebTestCase {
    * Verifies that a non-standard table alias can be used, and that a user
    * without node access cannot view the nodes.
    */
-  function testNodeQueryAlterLowLevelNoAccess() {
+  public function testNodeQueryAlterLowLevelNoAccess() {
     // User without access should be able to view 0 nodes.
     try {
       $query = db_select('node', 'mytab')
@@ -3170,7 +3170,7 @@ class NodeQueryAlter extends BackdropWebTestCase {
    * Verifies that a non-standard table alias can be used, and that a user with
    * view-only node access cannot edit the nodes.
    */
-  function testNodeQueryAlterLowLevelEditAccess() {
+  public function testNodeQueryAlterLowLevelEditAccess() {
     // User with view-only access should not be able to edit nodes.
     try {
       $query = db_select('node', 'mytab')
@@ -3198,7 +3198,7 @@ class NodeQueryAlter extends BackdropWebTestCase {
    * add a record to {node_access} paired with a corresponding privilege in
    * hook_node_grants().
    */
-  function testNodeQueryAlterOverride() {
+  public function testNodeQueryAlterOverride() {
     $record = array(
       'nid' => 0,
       'gid' => 0,
@@ -3270,7 +3270,7 @@ class NodeEntityFieldQueryAlter extends BackdropWebTestCase {
    */
   protected $noAccessUser;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('node_access_test');
     node_access_rebuild();
 
@@ -3296,7 +3296,7 @@ class NodeEntityFieldQueryAlter extends BackdropWebTestCase {
   /**
    * Tests that node access permissions are followed.
    */
-  function testNodeQueryAlterWithUI() {
+  public function testNodeQueryAlterWithUI() {
     // Verify that a user with access permission can see at least one node.
     $this->backdropLogin($this->accessUser);
     $this->backdropGet('node_access_entity_test_page');
@@ -3318,7 +3318,7 @@ class NodeTokenReplaceTestCase extends BackdropWebTestCase {
   /**
    * Creates a node, then tests the tokens generated from it.
    */
-  function testNodeTokenReplacement() {
+  public function testNodeTokenReplacement() {
     global $language;
     $url_options = array(
       'absolute' => TRUE,
@@ -3439,7 +3439,7 @@ class NodeRevisionPermissionsTestCase extends BackdropWebTestCase {
     'delete' => 'delete revisions',
   );
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     // Create a node with several revisions.
@@ -3485,7 +3485,7 @@ class NodeRevisionPermissionsTestCase extends BackdropWebTestCase {
   /**
    * Tests the _node_revision_access() function.
    */
-  function testNodeRevisionAccess() {
+  public function testNodeRevisionAccess() {
     $revision = $this->node_revisions[1];
 
     $parameters = array(
@@ -3617,7 +3617,7 @@ class NodeAccessFieldTestCase extends NodeWebTestCase {
   /**
    * Tests administering fields when node access is restricted.
    */
-  function testNodeAccessAdministerField() {
+  public function testNodeAccessAdministerField() {
     // Create a page node.
     $langcode = LANGUAGE_NONE;
     $field_data = array();
@@ -3661,14 +3661,14 @@ class NodeAccessFieldTestCase extends NodeWebTestCase {
  * Tests changing display modes for nodes.
  */
 class NodeEntityViewModeAlterTest extends NodeWebTestCase {
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('node_test'));
   }
 
   /**
    * Create a "Page" node and verify its consistency in the database.
    */
-  function testNodeViewModeChange() {
+  public function testNodeViewModeChange() {
     $web_user = $this->backdropCreateUser(array('create page content', 'edit own page content'));
     $this->backdropLogin($web_user);
 
@@ -3699,7 +3699,7 @@ class NodeEntityViewModeAlterTest extends NodeWebTestCase {
   /**
    * Tests fields that were previously hidden when the display mode is changed.
    */
-  function testNodeViewModeChangeHiddenField() {
+  public function testNodeViewModeChangeHiddenField() {
     // Hide the tags field on the default display
     $instance = field_info_instance('node', 'field_tags', 'post');
     $instance['display']['default']['type'] = 'hidden';
@@ -3747,7 +3747,7 @@ class NodePageCacheTest extends NodeWebTestCase {
    */
   protected $admin_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     config_set('system.core', 'cache', 1);
@@ -3908,7 +3908,7 @@ class NodePublishScheduling extends BackdropWebTestCase {
    */
   protected $admin_user;
 
-  function testNodeTypeCreateDefaultDraft() {
+  public function testNodeTypeCreateDefaultDraft() {
     // Create a content type of foobar via the user interface.
     $this->admin_user = $this->backdropCreateUser(array('bypass node access', 'administer nodes'));
     $web_user = $this->backdropCreateUser(array('bypass node access', 'administer content types', 'administer nodes'));

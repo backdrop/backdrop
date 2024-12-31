@@ -19,7 +19,7 @@ class UnicodeUnitTest extends BackdropUnitTestCase {
   /**
    * Test full unicode features implemented using the mbstring extension.
    */
-  function testMbStringUnicode() {
+  public function testMbStringUnicode() {
     global $multibyte;
 
     // mbstring was not detected on this installation, there is no way to test
@@ -44,7 +44,7 @@ class UnicodeUnitTest extends BackdropUnitTestCase {
   /**
    * Test emulated unicode features.
    */
-  function testEmulatedUnicode() {
+  public function testEmulatedUnicode() {
     global $multibyte;
 
     $multibyte = UNICODE_SINGLEBYTE;
@@ -61,7 +61,7 @@ class UnicodeUnitTest extends BackdropUnitTestCase {
     $this->helperTestTruncate();
   }
 
-  function helperTestStrToLower() {
+  protected function helperTestStrToLower() {
     $testcase = array(
       'tHe QUIcK bRoWn' => 'the quick brown',
       // cspell:disable-next-line
@@ -77,7 +77,7 @@ class UnicodeUnitTest extends BackdropUnitTestCase {
     }
   }
 
-  function helperTestStrToUpper() {
+  protected function helperTestStrToUpper() {
     $testcase = array(
       'tHe QUIcK bRoWn' => 'THE QUICK BROWN',
       // cspell:disable-next-line
@@ -93,7 +93,7 @@ class UnicodeUnitTest extends BackdropUnitTestCase {
     }
   }
 
-  function helperTestUcFirst() {
+  protected function helperTestUcFirst() {
     $testcase = array(
       // cspell:disable
       'tHe QUIcK bRoWn' => 'THe QUIcK bRoWn',
@@ -112,7 +112,7 @@ class UnicodeUnitTest extends BackdropUnitTestCase {
     }
   }
 
-  function helperTestStrLen() {
+  protected function helperTestStrLen() {
     $testcase = array(
       'tHe QUIcK bRoWn' => 15,
       // cspell:disable-next-line
@@ -124,7 +124,7 @@ class UnicodeUnitTest extends BackdropUnitTestCase {
     }
   }
 
-  function helperTestSubStr() {
+  protected function helperTestSubStr() {
     $testcase = array(
       //     012345678901234567890123
       // cspell:disable
@@ -188,7 +188,7 @@ class UnicodeUnitTest extends BackdropUnitTestCase {
   /**
    * Test decode_entities().
    */
-  function testDecodeEntities() {
+  public function testDecodeEntities() {
     $testcase = array(
       'Backdrop' => 'Backdrop',
       '<script>' => '<script>',
@@ -220,7 +220,7 @@ class UnicodeUnitTest extends BackdropUnitTestCase {
   /**
    * Tests truncate_utf8().
    */
-  function helperTestTruncate() {
+  protected function helperTestTruncate() {
     // Each case is an array with input string, length to truncate to, and
     // expected return value.
 
@@ -304,7 +304,7 @@ class UnicodeUnitTest extends BackdropUnitTestCase {
    * @param $ellipsis
    *   TRUE to append ... if the input is truncated, FALSE to not append ....
    */
-  function runTruncateTests($cases, $wordsafe, $ellipsis) {
+  protected function runTruncateTests($cases, $wordsafe, $ellipsis) {
     foreach ($cases as $case) {
       list($input, $max_length, $expected) = $case;
       $output = truncate_utf8($input, $max_length, $wordsafe, $ellipsis);

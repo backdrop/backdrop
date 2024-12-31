@@ -10,14 +10,14 @@
 class BatchProcessingTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('batch_test');
   }
 
   /**
    * Test batches triggered outside of form submission.
    */
-  function testBatchNoForm() {
+  public function testBatchNoForm() {
     // Displaying the page triggers batch 1.
     $this->backdropGet('batch-test/no-form');
     $this->assertBatchMessages($this->_resultMessages(1), t('Batch for step 2 performed successfully.'));
@@ -28,7 +28,7 @@ class BatchProcessingTestCase extends BackdropWebTestCase {
   /**
    * Test batches defined in a form submit handler.
    */
-  function testBatchForm() {
+  public function testBatchForm() {
     // Batch 0: no operation.
     $edit = array('batch' => 'batch_0');
     $this->backdropPost('batch-test/simple', $edit, 'Submit');
@@ -67,7 +67,7 @@ class BatchProcessingTestCase extends BackdropWebTestCase {
   /**
    * Test batches defined in a multistep form.
    */
-  function testBatchFormMultistep() {
+  public function testBatchFormMultistep() {
     $this->backdropGet('batch-test/multistep');
     $this->assertText('step 1', t('Form is displayed in step 1.'));
 
@@ -87,7 +87,7 @@ class BatchProcessingTestCase extends BackdropWebTestCase {
   /**
    * Test batches defined in different submit handlers on the same form.
    */
-  function testBatchFormMultipleBatches() {
+  public function testBatchFormMultipleBatches() {
     // Batches 1, 2 and 3 are triggered in sequence by different submit
     // handlers. Each submit handler modify the submitted 'value'.
     $value = 'sample-value';
@@ -109,7 +109,7 @@ class BatchProcessingTestCase extends BackdropWebTestCase {
   /**
    * Test batches defined in a programmatically submitted form.
    */
-  function testBatchFormProgrammatic() {
+  public function testBatchFormProgrammatic() {
     // Batches 1, 2 and 3 are triggered in sequence by different submit
     // handlers. Each submit handler modify the submitted 'value'.
     $value = 'sample-value-from-menu';
@@ -125,7 +125,7 @@ class BatchProcessingTestCase extends BackdropWebTestCase {
   /**
    * Test that backdrop_form_submit() can run within a batch operation.
    */
-  function testBackdropFormSubmitInBatch() {
+  public function testBackdropFormSubmitInBatch() {
     // Displaying the page triggers a batch that programmatically submits a
     // form.
     $value = 'sample-value-from-menu';
@@ -137,7 +137,7 @@ class BatchProcessingTestCase extends BackdropWebTestCase {
    * Test batches that return $context['finished'] > 1 do in fact complete.
    * See http://drupal.org/node/600836
    */
-  function testBatchLargePercentage() {
+  public function testBatchLargePercentage() {
     // Displaying the page triggers batch 5.
     $this->backdropGet('batch-test/large-percentage');
     $this->assertBatchMessages($this->_resultMessages(1), t('Batch for step 2 performed successfully.'));
@@ -156,7 +156,7 @@ class BatchProcessingTestCase extends BackdropWebTestCase {
    * @return
    *   TRUE on pass, FALSE on fail.
    */
-  function assertBatchMessages($texts, $message) {
+  protected function assertBatchMessages($texts, $message) {
     $pattern = '|' . implode('.*', $texts) .'|s';
     return $this->assertPattern($pattern, $message);
   }
@@ -164,7 +164,7 @@ class BatchProcessingTestCase extends BackdropWebTestCase {
   /**
    * Helper function: return expected execution stacks for the test batches.
    */
-  function _resultStack($id, $value = 0) {
+  private function _resultStack($id, $value = 0) {
     $stack = array();
     switch ($id) {
       case 'batch_1':
@@ -231,7 +231,7 @@ class BatchProcessingTestCase extends BackdropWebTestCase {
   /**
    * Helper function: return expected result messages for the test batches.
    */
-  function _resultMessages($id) {
+  private function _resultMessages($id) {
     $messages = array();
 
     switch ($id) {
@@ -276,14 +276,14 @@ class BatchProcessingTestCase extends BackdropWebTestCase {
 class BatchPageTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('batch_test');
   }
 
   /**
    * Tests that the batch API progress page uses the correct theme.
    */
-  function testBatchProgressPageTheme() {
+  public function testBatchProgressPageTheme() {
     // Make sure that the page which starts the batch (an administrative page)
     // is using a different theme than would normally be used by the batch API.
     config_set('system.core', 'theme_default', 'bartik');
@@ -310,7 +310,7 @@ class BatchPercentagesUnitTestCase extends BackdropUnitTestCase {
   protected $profile = 'testing';
   protected $testCases = array();
 
-  function setUp() {
+  public function setUp() {
     // Set up an array of test cases, where the expected values are the keys,
     // and the values are arrays with the keys 'total' and 'current',
     // corresponding with the function parameters of _batch_api_percentage().
@@ -367,7 +367,7 @@ class BatchPercentagesUnitTestCase extends BackdropUnitTestCase {
   /**
    * Test the _batch_api_percentage() function.
    */
-  function testBatchPercentages() {
+  public function testBatchPercentages() {
     foreach ($this->testCases as $expected_result => $arguments) {
       // PHP sometimes casts numeric strings that are array keys to integers,
       // cast them back here.

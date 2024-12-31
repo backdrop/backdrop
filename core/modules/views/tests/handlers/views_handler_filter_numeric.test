@@ -20,7 +20,7 @@ class ViewsHandlerFilterNumericTest extends ViewsSqlTest {
     );
   }
 
-  function viewsData() {
+  protected function viewsData() {
     $data = parent::viewsData();
     $data['views_test']['age']['filter']['allow empty'] = TRUE;
     $data['views_test']['id']['filter']['allow empty'] = FALSE;

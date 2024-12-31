@@ -29,7 +29,7 @@ class LinkUITest extends LinkBaseTestClass {
   /**
    * Creates a link field for the "page" type and creates a page with a link.
    */
-  function testLinkCreate() {
+  public function testLinkCreate() {
     $name = strtolower($this->randomName());
     $edit = array(
       'fields[_add_new_field][label]' => $name,
@@ -143,7 +143,7 @@ class LinkUITest extends LinkBaseTestClass {
   /**
    * Tests if <strong> is used in a static title that the markup is retained.
    */
-  function testStaticLinkCreate() {
+  public function testStaticLinkCreate() {
     $name = strtolower($this->randomName());
     $field_name = 'field_' . $name;
     $edit = array(
@@ -177,7 +177,7 @@ class LinkUITest extends LinkBaseTestClass {
   /**
    * Tests that if a field has a title but no URL, the title is not sanitized twice.
    */
-  function testCRUDTitleOnlyTitleNoLink() {
+  public function testCRUDTitleOnlyTitleNoLink() {
     $name = strtolower($this->randomName());
     $field_name = 'field_' . $name;
     $edit = array(
@@ -212,7 +212,7 @@ class LinkUITest extends LinkBaseTestClass {
   /**
    * Creates a field with all the default values and check expected values.
    */
-  function testCRUDCreateFieldDefaults() {
+  public function testCRUDCreateFieldDefaults() {
     $name = strtolower($this->randomName());
     $edit = array(
       'fields[_add_new_field][label]' => $name,
@@ -242,7 +242,7 @@ class LinkUITest extends LinkBaseTestClass {
   /**
    * Tests adding custom classes (single and multiple) to link fields.
    */
-  function testCRUDCreateFieldWithClasses() {
+  public function testCRUDCreateFieldWithClasses() {
     // Disable the page cache for this test.
     config_set('system.core', 'cache', 0);
     $name = strtolower($this->randomName());
@@ -304,7 +304,7 @@ class LinkUITest extends LinkBaseTestClass {
   /**
    * Tests the link type: "internal", "external", and "both" settings.
    */
-  function testCRUDCreateFieldWithLinkType() {
+  public function testCRUDCreateFieldWithLinkType() {
     $name = strtolower($this->randomName());
     $edit = array(
       'fields[_add_new_field][label]' => $name,

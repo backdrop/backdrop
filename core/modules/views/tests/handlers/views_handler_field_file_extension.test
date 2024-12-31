@@ -10,7 +10,7 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests the views_handler_field_file_extension handler.
  */
 class ViewsHandlerFileExtensionTest extends ViewsSqlTest {
-  function dataSet() {
+  protected function dataSet() {
     $data = parent::dataSet();
     $data[0]['name'] = 'file.png';
     $data[1]['name'] = 'file.tar';
@@ -20,7 +20,7 @@ class ViewsHandlerFileExtensionTest extends ViewsSqlTest {
     return $data;
   }
 
-  function viewsData() {
+  protected function viewsData() {
     $data = parent::viewsData();
     $data['views_test']['name']['field']['handler'] = 'views_handler_field_file_extension';
     $data['views_test']['name']['real field'] = 'name';

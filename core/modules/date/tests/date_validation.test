@@ -3,7 +3,7 @@
  * @file
  * Date validation tests.
  */
- 
+
 require_once BACKDROP_ROOT . '/core/modules/date/tests/date_field.test';
 
 class DateValidationTestCase extends DateFieldBasic {
@@ -47,7 +47,7 @@ class DateValidationTestCase extends DateFieldBasic {
   /**
    * Attempt to create a node with a malformed date and ensure it fails.
    */
-  function malFormedDate($field_name, $field_type, $widget_type) {
+  protected function malFormedDate($field_name, $field_type, $widget_type) {
     // Tests that date field filters improper dates.
     $edit = array();
     $edit['title'] = $this->randomName(8);

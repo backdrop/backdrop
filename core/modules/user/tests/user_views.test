@@ -45,7 +45,7 @@ class UserViewsTestCase extends ViewsSqlTest {
     $this->assertIdenticalResultset($view, $expected);
   }
 
-  function test_view_user_relationship() {
+  public function test_view_user_relationship() {
     $view = new view;
     $view->name = 'test_user_relationship';
     $view->description = '';

@@ -57,7 +57,7 @@ class FileTestCase extends BackdropWebTestCase {
    * @param $after
    *   File object to compare.
    */
-  function assertFileUnchanged($before, $after) {
+  protected function assertFileUnchanged($before, $after) {
     $this->assertEqual($before->fid, $after->fid, format_string('File id is the same: %file1 == %file2.', array('%file1' => $before->fid, '%file2' => $after->fid)), 'File unchanged');
     $this->assertEqual($before->uid, $after->uid, format_string('File owner is the same: %file1 == %file2.', array('%file1' => $before->uid, '%file2' => $after->uid)), 'File unchanged');
     $this->assertEqual($before->filename, $after->filename, format_string('File name is the same: %file1 == %file2.', array('%file1' => $before->filename, '%file2' => $after->filename)), 'File unchanged');
@@ -75,7 +75,7 @@ class FileTestCase extends BackdropWebTestCase {
    * @param $file2
    *   File object to compare.
    */
-  function assertDifferentFile($file1, $file2) {
+  protected function assertDifferentFile($file1, $file2) {
     $this->assertNotEqual($file1->fid, $file2->fid, format_string('Files have different ids: %file1 != %file2.', array('%file1' => $file1->fid, '%file2' => $file2->fid)), 'Different file');
     $this->assertNotEqual($file1->uri, $file2->uri, format_string('Files have different paths: %file1 != %file2.', array('%file1' => $file1->uri, '%file2' => $file2->uri)), 'Different file');
   }
@@ -88,7 +88,7 @@ class FileTestCase extends BackdropWebTestCase {
    * @param $file2
    *   File object to compare.
    */
-  function assertSameFile($file1, $file2) {
+  protected function assertSameFile($file1, $file2) {
     $this->assertEqual($file1->fid, $file2->fid, format_string('Files have the same ids: %file1 == %file2.', array('%file1' => $file1->fid, '%file2-fid' => $file2->fid)), 'Same file');
     $this->assertEqual($file1->uri, $file2->uri, format_string('Files have the same path: %file1 == %file2.', array('%file1' => $file1->uri, '%file2' => $file2->uri)), 'Same file');
   }
@@ -103,7 +103,7 @@ class FileTestCase extends BackdropWebTestCase {
    * @param $message
    *   Optional message.
    */
-  function assertFilePermissions($filepath, $expected_mode, $message = NULL) {
+  protected function assertFilePermissions($filepath, $expected_mode, $message = NULL) {
     // Clear out PHP's file stat cache to be sure we see the current value.
     clearstatcache();
 
@@ -138,7 +138,7 @@ class FileTestCase extends BackdropWebTestCase {
    * @param $message
    *   Optional message.
    */
-  function assertDirectoryPermissions($directory, $expected_mode, $message = NULL) {
+  protected function assertDirectoryPermissions($directory, $expected_mode, $message = NULL) {
     // Clear out PHP's file stat cache to be sure we see the current value.
     clearstatcache();
 
@@ -172,7 +172,7 @@ class FileTestCase extends BackdropWebTestCase {
    * @return
    *   The path to the directory.
    */
-  function createDirectory($path = NULL) {
+  protected function createDirectory($path = NULL) {
     // A directory to operate on.
     if (!isset($path)) {
       $path = file_default_scheme() . '://' . $this->randomName();
@@ -198,7 +198,7 @@ class FileTestCase extends BackdropWebTestCase {
    * @return File
    *   File object.
    */
-  function createFile($filepath = NULL, $contents = NULL, $scheme = NULL) {
+  protected function createFile($filepath = NULL, $contents = NULL, $scheme = NULL) {
     if (!isset($filepath)) {
       // Prefix with non-latin characters to ensure that all file-related
       // tests work with international filenames.
@@ -238,7 +238,7 @@ class FileTestCase extends BackdropWebTestCase {
  * hooks.
  */
 class FileHookTestCase extends FileTestCase {
-  function setUp() {
+  public function setUp() {
     // Install file_test module
     parent::setUp('file_test');
     // Clear out any hook calls.
@@ -253,7 +253,7 @@ class FileHookTestCase extends FileTestCase {
    *   Array with string containing with the hook name, e.g. 'load', 'save',
    *   'insert', etc.
    */
-  function assertFileHooksCalled($expected) {
+  protected function assertFileHooksCalled($expected) {
     // Determine which hooks were called.
     $actual = array_keys(array_filter(file_test_get_all_calls()));
 
@@ -286,7 +286,7 @@ class FileHookTestCase extends FileTestCase {
    * @param $message
    *   Optional translated string message.
    */
-  function assertFileHookCalled($hook, $expected_count = 1, $message = NULL) {
+  protected function assertFileHookCalled($hook, $expected_count = 1, $message = NULL) {
     $actual_count = count(file_test_get_calls($hook));
 
     if (!isset($message)) {
@@ -309,7 +309,7 @@ class FileHookTestCase extends FileTestCase {
  *  This will run tests against the file_space_used() function.
  */
 class FileSpaceUsedTest extends FileTestCase {
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     // Create records for a couple of users with different sizes.
@@ -332,7 +332,7 @@ class FileSpaceUsedTest extends FileTestCase {
   /**
    * Test different users with the default status.
    */
-  function testFileSpaceUsed() {
+  public function testFileSpaceUsed() {
     // Test different users with default status.
     $this->assertEqual(file_space_used(2), 70);
     $this->assertEqual(file_space_used(3), 300);
@@ -361,7 +361,7 @@ class FileValidatorTest extends BackdropWebTestCase {
   protected $non_image;
   protected $file;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('file'));
 
     $this->image = new File(array());
@@ -376,7 +376,7 @@ class FileValidatorTest extends BackdropWebTestCase {
   /**
    * Test the file_validate_extensions() function.
    */
-  function testFileValidateExtensions() {
+  public function testFileValidateExtensions() {
     $file = new File(array('filename' => 'asdf.txt'));
     $errors = file_validate_extensions($file, 'asdf txt pork');
     $this->assertEqual(count($errors), 0, 'Valid extension accepted.', 'File');
@@ -389,7 +389,7 @@ class FileValidatorTest extends BackdropWebTestCase {
   /**
    *  This ensures a specific file is actually an image.
    */
-  function testFileValidateIsImage() {
+  public function testFileValidateIsImage() {
     $this->assertTrue(file_exists($this->image->uri), 'The image being tested exists.', 'File');
     $errors = file_validate_is_image($this->image);
     $this->assertEqual(count($errors), 0, 'No error reported for our image file.', 'File');
@@ -403,7 +403,7 @@ class FileValidatorTest extends BackdropWebTestCase {
    *  This ensures the resolution of a specific file is within bounds.
    *  The image will be resized if it's too large.
    */
-  function testFileValidateImageResolution() {
+  public function testFileValidateImageResolution() {
     // Non-images.
     $errors = file_validate_image_resolution($this->non_image);
     $this->assertEqual(count($errors), 0, "Shouldn't get any errors for a non-image file.", 'File');
@@ -445,7 +445,7 @@ class FileValidatorTest extends BackdropWebTestCase {
   /**
    *  This will ensure the filename length is valid.
    */
-  function testFileValidateNameLength() {
+  public function testFileValidateNameLength() {
     // Create a new file entity.
     $file = new File();
 
@@ -470,7 +470,7 @@ class FileValidatorTest extends BackdropWebTestCase {
   /**
    * Test file_validate_size().
    */
-  function testFileValidateSize() {
+  public function testFileValidateSize() {
     // Create a file with a size of 1000 bytes, and quotas of only 1 byte.
     $file = new File(array('filesize' => 1000));
     $errors = file_validate_size($file, 0, 0);
@@ -493,7 +493,7 @@ class FileUnmanagedSaveDataTest extends FileTestCase {
   /**
    * Test the file_unmanaged_save_data() function.
    */
-  function testFileSaveData() {
+  public function testFileSaveData() {
     $contents = $this->randomName(8);
 
     // No filename.
@@ -515,7 +515,7 @@ class FileUnmanagedSaveDataTest extends FileTestCase {
  *  Tests the file_unmanaged_save_data() function on remote filesystems.
  */
 class RemoteFileUnmanagedSaveDataTest extends FileUnmanagedSaveDataTest {
-  function setUp() {
+  public function setUp() {
     parent::setUp('file_test');
     config_set('system.core', 'file_default_scheme', 'dummy-remote');
   }
@@ -541,7 +541,7 @@ class FileSaveUploadTest extends FileHookTestCase {
    */
   protected $maxFidBefore;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     $image_files = $this->backdropGetTestFiles('image');
@@ -573,7 +573,7 @@ class FileSaveUploadTest extends FileHookTestCase {
   /**
    * Test the file_save_upload() function.
    */
-  function testNormal() {
+  public function testNormal() {
     $max_fid_after = db_query('SELECT MAX(fid) AS fid FROM {file_managed}')->fetchField();
     $this->assertTrue($max_fid_after > $this->maxFidBefore, 'A new file was created.');
     $file1 = file_load($max_fid_after);
@@ -625,7 +625,7 @@ class FileSaveUploadTest extends FileHookTestCase {
   /**
    * Test extension handling.
    */
-  function testHandleExtension() {
+  public function testHandleExtension() {
     // The file being tested is a .gif which is in the default safe list
     // of extensions to allow when the extension validator isn't used. This is
     // implicitly tested at the testNormal() test. Here we tell
@@ -707,7 +707,7 @@ class FileSaveUploadTest extends FileHookTestCase {
   /**
    * Test dangerous file handling.
    */
-  function testHandleDangerousFile() {
+  public function testHandleDangerousFile() {
     // Allow the .php extension and make sure it gets munged and given a .txt
     // extension for safety. Also check to make sure its MIME type was changed.
     $edit = array(
@@ -784,7 +784,7 @@ class FileSaveUploadTest extends FileHookTestCase {
   /**
    * Test file munge handling.
    */
-  function testHandleFileMunge() {
+  public function testHandleFileMunge() {
     $original_image_uri = $this->image->uri;
     $this->image = file_move($this->image, $this->image->uri . '.foo.' . $this->image_extension);
 
@@ -938,7 +938,7 @@ class FileSaveUploadTest extends FileHookTestCase {
   /**
    * Test renaming when uploading over a file that already exists.
    */
-  function testExistingRename() {
+  public function testExistingRename() {
     $edit = array(
       'file_test_replace' => FILE_EXISTS_RENAME,
       'files[file_test_upload]' => backdrop_realpath($this->image->uri)
@@ -954,7 +954,7 @@ class FileSaveUploadTest extends FileHookTestCase {
   /**
    * Test replacement when uploading over a file that already exists.
    */
-  function testExistingReplace() {
+  public function testExistingReplace() {
     $edit = array(
       'file_test_replace' => FILE_EXISTS_REPLACE,
       'files[file_test_upload]' => backdrop_realpath($this->image->uri)
@@ -970,7 +970,7 @@ class FileSaveUploadTest extends FileHookTestCase {
   /**
    * Test for failure when uploading over a file that already exists.
    */
-  function testErrors() {
+  public function testErrors() {
     $edit = array(
       'file_test_replace' => FILE_EXISTS_ERROR,
       'files[file_test_upload]' => backdrop_realpath($this->image->uri)
@@ -995,7 +995,7 @@ class FileSaveUploadTest extends FileHookTestCase {
  * Test the file_save_upload() function on remote filesystems.
  */
 class RemoteFileSaveUploadTest extends FileSaveUploadTest {
-  function setUp() {
+  public function setUp() {
     parent::setUp();
     config_set('system.core', 'file_default_scheme', 'dummy-remote');
   }
@@ -1005,14 +1005,14 @@ class RemoteFileSaveUploadTest extends FileSaveUploadTest {
  * Tests transliterating files on upload and subsequent bulk updating.
  */
 class FileUploadTransliterationTest extends FileTestCase {
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('file_test'));
 
     $admin_user = $this->backdropCreateUser(array('administer site configuration'));
     $this->backdropLogin($admin_user);
   }
 
-  function testTransliteration() {
+  public function testTransliteration() {
     // Make a particularly troublesome file name, starting with an umlaut and
     // containing upper-case variant characters.
     // cspell:disable-next-line.
@@ -1124,7 +1124,7 @@ class FileDirectoryTest extends FileTestCase {
   /**
    * Test directory handling functions.
    */
-  function testFileCheckDirectoryHandling() {
+  public function testFileCheckDirectoryHandling() {
     // A directory to operate on.
     $directory = file_default_scheme() . '://' . $this->randomName() . '/' . $this->randomName();
     $this->assertFalse(is_dir($directory), 'Directory does not exist prior to testing.');
@@ -1169,7 +1169,7 @@ class FileDirectoryTest extends FileTestCase {
    * This will take a directory and path, and find a valid filepath that is not
    * taken by another file.
    */
-  function testFileCreateNewFilepath() {
+  public function testFileCreateNewFilepath() {
     // First we test against an imaginary file that does not exist in a
     // directory.
     $basename = 'xyz.txt';
@@ -1209,7 +1209,7 @@ class FileDirectoryTest extends FileTestCase {
    *
    * If the file doesn't currently exist, then it will return the filepath.
    */
-  function testFileDestination() {
+  public function testFileDestination() {
     // First test for non-existent file.
     $destination = 'core/misc/xyz.txt';
     $path = file_destination($destination, FILE_EXISTS_REPLACE);
@@ -1239,7 +1239,7 @@ class FileDirectoryTest extends FileTestCase {
   /**
    * Ensure that the file_directory_temp() function always returns a value.
    */
-  function testFileDirectoryTemp() {
+  public function testFileDirectoryTemp() {
     // Start with an empty config to ensure we have a clean slate.
     config_set('system.core', 'file_temporary_path', '');
     $tmp_directory = file_directory_temp();
@@ -1257,7 +1257,7 @@ class FileDirectoryTest extends FileTestCase {
  * Directory related tests.
  */
 class RemoteFileDirectoryTest extends FileDirectoryTest {
-  function setUp() {
+  public function setUp() {
     parent::setUp('file_test');
     config_set('system.core', 'file_default_scheme', 'dummy-remote');
   }
@@ -1269,7 +1269,7 @@ class RemoteFileDirectoryTest extends FileDirectoryTest {
 class FileScanDirectoryTest extends FileTestCase {
   protected $path;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
     $this->path = backdrop_get_path('module', 'simpletest') . '/files';
   }
@@ -1277,7 +1277,7 @@ class FileScanDirectoryTest extends FileTestCase {
   /**
    * Check the format of the returned values.
    */
-  function testReturn() {
+  public function testReturn() {
     // Grab a listing of all the JavaScript files and check that they're
     // passed to the callback.
     $all_files = file_scan_directory($this->path, '/^javascript-/');
@@ -1302,7 +1302,7 @@ class FileScanDirectoryTest extends FileTestCase {
   /**
    * Check that the callback function is called correctly.
    */
-  function testOptionCallback() {
+  public function testOptionCallback() {
     // When nothing is matched nothing should be passed to the callback.
     $all_files = file_scan_directory($this->path, '/^NONEXISTINGFILENAME/', array('callback' => 'file_test_file_scan_callback'));
     $this->assertEqual(0, count($all_files), 'No files were found.');
@@ -1322,7 +1322,7 @@ class FileScanDirectoryTest extends FileTestCase {
   /**
    * Check that the no-mask parameter is honored.
    */
-  function testOptionNoMask() {
+  public function testOptionNoMask() {
     // Grab a listing of all the JavaScript files.
     $all_files = file_scan_directory($this->path, '/^javascript-/', array('recurse' => FALSE));
     $this->assertEqual(2, count($all_files), 'Found two, expected javascript files.');
@@ -1342,7 +1342,7 @@ class FileScanDirectoryTest extends FileTestCase {
   /**
    * Check that key parameter sets the return value's key.
    */
-  function testOptionKey() {
+  public function testOptionKey() {
     // "filename", for the path starting with $dir.
     $expected = array($this->path . '/javascript-1.txt', $this->path . '/javascript-2.script');
     $actual = array_keys(file_scan_directory($this->path, '/^javascript-/', array('key' => 'filepath')));
@@ -1371,7 +1371,7 @@ class FileScanDirectoryTest extends FileTestCase {
   /**
    * Check that the recurse option descends into subdirectories.
    */
-  function testOptionRecurse() {
+  public function testOptionRecurse() {
     $files = file_scan_directory(backdrop_get_path('module', 'simpletest'), '/^javascript-/', array('recurse' => FALSE));
     $this->assertTrue(empty($files), "Without recursion couldn't find javascript files.");
 
@@ -1384,7 +1384,7 @@ class FileScanDirectoryTest extends FileTestCase {
    * Check that the min_depth options lets us ignore files in the starting
    * directory.
    */
-  function testOptionMinDepth() {
+  public function testOptionMinDepth() {
     $files = file_scan_directory($this->path, '/^javascript-/', array('min_depth' => 0));
     $this->assertEqual(2, count($files), 'No minimum-depth gets files in current directory.');
 
@@ -1397,7 +1397,7 @@ class FileScanDirectoryTest extends FileTestCase {
  * Tests the file_scan_directory() function on remote filesystems.
  */
 class RemoteFileScanDirectoryTest extends FileScanDirectoryTest {
-  function setUp() {
+  public function setUp() {
     parent::setUp();
     config_set('system.core', 'file_default_scheme', 'dummy-remote');
   }
@@ -1413,7 +1413,7 @@ class FileUnmanagedDeleteTest extends FileTestCase {
   /**
    * Delete a normal file.
    */
-  function testNormal() {
+  public function testNormal() {
     // Create a file for testing
     $file = $this->createFile();
 
@@ -1425,7 +1425,7 @@ class FileUnmanagedDeleteTest extends FileTestCase {
   /**
    * Try deleting a missing file.
    */
-  function testMissing() {
+  public function testMissing() {
     // Try to delete a non-existing file
     $this->assertTrue(file_unmanaged_delete(file_default_scheme() . '/' . $this->randomName()), 'Returns true when deleting a non-existent file.');
   }
@@ -1433,7 +1433,7 @@ class FileUnmanagedDeleteTest extends FileTestCase {
   /**
    * Try deleting a directory.
    */
-  function testDirectory() {
+  public function testDirectory() {
     // A directory to operate on.
     $directory = $this->createDirectory();
 
@@ -1447,7 +1447,7 @@ class FileUnmanagedDeleteTest extends FileTestCase {
  * Deletion related tests on remote filesystems.
  */
 class RemoteFileUnmanagedDeleteTest extends FileUnmanagedDeleteTest {
-  function setUp() {
+  public function setUp() {
     parent::setUp('file_test');
     config_set('system.core', 'file_default_scheme', 'dummy-remote');
   }
@@ -1463,7 +1463,7 @@ class FileUnmanagedDeleteRecursiveTest extends FileTestCase {
   /**
    * Delete a normal file.
    */
-  function testSingleFile() {
+  public function testSingleFile() {
     // Create a file for testing
     $filepath = file_default_scheme() . '://' . $this->randomName();
     file_put_contents($filepath, '');
@@ -1476,7 +1476,7 @@ class FileUnmanagedDeleteRecursiveTest extends FileTestCase {
   /**
    * Try deleting an empty directory.
    */
-  function testEmptyDirectory() {
+  public function testEmptyDirectory() {
     // A directory to operate on.
     $directory = $this->createDirectory();
 
@@ -1488,7 +1488,7 @@ class FileUnmanagedDeleteRecursiveTest extends FileTestCase {
   /**
    * Try deleting a directory with some files.
    */
-  function testDirectory() {
+  public function testDirectory() {
     // A directory to operate on.
     $directory = $this->createDirectory();
     $filepathA = $directory . '/A';
@@ -1506,7 +1506,7 @@ class FileUnmanagedDeleteRecursiveTest extends FileTestCase {
   /**
    * Try deleting subdirectories with some files.
    */
-  function testSubDirectory() {
+  public function testSubDirectory() {
     // A directory to operate on.
     $directory = $this->createDirectory();
     $subdirectory = $this->createDirectory($directory . '/sub');
@@ -1528,7 +1528,7 @@ class FileUnmanagedDeleteRecursiveTest extends FileTestCase {
  * Deletion related tests on remote filesystems.
  */
 class RemoteFileUnmanagedDeleteRecursiveTest extends FileUnmanagedDeleteRecursiveTest {
-  function setUp() {
+  public function setUp() {
     parent::setUp('file_test');
     config_set('system.core', 'file_default_scheme', 'dummy-remote');
   }
@@ -1544,7 +1544,7 @@ class FileUnmanagedMoveTest extends FileTestCase {
   /**
    * Move a normal file.
    */
-  function testNormal() {
+  public function testNormal() {
     // Create a file for testing
     $file = $this->createFile();
 
@@ -1575,7 +1575,7 @@ class FileUnmanagedMoveTest extends FileTestCase {
   /**
    * Try to move a missing file.
    */
-  function testMissing() {
+  public function testMissing() {
     // Move non-existent file.
     $new_filepath = file_unmanaged_move($this->randomName(), $this->randomName());
     $this->assertFalse($new_filepath, 'Moving a missing file fails.');
@@ -1584,7 +1584,7 @@ class FileUnmanagedMoveTest extends FileTestCase {
   /**
    * Try to move a file onto itself.
    */
-  function testOverwriteSelf() {
+  public function testOverwriteSelf() {
     // Create a file for testing.
     $file = $this->createFile();
 
@@ -1605,7 +1605,7 @@ class FileUnmanagedMoveTest extends FileTestCase {
  * Unmanaged move related tests on remote filesystems.
  */
 class RemoteFileUnmanagedMoveTest extends FileUnmanagedMoveTest {
-  function setUp() {
+  public function setUp() {
     parent::setUp('file_test');
     config_set('system.core', 'file_default_scheme', 'dummy-remote');
   }
@@ -1621,7 +1621,7 @@ class FileUnmanagedCopyTest extends FileTestCase {
   /**
    * Copy a normal file.
    */
-  function testNormal() {
+  public function testNormal() {
     // Create a file for testing
     $file = $this->createFile();
 
@@ -1651,7 +1651,7 @@ class FileUnmanagedCopyTest extends FileTestCase {
   /**
    * Copy a non-existent file.
    */
-  function testNonExistent() {
+  public function testNonExistent() {
     // Copy non-existent file
     $desired_filepath = $this->randomName();
     $this->assertFalse(file_exists($desired_filepath), "Randomly named file doesn't exists.");
@@ -1662,7 +1662,7 @@ class FileUnmanagedCopyTest extends FileTestCase {
   /**
    * Copy a file onto itself.
    */
-  function testOverwriteSelf() {
+  public function testOverwriteSelf() {
     // Create a file for testing
     $file = $this->createFile();
 
@@ -1698,7 +1698,7 @@ class FileUnmanagedCopyTest extends FileTestCase {
  * Unmanaged copy related tests on remote filesystems.
  */
 class RemoteFileUnmanagedCopyTest extends FileUnmanagedCopyTest {
-  function setUp() {
+  public function setUp() {
     parent::setUp('file_test');
     config_set('system.core', 'file_default_scheme', 'dummy-remote');
   }
@@ -1711,7 +1711,7 @@ class FileDeleteTest extends FileHookTestCase {
   /**
    * Tries deleting a normal file (as opposed to a directory, symlink, etc).
    */
-  function testUnused() {
+  public function testUnused() {
     $file = $this->createFile();
 
     // Check that deletion removes the file and database record.
@@ -1725,7 +1725,7 @@ class FileDeleteTest extends FileHookTestCase {
   /**
    * Tries deleting a file that is in use.
    */
-  function testInUse() {
+  public function testInUse() {
     $file = $this->createFile();
     file_usage_add($file, 'testing', 'test', 1);
     file_usage_add($file, 'testing', 'test', 1);
@@ -1778,7 +1778,7 @@ class FileMoveTest extends FileHookTestCase {
   /**
    * Move a normal file.
    */
-  function testNormal() {
+  public function testNormal() {
     $contents = $this->randomName(10);
     $source = $this->createFile(NULL, $contents);
     $desired_filepath = 'public://' . $this->randomName();
@@ -1808,7 +1808,7 @@ class FileMoveTest extends FileHookTestCase {
   /**
    * Test renaming when moving onto a file that already exists.
    */
-  function testExistingRename() {
+  public function testExistingRename() {
     // Setup a file to overwrite.
     $contents = $this->randomName(10);
     $source = $this->createFile(NULL, $contents);
@@ -1843,7 +1843,7 @@ class FileMoveTest extends FileHookTestCase {
   /**
    * Test replacement when moving onto a file that already exists.
    */
-  function testExistingReplace() {
+  public function testExistingReplace() {
     // Setup a file to overwrite.
     $contents = $this->randomName(10);
     $source = $this->createFile(NULL, $contents);
@@ -1875,7 +1875,7 @@ class FileMoveTest extends FileHookTestCase {
   /**
    * Test replacement when moving onto itself.
    */
-  function testExistingReplaceSelf() {
+  public function testExistingReplaceSelf() {
     // Setup a file to overwrite.
     $contents = $this->randomName(10);
     $source = $this->createFile(NULL, $contents);
@@ -1898,7 +1898,7 @@ class FileMoveTest extends FileHookTestCase {
    * Test that moving onto an existing file fails when FILE_EXISTS_ERROR is
    * specified.
    */
-  function testExistingError() {
+  public function testExistingError() {
     $contents = $this->randomName(10);
     $source = $this->createFile();
     $target = $this->createFile(NULL, $contents);
@@ -1931,7 +1931,7 @@ class FileCopyTest extends FileHookTestCase {
   /**
    * Test file copying in the normal, base case.
    */
-  function testNormal() {
+  public function testNormal() {
     $contents = $this->randomName(10);
     $source = $this->createFile(NULL, $contents);
     $desired_uri = 'public://' . $this->randomName();
@@ -1960,7 +1960,7 @@ class FileCopyTest extends FileHookTestCase {
   /**
    * Test renaming when copying over a file that already exists.
    */
-  function testExistingRename() {
+  public function testExistingRename() {
     // Setup a file to overwrite.
     $contents = $this->randomName(10);
     $source = $this->createFile(NULL, $contents);
@@ -2000,7 +2000,7 @@ class FileCopyTest extends FileHookTestCase {
   /**
    * Test replacement when copying over a file that already exists.
    */
-  function testExistingReplace() {
+  public function testExistingReplace() {
     // Setup a file to overwrite.
     $contents = $this->randomName(10);
     $source = $this->createFile(NULL, $contents);
@@ -2039,7 +2039,7 @@ class FileCopyTest extends FileHookTestCase {
    * Test that copying over an existing file fails when FILE_EXISTS_ERROR is
    * specified.
    */
-  function testExistingError() {
+  public function testExistingError() {
     $contents = $this->randomName(10);
     $source = $this->createFile();
     $target = $this->createFile(NULL, $contents);
@@ -2069,7 +2069,7 @@ class FileLoadTest extends FileHookTestCase {
   /**
    * Try to load a non-existent file by fid.
    */
-  function testLoadMissingFid() {
+  public function testLoadMissingFid() {
     $this->assertFalse(file_load(-1), "Try to load an invalid fid fails.");
     $this->assertFileHooksCalled(array());
   }
@@ -2077,7 +2077,7 @@ class FileLoadTest extends FileHookTestCase {
   /**
    * Try to load a non-existent file by URI.
    */
-  function testLoadMissingFilepath() {
+  public function testLoadMissingFilepath() {
     $files = file_load_multiple(array(), array('uri' => 'foobar://misc/feed.png'));
     $this->assertFalse(reset($files), "Try to load a file that doesn't exist in the database fails.");
     $this->assertFileHooksCalled(array());
@@ -2086,7 +2086,7 @@ class FileLoadTest extends FileHookTestCase {
   /**
    * Try to load a non-existent file by status.
    */
-  function testLoadInvalidStatus() {
+  public function testLoadInvalidStatus() {
     $files = file_load_multiple(array(), array('status' => -99));
     $this->assertFalse(reset($files), "Trying to load a file with an invalid status fails.");
     $this->assertFileHooksCalled(array());
@@ -2095,7 +2095,7 @@ class FileLoadTest extends FileHookTestCase {
   /**
    * Load a single file and ensure that the correct values are returned.
    */
-  function testSingleValues() {
+  public function testSingleValues() {
     // Create a new file entity from scratch so we know the values.
     $file = $this->createFile('backdrop.txt', NULL, 'public');
 
@@ -2113,7 +2113,7 @@ class FileLoadTest extends FileHookTestCase {
   /**
    * This will test loading file data from the database.
    */
-  function testMultiple() {
+  public function testMultiple() {
     // Create a new file entity.
     $file = $this->createFile('backdrop.txt', NULL, 'public');
 
@@ -2145,7 +2145,7 @@ class FileLoadTest extends FileHookTestCase {
  * Tests saving files.
  */
 class FileSaveTest extends FileHookTestCase {
-  function testFileSave() {
+  public function testFileSave() {
     // Create a new file object.
     $file = new File(array(
       'uid' => 1,
@@ -2196,7 +2196,7 @@ class FileUsageTest extends FileTestCase {
   /**
    * Tests file_usage_list().
    */
-  function testGetUsage() {
+  public function testGetUsage() {
     $file = $this->createFile();
     db_insert('file_usage')
       ->fields(array(
@@ -2229,7 +2229,7 @@ class FileUsageTest extends FileTestCase {
   /**
    * Tests file_usage_add().
    */
-  function testAddUsage() {
+  public function testAddUsage() {
     $file = $this->createFile();
     file_usage_add($file, 'testing', 'foo', 1);
     // Add the file twice to ensure that the count is incremented rather than
@@ -2254,7 +2254,7 @@ class FileUsageTest extends FileTestCase {
   /**
    * Tests file_usage_delete().
    */
-  function testRemoveUsage() {
+  public function testRemoveUsage() {
     $file = $this->createFile();
     db_insert('file_usage')
       ->fields(array(
@@ -2302,7 +2302,7 @@ class FileValidateTest extends FileHookTestCase {
   /**
    * Test that the validators passed into are checked.
    */
-  function testCallerValidation() {
+  public function testCallerValidation() {
     $file = $this->createFile();
 
     // Empty validators.
@@ -2352,7 +2352,7 @@ class FileSaveDataTest extends FileHookTestCase {
   /**
    * Test the file_save_data() function when no filename is provided.
    */
-  function testWithoutFilename() {
+  public function testWithoutFilename() {
     $contents = $this->randomName(8);
 
     $result = file_save_data($contents);
@@ -2374,7 +2374,7 @@ class FileSaveDataTest extends FileHookTestCase {
   /**
    * Test the file_save_data() function when a filename is provided.
    */
-  function testWithFilename() {
+  public function testWithFilename() {
     $contents = $this->randomName(8);
 
     // Using filename with non-latin characters.
@@ -2400,7 +2400,7 @@ class FileSaveDataTest extends FileHookTestCase {
   /**
    * Test file_save_data() when renaming around an existing file.
    */
-  function testExistingRename() {
+  public function testExistingRename() {
     // Setup a file to overwrite.
     $existing = $this->createFile();
     $contents = $this->randomName(8);
@@ -2428,7 +2428,7 @@ class FileSaveDataTest extends FileHookTestCase {
   /**
    * Test file_save_data() when replacing an existing file.
    */
-  function testExistingReplace() {
+  public function testExistingReplace() {
     // Setup a file to overwrite.
     $existing = $this->createFile();
     $contents = $this->randomName(8);
@@ -2455,7 +2455,7 @@ class FileSaveDataTest extends FileHookTestCase {
   /**
    * Test that file_save_data() fails overwriting an existing file.
    */
-  function testExistingError() {
+  public function testExistingError() {
     $contents = $this->randomName(8);
     $existing = $this->createFile(NULL, $contents);
 
@@ -2476,7 +2476,7 @@ class FileSaveDataTest extends FileHookTestCase {
  * Tests for download/file transfer functions.
  */
 class FileDownloadTest extends FileTestCase {
-  function setUp() {
+  public function setUp() {
     parent::setUp('file_test');
     // Clear out any hook calls.
     file_test_reset();
@@ -2485,7 +2485,7 @@ class FileDownloadTest extends FileTestCase {
   /**
    * Test the public file transfer system.
    */
-  function testPublicFileTransfer() {
+  public function testPublicFileTransfer() {
     // Test generating an URL to a created file.
     $file = $this->createFile();
     $url = file_create_url($file->uri);
@@ -2508,7 +2508,7 @@ class FileDownloadTest extends FileTestCase {
   /**
    * Test the private file transfer system.
    */
-  function testPrivateFileTransfer() {
+  public function testPrivateFileTransfer() {
     // Set file downloads to private so handler functions get called.
 
     // Create a file.
@@ -2540,7 +2540,7 @@ class FileDownloadTest extends FileTestCase {
   /**
    * Test file_create_url().
    */
-  function testFileCreateUrl() {
+  public function testFileCreateUrl() {
     global $base_url;
 
     // Tilde (~) is excluded from this test because it is encoded by
@@ -2610,14 +2610,14 @@ class FileDownloadTest extends FileTestCase {
  * Tests for file URL rewriting.
  */
 class FileURLRewritingTest extends FileTestCase {
-  function setUp() {
+  public function setUp() {
     parent::setUp('file_test');
   }
 
   /**
    * Test the generating of rewritten shipped file URLs.
    */
-  function testShippedFileURL()  {
+  public function testShippedFileURL()  {
     // Test generating an URL to a shipped file (i.e. a file that is part of
     // Backdrop core, a module or a theme, for example a JavaScript file).
 
@@ -2652,7 +2652,7 @@ class FileURLRewritingTest extends FileTestCase {
   /**
    * Test the generating of rewritten public created file URLs.
    */
-  function testPublicCreatedFileURL() {
+  public function testPublicCreatedFileURL() {
     // Test generating an URL to a created file.
 
     // Test alteration of file URLs to use a CDN.
@@ -2684,7 +2684,7 @@ class FileNameMungingTest extends FileTestCase {
   protected $name;
   protected $name_with_uc_ext;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
     $this->bad_extension = 'foo';
     $this->name = $this->randomName() . '.' . $this->bad_extension . '.txt';
@@ -2694,7 +2694,7 @@ class FileNameMungingTest extends FileTestCase {
   /**
    * Create a file and munge/unmunge the name.
    */
-  function testMunging() {
+  public function testMunging() {
     $munged_name = file_munge_filename($this->name, '', TRUE);
     $messages = backdrop_get_messages();
     $this->assertTrue(in_array(t('For security reasons, your upload has been renamed to %filename.', array('%filename' => $munged_name)), $messages['status']), 'Alert properly set when a file is renamed.');
@@ -2704,7 +2704,7 @@ class FileNameMungingTest extends FileTestCase {
   /**
    * Tests munging with a null byte in the filename.
    */
-  function testMungeNullByte() {
+  public function testMungeNullByte() {
     $prefix = $this->randomName();
     $filename = $prefix . '.' . $this->bad_extension . "\0.txt";
     $this->assertEqual(file_munge_filename($filename, ''), $prefix . '.' . $this->bad_extension . '_.txt', 'A filename with a null byte is correctly munged to remove the null byte.');
@@ -2714,7 +2714,7 @@ class FileNameMungingTest extends FileTestCase {
    * If the allow_insecure_uploads variable evaluates to true, the file should
    * come out untouched, no matter how evil the filename.
    */
-  function testMungeIgnoreInsecure() {
+  public function testMungeIgnoreInsecure() {
     $GLOBALS['settings']['allow_insecure_uploads'] = 1;
     $munged_name = file_munge_filename($this->name, '');
     $this->assertIdentical($munged_name, $this->name, format_string('The original filename (%original) matches the munged filename (%munged) when insecure uploads are enabled.', array('%munged' => $munged_name, '%original' => $this->name)));
@@ -2723,7 +2723,7 @@ class FileNameMungingTest extends FileTestCase {
   /**
    * Allowed extensions are ignored by file_munge_filename().
    */
-  function testMungeIgnoreAllowed() {
+  public function testMungeIgnoreAllowed() {
     // Declare our extension as allowed. The declared extensions should be case
     // insensitive so test using one with a different case.
     $munged_name = file_munge_filename($this->name_with_uc_ext, $this->bad_extension);
@@ -2748,7 +2748,7 @@ class FileNameMungingTest extends FileTestCase {
   /**
    * Ensure that unmunge gets your name back.
    */
-  function testUnMunge() {
+  public function testUnMunge() {
     $munged_name = file_munge_filename($this->name, '', FALSE);
     $unmunged_name = file_unmunge_filename($munged_name);
     $this->assertIdentical($unmunged_name, $this->name, format_string('The unmunged (%unmunged) filename matches the original (%original)', array('%unmunged' => $unmunged_name, '%original' => $this->name)));
@@ -2759,7 +2759,7 @@ class FileNameMungingTest extends FileTestCase {
  * Tests for file_get_mimetype().
  */
 class FileMimeTypeTest extends BackdropWebTestCase {
-  function setUp() {
+  public function setUp() {
     parent::setUp('file_test');
   }
 
@@ -2840,12 +2840,12 @@ class StreamWrapperTest extends BackdropWebTestCase {
   protected $scheme = 'dummy';
   protected $class_name = 'BackdropDummyStreamWrapper';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('file_test');
     backdrop_static_reset('file_get_stream_wrappers');
   }
 
-  function tearDown() {
+  protected function tearDown() {
     parent::tearDown();
     stream_wrapper_unregister($this->scheme);
   }
@@ -2853,7 +2853,7 @@ class StreamWrapperTest extends BackdropWebTestCase {
   /**
    * Test the getClassName() function.
    */
-  function testGetClassName() {
+  public function testGetClassName() {
     // Check the dummy scheme.
     $this->assertEqual($this->class_name, file_stream_wrapper_get_class($this->scheme), 'Got correct class name for dummy scheme.');
     // Check core's scheme.
@@ -2863,7 +2863,7 @@ class StreamWrapperTest extends BackdropWebTestCase {
   /**
    * Test the file_stream_wrapper_get_instance_by_scheme() function.
    */
-  function testGetInstanceByScheme() {
+  public function testGetInstanceByScheme() {
     $instance = file_stream_wrapper_get_instance_by_scheme($this->scheme);
     $this->assertEqual($this->class_name, get_class($instance), 'Got correct class type for dummy scheme.');
 
@@ -2874,7 +2874,7 @@ class StreamWrapperTest extends BackdropWebTestCase {
   /**
    * Test the URI and target functions.
    */
-  function testUriFunctions() {
+  public function testUriFunctions() {
     $site_config = config('system.core');
     $instance = file_stream_wrapper_get_instance_by_uri($this->scheme . '://foo');
     $this->assertEqual($this->class_name, get_class($instance), 'Got correct class type for dummy URI.');
@@ -2898,7 +2898,7 @@ class StreamWrapperTest extends BackdropWebTestCase {
   /**
    * Test the scheme functions.
    */
-  function testGetValidStreamScheme() {
+  public function testGetValidStreamScheme() {
     $this->assertEqual('foo', file_uri_scheme('foo://pork//chops'), 'Got the correct scheme from foo://asdf');
     $this->assertTrue(file_stream_wrapper_valid_scheme(file_uri_scheme('public://asdf')), 'Got a valid stream scheme from public://asdf');
     $this->assertFalse(file_stream_wrapper_valid_scheme(file_uri_scheme('foo://asdf')), 'Did not get a valid stream scheme from foo://asdf');

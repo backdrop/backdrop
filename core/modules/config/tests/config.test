@@ -268,7 +268,7 @@ class ConfigurationUITest extends BackdropWebTestCase {
    */
   protected $webUser;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('config_test'));
 
     $this->webUser = $this->backdropCreateUser(array('synchronize configuration'));
@@ -278,7 +278,7 @@ class ConfigurationUITest extends BackdropWebTestCase {
   /**
    * Tests importing configuration.
    */
-  function testImport() {
+  public function testImport() {
     $name = 'config_test.simple';
     $dynamic_name = 'config_test.dynamic.new';
     $staging_storage = new ConfigFileStorage(config_get_config_directory('staging'));
@@ -355,7 +355,7 @@ class ConfigurationUITest extends BackdropWebTestCase {
   /**
    * Tests the screen that shows differences between active and staging.
    */
-  function testDiff() {
+  public function testDiff() {
     $staging_storage = new ConfigFileStorage(config_get_config_directory('staging'));
 
     $config_name = 'config_test.simple';
@@ -395,7 +395,7 @@ class ConfigurationUITest extends BackdropWebTestCase {
   /**
    * Tests export of configuration.
    */
-  function testExport() {
+  public function testExport() {
     // Verify the export page with export submit button is available.
     $this->backdropGet('admin/config/development/configuration/full/export');
     $this->assertFieldById('edit-submit', t('Export'));
@@ -438,7 +438,7 @@ class ConfigurationUITest extends BackdropWebTestCase {
   /**
    * Test full import validation.
    */
-  function testFullImportValidation() {
+  public function testFullImportValidation() {
     // Enable all non-test core modules to populate all default config files.
     $core_modules = db_query("SELECT name FROM {system} WHERE type = 'module' AND filename LIKE 'core/modules%' AND filename NOT LIKE '%/tests/%'")->fetchCol();
     module_enable($core_modules);

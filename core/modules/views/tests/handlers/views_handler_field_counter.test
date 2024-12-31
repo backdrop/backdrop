@@ -10,7 +10,7 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests the views_handler_field_counter handler.
  */
 class ViewsHandlerFilterCounterTest extends ViewsSqlTest {
-  function testSimple() {
+  public function testSimple() {
     $view = $this->getBasicView();
     $view->display['default']->handler->override_option('fields', array(
       'counter' => array(
@@ -58,6 +58,6 @@ class ViewsHandlerFilterCounterTest extends ViewsSqlTest {
   }
 
   // @TODO: Write tests for pager.
-  function testPager() {
+  public function testPager() {
   }
 }

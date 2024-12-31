@@ -14,7 +14,7 @@ class ModuleTestCase extends WatchdogTestCase {
   protected $admin_user;
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('system_test');
 
     $this->admin_user = $this->backdropCreateUser(array('access administration pages', 'administer modules'));
@@ -30,7 +30,7 @@ class ModuleTestCase extends WatchdogTestCase {
    *   (optional) Whether or not to assert that there are tables that match the
    *   specified base table. Defaults to TRUE.
    */
-  function assertTableCount($base_table, $count = TRUE) {
+  protected function assertTableCount($base_table, $count = TRUE) {
     $tables = db_find_tables(Database::getConnection()->prefixTables('{' . $base_table . '}') . '%');
 
     if ($count) {
@@ -45,7 +45,7 @@ class ModuleTestCase extends WatchdogTestCase {
    * @param $module
    *   The name of the module.
    */
-  function assertModuleTablesExist($module) {
+  protected function assertModuleTablesExist($module) {
     $tables = array_keys(backdrop_get_schema_unprocessed($module));
     $tables_exist = TRUE;
     foreach ($tables as $table) {
@@ -62,7 +62,7 @@ class ModuleTestCase extends WatchdogTestCase {
    * @param $module
    *   The name of the module.
    */
-  function assertModuleTablesDoNotExist($module) {
+  protected function assertModuleTablesDoNotExist($module) {
     $tables = array_keys(backdrop_get_schema_unprocessed($module));
     $tables_exist = FALSE;
     foreach ($tables as $table) {
@@ -81,7 +81,7 @@ class ModuleTestCase extends WatchdogTestCase {
    * @param $enabled
    *   Expected module state.
    */
-  function assertModules(array $modules, $enabled) {
+  protected function assertModules(array $modules, $enabled) {
     module_list(TRUE);
     foreach ($modules as $module) {
       if ($enabled) {
@@ -104,7 +104,7 @@ class FilterResetTestCase extends ModuleTestCase {
   /**
    * Test that the search and reset functionality on the modules page works.
    */
-  function testFilterReset() {
+  public function testFilterReset() {
     $edit = array();
     $edit['search'] = 'image';
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
@@ -128,7 +128,7 @@ class EnableDisableTestCase extends ModuleTestCase {
   /**
    * Test that all core modules can be enabled, disabled and uninstalled.
    */
-  function testEnableDisable() {
+  public function testEnableDisable() {
     // Try to enable, disable and uninstall all core modules.
     $modules = system_rebuild_module_data();
     foreach ($modules as $name => $module) {
@@ -269,7 +269,7 @@ class EnableDisableTestCase extends ModuleTestCase {
    *   The complete object representing the module to disable and uninstall, as
    *   retrieved with system_rebuild_module_data().
    */
-  function assertSuccessfulDisableAndUninstall($module) {
+  protected function assertSuccessfulDisableAndUninstall($module) {
     // Disable the module.
     $edit = array();
     $edit['modules[' . $module->info['package'] . '][' . $module->name . '][enable]'] = FALSE;
@@ -314,7 +314,7 @@ class HookRequirementsTestCase extends ModuleTestCase {
   /**
    * Assert that a module cannot be installed if it fails hook_requirements().
    */
-  function testHookRequirementsFailure() {
+  public function testHookRequirementsFailure() {
     $this->assertModules(array('requirements1_test'), FALSE);
 
     // Attempt to install the requirements1_test module.
@@ -335,7 +335,7 @@ class ModuleDependencyTestCase extends ModuleTestCase {
   /**
    * Checks functionality of project namespaces for dependencies.
    */
-  function testProjectNamespaceForDependencies() {
+  public function testProjectNamespaceForDependencies() {
     // Enable module with project namespace to ensure nothing breaks.
     $edit = array(
       'modules[Testing][system_project_namespace_test][enable]' => TRUE,
@@ -347,7 +347,7 @@ class ModuleDependencyTestCase extends ModuleTestCase {
   /**
    * Attempt to enable translation module without locale enabled.
    */
-  function testEnableWithoutDependency() {
+  public function testEnableWithoutDependency() {
     // Attempt to enable content translation without locale enabled.
     $edit = array();
     $edit['modules[Translation][translation][enable]'] = 'translation';
@@ -373,7 +373,7 @@ class ModuleDependencyTestCase extends ModuleTestCase {
   /**
    * Attempt to enable a module with a missing dependency.
    */
-  function testMissingModules() {
+  public function testMissingModules() {
     // Test that the system_dependencies_test module is marked
     // as missing a dependency.
     $this->backdropGet('admin/modules');
@@ -399,7 +399,7 @@ class ModuleDependencyTestCase extends ModuleTestCase {
   /**
    * Tests enabling a module that depends on an incompatible version of a module.
    */
-  function testIncompatibleModuleVersionDependency() {
+  public function testIncompatibleModuleVersionDependency() {
     // Test that the system_incompatible_module_version_dependencies_test is
     // marked as having an incompatible dependency.
     $this->backdropGet('admin/modules');
@@ -414,7 +414,7 @@ class ModuleDependencyTestCase extends ModuleTestCase {
   /**
    * Tests enabling a module that depends on a module with an incompatible core version.
    */
-  function testIncompatibleCoreVersionDependency() {
+  public function testIncompatibleCoreVersionDependency() {
     // Test that the system_incompatible_core_version_dependencies_test is
     // marked as having an incompatible dependency.
     $this->backdropGet('admin/modules');
@@ -428,7 +428,7 @@ class ModuleDependencyTestCase extends ModuleTestCase {
   /**
    * Tests enabling a module that depends on a module which fails hook_requirements().
    */
-  function testEnableRequirementsFailureDependency() {
+  public function testEnableRequirementsFailureDependency() {
     // Enable comment module before testing the dependencies.
     $edit = array();
     $edit['modules[Comments][comment][enable]'] = TRUE;
@@ -458,7 +458,7 @@ class ModuleDependencyTestCase extends ModuleTestCase {
    * Tests that module dependencies are enabled in the correct order via the
    * UI. Dependencies should be enabled before their dependents.
    */
-  function testModuleEnableOrder() {
+  public function testModuleEnableOrder() {
     module_enable(array('module_test'), FALSE);
     $this->resetAll();
     $this->assertModules(array('module_test'), TRUE);
@@ -486,7 +486,7 @@ class ModuleDependencyTestCase extends ModuleTestCase {
   /**
    * Tests attempting to uninstall a module that has installed dependents.
    */
-  function testUninstallDependents() {
+  public function testUninstallDependents() {
     // Enable both language and locale modules.
     $edit = array('modules[Translation][language][enable]' => 'language');
     $this->backdropPost('admin/modules', $edit, t('Save configuration'));
@@ -522,7 +522,7 @@ class ModuleDependencyTestCase extends ModuleTestCase {
   /**
    * Tests whether the correct module metadata is returned.
    */
-  function testModuleMetaData() {
+  public function testModuleMetaData() {
     // Generate the list of available modules.
     $modules = system_rebuild_module_data();
     // Check that the mtime field exists for the system module.
@@ -536,7 +536,7 @@ class ModuleDependencyTestCase extends ModuleTestCase {
   /**
    * Tests whether the correct theme metadata is returned.
    */
-  function testThemeMetaData() {
+  public function testThemeMetaData() {
     // Generate the list of available themes.
     $themes = system_rebuild_theme_data();
     // Check that the mtime field exists for the bartik theme.
@@ -552,14 +552,14 @@ class ModuleDependencyTestCase extends ModuleTestCase {
  * Test module dependency on specific versions.
  */
 class ModuleVersionTestCase extends ModuleTestCase {
-  function setUp() {
+  public function setUp() {
     parent::setUp('module_test');
   }
 
   /**
    * Test version dependencies.
    */
-  function testModuleVersions() {
+  public function testModuleVersions() {
     $dependencies = array(
       // All comparisons are done against 1.x-2.4.5-beta3.
       'common_test' => TRUE,
@@ -648,14 +648,14 @@ class ModuleVersionTestCase extends ModuleTestCase {
 class CronRunTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('common_test', 'common_test_cron_helper'));
   }
 
   /**
    * Test cron runs.
    */
-  function testCronRun() {
+  public function testCronRun() {
     global $base_url;
 
     // Run cron anonymously without any cron key.
@@ -679,7 +679,7 @@ class CronRunTestCase extends BackdropWebTestCase {
    * In these tests we do not use REQUEST_TIME to track start time, because we
    * need the exact time when cron is triggered.
    */
-  function testAutomaticCron() {
+  public function testAutomaticCron() {
     // Ensure cron does not run when the cron threshold is enabled and was
     // not passed.
     $cron_last = time();
@@ -718,7 +718,7 @@ class CronRunTestCase extends BackdropWebTestCase {
    * Create files for all the possible combinations of age and status. We are
    * using UPDATE statements because using the API would set the timestamp.
    */
-  function testTempFileCleanup() {
+  public function testTempFileCleanup() {
     // Temporary file that is older than BACKDROP_MAXIMUM_TEMP_FILE_AGE.
     $temp_old = file_save_data('');
     db_update('file_managed')
@@ -761,7 +761,7 @@ class CronRunTestCase extends BackdropWebTestCase {
   /**
    * Make sure exceptions thrown on hook_cron() don't affect other modules.
    */
-  function testCronExceptions() {
+  public function testCronExceptions() {
     state_del('common_test_cron');
     // The common_test module throws an exception. If it isn't caught, the tests
     // won't finish successfully.
@@ -802,14 +802,14 @@ class CronRunTestCase extends BackdropWebTestCase {
 class CronQueueTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('common_test', 'common_test_cron_helper', 'cron_queue_test'));
   }
 
   /**
    * Tests that exceptions thrown by workers are handled properly.
    */
-  function testExceptions() {
+  public function testExceptions() {
     $queue = BackdropQueue::get('cron_queue_test_exception');
 
     // Enqueue an item for processing.
@@ -826,7 +826,7 @@ class CronQueueTestCase extends BackdropWebTestCase {
   /**
    * Tests worker defined as a class method callable.
    */
-  function testCallable() {
+  public function testCallable() {
     $queue = BackdropQueue::get('cron_queue_test_callback');
 
     // Enqueue an item for processing.
@@ -865,7 +865,7 @@ class MetaTagsTestCase extends BackdropWebTestCase {
 class AccessDeniedTestCase extends BackdropWebTestCase {
   protected $admin_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     // Create an administrative user.
@@ -875,7 +875,7 @@ class AccessDeniedTestCase extends BackdropWebTestCase {
     config_set('system.core', 'cache', '0');
   }
 
-  function testAccessDenied() {
+  public function testAccessDenied() {
     $this->backdropLogout();
     $this->backdropGet('admin');
     $this->assertText(t('Access denied'), 'Found the default 403 page');
@@ -930,7 +930,7 @@ class AccessDeniedTestCase extends BackdropWebTestCase {
     $this->assertText(t('Site information'));
   }
 
-  function test403PathOnSystemForm() {
+  public function test403PathOnSystemForm() {
     $this->backdropLogin($this->admin_user);
     $edit = array(
       'title' => $this->randomName(10),
@@ -959,7 +959,7 @@ class PageNotFoundTestCase extends BackdropWebTestCase {
   /**
    * Implement setUp().
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     // Create an administrative user.
@@ -967,7 +967,7 @@ class PageNotFoundTestCase extends BackdropWebTestCase {
     $this->backdropLogin($this->admin_user);
   }
 
-  function testPageNotFound() {
+  public function testPageNotFound() {
     $this->backdropGet($this->randomName(10));
     $this->assertText(t('Page not found'), 'Found the default 404 page');
 
@@ -984,7 +984,7 @@ class PageNotFoundTestCase extends BackdropWebTestCase {
     $this->assertText($node->title, 'Found the custom 404 page');
   }
 
-  function test404PathOnSystemForm() {
+  public function test404PathOnSystemForm() {
     $this->backdropLogin($this->admin_user);
     $edit = array(
       'title' => $this->randomName(10),
@@ -1013,7 +1013,7 @@ class DeprecatedRedirectPageCase extends BackdropWebTestCase {
   /**
    * {@inheritdoc}
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('deprecated_redirect_test', 'dblog'));
     // Enable deprecated watchdog messages (level 8).
     config_set('system.core', 'watchdog_enabled_severity_levels', array(0, 1, 2, 3, 4, 5, 6, 8));
@@ -1022,7 +1022,7 @@ class DeprecatedRedirectPageCase extends BackdropWebTestCase {
   /**
    * Tests redirecting from a old menu paths to new menu paths.
    */
-  function testRedirects() {
+  public function testRedirects() {
     // Message used in watchdog entries.
     $watchdog_message = 'The path %path has been deprecated and will be removed in the next major release of Backdrop. This path was called from %referrer. It is recommended to remove it from any existing links.';
 
@@ -1058,7 +1058,7 @@ class CustomLogoTestCase extends BackdropWebTestCase {
   /**
    * Implement setUp().
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     // Create an administrative user.
@@ -1072,7 +1072,7 @@ class CustomLogoTestCase extends BackdropWebTestCase {
   /**
    * Test the use of a custom logo.
    */
-  function testCustomLogo() {
+  public function testCustomLogo() {
     $file_public_path = config_get('system.core', 'file_public_path');
 
     // Specify a filesystem path to be used for the logo.
@@ -1221,7 +1221,7 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
   protected $admin_user;
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     // Create a user allowed to access site in maintenance mode.
@@ -1234,7 +1234,7 @@ class SiteMaintenanceTestCase extends BackdropWebTestCase {
   /**
    * Verify site maintenance mode functionality.
    */
-  function testSiteMaintenance() {
+  public function testSiteMaintenance() {
     // Start with the page cache disabled.
     config_set('system.core', 'page_cache_maximum_age', 0);
 
@@ -1356,7 +1356,7 @@ class DateTimeFunctionalTest extends BackdropWebTestCase {
    */
   protected $admin_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('locale'));
 
     // Create admin user and log in admin user.
@@ -1368,7 +1368,7 @@ class DateTimeFunctionalTest extends BackdropWebTestCase {
   /**
    * Test time zones and DST handling.
    */
-  function testTimeZoneHandling() {
+  public function testTimeZoneHandling() {
     // Setup date/time settings for Honolulu time.
     $config = config('system.date')
       ->set('default_timezone', 'Pacific/Honolulu')
@@ -1401,7 +1401,7 @@ class DateTimeFunctionalTest extends BackdropWebTestCase {
   /**
    * Test date format configuration.
    */
-  function testDateFormatConfiguration() {
+  public function testDateFormatConfiguration() {
     // Confirm 'no custom date formats available' message appears.
     $this->backdropGet('admin/config/regional/date-time/formats');
 
@@ -1445,7 +1445,7 @@ class DateTimeFunctionalTest extends BackdropWebTestCase {
   /**
    * Test if the date formats are stored properly.
    */
-  function testDateFormatStorage() {
+  public function testDateFormatStorage() {
     $date_format_info = array(
       'label' => 'testDateFormatStorage Short Format',
       'name' => 'test_short',
@@ -1466,7 +1466,7 @@ class PageTitleFiltering extends BackdropWebTestCase {
   /**
    * Implement setUp().
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     $this->content_user = $this->backdropCreateUser(array('create page content', 'access content', 'administer themes', 'administer site configuration'));
@@ -1477,7 +1477,7 @@ class PageTitleFiltering extends BackdropWebTestCase {
   /**
    * Reset page title.
    */
-  function tearDown() {
+  protected function tearDown() {
     // Restore the page title.
     backdrop_set_title($this->saved_title, PASS_THROUGH);
 
@@ -1487,7 +1487,7 @@ class PageTitleFiltering extends BackdropWebTestCase {
   /**
    * Tests the handling of HTML by backdrop_set_title() and backdrop_get_title()
    */
-  function testTitleTags() {
+  public function testTitleTags() {
     $title = "string with <em>HTML</em>";
     // backdrop_set_title's $filter is CHECK_PLAIN by default, so the title should be
     // returned with check_plain().
@@ -1515,7 +1515,7 @@ class PageTitleFiltering extends BackdropWebTestCase {
   /**
    * Test if the title of the site is XSS proof.
    */
-  function testTitleXSS() {
+  public function testTitleXSS() {
     // Set some title with JavaScript and HTML chars to escape.
     $title = '</title><script type="text/javascript">alert("Title XSS!");</script> & < > " \' ';
     $title_filtered = check_plain($title);
@@ -1559,7 +1559,7 @@ class FrontPageTestCase extends BackdropWebTestCase {
    */
   protected $node_path;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('system_test');
 
     // Create admin user, log in admin user, and create one node.
@@ -1574,7 +1574,7 @@ class FrontPageTestCase extends BackdropWebTestCase {
   /**
    * Test home page functionality.
    */
-  function testBackdropIsFrontPage() {
+  public function testBackdropIsFrontPage() {
     $this->backdropGet('');
     $this->assertText(t('On home page.'), 'Path is the home page.');
     config_set('system.core', 'site_frontpage', 'node');
@@ -1626,7 +1626,7 @@ class FrontPageTestCase extends BackdropWebTestCase {
 class SystemBlockTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('block');
 
     // Create and login user
@@ -1637,7 +1637,7 @@ class SystemBlockTestCase extends BackdropWebTestCase {
   /**
    * Test displaying and hiding the powered-by and help blocks.
    */
-  function testSystemBlocks() {
+  public function testSystemBlocks() {
     // The powered-by block is enabled by default. Confirm that the block is
     // being displayed.
     $this->backdropGet('node');
@@ -1692,7 +1692,7 @@ class SystemMainContentFallback extends BackdropWebTestCase {
   protected $admin_user;
   protected $web_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('system_test');
 
     // Create and login admin user.
@@ -1712,7 +1712,7 @@ class SystemMainContentFallback extends BackdropWebTestCase {
   /**
    * Test availability of main content.
    */
-  function testMainContentFallback() {
+  public function testMainContentFallback() {
     // Disable the layout module.
     module_disable(array('layout'));
     // Remove the old layout path from the menu.
@@ -1754,7 +1754,7 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
    */
   protected $node;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('node', 'block'));
 
     $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
@@ -1767,7 +1767,7 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
   /**
    * Test the individual per-theme settings form.
    */
-  function testPerThemeSettings() {
+  public function testPerThemeSettings() {
     // Enable the test theme and the module that controls it. Clear caches in
     // between so that the module's hook_system_theme_info() implementation is
     // correctly registered.
@@ -1790,7 +1790,7 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
   /**
    * Test the administration theme functionality.
    */
-  function testAdministrationTheme() {
+  public function testAdministrationTheme() {
     theme_enable(array('stark'));
     config_set('system.core', 'theme_default', 'stark');
     // Enable an administration theme and show it on the node admin pages.
@@ -1837,7 +1837,7 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
   /**
    * Test switching the default theme.
    */
-  function testSwitchDefaultTheme() {
+  public function testSwitchDefaultTheme() {
     // Enable Basis and set it as the default theme.
     theme_enable(array('basis'));
     $this->backdropGet('admin/appearance');
@@ -1853,7 +1853,7 @@ class SystemThemeFunctionalTest extends BackdropWebTestCase {
   /**
    * Test theme settings.
    */
-  function testThemeSettings() {
+  public function testThemeSettings() {
     theme_enable(array('basis'));
     module_enable(array('color', 'theme_test'));
     backdrop_flush_all_caches();
@@ -1893,7 +1893,7 @@ class QueueTestCase extends BackdropWebTestCase {
   /**
    * Queues and dequeues a set of items to check the basic queue functionality.
    */
-  function testQueue() {
+  public function testQueue() {
     // Create two queues.
     $queue1 = BackdropQueue::get($this->randomName());
     $queue1->createQueue();
@@ -1956,7 +1956,7 @@ class QueueTestCase extends BackdropWebTestCase {
   /**
    * This function returns the number of equal items in two arrays.
    */
-  function queueScore($items, $new_items) {
+  protected function queueScore($items, $new_items) {
     $score = 0;
     foreach ($items as $item) {
       foreach ($new_items as $new_item) {
@@ -1973,7 +1973,7 @@ class InfoFileParserTestCase extends BackdropUnitTestCase {
   /**
    * Test backdrop_parse_info_format().
    */
-  function testBackdropParseInfoFormat() {
+  public function testBackdropParseInfoFormat() {
     $config = '
 simple = Value
 quoted = " Value"
@@ -2039,7 +2039,7 @@ class InfoFileCoreTest extends BackdropUnitTestCase {
   /**
    * Tests that the .info files of all core projects specify a project type.
    */
-  function testProjectInfoFileContents() {
+  public function testProjectInfoFileContents() {
     $projects = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'core');
     $allowed_project_types = array('module', 'theme', 'layout', 'profile');
     $type_fails = array();
@@ -2073,7 +2073,7 @@ class SystemInfoAlterTestCase extends BackdropWebTestCase {
    * hook_system_info_alter() is enabled. Also tests if core *_list() functions
    * return freshly altered info.
    */
-  function testSystemInfoAlter() {
+  public function testSystemInfoAlter() {
     // Enable our test module. Flush all caches, which we assert is the only
     // thing necessary to use the rebuilt {system}.info.
     module_enable(array('module_test'), FALSE);
@@ -2113,7 +2113,7 @@ class SystemInfoAlterTestCase extends BackdropWebTestCase {
    * @return
    *   Array of info, or FALSE if the record is not found.
    */
-  function getSystemInfo($name, $type) {
+  protected function getSystemInfo($name, $type) {
     $raw_info = db_query("SELECT info FROM {system} WHERE name = :name AND type = :type", array(':name' => $name, ':type' => $type))->fetchField();
     return $raw_info ? unserialize($raw_info) : FALSE;
   }
@@ -2126,7 +2126,7 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
   private $update_url;
   private $update_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('update_script_test', 'dblog'));
     $this->update_url = $GLOBALS['base_url'] . '/core/update.php';
     $this->update_user = $this->backdropCreateUser(array('administer software updates'));
@@ -2135,7 +2135,7 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
   /**
    * Tests that there are no pending updates for the first test method.
    */
-  function testNoPendingUpdates() {
+  public function testNoPendingUpdates() {
     // Ensure that for the first test method in a class, there are no pending
     // updates. This tests a backdrop_get_schema_versions() bug that previously
     // led to the wrong schema version being recorded for the initial install
@@ -2149,7 +2149,7 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
   /**
    * Tests access to the update script.
    */
-  function testUpdateAccess() {
+  public function testUpdateAccess() {
     // Try accessing update.php without the proper permission.
     $regular_user = $this->backdropCreateUser();
     $this->backdropLogin($regular_user);
@@ -2180,7 +2180,7 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
   /**
    * Tests that requirements warnings and errors are correctly displayed.
    */
-  function testRequirements() {
+  public function testRequirements() {
     $config = config('update.settings');
     $this->backdropLogin($this->update_user);
 
@@ -2242,7 +2242,7 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
   /**
    * Tests the effect of using the update script on the theme system.
    */
-  function testThemeSystem() {
+  public function testThemeSystem() {
     // Since visiting update.php triggers a rebuild of the theme system from an
     // unusual maintenance mode environment, we check that this rebuild did not
     // put any incorrect information about the themes into the database.
@@ -2256,7 +2256,7 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
   /**
    * Tests update.php when there are no updates to apply.
    */
-  function testNoUpdateFunctionality() {
+  public function testNoUpdateFunctionality() {
     // Click through update.php with 'administer software updates' permission.
     $this->backdropLogin($this->update_user);
     $this->backdropPost($this->update_url, array(), t('Continue'), array('external' => TRUE));
@@ -2277,7 +2277,7 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
   /**
    * Tests update.php after performing a successful update.
    */
-  function testSuccessfulUpdateFunctionality() {
+  public function testSuccessfulUpdateFunctionality() {
     backdrop_set_installed_schema_version('update_script_test', backdrop_get_installed_schema_version('update_script_test') - 1);
     // Click through update.php with 'administer software updates' permission.
     $this->backdropLogin($this->update_user);
@@ -2317,7 +2317,7 @@ class FloodFunctionalTest extends BackdropWebTestCase {
   /**
    * Test flood control mechanism clean-up.
    */
-  function testCleanUp() {
+  public function testCleanUp() {
     $threshold = 1;
     $window_expired = -1;
     $name = 'flood_test_cleanup';
@@ -2347,7 +2347,7 @@ class RetrieveFileTestCase extends BackdropWebTestCase {
   /**
    * Invokes system_retrieve_file() in several scenarios.
    */
-  function testFileRetrieving() {
+  public function testFileRetrieving() {
     // Test 404 handling by trying to fetch a randomly named file.
     backdrop_mkdir($sourcedir = 'public://' . $this->randomName());
     // cspell:disable-next-line
@@ -2387,14 +2387,14 @@ class RetrieveFileTestCase extends BackdropWebTestCase {
  * Functional tests shutdown functions.
  */
 class ShutdownFunctionsTest extends BackdropWebTestCase {
-  function setUp() {
+  public function setUp() {
     parent::setUp('system_test');
   }
 
   /**
    * Test shutdown functions.
    */
-  function testShutdownFunctions() {
+  public function testShutdownFunctions() {
     $arg1 = $this->randomName();
     $arg2 = $this->randomName();
     $this->backdropGet('system-test/shutdown-functions/' . $arg1 . '/' . $arg2);
@@ -2439,7 +2439,7 @@ class SystemAdminTestCase extends BackdropWebTestCase {
    */
   protected $web_user;
 
-  function setUp() {
+  public function setUp() {
     // testAdminPages() requires Locale module.
     parent::setUp(array('locale'));
 
@@ -2457,7 +2457,7 @@ class SystemAdminTestCase extends BackdropWebTestCase {
   /**
    * Tests output on administrative listing pages.
    */
-  function testAdminPages() {
+  public function testAdminPages() {
     // Go to Administration.
     $this->backdropGet('admin');
 
@@ -2586,7 +2586,7 @@ class SystemAuthorizeCase extends BackdropWebTestCase {
    */
   protected $admin_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('system_test'));
 
     $GLOBALS['settings']['allow_authorize_operations'] = TRUE;
@@ -2607,14 +2607,14 @@ class SystemAuthorizeCase extends BackdropWebTestCase {
    *
    * @see system_authorized_init().
    */
-  function backdropGetAuthorizePHP($page_title = 'system-test-auth') {
+  protected function backdropGetAuthorizePHP($page_title = 'system-test-auth') {
     $this->backdropGet('system-test/authorize-init/' . $page_title);
   }
 
   /**
    * Tests the FileTransfer hooks
    */
-  function testFileTransferHooks() {
+  public function testFileTransferHooks() {
     $page_title = $this->randomName(16);
     $this->backdropGetAuthorizePHP($page_title);
     $this->assertTitle(strtr('@title | Backdrop CMS', array('@title' => $page_title)), 'authorize.php page title is correct.');
@@ -2635,7 +2635,7 @@ class SystemIndexPhpTest extends BackdropWebTestCase {
   /**
    * Test index.php handling.
    */
-  function testIndexPhpHandling() {
+  public function testIndexPhpHandling() {
     $this->backdropGet('<front>');
     $this->assertResponse(200, 'Make sure the home page returns a valid page.');
 
@@ -2691,14 +2691,14 @@ class SystemValidTokenTest extends BackdropWebTestCase {
  */
 class BackdropSetMessageTest extends BackdropWebTestCase {
   protected $profile = 'testing';
-  function setUp() {
+  public function setUp() {
     parent::setUp('system_test');
   }
 
   /**
    * Tests setting messages and removing one before it is displayed.
    */
-  function testSetRemoveMessages() {
+  public function testSetRemoveMessages() {
     // The page at system-test/backdrop-set-message sets two messages and then
     // removes the first before it is displayed.
     $this->backdropGet('system-test/backdrop-set-message');
@@ -2713,7 +2713,7 @@ class BackdropSetMessageTest extends BackdropWebTestCase {
 class ConfirmFormTest extends BackdropWebTestCase {
   protected $admin_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     $this->admin_user = $this->backdropCreateUser(array('administer users'));
@@ -2723,7 +2723,7 @@ class ConfirmFormTest extends BackdropWebTestCase {
   /**
    * Tests that the confirm form does not use external destinations.
    */
-  function testConfirmForm() {
+  public function testConfirmForm() {
     $this->backdropGet('user/1/cancel');
     $this->assertCancelLinkUrl(url('user/1'));
     $this->backdropGet('user/1/cancel', array('query' => array('destination' => 'node')));
@@ -2735,7 +2735,7 @@ class ConfirmFormTest extends BackdropWebTestCase {
   /**
    * Asserts that a cancel link is present pointing to the provided URL.
    */
-  function assertCancelLinkUrl($url, $message = '', $group = 'Other') {
+  protected function assertCancelLinkUrl($url, $message = '', $group = 'Other') {
     $links = $this->xpath('//a[normalize-space(text())=:label and @href=:url]', array(':label' => t('Cancel'), ':url' => $url));
     $message = ($message ? $message : format_string('Cancel link with url %url found.', array('%url' => $url)));
     return $this->assertTrue(isset($links[0]), $message, $group);
@@ -2748,7 +2748,7 @@ class ConfirmFormTest extends BackdropWebTestCase {
 class BackdropRequestSanitizerUnitTestCase extends BackdropUnitTestCase {
   protected $testCases = array();
 
-  function setUp() {
+  public function setUp() {
     // Set up an array of test cases.
     $this->testCases = array(
       'invalid_param_get' => array(
@@ -2794,7 +2794,7 @@ class BackdropRequestSanitizerUnitTestCase extends BackdropUnitTestCase {
   /**
    * Tests request sanitation used in early bootstrap.
    */
-  function testBackdropRequestSanitizer() {
+  public function testBackdropRequestSanitizer() {
     foreach ($this->testCases as $provider_name => $arguments) {
       foreach ($arguments['setup'] as $global_name => $value) {
         $GLOBALS[$global_name] = $value;
@@ -2846,7 +2846,7 @@ class UuidUnitTestCase extends BackdropUnitTestCase {
   /**
    * Test UUID validation.
    */
-  function testUuidValidation() {
+  public function testUuidValidation() {
     // These valid UUIDs.
     $uuid_fqdn = '6ba7b810-9dad-11d1-80b4-00c04fd430c8';
     $uuid_min = '00000000-0000-0000-0000-000000000000';
@@ -2876,7 +2876,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
    */
   protected $admin_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('menu');
 
     $this->admin_user = $this->backdropCreateUser(array(
@@ -2892,14 +2892,14 @@ class MenuBlockTestCase extends BackdropWebTestCase {
   /**
    * Test Menu Block functionality with a system menu.
    */
-  function testMainMenuBlocks() {
+  public function testMainMenuBlocks() {
     $this->doMenuBlockTests('main-menu', 'Primary navigation');
   }
 
   /**
    * Test Menu Block functionality with custom menu.
    */
-  function testCustomMenuBlocks() {
+  public function testCustomMenuBlocks() {
     // Add a new custom menu.
     $menu_name = substr(hash('sha256', $this->randomName(16)), 0, MENU_MAX_MENU_NAME_LENGTH_UI);
     $title = $this->randomName(16);
@@ -2916,7 +2916,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
   /**
    * Test Menu Block functionality.
    */
-  function doMenuBlockTests($menu_name, $menu_title) {
+  protected function doMenuBlockTests($menu_name, $menu_title) {
 
     // Add nodes to use as links for menu links.
     $node1 = $this->backdropCreateNode(array('type' => 'post'));
@@ -3062,7 +3062,7 @@ class MenuBlockTestCase extends BackdropWebTestCase {
    * @param string $menu_name Menu name.
    * @return array Menu link created.
    */
-  function addMenuLink($menu_name, $plid = 0, $link = 'user') {
+  protected function addMenuLink($menu_name, $plid = 0, $link = 'user') {
     // View add menu link page.
     $this->backdropGet("admin/structure/menu/manage/$menu_name/add");
     $this->assertResponse(200);

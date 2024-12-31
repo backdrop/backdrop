@@ -37,7 +37,7 @@ class FieldSqlStorageTestCase extends BackdropWebTestCase {
    */
   protected $revision_table;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('field_sql_storage', 'field', 'field_test', 'text');
     $this->field_name = strtolower($this->randomName());
     $this->field = array('field_name' => $this->field_name, 'type' => 'test_field', 'cardinality' => 4);
@@ -57,7 +57,7 @@ class FieldSqlStorageTestCase extends BackdropWebTestCase {
    * Uses the mysql tables and records to verify
    * field_load_revision works correctly.
    */
-  function testFieldAttachLoad() {
+  public function testFieldAttachLoad() {
     $entity_type = 'test_entity';
     $eid = 0;
     $langcode = LANGUAGE_NONE;
@@ -125,7 +125,7 @@ class FieldSqlStorageTestCase extends BackdropWebTestCase {
    * Reads mysql to verify correct data is
    * written when using insert and update.
    */
-  function testFieldAttachInsertAndUpdate() {
+  public function testFieldAttachInsertAndUpdate() {
     $entity_type = 'test_entity';
     $entity = field_test_create_entity(0, 0, $this->instance['bundle']);
     $langcode = LANGUAGE_NONE;
@@ -206,7 +206,7 @@ class FieldSqlStorageTestCase extends BackdropWebTestCase {
   /**
    * Tests insert and update with missing or NULL fields.
    */
-  function testFieldAttachSaveMissingData() {
+  public function testFieldAttachSaveMissingData() {
     $entity_type = 'test_entity';
     $entity = field_test_create_entity(0, 0, $this->instance['bundle']);
     $langcode = LANGUAGE_NONE;
@@ -301,7 +301,7 @@ class FieldSqlStorageTestCase extends BackdropWebTestCase {
   /**
    * Test trying to update a field with data.
    */
-  function testUpdateFieldSchemaWithData() {
+  public function testUpdateFieldSchemaWithData() {
     // Create a decimal 5.2 field and add some data.
     $field = array('field_name' => 'decimal52', 'type' => 'number_decimal', 'settings' => array('precision' => 5, 'scale' => 2));
     $field = field_create_field($field);
@@ -325,7 +325,7 @@ class FieldSqlStorageTestCase extends BackdropWebTestCase {
   /**
    * Test that failure to create fields is handled gracefully.
    */
-  function testFieldUpdateFailure() {
+  public function testFieldUpdateFailure() {
     // Create a text field.
     $field = array('field_name' => 'test_text', 'type' => 'text', 'settings' => array('max_length' => 255));
     $field = field_create_field($field);
@@ -350,7 +350,7 @@ class FieldSqlStorageTestCase extends BackdropWebTestCase {
   /**
    * Test the storage details.
    */
-  function testFieldStorageDetails() {
+  public function testFieldStorageDetails() {
     $current = _field_sql_storage_tablename($this->field);
     $revision = _field_sql_storage_revision_tablename($this->field);
 
@@ -378,7 +378,7 @@ class FieldSqlStorageTestCase extends BackdropWebTestCase {
   /**
    * Test foreign key support.
    */
-  function testFieldSqlStorageForeignKeys() {
+  public function testFieldSqlStorageForeignKeys() {
     // Create a decimal field.
     $field_name = 'test_field';
     $field = array(
@@ -409,7 +409,7 @@ class FieldSqlStorageTestCase extends BackdropWebTestCase {
    *
    * Tests both the result and the complexity of the query.
    */
-  function testFieldSqlStorageMultipleConditionsSameColumn() {
+  public function testFieldSqlStorageMultipleConditionsSameColumn() {
     $entity = field_test_create_entity(NULL, NULL);
     $entity->{$this->field_name}[LANGUAGE_NONE][0] = array('value' => 1);
     field_test_entity_save($entity);
@@ -450,7 +450,7 @@ class FieldSqlStorageTestCase extends BackdropWebTestCase {
    *
    * Tests both the result and the complexity of the query.
    */
-  function testFieldSqlStorageMultipleConditionsDifferentColumns() {
+  public function testFieldSqlStorageMultipleConditionsDifferentColumns() {
     // Create the multi-column shape field
     $field_name = strtolower($this->randomName());
     $field = array('field_name' => $field_name, 'type' => 'shape', 'cardinality' => 4);
@@ -502,7 +502,7 @@ class FieldSqlStorageTestCase extends BackdropWebTestCase {
    *
    * Tests both the result and the complexity of the query.
    */
-  function testFieldSqlStorageMultipleConditionsDifferentColumnsMultipleLanguages() {
+  public function testFieldSqlStorageMultipleConditionsDifferentColumnsMultipleLanguages() {
     field_test_entity_info_translatable('test_entity', TRUE);
 
     // Create the multi-column shape field

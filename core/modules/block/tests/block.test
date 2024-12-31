@@ -7,7 +7,7 @@
 class BlockTestCase extends BackdropWebTestCase {
   protected $admin_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('block_test');
 
     // Create and log in an administrative user having access to the Raw HTML
@@ -25,7 +25,7 @@ class BlockTestCase extends BackdropWebTestCase {
   /**
    * Test creating custom block, editing, and then deleting it.
    */
-  function testCustomBlock() {
+  public function testCustomBlock() {
     // Confirm that the add block link appears on block overview pages.
     $this->backdropGet('admin/structure/block');
     $this->assertRaw(l('Add reusable custom block', 'admin/structure/block/add'), 'Add block link is present on block overview page for default theme.');
@@ -95,7 +95,7 @@ class BlockTestCase extends BackdropWebTestCase {
   /**
    * Test creating custom block using Raw HTML (full_html).
    */
-  function testCustomBlockFormat() {
+  public function testCustomBlockFormat() {
     // Add a new custom block by filling out the input form on the admin/structure/block/add page.
     $custom_block = array();
     $custom_block['info'] = $this->randomName(8);
@@ -132,7 +132,7 @@ class BlockTestCase extends BackdropWebTestCase {
   /**
    * Tests the various block hooks get called when needed.
    */
-  function testBlockHooks() {
+  public function testBlockHooks() {
     // Test hook_block_info_alter().
     $this->backdropGet('admin/structure/layouts/manage/default/add-block/editor/content');
     $this->assertText(t('Original description.'), 'Original description found with no alterations.');
