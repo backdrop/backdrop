@@ -209,7 +209,7 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
   /**
    * Tests duplicate grouped "one of" filters on taxonomy term field.
    */
-  public function testGroupedOneOf() {
+  protected function testGroupedOneOf() {
     $view = $this->getGroupedOneOfTestView();
     $this->executeView($view);
 
@@ -242,7 +242,7 @@ class ViewsHandlerManyToOneTest extends ViewsSqlTest {
   /**
    * Tests exposed filter with "Reduce duplicates." and grouped options.
    */
-  public function testReducedExposedGroupedOptions() {
+  protected function testReducedExposedGroupedOptions() {
     // Assert that nodes have been created and have expected field values.
     $value = field_get_items('node', $this->nodes[0], 'field_list', LANGUAGE_NONE);
     $value = isset($value[0]['value']) ? (int) $value[0]['value'] : 0;

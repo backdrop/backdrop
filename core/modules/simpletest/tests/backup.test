@@ -133,7 +133,7 @@ class BackupSettingsTestCase extends BackupBaseTestCase {
   /**
    * Tests the backup settings form.
    */
-  public function testBackupSettingsForm() {
+  protected function testBackupSettingsForm() {
     // Hit the homepage to ensure a cache entry exists in cache_page.
     $this->backdropGet('<front>');
     $cached_homepage = cache_get(url('<front>', array('absolute' => TRUE)), 'cache_page');
@@ -334,7 +334,7 @@ class BackupUpdateTestCase extends BackupBaseTestCase {
   /**
    * Tests running an update with a backup and then restoring it.
    */
-  public function testUpdateWithBackup() {
+  protected function testUpdateWithBackup() {
     $this->backdropLogin($this->adminUser);
 
     // Store the original site name.

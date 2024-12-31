@@ -177,7 +177,7 @@ class FieldViewsDataTest extends FieldViewsTestHelper {
    *
    * We check data structure for both node and node revision tables.
    */
-  public function testViewsData() {
+  protected function testViewsData() {
     $data = views_fetch_data();
 
     // Check the table and the joins of the first field.
@@ -318,7 +318,7 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
       $this->nodes[$i] = $this->backdropCreateNode($edit);
     }
   }
-  public function testFieldRender() {
+  protected function testFieldRender() {
     $this->_testSimpleFieldRender();
     $this->_testFormatterSimpleFieldRender();
     $this->_testMultipleFieldRender();

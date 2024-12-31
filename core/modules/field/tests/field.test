@@ -57,7 +57,7 @@ class FieldAttachTestCase extends FieldTestCase {
   protected $field;
   protected $instance;
 
-  public function setUp() {
+  protected function setUp() {
     // Since this is a base class for many test cases, support the same
     // flexibility that BackdropWebTestCase::setUp() has for the modules to be
     // passed in as either an array or a variable number of string arguments.
@@ -123,7 +123,7 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
    * Works independently of the underlying field storage backend. Inserts or
    * updates random field data and then loads and verifies the data.
    */
-  public function testFieldAttachSaveLoad() {
+  protected function testFieldAttachSaveLoad() {
     // Configure the instance so that we test hook_field_load() (see
     // field_test_field_load() in field_test.module).
     $this->instance['settings']['test_hook_field_load'] = TRUE;
@@ -185,7 +185,7 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
   /**
    * Test the 'multiple' load feature.
    */
-  public function testFieldAttachLoadMultiple() {
+  protected function testFieldAttachLoadMultiple() {
     $entity_type = 'test_entity';
     $langcode = LANGUAGE_NONE;
 
@@ -264,7 +264,7 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
   /**
    * Test saving and loading fields using different storage backends.
    */
-  public function testFieldAttachSaveLoadDifferentStorage() {
+  protected function testFieldAttachSaveLoadDifferentStorage() {
     $entity_type = 'test_entity';
     $langcode = LANGUAGE_NONE;
 
@@ -317,7 +317,7 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
    *
    * @see field_test_storage_details_alter()
    */
-  public function testFieldStorageDetailsAlter() {
+  protected function testFieldStorageDetailsAlter() {
     $field_name = 'field_test_change_my_details';
     $field = array(
       'field_name' => $field_name,
@@ -356,7 +356,7 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
   /**
    * Tests insert and update with missing or NULL fields.
    */
-  public function testFieldAttachSaveMissingData() {
+  protected function testFieldAttachSaveMissingData() {
     $entity_type = 'test_entity';
     $entity_init = field_test_create_entity();
     $langcode = LANGUAGE_NONE;
@@ -434,7 +434,7 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
   /**
    * Test insert with missing or NULL fields, with default value.
    */
-  public function testFieldAttachSaveMissingDataDefaultValue() {
+  protected function testFieldAttachSaveMissingDataDefaultValue() {
     // Add a default value function.
     $this->instance['default_value_function'] = 'field_test_default_value';
     field_update_instance($this->instance);
@@ -466,7 +466,7 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
   /**
    * Test field_has_data().
    */
-  public function testFieldHasData() {
+  protected function testFieldHasData() {
     $entity_type = 'test_entity';
     $langcode = LANGUAGE_NONE;
 
@@ -511,7 +511,7 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
   /**
    * Test field_attach_delete().
    */
-  public function testFieldAttachDelete() {
+  protected function testFieldAttachDelete() {
     $entity_type = 'test_entity';
     $langcode = LANGUAGE_NONE;
     $rev[0] = field_test_create_entity(0, 0, $this->instance['bundle']);
@@ -566,7 +566,7 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
   /**
    * Test field_attach_create_bundle() and field_attach_rename_bundle().
    */
-  public function testFieldAttachCreateRenameBundle() {
+  protected function testFieldAttachCreateRenameBundle() {
     // Create a new bundle. This has to be initiated by the module so that its
     // hook_entity_info() is consistent.
     $new_bundle = 'test_bundle_' . backdrop_strtolower($this->randomName());
@@ -607,7 +607,7 @@ class FieldAttachStorageTestCase extends FieldAttachTestCase {
   /**
    * Test field_attach_delete_bundle().
    */
-  public function testFieldAttachDeleteBundle() {
+  protected function testFieldAttachDeleteBundle() {
     // Create a new bundle. This has to be initiated by the module so that its
     // hook_entity_info() is consistent.
     $new_bundle = 'test_bundle_' . backdrop_strtolower($this->randomName());
@@ -676,7 +676,7 @@ class FieldAttachOtherTestCase extends FieldAttachTestCase {
   /**
    * Test field_attach_view() and field_attach_prepare_view().
    */
-  public function testFieldAttachView() {
+  protected function testFieldAttachView() {
     $this->createFieldWithInstance('_2');
 
     $entity_type = 'test_entity';
@@ -838,7 +838,7 @@ class FieldAttachOtherTestCase extends FieldAttachTestCase {
   /**
    * Tests the 'multiple entity' behavior of field_attach_prepare_view().
    */
-  public function testFieldAttachPrepareViewMultiple() {
+  protected function testFieldAttachPrepareViewMultiple() {
     $entity_type = 'test_entity';
     $langcode = LANGUAGE_NONE;
 
@@ -887,7 +887,7 @@ class FieldAttachOtherTestCase extends FieldAttachTestCase {
   /**
    * Test field cache.
    */
-  public function testFieldAttachCache() {
+  protected function testFieldAttachCache() {
     // Initialize random values and a test entity.
     $entity_init = field_test_create_entity(1, 1, $this->instance['bundle']);
     $langcode = LANGUAGE_NONE;
@@ -977,7 +977,7 @@ class FieldAttachOtherTestCase extends FieldAttachTestCase {
    * Verify that field_attach_validate() invokes the correct
    * hook_field_validate.
    */
-  public function testFieldAttachValidate() {
+  protected function testFieldAttachValidate() {
     $this->createFieldWithInstance('_2');
 
     $entity_type = 'test_entity';
@@ -1070,7 +1070,7 @@ class FieldAttachOtherTestCase extends FieldAttachTestCase {
    * This could be much more thorough, but it does verify that the correct
    * widgets show up.
    */
-  public function testFieldAttachForm() {
+  protected function testFieldAttachForm() {
     $this->createFieldWithInstance('_2');
 
     $entity_type = 'test_entity';
@@ -1110,7 +1110,7 @@ class FieldAttachOtherTestCase extends FieldAttachTestCase {
   /**
    * Test field_attach_submit().
    */
-  public function testFieldAttachSubmit() {
+  protected function testFieldAttachSubmit() {
     $this->createFieldWithInstance('_2');
 
     $entity_type = 'test_entity';
@@ -1194,14 +1194,14 @@ class FieldAttachOtherTestCase extends FieldAttachTestCase {
 }
 
 class FieldInfoTestCase extends FieldTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('field_test');
   }
 
   /**
    * Test that field types and field definitions are correctly cached.
    */
-  public function testFieldInfo() {
+  protected function testFieldInfo() {
     // Test that field_test module's fields, widgets, and formatters show up.
 
     $field_test_info = field_test_field_info();
@@ -1317,7 +1317,7 @@ class FieldInfoTestCase extends FieldTestCase {
   /**
    * Test that cached field definitions are ready for current runtime context.
    */
-  public function testFieldPrepare() {
+  protected function testFieldPrepare() {
     $field_definition = array(
       'field_name' => 'field',
       'type' => 'test_field',
@@ -1344,7 +1344,7 @@ class FieldInfoTestCase extends FieldTestCase {
   /**
    * Test that cached instance definitions are ready for current runtime context.
    */
-  public function testInstancePrepare() {
+  protected function testInstancePrepare() {
     $field_definition = array(
       'field_name' => 'field',
       'type' => 'test_field',
@@ -1394,7 +1394,7 @@ class FieldInfoTestCase extends FieldTestCase {
   /**
    * Test that instances on disabled entity types are filtered out.
    */
-  public function testInstanceDisabledEntityType() {
+  protected function testInstanceDisabledEntityType() {
     // For this test the field type and the entity type must be exposed by
     // different modules.
     $field_definition = array(
@@ -1417,7 +1417,7 @@ class FieldInfoTestCase extends FieldTestCase {
   /**
    * Test that the field_info settings convenience functions work.
    */
-  public function testSettingsInfo() {
+  protected function testSettingsInfo() {
     $info = field_test_field_info();
     // We need to account for the existence of user_field_info_alter().
     foreach (array_keys($info) as $name) {
@@ -1448,7 +1448,7 @@ class FieldFormTestCase extends FieldTestCase {
   protected $field_multiple;
   protected $field_unlimited;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('field_test');
 
     $web_user = $this->backdropCreateUser(array('access field_test content', 'administer field_test content'));
@@ -1477,7 +1477,7 @@ class FieldFormTestCase extends FieldTestCase {
     );
   }
 
-  public function testFieldFormSingle() {
+  protected function testFieldFormSingle() {
     $this->field = $this->field_single;
     $this->field_name = $this->field['field_name'];
     $this->instance['field_name'] = $this->field_name;
@@ -1530,7 +1530,7 @@ class FieldFormTestCase extends FieldTestCase {
 
   }
 
-  public function testFieldFormSingleRequired() {
+  protected function testFieldFormSingleRequired() {
     $this->field = $this->field_single;
     $this->field_name = $this->field['field_name'];
     $this->instance['field_name'] = $this->field_name;
@@ -1561,7 +1561,7 @@ class FieldFormTestCase extends FieldTestCase {
     $this->assertRaw(t('!name field is required.', array('!name' => $this->instance['label'])), 'Required field with no value fails validation');
   }
 
-//  public function testFieldFormMultiple() {
+//  protected function testFieldFormMultiple() {
 //    $this->field = $this->field_multiple;
 //    $this->field_name = $this->field['field_name'];
 //    $this->instance['field_name'] = $this->field_name;
@@ -1569,7 +1569,7 @@ class FieldFormTestCase extends FieldTestCase {
 //    field_create_instance($this->instance);
 //  }
 
-  public function testFieldFormUnlimited() {
+  protected function testFieldFormUnlimited() {
     $this->field = $this->field_unlimited;
     $this->field_name = $this->field['field_name'];
     $this->instance['field_name'] = $this->field_name;
@@ -1648,7 +1648,7 @@ class FieldFormTestCase extends FieldTestCase {
   /**
    * Tests the position of the "required" symbol and the validation error text.
    */
-  public function testFieldFormUnlimitedRequired() {
+  protected function testFieldFormUnlimitedRequired() {
     $this->field = $this->field_unlimited;
     $this->field_name = $this->field['field_name'];
     $this->instance['field_name'] = $this->field_name;
@@ -1674,7 +1674,7 @@ class FieldFormTestCase extends FieldTestCase {
   /**
    * Tests widget handling of multiple required radios.
    */
-  public function testFieldFormMultivalueWithRequiredRadio() {
+  protected function testFieldFormMultivalueWithRequiredRadio() {
     // Create a multivalue test field.
     $this->field = $this->field_unlimited;
     $this->field_name = $this->field['field_name'];
@@ -1716,7 +1716,7 @@ class FieldFormTestCase extends FieldTestCase {
     $this->assertNoField("{$this->field_name}[$langcode][2][value]", 'No extraneous widget is displayed');
   }
 
-  public function testFieldFormJSAddMore() {
+  protected function testFieldFormJSAddMore() {
     $this->field = $this->field_unlimited;
     $this->field_name = $this->field['field_name'];
     $this->instance['field_name'] = $this->field_name;
@@ -1773,7 +1773,7 @@ class FieldFormTestCase extends FieldTestCase {
   /**
    * Tests widgets handling multiple values.
    */
-  public function testFieldFormMultipleWidget() {
+  protected function testFieldFormMultipleWidget() {
     // Create a field with fixed cardinality and an instance using a multiple
     // widget.
     $this->field = $this->field_multiple;
@@ -1813,7 +1813,7 @@ class FieldFormTestCase extends FieldTestCase {
   /**
    * Tests fields with no 'edit' access.
    */
-  public function testFieldFormAccess() {
+  protected function testFieldFormAccess() {
     // Create a "regular" field.
     $field = $this->field_single;
     $field_name = $field['field_name'];
@@ -1884,7 +1884,7 @@ class FieldFormTestCase extends FieldTestCase {
   /**
    * Tests Field API form integration within a subform.
    */
-  public function testNestedFieldForm() {
+  protected function testNestedFieldForm() {
     // Add two instances on the 'test_bundle'
     field_create_field($this->field_single);
     field_create_field($this->field_unlimited);
@@ -2002,7 +2002,7 @@ class FieldDisplayAPITestCase extends FieldTestCase {
   protected $values;
   protected $entity;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('field_test');
 
     // Create a field and instance.
@@ -2049,7 +2049,7 @@ class FieldDisplayAPITestCase extends FieldTestCase {
   /**
    * Test the field_view_field() function.
    */
-  public function testFieldViewField() {
+  protected function testFieldViewField() {
     // No display settings: check that default display settings are used.
     $output = field_view_field('test_entity', $this->entity, $this->field_name);
     $this->backdropSetContent(backdrop_render($output));
@@ -2122,7 +2122,7 @@ class FieldDisplayAPITestCase extends FieldTestCase {
   /**
    * Test the field_view_value() function.
    */
-  public function testFieldViewValue() {
+  protected function testFieldViewValue() {
     // No display settings: check that default display settings are used.
     $settings = field_info_formatter_settings('field_test_default');
     $setting = $settings['test_formatter_setting'];
@@ -2189,7 +2189,7 @@ class FieldCrudTestCase extends FieldTestCase {
   protected $field;
   protected $instance;
 
-  public function setUp() {
+  protected function setUp() {
     // field_update_field() tests use number.module
     parent::setUp('field_test', 'number');
   }
@@ -2202,7 +2202,7 @@ class FieldCrudTestCase extends FieldTestCase {
   /**
    * Test the creation of a field.
    */
-  public function testCreateField() {
+  protected function testCreateField() {
     $field_definition = array(
       'field_name' => 'field_2',
       'type' => 'test_field',
@@ -2320,7 +2320,7 @@ class FieldCrudTestCase extends FieldTestCase {
   /**
    * Test failure to create a field.
    */
-  public function testCreateFieldFail() {
+  protected function testCreateFieldFail() {
     $field_name = 'duplicate';
     $field_definition = array('field_name' => $field_name, 'type' => 'test_field', 'storage' => array('type' => 'field_test_storage_failure'));
 
@@ -2345,7 +2345,7 @@ class FieldCrudTestCase extends FieldTestCase {
   /**
    * Test reading back a field definition.
    */
-  public function testReadField() {
+  protected function testReadField() {
     $field_definition = array(
       'field_name' => 'field_1',
       'type' => 'test_field',
@@ -2360,7 +2360,7 @@ class FieldCrudTestCase extends FieldTestCase {
   /**
    * Test the deletion of a field.
    */
-  public function testDeleteField() {
+  protected function testDeleteField() {
     // TODO: Also test deletion of the data stored in the field ?
 
     // Create two fields (so we can test that only one is deleted).
@@ -2440,7 +2440,7 @@ class FieldCrudTestCase extends FieldTestCase {
     $this->assertFalse($field, 'Field is deleted after a batch run.');
   }
 
-  public function testUpdateNonExistentField() {
+  protected function testUpdateNonExistentField() {
     $test_field = array('field_name' => 'does_not_exist', 'type' => 'number_decimal');
     try {
       field_update_field($test_field);
@@ -2451,7 +2451,7 @@ class FieldCrudTestCase extends FieldTestCase {
     }
   }
 
-  public function testUpdateFieldType() {
+  protected function testUpdateFieldType() {
     $field = array('field_name' => 'field_type', 'type' => 'number_decimal');
     field_create_field($field);
 
@@ -2468,7 +2468,7 @@ class FieldCrudTestCase extends FieldTestCase {
   /**
    * Test updating a field.
    */
-  public function testUpdateField() {
+  protected function testUpdateField() {
     // Create a field with a defined cardinality, so that we can ensure it's
     // respected. Since cardinality enforcement is consistent across database
     // systems, it makes a good test case.
@@ -2513,7 +2513,7 @@ class FieldCrudTestCase extends FieldTestCase {
   /**
    * Test field type modules forbidding an update.
    */
-  public function testUpdateFieldForbid() {
+  protected function testUpdateFieldForbid() {
     $field = array('field_name' => 'forbidden', 'type' => 'test_field', 'settings' => array('changeable' => 0, 'unchangeable' => 0));
     $field = field_create_field($field);
     $field['settings']['changeable']++;
@@ -2537,7 +2537,7 @@ class FieldCrudTestCase extends FieldTestCase {
   /**
    * Test that fields are properly marked active or inactive.
    */
-  public function testActive() {
+  protected function testActive() {
     $field_definition = array(
       'field_name' => 'field_1',
       'type' => 'test_field',
@@ -2603,7 +2603,7 @@ class FieldCrudTestCase extends FieldTestCase {
  */
 class FieldSchemaAlterTestCase extends FieldTestCase {
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('field_test', 'field_test_schema_alter');
   }
 
@@ -2612,7 +2612,7 @@ class FieldSchemaAlterTestCase extends FieldTestCase {
    *
    * @see field_test_schema_alter_field_schema_alter()
    */
-  public function testImageFieldSchemaAlter() {
+  protected function testImageFieldSchemaAlter() {
     $test_field = array(
       'field_name' => backdrop_strtolower($this->randomName()),
       'type' => 'test_field',
@@ -2638,7 +2638,7 @@ class FieldInstanceCrudTestCase extends FieldTestCase {
   protected $field;
   protected $instance_definition;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('field_test');
 
     $this->field = array(
@@ -2662,7 +2662,7 @@ class FieldInstanceCrudTestCase extends FieldTestCase {
   /**
    * Test the creation of a field instance.
    */
-  public function testCreateFieldInstance() {
+  protected function testCreateFieldInstance() {
     field_create_instance($this->instance_definition);
 
     // Read the raw record from the config
@@ -2746,7 +2746,7 @@ class FieldInstanceCrudTestCase extends FieldTestCase {
   /**
    * Test reading back an instance definition.
    */
-  public function testReadFieldInstance() {
+  protected function testReadFieldInstance() {
     field_create_instance($this->instance_definition);
 
     // Read the instance back.
@@ -2757,7 +2757,7 @@ class FieldInstanceCrudTestCase extends FieldTestCase {
   /**
    * Test the update of a field instance.
    */
-  public function testUpdateFieldInstance() {
+  protected function testUpdateFieldInstance() {
     field_create_instance($this->instance_definition);
     $field_type = field_info_field_types($this->field['type']);
 
@@ -2815,7 +2815,7 @@ class FieldInstanceCrudTestCase extends FieldTestCase {
   /**
    * Test the deletion of a field instance.
    */
-  public function testDeleteFieldInstance() {
+  protected function testDeleteFieldInstance() {
     // TODO: Test deletion of the data stored in the field also.
     // Need to check that data for a 'deleted' field / instance doesn't get loaded
     // Need to check data marked deleted is cleaned on cron (not implemented yet...)
@@ -2864,7 +2864,7 @@ class FieldTranslationsTestCase extends FieldTestCase {
   protected $instance;
   protected $entity_type;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('locale', 'field_test');
 
     $this->field_name = backdrop_strtolower($this->randomName() . '_field_name');
@@ -2902,7 +2902,7 @@ class FieldTranslationsTestCase extends FieldTestCase {
   /**
    * Ensures that only valid values are returned by field_available_languages().
    */
-  public function testFieldAvailableLanguages() {
+  protected function testFieldAvailableLanguages() {
     // Test 'translatable' fieldable info.
     field_test_entity_info_translatable('test_entity', FALSE);
     $field = $this->field;
@@ -2933,7 +2933,7 @@ class FieldTranslationsTestCase extends FieldTestCase {
   /**
    * Test the multilanguage logic of _field_invoke().
    */
-  public function testFieldInvoke() {
+  protected function testFieldInvoke() {
     // Enable field translations for the entity.
     field_test_entity_info_translatable('test_entity', TRUE);
 
@@ -2971,7 +2971,7 @@ class FieldTranslationsTestCase extends FieldTestCase {
   /**
    * Test the multilanguage logic of _field_invoke_multiple().
    */
-  public function testFieldInvokeMultiple() {
+  protected function testFieldInvokeMultiple() {
     // Enable field translations for the entity.
     field_test_entity_info_translatable('test_entity', TRUE);
 
@@ -3045,7 +3045,7 @@ class FieldTranslationsTestCase extends FieldTestCase {
   /**
    * Test translatable fields storage/retrieval.
    */
-  public function testTranslatableFieldSaveLoad() {
+  protected function testTranslatableFieldSaveLoad() {
     // Enable field translations for nodes.
     field_test_entity_info_translatable('node', TRUE);
     $entity_info = entity_get_info('node');
@@ -3082,7 +3082,7 @@ class FieldTranslationsTestCase extends FieldTestCase {
   /**
    * Tests display language logic for translatable fields.
    */
-  public function testFieldDisplayLanguage() {
+  protected function testFieldDisplayLanguage() {
     $field_name = backdrop_strtolower($this->randomName() . '_field_name');
     $entity_type = 'test_entity';
 
@@ -3163,7 +3163,7 @@ class FieldTranslationsTestCase extends FieldTestCase {
   /**
    * Tests field translations when creating a new revision.
    */
-  public function testFieldFormTranslationRevisions() {
+  protected function testFieldFormTranslationRevisions() {
     $web_user = $this->backdropCreateUser(array('access field_test content', 'administer field_test content'));
     $this->backdropLogin($web_user);
 
@@ -3270,7 +3270,7 @@ class FieldBulkDeleteTestCase extends FieldTestCase {
     }
   }
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('field_test');
 
     $this->fields = array();
@@ -3331,7 +3331,7 @@ class FieldBulkDeleteTestCase extends FieldTestCase {
    * field_delete_instance() and could be moved to FieldCrudTestCase,
    * but depends on this class's setUp().
    */
-  public function testDeleteFieldInstance() {
+  protected function testDeleteFieldInstance() {
     $bundle = reset($this->bundles);
     $field = reset($this->fields);
 
@@ -3383,7 +3383,7 @@ class FieldBulkDeleteTestCase extends FieldTestCase {
    * Verify that field data items and instances are purged when an
    * instance is deleted.
    */
-  public function testPurgeInstance() {
+  protected function testPurgeInstance() {
     // Start recording hook invocations.
     field_test_memorize();
 
@@ -3442,7 +3442,7 @@ class FieldBulkDeleteTestCase extends FieldTestCase {
    * Verify that fields are preserved and purged correctly as multiple
    * instances are deleted and purged.
    */
-  public function testPurgeField() {
+  protected function testPurgeField() {
     // Start recording hook invocations.
     field_test_memorize();
 
@@ -3506,7 +3506,7 @@ class FieldBlockTestCase extends FieldTestCase {
   protected $admin_user;
   protected $node;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp(array('node', 'field', 'field_test'));
 
     $this->content_type = $this->backdropCreateContentType(array(
@@ -3541,7 +3541,7 @@ class FieldBlockTestCase extends FieldTestCase {
   /**
    * Check special conditions around the main content block.
    */
-  public function testFieldBlock() {
+  protected function testFieldBlock() {
     $this->backdropLogin($this->admin_user);
 
     // Override the node/% path to test the availability of the field blocks.
@@ -3659,7 +3659,7 @@ class FieldGetValueTestCase extends FieldTestCase {
    */
   protected $value_email2;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp(array('node', 'field', 'field_test', 'email'));
 
     $this->content_type = $this->backdropCreateContentType(array(
@@ -3720,7 +3720,7 @@ class FieldGetValueTestCase extends FieldTestCase {
   /**
    * Test field_get_value().
    */
-  public function testFieldGetValue() {
+  protected function testFieldGetValue() {
     // Test single 'value' return.
     $single_value = field_get_value($this->node, $this->test_field_name);
     $this->assertEqual($this->value1, $single_value, 'The first value in test_field is returned.');
@@ -3777,7 +3777,7 @@ class FieldTokenTestCase extends FieldTestCase {
    */
   protected $content_type;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp(array('node', 'field', 'field_ui', 'field_test', 'date', 'path'));
 
     // Create test user.
@@ -3886,7 +3886,7 @@ class FieldTokenTestCase extends FieldTestCase {
   /**
    * Test fields in token display mode.
    */
-  public function testFieldToken() {
+  protected function testFieldToken() {
     $edit = array();
     $edit['title'] = $this->randomName(8);
     $edit[$this->test_field_name . '[und][0][value]'] = 'foo';

@@ -20,7 +20,7 @@ class TranslationTestCase extends BackdropWebTestCase {
    */
   protected $translator;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('node', 'language', 'locale', 'translation', 'translation_test');
 
     // Setup users.
@@ -61,7 +61,7 @@ class TranslationTestCase extends BackdropWebTestCase {
   /**
    * Creates, modifies, and updates a page with a translation.
    */
-  public function testContentTranslation() {
+  protected function testContentTranslation() {
     // Create Page in English.
     $node_title = $this->randomName();
     $node_body =  $this->randomName();
@@ -153,7 +153,7 @@ class TranslationTestCase extends BackdropWebTestCase {
   /**
    * Checks that the language switch links behave properly.
    */
-  public function testLanguageSwitchLinks() {
+  protected function testLanguageSwitchLinks() {
     // Create a Page in English and its translations in Spanish and
     // Italian.
     $node = $this->createPage($this->randomName(), $this->randomName(), 'en');
@@ -199,7 +199,7 @@ class TranslationTestCase extends BackdropWebTestCase {
   /**
    * Tests that the language switcher block alterations work as intended.
    */
-  public function testLanguageSwitcherBlockIntegration() {
+  protected function testLanguageSwitcherBlockIntegration() {
     // Enable Italian to have three items in the language switcher block.
     $this->backdropLogin($this->admin_user);
     $edit = array('languages[it][enabled]' => TRUE);

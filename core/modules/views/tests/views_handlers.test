@@ -11,7 +11,7 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  */
 class ViewsHandlersTest extends ViewsSqlTest {
 
-  public function testFilterInOperatorUi() {
+  protected function testFilterInOperatorUi() {
     $admin_user = $this->backdropCreateUser(array('administer views', 'administer site configuration'));
     $this->backdropLogin($admin_user);
     menu_rebuild();
@@ -31,7 +31,7 @@ class ViewsHandlersTest extends ViewsSqlTest {
   /**
    * Tests views_break_phrase_string function.
    */
-  public function test_views_break_phrase_string() {
+  protected function test_views_break_phrase_string() {
     module_load_include('inc', 'views', 'includes/utility');
     $empty_class = new stdClass();
     $empty_class->operator = 'or';
@@ -87,7 +87,7 @@ class ViewsHandlersTest extends ViewsSqlTest {
   /**
    * Tests views_break_phrase function.
    */
-  public function test_views_break_phrase() {
+  protected function test_views_break_phrase() {
     $empty_class = new stdClass();
     $empty_class->operator = 'or';
     $empty_class->value = array();

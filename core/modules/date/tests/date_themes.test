@@ -12,7 +12,7 @@ class DateThemeTestCase extends BackdropWebTestCase {
   /**
    * Test date_display_single theme function.
    */
-  public function testDateDisplaySingle() {
+  protected function testDateDisplaySingle() {
     // Single date with timezone offset included in format.
     $variables = array(
       'date' => '2019-03-29T12:00+0100',
@@ -49,7 +49,7 @@ class DateThemeTestCase extends BackdropWebTestCase {
   /**
    * Test date_display_combination theme function.
    */
-  public function testDateDisplayCombination() {
+  protected function testDateDisplayCombination() {
     // Start and end date on same day, with timezone.
     // We don't need a full entity, stdClass is sufficient here.
     $stdobj = new stdClass();

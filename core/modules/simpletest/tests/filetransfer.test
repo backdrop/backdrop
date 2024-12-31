@@ -12,7 +12,7 @@ class FileTransferTest extends BackdropWebTestCase {
    */
   protected $testConnection;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp();
     $this->testConnection = TestFileTransfer::factory(BACKDROP_ROOT, array('hostname' => $this->hostname, 'username' => $this->username, 'password' => $this->password, 'port' => $this->port));
   }
@@ -60,7 +60,7 @@ class FileTransferTest extends BackdropWebTestCase {
     }
   }
 
-  public function testJail() {
+  protected function testJail() {
     $source = $this->_buildFakeModule();
 
     // This convoluted piece of code is here because our testing framework does

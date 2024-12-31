@@ -10,7 +10,7 @@ class MenuTestCase extends BackdropWebTestCase {
   protected $menu;
   protected $items;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('menu');
     // Create users.
     $this->big_user = $this->backdropCreateUser(array('access administration pages', 'administer blocks', 'administer menu', 'create post content'));
@@ -33,7 +33,7 @@ class MenuTestCase extends BackdropWebTestCase {
   /**
    * Login users, add menus and menu links, and test menu functionality through the admin and user interfaces.
    */
-  public function testMenu() {
+  protected function testMenu() {
     // Login the user.
     $this->backdropLogin($this->big_user);
     $this->items = array();
@@ -305,7 +305,7 @@ class MenuTestCase extends BackdropWebTestCase {
   /**
    * Add and remove a menu link with a query string and fragment.
    */
-  public function testMenuQueryAndFragment() {
+  protected function testMenuQueryAndFragment() {
     $this->backdropLogin($this->big_user);
 
     // Make a path with query and fragment on.
@@ -575,7 +575,7 @@ class MenuTestCase extends BackdropWebTestCase {
   /**
    * Test administrative users other than user 1 can access the menu parents AJAX callback.
    */
-  public function testMenuParentsJsAccess() {
+  protected function testMenuParentsJsAccess() {
     $admin = $this->backdropCreateUser(array('administer menu'));
     $this->backdropLogin($admin);
     // Just check access to the callback overall, the POST data is irrelevant.
@@ -663,7 +663,7 @@ class MenuNodeTestCase extends BackdropWebTestCase {
    */
   protected $admin_user;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('menu');
 
     $this->admin_user = $this->backdropCreateUser(array(
@@ -680,7 +680,7 @@ class MenuNodeTestCase extends BackdropWebTestCase {
   /**
    * Test creating, editing, deleting menu links via node form widget.
    */
-  public function testMenuNodeFormWidget() {
+  protected function testMenuNodeFormWidget() {
     // Enable Main menu as available menu.
     $edit = array(
       'menu_options[main-menu]' => 1,

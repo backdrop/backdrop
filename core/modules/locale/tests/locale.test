@@ -8,14 +8,14 @@
  * Functional tests for language configuration's effect on negotiation setup.
  */
 class LocaleConfigurationTest extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('locale');
   }
 
   /**
    * Functional tests for adding, editing and deleting languages.
    */
-  public function testLanguageConfiguration() {
+  protected function testLanguageConfiguration() {
     global $base_url;
 
     // User to add and remove language.
@@ -68,7 +68,7 @@ class LocaleConfigurationTest extends BackdropWebTestCase {
  * Currently, only the jQuery datepicker is localized using Backdrop translations.
  */
 class LocaleLibraryInfoAlterTest extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('locale', 'locale_test');
   }
 
@@ -77,7 +77,7 @@ class LocaleLibraryInfoAlterTest extends BackdropWebTestCase {
    *
    * @see locale_library_info_alter()
    */
-  public function testLibraryInfoAlter() {
+  protected function testLibraryInfoAlter() {
     backdrop_add_library('system', 'ui.datepicker');
     $scripts = backdrop_get_js();
     $this->assertTrue(strpos($scripts, 'locale.datepicker.js'), 'locale.datepicker.js added to scripts.');
@@ -88,11 +88,11 @@ class LocaleLibraryInfoAlterTest extends BackdropWebTestCase {
  * Functional tests for JavaScript parsing for translatable strings.
  */
 class LocaleJavascriptTranslationTest extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('locale', 'locale_test');
   }
 
-  public function testFileParsing() {
+  protected function testFileParsing() {
 
     $filename = backdrop_get_path('module', 'locale_test') . '/locale_test.js';
 
@@ -173,14 +173,14 @@ class LocaleJavascriptTranslationTest extends BackdropWebTestCase {
  * Functional test for string translation and validation.
  */
 class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('locale');
   }
 
   /**
    * Adds a language and tests string translation by users with the appropriate permissions.
    */
-  public function testStringTranslation() {
+  protected function testStringTranslation() {
     global $base_url;
 
     // User to add and remove language.
@@ -338,7 +338,7 @@ class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
    * Adds a language and checks that the JavaScript translation files are
    * properly created and rebuilt on deletion.
    */
-  public function testJavaScriptTranslation() {
+  protected function testJavaScriptTranslation() {
     $user = $this->backdropCreateUser(array('translate interface', 'administer languages', 'access administration pages'));
     $this->backdropLogin($user);
 
@@ -390,7 +390,7 @@ class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
   /**
    * Tests the validation of the translation input.
    */
-  public function testStringValidation() {
+  protected function testStringValidation() {
     global $base_url;
 
     // User to add language and strings.
@@ -451,7 +451,7 @@ class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
   /**
    * Tests translation search form.
    */
-  public function testStringSearch() {
+  protected function testStringSearch() {
     global $base_url;
 
     // User to add and remove language.
@@ -606,7 +606,7 @@ class LocaleTranslationFunctionalTest extends BackdropWebTestCase {
  * Tests plural index computation functionality.
  */
 class LocalePluralFormatTest extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('locale', 'locale_test');
 
     $admin_user = $this->backdropCreateUser(array('administer languages', 'translate interface', 'access administration pages'));
@@ -616,7 +616,7 @@ class LocalePluralFormatTest extends BackdropWebTestCase {
   /**
    * Tests locale_get_plural() functionality.
    */
-  public function testGetPluralFormat() {
+  protected function testGetPluralFormat() {
     // Import some .po files with formulas to set up the environment.
     // These will also add the languages to the system and enable them.
     $this->importPoFile($this->getPoFileWithSimplePlural(), array(
@@ -771,7 +771,7 @@ class LocaleImportFunctionalTest extends BackdropWebTestCase {
    */
   protected $admin_user = NULL;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('locale', 'locale_test');
 
     // Set the translation file directory.
@@ -789,7 +789,7 @@ class LocaleImportFunctionalTest extends BackdropWebTestCase {
   /**
    * Test import of standalone .po files.
    */
-  public function testStandalonePoFile() {
+  protected function testStandalonePoFile() {
     // Try importing a .po file.
     $this->importPoFile($this->getPoFile(), array(
       'langcode' => 'fr',
@@ -877,7 +877,7 @@ class LocaleImportFunctionalTest extends BackdropWebTestCase {
   /**
    * Test automatic import of a module's translation files.
    */
-  public function testAutomaticModuleTranslationImportLanguageEnable() {
+  protected function testAutomaticModuleTranslationImportLanguageEnable() {
     // Code for the language - manually set to match the test translation file.
     $langcode = 'xx';
     // The English name for the language.
@@ -910,7 +910,7 @@ class LocaleImportFunctionalTest extends BackdropWebTestCase {
   /**
    * Test msgctxt context support.
    */
-  public function testLanguageContext() {
+  protected function testLanguageContext() {
     // Try importing a .po file.
     $this->importPoFile($this->getPoFileWithContext(), array(
       'langcode' => 'hr',
@@ -923,7 +923,7 @@ class LocaleImportFunctionalTest extends BackdropWebTestCase {
   /**
    * Test empty msgstr at end of .po file see #611786.
    */
-  public function testEmptyMsgstr() {
+  protected function testEmptyMsgstr() {
     $langcode = 'hu';
 
     // Try importing a .po file.
@@ -1136,7 +1136,7 @@ class LocaleExportFunctionalTest extends BackdropWebTestCase {
    */
   protected $admin_user = NULL;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('locale', 'locale_test');
 
     $this->admin_user = $this->backdropCreateUser(array('administer languages', 'translate interface', 'access administration pages'));
@@ -1146,7 +1146,7 @@ class LocaleExportFunctionalTest extends BackdropWebTestCase {
   /**
    * Test exportation of translations.
    */
-  public function testExportTranslation() {
+  protected function testExportTranslation() {
     // First import some known translations.
     // This will also automatically enable the 'fr' language.
     $name = backdrop_tempnam('temporary://', "po_") . '.po';
@@ -1171,7 +1171,7 @@ class LocaleExportFunctionalTest extends BackdropWebTestCase {
   /**
    * Test exportation of translation template file.
    */
-  public function testExportTranslationTemplateFile() {
+  protected function testExportTranslationTemplateFile() {
     // Get the translation template file.
     // There are two 'Export' buttons on this page, but it somehow works.  It'd
     // be better if we could use the submit button id like documented but that
@@ -1205,7 +1205,7 @@ EOF;
  * Tests for the st() function.
  */
 class LocaleInstallTest extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('locale');
 
     // st() lives in install.inc, so ensure that it is loaded for all tests.
@@ -1215,7 +1215,7 @@ class LocaleInstallTest extends BackdropWebTestCase {
   /**
    * Verify that function signatures of t() and st() are equal.
    */
-  public function testFunctionSignatures() {
+  protected function testFunctionSignatures() {
     $reflector_t = new ReflectionFunction('t');
     $reflector_st = new ReflectionFunction('st');
     $this->assertEqual($reflector_t->getParameters(), $reflector_st->getParameters(), 'Function signatures of t() and st() are equal.');
@@ -1232,7 +1232,7 @@ class LocaleUninstallFunctionalTest extends BackdropWebTestCase {
    */
   protected $langcode;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('locale');
     $this->langcode = 'en';
   }
@@ -1240,7 +1240,7 @@ class LocaleUninstallFunctionalTest extends BackdropWebTestCase {
   /**
    * Check if the values of the Locale variables are correct after uninstall.
    */
-  public function testUninstallProcess() {
+  protected function testUninstallProcess() {
     $locale_module = array('locale', 'language');
 
     // Add a new language and optionally set it as default.
@@ -1347,7 +1347,7 @@ class LocaleUninstallFunctionalTest extends BackdropWebTestCase {
  * to test with this new language.
  */
 class LocaleUninstallFrenchFunctionalTest extends LocaleUninstallFunctionalTest {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp();
     $this->langcode = 'fr';
   }
@@ -1357,7 +1357,7 @@ class LocaleUninstallFrenchFunctionalTest extends LocaleUninstallFunctionalTest 
  * Functional tests for the language switching feature.
  */
 class LocaleLanguageSwitchingFunctionalTest extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('locale');
 
     // Create and login user.
@@ -1368,7 +1368,7 @@ class LocaleLanguageSwitchingFunctionalTest extends BackdropWebTestCase {
   /**
    * Functional tests for the language switcher block.
    */
-  public function testLanguageBlock() {
+  protected function testLanguageBlock() {
     // Enable the language switching block.
     $language_type = LANGUAGE_TYPE_INTERFACE;
     $layout = layout_load('default');
@@ -1428,7 +1428,7 @@ class LocaleBrowserDetectionTest extends BackdropUnitTestCase {
   /**
    * Unit tests for the locale_language_from_browser() function.
    */
-  public function testLanguageFromBrowser() {
+  protected function testLanguageFromBrowser() {
     // Load the required functions.
     require_once BACKDROP_ROOT . '/core/includes/locale.inc';
 
@@ -1536,14 +1536,14 @@ class LocaleBrowserDetectionTest extends BackdropUnitTestCase {
  * Functional tests for a user's ability to change their default language.
  */
 class LocaleUserLanguageFunctionalTest extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('locale');
   }
 
   /**
    * Test if user can change their default language.
    */
-  public function testUserLanguageConfiguration() {
+  protected function testUserLanguageConfiguration() {
     global $base_url;
 
     // User to add and remove language.
@@ -1617,7 +1617,7 @@ class LocaleUserLanguageFunctionalTest extends BackdropWebTestCase {
  * Functional test for language handling during user creation.
  */
 class LocaleUserCreationTest extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('locale');
     config_set('system.core', 'user_register', USER_REGISTER_VISITORS);
   }
@@ -1625,7 +1625,7 @@ class LocaleUserCreationTest extends BackdropWebTestCase {
   /**
    * Functional test for language handling during user creation.
    */
-  public function testLocalUserCreation() {
+  protected function testLocalUserCreation() {
     // User to add and remove language and create new users.
     $admin_user = $this->backdropCreateUser(array('administer languages', 'access administration pages', 'administer users'));
     $this->backdropLogin($admin_user);
@@ -1709,14 +1709,14 @@ class LocaleUserCreationTest extends BackdropWebTestCase {
  * Functional tests for configuring a different URL alias per language.
  */
 class LocalePathFunctionalTest extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('locale', 'path');
   }
 
   /**
    * Test if a language can be associated with a URL alias.
    */
-  public function testPathLanguageConfiguration() {
+  protected function testPathLanguageConfiguration() {
     global $base_url;
 
     // User to add and remove language.
@@ -1838,14 +1838,14 @@ class LocalePathFunctionalTest extends BackdropWebTestCase {
  * Functional tests for multilingual support on nodes.
  */
 class LocaleContentFunctionalTest extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('locale');
   }
 
   /**
    * Verifies that machine name fields are always LTR.
    */
-  public function testMachineNameLTR() {
+  protected function testMachineNameLTR() {
     // User to add and remove language.
     $admin_user = $this->backdropCreateUser(array('administer languages', 'administer content types', 'access administration pages'));
 
@@ -1873,7 +1873,7 @@ class LocaleContentFunctionalTest extends BackdropWebTestCase {
   /**
    * Test if a content type can be set to multilingual and language is present.
    */
-  public function testContentTypeLanguageConfiguration() {
+  protected function testContentTypeLanguageConfiguration() {
     global $base_url;
 
     // User to add and remove language.
@@ -1969,7 +1969,7 @@ class LocaleContentFunctionalTest extends BackdropWebTestCase {
   /**
    * Test if a dir and lang tags exist in node's attributes.
    */
-  public function testContentTypeDirLang() {
+  protected function testContentTypeDirLang() {
     // User to add and remove language.
     $admin_user = $this->backdropCreateUser(array('administer languages', 'administer content types', 'access administration pages'));
     // User to create a node.
@@ -2075,7 +2075,7 @@ class LocaleContentFunctionalTest extends BackdropWebTestCase {
  *          UI language in Chinese
  */
 class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('locale', 'locale_test');
     require_once BACKDROP_ROOT . '/core/includes/language.inc';
     backdrop_load('module', 'locale');
@@ -2086,7 +2086,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
   /**
    * Tests for language switching by URL path.
    */
-  public function testUILanguageNegotiation() {
+  protected function testUILanguageNegotiation() {
     // A few languages to switch to.
     // This one is unknown, should get the default lang version.
     $langcode_unknown = 'blah-blah';
@@ -2261,7 +2261,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
   /**
    * Test URL language detection when the requested URL has no language.
    */
-  public function testUrlLanguageFallback() {
+  protected function testUrlLanguageFallback() {
     // Add the Italian language.
     $langcode_browser_fallback = 'it';
     $language = (object) array(
@@ -2314,7 +2314,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
   /**
    * Tests url() when separate domains are used for multiple languages.
    */
-  public function testLanguageDomain() {
+  protected function testLanguageDomain() {
     // Add the Italian language.
     $langcode = 'it';
     $language = (object) array(
@@ -2376,7 +2376,7 @@ class LocaleUrlRewritingTest extends BackdropWebTestCase {
    */
   protected $web_user;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('locale');
 
     // Create and login user.
@@ -2410,7 +2410,7 @@ class LocaleUrlRewritingTest extends BackdropWebTestCase {
   /**
    * Check that disabled or non-installed languages are not considered.
    */
-  public function testUrlRewritingEdgeCases() {
+  protected function testUrlRewritingEdgeCases() {
     // Check URL rewriting with a disabled language.
     $languages = language_list();
     $this->checkUrl($languages['it'], 'Path language is ignored if language is disabled.', 'URL language negotiation does not work with disabled languages');
@@ -2458,7 +2458,7 @@ class LocaleUrlRewritingTest extends BackdropWebTestCase {
   /**
    * Check URL rewriting when using a domain name and a non-standard port.
    */
-  public function testDomainNameNegotiationPort() {
+  protected function testDomainNameNegotiationPort() {
     $edit = array(
       // Enable domain configuration.
       'language_negotiation_url_part' => LANGUAGE_NEGOTIATION_URL_DOMAIN,
@@ -2516,7 +2516,7 @@ class LocaleUrlRewritingTest extends BackdropWebTestCase {
  * Functional test for multilingual fields.
  */
 class LocaleMultilingualFieldsFunctionalTest extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('locale');
     // Setup users.
     $admin_user = $this->backdropCreateUser(array('administer languages', 'administer content types', 'access administration pages', 'create page content', 'edit own page content'));
@@ -2550,7 +2550,7 @@ class LocaleMultilingualFieldsFunctionalTest extends BackdropWebTestCase {
   /**
    * Test if field languages are correctly set through the node form.
    */
-  public function testMultilingualNodeForm() {
+  protected function testMultilingualNodeForm() {
     // Create "Page" content.
     $langcode = LANGUAGE_NONE;
     $title_key = "title";
@@ -2599,7 +2599,7 @@ class LocaleMultilingualFieldsFunctionalTest extends BackdropWebTestCase {
   /*
    * Test multilingual field display settings.
    */
-  public function testMultilingualDisplaySettings() {
+  protected function testMultilingualDisplaySettings() {
     // Create "Page" content.
     $langcode = LANGUAGE_NONE;
     $title_key = "title";
@@ -2629,7 +2629,7 @@ class LocaleMultilingualFieldsFunctionalTest extends BackdropWebTestCase {
  * Functional tests for comment language.
  */
 class LocaleCommentLanguageFunctionalTest extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('locale', 'locale_test');
 
     // Create and login user.
@@ -2667,7 +2667,7 @@ class LocaleCommentLanguageFunctionalTest extends BackdropWebTestCase {
   /**
    * Test that comment language is properly set.
    */
-  public function testCommentLanguage() {
+  protected function testCommentLanguage() {
     backdrop_static_reset('language_list');
 
     // Create two nodes, one for english and one for french, and comment each
@@ -2714,7 +2714,7 @@ class LocaleCommentLanguageFunctionalTest extends BackdropWebTestCase {
  * Functional tests for localizing date formats.
  */
 class LocaleDateFormatsFunctionalTest extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('locale');
 
     // Make sure we're using UTC
@@ -2738,7 +2738,7 @@ class LocaleDateFormatsFunctionalTest extends BackdropWebTestCase {
   /**
    * Functional tests for localizing date formats.
    */
-  public function testLocalizeDateFormats() {
+  protected function testLocalizeDateFormats() {
     // Add language.
     $edit = array(
       'predefined_langcode' => 'fr',
@@ -2802,7 +2802,7 @@ class LocaleDateFormatsFunctionalTest extends BackdropWebTestCase {
  * Functional test for language types/negotiation info.
  */
 class LocaleLanguageNegotiationInfoFunctionalTest extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('locale');
     require_once BACKDROP_ROOT .'/core/includes/language.inc';
     $admin_user = $this->backdropCreateUser(array('administer languages', 'access administration pages', 'view the administration theme'));
@@ -2813,7 +2813,7 @@ class LocaleLanguageNegotiationInfoFunctionalTest extends BackdropWebTestCase {
   /**
    * Tests alterations to language types/negotiation info.
    */
-  public function testInfoAlterations() {
+  protected function testInfoAlterations() {
     // Enable language type/negotiation info alterations.
     state_set('locale_test_language_types', TRUE);
     state_set('locale_test_language_negotiation_info', TRUE);
@@ -2925,14 +2925,14 @@ class LocaleLanguageNegotiationInfoFunctionalTest extends BackdropWebTestCase {
  * Tests locale translation safe string handling.
  */
 class LocaleStringIsSafeTest extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('locale');
   }
 
   /**
    * Tests for locale_string_is_safe().
    */
-  public function testLocaleStringIsSafe() {
+  protected function testLocaleStringIsSafe() {
     // Check a translatable string without HTML.
     $string = 'Hello world!';
     $result = locale_string_is_safe($string);

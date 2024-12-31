@@ -31,7 +31,7 @@ class ViewsHandlerFileExtensionTest extends ViewsSqlTest {
   /**
    * Tests the 'extension_detect_tar' handler option.
    */
-  public function testFileExtensionTarOption() {
+  protected function testFileExtensionTarOption() {
     $view = $this->getBasicView();
 
     $view->display['default']->handler->override_option('fields', array(

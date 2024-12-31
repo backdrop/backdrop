@@ -57,7 +57,7 @@ class TaxonomyViewsHandlerRelationshipNodeTermDataTest extends ViewsSqlTest {
     $this->node = $this->backdropCreateNode($node);
   }
 
-  public function testViewsHandlerRelationshipNodeTermData() {
+  protected function testViewsHandlerRelationshipNodeTermData() {
     $view = $this->view_taxonomy_node_term_data();
 
     $this->executeView($view, array($this->term_1->tid, $this->term_2->tid));

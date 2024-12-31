@@ -16,7 +16,7 @@ class ViewsHandlerFieldUrlTest extends ViewsSqlTest {
     return $data;
   }
 
-  public function testFieldUrl() {
+  protected function testFieldUrl() {
     $view = $this->getBasicView();
 
     $view->display['default']->handler->override_option('fields', array(

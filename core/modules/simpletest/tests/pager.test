@@ -15,7 +15,7 @@ class PagerFunctionalWebTestCase extends BackdropWebTestCase {
    */
   protected $admin_user;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp(array('dblog'));
 
     // Insert 300 log messages.
@@ -32,7 +32,7 @@ class PagerFunctionalWebTestCase extends BackdropWebTestCase {
   /**
    * Tests markup and CSS classes of pager links.
    */
-  public function testActiveClass() {
+  protected function testActiveClass() {
     // Verify first page.
     $this->backdropGet('admin/reports/dblog');
     $current_page = 0;
@@ -54,7 +54,7 @@ class PagerFunctionalWebTestCase extends BackdropWebTestCase {
   /**
    * Tests theme_pager() when an empty quantity is passed.
    */
-  public function testThemePagerQuantityNotSet() {
+  protected function testThemePagerQuantityNotSet() {
     $variables = array(
       'element' => 0,
       'parameters' => array(),

@@ -15,7 +15,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
   /**
    * Tests aggregate count feature.
    */
-  public function testAggregateCount() {
+  protected function testAggregateCount() {
     // Create 2 nodes of type1 and 3 nodes of type2
     $type1 = $this->backdropCreateContentType();
     $type2 = $this->backdropCreateContentType();
@@ -209,32 +209,32 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     return $view;
   }
 
-  public function testGroupByCount() {
+  protected function testGroupByCount() {
     $this->GroupByTestHelper('count', array(4, 3));
   }
 
-  public function testGroupBySum() {
+  protected function testGroupBySum() {
     $this->GroupByTestHelper('sum', array(10, 18));
   }
 
 
-  public function testGroupByAverage() {
+  protected function testGroupByAverage() {
     $this->GroupByTestHelper('avg', array(2.5, 6));
   }
 
-  public function testGroupByMin() {
+  protected function testGroupByMin() {
     $this->GroupByTestHelper('min', array(1, 5));
   }
 
-  public function testGroupByMax() {
+  protected function testGroupByMax() {
     $this->GroupByTestHelper('max', array(4, 7));
   }
 
-  public function testGroupByNone() {
+  protected function testGroupByNone() {
     $this->GroupByTestHelper();
   }
 
-  public function testGroupByCountOnlyFilters() {
+  protected function testGroupByCountOnlyFilters() {
     // Check if GROUP BY and HAVING are included when a view doesn't display
     // SUM, COUNT, MAX... functions in SELECT statement.
 
@@ -304,7 +304,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
  * Tests UI of aggregate functionality..
  */
 class viewsUiGroupbyTestCase extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     // Enable views_ui.
     parent::setUp('views_ui', 'views_test');
 
@@ -318,7 +318,7 @@ class viewsUiGroupbyTestCase extends BackdropWebTestCase {
    *
    * @todo: this should check the change of the settings as well.
    */
-  public function testGroupBySave() {
+  protected function testGroupBySave() {
     $this->backdropGet('admin/structure/views/view/test_views_groupby_save/configure');
 
     $edit = array(

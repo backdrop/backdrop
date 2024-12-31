@@ -10,7 +10,7 @@
  */
 class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('entityreference');
 
     // Remove default content.
@@ -46,7 +46,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
   /**
    * Test the node-specific overrides of the entity handler.
    */
-  public function testNodeHandler() {
+  protected function testNodeHandler() {
     // Build a fake field instance.
     $field = array(
       'translatable' => FALSE,
@@ -215,7 +215,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
   /**
    * Test the user-specific overrides of the entity handler.
    */
-  public function testUserHandler() {
+  protected function testUserHandler() {
     // Build a fake field instance.
     $field = array(
       'translatable' => FALSE,
@@ -348,7 +348,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
   /**
    * Test the comment-specific overrides of the entity handler.
    */
-  public function testCommentHandler() {
+  protected function testCommentHandler() {
     // Build a fake field instance.
     $field = array(
       'translatable' => FALSE,
@@ -508,7 +508,7 @@ class EntityReferenceHandlersTestCase extends BackdropWebTestCase {
    * Since we are sorting on a field, we need to make sure the base-table
    * is added, and access-control is behaving as expected.
    */
-  public function testSortByField() {
+  protected function testSortByField() {
     // Add text field to entity, to sort by.
     $field_info = array(
       'field_name' => 'field_text',

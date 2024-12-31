@@ -9,7 +9,7 @@ require_once(__DIR__ . '/link.test');
 class LinkValidateTest extends LinkBaseTestClass {
   protected $field_name;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp();
     $this->field_name = $this->createLinkField();
   }
@@ -54,7 +54,7 @@ class LinkValidateTest extends LinkBaseTestClass {
    * Each of these tests creates a new node and ensures that the value of the
    * URL is stored properly in the database.
    */
-  public function testUrls() {
+  protected function testUrls() {
     $this->validateUrl('http://www.example.com');
     $this->validateUrl('<front>');
     $this->validateUrl('node/32');
@@ -76,7 +76,7 @@ class LinkValidateTest extends LinkBaseTestClass {
   /**
    * Test if we can post a bad URL if the validation is expressly turned off.
    */
-  public function testBadUrlValidationOff() {
+  protected function testBadUrlValidationOff() {
     // Disable validation.
     $edit = array(
       'instance[settings][validate_url]' => FALSE,
@@ -95,7 +95,7 @@ class LinkValidateTest extends LinkBaseTestClass {
   /**
    * Test if a bad URL will display if validation is disabled.
    */
-  public function testXss() {
+  protected function testXss() {
     // Disable validation.
     $edit = array(
       'instance[settings][validate_url]' => FALSE,
@@ -138,43 +138,43 @@ class LinkValidateTest extends LinkBaseTestClass {
  * Validation is guided by the rules in http://tools.ietf.org/html/rfc1738!
  */
 class LinkValidateUnitTest extends BackdropUnitTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp();
     backdrop_load('module', 'link');
   }
 
   // Make sure that a link labelled <front> works.
-  public function testValidateFrontLink() {
+  protected function testValidateFrontLink() {
     $valid = link_validate_url('<front>');
     $this->assertEqual(LINK_FRONT, $valid, 'Make sure that front link is verified and identified');
   }
 
-  public function testValidateEmailLink() {
+  protected function testValidateEmailLink() {
     $valid = link_validate_url('mailto:bob@example.com');
     $this->assertEqual(LINK_EMAIL, $valid, "Make sure a basic mailto is verified and identified");
   }
 
-  public function testValidateEmailLinkBad() {
+  protected function testValidateEmailLinkBad() {
     $valid = link_validate_url(':bob@example.com');
     $this->assertEqual(FALSE, $valid, 'Make sure just a bad address is correctly failed');
   }
 
-  public function testValidateNewsgroupLink() {
+  protected function testValidateNewsgroupLink() {
     $valid = link_validate_url('news:comp.info-systems.www.misc');
     $this->assertEqual(LINK_NEWS, $valid, 'Make sure link to newsgroup validates as news.');
   }
 
-  public function testValidateNewsArticleLink() {
+  protected function testValidateNewsArticleLink() {
     $valid = link_validate_url('news:hj0db8$vrm$1@news.eternal-september.org');
     $this->assertEqual(LINK_NEWS, $valid, 'Make sure link to specific article validates as news.');
   }
 
-  public function testValidateBadNewsgroupLink() {
+  protected function testValidateBadNewsgroupLink() {
     $valid = link_validate_url('news:comp.bad_name.misc');
     $this->assertEqual(FALSE, $valid, 'newsgroup names can\'t contain underscores, so it should come back as invalid.');
   }
 
-  public function testValidateInternalLinks() {
+  protected function testValidateInternalLinks() {
     $links = array(
       'node/5',
       'feeds/rss.xml',
@@ -188,7 +188,7 @@ class LinkValidateUnitTest extends BackdropUnitTestCase {
     }
   }
 
-  public function testValidateExternalLinks() {
+  protected function testValidateExternalLinks() {
     $links = array(
       'http://localhost:8080/',
       'www.example.com',
@@ -232,7 +232,7 @@ class LinkValidateUnitTest extends BackdropUnitTestCase {
     }
   }
 
-  public function testInvalidExternalLinks() {
+  protected function testInvalidExternalLinks() {
     $links = array(
       'http://www.ex ample.com/',
       'http://@www.example.com/',

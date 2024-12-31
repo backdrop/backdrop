@@ -68,7 +68,7 @@ class ViewsCacheTest extends ViewsSqlTest {
    *
    * @see views_plugin_cache_time
    */
-  public function testTimeCaching() {
+  protected function testTimeCaching() {
     // Create a basic result which just 2 results.
     $view = $this->getBasicView();
     $view->set_display();
@@ -109,7 +109,7 @@ class ViewsCacheTest extends ViewsSqlTest {
    *
    * @see views_plugin_cache_time
    */
-  public function testNoneCaching() {
+  protected function testNoneCaching() {
     // Create a basic result which just 2 results.
     $view = $this->getBasicView();
     $view->set_display();
@@ -145,7 +145,7 @@ class ViewsCacheTest extends ViewsSqlTest {
   /**
    * Tests css/js storage and restoring mechanism.
    */
-  public function testHeaderStorage() {
+  protected function testHeaderStorage() {
     // Create a view with output caching enabled.
     // Some hook_views_pre_render in views_test.module adds the test css/js file.
     // so they should be added to the css/js storage.
@@ -204,7 +204,7 @@ class ViewsCacheTest extends ViewsSqlTest {
   /**
    * Check that HTTP headers are cached for views.
    */
-  public function testHttpHeadersCaching() {
+  protected function testHttpHeadersCaching() {
     // Create a few nodes to appear in RSS feed.
     for ($i = 0; $i < 5; $i++) {
       $this->backdropCreateNode();
@@ -239,7 +239,7 @@ class ViewsCacheTest extends ViewsSqlTest {
    *
    * Make sure the output is different.
    */
-  public function testExposedFilterSameResultsCaching() {
+  protected function testExposedFilterSameResultsCaching() {
     // Create the view with time-based cache with hour lifetimes and add exposed
     // filter to it with "Starts with" operator.
     $view = $this->getBasicView();

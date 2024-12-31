@@ -25,7 +25,7 @@ class ViewsHandlerFieldTest extends ViewsSqlTest {
     );
   }
 
-  public function testEmpty() {
+  protected function testEmpty() {
     $this->_testHideIfEmpty();
     $this->_testEmptyText();
   }
@@ -290,7 +290,7 @@ class ViewsHandlerFieldTest extends ViewsSqlTest {
   /**
    * Tests views_handler_field::is_value_empty().
    */
-  public function testIsValueEmpty() {
+  protected function testIsValueEmpty() {
     $view = $this->getBasicView();
     $view->init_display();
     $view->init_handlers();

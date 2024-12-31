@@ -12,7 +12,7 @@ class ImageToolkitTestCase extends BackdropWebTestCase {
   protected $file;
   protected $image;
 
-  public function setUp() {
+  protected function setUp() {
     $modules = func_get_args();
     if (isset($modules[0]) && is_array($modules[0])) {
       $modules = $modules[0];
@@ -79,7 +79,7 @@ class ImageToolkitUnitTest extends ImageToolkitTestCase {
    * Check that hook_image_toolkits() is called and only available toolkits are
    * returned.
    */
-  public function testGetAvailableToolkits() {
+  protected function testGetAvailableToolkits() {
     $toolkits = image_get_available_toolkits();
     $this->assertTrue(isset($toolkits['test']), 'The working toolkit was returned.');
     $this->assertFalse(isset($toolkits['broken']), 'The toolkit marked unavailable was not returned');
@@ -89,7 +89,7 @@ class ImageToolkitUnitTest extends ImageToolkitTestCase {
   /**
    * Test the image_load() function.
    */
-  public function testLoad() {
+  protected function testLoad() {
     $image = image_load($this->file, $this->toolkit);
     $this->assertTrue(is_object($image), 'Returned an object.');
     $this->assertEqual($this->toolkit, $image->toolkit, 'Image had toolkit set.');
@@ -99,7 +99,7 @@ class ImageToolkitUnitTest extends ImageToolkitTestCase {
   /**
    * Test the image_save() function.
    */
-  public function testSave() {
+  protected function testSave() {
     $this->assertFalse(image_save($this->image), 'Function returned the expected value.');
     $this->assertToolkitOperationsCalled(array('save'));
   }
@@ -107,7 +107,7 @@ class ImageToolkitUnitTest extends ImageToolkitTestCase {
   /**
    * Test the image_resize() function.
    */
-  public function testResize() {
+  protected function testResize() {
     $this->assertTrue(image_resize($this->image, 1, 2), 'Function returned the expected value.');
     $this->assertToolkitOperationsCalled(array('resize'));
 
@@ -120,7 +120,7 @@ class ImageToolkitUnitTest extends ImageToolkitTestCase {
   /**
    * Test the image_scale() function.
    */
-  public function testScale() {
+  protected function testScale() {
   // @todo: need to test upscaling.
     $this->assertTrue(image_scale($this->image, 10, 10), 'Function returned the expected value.');
     $this->assertToolkitOperationsCalled(array('resize'));
@@ -134,7 +134,7 @@ class ImageToolkitUnitTest extends ImageToolkitTestCase {
   /**
    * Test the image_scale_and_crop() function.
    */
-  public function testScaleAndCrop() {
+  protected function testScaleAndCrop() {
     $this->assertTrue(image_scale_and_crop($this->image, 5, 10, 'center-center'), 'Function returned the expected value.');
     $this->assertToolkitOperationsCalled(array('resize', 'crop'));
 
@@ -150,7 +150,7 @@ class ImageToolkitUnitTest extends ImageToolkitTestCase {
   /**
    * Test the image_rotate() function.
    */
-  public function testRotate() {
+  protected function testRotate() {
     $this->assertTrue(image_rotate($this->image, 90, 1), 'Function returned the expected value.');
     $this->assertToolkitOperationsCalled(array('rotate'));
 
@@ -163,7 +163,7 @@ class ImageToolkitUnitTest extends ImageToolkitTestCase {
   /**
    * Test the image_crop() function.
    */
-  public function testCrop() {
+  protected function testCrop() {
     $this->assertTrue(image_crop($this->image, 1, 2, 3, 4), 'Function returned the expected value.');
     $this->assertToolkitOperationsCalled(array('crop'));
 
@@ -178,7 +178,7 @@ class ImageToolkitUnitTest extends ImageToolkitTestCase {
   /**
    * Test the image_desaturate() function.
    */
-  public function testDesaturate() {
+  protected function testDesaturate() {
     $this->assertTrue(image_desaturate($this->image), 'Function returned the expected value.');
     $this->assertToolkitOperationsCalled(array('desaturate'));
 
@@ -252,7 +252,7 @@ class ImageToolkitGdTestCase extends BackdropWebTestCase {
    * properly, build a list of expected color values for each of the corners and
    * the expected height and widths for the final images.
    */
-  public function testManipulations() {
+  protected function testManipulations() {
     // Typically the corner colors will be unchanged. These colors are in the
     // order of top-left, top-right, bottom-right, bottom-left.
     $default_corners = array($this->red, $this->green, $this->blue, $this->transparent);
@@ -473,7 +473,7 @@ class ImageFileMoveTest extends ImageToolkitTestCase {
   /**
    * Tests moving a randomly generated image.
    */
-  public function testNormal() {
+  protected function testNormal() {
     // Pick a file for testing.
     $file = entity_create('file', (array) current($this->backdropGetTestFiles('image')));
 

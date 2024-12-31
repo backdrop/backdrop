@@ -38,7 +38,7 @@ class ViewsUpgradeTestCase extends ViewsSqlTest {
   /**
    * Tests the moved to parameter in general.
    */
-  public function testMovedTo() {
+  protected function testMovedTo() {
     // Test moving on field level.
     $view = $this->viewsMovedToField();
     $view->update();

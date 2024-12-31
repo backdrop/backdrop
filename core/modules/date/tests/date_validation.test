@@ -11,7 +11,7 @@ class DateValidationTestCase extends DateFieldBasic {
   /**
    * Test validation on each type of date widget.
    */
-   public function testValidation() {
+   protected function testValidation() {
     // Attempts to create text date field stored as a date with default settings
     // (from input which is not valid).
     foreach (array('date', 'datestamp', 'datetime') as $field_type) {

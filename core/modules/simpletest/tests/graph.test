@@ -8,7 +8,7 @@
  * Unit tests for the graph handling features.
  */
 class GraphUnitTest extends BackdropUnitTestCase {
-  public function setUp() {
+  protected function setUp() {
     require_once BACKDROP_ROOT . '/core/includes/graph.inc';
     parent::setUp();
   }
@@ -16,7 +16,7 @@ class GraphUnitTest extends BackdropUnitTestCase {
   /**
    * Test depth-first-search features.
    */
-  public function testDepthFirstSearch() {
+  protected function testDepthFirstSearch() {
     // The sample graph used is:
     // 1 --> 2 --> 3     5 ---> 6
     //       |     ^     ^

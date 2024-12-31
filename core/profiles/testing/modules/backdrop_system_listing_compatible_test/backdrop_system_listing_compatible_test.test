@@ -14,7 +14,7 @@ class BackdropSystemListingCompatibleTestCase extends BackdropWebTestCase {
    */
   protected $profile = 'minimal';
 
-  public function setUp() {
+  protected function setUp() {
     // Attempt to install a module in Testing profile, while this test runs with
     // a different profile.
     parent::setUp(array('backdrop_system_listing_compatible_test'));
@@ -23,7 +23,7 @@ class BackdropSystemListingCompatibleTestCase extends BackdropWebTestCase {
   /**
    * Non-empty test* method required to executed the test case class.
    */
-  public function testBackdropSystemListing() {
+  protected function testBackdropSystemListing() {
     $this->pass(__CLASS__ . ' test executed.');
   }
 }

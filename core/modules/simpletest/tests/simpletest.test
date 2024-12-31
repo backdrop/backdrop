@@ -38,7 +38,7 @@ class SimpleTestFunctionalTest extends BackdropWebTestCase {
    */
   protected $test_ids = array();
 
-  public function setUp() {
+  protected function setUp() {
     if (!$this->inCURL()) {
       parent::setUp('simpletest');
 
@@ -54,7 +54,7 @@ class SimpleTestFunctionalTest extends BackdropWebTestCase {
   /**
    * Test the internal browsers functionality.
    */
-  public function testInternalBrowser() {
+  protected function testInternalBrowser() {
     if (!$this->inCURL()) {
       $this->backdropGet('node');
       $this->assertTrue($this->backdropGetHeader('Date'), 'An HTTP header was received.');
@@ -98,7 +98,7 @@ class SimpleTestFunctionalTest extends BackdropWebTestCase {
   /**
    * Test validation of the User-Agent header we use to perform test requests.
    */
-  public function testUserAgentValidation() {
+  protected function testUserAgentValidation() {
     if (!$this->inCURL()) {
       global $base_url;
       $simpletest_path = $base_url . '/' . backdrop_get_path('module', 'simpletest');
@@ -136,7 +136,7 @@ class SimpleTestFunctionalTest extends BackdropWebTestCase {
    * Make sure that tests selected through the web interface are run and
    * that the results are displayed correctly.
    */
-  public function testWebTestRunner() {
+  protected function testWebTestRunner() {
     $this->pass = t('SimpleTest pass.');
     $this->fail = t('SimpleTest fail.');
     $this->valid_permission = 'access content';
@@ -356,7 +356,7 @@ class SimpleTestBrowserTestCase extends BackdropWebTestCase {
    */
   protected static $cookieSet = FALSE;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp();
     config_set('system.core', 'user_register', USER_REGISTER_VISITORS);
   }
@@ -364,7 +364,7 @@ class SimpleTestBrowserTestCase extends BackdropWebTestCase {
   /**
    * Test BackdropWebTestCase::getAbsoluteUrl().
    */
-  public function testGetAbsoluteUrl() {
+  protected function testGetAbsoluteUrl() {
     // Testbed runs with Clean URLs disabled, so disable it here.
     config_set('system.core', 'clean_url', 0);
     backdrop_static_reset('url');
@@ -389,7 +389,7 @@ class SimpleTestBrowserTestCase extends BackdropWebTestCase {
   /**
    * Tests XPath escaping.
    */
-  public function testXPathEscaping() {
+  protected function testXPathEscaping() {
     $test_page = <<< EOF
 <html>
 <body>
@@ -411,7 +411,7 @@ EOF;
   /**
    * Tests that cookies set during a request are available for testing.
    */
-  public function testCookies() {
+  protected function testCookies() {
     // Check that the $this->cookies property is populated when a user logs in.
     $user = $this->backdropCreateUser();
     $edit = array('name' => $user->name, 'pass' => $user->pass_raw);
@@ -440,7 +440,7 @@ EOF;
    *
    * @see SimpleTestBrowserTestCase::testCookies().
    */
-  public function testCookieDoesNotBleed() {
+  protected function testCookieDoesNotBleed() {
     // In order for this test to be effective it should always run after the
     // testCookies() test.
     $this->assertTrue(self::$cookieSet, 'Tests have been executed in the expected order.');
@@ -452,7 +452,7 @@ class SimpleTestMailCaptureTestCase extends BackdropWebTestCase {
   /**
    * Test to see if the wrapper function is executed correctly.
    */
-  public function testMailSend() {
+  protected function testMailSend() {
     // Create an email.
     $subject = $this->randomString(64);
     $body = $this->randomString(128);
@@ -519,11 +519,11 @@ class SimpleTestMailCaptureTestCase extends BackdropWebTestCase {
 class SimpleTestFolderTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  public function setUp() {
+  protected function setUp() {
     return parent::setUp('image');
   }
 
-  public function testFolderSetup() {
+  protected function testFolderSetup() {
     $directory = file_default_scheme() . '://styles';
     $this->assertTrue(file_prepare_directory($directory, FALSE), 'Directory created.');
   }
@@ -536,7 +536,7 @@ class SimpleTestMissingDependentModuleUnitTest extends BackdropUnitTestCase {
   /**
    * Ensure that this test will not be loaded despite its dependency.
    */
-  public function testFail() {
+  protected function testFail() {
     $this->fail(t('Running test with missing required module.'));
   }
 }
@@ -551,7 +551,7 @@ class SimpleTestMissingDependentModuleUnitTest extends BackdropUnitTestCase {
  * @see BackdropTestCase
  */
 class SimpleTestBrokenSetUp extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     // If the test is being run from the main site, set up normally.
     if (!backdrop_valid_test_ua()) {
       parent::setUp('simpletest');
@@ -580,7 +580,7 @@ class SimpleTestBrokenSetUp extends BackdropWebTestCase {
   /**
    * Runs this test case from within the simpletest child site.
    */
-  public function testBreakSetUp() {
+  protected function testBreakSetUp() {
     // If the test is being run from the main site, run it again from the web
     // interface within the simpletest child site.
     if (!backdrop_valid_test_ua()) {
@@ -604,7 +604,7 @@ class SimpleTestBrokenSetUp extends BackdropWebTestCase {
  * Tests missing requirements to run test.
  */
 class SimpleTestMissingCheckedRequirements extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('simpletest');
     $admin_user = $this->backdropCreateUser(array('administer unit tests'));
     $this->backdropLogin($admin_user);
@@ -664,7 +664,7 @@ class SimpleTestInstallationProfileModuleTestsTestCase extends BackdropWebTestCa
    */
   protected $admin_user;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp(array('simpletest'));
 
     $this->admin_user = $this->backdropCreateUser(array('administer unit tests'));
@@ -674,7 +674,7 @@ class SimpleTestInstallationProfileModuleTestsTestCase extends BackdropWebTestCa
   /**
    * Tests existence of test case located in an installation profile module.
    */
-  public function testInstallationProfileTests() {
+  protected function testInstallationProfileTests() {
     $this->backdropGet('admin/config/development/testing');
     $this->assertText('Installation profile module tests helper');
     $edit = array(
@@ -707,7 +707,7 @@ class SimpleTestOtherInstallationProfileModuleTestsTestCase extends BackdropWebT
    */
   protected $admin_user;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp(array('simpletest'));
 
     $this->admin_user = $this->backdropCreateUser(array('administer unit tests'));
@@ -717,7 +717,7 @@ class SimpleTestOtherInstallationProfileModuleTestsTestCase extends BackdropWebT
   /**
    * Tests that tests located in another installation profile do not appear.
    */
-  public function testOtherInstallationProfile() {
+  protected function testOtherInstallationProfile() {
     $this->backdropGet('admin/config/development/testing');
     $this->assertNoText('Installation profile module tests helper');
   }

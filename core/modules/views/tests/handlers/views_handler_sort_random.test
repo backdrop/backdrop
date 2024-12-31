@@ -49,7 +49,7 @@ class ViewsHandlerSortRandomTest extends ViewsSqlTest {
    *
    * @see DatabaseSelectTestCase::testRandomOrder()
    */
-  public function testRandomOrdering() {
+  protected function testRandomOrdering() {
     // Execute a basic view first.
     $view = $this->getBasicView();
     $this->executeView($view);

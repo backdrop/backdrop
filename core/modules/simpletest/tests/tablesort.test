@@ -16,7 +16,7 @@ class TableSortTest extends BackdropUnitTestCase {
    */
   protected $GET = array();
 
-  public function setUp() {
+  protected function setUp() {
     // Save the original $_GET to be restored later.
     $this->GET = $_GET;
 
@@ -33,7 +33,7 @@ class TableSortTest extends BackdropUnitTestCase {
   /**
    * Test tablesort_init().
    */
-  public function testTableSortInit() {
+  protected function testTableSortInit() {
 
     // Test simple table headers.
 

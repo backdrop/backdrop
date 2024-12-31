@@ -26,7 +26,7 @@ class ListFieldTestCase extends FieldTestCase {
    */
   protected $instance;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('field_test');
 
     $this->field_name = 'test_list';
@@ -54,7 +54,7 @@ class ListFieldTestCase extends FieldTestCase {
   /**
    * Test that allowed values can be updated.
    */
-  public function testUpdateAllowedValues() {
+  protected function testUpdateAllowedValues() {
     $langcode = LANGUAGE_NONE;
 
     // All three options appear.
@@ -152,7 +152,7 @@ class ListDynamicValuesTestCase extends FieldTestCase {
    */
   protected $entity;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp(array('list', 'field_test', 'list_test'));
 
     $this->field_name = 'test_list';
@@ -193,7 +193,7 @@ class ListDynamicValuesValidationTestCase extends ListDynamicValuesTestCase {
   /**
    * Test that allowed values function gets the entity.
    */
-  public function testDynamicAllowedValues() {
+  protected function testDynamicAllowedValues() {
     // Verify that the test passes against every value we had.
     state_set('list_test_dynamic_values', backdrop_map_assoc($this->test));
     foreach ($this->test as $key => $value) {
@@ -247,7 +247,7 @@ class ListFieldUITestCase extends FieldTestCase {
    */
   protected $admin_path;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('field_test', 'field_ui');
 
     // Create test user.
@@ -265,7 +265,7 @@ class ListFieldUITestCase extends FieldTestCase {
   /**
    * List (integer) : test 'allowed values' input.
    */
-  public function testListAllowedValuesInteger() {
+  protected function testListAllowedValuesInteger() {
     $this->field_name = 'field_list_integer';
     $this->createListField('list_integer');
 
@@ -316,7 +316,7 @@ class ListFieldUITestCase extends FieldTestCase {
   /**
    * List (float) : test 'allowed values' input.
    */
-  public function testListAllowedValuesFloat() {
+  protected function testListAllowedValuesFloat() {
     $this->field_name = 'field_list_float';
     $this->createListField('list_float');
 
@@ -366,7 +366,7 @@ class ListFieldUITestCase extends FieldTestCase {
   /**
    * List (text) : test 'allowed values' input.
    */
-  public function testListAllowedValuesText() {
+  protected function testListAllowedValuesText() {
     $this->field_name = 'field_list_text';
     $this->createListField('list_text');
 
@@ -425,7 +425,7 @@ class ListFieldUITestCase extends FieldTestCase {
   /**
    * List (boolean) : test 'On/Off' values input.
    */
-  public function testListAllowedValuesBoolean() {
+  protected function testListAllowedValuesBoolean() {
     $this->field_name = 'field_list_boolean';
     $this->createListField('list_boolean');
 
@@ -524,7 +524,7 @@ class ListFieldDisplayTestCase extends FieldTestCase {
    */
   protected $field_name;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('field_test', 'field_ui');
 
     // Create test user.
@@ -565,7 +565,7 @@ class ListFieldDisplayTestCase extends FieldTestCase {
   /**
    * List (boolean) : test 'On/Off' values input.
    */
-  public function testListDisplayFormatterBoolean() {
+  protected function testListDisplayFormatterBoolean() {
     $this->field_name = 'field_list_boolean';
     $this->createListField('list_boolean');
 

@@ -3,7 +3,7 @@
  * @file
  * Timezone tests.
  */
- 
+
 require_once BACKDROP_ROOT . '/core/modules/date/tests/date_field.test';
 
 class DateTimezoneTestCase extends DateFieldBasic {
@@ -11,7 +11,7 @@ class DateTimezoneTestCase extends DateFieldBasic {
   /**
    * Creates one of each type of date field and check timezone handling in each.
    */
-  public function testTimezone() {
+  protected function testTimezone() {
     // Create date fields with combinations of various timezone handling and
     // granularity.
     foreach (array('date', 'datestamp', 'datetime') as $field_type) {
@@ -45,7 +45,7 @@ class DateTimezoneTestCase extends DateFieldBasic {
   /**
    * Validates timezone handling with a multi-value date field.
    */
-  public function testMultiUserTimezone() {
+  protected function testMultiUserTimezone() {
     // Create date fields with combinations of various types and granularity
     // using the "Date's Timezone" strategy.
     $field_type = 'datetime';

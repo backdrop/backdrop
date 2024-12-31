@@ -40,7 +40,7 @@ class ViewsPluginStyleJumpMenuTest extends ViewsSqlTest {
   /**
    * Tests jump menus with more than one same path but maybe different titles.
    */
-  public function testDuplicatePaths() {
+  protected function testDuplicatePaths() {
     $view = $this->getJumpMenuView();
     $view->set_display();
     $view->init_handlers();

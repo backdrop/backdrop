@@ -15,7 +15,7 @@ class ViewsHandlerArgumentStringTest extends ViewsSqlTest {
   /**
    * Tests the glossary feature.
    */
-  public function testGlossary() {
+  protected function testGlossary() {
     // Setup some nodes, one with a, two with b and three with c.
     $counter = 1;
     foreach (array('a', 'b', 'c') as $char) {

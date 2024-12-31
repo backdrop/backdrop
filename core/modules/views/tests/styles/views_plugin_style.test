@@ -13,7 +13,7 @@ class ViewsPluginStyleTestCase extends ViewsPluginStyleTestBase {
   /**
    * Tests the grouping legacy features of styles.
    */
-  public function testGroupingLegacy() {
+  protected function testGroupingLegacy() {
     $view = $this->getBasicView();
     // Setup grouping by the job.
     $view->init_display();
@@ -101,7 +101,7 @@ class ViewsPluginStyleTestCase extends ViewsPluginStyleTestBase {
     $this->assertEqual($sets_new_value, $expected, t('The style plugins should proper group the results with grouping by the value.'));
   }
 
-  public function testGrouping() {
+  protected function testGrouping() {
     $this->_testGrouping(FALSE);
     $this->_testGrouping(TRUE);
   }
@@ -228,7 +228,7 @@ class ViewsPluginStyleTestCase extends ViewsPluginStyleTestBase {
   /**
    * Tests custom css classes.
    */
-  public function testCustomRowClasses() {
+  protected function testCustomRowClasses() {
     $view = $this->getBasicView();
 
     // Setup some random css class.

@@ -38,7 +38,7 @@ class BootstrapIPAddressTestCase extends BackdropWebTestCase {
    */
   protected $untrusted_ip;
 
-  public function setUp() {
+  protected function setUp() {
     $this->oldserver = $_SERVER;
 
     $this->remote_ip = '127.0.0.1';
@@ -66,7 +66,7 @@ class BootstrapIPAddressTestCase extends BackdropWebTestCase {
   /**
    * test IP Address and hostname
    */
-  public function testIPAddressHost() {
+  protected function testIPAddressHost() {
     // Test the normal IP address.
     $this->assertTrue(
       ip_address() == $this->remote_ip,
@@ -142,14 +142,14 @@ class BootstrapIPAddressTestCase extends BackdropWebTestCase {
 class BootstrapPageCacheTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('system_test');
   }
 
   /**
    * Test support for requests containing If-Modified-Since and If-None-Match headers.
    */
-  public function testConditionalRequests() {
+  protected function testConditionalRequests() {
     config_set('system.core', 'cache', 1);
     config_set('system.core', 'page_cache_background_fetch', 0);
     config_set('system.core', 'page_cache_maximum_age', 300);
@@ -192,7 +192,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
   /**
    * Test cache headers.
    */
-  public function testPageCache() {
+  protected function testPageCache() {
     config_set('system.core', 'cache', 1);
     config_set('system.core', 'page_cache_background_fetch', 0);
     config_set('system.core', 'page_cache_maximum_age', 300);
@@ -358,7 +358,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
    * .htaccess or similar, or if compression is done outside PHP, e.g. by the
    * mod_deflate Apache module.
    */
-  public function testPageCompression() {
+  protected function testPageCompression() {
     config_set('system.core', 'cache', 1);
     config_set('system.core', 'page_cache_background_fetch', 0);
     config_set('system.core', 'page_cache_maximum_age', 300);
@@ -402,14 +402,14 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
 class BootstrapVariableTestCase extends BackdropWebTestCase {
   protected $profile = 'minimal';
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('system_test');
   }
 
   /**
    * testVariable
    */
-  public function testVariable() {
+  protected function testVariable() {
     // Setting and retrieving values.
     $variable = $this->randomName();
     variable_set('simpletest_bootstrap_variable_test', $variable);
@@ -429,7 +429,7 @@ class BootstrapVariableTestCase extends BackdropWebTestCase {
   /**
    * Makes sure that the default variable parameter is passed through okay.
    */
-  public function testVariableDefaults() {
+  protected function testVariableDefaults() {
     // Tests passing nothing through to the default.
     $this->assertIdentical(NULL, state_get('simpletest_bootstrap_variable_test'), 'Variables are correctly defaulting to NULL.');
 
@@ -445,14 +445,14 @@ class BootstrapVariableTestCase extends BackdropWebTestCase {
 class HookBootExitTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('system_test', 'dblog');
   }
 
   /**
    * Test calling of hook_boot() and hook_exit().
    */
-  public function testHookBootExit() {
+  protected function testHookBootExit() {
     // Test with cache disabled. Boot and exit should always fire.
     config_set('system.core', 'cache', 0);
 
@@ -499,7 +499,7 @@ class BootstrapGetFilenameTestCase extends BackdropUnitTestCase {
   /**
    * Test that backdrop_get_filename() works correctly when the file is not found in the database.
    */
-  public function testBackdropGetFilename() {
+  protected function testBackdropGetFilename() {
     // Reset the static cache so we can test the "db is not active" code of
     // backdrop_get_filename().
     backdrop_static_reset('backdrop_get_filename');
@@ -537,7 +537,7 @@ class BootstrapTimerTestCase extends BackdropUnitTestCase {
    * started and stopped multiple times.
    * @return
    */
-  public function testTimer() {
+  protected function testTimer() {
     timer_start('test');
     sleep(1);
     $this->assertTrue(timer_read('test') >= 1000, 'Timer measured 1 second of sleeping while running.');
@@ -562,7 +562,7 @@ class BootstrapResettableStaticTestCase extends BackdropUnitTestCase {
    * Test that a variable reference returned by backdrop_static() gets reset when
    * backdrop_static_reset() is called.
    */
-  public function testBackdropStatic() {
+  protected function testBackdropStatic() {
     $name = __CLASS__ . '_' . __METHOD__;
     $var = &backdrop_static($name, 'foo');
     $this->assertEqual($var, 'foo', 'Variable returned by backdrop_static() was set to its default.');
@@ -591,7 +591,7 @@ class BootstrapMiscTestCase extends BackdropUnitTestCase {
   /**
    * Test miscellaneous functions in bootstrap.inc.
    */
-  public function testMisc() {
+  protected function testMisc() {
     // Test backdrop_array_merge_deep().
     $link_options_1 = array('fragment' => 'x', 'attributes' => array('title' => 'X', 'class' => array('a', 'b')), 'language' => 'en');
     $link_options_2 = array('fragment' => 'y', 'attributes' => array('title' => 'Y', 'class' => array('c', 'd')), 'html' => TRUE);
@@ -607,7 +607,7 @@ class BootstrapOverrideServerVariablesTestCase extends BackdropUnitTestCase {
   /**
    * Test providing a direct URL to to backdrop_override_server_variables().
    */
-  public function testBackdropOverrideServerVariablesProvidedURL() {
+  protected function testBackdropOverrideServerVariablesProvidedURL() {
     $tests = array(
       'http://example.com' => array(
         'HTTP_HOST' => 'example.com',
@@ -640,7 +640,7 @@ class BootstrapOverrideServerVariablesTestCase extends BackdropUnitTestCase {
   /**
    * Test that settings.php variables can be overridden by the server.
    */
-  public function testBackdropSettingsOverride() {
+  protected function testBackdropSettingsOverride() {
     // This test only runs when the "BACKDROP_SETTINGS" environment variable is
     // set. This usually is done through a Apache VirtualHost setting.
     // See backdrop_settings_initialize().
@@ -667,7 +667,7 @@ class BootstrapOverrideServerVariablesTestCase extends BackdropUnitTestCase {
   /**
    * Tests that the backdrop_check_memory_limit() function works as expected.
    */
-  public function testCheckMemoryLimit() {
+  protected function testCheckMemoryLimit() {
     // Test that a very reasonable amount of memory is available.
     $this->assertTrue(backdrop_check_memory_limit('30MB'), '30MB of memory tested available.');
 
@@ -690,7 +690,7 @@ class BootstrapOverrideServerVariablesTestCase extends BackdropUnitTestCase {
 class BootstrapDestinationTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('system_test');
   }
 
@@ -701,7 +701,7 @@ class BootstrapDestinationTestCase extends BackdropWebTestCase {
    * @see system_test_get_destination()
    * @see system_test_request_destination()
    */
-  public function testDestination() {
+  protected function testDestination() {
     $test_cases = array(
       array(
         'input' => 'node',
@@ -837,7 +837,7 @@ class WatchdogTestCase extends BackdropWebTestCase {
 }
 
 class BootstrapWatchdogTestCase extends WatchdogTestCase {
-  public function testWatchdogLogging() {
+  protected function testWatchdogLogging() {
     // Check the basic watchdog calls work.
     watchdog('testing', 'test @severity message', array('@severity' => 'notice'), WATCHDOG_NOTICE, 'http://example.org');
     $this->assertLogMessage('testing', 'test @severity message', array('@severity' => 'notice'), WATCHDOG_NOTICE, 'http://example.org');

@@ -86,7 +86,7 @@ class CommentViewsHandlerArgumentUserUidTest extends ViewsSqlTest {
     $this->postComment($this->node_user_commented);
   }
 
-  public function testCommentUserUidTest() {
+  protected function testCommentUserUidTest() {
     $view = $this->view_comment_user_uid();
 
 

@@ -74,7 +74,7 @@ class ViewsAccessTest extends ViewsSqlTest {
   /**
    * Tests none access plugin.
    */
-  public function testAccessNone() {
+  protected function testAccessNone() {
     $view = $this->view_access_none();
 
     $view->set_display('default');
@@ -87,7 +87,7 @@ class ViewsAccessTest extends ViewsSqlTest {
   /**
    * Tests perm access plugin.
    */
-  public function testAccessPerm() {
+  protected function testAccessPerm() {
     $view = $this->view_access_perm();
 
     $view->set_display('default');
@@ -101,7 +101,7 @@ class ViewsAccessTest extends ViewsSqlTest {
   /**
    * Tests role access plugin.
    */
-  public function testAccessRole() {
+  protected function testAccessRole() {
     $view = $this->view_access_role();
 
     $view->set_display('default');
@@ -119,7 +119,7 @@ class ViewsAccessTest extends ViewsSqlTest {
   /**
    * Tests static access check.
    */
-  public function testStaticAccessPlugin() {
+  protected function testStaticAccessPlugin() {
     $view = $this->view_access_static();
 
     $view->set_display('default');
@@ -146,7 +146,7 @@ class ViewsAccessTest extends ViewsSqlTest {
   /**
    * Tests dynamic access plugin.
    */
-  public function testDynamicAccessPlugin() {
+  protected function testDynamicAccessPlugin() {
     $view = $this->view_access_dynamic();
     $argument1 = $this->randomName();
     $argument2 = $this->randomName();

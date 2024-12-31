@@ -41,7 +41,7 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
   /**
    * Test the general offset functionality.
    */
-  public function testOffset() {
+  protected function testOffset() {
     $view = $this->views_test_offset();
     // Test offset for simple operator.
     $view->set_display('default');
@@ -105,7 +105,7 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
   /**
    * Tests the filter operator between/not between.
    */
-  public function testBetween() {
+  protected function testBetween() {
     // Test between with min and max.
     $view = $this->views_test_between();
     $view->set_display('default');
@@ -169,7 +169,7 @@ class ViewsHandlerFilterDateTest extends ViewsSqlTest {
   /**
    * Make sure the validation callbacks works.
    */
-  public function testUiValidation() {
+  protected function testUiValidation() {
     $view = $this->views_test_between();
     $view->save();
 

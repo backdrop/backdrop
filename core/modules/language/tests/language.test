@@ -11,14 +11,14 @@
  * Functional tests for the language list configuration forms.
  */
 class LanguageListTest extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('language');
   }
 
   /**
    * Functional tests for adding, configuring, and deleting languages.
    */
-  public function testLanguageList() {
+  protected function testLanguageList() {
     global $base_url;
 
     // User to add and remove language.

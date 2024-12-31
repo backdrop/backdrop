@@ -32,7 +32,7 @@ class ViewsHandlerFilterCombineTest extends ViewsSqlTest {
     return $view;
   }
 
-  public function testFilterCombineContains() {
+  protected function testFilterCombineContains() {
     $view = $this->getBasicView();
 
     // Change the filtering.

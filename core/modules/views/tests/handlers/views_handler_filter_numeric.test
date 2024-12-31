@@ -28,7 +28,7 @@ class ViewsHandlerFilterNumericTest extends ViewsSqlTest {
     return $data;
   }
 
-  public function testFilterNumericSimple() {
+  protected function testFilterNumericSimple() {
     $view = $this->getBasicView();
 
     // Change the filtering
@@ -53,7 +53,7 @@ class ViewsHandlerFilterNumericTest extends ViewsSqlTest {
     $this->assertIdenticalResultset($view, $resultset, $this->column_map);
   }
 
-  public function testFilterNumericExposedGroupedSimple() {
+  protected function testFilterNumericExposedGroupedSimple() {
     $filters = $this->getGroupedExposedFilters();
     $view = $this->getBasicPageView();
 
@@ -72,7 +72,7 @@ class ViewsHandlerFilterNumericTest extends ViewsSqlTest {
     $this->assertIdenticalResultset($view, $resultset, $this->column_map);
   }
 
-  public function testFilterNumericBetween() {
+  protected function testFilterNumericBetween() {
     $view = $this->getBasicView();
 
     // Change the filtering
@@ -144,7 +144,7 @@ class ViewsHandlerFilterNumericTest extends ViewsSqlTest {
     $this->assertIdenticalResultset($view, $resultset, $this->column_map);
   }
 
-  public function testFilterNumericExposedGroupedBetween() {
+  protected function testFilterNumericExposedGroupedBetween() {
     $filters = $this->getGroupedExposedFilters();
     $view = $this->getBasicPageView();
 
@@ -172,7 +172,7 @@ class ViewsHandlerFilterNumericTest extends ViewsSqlTest {
     $this->assertIdenticalResultset($view, $resultset, $this->column_map);
   }
 
-  public function testFilterNumericExposedGroupedNotBetween() {
+  protected function testFilterNumericExposedGroupedNotBetween() {
     $filters = $this->getGroupedExposedFilters();
     $view = $this->getBasicPageView();
 
@@ -201,7 +201,7 @@ class ViewsHandlerFilterNumericTest extends ViewsSqlTest {
   }
 
 
-  public function testFilterNumericEmpty() {
+  protected function testFilterNumericEmpty() {
     $view = $this->getBasicView();
 
     // Change the filtering
@@ -261,7 +261,7 @@ class ViewsHandlerFilterNumericTest extends ViewsSqlTest {
   }
 
 
-  public function testFilterNumericExposedGroupedEmpty() {
+  protected function testFilterNumericExposedGroupedEmpty() {
     $filters = $this->getGroupedExposedFilters();
     $view = $this->getBasicPageView();
 
@@ -277,7 +277,7 @@ class ViewsHandlerFilterNumericTest extends ViewsSqlTest {
     $this->assertIdenticalResultset($view, $resultset, $this->column_map);
   }
 
-  public function testFilterNumericExposedGroupedNotEmpty() {
+  protected function testFilterNumericExposedGroupedNotEmpty() {
     $filters = $this->getGroupedExposedFilters();
     $view = $this->getBasicPageView();
 
@@ -314,7 +314,7 @@ class ViewsHandlerFilterNumericTest extends ViewsSqlTest {
   }
 
 
-  public function testAllowEmpty() {
+  protected function testAllowEmpty() {
     $view = $this->getBasicView();
 
     $view->display['default']->handler->override_option('filters', array(

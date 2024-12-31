@@ -62,7 +62,7 @@ class ViewsAjaxTest extends ViewsSqlTest {
   /**
    * Tests an ajax and non-ajax view.
    */
-  public function testAjaxView() {
+  protected function testAjaxView() {
     $this->backdropCreateNode();
     $this->backdropGet('test_ajax_view');
     $backdrop_settings = $this->backdropGetSettings();

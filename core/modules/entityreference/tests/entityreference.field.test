@@ -21,7 +21,7 @@ class EntityReferenceFieldTestCase extends BackdropWebTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp() {
     parent::setUp(array('field_ui', 'entity', 'entityreference'));
 
     // Create test user.
@@ -69,7 +69,7 @@ class EntityReferenceFieldTestCase extends BackdropWebTestCase {
   /**
    * Tests the "Show links" setting for the field formatter "Rendered entity".
    */
-  public function testShowLinksSetting() {
+  protected function testShowLinksSetting() {
     // Create an entity reference field.
     $this->createEntityReferenceField('test');
 

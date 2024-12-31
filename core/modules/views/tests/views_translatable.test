@@ -39,7 +39,7 @@ class ViewsTranslatableTest extends ViewsSqlTest {
   /**
    * {@inheritdoc}
    */
-  public function setUp(array $modules = array()) {
+  protected function setUp(array $modules = array()) {
     parent::setUp($modules);
 
     config_set('views.settings', 'views_localization_plugin', 'test');
@@ -66,7 +66,7 @@ class ViewsTranslatableTest extends ViewsSqlTest {
   /**
    * Tests the unpack translation functionality.
    */
-  public function testUnpackTranslatable() {
+  protected function testUnpackTranslatable() {
     $view = $this->viewUnpackTranslatable();
     $view->init_localization();
 
@@ -82,7 +82,7 @@ class ViewsTranslatableTest extends ViewsSqlTest {
   /**
    * Make sure that the string is not translated in the UI.
    */
-  public function testUi() {
+  protected function testUi() {
     $view = $this->viewUnpackTranslatable();
     $view->save();
     views_invalidate_cache();
@@ -97,7 +97,7 @@ class ViewsTranslatableTest extends ViewsSqlTest {
   /**
    * Make sure that the translations get into the loaded view.
    */
-  public function testTranslation() {
+  protected function testTranslation() {
     $view = $this->viewUnpackTranslatable();
     $view->set_display('default');
     $this->executeView($view);
@@ -112,7 +112,7 @@ class ViewsTranslatableTest extends ViewsSqlTest {
   /**
    * Make sure that the different things have the right translation keys.
    */
-  public function testTranslationKey() {
+  protected function testTranslationKey() {
     $view = $this->viewUnpackTranslatable();
     $view->editing = TRUE;
     $view->init_display();

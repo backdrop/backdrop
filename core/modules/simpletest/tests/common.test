@@ -8,11 +8,11 @@
  * Tests for URL generation functions.
  */
 class CommonBackdropAlterTestCase extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('common_test');
   }
 
-  public function testBackdropAlter() {
+  protected function testBackdropAlter() {
     // This test depends on Bartik, so make sure that it is always the current
     // active theme.
     global $theme, $base_theme_info;
@@ -70,7 +70,7 @@ class CommonURLWebTestCase extends BackdropWebTestCase {
   /**
    * Confirm that invalid text given as $path is filtered.
    */
-  public function testLXSS() {
+  protected function testLXSS() {
     $text = $this->randomName();
     $path = "<SCRIPT>alert('XSS')</SCRIPT>";
     $link = l($text, $path);
@@ -101,7 +101,7 @@ class CommonURLWebTestCase extends BackdropWebTestCase {
   /*
    * Tests for active class in l() function.
    */
-  public function testLActiveClass() {
+  protected function testLActiveClass() {
     $link = l($this->randomName(), $_GET['q']);
     $this->assertTrue($this->hasClass($link, 'active'), format_string('Class @class is present on link to the current page', array('@class' => 'active')));
   }
@@ -109,7 +109,7 @@ class CommonURLWebTestCase extends BackdropWebTestCase {
   /**
    * Tests for custom class in l() function.
    */
-  public function testLCustomClass() {
+  protected function testLCustomClass() {
     $class = $this->randomName();
     $link = l($this->randomName(), $_GET['q'], array('attributes' => array('class' => array($class))));
     $this->assertTrue($this->hasClass($link, $class), format_string('Custom class @class is present on link when requested', array('@class' => $class)));
@@ -124,7 +124,7 @@ class CommonURLWebTestCase extends BackdropWebTestCase {
    * Test url() with/without query, with/without fragment, absolute on/off and
    * assert all that works when clean URLs are on and off.
    */
-  public function testUrl() {
+  protected function testUrl() {
     global $base_url;
 
     foreach (array(FALSE, TRUE) as $absolute) {
@@ -201,7 +201,7 @@ class CommonURLWebTestCase extends BackdropWebTestCase {
   /**
    * Test external URL handling.
    */
-  public function testExternalUrls() {
+  protected function testExternalUrls() {
     $test_url = 'https://backdropcms.org/';
 
     // Verify external URL can contain a fragment.
@@ -247,7 +247,7 @@ class CommonURLWebTestCase extends BackdropWebTestCase {
   /**
    * Tests the url() function on internal paths which mimic external URLs.
    */
-  public function testInternalPathMimicsExternal() {
+  protected function testInternalPathMimicsExternal() {
     module_enable(array('common_test'));
     // Ensure that calling url(current_path()) on "/http://example.com" (an
     // internal path which mimics an external URL) always links to the internal
@@ -268,7 +268,7 @@ class CommonURLUnitTestCase extends BackdropUnitTestCase {
   /**
    * Test backdrop_get_query_parameters().
    */
-  public function testBackdropGetQueryParameters() {
+  protected function testBackdropGetQueryParameters() {
     $original = array(
       'a' => 1,
       'b' => array(
@@ -315,7 +315,7 @@ class CommonURLUnitTestCase extends BackdropUnitTestCase {
   /**
    * Test backdrop_http_build_query().
    */
-  public function testBackdropHttpBuildQuery() {
+  protected function testBackdropHttpBuildQuery() {
     $this->assertEqual(backdrop_http_build_query(array('a' => ' &#//+%20@۞')), 'a=%20%26%23//%2B%2520%40%DB%9E', 'Value was properly encoded.');
     $this->assertEqual(backdrop_http_build_query(array(' &#//+%20@۞' => 'a')), '%20%26%23//%2B%2520%40%DB%9E=a', 'Key was properly encoded.');
     $this->assertEqual(backdrop_http_build_query(array('a' => '1', 'b' => '2', 'c' => '3')), 'a=1&b=2&c=3', 'Multiple values were properly concatenated.');
@@ -325,7 +325,7 @@ class CommonURLUnitTestCase extends BackdropUnitTestCase {
   /**
    * Test backdrop_get_bare_domain().
    */
-  public function testBackdropGetBareDomain() {
+  protected function testBackdropGetBareDomain() {
     // Input => Expected Output.
     $tests = array(
      'http://www.example.com/path-to-page' => 'example.com',
@@ -355,7 +355,7 @@ class CommonURLUnitTestCase extends BackdropUnitTestCase {
   /**
    * Test backdrop_parse_url().
    */
-  public function testBackdropParseUrl() {
+  protected function testBackdropParseUrl() {
     // Relative URL.
     $url = 'foo/bar?foo=bar&bar=baz&baz#foo';
     $result = array(
@@ -438,7 +438,7 @@ class UrlIsExternalUnitTest extends BackdropUnitTestCase {
   /**
    * Tests if each URL is external or not.
    */
-  public function testUrlIsExternal() {
+  protected function testUrlIsExternal() {
     foreach ($this->examples() as $path => $expected) {
       $this->assertIdentical(url_is_external($path), $expected, $path);
     }
@@ -488,7 +488,7 @@ class CommonXssUnitTestCase extends BackdropUnitTestCase {
   /**
    * Check that invalid multi-byte sequences are rejected.
    */
-  public function testInvalidMultiByte() {
+  protected function testInvalidMultiByte() {
      // Ignore PHP 8.0+ null deprecations.
      $text = check_plain(NULL);
      $this->assertEqual($text, '', 'check_plain() casts null to string');
@@ -513,7 +513,7 @@ class CommonXssUnitTestCase extends BackdropUnitTestCase {
   /**
    * Check that special characters are escaped.
    */
-  public function testEscaping() {
+  protected function testEscaping() {
      $text = check_plain("<script>");
      $this->assertEqual($text, '&lt;script&gt;', 'check_plain() escapes &lt;script&gt;');
      $text = check_plain('<>&"\'');
@@ -523,7 +523,7 @@ class CommonXssUnitTestCase extends BackdropUnitTestCase {
   /**
    * Test t() and format_string() replacement functionality.
    */
-  public function testFormatStringAndT() {
+  protected function testFormatStringAndT() {
     foreach (array('format_string', 't') as $function) {
       $text = $function('Simple text');
       $this->assertEqual($text, 'Simple text', $function . ' leaves simple text alone.');
@@ -539,7 +539,7 @@ class CommonXssUnitTestCase extends BackdropUnitTestCase {
   /**
    * Check that harmful protocols are stripped.
    */
-  public function testBadProtocolStripping() {
+  protected function testBadProtocolStripping() {
     // Ensure that check_url() strips out harmful protocols, and encodes for
     // HTML. Ensure backdrop_strip_dangerous_protocols() can be used to return a
     // plain-text string stripped of harmful protocols.
@@ -558,7 +558,7 @@ class CommonSizeUnitTestCase extends BackdropUnitTestCase {
   protected $exact_test_cases;
   protected $rounded_test_cases;
 
-  public function setUp() {
+  protected function setUp() {
     $kb = BACKDROP_KILOBYTE;
     $this->exact_test_cases = array(
       '1 byte' => 1,
@@ -584,7 +584,7 @@ class CommonSizeUnitTestCase extends BackdropUnitTestCase {
   /**
    * Check that format_size() returns the expected string.
    */
-  public function testCommonFormatSize() {
+  protected function testCommonFormatSize() {
     foreach (array($this->exact_test_cases, $this->rounded_test_cases) as $test_cases) {
       foreach ($test_cases as $expected => $input) {
         $this->assertEqual(
@@ -599,7 +599,7 @@ class CommonSizeUnitTestCase extends BackdropUnitTestCase {
   /**
    * Check that parse_size() returns the proper byte sizes.
    */
-  public function testCommonParseSize() {
+  protected function testCommonParseSize() {
     foreach ($this->exact_test_cases as $string => $size) {
       $this->assertEqual(
         $parsed_size = parse_size($string),
@@ -632,7 +632,7 @@ class CommonSizeUnitTestCase extends BackdropUnitTestCase {
   /**
    * Cross-test parse_size() and format_size().
    */
-  public function testCommonParseSizeFormatSize() {
+  protected function testCommonParseSizeFormatSize() {
     foreach ($this->exact_test_cases as $size) {
       $this->assertEqual(
         $size,
@@ -657,7 +657,7 @@ class CommonAutocompleteTagsTestCase extends BackdropUnitTestCase {
   /**
    * Explode a series of tags.
    */
-  public function testBackdropExplodeTags() {
+  protected function testBackdropExplodeTags() {
     $string = implode(', ', array_keys($this->validTags));
     $tags = backdrop_explode_tags($string);
     $this->assertTags($tags);
@@ -666,7 +666,7 @@ class CommonAutocompleteTagsTestCase extends BackdropUnitTestCase {
   /**
    * Implode a series of tags.
    */
-  public function testBackdropImplodeTags() {
+  protected function testBackdropImplodeTags() {
     $tags = array_values($this->validTags);
     // Let's explode and implode to our heart's content.
     for ($i = 0; $i < 10; $i++) {
@@ -698,7 +698,7 @@ class CommonAutocompleteTagsTestCase extends BackdropUnitTestCase {
 class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('language', 'common_test');
     // Reset backdrop_add_css() before each test.
     backdrop_static_reset('backdrop_add_css');
@@ -707,14 +707,14 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
   /**
    * Check default stylesheets as empty.
    */
-  public function testDefault() {
+  protected function testDefault() {
     $this->assertEqual(array(), backdrop_add_css(), 'Default CSS is empty.');
   }
 
   /**
    * Test that stylesheets in module .info files are loaded.
    */
-  public function testModuleInfo() {
+  protected function testModuleInfo() {
     $this->backdropGet('');
 
     // Verify common_test.css in a STYLE media="all" tag.
@@ -735,7 +735,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
   /**
    * Tests adding a file stylesheet.
    */
-  public function testAddFile() {
+  protected function testAddFile() {
     $path = backdrop_get_path('module', 'simpletest') . '/css/simpletest.css';
     $css = backdrop_add_css($path);
     $this->assertEqual($css[$path]['data'], $path, 'Adding a CSS file caches it properly.');
@@ -744,7 +744,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
   /**
    * Tests adding an external stylesheet.
    */
-  public function testAddExternal() {
+  protected function testAddExternal() {
     $path = 'http://example.com/style.css';
     $css = backdrop_add_css($path, 'external');
     $this->assertEqual($css[$path]['type'], 'external', 'Adding an external CSS file caches it properly.');
@@ -753,7 +753,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
   /**
    * Makes sure that resetting the CSS empties the cache.
    */
-  public function testReset() {
+  protected function testReset() {
     backdrop_static_reset('backdrop_add_css');
     $this->assertEqual(array(), backdrop_add_css(), 'Resetting the CSS empties the cache.');
   }
@@ -761,7 +761,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
   /**
    * Tests rendering the stylesheets.
    */
-  public function testRenderFile() {
+  protected function testRenderFile() {
     $css = backdrop_get_path('module', 'simpletest') . '/css/simpletest.css';
     backdrop_add_css($css);
     $styles = backdrop_get_css();
@@ -775,7 +775,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
   /**
    * Tests rendering an external stylesheet.
    */
-  public function testRenderExternal() {
+  protected function testRenderExternal() {
     $css = 'http://example.com/style.css';
     backdrop_add_css($css, 'external');
     $styles = backdrop_get_css();
@@ -787,7 +787,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
   /**
    * Tests rendering inline stylesheets with preprocessing on.
    */
-  public function testRenderInlinePreprocess() {
+  protected function testRenderInlinePreprocess() {
     $css = 'body { padding: 0px; }';
     $css_preprocessed = '<style media="all">' . backdrop_load_stylesheet_content($css, TRUE) . '</style>';
     backdrop_add_css($css, array('type' => 'inline'));
@@ -798,7 +798,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
   /**
    * Tests removing charset when rendering stylesheets with preprocessing on.
    */
-  public function testRenderRemoveCharsetPreprocess() {
+  protected function testRenderRemoveCharsetPreprocess() {
     $cases = array(
       array(
         'asset' => '@charset "UTF-8";html{font-family:"sans-serif";}',
@@ -823,7 +823,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
   /**
    * Tests rendering inline stylesheets with preprocessing off.
    */
-  public function testRenderInlineNoPreprocess() {
+  protected function testRenderInlineNoPreprocess() {
     $css = 'body { padding: 0px; }';
     backdrop_add_css($css, array('type' => 'inline', 'preprocess' => FALSE));
     $styles = backdrop_get_css();
@@ -835,7 +835,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
    *
    * @see common_test_render_inline_full_page()
    */
-  public function testRenderInlineFullPage() {
+  protected function testRenderInlineFullPage() {
     // Inline CSS is minified unless 'preprocess' => FALSE is passed as a
     // backdrop_add_css() option.
     $expected = 'body{font-size:254px;}';
@@ -848,7 +848,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
   /**
    * Test CSS ordering.
    */
-  public function testRenderOrder() {
+  protected function testRenderOrder() {
     // A module CSS file.
     backdrop_add_css(backdrop_get_path('module', 'simpletest') . '/css/simpletest.css');
     // A few system CSS files, ordered in a strange way.
@@ -878,7 +878,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
   /**
    * Test CSS override.
    */
-  public function testRenderOverride() {
+  protected function testRenderOverride() {
     $system = backdrop_get_path('module', 'system');
     $simpletest = backdrop_get_path('module', 'simpletest');
 
@@ -903,7 +903,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
   /**
    * Test CSS Styles with attributes rendering.
    */
-  public function testRenderStylesAttributes() {
+  protected function testRenderStylesAttributes() {
     // Disable aggregation.
     config_set('system.core', 'preprocess_css', 0);
 
@@ -928,7 +928,7 @@ class CommonCascadingStylesheetsTestCase extends BackdropWebTestCase {
    * Tests that the query string remains intact when adding CSS files that have
    * query string parameters.
    */
-  public function testAddCssFileWithQueryString() {
+  protected function testAddCssFileWithQueryString() {
     $this->backdropGet('common-test/query-string');
     $query_string = state_get('css_js_query_string', '0');
     $this->assertRaw(backdrop_get_path('module', 'node') . '/css/node.admin.css?' . $query_string, 'Query string was appended correctly to css.');
@@ -943,7 +943,7 @@ class CommonHTMLIdentifierTestCase extends BackdropUnitTestCase {
   /**
    * Tests that backdrop_clean_css_identifier() cleans the identifier properly.
    */
-  public function testBackdropCleanCSSIdentifier() {
+  protected function testBackdropCleanCSSIdentifier() {
     // Verify that no valid ASCII characters are stripped from the identifier.
     $identifier = 'abcdefghijklmnopqrstuvwxyz_ABCDEFGHIJKLMNOPQRSTUVWXYZ-0123456789';
     $this->assertIdentical(backdrop_clean_css_identifier($identifier, array()), $identifier, 'Verify valid ASCII characters pass through.');
@@ -959,7 +959,7 @@ class CommonHTMLIdentifierTestCase extends BackdropUnitTestCase {
   /**
    * Tests that backdrop_html_class() cleans the class name properly.
    */
-  public function testBackdropHTMLClass() {
+  protected function testBackdropHTMLClass() {
     // Verify Backdrop coding standards are enforced.
     $this->assertIdentical(backdrop_html_class('CLASS NAME_[Ü]'), 'class-name--ü', 'Enforce Backdrop coding standards.');
   }
@@ -967,7 +967,7 @@ class CommonHTMLIdentifierTestCase extends BackdropUnitTestCase {
   /**
    * Tests that backdrop_html_id() cleans the ID properly.
    */
-  public function testBackdropHTMLId() {
+  protected function testBackdropHTMLId() {
     // Verify that letters, digits, and hyphens are not stripped from the ID.
     $id = 'abcdefghijklmnopqrstuvwxyz-0123456789';
     $this->assertIdentical(backdrop_html_id($id), $id, 'Verify valid characters pass through.');
@@ -1003,7 +1003,7 @@ class CommonCascadingStylesheetsUnitTestCase extends BackdropUnitTestCase {
    * - Support semicolons in import statements.
    *   (https://github.com/backdrop/backdrop-issues/issues/6337)
    */
-  public function testLoadCssBasic() {
+  protected function testLoadCssBasic() {
     // Array of files to test living in 'simpletest/files/css_test_files/'.
     // - Original: name.css
     // - Unoptimized expected content: name.css.unoptimized.css
@@ -1043,11 +1043,11 @@ class CommonCascadingStylesheetsUnitTestCase extends BackdropUnitTestCase {
  * Test backdrop_http_request().
  */
 class CommonBackdropHTTPRequestTestCase extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('system_test', 'locale');
   }
 
-  public function testBackdropHTTPRequest() {
+  protected function testBackdropHTTPRequest() {
     global $is_https;
 
     // Parse URL schema.
@@ -1097,7 +1097,7 @@ class CommonBackdropHTTPRequestTestCase extends BackdropWebTestCase {
     }
   }
 
-  public function testBackdropHTTPRequestBasicAuth() {
+  protected function testBackdropHTTPRequestBasicAuth() {
     $username = $this->randomName();
     $password = $this->randomName();
     $url = url('system-test/auth', array('absolute' => TRUE));
@@ -1110,7 +1110,7 @@ class CommonBackdropHTTPRequestTestCase extends BackdropWebTestCase {
     $this->assertRaw($password, 'Password is passed correctly.');
   }
 
-  public function testBackdropHTTPRequestRedirect() {
+  protected function testBackdropHTTPRequestRedirect() {
     $redirect_301 = backdrop_http_request(url('system-test/redirect/301', array('absolute' => TRUE)), array('max_redirects' => 1));
     $this->assertEqual($redirect_301->redirect_code, 301, 'backdrop_http_request follows the 301 redirect.');
 
@@ -1156,7 +1156,7 @@ class CommonBackdropHTTPRequestTestCase extends BackdropWebTestCase {
   /**
    * Tests Content-language headers generated by Backdrop.
    */
-  public function testBackdropHTTPRequestHeaders() {
+  protected function testBackdropHTTPRequestHeaders() {
     // Check the default header.
     $request = backdrop_http_request(url('<front>', array('absolute' => TRUE)));
     $this->assertEqual($request->headers['content-language'], 'en', t('Content-Language HTTP header is English.'));
@@ -1181,7 +1181,7 @@ class CommonBackdropHTTPRedirectTest extends BackdropUnitTestCase {
   /**
    * Tests HTTP redirect with HTTPS downgrade.
    */
-  public function testHttpsDowngrade() {
+  protected function testHttpsDowngrade() {
     $url = 'https://example.com/foo';
     $location = 'http://example.com/bar';
     $this->assertTrue(_backdrop_should_strip_sensitive_headers_on_http_redirect($url, $location), 'Sensitive headers are stripped on HTTPS downgrade.');
@@ -1190,7 +1190,7 @@ class CommonBackdropHTTPRedirectTest extends BackdropUnitTestCase {
   /**
    * Tests HTTP redirect without downgrade.
    */
-  public function testNoHttpsDowngrade() {
+  protected function testNoHttpsDowngrade() {
     $url = 'https://example.com/foo';
     $location = 'https://example.com/bar';
     $this->assertFalse(_backdrop_should_strip_sensitive_headers_on_http_redirect($url, $location), 'Sensitive headers are not stripped without HTTPS downgrade.');
@@ -1199,7 +1199,7 @@ class CommonBackdropHTTPRedirectTest extends BackdropUnitTestCase {
   /**
    * Tests HTTP redirect with host change.
    */
-  public function testHostChange() {
+  protected function testHostChange() {
     $url = 'https://example.com/foo';
     $location = 'https://www.example.com/bar';
     $this->assertTrue(_backdrop_should_strip_sensitive_headers_on_http_redirect($url, $location), 'Sensitive headers are stripped on change of host.');
@@ -1208,7 +1208,7 @@ class CommonBackdropHTTPRedirectTest extends BackdropUnitTestCase {
   /**
    * Tests HTTP redirect without downgrade and host change.
    */
-  public function testNoHostChange() {
+  protected function testNoHostChange() {
     $url = 'http://example.com/foo';
     $location = 'http://example.com/bar';
     $this->assertFalse(_backdrop_should_strip_sensitive_headers_on_http_redirect($url, $location), 'Sensitive headers are not stripped without change of host.');
@@ -1224,7 +1224,7 @@ class CommonBackdropHTTPResponseStatusLineTest extends BackdropUnitTestCase {
   /**
    * Tests parsing HTTP response status line.
    */
-  public function testStatusLine() {
+  protected function testStatusLine() {
     // Grab the big array of test data from statusLineData().
     $data = $this->statusLineData();
     foreach($data as $test_case) {
@@ -1282,14 +1282,14 @@ class CommonBackdropHTTPResponseStatusLineTest extends BackdropUnitTestCase {
  * Tests backdrop_goto() and hook_backdrop_goto_alter().
  */
 class CommonBackdropGotoTestCase extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('common_test');
   }
 
   /**
    * Test backdrop_goto().
    */
-  public function testBackdropGoto() {
+  protected function testBackdropGoto() {
     $this->backdropGet('common-test/backdrop_goto/redirect');
     $headers = $this->backdropGetHeaders(TRUE);
     list(, $status) = explode(' ', $headers[0][':status'], 3);
@@ -1325,7 +1325,7 @@ class CommonBackdropGotoTestCase extends BackdropWebTestCase {
   /**
    * Test hook_backdrop_goto_alter().
    */
-  public function testBackdropGotoAlter() {
+  protected function testBackdropGotoAlter() {
     $this->backdropGet('common-test/backdrop_goto/redirect_fail');
 
     $this->assertNoText(t("Backdrop goto failed to stop program"), 'Backdrop goto stopped program.');
@@ -1335,7 +1335,7 @@ class CommonBackdropGotoTestCase extends BackdropWebTestCase {
   /**
    * Test backdrop_get_destination().
    */
-  public function testBackdropGetDestination() {
+  protected function testBackdropGetDestination() {
     $query = $this->randomName(10);
 
     // Verify that a 'destination' query string is used as destination.
@@ -1359,7 +1359,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
    */
   protected $preprocess_js = NULL;
 
-  public function setUp() {
+  protected function setUp() {
     // Enable Locale and SimpleTest in the test environment.
     parent::setUp('locale', 'simpletest', 'common_test');
 
@@ -1381,14 +1381,14 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   /**
    * Test default JavaScript is empty.
    */
-  public function testDefault() {
+  protected function testDefault() {
     $this->assertEqual(array(), backdrop_add_js(), 'Default JavaScript is empty.');
   }
 
   /**
    * Test adding a JavaScript file.
    */
-  public function testAddFile() {
+  protected function testAddFile() {
     $javascript = backdrop_add_js('core/misc/collapse.js');
     $this->assertTrue(array_key_exists('core/misc/jquery.js', $javascript), 'jQuery is added when a file is added.');
     $this->assertTrue(array_key_exists('core/misc/backdrop.js', $javascript), 'Backdrop.js is added when file is added.');
@@ -1401,7 +1401,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   /**
    * Test adding settings.
    */
-  public function testAddSetting() {
+  protected function testAddSetting() {
     $javascript = backdrop_add_js(array('backdrop' => 'rocks', 'v1.0.0' => 1421394600), 'setting');
     $this->assertEqual(1421394600, $javascript['settings']['data'][2]['v1.0.0'], 'JavaScript setting is set correctly.');
     $this->assertEqual('rocks', $javascript['settings']['data'][2]['backdrop'], 'The other JavaScript setting is set correctly.');
@@ -1410,7 +1410,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   /**
    * Tests adding an external JavaScript File.
    */
-  public function testAddExternal() {
+  protected function testAddExternal() {
     $path = 'http://example.com/script.js';
     $javascript = backdrop_add_js($path, 'external');
     $this->assertTrue(array_key_exists('http://example.com/script.js', $javascript), 'Added an external JavaScript file.');
@@ -1419,7 +1419,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   /**
    * Test backdrop_get_js() for JavaScript settings.
    */
-  public function testHeaderSetting() {
+  protected function testHeaderSetting() {
     // Only the second of these two entries should appear in Backdrop.settings.
     backdrop_add_js(array('commonTest' => 'commonTestShouldNotAppear'), 'setting');
     backdrop_add_js(array('commonTest' => 'commonTestShouldAppear'), 'setting');
@@ -1454,7 +1454,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   /**
    * Test to see if resetting the JavaScript empties the cache.
    */
-  public function testReset() {
+  protected function testReset() {
     backdrop_add_js('core/misc/collapse.js');
     backdrop_static_reset('backdrop_add_js');
     $this->assertEqual(array(), backdrop_add_js(), 'Resetting the JavaScript correctly empties the cache.');
@@ -1463,7 +1463,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   /**
    * Test adding inline scripts.
    */
-  public function testAddInline() {
+  protected function testAddInline() {
     $inline = 'jQuery(function () { });';
     $javascript = backdrop_add_js($inline, array('type' => 'inline', 'scope' => 'footer'));
     $this->assertTrue(array_key_exists('core/misc/jquery.js', $javascript), 'jQuery is added when inline scripts are added.');
@@ -1474,7 +1474,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   /**
    * Test rendering an external JavaScript file.
    */
-  public function testRenderExternal() {
+  protected function testRenderExternal() {
     $external = 'http://example.com/example.js';
     backdrop_add_js($external, 'external');
     $javascript = backdrop_get_js();
@@ -1485,7 +1485,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   /**
    * Test backdrop_get_js() with a footer scope.
    */
-  public function testFooterHTML() {
+  protected function testFooterHTML() {
     $inline = 'jQuery(function () { });';
     backdrop_add_js($inline, array('type' => 'inline', 'scope' => 'footer'));
     $javascript = backdrop_get_js('footer');
@@ -1495,7 +1495,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   /**
    * Test backdrop_add_js() sets preprocess to false when cache is set to false.
    */
-  public function testNoCache() {
+  protected function testNoCache() {
     $javascript = backdrop_add_js('core/misc/collapse.js', array('cache' => FALSE));
     $this->assertFalse($javascript['core/misc/collapse.js']['preprocess'], 'Setting cache to FALSE sets preprocess to FALSE when adding JavaScript.');
   }
@@ -1503,7 +1503,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   /**
    * Test adding a JavaScript file with a different group.
    */
-  public function testDifferentGroup() {
+  protected function testDifferentGroup() {
     $javascript = backdrop_add_js('core/misc/collapse.js', array('group' => JS_THEME));
     $this->assertEqual($javascript['core/misc/collapse.js']['group'], JS_THEME, 'Adding a JavaScript file with a different group caches the given group.');
   }
@@ -1511,7 +1511,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   /**
    * Test adding a JavaScript file with a different weight.
    */
-  public function testDifferentWeight() {
+  protected function testDifferentWeight() {
     $javascript = backdrop_add_js('core/misc/collapse.js', array('weight' => 2));
     $this->assertEqual($javascript['core/misc/collapse.js']['weight'], 2, 'Adding a JavaScript file with a different weight caches the given weight.');
   }
@@ -1527,7 +1527,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
    *
    * @see backdrop_pre_render_conditional_comments()
    */
-  public function testDeprecatedBrowserConditionalComments() {
+  protected function testDeprecatedBrowserConditionalComments() {
     $default_query_string = state_get('css_js_query_string', '0');
 
     backdrop_add_js('core/misc/collapse.js', array('browsers' => array('IE' => 'lte IE 8', '!IE' => FALSE)));
@@ -1546,7 +1546,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   /**
    * Test JavaScript versioning.
    */
-  public function testVersionQueryString() {
+  protected function testVersionQueryString() {
     backdrop_add_js('core/misc/collapse.js', array('version' => 'foo'));
     backdrop_add_js('core/misc/ajax.js', array('version' => 'bar'));
     $javascript = backdrop_get_js();
@@ -1556,7 +1556,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   /**
    * Test JavaScript grouping and aggregation.
    */
-  public function testAggregation() {
+  protected function testAggregation() {
     $default_query_string = state_get('css_js_query_string', '0');
 
     // To optimize aggregation, items with the 'every_page' option are ordered
@@ -1596,7 +1596,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   /**
    * Tests JavaScript aggregation when files are added to a different scope.
    */
-  public function testAggregationOrder() {
+  protected function testAggregationOrder() {
     // Enable JavaScript aggregation.
     config_set('system.core', 'preprocess_js', 1);
     backdrop_static_reset('backdrop_add_js');
@@ -1638,7 +1638,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   /**
    * Test JavaScript ordering.
    */
-  public function testRenderOrder() {
+  protected function testRenderOrder() {
     // Add a bunch of JavaScript in strange ordering.
     backdrop_add_js('(function($){alert("Weight 5 #1");})(jQuery);', array('type' => 'inline', 'scope' => 'footer', 'weight' => 5));
     backdrop_add_js('(function($){alert("Weight 0 #1");})(jQuery);', array('type' => 'inline', 'scope' => 'footer'));
@@ -1680,7 +1680,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   /**
    * Test rendering the JavaScript with a file's weight above jQuery's.
    */
-  public function testRenderDifferentWeight() {
+  protected function testRenderDifferentWeight() {
     // JavaScript files are sorted first by group, then by the 'every_page'
     // flag, then by weight (see backdrop_sort_css_js()), so to test the effect of
     // weight, we need the other two options to be the same.
@@ -1692,7 +1692,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   /**
    * Tests adding JavaScript files with additional attributes.
    */
-  public function testAttributes() {
+  protected function testAttributes() {
     // Disable aggregation.
     config_set('system.core', 'preprocess_js', 0);
     // Add internal and external JavaScript files that add the 'async' and
@@ -1769,7 +1769,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   /**
    * Tests that attributes are maintained when JS aggregation is enabled.
    */
-  public function testAggregatedAttributes() {
+  protected function testAggregatedAttributes() {
     // Enable aggregation.
     config_set('system.core', 'preprocess_js', TRUE);
     // Add internal and external JavaScript files that add the 'async' and
@@ -1842,7 +1842,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
    *
    * @see simpletest_js_alter()
    */
-  public function testAlter() {
+  protected function testAlter() {
     // Add both tableselect.js and simpletest.js, with a larger weight on SimpleTest.
     backdrop_add_js('core/misc/tableselect.js');
     backdrop_add_js(backdrop_get_path('module', 'simpletest') . '/js/simpletest.js', array('weight' => 9999));
@@ -1857,7 +1857,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   /**
    * Adds a library to the page and tests for both its JavaScript and its CSS.
    */
-  public function testLibraryRender() {
+  protected function testLibraryRender() {
     $result = backdrop_add_library('system', 'farbtastic');
     $this->assertTrue($result !== FALSE, t('Library was added without errors.'));
     $scripts = backdrop_get_js();
@@ -1871,7 +1871,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
    *
    * @see common_test_library_info_alter()
    */
-  public function testLibraryAlter() {
+  protected function testLibraryAlter() {
     // Verify that common_test altered the title of Farbtastic.
     $library = backdrop_get_library('system', 'farbtastic');
     $this->assertEqual($library['title'], 'Farbtastic: Altered Library', 'Registered libraries were altered.');
@@ -1887,7 +1887,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
    *
    * @see common_test_library_info()
    */
-  public function testLibraryNameConflicts() {
+  protected function testLibraryNameConflicts() {
     $farbtastic = backdrop_get_library('common_test', 'farbtastic');
     $this->assertEqual($farbtastic['title'], 'Custom Farbtastic Library', 'Alternative libraries can be added to the page.');
   }
@@ -1895,7 +1895,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   /**
    * Tests non-existing libraries.
    */
-  public function testLibraryUnknown() {
+  protected function testLibraryUnknown() {
     $result = backdrop_get_library('unknown', 'unknown');
     $this->assertFalse($result, 'Unknown library returned FALSE.');
     backdrop_static_reset('backdrop_get_library');
@@ -1909,7 +1909,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   /**
    * Tests the addition of libraries through the #attached['library'] property.
    */
-  public function testAttachedLibrary() {
+  protected function testAttachedLibrary() {
     $element['#attached']['library'][] = array('system', 'farbtastic');
     backdrop_render($element);
     $scripts = backdrop_get_js();
@@ -1919,7 +1919,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   /**
    * Tests retrieval of libraries via backdrop_get_library().
    */
-  public function testGetLibrary() {
+  protected function testGetLibrary() {
     // Retrieve all libraries registered by a module.
     $libraries = backdrop_get_library('common_test');
     $this->assertTrue(isset($libraries['farbtastic']), 'Retrieved all module libraries.');
@@ -1940,7 +1940,7 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
    * Tests that the query string remains intact when adding JavaScript files
    *  that have query string parameters.
    */
-  public function testAddJsFileWithQueryString() {
+  protected function testAddJsFileWithQueryString() {
     $this->backdropGet('common-test/query-string');
     $query_string = state_get('css_js_query_string', '0');
     $this->assertRaw(backdrop_get_path('module', 'node') . '/js/node.js?' . $query_string, 'Query string was appended correctly to js.');
@@ -1953,14 +1953,14 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
 class CommonBackdropRenderTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('common_test');
   }
 
   /**
    * Tests the output backdrop_render() for some elementary input values.
    */
-  public function testBackdropRenderBasics() {
+  protected function testBackdropRenderBasics() {
     $types = array(
       array(
         'name' => 'null',
@@ -2014,7 +2014,7 @@ class CommonBackdropRenderTestCase extends BackdropWebTestCase {
   /**
    * Test sorting by weight.
    */
-  public function testBackdropRenderSorting() {
+  protected function testBackdropRenderSorting() {
     $first = $this->randomName();
     $second = $this->randomName();
     // Build an array with '#weight' set for each element.
@@ -2065,7 +2065,7 @@ class CommonBackdropRenderTestCase extends BackdropWebTestCase {
   /**
    * Test #attached functionality in children elements.
    */
-  public function testBackdropRenderChildrenAttached() {
+  protected function testBackdropRenderChildrenAttached() {
     // The cache system is turned off for POST requests.
     $request_method = $_SERVER['REQUEST_METHOD'];
     $_SERVER['REQUEST_METHOD'] = 'GET';
@@ -2116,7 +2116,7 @@ class CommonBackdropRenderTestCase extends BackdropWebTestCase {
   /**
    * Test passing arguments to the theme function.
    */
-  public function testBackdropRenderThemeArguments() {
+  protected function testBackdropRenderThemeArguments() {
     $element = array(
       '#theme' => 'common_test_foo',
     );
@@ -2134,7 +2134,7 @@ class CommonBackdropRenderTestCase extends BackdropWebTestCase {
   /**
    * Test rendering form elements without passing through form_builder().
    */
-  public function testBackdropRenderFormElements() {
+  protected function testBackdropRenderFormElements() {
     // Define a series of form elements.
     $element = array(
       '#type' => 'button',
@@ -2244,7 +2244,7 @@ class CommonBackdropRenderTestCase extends BackdropWebTestCase {
   /**
    * Test rendering elements with invalid keys.
    */
-  public function testBackdropRenderInvalidKeys() {
+  protected function testBackdropRenderInvalidKeys() {
     $error = array(
       '%type' => 'User error',
       '!message' => '"child" is an invalid render array key',
@@ -2277,7 +2277,7 @@ class CommonBackdropRenderTestCase extends BackdropWebTestCase {
   /**
    * Tests caching of render items.
    */
-  public function testBackdropRenderCache() {
+  protected function testBackdropRenderCache() {
     // Force a request via GET.
     $request_method = $_SERVER['REQUEST_METHOD'];
     $_SERVER['REQUEST_METHOD'] = 'GET';
@@ -2366,7 +2366,7 @@ class CommonValidUrlUnitTestCase extends BackdropUnitTestCase {
   /**
    * Test valid absolute URLs.
    */
-  public function testValidAbsolute() {
+  protected function testValidAbsolute() {
     $url_schemes = array('http', 'https', 'ftp');
     $valid_absolute_urls = array(
       // cspell:disable
@@ -2403,7 +2403,7 @@ class CommonValidUrlUnitTestCase extends BackdropUnitTestCase {
   /**
    * Test invalid absolute URLs.
    */
-  public function testInvalidAbsolute() {
+  protected function testInvalidAbsolute() {
     $url_schemes = array('http', 'https', 'ftp');
     $invalid_absolute_urls = array(
       // cspell:disable
@@ -2425,7 +2425,7 @@ class CommonValidUrlUnitTestCase extends BackdropUnitTestCase {
   /**
    * Test valid relative URLs.
    */
-  public function testValidRelative() {
+  protected function testValidRelative() {
     $valid_relative_urls = array(
       // cspell:disable
       'paren(the)sis',
@@ -2448,7 +2448,7 @@ class CommonValidUrlUnitTestCase extends BackdropUnitTestCase {
   /**
    * Test invalid relative URLs.
    */
-  public function testInvalidRelative() {
+  protected function testInvalidRelative() {
     $invalid_relative_urls = array(
       // cspell:disable
       'ex^mple',
@@ -2474,7 +2474,7 @@ class CommonValidNumberStepUnitTestCase extends BackdropUnitTestCase {
   /**
    * Tests valid_number_step() without offset.
    */
-  public function testNumberStep() {
+  protected function testNumberStep() {
     // Value and step equal.
     $this->assertTrue(valid_number_step(10.3, 10.3));
 
@@ -2520,7 +2520,7 @@ class CommonValidNumberStepUnitTestCase extends BackdropUnitTestCase {
   /**
    * Tests valid_number_step() with offset.
    */
-  public function testNumberStepOffset() {
+  protected function testNumberStepOffset() {
     // Try obvious fits.
     $this->assertTrue(valid_number_step(11.3, 10.3, 1));
     $this->assertTrue(valid_number_step(100, 10, 50));
@@ -2541,14 +2541,14 @@ class CommonValidNumberStepUnitTestCase extends BackdropUnitTestCase {
  * Tests writing of data records with backdrop_write_record().
  */
 class CommonBackdropWriteRecordTestCase extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('database_test');
   }
 
   /**
    * Test the backdrop_write_record() API function.
    */
-  public function testBackdropWriteRecord() {
+  protected function testBackdropWriteRecord() {
     // Insert a record with no columns populated.
     $record = array();
     $insert_result = backdrop_write_record('test', $record);
@@ -2680,14 +2680,14 @@ class CommonSimpleTestErrorCollectorTestCase extends BackdropWebTestCase {
    */
   protected $collectedErrors = array();
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('system_test', 'error_test');
   }
 
   /**
    * Test that simpletest collects errors from the tested site.
    */
-  public function testErrorCollect() {
+  protected function testErrorCollect() {
     $this->collectedErrors = array();
     $this->backdropGet('error-test/generate-warnings-with-report');
     $this->assertEqual(count($this->collectedErrors), 3, 'Three errors were collected');
@@ -2755,7 +2755,7 @@ class CommonBackdropParseInfoFileTestCase extends BackdropUnitTestCase {
   /**
    * Parse an example .info file an verify the results.
    */
-  public function testParseInfoFile() {
+  protected function testParseInfoFile() {
     $info_values = backdrop_parse_info_file(backdrop_get_path('module', 'simpletest') . '/tests/common_test_info.txt');
     $this->assertEqual($info_values['simple_string'], 'A simple string', 'Simple string value was parsed correctly.', 'System');
     $this->assertEqual($info_values['simple_constant'], WATCHDOG_INFO, 'Constant value was parsed correctly.', 'System');
@@ -2775,7 +2775,7 @@ class CommonBackdropSystemListingTestCase extends BackdropWebTestCase {
   /**
    * Test that files in different directories take precedence as expected.
    */
-  public function testDirectoryPrecedence() {
+  protected function testDirectoryPrecedence() {
     // Define the module files we will search for, and the directory precedence
     // we expect.
     $expected_directories = array(
@@ -2830,7 +2830,7 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
    */
   const LANGCODE = 'xx';
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('locale');
 
     config('system.date')
@@ -2852,7 +2852,7 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
   /**
    * Test admin-defined formats in format_date().
    */
-  public function testAdminDefinedFormatDate() {
+  protected function testAdminDefinedFormatDate() {
     // Create an admin user.
     $this->admin_user = $this->backdropCreateUser(array('administer site configuration'));
     $this->backdropLogin($this->admin_user);
@@ -2887,7 +2887,7 @@ class CommonFormatDateTestCase extends BackdropWebTestCase {
   /**
    * Tests for the format_date() function.
    */
-  public function testFormatDate() {
+  protected function testFormatDate() {
     global $user, $language;
 
     $timestamp = strtotime('2007-03-26T00:00:00+00:00');
@@ -2962,7 +2962,7 @@ class CommonBackdropFormatXmlElementsUnitTestCase extends BackdropUnitTestCase {
   /**
    * Provide a sample data structure and verify the XML results.
    */
-  public function testParseFormatXmlElements() {
+  protected function testParseFormatXmlElements() {
     $structure = array(
       // Test normal key => value pairs.
       'key-value-pairs' => array(
@@ -3032,7 +3032,7 @@ class CommonBackdropAttributesUnitTestCase extends BackdropUnitTestCase {
   /**
    * Tests that backdrop_html_class() cleans the class name properly.
    */
-  public function testBackdropAttributes() {
+  protected function testBackdropAttributes() {
     // Verify that special characters are HTML encoded.
     $this->assertIdentical(backdrop_attributes(array('title' => '&"\'<>')), ' title="&amp;&quot;&#039;&lt;&gt;"', 'HTML encode attribute values.');
 
@@ -3072,7 +3072,7 @@ class CommonBackdropArrayUnitTest extends BackdropUnitTestCase {
    */
   protected $parents;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp();
 
     // Create a form structure with a nested element.
@@ -3087,7 +3087,7 @@ class CommonBackdropArrayUnitTest extends BackdropUnitTestCase {
   /**
    * Tests getting nested array values.
    */
-  public function testGet() {
+  protected function testGet() {
     // Verify getting a value of a nested element.
     $value = backdrop_array_get_nested_value($this->form, $this->parents);
     $this->assertEqual($value['#value'], 'Nested element', 'Nested element value found.');
@@ -3115,7 +3115,7 @@ class CommonBackdropArrayUnitTest extends BackdropUnitTestCase {
   /**
    * Tests setting nested array values.
    */
-  public function testSet() {
+  protected function testSet() {
     $new_value = array(
       '#value' => 'New value',
       '#required' => TRUE,
@@ -3130,7 +3130,7 @@ class CommonBackdropArrayUnitTest extends BackdropUnitTestCase {
   /**
    * Tests unsetting nested array values.
    */
-  public function testUnset() {
+  protected function testUnset() {
     // Verify unsetting a non-existing nested element throws no errors and the
     // non-existing key is properly reported.
     $key_existed = NULL;
@@ -3150,7 +3150,7 @@ class CommonBackdropArrayUnitTest extends BackdropUnitTestCase {
   /**
    * Tests existence of array key.
    */
-  public function testKeyExists() {
+  protected function testKeyExists() {
     // Verify that existing key is found.
     $this->assertIdentical(backdrop_array_nested_key_exists($this->form, $this->parents), TRUE, 'Nested key found.');
 
@@ -3168,7 +3168,7 @@ class CommonJSONUnitTestCase extends BackdropUnitTestCase {
   /**
    * Tests converting PHP variables to JSON strings and back.
    */
-  public function testJSON() {
+  protected function testJSON() {
     // Setup a string with the full ASCII table.
     $str = '';
     for ($i=0; $i < 128; $i++) {
@@ -3252,7 +3252,7 @@ class CommonBackdropAddFeedTestCase extends BackdropWebTestCase {
   /**
    * Test backdrop_add_feed() with paths, URLs, and titles.
    */
-  public function testBasicFeedAddNoTitle() {
+  protected function testBasicFeedAddNoTitle() {
     $path = $this->randomName(12);
     $external_url = 'http://' . $this->randomName(12) . '/' . $this->randomName(12);
     $fully_qualified_local_url = url($this->randomName(12), array('absolute' => TRUE));
@@ -3331,7 +3331,7 @@ class CommonBackdropSortUnitTest extends BackdropUnitTestCase {
    */
   protected $test_array;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp();
 
     $this->test_array = array(
@@ -3374,7 +3374,7 @@ class CommonBackdropSortUnitTest extends BackdropUnitTestCase {
   /**
    * Tests backdrop_sort().
    */
-  public function testBackdropSort() {
+  protected function testBackdropSort() {
     $expected = array(
       'form',
       'custom_block',
@@ -3449,7 +3449,7 @@ class ArrayDiffUnitTest extends BackdropUnitTestCase {
    */
   protected $array2;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp();
 
     $this->array1 = array(
@@ -3479,7 +3479,7 @@ class ArrayDiffUnitTest extends BackdropUnitTestCase {
   /**
    * Tests backdrop_array_diff_assoc_recursive().
    */
-  public function testArrayDiffAssocRecursive() {
+  protected function testArrayDiffAssocRecursive() {
     $expected = array(
       'different' => 'no',
       'int_diff' => 1,
@@ -3501,7 +3501,7 @@ class BackdropGetQueryArrayTestCase extends BackdropWebTestCase {
   /**
    * Tests that backdrop_get_query_array() correctly explodes query parameters.
    */
-  public function testBackdropGetQueryArray() {
+  protected function testBackdropGetQueryArray() {
     $url = "http://my.site.com/some-path?foo=/content/folder[@name='foo']/folder[@name='bar']";
     $parsed = parse_url($url);
     $result = backdrop_get_query_array($parsed['query']);
@@ -3517,7 +3517,7 @@ class FeedIconTest extends BackdropWebTestCase {
   /**
    * Check that special characters are correctly escaped. Test for issue #1211668.
    */
-  public function testFeedIconEscaping() {
+  protected function testFeedIconEscaping() {
     $variables = array();
     $variables['url'] = 'node';
     $variables['title'] = '<>&"\'';

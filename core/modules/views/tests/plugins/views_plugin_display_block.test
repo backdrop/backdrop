@@ -39,7 +39,7 @@ class ViewsPluginDisplayBlockTestCase extends ViewsSqlTest {
   /**
    * Tests, whether and how the reset button can be renamed.
    */
-  public function testViewBlocks() {
+  protected function testViewBlocks() {
     $layout = layout_load('default');
     $layout_block = $layout->addBlock('views', 'test_block-block', 'content');
     $layout->save();

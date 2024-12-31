@@ -24,7 +24,7 @@ class ViewsLayoutsTest extends BackdropWebTestCase {
   /**
    * Tests that a contextual filter input can be passed in from a layout.
    */
-  public function testViewsLayouts() {
+  protected function testViewsLayouts() {
     global $admin_user;
 
     $permissions = array(

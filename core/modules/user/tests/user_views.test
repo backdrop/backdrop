@@ -30,7 +30,7 @@ class UserViewsTestCase extends ViewsSqlTest {
    * @todo: Remove the following comment once the relationship is required.
    * One day a view will require the relationship so it should still work
    */
-  public function testRelationship() {
+  protected function testRelationship() {
     $view = $this->test_view_user_relationship();
 
     $view->execute_display();
@@ -45,7 +45,7 @@ class UserViewsTestCase extends ViewsSqlTest {
     $this->assertIdenticalResultset($view, $expected);
   }
 
-  public function test_view_user_relationship() {
+  protected function test_view_user_relationship() {
     $view = new view;
     $view->name = 'test_user_relationship';
     $view->description = '';

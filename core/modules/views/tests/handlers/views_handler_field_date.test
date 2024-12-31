@@ -16,7 +16,7 @@ class ViewsHandlerFieldDateTest extends ViewsSqlTest {
     return $data;
   }
 
-  public function testFieldDate() {
+  protected function testFieldDate() {
     $view = $this->getBasicView();
 
     $view->display['default']->handler->override_option('fields', array(

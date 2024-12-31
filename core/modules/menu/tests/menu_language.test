@@ -77,7 +77,7 @@ class MenuLanguageTestCase extends BackdropWebTestCase {
   /**
    * Set up test environment.
    */
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('menu', 'language', 'locale');
 
     // Add languages.
@@ -118,7 +118,7 @@ class MenuLanguageTestCase extends BackdropWebTestCase {
   /**
    * Test menu item parents on form menu_edit_item.
    */
-  public function testMenuParentLanguage() {
+  protected function testMenuParentLanguage() {
 
     foreach ($this->langcodes as $langcode) {
       $options = array(
@@ -156,7 +156,7 @@ class MenuLanguageTestCase extends BackdropWebTestCase {
   /**
    * Test that the available parent menu items match on the node form.
    */
-  public function testMenuParentLanguageNode() {
+  protected function testMenuParentLanguageNode() {
 
     // Create basic content type.
     $this->backdropCreateContentType(array(

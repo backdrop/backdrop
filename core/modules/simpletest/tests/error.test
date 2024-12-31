@@ -4,14 +4,14 @@
  * Tests Backdrop error and exception handlers.
  */
 class BackdropErrorHandlerUnitTest extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('error_test');
   }
 
   /**
    * Test the error handler.
    */
-  public function testErrorHandler() {
+  protected function testErrorHandler() {
     $config = config('system.core');
     $error_notice = array(
       '%type' => 'Notice',
@@ -60,7 +60,7 @@ class BackdropErrorHandlerUnitTest extends BackdropWebTestCase {
   /**
    * Test the exception handler.
    */
-  public function testExceptionHandler() {
+  protected function testExceptionHandler() {
     $config = config('system.core');
     $error_exception = array(
       '%type' => 'Exception',

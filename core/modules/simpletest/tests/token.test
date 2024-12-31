@@ -13,7 +13,7 @@ class TokenReplaceTestCase extends BackdropWebTestCase {
   /**
    * Creates a user and a node, then tests the tokens generated from them.
    */
-  public function testTokenReplacement() {
+  protected function testTokenReplacement() {
     // Create the initial objects.
     $account = $this->backdropCreateUser();
     $node = $this->backdropCreateNode(array('uid' => $account->uid));
@@ -62,7 +62,7 @@ class TokenReplaceTestCase extends BackdropWebTestCase {
   /**
    * Test whether token-replacement works in various contexts.
    */
-  public function testSystemTokenRecognition() {
+  protected function testSystemTokenRecognition() {
     global $language;
 
     // Generate prefixes and suffixes for the token context.
@@ -91,7 +91,7 @@ class TokenReplaceTestCase extends BackdropWebTestCase {
   /**
    * Tests the generation of all system site information tokens.
    */
-  public function testSystemSiteTokenReplacement() {
+  protected function testSystemSiteTokenReplacement() {
     global $language;
     $url_options = array(
       'absolute' => TRUE,
@@ -135,7 +135,7 @@ class TokenReplaceTestCase extends BackdropWebTestCase {
   /**
    * Tests the generation of all system date tokens.
    */
-  public function testSystemDateTokenReplacement() {
+  protected function testSystemDateTokenReplacement() {
     global $language;
 
     // Set time to one hour before request.
@@ -167,7 +167,7 @@ class TokenScanTest extends BackdropUnitTestCase {
   /**
    * Scans dummy text, then tests the output.
    */
-  public function testTokenScan() {
+  protected function testTokenScan() {
     // Define text with valid and not valid, fake and existing token-like
     // strings.
     $text = 'First a [valid:simple], but dummy token, and a dummy [valid:token with: spaces].';
@@ -189,7 +189,7 @@ class TokenTestHelper extends BackdropWebTestCase {
   protected $profile = 'testing';
   protected $config;
 
-  public function setUp($modules = array()) {
+  protected function setUp($modules = array()) {
     $modules[] = 'path';
     $modules[] = 'token_test';
     parent::setUp($modules);
@@ -297,7 +297,7 @@ class TokenUnitTestCase extends TokenTestHelper {
   /**
    * Test token_get_invalid_tokens() and token_get_invalid_tokens_by_context().
    */
-  public function testGetInvalidTokens() {
+  protected function testGetInvalidTokens() {
     $tests = array();
     $tests[] = array(
       'valid tokens' => array(
@@ -370,12 +370,12 @@ class TokenUnitTestCase extends TokenTestHelper {
 
 class TokenURLTestCase extends TokenTestHelper {
 
-  public function setUp($modules = array()) {
+  protected function setUp($modules = array()) {
     parent::setUp($modules);
     $this->saveAlias('node/1', 'first-node');
   }
 
-  public function testURLTokens() {
+  protected function testURLTokens() {
     $tokens = array(
       'absolute' => 'http://example.com/first-node',
       'relative' => base_path() . 'first-node',
@@ -400,12 +400,12 @@ class TokenURLTestCase extends TokenTestHelper {
 
 class TokenCommentTestCase extends TokenTestHelper {
 
-  public function setUp($modules = array()) {
+  protected function setUp($modules = array()) {
     $modules[] = 'comment';
     parent::setUp($modules);
   }
 
-  public function testCommentTokens() {
+  protected function testCommentTokens() {
     $node = $this->backdropCreateNode(array('comment' => COMMENT_NODE_OPEN));
 
     $parent_comment = new Comment();
@@ -455,7 +455,7 @@ class TokenCommentTestCase extends TokenTestHelper {
 class TokenNodeTestCase extends TokenTestHelper {
   protected $profile = 'standard';
 
-  public function testNodeTokens() {
+  protected function testNodeTokens() {
     $admin_user = $this->backdropCreateUser(array('create post content', 'create url aliases'));
     $this->backdropLogin($admin_user);
 
@@ -528,12 +528,12 @@ class TokenNodeTestCase extends TokenTestHelper {
 
 class TokenMenuTestCase extends TokenTestHelper {
 
-  public function setUp($modules = array()) {
+  protected function setUp($modules = array()) {
     $modules[] = 'menu';
     parent::setUp($modules);
   }
 
-  public function testMenuTokens() {
+  protected function testMenuTokens() {
     // Add a root link.
     $root_link = array(
       'link_path' => 'root',
@@ -626,7 +626,7 @@ class TokenTaxonomyTestCase extends TokenTestHelper {
   protected $profile = 'standard';
   protected $vocab;
 
-  public function setUp($modules = array()) {
+  protected function setUp($modules = array()) {
     $modules[] = 'taxonomy';
     parent::setUp($modules);
 
@@ -642,7 +642,7 @@ class TokenTaxonomyTestCase extends TokenTestHelper {
   /**
    * Test the additional taxonomy term tokens.
    */
-  public function testTaxonomyTokens() {
+  protected function testTaxonomyTokens() {
     $root_term = $this->addTerm($this->vocab, array('name' => 'Root term', 'path' => array('alias' => 'root-term', 'auto' => FALSE)));
     $tokens = array(
       'url' => url("taxonomy/term/{$root_term->tid}", array('absolute' => TRUE)),
@@ -690,7 +690,7 @@ class TokenTaxonomyTestCase extends TokenTestHelper {
   /**
    * Test the additional vocabulary tokens.
    */
-  public function testVocabularyTokens() {
+  protected function testVocabularyTokens() {
     $vocabulary = $this->vocab;
     $tokens = array(
       'machine-name' => 'tags',
@@ -726,7 +726,7 @@ class TokenUserTestCase extends TokenTestHelper {
   protected $config;
 
 
-  public function setUp($modules = array()) {
+  protected function setUp($modules = array()) {
     parent::setUp($modules);
     // Enable user pictures.
     config_set('system.core', 'user_pictures', 1);
@@ -742,7 +742,7 @@ class TokenUserTestCase extends TokenTestHelper {
     $this->backdropLogin($this->account);
   }
 
-  public function testUserTokens() {
+  protected function testUserTokens() {
     // Add a user picture to the account.
     $image = current($this->backdropGetTestFiles('image'));
     $edit = array('files[picture_upload]' => backdrop_realpath($image->uri));
@@ -801,7 +801,7 @@ class TokenEntityTestCase extends TokenTestHelper {
    */
   protected $vocab;
 
-  public function setUp($modules = array()) {
+  protected function setUp($modules = array()) {
     $modules[] = 'taxonomy';
     parent::setUp($modules);
 
@@ -828,7 +828,7 @@ class TokenEntityTestCase extends TokenTestHelper {
   /**
    * Test the [entity:original:*] tokens.
    */
-  public function testEntityOriginal() {
+  protected function testEntityOriginal() {
     $node = $this->backdropCreateNode(array('title' => 'Original title'));
 
     $tokens = array(
@@ -861,7 +861,7 @@ class TokenCurrentPageTestCase extends TokenTestHelper {
   protected $profile = 'standard';
   protected $config;
 
-  public function testCurrentPageTokens() {
+  protected function testCurrentPageTokens() {
     $tokens = array(
       '[current-page:title]' => t('Home', array('@site-name' => config_get('system.core', 'site_name'))),
       '[current-page:url]' => url('home', array('absolute' => TRUE)),
@@ -915,7 +915,7 @@ class TokenCurrentPageTestCase extends TokenTestHelper {
 
 class TokenArrayTestCase extends TokenTestHelper {
 
-  public function testArrayTokens() {
+  protected function testArrayTokens() {
     // Test a simple array.
     $array = array(0 => 'a', 1 => 'b', 2 => 'c', 4 => 'd');
     $tokens = array(
@@ -967,7 +967,7 @@ class TokenArrayTestCase extends TokenTestHelper {
 
 class TokenFileTestCase extends TokenTestHelper {
 
-  public function testFileTokens() {
+  protected function testFileTokens() {
     // Create a test file object.
     $file = new File();
     $file->fid = 1;

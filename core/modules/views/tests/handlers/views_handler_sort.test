@@ -13,7 +13,7 @@ class ViewsHandlerSortTest extends ViewsSqlTest {
   /**
    * Tests numeric ordering of the result set.
    */
-  public function testNumericOrdering() {
+  protected function testNumericOrdering() {
     $view = $this->getBasicView();
 
     // Change the ordering
@@ -64,7 +64,7 @@ class ViewsHandlerSortTest extends ViewsSqlTest {
   /**
    * Tests string ordering of the result set.
    */
-  public function testStringOrdering() {
+  protected function testStringOrdering() {
     $view = $this->getBasicView();
 
     // Change the ordering

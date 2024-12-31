@@ -31,7 +31,7 @@ class ViewsHandlerTestXss extends ViewsSqlTest {
     return $data;
   }
 
-  public function testFieldXss() {
+  protected function testFieldXss() {
     $view = $this->getBasicView();
 
     $view->display['default']->handler->override_option('fields', array(

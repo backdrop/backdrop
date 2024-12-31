@@ -10,7 +10,7 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests Views argument validators.
  */
 class ViewsArgumentValidatorTest extends ViewsSqlTest {
-  public function testArgumentValidatePhp() {
+  protected function testArgumentValidatePhp() {
     $string = $this->randomName();
     $view = $this->view_test_argument_validate_php($string);
     $view->set_display('default');
@@ -22,7 +22,7 @@ class ViewsArgumentValidatorTest extends ViewsSqlTest {
     $this->assertFalse($view->argument['null']->validate_arg($this->randomName()));
   }
 
-  public function testArgumentValidateNumeric() {
+  protected function testArgumentValidateNumeric() {
     $view = $this->view_argument_validate_numeric();
     $view->set_display('default');
     $view->pre_execute();
@@ -36,7 +36,7 @@ class ViewsArgumentValidatorTest extends ViewsSqlTest {
   /**
    * Make sure argument validation works properly.
    */
-  public function testArgumentValidatePhpFailure() {
+  protected function testArgumentValidatePhpFailure() {
     $view = $this->view_test_argument_validate_php_failure();
     $view->save();
     $this->backdropGet('test-php-failure');

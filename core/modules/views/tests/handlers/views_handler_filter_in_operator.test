@@ -17,7 +17,7 @@ class ViewsHandlerFilterInOperator extends ViewsSqlTest {
     return $data;
   }
 
-  public function testFilterInOperatorSimple() {
+  protected function testFilterInOperatorSimple() {
     $view = $this->getBasicView();
 
     // Add a in_operator ordering.
@@ -88,7 +88,7 @@ class ViewsHandlerFilterInOperator extends ViewsSqlTest {
     ));
   }
 
-  public function testFilterInOperatorGroupedExposedSimple() {
+  protected function testFilterInOperatorGroupedExposedSimple() {
     $filters = $this->getGroupedExposedFilters();
     $view = $this->getBasicPageView();
 
@@ -117,7 +117,7 @@ class ViewsHandlerFilterInOperator extends ViewsSqlTest {
     ));
   }
 
-  public function testFilterNotInOperatorGroupedExposedSimple() {
+  protected function testFilterNotInOperatorGroupedExposedSimple() {
     $filters = $this->getGroupedExposedFilters();
     $view = $this->getBasicPageView();
 

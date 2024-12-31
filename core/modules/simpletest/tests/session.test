@@ -5,7 +5,7 @@
  */
 
 class SessionTestCase extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('session_test');
 
     // Disable the cache.
@@ -15,7 +15,7 @@ class SessionTestCase extends BackdropWebTestCase {
   /**
    * Tests for backdrop_save_session() and backdrop_session_regenerate().
    */
-  public function testSessionSaveRegenerate() {
+  protected function testSessionSaveRegenerate() {
     $this->assertFalse(backdrop_save_session(), 'backdrop_save_session() correctly returns FALSE (inside of testing framework) when initially called with no arguments.', 'Session');
     $this->assertFalse(backdrop_save_session(FALSE), 'backdrop_save_session() correctly returns FALSE when called with FALSE.', 'Session');
     $this->assertFalse(backdrop_save_session(), 'backdrop_save_session() correctly returns FALSE when saving has been disabled.', 'Session');
@@ -63,7 +63,7 @@ class SessionTestCase extends BackdropWebTestCase {
   /**
    * Test data persistence via the session_test module callbacks.
    */
-  public function testDataPersistence() {
+  protected function testDataPersistence() {
     $user = $this->backdropCreateUser(array('access content'));
     // Enable sessions.
     $this->sessionReset($user->uid);
@@ -124,7 +124,7 @@ class SessionTestCase extends BackdropWebTestCase {
   /**
    * Test that empty anonymous sessions are destroyed.
    */
-  public function testEmptyAnonymousSession() {
+  protected function testEmptyAnonymousSession() {
     // Verify that no session is automatically created for anonymous user.
     $this->backdropGet('');
     $this->assertSessionCookie(FALSE);
@@ -174,7 +174,7 @@ class SessionTestCase extends BackdropWebTestCase {
   /**
    * Test that sessions are only saved when necessary.
    */
-  public function testSessionWrite() {
+  protected function testSessionWrite() {
     $user = $this->backdropCreateUser(array('access content'));
     $this->backdropLogin($user);
 
@@ -218,7 +218,7 @@ class SessionTestCase extends BackdropWebTestCase {
   /**
    * Test that empty session IDs are not allowed.
    */
-  public function testEmptySessionID() {
+  protected function testEmptySessionID() {
     $user = $this->backdropCreateUser(array('access content'));
     $this->backdropLogin($user);
     $this->backdropGet('session-test/is-logged-in');
@@ -287,7 +287,7 @@ class SessionTestCase extends BackdropWebTestCase {
  * Ensure that when running under HTTPS two session cookies are generated.
  */
 class SessionHttpsTestCase extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('session_test');
   }
 
@@ -467,7 +467,7 @@ class SessionHttpsTestCase extends BackdropWebTestCase {
   /**
    * Tests that empty session IDs do not cause unrelated sessions to load.
    */
-  public function testEmptySessionId() {
+  protected function testEmptySessionId() {
     global $is_https;
 
     if ($is_https) {

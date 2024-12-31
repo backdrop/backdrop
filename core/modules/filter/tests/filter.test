@@ -8,14 +8,14 @@
  * Tests for text format and filter CRUD operations.
  */
 class FilterCRUDTestCase extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('filter_test');
   }
 
   /**
    * Tests CRUD operations for text formats and filters.
    */
-  public function testTextFormatCRUD() {
+  protected function testTextFormatCRUD() {
     // Add a text format with minimum data only.
     $format = new stdClass();
     $format->format = 'empty_format';
@@ -154,7 +154,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
    */
   protected $web_user;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp();
 
     // Create users.
@@ -210,7 +210,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
   /**
    * Tests the format administration functionality.
    */
-  public function testFormatAdmin() {
+  protected function testFormatAdmin() {
     // Add text format.
     $this->backdropGet('admin/config/content/formats');
     $this->clickLink('Add text format');
@@ -295,7 +295,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
   /**
    * Tests filter administration functionality.
    */
-  public function testFilterAdmin() {
+  protected function testFilterAdmin() {
     // URL filter.
     $first_filter = 'filter_url';
     // Line filter.
@@ -494,7 +494,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
   /**
    * Tests the URL filter settings form is properly validated.
    */
-  public function testUrlFilterAdmin() {
+  protected function testUrlFilterAdmin() {
     // The form does not save with an invalid filter URL length.
     $edit = array(
       'filter_url_length' => $this->randomName(4),
@@ -570,7 +570,7 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
    */
   protected $disallowed_format;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp();
 
     // Create a user who can administer text formats, but does not have
@@ -616,7 +616,7 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
   /**
    * Tests the Filter format access permissions functionality.
    */
-  public function testFormatPermissions() {
+  protected function testFormatPermissions() {
     // Make sure that a regular user only has access to the text format they
     // were granted access to, as well to the fallback format.
     $this->assertTrue(filter_access($this->allowed_format, $this->web_user), 'A regular user has access to a text format they were granted access to.');
@@ -676,7 +676,7 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
   /**
    * Tests if text format is available to a role.
    */
-  public function testFormatRoles() {
+  protected function testFormatRoles() {
     // Get the role name assigned to the regular user.
     $roles = array_diff($this->web_user->roles, array(BACKDROP_AUTHENTICATED_ROLE));
     $role_name = reset($roles);
@@ -706,7 +706,7 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
    * be edited by administrators only, but that the administrator is forced to
    * choose a new format before saving the page.
    */
-  public function testFormatWidgetPermissions() {
+  protected function testFormatWidgetPermissions() {
     config_set('path.settings', 'node_pattern', '');
     config_set('path.settings', 'node_page_pattern', '');
 
@@ -817,7 +817,7 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
   /**
    * Tests loading of disabled formats.
    */
-  public function testFormatDisabledAccess() {
+  protected function testFormatDisabledAccess() {
     // Check filter_formats() in sequence loading both enabled and all formats.
     filter_format_disable($this->disallowed_format);
     $this->resetFilterCaches();
@@ -851,7 +851,7 @@ class FilterDefaultFormatTestCase extends BackdropWebTestCase {
   /**
    * Tests if the default text format is accessible to users.
    */
-  public function testDefaultTextFormats() {
+  protected function testDefaultTextFormats() {
     // Create two text formats, and two users. The first user has access to
     // both formats, but the second user only has access to the second one.
     $admin_user = $this->backdropCreateUser(array('administer filters'));
@@ -911,7 +911,7 @@ class FilterNoFormatTestCase extends BackdropWebTestCase {
    * Tests if text with no format is filtered the same way as text in the
    * fallback format.
    */
-  public function testCheckMarkupNoFormat() {
+  protected function testCheckMarkupNoFormat() {
     // Create some text. Include some HTML and line breaks, so we get a good
     // test of the filtering that is applied to it.
     $text = "<strong>" . $this->randomName(32) . "</strong>\n\n<div>" . $this->randomName(32) . "</div>";
@@ -932,7 +932,7 @@ class FilterSecurityTestCase extends BackdropWebTestCase {
    */
   protected $admin_user;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('filter_test');
     $this->admin_user = $this->backdropCreateUser(array('administer modules', 'administer filters', 'administer site configuration'));
     $this->backdropLogin($this->admin_user);
@@ -944,7 +944,7 @@ class FilterSecurityTestCase extends BackdropWebTestCase {
    * Tests that filtered content is emptied when an actively used filter module
    * is disabled.
    */
-  public function testDisableFilterModule() {
+  protected function testDisableFilterModule() {
     // Create a new node.
     $node = $this->backdropCreateNode(array('promote' => 1));
     $body_raw = $node->body[LANGUAGE_NONE][0]['value'];
@@ -987,7 +987,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
   /**
    * Tests the line break filter.
    */
-  public function testLineBreakFilter() {
+  protected function testLineBreakFilter() {
     // Set up dummy filter object.
     $filter = new stdClass();
     $filter->callback = '_filter_autop';
@@ -1095,7 +1095,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
    * - CVE-2002-1806, ~CVE-2005-0682, ~CVE-2005-2106, CVE-2005-3973,
    *   CVE-2006-1226 (= rev. 1.112?), CVE-2008-0273, CVE-2008-3740.
    */
-  public function testFilterXSS() {
+  protected function testFilterXSS() {
     // Tag stripping, different ways to work around removal of HTML tags.
     $f = filter_xss('<script>alert(0)</script>');
     $this->assertNoNormalized($f, 'script', 'HTML tag stripping -- simple script without special characters.');
@@ -1282,7 +1282,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
    * @todo Class, id, name and xmlns should be added to disallowed attributes,
    *   or better, an allowed attributes approach should be used for that too.
    */
-  public function testHtmlFilter() {
+  protected function testHtmlFilter() {
     // Set up dummy filter object.
     $filter = new stdClass();
     $filter->settings = array(
@@ -1331,7 +1331,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
   /**
    * Tests the spam deterrent.
    */
-  public function testNoFollowFilter() {
+  protected function testNoFollowFilter() {
     // Set up dummy filter object.
     $filter = new stdClass();
     $filter->settings = array(
@@ -1362,7 +1362,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
   /**
    * Tests the loose, admin HTML filter.
    */
-  public function testFilterXSSAdmin() {
+  protected function testFilterXSSAdmin() {
     // DRUPAL-SA-2008-044
     $f = filter_xss_admin('<object />');
     $this->assertNoNormalized($f, 'object', 'Admin HTML filter -- should not allow object tag.');
@@ -1379,7 +1379,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
    *
    * check_plain() is not tested here.
    */
-  public function testHtmlEscapeFilter() {
+  protected function testHtmlEscapeFilter() {
     // Set up dummy filter object.
     $filter = new stdClass();
     $filter->callback = '_filter_html_escape';
@@ -1397,7 +1397,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
   /**
    * Tests the URL filter.
    */
-  public function testUrlFilter() {
+  protected function testUrlFilter() {
     // Set up dummy filter object.
     $filter = new stdClass();
     $filter->callback = '_filter_url';
@@ -1764,7 +1764,7 @@ www.example.com with a newline in comments -->
    * - Empty HTML tags (BR, IMG).
    * - Mix of absolute and partial URLs, and email addresses in one content.
    */
-  public function testUrlFilterContent() {
+  protected function testUrlFilterContent() {
     // Set up dummy filter object.
     $filter = new stdClass();
     $filter->settings = array(
@@ -1781,7 +1781,7 @@ www.example.com with a newline in comments -->
   /**
    * Tests the Image alignment filter (data-align).
    */
-  public function testImageAlignFilter() {
+  protected function testImageAlignFilter() {
     // Set up dummy filter object.
     $filter = new stdClass();
     $filter->callback = '_filter_image_align';
@@ -1829,7 +1829,7 @@ EOF;
   /**
    * Tests the Image caption filter (data-caption).
    */
-  public function testImageAlignCaption() {
+  protected function testImageAlignCaption() {
     // Set up dummy filter object.
     $filter = new stdClass();
     $filter->callback = '_filter_image_caption';
@@ -1858,7 +1858,7 @@ EOF;
    *
    * @todo This test could really use some validity checking function.
    */
-  public function testHtmlCorrectorFilter() {
+  protected function testHtmlCorrectorFilter() {
     // Tag closing.
     $f = _filter_htmlcorrector('<p>text');
     $this->assertEqual($f, '<p>text</p>', 'HTML corrector -- tag closing at the end of input.');
@@ -2099,7 +2099,7 @@ body {color:red}
  * Tests for Filter's hook invocations.
  */
 class FilterHooksTestCase extends BackdropWebTestCase {
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('block', 'filter_test');
     $admin_user = $this->backdropCreateUser(array('administer filters', 'administer blocks'));
     $this->backdropLogin($admin_user);
@@ -2111,7 +2111,7 @@ class FilterHooksTestCase extends BackdropWebTestCase {
    * Tests that hooks run correctly on creating, editing, and deleting a text
    * format.
    */
-  public function testFilterHooks() {
+  protected function testFilterHooks() {
     // Add a text format.
     $name = $this->randomName();
     $edit = array();
@@ -2167,7 +2167,7 @@ class FilterSettingsTestCase extends BackdropWebTestCase {
   /**
    * Tests explicit and implicit default settings for filters.
    */
-  public function testFilterDefaults() {
+  protected function testFilterDefaults() {
     $filter_info = filter_filter_info();
     $filters = array_fill_keys(array_keys($filter_info), array());
 
@@ -2215,7 +2215,7 @@ class FilterFileUsageTest extends BackdropWebTestCase {
   /**
    * Tests file usages are tracked in creating, updating, and deleting content.
    */
-  public function testFilterEntityHooks() {
+  protected function testFilterEntityHooks() {
     $image = entity_create('file', array());
     $image->uri = 'core/misc/favicon.ico';
     $image->filename = 'favicon.ico';
@@ -2282,7 +2282,7 @@ class FilterDOMSerializeTestCase extends BackdropWebTestCase {
   /**
    * Tests empty DOMDocument object.
    */
-  public function testFilterEmptyDOMSerialization() {
+  protected function testFilterEmptyDOMSerialization() {
     $document = new DOMDocument();
     $result = filter_dom_serialize($document);
     $this->assertEqual('', $result);
@@ -2295,7 +2295,7 @@ class FilterDOMSerializeTestCase extends BackdropWebTestCase {
 class FilterEditorAccessTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp(array('file'));
 
     $filtered_html_format = array(
@@ -2316,7 +2316,7 @@ class FilterEditorAccessTestCase extends BackdropWebTestCase {
   /**
    * Checks access to editor dialogs for adding images and links.
    */
-  public function testDialogAccess() {
+  protected function testDialogAccess() {
     // Check that the dialog for filtered HTML is not directly accessible.
     $this->backdropGet('editor/dialog/image/filtered_html');
     $this->assertResponse(403, 'Access denied on image dialog without token.');

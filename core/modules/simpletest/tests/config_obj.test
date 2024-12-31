@@ -4,11 +4,11 @@
  */
 class ConfigObjectTestCase extends BackdropWebTestCase {
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp(array('config_obj_test'));
   }
 
-  public function testConfigObject() {
+  protected function testConfigObject() {
     $config = config('config_obj_test.settings');
 
     // Test getting a config object

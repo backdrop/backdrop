@@ -10,7 +10,7 @@
 class ContextualDynamicContextTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp(array('contextual', 'node'));
     $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
     $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
@@ -21,7 +21,7 @@ class ContextualDynamicContextTestCase extends BackdropWebTestCase {
   /**
    * Tests contextual links on node lists with different permissions.
    */
-  public function testNodeLinks() {
+  protected function testNodeLinks() {
     // Create three nodes in the following order:
     // - An post, which should be user-editable.
     // - A page, which should not be user-editable.

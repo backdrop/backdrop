@@ -33,7 +33,7 @@ class FileViewsTestCase extends BackdropWebTestCase {
   /**
    * Tests the File "Icon" field capability within Views.
    */
-  public function testFileViewsIcon() {
+  protected function testFileViewsIcon() {
     $this->backdropLogin($this->admin_user);
 
     // Upload a few test files.

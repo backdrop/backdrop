@@ -6,7 +6,7 @@ class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
   protected $privileged_user;
 
-  public function setUp() {
+  protected function setUp() {
     // Enable any modules required for the test.
     parent::setUp('installer', 'update', 'installer_test');
 
@@ -38,7 +38,7 @@ class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
     return $errors;
   }
 
-  public function testProjectBrowserProjects() {
+  protected function testProjectBrowserProjects() {
     // Attempt to fetch the default projects.
     $edit = array();
     $edit['search_text'] = '';
@@ -56,7 +56,7 @@ class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
     $this->assertText(t('Showing 1 to'), 'Layout browser loaded');
     }
 
-  public function testProjectBrowserSearch() {
+  protected function testProjectBrowserSearch() {
     // Test searching for a project by name.
     $edit = array();
     $edit['search_text'] = 'aaa';
@@ -64,13 +64,13 @@ class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
     $this->assertText('Showing 1 to');
   }
 
-  public function testProjectBrowserProjectEnabled() {
+  protected function testProjectBrowserProjectEnabled() {
     // Make sure project enabled detection works.
     module_load_include('inc', 'installer', 'installer.browser');
     $this->assertTrue(_installer_browser_is_project_enabled('module', 'update'), t('Make sure project enabled detection works.'));
   }
 
-  public function testProjectBrowserAddRemoveQueue() {
+  protected function testProjectBrowserAddRemoveQueue() {
     // Refresh the page
     $this->backdropGet('admin/modules/install');
 
@@ -85,7 +85,7 @@ class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
     $this->assertNoText(t('Error: The project was not found.'));
   }
 
-  public function testProjectBrowserInstallPage() {
+  protected function testProjectBrowserInstallPage() {
     // Refresh the page.
     $this->backdropGet('admin/modules/install');
     $module_one = 'ddd_installer_test';
@@ -199,7 +199,7 @@ class InstallerBrowserAdministrationTestCase extends BackdropWebTestCase {
 class InstallerTestUploadCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp(array('installer', 'update', 'installer_test'));
     $admin_user = $this->backdropCreateUser(array(
       'administer site configuration',
@@ -211,7 +211,7 @@ class InstallerTestUploadCase extends BackdropWebTestCase {
   /**
    * Tests upload and extraction of a module.
    */
-  public function testUploadModule() {
+  protected function testUploadModule() {
     // Images are not valid archives, so get one and try to install it. We
     // need an extra variable to store the result of backdropGetTestFiles()
     // since reset() takes an argument by reference and passing in a constant
@@ -239,7 +239,7 @@ class InstallerTestUploadCase extends BackdropWebTestCase {
   /**
    * Ensures that archiver extensions are properly merged in the UI.
    */
-  public function testFileNameExtensionMerging() {
+  protected function testFileNameExtensionMerging() {
     $this->backdropGet('admin/installer/manual');
     // Make sure the bogus extension supported by installer_test.module is there.
     $this->assertPattern('/file extensions are supported:.*installer-test-extension/', "Found 'installer-test-extension' extension");
@@ -250,7 +250,7 @@ class InstallerTestUploadCase extends BackdropWebTestCase {
   /**
    * Checks the messages on Update Manager pages when missing a security update.
    */
-  public function testUpdateManagerCoreSecurityUpdateMessages() {
+  protected function testUpdateManagerCoreSecurityUpdateMessages() {
     $config = config('update.settings');
     $setting = array(
       '#all' => array(

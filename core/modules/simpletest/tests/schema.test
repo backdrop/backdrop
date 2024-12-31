@@ -16,7 +16,7 @@ class SchemaTestCase extends BackdropWebTestCase {
   /**
    *
    */
-  public function testSchema() {
+  protected function testSchema() {
     // Try creating a table.
     $table_specification = array(
       'description' => 'Schema table description.',
@@ -141,7 +141,7 @@ class SchemaTestCase extends BackdropWebTestCase {
   /**
    * Tests creating unsigned columns and data integrity thereof.
    */
-  public function testUnsignedColumns() {
+  protected function testUnsignedColumns() {
     // First create the table with just a serial column.
     $table_name = 'unsigned_table';
     $table_spec = array(
@@ -195,7 +195,7 @@ class SchemaTestCase extends BackdropWebTestCase {
   /**
    * Test adding columns to an existing table.
    */
-  public function testSchemaAddField() {
+  protected function testSchemaAddField() {
     // Test varchar types.
     foreach (array(1, 32, 128, 256, 512) as $length) {
       $base_field_spec = array(

@@ -24,7 +24,7 @@ class ViewsHandlerFieldBooleanTest extends ViewsSqlTest {
     return $data;
   }
 
-  public function testFieldBoolean() {
+  protected function testFieldBoolean() {
     $view = $this->getBasicView();
 
     $view->display['default']->handler->override_option('fields', array(

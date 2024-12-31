@@ -19,7 +19,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
    */
   protected $field_names;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp(array('node', 'field_test', 'entity_query_access_test', 'node_access_test'));
 
     field_test_create_bundle('bundle1');
@@ -161,7 +161,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
   /**
    * Tests EntityFieldQuery.
    */
-  public function testEntityFieldQuery() {
+  protected function testEntityFieldQuery() {
     $query = new EntityFieldQuery();
     $query
       ->entityCondition('entity_type', 'test_entity_bundle')
@@ -1051,7 +1051,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
   /**
    * Tests querying translatable fields.
    */
-  public function testEntityFieldQueryTranslatable() {
+  protected function testEntityFieldQueryTranslatable() {
 
     // Make a test field translatable AND cardinality one.
     $this->fields[0]['translatable'] = TRUE;
@@ -1090,7 +1090,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
   /**
    * Tests field meta conditions.
    */
-  public function testEntityFieldQueryMetaConditions() {
+  protected function testEntityFieldQueryMetaConditions() {
     // Make a test field translatable.
     $this->fields[0]['translatable'] = TRUE;
     field_update_field($this->fields[0]);
@@ -1216,7 +1216,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
   /**
    * Tests the routing feature of EntityFieldQuery.
    */
-  public function testEntityFieldQueryRouting() {
+  protected function testEntityFieldQueryRouting() {
     // Entity-only query.
     $query = new EntityFieldQuery();
     $query->entityCondition('entity_type', 'test_entity_bundle_key');
@@ -1270,7 +1270,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
   /**
    * Tests the pager integration of EntityFieldQuery.
    */
-  public function testEntityFieldQueryPager() {
+  protected function testEntityFieldQueryPager() {
     // Test pager in propertyQuery
     $_GET['page'] = '0,1';
     $query = new EntityFieldQuery();
@@ -1325,7 +1325,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
   /**
    * Tests the disabling the pager in EntityFieldQuery.
    */
-  public function testEntityFieldQueryDisablePager() {
+  protected function testEntityFieldQueryDisablePager() {
     // Test enabling a pager and then disabling it.
     $query = new EntityFieldQuery();
     $query
@@ -1346,7 +1346,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
   /**
    * Tests the TableSort integration of EntityFieldQuery.
    */
-  public function testEntityFieldQueryTableSort() {
+  protected function testEntityFieldQueryTableSort() {
     // Test TableSort in propertyQuery
     $_GET['sort'] = 'asc';
     $_GET['order'] = 'Id';
@@ -1523,7 +1523,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
   /**
    * Tests EntityFieldQuery access on non-node entities.
    */
-  public function testEntityFieldQueryAccess() {
+  protected function testEntityFieldQueryAccess() {
     // Test as a user with ability to bypass node access.
     $privileged_user = $this->backdropCreateUser(array('bypass node access', 'access content'));
     $this->backdropLogin($privileged_user);
@@ -1579,7 +1579,7 @@ class EntityFieldQueryTestCase extends BackdropWebTestCase {
    *
    * @see field_test_query_efq_table_prefixing_test_alter()
    */
-  public function testTablePrefixing() {
+  protected function testTablePrefixing() {
     $query = new EntityFieldQuery();
     $query = $query
       ->entityCondition('entity_type', 'test_entity')

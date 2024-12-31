@@ -13,7 +13,7 @@ class ViewsViewTest extends ViewsSqlTest {
   /**
    * Tests the deconstructor to be sure that every kind of heavy objects are removed.
    */
-  public function testDestroy() {
+  protected function testDestroy() {
     $view = $this->view_test_destroy();
 
     $view->preview();
@@ -51,7 +51,7 @@ class ViewsViewTest extends ViewsSqlTest {
     $this->assertEqual($view->attachment_after, '');
   }
 
-  public function testDelete() {
+  protected function testDelete() {
     // Delete a database view
     $view = $this->view_test_delete();
     $view->save();
@@ -62,7 +62,7 @@ class ViewsViewTest extends ViewsSqlTest {
     $this->assertFalse($view, 'Make sure that the old view is removed from the static cache.');
   }
 
-  public function testValidate() {
+  protected function testValidate() {
     // Test a view with multiple displays.
     // Validating a view shouldn't change the active display.
     // @todo: Create an extra validation view.

@@ -17,7 +17,7 @@ class ViewsHandlerArgumentNullTest extends ViewsSqlTest {
     return $data;
   }
 
-  public function testAreaText() {
+  protected function testAreaText() {
     // Test validation
     $view = $this->getBasicView();
 

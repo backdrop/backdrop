@@ -11,7 +11,7 @@ class DateViewsTestCase extends DateFieldBasic {
   /**
    * Test setup actions.
    */
-  public function setUp($modules = array()) {
+  protected function setUp($modules = array()) {
     parent::setUp(array('views', 'views_ui', 'views_test'));
 
     // Create a date field.
@@ -76,7 +76,7 @@ class DateViewsTestCase extends DateFieldBasic {
   /**
    * Test date popup.
    */
-  public function testDateViews() {
+  protected function testDateViews() {
     // Go to view page.
     $this->backdropGet('test-date-popup');
 
@@ -85,7 +85,7 @@ class DateViewsTestCase extends DateFieldBasic {
     $this->assertNoField('field_test_date_popup_value[value][time]');
   }
 
-  public function testDateViewsFields() {
+  protected function testDateViewsFields() {
     // Create date fields with simple values.
     $expected_keys = array();
     foreach (array('date', 'datestamp', 'datetime') as $field_type) {
@@ -142,7 +142,7 @@ class DateViewsTestCase extends DateFieldBasic {
   /**
    * Test the date views pager plugin.
    */
-  public function testDateViewsPagerPlugin() {
+  protected function testDateViewsPagerPlugin() {
     $this->backdropCreateNode();
     // The view date_views_pager_test ships with the views_test module.
     $this->backdropGet('date-views-pager-test');

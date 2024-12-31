@@ -266,7 +266,7 @@ class DateFieldTestCase extends DateFieldBasic {
   /**
    * @todo.
    */
-  public function testField() {
+  protected function testField() {
     // Create a date fields with simple values.
     foreach (array('date', 'datestamp', 'datetime') as $field_type) {
       foreach (array('date_select', 'date_popup', 'date_text', 'date_html5') as $widget_type) {
@@ -366,7 +366,7 @@ class DateFieldTokenTestCase extends DateFieldBasic {
   /**
    * Tests that date field tokens function properly.
    */
-  public function testDateFieldToken() {
+  protected function testDateFieldToken() {
     $timestamp = REQUEST_TIME;
     $timestamp_end = $timestamp + 7200; // Two hours later.
     $timestamp2 = 692955971;
