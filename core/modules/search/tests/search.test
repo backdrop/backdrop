@@ -1691,7 +1691,7 @@ class SearchExcerptTestCase extends BackdropWebTestCase {
     $result = preg_replace('| +|', ' ', search_excerpt('"Number 1234567890"', $text));
     $this->assertTrue(strpos($result, '<strong>Number: 123456.7890</strong>') !== FALSE, 'Phrase with punctuated and numeric keyword is highlighted with simplified match');
 
-    $result = preg_replace('| +|', ' ', search_excerpt('"Hyphenated onetwo"', $text));
+    $result = preg_replace('| +|', ' ', search_excerpt('"Hyphenated onetwo"', $text)); // cspell:disable-line
     $this->assertTrue(strpos($result, '<strong>Hyphenated: one-two</strong>') !== FALSE, 'Phrase with punctuated and hyphenated keyword is highlighted with simplified match');
 
     $result = preg_replace('| +|', ' ', search_excerpt('"abc def"', $text));
