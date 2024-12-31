@@ -189,7 +189,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
      *   The page content that results from clicking on the link, or FALSE on
      *   failure. Failure also results in a failed assertion.
      */
-    function clickTextFormatOperationLink($label, $unique_href_part) {
+    protected function clickTextFormatOperationLink($label, $unique_href_part) {
       $links = $this->xpath('//a[normalize-space(text())=:label]', array(':label' => $label));
       foreach ($links as $link_index => $link) {
         $position = strpos($link['href'], $unique_href_part);

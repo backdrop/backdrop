@@ -325,32 +325,32 @@ class CommonURLUnitTestCase extends BackdropUnitTestCase {
   /**
    * Test backdrop_get_bare_domain().
    */
-   function testBackdropGetBareDomain() {
-     // Input => Expected Output.
-     $tests = array(
-       'http://www.example.com/path-to-page' => 'example.com',
-       'http://example.com/path-to-page' => 'example.com',
-       'http://beta.example.com/path-to-page' => 'example.com',
-       'https://www.beta.example.co.uk/path-to-page' => 'example.co.uk',
-       'http://example.co.uk/path-to-page' => 'example.co.uk',
-       'http://beta.example.co.uk/path-to-page' => 'example.co.uk',
-       '//example.co.uk/path-to-page' => 'example.co.uk',
+  public function testBackdropGetBareDomain() {
+    // Input => Expected Output.
+    $tests = array(
+     'http://www.example.com/path-to-page' => 'example.com',
+     'http://example.com/path-to-page' => 'example.com',
+     'http://beta.example.com/path-to-page' => 'example.com',
+     'https://www.beta.example.co.uk/path-to-page' => 'example.co.uk',
+     'http://example.co.uk/path-to-page' => 'example.co.uk',
+     'http://beta.example.co.uk/path-to-page' => 'example.co.uk',
+     '//example.co.uk/path-to-page' => 'example.co.uk',
 
-       'example.co.uk' => 'example.co.uk',
-       'example.com' => 'example.com',
-       'beta.example.com' => 'example.com',
-       'alpha.beta.example.com' => 'example.com',
-       'bbc.co.uk' => 'bbc.co.uk',
-       'foo.bbc.co.uk' => 'bbc.co.uk',
-       'bar.foo.bbc.co.uk' => 'bbc.co.uk',
-       'bar.foo.abc.com' => 'abc.com',
-       'lb.cm' => 'lb.cm',
-     );
+     'example.co.uk' => 'example.co.uk',
+     'example.com' => 'example.com',
+     'beta.example.com' => 'example.com',
+     'alpha.beta.example.com' => 'example.com',
+     'bbc.co.uk' => 'bbc.co.uk',
+     'foo.bbc.co.uk' => 'bbc.co.uk',
+     'bar.foo.bbc.co.uk' => 'bbc.co.uk',
+     'bar.foo.abc.com' => 'abc.com',
+     'lb.cm' => 'lb.cm',
+    );
 
-     foreach ($tests as $input => $expected_output) {
-       $this->assertIdentical($expected_output, backdrop_get_bare_domain($input));
-     }
-   }
+    foreach ($tests as $input => $expected_output) {
+     $this->assertIdentical($expected_output, backdrop_get_bare_domain($input));
+    }
+  }
 
   /**
    * Test backdrop_parse_url().

@@ -2039,24 +2039,24 @@ class LayoutInterfaceTest extends BackdropWebTestCase {
  * Tests the blocks title, content, and display settings.
  */
 class LayoutBlockTest extends BackdropWebTestCase {
-    protected $profile = 'minimal';
-    protected $admin_user;
+  protected $profile = 'minimal';
+  protected $admin_user;
 
-    function setUp() {
-      parent::setUp(array('file', 'block'));
-      // Create content types for testing.
-      $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+  public function setUp() {
+    parent::setUp(array('file', 'block'));
+    // Create content types for testing.
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
 
-      // Create and login admin user.
-      $this->admin_user = $this->backdropCreateUser(array(
-        'access administration pages',
-        'administer layouts',
-        'access user profiles',
-        'edit any page content',
-        'administer nodes',
-      ));
-      $this->backdropLogin($this->admin_user);
-    }
+    // Create and login admin user.
+    $this->admin_user = $this->backdropCreateUser(array(
+      'access administration pages',
+      'administer layouts',
+      'access user profiles',
+      'edit any page content',
+      'administer nodes',
+    ));
+    $this->backdropLogin($this->admin_user);
+  }
 
   /**
    * Test Custom Text blocks.

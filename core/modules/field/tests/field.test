@@ -1561,7 +1561,7 @@ class FieldFormTestCase extends FieldTestCase {
     $this->assertRaw(t('!name field is required.', array('!name' => $this->instance['label'])), 'Required field with no value fails validation');
   }
 
-//  function testFieldFormMultiple() {
+//  public function testFieldFormMultiple() {
 //    $this->field = $this->field_multiple;
 //    $this->field_name = $this->field['field_name'];
 //    $this->instance['field_name'] = $this->field_name;
