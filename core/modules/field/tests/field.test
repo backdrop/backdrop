@@ -16,7 +16,7 @@ class FieldTestCase extends BackdropWebTestCase {
    * @return array
    *  An array of random values, in the format expected for field values.
    */
-  private function _generateTestFieldValues($cardinality) {
+  protected function _generateTestFieldValues($cardinality) {
     $values = array();
     for ($i = 0; $i < $cardinality; $i++) {
       // field_test fields treat 0 as 'empty value'.
