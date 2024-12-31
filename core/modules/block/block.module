@@ -9,8 +9,8 @@
  */
 function block_permission() {
   $permissions['administer blocks'] = array(
-    'title' => t('Administer custom blocks'),
-    'description' => t('Manage custom blocks and access the custom block listing page.'),
+    'title' => t('Administer reusable custom blocks'),
+    'description' => t('Manage reusable custom blocks and access the reusable custom blocks listing page.'),
   );
   return $permissions;
 }
@@ -20,14 +20,14 @@ function block_permission() {
  */
 function block_menu() {
   $items['admin/structure/block'] = array(
-    'title' => 'Custom blocks',
+    'title' => 'Reusable custom blocks',
     'description' => 'Create reusable blocks that can be placed in layouts.',
     'page callback' => 'block_admin_list',
     'access arguments' => array('administer blocks'),
     'file' => 'block.admin.inc',
   );
   $items['admin/structure/block/list'] = array(
-    'title' => 'List custom blocks',
+    'title' => 'List reusable custom blocks',
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
   $items['admin/structure/block/manage/%'] = array(
@@ -72,7 +72,7 @@ function block_menu() {
     'file' => 'block.admin.inc',
   );
   $items['admin/structure/block/add'] = array(
-    'title' => 'Add custom block',
+    'title' => 'Add reusable custom block',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('block_add_block_form'),
     'access arguments' => array('administer blocks'),
@@ -89,7 +89,7 @@ function block_config_info() {
   $prefixes['block.custom'] = array(
     'name_key' => 'delta',
     'label_key' => 'info',
-    'group' => t('Custom Blocks'),
+    'group' => t('Reusable custom blocks'),
   );
   return $prefixes;
 }

@@ -1447,6 +1447,33 @@ function state_del($name) {
 }
 
 /**
+ * Get the backup directory (if any) for this site.
+ *
+ * This setting comes from $settings['backup_directory'] in settings.php. Note
+ * that settings_get('backup_directory') should not be called directly, instead
+ * use this function, which takes into account test runs.
+ *
+ * This function is in bootstrap.inc so that it can be used without loading
+ * backup.inc if backups are not enabled.
+ *
+ * @return string|null
+ *   The path to the backup directory, relative or absolute, depending on the
+ *   site configuration, or NULL if no backup directory is specified.
+ *
+ * @since 1.30.0 Function added.
+ */
+function backup_get_backup_directory() {
+  $backup_directory = settings_get('backup_directory');
+
+  // For test runs, specify a specific sub-directory. See BackdropWebTestBase::setUp().
+  if ($test_prefix = backdrop_valid_test_ua()) {
+    $backup_directory = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/backups';
+  }
+
+  return $backup_directory;
+}
+
+/**
  * Retrieves the current page from the cache.
  *
  * Note: we do not serve cached pages to authenticated users, or to anonymous
@@ -2953,6 +2980,12 @@ function backdrop_bootstrap($phase = NULL, $new_phase = TRUE) {
  * at an empty database. If this happens, redirect the user to install.php.
  */
 function backdrop_bootstrap_is_installed() {
+  // If in any maintenance mode (install, update, restore, etc.) assume the site
+  // is in the process of installing or restoring.
+  if (defined('MAINTENANCE_MODE')) {
+    return TRUE;
+  }
+
   // We may get a situation where the config directory has been specified in
   // settings.php but the database is empty. In which case a config exception
   // is thrown in the first bootstrap phase but the database hasn't been loaded.

@@ -153,7 +153,7 @@ function system_theme() {
  * Implements hook_permission().
  */
 function system_permission() {
-  return array(
+  $permissions = array(
     'administer modules' => array(
       'title' => t('Administer modules'),
     ),
@@ -168,8 +168,20 @@ function system_permission() {
     'administer software updates' => array(
       'title' => t('Administer software updates'),
       'restrict access' => TRUE,
-      'warning' => t('Run site updates for Backdrop projects.'),
+      'warning' => t('Allows running site updates (update.php) for Backdrop projects.'),
     ),
+  );
+  // If backups are not configured, do not show related permission.
+  if (backup_get_backup_directory()) {
+    $permissions += array(
+      'restore site backups' => array(
+        'title' => t('Restore site backups'),
+        'restrict access' => TRUE,
+        'warning' => t('Allows restoring the configuration and database from backups (restore.php).'),
+      ),
+    );
+  }
+  $permissions += array(
     'access administration pages' => array(
       'title' => t('Use the administration pages'),
     ),
@@ -188,6 +200,8 @@ function system_permission() {
       'description' => t('Provides access to manually flush caches.'),
     ),
   );
+
+  return $permissions;
 }
 
 /**
@@ -4171,6 +4185,10 @@ function system_config_info() {
   );
   $prefixes['system.authorize'] = array(
     'label' => t('System authorize'),
+    'group' => t('Configuration'),
+  );
+  $prefixes['system.backup'] = array(
+    'label' => t('System backup'),
     'group' => t('Configuration'),
   );
   $prefixes['system.date'] = array(

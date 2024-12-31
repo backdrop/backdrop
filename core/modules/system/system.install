@@ -301,13 +301,28 @@ function system_requirements($phase) {
       $config_storage = config_get_config_storage($type);
       if (is_a($config_storage, 'ConfigFileStorage')) {
         $config_directory = config_get_config_directory($type);
-        file_save_htaccess($config_directory);
+        $config_directory_accessible = strstr(realpath($config_directory), BACKDROP_ROOT);
+        if ($config_directory_accessible) {
+          file_save_htaccess($config_directory);
 
-        $htaccess_files[$config_directory . '/.htaccess'] = array(
-          'title' => $t('%type config directory', array('%type' => backdrop_ucfirst($type))),
-          'directory' => $config_directory,
-        );
+          $htaccess_files[$config_directory . '/.htaccess'] = array(
+            'title' => $t('%type config directory', array('%type' => backdrop_ucfirst($type))),
+            'directory' => $config_directory,
+          );
+        }
       }
+    }
+
+    // Check/create the .htaccess file for the backup directory.
+    $backup_directory = backup_get_backup_directory();
+    $backup_directory_accessible = strstr(realpath($backup_directory), BACKDROP_ROOT);
+    if ($backup_directory && $backup_directory_accessible) {
+      file_save_htaccess($backup_directory);
+
+      $htaccess_files[$backup_directory . '/.htaccess'] = array(
+        'title' => $t('Backup directory'),
+        'directory' => $backup_directory,
+      );
     }
 
     // Try to write the .htaccess files first, to prevent false alarms in case
@@ -486,7 +501,12 @@ function system_requirements($phase) {
       $requirements['update access'] = array(
         'value' => $t('Not protected'),
         'severity' => REQUIREMENT_ERROR,
-        'description' => $t('The <code>update.php</code> script is accessible to everyone without authentication check, which is a security risk. You must change the <code>update_free_access</code> value in your <code>settings.php</code> back to <code>FALSE</code>.'),
+        'description' => $t('The !file script is accessible to everyone without authentication check, which is a security risk. You must change the !setting value in your !settings_file back to !value.', array(
+          '!file' => '<code>update.php</code>',
+          '!setting' => '<code>update_free_access</code>',
+          '!settings_file' => '<code>settings.php</code>',
+          '!value' => '<code>FALSE</code>',
+        )),
       );
     }
     else {
@@ -495,6 +515,28 @@ function system_requirements($phase) {
       );
     }
     $requirements['update access']['title'] = $t('Access to update.php');
+  }
+
+  // Verify the restore.php access setting.
+  if ($phase == 'runtime') {
+    if (!empty($GLOBALS['settings']['restore_free_access'])) {
+      $requirements['restore access'] = array(
+        'value' => $t('Not protected'),
+        'severity' => REQUIREMENT_ERROR,
+        'description' => $t('The !file script is accessible to everyone without authentication check, which is a security risk. You must change the !setting value in your !settings_file back to !value.', array(
+          '!file' => '<code>restore.php</code>',
+          '!setting' => '<code>restore_free_access</code>',
+          '!settings_file' => '<code>settings.php</code>',
+          '!value' => '<code>FALSE</code>',
+        )),
+      );
+    }
+    else {
+      $requirements['restore access'] = array(
+        'value' => $t('Protected'),
+      );
+    }
+    $requirements['restore access']['title'] = $t('Access to restore.php');
   }
 
   // Display an error if a newly introduced dependency in a module is not resolved.
@@ -3727,6 +3769,21 @@ function system_update_1100() {
       // sites running Basis.
       $data['css_update_version'] = '';
     }
+    $config->setData($data);
+    $config->save();
+  }
+}
+
+/**
+ * Create the default backup settings configuration.
+ */
+function system_update_1101() {
+  $config = config('system.backup');
+  if ($config->isNew()) {
+    $data = array(
+      '_config_static' => TRUE,
+      'backup_limit' => 5,
+    );
     $config->setData($data);
     $config->save();
   }

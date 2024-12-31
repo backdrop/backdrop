@@ -1046,16 +1046,39 @@ function user_account_form(&$form, &$form_state) {
  */
 function user_validate_current_pass(&$form, &$form_state) {
   $account = $form['#user'];
+  $flood_config = config('user.flood');
   foreach ($form_state['values']['current_pass_required_values'] as $key => $name) {
     // This validation only works for required textfields (like mail) or
     // form values like password_confirm that have their own validation
     // that prevent them from being empty if they are changed.
     if ((strlen(trim($form_state['values'][$key])) > 0) && ($form_state['values'][$key] != $account->$key)) {
+      // Don't validate the password if the limit for the user has been reached.
+      // Default is to allow 5 failed passwords validations every 6 hours to
+      // prevent brute force attacks.
+      $identifier = $account->uid;
+      $pass_reset_window = $flood_config->get('flood_user_window');
+      $pass_reset_limit = $flood_config->get('flood_user_limit');
+      if (!flood_is_allowed('failed_pass_validation_user', $pass_reset_limit, $pass_reset_window, $identifier)) {
+        form_set_error('current_pass',
+          format_plural($pass_reset_limit,
+            'Sorry, you have entered the incorrect password more than once. Changes to fields that require current password are temporarily blocked. Try again later.',
+            'Sorry, you have entered the incorrect password more than @count times. Changes to fields that require current password are temporarily blocked. Try again later.'
+          ));
+        break;
+      }
+
       require_once BACKDROP_ROOT . '/' . settings_get('password_inc', 'core/includes/password.inc');
-      $current_pass_failed = strlen(trim($form_state['values']['current_pass'])) === 0 || !user_check_password($form_state['values']['current_pass'], $account);
+      $trim_pass_len = strlen(trim($form_state['values']['current_pass']));
+      $current_pass_failed = $trim_pass_len === 0 || !user_check_password($form_state['values']['current_pass'], $account);
       if ($current_pass_failed) {
         form_set_error('current_pass', t("Your current password is missing or incorrect; it's required to change the %name.", array('%name' => $name)));
         form_set_error($key);
+
+        // Register failed password validation flood event based on the uid, if
+        // the password was entered.
+        if ($trim_pass_len > 0) {
+          flood_register_event('failed_pass_validation_user', $pass_reset_window, $identifier);
+        }
       }
       // We only need to check the password once.
       break;

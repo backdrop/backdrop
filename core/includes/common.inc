@@ -7956,6 +7956,13 @@ function backdrop_common_theme() {
       ),
       'template' => 'templates/maintenance-page',
     ),
+    'install_page' => array(
+      'variables' => array(
+        'content' => NULL,
+        'sidebar' => NULL,
+        'footer' => NULL,
+      ),
+    ),
     'update_page' => array(
       'variables' => array(
         'content' => NULL,
@@ -7964,7 +7971,7 @@ function backdrop_common_theme() {
         'show_messages' => TRUE,
       ),
     ),
-    'install_page' => array(
+    'restore_page' => array(
       'variables' => array(
         'content' => NULL,
         'sidebar' => NULL,
