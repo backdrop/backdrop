@@ -1375,7 +1375,7 @@ function user_is_logged_in() {
  * @return bool
  *   TRUE if the path is administrative, FALSE otherwise.
  *
- * @see path_get_admin_paths()
+ * @see user_get_user_login_paths()
  * @see hook_user_login_paths()
  * @see hook_user_login_paths_alter()
  */
@@ -1731,7 +1731,7 @@ function user_menu_alter(&$items) {
   if (config_get('system.core', 'user_login_appearance') == 'simplified') {
     $login_paths = user_get_user_login_paths();
     foreach ($login_paths['login'] as $login_path) {
-      if (isset($items[$login_path])) {
+      if (isset($items[$login_path]) && user_is_login_path($login_path)) {
         $items[$login_path]['delivery callback'] = 'backdrop_deliver_html_page';
       }
     }
