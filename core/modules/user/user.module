@@ -1836,7 +1836,7 @@ function user_admin_paths() {
  */
 function user_user_login_paths() {
   return array(
-    'user/login' => FALSE,
+    'user/login' => TRUE,
     'user/password' => TRUE,
     'user/register' => TRUE,
   );
@@ -1953,6 +1953,9 @@ function user_login_page() {
  * paths. It checks the "user_login_appearance" setting and wraps the form as
  * needed with additional information.
  *
+ * @param array $form
+ *   The render array for a form to be wrapped.
+ *
  * @return string
  *   The rendered content of the page, ready for return by a menu handler.
  *
@@ -1962,7 +1965,7 @@ function user_login_page() {
  *
  * @since 1.30.0 Function added.
  */
-function user_login_page_wrapper($form) {
+function user_login_page_wrapper(array $form) {
   $user_login_appearance = config_get('system.core', 'user_login_appearance');
 
   // If this page is not specified in hook_user_login_paths() or modified by
