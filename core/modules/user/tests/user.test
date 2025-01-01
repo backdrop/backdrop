@@ -2936,29 +2936,30 @@ class UserLoginAppearanceTestCase extends BackdropWebTestCase {
       $this->assertEqual(count($links), 1, 'Login links were found.');
     }
 
-    // Set login appearance to simplified again.
+    // Test hook_user_paths() and hook_user_paths_alter() in user_form_test.
     $this->backdropLogin($this->adminUser);
-
-    $layout = $this->xpath('//body/div[contains(@class, "layout")]');
-    $this->assertEqual(count($layout), 1, 'Layout in use before enabling hook_user_paths() in user_form_test.');
-
-    // Enable the hook_user_paths() and hook_user_paths_alter() in
-    // user_form_test module.
-    state_set('user_form_test_user_paths', TRUE);
-
     $edit = array();
     $edit['user_login_appearance'] = 'simplified';
     $this->backdropPost('admin/config/people/login', $edit, t('Save configuration'));
 
-    // The custom form should be given the simplified appearance as the path is
-    // added in hook_user_paths().
+    // This path should not use a simplified layout before hooks are enabled.
+    $this->backdropGet('user_form_test_current_password/' . $this->adminUser->uid);
+    $layout = $this->xpath('//body/div[contains(@class, "layout")]');
+    $this->assertEqual(count($layout), 1, 'Layout in use before enabling hook_user_paths() in user_form_test.');
+
+    // Enable the hooks in user_form_test module.
+    state_set('user_form_test_user_paths', TRUE);
+    $this->backdropPost('admin/config/people/login', $edit, t('Save configuration'));
+
+    // Now the custom form should be given the simplified appearance as the path
+    // is added in hook_user_paths().
     $this->backdropGet('user_form_test_current_password/' . $this->adminUser->uid);
     $layout = $this->xpath('//body/div[contains(@class, "layout")]');
     $this->assertEqual(count($layout), 0, 'Layout no longer in use after enabling hook_user_paths() in user_form_test.');
     $this->backdropLogout();
 
-    // The user/login path should have a normal appearance if excluded from
-    // user paths via hook_user_paths_alter().
+    // The user/login path should have a normal appearance now that it is
+    // excluded from user paths via hook_user_paths_alter().
     $this->backdropGet('user/login');
     $layout = $this->xpath('//body/div[contains(@class, "layout")]');
     $this->assertEqual(count($layout), 1, 'User login form is excluded from user paths by hook_user_paths_alter() in user_form_test.');
