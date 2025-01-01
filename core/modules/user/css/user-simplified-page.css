@@ -2,10 +2,18 @@
  * Simplified login pages.
  */
 
-.user-simplified-page .user-simplified-page-logo {
-  max-width: 150px;
+.user-simplified-page-logo {
+  text-align: center;
 }
-body.user-simplified-page-body {
+.user-simplified-page-logo .logo {
+  display: inline-block;
+  max-width: 240px;
+  margin: auto;
+}
+.user-simplified-page .site-name {
+  text-align: center;
+}
+.user-simplified-page-body {
   padding: 1em;
 }
 .user-simplified-page-wrapper {
@@ -17,15 +25,13 @@ body.user-simplified-page-body {
   position: relative;
 }
 @media all and (min-width: 768px) {
-  body.user-simplified-page-body  {
+  .user-simplified-page-body  {
     width: 100%;
-    display: table;
-  }
-  body.user-simplified-page-body  {
     height: 100%;
+    display: table;
     box-sizing: border-box;
   }
-  body.user-simplified-page-body .user-simplified-page {
+  .user-simplified-page-body .user-simplified-page {
     height: 100%;
     width: 100%;
     display: table-cell;
@@ -38,7 +44,7 @@ body.user-simplified-page-body {
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     overflow: auto;
   }
-  html:has(body.user-simplified-page-body) {
+  html:has(.user-simplified-page-body) {
     margin: 0;
     height: 100%;
     width: 100%;

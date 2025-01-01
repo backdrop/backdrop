@@ -1836,7 +1836,7 @@ function user_admin_paths() {
  */
 function user_user_login_paths() {
   return array(
-    'user/login' => TRUE,
+    'user/login' => FALSE,
     'user/password' => TRUE,
     'user/register' => TRUE,
   );
@@ -1943,30 +1943,91 @@ function user_preprocess_page_components(&$variables) {
  */
 function user_login_page() {
   $user_login_form = backdrop_get_form('user_login');
+  return user_login_page_wrapper($user_login_form);
+}
 
-  switch (config_get('system.core', 'user_login_appearance')) {
+/**
+ * Shared output for pages related to the user login process.
+ *
+ * This callback is shared by "user/login", "user/password", and "user/register"
+ * paths. It checks the "user_login_appearance" setting and wraps the form as
+ * needed with additional information.
+ *
+ * @return string
+ *   The rendered content of the page, ready for return by a menu handler.
+ *
+ * @see user_login_page()
+ * @see user_pass_page()
+ * @see user_register_page()
+ *
+ * @since 1.30.0 Function added.
+ */
+function user_login_page_wrapper($form) {
+  $user_login_appearance = config_get('system.core', 'user_login_appearance');
+
+  // If this page is not specified in hook_user_login_paths() or modified by
+  // hook_user_login_paths_alter(), use the default appearance.
+  if ($user_login_appearance == 'simplified' && !user_is_login_path()) {
+    $user_login_appearance = 'tabs';
+  }
+
+  switch ($user_login_appearance) {
     case 'simplified':
-      $links = _user_local_tasks_to_list();
+      $links = _user_login_links();
       $output = theme('user_simplified_page', array(
-        'form' => $user_login_form,
+        'form' => $form,
         'links' => $links,
       ));
       break;
 
     case 'links':
-      $links = _user_local_tasks_to_list();
+      $links = _user_login_links();
       $output = theme('user_links_page', array(
-        'form' => $user_login_form,
+        'form' => $form,
         'links' => $links,
       ));
       break;
 
     case 'tabs':
     default:
-      $output = $user_login_form;
+      $output = $form;
   }
 
   return $output;
+}
+
+/**
+ * Helper function to transform user local tasks (tabs) to a list of links.
+ *
+ * Used on the pages related to the login process.
+ *
+ * @return array
+ *   A renderable array of items themed as an unordered list.
+ *
+ * @see user_login_page_wrapper()
+ */
+function _user_login_links() {
+  $local_tasks = menu_local_tasks();
+  $items = array();
+  foreach ($local_tasks['tabs']['output'] as $local_tab_data) {
+    // Do not include the active tab.
+    if (!empty($local_tab_data['#active'])) {
+      continue;
+    }
+    if (empty($local_tab_data['#link']['localized_options']['html'])) {
+      $local_tab_data['#link']['title'] = check_plain($local_tab_data['#link']['title']);
+    }
+    $local_tab_data['#link']['localized_options']['html'] = TRUE;
+    $items[] = l($local_tab_data['#link']['title'], $local_tab_data['#link']['href'], $local_tab_data['#link']['localized_options']);
+  }
+  $links = array(
+    '#theme' => 'item_list',
+    '#items' => $items,
+    '#attributes' => array(
+      'class' => array('login-links'),
+    )
+  );
+  return $links;
 }
 
 /**
@@ -3402,32 +3463,8 @@ function user_form_field_ui_field_edit_form_submit($form, &$form_state) {
 function user_register_page() {
   // We need to set the page title because this menu entry is a local task.
   backdrop_set_title(t('Create new account'));
-  $user_login_appearance = config_get('system.core', 'user_login_appearance');
   $user_register_form = backdrop_get_form('user_register_form');
-
-  switch ($user_login_appearance) {
-    case 'simplified':
-      $links = _user_local_tasks_to_list();
-      $output = theme('user_simplified_page', array(
-        'form' => $user_register_form,
-        'links' => $links,
-      ));
-      break;
-
-    case 'links':
-      $links = _user_local_tasks_to_list();
-      $output = theme('user_links_page', array(
-        'form' => $user_register_form,
-        'links' => $links,
-      ));
-      break;
-
-    case 'tabs':
-    default:
-      $output = $user_register_form;
-  }
-
-  return $output;
+  return user_login_page_wrapper($user_register_form);
 }
 
 /**
@@ -3719,34 +3756,4 @@ function user_file_download_access($field, $entity_type, $entity) {
   if ($entity_type == 'user') {
     return user_view_access($entity);
   }
-}
-
-/**
- *  Helper function to transform user local tasks (tabs) to a list of links.
- *
- * @return array
- *   A renderable array of items themed as an unordered list.
- */
-function _user_local_tasks_to_list() {
-  $local_tasks = menu_local_tasks();
-  $items = array();
-  foreach ($local_tasks['tabs']['output'] as $local_tab_data) {
-    // Do not include the active tab.
-    if (!empty($local_tab_data['#active'])) {
-      continue;
-    }
-    if (empty($local_tab_data['#link']['localized_options']['html'])) {
-      $local_tab_data['#link']['title'] = check_plain($local_tab_data['#link']['title']);
-    }
-    $local_tab_data['#link']['localized_options']['html'] = TRUE;
-    $items[] = l($local_tab_data['#link']['title'], $local_tab_data['#link']['href'], $local_tab_data['#link']['localized_options']);
-  }
-  $links = array(
-    '#theme' => 'item_list',
-    '#items' => $items,
-    '#attributes' => array(
-      'class' => array('login-links'),
-    )
-  );
-  return $links;
 }

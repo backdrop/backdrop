@@ -1497,7 +1497,7 @@ table.update {
 
 /* Maintenance page styles */
 body.maintenance-page,
-body.user-simplified-page-body {
+.user-simplified-page-body {
   background: #E8E6E5;
   padding: 1em;
 }
@@ -1585,6 +1585,18 @@ body.maintenance-page #logo {
   max-width: 120px;
   margin: 0 auto;
 }
+.user-simplified-page-logo {
+  text-align: center;
+}
+.user-simplified-page-logo .logo {
+  display: inline-block;
+  max-width: 240px;
+  margin: 0 auto;
+}
+.user-simplified-page .site-name {
+  text-align: center;
+}
+
 ol.task-list {
   margin: 0;
   padding-left: 0; /* LTR */
@@ -1783,15 +1795,15 @@ div.add-or-remove-shortcuts {
     width: 100%;
   }
   .maintenance-page-wrapper,
-  body.user-simplified-page-body  {
+  .user-simplified-page-body  {
     width: 100%;
     display: table;
   }
-  body.user-simplified-page-body  {
+  .user-simplified-page-body  {
     height: 100%;
     box-sizing: border-box;
   }
-  body.user-simplified-page-body .user-simplified-page {
+  .user-simplified-page-body .user-simplified-page {
     height: 100%;
     width: 100%;
     display: table-cell;

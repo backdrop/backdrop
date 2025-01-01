@@ -22,10 +22,11 @@
             <?php print $logo_image; ?>
           </a>
         </div>
+      <?php else: ?>
+        <h1 class="site-name">
+          <a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>" rel="home"><span><?php print $site_name; ?></span></a>
+        </h1>
       <?php endif; ?>
-      <h1 class="site-name">
-        <a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>" rel="home"><span><?php print $site_name; ?></span></a>
-      </h1>
       <h2 class="user-simplified-page-title">
         <?php print $page_title; ?>
       </h2>

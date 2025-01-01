@@ -33,31 +33,10 @@ function user_pass_page() {
 
   // If user is logged in, always display with tabs appearance.
   if (user_is_logged_in()) {
-    return $user_password_form;
+    $output = $user_password_form;
   }
-
-  // For anonymous users, match with the selected appearance.
-  $user_login_appearance = config_get('system.core', 'user_login_appearance');
-  switch ($user_login_appearance) {
-    case 'simplified':
-      $links = _user_local_tasks_to_list();
-      $output = theme('user_simplified_page', array(
-        'form' => $user_password_form,
-        'links' => $links,
-      ));
-      break;
-
-    case 'links':
-      $links = _user_local_tasks_to_list();
-      $output = theme('user_links_page', array(
-        'form' => $user_password_form,
-        'links' => $links,
-      ));
-      break;
-
-    case 'tabs':
-    default:
-      $output = $user_password_form;
+  else {
+    $output = user_login_page_wrapper($user_password_form);
   }
 
   return $output;
