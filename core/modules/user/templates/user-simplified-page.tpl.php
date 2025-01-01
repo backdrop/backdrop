@@ -23,13 +23,13 @@
           </a>
         </div>
       <?php else: ?>
-        <h1 class="site-name">
+        <div class="site-name">
           <a href="<?php print $front_page; ?>" title="<?php print t('Home'); ?>" rel="home"><span><?php print $site_name; ?></span></a>
-        </h1>
+        </div>
       <?php endif; ?>
-      <h2 class="user-simplified-page-title">
+      <h1 class="user-simplified-page-title">
         <?php print $page_title; ?>
-      </h2>
+      </h1>
       <div class="user-simplified-page-messages">
         <?php print $messages; ?>
       </div>

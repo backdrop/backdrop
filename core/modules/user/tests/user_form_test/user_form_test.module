@@ -83,3 +83,25 @@ function user_form_test_user_account_submit($form, &$form_state) {
   // test for bugs that can be triggered in contributed modules.
   $form_state['rebuild'] = TRUE;
 }
+
+/**
+ * Implements hook_user_paths().
+ */
+function user_form_test_user_paths() {
+  $paths = array();
+  // If set, turn the custom password form into a user login path so that it
+  // uses the simplified login display.
+  if (state_get('user_form_test_user_paths', FALSE)) {
+    $paths['user_form_test_current_password/%user'] = TRUE;
+  }
+  return $paths;
+}
+
+/**
+ * Implements hook_user_paths_alter().
+ */
+function user_form_test_user_paths_alter(&$paths) {
+  if (state_get('user_form_test_user_paths', FALSE)) {
+    $paths['user/login'] = FALSE;
+  }
+}

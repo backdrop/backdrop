@@ -1585,17 +1585,6 @@ body.maintenance-page #logo {
   max-width: 120px;
   margin: 0 auto;
 }
-.user-simplified-page-logo {
-  text-align: center;
-}
-.user-simplified-page-logo .logo {
-  display: inline-block;
-  max-width: 240px;
-  margin: 0 auto;
-}
-.user-simplified-page .site-name {
-  text-align: center;
-}
 
 ol.task-list {
   margin: 0;
