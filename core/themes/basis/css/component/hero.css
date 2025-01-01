@@ -27,7 +27,7 @@
 }
 
 .update-1-30 .l-top .block-hero {
-  margin-top: 0;/* Negative top margin collapses spacing under header */
+  margin-top: 0;
 }
 
 .update-1-30 .l-top .block-hero:first-child,
