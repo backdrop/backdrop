@@ -420,8 +420,8 @@ function template_preprocess_user_simplified_page(&$variables) {
  * @param array $variables
  *   An associative array containing:
  *   - form: A render array of the form to be rendered
- *     (e.g. login or password reset).
- *   - links: An item_list render array with the local tasks as links. 
+ *     (for example, login or password reset).
+ *   - links: An item_list render array with the local tasks as links.
  *
  * @return string
  *   The themed HTML string with the links.
