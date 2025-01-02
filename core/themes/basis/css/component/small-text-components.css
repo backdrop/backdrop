@@ -157,6 +157,9 @@ ul.links,
 
 .links.inline li {
   display: inline-block;
+  padding: 0 0 0 0.6em;
+}
+html[dir="rtl"] .links.inline li {
   padding: 0 0.6em 0 0;
 }
 
@@ -168,7 +171,13 @@ ul.links,
   border: 0;
   padding: 0 0 0 0.6em;
 }
+html[dir="rtl"] .links.inline li:after {
+  padding: 0 0.6em 0 0;
+}
 
 .links.inline li:last-child:after {
   content: '';
+}
+html[dir="rtl"] .links.inline li:last-child {
+  padding: 0;
 }
