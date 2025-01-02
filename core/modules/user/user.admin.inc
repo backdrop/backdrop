@@ -140,13 +140,20 @@ function user_admin_settings($form, &$form_state) {
   );
   $form['registration_cancellation']['user_email_verification'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Require email verification when a visitor creates an account.'),
+    '#title' => t('Require email verification when a visitor creates an account'),
     '#default_value' => $config->get('user_email_verification'),
-    '#description' => t('New users will be required to validate their email address prior to logging into the site, and will be assigned a system-generated password. With this setting disabled, users will be logged in immediately upon registering, and may select their own passwords during registration.')
+    '#description' => t('New users will be required to validate their email address prior to logging into the site, and will be assigned a system-generated password. With this setting disabled, users will be logged in immediately upon registering, and may select their own passwords during registration.'),
+    '#states' => array(
+      // Hide this checkbox when "Administrators only" is selected.
+      'invisible' => array(
+        'input[name="user_register"]' => array('value' => USER_REGISTER_ADMINISTRATORS_ONLY),
+      ),
+    ),
+    '#indentation' => 1,
   );
   $form['registration_cancellation']['user_email_match'] = array(
     '#type' => 'checkbox',
-    '#title' => t('When an email address is used as username, require a matching email address.'),
+    '#title' => t('When an email address is used as username, require a matching email address'),
     '#default_value' => $config->get('user_email_match'),
   );
   module_load_include('inc', 'user', 'user.pages');
@@ -193,7 +200,7 @@ function user_admin_settings($form, &$form_state) {
   );
   $form['personalization']['user_signatures'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Enable signatures.'),
+    '#title' => t('Enable signatures'),
     '#default_value' => $config->get('user_signatures'),
   );
   // If picture support is enabled, check whether the picture directory exists.
@@ -208,7 +215,7 @@ function user_admin_settings($form, &$form_state) {
   $picture_support = $config->get('user_pictures');
   $form['personalization']['user_pictures'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Enable user pictures.'),
+    '#title' => t('Enable user pictures'),
     '#default_value' => $picture_support,
   );
   backdrop_add_js(backdrop_get_path('module', 'user') . '/js/user.js');
@@ -380,18 +387,44 @@ function user_login_settings($form, &$form_state) {
     '#type' => 'radios',
     '#title' => t('Identify users attempting to log in, using'),
     '#options' => array(
-      '0' => t('User ID and IP address combination'),
       '1' => t('User ID only'),
+      '0' => t('User ID and IP address combination'),
     ),
     '#default_value' => $flood_config->get('flood_uid_only'),
-    FALSE => array(
-      '#description' => ' Less secure, less likely to lock out users.',
+    '1' => array(
+      '#description' => t('More secure, more likely to lock out users.'),
     ),
-    TRUE => array(
-      '#description' => 'More secure, more likely to lock out users.',
+    '0' => array(
+      '#description' => t('Less secure, less likely to lock out users.'),
     ),
   );
 
+  $form['user_login_appearance_setting'] = array(
+    '#type' => 'fieldset',
+    '#title' => '',
+  );
+  $user_login_page_tab_options = array(
+    'tabs' => t('Use tabs'),
+    'links' => t('Use links'),
+    'simplified' => t('Show simplified page'),
+  );
+  $user_login_appearance = $core_config->get('user_login_appearance');
+  $form['user_login_appearance_setting']['user_login_appearance'] = array(
+    '#title' => t('Login page options'),
+    '#type' => 'radios',
+    '#options' => $user_login_page_tab_options,
+    '#default_value' => $user_login_appearance ? $user_login_appearance : 'tabs',
+    '#config' => 'system.core',
+    'tabs' => array(
+      '#description' => t('Show tabs for "Create new account", "Log in", and "Reset password" links.'),
+    ),
+    'links' => array(
+      '#description' => t('Show plain links to these pages.'),
+    ),
+    'simplified' => array(
+      '#description' => t('Show plain links to these pages, and hide all layout regions, such as headers, footers, and sidebars.'),
+    ),
+  );
   $form['flood_log_failed_attempts'] = array(
     '#type' => 'checkbox',
     '#title' => t('Log excessive failed login attempts.'),
@@ -399,7 +432,19 @@ function user_login_settings($form, &$form_state) {
     '#description' => t('If there are excessive failed login attempts, the offending IP address or user account will be temporarily blocked. By default these events will be logged, as it helps identify brute force login attacks. You may want to disable logging them if for example, you are using the dblog module, and want to avoid database writes.'),
   );
 
-  return system_settings_form($form);
+  $form = system_settings_form($form);
+
+  // Add another submit handler to flush caches on save, needed to rebuild
+  // menus and clear the page cache for anonymous users.
+  $form['#submit'][] = 'user_login_settings_submit';
+  return $form;
+}
+
+/**
+ * Second form submission handler for user_login_settings().
+ */
+function user_login_settings_submit($form, &$form_state) {
+  backdrop_flush_all_caches();
 }
 
 /**
@@ -502,7 +547,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
     );
     $form['role_names'][$role_name] = array(
       '#markup' => check_plain($role->label),
-      '#description' => filter_xss_admin($role->admin_description),
+      '#description' => filter_xss_admin($role->description),
       '#tree' => TRUE,
     );
   }
@@ -550,29 +595,37 @@ function user_admin_roles($form, $form_state) {
     '#markup' => t('Roles provide a way to organize people into groups that have similar duties. Each user account can be given one or more roles, and <a href="@permissions">permissions</a> can be granted to those roles. To make the <a href="@permissions">permissions</a> page easier to navigate, it is recommended that roles be ordered from the least permissive (Anonymous) to the most permissive (usually Administrator).', array('@permissions' => url('admin/config/people/permissions'))),
   );
 
-  // Administrative role option.
-  $form['admin_role'] = array(
+  // Default administrator role and content editor role options.
+  $form['default_roles'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Administrator role'),
+    '#title' => t('Default roles'),
+    '#description' => t('Changing these settings will not affect existing permissions.'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#weight' => -20,
   );
   $roles = user_roles();
-  // Do not allow the anonymous or authenticated roles to be set as the
-  // administrator.
+  // Do not allow the anonymous or authenticated roles to be set as the default
+  // administrator or content editor roles.
   unset($roles[BACKDROP_ANONYMOUS_ROLE]);
   unset($roles[BACKDROP_AUTHENTICATED_ROLE]);
   // Add the "disabled" option to the top of the roles list (makes sure that
-  // this is the selected option if the role that was previously set as admin is
-  // deleted).
-  $roles = array(0 => t('disabled')) + $roles;
-  $form['admin_role']['user_admin_role'] = array(
+  // this is the selected option if the role that was previously set as admin or
+  // content editor is deleted).
+  $roles = array(0 => t('- None -')) + $roles;
+  $form['default_roles']['user_admin_role'] = array(
     '#type' => 'select',
-    '#title' => t('The role that will be automatically assigned new permissions whenever a module is enabled:'),
+    '#title' => t('Default administrator role'),
     '#default_value' => $system_config->get('user_admin_role') ? $system_config->get('user_admin_role') : 0,
     '#options' => $roles,
-    '#description' => t('Changing this setting will not affect existing permissions.'),
+    '#description' => t('This role will be automatically given any permission introduced by newly enabled modules.'),
+  );
+  $form['default_roles']['user_editor_role'] = array(
+    '#type' => 'select',
+    '#title' => t('Default content editor role'),
+    '#default_value' => $system_config->get('user_editor_role') ? $system_config->get('user_editor_role') : 0,
+    '#options' => $roles,
+    '#description' => t('This role will be automatically given permission to create, edit, and delete content for any newly created content types.'),
   );
 
   // Settings for anonymous users.
@@ -622,7 +675,7 @@ function user_admin_roles($form, $form_state) {
         'title' => t('Export role'),
         'href' => 'admin/config/development/configuration/single/export',
         'query' => array(
-          'group' => 'User roles',
+          'group' => t('User roles'),
           'name' => 'user.role.' . $role_name,
         ),
       );
@@ -645,7 +698,12 @@ function user_admin_roles($form, $form_state) {
   $form['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save configuration'),
-    '#limit_validation_errors' => array(array('roles'), array('user_admin_role'), array('anonymous')),
+    '#limit_validation_errors' => array(
+      array('roles'),
+      array('user_admin_role'),
+      array('user_editor_role'),
+      array('anonymous'),
+    ),
     '#submit' => array('user_admin_roles_order_submit'),
   );
 
@@ -660,6 +718,7 @@ function user_admin_roles_order_submit($form, &$form_state) {
   $config = config('system.core');
   $config->set('anonymous', $form_state['values']['anonymous']);
   $config->set('user_admin_role', $form_state['values']['user_admin_role']);
+  $config->set('user_editor_role', $form_state['values']['user_editor_role']);
   $config->save();
 
   // Save roles.
@@ -704,20 +763,12 @@ function user_admin_role($form, &$form_state, $role = NULL) {
     ),
     '#description' => t('A unique machine-readable name for this role. It must only contain lowercase letters, numbers, and underscores.'),
   );
-  $form['admin_description'] = array(
-    '#type' => 'textarea',
-    '#rows' => 3,
-    '#title' => t('Admin description'),
-    '#default_value' => isset($role->admin_description) ? $role->admin_description : '',
-    '#description' => t('Summary of this role\'s purpose, shown on the role listing page.'),
-  );
   $form['description'] = array(
     '#type' => 'textarea',
     '#rows' => 3,
-    '#title' => t('Help text'),
+    '#title' => t('Description'),
     '#default_value' => isset($role->description) ? $role->description : '',
-    '#description' => t('Description to present when assigning this role on the account edit form.'),
-    '#access' => !isset($role->name) || $role->name !== BACKDROP_ANONYMOUS_ROLE,
+    '#description' => t('Summary of this role\'s purpose, shown on the role listing page and when assigning this role on user account forms.'),
   );
   $form['weight'] = array(
     '#type' => 'value',
@@ -757,7 +808,6 @@ function user_admin_role_submit($form, &$form_state) {
     $role = (object) array(
       'name' => $form_state['values']['name'],
       'label' => $form_state['values']['label'],
-      'admin_description' => $form_state['values']['admin_description'],
       'description' => $form_state['values']['description'],
     );
     user_role_save($role);
@@ -772,7 +822,6 @@ function user_admin_role_submit($form, &$form_state) {
     // Update existing role.
     $role = $form_state['role'];
     $role->label = $form_state['values']['label'];
-    $role->admin_description = $form_state['values']['admin_description'];
     $role->description = $form_state['values']['description'];
     user_role_save($role);
     backdrop_set_message(t('The %role role has been saved.', array('%role' => $role->label)));

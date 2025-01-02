@@ -163,7 +163,7 @@ function hook_user_cancel_methods_alter(&$methods) {
   unset($methods['user_cancel_reassign']);
 
   // Add a custom zero-out method.
-  $methods['mymodule_zero_out'] = array(
+  $methods['my_module_zero_out'] = array(
     'title' => t('Delete the account and remove all content.'),
     'description' => t('All your content will be replaced by empty strings.'),
     // access should be used for administrative methods only.
@@ -210,10 +210,10 @@ function hook_user_format_name_alter(&$name, $account) {
  * @see hook_user_update()
  */
 function hook_user_presave($account) {
-  // Make sure that our form value 'mymodule_foo' is stored as
-  // 'mymodule_bar' in the 'data' (serialized) column.
-  if (isset($account->mymodule_foo)) {
-    $account->data['mymodule_bar'] = $account->mymodule_foo;
+  // Make sure that our form value 'my_module_foo' is stored as
+  // 'my_module_bar' in the 'data' (serialized) column.
+  if (isset($account->my_module_foo)) {
+    $account->data['my_module_bar'] = $account->my_module_foo;
   }
 }
 
@@ -427,11 +427,51 @@ function hook_user_role_delete($role) {
     ->execute();
 }
 
+
+/**
+ * Define paths related to the user login process.
+ *
+ * The paths "user/login", "user/password", and "user/register" are added by
+ * User module. Other modules that expand the user login process should also
+ * add their paths here.
+ *
+ * @return array
+ *   For each item, the key is the path in question, in a format acceptable to
+ *   backdrop_match_path(). The value for each item should be TRUE (for paths
+ *   related to the login process) or FALSE (for non-login related paths).
+ *
+ * @see hook_menu()
+ * @see backdrop_match_path()
+ * @see hook_user_login_paths_alter()
+ */
+function hook_user_login_paths() {
+  return array(
+    'my_module/user/login' => TRUE,
+    'my_module/user/password' => TRUE,
+    'my_module/user/login/*' => TRUE,
+  );
+}
+
+/**
+ * Redefine user login paths defined by other modules.
+ *
+ * @param $paths
+ *   An associative array of paths related to the login process, as defined by
+ *   implementations of hook_user_login_paths(). Modified by reference.
+ *
+ * @see hook_user_login_paths()
+ */
+function hook_user_login_paths_alter(&$paths) {
+  // Do not treat the user login page special (disabling the simplified login
+  // page appearance).
+  $paths['user/login'] = FALSE;
+}
+
 /**
  * Alter the requirement for rejecting weak passwords.
  *
  * Called by user_password_reject_weak() to allow modules to alter
- * wheather to reject weak passwords. Can be used to only reject
+ * whether to reject weak passwords. Can be used to only reject
  * passwords for certain roles. For instance, administrators
  * may be required to set strong passwords.
  *

@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.24.x-dev');
+define('BACKDROP_VERSION', '1.30.x-dev');
 
 /**
  * Core API compatibility.
@@ -63,6 +63,7 @@ define('CACHE_TEMPORARY', -1);
  * comment, "And it's also not a bug, as Windows just have less log levels,"
  * and "So the behavior you're seeing is perfectly normal."
  *
+ * @see https://en.wikipedia.org/wiki/Syslog#Severity_level
  * @see http://www.faqs.org/rfcs/rfc3164.html
  * @see http://bugs.php.net/bug.php?id=18090
  * @see http://php.net/manual/function.syslog.php
@@ -97,7 +98,7 @@ define('WATCHDOG_ERROR', 3);
 define('WATCHDOG_WARNING', 4);
 
 /**
- * Log message severity -- Normal but significant conditions.
+ * Log message severity -- Notice: normal but significant conditions.
  */
 define('WATCHDOG_NOTICE', 5);
 
@@ -112,7 +113,7 @@ define('WATCHDOG_INFO', 6);
 define('WATCHDOG_DEBUG', 7);
 
 /**
- * Log message severity -- Deprecated function / feature notices.
+ * Log message severity -- Deprecated function/feature notices.
  */
 define('WATCHDOG_DEPRECATED', 8);
 
@@ -366,7 +367,7 @@ abstract class BackdropCacheArray implements ArrayAccess {
     $this->bin = $bin;
 
     if ($cached = cache($bin)->get($this->cid)) {
-     $this->storage = $cached->data;
+      $this->storage = $cached->data;
     }
   }
 
@@ -420,7 +421,7 @@ abstract class BackdropCacheArray implements ArrayAccess {
    * @param $persist
    *   Optional boolean to specify whether the offset should be persisted or
    *   not, defaults to TRUE. When called with $persist = FALSE the offset will
-   *   be unflagged so that it will not be written at the end of the request.
+   *   be un-flagged so that it will not be written at the end of the request.
    */
   protected function persist($offset, $persist = TRUE) {
     $this->keysToPersist[$offset] = $persist;
@@ -468,6 +469,9 @@ abstract class BackdropCacheArray implements ArrayAccess {
    * Destructs the BackdropCacheArray object.
    */
   public function __destruct() {
+    if (!is_array($this->keysToPersist)) {
+      throw new UnexpectedValueException();
+    }
     $data = array();
     foreach ($this->keysToPersist as $offset => $persist) {
       if ($persist) {
@@ -593,11 +597,14 @@ function conf_path($require_settings = TRUE, $reset = FALSE) {
  * which directory should be used based on the hostname. If not using multisite,
  * the path returned will be a single period (indicating the current directory).
  *
- * @param $http_host
+ * @param string $http_host
  *   The hostname and optional port number, e.g. "www.example.com" or
  *   "www.example.com:8080".
- * @param $script_name
+ * @param string $script_name
  *   The part of the url following the hostname, including the leading slash.
+ * @param bool $require_settings
+ *   Only configuration directories with an existing settings.php file
+ *   will be recognized. Defaults to TRUE.
  *
  * @return
  *   The relative path of the matching configuration directory.
@@ -802,6 +809,12 @@ function backdrop_is_https() {
  * @since 1.9.2
  */
 function backdrop_is_apache() {
+  // Test runs always emulate Apache.
+  $test_info = &$GLOBALS['backdrop_test_info'];
+  if (!empty($test_info['in_child_site'])) {
+    return TRUE;
+  }
+
   $server_software = $_SERVER['SERVER_SOFTWARE'];
   return (bool) preg_match("/apache/i", $server_software);
 }
@@ -841,7 +854,6 @@ function backdrop_settings_initialize() {
   // Export these settings.php variables to the global namespace.
   global $databases, $cookie_domain, $conf, $settings, $installed_profile, $is_https, $base_secure_url, $base_insecure_url, $config_directories, $config;
   $conf = array();
-  $settings = array();
 
   $conf_path = conf_path();
   if (file_exists($conf_path . '/settings.php')) {
@@ -851,21 +863,66 @@ function backdrop_settings_initialize() {
     require_once BACKDROP_ROOT . '/core/includes/drupal.inc';
   }
 
-  // Convert simplified database settings into the full databases array.
-  if (!empty($database) && $database !== 'mysql://user:pass@localhost/database_name') {
-    $database_parts = parse_url($database);
-    if (!$database_parts) {
-      trigger_error('The database setting could not be parsed. Please check the $database setting in settings.php.', E_USER_ERROR);
+  $database_is_set = FALSE;
+
+  // The database connection can be specified in multiple formats:
+  // - $database as a string.
+  // - $database as an simple array.
+  // - $databases as a multi-level nested array.
+  // Both the simplified syntaxes are converted to the larger $databases array.
+
+  // First option: the database connection settings have been provided in the
+  // form of a connection string. This was the default format in versions prior
+  // to Backdrop 1.30.0:
+  if (!empty($database) && is_string($database)) {
+    $default_db_string = 'mysql://user:pass@localhost/database_name';
+    if ($database !== $default_db_string) {
+      // Convert simplified database settings string into the full databases
+      // array.
+      $database_parts = parse_url($database);
+      if (!$database_parts) {
+        trigger_error('The database setting could not be parsed. Please check the $database setting in settings.php.', E_USER_ERROR);
+      }
+      $databases['default']['default'] = array(
+        'driver' => $database_parts['scheme'],
+        // Remove leading slash.
+        'database' => rawurldecode(substr($database_parts['path'], 1)),
+        'username' => isset($database_parts['user']) ? rawurldecode($database_parts['user']) : '',
+        'password' => isset($database_parts['pass']) ? rawurldecode($database_parts['pass']) : '',
+        'host' => $database_parts['host'],
+        'port' => isset($database_parts['port']) ? $database_parts['port'] : NULL,
+        'prefix' => !empty($database_prefix) ? $database_prefix : '',
+      );
+      $database_is_set = TRUE;
     }
-    $databases['default']['default'] = array(
-      'driver' => $database_parts['scheme'],
-      'database' => rawurldecode(substr($database_parts['path'], 1)), // Remove leading slash.
-      'username' => isset($database_parts['user']) ? rawurldecode($database_parts['user']) : '',
-      'password' => isset($database_parts['pass']) ? rawurldecode($database_parts['pass']) : '',
-      'host' => $database_parts['host'],
-      'port' => isset($database_parts['port']) ? $database_parts['port'] : NULL,
-      'prefix' => !empty($database_prefix) ? $database_prefix : '',
+  }
+  // Second option: the database connection settings is a simplified array. This
+  // is the default format in version 1.30.0 and higher.
+  if (!empty($database) && is_array($database)) {
+    $default_db_array = array(
+      'database' => 'database_name',
+      'username' => 'user',
+      'password' => 'pass',
+      'host' => 'localhost',
     );
+    if ($database != $default_db_array) {
+      // Specify default values.
+      $database += array(
+        'prefix' => '',
+        'driver' => 'mysql',
+        'port' => NULL,
+        'charset' => 'utf8mb4',
+        'collation' => 'utf8mb4_general_ci',
+      );
+      $databases['default']['default'] = $database;
+      $database_is_set = TRUE;
+    }
+  }
+
+  // If using one of the simplified syntaxes, verify all the necessary parts
+  // are specified.
+  if ($database_is_set) {
+    // Check that all required parts are included.
     $required_parts = array('driver', 'database', 'username', 'host');
     foreach ($required_parts as $key) {
       if (!$databases['default']['default'][$key]) {
@@ -877,7 +934,7 @@ function backdrop_settings_initialize() {
 
   $is_https = backdrop_is_https();
 
-  // Load settings specified by the server, if present
+  // Load settings specified by the server, if present.
   if (isset($_SERVER['BACKDROP_SETTINGS'])) {
     $server_settings = @json_decode($_SERVER['BACKDROP_SETTINGS'], TRUE);
     if (!is_array($server_settings)) {
@@ -1027,7 +1084,10 @@ function backdrop_get_filename($type, $name, $filename = NULL) {
 
   // Profiles are a special case: they have a fixed location and naming.
   if ($type == 'profile') {
-    $profile_filenames = array("profiles/$name/$name.profile", "core/profiles/$name/$name.profile");
+    $profile_filenames = array(
+      "profiles/$name/$name.profile",
+      "core/profiles/$name/$name.profile",
+    );
     foreach ($profile_filenames as $profile_filename) {
       if (file_exists($profile_filename)) {
         $files[$type][$name] = $profile_filename;
@@ -1387,6 +1447,33 @@ function state_del($name) {
 }
 
 /**
+ * Get the backup directory (if any) for this site.
+ *
+ * This setting comes from $settings['backup_directory'] in settings.php. Note
+ * that settings_get('backup_directory') should not be called directly, instead
+ * use this function, which takes into account test runs.
+ *
+ * This function is in bootstrap.inc so that it can be used without loading
+ * backup.inc if backups are not enabled.
+ *
+ * @return string|null
+ *   The path to the backup directory, relative or absolute, depending on the
+ *   site configuration, or NULL if no backup directory is specified.
+ *
+ * @since 1.30.0 Function added.
+ */
+function backup_get_backup_directory() {
+  $backup_directory = settings_get('backup_directory');
+
+  // For test runs, specify a specific sub-directory. See BackdropWebTestBase::setUp().
+  if ($test_prefix = backdrop_valid_test_ua()) {
+    $backup_directory = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/backups';
+  }
+
+  return $backup_directory;
+}
+
+/**
  * Retrieves the current page from the cache.
  *
  * Note: we do not serve cached pages to authenticated users, or to anonymous
@@ -1582,7 +1669,7 @@ function backdrop_get_http_header($name = NULL) {
  * @param string $name
  *   Optional. A header name with the preferred capitalization, e.g.
  *   Cache-Control or Content-Type.
- * @return
+ * @return string[]
  *   The array of all current preferred header names. Keyed by a lower-case
  *   string of each header name.
  */
@@ -1662,7 +1749,7 @@ function backdrop_send_headers($default_headers = array(), $only_default = FALSE
  * refers to the time of the request. If the user accesses Backdrop via a proxy
  * server, and the proxy already has a cached copy of the anonymous page with an
  * older Last-Modified date, the proxy may respond with 304 Not Modified, making
- * the client think that the anonymous and authenticated pageviews are
+ * the client think that the anonymous and authenticated page views are
  * identical.
  *
  * @return bool
@@ -2218,19 +2305,20 @@ function watchdog_exception($type, Exception $exception, $message = NULL, $varia
     return;
   }
 
-   // Use a default value if $message is not set.
-   if (empty($message)) {
-     // The exception message is run through check_plain() by _backdrop_decode_exception().
-     $message = '%type: !message in %function (line %line of %file).';
-   }
-   // $variables must be an array so that we can add the exception information.
-   if (!is_array($variables)) {
-     $variables = array();
-   }
+  // Use a default value if $message is not set.
+  if (empty($message)) {
+    // The exception message is run through check_plain() by
+    // _backdrop_decode_exception().
+    $message = '%type: !message in %function (line %line of %file).';
+  }
+  // $variables must be an array so that we can add the exception information.
+  if (!is_array($variables)) {
+    $variables = array();
+  }
 
-   require_once BACKDROP_ROOT . '/core/includes/errors.inc';
-   $variables += _backdrop_decode_exception($exception);
-   watchdog($type, $message, $variables, $severity, $link);
+  require_once BACKDROP_ROOT . '/core/includes/errors.inc';
+  $variables += _backdrop_decode_exception($exception);
+  watchdog($type, $message, $variables, $severity, $link);
 }
 
 /**
@@ -2256,6 +2344,7 @@ function watchdog_severity_enabled($severity = WATCHDOG_NOTICE) {
   // This may be called before system.core, such as when running update.php or
   // the initial installation. As such we provide the defaults if needed.
   if (!isset($enabled_severity_levels)) {
+    // See watchdog_severity_levels() for possible values.
     $enabled_severity_levels = array(
       WATCHDOG_EMERGENCY,
       WATCHDOG_ALERT,
@@ -2264,8 +2353,6 @@ function watchdog_severity_enabled($severity = WATCHDOG_NOTICE) {
       WATCHDOG_WARNING,
       WATCHDOG_NOTICE,
       WATCHDOG_INFO,
-      // WATCHDOG_DEBUG,
-      // WATCHDOG_DEPRECATED,
     );
   }
 
@@ -2325,7 +2412,7 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
     // The user object may not exist in all conditions, so 0 is substituted if needed.
     $user_uid = isset($user->uid) ? $user->uid : 0;
 
-    // Prepare the fields to be logged
+    // Prepare the fields to be logged.
     $log_entry = array(
       'type'        => $type,
       'message'     => $message,
@@ -2341,7 +2428,7 @@ function watchdog($type, $message, $variables = array(), $severity = WATCHDOG_NO
       'timestamp'   => time(),
     );
 
-    // Call the logging hooks to log/process the message
+    // Call the logging hooks to log/process the message.
     module_invoke_all('watchdog', $log_entry);
 
     // It is critical that the semaphore is only cleared here, in the parent
@@ -2532,7 +2619,8 @@ function backdrop_set_title($title = NULL, $output = CHECK_PLAIN) {
  *   The number of random bytes to fetch and base64 encode.
  *
  * @return string
- *   The base64 encoded result will have a length of up to 4 * $byte_count.
+ *   The base64 encoded result will have a length of up to
+ *   ceil($byte_count * 4 / 3).
  */
 function backdrop_random_key($byte_count = 32) {
   return backdrop_base64_encode(backdrop_random_bytes($byte_count));
@@ -2892,6 +2980,12 @@ function backdrop_bootstrap($phase = NULL, $new_phase = TRUE) {
  * at an empty database. If this happens, redirect the user to install.php.
  */
 function backdrop_bootstrap_is_installed() {
+  // If in any maintenance mode (install, update, restore, etc.) assume the site
+  // is in the process of installing or restoring.
+  if (defined('MAINTENANCE_MODE')) {
+    return TRUE;
+  }
+
   // We may get a situation where the config directory has been specified in
   // settings.php but the database is empty. In which case a config exception
   // is thrown in the first bootstrap phase but the database hasn't been loaded.
@@ -3007,6 +3101,7 @@ function _backdrop_exception_handler($exception) {
  */
 function _backdrop_bootstrap_configuration() {
   backdrop_environment_initialize();
+
   // Start a page timer:
   timer_start('page');
   // Initialize the configuration, including variables from settings.php.
@@ -3034,11 +3129,20 @@ function _backdrop_bootstrap_configuration() {
     throw new Exception(format_string('The HTTP Host "@hostname" is not white-listed for this site. Check the trusted_host_patterns setting in settings.php.', array('@hostname' => $_SERVER['HTTP_HOST'])));
   }
 
+  // Bootstrap the database if it is needed but not yet available.
+  $config_storage = config_get_config_storage('active');
+
   // Check that the config directory is not empty.
-  if (!defined('MAINTENANCE_MODE') && ($config_storage = config_get_config_storage('active'))) {
+  if (!defined('MAINTENANCE_MODE') && (!empty($config_storage))) {
     if (!($config_storage->exists('system.core') || $config_storage->exists('system.performance'))) {
-      $directory = config_get_config_directory('active');
-      throw new Exception("The configuration directory in settings.php is specified as '$directory', but this directory is either empty or missing crucial files. Check that the \$config_directories variable is correct in settings.php.");
+      if (is_a($config_storage, 'ConfigFileStorage')) {
+        $directory = config_get_config_directory('active');
+        $exception_message = "The configuration directory in settings.php is specified as '$directory', but this directory is either empty or missing crucial files. Check that the \$config_directories variable is correct in settings.php.";
+      }
+      else {
+        $exception_message = "The active configuration location is either empty or missing crucial information. Check that the \$settings['config_active_class'] variable is correct in settings.php.";
+      }
+      throw new Exception($exception_message);
     }
   }
 }
@@ -3091,7 +3195,7 @@ function _backdrop_bootstrap_page_cache() {
       ob_start();
 
       // Calls to hook_boot() on page cache requests is deprecated, though they
-      // can still be enabled via settings.php
+      // can still be enabled via settings.php.
       if (settings_get('page_cache_invoke_hooks', FALSE)) {
         // Restore the metadata cached with the page for hook_boot().
         $_GET['q'] = $cache->data['path'];
@@ -3216,7 +3320,6 @@ function _backdrop_bootstrap_variables() {
     }
   }
 
-
   // Load variables from the database, but do not overwrite variables set in settings.php.
   $conf = variable_initialize(isset($conf) ? $conf : array());
 }
@@ -3244,7 +3347,8 @@ function _backdrop_bootstrap_sanitize_request() {
   // Remove dangerous keys from input data.
   $allowlist = settings_get('sanitize_input_allowlist', array());
   if (empty($allowlist)) {
-    // Backwards compatible setting support. @todo Remove in 2.x.
+    // @todo Remove forbidden backwards compatibility word in Backdrop 2.x.
+    // cspell:disable-next-line
     $allowlist = settings_get('sanitize_input_whitelist', array());
   }
   $log_sanitized_keys = settings_get('sanitize_input_logging');
@@ -3362,7 +3466,7 @@ function backdrop_valid_test_ua() {
 
   if (isset($_SERVER['HTTP_USER_AGENT']) && preg_match("/^(simpletest\d+);(.+);(.+);(.+)$/", $_SERVER['HTTP_USER_AGENT'], $matches)) {
     list(, $prefix, $time, $salt, $hmac) = $matches;
-    $check_string =  $prefix . ';' . $time . ';' . $salt;
+    $check_string = $prefix . ';' . $time . ';' . $salt;
     // We use the salt from settings.php to make the HMAC key, since the
     // database is not yet initialized and we can't access any Backdrop
     // variables. The file properties add more entropy.
@@ -3562,12 +3666,12 @@ function language_multilingual() {
  */
 function language_list($only_enabled = FALSE, $option_list = FALSE, $native_names = FALSE) {
   $languages = &backdrop_static(__FUNCTION__);
-  // Initialize master language list.
+  // Initialize primary language list.
   if (!isset($languages)) {
     // Initialize local language list caches.
     $languages = array('all' => array(), 'enabled' => array());
 
-    // Fill in master language list based on current configuration. This may be
+    // Fill in primary language list based on current configuration. This may be
     // in the event of an early bootstrap error, so fallback to defaults.
     try {
       $default_langcode = config_get('system.core', 'language_default');
@@ -3618,7 +3722,10 @@ function language_list($only_enabled = FALSE, $option_list = FALSE, $native_name
     // backdrop_sort() needed for ordering, but common.inc may not be loaded
     // in very early bootstrap. Include only if returning an option list.
     require_once __DIR__ . '/common.inc';
-    backdrop_sort($this_list, array('weight' => SORT_NUMERIC, 'name' => SORT_STRING));
+    backdrop_sort($this_list, array(
+      'weight' => SORT_NUMERIC,
+      'name' => SORT_STRING,
+    ));
     foreach ($this_list as $language) {
       if ($native_names && isset($language->native)) {
         $label = $language->native;
@@ -3722,8 +3829,8 @@ function language_default() {
  *
  * Examples:
  * - http://example.com/node/306 returns "node/306".
- * - http://example.com/backdropfolder/node/306 returns "node/306" while
- *   base_path() returns "/backdropfolder/".
+ * - http://example.com/backdrop_folder/node/306 returns "node/306" while
+ *   base_path() returns "/backdrop_folder/".
  * - http://example.com/url-alias (which is a URL alias for node/306) returns
  *   "path/alias" as opposed to the internal path.
  * - http://example.com/index.php returns an empty string (meaning: home page).
@@ -3940,7 +4047,7 @@ class SchemaCache extends BackdropCacheArray {
    */
   protected function resolveCacheMiss($offset) {
     $complete_schema = backdrop_get_complete_schema();
-    $value = isset($complete_schema[$offset]) ? $complete_schema[$offset] :  NULL;
+    $value = isset($complete_schema[$offset]) ? $complete_schema[$offset] : NULL;
     $this->storage[$offset] = $value;
     $this->persist($offset);
     return $value;
@@ -4135,7 +4242,7 @@ function backdrop_autoload($class) {
  * static $foo = &backdrop_static(__FUNCTION__);
  * @endcode
  * However, the above line of code does not work, because PHP only allows static
- * variables to be initializied by literal values, and does not allow static
+ * variables to be initialized by literal values, and does not allow static
  * variables to be assigned to references.
  * - http://php.net/manual/language.variables.scope.php#language.variables.scope.static
  * - http://php.net/manual/language.variables.scope.php#language.variables.scope.references
@@ -4329,7 +4436,7 @@ function &backdrop_register_shutdown_function($callback = NULL) {
     }
     $args = func_get_args();
     array_shift($args);
-    // Save callback and arguments
+    // Save callback and arguments.
     $callbacks[] = array('callback' => $callback, 'arguments' => $args);
   }
   return $callbacks;
@@ -4430,7 +4537,7 @@ function backdrop_clear_opcode_cache($filepath) {
  * @param string $host
  *   The host to check against the patterns specified in settings.php.
  *
- * @return
+ * @return bool
  *   TRUE if the host can be trusted; FALSE otherwise.
  *
  * @since Backdrop 1.14.0

@@ -279,13 +279,25 @@ function file_requirements($phase) {
     if ($file_needs_classification) {
       $requirements['file_needs_classification'] = array(
         'title' => t('File Type Classification'),
-        'value' => t('File types need to be classified. (<a href="!path">Classify file types</a>).', array('!path' => '/admin/structure/file-types/classify')),
+        'value' => t('File types need to be classified. (<a href="!path">Classify file types</a>).', array('!path' => url('admin/structure/file-types/classify'))),
         'description' => t('This site may not work properly if file types are not classified. Classifying file types may take some time if there are a lot of files without an assigned file type.'),
         'severity' => REQUIREMENT_ERROR,
       );
     }
   }
   return $requirements;
+}
+
+/**
+ * Implements hook_update_dependencies().
+ */
+function file_update_dependencies() {
+  // Ensure that the text filters have been converted to config prior to
+  // updating the "No results" format on the file admin View.
+  $dependencies['file'][1009] = array(
+    'system' => 1028,
+  );
+  return $dependencies;
 }
 
 /**
@@ -304,7 +316,7 @@ function file_update_1000() {
     'core' => '1.6',
     'display' => array(
       'default' => array(
-        'display_title' => 'Master',
+        'display_title' => 'Default',
         'display_plugin' => 'default',
         'display_options' => array(
           'query' => array(
@@ -919,6 +931,7 @@ function file_update_1005() {
       'description' => 'A document file is written information.',
       'mimetypes' => array(
           'text/plain',
+          // cspell:disable
           'application/msword',
           'application/vnd.ms-excel',
           'application/pdf',
@@ -929,6 +942,7 @@ function file_update_1005() {
           'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
           'application/vnd.openxmlformats-officedocument.presentationml.presentation',
           'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          // cspell:enable
       ),
       'disabled' => FALSE,
       'storage' => 4,
@@ -1202,7 +1216,7 @@ function file_update_1008() {
   db_create_table('cache_entity_file', $table);
 }
 
-/** 
+/**
  * Remove the file_type_determine queue.
  */
 function file_update_1009() {
@@ -1211,4 +1225,65 @@ function file_update_1009() {
     file_needs_type_classification(TRUE);
   }
   $queue->deleteQueue();
+}
+
+/**
+ * Ensures that the "no results" text in 'file_admin' view has a valid format.
+ */
+function file_update_1010() {
+  // Back in file_update_1000() we created this view containing 'filtered_html'
+  // as the "no results" text format, but if we were upgrading from a site that
+  // didn't contain that format, it results in an error. Here we ensure that the
+  // format for that text is a valid format and if it isn't, use the fallback
+  // format. Check the format for all displays, in case the user has modified
+  // the page from the default.
+  $config = config('views.view.file_admin');
+  $displays = $config->get('display');
+  if (!empty($displays)) {
+    $filter_format_configs = config_get_names_with_prefix('filter.format.');
+    foreach ($displays as &$display) {
+      if (isset($display['display_options']['empty']['area']['format'])) {
+        $format = $display['display_options']['empty']['area']['format'];
+        if (in_array('filter.format.' . $format, $filter_format_configs)) {
+          continue;
+        }
+        $display['display_options']['empty']['area']['format'] = filter_fallback_format();
+      }
+    }
+    $config->set('display', $displays);
+    $config->save();
+  }
+}
+
+/**
+ * Add Apple media types to document file type and to allowed extensions.
+ */
+function file_update_1011() {
+  $config = config('file.type.document');
+  $mimetypes = $config->get('mimetypes');
+  $mimetypes = array_merge($mimetypes, array(
+    'application/vnd.apple.keynote',
+    'application/vnd.apple.numbers',
+    'application/vnd.apple.pages',
+  ));
+  $config->set('mimetypes', $mimetypes);
+  $config->save();
+
+  // Check if there are any existing files with these extensions that are of
+  // type 'undefined'. If so, turn on the reclassification alert.
+  $count = db_query("SELECT COUNT(fid) FROM {file_managed} WHERE (filename LIKE :keynote_extension OR filename LIKE :numbers_extension OR filename LIKE :pages_extension) AND type = :undefined_type",
+    array(
+      ':keynote_extension' => '%.keynote',
+      ':numbers_extension' => '%.numbers',
+      ':pages_extension' => '%.pages',
+      ':undefined_type' => 'undefined',
+    ))->fetchField();
+  if ($count) {
+    file_needs_type_classification(TRUE);
+    $message = format_plural($count, '@count file with an Apple file type was found.', '@count files with Apple file types were found.', array('@count' => $count));
+    $message .= ' ' . t('Visit the <a href="@url">File reclassification form</a> next to classify these files properly.', array(
+      '@url' => url('admin/structure/file-types/classify'),
+    ));
+    return $message;
+  }
 }

@@ -312,6 +312,11 @@ function file_display_form($form, &$form_state, $file_type, $view_mode) {
     if (!empty($formatter['hidden'])) {
       unset($formatters[$name]);
     }
+    if (!isset($formatter['view callback']) || !function_exists($formatter['view callback'])) {
+      // Don't include the formatters for which file_view_file() would show a
+      // link to the file as fallback.
+      unset($formatters[$name]);
+    }
     if (isset($formatter['mime types'])) {
       if (file_match_mimetypes($formatter['mime types'], $file_type->mimetypes)) {
         continue;
@@ -347,7 +352,7 @@ function file_display_form($form, &$form_state, $file_type, $view_mode) {
       if (!empty($settings_form)) {
         $form['display']['settings'][$name] = array(
           '#type' => 'fieldset',
-          '#title' => check_plain($formatter['label']) . ' ' . t('settings'),
+          '#title' => t('@label settings', array('@label' => $formatter['label'])),
           '#parents' => array('display', 'settings', $name),
           '#group' => 'display_settings',
           '#states' => array(
@@ -559,7 +564,7 @@ function file_settings_form($form, &$form_state) {
   );
   $form['file_replace_options'] = array(
     '#type' => 'fieldset',
-    '#title' => t('File replace optons'),
+    '#title' => t('File replace options'),
     '#collapsible' => TRUE,
     '#collapsed' => FALSE,
     '#description' => t('Default settings for how to handle file name changes during replace.'),
@@ -709,7 +714,7 @@ function file_type_classify_confirm($form, $form_state) {
 
 /**
  * Submit handler for file type classification confirmation form.
- * 
+ *
  * @see file_type_classify_confirm()
  */
 function file_type_classify_confirm_submit($form, &$form_state) {

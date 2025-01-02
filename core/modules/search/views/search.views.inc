@@ -185,7 +185,7 @@ function template_preprocess_views_view_row_search(&$variables) {
 
   $info = array();
   $info['type'] = node_type_get_name($node);
-  $info['user'] = theme('username', array('acccount' => $node));
+  $info['user'] = theme('username', array('account' => $node));
   $info['date'] = format_date($node->changed, 'short');
   $extra = module_invoke_all('node_search_result', $node);
   if (isset($extra) && is_array($extra)) {

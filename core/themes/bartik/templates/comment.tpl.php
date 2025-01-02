@@ -36,7 +36,7 @@
  *   - comment-preview: When previewing a new or edited comment.
  *   - comment-title-hidden: Comment titles should be hidden.
  *   - comment-title-auto: Comment titles are automatically generated.
- *   - commet-title-custom: Comment titles are custom for each comment.
+ *   - comment-title-custom: Comment titles are custom for each comment.
  *   The following applies only to viewers who are registered users:
  *   - comment-unpublished: An unpublished comment visible only to administrators.
  *   - comment-by-viewer: Comment by the user currently viewing the page.
@@ -59,7 +59,7 @@
  * @see theme_comment()
  */
 ?>
-<article class="<?php print implode(' ', $classes); ?> clearfix"<?php print backdrop_attributes($attributes); ?> role="article">
+<article class="<?php print implode(' ', $classes); ?> clearfix"<?php print backdrop_attributes($attributes); ?>>
   <header class="comment-header">
     <div class="attribution">
       <?php print $user_picture; ?>

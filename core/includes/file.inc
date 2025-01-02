@@ -514,8 +514,8 @@ function file_save_htaccess($directory, $private = TRUE, $force_overwrite = FALS
 
   $htaccess_lines = file_htaccess_lines($private);
 
-  // Write the .htaccess file.
-  if (file_put_contents($htaccess_path, $htaccess_lines)) {
+  // Write the .htaccess file. Suppress any PHP error and write to watchdog.
+  if (@file_put_contents($htaccess_path, $htaccess_lines)) {
     backdrop_chmod($htaccess_path, 0444);
   }
   else {
@@ -1579,7 +1579,8 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
   else {
     // No validator was provided, so add one using the default list.
     // Build a default non-munged safe list for file_munge_filename().
-    $extensions = 'jpg jpeg gif png txt doc xls pdf ppt pps odt ods odp docx docm pptx pptm xlsx xlsm';
+    $extensions = implode(' ', image_get_supported_extensions()) . ' txt doc xls pdf ppt pps odt ods odp docx docm pptx pptm xlsx xlsm';
+
     $validators['file_validate_extensions'] = array();
     $validators['file_validate_extensions'][0] = $extensions;
   }
@@ -1650,6 +1651,9 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
 
   // Add in our check of the the file name length.
   $validators['file_validate_name_length'] = array();
+
+  // Add in check for valid SVG.
+  $validators['file_validate_svg'] = array();
 
   // Call the validation functions specified by this function's caller.
   $errors = file_validate($file, $validators);
@@ -1883,7 +1887,8 @@ function file_validate_is_image(File $file) {
 
   $info = image_get_info($file->uri);
   if (!$info || empty($info['extension'])) {
-    $errors[] = t('Only JPEG, PNG and GIF images are allowed.');
+    $supported_extensions = image_get_supported_extensions();
+    $errors[] = t('Only images with the following extensions are allowed: @formats.', array('@formats' => implode(', ', $supported_extensions)));
   }
 
   return $errors;
@@ -2011,6 +2016,70 @@ function file_validate_image_orientation(File $file, $orientation = 0) {
         }
       }
     }
+  }
+
+  return $errors;
+}
+
+/**
+ * Validate uploaded SVG files.
+ *
+ * @param File $file
+ *   A file entity.
+ *
+ * @return array
+ *   If the file is an SVG and is either not valid or contains
+ *   dangerous content, the array will contain an error message.
+ *
+ * @see hook_file_validate()
+ */
+function file_validate_svg(File $file) {
+  $errors = array();
+
+  if ($file->filemime == 'image/svg+xml') {
+    $file_contents = file_get_contents($file->uri);
+    $file_contents = preg_replace('/<!DOCTYPE[^>]*>/i', '', $file_contents);
+    $file_contents = html_entity_decode($file_contents);
+    $file_contents = strtolower($file_contents);
+    libxml_use_internal_errors(TRUE);
+    $xml = simplexml_load_string($file_contents);
+    $errors = libxml_get_errors();
+
+    if (!$xml || !empty($errors)) {
+      return array(t('Invalid SVG file.'));
+    }
+    else {
+      $errors = array();
+      $namespaces = $xml->getNamespaces();
+      if (!in_array('http://www.w3.org/2000/svg', $namespaces)) {
+        $errors[] = t('Invalid SVG namespace.');
+      }
+
+      $search_patterns = array(
+        // @see https://developer.mozilla.org/en-US/docs/Web/SVG/Element
+        '//svg:foreignobject',
+        '//svg:script',
+        '//html:iframe',
+        // @see https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
+        '//@*[starts-with(name(), "on")]',
+        '//svg:a[starts-with(normalize-space(@href), "javascript:")]',
+        '//svg:a[starts-with(normalize-space(@xlink:href), "javascript:")]',
+        '//svg:a[starts-with(normalize-space(@href), "data:")]',
+        '//svg:a[starts-with(normalize-space(@xlink:href), "data:")]',
+      );
+
+      $xml->registerXPathNamespace('svg', 'http://www.w3.org/2000/svg');
+      $xml->registerXPathNamespace('html', 'http://www.w3.org/1999/xhtml');
+      foreach ($search_patterns as $search_pattern) {
+        $found = $xml->xpath($search_pattern);
+        if (!empty($found)) {
+          $errors[] = t('Dangerous content found.');
+          break;
+        }
+      }
+    }
+    libxml_clear_errors();
+    libxml_use_internal_errors(FALSE);
   }
 
   return $errors;
@@ -2169,6 +2238,7 @@ function file_download() {
   $scheme = array_shift($args);
   $target = implode('/', $args);
   $uri = $scheme . '://' . $target;
+  $uri = file_uri_normalize_dot_segments($uri);
   if (file_stream_wrapper_valid_scheme($scheme) && file_exists($uri)) {
     $headers = file_download_headers($uri);
     if (count($headers)) {
@@ -2272,6 +2342,8 @@ function file_download_access($uri) {
  *     extension. Defaults to 'uri'.
  *   - 'min_depth': Minimum depth of directories to return files from. Defaults
  *     to 0.
+ *   - 'max_depth': Maximum depth of directories to return files from. Defaults
+ *     to 30.
  * @param $depth
  *   Current depth of recursion. This parameter is only used internally and
  *   should not be passed in.
@@ -2295,6 +2367,7 @@ function file_scan_directory($dir, $mask, $options = array(), $depth = 0) {
     'recurse' => TRUE,
     'key' => 'uri',
     'min_depth' => 0,
+    'max_depth' => 30,
   );
 
   $options['key'] = in_array($options['key'], array('uri', 'filename', 'name')) ? $options['key'] : 'uri';
@@ -2305,10 +2378,11 @@ function file_scan_directory($dir, $mask, $options = array(), $depth = 0) {
         $uri = "$dir/$filename";
         $uri = file_stream_wrapper_uri_normalize($uri);
         if (is_dir($uri) && $options['recurse']) {
-          // Give priority to files in this folder by merging them in after any subdirectory files.
+          // Give priority to files in this folder by merging them in after any
+          // subdirectory files.
           $files = array_merge(file_scan_directory($uri, $mask, $options, $depth + 1), $files);
         }
-        elseif ($depth >= $options['min_depth'] && preg_match($mask, $filename)) {
+        elseif ($depth >= $options['min_depth'] && $depth < $options['max_depth'] && preg_match($mask, $filename)) {
           // Always use this match over anything already set in $files with the
           // same $$options['key'].
           $file = new stdClass();
@@ -2733,6 +2807,55 @@ function file_get_content_headers(File $file) {
     'Content-Length' => $file->filesize,
     'Cache-Control' => 'private',
   );
+}
+
+/**
+ * Normalize dot segments in a URI.
+ *
+ * @param $uri
+ *   A stream, referenced as "scheme://target".
+ *
+ * @return string
+ *   The URI with dot segments removed and slashes as directory separator.
+ */
+function file_uri_normalize_dot_segments($uri) {
+  $scheme = file_uri_scheme($uri);
+
+  if (file_stream_wrapper_valid_scheme($scheme)) {
+    $target = file_uri_target($uri);
+
+    if ($target !== FALSE) {
+      $skip_schemes = config_get('system.core', 'file_not_normalized_schemes');
+      if (empty($skip_schemes) || !in_array($scheme, $skip_schemes)) {
+        // URIs should always use '/' for separating directories in paths.
+        $class = file_stream_wrapper_get_class($scheme);
+        if (is_subclass_of($class, BackdropLocalStreamWrapper::class)) {
+          $target = str_replace(DIRECTORY_SEPARATOR, '/', $target);
+
+          // Remove '.' and '..' from the path.
+          $parts = explode('/', $target);
+          $normalized = array();
+          foreach ($parts as $part) {
+            if ($part === '' || $part === '.') {
+              continue;
+            }
+            elseif ($part === '..') {
+              array_pop($normalized);
+            }
+            else {
+              $normalized[] = $part;
+            }
+          }
+
+          $target = implode('/', $normalized);
+        }
+
+        $uri = $scheme . '://' . $target;
+      }
+    }
+  }
+
+  return $uri;
 }
 
 /**

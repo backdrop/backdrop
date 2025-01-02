@@ -52,7 +52,7 @@ class LocaleConfigurationTest extends BackdropWebTestCase {
     $this->assertNoFieldChecked('edit-site-default-en', 'Default language updated.');
     $this->assertEqual($this->getUrl(), url('admin/config/regional/language', array('absolute' => TRUE)), 'Correct page redirection.');
 
-    // Check if a valid language prefix is added afrer changing the default
+    // Check if a valid language prefix is added after changing the default
     // language.
     $this->backdropGet('admin/config/regional/language/detection/url');
     $this->assertFieldByXPath('//input[@name="prefix[en]"]', 'en', 'A valid path prefix has been added to the previous default language.');
@@ -149,6 +149,9 @@ class LocaleJavascriptTranslationTest extends BackdropWebTestCase {
       "Context Single Quoted @count plural" => "Context string single quoted",
       "Context Double Quoted plural" => "Context string double quoted",
       "Context Double Quoted @count plural" => "Context string double quoted",
+
+      "No count argument plural - singular" => '',
+      "No count argument plural - plural" => '',
     );
 
     // Assert that all strings were found properly.
@@ -636,7 +639,7 @@ class LocalePluralFormatTest extends BackdropWebTestCase {
     backdrop_static_reset('locale_get_plural');
     backdrop_static_reset('locale_get_plural:plurals');
 
-    // Test locale_get_plural() for English (no formula presnt).
+    // Test locale_get_plural() for English (no formula present).
     $this->assertIdentical(locale_get_plural(1, 'en'), 0, "Computed plural index for 'en' with count 1 is 0.");
     $this->assertIdentical(locale_get_plural(0, 'en'), 1, "Computed plural index for 'en' with count 0 is 1.");
     $this->assertIdentical(locale_get_plural(5, 'en'), 1, "Computed plural index for 'en' with count 5 is 1.");
@@ -838,7 +841,7 @@ class LocaleImportFunctionalTest extends BackdropWebTestCase {
     $this->assertRaw(t('The translation was successfully imported. There are %number newly created translated strings, %update strings were updated and %delete strings were removed.', array('%number' => 1, '%update' => 0, '%delete' => 0)), 'The translation file was successfully imported.');
     // Ensure string wasn't overwritten.
     $search = array(
-      'string' => 'Montag',
+      'string' => 'Montag', // cspell:disable-line
       'language' => 'fr',
       'translation' => 'translated',
     );
@@ -860,7 +863,7 @@ class LocaleImportFunctionalTest extends BackdropWebTestCase {
     $this->assertRaw(t('The translation was successfully imported. There are %number newly created translated strings, %update strings were updated and %delete strings were removed.', array('%number' => 0, '%update' => 2, '%delete' => 0)), 'The translation file was successfully imported.');
     // Ensure string was overwritten.
     $search = array(
-      'string' => 'Montag',
+      'string' => 'Montag', // cspell:disable-line
       'language' => 'fr',
       'translation' => 'translated',
     );
@@ -1039,6 +1042,7 @@ EOF;
    * Helper function that returns a proper .po file for testing.
    */
   function getOverwritePoFile() {
+    // cspell:disable
     return <<< EOF
 msgid ""
 msgstr ""
@@ -1054,6 +1058,7 @@ msgstr "Montag"
 msgid "Day"
 msgstr "Jour"
 EOF;
+    // cspell:enable
   }
 
   /**
@@ -1221,10 +1226,11 @@ class LocaleInstallTest extends BackdropWebTestCase {
  * Locale uninstall with English UI functional test.
  */
 class LocaleUninstallFunctionalTest extends BackdropWebTestCase {
+
   /**
-   * The default language set for the UI before uninstall.
+   * @var string
    */
-  protected $language;
+  protected $langcode;
 
   function setUp() {
     parent::setUp('locale');
@@ -1740,7 +1746,7 @@ class LocalePathFunctionalTest extends BackdropWebTestCase {
     // Check that the "xx" home page is readily available because path prefix
     // negotiation is pre-configured.
     $this->backdropGet($prefix);
-    $this->assertText(t('Welcome to Backdrop'), 'The "xx" home page is readibly available.');
+    $this->assertText(t('Welcome to Backdrop'), 'The "xx" home page is readily available.');
 
     // Create a node.
     $node = $this->backdropCreateNode(array('type' => 'page'));
@@ -2179,7 +2185,7 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
         'expect' => $language_string,
         'expected_provider' => LANGUAGE_NEGOTIATION_URL,
         'http_header' => $http_header_browser_fallback,
-        'message' => 'URL (PATH) > BROWSER: with langage prefix, UI language is based on path prefix',
+        'message' => 'URL (PATH) > BROWSER: with language prefix, UI language is based on path prefix',
       ),
       // Default, browser language preference is not one of site's lang.
       array(
@@ -2364,6 +2370,12 @@ class LocaleUILanguageNegotiationTest extends BackdropWebTestCase {
  * Test that URL rewriting works as expected.
  */
 class LocaleUrlRewritingTest extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   function setUp() {
     parent::setUp('locale');
 
@@ -2483,7 +2495,7 @@ class LocaleUrlRewritingTest extends BackdropWebTestCase {
 
     $this->assertEqual($url, $expected, 'The right port is used.');
 
-    // If we set the port explicitly in url(), it should not be overriden.
+    // If we set the port explicitly in url(), it should not be overridden.
     $url = url('', array(
       'absolute' => TRUE,
       'language' => $language,
@@ -2493,7 +2505,7 @@ class LocaleUrlRewritingTest extends BackdropWebTestCase {
     $expected = 'http://example.fr:90/';
     $expected .= $index_php ? 'index.php/' : '';
 
-    $this->assertEqual($url, $expected, 'A given port is not overriden.');
+    $this->assertEqual($url, $expected, 'A given port is not overridden.');
 
     // Restore HTTP_HOST.
     $_SERVER['HTTP_HOST'] = $http_host;
@@ -2931,8 +2943,8 @@ class LocaleStringIsSafeTest extends BackdropWebTestCase {
     $result = locale_string_is_safe($string);
     $this->assertTrue($result);
 
-    // Check an untranslatable string which includes untrustable HTML (according
-    // to the locale_string_is_safe() function definition).
+    // Check an untranslatable string which includes potentially unsafe HTML
+    // (according to the locale_string_is_safe() function definition).
     $string = 'Hello <img src="world.png" alt="world" />!';
     $result = locale_string_is_safe($string);
     $this->assertFalse($result);
@@ -2943,4 +2955,3 @@ class LocaleStringIsSafeTest extends BackdropWebTestCase {
     $this->assertTrue($result);
   }
 }
-
