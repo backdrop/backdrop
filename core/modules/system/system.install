@@ -539,6 +539,32 @@ function system_requirements($phase) {
     $requirements['restore access']['title'] = $t('Access to restore.php');
   }
 
+  // Verify the backup setting.
+  if ($phase == 'runtime') {
+    if (empty($GLOBALS['settings']['backup_directory'])) {
+      $help = '<p>' . t('Backups are not available because the variable !variable has not been set in !file.', array(
+        '!variable' => '<code>$settings[\'backup_directory\']</code>',
+        '!file' => '<code>settings.php</code>',
+      )) . '</p>';
+      $help .= '<p>' . t('Before running updates, it is recommended to create a backup of your database and configuration.') . '</p>';
+      $help .= '<p>' . t('If not enabling the core backup process, please ensure you create a backup through a different mechanism, such as through your hosting provider.') . '</p>';
+      $help .= '<p>' . t('Please check the <a href="!url">documentation on configuring backups</a>.', array(
+        '!url' => 'https://docs.backdropcms.org/documentation/backup-and-restore',
+      )) . '</p>';
+      $requirements['backup'] = array(
+        'value' => $t('Not enabled'),
+        'severity' => REQUIREMENT_INFO,
+        'description' => $help,
+      );
+    }
+    else {
+      $requirements['backup'] = array(
+        'value' => $t('Enabled'),
+      );
+    }
+    $requirements['backup']['title'] = $t('Backdrop CMS backups');
+  }
+
   // Display an error if a newly introduced dependency in a module is not resolved.
   if ($phase == 'update') {
     $profile = backdrop_get_profile();

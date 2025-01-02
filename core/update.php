@@ -334,25 +334,8 @@ function update_backup_page() {
  * Form constructor for the list of available database module updates.
  */
 function update_backup_form($form, &$form_state) {
-  // Check if Backup directory is specified. If FALSE, this form shouldn't even
-  // be displayed. If NULL, link to documentation on setting up backups.
-  $backup_directory = backup_get_backup_directory();
+  $help = '<p>' . t('The backup process may take several minutes, depending on the size of your database.') . '</p>';
 
-  $help = '<p>' . t('Before running updates, it is recommended to create a backup of your database and configuration.') . '</p>';
-  $help .= '<p>' . t('If skipping the backup process, please ensure you create a backup through a different mechanism, such as through your hosting provider.') . '</p>';
-
-  if (empty($backup_directory)) {
-    $help .= '<p>' . t('Backups are not available because the variable !variable has not been set in !file.', array(
-      '!variable' => '<code>$settings[\'backup_directory\']</code>',
-      '!file' => '<code>settings.php</code>',
-    )) . '</p>';
-    $help .= '<p>' . t('Please check the <a href="!url">documentation on configuring backups</a>.', array(
-      '!url' => 'https://docs.backdropcms.org/documentation/backup-and-restore',
-    )) . '</p>';
-  }
-  else {
-    $help .= '<p>' . t('The backup process may take several minutes, depending on the size of your database.') . '</p>';
-  }
   $form['help'] = array(
     '#type' => 'help',
     '#markup' => $help,
