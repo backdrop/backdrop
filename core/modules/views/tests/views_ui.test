@@ -961,7 +961,7 @@ class ViewsUIWizardDisplaysTestCase extends ViewsUIWizardHelper {
     $view['page[create]'] = FALSE;
     $view['block[create]'] = FALSE;
 
-    $this->backdropPost('admin/structure/views/add', $view, t('Continue & edit'));
+    $this->backdropPost('admin/structure/views/add', $view, t('Continue and configure'));
 
     // Add 4 page displays. Using different permissions for each one.
     $displays = array(
