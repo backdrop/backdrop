@@ -287,9 +287,10 @@ class SystemQueue implements BackdropReliableQueueInterface {
 /**
  * Static queue implementation.
  *
- * This allows "undelayed" variants of processes relying on the Queue
- * interface. The queue data resides in memory. It should only be used for
- * items that will be queued and dequeued within a given page request.
+ * This allows processes that rely on the Queue interface to be executed
+ * immediately and all in one page request. The queue data resides in memory.
+ * It should only be used for items that will be queued and dequeued within the
+ * same page request.
  */
 class MemoryQueue implements BackdropQueueInterface {
   /**

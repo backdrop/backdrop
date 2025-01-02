@@ -3790,6 +3790,18 @@ function system_update_1101() {
 }
 
 /**
+ * Set the "Log in", "Reset password", and "Create new account" pages to use
+ * tabs for switching between these pages.
+ */
+function system_update_1102() {
+  $config = config('system.core');
+  if ($config->get('user_login_appearance') === NULL) {
+    $config->set('user_login_appearance', 'tabs');
+    $config->save();
+  }
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

@@ -78,7 +78,7 @@ class BlockTranslationTestCase extends BackdropWebTestCase {
     $custom_block = array();
     $custom_block['info'] = $this->randomName(8);
     $custom_block['delta'] = $block_delta;
-    $custom_block['title'] = 'Testblock created in default language';
+    $custom_block['title'] = 'Test block created in default language';
     $custom_block['body[value]'] = $this->randomName(32);
     $this->backdropPost(NULL, $custom_block, t('Save block'));
 
@@ -122,7 +122,7 @@ class BlockTranslationTestCase extends BackdropWebTestCase {
       // Translate custom block by filling out the input.
       $translated_block = array();
       $translated_block['info'] = $this->randomName(8);
-      $translated_block['title'] = 'Testblock translated to ' . $value;
+      $translated_block['title'] = 'Test block translated to ' . $value;
       $translated_block['body[value]'] = $this->randomName(32);
       $this->backdropPost(NULL, $translated_block, t('Save block'));
     }
@@ -134,7 +134,7 @@ class BlockTranslationTestCase extends BackdropWebTestCase {
 
     // Confirm that the custom block is being displayed in the default language.
     $this->backdropGet('user');
-    $this->assertText('Testblock created in default language', 'Custom block successfully being displayed.');
+    $this->assertText('Test block created in default language', 'Custom block successfully being displayed.');
 
     // Check if the translated blocks appear.
     foreach ($languages as $key => $value) {
@@ -148,7 +148,7 @@ class BlockTranslationTestCase extends BackdropWebTestCase {
 
       // Confirm that the custom block is being displayed in italy.
       $this->backdropGet('user');
-      $this->assertText('Testblock translated to ' . $value, 'Translated block successfully being displayed in ' . $value . '.');
+      $this->assertText('Test block translated to ' . $value, 'Translated block successfully being displayed in ' . $value . '.');
     }
   }
 

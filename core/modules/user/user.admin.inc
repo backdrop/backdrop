@@ -399,6 +399,32 @@ function user_login_settings($form, &$form_state) {
     ),
   );
 
+  $form['user_login_appearance_setting'] = array(
+    '#type' => 'fieldset',
+    '#title' => '',
+  );
+  $user_login_page_tab_options = array(
+    'tabs' => t('Use tabs'),
+    'links' => t('Use links'),
+    'simplified' => t('Show simplified page'),
+  );
+  $user_login_appearance = $core_config->get('user_login_appearance');
+  $form['user_login_appearance_setting']['user_login_appearance'] = array(
+    '#title' => t('Login page options'),
+    '#type' => 'radios',
+    '#options' => $user_login_page_tab_options,
+    '#default_value' => $user_login_appearance ? $user_login_appearance : 'tabs',
+    '#config' => 'system.core',
+    'tabs' => array(
+      '#description' => t('Show tabs for "Create new account", "Log in", and "Reset password" links.'),
+    ),
+    'links' => array(
+      '#description' => t('Show plain links to these pages.'),
+    ),
+    'simplified' => array(
+      '#description' => t('Show plain links to these pages, and hide all layout regions, such as headers, footers, and sidebars.'),
+    ),
+  );
   $form['flood_log_failed_attempts'] = array(
     '#type' => 'checkbox',
     '#title' => t('Log excessive failed login attempts.'),
@@ -406,7 +432,19 @@ function user_login_settings($form, &$form_state) {
     '#description' => t('If there are excessive failed login attempts, the offending IP address or user account will be temporarily blocked. By default these events will be logged, as it helps identify brute force login attacks. You may want to disable logging them if for example, you are using the dblog module, and want to avoid database writes.'),
   );
 
-  return system_settings_form($form);
+  $form = system_settings_form($form);
+
+  // Add another submit handler to flush caches on save, needed to rebuild
+  // menus and clear the page cache for anonymous users.
+  $form['#submit'][] = 'user_login_settings_submit';
+  return $form;
+}
+
+/**
+ * Second form submission handler for user_login_settings().
+ */
+function user_login_settings_submit($form, &$form_state) {
+  backdrop_flush_all_caches();
 }
 
 /**
