@@ -106,8 +106,14 @@ function _vocabulary_get_operations($vocabulary) {
       'title' => t('Manage displays'),
       'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/display',
       'weight' => 10,
-      );
-    }
+    );
+  }
+  if (user_access('administer layouts')) {
+    $links['taxonomy_layouts'] = array(
+      'title' => t('Manage layout'),
+      'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/layouts',
+    );
+  }
   if (module_exists('config') && user_access('synchronize configuration')) {
     $links['export'] = array(
       'title' => t('Export'),
@@ -493,10 +499,10 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
     // Do not let a term start the page that is not at the root.
     if (isset($term->depth) && ($term->depth > 0) && !isset($back_step)) {
       $back_step = 0;
-      while ($pterm = prev($tree)) {
+      while ($previous_term = prev($tree)) {
         $before_entries--;
         $back_step++;
-        if ($pterm->depth == 0) {
+        if ($previous_term->depth == 0) {
           prev($tree);
           continue 2; // Jump back to the start of the root level parent.
        }

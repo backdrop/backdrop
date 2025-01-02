@@ -154,8 +154,11 @@ define('MENU_CALLBACK', 0x0000);
  *
  * Modules may "suggest" menu items that the administrator may enable. They act
  * just as callbacks do until enabled, at which time they act like normal items.
- * Note for the value: 0x0010 was a flag which is no longer used, but this way
- * the values of MENU_CALLBACK and MENU_SUGGESTED_ITEM are separate.
+ *
+ * Note: The value 0x0010 cannot be removed from the definition of
+ * MENU_SUGGESTED_ITEM. It is a flag (no longer used) that at one time ensured
+ * that the values of MENU_VISIBLE_IN_BREADCRUMB and MENU_SUGGESTED_ITEM were
+ * separate.
  */
 define('MENU_SUGGESTED_ITEM', MENU_VISIBLE_IN_BREADCRUMB | 0x0010);
 
@@ -730,7 +733,7 @@ function _menu_item_localize(&$item, $map, $link_translate = FALSE) {
   $item['localized_options'] = $item['options'];
   // All 'class' attributes are assumed to be an array during rendering, but
   // links stored in the database may use an old string value.
-  // @todo In order to remove this code we need to implement a database update
+  // @todo In order to remove this code we need to implement a site update,
   //   including unserializing all existing link options and running this code
   //   on them, as well as adding validation to menu_link_save().
   if (isset($item['options']['attributes']['class']) && is_string($item['options']['attributes']['class'])) {
@@ -1917,7 +1920,7 @@ function theme_menu_toggle($variables) {
     $output  = '<input id="' . $id . '" class="menu-toggle-state element-invisible" type="checkbox" aria-controls="' . $id . '" />';
     $output .= '<label class="menu-toggle-button" for="' . $id . '">';
     $output .= '<span class="menu-toggle-button-icon"></span>';
-    $output .= '<span class="menu-toggle-button-text">' . $variables['text'] . '</span>';
+    $output .= (!empty($variables['text'])) ? '<span class="menu-toggle-button-text">' . check_plain($variables['text']) . '</span>' : '';
     $output .= '<span class="menu-toggle-assistive-text element-invisible">' . t('Toggle menu visibility') . '</span>';
     $output .= '</label>';
   }
@@ -2982,6 +2985,16 @@ function _menu_link_build($item) {
   elseif (!($item['type'] & MENU_VISIBLE_IN_TREE)) {
     $item['hidden'] = -1;
   }
+
+  // Save icon and description to options.
+  $options = array();
+  if (!empty($item['icon'])) {
+    $options['icon'] = $item['icon'];
+  }
+  if (!empty($item['description'])) {
+    $options['attributes']['title'] = $item['description'];
+  }
+
   // Note, we set this as 'system', so that we can be sure to distinguish all
   // the menu links generated automatically from entries in {menu_router}.
   $item['module'] = 'system';
@@ -2990,7 +3003,7 @@ function _menu_link_build($item) {
     'link_title' => $item['title'],
     'link_path' => $item['path'],
     'hidden' => 0,
-    'options' => empty($item['description']) ? array() : array('attributes' => array('title' => $item['description'])),
+    'options' => $options,
   );
   return $item;
 }
@@ -4067,17 +4080,19 @@ function _menu_site_status($path = NULL, $display_messages = FALSE) {
   // Check if site is in maintenance mode.
   if (state_get('maintenance_mode', FALSE)) {
     if (user_access('access site in maintenance mode')) {
-      // Ensure that the maintenance mode message is displayed only once
-      // (allowing for page redirects) and specifically suppress its display on
-      // the batch and maintenance mode settings pages. 'admin_bar/flush-cache'
-      // has been added to the list of excluded paths in order to suppress the
-      // warning on the maintenance mode settings page when clearing caches (see
+      // Ensure that the maintenance mode message is displayed only once and
+      // specifically suppress its display on the batch and maintenance mode
+      // settings pages. 'admin_bar/flush-cache' has been added to the list of
+      // excluded paths in order to suppress the warning on the maintenance mode
+      // settings page when clearing caches (see
       // https://github.com/backdrop/backdrop-issues/issues/3313).
       $excluded_paths = array('batch', 'admin/config/development/maintenance', 'admin_bar/flush-cache');
       if ($display_messages && !in_array(current_path(), $excluded_paths)) {
         $message = t('The site is currently in maintenance mode.');
         if (user_access('administer site configuration')) {
-          $message .= ' ' . l(t('Go online.'), 'admin/config/development/maintenance', array('query' => backdrop_get_destination()));
+          $message = t('The site is currently in <a href="@maintenance-url">maintenance mode</a>.', array(
+            '@maintenance-url' => url('admin/config/development/maintenance'),
+          ));
         }
         backdrop_set_message($message, 'warning', FALSE);
       }

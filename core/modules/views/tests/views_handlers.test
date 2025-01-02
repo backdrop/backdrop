@@ -33,13 +33,13 @@ class ViewsHandlersTest extends ViewsSqlTest {
    */
   function test_views_break_phrase_string() {
     module_load_include('inc', 'views', 'includes/utility');
-    $empty_stdclass = new stdClass();
-    $empty_stdclass->operator = 'or';
-    $empty_stdclass->value = array();
+    $empty_class = new stdClass();
+    $empty_class->operator = 'or';
+    $empty_class->value = array();
 
     $null = NULL;
     // check defaults
-    $this->assertEqual($empty_stdclass, views_break_phrase_string('', $null));
+    $this->assertEqual($empty_class, views_break_phrase_string('', $null));
 
     $handler = views_get_handler('node', 'title', 'argument');
     $this->assertEqual($handler, views_break_phrase_string('', $handler));
@@ -88,13 +88,13 @@ class ViewsHandlersTest extends ViewsSqlTest {
    * Tests views_break_phrase function.
    */
   function test_views_break_phrase() {
-    $empty_stdclass = new stdClass();
-    $empty_stdclass->operator = 'or';
-    $empty_stdclass->value = array();
+    $empty_class = new stdClass();
+    $empty_class->operator = 'or';
+    $empty_class->value = array();
 
     $null = NULL;
     // check defaults
-    $this->assertEqual($empty_stdclass, views_break_phrase('', $null));
+    $this->assertEqual($empty_class, views_break_phrase('', $null));
 
     $handler = views_get_handler('node', 'title', 'argument');
     $this->assertEqual($handler, views_break_phrase('', $handler));

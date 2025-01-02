@@ -37,10 +37,10 @@ Backdrop.behaviors.fileButtons = {
  */
 Backdrop.behaviors.filePreviewLinks = {
   attach: function (context) {
-    $('div.form-managed-file .file a, .file-widget .file a', context).once('file-preview-link').on('click', Backdrop.file.openInNewWindow);
+    $('.file-preview-link', context).once('file-preview-link').on('click', Backdrop.file.openInNewWindow);
   },
   detach: function (context){
-    $('div.form-managed-file .file a, .file-widget .file a', context).off('click', Backdrop.file.openInNewWindow);
+    $('.file-preview-link', context).off('click', Backdrop.file.openInNewWindow);
   }
 };
 
@@ -172,7 +172,7 @@ Backdrop.file = Backdrop.file || {
   /**
    * Provide events for files in the file browser dialog.
    */
-  dialogOpenEvent: function(e, dialoog, $element, settings) {
+  dialogOpenEvent: function(e, dialog, $element, settings) {
     var $browserContainer = $element.find(".file-browser");
     $browserContainer.once('file-browser').on('click', '[data-fid]', function () {
       var $selectedElement = $(this);

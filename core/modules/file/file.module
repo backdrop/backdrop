@@ -114,10 +114,12 @@ function file_autoload_info() {
 
     // Views handlers.
     'views_handler_argument_file_fid' => 'views/views_handler_argument_file_fid.inc',
+    'views_handler_argument_file_type' => 'views/views_handler_argument_file_type.inc',
     'views_handler_field_file' => 'views/views_handler_field_file.inc',
     'views_handler_field_file_link_edit' => 'views/views_handler_field_file_link_edit.inc',
     'views_handler_field_file_link_delete' => 'views/views_handler_field_file_link_delete.inc',
     'views_handler_field_file_extension' => 'views/views_handler_field_file_extension.inc',
+    'views_handler_field_file_icon' => 'views/views_handler_field_file_icon.inc',
     'views_handler_field_file_filemime' => 'views/views_handler_field_file_filemime.inc',
     'views_handler_field_file_uri' => 'views/views_handler_field_file_uri.inc',
     'views_handler_field_file_status' => 'views/views_handler_field_file_status.inc',
@@ -846,7 +848,7 @@ function file_theme() {
       'template' => 'templates/file',
     ) + $base,
     'file_link' => array(
-      'variables' => array('file' => NULL, 'icon_directory' => NULL),
+      'variables' => array('file' => NULL, 'icon_directory' => NULL, 'attributes' => array()),
     ) + $base,
     'file_icon' => array(
       'variables' => array('file' => NULL, 'icon_directory' => NULL, 'alt' => ''),
@@ -1109,8 +1111,8 @@ function file_file_download($uri, $field_type = 'file') {
  *
  * This rebuilds the form element for a particular field item. As long as the
  * form processing is properly encapsulated in the widget element the form
- * should rebuild correctly using FAPI without the need for additional callbacks
- * or processing.
+ * should rebuild correctly using Form API without the need for additional
+ * callbacks or processing.
  *
  * @see file_menu()
  */
@@ -1418,7 +1420,10 @@ function file_managed_file_process($element, &$form_state, $form) {
   if ($fid && $element['#file']) {
     $element['filename'] = array(
       '#type' => 'markup',
-      '#markup' => theme('file_link', array('file' => $element['#file'])) . ' ',
+      '#markup' => theme('file_link', array(
+        'file' => $element['#file'],
+        'attributes' => array('class' => array('file-preview-link')),
+      )) . ' ',
       '#weight' => -10,
     );
 
@@ -1493,9 +1498,9 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
     }
     else {
       // Check for #filefield_value_callback values.
-      // Because FAPI does not allow multiple #value_callback values like it
+      // Because Form API does not allow multiple #value_callback values like it
       // does for #element_validate and #process, this fills the missing
-      // functionality to allow File fields to be extended through FAPI.
+      // functionality to allow File fields to be extended through Form API.
       if (isset($element['#file_value_callbacks'])) {
         foreach ($element['#file_value_callbacks'] as $callback) {
           $callback($element, $input, $form_state);
@@ -1640,7 +1645,7 @@ function file_managed_file_submit($form, &$form_state) {
  * Saves any files that have been uploaded into a managed_file element.
  *
  * @param $element
- *   The FAPI element whose values are being saved.
+ *   The Form API element whose values are being saved.
  *
  * @return
  *   The file entity representing the file that was saved, or FALSE if no file
@@ -1720,7 +1725,10 @@ function file_managed_file_browser_open($form, $form_state) {
   if (empty($view)) {
     $view = t('The view "@view_name" is not available.', array('@view_name' => $view_name));
     if (user_access('administer views')) {
-      $view .= ' ' . t('Check the <a href="!url">Views administration page</a> to enable or create the "@view_name" view as needed.', array('!url' => url('admin/structure/views'), '@view_name' => $view_name));
+      $view .= ' ' . t('Check the <a href="!url">Views administration page</a> to enable or create the "@view_name" view as needed.', array(
+        '!url' => url('admin/structure/views'),
+        '@view_name' => $view_name,
+      ));
     }
   }
 
@@ -1788,7 +1796,12 @@ function file_managed_file_browser_form($form, &$form_state) {
     '#attributes' => array(
       // Adding button classes puts the link in the button area of the dialog,
       // while the special "dialog-cancel" class closes the dialog.
-      'class' => array('button', 'button-secondary', 'form-submit', 'dialog-cancel'),
+      'class' => array(
+        'button',
+        'button-secondary',
+        'form-submit',
+        'dialog-cancel',
+      ),
     ),
   );
 
@@ -1899,6 +1912,7 @@ function file_icon_path(File $file, $icon_directory = NULL) {
  *   The generic icon MIME package expected for this file.
  */
 function file_icon_map(File $file) {
+  // cspell:disable
   switch ($file->filemime) {
     // Word document types.
     case 'application/msword':
@@ -2013,6 +2027,7 @@ function file_icon_map(File $file) {
     default:
       return FALSE;
   }
+  // cspell:enable
 }
 
 /**
@@ -2106,17 +2121,17 @@ function file_get_download_token($file) {
  *
  * @param File $file
  *   A file entity.
- * @param $field
+ * @param array|null $field
  *   (optional) A field array to be used for this check. If given, limits the
  *   reference check to the given field.
- * @param $age
+ * @param string $age
  *   (optional) A constant that specifies which references to count. Use
  *   FIELD_LOAD_REVISION to retrieve all references within all revisions or
  *   FIELD_LOAD_CURRENT to retrieve references only in the current revisions.
- * @param $field_type
+ * @param string $field_type
  *   (optional) The name of a field type. If given, limits the reference check
  *   to fields of the given type.
- * @param $check_access
+ * @param bool $check_access
  *   (optional) A boolean that specifies whether the permissions of the current
  *   user should be checked when retrieving references. If FALSE, all
  *   references to the file are returned. If TRUE, only references from
@@ -3226,7 +3241,7 @@ function file_view_multiple($files, $view_mode = 'full', $weight = 0, $langcode 
   }
   // Sort here, to preserve the input order of the entities that were passed to
   // this function.
-  uasort($build['files'], 'element_sort');
+  backdrop_sort($build['files'], array('#weight'));
   $build['files']['#sorted'] = TRUE;
 
   return $build;

@@ -469,6 +469,14 @@ function color_valid_hexadecimal_string($color) {
   return preg_match('/^#([a-f0-9]{3}){1,2}$/iD', $color);
 }
 
+
+/**
+ * Returns the name of the theme currently being previewed.
+ *
+ * @return string
+ *   The name of the theme currently being previewed, or an empty string if the
+ *   logged in user does not have access to administer themes.
+ */
 function _color_preview_theme() {
   if (user_access('administer themes')) {
     if (isset($_GET['preview'])) {

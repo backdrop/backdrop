@@ -12,7 +12,7 @@ interface EntityReferenceSelectionHandlerInterface {
    * Factory function: create a new instance of this handler for a given field.
    *
    * @param $field
-   *   A field datastructure.
+   *   A field data structure.
    * @return EntityReferenceHandler
    */
   public static function getInstance($field, $instance = NULL, $entity_type = NULL, $entity = NULL);

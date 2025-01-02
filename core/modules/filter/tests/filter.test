@@ -500,7 +500,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
       'filter_url_length' => $this->randomName(4),
     );
     $this->backdropPost('admin/config/content/formats/filtered_html/filter-settings/filter_url', $edit, t('Update'));
-    $this->assertNoRaw(t('The text format %format has been updated.', array('%format' => 'Filtered HTML')));
+    $this->assertNoRaw(t('The text format %format has been updated.', array('%format' => 'Basic')));
 
     // The form does save permitted value and it appears in the config json.
     $length = 88;
@@ -1035,9 +1035,9 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
       ),
       // Comments remain unchanged and subsequent lines/paragraphs are
       // transformed normally.
-      "aaa<!--comment-->\n\nbbb\n\nccc\n\nddd<!--comment\nwith linebreak-->\n\neee\n\nfff" => array(
+      "aaa<!--comment-->\n\nbbb\n\nccc\n\nddd<!--comment\nwith line break-->\n\neee\n\nfff" => array(
         "<p>aaa</p>\n<!--comment--><p>\nbbb</p>\n<p>ccc</p>\n<p>ddd</p>" => TRUE,
-        "<!--comment\nwith linebreak--><p>\neee</p>\n<p>fff</p>" => TRUE,
+        "<!--comment\nwith line break--><p>\neee</p>\n<p>fff</p>" => TRUE,
       ),
       // Check that a comment in a PRE will result that the text after
       // the comment, but still in PRE, is not transformed.
@@ -1047,6 +1047,28 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
       // Bug 810824, paragraphs were appearing around iframe tags.
       "<iframe>aaa</iframe>\n\n" => array(
         "<p><iframe>aaa</iframe></p>" => FALSE,
+      ),
+      // Check that tags that close on a separate line do not get an extra
+      // <br /> before the closing tag. This is the default formatting output by
+      // CKEditor 5 in Backdrop.
+      "<h3>\n    indented line\n</h3>" => array(
+        "<h3>\n    indented line\n</h3>" => TRUE,
+        "<h3>\n    indented line<br />\n</h3>" => FALSE,
+      ),
+      // Check that new lines within block elements have <br /> tags added, but
+      // not before the closing tag on a new line.
+      "<p>\n    indented line\n    second indented line\n</p>" => array(
+        "<p>\n    indented line<br />\n    second indented line\n</p>" => TRUE,
+        "<p>\n    indented line<br />\n    second indented line<br />\n</p>" => FALSE,
+        "<p>\n    indented line\n    second indented line\n</p>" => FALSE,
+      ),
+      // Check that manually added <br> tags at end of lines don't duplicate
+      // another <br /> tag after them. Line breaks are normalized from <br>
+      // to <br /> as part of this filter.
+      "<p>\n    line before break<br>\n    line after break</p>" => array(
+        "<p>\n    line before break<br />\n    line after break</p>"  => TRUE,
+        "<p>\n    line before break<br><br />\n    line after break</p>"  => FALSE,
+        "<p>\n    line before break<br /><br />\n    line after break</p>"  => FALSE,
       ),
     );
     $this->assertFilteredString($filter, $tests);
@@ -1413,15 +1435,15 @@ person@example.com or mailto:person2@example.com or ' . $email_with_plus_sign . 
       ),
       // URI parts and special characters.
       '
-http://trailingslash.com/ or www.trailingslash.com/
+http://trailing-slash.com/ or www.trailing-slash.com/
 http://host.com/some/path?query=foo&bar[baz]=beer#fragment or www.host.com/some/path?query=foo&bar[baz]=beer#fragment
 http://twitter.com/#!/example/status/22376963142324226
 ftp://user:pass@ftp.example.com/~home/dir1
 sftp://user@nonstandardport:222/dir
 ssh://192.168.0.100/srv/git/backdrop.git
 ' => array(
-        '<a href="http://trailingslash.com/">http://trailingslash.com/</a>' => TRUE,
-        '<a href="http://www.trailingslash.com/">www.trailingslash.com/</a>' => TRUE,
+        '<a href="http://trailing-slash.com/">http://trailing-slash.com/</a>' => TRUE,
+        '<a href="http://www.trailing-slash.com/">www.trailing-slash.com/</a>' => TRUE,
         '<a href="http://host.com/some/path?query=foo&amp;bar[baz]=beer#fragment">http://host.com/some/path?query=foo&amp;bar[baz]=beer#fragment</a>' => TRUE,
         '<a href="http://www.host.com/some/path?query=foo&amp;bar[baz]=beer#fragment">www.host.com/some/path?query=foo&amp;bar[baz]=beer#fragment</a>' => TRUE,
         '<a href="http://twitter.com/#!/example/status/22376963142324226">http://twitter.com/#!/example/status/22376963142324226</a>' => TRUE,
@@ -1439,6 +1461,7 @@ http://encoded.com/?a=1&amp;b=2
       ),
       // Domain name length.
       '
+// cspell:disable-next-line
 www.ex.ex or www.example.example or www.toolongdomainexampledomainexampledomainexampledomainexampledomain or
 me@me.tv
 ' => array(
@@ -1578,11 +1601,11 @@ HTML www.example21.com soup by person@example22.com can literally http://www.exa
 <script>
 <!--
   // @see www.example.com
-  var exampleurl = "http://example.net";
+  var exampleUrl = "http://example.net";
 -->
 <!--//--><![CDATA[//><!--
   // @see www.example.com
-  var exampleurl = "http://example.net";
+  var exampleUrl = "http://example.net";
 //--><!]]>
 </script>
 ' => array(
@@ -1923,8 +1946,10 @@ EOF;
     $f = _filter_htmlcorrector('<p>test\n</p>\n');
     $this->assertEqual($f, '<p>test\n</p>\n', 'HTML corrector -- New-lines are accepted and kept as-is.');
 
+    // cspell:disable
     $f = _filter_htmlcorrector('<p>دروبال');
     $this->assertEqual($f, '<p>دروبال</p>', 'HTML corrector -- Encoding is correctly kept.');
+    // cspell:enable
 
     $f = _filter_htmlcorrector('<script type="text/javascript">alert("test")</script>');
     $this->assertEqual($f, '<script type="text/javascript">
@@ -2275,7 +2300,7 @@ class FilterEditorAccessTestCase extends BackdropWebTestCase {
 
     $filtered_html_format = array(
       'format' => 'filtered_html',
-      'name' => 'Filtered HTML',
+      'name' => 'Basic',
       'weight' => 0,
       'editor' => 'ckeditor',
       'filters' => array(),

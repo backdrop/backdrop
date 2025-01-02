@@ -7,6 +7,7 @@
 /**
  * Matches all 'N' Unicode character classes (numbers)
  */
+// cspell:disable
 define('PREG_CLASS_NUMBERS',
   '\x{30}-\x{39}\x{b2}\x{b3}\x{b9}\x{bc}-\x{be}\x{660}-\x{669}\x{6f0}-\x{6f9}' .
   '\x{966}-\x{96f}\x{9e6}-\x{9ef}\x{9f4}-\x{9f9}\x{a66}-\x{a6f}\x{ae6}-\x{aef}' .
@@ -17,10 +18,12 @@ define('PREG_CLASS_NUMBERS',
   '\x{2460}-\x{249b}\x{24ea}-\x{24ff}\x{2776}-\x{2793}\x{3007}\x{3021}-\x{3029}' .
   '\x{3038}-\x{303a}\x{3192}-\x{3195}\x{3220}-\x{3229}\x{3251}-\x{325f}\x{3280}-' .
   '\x{3289}\x{32b1}-\x{32bf}\x{ff10}-\x{ff19}');
+  // cspell:enable
 
 /**
  * Matches all 'P' Unicode character classes (punctuation)
  */
+// cspell:disable
 define('PREG_CLASS_PUNCTUATION',
   '\x{21}-\x{23}\x{25}-\x{2a}\x{2c}-\x{2f}\x{3a}\x{3b}\x{3f}\x{40}\x{5b}-\x{5d}' .
   '\x{5f}\x{7b}\x{7d}\x{a1}\x{ab}\x{b7}\x{bb}\x{bf}\x{37e}\x{387}\x{55a}-\x{55f}' .
@@ -37,6 +40,7 @@ define('PREG_CLASS_PUNCTUATION',
   '\x{fe6a}\x{fe6b}\x{ff01}-\x{ff03}\x{ff05}-\x{ff0a}\x{ff0c}-\x{ff0f}\x{ff1a}' .
   '\x{ff1b}\x{ff1f}\x{ff20}\x{ff3b}-\x{ff3d}\x{ff3f}\x{ff5b}\x{ff5d}\x{ff5f}-' .
   '\x{ff65}');
+  // cspell:enable
 
 /**
  * Matches CJK (Chinese, Japanese, Korean) letter-like characters.
@@ -53,11 +57,13 @@ define('PREG_CLASS_PUNCTUATION',
  *
  * @see search_expand_cjk()
  */
+// cspell:disable
 define('PREG_CLASS_CJK', '\x{1100}-\x{11FF}\x{3040}-\x{309F}\x{30A1}-\x{318E}' .
   '\x{31A0}-\x{31B7}\x{31F0}-\x{31FF}\x{3400}-\x{4DBF}\x{4E00}-\x{9FCF}' .
   '\x{A000}-\x{A48F}\x{A4D0}-\x{A4FD}\x{A960}-\x{A97F}\x{AC00}-\x{D7FF}' .
   '\x{F900}-\x{FAFF}\x{FF21}-\x{FF3A}\x{FF41}-\x{FF5A}\x{FF66}-\x{FFDC}' .
   '\x{20000}-\x{2FFFD}\x{30000}-\x{3FFFD}');
+  // cspell:enable
 
 /**
  * Implements hook_theme().
@@ -985,8 +991,8 @@ function search_expression_insert($expression, $option, $value = NULL) {
  *
  * If your module needs to provide a more complicated search form, then you need
  * to implement it yourself without hook_search_info(). In that case, you should
- * define it as a local task (tab) under the /search page (e.g. /search/mymodule)
- * so that users know where to find it.
+ * define it as a local task (tab) under the /search page (e.g.
+ * /search/my_module), so that users know where to find it.
  */
 
 /**

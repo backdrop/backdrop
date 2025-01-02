@@ -33,11 +33,11 @@ class views_plugin_query extends views_plugin {
   }
 
   /**
-   * Generate a query and a countquery from all of the information supplied
+   * Generate a query and a countQuery from all of the information supplied
    * to the object.
    *
    * @param $get_count
-   *   Provide a countquery if this is true, otherwise provide a normal query.
+   *   Provide a countQuery if this is true, otherwise provide a normal query.
    */
   function query($get_count = FALSE) { }
 

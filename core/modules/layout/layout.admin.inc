@@ -16,30 +16,30 @@ function layout_list_page() {
   // Group layouts by path.
   $layout_paths = array();
   $path_groups = array();
-  $path_groups_end = array();
+  $admin_path_groups = array();
   foreach ($layouts as $layout) {
     $path = $layout->getPath();
-    // Move admin layouts to the bottom of the list. Note that default layout
-    // has a NULL path, which path_is_admin() won't like in PHP 8.1.
-    if (is_null($path) || path_is_admin($path)) {
-      $path_groups_end[$path][$layout->name] = $layout;
+    // Admin layouts are to be added to the bottom of the list.
+    if (path_is_admin($path)) {
+      $admin_path_groups[$path][$layout->name] = $layout;
     }
     else {
       $path_groups[$path][$layout->name] = $layout;
     }
-    // Build a list of all layout paths to check callbacks.
-    if ($path) {
+    // Build a list of all layout paths to check callbacks for.
+    if ($path && !in_array($path, $layout_paths)) {
       $layout_paths[] = $path;
     }
   }
 
   // Put admin layouts at the bottom of the list.
-  foreach ($path_groups_end as $path => $name) {
+  foreach ($admin_path_groups as $path => $name) {
     foreach ($name as $layout) {
       $path_groups[$path][$layout->name] = $layout;
     }
   }
 
+  // Check layout paths for callbacks.
   if (!empty($layout_paths)) {
     $page_callbacks = db_query('
       SELECT path, page_callback
@@ -53,8 +53,10 @@ function layout_list_page() {
   }
 
   // Assemble the rows of the table.
-  $override_rows = array();
   $stand_alone_rows = array();
+  $override_rows = array();
+  $default_rows = array();
+
   foreach ($path_groups as $path => $group) {
     // Print a row for rearranging a group of layouts.
     $operations = array(
@@ -62,49 +64,45 @@ function layout_list_page() {
       '#links' => _layout_get_group_operations($path, $group),
     );
     $row = array();
-    // Default layouts have a null path.
-    if ($path === '') {
-      $row[] = array('data' => t('Default layouts (used on all paths without a specific layout)'));
-      // Empty columns are intentional so that they may be hidden with
-      // priority-low class on the $header array.
-      $row[] = '';
-      $row[] = '';
-      $row[] = '';
-    }
-    else {
+    // Generate the heading row for non-default layout path groups.
+    if ($path !== '') {
       if (strpos($path, '%') === FALSE) {
-         $path_link = t('Path: ') . l($path, $path);
+        $path_link = t('Path: ') . l($path, $path);
       }
       else {
         $path_link = t('System path: ') . check_plain($path);
       }
-
       $class = array();
       if (!$page_callbacks[$path]) {
         $class[] = 'missing-path';
         $path_link .= ' <span class="path-parenthetical">(' . t('missing callback') . ')</span>';
       }
+      $menu_item = layout_menu_item_load_multiple_by_path($path);
       $row[] = array('data' => $path_link, 'class' => $class);
-      // Empty columns are intentional.
+      // Empty columns are intentional so that they may be hidden with
+      // priority-low class on the $header array.
       $row[] = '';
+      $row[] = theme('layout_condition_info', array(
+        'layout' => $menu_item,
+        'show_empty' => FALSE,
+      ));
       $row[] = '';
-      $row[] = '';
-    }
 
-    if (count($operations['#links']) !== 0) {
-      $row[] = backdrop_render($operations);
+      if (count($operations['#links']) !== 0) {
+        $row[] = backdrop_render($operations);
+      }
+      else {
+        $row[] = '';
+      }
     }
-    else {
-      $row[] = '';
-    }
-
+    // Add the heading row to the non-default layout path groups.
     if (isset($page_callbacks[$path]) && $page_callbacks[$path] == 'layout_page_callback') {
       $stand_alone_rows[] = array(
         'data' => $row,
         'class' => array('layout-group'),
       );
     }
-    else {
+    elseif ($path !== '') {
       $override_rows[] = array('data' => $row, 'class' => array('layout-group'));
     }
 
@@ -141,6 +139,9 @@ function layout_list_page() {
       if (isset($page_callbacks[$path]) && $page_callbacks[$path] == 'layout_page_callback') {
         $stand_alone_rows[] = array('data' => $row, 'class' => $class);
       }
+      elseif ($path === '') {
+        $default_rows[] = array('data' => $row, 'class' => $class);
+      }
       else {
         $override_rows[] = array('data' => $row, 'class' => $class);
       }
@@ -150,15 +151,16 @@ function layout_list_page() {
   $header = array(
     array('data' => t('Layout'), 'class' => array('layout-title')),
     array('data' => t('Template'), 'class' => array('layout-template', 'priority-low')),
-    array('data' => t('Visibility conditions'), 'class' => array('layout-conditions', 'priority-low')),
+    array('data' => t('Conditions'), 'class' => array('layout-conditions', 'priority-low')),
     array('data' => t('Storage state'), 'class' => array('layout-status', 'priority-low')),
     array('data' => t('Operations'), 'class' => array('layout-operations')),
   );
 
-  $help = '<p>' . t('There are two kinds of <em>Layouts</em>:') . '</p>';
+  $help = '<p>' . t('There are three kinds of <em>Layouts</em>:') . '</p>';
   $help_items = array();
   $help_items[] = t('<strong>Layout pages</strong> are layouts that create new stand-alone pages on the site.  Without the layouts, these pages would not exist.');
-  $help_items[] = t('<strong>Layout overrides</strong> are layouts that override existing pages on the site. Without these layout overrides, these pages would use other layouts. Which one is used will depend on the path and visibility conditions. If no other layouts match, one of the defaults will be used.');
+  $help_items[] = t('<strong>Layout overrides</strong> are layouts that override existing pages on the site. Without these layout overrides, these pages would use other layouts. Which one is used will depend on the path and visibility conditions. If no other layouts match, one of the default layouts will be used.');
+  $help_items[] = t('<strong>Default layouts</strong> are used for paths that have no other matching layouts.');
   $help .= theme('item_list', array('items' => $help_items));
   $help .= '<p>' . t('As a page is rendered, a <em>Layout</em> is selected as follows.') . '</p>';
   $help_items = array();
@@ -211,9 +213,21 @@ function layout_list_page() {
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $override_rows,
-    '#attributes' => array('class' =>   array('layout-list')),
+    '#attributes' => array('class' => array('layout-list')),
     '#empty' => t('No layout overrides have been created yet.'),
     '#weight' => 3,
+  );
+  $page['default'] = array(
+    '#type' => 'help',
+    '#markup' => '<h2>' . t('Default layouts') . '</h2>' . t('Used as a fallback for all paths without a matching layout.'),
+    '#weight' => 4,
+  );
+  $page['default_table'] = array(
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $default_rows,
+    '#attributes' => array('class' => array('layout-list')),
+    '#weight' => 5,
   );
   return $page;
 }
@@ -373,10 +387,18 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#required' => TRUE,
     '#access' => !$layout->isDefault(),
   );
+  if ($layout->layout_template != NULL) {
+    $layout_template = $layout->layout_template;
+  }
+  else {
+    // If no layout template has been selected, then pre-select the template
+    // used by the default layout, to avoid AJAX validation errors in the form.
+    $layout_template = config_get('layout.layout.default', 'layout_template');
+  }
   $form['layout_template'] = array(
     '#title' => t('Layout template'),
     '#type' => 'radios',
-    '#default_value' => $layout->layout_template,
+    '#default_value' => $layout_template,
     '#options' => array(),
     '#wrapper_attributes' => array('class' => array('clearfix', 'layout-options')),
     '#required' => TRUE,
@@ -679,8 +701,8 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   }
 
   // Display a notice if overriding a system path that normally contains
-  // placeholders e.g. node/1 instead of node/%. This is usually (but not always)
-  // a misconfiguration of the layout.
+  // placeholders e.g. node/1 instead of node/%. This is usually (but not
+  // always) a misconfiguration of the layout.
   $layout_path = $layout->getPath();
   $router_item = menu_get_item($layout_path);
   if ($router_item && $layout_path) {
@@ -712,7 +734,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   );
   $form['conditions']['links']['add'] = array(
     '#type' => 'submit',
-    '#value' => t('Add visibility condition'),
+    '#value' => t('Add condition'),
     '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
     '#validate' => array(),
     '#submit' => array(
@@ -1180,7 +1202,8 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
 
   // Add a link to preview the page.
   $link_path = $layout->getPath();
-  // A null path returns the site root. See https://github.com/backdrop/backdrop-issues/issues/4383
+  // A null path returns the site root.
+  // See https://github.com/backdrop/backdrop-issues/issues/4383
   if (!is_null($link_path) && backdrop_valid_path($link_path)) {
     $form['top']['#theme_wrappers'] = array('container');
     $form['top']['#attributes']['class'] = array('edit-layout-top', 'clearfix');
@@ -1192,7 +1215,7 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
       array(
         'title' => t('View page'),
         'href' => $link_path,
-      )
+      ),
     );
   }
 
@@ -1203,7 +1226,7 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
     '#markup' => $renderer->render(),
   );
 
-  foreach ($renderer->layout_info['regions'] as $region_id => $title) {
+  foreach ($renderer->layout_template_info['regions'] as $region_id => $title) {
     // Make sure we at least have an empty array for all possible locations.
     if (!isset($layout->positions[$region_id])) {
       $layout->positions[$region_id] = array();
@@ -1653,7 +1676,7 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
   );
   $form['conditions']['links']['add'] = array(
     '#type' => 'submit',
-    '#value' => t('Add visibility condition'),
+    '#value' => t('Add condition'),
     '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
     '#submit' => array(
       'layout_block_configure_form_submit',
@@ -1881,7 +1904,7 @@ function layout_block_configure_ajax_update($form, $form_state) {
 
   // Remove the page title pseudo region if we're adding a Title block or a
   // Combo block.
-  if ($block->module == 'system' && $block->delta == 'page_components' && ($block->childDelta == 'title' || $block->childDelta =='title_combo')) {
+  if ($block->module == 'system' && $block->delta == 'page_components' && ($block->childDelta == 'title' || $block->childDelta == 'title_combo')) {
     $commands[] = ajax_command_replace('#layout-editor-title', '<div id="layout-title-region-empty"></div>');
   }
 
@@ -1914,11 +1937,11 @@ function layout_block_remove_page(Layout $layout, Block $block, $renderer_name) 
     $commands[] = ajax_command_remove('#layout-editor-block-' . $block->uuid);
     // If neither a Title block nor a Combo block remains in the layout, add
     // the page title pseudo-region.
-    if ($block->module == 'system' && $block->delta == 'page_components' && ($block->childDelta == 'title' || $block->childDelta =='title_combo')) {
+    if ($block->module == 'system' && $block->delta == 'page_components' && ($block->childDelta == 'title' || $block->childDelta == 'title_combo')) {
       $render_title_region = TRUE;
       $all_layout_blocks = $layout->content;
       foreach ($all_layout_blocks as $existing_block) {
-        if ($existing_block->module == 'system' && $existing_block->delta == 'page_components' && ($existing_block->childDelta == 'title' || $existing_block->childDelta =='title_combo') && ($existing_block->uuid != $block->uuid)) {
+        if ($existing_block->module == 'system' && $existing_block->delta == 'page_components' && ($existing_block->childDelta == 'title' || $existing_block->childDelta == 'title_combo') && ($existing_block->uuid != $block->uuid)) {
           $render_title_region = FALSE;
           break;
         }
@@ -2014,7 +2037,7 @@ function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, B
   if (isset($menu_item)) {
     $form['#redirect'] = 'admin/structure/layouts/menu/' . $menu_item->name . '/access';
     if ($is_new_condition) {
-      $form['#title'] = t('Add visibility condition');
+      $form['#title'] = t('Add condition');
     }
     else {
       $form['#title'] = t('Configure visibility condition');
@@ -2025,7 +2048,7 @@ function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, B
   elseif (isset($block)) {
     $form['#redirect'] = 'admin/structure/layouts/manage/' . $layout->name;
     if ($is_new_condition) {
-      $form['#title'] = t('Add visibility condition for "!title" block', array('!title' => $block->getAdminTitle()));
+      $form['#title'] = t('Add condition for "!title" block', array('!title' => $block->getAdminTitle()));
     }
     else {
       $form['#title'] = t('Configure visibility condition for "!title" block', array('!title' => $block->getAdminTitle()));
@@ -2036,7 +2059,7 @@ function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, B
   else {
     $form['#redirect'] = 'admin/structure/layouts/manage/' . $layout->name . '/configure';
     if ($is_new_condition) {
-      $form['#title'] = t('Add visibility condition for "@title" layout', array('@title' => $layout->title));
+      $form['#title'] = t('Add condition for "@title" layout', array('@title' => $layout->title));
     }
     else {
       $form['#title'] = t('Configure visibility condition for "@title" layout', array('@title' => $layout->title));
@@ -2092,7 +2115,7 @@ function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, B
   );
   $form['actions']['add'] = array(
     '#type' => 'submit',
-    '#value' => $is_new_condition ? t('Add visibility condition') : t('Save visibility condition'),
+    '#value' => $is_new_condition ? t('Add condition') : t('Save visibility condition'),
     '#submit' => array(
       'layout_condition_add_form_submit',
     ),
@@ -2310,13 +2333,21 @@ function layout_condition_edit_title(Layout $layout = NULL, Block $block = NULL,
   $access_info = layout_get_access_info($plugin_name);
   if (isset($access_info['title'])) {
     if ($menu_item) {
-      return t('Configure condition "@condition" for "@title"', array('@condition' => $access_info['title'], '@title' => $menu_item->path));
+      return t('Configure condition "@condition" for "@title"', array(
+        '@condition' => $access_info['title'],
+        '@title' => $menu_item->path,
+      ));
     }
     elseif ($block) {
-      return t('Configure condition "@condition" for "@title"', array('@condition' => $access_info['title'], '@title' => $block->getAdminTitle()));
+      return t('Configure condition "@condition" for "@title"', array(
+        '@condition' => $access_info['title'],
+        '@title' => $block->getAdminTitle(),
+      ));
     }
     else {
-      return t('Configure condition "@condition"', array('@condition' => $access_info['title']));
+      return t('Configure condition "@condition"', array(
+        '@condition' => $access_info['title'],
+      ));
     }
   }
 }
@@ -2448,9 +2479,7 @@ function layout_reorder_form($form, &$form_state) {
     '#title' => t('Cancel'),
     '#href' => 'admin/structure/layouts',
     '#options' => array(
-      'attributes' => array(
-        'class' => array('form-cancel')
-      ),
+      'attributes' => array('class' => array('form-cancel')),
     ),
   );
 
@@ -2772,13 +2801,7 @@ function layout_menu_item_form($form, &$form_state, LayoutMenuItem $menu_item) {
   $form['menu']['type'] = array(
     '#title' => t('Type'),
     '#type' => 'radios',
-    '#options' => array(
-      'none' => t('No menu entry'),
-      'normal' => t('Normal menu entry'),
-      'tab' => t('Menu tab'),
-      'default tab' => t('Default menu tab'),
-      'action' => t('Local action'),
-    ),
+    '#options' => layout_get_menu_types(),
     '#default_value' => $menu_settings['type'],
   );
 
@@ -2942,7 +2965,7 @@ function layout_menu_item_form($form, &$form_state, LayoutMenuItem $menu_item) {
   );
   $form['conditions']['links']['add'] = array(
     '#type' => 'submit',
-    '#value' => t('Add visibility condition'),
+    '#value' => t('Add condition'),
     '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
     '#submit' => array(
       'layout_menu_item_form_condition_add'
@@ -3141,7 +3164,7 @@ function layout_ajax_form_save_dialog($form, $form_state) {
   /* @var Layout $layout */
   $layout = $form_state['layout'];
   /* @var LayoutMenuItem $menu_item */
-  $menu_item = isset($form_state['menu_item']) ? $form_state['menu_item']  : '';
+  $menu_item = isset($form_state['menu_item']) ? $form_state['menu_item'] : '';
 
   $commands = array();
   $commands[] = ajax_command_close_modal_dialog();
@@ -3184,6 +3207,12 @@ function layout_ajax_form_save_dialog($form, $form_state) {
   );
 }
 
+/**
+ * AJAX handler that updates the title.
+ *
+ * @return array
+ *   AJAX commands to update the page.
+ */
 function layout_ajax_form_save_title_dialog($form, $form_state) {
   $layout = $form_state['layout'];
 
@@ -3285,7 +3314,11 @@ function layout_ajax_form_update($form, $form_state) {
 function layout_settings_page($form, &$form_state) {
   $header = array(
     'layout_template_info' => array('data' => t('Template')),
-    'type' => array('data' => t('Type'), 'sort' => 'desc', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
+    'type' => array(
+      'data' => t('Type'),
+      'sort' => 'desc',
+      'class' => array(RESPONSIVE_PRIORITY_LOW),
+    ),
     'operations' => t('Operations'),
   );
 
@@ -3314,7 +3347,7 @@ function layout_settings_page($form, &$form_state) {
       $rows[$template_name]['operations']['data'] = array(
         '#type' => 'dropbutton',
         '#links' => _layout_settings_get_group_operations($template_info, $is_default),
-       );
+      );
     }
     // For disabled and hidden templates, save the fact they are disabled.
     elseif ($template_info['hidden']) {
@@ -3433,8 +3466,8 @@ function _layout_settings_get_group_operations($template_info, $is_default) {
 function layout_configure_region_page($form, &$form_state, Layout $layout, $renderer_name, $region_name, $block_key = NULL) {
   $form_state['layout'] = $layout;
   $form_state['region_name'] = $region_name;
-  $layout_info = layout_get_layout_template_info($layout->layout_template);
-  if (!array_key_exists($region_name, $layout_info['regions'])) {
+  $layout_template_info = layout_get_layout_template_info($layout->layout_template);
+  if (!array_key_exists($region_name, $layout_template_info['regions'])) {
     return MENU_NOT_FOUND;
   }
 
@@ -3522,16 +3555,38 @@ function layout_block_list() {
           'label' => $block['info'],
           'machine_name' => $delta,
         ));
-        $rows[] = array('name' => $block_name, 'usage' => $usage_list, 'module' => $module, 'contexts' => $contexts);
+        $rows[] = array(
+          'name' => $block_name,
+          'usage' => $usage_list,
+          'module' => $module,
+          'contexts' => $contexts,
+        );
       }
     }
   }
 
   $header = array(
-    array('data' => 'Name', 'field' => 'name', 'sort' => 'ASC'),
-    array('data' => 'Usage', 'field' => 'usage', 'sort' => 'ASC'),
-    array('data' => 'Module', 'field' => 'module', 'sort' => 'ASC', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
-    array('data' => 'Required contexts', 'field' => 'contexts', 'class' => array(RESPONSIVE_PRIORITY_LOW)),
+    array(
+      'data' => 'Name',
+      'field' => 'name',
+      'sort' => 'ASC',
+    ),
+    array(
+      'data' => 'Usage',
+      'field' => 'usage',
+      'sort' => 'ASC',
+    ),
+    array(
+      'data' => 'Module',
+      'field' => 'module',
+      'sort' => 'ASC',
+      'class' => array(RESPONSIVE_PRIORITY_LOW),
+    ),
+    array(
+      'data' => 'Required contexts',
+      'field' => 'contexts',
+      'class' => array(RESPONSIVE_PRIORITY_LOW),
+    ),
   );
 
   $order = tablesort_get_order($header);
@@ -3595,4 +3650,18 @@ function layout_get_block_usage($module = NULL, $delta = NULL) {
     return $blocks[$module];
   }
   return $blocks;
+}
+
+
+/**
+ * Lists information about menu types.
+ */
+function layout_get_menu_types() {
+  return array(
+    'none' => t('No menu entry'),
+    'normal' => t('Normal menu entry'),
+    'tab' => t('Menu tab'),
+    'default tab' => t('Default menu tab'),
+    'action' => t('Local action'),
+  );
 }

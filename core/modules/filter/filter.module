@@ -60,6 +60,7 @@ function filter_element_info() {
     '#process' => array('filter_process_format'),
     '#base_type' => 'textarea',
     '#theme_wrappers' => array('text_format_wrapper'),
+    '#description_display' => 'before',
   );
   return $type;
 }
@@ -869,6 +870,12 @@ function filter_get_editors() {
       $module_editors = module_invoke($module, 'editor_info');
       foreach ($module_editors as $editor_name => $editor) {
         $editor['module'] = $module;
+        // Populate optional defaults.
+        $editor += array(
+          'settings callback' => NULL,
+          'default settings' => array(),
+          'file' => NULL,
+        );
         $editors[$editor_name] = $editor;
       }
     }
@@ -1061,6 +1068,7 @@ function filter_get_filters() {
           $info[$name] += array(
             'description' => '',
             'weight' => 0,
+            'default settings' => array(),
           );
         }
         $filters = array_merge($filters, $info);
@@ -1274,8 +1282,6 @@ function filter_process_format($element) {
     // Do not copy this #process function to prevent form_builder() from
     // recursing infinitely.
     '#process',
-    // Description is handled by theme_text_format_wrapper().
-    '#description',
     // Ensure proper ordering of children.
     '#weight',
     // Properties already processed for the parent element.
@@ -1285,6 +1291,16 @@ function filter_process_format($element) {
     '#processed',
     '#theme_wrappers',
   );
+
+  // If the #description is set to be placed after the element (which is the
+  // default), let theme_text_format_wrapper() handle it. Otherwise, if the
+  // #description is set to be placed before the element, or set to invisible,
+  // then it would be rendered between the text-format-enabled area and the
+  // "Formatting options" fieldset.
+  if ($element['#description_display'] == 'after') {
+    $denylist[] = '#description';
+  }
+
   // Move this element into sub-element 'value'.
   unset($element['value']);
   foreach (element_properties($element) as $key) {
@@ -1300,6 +1316,15 @@ function filter_process_format($element) {
   $formats = filter_formats($user);
   $fallback_format = filter_fallback_format();
 
+  // Turn original element into a text format wrapper. Settings for all
+  // available formats are added to make them available for all fields.
+  if (isset($element['#attached'])) {
+    $element['#attached'] = array_merge_recursive($element['#attached'], filter_get_attached($formats));
+  }
+  else {
+    $element['#attached'] = filter_get_attached($formats);
+  }
+
   // Reduce the list if a list of allowed formats was provided.
   if (!empty($element['#allowed_formats'])) {
     foreach ($formats as $format) {
@@ -1308,14 +1333,6 @@ function filter_process_format($element) {
         unset($formats[$format->format]);
       }
     }
-  }
-
-  // Turn original element into a text format wrapper.
-  if (isset($element['#attached'])) {
-    $element['#attached'] = array_merge_recursive($element['#attached'], filter_get_attached($formats));
-  }
-  else {
-    $element['#attached'] = filter_get_attached($formats);
   }
 
   // Specify if uploads are allowed by using a data attribute.
@@ -1943,7 +1960,7 @@ function filter_filter_info() {
     'settings callback' => '_filter_html_settings',
     'allowed html callback' => '_filter_html_allowed_html',
     'default settings' => array(
-      'allowed_html' => '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <h3> <h4> <h5> <p> <img> <figure> <figcaption>',
+      'allowed_html' => '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <h3> <h4> <h5> <p> <br> <img> <figure> <figcaption>',
       'filter_html_help' => 1,
       'filter_html_nofollow' => 0,
     ),
@@ -2230,9 +2247,14 @@ function _filter_url($text, $filter) {
 
   // Prepare domain name pattern.
   // The ICANN seems to be on track towards accepting more diverse top level
-  // domains, so this pattern has been "future-proofed" to allow for TLDs
+  // domains (TLDs), so this pattern has been "future-proofed" to allow for TLDs
   // of length 2-64.
   $domain = '(?:[A-Za-z0-9._+-]+\.)?[A-Za-z]{2,64}\b';
+
+  // Mail domains differ from the generic domain pattern; specifically, a .
+  // character must be present in the string that follows the @ character.
+  $email_domain = '(?:[\p{L}\p{M}\p{N}._+-]+\.)+[\p{L}\p{M}]{2,64}\b';
+
   $ip = '(?:[0-9]{1,3}\.){3}[0-9]{1,3}';
   $auth = '[a-zA-Z0-9:%_+*~#?&=.,/;-]+@';
   $trail = '[a-zA-Z0-9:%_+*~#&\[\]=/;?!\.,-]*[a-zA-Z0-9:%_+*~#&\[\]=/;-]';
@@ -2249,7 +2271,7 @@ function _filter_url($text, $filter) {
   $tasks['_filter_url_parse_full_links'] = $pattern;
 
   // Match email addresses.
-  $url_pattern = "[A-Za-z0-9._+-]{1,254}@(?:$domain)";
+  $url_pattern = "[\p{L}\p{M}\p{N}._+-]{1,254}@(?:$email_domain)";
   $pattern = "`($url_pattern)`";
   $tasks['_filter_url_parse_email_links'] = $pattern;
 
@@ -2469,7 +2491,7 @@ function _filter_autop($text) {
   // Note: PHP ensures the array consists of alternating delimiters and literals
   // and begins and ends with a literal (inserting NULL as required).
   $ignore = FALSE;
-  $ignoretag = '';
+  $ignore_tag = '';
   $output = '';
   foreach ($chunks as $i => $chunk) {
     if ($i % 2) {
@@ -2485,16 +2507,17 @@ function _filter_autop($text) {
       if (!$ignore) {
         if ($open) {
           $ignore = TRUE;
-          $ignoretag = $tag;
+          $ignore_tag = $tag;
         }
       }
       // Only allow a matching tag to close it.
-      elseif (!$open && $ignoretag == $tag) {
+      elseif (!$open && $ignore_tag == $tag) {
         $ignore = FALSE;
-        $ignoretag = '';
+        $ignore_tag = '';
       }
     }
     elseif (!$ignore) {
+      $chunk = preg_replace('|<br>|', '<br />', $chunk); // Normalize break tags for consistency in matching
       $chunk = preg_replace('|\n*$|', '', $chunk) . "\n\n"; // just to make things a little easier, pad the end
       $chunk = preg_replace('|<br />\s*<br />|', "\n\n", $chunk);
       $chunk = preg_replace('!(<' . $block . '[^>]*>)!', "\n$1", $chunk); // Space things out a little
@@ -2510,7 +2533,7 @@ function _filter_autop($text) {
       $chunk = preg_replace('!(</?' . $block . '[^>]*>)\s*</p>!', "$1", $chunk);
       $chunk = preg_replace('|(?<!<br />)\s*\n|', "<br />\n", $chunk); // make line breaks
       $chunk = preg_replace('!(</?' . $block . '[^>]*>)\s*<br />!', "$1", $chunk);
-      $chunk = preg_replace('!<br />(\s*</?(?:p|li|div|th|pre|td|ul|ol)>)!', '$1', $chunk);
+      $chunk = preg_replace('!<br />(\s*</?(?:p|li|div|th|pre|td|ul|ol|h[1-6])>)!', '$1', $chunk); // Remove added break tags before closing block tags
       $chunk = preg_replace('/&([^#])(?![A-Za-z0-9]{1,8};)/', '&amp;$1', $chunk);
     }
     $output .= $chunk;
@@ -2661,6 +2684,11 @@ function _filter_image_align($text) {
       $parent = $node->parentNode;
       if ($parent && $parent->nodeName === 'figure') {
         $target = $parent;
+      }
+      // Consider more deeply nested structures. A link wrapped around a
+      // captioned image.
+      elseif ($parent && $parent->nodeName === 'a' && $parent->parentNode && $parent->parentNode->nodeName === 'figure') {
+        $target = $parent->parentNode;
       }
       else {
         $target = $node;

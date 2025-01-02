@@ -18,17 +18,10 @@
 function dblog_overview() {
   $filter = dblog_build_filter_query();
   $rows = array();
-  $classes = array(
-    WATCHDOG_DEBUG => 'dblog-debug',
-    WATCHDOG_INFO => 'dblog-info',
-    WATCHDOG_NOTICE => 'dblog-notice',
-    WATCHDOG_WARNING => 'dblog-warning',
-    WATCHDOG_ERROR => 'dblog-error',
-    WATCHDOG_CRITICAL => 'dblog-critical',
-    WATCHDOG_ALERT => 'dblog-alert',
-    WATCHDOG_EMERGENCY => 'dblog-emergency',
-    WATCHDOG_DEPRECATED => 'dblog-deprecated',
-  );
+  $classes = watchdog_severity_levels('name');
+  foreach ($classes as $key => $value) {
+    $classes[$key] = 'dblog-' . $value;
+  }
 
   $build['dblog_filter_form'] = backdrop_get_form('dblog_filter_form');
 
