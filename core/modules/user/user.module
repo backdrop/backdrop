@@ -3767,33 +3767,3 @@ function user_file_download_access($field, $entity_type, $entity) {
     return user_view_access($entity);
   }
 }
-
-/**
- * Implements hook_form_FORM_ID_alter().
- *
- * Alters the theme form to use the admin theme on simplified login pages.
- *
- * @see user_form_system_themes_admin_form_submit()
- */
-function user_form_system_themes_admin_form_alter(&$form, &$form_state, $form_id) {
-  $form['admin_theme']['login_admin_theme'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Use the administration theme for login pages'),
-    '#default_value' => config_get('system.core', 'login_admin_theme'),
-    '#description' => t('If disabled, the default front-end theme will be used. This setting only has an effect when the "Show simplified page" is set in the <a href="@link">Login settings</a>.', array('@link' => url('admin/config/people/login'))),
-    '#config' => 'system.core',
-    '#access' => config_get('system.core', 'user_login_appearance') == 'simplified',
-  );
-  $form['#submit'][] = 'user_form_system_themes_admin_form_submit';
-}
-
-/**
- * Form submission handler for system_themes_admin_form().
- *
- * @see user_form_system_themes_admin_form_alter()
- */
-function user_form_system_themes_admin_form_submit($form, &$form_state) {
-  config_set('system.core', 'login_admin_theme', $form_state['values']['login_admin_theme']);
-
-  backdrop_flush_all_caches();
-}
