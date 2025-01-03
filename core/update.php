@@ -341,13 +341,13 @@ function update_backup_form($form, &$form_state) {
   $help = '<p>' . t('Before running updates, it is recommended to create a backup of your database and configuration.') . '</p>';
   $help .= '<p>' . t('If skipping the backup process, please ensure you create a backup through a different mechanism, such as through your hosting provider.') . '</p>';
 
-  if (empty($backup_directory)) {
+  if (empty($backup_directory) && $backup_directory !== FALSE) {
     $help .= '<p>' . t('Backups are not available because the variable !variable has not been set in !file.', array(
       '!variable' => '<code>$settings[\'backup_directory\']</code>',
       '!file' => '<code>settings.php</code>',
     )) . '</p>';
     $help .= '<p>' . t('Please check the <a href="!url">documentation on configuring backups</a>.', array(
-      '!url' => 'https://docs.backdropcms.org/documentation/backup-and-restore',
+      '!url' => 'https://docs.backdropcms.org/documentation/creating-backups',
     )) . '</p>';
   }
   else {
