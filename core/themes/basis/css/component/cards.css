@@ -9,12 +9,22 @@
 }
 /* Undo previous compensation with supplemental css selector. */
 .update-1-30 .l-top .block-views-promoted-cards-block {
-  margin-top: inherit;
+  margin-top: 0;
 }
+/* Reduce spacing only for default home page block configuration. */
+.update-1-30 .block-hero + .block-views-promoted-cards-block,
+.update-1-30 .block-system-messages + .block-views-promoted-cards-block {
+  padding-top: 0;
+}
+
 .block-views-promoted-cards-block {
   padding-top: 2rem;
   padding-bottom: 2rem;
   background-color: #f2f2f2;
+}
+/* Background color has been moved to l-top region. */
+.update-1-30 .block-views-promoted-cards-block {
+  background-color: transparent;
 }
 
 .block-views-promoted-cards-block .views-view-grid-cols-3 {

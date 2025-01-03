@@ -7,14 +7,21 @@
   position: relative;
   margin: 0 0 2rem;
 }
-/* Boxton is the only layout with a full-width l-top region. */
 .update-1-30 .layout--boxton .l-header {
-   /* Boxton is the only layout with no space betweem the header and l-top. */
+   /* Boxton is the only layout with no space betweem l-header and l-top. */
   margin-bottom: 0;
 }
 
 .layout .l-messages {
   margin: 0 0 2rem;
+  background: pink;
+}
+/* Reduce spacing only for default home page block configuration. */
+.update-1-30 .layout--boxton .block-hero + .block-system-messages .l-messages {
+  padding-top: 0;
+}
+.update-1-30 .layout--boxton .l-messages {
+  margin: 0 0 1rem;
 }
 
 /* Push the footer down to the bottom of the page. */
