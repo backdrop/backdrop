@@ -432,7 +432,7 @@ function user_login_settings($form, &$form_state) {
     '#config' => 'system.core',
     '#description' => t('If disabled, the default front-end theme will be used. This setting only has an effect when the "Show simplified page" is set.'),
     '#states' => array(
-      'enabled' => array(
+      'visible' => array(
         ':input[name="user_login_appearance"]' => array('value' => 'simplified'),
       ),
     ),
