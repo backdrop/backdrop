@@ -56,6 +56,11 @@
   background: #0074bd url(../../images/texture.png) repeat center center;
   background-blend-mode: luminosity;
 }
+body.update-1-30 .block-hero-no-image {
+  background-image: url(../../images/waves.svg);
+  background-size: cover;
+  background-blend-mode: normal;
+}
 
 .no-background-blend-mode .block-hero-no-image * {
   position: relative;
