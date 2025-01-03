@@ -3782,7 +3782,7 @@ function user_form_system_themes_admin_form_alter(&$form, &$form_state, $form_id
     '#default_value' => config_get('system.core', 'login_admin_theme'),
     '#description' => t('If disabled, the default front-end theme will be used. This setting only has an effect when the "Show simplified page" is set in the <a href="@link">Login settings</a>.', array('@link' => url('admin/config/people/login'))),
     '#config' => 'system.core',
-    '#access' => config_get('system.core', 'user_login_appearance') != 'simplified',
+    '#access' => config_get('system.core', 'user_login_appearance') == 'simplified',
   );
   $form['#submit'][] = 'user_form_system_themes_admin_form_submit';
 }
