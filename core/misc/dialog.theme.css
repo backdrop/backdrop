@@ -24,7 +24,7 @@
   background: none;
 }
 .ui-dialog .ui-dialog-buttonpane {
-  margin-top: 0;
+  margin-block-start: 0;
   background: #f3f4ee;
   padding: .3em 1em;
   border-width: 1px 0 0 0;
@@ -46,9 +46,9 @@
 }
 .ui-dialog .ajax-progress-throbber {
   /* Can't do center:50% middle: 50%, so approximate it for a typical window size. */
-  left: 49%;
+  inset-inline-start: 49%;
   position: fixed;
-  top: 48.5%;
+  inset-block-start: 48.5%;
   z-index: 1000;
   background-color: #232323;
   background-image: url("loading-small.gif");

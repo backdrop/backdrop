@@ -17,10 +17,10 @@
 #admin-bar {
   /* Adjusting font size will scale the entire admin menu, including icons. */
   font: normal var(--admin-bar-font-size) "Lucida Grande", Verdana, sans-serif;
-  left: 0;
+  inset-inline-start: 0;
   position: absolute;
-  text-align: left; /* LTR */
-  top: 0;
+  text-align: start;
+  inset-block-start: 0;
   width: 100%;
   line-height: 1;
   padding: 0;
@@ -28,19 +28,16 @@
   z-index: 999;
   background: linear-gradient(#2D2D2D 0%, #171717 100%); /* W3C */
 }
-[dir="rtl"] #admin-bar {
-  text-align: right;
-}
 #admin-bar-wrapper {
   overflow: hidden;
 }
 /* When body is a contextual links region. */
 .contextual-links-region #admin-bar {
-  top: calc(var(--admin-bar-height) * -1)
+  inset-block-start: calc(var(--admin-bar-height) * -1)
 }
 
 .admin-bar body {
-  border-top: var(--admin-bar-height) solid #2D2D2D !important;
+  border-block-start: var(--admin-bar-height) solid #2D2D2D !important;
 }
 
 /* Top level items. */
@@ -57,13 +54,13 @@
 }
 #admin-bar .top-level > li > ul {
   display: inline-block;
-  left: auto;
+  inset-inline-start: auto;
   width: auto;
-  right: auto;
+  inset-inline-end: auto;
   background: transparent;
 }
 #admin-bar .top-level > li > ul > li {
-  float: left;
+  float: inline-start;
   width: auto;
 }
 #admin-bar-menu.top-level > li > ul > li > a.active-trail {
@@ -78,14 +75,10 @@
 #admin-bar svg.icon {
   width: 1.9em;
   height: 1.9em;
-  margin-top: -0.3em;
-  margin-bottom: -0.4em;
-  padding-right: 0.3em; /* LTR */
+  margin-block-start: -0.3em;
+  margin-block-end: -0.4em;
+  padding-inline-end: 0.3em;
   box-sizing: content-box;
-}
-[dir="rtl"] #admin-bar svg.icon {
-  padding-right: 0;
-  padding-left: 0.3em;
 }
 
 /* Restore active and hover colors. */
@@ -127,23 +120,21 @@
   border: none;
   color: #eeeeee;
   font-weight: normal;
-  text-align: left; /* LTR */
+  text-align: start;
   text-decoration: none;
-}
-[dir="rtl"] #admin-bar li > a,
-[dir="rtl"] #admin-bar li > span {
-  text-align: right;
 }
 #admin-bar .dropdown li > a,
 #admin-bar .dropdown li > span {
   display: block;
-  padding: 0.7em 1.5em 0.7em 0.75em;
+  padding-block: 0.7em;
+  padding-inline: 0.75em 1.5em;
 }
 #admin-bar-icon > li.expandable > a,
 #admin-bar-menu > li.expandable > ul.dropdown > li > a,
 #admin-bar-extra > li.expandable > ul.dropdown > li > a,
 #admin-bar-extra > li.expandable > ul.dropdown > li > span {
-  padding: 0.7em 0.75em 0.7em 0.7em;
+  padding-block: 0.7em;
+  padding-inline: 0.7em 0.75em;
 }
 #admin-bar a.expanded-trail,
 #admin-bar span.expanded-trail {
@@ -151,19 +142,12 @@
 }
 
 #admin-bar .dropdown .admin-bar-tab a {
-  border-left: none; /* LTR */
-  border-right: 1px solid #52565e; /* LTR */
-}
-[dir="rtl"] #admin-bar .dropdown .admin-bar-tab a {
-  border-left: 1px solid #52565e;
-  border-right: none;
+  border-inline-start: none;
+  border-inline-end: 1px solid #52565e;
 }
 #admin-bar .dropdown li li a {
-  border-right: none; /* LTR */
-  border-top: 1px solid #323232;
-}
-[dir="rtl"] #admin-bar .dropdown li li a {
-  border-left: none;
+  border-inline-end: none;
+  border-block-start: 1px solid #323232;
 }
 #admin-bar .dropdown a:hover {
   text-decoration: underline;
@@ -172,15 +156,12 @@
 /* All dropdown list items. */
 #admin-bar .dropdown li {
   background-image: none;
-  float: left; /* LTR */
+  float: inline-start;
   height: 100%;
   list-style-image: none;
   list-style-type: none;
   margin: 0 !important;
   padding: 0;
-}
-[dir="rtl"] #admin-bar .dropdown li {
-  float: right;
 }
 
 /* First level items. */
@@ -196,33 +177,26 @@
    read by screen readers). */
 #admin-bar .dropdown li ul {
   display: none;
-  left: -999em; /* LTR */
+  inset-inline-start: -999em;
   margin: 0;
   position: absolute;
   width: 15em;
 }
-[dir="rtl"] #admin-bar .dropdown li ul {
-  left: auto;
-}
 
 /* Third-and-above-level lists. */
 #admin-bar .dropdown li li.expandable ul {
-  margin: calc(-1px - var(--admin-bar-height)) 0 0 15em; /* LTR */
+  margin-block: calc(-1px - var(--admin-bar-height)) 0;
+  margin-inline: 15em 0;
 }
 #admin-bar .dropdown li li.expandable.outside-right ul {
   z-index: 1;
-  margin-left: -15em; /* LTR */
+  margin-inline-start: -15em;
   /* Add a shadow to help distinguish when a sub-menu overlaps its parent. */
   box-shadow:
     -1px 0 0 1px #777,
     -8px 0px 24px 3px rgba(0, 0, 0, 0.6);
 }
-[dir="rtl"] #admin-bar .dropdown li li.expandable ul {
-  margin-right: 15em;
-  margin-left: 0;
-}
 [dir="rtl"] #admin-bar .dropdown li li.expandable.outside-left ul {
-  margin-right: -15em;
   box-shadow:
     1px 0 0 1px #777,
     8px 0px 24px 3px rgba(0, 0, 0, 0.6);
@@ -231,10 +205,7 @@
 /* Lists nested under hovered list items. */
 #admin-bar .dropdown ul.expanded {
   display: block;
-  left: auto; /* LTR */
-}
-[dir="rtl"] #admin-bar .dropdown ul.expanded {
-  right: auto;
+  inset-inline-start: auto;
 }
 
 /* Second-and-more-level hovering. */
@@ -251,15 +222,14 @@
   background: #ffffff;
   width: 1em;
   height: 100%;
-  margin: -0.7em 0;
+  margin-block: -0.7em;
+  margin-inline: 0;
   position: absolute;
-  right: 0.7em; /* LTR */
+  inset-inline-end: 0.7em;
 }
 [dir="rtl"] #admin-bar .dropdown li li.expandable > a::before {
   /*noinspection CssUnresolvedCustomProperty*/
   mask-image: var(--icon-arrow-left);
-  right: auto;
-  left: 0.7em;
 }
 #admin-bar .dropdown li li a.expanded-trail {
   background-color: #111;
@@ -278,28 +248,12 @@
 
 /* Extras menu. */
 #admin-bar-extra {
-  float: right; /* LTR */
-  direction: rtl; /* LTR */
-}
-[dir="rtl"] #admin-bar-extra {
-  float: left;
-  direction: ltr;
-}
-#admin-bar-extra .dropdown li {
-  direction: ltr; /* LTR */
-}
-[dir="rtl"] #admin-bar-extra .dropdown li {
-  direction: rtl;
+  float: inline-end;
 }
 #admin-bar-extra svg.icon {
-  float: right; /* LTR */
-  margin-left: 0.75em; /* LTR */
-  margin-right: 0; /* LTR */
-}
-[dir="rtl"] #admin-bar-extra svg.icon {
-  float: left;
-  margin-left: 0;
-  margin-right: 0.75em;
+  float: inline-end;
+  margin-inline-start: 0.75em;
+  margin-inline-end: 0;
 }
 
 /* Search form. */
@@ -316,27 +270,23 @@
 #admin-bar .admin-bar-search input {
   /*noinspection CssUnresolvedCustomProperty*/
   background: #fff var(--icon-magnifying-glass) center right no-repeat;
-  background-position: right 0.5em center; /* LTR */
+  background-position: inline-end 0.5em center;
   background-size: 1.2em;
   border: none;
   border-radius: 0;
   box-shadow: none;
   margin: 0;
   outline: none;
-  padding: 0.5em 2em 0.5em 1em; /* LTR */
+  padding-block: 0.5em;
+  padding-inline: 1em 2em;
   width: 100%;
   box-sizing: border-box;
-}
-[dir="rtl"] #admin-bar .admin-bar-search input {
-  background-position: left 0.5em center;
-  padding-left: 2em;
-  padding-right: 1em;
 }
 
 #admin-bar .admin-bar-search-results .dropdown {
   display: block !important;
-  left: auto !important;
-  top: 100%;
+  inset-inline-start: auto !important;
+  inset-block-start: 100%;
 }
 #admin-bar .admin-bar-search-results .dropdown,
 #admin-bar .admin-bar-search-results .dropdown li {
@@ -360,7 +310,7 @@ html.js fieldset.collapsible div.fieldset-wrapper {
     display: none !important;
   }
   body.admin-bar {
-    margin-top: 0 !important;
+    margin-block-start: 0 !important;
   }
 }
 
@@ -371,24 +321,25 @@ tr.admin-bar-tweak-permissions-processed {
   cursor: hand;
 }
 tr.admin-bar-tweak-permissions-processed td.module {
-  border-top: 0;
+  border-block-start: 0;
 }
 
 /* Alert colors. */
 #admin-bar .admin-bar-alert .error-count {
   box-sizing: content-box;
-  padding: 0.5em 0.4em 0.5em 0.4em;
+  padding: 0.5em 0.4em;
   display: inline-block;
   min-width: 1.2em;
   border-radius: 2em;
-  margin: -0.4em 0 -0.5em;
+  margin-block: -0.4em -0.5em;
+  margin-inline: 0;
   text-align: center;
   background-color: #ee3d23;
   line-height: 1;
 }
 #admin-bar .admin-bar-alert .error-count {
-  margin-left: 0;
-  margin-right: 0;
+  margin-inline-start: 0;
+  margin-inline-end: 0;
 }
 #admin-bar .admin-bar-alert .error-label {
   display: none;

@@ -18,19 +18,19 @@
 
 .ckeditor5-dialog-loading {
   position: absolute;
-  top: 6px;
-  left: 0;
+  inset-block-start: 6px;
+  inset-inline-start: 0;
   width: 100%;
   text-align: center;
 }
 
 .ckeditor5-dialog-loading-link {
   position: relative;
-  top: 0;
+  inset-block-start: 0;
   display: inline-block;
   border-radius: 5px;
   border: 1px solid #B6B6B6;
-  border-top: none;
+  border-block-start: none;
   background: white;
   padding: 3px 10px;
   box-shadow: 0 0 6px -3px #000;

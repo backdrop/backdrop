@@ -2,18 +2,14 @@
 .views-bulk-form .form-item,
 .views-bulk-form .form-actions {
   display: inline-block;
-  padding: .5em 1em 0 0; /* LTR */
-}
-[dir="rtl"] .views-exposed-form .views-exposed-widget,
-[dir="rtl"] .views-bulk-form .form-item,
-[dir="rtl"] .views-bulk-form .form-actions {
-  padding: .5em 0 0 1em;
+  padding-block: 0.5em 0;
+  padding-inline: 0 1em;
 }
 
 .views-exposed-form .form-item,
 .views-exposed-form .form-submit {
-  margin-top: 0;
-  margin-bottom: 0;
+  margin-block-start: 0;
+  margin-block-end: 0;
 }
 
 .views-exposed-form label {
@@ -21,7 +17,7 @@
 }
 
 .views-exposed-widgets {
-  margin-bottom: .5em;
+  margin-block-end: .5em;
 }
 
 .views-bulk-form .form-item,
@@ -29,20 +25,20 @@
 .views-bulk-form .form-submit {
   display: inline-block;
   vertical-align: bottom;
-  margin-top: 0;
-  margin-bottom: 0;
+  margin-block-start: 0;
+  margin-block-end: 0;
 }
 
 .views-bulk-form {
-  margin-bottom: 1em;
+  margin-block-end: 1em;
 }
 
 /* table style column align */
 .views-align-left {
-  text-align: left;
+  text-align: start;
 }
 .views-align-right {
-  text-align: right;
+  text-align: end;
 }
 .views-align-center {
   text-align: center;
@@ -110,7 +106,7 @@
 /* Remove the border on tbody that system puts in */
 /* Deprecated */
 .views-view-grid tbody {
-  border-top: none;
+  border-block-start: none;
 }
 
 .view .progress-disabled {

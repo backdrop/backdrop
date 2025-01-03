@@ -15,12 +15,13 @@
 /* @group Layout */
 
 .box-padding {
-  padding-left: 12px;
-  padding-right: 12px;
+  padding-inline-start: 12px;
+  padding-inline-end: 12px;
 }
 
 .box-margin {
-  margin: 12px 12px 0 12px;
+  margin-block: 12px 0;
+  margin-inline: 12px;
 }
 
 /* @end */
@@ -36,7 +37,7 @@
 .views-admin .icon-text {
   background-attachment: scroll;
   background-image: url("../images/sprites.png");
-  background-position: left top; /* LTR */
+  background-position: left top;
   background-repeat: no-repeat;
 }
 
@@ -80,7 +81,7 @@
 
 /* Targets any element with an icon -> text combo */
 .views-admin .icon-text {
-  padding-left: 19px; /* LTR */
+  padding-inline-start: 19px;
 }
 
 .views-admin .icon.linked {
@@ -132,17 +133,17 @@ fieldset.box-padding {
 }
 
 .views-admin fieldset fieldset {
-  margin-bottom: 0;
+  margin-block-end: 0;
 }
 
 .form-item {
-  margin-top: 9px;
-  padding-bottom: 0;
-  padding-top: 0;
+  margin-block-start: 9px;
+  padding-block-end: 0;
+  padding-block-start: 0;
 }
 
 .form-type-checkbox {
-  margin-top: 6px;
+  margin-block-start: 6px;
 }
 
 input.form-checkbox,
@@ -151,27 +152,27 @@ input.form-radio {
 }
 
 .container-inline {
-  padding-top: 15px;
+  padding-block-start: 15px;
 }
 
 .container-inline > * + *,
 .container-inline .fieldset-wrapper > * + * {
-  padding-left: 4pt; /* LTR */
+  padding-inline-start: 4pt;
 }
 
 .views-admin fieldset fieldset.container-inline {
-  margin-bottom: 1em;
-  margin-top: 1em;
-  padding-top: 0;
+  margin-block-end: 1em;
+  margin-block-start: 1em;
+  padding-block-start: 0;
 }
 
 .views-admin fieldset fieldset.container-inline > .fieldset-wrapper {
-  padding-bottom: 0;
+  padding-block-end: 0;
 }
 
 /* Indent form elements so they're directly underneath the label of the checkbox that reveals them */
 .views-admin .form-type-checkbox + .form-wrapper {
-  margin-left: 16px; /* LTR */
+  margin-inline-start: 16px;
 }
 
 /* Hide 'remove' checkboxes. */
@@ -188,8 +189,8 @@ input.form-radio {
 /* @group Dependent options */
 
 .views-admin-dependent .form-item {
-  margin-bottom: 6px;
-  margin-top: 6px;
+  margin-block-end: 6px;
+  margin-block-start: 6px;
 }
 
 .form-item-show-wizard-key,
@@ -204,24 +205,24 @@ input.form-radio {
 .edit-page-style-wrapper,
 .edit-block-style-wrapper {
   display: table-cell;
-  padding-top: 1em;
+  padding-block-start: 1em;
 }
 
 .edit-page-style-wrapper .fieldset-wrapper,
 .edit-block-style-wrapper .fieldset-wrapper {
-  margin-bottom: 0;
+  margin-block-end: 0;
 }
 
 .form-item-page-create input.form-checkbox,
 .form-item-block-create input.form-checkbox,
 .form-item-page-create label.option,
 .form-item-block-create label.option {
-  margin-bottom: 0;
+  margin-block-end: 0;
 }
 
 .edit-page-style-inner-wrapper,
 .edit-block-style-inner-wrapper {
-  padding-top: 1em;
+  padding-block-start: 1em;
 }
 
 .edit-page-style-wrapper div,
@@ -245,7 +246,8 @@ input.form-radio {
   .edit-block-style-wrapper label,
   .edit-block-style-wrapper input {
     display: inline-block;
-    margin: 0 0 0.5em;
+    margin-block: 0 0.5em;
+    margin-inline: 0;
   }
 
   .form-item-show-wizard-key,
@@ -274,8 +276,8 @@ input.form-radio {
 /* @group Lists */
 
 .horizontal > * + * {
-  margin-left: 9px; /* LTR */
-  padding-left: 9px; /* LTR */
+  margin-inline-start: 9px;
+  padding-inline-start: 9px;
 }
 
 @media (max-width: 768px) {
@@ -299,7 +301,7 @@ input.form-radio {
     display: none;
   }
 
-  .views-list td:before {
+  .views-list td::before {
     content: attr(data-label);
     display: block;
     font-weight: bold;
@@ -307,13 +309,13 @@ input.form-radio {
     font-size: 0.923em;
   }
 
-  .views-list .views-ui-operations:before {
+  .views-list .views-ui-operations::before {
     display: none;
   }
 
   .js .views-list .dropbutton-widget {
-    left: 0;
-    right: auto;
+    inset-inline-start: 0;
+    inset-inline-end: auto;
   }
 
 }
@@ -323,7 +325,7 @@ input.form-radio {
 /* @group Messages */
 
 .view-changed {
-  margin-bottom: 21px;
+  margin-block-end: 21px;
 }
 
 /* @end */
@@ -335,7 +337,7 @@ input.form-radio {
   font-size: 15px;
   line-height: 1.6154;
   margin: 0;
-  padding-top: 1.5em;
+  padding-block-start: 1.5em;
 }
 
 /* @end */
@@ -374,12 +376,13 @@ th.views-ui-operations {
 }
 
 td.views-ui-displays ul {
-  margin: 0.25em 0 0.25em 0;
+  margin-block: 0.25em;
+  margin-inline: 0;
 }
 
 .views-ui-view-tag,
 .views-ui-view-storage {
-  margin-top: 3px;
+  margin-block-start: 3px;
 }
 
 /* @end */
@@ -403,7 +406,7 @@ td.views-ui-displays ul {
  * I wish this didn't have to be so specific
  */
 .form-item-description-enable + .form-item-description {
-  margin-top: 0;
+  margin-block-start: 0;
 }
 
 .form-item-description-enable label {
@@ -412,7 +415,7 @@ td.views-ui-displays ul {
 
 .form-item-page-create,
 .form-item-block-create {
-  margin-top: 13px;
+  margin-block-start: 13px;
 }
 
 .form-item-page-create label,
@@ -459,45 +462,42 @@ td.group-title {
 .group-message .form-submit,
 .views-remove-group-link,
 #views-add-group {
-  float: right;
+  float: inline-end;
   clear: both;
 }
 
 .views-operator-label {
   font-style: italic;
   font-weight: bold;
-  padding-left: 0.5em; /* LTR */
+  padding-inline-start: 0.5em;
   text-transform: uppercase;
 }
 
 .grouped-description,
 .exposed-description {
-  float: left;
-  padding-top: 3px;
-  padding-right: 10px;
+  float: inline-start;
+  padding-block-start: 3px;
+  padding-inline-end: 10px;
 }
 
 #views-rearrange-filters {
-  border-top: 1px solid #ccc;
+  border-block-start: 1px solid #ccc;
 }
 #views-rearrange-filters tr.even,
 #views-rearrange-filters tr.odd {
   box-shadow: none;
   border: 1px solid #ccc;
-  border-top: none;
+  border-block-start: none;
 }
 #views-rearrange-filters tr.filter-group-operator-row {
-  border-bottom: 1px solid #ccc;
+  border-block-end: 1px solid #ccc;
 }
 #views-rearrange-filters tr.views-group-title {
-  border-bottom: none;
+  border-block-end: none;
 }
 #views-rearrange-filters td.group-operator {
-  border-right: 1px solid #ccc; /* LTR */
+  border-inline-end: 1px solid #ccc;
   vertical-align: middle;
-}
-[dir="rtl"] #views-rearrange-filters td.group-operator {
-  border-left: 1px solid #ccc;
 }
 
 /* This keeps the collapsible fieldsets of options from crashing into the bottom
@@ -506,7 +506,7 @@ td.group-title {
  * the float edit option columns.
  */
 #edit-options .collapsible {
-  float: left;
+  float: inline-start;
   width: 100%;
 }
 
@@ -539,7 +539,7 @@ td.group-title {
  */
 
 #views-display-menu-tabs li {
-  margin-bottom: 5px;
+  margin-block-end: 5px;
 }
 
 #views-display-menu-tabs li.add {
@@ -576,7 +576,7 @@ td.group-title {
 }
 .views-displays .secondary .open > a {
   background-color: #f1f1f1;
-  border-bottom: 1px solid transparent;
+  border-block-end: 1px solid transparent;
   position: relative;
 }
 
@@ -636,7 +636,7 @@ td.group-title {
 }
 
 #edit-display-settings-content {
-  margin-top: 12px;
+  margin-block-start: 12px;
 }
 
 #edit-display-settings-main {
@@ -652,7 +652,7 @@ td.group-title {
  */
 
 .views-display-column + .views-display-column {
-   margin-top: 0;
+   margin-block-start: 0;
  }
 
  /* @end */
@@ -664,16 +664,16 @@ td.group-title {
 
 #views-ui-preview-form > div > div,
 #views-ui-preview-form > div > input {
-  float: left;
+  float: inline-start;
 }
 
 #views-ui-preview-form .form-type-checkbox {
-  margin-top: 2px;
-  margin-left: 2px;
+  margin-block-start: 2px;
+  margin-inline-start: 2px;
 }
 
 #views-ui-preview-form .form-type-textfield {
-  margin-top: 5px;
+  margin-block-start: 5px;
 }
 
 #views-ui-preview-form .arguments-preview {
@@ -682,19 +682,16 @@ td.group-title {
 
 #views-ui-preview-form .arguments-preview,
 #views-ui-preview-form .form-type-textfield {
-  margin: 0 0 0 14px;
-}
-[dir="rtl"] #views-ui-preview-form .arguments-preview,
-[dir="rtl"] #views-ui-preview-form .form-type-textfield {
-  margin: 0 14px 0 0;
+  margin-block: 0;
+  margin-inline: 14px 0;
 }
 
 #views-ui-preview-form .form-type-textfield label {
   display: inline-block;
-  float: left;
+  float: inline-start;
   font-weight: normal;
   height: 6ex;
-  margin-right: 0.75em;
+  margin-inline-end: 0.75em;
 }
 
 #views-ui-preview-form .form-type-textfield .description {
@@ -714,7 +711,7 @@ td.group-title {
 }
 
 .views-ui-display-tab-bucket + .views-ui-display-tab-bucket {
-  border-top: medium none;
+  border-block-start: medium none;
 }
 
 .views-ui-display-tab-bucket > h3 {
@@ -729,25 +726,25 @@ td.group-title {
 }
 
 .views-ui-display-tab-bucket .horizontal.actions {
-  margin-right: 6px;
+  margin-inline-end: 6px;
 }
 
 .views-ui-display-tab-bucket .actions.horizontal li + li {
-  margin-left: 3px;
-  padding-left: 3px;
+  margin-inline-start: 3px;
+  padding-inline-start: 3px;
 }
 
 .views-ui-display-tab-bucket.access {
-  padding-top: 0;
+  padding-block-start: 0;
 }
 
 .views-ui-display-tab-bucket.page-settings {
-  border-bottom: medium none;
+  border-block-end: medium none;
 }
 
 .views-display-setting .views-ajax-link {
-  margin-left: 0.2083em;
-  margin-right: 0.2083em;
+  margin-inline-start: 0.2083em;
+  margin-inline-end: 0.2083em;
 }
 
 /* @end */
@@ -772,7 +769,8 @@ td.group-title {
 
 .views-ui-display-tab-bucket {
   position: relative;
-  margin: 0 0 0.8em;
+  margin-block: 0 0.8em;
+  margin-inline: 0;
 }
 
 /* @end */
@@ -788,12 +786,12 @@ td.group-title {
 }
 
 .views-ui-display-tab-bucket .views-group-text {
-  margin-top: 6px;
-  margin-bottom: 6px;
+  margin-block-start: 6px;
+  margin-block-end: 6px;
 }
 
 .views-display-setting .label {
-  margin-right: 3pt; /* LTR */
+  margin-inline-end: 3pt;
 }
 
 /* @end */
@@ -818,8 +816,8 @@ td.group-title {
 }
 
 tr.views-filterable-option .form-item {
-  margin-bottom: 0;
-  margin-top: 0;
+  margin-block-end: 0;
+  margin-block-start: 0;
 }
 
 tr.views-filterable-option td.title {
@@ -827,8 +825,8 @@ tr.views-filterable-option td.title {
 }
 
 .views-filterable-options .form-type-checkbox .description {
-  margin-top: 0;
-  margin-bottom: 0;
+  margin-block-start: 0;
+  margin-block-end: 0;
 }
 
 #views-filterable-options-controls {
@@ -837,7 +835,7 @@ tr.views-filterable-option td.title {
 
 #views-filterable-options-controls .form-item {
   width: 45%;
-  margin-right: 2%; /* LTR */
+  margin-inline-end: 2%;
 }
 
 #views-filterable-options-controls input,
@@ -846,11 +844,11 @@ tr.views-filterable-option td.title {
 }
 
 .views-ui-dialog .views-filterable-options {
-  margin-bottom: 10px;
+  margin-block-end: 10px;
 }
 
 .views-ui-dialog .views-add-form-selected.container-inline {
-  padding-top: 0;
+  padding-block-start: 0;
 }
 
 .views-ui-dialog .views-add-form-selected.container-inline > div {
@@ -867,7 +865,7 @@ tr.views-filterable-option td.title {
 .views-ui-dialog #views-ajax-title,
 .views-ui-dialog .views-override {
   background-color: #F3F4EE;
-  border-bottom: 1px solid #CCCCCC;
+  border-block-end: 1px solid #CCCCCC;
 }
 
 .views-ui-dialog .views-override {
@@ -886,11 +884,11 @@ tr.views-filterable-option td.title {
 .views-ui-dialog #views-progress-indicator {
   font-size: 11px;
   position: absolute;
-  right: 10px; /* LTR */
-  top: 8px;
+  inset-inline-end: 10px;
+  inset-block-start: 8px;
 }
 
-.views-ui-dialog #views-progress-indicator:before {
+.views-ui-dialog #views-progress-indicator::before {
   content: "\003C\00A0";
 }
 
@@ -899,7 +897,7 @@ tr.views-filterable-option td.title {
 }
 
 .views-ui-dialog fieldset .item-list {
-  padding-left: 2em;
+  padding-inline-start: 2em;
 }
 
 .views-ui-dialog .form-buttons {
@@ -907,8 +905,8 @@ tr.views-filterable-option td.title {
   padding: 8px 13px;
 }
 .views-ui-dialog .form-buttons input {
-  margin-bottom: 0;
-  margin-right: 0;
+  margin-block-end: 0;
+  margin-inline-end: 0;
 }
 
 /* @end */
@@ -924,7 +922,7 @@ tr.views-filterable-option td.title {
   border-width: 1px;
   max-height: 210px;
   overflow: auto;
-  margin-top: 5px;
+  margin-block-start: 5px;
   padding: 0 5px;
   width: 190px;
 }
@@ -944,7 +942,7 @@ tr.views-filterable-option td.title {
 }
 
 #views-ui-rearrange-filter-form tr[id^="views-row"] {
-  border-right: 1px solid #CDCDCD;
+  border-inline-end: 1px solid #CDCDCD;
 }
 
 #views-ui-rearrange-filter-form tr[id^="views-row"].even td {
@@ -952,11 +950,11 @@ tr.views-filterable-option td.title {
 }
 
 #views-ui-rearrange-filter-form .views-group-title {
-  border-top: 1px solid #CDCDCD;
+  border-block-start: 1px solid #CDCDCD;
 }
 
 #views-ui-rearrange-filter-form .group-empty {
-  border-bottom: 1px solid #CDCDCD;
+  border-block-end: 1px solid #CDCDCD;
 }
 
 /* @end */
@@ -966,9 +964,9 @@ tr.views-filterable-option td.title {
 .form-item-options-expose-required,
 .form-item-options-expose-label,
 .form-item-options-expose-description {
-  margin-bottom: 6px;
-  margin-left: 18px;
-  margin-top: 6px;
+  margin-block-end: 6px;
+  margin-inline-start: 18px;
+  margin-block-start: 6px;
 }
 
 /* @end */
@@ -976,10 +974,10 @@ tr.views-filterable-option td.title {
 /* @group Live preview elements */
 
 #views-preview-wrapper {
-  padding-bottom: 12px;
-  padding-top: 20px;
+  padding-block-end: 12px;
+  padding-block-start: 20px;
   margin: 0 0 1em;
-  border-top: 0.125em solid #CCC;
+  border-block-start: 0.125em solid #CCC;
 }
 
 #views-ui-preview-form {
@@ -1001,12 +999,12 @@ tr.views-filterable-option td.title {
   font-size: 13px;
   font-weight: normal;
   line-height: 1.6154;
-  margin-bottom: 0;
-  margin-top: 0;
+  margin-block-end: 0;
+  margin-block-start: 0;
 }
 
 #views-live-preview .view > * {
-  margin-top: 18px;
+  margin-block-start: 18px;
 }
 
 #views-live-preview .preview-section {
@@ -1016,12 +1014,12 @@ tr.views-filterable-option td.title {
 }
 
 #views-live-preview li.views-row + li.views-row {
-  margin-top: 18px;
+  margin-block-start: 18px;
 }
 
 /* The div.views-row is intentional and excludes li.views-row, for example */
 #views-live-preview div.views-row + div.views-row {
-  margin-top: 36px;
+  margin-block-start: 36px;
 }
 
 /* @group Query info table */
@@ -1058,7 +1056,7 @@ tr.views-filterable-option td.title {
 
 #views-live-preview .view-content > .item-list > ul {
   list-style-position: outside;
-  padding-left: 21px; /* LTR */
+  padding-inline-start: 21px;
 }
 
 /* @end */
@@ -1069,13 +1067,13 @@ tr.views-filterable-option td.title {
 
 #edit-options-default-action {
   width: 300px;
-  float: left;
+  float: inline-start;
 }
 
 #edit-options-exception.collapsible {
-  float: right;
+  float: inline-end;
   width: 250px;
-  margin-top: -2px;
+  margin-block-start: -2px;
 }
 
 /* @end */
@@ -1107,28 +1105,20 @@ tr.views-filterable-option td.title {
  * Overrides to Backdrop system CSS
  */
 div.messages {
-  margin-bottom: 18px;
+  margin-block-end: 18px;
 }
 
 /* @end */
 
 /* @group Drop buttons */
 .js .views-displays .dropbutton-widget {
-  left: auto; /* LTR */
-  right: 0; /* LTR */
-}
-[dir="rtl"].js .views-displays .dropbutton-widget {
-  left: 0;
-  right: auto;
+  inset-inline-start: auto;
+  inset-inline-end: 0;
 }
 .views-ui-display-tab-bucket .dropbutton-wrapper {
   position: absolute;
-  right: 12px; /* LTR */
-  top: 8px;
-}
-[dir="rtl"] .views-ui-display-tab-bucket .dropbutton-wrapper {
-  left: 12px;
-  right: auto;
+  inset-inline-end: 12px;
+  inset-block-start: 8px;
 }
 .views-ui-display-tab-bucket .dropbutton-wrapper,
 .views-ui-display-tab-bucket .dropbutton-wrapper * {
@@ -1146,21 +1136,17 @@ div.messages {
   border: medium;
   font-family: inherit;
   font-size: 14px;
-  padding-left: 12px;
-  margin-bottom: 0;
+  padding-inline-start: 12px;
+  margin-block-end: 0;
   line-height: normal;
   cursor: pointer;
 }
 .views-ui-display-tab-actions .dropbutton-wrapper input.form-submit {
-  text-align: left;
+  text-align: start;
   min-width: 100%;
   margin: 0;
-  /* LTR */
-  border-radius: 0 0 0 5px;
-}
-[dir="rtl"] .views-ui-display-tab-actions .dropbutton-wrapper input.form-submit {
-  text-align: right;
-  border-radius: 0 0 5px 0;
+  border-radius: 0;
+  border-end-start-radius: 5px;
 }
 
 /* @end */
@@ -1172,14 +1158,14 @@ div.messages {
 }
 
 #views-live-preview .contextual-links-wrapper {
-  right: auto;
-  top: auto;
+  inset-inline-end: auto;
+  inset-block-start: auto;
 }
 
 html.js #views-live-preview .contextual-links-wrapper {
   display: inline;
-  right: auto;
-  left: auto;
+  inset-inline-end: auto;
+  inset-inline-start: auto;
 }
 
 #views-live-preview a.contextual-links-trigger {
@@ -1189,26 +1175,22 @@ html.js #views-live-preview .contextual-links-wrapper {
 
 #views-live-preview .contextual-links-wrapper .contextual-links {
   min-width: 10em;
-  right: auto;
-  border-radius: 0 4px 4px 4px;
-}
-[dir="rtl"] #views-live-preview .contextual-links-wrapper .contextual-links {
-  left: auto;
-  right: 0;
-  border-radius: 4px 0 4px 4px;
+  inset-inline-end: auto;
+  border-radius: 4px;
+  border-start-start-radius: 0;
 }
 
 #views-live-preview .contextual-links li span {
   font-weight: bold;
   margin: 0.25em 0;
-  padding: 0.5em 1em 0.25em 0.5em;
+  padding-block: 0.5em 0.25em;
+  padding-inline: 0.5em 1em;
   color: #333;
   display: block;
-  border-bottom: 1px dashed #CCC;
+  border-block-end: 1px dashed #CCC;
 }
 
 /* @end */
-
 
 #views-ajax-popup {
   padding: 0 0 1.25em;

@@ -8,13 +8,13 @@
 .views-admin ul,
 .views-admin menu,
 .views-admin dir {
-  padding-left: 0;
-  padding-right: 0;
+  padding-inline-start: 0;
+  padding-inline-end: 0;
 }
 
 .views-admin pre {
-  margin-bottom: 0;
-  margin-top: 0;
+  margin-block-end: 0;
+  margin-block-start: 0;
   white-space: pre-wrap;
 }
 
@@ -24,48 +24,48 @@
 
 @media (min-width:768px) {
   .views-left-25 {
-    float: left;
+    float: inline-start;
     width: 25%;
   }
 
   .views-left-30 {
-    float: left;
+    float: inline-start;
     width: 30%;
   }
 
   .views-left-40 {
-    float: left;
+    float: inline-start;
     width: 40%;
   }
 
   .views-left-50 {
-    float: left;
+    float: inline-start;
     width: 50%;
   }
 
   .views-left-75 {
-    float: left;
+    float: inline-start;
     width: 75%;
   }
 
   .views-right-50 {
-    float: right;
+    float: inline-end;
     width: 50%;
   }
 
   .views-right-60 {
-    float: right;
+    float: inline-end;
     width: 60%;
   }
 
   .views-right-70 {
-    float: right;
+    float: inline-end;
     width: 70%;
   }
 
   .views-group-box .form-item {
-    margin-left: 3px;
-    margin-right: 3px;
+    margin-inline-start: 3px;
+    margin-inline-end: 3px;
   }
 }
 
@@ -78,10 +78,7 @@
  */
 
 .form-edit .form-actions {
-  float: right; /* LTR */
-}
-[dir="rtl"] .form-edit .form-actions {
-  float: left;
+  float: inline-end;
 }
 
 .views-displays {
@@ -95,20 +92,17 @@
  * The tabs that switch between sections
  */
  .views-displays .secondary {
-   border-bottom: 0 none;
+   border-block-end: 0 none;
    margin: 0;
    overflow: visible;
    padding: 0;
  }
 
 .views-displays .secondary > li {
-  border-right: 0 none;
+  border-inline-end: 0 none;
   display: inline-block;
-  float: left; /* LTR */
+  float: inline-start;
   padding: 0;
-}
-[dir="rtl"] .views-displays .secondary > li {
-  float: right;
 }
 
 .views-displays .secondary .open > a {
@@ -141,22 +135,13 @@
 
 @media (min-width: 768px) {
   .views-display-top .secondary {
-    margin-right: 23em; /* LTR */
-    text-align: left; /* LTR */
-    float: left; /* LTR */
+    margin-inline-end: 23em;
+    text-align: start;
+    float: inline-start;
     clear: none;
   }
-  [dir="rtl"] .views-display-top .secondary {
-    margin-right: 0;
-    margin-left: 23em;
-    text-align: right;
-    float: right;
-  }
   .views-display-top .dropbutton-wrapper {
-    float: right;
-  }
-  [dir="rtl"] .views-display-top .dropbutton-wrapper {
-    float: left;
+    float: inline-end;
   }
 }
 
@@ -166,7 +151,7 @@
 }
 
 .views-displays .secondary > li:first-child {
-  padding-left: 0;
+  padding-inline-start: 0;
 }
 
 .views-displays .secondary li.add {
@@ -174,15 +159,11 @@
 }
 
 .views-displays .secondary .action-list {
-  left: 0; /* LTR */
+  inset-inline-start: 0;
   margin: 0;
   position: absolute;
-  top: 25px;
+  inset-block-start: 25px;
   z-index: 50;
-}
-[dir="rtl"] .views-displays .secondary .action-list {
-  left: auto;
-  right: 0;
 }
 
 .views-displays .secondary .action-list  li {
@@ -196,20 +177,14 @@
 
 #edit-display-settings-top .dropbutton-wrapper {
   position: relative;
-  top: auto;
-  left: auto;
-  right: auto;
-  float: right; /* LTR */
-}
-[dir="rtl"] #edit-display-settings-top .dropbutton-wrapper {
-  float: left;
+  inset-block-start: auto;
+  inset-inline-start: auto;
+  inset-inline-end: auto;
+  float: inline-end;
 }
 #edit-display-settings-top .views-ui-display-tab-setting {
   position: relative;
-  float: left; /* LTR */
-}
-[dir="rtl"] #edit-display-settings-top .views-ui-display-tab-setting {
-  float: right;
+  float: inline-start;
 }
 
 /* @end */
@@ -217,12 +192,8 @@
 /* @group Attachment details collapsible fieldset */
 
 .views-display-tab .fieldset-legend {
-  left: -5px; /* LTR */
+  inset-inline-start: -5px;
   position: relative;
-}
-[dir="rtl"] .views-display-tab .fieldset-legend {
-  left: auto;
-  right: -5px;
 }
 
 .views-display-tab .fieldset-wrapper {
@@ -237,12 +208,8 @@
  */
 .views-display-tab .fieldset-wrapper > .views-ui-display-tab-bucket .actions {
   position: absolute;
-  right: 0; /* LTR */
-  top: -5px;
-}
-[dir="rtl"] .views-display-tab .fieldset-wrapper > .views-ui-display-tab-bucket .actions {
-  left: 0;
-  right: auto;
+  inset-inline-end: 0;
+  inset-block-start: -5px;
 }
 
 /* @end */
@@ -261,12 +228,9 @@
 
   .views-display-columns > * {
     box-sizing: border-box;
-    float: left; /* LTR */
+    float: inline-start;
     width: 33.333%;
     padding: 0 0.5em;
-  }
-  [dir="rtl"] .views-display-columns > * {
-    float: right;
   }
 }
 
@@ -287,7 +251,7 @@
 }
 
 .views-ui-dialog .ui-dialog-titlebar {
-  border-bottom: none;
+  border-block-end: none;
 }
 
 .views-ui-dialog .ui-dialog-content {
@@ -301,7 +265,7 @@
 }
 
 .views-ui-dialog .ui-dialog-buttonpane {
-  margin-top: 0;
+  margin-block-start: 0;
 }
 
 .views-ui-dialog #views-ajax-popup {
@@ -343,7 +307,8 @@
 .views-ui-dialog .views-messages {
   max-height: 200px;
   overflow: auto;
-  padding: 10px 15px 0 15px;
+  padding-block: 10px 0;
+  padding-inline: 15px;
 }
 
 .views-ui-dialog input,
@@ -359,11 +324,7 @@
 .views-display-setting .label,
 .views-display-setting .views-ajax-link {
   display: inline-block;
-  float: left; /* LTR */
-}
-[dir="rtl"] .views-display-setting .label,
-[dir="rtl"] .views-display-setting .views-ajax-link {
-  float: right;
+  float: inline-start;
 }
 
 #views-page-path {
@@ -397,9 +358,9 @@ div.form-item-options-value-all {
 #views-ui-list-page .ajax-progress-throbber,
 .views-admin .ajax-progress-throbber {
   /* Can't do center:50% middle: 50%, so approximate it for a typical window size. */
-  left: 49%;
+  inset-inline-start: 49%;
   position: fixed;
-  top: 48.5%;
+  inset-block-start: 48.5%;
   z-index: 1000;
 }
 #views-ui-list-page .ajax-progress-throbber .message,
@@ -410,9 +371,9 @@ div.form-item-options-value-all {
 /* Modal */
 #views-ajax-popup .ajax-progress-throbber {
   /* Can't do center:50% middle: 50%, so approximate it for a typical window size. */
-  left: 49%;
+  inset-inline-start: 49%;
   position: fixed;
-  top: 48.5%;
+  inset-block-start: 48.5%;
   z-index: 1000;
 }
 #views-ajax-popup .ajax-progress-throbber .message {

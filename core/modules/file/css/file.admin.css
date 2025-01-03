@@ -17,7 +17,7 @@
 }
 .form-managed-file div.ajax-progress-bar {
   display: none;
-  margin-top: 4px;
+  margin-block-start: 4px;
   padding: 0;
   width: 28em;
 }

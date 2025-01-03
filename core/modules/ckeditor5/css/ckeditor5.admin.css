@@ -34,10 +34,6 @@
   border: 1px solid #d1d1d1;
   box-shadow: 0 1px 0 rgba(255, 255, 255, .5), 0 0 2px rgba(255, 255, 255, .15) inset, 0 1px 0 rgba(255, 255, 255, .15) inset;
 }
-[dir="rtl"] .ckeditor5-buttons {
-  padding: 0;
-  margin: 0;
-}
 .ckeditor5-button,
 .ckeditor5-button-placeholder {
   display: inline-block;
@@ -78,14 +74,10 @@
   text-align: center;
 }
 .ckeditor5-row-controls {
-  float: right; /* LTR */
-  text-align: right; /* LTR */
+  float: inline-end;
+  text-align: end;
   font-size: 18px;
   width: 40px;
-}
-[dir="rtl"] .ckeditor5-row-controls {
-  float: left;
-  text-align: left;
 }
 .ckeditor5-row-controls a {
   display: inline-block;
@@ -101,7 +93,7 @@
   text-decoration: none;
 }
 .ckeditor5-multiple-label {
-  float: left;
+  float: inline-start;
   padding: 4px;
 }
 .ckeditor5-buttons .ckeditor5-button-separator {
@@ -125,16 +117,17 @@
 .ckeditor5-button-arrow {
   width: 0;
   text-align: center;
-  border-left: 3px solid transparent;
-  border-right: 3px solid transparent;
-  border-top: 3px solid #333;
+  border-inline-start: 3px solid transparent;
+  border-inline-end: 3px solid transparent;
+  border-block-start: 3px solid #333;
   display: inline-block;
-  margin: 0 4px 2px;
+  margin-block: 0 2px;
+  margin-inline: 4px;
 }
 .ckeditor5-row {
   padding: 2px 0 3px;
 }
 .ckeditor5-row + .ckeditor5-row {
-  margin-top: 0.25em;
+  margin-block-start: 0.25em;
   clear: both;
 }

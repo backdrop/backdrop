@@ -28,10 +28,8 @@ body {
   border-color: #e3e3e3 transparent transparent transparent;
 }
 .l-header .no-tabs .menu-dropdown ul a span.sub-arrow {
-  border-color: transparent transparent transparent #e3e3e3; /* RTL */
-}
-[dir="rtl"] .l-header  .no-tabs .menu-dropdown ul a span.sub-arrow {
-  border-color: transparent #e3e3e3 transparent transparent;
+  border-color: transparent;
+  border-inline-start-color: #e3e3e3;
 }
 .l-header .no-tabs ul.menu-dropdown ul {
   background-color: #000001;
@@ -45,7 +43,7 @@ input {
 }
 .tabs ul.primary > li.active > a {
   background-color: #ffffff;
-  border-bottom: 1px solid #ffffff;
+  border-block-end: 1px solid #ffffff;
 }
 .comment .comment-arrow {
   border-color: #ffffff;

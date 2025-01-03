@@ -21,13 +21,9 @@
   display: none;
   font-size: 90%;
   position: absolute;
-  right: 5px; /* LTR */
-  top: 2px;
+  inset-inline-end: 5px;
+  inset-block-start: 2px;
   z-index: 999;
-}
-[dir="rtl"] .contextual-links-wrapper {
-  left: 5px;
-  right: auto;
 }
 .js .contextual-links-wrapper {
   display: block;
@@ -35,7 +31,7 @@
 
 /** Prevents interference with dismiss option on notifications. **/
 .layout .l-messages {
-    padding-top: 1em;
+    padding-block-start: 1em;
 }
 
 .contextual-links-trigger {
@@ -64,7 +60,7 @@
 .contextual-links-active .contextual-links-trigger {
   background-color: #fff;
   border-color: #ccc;
-  border-bottom: none;
+  border-block-end: none;
   position: relative;
   z-index: 1;
   border-radius: 4px 4px 0 0;
@@ -76,17 +72,14 @@
   margin: 0;
   padding: 0.25em 0;
   position: absolute;
-  right: 0;
-  text-align: left; /* LTR */
-  top: 18px;
+  inset-inline-end: 0;
+  text-align: start;
+  inset-block-start: 18px;
   white-space: nowrap;
-  border-radius: 4px 0 4px 4px; /* LTR */
-}
-[dir="rtl"] .contextual-links-wrapper .contextual-links {
-  text-align: right;
-  border-radius: 0 4px 4px 4px;
-  left: 0;
-  right: auto;
+  border-end-start-radius: 4px;
+  border-end-end-radius: 0;
+  border-start-end-radius: 4px;
+  border-start-start-radius: 4px;
 }
 .contextual-links-trigger-active,
 .contextual-links-active .contextual-links-trigger,
@@ -107,11 +100,9 @@
   color: #333 !important;
   display: block;
   margin: 0.25em 0;
-  padding: 0.25em 1em 0.25em 0.5em; /* LTR */
+  padding-block: .25em;
+  padding-inline: 0.5em 1em;
   text-indent: 0;
-}
-[dir="rtl"] .contextual-links li a {
-  padding: 0.25em 0.5em 0.25em 1em;
 }
 .contextual-links li a:hover {
   background-color: #bfdcee;

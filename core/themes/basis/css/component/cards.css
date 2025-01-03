@@ -5,11 +5,11 @@
 
 /* @todo compensates for a bug in Basis. */
 .l-top .block-views-promoted-cards-block {
-  margin-top: -2rem; /* Negative top margin collapses spacing under header */
+  margin-block-start: -2rem; /* Negative top margin collapses spacing under header */
 }
 .block-views-promoted-cards-block {
-  padding-top: 2rem;
-  padding-bottom: 2rem;
+  padding-block-start: 2rem;
+  padding-block-end: 2rem;
   background-color: #f2f2f2;
 }
 

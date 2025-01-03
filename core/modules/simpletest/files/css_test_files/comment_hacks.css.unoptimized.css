@@ -30,7 +30,7 @@ that macIE5 ignores the following rule. Odd, but extremely useful. */
 .test4 { display:block;}
 
 /**************************************/
-.comment-in-double-quotes:before {
+.comment-in-double-quotes::before {
   content: "/* ";
 }
 .this_rule_must_stay {
@@ -41,7 +41,7 @@ that macIE5 ignores the following rule. Odd, but extremely useful. */
   content: " */";
 }
 /**************************************/
-.comment-in-single-quotes:before {
+.comment-in-single-quotes::before {
   content: '/*';
 }
 .this_rule_must_stay {
@@ -52,7 +52,7 @@ that macIE5 ignores the following rule. Odd, but extremely useful. */
   content: '*/';
 }
 /**************************************/
-.comment-in-mixed-quotes:before {
+.comment-in-mixed-quotes::before {
   content: '"/*"';
 }
 .this_rule_must_stay {
@@ -63,7 +63,7 @@ that macIE5 ignores the following rule. Odd, but extremely useful. */
   content: "'*/'";
 }
 /**************************************/
-.comment-in-quotes-with-escaped:before {
+.comment-in-quotes-with-escaped::before {
   content: '/* \" \' */';
 }
 .this_rule_must_stay {

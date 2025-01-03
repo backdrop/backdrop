@@ -11,7 +11,8 @@
 .caption {
   display: table;
   max-width: 100%;
-  margin: 0 12px 10px;
+  margin-block: 0 10px;
+  margin-inline: 12px;
 }
 .caption .cke_image_resizer_wrapper {
   display: block !important;
@@ -20,8 +21,8 @@
   text-align: center;
 }
 .cke_widget_wrapper.align-center .caption {
-  margin-left: auto;
-  margin-right: auto;
+  margin-inline-start: auto;
+  margin-inline-end: auto;
 }
 .caption > * {
   display: block;
@@ -34,7 +35,7 @@
   max-width: none;
   padding: 3px 6px;
   border: 1px solid #CCC;
-  border-top: none;
+  border-block-start: none;
   background-color: #eee;
 }
 
@@ -43,7 +44,7 @@
  *
  * Based on http://codepen.io/flesler/pen/AEIFc.
  */
-.caption > figcaption[contenteditable=true]:empty:before {
+.caption > figcaption[contenteditable=true]:empty::before {
   content: attr(data-placeholder);
   font-style: italic;
 }

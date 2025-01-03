@@ -7,8 +7,8 @@
  * Book navigation.
  */
 .book-navigation .menu {
-  padding-bottom: 0;
-  padding-top: 1em;
+  padding-block-end: 0;
+  padding-block-start: 1em;
 }
 .book-navigation .book-pager {
   margin: 0;
@@ -21,23 +21,16 @@
   vertical-align: top;
 }
 .book-pager .previous {
-  text-align: left; /* LTR */
+  float: inline-start;
+  text-align: start;
   width: 45%;
-}
-[dir="rtl"] .book-pager .previous {
-  float: right;
-  text-align: right;
 }
 .book-pager .up {
   text-align: center;
   width: 8%;
 }
 .book-pager .next {
-  float: right; /* LTR */
-  text-align: right; /* LTR */
+  float: inline-end;
+  text-align: end;
   width: 45%;
-}
-[dir="rtl"] .book-pager .next {
-  float: left;
-  text-align: left;
 }

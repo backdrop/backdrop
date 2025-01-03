@@ -7,12 +7,9 @@ body {
   direction: rtl;
 }
 th {
-  text-align: left; /* LTR */
+  text-align: start;
   color: #006;
-  border-bottom: 1px solid #ccc;
-}
-[dir="rtl"] th {
-  text-align: right;
+  border-block-end: 1px solid #ccc;
 }
 tr.odd {
   background-color: #ddd;

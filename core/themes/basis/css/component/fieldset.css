@@ -20,16 +20,11 @@
 
 fieldset .fieldset-legend {
   position: absolute;
-  left: 0; /* LTR */
-  top: 0;
+  inset-block-start: 0;
   width: 100%;
-  padding: 0.5em 0.78947em; /* LTR */
+  padding-block: 0.5em;
+  padding-inline: 0.78947em;
   text-transform: uppercase;
-}
-[dir="rtl"] fieldset .fieldset-legend {
-  right: 0;
-  padding-right: 0.9375em;
-  padding-left: 0;
 }
 
 .fieldset-description {
@@ -51,10 +46,8 @@ fieldset .fieldset-legend {
 }
 
 fieldset .fieldset-wrapper {
-  padding: 0 13px 13px 15px; /* LTR */
-}
-[dir="rtl"] fieldset .fieldset-wrapper {
-  padding: 0 15px 13px 13px;
+  padding-block: 0 13px;
+  padding-inline: 15px 13px;
 }
 
 .text-format-wrapper fieldset.collapsible .fieldset-legend {
@@ -66,49 +59,38 @@ fieldset .fieldset-wrapper {
   z-index: 1;
   display: block;
   width: 100%;
-  padding: 0.3em 0.3em 0.3em 1.8em; /* LTR */
+  padding-block: 0.3em;
+  padding-inline: 1.8em 0.3em;
   margin: 0 -0.5em;
   border-radius: 4px;
   background: transparent;
   text-decoration: none;
 }
-.js[dir="rtl"] fieldset.collapsible .fieldset-title {
-  padding: 0.3em 1.8em 0.3em 0.3em;
-}
 
-.js fieldset.collapsible .fieldset-legend a:before {
+.js fieldset.collapsible .fieldset-legend a::before {
   content: "";
   position: absolute;
-  left: 0.6em; /* LTR */
-  top: 0.8em;
+  inset-inline-start: 0.6em;
+  inset-block-start: 0.8em;
   width: 0;
   height: 0;
   border: .32em solid transparent;
-  border-top-color: #000000;
-  border-bottom: 0;
+  border-block-start-color: #000000;
+  border-block-end: 0;
   transform: translate(0, 0.125em);
   transition: transform 0.25s ease-out;
-}
-.js[dir="rtl"] fieldset.collapsible .fieldset-legend a:before {
-  right: 0.6em;
-  left: auto;
-  transform: translate(0, 0.125em);
 }
 
 .fieldset-legend span.summary {
   color: #757575;
   position: absolute;
-  right: 1.4em; /* LTR */
-  top: .8em;
+  inset-inline-end: 1.4em;
+  inset-block-start: .8em;
   z-index: 0;
   /* Hide the summary by default; we show it on wider screens (see below). */
   display: none;
 }
-[dir="rtl"] .fieldset-legend span.summary {
-  right: auto;
-  left: 1.4em;
-}
-.fieldset-legend span.summary:not(:empty):before {
+.fieldset-legend span.summary:not(:empty)::before {
   content: '(';
 }
 .fieldset-legend span.summary:not(:empty):after {
@@ -126,12 +108,12 @@ fieldset .fieldset-wrapper {
   padding: 3.774em 0 0!important;
 }
 
-.js fieldset.collapsed .fieldset-legend a:before {
+.js fieldset.collapsed .fieldset-legend a::before {
   transform:
     translate(0, 0.125em)
     rotate(-90deg);
 }
-.js[dir="rtl"] fieldset.collapsed .fieldset-legend a:before {
+.js[dir="rtl"] fieldset.collapsed .fieldset-legend a::before {
   transform:
     translate(0, 0.125em)
     rotate(90deg);

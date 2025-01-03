@@ -2,17 +2,17 @@
  * Update styles.
  */
 .update-results {
-  margin-top: 3em;
+  margin-block-start: 3em;
   padding: 0.25em;
   border: 1px solid #ccc;
   background: #eee;
   font-size: smaller;
 }
 .update-results h2 {
-  margin-top: 0.25em;
+  margin-block-start: 0.25em;
 }
 .update-results h4 {
-  margin-bottom: 0.25em;
+  margin-block-end: 0.25em;
 }
 .update-results .none {
   color: #888;
@@ -50,7 +50,8 @@
 }
 
 #edit-connection-settings-change-connection-type {
-  margin: 2.6em 0.5em 0 1em;
+  margin-block: 2.6em 0;
+  margin-inline: 1em 0.5em;
 }
 
 /**

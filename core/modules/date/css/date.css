@@ -14,15 +14,11 @@
 }
 .container-inline-date > .form-item {
   display: inline-block;
-  margin-right: 0.5em; /* LTR */
+  margin-inline-end: 0.5em;
   vertical-align: top;
 }
-[dir="rtl"] .container-inline-date > .form-item {
-  margin-left: 0.5em;
-  margin-right: 0;
-}
 fieldset.date-combo .container-inline-date > .form-item {
-  margin-bottom: 10px;
+  margin-block-end: 10px;
 }
 .container-inline-date .form-item {
   display: inline-block;
@@ -93,34 +89,35 @@ span.date-display-end {
 }
 
 .date-container .date-format-delete {
-  float: left;
-  margin-top: 1.8em;
-  margin-left: 1.5em;
+  float: inline-start;
+  margin-block-start: 1.8em;
+  margin-inline-start: 1.5em;
 }
 .date-container .date-format-name {
-  float: left;
+  float: inline-start;
 }
 .date-container .date-format-type {
-  float: left;
-  padding-left: 10px;
+  float: inline-start;
+  padding-inline-start: 10px;
 }
 
 .date-container .select-container {
   clear: left;
-  float: left;
+  float: inline-start;
 }
 
 /* Calendar day css */
 div.date-calendar-day {
   background: #F3F3F3;
-  border-top: 1px solid #EEE;
-  border-left: 1px solid #EEE;
-  border-right: 1px solid #BBB;
-  border-bottom: 1px solid #BBB;
+  border-block-start: 1px solid #EEE;
+  border-inline-start: 1px solid #EEE;
+  border-inline-end: 1px solid #BBB;
+  border-block-end: 1px solid #BBB;
   color: #999;
-  float: left;
+  float: inline-start;
   line-height: 1;
-  margin: 6px 10px 0 0;
+  margin-block: 6px 0;
+  margin-inline: 0 10px;
   text-align: center;
   width: 40px;
 }
@@ -148,26 +145,22 @@ div.date-calendar-day span.year {
 /* Admin styling */
 .form-item.form-item-instance-widget-settings-input-format-custom,
 .form-item.form-item-field-settings-enddate-required {
-  margin-left: 1.3em;
+  margin-inline-start: 1.3em;
 }
 
 #edit-field-settings-granularity .form-type-checkbox {
-  margin-right: .6em; /* LTR */
-}
-[dir="rtl"] #edit-field-settings-granularity .form-type-checkbox {
-  margin-right: 0;
-  margin-left: .6em;
+  margin-inline-end: .6em;
 }
 
 .date-year-range-select {
-  margin-right: 1em;
+  margin-inline-end: 1em;
 }
 
 /* TimeEntry styles */
 .timeEntry_control {
   vertical-align: middle;
-  margin-left: 2px;
+  margin-inline-start: 2px;
 }
 * html .timeEntry_control { /* IE only */
-  margin-top: -4px;
+  margin-block-start: -4px;
 }

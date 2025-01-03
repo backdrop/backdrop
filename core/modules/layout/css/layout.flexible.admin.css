@@ -5,14 +5,12 @@
 .layout-flexible-region-top .label {
   display: inline-block;
   margin: 0;
-  padding: 4px 12px 4px 0; /* LTR */
+  padding-block: 4px;
+  padding-inline: 0 12px;
   line-height: 1.2;
   text-transform: uppercase;
   font-weight: normal;
   color: #000000;
-}
-[dir="rtl"] .layout-flexible-region-top .label {
-  padding: 4px 0 4px 12px;
 }
 
 .flexible-row .layout-editor-region {
@@ -29,7 +27,8 @@
 }
 .layout--flexible .layout-editor-block-title {
   padding: 0.4em 1em;
-  margin: 0 -0.9375rem 0.9375rem -0.9375rem;
+  margin-block: 0 0.9375rem;
+  margin-inline: -0.9375rem;
 }
 .layout--flexible .layout-editor-block-title .text {
   font-weight: bold;
@@ -45,7 +44,7 @@
 .layout-flexible-editor .flexible-row {
   padding: 0;
   border: 1px solid #cccccc;
-  margin-bottom: 15px;
+  margin-block-end: 15px;
   border-radius: 4px;
   cursor: ns-resize;
   box-shadow: 2px 2px 0 0 #d0d0d0;
@@ -54,9 +53,6 @@
 
 .layout-flexible-add-row {
   margin: 20px;
-}
-[dir="rtl"] .layout-flexible-template-configure-form .layout-flexible-add-row {
-  margin-right: 20px;
 }
 
 .flexible-icon {

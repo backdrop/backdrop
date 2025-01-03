@@ -21,8 +21,8 @@
 .layout--two-column .l-container,
 .layout--two-column .l-footer {
   width: 100%;
-  margin-left: auto;
-  margin-right: auto;
+  margin-inline-start: auto;
+  margin-inline-end: auto;
   box-sizing: border-box;
   clear: both;
 }
@@ -36,26 +36,15 @@
   .layout--two-column .l-content,
   .layout--two-column .l-sidebar {
     display: inline;
-    float: left; /* LTR */
+    float: inline-start;
     position: relative;
   }
-  [dir="rtl"] .layout--two-column .l-content,
-  [dir="rtl"] .layout--two-column .l-sidebar {
-    float: right;
-  }
   .layout--two-column .l-content {
-    margin-right: 30%;
+    margin-inline-end: 30%;
     width: 70%;
-  }
-  [dir="rtl"] .layout--two-column .l-content {
-    margin-left: 30%;
-    margin-right: 0;
   }
   .layout--two-column .l-sidebar {
     width: 30%;
-    margin-left: -30%; /* LTR */
-  }
-  [dir="rtl"] .layout--two-column .l-sidebar {
-    margin-right: -30%;
+    margin-inline-start: -30%;
   }
 }

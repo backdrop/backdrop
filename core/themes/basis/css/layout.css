@@ -24,8 +24,8 @@
   flex-direction: column;
 }
 .admin-bar body .layout {
-  padding-top: 33px;
-  margin-top: -33px;
+  padding-block-start: 33px;
+  margin-block-start: -33px;
 }
 .l-wrapper {
   -webkit-flex: 1 0 auto;

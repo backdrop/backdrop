@@ -37,10 +37,6 @@
   border: 1px solid #d1d1d1;
   box-shadow: 0 1px 0 rgba(255, 255, 255, .5), 0 0 2px rgba(255, 255, 255, .15) inset, 0 1px 0 rgba(255, 255, 255, .15) inset;
 }
-[dir="rtl"] .ckeditor-buttons {
-  padding: 0;
-  margin: 0;
-}
 .ckeditor-button,
 .ckeditor-button-placeholder,
 .ckeditor-group-add {
@@ -55,12 +51,12 @@
   background: #f8f8f8;
 }
 .ckeditor-buttons .ckeditor-button:first-child {
-  border-top-left-radius: 2px;
-  border-bottom-left-radius: 2px;
+  border-start-start-radius: 2px;
+  border-end-start-radius: 2px;
 }
 .ckeditor-buttons .ckeditor-button:last-child {
-  border-top-right-radius: 2px;
-  border-bottom-right-radius: 2px;
+  border-start-end-radius: 2px;
+  border-end-end-radius: 2px;
 }
 .ckeditor-buttons .ckeditor-button-placeholder {
   background: #333;
@@ -70,11 +66,8 @@
   cursor: move;
 }
 .ckeditor-group-add-wrapper {
-  float: left; /* LTR */
+  float: inline-start;
   margin: 0px 0.3333em;
-}
-[dir="rtl"] .ckeditor-group-add-wrapper {
-  float: right;
 }
 .ckeditor-group-add {
   cursor: pointer;
@@ -100,14 +93,10 @@
   cursor: move;
 }
 .ckeditor-row-controls {
-  float: right; /* LTR */
-  text-align: right; /* LTR */
+  float: inline-end;
+  text-align: end;
   font-size: 18px;
   width: 40px;
-}
-[dir="rtl"] .ckeditor-row-controls {
-  float: left;
-  text-align: left;
 }
 .ckeditor-row-controls a {
   display: inline-block;
@@ -123,7 +112,7 @@
   text-decoration: none;
 }
 .ckeditor-multiple-label {
-  float: left;
+  float: inline-start;
   padding: 4px;
 }
 .ckeditor-buttons .ckeditor-button-separator {
@@ -153,21 +142,22 @@
 .ckeditor-button-arrow {
   width: 0;
   text-align: center;
-  border-left: 3px solid transparent;
-  border-right: 3px solid transparent;
-  border-top: 3px solid #333;
+  border-inline-start: 3px solid transparent;
+  border-inline-end: 3px solid transparent;
+  border-block-start: 3px solid #333;
   display: inline-block;
-  margin: 0 4px 2px;
+  margin-block: 0 2px;
+  margin-inline: 4px;
 }
 .ckeditor-toolbar-disabled {
-  margin-bottom: 0.5em;
+  margin-block-end: 0.5em;
 }
 .ckeditor-row {
   padding: 2px 0 3px;
   border-radius: 3px;
 }
 .ckeditor-row + .ckeditor-row {
-  margin-top: 0.25em;
+  margin-block-start: 0.25em;
   clear: both;
 }
 .ckeditor-toolbar-groups {
@@ -176,12 +166,7 @@
   list-style: none;
   min-height: 2em;
   min-width: 4px;
-  float: left; /* LTR */
-}
-[dir="rtl"] .ckeditor-toolbar-groups {
-  margin: 0;
-  padding: 0;
-  float: right;
+  float: inline-start;
 }
 .ckeditor-toolbar-group {
   display: inline-block;
@@ -197,7 +182,8 @@
   display: none;
   font-size: 1em;
   font-weight: normal;
-  margin: -1.5em 0 .25em;
+  margin-block: -1.5em .25em;
+  margin-inline: 0;
   background: white;
   padding: 0 4px;
   border: 1px solid #B6B6B6;
@@ -212,17 +198,9 @@
   list-style: none;
   padding: 0;
   margin: 0;
-  float: left; /* LTR */
-}
-[dir="rtl"] .ckeditor-toolbar-group-buttons {
-  padding: 0;
-  margin: 0;
-  float: right;
+  float: inline-start;
 }
 .ckeditor-groupnames-toggle {
   cursor: pointer;
-  float: right; /* LTR */
-}
-[dir="rtl"] .ckeditor-groupnames-toggle {
-  float: left;
+  float: inline-end;
 }

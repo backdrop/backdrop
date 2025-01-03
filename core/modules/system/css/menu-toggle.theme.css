@@ -39,32 +39,25 @@
  * Hamburger icon.
  */
 .menu-toggle-button-icon,
-.menu-toggle-button-icon:before,
+.menu-toggle-button-icon::before,
 .menu-toggle-button-icon:after {
   position: absolute;
-  top: 50%;
-  left: 2px; /* LTR */
+  inset-block-start: 50%;
+  inset-inline-start: 2px;
   height: 2px;
   width: 24px;
   background: #bbb;
   transition: all 0.25s;
 }
-[dir="rtl"] .menu-toggle-button-icon {
-  right: 2px;
-}
-.menu-toggle-button-icon:before {
+.menu-toggle-button-icon::before {
   content: '';
-  top: -7px;
-  left: 0; /* LTR */
+  inset-block-start: -7px;
+  inset-inline-start: 0;
 }
 .menu-toggle-button-icon:after {
   content: '';
-  top: 7px;
-  left: 0; /* LTR */
-}
-[dir="rtl"] .menu-toggle-button-icon:before,
-[dir="rtl"] .menu-toggle-button-icon:after {
-  right: 0;
+  inset-block-start: 7px;
+  inset-inline-start: 0;
 }
 
 /**
@@ -74,12 +67,12 @@
   height: 0;
   background: transparent;
 }
-.menu-toggle-state:checked ~ .menu-toggle-button .menu-toggle-button-icon:before {
-  top: 0;
+.menu-toggle-state:checked ~ .menu-toggle-button .menu-toggle-button-icon::before {
+  inset-block-start: 0;
   transform: rotate(-45deg);
 }
 .menu-toggle-state:checked ~ .menu-toggle-button .menu-toggle-button-icon:after {
-  top: 0;
+  inset-block-start: 0;
   transform: rotate(45deg);
 }
 

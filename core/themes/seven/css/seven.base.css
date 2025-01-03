@@ -56,19 +56,15 @@ dl {
 }
 dl dd,
 dl dl {
-  margin-left: 20px; /* LTR */
-  margin-bottom: 10px;
-}
-[dir="rtl"] dl dd,
-[dir="rtl"] dl dl {
-  margin-right: 20px;
+  margin-inline-start: 20px;
+  margin-block-end: 10px;
 }
 blockquote {
   padding: 5px 30px;
   width: 85%;
   background-color: #fff;
   margin: 20px auto;
-  border-left: 2px solid #BDBDBD;
+  border-inline-start: 2px solid #BDBDBD;
 }
 blockquote * {
   font-size: 95%;
@@ -107,21 +103,17 @@ nobr {
 }
 abbr,
 acronym {
-  border-bottom: dotted 1px;
+  border-block-end: dotted 1px;
 }
 ul,
 .block ul,
 .item-list ul {
   list-style-type: disc;
   list-style-image: none;
-  margin: 0.25em 0 0.25em 1.5em; /* LTR */
+  margin-block: 0.25em;
+  margin-inline: 1.5em 0;
   padding: 0;
   line-height: 160%;
-}
-[dir="rtl"] ul,
-[dir="rtl"] .block ul,
-[dir="rtl"] .item-list ul {
-  margin: 0.25em 1.5em 0.25em 0;
 }
 .item-list ul li,
 li.leaf,
@@ -135,12 +127,10 @@ ul.menu li {
 }
 ol {
   list-style-type: decimal;
-  margin: 0.25em 0 0.25em 2em; /* LTR */
+  margin-block: 0.25em;
+  margin-inline: 2em 0;
   line-height: 160%;
   padding: 0;
-}
-[dir="rtl"] ol {
-  margin: 0.25em 2em 0.25em 0;
 }
 quote,
 code {

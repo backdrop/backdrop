@@ -9,7 +9,7 @@
 
 table.update {
   width: 100%;
-  margin-top: .5em;
+  margin-block-start: .5em;
 }
 .update tr {
   position: relative;
@@ -21,16 +21,10 @@ table.update {
 }
 @media all and (min-width: 550px) {
   .update .project {
-    float: left; /* LTR */
-  }
-  [dir="rtl"] .update .project {
-    float: right;
+    float: inline-start;
   }
   .update .version-status {
-    float: right; /* LTR */
-  }
-  [dir="rtl"] .update .version-status {
-    float: left;
+    float: inline-end;
   }
   .update .versions,
   .update .project-info {
@@ -40,16 +34,11 @@ table.update {
 
 @media all and (min-width: 550px) {
   .update .version-status {
-    text-align: right;
+    text-align: end;
     font-size: 110%;
     position: static;
-    float: right; /* LTR */
-    padding-left: 10px;
-  }
-  [dir="rtl"] .update .version-status {
-    float: left;
-    padding-left: 0;
-    padding-right: 10px;
+    float: inline-end;
+    padding-inline-start: 10px;
   }
 }
 
@@ -69,7 +58,7 @@ table.update {
 }
 
 .update .version {
-  padding-top: 5px;
+  padding-block-start: 5px;
 }
 .update .version div {
   box-sizing: border-box;
@@ -96,14 +85,12 @@ table.update {
   font-size: .9em;
   list-style-type: none;
   padding: 0;
-  margin: 5px 0 0 0;
+  margin-block: 5px 0;
+  margin-inline: 0;
 }
 @media all and (min-width: 550px) {
   .update .version-links ul {
-    text-align: right; /* LTR */
-  }
-  [dir="rtl"] .update .version-links {
-    text-align: left;
+    text-align: end;
   }
 }
 
@@ -117,11 +104,7 @@ table.update {
 }
 
 .update .check-manually {
-  padding-left: 1em; /* LTR */
-}
-[dir="rtl"] .update .check-manually {
-  padding-left: 0;
-  padding-right: 1em;
+  padding-inline-start: 1em;
 }
 
 .update .project-info {

@@ -10,13 +10,14 @@
   background-color: #eee;
 }
 .taxonomy-term-divider-top {
-  border-bottom: none;
+  border-block-end: none;
 }
 .taxonomy-term-divider-bottom {
-  border-top: 1px dotted #ccc;
+  border-block-start: 1px dotted #ccc;
 }
 .taxonomy-term-description {
-  margin: 5px 0 20px;
+  margin-block: 5px 20px;
+  margin-inline: 0;
 }
 
 /**
@@ -29,5 +30,5 @@
   font-size: smaller;
 }
 .vocabulary-term-count {
-  text-align: right;
+  text-align: end;
 }

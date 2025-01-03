@@ -2,7 +2,7 @@ table.treetable span.indenter {
   display: inline-block;
   margin: 0;
   padding: 0;
-  text-align: right;
+  text-align: end;
 
   /* Disable text selection of nodes (for better D&D UX) */
   user-select: none;

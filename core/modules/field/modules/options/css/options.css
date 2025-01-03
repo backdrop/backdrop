@@ -7,7 +7,7 @@
   margin: 0;
 }
 .form-options .options {
-  margin-bottom: 0;
+  margin-block-end: 0;
 }
 .options-widget a.add span,
 .options-widget a.remove span {
@@ -23,11 +23,7 @@
   background-position: 0 0;
   background-size: contain;
   opacity: 0.3;
-  float: left; /* LTR */
-}
-[dir="rtl"] .options-widget a.add,
-[dir="rtl"] .options-widget a.remove {
-  float: right;
+  float: inline-start;
 }
 .options-widget a.add:hover,
 .options-widget a.remove:hover {
@@ -42,24 +38,14 @@
   background-image: url(../../../../../misc/minus-black-64.png);
 }
 .default-value-pattern-match {
-  float: left; /* LTR */
-}
-[dir="rtl"] .default-value-pattern-match {
-  float: right;
+  float: inline-start;
 }
 .remove-default {
-  float: left; /* LTR */
-}
-[dir="rtl"] .remove-default {
-  float: right;
+  float: inline-start;
 }
 .form-options-manual,
 .form-option-add {
-  text-align: right; /* LTR */
-}
-[dir="rtl"] .form-options-manual,
-[dir="rtl"] .form-option-add {
-  text-align: left;
+  text-align: end;
 }
 .form-options-manual a,
 .form-option-add a {
