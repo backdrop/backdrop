@@ -25,6 +25,10 @@
 .l-top .block-hero {
   margin-top: -2rem;/* Negative top margin collapses spacing under header */
 }
+/* Boxton is the only layout with no space betweem l-header and l-top. */
+.update-1-30 .layout--boxton .l-top .block-hero {
+  margin-top: 0;
+}
 
 .container .block-hero {
   margin-top: 0; /* If hero is in a container don't collapse top spacing */

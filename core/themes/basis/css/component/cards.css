@@ -3,9 +3,13 @@
  * Card listing view on the default home page.
  */
 
-/* @todo compensates for a bug in Basis. */
+/* Legacy: compensate for an old bug in Basis. */
 .l-top .block-views-promoted-cards-block {
   margin-top: -2rem; /* Negative top margin collapses spacing under header */
+}
+/* Undo previous compensation with supplemental css selector. */
+.update-1-30 .l-top .block-views-promoted-cards-block {
+  margin-top: inherit;
 }
 .block-views-promoted-cards-block {
   padding-top: 2rem;

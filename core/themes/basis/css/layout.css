@@ -7,6 +7,11 @@
   position: relative;
   margin: 0 0 2rem;
 }
+/* Boxton is the only layout with a full-width l-top region. */
+.update-1-30 .layout--boxton .l-header {
+   /* Boxton is the only layout with no space betweem the header and l-top. */
+  margin-bottom: 0;
+}
 
 .layout .l-messages {
   margin: 0 0 2rem;

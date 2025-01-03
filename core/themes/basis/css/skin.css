@@ -400,6 +400,11 @@ fieldset .fieldset-legend {
   }
 }
 
+/* Boxton is the only layout where l-header is full-width. */
+.update-1-30 .layout--boxton .l-top {
+  background-color: #f2f2f2;
+}
+
 /**
  * Footer styles
  */
