@@ -3,6 +3,10 @@
  * @file
  * Class for loading, modifying, and executing a layout.
  */
+
+/**
+ *
+ */
 class Layout {
   /**
    * The name of the layout.
@@ -73,12 +77,28 @@ class Layout {
    * The name of the layout template used by this configuration.
    *
    * Although this property may be retrieved and set directly, if changing a
-   * layout from one value to another, it is best to use Layout::setLayout(),
-   * which will handle the moving of blocks from one region to another.
+   * layout from one value to another, it is best to use
+   * Layout::setLayoutTemplate(), which will handle the moving of blocks from
+   * one region to another.
    *
    * @var string
    */
   var $layout_template;
+
+  /**
+   * The layout template type used by this configuration.
+   *
+   * @var string
+   */
+  var $layout_template_type;
+
+  /**
+   * Whether this layout is a full page layout (for example, with a header and
+   * footer, optional page title) or not.
+   *
+   * @var bool
+   */
+  public $is_full_page = TRUE;
 
   /**
    * Whether this layout is disabled.
@@ -469,7 +489,7 @@ class Layout {
    * @param $hook
    *   One of 'insert', 'update', 'enable', 'disable', 'revert', or 'delete'.
    */
-   protected function invokeHook($hook) {
+  protected function invokeHook($hook) {
     module_invoke_all('layout_' . $hook, $this);
   }
 
@@ -929,7 +949,7 @@ class Layout {
         }
       }
     }
-    
+
     return empty(array_filter($context_counts));
   }
 

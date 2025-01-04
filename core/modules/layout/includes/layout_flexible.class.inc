@@ -3,6 +3,10 @@
  * @file
  * Class that holds configuration for a flexible layout template configuration.
  */
+
+/**
+ *
+ */
 class LayoutFlexibleTemplate {
   /**
    * The name of the layout template.
@@ -45,6 +49,24 @@ class LayoutFlexibleTemplate {
   public $is_new;
 
   /**
+   * @var string
+   */
+  public $preview;
+
+  /**
+   * @var string
+   */
+  public $layout_template_type;
+
+  /**
+   * Whether this layout is a full page layout (for example, with a header and
+   * footer, optional page title) or not.
+   *
+   * @var bool
+   */
+  public $is_full_page = TRUE;
+
+  /**
    * Constructor for a LayoutFlexibleTemplate class.
    *
    * @param array $config
@@ -54,16 +76,24 @@ class LayoutFlexibleTemplate {
     foreach ($config as $property => $property_value) {
       $this->{$property} = $property_value;
     }
+    if ($this->is_full_page === NULL) {
+      $this->is_full_page = TRUE;
+    }
+    if ($this->layout_template_type === NULL) {
+      $this->layout_template_type = 'flexible';
+    }
 
     if (empty($this->rows)) {
       $uuid = new Uuid();
-      $this->rows[$uuid->generate()] = array(
-        'contains' => 'region_12',
-        'element' => 'header',
-        'classes' => '',
-        'container' => 'container',
-        'region_names' => array('region_0' => array('label' => t('Header'), 'name' => 'header', 'classes' => '')),
-      );
+      if ($this->is_full_page) {
+        $this->rows[$uuid->generate()] = array(
+          'contains' => 'region_12',
+          'element' => 'header',
+          'classes' => '',
+          'container' => 'container',
+          'region_names' => array('region_0' => array('label' => t('Header'), 'name' => 'header', 'classes' => '')),
+        );
+      }
       $this->rows[$uuid->generate()] = array(
         'contains' => 'region_12',
         'element' => '',
@@ -71,13 +101,16 @@ class LayoutFlexibleTemplate {
         'container' => 'container',
         'region_names' => array('region_0' => array('label' => t('Content'), 'name' => 'content', 'classes' => '')),
       );
-      $this->rows[$uuid->generate()] = array(
-        'contains' => 'region_12',
-        'element' => 'footer',
-        'classes' => '',
-        'container' => 'container',
-        'region_names' => array('region_0' => array('label' => t('Footer'), 'name' => 'footer', 'classes' => '')),
-      );
+      if ($this->is_full_page) {
+        $this->rows[$uuid->generate()] = array(
+          'contains' => 'region_12',
+          'element' => 'footer',
+          'classes' => '',
+          'container' => 'container',
+          'region_names' => array('region_0' => array('label' => t('Footer'), 'name' => 'footer', 'classes' => '')),
+        );
+      }
+
     }
   }
 
@@ -90,9 +123,11 @@ class LayoutFlexibleTemplate {
       'title' => $this->title,
       'description' => $this->description,
       'rows' => $this->rows,
+      'preview' => $this->preview,
+      'is_full_page' => $this->is_full_page,
     );
 
-    config('layout.flexible.' . $this->name)
+    config('layout.' . $this->layout_template_type . '.' . $this->name)
       ->setData($data)
       ->save();
 
@@ -116,4 +151,3 @@ class LayoutFlexibleTemplate {
     backdrop_theme_rebuild();
   }
 }
-
