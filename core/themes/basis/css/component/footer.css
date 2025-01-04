@@ -74,6 +74,9 @@
   background: url("../../images/drop-lounging.png") no-repeat;
   background-size: 100% auto;
 }
+[dir="rtl"] .drop-lounging::before {
+  transform: translate(50%, -82%) scaleX(-1);
+}
 
 .l-footer .block:first-child .drop-lounging::before {
   display: block;

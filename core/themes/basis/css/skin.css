@@ -296,6 +296,11 @@ fieldset .fieldset-legend {
 .l-header .menu > li {
   text-align: start;
 }
+[dir="rtl"] .l-header .menu,
+[dir="rtl"] .l-header .menu > li {
+  /* Smart Menus sets this explicitly as LTR, so we need to override */
+  direction: rtl;
+}
 
 .l-header .menu > li {
   font-size: 1em;
