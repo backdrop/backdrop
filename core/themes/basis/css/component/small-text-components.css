@@ -159,10 +159,10 @@ ul.links,
   display: inline-block;
   padding: 0 0.6em 0 0;
 }
-body.update-1-30 .links.inline li {
+.update-1-30 .links.inline li {
   padding: 0 0 0 0.6em;
 }
-html[dir="rtl"] body.update-1-30 .links.inline li {
+[dir="rtl"] .update-1-30 .links.inline li {
   padding: 0 0.6em 0 0;
 }
 
@@ -173,34 +173,34 @@ html[dir="rtl"] body.update-1-30 .links.inline li {
   transform: none;
   border: 0;
 }
-body.update-1-30 .links.inline li:after {
+.update-1-30 .links.inline li:after {
   content: '|';
   padding: 0 0 0 0.6em;
 }
-html[dir="rtl"] body.update-1-30 .links.inline li:after {
+[dir="rtl"] .update-1-30 .links.inline li:after {
   padding: 0 0.6em 0 0;
 }
 
 .links.inline li:last-child:after {
   content: '';
 }
-body.update-1-30 .links.inline li:last-child:after {
+.update-1-30 .links.inline li:last-child:after {
   content: '';
 }
-html[dir="rtl"] body.update-1-30 .links.inline li:last-child {
+[dir="rtl"] .update-1-30 .links.inline li:last-child {
   padding: 0;
 }
 
 .links.inline .node-readmore {
   display: block;
 }
-body.update-1-30 .links.inline .node-readmore {
+.update-1-30 .links.inline .node-readmore {
   display: inline-block;
 }
 
 .links.inline .node-readmore:after {
   content: '';
 }
-body.update-1-30 .links.inline .node-readmore:after {
+.update-1-30 .links.inline .node-readmore:after {
   content: '|';
 }
