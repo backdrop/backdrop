@@ -12,7 +12,9 @@
   padding-bottom: 2rem;
   background-color: #f2f2f2;
 }
-
+.front.update-1-30 .l-top:has(.block-views-promoted-cards-block) {
+  background-color: #f2f2f2;
+}
 .block-views-promoted-cards-block .views-view-grid-cols-3 {
   grid-template-columns: repeat(1, 1fr);
 }
