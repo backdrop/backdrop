@@ -3401,7 +3401,7 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     // Go to the the layout path and confirm the blocks exist, have the right
     // setting, and are in the right place.
     $this->backdropGet($layout_url);
-    $layout_template = layout_flexible_template_load($template_machine_name1);
+    $layout_template = layout_flexible_template_load($template_machine_name1, 'flexible');
     $layout_region_names = array_keys($layout_template->rows);
     $region_block_settings = array(
       $layout_region_names[0] => 30,

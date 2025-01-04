@@ -90,7 +90,7 @@ class Layout {
    *
    * @var string
    */
-  var $layout_template_type;
+  public var $layout_template_type;
 
   /**
    * Whether this layout is a full page layout (for example, with a header and

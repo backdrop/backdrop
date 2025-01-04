@@ -91,7 +91,13 @@ class LayoutFlexibleTemplate {
           'element' => 'header',
           'classes' => '',
           'container' => 'container',
-          'region_names' => array('region_0' => array('label' => t('Header'), 'name' => 'header', 'classes' => '')),
+          'region_names' => array(
+            'region_0' => array(
+              'label' => t('Header'),
+              'name' => 'header',
+              'classes' => '',
+            ),
+          ),
         );
       }
       $this->rows[$uuid->generate()] = array(
@@ -99,7 +105,13 @@ class LayoutFlexibleTemplate {
         'element' => '',
         'classes' => '',
         'container' => 'container',
-        'region_names' => array('region_0' => array('label' => t('Content'), 'name' => 'content', 'classes' => '')),
+        'region_names' => array(
+          'region_0' => array(
+            'label' => t('Content'),
+            'name' => 'content',
+            'classes' => '',
+          ),
+        ),
       );
       if ($this->is_full_page) {
         $this->rows[$uuid->generate()] = array(
@@ -107,7 +119,13 @@ class LayoutFlexibleTemplate {
           'element' => 'footer',
           'classes' => '',
           'container' => 'container',
-          'region_names' => array('region_0' => array('label' => t('Footer'), 'name' => 'footer', 'classes' => '')),
+          'region_names' => array(
+            'region_0' => array(
+              'label' => t('Footer'),
+              'name' => 'footer',
+              'classes' => '',
+            ),
+          ),
         );
       }
 

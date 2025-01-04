@@ -1205,7 +1205,10 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
     // See https://github.com/backdrop/backdrop-issues/issues/4383
     if (!is_null($link_path) && backdrop_valid_path($link_path)) {
       $form['top']['#theme_wrappers'] = array('container');
-      $form['top']['#attributes']['class'] = array('edit-layout-top', 'clearfix');
+      $form['top']['#attributes']['class'] = array(
+        'edit-layout-top',
+        'clearfix',
+      );
 
       $form['top']['button'] = array(
         '#type' => 'dropbutton',
@@ -2540,10 +2543,16 @@ function layout_locked_message($item, $type = 'layout') {
     $lock_user = theme('username', array('account' => $account));
     $lock_age = format_interval(REQUEST_TIME - $item->locked['updated']);
     $lock_break_url = url('admin/structure/layouts/' . $path_type . '/' . $item->name . '/break-lock', array('query' => array('token' => backdrop_get_token($type . '-' . $item->name)) + backdrop_get_destination()));
-    $message = t('Settings on this page are being edited by user !user, and is therefore locked from editing by others. This lock is !age old. Click here to <a href="!break">break this lock</a>.', array('!user' => $lock_user, '!age' => $lock_age, '!break' => $lock_break_url));
+    $message = t('Settings on this page are being edited by user !user, and is therefore locked from editing by others. This lock is !age old. Click here to <a href="!break">break this lock</a>.', array(
+      '!user' => $lock_user,
+      '!age' => $lock_age,
+      '!break' => $lock_break_url,
+    ));
   }
   elseif (!empty($item->locked['updated'])) {
-    $message = t('This form has unsaved changes. Click "@button" to make changes permanent or "Cancel" to discard changes.', array('@button' => $button_title));
+    $message = t('This form has unsaved changes. Click "@button" to make changes permanent or "Cancel" to discard changes.', array(
+      '@button' => $button_title,
+    ));
   }
 
   return $message;

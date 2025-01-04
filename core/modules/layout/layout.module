@@ -2414,7 +2414,7 @@ function layout_flexible_tempstore_set(LayoutFlexibleTemplate $flexible_template
  * @return LayoutFlexibleTemplate
  *   The flexible template object.
  */
-function layout_flexible_tempstore_load($flexible_template_name = NULL, $flexible_template_type = 'flexible') {
+function layout_flexible_tempstore_load($flexible_template_name = NULL, string $flexible_template_type = 'flexible') {
   if (!$flexible_template_name) {
     return new LayoutFlexibleTemplate();
   }
@@ -2440,7 +2440,7 @@ function layout_flexible_tempstore_load($flexible_template_name = NULL, $flexibl
  *
  * @return LayoutFlexibleTemplate|false
  */
-function layout_flexible_template_load($flexible_template_name = NULL, $flexible_type = 'flexible') {
+function layout_flexible_template_load($flexible_template_name = NULL, string $flexible_type = 'flexible') {
   $all_templates = layout_flexible_template_load_all($flexible_type);
   if (isset($all_templates[$flexible_template_name])) {
     return $all_templates[$flexible_template_name];
@@ -2455,7 +2455,7 @@ function layout_flexible_template_load($flexible_template_name = NULL, $flexible
  *
  * @return LayoutFlexibleTemplate[]
  */
-function layout_flexible_template_load_all($flexible_type = 'flexible') {
+function layout_flexible_template_load_all(string $flexible_type = 'flexible') {
   $templates = &backdrop_static(__FUNCTION__ . ':' . $flexible_type, array());
 
   if (empty($templates)) {
@@ -2523,12 +2523,12 @@ function layout_layout_template_info() {
 }
 
 /**
- * Implementation of deprecated hook_layout_info().
+ * Implements deprecated hook_layout_info().
  *
  * This hook has been replaced by hook_layout_template_info.
  *
  * @deprecated since 1.28.0
- * @see layout_layout_templatet_info()
+ * @see layout_layout_template_info()
  * @see https://docs.backdropcms.org/node/***** @todo
  */
 function layout_layout_info() {
