@@ -28,8 +28,8 @@
 body.update-1-30 .l-top .block-hero {
   margin-top: 0;
 }
-body.update-1-30 .l-top:has(.block-hero:first-child) {
-  margin-top: -2em;
+body.update-1-30 .l-top:has(.block-hero) {
+  margin-top: -2rem;
 }
 .container .block-hero {
   margin-top: 0; /* If hero is in a container don't collapse top spacing */
