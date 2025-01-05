@@ -252,7 +252,7 @@
   margin-block: 0;
   margin-inline: 0 0.5em;
   padding-block: 0.25em;
-  padding-block: 0.75em;
+  padding-inline: 0.75em;
   box-sizing: content-box;
 }
 .layout-editor-block-title .text {
