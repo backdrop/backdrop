@@ -2453,9 +2453,12 @@ function layout_flexible_template_load($flexible_template_name = NULL, $flexible
 /**
  * Load all flexible templates by type. Defaults to 'flexible'.
  *
+ * @param string $flexible_type
+ *  The type of flexible template to load. Defaults to 'flexible'.
+ *
  * @return LayoutFlexibleTemplate[]
  */
-function layout_flexible_template_load_all(string $flexible_type = 'flexible') {
+function layout_flexible_template_load_all($flexible_type = 'flexible') {
   $templates = &backdrop_static(__FUNCTION__ . ':' . $flexible_type, array());
 
   if (empty($templates)) {
