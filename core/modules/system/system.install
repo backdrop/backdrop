@@ -3808,7 +3808,7 @@ function system_update_1102() {
  * @see https://github.com/backdrop/backdrop-issues/issues/5919
  */
 function system_update_1103() {
-  return t("Previously, when changing access settings on a view display it could unexpectedly change the setting on other non-overridden displays of that view. This issue has now been fixed. It is recommended to check that all your views settings under 'Access > Access' are correct.");
+  return t("Previously, when changing access settings on a view display it could unexpectedly change the setting on other non-overridden displays of that view. This issue has now been fixed. If you have views where different displays have different access rules, you are recommended to check that the settings under 'Access > Access' are correct for these views.");
 }
 
 /**
