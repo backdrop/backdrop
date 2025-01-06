@@ -10,9 +10,3 @@ sites/*/settings*.php
 /private
 sites/*/files
 sites/*/private
-.ddev
-drushrc.php
-
-# Ignore modules, etc. installed to test locally.
-modules/*
-themes/*
