@@ -15,12 +15,12 @@
 body.update-1-30 .l-top .block-views-promoted-cards-block {
   margin-top: 0;
 }
-body.update-1-30 .l-top:has(.block-views-promoted-cards-block) {
+body.update-1-30 .l-wrapper > .l-top:has(.block-views-promoted-cards-block) {
   background-color: #f2f2f2;
-  margin-top: -2rem;
+  margin-top: -2rem; /* Negative top margin on parent limited in scope. */
 }
-body.update-1-30 .l-top:has(.block-views-promoted-cards-block) .block,
-body.update-1-30 .l-top:has(.block-views-promoted-cards-block) .l-messages {
+body.update-1-30 .l-wrapper > .l-top:has(.block-views-promoted-cards-block) .block,
+body.update-1-30 .l-wrapper > .l-top:has(.block-views-promoted-cards-block) .l-messages {
   margin-bottom: 0;
 }
 .block-views-promoted-cards-block .views-view-grid-cols-3 {
