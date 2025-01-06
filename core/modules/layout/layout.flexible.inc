@@ -28,7 +28,7 @@ function layout_flexible_template_settings_add_form() {
  */
 function layout_flexible_template_settings_edit_form($form, &$form_state, LayoutFlexibleTemplate $flexible_template) {
   $form_state['flexible_template'] = $flexible_template;
-  $template_exists = layout_flexible_template_load($flexible_template->name);
+  $template_exists = layout_flexible_template_load($flexible_template->name, 'flexible');
 
   $form['name'] = array(
     '#title' => t('Template name'),
