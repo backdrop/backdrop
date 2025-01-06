@@ -2414,7 +2414,7 @@ function layout_flexible_tempstore_set(LayoutFlexibleTemplate $flexible_template
  * @return LayoutFlexibleTemplate
  *   The flexible template object.
  */
-function layout_flexible_tempstore_load($flexible_template_name = NULL, string $flexible_template_type = 'flexible') {
+function layout_flexible_tempstore_load($flexible_template_name = NULL, $flexible_template_type = 'flexible') {
   if (!$flexible_template_name) {
     return new LayoutFlexibleTemplate();
   }
