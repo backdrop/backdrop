@@ -2440,7 +2440,7 @@ function layout_flexible_tempstore_load($flexible_template_name = NULL, $flexibl
  *
  * @return LayoutFlexibleTemplate|false
  */
-function layout_flexible_template_load($flexible_template_name = NULL, string $flexible_type = 'flexible') {
+function layout_flexible_template_load($flexible_template_name = NULL, $flexible_type = 'flexible') {
   $all_templates = layout_flexible_template_load_all($flexible_type);
   if (isset($all_templates[$flexible_template_name])) {
     return $all_templates[$flexible_template_name];
