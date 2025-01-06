@@ -2454,7 +2454,7 @@ function layout_flexible_template_load($flexible_template_name = NULL, $flexible
  * Load all flexible templates by type. Defaults to 'flexible'.
  *
  * @param string $flexible_type
- *  The type of flexible template to load. Defaults to 'flexible'.
+ *   The type of flexible template to load. Defaults to 'flexible'.
  *
  * @return LayoutFlexibleTemplate[]
  */
@@ -2523,20 +2523,6 @@ function layout_layout_template_info() {
   }
 
   return $layouts;
-}
-
-/**
- * Implements deprecated hook_layout_info().
- *
- * This hook has been replaced by hook_layout_template_info.
- *
- * @deprecated since 1.28.0
- * @see layout_layout_template_info()
- * @see https://docs.backdropcms.org/node/***** @todo
- */
-function layout_layout_info() {
-  watchdog_deprecated_function('layout', __FUNCTION__);
-  return layout_layout_template_info();
 }
 
 /**
