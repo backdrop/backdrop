@@ -2038,6 +2038,9 @@ function file_validate_svg(File $file) {
 
   if ($file->filemime == 'image/svg+xml') {
     $file_contents = file_get_contents($file->uri);
+    $file_contents = preg_replace('/<!DOCTYPE[^>]*>/i', '', $file_contents);
+    $file_contents = html_entity_decode($file_contents);
+    $file_contents = strtolower($file_contents);
     libxml_use_internal_errors(TRUE);
     $xml = simplexml_load_string($file_contents);
     $errors = libxml_get_errors();
@@ -2054,15 +2057,15 @@ function file_validate_svg(File $file) {
 
       $search_patterns = array(
         // @see https://developer.mozilla.org/en-US/docs/Web/SVG/Element
-        '//svg:foreignObject',
+        '//svg:foreignobject',
         '//svg:script',
         '//html:iframe',
         // @see https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
         '//@*[starts-with(name(), "on")]',
-        '//svg:a[starts-with(@href, "javascript:")]',
-        '//svg:a[starts-with(@xlink:href, "javascript:")]',
-        '//svg:a[starts-with(@href, "data:")]',
-        '//svg:a[starts-with(@xlink:href, "data:")]',
+        '//svg:a[starts-with(normalize-space(@href), "javascript:")]',
+        '//svg:a[starts-with(normalize-space(@xlink:href), "javascript:")]',
+        '//svg:a[starts-with(normalize-space(@href), "data:")]',
+        '//svg:a[starts-with(normalize-space(@xlink:href), "data:")]',
       );
 
       $xml->registerXPathNamespace('svg', 'http://www.w3.org/2000/svg');
@@ -2339,6 +2342,8 @@ function file_download_access($uri) {
  *     extension. Defaults to 'uri'.
  *   - 'min_depth': Minimum depth of directories to return files from. Defaults
  *     to 0.
+ *   - 'max_depth': Maximum depth of directories to return files from. Defaults
+ *     to 30.
  * @param $depth
  *   Current depth of recursion. This parameter is only used internally and
  *   should not be passed in.
@@ -2362,6 +2367,7 @@ function file_scan_directory($dir, $mask, $options = array(), $depth = 0) {
     'recurse' => TRUE,
     'key' => 'uri',
     'min_depth' => 0,
+    'max_depth' => 30,
   );
 
   $options['key'] = in_array($options['key'], array('uri', 'filename', 'name')) ? $options['key'] : 'uri';
@@ -2376,7 +2382,7 @@ function file_scan_directory($dir, $mask, $options = array(), $depth = 0) {
           // subdirectory files.
           $files = array_merge(file_scan_directory($uri, $mask, $options, $depth + 1), $files);
         }
-        elseif ($depth >= $options['min_depth'] && preg_match($mask, $filename)) {
+        elseif ($depth >= $options['min_depth'] && $depth < $options['max_depth'] && preg_match($mask, $filename)) {
           // Always use this match over anything already set in $files with the
           // same $$options['key'].
           $file = new stdClass();

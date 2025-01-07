@@ -4,7 +4,7 @@
  * Provides integration with the CKEditor WYSIWYG editor.
  */
 
-define('CKEDITOR5_VERSION', '42.0.2');
+define('CKEDITOR5_VERSION', '44.1.0');
 
 /**
  * Implements hook_menu().
@@ -46,7 +46,7 @@ function ckeditor5_editor_info() {
         'bulletedList', 'numberedList', '|',
         'alignment:left', 'alignment:center', 'alignment:right', '|',
         'backdropLink', 'backdropImage', '|',
-        'sourceEditing', 'removeFormat',
+        'sourceEditing', 'removeFormat', 'maximize',
       ),
       'heading_list' => array('p', 'h3', 'h4', 'h5'),
       'style_list' => array(),

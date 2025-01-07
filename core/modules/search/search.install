@@ -236,6 +236,30 @@ function search_update_1003() {
 }
 
 /**
+ * Update outdated search menu item, if necessary.
+ */
+function search_update_1004() {
+  $search_old_item = db_query("SELECT mlid FROM {menu_links} WHERE link_path = 'search' AND module = 'system' AND menu_name = 'navigation'")->fetch();
+  if ($search_old_item) {
+    // Only relevant for sites upgraded from Drupal 7. Move search menu item
+    // (parent) to the same menu as in native installs - where children are.
+    $mlid = $search_old_item->mlid;
+    db_update('menu_links')
+      ->fields(array('menu_name' => 'internal'))
+      ->condition('mlid', $mlid)
+      ->execute();
+    // Also update children plid to fix parent-child relation.
+    $children = array('search/node', 'search/user');
+    db_update('menu_links')
+      ->fields(array('plid' => $mlid))
+      ->condition('menu_name', 'internal')
+      ->condition('module', 'system')
+      ->condition('link_path', $children, 'IN')
+      ->execute();
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

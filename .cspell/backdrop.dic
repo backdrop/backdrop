@@ -25,6 +25,7 @@ attrarr
 attributename
 attrlist
 attrname
+autocreate
 backdropcaption
 backdropcms
 backdropimage
@@ -36,6 +37,8 @@ barbaz
 Barepaths
 bartik
 basenames
+basepath
+basetheme
 basethemes
 bitmasks
 bitstring
@@ -73,6 +76,7 @@ cresult
 cript
 csspath
 CURLAUTH
+CURLOPT
 curparts
 curstr
 Dairiki
@@ -91,7 +95,10 @@ devmajor
 devminor
 diffutils
 dimanche
+dialogclose
+dialogopen
 divitis
+divs
 docache
 docwilmot
 domdocument
@@ -109,8 +116,10 @@ Enregistrer
 entityreference
 éøïвβ
 errorcode
+etag
 evalmath
 evid
+exitcode
 expandtab
 exportables
 extname
@@ -123,6 +132,7 @@ Fastly
 feedburner
 fetchmode
 fffffg
+fieldable
 Fieldby
 fieldlabel
 fieldsql
@@ -184,6 +194,7 @@ Htmlto
 httpauth
 HTTPAUTH
 HTTPGET
+HWLDF
 ical
 ICAL
 IDNA
@@ -200,6 +211,7 @@ innodb
 instantiatable
 isid
 istart
+itoa
 jahwohl
 Jamo
 jdalton
@@ -242,6 +254,7 @@ mercredi
 merlinofchaos
 metacharacters
 meus
+mdhash
 microweights
 milli
 mimeheaders
@@ -257,9 +270,13 @@ mousedown
 mouton
 moutons
 msgbox
+msgid
+msgstr
+msword
 multibundle
 multilanguage
 multipage
+multipass
 multisite
 multisites
 Műveletek
@@ -301,6 +318,7 @@ Nmedi
 noaccess
 noajax
 nocache
+nodata
 nodeapi
 nongranularity
 nonmodal
@@ -331,16 +349,19 @@ Optionchecker
 otherjob
 othername
 otherval
+outro
 padder
 pageno
 pagenum
 pagerpieces
+PHPGGC
 phptemplate
 phpwiki
 plid
 plids
 pneum
 Ponedjeljak
+POSTFIELDS
 preenable
 Prefilter
 preinstall
@@ -359,6 +380,7 @@ PRNG
 propertyname
 Punycode
 queryor
+querystring
 quicktime
 Quieligo
 rawurlencoded
@@ -371,11 +393,13 @@ realelement
 refclass
 referencable
 Referencable
+renderable
 reparent
 reparented
 reparenting
 requeing
 restriping
+RETURNTRANSFER
 retval
 rger
 rkey
@@ -442,6 +466,7 @@ Teletubbies
 tempstore
 testconfig
 testfiles
+testsuite
 testviews
 textgroup
 textgroups
@@ -488,6 +513,7 @@ unpackage
 unpermissioned
 unpromoted
 unrendered
+unsetting
 unshortened
 uploadimage
 uploadwidget

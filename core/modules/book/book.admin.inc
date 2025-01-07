@@ -50,12 +50,18 @@ function book_admin_overview() {
 function book_admin_settings($form, &$form_state) {
   $types = node_type_get_names();
   $config = config('book.settings');
+  $form['book_admin_allowed_all'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow admins to use all content types in book outlines'),
+    '#default_value' => $config->get('book_admin_allowed_all'),
+    '#description' => t('Overrides the specific content type list and allows all content types for user accounts with the %outline-perm permission.', array('%outline-perm' => t('Administer book outlines'))),
+  );
   $form['book_allowed_types'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Content types allowed in book outlines'),
     '#default_value' => $config->get('book_allowed_types'),
     '#options' => $types,
-    '#description' => t('Users with the %outline-perm permission can add all content types.', array('%outline-perm' => t('Administer book outlines'))),
+    '#description' => t('Affects users with the %add-content-to-books permission.', array('%add-content-to-books' => t('Add content and child pages to books'))),
     '#required' => TRUE,
   );
   $form['book_child_type'] = array(
@@ -127,6 +133,7 @@ function book_admin_settings_validate($form, &$form_state) {
  */
 function book_admin_settings_submit($form, &$form_state) {
   config('book.settings')
+    ->set('book_admin_allowed_all', $form_state['values']['book_admin_allowed_all'])
     ->set('book_allowed_types', $form_state['values']['book_allowed_types'])
     ->set('book_child_type', $form_state['values']['book_child_type'])
     ->set('book_navigation', $form_state['values']['book_navigation'])

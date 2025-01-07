@@ -90,7 +90,9 @@ Backdrop.behaviors.filterEditors = {
       var $this = $(this);
       var activeEditor = $this.val();
       var field = $this.closest('.text-format-wrapper').find('textarea').get(-1);
-      $this.removeOnce('filterEditors');
+      if (trigger !== 'serialize') {
+        $this.removeOnce('filterEditors');
+      }
       if (field && Backdrop.settings.filter.formats[activeEditor]) {
         Backdrop.filterEditorDetach(field, Backdrop.settings.filter.formats[activeEditor], trigger);
       }
