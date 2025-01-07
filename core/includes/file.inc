@@ -1616,15 +1616,6 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
       $validators['file_validate_extensions'] = array();
       $validators['file_validate_extensions'][0] = $extensions;
     }
-  }
-  else {
-    // No validator was provided, so add one using the default list.
-    // Build a default non-munged safe list for file_munge_filename().
-    $extensions = implode(' ', image_get_supported_extensions()) . ' txt doc xls pdf ppt pps odt ods odp docx docm pptx pptm xlsx xlsm';
-
-    $validators['file_validate_extensions'] = array();
-    $validators['file_validate_extensions'][0] = $extensions;
-  }
 
     if (!settings_get('allow_insecure_uploads', 0)) {
       if (!empty($extensions)) {
