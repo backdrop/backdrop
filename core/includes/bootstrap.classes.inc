@@ -14,7 +14,7 @@ function backdrop_class_list() {
     'BatchQueue' => $path . 'batch.queue.inc',
     'BatchMemoryQueue' => $path . 'batch.queue.inc',
     'BackdropCacheArray' => $path . 'bootstrap.inc',
-    'SchemaCache' => $path . 'boostrap.inc',
+    'SchemaCache' => $path . 'bootstrap.inc',
     'BackdropFakeCache' => $path . 'cache-install.inc',
     'BackdropNullCache' => $path . 'cache.inc',
     'BackdropDatabaseCache' => $path . 'cache.inc',
@@ -76,7 +76,8 @@ function backdrop_class_list() {
     'DatabaseStatementEmpty' => $path . 'database/database.inc',
     'DatabaseStatementInterface' => $path . 'database/database.inc',
     'DatabaseLog' => $path . 'database/log.inc',
-    'DatabaseStatementPrefetch' => $path . 'database/prefetch.inc',
+    // @todo Remove DatabaseStatementPrefetch entirely, only used by SQLite.
+    // 'DatabaseStatementPrefetch' => $path . 'database/prefetch.inc',
     'Query' => $path . 'database/query.inc',
     'InsertQuery' => $path . 'database/query.inc',
     'DeleteQuery' => $path . 'database/query.inc',
@@ -94,6 +95,12 @@ function backdrop_class_list() {
     'SelectQuery' => $path . 'database/select.inc',
     'QueryExtendableInterface' => $path . 'database/select.inc',
     'SelectQueryInterface' => $path . 'database/select.inc',
+
+    'Backup' => $path . 'backup/backup.class.inc',
+    'BackupConfig' => $path . 'backup/backup.config.inc',
+    'BackupDatabase' => $path . 'backup/backup.database.inc',
+    'BackupFile' => $path . 'backup/backup.file.inc',
+    'BackupMySql' => $path . 'backup/backup.mysql.inc',
 
     'DatabaseConnection_mysql' => $path . 'database/mysql/database.inc',
     'DatabaseTasks_mysql' => $path . 'database/mysql/install.inc',

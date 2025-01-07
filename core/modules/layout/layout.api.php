@@ -10,34 +10,66 @@
  */
 
 /**
- * Provides a list of layouts that can be used within the Layout module.
+ * Provides a list of layout templates that can be used within the Layout
+ * module.
  *
- * This hook returns an array keyed by a unique identifier for a layout name.
+ * This hook returns an array keyed by a unique identifier for a layout template
+ * name.
  *
- * The contents of this hook are merged with layout information provided by
- * stand-alone layouts with their own .info files. Generally, the data returned
- * here matches the keys used within layout .info files.
+ * The contents of this hook are merged with layout template information
+ * provided by stand-alone layout templates with their own .info files.
+ * Generally, the data returned here matches the keys used within layout
+ * template .info files.
  *
  * @return array
  *   Each item in the returned array of info should have the following keys:
- *   - title: The human-readable name of the layout.
+ *   - title: The human-readable name of the layout template.
  *   - path: A local path within the providing module to files needed by this
- *     layout, such as associated CSS, the icon image, and template file.
- *   - regions: A list of regions this layout provides, keyed by a machine name
- *     with a human label value.
- *   - preview: Optional. An image representing the appearance of this layout.
- *     If left empty, "preview.png" will be used.
- *   - stylesheets: An array of CSS file used whenever this layout is presented.
- *     If left empty, "one-column.css" will be used for all media types.
+ *     layout template, such as associated CSS, the icon image, and tpl.php
+ *     file.
+ *   - regions: A list of regions this layout template provides, keyed by a
+ *     machine name with a human label value.
+ *   - preview: Optional. An image representing the appearance of this layout
+ *     template. If left empty, "preview.png" will be used.
+ *   - stylesheets: An array of CSS file used whenever this layout template
+ *     is presented. If left empty, "one-column.css" will be used for all media
+ *     types.
  *   - template: The name of the template file (without the extension) used for
- *     this layout. All layouts should always be named with a "layout--" prefix,
- *     so that the default variables may be provided in
+ *     this layout template. Layout templates should always be named with a
+ *     "layout--" prefix, so that the default variables may be provided in
  *     template_preprocess_layout(). If left empty, "layout--[key]" will be
- *     used, with underscores converted to hyphens in the layout key.
- *   - file: The name of a PHP file to be included prior to any rendering of
- *     this layout. This may be used to provide preprocess functions to prepare
- *     variables for the use of the layout.
+ *     used, with underscores converted to hyphens in the layout template key.
+ *   - file: Optional. The name of a PHP file to be included prior to any
+ *     rendering of this layout template. This may be used to provide preprocess
+ *     functions to prepare variables for the use of the layout template.
  */
+function hook_layout_template_info() {
+  $layout_templates['my_layout_template'] = array(
+    'title' => t('A custom layout template'),
+    'path' => 'layouts/my-layout-template',
+    'regions' => array(
+      'header' => t('Header'),
+      'content' => t('Content'),
+      'sidebar' => t('Sidebar'),
+      'footer' => t('Footer'),
+    ),
+
+    // Optional information that populates using defaults.
+    'preview' => 'preview.png',
+    'stylesheets' => array('all' => array('one-column.css')),
+    'template' => 'layout--my-layout-template',
+
+    // Specify a file containing preprocess functions if needed.
+    'file' => 'my_layout_template.php',
+  );
+  return $layout_templates;
+}
+
+  /**
+   * Deprecated. Now replaced by hook_layout_template_info().
+   *
+   * @deprecated since 1.30.0
+   */
 function hook_layout_info() {
   $layouts['my_layout'] = array(
     'title' => t('A custom layout'),
@@ -140,8 +172,8 @@ function hook_layout_context_info() {
  *     through hook_autoload_info().
  *   - path: Optional. Override the path to the file to be used. Ordinarily
  *     theme functions are located in a file in the module path (for example:
- *     mymodule/mymodule.theme.inc) and template files are located in a
- *     subdirectory named templates (for example: mymodule/templates/), but if
+ *     my_module/my_module.theme.inc) and template files are located in a
+ *     subdirectory named templates (for example: my_module/templates/), but if
  *     your file will not be in the default location, include it here. This
  *     path should be relative to the Backdrop root directory.
  *   - template: If specified, this theme implementation is a template, and
@@ -161,12 +193,12 @@ function hook_layout_style_info() {
     'title' => t('A new style'),
     'description' => t('An advanced style with settings.'),
     // The theme key for rendering an individual block.
-    'block theme' => 'mymodule_block',
+    'block theme' => 'my_module_block',
     // Provide a class name if this style has settings. The class should extend
     // the LayoutStyle class.
     'class' => 'MyModuleLayoutStyle',
     // Override the path to the file to be used.
-    'path' => 'templates/subdir',
+    'path' => 'templates/subdirectory',
     // Name of template file (with or without path).
     'template' => 'templates/my-filename',
   );
@@ -356,7 +388,7 @@ function hook_layout_presave(Layout $layout) {
  * from the path in the router item and you will rely on the system to set the
  * context, you should set the position of the context(s) in the layout to the
  * position in the router. Example: the path in the router item is
- * mymodule/node/% and you wish to use the layout with path node/%. Then you
+ * my_module/node/% and you wish to use the layout with path node/%. Then you
  * would find the context at position 2 in the router item and set its
  *  Context::position variable to 2, so that the layout with path node/% looks
  * at position 2 to set the context for that placeholder.
@@ -531,11 +563,13 @@ function hook_block_info_alter(&$blocks) {
 /**
  * Define a configuration form for a block.
  *
- * @param $delta
+ * @param string $delta
  *   Which block is being configured. This is a unique identifier for the block
  *   within the module, defined in hook_block_info().
+ * @param array $settings
+ *   An array of settings for this block.
  *
- * @return
+ * @return array
  *   A configuration form, if one is needed for your block beyond the standard
  *   elements that the block module provides (block title, visibility, etc.).
  *
@@ -543,6 +577,8 @@ function hook_block_info_alter(&$blocks) {
  *
  * @see hook_block_info()
  * @see hook_block_save()
+ *
+ * @since 1.0.6 $settings parameter added.
  */
 function hook_block_configure($delta = '', $settings = array()) {
   // This example comes from node.module.
@@ -585,7 +621,7 @@ function hook_block_configure($delta = '', $settings = array()) {
  */
 function hook_block_save($delta, &$edit = array()) {
   if ($delta == 'my_block_delta') {
-    config_set('mymodule.settings', 'my_global_value', $edit['my_global_value']);
+    config_set('my_module.settings', 'my_global_value', $edit['my_global_value']);
     // Remove the value so it is not saved by Layout module.
     unset($edit['my_global_value']);
   }
@@ -682,8 +718,10 @@ function hook_block_view($delta = '', $settings = array(), $contexts = array()) 
  *   - module: The name of the module that defined the block.
  *   - delta: The unique identifier for the block within that module, as defined
  *     in hook_block_info().
- *   - settings: All block settings as defined for this instance of the block.
- *   - contexts: All layout contexts available for the layout.
+ *   - settings: An array containing all block settings as defined for this
+ *     instance of the block.
+ *   - contexts: An array containing all layout contexts available for the
+ *     layout.
  *
  * @see hook_block_view_MODULE_DELTA_alter()
  * @see hook_block_view()
@@ -694,9 +732,9 @@ function hook_block_view_alter(&$data, $block) {
     unset($data['content']['#contextual_links']);
   }
   // Add a theme wrapper function defined by the current module to all blocks
-  // provided by the "somemodule" module.
-  if (is_array($data['content']) && $block->module == 'somemodule') {
-    $data['content']['#theme_wrappers'][] = 'mymodule_special_block';
+  // provided by the "some_module" module.
+  if (is_array($data['content']) && $block->module == 'some_module') {
+    $data['content']['#theme_wrappers'][] = 'my_module_special_block';
   }
 }
 
@@ -719,18 +757,20 @@ function hook_block_view_alter(&$data, $block) {
  *   - module: The name of the module that defined the block.
  *   - delta: The unique identifier for the block within that module, as defined
  *     in hook_block_info().
- * @param array $settings
- *   An array of settings for this block.
+ *   - settings: An array containing all block settings as defined for this
+ *     instance of the block.
+ *   - contexts: An array containing all layout contexts available for the
+ *     layout.
  *
  * @see hook_block_view_alter()
  * @see hook_block_view()
  */
 function hook_block_view_MODULE_DELTA_alter(&$data, $block) {
   // This code will only run for a specific block. For example, if MODULE_DELTA
-  // in the function definition above is set to "mymodule_somedelta", the code
-  // will only run on the "somedelta" block provided by the "mymodule" module.
-
-  // Change the title of the "somedelta" block provided by the "mymodule"
+  // in the function definition above is set to "my_module_some_delta", the code
+  // will only run on the "some_delta" block provided by the "my_module" module.
+  //
+  // Change the title of the "some_delta" block provided by the "my_module"
   // module.
   $data['title'] = t('New title of the block');
 }

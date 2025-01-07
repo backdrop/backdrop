@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Directed acyclic graph manipulation.

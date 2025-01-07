@@ -68,6 +68,22 @@ define('COMMENT_NODE_CLOSED', 1);
 define('COMMENT_NODE_OPEN', 2);
 
 /**
+ * Auto generated comment titles.
+ */
+define('COMMENT_TITLE_AUTO', 'auto');
+
+/**
+ * Custom comment titles.
+ */
+define('COMMENT_TITLE_CUSTOM', 'custom');
+
+/**
+ * Hidden comment titles.
+ */
+define('COMMENT_TITLE_HIDDEN', 'hidden');
+
+
+/**
  * Implements hook_entity_info().
  */
 function comment_entity_info() {
@@ -135,7 +151,7 @@ function comment_field_extra_fields() {
   $return = array();
 
   foreach (node_type_get_types() as $type) {
-    if ($type->settings['comment_subject_field']) {
+    if ($type->settings['comment_title_options'] == COMMENT_TITLE_CUSTOM) {
       $return['comment']['comment_node_' . $type->type] = array(
         'form' => array(
           'author' => array(
@@ -314,7 +330,7 @@ function comment_node_type_load(&$types) {
       'comment_per_page' => 50,
       'comment_mode' => COMMENT_MODE_THREADED,
       'comment_anonymous' => COMMENT_ANONYMOUS_MAYNOT_CONTACT,
-      'comment_subject_field' => FALSE,
+      'comment_title_options' => COMMENT_TITLE_AUTO,
       'comment_user_picture' => TRUE,
       'comment_form_location' => COMMENT_FORM_BELOW,
       'comment_preview' => BACKDROP_OPTIONAL,
@@ -399,8 +415,17 @@ function _comment_body_field_create($info) {
  */
 function comment_permission() {
   return array(
+    'administer comment settings' => array(
+      'title' => t('Administer comment settings'),
+      'description' => t('Configure comment settings per content type.'),
+      'restrict access' => TRUE,
+      'warning' => t('Allows changing comment settings for each content type, and disabling comments.'),
+    ),
     'administer comments' => array(
-      'title' => t('Administer comments and comment settings'),
+      'title' => t('Administer comments'),
+      'description' => t('Edit, delete, unpublish, etc. comments at <em>/admin/content/comment</em>.'),
+      'restrict access' => TRUE,
+      'warning' => t('Allows deleting/updating any comment, even those posted by other people.'),
     ),
     'access comments' => array(
       'title' => t('View comments'),
@@ -409,7 +434,8 @@ function comment_permission() {
       'title' => t('Post comments'),
     ),
     'skip comment approval' => array(
-      'title' => t('Skip comment approval'),
+      'title' => t('Skip comment approval: Comments will be immediately visible to everyone'),
+      'warning' => t('Because spam and offensive comments are common, this permission should only be granted to those who are trusted, or on a site with additional spam protection measures in place.'),
     ),
     'edit own comments' => array(
       'title' => t('Edit own comments'),
@@ -935,55 +961,7 @@ function comment_prepare_thread(&$comments) {
  *   An array as expected by backdrop_render().
  */
 function comment_view(Comment $comment, Node $node, $view_mode = 'full', $langcode = NULL) {
-  if (!isset($langcode)) {
-    $langcode = $GLOBALS['language_content']->langcode;
-  }
-
-  // Populate $comment->content with a render() array.
-  comment_build_content($comment, $node, $view_mode, $langcode);
-
-  $build = $comment->content;
-  // We don't need duplicate rendering info in comment->content.
-  unset($comment->content);
-
-  $build += array(
-    '#theme' => 'comment__node_' . $node->type . '__' . $view_mode,
-    '#comment' => $comment,
-    '#node' => $node,
-    '#view_mode' => $view_mode,
-    '#language' => $langcode,
-  );
-  $node_type = node_type_get_type($node->type);
-
-  if (empty($comment->in_preview)) {
-    $prefix = '';
-    $is_threaded = isset($comment->divs) && $node_type->settings['comment_mode'] == COMMENT_MODE_THREADED;
-
-    // Add 'new' anchor if needed.
-    if (!empty($comment->first_new)) {
-      $prefix .= "<a id=\"new\"></a>\n";
-    }
-
-    // Add indentation div or close open divs as needed.
-    if ($is_threaded) {
-      $prefix .= $comment->divs <= 0 ? str_repeat('</div>', abs($comment->divs)) : "\n" . '<div class="indented">';
-    }
-
-    // Add anchor for each comment.
-    $prefix .= "<a id=\"comment-$comment->cid\"></a>\n";
-    $build['#prefix'] = $prefix;
-
-    // Close all open divs.
-    if ($is_threaded && !empty($comment->divs_final)) {
-      $build['#suffix'] = str_repeat('</div>', $comment->divs_final);
-    }
-  }
-
-  // Allow modules to modify the structured comment.
-  $type = 'comment';
-  backdrop_alter(array('comment_view', 'entity_view'), $build, $type);
-
-  return $build;
+  return $comment->view($view_mode, $langcode);
 }
 
 /**
@@ -1003,41 +981,7 @@ function comment_view(Comment $comment, Node $node, $view_mode = 'full', $langco
  *   content language of the current request.
  */
 function comment_build_content(Comment $comment, Node $node, $view_mode = 'full', $langcode = NULL) {
-  if (!isset($langcode)) {
-    $langcode = $GLOBALS['language_content']->langcode;
-  }
-
-  // Remove previously built content, if exists.
-  $comment->content = array();
-
-  // Allow modules to change the display mode.
-  $view_mode = key(entity_view_mode_prepare('comment', array($comment->cid => $comment), $view_mode, $langcode));
-
-  // Build fields content.
-  field_attach_prepare_view('comment', array($comment->cid => $comment), $view_mode, $langcode);
-  entity_prepare_view('comment', array($comment->cid => $comment), $langcode);
-  $comment->content += field_attach_view('comment', $comment, $view_mode, $langcode);
-
-  $comment->content['links'] = array(
-    '#theme' => 'links__comment',
-    '#pre_render' => array('backdrop_pre_render_links'),
-    '#attributes' => array('class' => array('links', 'inline')),
-  );
-  if (empty($comment->in_preview)) {
-    $comment->content['links']['comment'] = array(
-      '#theme' => 'links__comment__comment',
-      '#links' => comment_links($comment, $node),
-      '#attributes' => array('class' => array('links', 'inline')),
-    );
-  }
-
-  // Allow modules to make their own additions to the comment.
-  module_invoke_all('comment_view', $comment, $view_mode, $langcode);
-  module_invoke_all('entity_view', $comment, 'comment', $view_mode, $langcode);
-
-  // Make sure the current display mode is stored if no module has already
-  // populated the related key.
-  $comment->content += array('#view_mode' => $view_mode);
+  $comment->buildContent($view_mode, $langcode);
 }
 
 /**
@@ -1147,6 +1091,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
       '#group' => 'additional_settings',
+      '#access' => user_access('administer comment settings'),
       '#attributes' => array(
         'class' => array('comment-node-type-settings-form'),
       ),
@@ -1155,7 +1100,7 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       ),
       '#weight' => 25,
     );
-    // Unlike coment_form_node_form_alter(), all of these settings are applied
+    // Unlike comment_form_node_form_alter(), all of these settings are applied
     // as defaults to all new nodes. Therefore, it would be wrong to use #states
     // to hide the other settings based on the primary comment setting.
     $form['comment']['comment_default'] = array(
@@ -1192,12 +1137,6 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
         COMMENT_ANONYMOUS_MUST_CONTACT => t('Anonymous posters must leave their contact information'),
       ),
       '#access' => user_access('post comments', backdrop_anonymous_user()),
-    );
-    $form['comment']['comment_subject_field'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Allow a custom title to be set for each comment'),
-      '#default_value' => $node_type->settings['comment_subject_field'],
-      '#description' => t('When disabled, the comment title will be automatically generated from the comment text.'),
     );
     if (config_get('system.core', 'user_pictures')) {
       $form['comment']['comment_user_picture'] = array(
@@ -1241,6 +1180,19 @@ function comment_form_node_type_form_alter(&$form, $form_state) {
       '#default_value' => $node_type->settings['comment_close_days'],
       '#field_suffix' => t('days'),
     );
+    $form['comment']['comment_title_options'] = array(
+      '#type' => 'radios',
+      '#title' => t('Comment titles'),
+      '#default_value' => $node_type->settings['comment_title_options'],
+      '#options' => array(
+        COMMENT_TITLE_CUSTOM => t('Visible, customizable'),
+        COMMENT_TITLE_AUTO => t('Visible, auto-generated'),
+        COMMENT_TITLE_HIDDEN => t('Hidden'),
+      ),
+    );
+    $form['comment']['comment_title_options'][COMMENT_TITLE_CUSTOM]['#description'] = t('A title field is provided, to allow customizing comment titles.');
+    $form['comment']['comment_title_options'][COMMENT_TITLE_AUTO]['#description'] = t('Comment titles are automatically generated from the comment body.');
+    $form['comment']['comment_title_options'][COMMENT_TITLE_HIDDEN]['#description'] = t('Note: this option might not be supported by some themes.');
   }
 }
 
@@ -1251,7 +1203,7 @@ function comment_form_node_form_alter(&$form, $form_state) {
   $node = $form['#node'];
   $form['comment_settings'] = array(
     '#type' => 'fieldset',
-    '#access' => user_access('administer comments'),
+    '#access' => user_access('administer comment settings'),
     '#title' => t('Comment settings'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
@@ -1553,7 +1505,7 @@ function comment_config_create_validate(Config $staging_config, $all_changes) {
  *   (optional) The comment object, or NULL when using 'create' op.
  *
  * @return bool
- *   TRUE if the current user has acces to the comment, FALSE otherwise.
+ *   TRUE if the current user has access to the comment, FALSE otherwise.
  *
  * @since 1.13.0 The "create" $op option was added.
  * @since 1.13.0 The "edit" $op option is deprecated. Use "update" instead.
@@ -1720,7 +1672,7 @@ function comment_get_display_ordinal($cid, $node_type) {
 
   if ($mode == COMMENT_MODE_FLAT) {
     // For flat comments, cid is used for ordering comments due to
-    // unpredicatable behavior with timestamp, so we make the same assumption
+    // unpredictable behavior with timestamp, so we make the same assumption
     // here.
     $query->condition('c1.cid', $cid, '<');
   }
@@ -1895,10 +1847,10 @@ function comment_form($form, &$form_state, $comment) {
     );
   }
 
-  // Add author e-mail and homepage fields depending on the current user.
+  // Add author email and homepage fields depending on the current user.
   $form['author']['mail'] = array(
     '#type' => 'email',
-    '#title' => t('E-mail'),
+    '#title' => t('Email'),
     '#default_value' => $comment->mail,
     '#required' => (!$user->uid && $anonymous_contact == COMMENT_ANONYMOUS_MUST_CONTACT),
     '#maxlength' => 64,
@@ -1940,7 +1892,7 @@ function comment_form($form, &$form_state, $comment) {
     '#title' => t('Title'),
     '#maxlength' => 64,
     '#default_value' => $comment->subject,
-    '#access' => $node_type->settings['comment_subject_field'],
+    '#access' => $node_type->settings['comment_title_options'] == COMMENT_TITLE_CUSTOM,
     '#weight' => -1,
   );
 

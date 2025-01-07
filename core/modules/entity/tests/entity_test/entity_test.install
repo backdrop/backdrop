@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Install, update and uninstall functions for the entity_test module.
@@ -41,7 +40,7 @@ function entity_test_schema() {
       'id' => array(
         'type' => 'serial',
         'not null' => TRUE,
-        'description' => 'Primary Key: Unique entity-test item ID.',
+        'description' => 'Primary Key: Unique entity_test item ID.',
       ),
       'name' => array(
         'description' => 'The name of the test entity.',

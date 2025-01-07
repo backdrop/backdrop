@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of views_handler_sort_date.

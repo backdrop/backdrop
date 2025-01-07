@@ -142,8 +142,8 @@
  * There are several types of plugins in Views:
  * - Display: Display plugins are responsible for controlling *where* a view
  *   lives; that is, how they are being exposed to other parts of Backdrop. Page
- *   and block are the most common displays, as well as the ubiquitous 'master'
- *   (or 'default') display.
+ *   and block are the most common displays, as well as the ubiquitous 'default'
+ *   display.
  * - Style: Style plugins control how a view is displayed. For the most part
  *   they are object wrappers around theme templates. Styles could for example
  *   be HTML lists or tables.
@@ -338,9 +338,10 @@ function hook_views_data() {
   );
 
   // Next, describe each of the individual fields in this table to Views. This
-  // is done by describing $data['example_table']['FIELD_NAME']. This part of
-  // the array may then have further entries:
-  //   - title: The label for the table field, as presented in Views.
+  // is done by describing $data['example_table']['FIELD_NAME']. All text should
+  // both be sanitized and translated or run through t() before being passed to
+  // the views UI. Keys are as follows:
+  //   - title: A sanitized label for the table field, as presented in Views.
   //   - help: The description text for the table field.
   //   - relationship: A description of any relationship handler for the table
   //     field.
@@ -550,7 +551,7 @@ function hook_views_data_alter(&$data) {
  *       Views overview and also used as default name for new displays. Wrap in
  *       t().
  *     - no remove: Set to TRUE to make the display non-removable. (Basically
- *       only used for the master/default display.)
+ *       only used for the default display.)
  *     - use ajax: Set to TRUE to allow AJAX loads in the display. If it's
  *       disabled there will be no ajax option in the ui.
  *     - use pager: Set to TRUE to allow paging in the display.
@@ -632,8 +633,7 @@ function hook_views_plugins_alter(&$plugins) {
 /**
  * Register View API information.
  *
- * This is required for your module to have its include files loaded; for
- * example, when implementing hook_views_default_views().
+ * This is required for your module to have its include files loaded.
  *
  * @return
  *   An array with the following possible keys:
@@ -965,7 +965,7 @@ function hook_views_ajax_data_alter(&$commands, $view) {
  * @see views_invalidate_cache()
  */
 function hook_views_invalidate_cache() {
-  cache('mymodule')->deletePrefix('views:');
+  cache('my_module')->deletePrefix('views:');
 }
 
 /**

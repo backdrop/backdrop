@@ -10,7 +10,7 @@
  * @ingroup themeable
  */
 function theme_system_powered_by() {
-  return '<span>' . t('Powered by <a href="@poweredby">Backdrop CMS</a>', array('@poweredby' => 'https://backdropcms.org')) . '</span>';
+  return '<span>' . t('Powered by <a href="@url">Backdrop CMS</a>', array('@url' => 'https://backdropcms.org')) . '</span>';
 }
 
 /**
@@ -165,7 +165,7 @@ function theme_system_modules_fieldset($variables) {
     // Add the first column: the checkbox.
     $row[] = array('class' => array('checkbox'), 'data' => backdrop_render($module['enable']));
 
-    // Add the second column: module label and expand/collapse functionalty.
+    // Add the second column: module label and expand/collapse functionality.
     $row[] = array('class' => array('module'), 'data' => '<label id="module-' . $key . '" for="' . $module['enable']['#id'] . '" class="module-name table-filter-text-source">' . backdrop_render($module['name']) . '</label>');
 
     // Add the third column: module version number.
@@ -177,6 +177,9 @@ function theme_system_modules_fieldset($variables) {
     }
     if ($required_by) {
       $requirements .= '<div class="admin-requirements">' . t('Required by:') . ' ' . implode(', ', $module['#required_by']) . '</div>';
+    }
+    if (isset($module['#project']) && $module['#project'] != 'backdrop') {
+      $requirements .= '<div class="admin-requirements project-links">' . t('Links:') . ' ' . l(t("BackdropCMS.org"), 'https://backdropcms.org/project/' . $module['#project']) . ', ' . l(t("GitHub"), 'https://github.com/backdrop-contrib/' . $module['#project']) . '</div>';
     }
     $requirements .= '<div class="admin-requirements table-filter-text-source">' . t('Tags:') . ' ' . backdrop_render($module['tags']) . '</div>';
     $requirements .= '</div>';
@@ -245,23 +248,36 @@ function theme_system_modules_uninstall($variables) {
       $disabled_message = format_plural(count($form['modules'][$module]['#required_by']),
         'To uninstall @module, the following module must be uninstalled first: @required_modules',
         'To uninstall @module, the following modules must be uninstalled first: @required_modules',
-        array('@module' => $form['modules'][$module]['#module_name'], '@required_modules' => implode(', ', $form['modules'][$module]['#required_by'])));
+        array(
+          '@module' => $form['modules'][$module]['#module_name'],
+          '@required_modules' => implode(', ', $form['modules'][$module]['#required_by']),
+        ));
       $disabled_message = '<div class="admin-requirements">' . $disabled_message . '</div>';
     }
     else {
       $disabled_message = '';
     }
     $rows[] = array(
-      array('data' => backdrop_render($form['uninstall'][$module]), 'align' => 'center'),
+      array(
+        'data' => backdrop_render($form['uninstall'][$module]),
+        'align' => 'center',
+      ),
       '<strong><label for="' . $form['uninstall'][$module]['#id'] . '">' . backdrop_render($form['modules'][$module]['name']) . '</label></strong>',
-      array('data' => backdrop_render($form['modules'][$module]['description']) . $disabled_message, 'class' => array('description')),
+      array(
+        'data' => backdrop_render($form['modules'][$module]['description']) . $disabled_message,
+        'class' => array('description'),
+      ),
     );
   }
 
-  $output  = theme('table', array('header' => $header, 'rows' => $rows, 'empty' => t('No modules are available to uninstall.')));
-  $output .= backdrop_render_children($form);
+  $form['modules'] = array(
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $rows,
+    '#empty' => t('No modules are available to uninstall.'),
+  );
 
-  return $output;
+  return backdrop_render_children($form);
 }
 
 /**
@@ -282,11 +298,17 @@ function theme_system_modules_uninstall($variables) {
  *       - REQUIREMENT_OK: The requirement is satisfied.
  *       - REQUIREMENT_WARNING: The requirement failed with a warning.
  *       - REQUIREMENT_ERROR: The requirement failed with an error.
+ *   - phase: The current phase. Possible values are one of:
+ *     - install: When called from install.php.
+ *     - update: When called from update.php.
+ *     - runtime: Showing the normal status report page, or no phase specified.
  *
  * @ingroup themeable
+ * @since 1.26.2 support for the "phase" variable added.
  */
 function theme_status_report($variables) {
   $requirements = $variables['requirements'];
+  $phase = isset($variables['phase']) ? $variables['phase'] : 'runtime';
   backdrop_sort($requirements, array('title' => SORT_STRING));
 
   // Separate requirements by severity.
@@ -338,7 +360,7 @@ function theme_status_report($variables) {
   $system_status_report_table = array(
     'header' => array(),
     'rows' => array(),
-    'attributes' => array('class' => 'system-status-report'),
+    'attributes' => array('class' => array('system-status-report', 'phase-' . $phase)),
     'caption' => '',
     'colgroups' => array(),
     'sticky' => FALSE,
@@ -363,14 +385,27 @@ function theme_status_report($variables) {
       $details = '<div class="status-description">' . $requirement['description']. '</div>';
     }
 
-    $description = '<div class="status-summary">' . $requirement['value'] . $more . '</div>' . $details;
-
-    $row = array(
-      'data' => array(
+    // For the "Requirements problem" page of the installer, place the label and
+    // the description of each check/row in a single table cell.
+    if ($phase == 'install') {
+      $description = '<div class="status-summary status-value">' . $requirement['value'] . $more . '</div>' . $details;
+      $data = array(
+        array('data' => $severity['icon'], 'class' => 'report-icon'),
+        array('data' => $title . $description, 'class' => 'status-title'),
+      );
+    }
+    // For the site status report page, place the label and the description of
+    // each check in separate table cells in the same row.
+    else {
+      $description = '<div class="status-summary">' . $requirement['value'] . $more . '</div>' . $details;
+      $data = array(
         array('data' => $severity['icon'], 'class' => 'report-icon'),
         array('data' => $title, 'class' => 'status-title'),
         array('data' => $description, 'class' => array('status-value', 'priority-low')),
-      ),
+      );
+    }
+    $row = array(
+      'data' => $data,
       'class' => $severity['class'],
     );
 
@@ -390,38 +425,25 @@ function theme_status_report($variables) {
  * @param $variables
  *   An associative array containing:
  *   - blocks: An array of blocks to display. Each array should include a
- *     'title', a 'description', a formatted 'content' and a 'position' which
- *     will control which container it will be in. This is usually 'left' or
- *     'right'.
+ *     'title', a 'description' and a formatted 'content'.
  *
  * @ingroup themeable
  */
 function theme_admin_page($variables) {
   $blocks = $variables['blocks'];
-
-  $stripe = 0;
   $container = array();
 
   foreach ($blocks as $block) {
     if ($block_output = theme('admin_block', array('block' => $block))) {
-      if (empty($block['position'])) {
-        // perform automatic striping.
-        $block['position'] = ++$stripe % 2 ? 'left' : 'right';
-      }
-      if (!isset($container[$block['position']])) {
-        $container[$block['position']] = '';
-      }
-      $container[$block['position']] .= $block_output;
+      $container[] = $block_output;
     }
   }
 
   if (!empty($container)) {
     $output = '<div class="admin clearfix">';
-      foreach ($container as $id => $data) {
-        $output .= '<div class="' . $id . ' clearfix">';
-        $output .= $data;
-        $output .= '</div>';
-      }
+    foreach ($container as $data) {
+      $output .= $data;
+    }
     $output .= '</div>';
   }
   else {
@@ -438,6 +460,7 @@ function theme_admin_page($variables) {
  *   - block: An array containing information about the block:
  *     - show: A Boolean whether to output the block. Defaults to FALSE.
  *     - title: The block's title.
+ *     - icon: (optional) The block's icon.
  *     - content: (optional) Formatted content for the block.
  *     - description: (optional) Description of the block. Only output if
  *       'content' is not set.
@@ -462,7 +485,9 @@ function theme_admin_block($variables) {
 
   $output .= '<div class="' . implode(' ', $classes) . '">';
   if (!empty($block['title'])) {
-    $output .= '<h3>' . $block['title'] . '</h3>';
+    $icon = empty($block['icon']) ? '' : '<span class="admin-panel-icon">' . icon($block['icon']) . '</span>';
+    $title = '<span class="admin-panel-title">' . $block['title'] . '</span>';
+    $output .= '<h3>' . $icon . $title . '</h3>';
   }
   if (!empty($block['content'])) {
     $output .= '<div class="body">' . $block['content'] . '</div>';
@@ -516,11 +541,7 @@ function theme_admin_block_content($variables) {
  */
 function theme_system_admin_index($variables) {
   $menu_items = $variables['menu_items'];
-
-  $stripe = 0;
-  $container = array('left' => '', 'right' => '');
-  $flip = array('left' => 'right', 'right' => 'left');
-  $position = 'left';
+  $blocks = array();
 
   // Iterate over all modules.
   foreach ($menu_items as $module => $block) {
@@ -535,21 +556,14 @@ function theme_system_admin_index($variables) {
       $block['show'] = TRUE;
 
       if ($block_output = theme('admin_block', array('block' => $block))) {
-        if (!isset($block['position'])) {
-          // Perform automatic striping.
-          $block['position'] = $position;
-          $position = $flip[$position];
-        }
-        $container[$block['position']] .= $block_output;
+        $blocks[] = $block_output;
       }
     }
   }
 
   $output = '<div class="admin clearfix">';
-  foreach ($container as $id => $data) {
-    $output .= '<div class="' . $id . ' clearfix">';
-    $output .= $data;
-    $output .= '</div>';
+  foreach ($blocks as $block) {
+    $output .= $block;
   }
   $output .= '</div>';
 
@@ -560,66 +574,35 @@ function theme_system_admin_index($variables) {
  * Theme a link to a token tree either as a regular link or a dialog.
  */
 function theme_token_tree_link($variables) {
-  if (empty($variables['text'])) {
-    $variables['text'] = t('Browse available tokens');
+  $options = array(
+    'attributes' => array(),
+    'query' => array(
+      'token' => backdrop_get_token('token-browser'),
+      'show_restricted' => $variables['show_restricted'] ? 1 : 0,
+    ),
+  );
+
+  if (!empty($variables['token_types'])) {
+    $options['query']['token_types'] = backdrop_json_encode($variables['token_types']);
+    $options['query']['global_types'] = backdrop_json_encode($variables['global_types']);
   }
 
   if (!empty($variables['dialog'])) {
     backdrop_add_library('system', 'token');
-    $variables['options']['attributes']['class'][] = 'use-ajax token-browser-link';
+    backdrop_add_library('system', 'backdrop.ajax');
+    $options['attributes']['class'][] = 'use-ajax token-browser-link';
   }
-
-  $info = system_theme();
-  $tree_variables = array_intersect_key($variables, $info['token_tree']['variables']);
-  $tree_variables = backdrop_array_diff_assoc_recursive($tree_variables, $info['token_tree']['variables']);
-  if (!isset($variables['options']['query']['options'])) {
-    $variables['options']['query']['options'] = array();
+  else {
+    $options['attributes']['target'] = '_blank';
   }
-  $variables['options']['query']['options'] += $tree_variables;
-
-  // We should never pass the dialog option to theme_token_tree(). It is only
-  // used for this function.
-  unset($variables['options']['query']['options']['dialog']);
-
-  // Add a security token so that the tree page should only work when used
-  // when the dialog link is output with theme('token_tree_link').
-  $variables['options']['query']['token'] = backdrop_get_token('token-tree:' . serialize($variables['options']['query']['options']));
-
-  // Because PHP converts query strings with arrays into a different syntax on
-  // the next request, the options have to be encoded with JSON in the query
-  // string so that we can reliably decode it for token comparison.
-  $variables['options']['query']['options'] = backdrop_json_encode($variables['options']['query']['options']);
-
-  // Set the token tree to open in a separate window.
-  $variables['options']['attributes'] + array('target' => '_blank');
-
-  return l($variables['text'], 'token/tree', $variables['options']);
-}
-
-/**
- * Theme a tree table.
- *
- * @ingroup themeable
- */
-function theme_tree_table($variables) {
-  foreach ($variables['rows'] as &$row) {
-    $row += array('class' => array());
-    if (!empty($row['id'])) {
-      $row['data-tt-id'] = $row['id'];
-      $row['no_striping'] = TRUE;
-      unset($row['id']);
-    }
-    if (!empty($row['parent'])) {
-      $row['data-tt-parent-id'] = $row['parent'];
-      unset($row['parent']);
-    }
-  }
-
-  if (!empty($variables['rows'])) {
-    backdrop_add_library('system', 'jquery.treetable');
-  }
-
-  return theme('table', $variables);
+  // Create a security token.
+  $settings['tokenBrowser'] = array(
+    'token' => backdrop_get_token('token-browser-endpoint'),
+    'restricted' => $variables['show_restricted'],
+    'click_insert' => $variables['click_insert'],
+  );
+  backdrop_add_js($settings, 'setting');
+  return l($variables['text'], 'token/tree', $options);
 }
 
 /**
@@ -628,113 +611,20 @@ function theme_tree_table($variables) {
  * @ingroup themeable
  */
 function theme_token_tree($variables) {
-  $token_types = $variables['token_types'];
-  $info = token_get_info();
-
-  if ($token_types == 'all') {
-    $token_types = array_keys($info['types']);
+  if (!empty($variables['dialog'])) {
+    return theme('token_tree_link', $variables);
   }
-  elseif ($variables['global_types']) {
-    $token_types = array_merge($token_types, token_get_global_token_types());
-  }
-
-  $options = array(
-    'flat' => TRUE,
+  module_load_include('inc', 'system', 'system.pages');
+  $content = system_token_browser_tree_build_content($variables['token_types'], $variables['global_types'], $variables['show_restricted']);
+  // Create a security token.
+  $settings['tokenBrowser'] = array(
+    'token' => backdrop_get_token('token-browser-endpoint'),
     'restricted' => $variables['show_restricted'],
-    'depth' => $variables['recursion_limit'],
+    'click_insert' => $variables['click_insert'],
   );
-  $multiple_token_types = (count($token_types) > 1);
-  $rows = array();
+  backdrop_add_js($settings, 'setting');
 
-  foreach ($info['types'] as $type => $type_info) {
-    if (!in_array($type, $token_types)) {
-      continue;
-    }
-
-    if ($multiple_token_types) {
-      $row = _token_token_tree_format_row($type, $type_info, TRUE);
-      unset($row['data']['value']);
-      $rows[] = $row;
-    }
-
-    $tree = token_build_tree($type, $options);
-    foreach ($tree as $token => $token_info) {
-      if (!empty($token_info['restricted']) && empty($variables['show_restricted'])) {
-        continue;
-      }
-      if (!empty($token_info['deprecated'])) {
-        continue;
-      }
-      if ($multiple_token_types && !isset($token_info['parent'])) {
-        $token_info['parent'] = $type;
-      }
-      $row = _token_token_tree_format_row($token, $token_info);
-      unset($row['data']['value']);
-      $rows[] = $row;
-    }
-  }
-
-  $table_variables = array(
-    'header' => array(
-      t('Name'),
-      t('Token'),
-    ),
-    'rows' => $rows,
-    'attributes' => array('class' => array('token-tree')),
-    'empty' => t('No tokens available'),
-  );
-
-  if ($variables['click_insert']) {
-    $table_variables['caption'] = t('Select a token to insert it into the current field.');
-    $table_variables['attributes']['class'][] = 'token-click-insert';
-  }
-
-  backdrop_add_library('system', 'token');
-  $output = theme('tree_table', $table_variables);
-  return $output;
-}
-
-/**
- * Build a row in the token tree.
- */
-function _token_token_tree_format_row($token, array $token_info, $is_group = FALSE) {
-  // Build a statically cached array of default values. This is around four
-  // times as efficient as building the base array from scratch each time this
-  // function is called.
-  static $defaults = array(
-    'id' => '',
-    'class' => array(),
-    'data' => array(
-      'name' => array(),
-      'token' => array(),
-      'value' => '',
-    ),
-  );
-
-  $row = $defaults;
-  $row['id'] = backdrop_clean_css_identifier($token);
-  $row['data']['name']['data'] = $token_info['name'];
-  $row['data']['name']['class'][] = 'token-name';
-
-  if ($is_group) {
-    // This is a token type/group.
-    $row['class'][] = 'token-group';
-    $row['data']['token']['data'] = '<span class="token-group-description">' . $token_info['description'] . '</span>';
-  }
-  else {
-    // This is a token.
-    $row['data']['token']['class'][] = 'token-token';
-    $row['data']['token']['data'] = '<span class="token-key">' . $token . '</span>';
-    if (isset($token_info['value'])) {
-      $row['data']['value'] = $token_info['value'];
-    }
-    if (!empty($token_info['parent'])) {
-      $row['parent'] = backdrop_clean_css_identifier($token_info['parent']);
-    }
-    $row['data']['token']['data'] .= '<span class="token-description">' . $token_info['description'] . '</span>';
-  }
-
-  return $row;
+  return backdrop_render($content);
 }
 
 /**

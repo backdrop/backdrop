@@ -88,7 +88,7 @@ function theme_simpletest_test_table($variables) {
         'class' => array('simpletest-test-select'),
       );
       $row[] = array(
-        'data' => '<label for="' . $test['#id'] . '">' . $title . '</label>',
+        'data' => '<label for="' . $test['#id'] . '">' . $title . '</label><span class="description test-name"> (' . $test_name . ')</span>',
         'class' => array('simpletest-test-label'),
       );
       $row[] = array(
@@ -101,12 +101,12 @@ function theme_simpletest_test_table($variables) {
     unset($table[$key]);
   }
 
-  if (empty($rows)) {
-    return '<strong>' . t('No tests to display.') . '</strong>';
-  }
-  else {
-    return theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'simpletest-form-table')));
-  }
+  return theme('table', array(
+    'header' => $header,
+    'rows' => $rows,
+    'empty' => '<strong>' . t('No tests to display.') . '</strong>',
+    'attributes' => array('id' => 'simpletest-form-table'),
+  ));
 }
 
 /**

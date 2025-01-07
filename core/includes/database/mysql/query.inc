@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Query code for MySQL embedded database engine.
+ */
 
 /**
  * @addtogroup database
@@ -6,13 +10,12 @@
  */
 
 /**
- * @file
- * Query code for MySQL embedded database engine.
+ * MySQL-specific class for executing INSERT queries.
  */
-
-
 class InsertQuery_mysql extends InsertQuery {
-
+  /**
+   * {@inheritdoc}
+   */
   public function execute() {
     if (!$this->preExecute()) {
       return NULL;
@@ -25,7 +28,7 @@ class InsertQuery_mysql extends InsertQuery {
       $values = array();
       foreach ($this->insertValues as $insert_values) {
         foreach ($insert_values as $value) {
-          $values[':db_insert_placeholder_' . $max_placeholder++] = $value;
+          $values[':db_insert_placeholder_' . ($max_placeholder++)] = $value;
         }
       }
     }
@@ -41,6 +44,9 @@ class InsertQuery_mysql extends InsertQuery {
     return $last_insert_id;
   }
 
+  /**
+   * {@inheritdoc}
+   */
   public function __toString() {
     // Create a sanitized comment string to prepend to the query.
     $comments = $this->connection->makeComment($this->comments);
@@ -64,12 +70,21 @@ class InsertQuery_mysql extends InsertQuery {
 
     $max_placeholder = 0;
     $values = array();
+    if (!is_array($this->insertValues)) {
+      // Older PHP versions cannot throw an exception within __toString().
+      if (version_compare(PHP_VERSION, '7.4', '>=')) {
+        throw new UnexpectedValueException();
+      }
+      else {
+        trigger_error('Unexpected Value');
+      }
+    }
     if (count($this->insertValues)) {
       foreach ($this->insertValues as $insert_values) {
         $placeholders = array();
 
-        // Default fields aren't really placeholders, but this is the most convenient
-        // way to handle them.
+        // Default fields aren't really placeholders, but this is the most
+        // convenient way to handle them.
         $placeholders = array_pad($placeholders, count($this->defaultFields), 'default');
 
         $new_placeholder = $max_placeholder + count($insert_values);
@@ -81,7 +96,8 @@ class InsertQuery_mysql extends InsertQuery {
       }
     }
     else {
-      // If there are no values, then this is a default-only query. We still need to handle that.
+      // If there are no values, then this is a default-only query. We still
+      // need to handle that.
       $placeholders = array_fill(0, count($this->defaultFields), 'default');
       $values[] = '(' . implode(', ', $placeholders) . ')';
     }
@@ -92,6 +108,13 @@ class InsertQuery_mysql extends InsertQuery {
   }
 }
 
+/**
+ * MySQL-specific class for executing TRUNCATE queries.
+ *
+ * Note: This has been used previously but is now empty.
+ *
+ * @todo Remove in Backdrop 2.x.
+ */
 class TruncateQuery_mysql extends TruncateQuery { }
 
 /**

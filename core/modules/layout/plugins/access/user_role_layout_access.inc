@@ -3,7 +3,7 @@
  * @file
  * Plugin to provide access control based upon role membership.
  */
-class UserRoleLayoutAccess extends LayoutAccess {
+class UserRoleLayoutAccess extends LayoutAccessNegatable {
   /**
    * Constructor for a Layout access rule.
    */
@@ -23,7 +23,12 @@ class UserRoleLayoutAccess extends LayoutAccess {
     if (empty($roles)) {
       return t('User can have any role');
     }
-    return format_plural(count($roles), 'User has the role @role', 'User has one of the following roles: @role', array('@role' => implode(', ', $roles)));
+    if ($this->settings['negate']) {
+      return format_plural(count($roles), 'User does not have the role @role', 'User does not have one of the following roles: @role', array('@role' => implode(', ', $roles)));
+    }
+    else {
+      return format_plural(count($roles), 'User has the role @role', 'User has one of the following roles: @role', array('@role' => implode(', ', $roles)));
+    }
   }
 
   /**
@@ -32,7 +37,13 @@ class UserRoleLayoutAccess extends LayoutAccess {
   function checkAccess() {
     $account = $this->contexts['user']->data;
     $roles = $account->roles;
-    return count(array_intersect($this->settings['roles'], $roles)) > 0;
+    $role_matches = count(array_intersect($this->settings['roles'], $roles)) > 0;
+    if ($this->settings['negate']) {
+      return !$role_matches;
+    }
+    else {
+      return $role_matches;
+    }
   }
 
   /**
@@ -45,7 +56,7 @@ class UserRoleLayoutAccess extends LayoutAccess {
       '#title' => t('Role'),
       '#default_value' => $this->settings['roles'],
       '#options' => user_roles(),
-      '#description' => t('Only the checked roles will be granted access.'),
+      '#description' => t('Only the checked roles will be granted access (or denied access, if "Reverse" is checked).'),
     );
   }
 

@@ -40,7 +40,7 @@ function theme_layout_reorder_layouts($variables) {
 /**
  * Outputs information about a layout. Used in the layout listing page.
  *
- * @param $variables
+ * @param array $variables
  *   An array with a single value: "layout", which contains the layout object.
  *
  * @return string
@@ -69,10 +69,11 @@ function theme_layout_info($variables) {
 }
 
 /**
- * Outputs a list of conditions for a layout. Used in the layout listing page.
+ * Outputs a list of conditions. Used in the layout listing page.
  *
- * @param $variables
- *   An array with a single value: "layout", which contains the layout object.
+ * @param array $variables
+ *   An array with a single value: "layout", which contains a layout object or
+ *   a menu item.
  *
  * @return string
  */
@@ -81,11 +82,14 @@ function theme_layout_condition_info($variables) {
   $layout = $variables['layout'];
   // Build a list of visibility conditions on this layout
   $conditions = array();
-  foreach ($layout->conditions as $access_key => $layout_access) {
-    $conditions[] = $layout_access->summary();
+  if (isset($layout->conditions)) {
+    foreach ($layout->conditions as $access_key => $layout_access) {
+      $conditions[] = $layout_access->summary();
+    }
   }
   $output  = '<div class="layout-conditions-list">';
-  if (empty($conditions)) {
+  // Don't show empty text if this is a menu item.
+  if (empty($conditions) && isset($layout->menu)) {
     $output .= t('No conditions set.');
   }
   else {
@@ -118,7 +122,7 @@ function theme_layout_template_option($variables) {
  * Outputs information about a layout template . Used in the layout template
  * listing page.
  *
- * @param $variables
+ * @param array $variables
  *   An array with a single value: "template_info", which contains information
  *   about the layout template.
  *
@@ -127,7 +131,7 @@ function theme_layout_template_option($variables) {
 function theme_layout_template_info($variables) {
   $template_info = $variables['template_info'];
 
-  // Build template thumbnail preview
+  // Build template thumbnail preview.
   $preview_path = $template_info['path'] . '/' . $template_info['preview'];
   $preview_img = theme('image', array('path' => $preview_path));
 
@@ -273,6 +277,48 @@ function theme_layout_region_inner($variables) {
   return implode('', $variables['blocks']);
 }
 
+
+/**
+ * Output a preview of hero block background image.
+ *
+ * @see BlockHero::form()
+ * @since 1.30.0 Theme function added.
+ */
+function theme_layout_hero_background_image($variables) {
+  $element = $variables['element'];
+  $attributes = array();
+  if (isset($element['#id'])) {
+    $attributes['id'] = $element['#id'];
+  }
+  if (!empty($element['#attributes']['class'])) {
+    $attributes['class'] = (array) $element['#attributes']['class'];
+  }
+  $attributes['class'][] = 'form-managed-file';
+
+  $output = '';
+  $output .= '<div' . backdrop_attributes($attributes) . '>';
+  if (isset($element['#file']->uri)) {
+    $output .= '<div class="layout-hero-background-preview">';
+    $output .= theme('image_style',
+      array(
+        'style_name' => $element['#image_style'],
+        'uri' => $element['#file']->uri,
+        'width' => '200',
+        'height' => '250',
+      ));
+    $output .= '</div>';
+  }
+  else {
+    $output .= '<div class="layout-hero-background-preview-empty description">';
+    $output .= t('No background image is currently set.<br/>Themes, such as Basis, may display a background image defined in CSS.');
+    $output .= '</div>';
+  }
+  $output .= backdrop_render_children($element);
+  $output .= '</div>';
+
+  return $output;
+}
+
 /**
  * Prepares variables for layout templates.
  *
@@ -326,7 +372,7 @@ function layout_preprocess_layout(&$variables) {
 
   // Build HTML for displaying flexible templates.
   if (isset($variables['layout_info']['template']) && ($variables['layout_info']['template'] == 'layout--flexible')) {
-    if (!empty($variables['renderer']->flexible)) {
+    if (is_a($variables['renderer'], 'LayoutRendererFlexible')) {
       $variables['flexible_editor'] = TRUE;
       $flexible_layout = layout_flexible_tempstore_load($variables['layout_info']['name']);
     }
@@ -343,20 +389,34 @@ function layout_preprocess_layout(&$variables) {
 
     $variables['rows'] = $flexible_layout->rows;
     $variables['row_data'] = array();
+
+    $variables['row_widths'] = array(
+      'container' => t('Fixed maximum width'),
+      'container_fluid' => t('Fluid width'),
+      'no_container' => t('Full width'),
+    );
     foreach ($variables['rows'] as $name => $row) {
       $container = ($row['container'] == 'container') ? 'container container-fluid' : (($row['container'] == 'container_fluid') ? 'container-fluid' : 'no-container');
       $row['row_class'] = $container . ' flexible-row--' . $name . ' ' . $row['contains'] . ' ' . $row['classes'];
       $row['row_id'] = $variables['flexible_editor'] ? 'id = "flexible-row--' . $name . '"' : '';
       $row['element'] = !empty($row['element']) ? $row['element'] : 'div';
+      $row['row_label'] = t('@element row', array('@element' => "<$row[element]>"));
       if ($row['contains'] == 'region_12') {
-        if (!empty($row['region_names']['region_name_0'])) {
-          $region_name = $row['region_names']['region_name_0'];
+        $region_classes = '';
+        if (!empty($row['region_names']['region_0'])) {
+          $region_name = $row['region_names']['region_0']['label'];
+          $class_name = isset($row['region_names']['region_0']['name']) ? $row['region_names']['region_0']['name'] : backdrop_html_class($row['region_names']['region_0']['label']);
+          $region_classes .= 'l-region--' . $class_name;
+          $custom_classes = !empty($row['region_names']['region_0']['classes']) ? ' ' . _layout_clean_custom_css($row['region_names']['region_0']['classes']) : '';
+          $region_classes .= !empty($row['region_names']['region_0']['region_class_enable']) ? $custom_classes : '';
         }
         else {
           $region_name = $name;
+          $region_classes .= 'l-region--' . backdrop_html_class($name);
         }
         $row['regions'][0]['region_md'] = '12';
         $row['regions'][0]['region_name'] = $region_name;
+        $row['regions'][0]['region_classes'] = $region_classes;
         $row['regions'][0]['content_key'] = $variables['flexible_editor'] ? $name : $name . '--0';
       }
       else {
@@ -364,15 +424,22 @@ function layout_preprocess_layout(&$variables) {
         $split = explode(':', $col_info['bootstrap']);
         $i = 0;
         foreach ($split as $col) {
-          if (!empty($row['region_names']['region_name_' . $i])) {
-            $region_name = $row['region_names']['region_name_' . $i];
+          $region_classes = '';
+          if (!empty($row['region_names']['region_' . $i])) {
+            $region_name = $row['region_names']['region_' . $i]['label'];
+            $class_name = isset($row['region_names']['region_' . $i]['name']) ? $row['region_names']['region_' . $i]['name'] : backdrop_html_class($row['region_names']['region_' . $i]['label']);
+            $region_classes .= 'l-region--' . $class_name;
+            $custom_classes = !empty($row['region_names']['region_' . $i]['classes']) ? ' ' . _layout_clean_custom_css($row['region_names']['region_' . $i]['classes']) : '';
+            $region_classes .= !empty($row['region_names']['region_' . $i]['region_class_enable']) ? $custom_classes : '';
           }
           else {
             $region_name = $name . ' ' . $i;
+            $region_classes .= 'l-region--' . backdrop_html_class($name . ' ' . $i);
           }
           $row['regions'][] = array(
             'region_md' => $col,
             'region_name' => $region_name,
+            'region_classes' => $region_classes,
             'content_key' => $variables['flexible_editor'] ? $name : $name . '--' . $i,
           );
           $i++;
@@ -516,9 +583,10 @@ function template_preprocess_block_dynamic(&$variables) {
   }
   $title_classes = array_filter($title_classes);
   $variables['title_tag'] = $style->settings['title_tag'];
-  $variables['title_attributes'] = array(
-    'class' => $title_classes,
-  );
+  $variables['title_attributes'] = array();
+  if (!empty($title_classes)) {
+    $variables['title_attributes']['class'] = $title_classes;
+  }
 
   // Add content tag and classes.
   $content_classes = explode(' ', $style->settings['content_classes']);
@@ -527,7 +595,8 @@ function template_preprocess_block_dynamic(&$variables) {
   }
   $content_classes = array_filter($content_classes);
   $variables['content_tag'] = $style->settings['content_tag'];
-  $variables['content_attributes'] = array(
-    'class' => $content_classes,
-  );
+  $variables['content_attributes'] = array();
+  if (!empty($content_classes)) {
+    $variables['content_attributes']['class'] = $content_classes;
+  }
 }

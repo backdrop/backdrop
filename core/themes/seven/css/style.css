@@ -64,8 +64,6 @@ ul.menu li.expanded {
   color: #ffffff;
   min-width: 20px;
   padding: 7px 10px;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
   border-radius: 4px;
 }
 .item-list .pager a {
@@ -74,8 +72,6 @@ ul.menu li.expanded {
   color: #444b53;
   min-width: 20px;
   padding: 7px 10px;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
   border-radius: 4px;
 }
 .item-list .pager a:hover {
@@ -109,8 +105,6 @@ ul.menu li.expanded {
   font-size: 0.94em;
   padding: 1px 10px 2px 10px; /* LTR */
   text-decoration: none;
-  -webkit-border-radius: 0 0 10px 10px;
-  -moz-border-radius: 0 0 10px 10px;
   border-radius: 0 0 10px 10px;
 }
 [dir="rtl"] #skip-link a,
@@ -196,8 +190,6 @@ ul.menu li.expanded {
   height: 55px;
   width: 80px;
   overflow: hidden;
-  -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;
   border-radius: 5px;
 }
 .header-menu ul.links li a:hover {
@@ -316,14 +308,10 @@ ul.primary li a:hover,
   background: #c5c5c3;
 }
 ul.primary li:first-child a {
-  -webkit-border-radius: 4px 0 0 0;
-  -moz-border-radius: 4px 0 0 0;
   border-radius: 4px 0 0 0;
 }
 .expand-dropdown-tabs-control,
 ul.primary li:last-child a {
-  -webkit-border-radius: 0 4px 0 0;
-  -moz-border-radius: 0 4px 0 0;
   border-radius: 0 4px 0 0;
 }
 @media (max-width: 450px) {
@@ -357,8 +345,6 @@ ul.secondary li {
 ul.secondary li a {
   display: block;
   border: 0;
-  -webkit-border-radius: 3px;
-  -moz-border-radius: 3px;
   border-radius: 3px;
   background: #ddd;
   color: #000;
@@ -410,8 +396,6 @@ ul.secondary li.active a.active {
   height: 100%;
   margin: 0 -20px;
   z-index: 0;
-  -webkit-box-sizing: content-box;
-  -moz-box-sizing: content-box;
   box-sizing: content-box;
   background-color: #f0f0f0;
 }
@@ -431,8 +415,8 @@ ul.secondary li.active a.active {
   /* Make the one column layout margin match other layouts. */
   margin: 0 15px;
 }
-main {
-  margin-bottom: 20px;
+.l-wrapper {
+  padding-bottom: 80px;
 }
 
 /* Administration page listings. */
@@ -552,13 +536,9 @@ th {
   border: 0;
 }
 th:first-child {
-  -webkit-border-radius: 4px 0 0;
-  -moz-border-radius: 4px 0 0;
   border-radius: 4px 0 0;
 }
 th:last-child {
-  -webkit-border-radius: 0 4px 0 0;
-  -moz-border-radius: 0 4px 0 0;
   border-radius: 0 4px 0 0;
 }
 /**
@@ -753,6 +733,10 @@ fieldset .fieldset-wrapper::before {
   right: .6em;
 }
 
+.fieldset-legend a:hover {
+  text-decoration: none;
+}
+
 .fieldset-legend span.summary {
   position: absolute;
   top: .4em;
@@ -834,8 +818,6 @@ form.views-exposed-form {
   border: 2px solid #d0d0d0;
   border-top: 0;
   background: hsla(0,0%,100%,0.95);
-  -webkit-border-radius: 0 0 4px 4px;
-  -moz-border-radius: 0 0 4px 4px;
   border-radius: 0 0 4px 4px;
   box-shadow: 0 2px 5px 0 hsla(0,0%,0%,0.15);
 }
@@ -866,7 +848,8 @@ form.views-exposed-form {
 div.teaser-checkbox .form-item,
 .form-item .form-item {
   padding: 5px 0;
-  margin: 0;
+  margin-top: 0;
+  margin-bottom: 0;
   border: 0;
 }
 .form-type-checkbox {
@@ -889,7 +872,14 @@ div.teaser-checkbox .form-item,
 .form-item input.form-radio,
 .form-item input.form-checkbox {
   vertical-align: middle;
-  margin-right: 5px;
+}
+.form-item input.form-radio,
+.form-item input.form-checkbox {
+  margin-right: 5px; /* LTR */
+}
+[dir="rtl"] .form-item input.form-radio,
+[dir="rtl"] .form-item input.form-checkbox {
+  margin-left: 5px;
 }
 .form-disabled input.form-autocomplete,
 .form-disabled input.form-text,
@@ -945,6 +935,9 @@ div.description,
   font-size: 0.923em;
   color: #666;
 }
+div.description.form-item-description {
+  margin: -1em 0 1em 0;
+}
 .password-strength {
   padding-top: 6px;
 }
@@ -968,6 +961,7 @@ a.button {
   text-align: center;
   text-transform: uppercase;
   color: #444b53;
+  cursor: pointer;
   background: #e5e5e6;
   letter-spacing: 0.4px;
   line-height: 43px;
@@ -975,8 +969,6 @@ a.button {
   padding: 0 25px;
   margin-bottom: 1em;
   margin-right: 1em; /* LTR */
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
   border-radius: 4px;
   transition: background-color 0.6s ease 0s, color 0.6s ease 0s;
 }
@@ -1011,8 +1003,6 @@ input.form-submit:active {
   text-decoration: none;
   background-color: #CFDE56;
   border-color: #CFDE56;
-  -webkit-box-shadow: 0 0 5px rgb(220, 220, 220);
-  -moz-box-shadow: 0 0 5px rgb(220, 220, 220);
   box-shadow: 0 0 5px rgb(220, 220, 220);
 }
 input.button-primary,
@@ -1035,8 +1025,6 @@ input.button-secondary,
 button.button-secondary {
   color: #828188;
   background-color: white;
-  -webkit-box-shadow: inset 0px 0px 0px 2px #97979e;
-  -moz-box-shadow: inset 0px 0px 0px 2px #97979e;
   box-shadow: inset 0px 0px 0px 2px #97979e;
 }
 a.button-secondary:hover,
@@ -1048,13 +1036,23 @@ button.button-secondary:focus {
   color: white;
   background-color: #97979e;
 }
+
+.form-item input.form-submit {
+  color: #0074bd;
+  background-color: white;
+  box-shadow: inset 0px 0px 0px 2px #cccccc;
+  text-transform: none;
+}
+.form-item input.form-submit:hover,
+.form-item input.form-submit:focus {
+  box-shadow: inset 0px 0px 0px 2px #0074bd;
+}
+
 a.button-danger,
 input.button-danger,
 button.button-danger {
   color: #e7251b;
   background-color: transparent;
-  -webkit-box-shadow: inset 0px 0px 0px 2px #e7251b;
-  -moz-box-shadow: inset 0px 0px 0px 2px #e7251b;
   box-shadow: inset 0px 0px 0px 2px #e7251b;
 }
 a.button-danger:hover,
@@ -1100,13 +1098,8 @@ textarea.form-textarea {
   font-weight: 400;
   color: #444b53;
   background: #fff;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
   border-radius: 4px;
-  -webkit-transition: border-color 0.25s ease-in-out;
-  -moz-transition: border-color 0.25s ease-in-out;
-  -ms-transition: border-color 0.25s ease-in-out;
-  -o-transition: border-color 0.25s ease-in-out;
+  transition: border-color 0.25s ease-in-out;
   will-change: border-color;
 }
 input.form-text,
@@ -1123,8 +1116,6 @@ select.form-select {
   box-sizing: border-box;
   color: #444b53;
   background: #fff;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
   border-radius: 4px;
   will-change: border-color;
   height: 43px;
@@ -1159,6 +1150,27 @@ textarea.form-textarea:focus {
   outline: 0;
   color: #000;
   border-color: #43afe4;
+}
+input.form-color {
+  border-radius: 100%;
+  height: 35px;
+  width: 35px;
+  padding: 0px;
+  cursor: pointer;
+  vertical-align: middle;
+}
+/* Styles to control the color inputs in Firefox. */
+input.form-color::-moz-color-swatch {
+  border: none;
+  border-radius: 100%;
+}
+/* Styles to control the color inputs in Chrome. */
+input.form-color::-webkit-color-swatch {
+  border: none;
+  border-radius: 100%;
+}
+input.form-color::-webkit-color-swatch-wrapper {
+  padding: 0;
 }
 ul.action-links {
   margin: 1em 0;
@@ -1217,21 +1229,22 @@ div.filter-options select {
 .admin-panel .block-title,
 .admin-panel h3 {
   margin: 9px 9px 0;
-  padding: 6px 0 6px 35px; /* LTR */
+  padding: 6px 0;
   font-size: 0.923em;
   text-transform: uppercase;
-  /* All icons derived from Font Awesome. See README.md in the Seven theme.*/
-  background: url('../images/chevron-circle-right--black--64.png') no-repeat left center; /* LTR */
-  background-size: 23px;
 }
-[dir="rtl"] .admin-panel .block-title,
-[dir="rtl"] .admin-panel h3 {
-  margin-left: 0;
-  margin-right: 9px;
-  padding: 6px 35px 6px 0;
-  background: url('../images/chevron-circle-left--black--64.png') no-repeat right center; /* LTR */
-  background-size: 23px;
+.admin-panel svg.icon {
+  width: 24px;
+  height: 24px;
+  vertical-align: bottom;
+  display: inline-block;
+  padding-right: 6px; /* RTL */
 }
+[dir=rtl] .admin-panel svg.icon {
+  padding-right: 0;
+  padding-left: 6px;
+}
+
 @media (min-width: 34em) { /* 544px @ 16px font size -- SM */
   .admin-panel .block-content {
     padding: 0 15px 15px;
@@ -1250,57 +1263,47 @@ div.filter-options select {
   background: none;
 }
 
-/* Add special icons for admin/config */
-.admin-panel-people h3 {
-  background-image: url('../images/users--black--64.png');
+/* Icon positioning for dashboard blocks. */
+.block-dashboard .block-title {
+  background-repeat: no-repeat;
+  background-size: 32px;
+  padding-left: 40px; /* LTR */
+  /*noinspection CssUnresolvedCustomProperty*/
+  background-image: var(--icon-caret-circle-right); /* LTR */
+  background-position: left; /* LTR */
 }
-.admin-panel-content h3 {
-  background-image: url('../images/pencil-square-o--black--64.png');
-}
-.admin-panel-system h3 {
-  background-image: url('../images/hdd-o--black--64.png');
-}
-.admin-panel-administration h3 {
-  background-image: url('../images/cog--black--64.png');
-}
-.admin-panel-media h3 {
-  background-image: url('../images/picture-o--black--64.png');
-}
-.admin-panel-search h3 {
-  background-image: url('../images/search--black--64.png');
-}
-.admin-panel-regional h3 {
-  background-image: url('../images/globe--black--64.png');
-}
-.admin-panel-urls h3 {
-  background-image: url('../images/link--black--64.png');
-}
-.admin-panel-development h3 {
-  background-image: url('../images/wrench--black--64.png');
-}
-.admin-panel-services h3 {
-  background-image: url('../images/rss--black--64.png');
+[dir=rtl] .block-dashboard .block-title {
+  padding-left: 0;
+  padding-right: 40px;
+  /*noinspection CssUnresolvedCustomProperty*/
+  background-image: var(--icon-caret-circle-left);
+  background-position: right;
 }
 
 /* Add special icons for admin/dashboard */
-
-.block-dashboard-welcome .block-title {
-  background-image: url('../images/backdrop-logo-mark--64.png');
+.block-dashboard.block-dashboard-welcome .block-title {
+  /*noinspection CssUnresolvedCustomProperty*/
+  background-image: var(--icon-backdrop-logo);
 }
-.block-dashboard-create .block-title {
-  background-image: url('../images/pencil-square-o--black--64.png');
+.block-dashboard.block-dashboard-create .block-title {
+  /*noinspection CssUnresolvedCustomProperty*/
+  background-image: var(--icon-note-pencil);
 }
-.block-dashboard-overview-content .block-title {
-  background-image: url('../images/pencil-alt--black--64.png');
+.block-dashboard.block-dashboard-overview-content .block-title {
+  /*noinspection CssUnresolvedCustomProperty*/
+  background-image: var(--icon-pencil);
 }
-.block-dashboard-overview-user .block-title {
-  background-image: url('../images/users--black--64.png');
+.block-dashboard.block-dashboard-overview-user .block-title {
+  /*noinspection CssUnresolvedCustomProperty*/
+  background-image: var(--icon-users);
 }
-.block-dashboard-updates .block-title {
-  background-image: url('../images/info-circle--black--64.png');
+.block-dashboard.block-dashboard-updates .block-title {
+  /*noinspection CssUnresolvedCustomProperty*/
+  background-image: var(--icon-cloud-arrow-down);
 }
-.block-dashboard-news .block-title {
-  background-image: url('../images/bell--black--64.png');
+.block-dashboard.block-dashboard-news .block-title {
+  /*noinspection CssUnresolvedCustomProperty*/
+  background-image: var(--icon-bell);
 }
 
 /* admin/appearance */
@@ -1335,7 +1338,8 @@ div.filter-options select {
   margin: 0;
   background: none;
 }
-#layout-edit-main .l-header:before {
+#layout-edit-main .l-header:before,
+#layout-flexible-edit-main .l-header:before {
   /* Make sure the page gray bg isn't showing inside layout edit area */
   background: transparent;
 }
@@ -1356,7 +1360,9 @@ div.filter-options select {
 /**
  * Pretty block radios, `:not(#foo) >` rules out browsers that can't support this
  */
-:not(#foo) > .layout-settings-form .layout-options .form-type-radio input, .form-item-region-style .form-type-radio input {
+:not(#foo) > .layout-settings-form .layout-options .form-type-radio input,
+.layout-entity-admin-add-form .layout-options .form-type-radio input,
+.form-item-region-style .form-type-radio input {
   /* Hide radios from visuals but not screen-readers */
   position: absolute;
   width: 1px;
@@ -1367,6 +1373,7 @@ div.filter-options select {
   clip: rect(0, 0, 0, 0);
   border: 0;
 }
+.layout-entity-admin-add-form .layout-options .form-type-radio label,
 .form-item-region-style .form-type-radio label,
 .layout-settings-page .layout-options .form-type-checkbox label,
 .layout-settings-form .layout-options .form-type-radio label {
@@ -1377,20 +1384,19 @@ div.filter-options select {
   border: 2px solid transparent;
   border-radius: 4px;
   min-height: 145px;
-  -webkit-transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
-  -moz-transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
-  -ms-transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
-  -o-transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
   transition: border-color 0.25s ease-in-out, background-color 0.25s ease-in-out;
   will-change: border-color, background-color;
 }
 .form-item-region-style .form-type-radio label {
   min-height: inherit;
 }
+.layout-entity-admin-add-form .layout-options.no-flexbox .form-type-radio label,
 .layout-settings-page .layout-options.no-flexbox .form-type-checkbox label,
 .layout-settings-form .layout-options.no-flexbox .form-type-radio label {
   min-height: 150px;
 }
+.layout-entity-admin-add-form .layout-options .form-type-radio:active label,
+.layout-entity-admin-add-form .layout-options .form-type-radio input:checked + label,
 .form-item-region-style .form-type-radio:active label,
 .form-item-region-style .form-type-radio input:checked + label,
 .layout-settings-page .layout-options .form-type-checkbox:active label,
@@ -1400,6 +1406,9 @@ div.filter-options select {
   background-color: #ffffff;
   border-color: #d0d0d0;
 }
+.layout-entity-admin-add-form .layout-options .form-type-radio input:focus + label,
+.layout-entity-admin-add-form .layout-options .form-type-radio input:hover + label,
+.layout-entity-admin-add-form .layout-options .form-type-radio:hover input:checked + label,
 .form-item-region-style .form-type-radio input:focus + label,
 .form-item-region-style .form-type-radio input:hover + label,
 .form-item-region-style .form-type-radio:hover input:checked + label,
@@ -1412,6 +1421,7 @@ div.filter-options select {
   background-color: #ffffff;
   border-color: #43afe4;
 }
+.layout-entity-admin-add-form .layout-options .layout-options .form-type-radio img,
 .layout-settings-page .layout-options .form-type-checkbox img,
 .layout-settings-form .layout-options .form-type-radio img {
   position: relative;
@@ -1475,8 +1485,6 @@ div.admin-options div.form-item {
 table.system-status-report {
   border-collapse: separate;
   border: 2px solid #EAEAEA;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
   border-radius: 4px;
 }
 
@@ -1484,17 +1492,17 @@ table.system-status-report {
 table.update {
   border-collapse: separate;
   border: 2px solid #EAEAEA;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
   border-radius: 4px;
 }
 
 /* Maintenance page styles */
-body.maintenance-page {
+body.maintenance-page,
+.user-simplified-page-body {
   background: #E8E6E5;
   padding: 1em;
 }
-body.maintenance-page #page {
+body.maintenance-page #page,
+.user-simplified-page-wrapper {
   padding: 2em;
   max-width: 770px;
   min-width: 255px;
@@ -1502,7 +1510,8 @@ body.maintenance-page #page {
   background: white;
   position: relative;
 }
-body.maintenance-page #page:after {
+body.maintenance-page #page:after,
+.user-simplified-page-wrapper:after {
   left: 100%; /* LTR */
   border: solid transparent;
   border-color: rgba(255, 255, 255, 0);
@@ -1576,6 +1585,7 @@ body.maintenance-page #logo {
   max-width: 120px;
   margin: 0 auto;
 }
+
 ol.task-list {
   margin: 0;
   padding-left: 0; /* LTR */
@@ -1743,19 +1753,14 @@ div.add-or-remove-shortcuts {
   background: #e9e8e8;
 }
 .ui-dialog {
+  position: absolute;
   border: 1px solid #d0d0d0;
-  -webkit-border-radius: 4px;
-  -moz-border-radius: 4px;
   border-radius: 4px;
-  -webkit-box-shadow: 0 0 12px -8px #666;
-  -moz-box-shadow: 0 0 12px -8px #666;
   box-shadow: 0 0 12px -8px #666;
 }
 .ui-dialog-titlebar {
   border: 1px solid #d0d0d0;
   border-bottom: none;
-  -webkit-border-radius: 4px 4px 0 0;
-  -moz-border-radius: 4px 4px 0 0;
   border-radius: 4px 4px 0 0;
 }
 
@@ -1778,21 +1783,38 @@ div.add-or-remove-shortcuts {
     height: 100%;
     width: 100%;
   }
-  .maintenance-page-wrapper {
+  .maintenance-page-wrapper,
+  .user-simplified-page-body  {
+    width: 100%;
     display: table;
   }
-  body.maintenance-page {
+  .user-simplified-page-body  {
+    height: 100%;
+    box-sizing: border-box;
+  }
+  .user-simplified-page-body .user-simplified-page {
     height: 100%;
     width: 100%;
     display: table-cell;
     vertical-align: middle;
   }
-  body.maintenance-page #page {
+  .user-simplified-page-wrapper  {
+    width: 75%;
+    margin: 0 auto;
+    max-width: 500px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    overflow: auto;
+  }
+  body.maintenance-page {
+    height: 100%;
+    width: 100%;
+    vertical-align: middle;
+    display: table-cell;
+  }
+  body.maintenance-page #page  {
     width: 75%;
     margin: 0 auto;
     max-width: 770px;
-    -webkit-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    -moz-box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
     overflow: auto;
   }
@@ -1879,7 +1901,6 @@ div.add-or-remove-shortcuts {
   right: 0;
   bottom: 0;
   overflow: hidden;
-  -webkit-transition: width .4s;
   transition: width .4s;
   will-change: width;
   background-image: -webkit-gradient(linear, 0 0, 100% 100%,
@@ -1902,15 +1923,11 @@ div.add-or-remove-shortcuts {
   background-size: 50px 50px;
   padding: 0 1px;
   height: 2.5em;
-  -webkit-animation: animate-stripes 2s linear infinite;
-  -moz-animation: animate-stripes 2s linear infinite;
-  -webkit-transition: width 0.5s ease-out;
+  animation: animate-stripes 2s linear infinite;
   transition: width 0.5s ease-out;
 }
 [dir="rtl"] .progress .filled:after {
   animation-direction: reverse;
-  -webkit-animation-direction: reverse;
-  -moz-animation-direction: reverse;
 }
 
 /**
