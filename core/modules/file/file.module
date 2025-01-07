@@ -1282,7 +1282,7 @@ function file_admin_paths() {
  * This function is assigned as a #process callback in file_element_info().
  */
 function file_managed_file_process($element, &$form_state, $form) {
-  // This is used sometimes so let's implode it just once.
+  // This parent list is used as a prefix on the name attribute of sub-elements.
   $parents_prefix = implode('_', $element['#parents']);
 
   if (!empty($element['#value']['fid'])) {
@@ -1644,8 +1644,8 @@ function file_managed_file_submit($form, &$form_state) {
 
   // No action is needed here for the upload button, because all file uploads on
   // the form are processed by file_managed_file_value() regardless of which
-  // button was clicked. Action is needed here for the remove button, because we
-  // only remove a file in response to its remove button being clicked.
+  // Button was clicked. Action is needed here for the remove button, because we
+  // only remove files in response to the remove button being clicked.
   if ($button_key == 'remove_button') {
     $fids = array_keys($element['#files']);
     // Get files that will be removed.

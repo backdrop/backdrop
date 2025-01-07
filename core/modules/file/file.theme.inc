@@ -144,7 +144,8 @@ function theme_file_widget($variables) {
   if ($element['fid']['#value'] != 0) {
     // Add the file size after the file name.
     $file = reset($element['#files']);
-    $element['file_' . $file->fid]['filename']['#markup'] .= ' <span class="file-size">(' . format_size($file->filesize) . ')</span> ';  }
+    $element['file_' . $file->fid]['filename']['#markup'] .= ' <span class="file-size">(' . format_size($file->filesize) . ')</span> ';
+  }
   $output .= backdrop_render_children($element);
   $output .= '</div>';
 
