@@ -1855,7 +1855,14 @@ function user_custom_theme() {
   }
   $user_login_appearance = config_get('system.core', 'user_login_appearance');
   if ($user_login_appearance == 'simplified') {
-    return config_get('system.core', 'admin_theme');
+    $login_theme = config_get('system.core', 'login_admin_theme');
+    if ($login_theme) {
+      $login_theme = config_get('system.core', 'admin_theme');
+    }
+    else {
+      $login_theme = config_get('system.core', 'theme_default');
+    }
+    return $login_theme;
   }
   return NULL;
 }
