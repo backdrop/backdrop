@@ -1563,13 +1563,13 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
       case UPLOAD_ERR_FORM_SIZE:
         backdrop_set_message(t('The file %file could not be saved because it exceeds %maxsize, the maximum allowed size for uploads.', array('%file' => $name, '%maxsize' => format_size(file_upload_max_size()))), 'error');
         $files[$i] = FALSE;
-        continue;
+        break;
 
       case UPLOAD_ERR_PARTIAL:
       case UPLOAD_ERR_NO_FILE:
         backdrop_set_message(t('The file %file could not be saved because the upload did not complete.', array('%file' => $name)), 'error');
         $files[$i] = FALSE;
-        continue;
+        break;
  
       case UPLOAD_ERR_OK:
         // Final check that this is a valid upload, if it isn't, use the
@@ -1582,7 +1582,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
       default:
         backdrop_set_message(t('The file %file could not be saved. An unknown error has occurred.', array('%file' => $name)), 'error');
         $files[$i] = FALSE;
-        continue;
+        break;
 
     }
     // Begin building file entity.
