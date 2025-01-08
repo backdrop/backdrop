@@ -218,7 +218,7 @@
      * @param {String|false} isPreviousLinePreFormatted
      *   Information on whether the previous line was preformatted (and how).
      */
-     _isPreformattedBlockLine(line, isPreviousLinePreFormatted) {
+    _isPreformattedBlockLine(line, isPreviousLinePreFormatted) {
       if (new RegExp('<pre( .*?)?>').test(line)) {
         return 'first';
       }
