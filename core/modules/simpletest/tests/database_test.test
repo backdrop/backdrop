@@ -26,6 +26,11 @@ class FakeRecord {
 class FakeRecordWithConstructor {
 
   /**
+   * @var string
+   */
+  public $name;
+
+  /**
    * Constructor for FakeRecordWithConstructor.
    */
   public function __construct() {}
