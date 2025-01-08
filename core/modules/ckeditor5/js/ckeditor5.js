@@ -291,13 +291,20 @@
      *   Returns true if values have been modified, false if unchanged.
      */
     checkValueModified: function (beforeAttachValue, afterAttachValue) {
+      // Create a sandboxed document within an iframe.
+      const sandboxIframe = document.createElement('iframe');
+      sandboxIframe.setAttribute('sandbox', 'allow-same-origin');
+      sandboxIframe.srcdoc = "<!doctype html>";
+      document.body.append(sandboxIframe);
+      const sandboxDocument = sandboxIframe.contentDocument;
+
       // Pass the before value through elementGetHtml() to standardize
       // attribute order and self-closing tags. For example, two <img> tags with
       // src, width, and height attributes should be equal, even if one uses the
       // order height, src, width. Similarly, <hr /> and <hr> should be
       // considered the same. Passing in an out of the DOM makes these two
       // values use the same order and tag closing.
-      const beforeElement = document.createElement('template');
+      const beforeElement = sandboxDocument.createElement('template');
       beforeElement.innerHTML = beforeAttachValue;
       beforeAttachValue = Backdrop.ckeditor5.elementGetHtml(beforeElement.content);
 
@@ -305,9 +312,9 @@
       // formatHtml(). Wrap both strings with a temporary <div> tag, to allow
       // childNodes (which is used later when comparing the two strings) to work
       // on them.
-      const formattedBeforeValue = document.createElement('div');
+      const formattedBeforeValue = sandboxDocument.createElement('div');
       formattedBeforeValue.innerHTML = Backdrop.ckeditor5.formatHtml(beforeAttachValue);
-      const formattedAfterValue = document.createElement('div');
+      const formattedAfterValue = sandboxDocument.createElement('div');
       formattedAfterValue.innerHTML = Backdrop.ckeditor5.formatHtml(afterAttachValue);
 
       // Get all Nodes for each string.
@@ -317,6 +324,7 @@
       // If the number of Nodes differs, then the values have been modified.
       // Bail early in that case.
       if (formattedBeforeValueNodes.length !== formattedAfterValueNodes.length) {
+        sandboxIframe.remove();
         return true;
       }
 
@@ -334,6 +342,7 @@
           if (!formattedBeforeValueNodes[i].isEqualNode(formattedAfterValueNodes[i])) {
             // Bail on the first pair of Nodes that is found to have different
             // attributes/values regardless of their order.
+            sandboxIframe.remove();
             return true;
           }
         }
@@ -341,6 +350,7 @@
 
       // If all previous checks for modified values failed, assume that the two
       // strings have not been modified.
+      sandboxIframe.remove();
       return false;
     },
 
