@@ -2060,6 +2060,7 @@ function file_validate_svg(File $file) {
         '//svg:foreignobject',
         '//svg:script',
         '//html:iframe',
+        '//svg:set',
         // @see https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
         '//@*[starts-with(name(), "on")]',
         '//svg:a[starts-with(normalize-space(@href), "javascript:")]',
