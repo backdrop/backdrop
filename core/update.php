@@ -50,7 +50,7 @@ define('MAINTENANCE_MODE', 'update');
  * Renders form with a list of available site updates.
  */
 function update_selection_page() {
-  backdrop_set_title('Backdrop site update');
+  backdrop_set_title('Update Backdrop CMS: Review updates');
   $elements = backdrop_get_form('update_script_selection_form');
   $output = backdrop_render($elements);
 
@@ -190,7 +190,7 @@ function update_helpful_links() {
  * Displays results of the update script with any accompanying errors.
  */
 function update_results_page() {
-  backdrop_set_title('Backdrop site update');
+  backdrop_set_title('Update Backdrop CMS: Review');
 
   update_task_list();
   // Report end result.
@@ -296,7 +296,7 @@ function update_info_page() {
   backdrop_theme_rebuild();
 
   update_task_list('info');
-  backdrop_set_title('Backdrop site update');
+  backdrop_set_title('Update Backdrop CMS: Overview');
   $token = backdrop_get_token('update');
   $output = '<p>Use this utility to update your site whenever you install a new version of Backdrop CMS or any of the site\'s modules.</p>';
   $output .= '<p>For more detailed information, see the <a href="https://backdropcms.org/upgrade">Upgrading Backdrop CMS</a> page.</p>';
@@ -324,7 +324,7 @@ function update_info_page() {
  */
 function update_backup_page() {
   update_task_list('backup');
-  backdrop_set_title('Backdrop CMS backup process');
+  backdrop_set_title('Update Backdrop CMS: Backup');
 
   $elements = backdrop_get_form('update_backup_form');
   return backdrop_render($elements);
