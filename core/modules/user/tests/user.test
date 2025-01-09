@@ -2882,6 +2882,9 @@ class UserLoginAppearanceTestCase extends BackdropWebTestCase {
     parent::setUp(array('user_form_test'));
     $this->adminUser = $this->backdropCreateUser(array('administer account settings', 'administer users'));
     config_set('system.core', 'user_register', USER_REGISTER_VISITORS);
+    // Flush the same caches as user_admin_settings_submit() does.
+    backdrop_static_reset();
+    backdrop_flush_all_caches();
   }
 
   /**
