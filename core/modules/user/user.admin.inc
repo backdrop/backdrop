@@ -338,15 +338,15 @@ function user_login_settings($form, &$form_state) {
     $complexity_default = 'simplified';
   }
   $form['user_login_page_settings']['complexity'] = array(
-    '#title' => t('Page compexlty'),
+    '#title' => t('Regions and branding'),
     '#type' => 'radios',
     '#options' => array(
-      'standard' => t('Standard, Lyout-based login pages'),
-      'simplified' => t('Simplified login pages'),
+      'standard' => t('Standard, layout-based login pages'),
+      'simplified' => t('Simplified login pages contain only small forms with site name'),
     ),
     '#default_value' => $complexity_default,
     'simplified' => array(
-      '#description' => t('Supress layout regions such as headers, footers, and sidebars.'),
+      '#description' => t('All layout regions such as header, footer, and sidebar are suppressed.'),
     ),
   );
   $form['user_login_page_settings']['login_admin_theme'] = array(
@@ -376,21 +376,9 @@ function user_login_settings($form, &$form_state) {
     '#options' => $user_login_page_tab_options,
     '#default_value' => $user_login_appearance_default,
     '#config' => 'system.core',
+    '#indentation' => 1,
     '#states' => array(
       'visible' => array(
-        ':input[name="complexity"]' => array('value' => 'standard'),
-      ),
-    ),
-  );
-  $form['user_login_page_settings']['user_login_appearance_null'] = array(
-    '#title' =>  t('Navigation between simplified login pages'),
-    '#type' => 'radios',
-    '#options' => array(
-      'null' => t('Simplified longin pages always use Links below the form'),
-    ),
-    '#default_value' => 'null',
-    '#states' => array(
-      'invisible' => array(
         ':input[name="complexity"]' => array('value' => 'standard'),
       ),
     ),
@@ -491,8 +479,10 @@ function user_login_settings_validate($form, &$form_state) {
   if ($form_state['values']['complexity'] == 'simplified') {
     $form_state['values']['user_login_appearance'] = 'simplified';
   }
+  if ($form_state['values']['complexity'] == 'standard') {
+    $form_state['values']['login_admin_theme'] = FALSE;
+  }
   unset($form_state['values']['complexity']);
-  unset($form_state['values']['user_login_appearance_null']);
 }
 
 /**
