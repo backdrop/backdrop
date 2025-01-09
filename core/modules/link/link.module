@@ -689,7 +689,7 @@ function _link_parse_str($query) {
  * Punycode. This converts a URL into a fully escaped format so that it may be
  * validated using only ASCII characters.
  *
- * @param $url
+ * @param string $url
  *   The URL whose domain should be escaped.
  *
  * @return string
@@ -811,7 +811,7 @@ function link_element_info() {
     '#link_field_options' => array(),
 
     // #delta is typically passed by the widget form, but we provide a default
-    // value to help validations when link_field is used as a FAPI element.
+    // value to help validations when link_field is used as a Form API element.
     '#delta' => 0,
 
     // Attach the css by default.
@@ -865,7 +865,7 @@ function _link_field_options_defaults() {
 /**
  * Processes the link type element before displaying the field.
  *
- * Build the form element. When creating a form using FAPI #process,
+ * Build the form element. When creating a form using Form API #process,
  * note that $element['#value'] is already set.
  *
  * The $fields array is in $complete_form['#field_info'][$element['#field_name']].
@@ -1145,7 +1145,19 @@ function link_cleanup_url($url, $protocol = 'http') {
  *   the LINK_(linktype) constants.
  */
 function link_validate_url($text) {
-  $allowed_protocols = settings_get('filter_allowed_protocols', array('http', 'https', 'ftp', 'news', 'nntp', 'telnet', 'mailto', 'irc', 'ssh', 'sftp', 'webcal'));
+  $allowed_protocols = settings_get('filter_allowed_protocols', array(
+    'http',
+    'https',
+    'ftp',
+    'news',
+    'nntp',
+    'telnet',
+    'mailto',
+    'irc',
+    'ssh',
+    'sftp',
+    'webcal',
+  ));
   $cleaned_text = _link_escape_domain($text);
 
   $protocol = '((?:' . implode("|", $allowed_protocols) . '):\/\/)';

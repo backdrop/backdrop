@@ -93,7 +93,7 @@ class views_plugin_query_default extends views_plugin_query {
    var $field_aliases = array();
 
    /**
-    * Query tags which will be passed over to the dbtng query object.
+    * Query tags which will be passed over to the query object.
     */
    var $tags = array();
 
@@ -885,7 +885,7 @@ class views_plugin_query_default extends views_plugin_query {
    *
    * The caller is responsible for ensuring that all fields are fully qualified
    * (TABLE.FIELD) and that the table already exists in the query. Internally,
-   * the dbtng method "where" is used.
+   * the database "where" method is used.
    *
    * @param $group
    *   The WHERE group to add these to; groups are used to create AND/OR
@@ -923,7 +923,7 @@ class views_plugin_query_default extends views_plugin_query {
    *
    * The caller is responsible for ensuring that all fields are fully qualified
    * (TABLE.FIELD) and that the table and an appropriate GROUP BY already exist in the query.
-   * Internally the dbtng method "havingCondition" is used.
+   * Internally the database "havingCondition" method is used.
    *
    * @param $group
    *   The HAVING group to add these to; groups are used to create AND/OR
@@ -965,8 +965,8 @@ class views_plugin_query_default extends views_plugin_query {
   /**
    * Add a complex HAVING clause to the query.
    * The caller is responsible for ensuring that all fields are fully qualified
-   * (TABLE.FIELD) and that the table and an appropriate GROUP BY already exist in the query.
-   * Internally the dbtng method "having" is used.
+   * (TABLE.FIELD) and that the table and an appropriate GROUP BY already exist
+   * in the query. Internally the database "having" method is used.
    *
    * @param $group
    *   The HAVING group to add these to; groups are used to create AND/OR
@@ -1124,9 +1124,10 @@ class views_plugin_query_default extends views_plugin_query {
       if (!empty($info['conditions'])) {
         $sub_group = $info['type'] == 'OR' ? db_or() : db_and();
         foreach ($info['conditions'] as $key => $clause) {
-          // DBTNG doesn't support to add the same subquery twice to the main
-          // query and the count query, so clone the subquery to have two instances
-          // of the same object. - http://drupal.org/node/1112854
+          // The database layer doesn't support adding the same subquery twice
+          // to the main query and the count query, so clone the subquery to
+          // have two instances of the same object.
+          // See http://drupal.org/node/1112854
           if (is_object($clause['value']) && $clause['value'] instanceof SelectQuery) {
             $clause['value'] = clone $clause['value'];
           }

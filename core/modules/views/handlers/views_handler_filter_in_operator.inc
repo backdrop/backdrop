@@ -21,7 +21,7 @@ class views_handler_filter_in_operator extends views_handler_filter {
    *
    * @var string
    */
-  var $value_title;
+  public $value_title;
 
   /**
    * Stores all operations which are available on the form.
@@ -289,8 +289,8 @@ class views_handler_filter_in_operator extends views_handler_filter {
   }
 
   function value_submit($form, &$form_state) {
-    // Backdrop's FAPI system automatically puts '0' in for any checkbox that
-    // was not set, and the key to the checkbox if it is set.
+    // Backdrop's Form API system automatically puts '0' in for any checkbox
+    // that was not set, and the key to the checkbox if it is set.
     // Unfortunately, this means that if the key to that checkbox is 0,
     // we are unable to tell if that checkbox was set or not.
 
