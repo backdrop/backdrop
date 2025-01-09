@@ -1417,7 +1417,7 @@ function user_get_user_login_paths() {
     $patterns['login'] = array();
     $patterns['non_login'] = array();
     foreach ($paths as $path => $enabled) {
-      if ($enabled) {
+      if ($enabled && backdrop_valid_path($path)) {
         $patterns['login'][] = $path;
       }
       else {
