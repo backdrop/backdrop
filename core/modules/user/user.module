@@ -1858,7 +1858,7 @@ function user_custom_theme() {
   }
   $user_login_appearance = config_get('system.core', 'user_login_appearance');
   if ($user_login_appearance == 'simplified') {
-    if (!backdrop_valid_path(current_path())) {
+    if (!backdrop_valid_path(current_path(), TRUE)) {
       return NULL;
     }
     $login_theme = config_get('system.core', 'login_admin_theme');
