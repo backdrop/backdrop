@@ -64,6 +64,9 @@ class BookTestCase extends BackdropWebTestCase {
 
     // Disable default path patterns for nodes.
     config_set('path.settings', 'node_pattern', '');
+    // Use tabs on login page.
+    config_set('system.core', 'user_login_appearance', 'tabs');
+    state_set('menu_rebuild_needed', TRUE);
   }
 
   /**

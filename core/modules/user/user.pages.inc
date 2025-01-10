@@ -29,7 +29,17 @@ function user_autocomplete($string = '') {
  */
 function user_pass_page() {
   backdrop_set_title(t('Reset password'));
-  return backdrop_get_form('user_pass');
+  $user_password_form = backdrop_get_form('user_pass');
+
+  // If user is logged in, always display with tabs appearance.
+  if (user_is_logged_in()) {
+    $output = $user_password_form;
+  }
+  else {
+    $output = user_login_page_wrapper($user_password_form);
+  }
+
+  return $output;
 }
 
 /**

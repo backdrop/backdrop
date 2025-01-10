@@ -658,6 +658,12 @@ description = Tests management of database connections.
 group = Database
 file = database_test.test
 
+[DatabaseStatementPrefetchGadgetChainTestCase]
+name = Database Statement Prefetch Gadget Chain Test
+description = Tests protection against unserialization attacks.
+group = Database
+file = database_test.test
+
 [BackdropErrorHandlerUnitTest]
 name = Backdrop error handlers
 description = Performs tests on the Backdrop error and exception handler.
