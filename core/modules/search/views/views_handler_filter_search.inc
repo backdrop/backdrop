@@ -114,8 +114,8 @@ class views_handler_filter_search extends views_handler_filter {
   /**
    * Add this filter to the query.
    *
-   * Due to the nature of fapi, the value and the operator have an unintended
-   * level of indirection. You will find them in $this->operator
+   * Due to the nature of Form API, the value and the operator have an
+   * unintended level of indirection. You will find them in $this->operator
    * and $this->value respectively.
    */
   function query() {

@@ -370,7 +370,7 @@ function template_preprocess_username(&$variables) {
  * @see user-profile.tpl.php
  */
 function template_preprocess_user_profile(&$variables) {
-  $variables['view_mode'] = $variables['elements']['#view_mode'];
+  $view_mode = $variables['view_mode'] = $variables['elements']['#view_mode'];
   $account = $variables['elements']['#account'];
 
   // Helpful $user_profile variable for templates.
@@ -380,4 +380,59 @@ function template_preprocess_user_profile(&$variables) {
 
   // Preprocess fields.
   field_attach_preprocess('user', $account, $variables['elements'], $variables);
+
+  // Add extra theme hook suggestions for user view_mode and id.
+  $variables['theme_hook_suggestions'][] = 'user_profile__' . $view_mode;
+  $variables['theme_hook_suggestions'][] = 'user_profile__' . $account->uid;
+  $variables['theme_hook_suggestions'][] = 'user_profile__' . $account->uid . '__' . $view_mode;
+}
+
+/**
+ * Preprocess variables for user-simplified-page.tpl.php.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - form: The form structure to be rendered.
+ *   - links: A render array containing the links to other related forms.
+ *
+ * @see user-simplified-page.tpl.php
+ */
+function template_preprocess_user_simplified_page(&$variables) {
+  $page_title = backdrop_get_title();
+  $variables['logo_image'] = '';
+
+  if ($logo = backdrop_get_logo()) {
+    $variables['logo_image'] = theme('image', array(
+      'path' => $logo,
+      'alt' => $page_title,
+    ));
+  }
+  $variables['site_name'] = config_get_translated('system.core', 'site_name');
+  $variables['front_page'] = url();
+  $variables['page_title'] = $page_title;
+  $variables['messages'] = theme('status_messages');
+  backdrop_add_css(backdrop_get_path('module', 'user') . '/css/user-simplified-page.css');
+}
+
+/**
+ * Returns HTML for user forms with links instead of tabs.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - form: A render array of the form to be rendered, such as the login or
+ *     password reset form.
+ *   - links: An item_list render array with the local tasks as links.
+ *
+ * @return string
+ *   The themed HTML string with the links.
+ *
+ * @ingroup themeable
+ */
+function theme_user_links_page($variables) {
+  $output = '';
+  $output .= backdrop_render($variables['form']);
+  $output .= '<div class="user-form-links">';
+  $output .= backdrop_render($variables['links']);
+  $output .= '</div>';
+  return $output;
 }

@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.28.x-dev');
+define('BACKDROP_VERSION', '1.30.x-dev');
 
 /**
  * Core API compatibility.
@@ -421,7 +421,7 @@ abstract class BackdropCacheArray implements ArrayAccess {
    * @param $persist
    *   Optional boolean to specify whether the offset should be persisted or
    *   not, defaults to TRUE. When called with $persist = FALSE the offset will
-   *   be unflagged so that it will not be written at the end of the request.
+   *   be un-flagged so that it will not be written at the end of the request.
    */
   protected function persist($offset, $persist = TRUE) {
     $this->keysToPersist[$offset] = $persist;
@@ -469,6 +469,9 @@ abstract class BackdropCacheArray implements ArrayAccess {
    * Destructs the BackdropCacheArray object.
    */
   public function __destruct() {
+    if (!is_array($this->keysToPersist)) {
+      throw new UnexpectedValueException();
+    }
     $data = array();
     foreach ($this->keysToPersist as $offset => $persist) {
       if ($persist) {
@@ -806,6 +809,12 @@ function backdrop_is_https() {
  * @since 1.9.2
  */
 function backdrop_is_apache() {
+  // Test runs always emulate Apache.
+  $test_info = &$GLOBALS['backdrop_test_info'];
+  if (!empty($test_info['in_child_site'])) {
+    return TRUE;
+  }
+
   $server_software = $_SERVER['SERVER_SOFTWARE'];
   return (bool) preg_match("/apache/i", $server_software);
 }
@@ -845,7 +854,6 @@ function backdrop_settings_initialize() {
   // Export these settings.php variables to the global namespace.
   global $databases, $cookie_domain, $conf, $settings, $installed_profile, $is_https, $base_secure_url, $base_insecure_url, $config_directories, $config;
   $conf = array();
-  $settings = array();
 
   $conf_path = conf_path();
   if (file_exists($conf_path . '/settings.php')) {
@@ -855,21 +863,66 @@ function backdrop_settings_initialize() {
     require_once BACKDROP_ROOT . '/core/includes/drupal.inc';
   }
 
-  // Convert simplified database settings into the full databases array.
-  if (!empty($database) && $database !== 'mysql://user:pass@localhost/database_name') {
-    $database_parts = parse_url($database);
-    if (!$database_parts) {
-      trigger_error('The database setting could not be parsed. Please check the $database setting in settings.php.', E_USER_ERROR);
+  $database_is_set = FALSE;
+
+  // The database connection can be specified in multiple formats:
+  // - $database as a string.
+  // - $database as an simple array.
+  // - $databases as a multi-level nested array.
+  // Both the simplified syntaxes are converted to the larger $databases array.
+
+  // First option: the database connection settings have been provided in the
+  // form of a connection string. This was the default format in versions prior
+  // to Backdrop 1.30.0:
+  if (!empty($database) && is_string($database)) {
+    $default_db_string = 'mysql://user:pass@localhost/database_name';
+    if ($database !== $default_db_string) {
+      // Convert simplified database settings string into the full databases
+      // array.
+      $database_parts = parse_url($database);
+      if (!$database_parts) {
+        trigger_error('The database setting could not be parsed. Please check the $database setting in settings.php.', E_USER_ERROR);
+      }
+      $databases['default']['default'] = array(
+        'driver' => $database_parts['scheme'],
+        // Remove leading slash.
+        'database' => rawurldecode(substr($database_parts['path'], 1)),
+        'username' => isset($database_parts['user']) ? rawurldecode($database_parts['user']) : '',
+        'password' => isset($database_parts['pass']) ? rawurldecode($database_parts['pass']) : '',
+        'host' => $database_parts['host'],
+        'port' => isset($database_parts['port']) ? $database_parts['port'] : NULL,
+        'prefix' => !empty($database_prefix) ? $database_prefix : '',
+      );
+      $database_is_set = TRUE;
     }
-    $databases['default']['default'] = array(
-      'driver' => $database_parts['scheme'],
-      'database' => rawurldecode(substr($database_parts['path'], 1)), // Remove leading slash.
-      'username' => isset($database_parts['user']) ? rawurldecode($database_parts['user']) : '',
-      'password' => isset($database_parts['pass']) ? rawurldecode($database_parts['pass']) : '',
-      'host' => $database_parts['host'],
-      'port' => isset($database_parts['port']) ? $database_parts['port'] : NULL,
-      'prefix' => !empty($database_prefix) ? $database_prefix : '',
+  }
+  // Second option: the database connection settings is a simplified array. This
+  // is the default format in version 1.30.0 and higher.
+  if (!empty($database) && is_array($database)) {
+    $default_db_array = array(
+      'database' => 'database_name',
+      'username' => 'user',
+      'password' => 'pass',
+      'host' => 'localhost',
     );
+    if ($database != $default_db_array) {
+      // Specify default values.
+      $database += array(
+        'prefix' => '',
+        'driver' => 'mysql',
+        'port' => NULL,
+        'charset' => 'utf8mb4',
+        'collation' => 'utf8mb4_general_ci',
+      );
+      $databases['default']['default'] = $database;
+      $database_is_set = TRUE;
+    }
+  }
+
+  // If using one of the simplified syntaxes, verify all the necessary parts
+  // are specified.
+  if ($database_is_set) {
+    // Check that all required parts are included.
     $required_parts = array('driver', 'database', 'username', 'host');
     foreach ($required_parts as $key) {
       if (!$databases['default']['default'][$key]) {
@@ -1391,6 +1444,33 @@ function state_del($name) {
   if ($states && array_key_exists($name, $states)) {
     unset($states[$name]);
   }
+}
+
+/**
+ * Get the backup directory (if any) for this site.
+ *
+ * This setting comes from $settings['backup_directory'] in settings.php. Note
+ * that settings_get('backup_directory') should not be called directly, instead
+ * use this function, which takes into account test runs.
+ *
+ * This function is in bootstrap.inc so that it can be used without loading
+ * backup.inc if backups are not enabled.
+ *
+ * @return string|null
+ *   The path to the backup directory, relative or absolute, depending on the
+ *   site configuration, or NULL if no backup directory is specified.
+ *
+ * @since 1.30.0 Function added.
+ */
+function backup_get_backup_directory() {
+  $backup_directory = settings_get('backup_directory', '');
+
+  // For test runs, specify a specific sub-directory. See BackdropWebTestBase::setUp().
+  if ($test_prefix = backdrop_valid_test_ua()) {
+    $backup_directory = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/backups';
+  }
+
+  return $backup_directory;
 }
 
 /**
@@ -2900,6 +2980,12 @@ function backdrop_bootstrap($phase = NULL, $new_phase = TRUE) {
  * at an empty database. If this happens, redirect the user to install.php.
  */
 function backdrop_bootstrap_is_installed() {
+  // If in any maintenance mode (install, update, restore, etc.) assume the site
+  // is in the process of installing or restoring.
+  if (defined('MAINTENANCE_MODE')) {
+    return TRUE;
+  }
+
   // We may get a situation where the config directory has been specified in
   // settings.php but the database is empty. In which case a config exception
   // is thrown in the first bootstrap phase but the database hasn't been loaded.
@@ -3043,11 +3129,20 @@ function _backdrop_bootstrap_configuration() {
     throw new Exception(format_string('The HTTP Host "@hostname" is not white-listed for this site. Check the trusted_host_patterns setting in settings.php.', array('@hostname' => $_SERVER['HTTP_HOST'])));
   }
 
+  // Bootstrap the database if it is needed but not yet available.
+  $config_storage = config_get_config_storage('active');
+
   // Check that the config directory is not empty.
-  if (!defined('MAINTENANCE_MODE') && ($config_storage = config_get_config_storage('active'))) {
+  if (!defined('MAINTENANCE_MODE') && (!empty($config_storage))) {
     if (!($config_storage->exists('system.core') || $config_storage->exists('system.performance'))) {
-      $directory = config_get_config_directory('active');
-      throw new Exception("The configuration directory in settings.php is specified as '$directory', but this directory is either empty or missing crucial files. Check that the \$config_directories variable is correct in settings.php.");
+      if (is_a($config_storage, 'ConfigFileStorage')) {
+        $directory = config_get_config_directory('active');
+        $exception_message = "The configuration directory in settings.php is specified as '$directory', but this directory is either empty or missing crucial files. Check that the \$config_directories variable is correct in settings.php.";
+      }
+      else {
+        $exception_message = "The active configuration location is either empty or missing crucial information. Check that the \$settings['config_active_class'] variable is correct in settings.php.";
+      }
+      throw new Exception($exception_message);
     }
   }
 }

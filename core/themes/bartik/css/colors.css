@@ -11,7 +11,7 @@ body {
 .l-header {
   color: #fffeff;
   background-color: #000000;
-  background-image: linear-gradient(top, #000000 0%, #000001 100%);
+  background: linear-gradient(to bottom, #000000 0%, #000001 100%);
 }
 .l-header ul.menu > li > a {
   color: #e3e3e3;

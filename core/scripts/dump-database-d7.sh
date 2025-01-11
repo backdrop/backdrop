@@ -31,7 +31,7 @@ backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
 include_once dirname(__FILE__) . '/../includes/utility.inc';
 
 // Output the PHP header.
-$output = <<<ENDOFHEADER
+$output = <<<END
 <?php
 /**
  * @file
@@ -41,7 +41,7 @@ $output = <<<ENDOFHEADER
  * installation of Drupal 7, filled with data using the generate-d7-content.sh
  * tool. It has the following modules installed:
 
-ENDOFHEADER;
+END;
 
 foreach (module_list() as $module) {
   $output .= " *  - $module\n";

@@ -80,8 +80,8 @@
  *    --url http://example.com/ BlockTestCase
  *
  *  @code
- *    sudo -u [wwwrun|www-data|etc] ./core/scripts/run-tests.sh --url http://example.com/ --all
- *    sudo -u [wwwrun|www-data|etc] ./core/scripts/run-tests.sh --url http://example.com/ BlockTestCase
+ *    sudo -u [www|www-data|etc] ./core/scripts/run-tests.sh --url http://example.com/ --all
+ *    sudo -u [www|www-data|etc] ./core/scripts/run-tests.sh --url http://example.com/ BlockTestCase
  *  @endcode
  */
 
@@ -241,7 +241,7 @@ if ($args['xml']) {
   simpletest_script_reporter_write_xml_results();
 }
 
-if($args['summary']) {
+if ($args['summary']) {
   simpletest_script_write_summary($args['summary']);
 }
 
@@ -330,9 +330,9 @@ All arguments are long options.
 To run this script you will normally invoke it from the root directory of your
 Backdrop installation as the webserver user (differs per configuration), or root:
 
-sudo -u [wwwrun|www-data|etc ./core/scripts/{$args['script']}
+sudo -u [www|www-data|etc] ./core/scripts/{$args['script']}
   --url http://example.com/ --all
-sudo -u [wwwrun|www-data|etc] ./core/scripts/{$args['script']}
+sudo -u [www|www-data|etc] ./core/scripts/{$args['script']}
   --url http://example.com/ BlockTestCase
 \n
 EOF;
@@ -896,6 +896,7 @@ function simpletest_script_reporter_write_xml_results() {
 
       // Create the XML element for this test case:
       $case = $dom_document->createElement('testcase');
+      // cspell:disable-next-line
       $case->setAttribute('classname', $test_class);
       list($class, $name) = explode('->', $result->function, 2);
       $case->setAttribute('name', $name);
