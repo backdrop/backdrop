@@ -143,7 +143,10 @@
       let isPreformattedLine = false;
 
       return lines
-        .filter((line) => { return line.length })
+        .filter((line) => {
+          isPreformattedLine = this._isPreformattedBlockLine(line, isPreformattedLine);
+          return isPreformattedLine || line.trim().length
+        })
         .map((line) => {
           isPreformattedLine = this._isPreformattedBlockLine(line, isPreformattedLine);
           if (this._isNonVoidOpeningTag(line)) {
