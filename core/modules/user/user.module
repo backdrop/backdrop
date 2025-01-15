@@ -1835,11 +1835,14 @@ function user_admin_paths() {
  * Implements hook_user_login_paths().
  */
 function user_user_login_paths() {
-  return array(
+  $paths = array(
     'user/login' => TRUE,
     'user/password' => TRUE,
-    'user/register' => TRUE,
   );
+  if (config_get('system.core', 'user_register') != USER_REGISTER_ADMINISTRATORS_ONLY) {
+    $paths['user/register'] = TRUE;
+  }
+  return $paths;
 }
 
 /**
@@ -1855,6 +1858,9 @@ function user_custom_theme() {
   }
   $user_login_appearance = config_get('system.core', 'user_login_appearance');
   if ($user_login_appearance == 'simplified') {
+    if (!backdrop_valid_path(current_path(), TRUE)) {
+      return NULL;
+    }
     $login_theme = config_get('system.core', 'login_admin_theme');
     if ($login_theme) {
       $login_theme = config_get('system.core', 'admin_theme');

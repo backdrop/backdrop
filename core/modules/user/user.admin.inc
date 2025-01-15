@@ -295,6 +295,7 @@ function user_admin_settings_submit($form, &$form_state) {
   token_cache_clear();
 
   // Clear all other caches, because menu items and permissions may have changed.
+  backdrop_static_reset();
   backdrop_flush_all_caches();
 }
 
