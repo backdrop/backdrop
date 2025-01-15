@@ -17,7 +17,7 @@
   margin-top: 0;
 }
 .update-1-30 .l-wrapper > .l-top .block-system-messages + .block-views-promoted-cards-block {
-  padding-top: 1rem;
+  padding-top: 0;
 }
 .update-1-30 .l-wrapper > .l-top:has(.block-views-promoted-cards-block) {
   background-color: #f2f2f2;
@@ -26,9 +26,6 @@
 .update-1-30 .l-wrapper > .l-top:has(.block-views-promoted-cards-block) .block,
 .update-1-30 .l-wrapper > .l-top .block-system-messages:has(+ .block-views-promoted-cards-block) .l-messages {
   margin-bottom: 0;
-}
-.update-1-30 .l-wrapper > .l-top:has(.block-views-promoted-cards-block) .block-system-messages {
-  padding-top: 1rem;
 }
 
 .block-views-promoted-cards-block .views-view-grid-cols-3 {
