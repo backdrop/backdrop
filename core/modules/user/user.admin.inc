@@ -295,6 +295,7 @@ function user_admin_settings_submit($form, &$form_state) {
   token_cache_clear();
 
   // Clear all other caches, because menu items and permissions may have changed.
+  backdrop_static_reset();
   backdrop_flush_all_caches();
 }
 
@@ -423,6 +424,19 @@ function user_login_settings($form, &$form_state) {
     ),
     'simplified' => array(
       '#description' => t('Show plain links to these pages, and hide all layout regions, such as headers, footers, and sidebars.'),
+    ),
+  );
+  $form['user_login_appearance_setting']['login_admin_theme'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use the administration theme for simplified login pages'),
+    '#default_value' => $core_config->get('login_admin_theme'),
+    '#config' => 'system.core',
+    '#description' => t('If disabled, the default front-end theme will be used. This setting only has an effect when the "Show simplified page" option is selected.'),
+    '#indentation' => 1,
+    '#states' => array(
+      'visible' => array(
+        ':input[name="user_login_appearance"]' => array('value' => 'simplified'),
+      ),
     ),
   );
   $form['flood_log_failed_attempts'] = array(

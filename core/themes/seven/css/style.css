@@ -716,7 +716,6 @@ details {
   margin: 1em 0;
   overflow: hidden;
   background-color: #ffffff;
-  display: table-cell;
 }
 details summary span {
   color: #0074bd;
