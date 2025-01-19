@@ -364,10 +364,10 @@ function system_menu_tree_block_data(array &$config) {
  *   The menu tree to prune.
  * @param int $level
  *   The level of the original tree that will start the pruned tree.
- * @param array $parent_item
+ * @param ?array $parent_item
  *   The menu item that should be used as the root of the tree.
  */
-function system_menu_tree_prune_tree(array &$tree, $level, array $parent_item = array()) {
+function system_menu_tree_prune_tree(array &$tree, $level, ?array $parent_item) {
   if (!empty($parent_item)) {
     // Prune the tree along the path to the menu item.
     for ($i = 1; $i <= MENU_MAX_DEPTH && $parent_item["p$i"] != '0'; $i++) {

@@ -520,8 +520,8 @@ abstract class BackdropTestCase {
    *   The type of assertion - examples are "Browser", "PHP".
    * @param $caller
    *   The caller of the error.
-   * @return
-   *   FALSE.
+   * @return false
+   *   Always returns false.
    */
   protected function error($message = '', $group = 'Other', array $caller = array()) {
     if ($group == 'User notice') {
