@@ -43,7 +43,7 @@ function layout_flexible_template_settings_edit_form($form, &$form_state, Layout
     '#default_value' => $flexible_template->name,
     '#disabled' => ($template_exists && empty($flexible_template->is_new)),
     '#machine_name' => array(
-      'exists' => 'layout_flexible_template_load',
+      'exists' => 'layout_flexible_template_machine_name_exists',
     ),
   );
   $form['description'] = array(

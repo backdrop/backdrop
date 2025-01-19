@@ -2488,6 +2488,17 @@ function layout_flexible_template_load_all($flexible_type = 'flexible') {
 }
 
 /**
+ * Returns whether a flexible layout template machine name already exists.
+ *
+ * @see layout_flexible_template_settings_edit_form()
+ * @see form_validate_machine_name()
+ */
+function layout_flexible_template_machine_name_exists($value) {
+  $exists = (bool) layout_flexible_template_load($value);
+  return $exists;
+}
+
+/**
  * Implements hook_layout_template_info().
  */
 function layout_layout_template_info() {
