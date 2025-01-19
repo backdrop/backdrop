@@ -26,7 +26,7 @@ function layout_settings_form_context_add($form, &$form_state) {
 /**
  * Form callback; Displays form for adding new contexts to a layout.
  *
- * @param ?Layout $layout
+ * @param Layout $layout
  *   The layout to which a context is being added.
  * @param int|null $context_id
  *   The ID of the context being configured. If adding a new
@@ -34,7 +34,7 @@ function layout_settings_form_context_add($form, &$form_state) {
  *
  * @ingroup forms
  */
-function layout_context_add_form($form, &$form_state, ?Layout $layout, $context_id = NULL) {
+function layout_context_add_form($form, &$form_state, Layout $layout, $context_id = NULL) {
   form_load_include($form_state, 'inc', 'layout', 'layout.context.admin');
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
 

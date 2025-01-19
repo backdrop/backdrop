@@ -1456,7 +1456,7 @@ class views_plugin_query_default extends views_plugin_query {
       // See pager.inc > PagerDefault::execute()
       // http://api.drupal.org/api/drupal/includes--pager.inc/function/PagerDefault::execute/7
       // See http://drupal.org/node/1046170.
-      $count_query->preExecute(NULL);
+      $count_query->preExecute();
 
       // Build the count query.
       $count_query = $count_query->countQuery();

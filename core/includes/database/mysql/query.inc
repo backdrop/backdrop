@@ -33,7 +33,7 @@ class InsertQuery_mysql extends InsertQuery {
       }
     }
     else {
-      $values = $this->fromQuery->getArguments(NULL);
+      $values = $this->fromQuery->getArguments();
     }
 
     $last_insert_id = $this->connection->query((string) $this, $values, $this->queryOptions);

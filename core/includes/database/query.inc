@@ -643,7 +643,7 @@ class InsertQuery extends Query {
     if (!empty($this->fromQuery)) {
       $sql = (string) $this;
       // The SelectQuery may contain arguments, load and pass them through.
-      return $this->connection->query($sql, $this->fromQuery->getArguments(NULL), $this->queryOptions);
+      return $this->connection->query($sql, $this->fromQuery->getArguments(), $this->queryOptions);
     }
 
     $last_insert_id = 0;

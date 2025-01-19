@@ -572,7 +572,7 @@ function user_is_blocked($name) {
  *
  * @param string $role_name
  *   A string representing the role name.
- * @param ?User $account
+ * @param ?User|null $account
  *   (optional) A user account. Defaults to the current user.
  *
  * @return bool
@@ -580,7 +580,7 @@ function user_is_blocked($name) {
  *
  * @since 1.14.0 First parameter changed from $rid to $role_name.
  */
-function user_has_role($role_name, ?User $account) {
+function user_has_role($role_name, ?User $account = NULL) {
   if (!$account) {
     $account = $GLOBALS['user'];
   }

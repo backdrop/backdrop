@@ -1501,7 +1501,7 @@ function comment_config_create_validate(Config $staging_config, $all_changes) {
  *   - update
  *   - delete
  *   - approve
- * @param ?Comment $comment
+ * @param ?Comment|null $comment
  *   (optional) The comment object, or NULL when using 'create' op.
  *
  * @return bool
@@ -1510,7 +1510,7 @@ function comment_config_create_validate(Config $staging_config, $all_changes) {
  * @since 1.13.0 The "create" $op option was added.
  * @since 1.13.0 The "edit" $op option is deprecated. Use "update" instead.
  */
-function comment_access($op, ?Comment $comment) {
+function comment_access($op, ?Comment $comment = NULL) {
   if ($op == 'edit') {
     // Normalize 'edit' operation to 'update'.
     $op = 'update';
