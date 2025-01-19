@@ -167,14 +167,14 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
   /**
    * Compiles and returns an array of the arguments for this prepared statement.
    *
-   * @param QueryPlaceholderInterface|null $queryPlaceholder
+   * @param ?QueryPlaceholderInterface $queryPlaceholder
    *   When collecting the arguments of a subquery, the main placeholder
    *   object should be passed as this parameter.
    *
    * @return array
    *   An associative array of all placeholder arguments for this query.
    */
-  public function getArguments(QueryPlaceholderInterface $queryPlaceholder = NULL);
+  public function getArguments(?QueryPlaceholderInterface $queryPlaceholder);
 
   /* Query building operations */
 
@@ -512,7 +512,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * @return bool
    *   TRUE if the validation was successful, FALSE if not.
    */
-  public function preExecute(SelectQueryInterface $query = NULL);
+  public function preExecute(?SelectQueryInterface $query);
 
   /**
    * Helper function to build most common HAVING conditional clauses.
@@ -819,7 +819,7 @@ class SelectQueryExtender implements SelectQueryInterface {
   /**
    * {@inheritdoc}
    */
-  public function getArguments(QueryPlaceholderInterface $queryPlaceholder = NULL) {
+  public function getArguments(?QueryPlaceholderInterface $queryPlaceholder) {
     return $this->query->getArguments($queryPlaceholder);
   }
 
@@ -833,7 +833,7 @@ class SelectQueryExtender implements SelectQueryInterface {
   /**
    * {@inheritdoc}
    */
-  public function preExecute(SelectQueryInterface $query = NULL) {
+  public function preExecute(?SelectQueryInterface $query) {
     // If no query object is passed in, use $this.
     if (!isset($query)) {
       $query = $this;
@@ -1573,7 +1573,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
   /**
    * {@inheritdoc}
    */
-  public function getArguments(QueryPlaceholderInterface $queryPlaceholder = NULL) {
+  public function getArguments(?QueryPlaceholderInterface $queryPlaceholder) {
     if (!isset($queryPlaceholder)) {
       $queryPlaceholder = $this;
     }
@@ -1591,7 +1591,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
   /**
    * {@inheritdoc}
    */
-  public function preExecute(SelectQueryInterface $query = NULL) {
+  public function preExecute(?SelectQueryInterface $query) {
     // If no query object is passed in, use $this.
     if (!isset($query)) {
       $query = $this;
@@ -1630,12 +1630,12 @@ class SelectQuery extends Query implements SelectQueryInterface {
     // Now also prepare any sub-queries.
     foreach ($this->tables as $table) {
       if ($table['table'] instanceof SelectQueryInterface) {
-        $table['table']->preExecute();
+        $table['table']->preExecute(NULL);
       }
     }
 
     foreach ($this->union as $union) {
-      $union['query']->preExecute();
+      $union['query']->preExecute(NULL);
     }
 
     return $this->prepared;
@@ -1647,11 +1647,11 @@ class SelectQuery extends Query implements SelectQueryInterface {
   public function execute() {
     // If validation fails, return NULL. Note that validation routines in
     // preExecute() may throw exceptions instead.
-    if (!$this->preExecute()) {
+    if (!$this->preExecute(NULL)) {
       return NULL;
     }
 
-    $args = $this->getArguments();
+    $args = $this->getArguments(NULL);
     return $this->connection->query((string) $this, $args, $this->queryOptions);
   }
 
@@ -1986,7 +1986,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
       if ($table['table'] instanceof SelectQueryInterface) {
         // Run preparation steps on this sub-query before converting to string.
         $subquery = $table['table'];
-        $subquery->preExecute();
+        $subquery->preExecute(NULL);
         $table_string = '(' . (string) $subquery . ')';
       }
       else {

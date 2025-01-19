@@ -643,7 +643,7 @@ class InsertQuery extends Query {
     if (!empty($this->fromQuery)) {
       $sql = (string) $this;
       // The SelectQuery may contain arguments, load and pass them through.
-      return $this->connection->query($sql, $this->fromQuery->getArguments(), $this->queryOptions);
+      return $this->connection->query($sql, $this->fromQuery->getArguments(NULL), $this->queryOptions);
     }
 
     $last_insert_id = 0;
@@ -1147,14 +1147,14 @@ class UpdateQuery extends Query implements QueryConditionInterface {
    * @param string $expression
    *   The field will be set to the value of this expression. This parameter
    *   may include named placeholders.
-   * @param ?array $arguments
+   * @param array $arguments
    *   If specified, this is an array of key/value pairs for named placeholders
    *   corresponding to the expression.
    *
    * @return UpdateQuery
    *   The called object.
    */
-  public function expression($field, $expression, ?array $arguments) {
+  public function expression($field, $expression, array $arguments = array()) {
     $this->expressionFields[$field] = array(
       'expression' => $expression,
       'arguments' => $arguments,
@@ -1410,14 +1410,14 @@ class MergeQuery extends Query implements QueryConditionInterface {
    * @param string $expression
    *   The field will be set to the value of this expression. This parameter
    *   may include named placeholders.
-   * @param ?array $arguments
+   * @param array $arguments
    *   If specified, this is an array of key/value pairs for named placeholders
    *   corresponding to the expression.
    *
    * @return MergeQuery
    *   The called object.
    */
-  public function expression($field, $expression, ?array $arguments) {
+  public function expression($field, $expression, array $arguments = array()) {
     $this->expressionFields[$field] = array(
       'expression' => $expression,
       'arguments' => $arguments,

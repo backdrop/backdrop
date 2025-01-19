@@ -494,7 +494,7 @@ function backdrop_get_feeds($delimiter = "\n") {
  * @return array
  *   An array containing query parameters, which can be used for url().
  */
-function backdrop_get_query_parameters(?array $query, array $exclude = array('q'), $parent = '') {
+function backdrop_get_query_parameters($query = NULL, array $exclude = array('q'), $parent = '') {
   // Set defaults, if none given.
   if (!isset($query)) {
     $query = $_GET;
@@ -2529,16 +2529,16 @@ function format_date($timestamp, $date_format_name = 'medium', $pattern = '', $t
  *
  * Callback for preg_replace_callback() within format_date().
  *
- * @param ?array $matches
+ * @param array|null $matches
  *   The array of matches as found by preg_replace_callback().
- * @param ?string $new_langcode
+ * @param string $new_langcode
  *   Sets the internal langcode to be used. Set the langcode prior to calling
  *   preg_replace_callback().
  *
  * @return string
  *   The date from $matches as a translated string.
  */
-function _format_date_callback(?array $matches, ?string $new_langcode) {
+function _format_date_callback($matches = NULL, $new_langcode = '') {
   // We cache translations to avoid redundant and rather costly calls to t().
   static $cache, $langcode;
 

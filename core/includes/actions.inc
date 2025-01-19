@@ -73,7 +73,7 @@ function actions_get_info($action_name = NULL) {
  *
  * @param string $action_name
  *   The machine name of the action to be executed.
- * @param Entity $entity
+ * @param ?Entity $entity
  *   The entity object that the action will act upon, such as a node, user, or
  *   comment object.
  *
@@ -82,7 +82,7 @@ function actions_get_info($action_name = NULL) {
  *
  * @ingroup actions
  */
-function actions_execute($action_name, Entity $entity = NULL, &$context) {
+function actions_execute($action_name, ?Entity $entity, &$context) {
   // $stack tracks the number of recursive calls.
   static $stack;
   $stack++;
