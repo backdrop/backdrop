@@ -283,6 +283,7 @@ function menu_overview_form_language_filter_submit($form, &$form_state) {
   $query['langcode'] = $form_state['values']['langcode'];
   if (isset($_GET['destination'])) {
     $query['destination'] = $_GET['destination'];
+    unset($_GET['destination']);
   }
   backdrop_goto($_GET['q'], array('query' => $query));
 }
