@@ -149,9 +149,8 @@ function update_script_selection_form($form, &$form_state) {
     '#value' => t('Apply pending updates'),
   );
   $form['actions']['cancel'] = array(
-    '#type' => 'link',
-    '#href' => $_SERVER['SCRIPT_NAME'],
-    '#title' => t('Cancel'),
+    '#type' => 'markup',
+    '#markup' => '<a href="' . $_SERVER['SCRIPT_NAME'] . '">' . t('Cancel') . '</a>',
   );
 
   return $form;
@@ -363,13 +362,12 @@ function update_backup_form($form, &$form_state) {
 
   $query = backdrop_get_query_parameters();
   $query['op'] = 'selection';
+  // Low level URL building to avoid problems with language prefix on
+  // multilingual sites.
+  $skip_url = $_SERVER['SCRIPT_NAME'] . '?' . backdrop_http_build_query($query);
   $form['actions']['continue'] = array(
-    '#type' => 'link',
-    '#href' => $_SERVER['SCRIPT_NAME'],
-    '#options' => array(
-      'query' => $query,
-    ),
-    '#title' => t('Skip backup'),
+    '#type' => 'markup',
+    '#markup' => '<a href="' . $skip_url . '">' . t('Skip backup') . '</a>',
   );
 
   return $form;
