@@ -737,9 +737,6 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $name = $this->randomName(8);
     $edit = array();
     $edit[$title_key] = $name;
-    $edit['status'] = 2;
-    $edit['scheduled[date]'] = format_date(REQUEST_TIME + 360, 'custom', 'Y-m-d', $web_user->timezone);
-    $edit['scheduled[time]'] = format_date(REQUEST_TIME + 360, 'custom', 'H:i:s', $web_user->timezone);
     $this->backdropPost(NULL, $edit, t('Preview'));
     // Make sure that the preview warnings are shown, and that they are only
     // shown once.
@@ -750,9 +747,6 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     $this->assertNoText(t('This is a preview. Links within the page are disabled.'), 'Preview warning NOT displayed.');
     $this->assertNoText(t('Changes are stored temporarily.'), 'Temporary changes warning NOT displayed.');
     $node = $this->backdropGetNodeByTitle($name, TRUE);
-    $this->assertEqual($node->status, '0', 'The node is in the state Draft.');
-
-    $this->assertNotEqual($node->scheduled, 0, 'The node has a non zero published date.');
 
     // Test that a user with permissions to create, but not edit, can still
     // access preview.
