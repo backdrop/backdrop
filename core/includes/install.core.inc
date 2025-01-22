@@ -1108,7 +1108,9 @@ function install_settings_form_submit($form, &$form_state) {
   // If UTF-8 MB4 is not supported, use the old UTF-8 charset.
   if (install_verify_database_utf8mb4() === FALSE) {
     $db_settings['charset'] = 'utf8';
-    $db_settings['collation'] = 'utf8_general_ci';
+    // This has to be set to prevent the default (utf8mb4_general_ci), but we
+    // can not set a value.
+    $db_settings['collation'] = '';
   }
 
   // Only populate values if they are not the defaults:
@@ -1124,7 +1126,7 @@ function install_settings_form_submit($form, &$form_state) {
   if ($db_settings['charset'] && $db_settings['charset'] != 'utf8mb4') {
     $settings['database']['value']['charset'] = $db_settings['charset'];
   }
-  if ($db_settings['collation'] && $db_settings['collation'] != 'utf8mb4_general_ci') {
+  if (isset($db_settings['collation']) && $db_settings['collation'] != 'utf8mb4_general_ci') {
     $settings['database']['value']['collation'] = $db_settings['collation'];
   }
   backdrop_rewrite_settings($settings);
