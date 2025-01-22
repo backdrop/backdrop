@@ -3755,23 +3755,7 @@ function system_update_1099() {
  * Set the default Basis settings for CSS updates.
  */
 function system_update_1100() {
-  $themes = system_list('theme');
-  if (!empty($themes['basis']->status)) {
-    $config = config('basis.settings');
-    $data = $config->getData();
-    // Put the _config_static option at the top of the file.
-    $data = array_merge(array(
-      '_config_static' => TRUE,
-    ), $data);
-    if (!isset($data['css_update'])) {
-      $data['css_update'] = 'install';
-      // An empty version is sufficient, the same as "No updates" for existing
-      // sites running Basis.
-      $data['css_update_version'] = '';
-    }
-    $config->setData($data);
-    $config->save();
-  }
+  // Replaced by system_update_1103().
 }
 
 /**
@@ -3800,6 +3784,26 @@ function system_update_1102() {
     $config->set('login_admin_theme', 1);
     $config->save();
   }
+}
+
+/**
+ * Set the default Basis settings for CSS updates.
+ */
+function system_update_1103() {
+  $config = config('basis.settings');
+  $data = $config->getData();
+  // Put the _config_static option at the top of the file.
+  $data = array_merge(array(
+    '_config_static' => TRUE,
+  ), $data);
+  if (!isset($data['css_update'])) {
+    $data['css_update'] = 'install';
+    // An empty version is sufficient, the same as "No updates" for existing
+    // sites running Basis.
+    $data['css_update_version'] = '';
+  }
+  $config->setData($data);
+  $config->save();
 }
 
 /**
