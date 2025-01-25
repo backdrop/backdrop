@@ -296,6 +296,17 @@ function system_theme_enable() {
 
     // Check if the specified theme is one recognized by the system.
     if (!empty($themes[$theme])) {
+      if (!empty($themes[$theme]->base_theme)) {
+        // If this is a sub theme, check if the base theme is available.
+        $base_theme = $themes[$theme]->base_theme;
+        if (!array_key_exists($base_theme, $themes)) {
+          backdrop_set_message(t('%theme is a sub theme of %base_theme, but %base_theme is missing.', array(
+            '%theme' => $themes[$theme]->info['name'],
+            '%base_theme' => $base_theme,
+          )), 'error');
+          backdrop_goto('admin/appearance');
+        }
+      }
       theme_enable(array($theme));
       backdrop_set_message(t('The %theme theme has been enabled.', array('%theme' => $themes[$theme]->info['name'])));
     }
@@ -366,6 +377,17 @@ function system_theme_default() {
     if (!empty($themes[$theme])) {
       // Enable the theme if it is currently disabled.
       if (empty($themes[$theme]->status)) {
+        if (!empty($themes[$theme]->base_theme)) {
+          // If this is a sub theme, check if the base theme is available.
+          $base_theme = $themes[$theme]->base_theme;
+          if (!array_key_exists($base_theme, $themes)) {
+            backdrop_set_message(t('%theme is a sub theme of %base_theme, but %base_theme is missing.', array(
+              '%theme' => $themes[$theme]->info['name'],
+              '%base_theme' => $base_theme,
+            )), 'error');
+            backdrop_goto('admin/appearance');
+          }
+        }
         theme_enable(array($theme));
       }
       // Set the default theme.
