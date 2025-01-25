@@ -300,7 +300,7 @@ function system_theme_enable() {
         // If this is a sub theme, check if the base theme is available.
         $base_theme = $themes[$theme]->base_theme;
         if (!array_key_exists($base_theme, $themes)) {
-          backdrop_set_message(t('%theme is a sub theme of %base_theme, but %base_theme is missing.', array(
+          backdrop_set_message(t('%theme is a sub theme of %base_theme, but its base theme is missing.', array(
             '%theme' => $themes[$theme]->info['name'],
             '%base_theme' => $base_theme,
           )), 'error');
@@ -381,7 +381,7 @@ function system_theme_default() {
           // If this is a sub theme, check if the base theme is available.
           $base_theme = $themes[$theme]->base_theme;
           if (!array_key_exists($base_theme, $themes)) {
-            backdrop_set_message(t('%theme is a sub theme of %base_theme, but %base_theme is missing.', array(
+            backdrop_set_message(t('%theme is a sub theme of %base_theme, but its base theme is missing.', array(
               '%theme' => $themes[$theme]->info['name'],
               '%base_theme' => $base_theme,
             )), 'error');
