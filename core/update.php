@@ -306,7 +306,10 @@ function update_info_page() {
 
   // Go straight to update selection if upgrading from Drupal 7.
   $op = (backdrop_get_installed_schema_version('system') > 7000) ? 'selection' : 'check_updates';
-  $form_action = check_url(backdrop_current_script_url(array('op' => $op, 'token' => $token)));
+  $form_action = check_url(backdrop_current_script_url(array(
+    'op' => $op,
+    'token' => $token,
+  )));
   $output .= '<form method="post" action="' . $form_action . '">
   <div class="form-actions">
     <input type="submit" value="Continue" class="form-submit button-primary" />
