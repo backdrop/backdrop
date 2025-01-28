@@ -145,7 +145,7 @@ function system_themes_page() {
       foreach ($theme->base_themes as $name => $value) {
         // A value of NULL indicates that the base theme is missing.
         if ($value == NULL) {
-          $broken_dependencies[] = $theme->name;
+          $broken_dependencies[$theme->name][] = $name;
           // If the theme is even enabled, warn about that problem.
           if ($theme->status) {
             if ($theme->is_default) {
@@ -207,7 +207,7 @@ function system_themes_page() {
             'query' => $query,
             'attributes' => array('title' => t('Disable !theme theme', array('!theme' => $theme->info['name']))),
           );
-          if (!in_array($theme->name, $broken_dependencies)) {
+          if (!array_key_exists($theme->name, $broken_dependencies)) {
             $theme->operations['default'] = array(
               'title' => t('Set default'),
               'href' => 'admin/appearance/default',
@@ -218,7 +218,7 @@ function system_themes_page() {
         }
       }
       else {
-        if (!in_array($theme->name, $broken_dependencies)) {
+        if (!array_key_exists($theme->name, $broken_dependencies)) {
           $theme->operations['enable'] = array(
             'title' => t('Enable'),
             'href' => 'admin/appearance/enable',
@@ -246,8 +246,9 @@ function system_themes_page() {
       $theme->classes[] = 'admin-theme';
       $theme->notes[] = t('administration theme');
     }
-    if (in_array($theme->name, $broken_dependencies)) {
+    if (array_key_exists($theme->name, $broken_dependencies)) {
       $theme->notes[] = t('missing dependency');
+      $theme->missing_dependencies = $broken_dependencies[$theme->name];
     }
 
     // Sort enabled and disabled themes into their own groups.

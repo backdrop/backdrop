@@ -105,7 +105,11 @@ function theme_system_themes_page($variables) {
       $description = t($theme->info['description']);
       $depends = '';
       if (isset($theme->info['base theme'])) {
-        $depends = '<br><strong>' . t('Base theme') . ':</strong> ' . $theme->info['base theme'];
+        $base_theme_name = $theme->info['base theme'];
+        $depends = '<br><strong>' . t('Base theme') . ':</strong> ' . $base_theme_name;
+        if (isset($theme->missing_dependencies) && in_array($base_theme_name, $theme->missing_dependencies)) {
+          $depends .= ' <em>(' . t('missing') . ')</em>';
+        }
       }
 
       // Style theme info
