@@ -103,12 +103,16 @@ function theme_system_themes_page($variables) {
 
       // Localize the theme description.
       $description = t($theme->info['description']);
+      $depends = '';
+      if (isset($theme->info['base theme'])) {
+        $depends = '<br><strong>' . t('Base theme') . ':</strong> ' . $theme->info['base theme'];
+      }
 
       // Style theme info
       $notes = count($theme->notes) ? ' (' . join(', ', $theme->notes) . ')' : '';
       $theme->classes[] = 'theme-selector';
       $theme->classes[] = 'clearfix';
-      $output .= '<div class="'. join(' ', $theme->classes) .'">' . $screenshot . '<div class="theme-info"><h3>' . $theme->info['name'] . ' ' . (isset($theme->info['version']) ? $theme->info['version'] : '') . $notes . '</h3><div class="theme-description">' . $description . '</div>';
+      $output .= '<div class="'. join(' ', $theme->classes) .'">' . $screenshot . '<div class="theme-info"><h3>' . $theme->info['name'] . ' ' . (isset($theme->info['version']) ? $theme->info['version'] : '') . $notes . '</h3><div class="theme-description">' . $description . $depends . '</div>';
 
       // Make sure to provide feedback on compatibility.
       if (!empty($theme->incompatible_core)) {
