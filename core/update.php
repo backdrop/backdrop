@@ -304,7 +304,9 @@ function update_info_page() {
     $output .= $module_status_report;
   }
 
-  $form_action = check_url(backdrop_current_script_url(array('op' => 'check_updates', 'token' => $token)));
+  // Go straight to update selection if upgrading from Drupal 7.
+  $op = (backdrop_get_installed_schema_version('system') > 7000) ? 'selection' : 'check_updates';
+  $form_action = check_url(backdrop_current_script_url(array('op' => $op, 'token' => $token)));
   $output .= '<form method="post" action="' . $form_action . '">
   <div class="form-actions">
     <input type="submit" value="Continue" class="form-submit button-primary" />
@@ -617,8 +619,7 @@ if (update_access_allowed()) {
         install_goto('core/update.php?op=results');
       }
       else {
-        // Skip the backup and go to update selection if upgrading from Drupal 7.
-        $op = update_backup_enabled() ? 'backup' : 'selection';
+        $op = 'backup';
         $token = backdrop_get_token('update');
         install_goto('core/update.php?op=' . $op . '&token=' . $token);
       }
