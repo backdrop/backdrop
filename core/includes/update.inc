@@ -306,9 +306,6 @@ function update_module_add_to_system($modules = array()) {
 function update_upgrade_check_dependencies() {
   $status_report = '';
   if (backdrop_get_installed_schema_version('system') > 7000) {
-    // Set a state indicating we are upgrading a Drupal 7 site.
-    state_set('update_d7_upgrade', TRUE);
-
     $modules_to_enable = update_upgrade_modules_to_enable();
 
     if (empty($modules_to_enable)) {

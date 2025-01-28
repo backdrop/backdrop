@@ -305,7 +305,7 @@ function update_info_page() {
   }
 
   // Go straight to update selection if upgrading from Drupal 7.
-  $op = (backdrop_get_installed_schema_version('system') > 7000) ? 'selection' : 'check_updates';
+  $op = (state_get('update_d7_upgrade', FALSE)) ? 'selection' : 'check_updates';
   $form_action = check_url(backdrop_current_script_url(array(
     'op' => $op,
     'token' => $token,
@@ -569,14 +569,12 @@ if (empty($op) && update_access_allowed()) {
 
 // update_fix_requirements() needs to run before bootstrapping beyond path.
 // So bootstrap to BACKDROP_BOOTSTRAP_LANGUAGE then include unicode.inc.
-
 backdrop_bootstrap(BACKDROP_BOOTSTRAP_LANGUAGE);
 include_once BACKDROP_ROOT . '/core/includes/unicode.inc';
 
 update_fix_requirements();
 
 // Now proceed with a full bootstrap.
-
 backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
 backdrop_maintenance_theme();
 
@@ -593,6 +591,11 @@ if (update_access_allowed()) {
   backdrop_load_updates();
 
   update_fix_compatibility();
+
+  if (backdrop_get_installed_schema_version('system') > 7000) {
+    // Set a state indicating we are upgrading a Drupal 7 site.
+    state_set('update_d7_upgrade', TRUE);
+  }
 
   $op = isset($_REQUEST['op']) ? $_REQUEST['op'] : '';
   $valid_token = isset($_GET['token']) && backdrop_valid_token($_GET['token'], 'update');
