@@ -625,7 +625,8 @@ if (update_access_allowed()) {
         install_goto('core/update.php?op=results');
       }
       else {
-        $op = 'backup';
+        // Skip the backup and go to update selection if backup is not enabled.
+        $op = update_backup_enabled() ? 'backup' : 'selection';
         $token = backdrop_get_token('update');
         install_goto('core/update.php?op=' . $op . '&token=' . $token);
       }
