@@ -168,7 +168,6 @@ abstract class UpgradePathTestCase extends BackdropWebTestCase {
    *   TRUE if the upgrade succeeded, FALSE otherwise.
    */
   protected function performUpgrade($register_errors = TRUE) {
-    backdrop_session_regenerate();
 
     // Load the first update screen.
     $update_url = $GLOBALS['base_url'] . '/core/update.php';
