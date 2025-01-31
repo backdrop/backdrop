@@ -1105,9 +1105,10 @@ function install_settings_form_submit($form, &$form_state) {
     'required' => TRUE,
   );
 
-  // If UTF-8 MB4 is not supported, use the old UTF-8 charset.
-  if (install_verify_database_utf8mb4() === FALSE && $db_settings['charset'] === 'utf8mb4') {
+  // If UTF-8 MB4 is not supported, use the old UTF-8 charset and collation.
+  if (install_verify_database_utf8mb4() === FALSE) {
     $db_settings['charset'] = 'utf8';
+    $db_settings['collation'] = 'utf8_general_ci';
   }
 
   // Only populate values if they are not the defaults:
