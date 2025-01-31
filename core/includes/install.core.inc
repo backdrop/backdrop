@@ -1121,10 +1121,10 @@ function install_settings_form_submit($form, &$form_state) {
   if ($db_settings['port'] && $db_settings['port'] != '3306') {
     $settings['database']['value']['port'] = $db_settings['port'];
   }
-  if ($db_settings['charset'] && $db_settings['charset'] != 'utf8mb4') {
+  if (!empty($db_settings['charset']) && $db_settings['charset'] != 'utf8mb4') {
     $settings['database']['value']['charset'] = $db_settings['charset'];
   }
-  if ($db_settings['collation'] && $db_settings['collation'] != 'utf8mb4_general_ci') {
+  if (!empty($db_settings['collation']) && $db_settings['collation'] != 'utf8mb4_general_ci') {
     $settings['database']['value']['collation'] = $db_settings['collation'];
   }
   backdrop_rewrite_settings($settings);
