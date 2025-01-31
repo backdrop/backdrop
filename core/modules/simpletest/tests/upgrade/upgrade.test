@@ -95,6 +95,23 @@ abstract class UpgradePathTestCase extends BackdropWebTestCase {
 
     $this->pass('Finished loading the dump.');
 
+    // Ensure that the session is not written to the new environment and replace
+    // the global $user session with uid 1 from the new test site.
+    backdrop_save_session(FALSE);
+    // Login as uid 1.
+    $user = db_query('SELECT * FROM {users} WHERE uid = :uid', array(':uid' => 1))->fetchObject();
+
+    // Generate and set a session cookie.
+    $this->curlInitialize();
+    $sid = backdrop_hash_base64(uniqid(mt_rand(), TRUE) . backdrop_random_bytes(55));
+    curl_setopt($this->curlHandle, CURLOPT_COOKIE, rawurlencode(session_name()) . '=' . rawurlencode($sid));
+
+    // Force our way into the session of the child site.
+    backdrop_save_session(TRUE);
+    _backdrop_session_write($sid, '');
+    // Remove the temporarily added ssid column.
+    backdrop_save_session(FALSE);
+
     // Restore necessary variables.
     $this->variable_set('clean_url', $this->originalCleanUrl);
     $this->variable_set('site_mail', 'simpletest@example.com');
@@ -151,6 +168,7 @@ abstract class UpgradePathTestCase extends BackdropWebTestCase {
    *   TRUE if the upgrade succeeded, FALSE otherwise.
    */
   protected function performUpgrade($register_errors = TRUE) {
+    backdrop_session_regenerate();
 
     // Load the first update screen.
     $update_url = $GLOBALS['base_url'] . '/core/update.php';
