@@ -146,7 +146,7 @@ function system_themes_page() {
         // A value of NULL indicates that the base theme is missing.
         if ($value == NULL) {
           $broken_dependencies[$theme->name][] = $name;
-          // If the theme is even enabled, warn about that problem.
+          // If the theme is enabled, warn about that problem.
           if ($theme->status) {
             if ($theme->is_default) {
               $message = t('%theme is a sub theme of %base_theme, but its base theme is missing. Set another theme as default theme or download the base theme.', array(
