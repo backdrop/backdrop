@@ -617,6 +617,12 @@ if (update_access_allowed()) {
         install_goto('core/update.php?op=results');
       }
       else {
+        // Prevent the session from being saved when we run update as anonymous.
+        // This will prevent Backdrop from destroying the PHP session ID in
+        // backdrop_session_commit().
+        if ($user->uid === 0) {
+          backdrop_save_session(FALSE);
+        }
         // Skip the backup and go to update selection if upgrading from Drupal 7.
         $op = update_backup_enabled() ? 'backup' : 'selection';
         $token = backdrop_get_token('update');
