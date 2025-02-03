@@ -29,8 +29,10 @@ abstract class UpgradePathTestCase extends BackdropWebTestCase {
 
   /**
    * Flag to run the upgrade as anonymous user.
+   * 
+   * @var bool
    */
-  var $runAsAnonymous = FALSE;
+  public $runAsAnonymous = FALSE;
 
   /**
    * Checks that zlib is enabled in order to run the upgrade tests.
@@ -101,8 +103,8 @@ abstract class UpgradePathTestCase extends BackdropWebTestCase {
     $this->pass('Finished loading the dump.');
 
     if (!$this->runAsAnonymous) {
-      // Ensure that the session is not written to the new environment and replace
-      // the global $user session with uid 1 from the new test site.
+      // Ensure that the session is not written to the new environment and
+      // replace the global $user session with uid 1 from the new test site.
       backdrop_save_session(FALSE);
       // Login as uid 1.
       $user = db_query('SELECT * FROM {users} WHERE uid = :uid', array(':uid' => 1))->fetchObject();

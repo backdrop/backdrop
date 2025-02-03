@@ -18,3 +18,6 @@ $config_directories['staging'] = 'files/config/staging';
 
 // Specify a backup directory to test backup/restore capabilities.
 $settings['backup_directory'] = 'files/backups';
+
+// Allow anonymous upgrades for the D7 upgrade tests.
+$settings['update_free_access'] = TRUE;
