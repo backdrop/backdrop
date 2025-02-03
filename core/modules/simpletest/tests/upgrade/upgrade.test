@@ -29,7 +29,7 @@ abstract class UpgradePathTestCase extends BackdropWebTestCase {
 
   /**
    * Flag to run the upgrade as anonymous user.
-   * 
+   *
    * @var bool
    */
   public $runAsAnonymous = FALSE;
