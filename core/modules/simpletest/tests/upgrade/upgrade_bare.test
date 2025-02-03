@@ -13,7 +13,6 @@ class BareUpgradePathTestCase extends UpgradePathTestCase {
     $this->databaseDumpFiles = array(
       backdrop_get_path('module', 'simpletest') . '/tests/upgrade/drupal-7.bare.database.php.gz',
     );
-    $this->runAsAnonymous = TRUE;
     parent::setUp();
   }
 
