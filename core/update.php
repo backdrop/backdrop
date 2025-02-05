@@ -425,8 +425,14 @@ function update_access_allowed() {
     return TRUE;
   }
 
-  // When testing D7 upgrades config_get() isn't usable initially.
-  $public_file_path = config_get('system.core', 'file_public_path');
+  // When testing D7 upgrades config_get() isn't usable initially, but later on
+  // global $conf doesn't contain what we need.
+  try {
+    $public_file_path = config_get('system.core', 'file_public_path');
+  }
+  catch (Exception $e) {
+    $public_file_path = NULL;
+  }
   if (empty($public_file_path)) {
     global $conf;
     if (!empty($conf['file_public_path'])) {
