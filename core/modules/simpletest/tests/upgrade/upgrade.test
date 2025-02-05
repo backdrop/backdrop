@@ -95,7 +95,9 @@ abstract class UpgradePathTestCase extends BackdropWebTestCase {
 
     // Create our backdoor to simulate update_free_access setting.
     // @see update_access_allowed()
-    $fake_free_access_file = BACKDROP_ROOT . '/' . $this->public_files_directory . '/fake_update_free_access.txt';
+    // @todo this is only the files directory as $this->public_files_directory
+    // does not work with GHA.
+    $fake_free_access_file = BACKDROP_ROOT . '/files/fake_update_free_access.txt';
     file_put_contents($fake_free_access_file, '');
 
     $this->pass('Finished loading the dump.');
@@ -106,6 +108,17 @@ abstract class UpgradePathTestCase extends BackdropWebTestCase {
 
     backdrop_set_time_limit($this->timeLimit);
     $this->setup = TRUE;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function tearDown() {
+    $fake_file = BACKDROP_ROOT . '/files/fake_update_free_access.txt';
+    if (file_exists($fake_file)) {
+      unlink($fake_file);
+    }
+    parent::tearDown();
   }
 
   /**

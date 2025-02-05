@@ -425,21 +425,9 @@ function update_access_allowed() {
     return TRUE;
   }
 
-  // When testing D7 upgrades config_get() isn't usable initially, but later on
-  // global $conf doesn't contain what we need.
-  $public_file_path = NULL;
-  if (!empty($GLOBALS['conf']) && isset($GLOBALS['conf']['file_public_path'])) {
-    $public_file_path = $GLOBALS['conf']['file_public_path'];
-  }
-  if (empty($public_file_path)) {
-    $public_file_path = config_get('system.core', 'file_public_path');
-  }
-  // @see UpgradePathTestCase::setUp()
-  if (!empty($public_file_path) && strpos($public_file_path, 'simpletest') !== FALSE) {
-    $fake_update_free_access = BACKDROP_ROOT . '/' . $public_file_path . '/fake_update_free_access.txt';
-    if (file_exists($fake_update_free_access)) {
-      return TRUE;
-    }
+  // No, not seriously, of course.
+  if (file_exists(BACKDROP_ROOT . '/files/fake_update_free_access.txt')) {
+    return TRUE;
   }
 
   // Calls to user_access() might fail during the update process,
