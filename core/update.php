@@ -434,7 +434,7 @@ function update_access_allowed() {
   }
   if (empty($public_file_path)) {
     try {
-      $public_file_path = config_get('system.core', 'file_public_path');
+      //$public_file_path = config_get('system.core', 'file_public_path');
     }
     catch (ConfigStorageException $e) {
     }
