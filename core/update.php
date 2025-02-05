@@ -428,16 +428,14 @@ function update_access_allowed() {
   // When testing D7 upgrades config_get() isn't usable initially, but later on
   // global $conf doesn't contain what we need.
   $public_file_path = NULL;
+/*
   global $conf;
   if (!empty($conf['file_public_path'])) {
     $public_file_path = $conf['file_public_path'];
   }
+*/
   if (empty($public_file_path)) {
-    try {
-      //$public_file_path = config_get('system.core', 'file_public_path');
-    }
-    catch (ConfigStorageException $e) {
-    }
+    $public_file_path = config_get('system.core', 'file_public_path');
   }
   // @see UpgradePathTestCase::setUp()
   if (!empty($public_file_path) && strpos($public_file_path, 'simpletest') !== FALSE) {
