@@ -2824,6 +2824,18 @@ class LayoutUpgradePathTest extends UpgradePathTestCase {
   public function testLayoutUpgrade() {
     $this->assertTrue($this->performUpgrade(), 'The upgrade was completed successfully.');
 
+    $admin_user = $this->backdropCreateUser(array(
+      'administer layouts',
+      'administer flexible templates',
+      'administer blocks',
+      'administer search',
+      'search content',
+      'administer menu',
+      'administer users',
+      'bypass node access',
+    ));
+    $this->backdropLogin($admin_user);
+
     $this->backdropGet('user');
     $blocks = array(
       'l-header' => array(
