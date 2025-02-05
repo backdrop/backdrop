@@ -267,6 +267,7 @@ function update_results_page() {
     }
   }
 
+  unset($_SESSION['update_initialized']);
   unset($_SESSION['update_results']);
   unset($_SESSION['update_success']);
 
@@ -608,6 +609,7 @@ if (update_access_allowed()) {
       break;
 
     case 'check_updates':
+      $_SESSION['update_initialized'] = TRUE;
       $update_count = update_get_update_count();
       if ($update_count === 0) {
         backdrop_set_message(t('No pending updates.') . ' ' . t('All caches cleared.'));
@@ -617,12 +619,6 @@ if (update_access_allowed()) {
         install_goto('core/update.php?op=results');
       }
       else {
-        // Prevent the session from being saved when we run update as anonymous.
-        // This will prevent Backdrop from destroying the PHP session ID in
-        // backdrop_session_commit().
-        if ($user->uid === 0) {
-          backdrop_save_session(FALSE);
-        }
         // Skip the backup and go to update selection if upgrading from Drupal 7.
         $op = update_backup_enabled() ? 'backup' : 'selection';
         $token = backdrop_get_token('update');
