@@ -424,6 +424,23 @@ function update_access_allowed() {
   if (settings_get('update_free_access')) {
     return TRUE;
   }
+
+  // When testing D7 upgrades config_get() isn't usable initially.
+  $public_file_path = config_get('system.core', 'file_public_path');
+  if (empty($public_file_path)) {
+    global $conf;
+    if (!empty($conf['file_public_path'])) {
+      $public_file_path = $conf['file_public_path'];
+    }
+  }
+  // @see UpgradePathTestCase::setUp()
+  if (!empty($public_file_path) && strpos($public_file_path, 'simpletest') !== FALSE) {
+    $fake_update_free_access = BACKDROP_ROOT . '/' . $public_file_path . '/fake_update_free_access.txt';
+    if (file_exists($fake_update_free_access)) {
+      return TRUE;
+    }
+  }
+
   // Calls to user_access() might fail during the update process,
   // so we fall back on requiring that the user be logged in as user #1.
   try {
@@ -463,7 +480,7 @@ function update_task_list($set_active = NULL) {
   // Only show the task list on the left sidebar if the logged-in user is has
   // permission to perform updates, or if the 'update_free_access' setting in
   // settings.php has been set to TRUE.
-  if (settings_get('update_free_access') || user_access('administer software updates')) {
+  if (update_access_allowed()) {
     return theme('task_list', array('items' => $tasks, 'active' => $active));
   }
 
