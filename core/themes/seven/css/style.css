@@ -930,9 +930,10 @@ div.description,
 .password-strength,
 .password-match {
   margin: 5px 0;
-  line-height: 1.231em;
+  line-height: 1.5em;
   font-size: 0.923em;
   color: #666;
+  max-width: 38.75em;
 }
 div.description.form-item-description {
   margin: -1em 0 1em 0;
