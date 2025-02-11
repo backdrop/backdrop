@@ -1,5 +1,6 @@
 type = layout
 name = Boxton
+description = A simple layout without sidebars that is the default for the homepage.
 version = BACKDROP_VERSION
 backdrop = 1.x
 

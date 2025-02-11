@@ -144,6 +144,9 @@ function theme_layout_template_info($variables) {
   $output = '<div class="layout-info">';
   $output .= $preview_img;
   $output .= '<div class="layout-detail">' . $label . '</div>';
+  if (isset($template_info['description'])) {
+    $output .= '<div class="layout-description">' . $template_info['description'] . '</div>';
+  }
   $output .= '</div>';
 
   return $output;
