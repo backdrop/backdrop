@@ -3314,6 +3314,7 @@ function layout_ajax_form_update($form, $form_state) {
 function layout_settings_page($form, &$form_state) {
   $header = array(
     'layout_template_info' => array('data' => t('Template')),
+    'description' => array('data' => t('Description')),
     'type' => array(
       'data' => t('Type'),
       'sort' => 'desc',
@@ -3343,6 +3344,7 @@ function layout_settings_page($form, &$form_state) {
       $rows[$template_name] = array(
         'layout_template_info' => theme('layout_template_info', array('template_info' => $template_info)),
         'type' => !empty($template_info['flexible']) ? t('Flexible') : t('Standard'),
+        'description' => !empty($template_info['description']) ? $template_info['description'] : '',
       );
       $rows[$template_name]['operations']['data'] = array(
         '#type' => 'dropbutton',

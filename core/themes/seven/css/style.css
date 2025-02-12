@@ -1959,7 +1959,3 @@ table .machine-name {
 [dir="rtl"] .tabledrag-handles-shown .machine-name {
   padding-right: 28px;
 }
-table .layout-description {
-  color: #666;
-  font-size: smaller;
-}
