@@ -1,6 +1,6 @@
 type = layout
 name = Boxton
-description = A layout with a header, top, content, bottom, and footer. This is the default layout for the homepage.
+description = A layout with a header, top, content, bottom, and footer. This is the default template for the home page.
 version = BACKDROP_VERSION
 backdrop = 1.x
 
