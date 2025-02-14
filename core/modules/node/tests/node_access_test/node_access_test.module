@@ -29,10 +29,8 @@ function node_access_test_node_grants($account, $op) {
  */
 function node_access_test_node_access_records(Node $node) {
   $grants = array();
-  // For NodeAccessBaseTableTestCase, only set records for private nodes. We'll
-  // set these as unpublished, so they should not be visible to anyone except
-  // the author.
-  if (!state_get('node_access_test_private') || !($node->status)) {
+  // For NodeAccessBaseTableTestCase, only set records for private nodes.
+  if (!state_get('node_access_test_private') || $node->private) {
     $grants[] = array(
       'realm' => 'node_access_test',
       'gid' => 8888,
@@ -172,7 +170,6 @@ function node_access_entity_test_page() {
 
   return $output;
 }
-
 
 /**
  * Implements hook_form_BASE_FORM_ID_alter().

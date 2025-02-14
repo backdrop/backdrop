@@ -5,7 +5,7 @@
     "bundle": "post",
     "label": "Related post",
     "widget": {
-        "weight": "6",
+        "weight": "1",
         "type": "entityreference_autocomplete",
         "module": "entityreference",
         "active": 1,
@@ -33,7 +33,7 @@
                 "bypass_access": false
             },
             "module": "entityreference",
-            "weight": 12
+            "weight": 11
         }
     }
 }

@@ -2742,18 +2742,16 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
 
     // Set the block to a region to confirm block is available.
     $layout = layout_load('home');
-    $block = $layout->addBlock('node', 'recent', 'content');
+    $block = $layout->addBlock('views', 'recent_content-block', 'content');
 
     // Set block title and variables.
     $block_title = $this->randomName();
     $block->settings['title'] = $block_title;
     $block->settings['title_display'] = LAYOUT_TITLE_CUSTOM;
-    $block->settings['block_settings'] = array(
-      'node_count' => 2,
-    );
+    $block->settings['items_per_page'] = 2;
     $layout->save();
 
-    // Test that block is not visible without nodes
+    // Test that block shows the no content available message with no nodes.
     $this->backdropGet('');
     $this->assertText(t('No content available.'), 'Block with "No content available." found.');
 
@@ -2791,15 +2789,13 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     $this->assertText($node3->title, t('Node found in block.'));
 
     // Check to make sure nodes are in the right order.
-    $this->assertTrue($this->xpath('//*[contains(@class,"block-node-recent")]/div/table/tbody/tr[position() = 1]/td/div/a[text() = "' . $node3->title . '"]'), t('Nodes were ordered correctly in block.'));
+    $this->assertTrue($this->xpath('//*[contains(@class,"block-views-recent-content-block")]/div/div/div/table/tbody/tr[position() = 1]/td/div/a[text() = "' . $node3->title . '"]'), t('Nodes were ordered correctly in block.'));
 
     // Set the number of recent nodes to show to 10.
     $this->backdropLogout();
     $this->backdropLogin($this->admin_user);
 
-    $block->settings['block_settings'] = array(
-      'node_count' => 10,
-    );
+    $block->settings['items_per_page'] = 10;
     $layout->save();
 
     // Post an additional node.
@@ -2833,9 +2829,9 @@ class NodeBlockFunctionalTest extends BackdropWebTestCase {
     $this->backdropPost('admin/structure/layouts/add', $edit, t('Create layout'));
 
     // Add a condition to specify only the post type should have this layout.
-    $this->backdropPost('admin/structure/layouts/manage/post_layout/configure', array(), t('Add visibility condition'));
+    $this->backdropPost('admin/structure/layouts/manage/post_layout/configure', array(), t('Add condition'));
     $this->backdropPost(NULL, array('condition' => 'node_type'), t('Load condition'));
-    $this->backdropPost(NULL, array('bundles[post]' => 1), t('Add visibility condition'));
+    $this->backdropPost(NULL, array('bundles[post]' => 1), t('Add condition'));
     $this->backdropPost(NULL, array(), t('Save layout'));
 
     // Add the custom block to the layout.
@@ -3746,11 +3742,9 @@ class NodeEntityViewModeAlterTest extends NodeWebTestCase {
 class NodeAccessJoinTest extends NodeWebTestCase {
 
   public function setUp() {
-    $modules = array('node_access_test');
+    $modules = array('entityreference', 'node_access_test');
     parent::setUp($modules);
-
     node_access_rebuild();
-    state_set('node_access_test_private', TRUE);
   }
 
   /**
@@ -3777,17 +3771,18 @@ class NodeAccessJoinTest extends NodeWebTestCase {
    *   permissions, confirming this user sees the complete view.
    */
   public function testNodeAccessJoin() {
-
     // User to add posts and test author access.
     $this->authorUser = $this->backdropCreateUser(array(
       'access content',
       'create post content',
+      'view own unpublished content',
     ));
     // Another user to add posts (whose private posts can not be accessed
     // by authorUser).
     $this->otherUser = $this->backdropCreateUser(array(
       'access content',
       'create post content',
+      'view own unpublished content',
     ));
 
     // Create the posts.
@@ -3808,7 +3803,7 @@ class NodeAccessJoinTest extends NodeWebTestCase {
         $edit = array(
           'type' => 'post',
           'uid' => $is_author ? $this->authorUser->uid : $this->otherUser->uid,
-          'private' => $is_private,
+          'status' => !$is_private,
         );
         // The post names provide the access status of the post and the
         // access status of the related post (if any).
@@ -3823,7 +3818,7 @@ class NodeAccessJoinTest extends NodeWebTestCase {
         $node = $this->backdropCreateNode($edit);
         $this->posts[$post][$reference2] = $node->nid;
 
-        $this->assertEqual((int) $is_private, (int) $node->private, 'The private status of the post node was properly set in the node_access_test table.');
+        $this->assertEqual((int) $is_private, (int) !$node->status, 'The private status of the post node was properly set in the node_access_test table.');
         if ($reference2 != 'no_reference') {
           $this->assertEqual((int) $this->posts[$reference2]['no_reference'], (int) $node->field_related_post[$langcode][0]['target_id'], 'Proper post attached to post.');
         }

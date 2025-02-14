@@ -6,7 +6,7 @@
     "disabled": false,
     "base_table": "node",
     "human_name": "Test Node Access Join",
-    "core": "1.29.x-dev",
+    "core": "1.30.0",
     "display": {
         "default": {
             "display_title": "Default",
