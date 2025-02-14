@@ -267,6 +267,7 @@ function update_results_page() {
     }
   }
 
+  unset($_SESSION['update_initialized']);
   unset($_SESSION['update_results']);
   unset($_SESSION['update_success']);
 
@@ -608,6 +609,7 @@ if (update_access_allowed()) {
       break;
 
     case 'check_updates':
+      $_SESSION['update_initialized'] = TRUE;
       $update_count = update_get_update_count();
       if ($update_count === 0) {
         backdrop_set_message(t('No pending updates.') . ' ' . t('All caches cleared.'));
