@@ -1082,7 +1082,7 @@ class SelectQuery extends Query implements SelectQueryInterface {
    *
    * If $table is a string, it is taken as the name of a table. If it is
    * a SelectQuery object, it is taken as a subquery.
-   * 
+   *
    * If $join_condition is a Condition object, any arguments should be
    * incorporated into the object; a separate array of arguments does not need
    * to be provided.
