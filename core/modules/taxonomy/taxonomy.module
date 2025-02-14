@@ -2159,18 +2159,19 @@ function taxonomy_config_info() {
 }
 
 /**
- * Implements hook_config_create_validate()
+ * Implements hook_config_create_validate().
  */
 function taxonomy_config_create_validate(Config $staging_config, $all_changes) {
   $config_name = $staging_config->getName();
 
-  // Ensure entity types and bundles exist or will be imported.
-  if (strpos($config_name, 'taxonomy.vocabulary.') === 0) {
-    list($vocabulary_name, $field_name) = explode('.', str_replace('taxonomy.vocabulary.', '', $config_name));
+  // Ensure the taxonomy vocabulary exists before importing fields.
+  // First, check this is a config file for a taxonomy vocabulary field.
+  if (strpos($config_name, 'field.instance.taxonomy_term.') === 0) {
+    list($vocabulary_name, $field_name) = explode('.', str_replace('field.instance.taxonomy_term.', '', $config_name));
 
     // Check that the vocabulary does or will exist.
     $vocabulary_exists = (bool) taxonomy_vocabulary_load($vocabulary_name);
-    $vocabulary_created = $all_changes['taxonomy.vocabulary.' . $vocabulary_name];
+    $vocabulary_created = isset($all_changes['taxonomy.vocabulary.' . $vocabulary_name]);
     if (!$vocabulary_exists && !$vocabulary_created) {
       throw new ConfigValidateException(t('The field "@name" cannot be added because the vocabulary "@vocabulary" does not exist.', array('@name' => $field_name, '@vocabulary' => $vocabulary_name)));
     }

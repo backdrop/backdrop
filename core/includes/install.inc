@@ -436,6 +436,8 @@ abstract class DatabaseTasks {
   protected function connect() {
     $original_connection_info = $modified_connection_info = Database::getConnectionInfo();
     $last_exception = FALSE;
+    $extra_help = '';
+
     try {
       // This doesn't actually test the connection.
       db_set_active();
@@ -454,11 +456,13 @@ abstract class DatabaseTasks {
     //   socket may work instead. This can happen when using local environments
     //   that use non-standard port numbers for the database.
     if ($last_exception && ($last_exception->getCode() === $this->connectionRefusedErrorCode)) {
-      if ($original_connection_info['default']['host'] === 'localhost') {
+      $localhost_invalid = $original_connection_info['default']['host'] === 'localhost';
+      $local_ip_invalid = $original_connection_info['default']['host'] === '127.0.0.1';
+      if ($localhost_invalid) {
         $modified_connection_info['default']['host'] = '127.0.0.1';
         $modified_connection_info['default']['port'] = '3306';
       }
-      elseif ($original_connection_info['default']['host'] === '127.0.0.1') {
+      elseif ($local_ip_invalid) {
         $modified_connection_info['default']['host'] = 'localhost';
         $modified_connection_info['default']['port'] = '';
       }
@@ -466,19 +470,15 @@ abstract class DatabaseTasks {
         Database::removeConnection('default');
         Database::addConnectionInfo('default', 'default', $modified_connection_info['default']);
         try {
-          Database::getConnection();
-          $last_exception = FALSE;
+          Database::getConnection('default', 'default');
 
-          // Connection was successful, but settings.php needs to be updated.
-          $db_settings = $modified_connection_info['default'];
-          $settings['database'] = array(
-            'value' => $db_settings['driver'] . '://' . rawurlencode($db_settings['username']) . ':' . rawurlencode($db_settings['password']) . '@' . $db_settings['host'] . ($db_settings['port'] ? (':' . $db_settings['port']) : '') . '/' . rawurlencode($db_settings['database']),
-            'required' => TRUE,
-          );
-          $settings['database_prefix'] = array(
-            'value' => $db_settings['prefix']['default'],
-          );
-          backdrop_rewrite_settings($settings);
+          // The modified database connection was successful. Provide an
+          // informative help message asking the installer to adjust the
+          // values.
+          $extra_help = st('Connecting to "@broken_host" was not successful, but connecting to "@working_host" with the same credentials was successful. Try setting the database host (under Advanced options) to "@working_host".', array(
+            '@broken_host' => $localhost_invalid ? 'localhost' : '127.0.0.1',
+            '@working_host' => $localhost_invalid ? '127.0.0.1' : 'localhost',
+          ));
         }
         catch (Exception $e) {
           $last_exception = $e;
@@ -521,13 +521,21 @@ abstract class DatabaseTasks {
       }
       $exception_message = preg_replace('/SQLSTATE\[.*\]/', '', $original_failed_exception->getMessage());
       $error = st('Failed to connect to your database server. The server reports the following message: %error.', array('%error' => $exception_message));
-      $error .= '<div class="item-list"><ul><li>';
-      $error .= st('Is the database server running on %host?', array('%host' => $host));
-      $error .= '</li><li>';
-      $error .= st('Is %database the correct database name?', array('%database' => $original_connection_info['default']['database']));
-      $error .= '</li><li>';
-      $error .= st('Are the username and password correct?');
-      $error .= '</li></ul></div>';
+
+      $error .= '<div class="database-extra-help">';
+      if ($extra_help) {
+        $error .= $extra_help;
+      }
+      else {
+        $error .= '<div class="item-list"><ul><li>';
+        $error .= st('Is the database server running on %host?', array('%host' => $host));
+        $error .= '</li><li>';
+        $error .= st('Is %database the correct database name?', array('%database' => $original_connection_info['default']['database']));
+        $error .= '</li><li>';
+        $error .= st('Are the username and password correct?');
+        $error .= '</li></ul></div>';
+      }
+      $error .= '</div>';
       $this->fail($error);
       return FALSE;
     }
@@ -706,12 +714,15 @@ class DatabaseTaskException extends Exception {
  */
 function backdrop_rewrite_settings($settings = array()) {
   backdrop_static_reset('conf_path');
+  include_once BACKDROP_ROOT . '/core/includes/utility.inc';
+
   $settings_file = conf_path(FALSE) . '/settings.php';
   $additional_settings = $settings;
   $additions = '';
 
   $buffer = NULL;
   $first = TRUE;
+  $database_line_count = 0;
   if ($fp = fopen($settings_file, 'r')) {
     // Step line by line through settings.php.
     while (!feof($fp)) {
@@ -725,10 +736,16 @@ function backdrop_rewrite_settings($settings = array()) {
         preg_match('/\$([^ =]*) /', $line, $variable);
         $variable_name = $variable[1];
         if (array_key_exists($variable_name, $settings)) {
+          // If variable_name is 'database', we need to remove the next 5
+          // lines as they are part of the default database array.
+          // @todo Improve this logic to support replacing any size array.
+          if ($variable_name == 'database') {
+            $database_line_count = 5;
+          }
           // Write new value to settings.php in the following format:
           //    $'setting' = 'value'; // 'comment'
           $setting = $settings[$variable_name];
-          $new_line = '$' . $variable_name . " = " . var_export($setting['value'], TRUE) . ";" . (!empty($setting['comment']) ? ' // ' . $setting['comment'] . "\n" : "\n");
+          $new_line = '$' . $variable_name . " = " . backdrop_var_export($setting['value']) . ";" . (!empty($setting['comment']) ? ' // ' . $setting['comment'] . "\n" : "\n");
           $buffer .= $new_line;
           $additions .= $new_line;
           // Remove this variable from being added to the bottom of the file.
@@ -739,7 +756,14 @@ function backdrop_rewrite_settings($settings = array()) {
         }
       }
       else {
-        $buffer .= $line;
+        if ($database_line_count) {
+          // If this is part of the default database array, decrement the
+          // counter and don't include the line.
+          --$database_line_count;
+        }
+        else {
+          $buffer .= $line;
+        }
       }
     }
     fclose($fp);
@@ -808,7 +832,7 @@ function backdrop_install_config_location() {
 
   if ($settings['config_active_class'] === 'ConfigFileStorage') {
     $is_empty = empty($config_directories['active']);
-    $is_default_file_storage = $config_directories['active'] === 'files/config_' . md5($database) . '/active';
+    $is_default_file_storage = $config_directories['active'] === 'files/config_' . md5(serialize($database)) . '/active';
 
     // Add a randomized config directory name to settings.php, unless it was
     // manually defined in the existing already.

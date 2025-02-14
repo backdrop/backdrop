@@ -151,7 +151,7 @@ function layout_list_page() {
   $header = array(
     array('data' => t('Layout'), 'class' => array('layout-title')),
     array('data' => t('Template'), 'class' => array('layout-template', 'priority-low')),
-    array('data' => t('Visibility conditions'), 'class' => array('layout-conditions', 'priority-low')),
+    array('data' => t('Conditions'), 'class' => array('layout-conditions', 'priority-low')),
     array('data' => t('Storage state'), 'class' => array('layout-status', 'priority-low')),
     array('data' => t('Operations'), 'class' => array('layout-operations')),
   );
@@ -734,7 +734,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   );
   $form['conditions']['links']['add'] = array(
     '#type' => 'submit',
-    '#value' => t('Add visibility condition'),
+    '#value' => t('Add condition'),
     '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
     '#validate' => array(),
     '#submit' => array(
@@ -1226,7 +1226,7 @@ function layout_content_form($form, &$form_state, Layout $layout, $renderer_name
     '#markup' => $renderer->render(),
   );
 
-  foreach ($renderer->layout_info['regions'] as $region_id => $title) {
+  foreach ($renderer->layout_template_info['regions'] as $region_id => $title) {
     // Make sure we at least have an empty array for all possible locations.
     if (!isset($layout->positions[$region_id])) {
       $layout->positions[$region_id] = array();
@@ -1676,7 +1676,7 @@ function layout_block_configure_form($form, &$form_state, Layout $layout, Block 
   );
   $form['conditions']['links']['add'] = array(
     '#type' => 'submit',
-    '#value' => t('Add visibility condition'),
+    '#value' => t('Add condition'),
     '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
     '#submit' => array(
       'layout_block_configure_form_submit',
@@ -2037,7 +2037,7 @@ function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, B
   if (isset($menu_item)) {
     $form['#redirect'] = 'admin/structure/layouts/menu/' . $menu_item->name . '/access';
     if ($is_new_condition) {
-      $form['#title'] = t('Add visibility condition');
+      $form['#title'] = t('Add condition');
     }
     else {
       $form['#title'] = t('Configure visibility condition');
@@ -2048,7 +2048,7 @@ function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, B
   elseif (isset($block)) {
     $form['#redirect'] = 'admin/structure/layouts/manage/' . $layout->name;
     if ($is_new_condition) {
-      $form['#title'] = t('Add visibility condition for "!title" block', array('!title' => $block->getAdminTitle()));
+      $form['#title'] = t('Add condition for "!title" block', array('!title' => $block->getAdminTitle()));
     }
     else {
       $form['#title'] = t('Configure visibility condition for "!title" block', array('!title' => $block->getAdminTitle()));
@@ -2059,7 +2059,7 @@ function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, B
   else {
     $form['#redirect'] = 'admin/structure/layouts/manage/' . $layout->name . '/configure';
     if ($is_new_condition) {
-      $form['#title'] = t('Add visibility condition for "@title" layout', array('@title' => $layout->title));
+      $form['#title'] = t('Add condition for "@title" layout', array('@title' => $layout->title));
     }
     else {
       $form['#title'] = t('Configure visibility condition for "@title" layout', array('@title' => $layout->title));
@@ -2115,7 +2115,7 @@ function layout_condition_add_form($form, &$form_state, Layout $layout = NULL, B
   );
   $form['actions']['add'] = array(
     '#type' => 'submit',
-    '#value' => $is_new_condition ? t('Add visibility condition') : t('Save visibility condition'),
+    '#value' => $is_new_condition ? t('Add condition') : t('Save visibility condition'),
     '#submit' => array(
       'layout_condition_add_form_submit',
     ),
@@ -2965,7 +2965,7 @@ function layout_menu_item_form($form, &$form_state, LayoutMenuItem $menu_item) {
   );
   $form['conditions']['links']['add'] = array(
     '#type' => 'submit',
-    '#value' => t('Add visibility condition'),
+    '#value' => t('Add condition'),
     '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
     '#submit' => array(
       'layout_menu_item_form_condition_add'
@@ -3466,8 +3466,8 @@ function _layout_settings_get_group_operations($template_info, $is_default) {
 function layout_configure_region_page($form, &$form_state, Layout $layout, $renderer_name, $region_name, $block_key = NULL) {
   $form_state['layout'] = $layout;
   $form_state['region_name'] = $region_name;
-  $layout_info = layout_get_layout_template_info($layout->layout_template);
-  if (!array_key_exists($region_name, $layout_info['regions'])) {
+  $layout_template_info = layout_get_layout_template_info($layout->layout_template);
+  if (!array_key_exists($region_name, $layout_template_info['regions'])) {
     return MENU_NOT_FOUND;
   }
 

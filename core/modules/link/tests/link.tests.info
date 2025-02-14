@@ -27,3 +27,9 @@ name = Link validation unit tests
 description = Tests the link_validate_url() function by itself, without invoking the full Backdrop bootstrap.
 group = Link
 file = link.validate.test
+
+[LinkCustomFormTest]
+name = Link field custom form tests
+description = Tests link fields being used on custom forms.
+group = Link
+file = link.custom.test

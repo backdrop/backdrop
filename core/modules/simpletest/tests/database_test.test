@@ -21,6 +21,22 @@ class FakeRecord {
 }
 
 /**
+ * Dummy class that contains a construct method.
+ */
+class FakeRecordWithConstructor {
+
+  /**
+   * @var string
+   */
+  public $name;
+
+  /**
+   * Constructor for FakeRecordWithConstructor.
+   */
+  public function __construct() {}
+}
+
+/**
  * Base test class for databases.
  *
  * Because all database tests share the same test data, we can centralize that
@@ -397,6 +413,26 @@ class DatabaseFetchTestCase extends DatabaseTestCase {
       $records[] = $record;
       if ($this->assertTrue(is_array($record), 'Record is an array.')) {
         $this->assertIdentical($record['name'], 'John', 'Record can be accessed associatively.');
+      }
+    }
+
+    $this->assertIdentical(count($records), 1, 'There is only one record.');
+  }
+
+  /**
+   * Test passing custom constructor_args for a FETCH_CLASS.
+   *
+   * @see FakeRecordWithConstructor
+   */
+  public function testQueryFetchClassCustomConstructorArgs() {
+    $records = array();
+    $result = db_query('SELECT name FROM {test} WHERE age = :age', array(':age' => 25));
+    // @see EntityPlusController::query (in the contrib entity_plus module).
+    $result->setFetchMode(PDO::FETCH_CLASS, 'FakeRecordWithConstructor', array('foo'));
+    foreach ($result as $record) {
+      $records[] = $record;
+      if ($this->assertTrue($record instanceof FakeRecordWithConstructor, 'Record is an object of class FakeRecordWithConstructor.')) {
+        $this->assertIdentical($record->name, 'John', '25 year old is John.');
       }
     }
 
@@ -1332,7 +1368,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
     }
 
     $query = (string)$query;
-    $expected = "/* Testing query comments */ SELECT test.`name` AS `name`, test.`age` AS `age`\nFROM \n{test} test";
+    $expected = "/* Testing query comments */ SELECT `test`.`name` AS `name`, `test`.`age` AS `age`\nFROM \n{test} `test`";
 
     $this->assertEqual($num_records, 4, 'Returned the correct number of rows.');
     $this->assertEqual($query, $expected, 'The flattened query contains the comment string.');
@@ -1354,7 +1390,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
     }
 
     $query = (string)$query;
-    $expected = "/* Testing query comments  * / SELECT nid FROM {node}; -- */ SELECT test.`name` AS `name`, test.`age` AS `age`\nFROM \n{test} test";
+    $expected = "/* Testing query comments  * / SELECT nid FROM {node}; -- */ SELECT `test`.`name` AS `name`, `test`.`age` AS `age`\nFROM \n{test} `test`";
 
     $this->assertEqual($num_records, 4, 'Returned the correct number of rows.');
     $this->assertEqual($query, $expected, 'The flattened query contains the sanitised comment string.');
@@ -4124,4 +4160,48 @@ class ConnectionUnitTest extends BackdropUnitTestCase {
     $this->assertNoConnection($id);
   }
 
+}
+
+/**
+ * Tests database statements against deserialization attacks.
+ *
+ * PHPGGC (PHP Generic Gadget Chain) is a tool for creating serialized attack
+ * strings.
+ */
+class DatabaseStatementPrefetchGadgetChainTestCase extends BackdropWebTestCase {
+  /**
+   * Tests unserialization within the theme registry.
+   */
+  public function testThemeRegistryGadgetChain() {
+    if (version_compare(PHP_VERSION, '7.4', '<')) {
+      $this->assert('pass', 'Test skipped for older PHP versions.');
+      return;
+    }
+    $payload = 'O:13:"ThemeRegistry":1:{s:13:"keysToPersist";O:25:"DatabaseStatementPrefetch":3:{s:10:"currentRow";a:0:{}s:10:"fetchStyle";i:8;s:12:"fetchOptions";a:2:{s:5:"class";s:10:"FakeRecord";s:16:"constructor_args";a:1:{i:0;a:2:{i:0;s:3:"foo";i:1;s:3:"bar";}}}}}';
+    try {
+      // Do not assign the return value of unserialize as we want the objects
+      // to be destructed immediately.
+      unserialize($payload);
+    } catch (Exception $e) {
+      $this->assertEqual(get_class($e), 'UnexpectedValueException', get_class($e) . ' thrown when unserializing payload.');
+    }
+  }
+
+  /**
+   * Tests unserialization within the UpdateQuery class.
+   */
+  public function testUpdateQueryGadgetChain() {
+    if (version_compare(PHP_VERSION, '7.4', '<')) {
+      $this->assert('pass', 'Test skipped for older PHP versions.');
+      return;
+    }
+    $payload = 'O:11:"UpdateQuery":2:{s:10:"connection";O:24:"DatabaseConnection_mysql":0:{}s:6:"fields";O:25:"DatabaseStatementPrefetch":3:{s:10:"currentRow";a:0:{}s:10:"fetchStyle";i:8;s:12:"fetchOptions";a:2:{s:5:"class";s:10:"FakeRecord";s:16:"constructor_args";a:2:{i:0;s:3:"foo";i:1;s:3:"bar";}}}}';
+    try {
+      // In this case we can assign the return value; casting it to a string
+      // invokes the relevant __toString magic method.
+      $result = (string) unserialize($payload);
+    } catch (Exception $e) {
+      $this->assertEqual(get_class($e), 'UnexpectedValueException', get_class($e) . ' thrown when unserializing payload.');
+    }
+  }
 }

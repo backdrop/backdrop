@@ -6,7 +6,7 @@
 
     attach: function (element, format) {
       // Bail out if the editor has already been attached to the element.
-      if (typeof element.ckeditor5AttachedEditor != 'undefined') {
+      if (typeof element.ckeditor5Processed !== 'undefined') {
         return;
       }
 
@@ -34,7 +34,7 @@
       // The source element value is managed manually to apply code formatting.
       editorSettings.updateSourceElementOnDestroy = false;
 
-      editorSettings.licenseKey = '';
+      editorSettings.licenseKey = 'GPL';
 
       // If filter_html is turned on, and the htmlSupport plugin is available,
       // we prevent on* attributes.
@@ -69,8 +69,9 @@
         }
       });
 
-      // Hide the resizable grippie while CKEditor is active.
-      $(element).siblings('.grippie').hide();
+      // Indicate that this element is about to receive an editor. This prevents
+      // double-binding if the .attach() method is called twice very quickly.
+      element.ckeditor5Processed = true;
 
       const beforeAttachValue = element.value;
       CKEditor5.editorClassic.ClassicEditor
@@ -79,6 +80,7 @@
           Backdrop.ckeditor5.setEditorOffset(editor);
           Backdrop.ckeditor5.instances.set(editor.id, editor);
           Backdrop.ckeditor5.watchEditorChanges(editor, element);
+          Backdrop.ckeditor5.trackActiveEditor(editor);
           element.ckeditor5AttachedEditor = editor;
           const valueModified = Backdrop.ckeditor5.checkValueModified(beforeAttachValue, editor.getData());
           if (valueModified && !Backdrop.ckeditor5.bypassContentWarning) {
@@ -87,6 +89,7 @@
           return true;
         })
         .catch(error => {
+          element.ckeditor5Processed = false;
           console.error('The CKEditor instance could not be initialized.');
           console.error(error);
           return false;
@@ -116,14 +119,13 @@
         editor.destroy();
         Backdrop.ckeditor5.instances.delete(editor.id);
         delete element.ckeditor5AttachedEditor;
+        delete element.ckeditor5Processed;
       }
 
       // Save formatted value after destroying the editor, which can also
       // update the element value.
       element.value = newData;
 
-      // Restore the resize grippie.
-      $(element).siblings('.grippie').show();
       return !!editor;
     },
 
@@ -149,6 +151,11 @@
      * Key-value map of all active instances of CKEditor 5.
      */
     instances: new Map(),
+
+    /**
+     * The last-active CKEditor 5 instance.
+     */
+    activeEditor: null,
 
     /**
      * Boolean indicating if CKEditor instances should be attached even if they
@@ -277,6 +284,29 @@
     },
 
     /**
+     * Binds an on change event to the editor to watch for focus changes.
+     *
+     * The Backdrop.ckeditor5.activeEditor variable can be used by other modules
+     * to insert content into the editor, or provide other outside integrations.
+     *
+     * @param editor
+     *   The CKEditor 5 instance.
+     */
+    trackActiveEditor: function (editor) {
+      // If no editor has been set yet, set the first one as the active.
+      if (!Backdrop.ckeditor5.activeEditor) {
+        Backdrop.ckeditor5.activeEditor = editor;
+      }
+      // Track when focus is set on a new editor.
+      // See https://ckeditor.com/docs/ckeditor5/latest/framework/deep-dive/ui/focus-tracking.html#a-note-about-the-global-focus-tracker
+      editor.ui.focusTracker.on('change:isFocused', (evt, data, isFocused) => {
+        if (isFocused) {
+          Backdrop.ckeditor5.activeEditor = editor;
+        }
+      });
+    },
+
+    /**
      * Compare the data before CKEditor 5 is attached vs. after it is attached.
      *
      * This comparison reformats both the before and after values to the same
@@ -291,13 +321,20 @@
      *   Returns true if values have been modified, false if unchanged.
      */
     checkValueModified: function (beforeAttachValue, afterAttachValue) {
+      // Create a sandboxed document within an iframe.
+      const sandboxIframe = document.createElement('iframe');
+      sandboxIframe.setAttribute('sandbox', 'allow-same-origin');
+      sandboxIframe.srcdoc = "<!doctype html>";
+      document.body.append(sandboxIframe);
+      const sandboxDocument = sandboxIframe.contentDocument;
+
       // Pass the before value through elementGetHtml() to standardize
       // attribute order and self-closing tags. For example, two <img> tags with
       // src, width, and height attributes should be equal, even if one uses the
       // order height, src, width. Similarly, <hr /> and <hr> should be
       // considered the same. Passing in an out of the DOM makes these two
       // values use the same order and tag closing.
-      const beforeElement = document.createElement('template');
+      const beforeElement = sandboxDocument.createElement('template');
       beforeElement.innerHTML = beforeAttachValue;
       beforeAttachValue = Backdrop.ckeditor5.elementGetHtml(beforeElement.content);
 
@@ -305,9 +342,9 @@
       // formatHtml(). Wrap both strings with a temporary <div> tag, to allow
       // childNodes (which is used later when comparing the two strings) to work
       // on them.
-      const formattedBeforeValue = document.createElement('div');
+      const formattedBeforeValue = sandboxDocument.createElement('div');
       formattedBeforeValue.innerHTML = Backdrop.ckeditor5.formatHtml(beforeAttachValue);
-      const formattedAfterValue = document.createElement('div');
+      const formattedAfterValue = sandboxDocument.createElement('div');
       formattedAfterValue.innerHTML = Backdrop.ckeditor5.formatHtml(afterAttachValue);
 
       // Get all Nodes for each string.
@@ -317,6 +354,7 @@
       // If the number of Nodes differs, then the values have been modified.
       // Bail early in that case.
       if (formattedBeforeValueNodes.length !== formattedAfterValueNodes.length) {
+        sandboxIframe.remove();
         return true;
       }
 
@@ -334,6 +372,7 @@
           if (!formattedBeforeValueNodes[i].isEqualNode(formattedAfterValueNodes[i])) {
             // Bail on the first pair of Nodes that is found to have different
             // attributes/values regardless of their order.
+            sandboxIframe.remove();
             return true;
           }
         }
@@ -341,6 +380,7 @@
 
       // If all previous checks for modified values failed, assume that the two
       // strings have not been modified.
+      sandboxIframe.remove();
       return false;
     },
 

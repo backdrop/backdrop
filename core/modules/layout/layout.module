@@ -817,6 +817,7 @@ function layout_theme() {
         'content' => NULL,
         'settings' => NULL,
         'layout' => NULL,
+        // @todo: Rename to layout_template_info in 2.x.
         'layout_info' => NULL,
         'renderer' => NULL,
         'attributes' => array(),
@@ -830,6 +831,9 @@ function layout_theme() {
     'layout_content_form' => array(
       'template' => 'templates/layout-content-form',
       'render element' => 'form',
+    ) + $base,
+    'layout_hero_background_image' => array(
+      'render element' => 'element',
     ) + $base,
     'layout_info' => array(
       'variables' => array('layout' => NULL),
@@ -882,6 +886,7 @@ function layout_theme() {
           'content' => NULL,
           'settings' => NULL,
           'layout' => NULL,
+          // @todo: Rename to layout_template_info in 2.x.
           'layout_info' => NULL,
           'renderer' => NULL,
           'attributes' => array(),
@@ -1611,6 +1616,23 @@ function _layout_get_all_info($data_type, $init = array()) {
 
     foreach (module_implements($data_type . '_info') as $module) {
       $function = $module . '_' . $data_type . '_info';
+      // A module implements deprecated hook_layout_info(), which has been
+      // renamed in 1.30.0.
+      if ($data_type == 'layout') {
+        $link = l(t('Change record: @hook_old has been renamed to @hook_new.', array(
+          '@hook_old' => 'hook_layout_info()',
+          '@hook_new' => 'hook_layout_template_info()',
+        )), 'https://docs.backdropcms.org/change-records/hook_layout_info-renamed-to-hook_layout_template_info');
+        // We can not use watchdog_deprecated_function() here, as its message
+        // would misleadingly point to this function instead of the actual hook
+        // implementation.
+        $placeholders = array(
+          '%module' => $module,
+          '%hook' => 'hook_layout_info()',
+          '%function' => $function . '()',
+        );
+        watchdog('layout', 'Module %module implements deprecated %hook in %function.', $placeholders, WATCHDOG_DEPRECATED, $link);
+      }
       $data = $function();
       $module_path = backdrop_get_path('module', $module);
 
@@ -1651,8 +1673,9 @@ function _layout_get_all_info($data_type, $init = array()) {
  *
  * @return array|boolean
  *   The layout template information, as returned by either a stand-alone
- *   template .info file, or through a module's hook_layout_info().
+ *   template .info file, or through a module's hook_layout_template_info().
  *
+ * @see hook_layout_template_info()
  * @see hook_layout_info()
  */
 function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE) {
@@ -1660,6 +1683,7 @@ function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE
 
   // Try getting a cached list of layout info.
   if (!isset($info) && !$rebuild) {
+    // @todo: Rename cache key to layout_template_info in 2.x.
     $cache = cache('cache')->get('layout_info');
 
     if ($cache && $cache->data) {
@@ -1685,10 +1709,12 @@ function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE
       $init[$name]['title'] = $init[$name]['name'];
       $init[$name]['name'] = $name;
     }
-    $info = _layout_get_all_info('layout', $init);
+    $info = _layout_get_all_info('layout_template', $init);
+    // Account for implementations of the deprecated hook_layout_info().
+    $info = _layout_get_all_info('layout', $info);
 
     // Populate defaults.
-    foreach ($info as $name => $layout_info) {
+    foreach ($info as $name => $layout_template_info) {
       $info[$name] += array(
         'hidden' => FALSE,
         'preview' => 'preview.png',
@@ -1698,7 +1724,7 @@ function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE
         ),
       );
       if (!isset($info[$name]['template'])) {
-        $template_path = BACKDROP_ROOT . '/' . $layout_info['path'] . '/layout--' . str_replace('_', '-', $name) . '.tpl.php';
+        $template_path = BACKDROP_ROOT . '/' . $layout_template_info['path'] . '/layout--' . str_replace('_', '-', $name) . '.tpl.php';
 
         if (is_file($template_path)) {
           $info[$name]['template'] = 'layout--' . str_replace('_', '-', $name);
@@ -1738,7 +1764,7 @@ function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE
  *
  * @return array|boolean
  *   The layout template information, as returned by either a stand-alone
- *   template .info file, or through a module's hook_layout_info().
+ *   template .info file, or through a module's hook_layout_template_info().
  *
  * @deprecated since 1.4.0
  * @see layout_get_layout_template_info()
@@ -2145,7 +2171,7 @@ function layout_context_required_by_path($path) {
         // Determine the argument placement within the path.
         $parts = explode('/', $context_path);
         foreach ($parts as $part_index => $part) {
-          if ($part === $context_info['path placeholder']) {
+          if (!empty($context_info['path placeholder']) && $part === $context_info['path placeholder']) {
             $required_context_info[$part_index] = array(
               'plugin' => $context_info['name'],
               'position' => $part_index,
@@ -2444,9 +2470,9 @@ function layout_flexible_template_load_all() {
 }
 
 /**
- * Implements hook_layout_info().
+ * Implements hook_layout_template_info().
  */
-function layout_layout_info() {
+function layout_layout_template_info() {
   $layouts = array();
   $styles = layout_flexible_row_styles();
 

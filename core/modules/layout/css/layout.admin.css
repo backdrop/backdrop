@@ -254,7 +254,8 @@
 }
 .layout-editor-block {
   margin: -1px 1px 15px -1px;
-  background: #FFF;
+  background: #ffffff;
+  border: 1px solid #cccccc;
   border-radius: 4px;
   box-shadow: 2px 2px 0 0 #d0d0d0;
 }
@@ -357,6 +358,14 @@
 .layout-content-form .page-title .layout-editor-block-title .description {
   padding: 0 0.8em;
   font-size: 90%;
+}
+
+/* Hero block provided by Layout module. */
+.layout-hero-image-upload .layout-hero-background-preview-empty {
+  padding-bottom: 0.5em;
+}
+.layout-hero-image-upload .form-file {
+  max-width: 20em;
 }
 
 /* Layout Misc */

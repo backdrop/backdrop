@@ -5,10 +5,10 @@
  */
 
 /**
- * Implements hook_layout_info().
+ * Implements hook_layout_template_info().
  */
-function layout_test_layout_info() {
-  $layouts['layout_test_layout'] = array(
+function layout_test_layout_template_info() {
+  $layout_templates['layout_test_layout_template'] = array(
     'title' => 'Layout test layout',
     'regions' => array(
       'header' => t('Header'),
@@ -18,10 +18,10 @@ function layout_test_layout_info() {
       'footer' => t('Footer'),
     ),
     'default region' => 'content',
-    'path' => 'layout_test_layout',
+    'path' => 'layout_test_layout_template',
   );
 
-  return $layouts;
+  return $layout_templates;
 }
 
 /**

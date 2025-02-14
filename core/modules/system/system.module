@@ -121,24 +121,23 @@ function system_theme() {
     ) + $base,
     'token_tree' => array(
       'variables' => array(
+        'text' => t('Browse available tokens.'),
         'token_types' => array(),
         'global_types' => TRUE,
+        'dialog' => FALSE,
         'click_insert' => TRUE,
         'show_restricted' => FALSE,
-        'recursion_limit' => 3,
-        'dialog' => FALSE,
       ),
     ) + $base,
     'token_tree_link' => array(
       'variables' => array(
-        'text' => NULL,
-        'options' => array(),
+        'text' => t('Browse available tokens.'),
         'token_types' => array(),
         'global_types' => TRUE,
+        'dialog' => TRUE,
+        'options' => array(),
         'click_insert' => TRUE,
         'show_restricted' => FALSE,
-        'recursion_limit' => 3,
-        'dialog' => TRUE,
       ),
     ) + $base,
     'label_machine_name' => array(
@@ -154,7 +153,7 @@ function system_theme() {
  * Implements hook_permission().
  */
 function system_permission() {
-  return array(
+  $permissions = array(
     'administer modules' => array(
       'title' => t('Administer modules'),
     ),
@@ -169,8 +168,20 @@ function system_permission() {
     'administer software updates' => array(
       'title' => t('Administer software updates'),
       'restrict access' => TRUE,
-      'warning' => t('Run site updates for Backdrop projects.'),
+      'warning' => t('Allows running site updates (update.php) for Backdrop projects.'),
     ),
+  );
+  // If backups are not configured, do not show related permission.
+  if (backup_get_backup_directory()) {
+    $permissions += array(
+      'restore site backups' => array(
+        'title' => t('Restore site backups'),
+        'restrict access' => TRUE,
+        'warning' => t('Allows restoring the configuration and database from backups (restore.php).'),
+      ),
+    );
+  }
+  $permissions += array(
     'access administration pages' => array(
       'title' => t('Use the administration pages'),
     ),
@@ -189,6 +200,8 @@ function system_permission() {
       'description' => t('Provides access to manually flush caches.'),
     ),
   );
+
+  return $permissions;
 }
 
 /**
@@ -397,12 +410,14 @@ function system_element_info() {
     '#cols' => 60,
     '#rows' => 5,
     '#resizable' => 'vertical',
+    '#description_display' => 'before',
     '#process' => array('ajax_process_form'),
     '#theme' => 'textarea',
     '#theme_wrappers' => array('form_element'),
   );
   $types['radios'] = array(
     '#input' => TRUE,
+    '#description_display' => 'before',
     '#process' => array('form_process_radios'),
     '#theme_wrappers' => array('container__radios'),
     '#pre_render' => array('form_pre_render_conditional_form_element'),
@@ -417,6 +432,7 @@ function system_element_info() {
   );
   $types['checkboxes'] = array(
     '#input' => TRUE,
+    '#description_display' => 'before',
     '#process' => array('form_process_checkboxes'),
     '#theme_wrappers' => array('container__checkboxes'),
     '#pre_render' => array('form_pre_render_conditional_form_element'),
@@ -516,6 +532,7 @@ function system_element_info() {
     '#collapsible' => FALSE,
     '#collapsed' => FALSE,
     '#value' => NULL,
+    '#description_display' => 'before',
     '#process' => array('form_process_fieldset', 'ajax_process_form'),
     '#pre_render' => array('form_pre_render_fieldset'),
     '#theme_wrappers' => array('fieldset'),
@@ -1105,13 +1122,23 @@ function system_menu() {
     'file' => 'system.admin.inc',
   );
 
-  // Token paths.
+  // AJAX endpoint for the assembled token tree.
   $items['token/tree'] = array(
     'page callback' => 'system_token_output',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
     'file' => 'system.pages.inc',
     'theme callback' => 'ajax_base_page_theme',
+  );
+
+  // AJAX endpoint for retrieving a token.
+  $items['token-browser/token/%'] = array(
+    'page callback' => 'system_token_browser',
+    'page arguments' => array(2),
+    'delivery callback' => 'system_token_browser_output',
+    'access callback' => 'system_token_browser_access',
+    'file' => 'system.pages.inc',
+    'type' => MENU_CALLBACK,
   );
 
   // Machine names transliteration.
@@ -2107,6 +2134,9 @@ function system_library_info() {
     'dependencies' => array(
       array('system', 'jquery.treetable'),
       array('system', 'backdrop.ajax'),
+    ),
+    'icons' => array(
+      'caret-down',
     ),
   );
 
@@ -3896,7 +3926,7 @@ function system_check_http_request() {
 /**
  * Menu callback; Retrieve a JSON object containing a suggested time zone name.
  */
-function system_timezone($abbreviation = '', $offset = -1, $is_daylight_saving_time = NULL) {
+function system_timezone($abbreviation = '', $offset = -1, $is_daylight_saving_time = -1) {
   // An abbreviation of "0" passed in the callback arguments should be
   // interpreted as the empty string.
   $abbreviation = $abbreviation ? $abbreviation : '';
@@ -4157,6 +4187,10 @@ function system_config_info() {
     'label' => t('System authorize'),
     'group' => t('Configuration'),
   );
+  $prefixes['system.backup'] = array(
+    'label' => t('System backup'),
+    'group' => t('Configuration'),
+  );
   $prefixes['system.date'] = array(
     'label' => t('System date'),
     'group' => t('Configuration'),
@@ -4201,14 +4235,14 @@ function system_system_info_alter(&$info, $file, $type) {
  * Menu callback; Returns the standard "Page not found" error page.
  */
 function system_404() {
-  return t('The requested page "@path" could not be found.', array('@path' => request_uri()));
+  return '<p>' . t('The requested page "@path" could not be found.', array('@path' => request_uri())) . '</p>';
 }
 
 /**
  * Menu callback; Returns the standard "Page not found" error page.
  */
 function system_403() {
-  return t('You are not authorized to access this page.');
+  return '<p>' . t('You are not authorized to access this page.') . '</p>';
 }
 
 /**
