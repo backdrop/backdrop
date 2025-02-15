@@ -265,7 +265,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * @param string|null $alias
    *   The alias for the table. In most cases this should be the first letter
    *   of the table, or the first letter of each "word" in the table.
-   * @param array|null $condition
+   * @param string|DatabaseCondition|null $condition
    *   The condition on which to join this table. If the join requires values,
    *   this clause should use a named placeholder and the value or values to
    *   insert should be passed in the 4th parameter. For the first table joined
@@ -289,7 +289,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * @param string|null $alias
    *   The alias for the table. In most cases this should be the first letter
    *   of the table, or the first letter of each "word" in the table.
-   * @param string|null $condition
+   * @param string|DatabaseCondition|null $condition
    *   The condition on which to join this table. If the join requires values,
    *   this clause should use a named placeholder and the value or values to
    *   insert should be passed in the 4th parameter. For the first table joined
@@ -313,7 +313,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * @param string|null $alias
    *   The alias for the table. In most cases this should be the first letter
    *   of the table, or the first letter of each "word" in the table.
-   * @param string|null $condition
+   * @param string|DatabaseCondition|null $condition
    *   The condition on which to join this table. If the join requires values,
    *   this clause should use a named placeholder and the value or values to
    *   insert should be passed in the 4th parameter. For the first table joined
@@ -337,7 +337,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    * @param string|null $alias
    *   The alias for the table. In most cases this should be the first letter
    *   of the table, or the first letter of each "word" in the table.
-   * @param string|null $condition
+   * @param string|DatabaseCondition|null $condition
    *   The condition on which to join this table. If the join requires values,
    *   this clause should use a named placeholder and the value or values to
    *   insert should be passed in the 4th parameter. For the first table joined
@@ -369,7 +369,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    *   The alias for the table. In most cases this should be the first letter
    *   of the table, or the first letter of each "word" in the table. If
    *   omitted, one will be dynamically generated.
-   * @param string|null $condition
+   * @param string|DatabaseCondition|null $condition
    *   The condition on which to join this table. If the join requires values,
    *   this clause should use a named placeholder and the value or values to
    *   insert should be passed in the 4th parameter. For the first table joined
