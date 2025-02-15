@@ -1,0 +1,390 @@
+<?php
+/**
+ * @file
+ * Test classes for verifying Backup and Restore functionality.
+ */
+
+/**
+ * Base class for testing Backup and Restore functionality.
+ */
+class BackupBaseTestCase extends BackdropWebTestCase {
+
+  /**
+   * Array of errors triggered during the restore process.
+   */
+  protected $restoreErrors = array();
+
+  /**
+   * Admin user with the permission to run updates.
+   *
+   * @var User
+   */
+  protected $adminUser;
+
+  /**
+   * List of all backups from before the test was executed.
+   *
+   * @var array[]
+   */
+  protected $backups = array();
+
+  /**
+   * Checks that zlib is enabled in order to run the upgrade tests.
+   */
+  protected function checkRequirements() {
+    $errors = parent::checkRequirements();
+    if (!function_exists('gzopen')) {
+      $errors[] = 'Missing zlib requirement for update tests.';
+    }
+    return $errors;
+  }
+
+
+  /**
+   * Overrides BackdropWebTestCase::setUp() for upgrade testing.
+   */
+  protected function setUp() {
+    $module_list = func_get_arg(0);
+    parent::setUp($module_list);
+    require_once BACKDROP_ROOT . '/core/includes/update.inc';
+    require_once BACKDROP_ROOT . '/core/includes/backup.inc';
+
+    $this->adminUser = $this->backdropCreateUser(array(
+      'access content',
+      'access user profiles',
+      'access administration pages',
+      'administer site configuration',
+      'administer software updates',
+      'restore site backups',
+      'view the administration theme',
+      'access site in maintenance mode',
+    ));
+
+    // Get a list of backups before the test was run.
+    $this->backups = backup_directory_list();
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function tearDown() {
+    parent::tearDown();
+
+    // Compare the list of backups to those from before the test run. Remove
+    // all the newly created backup files.
+    $new_backups = array_diff_key(backup_directory_list(), $this->backups);
+    foreach ($new_backups as $backup) {
+      file_unmanaged_delete_recursive($backup['backup_directory']);
+    }
+  }
+
+  /**
+   * Restore a backup via restore.php.
+   *
+   * @return bool
+   *   TRUE if the restore succeeded, FALSE otherwise.
+   */
+  protected function restoreBackup() {
+    // Load the first update screen.
+    $update_url = $GLOBALS['base_url'] . '/core/restore.php';
+    $this->backdropGet($update_url, array('external' => TRUE));
+    if (!$this->assertResponse(200)) {
+      return FALSE;
+    }
+
+    // Continue.
+    $this->backdropPost(NULL, array(), t('Continue'));
+    if (!$this->assertResponse(200)) {
+      return FALSE;
+    }
+
+    $this->backdropPost(NULL, array(), t('Restore backup'));
+
+    // Check for errors during the restore process.
+    $error_messages = (array) $this->xpath('//li[@class=:class]', array(':class' => 'failure'));
+    foreach ($error_messages as $element) {
+      $message = strip_tags($element->asXML());
+      $this->restoreErrors[] = $message;
+      $this->fail($message);
+    }
+
+    if (!empty($this->restoreErrors)) {
+      return FALSE;
+    }
+
+    $this->assertText(t('The backup was successfully restored.'));
+    $this->assertLink(t('Return to your site'));
+
+    return TRUE;
+  }
+}
+
+/**
+ * Tests backup settings form.
+ */
+class BackupSettingsTestCase extends BackupBaseTestCase {
+  /**
+   * Overrides BackdropWebTestCase::setUp() for backup settings testing.
+   */
+  protected function setUp() {
+    parent::setUp(array('backup_test'));
+  }
+
+  /**
+   * Tests the backup settings form.
+   */
+  public function testBackupSettingsForm() {
+    // Hit the homepage to ensure a cache entry exists in cache_page.
+    $this->backdropGet('<front>');
+    $cached_homepage = cache_get(url('<front>', array('absolute' => TRUE)), 'cache_page');
+    $this->assertTrue($cached_homepage, 'Cache exists for the site homepage.');
+
+    // Check that the "backup_test" table was created and has a value, as set
+    // in backup_test.install.
+    $database_row = db_query('SELECT * FROM {backup_test}')->fetchAssoc();
+    $this->assertEqual($database_row['name'], 'test_value1', 'Initial value present in backup_test table before backup.');
+
+    // Check that the default config file has the expected value.
+    $config_value = config_get('backup_test.settings', 'test_setting');
+    $this->assertEqual($config_value, 'foo', 'Initial config value present in backup_test.settings config file.');
+
+    // Verify backup page requires permissions to view.
+    $this->backdropGet('backup-test');
+    $this->assertResponse(403, 'Settings form not accessible to non-admins.');
+
+    // Log in as admin account with "restore site backups" permission.
+    $this->backdropLogin($this->adminUser);
+    $this->backdropGet('backup-test');
+    $this->assertResponse(200, 'Settings form accessible to an admin.');
+
+    // Verify defaults are as expected.
+    $this->assertFieldChecked('edit-targets-db-default-enabled', 'Default database backup checked.');
+    $this->assertNoFieldChecked('edit-targets-db-default-settings-lock-tables', 'Lock tables on default database not checked.');
+
+    // When running inside a test, only the simpletest prefix for this test run
+    // should be included in the backup. This means that the "system" and all
+    // other non-prefixed tables should not be included.
+    $original_connection = Database::getConnection('default', 'simpletest_original_default');
+    $original_prefix = $original_connection->tablePrefix('system');
+    $test_prefix = $this->databasePrefix;
+
+    $include_exclude_id = 'edit-targets-db-default-settings-include-exclude';
+    $this->assertOptionSelected($include_exclude_id, 'include');
+
+    $exclude_tables_id = 'edit-targets-db-default-settings-include-tables';
+    $this->assertOptionSelected($exclude_tables_id, $test_prefix . 'system');
+    $this->assertOptionSelected($exclude_tables_id, $test_prefix . 'cache_page');
+    $this->assertNoOptionSelected($exclude_tables_id, $original_prefix . 'system');
+    $this->assertNoOptionSelected($exclude_tables_id, $original_prefix . 'cache_page');
+
+    // The cache tables for the test prefix should have their data excluded, but
+    // the original prefix's table should not be data excluded (the entire table
+    // is skipped per above).
+    $nodata_tables_id = 'edit-targets-db-default-settings-nodata-tables';
+    $this->assertNoOptionSelected($nodata_tables_id, $original_prefix . 'cache_page');
+    $this->assertOptionSelected($nodata_tables_id, $test_prefix . 'cache_page');
+
+    // Create a backup with the default settings.
+    $original_backups = backup_directory_list();
+    $this->backdropPost(NULL, array(), t('Create backup'));
+    $this->assertText(t('Backup created successfully.'));
+    $new_backups = backup_directory_list();
+    $this->assertTrue(count($new_backups) === (count($original_backups) + 1), 'New backup directory created.');
+
+    // Now with the backup created, make changes to the database and config.
+    config_set('backup_test.settings', 'test_setting', 'bar');
+    db_update('backup_test')
+      ->condition('name', 'test_setting')
+      ->fields(array(
+        'value' => 'bar',
+      ))
+      ->execute();
+
+    // Restore the backup via restore.php.
+    $this->restoreBackup();
+
+    // Confirm the page cache cleared out as part of the restore.
+    $cached_homepage = cache_get(url('<front>', array('absolute' => TRUE)), 'cache_page');
+    $this->assertFalse($cached_homepage, 'The home page does not have a cache after restoring the database backup, because its table data was excluded.');
+
+    // Confirm the backup_test table's contents were restored.
+    $database_row = db_query('SELECT * FROM {backup_test}')->fetchAssoc();
+    $this->assertEqual($database_row['name'], 'test_value1', 'Initial value present in backup_test table before backup.');
+
+    // Check that the config file data has been restored.
+    backdrop_static_reset('config');
+    $config_value = config_get('backup_test.settings', 'test_setting');
+    $this->assertEqual($config_value, 'foo', 'Initial config value present in backup_test.settings config file.');
+
+    // Set a backup limit of 2 and create a second backup.
+    config_set('system.backup', 'backup_limit', 2);
+    sleep(1);
+
+    $edit = array(
+      'options[name]' => 'test_backup',
+      'options[label]' => 'Test Backup',
+      'options[description]' => 'Test backup description.',
+    );
+    $this->backdropPost('backup-test', $edit, t('Create backup'));
+    $this->assertText(t('Backup created successfully.'));
+
+    // Confirm that at least two backups exist.
+    $two_backups1 = backup_directory_list();
+    $this->assertTrue(count($two_backups1) == 2, 'Two backups created with backup limit of two.');
+
+    // And confirm the saved values are present.
+    $backup = $two_backups1['test_backup'];
+    $this->assertEqual($backup['name'], 'test_backup');
+    $this->assertTrue($backup['label'], 'Test Backup');
+    $this->assertTrue($backup['description'], 'Test backup description.');
+
+    // Create a 3rd backup, and confirm that the oldest one is deleted.
+    sleep(1);
+    $this->backdropPost('backup-test', array(), t('Create backup'));
+    $this->assertText(t('Backup created successfully.'));
+
+    $two_backups2 = backup_directory_list();
+    $this->assertTrue(count($two_backups2) == 2, 'Still only two backups after creating third backup with limit of two.');
+
+    // Backups are listed alphabetically, and since that is also chronological,
+    // the first item would be the oldest backup.
+    $deleted_backup_key = key($two_backups1);
+    $this->assertTrue(!in_array($deleted_backup_key, $two_backups2), 'The oldest backup was deleted to keep within the backup limit.');
+  }
+}
+
+/**
+ * Tests backup and restore via update.php and restore.php.
+ */
+class BackupUpdateTestCase extends BackupBaseTestCase {
+  /**
+   * Array of errors triggered during the upgrade process.
+   */
+  protected $upgradeErrors = array();
+
+  /**
+   * Overrides BackdropWebTestCase::setUp() for upgrade testing.
+   */
+  protected function setUp() {
+    parent::setUp(array('update_test_1', 'update_test_2', 'update_test_3'));
+
+    $this->upgradeErrors = array();
+
+    db_query("UPDATE {system} SET schema_version = 0 WHERE name LIKE 'update_test_%'");
+  }
+
+  /**
+   * Perform the upgrade.
+   *
+   * @return bool
+   *   TRUE if the upgrade succeeded, FALSE otherwise.
+   */
+  protected function performUpgradeWithBackup() {
+    // Load the first update screen.
+    $update_url = $GLOBALS['base_url'] . '/core/update.php';
+    $this->backdropGet($update_url, array('external' => TRUE));
+    if (!$this->assertResponse(200)) {
+      return FALSE;
+    }
+
+    // Continue.
+    $this->backdropPost(NULL, array(), t('Continue'));
+    if (!$this->assertResponse(200)) {
+      return FALSE;
+    }
+
+    $this->backdropPost(NULL, array(), t('Create backup'));
+    if (!$this->assertResponse(200)) {
+      return FALSE;
+    }
+
+    // Go!
+    $this->backdropPost(NULL, array(), t('Apply pending updates'));
+    if (!$this->assertText(t('Updates were attempted'))) {
+      return FALSE;
+    }
+
+    // Check for errors during the update process.
+    foreach ($this->xpath('//li[@class=:class]', array(':class' => 'failure')) as $element) {
+      $message = strip_tags($element->asXML());
+      $this->upgradeErrors[] = $message;
+      $this->fail($message);
+    }
+
+    if (!empty($this->upgradeErrors)) {
+      // Upgrade failed, the installation might be in an inconsistent state,
+      // don't process.
+      return FALSE;
+    }
+
+    // Check if there still are pending updates.
+    $this->backdropGet($update_url, array('external' => TRUE));
+    $this->backdropPost(NULL, array(), t('Continue'));
+    if (!$this->assertText(t('No pending updates.'), 'No pending updates at the end of the update process.')) {
+      return FALSE;
+    }
+
+    $this->checkPermissions(array(), TRUE);
+
+    // Check we can load the home page of the new site.
+    $this->backdropGet('');
+    return $this->assertText('Powered by Backdrop CMS', 'The home page of the upgraded site loads successfully.');
+  }
+
+  /**
+   * Tests running an update with a backup and then restoring it.
+   */
+  public function testUpdateWithBackup() {
+    $this->backdropLogin($this->adminUser);
+
+    // Store the original site name.
+    $original_site_name = 'Original site name ' . $this->randomName(16);
+    $edit = array(
+      'site_name' => $original_site_name,
+    );
+    $this->backdropPost('admin/config/system/site-information', $edit, t('Save configuration'));
+
+    // Create a few pieces of content to confirm they exist after restore.
+    $test_node1 = $this->backdropCreateNode();
+    $test_user1 = $this->backdropCreateUser();
+
+    $this->performUpgradeWithBackup();
+
+    // Create content after creating the backup.
+    $test_node2 = $this->backdropCreateNode();
+    $test_user2 = $this->backdropCreateUser();
+
+    // Change the site name to test configuration being reverted.
+    $new_site_name = 'New site name ' . $this->randomName(16);
+    $edit = array(
+      'site_name' => $new_site_name,
+    );
+    $this->backdropPost('admin/config/system/site-information', $edit, t('Save configuration'));
+    $this->assertText(t('The configuration options have been saved.'));
+
+    $this->backdropGet('<front>');
+    $this->assertText($new_site_name);
+    $this->assertNoText($original_site_name);
+
+    $this->restoreBackup();
+
+    $this->backdropGet('<front>');
+    $this->assertText('Powered by Backdrop CMS', 'The home page of the restored site loads successfully.');
+
+    // Verify the site title has been reverted.
+    $this->assertText($original_site_name);
+    $this->assertNoText($new_site_name);
+
+    // Verify content before the backup still exists.
+    $this->backdropGet('node/' . $test_node1->nid);
+    $this->assertResponse(200, 'Test content from before backup is accessible.');
+    $this->backdropGet('user/' . $test_user1->uid);
+    $this->assertResponse(200, 'Test user from before backup is accessible.');
+
+    // Verify the content after the backup has been wiped out.
+    $this->backdropGet('node/' . $test_node2->nid);
+    $this->assertResponse(404, 'Test content from after backup has been removed.');
+    $this->backdropGet('user/' . $test_user2->uid);
+    $this->assertResponse(404, 'Test user from after backup has been removed.');
+  }
+}

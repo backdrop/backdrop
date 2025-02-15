@@ -950,4 +950,72 @@ class ViewsUIWizardDisplaysTestCase extends ViewsUIWizardHelper {
 
     $this->backdropPost(NULL, array(), t('Save'));
   }
+
+  /**
+   * Test multiple overridden page displays with different permissions.
+   */
+  function testPageDisplaysWithDifferentPermissions() {
+    // Create a basic view with no displays.
+    $view['human_name'] = $this->randomName(16);
+    $view['name'] = strtolower($this->randomName(16));
+    $view['page[create]'] = FALSE;
+    $view['block[create]'] = FALSE;
+
+    $this->backdropPost('admin/structure/views/add', $view, t('Continue and configure'));
+
+    // Add 4 page displays. Using different permissions for each one.
+    $displays = array(
+      'page_1' => 'administer modules',
+      'page_2' => 'administer nodes',
+      'page_3' => 'access content',
+      'page_4' => 'bypass node access',
+    );
+    foreach ($displays as $display => $permission) {
+      // Add a new Page, Set it permissions to 'administer modules'.
+      $edit = array();
+      $this->backdropPost("admin/structure/views/view/{$view['name']}/configure", $edit, t('Add Page'));
+
+      $edit = array(
+        'path' => "my-path",
+      );
+      $this->backdropPost("admin/structure/views/nojs/display/{$view['name']}/$display/path", $edit, t('Apply'));
+
+      $edit = array(
+        'override[dropdown]' => $display,
+        'access_options[perm]' => $permission,
+      );
+      $this->backdropPost("admin/structure/views/nojs/display/{$view['name']}/$display/access_options", $edit, t('Apply'));
+    }
+
+    // Save all the displays.
+    $this->backdropPost("admin/structure/views/view/{$view['name']}/configure/page_4", array(), t('Save'));
+
+    foreach ($displays as $display => $permission) {
+      $this->backdropGet("admin/structure/views/nojs/display/{$view['name']}/$display/access_options");
+      // Check the permissions are the same after save all the displays.
+      $this->assertOptionSelected('edit-access-options-perm', $permission);
+    }
+
+    // Now set page_1, page_2, and page_4 to defaults.
+    foreach (array('page_1', 'page_2', 'page_4') as $display) {
+      $edit = array(
+        'override[dropdown]' => 'default',
+        'access_options[perm]' => 'administer nodes',
+      );
+      $this->backdropPost("admin/structure/views/nojs/display/{$view['name']}/$display/access_options", $edit, t('Apply'));
+    }
+
+    // Save all the displays.
+    $this->backdropPost("admin/structure/views/view/{$view['name']}/configure/page_4", array(), t('Save'));
+
+    // Finally check that only 'page_3' have a different permission assigned.
+    foreach (array('page_1', 'page_2', 'page_3', 'page_4') as $display) {
+      $this->backdropGet("admin/structure/views/nojs/display/{$view['name']}/$display/access_options");
+      $permission = 'administer nodes';
+      if ($display == 'page_3') {
+        $permission = 'access content';
+      }
+      $this->assertOptionSelected('edit-access-options-perm', $permission);
+    }
+  }
 }

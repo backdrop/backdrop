@@ -15,3 +15,6 @@ $settings['backdrop_drupal_compatibility'] = FALSE;
 // Use a consistent config directory.
 $config_directories['active'] = 'files/config/active';
 $config_directories['staging'] = 'files/config/staging';
+
+// Specify a backup directory to test backup/restore capabilities.
+$settings['backup_directory'] = 'files/backups';

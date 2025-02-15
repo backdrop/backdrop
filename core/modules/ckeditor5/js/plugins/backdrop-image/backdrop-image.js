@@ -88,7 +88,7 @@ class BackdropImage extends CKEditor5.core.Plugin {
     conversion
       .for('dataDowncast')
       // Pull out the caption if present. This needs to be done before other
-      // conversions because afterward the caption element is eleminated.
+      // conversions because afterward the caption element is eliminated.
       .add(viewCaptionToCaptionAttribute(editor))
       // Create a blank image element, removing any wrapping figure element.
       .elementToElement({

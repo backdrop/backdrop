@@ -5,11 +5,11 @@
  */
 
 /**
- * Form constructor for testing FAPI file inclusion of the file specified in
+ * Form constructor for testing Form API file inclusion of the file specified in
  * hook_menu().
  */
 function form_test_load_include_menu($form, &$form_state) {
-  // Submit the form via Ajax. That way the FAPI has to care about including
+  // Submit the form via Ajax. That way the Form API has to care about including
   // the file specified in hook_menu().
   $ajax_wrapper_id = backdrop_html_id('form-test-load-include-menu-ajax-wrapper');
   $form['ajax_wrapper'] = array(

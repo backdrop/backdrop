@@ -29,7 +29,17 @@ function user_autocomplete($string = '') {
  */
 function user_pass_page() {
   backdrop_set_title(t('Reset password'));
-  return backdrop_get_form('user_pass');
+  $user_password_form = backdrop_get_form('user_pass');
+
+  // If user is logged in, always display with tabs appearance.
+  if (user_is_logged_in()) {
+    $output = $user_password_form;
+  }
+  else {
+    $output = user_login_page_wrapper($user_password_form);
+  }
+
+  return $output;
 }
 
 /**
@@ -197,7 +207,7 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
     // Time out, in seconds, until login URL expires.
     $timeout = config_get('system.core', 'user_password_reset_timeout');
     $current = REQUEST_TIME;
-    // Some redundant checks for extra security ?
+    // Some redundant checks for extra security?
     $users = user_load_multiple(array($uid), array('status' => '1'));
     if ($timestamp <= $current && $account = reset($users)) {
       // No time out for first time login.
@@ -225,6 +235,8 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
           user_login_finalize();
           // Clear any password reset flood events for this user.
           flood_clear_event('pass_reset_user', $account->uid);
+          // Clear any failed password validation flood events for this user.
+          flood_clear_event('failed_pass_validation_user', $account->uid);
           backdrop_set_message(t('You have used your one-time log-in link and are now logged-in.'));
           watchdog('user', 'User %name used one-time password reset link at time %timestamp.', array('%name' => $account->name, '%timestamp' => format_date(REQUEST_TIME, 'long')));
           backdrop_goto();

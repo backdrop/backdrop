@@ -957,14 +957,14 @@ class BackdropWebTestCase extends BackdropTestCase {
   /**
    * The content of the page currently loaded in the internal browser.
    *
-   * @var string
+   * @var string|false
    */
   protected $content;
 
   /**
    * The content of the page currently loaded in the internal browser (plain text version).
    *
-   * @var string
+   * @var string|false
    */
   protected $plainTextContent;
 
@@ -1585,6 +1585,10 @@ class BackdropWebTestCase extends BackdropTestCase {
     $config_base_path = 'files/simpletest/' . $this->fileDirectoryName . '/config_';
     $config_directories['active'] = $config_base_path . 'active';
     $config_directories['staging'] = $config_base_path . 'staging';
+
+    // Set the new backup directories. During test execution, these values are
+    // manually set directly in backup_get_backup_directory().
+    $settings['backup_directory'] = 'files/simpletest/' . $this->fileDirectoryName . '/backups';
 
     // Log fatal errors.
     ini_set('log_errors', 1);
