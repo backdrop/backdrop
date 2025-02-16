@@ -150,7 +150,7 @@ function path_clean_string($string, array $options = array()) {
     );
     foreach ($fancy_character_map as $fancy_character => $simple_character) {
       if (!isset($cache['punctuation'][$fancy_character]) && isset($cache['punctuation'][$simple_character])) {
-        $cache['punctuation'][$fancy_character] =  $cache['punctuation'][$simple_character];
+        $cache['punctuation'][$fancy_character] = $cache['punctuation'][$simple_character];
       }
     }
 
