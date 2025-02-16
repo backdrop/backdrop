@@ -3779,6 +3779,9 @@ class NodeAccessJoinTest extends NodeWebTestCase {
    */
   public $posts;
 
+  /**
+   * Set up the test.
+   */
   public function setUp() {
     $modules = array('node_access_test');
     parent::setUp($modules);
@@ -3834,7 +3837,7 @@ class NodeAccessJoinTest extends NodeWebTestCase {
   * - Repeat tests using a user with "access content" and "node test view"
   *   permissions, confirming this user sees the complete view.
   */
- public function testNodeAccessJoin() {
+  public function testNodeAccessJoin() {
 
     // User to add posts and test author access.
     $this->authorUser = $this->backdropCreateUser(array('access content', 'create post content'));
