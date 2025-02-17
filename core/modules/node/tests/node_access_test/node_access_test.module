@@ -194,7 +194,7 @@ function node_access_entity_test_page() {
 function node_access_join_test_page() {
   $output = '';
   try {
-    // Get custom field info
+    // Get custom field info.
     $field_name = 'related_post';
     $field = field_info_field($field_name);
     $join_table = _field_sql_storage_tablename($field);
@@ -238,9 +238,9 @@ function node_access_join_test_page() {
         $output .= '<td headers="view-title-table-column"><a>'.$row->title.'</a></td>';
         $output .= '<td headers="view-title-1-table-column">';
         if (!empty($row->s1_title)) {
-          // Non-empty nodes are wrapped in <a> solely for sake of xpath counting --
-          // in drupal8 these are links (because href is set), but for the purpose
-          // of the tests, href is unnecessary.
+          // Non-empty nodes are wrapped in <a> solely for sake of xpath
+          // counting -- in Drupal these are links (because href is set), but
+          // for the purpose of the tests, href is unnecessary.
           $output .= '<a>'.$row->s1_title.'</a>';
         }
         $output .= '</td><td headers="view-title-2-table-column">';
@@ -255,7 +255,7 @@ function node_access_join_test_page() {
       $output .= '<p>No nodes</p>';
     }
 
-    $output .= '<p>' . ((string) $query ) . '</p>';
+    $output .= '<p>' . ((string) $query) . '</p>';
     $output .= '<p>' . serialize($query->getArguments()) . '</p>';
   }
   catch (Exception $e) {

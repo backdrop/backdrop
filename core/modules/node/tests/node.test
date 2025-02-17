@@ -3814,36 +3814,42 @@ class NodeAccessJoinTest extends NodeWebTestCase {
     field_create_instance($post_instance);
   }
 
- /**
-  * Tests the accessibility of joined nodes.
-  *
-  * - Create two users with "access content" and "create post" permissions
-  *   who can each access their own private posts but not others'.
-  * - Create post-type nodes with and without references to other posts.
-  *   The posts and references represent all possible combinations of the
-  *   tested access types.
-  * - Create page-type nodes referencing each of the posts, as well as a
-  *   page with no reference.
-  * - Use a custom view that creates two joins between nodes and has a
-  *   node_access tag. The view lists the page nodes, the post
-  *   referenced by each page node, and the post referenced by each
-  *   post.
-  *
-  * - Login with the author user and check that he does not have access to
-  *   private nodes created by other users. Test access using total row
-  *   count as well as checking for presence of individual page titles.
-  * - Repeat tests using a user with only the "access content" permission,
-  *   confirming this user does not have access to any private nodes.
-  * - Repeat tests using a user with "access content" and "node test view"
-  *   permissions, confirming this user sees the complete view.
-  */
+  /**
+    * Tests the accessibility of joined nodes.
+    *
+    * - Create two users with "access content" and "create post" permissions
+    *   who can each access their own private posts but not others'.
+    * - Create post-type nodes with and without references to other posts.
+    *   The posts and references represent all possible combinations of the
+    *   tested access types.
+    * - Create page-type nodes referencing each of the posts, as well as a
+    *   page with no reference.
+    * - Use a custom view that creates two joins between nodes and has a
+    *   node_access tag. The view lists the page nodes, the post
+    *   referenced by each page node, and the post referenced by each
+    *   post.
+    *
+    * - Login with the author user and check that he does not have access to
+    *   private nodes created by other users. Test access using total row
+    *   count as well as checking for presence of individual page titles.
+    * - Repeat tests using a user with only the "access content" permission,
+    *   confirming this user does not have access to any private nodes.
+    * - Repeat tests using a user with "access content" and "node test view"
+    *   permissions, confirming this user sees the complete view.
+    */
   public function testNodeAccessJoin() {
 
     // User to add posts and test author access.
-    $this->authorUser = $this->backdropCreateUser(array('access content', 'create post content'));
+    $this->authorUser = $this->backdropCreateUser(array(
+      'access content',
+      'create post content',
+    ));
     // Another user to add posts (whose private posts can not be accessed
     // by authorUser).
-    $this->otherUser = $this->backdropCreateUser(array('access content', 'create post content'));
+    $this->otherUser = $this->backdropCreateUser(array(
+      'access content',
+      'create post content',
+    ));
 
     // Create the posts.
     $langcode = LANGUAGE_NONE;
@@ -3851,17 +3857,17 @@ class NodeAccessJoinTest extends NodeWebTestCase {
     // The posts are stored in an array keyed by $post and $reference2, where
     // $post is the access type of the post itself, and $reference2 is the
     // access type of the reference linked to by the post.
-    //  'public' posts are created by otherUser with private=0.
-    //  'private' posts are created by otherUser with private=1.
-    //  'author_public' posts are created by authorUser with private=0.
-    //  'author_private' posts are created by authorUser with private=1.
-    //  'no_reference' is used for references when there is no related post.
+    //   'public' posts are created by otherUser with private=0.
+    //   'private' posts are created by otherUser with private=1.
+    //   'author_public' posts are created by authorUser with private=0.
+    //   'author_private' posts are created by authorUser with private=1.
+    //   'no_reference' is used for references when there is no related post.
     $access_types = array(
       'no_reference',
       'public',
       'private',
       'author_public',
-      'author_private'
+      'author_private',
     );
     foreach ($access_types as $reference2) {
       foreach (array('public', 'private', 'author_public', 'author_private') as $post) {
@@ -3875,9 +3881,9 @@ class NodeAccessJoinTest extends NodeWebTestCase {
         // The post names provide the access status of the post and the
         // access status of the related post (if any).
         // The naming system ensures that the text 'Post $post' will only appear
-        // in the view if an post with that access type is displayed in the view. (The text
-        // '$post' alone will appear in the titles of other nodes that reference
-        // an post.)
+        // in the view if a post with that access type is displayed in the
+        // view. (The text '$post' alone will appear in the titles of other
+        // nodes that reference a post.)
         $edit['title'] = "Post $post - $reference2";
         if ($reference2 != 'no_reference') {
           $edit['related_post'][$langcode][0]['value'] = $this->posts[$reference2]['no_reference'];
@@ -3902,7 +3908,8 @@ class NodeAccessJoinTest extends NodeWebTestCase {
     $count_s_author = $count_s2_author = 0;
     $total_public = $total_author = 0;
 
-    // Create page nodes referencing each post, as well as a page with no reference.
+    // Create page nodes referencing each post, as well as a page with no
+    // reference.
     foreach ($this->posts as $reference => $list) {
       foreach ($list as $reference2 => $post_nid) {
         $title = "Page - $reference";
@@ -3939,7 +3946,8 @@ class NodeAccessJoinTest extends NodeWebTestCase {
             $count_s2_public++;
           }
         }
-        // authorUser sees 'public', 'author_public', and 'author_private' posts.
+        // authorUser sees 'public', 'author_public', and 'author_private'
+        // posts.
         if (substr($reference, -6) == 'public' || substr($reference, 0, 6) == 'author') {
           $count_s_author++;
           if (substr($reference2, -6) == 'public' || substr($reference2, 0, 6) == 'author') {
@@ -3984,8 +3992,6 @@ class NodeAccessJoinTest extends NodeWebTestCase {
     $this->assertNoText('Post private', 'Author should not see posts with access type: private.');
     $this->assertText('Post author_public', 'Author should see posts with access type: author_public.');
     $this->assertText('Post author_private', 'Author should see posts with access type: author_private.');
-    // Following test is no longer relevant.
-    //$this->assertNoText('- private', 'Author should not see pages related to others\' private posts.');
 
     // Check a regular user (who did not author any posts).
     $this->regularUser = $this->backdropCreateUser(array('access content'));
@@ -4004,8 +4010,6 @@ class NodeAccessJoinTest extends NodeWebTestCase {
     $this->assertNoText('Post private', 'Public user should not see posts with access type: private.');
     $this->assertText('Post author_public', 'Public user should see posts with access type: author_public.');
     $this->assertNoText('Post author_private', 'Public user should not see posts with access type: author_private.');
-    // Following test is no longer relevant.
-    //$this->assertNoText('private', 'Public user should not see pages related to any private posts.');
 
     // Check a user with the special 'node test view' permission, who should
     // be able to view all pages and posts.
