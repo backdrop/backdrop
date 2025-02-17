@@ -1483,7 +1483,7 @@ function theme_get_setting($setting_name, $theme = NULL) {
   $value = $configs[$theme]->get($setting_name);
   if (is_null($value)) {
     $themes = list_themes();
-    // Do not try to access settings of inexistent (base-)themes.
+    // Do not try to access settings of missing (base-)themes.
     if (!isset($themes[$theme])) {
       return;
     }
