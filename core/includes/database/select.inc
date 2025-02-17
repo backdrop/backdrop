@@ -1087,8 +1087,6 @@ class SelectQuery extends Query implements SelectQueryInterface {
    * incorporated into the object; a separate array of arguments does not need
    * to be provided.
    *
-
-   *
    * @var array
    */
   protected $tables = array();
