@@ -278,6 +278,8 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    *
    * @return string
    *   The unique alias that was assigned for this table.
+   *
+   * @since 1.30.1 $condition can now be a DatabaseCondition object.
    */
   public function join($table, $alias = NULL, $condition = NULL, $arguments = array()); // phpcs:ignore -- No type hint on $arguments, add in 2.x.
 
@@ -302,6 +304,8 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    *
    * @return string
    *   The unique alias that was assigned for this table.
+   *
+   * @since 1.30.1 $condition can now be a DatabaseCondition object.
    */
   public function innerJoin($table, $alias = NULL, $condition = NULL, $arguments = array()); // phpcs:ignore -- No type hint on $arguments, add in 2.x.
 
@@ -326,6 +330,8 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    *
    * @return string
    *   The unique alias that was assigned for this table.
+   *
+   * @since 1.30.1 $condition can now be a DatabaseCondition object.
    */
   public function leftJoin($table, $alias = NULL, $condition = NULL, $arguments = array()); // phpcs:ignore -- No type hint on $arguments, add in 2.x.
 
@@ -350,6 +356,8 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    *
    * @return string
    *   The unique alias that was assigned for this table.
+   *
+   * @since 1.30.1 $condition can now be a DatabaseCondition object.
    */
   public function rightJoin($table, $alias = NULL, $condition = NULL, $arguments = array()); // phpcs:ignore -- No type hint on $arguments, add in 2.x.
 
@@ -382,6 +390,8 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
    *
    * @return string
    *   The unique alias that was assigned for this table.
+   *
+   * @since 1.30.1 $condition can now be a DatabaseCondition object.
    */
   public function addJoin($type, $table, $alias = NULL, $condition = NULL, $arguments = array()); // phpcs:ignore -- No type hint on $arguments, add in 2.x.
 
