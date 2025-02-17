@@ -3857,11 +3857,11 @@ class NodeAccessJoinTest extends NodeWebTestCase {
     // The posts are stored in an array keyed by $post and $reference2, where
     // $post is the access type of the post itself, and $reference2 is the
     // access type of the reference linked to by the post.
-    //   'public' posts are created by otherUser with private=0.
-    //   'private' posts are created by otherUser with private=1.
-    //   'author_public' posts are created by authorUser with private=0.
-    //   'author_private' posts are created by authorUser with private=1.
-    //   'no_reference' is used for references when there is no related post.
+    // - 'public' posts are created by otherUser with private=0.
+    // - 'private' posts are created by otherUser with private=1.
+    // - 'author_public' posts are created by authorUser with private=0.
+    // - 'author_private' posts are created by authorUser with private=1.
+    // - 'no_reference' is used for references when there is no related post.
     $access_types = array(
       'no_reference',
       'public',
