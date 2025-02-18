@@ -247,7 +247,6 @@ function system_themes_page() {
       $theme->notes[] = t('administration theme');
     }
     if (array_key_exists($theme->name, $broken_dependencies)) {
-      $theme->notes[] = t('missing dependency');
       $theme->missing_dependencies = $broken_dependencies[$theme->name];
     }
 
