@@ -114,7 +114,7 @@ function theme_system_themes_page($variables) {
           $icon = icon('warning', array(
             'attributes' => array('width' => 24, 'height' => 24),
           ));
-          $prefix = '<div class="prefix">' . $icon . ' ' . t('Missing dependency') . '</div>';
+          $prefix = '<div class="missing-warning">' . $icon . ' ' . t('Missing dependency') . '</div>';
           if (in_array($base_theme_name, $theme->missing_dependencies)) {
             $depends .= ' <em>(' . t('missing') . ')</em>';
           }
