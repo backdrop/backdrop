@@ -8751,7 +8751,7 @@ function backdrop_explode_tags($tags) {
     return array();
   }
   // This regexp allows the following types of user input:
-  // this, "somecompany, llc", "and ""this"" w,o.rks", foo bar
+  // this, "some company, llc", "and ""this"" w,o.rks", foo bar
   $regexp = '%(?:^|,\ *)("(?>[^"]*)(?>""[^"]* )*"|(?: [^",]*))%x';
   preg_match_all($regexp, $tags, $matches);
   $typed_tags = array_unique($matches[1]);

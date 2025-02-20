@@ -889,8 +889,10 @@ function comment_get_thread(Node $node, $mode, $comments_per_page) {
     // See comment above. Analysis reveals that this doesn't cost too
     // much. It scales much much better than having the whole comment
     // structure.
+    // cspell:disable
     $query->addExpression('SUBSTRING(c.thread, 1, (LENGTH(c.thread) - 1))', 'torder');
     $query->orderBy('torder', 'ASC');
+    // cspell:enable
   }
 
   $query->setCountQuery($count_query);
