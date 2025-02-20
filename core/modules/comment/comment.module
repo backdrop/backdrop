@@ -1501,7 +1501,7 @@ function comment_config_create_validate(Config $staging_config, $all_changes) {
  *   - update
  *   - delete
  *   - approve
- * @param ?Comment|null $comment
+ * @param Comment|null $comment
  *   (optional) The comment object, or NULL when using 'create' op.
  *
  * @return bool

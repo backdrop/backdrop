@@ -847,7 +847,7 @@ function taxonomy_terms_static_reset() {
 /**
  * Clear all static cache variables for vocabularies.
  *
- * @param ?array|null $ids
+ * @param array|null $ids
  *   An array of ids to reset in entity controller cache.
  */
 function taxonomy_vocabulary_static_reset(?array $ids = NULL) {

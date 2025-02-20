@@ -20,7 +20,7 @@ interface EntityControllerInterface {
   /**
    * Resets the internal, static entity cache.
    *
-   * @param ?array|null $ids
+   * @param array|null $ids
    *   (optional) If specified, the cache is reset for the entities with the
    *   given ids only.
    */
@@ -29,7 +29,7 @@ interface EntityControllerInterface {
   /**
    * Resets the internal, static entity cache.
    *
-   * @param ?array|null $ids
+   * @param array|null $ids
    *   (optional) If specified, the cache is reset for the entities with the
    *   given IDs only.
    */

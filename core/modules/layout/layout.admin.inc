@@ -1999,11 +1999,11 @@ function layout_block_disable_page(Layout $layout, Block $block, $renderer_name)
 /**
  * Form callback; Displays form for adding new conditions to a layout or block.
  *
- * @param ?Layout|null $layout
+ * @param Layout|null $layout
  *   The layout to which a condition is being added.
- * @param ?Block|null $block
+ * @param Block|null $block
  *   If applying a condition to a particular block, the block instance.
- * @param ?LayoutMenuItem|null $menu_item
+ * @param LayoutMenuItem|null $menu_item
  *   If applying a condition to an menu item, the menu item object.
  * @param int|null $condition_id
  *   The integer ID of the condition being configured. If adding a new

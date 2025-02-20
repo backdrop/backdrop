@@ -167,7 +167,7 @@ interface SelectQueryInterface extends QueryConditionInterface, QueryAlterableIn
   /**
    * Compiles and returns an array of the arguments for this prepared statement.
    *
-   * @param ?QueryPlaceholderInterface|null $queryPlaceholder
+   * @param QueryPlaceholderInterface|null $queryPlaceholder
    *   When collecting the arguments of a subquery, the main placeholder
    *   object should be passed as this parameter.
    *

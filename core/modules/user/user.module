@@ -572,7 +572,7 @@ function user_is_blocked($name) {
  *
  * @param string $role_name
  *   A string representing the role name.
- * @param ?User|null $account
+ * @param User|null $account
  *   (optional) A user account. Defaults to the current user.
  *
  * @return bool

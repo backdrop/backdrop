@@ -29,6 +29,11 @@ function backdrop_error_levels() {
     E_DEPRECATED => array('Deprecated function', WATCHDOG_DEBUG),
     E_USER_DEPRECATED => array('User deprecated function', WATCHDOG_DEBUG),
   );
+  // E_STRICT was removed from PHP 8.4 and higher, but still exists in older
+  // versions.
+  if (version_compare(PHP_VERSION, '8.4.0') < 0) {
+    $types[E_STRICT] = array('Strict warning', WATCHDOG_DEBUG);
+  }
 
   return $types;
 }

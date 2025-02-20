@@ -483,7 +483,7 @@ function backdrop_get_feeds($delimiter = "\n") {
 /**
  * Processes a URL query parameter array to remove unwanted elements.
  *
- * @param ?array|null $query
+ * @param array|null $query
  *   (optional) An array to be processed. Defaults to $_GET.
  * @param array $exclude
  *   (optional) A list of $query array keys to remove. Use "parent[child]" to

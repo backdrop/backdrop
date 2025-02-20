@@ -789,10 +789,10 @@ function taxonomy_overview_terms_submit($form, &$form_state) {
 /**
  * Form function for the term edit form.
  *
- * @param ?TaxonomyTerm|null $term
+ * @param TaxonomyTerm|null $term
  *   (optional) The taxonomy term entity to edit. If NULL or omitted, the form
  *   creates a new term.
- * @param ?TaxonomyVocabulary|null $vocabulary
+ * @param TaxonomyVocabulary|null $vocabulary
  *   (optional) A taxonomy vocabulary entity to create the term in. Required if
  *   the term is omitted.
  *

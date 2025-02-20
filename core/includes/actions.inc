@@ -73,7 +73,7 @@ function actions_get_info($action_name = NULL) {
  *
  * @param string $action_name
  *   The machine name of the action to be executed.
- * @param ?Entity|null $entity
+ * @param Entity|null $entity
  *   The entity object that the action will act upon, such as a node, user, or
  *   comment object.
  *

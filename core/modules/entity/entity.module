@@ -176,10 +176,10 @@ function entity_view_mode_exists($machine_name, $element, $form_state) {
  *   - delete
  * @param string $entity_type
  *   The entity type of the entity to check for.
- * @param ?EntityInterface|null $entity
+ * @param EntityInterface|null $entity
  *   Optionally an entity to check access for. If no entity is given, it will be
  *   determined whether access is allowed for all entities of the given type.
- * @param ?User|null $account
+ * @param User|null $account
  *   The user to check for. Leave it to NULL to check for the global user.
  *
  * @return bool
