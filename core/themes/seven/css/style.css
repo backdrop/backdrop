@@ -1319,6 +1319,9 @@ div.filter-options select {
 .system-themes-list-enabled .theme-selector h3 {
   margin-top: 0;
 }
+.theme-selector .icon {
+  vertical-align: text-bottom;
+}
 
 /**
  * Layout configuration.

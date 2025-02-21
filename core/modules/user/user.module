@@ -2624,7 +2624,7 @@ function user_delete_multiple(array $uids) {
       watchdog_exception('user', $e);
       throw $e;
     }
-    entity_get_controller('user')->resetCache();
+    entity_get_controller('user')->resetCache($uids);
   }
 }
 
