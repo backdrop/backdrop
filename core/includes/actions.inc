@@ -82,7 +82,7 @@ function actions_get_info($action_name = NULL) {
  *
  * @ingroup actions
  */
-function actions_execute($action_name, ?Entity $entity = NULL, &$context) {
+function actions_execute($action_name, ?Entity $entity, &$context) {
   // $stack tracks the number of recursive calls.
   static $stack;
   $stack++;
