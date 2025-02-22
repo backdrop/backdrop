@@ -1049,7 +1049,7 @@ function update_already_performed($module, $number) {
 function update_backup_enabled() {
   // Backups are disabled when upgrading from Drupal 7, and if the
   // $settings['backup_directory'] is set to FALSE in settings.php.
-  return state_get('update_d7_upgrade', FALSE) === FALSE && backup_get_backup_directory();
+  return state_get('update_d7_upgrade', FALSE) === FALSE && backup_get_backup_directory() !== FALSE;
 }
 
 /**

@@ -3926,7 +3926,7 @@ function system_check_http_request() {
 /**
  * Menu callback; Retrieve a JSON object containing a suggested time zone name.
  */
-function system_timezone($abbreviation = '', $offset = -1, $is_daylight_saving_time = NULL) {
+function system_timezone($abbreviation = '', $offset = -1, $is_daylight_saving_time = -1) {
   // An abbreviation of "0" passed in the callback arguments should be
   // interpreted as the empty string.
   $abbreviation = $abbreviation ? $abbreviation : '';

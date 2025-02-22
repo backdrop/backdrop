@@ -161,7 +161,7 @@
 
 /* Layout dialogs. */
 .layout-dialog {
-  max-width: 600px;
+  max-width: min(95vw, 48em);
 }
 .layout-block-list {
   max-height: 300px;

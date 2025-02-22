@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.30.x-dev');
+define('BACKDROP_VERSION', '1.31.x-dev');
 
 /**
  * Core API compatibility.
@@ -1463,7 +1463,7 @@ function state_del($name) {
  * @since 1.30.0 Function added.
  */
 function backup_get_backup_directory() {
-  $backup_directory = settings_get('backup_directory');
+  $backup_directory = settings_get('backup_directory', '');
 
   // For test runs, specify a specific sub-directory. See BackdropWebTestBase::setUp().
   if ($test_prefix = backdrop_valid_test_ua()) {

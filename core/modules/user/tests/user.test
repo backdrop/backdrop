@@ -2866,3 +2866,105 @@ class UserEntityCallbacksTestCase extends BackdropWebTestCase {
     $this->assertEqual('user/' . $this->account->uid, $uri['path'], t('Correct user URI.'));
   }
 }
+
+/**
+ * Test login page appearance.
+ */
+class UserLoginAppearanceTestCase extends BackdropWebTestCase {
+  protected $profile = 'testing';
+
+  /**
+   * @var User
+   */
+  protected $adminUser;
+
+  function setUp() {
+    parent::setUp(array('user_form_test'));
+    $this->adminUser = $this->backdropCreateUser(array('administer account settings', 'administer users'));
+    config_set('system.core', 'user_register', USER_REGISTER_VISITORS);
+    // Flush the same caches as user_admin_settings_submit() does.
+    backdrop_static_reset();
+    backdrop_flush_all_caches();
+  }
+
+  /**
+   * Test login page appearance.
+   */
+  function testLoginAppearance() {
+    $login_pages = array(
+      'user/login',
+      'user/password',
+      'user/register',
+    );
+    // Default login appearance is simplified: no layout, no tabs.
+    foreach ($login_pages as $page) {
+      $this->backdropGet($page);
+      $layout = $this->xpath('//body/div[contains(@class, "layout")]');
+      $this->assertEqual(count($layout), 0, 'No layout in use on the login page.');
+      $tabs = $this->xpath('(//nav[contains(@class, "tabs")])//ul[contains(@class, "tabs")]');
+      $this->assertEqual(count($tabs), 0, 'The tabs nav element was not found.');
+      $links = $this->xpath('(//ul[contains(@class, "login-links")])');
+      $this->assertEqual(count($links), 1, 'The links element was found.');
+    }
+
+    // Set login appearance to tabs.
+    $this->backdropLogin($this->adminUser);
+    $edit = array();
+    $edit['user_login_appearance'] = 'tabs';
+    $this->backdropPost('admin/config/people/login', $edit, t('Save configuration'));
+    $this->backdropLogout();
+    foreach ($login_pages as $page) {
+      $this->backdropGet($page);
+      $layout = $this->xpath('//body/div[contains(@class, "layout")]');
+      $this->assertEqual(count($layout), 1, 'Layout in use on the login page.');
+      $tabs = $this->xpath('(//nav[contains(@class, "tabs")])//ul[contains(@class, "tabs")]');
+      $this->assertEqual(count($tabs), 1, 'The tabs nav element was found.');
+      $links = $this->xpath('(//ul[contains(@class, "login-links")])');
+      $this->assertEqual(count($links), 0, 'Login links were not found.');
+    }
+
+    // Set login appearance to links.
+    $this->backdropLogin($this->adminUser);
+    $edit = array();
+    $edit['user_login_appearance'] = 'links';
+    $this->backdropPost('admin/config/people/login', $edit, t('Save configuration'));
+    $this->backdropLogout();
+    foreach ($login_pages as $page) {
+      $this->backdropGet($page);
+      $layout = $this->xpath('//body/div[contains(@class, "layout")]');
+      $this->assertEqual(count($layout), 1, 'Layout in use on the login page.');
+      $tabs = $this->xpath('(//nav[contains(@class, "tabs")])//ul[contains(@class, "tabs")]');
+      $this->assertEqual(count($tabs), 0, 'The tabs nav element was not found.');
+      $links = $this->xpath('(//ul[contains(@class, "login-links")])');
+      $this->assertEqual(count($links), 1, 'Login links were found.');
+    }
+
+    // Test hook_user_paths() and hook_user_paths_alter() in user_form_test.
+    $this->backdropLogin($this->adminUser);
+    $edit = array();
+    $edit['user_login_appearance'] = 'simplified';
+    $this->backdropPost('admin/config/people/login', $edit, t('Save configuration'));
+
+    // This path should not use a simplified layout before hooks are enabled.
+    $this->backdropGet('user_form_test_current_password/' . $this->adminUser->uid);
+    $layout = $this->xpath('//body/div[contains(@class, "layout")]');
+    $this->assertEqual(count($layout), 1, 'Layout in use before enabling hook_user_paths() in user_form_test.');
+
+    // Enable the hooks in user_form_test module.
+    state_set('user_form_test_user_paths', TRUE);
+    $this->backdropPost('admin/config/people/login', $edit, t('Save configuration'));
+
+    // Now the custom form should be given the simplified appearance as the path
+    // is added in hook_user_paths().
+    $this->backdropGet('user_form_test_current_password/' . $this->adminUser->uid);
+    $layout = $this->xpath('//body/div[contains(@class, "layout")]');
+    $this->assertEqual(count($layout), 0, 'Layout no longer in use after enabling hook_user_paths() in user_form_test.');
+    $this->backdropLogout();
+
+    // The user/login path should have a normal appearance now that it is
+    // excluded from user paths via hook_user_paths_alter().
+    $this->backdropGet('user/login');
+    $layout = $this->xpath('//body/div[contains(@class, "layout")]');
+    $this->assertEqual(count($layout), 1, 'User login form is excluded from user paths by hook_user_paths_alter() in user_form_test.');
+  }
+}

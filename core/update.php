@@ -149,9 +149,8 @@ function update_script_selection_form($form, &$form_state) {
     '#value' => t('Apply pending updates'),
   );
   $form['actions']['cancel'] = array(
-    '#type' => 'link',
-    '#href' => $_SERVER['SCRIPT_NAME'],
-    '#title' => t('Cancel'),
+    '#type' => 'markup',
+    '#markup' => '<a href="' . $_SERVER['SCRIPT_NAME'] . '">' . t('Cancel') . '</a>',
   );
 
   return $form;
@@ -268,6 +267,7 @@ function update_results_page() {
     }
   }
 
+  unset($_SESSION['update_initialized']);
   unset($_SESSION['update_results']);
   unset($_SESSION['update_success']);
 
@@ -341,13 +341,13 @@ function update_backup_form($form, &$form_state) {
   $help = '<p>' . t('Before running updates, it is recommended to create a backup of your database and configuration.') . '</p>';
   $help .= '<p>' . t('If skipping the backup process, please ensure you create a backup through a different mechanism, such as through your hosting provider.') . '</p>';
 
-  if (empty($backup_directory)) {
+  if (empty($backup_directory) && $backup_directory !== FALSE) {
     $help .= '<p>' . t('Backups are not available because the variable !variable has not been set in !file.', array(
       '!variable' => '<code>$settings[\'backup_directory\']</code>',
       '!file' => '<code>settings.php</code>',
     )) . '</p>';
     $help .= '<p>' . t('Please check the <a href="!url">documentation on configuring backups</a>.', array(
-      '!url' => 'https://docs.backdropcms.org/documentation/backup-and-restore',
+      '!url' => 'https://docs.backdropcms.org/documentation/creating-backups',
     )) . '</p>';
   }
   else {
@@ -363,13 +363,12 @@ function update_backup_form($form, &$form_state) {
 
   $query = backdrop_get_query_parameters();
   $query['op'] = 'selection';
+  // Low level URL building to avoid problems with language prefix on
+  // multilingual sites.
+  $skip_url = $_SERVER['SCRIPT_NAME'] . '?' . backdrop_http_build_query($query);
   $form['actions']['continue'] = array(
-    '#type' => 'link',
-    '#href' => $_SERVER['SCRIPT_NAME'],
-    '#options' => array(
-      'query' => $query,
-    ),
-    '#title' => t('Skip backup'),
+    '#type' => 'markup',
+    '#markup' => '<a href="' . $skip_url . '">' . t('Skip backup') . '</a>',
   );
 
   return $form;
@@ -610,6 +609,7 @@ if (update_access_allowed()) {
       break;
 
     case 'check_updates':
+      $_SESSION['update_initialized'] = TRUE;
       $update_count = update_get_update_count();
       if ($update_count === 0) {
         backdrop_set_message(t('No pending updates.') . ' ' . t('All caches cleared.'));

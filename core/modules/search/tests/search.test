@@ -699,6 +699,8 @@ class SearchCommentTestCase extends BackdropWebTestCase {
 
     // Disable cache.
     config_set('system.core', 'cache', '0');
+    // Use tabs on login page.
+    config_set('system.core', 'user_login_appearance', 'tabs');
 
     // Create a simple content type and text format.
     $this->backdropCreateContentType(array(

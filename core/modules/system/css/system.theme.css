@@ -92,7 +92,6 @@ tr.odd .form-item,
 tr.even .form-item {
   margin-top: 0;
   margin-bottom: 0;
-  white-space: nowrap;
 }
 .form-item .description {
   font-size: 0.85em;
