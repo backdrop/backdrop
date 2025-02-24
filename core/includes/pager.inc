@@ -367,12 +367,12 @@ function theme_pager_next($variables) {
   $element = $variables['element'];
   $interval = $variables['interval'];
   $parameters = $variables['parameters'];
-  $no_count_query = $variables['no_count_query'];
+  $use_count_query = $variables['use_count_query'];
   global $pager_page_array, $pager_total;
   $output = '';
 
   // If we are anywhere but the last page.
-  if ($no_count_query) {
+  if (!$use_count_query) {
     $not_last_page = (isset($pager_total[$element]) && $pager_page_array[$element] <= ($pager_total[$element] - 1)) || $pager_page_array[$element] == 0;
   }
   else {

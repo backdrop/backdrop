@@ -1141,17 +1141,17 @@ function theme_views_mini_pager($variables) {
   $tags = $variables['tags'];
   $element = $variables['element'];
   $parameters = $variables['parameters'];
-  $no_count_query = $variables['no_count_query'];
+  $use_count_query = $variables['use_count_query'];
 
   // Pager is only needed if there are results.
-  if (!isset($pager_page_array[$element]) || (!$no_count_query && empty($pager_total))) {
+  if (!isset($pager_page_array[$element]) || ($use_count_query && empty($pager_total))) {
     return '';
   }
 
   // Current is the page we are currently paged to.
   $pager_current = $pager_page_array[$element] + 1;
 
-  if ($no_count_query) {
+  if (!$use_count_query) {
     $data = format_plural($pager_current, 'Page 1', 'Page @count');
   }
   else {
@@ -1160,7 +1160,7 @@ function theme_views_mini_pager($variables) {
     $data = t('@current of @max', array('@current' => $pager_current, '@max' => $pager_max));
   }
 
-  if ($no_count_query || $pager_total[$element] > 1) {
+  if (!$use_count_query || $pager_total[$element] > 1) {
     $li_previous = theme('pager_previous',
       array(
         'text' => isset($tags[1]) ? $tags[1] : t('‹‹'),
@@ -1176,7 +1176,7 @@ function theme_views_mini_pager($variables) {
         'element' => $element,
         'interval' => 1,
         'parameters' => $parameters,
-        'no_count_query' => $no_count_query,
+        'use_count_query' => $use_count_query,
       )
     );
 
