@@ -367,11 +367,18 @@ function theme_pager_next($variables) {
   $element = $variables['element'];
   $interval = $variables['interval'];
   $parameters = $variables['parameters'];
+  $no_count_query = $variables['no_count_query'];
   global $pager_page_array, $pager_total;
   $output = '';
 
-  // If we are anywhere but the last page
-  $not_last_page = (isset($pager_total[$element]) && $pager_page_array[$element] <= ($pager_total[$element] - 1)) || $pager_page_array[$element] == 0;
+  // If we are anywhere but the last page.
+  if ($no_count_query) {
+    $not_last_page = (isset($pager_total[$element]) && $pager_page_array[$element] <= ($pager_total[$element] - 1)) || $pager_page_array[$element] == 0;
+  }
+  else {
+    $not_last_page = $pager_page_array[$element] < ($pager_total[$element] - 1);
+  }
+
   if ($not_last_page) {
     $page_new = pager_load_array($pager_page_array[$element] + $interval, $element, $pager_page_array);
     // If the next page is the last page, mark the link as such.

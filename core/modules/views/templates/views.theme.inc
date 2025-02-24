@@ -1176,6 +1176,7 @@ function theme_views_mini_pager($variables) {
         'element' => $element,
         'interval' => 1,
         'parameters' => $parameters,
+        'no_count_query' => $no_count_query,
       )
     );
 
