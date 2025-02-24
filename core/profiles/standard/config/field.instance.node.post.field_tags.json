@@ -1,0 +1,41 @@
+{
+    "_config_name": "field.instance.node.post.field_tags",
+    "field_name": "field_tags",
+    "entity_type": "node",
+    "label": "Tags",
+    "bundle": "post",
+    "description": "Enter a comma-separated list of words to describe your content.",
+    "widget": {
+        "type": "taxonomy_autocomplete",
+        "weight": -4,
+        "settings": {
+            "size": 60,
+            "autocomplete_path": "taxonomy/autocomplete",
+            "follow_content_language": true
+        },
+        "module": "taxonomy"
+    },
+    "display": {
+        "default": {
+            "type": "taxonomy_term_reference_link",
+            "weight": 10,
+            "label": "hidden",
+            "settings": [],
+            "module": "taxonomy"
+        },
+        "teaser": {
+            "type": "taxonomy_term_reference_link",
+            "weight": 10,
+            "label": "hidden",
+            "settings": [],
+            "module": "taxonomy"
+        }
+    },
+    "required": 0,
+    "deleted": 0,
+    "default_value": null,
+    "default_value_function": null,
+    "settings": {
+        "user_register_form": false
+    }
+}
