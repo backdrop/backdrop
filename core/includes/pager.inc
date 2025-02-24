@@ -371,7 +371,8 @@ function theme_pager_next($variables) {
   $output = '';
 
   // If we are anywhere but the last page
-  if ($pager_page_array[$element] < ($pager_total[$element] - 1)) {
+  $not_last_page = (isset($pager_total[$element]) && $pager_page_array[$element] <= ($pager_total[$element] - 1)) || $pager_page_array[$element] == 0;
+  if ($not_last_page) {
     $page_new = pager_load_array($pager_page_array[$element] + $interval, $element, $pager_page_array);
     // If the next page is the last page, mark the link as such.
     if ($page_new[$element] == ($pager_total[$element] - 1)) {

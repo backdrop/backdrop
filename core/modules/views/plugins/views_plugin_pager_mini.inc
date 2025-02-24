@@ -33,6 +33,8 @@ class views_plugin_pager_mini extends views_plugin_pager_full {
     $options['tags']['previous']['default'] = '‹‹';
     $options['tags']['next']['default'] = '››';
 
+    $options['no_count_query'] = array('default' => TRUE);
+
     return $options;
   }
 
@@ -47,6 +49,61 @@ class views_plugin_pager_mini extends views_plugin_pager_full {
     unset($form['quantity']);
     unset($form['tags']['first']);
     unset($form['tags']['last']);
+
+    $form['no_count_query'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('No total count'),
+      '#description' => t('When checked, there will be no total count to prevent slow queries on large datasets.'),
+      '#default_value' => $this->options['no_count_query'],
+    );
+  }
+
+  function use_count_query() {
+    return empty($this->options['no_count_query']);
+  }
+
+  function query() {
+    parent::query();
+
+    if (empty($this->options['no_count_query'])) {
+      return;
+    }
+
+    $next_page = TRUE;
+    if (!empty($this->options['total_pages'])) {
+      if (($this->current_page + 1) >= $this->options['total_pages']) {
+        $next_page = FALSE;
+      }
+    }
+    if ($next_page) {
+      $limit = $this->options['items_per_page'];
+      // Fetch one extra to have a peek one page ahead.
+      // Useful to determine if there are more pages without doing a total
+      // count.
+      $this->view->query->set_limit($limit + 1);
+    }
+  }
+
+  function pre_render(&$result) {
+    global $pager_page_array, $pager_total;
+
+    if (empty($this->options['no_count_query'])) {
+      return;
+    }
+
+    if (count($result) > $this->options['items_per_page']) {
+      // query() sets limit 1 record past this page. If there is an extra record
+      // remove it before rendering the result.
+      array_pop($result);
+      $this->next_page = TRUE;
+      if ($pager_page_array[$this->get_pager_id()] == -1) {
+        $this->set_current_page();
+      }
+      $pager_total[$this->get_pager_id()] = $pager_page_array[$this->get_pager_id()] + 1;
+    }
+    else {
+      $this->set_current_page();
+    }
   }
 
   /**
@@ -56,6 +113,14 @@ class views_plugin_pager_mini extends views_plugin_pager_full {
    * and leaving out variables that are not used in the mini pager.
    */
   function render($input) {
+    global $pager_page_array;
+
+    $next_page = !isset($this->next_page) || $this->next_page != TRUE;
+
+    if (!empty($this->options['no_count_query']) && empty($pager_page_array[$this->get_pager_id()]) && $next_page) {
+      return '';
+    }
+
     $pager_theme = views_theme_functions('views_mini_pager', $this->view, $this->display);
     // The 1, 3 index are correct.
     // @see theme_pager().
@@ -67,6 +132,7 @@ class views_plugin_pager_mini extends views_plugin_pager_full {
       'tags' => $tags,
       'element' => $this->get_pager_id(),
       'parameters' => $input,
+      'no_count_query' => !empty($this->options['no_count_query']),
     ));
   }
 }
