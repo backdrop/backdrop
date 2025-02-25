@@ -10,6 +10,9 @@
   max-width: 240px;
   margin: auto;
 }
+.user-simplified-page-logo .logo img {
+  max-height: 160px;
+}
 .user-simplified-page .site-name {
   font-size: 2em;
   text-align: center;
