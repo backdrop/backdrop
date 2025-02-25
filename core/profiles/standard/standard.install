@@ -207,7 +207,7 @@ function standard_install() {
   $system_config->set('preprocess_js', '1');
   $system_config->set('cache', '1');
 
-  # Save system config changes.
+  // Save system config changes.
   $system_config->save();
   backdrop_flush_all_caches();
 }
