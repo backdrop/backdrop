@@ -145,6 +145,7 @@ function standard_install() {
     'access comments',
     'use text format filtered_html',
   );
+  user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, $anonymous_permissions);
   $authenticated_permissions = array(
     'access content',
     'access comments',
@@ -153,11 +154,11 @@ function standard_install() {
     'upload editor images',
     'use text format filtered_html',
   );
-  user_role_grant_permissions(BACKDROP_ANONYMOUS_ROLE, $anonymous_permissions);
   user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, $authenticated_permissions);
 
-  // Set 'Administrator' as the administrator role.
+  // Set 'Administrator' as the administrator role and grant all permissions.
   $system_config->set('user_admin_role', 'administrator');
+  user_role_grant_permissions('administrator', array_keys(module_invoke_all('permission')));
 
   // Assign the "Administrator" role to user 1, and make sure that generation of
   // automatic path alias is enabled.
