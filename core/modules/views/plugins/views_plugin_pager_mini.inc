@@ -29,7 +29,6 @@ class views_plugin_pager_mini extends views_plugin_pager_full {
 
     // Overrides the full pager options form by deleting unused settings,
     // and setting default for the count query.
-
     // Intentionally setting $options['quantity'] to NULL here instead of using
     // unset(), otherwise it throws "undefined index" notices.
     $options['quantity'] = NULL;

@@ -1157,7 +1157,10 @@ function theme_views_mini_pager($variables) {
   else {
     // Max is the maximum page number.
     $pager_max = $pager_total[$element];
-    $data = t('@current of @max', array('@current' => $pager_current, '@max' => $pager_max));
+    $data = t('@current of @max', array(
+      '@current' => $pager_current,
+      '@max' => $pager_max,
+    ));
   }
 
   if (!$use_count_query || $pager_total[$element] > 1) {
@@ -1200,7 +1203,7 @@ function theme_views_mini_pager($variables) {
       $li_next_classes[] = 'pager-next-empty';
     }
     $items[] = array(
-    'class' => $li_next_classes,
+      'class' => $li_next_classes,
       'data' => $li_next,
     );
 

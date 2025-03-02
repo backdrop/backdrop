@@ -367,7 +367,7 @@ function theme_pager_next($variables) {
   $element = $variables['element'];
   $interval = $variables['interval'];
   $parameters = $variables['parameters'];
-  $use_count_query = $variables['use_count_query'];
+  $use_count_query = !empty($variables['use_count_query']);
   global $pager_page_array, $pager_total;
   $output = '';
 
