@@ -138,12 +138,12 @@ function search_admin_settings($form, &$form_state) {
   );
 
   /* Add checkbox for partial word search */
-  $search_partial_words = $config->get('search_partial_words_enable');
-  $form['active']['search_partial_words_enable'] = array(
+  $search_partial_words = $config->get('search_partial_words');
+  $form['active']['search_partial_words'] = array(
     '#title' => t('Enable partial word search'),
     '#type' => 'checkbox',
-    '#default_value' => $config->get('search_partial_words_enable'),
-    '#description' => t('Check setting to enable partial word search, uncheck for full word only search.')
+    '#default_value' => $config->get('search_partial_words'),
+    '#description' => t('Uncheck for full word only search.')
   );
 
   $form['pager'] = array(
@@ -280,7 +280,7 @@ function search_admin_settings_submit($form, &$form_state) {
   $config->set('search_default_module', $form_state['values']['search_default_module']);
   $config->set('search_logging', (bool) $form_state['values']['search_logging']);
   $config->set('search_pager_type', $form_state['values']['search_pager_type']);
-  $config->set('search_partial_words_enable', $form_state['values']['search_partial_words_enable']);
+  $config->set('search_partial_words', $form_state['values']['search_partial_words']);
 
   // Check whether we are resetting the values.
   if ($form_state['triggering_element']['#value'] == t('Reset to defaults')) {
