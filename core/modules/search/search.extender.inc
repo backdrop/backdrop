@@ -259,7 +259,7 @@ class SearchQuery extends SelectQueryExtender {
       $or = FALSE;
     }
 
-    $search_partial_words = config_get('search.settings', 'search_partial_words_enable');
+    $search_partial_words = config_get('search.settings', 'search_partial_words');
 
     // Convert keywords into SQL statements.
     $this->conditions = db_and();
