@@ -369,7 +369,7 @@ class SearchQuery extends SelectQueryExtender {
     }
     $this->executedFirstPass = TRUE;
 
-    $search_partial_words = config_get('search.settings', 'search_partial_words_enable');
+    $search_partial_words = config_get('search.settings', 'search_partial_words');
 
     if (!empty($this->words)) {
       $or = db_or();
