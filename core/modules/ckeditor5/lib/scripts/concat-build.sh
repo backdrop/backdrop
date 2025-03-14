@@ -8,6 +8,7 @@ declare -a PLUGINS=(
 "@ckeditor/ckeditor5-block-quote"
 "@ckeditor/ckeditor5-code-block"
 "@ckeditor/ckeditor5-editor-classic"
+"@ckeditor/ckeditor5-emoji"
 "@ckeditor/ckeditor5-essentials"
 "@ckeditor/ckeditor5-heading"
 "@ckeditor/ckeditor5-horizontal-line"
