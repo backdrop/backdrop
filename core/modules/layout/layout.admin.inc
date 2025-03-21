@@ -1999,7 +1999,7 @@ function layout_block_disable_page(Layout $layout, Block $block, $renderer_name)
 /**
  * Form callback; Displays form for adding new conditions to a layout or block.
  *
- * @param Layout|null $layout
+ * @param Layout $layout
  *   The layout to which a condition is being added.
  * @param Block|null $block
  *   If applying a condition to a particular block, the block instance.
@@ -2014,7 +2014,7 @@ function layout_block_disable_page(Layout $layout, Block $block, $renderer_name)
  *
  * @ingroup forms
  */
-function layout_condition_add_form($form, &$form_state, ?Layout $layout = NULL, ?Block $block = NULL, ?LayoutMenuItem $menu_item = NULL, $condition_id = NULL) {
+function layout_condition_add_form($form, &$form_state, Layout $layout, ?Block $block = NULL, ?LayoutMenuItem $menu_item = NULL, $condition_id = NULL) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   $form_state['layout'] = $layout;
   $form_state['block'] = $block;
