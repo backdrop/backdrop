@@ -18,6 +18,7 @@ declare -a PLUGINS=(
 "@ckeditor/ckeditor5-language"
 "@ckeditor/ckeditor5-link"
 "@ckeditor/ckeditor5-list"
+"@ckeditor/ckeditor5-mention"
 "@ckeditor/ckeditor5-paste-from-office"
 "@ckeditor/ckeditor5-remove-format"
 "@ckeditor/ckeditor5-source-editing"
