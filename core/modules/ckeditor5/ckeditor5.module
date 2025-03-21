@@ -594,6 +594,19 @@ function ckeditor5_ckeditor5_plugins() {
     ),
   );
 
+  // @see https://ckeditor.com/docs/ckeditor5/latest/features/emoji.html
+  $plugins['emoji.EmojiPicker'] = array(
+    'buttons' => array(
+      'emoji' => array(
+        'label' => t('Emoji'),
+        'image' => $image_prefix . '/emoji.svg',
+        // Emoji autocomplete requires the Mentions plugin, which is not yet
+        // bundled with core.
+        //'plugin_dependencies' => array('emoji.EmojiMention'),
+      ),
+    ),
+  );
+
   // Plugin that converts CKEditor preferred tags to Backdrop preferred tags,
   // such as converting <s> to <del> or <i> to <em>.
   $plugins['backdropBasicStyles.BackdropBasicStyles'] = array(
