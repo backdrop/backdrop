@@ -673,6 +673,11 @@ abstract class BackdropTestCase {
         E_DEPRECATED => 'Deprecated',
         E_USER_DEPRECATED => 'User deprecated',
       );
+      // E_STRICT was removed from PHP 8.4 and higher, but still exists in older
+      // versions.
+      if (version_compare(PHP_VERSION, '8.4.0') < 0) {
+        $error_map[E_STRICT] = 'Run-time notice';
+      }
 
       $backtrace = debug_backtrace();
       $this->error($message, $error_map[$severity], _backdrop_get_last_caller($backtrace));

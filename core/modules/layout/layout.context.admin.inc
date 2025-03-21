@@ -141,7 +141,7 @@ function layout_context_add_form($form, &$form_state, Layout $layout, $context_i
  *
  * @ingroup forms
  */
-function layout_context_relationship_add_form($form, &$form_state, ?Layout $layout, $relationship_id = NULL) {
+function layout_context_relationship_add_form($form, &$form_state, ?Layout $layout = NULL, $relationship_id = NULL) {
   form_load_include($form_state, 'inc', 'layout', 'layout.context.admin');
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
 
