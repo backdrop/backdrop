@@ -3451,50 +3451,54 @@ function node_forms() {
  * Implements hook_action_info().
  */
 function node_action_info() {
-  return array(
-    'node_publish_action' => array(
-      'type' => 'node',
-      'label' => t('Publish content'),
-      'callback' => 'node_publish_action',
-      'file' => 'node.actions.inc'
-    ),
-    'node_unpublish_action' => array(
-      'type' => 'node',
-      'label' => t('Unpublish content'),
-      'callback' => 'node_unpublish_action',
-      'file' => 'node.actions.inc',
-    ),
-    'node_make_sticky_action' => array(
-      'type' => 'node',
-      'label' => t('Make content sticky'),
-      'callback' => 'node_make_sticky_action',
-      'file' => 'node.actions.inc',
-    ),
-    'node_make_unsticky_action' => array(
-      'type' => 'node',
-      'label' => t('Make content unsticky'),
-      'callback' => 'node_make_unsticky_action',
-      'file' => 'node.actions.inc',
-    ),
-    'node_promote_action' => array(
-      'type' => 'node',
-      'label' => t('Promote content'),
-      'callback' => 'node_promote_action',
-      'file' => 'node.actions.inc',
-    ),
-    'node_unpromote_action' => array(
-      'type' => 'node',
-      'label' => t('Remove promotion'),
-      'callback' => 'node_unpromote_action',
-      'file' => 'node.actions.inc',
-    ),
-    'node_delete_action' => array(
-      'type' => 'node',
-      'label' => t('Delete content'),
-      'callback' => 'node_delete_action',
-      'file' => 'node.actions.inc',
-    ),
-  );
+  $actions = array();
+  if (user_access('administer nodes')) {
+    $actions += array(
+      'node_publish_action' => array(
+        'type' => 'node',
+        'label' => t('Publish content'),
+        'callback' => 'node_publish_action',
+        'file' => 'node.actions.inc'
+      ),
+      'node_unpublish_action' => array(
+        'type' => 'node',
+        'label' => t('Unpublish content'),
+        'callback' => 'node_unpublish_action',
+        'file' => 'node.actions.inc',
+      ),
+      'node_make_sticky_action' => array(
+        'type' => 'node',
+        'label' => t('Make content sticky'),
+        'callback' => 'node_make_sticky_action',
+        'file' => 'node.actions.inc',
+      ),
+      'node_make_unsticky_action' => array(
+        'type' => 'node',
+        'label' => t('Make content unsticky'),
+        'callback' => 'node_make_unsticky_action',
+        'file' => 'node.actions.inc',
+      ),
+      'node_promote_action' => array(
+        'type' => 'node',
+        'label' => t('Promote content'),
+        'callback' => 'node_promote_action',
+        'file' => 'node.actions.inc',
+      ),
+      'node_unpromote_action' => array(
+        'type' => 'node',
+        'label' => t('Remove promotion'),
+        'callback' => 'node_unpromote_action',
+        'file' => 'node.actions.inc',
+      ),
+      'node_delete_action' => array(
+        'type' => 'node',
+        'label' => t('Delete content'),
+        'callback' => 'node_delete_action',
+        'file' => 'node.actions.inc',
+      ),
+    );
+  }
+  return $actions;
 }
 
 /**
