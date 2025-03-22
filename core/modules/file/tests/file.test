@@ -2115,11 +2115,11 @@ class FileFileTypeClassificationTestCase extends BackdropWebTestCase {
   function testFileTypeClassification() {
     // Get test text and image files.
     $file = current($this->backdropGetTestFiles('text'));
-    $text_file =  entity_create('file', (array) $file);
+    $text_file = entity_create('file', (array) $file);
     file_save($text_file);
 
     $file = current($this->backdropGetTestFiles('image'));
-    $image_file =  entity_create('file', (array) $file);
+    $image_file = entity_create('file', (array) $file);
     file_save($image_file);
 
     // The classification process should assign a file type to any file whose
