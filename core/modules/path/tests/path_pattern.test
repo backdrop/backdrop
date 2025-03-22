@@ -109,7 +109,7 @@ class PathPatternTestHelper extends BackdropWebTestCase {
       'vocabulary' => $vocabulary->machine_name,
       'parent' => array(0),
     );
-    $term = new entity_create('taxonomy_term', $term);
+    $term = entity_create('taxonomy_term', $term);
     taxonomy_term_save($term);
     return $term;
   }
