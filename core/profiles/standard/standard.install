@@ -364,7 +364,6 @@ function standard_install() {
 
   // Create a default post to display on front page.
   $post = entity_create('node', array(
-    array(
       'title' => st('Your first post!'),
       'body' => array(
         LANGUAGE_NONE => array(
@@ -379,12 +378,11 @@ function standard_install() {
       'promote' => 1,
       'type' => 'post',
     )
-  ));
+  );
   $post->save();
 
   // Create an "About" page node.
   $page = entity_create('node', array(
-    array(
       'title' => st('About'),
       'body' => array(
         LANGUAGE_NONE => array(
@@ -399,7 +397,7 @@ function standard_install() {
       'promote' => 0,
       'type' => 'page',
     )
-  ));
+  );
   $page->save();
 
   // Create an "About" link in the main menu.
@@ -442,7 +440,6 @@ function standard_install() {
 
     $file->save();
     $card = entity_create('node', array(
-      array(
         'title' => $info['title'],
         'body' => array(
           LANGUAGE_NONE => array(
@@ -468,7 +465,7 @@ function standard_install() {
         'promote' => 1,
         'type' => 'card',
       )
-    ));
+    );
 
     $card->save();
   }
