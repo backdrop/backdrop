@@ -163,7 +163,7 @@ class BackupMySql extends BackupDatabase {
     $out = '';
     while ($line = $file->read()) {
       $first2 = substr($line, 0, 2);
-      $first3 = substr($line, 0, 2);
+      $first3 = substr($line, 0, 3);
 
       // Ignore single line comments. This function doesn't support multiline
       // comments or inline comments.
@@ -464,7 +464,7 @@ class BackupMySql extends BackupDatabase {
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE=NO_AUTO_VALUE_ON_ZERO */;
 
 SET SQL_MODE=\"NO_AUTO_VALUE_ON_ZERO\";
-SET NAMES utf8;
+SET NAMES utf8mb4;
 
 ";
   }
