@@ -109,7 +109,7 @@ class PathPatternTestHelper extends BackdropWebTestCase {
       'vocabulary' => $vocabulary->machine_name,
       'parent' => array(0),
     );
-    $term = new TaxonomyTerm($term);
+    $term = new entity_create('taxonomy_term', $term);
     taxonomy_term_save($term);
     return $term;
   }
@@ -832,7 +832,7 @@ class PathPatternFunctionalTestCase extends PathPatternFunctionalTestHelper {
     $edit['pass']   = user_password();
     $edit['path'] = array('auto' => TRUE);
     $edit['status'] = 1;
-    $account = new User($edit);
+    $account = entity_create('user', $edit);
     $account->save();
     $this->assertEntityAlias('user', $account, 'accounts/test-user');
   }

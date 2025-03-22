@@ -159,7 +159,7 @@ abstract class ViewsSqlTest extends ViewsTestCase {
    *   A full term object with a random name.
    */
   protected function viewsCreateTerm($vocabulary_name) {
-    $term = new TaxonomyTerm();
+    $term = entity_create('taxonomy_term', array());
     $term->name = $this->randomName();
     $term->description = $this->randomName();
     $term->vocabulary = $vocabulary_name;

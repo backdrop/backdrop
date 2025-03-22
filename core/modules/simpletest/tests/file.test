@@ -364,11 +364,11 @@ class FileValidatorTest extends BackdropWebTestCase {
   function setUp() {
     parent::setUp(array('file'));
 
-    $this->image = new File(array());
+    $this->image = entity_create('file', array());
     $this->image->uri = 'core/misc/feed.png';
     $this->image->filename = backdrop_basename($this->image->uri);
 
-    $this->non_image = new File(array());
+    $this->non_image = entity_create('file', array());
     $this->non_image->uri = 'core/misc/jquery.js';
     $this->non_image->filename = backdrop_basename($this->non_image->uri);
   }
@@ -377,7 +377,7 @@ class FileValidatorTest extends BackdropWebTestCase {
    * Test the file_validate_extensions() function.
    */
   function testFileValidateExtensions() {
-    $file = new File(array('filename' => 'asdf.txt'));
+    $file = entity_create('file', array('filename' => 'asdf.txt'));
     $errors = file_validate_extensions($file, 'asdf txt pork');
     $this->assertEqual(count($errors), 0, 'Valid extension accepted.', 'File');
 
@@ -447,7 +447,7 @@ class FileValidatorTest extends BackdropWebTestCase {
    */
   function testFileValidateNameLength() {
     // Create a new file entity.
-    $file = new File();
+    $file = entity_create('file', array());
 
     // Add a filename with an allowed length and test it.
     $file->filename = str_repeat('x', 240);
@@ -472,7 +472,7 @@ class FileValidatorTest extends BackdropWebTestCase {
    */
   function testFileValidateSize() {
     // Create a file with a size of 1000 bytes, and quotas of only 1 byte.
-    $file = new File(array('filesize' => 1000));
+    $file = entity_create('file', array('filesize' => 1000));
     $errors = file_validate_size($file, 0, 0);
     $this->assertEqual(count($errors), 0, 'No limits means no errors.', 'File');
     $errors = file_validate_size($file, 1, 0);
@@ -545,7 +545,7 @@ class FileSaveUploadTest extends FileHookTestCase {
     parent::setUp();
 
     $image_files = $this->backdropGetTestFiles('image');
-    $this->image = new File((array) current($image_files));
+    $this->image = entity_create('file', (array) current($image_files));
 
     list(, $this->image_extension) = explode('.', $this->image->filename);
     $this->assertTrue(is_file($this->image->uri), "The image file we're going to upload exists.");
@@ -2147,7 +2147,7 @@ class FileLoadTest extends FileHookTestCase {
 class FileSaveTest extends FileHookTestCase {
   function testFileSave() {
     // Create a new file object.
-    $file = new File(array(
+    $file = entity_create('file', array(
       'uid' => 1,
       'filename' => 'backdrop.txt',
       'uri' => 'public://backdrop.txt',

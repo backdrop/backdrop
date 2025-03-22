@@ -2295,7 +2295,7 @@ class FilterFileUsageTest extends BackdropWebTestCase {
     $this->assertIdentical(array(), file_usage_list($image), 'The image has zero usages.');
 
     // Test filter_entity_insert(): increment.
-    $node = new Node(array(
+    $node = entity_create('node', array(
       'type' => 'page',
       'title' => 'test',
       'uid' => 0,

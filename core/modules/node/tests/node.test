@@ -2234,8 +2234,7 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $this->assertFalse(node_type_has_content('post'), 'The post node type has no content associated with it.');
 
     // Create a post.
-    $node = new Node();
-    $node->type = 'post';
+    $node = entity_create('node', array('type' => 'post'));
     node_object_prepare($node);
     $node->title = 'A new post';
     node_save($node);

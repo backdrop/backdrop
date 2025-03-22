@@ -1161,7 +1161,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     );
     $settings['body'][$settings['langcode']][0] += $body;
 
-    $node = new Node($settings);
+    $node = entity_create('node', $settings);
     $node->save();
 
     // Small hack to link revisions to our test user.

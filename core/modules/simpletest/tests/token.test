@@ -408,7 +408,7 @@ class TokenCommentTestCase extends TokenTestHelper {
   function testCommentTokens() {
     $node = $this->backdropCreateNode(array('comment' => COMMENT_NODE_OPEN));
 
-    $parent_comment = new Comment();
+    $parent_comment = entity_create('comment', array());
     $parent_comment->nid = $node->nid;
     $parent_comment->pid = 0;
     $parent_comment->cid = NULL;
@@ -430,7 +430,7 @@ class TokenCommentTestCase extends TokenTestHelper {
     );
     $this->assertTokens('comment', array('comment' => $parent_comment), $tokens);
 
-    $comment = new Comment();
+    $comment = entity_create('comment', array());
     $comment->nid = $node->nid;
     $comment->pid = $parent_comment->cid;
     $comment->cid = NULL;
@@ -460,7 +460,7 @@ class TokenNodeTestCase extends TokenTestHelper {
     $this->backdropLogin($admin_user);
 
     $files = $this->backdropGetTestFiles('image');
-    $file = new File((array) $files[0]);
+    $file = entity_create('file', (array) $files[0]);
     $file->uid = $admin_user->uid;
     $file->save();
     $node_title = $this->randomName();
@@ -715,7 +715,7 @@ class TokenTaxonomyTestCase extends TokenTestHelper {
       'vocabulary' => $vocabulary->machine_name,
       'parent' => array(0),
     );
-    $term = new TaxonomyTerm($term);
+    $term = entity_create('taxonomy_term', $term);
     taxonomy_term_save($term);
     return $term;
   }
@@ -820,7 +820,7 @@ class TokenEntityTestCase extends TokenTestHelper {
       'vocabulary' => $vocabulary->machine_name,
       'parents' => array(0),
     );
-    $term = new TaxonomyTerm($term);
+    $term = entity_create('taxonomy_term', $term);
     $term->save();
     return $term;
   }
@@ -969,7 +969,7 @@ class TokenFileTestCase extends TokenTestHelper {
 
   function testFileTokens() {
     // Create a test file object.
-    $file = new File();
+    $file = entity_create('file', array());
     $file->fid = 1;
     $file->filename = 'test.png';
     $file->filesize = 100;

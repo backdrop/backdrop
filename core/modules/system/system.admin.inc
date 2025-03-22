@@ -3139,7 +3139,7 @@ function system_transliteration_retroactive_submit($form, &$form_state) {
   $result = system_transliteration_file_query()->execute();
 
   while ($row = $result->fetchAssoc()) {
-    $file = new File($row);
+    $file = entity_create('file', $row);
     $wrapper = file_stream_wrapper_get_instance_by_uri($file->uri);
     $scheme = file_uri_scheme($file->uri);
 
