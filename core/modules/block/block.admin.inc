@@ -50,7 +50,7 @@ function block_admin_list() {
         'title' => t('Export'),
         'href' => 'admin/config/development/configuration/single/export',
         'query' => array(
-          'group' => 'Reusable custom blocks',
+          'group' => 'Custom blocks',
           'name' => 'block.custom.' . $delta,
         ),
       );
