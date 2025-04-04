@@ -1574,14 +1574,14 @@ abstract class Database {
       // Every target already active for this connection key needs to have the
       // logging object associated with it.
       if (!empty(self::$connections[$key])) {
-        /* @var DatabaseConnection $connection */
+        /** @var DatabaseConnection $connection */
         foreach (self::$connections[$key] as $connection) {
           $connection->setLogger(self::$logs[$key]);
         }
       }
     }
 
-    /* @var DatabaseLog $logger */
+    /** @var DatabaseLog $logger */
     $logger = self::$logs[$key];
     $logger->start($logging_key);
     return self::$logs[$key];
@@ -1610,7 +1610,7 @@ abstract class Database {
       return NULL;
     }
 
-    /* @var DatabaseLog $logger */
+    /** @var DatabaseLog $logger */
     $logger = self::$logs[$key];
     $queries = $logger->get($logging_key);
     $logger->end($logging_key);
@@ -1869,7 +1869,7 @@ abstract class Database {
     $driver_class = 'DatabaseConnection_' . $driver;
     require_once BACKDROP_ROOT . '/core/includes/database/' . $driver . '/database.inc';
 
-    /* @var DatabaseConnection $new_connection */
+    /** @var DatabaseConnection $new_connection */
     $new_connection = new $driver_class(self::$databaseInfo[$key][$target]);
     $new_connection->setTarget($target);
     $new_connection->setKey($key);
