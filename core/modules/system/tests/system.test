@@ -2205,6 +2205,9 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
     $this->clickLink('try again');
     $this->assertNoText('This is a requirements warning provided by the update_script_test module.');
     $this->backdropPost(NULL, array(), t('Continue'));
+    if (backup_get_backup_directory()) {
+      $this->clickLink(t('Skip backup'));
+    }
     $this->backdropPost(NULL, array(), t('Apply pending updates'));
     $this->assertText(t('The update_script_test_update_1000() update was executed successfully.'), t('End of update process was reached.'));
     // Confirm that all caches were cleared.
@@ -2279,6 +2282,9 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
     // Click through update.php with 'administer software updates' permission.
     $this->backdropLogin($this->update_user);
     $this->backdropPost($this->update_url, array(), t('Continue'), array('external' => TRUE));
+    if (backup_get_backup_directory()) {
+      $this->clickLink(t('Skip backup'));
+    }
     $this->backdropPost(NULL, array(), t('Apply pending updates'));
     $this->assertText('Updates were attempted.');
     $this->assertLink('site');
@@ -2293,6 +2299,9 @@ class UpdateScriptFunctionalTest extends BackdropWebTestCase {
     $admin_user = $this->backdropCreateUser(array('administer software updates', 'access administration pages', 'access site reports'));
     $this->backdropLogin($admin_user);
     $this->backdropPost($this->update_url, array(), t('Continue'), array('external' => TRUE));
+    if (backup_get_backup_directory()) {
+      $this->clickLink(t('Skip backup'));
+    }
     $this->backdropPost(NULL, array(), t('Apply pending updates'));
     $this->assertText('Updates were attempted.');
     $this->assertLink('logged');

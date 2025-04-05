@@ -1269,6 +1269,78 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
   }
 
   /**
+   * Tests sanitizing XSS within an attributes array.
+   *
+   * Attributes arrays are commonly passed into functions such as l().
+   * If the contents of these arrays have user-provided data, the attributes
+   * should be passed through filter_xss_attributes() before calling l().
+   */
+  public function testFilterXSSAttributes() {
+    $data = array(
+      'safe' => array(
+        array('class' => array('foo', 'bar'), 'data-biscuit' => TRUE),
+        array('class' => array('foo', 'bar'), 'data-biscuit' => TRUE),
+      ),
+      'valueless' => array(
+        array('class' => array('foo', 'bar'), 'selected' => ''),
+        array('class' => array('foo', 'bar'), 'selected' => ''),
+      ),
+      'valueless, mangled with a space' => array(
+        array('class' => array('foo', 'bar'), 'selected href' => 'http://example.com'),
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'http://example.com'),
+      ),
+      'valueless, mangled with multiple spaces, blocked' => array(
+        array('class' => array('foo', 'bar'), 'selected  onclick href' => 'http://example.com'),
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'http://example.com'),
+      ),
+      'valueless, mangled with multiple spaces, blocked, mangled first' => array(
+        array('selected  onclick href' => 'http://example.com', 'class' => array('foo', 'bar')),
+        array('selected' => 'selected', 'href' => 'http://example.com', 'class' => array('foo', 'bar')),
+      ),
+      'valueless but with value' => array(
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'http://example.com'),
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'http://example.com'),
+      ),
+      'valueless but with value, bad protocol' => array(
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'javascript:alert()'),
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'alert()'),
+      ),
+      'valueless, mangled with a space and bad protocol' => array(
+        array('class' => array('foo', 'bar'), 'selected href' => 'javascript:alert()'),
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'alert()'),
+      ),
+      'valueless, mangled with a space and bad protocol, repeated' => array(
+        array('class' => array('foo', 'bar'), 'selected href' => 'javascript:alert()', 'href' => 'http://example.com'),
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'alert()'),
+      ),
+      'with a space' => array(
+        array('class' => array('foo', 'bar'), 'href' => urlencode('some file.pdf')),
+        array('class' => array('foo', 'bar'), 'href' => 'some+file.pdf'),
+      ),
+      'with an unencoded space' => array(
+        array('class' => array('foo', 'bar'), 'href' => 'some file.pdf'),
+        array('class' => array('foo', 'bar'), 'href' => 'some file.pdf'),
+      ),
+      'xss onclick' => array(
+        array('class' => array('foo', 'bar'), 'onclick' => 'alert("whoop");'),
+        array('class' => array('foo', 'bar')),
+      ),
+      'xss onclick, valueless, mangled with a space' => array(
+        array('class' => array('foo', 'bar'), 'selected onclick href' => 'http://example.com'),
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'http://example.com'),
+      ),
+      'xss protocol' => array(
+        array('class' => array('foo', 'bar'), 'src' => 'javascript:alert("whoop");'),
+        array('class' => array('foo', 'bar')),
+      ),
+    );
+    foreach ($data as $name => $row) {
+      list($attributes, $expected) = $row;
+      $this->assertEqual($expected, filter_xss_attributes($attributes), 'filter_xss_attributes() correctly cleaned the "' . $name . '" test case.');
+    }
+  }
+
+  /**
    * Tests filter settings, defaults, access restrictions and similar.
    *
    * @todo This is for functions like filter_filter and check_markup, whose

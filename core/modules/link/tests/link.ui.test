@@ -91,7 +91,7 @@ class LinkUITest extends LinkBaseTestClass {
       array(
         'href' => 'http://ecs-es.kelkoo.es/ctl/go/sitesearchGo?.ts=1338833010331&.sig=qP9GXeEFH6syBzwmzYkxmsvp1EI-',
         'label' => 'http://ecs-es.kelkoo.es/ctl/go/sitesearchGo?.ts=1338833010331&.sig=qP9GXeEFH6syBzwmzYkxmsvp1EI-',
-        'msg' => 'Url with . in querystring',
+        'msg' => 'Url with . in query string',
         'type' => self::LINK_INPUT_TYPE_GOOD,
       ),
     );
@@ -119,11 +119,14 @@ class LinkUITest extends LinkBaseTestClass {
         continue;
       }
       else {
-        $this->assertRaw(' ' . t('has been created.', array('@type' => 'Basic Page', '%title' => $edit['title'])), 'Page created: ' . $input['href']);
+        $this->assertRaw(' ' . t('has been created.', array(
+          '@type' => 'Basic Page',
+          '%title' => $edit['title'],
+        )), 'Page created: ' . $input['href']);
       }
 
-      // If simpletest starts using something to override the error system, this
-      ///will flag us and let us know it's broken.
+      // If Simpletest starts using something to override the error system, this
+      // will flag us and let us know it's broken.
       $this->assertFalse(libxml_use_internal_errors(TRUE));
       if (isset($input['expected_href'])) {
         $path = '//a[@href="' . $input['expected_href'] . '" and text()="' . $input['label'] . '"]';
@@ -329,7 +332,7 @@ class LinkUITest extends LinkBaseTestClass {
     $this->backdropGet('node/add/page');
 
     // Check that autocomplete is enabled on internal/external link fields.
-    $this->assertFieldByXPath("//input[@name='${field_name}[und][0][url]' and contains(@class, 'form-autocomplete')]", NULL, 'Autocomplete is enabled on the link URL field.');
+    $this->assertFieldByXPath("//input[@name='{$field_name}[und][0][url]' and contains(@class, 'form-autocomplete')]", NULL, 'Autocomplete is enabled on the link URL field.');
 
     // Save both an internal and external value.
     $edit = array(
@@ -362,7 +365,7 @@ class LinkUITest extends LinkBaseTestClass {
 
     // Check that autocomplete is enabled on internal/external link fields.
     $this->backdropGet('node/add/page');
-    $this->assertFieldByXPath("//input[@name='${field_name}[und][0][url]' and contains(@class, 'form-autocomplete')]", NULL, 'Autocomplete is enabled on the link URL field.');
+    $this->assertFieldByXPath("//input[@name='{$field_name}[und][0][url]' and contains(@class, 'form-autocomplete')]", NULL, 'Autocomplete is enabled on the link URL field.');
 
     // Confirm an external value is not allowed.
     $edit = array(
@@ -392,7 +395,7 @@ class LinkUITest extends LinkBaseTestClass {
 
     // Check that autocomplete is disabled on external link fields.
     $this->backdropGet('node/add/page');
-    $this->assertNoFieldByXPath("//input[@name='${field_name}[und][0][url]' and contains(@class, 'form-autocomplete')]", NULL, 'Autocomplete is enabled on the link URL field.');
+    $this->assertNoFieldByXPath("//input[@name='{$field_name}[und][0][url]' and contains(@class, 'form-autocomplete')]", NULL, 'Autocomplete is enabled on the link URL field.');
 
     // Confirm an internal value is not allowed.
     $edit = array(

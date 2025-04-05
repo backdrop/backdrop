@@ -153,7 +153,7 @@ function system_theme() {
  * Implements hook_permission().
  */
 function system_permission() {
-  return array(
+  $permissions = array(
     'administer modules' => array(
       'title' => t('Administer modules'),
     ),
@@ -168,8 +168,20 @@ function system_permission() {
     'administer software updates' => array(
       'title' => t('Administer software updates'),
       'restrict access' => TRUE,
-      'warning' => t('Run site updates for Backdrop projects.'),
+      'warning' => t('Allows running site updates (update.php) for Backdrop projects.'),
     ),
+  );
+  // If backups are not configured, do not show related permission.
+  if (backup_get_backup_directory()) {
+    $permissions += array(
+      'restore site backups' => array(
+        'title' => t('Restore site backups'),
+        'restrict access' => TRUE,
+        'warning' => t('Allows restoring the configuration and database from backups (restore.php).'),
+      ),
+    );
+  }
+  $permissions += array(
     'access administration pages' => array(
       'title' => t('Use the administration pages'),
     ),
@@ -188,6 +200,8 @@ function system_permission() {
       'description' => t('Provides access to manually flush caches.'),
     ),
   );
+
+  return $permissions;
 }
 
 /**
@@ -3875,7 +3889,10 @@ function system_time_zones($blank = NULL) {
     // reasons and should not be used, the list is filtered by a regular
     // expression.
     if (preg_match('!^((Africa|America|Antarctica|Arctic|Asia|Atlantic|Australia|Europe|Indian|Pacific)/|UTC$)!', $zone)) {
-      $zones[$zone] = t('@zone: @date', array('@zone' => t(str_replace('_', ' ', $zone)), '@date' => format_date(REQUEST_TIME, 'custom', config_get('system.date', 'formats.long.pattern.php') . ' O', $zone)));
+      $zones[$zone] = t('@zone: @date', array(
+        '@zone' => t(str_replace('_', ' ', $zone)),
+        '@date' => format_date(REQUEST_TIME, 'custom', config_get('system.date', 'formats.long.pattern') . ' O', $zone),
+      ));
     }
   }
   // Sort the translated time zones alphabetically.
@@ -3912,7 +3929,7 @@ function system_check_http_request() {
 /**
  * Menu callback; Retrieve a JSON object containing a suggested time zone name.
  */
-function system_timezone($abbreviation = '', $offset = -1, $is_daylight_saving_time = NULL) {
+function system_timezone($abbreviation = '', $offset = -1, $is_daylight_saving_time = -1) {
   // An abbreviation of "0" passed in the callback arguments should be
   // interpreted as the empty string.
   $abbreviation = $abbreviation ? $abbreviation : '';
@@ -4171,6 +4188,10 @@ function system_config_info() {
   );
   $prefixes['system.authorize'] = array(
     'label' => t('System authorize'),
+    'group' => t('Configuration'),
+  );
+  $prefixes['system.backup'] = array(
+    'label' => t('System backup'),
     'group' => t('Configuration'),
   );
   $prefixes['system.date'] = array(

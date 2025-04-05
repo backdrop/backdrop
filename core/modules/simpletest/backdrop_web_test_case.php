@@ -202,7 +202,7 @@ abstract class BackdropTestCase {
    * @return bool
    *   TRUE if the assertion passed and FALSE if it failed.
    */
-  protected function assert($status, $message = '', $group = 'Other', array $caller = NULL) {
+  protected function assert($status, $message = '', $group = 'Other', array $caller = array()) {
     // Convert boolean status to string status.
     if (is_bool($status)) {
       $status = $status ? 'pass' : 'fail';
@@ -520,10 +520,10 @@ abstract class BackdropTestCase {
    *   The type of assertion - examples are "Browser", "PHP".
    * @param $caller
    *   The caller of the error.
-   * @return
-   *   FALSE.
+   * @return false
+   *   Always returns false.
    */
-  protected function error($message = '', $group = 'Other', array $caller = NULL) {
+  protected function error($message = '', $group = 'Other', array $caller = array()) {
     if ($group == 'User notice') {
       // Since 'User notice' is set by trigger_error() which is used for debug
       // set the message to a status of 'debug'.
@@ -662,7 +662,6 @@ abstract class BackdropTestCase {
   public function errorHandler($severity, $message, $file = NULL, $line = NULL) {
     if ($severity & error_reporting()) {
       $error_map = array(
-        E_STRICT => 'Run-time notice',
         E_WARNING => 'Warning',
         E_NOTICE => 'Notice',
         E_CORE_ERROR => 'Core error',
@@ -674,6 +673,11 @@ abstract class BackdropTestCase {
         E_DEPRECATED => 'Deprecated',
         E_USER_DEPRECATED => 'User deprecated',
       );
+      // E_STRICT was removed from PHP 8.4 and higher, but still exists in older
+      // versions.
+      if (version_compare(PHP_VERSION, '8.4.0') < 0) {
+        $error_map[E_STRICT] = 'Run-time notice';
+      }
 
       $backtrace = debug_backtrace();
       $this->error($message, $error_map[$severity], _backdrop_get_last_caller($backtrace));
@@ -957,14 +961,14 @@ class BackdropWebTestCase extends BackdropTestCase {
   /**
    * The content of the page currently loaded in the internal browser.
    *
-   * @var string
+   * @var string|false
    */
   protected $content;
 
   /**
    * The content of the page currently loaded in the internal browser (plain text version).
    *
-   * @var string
+   * @var string|false
    */
   protected $plainTextContent;
 
@@ -1585,6 +1589,10 @@ class BackdropWebTestCase extends BackdropTestCase {
     $config_base_path = 'files/simpletest/' . $this->fileDirectoryName . '/config_';
     $config_directories['active'] = $config_base_path . 'active';
     $config_directories['staging'] = $config_base_path . 'staging';
+
+    // Set the new backup directories. During test execution, these values are
+    // manually set directly in backup_get_backup_directory().
+    $settings['backup_directory'] = 'files/simpletest/' . $this->fileDirectoryName . '/backups';
 
     // Log fatal errors.
     ini_set('log_errors', 1);
