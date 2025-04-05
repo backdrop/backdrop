@@ -427,6 +427,46 @@ function hook_user_role_delete($role) {
     ->execute();
 }
 
+
+/**
+ * Define paths related to the user login process.
+ *
+ * The paths "user/login", "user/password", and "user/register" are added by
+ * User module. Other modules that expand the user login process should also
+ * add their paths here.
+ *
+ * @return array
+ *   For each item, the key is the path in question, in a format acceptable to
+ *   backdrop_match_path(). The value for each item should be TRUE (for paths
+ *   related to the login process) or FALSE (for non-login related paths).
+ *
+ * @see hook_menu()
+ * @see backdrop_match_path()
+ * @see hook_user_login_paths_alter()
+ */
+function hook_user_login_paths() {
+  return array(
+    'my_module/user/login' => TRUE,
+    'my_module/user/password' => TRUE,
+    'my_module/user/login/*' => TRUE,
+  );
+}
+
+/**
+ * Redefine user login paths defined by other modules.
+ *
+ * @param $paths
+ *   An associative array of paths related to the login process, as defined by
+ *   implementations of hook_user_login_paths(). Modified by reference.
+ *
+ * @see hook_user_login_paths()
+ */
+function hook_user_login_paths_alter(&$paths) {
+  // Do not treat the user login page special (disabling the simplified login
+  // page appearance).
+  $paths['user/login'] = FALSE;
+}
+
 /**
  * Alter the requirement for rejecting weak passwords.
  *

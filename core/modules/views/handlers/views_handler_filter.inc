@@ -1124,7 +1124,7 @@ class views_handler_filter extends views_handler {
       if (is_array($label)) {
         $this->prepare_filter_select_options($options[$value]);
       }
-      // FAPI has some special value to allow hierarchy.
+      // Form API has some special value to allow hierarchy.
       // @see _form_options_flatten
       elseif (is_object($label)) {
         $this->prepare_filter_select_options($options[$value]->option);
@@ -1377,8 +1377,8 @@ class views_handler_filter extends views_handler {
   /**
    * Add this filter to the query.
    *
-   * Due to the nature of fapi, the value and the operator have an unintended
-   * level of indirection. You will find them in $this->operator
+   * Due to the nature of Form API, the value and the operator have an
+   * unintended level of indirection. You will find them in $this->operator
    * and $this->value respectively.
    */
   function query() {

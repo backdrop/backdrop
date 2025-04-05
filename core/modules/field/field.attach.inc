@@ -764,7 +764,7 @@ function field_attach_validate($entity_type, $entity, $options = array()) {
  * There are two levels of validation for fields in forms: widget
  * validation, and field validation.
  * - Widget validation steps are specific to a given widget's own form
- *   structure and UI metaphors. They are executed through FAPI's
+ *   structure and UI metaphors. They are executed through Form API's
  *   #element_validate property during normal form validation.
  * - Field validation steps are common to a given field type, independently of
  *   the specific widget being used in a given form. They are defined in the

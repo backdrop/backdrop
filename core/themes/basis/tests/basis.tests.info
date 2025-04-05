@@ -1,0 +1,5 @@
+[BasisTestCase]
+name = Basis theme
+description = Test supplemental CSS update selectors in the Basis theme.
+group = Theme
+file = basis.test

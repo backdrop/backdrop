@@ -1,0 +1,56 @@
+/**
+ * Simplified login pages.
+ */
+
+.user-simplified-page-logo {
+  text-align: center;
+}
+.user-simplified-page-logo .logo {
+  display: inline-block;
+  max-width: 240px;
+  margin: auto;
+}
+.user-simplified-page-logo .logo img {
+  max-height: 160px;
+}
+.user-simplified-page .site-name {
+  font-size: 2em;
+  text-align: center;
+}
+.user-simplified-page-body {
+  padding: 1em;
+}
+.user-simplified-page-wrapper {
+  padding: 2em;
+  max-width: 770px;
+  min-width: 255px;
+  margin: 0 auto;
+  background: white;
+  position: relative;
+}
+@media all and (min-width: 768px) {
+  .user-simplified-page-body  {
+    width: 100%;
+    height: 100%;
+    display: table;
+    box-sizing: border-box;
+  }
+  .user-simplified-page-body .user-simplified-page {
+    height: 100%;
+    width: 100%;
+    display: table-cell;
+    vertical-align: middle;
+  }
+  .user-simplified-page-wrapper  {
+    width: 75%;
+    margin: 0 auto;
+    max-width: 500px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    overflow: auto;
+  }
+  html:has(.user-simplified-page-body) {
+    margin: 0;
+    height: 100%;
+    width: 100%;
+  }
+}
