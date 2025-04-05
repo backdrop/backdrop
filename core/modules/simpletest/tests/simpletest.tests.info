@@ -108,9 +108,27 @@ file = ajax.test
 
 [AJAXDialogTest]
 name = AJAX dialog commands
-description = APerforms tests on opening and manipulating dialogs via AJAX commands.
+description = Performs tests on opening and manipulating dialogs via AJAX commands.
 group = AJAX
 file = ajax.test
+
+[BackupSettingsTestCase]
+name = Backup settings form
+description = Confirm the settings forms provided by update handlers work properly.
+group = Backup
+file = backup.test
+
+[BackupUpdateTestCase]
+name = Backup during system updates
+description = Run update.php with a backup and then restore that backup.
+group = Backup
+file = backup.test
+
+[BasisTestCase]
+name = Basis theme
+description = Test supplemental CSS update selectors in the Basis theme.
+group = Theme
+file = basis.test
 
 [BatchProcessingTestCase]
 name = Batch processing
@@ -637,6 +655,12 @@ file = database_test.test
 [ConnectionUnitTest]
 name = Connection unit tests
 description = Tests management of database connections.
+group = Database
+file = database_test.test
+
+[DatabaseStatementPrefetchGadgetChainTestCase]
+name = Database Statement Prefetch Gadget Chain Test
+description = Tests protection against unserialization attacks.
 group = Database
 file = database_test.test
 
