@@ -70,7 +70,7 @@ CKEDITOR.plugins.add('backdropimage', {
       // (http://docs.ckeditor.com/#!/guide/dev_styles-section-widget-styles).
       // Is applied to whatever the main element of the widget is (<figure> or
       // <img>). The classes in image2_captionedClass are always added due to
-      // a bug in CKEditor. In the case of drupalimage, we don't ever want to
+      // a bug in CKEditor. In the case of backdropimage, we don't ever want to
       // add that class, because the widget template already contains it.
       // @see http://dev.ckeditor.com/ticket/13888
       // @see https://www.drupal.org/node/2268941
