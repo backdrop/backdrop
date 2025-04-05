@@ -141,7 +141,7 @@ function _vocabulary_get_operations($vocabulary) {
  * @see taxonomy_form_vocabulary_submit()
  * @see taxonomy_form_vocabulary_validate()
  */
-function taxonomy_form_vocabulary($form, &$form_state, TaxonomyVocabulary $vocabulary = NULL) {
+function taxonomy_form_vocabulary($form, &$form_state, ?TaxonomyVocabulary $vocabulary = NULL) {
   // During initial form build, add the entity to the form state for use
   // during form building and processing. During a rebuild, use what is in the
   // form state.
@@ -800,7 +800,7 @@ function taxonomy_overview_terms_submit($form, &$form_state) {
  * @see taxonomy_form_term_validate()
  * @see taxonomy_form_term_submit()
  */
-function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, TaxonomyVocabulary $vocabulary = NULL) {
+function taxonomy_form_term($form, &$form_state, ?TaxonomyTerm $term = NULL, ?TaxonomyVocabulary $vocabulary = NULL) {
   // Load the vocabulary from the term, if not already provided.
   if (!isset($vocabulary) && isset($term->vocabulary)) {
     $vocabulary = taxonomy_vocabulary_load($term->vocabulary);
