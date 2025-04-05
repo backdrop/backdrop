@@ -386,7 +386,7 @@ function book_get_books() {
  */
 function book_form_node_form_alter(&$form, &$form_state, $form_id) {
   $node = $form['#node'];
-  $access = user_access('administer book outlines');
+  $access = book_all_types_allowed();
   if (!$access) {
     if (user_access('add content to books') && ((!empty($node->book['mlid']) && !empty($node->nid)) || book_type_is_allowed($node->type))) {
       // Already in the book hierarchy, or this node type is allowed.
@@ -1146,6 +1146,17 @@ function book_toc($bid, $depth_limit, $exclude = array()) {
 function book_type_is_allowed($type) {
   $book_allowed_types = array_filter(config_get('book.settings', 'book_allowed_types'));
   return in_array($type, $book_allowed_types);
+}
+
+/**
+ * Determine if users are allowed to add any content type to books.
+ *
+ * @return bool
+ *   A Boolean TRUE if all node types can be included in books for this user;
+ *   otherwise, FALSE.
+ */
+function book_all_types_allowed() {
+  return user_access('administer book outlines') && config_get('book.settings', 'book_admin_allowed_all');
 }
 
 /**

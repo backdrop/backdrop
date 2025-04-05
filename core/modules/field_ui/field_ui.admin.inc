@@ -1991,7 +1991,8 @@ function field_ui_field_edit_form($form, &$form_state, $instance) {
   $form['field'] = array(
     '#type' => 'fieldset',
     '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
+    // Open when first creating a field and close when editing.
+    '#collapsed' => empty($_GET['destinations']),
     '#title' => t('Global settings'),
     '#description' => $description,
     '#tree' => TRUE,

@@ -175,7 +175,7 @@ function standard_install() {
   );
 
   foreach ($types as $type) {
-    $type = node_type_set_defaults($type);
+    $type = (object) $type;
     node_type_save($type);
     node_add_body_field($type);
   }
@@ -550,6 +550,12 @@ function standard_install() {
     'view files',
     $filtered_html_permission,
   );
+
+  $file_types = file_permissions_get_configured_types();
+  foreach ($file_types as $file_type) {
+    $editor_permissions[] = "edit own $file_type files";
+    $editor_permissions[] = "download own $file_type files";
+  }
   user_role_grant_permissions('editor', $editor_permissions);
 
   // Create a default role for site administrators, with all available

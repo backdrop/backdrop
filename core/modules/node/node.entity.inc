@@ -352,18 +352,12 @@ class Node extends Entity {
         $query->condition($nids);
         $query->range(0, 1);
 
-        $grants = db_or();
-        foreach (node_access_grants($op, $account) as $realm => $gids) {
-          foreach ($gids as $gid) {
-            $grants->condition(db_and()
-              ->condition('gid', $gid)
-              ->condition('realm', $realm)
-            );
-          }
-        }
+        $grants = node_add_node_grants_to_query(node_access_grants($op, $account));
+
         if (count($grants) > 0) {
           $query->condition($grants);
         }
+
         $result = (bool) $query
           ->execute()
           ->fetchField();

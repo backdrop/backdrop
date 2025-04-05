@@ -9,19 +9,19 @@
  * @endcode
  *
  * On elements you want to auto-submit when changed, add the autosubmit
- * class. With FAPI, add:
+ * class. With Form API, add:
  * @code
  *   $form['field_name']['#attributes']['class'] = array('autosubmit');
  * @endcode
  *
  * If you want to have auto-submit for every form element,
- * add the autosubmit-full-form to the form. With FAPI, add:
+ * add the autosubmit-full-form to the form. With Form API, add:
  * @code
  *   $form['#attributes']['class'] = array('autosubmit-full-form');
  * @endcode
  *
  * If you want to exclude a field from the autosubmit-full-form auto submission,
- * add the class autosubmit-exclude to the form element. With FAPI, add:
+ * add the class autosubmit-exclude to the form element. With Form API, add:
  * @code
  *   $form['field_name']['#attributes']['class'] = array('autosubmit-exclude');
  * @endcode

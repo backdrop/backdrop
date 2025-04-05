@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php-versions: ['5.6', '7.4', '8.3']
+        php-versions: ['7.1', '7.4', '8.4']
         fraction: ['1', '2', '3']
         database-versions: ['mariadb-10.3']
 

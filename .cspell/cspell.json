@@ -71,6 +71,10 @@
       "ignoreWords": ["pastetext", "pastefromword", "showblocks"]
     },
     {
+      "filename": "/core/modules/ckeditor5/**/*.js",
+      "ignoreWords": ["downcastdispatcher", "downcasted", "datafilter", "linkimageediting", "simpleuploadadapter", "filerepository"]
+    },
+    {
       "filename": "/core/modules/filter/tests/filter.test",
       "ignoreWords": ["nbbb", "nccc", "nddd", "neee", "nfff"]
     },
