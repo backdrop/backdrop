@@ -103,12 +103,29 @@ function theme_system_themes_page($variables) {
 
       // Localize the theme description.
       $description = t($theme->info['description']);
+      $prefix = '';
+      $depends = '';
+      if (isset($theme->info['base theme'])) {
+        $base_theme_name = $theme->info['base theme'];
+        $base_theme_label = !empty($theme->base_themes[$base_theme_name]) ? $theme->base_themes[$base_theme_name] : $base_theme_name;
+        $depends = '<br><strong>' . t('Base theme') . ':</strong> ' . check_plain($base_theme_label);
+        if (isset($theme->missing_dependencies)) {
+          $theme->classes[] = 'missing-dependency';
+          $icon = icon('warning', array(
+            'attributes' => array('width' => 24, 'height' => 24),
+          ));
+          $prefix = '<div class="missing-warning">' . $icon . ' ' . t('Missing dependency') . '</div>';
+          if (in_array($base_theme_name, $theme->missing_dependencies)) {
+            $depends .= ' <em>(' . t('missing') . ')</em>';
+          }
+        }
+      }
 
       // Style theme info
       $notes = count($theme->notes) ? ' (' . join(', ', $theme->notes) . ')' : '';
       $theme->classes[] = 'theme-selector';
       $theme->classes[] = 'clearfix';
-      $output .= '<div class="'. join(' ', $theme->classes) .'">' . $screenshot . '<div class="theme-info"><h3>' . $theme->info['name'] . ' ' . (isset($theme->info['version']) ? $theme->info['version'] : '') . $notes . '</h3><div class="theme-description">' . $description . '</div>';
+      $output .= '<div class="'. join(' ', $theme->classes) .'">' . $screenshot . '<div class="theme-info"><h3>' . $theme->info['name'] . ' ' . (isset($theme->info['version']) ? $theme->info['version'] : '') . $notes . '</h3><div class="theme-description">' . $prefix . $description . $depends . '</div>';
 
       // Make sure to provide feedback on compatibility.
       if (!empty($theme->incompatible_core)) {
