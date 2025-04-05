@@ -25,7 +25,12 @@
 .l-top .block-hero {
   margin-top: -2rem;/* Negative top margin collapses spacing under header */
 }
-
+body.update-1-30 .l-top .block-hero {
+  margin-top: 0;
+}
+body.update-1-30 .l-wrapper > .l-top:has(.block-hero) {
+  margin-top: -2rem; /* Negative top margin on parent limited in scope. */
+}
 .container .block-hero {
   margin-top: 0; /* If hero is in a container don't collapse top spacing */
 }
@@ -55,6 +60,11 @@
 .block-hero-no-image {
   background: #0074bd url(../../images/texture.png) repeat center center;
   background-blend-mode: luminosity;
+}
+body.update-1-30 .block-hero-no-image {
+  background-image: url(../../images/waves.svg);
+  background-size: cover;
+  background-blend-mode: normal;
 }
 
 .no-background-blend-mode .block-hero-no-image * {

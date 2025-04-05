@@ -2042,7 +2042,7 @@ function views_get_view_result($name, $display_id = NULL) {
 /**
  * #process callback to see if we need to check_plain() the options.
  *
- * Since FAPI is inconsistent, the #options are sanitized for you in all cases
+ * Form API is inconsistent, the #options are sanitized for you in all cases
  * _except_ checkboxes. We have form elements that are sometimes 'select' and
  * sometimes 'checkboxes', so we need decide late in the form rendering cycle
  * if the options need to be sanitized before they're rendered. This callback

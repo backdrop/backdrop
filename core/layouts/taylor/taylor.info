@@ -1,5 +1,6 @@
 type = layout
 name = Taylor
+description = Includes a header, top, content, two sidebars on the right, bottom, and footer.
 version = BACKDROP_VERSION
 backdrop = 1.x
 

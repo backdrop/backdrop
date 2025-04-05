@@ -1,0 +1,5 @@
+{
+    "_config_name": "system.backup",
+    "_config_static": true,
+    "backup_limit": 5
+}
