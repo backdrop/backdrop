@@ -177,3 +177,9 @@ name = User Views integration
 description = Tests the basic integration with Views module.
 group = User
 file = user_views.test
+
+[UserLoginAppearanceTestCase]
+name = User Login Appearance test
+description = Tests the appearance of the "Log in", "Reset password", and "Create new account" pages.
+group = User
+file = user.test

@@ -662,16 +662,6 @@ abstract class DatabaseTasks {
       '#description' => st('If your database server is listening to a non-standard port, enter its number.'),
     );
 
-    $form['advanced_options']['charset'] = array(
-      '#type' => 'hidden',
-      '#default_value' => empty($database['charset']) ? 'utf8mb4' : $database['charset'],
-    );
-
-    $form['advanced_options']['collation'] = array(
-      '#type' => 'hidden',
-      '#default_value' => empty($database['collation']) ? 'utf8mb4_general_ci' : $database['collation'],
-    );
-
     return $form;
   }
 

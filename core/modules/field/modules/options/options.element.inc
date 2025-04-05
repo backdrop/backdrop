@@ -115,7 +115,7 @@ function _form_options_expand($element) {
     'data' => array('optionsElement' => array('allowedtags' => '<div class="description">' . t('Allowed HTML tags in labels: @tags', array('@tags' => _field_filter_xss_display_allowed_tags())) . '</div>')),
   );
 
-  // Remove properties that will confuse the FAPI.
+  // Remove properties that will confuse the Form API.
   unset($element['#options']);
 
   return $element;
