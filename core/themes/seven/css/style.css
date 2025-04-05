@@ -781,7 +781,6 @@ details {
   margin: 1em 0;
   overflow: hidden;
   background-color: #ffffff;
-  display: table-cell;
 }
 details summary span {
   color: #0074bd;
@@ -1320,6 +1319,9 @@ div.filter-options select {
 .system-themes-list-enabled .theme-selector h3 {
   margin-top: 0;
 }
+.theme-selector .icon {
+  vertical-align: text-bottom;
+}
 
 /**
  * Layout configuration.
@@ -1496,11 +1498,13 @@ table.update {
 }
 
 /* Maintenance page styles */
-body.maintenance-page {
+body.maintenance-page,
+.user-simplified-page-body {
   background: #E8E6E5;
   padding: 1em;
 }
-body.maintenance-page #page {
+body.maintenance-page #page,
+.user-simplified-page-wrapper {
   padding: 2em;
   max-width: 770px;
   min-width: 255px;
@@ -1508,7 +1512,8 @@ body.maintenance-page #page {
   background: white;
   position: relative;
 }
-body.maintenance-page #page:after {
+body.maintenance-page #page:after,
+.user-simplified-page-wrapper:after {
   left: 100%; /* LTR */
   border: solid transparent;
   border-color: rgba(255, 255, 255, 0);
@@ -1582,6 +1587,7 @@ body.maintenance-page #logo {
   max-width: 120px;
   margin: 0 auto;
 }
+
 ol.task-list {
   margin: 0;
   padding-left: 0; /* LTR */
@@ -1779,16 +1785,35 @@ div.add-or-remove-shortcuts {
     height: 100%;
     width: 100%;
   }
-  .maintenance-page-wrapper {
+  .maintenance-page-wrapper,
+  .user-simplified-page-body  {
+    width: 100%;
     display: table;
   }
-  body.maintenance-page {
+  .user-simplified-page-body  {
+    height: 100%;
+    box-sizing: border-box;
+  }
+  .user-simplified-page-body .user-simplified-page {
     height: 100%;
     width: 100%;
     display: table-cell;
     vertical-align: middle;
   }
-  body.maintenance-page #page {
+  .user-simplified-page-wrapper  {
+    width: 75%;
+    margin: 0 auto;
+    max-width: 500px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    overflow: auto;
+  }
+  body.maintenance-page {
+    height: 100%;
+    width: 100%;
+    vertical-align: middle;
+    display: table-cell;
+  }
+  body.maintenance-page #page  {
     width: 75%;
     margin: 0 auto;
     max-width: 770px;

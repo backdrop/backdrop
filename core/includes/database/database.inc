@@ -471,6 +471,20 @@ abstract class DatabaseConnection {
   }
 
   /**
+   * Get the list of table prefixes used by this database connection.
+   *
+   * @return array
+   *   An array of all prefixes, with the key being the table name and the value
+   *   being the prefix. The special key "default" applies to all tables not
+   *   specifically prefixed.
+   *
+   * @since 1.30.0 Method added.
+   */
+  function getPrefixes() {
+    return $this->prefixes;
+  }
+
+  /**
    * Appends a database prefix to all tables in a query.
    *
    * Queries sent to Backdrop should wrap all table names in curly brackets.

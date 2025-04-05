@@ -19,7 +19,7 @@ class FormsTestCase extends BackdropWebTestCase {
    *
    * If the form field is found in form_get_errors() then the test pass.
    */
-  function testRequiredFields() {
+  public function testRequiredFields() {
     // Originates from http://drupal.org/node/117748
     // Sets of empty strings and arrays.
     $empty_strings = array('""' => "", '"\n"' => "\n", '" "' => " ", '"\t"' => "\t", '" \n\t "' => " \n\t ", '"\n\n\n\n\n"' => "\n\n\n\n\n");
@@ -135,7 +135,7 @@ class FormsTestCase extends BackdropWebTestCase {
    *
    * @see form_test_validate_required_form()
    */
-  function testRequiredCheckboxesRadio() {
+  public function testRequiredCheckboxesRadio() {
     $form = $form_state = array();
     $form = form_test_validate_required_form($form, $form_state);
 
@@ -222,7 +222,7 @@ class FormsTestCase extends BackdropWebTestCase {
    *
    * @see form_test_validate_required_form_no_title()
    */
-  function testRequiredTextfieldNoTitle() {
+  public function testRequiredTextfieldNoTitle() {
     $form = $form_state = array();
     $form = form_test_validate_required_form_no_title($form, $form_state);
 
@@ -249,7 +249,7 @@ class FormsTestCase extends BackdropWebTestCase {
    *
    * @see _form_test_checkbox()
    */
-  function testCheckboxProcessing() {
+  public function testCheckboxProcessing() {
     // First, try to submit without the required checkbox.
     $edit = array();
     $this->backdropPost('form-test/checkbox', $edit, t('Submit'));
@@ -277,7 +277,7 @@ class FormsTestCase extends BackdropWebTestCase {
   /**
    * Tests validation of #type 'select' elements.
    */
-  function testSelect() {
+  public function testSelect() {
     $form = $form_state = array();
     $form = form_test_select($form, $form_state);
     $error = '!name field is required.';
@@ -341,7 +341,7 @@ class FormsTestCase extends BackdropWebTestCase {
   /**
    * Tests validation of #type 'color' elements.
    */
-  function testColorValidation() {
+  public function testColorValidation() {
     // Keys are inputs, values are expected results.
     $values = array(
       '' => '#000000',
@@ -376,7 +376,7 @@ class FormsTestCase extends BackdropWebTestCase {
   /**
    * Tests validation of #type 'number' elements.
    */
-  function testNumber() {
+  public function testNumber() {
     $form = $form_state = array();
     $form = form_test_number($form, $form_state);
     $this->backdropGet('form-test/number');
@@ -449,7 +449,7 @@ class FormsTestCase extends BackdropWebTestCase {
    *
    * @see _form_test_disabled_elements()
    */
-  function testDisabledElements() {
+  public function testDisabledElements() {
     // Get the raw form in its original state.
     $form_state = array();
     $form = _form_test_disabled_elements(array(), $form_state);
@@ -502,7 +502,7 @@ class FormsTestCase extends BackdropWebTestCase {
   /**
    * Assert that the values submitted to a form matches the default values of the elements.
    */
-  function assertFormValuesDefault($values, $form) {
+  public function assertFormValuesDefault($values, $form) {
     foreach (element_children($form) as $key) {
       if (isset($form[$key]['#default_value'])) {
         if (isset($form[$key]['#expected_value'])) {
@@ -533,7 +533,7 @@ class FormsTestCase extends BackdropWebTestCase {
    *
    * @see _form_test_disabled_elements()
    */
-  function testDisabledMarkup() {
+  public function testDisabledMarkup() {
     $this->backdropGet('form-test/disabled-elements');
     $form_state = array();
     $form = _form_test_disabled_elements(array(), $form_state);
@@ -592,7 +592,7 @@ class FormsTestCase extends BackdropWebTestCase {
    *
    * @see _form_test_input_forgery()
    */
-  function testInputForgery() {
+  public function testInputForgery() {
     $this->backdropGet('form-test/input-forgery');
     $checkbox = $this->xpath('//input[@name="checkboxes[two]"]');
     $checkbox[0]['value'] = 'FORGERY';
@@ -615,7 +615,7 @@ class FormElementTestCase extends BackdropWebTestCase {
   /**
    * Tests placeholder text for elements that support placeholders.
    */
-  function testPlaceHolderText() {
+  public function testPlaceHolderText() {
     $this->backdropGet('form-test/placeholder-text');
     $expected = 'placeholder-text';
     // Test to make sure non-textarea elements have the proper placeholder text.
@@ -638,7 +638,7 @@ class FormElementTestCase extends BackdropWebTestCase {
   /**
    * Tests expansion of #options for #type checkboxes and radios.
    */
-  function testOptions() {
+  public function testOptions() {
     $this->backdropGet('form-test/checkboxes-radios');
 
     // Verify that all options appear in their defined order.
@@ -742,7 +742,7 @@ class FormAlterTestCase extends BackdropWebTestCase {
   /**
    * Tests execution order of hook_form_alter() and hook_form_FORM_ID_alter().
    */
-  function testExecutionOrder() {
+  public function testExecutionOrder() {
     $this->backdropGet('form-test/alter');
     // Ensure that the order is first by module, then for a given module, the
     // id-specific one after the generic one.
@@ -769,7 +769,7 @@ class FormValidationTestCase extends BackdropWebTestCase {
   /**
    * Tests form alterations by #element_validate, #validate, and form_set_value().
    */
-  function testValidate() {
+  public function testValidate() {
     $this->backdropGet('form-test/validate');
     // Verify that #element_validate handlers can alter the form and submitted
     // form values.
@@ -819,7 +819,7 @@ class FormValidationTestCase extends BackdropWebTestCase {
   /**
    * Tests that a form with a disabled CSRF token can be validated.
    */
-  function testDisabledToken() {
+  public function testDisabledToken() {
     $this->backdropPost('form-test/validate-no-token', array(), 'Save');
     $this->assertText('The form_test_validate_no_token form has been submitted successfully.');
   }
@@ -827,7 +827,7 @@ class FormValidationTestCase extends BackdropWebTestCase {
   /**
    * Tests partial form validation through #limit_validation_errors.
    */
-  function testValidateLimitErrors() {
+  public function testValidateLimitErrors() {
     $edit = array(
       'test' => 'invalid',
       'test_numeric_index[0]' => 'invalid',
@@ -869,7 +869,7 @@ class FormValidationTestCase extends BackdropWebTestCase {
   /**
    *  Tests error border of multiple fields with same name in a page.
    */
-  function testMultiFormSameNameErrorClass() {
+  public function testMultiFormSameNameErrorClass() {
     $this->backdropGet('form-test/double-form');
     $edit = array();
     $this->backdropPost(NULL, $edit, t('Save'));
@@ -882,7 +882,7 @@ class FormValidationTestCase extends BackdropWebTestCase {
    *
    * @see form_test_validate_required_form()
    */
-  function testCustomRequiredMessage() {
+  public function testCustomRequiredMessage() {
     $form = $form_state = array();
     $form = form_test_validate_required_form($form, $form_state);
 
@@ -936,7 +936,7 @@ class FormsElementsLabelsTestCase extends BackdropWebTestCase {
    * Test form elements, labels, title attributes and required marks output
    * correctly and have the correct label option class if needed.
    */
-  function testFormLabels() {
+  public function testFormLabels() {
     $this->backdropGet('form_test/form-labels');
 
     // Check that the checkbox/radio processing is not interfering with
@@ -1092,7 +1092,7 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
   /**
    * Test the display of checkboxes when #multiple is TRUE.
    */
-  function testMultipleTrue() {
+  public function testMultipleTrue() {
 
     $this->backdropGet('form_test/tableselect/multiple-true');
 
@@ -1110,7 +1110,7 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
   /**
    * Test the display of radios when #multiple is FALSE.
    */
-  function testMultipleFalse() {
+  public function testMultipleFalse() {
     $this->backdropGet('form_test/tableselect/multiple-false');
 
     $this->assertNoText(t('Empty text.'), 'Empty text should not be displayed.');
@@ -1127,7 +1127,7 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
   /**
    * Test the display of the #empty text when #options is an empty array.
    */
-  function testEmptyText() {
+  public function testEmptyText() {
     $this->backdropGet('form_test/tableselect/empty-text');
     $this->assertText(t('Empty text.'), 'Empty text should be displayed.');
   }
@@ -1135,7 +1135,7 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
   /**
    * Test the submission of single and multiple values when #multiple is TRUE.
    */
-  function testMultipleTrueSubmit() {
+  public function testMultipleTrueSubmit() {
 
     // Test a submission with one checkbox checked.
     $edit = array();
@@ -1160,7 +1160,7 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
   /**
    * Test submission of values when #multiple is FALSE.
    */
-  function testMultipleFalseSubmit() {
+  public function testMultipleFalseSubmit() {
     $edit['tableselect'] = 'row1';
     $this->backdropPost('form_test/tableselect/multiple-false', $edit, 'Submit');
     $this->assertText(t('Submitted: row1'), 'Selected radio button');
@@ -1169,7 +1169,7 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
   /**
    * Test the #js_select property.
    */
-  function testAdvancedSelect() {
+  public function testAdvancedSelect() {
     // When #multiple = TRUE a Select all checkbox should be displayed by default.
     $this->backdropGet('form_test/tableselect/advanced-select/multiple-true-default');
     $this->assertFieldByXPath('//th[@class="select-all"]', NULL, 'Display a "Select all" checkbox by default when #multiple is TRUE.');
@@ -1190,7 +1190,7 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
   /**
    * Test the whether the option checker gives an error on invalid tableselect values for checkboxes.
    */
-  function testMultipleTrueOptionChecker() {
+  public function testMultipleTrueOptionChecker() {
 
     list($header, $options) = _form_test_tableselect_get_data();
 
@@ -1214,7 +1214,7 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
   /**
    * Test the whether the option checker gives an error on invalid tableselect values for radios.
    */
-  function testMultipleFalseOptionChecker() {
+  public function testMultipleFalseOptionChecker() {
 
     list($header, $options) = _form_test_tableselect_get_data();
 
@@ -1237,7 +1237,7 @@ class FormsElementsTableSelectFunctionalTest extends BackdropWebTestCase {
   /**
    * Test presence of ajax functionality
    */
-  function testAjax() {
+  public function testAjax() {
     $rows = array('row1', 'row2', 'row3');
     // Test checkboxes (#multiple == TRUE).
     foreach ($rows as $row) {
@@ -1311,7 +1311,7 @@ class FormsElementsVerticalTabsFunctionalTest extends BackdropWebTestCase {
    *
    * Otherwise, collapse.js adds "SHOW" or "HIDE" labels to the tabs.
    */
-  function testJavaScriptOrdering() {
+  public function testJavaScriptOrdering() {
     $this->backdropGet('form_test/vertical-tabs');
     $position1 = strpos($this->content, 'core/misc/vertical-tabs.js');
     $position2 = strpos($this->content, 'core/misc/collapse.js');
@@ -1346,7 +1346,7 @@ class FormsFormStorageTestCase extends BackdropWebTestCase {
   /**
    * Tests using the form in a usual way.
    */
-  function testForm() {
+  public function testForm() {
     $this->backdropGet('form_test/form-storage');
     $this->assertText('Form constructions: 1');
 
@@ -1372,7 +1372,7 @@ class FormsFormStorageTestCase extends BackdropWebTestCase {
   /**
    * Tests using the form with an activated $form_state['cache'] property.
    */
-  function testFormCached() {
+  public function testFormCached() {
     $this->backdropGet('form_test/form-storage', array('query' => array('cache' => 1)));
     $this->assertText('Form constructions: 1');
 
@@ -1396,7 +1396,7 @@ class FormsFormStorageTestCase extends BackdropWebTestCase {
   /**
    * Tests validation when form storage is used.
    */
-  function testValidation() {
+  public function testValidation() {
     $this->backdropPost('form_test/form-storage', array('title' => '', 'value' => 'value_is_set'), 'Continue submit');
     $this->assertPattern('/value_is_set/', 'The input values have been kept.');
   }
@@ -1411,7 +1411,7 @@ class FormsFormStorageTestCase extends BackdropWebTestCase {
    * during form validation, while another, required element in the form
    * triggers a form validation error.
    */
-  function testCachedFormStorageValidation() {
+  public function testCachedFormStorageValidation() {
     // Request the form with 'cache' query parameter to enable form caching.
     $this->backdropGet('form_test/form-storage', array('query' => array('cache' => 1)));
 
@@ -1442,7 +1442,7 @@ class FormsFormStorageTestCase extends BackdropWebTestCase {
    * gets activated, what may happen when a modules alter the form and adds
    * #ajax properties.
    */
-  function testFormStatePersist() {
+  public function testFormStatePersist() {
     // Test the form one time with caching activated and one time without.
     $run_options = array(
       array(),
@@ -1470,7 +1470,7 @@ class FormsFormStorageTestCase extends BackdropWebTestCase {
    * Verify that the form build-id remains the same when validation errors
    * occur on a mutable form.
    */
-  function testMutableForm() {
+  public function testMutableForm() {
     // Request the form with 'cache' query parameter to enable form caching.
     $this->backdropGet('form_test/form-storage', array('query' => array('cache' => 1)));
     $buildIdFields = $this->xpath('//input[@name="form_build_id"]');
@@ -1489,7 +1489,7 @@ class FormsFormStorageTestCase extends BackdropWebTestCase {
    * Verifies that form build-id is regenerated when loading an immutable form
    * from the cache.
    */
-  function testImmutableForm() {
+  public function testImmutableForm() {
     // Request the form with 'cache' query parameter to enable form caching.
     $this->backdropGet('form_test/form-storage', array('query' => array('cache' => 1, 'immutable' => 1)));
     $buildIdFields = $this->xpath('//input[@name="form_build_id"]');
@@ -1702,7 +1702,7 @@ class FormsFormWrapperTestCase extends BackdropWebTestCase {
   /**
    * Tests using the form in a usual way.
    */
-  function testWrapperCallback() {
+  public function testWrapperCallback() {
     $this->backdropGet('form_test/wrapper-callback');
     $this->assertText('Form wrapper callback element output.', 'The form contains form wrapper elements.');
     $this->assertText('Form builder element output.', 'The form contains form builder elements.');
@@ -1722,7 +1722,7 @@ class FormStateValuesCleanTestCase extends BackdropWebTestCase {
   /**
    * Tests form_state_values_clean().
    */
-  function testFormStateValuesClean() {
+  public function testFormStateValuesClean() {
     $values = backdrop_json_decode($this->backdropPost('form_test/form-state-values-clean', array(), t('Submit')));
 
     // Setup the expected result.
@@ -1769,7 +1769,7 @@ class FormStateValuesCleanAdvancedTestCase extends BackdropWebTestCase {
   /**
    * Tests form_state_values_clean().
    */
-  function testFormStateValuesCleanAdvanced() {
+  public function testFormStateValuesCleanAdvanced() {
 
     // Get an image for uploading.
     $image_files = $this->backdropGetTestFiles('image');
@@ -1812,7 +1812,7 @@ class FormsRebuildTestCase extends BackdropWebTestCase {
   /**
    * Tests preservation of values.
    */
-  function testRebuildPreservesValues() {
+  public function testRebuildPreservesValues() {
     $edit = array(
       'checkbox_1_default_off' => TRUE,
       'checkbox_1_default_on' => FALSE,
@@ -1837,7 +1837,7 @@ class FormsRebuildTestCase extends BackdropWebTestCase {
    * The 'action' attribute of a form should not change after an Ajax submission
    * followed by a non-Ajax submission, which triggers a validation error.
    */
-  function testPreserveFormActionAfterAJAX() {
+  public function testPreserveFormActionAfterAJAX() {
     // Create a multi-valued field for 'page' nodes to use for Ajax testing.
     $field_name = 'field_ajax_test';
     $field = array(
@@ -1895,7 +1895,7 @@ class FormsRedirectTestCase extends BackdropWebTestCase {
   /**
    * Tests form redirection.
    */
-  function testRedirect() {
+  public function testRedirect() {
     $path = 'form-test/redirect';
     $options = array('query' => array('foo' => 'bar'));
     $options['absolute'] = TRUE;
@@ -1963,7 +1963,7 @@ class FormsProgrammaticTestCase extends BackdropWebTestCase {
   /**
    * Test the programmatic form submission workflow.
    */
-  function testSubmissionWorkflow() {
+  public function testSubmissionWorkflow() {
     // Backup the current batch status and reset it to avoid conflicts while
     // processing the dummy form submit handler.
     $current_batch = $batch =& batch_get();
@@ -2057,7 +2057,7 @@ class FormsProgrammaticTestCase extends BackdropWebTestCase {
 }
 
 /**
- * Test that FAPI correctly determines $form_state['triggering_element'].
+ * Test that Form API correctly determines $form_state['triggering_element'].
  */
 class FormsTriggeringElementTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
@@ -2071,7 +2071,7 @@ class FormsTriggeringElementTestCase extends BackdropWebTestCase {
    * information is included in the POST data, as is sometimes the case when
    * the ENTER key is pressed in a textfield in Internet Explorer.
    */
-  function testNoButtonInfoInPost() {
+  public function testNoButtonInfoInPost() {
     $path = 'form-test/clicked-button';
     $edit = array();
     $form_html_id = 'form-test-clicked-button';
@@ -2101,9 +2101,9 @@ class FormsTriggeringElementTestCase extends BackdropWebTestCase {
 
     // Ensure submitting a form with buttons of different types results in
     // $form_state['triggering_element'] being set to the first button,
-    // regardless of type. For the FAPI 'button' type, this should result in the
-    // submit handler not executing. The types are 's' (submit), 'b' (button),
-    // and 'i' (image_button).
+    // regardless of type. For the Form API 'button' type, this should result in
+    // the submit handler not executing. The types are 's' (submit),]
+    // 'b' (button), and 'i' (image_button).
     $this->backdropPost($path . '/s/b/i', $edit, NULL, array(), array(), $form_html_id);
     $this->assertText('The clicked button is button1.', '$form_state[\'triggering_element\'] set to first button.');
     $this->assertText('Submit handler for form_test_clicked_button executed.', 'Form submit handler executed.');
@@ -2121,7 +2121,7 @@ class FormsTriggeringElementTestCase extends BackdropWebTestCase {
    * Test that $form_state['triggering_element'] does not get set to a button
    * with #access=FALSE.
    */
-  function testAttemptAccessControlBypass() {
+  public function testAttemptAccessControlBypass() {
     $path = 'form-test/clicked-button';
     $form_html_id = 'form-test-clicked-button';
 
@@ -2179,7 +2179,7 @@ class FormsArbitraryRebuildTestCase extends BackdropWebTestCase {
   /**
    * Tests a basic rebuild with the user registration form.
    */
-  function testUserRegistrationRebuild() {
+  public function testUserRegistrationRebuild() {
     $edit = array(
       'name' => 'foo',
       'mail' => 'bar@example.com',
@@ -2193,7 +2193,7 @@ class FormsArbitraryRebuildTestCase extends BackdropWebTestCase {
   /**
    * Tests a rebuild caused by a multiple value field.
    */
-  function testUserRegistrationMultipleField() {
+  public function testUserRegistrationMultipleField() {
     $edit = array(
       'name' => 'foo',
       'mail' => 'bar@example.com',
@@ -2218,7 +2218,7 @@ class FormsFileInclusionTestCase extends BackdropWebTestCase {
   /**
    * Tests loading an include specified in hook_menu().
    */
-  function testLoadMenuInclude() {
+  public function testLoadMenuInclude() {
     $this->backdropPostAJAX('form-test/load-include-menu', array(), array('op' => t('Save')), 'system/ajax', array(), array(), 'form-test-load-include-menu');
     $this->assertText('Submit callback called.');
   }
@@ -2226,7 +2226,7 @@ class FormsFileInclusionTestCase extends BackdropWebTestCase {
   /**
    * Tests loading a custom specified include.
    */
-  function testLoadCustomInclude() {
+  public function testLoadCustomInclude() {
     $this->backdropPost('form-test/load-include-custom', array(), t('Save'));
     $this->assertText('Submit callback called.');
   }
@@ -2242,7 +2242,7 @@ class FormCheckboxTestCase extends BackdropWebTestCase {
     parent::setUp('form_test');
   }
 
-  function testFormCheckbox() {
+  public function testFormCheckbox() {
     // Ensure that the checked state is determined and rendered correctly for
     // tricky combinations of default and return values.
     foreach (array(FALSE, NULL, TRUE, 0, '0', '', 1, '1', 'foobar', '1foobar') as $default_value) {
@@ -2401,7 +2401,7 @@ class FormEmailTestCase extends BackdropWebTestCase {
   /**
    * Tests that #type 'email' fields are properly validated.
    */
-  function testFormEmail() {
+  public function testFormEmail() {
     $edit = array();
     $edit['email'] = 'invalid';
     $edit['email_required'] = ' ';
@@ -2437,7 +2437,7 @@ class FormH5datetimeTestCase extends BackdropWebTestCase {
   /**
    * Tests for #type 'html_date', 'html_time' and 'html_datetime' validation.
    */
-  function testFormH5datetime() {
+  public function testFormH5datetime() {
     $edit = array();
     // Valid input.
     $edit['h5date'] = '2002-02-01';
@@ -2462,7 +2462,7 @@ class FormH5datetimeTestCase extends BackdropWebTestCase {
   /**
    * Test return value for disabled html_date and html_time elements.
    *
-   * These two FAPI elements use an array for #default_value, so, the value
+   * These two Form API elements use an array for #default_value, so, the value
    * callback function html_date_or_time_value_callback needs to take care of
    * converting the array to a string upon submission of a form that contains
    * them.
@@ -2491,7 +2491,7 @@ class HTMLIdTestCase extends BackdropWebTestCase {
   /**
    * Tests that HTML IDs do not get duplicated when form validation fails.
    */
-  function testHTMLId() {
+  public function testHTMLId() {
     $this->backdropGet('form-test/double-form');
     $this->assertNoDuplicateIds('There are no duplicate IDs');
 
@@ -2515,7 +2515,7 @@ class FormUrlTestCase extends BackdropWebTestCase {
   /**
    * Tests that #type 'url' fields are properly validated and trimmed.
    */
-  function testFormUrl() {
+  public function testFormUrl() {
     $edit = array();
     $edit['url'] = 'http://';
     $edit['url_required'] = ' ';

@@ -97,6 +97,7 @@ function syslog_watchdog(array $log_entry) {
     if ($facility === '') {
       $facility = defined('LOG_LOCAL0') ? LOG_LOCAL0 : LOG_USER;
     }
+    // cspell:disable-next-line
     openlog($config->get('log_identity'), LOG_NDELAY, $facility);
   }
 

@@ -71,6 +71,10 @@ class BlockHero extends BlockText {
       '#upload_location' => 'public://hero/',
       '#upload_validators' => $upload_validators,
       '#weight' => -10,
+      '#attributes' => array('class' => array('layout-hero-image-upload')),
+      '#theme' => 'layout_hero_background_image',
+      '#image_style' => 'medium',
+      '#browser_view' => 'image_library',
     );
     // Store the image path separately.
     $form['image_path'] = array(
