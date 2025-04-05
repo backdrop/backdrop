@@ -604,6 +604,8 @@ function install_tasks($install_state) {
     ),
     'install_config_location' => array(
     ),
+    'install_backup_location' => array(
+    ),
     'install_system_module' => array(
     ),
     'install_bootstrap_full' => array(
@@ -947,6 +949,29 @@ function install_config_location(&$install_state) {
 }
 
 /**
+ * Installation task; Rewrite settings.php to include backup location.
+ */
+function install_backup_location(&$install_state) {
+  global $settings, $databases;
+
+  $backup_directory = isset($settings['backup_directory']) ? $settings['backup_directory'] : '';
+  // A value of FALSE disables backups and will not rewrite on install.
+  if (empty($backup_directory) && $backup_directory !== FALSE) {
+    $backup_directory = 'files/backups_' . md5(json_encode($databases) . backdrop_random_bytes(10));
+    $update_settings["settings['backup_directory']"] = array(
+      'value' => $backup_directory,
+      'required' => TRUE,
+    );
+
+    // Backup directory is optional, so continue even if it can't be written.
+    try {
+      backdrop_rewrite_settings($update_settings);
+    }
+    catch (Exception $e) {}
+  }
+}
+
+/**
  * Form constructor for a form to configure and rewrite settings.php.
  *
  * @param array $install_state
@@ -1080,9 +1105,10 @@ function install_settings_form_submit($form, &$form_state) {
     'required' => TRUE,
   );
 
-  // If UTF-8 MB4 is not supported, use the old UTF-8 charset.
-  if (install_verify_database_utf8mb4() === FALSE && $db_settings['charset'] === 'utf8mb4') {
+  // If UTF-8 MB4 is not supported, use the old UTF-8 charset and collation.
+  if (install_verify_database_utf8mb4() === FALSE) {
     $db_settings['charset'] = 'utf8';
+    $db_settings['collation'] = 'utf8_general_ci';
   }
 
   // Only populate values if they are not the defaults:
@@ -1095,10 +1121,10 @@ function install_settings_form_submit($form, &$form_state) {
   if ($db_settings['port'] && $db_settings['port'] != '3306') {
     $settings['database']['value']['port'] = $db_settings['port'];
   }
-  if ($db_settings['charset'] && $db_settings['charset'] != 'utf8mb4') {
+  if (!empty($db_settings['charset']) && $db_settings['charset'] != 'utf8mb4') {
     $settings['database']['value']['charset'] = $db_settings['charset'];
   }
-  if ($db_settings['collation'] && $db_settings['collation'] != 'utf8mb4_general_ci') {
+  if (!empty($db_settings['collation']) && $db_settings['collation'] != 'utf8mb4_general_ci') {
     $settings['database']['value']['collation'] = $db_settings['collation'];
   }
   backdrop_rewrite_settings($settings);

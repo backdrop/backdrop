@@ -108,7 +108,16 @@ function backdrop_theme_initialize() {
   $base_themes = array();
   $ancestor = $theme;
   while ($ancestor && isset($themes[$ancestor]->base_theme)) {
+    $current_theme = $themes[$ancestor];
     $ancestor = $themes[$ancestor]->base_theme;
+    if (!array_key_exists($ancestor, $themes)) {
+      // A base theme is missing, warn about the problem and skip adding.
+      watchdog('theme', '%theme is a sub theme of %base_theme, but its base theme is missing.', array(
+        '%theme' => $current_theme->info['name'],
+        '%base_theme' => $ancestor,
+      ), WATCHDOG_WARNING);
+      continue;
+    }
     $base_themes[] = $themes[$ancestor];
   }
   _backdrop_theme_initialize($themes[$theme], array_reverse($base_themes));
@@ -1474,6 +1483,10 @@ function theme_get_setting($setting_name, $theme = NULL) {
   $value = $configs[$theme]->get($setting_name);
   if (is_null($value)) {
     $themes = list_themes();
+    // Do not try to access settings of missing (base-)themes.
+    if (!isset($themes[$theme])) {
+      return;
+    }
     $theme_info = $themes[$theme];
     $value = isset($theme_info->info['settings'][$setting_name]) ? $theme_info->info['settings'][$setting_name] : NULL;
   }
@@ -1504,6 +1517,9 @@ function theme_has_settings($theme) {
     return TRUE;
   }
   $themes = list_themes();
+  if (!isset($themes[$theme])) {
+    return FALSE;
+  }
   $theme_info = $themes[$theme];
   if (!empty($theme_info->info['settings'])) {
     return TRUE;
