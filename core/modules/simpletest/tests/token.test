@@ -411,6 +411,7 @@ class TokenCommentTestCase extends TokenTestHelper {
   function testCommentTokens() {
     $node = $this->backdropCreateNode(array('comment' => COMMENT_NODE_OPEN));
 
+    /** @var Comment $parent_comment */
     $parent_comment = entity_create('comment', array());
     $parent_comment->nid = $node->nid;
     $parent_comment->pid = 0;
@@ -433,6 +434,7 @@ class TokenCommentTestCase extends TokenTestHelper {
     );
     $this->assertTokens('comment', array('comment' => $parent_comment), $tokens);
 
+    /** @var Comment $comment */
     $comment = entity_create('comment', array());
     $comment->nid = $node->nid;
     $comment->pid = $parent_comment->cid;
@@ -463,6 +465,7 @@ class TokenNodeTestCase extends TokenTestHelper {
     $this->backdropLogin($admin_user);
 
     $files = $this->backdropGetTestFiles('image');
+    /** @var File $file */
     $file = entity_create('file', (array) $files[0]);
     $file->uid = $admin_user->uid;
     $file->save();
@@ -712,13 +715,14 @@ class TokenTaxonomyTestCase extends TokenTestHelper {
     return $vocabulary;
   }
 
-  function addTerm(TaxonomyVocabulary $vocabulary, array $term = array()) {
-    $term += array(
+  function addTerm(TaxonomyVocabulary $vocabulary, array $term_parameters = array()) {
+    $term_parameters += array(
       'name' => backdrop_strtolower($this->randomName(5)),
       'vocabulary' => $vocabulary->machine_name,
       'parent' => array(0),
     );
-    $term = entity_create('taxonomy_term', $term);
+    /** @var TaxonomyTerm $term */
+    $term = entity_create('taxonomy_term', $term_parameters);
     taxonomy_term_save($term);
     return $term;
   }
@@ -817,13 +821,14 @@ class TokenEntityTestCase extends TokenTestHelper {
     $this->vocab = $vocabulary;
   }
 
-  function addTerm(TaxonomyVocabulary $vocabulary, array $term = array()) {
-    $term += array(
+  function addTerm(TaxonomyVocabulary $vocabulary, array $term_parameters = array()) {
+    $term_parameters += array(
       'name' => backdrop_strtolower($this->randomName(5)),
       'vocabulary' => $vocabulary->machine_name,
       'parents' => array(0),
     );
-    $term = entity_create('taxonomy_term', $term);
+    /** @var TaxonomyTerm $term */
+    $term = entity_create('taxonomy_term', $term_parameters);
     $term->save();
     return $term;
   }
@@ -972,6 +977,7 @@ class TokenFileTestCase extends TokenTestHelper {
 
   function testFileTokens() {
     // Create a test file object.
+    /** @var File $file */
     $file = entity_create('file', array());
     $file->fid = 1;
     $file->filename = 'test.png';

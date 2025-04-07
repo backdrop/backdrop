@@ -12,6 +12,7 @@
 class views_handler_field_user_link_edit extends views_handler_field_user_link {
   function render_link($data, $values) {
     // Build a pseudo account object to be able to check the access.
+    /** @var User $account */
     $account = entity_create('user', array());
     $account->uid = $data;
 

@@ -1561,6 +1561,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     'filesize' => $_FILES['files']['size'][$form_field_name],
   );
   $values['filemime'] = file_get_mimetype($values['filename']);
+  /** @var File $file */
   $file = entity_create('file', $values);
 
   $extensions = '';
@@ -2123,6 +2124,7 @@ function file_save_data($data, $destination = NULL, $replace = FILE_EXISTS_RENAM
 
   if ($uri = file_unmanaged_save_data($data, $destination, $replace)) {
     // Create a file entity.
+    /** @var File $file */
     $file = entity_create('file', array(
       'uri' => $uri,
       'uid' => $user->uid,

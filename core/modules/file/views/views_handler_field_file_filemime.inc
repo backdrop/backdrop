@@ -28,6 +28,7 @@ class views_handler_field_file_filemime extends views_handler_field_file {
   function render($values) {
     $data = $values->{$this->field_alias};
     if (!empty($this->options['filemime_image']) && $data !== NULL && $data !== '') {
+      /** @var File $fake_file */
       $fake_file = entity_create('file', array());
       $fake_file->filemime = $data;
       $data = theme('file_icon', array('file' => $fake_file));

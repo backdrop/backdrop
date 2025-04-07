@@ -1926,6 +1926,7 @@ class UserSaveTestCase extends BackdropWebTestCase {
     $test_name = $this->randomName();
 
     // Create the base user, based on backdropCreateUser().
+    /** @var User $user */
     $user = entity_create('user', array(
       'name' => $test_name,
       'uid' => $test_uid,

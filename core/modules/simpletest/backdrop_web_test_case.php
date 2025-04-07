@@ -1161,6 +1161,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     );
     $settings['body'][$settings['langcode']][0] += $body;
 
+    /** @var Node $node */
     $node = entity_create('node', $settings);
     $node->save();
 
@@ -1334,6 +1335,7 @@ class BackdropWebTestCase extends BackdropTestCase {
       $edit['roles'] = array($role_name);
     }
 
+    /** @var User $account */
     $account = entity_create('user', $edit);
     $account->save();
 

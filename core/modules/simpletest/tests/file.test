@@ -377,6 +377,7 @@ class FileValidatorTest extends BackdropWebTestCase {
    * Test the file_validate_extensions() function.
    */
   function testFileValidateExtensions() {
+    /** @var File $file */
     $file = entity_create('file', array('filename' => 'asdf.txt'));
     $errors = file_validate_extensions($file, 'asdf txt pork');
     $this->assertEqual(count($errors), 0, 'Valid extension accepted.', 'File');
@@ -447,6 +448,7 @@ class FileValidatorTest extends BackdropWebTestCase {
    */
   function testFileValidateNameLength() {
     // Create a new file entity.
+    /** @var File $file */
     $file = entity_create('file', array());
 
     // Add a filename with an allowed length and test it.
@@ -472,6 +474,7 @@ class FileValidatorTest extends BackdropWebTestCase {
    */
   function testFileValidateSize() {
     // Create a file with a size of 1000 bytes, and quotas of only 1 byte.
+    /** @var File $file */
     $file = entity_create('file', array('filesize' => 1000));
     $errors = file_validate_size($file, 0, 0);
     $this->assertEqual(count($errors), 0, 'No limits means no errors.', 'File');
@@ -2147,6 +2150,7 @@ class FileLoadTest extends FileHookTestCase {
 class FileSaveTest extends FileHookTestCase {
   function testFileSave() {
     // Create a new file object.
+    /** @var File $file */
     $file = entity_create('file', array(
       'uid' => 1,
       'filename' => 'backdrop.txt',

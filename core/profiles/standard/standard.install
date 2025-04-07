@@ -363,6 +363,7 @@ function standard_install() {
   field_create_instance($instance);
 
   // Create a default post to display on front page.
+  /** @var Node $post */
   $post = entity_create('node', array(
       'title' => st('Your first post!'),
       'body' => array(
@@ -382,6 +383,7 @@ function standard_install() {
   $post->save();
 
   // Create an "About" page node.
+  /** @var Node $page */
   $page = entity_create('node', array(
       'title' => st('About'),
       'body' => array(
@@ -432,6 +434,7 @@ function standard_install() {
     $image_url = BACKDROP_ROOT . '/' . backdrop_get_path('profile', 'standard') . '/images/' . $image_filename;
     $moved_file = file_unmanaged_copy($image_url, $field_image_dir);
 
+    /** @var File $file */
     $file = entity_create('file', array(
       'filename' => $image_filename,
       'uri' => $moved_file,
@@ -439,6 +442,7 @@ function standard_install() {
     ));
 
     $file->save();
+    /** @var Node $card */
     $card = entity_create('node', array(
         'title' => $info['title'],
         'body' => array(
