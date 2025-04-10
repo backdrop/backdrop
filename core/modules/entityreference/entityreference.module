@@ -961,13 +961,13 @@ function entityreference_field_widget_error($element, $error) {
 /**
  * Menu Access callback for the autocomplete widget.
  *
- * @param $type
+ * @param string $type
  *   The widget type (i.e. 'single' or 'tags').
- * @param $field_name
+ * @param string $field_name
  *   The name of the entity-reference field.
- * @param $entity_type
+ * @param string $entity_type
  *   The entity type.
- * @param $bundle_name
+ * @param string $bundle_name
  *   The bundle name.
  *
  * @return bool
@@ -986,18 +986,18 @@ function entityreference_autocomplete_access_callback($type, $field_name, $entit
 /**
  * Menu callback: autocomplete the label of an entity.
  *
- * @param $type
+ * @param string $type
  *   The widget type (i.e. 'single' or 'tags').
- * @param $field_name
+ * @param string $field_name
  *   The name of the entity-reference field.
- * @param $entity_type
+ * @param string $entity_type
  *   The entity type.
- * @param $bundle_name
+ * @param string $bundle_name
  *   The bundle name.
- * @param $entity_id
+ * @param string $entity_id
  *   Optional; The entity ID the entity-reference field is attached to.
  *   Defaults to ''.
- * @param $string
+ * @param string $string
  *   The label of the entity to query by.
  */
 function entityreference_autocomplete_callback($type, $field_name, $entity_type, $bundle_name, $entity_id = '', $string = '') {
@@ -1026,18 +1026,18 @@ function entityreference_autocomplete_callback($type, $field_name, $entity_type,
  * This function can be used by other modules that wish to pass a mocked
  * definition of the field on instance.
  *
- * @param $type
+ * @param string $type
  *   The widget type (i.e. 'single' or 'tags').
- * @param $field
+ * @param array $field
  *   The field array definition.
- * @param $instance
+ * @param array $instance
  *   The instance array definition.
- * @param $entity_type
+ * @param string $entity_type
  *   The entity type.
- * @param $entity_id
+ * @param string $entity_id
  *   Optional; The entity ID the entity-reference field is attached to.
  *   Defaults to ''.
- * @param $string
+ * @param string $string
  *   The label of the entity to query by.
  */
 function entityreference_autocomplete_callback_get_matches($type, $field, $instance, $entity_type, $entity_id = '', $string = '') {
@@ -1448,12 +1448,15 @@ function entityreference_entityreference_behavior_plugins() {
 
 /**
  * Implements hook_entityreference_selection_plugins().
+ *
+ * @return array
+ *   Selection plugin definitions.
  */
 function entityreference_entityreference_selection_plugins() {
   $plugins['base'] = array(
-      'title' => t('Simple (with optional filter by bundle)'),
-      'class' => 'EntityReferenceSelectionHandlerGeneric',
-      'weight' => -100,
+    'title' => t('Simple (with optional filter by bundle)'),
+    'class' => 'EntityReferenceSelectionHandlerGeneric',
+    'weight' => -100,
   );
   if (module_exists('views')) {
     $plugins['views'] = array(
@@ -1467,6 +1470,9 @@ function entityreference_entityreference_selection_plugins() {
 
 /**
  * Load a behavior class for a given property.
+ *
+ * @return string|null
+ *   The behavior class or null if it is not found.
  */
 function entityreference_load_behavior_class($property) {
   $plugins = _entityreference_behavior_plugins();
@@ -1475,6 +1481,9 @@ function entityreference_load_behavior_class($property) {
 
 /**
  * Load a selection class for a given property.
+ *
+ * @return string|null
+ *   The selection class or null if it is not found.
  */
 function entityreference_load_selection_class($property) {
   $plugins = _entityreference_selection_plugins();
@@ -1483,6 +1492,9 @@ function entityreference_load_selection_class($property) {
 
 /**
  * Get all behavior plugins implemented by any module.
+ *
+ * @return array
+ *   All behavior plugin definitions.
  *
  */
 function _entityreference_behavior_plugins() {
@@ -1513,6 +1525,9 @@ function _entityreference_behavior_plugins() {
 
 /**
  * Get all selection plugins implemented by any module.
+ *
+ * @return array
+ *   All selection plugin definitions.
  */
 function _entityreference_selection_plugins() {
   $plugins = &backdrop_static(__FUNCTION__);
@@ -1618,13 +1633,13 @@ function entityreference_preprocess_taxonomy_term(&$variables) {
 /**
  * Pass title display setting to templates.
  *
- * If #page is set in the rendered entity reference display mode then pass it 
+ * If #page is set in the rendered entity reference display mode then pass it
  * to the template.
  *
  * @param array $variables
  *   Render variables passed by reference.
  */
-function _entityreference_preprocess_set_title_display(&$variables) {
+function _entityreference_preprocess_set_title_display(array &$variables) {
   if (!strstr($variables['theme_hook_original'], 'entityreference')) {
     return;
   }
