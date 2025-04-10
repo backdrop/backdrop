@@ -357,8 +357,20 @@ class FileSpaceUsedTest extends FileTestCase {
  */
 class FileValidatorTest extends BackdropWebTestCase {
   protected $profile = 'testing';
+
+  /**
+   * @var File $image
+   */
   protected $image;
+
+  /**
+   * @var File $non_image
+   */
   protected $non_image;
+
+  /**
+   * @var File $file
+   */
   protected $file;
 
   function setUp() {
