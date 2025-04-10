@@ -1711,7 +1711,7 @@ function taxonomy_field_formatter_settings_form($field, $instance, $view_mode, $
         '#type' => 'select',
         '#options' => $options,
         '#default_value' => $settings['view_mode'],
-        // Never empty, so no #empty_option
+        // Never empty, so no #empty_option.
       );
       break;
   }
@@ -1763,7 +1763,7 @@ function taxonomy_field_formatter_settings_summary($field, $instance, $view_mode
  * @return array
  *   The array of valid terms for this field, keyed by term id.
  *
- * @see taxonomy_options_list().
+ * @see taxonomy_options_list()
  */
 function taxonomy_allowed_values(array $field, ?array $instance = NULL, ?string $entity_type = NULL, ?EntityInterface $entity = NULL) {
   $options = array();
@@ -1924,7 +1924,7 @@ function taxonomy_autocomplete_validate($element, &$form_state) {
           'vocabulary' => $vocabulary->machine_name,
           'langcode' => LANGUAGE_NONE,
         );
-        if (module_exists('language') && $vocabulary->language == TAXONOMY_LANGUAGE_ENABLED  && $instance['widget']['settings']['follow_content_language']) {
+        if (module_exists('language') && $vocabulary->language == TAXONOMY_LANGUAGE_ENABLED && $instance['widget']['settings']['follow_content_language']) {
           $term['langcode'] = $langcode;
         }
       }
