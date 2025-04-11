@@ -1745,7 +1745,7 @@ function tempstore_clear_all($collection) {
  * @{
  * Functions to sanitize values.
  *
- * See http://drupal.org/writing-secure-code for information
+ * See https://docs.backdropcms.org/documentation/writing-secure-code for information
  * on writing secure code.
  */
 
