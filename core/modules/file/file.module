@@ -1936,6 +1936,7 @@ function file_icon_map(File $file) {
     // Spreadsheet document types.
     case 'application/vnd.ms-excel':
     case 'application/vnd.ms-excel.sheet.macroEnabled.12':
+    case 'application/vnd.ms-excel.sheet.binary.macroEnabled.12':
     case 'application/vnd.oasis.opendocument.spreadsheet':
     case 'application/vnd.oasis.opendocument.spreadsheet-template':
     case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
