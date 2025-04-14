@@ -2480,6 +2480,7 @@ function layout_layout_template_info() {
   foreach ($flexible_templates as $flexible_template) {
     $layouts[$flexible_template->name] = array(
       'title' => $flexible_template->title,
+      'description' => $flexible_template->description,
       'regions' => array(),
       'default region' => '',
       'template' => 'layout--flexible',

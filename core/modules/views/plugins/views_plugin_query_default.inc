@@ -895,8 +895,10 @@ class views_plugin_query_default extends views_plugin_query {
    *   The snippet to check. This can be either a column or a complex expression
    *   like "UPPER(table.field) = 'value'".
    * @param $args
-   *   An associative array of arguments.
+   *   An associative array of arguments. Placeholders must be unique when
+   *   using this method multiple times on a single query.
    *
+   * @see https://www.php.net/manual/en/pdo.prepare.php
    * @see QueryConditionInterface::where()
    */
   function add_where_expression($group, $snippet, $args = array()) {
@@ -976,9 +978,11 @@ class views_plugin_query_default extends views_plugin_query {
    *   The snippet to check. This can be either a column or
    *   a complex expression like "COUNT(table.field) > 3"
    * @param $args
-   *   An associative array of arguments.
+   *   An associative array of arguments. Placeholders must be unique when
+   *   using this method multiple times on a single query.
    *
-   * @see QueryConditionInterface::having()
+   * @see https://www.php.net/manual/en/pdo.prepare.php
+   * @see QueryConditionInterface::where()
    */
   function add_having_expression($group, $snippet, $args = array()) {
     // Ensure all variants of 0 are actually 0. Thus '', 0 and NULL are all
