@@ -487,7 +487,8 @@ function file_entity_info() {
       'entity class' => 'File',
       'entity keys' => array(
         'id' => 'fid',
-        'bundle' => 'type'
+        'bundle' => 'type',
+        'label' => 'filename',
       ),
       'bundle keys' => array(
         'bundle' => 'type'
