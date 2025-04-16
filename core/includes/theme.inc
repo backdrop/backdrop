@@ -1166,6 +1166,7 @@ function theme($hook, $variables = array()) {
       }
     }
   }
+
   // Attach any assets that were specified in the theme hook.
   if (!empty($info['attached'])) {
     $elements['#attached'] = $info['attached'];
