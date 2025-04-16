@@ -1844,7 +1844,7 @@ function hook_theme($existing, $type, $theme, $path) {
           'core/misc/ajax.js' => array(),
         ),
         'css' => array(
-          array('my_module/css/my-module.css' => array()),
+          'css/my-module.css' => array(),
         ),
         'icons' => array(
           'acorn-fill' => array(),
