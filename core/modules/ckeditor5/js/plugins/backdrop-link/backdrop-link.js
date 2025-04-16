@@ -306,7 +306,8 @@ class BackdropLink extends CKEditor5.core.Plugin {
           // This is not ideal to call an internal method to show the balloon,
           // but this is the same approach used by LinkImageUI.
           // See https://github.com/ckeditor/ckeditor5/blob/master/packages/ckeditor5-link/src/linkimageui.ts
-          linkUI._addActionsView();
+          // @todo find a replacement for _addActionsView(), it's gone.
+          //linkUI._addActionsView();
         }
         // For new links, open the link dialog directly.
         else {
@@ -337,6 +338,9 @@ class BackdropLink extends CKEditor5.core.Plugin {
 
     // Bind to the balloon being shown and check for the link UI.
     this.listenTo(contextualBalloonPlugin, 'change:visibleView', (evt, name, visibleView) => {
+      // @todo actually fix this function, linkUI.actionsView is gone in 45.0.0.
+      return;
+
       const actionsView = linkUI.actionsView;
       if (actionsView && visibleView === actionsView) {
         if (!linkUiModified) {

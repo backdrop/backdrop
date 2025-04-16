@@ -73,6 +73,13 @@
       // double-binding if the .attach() method is called twice very quickly.
       element.ckeditor5Processed = true;
 
+      // Prevent fatal error on init.
+      // Note: this isn't an actual fix, icons have been moved to
+      // CKEditor5.icons in 45.0.0 and have different names now.
+      if (typeof CKEditor5.core.icons === 'undefined') {
+        CKEditor5.core.icons = {};
+      }
+
       const beforeAttachValue = element.value;
       CKEditor5.editorClassic.ClassicEditor
         .create(element, editorSettings)

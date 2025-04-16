@@ -122,7 +122,7 @@ class BackdropImage extends CKEditor5.core.Plugin {
       const buttonView = new CKEditor5.ui.ButtonView(locale);
       buttonView.set({
         label: editLabel,
-        icon: CKEditor5.core.icons.pencil,
+        icon: CKEditor5.icons.IconPencil,
         tooltip: true
       });
 
@@ -143,7 +143,7 @@ class BackdropImage extends CKEditor5.core.Plugin {
 
       buttonView.set({
         label: insertLabel,
-        icon: CKEditor5.core.icons.image,
+        icon: CKEditor5.icons.IconImage,
         tooltip: true
       });
 
