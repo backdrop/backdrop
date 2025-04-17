@@ -230,7 +230,9 @@ function date_theme($existing, $type, $theme, $path) {
       'pattern' => 'date_views_pager__',
       'template' => 'templates/date-views-pager',
       'attached' => array(
-        backdrop_get_path('module', 'date') . "/css/date-views.css" => array(),
+        'css' => array(
+          backdrop_get_path('module', 'date') . "/css/date-views.css" => array(),
+        ),
       ),
     ) + $base,
   );
