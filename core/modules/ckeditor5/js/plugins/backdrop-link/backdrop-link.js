@@ -100,13 +100,13 @@ class BackdropLink extends CKEditor5.core.Plugin {
 
   _addExtraAttributeOnLinkCommandExecute(extraAttributes) {
     const editor = this.editor;
-    const linkCommand = editor.commands.get( 'link' );
+    const linkCommand = editor.commands.get('link');
     let linkCommandExecuting = false;
 
     linkCommand.on('execute', (evt, args) => {
       // Custom handling is only required if an extra attribute was passed into
       // editor.execute('link', ...).
-      if (args.length < 3) {
+      if (args.length < 4) {
         return;
       }
       if (linkCommandExecuting) {
@@ -131,7 +131,7 @@ class BackdropLink extends CKEditor5.core.Plugin {
       // Wrapping the original command execution in a model.change() block to
       // make sure there's a single undo step when the extra attribute is added.
       model.change((writer) => {
-        editor.execute('link', ...args);
+        editor.execute('link', args[0], args[1], args[2]);
 
         // If there is an image within this link, apply the link attributes to
         // the image model's htmlLinkAttributes attribute.
@@ -249,7 +249,7 @@ class BackdropLink extends CKEditor5.core.Plugin {
 
       buttonView.set({
         label: insertLabel,
-        icon: backdropLinkIcon,
+        icon: CKEditor5.icons.IconLink,
         tooltip: true
       });
 
@@ -306,8 +306,7 @@ class BackdropLink extends CKEditor5.core.Plugin {
           // This is not ideal to call an internal method to show the balloon,
           // but this is the same approach used by LinkImageUI.
           // See https://github.com/ckeditor/ckeditor5/blob/master/packages/ckeditor5-link/src/linkimageui.ts
-          // @todo find a replacement for _addActionsView(), it's gone.
-          //linkUI._addActionsView();
+          linkUI._addToolbarView();
         }
         // For new links, open the link dialog directly.
         else {
@@ -338,19 +337,18 @@ class BackdropLink extends CKEditor5.core.Plugin {
 
     // Bind to the balloon being shown and check for the link UI.
     this.listenTo(contextualBalloonPlugin, 'change:visibleView', (evt, name, visibleView) => {
-      // @todo actually fix this function, linkUI.actionsView is gone in 45.0.0.
-      return;
-
-      const actionsView = linkUI.actionsView;
-      if (actionsView && visibleView === actionsView) {
+      const toolbarView = linkUI.toolbarView;
+      if (toolbarView && visibleView === toolbarView) {
         if (!linkUiModified) {
           linkUiModified = true;
-          // Turn off the normal link editing action.
-          // See LinkUI::_createActionsView().
-          linkUI.stopListening(actionsView, 'edit');
+          // Turn off the normal link editing action, which is bound to the
+          // editLink button, which has the index of 2.
+          // See LinkUI::_registerComponents().
+          const linkButtonView = toolbarView.items.get(2);
+          linkUI.stopListening(linkButtonView, 'execute');
           // Replace with firing the backdropLink action instead.
-          this.listenTo(actionsView, 'edit', () => {
-            contextualBalloonPlugin.remove(actionsView);
+          this.listenTo(linkButtonView, 'execute', () => {
+            contextualBalloonPlugin.remove(toolbarView);
             backdropLinkCommand.execute();
           });
         }
@@ -418,6 +416,7 @@ class BackdropLinkCommand extends CKEditor5.core.Command {
     const saveCallback = function(returnValues) {
       const linkCommand = editor.commands.get('link');
       const newHref = returnValues.attributes.href;
+      let newText = null;
       delete returnValues.href;
       // Ignore a disabled target attribute.
       if (returnValues.attributes.target === 0) {
@@ -427,26 +426,23 @@ class BackdropLinkCommand extends CKEditor5.core.Command {
       if (!returnValues.attributes['data-file-id']) {
         delete returnValues.attributes['data-file-id'];
       }
-      // Remove "text" key intended to update the link text (not supported).
+      // Save the "text" attribute to be passed as a separate argument.
       if (returnValues.attributes.hasOwnProperty('text')) {
-        delete returnValues.attributes['text'];
+        newText = returnValues.attributes.text;
+        delete returnValues.attributes.text;
       }
 
-      // The normal link command does not support a 3rd argument natively.
+      // The normal link command does not support a 4th argument natively.
       // This has been extended in _addExtraAttributeOnLinkCommandExecute()
       // to also accept an array of attributes to be saved.
       // See https://github.com/ckeditor/ckeditor5/blob/master/packages/ckeditor5-link/src/linkcommand.ts
       // There is also a feature request to make this native to CKEditor
       // here: https://github.com/ckeditor/ckeditor5/issues/9730
-      linkCommand.execute(newHref, {}, returnValues.attributes);
-    }
+      linkCommand.execute(newHref, {}, newText, returnValues.attributes);
+    };
 
     Backdrop.ckeditor5.openDialog(editor, config.dialogUrl, existingValues, saveCallback, dialogSettings);
   }
 }
-
-// The CKEditor core link icon is not in a reusable location, so this is a
-// duplicated version for Backdrop use.
-const backdropLinkIcon = '<svg viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="m11.077 15 .991-1.416a.75.75 0 1 1 1.229.86l-1.148 1.64a.748.748 0 0 1-.217.206 5.251 5.251 0 0 1-8.503-5.955.741.741 0 0 1 .12-.274l1.147-1.639a.75.75 0 1 1 1.228.86L4.933 10.7l.006.003a3.75 3.75 0 0 0 6.132 4.294l.006.004zm5.494-5.335a.748.748 0 0 1-.12.274l-1.147 1.639a.75.75 0 1 1-1.228-.86l.86-1.23a3.75 3.75 0 0 0-6.144-4.301l-.86 1.229a.75.75 0 0 1-1.229-.86l1.148-1.64a.748.748 0 0 1 .217-.206 5.251 5.251 0 0 1 8.503 5.955zm-4.563-2.532a.75.75 0 0 1 .184 1.045l-3.155 4.505a.75.75 0 1 1-1.229-.86l3.155-4.506a.75.75 0 0 1 1.045-.184z"/></svg>';
 
 })(Backdrop, CKEditor5);
