@@ -3549,7 +3549,7 @@ function backdrop_css_defaults($data = NULL) {
  *   - 'external': The absolute path to an external CSS file that is not hosted
  *     on the local server. These files will not be aggregated if CSS
  *     aggregation is enabled.
- * @param array $options
+ * @param string|array $options
  *   (optional) A string defining the 'type' of CSS that is being added in the
  *   $data parameter ('file', 'inline', or 'external'), or an array which can
  *   have any or all of the following keys:
