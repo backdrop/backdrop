@@ -2003,6 +2003,16 @@ function filter_filter_info() {
     'process callback' => '_filter_image_align',
     'weight' => 5,
   );
+  $filters['filter_image_style'] = array(
+    'title' => t('Image styles in content'),
+    'description' => t('Apply image styles to images in content.'),
+    'process callback' => '_filter_image_style_process',
+    'settings callback' => '_filter_image_style_settings',
+    'default settings' => array(
+      'image_styles' => array(),
+    ),
+    'tips callback' => '_filter_image_style_tips',
+  );
   return $filters;
 }
 
@@ -2713,6 +2723,194 @@ function _filter_image_align($text) {
 
   return filter_dom_serialize($dom);
 }
+
+/**
+ * Filter settings callback for image style filter.
+ */
+function _filter_image_style_settings($form, &$form_state, $filter, $format, $defaults = array()) {
+  $settings = array();
+  $image_styles = image_styles();
+  $options = array('none' => t('Original Image'));
+
+  foreach ($image_styles as $machine_name => $info) {
+    $options[$machine_name] = $info['label'];
+  }
+
+  $settings['image_styles'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Available image styles'),
+    '#default_value' => isset($filter->settings['image_styles']) ? $filter->settings['image_styles'] : $defaults['image_styles'],
+    '#options' => $options,
+    '#description' => t('Select which image styles can be applied to images in content.'),
+  );
+  return $settings;
+}
+
+/**
+ * Process callback for image style filter.
+ */
+function _filter_image_style_process($text) {
+  if (preg_match_all('/<img [^>]*data-image-style\s*=\s*["\'][^>]*>/i', $text, $images)) {
+    foreach ($images[0] as $image) {
+      // Get image attributes
+      $image = preg_replace('/\s+/', ' ', trim($image));
+      if (preg_match('/data-image-style=[\'"](.*?)[\'"]/i', $image, $style_match)) {
+        $image_style = $style_match[1];
+        // Only process if a valid image style
+        if ($image_style && $image_style !== 'none' && image_style_load($image_style)) {
+          // Extract src
+          if (preg_match('/src=[\'"](.*?)[\'"]/i', $image, $src_match)) {
+            $src = $src_match[1];
+            $uri = _filter_image_style_uri($src);
+            if ($uri) {
+              $styled_url = image_style_url($image_style, $uri);
+              // Replace src with styled URL
+              $new_image = str_replace($src, $styled_url, $image);
+              $text = str_replace($image, $new_image, $text);
+            }
+          }
+        }
+      }
+    }
+  }
+  return $text;
+}
+
+/**
+ * Helper function to determine image URI from src.
+ */
+function _filter_image_style_uri($src) {
+  global $base_path;
+
+  $visible_wrappers = array_intersect_key(
+    file_get_stream_wrappers(STREAM_WRAPPERS_WRITE),
+    file_get_stream_wrappers(STREAM_WRAPPERS_VISIBLE)
+  );
+
+  $src = parse_url($src, PHP_URL_PATH);
+  $src = trim($src, '/');
+
+  foreach ($visible_wrappers as $scheme => $data) {
+    $class = file_stream_wrapper_get_class($scheme);
+    $wrapper = new $class();
+    if (method_exists($wrapper, 'getDirectoryPath')) {
+      $base_dir = trim($base_path . $wrapper->getDirectoryPath(), '/');
+      if (!empty($base_dir) && strpos($src, $base_dir) === 0) {
+        return $scheme . '://' . substr($src, strlen($base_dir) + 1);
+      }
+    }
+  }
+  return FALSE;
+}
+
+
+/**
+ * Filter tips callback for image style filter.
+ */
+function _filter_image_style_tips($filter, $format, $long = FALSE) {
+  if ($long) {
+    $enabled_styles = array_filter($filter->settings['image_styles']);
+    $image_styles = image_styles();
+    $style_names = array();
+
+    foreach ($enabled_styles as $style_name) {
+      if (isset($image_styles[$style_name])) {
+        $style_names[] = $image_styles[$style_name]['label'];
+      }
+    }
+
+    if (!empty($style_names)) {
+      return t('Images can be displayed using the following styles: %styles.', array(
+        '%styles' => implode(', ', $style_names),
+      ));
+    }
+    return t('No image styles have been enabled for this text format.');
+  }
+
+  return t('Images can be displayed using configured image styles.');
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for node edit forms.
+ */
+function filter_form_node_form_alter(&$form, &$form_state, $form_id) {
+  filter_form_alter_common($form, $form_state, $form_id);
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for block add forms on a layout
+ * screen.
+ */
+function filter_form_block_add_block_form_alter(&$form, &$form_state, $form_id) {
+  filter_form_alter_common($form, $form_state, $form_id);
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for block configuration forms.
+ */
+function filter_form_block_admin_configure_alter(&$form, &$form_state, $form_id) {
+  filter_form_alter_common($form, $form_state, $form_id);
+}
+
+/**
+ * Implements hook_form_BASE_FORM_ID_alter() for block configuration forms.
+ */
+function filter_form_layout_block_configure_form_alter(&$form, &$form_state, $form_id) {
+  filter_form_alter_common($form, $form_state, $form_id);
+}
+
+/**
+ * Common form alter logic for both node and block add forms.
+ */
+function filter_form_alter_common(&$form, &$form_state, $form_id) {
+  backdrop_add_css(filter_css('.ImagePreviewBox'), 'inline');
+
+  $image_styles = image_styles();
+  $mappings = ['none' => 'Original Image'];
+  foreach ($image_styles as $machine_name => $info) {
+    $mappings[$machine_name] = $info['label'];
+  }
+
+  backdrop_add_js(['filter' => [
+    'mappings'  => $mappings,
+    'label'     => t('All Image Styles'),
+    'editorCSS' => filter_css(),
+  ]], 'setting');
+}
+
+/**
+ * Generate CSS to handle more realistic display of image styles.
+ */
+function filter_css($prefix = '') {
+  $image_styles = image_styles();
+  $ckeditor_mappings = [];
+
+  $formats = filter_formats();
+  foreach ($formats as $format) {
+    if (isset($format->filters['filter_image_style']) && $format->filters['filter_image_style']->status) {
+      $ckeditor_mappings = array_merge($ckeditor_mappings, $format->filters['filter_image_style']->settings['image_styles']);
+    }
+  }
+
+  $ckeditor_mappings = array_filter($ckeditor_mappings); // Remove any empty values
+  $mappings = [];
+
+  foreach ($ckeditor_mappings as $machine_name) {
+    if (array_key_exists($machine_name, $image_styles) && !empty($image_styles[$machine_name]['effects'])) {
+      $effect = reset($image_styles[$machine_name]['effects']);
+      if (isset($effect['data']['width']) && isset($effect['data']['height'])) {
+        $width = $effect['data']['width'] . 'px';
+        $height = $effect['data']['height'] . 'px';
+        $mappings[$machine_name] = $prefix . ' img[data-image-style="' . $machine_name . '"] {';
+        $mappings[$machine_name] .= ' width: ' . $width . ';';
+        $mappings[$machine_name] .= ' height: ' . $height . ';';
+        $mappings[$machine_name] .= ' }';
+      }
+    }
+  }
+  return implode("\n", $mappings);
+}
+
 
 /**
  * @} End of "Standard filters".

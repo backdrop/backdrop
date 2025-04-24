@@ -113,7 +113,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#wrapper_attributes' => array(
       'data-editor-image-toggle' => t('Select from library'),
     ),
-    '#weight' => -8,
+    '#weight' => 0,
     '#maxlength' => 2048,
   );
 
@@ -130,11 +130,37 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#description' => t('The alt attribute may be used by screen readers, search engines, and when the image cannot be loaded.'),
     '#parents' => array('attributes', 'alt'),
     '#required' => $upload_settings['alt_required'],
+    '#weight' => 1,
   );
+
+  // Add image style selector if the filter is enabled
+  if (!empty($format->filters['filter_image_style']->status)) {
+    $image_styles = image_styles();
+    $enabled_styles = array_filter($format->filters['filter_image_style']->settings['image_styles']);
+    $options = array('none' => t('Original Image'));
+
+    foreach ($enabled_styles as $machine_name) {
+      if (isset($image_styles[$machine_name])) {
+        $options[$machine_name] = $image_styles[$machine_name]['label'];
+      }
+    }
+
+    $form['image_style'] = array(
+      '#title' => t('Image style'),
+      '#type' => 'select',
+      '#default_value' => isset($values['data-image-style']) ? $values['data-image-style'] : 'none',
+      '#options' => $options,
+      '#parents' => array('attributes', 'data-image-style'),
+      '#weight' => 3,
+      '#access' => !empty($options),
+    );
+  }
+
   $form['size'] = array(
     '#title' => t('Image size'),
     '#wrapper_attributes' => array('class' => array('editor-image-size')),
     '#theme_wrappers' => array('form_element'),
+    '#weight' => 2,
   );
   $form['size']['width'] = array(
     '#title' => t('Width'),
@@ -156,6 +182,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#parents' => array('attributes', 'height'),
     '#field_suffix' => ' ' . t('pixels')
   );
+
   $form['align'] = array(
     '#title' => t('Align'),
     '#type' => 'radios',
@@ -169,6 +196,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#wrapper_attributes' => array('class' => array('editor-image-align')),
     '#parents' => array('attributes', 'data-align'),
     '#access' => !empty($format->filters['filter_image_align']->status),
+    '#weight' => 4,
   );
   $form['caption'] = array(
     '#title' => t('Add a caption'),
@@ -176,6 +204,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#default_value' => (isset($values['data-has-caption']) && strcmp($values['data-has-caption'], 'false') !== 0) ? (bool) $values['data-has-caption'] : FALSE,
     '#parents' => array('attributes', 'data-has-caption'),
     '#access' => !empty($format->filters['filter_image_caption']->status),
+    '#weight' => 5,
   );
 
   // This button is hidden from display and clicked via JavaScript in
