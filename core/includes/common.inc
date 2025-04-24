@@ -3479,7 +3479,7 @@ function backdrop_add_html_head_link($attributes, $header = FALSE) {
 /**
  * Constructs an array of the defaults that are used for styles items.
  *
- * @param array|null $data
+ * @param string|null $data
  *   (optional) The default data parameter for the style item array.
  *
  * @see backdrop_get_css()
