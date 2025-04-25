@@ -2849,7 +2849,12 @@ function url($path = NULL, array $options = array()) {
 
   // With Clean URLs.
   if (!empty($clean_url)) {
-    $path = backdrop_encode_path($prefix . $path);
+    if (substr($path, 0, strlen($prefix)) == $prefix) {
+      $path = backdrop_encode_path($path);
+    }
+    else {
+      $path = backdrop_encode_path($prefix . $path);
+    }
     if ($options['query']) {
       return $base . $path . '?' . backdrop_http_build_query($options['query']) . $options['fragment'];
     }
@@ -2859,7 +2864,9 @@ function url($path = NULL, array $options = array()) {
   }
   // Without Clean URLs.
   else {
-    $path = $prefix . $path;
+    if (substr($path, 0, strlen($prefix)) != $prefix) {
+      $path = $prefix . $path;
+    }
     $query = array();
     if (!empty($path)) {
       $query['q'] = $path;
