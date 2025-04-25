@@ -2867,10 +2867,13 @@ function filter_form_layout_block_configure_form_alter(&$form, &$form_state, $fo
 function filter_form_alter_common(&$form, &$form_state, $form_id) {
   backdrop_add_css(filter_css('.ImagePreviewBox'), 'inline');
 
-  $image_styles = image_styles();
   $mappings = ['none' => 'Original Image'];
-  foreach ($image_styles as $machine_name => $info) {
-    $mappings[$machine_name] = $info['label'];
+
+  if (module_exists('image')) {
+    $image_styles = image_styles();
+    foreach ($image_styles as $machine_name => $info) {
+      $mappings[$machine_name] = $info['label'];
+    }
   }
 
   backdrop_add_js(['filter' => [
