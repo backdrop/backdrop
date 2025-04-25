@@ -2003,16 +2003,18 @@ function filter_filter_info() {
     'process callback' => '_filter_image_align',
     'weight' => 5,
   );
-  $filters['filter_image_style'] = array(
-    'title' => t('Image styles in content'),
-    'description' => t('Apply image styles to images in content.'),
-    'process callback' => '_filter_image_style_process',
-    'settings callback' => '_filter_image_style_settings',
-    'default settings' => array(
-      'image_styles' => array(),
-    ),
-    'tips callback' => '_filter_image_style_tips',
-  );
+  if (module_exists('image')){
+    $filters['filter_image_style'] = [
+      'title'             => t('Image styles in content'),
+      'description'       => t('Apply image styles to images in content.'),
+      'process callback'  => '_filter_image_style_process',
+      'settings callback' => '_filter_image_style_settings',
+      'default settings'  => [
+        'image_styles' => [],
+      ],
+      'tips callback'     => '_filter_image_style_tips',
+    ];
+  }
   return $filters;
 }
 
