@@ -2884,6 +2884,10 @@ function filter_form_alter_common(&$form, &$form_state, $form_id) {
  * Generate CSS to handle more realistic display of image styles.
  */
 function filter_css($prefix = '') {
+  if (!module_exists('image')) {
+    return '';
+  }
+
   $image_styles = image_styles();
   $ckeditor_mappings = [];
 
