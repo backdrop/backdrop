@@ -2865,22 +2865,28 @@ function filter_form_layout_block_configure_form_alter(&$form, &$form_state, $fo
  * Common form alter logic for both node and block add forms.
  */
 function filter_form_alter_common(&$form, &$form_state, $form_id) {
-  backdrop_add_css(filter_css('.ImagePreviewBox'), 'inline');
+  // Add basic format settings first
+  $settings = array(
+    'formats' => array(),
+    'mappings' => array('none' => 'Original Image'),
+    'label' => t('All Image Styles'),
+  );
 
-  $mappings = ['none' => 'Original Image'];
-
+  // Add image styles if the module exists
   if (module_exists('image')) {
     $image_styles = image_styles();
     foreach ($image_styles as $machine_name => $info) {
-      $mappings[$machine_name] = $info['label'];
+      $settings['mappings'][$machine_name] = $info['label'];
     }
   }
 
-  backdrop_add_js(['filter' => [
-    'mappings'  => $mappings,
-    'label'     => t('All Image Styles'),
-    'editorCSS' => filter_css(),
-  ]], 'setting');
+  // Add CSS settings
+  backdrop_add_css(filter_css('.ImagePreviewBox'), 'inline');
+
+  // Add all settings to Backdrop's JS settings
+  backdrop_add_js(array(
+    'filter' => $settings
+  ), 'setting');
 }
 
 /**
