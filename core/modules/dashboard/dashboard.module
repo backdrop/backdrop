@@ -319,7 +319,7 @@ function dashboard_admin_settings($form, &$form_state) {
 
   $form['dashboard_login_redirect'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Redirect users to their dashboard after logging in'),
+    '#title' => t('Redirect administrators to Dashboard after log in'),
     '#default_value' => $config->get('dashboard_login_redirect'),
   );
 
