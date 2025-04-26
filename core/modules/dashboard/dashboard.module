@@ -218,13 +218,13 @@ function dashboard_preprocess_layout(&$variables) {
   $layout = $variables['layout'];
   if (is_a($layout, 'Layout') && $layout->hasContexts(array('dashboard'))) {
     backdrop_add_library('dashboard', 'dashboard');
-    
-    // Add collapsible blocks library if enabled
+
+    // Add collapsible blocks library if enabled.
     $config = config('dashboard.settings');
     if ($config->get('dashboard_collapsible_blocks') !== NULL ? $config->get('dashboard_collapsible_blocks') : TRUE) {
       backdrop_add_library('dashboard', 'dashboard.blocks');
     }
-    
+
     $variables['classes'][] = 'dashboard';
   }
 }
@@ -316,7 +316,7 @@ function dashboard_cron() {
  */
 function dashboard_admin_settings($form, &$form_state) {
   $config = config('dashboard.settings');
-  
+
   $form['dashboard_login_redirect'] = array(
     '#type' => 'checkbox',
     '#title' => t('Redirect users to their dashboard after logging in'),
