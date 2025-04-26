@@ -3630,7 +3630,7 @@ function backdrop_add_css($data = NULL, $options = array()) {
   }
 
   // Construct the options, taking the defaults into consideration.
-  if (isset($options) && !is_array($options)) {
+  if (isset($options) && is_string($options)) {
     $options = array('type' => $options);
   }
 
