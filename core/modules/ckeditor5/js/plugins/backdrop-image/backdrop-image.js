@@ -54,12 +54,39 @@ class BackdropImage extends CKEditor5.core.Plugin {
       return;
     }
 
-    // Allow data-image-style attribute for imageBlock and imageInline.
-    editor.model.schema.extend('imageBlock', { allowAttributes: ['dataImageStyle', 'dataFileId', 'dataAlign'] });
-    editor.model.schema.extend('imageInline', { allowAttributes: ['dataImageStyle', 'dataFileId', 'dataAlign'] });
+    // Allow image styles and other attributes for imageBlock and imageInline.
+    if (schema.isRegistered('imageBlock')) {
+      // Make sure config.extraAttributes exists
+      if (!config.extraAttributes) {
+        config.extraAttributes = {};
+      }
 
-    // Your existing initialization code...
-    this._defineConverters(); // Call the converter definitions.
+      // Ensure critical attributes are included
+      config.extraAttributes.dataImageStyle = true;
+      config.extraAttributes.dataHasCaption = true;
+      config.extraAttributes.dataFileId = true;
+      config.extraAttributes.dataAlign = true;
+
+      schema.extend('imageBlock', {
+        allowAttributes: Object.keys(config.extraAttributes)
+      });
+    }
+
+    if (schema.isRegistered('imageInline')) {
+      // Same approach for inline images
+      if (!config.extraAttributes) {
+        config.extraAttributes = {};
+      }
+
+      config.extraAttributes.dataImageStyle = true;
+      config.extraAttributes.dataHasCaption = true;
+      config.extraAttributes.dataFileId = true;
+      config.extraAttributes.dataAlign = true;
+
+      schema.extend('imageInline', {
+        allowAttributes: Object.keys(config.extraAttributes)
+      });
+    }
 
     // Upcast from the raw <img> element to the CKEditor model.
     conversion
@@ -86,10 +113,10 @@ class BackdropImage extends CKEditor5.core.Plugin {
     // editor is being used.
     conversion
       .for('dataDowncast')
-      // Pull out the caption if present. This needs to be done before other
-      // conversions because afterward the caption element is eliminated.
+      // Pull out the caption if present. (MUST happen first)
       .add(viewCaptionToCaptionAttribute(editor))
-      // Create a blank image element, removing any wrapping figure element.
+
+      // THEN, create img (or img inside figure).
       .elementToElement({
         model: 'imageBlock',
         view: (modelElement, { writer }) => {
@@ -104,14 +131,16 @@ class BackdropImage extends CKEditor5.core.Plugin {
         },
         converterPriority: 'high',
       })
-      // Convert ImageStyle to data-align attribute.
+
+      // THEN add other attribute converters.
       .add(modelImageStyleToDataAttribute(editor))
-      // Backdrop image style.
-      .add(modelDataImageStyleToDataAttribute(editor))
-      // Convert height and width attributes.
+
+      // (Here is where you now add yours)
+      .add(modelDataImageStyleToDataAttribute(editor))   // ← add it here
+
       .add(modelImageWidthAndHeightToAttributes(editor))
-      // Convert any link to wrap the <img> tag.
       .add(downcastBlockImageLink());
+
 
     // Add the backdropImage command.
     editor.commands.add('backdropImage', new BackdropImageCommand(editor));

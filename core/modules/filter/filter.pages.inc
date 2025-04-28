@@ -153,6 +153,15 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
       '#parents' => array('attributes', 'data-image-style'),
       '#weight' => 3,
       '#access' => !empty($options),
+      '#ajax' => array(
+        'callback' => '_filter_image_style_dimensions_ajax',
+        'wrapper' => 'edit-size',
+        'method' => 'replace',
+        'effect' => 'fade',
+      ),
+      '#attributes' => array(
+        'class' => array('image-style-select'),
+      ),
     );
   }
 
@@ -161,6 +170,8 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#wrapper_attributes' => array('class' => array('editor-image-size')),
     '#theme_wrappers' => array('form_element'),
     '#weight' => 2,
+    '#prefix' => '<div id="edit-size">',
+    '#suffix' => '</div>',
   );
   $form['size']['width'] = array(
     '#title' => t('Width'),
@@ -261,6 +272,144 @@ function _filter_image_library_ajax() {
     '#type' => 'ajax',
     '#commands' => $commands,
   );
+}
+
+/**
+ * AJAX callback for image style dimension updates.
+ */
+function _filter_image_style_dimensions_ajax($form, &$form_state) {
+  // Get the image style selected
+  $style_name = $form_state['values']['attributes']['data-image-style'];
+
+  // Original image style selected, return to original dimensions
+  if ($style_name == 'none') {
+    // If we have a file, get its original dimensions
+    if (!empty($form_state['values']['fid'])) {
+      $fid = $form_state['values']['fid'];
+      $file = file_load($fid);
+
+      if ($file) {
+        $image_info = image_get_info($file->uri);
+        if ($image_info) {
+          $form['size']['width']['#value'] = $image_info['width'];
+          $form['size']['height']['#value'] = $image_info['height'];
+        }
+      }
+    }
+    // Otherwise, keep the current dimensions
+  }
+  // A specific image style is selected
+  else {
+    // Load the image style to get its settings
+    $style = image_style_load($style_name);
+
+    // If a file has been uploaded, we can get dimensions for the specific image
+    if (!empty($form_state['values']['fid'])) {
+      $fid = $form_state['values']['fid'];
+      $file = file_load($fid);
+
+      if ($file) {
+        // Get original image dimensions
+        $image_info = image_get_info($file->uri);
+
+        if ($image_info) {
+          // Create a dimensions array for transformation
+          $dimensions = array(
+            'width' => $image_info['width'],
+            'height' => $image_info['height'],
+          );
+
+          // Apply the image style transformations to get new dimensions
+          module_load_include('inc', 'image', 'image.effects');
+          image_style_transform_dimensions($style_name, $dimensions);
+
+          // If dimensions were calculated successfully, update the form fields
+          if (!empty($dimensions['width']) && !empty($dimensions['height'])) {
+            $form['size']['width']['#value'] = $dimensions['width'];
+            $form['size']['height']['#value'] = $dimensions['height'];
+          }
+          else {
+            // Check if the style has scale or resize effects with fixed dimensions
+            $fixed_dimensions = _filter_get_style_fixed_dimensions($style);
+            if ($fixed_dimensions) {
+              $form['size']['width']['#value'] = $fixed_dimensions['width'];
+              $form['size']['height']['#value'] = $fixed_dimensions['height'];
+            }
+            else {
+              // Empty the fields if we can't determine dimensions
+              $form['size']['width']['#value'] = '';
+              $form['size']['height']['#value'] = '';
+            }
+          }
+        }
+      }
+    }
+    else {
+      // Check if the style has scale or resize effects with fixed dimensions
+      $fixed_dimensions = _filter_get_style_fixed_dimensions($style);
+      if ($fixed_dimensions) {
+        $form['size']['width']['#value'] = $fixed_dimensions['width'];
+        $form['size']['height']['#value'] = $fixed_dimensions['height'];
+      }
+      else {
+        // Empty the fields if we can't determine dimensions
+        $form['size']['width']['#value'] = '';
+        $form['size']['height']['#value'] = '';
+      }
+    }
+  }
+
+  return $form['size'];
+}
+
+/**
+ * Helper function to get fixed dimensions from an image style if available.
+ *
+ * @param array $style
+ *   An image style array.
+ *
+ * @return array|false
+ *   An array with 'width' and 'height' keys, or FALSE if fixed dimensions
+ *   could not be determined.
+ */
+function _filter_get_style_fixed_dimensions($style) {
+  if (empty($style['effects'])) {
+    return FALSE;
+  }
+
+  // Look for scale or resize effects with specific dimensions
+  foreach ($style['effects'] as $effect) {
+    // Scale effect with specific width and height
+    if ($effect['name'] == 'image_scale' && !empty($effect['data']['width']) && !empty($effect['data']['height'])) {
+      return array(
+        'width' => $effect['data']['width'],
+        'height' => $effect['data']['height'],
+      );
+    }
+    // Resize effect with specific width and height
+    elseif ($effect['name'] == 'image_resize' && !empty($effect['data']['width']) && !empty($effect['data']['height'])) {
+      return array(
+        'width' => $effect['data']['width'],
+        'height' => $effect['data']['height'],
+      );
+    }
+    // Scale and crop effect
+    elseif ($effect['name'] == 'image_scale_and_crop' && !empty($effect['data']['width']) && !empty($effect['data']['height'])) {
+      return array(
+        'width' => $effect['data']['width'],
+        'height' => $effect['data']['height'],
+      );
+    }
+    // Crop effect with specific width and height
+    elseif ($effect['name'] == 'image_crop' && !empty($effect['data']['width']) && !empty($effect['data']['height'])) {
+      return array(
+        'width' => $effect['data']['width'],
+        'height' => $effect['data']['height'],
+      );
+    }
+  }
+
+  return FALSE;
 }
 
 /**

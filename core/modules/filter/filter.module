@@ -2869,21 +2869,27 @@ function filter_form_layout_block_configure_form_alter(&$form, &$form_state, $fo
  */
 function filter_form_alter_common(&$form, &$form_state, $form_id) {
   backdrop_add_css(filter_css('.ImagePreviewBox'), 'inline');
-  $mappings = []; // Initialize $mappings variable
+
+  // Add basic format settings first
+  $settings = array(
+    'formats' => array(),
+    'mappings' => array('none' => 'Original Image'),
+    'label' => t('All Image Styles'),
+    'editorCSS' => filter_css(),
+  );
+
+  // Add image styles if the module exists
   if (module_exists('image')) {
     $image_styles = image_styles();
-    $mappings = ['none' => 'Original Image'];
     foreach ($image_styles as $machine_name => $info) {
-      $mappings[$machine_name] = $info['label'];
+      $settings['mappings'][$machine_name] = $info['label'];
     }
   }
 
-  backdrop_add_js(['filter' => [
-    'mappings'  => $mappings,
-    'label'     => t('All Image Styles'),
-    'editorCSS' => filter_css(),
-  ]], 'setting');
+  backdrop_add_js(['filter' => $settings], 'setting');
 }
+
+
 
 /**
  * Generate CSS to handle more realistic display of image styles.
