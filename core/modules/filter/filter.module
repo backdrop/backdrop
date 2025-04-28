@@ -2003,16 +2003,19 @@ function filter_filter_info() {
     'process callback' => '_filter_image_align',
     'weight' => 5,
   );
-  if (module_exists('image')){
+  if (module_exists('image')) {
+    // Get available image styles
+    $available_styles = image_style_options(FALSE);
+
     $filters['filter_image_style'] = [
-      'title'             => t('Image styles in content'),
-      'description'       => t('Apply image styles to images in content.'),
-      'process callback'  => '_filter_image_style_process',
+      'title' => t('Image styles in content'),
+      'description' => t('Apply image styles to images in content.'),
+      'process callback' => '_filter_image_style_process',
       'settings callback' => '_filter_image_style_settings',
-      'default settings'  => [
-        'image_styles' => [],
+      'default settings' => [
+        'image_styles' => $available_styles,
       ],
-      'tips callback'     => '_filter_image_style_tips',
+      'tips callback' => '_filter_image_style_tips',
     ];
   }
   return $filters;
@@ -2515,7 +2518,7 @@ function _filter_autop($text) {
       }
       // Opening or closing tag?
       $open = ($chunk[1] != '/');
-      list($tag) = preg_split('/[ >]/', substr($chunk, 2 - $open), 2);
+      [$tag] = preg_split('/[ >]/', substr($chunk, 2 - $open), 2);
       if (!$ignore) {
         if ($open) {
           $ignore = TRUE;
@@ -2865,28 +2868,21 @@ function filter_form_layout_block_configure_form_alter(&$form, &$form_state, $fo
  * Common form alter logic for both node and block add forms.
  */
 function filter_form_alter_common(&$form, &$form_state, $form_id) {
-  // Add basic format settings first
-  $settings = array(
-    'formats' => array(),
-    'mappings' => array('none' => 'Original Image'),
-    'label' => t('All Image Styles'),
-  );
+  backdrop_add_css(filter_css('.ImagePreviewBox'), 'inline');
 
-  // Add image styles if the module exists
   if (module_exists('image')) {
     $image_styles = image_styles();
+    $mappings = ['none' => 'Original Image'];
     foreach ($image_styles as $machine_name => $info) {
-      $settings['mappings'][$machine_name] = $info['label'];
+      $mappings[$machine_name] = $info['label'];
     }
   }
 
-  // Add CSS settings
-  backdrop_add_css(filter_css('.ImagePreviewBox'), 'inline');
-
-  // Add all settings to Backdrop's JS settings
-  backdrop_add_js(array(
-    'filter' => $settings
-  ), 'setting');
+  backdrop_add_js(['filter' => [
+    'mappings'  => $mappings,
+    'label'     => t('All Image Styles'),
+    'editorCSS' => filter_css(),
+  ]], 'setting');
 }
 
 /**
@@ -2896,7 +2892,6 @@ function filter_css($prefix = '') {
   if (!module_exists('image')) {
     return '';
   }
-
   $image_styles = image_styles();
   $ckeditor_mappings = [];
 
