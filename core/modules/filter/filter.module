@@ -2869,7 +2869,7 @@ function filter_form_layout_block_configure_form_alter(&$form, &$form_state, $fo
  */
 function filter_form_alter_common(&$form, &$form_state, $form_id) {
   backdrop_add_css(filter_css('.ImagePreviewBox'), 'inline');
-
+  $mappings = []; // Initialize $mappings variable
   if (module_exists('image')) {
     $image_styles = image_styles();
     $mappings = ['none' => 'Original Image'];
