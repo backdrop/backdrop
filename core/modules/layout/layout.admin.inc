@@ -902,27 +902,26 @@ function layout_settings_form_validate(&$form, &$form_state) {
 
   $layout->additional_paths = array();
   if (isset($form_state['values']['additional_paths'])) {
-    $primary_path = $form_state['values']['path'];
-    $num_placeholders = count(_layout_placeholder_positions($primary_path));
-    $paths = explode("\n", $form_state['values']['additional_paths']);
-    foreach ($paths as $path){
-      $path = trim($path);
-      if (!empty($path)) {
-        $layout_provides_path = layout_provides_path($path);
-        $router_item = menu_get_item($path);
+    $num_placeholders = count(_layout_placeholder_positions($path));
+    $additional_paths = explode("\n", $form_state['values']['additional_paths']);
+    foreach ($additional_paths as $additional_path){
+      $additional_path = trim($additional_path);
+      if (!empty($additional_path)) {
+        $layout_provides_path = layout_provides_path($additional_path);
+        $router_item = menu_get_item($additional_path);
         $router_item_path = $router_item ? (string) $router_item['path'] : '';
-        $num_additional_placeholders = count(_layout_placeholder_positions($path));
+        $num_additional_placeholders = count(_layout_placeholder_positions($additional_path));
         $alias = NULL;
-        if (strpos($path, '%') === FALSE) {
-          $alias = db_query('SELECT * FROM {url_alias} WHERE alias = :path', array(':path' => $path))->fetchObject();
+        if (strpos($additional_path, '%') === FALSE) {
+          $alias = db_query('SELECT * FROM {url_alias} WHERE alias = :path', array(':path' => $additional_path))->fetchObject();
         }
         switch (TRUE) {
           case ($num_placeholders != $num_additional_placeholders):
             // For example, it cannot have "node/%" nor "node".
             form_set_error('additional_paths', t('Additional path %path should have the same number of placeholders as primary path %primary_path.',
               array(
-                '%path' => $path,
-                '%primary_path' => $primary_path,
+                '%path' => $additional_path,
+                '%primary_path' => $path,
               )
             ));
             break;
@@ -930,7 +929,7 @@ function layout_settings_form_validate(&$form, &$form_state) {
             // E.g. "about" is an alias of "node/2".
             form_set_error('additional_paths', t('Additional path %path is currently assigned to be an alias for "@alias" and cannot be used.',
               array(
-                '%path' => $path,
+                '%path' => $additional_path,
                 '@alias' => $alias->source,
               )
             ));
@@ -940,31 +939,31 @@ function layout_settings_form_validate(&$form, &$form_state) {
             // cannot be used in the additional paths.
             form_set_error('additional_paths', t('Additional path %path is already used as the primary path of another layout.',
               array(
-                '%path' => $path,
+                '%path' => $additional_path,
               )
             ));
             break;
-          case ($router_item_path !== $path && strpos($router_item_path, '%') !== FALSE):
+          case ($router_item_path !== $additional_path && strpos($router_item_path, '%') !== FALSE):
             // E.g. "node/2" cannot be used since it requires a context.
             form_set_error('additional_paths', t('Additional path %path cannot be used as an additional path. It requires a context in the primary path.',
               array(
-                '%path' => $path,
+                '%path' => $additional_path,
               )
             ));
             break;
-          case (!$router_item_path && strpos($path, '%') === FALSE):
+          case (!$router_item_path && strpos($additional_path, '%') === FALSE):
             // E.g. Only allow "pages/2" if the router item exists. But allow
             // "node/%/edit" to pass.
             form_set_error('additional_paths', t('Additional path %path cannot be used as an additional path. It does not exist in the system.',
               array(
-                '%path' => $path,
+                '%path' => $additional_path,
               )
             ));
             break;
-          case (_layout_set_message_on_path_error($form, 'additional_paths', $path)):
+          case (_layout_set_message_on_path_error($form, 'additional_paths', $additional_path)):
             break;
           default:
-            $layout->additional_paths[] = $path;
+            $layout->additional_paths[] = $additional_path;
             break;
         }
       }
