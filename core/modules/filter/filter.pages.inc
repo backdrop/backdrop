@@ -131,10 +131,13 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#parents' => array('attributes', 'alt'),
     '#required' => $upload_settings['alt_required'],
   );
+
+  $use_image_styles = !empty($format->editor_settings['image_upload']['use_image_styles']);
   $form['size'] = array(
     '#title' => t('Image size'),
     '#wrapper_attributes' => array('class' => array('editor-image-size')),
     '#theme_wrappers' => array('form_element'),
+    '#access' => !$use_image_styles,
   );
   $form['size']['width'] = array(
     '#title' => t('Width'),
@@ -156,6 +159,29 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#parents' => array('attributes', 'height'),
     '#field_suffix' => ' ' . t('pixels')
   );
+  $available_style_options = array();
+  if ($use_image_styles) {
+    $all_image_styles = image_style_options(FALSE, PASS_THROUGH);
+    $enabled = array_filter($format->editor_settings['image_upload']['available_styles']);
+    foreach ($enabled as $name) {
+      $available_style_options[$name] = $all_image_styles[$name];
+    }
+  }
+  $default_value = NULL;
+  if ($use_image_styles && !empty($values['src']) && strpos($values['src'], 'styles/') > 0) {
+    $path_parts = explode('/', $values['src']);
+    $before_style = array_search('styles', $path_parts);
+    $default_value = $path_parts[$before_style + 1];
+  }
+  $form['image_style'] = array(
+    '#title' => t('Image style'),
+    '#type' => 'select',
+    '#options' => $available_style_options,
+    '#default_value' => $default_value,
+    '#access' => $use_image_styles,
+    '#required' => $use_image_styles,
+  );
+
   $form['align'] = array(
     '#title' => t('Align'),
     '#type' => 'radios',
@@ -245,7 +271,17 @@ function filter_format_editor_image_form_submit($form, &$form_state) {
 
     // Try to make a local path if possible for better portability.
     $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
-    $url = file_create_url($file->uri);
+
+    if (empty($form_state['values']['image_style'])) {
+      $url = file_create_url($file->uri);
+    }
+    else {
+      $style_name = $form_state['values']['image_style'];
+      $url = image_style_url($style_name, $file->uri);
+      // Let the editor determine (possibly changed) dimensions.
+      $form_state['values']['attributes']['width'] = '';
+      $form_state['values']['attributes']['height'] = '';
+    }
     $url = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
 
     $form_state['values']['attributes']['src'] = $url;
