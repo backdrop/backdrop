@@ -209,6 +209,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#access' => !empty($format->filters['filter_image_align']->status),
     '#weight' => 4,
   );
+
   $form['caption'] = array(
     '#title' => t('Add a caption'),
     '#type' => 'checkbox',
@@ -217,7 +218,6 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#access' => !empty($format->filters['filter_image_caption']->status),
     '#weight' => 5,
   );
-
   // This button is hidden from display and clicked via JavaScript in
   // Backdrop.behaviors.editorImageDialog in filter.js.
   $form['library_open'] = array(
@@ -245,7 +245,6 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
       'event' => 'click',
     ),
   );
-
   return $form;
 }
 

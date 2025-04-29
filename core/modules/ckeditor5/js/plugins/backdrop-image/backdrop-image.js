@@ -54,39 +54,12 @@ class BackdropImage extends CKEditor5.core.Plugin {
       return;
     }
 
-    // Allow image styles and other attributes for imageBlock and imageInline.
-    if (schema.isRegistered('imageBlock')) {
-      // Make sure config.extraAttributes exists
-      if (!config.extraAttributes) {
-        config.extraAttributes = {};
-      }
+    // Allow data-image-style attribute for imageBlock and imageInline.
+    editor.model.schema.extend('imageBlock', { allowAttributes: ['dataImageStyle', 'dataFileId', 'dataAlign', 'hasDataCaption'] });
+    editor.model.schema.extend('imageInline', { allowAttributes: ['dataImageStyle', 'dataFileId', 'dataAlign', 'hasDataCaption'] });
 
-      // Ensure critical attributes are included
-      config.extraAttributes.dataImageStyle = true;
-      config.extraAttributes.dataHasCaption = true;
-      config.extraAttributes.dataFileId = true;
-      config.extraAttributes.dataAlign = true;
-
-      schema.extend('imageBlock', {
-        allowAttributes: Object.keys(config.extraAttributes)
-      });
-    }
-
-    if (schema.isRegistered('imageInline')) {
-      // Same approach for inline images
-      if (!config.extraAttributes) {
-        config.extraAttributes = {};
-      }
-
-      config.extraAttributes.dataImageStyle = true;
-      config.extraAttributes.dataHasCaption = true;
-      config.extraAttributes.dataFileId = true;
-      config.extraAttributes.dataAlign = true;
-
-      schema.extend('imageInline', {
-        allowAttributes: Object.keys(config.extraAttributes)
-      });
-    }
+    // Your existing initialization code...
+    this._defineConverters(); // Call the converter definitions.
 
     // Upcast from the raw <img> element to the CKEditor model.
     conversion
@@ -113,10 +86,10 @@ class BackdropImage extends CKEditor5.core.Plugin {
     // editor is being used.
     conversion
       .for('dataDowncast')
-      // Pull out the caption if present. (MUST happen first)
+      // Pull out the caption if present. This needs to be done before other
+      // conversions because afterward the caption element is eliminated.
       .add(viewCaptionToCaptionAttribute(editor))
-
-      // THEN, create img (or img inside figure).
+      // Create a blank image element, removing any wrapping figure element.
       .elementToElement({
         model: 'imageBlock',
         view: (modelElement, { writer }) => {
@@ -131,16 +104,14 @@ class BackdropImage extends CKEditor5.core.Plugin {
         },
         converterPriority: 'high',
       })
-
-      // THEN add other attribute converters.
+      // Convert ImageStyle to data-align attribute.
       .add(modelImageStyleToDataAttribute(editor))
-
-      // (Here is where you now add yours)
-      .add(modelDataImageStyleToDataAttribute(editor))   // ← add it here
-
+      // Backdrop image style.
+      .add(modelDataImageStyleToDataAttribute(editor))
+      // Convert height and width attributes.
       .add(modelImageWidthAndHeightToAttributes(editor))
+      // Convert any link to wrap the <img> tag.
       .add(downcastBlockImageLink());
-
 
     // Add the backdropImage command.
     editor.commands.add('backdropImage', new BackdropImageCommand(editor));
@@ -264,25 +235,7 @@ function downcastDataImageStyle(modelElementName) {
     dispatcher.on(`attribute:dataImageStyle:${modelElementName}`, (evt, data, conversionApi) => {
       const { writer, mapper } = conversionApi;
       const figure = mapper.toViewElement(data.item);
-      let img;
-
-      // Try to find the image element using ImageUtils if available in the editor instance
-      try {
-        // Get the editor instance from the model item if possible
-        const editor = data.editor || (data.item && data.item.root && data.item.root.document && data.item.root.document.model && data.item.root.document.model.editor);
-
-        if (editor && editor.plugins && editor.plugins.has('ImageUtils')) {
-          const imageUtils = editor.plugins.get('ImageUtils');
-          img = imageUtils.findViewImgElement(figure);
-        }
-      } catch (error) {
-        // Unable to use ImageUtils, fallback method will be tried
-      }
-
-      // Fallback to manual search if ImageUtils didn't find it or wasn't available
-      if (!img) {
-        img = findChildInView(figure, 'img', writer);
-      }
+      const img = findChildInView(figure, 'img', writer);
 
       if (img) {
         writer.setAttribute('data-image-style', data.attributeNewValue || '', img);
@@ -292,44 +245,11 @@ function downcastDataImageStyle(modelElementName) {
 
 
 function findChildInView(parentViewElement, childViewName, viewWriter) {
-  if (!parentViewElement) {
-    return null;
-  }
-
-  // Handle case where the parent is already the element we're looking for
-  if (parentViewElement.is && parentViewElement.is('element', childViewName)) {
-    return parentViewElement;
-  }
-
-  try {
-    // First try with standard API
-    for (const child of viewWriter.createRangeIn(parentViewElement).getItems()) {
-      if (child.is && child.is('element', childViewName)) {
-        return child;
-      }
+  for (const child of viewWriter.createRangeIn(parentViewElement).getItems()) {
+    if (child.is('element', childViewName)) {
+      return child;
     }
-
-    // Fallback if parent has a getChildren method
-    if (parentViewElement.getChildren) {
-      for (const child of parentViewElement.getChildren()) {
-        if (child.is && child.is('element', childViewName)) {
-          return child;
-        }
-
-        // Check one level deeper
-        if (child.getChildren) {
-          for (const grandchild of child.getChildren()) {
-            if (grandchild.is && grandchild.is('element', childViewName)) {
-              return grandchild;
-            }
-          }
-        }
-      }
-    }
-  } catch (error) {
-    // Error while traversing view structure
   }
-
   return null;
 }
 
@@ -603,41 +523,15 @@ function modelDataImageStyleToDataAttribute(editor) {
       return;
     }
 
-    try {
-      const viewElement = conversionApi.mapper.toViewElement(item);
-      if (!viewElement) {
-        return;
-      }
+    const imageUtils = editor.plugins.get('ImageUtils');
+    const viewElement = conversionApi.mapper.toViewElement(item);
+    const img = imageUtils.findViewImgElement(viewElement);
 
-      let img;
-
-      // Try with ImageUtils if available
-      if (editor && editor.plugins && editor.plugins.has('ImageUtils')) {
-        const imageUtils = editor.plugins.get('ImageUtils');
-        img = imageUtils.findViewImgElement(viewElement);
-      }
-
-      // Fallback to manual search
-      if (!img) {
-        img = findChildInView(viewElement, 'img', writer);
-      }
-
-      // Last resort - if it's a direct img element
-      if (!img && viewElement.name === 'img') {
-        img = viewElement;
-      }
-
-      if (img) {
-        writer.setAttribute('data-image-style', imageStyleValue, img);
-      }
-    } catch (error) {
-      // Error handling model to data conversion
-    }
+    writer.setAttribute('data-image-style', imageStyleValue, img);
   }
 
   return (dispatcher) => {
-    dispatcher.on('attribute:dataImageStyle:imageBlock', converter, { priority: 'high' });
-    dispatcher.on('attribute:dataImageStyle:imageInline', converter, { priority: 'high' });
+    dispatcher.on('attribute:dataImageStyle', converter, { priority: 'high' });
   };
 }
 
@@ -780,11 +674,6 @@ function viewImageToModelImage(editor) {
       attributes: 'data-caption',
     });
 
-    // Create image that's allowed in the given context. If the image has a
-    // caption, the image must be created as a block image to ensure the caption
-    // is not lost on conversion. This is based on the assumption that
-    // preserving the image caption is more important to the content creator
-    // than preserving the wrapping element that doesn't allow block images.
     if (schema.checkChild(data.modelCursor, 'imageInline') && !hasDataCaption) {
       image = writer.createElement('imageInline', {
         src: viewItem.getAttribute('src'),
@@ -797,8 +686,8 @@ function viewImageToModelImage(editor) {
 
     // Handling data-image-style
     const dataImageStyle = viewItem.getAttribute('data-image-style');
-    if (dataImageStyle && consumable.test(viewItem, { name: true, attributes: 'data-image-style' })) {
-      // Set dataImageStyle attribute for the model element
+    if (dataImageStyle) {
+      // Note: Make sure 'dataImageStyle' is allowed in the schema for image elements
       writer.setAttribute('dataImageStyle', dataImageStyle, image);
       attributesToConsume.push('data-image-style');
     }
@@ -977,119 +866,110 @@ class BackdropImageCommand extends CKEditor5.core.Command {
 
     // Convert attributes to map for easier looping.
     const extraAttributes = new Map(Object.entries(config.extraAttributes));
+
+    const uploadsEnabled = true; // @todo Set dynamically.
     let existingValues = {};
 
     if (imageElement) {
-      // Ensure dataImageStyle is properly retrieved and set
+      // Most attributes can be directly mapped from the model.
+      extraAttributes.forEach((attributeName, modelName) => {
+        existingValues[attributeName] = imageElement.getAttribute(modelName);
+      });
+
+      // Convert the 'resizedWidth' internal attribute to be the 'width'
+      // attribute. Also update 'height' to match.
+      const resizedWidth = imageElement.getAttribute('resizedWidth');
+      if (existingValues['width'] && existingValues['height'] && resizedWidth) {
+        const [newWidth, newHeight] = _getResizedWidthHeight(existingValues['width'], existingValues['height'], resizedWidth);
+        existingValues['width'] = newWidth;
+        existingValues['height'] = newHeight;
+      }
+
+      // Alignment is stored as a CKEditor Image Style.
+      const imageStyle = imageElement.getAttribute('imageStyle');
+      const alignAttribute = _getDataAttributeFromModelImageStyle(imageStyle);
+      existingValues['data-align'] = alignAttribute;
+      // Save data-image-style if it exists.
       const dataImageStyle = imageElement.getAttribute('dataImageStyle');
       if (dataImageStyle) {
         existingValues['data-image-style'] = dataImageStyle;
       }
-      extraAttributes.forEach((attributeName, modelName) => {
-        existingValues[attributeName] = imageElement.getAttribute(modelName);
-      });
+
+      // The image caption is stored outside the imageElement model and must
+      // be retrieved to get its value.
+      const imageCaption = ImageCaptionUtils.getCaptionFromImageModelElement(imageElement);
+      // Inform the image dialog, that there is a caption and the checkbox in
+      // the form should be ticked. The value for data-caption isn't relevant.
+      // @see filter_format_editor_image_form()
+      existingValues['data-has-caption'] = !!imageCaption;
     }
 
     const saveCallback = (dialogValues) => {
+      // Map the submitted form values to the CKEditor image model.
       let imageAttributes = {};
-
-      // Map dialog keys to model keys.
-      for (const key in dialogValues.attributes) {
-        if (dialogValues.attributes.hasOwnProperty(key)) {
-          switch (key) {
-            case 'data-image-style':
-              if (dialogValues.attributes[key]) {
-                imageAttributes['dataImageStyle'] = dialogValues.attributes[key];
-              }
-              break;
-            case 'data-file-id':
-              imageAttributes['dataFileId'] = dialogValues.attributes[key];
-              break;
-            case 'data-align':
-              // Convert "center", "left", "right" to model imageStyle values.
-              const dataAlign = dialogValues.attributes[key];
-              let modelAlign;
-              if (dataAlign === 'center') {
-                modelAlign = 'alignCenter';
-              } else if (dataAlign === 'right') {
-                modelAlign = 'alignRight';
-              } else if (dataAlign === 'left') {
-                modelAlign = 'alignLeft';
-              }
-              imageAttributes['imageStyle'] = modelAlign;
-              break;
-            default:
-              // Pass through other attributes (src, alt, width, height, etc.)
-              imageAttributes[key] = dialogValues.attributes[key];
-          }
+      extraAttributes.forEach((attributeName, modelName) => {
+        if (dialogValues.attributes[attributeName] !== undefined) {
+          imageAttributes[modelName] = dialogValues.attributes[attributeName];
         }
+      });
+      // Save the data-image-style manually.
+      if (dialogValues.attributes['data-image-style'] !== undefined) {
+        imageAttributes['dataImageStyle'] = dialogValues.attributes['data-image-style'];
+      }
+      // Set CKEditor Image Style from the data-align attribute as imageStyle.
+      const imageStyle = _getModelImageStyleFromDataAttribute(dialogValues.attributes['data-align']);
+      imageAttributes['imageStyle'] = imageStyle;
+      if (imageAttributes.hasOwnProperty('dataAlign')) {
+        delete imageAttributes['dataAlign'];
       }
 
-      // If editing an existing image...
+      // For updating an existing element:
       if (imageElement) {
         model.change((writer) => {
+          writer.removeAttribute('resizedWidth', imageElement);
           writer.setAttributes(imageAttributes, imageElement);
-          // Handle caption: if captioning is enabled...
-          if (dialogValues.attributes['data-has-caption'] == 1) {
-            // Check if a caption already exists.
-            let captionElement = null;
-            for (const child of imageElement.getChildren()) {
-              if (child.name === 'caption') {
-                captionElement = child;
-                break;
-              }
-            }
-            // If not, create one.
-            if (!captionElement) {
-              captionElement = writer.createElement('caption');
-              writer.append(captionElement, imageElement);
-            }
-            // Update the caption text.
-            // Here we clear any existing text and insert the new caption.
-            writer.remove(writer.createRangeIn(captionElement));
-            writer.insertText(
-              dialogValues.attributes['data-caption'] || '',
-              captionElement
-            );
-          }
         });
-      } else {
-        // Inserting a new image.
-        editor.model.change((writer) => {
-          // Create the base element first without dataImageStyle
-          const basicAttributes = {...imageAttributes};
-          delete basicAttributes.dataImageStyle; // Remove from initial creation if present
 
-          let imageElement = writer.createElement('imageBlock', basicAttributes);
+        // If width/height are empty, set to their natural values.
+        if (imageAttributes['width'] === '' && imageAttributes['height'] === '') {
+          imageUtils.setImageNaturalSizeAttributes(imageElement);
+        }
 
-          // Explicitly add dataImageStyle separately - this ensures it's properly processed
-          if (dialogValues.attributes['data-image-style']) {
-            writer.setAttribute('dataImageStyle', dialogValues.attributes['data-image-style'], imageElement);
-          }
+        const imageCaption = ImageCaptionUtils.getCaptionFromImageModelElement(imageElement);
+        // Remove an existing caption if disabled.
+        if (imageCaption && !dialogValues.attributes['data-has-caption']) {
+          editor.execute('toggleImageCaption');
+        }
+        // Add a caption if enabled and none yet exists.
+        if (!imageCaption && dialogValues.attributes['data-has-caption']) {
+          editor.execute('toggleImageCaption', { focusCaptionOnShow: true });
+        }
+      }
+      // Inserting a new element:
+      else {
+        // An imageStyle key (even if undefined) on image insert will cause
+        // conflicts in the Image Style plugin, so remove the attribute entirely
+        // from the object.
+        if (imageAttributes.hasOwnProperty('imageStyle') && !imageAttributes['imageStyle']) {
+          delete imageAttributes['imageStyle'];
+        }
 
-          // If captioning is enabled, create a caption element as a child.
-          if (dialogValues.attributes['data-has-caption'] == 1) {
-            const captionText = dialogValues.attributes['data-caption'] || '';
-            const captionElement = writer.createElement('caption');
-            writer.insertText(captionText, captionElement);
-            writer.append(captionElement, imageElement);
-          }
+        // Inserting an image has an unusual way of passing the attributes.
+        // See https://ckeditor.com/docs/ckeditor5/latest/api/module_image_image_insertimagecommand-InsertImageCommand.html
+        editor.execute('insertImage', { source: [imageAttributes] });
 
-          // Insert the element at the current position
-          writer.insert(imageElement, editor.model.document.selection.getFirstPosition());
-
-          // Ensure the model is properly updated
-          writer.setSelection(imageElement, 'on');
-        });
+        // Toggle showing the caption after the image is inserted.
+        if (dialogValues.attributes['data-has-caption']) {
+          editor.execute('toggleImageCaption', { focusCaptionOnShow: true });
+        }
       }
     };
 
     const dialogSettings = {
       title: config.insertLabel || 'Insert Image',
-      uploads: true,
+      uploads: uploadsEnabled,
       dialogClass: 'editor-image-dialog'
     };
-
     Backdrop.ckeditor5.openDialog(editor, config.dialogUrl, existingValues, saveCallback, dialogSettings);
   }
 }

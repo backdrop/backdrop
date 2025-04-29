@@ -14,29 +14,29 @@ function filter_theme() {
 
   return array(
     'filter_admin_overview' => array(
-      'render element' => 'form',
-    ) + $base,
+        'render element' => 'form',
+      ) + $base,
     'filter_admin_format_filter_order' => array(
-      'render element' => 'element',
-    ) + $base,
+        'render element' => 'element',
+      ) + $base,
     'filter_tips' => array(
-      'variables' => array('tips' => NULL, 'long' => FALSE),
-    ) + $base,
+        'variables' => array('tips' => NULL, 'long' => FALSE),
+      ) + $base,
     'text_format_wrapper' => array(
-      'render element' => 'element',
-    ) + $base,
+        'render element' => 'element',
+      ) + $base,
     'filter_caption' => array(
-      'variables' => array('item' => NULL, 'caption' => '', 'attributes' => array()),
-    ) + $base,
+        'variables' => array('item' => NULL, 'caption' => '', 'attributes' => array()),
+      ) + $base,
     'filter_tips_more_info' => array(
-      'variables' => array(),
-    ) + $base,
+        'variables' => array(),
+      ) + $base,
     'filter_guidelines' => array(
-      'variables' => array('format' => NULL),
-    ) + $base,
+        'variables' => array('format' => NULL),
+      ) + $base,
     'filter_format_editor_image_form' => array(
         'render element' => 'form',
-    ) + $base,
+      ) + $base,
   );
 }
 
@@ -2138,7 +2138,7 @@ function _filter_html_tips($filter, $format, $long = FALSE) {
     'tr' => NULL, 'td' => NULL, 'th' => NULL,
     'del' => array(t('Deleted'), '<del>' . t('Deleted') . '</del>'),
     'ins' => array(t('Inserted'), '<ins>' . t('Inserted') . '</ins>'),
-     // Assumes and describes li.
+    // Assumes and describes li.
     'ol' => array(t('Ordered list - use the &lt;li&gt; to begin each list item'), '<ol> <li>' . t('First item') . '</li> <li>' . t('Second item') . '</li> </ol>'),
     'ul' => array(t('Unordered list - use the &lt;li&gt; to begin each list item'), '<ul> <li>' . t('First item') . '</li> <li>' . t('Second item') . '</li> </ul>'),
     'li' => NULL,
@@ -2735,7 +2735,7 @@ function _filter_image_align($text) {
 function _filter_image_style_settings($form, &$form_state, $filter, $format, $defaults = array()) {
   $settings = array();
   $image_styles = image_styles();
-  $options = array('none' => t('Original Image'));
+  $options = array();
 
   foreach ($image_styles as $machine_name => $info) {
     $options[$machine_name] = $info['label'];
@@ -2743,10 +2743,10 @@ function _filter_image_style_settings($form, &$form_state, $filter, $format, $de
 
   $settings['image_styles'] = array(
     '#type' => 'checkboxes',
-    '#title' => t('Available image styles'),
+    '#title' => t('Available image styles -- Original Image is always available'),
     '#default_value' => isset($filter->settings['image_styles']) ? $filter->settings['image_styles'] : $defaults['image_styles'],
     '#options' => $options,
-    '#description' => t('Select which image styles can be applied to images in content.'),
+    '#description' => t('Select which additional image styles can be applied to images in content.'),
   );
   return $settings;
 }
@@ -2869,27 +2869,21 @@ function filter_form_layout_block_configure_form_alter(&$form, &$form_state, $fo
  */
 function filter_form_alter_common(&$form, &$form_state, $form_id) {
   backdrop_add_css(filter_css('.ImagePreviewBox'), 'inline');
-
-  // Add basic format settings first
-  $settings = array(
-    'formats' => array(),
-    'mappings' => array('none' => 'Original Image'),
-    'label' => t('All Image Styles'),
-    'editorCSS' => filter_css(),
-  );
-
-  // Add image styles if the module exists
+  $mappings = []; // Initialize $mappings variable
   if (module_exists('image')) {
     $image_styles = image_styles();
+    $mappings = ['none' => 'Original Image'];
     foreach ($image_styles as $machine_name => $info) {
-      $settings['mappings'][$machine_name] = $info['label'];
+      $mappings[$machine_name] = $info['label'];
     }
   }
 
-  backdrop_add_js(['filter' => $settings], 'setting');
+  backdrop_add_js(['filter' => [
+    'mappings'  => $mappings,
+    'label'     => t('All Image Styles'),
+    'editorCSS' => filter_css(),
+  ]], 'setting');
 }
-
-
 
 /**
  * Generate CSS to handle more realistic display of image styles.
@@ -2908,26 +2902,47 @@ function filter_css($prefix = '') {
     }
   }
 
-  $ckeditor_mappings = array_filter($ckeditor_mappings); // Remove any empty values
+  $ckeditor_mappings = array_filter($ckeditor_mappings);
   $mappings = [];
 
   foreach ($ckeditor_mappings as $machine_name) {
     if (array_key_exists($machine_name, $image_styles) && !empty($image_styles[$machine_name]['effects'])) {
-      $effect = reset($image_styles[$machine_name]['effects']);
-      if (isset($effect['data']['width']) && isset($effect['data']['height'])) {
-        $width = $effect['data']['width'] . 'px';
-        $height = $effect['data']['height'] . 'px';
-        $mappings[$machine_name] = $prefix . ' img[data-image-style="' . $machine_name . '"] {';
-        $mappings[$machine_name] .= ' width: ' . $width . ';';
-        $mappings[$machine_name] .= ' height: ' . $height . ';';
-        $mappings[$machine_name] .= ' }';
+      $mappings[$machine_name] = $prefix . ' img[data-image-style="' . $machine_name . '"] {';
+
+      foreach ($image_styles[$machine_name]['effects'] as $effect) {
+        switch ($effect['name']) {
+          case 'image_crop':
+            if (isset($effect['data']['width']) && isset($effect['data']['height'])) {
+              $width = (int) $effect['data']['width'];
+              $height = (int) $effect['data']['height'];
+              $mappings[$machine_name] .= ' width: ' . $width . 'px;';
+              $mappings[$machine_name] .= ' height: ' . $height . 'px;';
+              $mappings[$machine_name] .= ' max-width: ' . $width . 'px;';
+              $mappings[$machine_name] .= ' max-height: ' . $height . 'px;';
+              $mappings[$machine_name] .= ' min-width: ' . $width . 'px;';
+              $mappings[$machine_name] .= ' min-height: ' . $height . 'px;';
+              $mappings[$machine_name] .= ' object-fit: cover;';
+              $mappings[$machine_name] .= ' object-position: center center;';
+              $mappings[$machine_name] .= ' overflow: hidden;';
+              $mappings[$machine_name] .= ' aspect-ratio: ' . $width . ' / ' . $height . ';';
+            }
+            break;
+          case 'image_desaturate':
+            $mappings[$machine_name] .= ' filter: grayscale(100%);';
+            break;
+          case 'image_rotate':
+            if (isset($effect['data']['degrees'])) {
+              $mappings[$machine_name] .= ' transform: rotate(' . $effect['data']['degrees'] . 'deg);';
+            }
+            break;
+        }
       }
+
+      $mappings[$machine_name] .= ' }';
     }
   }
   return implode("\n", $mappings);
 }
-
-
 /**
  * @} End of "Standard filters".
  */

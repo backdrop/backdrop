@@ -287,21 +287,10 @@ Backdrop.behaviors.editorImageLibrary = {
         $form.find('[name="attributes[src]"]').val(relativeImgSrc);
         $form.find('[name="fid[fid]"]').val($selectedImg.data('fid'));
 
-        // Get and set original dimensions when available from the data attributes
-        var imgWidth = $selectedImg.data('width') || '';
-        var imgHeight = $selectedImg.data('height') || '';
-
-        var $widthField = $form.find('[name="attributes[width]"]');
-        var $heightField = $form.find('[name="attributes[height]"]');
-
-        $widthField.val(imgWidth).data('original-width', imgWidth);
-        $heightField.val(imgHeight).data('original-height', imgHeight);
-
-        // Check if a non-original image style is selected and trigger change
-        var styleSelected = $form.find('[name="attributes[data-image-style]"]').val();
-        if (styleSelected !== 'none' && styleSelected !== '') {
-          $form.find('[name="attributes[data-image-style]"]').trigger('change');
-        }
+        // Reset width and height so image is not stretched to the any
+        // previous image's dimensions.
+        $form.find('[name="attributes[width]"]').val('');
+        $form.find('[name="attributes[height]"]').val('');
         // Remove style from previous selection.
         $('.image-library-image-selected').removeClass('image-library-image-selected');
         // Add style to this selection.
@@ -357,37 +346,6 @@ $(window).on('dialog:aftercreate', function () {
       $visibleItems.first().find('input, textarea, select').filter(':focusable').first().trigger('focus');
       $visibleItems.first().trigger('editor-image-show');
     }
-
-    // Handle image style selection changes.
-    $('select[name="attributes[data-image-style]"]', context).once('editor-image-style').each(function() {
-      var $widthField = $('input[name="attributes[width]"]');
-      var $heightField = $('input[name="attributes[height]"]');
-
-      // Store original dimensions when the form loads
-      if (!$widthField.data('original-width') && $widthField.val()) {
-        $widthField.data('original-width', $widthField.val());
-        $heightField.data('original-height', $heightField.val());
-      }
-
-      $(this).bind('change', function() {
-        var styleSelected = $(this).val();
-        var imageUrl = $('input[name="attributes[src]"]').val();
-        var fid = $('input[name="fid[fid]"]').val();
-
-        // If "none" (original) is selected, restore original dimensions if we have them
-        if (styleSelected === 'none') {
-          var originalWidth = $widthField.data('original-width');
-          var originalHeight = $heightField.data('original-height');
-
-          if (originalWidth && originalHeight) {
-            $widthField.val(originalWidth);
-            $heightField.val(originalHeight);
-          }
-        }
-        // For other styles, let the AJAX callback handle it or clear the fields
-        // This will trigger the AJAX callback defined in the select element
-      });
-    });
   }
   // If no element is visible show the first tab.
   else {
