@@ -172,7 +172,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     }
   }
   $default_value = NULL;
-  // Determine the style from path - this doesn not work with SVG, as those get
+  // Determine the style from path - this does not work with SVG, as those get
   // always served from their original path.
   if ($use_image_styles && !empty($values['src']) && strpos($values['src'], 'styles/') > 0) {
     $path_parts = explode('/', $values['src']);
