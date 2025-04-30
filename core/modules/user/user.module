@@ -141,7 +141,6 @@ function user_entity_info() {
       'entity class' => 'User',
       'entity keys' => array(
         'id' => 'uid',
-        'label' => 'name',
       ),
       'label callback' => 'user_format_name',
       'bundles' => array(
