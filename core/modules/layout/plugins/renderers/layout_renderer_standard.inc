@@ -523,35 +523,14 @@ class LayoutRendererStandard {
     if ($content = $block->getContent()) {
       $style = layout_get_style_info($block->style->plugin);
 
-      // Ensure block content is a renderable array for contextual links.
-      if (is_string($content)) {
-        $content = array(
-          '#markup' => $content,
-        );
-      }
+      $render_array = block_get_renderable_array($block);
+
       // Add the contextual links.
       if (!($block->module === 'system' && $block->delta === 'main')) {
-        $content['#contextual_links']['layout'] = array('admin/structure/layouts/manage/' . $this->layout->name . '/modal', array($block->uuid));
+        $render_array['#content']->content['#contextual_links']['layout'] = array('admin/structure/layouts/manage/' . $this->layout->name . '/modal', array($block->uuid));
       }
 
-      $title = '';
-      if ($block->settings['title_display'] !== LAYOUT_TITLE_NONE) {
-        $title = $block->getTitle();
-      }
-
-      $data = array(
-        'title' => $title,
-        'content' => $content,
-      );
-
-      // Allow altering of the title and content by other modules.
-      backdrop_alter(array('block_view', 'block_view_' . $block->module . '_' . str_replace('-', '_', $block->delta)), $data, $block);
-
-      // Assemble a structured content array.
-      $content = (object) array(
-        'title' => $data['title'],
-        'content' => $data['content'],
-      );
+      $content = $render_array['#content'];
 
       if (isset($style) && isset($style['block theme'])) {
         $output = theme($style['block theme'] . '__' . $block->module . '__' . strtr($block->delta, '-', '_'), array('content' => $content, 'layout' => $this->layout, 'block' => $block, 'style' => $style, 'settings' => $block->style->settings));

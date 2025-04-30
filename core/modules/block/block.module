@@ -227,6 +227,67 @@ function block_custom_block_load($delta, $langcode = LANGUAGE_NONE) {
 }
 
 /**
+ * Get a renderable array for a block.
+ *
+ * @param Block $block
+ * The Block entity to get a renderable array for.
+ * Assumes the block has been loaded and $block->prepare()
+ * has been called.
+ */
+function block_get_renderable_array($block) {
+  $content = $block->getContent();
+
+  if (is_string($content)) {
+    $content = array(
+      '#markup' => $content,
+    );
+  }
+
+  $title = '';
+  if ($block->settings['title_display'] !== LAYOUT_TITLE_NONE) {
+    $title = $block->getTitle();
+  }
+
+  $data = array(
+    'title' => $title,
+    'content' => $content,
+  );
+
+  // Allow altering of the title and content by other modules.
+  backdrop_alter(array(
+    'block_view',
+    'block_view_' . $block->module . '_' . str_replace('-', '_', $block->delta),
+  ), $data, $block);
+
+  // Assemble a structured content array.
+  $content = (object) array(
+    'title' => $data['title'],
+    'content' => $data['content'],
+  );
+
+  return array(
+    '#theme' => 'block',
+    '#content' => $content,
+    '#block' => $block,
+  );
+}
+
+/**
+ * Render a block
+ * @param Block $block
+ * The Block entity to render
+ * Assumes the block has been loaded and $block->prepare()
+ * has been called.
+ */
+function block_render_block($block) {
+  $output = '';
+  if ($content = $block->getContent()) {
+    $content = block_get_renderable_array($block);
+  }
+  return backdrop_render($output);;
+}
+
+/**
  * Form constructor for the custom block form.
  *
  * @param $edit
