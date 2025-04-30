@@ -970,10 +970,12 @@ function filter_editor_image_styles_settings_form($format) {
     '#default_value' => $settings['use_image_styles'],
     '#description' => t('Instead of letting people freely resize images, let them pick from pre-defined image styles. Note that styles do not initially apply to drag-and-drop uploads.'),
   );
+  $style_options = array('' => t('None (original image)'));
+  $style_options += image_style_options(FALSE);
   $form['available_styles'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Available image styles'),
-    '#options' => image_style_options(),
+    '#options' => $style_options,
     '#default_value' => $settings['available_styles'],
     '#states' => array(
       'visible' => array(

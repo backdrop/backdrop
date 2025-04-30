@@ -163,7 +163,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   if ($use_image_styles) {
     $all_image_styles = image_style_options(FALSE, PASS_THROUGH);
     foreach ($format->editor_settings['image_styles']['available_styles'] as $key => $value) {
-      if ($key === '') {
+      if ($key === '' && $value !== 0) {
         $available_style_options[$key] = t('None (original image)');
       }
       elseif (!empty($value) && array_key_exists($key, $all_image_styles)) {
@@ -172,6 +172,8 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     }
   }
   $default_value = NULL;
+  // Determine the style from path - this doesn not work with SVG, as those get
+  // always served from their original path.
   if ($use_image_styles && !empty($values['src']) && strpos($values['src'], 'styles/') > 0) {
     $path_parts = explode('/', $values['src']);
     $before_style = array_search('styles', $path_parts);
