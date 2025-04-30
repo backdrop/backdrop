@@ -269,11 +269,23 @@ function _filter_image_library_ajax() {
  * Submit handler for filter_format_editor_image_form().
  */
 function filter_format_editor_image_form_submit($form, &$form_state) {
-  // Convert any uploaded files from the FID values to the src attribute.
-  if (!empty($form_state['values']['fid'])) {
+  // Determine the file either from fid (when upload is enabled) or from src
+  // attribute (if image upload in editor is disabled).
+  $file = NULL;
+  $fid = 0;
+  if (!empty($form_state['values']['fid']) && empty($form_state['values']['attributes']['src'])) {
+    $file = file_load($form_state['values']['fid']);
     $fid = $form_state['values']['fid'];
-    $file = file_load($fid);
-
+    unset($form_state['values']['fid']);
+  }
+  elseif (!empty($form_state['values']['attributes']['src'])) {
+    $fid = _filter_get_file_id($form_state['values']['attributes']['src']);
+    if ($fid) {
+      $file = file_load($fid);
+      unset($form_state['values']['attributes']['src']);
+    }
+  }
+  if (!empty($file)) {
     // Try to make a local path if possible for better portability.
     $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
 
@@ -302,7 +314,6 @@ function filter_format_editor_image_form_submit($form, &$form_state) {
 
     $form_state['values']['attributes']['src'] = $url;
     $form_state['values']['attributes']['data-file-id'] = $fid;
-    unset($form_state['values']['fid']);
   }
 }
 
