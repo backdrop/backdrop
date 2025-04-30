@@ -933,7 +933,33 @@ function filter_editor_image_upload_settings_form($format) {
     '#field_suffix' => 'pixels',
     '#states' => $show_if_image_uploads_enabled,
   );
-  // @todo Is this the right place in this form, anyway? (I don't think so.)
+
+  return $form;
+}
+
+/**
+ * Subform constructor to configure the text editor's inline image styles.
+ *
+ * Each text editor implementation using the Filter dialog can use this form to
+ * configure image styles for inline images instead of free resizing.
+ *
+ * @param object $format
+ *   The filter format object.
+ *
+ * @return array
+ *   Subform items or empty array if not applicable.
+ */
+function filter_editor_image_styles_settings_form($format) {
+  $form = array();
+  if (!module_exists('image')) {
+    return $form;
+  }
+  $settings = isset($format->editor_settings['image_styles']) ? $format->editor_settings['image_styles'] : array();
+  $settings += array(
+    'use_image_styles' => FALSE,
+    'available_styles' => array(),
+  );
+
   // @todo CKE5: actually we should unload 'image.ImageResize' entirely, but
   // backdropImage declares a dependency on it in an info hook, where we have no
   // info about formats. And core has no concept for "conditional plugin
@@ -941,24 +967,23 @@ function filter_editor_image_upload_settings_form($format) {
   $form['use_image_styles'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use image styles'),
-    '#default_value' => isset($settings['use_image_styles']) ? $settings['use_image_styles'] : FALSE,
-    '#description' => t('Instead of letting people freely resize images, let them pick from pre-defined image styles.'),
+    '#default_value' => $settings['use_image_styles'],
+    '#description' => t('Instead of letting people freely resize images, let them pick from pre-defined image styles. Note that styles do not initially apply to drag-and-drop uploads.'),
   );
   $form['available_styles'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Available image styles'),
-    '#options' => image_style_options(FALSE, PASS_THROUGH),
-    '#default_value' => isset($settings['available_styles']) ? $settings['available_styles'] : NULL,
+    '#options' => image_style_options(),
+    '#default_value' => $settings['available_styles'],
     '#states' => array(
       'visible' => array(
-        ':input[name="editor_settings[image_upload][use_image_styles]"]' => array('checked' => TRUE),
+        ':input[name="editor_settings[image_styles][use_image_styles]"]' => array('checked' => TRUE),
       ),
     ),
   );
 
   return $form;
 }
-
 
 /**
  * Subform constructor to configure the text editor's file upload settings.

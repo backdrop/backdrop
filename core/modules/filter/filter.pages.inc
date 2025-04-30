@@ -132,7 +132,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#required' => $upload_settings['alt_required'],
   );
 
-  $use_image_styles = !empty($format->editor_settings['image_upload']['use_image_styles']);
+  $use_image_styles = !empty($format->editor_settings['image_styles']['use_image_styles']) && module_exists('image');
   $form['size'] = array(
     '#title' => t('Image size'),
     '#wrapper_attributes' => array('class' => array('editor-image-size')),
@@ -162,9 +162,13 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   $available_style_options = array();
   if ($use_image_styles) {
     $all_image_styles = image_style_options(FALSE, PASS_THROUGH);
-    $enabled = array_filter($format->editor_settings['image_upload']['available_styles']);
-    foreach ($enabled as $name) {
-      $available_style_options[$name] = $all_image_styles[$name];
+    foreach ($format->editor_settings['image_styles']['available_styles'] as $key => $value) {
+      if ($key === '') {
+        $available_style_options[$key] = t('None (original image)');
+      }
+      elseif (!empty($value) && array_key_exists($key, $all_image_styles)) {
+        $available_style_options[$key] = $all_image_styles[$key];
+      }
     }
   }
   $default_value = NULL;
@@ -179,7 +183,6 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#options' => $available_style_options,
     '#default_value' => $default_value,
     '#access' => $use_image_styles,
-    '#required' => $use_image_styles,
   );
 
   $form['align'] = array(
@@ -274,13 +277,24 @@ function filter_format_editor_image_form_submit($form, &$form_state) {
 
     if (empty($form_state['values']['image_style'])) {
       $url = file_create_url($file->uri);
+      $form_state['values']['attributes']['width'] = $file->width;
+      $form_state['values']['attributes']['height'] = $file->height;
     }
     else {
       $style_name = $form_state['values']['image_style'];
       $url = image_style_url($style_name, $file->uri);
-      // Let the editor determine (possibly changed) dimensions.
-      $form_state['values']['attributes']['width'] = '';
-      $form_state['values']['attributes']['height'] = '';
+      $dimensions = array('width' => '', 'height' => '');
+      // Although the editor could determine dimensions, this would not work
+      // with SVG.
+      if (!empty($file->width)) {
+        $dimensions = array(
+          'width' => $file->width,
+          'height' => $file->height,
+        );
+        image_style_transform_dimensions($style_name, $dimensions);
+      }
+      $form_state['values']['attributes']['width'] = $dimensions['width'];
+      $form_state['values']['attributes']['height'] = $dimensions['height'];
     }
     $url = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
 
