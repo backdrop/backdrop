@@ -727,7 +727,7 @@ function _filter_get_file_id($href) {
   $public_path = config_get('system.core', 'file_public_path');
   // Private files have "system/files/" in their URL.
   // @see BackdropPrivateStreamWrapper::getExternalUrl()
-  $pattern = '#^' . $base_path . '(\?q=)?(' . $public_path . '|system/files/' . ')#';
+  $pattern = '#^' . $base_path . '(\?q=)?(' . $public_path . '|system/files/)#';
   if (preg_match($pattern, $href) === FALSE) {
     return $result;
   }
