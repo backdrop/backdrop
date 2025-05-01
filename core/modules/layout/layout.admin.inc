@@ -514,6 +514,26 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#access' => !$layout->isDefault(),
   );
 
+  if (isset($layout->settings['additional_paths'])) {
+    $default_value = implode("\n", $layout->settings['additional_paths']);
+  }
+  else {
+    $default_value = '';
+  }
+  $toggle_additional = ' <a class="layout-additional-paths-examples-toggle" href="#">' . t('Show examples') . '<span class="arrow"></span></a>';
+  $description_additional_items = array(
+    t('Content: <code>node/%/edit</code> if primary path is <code>node/%</code>'),
+    t('Views page: <code>user/%/posts</code> if primary path is <code>user/%</code>'),
+    t('Login: <code>user/register</code> if primary path is <code>user/login</code>'),
+  );
+  $description_additional_list = '<div class="layout-additional-paths-examples">' . t('Some common examples of additional paths include:') . theme('item_list', array('items' => $description_additional_items)) . '</div>';
+  $form['additional_paths'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Additional paths'),
+    '#description' => t('Optionally, specify one or more additional paths to be handled by this layout (in addition to the primary path above). These paths must already be provided by the system or another module. If an additional path contains a placeholder it must be a child path of the primary path.') . $toggle_additional . $description_additional_list,
+    '#default_value' => $default_value,
+  );
+
   // Get all contexts except those provided by relationships.
   $contexts = $layout->getContexts(LayoutContext::USAGE_TYPE_ALL ^ LayoutContext::USAGE_TYPE_RELATIONSHIP);
   $built_in_contexts = isset($contexts['overrides_path']) ? 2 : 1;
@@ -794,26 +814,6 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
       '#name' => 'conditions_' . $access_key . '_configure',
     );
   }
-
-  if (isset($layout->settings['additional_paths'])) {
-    $default_value = implode("\n", $layout->settings['additional_paths']);
-  }
-  else {
-    $default_value = '';
-  }
-  $toggle_additional = ' <a class="layout-additional-paths-examples-toggle" href="#">' . t('Show examples') . '<span class="arrow"></span></a>';
-  $description_additional_items = array(
-    t('Content: <code>node/%/edit</code> if primary path is <code>node/%</code>'),
-    t('Views page: <code>user/%/posts</code> if primary path is <code>user/%</code>'),
-    t('Login: <code>user/register</code> if primary path is <code>user/login</code>'),
-  );
-  $description_additional_list = '<div class="layout-additional-paths-examples">' . t('Some common examples of additional paths include:') . theme('item_list', array('items' => $description_additional_items)) . '</div>';
-  $form['additional_paths'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Additional paths'),
-    '#description' => t('Optionally, specify one or more additional paths to be handled by this layout (in addition to the primary path above). These paths must already be provided by the system or another module. If an additional path contains a placeholder it must be a child path of the primary path.') . $toggle_additional . $description_additional_list,
-    '#default_value' => $default_value,
-  );
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
