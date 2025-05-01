@@ -514,24 +514,53 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#access' => !$layout->isDefault(),
   );
 
-  if (isset($layout->settings['additional_paths'])) {
-    $default_value = implode("\n", $layout->settings['additional_paths']);
-  }
-  else {
-    $default_value = '';
+  $form['path_wrapper'] = array(
+    '#title' => t('Additional Paths'),
+    '#type' => 'item',
+    '#id' => 'path-wrapper',
+  );
+  $additional_paths_desc = t('Specify additional paths to be handled by this layout. If an additional path contains a placeholder it must be a child path of the primary path.');
+  if ($layout_override) {
+    $additional_paths_desc .= ' ' . t('These paths must already be provided by the system or another module. ');
   }
   $toggle_additional = ' <a class="layout-additional-paths-examples-toggle" href="#">' . t('Show examples') . '<span class="arrow"></span></a>';
   $description_additional_items = array(
-    t('Content: <code>node/%/edit</code> if primary path is <code>node/%</code>'),
-    t('Views page: <code>user/%/posts</code> if primary path is <code>user/%</code>'),
-    t('Login: <code>user/register</code> if primary path is <code>user/login</code>'),
+    t('Content: Additional path is <code>node/%/edit</code> if primary path is <code>node/%</code>'),
+    t('Views page: Additional path is <code>user/%/posts</code> if primary path is <code>user/%</code>'),
+    t('Login: Additional path is <code>user/register</code> if primary path is <code>user/login</code>'),
   );
   $description_additional_list = '<div class="layout-additional-paths-examples">' . t('Some common examples of additional paths include:') . theme('item_list', array('items' => $description_additional_items)) . '</div>';
-  $form['additional_paths'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Additional paths'),
-    '#description' => t('Optionally, specify one or more additional paths to be handled by this layout (in addition to the primary path above). These paths must already be provided by the system or another module. If an additional path contains a placeholder it must be a child path of the primary path.') . $toggle_additional . $description_additional_list,
-    '#default_value' => $default_value,
+  $form['path_wrapper']['additional']['description'] = array(
+    '#markup' => $additional_paths_desc . $toggle_additional . $description_additional_list,
+    '#prefix' => '<div class="description">',
+    '#suffix' => '</div>',
+  );
+  foreach ($layout->settings['additional_paths'] as $delta => $path) {
+    $form['path_wrapper']['additional'][$delta]['path'] = array(
+      '#field_prefix' => url('', array('absolute' => TRUE)),
+      '#type' => 'textfield',
+      '#default_value' => $layout->settings['additional_paths'][$delta],
+      '#required' => TRUE,
+      '#access' => !$layout->isDefault(),
+    );
+  }
+
+  $form['path_wrapper']['additional']['links'] = array(
+    '#theme' => 'layout_action_links',
+  );
+  $form['path_wrapper']['additional']['links']['add'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add another path'),
+    '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
+    '#validate' => array(
+      'layout_path_add another_validate',
+    ),
+    '#submit' => array(
+      'layout_path_add another',
+    ),
+    '#ajax' => array(
+      'callback' => 'layout_ajax_form_open_dialog',
+    ),
   );
 
   // Get all contexts except those provided by relationships.
