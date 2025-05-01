@@ -959,11 +959,6 @@ function filter_editor_image_styles_settings_form($format) {
     'use_image_styles' => FALSE,
     'available_styles' => array(),
   );
-
-  // @todo CKE5: actually we should unload 'image.ImageResize' entirely, but
-  // backdropImage declares a dependency on it in an info hook, where we have no
-  // info about formats. And core has no concept for "conditional plugin
-  // dependencies" for CKE5.
   $form['use_image_styles'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use image styles'),
