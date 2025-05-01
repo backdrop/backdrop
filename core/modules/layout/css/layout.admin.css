@@ -103,6 +103,10 @@
   margin-left: 0;
 }
 
+.layout-settings-section {
+  margin-bottom: 30px;
+}
+
 /* Inject a little space after the path matches text within the description. */
 #layout-path-matches {
   margin-bottom: 0.5em;
@@ -144,23 +148,26 @@
   text-decoration: underline;
 }
 
+#layout-path-table,
 #layout-context-table {
   width: auto;
 }
 
 /* Buttons that are displayed as links. */
+.layout-path-remove,
+.layout-path-configure,
 .layout-access-remove,
 .layout-access-configure,
 .layout-context-remove,
 .layout-context-configure {
-  padding-left: 10px; /* LTR */
+  padding-right: 10px; /* LTR */
 }
 [dir="rtl"] .layout-access-remove,
 [dir="rtl"] .layout-access-configure,
 [dir="rtl"] .layout-context-remove,
 [dir="rtl"] .layout-context-configure {
-  padding-left: 0;
-  padding-right: 10px;
+  padding-right: 0;
+  padding-left: 10px;
 }
 
 /* Layout dialogs. */

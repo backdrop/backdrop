@@ -518,11 +518,10 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#title' => t('Additional Paths'),
     '#type' => 'item',
     '#id' => 'path-wrapper',
+    '#wrapper_attributes' => array('class' => array('layout-settings-section')),
   );
-  $additional_paths_desc = t('Specify additional paths to be handled by this layout. If an additional path contains a placeholder it must be a child path of the primary path.');
-  if ($layout_override) {
-    $additional_paths_desc .= ' ' . t('These paths must already be provided by the system or another module. ');
-  }
+  // Splitting into two sentences for translation after the first is removed.
+  $additional_paths_desc = t('Additional paths must already be provided by the system or another module.') . '<br>' . t('If an additional path contains a placeholder it must be a child path of the primary path.');
   $toggle_additional = ' <a class="layout-additional-paths-examples-toggle" href="#">' . t('Show examples') . '<span class="arrow"></span></a>';
   $description_additional_items = array(
     t('Content: Additional path is <code>node/%/edit</code> if primary path is <code>node/%</code>'),
@@ -535,16 +534,6 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#prefix' => '<div class="description">',
     '#suffix' => '</div>',
   );
-  foreach ($layout->settings['additional_paths'] as $delta => $path) {
-    $form['path_wrapper']['additional'][$delta]['path'] = array(
-      '#field_prefix' => url('', array('absolute' => TRUE)),
-      '#type' => 'textfield',
-      '#default_value' => $layout->settings['additional_paths'][$delta],
-      '#required' => TRUE,
-      '#access' => !$layout->isDefault(),
-    );
-  }
-
   $form['path_wrapper']['additional']['links'] = array(
     '#theme' => 'layout_action_links',
   );
@@ -553,15 +542,59 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#value' => t('Add another path'),
     '#attributes' => array('class' => array('layout-link-button', 'layout-access-add')),
     '#validate' => array(
-      'layout_path_add another_validate',
+      'layout_path_add_another_validate',
     ),
     '#submit' => array(
-      'layout_path_add another',
+      'layout_path_add_another',
     ),
     '#ajax' => array(
       'callback' => 'layout_ajax_form_open_dialog',
     ),
   );
+
+  $form['path_wrapper']['additional']['table'] = array(
+    '#theme' => 'layout_settings_paths_table',
+    '#layout_path' => $layout->getPath(),
+  );
+
+  foreach ($layout->settings['additional_paths'] as $path_key => $path) {
+    $form['path_wrapper']['additional']['table'][$path_key]['summary'] = array(
+      '#markup' => url('', array('absolute' => TRUE)) . '<strong>' . $path . '</strong>',
+    );
+    $form['path_wrapper']['additional']['table'][$path_key]['operations'] = array(
+      '#type' => 'container',
+      '#attributes' => array('class' => array('layout-operations')),
+    );
+    $form['path_wrapper']['additional']['table'][$path_key]['operations']['remove'] = array(
+      '#type' => 'submit',
+      '#value' => t('Remove'),
+      '#attributes' => array('class' => array('layout-link-button', 'layout-path-remove')),
+      '#validate' => array(),
+      '#submit' => array(
+        'layout_settings_form_path_remove',
+        'layout_settings_form_update_layout',
+      ),
+      '#ajax' => array(
+        'callback' => 'layout_ajax_form_update',
+      ),
+      '#name' => 'path_' . $path_key . '_remove',
+    );
+    $form['path_wrapper']['additional']['table'][$path_key]['operations']['configure'] = array(
+      '#type' => 'submit',
+      '#value' => t('Configure'),
+      '#attributes' => array('class' => array('layout-link-button', 'layout-path-configure')),
+      '#validate' => array(
+        'layout_settings_form_validate',
+      ),
+      '#submit' => array(
+        'layout_settings_form_path_configure',
+      ),
+      '#ajax' => array(
+        'callback' => 'layout_ajax_form_open_dialog',
+      ),
+      '#name' => 'path_' . $path_key . '_configure',
+    );
+  }
 
   // Get all contexts except those provided by relationships.
   $contexts = $layout->getContexts(LayoutContext::USAGE_TYPE_ALL ^ LayoutContext::USAGE_TYPE_RELATIONSHIP);
@@ -571,6 +604,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#title' => t('Contexts'),
     '#type' => 'item',
     '#id' => 'context-wrapper',
+    '#wrapper_attributes' => array('class' => array('layout-settings-section')),
   );
   $form['context_wrapper']['#access'] = !$layout->isDefault();
   $form['context_wrapper']['#prefix'] = '<div id="layout-contexts">';
@@ -772,6 +806,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#type' => 'item',
     '#id' => 'layout-access',
     '#access' => !$layout->isDefault(),
+    '#wrapper_attributes' => array('class' => array('layout-settings-section')),
   );
   $form['conditions']['description'] = array(
     '#markup' => t('Visibility conditions allow this layout to selectively apply to different situations, such as different types of content at the same path.'),

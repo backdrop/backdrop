@@ -202,6 +202,40 @@ function theme_layout_menu_item_arguments_table($variables) {
 /**
  * Output the table for layout_settings_form() contexts.
  */
+function theme_layout_settings_paths_table($variables) {
+  $element = $variables['element'];
+  $path = $element['#layout_path'];
+  $parts = explode('/', $path);
+  $header = array(
+    t('Additional Path'),
+    t('Operations'),
+  );
+  $rows = array();
+  dpm($element);
+  foreach (element_children($element) as $key) {
+    $argument_parts = $parts;
+    $row = array();
+    $row[] = backdrop_render($element[$key]['summary']);
+    if (isset($element[$key]['operations'])) {
+      $row[] = backdrop_render($element[$key]['operations']);
+    }
+    else {
+      $row[] = array();
+    }
+
+    $rows[] = $row;
+  }
+  return theme('table', array(
+    'header' => $header,
+    'rows' => $rows,
+    'attributes' => array('id' => 'layout-path-table'),
+    'empty' => t('No additional paths.'),
+  ));
+}
+
+/**
+ * Output the table for layout_settings_form() contexts.
+ */
 function theme_layout_settings_context_table($variables) {
   $element = $variables['element'];
   $path = $element['#layout_path'];
