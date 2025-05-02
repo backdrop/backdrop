@@ -1932,9 +1932,6 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
     $this->assertRaw('core/themes/seven/js/script.js', 'JS attached via hook_theme() is added to the page.');
     $this->assertRaw('"globe-stand-fill":"\/core\/misc\/icons\/globe-stand-fill.svg"', 'Icon attached via hook_theme() is added to the page.');
     $this->assertRaw('core/misc/ajax.js', 'Library attached via hook_theme() is added to the page.');
-    $config->set('preprocess_css', TRUE);
-    $config->set('preprocess_js', TRUE);
-    $config->save();
   }
 
   /**
