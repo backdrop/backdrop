@@ -1823,6 +1823,8 @@ function hook_permission() {
  *     module, so that it doesn't need to be looked up.
  *
  * @see hook_theme_registry_alter()
+ *
+ * @since 1.31.0 Added optional "attached" key.
  */
 function hook_theme($existing, $type, $theme, $path) {
   return array(
