@@ -43,6 +43,7 @@
   "globRoot": "../",
   "ignorePaths": [
     "*.svg",
+    "file.type.*.json",
     "/.*/",
     "/core/includes/diff.inc",
     "/core/includes/file.mimetypes.inc",
@@ -57,6 +58,7 @@
     "/core/misc/opensans/",
     "/core/misc/smartmenus/",
     "/core/misc/ui/",
+    "/core/modules/ckeditor5/lib/ckeditor5/",
     "/core/modules/search/tests/UnicodeTest.txt",
     "/core/modules/system/system.tar.inc",
     "/core/themes/bartik/color/preview.html",
@@ -67,6 +69,10 @@
     {
       "filename": "/core/modules/ckeditor/ckeditor.module",
       "ignoreWords": ["pastetext", "pastefromword", "showblocks"]
+    },
+    {
+      "filename": "/core/modules/ckeditor5/**/*.js",
+      "ignoreWords": ["downcastdispatcher", "downcasted", "datafilter", "linkimageediting", "simpleuploadadapter", "filerepository"]
     },
     {
       "filename": "/core/modules/filter/tests/filter.test",

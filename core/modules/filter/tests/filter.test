@@ -1035,9 +1035,9 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
       ),
       // Comments remain unchanged and subsequent lines/paragraphs are
       // transformed normally.
-      "aaa<!--comment-->\n\nbbb\n\nccc\n\nddd<!--comment\nwith linebreak-->\n\neee\n\nfff" => array(
+      "aaa<!--comment-->\n\nbbb\n\nccc\n\nddd<!--comment\nwith line break-->\n\neee\n\nfff" => array(
         "<p>aaa</p>\n<!--comment--><p>\nbbb</p>\n<p>ccc</p>\n<p>ddd</p>" => TRUE,
-        "<!--comment\nwith linebreak--><p>\neee</p>\n<p>fff</p>" => TRUE,
+        "<!--comment\nwith line break--><p>\neee</p>\n<p>fff</p>" => TRUE,
       ),
       // Check that a comment in a PRE will result that the text after
       // the comment, but still in PRE, is not transformed.
@@ -1269,6 +1269,78 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
   }
 
   /**
+   * Tests sanitizing XSS within an attributes array.
+   *
+   * Attributes arrays are commonly passed into functions such as l().
+   * If the contents of these arrays have user-provided data, the attributes
+   * should be passed through filter_xss_attributes() before calling l().
+   */
+  public function testFilterXSSAttributes() {
+    $data = array(
+      'safe' => array(
+        array('class' => array('foo', 'bar'), 'data-biscuit' => TRUE),
+        array('class' => array('foo', 'bar'), 'data-biscuit' => TRUE),
+      ),
+      'valueless' => array(
+        array('class' => array('foo', 'bar'), 'selected' => ''),
+        array('class' => array('foo', 'bar'), 'selected' => ''),
+      ),
+      'valueless, mangled with a space' => array(
+        array('class' => array('foo', 'bar'), 'selected href' => 'http://example.com'),
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'http://example.com'),
+      ),
+      'valueless, mangled with multiple spaces, blocked' => array(
+        array('class' => array('foo', 'bar'), 'selected  onclick href' => 'http://example.com'),
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'http://example.com'),
+      ),
+      'valueless, mangled with multiple spaces, blocked, mangled first' => array(
+        array('selected  onclick href' => 'http://example.com', 'class' => array('foo', 'bar')),
+        array('selected' => 'selected', 'href' => 'http://example.com', 'class' => array('foo', 'bar')),
+      ),
+      'valueless but with value' => array(
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'http://example.com'),
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'http://example.com'),
+      ),
+      'valueless but with value, bad protocol' => array(
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'javascript:alert()'),
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'alert()'),
+      ),
+      'valueless, mangled with a space and bad protocol' => array(
+        array('class' => array('foo', 'bar'), 'selected href' => 'javascript:alert()'),
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'alert()'),
+      ),
+      'valueless, mangled with a space and bad protocol, repeated' => array(
+        array('class' => array('foo', 'bar'), 'selected href' => 'javascript:alert()', 'href' => 'http://example.com'),
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'alert()'),
+      ),
+      'with a space' => array(
+        array('class' => array('foo', 'bar'), 'href' => urlencode('some file.pdf')),
+        array('class' => array('foo', 'bar'), 'href' => 'some+file.pdf'),
+      ),
+      'with an unencoded space' => array(
+        array('class' => array('foo', 'bar'), 'href' => 'some file.pdf'),
+        array('class' => array('foo', 'bar'), 'href' => 'some file.pdf'),
+      ),
+      'xss onclick' => array(
+        array('class' => array('foo', 'bar'), 'onclick' => 'alert("whoop");'),
+        array('class' => array('foo', 'bar')),
+      ),
+      'xss onclick, valueless, mangled with a space' => array(
+        array('class' => array('foo', 'bar'), 'selected onclick href' => 'http://example.com'),
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'http://example.com'),
+      ),
+      'xss protocol' => array(
+        array('class' => array('foo', 'bar'), 'src' => 'javascript:alert("whoop");'),
+        array('class' => array('foo', 'bar')),
+      ),
+    );
+    foreach ($data as $name => $row) {
+      list($attributes, $expected) = $row;
+      $this->assertEqual($expected, filter_xss_attributes($attributes), 'filter_xss_attributes() correctly cleaned the "' . $name . '" test case.');
+    }
+  }
+
+  /**
    * Tests filter settings, defaults, access restrictions and similar.
    *
    * @todo This is for functions like filter_filter and check_markup, whose
@@ -1435,15 +1507,15 @@ person@example.com or mailto:person2@example.com or ' . $email_with_plus_sign . 
       ),
       // URI parts and special characters.
       '
-http://trailingslash.com/ or www.trailingslash.com/
+http://trailing-slash.com/ or www.trailing-slash.com/
 http://host.com/some/path?query=foo&bar[baz]=beer#fragment or www.host.com/some/path?query=foo&bar[baz]=beer#fragment
 http://twitter.com/#!/example/status/22376963142324226
 ftp://user:pass@ftp.example.com/~home/dir1
 sftp://user@nonstandardport:222/dir
 ssh://192.168.0.100/srv/git/backdrop.git
 ' => array(
-        '<a href="http://trailingslash.com/">http://trailingslash.com/</a>' => TRUE,
-        '<a href="http://www.trailingslash.com/">www.trailingslash.com/</a>' => TRUE,
+        '<a href="http://trailing-slash.com/">http://trailing-slash.com/</a>' => TRUE,
+        '<a href="http://www.trailing-slash.com/">www.trailing-slash.com/</a>' => TRUE,
         '<a href="http://host.com/some/path?query=foo&amp;bar[baz]=beer#fragment">http://host.com/some/path?query=foo&amp;bar[baz]=beer#fragment</a>' => TRUE,
         '<a href="http://www.host.com/some/path?query=foo&amp;bar[baz]=beer#fragment">www.host.com/some/path?query=foo&amp;bar[baz]=beer#fragment</a>' => TRUE,
         '<a href="http://twitter.com/#!/example/status/22376963142324226">http://twitter.com/#!/example/status/22376963142324226</a>' => TRUE,
@@ -1461,6 +1533,7 @@ http://encoded.com/?a=1&amp;b=2
       ),
       // Domain name length.
       '
+// cspell:disable-next-line
 www.ex.ex or www.example.example or www.toolongdomainexampledomainexampledomainexampledomainexampledomain or
 me@me.tv
 ' => array(
@@ -1600,11 +1673,11 @@ HTML www.example21.com soup by person@example22.com can literally http://www.exa
 <script>
 <!--
   // @see www.example.com
-  var exampleurl = "http://example.net";
+  var exampleUrl = "http://example.net";
 -->
 <!--//--><![CDATA[//><!--
   // @see www.example.com
-  var exampleurl = "http://example.net";
+  var exampleUrl = "http://example.net";
 //--><!]]>
 </script>
 ' => array(

@@ -1,0 +1,85 @@
+<?php
+/**
+ * @file
+ * Tests for the Basis core theme.
+ */
+
+/**
+ * Test the addition of supplemental CSS update selectors on the body class.
+ */
+class BasisTestCase extends BackdropWebTestCase {
+  protected $profile = 'standard';
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function setUp() {
+    theme_enable(array('basis'));
+    config_set('system.core', 'theme_default', 'basis');
+    parent::setUp();
+  }
+
+  /**
+   * Tests that body classes are added correctly for CSS updates.
+   */
+  public function testCssUpdates() {
+    // Include Basis's template.php file to get utility functions.
+    $path = backdrop_get_path('theme', 'basis');
+    include_once $path . '/template.php';
+
+    // Disable the page cache while testing the body classes.
+    config_set('system.core', 'cache', 0);
+
+    $css_update_versions = basis_updated_css_versions();
+    $latest_update_version = reset($css_update_versions);
+
+    // These tests will intentionally break when we release a second version of
+    // Backdrop core with Basis CSS updates. The "update-1-30" string will need
+    // to be incremented and the tests should be expanded to cover the new
+    // version strings.
+    $config = config('basis.settings');
+    $this->assertEqual($config->get('css_update'), 'install', 'Basis defaults to using the latest CSS updates at the time Backdrop core is installed.');
+    $this->assertEqual($config->get('css_update_version'), $latest_update_version, 'The most recent CSS update is set as the default.');
+
+    $this->backdropGet('<front>');
+    // @todo Confirm multiple version strings are included once they exist.
+    $this->assertTrue(in_array('update-1-30', $this->getBodyClasses()), 'The current CSS update version exists as a body class.');
+
+    // Set the CSS update version to an empty string for "no updates".
+    $config->set('css_update', 'version');
+    $config->set('css_update_version', '');
+    $config->save();
+
+    $this->backdropGet('<front>');
+    $body_class_string = implode(' ', $this->getBodyClasses());
+    $this->assertFalse(strpos($body_class_string, 'update'), 'No CSS update classes exist on the body class.');
+
+    // Set the CSS update version to "all" to accept all version changes.
+    $config->set('css_update', 'all');
+    $config->set('css_update_version', '');
+    $config->save();
+
+    $this->backdropGet('<front>');
+    // @todo Confirm multiple version strings are included once they exist.
+    $this->assertTrue(in_array('update-1-30', $this->getBodyClasses()), 'All CSS update versions exists within the body class.');
+
+    // Set the CSS update version to a specific value.
+    $config->set('css_update', 'version');
+    $config->set('css_update_version', '1.30');
+    $config->save();
+
+    $this->backdropGet('<front>');
+    // @todo Confirm multiple version strings are included once they exist.
+    $this->assertTrue(in_array('update-1-30', $this->getBodyClasses()), 'The specific CSS update version exists as a body class.');
+  }
+
+  /**
+   * Get all body classes on the current page as an array.
+   *
+   * @return string[]
+   */
+  private function getBodyClasses() {
+    $body = current($this->xpath('//body'));
+    return explode(' ', (string) $body->attributes()->class);
+  }
+}

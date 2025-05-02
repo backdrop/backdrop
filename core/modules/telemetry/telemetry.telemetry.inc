@@ -18,6 +18,11 @@ function telemetry_telemetry_info() {
     'description' => t('The version number of your database (either MySQL or MariaDB).'),
     'project' => 'backdrop',
   );
+  $info['install_version'] = array(
+    'label' => t('Backdrop initial version'),
+    'description' => t('The Backdrop core version at the time Backdrop was first installed.'),
+    'project' => 'backdrop',
+  );
   $info['server_os'] = array(
     'label' => t('Server OS'),
     'description' => t('The operating system of your server, such as RedHat Linux, Debian, Windows, etc.'),
@@ -43,6 +48,21 @@ function telemetry_telemetry_info() {
     'description' => t('The CKEditor module version that your site uses (either 4, 5, both, or neither).'),
     'project' => 'backdrop',
   );
+  $info['drupal_compatibility'] = array(
+    'label' => t('Drupal compatibility layer'),
+    'description' => t('Is the Drupal compatibility layer enabled?'),
+    'project' => 'backdrop',
+  );
+  $info['jquery_version'] = array(
+    'label' => t('jQuery version'),
+    'description' => t('The version of jQuery configured on your site.'),
+    'project' => 'backdrop',
+  );
+  $info['update_module'] = array(
+    'label' => t('Update module enabled'),
+    'description' => t('Whether this site has Update module enabled to check for project updates.'),
+    'project' => 'backdrop',
+  );
   return $info;
 }
 
@@ -55,6 +75,8 @@ function telemetry_telemetry_data($key) {
       return PHP_MAJOR_VERSION . '.' . PHP_MINOR_VERSION . '.' . PHP_RELEASE_VERSION;
     case 'mysql_version':
       return Database::getConnection()->databaseType() === 'mysql' ? Database::getConnection()->version() : NULL;
+    case 'install_version':
+      return config_get('system.core', 'install_version');
     case 'server_os':
       return PHP_OS;
     case 'web_server':
@@ -89,5 +111,12 @@ function telemetry_telemetry_data($key) {
       else {
         return 'Neither';
       }
+    case 'drupal_compatibility':
+      return settings_get('backdrop_drupal_compatibility') ? 'Yes' : 'No';
+    case 'jquery_version':
+      $jquery = backdrop_get_library('system', 'jquery');
+      return $jquery['version'];
+    case 'update_module':
+      return module_exists('update') ? 'Yes' : 'No';
   }
 }

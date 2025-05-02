@@ -149,6 +149,9 @@ class LocaleJavascriptTranslationTest extends BackdropWebTestCase {
       "Context Single Quoted @count plural" => "Context string single quoted",
       "Context Double Quoted plural" => "Context string double quoted",
       "Context Double Quoted @count plural" => "Context string double quoted",
+
+      "No count argument plural - singular" => '',
+      "No count argument plural - plural" => '',
     );
 
     // Assert that all strings were found properly.
@@ -838,7 +841,7 @@ class LocaleImportFunctionalTest extends BackdropWebTestCase {
     $this->assertRaw(t('The translation was successfully imported. There are %number newly created translated strings, %update strings were updated and %delete strings were removed.', array('%number' => 1, '%update' => 0, '%delete' => 0)), 'The translation file was successfully imported.');
     // Ensure string wasn't overwritten.
     $search = array(
-      'string' => 'Montag',
+      'string' => 'Montag', // cspell:disable-line
       'language' => 'fr',
       'translation' => 'translated',
     );
@@ -860,7 +863,7 @@ class LocaleImportFunctionalTest extends BackdropWebTestCase {
     $this->assertRaw(t('The translation was successfully imported. There are %number newly created translated strings, %update strings were updated and %delete strings were removed.', array('%number' => 0, '%update' => 2, '%delete' => 0)), 'The translation file was successfully imported.');
     // Ensure string was overwritten.
     $search = array(
-      'string' => 'Montag',
+      'string' => 'Montag', // cspell:disable-line
       'language' => 'fr',
       'translation' => 'translated',
     );
@@ -1039,6 +1042,7 @@ EOF;
    * Helper function that returns a proper .po file for testing.
    */
   function getOverwritePoFile() {
+    // cspell:disable
     return <<< EOF
 msgid ""
 msgstr ""
@@ -1054,6 +1058,7 @@ msgstr "Montag"
 msgid "Day"
 msgstr "Jour"
 EOF;
+    // cspell:enable
   }
 
   /**
@@ -2938,8 +2943,8 @@ class LocaleStringIsSafeTest extends BackdropWebTestCase {
     $result = locale_string_is_safe($string);
     $this->assertTrue($result);
 
-    // Check an untranslatable string which includes untrustable HTML (according
-    // to the locale_string_is_safe() function definition).
+    // Check an untranslatable string which includes potentially unsafe HTML
+    // (according to the locale_string_is_safe() function definition).
     $string = 'Hello <img src="world.png" alt="world" />!';
     $result = locale_string_is_safe($string);
     $this->assertFalse($result);

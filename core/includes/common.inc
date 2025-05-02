@@ -483,18 +483,18 @@ function backdrop_get_feeds($delimiter = "\n") {
 /**
  * Processes a URL query parameter array to remove unwanted elements.
  *
- * @param $query
+ * @param array|null $query
  *   (optional) An array to be processed. Defaults to $_GET.
- * @param $exclude
+ * @param array $exclude
  *   (optional) A list of $query array keys to remove. Use "parent[child]" to
  *   exclude nested items. Defaults to array('q').
- * @param $parent
+ * @param string $parent
  *   Internal use only. Used to build the $query array key for nested items.
  *
- * @return
+ * @return array
  *   An array containing query parameters, which can be used for url().
  */
-function backdrop_get_query_parameters(array $query = NULL, array $exclude = array('q'), $parent = '') {
+function backdrop_get_query_parameters(?array $query = NULL, array $exclude = array('q'), $parent = '') {
   // Set defaults, if none given.
   if (!isset($query)) {
     $query = $_GET;
@@ -953,6 +953,11 @@ function backdrop_access_denied() {
  * @see backdrop_http_build_query()
  *
  * @since 1.18.4 The $options['data'] key may now be passed as an array.
+ * @since 1.27.2 Support added for the 429 response code (previously treaded as
+ *   a 400).
+ * @since 1.27.2 Now removes any potentially sensitive headers before following
+ *   a redirect. See the 'strip_sensitive_headers_on_host_change' setting in
+ *   settings.php for details.
  */
 function backdrop_http_request($url, array $options = array()) {
   // Allow an alternate HTTP client library to replace Backdrop's default
@@ -1226,6 +1231,7 @@ function backdrop_http_request($url, array $options = array()) {
     415 => 'Unsupported Media Type',
     416 => 'Requested range not satisfiable',
     417 => 'Expectation Failed',
+    429 => 'Too Many Requests',
     500 => 'Internal Server Error',
     501 => 'Not Implemented',
     502 => 'Bad Gateway',
@@ -1262,6 +1268,15 @@ function backdrop_http_request($url, array $options = array()) {
       elseif ($options['max_redirects']) {
         // Redirect to the new location.
         $options['max_redirects']--;
+
+        // Check if we need to remove any potentially sensitive headers before
+        // following the redirect.
+        // @see https://www.rfc-editor.org/rfc/rfc9110.html#name-redirection-3xx
+        if (_backdrop_should_strip_sensitive_headers_on_http_redirect($url, $location)) {
+          unset($options['headers']['Cookie']);
+          unset($options['headers']['Authorization']);
+        }
+
         // Remove the automatically added Host header, as the redirect may
         // be on a different domain name.
         if (isset($options['headers']['Host'])) {
@@ -1279,6 +1294,36 @@ function backdrop_http_request($url, array $options = array()) {
   }
 
   return $result;
+}
+
+/**
+ * Determine whether to strip sensitive headers from a request when redirected.
+ *
+ * @param string $url
+ *   The url from the original outbound http request.
+ *
+ * @param string $location
+ *   The location to which the request has been redirected.
+ *
+ * @return boolean
+ *   Whether sensitive headers should be stripped from the request before
+ *   following the redirect.
+ */
+function _backdrop_should_strip_sensitive_headers_on_http_redirect($url, $location) {
+  $url_parsed = parse_url($url);
+  $location_parsed = parse_url($location);
+  if (!isset($location_parsed['host'])) {
+    return FALSE;
+  }
+  $strip_on_host_change = config_get('system.core', 'backdrop_http_request.strip_sensitive_headers_on_host_change');
+  $strip_on_https_downgrade = config_get('system.core', 'backdrop_http_request.strip_sensitive_headers_on_https_downgrade');
+  if ($strip_on_host_change && strcasecmp($url_parsed['host'], $location_parsed['host']) !== 0) {
+    return TRUE;
+  }
+  if ($strip_on_https_downgrade && $url_parsed['scheme'] !== $location_parsed['scheme'] && $location_parsed['scheme'] !== 'https') {
+    return TRUE;
+  }
+  return FALSE;
 }
 
 /**
@@ -1700,7 +1745,7 @@ function tempstore_clear_all($collection) {
  * @{
  * Functions to sanitize values.
  *
- * See http://drupal.org/writing-secure-code for information
+ * See https://docs.backdropcms.org/documentation/writing-secure-code for information
  * on writing secure code.
  */
 
@@ -1856,6 +1901,67 @@ function filter_xss($string, $allowed_tags = NULL) {
 }
 
 /**
+ * Sanitizes attributes.
+ *
+ * @param array $attributes
+ *   Attribute values as key => value format.
+ *
+ * @return array
+ *   Sanitized attributes.
+ */
+function filter_xss_attributes(array $attributes) {
+  $new_attributes = array();
+  foreach ($attributes as $name => $value) {
+    // The attribute name should be a single attribute, but there is the
+    // possibility that the name is corrupt. Core's _filter_xss_attributes() can
+    // cleanly handle sanitizing 'selected href="http://example.com" so we
+    // provide an allowance for cases where the attribute array is malformed.
+    // For example given a name of 'selected href' and a value of
+    // http://example.com we split this into two separate attributes, with the
+    // value assigned to the last attribute name.
+    // Explode the attribute name if a space exists.
+    $names = array_filter(explode(' ', $name));
+    if (count($names) === 0) {
+      // Empty attribute names.
+      continue;
+    }
+    // Valueless attributes set the name to the value.
+    $with_values = array_combine($names, $names);
+    // Convert the attribute array to a string. If there is only one attribute
+    // this simply creates a new attribute with a single key-value pair.
+    $last_name = end($names);
+    $with_values[$last_name] = $value;
+    $attribute_string = '';
+    // Convert class arrays to a string.
+    if (isset($with_values['class']) && is_array($with_values['class'])) {
+      $with_values['class'] = implode(' ', $with_values['class']);
+    }
+    foreach ($with_values as $valued_attribute => $valued_value) {
+      $attribute_string .= $valued_attribute . '="' . $valued_value . '" ';
+    }
+
+    // Filter the attributes.
+    $safe = _filter_xss_attributes($attribute_string);
+    $safe = array_map(function ($value) {
+      return html_entity_decode($value, ENT_QUOTES, 'UTF-8');
+    }, $safe);
+    if (array_key_exists('class', $safe)) {
+      // The class attribute is expected to be an array.
+      $safe['class'] = explode(' ', $safe['class']);
+    }
+    // Special case for boolean values which are unique to valueless
+    // attributes.
+    if (array_key_exists($last_name, $safe) && is_bool($value)) {
+      $safe[$last_name] = $value;
+    }
+    // Add the safe attributes to the new list.
+    $new_attributes += array_intersect_key($safe, $with_values);
+  }
+
+  return $new_attributes;
+}
+
+/**
  * List of the default tags allowed by filter_xss().
  */
 function _filter_xss_allowed_tags() {
@@ -1935,7 +2041,12 @@ function _filter_xss_split($m, $store = FALSE) {
   $xhtml_slash = $count ? ' /' : '';
 
   // Clean up attributes.
-  $attr2 = implode(' ', _filter_xss_attributes($attrlist));
+  $attr2 = '';
+  $cleaned_attributes = _filter_xss_attributes($attrlist);
+  foreach ($cleaned_attributes as $attribute_name => $attribute_value) {
+    $attr2 .= $attribute_name . '="' . $attribute_value . '" ';
+  }
+  $attr2 = trim($attr2);
   $attr2 = preg_replace('/[<>]/', '', $attr2);
   $attr2 = strlen($attr2) ? ' ' . $attr2 : '';
 
@@ -1945,101 +2056,126 @@ function _filter_xss_split($m, $store = FALSE) {
 /**
  * Processes a string of HTML attributes.
  *
- * @return
- *   Cleaned up version of the HTML attributes.
+ * @param string $attributes
+ *   A space-separated list of attributes, such as 'class="foo bar" foo="bar"'.
+ *
+ * @return array
+ *   Cleaned up version of the HTML attributes as an array.
  */
-function _filter_xss_attributes($attr) {
-  $attrarr = array();
-  $skip = FALSE;
+function _filter_xss_attributes($attributes) {
+  $attributes_array = array();
   $mode = 0;
-  $attrname = '';
+  $attribute_name = '';
+  $skip = FALSE;
+  $skip_protocol_filtering = FALSE;
 
-  while (strlen($attr) != 0) {
+  while (strlen($attributes) != 0) {
     // Was the last operation successful?
     $working = 0;
 
     switch ($mode) {
       case 0:
         // Attribute name, href for instance.
-        if (preg_match('/^([-a-zA-Z]+)/', $attr, $match)) {
-          $attrname = strtolower($match[1]);
+        if (preg_match('/^([-a-zA-Z]+)/', $attributes, $match)) {
+          $attribute_name = strtolower($match[1]);
           $skip = (
-            $attrname == 'style' ||
-            substr($attrname, 0, 2) == 'on' ||
-            substr($attrname, 0, 1) == '-' ||
+            $attribute_name == 'style' ||
+            substr($attribute_name, 0, 2) == 'on' ||
+            substr($attribute_name, 0, 1) == '-' ||
             // Ignore long attributes to avoid unnecessary processing overhead.
-            strlen($attrname) > 96
+            strlen($attribute_name) > 96
           );
+          // Values for attributes of type URI should be filtered for
+          // potentially malicious protocols (for example, an href-attribute
+          // starting with "javascript:"). However, for some non-URI
+          // attributes performing this filtering causes valid and safe data
+          // to be mangled. We prevent this by skipping protocol filtering on
+          // such attributes.
+          // @see backdrop_strip_dangerous_protocols()
+          // @see http://www.w3.org/TR/html4/index/attributes.html
+          $skip_protocol_filtering = (strpos($attribute_name, 'data-') === 0) || in_array($attribute_name, array(
+            'title',
+            'alt',
+            'rel',
+            'property',
+            'class',
+            'datetime',
+          ));
+
           $working = $mode = 1;
-          $attr = preg_replace('/^[-a-zA-Z]+/', '', $attr);
+          $attributes = preg_replace('/^[-a-zA-Z][-a-zA-Z0-9]*/', '', $attributes);
         }
         break;
 
       case 1:
         // Equals sign or valueless ("selected").
-        if (preg_match('/^\s*=\s*/', $attr)) {
-          $working = 1; $mode = 2;
-          $attr = preg_replace('/^\s*=\s*/', '', $attr);
+        if (preg_match('/^\s*=\s*/', $attributes)) {
+          $mode = 2;
+          $working = 1;
+          $attributes = preg_replace('/^\s*=\s*/', '', $attributes);
           break;
         }
 
-        if (preg_match('/^\s+/', $attr)) {
-          $working = 1; $mode = 0;
+        if (preg_match('/^\s+/', $attributes)) {
+          $mode = 0;
+          $working = 1;
           if (!$skip) {
-            $attrarr[] = $attrname;
+            $attributes_array[$attribute_name] = $attribute_name;
           }
-          $attr = preg_replace('/^\s+/', '', $attr);
+          $attributes = preg_replace('/^\s+/', '', $attributes);
         }
         break;
 
       case 2:
         // Attribute value, a URL after href= for instance.
-        if (preg_match('/^"([^"]*)"(\s+|$)/', $attr, $match)) {
+        if (preg_match('/^"([^"]*)"(\s+|$)/', $attributes, $match)) {
           // Prevent filtering for some attribute values, where performing
           // the filtering would cause valid and safe data to be mangled.
-          if (strpos($attrname, 'data-') === 0 || $attrname == 'alt' || $attrname == 'title') {
-            $thisval = $match[1];
+          if ($skip_protocol_filtering) {
+            $value = $match[1];
           }
           // Strip bad protocols from all other attributes, e.g. href, src.
           else {
-            $thisval = filter_xss_bad_protocol($match[1]);
+            $value = filter_xss_bad_protocol($match[1]);
           }
 
           if (!$skip) {
-            $attrarr[] = "$attrname=\"$thisval\"";
+            $attributes_array[$attribute_name] = $value;
           }
-          $working = 1;
           $mode = 0;
-          $attr = preg_replace('/^"[^"]*"(\s+|$)/', '', $attr);
+          $working = 1;
+          $attributes = preg_replace('/^"[^"]*"(\s+|$)/', '', $attributes);
           break;
         }
 
-        if (preg_match("/^'([^']*)'(\s+|$)/", $attr, $match)) {
-          $thisval = filter_xss_bad_protocol($match[1]);
+        if (preg_match("/^'([^']*)'(\s+|$)/", $attributes, $match)) {
+          $mode = 0;
+          $working = 1;
+          $value = filter_xss_bad_protocol($match[1]);
 
           if (!$skip) {
-            $attrarr[] = "$attrname='$thisval'";
+            $attributes_array[$attribute_name] = $value;
           }
-          $working = 1; $mode = 0;
-          $attr = preg_replace("/^'[^']*'(\s+|$)/", '', $attr);
+          $attributes = preg_replace("/^'[^']*'(\s+|$)/", '', $attributes);
           break;
         }
 
-        if (preg_match("%^([^\s\"']+)(\s+|$)%", $attr, $match)) {
-          $thisval = filter_xss_bad_protocol($match[1]);
+        if (preg_match("%^([^\s\"']+)(\s+|$)%", $attributes, $match)) {
+          $mode = 0;
+          $working = 1;
+          $value = filter_xss_bad_protocol($match[1]);
 
           if (!$skip) {
-            $attrarr[] = "$attrname=\"$thisval\"";
+            $attributes_array[$attribute_name] = $value;
           }
-          $working = 1; $mode = 0;
-          $attr = preg_replace("%^[^\s\"']+(\s+|$)%", '', $attr);
+          $attributes = preg_replace("%^[^\s\"']+(\s+|$)%", '', $attributes);
         }
         break;
     }
 
     if ($working == 0) {
-      // Not well formed; remove and try again.
-      $attr = preg_replace('/
+      // Not well-formed; remove and try again.
+      $attributes = preg_replace('/
         ^
         (
         "[^"]*("|$)     # - a string that starts with a double quote, up until the next double quote or the end of the string
@@ -2049,16 +2185,16 @@ function _filter_xss_attributes($attr) {
         \S              # - a non-whitespace character
         )*              # any number of the above three
         \s*             # any number of whitespaces
-        /x', '', $attr);
+        /x', '', $attributes);
       $mode = 0;
     }
   }
 
   // The attribute list ends with a valueless attribute like "selected".
   if ($mode == 1 && !$skip) {
-    $attrarr[] = $attrname;
+    $attributes_array[] = $attribute_name;
   }
-  return $attrarr;
+  return $attributes_array;
 }
 
 /**
@@ -2166,9 +2302,9 @@ function format_rss_item($title, $link, $description, $args = array()) {
  * @since 1.12.7 Added $indentation_level parameter.
  *
  * @return string
- *  A string of XML representing the elements passed in.
+ *   A string of XML representing the elements passed in.
  */
-function format_xml_elements($array, $indentation_level = 0) {
+function format_xml_elements(array $array, $indentation_level = 0) {
   $output = '';
 
   // Indent two spaces per level.
@@ -2484,16 +2620,16 @@ function format_date($timestamp, $date_format_name = 'medium', $pattern = '', $t
  *
  * Callback for preg_replace_callback() within format_date().
  *
- * @param $matches
+ * @param array|null $matches
  *   The array of matches as found by preg_replace_callback().
- * @param string $new_langcode
+ * @param string|null $new_langcode
  *   Sets the internal langcode to be used. Set the langcode prior to calling
  *   preg_replace_callback().
  *
  * @return string
  *   The date from $matches as a translated string.
  */
-function _format_date_callback(array $matches = NULL, $new_langcode = NULL) {
+function _format_date_callback(?array $matches = NULL, $new_langcode = NULL) {
   // We cache translations to avoid redundant and rather costly calls to t().
   static $cache, $langcode;
 
@@ -2757,8 +2893,8 @@ function url_is_external($path) {
   $colon_position = strpos($path, ':');
   // Some browsers treat \ as / so normalize to forward slashes.
   $path = str_replace('\\', '/', $path);
-  // Avoid calling backdrop_strip_dangerous_protocols(). If the path starts with 2
-  // slashes then it is always considered an external URL without an explicit
+  // Avoid calling backdrop_strip_dangerous_protocols(). If the path starts with
+  // 2 slashes then it is always considered an external URL without an explicit
   // protocol part.
   return (strpos($path, '//') === 0)
     // Leading control characters may be ignored or mishandled by browsers, so
@@ -2803,7 +2939,7 @@ function backdrop_http_header_attributes(array $attributes = array()) {
  *
  * Attribute values are sanitized by running them through check_plain().
  * Attribute names are not automatically sanitized. When using user-supplied
- * attribute names, it is strongly recommended to allow only white-listed names,
+ * attribute names, it is strongly recommended to ensure that they are allowed,
  * since certain attributes carry security risks and can be abused.
  *
  * Examples of security aspects when using backdrop_attributes:
@@ -3264,7 +3400,7 @@ function backdrop_map_assoc($array, $function = NULL) {
  * not possible to reliably ensure that PHP or a security extension will
  * not issue a warning/error if they prevent the use of this function.
  *
- * @param $time_limit
+ * @param int $time_limit
  *   An integer specifying the new time limit, in seconds. A value of 0
  *   indicates unlimited execution time.
  *
@@ -3283,12 +3419,12 @@ function backdrop_set_time_limit($time_limit) {
 /**
  * Returns the path to a system item (module, theme, etc.).
  *
- * @param $type
+ * @param string $type
  *   The type of the item (i.e. theme, theme_engine, module, profile).
- * @param $name
+ * @param string $name
  *   The name of the item for which the path is requested.
  *
- * @return
+ * @return string
  *   The path to the requested item or an empty string if the item is not found.
  */
 function backdrop_get_path($type, $name) {
@@ -3318,9 +3454,9 @@ function base_path() {
  * a link will overwrite a prior link with the exact same 'rel' and 'href'
  * attributes.
  *
- * @param $attributes
+ * @param array $attributes
  *   Associative array of element attributes including 'href' and 'rel'.
- * @param $header
+ * @param bool $header
  *   Optional flag to determine if a HTTP 'Link:' header should be sent.
  */
 function backdrop_add_html_head_link($attributes, $header = FALSE) {
@@ -3343,7 +3479,7 @@ function backdrop_add_html_head_link($attributes, $header = FALSE) {
 /**
  * Constructs an array of the defaults that are used for styles items.
  *
- * @param $data
+ * @param array|null $data
  *   (optional) The default data parameter for the style item array.
  *
  * @see backdrop_get_css()
@@ -3396,7 +3532,7 @@ function backdrop_css_defaults($data = NULL) {
  * Non-preprocessed files should only be added to the page when they are
  * actually needed.
  *
- * @param $data
+ * @param array|null $data
  *   (optional) The stylesheet data to be added, depending on what is passed
  *   through to the $options['type'] parameter:
  *   - 'file': The path to the CSS file relative to the base_path(), or a
@@ -3413,7 +3549,7 @@ function backdrop_css_defaults($data = NULL) {
  *   - 'external': The absolute path to an external CSS file that is not hosted
  *     on the local server. These files will not be aggregated if CSS
  *     aggregation is enabled.
- * @param $options
+ * @param array|null $options
  *   (optional) A string defining the 'type' of CSS that is being added in the
  *   $data parameter ('file', 'inline', or 'external'), or an array which can
  *   have any or all of the following keys:
@@ -5075,6 +5211,7 @@ function backdrop_aggregate_js(&$js_groups) {
  * to elements using the #attached property. The #attached property is an
  * associative array, where the keys are the the attachment types and the values
  * are the attached data. For example:
+ *
  * @code
  * $build['#attached'] = array(
  *   'js' => array(backdrop_get_path('module', 'taxonomy') . '/js/taxonomy.admin.js'),
@@ -5122,6 +5259,7 @@ function backdrop_aggregate_js(&$js_groups) {
  * @see backdrop_add_library()
  * @see backdrop_add_js()
  * @see backdrop_add_css()
+ * @see backdrop_add_icon()
  * @see backdrop_render()
  */
 function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_check = FALSE, $every_page = NULL) {
@@ -5130,6 +5268,7 @@ function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_c
     'library' => array(),
     'js' => array(),
     'css' => array(),
+    'icons' => array(),
   );
 
   // Add the libraries first.
@@ -5174,6 +5313,10 @@ function backdrop_process_attached($elements, $group = JS_DEFAULT, $dependency_c
     }
     unset($elements['#attached'][$type]);
   }
+
+  // Icons are added all at once, no need to apply separate options.
+  backdrop_add_icons($elements['#attached']['icons']);
+  unset($elements['#attached']['icons']);
 
   // Add additional types of attachments specified in the render() structure.
   // Libraries, JavaScript and CSS have been added already, as they require
@@ -5396,6 +5539,7 @@ function backdrop_add_library($module, $name, $every_page = NULL) {
         'library' => $library['dependencies'],
         'js' => $library['js'],
         'css' => $library['css'],
+        'icons' => $library['icons'],
       );
       $added[$module][$name] = backdrop_process_attached($elements, JS_LIBRARY, TRUE, $every_page);
     }
@@ -5454,7 +5598,12 @@ function backdrop_get_library($module, $name = NULL) {
     foreach ($module_libraries as $key => $data) {
       if (is_array($data)) {
         // Add default elements to allow for easier processing.
-        $module_libraries[$key] += array('dependencies' => array(), 'js' => array(), 'css' => array());
+        $module_libraries[$key] += array(
+          'dependencies' => array(),
+          'js' => array(),
+          'css' => array(),
+          'icons' => array(),
+        );
         foreach ($module_libraries[$key]['js'] as $file => $options) {
           $module_libraries[$key]['js'][$file]['version'] = $module_libraries[$key]['version'];
         }
@@ -5469,6 +5618,42 @@ function backdrop_get_library($module, $name = NULL) {
     return $libraries[$module][$name];
   }
   return $libraries[$module];
+}
+
+/**
+ * Adds icons to the page to make them available in JS and CSS files.
+ *
+ * The icon name is resolved to a file path and then added to the page as both
+ * a JavaScript variable (Backdrop.icons['icon-name']) and as a CSS variable
+ * (--icon-[icon-name]). Note that use of this function is not necessary if
+ * embedding an icon directly onto the page using the icon() function. This is
+ * only needed if using icons in JS and CSS files.
+ *
+ * @param array $icon_names
+ *   An array of unique icon names be added, without the extensions. Most icon
+ *   names can be found by browsing the core/misc/icons directory. The icon
+ *   list can either be a plain list of names in an unindexed array, or the
+ *   icon name can be the key, with an array of options as the value. The
+ *   available options for each icon include:
+ *   - immutable: Whether to use the original icon instead of any overrides.
+ *
+ * @see icon()
+ *
+ * @since 1.28.0 Function added.
+ */
+function backdrop_add_icons(array $icon_names) {
+  $icon_paths = array();
+  foreach ($icon_names as $icon_key => $icon_options) {
+    $icon_name = is_array($icon_options) ? $icon_key : $icon_options;
+    $immutable = is_array($icon_options) && !empty($icon_options['immutable']);
+    if ($icon_path = icon_get_path($icon_name, $immutable)) {
+      $icon_paths[$icon_name] = base_path() . $icon_path;
+    }
+  }
+  if ($icon_paths) {
+    backdrop_add_js(array('icons' => $icon_paths), 'setting');
+    backdrop_add_library('system', 'backdrop.icons');
+  }
 }
 
 /**
@@ -5701,8 +5886,8 @@ function backdrop_clear_js_cache() {
  *   readable by humans, or emulates this functionality if running an older
  *   version of PHP.
  *
- * @return string
- *   The given $var encoded as a JSON string.
+ * @return string|FALSE
+ *   The given $var encoded as a JSON string or FALSE on failure.
  *
  * @see backdrop_json_decode()
  * @ingroup php_wrappers
@@ -5985,6 +6170,7 @@ function _backdrop_bootstrap_full() {
   require_once BACKDROP_ROOT . '/core/includes/tablesort.inc';
   require_once BACKDROP_ROOT . '/core/includes/file.inc';
   require_once BACKDROP_ROOT . '/core/includes/unicode.inc';
+  require_once BACKDROP_ROOT . '/core/includes/icon.inc';
   require_once BACKDROP_ROOT . '/core/includes/image.inc';
   require_once BACKDROP_ROOT . '/core/includes/form.inc';
   require_once BACKDROP_ROOT . '/core/includes/mail.inc';
@@ -7861,6 +8047,13 @@ function backdrop_common_theme() {
       ),
       'template' => 'templates/maintenance-page',
     ),
+    'install_page' => array(
+      'variables' => array(
+        'content' => NULL,
+        'sidebar' => NULL,
+        'footer' => NULL,
+      ),
+    ),
     'update_page' => array(
       'variables' => array(
         'content' => NULL,
@@ -7869,7 +8062,7 @@ function backdrop_common_theme() {
         'show_messages' => TRUE,
       ),
     ),
-    'install_page' => array(
+    'restore_page' => array(
       'variables' => array(
         'content' => NULL,
         'sidebar' => NULL,
@@ -8040,6 +8233,9 @@ function backdrop_common_theme() {
     'form_element_label' => array(
       'render element' => 'element',
     ),
+    'form_element_description' => array(
+      'render element' => 'element',
+    ),
     'vertical_tabs' => array(
       'render element' => 'element',
     ),
@@ -8048,6 +8244,16 @@ function backdrop_common_theme() {
     ),
     'details' => array(
       'render element' => 'element',
+    ),
+    // From icon.inc.
+    'icon' => array(
+      'variables' => array(
+        'name' => NULL,
+        'path' => NULL,
+        'alt' => NULL,
+        'attributes' => array('class' => array()),
+        'wrapper_attributes' => array('class' => array()),
+      ),
     ),
   );
 }
@@ -8636,7 +8842,7 @@ function backdrop_explode_tags($tags) {
     return array();
   }
   // This regexp allows the following types of user input:
-  // this, "somecompany, llc", "and ""this"" w,o.rks", foo bar
+  // this, "some company, llc", "and ""this"" w,o.rks", foo bar
   $regexp = '%(?:^|,\ *)("(?>[^"]*)(?>""[^"]* )*"|(?: [^",]*))%x';
   preg_match_all($regexp, $tags, $matches);
   $typed_tags = array_unique($matches[1]);

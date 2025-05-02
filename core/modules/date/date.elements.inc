@@ -112,7 +112,7 @@ function _date_element_info() {
     '#process' => array('date_popup_element_process'),
     '#value_callback' => 'date_popup_element_value_callback',
     '#theme_wrappers' => array('date_popup'),
-    ) + $date_base;
+  ) + $date_base;
   $type['date_timezone'] = array(
     '#input' => TRUE,
     '#tree' => TRUE,
@@ -192,7 +192,9 @@ function date_year_range_element_process($element, &$form_state, $form) {
     '#default_value' => $element['#value']['years_back'],
     '#size' => 10,
     '#maxsize' => 10,
-    '#attributes' => array('class' => array('select-list-with-custom-option', 'back')),
+    '#attributes' => array(
+      'class' => array('select-list-with-custom-option', 'back'),
+    ),
     '#description' => t('Enter a relative value (-9, +9) or an absolute year such as 2015.'),
   );
   $element['years_forward'] = array(
@@ -201,7 +203,9 @@ function date_year_range_element_process($element, &$form_state, $form) {
     '#default_value' => $element['#value']['years_forward'],
     '#size' => 10,
     '#maxsize' => 10,
-    '#attributes' => array('class' => array('select-list-with-custom-option', 'forward')),
+    '#attributes' => array(
+      'class' => array('select-list-with-custom-option', 'forward'),
+    ),
     '#description' => t('Enter a relative value (-9, +9) or an absolute year such as 2015.'),
   );
 
@@ -270,7 +274,7 @@ function date_timezone_element_value_callback($element, $input = FALSE, &$form_s
  * @return array
  *   the timezone form element
  */
-function date_timezone_element_process($element, &$form_state, $form) {
+function date_timezone_element_process(array $element, &$form_state, $form) {
   if (date_hidden_element($element)) {
     return $element;
   }
@@ -586,16 +590,20 @@ function date_select_element_process($element, &$form_state, $form) {
  * @return array
  *   The form array for the submitted date parts.
  */
-function date_parts_element($element, $date, $format) {
+function date_parts_element(array $element, $date, $format) {
   $granularity = date_format_order($format);
   $sub_element = array('#granularity' => $granularity);
   $order = array_flip($granularity);
 
   $hours_format  = strpos(strtolower($element['#date_format']), 'a') ? 'g' : 'G';
   $month_function  = strpos($element['#date_format'], 'F') !== FALSE ? 'date_month_names' : 'date_month_names_abbr';
+  $invisible_title = in_array($element['#date_label_position'], array(
+    'within',
+    'none',
+  ));
 
   // Allow empty value as option if date is not required or there is no date.
-  $part_required = (bool) $element['#required'] && is_object($date);
+  $part_required = $element['#required'] && is_object($date);
   foreach ($granularity as $field) {
     $part_type = in_array($field, $element['#date_text_parts']) ? 'textfield' : 'select';
     $sub_element[$field] = array(
@@ -673,7 +681,7 @@ function date_parts_element($element, $date, $format) {
       $sub_element[$field]['#type'] = 'textfield';
       $sub_element[$field]['#theme'] = 'date_textfield_element';
       $sub_element[$field]['#size'] = 7;
-      $sub_element[$field]['#title_display'] = in_array($element['#date_label_position'], array('within', 'none')) ? 'invisible' : 'before';
+      $sub_element[$field]['#title_display'] = $invisible_title ? 'invisible' : 'before';
       if ($element['#date_label_position'] == 'within') {
         if (!empty($sub_element[$field]['#options']) && is_array($sub_element[$field]['#options'])) {
           $sub_element[$field]['#options'] = array('' => $label) + $sub_element[$field]['#options'];
@@ -683,7 +691,7 @@ function date_parts_element($element, $date, $format) {
     else {
       $sub_element[$field]['#type'] = 'select';
       $sub_element[$field]['#theme'] = 'date_select_element';
-      $sub_element[$field]['#title_display'] = in_array($element['#date_label_position'], array('within', 'none')) ? 'invisible' : 'before';
+      $sub_element[$field]['#title_display'] = $invisible_title ? 'invisible' : 'before';
       if ($element['#date_label_position'] == 'within') {
         $sub_element[$field]['#options'] = array('' => $label) + $sub_element[$field]['#options'];
       }
@@ -705,7 +713,7 @@ function date_parts_element($element, $date, $format) {
       '#type' => 'select',
       '#theme' => 'date_select_element',
       '#title' => $label,
-      '#title_display' => in_array($element['#date_label_position'], array('within', 'none')) ? 'invisible' : 'before',
+      '#title_display' => $invisible_title ? 'invisible' : 'before',
       '#default_value' => is_object($date) ? (date_format($date, 'G') >= 12 ? 'pm' : 'am') : '',
       '#options' => backdrop_map_assoc(date_ampm($part_required)),
       '#required' => $part_required,
@@ -992,7 +1000,6 @@ function date_popup_element_process($element, &$form_state, $form) {
   $element['date'] = _date_popup_process_date_part($element);
   $element['time'] = _date_popup_process_time_part($element);
 
-  // If
   if (empty($element['#date_title_printed'])) {
     // Both date and time exist.
     if (!empty($element['date']) && !empty($element['time'])) {
@@ -1071,7 +1078,7 @@ function _date_popup_process_date_part(&$element) {
     'autoPopUp' => 'focus',
     'closeAtTop' => FALSE,
     'speed' => 'immediate',
-    'firstDay' => intval(config_get('system.date','first_day')),
+    'firstDay' => intval(config_get('system.date', 'first_day')),
     'dateFormat' => _date_popup_format_to_popup(_date_popup_date_format($element)),
     'yearRange' => $year_range,
   );
@@ -1102,7 +1109,7 @@ function _date_popup_process_date_part(&$element) {
     '#name' => array_shift($parents) . '[' . implode('][', $parents) . ']',
     '#ajax' => !empty($element['#ajax']) ? $element['#ajax'] : FALSE,
     '#attached' => array('library' => array(
-      array('system', 'ui.datepicker')
+      array('system', 'ui.datepicker'),
     )),
   );
   $sub_element['#value'] = $sub_element['#default_value'];
@@ -1114,9 +1121,8 @@ function _date_popup_process_date_part(&$element) {
         date_example_date(),
         'custom',
         _date_popup_date_format($element)
-        ),
-      )
-    );
+      ),
+    ));
   }
 
   return $sub_element;
@@ -1154,7 +1160,7 @@ function _date_popup_process_time_part(&$element) {
     '#name' => array_shift($parents) . '[' . implode('][', $parents) . ']',
     '#ajax' => !empty($element['#ajax']) ? $element['#ajax'] : FALSE,
     '#attached' => array('library' => array(
-      array('system', 'jquery.timeentry')
+      array('system', 'jquery.timeentry'),
     )),
     '#attributes' => $element['#attributes'],
   );
@@ -1178,7 +1184,11 @@ function _date_popup_process_time_part(&$element) {
     $settings = array(
       'show24Hours' => (strpos($element['#date_format'], 'H') !== FALSE || strpos($element['#date_format'], 'G') !== FALSE) ? TRUE : FALSE,
       'showSeconds' => (in_array('second', $granularity) ? TRUE : FALSE),
-      'timeSteps' => array(1, intval($element['#date_increment']), (in_array('second', $granularity) ? $element['#date_increment'] : 0)),
+      'timeSteps' => array(
+        1,
+        intval($element['#date_increment']),
+        in_array('second', $granularity) ? $element['#date_increment'] : 0,
+      ),
       'fromTo' => isset($fromto),
       'spinnerImage' => '',
     );
@@ -1341,7 +1351,7 @@ function _date_popup_time_formats($with_seconds = FALSE) {
  * Recreate a date format string so it has the values popup expects.
  *
  * @param string $format
- *   A normal date format string, like Y-m-d
+ *   A normal date format string, like Y-m-d.
  *
  * @return string
  *   A format string in popup format, like YMD-, for the
@@ -1597,7 +1607,6 @@ function date_combo_validate($element, &$form_state) {
   if (!is_array($element['#field_parents'])) {
     $element['#field_parents'] = array();
   }
-  $form_values = backdrop_array_get_nested_value($form_state['values'], $element['#field_parents']);
   $form_input = backdrop_array_get_nested_value($form_state['input'], $element['#field_parents']);
 
   // If the whole field is empty and that's OK, stop now.
@@ -1625,6 +1634,8 @@ function date_combo_validate($element, &$form_state) {
   $offset_field = 'offset';
   $offset_field2 = 'offset2';
 
+  $errors = array();
+
   // Check for empty 'Start date', which could either be an empty
   // value or an array of empty values, depending on the widget.
   $empty = TRUE;
@@ -1645,13 +1656,18 @@ function date_combo_validate($element, &$form_state) {
   // An 'End' date without a 'Start' date is a validation error.
   if ($empty && !empty($item[$to_field])) {
     if (!is_array($item[$to_field])) {
-      form_error($element, t("A start date is required if an end date is supplied for field @field #@delta.", array('@delta' => $field['cardinality'] ? intval($delta + 1) : '', '@field' => $instance['label'])));
+      $errors[] = t("A start date is required if an end date is supplied.", array(
+        '%field' => $instance['label'],
+      ));
       $empty = FALSE;
     }
     else {
       foreach ($item[$to_field] as $key => $value) {
         if (!empty($value)) {
-          form_error($element, t("A start date is required if an end date is supplied for field @field #@delta.", array('@delta' => $field['cardinality'] ? intval($delta + 1) : '', '@field' => $instance['label'])));
+          $errors[] = t("A start date is required if an end date is supplied for field %field #@delta.", array(
+            '@delta' => $field['cardinality'] ? intval($delta + 1) : '',
+            '%field' => $instance['label'],
+          ));
           $empty = FALSE;
           break;
         }
@@ -1672,78 +1688,78 @@ function date_combo_validate($element, &$form_state) {
       return;
     }
   }
-
-  $timezone = !empty($item[$tz_field]) ? $item[$tz_field] : $element['#date_timezone'];
-  $timezone_db = date_get_timezone_db($field['settings']['tz_handling']);
-  $element[$from_field]['#date_timezone'] = $timezone;
-  $from_date = date_input_date($field, $instance, $element[$from_field], $posted[$from_field]);
-
-  if (!empty($field['settings']['todate'])) {
-    $element[$to_field]['#date_timezone'] = $timezone;
-    $to_date = date_input_date($field, $instance, $element[$to_field], $posted[$to_field]);
-  }
   else {
-    $to_date = $from_date;
-  }
+    $timezone = !empty($item[$tz_field]) ? $item[$tz_field] : $element['#date_timezone'];
+    $timezone_db = date_get_timezone_db($field['settings']['tz_handling']);
+    $element[$from_field]['#date_timezone'] = $timezone;
+    $from_date = date_input_date($field, $instance, $element[$from_field], $posted[$from_field]);
 
-  // Neither the start date nor the end date should be empty at this point
-  // unless they held values that couldn't be evaluated.
+    if (!empty($field['settings']['todate'])) {
+      $element[$to_field]['#date_timezone'] = $timezone;
+      $to_date = date_input_date($field, $instance, $element[$to_field], $posted[$to_field]);
+    }
+    else {
+      $to_date = $from_date;
+    }
 
-  if (!$instance['required'] && (!date_is_date($from_date) || !date_is_date($to_date))) {
-    date_element_empty($element, $form_state);
-    $errors[] = t('The dates are invalid.');
-  }
-  elseif (!empty($field['settings']['todate']) && $from_date > $to_date) {
-    form_set_value($element[$to_field], $to_date, $form_state);
-    $errors[] = t('The end date must be greater than the start date.');
-  }
-  else {
-    // Convert input dates back to their UTC values and re-format to ISO
-    // or UNIX instead of the DATETIME format used in element processing.
-    $item[$tz_field] = $timezone;
+    if (!$instance['required'] && (!date_is_date($from_date) || !date_is_date($to_date))) {
+      $errors[] = t('The dates are invalid.');
+    }
+    elseif (!empty($field['settings']['todate']) && $from_date > $to_date) {
+      form_set_value($element[$to_field], $to_date, $form_state);
+      $errors[] = t('The end date must be greater than the start date.');
+    }
 
-    // Update the context for changes in the $item, and allow other modules to
-    // alter the computed local dates.
-    $context['item'] = $item;
-    // We can only pass two additional values to backdrop_alter, so $element
-    // needs to be included in $context.
-    $context['element'] = $element;
-    backdrop_alter('date_combo_validate_date_start', $from_date, $form_state, $context);
-    backdrop_alter('date_combo_validate_date_end', $to_date, $form_state, $context);
+    if (empty($errors) && !empty($from_date)) {
+      // Convert input dates back to their UTC values and re-format to ISO
+      // or UNIX instead of the DATETIME format used in element processing.
+      $item[$tz_field] = $timezone;
 
-    $item[$offset_field] = date_offset_get($from_date);
+      // Update the context for changes in the $item, and allow other modules
+      // to alter the computed local dates.
+      $context['item'] = $item;
+      // We can only pass two additional values to backdrop_alter, so $element
+      // needs to be included in $context.
+      $context['element'] = $element;
+      backdrop_alter('date_combo_validate_date_start', $from_date, $form_state, $context);
+      backdrop_alter('date_combo_validate_date_end', $to_date, $form_state, $context);
 
-    $test_from = date_format($from_date, 'r');
-    $test_to = date_format($to_date, 'r');
+      $item[$offset_field] = date_offset_get($from_date);
 
-    $item[$offset_field2] = date_offset_get($to_date);
-    date_timezone_set($from_date, timezone_open($timezone_db));
-    date_timezone_set($to_date, timezone_open($timezone_db));
-    $item[$from_field] = date_format($from_date, date_type_format($field['type']));
-    $item[$to_field] = date_format($to_date, date_type_format($field['type']));
+      $test_from = date_format($from_date, 'r');
+      $test_to = date_format($to_date, 'r');
 
-    // If the db timezone is not the same as the display timezone
-    // and we are using a date with time granularity,
-    // test a roundtrip back to the original timezone to catch
-    // invalid dates, like 2AM on the day that spring daylight savings
-    // time begins in the US.
-    $granularity = date_format_order($element[$from_field]['#date_format']);
-    if ($timezone != $timezone_db && date_has_time($granularity)) {
-      date_timezone_set($from_date, timezone_open($timezone));
-      date_timezone_set($to_date, timezone_open($timezone));
+      $item[$offset_field2] = date_offset_get($to_date);
+      date_timezone_set($from_date, timezone_open($timezone_db));
+      date_timezone_set($to_date, timezone_open($timezone_db));
+      $item[$from_field] = date_format($from_date, date_type_format($field['type']));
+      $item[$to_field] = date_format($to_date, date_type_format($field['type']));
 
-      if ($test_from != date_format($from_date, 'r')) {
-        $errors[] = t('The start date is invalid.');
+      // If the db timezone is not the same as the display timezone
+      // and we are using a date with time granularity,
+      // test a roundtrip back to the original timezone to catch
+      // invalid dates, like 2AM on the day that spring daylight savings
+      // time begins in the US.
+      $granularity = date_format_order($element[$from_field]['#date_format']);
+      if ($timezone != $timezone_db && date_has_time($granularity)) {
+        date_timezone_set($from_date, timezone_open($timezone));
+        date_timezone_set($to_date, timezone_open($timezone));
+
+        if ($test_from != date_format($from_date, 'r')) {
+          $errors[] = t('The start date is invalid.');
+        }
+        if ($test_to != date_format($to_date, 'r')) {
+          $errors[] = t('The end date is invalid.');
+        }
       }
-      if ($test_to != date_format($to_date, 'r')) {
-        $errors[] = t('The end date is invalid.');
+      if (empty($errors)) {
+        form_set_value($element, $item, $form_state);
       }
     }
-    if (empty($errors)) {
-      form_set_value($element, $item, $form_state);
-    }
   }
-
+  // Don't show further errors if errors are already flagged
+  // because otherwise we'll show errors on the nested elements
+  // more than once.
   if (!empty($errors)) {
     if (count($errors) === 1) {
       $error_list = ' ' . reset($errors);
@@ -1751,11 +1767,16 @@ function date_combo_validate($element, &$form_state) {
     else {
       $error_list = theme('item_list', array('items' => $errors));
     }
-    if ($field['cardinality']) {
-      form_error($element, t('There are errors in @field_name value #@delta:', array('@field_name' => $instance['label'], '@delta' => $delta + 1)) . $error_list);
+    if ($field['cardinality'] != 1) {
+      form_error($element, t('There are errors in %field_name value #@delta:', array(
+        '%field_name' => $instance['label'],
+        '@delta' => $delta + 1,
+      )) . $error_list);
     }
     else {
-      form_error($element, t('There are errors in @field_name:', array('@field_name' => $instance['label'])) . $error_list);
+      form_error($element, t('There are errors in %field_name:', array(
+        '%field_name' => $instance['label'],
+      )) . $error_list);
     }
   }
 }
@@ -1817,8 +1838,8 @@ function date_empty_end_date(&$element, &$form_state, &$input) {
 /**
  * Determines if the date element needs to be processed.
  *
- * Helper function to see if date element has been hidden by FAPI to see if it
- * needs to be processed or just pass the value through. This is needed since
+ * Helper function to see if date element has been hidden by Form API to see if
+ * it needs to be processed or just pass the value through. This is needed since
  * normal date processing expands the date element into parts and then
  * reconstructs it, which is not needed or desirable if the field is hidden.
  *
@@ -1828,7 +1849,7 @@ function date_empty_end_date(&$element, &$form_state, &$input) {
  * @return bool
  *   TRUE if the element is effectively hidden, FALSE otherwise.
  */
-function date_hidden_element($element) {
+function date_hidden_element(array $element) {
   if ((isset($element['#access']) && empty($element['#access']))
     || !empty($element['#programmed'])
     || in_array($element['#type'], array('hidden', 'value'))) {

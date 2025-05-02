@@ -225,8 +225,10 @@ function image_field_instance_settings_form($field, $instance) {
  * Element validate handler for image_field_instance_settings_form().
  */
 function image_field_instance_settings_form_validate($element, &$form_state, $complete_form) {
-  $min_dimensions = explode('x', $form_state['values']['instance']['settings']['min_dimensions']) + array('', '');
-  $max_dimensions = explode('x', $form_state['values']['instance']['settings']['max_dimensions']) + array('', '');
+  $min = $form_state['values']['instance']['settings']['min_dimensions'];
+  $max = $form_state['values']['instance']['settings']['max_dimensions'];
+  $min_dimensions = explode('x', $min) + array('', '');
+  $max_dimensions = explode('x', $max) + array('', '');
 
   $min_dimensions_x = (int) $min_dimensions[0];
   $min_dimensions_y = (int) $min_dimensions[1];
@@ -621,22 +623,21 @@ function _image_field_widget_alt_validate($element, &$form_state) {
  * Implements hook_field_formatter_info().
  */
 function image_field_formatter_info() {
-  $formatters = array(
-    'image' => array(
-      'label' => t('Image'),
-      'field types' => array('image'),
-      'settings' => array(
-        'image_style' => '',
-        'image_link' => '',
-        'image_float' => '',
-        'image_load' => 'auto',
-      ),
-	  'description' => t('Format the file as an image. The image can be displayed using an image style and can optionally be linked to the image file itself or its parent content.'),
-	  'file formatter' => array(
-        'mime types' => array('image/*'),
-      ),
+  $image_formatter = array(
+    'label' => t('Image'),
+    'field types' => array('image'),
+    'settings' => array(
+      'image_style' => '',
+      'image_link' => '',
+      'image_float' => '',
+      'image_load' => 'auto',
+    ),
+    'description' => t('Format the file as an image. The image can be displayed using an image style and can optionally be linked to the image file itself or its parent content.'),
+    'file formatter' => array(
+      'mime types' => array('image/*'),
     ),
   );
+  $formatters['image'] = $image_formatter;
 
   return $formatters;
 }
@@ -759,26 +760,29 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
   }
 
   foreach ($items as $delta => $item) {
-    // Add class for floating the image
-    if (!empty($display['settings']['image_float'])) {
-      $item['attributes']['class'][] = 'align-' . $display['settings']['image_float'];
-    }
+    if (!empty($item)) {
+      // Add class for floating the image.
+      if (!empty($display['settings']['image_float'])) {
+        $item['attributes']['class'][] = 'align-' . $display['settings']['image_float'];
+      }
 
-    if (!empty($display['settings']['image_load'])) {
-      // Although available in Chromium, the 'auto' value is not mentioned in
-      // the specification. Since it may be subject to change, we recommend not
-      // to use it until it gets officially included.
-      if ($display['settings']['image_load'] != 'auto') {
-        $item['attributes']['loading'] = $display['settings']['image_load'];
+      if (!empty($display['settings']['image_load'])) {
+        // Although available in Chromium, the 'auto' value is not mentioned in
+        // the specification. Since it may be subject to change, we recommend
+        // not to use it until it gets officially included.
+        if ($display['settings']['image_load'] != 'auto') {
+          $item['attributes']['loading'] = $display['settings']['image_load'];
+        }
+      }
+
+      if (isset($link_file)) {
+        $uri = array(
+          'path' => file_create_url($item['uri']),
+          'options' => array(),
+        );
       }
     }
 
-    if (isset($link_file)) {
-      $uri = array(
-        'path' => file_create_url($item['uri']),
-        'options' => array(),
-      );
-    }
     $element[$delta] = array(
       '#theme' => 'image_formatter',
       '#item' => $item,

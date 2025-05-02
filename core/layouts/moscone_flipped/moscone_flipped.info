@@ -1,5 +1,6 @@
 type = layout
 name = Moscone Flipped
+description = Includes a header, top, content, right sidebar, bottom, and footer. This is the default template for the Default Layout.
 version = BACKDROP_VERSION
 backdrop = 1.x
 

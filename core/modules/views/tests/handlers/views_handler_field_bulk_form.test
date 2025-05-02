@@ -36,7 +36,7 @@ class ViewsHandlerFieldBulkFormTest extends ViewsSqlTest {
     $this->view->set_display('default');
 
     // Create and log in a user with administer views permission.
-    $views_admin = $this->backdropCreateUser(array('administer views', 'bypass node access'));
+    $views_admin = $this->backdropCreateUser(array('administer nodes', 'administer views', 'bypass node access'));
     $this->backdropLogin($views_admin);
 
     // Create two nodes for the test.

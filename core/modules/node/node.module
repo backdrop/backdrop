@@ -94,17 +94,14 @@ function node_theme() {
     'node_preview_banner_form' => array(
       'render element' => 'form',
     ) + $base,
+    'node_preview' => array(
+      'render element' => 'node_preview',
+    ) + $base,
     'node_add_list' => array(
       'variables' => array('content' => NULL),
     ) + $base,
     'node_admin_overview' => array(
       'variables' => array('name' => NULL, 'type' => NULL),
-    ) + $base,
-    'node_recent_block' => array(
-      'variables' => array('nodes' => NULL),
-    ) + $base,
-    'node_recent_content' => array(
-      'variables' => array('node' => NULL),
     ) + $base,
     'node_type_form_permissions' => array(
       'render element' => 'form',
@@ -1962,9 +1959,18 @@ function node_menu() {
 }
 
 /**
+ * Implements hook_menu().
+ */
+function node_menu_alter(&$items) {
+  if (isset($items['admin/content'])) {
+    $items['admin/content']['icon'] = 'pencil-fill';
+  }
+}
+
+/**
  * Access callback: Checks a user's permission for previewing a node.
  *
- * @param $node_tempstore_id
+ * @param string $node_tempstore_id
  *   The node_tempstore_id of the node being created or updated.
  *
  * @return bool
@@ -2068,10 +2074,6 @@ function node_block_info() {
     'info' => t('Syndicate'),
     'description' => t('An RSS icon linking to available feeds.'),
   );
-  $blocks['recent'] = array(
-    'info' => t('Recent content'),
-    'description' => t('A list of recently published content.'),
-  );
   $blocks['content'] = array(
     'info' => t('Existing content'),
     'description' => t('Embed existing node content as a block onto other pages'),
@@ -2095,25 +2097,6 @@ function node_block_view($delta = '', $settings = array()) {
         $block['content'] = node_syndicate_content($settings);
       }
       break;
-
-    case 'recent':
-      if (user_access('access content')) {
-        $settings += array(
-          'node_count' => 10,
-        );
-        $block['subject'] = t('Recent content');
-        if ($nodes = node_get_recent($settings['node_count'])) {
-          $block['content'] = array(
-            '#theme' => 'node_recent_block',
-            '#nodes' => $nodes,
-          );
-        }
-        else {
-          $block['content'] = t('No content available.');
-        }
-      }
-      break;
-
   }
 
   return $block;
@@ -2124,17 +2107,6 @@ function node_block_view($delta = '', $settings = array()) {
  */
 function node_block_configure($delta = '', $settings = array()) {
   $form = array();
-  if ($delta == 'recent') {
-    $settings += array(
-      'node_count' => 10,
-    );
-    $form['node_count'] = array(
-      '#type' => 'select',
-      '#title' => t('Number of recent content items to display'),
-      '#default_value' => $settings['node_count'],
-      '#options' => backdrop_map_assoc(array(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 30)),
-    );
-  }
   if ($delta == 'syndicate') {
     $form['syndicate_settings'] = array(
       '#type' => 'radios',
@@ -2155,7 +2127,7 @@ function node_block_configure($delta = '', $settings = array()) {
  * @param array $settings
  *   Block configuration settings.
  */
-function node_syndicate_content($settings) {
+function node_syndicate_content(array $settings) {
   if (isset($settings['syndicate_settings']) && $settings['syndicate_settings'] == 'page_content') {
     return backdrop_get_feeds();
   }
@@ -2165,51 +2137,6 @@ function node_syndicate_content($settings) {
     '#url' => 'rss.xml',
     '#title' => t('Subscribe to promoted content'),
   );
-}
-
-/**
- * Finds the most recently changed nodes that are available to the current user.
- *
- * @param $number
- *   (optional) The maximum number of nodes to find. Defaults to 10.
- *
- * @return
- *   An array of node entities or an empty array if there are no recent nodes
- *   visible to the current user.
- */
-function node_get_recent($number = 10) {
-  $query = db_select('node', 'n');
-
-  if (!user_access('bypass node access') && !user_access('view any unpublished content')) {
-    // If the user is able to view unpublished nodes, allow them to see these
-    // in addition to published nodes. Check that they actually have some
-    // unpublished nodes to view before adding the condition.
-    // Note: this query still ignores unpublished by type permissions.
-    // See: https://github.com/backdrop/backdrop-issues/issues/146.
-    $own_unpublished = db_query('SELECT nid FROM {node} WHERE uid = :uid AND status = :status',
-     array(':uid' => $GLOBALS['user']->uid, ':status' => NODE_NOT_PUBLISHED))->fetchCol();
-    if (user_access('view own unpublished content') && $own_unpublished) {
-      $query->condition(db_or()
-        ->condition('n.status', NODE_PUBLISHED)
-        ->condition('n.nid', $own_unpublished, 'IN')
-      );
-    }
-    else {
-      // If not, restrict the query to published nodes.
-      $query->condition('n.status', NODE_PUBLISHED);
-    }
-  }
-  $nids = $query
-    ->fields('n', array('nid'))
-    ->orderBy('n.changed', 'DESC')
-    ->range(0, $number)
-    ->addTag('node_access')
-    ->execute()
-    ->fetchCol();
-
-  $nodes = node_load_multiple($nids);
-
-  return $nodes ? $nodes : array();
 }
 
 /**
@@ -2665,6 +2592,9 @@ function node_form_system_themes_admin_form_alter(&$form, &$form_state, $form_id
  */
 function node_form_system_themes_admin_form_submit($form, &$form_state) {
   config_set('system.core', 'node_admin_theme', $form_state['values']['node_admin_theme']);
+  // The default and admin layout are tied directly to this setting, so clear
+  // the Layout cache.
+  layout_reset_caches();
 }
 
 /**
@@ -2749,6 +2679,33 @@ function node_access($op, $node, $account = NULL) {
     return $node->access($op, $account);
   }
   return FALSE;
+}
+
+/**
+ * Helper function to create the OR condition for a node grants check.
+ *
+ * @param array $node_access_grants
+ *   The grants to add to the query, usually gotten via node_access_grants().
+ * @param string $table_alias
+ *   Optional, the alias to the node access table.
+ *
+ * @return bool
+ *   TRUE if the operation may be performed, FALSE otherwise.
+ *
+ * @since 1.30.0 Function added.
+ */
+function node_add_node_grants_to_query($node_access_grants, $table_alias = '') {
+  $grants = db_or();
+  $prefix = $table_alias ? $table_alias . '.' : '';
+  foreach ($node_access_grants as $realm => $gids) {
+    if (!empty($gids)) {
+      $grants->condition(db_and()
+        ->condition($prefix . 'gid', $gids, 'IN')
+        ->condition($prefix . 'realm', $realm)
+      );
+    }
+  }
+  return $grants;
 }
 
 /**
@@ -2932,18 +2889,12 @@ function node_access_view_all_nodes($account = NULL) {
       ->condition('nid', 0)
       ->condition('grant_view', 1, '>=');
 
-    $grants = db_or();
-    foreach (node_access_grants('view', $account) as $realm => $gids) {
-      foreach ($gids as $gid) {
-        $grants->condition(db_and()
-          ->condition('gid', $gid)
-          ->condition('realm', $realm)
-        );
-      }
-    }
+    $grants = node_add_node_grants_to_query(node_access_grants('view', $account));
+
     if (count($grants) > 0 ) {
       $query->condition($grants);
     }
+
     $access[$account->uid] = $query
       ->execute()
       ->fetchField();
@@ -3119,17 +3070,7 @@ function _node_query_node_access_alter($query, $type) {
       $subquery = db_select('node_access', 'na')
        ->fields('na', array('nid'));
 
-      $grant_conditions = db_or();
-      // If any grant exists for the specified user, then user has access
-      // to the node for the specified operation.
-      foreach ($grants as $realm => $gids) {
-        foreach ($gids as $gid) {
-          $grant_conditions->condition(db_and()
-            ->condition('na.gid', $gid)
-            ->condition('na.realm', $realm)
-          );
-        }
-      }
+      $grant_conditions = node_add_node_grants_to_query($grants, 'na');
 
       // Attach conditions to the subquery for nodes.
       if (count($grant_conditions->conditions())) {
@@ -3510,50 +3451,54 @@ function node_forms() {
  * Implements hook_action_info().
  */
 function node_action_info() {
-  return array(
-    'node_publish_action' => array(
-      'type' => 'node',
-      'label' => t('Publish content'),
-      'callback' => 'node_publish_action',
-      'file' => 'node.actions.inc'
-    ),
-    'node_unpublish_action' => array(
-      'type' => 'node',
-      'label' => t('Unpublish content'),
-      'callback' => 'node_unpublish_action',
-      'file' => 'node.actions.inc',
-    ),
-    'node_make_sticky_action' => array(
-      'type' => 'node',
-      'label' => t('Make content sticky'),
-      'callback' => 'node_make_sticky_action',
-      'file' => 'node.actions.inc',
-    ),
-    'node_make_unsticky_action' => array(
-      'type' => 'node',
-      'label' => t('Make content unsticky'),
-      'callback' => 'node_make_unsticky_action',
-      'file' => 'node.actions.inc',
-    ),
-    'node_promote_action' => array(
-      'type' => 'node',
-      'label' => t('Promote content'),
-      'callback' => 'node_promote_action',
-      'file' => 'node.actions.inc',
-    ),
-    'node_unpromote_action' => array(
-      'type' => 'node',
-      'label' => t('Remove promotion'),
-      'callback' => 'node_unpromote_action',
-      'file' => 'node.actions.inc',
-    ),
-    'node_delete_action' => array(
-      'type' => 'node',
-      'label' => t('Delete content'),
-      'callback' => 'node_delete_action',
-      'file' => 'node.actions.inc',
-    ),
-  );
+  $actions = array();
+  if (user_access('administer nodes')) {
+    $actions += array(
+      'node_publish_action' => array(
+        'type' => 'node',
+        'label' => t('Publish content'),
+        'callback' => 'node_publish_action',
+        'file' => 'node.actions.inc'
+      ),
+      'node_unpublish_action' => array(
+        'type' => 'node',
+        'label' => t('Unpublish content'),
+        'callback' => 'node_unpublish_action',
+        'file' => 'node.actions.inc',
+      ),
+      'node_make_sticky_action' => array(
+        'type' => 'node',
+        'label' => t('Make content sticky'),
+        'callback' => 'node_make_sticky_action',
+        'file' => 'node.actions.inc',
+      ),
+      'node_make_unsticky_action' => array(
+        'type' => 'node',
+        'label' => t('Make content unsticky'),
+        'callback' => 'node_make_unsticky_action',
+        'file' => 'node.actions.inc',
+      ),
+      'node_promote_action' => array(
+        'type' => 'node',
+        'label' => t('Promote content'),
+        'callback' => 'node_promote_action',
+        'file' => 'node.actions.inc',
+      ),
+      'node_unpromote_action' => array(
+        'type' => 'node',
+        'label' => t('Remove promotion'),
+        'callback' => 'node_unpromote_action',
+        'file' => 'node.actions.inc',
+      ),
+      'node_delete_action' => array(
+        'type' => 'node',
+        'label' => t('Delete content'),
+        'callback' => 'node_delete_action',
+        'file' => 'node.actions.inc',
+      ),
+    );
+  }
+  return $actions;
 }
 
 /**
@@ -3729,7 +3674,7 @@ function node_config_create_validate(Config $staging_config, $all_changes) {
 
     // Check that the node type does or will exist.
     $type_exists = (bool) node_type_get_type($node_type);
-    $type_created = $all_changes['node.type.' . $node_type];
+    $type_created = !empty($all_changes['node.type.' . $node_type]);
     if (!$type_exists && !$type_created) {
       throw new ConfigValidateException(t('The field "@name" cannot be added because the node type "@type" does not exist.', array('@name' => $field_name, '@type' => $node_type)));
     }
