@@ -132,12 +132,49 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#required' => $upload_settings['alt_required'],
   );
 
-  $use_image_styles = !empty($format->editor_settings['image_styles']['use_image_styles']) && module_exists('image');
+  $use_image_styles = !empty($format->editor_settings['image_styles']['status']) && module_exists('image');
+
+  $available_style_options = array();
+  if ($use_image_styles) {
+    $all_image_styles = image_style_options(FALSE, PASS_THROUGH);
+    foreach ($format->editor_settings['image_styles']['list'] as $key => $value) {
+      if ($key === '' && $value !== 0) {
+        $available_style_options[$key] = t('None (original image)');
+      }
+      elseif (!empty($value) && array_key_exists($key, $all_image_styles)) {
+        $available_style_options[$key] = $all_image_styles[$key];
+      }
+    }
+  }
+  // If the image style list is empty (the image styles may no longer exists),
+  // fallback to the normal no image style behavior.
+  $use_image_styles = !empty($available_style_options);
+
+  $default_value = NULL;
+  // Determine the style from path - this does not work with SVG, as those get
+  // always served from their original path.
+  if ($use_image_styles && !empty($values['src']) && strpos($values['src'], 'styles/') > 0) {
+    $path_parts = explode('/', $values['src']);
+    $before_style = array_search('styles', $path_parts);
+    $default_value = $path_parts[$before_style + 1];
+  }
+  $form['image_style'] = array(
+    '#title' => t('Image style'),
+    '#type' => 'select',
+    '#options' => $available_style_options,
+    '#default_value' => $default_value,
+    '#access' => $use_image_styles,
+  );
+
   $form['size'] = array(
     '#title' => t('Image size'),
     '#wrapper_attributes' => array('class' => array('editor-image-size')),
-    '#theme_wrappers' => array('form_element'),
-    '#access' => !$use_image_styles,
+    '#type' => 'item',
+    '#states' => array(
+      'visible' => array(
+        ':input[name="image_style"]' => array('value' => ''),
+      ),
+    ),
   );
   $form['size']['width'] = array(
     '#title' => t('Width'),
@@ -157,34 +194,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#max' => 99999,
     '#attributes' => array('placeholder' => t('height')),
     '#parents' => array('attributes', 'height'),
-    '#field_suffix' => ' ' . t('pixels')
-  );
-  $available_style_options = array();
-  if ($use_image_styles) {
-    $all_image_styles = image_style_options(FALSE, PASS_THROUGH);
-    foreach ($format->editor_settings['image_styles']['available_styles'] as $key => $value) {
-      if ($key === '' && $value !== 0) {
-        $available_style_options[$key] = t('None (original image)');
-      }
-      elseif (!empty($value) && array_key_exists($key, $all_image_styles)) {
-        $available_style_options[$key] = $all_image_styles[$key];
-      }
-    }
-  }
-  $default_value = NULL;
-  // Determine the style from path - this does not work with SVG, as those get
-  // always served from their original path.
-  if ($use_image_styles && !empty($values['src']) && strpos($values['src'], 'styles/') > 0) {
-    $path_parts = explode('/', $values['src']);
-    $before_style = array_search('styles', $path_parts);
-    $default_value = $path_parts[$before_style + 1];
-  }
-  $form['image_style'] = array(
-    '#title' => t('Image style'),
-    '#type' => 'select',
-    '#options' => $available_style_options,
-    '#default_value' => $default_value,
-    '#access' => $use_image_styles,
+    '#field_suffix' => ' ' . t('pixels'),
   );
 
   $form['align'] = array(
@@ -273,16 +283,17 @@ function filter_format_editor_image_form_submit($form, &$form_state) {
   // attribute (if image upload in editor is disabled).
   $file = NULL;
   $fid = 0;
-  if (!empty($form_state['values']['fid']) && empty($form_state['values']['attributes']['src'])) {
+  $attributes = $form_state['values']['attributes'] ?? array();
+  if (!empty($form_state['values']['fid']) && empty($attributes['src'])) {
     $file = file_load($form_state['values']['fid']);
     $fid = $form_state['values']['fid'];
     unset($form_state['values']['fid']);
   }
-  elseif (!empty($form_state['values']['attributes']['src'])) {
-    $fid = _filter_get_file_id($form_state['values']['attributes']['src']);
+  elseif (!empty($attributes['src'])) {
+    $fid = _filter_get_file_id($attributes['src']);
     if ($fid) {
       $file = file_load($fid);
-      unset($form_state['values']['attributes']['src']);
+      unset($attributes['src']);
     }
   }
   if (!empty($file)) {
@@ -291,8 +302,10 @@ function filter_format_editor_image_form_submit($form, &$form_state) {
 
     if (empty($form_state['values']['image_style'])) {
       $url = file_create_url($file->uri);
-      $form_state['values']['attributes']['width'] = $file->width;
-      $form_state['values']['attributes']['height'] = $file->height;
+      if (empty($attributes['width']) && empty($attributes['height'])) {
+        $attributes['width'] = $file->width;
+        $attributes['height'] = $file->height;
+      }
     }
     else {
       $style_name = $form_state['values']['image_style'];
@@ -307,14 +320,16 @@ function filter_format_editor_image_form_submit($form, &$form_state) {
         );
         image_style_transform_dimensions($style_name, $dimensions);
       }
-      $form_state['values']['attributes']['width'] = $dimensions['width'];
-      $form_state['values']['attributes']['height'] = $dimensions['height'];
+      $attributes['width'] = $dimensions['width'];
+      $attributes['height'] = $dimensions['height'];
     }
     $url = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
 
-    $form_state['values']['attributes']['src'] = $url;
-    $form_state['values']['attributes']['data-file-id'] = $fid;
+    $attributes['src'] = $url;
+    $attributes['data-file-id'] = $fid;
   }
+
+  $form_state['values']['attributes'] = $attributes;
 }
 
 /**

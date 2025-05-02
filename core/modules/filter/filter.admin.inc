@@ -956,25 +956,24 @@ function filter_editor_image_styles_settings_form($format) {
   }
   $settings = isset($format->editor_settings['image_styles']) ? $format->editor_settings['image_styles'] : array();
   $settings += array(
-    'use_image_styles' => FALSE,
-    'available_styles' => array(),
+    'status' => FALSE,
+    'list' => array(),
   );
-  $form['use_image_styles'] = array(
+  $form['status'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Use image styles'),
-    '#default_value' => $settings['use_image_styles'],
-    '#description' => t('Instead of letting people freely resize images, let them pick from pre-defined image styles. Note that styles do not initially apply to drag-and-drop uploads.'),
+    '#title' => t('Enable image styles'),
+    '#default_value' => $settings['status'],
   );
   $style_options = array('' => t('None (original image)'));
   $style_options += image_style_options(FALSE);
-  $form['available_styles'] = array(
+  $form['list'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Available image styles'),
     '#options' => $style_options,
-    '#default_value' => $settings['available_styles'],
+    '#default_value' => $settings['list'],
     '#states' => array(
       'visible' => array(
-        ':input[name="editor_settings[image_styles][use_image_styles]"]' => array('checked' => TRUE),
+        ':input[name="editor_settings[image_styles][status]"]' => array('checked' => TRUE),
       ),
     ),
   );
