@@ -183,7 +183,7 @@ function installer_theme($existing, $type, $theme, $path) {
         'css' => array(
           backdrop_get_path('module', 'installer') . '/css/installer.css' => array(),
         ),
-      )
+      ),
     ) + $base,
     // Template for block.
     'installer_browser_block' => array(

@@ -275,7 +275,7 @@ function common_test_theme() {
         ),
         'library' => array(
           array('system', 'backdrop.ajax'),
-        )
+        ),
       ),
     ),
   );

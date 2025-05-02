@@ -73,7 +73,7 @@ function simpletest_theme() {
           $module_path . '/js/simpletest.js' => array(),
           'core/misc/tableselect.js' => array(),
         ),
-      )
+      ),
     ) + $base,
     'simpletest_result_summary' => array(
       'render element' => 'form',

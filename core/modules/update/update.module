@@ -139,7 +139,7 @@ function update_theme($existing, $type, $theme, $path) {
         'css' => array(
           backdrop_get_path('module', 'update') . '/css/update.css' => array(),
         ),
-      )
+      ),
     ) + $base,
     'update_version' => array(
       'variables' => array('version' => NULL, 'tag' => NULL, 'class' => array()),

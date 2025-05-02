@@ -189,7 +189,7 @@ function path_theme() {
       'attached' => array(
         'css' => array($module_path . '/css/path.admin.css' => array()),
         'js' => array($module_path . '/js/path.admin.js' => array()),
-      )
+      ),
     ) + $base,
   );
 }
