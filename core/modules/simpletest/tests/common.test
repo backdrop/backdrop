@@ -1920,9 +1920,9 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
    * Tests the addition of assets via hook_theme(). These are all random assets
    * that would not normally be added to the page.
    *
-   * @see common_test_theme().
+   * @see common_test_theme()
    */
-  function testAssetsAttachedViaHookTheme() {
+  public function testAssetsAttachedViaHookTheme() {
     $config = config('system.core');
     $config->set('preprocess_css', FALSE);
     $config->set('preprocess_js', FALSE);
