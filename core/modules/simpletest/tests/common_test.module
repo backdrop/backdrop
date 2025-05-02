@@ -271,10 +271,10 @@ function common_test_theme() {
           backdrop_get_path('theme', 'basis') . '/css/component/maintenance.css',
         ),
         'icons' => array(
-          'globe-stand-fill',
+          'globe-stand-fill' => array(),
         ),
         'library' => array(
-          array('system', 'backdrop.ajax', FALSE),
+          array('system', 'backdrop.ajax'),
         )
       ),
     ),
