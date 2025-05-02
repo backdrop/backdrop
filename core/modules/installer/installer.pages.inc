@@ -233,81 +233,102 @@ function installer_browser_installation_select_versions_form($form, &$form_state
   $form['releases'] = array();
 
   $project_type = 'module';
+
   foreach ($projects as $project) {
-    // Get the available releases for this project.
-    $release_data = installer_browser_get_project_release_data($project);
-    if (!$release_data) {
-      backdrop_set_message(t('Could not fetch releases for project %project.', array('%project' => $project['title'])), 'warning');
-      watchdog('installer', 'Could not fetch releases for project %project.', array('%project' => $project['title']), WATCHDOG_ERROR);
-      installer_browser_install_queue_remove($project['name']);
-      continue;
+    if ($project['type'] == 'submodule') {
+      // This is a submodule. Do not check for release data - only reset its
+      // temporary 'submodule' type (previously set in
+      // installer_browser_installation_install_dependencies_page()) back to
+      // 'module'.
+      $project['type'] = 'module';
     }
+    else {
+      // This is a regular project. Get the available releases for it.
+      $release_data = installer_browser_get_project_release_data($project);
 
-    // We use the update module to calculate the recommended version.
-    $project_data = array(
-      'existing_major' => 0,
-      'existing_version' => 0,
-      'install_type' => '',
-    );
-    module_load_include('inc', 'update', 'update.compare');
-    update_calculate_project_update_status($project_data, $release_data);
+      $message = 'Could not fetch releases for project %project.';
+      $replacements = array('%project' => $project['title']);
 
-    $releases_list = array();
+      if (!$release_data) {
+        backdrop_set_message(t($message, $replacements), 'warning');
+        watchdog('installer', $message, $replacements, WATCHDOG_ERROR);
+        installer_browser_install_queue_remove($project['name']);
+        continue;
+      }
 
-    foreach ($release_data['releases'] as $version => $release) {
-      $release_title = format_string("@project @version - @date", array(
-        '@project' => $project['title'],
-        '@version' => $release['version'],
-        '@date' => format_date($release['date'], 'custom', 'M j, Y'),
+      // We use the Update module to calculate the recommended version.
+      $project_data = array(
+        'existing_major' => 0,
+        'existing_version' => 0,
+        'install_type' => '',
+      );
+      module_load_include('inc', 'update', 'update.compare');
+      update_calculate_project_update_status($project_data, $release_data);
+
+      $releases_list = array();
+
+      foreach ($release_data['releases'] as $version => $release) {
+        $release_title = format_string("@project @version - @date", array(
+          '@project' => $project['title'],
+          '@version' => $release['version'],
+          '@date' => format_date($release['date'], 'custom', 'M j, Y'),
         ));
-      if (isset($release['terms']['Release type']) && !empty($release['terms']['Release type'])) {
-        $release_title .= check_plain(" (" . implode(', ', $release['terms']['Release type']) . ")");
+        if (isset($release['terms']['Release type']) && !empty($release['terms']['Release type'])) {
+          $release_title .= check_plain(" (" . implode(', ', $release['terms']['Release type']) . ")");
+        }
+        $releases_list[$version] = $release_title;
+        if (isset($release['release_link'])) {
+          $options = array(
+            'attributes' => array(
+              'title' => t('Release notes for @project_title', array(
+                '@project_title' => $project['title'],
+              )),
+              'target' => '_blank',
+            )
+          );
+          $releases_list[$version] .= ' (' . l(t('release notes'), $release['release_link'], $options) . ')';
+        }
       }
-      $releases_list[$version] = $release_title;
-      if (isset($release['release_link'])) {
-        $releases_list[$version] .= ' (' . l(t('release notes'), $release['release_link'], array('attributes' => array('title' => t('Release notes for @project_title', array('@project_title' => $project['title'])), 'target' => '_blank'))) . ')';
+
+      $form['releases'][$project['name']]['project'] = array(
+        '#type' => 'value',
+        '#value' => $project,
+      );
+
+      $form['releases'][$project['name']]['release_name'] = array(
+        '#type' => 'radios',
+        '#title' => t('Select release for @project', array('@project' => $project['title'])),
+        '#options' => $releases_list,
+        '#default_value' => key($releases_list),
+        '#prefix' => '<div class="installer-browser-releases-wrapper installer-browser-release-' . $project['name'] . '">',
+        '#suffix' => '</div>',
+        '#attributes' => array(
+          'class' => array('installer-browser-releases-radios'),
+        ),
+        '#required' => TRUE,
+      );
+      $form['releases'][$project['name']]['selected_text'] = array(
+        '#type' => 'item',
+        '#prefix' => '<div class="installer-browser-selected-release installer-browser-selected-release-' . $project['name'] . '">',
+        '#suffix' => '</div>',
+        '#markup' => reset($releases_list),
+      );
+      if (isset($project_data['recommended'])) {
+        // If there is a recommended release set, then only show it and show the
+        // jQuery link.
+        $recommended_releases = array();
+        $recommended_releases[$project_data['recommended']] = $releases_list[$project_data['recommended']];
+        $form['releases'][$project['name']]['release_name']['#default_value'] = $project_data['recommended'];
+        $form['releases'][$project['name']]['selected_text']['#markup'] = $releases_list[$project_data['recommended']];
       }
-    }
+      if (count($releases_list) > 1) {
+        $form['releases'][$project['name']]['selected_text']['#markup'] .= ' (<a class="installer-browser-show-releases-link js-show" href="#" rel="' . $project['name'] . '">' . t('change release') . '</a>)';
+      }
 
-    $form['releases'][$project['name']]['project'] = array(
-      '#type' => 'value',
-      '#value' => $project,
-    );
-
-    $form['releases'][$project['name']]['release_name'] = array(
-      '#type' => 'radios',
-      '#title' => t('Select release for @project', array('@project' => $project['title'])),
-      '#options' => $releases_list,
-      '#default_value' => key($releases_list),
-      '#prefix' => '<div class="installer-browser-releases-wrapper installer-browser-release-' . $project['name'] . '">',
-      '#suffix' => '</div>',
-      '#attributes' => array(
-        'class' => array('installer-browser-releases-radios'),
-      ),
-      '#required' => TRUE,
-    );
-    $form['releases'][$project['name']]['selected_text'] = array(
-      '#type' => 'item',
-      '#prefix' => '<div class="installer-browser-selected-release installer-browser-selected-release-' . $project['name'] . '">',
-      '#suffix' => '</div>',
-      '#markup' => reset($releases_list),
-    );
-    if (isset($project_data['recommended'])) {
-      // If there is a recommended release set, then only show it and show the
-      // jQuery link.
-      $recommended_releases = array();
-      $recommended_releases[$project_data['recommended']] = $releases_list[$project_data['recommended']];
-      $form['releases'][$project['name']]['release_name']['#default_value'] = $project_data['recommended'];
-      $form['releases'][$project['name']]['selected_text']['#markup'] = $releases_list[$project_data['recommended']];
-    }
-    if (count($releases_list) > 1) {
-      $form['releases'][$project['name']]['selected_text']['#markup'] .=
-        ' (<a class="installer-browser-show-releases-link js-show" href="#" rel="' . $project['name'] . '">' . t('change release') . '</a>)';
-    }
-
-    // Update the project type based on the type of projects being selected.
-    if (isset($project['type'])) {
-      $project_type = $project['type'];
+      // Update the project type based on the type of projects being selected.
+      if (isset($project['type'])) {
+        $project_type = $project['type'];
+      }
     }
   }
 
@@ -475,22 +496,60 @@ function installer_browser_installation_install_dependencies_page() {
     $missing_projects = array();
     // Add the project data in the array as best we can.
     foreach ($missing as $project_shortname => $dependencies) {
-      foreach ($dependencies as $dependency_shortname) {
-        $missing_projects[$dependency_shortname] = array(
-          'name' => $dependency_shortname,
-          'type' => 'module',
-          'title' => $dependency_shortname,
+      foreach ($dependencies as $dependency_string) {
+        // Check whether the dependency is a combo of a parent project + a
+        // submodule (denoted with the format PROJECT:SUBMODULE).
+        $dependency_breakdown = explode(':', $dependency_string);
+
+        // Parent module + submodule dependency.
+        if (count($dependency_breakdown) == 2) {
+          list($parent_project, $dependency_name) = $dependency_breakdown;
+          // Temporarily set the dependency type to 'submodule' (used in order
+          // to exclude these dependencies from fetching release data in
+          // installer_browser_installation_select_versions_form() - we still
+          // want to include them as missing dependencies though, so that they
+          // can be enabled later).
+          $dependency_type = 'submodule';
+
+          // If the parent project was not previously added in the dependency
+          // list, make sure to add it now.
+          if (!in_array($parent_project, $missing_projects)) {
+            $missing_projects[$parent_project] = array(
+              'name' => $parent_project,
+              'type' => 'module',
+              'title' => $parent_project,
+              'includes' => array(),
+            );
+          }
+        }
+        else {
+          // Regular, non-submodule dependency.
+          $dependency_name = $dependency_string;
+          $dependency_type = 'module';
+        }
+
+        $missing_projects[$dependency_name] = array(
+          'name' => $dependency_name,
+          'type' => $dependency_type,
+          'title' => $dependency_name,
           'includes' => array(),
         );
-        // Make an assumption that the dependencies will have the same update
-        // status URL as the project. This may not be true in the future if
-        // we have decide to have more than one update server, but for now this
-        // is necessary to test dependencies installation.
-        if (isset($projects[$project_shortname]['project status url'])) {
-          // Replace the dependent project short name with the parent short
-          // name, as is needed with Backdrop's default update server.
-          $status_url = preg_replace('/\/' . preg_quote($project_shortname, '/') . '([.\/]?)/', '/' . $dependency_shortname . '$1', $projects[$project_shortname]['project status url']);
-          $missing_projects[$dependency_shortname]['project status url'] = $status_url;
+
+        // Add the URL where project release data can be fetched from, but only
+        // for regular projects - not for submodules contained within parent
+        // projects.
+        if ($dependency_type != 'submodule') {
+          // Make an assumption that the dependencies will have the same update
+          // status URL as the project that depends on them. This may not be
+          // true in the future if we decide to allow more than one update
+          // server, but for now this is necessary to test dependencies
+          // installation.
+          if (isset($projects[$project_shortname]['project status url'])) {
+            // Replace the dependent project short name with the parent short
+            // name, as is needed with Backdrop's default update server.
+            $status_url = preg_replace('/\/' . preg_quote($project_shortname, '/') . '([.\/]?)/', '/' . $dependency_name . '$1', $projects[$project_shortname]['project status url']);
+            $missing_projects[$dependency_name]['project status url'] = $status_url;
+          }
         }
       }
     }

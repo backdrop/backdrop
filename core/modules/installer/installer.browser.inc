@@ -460,7 +460,13 @@ function installer_browser_get_missing_dependencies($projects) {
       $dependencies = array();
       if (isset($modules[$project['name']])) {
         foreach ($modules[$project['name']]->requires as $requires) {
-          $dependency = $requires['name'];
+          // Make sure to include any submodule dependencies in the format
+          // PROJECT:SUBMODULE. This helps exclude the submodules from the list
+          // of projects that we'll attempt to fetch release data for in
+          // installer_browser_installation_select_versions_form() and
+          // installer_browser_installation_install_dependencies_page().
+          $dependency = isset($requires['project']) ? $requires['project'] . ':' . $requires['name'] : $requires['name'];
+
           if (!isset($modules[$dependency])) {
             $dependencies[] = $dependency;
           }
