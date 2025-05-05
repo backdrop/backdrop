@@ -175,7 +175,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
       }
     }
   }
-  // If the image style list is empty (the image styles may no longer exists),
+  // If the image style list is empty (the image styles may no longer exist),
   // fallback to the normal no image style behavior.
   $use_image_styles = !empty($available_style_options);
   $form['image_style'] = array(
