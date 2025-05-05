@@ -57,6 +57,9 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   if (isset($form_state['input']['editor_object'])) {
     $values = array_merge($values, $form_state['input']['editor_object']);
   }
+  // Store original values for reference.
+  $values['previous_width'] = $values['width'];
+  $values['previous_height'] = $values['height'];
 
   // Determine the style from path - this does not work with SVG, as those get
   // always served from their original path.
@@ -213,6 +216,15 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#parents' => array('attributes', 'height'),
     '#field_suffix' => ' ' . t('pixels'),
   );
+  // Original values used for reference in submit handler.
+  $form['size']['previous_width'] = array(
+    '#type' => 'value',
+    '#value' => $values['previous_width'],
+  );
+  $form['size']['previous_height'] = array(
+    '#type' => 'value',
+    '#value' => $values['previous_height'],
+  );
 
   $form['align'] = array(
     '#title' => t('Align'),
@@ -326,19 +338,26 @@ function filter_format_editor_image_form_submit($form, &$form_state) {
     }
     else {
       $style_name = $form_state['values']['image_style'];
+      $style_changed = $form['image_style']['#default_value'] != $style_name;
       $url = image_style_url($style_name, $file->uri);
-      $dimensions = array('width' => '', 'height' => '');
-      // Although the editor could determine dimensions, this would not work
-      // with SVG.
-      if (!empty($file->width)) {
-        $dimensions = array(
-          'width' => $file->width,
-          'height' => $file->height,
-        );
-        image_style_transform_dimensions($style_name, $dimensions);
+      if ($style_changed) {
+        $dimensions = array('width' => '', 'height' => '');
+        // Although the editor could determine dimensions, this would not work
+        // with SVG.
+        if (!empty($file->width)) {
+          $dimensions = array(
+            'width' => $file->width,
+            'height' => $file->height,
+          );
+          image_style_transform_dimensions($style_name, $dimensions);
+        }
+        $attributes['width'] = $dimensions['width'];
+        $attributes['height'] = $dimensions['height'];
       }
-      $attributes['width'] = $dimensions['width'];
-      $attributes['height'] = $dimensions['height'];
+      elseif (!empty($form_state['values']['previous_width'])) {
+        $attributes['width'] = $form_state['values']['previous_width'];
+        $attributes['height'] = $form_state['values']['previous_height'];
+      }
     }
     $url = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
 
