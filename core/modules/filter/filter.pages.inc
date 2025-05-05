@@ -43,10 +43,36 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   // Record if image uploading is requested by the calling element.
   $element_supports_uploads = !isset($form_state['input']['dialogOptions']['uploads']) || (bool) $form_state['input']['dialogOptions']['uploads'];
 
+  // Populate defaults.
+  $values = array(
+    'src' => '',
+    'data-file-id' => NULL,
+    'alt' => '',
+    'width' => '',
+    'height' => '',
+    'data-align' => 'none',
+    'data-has-caption' => 'false',
+  );
   // Pull in any default values set by the editor.
-  $values = array();
   if (isset($form_state['input']['editor_object'])) {
-    $values = $form_state['input']['editor_object'];
+    $values = array_merge($values, $form_state['input']['editor_object']);
+  }
+
+  // Determine the style from path - this does not work with SVG, as those get
+  // always served from their original path.
+  $image_style_default = NULL;
+  if (!empty($values['src']) && strpos($values['src'], 'styles/') > 0) {
+    $path_parts = explode('/', $values['src']);
+    $before_style = array_search('styles', $path_parts);
+    $image_style_default = $path_parts[$before_style + 1];
+  }
+
+  // If an image style is set, remove the width and height, which do not apply
+  // to image styles (they reset on save). This also lets images take on their
+  // original dimensions if setting back to the original image.
+  if (isset($image_style_default)) {
+    $values['width'] = '';
+    $values['height'] = '';
   }
 
   // Set the dialog title and submit button label.
@@ -108,7 +134,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#type' => 'textfield',
     '#element_validate' => array('_filter_format_editor_link_url_validate'),
     '#placeholder' => '/example/image.jpg',
-    '#default_value' => isset($values['src']) ? $values['src'] : NULL,
+    '#default_value' => $values['src'],
     '#parents' => array('attributes', 'src'),
     '#wrapper_attributes' => array(
       'data-editor-image-toggle' => t('Select from library'),
@@ -126,7 +152,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   $form['alt'] = array(
     '#title' => t('Alternative text'),
     '#type' => 'textfield',
-    '#default_value' => isset($values['alt']) ? $values['alt'] : NULL,
+    '#default_value' => $values['alt'],
     '#description' => t('The alt attribute may be used by screen readers, search engines, and when the image cannot be loaded.'),
     '#parents' => array('attributes', 'alt'),
     '#required' => $upload_settings['alt_required'],
@@ -149,20 +175,11 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   // If the image style list is empty (the image styles may no longer exists),
   // fallback to the normal no image style behavior.
   $use_image_styles = !empty($available_style_options);
-
-  $default_value = NULL;
-  // Determine the style from path - this does not work with SVG, as those get
-  // always served from their original path.
-  if ($use_image_styles && !empty($values['src']) && strpos($values['src'], 'styles/') > 0) {
-    $path_parts = explode('/', $values['src']);
-    $before_style = array_search('styles', $path_parts);
-    $default_value = $path_parts[$before_style + 1];
-  }
   $form['image_style'] = array(
     '#title' => t('Image style'),
     '#type' => 'select',
     '#options' => $available_style_options,
-    '#default_value' => $default_value,
+    '#default_value' => $image_style_default,
     '#access' => $use_image_styles,
   );
 
@@ -180,7 +197,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#title' => t('Width'),
     '#title_display' => 'attribute',
     '#type' => 'number',
-    '#default_value' => !empty($values['width']) ? $values['width'] : '',
+    '#default_value' => $values['width'],
     '#max' => 99999,
     '#attributes' => array('placeholder' => t('width')),
     '#parents' => array('attributes', 'width'),
@@ -190,7 +207,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#title' => t('Height'),
     '#title_display' => 'attribute',
     '#type' => 'number',
-    '#default_value' => !empty($values['height']) ? $values['height'] : '',
+    '#default_value' => $values['height'],
     '#max' => 99999,
     '#attributes' => array('placeholder' => t('height')),
     '#parents' => array('attributes', 'height'),
@@ -200,7 +217,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   $form['align'] = array(
     '#title' => t('Align'),
     '#type' => 'radios',
-    '#default_value' => isset($values['data-align']) ? $values['data-align'] : 'none',
+    '#default_value' => $values['data-align'],
     '#options' => array(
       'none' => t('None'),
       'left' => t('Left'),
@@ -214,7 +231,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   $form['caption'] = array(
     '#title' => t('Add a caption'),
     '#type' => 'checkbox',
-    '#default_value' => (isset($values['data-has-caption']) && strcmp($values['data-has-caption'], 'false') !== 0) ? (bool) $values['data-has-caption'] : FALSE,
+    '#default_value' => (strcmp($values['data-has-caption'], 'false') !== 0) ? (bool) $values['data-has-caption'] : FALSE,
     '#parents' => array('attributes', 'data-has-caption'),
     '#access' => !empty($format->filters['filter_image_caption']->status),
   );
