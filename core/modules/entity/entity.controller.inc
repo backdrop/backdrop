@@ -619,7 +619,7 @@ class DefaultEntityController implements EntityControllerInterface {
 
     $view = array();
     foreach ($entities as $entity) {
-      /* @var EntityInterface $entity */
+      /** @var EntityInterface $entity */
       $this->buildContent($entity, $view_mode, $langcode);
 
       $build = $entity->content;

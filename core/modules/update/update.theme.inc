@@ -312,7 +312,6 @@ function theme_update_report($variables) {
       $output .= theme('table', array('header' => $header, 'rows' => $rows[$type_name], 'attributes' => array('class' => array('update'))));
     }
   }
-  backdrop_add_css(backdrop_get_path('module', 'update') . '/css/update.css');
   return $output;
 }
 

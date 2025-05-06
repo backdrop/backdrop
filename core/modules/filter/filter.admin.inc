@@ -937,6 +937,49 @@ function filter_editor_image_upload_settings_form($format) {
   return $form;
 }
 
+/**
+ * Subform constructor to configure the text editor's inline image styles.
+ *
+ * Each text editor implementation using the Filter dialog can use this form to
+ * configure image styles for inline images instead of free resizing.
+ *
+ * @param object $format
+ *   The filter format object.
+ *
+ * @return array
+ *   Subform items or empty array if not applicable.
+ */
+function filter_editor_image_styles_settings_form($format) {
+  $form = array();
+  if (!module_exists('image')) {
+    return $form;
+  }
+  $settings = isset($format->editor_settings['image_styles']) ? $format->editor_settings['image_styles'] : array();
+  $settings += array(
+    'status' => FALSE,
+    'list' => array(),
+  );
+  $form['status'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable image styles'),
+    '#default_value' => $settings['status'],
+  );
+  $style_options = array('' => t('None (original image)'));
+  $style_options += image_style_options(FALSE);
+  $form['list'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Available image styles'),
+    '#options' => $style_options,
+    '#default_value' => $settings['list'],
+    '#states' => array(
+      'visible' => array(
+        ':input[name="editor_settings[image_styles][status]"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+
+  return $form;
+}
 
 /**
  * Subform constructor to configure the text editor's file upload settings.
