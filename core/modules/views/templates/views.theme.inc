@@ -773,6 +773,9 @@ function template_preprocess_views_view_grid(&$variables) {
       }
     }
     $variables['classes'] = array('views-view-grid', 'views-view-grid-cols-' . $columns);
+    if (!empty($options['responsive'])) {
+      $variables['classes'][] = 'views-view-grid-responsive';
+    }
   }
   else {
     if ($options['alignment'] == 'horizontal') {
