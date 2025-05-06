@@ -202,7 +202,7 @@ function views_update_1008() {
     $displays = $config->get('display');
     $changed = FALSE;
     foreach ($displays as $display => $display_details) {
-      if (isset($display_details['display_plugin']) && $display_details['display_plugin'] == 'views_content') {
+      if (isset($display_details['display_plugin']) && $display_details['display_plugin'] == 'panel_pane') {
         $config->set('display.' . $display . '.display_plugin', 'block');
         $changed = TRUE;
       }
