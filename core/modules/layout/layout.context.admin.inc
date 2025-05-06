@@ -328,13 +328,13 @@ function layout_context_add_form_validate($form, &$form_state) {
  */
 function layout_context_add_form_submit($form, &$form_state) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
-  /* @var Layout $layout */
+  /** @var Layout $layout */
   $layout = $form_state['layout'];
 
   if (!isset($form_state['handler'])) {
     return;
   }
-  /* @var LayoutAccess $handler */
+  /** @var LayoutAccess $handler */
   $handler = $form_state['handler'];
   $handler->formSubmit($form, $form_state);
   if (!empty($handler->is_new)) {
