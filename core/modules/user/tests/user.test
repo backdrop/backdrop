@@ -2905,6 +2905,7 @@ class UserLoginAppearanceTestCase extends BackdropWebTestCase {
       $this->assertEqual(count($tabs), 0, 'The tabs nav element was not found.');
       $links = $this->xpath('(//ul[contains(@class, "login-links")])');
       $this->assertEqual(count($links), 1, 'The links element was found.');
+      $this->assertRaw('user/css/user-simplified-page.css');
     }
 
     // Set login appearance to tabs.

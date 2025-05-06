@@ -62,7 +62,6 @@ function template_preprocess_installer_browser_block(&$variables) {
  */
 function template_preprocess_installer_browser_list(&$variables) {
   module_load_include('inc', 'installer', 'installer.browser');
-  backdrop_add_css(backdrop_get_path('module', 'installer') . '/css/installer.css');
 
   if (is_array($variables['projects_list']) && !empty($variables['projects_list'])) {
     $content = '';
