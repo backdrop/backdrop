@@ -965,7 +965,7 @@ function backdrop_http_request($url, array $options = array()) {
   $alternate_http_system = &backdrop_static('__FUNCTION__');
   if (!isset($alternate_http_system)) {
     $class = settings_get('http_system');
-    /* @var BackdropHTTPSystemInterface $alternate_http_system */
+    /** @var BackdropHTTPSystemInterface $alternate_http_system */
     $alternate_http_system = $class ? new $class() : FALSE;
   }
   if ($alternate_http_system) {
