@@ -6,13 +6,13 @@ on:
 jobs:
   phpcs:
     name: Run phpcs
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     steps:
       - name: Setup PHP with CodeSniffer tool
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1'
-          tools: phpcs:3.7
+          tools: phpcs
 
       # The checkout action refuses to put it outside, so we have to do it in
       # two steps.

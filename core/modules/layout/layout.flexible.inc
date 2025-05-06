@@ -88,7 +88,7 @@ function layout_flexible_template_settings_form_cancel($form, &$form_state) {
  * @see layout_flexible_template_settings_edit_form()
  */
 function layout_flexible_template_settings_form_submit($form, &$form_state) {
-  /* @var LayoutFlexibleTemplate $flexible_template */
+  /** @var LayoutFlexibleTemplate $flexible_template */
   $flexible_template = $form_state['flexible_template'];
   $flexible_template->name = $form_state['values']['machine_name'];
   $flexible_template->title = $form_state['values']['name'];
@@ -732,7 +732,7 @@ function layout_flexible_template_edit_row_validate($form, &$form_state) {
 function layout_flexible_template_edit_row_form_submit($form, &$form_state) {
   form_load_include($form_state, 'inc', 'layout', 'layout.admin');
   form_load_include($form_state, 'inc', 'layout', 'layout.flexible');
-  /* @var LayoutFlexibleTemplate $flexible_template */
+  /** @var LayoutFlexibleTemplate $flexible_template */
   $flexible_template = $form_state['flexible_template'];
   $original_row = $form_state['original_row'];
 
@@ -906,7 +906,7 @@ function layout_flexible_template_delete_form($form, &$form_state, LayoutFlexibl
  * @see layout_flexible_template_delete_form()
  */
 function layout_flexible_template_delete_form_submit(&$form, &$form_state) {
-  /* @var LayoutFlexibleTemplate $flexible_template */
+  /** @var LayoutFlexibleTemplate $flexible_template */
   $flexible_template = &$form_state['flexible_template'];
   $flexible_template->delete();
 

@@ -89,7 +89,7 @@ class FileViewsTestCase extends BackdropWebTestCase {
         '%filename' => basename($file_info['path']),
       )));
 
-      /* @var SimpleXMLElement $svg_element */
+      /** @var SimpleXMLElement $svg_element */
       $svg_element = $xpath_result[0];
       $title_element = $svg_element->xpath('title');
       $this->assertTrue((string) $title_element[0], format_string('Inline SVG for %filename includes nested title as alt text.', array(
@@ -116,7 +116,7 @@ class FileViewsTestCase extends BackdropWebTestCase {
         '%filename' => basename($file_info['path']),
       )));
 
-      /* @var SimpleXMLElement $svg_element */
+      /** @var SimpleXMLElement $svg_element */
       $img_element = $xpath_result[0];
       $this->assertTrue((string) $img_element['alt'], format_string('Regular img tag icon for %filename includes alt text.', array(
         '%filename' => basename($file_info['path']),

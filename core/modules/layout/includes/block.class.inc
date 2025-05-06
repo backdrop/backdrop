@@ -241,7 +241,7 @@ class Block extends LayoutHandler {
    * Build the settings form for editing this block.
    */
   function form(&$form, &$form_state) {
-    /* @var Layout $layout */
+    /** @var Layout $layout */
     $layout = $form_state['layout'];
     $contexts = $layout->getContexts();
 
