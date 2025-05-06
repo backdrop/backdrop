@@ -21,6 +21,7 @@ class views_plugin_style_grid extends views_plugin_style {
     $options['fill_single_line'] = array('default' => TRUE, 'bool' => TRUE);
     $options['summary'] = array('default' => '');
     $options['caption'] = array('default' => '');
+    $options['responsive'] = array('default' => FALSE, 'bool' => TRUE);
     $options['deprecated_table'] = array('default' => FALSE, 'bool' => TRUE);
 
     return $options;
@@ -48,6 +49,18 @@ class views_plugin_style_grid extends views_plugin_style {
     );
     $form['alignment']['horizontal']['#description'] = t('Places items starting in the upper left and moving right.');
     $form['alignment']['vertical']['#description'] = t('Places items starting in the upper left and moving down.');
+
+    $form['responsive'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Responsive'),
+      '#description' => t('Checking this will ensure that grid items will flow in a single columns on small screens.'),
+      '#default_value' => !empty($this->options['responsive']),
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="style_options[deprecated_table]"]' => array('checked' => TRUE),
+        ),
+      ),
+    );
 
     $form['deprecated_table'] = array(
       '#type' => 'checkbox',
