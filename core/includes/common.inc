@@ -3479,7 +3479,7 @@ function backdrop_add_html_head_link($attributes, $header = FALSE) {
 /**
  * Constructs an array of the defaults that are used for styles items.
  *
- * @param array|null $data
+ * @param string|null $data
  *   (optional) The default data parameter for the style item array.
  *
  * @see backdrop_get_css()
@@ -3532,7 +3532,7 @@ function backdrop_css_defaults($data = NULL) {
  * Non-preprocessed files should only be added to the page when they are
  * actually needed.
  *
- * @param array|null $data
+ * @param string|null $data
  *   (optional) The stylesheet data to be added, depending on what is passed
  *   through to the $options['type'] parameter:
  *   - 'file': The path to the CSS file relative to the base_path(), or a
@@ -4664,7 +4664,7 @@ function backdrop_region_class($region) {
  * Non-preprocessed files should only be added to the page when they are
  * actually needed.
  *
- * @param $data
+ * @param string|null $data
  *   (optional) If given, the value depends on the $options parameter, or
  *   $options['type'] if $options is passed as an associative array:
  *   - 'file': Path to the file relative to base_path().
@@ -4678,7 +4678,7 @@ function backdrop_region_class($region) {
  *     the Backdrop.settings namespace. Settings within the same namespace will
  *     be recursively merged together unless a "key" option is specified in the
  *     $options array.
- * @param $options
+ * @param string|array|null $options
  *   (optional) A string defining the type of JavaScript that is being added in
  *   the $data parameter ('file'/'setting'/'inline'/'external'), or an
  *   associative array.
