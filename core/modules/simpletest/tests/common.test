@@ -1917,6 +1917,24 @@ class CommonJavaScriptTestCase extends BackdropWebTestCase {
   }
 
   /**
+   * Tests the addition of assets via hook_theme(). These are all random assets
+   * that would not normally be added to the page.
+   *
+   * @see common_test_theme()
+   */
+  public function testAssetsAttachedViaHookTheme() {
+    $config = config('system.core');
+    $config->set('preprocess_css', FALSE);
+    $config->set('preprocess_js', FALSE);
+    $config->save();
+    $this->backdropGet('common-test/assets-attached-via-hook-theme');
+    $this->assertRaw('core/themes/basis/css/component/maintenance.css', 'CSS attached via hook_theme() is added to the page.');
+    $this->assertRaw('core/themes/seven/js/script.js', 'JS attached via hook_theme() is added to the page.');
+    $this->assertRaw('"globe-stand-fill":"\/core\/misc\/icons\/globe-stand-fill.svg"', 'Icon attached via hook_theme() is added to the page.');
+    $this->assertRaw('core/misc/ajax.js', 'Library attached via hook_theme() is added to the page.');
+  }
+
+  /**
    * Tests retrieval of libraries via backdrop_get_library().
    */
   function testGetLibrary() {
@@ -2715,7 +2733,7 @@ class CommonSimpleTestErrorCollectorTestCase extends BackdropWebTestCase {
    * the class hierarchy. It just stuffs them into a protected collectedErrors
    * array for various assertions to inspect.
    */
-  protected function error($message = '', $group = 'Other', array $caller = NULL) {
+  protected function error($message = '', $group = 'Other', array $caller = array()) {
     // Due to a WTF elsewhere, simpletest treats debug() and verbose()
     // messages as if they were an 'error'. But, we don't want to collect
     // those here. This function just wants to collect the real errors (PHP

@@ -317,7 +317,7 @@ function file_stream_wrapper_get_instance_by_uri($uri) {
 
   $class = file_stream_wrapper_get_class($scheme);
   if (class_exists($class)) {
-    /* @var BackdropStreamWrapperInterface $instance */
+    /** @var BackdropStreamWrapperInterface $instance */
     $instance = new $class();
     $instance->setUri($uri);
     return $instance;
@@ -350,7 +350,7 @@ function file_stream_wrapper_get_instance_by_uri($uri) {
 function file_stream_wrapper_get_instance_by_scheme($scheme) {
   $class = file_stream_wrapper_get_class($scheme);
   if (class_exists($class)) {
-    /* @var BackdropStreamWrapperInterface $instance */
+    /** @var BackdropStreamWrapperInterface $instance */
     $instance = new $class();
     $instance->setUri($scheme . '://');
     return $instance;

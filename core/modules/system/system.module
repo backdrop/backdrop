@@ -85,6 +85,11 @@ function system_theme() {
     ) + $base,
     'status_report' => array(
       'render element' => 'requirements',
+      'attached' => array(
+        'js' => array(
+          backdrop_get_path('module', 'system') . '/js/status.js' => array(),
+        ),
+      ),
     ) + $base,
     'admin_page' => array(
       'variables' => array('blocks' => NULL),
@@ -3889,7 +3894,10 @@ function system_time_zones($blank = NULL) {
     // reasons and should not be used, the list is filtered by a regular
     // expression.
     if (preg_match('!^((Africa|America|Antarctica|Arctic|Asia|Atlantic|Australia|Europe|Indian|Pacific)/|UTC$)!', $zone)) {
-      $zones[$zone] = t('@zone: @date', array('@zone' => t(str_replace('_', ' ', $zone)), '@date' => format_date(REQUEST_TIME, 'custom', config_get('system.date', 'formats.long.pattern.php') . ' O', $zone)));
+      $zones[$zone] = t('@zone: @date', array(
+        '@zone' => t(str_replace('_', ' ', $zone)),
+        '@date' => format_date(REQUEST_TIME, 'custom', config_get('system.date', 'formats.long.pattern') . ' O', $zone),
+      ));
     }
   }
   // Sort the translated time zones alphabetically.

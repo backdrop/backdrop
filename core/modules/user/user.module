@@ -114,6 +114,11 @@ function user_theme() {
     'user_simplified_page' => array(
       'variables' => array('form' => array(), 'links' => array()),
       'template' => 'templates/user-simplified-page',
+      'attached' => array(
+        'css' => array(
+          backdrop_get_path('module', 'user') . '/css/user-simplified-page.css' => array(),
+        ),
+      ),
     ) + $base,
     'user_links_page' => array(
       'variables' => array('form' => array(), 'links' => array()),
@@ -572,7 +577,7 @@ function user_is_blocked($name) {
  *
  * @param string $role_name
  *   A string representing the role name.
- * @param User $account
+ * @param User|null $account
  *   (optional) A user account. Defaults to the current user.
  *
  * @return bool
@@ -580,7 +585,7 @@ function user_is_blocked($name) {
  *
  * @since 1.14.0 First parameter changed from $rid to $role_name.
  */
-function user_has_role($role_name, User $account = NULL) {
+function user_has_role($role_name, ?User $account = NULL) {
   if (!$account) {
     $account = $GLOBALS['user'];
   }
@@ -2624,7 +2629,7 @@ function user_delete_multiple(array $uids) {
       watchdog_exception('user', $e);
       throw $e;
     }
-    entity_get_controller('user')->resetCache();
+    entity_get_controller('user')->resetCache($uids);
   }
 }
 

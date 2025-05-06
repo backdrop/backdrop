@@ -202,7 +202,7 @@ abstract class BackdropTestCase {
    * @return bool
    *   TRUE if the assertion passed and FALSE if it failed.
    */
-  protected function assert($status, $message = '', $group = 'Other', array $caller = NULL) {
+  protected function assert($status, $message = '', $group = 'Other', array $caller = array()) {
     // Convert boolean status to string status.
     if (is_bool($status)) {
       $status = $status ? 'pass' : 'fail';
@@ -520,10 +520,10 @@ abstract class BackdropTestCase {
    *   The type of assertion - examples are "Browser", "PHP".
    * @param $caller
    *   The caller of the error.
-   * @return
-   *   FALSE.
+   * @return false
+   *   Always returns false.
    */
-  protected function error($message = '', $group = 'Other', array $caller = NULL) {
+  protected function error($message = '', $group = 'Other', array $caller = array()) {
     if ($group == 'User notice') {
       // Since 'User notice' is set by trigger_error() which is used for debug
       // set the message to a status of 'debug'.
@@ -662,7 +662,6 @@ abstract class BackdropTestCase {
   public function errorHandler($severity, $message, $file = NULL, $line = NULL) {
     if ($severity & error_reporting()) {
       $error_map = array(
-        E_STRICT => 'Run-time notice',
         E_WARNING => 'Warning',
         E_NOTICE => 'Notice',
         E_CORE_ERROR => 'Core error',
@@ -674,6 +673,11 @@ abstract class BackdropTestCase {
         E_DEPRECATED => 'Deprecated',
         E_USER_DEPRECATED => 'User deprecated',
       );
+      // E_STRICT was removed from PHP 8.4 and higher, but still exists in older
+      // versions.
+      if (version_compare(PHP_VERSION, '8.4.0') < 0) {
+        $error_map[E_STRICT] = 'Run-time notice';
+      }
 
       $backtrace = debug_backtrace();
       $this->error($message, $error_map[$severity], _backdrop_get_last_caller($backtrace));
