@@ -355,7 +355,7 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
 
     $view = array();
     foreach ($terms as $term) {
-      /* @var TaxonomyTerm $term */
+      /** @var TaxonomyTerm $term */
       // Populate $term->content with a render() array.
       $this->buildContent($term, $view_mode, $langcode);
       $build = $term->content;

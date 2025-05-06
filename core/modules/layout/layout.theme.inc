@@ -78,7 +78,7 @@ function theme_layout_info($variables) {
  * @return string
  */
 function theme_layout_condition_info($variables) {
-  /* @var Layout $layout */
+  /** @var Layout $layout */
   $layout = $variables['layout'];
   // Build a list of visibility conditions on this layout
   $conditions = array();

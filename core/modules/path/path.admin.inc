@@ -736,8 +736,6 @@ function path_bulk_update_form($form, &$form_state) {
  * @ingroup themeable
  */
 function theme_path_bulk_update_form($variables) {
-  backdrop_add_css(backdrop_get_path('module', 'path') . '/css/path.admin.css');
-  backdrop_add_js(backdrop_get_path('module', 'path') . '/js/path.admin.js');
   $form = $variables['form'];
 
   foreach (element_children($form['update']) as $base) {
