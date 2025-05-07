@@ -103,14 +103,12 @@
 /* Views responsive grid styles */
 
 .views-view-responsive-grid {
-  --views-responsive-grid--layout-gap: 2rem;
+  --views-responsive-grid--layout-gap: 10px;
   /* Will be overridden by an inline style. */
   --views-responsive-grid--column-count: 4;
   /* Will be overridden by an inline style. */
-  --views-responsive-grid--cell-min-width: 16rem;
+  --views-responsive-grid--cell-min-width: 100px;
   /* Will be overridden by an inline style. */
-
-  display: inherit;
 }
 
 .views-view-responsive-grid--horizontal {
@@ -125,7 +123,8 @@
 }
 
 .views-view-responsive-grid--vertical {
-  margin-bottom: calc(var(--views-responsive-grid--layout-gap) * -1); /* Offset the bottom row's padding. */
+  margin-bottom: calc(var(--views-responsive-grid--layout-gap) * -1);
+  /* Offset the bottom row's padding. */
   column-width: var(--views-responsive-grid--cell-min-width);
   column-count: var(--views-responsive-grid--column-count);
   column-gap: var(--views-responsive-grid--layout-gap);
