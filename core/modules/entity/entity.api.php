@@ -64,7 +64,7 @@
  *       the same as the entity type.
  *      - label: The name of the property that contains the label for the entity.
  *       This property is used in the core entity class's label method. The label
- *       can be overriden by setting a 'label callback' on the entity which the
+ *       can be overridden by setting a 'label callback' on the entity which the
  *       core entity class will call instead if it's set.
  *   - label callback: The name of a function that will be called to override the
  *     label property set in 'entity keys'. By default the core entity class will
