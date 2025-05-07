@@ -283,8 +283,9 @@ function block_render_block($block) {
   $output = '';
   if ($content = $block->getContent()) {
     $content = block_get_renderable_array($block);
+    $output = backdrop_render($output);
   }
-  return backdrop_render($output);;
+  return $output;
 }
 
 /**
