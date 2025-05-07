@@ -90,7 +90,7 @@ class FilterEditorImageDialogTestCase extends BackdropWebTestCase {
     );
     $this->backdropGet('editor/dialog/image/' . $this->format->format, $options);
 
-    // Insert path of the file created in setUp.
+    // Insert path of the file created above.
     $path = base_path() . $this->public_files_directory . '/' . $image->filename;
     $file_path = base_path() . $this->public_files_directory;
 
