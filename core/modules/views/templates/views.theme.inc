@@ -915,7 +915,7 @@ function template_preprocess_views_view_grid_responsive(&$variables) {
 
   $variables['items'] = $items;
 
-  $variables['classes'] = array('views-view-grid', 'views-view-responsive-grid');
+  $variables['classes'] = array('views-view-responsive-grid');
   $variables['classes'][] = 'views-view-responsive-grid--' . $options['alignment'];
   $variables['attributes'] = array('style' => implode(';', array(
     '--views-responsive-grid--column-count:' . $options['columns'],

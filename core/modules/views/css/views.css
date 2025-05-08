@@ -123,14 +123,13 @@
 }
 
 .views-view-responsive-grid--vertical {
-  margin-bottom: calc(var(--views-responsive-grid--layout-gap) * -1);
-  /* Offset the bottom row's padding. */
+  margin-bottom: calc(var(--views-responsive-grid--layout-gap) * -1); /* Offset the bottom row's padding. */
   column-width: var(--views-responsive-grid--cell-min-width);
   column-count: var(--views-responsive-grid--column-count);
   column-gap: var(--views-responsive-grid--layout-gap);
 }
 
-.views-view-responsive-grid--vertical .views-grid-box>* {
+.views-view-responsive-grid--vertical .views-responsive-grid-box>* {
   padding-bottom: var(--views-responsive-grid--layout-gap);
   page-break-inside: avoid;
   break-inside: avoid;
