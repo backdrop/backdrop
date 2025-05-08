@@ -78,7 +78,7 @@ file = filter_dialog.test
 
 [FilterEditorImageDialogTestCase]
 name = Editor image dialog
-description = Whatever...
+description = Test inline image styles via editor image dialog.
 group = Filter
 file = filter_image_dialog.test
 
