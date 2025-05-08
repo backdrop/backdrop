@@ -13,7 +13,7 @@ class views_plugin_style_grid_responsive extends views_plugin_style {
   /**
    * Set default options
    */
-  function option_definition() {
+  public function option_definition() {
     $options = parent::option_definition();
 
     $options['columns'] = array('default' => '4');
@@ -27,7 +27,7 @@ class views_plugin_style_grid_responsive extends views_plugin_style {
   /**
    * Render the given style.
    */
-  function options_form(&$form, &$form_state) {
+  public function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
     $form['columns'] = array(
       '#type' => 'number',
@@ -61,7 +61,10 @@ class views_plugin_style_grid_responsive extends views_plugin_style {
     $form['alignment'] = array(
       '#type' => 'radios',
       '#title' => t('Alignment'),
-      '#options' => array('horizontal' => t('Horizontal'), 'vertical' => t('Vertical')),
+      '#options' => array(
+        'horizontal' => t('Horizontal'),
+        'vertical' => t('Vertical'),
+      ),
       '#default_value' => $this->options['alignment'],
     );
     $form['alignment']['horizontal']['#description'] = t('Places items starting in the upper left and moving right.');
