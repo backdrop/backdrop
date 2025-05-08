@@ -19,7 +19,7 @@
 
 <div class="<?php print implode(' ', $classes); ?>"<?php print backdrop_attributes($attributes); ?>>
   <?php foreach ($items as $id => $item): ?>
-    <div <?php if (!empty($row_classes[$id])) { print 'class="' . implode(' ', $row_classes[$id]) . '"';  } ?>>
+    <div <?php if (!empty($row_classes[$id])) { print 'class="' . implode(' ', $row_classes[$id]) . '"'; } ?>>
       <div class="views-responsive-grid-box-inner">
         <?php print $item; ?>
       </div>
