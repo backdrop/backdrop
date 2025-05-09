@@ -109,6 +109,8 @@
   /* Will be overridden by an inline style. */
   --views-responsive-grid--cell-min-width: 100px;
   /* Will be overridden by an inline style. */
+
+  display: inherit;
 }
 
 .views-view-responsive-grid--horizontal {
@@ -129,7 +131,7 @@
   column-gap: var(--views-responsive-grid--layout-gap);
 }
 
-.views-view-responsive-grid--vertical .views-responsive-grid-box>* {
+.views-view-responsive-grid--vertical .views-grid-box>* {
   padding-bottom: var(--views-responsive-grid--layout-gap);
   page-break-inside: avoid;
   break-inside: avoid;

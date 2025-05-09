@@ -693,6 +693,8 @@ function template_preprocess_views_view_grid(&$variables) {
   // For old view default to table if view settings haven't been updated.
   $variables['deprecated_table'] = (!isset($options['deprecated_table']) || $options['deprecated_table']) ? TRUE : FALSE;
 
+  $variables['responsive'] = (bool) $options['responsive'];
+
   if (!$variables['deprecated_table']) {
     $rows = $variables['rows'];
 
@@ -700,8 +702,8 @@ function template_preprocess_views_view_grid(&$variables) {
     $count = 0;
     $max = count($rows);
 
-    // Reorder based on vertical alignment.
-    if ($options['alignment'] == 'vertical') {
+    // Reorder based on vertical alignment if not using responsive option.
+    if ($options['alignment'] == 'vertical' && !$variables['responsive']) {
       $rows = array();
       $rows_reorder = array();
       $num_rows = floor(count($variables['rows']) / $columns);
@@ -772,7 +774,18 @@ function template_preprocess_views_view_grid(&$variables) {
         $col_count++;
       }
     }
-    $variables['classes'] = array('views-view-grid', 'views-view-grid-cols-' . $columns);
+    if ($variables['responsive']) {
+      $variables['classes'] = array('views-view-grid', 'views-view-responsive-grid');
+      $variables['classes'][] = 'views-view-responsive-grid--' . $options['alignment'];
+      $variables['attributes'] = array('style' => implode(';', array(
+        '--views-responsive-grid--column-count:' . $options['columns'],
+        '--views-responsive-grid--cell-min-width:' . $options['cell_min_width'] . 'px',
+        '--views-responsive-grid--layout-gap:' . $options['grid_gutter'] . 'px',
+      )));
+    }
+    else {
+      $variables['classes'] = array('views-view-grid', 'views-view-grid-cols-' . $columns);
+    }
   }
   else {
     if ($options['alignment'] == 'horizontal') {
@@ -884,46 +897,6 @@ function template_preprocess_views_view_grid(&$variables) {
 
   $variables['rows'] = $rows;
 }
-
-/**
- * Prepares variables for views grid - responsive style templates.
- *
- * Default template: views-view-grid-responsive.tpl.php.
- *
- * @param array $variables
- *   An associative array containing:
- *   - view: The view object.
- *   - rows: An array of row items. Each row is an array of content.
- */
-function template_preprocess_views_view_grid_responsive(&$variables) {
-  $options = $variables['options'] = $variables['view']->style_plugin->options;
-  $view = $variables['view'];
-  $default_row_class = isset($options['default_row_class']) ? $options['default_row_class'] : TRUE;
-
-  $items = [];
-
-  foreach ($variables['rows'] as $id => $item) {
-    $variables['row_classes'][$id] = array();
-    if ($default_row_class) {
-      $variables['row_classes'][$id][] = 'views-responsive-grid-box';
-    }
-    if ($row_class = $view->style_plugin->get_row_class($id)) {
-      $variables['row_classes'][$id][] = $row_class;
-    }
-    $items[$id] = $item;
-  }
-
-  $variables['items'] = $items;
-
-  $variables['classes'] = array('views-view-responsive-grid');
-  $variables['classes'][] = 'views-view-responsive-grid--' . $options['alignment'];
-  $variables['attributes'] = array('style' => implode(';', array(
-    '--views-responsive-grid--column-count:' . $options['columns'],
-    '--views-responsive-grid--cell-min-width:' . $options['cell_min_width'] . 'px',
-    '--views-responsive-grid--layout-gap:' . $options['grid_gutter'] . 'px',
-  )));
-}
-
 
 /**
  * Display the simple view of rows one after another

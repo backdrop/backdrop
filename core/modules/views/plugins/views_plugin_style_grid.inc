@@ -22,6 +22,9 @@ class views_plugin_style_grid extends views_plugin_style {
     $options['summary'] = array('default' => '');
     $options['caption'] = array('default' => '');
     $options['deprecated_table'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['responsive'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['cell_min_width'] = array('default' => '100');
+    $options['grid_gutter'] = array('default' => '10');
 
     return $options;
   }
@@ -38,7 +41,42 @@ class views_plugin_style_grid extends views_plugin_style {
       '#required' => TRUE,
       '#min' => 1,
       '#step' => 1,
-      '#weight' => -2,
+    );
+    $form['responsive'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Responsive'),
+      '#description' => t('The grid cells will reflow to have fewer columns on narrower screens.'),
+      '#default_value' => $this->options['responsive'],
+    );
+    $form['cell_min_width'] = array(
+      '#type' => 'number',
+      '#title' => t('Minimum grid cell width'),
+      '#field_suffix' => 'px',
+      '#attributes' => array('style' => 'width: 6em;'),
+      '#description' => t('The minimum width of the grid cells. If the grid container becomes narrow, the grid cells will reflow onto the next row as needed.'),
+      '#default_value' => $this->options['cell_min_width'],
+      '#required' => TRUE,
+      '#min' => 1,
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="style_options[responsive]"]' => array('checked' => FALSE),
+        ),
+      ),
+    );
+    $form['grid_gutter'] = array(
+      '#type' => 'number',
+      '#title' => t('Grid gutter spacing'),
+      '#field_suffix' => 'px',
+      '#attributes' => array('style' => 'width: 6em;'),
+      '#description' => t('The spacing between the grid cells.'),
+      '#default_value' => $this->options['grid_gutter'],
+      '#required' => TRUE,
+      '#min' => 0,
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="style_options[responsive]"]' => array('checked' => FALSE),
+        ),
+      ),
     );
     $form['alignment'] = array(
       '#type' => 'radios',
