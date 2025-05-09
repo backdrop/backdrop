@@ -693,7 +693,9 @@ function template_preprocess_views_view_grid(&$variables) {
   // For old view default to table if view settings haven't been updated.
   $variables['deprecated_table'] = (!isset($options['deprecated_table']) || $options['deprecated_table']) ? TRUE : FALSE;
 
-  $variables['responsive'] = (bool) $options['responsive'];
+  // Existing grid is unresponsive. Default to unresponsive if the view settings
+  // haven't been updated.
+  $variables['deprecated_unresponsive'] = (!isset($options['deprecated_unresponsive']) || $options['deprecated_unresponsive']) ? TRUE : FALSE;
 
   if (!$variables['deprecated_table']) {
     $rows = $variables['rows'];
@@ -703,7 +705,7 @@ function template_preprocess_views_view_grid(&$variables) {
     $max = count($rows);
 
     // Reorder based on vertical alignment if not using responsive option.
-    if ($options['alignment'] == 'vertical' && !$variables['responsive']) {
+    if ($options['alignment'] == 'vertical' && $variables['deprecated_unresponsive']) {
       $rows = array();
       $rows_reorder = array();
       $num_rows = floor(count($variables['rows']) / $columns);
@@ -774,7 +776,7 @@ function template_preprocess_views_view_grid(&$variables) {
         $col_count++;
       }
     }
-    if ($variables['responsive']) {
+    if (!$variables['deprecated_unresponsive']) {
       $variables['classes'] = array(
         'views-view-grid',
         'views-view-responsive-grid',
