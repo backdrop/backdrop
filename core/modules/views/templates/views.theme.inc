@@ -693,9 +693,7 @@ function template_preprocess_views_view_grid(&$variables) {
   // For old view default to table if view settings haven't been updated.
   $variables['deprecated_table'] = (!isset($options['deprecated_table']) || $options['deprecated_table']) ? TRUE : FALSE;
 
-  // Existing grid is unresponsive. Default to unresponsive if the view settings
-  // haven't been updated.
-  $variables['unresponsive'] = (!isset($options['unresponsive']) || $options['unresponsive']) ? TRUE : FALSE;
+  $variables['responsive'] = (bool) $options['responsive'];
 
   if (!$variables['deprecated_table']) {
     $rows = $variables['rows'];
@@ -705,7 +703,7 @@ function template_preprocess_views_view_grid(&$variables) {
     $max = count($rows);
 
     // Reorder based on vertical alignment if not using responsive option.
-    if ($options['alignment'] == 'vertical' && $variables['unresponsive']) {
+    if ($options['alignment'] == 'vertical' && !$variables['responsive']) {
       $rows = array();
       $rows_reorder = array();
       $num_rows = floor(count($variables['rows']) / $columns);
@@ -776,24 +774,17 @@ function template_preprocess_views_view_grid(&$variables) {
         $col_count++;
       }
     }
-    if (!$variables['unresponsive']) {
-      $variables['classes'] = array(
-        'views-view-grid',
-        'views-view-responsive-grid',
-      );
+    if ($variables['responsive']) {
+      $variables['classes'] = array('views-view-grid', 'views-view-responsive-grid');
       $variables['classes'][] = 'views-view-responsive-grid--' . $options['alignment'];
       $variables['attributes'] = array('style' => implode(';', array(
         '--views-responsive-grid--column-count:' . $options['columns'],
-        '--views-responsive-grid--cell-min-width:' . ($options['cell_min_width']['width'] ?? 16) . ($options['cell_min_width']['unit'] ?? 'rem'),
-        '--views-responsive-grid--layout-gap:' . ($options['grid_gutter']['width'] ?? 2) . ($options['grid_gutter']['unit'] ?? 'rem'),
+        '--views-responsive-grid--cell-min-width:' . $options['cell_min_width'] . 'px',
+        '--views-responsive-grid--layout-gap:' . $options['grid_gutter'] . 'px',
       )));
     }
-    // Non-responsive grid uses a simple grid style.
     else {
-      $variables['classes'] = array(
-        'views-view-grid',
-        'views-view-grid-cols-' . $columns,
-      );
+      $variables['classes'] = array('views-view-grid', 'views-view-grid-cols-' . $columns);
     }
   }
   // Deprecated table style.
@@ -907,46 +898,6 @@ function template_preprocess_views_view_grid(&$variables) {
 
   $variables['rows'] = $rows;
 }
-
-/**
- * Prepares variables for views grid - responsive style templates.
- *
- * Default template: views-view-grid-responsive.tpl.php.
- *
- * @param array $variables
- *   An associative array containing:
- *   - view: The view object.
- *   - rows: An array of row items. Each row is an array of content.
- */
-function template_preprocess_views_view_grid_responsive(&$variables) {
-  $options = $variables['options'] = $variables['view']->style_plugin->options;
-  $view = $variables['view'];
-  $default_row_class = isset($options['default_row_class']) ? $options['default_row_class'] : TRUE;
-
-  $items = [];
-
-  foreach ($variables['rows'] as $id => $item) {
-    $variables['row_classes'][$id] = array();
-    if ($default_row_class) {
-      $variables['row_classes'][$id][] = 'views-responsive-grid-box';
-    }
-    if ($row_class = $view->style_plugin->get_row_class($id)) {
-      $variables['row_classes'][$id][] = $row_class;
-    }
-    $items[$id] = $item;
-  }
-
-  $variables['items'] = $items;
-
-  $variables['classes'] = array('views-view-responsive-grid');
-  $variables['classes'][] = 'views-view-responsive-grid--' . $options['alignment'];
-  $variables['attributes'] = array('style' => implode(';', array(
-    '--views-responsive-grid--column-count:' . $options['columns'],
-    '--views-responsive-grid--cell-min-width:' . $options['cell_min_width'] . 'px',
-    '--views-responsive-grid--layout-gap:' . $options['grid_gutter'] . 'px',
-  )));
-}
-
 
 /**
  * Display the simple view of rows one after another

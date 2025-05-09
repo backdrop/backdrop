@@ -22,11 +22,9 @@ class views_plugin_style_grid extends views_plugin_style {
     $options['summary'] = array('default' => '');
     $options['caption'] = array('default' => '');
     $options['deprecated_table'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['unresponsive'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['cell_min_width']['width'] = array('default' => 16);
-    $options['cell_min_width']['unit'] = array('default' => 'rem');
-    $options['grid_gutter']['width'] = array('default' => 2);
-    $options['grid_gutter']['unit'] = array('default' => 'rem');
+    $options['responsive'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['cell_min_width'] = array('default' => '100');
+    $options['grid_gutter'] = array('default' => '10');
 
     return $options;
   }
@@ -44,81 +42,41 @@ class views_plugin_style_grid extends views_plugin_style {
       '#min' => 1,
       '#step' => 1,
     );
+    $form['responsive'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Responsive'),
+      '#description' => t('The grid cells will reflow to have fewer columns on narrower screens.'),
+      '#default_value' => $this->options['responsive'],
+    );
     $form['cell_min_width'] = array(
-      '#type' => 'container',
-      '#attributes' => array('class' => array('container-inline')),
+      '#type' => 'number',
+      '#title' => t('Minimum grid cell width'),
+      '#field_suffix' => 'px',
+      '#attributes' => array('style' => 'width: 6em;'),
+      '#description' => t('The minimum width of the grid cells. If the grid container becomes narrow, the grid cells will reflow onto the next row as needed.'),
+      '#default_value' => $this->options['cell_min_width'],
+      '#required' => TRUE,
+      '#min' => 1,
       '#states' => array(
         'invisible' => array(
-          array(':input[name="style_options[unresponsive]"]' => array('checked' => TRUE)),
-          array(':input[name="style_options[deprecated_table]"]' => array('checked' => TRUE)),
+          ':input[name="style_options[responsive]"]' => array('checked' => FALSE),
         ),
       ),
-    );
-    $form['cell_min_width']['width'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Minimum grid cell width'),
-      '#title_display' => 'invisible',
-      '#prefix' => t('Minimum grid cell width'),
-      '#default_value' => $this->options['cell_min_width']['width'] ?? '16',
-      '#required' => TRUE,
-      '#element_validate' => array('form_validate_number'),
-      '#min' => 0,
-      '#size' => 4,
-    );
-    $form['cell_min_width']['unit'] = array(
-      '#type' => 'select',
-      '#title' => t('Cell width unit'),
-      '#title_display' => 'invisible',
-      '#prefix' => t('in'),
-      '#options' => array(
-        'px' => 'px',
-        'em' => 'em',
-        'rem' => 'rem',
-      ),
-      '#default_value' => $this->options['cell_min_width']['unit'] ?? 'rem',
-      '#required' => TRUE,
-    );
-    $form['cell_help'] = array(
-      '#type' => 'item',
-      '#description' => t('The minimum width of the grid cells. If the grid container becomes narrow, the grid cells will reflow onto the next row as needed.'),
     );
     $form['grid_gutter'] = array(
-      '#type' => 'container',
-      '#attributes' => array('class' => array('container-inline')),
+      '#type' => 'number',
+      '#title' => t('Grid gutter spacing'),
+      '#field_suffix' => 'px',
+      '#attributes' => array('style' => 'width: 6em;'),
+      '#description' => t('The spacing between the grid cells.'),
+      '#default_value' => $this->options['grid_gutter'],
+      '#required' => TRUE,
+      '#min' => 0,
       '#states' => array(
         'invisible' => array(
-          array(':input[name="style_options[unresponsive]"]' => array('checked' => TRUE)),
-          array(':input[name="style_options[deprecated_table]"]' => array('checked' => TRUE)),
+          ':input[name="style_options[responsive]"]' => array('checked' => FALSE),
         ),
       ),
-    );
-    $form['grid_gutter']['width'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Grid gutter spacing'),
-      '#title_display' => 'invisible',
-      '#prefix' => t('Grid gutter spacing'),
-      '#default_value' => $this->options['grid_gutter']['width'] ?? '2',
-      '#required' => TRUE,
-      '#element_validate' => array('form_validate_number'),
-      '#min' => 0,
-      '#size' => 4,
-    );
-    $form['grid_gutter']['unit'] = array(
-      '#type' => 'select',
-      '#title' => t('Grid gutter unit'),
-      '#title_display' => 'invisible',
-      '#prefix' => t('in'),
-      '#options' => array(
-        'px' => 'px',
-        'em' => 'em',
-        'rem' => 'rem',
-      ),
-      '#default_value' => $this->options['grid_gutter']['unit'] ?? 'rem',
-      '#required' => TRUE,
-    );
-    $form['gutter_help'] = array(
-      '#type' => 'item',
-      '#description' => t('The spacing between the grid cells.'),
     );
     $form['alignment'] = array(
       '#type' => 'radios',

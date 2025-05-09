@@ -2271,7 +2271,6 @@ function views_autoload_info() {
     'views_plugin_style' => 'plugins/views_plugin_style.inc',
     'views_plugin_style_default' => 'plugins/views_plugin_style_default.inc',
     'views_plugin_style_grid' => 'plugins/views_plugin_style_grid.inc',
-    'views_plugin_style_grid_responsive' => 'plugins/views_plugin_style_grid_responsive.inc',
     'views_plugin_style_list' => 'plugins/views_plugin_style_list.inc',
     'views_plugin_style_jump_menu' => 'plugins/views_plugin_style_jump_menu.inc',
     'views_plugin_style_mapping' => 'plugins/views_plugin_style_mapping.inc',
