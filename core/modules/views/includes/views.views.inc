@@ -269,18 +269,6 @@ function views_views_plugins() {
         'type' => 'normal',
         'help topic' => 'style-grid',
       ),
-      'grid_responsive' => array(
-        'title' => t('Responsive Grid'),
-        'help' => t('Displays rows in a responsive grid.'),
-        'handler' => 'views_plugin_style_grid_responsive',
-        'theme' => 'views_view_grid_responsive',
-        'uses fields' => FALSE,
-        'uses row plugin' => TRUE,
-        'uses row class' => TRUE,
-        'uses options' => TRUE,
-        'type' => 'normal',
-        'help topic' => 'style-grid',
-      ),
       'table' => array(
         'title' => t('Table'),
         'help' => t('Displays rows in a table.'),
