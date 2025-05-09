@@ -22,7 +22,7 @@ class views_plugin_style_grid extends views_plugin_style {
     $options['summary'] = array('default' => '');
     $options['caption'] = array('default' => '');
     $options['deprecated_table'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['responsive'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['deprecated_unresponsive'] = array('default' => FALSE, 'bool' => TRUE);
     $options['cell_min_width'] = array('default' => '100');
     $options['grid_gutter'] = array('default' => '10');
 
@@ -42,12 +42,6 @@ class views_plugin_style_grid extends views_plugin_style {
       '#min' => 1,
       '#step' => 1,
     );
-    $form['responsive'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Responsive'),
-      '#description' => t('The grid cells will reflow to have fewer columns on narrower screens.'),
-      '#default_value' => $this->options['responsive'],
-    );
     $form['cell_min_width'] = array(
       '#type' => 'number',
       '#title' => t('Minimum grid cell width'),
@@ -59,7 +53,7 @@ class views_plugin_style_grid extends views_plugin_style {
       '#min' => 1,
       '#states' => array(
         'invisible' => array(
-          ':input[name="style_options[responsive]"]' => array('checked' => FALSE),
+          ':input[name="style_options[deprecated_unresponsive]"]' => array('checked' => TRUE),
         ),
       ),
     );
@@ -74,7 +68,7 @@ class views_plugin_style_grid extends views_plugin_style {
       '#min' => 0,
       '#states' => array(
         'invisible' => array(
-          ':input[name="style_options[responsive]"]' => array('checked' => FALSE),
+          ':input[name="style_options[deprecated_unresponsive]"]' => array('checked' => TRUE),
         ),
       ),
     );
@@ -87,6 +81,17 @@ class views_plugin_style_grid extends views_plugin_style {
     $form['alignment']['horizontal']['#description'] = t('Places items starting in the upper left and moving right.');
     $form['alignment']['vertical']['#description'] = t('Places items starting in the upper left and moving down.');
 
+    $form['deprecated_unresponsive'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Use unresponsive grid (deprecated)'),
+      '#description' => t('The grid cells will not reflow to have fewer columns on narrower screens.'),
+      '#default_value' => !empty($this->options['deprecated_unresponsive']),
+      '#states' => array(
+        'invisible' => array(
+          ':input[name="style_options[deprecated_table]"]' => array('checked' => TRUE),
+        ),
+      ),
+    );
     $form['deprecated_table'] = array(
       '#type' => 'checkbox',
       '#title' => t('Use HTML table (deprecated)'),
