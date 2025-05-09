@@ -775,7 +775,10 @@ function template_preprocess_views_view_grid(&$variables) {
       }
     }
     if ($variables['responsive']) {
-      $variables['classes'] = array('views-view-grid', 'views-view-responsive-grid');
+      $variables['classes'] = array(
+        'views-view-grid',
+        'views-view-responsive-grid',
+      );
       $variables['classes'][] = 'views-view-responsive-grid--' . $options['alignment'];
       $variables['attributes'] = array('style' => implode(';', array(
         '--views-responsive-grid--column-count:' . $options['columns'],
@@ -783,8 +786,12 @@ function template_preprocess_views_view_grid(&$variables) {
         '--views-responsive-grid--layout-gap:' . $options['grid_gutter'] . 'px',
       )));
     }
+    // Non-responsive grid uses a simple grid style.
     else {
-      $variables['classes'] = array('views-view-grid', 'views-view-grid-cols-' . $columns);
+      $variables['classes'] = array(
+        'views-view-grid',
+        'views-view-grid-cols-' . $columns,
+      );
     }
   }
   // Deprecated table style.
