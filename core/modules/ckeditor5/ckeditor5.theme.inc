@@ -117,7 +117,8 @@ function template_preprocess_ckeditor5_settings_toolbar(&$variables) {
       $variables['multiple_buttons'][] = $build_button_item($button, $rtl);
     }
   }
-  if (!state_get('database_utf8mb4_active')) {
+  $connection = Database::getConnection();
+  if (!state_get('database_utf8mb4_active', FALSE) || !$connection->utf8mb4IsSupported()) {
     backdrop_set_message(t('The database does not support 4-byte UTF-8. Saving content with inserted emojis will cause errors. The Emoji button should not be enabled.'), 'warning');
   }
 }
