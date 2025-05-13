@@ -118,7 +118,7 @@ function template_preprocess_ckeditor5_settings_toolbar(&$variables) {
     }
   }
   if (!state_get('database_utf8mb4_active')) {
-    backdrop_set_message(t('Your database does not support 4-byte UTF-8, so inserting emojis will cause errors, when saving content. Make sure, the Emoji button is disabled.'), 'warning');
+    backdrop_set_message(t('The database does not support 4-byte UTF-8. Saving content with inserted emojis will cause errors. The Emoji button should not be enabled.'), 'warning');
   }
 }
 
