@@ -1,16 +1,6 @@
 # Updating CKEditor 5
 
-This directory contains a custom DLL build of CKEditor 5. Normal builds of
-CKEditor, such as the one created through the CKEditor Online Builder Tool, must
-be configured with desired plugins at the time it is compiled. Because Backdrop
-needs to allow plugins to be loaded by individual modules, using the normal
-builder tool is not suitable.
-
-A DLL (Dynamically Linked Library) build on the other hand allows plugins to
-be loaded as separate individual files. When updating CKEditor 5, a new DLL
-build must be created.
-
-See https://ckeditor.com/docs/ckeditor5/latest/installation/advanced/alternative-setups/dll-builds.html#creating-a-dll-build
+This directory contains CKEditor 5 UMD build.
 
 ## Steps to update
 
@@ -22,18 +12,21 @@ See https://ckeditor.com/docs/ckeditor5/latest/installation/advanced/alternative
    mkdir ~/ckeditor5-temp
    cd ~/ckeditor5-temp
    ```
-3. Copy the script from lib/scripts there and make it executable:
+3. Download the latest version
    ```
-   cp [original/location/]concat-build.sh concat-build.sh
-   chmod +x concat-build.sh
+   npm install --save ckeditor5
    ```
-4. Run the script. This will download the DLL build via npm and concat the core
+4. Copy the translations directory recursively to your dev branch
    and plugin builds into one file.
    ```
-   ./concat-build.sh
+   cp -R ... @todo
    ```
-5. Copy the resulting "ckeditor5-dll.js" file and the "translations" directory
-   into the module directory lib/ckeditor5/build/
+5. Copy the relevant files to the dist folder of your dev branch
+   ```
+   cp node_modules/ckeditor5/dist/browser/ckeditor5.umd.js ... @todo
+   cp node_modules/ckeditor5/dist/browser/ckeditor5.umd.js.map ... @todo
+   cp node_modules/ckeditor5... .css @todo
+   ```
 6. Update the CKEDITOR5_VERSION constant in ckeditor5.module
 
 ## Determine version number

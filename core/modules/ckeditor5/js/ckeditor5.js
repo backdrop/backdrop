@@ -61,10 +61,17 @@
       // Convert the plugin list from strings to variable names. Each CKEditor
       // plugin is located under "CKEditor5.[packageName].[moduleName]". So
       // we convert the list of strings to match the expected variable name.
+      // @todo fix this ^^ comment. It's not accurate anymore.
       editorSettings.plugins = [];
       editorSettings.pluginList.forEach(function(pluginItem) {
         const [packageName,moduleName] = pluginItem.split('.');
-        if (typeof CKEditor5[packageName] != 'undefined') {
+        // Native plugins are defined differently with UMD.
+        if (typeof CKEditor5[moduleName] != 'undefined') {
+          editorSettings.plugins.push(CKEditor5[moduleName]);
+        }
+        // Backwards compatible to how plugins were defined for DLL - and how
+        // existing custom plugins still define it.
+        else if (typeof CKEditor5[packageName] != 'undefined') {
           editorSettings.plugins.push(CKEditor5[packageName][moduleName]);
         }
       });
@@ -74,7 +81,7 @@
       element.ckeditor5Processed = true;
 
       const beforeAttachValue = element.value;
-      CKEditor5.editorClassic.ClassicEditor
+      CKEditor5.ClassicEditor
         .create(element, editorSettings)
         .then(editor => {
           Backdrop.ckeditor5.setEditorOffset(editor);
