@@ -66,7 +66,7 @@
       editorSettings.pluginList.forEach(function(pluginItem) {
         const [packageName,moduleName] = pluginItem.split('.');
         // Native plugins are defined differently with UMD.
-        if (typeof CKEditor5[moduleName] != 'undefined') {
+        if (typeof CKEditor5[moduleName] != 'undefined' && CKEditor5[moduleName].hasOwnProperty('pluginName')) {
           editorSettings.plugins.push(CKEditor5[moduleName]);
         }
         // Backwards compatible to how plugins were defined for DLL - and how
