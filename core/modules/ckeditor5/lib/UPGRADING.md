@@ -24,7 +24,6 @@ This directory contains CKEditor 5 UMD build.
 5. Copy the relevant files to the dist folder of your dev branch
    ```
    cp node_modules/ckeditor5/dist/browser/ckeditor5.umd.js ... @todo
-   cp node_modules/ckeditor5/dist/browser/ckeditor5.umd.js.map ... @todo
    cp node_modules/ckeditor5... .css @todo
    ```
 6. Update the CKEDITOR5_VERSION constant in ckeditor5.module
