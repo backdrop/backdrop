@@ -16,10 +16,10 @@ This directory contains CKEditor 5 UMD build.
    ```
    npm install --save ckeditor5
    ```
-4. Copy the translations directory recursively to your dev branch
+4. Copy relevant umd files from translations directory:
    and plugin builds into one file.
    ```
-   cp -R ... @todo
+   cp -R ... *umd.js ... @todo
    ```
 5. Copy the relevant files to the dist folder of your dev branch
    ```
