@@ -3,6 +3,7 @@
  * Backwards compatibility to integration via DLL builds.
  */
 (function () {
+  "use strict";
 
   // Mimic some of the DLL structure by adding some aliases for commonly
   // extended classes. It won't be possible to mimic the entire DLL structure.
