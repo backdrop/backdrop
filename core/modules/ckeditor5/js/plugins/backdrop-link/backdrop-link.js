@@ -106,7 +106,7 @@ class BackdropLink extends CKEditor5.core.Plugin {
     linkCommand.on('execute', (evt, args) => {
       // Custom handling is only required if an extra attribute was passed into
       // editor.execute('link', ...).
-      if (args.length < 3) {
+      if (args.length < 4) {
         return;
       }
       if (linkCommandExecuting) {
@@ -199,7 +199,7 @@ class BackdropLink extends CKEditor5.core.Plugin {
           let ranges;
 
           if (selection.isCollapsed) {
-            ranges = [CKEditor5.typing.findAttributeRange(
+            ranges = [CKEditor5.findAttributeRange(
               selection.getFirstPosition(),
               modelName,
               selection.getAttribute( modelName ),
@@ -306,7 +306,7 @@ class BackdropLink extends CKEditor5.core.Plugin {
           // This is not ideal to call an internal method to show the balloon,
           // but this is the same approach used by LinkImageUI.
           // See https://github.com/ckeditor/ckeditor5/blob/master/packages/ckeditor5-link/src/linkimageui.ts
-          linkUI._addActionsView();
+          linkUI._addToolbarView();
         }
         // For new links, open the link dialog directly.
         else {
@@ -337,16 +337,17 @@ class BackdropLink extends CKEditor5.core.Plugin {
 
     // Bind to the balloon being shown and check for the link UI.
     this.listenTo(contextualBalloonPlugin, 'change:visibleView', (evt, name, visibleView) => {
-      const actionsView = linkUI.actionsView;
-      if (actionsView && visibleView === actionsView) {
+      const toolbarView = linkUI.toolbarView;
+      if (toolbarView && visibleView === toolbarView) {
         if (!linkUiModified) {
           linkUiModified = true;
           // Turn off the normal link editing action.
-          // See LinkUI::_createActionsView().
-          linkUI.stopListening(actionsView, 'edit');
+          // See LinkUI::_registerComponents().
+          const linkButtonView = toolbarView.items.get(2);
+          linkUI.stopListening(linkButtonView, 'execute');
           // Replace with firing the backdropLink action instead.
-          this.listenTo(actionsView, 'edit', () => {
-            contextualBalloonPlugin.remove(actionsView);
+          this.listenTo(linkButtonView, 'execute', () => {
+            contextualBalloonPlugin.remove(toolbarView);
             backdropLinkCommand.execute();
           });
         }
@@ -428,13 +429,13 @@ class BackdropLinkCommand extends CKEditor5.core.Command {
         delete returnValues.attributes['text'];
       }
 
-      // The normal link command does not support a 3rd argument natively.
+      // The normal link command does not support a 4th argument natively.
       // This has been extended in _addExtraAttributeOnLinkCommandExecute()
       // to also accept an array of attributes to be saved.
       // See https://github.com/ckeditor/ckeditor5/blob/master/packages/ckeditor5-link/src/linkcommand.ts
       // There is also a feature request to make this native to CKEditor
       // here: https://github.com/ckeditor/ckeditor5/issues/9730
-      linkCommand.execute(newHref, {}, returnValues.attributes);
+      linkCommand.execute(newHref, {}, null, returnValues.attributes);
     }
 
     Backdrop.ckeditor5.openDialog(editor, config.dialogUrl, existingValues, saveCallback, dialogSettings);
