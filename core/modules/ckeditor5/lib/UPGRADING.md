@@ -7,32 +7,28 @@ This directory contains CKEditor 5 UMD build.
 1. Install npm if you do not have it on your system. The recommended way to get
    npm running is to install nvm (Node Version Manager), which in turn installs
    npm and allows you to switch between multiple different versions.
-2. Make a temporary working directory anywhere on your system. e.g.
-   ```
-   mkdir ~/ckeditor5-temp
-   cd ~/ckeditor5-temp
-   ```
-3. Download the latest version
+2. Download the latest version
    ```
    npm install --save ckeditor5
    ```
-4. Copy relevant umd files from translations directory:
+3. Copy relevant umd files from translations directory:
    and plugin builds into one file.
    ```
-   cp -R ... *umd.js ... @todo
+   cp node_modules/ckeditor5/dist/translations/*umd.js PATH/TO/core/modules/ckeditor5/lib/ckeditor5/dist/translations/
    ```
-5. Copy the relevant files to the dist folder of your dev branch
+4. Copy the relevant files to the dist folder of your dev branch
    ```
-   cp node_modules/ckeditor5/dist/browser/ckeditor5.umd.js ... @todo
-   cp node_modules/ckeditor5... .css @todo
+   cp node_modules/ckeditor5/dist/browser/ckeditor5.umd.js PATH/TO/core/modules/ckeditor5/lib/ckeditor5/dist/browser/
+   cp node_modules/ckeditor5/dist/browser/ckeditor5.css PATH/TO/core/modules/ckeditor5/lib/ckeditor5/dist/browser/
    ```
-6. Update the CKEDITOR5_VERSION constant in ckeditor5.module
+5. Update the CKEDITOR5_VERSION constant in ckeditor5.module
 
 ## Determine version number
 
-When downloading via npm, the directory you run concat-build.sh in, will then
-contain a package.json file, where you can find the version number.
-
+```
+npm ls
+```
+Or from package.json file.
 
 ## Updating Emoji version
 
