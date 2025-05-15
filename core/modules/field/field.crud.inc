@@ -513,16 +513,6 @@ function field_create_instance($instance) {
     throw new FieldException($message);
   }
 
-  // Check to ensure that the field instance does not have a reserved word for
-  // this entity type.
-  $entity_info = entity_get_info($instance['entity_type']);
-  if (in_array($instance['field_name'], $entity_info['entity keys'])) {
-    throw new FieldException(t("You cannot add the existing field with the machine name '@name' to a @type as this machine name is reserved by this entity type", array(
-      '@name' => $instance['field_name'],
-      '@type' => $entity_info['label'],
-    )));
-  }
-
   // Give the instance a default label.
   if (strlen($instance['label']) === 0) {
     $instance['label'] = $instance['field_name'];
@@ -642,6 +632,27 @@ function field_validate_instance($instance, $update = FALSE, $load_field = TRUE)
     // @todo: Check that the widget type is known and can handle the field type.
     // @todo: Check that the formatters are known and can handle the field type.
     // @todo: Check that the display display modes are known for the entity type.
+  }
+
+  // Check to ensure that the field instance does not have a reserved word for
+  // this entity type.
+  $entity_info = entity_get_info($instance['entity_type']);
+  if (in_array($instance['field_name'], $entity_info['entity keys'])) {
+    // If it does, check whether this is new or an update and tailor the
+    // message accordingly.
+    if ($update) {
+      $error_message = t("The machine name '@name' is invalid for a @type as this machine name is reserved by this entity type. You will not be able to save any @type with this field on. Press the back button in your browser and delete this field; create a new field with an alternative machine name.", array(
+        '@name' => $instance['field_name'],
+        '@type' => $entity_info['label'],
+      ));
+    }
+    else {
+      $error_message = t("You cannot add the existing field with the machine name '@name' to a @type as this machine name is reserved by this entity type", array(
+        '@name' => $instance['field_name'],
+        '@type' => $entity_info['label'],
+      ));
+    }
+    throw new FieldException($error_message);
   }
 }
 
