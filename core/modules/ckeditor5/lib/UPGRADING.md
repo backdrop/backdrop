@@ -1,6 +1,6 @@
 # Updating CKEditor 5
 
-This directory contains CKEditor 5 UMD build.
+This directory contains CKEditor 5 UMD build, available via npm.
 
 ## Steps to update
 
@@ -11,8 +11,7 @@ This directory contains CKEditor 5 UMD build.
    ```
    npm install --save ckeditor5
    ```
-3. Copy relevant umd files from translations directory:
-   and plugin builds into one file.
+3. Copy relevant umd files (and only those) from translations directory:
    ```
    cp node_modules/ckeditor5/dist/translations/*umd.js PATH/TO/core/modules/ckeditor5/lib/ckeditor5/dist/translations/
    ```

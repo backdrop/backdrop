@@ -58,14 +58,12 @@
         }
       }
 
-      // Convert the plugin list from strings to variable names. Each CKEditor
-      // plugin is located under "CKEditor5.[packageName].[moduleName]". So
-      // we convert the list of strings to match the expected variable name.
-      // @todo fix this ^^ comment. It's not accurate anymore.
+      // Convert the plugin list from strings to variable names.
       editorSettings.plugins = [];
       editorSettings.pluginList.forEach(function(pluginItem) {
         const [packageName,moduleName] = pluginItem.split('.');
-        // Native plugins are defined differently with UMD.
+        // In UMD builds, native plugins are direct children of the global
+        // CKEditor object, this has changed compared to DLL.
         if (typeof CKEditor5[moduleName] != 'undefined' && CKEditor5[moduleName].hasOwnProperty('pluginName')) {
           editorSettings.plugins.push(CKEditor5[moduleName]);
         }
