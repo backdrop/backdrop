@@ -1,6 +1,6 @@
 /**
  * @file
- * Backwards compatibility to integration via DLL builds.
+ * Backwards compatibility of UMD build to integration via DLL builds.
  */
 (function () {
   "use strict";
@@ -11,8 +11,8 @@
   CKEDITOR.core = {};// Does not exist in UMD.
   CKEDITOR.core.Plugin = CKEDITOR.Plugin;
   CKEDITOR.core.Command = CKEDITOR.Command;
-  // @todo what about the icons? That's a total mess and will change again.
-  // @see https://github.com/ckeditor/ckeditor5/issues/17779
+  // Icon location and names have changed compared to DLL.
+  // @todo should we expose all of then in their old location (currently 763 icons)
   CKEDITOR.core.icons = {
     pencil: CKEDITOR.IconPencil,
     image: CKEDITOR.IconImage
