@@ -181,7 +181,7 @@ function node_access_entity_test_page() {
  * Page callback for node access join test page.
  *
  * This page simulates the views used for testing in the d8 version of the
- * code, but without introducing a views dependency in d7.
+ * code, but without adding the complexity of creating views here.
  *
  * Page should say "No nodes" if there are no nodes, and "Yes, # nodes" (with
  * the number filled in) if there were nodes the user could access. If there
