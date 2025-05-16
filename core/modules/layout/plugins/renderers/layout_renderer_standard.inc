@@ -523,7 +523,7 @@ class LayoutRendererStandard {
     if ($content = $block->getContent()) {
       $style = layout_get_style_info($block->style->plugin);
 
-      $render_array = block_get_renderable_array($block);
+      $render_array = layout_block_get_renderable_array($block);
 
       // Add the contextual links.
       if (!($block->module === 'system' && $block->delta === 'main')) {
