@@ -352,12 +352,12 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
 /**
  * Render API callback: Checks if a custom block machine name is taken.
  *
- * @param $value
+ * @param string $value
  *   The machine name.
  *
- * @return
+ * @return bool
  *   Whether or not the custom block machine name is taken.
- * 
+ *
  * @since 1.31.1
  */
 function _block_custom_block_name_exists($value) {
