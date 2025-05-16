@@ -430,8 +430,6 @@ function theme_status_report($variables) {
   }
 
   $system_status_report_table['rows'] = $rows;
-  $path = backdrop_get_path('module', 'system');
-  backdrop_add_js($path . '/js/status.js');
 
   return theme_table($system_status_report_table);
 }

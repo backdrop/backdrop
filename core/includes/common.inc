@@ -483,18 +483,18 @@ function backdrop_get_feeds($delimiter = "\n") {
 /**
  * Processes a URL query parameter array to remove unwanted elements.
  *
- * @param $query
+ * @param array|null $query
  *   (optional) An array to be processed. Defaults to $_GET.
- * @param $exclude
+ * @param array $exclude
  *   (optional) A list of $query array keys to remove. Use "parent[child]" to
  *   exclude nested items. Defaults to array('q').
- * @param $parent
+ * @param string $parent
  *   Internal use only. Used to build the $query array key for nested items.
  *
- * @return
+ * @return array
  *   An array containing query parameters, which can be used for url().
  */
-function backdrop_get_query_parameters(array $query = NULL, array $exclude = array('q'), $parent = '') {
+function backdrop_get_query_parameters(?array $query = NULL, array $exclude = array('q'), $parent = '') {
   // Set defaults, if none given.
   if (!isset($query)) {
     $query = $_GET;
@@ -965,7 +965,7 @@ function backdrop_http_request($url, array $options = array()) {
   $alternate_http_system = &backdrop_static('__FUNCTION__');
   if (!isset($alternate_http_system)) {
     $class = settings_get('http_system');
-    /* @var BackdropHTTPSystemInterface $alternate_http_system */
+    /** @var BackdropHTTPSystemInterface $alternate_http_system */
     $alternate_http_system = $class ? new $class() : FALSE;
   }
   if ($alternate_http_system) {
@@ -1745,7 +1745,7 @@ function tempstore_clear_all($collection) {
  * @{
  * Functions to sanitize values.
  *
- * See http://drupal.org/writing-secure-code for information
+ * See https://docs.backdropcms.org/documentation/writing-secure-code for information
  * on writing secure code.
  */
 
@@ -2620,16 +2620,16 @@ function format_date($timestamp, $date_format_name = 'medium', $pattern = '', $t
  *
  * Callback for preg_replace_callback() within format_date().
  *
- * @param array $matches
+ * @param array|null $matches
  *   The array of matches as found by preg_replace_callback().
- * @param string $new_langcode
+ * @param string|null $new_langcode
  *   Sets the internal langcode to be used. Set the langcode prior to calling
  *   preg_replace_callback().
  *
  * @return string
  *   The date from $matches as a translated string.
  */
-function _format_date_callback(array $matches = NULL, $new_langcode = NULL) {
+function _format_date_callback(?array $matches = NULL, $new_langcode = NULL) {
   // We cache translations to avoid redundant and rather costly calls to t().
   static $cache, $langcode;
 
@@ -3479,7 +3479,7 @@ function backdrop_add_html_head_link($attributes, $header = FALSE) {
 /**
  * Constructs an array of the defaults that are used for styles items.
  *
- * @param array|null $data
+ * @param string|null $data
  *   (optional) The default data parameter for the style item array.
  *
  * @see backdrop_get_css()
@@ -3532,7 +3532,7 @@ function backdrop_css_defaults($data = NULL) {
  * Non-preprocessed files should only be added to the page when they are
  * actually needed.
  *
- * @param array|null $data
+ * @param string|null $data
  *   (optional) The stylesheet data to be added, depending on what is passed
  *   through to the $options['type'] parameter:
  *   - 'file': The path to the CSS file relative to the base_path(), or a
@@ -4664,7 +4664,7 @@ function backdrop_region_class($region) {
  * Non-preprocessed files should only be added to the page when they are
  * actually needed.
  *
- * @param $data
+ * @param string|null $data
  *   (optional) If given, the value depends on the $options parameter, or
  *   $options['type'] if $options is passed as an associative array:
  *   - 'file': Path to the file relative to base_path().
@@ -4678,7 +4678,7 @@ function backdrop_region_class($region) {
  *     the Backdrop.settings namespace. Settings within the same namespace will
  *     be recursively merged together unless a "key" option is specified in the
  *     $options array.
- * @param $options
+ * @param string|array|null $options
  *   (optional) A string defining the type of JavaScript that is being added in
  *   the $data parameter ('file'/'setting'/'inline'/'external'), or an
  *   associative array.
@@ -8842,7 +8842,7 @@ function backdrop_explode_tags($tags) {
     return array();
   }
   // This regexp allows the following types of user input:
-  // this, "somecompany, llc", "and ""this"" w,o.rks", foo bar
+  // this, "some company, llc", "and ""this"" w,o.rks", foo bar
   $regexp = '%(?:^|,\ *)("(?>[^"]*)(?>""[^"]* )*"|(?: [^",]*))%x';
   preg_match_all($regexp, $tags, $matches);
   $typed_tags = array_unique($matches[1]);

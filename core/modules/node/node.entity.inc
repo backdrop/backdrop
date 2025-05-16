@@ -771,7 +771,7 @@ class NodeStorageController extends EntityDatabaseStorageController {
 
     $view = array();
     foreach ($nodes as $node) {
-      /* @var Node $node */
+      /** @var Node $node */
       if (isset($node->preview) && ($node->preview == 'Preview')) {
         backdrop_set_message(t('This is a preview. Links within the page are disabled.'), 'warning', FALSE);
         backdrop_set_message(t('<strong>Changes are stored temporarily</strong>. Click <em>Save</em> to make your changes permanent, or click <em>Back to content editing</em> to make additional changes.'), 'warning', FALSE);

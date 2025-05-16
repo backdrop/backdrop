@@ -514,7 +514,7 @@ class LayoutRendererStandard {
   function renderBlock($block) {
     // Pass any page title to the page components block before rendering it.
     if (method_exists($block, 'setPageTitle')) {
-      /* @var $block PageComponents */
+      /** @var $block PageComponents */
       $page_title = isset($this->page_title) ? $this->page_title : backdrop_get_title();
       $block->setPageTitle($page_title);
     }

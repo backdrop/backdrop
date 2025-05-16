@@ -178,6 +178,7 @@ function path_menu() {
  * Implements hook_theme().
  */
 function path_theme() {
+  $module_path = backdrop_get_path('module', 'path');
   $base = array(
     'file' => 'path.admin.inc',
   );
@@ -185,6 +186,10 @@ function path_theme() {
   return array(
     'path_bulk_update_form' => array(
       'render element' => 'form',
+      'attached' => array(
+        'css' => array($module_path . '/css/path.admin.css' => array()),
+        'js' => array($module_path . '/js/path.admin.js' => array()),
+      ),
     ) + $base,
   );
 }
