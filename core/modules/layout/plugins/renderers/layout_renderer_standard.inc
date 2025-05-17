@@ -520,8 +520,7 @@ class LayoutRendererStandard {
     }
 
     $output = '';
-    $render_array = layout_block_get_renderable_array($block);
-    if ($render_array) {
+    if ($render_array = $block->getRenderArray()) {
       $style = layout_get_style_info($block->style->plugin);
 
       // Add the contextual links.
