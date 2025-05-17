@@ -2773,8 +2773,6 @@ function layout_field_delete_instance($instance) {
  * Render a block
  * @param Block $block
  * The Block entity to render
- * Assumes the block has been loaded and $block->prepare()
- * has been called.
  */
 function layout_render_block($block) {
   $output = '';
