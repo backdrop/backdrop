@@ -2779,6 +2779,9 @@ function layout_field_delete_instance($instance) {
  */
 function layout_block_get_renderable_array($block) {
   $content = $block->getContent();
+  if (empty($content)) {
+    return NULL;
+  }
 
   if (is_string($content)) {
     $content = array(
@@ -2795,7 +2798,6 @@ function layout_block_get_renderable_array($block) {
     'title' => $title,
     'content' => $content,
   );
-
   // Allow altering of the title and content by other modules.
   backdrop_alter(array(
     'block_view',

@@ -520,13 +520,17 @@ class LayoutRendererStandard {
     }
 
     $output = '';
-    if ($content = $block->getContent()) {
+    $render_array = layout_block_get_renderable_array($block);
+    if ($render_array) {
       $style = layout_get_style_info($block->style->plugin);
-
-      $render_array = layout_block_get_renderable_array($block);
 
       // Add the contextual links.
       if (!($block->module === 'system' && $block->delta === 'main')) {
+        if (is_string($render_array['#content']->content)) {
+          $render_array['#content']->content = [
+            '#markup' => $render_array['#content']->content
+          ];
+        }
         $render_array['#content']->content['#contextual_links']['layout'] = array('admin/structure/layouts/manage/' . $this->layout->name . '/modal', array($block->uuid));
       }
 
