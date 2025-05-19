@@ -392,9 +392,9 @@ class BackdropLinkCommand extends CKEditor5.core.Command {
       dialogClass: 'editor-link-dialog'
     };
 
-    // Pull in existing values from the model to be sent to the dialog.
+    // Pull in existing value from linkCommand to be sent to the dialog.
     let existingValues = {
-      'href': linkUI.formView ? linkUI.formView.urlInputView.fieldView.value : '',
+      'href': linkCommand.value
     };
 
     // Images store link values in a special 'htmlLinkAttributes' attribute.
