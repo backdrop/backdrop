@@ -279,9 +279,9 @@ abstract class Entity extends stdClass implements EntityInterface {
   }
 
   /**
-   * Returns the label of the entity.
+   * Implements EntityInterface::label().
    *
-   * @return
+   * @return string|null
    *   The label of the entity, or NULL if there is no label defined.
    */
   public function label() {
