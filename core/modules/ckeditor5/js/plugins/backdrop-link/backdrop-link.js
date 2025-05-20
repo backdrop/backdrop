@@ -384,7 +384,6 @@ class BackdropLinkCommand extends CKEditor5.core.Command {
     const selection = editor.model.document.selection;
     const linkCommand = editor.commands.get('link');
     const imageUtils = editor.plugins.get('ImageUtils');
-    const linkUI = editor.plugins.get('LinkUI');
 
     const closestImage = imageUtils.getClosestSelectedImageElement(selection);
     const extraAttributes = new Map(Object.entries(config.extraAttributes));
