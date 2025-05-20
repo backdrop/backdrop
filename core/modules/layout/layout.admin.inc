@@ -1997,8 +1997,8 @@ function layout_block_disable_page(Layout $layout, Block $block, $renderer_name)
     backdrop_set_message(t('Block "@title" disabled.', array('@title' => $block->getAdminTitle())));
     backdrop_goto('admin/structure/layouts/manage/' . $layout->name);
   }
-
 }
+
 /**
  * Form callback; Displays form for adding new conditions to a layout or block.
  *
@@ -3482,7 +3482,8 @@ function _layout_settings_get_group_operations($template_info, $is_default) {
 function layout_configure_region_page($form, &$form_state, Layout $layout, $renderer_name, $region_name, $block_key = NULL) {
   $form_state['layout'] = $layout;
   $form_state['region_name'] = $region_name;
-  $layout_template_info = layout_get_layout_template_info($layout->layout_template, FALSE, $layout->layout_template_type);
+  $layout_template_type = $layout->layout_template_type ?? 'layout';
+  $layout_template_info = layout_get_layout_template_info($layout->layout_template, FALSE, $layout_template_type);
   if (!array_key_exists($region_name, $layout_template_info['regions'])) {
     return MENU_NOT_FOUND;
   }

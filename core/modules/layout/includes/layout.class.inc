@@ -639,7 +639,7 @@ class Layout {
     }
 
     // Add the block to the new region in the correct position.
-    if (isset($region_position)) {
+    if (isset($position)) {
       $new_positions = array();
       foreach (array_values($this->positions[$region_name]) as $region_position => $existing_uuid) {
         if ($region_position === $position) {
