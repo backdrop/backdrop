@@ -291,7 +291,7 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
   /**
    * Implements EntityControllerInterface::resetCache().
    */
-  public function resetCache(array $ids = NULL) {
+  public function resetCache(?array $ids = NULL) {
     backdrop_static_reset('taxonomy_term_count_nodes');
     backdrop_static_reset('taxonomy_get_tree');
     backdrop_static_reset('taxonomy_get_tree:parents');
@@ -355,7 +355,7 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
 
     $view = array();
     foreach ($terms as $term) {
-      /* @var TaxonomyTerm $term */
+      /** @var TaxonomyTerm $term */
       // Populate $term->content with a render() array.
       $this->buildContent($term, $view_mode, $langcode);
       $build = $term->content;

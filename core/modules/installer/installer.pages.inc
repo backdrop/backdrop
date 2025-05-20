@@ -243,9 +243,11 @@ function installer_browser_installation_select_versions_form($form, &$form_state
       continue;
     }
 
-    // We use the update module to calculate the recommended version.
+    // We use the update module to calculate the recommended version. Initialize
+    // with a nonexistent major version so that update module won't accidentally
+    // keep an older major version.
     $project_data = array(
-      'existing_major' => 0,
+      'existing_major' => -1,
       'existing_version' => 0,
       'install_type' => '',
     );

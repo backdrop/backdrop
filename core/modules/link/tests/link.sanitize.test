@@ -1,0 +1,176 @@
+<?php
+/**
+ * @file
+ * Contains simpletests for sanitization.
+ */
+
+require_once(__DIR__ . '/link.test');
+
+/**
+ * Test for _link_sanitize().
+ */
+class LinkSanitizeTest extends LinkBaseTestClass {
+
+  /**
+   * Backup of $_GET['q'] to be able to revert it to its original state.
+   *
+   * @var string
+   */
+  protected $q;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
+    parent::setUp();
+    $this->q = $_GET['q'];
+    $_GET['q'] = 'test-path';
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function tearDown(array $modules = array()) {
+    $_GET['q'] = $this->q;
+    parent::tearDown();
+  }
+
+  /**
+   * Generate parameters for testing _link_sanitize().
+   */
+  protected function generateParams($settings = array()) {
+    $field = array();
+    $instance['entity_type'] = 'node';
+    $defaults['attributes'] = array(
+      'target' => 'user',
+      'class' => '',
+    );
+    $defaults['display']['url_cutoff'] = 20;
+    $defaults['title'] = 'Test title';
+    $defaults['enable_tokens'] = 0;
+    $defaults['validate_url'] = TRUE;
+    $settings += $defaults;
+    $settings['display'] += $defaults['display'];
+    $instance['settings'] = $settings;
+    $entity = NULL;
+    return array($field, $instance, $entity);
+  }
+
+  /**
+   * Test that hash URLs are returned as is.
+   */
+  public function testHash() {
+    $item['url'] = '#hash-only';
+    list($field, $instance, $entity) = $this->generateParams();
+    _link_sanitize($item, 0, $field, $instance, $entity);
+    $this->assertEqual('#hash-only', $item['url']);
+  }
+
+  /**
+   * Test that query string URLs are returned as is.
+   */
+  public function testQueryString() {
+    $item['url'] = '?query=only';
+    list($field, $instance, $entity) = $this->generateParams();
+    _link_sanitize($item, 0, $field, $instance, $entity);
+    $this->assertEqual('?query=only', $item['url']);
+  }
+
+  /**
+   * Test that query URLs can be turned into absolute URLs.
+   */
+  public function testBlankTitle() {
+    $item['title'] = '';
+    $item['url'] = 'https://www.backdropcms.org/';
+    list($field, $instance, $entity) = $this->generateParams();
+    // Disable the URL cutoff to confirm the URL.
+    $instance['settings']['display']['url_cutoff'] = FALSE;
+    _link_sanitize($item, 0, $field, $instance, $entity);
+    $this->assertEqual('https://www.backdropcms.org/', $item['display_url']);
+    $this->assertEqual('https://www.backdropcms.org/', $item['url']);
+  }
+
+  /**
+   * Test that unwanted HTML in titles is removed.
+   */
+  public function testHtmlTitle() {
+    $item['title'] = '<script>alert("hi");</script>';
+    $item['url'] = 'https://www.backdropcms.org/';
+    $item['html'] = TRUE;
+    list($field, $instance, $entity) = $this->generateParams();
+    // Disable the URL cutoff to confirm the URL.
+    $instance['settings']['display']['url_cutoff'] = FALSE;
+    _link_sanitize($item, 0, $field, $instance, $entity);
+    $this->assertEqual('alert("hi");', $item['title']);
+  }
+
+  /**
+   * Assert that attributes are filtered.
+   */
+  public function testXssFiltering() {
+    $item['url'] = 'https://www.backdropcms.org/';
+    $item['attributes']['class'] = 'classy';
+    $item['attributes']['onmouseover'] = 'alert(document.cookie)';
+    list($field, $instance, $entity) = $this->generateParams();
+    _link_sanitize($item, 0, $field, $instance, $entity);
+    $this->assertEqual('classy', $item['attributes']['class']);
+    $this->assertFalse(isset($item['attributes']['onmouseover']));
+  }
+
+  /**
+   * Test that query URLs can be turned into absolute URLs.
+   */
+  public function testBlankTitleWithQuery() {
+    $item['title'] = '';
+    $item['url'] = 'https://www.backdropcms.org/?page=42';
+    list($field, $instance, $entity) = $this->generateParams();
+    // Disable the URL cutoff to confirm the URL.
+    $instance['settings']['display']['url_cutoff'] = FALSE;
+    _link_sanitize($item, 0, $field, $instance, $entity);
+    $this->assertEqual('https://www.backdropcms.org/?page=42', $item['display_url']);
+    $this->assertEqual('https://www.backdropcms.org/?page=42', $item['url']);
+  }
+
+  /**
+   * Test that multiple query URLs can be turned into absolute URLs.
+   */
+  public function testBlankTitleWithMultipleQueries() {
+    $item['title'] = '';
+    $item['url'] = 'https://www.backdropcms.org/?page=42&mango=thebest';
+    list($field, $instance, $entity) = $this->generateParams();
+    // Disable the URL cutoff to confirm the URL.
+    $instance['settings']['display']['url_cutoff'] = FALSE;
+    _link_sanitize($item, 0, $field, $instance, $entity);
+    $this->assertEqual('https://www.backdropcms.org/?page=42&mango=thebest', $item['display_url']);
+    $this->assertEqual('https://www.backdropcms.org/?page=42&mango=thebest', $item['url']);
+  }
+
+  /**
+   * Test that query URLs can be turned into absolute URLs.
+   */
+  public function testBlankTitleWithFragment() {
+    $item['title'] = '';
+    $item['url'] = 'https://www.backdropcms.org/#something';
+    list($field, $instance, $entity) = $this->generateParams();
+    // Disable the URL cutoff to confirm the URL.
+    $instance['settings']['display']['url_cutoff'] = FALSE;
+    _link_sanitize($item, 0, $field, $instance, $entity);
+    $this->assertEqual('https://www.backdropcms.org/#something', $item['display_url']);
+    $this->assertEqual('https://www.backdropcms.org/#something', $item['url']);
+  }
+
+  /**
+   * Test that query URLs can be turned into absolute URLs.
+   */
+  public function testBlankTitleWithQueryAndFragment() {
+    $item['title'] = '';
+    $item['url'] = 'https://www.backdropcms.org/?page=42#something';
+    list($field, $instance, $entity) = $this->generateParams();
+    // Disable the URL cutoff to confirm the URL.
+    $instance['settings']['display']['url_cutoff'] = FALSE;
+    _link_sanitize($item, 0, $field, $instance, $entity);
+    $this->assertEqual('https://www.backdropcms.org/?page=42#something', $item['display_url']);
+    $this->assertEqual('https://www.backdropcms.org/?page=42#something', $item['url']);
+  }
+
+}
