@@ -648,7 +648,7 @@ function field_validate_instance($instance, $update = FALSE, $load_field = TRUE)
         )));
       }
     }
-
+    // @todo: Expand the check for reserved words to all properties of the entity type.
     // @todo: Check that the widget type is known and can handle the field type.
     // @todo: Check that the formatters are known and can handle the field type.
     // @todo: Check that the display display modes are known for the entity type.
