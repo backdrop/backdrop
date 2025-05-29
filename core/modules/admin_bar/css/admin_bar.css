@@ -393,3 +393,10 @@ tr.admin-bar-tweak-permissions-processed td.module {
 #admin-bar .admin-bar-alert .error-label {
   display: none;
 }
+
+@media only screen and (max-width: 500px) {
+  #admin-bar-menu .dropdown.expanded .dropdown.expanded {
+    position: inherit;
+    margin: 0;
+  }
+}
