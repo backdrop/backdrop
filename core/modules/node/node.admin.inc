@@ -13,8 +13,14 @@
  * @ingroup forms
  */
 function node_configure_rebuild_confirm() {
-  return confirm_form(array(), t('Are you sure you want to rebuild the permissions on site content?'),
-                  'admin/reports/status', t('This action rebuilds all permissions on site content, and may be a lengthy process. This action cannot be undone.'), t('Rebuild permissions'), t('Cancel'));
+  return confirm_form(
+    array(),
+    t('Are you sure you want to rebuild the permissions on site content?'),
+    'admin/reports/status',
+    t('This action rebuilds all permissions on site content, and may be a lengthy process. This action cannot be undone.'),
+    t('Rebuild permissions'),
+    t('Cancel')
+  );
 }
 
 /**
