@@ -5,7 +5,7 @@
 .block-hero {
   /* Positioning, width and transform is to make hero full width on smaller screens */
   position: relative;
-  left: 50%;
+  inset-inline-start: 50%;
   width: 100vw;
   min-height: 30vh;
   padding: 1.5rem 2rem 2rem;
@@ -23,16 +23,16 @@
 }
 
 .l-top .block-hero {
-  margin-top: -2rem;/* Negative top margin collapses spacing under header */
+  margin-block-start: -2rem; /* Negative top margin collapses spacing under header */
 }
 body.update-1-30 .l-top .block-hero {
-  margin-top: 0;
+  margin-block-start: 0;
 }
 body.update-1-30 .l-wrapper > .l-top:has(.block-hero) {
-  margin-top: -2rem; /* Negative top margin on parent limited in scope. */
+  margin-block-start: -2rem; /* Negative top margin on parent limited in scope. */
 }
 .container .block-hero {
-  margin-top: 0; /* If hero is in a container don't collapse top spacing */
+  margin-block-start: 0; /* If hero is in a container don't collapse top spacing */
 }
 
 @media (min-width: 25em) {
@@ -51,7 +51,7 @@ body.update-1-30 .l-wrapper > .l-top:has(.block-hero) {
 @media (min-width: 62em) {
   .block-hero {
     /* Remove full width styles on larger screens */
-    left: auto;
+    inset-inline-start: auto;
     width: 100%;
     transform: none;
   }
@@ -78,11 +78,11 @@ body.update-1-30 .block-hero-no-image {
   z-index: 1;
 }
 
-.no-background-blend-mode .block-hero-no-image:before {
+.no-background-blend-mode .block-hero-no-image::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
+  inset-block-start: 0;
+  inset-inline-start: 0;
   display: block;
   width: 100%;
   height: 100%;

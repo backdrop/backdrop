@@ -11,16 +11,19 @@ nav.tabs {
   padding: 0.75em 0.5em 0;
 }
 
-nav.tabs:before {
+nav.tabs::before {
   content: '';
   position: absolute;
-  top: 0;
-  left: 50%;
+  inset-block-start: 0;
+  inset-inline-start: 50%;
   z-index: 0;
   display: block;
   width: 100%;
   height: 3.1875em;
   transform: translate(-50%, 0);
+}
+[dir="rtl"] nav.tabs::before {
+  transform: translate(50%, 0);
 }
 
 .tabs:after {
@@ -35,27 +38,25 @@ ul.primary {
   box-sizing: border-box;
   border: none;
   width: 100%;
-  float: left; /* LTR */
+  float: inline-start;
   margin: 0 0 1em;
-  padding: 0 0 0 0.5em;
+  padding-block: 0;
+  padding-inline: 0.5em 0;
   font-size: 0.9375em;
   text-transform: uppercase;
-}
-
-[dir="rtl"] ul.primary {
-  float: right;
 }
 
 ul.primary li {
   position: relative;
   z-index: 1;
-  float: left; /* LTR */
+  float: inline-start;
   margin: 0;
   list-style: none;
 }
 
-[dir="rtl"] ul.primary li {
-  float: right;
+ul.primary li,
+.expand-dropdown-tabs-control {
+  border-radius: 0;
 }
 
 ul.primary li a,
@@ -63,7 +64,7 @@ ul.primary li a:visited,
 ul.primary li a:hover,
 ul.primary li.active a,
 .expand-dropdown-tabs-control,
-.responsive-tabs-mobile .expand-dropdown-tabs-control:before,
+.responsive-tabs-mobile .expand-dropdown-tabs-control::before,
 .responsive-tabs-mobile .expand-dropdown-tabs-label {
   position: relative;
   z-index: 1;
@@ -71,7 +72,7 @@ ul.primary li.active a,
   padding: 12px 20px;
   text-decoration: none;
   border: 0;
-  border-right: 0.125rem solid #586172; /* LTR */
+  border-inline-end: 0.125rem solid #586172;
   overflow: visible;
   line-height: 1;
   font-weight: normal;
@@ -81,47 +82,23 @@ ul.primary li.active a,
   will-change: background-color, color;
 }
 
-[dir="rtl"] ul.primary li a,
-[dir="rtl"] ul.primary li a.active,
-[dir="rtl"] ul.primary li a:active,
-[dir="rtl"] ul.primary li a:visited,
-[dir="rtl"] ul.primary li a:hover,
-[dir="rtl"] ul.primary li.active a,
-[dir="rtl"] .expand-dropdown-tabs-control,
-[dir="rtl"] .responsive-tabs-mobile .expand-dropdown-tabs-control:before,
-[dir="rtl"] .responsive-tabs-mobile .expand-dropdown-tabs-label {
-  border-right: 0;
-  border-left-width: 0.125rem;
-  border-left-style: solid;
-}
-
 ul.primary li:first-child a {
-  border-radius: 4px 0 0 0;
+  border-start-start-radius: 4px;
 }
 
 .expand-dropdown-tabs-control,
 ul.primary li:last-child a {
-  border-radius: 0 4px 0 0;
-  border-right: 0;
-}
-
-[dir="rtl"] ul.primary li:first-child a {
-  border-radius: 0 4px 0 0;
-}
-
-[dir="rtl"] .expand-dropdown-tabs-control,
-[dir="rtl"] ul.primary li:last-child a {
-  border-radius: 4px 0 0 0;
-  border-right: 0;
+  border-start-end-radius: 4px;
+  border-inline-end: 0;
 }
 
 @media (max-width: 34em) {
   ul.primary li {
     float: none;
-    margin-bottom: 2px;
+    margin-block-end: 2px;
   }
   .js ul.primary li {
-    float: left;
+    float: inline-start;
   }
 }
 
@@ -168,7 +145,7 @@ ul.secondary li.active a.active {
 }
 
 .responsive-tabs-processed ul.primary li {
-  margin-bottom: 0;
+  margin-block-end: 0;
 }
 
 .responsive-tabs-processed .duplicated-tab,
@@ -196,35 +173,35 @@ ul.secondary li.active a.active {
 .expand-dropdown-tabs ul.responsive-tabs-dropdown li a,
 .expand-dropdown-tabs ul.responsive-tabs-dropdown li a:hover {
   border: 0;
-  border-top: 2px solid #ffffff;
+  border-block-start: 2px solid #ffffff;
   position: relative;
 }
 
-.expand-dropdown-tabs ul.responsive-tabs-dropdown li:first-child a:before {
-  margin-top: -2px;
+.expand-dropdown-tabs ul.responsive-tabs-dropdown li:first-child a::before {
+  margin-block-start: -2px;
   height: calc(100% + 2px);
 }
 
 .responsive-tabs-before.expand-dropdown-tabs ul.responsive-tabs-dropdown li a {
-  padding-right: 72px;
+  padding-inline-end: 72px;
 }
 
 .responsive-tabs-after.expand-dropdown-tabs ul.responsive-tabs-dropdown li a {
-  padding-left: 72px;
+  padding-inline-start: 72px;
 }
 
-.expand-dropdown-tabs .responsive-tabs-dropdown a:before {
+.expand-dropdown-tabs .responsive-tabs-dropdown a::before {
   content: '';
   position: absolute;
-  top: 0;
-  right: 0;
+  inset-block-start: 0;
+  inset-inline-end: 0;
   width: 50px;
   height: 100%;
 }
 
-.responsive-tabs-after.expand-dropdown-tabs .responsive-tabs-dropdown a:before {
-  right: auto;
-  left: 0;
+.responsive-tabs-after.expand-dropdown-tabs .responsive-tabs-dropdown a::before {
+  inset-inline-end: auto;
+  inset-inline-start: 0;
   width: 48px;
 }
 
@@ -257,13 +234,13 @@ ul.primary.responsive-tabs-dropdown li:last-child a {
 
 .expand-dropdown-tabs-control {
   position: absolute;
-  top: 0.8em;
-  left: 0;
+  inset-block-start: 0.8em;
+  inset-inline-start: 0;
   box-sizing: border-box;
   width: 50px;
   height: auto;
-  padding-left: 0;
-  padding-right: 0;
+  padding-inline-start: 0;
+  padding-inline-end: 0;
   font-size: 0.9375em;
   text-align: center;
   visibility: visible;
@@ -271,14 +248,14 @@ ul.primary.responsive-tabs-dropdown li:last-child a {
   cursor: pointer;
 }
 
-.expand-dropdown-tabs-control:before {
+.expand-dropdown-tabs-control::before {
   content: '...';
   font-weight: bold;
 }
 
 .responsive-tabs-after .expand-dropdown-tabs-control {
   border-radius: 4px 0 0 0;
-  border-left: 2px solid #bcc2cc;
+  border-inline-start: 2px solid #bcc2cc;
 }
 
 .desktop-primary-tabs .expand-dropdown-tabs-control {
@@ -308,7 +285,7 @@ ul.primary.responsive-tabs-dropdown li:last-child a {
 
 .responsive-tabs-mobile .expand-dropdown-tabs-label {
   display: block;
-  text-align: left;
+  text-align: start;
 }
 
 .responsive-tabs-mobile.expand-dropdown-tabs .expand-dropdown-tabs-label,
@@ -330,33 +307,33 @@ ul.primary.responsive-tabs-dropdown li:last-child a {
   overflow: visible;
 }
 
-.responsive-tabs-mobile .expand-dropdown-tabs-control:before {
+.responsive-tabs-mobile .expand-dropdown-tabs-control::before {
   content: '';
   position: absolute;
-  top: 0;
-  right: 0;
+  inset-block-start: 0;
+  inset-inline-end: 0;
   width: 3em;
   height: 100%;
   box-sizing: border-box;
-  border-left: 2px solid transparent;
+  border-inline-start: 2px solid transparent;
 }
 
 .responsive-tabs-mobile .expand-dropdown-tabs-control:after {
   content: '';
   position: absolute;
-  top: .85em;
-  right: 1.3em;
+  inset-block-start: .85em;
+  inset-inline-end: 1.3em;
   width: 0;
   height: 0;
   border: 0.4em solid transparent;
-  border-left: 0;
+  border-inline-start: 0;
 }
 
 .expand-dropdown-tabs .expand-dropdown-tabs-control:after {
-  top: 1.08em;
-  right: 1em;
+  inset-block-start: 1.08em;
+  inset-inline-end: 1em;
   border: 0.4em solid transparent;
-  border-bottom: 0;
+  border-block-end: 0;
 }
 
 .responsive-tabs-mobile ul.primary,
@@ -364,7 +341,7 @@ ul.primary.responsive-tabs-dropdown li:last-child a {
   position: absolute;
   width: 100%;
   margin: 0;
-  top: 2.6em;
+  inset-block-start: 2.6em;
 }
 
 .responsive-tabs-mobile ul.primary,
@@ -376,22 +353,22 @@ ul.primary.responsive-tabs-dropdown li:last-child a {
 .responsive-tabs-mobile ul.primary li {
   position: relative;
   float: none;
-  border-right: 0;
-  border-bottom: 2px solid #ffffff;
+  border-inline-end: 0;
+  border-block-end: 2px solid #ffffff;
 }
 
 .responsive-tabs-mobile ul.primary a:after {
   content: '';
   position: absolute;
-  top: 0;
-  right: 0;
+  inset-block-start: 0;
+  inset-inline-end: 0;
   display: block;
   width: 3em;
   height: 100%;
 }
 
 .responsive-tabs-mobile ul.primary li:last-child {
-  border-bottom: 0;
+  border-block-end: 0;
 }
 
 .responsive-tabs-mobile ul.primary li a {

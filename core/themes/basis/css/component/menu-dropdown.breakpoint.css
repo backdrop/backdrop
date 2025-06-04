@@ -9,35 +9,35 @@
 .js .menu-dropdown li,
 .js .menu-dropdown a.has-submenu.highlighted {
   float: none;
-  border-bottom: 1px solid #bbbbbb;
+  border-block-end: 1px solid #bbbbbb;
 }
 
 .js .menu-dropdown li.last {
-  border-bottom: 0;
+  border-block-end: 0;
 }
 .js .menu-dropdown > li.last {
-  padding-bottom: 1px;
+  padding-block-end: 1px;
 }
 
 .js .menu-dropdown ul li a {
-  padding-left: 3em;
+  padding-inline-start: 3em;
 }
 
 .js .menu-dropdown ul li li a {
-  padding-left: 5em;
+  padding-inline-start: 5em;
 }
 
 .js .menu-dropdown li.has-children > a {
   /* Make room for the toggle button (sub indicator) */
-  padding-right: 3.625rem;
+  padding-inline-end: 3.625rem;
 }
 
 .menu-dropdown a span.sub-arrow {
   position: absolute;
-  top: 1rem;
-  margin-top: -1.0625rem;
-  left: auto;
-  right: 0;
+  inset-block-start: 1rem;
+  margin-block-start: -1.0625rem;
+  inset-inline-start: auto;
+  inset-inline-end: 0;
   width: 3.5rem;
   height: 3.5rem;
   overflow: hidden;
@@ -48,13 +48,13 @@
   text-shadow: none;
 }
 
-.menu-dropdown span.sub-arrow:before {
+.menu-dropdown span.sub-arrow::before {
   display: block;
   content: '+';
-  margin-top: 0.5625rem;
+  margin-block-start: 0.5625rem;
 }
 
-.menu-dropdown a.highlighted span.sub-arrow:before {
+.menu-dropdown a.highlighted span.sub-arrow::before {
   display: block;
   content: '–';
 }

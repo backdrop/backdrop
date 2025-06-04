@@ -20,7 +20,7 @@
  * More help link
  */
 .more-help-link {
-  text-align: right;
+  text-align: end;
 }
 
 .more-help-link a {
@@ -28,12 +28,13 @@
   text-decoration: none;
 }
 
-.more-help-link a:before {
+.more-help-link a::before {
   content: '?';
   display: inline-block;
   width: 1.3em;
   height: 1.3em;
-  margin: 0 0.4em 0 0;
+  margin: 0;
+  margin-inline: 0 0.4em;
   border-radius: 50%;
   font-weight: 600;
   text-align: center;
@@ -51,13 +52,14 @@
   height: 0.9em;
   border: 0.0625em solid #0074bd;
   border-radius: 0.125em;
-  margin: 0 0 0 0.4em;
+  margin-block: 0;
+  margin-inline: 0.4em 0;
 }
 
 .icon-external-link-arrow {
   position: absolute;
-  top: 0;
-  right: 0;
+  inset-block-start: 0;
+  inset-inline-end: 0;
   display: block;
   transform:
     translate(0.4375em, -0.3125em)
@@ -67,19 +69,19 @@
   width: 0.2em;
   height: 0.6em;
   border: 0.125em solid #ffffff;
-  border-top: 0;
-  border-bottom: 0;
+  border-block-start: 0;
+  border-block-end: 0;
 }
 
-.icon-external-link-arrow:before,
+.icon-external-link-arrow::before,
 .icon-external-link-arrow:after {
   content: '';
   position: absolute;
 }
 
-.icon-external-link-arrow:before {
-  top: 0;
-  right: 0;
+.icon-external-link-arrow::before {
+  inset-block-start: 0;
+  inset-inline-end: 0;
   display: block;
   width: 0.4em;
   height: 0.4em;
@@ -89,13 +91,13 @@
     translate(0.28125em, -0.01367em);
   transform-origin: top right;
   border: 0.0625em solid #0074bd;
-  border-right: 0;
-  border-bottom: 0;
+  border-inline-end: 0;
+  border-block-end: 0;
 }
 
 .icon-external-link-arrow:after {
   border: 0.1875em solid transparent;
-  border-top: 0;
+  border-block-start: 0;
   transform: translate(-0.12em, -0.12em);
 }
 
@@ -104,14 +106,15 @@
  */
 .item-list h3 + ol,
 .item-list h3 + ul {
-  margin-top: 0;
+  margin-block-start: 0;
 }
 
 .item-list ol,
 .item-list ul,
 ul.links,
 .links ul {
-  padding: 0 0 0 1.3em;
+  padding-block: 0;
+  padding-inline: 1.3em 0;
 }
 
 .links li {
@@ -123,12 +126,12 @@ ul.links,
   text-decoration: none;
 }
 
-.links li:before,
+.links li::before,
 .links li:after {
   content: '';
   position: absolute;
-  top: 50%;
-  left: 0;
+  inset-block-start: 50%;
+  inset-inline-start: 0;
   width: 0.4375em;
   height: 0.4375em;
   border: 0.0625rem solid #0074bd;
@@ -144,7 +147,7 @@ ul.links,
     rotate(45deg);
 }
 
-.links.inline li:before {
+.links.inline li::before {
   display: none;
 }
 
@@ -157,7 +160,8 @@ ul.links,
 
 .links.inline li {
   display: inline-block;
-  padding: 0 0.6em 0 0;
+  padding-block: 0;
+  padding-inline: 0 0.6em;
 }
 
 .links.inline li:after {

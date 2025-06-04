@@ -26,8 +26,8 @@
 .layout--three-three-four-column .l-footer-wrapper {
   box-sizing: border-box;
   width: 100%;
-  margin-left: auto;
-  margin-right: auto;
+  margin-inline-start: auto;
+  margin-inline-end: auto;
 }
 .layout--three-three-four-column .l-content,
 .layout--three-three-four-column .l-sidebar {
@@ -61,28 +61,15 @@
   .layout--three-three-four-column .l-footer-third-column,
   .layout--three-three-four-column .l-footer-fourth-column {
     display: inline;
-    float: left; /* LTR */
+    float: inline-start;
     position: relative;
-  }
-  [dir="rtl"] .layout--three-three-four-column .l-sidebar-first,
-  [dir="rtl"] .layout--three-three-four-column .l-triptych-first,
-  [dir="rtl"] .layout--three-three-four-column .l-triptych-middle,
-  [dir="rtl"] .layout--three-three-four-column .l-triptych-last,
-  [dir="rtl"] .layout--three-three-four-column .l-footer-first-column,
-  [dir="rtl"] .layout--three-three-four-column .l-footer-second-column,
-  [dir="rtl"] .layout--three-three-four-column .l-footer-third-column,
-  [dir="rtl"] .layout--three-three-four-column .l-footer-fourth-column {
-    float: right;
   }
   .layout--three-three-four-column.layout-two-sidebars .l-sidebar-first {
     width: 49%;
   }
   .layout--three-three-four-column.layout-two-sidebars .l-sidebar-second {
     width: 49%;
-    margin-left: 51%; /* LTR */
-  }
-  [dir="rtl"] .layout--three-three-four-column.layout-two-sidebars .l-sidebar-second {
-    margin-right: 51%;
+    margin-inline-start: 51%;
   }
   .layout--three-three-four-column .l-triptych-first,
   .layout--three-three-four-column .l-triptych-middle,
@@ -122,24 +109,12 @@
   .layout--three-three-four-column .l-footer-third-column,
   .layout--three-three-four-column .l-footer-fourth-column {
     display: inline;
-    float: left; /* LTR */
+    float: inline-start;
     position: relative;
   }
-  [dir="rtl"] .layout--three-three-four-column .l-content,
-  [dir="rtl"] .layout--three-three-four-column .l-sidebar-first,
-  [dir="rtl"] .layout--three-three-four-column .l-sidebar-second,
-  [dir="rtl"] .layout--three-three-four-column .l-triptych-first,
-  [dir="rtl"] .layout--three-three-four-column .l-triptych-middle,
-  [dir="rtl"] .layout--three-three-four-column .l-triptych-last,
-  [dir="rtl"] .layout--three-three-four-column .l-footer-first-column,
-  [dir="rtl"] .layout--three-three-four-column .l-footer-second-column,
-  [dir="rtl"] .layout--three-three-four-column .l-footer-third-column,
-  [dir="rtl"] .layout--three-three-four-column .l-footer-fourth-column {
-    float: right;
-  }
   .layout--three-three-four-column.layout-two-sidebars .l-content {
-    margin-left: 25%;
-    margin-right: 25%;
+    margin-inline-start: 25%;
+    margin-inline-end: 25%;
     width: 50%;
   }
   .layout--three-three-four-column.layout-one-sidebar .l-content {
@@ -149,35 +124,21 @@
     width: 100%;
   }
   .layout--three-three-four-column.layout-sidebar-first .l-content {
-    margin-left: 25%; /* LTR */
-    margin-right: 0; /* LTR */
-  }
-  [dir="rtl"] .layout--three-three-four-column.layout-sidebar-first .l-content {
-    margin-left: 0;
-    margin-right: 25%;
+    margin-inline-start: 25%;
+    margin-inline-end: 0;
   }
   .layout--three-three-four-column.layout-sidebar-second .l-content {
-    margin-right: 25%; /* LTR */
-    margin-left: 0; /* LTR */
-  }
-  [dir="rtl"] .layout--three-three-four-column.layout-sidebar-second .l-content {
-    margin-right: 0;
-    margin-left: 25%;
+    margin-inline-end: 25%;
+    margin-inline-start: 0;
   }
   .layout--three-three-four-column .l-sidebar-first {
     width: 25%;
-    margin-left: -100%; /* LTR */
-  }
-  [dir="rtl"] .layout--three-three-four-column .l-sidebar-first {
-    margin-right: -100%;
+    margin-inline-start: -100%;
   }
   .layout--three-three-four-column .l-sidebar-second {
     width: 25%;
-    margin-left: -25%; /* LTR */
+    margin-inline-start: -25%;
     clear: none;
-  }
-  [dir="rtl"] .layout--three-three-four-column .l-sidebar-second {
-    margin-right: -25%;
   }
   .layout--three-three-four-column .l-triptych-first,
   .layout--three-three-four-column .l-triptych-middle,

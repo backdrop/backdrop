@@ -46,16 +46,16 @@ abbr.ajax-changed {
 
 .form-radios .form-item:last-child,
 .form-checkboxes .form-item:last-child {
-  margin-top: 0;
-  margin-bottom: 0;
+  margin-block-start: 0;
+  margin-block-end: 0;
 }
 
 .filter-wrapper .form-item,
 .teaser-checkbox .form-item,
 .form-item .form-item {
   padding: 0.3125em 0;
-  margin-top: 0;
-  margin-bottom: 0;
+  margin-block-start: 0;
+  margin-block-end: 0;
   border: 0;
 }
 
@@ -64,7 +64,7 @@ abbr.ajax-changed {
 }
 
 .text-format-wrapper .form-item {
-  padding-bottom: 0;
+  padding-block-end: 0;
 }
 
 .form-item label {
@@ -79,7 +79,7 @@ abbr.ajax-changed {
 .form-item input.form-radio,
 .form-item input.form-checkbox {
   vertical-align: middle;
-  margin-right: 0.3125em;
+  margin-inline-end: 0.3125em;
 }
 
 td.checkbox .form-item input {
@@ -88,12 +88,12 @@ td.checkbox .form-item input {
 
 /* Filter */
 .filter-wrapper {
-  border-top: 0;
+  border-block-start: 0;
   padding: 0 0.125em;
 }
 
 .filter-wrapper .fieldset-wrapper {
-  padding-top: 3.774em;
+  padding-block-start: 3.774em;
 }
 
 .filter-wrapper .form-item,
@@ -110,27 +110,20 @@ td.checkbox .form-item input {
 .form-item .description,
 .password-strength,
 .password-match {
-  border-left: 0.25em solid #bbbbbb;
+  border-inline-start: 0.25em solid #bbbbbb;
   margin: 0.6875em 0 2.5em;
   padding: 0.5em 0.8em;
 }
 
-[dir=rtl] .form-item .description,
-[dir=rtl] .password-strength,
-[dir=rtl] .password-match {
-  border-left: none;
-  border-right: 0.25em solid #bbbbbb;
-}
-
 .form-item-radios .description,
 .form-item-checkboxes .description {
-  margin-top: 0.375em;
+  margin-block-start: 0.375em;
 }
 
 .resizable-textarea + .description,
 .form-item-date .description,
 .form-item-select .description {
-  margin-top: 0.875em;
+  margin-block-start: 0.875em;
 }
 
 .field-suffix {
@@ -147,7 +140,7 @@ td.checkbox .form-item input {
 }
 
 .password-strength {
-  padding-top: 0.375em;
+  padding-block-start: 0.375em;
 }
 
 ul.tips {
@@ -165,28 +158,17 @@ button.form-submit,
   line-height: 2.875;
   border: 0;
   padding: 0 1.5625em;
-  margin-bottom: 1em;
-  margin-right: 1em; /* LTR */
+  margin-block-end: 1em;
+  margin-inline-end: 1em;
   transition:
     background-color 0.6s ease 0s,
     color 0.6s ease 0s;
 }
 
-[dir="rtl"] input.form-submit,
-[dir="rtl"] .button {
-  margin-left: 1em;
-  margin-right: 0;
-}
-
 .form-managed-file input.form-submit {
-  margin-left: 0.5em; /* LTR */
+  margin-inline-start: 0.5em;
   position: relative;
-  top: 0.0625em;
-}
-
-[dir="rtl"] .form-managed-file input.form-submit {
-  margin-left: 0;
-  margin-right: 0.5em;
+  inset-block-start: 0.0625em;
 }
 
 input.form-autocomplete,
@@ -231,12 +213,7 @@ select.form-select {
 /* De-emphasize the text format */
 select.filter-list {
   padding: 0.125em 0.5em;
-  margin-left: 0.3125em; /* LTR */
-}
-
-[dir="rtl"] select.filter-list {
-  margin-left: 0;
-  margin-right: 0.3125em;
+  margin-inline-start: 0.3125em;
 }
 
 input.form-text:focus,
@@ -255,7 +232,7 @@ textarea.form-textarea:focus {
 
 #autocomplete {
   border: 0.125rem solid #d0d0d0;
-  border-top: 0;
+  border-block-start: 0;
   box-sizing: content-box;
 }
 #autocomplete ul {
@@ -272,33 +249,25 @@ textarea.form-textarea:focus {
 
 ul.action-links {
   margin: 1em 0;
-  padding: 0 1.25em 0; /* LTR */
+  padding-block: 0;
+  padding-inline: 1.25em;
   list-style-type: none;
   overflow: hidden;
 }
 
 ul.action-links li {
-  float: left; /* LTR */
-  margin: 0 1em 0 0; /* LTR */
-}
-
-[dir="rtl"] ul.action-links li {
-  float: right;
-  margin: 0 0 0 1em;
+  float: inline-start;
+  margin-block: 0;
+  margin-inline: 0 1em;
 }
 
 ul.action-links a {
   position: relative;
-  padding-left: 1.125em; /* LTR */
+  padding-inline-start: 1.125em;
   line-height: 1.875;
 }
 
-[dir="rtl"] ul.action-links a {
-  padding-left: 0;
-  padding-right: 1.125em;
-}
-
-ul.action-links a:before,
+ul.action-links a::before,
 ul.action-links a:after {
   content: '';
   display: block;
@@ -306,28 +275,18 @@ ul.action-links a:after {
   background: #0074bd;
 }
 
-ul.action-links a:before {
-  top: 0.375em;
-  left: 0.25em;
+ul.action-links a::before {
+  inset-block-start: 0.375em;
+  inset-inline-start: 0.25em;
   width: 0.125em;
   height: 0.625em;
 }
 
 ul.action-links a:after {
-  top: 0.625em;
-  left: 0;
+  inset-block-start: 0.625em;
+  inset-inline-start: 0;
   width: 0.625em;
   height: 0.125em;
-}
-
-[dir="rtl"] ul.action-links a:before {
-  left: auto;
-  right: 0.25em;
-}
-
-[dir="rtl"] ul.action-links a:after {
-  left: auto;
-  right: 0;
 }
 
 /**

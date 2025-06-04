@@ -16,16 +16,13 @@
   width: 1em;
 }
 #simpletest-form-table td.simpletest-group-label {
-  border-left: 1px solid transparent;
-  border-right: 1px solid transparent;
+  border-inline-start: 1px solid transparent;
+  border-inline-end: 1px solid transparent;
 }
 #simpletest-form-table td.simpletest-group-label label {
   display: inline;
   font-weight: bold;
-  margin-left: 1em; /* LTR */
-}
-[dir="rtl"] #simpletest-form-table .simpletest-group-label label {
-  margin-right: 1em;
+  margin-inline-start: 1em;
 }
 #simpletest-form-table .description {
   margin: 0;
@@ -91,13 +88,13 @@ tr.simpletest-debug.even {
 a.simpletest-collapse {
   height: 0;
   width: 0;
-  top: -99em;
+  inset-block-start: -99em;
   position: absolute;
 }
 a.simpletest-collapse:focus,
 a.simpletest-collapse:hover {
   font-size: 80%;
-  top: 0px;
+  inset-block-start: 0px;
   height: auto;
   width: auto;
   overflow: visible;

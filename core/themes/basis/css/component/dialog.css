@@ -27,10 +27,10 @@
 }
 
 .ui-dialog .ui-dialog-titlebar-close {
-  top: 0;
-  top: calc(-0.125em);
-  right: 0;
-  right: calc(-0.125em);
+  inset-block-start: 0;
+  inset-block-start: calc(-0.125em);
+  inset-inline-end: 0;
+  inset-inline-end: calc(-0.125em);
   width: 2.5em;
   height: 100%;
   height: calc(100% + 0.125em);
@@ -40,8 +40,8 @@
 }
 
 .ui-dialog .ui-dialog-titlebar-close .ui-icon {
-  top: 50%;
-  left: 50%;
+  inset-block-start: 50%;
+  inset-inline-start: 50%;
   transform: translate(-50%, -50%);
   width: 1em;
   height: 1em;
@@ -52,18 +52,18 @@
 /**
  * Close X CSS art
  */
-.ui-dialog .ui-dialog-titlebar-close .ui-icon:before,
+.ui-dialog .ui-dialog-titlebar-close .ui-icon::before,
 .ui-dialog .ui-dialog-titlebar-close .ui-icon:after {
   content: '';
   position: absolute;
-  top: 0;
-  left: 0;
+  inset-block-start: 0;
+  inset-inline-start: 0;
   display: block;
   width: 0.125em;
   height: 0.875em;
 }
 
-.ui-dialog .ui-dialog-titlebar-close .ui-icon:before {
+.ui-dialog .ui-dialog-titlebar-close .ui-icon::before {
   transform:
     translate(0.5em, 0.125em)
     rotate(45deg);

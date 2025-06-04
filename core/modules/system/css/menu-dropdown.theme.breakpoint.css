@@ -15,7 +15,7 @@
 .js .menu-dropdown a:focus,
 .js .menu-dropdown a:active {
   /* Make room for the toggle button (sub indicator) */
-  padding-right: 58px;
+  padding-inline-end: 58px;
   font-weight: normal;
   line-height: 17px;
   text-decoration: none;
@@ -28,10 +28,10 @@
 }
 .menu-dropdown a span.sub-arrow {
   position: absolute;
-  top: 50%;
-  margin-top: -17px;
-  left: auto;
-  right: 4px;
+  inset-block-start: 50%;
+  margin-block-start: -17px;
+  inset-inline-start: auto;
+  inset-inline-end: 4px;
   width: 34px;
   height: 34px;
   overflow: hidden;
@@ -39,11 +39,11 @@
   text-align: center;
   text-shadow: none;
 }
-.menu-dropdown span.sub-arrow:before {
+.menu-dropdown span.sub-arrow::before {
   display: block;
   content: '+';
 }
-.menu-dropdown a.highlighted span.sub-arrow:before {
+.menu-dropdown a.highlighted span.sub-arrow::before {
   display: block;
   content: '-';
 }

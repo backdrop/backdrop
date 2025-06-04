@@ -1,5 +1,5 @@
 html.admin-bar body {
-  padding-top: 0;
+  padding-block-start: 0;
 }
 
 .tabs {

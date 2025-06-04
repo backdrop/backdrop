@@ -7,7 +7,7 @@
 #user-admin-permissions .search-reset {
   line-height: 42px;
   position: relative;
-  top: 1px;
+  inset-block-start: 1px;
 }
 #user-admin-permissions .table-filter {
   margin: 1em 0;
@@ -25,16 +25,12 @@
   background: #dddddd;
 }
 #permissions td.permission {
-  padding-left: 1.5em; /* LTR */
+  padding-inline-start: 1.5em;
 }
 #permissions td.permission .permission-warning-description {
   font-size: 0.9em;
   color: #444;
-  margin-top: 0.5em;
-}
-[dir="rtl"] #permissions td.permission {
-  padding-left: 0;
-  padding-right: 1.5em;
+  margin-block-start: 0.5em;
 }
 #permissions tr.odd .form-item,
 #permissions tr.even .form-item {
@@ -56,10 +52,10 @@
  */
 #user-admin-settings fieldset .fieldset-description {
   font-size: 0.85em;
-  padding-bottom: .5em;
+  padding-block-end: .5em;
 }
 #user-admin-settings .form-item-user-password-policy {
-  margin-bottom: 0;
+  margin-block-end: 0;
 }
 #user-admin-settings .min-length-wrapper {
   font-size: 0.923em;
@@ -75,13 +71,9 @@
 }
 .password-toggle {
   position: absolute;
-  top: -2em;
-  right: 0; /* LTR */
+  inset-block-start: -2em;
+  inset-inline-end: 0;
   font-size: 80%;
-}
-[dir="rtl"] .password-toggle {
-  right: auto;
-  left: 0;
 }
 
 /**
@@ -94,7 +86,7 @@
 }
 .password-strength {
   display: block;
-  margin-top: 3px;
+  margin-block-start: 3px;
   position: relative;
 }
 .password-strength.empty {
@@ -102,17 +94,10 @@
   display: none;
 }
 .password-strength-title {
-  float: left; /* LTR */
+  float: inline-start;
 }
 .password-strength-text {
-  padding-left: 5px; /* LTR */
-}
-[dir="rtl"] .password-strength-title {
-  float: right;
-}
-[dir="rtl"] .password-strength-text {
-  padding-left: 0;
-  padding-right: 5px;
+  padding-inline-start: 5px;
 }
 .password-indicator {
   background-color: #EEE;
@@ -120,8 +105,8 @@
   width: 100%;
   display: block;
   position: absolute;
-  top: 0;
-  left: 0;
+  inset-block-start: 0;
+  inset-inline-start: 0;
 }
 .password-strength .indicator {
   height: 100%;
@@ -181,23 +166,23 @@ form:not(.user-admin-settings) .password-strength-help-text.strong em {
   margin: 1em 0;
 }
 .profile .user-picture {
-  float: right; /* LTR */
-  margin: 0 1em 1em 0; /* LTR */
-}
-[dir="rtl"] .profile .user-picture {
-  float: left;
-  margin: 0 0 1em 1em;
+  float: inline-end;
+  margin-block: 0 1em;
+  margin-inline: 0 1em;
 }
 .profile h2 {
-  border-bottom: 1px solid #ccc;
+  border-block-end: 1px solid #ccc;
 }
 .profile dl {
-  margin: 0 0 1.5em 0;
+  margin-block: 0 1.5em;
+  margin-inline: 0;
 }
 .profile dt {
-  margin: 0 0 0.2em 0;
+  margin-block: 0 0.2em;
+  margin-inline: 0;
   font-weight: bold;
 }
 .profile dd {
-  margin: 0 0 1em 0;
+  margin-block: 0 1em;
+  margin-inline: 0;
 }

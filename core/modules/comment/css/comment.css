@@ -1,13 +1,9 @@
 
 #comments {
-  margin-top: 15px;
+  margin-block-start: 15px;
 }
 .indented {
-  margin-left: 25px; /* LTR */
-}
-[dir="rtl"] .indented {
-  margin-left: 0;
-  margin-right: 25px;
+  margin-inline-start: 25px;
 }
 .comment-unpublished {
   background-color: #fff4f4;

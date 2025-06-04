@@ -25,11 +25,7 @@
 @media (min-width: 48em) {
   .header-identity-wrapper {
     display: block;
-    float: left;
-  }
-
-  [dir="rtl"] .header-identity-wrapper {
-    float: right;
+    float: inline-start;
   }
 }
 
@@ -41,21 +37,13 @@
 
 @media (min-width: 34em) {
   .header-site-name-wrapper {
-    float: left;
-  }
-
-  [dir="rtl"] .header-site-name-wrapper {
-    float: right;
+    float: inline-start;
   }
 }
 
 .header-logo-wrapper {
   display: block;
-  float: left;
-}
-
-[dir="rtl"] .header-logo-wrapper {
-  float: right;
+  float: inline-start;
 }
 
 /* Makes sure images that are tall logos don't pop out of container */
@@ -101,12 +89,7 @@
 
 @media (min-width: 48em) {
   .header-menu {
-    float: right;
-    clear: none;
-  }
-
-  [dir="rtl"] .header-menu {
-    float: left;
+    float: inline-end;
     clear: none;
   }
 }
@@ -133,12 +116,7 @@
 
 .l-header .menu > li,
 .header-menu li {
-  float: left;
-}
-
-[dir="rtl"] .l-header .menu > li,
-[dir="rtl"] .header-menu li {
-  float: right;
+  float: inline-start;
 }
 
 .l-header .menu a,
@@ -147,7 +125,7 @@
   padding: 1rem 1.25rem;
 }
 .l-header .menu-toggle-button {
-  margin-left: .9375rem;
+  margin-inline-start: .9375rem;
   padding: .5rem 0;
 }
 .l-header .menu-toggle-button-text {
@@ -165,8 +143,8 @@
 @media (min-width: 48em) {
   .header-menu a {
     /* Attempt at lining up baseline of site name and header menu */
-    padding-top: 1.9375rem;
-    padding-bottom: 1.0625rem;
+    padding-block-start: 1.9375rem;
+    padding-block-end: 1.0625rem;
     line-height: 1.25rem;
   }
 }
@@ -174,8 +152,8 @@
 @media (min-width: 62em) {
   .header-menu a {
     /* Attempt at lining up baseline of site name and header menu */
-    padding-top: 2rem;
-    padding-bottom: 1rem;
+    padding-block-start: 2rem;
+    padding-block-end: 1rem;
     line-height: 1.25rem;
   }
 }
@@ -186,7 +164,7 @@
   padding: 0;
 }
 
-.header-menu .links li:before,
+.header-menu .links li::before,
 .header-menu .links li:after {
   /* Hides arrows intended for action links in body */
   display: none;

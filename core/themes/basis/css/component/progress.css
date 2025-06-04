@@ -9,7 +9,8 @@
 }
 
 .progress .bar {
-  margin: 0 0.2em .5em 0;
+  margin-block: 0 .5em;
+  margin-inline: 0 0.2em;
   border: 2px solid #e5e5e6;
   border-radius: 3px;
   overflow: hidden;
@@ -30,8 +31,8 @@
   width: 0.75em;
   height: 100%;
   transform: skewX(-20deg);
-  border-left: 2em solid #3c4350;
-  border-right: 0.75em solid #3c4350;
+  border-inline-start: 2em solid #3c4350;
+  border-inline-end: 0.75em solid #3c4350;
   animation: progressGradient 1.5s infinite;
   animation-fill-mode: forwards;
   animation-timing-function: linear;
@@ -41,14 +42,14 @@
 
 @keyframes progressGradient {
   0% {
-    left: -15%;
-    border-left-width: 2em;
-    border-right-width: 0.75em;
+    inset-inline-start: -15%;
+    border-inline-start-width: 2em;
+    border-inline-end-width: 0.75em;
   }
   100% {
-    left: 100%;
-    border-left-width: 1.75em;
-    border-right-width: 0.5em;
+    inset-inline-start: 100%;
+    border-inline-start-width: 1.75em;
+    border-inline-end-width: 0.5em;
   }
 }
 

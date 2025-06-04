@@ -1,16 +1,16 @@
 /* Views filter form css */
 .views-group-box div.date-views-filter-fieldset {
-  margin-left: 0;
+  margin-inline-start: 0;
 }
 .views-group-box fieldset.date-views-filter-fieldset {
-  padding-top: 0;
+  padding-block-start: 0;
 }
 .date-views-filter-wrapper {
   min-width: 250px;
 }
 .date-views-filter input {
-  float: left !important; /* LTR */
-  margin-right: 2px !important; /* LTR */
+  float: inline-start !important;
+  margin-inline-end: 2px !important;
   min-width: 12em;
   padding: 0 !important;
   width: 12em;
@@ -22,7 +22,7 @@
 /* Give the navigation bar a little extra padding below so it will clear the new contextual links overlay of the teasers below it. */
 .date-nav {
   clear: both;
-  padding-bottom: 1.5em;
+  padding-block-end: 1.5em;
   width: 100%;
 }
 .date-nav div.date-heading h3 {
@@ -31,12 +31,12 @@
 }
 
 .date-nav-wrapper .clear-block {
-  margin-bottom: 10px;
+  margin-block-end: 10px;
 }
 
 .date-nav-wrapper  {
   position: relative;
-  margin-top: 5px;
+  margin-block-start: 5px;
   width: 100%;
 }
 
@@ -47,7 +47,7 @@
   height: auto;
   min-height: 30px;
   position: relative;
-  margin-bottom: 10px;
+  margin-block-end: 10px;
 }
 
 .date-nav-wrapper .date-prev a,
@@ -64,28 +64,28 @@
 .date-nav-wrapper .date-prev {
   padding: 5px 0;
   position: absolute;
-  left: 0px;
-  text-align: left;
-  top: 0px;
+  inset-inline-start: 0px;
+  text-align: start;
+  inset-block-start: 0px;
   width: auto;
   z-index: 1;
   font-size: 12px;
 }
 
 .date-nav-wrapper .date-prev {
-  left: 0;
-  right: auto;
+  inset-inline-start: 0;
+  inset-inline-end: auto;
 }
 
 .date-nav-wrapper .date-prev a {
-  margin-left: 10px;
+  margin-inline-start: 10px;
   font-weight: bold;
 }
 
 .date-nav-wrapper .date-heading {
   position: relative;
   width: 100%;
-  top: 0px;
+  inset-block-start: 0px;
   text-align: center;
   z-index: 0;
 }
@@ -98,16 +98,16 @@
 .date-nav-wrapper .date-next {
   padding: 5px 0;
   position: absolute;
-  right: 0px;
-  text-align: right;
-  top: 0px;
+  inset-inline-end: 0px;
+  text-align: end;
+  inset-block-start: 0px;
   width: auto;
   z-index: 1;
   font-size: 12px;
 }
 
 .date-nav-wrapper .date-next a {
-  margin-right: 10px;
+  margin-inline-end: 10px;
   font-weight: bold;
 }
 

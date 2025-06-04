@@ -8,8 +8,8 @@
 .layout--one-column .l-container,
 .layout--one-column .l-footer {
   width: 100%;
-  margin-left: auto;
-  margin-right: auto;
+  margin-inline-start: auto;
+  margin-inline-end: auto;
   box-sizing: border-box;
   clear: both;
 }

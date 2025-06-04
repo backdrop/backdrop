@@ -12,7 +12,7 @@
   line-height: 1.5;
   overflow: hidden;
   word-wrap: break-word;
-  margin-bottom: 10px;
+  margin-block-end: 10px;
 }
 #preview-header {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -23,9 +23,9 @@
   font-weight: normal;
   font-size: 1.821em;
   line-height: 1;
-  margin-bottom: 30px;
-  margin-left: 15px;
-  padding-top: 34px;
+  margin-block-end: 30px;
+  margin-inline-start: 15px;
+  padding-block-start: 34px;
 }
 #preview-main-menu {
   clear: both;
@@ -46,8 +46,8 @@
   background: #ccc;
   background: rgba(255, 255, 255, 0.7);
   text-shadow: 0 1px #eee;
-  border-top-left-radius: 8px;
-  border-top-right-radius: 8px;
+  border-start-start-radius: 8px;
+  border-start-end-radius: 8px;
 }
 #preview-main-menu-links a:hover,
 #preview-main-menu-links a:focus {
@@ -59,7 +59,7 @@
   background: rgba(255, 255, 255, 1);
 }
 #preview-main-menu-links li a.active {
-  border-bottom: none;
+  border-block-end: none;
 }
 #preview-main-menu-links li {
   display: inline;
@@ -69,15 +69,15 @@
 #preview-sidebar,
 #preview-content {
   display: inline;
-  float: left;
+  float: inline-start;
   position: relative;
 }
 #preview-sidebar {
-  margin-left: 15px;
+  margin-inline-start: 15px;
   width: 210px;
 }
 #preview-content {
-  margin-left: 30px;
+  margin-inline-start: 30px;
   width: 26.5em;
 }
 #preview-sidebar .preview-block {
@@ -86,37 +86,40 @@
   padding: 15px 20px;
 }
 #preview-sidebar h2 {
-  border-bottom: 1px solid #d6d6d6;
+  border-block-end: 1px solid #d6d6d6;
   font-size: 1.071em;
   font-weight: normal;
   line-height: 1.2;
-  margin: 0 0 0.5em;
-  padding-bottom: 5px;
+  margin-block: 0 0.5em;
+  margin-inline: 0;
+  padding-block-end: 5px;
   text-shadow: 0 1px 0 #fff;
 }
 #preview .preview-block .preview-content {
-  margin-top: 1em;
+  margin-block-start: 1em;
 }
 #preview .preview-block-menu .preview-content,
 #preview .preview-block-menu .preview-content ul {
-  margin-top: 0;
+  margin-block-start: 0;
 }
 #preview-main {
-  margin-bottom: 40px;
-  margin-top: 20px;
+  margin-block-end: 40px;
+  margin-block-start: 20px;
 }
 #preview-page-title {
   font-size: 2em;
   font-weight: normal;
   line-height: 1;
-  margin: 1em 0 0.5em;
+  margin-block: 1em 0.5em;
+  margin-inline: 0;
 }
 #preview-footer-wrapper {
   color: #c0c0c0;
   color: rgba(255, 255, 255, 0.65);
   display: block !important;
   font-size: 0.857em;
-  padding: 20px 20px 25px;
+  padding-block: 20px 25px;
+  padding-inline: 20px;
 }
 #preview-footer-wrapper a {
   color: #fcfcfc;
@@ -130,7 +133,7 @@
 }
 #preview-footer-wrapper .preview-footer-column {
   display: inline;
-  float: left;
+  float: inline-start;
   padding: 0 10px;
   position: relative;
   width: 220px;
@@ -147,19 +150,19 @@
   padding: 0;
 }
 #preview-footer-columns h2 {
-  border-bottom: 1px solid #555;
+  border-block-end: 1px solid #555;
   border-color: rgba(255, 255, 255, 0.15);
   font-size: 1em;
-  margin-bottom: 0;
-  padding-bottom: 3px;
+  margin-block-end: 0;
+  padding-block-end: 3px;
   text-transform: uppercase;
 }
 #preview-footer-columns .preview-content {
-  margin-top: 0;
+  margin-block-start: 0;
 }
 #preview-footer-columns .preview-content ul {
-  margin-left: 0;
-  padding-left: 0;
+  margin-inline-start: 0;
+  padding-inline-start: 0;
 }
 #preview-footer-columns .preview-content li {
   list-style: none;
@@ -168,11 +171,12 @@
   padding: 0;
 }
 #preview-footer-columns .preview-content li a {
-  border-bottom: 1px solid #555;
+  border-block-end: 1px solid #555;
   border-color: rgba(255, 255, 255, 0.15);
   display: block;
   line-height: 1.2;
-  padding: 0.8em 2px 0.8em 20px;
+  padding-block: 0.8em;
+  padding-inline: 20px 2px;
   text-indent: -15px;
 }
 #preview-footer-columns .preview-content li a:hover,

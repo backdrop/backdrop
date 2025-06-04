@@ -5,5 +5,5 @@
   display: none;
 }
 .admin-bar body {
-  border-top: none !important;
+  border-block-start: none !important;
 }

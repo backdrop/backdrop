@@ -7,11 +7,11 @@
 
 .comments .indented {
   position: relative;
-  padding-left: 1.25em;
-  margin-top: -1.5em;
+  padding-inline-start: 1.25em;
+  margin-block-start: -1.5em;
 }
 
-.comments .indented:before,
+.comments .indented::before,
 .comments .indented:after {
   content: '';
   position: absolute;
@@ -19,56 +19,52 @@
   border: 0.125em solid transparent;
 }
 
-.comments .indented:before {
-  top: -1em;
-  left: 0;
+.comments .indented::before {
+  inset-block-start: -1em;
+  inset-inline-start: 0;
   width: 0.5em;
   height: 1.5em;
-  border-left-color: #dee2ea;
-  border-bottom-color: #dee2ea;
+  border-inline-start-color: #dee2ea;
+  border-block-end-color: #dee2ea;
 }
 
 .comments .indented:after {
   content: '';
   position: absolute;
-  top: 0.6875em;
-  left: 0.4375em;
+  inset-block-start: 0.6875em;
+  inset-inline-start: 0.4375em;
   width: 0.25em;
   height: 0.25em;
-  border-top-color: #dee2ea;
-  border-right-color: #dee2ea;
+  border-block-start-color: #dee2ea;
+  border-inline-end-color: #dee2ea;
   transform: rotate(45deg);
   transform-origin: right top;
-}
-
-[dir="rtl"] .comment {
-  padding: 0;
 }
 
 .comment-header {
   position: relative;
 }
 
-.comment-header:before {
+.comment-header::before {
   content: "";
   position: absolute;
-  top: 100%;
-  left: 1.625em;
+  inset-block-start: 100%;
+  inset-inline-start: 1.625em;
   width: 0.875em;
   height: 0.875em;
   display: block;
   border: 0.125em solid transparent;
-  border-bottom-color: #dee2ea;
-  border-left-color: #dee2ea;
+  border-block-end-color: #dee2ea;
+  border-inline-start-color: #dee2ea;
   transform: rotate(-45deg) translate(0, -0.75em);
   background: #ffffff;
   pointer-events: none;
   z-index: 0;
 }
 
-[dir="rtl"] .comment:before {
-  right: 1.625em;
-  left: auto;
+.comment::before {
+  inset-inline-start: 1.625em;
+  inset-inline-end: auto;
 }
 
 .comment .attribution {
@@ -84,12 +80,6 @@
   -ms-flex-align: center;
   align-items: center;
   padding: 0 0 0.5em;
-}
-
-[dir="rtl"] .comment .attribution {
-  -webkit-box-pack: end;
-  -ms-flex-pack: end;
-  justify-content: flex-end;
 }
 
 .comment .attribution img {
@@ -137,9 +127,10 @@
 }
 
 .comment-footer {
-  float: right;
-  margin: 0 -0.125em 0 0;
-  padding: 0.5em 0.5em;
+  float: inline-end;
+  margin-block: 0;
+  margin-inline: 0 -0.125em;
+  padding: 0.5em;
   background: #dee2ea;
 }
 
@@ -161,10 +152,6 @@
   text-decoration: underline;
 }
 
-[dir="rtl"] .comment-footer {
-  float: left;
-}
-
 a.comment-permalink  {
   width: .7em;
   height: .7em;
@@ -175,5 +162,6 @@ a.comment-permalink  {
   mask-image: url("../../images/link-icon.svg");
   -webkit-mask-size: cover;
   mask-size: cover;
-  margin: 0 0 0 0.5em;
+  margin-block: 0;
+  margin-inline: 0.5em 0;
 }

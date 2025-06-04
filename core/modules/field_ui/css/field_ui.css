@@ -5,16 +5,13 @@
 
 /* 'Manage fields' and 'Manage displays' overviews */
 .field-ui-overview tr.add-new .label-input {
-  float: left; /* LTR */
-}
-[dir="rtl"] .field-ui-overview tr.add-new .label-input {
-  float: right;
+  float: inline-start;
 }
 .field-ui-overview tr.add-new .tabledrag-changed {
   display: none;
 }
 .field-ui-overview tr.add-new .description {
-  margin-bottom: 0;
+  margin-block-end: 0;
   max-width: 250px;
 }
 .field-ui-overview tr.add-new .form-type-machine-name .description {
@@ -22,7 +19,7 @@
 }
 .field-ui-overview tr.add-new .add-new-placeholder {
   font-weight: bold;
-  padding-bottom: .5em;
+  padding-block-end: .5em;
 }
 .field-ui-overview tr.region-title td {
   font-weight: bold;
@@ -49,19 +46,19 @@
   line-height: 1em;
 }
 .field-ui-overview .field-formatter-summary {
-  float: left;
+  float: inline-start;
   font-size: 0.9em;
 }
 .field-ui-overview td.field-formatter-summary-cell span.warning {
   display: block;
-  float: left;
-  margin-right: .5em;
+  float: inline-start;
+  margin-inline-end: .5em;
 }
 .field-ui-overview .field-formatter-settings-edit-wrapper {
-  float: right;
+  float: inline-end;
 }
 .field-ui-overview .field-formatter-settings-edit {
-  float: right;
+  float: inline-end;
 }
 .field-ui-overview tr.field-formatter-settings-editing td {
   vertical-align: top;

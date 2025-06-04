@@ -22,11 +22,7 @@ figure {
 }
 
 blockquote {
-  border-left: 0.25rem solid #bbbbbb; /* LTR */
-}
-[dir="rtl"] blockquote {
-  border-left: none;
-  border-right: 0.25rem solid #bbbbbb;
+  border-inline-start: 0.25rem solid #bbbbbb;
 }
 
 blockquote {
@@ -35,11 +31,11 @@ blockquote {
 }
 
 blockquote > :first-child {
-  margin-top: 0;
+  margin-block-start: 0;
 }
 
 blockquote > :last-child {
-  margin-bottom: 0;
+  margin-block-end: 0;
 }
 
 pre,
@@ -59,7 +55,7 @@ pre code {
   margin: 0;
   padding: 0.8em 1.3em;
   border: 0;
-  border-left: 0.25rem solid #bbbbbb;
+  border-inline-start: 0.25rem solid #bbbbbb;
   background: transparent;
 }
 
@@ -168,12 +164,12 @@ td {
 }
 
 th {
-  border-right: 0.0625rem solid #bbbbbb;
+  border-inline-end: 0.0625rem solid #bbbbbb;
   background: #dee2ea;
 }
 
 th:last-child {
-  border-right-color: #dee2ea;
+  border-inline-end-color: #dee2ea;
 }
 
 table [aria-sort] a:after {
@@ -185,13 +181,13 @@ table [aria-sort] a:after {
 }
 
 table [aria-sort="descending"] a:after {
-  border-top-color: #333333;
-  border-bottom-width: 0;
+  border-block-start-color: #333333;
+  border-block-end-width: 0;
 }
 
 table [aria-sort="ascending"] a:after {
-  border-bottom-color: #333333;
-  border-top-width: 0;
+  border-block-end-color: #333333;
+  border-block-start-width: 0;
 }
 
 table [aria-sort] img {
@@ -205,13 +201,10 @@ fieldset {
   position: relative;
   max-width: 100%;
   margin: 1em 0;
-  padding: 3.774em 0 0 0; /* LTR */
+  padding-block: 3.774em 0;
+  padding-inline: 0;
   border: 0.125em solid #eaeaea;
   min-width: 0;
-}
-
-[dir="rtl"] fieldset {
-  padding: 2.5em 0 0;
 }
 
 /**

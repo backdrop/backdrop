@@ -7,10 +7,10 @@ div.image-style-new div {
   display: inline;
 }
 div.image-style-preview .preview-image-wrapper {
-  float: left;
-  padding-bottom: 2em;
+  float: inline-start;
+  padding-block-end: 2em;
   text-align: center;
-  top: 50%;
+  inset-block-start: 50%;
   width: 48%;
 }
 div.image-style-preview div.preview-image {
@@ -19,32 +19,32 @@ div.image-style-preview div.preview-image {
 }
 div.image-style-preview div.preview-image div.width {
   border: 1px solid #666;
-  border-top: none;
+  border-block-start: none;
   height: 2px;
-  left: -1px;
-  bottom: -6px;
+  inset-inline-start: -1px;
+  inset-block-end: -6px;
   position: absolute;
   box-sizing: content-box;
 }
 div.image-style-preview div.preview-image div.width span {
   position: relative;
-  top: 4px;
+  inset-block-start: 4px;
 }
 div.image-style-preview div.preview-image div.height {
   border: 1px solid #666;
-  border-left: none;
+  border-inline-start: none;
   position: absolute;
-  right: -6px;
-  top: -1px;
+  inset-inline-end: -6px;
+  inset-block-start: -1px;
   width: 2px;
   box-sizing: content-box;
 }
 div.image-style-preview div.preview-image div.height span {
   height: 2em;
-  left: 10px;
-  margin-top: -1em;
+  inset-inline-start: 10px;
+  margin-block-start: -1em;
   position: absolute;
-  top: 50%;
+  inset-block-start: 50%;
 }
 
 /**

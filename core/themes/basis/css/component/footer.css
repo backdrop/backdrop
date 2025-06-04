@@ -33,11 +33,7 @@
 }
 
 .l-footer .menu > li {
-  float: left;
-}
-
-[dir="rtl"] .l-footer .menu > li {
-  float: right;
+  float: inline-start;
 }
 
 .l-footer .menu a {
@@ -62,12 +58,12 @@
   width: 7em;
 }
 
-.drop-lounging:before {
+.drop-lounging::before {
   content: '';
   position: absolute;
-  top: -0.75em;
-  left: 50%;
-  left: calc(50% + 1.25em);
+  inset-block-start: -0.75em;
+  inset-inline-start: 50%;
+  inset-inline-start: calc(50% + 1.25em);
   display: none; /* Default hidden unless certain criteria are met */
   box-sizing: content-box;
   width: 100%;
@@ -78,7 +74,10 @@
   background: url("../../images/drop-lounging.png") no-repeat;
   background-size: 100% auto;
 }
+[dir="rtl"] .drop-lounging::before {
+  transform: translate(50%, -82%) scaleX(-1);
+}
 
-.l-footer .block:first-child .drop-lounging:before {
+.l-footer .block:first-child .drop-lounging::before {
   display: block;
 }

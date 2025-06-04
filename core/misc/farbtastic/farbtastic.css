@@ -13,8 +13,8 @@
 }
 .farbtastic .color,
 .farbtastic .overlay {
-  top: 47px;
-  left: 47px;
+  inset-block-start: 47px;
+  inset-inline-start: 47px;
   width: 101px;
   height: 101px;
 }
@@ -29,7 +29,8 @@
 .farbtastic .marker {
   width: 17px;
   height: 17px;
-  margin: -8px 0 0 -8px;
+  margin-block: -8px 0;
+  margin-inline: -8px 0;
   overflow: hidden;
   background: url(marker.png) no-repeat;
 }

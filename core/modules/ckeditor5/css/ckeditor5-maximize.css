@@ -12,16 +12,16 @@ body.ck-scroll-prevented {
 }
 .ck-maximize-active .ck.ck-sticky-panel .ck-sticky-panel__content_sticky {
   /* Force to ignore the space for admin-bar. */
-  top: 0 !important;
+  inset-block-start: 0 !important;
   /* Force full width. */
   width: 100% !important;
 }
 .ck-maximize-active {
   position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  inset-block-start: 0;
+  inset-inline-start: 0;
+  inset-inline-end: 0;
+  inset-block-end: 0;
   display: flex;
   flex-direction: column;
   height: 100vh;

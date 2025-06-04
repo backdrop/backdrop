@@ -60,65 +60,65 @@
 .tree-grid td {
   background: padding-box #fff;
   border: #aaa solid 0;
-  border-bottom-width: 1px;
+  border-block-end-width: 1px;
   height: 2.4em;
   padding: .2em .5em;
 }
 
 .tree-grid .token-name {
-  padding-left: 2.4em;
+  padding-inline-start: 2.4em;
 }
 
 .tree-grid td:first-child {
-  border-left-width: 24em;
+  border-inline-start-width: 24em;
 }
 
 .tree-grid [aria-level="1"] td:first-child {
-  border-left-width: 0;
+  border-inline-start-width: 0;
 }
 
 .tree-grid [aria-level="2"] td:first-child {
-  border-left-width: 2em;
+  border-inline-start-width: 2em;
 }
 
 .tree-grid [aria-level="3"] td:first-child {
-  border-left-width: 4em;
+  border-inline-start-width: 4em;
 }
 
 .tree-grid [aria-level="4"] td:first-child {
-  border-left-width: 6em;
+  border-inline-start-width: 6em;
 }
 
 .tree-grid [aria-level="5"] td:first-child {
-  border-left-width: 8em;
+  border-inline-start-width: 8em;
 }
 
 .tree-grid [aria-level="6"] td:first-child {
-  border-left-width: 10em;
+  border-inline-start-width: 10em;
 }
 
 .tree-grid [aria-level="7"] td:first-child {
-  border-left-width: 12em;
+  border-inline-start-width: 12em;
 }
 
 .tree-grid [aria-level="8"] td:first-child {
-  border-left-width: 14em;
+  border-inline-start-width: 14em;
 }
 
 .tree-grid [aria-level="9"] td:first-child {
-  border-left-width: 16em;
+  border-inline-start-width: 16em;
 }
 
 .tree-grid [aria-level="10"] td:first-child {
-  border-left-width: 18em;
+  border-inline-start-width: 18em;
 }
 
 .tree-grid [aria-level="11"] td:first-child {
-  border-left-width: 20em;
+  border-inline-start-width: 20em;
 }
 
 .tree-grid [aria-level="12"] td:first-child {
-  border-left-width: 22em;
+  border-inline-start-width: 22em;
 }
 
 .tree-grid [aria-level="2"] td {
@@ -132,7 +132,7 @@
 .tree-grid [aria-level="7"] td,
 .tree-grid [aria-level="8"] td,
 .tree-grid [aria-level="9"] td,
-.tree-grid [aria-level="10"] td, 
+.tree-grid [aria-level="10"] td,
 .tree-grid [aria-level="11"] td,
 .tree-grid [aria-level="12"] td {
   background: #e9e9e9;
@@ -143,7 +143,8 @@
   border: 0;
   height: 2em;
   line-height: 0;
-  margin: 0 .2em 0 -2.2em;
+  margin-block: 0;
+  margin-inline: -2.2em 0.2em;
   overflow: hidden;
   padding: 0;
   position: relative;
@@ -158,10 +159,10 @@
   box-sizing: border-box;
   content: '';
   display: block;
-  left: 0;
+  inset-inline-start: 0;
   height: 100%;
   position: absolute;
-  top: 0;
+  inset-block-start: 0;
   transform: rotate(-90deg);
   transition: .15s;
   width: 100%;

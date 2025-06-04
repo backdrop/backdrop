@@ -6,16 +6,17 @@ body.maintenance-page {
 }
 .maintenance-page #page-wrapper {
   background: #fff;
-  margin-left: auto;
-  margin-right: auto;
+  margin-inline-start: auto;
+  margin-inline-end: auto;
   min-width: 0;
   min-height: 0;
   width: 800px;
   border: 1px solid #ddd;
-  margin-top: 40px;
+  margin-block-start: 40px;
 }
 .maintenance-page #page {
-  margin: 20px 40px 40px;
+  margin-block: 20px 40px;
+  margin-inline: 40px;
 }
 .maintenance-page #main-wrapper {
   min-height: inherit;
@@ -33,9 +34,9 @@ body.maintenance-page {
   background-image: none;
 }
 .maintenance-page #name-and-slogan {
-  margin-bottom: 50px;
-  margin-left: 0;
-  padding-top: 20px;
+  margin-block-end: 50px;
+  margin-inline-start: 0;
+  padding-block-start: 20px;
   font-size: 90%;
 }
 .maintenance-page #name-and-slogan,
@@ -51,11 +52,11 @@ body.maintenance-page {
 }
 .maintenance-page .page-title {
   line-height: 1em;
-  margin-top: 0;
+  margin-block-start: 0;
 }
 .maintenance-page #messages {
   padding: 0;
-  margin-top: 30px;
+  margin-block-start: 30px;
 }
 .maintenance-page #messages div.messages {
   margin: 0;

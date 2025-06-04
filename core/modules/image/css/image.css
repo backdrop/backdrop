@@ -3,19 +3,13 @@
  * Image upload widget.
  */
 .image-preview {
-  float: left; /* LTR */
-  padding: 0 10px 10px 0; /* LTR */
-}
-[dir="rtl"] .image-preview {
-  float: right;
-  padding: 0 0 10px 10px;
+  float: inline-start;
+  padding-block: 0 10px;
+  padding-inline: 0 10px;
 }
 div.image-widget-data {
-  float: left; /* LTR */
+  float: inline-start;
   max-width: 100%;
-}
-[dir="rtl"] .image-widget-data {
-  float: right;
 }
 div.image-widget-data .text-field {
   width: auto;

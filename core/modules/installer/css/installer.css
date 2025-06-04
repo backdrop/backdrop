@@ -25,11 +25,13 @@
 
 .installer-browser-install-button-form {
   clear: both;
-  margin: 10px 0 0;
+  margin-block: 10px 0;
+  margin-inline: 0;
 }
 
 .installer-browser-install-queue {
-  margin: 5px 0 0;
+  margin-block: 5px 0;
+  margin-inline: 0;
 }
 
 .installer-browser-install-queue-item {
@@ -41,8 +43,11 @@
 }
 
 .installer-browser-install-queue-item a {
-  padding-left: 22px;
+  padding-inline-start: 22px;
   background: url("../images/remove.png") no-repeat scroll left 3px transparent;
+}
+[dir="rtl"] .installer-browser-install-queue-item a {
+  background-position: right 3px;
 }
 
 .installer-browser-selected-release {
@@ -84,39 +89,33 @@
 
 .installer-browser-sort-list li.sort-asc a {
   background: url("/core/misc/arrow-asc.png") no-repeat scroll right 2px transparent; /* LTR */
-  padding-right: 17px; /* LTR */
+  padding-inline-end: 17px;
 }
 
 .installer-browser-sort-list li.sort-desc a {
   background: url("/core/misc/arrow-desc.png") no-repeat scroll right 2px transparent; /* LTR */
-  padding-right: 17px; /* LTR */
+  padding-inline-end: 17px;
 }
 [dir="rtl"] .installer-browser-sort-list li.sort-asc a,
 [dir="rtl"] .installer-browser-sort-list li.sort-desc a {
   background-position: left 2px;
-  padding-right: 0;
-  padding-left: 17px;
 }
 
 .project-extra {
   color: gray;
   clear: right; /* LTR */
-  text-align: right; /* LTR */
+  text-align: end;
 }
 [dir="rtl"] .project-extra {
-  text-align: left;
   clear: left;
 }
 
 .project-status {
-  text-align: right;
+  text-align: end;
 }
 
 .project-install {
-  text-align: right;
-}
-[dir="rtl"] .project-install {
-  text-align: left;
+  text-align: end;
 }
 
 .project-author {
@@ -148,7 +147,8 @@
 }
 
 .screenshot {
-  margin: 0 0 5px 0;
+  margin-block: 0 5px;
+  margin-inline: 0;
   overflow: hidden;
 }
 .screenshot img {
@@ -157,20 +157,13 @@
 }
 @media (min-width: 500px) {
   .screenshot {
-    float: left; /* LTR */
+    float: inline-start;
     width: 133px;
     height: 100px;
     margin: 0;
   }
-  [dir="rtl"] .screenshot {
-    float: right;
-  }
   .has-image .project-information {
-    margin-left: 148px; /* LTR */
-  }
-  [dir="rtl"] .has-image .project-information {
-    margin-right: 148px;
-    margin-left: 0;
+    margin-inline-start: 148px;
   }
 }
 
@@ -183,7 +176,7 @@
   height: 100%;
   font-size: 35px;
   line-height: 100px;
-  float: left;
+  float: inline-start;
 }
 
 .project-dialog .screenshot {
@@ -199,7 +192,7 @@
 .project-dialog .has-image .project-extra {
   text-align: center;
   clear: none;
-  margin-top: 30px;
+  margin-block-start: 30px;
 }
 .project-dialog .has-image .project-install {
   text-align: center;
@@ -207,7 +200,7 @@
 
 @media (min-width: 600px) {
   .project-dialog .screenshot {
-    float: right;
+    float: inline-end;
     width: 300px;
     height: 186px;
   }
@@ -216,10 +209,10 @@
     height: auto;
   }
   .project-dialog .has-image .project-extra {
-    text-align: left;
+    text-align: start;
   }
   .project-dialog .has-image .project-install {
-    text-align: left;
+    text-align: start;
   }
 }
 
@@ -239,22 +232,15 @@
 @media only screen and (min-width: 768px) {
   .installer-browser-install-sidebar {
     display: block;
-    float: left; /* LTR */
+    float: inline-start;
     width: 220px;
     box-sizing: border-box;
-  }
-  [dir="rtl"] .installer-browser-install-sidebar {
-    float: right;
   }
 
   .installer-browser-install-main {
     padding: 0 20px;
-    margin-left: 240px; /* LTR */
+    margin-inline-start: 240px;
     box-sizing: border-box;
-  }
-  [dir="rtl"] .installer-browser-install-main {
-    margin-left: 0;
-    margin-right: 240px;
   }
 }
 
@@ -267,13 +253,13 @@
 }
 @media (min-width: 600px) {
   .project-dialog .project-dialog-header {
-    text-align: left;
+    text-align: start;
   }
 }
 
 .project-title {
   font-size: 18px;
-  margin-bottom: 10px;
+  margin-block-end: 10px;
 }
 
 .project-dialog .project-title {
@@ -282,10 +268,7 @@
 }
 
 .installer-browser-main div.form-item-install {
-  float: right; /* LTR */
-}
-[dir="rtl"] .installer-browser-main .form-item-install {
-  float: left;
+  float: inline-end;
 }
 
 .installer-browser .installer-browser-region {
@@ -293,7 +276,7 @@
 }
 
 .installer-browser .installer-browser-block {
-  margin-bottom: 20px;
+  margin-block-end: 20px;
   background-color: #fff;
 }
 
@@ -317,26 +300,19 @@
 }
 
 .project-dialog-description {
-  margin-top: 1em;
-  border-top: 1px solid #ccc;
-  margin-bottom: 1em;
+  margin-block-start: 1em;
+  border-block-start: 1px solid #ccc;
+  margin-block-end: 1em;
 }
 
 .project-dialog-info {
-  float: left; /* LTR */
+  float: inline-start;
   max-width: 45%;
-}
-[dir="rtl"] .project-dialog-info {
-  float: right;
 }
 
 .project-dialog .project-status {
   position: relative;
-  right: 0; /* LTR */
-}
-[dir="rtl"] .project-dialog .project-status {
-  left: 0;
-  right: auto;
+  inset-inline-end: 0;
 }
 .project-dialog .project-item {
   border: none;
@@ -352,18 +328,14 @@ th.installer-project-name {
 
 .installer-status-count-link {
   display: inline;
-  float: right;
+  float: inline-end;
 }
 .installer-browser-filters-form {
   display: inline-block;
 }
 .installer-browser-filters-form .form-item-search-text {
   display: inline-block;
-  margin-right: 10px; /* LTR */
-}
-[dir="rtl"] .installer-browser-filters-form .form-item-search-text {
-  margin-right: 0;
-  margin-left: 10px;
+  margin-inline-end: 10px;
 }
 
 .installer-browser-sort {
@@ -376,32 +348,19 @@ th.installer-project-name {
   }
   .installer-browser .installer-browser-main {
     width: 75%;
-    float: left; /* LTR */
-    margin-right: 1%;
-  }
-  [dir="rtl"] .installer-browser .installer-browser-main {
-    float: right;
-    margin-right: 0;
-    margin-left: 1%;
+    float: inline-start;
+    margin-inline-end: 1%;
   }
 
   .installer-browser .installer-browser-list-sidebar {
     width: 23%;
-    float: right; /* LTR */
-  }
-  [dir="rtl"] .installer-browser .installer-browser-list-sidebar {
-    float: left; /* LTR */
+    float: inline-end;
   }
 
   .project-status {
     position: absolute;
-    right: 10px; /* LTR */
-    text-align: right; /* LTR */
-    top: 5px;
-  }
-  [dir="rtl"] .project-status {
-    right: auto;
-    left: 10px;
-    text-align: left;
+    inset-inline-end: 10px;
+    text-align: end;
+    inset-block-start: 5px;
   }
 }
