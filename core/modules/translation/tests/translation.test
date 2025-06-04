@@ -439,8 +439,9 @@ class TranslationTestCase extends BackdropWebTestCase {
     $languages = language_list();
     $node_langcode = $node->langcode === LANGUAGE_NONE ? $language_default : $node->langcode;
     $translation_langcode = $translation->langcode === LANGUAGE_NONE ? $language_default : $translation->langcode;
-    $page_language = $languages[$node_langcode];
-    $translation_language = $languages[$translation_langcode];
+    $page_language = $languages[entity_language('node', $node)];
+    $translation_language = $languages[$translation->langcode];
+
     $url = url("node/$translation->nid", array('language' => $translation_language));
 
     $this->backdropGet("node/$node->nid", array('language' => $page_language));
