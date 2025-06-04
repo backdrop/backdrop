@@ -112,7 +112,7 @@ function system_theme() {
     ) + $base,
     'block__system__main' => array(
       'template' => 'templates/block--system--main',
-      //'variables' => array('content' => NULL, 'layout' => NULL, 'block' => NULL, 'style' => NULL, 'settings' => array(), 'attributes' => array()),
+      // 'variables' => array('content' => NULL, 'layout' => NULL, 'block' => NULL, 'style' => NULL, 'settings' => array(), 'attributes' => array()),
       'base hook' => 'block',
     ) + $base,
     'tree_table' => array(
@@ -1042,7 +1042,7 @@ function system_menu() {
     'type' => MENU_CALLBACK,
   );
 
-  // Additional categories
+  // Additional categories.
   $items['admin/config/content'] = array(
     'title' => 'Content authoring',
     'icon' => 'note-pencil',
@@ -1311,7 +1311,7 @@ function system_library_info() {
       'core/misc/collapse.js' => array('group' => JS_DEFAULT),
     ),
     'dependencies' => array(
-      // collapse.js relies on backdropGetSummary in form.js
+      // collapse.js relies on backdropGetSummary in form.js.
       array('system', 'backdrop.form'),
     ),
   );
@@ -1427,7 +1427,7 @@ function system_library_info() {
     ),
   );
 
-  // jQuery TimeEntry
+  // jQuery TimeEntry.
   $libraries['jquery.timeentry'] = array(
     'title' => 'jQuery Time Entry Plugin',
     'website' => 'http://keith-wood.name/timeEntry.html',
@@ -1464,7 +1464,7 @@ function system_library_info() {
       'core/misc/vertical-tabs.css' => array(),
     ),
     'dependencies' => array(
-      // Vertical tabs relies on backdropGetSummary in form.js
+      // Vertical tabs relies on backdropGetSummary in form.js.
       array('system', 'backdrop.form'),
     ),
   );
@@ -3205,7 +3205,7 @@ function _system_update_bootstrap_status() {
  *   An associative array of themes information.
  */
 function _system_rebuild_theme_data() {
-  // Find themes
+  // Find themes.
   $themes = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'themes');
   // Allow modules to add further themes.
   if ($module_themes = module_invoke_all('system_theme_info')) {
@@ -3219,7 +3219,7 @@ function _system_rebuild_theme_data() {
     }
   }
 
-  // Find theme engines
+  // Find theme engines.
   $engines = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.engine$/', 'themes/engines');
 
   // Set defaults for theme info.
@@ -3233,7 +3233,7 @@ function _system_rebuild_theme_data() {
   );
 
   $sub_themes = array();
-  // Read info files for each theme
+  // Read info files for each theme.
   foreach ($themes as $key => $theme) {
     $themes[$key]->filename = $theme->uri;
     $themes[$key]->info = backdrop_parse_info_file($theme->uri) + $defaults;
@@ -3454,12 +3454,19 @@ function system_header_block($settings) {
  * @see system_block_view()
  */
 function system_breadcrumb_block($settings = array()) {
+  $output = '';
   $crumbs = backdrop_get_breadcrumb();
-  if (isset($settings['current']) && $settings['current'] == TRUE) {
-    $crumbs[] = '<span aria-current="page">' . backdrop_get_title() . '</span>';
+  if (!empty($crumbs)) {
+    if (empty($settings['current'])) {
+      // Hide the last link if the block settings don't call for showing it, for
+      // backwards compatibility.
+      $last_crumb = array_pop($crumbs);
+      $crumbs[] = str_replace('class="', 'class="element-invisible ', $last_crumb);
+    }
+    $output = theme('breadcrumb', array('breadcrumb' => $crumbs));
   }
 
-  return theme('breadcrumb', array('breadcrumb' => $crumbs));
+  return $output;
 }
 
 /**
@@ -3678,7 +3685,7 @@ function system_jump_menu_submit($form, &$form_state) {
   // This allows duplicate paths to be used in jump menus for multiple options.
   $redirect_array = explode("::", $form_state['values']['jump']);
 
-  if(isset($redirect_array[1]) && !empty($redirect_array[1])){
+  if (isset($redirect_array[1]) && !empty($redirect_array[1])) {
     $redirect = $redirect_array[1];
   }
   else {
@@ -3807,7 +3814,7 @@ function system_cron() {
   // of PHP. See http://drupal.org/node/352956.
   $result = db_query('SELECT fid FROM {file_managed} WHERE status <> :permanent AND timestamp < :timestamp', array(
     ':permanent' => FILE_STATUS_PERMANENT,
-    ':timestamp' => REQUEST_TIME - BACKDROP_MAXIMUM_TEMP_FILE_AGE
+    ':timestamp' => REQUEST_TIME - BACKDROP_MAXIMUM_TEMP_FILE_AGE,
   ));
   foreach ($result as $row) {
     if ($file = file_load($row->fid)) {
@@ -3917,7 +3924,7 @@ function system_time_zones($blank = NULL) {
  * has been deprecated and it will be removed in Backdrop 2.0.
  *
  * @return
- *  TRUE if this installation can issue HTTP requests.
+ *   TRUE if this installation can issue HTTP requests.
  *
  * @deprecated since 1.3.1
  */
@@ -4698,7 +4705,7 @@ function system_settings_form_submit($form, &$form_state) {
  *   A keyed array that will contain the form values sorted by CMI bucket when
  *   the function returns.  Defaults to an empty array.
  * @return
- *    Returns an array where the keys are the names of the CMI buckets (e.g.,
+ *   Returns an array where the keys are the names of the CMI buckets (e.g.,
  *    system.settings) and the values are key => value arrays of the settings
  *    for each bucket.
  */
@@ -4768,7 +4775,6 @@ function system_theme_debug_enabled_warning() {
  * @return string
  *   The transliterated and cleaned up string.
  */
-
 function system_transliterate_machine_name($string, $options = array()) {
   include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';
   $defaults = array(
