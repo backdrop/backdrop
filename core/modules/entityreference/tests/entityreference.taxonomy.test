@@ -5,7 +5,7 @@
  */
 class EntityReferenceTaxonomyTestCase extends BackdropWebTestCase {
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('node', 'entityreference', 'taxonomy');
 
     // Clear field info to ensure entityreference is recognized.
@@ -84,7 +84,7 @@ class EntityReferenceTaxonomyTestCase extends BackdropWebTestCase {
   /**
    * Test referencing a term using entity reference field.
    */
-  public function testNodeIndex() {
+  protected function testNodeIndex() {
     $this->setupForIndex();
     $langcode = LANGUAGE_NONE;
 
@@ -153,7 +153,7 @@ class EntityReferenceTaxonomyTestCase extends BackdropWebTestCase {
    * Make sure the index only contains one entry for a given node->term
    * reference, even when multiple ER fields link from the node bundle to terms.
    */
-  public function testIndexDuplicates() {
+  protected function testIndexDuplicates() {
     // Extra setup for this test: add another ER field on this content type.
     $this->setupForIndexDuplicates();
 

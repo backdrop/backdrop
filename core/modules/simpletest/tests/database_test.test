@@ -45,7 +45,7 @@ class FakeRecordWithConstructor {
 class DatabaseTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  protected function setUp() {
     $modules = func_get_args();
     if (isset($modules[0]) && is_array($modules[0])) {
       $modules = $modules[0];
@@ -71,7 +71,7 @@ class DatabaseTestCase extends BackdropWebTestCase {
    * @param $schema
    *   An array of table definitions to install.
    */
-  function installTables($schema) {
+  protected function installTables($schema) {
     // This ends up being a test for table drop and create, too, which is nice.
     foreach ($schema as $name => $data) {
       if (db_table_exists($name)) {
@@ -88,7 +88,7 @@ class DatabaseTestCase extends BackdropWebTestCase {
   /**
    * Set up tables for NULL handling.
    */
-  function ensureSampleDataNull() {
+  protected function ensureSampleDataNull() {
     $schema['test_null'] = backdrop_get_schema('test_null');
     $this->installTables($schema);
 
@@ -115,7 +115,7 @@ class DatabaseTestCase extends BackdropWebTestCase {
    * These are added using db_query(), since we're not trying to test the
    * INSERT operations here, just populate.
    */
-  function addSampleData() {
+  protected function addSampleData() {
     // We need the IDs, so we can't use a multi-insert here.
     $john = db_insert('test')
       ->fields(array(
@@ -205,7 +205,7 @@ class DatabaseConnectionTestCase extends DatabaseTestCase {
   /**
    * Test that connections return appropriate connection objects.
    */
-  function testConnectionRouting() {
+  protected function testConnectionRouting() {
     // Clone the primary credentials to a replica connection.
     // Note this will result in two independent connection objects that happen
     // to point to the same place.
@@ -239,7 +239,7 @@ class DatabaseConnectionTestCase extends DatabaseTestCase {
   /**
    * Test that connections return appropriate connection objects.
    */
-  function testConnectionRoutingOverride() {
+  protected function testConnectionRoutingOverride() {
     // Clone the primary credentials to a replica connection.
     // Note this will result in two independent connection objects that happen
     // to point to the same place.
@@ -257,7 +257,7 @@ class DatabaseConnectionTestCase extends DatabaseTestCase {
   /**
    * Tests the closing of a database connection.
    */
-  function testConnectionClosing() {
+  protected function testConnectionClosing() {
     // Open the default target so we have an object to compare.
     $db1 = Database::getConnection('default', 'default');
 
@@ -272,7 +272,7 @@ class DatabaseConnectionTestCase extends DatabaseTestCase {
   /**
    * Tests the connection options of the active database.
    */
-  function testConnectionOptions() {
+  protected function testConnectionOptions() {
     $connection_info = Database::getConnectionInfo('default');
 
     // Be sure we're connected to the default database.
@@ -312,7 +312,7 @@ class DatabaseSelectCloneTest extends DatabaseTestCase {
   /**
    * Test that subqueries as value within conditions are cloned properly.
    */
-  function testSelectConditionSubQueryCloning() {
+  protected function testSelectConditionSubQueryCloning() {
     $subquery = db_select('test', 't');
     $subquery->addField('t', 'id', 'id');
     $subquery->condition('age', 28, '<');
@@ -341,7 +341,7 @@ class DatabaseSelectCloneTest extends DatabaseTestCase {
   /**
    * Tests that nested SELECT queries are cloned properly.
    */
-  public function testNestedQueryCloning() {
+  protected function testNestedQueryCloning() {
     $sub_query = db_select('test', 't');
     $sub_query->addField('t', 'id', 'id');
     $sub_query->condition('age', 28, '<');
@@ -375,7 +375,7 @@ class DatabaseFetchTestCase extends DatabaseTestCase {
   /**
    * Confirm that we can fetch a record properly in default object mode.
    */
-  function testQueryFetchDefault() {
+  protected function testQueryFetchDefault() {
     $records = array();
     $result = db_query('SELECT name FROM {test} WHERE age = :age', array(':age' => 25));
     $this->assertTrue($result instanceof DatabaseStatementInterface, 'Result set is a Backdrop statement object.');
@@ -391,7 +391,7 @@ class DatabaseFetchTestCase extends DatabaseTestCase {
   /**
    * Confirm that we can fetch a record to an object explicitly.
    */
-  function testQueryFetchObject() {
+  protected function testQueryFetchObject() {
     $records = array();
     $result = db_query('SELECT name FROM {test} WHERE age = :age', array(':age' => 25), array('fetch' => PDO::FETCH_OBJ));
     foreach ($result as $record) {
@@ -406,7 +406,7 @@ class DatabaseFetchTestCase extends DatabaseTestCase {
   /**
    * Confirm that we can fetch a record to an array associative explicitly.
    */
-  function testQueryFetchArray() {
+  protected function testQueryFetchArray() {
     $records = array();
     $result = db_query('SELECT name FROM {test} WHERE age = :age', array(':age' => 25), array('fetch' => PDO::FETCH_ASSOC));
     foreach ($result as $record) {
@@ -444,7 +444,7 @@ class DatabaseFetchTestCase extends DatabaseTestCase {
    *
    * @see FakeRecord
    */
-  function testQueryFetchClass() {
+  protected function testQueryFetchClass() {
     $records = array();
     $result = db_query('SELECT name FROM {test} WHERE age = :age', array(':age' => 25), array('fetch' => 'FakeRecord'));
     foreach ($result as $record) {
@@ -465,7 +465,7 @@ class DatabaseFetchTestCase extends DatabaseTestCase {
  */
 class DatabaseFetch2TestCase extends DatabaseTestCase {
   // Confirm that we can fetch a record into an indexed array explicitly.
-  function testQueryFetchNum() {
+  protected function testQueryFetchNum() {
     $records = array();
     $result = db_query('SELECT name FROM {test} WHERE age = :age', array(':age' => 25), array('fetch' => PDO::FETCH_NUM));
     foreach ($result as $record) {
@@ -481,7 +481,7 @@ class DatabaseFetch2TestCase extends DatabaseTestCase {
   /**
    * Confirm that we can fetch a record into a doubly-keyed array explicitly.
    */
-  function testQueryFetchBoth() {
+  protected function testQueryFetchBoth() {
     $records = array();
     $result = db_query('SELECT name FROM {test} WHERE age = :age', array(':age' => 25), array('fetch' => PDO::FETCH_BOTH));
     foreach ($result as $record) {
@@ -498,7 +498,7 @@ class DatabaseFetch2TestCase extends DatabaseTestCase {
   /**
    * Confirm that we can fetch an entire column of a result set at once.
    */
-  function testQueryFetchCol() {
+  protected function testQueryFetchCol() {
     $records = array();
     $result = db_query('SELECT name FROM {test} WHERE age > :age', array(':age' => 25));
     $column = $result->fetchCol();
@@ -519,7 +519,7 @@ class DatabaseInsertTestCase extends DatabaseTestCase {
   /**
    * Test the very basic insert functionality.
    */
-  function testSimpleInsert() {
+  protected function testSimpleInsert() {
     $num_records_before = db_query('SELECT COUNT(*) FROM {test}')->fetchField();
 
     $query = db_insert('test');
@@ -538,7 +538,7 @@ class DatabaseInsertTestCase extends DatabaseTestCase {
   /**
    * Test that we can insert multiple records in one query object.
    */
-  function testMultiInsert() {
+  protected function testMultiInsert() {
     $num_records_before = (int) db_query('SELECT COUNT(*) FROM {test}')->fetchField();
 
     $query = db_insert('test');
@@ -571,7 +571,7 @@ class DatabaseInsertTestCase extends DatabaseTestCase {
   /**
    * Test that an insert object can be reused with new data after it executes.
    */
-  function testRepeatedInsert() {
+  protected function testRepeatedInsert() {
     $num_records_before = db_query('SELECT COUNT(*) FROM {test}')->fetchField();
 
     $query = db_insert('test');
@@ -606,7 +606,7 @@ class DatabaseInsertTestCase extends DatabaseTestCase {
   /**
    * Test that we can specify fields without values and specify values later.
    */
-  function testInsertFieldOnlyDefinition() {
+  protected function testInsertFieldOnlyDefinition() {
     // This is useful for importers, when we want to create a query and define
     // its fields once, then loop over a multi-insert execution.
     db_insert('test')
@@ -626,7 +626,7 @@ class DatabaseInsertTestCase extends DatabaseTestCase {
   /**
    * Test that inserts return the proper auto-increment ID.
    */
-  function testInsertLastInsertID() {
+  protected function testInsertLastInsertID() {
     $id = db_insert('test')
       ->fields(array(
         'name' => 'Larry',
@@ -640,7 +640,7 @@ class DatabaseInsertTestCase extends DatabaseTestCase {
   /**
    * Test that the INSERT INTO ... SELECT (fields) ... syntax works.
    */
-  function testInsertSelectFields() {
+  protected function testInsertSelectFields() {
     $query = db_select('test_people', 'tp');
     // The query builder will always append expressions after fields.
     // Add the expression first to test that the insert fields are correctly
@@ -666,7 +666,7 @@ class DatabaseInsertTestCase extends DatabaseTestCase {
   /**
    * Tests that the INSERT INTO ... SELECT * ... syntax works.
    */
-  function testInsertSelectAll() {
+  protected function testInsertSelectAll() {
     $query = db_select('test_people', 'tp')
       ->fields('tp')
       ->condition('tp.name', 'Meredith');
@@ -692,7 +692,7 @@ class DatabaseInsertLOBTestCase extends DatabaseTestCase {
   /**
    * Test that we can insert a single blob field successfully.
    */
-  function testInsertOneBlob() {
+  protected function testInsertOneBlob() {
     $data = "This is\000a test.";
     $this->assertTrue(strlen($data) === 15, 'Test data contains a NULL.');
     $id = db_insert('test_one_blob')
@@ -705,7 +705,7 @@ class DatabaseInsertLOBTestCase extends DatabaseTestCase {
   /**
    * Test that we can insert multiple blob fields in the same query.
    */
-  function testInsertMultipleBlob() {
+  protected function testInsertMultipleBlob() {
     $id = db_insert('test_two_blobs')
       ->fields(array(
         'blob1' => 'This is',
@@ -724,7 +724,7 @@ class DatabaseInsertDefaultsTestCase extends DatabaseTestCase {
   /**
    * Test that we can run a query that is "default values for everything".
    */
-  function testDefaultInsert() {
+  protected function testDefaultInsert() {
     $query = db_insert('test')->useDefaults(array('job'));
     $id = $query->execute();
 
@@ -737,7 +737,7 @@ class DatabaseInsertDefaultsTestCase extends DatabaseTestCase {
   /**
    * Test that no action will be preformed if no fields are specified.
    */
-  function testDefaultEmptyInsert() {
+  protected function testDefaultEmptyInsert() {
     $num_records_before = (int) db_query('SELECT COUNT(*) FROM {test}')->fetchField();
 
     try {
@@ -755,7 +755,7 @@ class DatabaseInsertDefaultsTestCase extends DatabaseTestCase {
   /**
    * Test that we can insert fields with values and defaults in the same query.
    */
-  function testDefaultInsertWithFields() {
+  protected function testDefaultInsertWithFields() {
     $query = db_insert('test')
       ->fields(array('name' => 'Bob'))
       ->useDefaults(array('job'));
@@ -775,7 +775,7 @@ class DatabaseUpdateTestCase extends DatabaseTestCase {
   /**
    * Confirm that we can update a single record successfully.
    */
-  function testSimpleUpdate() {
+  protected function testSimpleUpdate() {
     $num_updated = db_update('test')
       ->fields(array('name' => 'Tiffany'))
       ->condition('id', 1)
@@ -789,7 +789,7 @@ class DatabaseUpdateTestCase extends DatabaseTestCase {
   /**
    * Confirm updating to NULL.
    */
-  function testSimpleNullUpdate() {
+  protected function testSimpleNullUpdate() {
     $this->ensureSampleDataNull();
     $num_updated = db_update('test_null')
       ->fields(array('age' => NULL))
@@ -804,7 +804,7 @@ class DatabaseUpdateTestCase extends DatabaseTestCase {
   /**
    * Confirm that we can update a multiple records successfully.
    */
-  function testMultiUpdate() {
+  protected function testMultiUpdate() {
     $num_updated = db_update('test')
       ->fields(array('job' => 'Musician'))
       ->condition('job', 'Singer')
@@ -818,7 +818,7 @@ class DatabaseUpdateTestCase extends DatabaseTestCase {
   /**
    * Confirm that we can update a multiple records with a non-equality condition.
    */
-  function testMultiGTUpdate() {
+  protected function testMultiGTUpdate() {
     $num_updated = db_update('test')
       ->fields(array('job' => 'Musician'))
       ->condition('age', 26, '>')
@@ -832,7 +832,7 @@ class DatabaseUpdateTestCase extends DatabaseTestCase {
   /**
    * Confirm that we can update a multiple records with a where call.
    */
-  function testWhereUpdate() {
+  protected function testWhereUpdate() {
     $num_updated = db_update('test')
       ->fields(array('job' => 'Musician'))
       ->where('age > :age', array(':age' => 26))
@@ -846,7 +846,7 @@ class DatabaseUpdateTestCase extends DatabaseTestCase {
   /**
    * Confirm that we can stack condition and where calls.
    */
-  function testWhereAndConditionUpdate() {
+  protected function testWhereAndConditionUpdate() {
     $update = db_update('test')
       ->fields(array('job' => 'Musician'))
       ->where('age > :age', array(':age' => 26))
@@ -861,7 +861,7 @@ class DatabaseUpdateTestCase extends DatabaseTestCase {
   /**
    * Test updating with expressions.
    */
-  function testExpressionUpdate() {
+  protected function testExpressionUpdate() {
     // Ensure that expressions are handled properly. This should set every
     // record's age to a square of itself
     $num_rows = db_update('test')
@@ -873,7 +873,7 @@ class DatabaseUpdateTestCase extends DatabaseTestCase {
   /**
    * Tests return value on update.
    */
-  function testUpdateAffectedRows() {
+  protected function testUpdateAffectedRows() {
     // At 5am in the morning, all band members but those with a priority 1 task
     // are sleeping. So we set their tasks to 'sleep'. 5 records match the
     // condition and therefore are affected by the query, even though two of
@@ -890,7 +890,7 @@ class DatabaseUpdateTestCase extends DatabaseTestCase {
   /**
    * Confirm that we can update the primary key of a record successfully.
    */
-  function testPrimaryKeyUpdate() {
+  protected function testPrimaryKeyUpdate() {
     $num_updated = db_update('test')
       ->fields(array('id' => 42, 'name' => 'John'))
       ->condition('id', 1)
@@ -909,7 +909,7 @@ class DatabaseUpdateComplexTestCase extends DatabaseTestCase {
   /**
    * Test updates with OR conditionals.
    */
-  function testOrConditionUpdate() {
+  protected function testOrConditionUpdate() {
     $update = db_update('test')
       ->fields(array('job' => 'Musician'))
       ->condition(db_or()
@@ -926,7 +926,7 @@ class DatabaseUpdateComplexTestCase extends DatabaseTestCase {
   /**
    * Test WHERE IN clauses.
    */
-  function testInConditionUpdate() {
+  protected function testInConditionUpdate() {
     $num_updated = db_update('test')
       ->fields(array('job' => 'Musician'))
       ->condition('name', array('John', 'Paul'), 'IN')
@@ -940,7 +940,7 @@ class DatabaseUpdateComplexTestCase extends DatabaseTestCase {
   /**
    * Test WHERE NOT IN clauses.
    */
-  function testNotInConditionUpdate() {
+  protected function testNotInConditionUpdate() {
     // The o is lowercase in the 'NoT IN' operator, to make sure the operators
     // work in mixed case.
     $num_updated = db_update('test')
@@ -956,7 +956,7 @@ class DatabaseUpdateComplexTestCase extends DatabaseTestCase {
   /**
    * Test BETWEEN conditional clauses.
    */
-  function testBetweenConditionUpdate() {
+  protected function testBetweenConditionUpdate() {
     $num_updated = db_update('test')
       ->fields(array('job' => 'Musician'))
       ->condition('age', array(25, 26), 'BETWEEN')
@@ -970,7 +970,7 @@ class DatabaseUpdateComplexTestCase extends DatabaseTestCase {
   /**
    * Test LIKE conditionals.
    */
-  function testLikeConditionUpdate() {
+  protected function testLikeConditionUpdate() {
     $num_updated = db_update('test')
       ->fields(array('job' => 'Musician'))
       ->condition('name', '%ge%', 'LIKE')
@@ -984,7 +984,7 @@ class DatabaseUpdateComplexTestCase extends DatabaseTestCase {
   /**
    * Test update with expression values.
    */
-  function testUpdateExpression() {
+  protected function testUpdateExpression() {
     $before_age = db_query('SELECT age FROM {test} WHERE name = :name', array(':name' => 'Ringo'))->fetchField();
     $GLOBALS['larry_test'] = 1;
     $num_updated = db_update('test')
@@ -1007,7 +1007,7 @@ class DatabaseUpdateComplexTestCase extends DatabaseTestCase {
   /**
    * Test update with only expression values.
    */
-  function testUpdateOnlyExpression() {
+  protected function testUpdateOnlyExpression() {
     $before_age = db_query('SELECT age FROM {test} WHERE name = :name', array(':name' => 'Ringo'))->fetchField();
     $num_updated = db_update('test')
       ->condition('name', 'Ringo')
@@ -1027,7 +1027,7 @@ class DatabaseUpdateLOBTestCase extends DatabaseTestCase {
   /**
    * Confirm that we can update a blob column.
    */
-  function testUpdateOneBlob() {
+  protected function testUpdateOneBlob() {
     $data = "This is\000a test.";
     $this->assertTrue(strlen($data) === 15, 'Test data contains a NULL.');
     $id = db_insert('test_one_blob')
@@ -1047,7 +1047,7 @@ class DatabaseUpdateLOBTestCase extends DatabaseTestCase {
   /**
    * Confirm that we can update two blob columns in the same table.
    */
-  function testUpdateMultipleBlob() {
+  protected function testUpdateMultipleBlob() {
     $id = db_insert('test_two_blobs')
       ->fields(array(
         'blob1' => 'This is',
@@ -1080,7 +1080,7 @@ class DatabaseDeleteTruncateTestCase extends DatabaseTestCase {
   /**
    * Confirm that we can use a subselect in a delete successfully.
    */
-  function testSubselectDelete() {
+  protected function testSubselectDelete() {
     $num_records_before = db_query('SELECT COUNT(*) FROM {test_task}')->fetchField();
     $pid_to_delete = db_query("SELECT * FROM {test_task} WHERE task = 'sleep'")->fetchField();
 
@@ -1101,7 +1101,7 @@ class DatabaseDeleteTruncateTestCase extends DatabaseTestCase {
   /**
    * Confirm that we can delete a single record successfully.
    */
-  function testSimpleDelete() {
+  protected function testSimpleDelete() {
     $num_records_before = db_query('SELECT COUNT(*) FROM {test}')->fetchField();
 
     $num_deleted = db_delete('test')
@@ -1116,7 +1116,7 @@ class DatabaseDeleteTruncateTestCase extends DatabaseTestCase {
   /**
    * Confirm that we can truncate a whole table successfully.
    */
-  function testTruncate() {
+  protected function testTruncate() {
     $num_records_before = db_query("SELECT COUNT(*) FROM {test}")->fetchField();
 
     db_truncate('test')->execute();
@@ -1133,7 +1133,7 @@ class DatabaseMergeTestCase extends DatabaseTestCase {
   /**
    * Confirm that we can merge-insert a record successfully.
    */
-  function testMergeInsert() {
+  protected function testMergeInsert() {
     $num_records_before = db_query('SELECT COUNT(*) FROM {test}')->fetchField();
     $max_id_before = db_query('SELECT MAX(id) FROM {test}')->fetchField();
 
@@ -1160,7 +1160,7 @@ class DatabaseMergeTestCase extends DatabaseTestCase {
   /**
    * Confirm that we can merge-update a record successfully.
    */
-  function testMergeUpdate() {
+  protected function testMergeUpdate() {
     $num_records_before = db_query('SELECT COUNT(*) FROM {test_people}')->fetchField();
     $num_records_matched = db_query('SELECT COUNT(*) FROM {test_people} WHERE job = :job', array(':job' => 'Speaker'))->fetchField();
 
@@ -1186,7 +1186,7 @@ class DatabaseMergeTestCase extends DatabaseTestCase {
   /**
    * Confirm that we can merge-update a record successfully, with different insert and update.
    */
-  function testMergeUpdateExcept() {
+  protected function testMergeUpdateExcept() {
     $num_records_before = db_query('SELECT COUNT(*) FROM {test_people}')->fetchField();
 
     db_merge('test_people')
@@ -1207,7 +1207,7 @@ class DatabaseMergeTestCase extends DatabaseTestCase {
   /**
    * Confirm that we can merge-update a record successfully, with alternate replacement.
    */
-  function testMergeUpdateExplicit() {
+  protected function testMergeUpdateExplicit() {
     $num_records_before = db_query('SELECT COUNT(*) FROM {test_people}')->fetchField();
 
     db_merge('test_people')
@@ -1233,7 +1233,7 @@ class DatabaseMergeTestCase extends DatabaseTestCase {
   /**
    * Confirm that we can merge-update a record successfully, with expressions.
    */
-  function testMergeUpdateExpression() {
+  protected function testMergeUpdateExpression() {
     $num_records_before = db_query('SELECT COUNT(*) FROM {test_people}')->fetchField();
 
     $age_before = db_query('SELECT age FROM {test_people} WHERE job = :job', array(':job' => 'Speaker'))->fetchField();
@@ -1262,7 +1262,7 @@ class DatabaseMergeTestCase extends DatabaseTestCase {
   /**
    * Test that we can merge-insert without any update fields.
    */
-  function testMergeInsertWithoutUpdate() {
+  protected function testMergeInsertWithoutUpdate() {
     $num_records_before = db_query('SELECT COUNT(*) FROM {test_people}')->fetchField();
 
     db_merge('test_people')
@@ -1281,7 +1281,7 @@ class DatabaseMergeTestCase extends DatabaseTestCase {
   /**
    * Confirm that we can merge-update without any update fields.
    */
-  function testMergeUpdateWithoutUpdate() {
+  protected function testMergeUpdateWithoutUpdate() {
     $num_records_before = db_query('SELECT COUNT(*) FROM {test_people}')->fetchField();
 
     db_merge('test_people')
@@ -1313,7 +1313,7 @@ class DatabaseMergeTestCase extends DatabaseTestCase {
   /**
    * Test that an invalid merge query throws an exception like it is supposed to.
    */
-  function testInvalidMerge() {
+  protected function testInvalidMerge() {
     try {
       // This query should die because there is no key field specified.
       db_merge('test_people')
@@ -1338,7 +1338,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
   /**
    * Test rudimentary SELECT statements.
    */
-  function testSimpleSelect() {
+  protected function testSimpleSelect() {
     $query = db_select('test');
     $name_field = $query->addField('test', 'name');
     $age_field = $query->addField('test', 'age', 'age');
@@ -1355,7 +1355,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
   /**
    * Test rudimentary SELECT statement with a COMMENT.
    */
-  function testSimpleComment() {
+  protected function testSimpleComment() {
     $query = db_select('test');
     $query->comment('Testing query comments');
     $query->addField('test', 'name');
@@ -1377,7 +1377,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
   /**
    * Test query COMMENT system against vulnerabilities.
    */
-  function testVulnerableComment() {
+  protected function testVulnerableComment() {
     $query = db_select('test');
     $query->comment('Testing query comments */ SELECT nid FROM {node}; --');
     $query->addField('test', 'name');
@@ -1405,7 +1405,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
   /**
    * Provides expected and input values for testVulnerableComment().
    */
-  function makeCommentsProvider() {
+  protected function makeCommentsProvider() {
     return array(
       array(
         '/*  */ ',
@@ -1436,7 +1436,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
   /**
    * Test basic conditionals on SELECT statements.
    */
-  function testSimpleSelectConditional() {
+  protected function testSimpleSelectConditional() {
     $query = db_select('test');
     $name_field = $query->addField('test', 'name');
     $age_field = $query->addField('test', 'age', 'age');
@@ -1456,7 +1456,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
   /**
    * Test SELECT statements with expressions.
    */
-  function testSimpleSelectExpression() {
+  protected function testSimpleSelectExpression() {
     $query = db_select('test');
     $name_field = $query->addField('test', 'name');
     $age_field = $query->addExpression("age*2", 'double_age');
@@ -1476,7 +1476,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
   /**
    * Test SELECT statements with multiple expressions.
    */
-  function testSimpleSelectExpressionMultiple() {
+  protected function testSimpleSelectExpressionMultiple() {
     $query = db_select('test');
     $name_field = $query->addField('test', 'name');
     $age_double_field = $query->addExpression("age*2");
@@ -1498,7 +1498,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
   /**
    * Test adding multiple fields to a select statement at the same time.
    */
-  function testSimpleSelectMultipleFields() {
+  protected function testSimpleSelectMultipleFields() {
     $record = db_select('test')
       ->fields('test', array('id', 'name', 'age', 'job'))
       ->condition('age', 27)
@@ -1521,7 +1521,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
   /**
    * Test adding all fields from a given table to a select statement.
    */
-  function testSimpleSelectAllFields() {
+  protected function testSimpleSelectAllFields() {
     $record = db_select('test')
       ->fields('test')
       ->condition('age', 27)
@@ -1544,7 +1544,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
   /**
    * Test that a comparison with NULL is always FALSE.
    */
-  function testNullCondition() {
+  protected function testNullCondition() {
     $this->ensureSampleDataNull();
 
     $names = db_select('test_null', 'tn')
@@ -1558,7 +1558,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
   /**
    * Test that we can find a record with a NULL value.
    */
-  function testIsNullCondition() {
+  protected function testIsNullCondition() {
     $this->ensureSampleDataNull();
 
     $names = db_select('test_null', 'tn')
@@ -1573,7 +1573,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
   /**
    * Test that we can find a record without a NULL value.
    */
-  function testIsNotNullCondition() {
+  protected function testIsNotNullCondition() {
     $this->ensureSampleDataNull();
 
     $names = db_select('test_null', 'tn')
@@ -1591,7 +1591,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
    * Test that we can UNION multiple Select queries together. This is
    * semantically equal to UNION DISTINCT, so we don't explicitly test that.
    */
-  function testUnion() {
+  protected function testUnion() {
     $query_1 = db_select('test', 't')
       ->fields('t', array('name'))
       ->condition('age', array(27, 28), 'IN');
@@ -1614,7 +1614,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
   /**
    * Test that we can UNION ALL multiple Select queries together.
    */
-  function testUnionAll() {
+  protected function testUnionAll() {
     $query_1 = db_select('test', 't')
       ->fields('t', array('name'))
       ->condition('age', array(27, 28), 'IN');
@@ -1650,7 +1650,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
    * the only way this could happen is if we have successfully triggered the
    * database's random ordering functionality.
    */
-  function testRandomOrder() {
+  protected function testRandomOrder() {
     // Use 52 items, so the chance that this test fails by accident will be the
     // same as the chance that a deck of cards will come out in the same order
     // after shuffling it (in other words, nearly impossible).
@@ -1700,7 +1700,7 @@ class DatabaseSelectTestCase extends DatabaseTestCase {
   /**
    * Test that aliases are renamed when duplicates.
    */
-  function testSelectDuplicateAlias() {
+  protected function testSelectDuplicateAlias() {
     $query = db_select('test', 't');
     $alias1 = $query->addField('t', 'name', 'the_alias');
     $alias2 = $query->addField('t', 'age', 'the_alias');
@@ -1715,7 +1715,7 @@ class DatabaseSelectSubqueryTestCase extends DatabaseTestCase {
   /**
    * Test that we can use a subquery in a FROM clause.
    */
-  function testFromSubquerySelect() {
+  protected function testFromSubquerySelect() {
     // Create a subquery, which is just a normal query object.
     $subquery = db_select('test_task', 'tt');
     $subquery->addField('tt', 'pid', 'pid');
@@ -1749,7 +1749,7 @@ class DatabaseSelectSubqueryTestCase extends DatabaseTestCase {
   /**
    * Test that we can use a subquery in a FROM clause with a limit.
    */
-  function testFromSubquerySelectWithLimit() {
+  protected function testFromSubquerySelectWithLimit() {
     // Create a subquery, which is just a normal query object.
     $subquery = db_select('test_task', 'tt');
     $subquery->addField('tt', 'pid', 'pid');
@@ -1775,7 +1775,7 @@ class DatabaseSelectSubqueryTestCase extends DatabaseTestCase {
   /**
    * Test that we can use a subquery in a WHERE clause.
    */
-  function testConditionSubquerySelect() {
+  protected function testConditionSubquerySelect() {
     // Create a subquery, which is just a normal query object.
     $subquery = db_select('test_task', 'tt');
     $subquery->addField('tt', 'pid', 'pid');
@@ -1811,7 +1811,7 @@ class DatabaseSelectSubqueryTestCase extends DatabaseTestCase {
   /**
    * Test that we can use a subquery in a JOIN clause.
    */
-  function testJoinSubquerySelect() {
+  protected function testJoinSubquerySelect() {
     // Create a subquery, which is just a normal query object.
     $subquery = db_select('test_task', 'tt');
     $subquery->addField('tt', 'pid', 'pid');
@@ -1838,7 +1838,7 @@ class DatabaseSelectSubqueryTestCase extends DatabaseTestCase {
    * We essentially select all rows from the {test} table that have matching
    * rows in the {test_people} table based on the shared name column.
    */
-  function testExistsSubquerySelect() {
+  protected function testExistsSubquerySelect() {
     // Put George into {test_people}.
     db_insert('test_people')
       ->fields(array(
@@ -1868,7 +1868,7 @@ class DatabaseSelectSubqueryTestCase extends DatabaseTestCase {
    * We essentially select all rows from the {test} table that don't have
    * matching rows in the {test_people} table based on the shared name column.
    */
-  function testNotExistsSubquerySelect() {
+  protected function testNotExistsSubquerySelect() {
     // Put George into {test_people}.
     db_insert('test_people')
       ->fields(array(
@@ -1900,7 +1900,7 @@ class DatabaseSelectOrderedTestCase extends DatabaseTestCase {
   /**
    * Test basic order by.
    */
-  function testSimpleSelectOrdered() {
+  protected function testSimpleSelectOrdered() {
     $query = db_select('test');
     $name_field = $query->addField('test', 'name');
     $age_field = $query->addField('test', 'age', 'age');
@@ -1921,7 +1921,7 @@ class DatabaseSelectOrderedTestCase extends DatabaseTestCase {
   /**
    * Test multiple order by.
    */
-  function testSimpleSelectMultiOrdered() {
+  protected function testSimpleSelectMultiOrdered() {
     $query = db_select('test');
     $name_field = $query->addField('test', 'name');
     $age_field = $query->addField('test', 'age', 'age');
@@ -1952,7 +1952,7 @@ class DatabaseSelectOrderedTestCase extends DatabaseTestCase {
   /**
    * Test order by descending.
    */
-  function testSimpleSelectOrderedDesc() {
+  protected function testSimpleSelectOrderedDesc() {
     $query = db_select('test');
     $name_field = $query->addField('test', 'name');
     $age_field = $query->addField('test', 'age', 'age');
@@ -1973,7 +1973,7 @@ class DatabaseSelectOrderedTestCase extends DatabaseTestCase {
   /**
    * Tests that the sort direction is sanitized properly.
    */
-  function testOrderByEscaping() {
+  protected function testOrderByEscaping() {
     $query = db_select('test')->orderBy('name', 'invalid direction');
     $order_bys = $query->getOrderBy();
     $this->assertEqual($order_bys['name'], 'ASC', 'Invalid order by direction is converted to ASC.');
@@ -1987,7 +1987,7 @@ class DatabaseSelectComplexTestCase extends DatabaseTestCase {
   /**
    * Test simple JOIN statements.
    */
-  function testDefaultJoin() {
+  protected function testDefaultJoin() {
     $query = db_select('test_task', 't');
     $people_alias = $query->join('test', 'p', 't.pid = p.id');
     $name_field = $query->addField($people_alias, 'name', 'name');
@@ -2012,7 +2012,7 @@ class DatabaseSelectComplexTestCase extends DatabaseTestCase {
   /**
    * Test LEFT OUTER joins.
    */
-  function testLeftOuterJoin() {
+  protected function testLeftOuterJoin() {
     $query = db_select('test', 'p');
     $people_alias = $query->leftJoin('test_task', 't', 't.pid = p.id');
     $name_field = $query->addField('p', 'name', 'name');
@@ -2037,7 +2037,7 @@ class DatabaseSelectComplexTestCase extends DatabaseTestCase {
   /**
    * Test GROUP BY clauses.
    */
-  function testGroupBy() {
+  protected function testGroupBy() {
     $query = db_select('test_task', 't');
     $count_field = $query->addExpression('COUNT(task)', 'num');
     $task_field = $query->addField('t', 'task');
@@ -2073,7 +2073,7 @@ class DatabaseSelectComplexTestCase extends DatabaseTestCase {
   /**
    * Test GROUP BY and HAVING clauses together.
    */
-  function testGroupByAndHaving() {
+  protected function testGroupByAndHaving() {
     $query = db_select('test_task', 't');
     $count_field = $query->addExpression('COUNT(task)', 'num');
     $task_field = $query->addField('t', 'task');
@@ -2107,7 +2107,7 @@ class DatabaseSelectComplexTestCase extends DatabaseTestCase {
   /**
    * Test range queries. The SQL clause varies with the database.
    */
-  function testRange() {
+  protected function testRange() {
     $query = db_select('test');
     $name_field = $query->addField('test', 'name');
     $age_field = $query->addField('test', 'age', 'age');
@@ -2125,7 +2125,7 @@ class DatabaseSelectComplexTestCase extends DatabaseTestCase {
   /**
    * Test distinct queries.
    */
-  function testDistinct() {
+  protected function testDistinct() {
     $query = db_select('test_task');
     $task_field = $query->addField('test_task', 'task');
     $query->distinct();
@@ -2142,7 +2142,7 @@ class DatabaseSelectComplexTestCase extends DatabaseTestCase {
   /**
    * Test that we can generate a count query from a built query.
    */
-  function testCountQuery() {
+  protected function testCountQuery() {
     $query = db_select('test');
     $name_field = $query->addField('test', 'name');
     $age_field = $query->addField('test', 'age', 'age');
@@ -2159,7 +2159,7 @@ class DatabaseSelectComplexTestCase extends DatabaseTestCase {
     $this->assertEqual($record->$age_field, 27, 'Correct data retrieved.');
   }
 
-  function testHavingCountQuery() {
+  protected function testHavingCountQuery() {
     $query = db_select('test')
       ->extend('PagerDefault')
       ->groupBy('age')
@@ -2174,7 +2174,7 @@ class DatabaseSelectComplexTestCase extends DatabaseTestCase {
    * Test that countQuery properly removes 'all_fields' statements and
    * ordering clauses.
    */
-  function testCountQueryRemovals() {
+  protected function testCountQueryRemovals() {
     $query = db_select('test');
     $query->fields('test');
     $query->orderBy('name');
@@ -2202,7 +2202,7 @@ class DatabaseSelectComplexTestCase extends DatabaseTestCase {
   /**
    * Test that countQuery properly removes fields and expressions.
    */
-  function testCountQueryFieldRemovals() {
+  protected function testCountQueryFieldRemovals() {
     // countQuery should remove all fields and expressions, so this can be
     // tested by adding a non-existent field and expression: if it ends
     // up in the query, an error will be thrown. If not, it will return the
@@ -2220,7 +2220,7 @@ class DatabaseSelectComplexTestCase extends DatabaseTestCase {
   /**
    * Test that we can generate a count query from a query with distinct.
    */
-  function testCountQueryDistinct() {
+  protected function testCountQueryDistinct() {
     $query = db_select('test_task');
     $task_field = $query->addField('test_task', 'task');
     $query->distinct();
@@ -2233,7 +2233,7 @@ class DatabaseSelectComplexTestCase extends DatabaseTestCase {
   /**
    * Test that we can generate a count query from a query with GROUP BY.
    */
-  function testCountQueryGroupBy() {
+  protected function testCountQueryGroupBy() {
     $query = db_select('test_task');
     $pid_field = $query->addField('test_task', 'pid');
     $query->groupBy('pid');
@@ -2258,7 +2258,7 @@ class DatabaseSelectComplexTestCase extends DatabaseTestCase {
   /**
    * Confirm that we can properly nest conditional clauses.
    */
-  function testNestedConditions() {
+  protected function testNestedConditions() {
     // This query should translate to:
     // "SELECT job FROM {test} WHERE name = 'Paul' AND (age = 26 OR age = 27)"
     // That should find only one record. Yes it's a non-optimal way of writing
@@ -2275,7 +2275,7 @@ class DatabaseSelectComplexTestCase extends DatabaseTestCase {
   /**
    * Confirm we can join on a single table twice with a dynamic alias.
    */
-  function testJoinTwice() {
+  protected function testJoinTwice() {
     $query = db_select('test')->fields('test');
     $alias = $query->join('test', 'test', 'test.job = %alias.job');
     $query->addField($alias, 'name', 'othername');
@@ -2337,14 +2337,14 @@ class DatabaseSelectComplexTestCase extends DatabaseTestCase {
  * Test more complex select statements, part 2.
  */
 class DatabaseSelectComplexTestCase2 extends DatabaseTestCase {
-  function setUp() {
+  protected function setUp() {
     parent::setUp(array('node_access_test'));
   }
 
   /**
    * Test that we can join on a query.
    */
-  function testJoinSubquery() {
+  protected function testJoinSubquery() {
     $acct = $this->backdropCreateUser();
     $this->backdropLogin($acct);
 
@@ -2385,7 +2385,7 @@ class DatabaseSelectPagerDefaultTestCase extends DatabaseTestCase {
    * Note that we have to make an HTTP request to a test page handler
    * because the pager depends on GET parameters.
    */
-  function testEvenPagerQuery() {
+  protected function testEvenPagerQuery() {
     // To keep the test from being too brittle, we determine up front
     // what the page count should be dynamically, and pass the control
     // information forward to the actual query on the other side of the
@@ -2419,7 +2419,7 @@ class DatabaseSelectPagerDefaultTestCase extends DatabaseTestCase {
    * Note that we have to make an HTTP request to a test page handler
    * because the pager depends on GET parameters.
    */
-  function testOddPagerQuery() {
+  protected function testOddPagerQuery() {
     // To keep the test from being too brittle, we determine up front
     // what the page count should be dynamically, and pass the control
     // information forward to the actual query on the other side of the
@@ -2452,7 +2452,7 @@ class DatabaseSelectPagerDefaultTestCase extends DatabaseTestCase {
    *
    * This is a regression test for #467984.
    */
-  function testInnerPagerQuery() {
+  protected function testInnerPagerQuery() {
     $query = db_select('test', 't')->extend('PagerDefault');
     $query
       ->fields('t', array('age'))
@@ -2473,7 +2473,7 @@ class DatabaseSelectPagerDefaultTestCase extends DatabaseTestCase {
    *
    * This is a regression test for #467984.
    */
-  function testHavingPagerQuery() {
+  protected function testHavingPagerQuery() {
     $query = db_select('test', 't')->extend('PagerDefault');
     $query
       ->fields('t', array('name'))
@@ -2491,7 +2491,7 @@ class DatabaseSelectPagerDefaultTestCase extends DatabaseTestCase {
   /**
    * Confirm that every pager gets a valid non-overlapping element ID.
    */
-  function testElementNumbers() {
+  protected function testElementNumbers() {
     $_GET['page'] = '3, 2, 1, 0';
 
     $query = db_select('test', 't')->extend('PagerDefault');
@@ -2534,7 +2534,7 @@ class DatabaseSelectTableSortDefaultTestCase extends DatabaseTestCase {
    * Note that we have to make an HTTP request to a test page handler
    * because the pager depends on GET parameters.
    */
-  function testTableSortQuery() {
+  protected function testTableSortQuery() {
     $sorts = array(
       array('field' => t('Task ID'), 'sort' => 'desc', 'first' => 'perform at superbowl', 'last' => 'eat'),
       array('field' => t('Task ID'), 'sort' => 'asc', 'first' => 'eat', 'last' => 'perform at superbowl'),
@@ -2560,7 +2560,7 @@ class DatabaseSelectTableSortDefaultTestCase extends DatabaseTestCase {
    * Confirm that if a tablesort's orderByHeader is called before another orderBy, that the header happens first.
    *
    */
-  function testTableSortQueryFirst() {
+  protected function testTableSortQueryFirst() {
     $sorts = array(
       array('field' => t('Task ID'), 'sort' => 'desc', 'first' => 'perform at superbowl', 'last' => 'eat'),
       array('field' => t('Task ID'), 'sort' => 'asc', 'first' => 'eat', 'last' => 'perform at superbowl'),
@@ -2585,7 +2585,7 @@ class DatabaseSelectTableSortDefaultTestCase extends DatabaseTestCase {
   /**
    * Confirm that if a sort is not set in a tableselect form there is no error thrown when using the default.
    */
-  function testTableSortDefaultSort() {
+  protected function testTableSortDefaultSort() {
     $this->backdropGet('database_test/tablesort_default_sort');
     // Any PHP errors or notices thrown would trigger a simpletest exception, so
     // no additional assertions are needed.
@@ -2602,7 +2602,7 @@ class DatabaseTaggingTestCase extends DatabaseTestCase {
   /**
    * Confirm that a query has a "tag" added to it.
    */
-  function testHasTag() {
+  protected function testHasTag() {
     $query = db_select('test');
     $query->addField('test', 'name');
     $query->addField('test', 'age', 'age');
@@ -2616,7 +2616,7 @@ class DatabaseTaggingTestCase extends DatabaseTestCase {
   /**
    * Test query tagging "has all of these tags" functionality.
    */
-  function testHasAllTags() {
+  protected function testHasAllTags() {
     $query = db_select('test');
     $query->addField('test', 'name');
     $query->addField('test', 'age', 'age');
@@ -2631,7 +2631,7 @@ class DatabaseTaggingTestCase extends DatabaseTestCase {
   /**
    * Test query tagging "has at least one of these tags" functionality.
    */
-  function testHasAnyTag() {
+  protected function testHasAnyTag() {
     $query = db_select('test');
     $query->addField('test', 'name');
     $query->addField('test', 'age', 'age');
@@ -2645,7 +2645,7 @@ class DatabaseTaggingTestCase extends DatabaseTestCase {
   /**
    * Confirm that an extended query has a "tag" added to it.
    */
-  function testExtenderHasTag() {
+  protected function testExtenderHasTag() {
     $query = db_select('test')
       ->extend('SelectQueryExtender');
     $query->addField('test', 'name');
@@ -2660,7 +2660,7 @@ class DatabaseTaggingTestCase extends DatabaseTestCase {
   /**
    * Test extended query tagging "has all of these tags" functionality.
    */
-  function testExtenderHasAllTags() {
+  protected function testExtenderHasAllTags() {
     $query = db_select('test')
       ->extend('SelectQueryExtender');
     $query->addField('test', 'name');
@@ -2676,7 +2676,7 @@ class DatabaseTaggingTestCase extends DatabaseTestCase {
   /**
    * Test extended query tagging "has at least one of these tags" functionality.
    */
-  function testExtenderHasAnyTag() {
+  protected function testExtenderHasAnyTag() {
     $query = db_select('test')
       ->extend('SelectQueryExtender');
     $query->addField('test', 'name');
@@ -2693,7 +2693,7 @@ class DatabaseTaggingTestCase extends DatabaseTestCase {
    *
    * This is how we pass additional context to alter hooks.
    */
-  function testMetaData() {
+  protected function testMetaData() {
     $query = db_select('test');
     $query->addField('test', 'name');
     $query->addField('test', 'age', 'age');
@@ -2722,7 +2722,7 @@ class DatabaseAlterTestCase extends DatabaseTestCase {
   /**
    * Test that we can do basic alters.
    */
-  function testSimpleAlter() {
+  protected function testSimpleAlter() {
     $query = db_select('test');
     $query->addField('test', 'name');
     $query->addField('test', 'age', 'age');
@@ -2741,7 +2741,7 @@ class DatabaseAlterTestCase extends DatabaseTestCase {
   /**
    * Test that we can alter the joins on a query.
    */
-  function testAlterWithJoin() {
+  protected function testAlterWithJoin() {
     $query = db_select('test_task');
     $tid_field = $query->addField('test_task', 'tid');
     $task_field = $query->addField('test_task', 'task');
@@ -2765,7 +2765,7 @@ class DatabaseAlterTestCase extends DatabaseTestCase {
   /**
    * Test that we can alter a query's conditionals.
    */
-  function testAlterChangeConditional() {
+  protected function testAlterChangeConditional() {
     $query = db_select('test_task');
     $tid_field = $query->addField('test_task', 'tid');
     $pid_field = $query->addField('test_task', 'pid');
@@ -2790,7 +2790,7 @@ class DatabaseAlterTestCase extends DatabaseTestCase {
   /**
    * Test that we can alter the fields of a query.
    */
-  function testAlterChangeFields() {
+  protected function testAlterChangeFields() {
     $query = db_select('test');
     $name_field = $query->addField('test', 'name');
     $age_field = $query->addField('test', 'age', 'age');
@@ -2805,7 +2805,7 @@ class DatabaseAlterTestCase extends DatabaseTestCase {
   /**
    * Test that we can alter expressions in the query.
    */
-  function testAlterExpression() {
+  protected function testAlterExpression() {
     $query = db_select('test');
     $name_field = $query->addField('test', 'name');
     $age_field = $query->addExpression("age*2", 'double_age');
@@ -2823,7 +2823,7 @@ class DatabaseAlterTestCase extends DatabaseTestCase {
   /**
    * Test that we can remove a range() value from a query. This also tests hook_query_TAG_alter().
    */
-  function testAlterRemoveRange() {
+  protected function testAlterRemoveRange() {
     $query = db_select('test');
     $query->addField('test', 'name');
     $query->addField('test', 'age', 'age');
@@ -2838,7 +2838,7 @@ class DatabaseAlterTestCase extends DatabaseTestCase {
   /**
    * Test that we can do basic alters on subqueries.
    */
-  function testSimpleAlterSubquery() {
+  protected function testSimpleAlterSubquery() {
     // Create a sub-query with an alter tag.
     $subquery = db_select('test', 'p');
     $subquery->addField('p', 'name');
@@ -2865,7 +2865,7 @@ class DatabaseAlterTestCase extends DatabaseTestCase {
  * Regression tests.
  */
 class DatabaseRegressionTestCase extends DatabaseTestCase {
-  function setUp() {
+  protected function setUp() {
     parent::setUp(array('node'));
   }
 
@@ -2875,7 +2875,7 @@ class DatabaseRegressionTestCase extends DatabaseTestCase {
    * Tries to insert non-ascii UTF-8 data in a database column and checks
    * if its stored properly.
    */
-  function testRegression_310447() {
+  protected function testRegression_310447() {
     // That's a 255 character UTF-8 string.
     $name = str_repeat("é", 255);
     db_insert('test')
@@ -2892,7 +2892,7 @@ class DatabaseRegressionTestCase extends DatabaseTestCase {
   /**
    * Test the db_table_exists() function.
    */
-  function testDBTableExists() {
+  protected function testDBTableExists() {
     $this->assertIdentical(TRUE, db_table_exists('node'), 'Returns true for existent table.');
     $this->assertIdentical(FALSE, db_table_exists('nosuchtable'), 'Returns false for nonexistent table.');
   }
@@ -2900,7 +2900,7 @@ class DatabaseRegressionTestCase extends DatabaseTestCase {
   /**
    * Test the db_field_exists() function.
    */
-  function testDBFieldExists() {
+  protected function testDBFieldExists() {
     $this->assertIdentical(TRUE, db_field_exists('node', 'nid'), 'Returns true for existent column.');
     $this->assertIdentical(FALSE, db_field_exists('node', 'nosuchcolumn'), 'Returns false for nonexistent column.');
   }
@@ -2908,7 +2908,7 @@ class DatabaseRegressionTestCase extends DatabaseTestCase {
   /**
    * Test the db_index_exists() function.
    */
-  function testDBIndexExists() {
+  protected function testDBIndexExists() {
     $this->assertIdentical(TRUE, db_index_exists('node', 'node_created'), 'Returns true for existent index.');
     $this->assertIdentical(FALSE, db_index_exists('node', 'nosuchindex'), 'Returns false for nonexistent index.');
   }
@@ -2921,7 +2921,7 @@ class DatabaseLoggingTestCase extends DatabaseTestCase {
   /**
    * Test that we can log the existence of a query.
    */
-  function testEnableLogging() {
+  protected function testEnableLogging() {
     $log = Database::startLog('testing');
 
     db_query('SELECT name FROM {test} WHERE age > :age', array(':age' => 25))->fetchCol();
@@ -2942,7 +2942,7 @@ class DatabaseLoggingTestCase extends DatabaseTestCase {
   /**
    * Test that we can run two logs in parallel.
    */
-  function testEnableMultiLogging() {
+  protected function testEnableMultiLogging() {
     Database::startLog('testing1');
 
     db_query('SELECT name FROM {test} WHERE age > :age', array(':age' => 25))->fetchCol();
@@ -2961,7 +2961,7 @@ class DatabaseLoggingTestCase extends DatabaseTestCase {
   /**
    * Test that we can log queries against multiple targets on the same connection.
    */
-  function testEnableTargetLogging() {
+  protected function testEnableTargetLogging() {
     // Clone the primary credentials to a replica connection and to another fake
     // connection.
     $connection_info = Database::getConnectionInfo('default');
@@ -2987,7 +2987,7 @@ class DatabaseLoggingTestCase extends DatabaseTestCase {
    * a fake target so the query should fall back to running on the default
    * target.
    */
-  function testEnableTargetLoggingNoTarget() {
+  protected function testEnableTargetLoggingNoTarget() {
     Database::startLog('testing1');
 
     db_query('SELECT name FROM {test} WHERE age > :age', array(':age' => 25))->fetchCol();
@@ -3009,7 +3009,7 @@ class DatabaseLoggingTestCase extends DatabaseTestCase {
   /**
    * Test that we can log queries separately on different connections.
    */
-  function testEnableMultiConnectionLogging() {
+  protected function testEnableMultiConnectionLogging() {
     // Clone the primary credentials to a fake connection.
     // That both connections point to the same physical database is irrelevant.
     $connection_info = Database::getConnectionInfo('default');
@@ -3041,7 +3041,7 @@ class DatabaseSerializeQueryTestCase extends DatabaseTestCase {
   /**
    * Confirm that a query can be serialized and unserialized.
    */
-  function testSerializeQuery() {
+  protected function testSerializeQuery() {
     $query = db_select('test');
     $query->addField('test', 'age');
     $query->condition('name', 'Ringo');
@@ -3057,14 +3057,14 @@ class DatabaseSerializeQueryTestCase extends DatabaseTestCase {
  * Range query tests.
  */
 class DatabaseRangeQueryTestCase extends BackdropWebTestCase {
-  function setUp() {
+  protected function setUp() {
     parent::setUp('database_test');
   }
 
   /**
    * Confirm that range query work and return correct result.
    */
-  function testRangeQuery() {
+  protected function testRangeQuery() {
     // Test if return correct number of rows.
     $range_rows = db_query_range("SELECT name FROM {system} ORDER BY name", 2, 3)->fetchAll();
     $this->assertEqual(count($range_rows), 3, 'Range query work and return correct number of rows.');
@@ -3080,21 +3080,21 @@ class DatabaseRangeQueryTestCase extends BackdropWebTestCase {
  * Temporary query tests.
  */
 class DatabaseTemporaryQueryTestCase extends BackdropWebTestCase {
-  function setUp() {
+  protected function setUp() {
     parent::setUp('database_test');
   }
 
   /**
    * Return the number of rows of a table.
    */
-  function countTableRows($table_name) {
+  protected function countTableRows($table_name) {
     return db_select($table_name)->countQuery()->execute()->fetchField();
   }
 
   /**
    * Confirm that temporary tables work and are limited to one request.
    */
-  function testTemporaryQuery() {
+  protected function testTemporaryQuery() {
     $this->backdropGet('database_test/db_query_temporary');
     $data = json_decode($this->backdropGetContent());
     if ($data) {
@@ -3134,7 +3134,7 @@ class DatabaseBasicSyntaxTestCase extends DatabaseTestCase {
   /**
    * Test for string concatenation.
    */
-  function testBasicConcat() {
+  protected function testBasicConcat() {
     $result = db_query('SELECT CONCAT(:a1, CONCAT(:a2, CONCAT(:a3, CONCAT(:a4, :a5))))', array(
       ':a1' => 'This',
       ':a2' => ' ',
@@ -3148,7 +3148,7 @@ class DatabaseBasicSyntaxTestCase extends DatabaseTestCase {
   /**
    * Test for string concatenation with field values.
    */
-  function testFieldConcat() {
+  protected function testFieldConcat() {
     $result = db_query('SELECT CONCAT(:a1, CONCAT(name, CONCAT(:a2, CONCAT(age, :a3)))) FROM {test} WHERE age = :age', array(
       ':a1' => 'The age of ',
       ':a2' => ' is ',
@@ -3161,7 +3161,7 @@ class DatabaseBasicSyntaxTestCase extends DatabaseTestCase {
   /**
    * Test escaping of LIKE wildcards.
    */
-  function testLikeEscape() {
+  protected function testLikeEscape() {
     db_insert('test')
       ->fields(array(
         'name' => 'Ring_',
@@ -3187,7 +3187,7 @@ class DatabaseBasicSyntaxTestCase extends DatabaseTestCase {
   /**
    * Test LIKE query containing a backslash.
    */
-  function testLikeBackslash() {
+  protected function testLikeBackslash() {
     db_insert('test')
       ->fields(array('name'))
       ->values(array(
@@ -3223,7 +3223,7 @@ class DatabaseCaseSensitivityTestCase extends DatabaseTestCase {
   /**
    * Test BINARY collation in MySQL.
    */
-  function testCaseSensitiveInsert() {
+  protected function testCaseSensitiveInsert() {
     $num_records_before = db_query('SELECT COUNT(*) FROM {test}')->fetchField();
 
     $john = db_insert('test')
@@ -3248,7 +3248,7 @@ class DatabaseInvalidDataTestCase extends DatabaseTestCase {
   /**
    * Traditional SQL database systems abort inserts when invalid data is encountered.
    */
-  function testInsertDuplicateData() {
+  protected function testInsertDuplicateData() {
     // Try to insert multiple records where at least one has bad data.
     try {
       db_insert('test')
@@ -3309,7 +3309,7 @@ class DatabaseQueryTestCase extends DatabaseTestCase {
   /**
    * Test that we can specify an array of values in the query by passing in an array.
    */
-  function testArraySubstitution() {
+  protected function testArraySubstitution() {
     $names = db_query('SELECT name FROM {test} WHERE age IN (:ages) ORDER BY age', array(':ages' => array(25, 26, 27)))->fetchAll();
 
     $this->assertEqual(count($names), 3, 'Correct number of names returned');
@@ -3318,7 +3318,7 @@ class DatabaseQueryTestCase extends DatabaseTestCase {
   /**
    * Test SQL injection via database query array arguments.
    */
-  public function testArrayArgumentsSQLInjection() {
+  protected function testArrayArgumentsSQLInjection() {
     // Attempt SQL injection and verify that it does not work.
     $condition = array(
       "1 ;INSERT INTO {test} SET name = 'test12345678'; -- " => '',
@@ -3478,7 +3478,7 @@ class DatabaseTransactionTestCase extends DatabaseTestCase {
    *
    * If the active connection does not support transactions, this test does nothing.
    */
-  function testTransactionRollBackSupported() {
+  protected function testTransactionRollBackSupported() {
     // This test won't work right if transactions are not supported.
     if (!Database::getConnection()->supportsTransactions()) {
       return;
@@ -3504,7 +3504,7 @@ class DatabaseTransactionTestCase extends DatabaseTestCase {
    *
    * If the active driver supports transactions, this test does nothing.
    */
-  function testTransactionRollBackNotSupported() {
+  protected function testTransactionRollBackNotSupported() {
     // This test won't work right if transactions are supported.
     if (Database::getConnection()->supportsTransactions()) {
       return;
@@ -3531,7 +3531,7 @@ class DatabaseTransactionTestCase extends DatabaseTestCase {
    * The behavior of this test should be identical for connections that support
    * transactions and those that do not.
    */
-  function testCommittedTransaction() {
+  protected function testCommittedTransaction() {
     try {
       // Create two nested transactions. The changes should be committed.
       $this->transactionOuterLayer('A');
@@ -3550,7 +3550,7 @@ class DatabaseTransactionTestCase extends DatabaseTestCase {
   /**
    * Test the compatibility of transactions with DDL statements.
    */
-  function testTransactionWithDdlStatement() {
+  protected function testTransactionWithDdlStatement() {
     // First, test that a commit works normally, even with DDL statements.
     $transaction = db_transaction();
     $this->insertRow('row');
@@ -3698,7 +3698,7 @@ class DatabaseTransactionTestCase extends DatabaseTestCase {
    * @param $message
    *   The message to log for the assertion.
    */
-  function assertRowPresent($name, $message = NULL) {
+  protected function assertRowPresent($name, $message = NULL) {
     if (!isset($message)) {
       $message = format_string('Row %name is present.', array('%name' => $name));
     }
@@ -3714,7 +3714,7 @@ class DatabaseTransactionTestCase extends DatabaseTestCase {
    * @param $message
    *   The message to log for the assertion.
    */
-  function assertRowAbsent($name, $message = NULL) {
+  protected function assertRowAbsent($name, $message = NULL) {
     if (!isset($message)) {
       $message = format_string('Row %name is absent.', array('%name' => $name));
     }
@@ -3725,7 +3725,7 @@ class DatabaseTransactionTestCase extends DatabaseTestCase {
   /**
    * Test transaction stacking and commit / rollback.
    */
-  function testTransactionStacking() {
+  protected function testTransactionStacking() {
     // This test won't work right if transactions are not supported.
     if (!Database::getConnection()->supportsTransactions()) {
       return;
@@ -3844,88 +3844,87 @@ class DatabaseExtraTypesTestCase extends BackdropWebTestCase {
   /**
    * Test the date data type.
    */
-   function testDateField() {
-     try {
-       $date_table = array(
-         'fields' => array(
-           'date_field' => array(
-             'description' => t('Test Date field'),
-             'type' => 'date',
-             'not null' => FALSE,
-           ),
-         ),
-       );
-       db_create_table('date_table', $date_table);
-       $this->assertTrue(db_table_exists('date_table'), t('Created table with date field'));
+  protected function testDateField() {
+    try {
+      $date_table = array(
+        'fields' => array(
+          'date_field' => array(
+            'description' => t('Test Date field'),
+            'type' => 'date',
+            'not null' => FALSE,
+          ),
+        ),
+      );
+      db_create_table('date_table', $date_table);
+      $this->assertTrue(db_table_exists('date_table'), t('Created table with date field'));
 
-       db_insert('date_table')->fields(array('date_field'))
-         ->values(array('date_field' => '2001-01-01'))
-         ->values(array('date_field' => '1856-12-31'))
-         ->values(array('date_field' => '2100-06-30'))
-         ->execute();
+      db_insert('date_table')->fields(array('date_field'))
+        ->values(array('date_field' => '2001-01-01'))
+        ->values(array('date_field' => '1856-12-31'))
+        ->values(array('date_field' => '2100-06-30'))
+        ->execute();
 
-       $num_records = (int) db_query('SELECT COUNT(*) FROM {date_table}')->fetchField();
-       $this->assertEqual($num_records, 3, t('Inserted 3 records, and counted 3 records'));
-       $res = db_query('SELECT date_field from {date_table} ORDER BY date_field');
+      $num_records = (int) db_query('SELECT COUNT(*) FROM {date_table}')->fetchField();
+      $this->assertEqual($num_records, 3, t('Inserted 3 records, and counted 3 records'));
+      $res = db_query('SELECT date_field from {date_table} ORDER BY date_field');
 
-       $date = $res->fetch()->date_field;
-       $this->assertEqual($date, '1856-12-31', t('Date retrieved in order @date', array('@date' => $date)));
-       $date = $res->fetch()->date_field;
-       $this->assertEqual($date, '2001-01-01', t('Date retrieved in order @date', array('@date' => $date)));
-       $date = $res->fetch()->date_field;
-       $this->assertEqual($date, '2100-06-30', t('Date retrieved in order @date', array('@date' => $date)));
+      $date = $res->fetch()->date_field;
+      $this->assertEqual($date, '1856-12-31', t('Date retrieved in order @date', array('@date' => $date)));
+      $date = $res->fetch()->date_field;
+      $this->assertEqual($date, '2001-01-01', t('Date retrieved in order @date', array('@date' => $date)));
+      $date = $res->fetch()->date_field;
+      $this->assertEqual($date, '2100-06-30', t('Date retrieved in order @date', array('@date' => $date)));
 
 
-       db_drop_table('date_table');
-       $this->assertFalse(db_table_exists('date_table'), t('Dropped table with date field'));
+      db_drop_table('date_table');
+      $this->assertFalse(db_table_exists('date_table'), t('Dropped table with date field'));
 
-     } catch (Exception $e) {
-       $this->fail($e->getMessage());
-     }
-
-   }
+    } catch (Exception $e) {
+      $this->fail($e->getMessage());
+    }
+  }
 
   /**
    * Test the time data type.
    */
-   function testTimeField() {
-     try {
-       $time_table = array(
-         'fields' => array(
-           'time_field' => array(
-             'description' => t('Test Time field'),
-             'type' => 'time',
-             'not null' => FALSE,
-           ),
-         ),
-       );
-       db_create_table('time_table', $time_table);
-       $this->assertTrue(db_table_exists('time_table'), t('Created table with time field'));
+  protected function testTimeField() {
+    try {
+      $time_table = array(
+        'fields' => array(
+          'time_field' => array(
+            'description' => t('Test Time field'),
+            'type' => 'time',
+            'not null' => FALSE,
+          ),
+        ),
+      );
+      db_create_table('time_table', $time_table);
+      $this->assertTrue(db_table_exists('time_table'), t('Created table with time field'));
 
-       db_insert('time_table')->fields(array('time_field'))
-         ->values(array('time_field' => '12:59:00'))
-         ->values(array('time_field' => '00:01:00'))
-         ->values(array('time_field' => '23:17:00'))
-         ->execute();
+      db_insert('time_table')->fields(array('time_field'))
+        ->values(array('time_field' => '12:59:00'))
+        ->values(array('time_field' => '00:01:00'))
+        ->values(array('time_field' => '23:17:00'))
+        ->execute();
 
-       $num_records = (int) db_query('SELECT COUNT(*) FROM {time_table}')->fetchField();
-       $this->assertEqual($num_records, 3, t('Inserted 3 records, and counted 3 records'));
-       $res = db_query('SELECT time_field from {time_table} ORDER BY time_field');
+      $num_records = (int) db_query('SELECT COUNT(*) FROM {time_table}')->fetchField();
+      $this->assertEqual($num_records, 3, t('Inserted 3 records, and counted 3 records'));
+      $res = db_query('SELECT time_field from {time_table} ORDER BY time_field');
 
-       $time = $res->fetch()->time_field;
-       $this->assertEqual($time, '00:01:00', t('Time retrieved in order @time', array('@time' => $time)));
-       $time = $res->fetch()->time_field;
-       $this->assertEqual($time, '12:59:00', t('Time retrieved in order @time', array('@time' => $time)));
-       $time = $res->fetch()->time_field;
-       $this->assertEqual($time, '23:17:00', t('Time retrieved in order @time', array('@time' => $time)));
+      $time = $res->fetch()->time_field;
+      $this->assertEqual($time, '00:01:00', t('Time retrieved in order @time', array('@time' => $time)));
+      $time = $res->fetch()->time_field;
+      $this->assertEqual($time, '12:59:00', t('Time retrieved in order @time', array('@time' => $time)));
+      $time = $res->fetch()->time_field;
+      $this->assertEqual($time, '23:17:00', t('Time retrieved in order @time', array('@time' => $time)));
 
-       db_drop_table('time_table');
-       $this->assertFalse(db_table_exists('time_table'), t('Dropped table with time field'));
-     } catch (Exception $e) {
-       $this->fail($e->getMessage());
-     }
+      db_drop_table('time_table');
+      $this->assertFalse(db_table_exists('time_table'), t('Dropped table with time field'));
+    } catch (Exception $e) {
+      $this->fail($e->getMessage());
+    }
 
-  }
+ }
 
 }
 
@@ -3936,7 +3935,7 @@ class DatabaseNextIdCase extends BackdropWebTestCase {
   /**
    * Test that the sequences API work.
    */
-  function testDbNextId() {
+  protected function testDbNextId() {
     $first = db_next_id();
     $second = db_next_id();
     // We can test for exact increase in here because we know there is no
@@ -3955,7 +3954,7 @@ class DatabaseEmptyStatementTestCase extends BackdropWebTestCase {
   /**
    * Test that the empty result set behaves as empty.
    */
-  function testEmpty() {
+  protected function testEmpty() {
     $result = new DatabaseStatementEmpty();
 
     $this->assertTrue($result instanceof DatabaseStatementInterface, 'Class implements expected interface');
@@ -3965,7 +3964,7 @@ class DatabaseEmptyStatementTestCase extends BackdropWebTestCase {
   /**
    * Test that the empty result set iterates safely.
    */
-  function testEmptyIteration() {
+  protected function testEmptyIteration() {
     $result = new DatabaseStatementEmpty();
 
     foreach ($result as $record) {
@@ -3979,7 +3978,7 @@ class DatabaseEmptyStatementTestCase extends BackdropWebTestCase {
   /**
    * Test that the empty result set mass-fetches in an expected way.
    */
-  function testEmptyFetchAll() {
+  protected function testEmptyFetchAll() {
     $result = new DatabaseStatementEmpty();
 
     $this->assertEqual($result->fetchAll(), array(), 'Empty array returned from empty result set.');
@@ -4007,7 +4006,7 @@ class ConnectionUnitTest extends BackdropUnitTestCase {
    */
   protected $skipTest;
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp();
 
     $this->key = 'default';
@@ -4086,7 +4085,7 @@ class ConnectionUnitTest extends BackdropUnitTestCase {
    *
    * @todo getConnectionID() executes a query.
    */
-  function testOpenClose() {
+  protected function testOpenClose() {
     if ($this->skipTest) {
       return;
     }
@@ -4110,7 +4109,7 @@ class ConnectionUnitTest extends BackdropUnitTestCase {
   /**
    * Tests Database::closeConnection() with a query.
    */
-  function testOpenQueryClose() {
+  protected function testOpenQueryClose() {
     if ($this->skipTest) {
       return;
     }
@@ -4137,7 +4136,7 @@ class ConnectionUnitTest extends BackdropUnitTestCase {
   /**
    * Tests Database::closeConnection() with a query and custom prefetch method.
    */
-  function testOpenQueryPrefetchClose() {
+  protected function testOpenQueryPrefetchClose() {
     if ($this->skipTest) {
       return;
     }
@@ -4164,7 +4163,7 @@ class ConnectionUnitTest extends BackdropUnitTestCase {
   /**
    * Tests Database::closeConnection() with a select query.
    */
-  function testOpenSelectQueryClose() {
+  protected function testOpenSelectQueryClose() {
     if ($this->skipTest) {
       return;
     }

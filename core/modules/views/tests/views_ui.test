@@ -8,7 +8,7 @@
  * Views UI wizard tests.
  */
 class ViewsUIWizardHelper extends BackdropWebTestCase {
-  function setUp() {
+  protected function setUp() {
     // Enable views_ui.
     parent::setUp('views_ui');
 
@@ -22,7 +22,7 @@ class ViewsUIWizardHelper extends BackdropWebTestCase {
  * Tests creating views with the wizard and viewing them on the listing page.
  */
 class ViewsUIWizardBasicTestCase extends ViewsUIWizardHelper {
-  function testViewsWizardAndListing() {
+  protected function testViewsWizardAndListing() {
     // Check if we can access the main views admin page.
     $this->backdropGet('admin/structure/views');
     $this->assertLinkByHref(url('admin/config/development/configuration/single/export'));
@@ -141,7 +141,7 @@ class ViewsUIWizardDefaultViewsTestCase extends ViewsUIWizardHelper {
   /**
    * Tests default views.
    */
-  function testDefaultViews() {
+  protected function testDefaultViews() {
     // Make sure the taxonomy term view starts off as disabled.
     $edit_href = 'admin/structure/views/view/taxonomy_term';
     $this->backdropGet('admin/structure/views');
@@ -213,7 +213,7 @@ class ViewsUIWizardDefaultViewsTestCase extends ViewsUIWizardHelper {
    *   The page content that results from clicking on the link, or FALSE on
    *   failure. Failure also results in a failed assertion.
    */
-  function clickViewsOperationLink($label, $unique_href_part) {
+  protected function clickViewsOperationLink($label, $unique_href_part) {
     $links = $this->xpath('//a[normalize-space(text())=:label]', array(':label' => $label));
     foreach ($links as $link_index => $link) {
       $position = strpos($link['href'], $unique_href_part);
@@ -242,7 +242,7 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
   protected $tag_field;
   protected $tag_instance;
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp();
 
     // Create two content types. One will have an autocomplete tagging field,
@@ -299,7 +299,7 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
   /**
    * Tests the "tagged with" functionality.
    */
-  function testTaggedWith() {
+  protected function testTaggedWith() {
     // In this test we will only create nodes that have an instance of the tag
     // field.
     $node_add_path = 'node/add/' . $this->node_type_with_tags->type;
@@ -363,7 +363,7 @@ class ViewsUIWizardTaggedWithTestCase extends ViewsUIWizardHelper {
   /**
    * Tests that the "tagged with" form element only shows for node types that support it.
    */
-  function testTaggedWithByNodeType() {
+  protected function testTaggedWithByNodeType() {
     // The tagging field is associated with one of our node types only. So the
     // "tagged with" form element on the view wizard should appear on the form
     // by default (when the wizard is configured to display all content) and
@@ -400,7 +400,7 @@ class ViewsUIWizardSortingTestCase extends ViewsUIWizardHelper {
   /**
    * Tests the sorting functionality.
    */
-  function testSorting() {
+  protected function testSorting() {
     // Create nodes, each with a different creation time so that we can do a
     // meaningful sort.
     $node1 = $this->backdropCreateNode(array('created' => REQUEST_TIME));
@@ -462,7 +462,7 @@ class ViewsUIWizardItemsPerPageTestCase extends ViewsUIWizardHelper {
   /**
    * Tests the number of items per page.
    */
-  function testItemsPerPage() {
+  protected function testItemsPerPage() {
     // Create posts, each with a different creation time so that we can do a
     // meaningful sort.
     $node1 = $this->backdropCreateNode(array('type' => 'post', 'created' => REQUEST_TIME));
@@ -539,7 +539,7 @@ class ViewsUIWizardMenuTestCase extends ViewsUIWizardHelper {
   /**
    * Tests the menu functionality.
    */
-  function testMenus() {
+  protected function testMenus() {
     // Create a view with a page display and a menu link in the Main Menu.
     $view = array();
     $view['human_name'] = $this->randomName(16);
@@ -577,7 +577,7 @@ class ViewsUIWizardMenuTestCase extends ViewsUIWizardHelper {
  */
 class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
 
-  function setup() {
+  protected function setUp() {
     parent::setup();
 
     // Make sure we're using UTC
@@ -587,7 +587,7 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
   /**
    * Tests the jump menu style plugin.
    */
-  function testJumpMenus() {
+  protected function testJumpMenus() {
     // We'll run this test for several different base tables that appear in the
     // wizard.
     $base_table_methods = array(
@@ -654,7 +654,7 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
   /**
    * Helper function to create a node and return its expected path.
    */
-  function createNodeAndGetPath() {
+  protected function createNodeAndGetPath() {
     $node = $this->backdropCreateNode();
     return entity_uri('node', $node);
   }
@@ -662,7 +662,7 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
   /**
    * Helper function to create a user and return its expected path.
    */
-  function createUserAndGetPath() {
+  protected function createUserAndGetPath() {
     $account = $this->backdropCreateUser();
     return entity_uri('user', $account);
   }
@@ -670,7 +670,7 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
   /**
    * Helper function to create a comment and return its expected path.
    */
-  function createCommentAndGetPath() {
+  protected function createCommentAndGetPath() {
     $node = $this->backdropCreateNode();
     $comment = entity_create('comment', array(
       'cid' => NULL,
@@ -689,7 +689,7 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
   /**
    * Helper function to create a taxonomy term and return its expected path.
    */
-  function createTaxonomyTermAndGetPath() {
+  protected function createTaxonomyTermAndGetPath() {
     $vocabulary = new TaxonomyVocabulary(array(
       'name' => $this->randomName(),
       'machine_name' => backdrop_strtolower($this->randomName()),
@@ -708,7 +708,7 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
   /**
    * Helper function to create a file and return its expected path.
    */
-  function createFileAndGetPath() {
+  protected function createFileAndGetPath() {
     $file = entity_create('file', array(
       'uid' => 1,
       'filename' => 'views-ui-jump-menu-test.txt',
@@ -725,7 +725,7 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
   /**
    * Helper function to create a node revision and return its expected path.
    */
-  function createNodeRevisionAndGetPath() {
+  protected function createNodeRevisionAndGetPath() {
     // The node needs at least two revisions in order for Backdrop to allow
     // access to the revision path.
     $settings = array('revision' => TRUE);
@@ -743,7 +743,7 @@ class ViewsUIWizardDisplaysTestCase extends ViewsUIWizardHelper {
   /**
    * Tests that displays can be overridden via the UI.
    */
-  function testOverrideDisplays() {
+  protected function testOverrideDisplays() {
     // Create a basic view that shows all content, with a page and a block
     // display.
     $view['human_name'] = $this->randomName(16);
@@ -806,7 +806,7 @@ class ViewsUIWizardDisplaysTestCase extends ViewsUIWizardHelper {
   /**
    * Tests that the wizard correctly sets up default and overridden displays.
    */
-  function testWizardMixedDefaultOverriddenDisplays() {
+  protected function testWizardMixedDefaultOverriddenDisplays() {
     // Create a basic view with a page, block, and feed. Give the page and feed
     // identical titles, but give the block a different one, so we expect the
     // page and feed to inherit their titles from the default display, but the
@@ -891,7 +891,7 @@ class ViewsUIWizardDisplaysTestCase extends ViewsUIWizardHelper {
   /**
    * Tests that the revert to all displays select-option works as expected.
    */
-  function testRevertAllDisplays() {
+  protected function testRevertAllDisplays() {
     // Create a basic view with a page, block.
     // Because there is both a title on page and block we expect the title on
     // the block be overridden.
@@ -918,7 +918,7 @@ class ViewsUIWizardDisplaysTestCase extends ViewsUIWizardHelper {
   /**
    * Test reordering of displays.
    */
-  function testReorderDisplays() {
+  protected function testReorderDisplays() {
     // Create a basic view with a page, block.
     $view['human_name'] = $this->randomName(16);
     $view['name'] = strtolower($this->randomName(16));

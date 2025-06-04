@@ -20,7 +20,7 @@ class TranslationTestCase extends BackdropWebTestCase {
    */
   protected $translator;
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp('node', 'language', 'locale', 'translation', 'translation_test');
 
     // Setup users.
@@ -61,7 +61,7 @@ class TranslationTestCase extends BackdropWebTestCase {
   /**
    * Creates, modifies, and updates a page with a translation.
    */
-  function testContentTranslation() {
+  protected function testContentTranslation() {
     // Create Page in English.
     $node_title = $this->randomName();
     $node_body =  $this->randomName();
@@ -153,7 +153,7 @@ class TranslationTestCase extends BackdropWebTestCase {
   /**
    * Checks that the language switch links behave properly.
    */
-  function testLanguageSwitchLinks() {
+  protected function testLanguageSwitchLinks() {
     // Create a Page in English and its translations in Spanish and
     // Italian.
     $node = $this->createPage($this->randomName(), $this->randomName(), 'en');
@@ -199,7 +199,7 @@ class TranslationTestCase extends BackdropWebTestCase {
   /**
    * Tests that the language switcher block alterations work as intended.
    */
-  function testLanguageSwitcherBlockIntegration() {
+  protected function testLanguageSwitcherBlockIntegration() {
     // Enable Italian to have three items in the language switcher block.
     $this->backdropLogin($this->admin_user);
     $edit = array('languages[it][enabled]' => TRUE);
@@ -262,7 +262,7 @@ class TranslationTestCase extends BackdropWebTestCase {
   /**
    * Resets static caches to make the test code match the client-side behavior.
    */
-  function resetCaches() {
+  protected function resetCaches() {
     backdrop_static_reset('language_list');
     backdrop_static_reset('locale_url_outbound_alter');
     backdrop_static_reset('locale_language_url_rewrite_url');
@@ -277,7 +277,7 @@ class TranslationTestCase extends BackdropWebTestCase {
    * @return
    *   An empty node data structure.
    */
-  function emptyNode($langcode) {
+  protected function emptyNode($langcode) {
     return (object) array('nid' => NULL, 'langcode' => $langcode);
   }
 
@@ -287,7 +287,7 @@ class TranslationTestCase extends BackdropWebTestCase {
    * @param $language_code
    *   The language code to check.
    */
-  function addLanguage($language_code) {
+  protected function addLanguage($language_code) {
     // Check to make sure that language has not already been installed.
     $this->backdropGet('admin/config/regional/language');
 
@@ -331,7 +331,7 @@ class TranslationTestCase extends BackdropWebTestCase {
    * @return
    *   A node object.
    */
-  function createPage($title, $body, $langcode = NULL) {
+  protected function createPage($title, $body, $langcode = NULL) {
     $edit = array();
     $field_langcode = LANGUAGE_NONE;
     $edit["title"] = $title;
@@ -364,7 +364,7 @@ class TranslationTestCase extends BackdropWebTestCase {
    * @return
    *   Translation object.
    */
-  function createTranslation(Node $node, $title, $body, $langcode) {
+  protected function createTranslation(Node $node, $title, $body, $langcode) {
     $this->backdropGet('node/add/page', array('query' => array('translation' => $node->nid, 'target' => $langcode)));
 
     $field_langcode = LANGUAGE_NONE;
@@ -405,7 +405,7 @@ class TranslationTestCase extends BackdropWebTestCase {
    * @return
    *   TRUE on pass, FALSE on fail.
    */
-  function assertContentByXPath($xpath, array $arguments = array(), $value = NULL, $message = '', $group = 'Other') {
+  protected function assertContentByXPath($xpath, array $arguments = array(), $value = NULL, $message = '', $group = 'Other') {
     $found = $this->findContentByXPath($xpath, $arguments, $value);
     return $this->assertTrue($found, $message, $group);
   }
@@ -425,7 +425,7 @@ class TranslationTestCase extends BackdropWebTestCase {
    * @return
    *   TRUE if the language switch links are found, FALSE if not.
    */
-  function assertLanguageSwitchLinks($node, $translation, $find = TRUE, $types = NULL) {
+  protected function assertLanguageSwitchLinks($node, $translation, $find = TRUE, $types = NULL) {
     $language_default = config_get('system.core', 'language_default');
 
     if (empty($types)) {
@@ -499,7 +499,7 @@ class TranslationTestCase extends BackdropWebTestCase {
    * @return
    *   TRUE if found, otherwise FALSE.
    */
-  function findContentByXPath($xpath, array $arguments = array(), $value = NULL) {
+  protected function findContentByXPath($xpath, array $arguments = array(), $value = NULL) {
     $elements = $this->xpath($xpath, $arguments);
 
     $found = TRUE;

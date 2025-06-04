@@ -8,7 +8,7 @@ require_once BACKDROP_ROOT . '/core/modules/date/tests/date_field.test';
 
 class DateUITestCase extends DateFieldBasic {
 
-  public function setUp($modules = array()) {
+  protected function setUp($modules = array()) {
     parent::setUp($modules);
 
     $format = system_date_format_load('long');
@@ -16,7 +16,7 @@ class DateUITestCase extends DateFieldBasic {
     system_date_format_save($format);
   }
 
-  public function testFieldUI() {
+  protected function testFieldUI() {
     $label = 'Test';
     $current_year = date('Y');
 
@@ -47,7 +47,7 @@ class DateUITestCase extends DateFieldBasic {
     $this->deleteDateField($label);
   }
 
-  function dateForm($options) {
+  protected function dateForm($options) {
     // Tests that date field functions properly.
     $edit = array();
     $edit['title'] = $this->randomName(8);

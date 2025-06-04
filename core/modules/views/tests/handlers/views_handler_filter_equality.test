@@ -23,14 +23,14 @@ class ViewsHandlerFilterEqualityTest extends ViewsSqlTest {
     );
   }
 
-  function viewsData() {
+  protected function viewsData() {
     $data = parent::viewsData();
     $data['views_test']['name']['filter']['handler'] = 'views_handler_filter_equality';
 
     return $data;
   }
 
-  function testEqual() {
+  protected function testEqual() {
     $view = $this->getBasicView();
 
     // Change the filtering
@@ -54,7 +54,7 @@ class ViewsHandlerFilterEqualityTest extends ViewsSqlTest {
     $this->assertIdenticalResultset($view, $resultset, $this->column_map);
   }
 
-  public function testEqualGroupedExposed() {
+  protected function testEqualGroupedExposed() {
     $filters = $this->getGroupedExposedFilters();
     $view = $this->getBasicPageView();
 
@@ -72,7 +72,7 @@ class ViewsHandlerFilterEqualityTest extends ViewsSqlTest {
     $this->assertIdenticalResultset($view, $resultset, $this->column_map);
   }
 
-  function testNotEqual() {
+  protected function testNotEqual() {
     $view = $this->getBasicView();
 
     // Change the filtering
@@ -105,7 +105,7 @@ class ViewsHandlerFilterEqualityTest extends ViewsSqlTest {
     $this->assertIdenticalResultset($view, $resultset, $this->column_map);
   }
 
-  public function testEqualGroupedNotExposed() {
+  protected function testEqualGroupedNotExposed() {
     $filters = $this->getGroupedExposedFilters();
     $view = $this->getBasicPageView();
 

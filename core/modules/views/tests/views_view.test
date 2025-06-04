@@ -13,7 +13,7 @@ class ViewsViewTest extends ViewsSqlTest {
   /**
    * Tests the deconstructor to be sure that every kind of heavy objects are removed.
    */
-  function testDestroy() {
+  protected function testDestroy() {
     $view = $this->view_test_destroy();
 
     $view->preview();
@@ -29,7 +29,7 @@ class ViewsViewTest extends ViewsSqlTest {
     $this->assertViewDestroy($view);
   }
 
-  function assertViewDestroy($view) {
+  protected function assertViewDestroy($view) {
     $this->assertFalse(isset($view->display['default']->handler), 'Make sure all displays are destroyed.');
     $this->assertFalse(isset($view->display['attachment_1']->handler), 'Make sure all displays are destroyed.');
 
@@ -51,7 +51,7 @@ class ViewsViewTest extends ViewsSqlTest {
     $this->assertEqual($view->attachment_after, '');
   }
 
-  function testDelete() {
+  protected function testDelete() {
     // Delete a database view
     $view = $this->view_test_delete();
     $view->save();
@@ -62,7 +62,7 @@ class ViewsViewTest extends ViewsSqlTest {
     $this->assertFalse($view, 'Make sure that the old view is removed from the static cache.');
   }
 
-  function testValidate() {
+  protected function testValidate() {
     // Test a view with multiple displays.
     // Validating a view shouldn't change the active display.
     // @todo: Create an extra validation view.
@@ -82,7 +82,7 @@ class ViewsViewTest extends ViewsSqlTest {
   /**
    * This view provides some filters, fields, arguments, relationships, sorts, areas and attachments.
    */
-  function view_test_destroy() {
+  private function view_test_destroy() {
     $view = new view;
     $view->name = 'test_destroy';
     $view->description = '';
@@ -242,7 +242,7 @@ class ViewsViewTest extends ViewsSqlTest {
 
     return $view;
   }
-  function view_test_delete() {
+  private function view_test_delete() {
     $view = new view;
     $view->name = 'test_view_delete';
     $view->description = '';

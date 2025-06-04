@@ -28,7 +28,7 @@ class ViewsModuleTest extends ViewsSqlTest {
     return $data;
   }
 
-  public function test_views_trim_text() {
+  protected function test_views_trim_text() {
     views_include('utility');
 
     // Test unicode, @see http://drupal.org/node/513396#comment-2839416
@@ -90,7 +90,7 @@ class ViewsModuleTest extends ViewsSqlTest {
   /**
    * Tests the dynamic includes of templates via module feature.
    */
-  function testModuleTemplates() {
+  protected function testModuleTemplates() {
     $existing = array();
     $type = array();
     $theme = array();
@@ -102,7 +102,7 @@ class ViewsModuleTest extends ViewsSqlTest {
   /**
    * Tests the views_get_handler method.
    */
-  function testviews_get_handler() {
+  protected function testviews_get_handler() {
     $types = array('field', 'area', 'filter');
     foreach ($types as $type) {
       $handler = views_get_handler($this->randomName(), $this->randomName(), $type);
@@ -151,7 +151,7 @@ class ViewsModuleTest extends ViewsSqlTest {
   /**
    * Tests views_fetch_data().
    */
-  function testFetchData() {
+  protected function testFetchData() {
 
     // Make sure we start with a empty cache.
     $this->resetStaticViewsDataCache();
@@ -219,7 +219,7 @@ class ViewsModuleTest extends ViewsSqlTest {
   /**
    * Ensure that a certain handler is a instance of a certain table/field.
    */
-  function assertInstanceHandler($handler, $table, $field, $id) {
+  protected function assertInstanceHandler($handler, $table, $field, $id) {
     $table_data = views_fetch_data($table);
     $field_data = $table_data[$field][$id];
 

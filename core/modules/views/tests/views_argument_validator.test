@@ -10,7 +10,7 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests Views argument validators.
  */
 class ViewsArgumentValidatorTest extends ViewsSqlTest {
-  function testArgumentValidatePhp() {
+  protected function testArgumentValidatePhp() {
     $string = $this->randomName();
     $view = $this->view_test_argument_validate_php($string);
     $view->set_display('default');
@@ -22,7 +22,7 @@ class ViewsArgumentValidatorTest extends ViewsSqlTest {
     $this->assertFalse($view->argument['null']->validate_arg($this->randomName()));
   }
 
-  function testArgumentValidateNumeric() {
+  protected function testArgumentValidateNumeric() {
     $view = $this->view_argument_validate_numeric();
     $view->set_display('default');
     $view->pre_execute();
@@ -36,7 +36,7 @@ class ViewsArgumentValidatorTest extends ViewsSqlTest {
   /**
    * Make sure argument validation works properly.
    */
-  function testArgumentValidatePhpFailure() {
+  protected function testArgumentValidatePhpFailure() {
     $view = $this->view_test_argument_validate_php_failure();
     $view->save();
     $this->backdropGet('test-php-failure');
@@ -50,7 +50,7 @@ class ViewsArgumentValidatorTest extends ViewsSqlTest {
     $this->assertResponse(403);
   }
 
-  function view_test_argument_validate_php($string) {
+  private function view_test_argument_validate_php($string) {
     $code = 'return $argument == \''. $string .'\';';
     $view = new view;
     $view->name = 'view_argument_validate_php';
@@ -83,7 +83,7 @@ class ViewsArgumentValidatorTest extends ViewsSqlTest {
     return $view;
   }
 
-  function view_argument_validate_numeric() {
+  private function view_argument_validate_numeric() {
     $view = new view;
     $view->name = 'view_argument_validate_numeric';
     $view->description = '';
@@ -114,7 +114,7 @@ class ViewsArgumentValidatorTest extends ViewsSqlTest {
     return $view;
   }
 
-  function view_test_argument_validate_php_failure() {
+  private function view_test_argument_validate_php_failure() {
     $view = new view();
     $view->name = 'view_argument_validate_php_failure';
     $view->description = '';

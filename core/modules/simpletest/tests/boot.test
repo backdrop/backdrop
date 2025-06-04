@@ -3,14 +3,14 @@
  * Perform early bootstrap tests.
  */
 class EarlyBootstrapTestCase extends BackdropWebTestCase {
-  function setUp() {
+  protected function setUp() {
     parent::setUp('boot_test_1', 'boot_test_2');
   }
 
   /**
    * Test hook_boot() on both regular and "early exit" pages.
    */
-  public function testHookBoot() {
+  protected function testHookBoot() {
     $paths = array('', 'early_exit');
     foreach ($paths as $path) {
       // Empty the module_implements() caches.

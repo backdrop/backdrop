@@ -29,7 +29,7 @@ class OptionsWidgetsTestCase extends FieldTestCase {
    */
   protected $web_user;
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp('field_test', 'list_test');
 
     // Field with cardinality 1.
@@ -92,7 +92,7 @@ class OptionsWidgetsTestCase extends FieldTestCase {
   /**
    * Tests the 'options_buttons' widget (single select).
    */
-  function testRadioButtons() {
+  protected function testRadioButtons() {
     // Create an instance of the 'single value' field.
     $instance = array(
       'field_name' => $this->card_1['field_name'],
@@ -146,7 +146,7 @@ class OptionsWidgetsTestCase extends FieldTestCase {
   /**
    * Tests the 'options_buttons' widget (multiple select).
    */
-  function testCheckBoxes() {
+  protected function testCheckBoxes() {
     // Create an instance of the 'multiple values' field.
     $instance = array(
       'field_name' => $this->card_2['field_name'],
@@ -233,7 +233,7 @@ class OptionsWidgetsTestCase extends FieldTestCase {
   /**
    * Tests the 'options_select' widget (single select).
    */
-  function testSelectListSingle() {
+  protected function testSelectListSingle() {
     // Create an instance of the 'single value' field.
     $instance = array(
       'field_name' => $this->card_1['field_name'],
@@ -331,7 +331,7 @@ class OptionsWidgetsTestCase extends FieldTestCase {
   /**
    * Tests the 'options_select' widget (multiple select).
    */
-  function testSelectListMultiple() {
+  protected function testSelectListMultiple() {
     // Create an instance of the 'multiple values' field.
     $instance = array(
       'field_name' => $this->card_2['field_name'],
@@ -448,7 +448,7 @@ class OptionsWidgetsTestCase extends FieldTestCase {
   /**
    * Tests the 'options_onoff' widget.
    */
-  function testOnOffCheckbox() {
+  protected function testOnOffCheckbox() {
     // Create an instance of the 'boolean' field.
     $instance = array(
       'field_name' => $this->bool['field_name'],
@@ -555,7 +555,7 @@ class OptionsSelectDynamicValuesTestCase extends ListDynamicValuesTestCase {
   /**
    * Tests the 'options_select' widget (single select).
    */
-  function testSelectListDynamic() {
+  protected function testSelectListDynamic() {
     // Create an entity.
     $this->entity->is_new = TRUE;
     field_test_entity_save($this->entity);

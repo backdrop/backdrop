@@ -13,7 +13,7 @@ class ViewsExposedFormTest extends ViewsSqlTest {
   /**
    * Tests, whether and how the reset button can be renamed.
    */
-  public function testRenameResetButton() {
+  protected function testRenameResetButton() {
     $account = $this->backdropCreateUser();
     $this->backdropLogin($account);
     // Create some random nodes.
@@ -43,7 +43,7 @@ class ViewsExposedFormTest extends ViewsSqlTest {
   /**
    * Test remembering exposed filters.
    */
-  function testExposedRemember() {
+  protected function testExposedRemember() {
     $admin_user = $this->backdropCreateUser(array('administer views', 'administer site configuration'));
     $this->backdropLogin($admin_user);
 
@@ -87,7 +87,7 @@ class ViewsExposedFormTest extends ViewsSqlTest {
   /**
    * Tests the admin interface of exposed filter and sort items.
    */
-  function testExposedAdminUi() {
+  protected function testExposedAdminUi() {
     $admin_user = $this->backdropCreateUser(array('administer views', 'administer site configuration'));
     $this->backdropLogin($admin_user);
     menu_rebuild();

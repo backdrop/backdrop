@@ -5,7 +5,7 @@
  */
 
 class MenuWebTestCase extends BackdropWebTestCase {
-  function setUp() {
+  protected function setUp() {
     $modules = func_get_args();
     if (isset($modules[0]) && is_array($modules[0])) {
       $modules = $modules[0];
@@ -123,7 +123,7 @@ class MenuWebTestCase extends BackdropWebTestCase {
 class MenuRouterTestCase extends BackdropWebTestCase {
   protected $profile = 'minimal';
 
-  function setUp() {
+  protected function setUp() {
     // Enable dummy module that implements hook_menu.
     parent::setUp('menu_test');
     // Make the tests below more robust by explicitly setting the default theme
@@ -136,7 +136,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
   /**
    * Tests title and theme callbacks in hook_menu().
    */
-  function testMenuCallbacks() {
+  protected function testMenuCallbacks() {
     // Test title callback set to FALSE.
     $this->backdropGet('node');
     $this->assertText('A title with @placeholder', 'Raw text found on the page');
@@ -224,7 +224,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
    * Test that an authenticated user hitting 'user/login' gets redirected to
    * 'user' and 'user/register' gets redirected to the user edit page.
    */
-  function testAuthUserUserLogin() {
+  protected function testAuthUserUserLogin() {
     $loggedInUser = $this->backdropCreateUser(array());
     $this->backdropLogin($loggedInUser);
 
@@ -240,7 +240,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
   /**
    * Test that hook_custom_theme() can control the theme of a page.
    */
-  function testHookCustomTheme() {
+  protected function testHookCustomTheme() {
     // Trigger hook_custom_theme() to dynamically request the Stark theme for
     // the requested page.
     state_set('menu_test_hook_custom_theme_name', 'stark');
@@ -256,7 +256,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
   /**
    * Test that the theme callback wins out over hook_custom_theme().
    */
-  function testThemeCallbackHookCustomTheme() {
+  protected function testThemeCallbackHookCustomTheme() {
     // Trigger hook_custom_theme() to dynamically request the Stark theme for
     // the requested page.
     state_set('menu_test_hook_custom_theme_name', 'stark');
@@ -272,7 +272,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
   /**
    * Tests for menu_link_maintain().
    */
-  function testMenuLinkMaintain() {
+  protected function testMenuLinkMaintain() {
     $admin_user = $this->backdropCreateUser(array('administer site configuration'));
     $this->backdropLogin($admin_user);
 
@@ -318,7 +318,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
   /**
    * Tests for menu_name parameter for hook_menu().
    */
-  function testMenuName() {
+  protected function testMenuName() {
     $admin_user = $this->backdropCreateUser(array('administer site configuration'));
     $this->backdropLogin($admin_user);
 
@@ -339,7 +339,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
   /**
    * Tests for menu hierarchy.
    */
-  function testMenuHierarchy() {
+  protected function testMenuHierarchy() {
     $parent_link = db_query('SELECT * FROM {menu_links} WHERE link_path = :link_path', array(':link_path' => 'menu-test/hierarchy/parent'))->fetchAssoc();
     $child_link = db_query('SELECT * FROM {menu_links} WHERE link_path = :link_path', array(':link_path' => 'menu-test/hierarchy/parent/child'))->fetchAssoc();
     $unattached_child_link = db_query('SELECT * FROM {menu_links} WHERE link_path = :link_path', array(':link_path' => 'menu-test/hierarchy/parent/child2/child'))->fetchAssoc();
@@ -351,7 +351,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
   /**
    * Tests menu link depth and parents of local tasks and menu callbacks.
    */
-  function testMenuHidden() {
+  protected function testMenuHidden() {
     // Verify links for one dynamic argument.
     $links = db_select('menu_links', 'ml')
       ->fields('ml')
@@ -440,7 +440,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
   /**
    * Test menu_get_item() with empty ancestors.
    */
-  function testMenuGetItemNoAncestors() {
+  protected function testMenuGetItemNoAncestors() {
     state_set('menu_masks', array());
     $this->backdropGet('');
   }
@@ -448,7 +448,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
   /**
    * Test menu_set_item().
    */
-  function testMenuSetItem() {
+  protected function testMenuSetItem() {
     $item = menu_get_item('node');
 
     $this->assertEqual($item['path'], 'node', "Path from menu_get_item('node') is equal to 'node'", 'menu');
@@ -465,7 +465,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
   /**
    * Test menu maintenance hooks.
    */
-  function testMenuItemHooks() {
+  protected function testMenuItemHooks() {
     // Create an item.
     menu_link_maintain('menu_test', 'insert', 'menu_test_maintain/4', 'Menu link #4');
     $this->assertEqual(menu_test_static_variable(), 'insert', 'hook_menu_link_insert() fired correctly');
@@ -480,7 +480,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
   /**
    * Test menu link 'options' storage and rendering.
    */
-  function testMenuLinkOptions() {
+  protected function testMenuLinkOptions() {
     // Create a menu link with options.
     $menu_link = array(
       'link_title' => 'Menu link options test',
@@ -509,7 +509,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
    *
    * @see menu_test_init()
    */
-  function testMenuItemTitlesCases() {
+  protected function testMenuItemTitlesCases() {
     for ($case_no = 1; $case_no <= 4; $case_no++) {
       $this->backdropGet('menu-title-test/case' . $case_no);
       $this->assertResponse(200);
@@ -528,7 +528,7 @@ class MenuRouterTestCase extends BackdropWebTestCase {
   /**
    * Tests inheritance of 'load arguments'.
    */
-  function testMenuLoadArgumentsInheritance() {
+  protected function testMenuLoadArgumentsInheritance() {
     $expected = array(
       'menu-test/arguments/%/%' => array(
         2 => array('menu_test_argument_load' => array(3)),
@@ -587,7 +587,7 @@ class MenuLinksUnitTestCase extends BackdropWebTestCase {
   /**
    * Create a simple hierarchy of links.
    */
-  function createLinkHierarchy($module = 'menu_test') {
+  protected function createLinkHierarchy($module = 'menu_test') {
     // First remove all the menu links.
     db_truncate('menu_links')->execute();
 
@@ -638,7 +638,7 @@ class MenuLinksUnitTestCase extends BackdropWebTestCase {
   /**
    * Assert that at set of links is properly parented.
    */
-  function assertMenuLinkParents($links, $expected_hierarchy) {
+  protected function assertMenuLinkParents($links, $expected_hierarchy) {
     foreach ($expected_hierarchy as $child => $parent) {
       $mlid = $links[$child]['mlid'];
       $plid = $parent ? $links[$parent]['mlid'] : 0;
@@ -652,7 +652,7 @@ class MenuLinksUnitTestCase extends BackdropWebTestCase {
   /**
    * Test automatic re-parenting of menu links.
    */
-  function testMenuLinkReparenting($module = 'menu_test') {
+  protected function testMenuLinkReparenting($module = 'menu_test') {
     // Check the initial hierarchy.
     $links = $this->createLinkHierarchy($module);
 
@@ -734,7 +734,7 @@ class MenuLinksUnitTestCase extends BackdropWebTestCase {
   /**
    * Test automatic reparenting of menu links derived from menu routers.
    */
-  function testMenuLinkRouterReparenting() {
+  protected function testMenuLinkRouterReparenting() {
     // Run all the standard parenting tests on menu links derived from
     // menu routers.
     $this->testMenuLinkReparenting('system');
@@ -797,7 +797,7 @@ class MenuRebuildTestCase extends BackdropWebTestCase {
   /**
    * Test if the 'menu_rebuild_needed' variable triggers a menu_rebuild() call.
    */
-  function testMenuRebuildByVariable() {
+  protected function testMenuRebuildByVariable() {
     // Check if 'admin' path exists.
     $admin_exists = db_query('SELECT path from {menu_router} WHERE path = :path', array(':path' => 'admin'))->fetchField();
     $this->assertEqual($admin_exists, 'admin', "The path 'admin/' exists prior to deleting.");
@@ -840,7 +840,7 @@ class MenuTreeDataTestCase extends BackdropUnitTestCase {
   /**
    * Validate the generation of a proper menu tree hierarchy.
    */
-  function testMenuTreeData() {
+  protected function testMenuTreeData() {
     $tree = menu_tree_data($this->links);
 
     // Validate that parent items #1, #2, and #5 exist on the root level.
@@ -900,7 +900,7 @@ class MenuTreeOutputTestCase extends BackdropWebTestCase {
   /**
    * Validate the generation of a proper menu tree output.
    */
-  function testMenuTreeData() {
+  protected function testMenuTreeData() {
     $output = menu_tree_output($this->tree_data);
 
     // Validate that the - in main-menu is changed into an underscore
@@ -924,7 +924,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
   protected $admin_user;
   protected $web_user;
 
-  function setUp() {
+  protected function setUp() {
     $modules = func_get_args();
     if (isset($modules[0]) && is_array($modules[0])) {
       $modules = $modules[0];
@@ -946,7 +946,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
   /**
    * Tests breadcrumbs on node and administrative paths.
    */
-  function testBreadCrumbs() {
+  protected function testBreadCrumbs() {
     foreach (array('default', 'admin_default') as $layout_name) {
       $layout = layout_load($layout_name);
       // Assume that the menu block is the second block in the default layout.
@@ -1402,7 +1402,7 @@ class MenuBreadcrumbTestCase extends MenuWebTestCase {
 class MenuTrailTestCase extends MenuWebTestCase {
   protected $admin_user;
 
-  function setUp() {
+  protected function setUp() {
     $modules = func_get_args();
     if (isset($modules[0]) && is_array($modules[0])) {
       $modules = $modules[0];
@@ -1439,7 +1439,7 @@ class MenuTrailTestCase extends MenuWebTestCase {
   /**
    * Tests active trails are properly affected by menu_tree_set_path().
    */
-  function testMenuTreeSetPath() {
+  protected function testMenuTreeSetPath() {
     $home = array('<front>' => 'Home');
     $config_tree = array(
       'admin' => t('Administration'),
@@ -1502,7 +1502,7 @@ class MenuTrailTestCase extends MenuWebTestCase {
   /**
    * Tests that the active trail works correctly on custom 403 and 404 pages.
    */
-  function testCustom403And404Pages() {
+  protected function testCustom403And404Pages() {
     // Set the custom 403 and 404 pages we will use.
     config('system.core')
       ->set('site_403', 'menu-test/custom-403-page')
@@ -1602,14 +1602,14 @@ class MenuChangeTestCase extends MenuWebTestCase {
   /**
    * Set up testing environment.
    */
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('menu_test');
   }
 
   /**
    * Test that updating the type of a menu item works correctly.
    */
-  public function testMenuChangeTypeTestCase() {
+  protected function testMenuChangeTypeTestCase() {
     // Check that the test menu item exists.
     $sql = "SELECT type FROM {menu_links}, {menu_router} WHERE {menu_links}.router_path = {menu_router}.path AND {menu_links}.router_path = 'menu-test/changes'";
     $type = db_query($sql)->fetchField();

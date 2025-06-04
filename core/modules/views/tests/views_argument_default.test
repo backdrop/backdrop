@@ -24,7 +24,7 @@ class ViewsArgumentDefaultTest extends ViewsSqlTest {
   /**
    * Tests the use of a default argument plugin that provides no options.
    */
-  function testArgumentDefaultNoOptions() {
+  protected function testArgumentDefaultNoOptions() {
     module_enable(array('views_ui', 'views_test'));
     $admin_user = $this->backdropCreateUser(array('administer views', 'administer site configuration'));
     $this->backdropLogin($admin_user);
@@ -49,7 +49,7 @@ class ViewsArgumentDefaultTest extends ViewsSqlTest {
   /**
    * Tests fixed default argument.
    */
-  function testArgumentDefaultFixed() {
+  protected function testArgumentDefaultFixed() {
     $view = $this->view_argument_default_fixed();
 
     $view->set_display('default');
@@ -73,18 +73,18 @@ class ViewsArgumentDefaultTest extends ViewsSqlTest {
   /**
    * @todo Test php default argument.
    */
-  function testArgumentDefaultPhp() {
+  protected function testArgumentDefaultPhp() {
 
   }
 
   /**
    * @todo Test node default argument.
    */
-  function testArgumentDefaultNode() {
+  protected function testArgumentDefaultNode() {
 
   }
 
-  function view_argument_default_fixed() {
+  private function view_argument_default_fixed() {
     $view = new view;
     $view->name = 'test_argument_default_fixed';
     $view->description = '';

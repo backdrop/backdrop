@@ -16,7 +16,7 @@ class CommentViewsHandlerFilterUserUidTest extends CommentViewsHandlerArgumentUs
    * Override the view from the argument test case to remove the argument and
    * add filter with the uid as the value.
    */
-  function view_comment_user_uid() {
+  private function view_comment_user_uid() {
     $view = parent::view_comment_user_uid();
     // Remove the argument.
     $view->set_item('default', 'argument', 'uid_touch', NULL);

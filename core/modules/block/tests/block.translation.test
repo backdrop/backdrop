@@ -8,7 +8,7 @@ class BlockTranslationTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
   protected $admin_user;
 
-  function setUp() {
+  protected function setUp() {
     $modules = array(
       'layout',
       'block',
@@ -46,7 +46,7 @@ class BlockTranslationTestCase extends BackdropWebTestCase {
   /**
    * Test creating custom block, translate it, and then deleting it.
    */
-  function testTranslateCustomBlock() {
+  protected function testTranslateCustomBlock() {
 
     // Check if language module was enabled.
     $this->assertTrue(module_exists('language'), 'Language module was enabled successfully.');

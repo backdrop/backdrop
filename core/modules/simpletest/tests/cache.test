@@ -63,7 +63,7 @@ class CacheTestCase extends BackdropWebTestCase {
    * @param $bin
    *   The bin the cache item was stored in.
    */
-  function assertCacheRemoved($message, $cid = NULL, $bin = NULL) {
+  protected function assertCacheRemoved($message, $cid = NULL, $bin = NULL) {
     if ($bin == NULL) {
       $bin = $this->default_bin;
     }
@@ -93,35 +93,35 @@ class CacheSavingCase extends CacheTestCase {
   /**
    * Test the saving and restoring of a string.
    */
-  function testString() {
+  protected function testString() {
     $this->checkVariable($this->randomName(100));
   }
 
   /**
    * Test the saving and restoring of an integer.
    */
-  function testInteger() {
+  protected function testInteger() {
     $this->checkVariable(100);
   }
 
   /**
    * Test the saving and restoring of a double.
    */
-  function testDouble() {
+  protected function testDouble() {
     $this->checkVariable(1.29);
   }
 
   /**
    * Test the saving and restoring of an array.
    */
-  function testArray() {
+  protected function testArray() {
     $this->checkVariable(array('backdrop1', 'backdrop2' => 'backdrop3', 'backdrop4' => array('backdrop5', 'backdrop6')));
   }
 
   /**
    * Test the saving and restoring of an object.
    */
-  function testObject() {
+  protected function testObject() {
     $test_object = new stdClass();
     $test_object->test1 = $this->randomName(100);
     $test_object->test2 = 100;
@@ -136,7 +136,7 @@ class CacheSavingCase extends CacheTestCase {
   /**
    * Check or a variable is stored and restored properly.
    */
-  function checkVariable($var) {
+  protected function checkVariable($var) {
     cache()->set('test_var', $var);
     $cached = cache()->get('test_var');
     $this->assertTrue(isset($cached->data) && $cached->data === $var, format_string('@type is saved and restored properly.', array('@type' => ucfirst(gettype($var)))));
@@ -145,7 +145,7 @@ class CacheSavingCase extends CacheTestCase {
   /**
    * Test no empty cids are written in cache table.
    */
-  function testNoEmptyCids() {
+  protected function testNoEmptyCids() {
     $this->backdropGet('user/register');
     $this->assertFalse(cache()->get(''), 'No cache entry is written with an empty cid.');
   }
@@ -155,7 +155,7 @@ class CacheSavingCase extends CacheTestCase {
  * Test getMultiple().
  */
 class CacheGetMultipleUnitTest extends CacheTestCase {
-  function setUp() {
+  protected function setUp() {
     $this->default_bin = 'page';
     parent::setUp();
   }
@@ -163,7 +163,7 @@ class CacheGetMultipleUnitTest extends CacheTestCase {
   /**
    * Test getMultiple().
    */
-  function testCacheMultiple() {
+  protected function testCacheMultiple() {
     $item1 = $this->randomName(10);
     $item2 = $this->randomName(10);
     $cache = cache($this->default_bin);
@@ -194,7 +194,7 @@ class CacheGetMultipleUnitTest extends CacheTestCase {
  * Test cache clearing methods.
  */
 class CacheClearCase extends CacheTestCase {
-  function setUp() {
+  protected function setUp() {
     $this->default_bin = 'page';
     $this->default_value = $this->randomName(10);
 
@@ -204,7 +204,7 @@ class CacheClearCase extends CacheTestCase {
   /**
    * Test clearing using a cid.
    */
-  function testClearCid() {
+  protected function testClearCid() {
     $cache = cache($this->default_bin);
     $cache->set('test_cid_clear', $this->default_value);
 
@@ -217,7 +217,7 @@ class CacheClearCase extends CacheTestCase {
   /**
    * Test clearing using wildcard.
    */
-  function testClearWildcard() {
+  protected function testClearWildcard() {
     $cache = cache($this->default_bin);
     $cache->set('test_cid_clear1', $this->default_value);
     $cache->set('test_cid_clear2', $this->default_value);
@@ -243,7 +243,7 @@ class CacheClearCase extends CacheTestCase {
   /**
    * Test clearing using an array.
    */
-  function testClearArray() {
+  protected function testClearArray() {
     // Create three cache entries.
     $cache = cache($this->default_bin);
     $cache->set('test_cid_clear1', $this->default_value);
@@ -279,7 +279,7 @@ class CacheClearCase extends CacheTestCase {
   /**
    * Test backdrop_flush_all_caches().
    */
-  function testFlushAllCaches() {
+  protected function testFlushAllCaches() {
     // Create cache entries for each flushed cache bin.
     $bins = array('cache', 'filter', 'page', 'bootstrap', 'path');
     $bins = array_merge(module_invoke_all('flush_caches'), $bins);
@@ -302,7 +302,7 @@ class CacheClearCase extends CacheTestCase {
  * Test isEmpty() method.
  */
 class CacheIsEmptyCase extends CacheTestCase {
-  function setUp() {
+  protected function setUp() {
     $this->default_bin = 'page';
     $this->default_value = $this->randomName(10);
 
@@ -312,7 +312,7 @@ class CacheIsEmptyCase extends CacheTestCase {
   /**
    * Test clearing using a cid.
    */
-  function testIsEmpty() {
+  protected function testIsEmpty() {
     // Clear the cache bin.
     $cache = cache($this->default_bin);
     $cache->flush();

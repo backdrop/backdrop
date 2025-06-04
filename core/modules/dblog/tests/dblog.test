@@ -26,7 +26,7 @@ class DBLogTestCase extends BackdropWebTestCase {
   /**
    * Enable modules and create users with specific permissions.
    */
-  function setUp() {
+  protected function setUp() {
     parent::setUp('dblog', 'book');
     // Create users.
     $this->big_user = $this->backdropCreateUser(array('administer site configuration', 'access administration pages', 'access site reports', 'administer users'));
@@ -40,7 +40,7 @@ class DBLogTestCase extends BackdropWebTestCase {
    * Database Logging module functionality through both the admin and user
    * interfaces.
    */
-  function testDBLog() {
+  protected function testDBLog() {
     // Login the admin user.
     $this->backdropLogin($this->big_user);
 
@@ -703,7 +703,7 @@ class DBLogTestCase extends BackdropWebTestCase {
   /**
    * Make sure HTML tags are filtered out in the log detail page.
    */
-  public function testLogMessageSanitized() {
+  protected function testLogMessageSanitized() {
     $this->backdropLogin($this->big_user);
 
     // Make sure dangerous HTML tags are filtered out in log detail page.

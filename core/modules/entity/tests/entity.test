@@ -8,14 +8,14 @@
  * Tests the basic Entity API.
  */
 class EntityAPITestCase extends BackdropWebTestCase {
-  function setUp() {
+  protected function setUp() {
     parent::setUp('entity', 'entity_test');
   }
 
   /**
    * Tests basic CRUD functionality of the Entity API.
    */
-  function testCRUD() {
+  protected function testCRUD() {
     $user1 = $this->backdropCreateUser();
 
     // Create some test entities.
@@ -59,7 +59,7 @@ class EntityAPITestCase extends BackdropWebTestCase {
   /**
    * Tests caching (and not caching) of entities in the Entity API.
    */
-  function testCaching() {
+  protected function testCaching() {
     module_enable(array('entity_caching_test'));
 
     $user1 = $this->backdropCreateUser();
@@ -100,7 +100,7 @@ class EntityAPITestCase extends BackdropWebTestCase {
   /**
    * Tests basic View functionality of the Entity API.
    */
-  function testEntityView() {
+  protected function testEntityView() {
     $user1 = $this->backdropCreateUser();
 
     // Create a test entity.
@@ -121,7 +121,7 @@ class EntityAPIInfoTestCase extends BackdropWebTestCase  {
   /**
    * Ensures entity info cache is updated after changes.
    */
-  function testEntityInfoChanges() {
+  protected function testEntityInfoChanges() {
     module_enable(array('entity_cache_test'));
     $entity_info = entity_get_info();
     $this->assertTrue(isset($entity_info['entity_cache_test']), 'Test entity type found.');
@@ -144,7 +144,7 @@ class EntityAPIInfoTestCase extends BackdropWebTestCase  {
    *
    * @see entity_cache_test_watchdog()
    */
-  function testEntityInfoCacheWatchdog() {
+  protected function testEntityInfoCacheWatchdog() {
     module_enable(array('entity_cache_test'));
     $info = state_get('entity_cache_test');
     $this->assertEqual($info['label'], 'Entity Cache Test', 'Entity info label is correct.');

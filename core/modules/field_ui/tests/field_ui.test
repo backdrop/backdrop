@@ -11,7 +11,7 @@ class FieldUITestCase extends BackdropWebTestCase {
   protected $type;
   protected $hyphen_type;
 
-  function setUp() {
+  protected function setUp() {
     // Since this is a base class for many test cases, support the same
     // flexibility that BackdropWebTestCase::setUp() has for the modules to be
     // passed in as either an array or a variable number of string arguments.
@@ -52,7 +52,7 @@ class FieldUITestCase extends BackdropWebTestCase {
    *   $edit parameter for backdropPost() on the third step ('Instance settings'
    *   form).
    */
-  function fieldUIAddNewField($bundle_path, $initial_edit, $field_edit = array(), $instance_edit = array()) {
+  protected function fieldUIAddNewField($bundle_path, $initial_edit, $field_edit = array(), $instance_edit = array()) {
     // Use 'test_field' field type by default.
     $initial_edit += array(
       'fields[_add_new_field][type]' => 'test_field',
@@ -96,7 +96,7 @@ class FieldUITestCase extends BackdropWebTestCase {
    *   $edit parameter for backdropPost() on the second step ('Instance settings'
    *   form).
    */
-  function fieldUIAddExistingField($bundle_path, $initial_edit, $instance_edit = array()) {
+  protected function fieldUIAddExistingField($bundle_path, $initial_edit, $instance_edit = array()) {
     // Use 'test_field_widget' by default.
     $initial_edit += array(
       'fields[_add_existing_field][widget_type]' => 'test_field_widget',
@@ -127,7 +127,7 @@ class FieldUITestCase extends BackdropWebTestCase {
    * @param $bundle_label
    *   The label of the bundle.
    */
-  function fieldUIDeleteField($bundle_path, $field_name, $label, $bundle_label) {
+  protected function fieldUIDeleteField($bundle_path, $field_name, $label, $bundle_label) {
     // Display confirmation form.
     $this->backdropGet("$bundle_path/fields/$field_name/delete");
     $this->assertRaw(t('Are you sure you want to delete the field %label', array('%label' => $label)), 'Delete confirmation was found.');
@@ -150,7 +150,7 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
   protected $field_name_input;
   protected $field_name;
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp();
 
     // Create random field name.
@@ -190,7 +190,7 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
    * In order to act on the same fields, and not create the fields over and over
    * again the following tests create, update and delete the same fields.
    */
-  function testCRUDFields() {
+  protected function testCRUDFields() {
     $this->manageFieldsPage();
     $this->createField();
     $this->updateField();
@@ -203,7 +203,7 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
    * This test creates a field but in one fewer step because the field has
    * no global field settings.
    */
-  function testCreateFieldNoSettings() {
+  protected function testCreateFieldNoSettings() {
     // This setting is checked in field_test_field_settings_form().
     state_get('field_ui_test_field_settings', FALSE);
     $this->createField();
@@ -212,7 +212,7 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
   /**
    * Tests the manage fields page.
    */
-  function manageFieldsPage() {
+  protected function manageFieldsPage() {
     $this->backdropGet('admin/structure/types/manage/' . $this->hyphen_type . '/fields');
     // Check all table columns.
     $table_headers = array(
@@ -240,7 +240,7 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
    * @todo Assert properties can bet set in the form and read back in $field and
    * $instances.
    */
-  function createField() {
+  protected function createField() {
     // Create a test field.
     $edit = array(
       'fields[_add_new_field][label]' => $this->field_label,
@@ -258,7 +258,7 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
   /**
    * Tests editing an existing field.
    */
-  function updateField() {
+  protected function updateField() {
     // Go to the field edit page.
     $this->backdropGet('admin/structure/types/manage/' . $this->hyphen_type . '/fields/' . $this->field_name);
 
@@ -281,7 +281,7 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
   /**
    * Tests adding an existing field in another content type.
    */
-  function addExistingField() {
+  protected function addExistingField() {
     // Check "Add existing field" appears.
     $this->backdropGet('admin/structure/types/manage/page/fields');
     $this->assertRaw(t('Add existing field'), '"Add existing field" was found.');
@@ -305,7 +305,7 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
    * We do not test if the number can be submitted with anything else than a
    * numeric value. That is tested already in FormsTestCase::testNumber().
    */
-  function testCardinalitySettings() {
+  protected function testCardinalitySettings() {
     $this->createField();
     $field_edit_path = 'admin/structure/types/manage/' . $this->hyphen_type . '/fields/' . $this->field_name;
 
@@ -352,7 +352,7 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
    * @param $entity_type
    *   The entity type for the instance.
    */
-  function assertFieldSettings($bundle, $field_name, $string = 'dummy test string', $entity_type = 'node') {
+  protected function assertFieldSettings($bundle, $field_name, $string = 'dummy test string', $entity_type = 'node') {
     // Reset the fields info.
     _field_info_collate_fields_reset();
     // Assert field settings.
@@ -368,7 +368,7 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
   /**
    * Tests that default value is correctly validated and saved.
    */
-  function testDefaultValue() {
+  protected function testDefaultValue() {
     // Create a test field and instance.
     $field_name = 'test';
     $field = array(
@@ -418,7 +418,7 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
   /**
    * Tests that deletion removes fields and instances as expected.
    */
-  function testDeleteField() {
+  protected function testDeleteField() {
     // Create a new field.
     $bundle_path1 = 'admin/structure/types/manage/' . $this->hyphen_type;
     $edit1 = array(
@@ -469,7 +469,7 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
   /**
    * Tests that Field UI respects the 'no_ui' option in hook_field_info().
    */
-  function testHiddenFields() {
+  protected function testHiddenFields() {
     $bundle_path = 'admin/structure/types/manage/' . $this->hyphen_type . '/fields';
 
     // Check that the field type is not available in the 'add new field' row.
@@ -504,7 +504,7 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
   /**
    * Tests renaming a bundle.
    */
-  function testRenameBundle() {
+  protected function testRenameBundle() {
     $type2 = strtolower($this->randomName(8)) . '_' .'test';
     $hyphen_type2 = str_replace('_', '-', $type2);
 
@@ -519,7 +519,7 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
   /**
    * Tests that a duplicate field name is caught by validation.
    */
-  function testDuplicateFieldName() {
+  protected function testDuplicateFieldName() {
     // field_tags already exists, so we're expecting an error when trying to
     // create a new field with the same name.
     $edit = array(
@@ -538,7 +538,7 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
   /**
    * Tests that external URLs in the 'destinations' query parameter are blocked.
    */
-  function testExternalDestinations() {
+  protected function testExternalDestinations() {
     $path = 'admin/structure/types/manage/post/fields/field_tags/field-settings';
     $options = array(
       'query' => array('destinations' => array('http://example.com')),
@@ -553,14 +553,14 @@ class FieldUIManageFieldsTestCase extends FieldUITestCase {
  * Tests the functionality of the 'Manage displays' screens.
  */
 class FieldUIManageDisplayTestCase extends FieldUITestCase {
-  function setUp() {
+  protected function setUp() {
     parent::setUp(array('search', 'field_test'));
   }
 
   /**
    * Tests formatter settings.
    */
-  function testFormatterUI() {
+  protected function testFormatterUI() {
     $manage_fields = 'admin/structure/types/manage/' . $this->hyphen_type;
     $manage_display = $manage_fields . '/display/default';
 
@@ -625,7 +625,7 @@ class FieldUIManageDisplayTestCase extends FieldUITestCase {
   /**
    * Tests switching display modes to use custom or 'default' settings'.
    */
-  function testViewModeCustom() {
+  protected function testViewModeCustom() {
     // Create a field, and a node with some data for the field.
     $edit = array(
       'fields[_add_new_field][label]' => 'Test field',
@@ -706,7 +706,7 @@ class FieldUIManageDisplayTestCase extends FieldUITestCase {
    * @return
    *   TRUE on pass, FALSE on fail.
    */
-  function assertNodeViewText(Node $node, $view_mode, $text, $message) {
+  protected function assertNodeViewText(Node $node, $view_mode, $text, $message) {
     return $this->assertNodeViewTextHelper($node, $view_mode, $text, $message, FALSE);
   }
 
@@ -724,7 +724,7 @@ class FieldUIManageDisplayTestCase extends FieldUITestCase {
    * @return
    *   TRUE on pass, FALSE on fail.
    */
-  function assertNodeViewNoText(Node $node, $view_mode, $text, $message) {
+  protected function assertNodeViewNoText(Node $node, $view_mode, $text, $message) {
     return $this->assertNodeViewTextHelper($node, $view_mode, $text, $message, TRUE);
   }
 
@@ -749,7 +749,7 @@ class FieldUIManageDisplayTestCase extends FieldUITestCase {
    * @return
    *   TRUE on pass, FALSE on fail.
    */
-  function assertNodeViewTextHelper(Node $node, $view_mode, $text, $message, $not_exists) {
+  protected function assertNodeViewTextHelper(Node $node, $view_mode, $text, $message, $not_exists) {
     // Make sure caches on the tester side are refreshed after changes
     // submitted on the tested side.
     field_info_cache_clear();
@@ -779,7 +779,7 @@ class FieldUIManageDisplayTestCase extends FieldUITestCase {
  * Tests custom widget hooks and callbacks on the field administration pages.
  */
 class FieldUIAlterTestCase extends BackdropWebTestCase {
-  function setUp() {
+  protected function setUp() {
     parent::setUp(array('field_test'));
 
     // Create test user.
@@ -794,7 +794,7 @@ class FieldUIAlterTestCase extends BackdropWebTestCase {
    * @see field_test_field_widget_properties_user_alter()
    * @see field_test_field_widget_form_alter()
    */
-  function testDefaultWidgetPropertiesAlter() {
+  protected function testDefaultWidgetPropertiesAlter() {
     // Create the alter_test_text field and an instance on post nodes.
     field_create_field(array(
       'field_name' => 'alter_test_text',
@@ -865,7 +865,7 @@ class FieldUIViewModeTestHelper extends BackdropWebTestCase {
   /**
    * Overrides BackdropWebTestCase::setUp().
    */
-  public function setUp(array $modules = array()) {
+  protected function setUp(array $modules = array()) {
     $modules[] = 'comment';
     $modules[] = 'field_ui';
     $modules[] = 'taxonomy';
@@ -942,7 +942,7 @@ class FieldUIViewModeFunctionalTest extends FieldUIViewModeTestHelper {
   /**
    * Tests display mode functionality.
    */
-  public function testFieldUIViewModes() {
+  protected function testFieldUIViewModes() {
     $this->backdropLogin($this->admin_user);
     $this->backdropGet('admin/structure/types/manage/post/display');
     $this->assertLinkByHref('admin/structure/types/manage/post/display/add');
@@ -1023,7 +1023,7 @@ class FieldUIViewModeFunctionalTest extends FieldUIViewModeTestHelper {
   /**
    * Test the new entity display mode hooks.
    */
-  public function testInfoHooks() {
+  protected function testInfoHooks() {
     config_set('entity.view_modes', 'view_modes', array(
       'node' => array(
         'info_3' => array(

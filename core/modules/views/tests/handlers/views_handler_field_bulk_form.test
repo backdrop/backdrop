@@ -47,7 +47,7 @@ class ViewsHandlerFieldBulkFormTest extends ViewsSqlTest {
   /**
    * Defines bulk form handler for custom entity views_test.
    */
-  function viewsData() {
+  protected function viewsData() {
     $data = parent::viewsData();
 
     // This is needed for views_handler_field_entity, used by the bulk form.
@@ -111,7 +111,7 @@ class ViewsHandlerFieldBulkFormTest extends ViewsSqlTest {
   /**
    * Assert that the form checkbox values match the entity ids.
    */
-  function assertCorrectBulkFormEntityIds($id_field, $entity_type) {
+  protected function assertCorrectBulkFormEntityIds($id_field, $entity_type) {
     // Generate a preview of the view in order to populate the field aliases.
     $this->view->preview();
     $field_alias = $this->view->field[$id_field]->field_alias;
@@ -130,7 +130,7 @@ class ViewsHandlerFieldBulkFormTest extends ViewsSqlTest {
   /**
    * Test Bulk Forms for nodes.
    */
-  public function testNodeFieldBulkForm() {
+  protected function testNodeFieldBulkForm() {
     // Create the basic view.
     $this->view->add_item('default', 'field', 'node', 'bulk_form', array(
         'id' => 'bulk_form',
@@ -162,7 +162,7 @@ class ViewsHandlerFieldBulkFormTest extends ViewsSqlTest {
    *
    * User entities are accessed through a relationship to node entities.
    */
-  public function testNodeAndUserBulkForm() {
+  protected function testNodeAndUserBulkForm() {
     // Add a relationship field to author (user).
     $this->view->add_item('default', 'relationship', 'node', 'uid', array(
       'id' => 'uid',
@@ -210,7 +210,7 @@ class ViewsHandlerFieldBulkFormTest extends ViewsSqlTest {
    * the 'id' value, rather than the 'nid', so that the bulk operation is
    * performed on the correct custom entity.
    */
-  public function testNodeAndCustomEntityBulkForm() {
+  protected function testNodeAndCustomEntityBulkForm() {
 
     // Enable the test module that defines the views_test entity.
     module_enable(array('views_test_entity'));

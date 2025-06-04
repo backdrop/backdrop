@@ -7,7 +7,7 @@
 class RedirectTestHelper extends BackdropWebTestCase {
   protected $profile = 'minimal';
 
-  function setUp(array $modules = array()) {
+  protected function setUp(array $modules = array()) {
     $modules[] = 'node';
     $modules[] = 'path';
     $modules[] = 'redirect';
@@ -100,7 +100,7 @@ class RedirectUnitTest extends BackdropUnitTestCase {
   /**
    * Test the redirect_compare_array_recursive() function.
    */
-  function testCompareArrayRecursive() {
+  protected function testCompareArrayRecursive() {
     backdrop_load('module', 'redirect');
     $haystack = array('a' => 'aa', 'b' => 'bb', 'c' => array('c1' => 'cc1', 'c2' => 'cc2'));
     $cases = array(
@@ -120,7 +120,7 @@ class RedirectUnitTest extends BackdropUnitTestCase {
   /**
    * Test redirect_sort_recursive().
    */
-  function testSortRecursive() {
+  protected function testSortRecursive() {
     $test_cases = array(
       array(
         'input' => array('b' => 'aa', 'c' => array('c2' => 'aa', 'c1' => 'aa'), 'a' => 'aa'),
@@ -139,7 +139,7 @@ class RedirectUnitTest extends BackdropUnitTestCase {
 class RedirectFunctionalTest extends RedirectTestHelper {
   protected $admin_user;
 
-  function setUp(array $modules = array()) {
+  protected function setUp(array $modules = array()) {
     parent::setUp($modules);
 
     $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
@@ -150,7 +150,7 @@ class RedirectFunctionalTest extends RedirectTestHelper {
   /**
    * Tests the links added to 404 pages for creating redirects.
    */
-  function test404Interface() {
+  protected function test404Interface() {
     // Check that 404 pages do get "Add URL redirect" links for admin users.
     $this->backdropGet('invalid-path1');
     $this->backdropGet('invalid-path2');
@@ -173,7 +173,7 @@ class RedirectFunctionalTest extends RedirectTestHelper {
   /**
    * Tests the links added to 404 pages for creating URL redirects.
    */
-  function testPageCache() {
+  protected function testPageCache() {
     // Set up cache variables.
     config_set('system.core', 'cache', 1);
     $edit = array(
@@ -218,7 +218,7 @@ class RedirectFunctionalTest extends RedirectTestHelper {
   /**
    * Tests renaming automatic aliases in a circular loop.
    */
-  function testPathChangeRedirects() {
+  protected function testPathChangeRedirects() {
     // Create an initial post node with a URL alias.
     $node = $this->backdropCreateNode(array('type' => 'post', 'path' => array('alias' => 'first-alias')));
     $node_path = 'node/' . $node->nid;
@@ -277,7 +277,7 @@ class RedirectFunctionalTest extends RedirectTestHelper {
   /**
    * Tests presence or absence of Redirect elements on node edit forms.
    */
-  function testNodeRedirectForm() {
+  protected function testNodeRedirectForm() {
     // Ensure that the redirect form is not present on node/add
     $this->backdropGet('node/add');
     $this->assertNoLink('Add URL redirect to this node');

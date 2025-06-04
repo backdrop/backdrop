@@ -16,7 +16,7 @@ class SchemaTestCase extends BackdropWebTestCase {
   /**
    *
    */
-  function testSchema() {
+  protected function testSchema() {
     // Try creating a table.
     $table_specification = array(
       'description' => 'Schema table description.',
@@ -109,7 +109,7 @@ class SchemaTestCase extends BackdropWebTestCase {
     $this->assertEqual($count, 2, 'There were two rows.');
   }
 
-  function tryInsert($table = 'test_table') {
+  protected function tryInsert($table = 'test_table') {
     try {
        db_insert($table)
          ->fields(array('id' => mt_rand(10, 20)))
@@ -131,7 +131,7 @@ class SchemaTestCase extends BackdropWebTestCase {
    * @param $column
    *   Optional column to test.
    */
-  function checkSchemaComment($description, $table, $column = NULL) {
+  protected function checkSchemaComment($description, $table, $column = NULL) {
     if (method_exists(Database::getConnection()->schema(), 'getComment')) {
       $comment = Database::getConnection()->schema()->getComment($table, $column);
       $this->assertEqual($comment, $description, 'The comment matches the schema description.');
@@ -141,7 +141,7 @@ class SchemaTestCase extends BackdropWebTestCase {
   /**
    * Tests creating unsigned columns and data integrity thereof.
    */
-  function testUnsignedColumns() {
+  protected function testUnsignedColumns() {
     // First create the table with just a serial column.
     $table_name = 'unsigned_table';
     $table_spec = array(
@@ -180,7 +180,7 @@ class SchemaTestCase extends BackdropWebTestCase {
    * @return
    *   TRUE if the insert succeeded, FALSE otherwise
    */
-  function tryUnsignedInsert($table_name, $column_name) {
+  protected function tryUnsignedInsert($table_name, $column_name) {
     try {
       db_insert($table_name)
          ->fields(array($column_name => -1))
@@ -195,7 +195,7 @@ class SchemaTestCase extends BackdropWebTestCase {
   /**
    * Test adding columns to an existing table.
    */
-  function testSchemaAddField() {
+  protected function testSchemaAddField() {
     // Test varchar types.
     foreach (array(1, 32, 128, 256, 512) as $length) {
       $base_field_spec = array(

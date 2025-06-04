@@ -61,7 +61,7 @@ class FieldViewsTestHelper extends ViewsSqlTest {
     return $account;
   }
 
-  function setUpFields($amount = 3) {
+  protected function setUpFields($amount = 3) {
     // Create three fields.
     $field_names = array();
     for ($i = 0; $i < $amount; $i++) {
@@ -73,7 +73,7 @@ class FieldViewsTestHelper extends ViewsSqlTest {
     return $field_names;
   }
 
-  function setUpInstances($bundle = 'page') {
+  protected function setUpInstances($bundle = 'page') {
     foreach ($this->fields as $key => $field) {
       $instance = array(
         'field_name' => $field['field_name'],
@@ -87,7 +87,7 @@ class FieldViewsTestHelper extends ViewsSqlTest {
   /**
    * Clear all views caches and static caches which are required for the patch.
    */
-  function clearViewsCaches() {
+  protected function clearViewsCaches() {
     // Reset views data cache.
     backdrop_static_reset('_views_fetch_data_cache');
     backdrop_static_reset('_views_fetch_data_recursion_protected');
@@ -177,7 +177,7 @@ class FieldViewsDataTest extends FieldViewsTestHelper {
    *
    * We check data structure for both node and node revision tables.
    */
-  function testViewsData() {
+  protected function testViewsData() {
     $data = views_fetch_data();
 
     // Check the table and the joins of the first field.
@@ -318,7 +318,7 @@ class FieldViewsFieldTest extends FieldViewsTestHelper {
       $this->nodes[$i] = $this->backdropCreateNode($edit);
     }
   }
-  public function testFieldRender() {
+  protected function testFieldRender() {
     $this->_testSimpleFieldRender();
     $this->_testFormatterSimpleFieldRender();
     $this->_testMultipleFieldRender();

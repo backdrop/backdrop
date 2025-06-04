@@ -26,7 +26,7 @@ class ViewsAnalyzeTest extends ViewsSqlTest {
   /**
    * Tests that analyze works in general.
    */
-  function testAnalyzeBasic() {
+  protected function testAnalyzeBasic() {
     $this->backdropLogin($this->admin);
     // Enable the taxonomy_term view and click the analyse button.
     $view = views_get_view('taxonomy_term');

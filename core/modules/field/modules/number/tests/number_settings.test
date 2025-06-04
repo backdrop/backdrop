@@ -32,7 +32,7 @@ class NumberFieldSettingsTestCase extends BackdropWebTestCase {
   /**
    * @inheritdoc
    */
-  public function setUp() {
+  protected function setUp() {
     parent::setUp();
     $this->adminUser = $this->backdropCreateUser(array(
       'administer content types',
@@ -44,7 +44,7 @@ class NumberFieldSettingsTestCase extends BackdropWebTestCase {
   /**
    * Test number_decimal field settings.
    */
-  public function testNumberDecimalFieldSettings() {
+  protected function testNumberDecimalFieldSettings() {
     // Create a field with settings to validate.
     $field_name = 'field_' . backdrop_strtolower($this->randomName());
     $precision = 7;
@@ -122,7 +122,7 @@ class NumberFieldSettingsTestCase extends BackdropWebTestCase {
   /**
    * Test number_integer field settings.
    */
-  public function testNumberIntegerFieldSettings() {
+  protected function testNumberIntegerFieldSettings() {
     // Create a field with settings to validate.
     $field_name = 'field_' . backdrop_strtolower($this->randomName());
 

@@ -10,7 +10,7 @@ class LinkAttributeCrudTest extends LinkBaseTestClass {
   private $zebra;
   protected $field_name;
 
-  function setup() {
+  protected function setUp() {
     parent::setup();
     $this->zebra = 0;
   }
@@ -45,7 +45,7 @@ class LinkAttributeCrudTest extends LinkBaseTestClass {
   /**
    * Test the link_plain formatter and it's output.
    */
-  function testFormatters() {
+  protected function testFormatters() {
     $this->field_name = $this->createLinkField();
 
     // Test the plain formatter.

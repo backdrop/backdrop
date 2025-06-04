@@ -14,7 +14,7 @@ class LinkTokenTest extends LinkBaseTestClass {
    * Creates a link field with a required title enabled for user-entered tokens.
    * Creates a node with a token in the link title and checks the value.
    */
-  function testUserTokenLinkCreate() {
+  protected function testUserTokenLinkCreate() {
     $settings = array(
       'instance[settings][enable_tokens]' => 1,
     );
@@ -42,7 +42,7 @@ class LinkTokenTest extends LinkBaseTestClass {
    * Creates a link field with a static title and an admin-entered token.
    * Creates a node with a link and checks the title value.
    */
-  function testStaticTokenLinkCreate() {
+  protected function testStaticTokenLinkCreate() {
     $name = $this->randomName();
     $settings = array(
       'instance[settings][title]' => 'value',
@@ -70,7 +70,7 @@ class LinkTokenTest extends LinkBaseTestClass {
    * Test that if you have a title and no URL on a field which does not have
    * tokens enabled, that the title is sanitized once.
    */
-  function testTitleOnlyTitleNoLink() {
+  protected function testTitleOnlyTitleNoLink() {
     $settings = array(
       'instance[settings][url]' => 1,
       'instance[settings][enable_tokens]' => 0,

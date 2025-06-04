@@ -25,7 +25,7 @@ class CKEditor5RtlTestCase extends BackdropWebTestCase {
   /**
    * Set up environment.
    */
-  public function setUp() {
+  protected function setUp() {
     parent::setUp(array('ckeditor5', 'language', 'locale'));
     // Add RTL language.
     $arabic = (object) array(
@@ -51,7 +51,7 @@ class CKEditor5RtlTestCase extends BackdropWebTestCase {
   /**
    * Test that the CKEditor admin form works correctly with RTL languages.
    */
-  public function testRtlAdminIcons() {
+  protected function testRtlAdminIcons() {
     $arabic = language_load('ar');
     $notice = '<em class="placeholder">Notice</em>: Undefined index: image_rtl in <em class="placeholder">{closure}()</em>';
 

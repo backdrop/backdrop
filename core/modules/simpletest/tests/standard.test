@@ -14,7 +14,7 @@ class StandardInstallTestCase extends BackdropWebTestCase {
   /**
    * Tests existence of test case located in an installation profile module.
    */
-  function testRolesExist() {
+  protected function testRolesExist() {
     $user_1 = user_load(1);
     $this->assertTrue(user_has_role('administrator', $user_1), 'User ID 1 is an administrator');
 

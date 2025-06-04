@@ -16,7 +16,7 @@ class AdminBarWebTestCase extends BackdropWebTestCase {
     'node' => 'access content',
   );
 
-  function setUp() {
+  protected function setUp() {
     // Enable admin bar module and any other modules.
     $modules = func_get_args();
     $modules = isset($modules[0]) ? $modules[0] : $modules;
@@ -122,14 +122,14 @@ class AdminBarWebTestCase extends BackdropWebTestCase {
  * Tests menu links depending on user permissions.
  */
 class AdminBarPermissionsTestCase extends AdminBarWebTestCase {
-  function setUp() {
+  protected function setUp() {
     parent::setUp(array('node'));
   }
 
   /**
    * Test that the links are added to the page (no JS testing).
    */
-  function testPermissions() {
+  protected function testPermissions() {
     module_enable(array('contact'));
     $this->resetAll();
 
@@ -167,7 +167,7 @@ class AdminBarPermissionsTestCase extends AdminBarWebTestCase {
   /**
    * Tests handling of links pointing to category/overview pages.
    */
-  function testCategories() {
+  protected function testCategories() {
     // Create a user with minimum permissions.
     $admin_user = $this->backdropCreateUser($this->basePermissions);
     $this->backdropLogin($admin_user);
@@ -197,7 +197,7 @@ class AdminBarPermissionsTestCase extends AdminBarWebTestCase {
   /**
    * Tests that user role and permission changes are properly taken up.
    */
-  function testPermissionChanges() {
+  protected function testPermissionChanges() {
     // Create a user who is able to change permissions.
     $permissions = $this->basePermissions + array(
       'administer permissions',
@@ -267,14 +267,14 @@ class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
    */
   protected $web_user;
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp(array('node'));
   }
 
   /**
    * Tests node type links.
    */
-  function testNode() {
+  protected function testNode() {
     $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
     // Create a content-type with special characters.
     $this->backdropCreateContentType(array('type' => 'special', 'name' => 'Cool & Special'));
@@ -347,7 +347,7 @@ class AdminBarDynamicLinksTestCase extends AdminBarWebTestCase {
   /**
    * Tests Add content links.
    */
-  function testNodeAdd() {
+  protected function testNodeAdd() {
     $this->backdropCreateContentType(array('type' => 'post', 'name' => 'Post'));
 
     // Verify that "Add content" does not appear for unprivileged users.
@@ -390,7 +390,7 @@ class AdminBarLinkTypesTestCase extends AdminBarWebTestCase {
    */
   protected $admin_user;
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp();
 
     $permissions = module_invoke_all('permission');
@@ -402,7 +402,7 @@ class AdminBarLinkTypesTestCase extends AdminBarWebTestCase {
   /**
    * Tests appearance of different router item link types.
    */
-  function testLinkTypes() {
+  protected function testLinkTypes() {
     // Verify that MENU_NORMAL_ITEMs appear.
     $this->assertLinkTrailByTitle(array(
       t('Configuration'),
@@ -438,7 +438,7 @@ class AdminBarCustomizedTestCase extends AdminBarWebTestCase {
    */
   protected $admin_user;
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp(array('menu'));
 
     $this->admin_user = $this->backdropCreateUser($this->basePermissions + array(
@@ -450,7 +450,7 @@ class AdminBarCustomizedTestCase extends AdminBarWebTestCase {
   /**
    * Test disabled custom links.
    */
-  function testCustomDisabled() {
+  protected function testCustomDisabled() {
     $type = $this->backdropCreateContentType();
     $node = $this->backdropCreateNode(array('type' => $type->type));
     $text = $this->randomName();
@@ -494,7 +494,7 @@ class AdminBarCustomizedTestCase extends AdminBarWebTestCase {
   /**
    * Tests external links.
    */
-  function testCustomExternal() {
+  protected function testCustomExternal() {
     // Add a custom link to the node to the menu.
     $edit = array(
       'link_path' => 'http://example.com',

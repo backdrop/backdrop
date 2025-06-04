@@ -19,7 +19,7 @@ class TextFieldTestCase extends BackdropWebTestCase {
    */
   protected $field_name;
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp('field_test');
 
     $this->admin_user = $this->backdropCreateUser(array('administer filters'));
@@ -32,7 +32,7 @@ class TextFieldTestCase extends BackdropWebTestCase {
   /**
    * Test text field validation.
    */
-  function testTextFieldValidation() {
+  protected function testTextFieldValidation() {
     // Create a field with settings to validate.
     $max_length = 3;
     $this->field = array(
@@ -75,7 +75,7 @@ class TextFieldTestCase extends BackdropWebTestCase {
   /**
    * Test widgets.
    */
-  function testTextfieldWidgets() {
+  protected function testTextfieldWidgets() {
     $this->_testTextfieldWidgets('text', 'text_textfield');
     $this->_testTextfieldWidgets('text_long', 'text_textarea');
   }
@@ -83,7 +83,7 @@ class TextFieldTestCase extends BackdropWebTestCase {
   /**
    * Helper function for testTextfieldWidgets().
    */
-  function _testTextfieldWidgets($field_type, $widget_type) {
+  private function _testTextfieldWidgets($field_type, $widget_type) {
     // Setup a field and instance
     $entity_type = 'test_entity';
     $field_name = backdrop_strtolower($this->randomName());
@@ -137,7 +137,7 @@ class TextFieldTestCase extends BackdropWebTestCase {
   /**
    * Test widgets + 'formatted_text' setting.
    */
-  function testTextfieldWidgetsFormatted() {
+  protected function testTextfieldWidgetsFormatted() {
     $this->_testTextfieldWidgetsFormatted('text', 'text_textfield');
     $this->_testTextfieldWidgetsFormatted('text_long', 'text_textarea');
   }
@@ -145,7 +145,7 @@ class TextFieldTestCase extends BackdropWebTestCase {
   /**
    * Helper function for testTextfieldWidgetsFormatted().
    */
-  function _testTextfieldWidgetsFormatted($field_type, $widget_type) {
+  private function _testTextfieldWidgetsFormatted($field_type, $widget_type) {
     // Setup a field and instance
     $entity_type = 'test_entity';
     $this->field_name = backdrop_strtolower($this->randomName());
@@ -244,7 +244,7 @@ class TextFieldTestCase extends BackdropWebTestCase {
   /**
    * Test widgets for fields with selected allowed formats.
    */
-  public function testTextfieldWidgetsAllowedFormats() {
+  protected function testTextfieldWidgetsAllowedFormats() {
     // Create one text format.
     $format1 = array(
       'format' => backdrop_strtolower($this->randomName()),
@@ -387,7 +387,7 @@ class TextSummaryTestCase extends BackdropWebTestCase {
    */
   protected $post_creator;
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp();
     $this->post_creator = $this->backdropCreateUser(array('create post content', 'edit own post content'));
   }
@@ -397,7 +397,7 @@ class TextSummaryTestCase extends BackdropWebTestCase {
    * subsequent sentences are not. This edge case is documented at
    * http://drupal.org/node/180425.
    */
-  function testFirstSentenceQuestion() {
+  protected function testFirstSentenceQuestion() {
     $text = 'A question? A sentence. Another sentence.';
     $expected = 'A question? A sentence.';
     $this->assertTextSummary($text, $expected, NULL, 30);
@@ -406,7 +406,7 @@ class TextSummaryTestCase extends BackdropWebTestCase {
   /**
    * Test summary with long example.
    */
-  function testLongSentence() {
+  protected function testLongSentence() {
     $text = 'Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ' . // 125
             'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. ' . // 108
             'Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. ' . // 103
@@ -421,7 +421,7 @@ class TextSummaryTestCase extends BackdropWebTestCase {
   /**
    * Test various summary length edge cases.
    */
-  function testLength() {
+  protected function testLength() {
     // This string tests a number of edge cases.
     $text = "<p>\nHi\n</p>\n<p>\nfolks\n<br />\n!\n</p>";
 
@@ -521,7 +521,7 @@ class TextSummaryTestCase extends BackdropWebTestCase {
   /**
    * Calls text_summary() and asserts that the expected teaser is returned.
    */
-  function assertTextSummary($text, $expected, $format = NULL, $size = NULL) {
+  protected function assertTextSummary($text, $expected, $format = NULL, $size = NULL) {
     $summary = text_summary($text, $format, $size);
     $this->assertIdentical($summary, $expected, format_string('Generated @format summary "@summary" matches expected "@expected".', array('@format' => $format, '@summary' => str_replace("\n", '\n', $summary), '@expected' => str_replace("\n", '\n', $expected))));
   }
@@ -529,7 +529,7 @@ class TextSummaryTestCase extends BackdropWebTestCase {
   /**
    * Test sending only summary.
    */
-  function testOnlyTextSummary() {
+  protected function testOnlyTextSummary() {
     // Login as post creator.
     $this->backdropLogin($this->post_creator);
     // Create post with summary but empty body.
@@ -562,7 +562,7 @@ class TextTranslationTestCase extends BackdropWebTestCase {
    */
   protected $translator;
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp('locale', 'translation');
 
     $full_html_format = filter_format_load('full_html');
@@ -591,7 +591,7 @@ class TextTranslationTestCase extends BackdropWebTestCase {
   /**
    * Test that a plaintext textfield widget is correctly populated.
    */
-  function testTextField() {
+  protected function testTextField() {
     // Disable text processing for body.
     $edit = array('instance[settings][text_processing]' => 0);
     $this->backdropPost('admin/structure/types/manage/post/fields/body', $edit, t('Save settings'));
@@ -620,7 +620,7 @@ class TextTranslationTestCase extends BackdropWebTestCase {
    * Check that user that does not have access the field format cannot see the
    * source value when creating a translation.
    */
-  function testTextFieldFormatted() {
+  protected function testTextFieldFormatted() {
     // Make node body multiple.
     $edit = array('field[cardinality]' => -1);
     $this->backdropPost('admin/structure/types/manage/post/fields/body', $edit, t('Save settings'));

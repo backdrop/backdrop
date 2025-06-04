@@ -13,7 +13,7 @@ class LinkCustomFormTest extends LinkBaseTestClass {
   /**
    * Test the output of a custom form with link fields.
    */
-  public function testCustomLinkFields() {
+  protected function testCustomLinkFields() {
     $group = 'Link field custom form';
 
     // Test form.

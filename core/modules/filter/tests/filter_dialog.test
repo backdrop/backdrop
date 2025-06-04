@@ -16,7 +16,7 @@ class FilterEditorLinkValidateTestCase extends BackdropWebTestCase {
   /**
    * Set up testing environment.
    */
-  public function setUp() {
+  protected function setUp() {
     parent::setUp(
       'filter',
       'ckeditor',
@@ -62,7 +62,7 @@ class FilterEditorLinkValidateTestCase extends BackdropWebTestCase {
   /**
    * Check function _filter_format_editor_link_url_validate().
    */
-  public function testEditorLinkValidate() {
+  protected function testEditorLinkValidate() {
     // Create a node and get the nid for the calling path.
     $node = $this->backdropCreateNode();
     $calling_path = "node/{$node->nid}/edit";

@@ -40,7 +40,7 @@ class BookTestCase extends BackdropWebTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp() {
     parent::setUp(array('book', 'node_access_test'));
 
     // node_access_test requires a node_access_rebuild().
@@ -106,7 +106,7 @@ class BookTestCase extends BackdropWebTestCase {
   /**
    * Tests book functionality through node interfaces.
    */
-  public function testBook() {
+  protected function testBook() {
     // Create new book.
     $nodes = $this->createBook();
     $book = $this->book;
@@ -213,7 +213,7 @@ class BookTestCase extends BackdropWebTestCase {
   /**
    * Test add to book outline access
    */
-  public function testBookAddToOutlineAccess() {
+  protected function testBookAddToOutlineAccess() {
     $this->backdropLogin($this->admin_user);
     $this->backdropGet('node/add/page');
     $this->assertNoText('Book outline', 'Cannot add page to book outline.');
@@ -285,7 +285,7 @@ class BookTestCase extends BackdropWebTestCase {
   /**
    * Tests the functionality of the book navigation block.
    */
-  public function testBookNavigationBlock() {
+  protected function testBookNavigationBlock() {
     $this->backdropLogin($this->admin_user);
 
     // Add the block to the sidebar region in the default layout.
@@ -321,7 +321,7 @@ class BookTestCase extends BackdropWebTestCase {
   /**
    * Tests the book navigation block when an access module is enabled.
    */
-  public function testNavigationBlockOnAccessModuleEnabled() {
+  protected function testNavigationBlockOnAccessModuleEnabled() {
     $this->backdropLogin($this->admin_user);
 
     // Set the block title.
@@ -367,7 +367,7 @@ class BookTestCase extends BackdropWebTestCase {
   /**
    * Tests the access for deleting top-level book nodes.
    */
-  public function testBookDelete() {
+  protected function testBookDelete() {
     $nodes = $this->createBook();
     $this->backdropLogin($this->admin_user);
     $edit = array();

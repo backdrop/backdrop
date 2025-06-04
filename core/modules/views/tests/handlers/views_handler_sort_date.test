@@ -143,7 +143,7 @@ class ViewsHandlerSortDateTest extends ViewsSqlTest {
   /**
    * Tests numeric ordering of the result set.
    */
-  public function testDateOrdering() {
+  protected function testDateOrdering() {
     foreach (array('second', 'minute', 'hour', 'day', 'month', 'year') as $granularity) {
       foreach (array(FALSE, TRUE) as $reverse) {
         $view = $this->getBasicView();

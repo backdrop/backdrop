@@ -15,7 +15,7 @@ class ViewsGlossaryTestCase extends ViewsSqlTest {
   /**
    * Tests the default glossary view.
    */
-  public function testGlossaryView() {
+  protected function testGlossaryView() {
     // Create a content type and add some nodes, with a non random title.
     $type = $this->backdropCreateContentType();
     $nodes_per_char = array(

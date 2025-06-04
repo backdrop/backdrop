@@ -5,13 +5,13 @@
  */
 
 class DateAPITestCase extends BackdropUnitTestCase {
-  function setUp() {
+  protected function setUp() {
     parent::setUp();
     require_once(BACKDROP_ROOT . '/core/includes/date.inc');
     require_once(BACKDROP_ROOT . '/core/includes/date.class.inc');
   }
 
-  public function testDateAPI() {
+  protected function testDateAPI() {
     // Test date_format_date().
     $formatters = array(
       'a',

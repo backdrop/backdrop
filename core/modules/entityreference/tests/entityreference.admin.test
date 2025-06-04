@@ -13,7 +13,7 @@ class EntityReferenceAdminTestCase extends BackdropWebTestCase {
   public $type;
   public $hyphen_type;
 
-  public function setUp() {
+  protected function setUp() {
     parent::setUp(array('field_ui', 'entity', 'entityreference'));
 
     // Create test user.
@@ -54,7 +54,7 @@ class EntityReferenceAdminTestCase extends BackdropWebTestCase {
     return $options;
   }
 
-  public function testFieldAdminHandler() {
+  protected function testFieldAdminHandler() {
     $bundle_path = 'admin/structure/types/manage/' . $this->hyphen_type;
 
     // First step: 'Add new field' on the 'Manage fields' page.

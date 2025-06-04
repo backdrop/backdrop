@@ -10,7 +10,7 @@
 class PathTestCase extends BackdropWebTestCase {
   protected $profile = 'minimal';
 
-  function setUp($modules = array()) {
+  protected function setUp($modules = array()) {
     $modules[] = 'path';
     parent::setUp($modules);
 
@@ -30,7 +30,7 @@ class PathTestCase extends BackdropWebTestCase {
   /**
    * Tests the path cache.
    */
-  function testPathCache() {
+  protected function testPathCache() {
     // Create test node.
     $node1 = $this->backdropCreateNode();
 
@@ -57,7 +57,7 @@ class PathTestCase extends BackdropWebTestCase {
   /**
    * Tests alias functionality through the admin interfaces.
    */
-  function testAdminAlias() {
+  protected function testAdminAlias() {
     // Create test node.
     $node1 = $this->backdropCreateNode();
 
@@ -144,7 +144,7 @@ class PathTestCase extends BackdropWebTestCase {
   /**
    * Tests alias functionality through the node interfaces.
    */
-  function testNodeAlias() {
+  protected function testNodeAlias() {
     // Create test node.
     $node1 = $this->backdropCreateNode();
 
@@ -205,14 +205,14 @@ class PathTestCase extends BackdropWebTestCase {
    * @return int
    *   Integer representing the path ID.
    */
-  function getPID($alias) {
+  protected function getPID($alias) {
     return db_query("SELECT pid FROM {url_alias} WHERE alias = :alias", array(':alias' => $alias))->fetchField();
   }
 
   /**
    * Tests that tries to create a duplicate alias are caught by validation.
    */
-  function testDuplicateNodeAlias() {
+  protected function testDuplicateNodeAlias() {
     // Create one node with a random alias.
     $node_one = $this->backdropCreateNode();
     $edit = array();
@@ -232,7 +232,7 @@ class PathTestCase extends BackdropWebTestCase {
  * Tests URL aliases for taxonomy terms.
  */
 class PathTaxonomyTermTestCase extends BackdropWebTestCase {
-  function setUp() {
+  protected function setUp() {
     parent::setUp('path', 'taxonomy');
 
     // Redirect module is not tested with aliases in these tests. Redirect does
@@ -248,7 +248,7 @@ class PathTaxonomyTermTestCase extends BackdropWebTestCase {
   /**
    * Tests alias functionality through the admin interfaces.
    */
-  function testTermAlias() {
+  protected function testTermAlias() {
     // Create a term in the default 'Tags' vocabulary with URL alias.
     $vocabulary = taxonomy_vocabulary_load('tags');
     $description = $this->randomName();
@@ -304,7 +304,7 @@ class PathLanguageTestCase extends BackdropWebTestCase {
    */
   protected $web_user;
 
-  function setUp($modules = array()) {
+  protected function setUp($modules = array()) {
     $modules[] = 'node';
     $modules[] = 'path';
     $modules[] = 'locale';
@@ -334,7 +334,7 @@ class PathLanguageTestCase extends BackdropWebTestCase {
   /**
    * Test alias functionality through the admin interfaces.
    */
-  function testAliasTranslation() {
+  protected function testAliasTranslation() {
     // Set 'page' content type to enable translation.
     $node_type = node_type_load('page');
     $node_type->settings['language'] = TRANSLATION_ENABLED;
@@ -454,7 +454,7 @@ class PathLanguageTestCase extends BackdropWebTestCase {
 class PathLanguageUITestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp('path', 'locale');
 
     // Create the content type.
@@ -481,7 +481,7 @@ class PathLanguageUITestCase extends BackdropWebTestCase {
   /**
    * Tests that a language-neutral URL alias works.
    */
-  function testLanguageNeutralURLs() {
+  protected function testLanguageNeutralURLs() {
     $name = $this->randomName(8);
     $edit = array();
     $edit['source'] = 'admin/config/urls/path';
@@ -495,7 +495,7 @@ class PathLanguageUITestCase extends BackdropWebTestCase {
   /**
    * Tests that a default language URL alias works.
    */
-  function testDefaultLanguageURLs() {
+  protected function testDefaultLanguageURLs() {
     $name = $this->randomName(8);
     $edit = array();
     $edit['source'] = 'admin/config/urls/path';
@@ -510,7 +510,7 @@ class PathLanguageUITestCase extends BackdropWebTestCase {
   /**
    * Tests that a non-default language URL alias works.
    */
-  function testNonDefaultURLs() {
+  protected function testNonDefaultURLs() {
     $name = $this->randomName(8);
     $edit = array();
     $edit['source'] = 'admin/config/urls/path';
@@ -530,7 +530,7 @@ class PathLanguageUITestCase extends BackdropWebTestCase {
 class PathMonolingualTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp('path', 'locale', 'translation');
 
     // Create and login user.
@@ -567,7 +567,7 @@ class PathMonolingualTestCase extends BackdropWebTestCase {
   /**
    * Verifies that links do not have language prefixes in them.
    */
-  function testPageLinks() {
+  protected function testPageLinks() {
     // Navigate to 'admin/config' path.
     $this->backdropGet('admin/config');
 
@@ -587,7 +587,7 @@ class PathMonolingualTestCase extends BackdropWebTestCase {
 class PathHooksTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp(array('node', 'path', 'path_test'));
     // Disable default path patterns for nodes.
     config_set('path.settings', 'node_pattern', '');
@@ -601,7 +601,7 @@ class PathHooksTestCase extends BackdropWebTestCase {
     $this->backdropLogin($web_user);
   }
 
-  function testPathHooks() {
+  protected function testPathHooks() {
     // Create test node.
     $node1 = $this->backdropCreateNode();
 

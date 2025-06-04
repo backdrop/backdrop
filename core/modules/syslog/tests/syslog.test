@@ -5,14 +5,14 @@
  */
 
 class SyslogTestCase extends BackdropWebTestCase {
-  function setUp() {
+  protected function setUp() {
     parent::setUp('syslog');
   }
 
   /**
    * Test the syslog settings page.
    */
-  function testSettings() {
+  protected function testSettings() {
     $admin_user = $this->backdropCreateUser(array('administer site configuration'));
     $this->backdropLogin($admin_user);
 

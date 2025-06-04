@@ -16,7 +16,7 @@ class ViewsPagerTest extends ViewsSqlTest {
    *
    * @see http://drupal.org/node/652712
    */
-  public function testStorePagerSettings() {
+  protected function testStorePagerSettings() {
     $admin_user = $this->backdropCreateUser(array('administer views', 'administer site configuration'));
     $this->backdropLogin($admin_user);
     // Test behaviour described in http://drupal.org/node/652712#comment-2354918.
@@ -107,7 +107,7 @@ class ViewsPagerTest extends ViewsSqlTest {
   /**
    * Tests the none-pager-query.
    */
-  public function testNoLimit() {
+  protected function testNoLimit() {
     // Create 11 nodes and make sure that everyone is returned.
     // We create 11 nodes, because the default pager plugin had 10 items per page.
     for ($i = 0; $i < 9; $i++) {
@@ -163,7 +163,7 @@ class ViewsPagerTest extends ViewsSqlTest {
     return $view;
   }
 
-  public function testViewTotalRowsWithoutPager() {
+  protected function testViewTotalRowsWithoutPager() {
     $this->createNodes(23);
 
     $view = $this->viewsPagerNoLimit();
@@ -185,7 +185,7 @@ class ViewsPagerTest extends ViewsSqlTest {
   /**
    * Tests the some pager plugin.
    */
-  public function testLimit() {
+  protected function testLimit() {
     // Create 11 nodes and make sure that everyone is returned.
     // We create 11 nodes, because the default pager plugin had 10 items per page.
     $this->createNodes(11);
@@ -242,7 +242,7 @@ class ViewsPagerTest extends ViewsSqlTest {
   /**
    * Tests the normal pager.
    */
-  public function testNormalPager() {
+  protected function testNormalPager() {
     // Create 11 nodes and make sure that everyone is returned.
     // We create 11 nodes, because the default pager plugin had 10 items per page.
     $this->createNodes(11);
@@ -297,7 +297,7 @@ class ViewsPagerTest extends ViewsSqlTest {
     $this->assertEqual(count($view->result), 11);
   }
 
-  function viewPagerFullZeroItemsPerPage() {
+  protected function viewPagerFullZeroItemsPerPage() {
     $view = new view;
     $view->name = 'view_pager_full_zero_items_per_page';
     $view->description = '';
@@ -337,7 +337,7 @@ class ViewsPagerTest extends ViewsSqlTest {
     return $view;
   }
 
-  function viewsPagerFull() {
+  protected function viewsPagerFull() {
     $view = new view;
     $view->name = 'test_pager_full';
     $view->description = '';
@@ -363,7 +363,7 @@ class ViewsPagerTest extends ViewsSqlTest {
     return $view;
   }
 
-  function viewsPagerFullFields() {
+  protected function viewsPagerFullFields() {
     $view = new view;
     $view->name = 'test_pager_full';
     $view->description = '';
@@ -404,14 +404,14 @@ class ViewsPagerTest extends ViewsSqlTest {
   /**
    * Tests the mini pager.
    */
-  public function testMiniPager() {
+  protected function testMiniPager() {
     // the functionality is the same as the normal pager, so i don't know what to test here.
   }
 
   /**
    * Tests rendering with NULL pager.
    */
-  public function testRenderNullPager() {
+  protected function testRenderNullPager() {
     // Create 11 nodes and make sure that everyone is returned.
     // We create 11 nodes, because the default pager plugin had 10 items per page.
     for ($i = 0; $i < 11; $i++) {
@@ -429,7 +429,7 @@ class ViewsPagerTest extends ViewsSqlTest {
   /**
    * Test the api functions on the view object.
    */
-  function testPagerApi() {
+  protected function testPagerApi() {
     $view = $this->viewsPagerFull();
     // On the first round don't initialize the pager.
 

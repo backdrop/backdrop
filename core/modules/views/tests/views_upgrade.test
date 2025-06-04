@@ -12,7 +12,7 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * You can find all conversions by searching for "moved to".
  */
 class ViewsUpgradeTestCase extends ViewsSqlTest {
-  function viewsData() {
+  protected function viewsData() {
     $data = parent::viewsData();
     $data['views_test']['old_field_1']['moved to'] = array('views_test', 'id');
     $data['views_test']['old_field_2']['field']['moved to'] = array('views_test', 'name');
@@ -26,7 +26,7 @@ class ViewsUpgradeTestCase extends ViewsSqlTest {
     return $data;
   }
 
-  function debugField($field) {
+  protected function debugField($field) {
     $keys = array('id', 'table', 'field', 'actual_field', 'original_field', 'real_field');
     $info = array();
     foreach ($keys as $key) {
@@ -38,7 +38,7 @@ class ViewsUpgradeTestCase extends ViewsSqlTest {
   /**
    * Tests the moved to parameter in general.
    */
-  public function testMovedTo() {
+  protected function testMovedTo() {
     // Test moving on field level.
     $view = $this->viewsMovedToField();
     $view->update();

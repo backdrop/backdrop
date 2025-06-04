@@ -14,7 +14,7 @@ class FilterSettingsAttachedTestCase extends BackdropWebTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp() {
     parent::setUp(array(
       'filter',
       'ckeditor5',
@@ -79,7 +79,7 @@ class FilterSettingsAttachedTestCase extends BackdropWebTestCase {
   /**
    * Test that the JavaScript settings attached to page node form are correct.
    */
-  public function testJavascriptSettingsAttached() {
+  protected function testJavascriptSettingsAttached() {
     // Snippets from the script tag containing the settings.
     $empty_settings = '"filter":{"formats":[]}';
     $basic_settings = '"filter":{"formats":{"basic":{"filterSettings":[],"editor":"ckeditor5","editorSettings":';

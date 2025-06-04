@@ -14,7 +14,7 @@ class NumberFieldTestCase extends BackdropWebTestCase {
   protected $instance;
   protected $web_user;
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp('field_test');
     $this->web_user = $this->backdropCreateUser(array('access field_test content', 'administer field_test content', 'administer content types', 'administer fields'));
     $this->backdropLogin($this->web_user);
@@ -23,7 +23,7 @@ class NumberFieldTestCase extends BackdropWebTestCase {
   /**
    * Test number_decimal field.
    */
-  function testNumberDecimalField() {
+  protected function testNumberDecimalField() {
     // Create a field with settings to validate.
     $this->field = array(
       'field_name' => backdrop_strtolower($this->randomName()),
@@ -110,7 +110,7 @@ class NumberFieldTestCase extends BackdropWebTestCase {
   /**
    * Test number_decimal field step validation.
    */
-  public function testNumberDecimalFieldStepValidation() {
+  protected function testNumberDecimalFieldStepValidation() {
     // Create a field with settings to validate, this time with higher
     // precision and scale.
     $this->field = array(
@@ -164,7 +164,7 @@ class NumberFieldTestCase extends BackdropWebTestCase {
   /**
    * Test number_integer field.
    */
-  function testNumberIntegerField() {
+  protected function testNumberIntegerField() {
     // Display the "Add content type" form.
     $this->backdropGet('admin/structure/types/add');
 
@@ -201,7 +201,7 @@ class NumberFieldTestCase extends BackdropWebTestCase {
   /**
    * Test number_float field.
    */
-  function testNumberFloatField() {
+  protected function testNumberFloatField() {
     $this->field = array(
       'field_name' => backdrop_strtolower($this->randomName()),
       'type' => 'number_float',
@@ -246,7 +246,7 @@ class NumberFieldTestCase extends BackdropWebTestCase {
   /**
    * Test empty value submission.
    */
-  function testNumberFieldEmpty() {
+  protected function testNumberFieldEmpty() {
     // Add a content type.
     $this->backdropGet('admin/structure/types/add');
     $name = $this->randomName();

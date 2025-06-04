@@ -13,7 +13,7 @@ class EntityLoadTestCase extends BackdropWebTestCase {
   /**
    * Tests the functionality for loading entities matching certain conditions.
    */
-  public function testEntityLoadConditions() {
+  protected function testEntityLoadConditions() {
     // Create a few nodes. One of them is given an edge-case title of "Array",
     // because loading entities by an array of conditions is subject to PHP
     // array-to-string conversion issues and we want to test those.

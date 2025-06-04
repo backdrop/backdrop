@@ -10,7 +10,7 @@
 class ThemeUnitTest extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp('theme_test');
     theme_enable(array('test_theme'));
   }
@@ -18,7 +18,7 @@ class ThemeUnitTest extends BackdropWebTestCase {
   /**
    * Test function theme_get_suggestions() for SA-CORE-2009-003.
    */
-  function testThemeSuggestions() {
+  protected function testThemeSuggestions() {
     // Set the home page as something random otherwise the CLI
     // test runner fails.
     config_set('system.core', 'site_frontpage', 'nobody-home');
@@ -49,7 +49,7 @@ class ThemeUnitTest extends BackdropWebTestCase {
    * separate file, so this test also ensures that that file is correctly loaded
    * when needed.
    */
-  function testPreprocessForSuggestions() {
+  protected function testPreprocessForSuggestions() {
     // Test with both an unprimed and primed theme registry.
     backdrop_theme_rebuild();
     for ($i = 0; $i < 2; $i++) {
@@ -61,7 +61,7 @@ class ThemeUnitTest extends BackdropWebTestCase {
   /**
    * Ensure page-front template suggestion is added when on home page.
    */
-  function testFrontPageThemeSuggestion() {
+  protected function testFrontPageThemeSuggestion() {
     $q = $_GET['q'];
     // Set $_GET['q'] to node because theme_get_suggestions() will query it to
     // see if we are on the home page.
@@ -76,7 +76,7 @@ class ThemeUnitTest extends BackdropWebTestCase {
   /**
    * Ensures theme hook_*_alter() implementations can run before anything is rendered.
    */
-  function testAlter() {
+  protected function testAlter() {
     $this->backdropGet('theme-test/alter');
     $this->assertText('The altered data is test_theme_theme_test_alter_alter was invoked.', 'The theme was able to implement an alter hook during page building before anything was rendered.');
   }
@@ -86,7 +86,7 @@ class ThemeUnitTest extends BackdropWebTestCase {
    *
    * @see test_theme.info
    */
-  function testCSSOverride() {
+  protected function testCSSOverride() {
     // Reuse the same page as in testPreprocessForSuggestions(). We're testing
     // what is output to the HTML HEAD based on what is in a theme's .info file,
     // so it doesn't matter what page we get, as long as it is themed with the
@@ -106,7 +106,7 @@ class ThemeUnitTest extends BackdropWebTestCase {
   /**
    * Ensures a themes template is overrideable based on the 'template' filename.
    */
-  function testTemplateOverride() {
+  protected function testTemplateOverride() {
     config_set('system.core', 'theme_default', 'test_theme');
     $this->backdropGet('theme-test/template-test');
     $this->assertText('Success: Template overridden.', t('Template overridden by defined \'template\' filename.'));
@@ -115,7 +115,7 @@ class ThemeUnitTest extends BackdropWebTestCase {
   /**
    * Test the list_themes() function.
    */
-  function testListThemes() {
+  protected function testListThemes() {
     $themes = list_themes();
     // Check if backdrop_theme_access() retrieves enabled themes properly from list_themes().
     $this->assertTrue(backdrop_theme_access('test_theme'), 'Enabled theme detected');
@@ -136,7 +136,7 @@ class ThemeUnitTest extends BackdropWebTestCase {
   /**
    * Test the theme_get_setting() function.
    */
-  function testThemeGetSetting() {
+  protected function testThemeGetSetting() {
     $GLOBALS['theme_key'] = 'test_theme';
     $this->assertIdentical(theme_get_setting('theme_test_setting'), 'default value', 'theme_get_setting() uses the default theme automatically.');
     $this->assertNotEqual(theme_get_setting('subtheme_override', 'test_basetheme'), theme_get_setting('subtheme_override', 'test_subtheme'), 'Base theme\'s default settings values can be overridden by subtheme.');
@@ -146,7 +146,7 @@ class ThemeUnitTest extends BackdropWebTestCase {
   /**
    * Ensures the theme registry is rebuilt when modules are disabled/enabled.
    */
-  function testRegistryRebuild() {
+  protected function testRegistryRebuild() {
     $this->assertIdentical(theme('theme_test_foo', array('foo' => 'a')), 'a', 'The theme registry contains theme_test_foo.');
 
     module_disable(array('theme_test'), FALSE);
@@ -164,7 +164,7 @@ class ThemeTableUnitTest extends BackdropWebTestCase {
   /**
    * Tableheader.js provides 'sticky' table headers, and is included by default.
    */
-  function testThemeTableStickyHeaders() {
+  protected function testThemeTableStickyHeaders() {
     $header = array('one', 'two', 'three');
     $rows = array(array(1,2,3), array(4,5,6), array(7,8,9));
     $this->content = theme('table', array('header' => $header, 'rows' => $rows));
@@ -177,7 +177,7 @@ class ThemeTableUnitTest extends BackdropWebTestCase {
   /**
    * If $sticky is FALSE, no tableheader.js should be included.
    */
-  function testThemeTableNoStickyHeaders() {
+  protected function testThemeTableNoStickyHeaders() {
     $header = array('one', 'two', 'three');
     $rows = array(array(1,2,3), array(4,5,6), array(7,8,9));
     $attributes = array();
@@ -194,7 +194,7 @@ class ThemeTableUnitTest extends BackdropWebTestCase {
    * Tests that the table header is printed correctly even if there are no rows,
    * and that the empty text is displayed correctly.
    */
-  function testThemeTableWithEmptyMessage() {
+  protected function testThemeTableWithEmptyMessage() {
     $header = array(
       t('Header 1'),
       array(
@@ -210,7 +210,7 @@ class ThemeTableUnitTest extends BackdropWebTestCase {
   /**
    * Tests that the 'no_striping' option works correctly.
    */
-  function testThemeTableWithNoStriping() {
+  protected function testThemeTableWithNoStriping() {
     $rows = array(
       array(
         'data' => array(1),
@@ -254,7 +254,7 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
   /**
    * Tests theme_item_list().
    */
-  function testItemList() {
+  protected function testItemList() {
     // Verify that empty items produce no output.
     $variables = array();
     $expected = '';
@@ -337,7 +337,7 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
   /**
    * Tests theme_links().
    */
-  function testLinks() {
+  protected function testLinks() {
     // Verify that empty variables produce no output.
     $variables = array();
     $expected = '';
@@ -426,7 +426,7 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
   /**
    * Test the use of backdrop_pre_render_links() on a nested array of links.
    */
-  function testBackdropPreRenderLinks() {
+  protected function testBackdropPreRenderLinks() {
     // Define the base array to be rendered, containing a variety of different
     // kinds of links.
     $base_array = array(
@@ -528,14 +528,14 @@ class ThemeFunctionsTestCase extends BackdropWebTestCase {
 class ThemeHookInitUnitTest extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp('theme_test');
   }
 
   /**
    * Test that the theme system can generate output when called by hook_init().
    */
-  function testThemeInitializationHookInit() {
+  protected function testThemeInitializationHookInit() {
     $this->backdropGet('theme-test/hook-init');
     $this->assertRaw('Themed output generated in hook_init()', 'Themed output generated in hook_init() correctly appears on the page.');
     $this->assertRaw('stark/layout.css', "The default theme's CSS appears on the page when the theme system is initialized in hook_init().");
@@ -552,7 +552,7 @@ class ThemeFastTestCase extends BackdropWebTestCase {
    */
   protected $account;
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp('theme_test');
     $this->account = $this->backdropCreateUser(array('access user profiles'));
   }
@@ -560,7 +560,7 @@ class ThemeFastTestCase extends BackdropWebTestCase {
   /**
    * Tests access to user autocompletion and verify the correct results.
    */
-  function testUserAutocomplete() {
+  protected function testUserAutocomplete() {
     $this->backdropLogin($this->account);
     $this->backdropGet('user/autocomplete/' . $this->account->name);
     $this->assertText('registry not initialized', 'The registry was not initialized');
@@ -574,7 +574,7 @@ class ThemeHeadTag extends BackdropUnitTestCase {
   /**
    * Test function theme_head_tag()
    */
-  function testThemeHeadTag() {
+  protected function testThemeHeadTag() {
     // Test auto-closure meta tag generation
     $tag['element'] = array('#tag' => 'meta', '#attributes' => array('name' => 'description', 'content' => 'Backdrop test'));
     $this->assertEqual('<meta name="description" content="Backdrop test" />'."\n", theme_head_tag($tag), 'Test auto-closure meta tag generation.');
@@ -600,7 +600,7 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
    *   - 'value': This is the render element to test.
    *   - 'expected': This is the expected markup for the element in 'value'.
    */
-  function assertElements($elements) {
+  protected function assertElements($elements) {
     foreach($elements as $element) {
       $this->assertIdentical(backdrop_render($element['value']), $element['expected'], '"' . $element['name'] . '" input rendered correctly by backdrop_render().');
     }
@@ -609,7 +609,7 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
   /**
    * Tests Form API #type 'container'.
    */
-  function testContainer() {
+  protected function testContainer() {
     $elements = array(
       // Basic container with no attributes.
       array(
@@ -644,7 +644,7 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
   /**
    * Tests Form API #type 'details'.
    */
-  public function testDetails() {
+  protected function testDetails() {
     $elements = array(
       // Basic 'details' element.
       array(
@@ -691,7 +691,7 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
   /**
    * Tests system #type 'head_tag'.
    */
-  function testHeadTag() {
+  protected function testHeadTag() {
     $elements = array(
       // Test auto-closure meta tag generation.
       array(
@@ -726,14 +726,14 @@ class RenderElementTypesTestCase extends BackdropWebTestCase {
  * Functional test for attributes of html.tpl.php.
  */
 class ThemeHtmlTplPhpAttributesTestCase extends BackdropWebTestCase {
-  function setUp() {
+  protected function setUp() {
     parent::setUp('theme_test');
   }
 
   /**
    * Tests that modules and themes can alter variables in html.tpl.php.
    */
-  function testThemeHtmlTplPhpAttributes() {
+  protected function testThemeHtmlTplPhpAttributes() {
     $this->backdropGet('');
     $attributes = $this->xpath('/html[@theme_test_html_attribute="theme test html attribute value"]');
     $this->assertTrue(count($attributes) == 1, t('Attribute set in the html element via hook_preprocess_html() found.'));
@@ -747,14 +747,14 @@ class ThemeHtmlTplPhpAttributesTestCase extends BackdropWebTestCase {
  */
 class ThemeRegistryTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
-  function setUp() {
+  protected function setUp() {
     parent::setUp('theme_test');
   }
 
   /**
    * Tests the behavior of the theme registry class.
    */
-  function testRaceCondition() {
+  protected function testRaceCondition() {
     $_SERVER['REQUEST_METHOD'] = 'GET';
     $cid = 'test_theme_registry';
 
@@ -795,7 +795,7 @@ class ThemeDatetime extends BackdropWebTestCase {
   /**
    * Test function theme_datetime().
    */
-  function testThemeDatetime() {
+  protected function testThemeDatetime() {
     // Create timestamp and formatted date for testing.
     $timestamp = 1421394600;
     $date = format_date($timestamp);
@@ -847,7 +847,7 @@ class ThemeDebugMarkupTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
   protected $admin_user;
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp('theme_test', 'node', 'taxonomy');
     theme_enable(array('test_theme'));
 
@@ -871,7 +871,7 @@ class ThemeDebugMarkupTestCase extends BackdropWebTestCase {
   /**
    * Tests debug node markup added to template output.
    */
-  function testDebugNodeOutput() {
+  protected function testDebugNodeOutput() {
     config_set('system.core', 'theme_default', 'test_theme');
     // Enable the debug output.
     config_set('system.core', 'theme_debug', TRUE);
@@ -939,7 +939,7 @@ EOL;
   /**
    * Tests debug user markup added to template output.
    */
-  function testDebugUserOutput() {
+  protected function testDebugUserOutput() {
     config_set('system.core', 'theme_default', 'test_theme');
     // Enable the debug output.
     config_set('system.core', 'theme_debug', TRUE);
@@ -1004,7 +1004,7 @@ EOL;
   /**
    * Tests debug taxonomy markup added to template output.
    */
-  function testDebugTaxonomyOutput() {
+  protected function testDebugTaxonomyOutput() {
     config_set('system.core', 'theme_default', 'test_theme');
     // Enable the debug output.
     config_set('system.core', 'theme_debug', TRUE);

@@ -16,7 +16,7 @@ class ColorTestCase extends BackdropWebTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp() {
     parent::setUp('color', 'config');
 
     // Create users.
@@ -54,7 +54,7 @@ class ColorTestCase extends BackdropWebTestCase {
   /**
    * Tests the Color module functionality.
    */
-  public function testColor() {
+  protected function testColor() {
     foreach ($this->themes as $theme => $test_values) {
       config_set('system.core', 'theme_default', $theme);
       $settings_path = 'admin/appearance/settings/' . $theme;
@@ -100,7 +100,7 @@ class ColorTestCase extends BackdropWebTestCase {
   /**
    * Tests whether the provided color is valid.
    */
-  public function testValidColor() {
+  protected function testValidColor() {
     config_set('system.core', 'theme_default', 'bartik');
     $settings_path = 'admin/appearance/settings/bartik';
 
@@ -123,7 +123,7 @@ class ColorTestCase extends BackdropWebTestCase {
   /**
    * Test if the CSS files for a theme are updated when editing Configuration.
    */
-  public function testUpdateCssFilesOnConfigSave() {
+  protected function testUpdateCssFilesOnConfigSave() {
     config_set('system.core', 'theme_default', 'bartik');
     $settings_path = 'admin/appearance/settings/bartik';
     $import_path = 'admin/config/development/configuration/single';
@@ -158,7 +158,7 @@ class ColorTestCase extends BackdropWebTestCase {
   /**
    * Test the Bartik legacy color mode.
    */
-  public function testBartikLegacy() {
+  protected function testBartikLegacy() {
     config_set('system.core', 'theme_default', 'bartik');
     $settings_path = 'admin/appearance/settings/bartik';
 

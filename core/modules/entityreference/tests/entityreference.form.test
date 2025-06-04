@@ -13,7 +13,7 @@ class EntityReferenceFormTestCase extends BackdropWebTestCase {
   /**
    * {@inheritdoc}
    */
-  public function setUp() {
+  protected function setUp() {
     // Enable entityreference module after views module is enabled to load
     // the selection plugin EntityReference_SelectionHandler_Views.
     parent::setUp(array('entity', 'views'));
@@ -27,7 +27,7 @@ class EntityReferenceFormTestCase extends BackdropWebTestCase {
   /**
    * Test that the Generic autocomplete widget validates the value properly.
    */
-  public function testAutocompleteValidationWithGenericSelectionHandler() {
+  protected function testAutocompleteValidationWithGenericSelectionHandler() {
     $type_referenced = $this->backdropCreateContentType();
     $type_referencing = $this->backdropCreateContentType();
 
@@ -85,7 +85,7 @@ class EntityReferenceFormTestCase extends BackdropWebTestCase {
   /**
    * Test that the Views autocomplete widget validates the value properly.
    */
-  public function testAutocompleteValidationWithViewsSelectionHandler() {
+  protected function testAutocompleteValidationWithViewsSelectionHandler() {
     $type_referenced = $this->backdropCreateContentType();
     $type_referencing = $this->backdropCreateContentType();
 

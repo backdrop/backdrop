@@ -12,7 +12,7 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * @see CommonXssUnitTest
  */
 class ViewsHandlerTestXss extends ViewsSqlTest {
-  function dataHelper() {
+  protected function dataHelper() {
     $map = array(
       'John' => 'John',
       "Foo\xC0barbaz" => '',
@@ -24,14 +24,14 @@ class ViewsHandlerTestXss extends ViewsSqlTest {
   }
 
 
-  function viewsData() {
+  protected function viewsData() {
     $data = parent::viewsData();
     $data['views_test']['name']['field']['handler'] = 'views_handler_field_xss';
 
     return $data;
   }
 
-  public function testFieldXss() {
+  protected function testFieldXss() {
     $view = $this->getBasicView();
 
     $view->display['default']->handler->override_option('fields', array(

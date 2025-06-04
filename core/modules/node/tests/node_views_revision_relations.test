@@ -13,7 +13,7 @@ class NodeViewsRevisionRelationsTestCase extends ViewsSqlTest {
   protected $profile = 'testing';
   protected $admin_user;
 
-  function setUp(array $modules = array()) {
+  protected function setUp(array $modules = array()) {
     parent::setUp($modules);
 
     // Create content type for testing.
@@ -23,7 +23,7 @@ class NodeViewsRevisionRelationsTestCase extends ViewsSqlTest {
   /**
    * Create a node with revision and rest result count for both views.
    */
-  public function testNodeRevisionRelationship() {
+  protected function testNodeRevisionRelationship() {
     $node = $this->backdropCreateNode();
     // Create revision of the node.
     $node_revision = clone $node;
@@ -68,7 +68,7 @@ class NodeViewsRevisionRelationsTestCase extends ViewsSqlTest {
   /**
    * Test view with default join on node.nid.
    */
-  function test_view_node_revision_nid() {
+  protected function test_view_node_revision_nid() {
     $view = new view();
     $view->name = 'test_node_revision_nid';
     $view->description = '';
@@ -129,7 +129,7 @@ class NodeViewsRevisionRelationsTestCase extends ViewsSqlTest {
   /**
    * Test view with default join on node.vid.
    */
-  function test_view_node_revision_vid() {
+  protected function test_view_node_revision_vid() {
     $view = new view();
     $view->name = 'test_node_revision_vid';
     $view->description = '';

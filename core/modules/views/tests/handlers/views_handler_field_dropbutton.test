@@ -13,7 +13,7 @@ class ViewsHandlerFieldDropbuttonTest extends ViewsSqlTest {
   /**
    * Tests dropbutton display.
    */
-  public function testDropbutton() {
+  protected function testDropbutton() {
     // Create a node to test the listing.
     $node = $this->backdropCreateNode();
     $this->backdropGet('views_test/dropbutton');

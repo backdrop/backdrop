@@ -10,14 +10,14 @@
 class ActionLoopTestCase extends BackdropWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp('dblog', 'actions_loop_test');
   }
 
   /**
    * Set up a loop with 3 - 12 recursions, and see if it aborts properly.
    */
-  function testActionLoop() {
+  protected function testActionLoop() {
     // Delete any existing watchdog messages to clear the plethora of
     // "Action added" messages from when Backdrop was installed.
     db_delete('watchdog')->execute();

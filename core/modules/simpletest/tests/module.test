@@ -17,7 +17,7 @@ class ModuleUnitTest extends BackdropWebTestCase {
   /**
    * The basic functionality of module_list().
    */
-  function testModuleList() {
+  protected function testModuleList() {
     // Build a list of modules, sorted alphabetically.
     $profile_info = install_profile_info('standard', 'en');
     $module_list = $profile_info['dependencies'];
@@ -81,7 +81,7 @@ class ModuleUnitTest extends BackdropWebTestCase {
   /**
    * Test module_implements() caching.
    */
-  function testModuleImplements() {
+  protected function testModuleImplements() {
     // Clear the cache.
     cache('bootstrap')->delete('module_implements');
     $this->assertFalse(cache('bootstrap')->get('module_implements'), 'The module implements cache is empty.');
@@ -116,7 +116,7 @@ class ModuleUnitTest extends BackdropWebTestCase {
   /**
    * Test that module_invoke() can load a hook defined in hook_hook_info().
    */
-  function testModuleInvoke() {
+  protected function testModuleInvoke() {
     module_enable(array('module_test'), FALSE);
     $this->resetAll();
     $this->backdropGet('module-test/hook-dynamic-loading-invoke');
@@ -126,7 +126,7 @@ class ModuleUnitTest extends BackdropWebTestCase {
   /**
    * Test that module_invoke_all() can load a hook defined in hook_hook_info().
    */
-  function testModuleInvokeAll() {
+  protected function testModuleInvokeAll() {
     module_enable(array('module_test'), FALSE);
     $this->resetAll();
     $this->backdropGet('module-test/hook-dynamic-loading-invoke-all');
@@ -136,7 +136,7 @@ class ModuleUnitTest extends BackdropWebTestCase {
   /**
    * Test dependency resolution.
    */
-  function testDependencyResolution() {
+  protected function testDependencyResolution() {
     // Enable the test module, disable the second module, and make sure that
     // other modules we are testing are not already enabled. (If they were, the
     // tests below would not work correctly.)
@@ -244,7 +244,7 @@ class ModuleUnitTest extends BackdropWebTestCase {
  * Unit tests for module installation.
  */
 class ModuleInstallTestCase extends BackdropWebTestCase {
-  function setUp() {
+  protected function setUp() {
     parent::setUp('module_test');
   }
 
@@ -260,7 +260,7 @@ class ModuleInstallTestCase extends BackdropWebTestCase {
    * that modules are fully functional while Backdrop is installing and enabling
    * them.
    */
-  function testBackdropWriteRecord() {
+  protected function testBackdropWriteRecord() {
     // Check for data that was inserted using backdrop_write_record() while the
     // 'module_test' module was being installed and enabled.
     $data = db_query("SELECT data FROM {module_test}")->fetchCol();
@@ -279,14 +279,14 @@ class ModuleUninstallTestCase extends BackdropWebTestCase {
    */
   protected $admin_user;
 
-  function setUp() {
+  protected function setUp() {
     parent::setUp('module_test', 'user');
   }
 
   /**
    * Tests the hook_modules_uninstalled() of the user module.
    */
-  function testUserPermsUninstalled() {
+  protected function testUserPermsUninstalled() {
     // Grant the test permission to the authenticate user role.
     user_role_grant_permissions(BACKDROP_AUTHENTICATED_ROLE, array('module_test perm'));
     $role = user_role_load(BACKDROP_AUTHENTICATED_ROLE);
@@ -305,7 +305,7 @@ class ModuleUninstallTestCase extends BackdropWebTestCase {
   /**
    * Tests that uninstalling locale does not cause problems.
    */
-  public function testUninstallLocale() {
+  protected function testUninstallLocale() {
     // Enable Locale with dependencies, add a language and set it to default.
     module_enable(array('language', 'locale'), FALSE);
     $language = (object) array(
@@ -347,7 +347,7 @@ class ModuleUninstallTestCase extends BackdropWebTestCase {
   /**
    * Test that uninstalling Comment and then immediately adding a node works.
    */
-  public function testUninstallCommentAddNode() {
+  protected function testUninstallCommentAddNode() {
     $admin_user = $this->backdropCreateUser(array(
       'administer modules',
       'bypass node access',
@@ -379,7 +379,7 @@ class ModuleImplementsAlterTestCase extends BackdropWebTestCase {
   /**
    * Tests hook_module_implements_alter() adding an implementation.
    */
-  function testModuleImplementsAlter() {
+  protected function testModuleImplementsAlter() {
     module_enable(array('module_test'), FALSE);
     $this->assertTrue(module_exists('module_test'), 'Test module is enabled.');
 

@@ -12,7 +12,7 @@ class ImageStyleTokenTests extends BackdropWebTestCase {
   /**
    * {@inheritdoc}
    */
-  function setUp(array $modules = array()) {
+  protected function setUp(array $modules = array()) {
     parent::setUp($modules);
 
     // Create an admin user and log them in.
@@ -31,7 +31,7 @@ class ImageStyleTokenTests extends BackdropWebTestCase {
   /**
    * Test that the image style tokens exist.
    */
-  function testTokens() {
+  protected function testTokens() {
     $bundle_label = 'Post';
     $node_title = 'Test post';
 
@@ -98,7 +98,7 @@ class ImageStyleTokenTests extends BackdropWebTestCase {
    * @return stdClass
    *   A file object.
    */
-  function getTestImage() {
+  protected function getTestImage() {
     // Get a file to upload.
     $file = current($this->backdropGetTestFiles('image'));
 

@@ -15,7 +15,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
   /**
    * Tests aggregate count feature.
    */
-  public function testAggregateCount() {
+  protected function testAggregateCount() {
     // Create 2 nodes of type1 and 3 nodes of type2
     $type1 = $this->backdropCreateContentType();
     $type2 = $this->backdropCreateContentType();
@@ -104,7 +104,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
    * @param array|null $values
    *   (optional) Expected values.
    */
-  function GroupByTestHelper($group_by = NULL, $values = NULL) {
+  protected function GroupByTestHelper($group_by = NULL, $values = NULL) {
     // Create 4 nodes of type1 and 3 nodes of type2.
     $type1 = $this->backdropCreateContentType();
     $type2 = $this->backdropCreateContentType();
@@ -150,7 +150,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $this->assertEqual($results[$type2->type], $values[1]);
   }
 
-  function viewsGroupByViewHelper($group_by = NULL) {
+  protected function viewsGroupByViewHelper($group_by = NULL) {
     $view = new view;
     $view->name = 'group_by_count';
     $view->description = '';
@@ -209,32 +209,32 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     return $view;
   }
 
-  public function testGroupByCount() {
+  protected function testGroupByCount() {
     $this->GroupByTestHelper('count', array(4, 3));
   }
 
-  function testGroupBySum() {
+  protected function testGroupBySum() {
     $this->GroupByTestHelper('sum', array(10, 18));
   }
 
 
-  function testGroupByAverage() {
+  protected function testGroupByAverage() {
     $this->GroupByTestHelper('avg', array(2.5, 6));
   }
 
-  function testGroupByMin() {
+  protected function testGroupByMin() {
     $this->GroupByTestHelper('min', array(1, 5));
   }
 
-  function testGroupByMax() {
+  protected function testGroupByMax() {
     $this->GroupByTestHelper('max', array(4, 7));
   }
 
-  function testGroupByNone() {
+  protected function testGroupByNone() {
     $this->GroupByTestHelper();
   }
 
-  public function testGroupByCountOnlyFilters() {
+  protected function testGroupByCountOnlyFilters() {
     // Check if GROUP BY and HAVING are included when a view doesn't display
     // SUM, COUNT, MAX... functions in SELECT statement.
 
@@ -254,7 +254,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $this->assertTrue(strpos($view->build_info['query'], 'HAVING'), t('Make sure that HAVING is in the query'));
   }
 
-  function viewsGroupByCountViewOnlyFilters() {
+  protected function viewsGroupByCountViewOnlyFilters() {
     $view = new view;
     $view->name = 'group_by_in_filters';
     $view->description = '';
@@ -304,7 +304,7 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
  * Tests UI of aggregate functionality..
  */
 class viewsUiGroupbyTestCase extends BackdropWebTestCase {
-  function setUp() {
+  protected function setUp() {
     // Enable views_ui.
     parent::setUp('views_ui', 'views_test');
 
@@ -318,7 +318,7 @@ class viewsUiGroupbyTestCase extends BackdropWebTestCase {
    *
    * @todo: this should check the change of the settings as well.
    */
-  function testGroupBySave() {
+  protected function testGroupBySave() {
     $this->backdropGet('admin/structure/views/view/test_views_groupby_save/configure');
 
     $edit = array(

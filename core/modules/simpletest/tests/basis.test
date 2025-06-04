@@ -22,7 +22,7 @@ class BasisTestCase extends BackdropWebTestCase {
   /**
    * Tests that body classes are added correctly for CSS updates.
    */
-  public function testCssUpdates() {
+  protected function testCssUpdates() {
     // Include Basis's template.php file to get utility functions.
     $path = backdrop_get_path('theme', 'basis');
     include_once $path . '/template.php';
