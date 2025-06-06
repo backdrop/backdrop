@@ -2770,9 +2770,13 @@ function layout_field_delete_instance($instance) {
 }
 
 /**
- * Render a block
+ * Generate an array for rendering the given block.
+ *
  * @param Block $block
- * The Block entity to render
+ *   The Block to render.
+ *
+ * @return array
+ *   An array as expected by backdrop_render().
  */
 function layout_render_block($block) {
   $output = '';
