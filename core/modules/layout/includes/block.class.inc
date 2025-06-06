@@ -437,7 +437,10 @@ class Block extends LayoutHandler {
   }
 
   /**
-   * Get a render array for a block.
+   * Generate an array for rendering the block.
+   *
+   * @return array
+   *   A render array of the block as expected by backdrop_render().
    */
   function getRenderArray() {
     $content = $this->getContent();
