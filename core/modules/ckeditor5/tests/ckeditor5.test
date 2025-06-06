@@ -84,6 +84,7 @@ class CKEditor5TestCase extends BackdropWebTestCase {
 
     $this->backdropGet('node/add/article');
     $this->assertRaw('modules/ckeditor5/css/ckeditor5-backdrop.css');
+    $this->assertRaw('modules/ckeditor5/lib/ckeditor5/dist/browser/ckeditor5.css');
     $this->assertRaw('modules/ckeditor5/js/ckeditor5.js');
     $this->assertRaw('modules/ckeditor5/lib/ckeditor5/dist/browser/ckeditor5.umd.js');
     $settings = $this->backdropGetSettings();
