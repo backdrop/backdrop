@@ -20,7 +20,7 @@
  * likely be split into multiple plugins and files. Backdrop does not use a
  * compilation step, so what is normally 5-8 files is all done in a single file.
  */
-class BackdropImage extends CKEditor5.core.Plugin {
+class BackdropImage extends CKEditor5.Plugin {
   /**
    * @inheritdoc
    */
@@ -119,7 +119,7 @@ class BackdropImage extends CKEditor5.core.Plugin {
     // This button has a different icon than the main toolbar button.
     editor.ui.componentFactory.add('editBackdropImage', (locale) => {
       const command = editor.commands.get('backdropImage');
-      const buttonView = new CKEditor5.ui.ButtonView(locale);
+      const buttonView = new CKEditor5.ButtonView(locale);
       buttonView.set({
         label: editLabel,
         icon: CKEditor5.IconPencil,
@@ -138,7 +138,7 @@ class BackdropImage extends CKEditor5.core.Plugin {
     // Add the backdropImage button for use in the main toolbar. This can
     // insert a new image or edit an existing one if selected.
     editor.ui.componentFactory.add('backdropImage', (locale) => {
-      const buttonView = new CKEditor5.ui.ButtonView(locale);
+      const buttonView = new CKEditor5.ButtonView(locale);
       const command = editor.commands.get('backdropImage');
 
       buttonView.set({
@@ -797,7 +797,7 @@ function downcastBlockImageLink() {
 /**
  * CKEditor command that opens the Backdrop image editing dialog.
  */
-class BackdropImageCommand extends CKEditor5.core.Command {
+class BackdropImageCommand extends CKEditor5.Command {
   /**
    * @inheritdoc
    */

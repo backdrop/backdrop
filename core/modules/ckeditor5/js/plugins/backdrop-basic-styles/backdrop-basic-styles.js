@@ -5,7 +5,7 @@
 /**
  * Backdrop-specific plugin to alter the CKEditor 5 basic tags.
  */
-class BackdropBasicStyles extends CKEditor5.core.Plugin {
+class BackdropBasicStyles extends CKEditor5.Plugin {
   /**
    * @inheritdoc
    */

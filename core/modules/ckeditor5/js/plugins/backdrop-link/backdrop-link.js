@@ -17,7 +17,7 @@
  * - Extends the editor.execute('link') function to take a 3rd parameter to
  *   apply attributes such as id, rel, and class to links.
  */
-class BackdropLink extends CKEditor5.core.Plugin {
+class BackdropLink extends CKEditor5.Plugin {
   /**
    * @inheritdoc
    */
@@ -245,7 +245,7 @@ class BackdropLink extends CKEditor5.core.Plugin {
     // Add the backdropLink button for use in the main toolbar. This can
     // insert a new link or edit an existing one if selected.
     editor.ui.componentFactory.add('backdropLink', (locale) => {
-      const buttonView = new CKEditor5.ui.ButtonView(locale);
+      const buttonView = new CKEditor5.ButtonView(locale);
 
       buttonView.set({
         label: insertLabel,
@@ -280,7 +280,7 @@ class BackdropLink extends CKEditor5.core.Plugin {
     // Add the backdropLinkImage button for use in the image toolbar. This can
     // insert a new link or edit an existing one if selected.
     editor.ui.componentFactory.add('backdropLinkImage', (locale) => {
-      const buttonView = new CKEditor5.ui.ButtonView(locale);
+      const buttonView = new CKEditor5.ButtonView(locale);
       const backdropLinkCommand = editor.commands.get('backdropLink');
       buttonView.set( {
         isEnabled: true,
@@ -364,7 +364,7 @@ CKEditor5.backdropLink = {
 /**
  * CKEditor command that opens the Backdrop link editing dialog.
  */
-class BackdropLinkCommand extends CKEditor5.core.Command {
+class BackdropLinkCommand extends CKEditor5.Command {
   /**
    * @inheritdoc
    */
