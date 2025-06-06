@@ -11,6 +11,11 @@ This directory contains CKEditor 5 UMD build, available via npm.
    ```
    npm install --save ckeditor5
    ```
+   Or, if you already have a previous version of ckeditor5 installed, update to
+   the latest version:
+   ```
+   npm update
+   ```
 3. Copy relevant umd files (and only those) from translations directory:
    ```
    cp node_modules/ckeditor5/dist/translations/*umd.js PATH/TO/core/modules/ckeditor5/lib/ckeditor5/dist/translations/
@@ -20,7 +25,9 @@ This directory contains CKEditor 5 UMD build, available via npm.
    cp node_modules/ckeditor5/dist/browser/ckeditor5.umd.js PATH/TO/core/modules/ckeditor5/lib/ckeditor5/dist/browser/
    cp node_modules/ckeditor5/dist/browser/ckeditor5.css PATH/TO/core/modules/ckeditor5/lib/ckeditor5/dist/browser/
    ```
-5. Update the CKEDITOR5_VERSION constant in ckeditor5.module
+5. Delete the map comment from lib/ckeditor5/dist/browser/ckeditor5.umd.js:
+   That's the last line: `//# sourceMappingURL=ckeditor5.umd.js.map`
+6. Update the CKEDITOR5_VERSION constant in ckeditor5.module
 
 ## Determine version number
 

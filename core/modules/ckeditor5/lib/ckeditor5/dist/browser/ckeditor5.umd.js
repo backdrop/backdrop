@@ -777,4 +777,3 @@
 	exports.wrapInParagraph = Sr;
 
 }));
-//# sourceMappingURL=ckeditor5.umd.js.map
