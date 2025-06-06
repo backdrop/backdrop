@@ -12,18 +12,6 @@
   CKEDITOR.core.Plugin = CKEDITOR.Plugin;
   CKEDITOR.core.Command = CKEDITOR.Command;
 
-  // Icon location and names have changed in CKEditor5 v45. These two icons are
-  // used by core plugins.
-  // There's some risk, that location and names change again at some point.
-  // @see https://github.com/ckeditor/ckeditor5/issues/17779#issuecomment-2882767192
-  //
-  // @todo should we expose all of then in their old location (currently that's
-  // 763 icons)?
-  CKEDITOR.core.icons = {
-    pencil: CKEDITOR.IconPencil,
-    image: CKEDITOR.IconImage
-  }
-
   CKEDITOR.ui = {};// Does not exist in UMD.
   CKEDITOR.ui.ButtonView = CKEDITOR.ButtonView;
 
