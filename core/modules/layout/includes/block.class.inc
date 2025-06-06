@@ -75,7 +75,8 @@ class Block extends LayoutHandler {
 
   /**
    * A boolean holding whether prepare() has run
-   * @public boolean
+   *
+   * @var bool
    */
   public $isPrepared;
 
@@ -442,10 +443,10 @@ class Block extends LayoutHandler {
    * @return array
    *   A render array of the block as expected by backdrop_render().
    */
-  function getRenderArray() {
+  function build() {
     $content = $this->getContent();
     if (empty($content)) {
-      return NULL;
+      return array();
     }
 
     if (!$this->isPrepared) {

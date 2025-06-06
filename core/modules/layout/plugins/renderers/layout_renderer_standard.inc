@@ -520,20 +520,21 @@ class LayoutRendererStandard {
     }
 
     $output = '';
-    if ($render_array = $block->getRenderArray()) {
+    $build = $block->build();
+    if ($build) {
       $style = layout_get_style_info($block->style->plugin);
 
       // Add the contextual links.
       if (!($block->module === 'system' && $block->delta === 'main')) {
-        if (is_string($render_array['#content']->content)) {
-          $render_array['#content']->content = [
-            '#markup' => $render_array['#content']->content
+        if (is_string($build['#content']->content)) {
+          $build['#content']->content = [
+            '#markup' => $build['#content']->content
           ];
         }
-        $render_array['#content']->content['#contextual_links']['layout'] = array('admin/structure/layouts/manage/' . $this->layout->name . '/modal', array($block->uuid));
+        $build['#content']->content['#contextual_links']['layout'] = array('admin/structure/layouts/manage/' . $this->layout->name . '/modal', array($block->uuid));
       }
 
-      $content = $render_array['#content'];
+      $content = $build['#content'];
 
       if (isset($style) && isset($style['block theme'])) {
         $output = theme($style['block theme'] . '__' . $block->module . '__' . strtr($block->delta, '-', '_'), array('content' => $content, 'layout' => $this->layout, 'block' => $block, 'style' => $style, 'settings' => $block->style->settings));
