@@ -514,10 +514,11 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
         $modules_installed[] = $module;
         watchdog('system', '%module module installed.', array('%module' => $module), WATCHDOG_INFO);
 
+        if (function_exists('_field_info_collate_types_reset')) {
         // Clear the field info cache so that the new module's field types are
         // available.
-        backdrop_static_reset('_field_info_collate_types');
-        cache('field')->deletePrefix('field_info_types:');
+          _field_info_collate_types_reset();
+        }
       }
 
       // Allow modules to react prior to the enabling of a module.
