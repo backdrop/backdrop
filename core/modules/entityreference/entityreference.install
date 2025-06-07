@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Entity Reference module install, update, and schema functions.
- */
 
 /**
  * Implements hook_field_schema().
@@ -45,14 +41,6 @@ function entityreference_field_schema($field) {
 
     return $schema;
   }
-}
-
-/**
- * Implements hook_install().
- */
-function entityreference_install() {
-  // Reset field types to recognize Entity Reference fields immediately.
-  _field_info_collate_types_reset();
 }
 
 /**

@@ -530,6 +530,9 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
   // If any modules were newly installed, invoke hook_modules_installed().
   if (!empty($modules_installed)) {
     module_invoke_all('modules_installed', $modules_installed);
+    // Reset field types to account for any new field types that may have been
+    // installed.
+    _field_info_collate_types_reset();
   }
 
   // If any modules were newly enabled, invoke hook_modules_enabled().
