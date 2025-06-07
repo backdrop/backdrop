@@ -485,6 +485,9 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
       backdrop_theme_rebuild();
       // Refresh Entity info static cache.
       entity_info_cache_clear();
+      // Clear the field info cache so that the new module's field types are
+      // available.
+      cache('field')->deletePrefix('field_info_types:');
 
       // Allow modules to react prior to the installation of a module.
       module_invoke_all('modules_preinstall', array($module));
@@ -530,9 +533,6 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
   // If any modules were newly installed, invoke hook_modules_installed().
   if (!empty($modules_installed)) {
     module_invoke_all('modules_installed', $modules_installed);
-    // Reset field types to account for any new field types that may have been
-    // installed.
-    _field_info_collate_types_reset();
   }
 
   // If any modules were newly enabled, invoke hook_modules_enabled().
