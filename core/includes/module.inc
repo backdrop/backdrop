@@ -515,8 +515,8 @@ function module_enable($module_list, $enable_dependencies = TRUE) {
         watchdog('system', '%module module installed.', array('%module' => $module), WATCHDOG_INFO);
 
         if (function_exists('_field_info_collate_types_reset')) {
-        // Clear the field info cache so that the new module's field types are
-        // available.
+          // Clear the field info cache so that the new module's field types are
+          // available.
           _field_info_collate_types_reset();
         }
       }
