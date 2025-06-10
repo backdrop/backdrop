@@ -241,7 +241,7 @@ function ckeditor5_js_alter(&$javascript) {
   $js_path = $dist_path . '/browser/ckeditor5.umd.js';
   $translation_path = $dist_path . '/translations/' . $language->langcode . '.umd.js';
 
-  // If the ckeditor5-umd.js library is present AND a translation file exists
+  // If the ckeditor5.umd.js library is present AND a translation file exists
   // for the current language, append the translation file to the JavaScript
   // array.
   if (isset($javascript[$js_path]) && file_exists($translation_path)) {
