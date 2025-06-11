@@ -26,8 +26,8 @@ function hook_emit_cache_tags(array $tags) {
  *   The tags that will be emitted via hook_emit_cache_tags().
  */
 function hook_pre_emit_cache_tags_alter(array &$tags) {
-  if (arg(0) == 'mymodule') {
-    $tags[] = 'myspecial-tag';
+  if (arg(0) == 'my_module') {
+    $tags[] = 'my-special-tag';
   }
 }
 
@@ -54,7 +54,7 @@ function hook_emit_cache_max_age($max_age) {
  *   The max_age that will be emitted via hook_emit_cache_max_age().
  */
 function hook_pre_emit_cache_max_age_alter(&$max_age) {
-  if (arg(0) == 'mymodule') {
+  if (arg(0) == 'my_module') {
     $max_age = CACHE_MAX_AGE_PERMANENT;
   }
 }
@@ -69,7 +69,7 @@ function hook_pre_emit_cache_max_age_alter(&$max_age) {
  *   The cache tags that should be invalidated.
  */
 function hook_invalidate_cache_tags(array $tags) {
-  mymodule_varnish_clear_cache_tags($tags);
+  my_module_varnish_clear_cache_tags($tags);
 }
 
 /**

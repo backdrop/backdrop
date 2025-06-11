@@ -4873,7 +4873,7 @@ function system_invalidate_cache_tags($tags) {
     }
   }
   else {
-    // Not in a transction, directly invalidate instead.
+    // Not in a transaction, directly invalidate instead.
     system_do_invalidate_cache_tags($tags);
   }
 }
@@ -5041,7 +5041,7 @@ function _system_cache_tags_calculate_checksum(array $tags) {
  *
  * @return array
  *   An array keyed by tag with invalidations as value. Using 0 if no
- *   invalidation occured, yet.
+ *   invalidation occurred, yet.
  */
 function _system_cache_tags_load_from_db(array $query_tags) {
   $result = array();
@@ -5092,7 +5092,7 @@ function _system_cache_tags_update_cache(array $result) {
  *
  * @param array &$query_tags
  *   The tags to query in the cache. Will be updated by removing tags
- *   sucessfully returned from cache.
+ *   successfully returned from cache.
  *
  * @return array
  *   An array keyed by tag with invalidations as value.

@@ -823,7 +823,7 @@ class BackdropTaggableCache implements BackdropTaggableCacheInterface {
     // Allow to override the TTL for a whole bin.
     if (isset($this->configuration['ttl'])) {
       if ($this->configuration['ttl'] == CACHE_MAX_AGE_PERMANENT) {
-        // Convert the TTL magic value to the equivilent expire magic value.
+        // Convert the TTL magic value to the equivalent expire magic value.
         $expire = CACHE_PERMANENT;
       }
       elseif ($this->configuration['ttl'] == CACHE_PERMANENT || $this->configuration['ttl'] == CACHE_TEMPORARY) {
@@ -1127,8 +1127,8 @@ class BackdropAttachmentsCollector {
    * // The structure of the render array looks like this:
    * $build['#attached'] = array(
    *   'js' => array(
-   *      array('data' => 'somefile.js'),
-   *      array('data' => 'anotherfile.js'),
+   *      array('data' => 'some_file.js'),
+   *      array('data' => 'another_file.js'),
    *   ),
    * );
    * @endcode
