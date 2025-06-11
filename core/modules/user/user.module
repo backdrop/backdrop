@@ -114,6 +114,11 @@ function user_theme() {
     'user_simplified_page' => array(
       'variables' => array('form' => array(), 'links' => array()),
       'template' => 'templates/user-simplified-page',
+      'attached' => array(
+        'css' => array(
+          backdrop_get_path('module', 'user') . '/css/user-simplified-page.css' => array(),
+        ),
+      ),
     ) + $base,
     'user_links_page' => array(
       'variables' => array('form' => array(), 'links' => array()),
@@ -574,7 +579,7 @@ function user_is_blocked($name) {
  *
  * @param string $role_name
  *   A string representing the role name.
- * @param User $account
+ * @param User|null $account
  *   (optional) A user account. Defaults to the current user.
  *
  * @return bool
@@ -582,7 +587,7 @@ function user_is_blocked($name) {
  *
  * @since 1.14.0 First parameter changed from $rid to $role_name.
  */
-function user_has_role($role_name, User $account = NULL) {
+function user_has_role($role_name, ?User $account = NULL) {
   if (!$account) {
     $account = $GLOBALS['user'];
   }
@@ -1837,11 +1842,14 @@ function user_admin_paths() {
  * Implements hook_user_login_paths().
  */
 function user_user_login_paths() {
-  return array(
+  $paths = array(
     'user/login' => TRUE,
     'user/password' => TRUE,
-    'user/register' => TRUE,
   );
+  if (config_get('system.core', 'user_register') != USER_REGISTER_ADMINISTRATORS_ONLY) {
+    $paths['user/register'] = TRUE;
+  }
+  return $paths;
 }
 
 /**
@@ -1857,6 +1865,9 @@ function user_custom_theme() {
   }
   $user_login_appearance = config_get('system.core', 'user_login_appearance');
   if ($user_login_appearance == 'simplified') {
+    if (!backdrop_valid_path(current_path(), TRUE)) {
+      return NULL;
+    }
     $login_theme = config_get('system.core', 'login_admin_theme');
     if ($login_theme) {
       $login_theme = config_get('system.core', 'admin_theme');
@@ -2640,8 +2651,7 @@ function user_delete_multiple(array $uids) {
     }
 
     backdrop_invalidate_cache_tags($tags);
-
-    entity_get_controller('user')->resetCache();
+    entity_get_controller('user')->resetCache($uids);
   }
 }
 

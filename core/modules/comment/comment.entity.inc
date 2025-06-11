@@ -494,7 +494,7 @@ class CommentStorageController extends EntityDatabaseStorageController {
 
     $view = array();
     foreach ($comments as $comment) {
-      /* @var Comment $comment */
+      /** @var Comment $comment */
       // Populate $comment->content with a render() array.
       $this->buildContent($comment, $view_mode, $langcode);
 

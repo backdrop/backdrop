@@ -889,8 +889,10 @@ function comment_get_thread(Node $node, $mode, $comments_per_page) {
     // See comment above. Analysis reveals that this doesn't cost too
     // much. It scales much much better than having the whole comment
     // structure.
+    // cspell:disable
     $query->addExpression('SUBSTRING(c.thread, 1, (LENGTH(c.thread) - 1))', 'torder');
     $query->orderBy('torder', 'ASC');
+    // cspell:enable
   }
 
   $query->setCountQuery($count_query);
@@ -1501,7 +1503,7 @@ function comment_config_create_validate(Config $staging_config, $all_changes) {
  *   - update
  *   - delete
  *   - approve
- * @param Comment $comment
+ * @param Comment|null $comment
  *   (optional) The comment object, or NULL when using 'create' op.
  *
  * @return bool
@@ -1510,7 +1512,7 @@ function comment_config_create_validate(Config $staging_config, $all_changes) {
  * @since 1.13.0 The "create" $op option was added.
  * @since 1.13.0 The "edit" $op option is deprecated. Use "update" instead.
  */
-function comment_access($op, Comment $comment = NULL) {
+function comment_access($op, ?Comment $comment = NULL) {
   if ($op == 'edit') {
     // Normalize 'edit' operation to 'update'.
     $op = 'update';

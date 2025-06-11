@@ -1177,6 +1177,9 @@ function backdrop_alter($type, &$data, &$context1 = NULL, &$context2 = NULL, &$c
     if (isset($theme)) {
       $theme_keys = array();
       foreach ($base_theme_info as $base) {
+        if (empty($base)) {
+          continue;
+        }
         $theme_keys[] = $base->name;
       }
       $theme_keys[] = $theme;

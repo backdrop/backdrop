@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.30.x-dev');
+define('BACKDROP_VERSION', '1.32.x-dev');
 
 /**
  * Core API compatibility.
@@ -17,7 +17,7 @@ define('BACKDROP_CORE_COMPATIBILITY', '1.x');
 /**
  * Minimum supported version of PHP.
  */
-define('BACKDROP_MINIMUM_PHP', '5.6.0');
+define('BACKDROP_MINIMUM_PHP', '7.1.0');
 
 /**
  * Minimum recommended value of PHP memory_limit.
@@ -743,8 +743,7 @@ function backdrop_environment_initialize() {
   // e.g. "&" or "%" that have special meanings in URLs and must be encoded.
   $_GET['q'] = request_path();
 
-  // Enforce E_STRICT, but allow users to set levels not part of E_STRICT.
-  error_reporting(E_STRICT | E_ALL | error_reporting());
+  error_reporting(E_ALL);
 
   // Override PHP settings required for Backdrop to work properly.
   // settings.php contains more runtime settings.

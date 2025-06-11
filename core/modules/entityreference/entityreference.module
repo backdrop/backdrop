@@ -909,8 +909,6 @@ function _entityreference_autocomplete_validate($element, &$form_state, $form) {
     else {
       // Try to get a match from the input string when the user didn't use the
       // autocomplete but filled in a value manually.
-      $field = field_info_field($element['#field_name']);
-      $handler = entityreference_get_selection_handler($field);
       $field_name = $element['#field_name'];
       $field = field_info_field($field_name);
       $instance = field_info_instance($element['#entity_type'], $field_name, $element['#bundle']);
@@ -963,13 +961,13 @@ function entityreference_field_widget_error($element, $error) {
 /**
  * Menu Access callback for the autocomplete widget.
  *
- * @param $type
+ * @param string $type
  *   The widget type (i.e. 'single' or 'tags').
- * @param $field_name
+ * @param string $field_name
  *   The name of the entity-reference field.
- * @param $entity_type
+ * @param string $entity_type
  *   The entity type.
- * @param $bundle_name
+ * @param string $bundle_name
  *   The bundle name.
  *
  * @return bool
@@ -988,18 +986,18 @@ function entityreference_autocomplete_access_callback($type, $field_name, $entit
 /**
  * Menu callback: autocomplete the label of an entity.
  *
- * @param $type
+ * @param string $type
  *   The widget type (i.e. 'single' or 'tags').
- * @param $field_name
+ * @param string $field_name
  *   The name of the entity-reference field.
- * @param $entity_type
+ * @param string $entity_type
  *   The entity type.
- * @param $bundle_name
+ * @param string $bundle_name
  *   The bundle name.
- * @param $entity_id
+ * @param string $entity_id
  *   Optional; The entity ID the entity-reference field is attached to.
  *   Defaults to ''.
- * @param $string
+ * @param string $string
  *   The label of the entity to query by.
  */
 function entityreference_autocomplete_callback($type, $field_name, $entity_type, $bundle_name, $entity_id = '', $string = '') {
@@ -1028,18 +1026,18 @@ function entityreference_autocomplete_callback($type, $field_name, $entity_type,
  * This function can be used by other modules that wish to pass a mocked
  * definition of the field on instance.
  *
- * @param $type
+ * @param string $type
  *   The widget type (i.e. 'single' or 'tags').
- * @param $field
+ * @param array $field
  *   The field array definition.
- * @param $instance
+ * @param array $instance
  *   The instance array definition.
- * @param $entity_type
+ * @param string $entity_type
  *   The entity type.
- * @param $entity_id
+ * @param string $entity_id
  *   Optional; The entity ID the entity-reference field is attached to.
  *   Defaults to ''.
- * @param $string
+ * @param string $string
  *   The label of the entity to query by.
  */
 function entityreference_autocomplete_callback_get_matches($type, $field, $instance, $entity_type, $entity_id = '', $string = '') {
@@ -1430,19 +1428,19 @@ function entityreference_entityreference_behavior_plugins() {
   $plugins = array();
   if (module_exists('taxonomy')) {
     $plugins['taxonomy'] = array(
-        'title' => t('Taxonomy index'),
-        'description' => t('Include the term references created by instances of this field carried by node entities in the core {taxonomy_index} table. This will allow various modules to handle them like core term_reference fields.'),
-        'class' => 'EntityReferenceBehaviorHandlerTaxonomyIndex',
-        'behavior type' => 'instance',
-        'force enabled' => TRUE,
+      'title' => t('Taxonomy index'),
+      'description' => t('Include the term references created by instances of this field carried by node entities in the core {taxonomy_index} table. This will allow various modules to handle them like core term_reference fields.'),
+      'class' => 'EntityReferenceBehaviorHandlerTaxonomyIndex',
+      'behavior type' => 'instance',
+      'force enabled' => TRUE,
     );
   }
   if (module_exists('views')) {
     $plugins['views'] = array(
-        'title' => t('Render Views filters as select list'),
-        'description' => t('Provides a select list for Views filters on this field. This should not be used when there are over 100 entities, as it might cause an out of memory error.'),
-        'class' => 'EntityReferenceBehaviorHandlerViewsFilterSelect',
-        'behavior type' => 'field',
+      'title' => t('Render Views filters as select list'),
+      'description' => t('Provides a select list for Views filters on this field. This should not be used when there are over 100 entities, as it might cause an out of memory error.'),
+      'class' => 'EntityReferenceBehaviorHandlerViewsFilterSelect',
+      'behavior type' => 'field',
     );
   }
   return $plugins;
@@ -1450,18 +1448,21 @@ function entityreference_entityreference_behavior_plugins() {
 
 /**
  * Implements hook_entityreference_selection_plugins().
+ *
+ * @return array
+ *   Selection plugin definitions.
  */
 function entityreference_entityreference_selection_plugins() {
   $plugins['base'] = array(
-      'title' => t('Simple (with optional filter by bundle)'),
-      'class' => 'EntityReferenceSelectionHandlerGeneric',
-      'weight' => -100,
+    'title' => t('Simple (with optional filter by bundle)'),
+    'class' => 'EntityReferenceSelectionHandlerGeneric',
+    'weight' => -100,
   );
   if (module_exists('views')) {
     $plugins['views'] = array(
-        'title' => t('Views: Filter by an entity reference view'),
-        'class' => 'EntityReferenceSelectionHandlerViews',
-        'weight' => 0,
+      'title' => t('Views: Filter by an entity reference view'),
+      'class' => 'EntityReferenceSelectionHandlerViews',
+      'weight' => 0,
     );
   }
   return $plugins;
@@ -1469,6 +1470,9 @@ function entityreference_entityreference_selection_plugins() {
 
 /**
  * Load a behavior class for a given property.
+ *
+ * @return string|null
+ *   The behavior class or null if it is not found.
  */
 function entityreference_load_behavior_class($property) {
   $plugins = _entityreference_behavior_plugins();
@@ -1477,6 +1481,9 @@ function entityreference_load_behavior_class($property) {
 
 /**
  * Load a selection class for a given property.
+ *
+ * @return string|null
+ *   The selection class or null if it is not found.
  */
 function entityreference_load_selection_class($property) {
   $plugins = _entityreference_selection_plugins();
@@ -1485,6 +1492,9 @@ function entityreference_load_selection_class($property) {
 
 /**
  * Get all behavior plugins implemented by any module.
+ *
+ * @return array
+ *   All behavior plugin definitions.
  *
  */
 function _entityreference_behavior_plugins() {
@@ -1515,6 +1525,9 @@ function _entityreference_behavior_plugins() {
 
 /**
  * Get all selection plugins implemented by any module.
+ *
+ * @return array
+ *   All selection plugin definitions.
  */
 function _entityreference_selection_plugins() {
   $plugins = &backdrop_static(__FUNCTION__);
@@ -1620,11 +1633,13 @@ function entityreference_preprocess_taxonomy_term(&$variables) {
 /**
  * Pass title display setting to templates.
  *
- * If #page is set in the rendered entity reference display mode then pass it to the template.
+ * If #page is set in the rendered entity reference display mode then pass it
+ * to the template.
  *
  * @param array $variables
+ *   Render variables passed by reference.
  */
-function _entityreference_preprocess_set_title_display(&$variables) {
+function _entityreference_preprocess_set_title_display(array &$variables) {
   if (!strstr($variables['theme_hook_original'], 'entityreference')) {
     return;
   }
