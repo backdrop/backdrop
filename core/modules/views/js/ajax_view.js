@@ -15,6 +15,20 @@ Backdrop.behaviors.ViewsAjaxView.attach = function() {
     });
   }
 };
+/**
+ * Removes configuration and state from the page when a view is removed.
+ */
+  Backdrop.behaviors.ViewsAjaxView.detach = function(context) {
+  if (Backdrop.settings && Backdrop.settings.views && Backdrop.settings.views.ajaxViews) {
+    $.each(Backdrop.settings.views.ajaxViews, function(i, settings) {
+      var $removedView = $('.view-dom-id-' + settings.view_dom_id, context);
+      if ($removedView.length) {
+        delete Backdrop.settings.views.ajaxViews[i];
+        delete Backdrop.views.instances[i];
+      }
+    });
+  }
+}
 
 Backdrop.views = {};
 Backdrop.views.instances = {};
@@ -129,6 +143,7 @@ Backdrop.ajax.prototype.commands.viewsScrollTop = function (ajax, response) {
   // to browse newly loaded content after e.g. clicking a pager
   // link.
   var offset = $(response.selector).offset();
+
   // We can't guarantee that the scrollable object should be
   // the body, as the view could be embedded in something
   // more complex such as a modal popup. Recurse up the DOM

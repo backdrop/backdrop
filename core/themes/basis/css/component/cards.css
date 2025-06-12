@@ -1,0 +1,62 @@
+/**
+ * @file
+ * Card listing view on the default home page.
+ */
+
+/* @todo compensates for a bug in Basis. */
+.l-top .block-views-promoted-cards-block {
+  margin-top: -2rem; /* Negative top margin collapses spacing under header */
+}
+.block-views-promoted-cards-block {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  background-color: #f2f2f2;
+}
+
+.update-1-30 .l-top .block-views-promoted-cards-block {
+  margin-top: 0;
+}
+.update-1-30 .l-wrapper > .l-top .block-system-messages + .block-views-promoted-cards-block {
+  padding-top: 1rem;
+}
+.update-1-30 .l-wrapper > .l-top:has(.block-views-promoted-cards-block) {
+  background-color: #f2f2f2;
+  margin-top: -2rem; /* Negative top margin on parent limited in scope. */
+}
+.update-1-30 .l-wrapper > .l-top:has(.block-views-promoted-cards-block) .block,
+.update-1-30 .l-wrapper > .l-top .block-system-messages:has(+ .block-views-promoted-cards-block) .l-messages {
+  margin-bottom: 0;
+}
+.update-1-30 .l-wrapper > .l-top .block-system-messages:has(+ .block-views-promoted-cards-block) {
+  padding-top: 1rem;
+}
+
+.block-views-promoted-cards-block .views-view-grid-cols-3 {
+  grid-template-columns: repeat(1, 1fr);
+}
+.view-promoted-cards .views-grid-box {
+  border: none;
+}
+
+.view-promoted-cards .views-grid-box {
+  border-radius: 0.25rem;
+  margin: 1rem 0;
+  padding: 0 0 1rem 0;
+  background-color: #ffffff;
+}
+.view-promoted-cards h2 {
+  font-size: 1.25rem;
+  font-weight: bold;
+}
+.view-promoted-cards .views-field {
+  padding: 0 1rem;
+}
+.view-promoted-cards .views-field-field-image {
+  padding: 0;
+}
+@media (min-width: 48em) {
+  .block-views-promoted-cards-block .views-view-grid-cols-3 {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+}

@@ -35,6 +35,13 @@ class LayoutMenuItem {
   var $path = '';
 
   /**
+   * The weight of this menu item.
+   *
+   * @var int
+   */
+  public $weight = 0;
+
+  /**
    * The settings for this menu item's menu link (if any).
    *
    * This contains at least the following properties:
@@ -231,7 +238,7 @@ class LayoutMenuItem {
   /**
    * Get all contexts required or configured for this menu path.
    *
-   * return LayoutContext[]
+   * @return LayoutContext[]
    */
   function getContexts() {
     if (is_null($this->contexts)) {
@@ -247,7 +254,10 @@ class LayoutMenuItem {
     // Add in configured arguments.
     foreach ($this->arguments as $position => $argument_config) {
       if (isset($path_parts[$position]) && $path_parts[$position] === '%') {
-        $context_config = $argument_config + array('required' => TRUE);
+        $context_config = $argument_config + array(
+          'required' => TRUE,
+          'usageType' => LayoutContext::USAGE_TYPE_MENU,
+        );
         $contexts[$position] = layout_create_context($argument_config['plugin'], $context_config);
       }
     }

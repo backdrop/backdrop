@@ -77,7 +77,7 @@ class DashboardWelcomeBlock extends Block {
       );
       $build['steps']['start']['content'] = array(
         '#type' => 'markup',
-        '#prefix' => '<h4>' . t('Get started') . '</h4>',
+        '#prefix' => '<h3>' . t('Get started') . '</h3>',
         '#markup' => $welcome_start_content,
       );
     }
@@ -112,7 +112,7 @@ class DashboardWelcomeBlock extends Block {
       );
       $build['steps']['next']['content'] = array(
         '#type' => 'markup',
-        '#prefix' => '<h4>' . t('Next steps') . '</h4>',
+        '#prefix' => '<h3>' . t('Next steps') . '</h3>',
         '#markup' => $welcome_next_content,
       );
     }
@@ -137,7 +137,7 @@ class DashboardWelcomeBlock extends Block {
       );
       $build['steps']['more']['content'] = array(
         '#type' => 'markup',
-        '#prefix' => '<h4>' . t('More actions') . '</h4>',
+        '#prefix' => '<h3>' . t('More actions') . '</h3>',
         '#markup' => $welcome_more_content,
       );
     }

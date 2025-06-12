@@ -30,7 +30,7 @@ function filter_admin_overview($form) {
       'href' => "admin/config/content/formats/$id",
       'weight' => 0,
     );
-    if (user_access('synchronize configuration')) {
+    if (module_exists('config') && user_access('synchronize configuration')) {
       $links['export'] = array(
         'title' => t('Export'),
         'href' => 'admin/config/development/configuration/single/export',
@@ -54,7 +54,11 @@ function filter_admin_overview($form) {
     // to all roles and cannot be disabled via the admin interface.
     $form['formats'][$id]['#is_fallback'] = ($id == $fallback_format);
     if ($form['formats'][$id]['#is_fallback']) {
-      $form['formats'][$id]['name'] = array('#markup' => $format->name);
+      $label = theme('label_machine_name__filter', array(
+        'label' => $format->name,
+        'machine_name' => $id,
+      ));
+      $form['formats'][$id]['name'] = array('#markup' => $label);
       $roles_markup = t('Fallback format. Used if a role has access to no other formats.');
     }
     else {
@@ -78,7 +82,11 @@ function filter_admin_overview($form) {
           'weight' => -10,
         );
       }
-      $form['formats'][$id]['name'] = array('#markup' => check_plain($format->name));
+      $label = theme('label_machine_name__filter', array(
+        'label' => $format->name,
+        'machine_name' => $id,
+      ));
+      $form['formats'][$id]['name'] = array('#markup' => $label);
       $roles = array();
       foreach (filter_get_roles_by_format($format) as $role_name) {
         $role = user_role_load($role_name);
@@ -196,6 +204,13 @@ function filter_admin_format_form($form, &$form_state, $format) {
   $editors = filter_get_editors();
   if (isset($form_state['editor_info'])) {
     $editor_info = $form_state['editor_info'];
+
+    // If the editor changed, update the format settings accordingly.
+    $current_editor = $form_state['values']['editor'];
+    if ($format->editor != $current_editor && isset($editors[$current_editor])) {
+      $format->editor = $current_editor;
+      $format->editor_settings = array();
+    }
   }
   else {
     $editor_info = ($format->editor && isset($editors[$format->editor])) ? $editors[$format->editor] : NULL;
@@ -246,7 +261,6 @@ function filter_admin_format_form($form, &$form_state, $format) {
   }
 
   // Associate an editor with this format.
-  $editor_info = $form_state['editor_info'];
   if ($editor_info) {
     // Load the associated editor callbacks file, if any.
     if (!empty($editor_info['file'])) {
@@ -346,7 +360,7 @@ function filter_admin_format_form($form, &$form_state, $format) {
         'name' => $name,
         'status' => 0,
         'weight' => $filter_info['weight'],
-        'settings' => isset($filter_info['default settings']) ? $filter_info['default settings'] : array(),
+        'settings' => $filter_info['default settings'],
       );
     }
   }
@@ -674,6 +688,8 @@ function filter_admin_format_form_submit($form, &$form_state) {
 
   // Add the submitted form values to the text format, and save it.
   $format = $form_state['format'];
+  // Whether we need this, depends on the tempstore triggered by AJAX or not.
+  $filters_original = $form_state['format']->filters;
   // Save allowed HTML tags from the hidden field in the event JS modified them.
   $allowed_html = $form_state['values']['allowed_html'];
   unset($form_state['values']['allowed_html']);
@@ -685,6 +701,16 @@ function filter_admin_format_form_submit($form, &$form_state) {
   if ($stored_format = filter_get_format_tempstore($format->format)) {
     foreach ($stored_format->filters as $name => $filter) {
       $format->filters[$name]['settings'] = $filter->settings;
+    }
+  }
+  // We have no tempstore, if none of the extended configure forms has been
+  // opened. So we fall back to the existing filter settings. They haven't been
+  // changed then.
+  else {
+    foreach ($filters_original as $name => $value) {
+      if (!empty($value->settings) && $name != 'filter_html') {
+        $format->filters[$name]['settings'] = $value->settings;
+      }
     }
   }
   // Set allowed html, parked in a variable previously.
@@ -789,6 +815,7 @@ function filter_editor_image_upload_settings_form($format) {
   $settings += array(
     'status' => FALSE,
     'scheme' => file_default_scheme(),
+    'alt_required' => FALSE,
     'directory' => 'inline-images',
     'max_size' => '',
     'max_dimensions' => array('width' => '', 'height' => ''),
@@ -838,11 +865,19 @@ function filter_editor_image_upload_settings_form($format) {
     );
   }
   // Set data- attributes with human-readable names for all possible stream
-  // wrappers, so that drupal.ckeditor.drupalimage.admin's summary rendering
+  // wrappers, so that backdrop.ckeditor.backdropimage.admin's summary rendering
   // can use that.
   foreach ($stream_wrappers as $scheme => $info) {
     $form['scheme'][$scheme]['#attributes']['data-label'] = t('Storage: @name', array('@name' => $info['name']));
   }
+
+  $form['alt_required'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('<em>Alt</em> text required'),
+    '#description' => t('Requiring alternative text is strongly encouraged to improve accessibility.'),
+    '#default_value' => $settings['alt_required'],
+    '#states' => $show_if_image_uploads_enabled,
+  );
 
   $form['directory'] = array(
     '#type' => 'textfield',
@@ -902,6 +937,49 @@ function filter_editor_image_upload_settings_form($format) {
   return $form;
 }
 
+/**
+ * Subform constructor to configure the text editor's inline image styles.
+ *
+ * Each text editor implementation using the Filter dialog can use this form to
+ * configure image styles for inline images instead of free resizing.
+ *
+ * @param object $format
+ *   The filter format object.
+ *
+ * @return array
+ *   Subform items or empty array if not applicable.
+ */
+function filter_editor_image_styles_settings_form($format) {
+  $form = array();
+  if (!module_exists('image')) {
+    return $form;
+  }
+  $settings = isset($format->editor_settings['image_styles']) ? $format->editor_settings['image_styles'] : array();
+  $settings += array(
+    'status' => FALSE,
+    'list' => array(),
+  );
+  $form['status'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable image styles'),
+    '#default_value' => $settings['status'],
+  );
+  $style_options = array('' => t('None (original image)'));
+  $style_options += image_style_options(FALSE);
+  $form['list'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Available image styles'),
+    '#options' => $style_options,
+    '#default_value' => $settings['list'],
+    '#states' => array(
+      'visible' => array(
+        ':input[name="editor_settings[image_styles][status]"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
+
+  return $form;
+}
 
 /**
  * Subform constructor to configure the text editor's file upload settings.
@@ -961,7 +1039,7 @@ function filter_editor_file_upload_settings_form($format) {
     );
   }
   // Set data- attributes with human-readable names for all possible stream
-  // wrappers, so that drupal.ckeditor.drupalimage.admin's summary rendering
+  // wrappers, so that backdrop.ckeditor.backdropimage.admin's summary rendering
   // can use that.
   foreach ($stream_wrappers as $scheme => $info) {
     $form['scheme'][$scheme]['#attributes']['data-label'] = t('Storage: @name', array('@name' => $info['name']));

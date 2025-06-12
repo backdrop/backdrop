@@ -404,7 +404,12 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
   public function stream_open($uri, $mode, $options, &$opened_path) {
     $this->uri = $uri;
     $path = $this->getLocalPath();
-    $this->handle = ($options & STREAM_REPORT_ERRORS) ? fopen($path, $mode) : @fopen($path, $mode);
+    if ($path) {
+      $this->handle = ($options & STREAM_REPORT_ERRORS) ? fopen($path, $mode) : @fopen($path, $mode);
+    }
+    else {
+      $this->handle = NULL;
+    }
 
     if ((bool) $this->handle && $options & STREAM_USE_PATH) {
       $opened_path = $path;
@@ -777,16 +782,16 @@ abstract class BackdropLocalStreamWrapper implements BackdropStreamWrapperInterf
     if ($recursive) {
       // $this->getLocalPath() fails if $uri has multiple levels of directories
       // that do not yet exist.
-      $localpath = $this->getDirectoryPath() . '/' . $this->getTarget($uri);
+      $local_path = $this->getDirectoryPath() . '/' . $this->getTarget($uri);
     }
     else {
-      $localpath = $this->getLocalPath($uri);
+      $local_path = $this->getLocalPath($uri);
     }
     if ($options & STREAM_REPORT_ERRORS) {
-      return mkdir($localpath, $mode, $recursive);
+      return mkdir($local_path, $mode, $recursive);
     }
     else {
-      return @mkdir($localpath, $mode, $recursive);
+      return @mkdir($local_path, $mode, $recursive);
     }
   }
 
@@ -926,6 +931,23 @@ class BackdropPublicStreamWrapper extends BackdropLocalStreamWrapper {
   function getExternalUrl() {
     $path = str_replace('\\', '/', $this->getTarget());
     return $GLOBALS['base_url'] . '/' . self::getDirectoryPath() . '/' . backdrop_encode_path($path);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  protected function getLocalPath($uri = NULL) {
+    $path = parent::getLocalPath($uri);
+
+    $private_path = config_get('system.core', 'file_private_path');
+    if ($private_path) {
+      $private_path = realpath($private_path);
+      if ($private_path && strpos($path, $private_path) === 0) {
+        return FALSE;
+      }
+    }
+
+    return $path;
   }
 }
 

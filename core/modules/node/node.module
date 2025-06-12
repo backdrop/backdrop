@@ -94,17 +94,14 @@ function node_theme() {
     'node_preview_banner_form' => array(
       'render element' => 'form',
     ) + $base,
+    'node_preview' => array(
+      'render element' => 'node_preview',
+    ) + $base,
     'node_add_list' => array(
       'variables' => array('content' => NULL),
     ) + $base,
     'node_admin_overview' => array(
       'variables' => array('name' => NULL, 'type' => NULL),
-    ) + $base,
-    'node_recent_block' => array(
-      'variables' => array('nodes' => NULL),
-    ) + $base,
-    'node_recent_content' => array(
-      'variables' => array('node' => NULL),
     ) + $base,
     'node_type_form_permissions' => array(
       'render element' => 'form',
@@ -636,14 +633,15 @@ function node_field_extra_fields() {
  *   The machine-readable name of the node type to be deleted.
  */
 function node_type_delete($type) {
-  $info = node_type_get_type($type);
-  $config = config('node.type.' . $type);
-  $config->delete();
-  field_attach_delete_bundle('node', $type);
-  module_invoke_all('node_type_delete', $info);
+  if ($info = node_type_get_type($type)) {
+    $config = config('node.type.' . $type);
+    $config->delete();
+    field_attach_delete_bundle('node', $type);
+    module_invoke_all('node_type_delete', $info);
 
-  // Clear the node type cache.
-  node_type_cache_reset();
+    // Clear the node type cache.
+    node_type_cache_reset();
+  }
 }
 
 /**
@@ -754,7 +752,7 @@ function node_type_cache_reset() {
 /**
  * Sets the default values for a node type.
  *
- * The defaults are appropriate for a type defined through hook_node_info(),
+ * The defaults are appropriate for a type defined through node_type_save(),
  * since 'custom' is TRUE for types defined in the user interface, and FALSE
  * for types defined by modules. (The 'module' flag prevents types from being
  * deleted through the user interface.) Also, the default for 'locked' is TRUE,
@@ -762,7 +760,7 @@ function node_type_cache_reset() {
  *
  * @param $info
  *   (optional) An object or array containing values to override the defaults.
- *   See hook_node_info() for details on what the array elements mean. Defaults
+ *   See node_type_save() for details on what the array elements mean. Defaults
  *   to an empty array.
  *
  * @return
@@ -855,15 +853,16 @@ function node_invoke($node, $hook, $a2 = NULL, $a3 = NULL, $a4 = NULL) {
  * from the database. Nodes are loaded into memory and will not require database
  * access if loaded again during the same page request.
  *
- * @param $nids
- *   (optional) An array of node IDs.
- * @param $conditions
+ * @param array|false $nids
+ *   (optional) An array of node IDs or FALSE to load all the nodes. Using an
+ *   empty array (the default value), the function will return an empty array.
+ * @param array $conditions
  *   (deprecated) An associative array of conditions on the {node}
  *   table, where the keys are the database fields and the values are the
  *   values those fields must have. Instead, it is preferable to use
  *   EntityFieldQuery to retrieve a list of entity IDs loadable by
  *   this function.
- * @param $reset
+ * @param bool $reset
  *   (optional) Whether to reset the internal node_load() cache.
  *
  * @return Node[]
@@ -1114,42 +1113,7 @@ function node_revision_delete($revision_id) {
  *   An array as expected by backdrop_render().
  */
 function node_view(Node $node, $view_mode = 'full', $langcode = NULL) {
-  if (!isset($langcode)) {
-    $langcode = $GLOBALS['language_content']->langcode;
-  }
-
-  if (isset($node->preview) && ($node->preview == 'Preview')) {
-    backdrop_set_message(t('This is a preview. Links within the page are disabled.'), 'warning', FALSE);
-    backdrop_set_message(t('<strong>Changes are stored temporarily</strong>. Click <em>Save</em> to make your changes permanent, or click <em>Back to content editing</em> to make additional changes.'), 'warning', FALSE);
-  }
-
-  // Populate $node->content with a render() array.
-  node_build_content($node, $view_mode, $langcode);
-
-  $build = $node->content;
-  // We don't need duplicate rendering info in node->content.
-  unset($node->content);
-
-  $build += array(
-    '#theme' => 'node__' . $node->type . '__' . $view_mode,
-    '#node' => $node,
-    '#view_mode' => $view_mode,
-    '#langcode' => $langcode,
-  );
-
-  // Add contextual links for this node, except when the node is already being
-  // displayed on its own page. Modules may alter this behavior (for example,
-  // to restrict contextual links to certain display modes) by implementing
-  // hook_node_view_alter().
-  if (!empty($node->nid) && !($view_mode == 'full' && node_is_page($node))) {
-    $build['#contextual_links']['node'] = array('node', array($node->nid));
-  }
-
-  // Allow modules to modify the structured node.
-  $type = 'node';
-  backdrop_alter(array('node_view', 'entity_view'), $build, $type);
-
-  return $build;
+  return $node->view($view_mode, $langcode);
 }
 
 /**
@@ -1181,60 +1145,7 @@ function node_view(Node $node, $view_mode = 'full', $langcode = NULL) {
  *   content language of the current request.
  */
 function node_build_content(Node $node, $view_mode = 'full', $langcode = NULL) {
-  if (!isset($langcode)) {
-    $langcode = $GLOBALS['language_content']->langcode;
-  }
-
-  // Remove previously built content, if exists.
-  $node->content = array();
-
-  // Allow modules to change the display mode.
-  $view_mode = key(entity_view_mode_prepare('node', array($node->nid => $node), $view_mode, $langcode));
-
-  // The 'view' hook can be implemented to overwrite the default function
-  // to display nodes.
-  if (node_hook($node, 'view')) {
-    $node = node_invoke($node, 'view', $view_mode, $langcode);
-  }
-
-  // Build fields content.
-  // In case of a multiple view, node_view_multiple() already ran the
-  // 'prepare_view' step. An internal flag prevents the operation from running
-  // twice.
-  field_attach_prepare_view('node', array($node->nid => $node), $view_mode, $langcode);
-  entity_prepare_view('node', array($node->nid => $node));
-  $node->content += field_attach_view('node', $node, $view_mode, $langcode);
-
-  // Always display a read more link on teasers because we have no way
-  // to know when a teaser view is different than a full view.
-  $links = array();
-  $node->content['links'] = array(
-    '#theme' => 'links__node',
-    '#pre_render' => array('backdrop_pre_render_links'),
-    '#attributes' => array('class' => array('links', 'inline')),
-  );
-  if ($view_mode == 'teaser') {
-    $node_title_stripped = strip_tags($node->title);
-    $links['node-readmore'] = array(
-      'title' => t('Read more<span class="element-invisible"> about @title</span>', array('@title' => $node_title_stripped)),
-      'href' => 'node/' . $node->nid,
-      'html' => TRUE,
-      'attributes' => array('rel' => 'tag', 'title' => $node_title_stripped),
-    );
-  }
-  $node->content['links']['node'] = array(
-    '#theme' => 'links__node__node',
-    '#links' => $links,
-    '#attributes' => array('class' => array('links', 'inline')),
-  );
-
-  // Allow modules to make their own additions to the node.
-  module_invoke_all('node_view', $node, $view_mode, $langcode);
-  module_invoke_all('entity_view', $node, 'node', $view_mode, $langcode);
-
-  // Make sure the current display mode is stored if no module has already
-  // populated the related key.
-  $node->content += array('#view_mode' => $view_mode);
+  $node->buildContent($view_mode, $langcode);
 }
 
 /**
@@ -1289,14 +1200,17 @@ function node_permission() {
       'title' => t('Bypass content access control'),
       'description' => t('View, edit and delete all content regardless of permission restrictions.'),
       'restrict access' => TRUE,
+      'warning' => t('Bypass all other node permissions.'),
     ),
     'administer content types' => array(
       'title' => t('Administer content types'),
       'restrict access' => TRUE,
+      'warning' => t('Define custom content types and delete existing ones.'),
     ),
     'administer nodes' => array(
       'title' => t('Administer content'),
       'restrict access' => TRUE,
+      'warning' => t('Edit or delete any content, which may cause irreversible data loss.'),
     ),
     'access content overview' => array(
       'title' => t('Access the content overview page'),
@@ -1474,7 +1388,7 @@ function node_search_admin_validate($element, &$form_state) {
  */
 function node_search_execute($keys = NULL, $conditions = NULL) {
   // Build matching conditions
-  $query = db_select('search_index', 'i', array('target' => 'slave'))->extend('SearchQuery')->extend('PagerDefault');
+  $query = db_select('search_index', 'i', array('target' => 'replica'))->extend('SearchQuery')->extend('PagerDefault');
   $query->join('node', 'n', 'n.nid = i.sid');
   $query
     ->condition('n.status', 1)
@@ -1626,6 +1540,26 @@ function node_user_predelete($account) {
 }
 
 /**
+ * Implements hook_user_update().
+ */
+function node_user_update($account) {
+  $orig = $account->original;
+  if ($account->name != $orig->name || $account->picture != $orig->picture || $account->data != $orig->data) {
+    $nids = db_select('node', 'n')
+      ->fields('n', array('nid'))
+      ->condition('uid', $account->uid)
+      ->execute()
+      ->fetchCol();
+
+    if (!empty($nids)) {
+      // Flush entity cache of nodes this user authored, to prevent outdated
+      // info (like old username) in cached data.
+      cache('entity_node')->deleteMultiple($nids);
+    }
+  }
+}
+
+/**
  * Access callback: Checks node revision access.
  *
  * @param Node $node
@@ -1739,6 +1673,86 @@ function node_layout_context_info() {
     'load callback' => 'node_load',
   );
   return $info;
+}
+
+/**
+ * Implements hook_layout_load_by_router_item_alter().
+ *
+ * When creating node preview pages, the path will be of the form
+ * node/preview/<type>/<id>, where <type> is the node type and <id> is the
+ * tempstore ID of the node being previewed. But we want to display it using a
+ * layout whose system path is node/%. So we choose those layouts and set the
+ * context from the tempstore node.
+ *
+ * When viewing old node revisions, the path will be of the form
+ * node/<nid>/revisions/<vid>/view, where <nid> is the node ID and <vid> is the
+ * revision ID. As with previews, we want to display it using a layout whose
+ * system path is node/%.
+ */
+function node_layout_load_by_router_item_alter(&$layouts, $router_item) {
+  $map = $router_item['map'];
+
+  // Check for node previews.
+  if (count($map) == 4 && $map[0] == 'node' && $map[1] == 'preview') {
+    // Add any node/% path as a fallback and set the context to the appropriate
+    // node from the tempstore.
+    $path_is_preview = FALSE;
+    foreach (node_type_get_types() as $type_obj) {
+      if ($type_obj->type == $map[2]) {
+        $path_is_preview = TRUE;
+        break;
+      }
+    }
+    if (!$path_is_preview) {
+      return;
+    }
+    $tempstore_id = $map[3];
+    $temp_node = node_get_node_tempstore($tempstore_id);
+    if ($temp_node) {
+      $node_layouts = layout_load_multiple_by_path('node/%', TRUE);
+      if ($node_layouts) {
+        $layouts += $node_layouts;
+        foreach ($layouts as $layout) {
+          foreach ($layout->getContexts() as $context) {
+            if (isset($context->position)) {
+              $context->setData($temp_node);
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // Check for node revisions.
+  if (count($map) == 5 && $map[0] == 'node' && $map[2] == 'revisions' && $map[4] == 'view') {
+    // Add any node/% path as a fallback and set the context to the appropriate
+    // node revision.
+    $rev_node = $map[1];
+    if ($rev_node) {
+      $node_layouts = layout_load_multiple_by_path('node/%', TRUE);
+      if ($node_layouts) {
+        $layouts += $node_layouts;
+        foreach ($layouts as $layout) {
+          foreach ($layout->getContexts() as $context) {
+            if (isset($context->position)) {
+              $context->setData($rev_node);
+            }
+          }
+        }
+      }
+    }
+  }
+  // If either default was passed in originally, move it to the end of the list.
+  if (isset($layouts['admin_default'])) {
+    $admin_default = $layouts['admin_default'];
+    unset($layouts['admin_default']);
+    $layouts['admin_default'] = $admin_default;
+  }
+  if (isset($layouts['default'])) {
+    $default = $layouts['default'];
+    unset($layouts['default']);
+    $layouts['default'] = $default;
+  }
 }
 
 /**
@@ -1945,9 +1959,18 @@ function node_menu() {
 }
 
 /**
+ * Implements hook_menu().
+ */
+function node_menu_alter(&$items) {
+  if (isset($items['admin/content'])) {
+    $items['admin/content']['icon'] = 'pencil-fill';
+  }
+}
+
+/**
  * Access callback: Checks a user's permission for previewing a node.
  *
- * @param $node_tempstore_id
+ * @param string $node_tempstore_id
  *   The node_tempstore_id of the node being created or updated.
  *
  * @return bool
@@ -2051,10 +2074,6 @@ function node_block_info() {
     'info' => t('Syndicate'),
     'description' => t('An RSS icon linking to available feeds.'),
   );
-  $blocks['recent'] = array(
-    'info' => t('Recent content'),
-    'description' => t('A list of recently published content.'),
-  );
   $blocks['content'] = array(
     'info' => t('Existing content'),
     'description' => t('Embed existing node content as a block onto other pages'),
@@ -2078,25 +2097,6 @@ function node_block_view($delta = '', $settings = array()) {
         $block['content'] = node_syndicate_content($settings);
       }
       break;
-
-    case 'recent':
-      if (user_access('access content')) {
-        $settings += array(
-          'node_count' => 10,
-        );
-        $block['subject'] = t('Recent content');
-        if ($nodes = node_get_recent($settings['node_count'])) {
-          $block['content'] = array(
-            '#theme' => 'node_recent_block',
-            '#nodes' => $nodes,
-          );
-        }
-        else {
-          $block['content'] = t('No content available.');
-        }
-      }
-      break;
-
   }
 
   return $block;
@@ -2107,17 +2107,6 @@ function node_block_view($delta = '', $settings = array()) {
  */
 function node_block_configure($delta = '', $settings = array()) {
   $form = array();
-  if ($delta == 'recent') {
-    $settings += array(
-      'node_count' => 10,
-    );
-    $form['node_count'] = array(
-      '#type' => 'select',
-      '#title' => t('Number of recent content items to display'),
-      '#default_value' => $settings['node_count'],
-      '#options' => backdrop_map_assoc(array(2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 25, 30)),
-    );
-  }
   if ($delta == 'syndicate') {
     $form['syndicate_settings'] = array(
       '#type' => 'radios',
@@ -2138,7 +2127,7 @@ function node_block_configure($delta = '', $settings = array()) {
  * @param array $settings
  *   Block configuration settings.
  */
-function node_syndicate_content($settings) {
+function node_syndicate_content(array $settings) {
   if (isset($settings['syndicate_settings']) && $settings['syndicate_settings'] == 'page_content') {
     return backdrop_get_feeds();
   }
@@ -2148,51 +2137,6 @@ function node_syndicate_content($settings) {
     '#url' => 'rss.xml',
     '#title' => t('Subscribe to promoted content'),
   );
-}
-
-/**
- * Finds the most recently changed nodes that are available to the current user.
- *
- * @param $number
- *   (optional) The maximum number of nodes to find. Defaults to 10.
- *
- * @return
- *   An array of node entities or an empty array if there are no recent nodes
- *   visible to the current user.
- */
-function node_get_recent($number = 10) {
-  $query = db_select('node', 'n');
-
-  if (!user_access('bypass node access') && !user_access('view any unpublished content')) {
-    // If the user is able to view unpublished nodes, allow them to see these
-    // in addition to published nodes. Check that they actually have some
-    // unpublished nodes to view before adding the condition.
-    // Note: this query still ignores unpublished by type permissions.
-    // See: https://github.com/backdrop/backdrop-issues/issues/146.
-    $own_unpublished = db_query('SELECT nid FROM {node} WHERE uid = :uid AND status = :status',
-     array(':uid' => $GLOBALS['user']->uid, ':status' => NODE_NOT_PUBLISHED))->fetchCol();
-    if (user_access('view own unpublished content') && $own_unpublished) {
-      $query->condition(db_or()
-        ->condition('n.status', NODE_PUBLISHED)
-        ->condition('n.nid', $own_unpublished, 'IN')
-      );
-    }
-    else {
-      // If not, restrict the query to published nodes.
-      $query->condition('n.status', NODE_PUBLISHED);
-    }
-  }
-  $nids = $query
-    ->fields('n', array('nid'))
-    ->orderBy('n.changed', 'DESC')
-    ->range(0, $number)
-    ->addTag('node_access')
-    ->execute()
-    ->fetchCol();
-
-  $nodes = node_load_multiple($nids);
-
-  return $nodes ? $nodes : array();
 }
 
 /**
@@ -2420,6 +2364,12 @@ function node_page_view(Node $node) {
   $uri_options = array('absolute' => TRUE, 'https' => $canonical_secure);
   backdrop_add_html_head_link(array('rel' => 'canonical', 'href' => url($uri['path'], array_merge($uri['options'], $uri_options))), TRUE);
 
+  // Show a message if the content type is configured to have a hidden path.
+  if ($type->settings['hidden_path']) {
+    $message = t('Only people with the <em>View hidden paths</em> permission will be able to view this page. Everyone else will receive a "Page not found" error.');
+    backdrop_set_message($message, 'info');
+  }
+
   return node_show($node);
 }
 
@@ -2431,7 +2381,7 @@ function node_update_index() {
 
   // Index selected content types.
   $enabled_types = _node_search_get_types();
-  $result = db_query_range("SELECT n.nid FROM {node} n LEFT JOIN {search_dataset} d ON d.type = 'node' AND d.sid = n.nid WHERE (d.sid IS NULL OR d.reindex <> 0) AND n.type IN (:enabled_types) ORDER BY d.reindex ASC, n.nid ASC", 0, $limit, array(':enabled_types' => $enabled_types), array('target' => 'slave'));
+  $result = db_query_range("SELECT n.nid FROM {node} n LEFT JOIN {search_dataset} d ON d.type = 'node' AND d.sid = n.nid WHERE (d.sid IS NULL OR d.reindex <> 0) AND n.type IN (:enabled_types) ORDER BY d.reindex ASC, n.nid ASC", 0, $limit, array(':enabled_types' => $enabled_types), array('target' => 'replica'));
   $nids = $result->fetchCol();
   if (!$nids) {
     return;
@@ -2452,7 +2402,7 @@ function _node_index_node(Node $node) {
 
   // Save the changed time of the most recent indexed node, for the search
   // results half-life calculation.
-  state_set('node_cron_last', $node->changed);
+  state_set('node_cron_last', (int) $node->changed);
 
   // Render the node.
   $build = node_view($node, 'search_index');
@@ -2541,7 +2491,8 @@ function node_form_search_form_alter(&$form, $form_state) {
       '#suffix' => '</div>',
       '#options' => $types,
     );
-    $form['advanced']['submit'] = array(
+    $form['advanced']['actions'] = array('#type' => 'actions');
+    $form['advanced']['actions']['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Advanced search'),
       '#prefix' => '<div class="action">',
@@ -2641,6 +2592,9 @@ function node_form_system_themes_admin_form_alter(&$form, &$form_state, $form_id
  */
 function node_form_system_themes_admin_form_submit($form, &$form_state) {
   config_set('system.core', 'node_admin_theme', $form_state['values']['node_admin_theme']);
+  // The default and admin layout are tied directly to this setting, so clear
+  // the Layout cache.
+  layout_reset_caches();
 }
 
 /**
@@ -2725,6 +2679,33 @@ function node_access($op, $node, $account = NULL) {
     return $node->access($op, $account);
   }
   return FALSE;
+}
+
+/**
+ * Helper function to create the OR condition for a node grants check.
+ *
+ * @param array $node_access_grants
+ *   The grants to add to the query, usually gotten via node_access_grants().
+ * @param string $table_alias
+ *   Optional, the alias to the node access table.
+ *
+ * @return bool
+ *   TRUE if the operation may be performed, FALSE otherwise.
+ *
+ * @since 1.30.0 Function added.
+ */
+function node_add_node_grants_to_query($node_access_grants, $table_alias = '') {
+  $grants = db_or();
+  $prefix = $table_alias ? $table_alias . '.' : '';
+  foreach ($node_access_grants as $realm => $gids) {
+    if (!empty($gids)) {
+      $grants->condition(db_and()
+        ->condition($prefix . 'gid', $gids, 'IN')
+        ->condition($prefix . 'realm', $realm)
+      );
+    }
+  }
+  return $grants;
 }
 
 /**
@@ -2908,18 +2889,12 @@ function node_access_view_all_nodes($account = NULL) {
       ->condition('nid', 0)
       ->condition('grant_view', 1, '>=');
 
-    $grants = db_or();
-    foreach (node_access_grants('view', $account) as $realm => $gids) {
-      foreach ($gids as $gid) {
-        $grants->condition(db_and()
-          ->condition('gid', $gid)
-          ->condition('realm', $realm)
-        );
-      }
-    }
+    $grants = node_add_node_grants_to_query(node_access_grants('view', $account));
+
     if (count($grants) > 0 ) {
       $query->condition($grants);
     }
+
     $access[$account->uid] = $query
       ->execute()
       ->fetchField();
@@ -3088,24 +3063,14 @@ function _node_query_node_access_alter($query, $type) {
     // then add it to the query at the end.
     $node_conditions = db_and();
   }
-  foreach ($tables as $nalias => $tableinfo) {
+  foreach ($tables as $node_alias => $tableinfo) {
     $table = $tableinfo['table'];
     if (!($table instanceof SelectQueryInterface) && $table == $base_table) {
       // Set the subquery.
       $subquery = db_select('node_access', 'na')
        ->fields('na', array('nid'));
 
-      $grant_conditions = db_or();
-      // If any grant exists for the specified user, then user has access
-      // to the node for the specified operation.
-      foreach ($grants as $realm => $gids) {
-        foreach ($gids as $gid) {
-          $grant_conditions->condition(db_and()
-            ->condition('na.gid', $gid)
-            ->condition('na.realm', $realm)
-          );
-        }
-      }
+      $grant_conditions = node_add_node_grants_to_query($grants, 'na');
 
       // Attach conditions to the subquery for nodes.
       if (count($grant_conditions->conditions())) {
@@ -3116,10 +3081,10 @@ function _node_query_node_access_alter($query, $type) {
       // Now handle entities.
       if ($type == 'entity') {
         // Set a common alias for entities.
-        $base_alias = $nalias;
+        $base_alias = $node_alias;
         $field = 'entity_id';
       }
-      $subquery->where("$nalias.$field = na.nid");
+      $subquery->where("$node_alias.$field = na.nid");
 
       // For an entity query, attach the subquery to entity conditions.
       if (isset($node_conditions)) {
@@ -3457,9 +3422,6 @@ function node_content_form(Node $node, $form_state) {
       '#default_value' => $node->title,
       '#maxlength' => 255,
       '#weight' => -5,
-      '#attributes' => array(
-        'autofocus' => TRUE,
-      ),
     );
   }
 
@@ -3489,50 +3451,54 @@ function node_forms() {
  * Implements hook_action_info().
  */
 function node_action_info() {
-  return array(
-    'node_publish_action' => array(
-      'type' => 'node',
-      'label' => t('Publish content'),
-      'callback' => 'node_publish_action',
-      'file' => 'node.actions.inc'
-    ),
-    'node_unpublish_action' => array(
-      'type' => 'node',
-      'label' => t('Unpublish content'),
-      'callback' => 'node_unpublish_action',
-      'file' => 'node.actions.inc',
-    ),
-    'node_make_sticky_action' => array(
-      'type' => 'node',
-      'label' => t('Make content sticky'),
-      'callback' => 'node_make_sticky_action',
-      'file' => 'node.actions.inc',
-    ),
-    'node_make_unsticky_action' => array(
-      'type' => 'node',
-      'label' => t('Make content unsticky'),
-      'callback' => 'node_make_unsticky_action',
-      'file' => 'node.actions.inc',
-    ),
-    'node_promote_action' => array(
-      'type' => 'node',
-      'label' => t('Promote content'),
-      'callback' => 'node_promote_action',
-      'file' => 'node.actions.inc',
-    ),
-    'node_unpromote_action' => array(
-      'type' => 'node',
-      'label' => t('Remove promotion'),
-      'callback' => 'node_unpromote_action',
-      'file' => 'node.actions.inc',
-    ),
-    'node_delete_action' => array(
-      'type' => 'node',
-      'label' => t('Delete content'),
-      'callback' => 'node_delete_action',
-      'file' => 'node.actions.inc',
-    ),
-  );
+  $actions = array();
+  if (user_access('administer nodes')) {
+    $actions += array(
+      'node_publish_action' => array(
+        'type' => 'node',
+        'label' => t('Publish content'),
+        'callback' => 'node_publish_action',
+        'file' => 'node.actions.inc'
+      ),
+      'node_unpublish_action' => array(
+        'type' => 'node',
+        'label' => t('Unpublish content'),
+        'callback' => 'node_unpublish_action',
+        'file' => 'node.actions.inc',
+      ),
+      'node_make_sticky_action' => array(
+        'type' => 'node',
+        'label' => t('Make content sticky'),
+        'callback' => 'node_make_sticky_action',
+        'file' => 'node.actions.inc',
+      ),
+      'node_make_unsticky_action' => array(
+        'type' => 'node',
+        'label' => t('Make content unsticky'),
+        'callback' => 'node_make_unsticky_action',
+        'file' => 'node.actions.inc',
+      ),
+      'node_promote_action' => array(
+        'type' => 'node',
+        'label' => t('Promote content'),
+        'callback' => 'node_promote_action',
+        'file' => 'node.actions.inc',
+      ),
+      'node_unpromote_action' => array(
+        'type' => 'node',
+        'label' => t('Remove promotion'),
+        'callback' => 'node_unpromote_action',
+        'file' => 'node.actions.inc',
+      ),
+      'node_delete_action' => array(
+        'type' => 'node',
+        'label' => t('Delete content'),
+        'callback' => 'node_delete_action',
+        'file' => 'node.actions.inc',
+      ),
+    );
+  }
+  return $actions;
 }
 
 /**
@@ -3541,23 +3507,41 @@ function node_action_info() {
 function node_requirements($phase) {
   $requirements = array();
   if ($phase === 'runtime') {
-    // Only show rebuild button if there are either 0, or 2 or more, rows
-    // in the {node_access} table, or if there are modules that
-    // implement hook_node_grants().
+    $needs_rebuild = node_access_needs_rebuild();
     $grant_count = db_query('SELECT COUNT(*) FROM {node_access}')->fetchField();
-    if ($grant_count != 1 || count(module_implements('node_grants')) > 0) {
+
+    // Show an error message if permissions need to be rebuilt. Otherwise
+    // show a permission count if there are either 0, or 2 or more, rows in the
+    // {node_access} table, or if there are modules that implement
+    // hook_node_grants().
+    if ($needs_rebuild) {
+      $value = t('Access permissions need to be rebuilt.');
+    }
+    elseif ($grant_count != 1 || count(module_implements('node_grants')) > 0) {
       $value = format_plural($grant_count, 'One permission in use', '@count permissions in use', array('@count' => $grant_count));
     }
     else {
       $value = t('Disabled');
     }
     $value .= ' (' . l(t('Rebuild permissions'), 'admin/reports/status/rebuild') . ')';
-    $description = t('If the site is experiencing problems with permissions to content, you may have to rebuild the permissions cache. Rebuilding will remove all privileges to content and replace them with permissions based on the current modules and settings. Rebuilding may take some time if there is a lot of content or complex permission settings. After rebuilding has completed, content will automatically use the new permissions.');
+
+    if ($needs_rebuild) {
+      $description = t('Node access permissions need to be rebuilt.');
+      $severity = REQUIREMENT_ERROR;
+    }
+    else {
+      $description = t('If the site is experiencing problems with permissions to content, you may have to rebuild the permissions cache.');
+      $severity = REQUIREMENT_OK;
+    }
+
+    // Add further information.
+    $description .= ' ' . t('Rebuilding will remove all privileges to content and replace them with permissions based on the current modules and settings. Rebuilding may take some time if there is a lot of content or complex permission settings. After rebuilding has completed, content will automatically use the new permissions.');
 
     $requirements['node_access'] = array(
       'title' => t('Node Access Permissions'),
       'value' => $value,
       'description' => $description,
+      'severity' => $severity
     );
   }
   return $requirements;
@@ -3673,7 +3657,7 @@ function node_config_info() {
   $prefixes['node.type'] = array(
     'name_key' => 'type',
     'label_key' => 'name',
-    'group' => t('Node types'),
+    'group' => t('Content types'),
   );
   return $prefixes;
 }
@@ -3690,7 +3674,7 @@ function node_config_create_validate(Config $staging_config, $all_changes) {
 
     // Check that the node type does or will exist.
     $type_exists = (bool) node_type_get_type($node_type);
-    $type_created = $all_changes['node.type.' . $node_type];
+    $type_created = !empty($all_changes['node.type.' . $node_type]);
     if (!$type_exists && !$type_created) {
       throw new ConfigValidateException(t('The field "@name" cannot be added because the node type "@type" does not exist.', array('@name' => $field_name, '@type' => $node_type)));
     }

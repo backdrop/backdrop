@@ -127,7 +127,7 @@ function file_field_instance_settings_form($field, $instance) {
 }
 
 /**
- * Render API callback: Validates the maximum uplodad size field.
+ * Render API callback: Validates the 'Maximum upload size' field.
  *
  * Ensures that a size has been entered and that it can be parsed by
  * parse_size().
@@ -774,7 +774,7 @@ function file_field_widget_uri($field, $instance, $data = array()) {
  *
  * This function is assigned as a #value callback in file_field_widget_form().
  */
-function file_field_widget_value($element, $input = FALSE, $form_state) {
+function file_field_widget_value($element, $input, $form_state) {
   if ($input) {
     // Checkboxes lose their value when empty.
     // If the display field is present make sure its unchecked value is saved.
@@ -1034,7 +1034,7 @@ function file_field_formatter_view($entity_type, $entity, $field, $instance, $la
         static $recursive_render_depth = array();
         if (!empty($item)) {
           // The repeat-rendering protection may be disabled if necessary.
-          if (config_get('file.sttings', 'protect_repeated_render')) {
+          if (config_get('file.settings', 'protect_repeated_render')) {
             // Protect ourselves from repeated rendering.
             static $repeated_render_depth = array();
             $repeated_render_id = $entity_type . $field['field_name'] . $item['fid'];
@@ -1177,4 +1177,3 @@ function file_field_formatter_view($entity_type, $entity, $field, $instance, $la
 
   return $element;
 }
-

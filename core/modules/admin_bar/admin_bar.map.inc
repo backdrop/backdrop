@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Implements hook_admin_bar_map() on behalf of core modules.
@@ -139,7 +138,7 @@ function field_ui_admin_bar_map() {
  * Implements hook_admin_bar_map() on behalf of Taxonomy module.
  */
 function taxonomy_admin_bar_map() {
-  if (!user_access('administer taxonomy')) {
+  if (!taxonomy_vocabulary_overview_access()) {
     return;
   }
   $map['admin/structure/taxonomy/%taxonomy_vocabulary'] = array(

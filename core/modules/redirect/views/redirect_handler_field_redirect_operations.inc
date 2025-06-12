@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Redirect field handler for redirect operations.
@@ -41,7 +40,7 @@ class redirect_handler_field_redirect_operations extends views_handler_field {
     $rid = $values->{$this->aliases['rid']};
     $redirect = redirect_load($rid);
     $destination = backdrop_get_destination();
-    
+
     $operations = array();
     if (redirect_access('update', $redirect)) {
       $operations['edit'] = array(

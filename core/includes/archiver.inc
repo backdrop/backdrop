@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Shared classes and interfaces for the archiver system.

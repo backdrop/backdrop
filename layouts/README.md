@@ -32,4 +32,4 @@ More information
 
 Refer to the "Developing Layouts" section of the developer documentation on the
 Backdrop API website for further information on creating custom layouts:
-https://api.backdropcms.org/developing-layouts.
+https://docs.backdropcms.org/documentation/developing-layouts.

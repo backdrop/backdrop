@@ -143,6 +143,17 @@ class FilterCRUDTestCase extends BackdropWebTestCase {
  * Tests the administrative functionality of the Filter module.
  */
 class FilterAdminTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
+  /**
+   * @var User
+   */
+  protected $web_user;
+
   function setUp() {
     parent::setUp();
 
@@ -489,7 +500,7 @@ class FilterAdminTestCase extends BackdropWebTestCase {
       'filter_url_length' => $this->randomName(4),
     );
     $this->backdropPost('admin/config/content/formats/filtered_html/filter-settings/filter_url', $edit, t('Update'));
-    $this->assertNoRaw(t('The text format %format has been updated.', array('%format' => 'Filtered HTML')));
+    $this->assertNoRaw(t('The text format %format has been updated.', array('%format' => 'Basic')));
 
     // The form does save permitted value and it appears in the config json.
     $length = 88;
@@ -700,7 +711,6 @@ class FilterFormatAccessTestCase extends BackdropWebTestCase {
     config_set('path.settings', 'node_page_pattern', '');
 
     $langcode = LANGUAGE_NONE;
-    $title_key = "title";
     $body_value_key = "body[$langcode][0][value]";
     $body_format_key = "body[$langcode][0][format]";
 
@@ -916,6 +926,12 @@ class FilterNoFormatTestCase extends BackdropWebTestCase {
  * Security tests for missing/vanished text formats or filters.
  */
 class FilterSecurityTestCase extends BackdropWebTestCase {
+
+  /**
+   * @var User
+   */
+  protected $admin_user;
+
   function setUp() {
     parent::setUp('filter_test');
     $this->admin_user = $this->backdropCreateUser(array('administer modules', 'administer filters', 'administer site configuration'));
@@ -1019,9 +1035,9 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
       ),
       // Comments remain unchanged and subsequent lines/paragraphs are
       // transformed normally.
-      "aaa<!--comment-->\n\nbbb\n\nccc\n\nddd<!--comment\nwith linebreak-->\n\neee\n\nfff" => array(
+      "aaa<!--comment-->\n\nbbb\n\nccc\n\nddd<!--comment\nwith line break-->\n\neee\n\nfff" => array(
         "<p>aaa</p>\n<!--comment--><p>\nbbb</p>\n<p>ccc</p>\n<p>ddd</p>" => TRUE,
-        "<!--comment\nwith linebreak--><p>\neee</p>\n<p>fff</p>" => TRUE,
+        "<!--comment\nwith line break--><p>\neee</p>\n<p>fff</p>" => TRUE,
       ),
       // Check that a comment in a PRE will result that the text after
       // the comment, but still in PRE, is not transformed.
@@ -1031,6 +1047,28 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
       // Bug 810824, paragraphs were appearing around iframe tags.
       "<iframe>aaa</iframe>\n\n" => array(
         "<p><iframe>aaa</iframe></p>" => FALSE,
+      ),
+      // Check that tags that close on a separate line do not get an extra
+      // <br /> before the closing tag. This is the default formatting output by
+      // CKEditor 5 in Backdrop.
+      "<h3>\n    indented line\n</h3>" => array(
+        "<h3>\n    indented line\n</h3>" => TRUE,
+        "<h3>\n    indented line<br />\n</h3>" => FALSE,
+      ),
+      // Check that new lines within block elements have <br /> tags added, but
+      // not before the closing tag on a new line.
+      "<p>\n    indented line\n    second indented line\n</p>" => array(
+        "<p>\n    indented line<br />\n    second indented line\n</p>" => TRUE,
+        "<p>\n    indented line<br />\n    second indented line<br />\n</p>" => FALSE,
+        "<p>\n    indented line\n    second indented line\n</p>" => FALSE,
+      ),
+      // Check that manually added <br> tags at end of lines don't duplicate
+      // another <br /> tag after them. Line breaks are normalized from <br>
+      // to <br /> as part of this filter.
+      "<p>\n    line before break<br>\n    line after break</p>" => array(
+        "<p>\n    line before break<br />\n    line after break</p>"  => TRUE,
+        "<p>\n    line before break<br><br />\n    line after break</p>"  => FALSE,
+        "<p>\n    line before break<br /><br />\n    line after break</p>"  => FALSE,
       ),
     );
     $this->assertFilteredString($filter, $tests);
@@ -1117,7 +1155,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
     $this->assertNoNormalized($f, 'script', 'HTML tag stripping evasion -- a malformed image tag.');
 
     $f = filter_xss('<blockquote><script>alert(0)</script></blockquote>', array('blockquote'));
-    $this->assertNoNormalized($f, 'script', 'HTML tag stripping evasion -- script in a blockqoute.');
+    $this->assertNoNormalized($f, 'script', 'HTML tag stripping evasion -- script in a blockquote.');
 
     $f = filter_xss("<!--[if true]><script>alert(0)</script><![endif]-->");
     $this->assertNoNormalized($f, 'script', 'HTML tag stripping evasion -- script within a comment.');
@@ -1142,7 +1180,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
     $f = filter_xss("<img o\0nfocus\0=alert(0)>", array('img'));
     $this->assertNoNormalized($f, 'focus', 'HTML filter attributes removal evasion -- breaking with nulls.');
 
-    // Only whitelisted scheme names allowed in attributes.
+    // Only allowed scheme names allowed in attributes.
     $f = filter_xss('<img src="javascript:alert(0)">', array('img'));
     $this->assertNoNormalized($f, 'javascript', 'HTML scheme clearing -- no evasion.');
 
@@ -1231,6 +1269,78 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
   }
 
   /**
+   * Tests sanitizing XSS within an attributes array.
+   *
+   * Attributes arrays are commonly passed into functions such as l().
+   * If the contents of these arrays have user-provided data, the attributes
+   * should be passed through filter_xss_attributes() before calling l().
+   */
+  public function testFilterXSSAttributes() {
+    $data = array(
+      'safe' => array(
+        array('class' => array('foo', 'bar'), 'data-biscuit' => TRUE),
+        array('class' => array('foo', 'bar'), 'data-biscuit' => TRUE),
+      ),
+      'valueless' => array(
+        array('class' => array('foo', 'bar'), 'selected' => ''),
+        array('class' => array('foo', 'bar'), 'selected' => ''),
+      ),
+      'valueless, mangled with a space' => array(
+        array('class' => array('foo', 'bar'), 'selected href' => 'http://example.com'),
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'http://example.com'),
+      ),
+      'valueless, mangled with multiple spaces, blocked' => array(
+        array('class' => array('foo', 'bar'), 'selected  onclick href' => 'http://example.com'),
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'http://example.com'),
+      ),
+      'valueless, mangled with multiple spaces, blocked, mangled first' => array(
+        array('selected  onclick href' => 'http://example.com', 'class' => array('foo', 'bar')),
+        array('selected' => 'selected', 'href' => 'http://example.com', 'class' => array('foo', 'bar')),
+      ),
+      'valueless but with value' => array(
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'http://example.com'),
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'http://example.com'),
+      ),
+      'valueless but with value, bad protocol' => array(
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'javascript:alert()'),
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'alert()'),
+      ),
+      'valueless, mangled with a space and bad protocol' => array(
+        array('class' => array('foo', 'bar'), 'selected href' => 'javascript:alert()'),
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'alert()'),
+      ),
+      'valueless, mangled with a space and bad protocol, repeated' => array(
+        array('class' => array('foo', 'bar'), 'selected href' => 'javascript:alert()', 'href' => 'http://example.com'),
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'alert()'),
+      ),
+      'with a space' => array(
+        array('class' => array('foo', 'bar'), 'href' => urlencode('some file.pdf')),
+        array('class' => array('foo', 'bar'), 'href' => 'some+file.pdf'),
+      ),
+      'with an unencoded space' => array(
+        array('class' => array('foo', 'bar'), 'href' => 'some file.pdf'),
+        array('class' => array('foo', 'bar'), 'href' => 'some file.pdf'),
+      ),
+      'xss onclick' => array(
+        array('class' => array('foo', 'bar'), 'onclick' => 'alert("whoop");'),
+        array('class' => array('foo', 'bar')),
+      ),
+      'xss onclick, valueless, mangled with a space' => array(
+        array('class' => array('foo', 'bar'), 'selected onclick href' => 'http://example.com'),
+        array('class' => array('foo', 'bar'), 'selected' => 'selected', 'href' => 'http://example.com'),
+      ),
+      'xss protocol' => array(
+        array('class' => array('foo', 'bar'), 'src' => 'javascript:alert("whoop");'),
+        array('class' => array('foo', 'bar')),
+      ),
+    );
+    foreach ($data as $name => $row) {
+      list($attributes, $expected) = $row;
+      $this->assertEqual($expected, filter_xss_attributes($attributes), 'filter_xss_attributes() correctly cleaned the "' . $name . '" test case.');
+    }
+  }
+
+  /**
    * Tests filter settings, defaults, access restrictions and similar.
    *
    * @todo This is for functions like filter_filter and check_markup, whose
@@ -1242,7 +1352,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
    *   makes HTML filter completely ineffective.
    *
    * @todo Class, id, name and xmlns should be added to disallowed attributes,
-   *   or better a whitelist approach should be used for that too.
+   *   or better, an allowed attributes approach should be used for that too.
    */
   function testHtmlFilter() {
     // Set up dummy filter object.
@@ -1370,7 +1480,7 @@ class FilterUnitTestCase extends BackdropUnitTestCase {
     // - absolute, mail, partial
     // - characters/encoding, surrounding markup, security
 
-    // Create a e-mail that is too long.
+    // Create an email that is too long.
     $long_email = str_repeat('a', 254) . '@example.com';
     $too_long_email = str_repeat('b', 255) . '@example.com';
     $email_with_plus_sign = 'one+two@example.com';
@@ -1397,15 +1507,15 @@ person@example.com or mailto:person2@example.com or ' . $email_with_plus_sign . 
       ),
       // URI parts and special characters.
       '
-http://trailingslash.com/ or www.trailingslash.com/
+http://trailing-slash.com/ or www.trailing-slash.com/
 http://host.com/some/path?query=foo&bar[baz]=beer#fragment or www.host.com/some/path?query=foo&bar[baz]=beer#fragment
 http://twitter.com/#!/example/status/22376963142324226
 ftp://user:pass@ftp.example.com/~home/dir1
 sftp://user@nonstandardport:222/dir
 ssh://192.168.0.100/srv/git/backdrop.git
 ' => array(
-        '<a href="http://trailingslash.com/">http://trailingslash.com/</a>' => TRUE,
-        '<a href="http://www.trailingslash.com/">www.trailingslash.com/</a>' => TRUE,
+        '<a href="http://trailing-slash.com/">http://trailing-slash.com/</a>' => TRUE,
+        '<a href="http://www.trailing-slash.com/">www.trailing-slash.com/</a>' => TRUE,
         '<a href="http://host.com/some/path?query=foo&amp;bar[baz]=beer#fragment">http://host.com/some/path?query=foo&amp;bar[baz]=beer#fragment</a>' => TRUE,
         '<a href="http://www.host.com/some/path?query=foo&amp;bar[baz]=beer#fragment">www.host.com/some/path?query=foo&amp;bar[baz]=beer#fragment</a>' => TRUE,
         '<a href="http://twitter.com/#!/example/status/22376963142324226">http://twitter.com/#!/example/status/22376963142324226</a>' => TRUE,
@@ -1423,6 +1533,7 @@ http://encoded.com/?a=1&amp;b=2
       ),
       // Domain name length.
       '
+// cspell:disable-next-line
 www.ex.ex or www.example.example or www.toolongdomainexampledomainexampledomainexampledomainexampledomain or
 me@me.tv
 ' => array(
@@ -1465,11 +1576,11 @@ not foo://disallowed.com.
     $tests = array(
       '
 Partial URL with trailing period www.partial.com.
-E-mail with trailing comma person@example.com,
+Email with trailing comma person@example.com,
 Absolute URL with trailing question http://www.absolute.com?
 Query string with trailing exclamation www.query.com/index.php?a=!
 Partial URL with 3 trailing www.partial.periods...
-E-mail with 3 trailing exclamations@example.com!!!
+Email with 3 trailing exclamations@example.com!!!
 Absolute URL and query string with 2 different punctuation characters (http://www.example.com/q=abc).
 ' => array(
         'period <a href="http://www.partial.com">www.partial.com</a>.' => TRUE,
@@ -1543,7 +1654,7 @@ Unknown tag <x>containing x and www.example.com</x>? And a tag <pooh>beginning w
       '
 <p>Test &lt;br/&gt;: This is a www.example17.com example <strong>with</strong> various http://www.example18.com tags. *<br/>
  It is important www.example19.com to *<br/>test different URLs and http://www.example20.com in the same paragraph. *<br>
-HTML www.example21.com soup by person@example22.com can litererally http://www.example23.com contain *img*<img> anything. Just a www.example24.com with http://www.example25.com thrown in. www.example26.com from person@example27.com with extra http://www.example28.com.
+HTML www.example21.com soup by person@example22.com can literally http://www.example23.com contain *img*<img> anything. Just a www.example24.com with http://www.example25.com thrown in. www.example26.com from person@example27.com with extra http://www.example28.com.
 ' => array(
         'href="http://www.example17.com"' => TRUE,
         'href="http://www.example18.com"' => TRUE,
@@ -1562,11 +1673,11 @@ HTML www.example21.com soup by person@example22.com can litererally http://www.e
 <script>
 <!--
   // @see www.example.com
-  var exampleurl = "http://example.net";
+  var exampleUrl = "http://example.net";
 -->
 <!--//--><![CDATA[//><!--
   // @see www.example.com
-  var exampleurl = "http://example.net";
+  var exampleUrl = "http://example.net";
 //--><!]]>
 </script>
 ' => array(
@@ -1623,6 +1734,26 @@ www.example.com with a newline in comments -->
         '<li><a href="http://listitem.com">http://listitem.com</a></li>' => TRUE,
         '<li class="odd"><a href="http://www.class.listitem.com">www.class.listitem.com</a></li>' => TRUE,
       ),
+      // 'nolink' class.
+      '
+<p class="nolink">www.no-example.com</p>
+<p class="no-link">www.example.com</p>
+<span class="link nolink button">www.button-me.com</span>
+<div id="divitis" class="nolink" alt="Alt text">www.divitis.com</div>
+<p class="nolink">me@no-example.com</p>
+<p class="nolink2">me@example.com</p>
+<span class="link nolink button">you@button-me.com</span>
+<div id="divitis" class="nolink" alt="Alt text">us@divitis.com</div>
+' => array(
+        '<p class="nolink"><a href="http://www.no-example.com">www.no-example.com</a></p>' => FALSE,
+        '<p class="no-link"><a href="http://www.example.com">www.example.com</a></p>' => TRUE,
+        '<span class="link nolink button"><a href="www.button-me.com">www.button-me.com</a></span>' => FALSE,
+        '<div id="divitis" class="nolink" alt="Alt text"><a href="http://www.divitis.com">www.divitis.com</a></div>' => FALSE,
+        '<p class="nolink"><a href="mailto:me@no-example.com">me@no-example.com</a></p>' => FALSE,
+        '<p class="nolink2"><a href="mailto:me@example.com">me@example.com</a></p>' => TRUE,
+        '<span class="link nolink button"><a href="mailto:you@button-me.com">you@button-me.com</a></span>' => FALSE,
+        '<div id="divitis" class="nolink" alt="Alt text"><a href="mailto:us@divitis.com">us@divitis.com</a></div>' => FALSE,
+      ),
     );
     $this->assertFilteredString($filter, $tests);
 
@@ -1656,6 +1787,8 @@ www.example.com with a newline in comments -->
    *   ),
    * );
    * @endcode
+   * This means that after passing 'Input string' through the given filter, we
+   * should find '<p>Input string</p>' in the output, but not 'Input string<br'.
    */
   function assertFilteredString($filter, $tests) {
     foreach ($tests as $source => $tasks) {
@@ -1701,7 +1834,7 @@ www.example.com with a newline in comments -->
    * - Mix of several HTML tags, invalid non-HTML tags, tags to ignore and HTML
    *   comments.
    * - Empty HTML tags (BR, IMG).
-   * - Mix of absolute and partial URLs, and e-mail addresses in one content.
+   * - Mix of absolute and partial URLs, and email addresses in one content.
    */
   function testUrlFilterContent() {
     // Set up dummy filter object.
@@ -1885,8 +2018,10 @@ EOF;
     $f = _filter_htmlcorrector('<p>test\n</p>\n');
     $this->assertEqual($f, '<p>test\n</p>\n', 'HTML corrector -- New-lines are accepted and kept as-is.');
 
+    // cspell:disable
     $f = _filter_htmlcorrector('<p>دروبال');
     $this->assertEqual($f, '<p>دروبال</p>', 'HTML corrector -- Encoding is correctly kept.');
+    // cspell:enable
 
     $f = _filter_htmlcorrector('<script type="text/javascript">alert("test")</script>');
     $this->assertEqual($f, '<script type="text/javascript">
@@ -2174,9 +2309,9 @@ class FilterFileUsageTest extends BackdropWebTestCase {
       ),
       'log' => 'First revision.',
     ));
-    debug($node);
     $node->save();
-    $this->assertIdentical(array('filter' => array('node' => array(3 => '1'))), file_usage_list($image), 'The image has 1 usage.');
+    $nid = $node->nid;
+    $this->assertIdentical(array('filter' => array('node' => array($nid => '1'))), file_usage_list($image), 'The image has 1 usage.');
 
     // Test filter_entity_update(): increment, twice, by creating new revisions.
     $node->vid = NULL;
@@ -2186,7 +2321,7 @@ class FilterFileUsageTest extends BackdropWebTestCase {
     $node->vid = NULL;
     $node->log = 'Third revision.';
     $node->save();
-    $this->assertIdentical(array('filter' => array('node' => array(3 => '3'))), file_usage_list($image), 'The image has 3 usages.');
+    $this->assertIdentical(array('filter' => array('node' => array($nid => '3'))), file_usage_list($image), 'The image has 3 usages.');
 
     // Test hook_entity_update(): decrement, by modifying the last revision:
     // remove the data- attribute from the body field.
@@ -2194,17 +2329,17 @@ class FilterFileUsageTest extends BackdropWebTestCase {
     $new_value = str_replace('data-file-id', 'data-file-id-modified', $original_value);
     $node->body[LANGUAGE_NONE][0]['value'] = $new_value;
     $node->save();
-    $this->assertIdentical(array('filter' => array('node' => array(3 => '2'))), file_usage_list($image), 'The image has 2 usages.');
+    $this->assertIdentical(array('filter' => array('node' => array($nid => '2'))), file_usage_list($image), 'The image has 2 usages.');
 
     // Test hook_entity_update(): increment, by modifying the last revision:
     // read the data- attribute to the body field.
     $node->body[LANGUAGE_NONE][0]['value'] = $original_value;
     $node->save();
-    $this->assertIdentical(array('filter' => array('node' => array(3 => '3'))), file_usage_list($image), 'The image has 3 usages.');
+    $this->assertIdentical(array('filter' => array('node' => array($nid => '3'))), file_usage_list($image), 'The image has 3 usages.');
 
     // Test filter_node_revision_delete(): decrement, by deleting a revision.
     node_revision_delete($second_revision_id);
-    $this->assertIdentical(array('filter' => array('node' => array(3 => '2'))), file_usage_list($image), 'The image has 2 usages.');
+    $this->assertIdentical(array('filter' => array('node' => array($nid => '2'))), file_usage_list($image), 'The image has 2 usages.');
 
     // Test filter_entity_delete().
     $node->delete();
@@ -2237,7 +2372,7 @@ class FilterEditorAccessTestCase extends BackdropWebTestCase {
 
     $filtered_html_format = array(
       'format' => 'filtered_html',
-      'name' => 'Filtered HTML',
+      'name' => 'Basic',
       'weight' => 0,
       'editor' => 'ckeditor',
       'filters' => array(),

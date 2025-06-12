@@ -133,7 +133,7 @@ Backdrop.dateYearRange.SelectListWithCustomOption.prototype.createDropdown = fun
 
   // When the user changes the selected option in the dropdown, perform
   // appropriate actions (such as showing or hiding the textfield).
-  $dropdown.bind('change', $.proxy(this.handleDropdownChange, this));
+  $dropdown.on('change', $.proxy(this.handleDropdownChange, this));
 
   // Set the initial value of the dropdown.
   this._setInitialDropdownValue($dropdown);
@@ -212,7 +212,7 @@ Backdrop.dateYearRange.SelectListWithCustomOption.prototype.hideTextfield = func
 /**
  * Copy the selected value of the dropdown to the textfield.
  *
- * FAPI doesn't know about the JS-only dropdown, so the textfield needs to
+ * Form API doesn't know about the JS-only dropdown, so the textfield needs to
  * reflect the value of the dropdown.
  */
 Backdrop.dateYearRange.SelectListWithCustomOption.prototype.syncTextfield = function () {

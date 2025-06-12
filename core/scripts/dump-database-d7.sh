@@ -1,7 +1,7 @@
 #!/usr/bin/env php
 <?php
-
 /**
+ * @file
  * Dump a Drupal 7 database into a Drupal 7 PHP script to test the upgrade
  * process.
  *
@@ -31,9 +31,8 @@ backdrop_bootstrap(BACKDROP_BOOTSTRAP_FULL);
 include_once dirname(__FILE__) . '/../includes/utility.inc';
 
 // Output the PHP header.
-$output = <<<ENDOFHEADER
+$output = <<<END
 <?php
-
 /**
  * @file
  * Filled installation of Drupal 7.0, for test purposes.
@@ -42,7 +41,7 @@ $output = <<<ENDOFHEADER
  * installation of Drupal 7, filled with data using the generate-d7-content.sh
  * tool. It has the following modules installed:
 
-ENDOFHEADER;
+END;
 
 foreach (module_list() as $module) {
   $output .= " *  - $module\n";

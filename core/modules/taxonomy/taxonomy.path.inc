@@ -11,7 +11,8 @@ function taxonomy_path_info() {
   $info['taxonomy_term'] = array(
     'entity type' => 'taxonomy_term',
     'label' => t('Taxonomy term'),
-    'pattern description' => t('Default URL alias pattern (applies to all vocabularies with blank URL alias patterns below)'),
+    'pattern label' => t('Default URL alias pattern for taxonomy terms'),
+    'pattern description' => t('Fallback pattern for all taxonomy terms without a specific URL alias pattern below.'),
     'pattern default' => '[term:vocabulary]/[term:name]',
     'type delete callback' => 'taxonomy_path_type_delete_callback',
     'batch update callback' => 'taxonomy_path_bulk_update_batch_process',
@@ -19,7 +20,7 @@ function taxonomy_path_info() {
     'batch file path' => backdrop_get_path('module', 'taxonomy'),
     'source prefix' => 'taxonomy/term/',
   );
-  $vocabularies = taxonomy_get_vocabularies();
+
   $languages = array();
   if (module_exists('language')) {
     $languages = array(LANGUAGE_NONE => (object) array(
@@ -27,17 +28,20 @@ function taxonomy_path_info() {
       'langcode' => LANGUAGE_NONE,
     )) + language_list();
   }
+
+  $vocabularies = taxonomy_get_vocabularies();
   if (count($vocabularies)) {
     $info['taxonomy_term']['pattern items'] = array();
+    $info['taxonomy_term']['pattern items label'] = t('URL alias patterns for specific vocabularies');
     foreach ($vocabularies as $vocabulary_name => $vocabulary) {
       if (count($languages) && !empty($vocabulary->language)) {
-        $info['taxonomy_term']['pattern items'][$vocabulary_name] = t('Default URL alias pattern for %vocab-name (applies to all %vocab-name categories with blank URL alias patterns below)', array('%vocab-name' => $vocabulary->name));
+        $info['taxonomy_term']['pattern items'][$vocabulary_name] = t('Default URL alias pattern for all taxonomy terms in the vocabulary %vocab-name (any language)', array('%vocab-name' => $vocabulary->name));
         foreach ($languages as $langcode => $language) {
-          $info['taxonomy_term']['pattern items'][$vocabulary_name . '_' . $langcode] = t('URL alias pattern for all %vocab-name URLs in %language', array('%vocab-name' => $vocabulary->name, '%language' => $language->name));
+          $info['taxonomy_term']['pattern items'][$vocabulary_name . '_' . $langcode] = t('Taxonomy terms in the vocabulary %vocab-name in %language', array('%vocab-name' => $vocabulary->name, '%language' => $language->name));
         }
       }
       else {
-        $info['taxonomy_term']['pattern items'][$vocabulary_name] = t('URL alias pattern for all %vocab-name URLs', array('%vocab-name' => $vocabulary->name));
+        $info['taxonomy_term']['pattern items'][$vocabulary_name] = t('Taxonomy terms in the vocabulary %vocab-name', array('%vocab-name' => $vocabulary->name));
       }
     }
   }

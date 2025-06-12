@@ -24,8 +24,6 @@
 .layout--three-three-four-column .l-container,
 .layout--three-three-four-column .l-triptych,
 .layout--three-three-four-column .l-footer-wrapper {
-  -moz-box-sizing: border-box;
-  -webkit-box-sizing: border-box;
   box-sizing: border-box;
   width: 100%;
   margin-left: auto;
@@ -33,8 +31,6 @@
 }
 .layout--three-three-four-column .l-content,
 .layout--three-three-four-column .l-sidebar {
-  -moz-box-sizing: border-box;
-  -webkit-box-sizing: border-box;
   box-sizing: border-box;
   padding: 0 15px;
 }
@@ -44,8 +40,6 @@
 .layout--three-three-four-column .l-triptych-first,
 .layout--three-three-four-column .l-triptych-middle,
 .layout--three-three-four-column .l-triptych-last {
-  -moz-box-sizing: border-box;
-  -webkit-box-sizing: border-box;
   box-sizing: border-box;
   padding: 0 20px 0;
 }
@@ -53,8 +47,6 @@
 .layout--three-three-four-column .l-footer-second-column,
 .layout--three-three-four-column .l-footer-third-column,
 .layout--three-three-four-column .l-footer-fourth-column {
-  -moz-box-sizing: border-box;
-  -webkit-box-sizing: border-box;
   box-sizing: border-box;
   padding: 0 10px;
 }
@@ -103,16 +95,12 @@
   }
   .layout--three-three-four-column .l-footer-first-column,
   .layout--three-three-four-column .l-footer-second-column {
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
     box-sizing: border-box;
     padding: 0 10px;
     width: 50%;
   }
   .layout--three-three-four-column .l-footer-third-column,
   .layout--three-three-four-column .l-footer-fourth-column {
-    -moz-box-sizing: border-box;
-    -webkit-box-sizing: border-box;
     box-sizing: border-box;
     padding: 0 10px;
     width: 50%;

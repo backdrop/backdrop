@@ -508,8 +508,6 @@ function date_preprocess_views_view(&$variables) {
  * Preprocess function for Date pager template.
  */
 function template_preprocess_date_views_pager(&$variables) {
-  backdrop_add_css(backdrop_get_path('module', 'date') . "/css/date-views.css");
-
   $plugin = $variables['plugin'];
   $input = $variables['input'];
   $view = $plugin->view;

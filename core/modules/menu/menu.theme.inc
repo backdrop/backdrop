@@ -12,9 +12,14 @@
  *   - title: The menu's title.
  *   - description: The menu's description.
  *
+ * @deprecated as of 1.19.4. Labels are now output using the
+ * theme_label_machine_name() function, and descriptions are displayed in a
+ * separate column.
+ *
  * @ingroup themeable
  */
 function theme_menu_admin_overview($variables) {
+  watchdog_deprecated_function('theme', __FUNCTION__);
   $output = check_plain($variables['title']);
   $output .= '<div class="description">' . filter_xss_admin($variables['description']) . '</div>';
 
@@ -78,18 +83,11 @@ function theme_menu_overview_form($variables) {
     }
   }
 
-  if (empty($rows)) {
-    $rows[] = array(
-      array(
-        'data' => $form['#empty_text'],
-        'colspan' => count($header),
-      ),
-    );
-  }
   $output .= theme('table', array(
     'header' => $header,
     'rows' => $rows,
     'attributes' => array('id' => 'menu-overview'),
+    'empty' => t('There are no menu links yet. <a href="@link">Add link</a>.', array('@link' => url('admin/structure/menu/manage/' . $form['#menu']['menu_name'] . '/add'))),
   ));
   $output .= backdrop_render_children($form);
   return $output;
