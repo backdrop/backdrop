@@ -134,6 +134,7 @@ function template_preprocess_views_view(&$variables) {
             // To fit multiple views on a page, the programmer may have
             // overridden the display's pager_element.
             'pager_element' => isset($view->query->pager) ? $view->query->pager->get_pager_id() : 0,
+            'exposed_form_in_block' => $view->display_handler->get_option('exposed_block'),
           ),
         ),
       ),
