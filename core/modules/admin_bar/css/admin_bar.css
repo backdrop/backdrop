@@ -10,14 +10,13 @@
 /* Set a CSS property declaring the height of the admin bar. */
 /* This can be read by themes to offset the top of the page if needed. */
 :root {
-  /* Adjusting font size will scale the entire admin menu, including icons. */
   --admin-bar-font-size: 12px;
   --admin-bar-height: calc(var(--admin-bar-font-size) * 3.05);
-  --admin-bar-font: normal var(--admin-bar-font-size) "Lucida Grande", Verdana, sans-serif;
 }
 
 #admin-bar {
-  font: var(--admin-bar-font);
+  /* Adjusting font size will scale the entire admin menu, including icons. */
+  font: normal var(--admin-bar-font-size) "Lucida Grande", Verdana, sans-serif;
   left: 0;
   position: absolute;
   text-align: left; /* LTR */
@@ -308,6 +307,11 @@
   margin: 0;
   padding: 0.5em;
 }
+#admin-bar-search-items {
+  /* Reinforce the admin bar font so the search input is unaffected by the
+  theme. */
+  font: inherit;
+}
 #admin-bar .top-level .admin-bar-search {
   width: 12em;
 }
@@ -327,7 +331,6 @@
   padding: 0.5em 2em 0.5em 1em; /* LTR */
   width: 100%;
   box-sizing: border-box;
-  font: var(--admin-bar-font);
 }
 [dir="rtl"] #admin-bar .admin-bar-search input {
   background-position: left 0.5em center;
