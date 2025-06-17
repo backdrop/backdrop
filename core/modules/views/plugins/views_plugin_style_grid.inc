@@ -23,8 +23,8 @@ class views_plugin_style_grid extends views_plugin_style {
     $options['caption'] = array('default' => '');
     $options['deprecated_table'] = array('default' => FALSE, 'bool' => TRUE);
     $options['deprecated_unresponsive'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['cell_min_width'] = array('default' => '100');
-    $options['grid_gutter'] = array('default' => '10');
+    $options['cell_min_width'] = array('default' => array());
+    $options['grid_gutter'] = array('default' => array());
 
     return $options;
   }
@@ -43,14 +43,8 @@ class views_plugin_style_grid extends views_plugin_style {
       '#step' => 1,
     );
     $form['cell_min_width'] = array(
-      '#type' => 'number',
-      '#title' => t('Minimum grid cell width'),
-      '#field_suffix' => 'px',
-      '#attributes' => array('style' => 'width: 6em;'),
-      '#description' => t('The minimum width of the grid cells. If the grid container becomes narrow, the grid cells will reflow onto the next row as needed.'),
-      '#default_value' => $this->options['cell_min_width'],
-      '#required' => TRUE,
-      '#min' => 1,
+      '#type' => 'container',
+      '#attributes' => array('class' => array('container-inline')),
       '#states' => array(
         'invisible' => array(
           array(':input[name="style_options[deprecated_unresponsive]"]' => array('checked' => TRUE)),
@@ -58,21 +52,67 @@ class views_plugin_style_grid extends views_plugin_style {
         ),
       ),
     );
-    $form['grid_gutter'] = array(
+    $form['cell_min_width']['width'] = array(
       '#type' => 'number',
-      '#title' => t('Grid gutter spacing'),
-      '#field_suffix' => 'px',
-      '#attributes' => array('style' => 'width: 6em;'),
-      '#description' => t('The spacing between the grid cells.'),
-      '#default_value' => $this->options['grid_gutter'],
+      '#title' => t('Minimum grid cell width'),
+      '#title_display' => 'invisible',
+      '#prefix' => t('Minimum grid cell width'),
+      '#default_value' => $this->options['cell_min_width']['width'] ?? '100',
       '#required' => TRUE,
-      '#min' => 0,
+      '#min' => 1,
+    );
+    $form['cell_min_width']['unit'] = array(
+      '#type' => 'select',
+      '#title' => t('Cell width unit'),
+      '#title_display' => 'invisible',
+      '#prefix' => t('in'),
+      '#options' => array(
+        'px' => 'px',
+        'em' => 'em',
+        'rem' => 'rem',
+      ),
+      '#default_value' => $this->options['cell_min_width']['unit'] ?? 'px',
+      '#required' => TRUE,
+    );
+    $form['cell_help'] = array(
+      '#type' => 'item',
+      '#description' => t('The minimum width of the grid cells. If the grid container becomes narrow, the grid cells will reflow onto the next row as needed.'),
+    );
+    $form['grid_gutter'] = array(
+      '#type' => 'container',
+      '#attributes' => array('class' => array('container-inline')),
       '#states' => array(
         'invisible' => array(
           array(':input[name="style_options[deprecated_unresponsive]"]' => array('checked' => TRUE)),
           array(':input[name="style_options[deprecated_table]"]' => array('checked' => TRUE)),
         ),
       ),
+    );
+    $form['grid_gutter']['gutter'] = array(
+      '#type' => 'number',
+      '#title' => t('Grid gutter spacing'),
+      '#title_display' => 'invisible',
+      '#prefix' => t('Grid gutter spacing'),
+      '#default_value' => $this->options['grid_gutter']['gutter'] ?? '10',
+      '#required' => TRUE,
+      '#min' => 0,
+    );
+    $form['grid_gutter']['unit'] = array(
+      '#type' => 'select',
+      '#title' => t('Grid gutter unit'),
+      '#title_display' => 'invisible',
+      '#prefix' => t('in'),
+      '#options' => array(
+        'px' => 'px',
+        'em' => 'em',
+        'rem' => 'rem',
+      ),
+      '#default_value' => $this->options['grid_gutter']['unit'] ?? 'px',
+      '#required' => TRUE,
+    );
+    $form['gutter_help'] = array(
+      '#type' => 'item',
+      '#description' => t('The spacing between the grid cells.'),
     );
     $form['alignment'] = array(
       '#type' => 'radios',
