@@ -53,13 +53,15 @@ class views_plugin_style_grid extends views_plugin_style {
       ),
     );
     $form['cell_min_width']['width'] = array(
-      '#type' => 'number',
+      '#type' => 'textfield',
       '#title' => t('Minimum grid cell width'),
       '#title_display' => 'invisible',
       '#prefix' => t('Minimum grid cell width'),
       '#default_value' => $this->options['cell_min_width']['width'] ?? '100',
       '#required' => TRUE,
-      '#min' => 1,
+      '#element_validate' => array('form_validate_number'),
+      '#min' => 0,
+      '#size' => 4,
     );
     $form['cell_min_width']['unit'] = array(
       '#type' => 'select',
@@ -89,13 +91,15 @@ class views_plugin_style_grid extends views_plugin_style {
       ),
     );
     $form['grid_gutter']['width'] = array(
-      '#type' => 'number',
+      '#type' => 'textfield',
       '#title' => t('Grid gutter spacing'),
       '#title_display' => 'invisible',
       '#prefix' => t('Grid gutter spacing'),
       '#default_value' => $this->options['grid_gutter']['width'] ?? '10',
       '#required' => TRUE,
+      '#element_validate' => array('form_validate_number'),
       '#min' => 0,
+      '#size' => 4,
     );
     $form['grid_gutter']['unit'] = array(
       '#type' => 'select',
