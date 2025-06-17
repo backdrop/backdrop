@@ -88,12 +88,12 @@ class views_plugin_style_grid extends views_plugin_style {
         ),
       ),
     );
-    $form['grid_gutter']['gutter'] = array(
+    $form['grid_gutter']['width'] = array(
       '#type' => 'number',
       '#title' => t('Grid gutter spacing'),
       '#title_display' => 'invisible',
       '#prefix' => t('Grid gutter spacing'),
-      '#default_value' => $this->options['grid_gutter']['gutter'] ?? '10',
+      '#default_value' => $this->options['grid_gutter']['width'] ?? '10',
       '#required' => TRUE,
       '#min' => 0,
     );
