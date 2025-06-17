@@ -53,7 +53,8 @@ class views_plugin_style_grid extends views_plugin_style {
       '#min' => 1,
       '#states' => array(
         'invisible' => array(
-          ':input[name="style_options[deprecated_unresponsive]"]' => array('checked' => TRUE),
+          array(':input[name="style_options[deprecated_unresponsive]"]' => array('checked' => TRUE)),
+          array(':input[name="style_options[deprecated_table]"]' => array('checked' => TRUE)),
         ),
       ),
     );
@@ -68,7 +69,8 @@ class views_plugin_style_grid extends views_plugin_style {
       '#min' => 0,
       '#states' => array(
         'invisible' => array(
-          ':input[name="style_options[deprecated_unresponsive]"]' => array('checked' => TRUE),
+          array(':input[name="style_options[deprecated_unresponsive]"]' => array('checked' => TRUE)),
+          array(':input[name="style_options[deprecated_table]"]' => array('checked' => TRUE)),
         ),
       ),
     );
