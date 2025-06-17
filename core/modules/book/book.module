@@ -1149,11 +1149,15 @@ function book_toc($bid, $depth_limit, $exclude = array()) {
  *   A node type.
  *
  * @return bool
- *   A Boolean TRUE if the node type can be included in books; otherwise, FALSE.
+ *   TRUE if the node type can be included in books, FALSE otherwise.
  */
 function book_type_is_allowed($type) {
-  $book_allowed_types = array_filter(config_get('book.settings', 'book_allowed_types'));
-  return in_array($type, $book_allowed_types);
+  $book_allowed_types = config_get('book.settings', 'book_allowed_types');
+  if (!empty($book_allowed_types)) {
+    $enabled_types = array_filter($book_allowed_types);
+    return in_array($type, $enabled_types);
+  }
+  return FALSE;
 }
 
 /**

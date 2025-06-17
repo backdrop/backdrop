@@ -4,7 +4,7 @@
  * Provides integration with the CKEditor WYSIWYG editor.
  */
 
-define('CKEDITOR5_VERSION', '44.1.0');
+define('CKEDITOR5_VERSION', '44.3.0');
 
 /**
  * Implements hook_menu().
@@ -268,7 +268,8 @@ function ckeditor5_plugins() {
  * Return a list of all plugins provided by this module.
  */
 function ckeditor5_ckeditor5_plugins() {
-  $image_prefix = backdrop_get_path('module', 'ckeditor5') . '/icons';
+  $module_path = backdrop_get_path('module', 'ckeditor5');
+  $image_prefix = $module_path . '/icons';
 
   // The "essentials" plugin is necessary for any kind of basic editing. Basic
   // formatting buttons are included under this plugin, even though they are
@@ -590,6 +591,26 @@ function ckeditor5_ckeditor5_plugins() {
         'label' => t('Special characters'),
         'image' => $image_prefix . '/special-characters.svg',
         'plugin_dependencies' => array('specialCharacters.SpecialCharactersEssentials'),
+      ),
+    ),
+  );
+
+  // @see https://ckeditor.com/docs/ckeditor5/latest/features/emoji.html
+  $emoji_definitions = $module_path . '/lib/ckeditor5/build/emoji/en.json';
+  $plugins['emoji.EmojiPicker'] = array(
+    'buttons' => array(
+      'emoji' => array(
+        'label' => t('Emoji'),
+        'image' => $image_prefix . '/emoji.svg',
+        'plugin_dependencies' => array('mention.Mention', 'emoji.EmojiMention'),
+      ),
+    ),
+    'config' => array(
+      'emoji' => array(
+        // Use a local list of emoji definitions instead of using the
+        // CKEditor CDN, which may be blocked by CORS configuration.
+        // See lib/UPGRADING.md for more information.
+        'definitionsUrl' => url($emoji_definitions, array('absolute' => TRUE)),
       ),
     ),
   );

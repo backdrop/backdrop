@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.30.x-dev');
+define('BACKDROP_VERSION', '1.32.x-dev');
 
 /**
  * Core API compatibility.
@@ -17,7 +17,7 @@ define('BACKDROP_CORE_COMPATIBILITY', '1.x');
 /**
  * Minimum supported version of PHP.
  */
-define('BACKDROP_MINIMUM_PHP', '5.6.0');
+define('BACKDROP_MINIMUM_PHP', '7.1.0');
 
 /**
  * Minimum recommended value of PHP memory_limit.
@@ -738,8 +738,7 @@ function backdrop_environment_initialize() {
   // e.g. "&" or "%" that have special meanings in URLs and must be encoded.
   $_GET['q'] = request_path();
 
-  // Enforce E_STRICT, but allow users to set levels not part of E_STRICT.
-  error_reporting(E_STRICT | E_ALL | error_reporting());
+  error_reporting(E_ALL);
 
   // Override PHP settings required for Backdrop to work properly.
   // settings.php contains more runtime settings.
@@ -1444,6 +1443,33 @@ function state_del($name) {
   if ($states && array_key_exists($name, $states)) {
     unset($states[$name]);
   }
+}
+
+/**
+ * Get the backup directory (if any) for this site.
+ *
+ * This setting comes from $settings['backup_directory'] in settings.php. Note
+ * that settings_get('backup_directory') should not be called directly, instead
+ * use this function, which takes into account test runs.
+ *
+ * This function is in bootstrap.inc so that it can be used without loading
+ * backup.inc if backups are not enabled.
+ *
+ * @return string|null
+ *   The path to the backup directory, relative or absolute, depending on the
+ *   site configuration, or NULL if no backup directory is specified.
+ *
+ * @since 1.30.0 Function added.
+ */
+function backup_get_backup_directory() {
+  $backup_directory = settings_get('backup_directory', '');
+
+  // For test runs, specify a specific sub-directory. See BackdropWebTestBase::setUp().
+  if ($test_prefix = backdrop_valid_test_ua()) {
+    $backup_directory = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/backups';
+  }
+
+  return $backup_directory;
 }
 
 /**
@@ -2953,6 +2979,12 @@ function backdrop_bootstrap($phase = NULL, $new_phase = TRUE) {
  * at an empty database. If this happens, redirect the user to install.php.
  */
 function backdrop_bootstrap_is_installed() {
+  // If in any maintenance mode (install, update, restore, etc.) assume the site
+  // is in the process of installing or restoring.
+  if (defined('MAINTENANCE_MODE')) {
+    return TRUE;
+  }
+
   // We may get a situation where the config directory has been specified in
   // settings.php but the database is empty. In which case a config exception
   // is thrown in the first bootstrap phase but the database hasn't been loaded.

@@ -41,6 +41,28 @@ See https://ckeditor.com/docs/ckeditor5/latest/installation/advanced/alternative
 When downloading via npm, the directory you run concat-build.sh in, will then
 contain a package.json file, where you can find the version number.
 
+
+## Updating Emoji version
+
+New Emoji standards are released intermittently. The current version can be
+found at https://www.unicode.org/emoji/charts/full-emoji-list.html
+
+CKEditor by default retrieves a list of all available emoji from its CDN. But
+using a remote asset may be blocked by a site's CORS configuration, so Backdrop
+mirrors the list of emoji locally.
+
+See https://ckeditor.com/docs/ckeditor5/latest/features/emoji.html#emoji-source
+for information about changing the emoji source.
+
+To update the emoji list, visit:
+
+https://cdn.ckeditor.com/ckeditor5/data/emoji/16/en.json
+
+Replacing "16" with the latest emoji version. Note that CKEditor only maintains
+the emoji list in English currently.
+
+Save this file into `lib/ckeditor5/build/emoji/en.json`.
+
 ## Testing
 
 The Backdrop-specific integration points are the most likely things to encounter

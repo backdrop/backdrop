@@ -318,7 +318,7 @@ function authorize_get_filetransfer($backend, $settings = array()) {
       $file = $backend_info['file path'] . '/' . $backend_info['file'];
       require_once $file;
     }
-    /* @var FileTransfer $class */
+    /** @var FileTransfer $class */
     $class = $backend_info['class'];
     if (class_exists($class)) {
       $filetransfer = $class::factory(BACKDROP_ROOT, $settings);

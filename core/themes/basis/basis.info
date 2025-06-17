@@ -45,3 +45,11 @@ scripts[] = js/script.js
 ; We need at least one setting for the theme settings page to appear in the
 ; menu. Color module provides our defaults, so we just register a dummy setting.
 settings[color] = true
+
+; These defaults are used when the Basis theme is disabled but a sub-theme is
+; active. These can be overridden by a sub-theme's [theme].settings.json config
+; file or the sub-themes [theme].info file.
+settings[css_update] = "install"
+
+; An empty string is the same as "no updates".
+settings[css_update_version] = ""

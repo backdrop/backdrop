@@ -317,7 +317,7 @@ function file_stream_wrapper_get_instance_by_uri($uri) {
 
   $class = file_stream_wrapper_get_class($scheme);
   if (class_exists($class)) {
-    /* @var BackdropStreamWrapperInterface $instance */
+    /** @var BackdropStreamWrapperInterface $instance */
     $instance = new $class();
     $instance->setUri($uri);
     return $instance;
@@ -350,7 +350,7 @@ function file_stream_wrapper_get_instance_by_uri($uri) {
 function file_stream_wrapper_get_instance_by_scheme($scheme) {
   $class = file_stream_wrapper_get_class($scheme);
   if (class_exists($class)) {
-    /* @var BackdropStreamWrapperInterface $instance */
+    /** @var BackdropStreamWrapperInterface $instance */
     $instance = new $class();
     $instance->setUri($scheme . '://');
     return $instance;
@@ -2060,6 +2060,7 @@ function file_validate_svg(File $file) {
         '//svg:foreignobject',
         '//svg:script',
         '//html:iframe',
+        '//svg:set',
         // @see https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
         '//@*[starts-with(name(), "on")]',
         '//svg:a[starts-with(normalize-space(@href), "javascript:")]',
@@ -2342,6 +2343,8 @@ function file_download_access($uri) {
  *     extension. Defaults to 'uri'.
  *   - 'min_depth': Minimum depth of directories to return files from. Defaults
  *     to 0.
+ *   - 'max_depth': Maximum depth of directories to return files from. Defaults
+ *     to 30.
  * @param $depth
  *   Current depth of recursion. This parameter is only used internally and
  *   should not be passed in.
@@ -2365,6 +2368,7 @@ function file_scan_directory($dir, $mask, $options = array(), $depth = 0) {
     'recurse' => TRUE,
     'key' => 'uri',
     'min_depth' => 0,
+    'max_depth' => 30,
   );
 
   $options['key'] = in_array($options['key'], array('uri', 'filename', 'name')) ? $options['key'] : 'uri';
@@ -2379,7 +2383,7 @@ function file_scan_directory($dir, $mask, $options = array(), $depth = 0) {
           // subdirectory files.
           $files = array_merge(file_scan_directory($uri, $mask, $options, $depth + 1), $files);
         }
-        elseif ($depth >= $options['min_depth'] && preg_match($mask, $filename)) {
+        elseif ($depth >= $options['min_depth'] && $depth < $options['max_depth'] && preg_match($mask, $filename)) {
           // Always use this match over anything already set in $files with the
           // same $$options['key'].
           $file = new stdClass();

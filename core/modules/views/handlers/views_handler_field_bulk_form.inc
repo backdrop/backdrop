@@ -115,26 +115,30 @@ class views_handler_field_bulk_form extends views_handler_field {
     );
 
     // Build the bulk operations action widget for the header.
-    // Allow themes to apply .container-inline on this separate container.
-    $form['header'][$this->options['id']] = array(
-      '#type' => 'container',
-      '#attributes' => array('class' => array('views-bulk-form')),
-    );
-    $form['header'][$this->options['id']]['action'] = array(
-      '#title' => t('Action'),
-      '#title_display' => 'none',
-      '#type' => 'select',
-      '#options' => $this->get_bulk_options(),
-      '#empty_option' => '- ' . t('Choose an action') . ' -',
-      '#required' => TRUE,
-    );
+    $bulk_options = $this->get_bulk_options();
+    if (!empty($bulk_options)) {
+      // Allow themes to apply .container-inline on this separate container.
+      $form['header'][$this->options['id']] = array(
+        '#type' => 'container',
+        '#attributes' => array('class' => array('views-bulk-form')),
+      );
 
-    // Set the form actions container in the header.
-    $actions['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Execute'),
-    );
-    $form['header'][$this->options['id']]['actions'] = $actions;
+      $form['header'][$this->options['id']]['action'] = array(
+        '#title' => t('Action'),
+        '#title_display' => 'none',
+        '#type' => 'select',
+        '#options' => $bulk_options,
+        '#empty_option' => '- ' . t('Choose an action') . ' -',
+        '#required' => TRUE,
+      );
+
+      // Set the form actions container in the header.
+      $actions['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Execute'),
+      );
+      $form['header'][$this->options['id']]['actions'] = $actions;
+    }
   }
 
   /**

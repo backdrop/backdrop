@@ -140,16 +140,25 @@
         .split('\n');
 
       let indentCount = 0;
+      let isPreformattedLine = false;
 
       return lines
-        .filter((line) => { return line.trim().length })
+        .filter((line) => {
+          isPreformattedLine = this._isPreformattedBlockLine(line, isPreformattedLine);
+          return isPreformattedLine || line.trim().length;
+        })
         .map((line) => {
+          isPreformattedLine = this._isPreformattedBlockLine(line, isPreformattedLine);
           if (this._isNonVoidOpeningTag(line)) {
             return this._indentLine(line, indentCount++);
           }
 
           if (this._isClosingTag(line)) {
             return this._indentLine(line, --indentCount);
+          }
+
+          if (isPreformattedLine === 'middle' || isPreformattedLine === 'last') {
+            return line;
           }
 
           return this._indentLine(line, indentCount);
@@ -202,6 +211,34 @@
     _indentLine(line, indentCount, indentChar = '    ' ) {
       // More about Math.max() here in https://github.com/ckeditor/ckeditor5/issues/10698.
       return indentChar.repeat(Math.max(0, indentCount)) + line.trim();
+    }
+
+    /**
+     * Checks whether a line belongs to a preformatted (`<pre>`) block.
+     *
+     * @param {String} line
+     *   String to check.
+     * @param {String|false} isPreviousLinePreFormatted
+     *   Information on whether the previous line was preformatted (and how).
+     */
+    _isPreformattedBlockLine(line, isPreviousLinePreFormatted) {
+      let preLineType = false;
+      if (new RegExp('<pre( .*?)?>').test(line)) {
+        preLineType = 'first';
+      }
+      if (new RegExp('</pre>').test(line)) {
+        // If both an opening and closing a <pre> tag, no special treatment needed.
+        if (preLineType === 'first') {
+          preLineType = false;
+        }
+        else {
+          preLineType = 'last';
+        }
+      }
+      if (!preLineType && (isPreviousLinePreFormatted === 'first' || isPreviousLinePreFormatted === 'middle')) {
+        preLineType = 'middle';
+      }
+      return preLineType;
     }
   }
 

@@ -679,7 +679,7 @@ function token_element_validate(&$element, &$form_state) {
 
   if (!backdrop_strlen($value)) {
     // Empty value needs no further validation since the element should depend
-    // on using the '#required' FAPI property.
+    // on using the '#required' Form API property.
     return $element;
   }
 
