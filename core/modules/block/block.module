@@ -355,8 +355,9 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
  * @param string $value
  *   The machine name.
  *
- * @return bool
- *   Whether or not the custom block machine name is taken.
+ * @return bool|null
+ *   Whether or not the custom block machine name is taken, or null if $value is
+ *   empty.
  *
  * @since 1.31.1
  */
