@@ -23,8 +23,10 @@ class views_plugin_style_grid extends views_plugin_style {
     $options['caption'] = array('default' => '');
     $options['deprecated_table'] = array('default' => FALSE, 'bool' => TRUE);
     $options['deprecated_unresponsive'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['cell_min_width'] = array('default' => array());
-    $options['grid_gutter'] = array('default' => array());
+    $options['cell_min_width']['width'] = array('default' => 100);
+    $options['cell_min_width']['unit'] = array('default' => 'px');
+    $options['grid_gutter']['width'] = array('default' => 10);
+    $options['grid_gutter']['unit'] = array('default' => 'px');
 
     return $options;
   }
