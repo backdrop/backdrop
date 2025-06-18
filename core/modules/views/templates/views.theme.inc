@@ -784,8 +784,8 @@ function template_preprocess_views_view_grid(&$variables) {
       $variables['classes'][] = 'views-view-responsive-grid--' . $options['alignment'];
       $variables['attributes'] = array('style' => implode(';', array(
         '--views-responsive-grid--column-count:' . $options['columns'],
-        '--views-responsive-grid--cell-min-width:' . $options['cell_min_width']['width'] . $options['cell_min_width']['unit'],
-        '--views-responsive-grid--layout-gap:' . $options['grid_gutter']['width'] . $options['grid_gutter']['unit'],
+        '--views-responsive-grid--cell-min-width:' . ($options['cell_min_width']['width'] ?? 100) . ($options['cell_min_width']['unit'] ?? 'px'),
+        '--views-responsive-grid--layout-gap:' . ($options['grid_gutter']['width'] ?? 10) . ($options['grid_gutter']['unit'] ?? 'px'),
       )));
     }
     // Non-responsive grid uses a simple grid style.
