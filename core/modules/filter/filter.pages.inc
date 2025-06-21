@@ -354,7 +354,10 @@ function filter_format_editor_image_form_submit($form, &$form_state) {
         $attributes['width'] = $dimensions['width'];
         $attributes['height'] = $dimensions['height'];
       }
-      elseif (!empty($form_state['values']['previous_width'])) {
+      elseif (empty($form_state['values']['attributes']['src']) && !empty($form_state['values']['previous_width'])) {
+        // Style did not change, no new file selected, previous dimensions
+        // exist, so re-use them. That way manually resized images with styles
+        // keep adapted dimensions.
         $attributes['width'] = $form_state['values']['previous_width'];
         $attributes['height'] = $form_state['values']['previous_height'];
       }
