@@ -2510,6 +2510,23 @@ class LocaleUrlRewritingTest extends BackdropWebTestCase {
     // Restore HTTP_HOST.
     $_SERVER['HTTP_HOST'] = $http_host;
   }
+
+  /**
+   * Check that rewriting a URL that is already rewritten produces the same URL
+   */
+  public function testUrlRewritingTwice() {
+    // Create a URL with a language prefix.
+    $languages = language_list();
+    $language = $languages['fr'];
+    $url = url('node', array('language' => $language));
+
+    // Check that the URL is rewritten correctly.
+    $this->assertEqual($url, '/fr/node', 'The URL is rewritten correctly.');
+
+    // Check that the URL is not rewritten again.
+    $url = url($url, array('language' => $language));
+    $this->assertEqual($url, '/fr/node', 'The URL is not rewritten again.');
+  }
 }
 
 /**
