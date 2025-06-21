@@ -54,6 +54,17 @@ function ckeditor5_settings_form(&$form, $form_state, $format) {
     '#parents' => array('editor_settings', 'image_upload'),
   );
 
+  $elements['plugins']['image_styles'] = filter_editor_image_styles_settings_form($format);
+  $elements['plugins']['image_styles'] += array(
+    '#type' => 'fieldset',
+    '#title' => t('Inline image styles'),
+    '#attributes' => array(
+      'class' => array('ckeditor5-plugin-backdropimage'),
+      'data-ckeditor5-feature-dependency' => 'backdropImage',
+    ),
+    '#parents' => array('editor_settings', 'image_styles'),
+  );
+
   $elements['plugins']['file'] = filter_editor_file_upload_settings_form($format);
   $elements['plugins']['file'] += array(
     '#type' => 'fieldset',

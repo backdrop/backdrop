@@ -234,7 +234,7 @@ function system_requirements($phase) {
   else {
     // Database information.
     $class = 'DatabaseTasks_' . Database::getConnection()->driver();
-    /* @var DatabaseTasks $tasks */
+    /** @var DatabaseTasks $tasks */
     $tasks = new $class();
     $dbinfo = $t('!system version !version', array('!system' => $tasks->name(), '!version' => Database::getConnection()->version()));
     $requirements['database_system'] = array(

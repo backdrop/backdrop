@@ -411,7 +411,6 @@ function template_preprocess_user_simplified_page(&$variables) {
   $variables['front_page'] = url();
   $variables['page_title'] = $page_title;
   $variables['messages'] = theme('status_messages');
-  backdrop_add_css(backdrop_get_path('module', 'user') . '/css/user-simplified-page.css');
 }
 
 /**
