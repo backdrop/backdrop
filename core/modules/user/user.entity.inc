@@ -548,7 +548,7 @@ class UserStorageController extends EntityDatabaseStorageController {
 
     $view = array();
     foreach ($accounts as $account) {
-      /* @var User $account */
+      /** @var User $account */
       // Retrieve all profile fields and attach to $account->content.
       $this->buildContent($account, $view_mode, $langcode);
 

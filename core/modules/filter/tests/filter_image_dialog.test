@@ -1,0 +1,135 @@
+<?php
+/**
+ * @file
+ * Functional tests for the Filter module.
+ */
+
+/**
+ * Test for filter editor image dialog.
+ */
+class FilterEditorImageDialogTestCase extends BackdropWebTestCase {
+
+  protected $profile = 'testing';
+  protected $editorUser;
+  protected $format;
+
+  /**
+   * {@inheritdoc}
+   */
+  public function setUp() {
+    parent::setUp(
+      'filter',
+      'ckeditor5',
+      'image',
+      'filter_formtest',
+    );
+
+    // Create text format using filter default settings.
+    $filter_info = filter_filter_info();
+    $filters = array_fill_keys(array_keys($filter_info), array());
+    $format = (object) array(
+      'format' => 'filter_custom',
+      'name' => 'Filter custom',
+      'filters' => $filters,
+      'editor' => 'ckeditor5',
+      'editor_settings' => array(
+        'image_upload' => array(
+          'status' => 1,
+          'scheme' => 'public',
+          'directory' => '',
+          'max_size' => '',
+        ),
+        'image_styles' => array(
+          'status' => 1,
+          'list' => array('' => '', 'medium' => 'medium', 'large' => 'large'),
+        ),
+      ),
+    );
+    filter_format_save($format);
+    $permission = filter_permission_name($format);
+    $this->format = $format;
+
+    // Create content type.
+    $this->backdropCreateContentType(array('type' => 'page', 'name' => 'Page'));
+
+    // Create user and log in.
+    $this->editorUser = $this->backdropCreateUser(array(
+      'access content',
+      'bypass node access',
+      'upload editor images',
+      $permission,
+    ));
+    $this->backdropLogin($this->editorUser);
+
+    return TRUE;
+  }
+
+  /**
+   * Check image dimension transform when using style.
+   */
+  public function testEditorImageStyleDimensions() {
+    // Create dummy image file.
+    file_unmanaged_copy('core/misc/feed.png', $this->public_files_directory . '/dummy.png');
+    $image = entity_create('file', array());
+    $image->uri = 'public://dummy.png';
+    $image->filename = 'dummy.png';
+    $image->type = 'image';
+    $image->uid = $this->editorUser->uid;
+    $image->status = 0;
+    $image->save();
+
+    // Create a node and get the nid for the calling path.
+    $node = $this->backdropCreateNode();
+    $calling_path = "node/{$node->nid}/edit";
+    $link_token = filter_editor_dialog_token($this->format, 'image', $this->editorUser, $calling_path);
+    $options = array(
+      'query' => array(
+        'token' => $link_token,
+        'calling_path' => $calling_path,
+      ),
+    );
+    $this->backdropGet('editor/dialog/image/' . $this->format->format, $options);
+
+    // Insert path of the file created above.
+    $path = base_path() . $this->public_files_directory . '/' . $image->filename;
+    $file_path = base_path() . $this->public_files_directory;
+
+    // Use "Medium" image style, simulate picking from library.
+    $edit = array(
+      'attributes[src]' => $path,
+      'image_style' => 'medium',
+    );
+    $this->backdropPost(NULL, $edit, t('Insert'));
+    $this->assertRaw('width:250|height:250|src:' . $file_path . '/styles/medium/public/dummy.png|fid:1', 'Image dimensions adapted, image style path in use.');
+
+    // Also set width and height attribute, which should get ignored.
+    $edit = array(
+      'attributes[src]' => $path,
+      'image_style' => 'medium',
+      'attributes[width]' => 500,
+      'attributes[height]' => 500,
+    );
+    $this->backdropPost(NULL, $edit, t('Insert'));
+    $this->assertRaw('width:250|height:250|src:' . $file_path . '/styles/medium/public/dummy.png|fid:1', 'Image dimensions adapted, custom dimensions ignored, image style path in use.');
+
+    // Set width and height for original image (no image style).
+    $edit = array(
+      'attributes[src]' => $path,
+      'image_style' => '',
+      'attributes[width]' => 500,
+      'attributes[height]' => 500,
+    );
+    $this->backdropPost(NULL, $edit, t('Insert'));
+    $this->assertRaw('width:500|height:500|src:' . $file_path . '/dummy.png|fid:1', 'Custom image dimensions set, image served from original path.');
+
+    // Simulate upload - as far as AJAX upload can be simulated.
+    $edit = array(
+      'fid[fid]' => '1',
+      'image_style' => 'large',
+    );
+    $this->backdropPost(NULL, $edit, t('Insert'));
+    $this->assertRaw('width:600|height:600|src:' . $file_path . '/styles/large/public/dummy.png|fid:1', 'Image dimensions adapted, image style path in use.');
+
+  }
+
+}
