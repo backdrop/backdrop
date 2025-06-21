@@ -597,6 +597,10 @@ function file_file_formatter_info() {
   // Allow file field formatters to be reused for displaying the file entity's
   // file pseudo-field.
   foreach (field_info_formatter_types() as $key => $formatter) {
+    // Filter out unrelated field formatters from core or contrib.
+    if (!isset($formatter['file formatter']) && $formatter['module'] != 'file') {
+      continue;
+    }
     if (array_intersect($formatter['field types'], array('file', 'image'))) {
       $key = 'file_field_' . $key;
       $formatters[$key] = array(
