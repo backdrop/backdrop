@@ -16,10 +16,6 @@
 function theme_simpletest_test_table($variables) {
   $table = $variables['table'];
 
-  backdrop_add_css(backdrop_get_path('module', 'simpletest') . '/css/simpletest.css');
-  backdrop_add_js(backdrop_get_path('module', 'simpletest') . '/js/simpletest.js');
-  backdrop_add_js('core/misc/tableselect.js');
-
   // Create header for test selection table.
   $header = array(
     array('class' => array('select-all')),
