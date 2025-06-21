@@ -114,6 +114,11 @@ function user_theme() {
     'user_simplified_page' => array(
       'variables' => array('form' => array(), 'links' => array()),
       'template' => 'templates/user-simplified-page',
+      'attached' => array(
+        'css' => array(
+          backdrop_get_path('module', 'user') . '/css/user-simplified-page.css' => array(),
+        ),
+      ),
     ) + $base,
     'user_links_page' => array(
       'variables' => array('form' => array(), 'links' => array()),
