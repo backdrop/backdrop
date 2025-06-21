@@ -85,6 +85,11 @@ function system_theme() {
     ) + $base,
     'status_report' => array(
       'render element' => 'requirements',
+      'attached' => array(
+        'js' => array(
+          backdrop_get_path('module', 'system') . '/js/status.js' => array(),
+        ),
+      ),
     ) + $base,
     'admin_page' => array(
       'variables' => array('blocks' => NULL),
