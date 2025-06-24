@@ -27,15 +27,12 @@ function seven_preprocess_layout(&$variables) {
         $variables['title'] = NULL;
       }
       if ($variables['tabs']) {
-        $primary_tabs = theme('menu_local_tasks', array(
+        $variables['content']['header'] .= theme('menu_local_tasks', array(
           'primary' => menu_primary_local_tasks(),
         ));
-        $variables['content']['header'] .= $primary_tabs;
-
-        $secondary_tabs = theme('menu_local_tasks', array(
+        $variables['tabs'] = theme('menu_local_tasks', array(
           'secondary' => menu_secondary_local_tasks(),
         ));
-        $variables['tabs'] = $secondary_tabs;
       }
     }
   }
