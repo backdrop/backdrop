@@ -83,9 +83,10 @@ class CKEditor5TestCase extends BackdropWebTestCase {
     ), t('Save configuration'));
 
     $this->backdropGet('node/add/article');
-    $this->assertRaw('modules/ckeditor5/css/ckeditor5.css');
+    $this->assertRaw('modules/ckeditor5/css/ckeditor5-backdrop.css');
+    $this->assertRaw('modules/ckeditor5/lib/ckeditor5/dist/browser/ckeditor5.css');
     $this->assertRaw('modules/ckeditor5/js/ckeditor5.js');
-    $this->assertRaw('modules/ckeditor5/lib/ckeditor5/build/ckeditor5-dll.js');
+    $this->assertRaw('modules/ckeditor5/lib/ckeditor5/dist/browser/ckeditor5.umd.js');
     $settings = $this->backdropGetSettings();
     $format_settings = $settings['filter']['formats']['ckeditor5'];
     $this->assertEqual($format_settings['editorSettings']['toolbar']['items'], $toolbar, 'CKEditor toolbar settings saved and added correctly.');
