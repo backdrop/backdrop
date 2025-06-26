@@ -28,7 +28,6 @@
   <?php if ($content['header']): ?>
     <header class="l-header" role="banner" aria-label="<?php print t('Site header'); ?>">
       <?php print $content['header']; ?>
-      <?php print $primary_tabs; ?>
     </header>
   <?php endif; ?>
 
@@ -38,9 +37,9 @@
     </div>
   <?php endif; ?>
 
-  <?php if ($secondary_tabs): ?>
+  <?php if ($tabs): ?>
     <div class="tabs">
-      <?php print $secondary_tabs; ?>
+      <?php print $tabs; ?>
     </div>
   <?php endif; ?>
 

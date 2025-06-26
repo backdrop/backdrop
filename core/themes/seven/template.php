@@ -27,11 +27,11 @@ function seven_preprocess_layout(&$variables) {
         $variables['title'] = NULL;
       }
       if ($variables['tabs']) {
-        $variables['primary_tabs'] = theme('menu_local_tasks', array(
-          'primary_tabs' => menu_primary_local_tasks(),
+        $variables['content']['header'] .= theme('menu_local_tasks', array(
+          'primary' => menu_primary_local_tasks(),
         ));
 
-        $variables['secondary_tabs'] = $variables['tabs'] = theme('menu_local_tasks', array(
+        $variables['tabs'] = theme('menu_local_tasks', array(
           'secondary' => menu_secondary_local_tasks(),
         ));
       }
