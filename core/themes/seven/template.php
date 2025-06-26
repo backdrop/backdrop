@@ -31,7 +31,7 @@ function seven_preprocess_layout(&$variables) {
           'primary_tabs' => menu_primary_local_tasks(),
         ));
 
-        $variables['primary_tabs'] = $variables['tabs'] = theme('menu_local_tasks', array(
+        $variables['secondary_tabs'] = $variables['tabs'] = theme('menu_local_tasks', array(
           'secondary' => menu_secondary_local_tasks(),
         ));
       }
