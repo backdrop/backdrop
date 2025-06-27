@@ -1,10 +1,11 @@
 <?php
 /**
  * @file
+ * Tests for Views functionality.
  */
 
 /**
- *
+ * Test click sort behavior with tables.
  */
 class ViewsClickSortTest extends BackdropWebTestCase {
 
@@ -41,7 +42,7 @@ class ViewsClickSortTest extends BackdropWebTestCase {
     // This view does not use "append_orig_sort".
     $this->backdropGet('test-click-sort');
     // First check the default order of the view.
-    $sorted =  $this->getTitleOrderFromXpath();
+    $sorted = $this->getTitleOrderFromXpath();
     $alpha_sorted = array('A', 'B', 'C', 'D', 'E', 'F');
     $this->assertTrue($sorted === $alpha_sorted, 'Values are sorted alphabetically');
 
@@ -55,7 +56,7 @@ class ViewsClickSortTest extends BackdropWebTestCase {
 
     // The second view does use "append_orig_sort".
     $this->backdropGet('test-click-sort-appended');
-    $sorted =  $this->getTitleOrderFromXpath();
+    $sorted = $this->getTitleOrderFromXpath();
     $alpha_sorted = array('A', 'B', 'C', 'D', 'E', 'F');
     $this->assertTrue($sorted === $alpha_sorted, 'Values are sorted alphabetically');
     // Use click sort to reorder by state.
