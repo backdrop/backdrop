@@ -183,6 +183,7 @@ class views_plugin_style_table extends views_plugin_style {
       '#title' => t('Apply normal sorting criteria after click sorting'),
       '#default_value' => !empty($this->options['override']) && !empty($this->options['append_orig_sort']),
       '#description' => t('Leave unchecked to discard default sorting criteria when click sort is active.'),
+      '#indentation' => 1,
       '#states' => array(
         'visible' => array(
           ':input[name="style_options[override]"]' => array('checked' => TRUE),
