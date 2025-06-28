@@ -182,7 +182,7 @@ class views_plugin_style_table extends views_plugin_style {
       '#type' => 'checkbox',
       '#title' => t('Apply normal sorting criteria after click sorting'),
       '#default_value' => !empty($this->options['override']) && !empty($this->options['append_orig_sort']),
-      '#description' => t('Leave unchecked to discard default sorting criteria when click sort is active.'),
+      '#description' => t('Leave unchecked to discard normal sorting criteria when click sorting is used.'),
       '#indentation' => 1,
       '#states' => array(
         'visible' => array(
