@@ -695,7 +695,7 @@ function template_preprocess_views_view_grid(&$variables) {
 
   // Existing grid is unresponsive. Default to unresponsive if the view settings
   // haven't been updated.
-  $variables['deprecated_unresponsive'] = (!isset($options['deprecated_unresponsive']) || $options['deprecated_unresponsive']) ? TRUE : FALSE;
+  $variables['unresponsive'] = (!isset($options['unresponsive']) || $options['unresponsive']) ? TRUE : FALSE;
 
   if (!$variables['deprecated_table']) {
     $rows = $variables['rows'];
@@ -705,7 +705,7 @@ function template_preprocess_views_view_grid(&$variables) {
     $max = count($rows);
 
     // Reorder based on vertical alignment if not using responsive option.
-    if ($options['alignment'] == 'vertical' && $variables['deprecated_unresponsive']) {
+    if ($options['alignment'] == 'vertical' && $variables['unresponsive']) {
       $rows = array();
       $rows_reorder = array();
       $num_rows = floor(count($variables['rows']) / $columns);
@@ -776,7 +776,7 @@ function template_preprocess_views_view_grid(&$variables) {
         $col_count++;
       }
     }
-    if (!$variables['deprecated_unresponsive']) {
+    if (!$variables['unresponsive']) {
       $variables['classes'] = array(
         'views-view-grid',
         'views-view-responsive-grid',
@@ -784,8 +784,8 @@ function template_preprocess_views_view_grid(&$variables) {
       $variables['classes'][] = 'views-view-responsive-grid--' . $options['alignment'];
       $variables['attributes'] = array('style' => implode(';', array(
         '--views-responsive-grid--column-count:' . $options['columns'],
-        '--views-responsive-grid--cell-min-width:' . ($options['cell_min_width']['width'] ?? 100) . ($options['cell_min_width']['unit'] ?? 'px'),
-        '--views-responsive-grid--layout-gap:' . ($options['grid_gutter']['width'] ?? 10) . ($options['grid_gutter']['unit'] ?? 'px'),
+        '--views-responsive-grid--cell-min-width:' . ($options['cell_min_width']['width'] ?? 16) . ($options['cell_min_width']['unit'] ?? 'rem'),
+        '--views-responsive-grid--layout-gap:' . ($options['grid_gutter']['width'] ?? 2) . ($options['grid_gutter']['unit'] ?? 'rem'),
       )));
     }
     // Non-responsive grid uses a simple grid style.

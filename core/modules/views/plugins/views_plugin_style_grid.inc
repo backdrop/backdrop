@@ -22,11 +22,11 @@ class views_plugin_style_grid extends views_plugin_style {
     $options['summary'] = array('default' => '');
     $options['caption'] = array('default' => '');
     $options['deprecated_table'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['deprecated_unresponsive'] = array('default' => FALSE, 'bool' => TRUE);
-    $options['cell_min_width']['width'] = array('default' => 100);
-    $options['cell_min_width']['unit'] = array('default' => 'px');
-    $options['grid_gutter']['width'] = array('default' => 10);
-    $options['grid_gutter']['unit'] = array('default' => 'px');
+    $options['unresponsive'] = array('default' => FALSE, 'bool' => TRUE);
+    $options['cell_min_width']['width'] = array('default' => 16);
+    $options['cell_min_width']['unit'] = array('default' => 'rem');
+    $options['grid_gutter']['width'] = array('default' => 2);
+    $options['grid_gutter']['unit'] = array('default' => 'rem');
 
     return $options;
   }
@@ -49,7 +49,7 @@ class views_plugin_style_grid extends views_plugin_style {
       '#attributes' => array('class' => array('container-inline')),
       '#states' => array(
         'invisible' => array(
-          array(':input[name="style_options[deprecated_unresponsive]"]' => array('checked' => TRUE)),
+          array(':input[name="style_options[unresponsive]"]' => array('checked' => TRUE)),
           array(':input[name="style_options[deprecated_table]"]' => array('checked' => TRUE)),
         ),
       ),
@@ -59,7 +59,7 @@ class views_plugin_style_grid extends views_plugin_style {
       '#title' => t('Minimum grid cell width'),
       '#title_display' => 'invisible',
       '#prefix' => t('Minimum grid cell width'),
-      '#default_value' => $this->options['cell_min_width']['width'] ?? '100',
+      '#default_value' => $this->options['cell_min_width']['width'] ?? '16',
       '#required' => TRUE,
       '#element_validate' => array('form_validate_number'),
       '#min' => 0,
@@ -75,7 +75,7 @@ class views_plugin_style_grid extends views_plugin_style {
         'em' => 'em',
         'rem' => 'rem',
       ),
-      '#default_value' => $this->options['cell_min_width']['unit'] ?? 'px',
+      '#default_value' => $this->options['cell_min_width']['unit'] ?? 'rem',
       '#required' => TRUE,
     );
     $form['cell_help'] = array(
@@ -87,7 +87,7 @@ class views_plugin_style_grid extends views_plugin_style {
       '#attributes' => array('class' => array('container-inline')),
       '#states' => array(
         'invisible' => array(
-          array(':input[name="style_options[deprecated_unresponsive]"]' => array('checked' => TRUE)),
+          array(':input[name="style_options[unresponsive]"]' => array('checked' => TRUE)),
           array(':input[name="style_options[deprecated_table]"]' => array('checked' => TRUE)),
         ),
       ),
@@ -97,7 +97,7 @@ class views_plugin_style_grid extends views_plugin_style {
       '#title' => t('Grid gutter spacing'),
       '#title_display' => 'invisible',
       '#prefix' => t('Grid gutter spacing'),
-      '#default_value' => $this->options['grid_gutter']['width'] ?? '10',
+      '#default_value' => $this->options['grid_gutter']['width'] ?? '2',
       '#required' => TRUE,
       '#element_validate' => array('form_validate_number'),
       '#min' => 0,
@@ -113,7 +113,7 @@ class views_plugin_style_grid extends views_plugin_style {
         'em' => 'em',
         'rem' => 'rem',
       ),
-      '#default_value' => $this->options['grid_gutter']['unit'] ?? 'px',
+      '#default_value' => $this->options['grid_gutter']['unit'] ?? 'rem',
       '#required' => TRUE,
     );
     $form['gutter_help'] = array(
@@ -129,11 +129,11 @@ class views_plugin_style_grid extends views_plugin_style {
     $form['alignment']['horizontal']['#description'] = t('Places items starting in the upper left and moving right.');
     $form['alignment']['vertical']['#description'] = t('Places items starting in the upper left and moving down.');
 
-    $form['deprecated_unresponsive'] = array(
+    $form['unresponsive'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Use unresponsive grid (deprecated)'),
-      '#description' => t('The grid cells will not reflow to have fewer columns on narrower screens.'),
-      '#default_value' => !empty($this->options['deprecated_unresponsive']),
+      '#title' => t('Use unresponsive grid'),
+      '#description' => t('The grid cells will have the same number of columns regardless of screen size.'),
+      '#default_value' => !empty($this->options['unresponsive']),
       '#states' => array(
         'invisible' => array(
           ':input[name="style_options[deprecated_table]"]' => array('checked' => TRUE),
