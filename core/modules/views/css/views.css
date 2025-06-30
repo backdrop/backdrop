@@ -103,11 +103,11 @@
 /* Views responsive grid styles */
 
 .views-view-responsive-grid {
-  --views-responsive-grid--layout-gap: 10px;
+  --views-responsive-grid--layout-gap: 2rem;
   /* Will be overridden by an inline style. */
   --views-responsive-grid--column-count: 4;
   /* Will be overridden by an inline style. */
-  --views-responsive-grid--cell-min-width: 100px;
+  --views-responsive-grid--cell-min-width: 16rem;
   /* Will be overridden by an inline style. */
 
   display: inherit;
