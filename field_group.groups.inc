@@ -279,8 +279,15 @@ function field_group_pre_render_html_element(&$element, $group, &$form) {
   }
 
   // Sanitize the attributes.
-  $element_attributes = _filter_xss_attributes(backdrop_attributes($element_attributes));
-  $attributes = $element_attributes ? ' ' . implode(' ', $element_attributes) : '';
+  if (function_exists('filter_xss_attributes')) {
+    // Function introduced in 1.30.x.
+    $attributes = backdrop_attributes(filter_xss_attributes($element_attributes));
+  }
+  else {
+    // Assume using core < 1.30.x.
+    $element_attributes = _filter_xss_attributes(backdrop_attributes($element_attributes));
+    $attributes = $element_attributes ? ' ' . implode(' ', $element_attributes) : '';
+  }
 
   $element['#prefix'] = '<' . $html_element . $attributes . '>';
   if ($show_label) {
