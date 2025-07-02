@@ -915,7 +915,7 @@ function field_group_field_ui_create_vertical_tabs(&$form, &$form_state, $params
     '#type' => 'fieldset',
     '#title' => t('Fieldgroups'),
     '#collapsible' => TRUE,
-    '#collapsed' => FALSE,
+    '#collapsed' => TRUE,
     '#parents' => array('additional_settings'),
   );
   $form['additional_settings']['field_group']['fieldgroup_clone'] = array(
