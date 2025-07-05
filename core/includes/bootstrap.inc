@@ -3123,9 +3123,13 @@ function _backdrop_bootstrap_configuration() {
     install_goto('core/install.php');
   }
 
-  // Untrusted host names, throw an exception for the end-user.
+  // Untrusted host names, return 400 Bad Request to the end-user.
   if (!defined('MAINTENANCE_MODE') && !backdrop_check_trusted_hosts($_SERVER['HTTP_HOST'])) {
-    throw new Exception(format_string('The HTTP Host "@hostname" is not white-listed for this site. Check the trusted_host_patterns setting in settings.php.', array('@hostname' => $_SERVER['HTTP_HOST'])));
+    http_response_code(400);
+    print format_string('HTTP Host "@hostname" is not included in "trusted_host_patterns" setting of this site.', array(
+      '@hostname' => $_SERVER['HTTP_HOST'],
+    ));
+    exit;
   }
 
   // Bootstrap the database if it is needed but not yet available.
