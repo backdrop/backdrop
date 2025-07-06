@@ -870,8 +870,8 @@ function installer_browser_install_button_form($form, &$form_state) {
 function installer_browser_filters_form($form, &$form_state, $type) {
   $form['description'] = array(
     '#type' => 'help',
-    '#markup' => t('<p>This form allows you to find and install modules with an official release.</p>
-    <p>Additional modules in various stages of development can be found in the <a href="!url" target="_blank">Backdrop Contrib Repositories</a>. Use of dev modules in production is not recommended without careful testing.</p>', array('!url' => url('https://github.com/backdrop-contrib'))),
+    '#markup' => t('This form allows you to find and install modules with an official release.</p>
+    <p>Additional modules in various stages of development can be found in the <a href="!url" target="_blank">backdrop-contrib</a> repositories. Use of dev modules in production is not recommended without careful testing.</p>', array('!url' => url('https://github.com/backdrop-contrib'))),
   );
 
   $form['search_text'] = array(
