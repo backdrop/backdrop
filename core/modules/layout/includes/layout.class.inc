@@ -722,27 +722,27 @@ class Layout {
   /**
    * Set the layout template, accommodating moving blocks if necessary.
    *
-   * @param $layout_name
-   *   The new layout name.
+   * @param $layout_template_name
+   *   The new layout template name.
    * @param $region_mapping
    *   An array of region names, each keyed by the old region name and the value
    *   of the new region name. If empty, all known regions will be copied from
    *   one to the other. To discard the contents of a region, set the value
    *   to FALSE.
    */
-  function setLayoutTemplate($layout_name, $region_mapping = array()) {
+  function setLayoutTemplate($layout_template_name, $region_mapping = array()) {
     // If not changing anything, return as a no-op.
-    if ($layout_name === $this->layout_template && empty($region_mapping)) {
+    if ($layout_template_name === $this->layout_template && empty($region_mapping)) {
       return;
     }
     // If no layout has yet been set, then we have no copying to do.
     if (!isset($this->layout_template)) {
-      $this->layout_template = $layout_name;
+      $this->layout_template = $layout_template_name;
       return;
     }
 
-    $old_layout_template_info = layout_get_layout_template_info($this->layout_template);
-    $new_layout_template_info = layout_get_layout_template_info($layout_name);
+    $old_layout_template_info = layout_get_layout_template_info($this->layout_template, TRUE, $this->layout_template_type);
+    $new_layout_template_info = layout_get_layout_template_info($layout_template_name, TRUE, $this->layout_template_type);
     // Set up the array with region names for the new layout.
     $new_positions = array();
     $new_regions = array_keys($new_layout_template_info['regions']);
@@ -794,7 +794,7 @@ class Layout {
       }
     }
 
-    $this->layout_template = $layout_name;
+    $this->layout_template = $layout_template_name;
     $this->positions = $new_positions;
     module_invoke_all('layout_template_change', $this, $old_layout_template_info['name']);
   }
