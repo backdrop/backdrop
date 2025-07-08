@@ -249,6 +249,10 @@ class Layout {
       unset($this->layout);
     }
 
+    if (empty($this->layout_template_type)) {
+      $this->layout_template_type = 'layout';
+    }
+
     // Set the storage type.
     if (isset($config['module'])) {
       if (empty($config['storage']) || $config['storage'] == LAYOUT_STORAGE_DEFAULT) {
