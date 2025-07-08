@@ -5,7 +5,7 @@
  */
 
 /**
- *
+ * Class representing a flexible layout template.
  */
 class LayoutFlexibleTemplate {
   /**

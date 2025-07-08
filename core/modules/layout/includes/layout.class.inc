@@ -5,7 +5,7 @@
  */
 
 /**
- *
+ * Class representing a layout.
  */
 class Layout {
   /**
@@ -722,15 +722,15 @@ class Layout {
   /**
    * Set the layout template, accommodating moving blocks if necessary.
    *
-   * @param $layout_template_name
+   * @param string $layout_template_name
    *   The new layout template name.
-   * @param $region_mapping
+   * @param array $region_mapping
    *   An array of region names, each keyed by the old region name and the value
    *   of the new region name. If empty, all known regions will be copied from
    *   one to the other. To discard the contents of a region, set the value
    *   to FALSE.
    */
-  function setLayoutTemplate($layout_template_name, $region_mapping = array()) {
+  public function setLayoutTemplate($layout_template_name, $region_mapping = array()) {
     // If not changing anything, return as a no-op.
     if ($layout_template_name === $this->layout_template && empty($region_mapping)) {
       return;

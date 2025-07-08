@@ -48,7 +48,7 @@
 }
 @media (min-width: 768px) {
   .layout-list img,
-    .layout-list .layout-icon {
+  .layout-list .layout-icon {
     display: inline-block;
     color: rgb(102, 102, 102);
   }

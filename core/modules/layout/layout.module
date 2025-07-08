@@ -1651,7 +1651,6 @@ function _layout_get_all_info($data_type, $init = array()) {
         else {
           $info['path'] = $module_path;
         }
-        // @todo: maybe we need $key.$layout_template_type as key
         $all_info[$data_type][$key] = $info;
       }
     }
