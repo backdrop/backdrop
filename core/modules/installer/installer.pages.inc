@@ -875,7 +875,7 @@ function installer_browser_filters_form($form, &$form_state, $type) {
       array(
         '@projects' => ($type == 'module') ? 'modules' : (($type == 'theme') ? 'themes' : (($type == 'layout') ? 'layout templates' : 'projects')),
         '!url' => url('https://github.com/backdrop-contrib'),
-      ),
+      )
     ),
   );
 
