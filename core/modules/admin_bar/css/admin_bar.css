@@ -311,6 +311,8 @@
   /* Reinforce the admin bar font so the search input is unaffected by the
   theme. */
   font: inherit;
+  line-height: 1.15;
+  font-family: sans-serif;
 }
 #admin-bar .top-level .admin-bar-search {
   width: 12em;
