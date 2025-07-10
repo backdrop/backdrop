@@ -868,12 +868,26 @@ function installer_browser_install_button_form($form, &$form_state) {
  * Builds the filters form.
  */
 function installer_browser_filters_form($form, &$form_state, $type) {
+  switch ($type) {
+    case 'module':
+      $projects = t('modules');
+      break;
+    case 'theme':
+      $projects = t('themes');
+      break;
+    case 'layout':
+      $projects = t('layout templates');
+      break;
+    default:
+      $projects = t('projects');
+  }
+
   $form['description'] = array(
     '#type' => 'help',
     '#markup' => t('This form allows you to find and install @projects with an official release.</p>
     <p>Additional @projects in various stages of development can be found in the <a href="!url" target="_blank">backdrop-contrib</a> repositories. Use of dev @projects in production is not recommended without careful testing.</p>',
       array(
-        '@projects' => ($type == 'module') ? 'modules' : (($type == 'theme') ? 'themes' : (($type == 'layout') ? 'layout templates' : 'projects')),
+        '@projects' => $projects,
         '!url' => url('https://github.com/backdrop-contrib'),
       )
     ),
