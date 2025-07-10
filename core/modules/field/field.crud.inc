@@ -642,7 +642,7 @@ function field_validate_instance($instance, $update = FALSE, $load_field = TRUE)
         )), 'error');
       }
       else {
-        throw new FieldException($error_message = t("You cannot add the existing field with the machine name '@name' to a @type as this machine name is reserved by this entity type", array(
+        throw new FieldException(t("You cannot add the existing field with the machine name '@name' to a @type as this machine name is reserved by this entity type", array(
           '@name' => $instance['field_name'],
           '@type' => $entity_info['label'],
         )));
