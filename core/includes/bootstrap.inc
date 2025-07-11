@@ -3126,7 +3126,7 @@ function _backdrop_bootstrap_configuration() {
   // Untrusted host names, return 400 Bad Request to the end-user.
   if (!defined('MAINTENANCE_MODE') && !backdrop_check_trusted_hosts($_SERVER['HTTP_HOST'])) {
     http_response_code(400);
-    print format_string('HTTP Host "@hostname" is not included in "trusted_host_patterns" setting of this site.', array(
+    print format_string('HTTP Host "@hostname" is not included in the "trusted_host_patterns" setting of this site.', array(
       '@hostname' => $_SERVER['HTTP_HOST'],
     ));
     exit;
