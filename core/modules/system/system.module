@@ -3347,6 +3347,68 @@ function system_themes_disabled($theme_list) {
 }
 
 /**
+ * Implements hook_config_update_validate().
+ */
+function system_config_update_validate(Config $staging_config, Config $active_config, $all_changes) {
+  $config_name = $staging_config->getName();
+  if ($config_name === 'system.extensions') {
+    // Check for disabled modules:
+    $staging_module_list = array_filter($staging_config->get('modules'));
+    $current_module_list = array_filter($active_config->get('modules'));
+    $removed_module_list = array_keys(array_diff_key($current_module_list, $staging_module_list));
+    if ($removed_module_list) {
+      $error = format_plural(count($removed_module_list), 'The module "@module_list" cannot be disabled on config import.', 'Modules (@module_list) cannot be disabled on config import.', array(
+        '@module_list' => implode(', ', $removed_module_list),
+      ));
+      $error .= ' ' . t('Try disabling and uninstalling from the <a href="!url">modules administration page</a>.', array('!url' => url('admin/modules')));
+      throw new ConfigValidateException($error);
+    }
+
+    // Check for disabled themes:
+    $staging_theme_list = array_filter($staging_config->get('themes'));
+    $current_theme_list =array_filter( $active_config->get('themes'));
+    $removed_theme_list = array_keys(array_diff_key($current_theme_list, $staging_theme_list));
+    if ($removed_theme_list) {
+      $error = format_plural(count($removed_theme_list), 'The theme "@theme_list" cannot be disabled on config import.', 'Themes (@theme_list) cannot be disabled on config import.', array(
+        '@theme_list' => implode(', ', $removed_theme_list),
+      ));
+      $error .= ' ' . t('Try disabling from the <a href="!url">themes administration page</a>.', array('!url' => url('admin/appearance')));
+      throw new ConfigValidateException($error);
+    }
+  }
+}
+
+/**
+ * Implements hook_config_delete_validate().
+ */
+function system_config_delete_validate(Config $active_config, $all_changes) {
+  $config_name = $active_config->getName();
+  if ($config_name === 'system.extensions') {
+    throw new ConfigValidateException(t('The @config configuration is required and cannot be deleted. Check that it was not accidentally removed.', array('@config' => $config_name)));
+  }
+}
+
+/**
+ * Implements hook_config_update().
+ */
+function system_config_update(Config $staging_config, Config $active_config) {
+  $config_name = $staging_config->getName();
+  if ($config_name === 'system.extensions') {
+    // Enable new modules.
+    $staging_module_list = array_filter($staging_config->get('modules'));
+    $current_module_list = array_filter($active_config->get('modules'));
+    $added_module_list = array_keys(array_diff_key($staging_module_list, $current_module_list));
+    module_enable($added_module_list);
+
+    // Enable new themes.
+    $staging_theme_list = array_filter($staging_config->get('themes'));
+    $current_theme_list = array_filter($active_config->get('themes'));
+    $added_theme_list = array_keys(array_diff_key($staging_theme_list, $current_theme_list));
+    theme_enable($added_theme_list);
+  }
+}
+
+/**
  * Prefixes all values in an .info file array with a given path.
  *
  * This helper function is mainly used to prefix all array values of an .info

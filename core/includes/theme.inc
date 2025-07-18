@@ -1672,11 +1672,10 @@ function theme_enable($theme_list) {
     // Copy any default configuration data to the system config directory.
     config_install_default_config($theme);
 
-    // Add the newly-enabled theme to the system.extensions.json config file,
-    // or update its status if already in it.
+    // Update the theme status in the system.extensions config.
     $config = config('system.extensions');
     $themes_in_config = $config->get('themes') != NULL ? $config->get('themes') : array();
-    $themes_in_config[$theme] = 1;
+    $themes_in_config[$theme] = TRUE;
     $config->set('themes', $themes_in_config);
     $config->save();
   }
@@ -1717,13 +1716,8 @@ function theme_disable($theme_list) {
 
     config_uninstall_config($theme);
 
-    // Update the status of the theme in the system.extensions.json config
-    // file.
-    $config = config('system.extensions');
-    $themes_in_config = $config->get('themes') != NULL ? $config->get('themes') : array();
-    $themes_in_config[$theme] = 0;
-    $config->set('themes', $themes_in_config);
-    $config->save();
+    // Remove the theme from the system.extensions config.
+    config_clear('system.extensions', 'themes.' . $theme);
   }
 
   list_themes(TRUE);
