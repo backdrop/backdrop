@@ -1676,6 +1676,12 @@ function theme_enable($theme_list) {
     $config = config('system.extensions');
     $themes_in_config = $config->get('themes') != NULL ? $config->get('themes') : array();
     $themes_in_config[$theme] = TRUE;
+
+    watchdog('system', '%theme theme enabled.', array('%theme' => $theme), WATCHDOG_INFO);
+  }
+
+  // Save the updated config.
+  if (isset($config) && isset($themes_in_config)) {
     $config->set('themes', $themes_in_config);
     $config->save();
   }
@@ -1686,8 +1692,6 @@ function theme_enable($theme_list) {
 
   // Invoke hook_themes_enabled() after the themes have been enabled.
   module_invoke_all('themes_enabled', $theme_list);
-
-  watchdog('system', '%theme theme enabled.', array('%theme' => $theme), WATCHDOG_INFO);
 }
 
 /**
@@ -1718,6 +1722,8 @@ function theme_disable($theme_list) {
 
     // Remove the theme from the system.extensions config.
     config_clear('system.extensions', 'themes.' . $theme);
+
+    watchdog('system', '%theme theme disabled.', array('%theme' => $theme), WATCHDOG_INFO);
   }
 
   list_themes(TRUE);
@@ -1726,8 +1732,6 @@ function theme_disable($theme_list) {
 
   // Invoke hook_themes_disabled after the themes have been disabled.
   module_invoke_all('themes_disabled', $theme_list);
-
-  watchdog('system', '%theme theme disabled.', array('%theme' => $theme), WATCHDOG_INFO);
 }
 
 /**

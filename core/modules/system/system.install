@@ -3826,7 +3826,8 @@ function system_update_1103() {
       $modules[$extension['name']] = (bool) $extension['status'];
     }
 
-    if ($extension['type'] === 'theme') {
+    // Only add enabled themes to the list.
+    if ($extension['type'] === 'theme' && $extension['status']) {
       $themes[$extension['name']] = (bool) $extension['status'];
     }
   }

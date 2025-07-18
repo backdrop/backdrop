@@ -3352,28 +3352,33 @@ function system_themes_disabled($theme_list) {
 function system_config_update_validate(Config $staging_config, Config $active_config, $all_changes) {
   $config_name = $staging_config->getName();
   if ($config_name === 'system.extensions') {
-    // Check for disabled modules:
-    $staging_module_list = array_filter($staging_config->get('modules'));
-    $current_module_list = array_filter($active_config->get('modules'));
-    $removed_module_list = array_keys(array_diff_key($current_module_list, $staging_module_list));
-    if ($removed_module_list) {
-      $error = format_plural(count($removed_module_list), 'The module "@module_list" cannot be disabled on config import.', 'Modules (@module_list) cannot be disabled on config import.', array(
-        '@module_list' => implode(', ', $removed_module_list),
-      ));
-      $error .= ' ' . t('Try disabling and uninstalling from the <a href="!url">modules administration page</a>.', array('!url' => url('admin/modules')));
-      throw new ConfigValidateException($error);
-    }
-
-    // Check for disabled themes:
-    $staging_theme_list = array_filter($staging_config->get('themes'));
-    $current_theme_list =array_filter( $active_config->get('themes'));
-    $removed_theme_list = array_keys(array_diff_key($current_theme_list, $staging_theme_list));
-    if ($removed_theme_list) {
-      $error = format_plural(count($removed_theme_list), 'The theme "@theme_list" cannot be disabled on config import.', 'Themes (@theme_list) cannot be disabled on config import.', array(
-        '@theme_list' => implode(', ', $removed_theme_list),
-      ));
-      $error .= ' ' . t('Try disabling from the <a href="!url">themes administration page</a>.', array('!url' => url('admin/appearance')));
-      throw new ConfigValidateException($error);
+    foreach (array('modules', 'themes') as $extension_type) {
+      $staging_list = array_filter($staging_config->get($extension_type));
+      $current_list = array_filter($active_config->get($extension_type));
+      $removed_list = array_keys(array_diff_key($current_list, $staging_list));
+      if ($removed_list) {
+        if ($extension_type === 'modules') {
+          $error = format_plural(count($removed_list),
+            'The module "@module_list" cannot be disabled on config import.',
+            'Modules (@module_list) cannot be disabled on config import.',
+            array(
+              '@module_list' => implode(', ', $removed_list),
+            )
+          );
+          $error .= ' ' . t('Try disabling and uninstalling from the <a href="!url">modules administration page</a>.', array('!url' => url('admin/modules')));
+        }
+        else {
+          $error = format_plural(count($removed_list),
+            'The theme "@theme_list" cannot be disabled on config import.',
+            'Themes (@theme_list) cannot be disabled on config import.',
+            array(
+              '@theme_list' => implode(', ', $removed_list),
+            )
+          );
+          $error .= ' ' . t('Try disabling from the <a href="!url">themes administration page</a>.', array('!url' => url('admin/appearance')));
+        }
+        throw new ConfigValidateException($error);
+      }
     }
   }
 }
@@ -3393,18 +3398,22 @@ function system_config_delete_validate(Config $active_config, $all_changes) {
  */
 function system_config_update(Config $staging_config, Config $active_config) {
   $config_name = $staging_config->getName();
-  if ($config_name === 'system.extensions') {
-    // Enable new modules.
-    $staging_module_list = array_filter($staging_config->get('modules'));
-    $current_module_list = array_filter($active_config->get('modules'));
-    $added_module_list = array_keys(array_diff_key($staging_module_list, $current_module_list));
-    module_enable($added_module_list);
 
-    // Enable new themes.
-    $staging_theme_list = array_filter($staging_config->get('themes'));
-    $current_theme_list = array_filter($active_config->get('themes'));
-    $added_theme_list = array_keys(array_diff_key($staging_theme_list, $current_theme_list));
-    theme_enable($added_theme_list);
+  // Enable modules and themes on config update. Note that the disabling and
+  // uninstalling of extensions is not supported through config. They must be
+  // disabled through the UI.
+  if ($config_name === 'system.extensions') {
+    foreach (array('modules', 'themes') as $extension_type) {
+      $staging_list = array_filter($staging_config->get($extension_type));
+      $current_list = array_filter($active_config->get($extension_type));
+      $added_list = array_keys(array_diff_key($staging_list, $current_list));
+      if ($extension_type === 'modules') {
+        module_enable($added_list);
+      }
+      else {
+        theme_enable($added_list);
+      }
+    }
   }
 }
 
