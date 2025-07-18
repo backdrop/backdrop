@@ -47,6 +47,7 @@ function theme_file_managed_file($variables) {
 function theme_file_link($variables) {
   $file = $variables['file'];
   $icon_directory = $variables['icon_directory'];
+  $attributes = $variables['attributes'];
 
   $url = file_create_url($file->uri);
 
@@ -77,12 +78,17 @@ function theme_file_link($variables) {
     'alt' => !empty($mime_name[$mimetype]) ? $mime_name[$mimetype] : t('File'),
   ));
 
-  // Set options as per anchor format described at
+  // Set "type" attribute per anchor format described at
   // http://microformats.org/wiki/file-format-examples
+  if (!isset($attributes['type'])) {
+    $attributes['type'] = $file->filemime . '; length=' . $file->filesize;
+  }
+
   $options = array(
     'attributes' => array(
       'type' => $file->filemime . '; length=' . $file->filesize,
     ),
+    'attributes' => $attributes,
   );
 
   // Use the description as the link text if available.
@@ -264,13 +270,13 @@ function theme_file_widget_multiple($variables) {
  * @ingroup themeable
  */
 function theme_file_upload_help($variables) {
-  $description = $variables['description'];
+  $description = (string) $variables['description'];
   $upload_validators = $variables['upload_validators'];
 
   $descriptions = array();
 
   if (strlen($description)) {
-    $descriptions[] = $description;
+    $descriptions[] = token_replace($description);
   }
   if (isset($upload_validators['file_validate_size'])) {
     $descriptions[] = t('Files must be less than !size.', array('!size' => '<strong>' . format_size($upload_validators['file_validate_size'][0]) . '</strong>'));
@@ -339,8 +345,13 @@ function theme_file_formatter_table($variables) {
  * Returns HTML for the file type overview page.
  *
  * Specifically, this returns HTML for a file type name and description.
+ *
+ * @deprecated as of 1.19.4. Labels are now output using the
+ * theme_label_machine_name() function, and descriptions are displayed in a
+ * separate column.
  */
 function theme_file_type_overview($variables) {
+  watchdog_deprecated_function('theme', __FUNCTION__);
   return check_plain($variables['name']) . '<div class="description">' . filter_xss_admin($variables['description']) . '</div>';
 }
 

@@ -33,6 +33,27 @@ function theme_node_preview_banner_form($variables) {
 }
 
 /**
+ * Returns HTML for a node preview for display during node creation and editing.
+ *
+ * @param array $variables
+ *   An associative array containing:
+ *   - node_preview: A render element representing the node preview.
+ *
+ * @see node_preview()
+ * @see node_preview_banner_form()
+ * @see theme_node_preview_banner_form()
+ *
+ * @ingroup themeable
+ *
+ * @since 1.0.6 Function removed (see: https://github.com/backdrop/backdrop-issues/issues/218).
+ * @since 1.28.0 Function re-added (see: https://github.com/backdrop/backdrop-issues/issues/6129).
+ */
+function theme_node_preview($variables) {
+  $node_preview = $variables['node_preview'];
+  return backdrop_render_children($node_preview);
+}
+
+/**
  * Returns HTML for the content ranking part of the search settings admin page.
  *
  * @param $variables
@@ -58,69 +79,6 @@ function theme_node_search_factors($variables) {
   $output .= theme('help', array('markup' => $element['#help']));
   $output .= theme('table', array('header' => $header, 'rows' => $rows));
   $output .= backdrop_render_children($element);
-  return $output;
-}
-
-/**
- * Returns HTML for a list of recent content.
- *
- * @param $variables
- *   An associative array containing:
- *   - nodes: An array of recent node entities.
- *
- * @ingroup themeable
- */
-function theme_node_recent_block($variables) {
-  $rows = array();
-  $output = '';
-
-  $l_options = array('query' => backdrop_get_destination());
-  foreach ($variables['nodes'] as $node) {
-    $row = array();
-    $row[] = array(
-      'data' => theme('node_recent_content', array('node' => $node)),
-      'class' => 'title-author',
-    );
-    $row[] = array(
-      'data' => node_access('update', $node) ? l(t('edit'), 'node/' . $node->nid . '/edit', $l_options) : '',
-      'class' => 'edit',
-    );
-    $row[] = array(
-      'data' => node_access('delete', $node) ? l(t('delete'), 'node/' . $node->nid . '/delete', $l_options) : '',
-      'class' => 'delete',
-    );
-    $rows[] = $row;
-  }
-
-  if ($rows) {
-    $output = theme('table', array('rows' => $rows));
-    if (user_access('access content overview')) {
-      $output .= theme('more_link', array('url' => 'admin/content', 'title' => t('Show more content')));
-    }
-  }
-
-  return $output;
-}
-
-/**
- * Returns HTML for a recent node to be displayed in the recent content block.
- *
- * @param $variables
- *   An associative array containing:
- *   - node: A node entity.
- *
- * @ingroup themeable
- */
-function theme_node_recent_content($variables) {
-  $node = $variables['node'];
-
-  $output = '<div class="node-title">';
-  $output .= l($node->title, 'node/' . $node->nid);
-  $output .= theme('mark', array('type' => node_mark($node->nid, $node->changed)));
-  $output .= '</div><div class="node-author">';
-  $output .= theme('username', array('account' => user_load($node->uid)));
-  $output .= '</div>';
-
   return $output;
 }
 
@@ -161,9 +119,14 @@ function theme_node_add_list($variables) {
  *   - type: An object containing the 'type' (machine name) and 'description' of
  *     the content type.
  *
+ * @deprecated as of 1.19.4. Labels are now output using the
+ * theme_label_machine_name() function, and descriptions are displayed in a
+ * separate column.
+ *
  * @ingroup themeable
  */
 function theme_node_admin_overview($variables) {
+  watchdog_deprecated_function('theme', __FUNCTION__);
   $name = $variables['name'];
   $type = $variables['type'];
 
@@ -241,9 +204,6 @@ function template_preprocess_node(&$variables) {
     }
   }
 
-  // Add article ARIA role.
-  $variables['attributes']['role'] = 'article';
-
   // Gather node classes.
   $variables['classes'][] = backdrop_html_class('node-' . $node->type);
   if ($variables['promote']) {
@@ -262,10 +222,23 @@ function template_preprocess_node(&$variables) {
     $variables['classes'][] = 'node-by-anonymous';
   }
   elseif ($node->uid == $variables['user']->uid) {
-      $variables['classes'][] = 'node-by-viewer';
+    $variables['classes'][] = 'node-by-viewer';
   }
 
-  // Add an extra theme hook suggestion for node id.
-  $variables['theme_hook_suggestions'][] = 'node__' . $node->nid;
-}
+  // Remove the link to the node if this type has a hidden path.
+  if ($node_type->settings['hidden_path'] && !user_access('view hidden paths')) {
+    // Empty the $node_url variable so the node title won't be linked.
+    $variables['node_url'] = FALSE;
+  }
 
+  // Add extra theme hook suggestions for node type, view_mode and id.
+  $variables['theme_hook_suggestions'][] = 'node__' . $node->type;
+  $variables['theme_hook_suggestions'][] = 'node__' . $node->type . '__' . $variables['view_mode'];
+  $variables['theme_hook_suggestions'][] = 'node__' . $node->nid;
+  $variables['theme_hook_suggestions'][] = 'node__' . $node->nid . '__' . $variables['view_mode'];
+
+  // Add a legacy theme hook suggestion for content block. @todo remove in 2.x.
+  if (strstr($variables['theme_hook_original'], 'node_block')) {
+    $variables['theme_hook_suggestions'][] = 'node__block_' . $node->nid;
+  }
+}

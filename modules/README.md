@@ -37,4 +37,4 @@ More information
 
 Refer to the "Developing Modules" section of the developer documentation on the
 Backdrop API website for further information on extending Backdrop with custom
-modules: https://api.backdropcms.org/developing-modules.
+modules: https://docs.backdropcms.org/documentation/developing-modules.

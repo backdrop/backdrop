@@ -202,7 +202,7 @@ abstract class BackdropTestCase {
    * @return bool
    *   TRUE if the assertion passed and FALSE if it failed.
    */
-  protected function assert($status, $message = '', $group = 'Other', array $caller = NULL) {
+  protected function assert($status, $message = '', $group = 'Other', array $caller = array()) {
     // Convert boolean status to string status.
     if (is_bool($status)) {
       $status = $status ? 'pass' : 'fail';
@@ -356,7 +356,7 @@ abstract class BackdropTestCase {
    *   The message to display along with the assertion.
    * @param $group
    *   The type of assertion - examples are "Browser", "PHP".
-   * @return
+   * @return boolean
    *   TRUE if the assertion succeeded, FALSE otherwise.
    */
   protected function assertTrue($value, $message = '', $group = 'Other') {
@@ -520,10 +520,10 @@ abstract class BackdropTestCase {
    *   The type of assertion - examples are "Browser", "PHP".
    * @param $caller
    *   The caller of the error.
-   * @return
-   *   FALSE.
+   * @return false
+   *   Always returns false.
    */
-  protected function error($message = '', $group = 'Other', array $caller = NULL) {
+  protected function error($message = '', $group = 'Other', array $caller = array()) {
     if ($group == 'User notice') {
       // Since 'User notice' is set by trigger_error() which is used for debug
       // set the message to a status of 'debug'.
@@ -662,7 +662,6 @@ abstract class BackdropTestCase {
   public function errorHandler($severity, $message, $file = NULL, $line = NULL) {
     if ($severity & error_reporting()) {
       $error_map = array(
-        E_STRICT => 'Run-time notice',
         E_WARNING => 'Warning',
         E_NOTICE => 'Notice',
         E_CORE_ERROR => 'Core error',
@@ -671,15 +670,13 @@ abstract class BackdropTestCase {
         E_USER_WARNING => 'User warning',
         E_USER_NOTICE => 'User notice',
         E_RECOVERABLE_ERROR => 'Recoverable error',
+        E_DEPRECATED => 'Deprecated',
+        E_USER_DEPRECATED => 'User deprecated',
       );
-
-      // PHP 5.3 adds new error logging constants. Add these conditionally for
-      // backwards compatibility with PHP 5.2.
-      if (defined('E_DEPRECATED')) {
-        $error_map += array(
-          E_DEPRECATED => 'Deprecated',
-          E_USER_DEPRECATED => 'User deprecated',
-        );
+      // E_STRICT was removed from PHP 8.4 and higher, but still exists in older
+      // versions.
+      if (version_compare(PHP_VERSION, '8.4.0') < 0) {
+        $error_map[E_STRICT] = 'Run-time notice';
       }
 
       $backtrace = debug_backtrace();
@@ -828,6 +825,11 @@ class BackdropUnitTestCase extends BackdropTestCase {
   protected $originalModuleList;
 
   /**
+   * @var object
+   */
+  protected $originalLanguage;
+
+  /**
    * Constructor for BackdropUnitTestCase.
    */
   function __construct($test_id = NULL) {
@@ -959,14 +961,14 @@ class BackdropWebTestCase extends BackdropTestCase {
   /**
    * The content of the page currently loaded in the internal browser.
    *
-   * @var string
+   * @var string|false
    */
   protected $content;
 
   /**
    * The content of the page currently loaded in the internal browser (plain text version).
    *
-   * @var string
+   * @var string|false
    */
   protected $plainTextContent;
 
@@ -1000,7 +1002,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected $cookieFile = NULL;
 
   /**
-   * An array of cookies set in the most recent cURL request.
+   * The cookies of the page currently loaded in the internal browser.
    *
    * @var array
    */
@@ -1041,7 +1043,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected $originalCleanUrl;
 
   /**
-   * The original shutdown handlers array, before it was cleaned for testing purposes.
+   * The original shutdown handlers array, before it was cleaned for testing.
    *
    * @var array
    */
@@ -1075,6 +1077,16 @@ class BackdropWebTestCase extends BackdropTestCase {
   public $public_files_directory;
   public $private_files_directory;
   public $temp_files_directory;
+
+  /**
+   * @var object
+   */
+  protected $originalLanguage;
+
+  /**
+   * @var object
+   */
+  protected $originalLanguageUrl;
 
   /**
    * Constructor for BackdropWebTestCase.
@@ -1227,7 +1239,8 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected function backdropGetTestFiles($type, $size = NULL) {
     $files = array();
     // Make sure type is valid.
-    if (in_array($type, array('binary', 'html', 'image', 'javascript', 'php', 'sql', 'text'))) {
+    $possible_types = array('binary', 'html', 'image', 'svg', 'javascript', 'php', 'sql', 'text');
+    if (in_array($type, $possible_types)) {
 
       if (!in_array($type, $this->generatedTestFiles)) {
         switch ($type) {
@@ -1425,14 +1438,14 @@ class BackdropWebTestCase extends BackdropTestCase {
    *   $account->pass_raw = $pass_raw;
    * @endcode
    *
-   * @param $account
+   * @param User $account
    *   User object representing the user to log in.
-   * @param $by_email
+   * @param boolean $by_email
    *   Whether to use email for login instead of username.
    *
    * @see backdropCreateUser()
    */
-  protected function backdropLogin($account, $by_email = FALSE) {
+  protected function backdropLogin(User $account, $by_email = FALSE) {
     global $user;
     if ($this->loggedInUser) {
       $this->backdropLogout();
@@ -1576,8 +1589,10 @@ class BackdropWebTestCase extends BackdropTestCase {
     $config_base_path = 'files/simpletest/' . $this->fileDirectoryName . '/config_';
     $config_directories['active'] = $config_base_path . 'active';
     $config_directories['staging'] = $config_base_path . 'staging';
-    config_get_config_storage('active')->initializeStorage();
-    config_get_config_storage('staging')->initializeStorage();
+
+    // Set the new backup directories. During test execution, these values are
+    // manually set directly in backup_get_backup_directory().
+    $settings['backup_directory'] = 'files/simpletest/' . $this->fileDirectoryName . '/backups';
 
     // Log fatal errors.
     ini_set('log_errors', 1);
@@ -1598,7 +1613,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   /**
    * Copies the cached tables and config for a profile if one is available.
    *
-   * @return
+   * @return boolean
    *   TRUE when cache used, FALSE when cache is not available.
    *
    * @see BackdropWebTestCase::setUp()
@@ -1699,6 +1714,17 @@ class BackdropWebTestCase extends BackdropTestCase {
       return FALSE;
     }
 
+    // This has to happen before any config changes are made to ensure that the
+    // database tables from the test cache exist.
+    $use_cache = $this->useCache();
+
+    if (!$use_cache) {
+      // Initialize config storage. The database storage needs to be done after
+      // switching the database prefix.
+      config_get_config_storage('active')->initializeStorage();
+      config_get_config_storage('staging')->initializeStorage();
+    }
+
     // Preset the 'install_profile' system variable, so the first call into
     // system_rebuild_module_data() (in backdrop_install_system()) will register
     // the test's profile as a module. Without this, the installation profile of
@@ -1707,11 +1733,18 @@ class BackdropWebTestCase extends BackdropTestCase {
     config_install_default_config('system');
     config_set('system.core', 'install_profile', $this->profile);
 
-    $use_cache = $this->useCache();
     if (!$use_cache) {
       // Perform the actual Backdrop installation.
       include_once BACKDROP_ROOT . '/core/includes/install.inc';
       backdrop_install_system();
+
+      // Set path variables.
+      $core_config = config('system.core');
+      $core_config->set('file_default_scheme', 'public');
+      $core_config->set('file_public_path', $this->public_files_directory);
+      $core_config->set('file_private_path', $this->private_files_directory);
+      $core_config->set('file_temporary_path', $this->temp_files_directory);
+      $core_config->save();
 
       // Ensure schema versions are recalculated.
       backdrop_static_reset('backdrop_get_schema_versions');
@@ -1728,14 +1761,15 @@ class BackdropWebTestCase extends BackdropTestCase {
         module_enable(array($this->profile), FALSE);
       }
     }
-
-    // Set path variables.
-    $core_config = config('system.core');
-    $core_config->set('file_default_scheme', 'public');
-    $core_config->set('file_public_path', $this->public_files_directory);
-    $core_config->set('file_private_path', $this->private_files_directory);
-    $core_config->set('file_temporary_path', $this->temp_files_directory);
-    $core_config->save();
+    else {
+      // Set path variables. This must be done even when using a profile cache.
+      $core_config = config('system.core');
+      $core_config->set('file_default_scheme', 'public');
+      $core_config->set('file_public_path', $this->public_files_directory);
+      $core_config->set('file_private_path', $this->private_files_directory);
+      $core_config->set('file_temporary_path', $this->temp_files_directory);
+      $core_config->save();
+    }
 
     // Set 'parent_profile' of simpletest to add the parent profile's
     // search path to the child site's search paths.
@@ -1853,9 +1887,13 @@ class BackdropWebTestCase extends BackdropTestCase {
 
     $emailCount = count(state_get('test_email_collector', array()));
     if ($emailCount) {
-      $message = format_plural($emailCount, '1 e-mail was sent during this test.', '@count e-mails were sent during this test.');
-      $this->pass($message, t('E-mail'));
+      $message = format_plural($emailCount, '1 email was sent during this test.', '@count emails were sent during this test.');
+      $this->pass($message, t('Email'));
     }
+
+    // Reset static variables, this may flush pending writes to the theme
+    // registry as well.
+    backdrop_static_reset();
 
     // Delete temporary files directory.
     file_unmanaged_delete_recursive($this->originalFileDirectory . '/simpletest/' . $this->fileDirectoryName);
@@ -1919,15 +1957,14 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Rebuild caches.
     $this->refreshVariables();
 
-    // Reset public files directory.
-    $GLOBALS['conf']['file_public_path'] = $this->originalFileDirectory;
-
     // Reset language.
     $language = $this->originalLanguage;
     $language_url = $this->originalLanguageUrl;
 
-    // Close the CURL handler.
+    // Close the CURL handler and reset the cookies array, so that test classes
+    // containing multiple tests are not polluted.
     $this->curlClose();
+    $this->cookies = array();
   }
 
   /**
@@ -2087,7 +2124,7 @@ class BackdropWebTestCase extends BackdropTestCase {
     // Errors are being sent via X-Backdrop-Assertion-* headers,
     // generated by _backdrop_log_error() in the exact form required
     // by BackdropWebTestCase::error().
-    if (preg_match('/^X-Backdrop-Assertion-[0-9]+: (.*)$/', $header, $matches)) {
+    if (preg_match('/^X-Backdrop-Assertion-[0-9]+: (.*)$/', trim($header), $matches)) {
       // Call BackdropWebTestCase::error() with the parameters from the header.
       call_user_func_array(array(&$this, 'error'), unserialize(urldecode($matches[1])));
     }
@@ -2305,14 +2342,7 @@ class BackdropWebTestCase extends BackdropTestCase {
             foreach ($upload as $key => $file) {
               $file = backdrop_realpath($file);
               if ($file && is_file($file)) {
-                // Use the new CurlFile class for file uploads when using PHP
-                // 5.5 or higher.
-                if (class_exists('CurlFile')) {
-                  $post[$key] = curl_file_create($file);
-                }
-                else {
-                  $post[$key] = '@' . $file;
-                }
+                $post[$key] = curl_file_create($file);
               }
             }
           }
@@ -2835,8 +2865,8 @@ class BackdropWebTestCase extends BackdropTestCase {
       $xpath = $this->buildXPathQuery($xpath, $arguments);
       $result = $this->elements->xpath($xpath);
       // Some combinations of PHP / libxml versions return an empty array
-      // instead of the documented FALSE. Forcefully convert any false-ish values
-      // to an empty array to allow foreach(...) constructions.
+      // instead of the documented FALSE. Forcefully convert any false-ish
+      // values to an empty array to allow foreach(...) constructions.
       return $result ? $result : array();
     }
     else {
@@ -3080,7 +3110,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    * @param $all_requests
    *   Boolean value specifying whether to check all requests if the header is
    *   not found in the last request. Defaults to FALSE.
-   * @return
+   * @return string|FALSE
    *   The HTTP header value or FALSE if not found.
    */
   protected function backdropGetHeader($name, $all_requests = FALSE) {
@@ -3118,12 +3148,12 @@ class BackdropWebTestCase extends BackdropTestCase {
   }
 
   /**
-   * Gets an array containing all e-mails sent during this test case.
+   * Gets an array containing all emails sent during this test case.
    *
    * @param $filter
-   *   An array containing key/value pairs used to filter the e-mails that are returned.
+   *   An array containing key/value pairs used to filter the emails that are returned.
    * @return
-   *   An array containing e-mail messages captured during the current test.
+   *   An array containing email messages captured during the current test.
    */
   protected function backdropGetMails($filter = array()) {
     $captured_emails = state_get('test_email_collector', array());
@@ -3892,7 +3922,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   }
 
   /**
-   * Asserts that the most recently sent e-mail message has the given value.
+   * Asserts that the most recently sent email message has the given value.
    *
    * The field in $name must have the content described in $value.
    *
@@ -3909,11 +3939,11 @@ class BackdropWebTestCase extends BackdropTestCase {
   protected function assertMail($name, $value = '', $message = '') {
     $captured_emails = state_get('test_email_collector', array());
     $email = end($captured_emails);
-    return $this->assertTrue($email && isset($email[$name]) && $email[$name] == $value, $message, t('E-mail'));
+    return $this->assertTrue($email && isset($email[$name]) && $email[$name] == $value, $message, t('Email'));
   }
 
   /**
-   * Asserts that the most recently sent e-mail message has the string in it.
+   * Asserts that the most recently sent email message has the string in it.
    *
    * @param $field_name
    *   Name of field or message property to assert: subject, body, id, ...
@@ -3943,7 +3973,7 @@ class BackdropWebTestCase extends BackdropTestCase {
   }
 
   /**
-   * Asserts that the most recently sent e-mail message has the pattern in it.
+   * Asserts that the most recently sent email message has the pattern in it.
    *
    * @param $field_name
    *   Name of field or message property to assert: subject, body, id, ...
@@ -3977,17 +4007,20 @@ class BackdropWebTestCase extends BackdropTestCase {
   /**
    * Verifies that a watchdog message has been entered.
    *
-   * @param $watchdog_message
+   * @param string $watchdog_message
    *   The watchdog message.
-   * @param $variables
+   * @param array $variables
    *   The array of variables passed to watchdog().
-   * @param $message
+   * @param string $message
    *   The assertion message.
    *
    * @since 1.19.0 Method added.
    */
-  function assertWatchdogMessage($watchdog_message, $variables, $message) {
-    $status = (bool) db_query_range("SELECT 1 FROM {watchdog} WHERE message = :message AND variables = :variables", 0, 1, array(':message' => $watchdog_message, ':variables' => serialize($variables)))->fetchField();
+  protected function assertWatchdogMessage($watchdog_message, array $variables, $message) {
+    $status = (bool) db_query_range("SELECT 1 FROM {watchdog} WHERE message = :message AND variables = :variables", 0, 1, array(
+      ':message' => $watchdog_message,
+      ':variables' => serialize($variables),
+    ))->fetchField();
     return $this->assert($status, format_string('@message', array('@message' => $message)));
   }
 
@@ -3996,7 +4029,7 @@ class BackdropWebTestCase extends BackdropTestCase {
    *
    * @since 1.19.0 Method added.
    */
-  function clearWatchdog() {
+  protected function clearWatchdog() {
     db_truncate('watchdog')->execute();
   }
 }

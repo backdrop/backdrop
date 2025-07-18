@@ -69,7 +69,7 @@ Backdrop.attachBehaviors = function (context, settings) {
   settings = settings || Backdrop.settings;
   // Execute all of them.
   $.each(Backdrop.behaviors, function () {
-    if ($.isFunction(this.attach)) {
+    if (typeof this.attach === 'function') {
       this.attach(context, settings);
     }
   });
@@ -121,7 +121,7 @@ Backdrop.detachBehaviors = function (context, settings, trigger) {
   trigger = trigger || 'unload';
   // Execute all of them.
   $.each(Backdrop.behaviors, function () {
-    if ($.isFunction(this.detach)) {
+    if (typeof this.detach === 'function') {
       this.detach(context, settings, trigger);
     }
   });
@@ -250,7 +250,7 @@ Backdrop.stringReplace = function (str, args, keys) {
   }
 
   // If the array of keys is not passed then collect the keys from the args.
-  if (!$.isArray(keys)) {
+  if (!Array.isArray(keys)) {
     keys = [];
     for (var k in args) {
       if (args.hasOwnProperty(k)) {
@@ -551,7 +551,7 @@ Backdrop.getSelection = function (element) {
  * This is primarily used by Backdrop.displayAjaxError().
  */
 Backdrop.beforeUnloadCalled = false;
-$(window).bind('beforeunload pagehide', function () {
+$(window).on('beforeunload pagehide', function () {
     Backdrop.beforeUnloadCalled = true;
 });
 
@@ -586,7 +586,7 @@ Backdrop.ajaxError = function (xmlhttp, uri, customMessage) {
   // Unfortunately, testing for it with typeof, etc, doesn't seem to catch that
   // and the test causes an exception. So we need to catch the exception here.
   try {
-    statusText = "\n" + Backdrop.t("StatusText: !statusText", {'!statusText': $.trim(xmlhttp.statusText)});
+    statusText = "\n" + Backdrop.t("StatusText: !statusText", {'!statusText': xmlhttp.statusText.trim()});
   }
   catch (e) {}
 
@@ -594,7 +594,7 @@ Backdrop.ajaxError = function (xmlhttp, uri, customMessage) {
   // Again, we don't have a way to know for sure whether accessing
   // xmlhttp.responseText is going to throw an exception. So we'll catch it.
   try {
-    responseText = "\n" + Backdrop.t("ResponseText: !responseText", {'!responseText': $.trim(xmlhttp.responseText) } );
+    responseText = "\n" + Backdrop.t("ResponseText: !responseText", {'!responseText': xmlhttp.responseText.trim() } );
   } catch (e) {}
 
   // Make the responseText more readable by stripping HTML tags and newlines.
@@ -760,7 +760,7 @@ Backdrop.featureDetect.flexbox = function() {
  * Example use:
  * @code
  *   Backdrop.optimizedResize.add(function() {
- *     console.log('Smooth AND resource effecient!');
+ *     console.log('Smooth AND resource-efficient!');
  *   });
  * @endcode
  */

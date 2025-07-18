@@ -7,16 +7,40 @@
 /**
  * Database configuration:
  *
- * Most sites can configure their database by entering the connection string
- * below. If using master/slave databases or multiple connections, see the
- * advanced database documentation at
- * https://api.backdropcms.org/database-configuration
+ * Most sites can configure their database by entering the connection details
+ * below. For advanced configurations, including:
+ *   - Custom 'port', 'prefix', 'charset', 'collation' or 'driver' values
+ *   - Primary/replica databases
+ *   - Multiple connections
+ * See the documentation at https://docs.backdropcms.org/database-configuration
  */
-$database = 'mysql://user:pass@localhost/database_name';
-$database_prefix = '';
+$database = array(
+  'database' => 'database_name',
+  'username' => 'user',
+  'password' => 'pass',
+  'host' => 'localhost',
+);
 
 /**
- * Site configuration files location.
+ * Configuration storage
+ *
+ * By default configuration will be stored in the filesystem, using the
+ * directories specified in the $config_directories setting. Optionally,
+ * configuration can be store in the database instead of the filesystem.
+ * Switching this option on a live site is not currently supported without some
+ * manual work.
+ *
+ * Example using the database for live and file storage for staging:
+ * @code
+ * $settings['config_active_class'] = 'ConfigDatabaseStorage';
+ * $settings['config_staging_class'] = 'ConfigFileStorage';
+ * @endcode
+ */
+// $settings['config_active_class'] = 'ConfigFileStorage';
+// $settings['config_staging_class'] = 'ConfigFileStorage';
+
+/**
+ * Site configuration files location (if using file storage for configuration)
  *
  * By default these directories are stored within the files directory with a
  * hashed path. For the best security, these directories should be in a location
@@ -34,8 +58,8 @@ $database_prefix = '';
  * $config_directories['staging'] = '/home/myusername/config/staging';
  * @endcode
  */
-$config_directories['active'] = 'files/config_' . md5($database) . '/active';
-$config_directories['staging'] = 'files/config_' . md5($database) . '/staging';
+$config_directories['active'] = 'files/config_' . md5(serialize($database)) . '/active';
+$config_directories['staging'] = 'files/config_' . md5(serialize($database)) . '/staging';
 
 /**
  * Skip the configuration staging directory cleanup
@@ -46,7 +70,7 @@ $config_directories['staging'] = 'files/config_' . md5($database) . '/staging';
 // $config['system.core']['config_sync_clear_staging'] = 0;
 
 /**
- * Access control for update.php script.
+ * Temporary access control for update.php script.
  *
  * If you are updating your Backdrop installation using the update.php script
  * but are not logged in using either an account with the "Administer software
@@ -57,6 +81,39 @@ $config_directories['staging'] = 'files/config_' . md5($database) . '/staging';
  * TRUE back to a FALSE!
  */
 $settings['update_free_access'] = FALSE;
+
+/**
+ * Temporary access control for the restore.php script.
+ *
+ * The restore.php script allows restoring database and configuration backups.
+ * Accounts with the "Restore system backups" permission can access this script.
+ * Change the FALSE to a TRUE to disable the access check. This can be used to
+ * restore your site in an emergency situation. After finishing the restore, be
+ * sure to open this file again and change the TRUE back to a FALSE.
+ */
+$settings['restore_free_access'] = FALSE;
+
+/**
+ * Enable creating database and config backups during the update.php process.
+ *
+ * By default the backup directory is stored within the files directory with a
+ * hashed path. For the best security, this directory should be in a location
+ * that is not publicly accessible through a web browser.
+ *
+ * Example using directories one parent level up:
+ * @code
+ * $settings['backup_directory'] = '../backups';
+ * @endcode
+ *
+ * Example using absolute paths:
+ * @code
+ * $settings['backup_directory'] = '/home/myusername/backups';
+ * @endcode
+ *
+ * This can also be set to a value of FALSE to disable the backup capability,
+ * for sites that have an alternative backup mechanism in place.
+ */
+$settings['backup_directory'] = '';
 
 /**
  * Salt for one-time login links and cancel links, form tokens, etc.
@@ -75,7 +132,6 @@ $settings['update_free_access'] = FALSE;
  * @code
  * $settings['hash_salt'] = file_get_contents('/home/example/salt.txt');
  * @endcode
- *
  */
 $settings['hash_salt'] = '';
 
@@ -334,7 +390,7 @@ $settings['locale_custom_strings_en'][''] = array(
  */
 $settings['404_fast_paths_exclude'] = '/\/(?:styles)|(?:system\/files)\//';
 $settings['404_fast_paths'] = '/\.(?:txt|png|gif|jpe?g|css|js|ico|swf|flv|cgi|bat|pl|dll|exe|asp)$/i';
-$settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL "@path" was not found on this server.</p></body></html>';
+$settings['404_fast_html'] = '<!DOCTYPE html><html lang="en"><head><title>404 Not Found</title></head><body><h1>Not Found</h1><p>The requested URL "@path" was not found on this server.</p></body></html>';
 
 /**
  * By default, fast 404s are returned as part of the normal page request
@@ -400,12 +456,30 @@ $settings['404_fast_html'] = '<!DOCTYPE html><html><head><title>404 Not Found</t
 /**
  * Drupal backwards compatibility.
  *
- * By default, Backdrop 1.0 includes a compatibility layer to keep it compatible
+ * By default, Backdrop 1.x includes a compatibility layer to keep it compatible
  * with Drupal 7 APIs. Backdrop core itself does not use this compatibility
- * layer however. You may disable it if all the modules you're running were
- * built for Backdrop.
+ * layer however. You may disable it if all the modules and themes used on the
+ * site were built for Backdrop.
  */
 $settings['backdrop_drupal_compatibility'] = TRUE;
+
+/**
+ * Suppress warnings of multiple versions of the same module being found.
+ *
+ * When scanning for module files, if Backdrop encounters multiple instances of
+ * the same module (for example, a version of a module in the /modules directory
+ * that has the same name as a module in /core), then only the last module will
+ * be loaded. In such cases, Backdrop will show a warning on the status report
+ * page.
+ *
+ * Having multiple versions of the same module may be intentional in certain use
+ * cases though, such as in some multisite configurations, when there is need to
+ * override a core or contrib module with a different version in the /sites
+ * folder. In such cases, you may want to disable the status report warnings.
+ *
+ * Uncomment the line below to disable the warnings.
+ */
+// $settings['disable_multiple_modules_warnings'] = TRUE;
 
 /**
  * Configuration overrides.
@@ -421,21 +495,67 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
  * such as views, content types, vocabularies, etc. may not work as expected.
  * Use any available API functions for complex systems instead.
  */
-//$config['system.core']['site_name'] = 'My Backdrop site';
-//$config['system.core']['file_temporary_path'] = '/tmp';
+// $config['system.core']['site_name'] = 'My Backdrop site';
+// $config['system.core']['file_temporary_path'] = '/tmp';
 
 /**
- * Add Permissions-Policy header to disable Google FLoC.
+ * File schemes whose paths should not be normalized.
  *
- * By default, Backdrop sends the 'Permissions-Policy: interest-cohort=()'
- * header, to disable Google's Federated Learning of Cohorts (FLoC) feature,
- * which was introduced in Chrome v89. For more information about FLoC, see:
- * https://en.wikipedia.org/wiki/Federated_Learning_of_Cohorts
+ * Normally, Backdrop normalizes '/./' and '/../' segments in file URIs in order
+ * to prevent unintended file access. For example, 'private://css/../image.png'
+ * is normalized to 'private://image.png' before checking access to the file.
  *
- * If you don't wish to disable FLoC in Chrome, you can uncomment the following
- * setting, and make sure its value is set to "FALSE".
+ * On Windows, Backdrop also replaces '\' with '/' in file URIs.
+ *
+ * If file URIs with one or more scheme should not be normalized like this, then
+ * list the schemes here. For example, if 'example://path/./filename.png' should
+ * not be normalized to 'example://path/filename.png', then add 'example' to
+ * this array. In this case, make sure that the module providing the 'example'
+ * scheme does not allow unintended file access when using '/../' to move up the
+ * directory tree.
  */
-//$config['system.core']['block_interest_cohort'] = FALSE;
+// $config['system.core']['file_not_normalized_schemes'] = array('example');
+
+/**
+ * Additional public file schemes.
+ *
+ * Public schemes are URI schemes that allow download access to all users for
+ * all files within that scheme.
+ *
+ * The "public" scheme is always public, and the "private" scheme is always
+ * private, but other schemes, such as "https", "s3", "example", or others,
+ * can be either public or private depending on the site. By default, they're
+ * private, and access to individual files is controlled via
+ * hook_file_download().
+ *
+ * Typically, if a scheme should be public, a module makes it public by
+ * implementing hook_file_download(), and granting access to all users for all
+ * files. This could be either the same module that provides the stream wrapper
+ * for the scheme, or a different module that decides to make the scheme
+ * public. However, in cases where a site needs to make a scheme public, but
+ * is unable to add code in a module to do so, the scheme may be added to this
+ * variable, the result of which is that system_file_download() grants public
+ * access to all files within that scheme.
+ */
+// $config['system.core']['file_additional_public_schemes'] = array('example');
+
+/**
+ * Sensitive request headers in backdrop_http_request() when following a
+ * redirect.
+ *
+ * By default backdrop_http_request() will strip sensitive request headers when
+ * following a redirect if the redirect location has a different http host to
+ * the original request, or if the scheme downgrades from https to http.
+ *
+ * These variables allow opting out of this behaviour. Careful consideration of
+ * the security implications of opting out is recommended. To opt out, set to
+ * FALSE.
+ *
+ * @see _backdrop_should_strip_sensitive_headers_on_http_redirect()
+ * @see backdrop_http_request()
+ */
+// $config['system.core']['backdrop_http_request']['strip_sensitive_headers_on_host_change'] = TRUE;
+// $config['system.core']['backdrop_http_request']['strip_sensitive_headers_on_https_downgrade'] = TRUE;
 
 /**
  * Include a local settings file, if available.
@@ -445,7 +565,7 @@ $settings['backdrop_drupal_compatibility'] = TRUE;
  * environment (staging, development, etc).
  *
  * Typically used to specify a different database connection information, to
- * disable caching, JavaScript/CSS compression, re-routing of outgoing e-mails,
+ * disable caching, JavaScript/CSS compression, re-routing of outgoing emails,
  * Google Analytics, and other things that should not happen on development and
  * testing sites.
  *

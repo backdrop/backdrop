@@ -40,13 +40,31 @@ class DashboardNewsBlock extends Block {
    */
   public function getContent() {
     $news = $this->getNews();
+
     $links = array();
     if ($news) {
       foreach ($news as $key => $notifications) {
-        $links[] = '<p>' . l(
-            $notifications['title'],
-            $notifications['url']
-          ) . ' - ' . filter_xss($notifications['summary']) . '</p>';
+        $notification_date = format_date($notifications['timestamp'], 'custom', 'M j, Y');
+        $date_classes = array('class' => array('notification-date'));
+        // A notification is considered new, if no more than 14 days (1209600
+        // seconds) have lapsed.
+        $is_new = (time() - $notifications['timestamp']) < 1209600;
+        if ($is_new) {
+          $date_classes['class'][] = 'marker';
+        }
+        $notification_date = '<span ' . backdrop_attributes($date_classes) . '>' . $notification_date . '</span>';
+        $notification_link = l($notifications['title'], $notifications['url'], array('attributes' => array('target'=>'_blank')));
+        $notification_summary = filter_xss($notifications['summary']);
+
+        $notification = array(
+          'data' => '<p>' . $notification_date . ': ' . $notification_link . ' - ' . $notification_summary . '</p>',
+        );
+
+        if ($is_new) {
+          $notification['class'] = array('is-new');
+        }
+
+        $links[] = $notification;
       }
     }
 

@@ -1,4 +1,4 @@
-; This info file contains an enourmous number of tests. They are ordered by:
+; This info file contains an enormous number of tests. They are ordered by:
 ; 1) The main SimpleTest tests from the simpletest.test file.
 ; 2) The list of all *.test files in the /tests directory, alphabetically.
 ; 3) Within each *.test file, matching the declaration order of each class.
@@ -16,8 +16,8 @@ group = SimpleTest
 file = simpletest.test
 
 [SimpleTestMailCaptureTestCase]
-name = SimpleTest e-mail capturing
-description = Test the SimpleTest e-mail capturing logic, the assertMail assertion and the backdropGetMails function.
+name = SimpleTest email capturing
+description = Test the SimpleTest email capturing logic, the assertMail assertion and the backdropGetMails function.
 group = SimpleTest
 file = simpletest.test
 
@@ -108,9 +108,27 @@ file = ajax.test
 
 [AJAXDialogTest]
 name = AJAX dialog commands
-description = APerforms tests on opening and manipulating dialogs via AJAX commands.
+description = Performs tests on opening and manipulating dialogs via AJAX commands.
 group = AJAX
 file = ajax.test
+
+[BackupSettingsTestCase]
+name = Backup settings form
+description = Confirm the settings forms provided by update handlers work properly.
+group = Backup
+file = backup.test
+
+[BackupUpdateTestCase]
+name = Backup during system updates
+description = Run update.php with a backup and then restore that backup.
+group = Backup
+file = backup.test
+
+[BasisTestCase]
+name = Basis theme
+description = Test supplemental CSS update selectors in the Basis theme.
+group = Theme
+file = basis.test
 
 [BatchProcessingTestCase]
 name = Batch processing
@@ -298,6 +316,12 @@ description = Performs tests on Backdrop's HTTP request mechanism.
 group = Common
 file = common.test
 
+[CommonBackdropHTTPRedirectTest]
+name = Backdrop HTTP Redirect Processing
+description = Perform unit tests on processing of http redirects.
+group = Common
+file = common.test
+
 [CommonBackdropHTTPResponseStatusLineTest]
 name = Backdrop HTTP Response Status
 description = Performs unit tests on Backdrop's HTTP Response Status.
@@ -410,12 +434,6 @@ file = common.test
 name = Query parsing using backdrop_get_query_array()
 description = Tests that backdrop_get_query_array() correctly parses query parameters.
 group = Common
-file = common.test
-
-[BlockInterestCohortTest]
-name = Block Interest Cohort
-description = Check Permissions-Policy header to disable Google FLoC.
-group = System
 file = common.test
 
 [FeedIconTest]
@@ -640,6 +658,12 @@ description = Tests management of database connections.
 group = Database
 file = database_test.test
 
+[DatabaseStatementPrefetchGadgetChainTestCase]
+name = Database Statement Prefetch Gadget Chain Test
+description = Tests protection against unserialization attacks.
+group = Database
+file = database_test.test
+
 [BackdropErrorHandlerUnitTest]
 name = Backdrop error handlers
 description = Performs tests on the Backdrop error and exception handler.
@@ -838,7 +862,7 @@ description = Tests stream wrapper functions.
 group = File API
 file = file.test
 
-[FileTranferTest]
+[FileTransferTest]
 name = FileTransfer unit tests
 description = Test that the jail is respected and that protocols using recursive file move operations work.
 group = System
@@ -880,6 +904,12 @@ description = Test form element labels, required markers and associated output.
 group = Form API
 file = form.test
 
+[FormsElementsDescriptionsTestCase]
+name = Form element and description output test
+description = Test form element descriptions.
+group = Form API
+file = form.test
+
 [FormsElementsTableSelectFunctionalTest]
 name = Tableselect form element type test
 description = Test the tableselect element for expected behavior
@@ -901,6 +931,12 @@ file = form.test
 [FormsFormStoragePageCacheTestCase]
 name  = Forms using form storage on cached pages
 description  = Tests a form using form storage and makes sure validation and caching works when page caching for anonymous users is turned on.
+group = Form API
+file = form.test
+
+[FormsFormCacheTestCase]
+name = Form caching
+description = Tests storage and retrieval of forms from cache.
 group = Form API
 file = form.test
 
@@ -958,6 +994,12 @@ description = Tests form API checkbox handling of various combinations of #defau
 group = Form API
 file = form.test
 
+[FormResizableTextareaTestCase]
+name = Form API resizable textarea
+description = Tests transition from old JS-based textarea resize to new CSS approach.
+group = Form API
+file = form.test
+
 [FormEmailTestCase]
 name = Form API email
 description = Tests the form API email element.
@@ -999,6 +1041,12 @@ name = Graph
 description = Graph handling unit tests.
 group = System
 file = graph.test
+
+[IconTestCase]
+name = Icon API
+description = Tests the providing and path matching of SVG icons.
+group = System
+file = icon.test
 
 [ImageToolkitUnitTest]
 name = Image toolkit tests
