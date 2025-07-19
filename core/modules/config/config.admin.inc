@@ -530,17 +530,7 @@ function config_get_statuses() {
       }
     }
   }
-
-  // Sort by the config names.
   ksort($config_statuses);
-
-  // Put "system.extensions" first if present to adjust module and theme status
-  // before running the import.
-  if (isset($config_statuses['system.extensions'])) {
-    $system_extensions_status = $config_statuses['system.extensions'];
-    unset($config_statuses['system.extensions']);
-    $config_statuses = array('system.extensions' => $system_extensions_status) + $config_statuses;
-  }
 
   return $config_statuses;
 }

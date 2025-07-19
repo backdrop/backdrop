@@ -332,9 +332,6 @@ function config_get_default_config_names($project) {
   if (is_dir($project_config_dir)) {
     $files = glob($project_config_dir . '/*.json');
     foreach ($files as $file) {
-      // Load config data into the active store and write it out to the
-      // file system in the Backdrop config directory. Note the config name
-      // needs to be the same as the file name WITHOUT the extension.
       $parts = explode('/', $file);
       $file = array_pop($parts);
       $config_names[] = str_replace('.json', '', $file);
@@ -615,7 +612,12 @@ class Config {
    */
   public function validateData() {
     if (!$this->validated) {
+      // Get config info if available. This may not be present if the providing
+      // module is being enabled at the same time.
       $config_info = config_get_info($this->getName());
+      if (!$config_info) {
+        $config_info = NULL;
+      }
       module_invoke_all('config_data_validate', $this, $config_info);
       $this->validated = TRUE;
     }
