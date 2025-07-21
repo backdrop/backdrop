@@ -640,10 +640,10 @@ function field_validate_instance($instance, $update = FALSE, $load_field = TRUE)
         '@type' => $entity_info['label'],
       );
       if ($update) {
-        $error_message = t("The machine name '@name' is invalid for a @type as this machine name is reserved by this entity type. You will not be able to save any @type with this field on. You should delete this field and create a new field with an alternative machine name", $error_message_placeholders);
+        $error_message = t("The machine name '@name' is invalid for entity type @type as this machine name is reserved by this entity type. You will not be able to save any @type with this field on. You should delete this field and create a new field with a different machine name", $error_message_placeholders);
       }
       else {
-        $error_message = t("You cannot add the existing field with the machine name '@name' to a @type as this machine name is reserved by this entity type", $error_message_placeholders);
+        $error_message = t("You cannot add the existing field with the machine name '@name' to entity type @type as this machine name is reserved by this entity type", $error_message_placeholders);
       }
       throw new FieldException($error_message);
     }
