@@ -330,7 +330,6 @@
   theme. */
   font: inherit;
   line-height: 1.15;
-  font-family: sans-serif;
 }
 [dir="rtl"] #admin-bar .admin-bar-search input {
   background-position: left 0.5em center;
