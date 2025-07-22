@@ -163,7 +163,7 @@
                     "default_row_class": 1,
                     "row_class_special": 1,
                     "override": 1,
-                    "append_orig_sort": 0,
+                    "append_original_sort": 0,
                     "sticky": 0,
                     "caption": "",
                     "summary": "",
