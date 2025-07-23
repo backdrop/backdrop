@@ -274,7 +274,7 @@ function node_form($form, &$form_state, Node $node) {
         backdrop_get_path('module', 'node') . '/js/node.js',
         array(
           'type' => 'setting',
-          'data' => array('anonymous' => $config->get('anonymous')),
+          'data' => array('anonymous' => $config->getTranslated('anonymous')),
         ),
       ),
     ),

@@ -976,7 +976,7 @@ function template_preprocess_views_view_rss(&$variables) {
 
   if ($view->display_handler->get_option('sitename_title')) {
     $site_config = config('system.core');
-    $title = $site_config->get('site_name');
+    $title = $site_config->getTranslated('site_name');
     if ($slogan = $site_config->getTranslated('site_slogan')) {
       $title .= ' - ' . $slogan;
     }
