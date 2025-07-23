@@ -884,8 +884,8 @@ function installer_browser_filters_form($form, &$form_state, $type) {
 
   $form['description'] = array(
     '#type' => 'help',
-    '#markup' => t('This form allows you to find and install @projects with an official release.</p>
-    <p>Additional @projects in various stages of development can be found in the <a href="!url" target="_blank">backdrop-contrib</a> repositories. Use of dev @projects in production is not recommended without careful testing.</p>',
+    '#markup' => t('<p>This form allows you to find and install @projects with an official release.</p>
+    <p>Additional @projects in various stages of development may be found in the <a href="!url" target="_blank">backdrop-contrib</a> repositories. Use of dev @projects in production is not recommended without careful testing.</p>',
       array(
         '@projects' => $projects,
         '!url' => url('https://github.com/backdrop-contrib'),
