@@ -1288,7 +1288,7 @@ function system_site_information_settings($form, &$form_state) {
   $form['site_information']['site_name'] = array(
     '#type' => 'textfield',
     '#title' => t('Site name'),
-    '#default_value' => $site_config->getTranslated('site_name'),
+    '#default_value' => $site_config->get('site_name'),
     '#required' => TRUE
   );
 
@@ -1357,7 +1357,7 @@ function system_site_information_settings($form, &$form_state) {
   $form['site_information']['site_slogan'] = array(
     '#type' => 'textfield',
     '#title' => t('Slogan'),
-    '#default_value' => $site_config->getTranslated('site_slogan'),
+    '#default_value' => $site_config->get('site_slogan'),
     '#description' => t("How this is used depends on your site's theme."),
   );
 
@@ -2203,7 +2203,7 @@ function system_site_maintenance_mode($form, &$form_state) {
   $form['maintenance_mode_message'] = array(
     '#type' => 'textarea',
     '#title' => t('Message to display when in maintenance mode'),
-    '#default_value' => $config->getTranslated('maintenance_mode_message'),
+    '#default_value' => $config->get('maintenance_mode_message'),
     '#description' => theme('token_tree_link'),
     '#element_validate' => array('token_element_validate'),
   );

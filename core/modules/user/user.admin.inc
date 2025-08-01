@@ -653,7 +653,7 @@ function user_admin_roles($form, $form_state) {
   $form['anonymous_settings']['anonymous'] = array(
     '#type' => 'textfield',
     '#title' => t('The name you would like used for anonymous visitors to your site:'),
-    '#default_value' => $system_config->getTranslated('anonymous'),
+    '#default_value' => $system_config->get('anonymous'),
     '#required' => TRUE,
   );
 
