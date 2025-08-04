@@ -4664,8 +4664,9 @@ function system_settings_form_submit($form, &$form_state) {
       return;
     }
 
-    // For compatibility with Drupal 7, if $form['array_filter'] is set,
-    // pass the form state values to array_filter().
+    // For compatibility with Drupal 7, if $form['array_filter'] is set, pass
+    // the form state values to array_filter(). This will remove any empty
+    // values.
     foreach ($form_state['values'] as $key => $value) {
       if (is_array($value) && isset($form_state['values']['array_filter'])) {
         $value = array_keys(array_filter($value));
