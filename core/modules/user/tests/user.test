@@ -665,8 +665,7 @@ class UserLoginTestCase extends UserLoginTestBase {
     $this->backdropGet($resetURL);
     $pass = user_password();
     $pass_edit = array(
-      'pass[pass1]' => $pass,
-      'pass[pass2]' => $pass,
+      'pass' => $pass,
     );
     $this->backdropPost(NULL, $pass_edit, t('Save password & log in'));
 
