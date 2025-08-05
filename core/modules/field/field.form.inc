@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Field forms management.
@@ -194,7 +193,7 @@ function field_multiple_value_form($field, $instance, $langcode, $items, &$form,
   }
 
   $title = check_plain($instance['label']);
-  $description = field_filter_xss($instance['description']);
+  $description = field_filter_xss(token_replace($instance['description']));
 
   $id_prefix = implode('-', array_merge($parents, array($field_name)));
   $wrapper_id = backdrop_html_id($id_prefix . '-add-more-wrapper');
@@ -241,7 +240,7 @@ function field_multiple_value_form($field, $instance, $langcode, $items, &$form,
             '#type' => 'weight',
             '#title' => t('Weight for row @number', array('@number' => $delta + 1)),
             '#title_display' => 'invisible',
-             // Note: this 'delta' is the FAPI 'weight' element's property.
+             // Note: this 'delta' is the Form API 'weight' element's property.
             '#delta' => $max,
             '#default_value' => isset($items[$delta]['_weight']) ? $items[$delta]['_weight'] : $delta,
             '#weight' => 100,

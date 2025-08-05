@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of views_handler_field_bulk_form.
@@ -116,26 +115,30 @@ class views_handler_field_bulk_form extends views_handler_field {
     );
 
     // Build the bulk operations action widget for the header.
-    // Allow themes to apply .container-inline on this separate container.
-    $form['header'][$this->options['id']] = array(
-      '#type' => 'container',
-      '#attributes' => array('class' => array('views-bulk-form')),
-    );
-    $form['header'][$this->options['id']]['action'] = array(
-      '#title' => t('Action'),
-      '#title_display' => 'none',
-      '#type' => 'select',
-      '#options' => $this->get_bulk_options(),
-      '#empty_option' => '- ' . t('Choose an action') . ' -',
-      '#required' => TRUE,
-    );
+    $bulk_options = $this->get_bulk_options();
+    if (!empty($bulk_options)) {
+      // Allow themes to apply .container-inline on this separate container.
+      $form['header'][$this->options['id']] = array(
+        '#type' => 'container',
+        '#attributes' => array('class' => array('views-bulk-form')),
+      );
 
-    // Set the form actions container in the header.
-    $actions['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Execute'),
-    );
-    $form['header'][$this->options['id']]['actions'] = $actions;
+      $form['header'][$this->options['id']]['action'] = array(
+        '#title' => t('Action'),
+        '#title_display' => 'none',
+        '#type' => 'select',
+        '#options' => $bulk_options,
+        '#empty_option' => '- ' . t('Choose an action') . ' -',
+        '#required' => TRUE,
+      );
+
+      // Set the form actions container in the header.
+      $actions['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Execute'),
+      );
+      $form['header'][$this->options['id']]['actions'] = $actions;
+    }
   }
 
   /**
@@ -219,21 +222,10 @@ class views_handler_field_bulk_form extends views_handler_field {
   }
 
   /**
-   * Determine the base table of the bulk operation field.
+   * Determine the entity type of the bulk operation field.
    */
   protected function get_entity_type() {
-    $base_table = $this->view->base_table;
-
-    // If the current field is under a relationship you can't be sure that the
-    // base table of the view is the base table of the current field.
-    // For example a field from a node author on a node view does have users as base table.
-    if (!empty($this->options['relationship']) && $this->options['relationship'] != 'none') {
-      $relationships = $this->view->display_handler->get_option('relationships');
-      $options = $relationships[$this->options['relationship']];
-      $data = views_fetch_data($options['table']);
-      $base_table = $data[$options['field']]['relationship']['base'];
-    }
-    // The base table is now known, use it to determine the entity type.
+    $base_table = isset($this->table) ? $this->table : $this->view->base_table;
     foreach (entity_get_info() as $entity_type => $info) {
       if (isset($info['base table']) && $info['base table'] == $base_table) {
         return $entity_type;

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Subclasses of the Updater class to update Backdrop core, modules, themes, and layouts.

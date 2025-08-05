@@ -68,7 +68,7 @@ class Comment extends Entity {
   public $name = '';
 
   /**
-   * The comment author's e-mail address.
+   * The comment author's email address.
    *
    * For anonymous authors, this is the value as typed in the comment form.
    *
@@ -114,13 +114,6 @@ class Comment extends Entity {
    */
   public function bundle() {
     return $this->node_type;
-  }
-
-  /**
-   * Implements EntityInterface::label().
-   */
-  public function label() {
-    return $this->subject;
   }
 
   /**
@@ -285,7 +278,7 @@ class CommentStorageController extends EntityDatabaseStorageController {
         // by retrieving the maximum thread level.
         $max = db_query('SELECT MAX(thread) FROM {comment} WHERE nid = :nid', array(':nid' => $comment->nid))->fetchField();
         // Strip the "/" from the end of the thread.
-        $max = rtrim($max, '/');
+        $max = rtrim((string) $max, '/');
         // We need to get the value at the correct depth.
         $parts = explode('.', $max);
         $firstsegment = $parts[0];
@@ -494,7 +487,7 @@ class CommentStorageController extends EntityDatabaseStorageController {
 
     $view = array();
     foreach ($comments as $comment) {
-      /* @var Comment $comment */
+      /** @var Comment $comment */
       // Populate $comment->content with a render() array.
       $this->buildContent($comment, $view_mode, $langcode);
 

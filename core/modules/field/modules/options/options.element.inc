@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * All logic for options form elements.
@@ -54,7 +53,7 @@ function _form_options_expand($element) {
   if (!isset($element['options'])) {
     $element['options_field'] = array(
       '#type' => 'textarea',
-      '#resizable' => TRUE,
+      '#resizable' => 'vertical',
       '#cols' => 60,
       '#rows' => 5,
       '#required' => isset($element['#required']) ? $element['#required'] : FALSE,
@@ -116,7 +115,7 @@ function _form_options_expand($element) {
     'data' => array('optionsElement' => array('allowedtags' => '<div class="description">' . t('Allowed HTML tags in labels: @tags', array('@tags' => _field_filter_xss_display_allowed_tags())) . '</div>')),
   );
 
-  // Remove properties that will confuse the FAPI.
+  // Remove properties that will confuse the Form API.
   unset($element['#options']);
 
   return $element;

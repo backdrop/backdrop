@@ -317,7 +317,7 @@ function node_form($form, &$form_state, Node $node) {
   $form['options'] = array(
     '#type' => 'fieldset',
     '#access' => user_access('administer nodes'),
-    '#title' => t('Publishing options'),
+    '#title' => $node->nid ? t('Publishing options') : t('Publishing actions'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'additional_settings',
@@ -335,18 +335,21 @@ function node_form($form, &$form_state, Node $node) {
   }
   $form['options']['status'] = array(
     '#type' => 'radios',
+    '#title' => $node->nid ? t('Published state') : t('Publish action'),
     '#options' => array(
       NODE_PUBLISHED => $node->nid ? t('Published') : t('Publish now'),
-      NODE_NOT_PUBLISHED => t('Draft'),
-      NODE_SCHEDULED => t('Schedule for later'),
+      NODE_NOT_PUBLISHED => $node->nid ? t('Draft') : t('Save as draft'),
+      NODE_SCHEDULED => $node->nid ? t('Scheduled for later') : t('Schedule for later'),
     ),
     '#default_value' => $status,
-    '#description' => t('Content saved as draft is only accessible to the content creator or site administrators.'),
   );
+  $form['options']['status'][NODE_PUBLISHED]['#description'] = t('Site visitors will be able to access this content.');
+  $form['options']['status'][NODE_NOT_PUBLISHED]['#description'] = t('Only the content creator or site administrators will be able to access this content.');
+  $form['options']['status'][NODE_SCHEDULED]['#description'] = t('The content is saved as draft, and will be automatically published on the date and time selected.');
+
 
   // Adjustments to the status radios if scheduling is enabled/disabled.
   if ($node_type->settings['scheduling_enabled']) {
-    $form['options']['status']['#description'] .= ' ' . t('Content set to "Schedule for later" will be saved as draft when the content is created, but will be automatically published on the date and time selected.');
 
     // Default the scheduled time to the current time + 1 day.
     $scheduled_date = $node->scheduled ? $node->scheduled : REQUEST_TIME + 86400;
@@ -373,7 +376,7 @@ function node_form($form, &$form_state, Node $node) {
       ),
       '#states' => array(
         'visible' => array(
-         ':input[name="status"]' => array('value' => NODE_SCHEDULED),
+          ':input[name="status"]' => array('value' => NODE_SCHEDULED),
         ),
       ),
     );
@@ -382,18 +385,33 @@ function node_form($form, &$form_state, Node $node) {
     $form['options']['status'][NODE_SCHEDULED]['#access'] = FALSE;
   }
 
+  $form['options']['additional'] = array(
+    // @todo candidate for conversion to '#type' => 'html_tag'.
+    // See: https://github.com/backdrop/backdrop-issues/issues/5223
+    '#type' => 'markup',
+    '#prefix' => '<label id="promote-sticky-label">',
+    '#markup' => $node->nid ? t('Additional options') : t('Additional actions'),
+    '#suffix' => '</label>',
+    '#access' => $node_type->settings['promote_enabled'] || $node_type->settings['sticky_enabled'],
+  );
 
   $form['options']['promote'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Promoted'),
+    '#title' => $node->nid ? t('Promoted') : t('Promote'),
     '#default_value' => $node->promote,
     '#access' => $node_type->settings['promote_enabled'],
+    '#attributes' => array(
+      'aria-labelledby' => array('promote-sticky-label'),
+    ),
   );
   $form['options']['sticky'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Sticky at top of lists'),
+    '#title' => $node->nid ? t('Sticky at top of lists') : t('Make sticky at top of lists'),
     '#default_value' => $node->sticky,
     '#access' => $node_type->settings['sticky_enabled'],
+    '#attributes' => array(
+      'aria-labelledby' => array('promote-sticky-label'),
+    ),
   );
 
   // Prepare cancel link.
@@ -551,7 +569,7 @@ function node_form_submit($form, &$form_state) {
   else {
     // In the unlikely case something went wrong on save, the node will be
     // rebuilt and node form redisplayed.
-    backdrop_set_message(t('The post could not be saved.'), 'error');
+    backdrop_set_message(t('The content could not be saved.'), 'error');
     $form_state['rebuild'] = TRUE;
   }
 }
@@ -569,7 +587,8 @@ function node_form_submit($form, &$form_state) {
  *
  * @see node_form_preview()
  *
- * @since 1.11.0
+ * @since 1.0.6 Function removed (see: https://github.com/backdrop/backdrop-issues/issues/218).
+ * @since 1.11.0 Function re-added (see: https://github.com/backdrop/backdrop-issues/issues/3062).
  */
 function node_preview($node_tempstore_id, $node_type) {
   // The tempstore object may have expired or an invalid ID submitted. Use the
@@ -623,6 +642,7 @@ function node_preview($node_tempstore_id, $node_type) {
   $form = backdrop_get_form('node_preview_banner_form', $node, $node_tempstore_id);
   $build['preview_form_select']['view-mode'] = $form;
   $build['preview'] = node_view($node, $view_mode);
+  $build['#theme'] = 'node_preview';
   return $build;
 }
 
@@ -895,6 +915,7 @@ function node_revision_overview($node) {
     else {
       $row[] = t('!date by !username', array('!date' => l(format_date($revision->timestamp, 'short'), "node/$node->nid/revisions/$revision->vid/view"), '!username' => theme('username', array('account' => $revision))))
                . (($revision->log != '') ? '<p class="revision-log">' . filter_xss($revision->log) . '</p>' : '');
+      $links = array();
       if ($revert_permission) {
         $links['revert'] = array(
           'title' => t('Revert'),
@@ -1063,7 +1084,7 @@ function node_autocomplete($string = '') {
  * Since the user chose a unique node, we must now use the same one in our
  * submit handler, which means we need to look in the string for the nid.
  *
- * @param $string
+ * @param string $string
  *   The string to validate.
  * @return $nid
  *   A node ID if matched, or NULL if no match.

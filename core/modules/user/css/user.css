@@ -1,10 +1,36 @@
+/**
+ * Permissions page.
+ */
+#user-admin-permissions .form-item-search {
+  display: inline-block;
+}
+#user-admin-permissions .search-reset {
+  line-height: 42px;
+  position: relative;
+  top: 1px;
+}
+#user-admin-permissions .table-filter {
+  margin: 1em 0;
+  padding: 7px 13px;
+  border-radius: 4px;
+  background-color: #fff;
+  border: 2px solid #EAEAEA;
+}
 
+/**
+ * Permissions matrix, used on permissions page, node type, and other places.
+ */
 #permissions td.module {
   font-weight: bold;
   background: #dddddd;
 }
 #permissions td.permission {
   padding-left: 1.5em; /* LTR */
+}
+#permissions td.permission .permission-warning-description {
+  font-size: 0.9em;
+  color: #444;
+  margin-top: 0.5em;
 }
 [dir="rtl"] #permissions td.permission {
   padding-left: 0;
@@ -14,6 +40,20 @@
 #permissions tr.even .form-item {
   white-space: normal;
 }
+.permissions-matrix {
+  overflow-x: auto;
+}
+
+/**
+ * Roles page.
+ */
+#user-roles .role-name {
+  white-space: nowrap;
+}
+
+/**
+ * Site-wide account configuration.
+ */
 #user-admin-settings fieldset .fieldset-description {
   font-size: 0.85em;
   padding-bottom: .5em;
@@ -88,10 +128,6 @@
   width: 0;
   background-color: #47C965;
   position: absolute;
-  -webkit-transition: width .2s;
-  -moz-transition: width .2s;
-  -ms-transition: width .2s;
-  -o-transition: width .2s;
   transition: width .2s;
 }
 .password-strength.weak .indicator {

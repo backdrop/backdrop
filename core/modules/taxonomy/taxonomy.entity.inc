@@ -65,8 +65,8 @@ class TaxonomyTerm extends Entity {
    * This property is not loaded, but may be used to modify the term parents via
    * TaxonomyTerm::save().
    *
-   * The property can be set to an array of term IDs. An entry of 0 means this
-   * term does not have any parents. When omitting this variable during an
+   * The property can be set to an array of term IDs. An entry of array(0) means
+   * this term does not have any parents. When omitting this variable during an
    * update, the existing hierarchy for the term remains unchanged.
    *
    * @var array
@@ -78,13 +78,6 @@ class TaxonomyTerm extends Entity {
    */
   public function id() {
     return isset($this->tid) ? $this->tid : NULL;
-  }
-
-  /**
-   * Implements EntityInterface::label().
-   */
-  public function label() {
-    return $this->name;
   }
 
   /**
@@ -120,7 +113,11 @@ class TaxonomyTerm extends Entity {
       $account = $GLOBALS['user'];
     }
 
-    return user_access('administer taxonomy', $account);
+    $admin_access = user_access('administer taxonomy', $account);
+    if (!empty($bundle)) {
+      return user_access("create terms in $bundle", $account) || $admin_access;
+    }
+    return $admin_access;
   }
 
   /**
@@ -287,7 +284,7 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
   /**
    * Implements EntityControllerInterface::resetCache().
    */
-  public function resetCache(array $ids = NULL) {
+  public function resetCache(?array $ids = NULL) {
     backdrop_static_reset('taxonomy_term_count_nodes');
     backdrop_static_reset('taxonomy_get_tree');
     backdrop_static_reset('taxonomy_get_tree:parents');
@@ -351,7 +348,7 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
 
     $view = array();
     foreach ($terms as $term) {
-      /* @var TaxonomyTerm $term */
+      /** @var TaxonomyTerm $term */
       // Populate $term->content with a render() array.
       $this->buildContent($term, $view_mode, $langcode);
       $build = $term->content;
@@ -360,7 +357,7 @@ class TaxonomyTermController extends EntityDatabaseStorageController {
       unset($term->content);
 
       $build += array(
-        '#theme' => 'taxonomy_term__' . $term->vocabulary . '__' . $view_mode,
+        '#theme' => 'taxonomy_term',
         '#term' => $term,
         '#view_mode' => $view_mode,
         '#language' => $langcode,

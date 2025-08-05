@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Entity API controller classes and interface.
@@ -21,20 +20,20 @@ interface EntityControllerInterface {
   /**
    * Resets the internal, static entity cache.
    *
-   * @param $ids
+   * @param array|null $ids
    *   (optional) If specified, the cache is reset for the entities with the
    *   given ids only.
    */
-  public function resetCache(array $ids = NULL);
+  public function resetCache(?array $ids = NULL);
 
   /**
    * Resets the internal, static entity cache.
    *
-   * @param array $ids
+   * @param array|null $ids
    *   (optional) If specified, the cache is reset for the entities with the
    *   given IDs only.
    */
-  public function resetStaticCache(array $ids = NULL);
+  public function resetStaticCache(?array $ids = NULL);
 
   /**
    * Loads one or more entities.
@@ -79,7 +78,7 @@ interface EntityControllerInterface {
    * @param string|NULL $langcode
    * @param bool|NULL $page
    *   (optional) If set will control if the entity is rendered: if TRUE
-   *   the entity will be rendered without its title, so that it can be embeded
+   *   the entity will be rendered without its title, so that it can be embedded
    *   in another context. If FALSE the entity will be displayed with its title
    *   in a mode suitable for lists.
    *   If unset, the page mode will be enabled if the current path is the URI
@@ -215,7 +214,7 @@ class DefaultEntityController implements EntityControllerInterface {
   /**
    * Implements EntityControllerInterface::resetCache().
    */
-  public function resetCache(array $ids = NULL) {
+  public function resetCache(?array $ids = NULL) {
     // Reset the persistent cache.
     if ($this->persistentCache) {
       if (!empty($ids)) {
@@ -233,7 +232,7 @@ class DefaultEntityController implements EntityControllerInterface {
   /**
    * Implements EntityControllerInterface::resetStaticCache().
    */
-  public function resetStaticCache(array $ids = NULL) {
+  public function resetStaticCache(?array $ids = NULL) {
     // An empty array will not clear any cache, but NULL will clear everything.
     if (isset($ids)) {
       foreach ($ids as $id) {
@@ -365,7 +364,11 @@ class DefaultEntityController implements EntityControllerInterface {
         $queried_entities_by_id = array_intersect_key($queried_entities, $passed_ids);
         if (!empty($queried_entities_by_id)) {
           foreach ($queried_entities_by_id as $id => $item) {
-            cache_set($id, $item, 'cache_entity_' . $this->entityType);
+            $bundle_name = !empty($item->bundle()) ? $item->bundle() : $this->entityType;
+            $bundle_cache = isset($this->entityInfo['bundles'][$bundle_name]['bundle cache']) ? $this->entityInfo['bundles'][$bundle_name]['bundle cache'] : TRUE;
+            if ($bundle_cache) {
+              cache_set($id, $item, 'cache_entity_' . $this->entityType);
+            }
           }
         }
       }
@@ -616,7 +619,7 @@ class DefaultEntityController implements EntityControllerInterface {
 
     $view = array();
     foreach ($entities as $entity) {
-      /* @var EntityInterface $entity */
+      /** @var EntityInterface $entity */
       $this->buildContent($entity, $view_mode, $langcode);
 
       $build = $entity->content;
@@ -735,8 +738,8 @@ class EntityDatabaseStorageController extends DefaultEntityController implements
       foreach ($entities as $id => $entity) {
         $this->invokeHook('delete', $entity);
       }
-      // Ignore slave server temporarily.
-      db_ignore_slave();
+      // Ignore replica server temporarily.
+      db_ignore_replica();
     }
     catch (Exception $e) {
       $transaction->rollback();
@@ -773,8 +776,8 @@ class EntityDatabaseStorageController extends DefaultEntityController implements
         $this->invokeHook('insert', $entity);
       }
 
-      // Ignore slave server temporarily.
-      db_ignore_slave();
+      // Ignore replica server temporarily.
+      db_ignore_replica();
       unset($entity->is_new);
       unset($entity->original);
 

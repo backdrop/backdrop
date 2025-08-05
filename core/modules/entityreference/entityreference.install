@@ -1,0 +1,95 @@
+<?php
+
+/**
+ * Implements hook_field_schema().
+ */
+function entityreference_field_schema($field) {
+  if ($field['type'] == 'entityreference') {
+    // Load the base table configuration from the cache.
+    $base_tables = state_get('entityreference_base_tables', array());
+
+    $schema = array(
+      'columns' => array(
+        'target_id' => array(
+          'description' => 'The id of the target entity.',
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+        ),
+      ),
+      'indexes' => array(
+        'target_id' => array('target_id'),
+      ),
+      'foreign keys' => array(),
+    );
+
+    // Create a foreign key to the target entity type base type, if available.
+    $entity_type = $field['settings']['target_type'];
+    if (isset($base_tables[$entity_type])) {
+      list($base_table, $id_column) = $base_tables[$entity_type];
+      $schema['foreign keys'][$base_table] = array(
+        'table' => $base_table,
+        'columns' => array('target_id' => $id_column),
+      );
+    }
+
+    // Invoke the behaviors to allow them to change the schema.
+    module_load_include('module', 'entityreference');
+    foreach (entityreference_get_behavior_handlers($field) as $handler) {
+      $handler->schema_alter($schema, $field);
+    }
+
+    return $schema;
+  }
+}
+
+/**
+ * Move entityreference settings from config to state.
+ */
+function entityreference_update_1000() {
+  $config = config('entityreference.settings');
+  $base_tables = $config->get('base-tables');
+  state_set('entityreference_base_tables', $base_tables);
+  $config->delete();
+
+}
+
+/**
+ * Update each field base that references old plugin name "views-select-list" to
+ * "views".
+ */
+function entityreference_update_1001() {
+  foreach (field_info_fields() as $field_name => $field) {
+    // Update the field configuration.
+    if ($field['type'] == 'entityreference') {
+      $settings = &$field['settings'];
+      if (isset($settings['handler_settings']['behaviors']['views-select-list'])) {
+        $settings['handler_settings']['behaviors']['views'] = $settings['handler_settings']['behaviors']['views-select-list'];
+        unset($settings['handler_settings']['behaviors']['views-select-list']);
+        field_update_field($field);
+      }
+    }
+  }
+}
+
+/**
+ * Updates each field instance that references old plugin name "taxonomy-index"
+ * to "taxonomy".
+ */
+function entityreference_update_1002() {
+  foreach (field_info_fields() as $field_name => $field) {
+    // Update the field instance configuration.
+    if ($field['type'] == 'entityreference') {
+      foreach ($field['bundles'] as $entity_type => $bundles) {
+        foreach ($bundles as $bundle) {
+          $instance = field_info_instance($entity_type, $field_name, $bundle);
+          if (isset($instance['settings']['behaviors']['taxonomy-index'])) {
+            $instance['settings']['behaviors']['taxonomy'] = $instance['settings']['behaviors']['taxonomy-index'];
+            unset($instance['settings']['behaviors']['taxonomy-index']);
+            field_update_instance($instance);
+          }
+        }
+      }
+    }
+  }
+}

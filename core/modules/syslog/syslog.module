@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Redirects logging messages to syslog.
@@ -98,6 +97,7 @@ function syslog_watchdog(array $log_entry) {
     if ($facility === '') {
       $facility = defined('LOG_LOCAL0') ? LOG_LOCAL0 : LOG_USER;
     }
+    // cspell:disable-next-line
     openlog($config->get('log_identity'), LOG_NDELAY, $facility);
   }
 
@@ -109,8 +109,8 @@ function syslog_watchdog(array $log_entry) {
     '!request_uri' => $log_entry['request_uri'],
     '!referer'     => $log_entry['referer'],
     '!uid'         => $log_entry['uid'],
-    '!link'        => strip_tags($log_entry['link']),
-    '!message'     => strip_tags(!isset($log_entry['variables']) ? $log_entry['message'] : strtr($log_entry['message'], $log_entry['variables'])),
+    '!link'        => strip_tags((string) $log_entry['link']),
+    '!message'     => strip_tags((string) (!isset($log_entry['variables']) ? $log_entry['message'] : strtr($log_entry['message'], $log_entry['variables']))),
   ));
 
   syslog($log_entry['severity'], $message);

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Definition of views_plugin_exposed_form.
@@ -143,8 +142,8 @@ class views_plugin_exposed_form extends views_plugin {
   /**
    * Render the exposed filter form.
    *
-   * This actually does more than that; because it's using FAPI, the form will
-   * also assign data to the appropriate handlers for use in building the
+   * This actually does more than that; because it's using Form API, the form
+   * will also assign data to the appropriate handlers for use in building the
    * query.
    */
   function render_exposed_form($block = FALSE) {
@@ -293,7 +292,7 @@ class views_plugin_exposed_form extends views_plugin {
   }
 
   /**
-  * This function is executed when exposed form is submited.
+  * This function is executed when the exposed form is submitted.
   *
   * @param $form
   *   Nested array of form elements that comprise the form.

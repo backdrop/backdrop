@@ -7,6 +7,7 @@
 /**
  * Matches all 'N' Unicode character classes (numbers)
  */
+// cspell:disable
 define('PREG_CLASS_NUMBERS',
   '\x{30}-\x{39}\x{b2}\x{b3}\x{b9}\x{bc}-\x{be}\x{660}-\x{669}\x{6f0}-\x{6f9}' .
   '\x{966}-\x{96f}\x{9e6}-\x{9ef}\x{9f4}-\x{9f9}\x{a66}-\x{a6f}\x{ae6}-\x{aef}' .
@@ -17,10 +18,12 @@ define('PREG_CLASS_NUMBERS',
   '\x{2460}-\x{249b}\x{24ea}-\x{24ff}\x{2776}-\x{2793}\x{3007}\x{3021}-\x{3029}' .
   '\x{3038}-\x{303a}\x{3192}-\x{3195}\x{3220}-\x{3229}\x{3251}-\x{325f}\x{3280}-' .
   '\x{3289}\x{32b1}-\x{32bf}\x{ff10}-\x{ff19}');
+  // cspell:enable
 
 /**
  * Matches all 'P' Unicode character classes (punctuation)
  */
+// cspell:disable
 define('PREG_CLASS_PUNCTUATION',
   '\x{21}-\x{23}\x{25}-\x{2a}\x{2c}-\x{2f}\x{3a}\x{3b}\x{3f}\x{40}\x{5b}-\x{5d}' .
   '\x{5f}\x{7b}\x{7d}\x{a1}\x{ab}\x{b7}\x{bb}\x{bf}\x{37e}\x{387}\x{55a}-\x{55f}' .
@@ -37,6 +40,7 @@ define('PREG_CLASS_PUNCTUATION',
   '\x{fe6a}\x{fe6b}\x{ff01}-\x{ff03}\x{ff05}-\x{ff0a}\x{ff0c}-\x{ff0f}\x{ff1a}' .
   '\x{ff1b}\x{ff1f}\x{ff20}\x{ff3b}-\x{ff3d}\x{ff3f}\x{ff5b}\x{ff5d}\x{ff5f}-' .
   '\x{ff65}');
+  // cspell:enable
 
 /**
  * Matches CJK (Chinese, Japanese, Korean) letter-like characters.
@@ -53,11 +57,13 @@ define('PREG_CLASS_PUNCTUATION',
  *
  * @see search_expand_cjk()
  */
+// cspell:disable
 define('PREG_CLASS_CJK', '\x{1100}-\x{11FF}\x{3040}-\x{309F}\x{30A1}-\x{318E}' .
   '\x{31A0}-\x{31B7}\x{31F0}-\x{31FF}\x{3400}-\x{4DBF}\x{4E00}-\x{9FCF}' .
   '\x{A000}-\x{A48F}\x{A4D0}-\x{A4FD}\x{A960}-\x{A97F}\x{AC00}-\x{D7FF}' .
   '\x{F900}-\x{FAFF}\x{FF21}-\x{FF3A}\x{FF41}-\x{FF5A}\x{FF66}-\x{FFDC}' .
   '\x{20000}-\x{2FFFD}\x{30000}-\x{3FFFD}');
+  // cspell:enable
 
 /**
  * Implements hook_theme().
@@ -234,7 +240,7 @@ function search_menu() {
     'file' => 'search.admin.inc',
   );
   $items['admin/config/search/settings/reindex'] = array(
-    'title' => 'Invalidate search index',
+    'title' => 'Rebuild search index',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('search_reindex_confirm'),
     'access arguments' => array('administer search'),
@@ -434,7 +440,7 @@ function search_update_totals() {
   // Update word IDF (Inverse Document Frequency) counts for new/changed words.
   foreach (search_dirty() as $word => $dummy) {
     // Get total count
-    $total = db_query("SELECT SUM(score) FROM {search_index} WHERE word = :word", array(':word' => $word), array('target' => 'slave'))->fetchField();
+    $total = db_query("SELECT SUM(score) FROM {search_index} WHERE word = :word", array(':word' => $word), array('target' => 'replica'))->fetchField();
     // Apply Zipf's law to equalize the probability distribution.
     $total = log10(1 + 1/(max(1, $total)));
     db_merge('search_total')
@@ -445,7 +451,7 @@ function search_update_totals() {
   // Find words that were deleted from search_index, but are still in
   // search_total. We use a LEFT JOIN between the two tables and keep only the
   // rows which fail to join.
-  $result = db_query("SELECT t.word AS realword, i.word FROM {search_total} t LEFT JOIN {search_index} i ON t.word = i.word WHERE i.word IS NULL", array(), array('target' => 'slave'));
+  $result = db_query("SELECT t.word AS realword, i.word FROM {search_total} t LEFT JOIN {search_index} i ON t.word = i.word WHERE i.word IS NULL", array(), array('target' => 'replica'));
   $or = db_or();
   foreach ($result as $word) {
     $or->condition('word', $word->realword);
@@ -496,7 +502,7 @@ function search_simplify($text) {
   $text = preg_replace('/([' . PREG_CLASS_NUMBERS . ']+)[' . PREG_CLASS_PUNCTUATION . ']+(?=[' . PREG_CLASS_NUMBERS . '])/u', '\1', $text);
 
   // Multiple dot and dash groups are word boundaries and replaced with space.
-  // No need to use the unicode modifer here because 0-127 ASCII characters
+  // No need to use the unicode modifier here because 0-127 ASCII characters
   // can't match higher UTF-8 characters as the leftmost bit of those are 1.
   $text = preg_replace('/[.-]{2,}/', ' ', $text);
 
@@ -688,7 +694,7 @@ function search_index($sid, $module, $text) {
             if (preg_match('!(?:node|book)/(?:view/)?([0-9]+)!i', $path, $match)) {
               $linknid = $match[1];
               if ($linknid > 0) {
-                $node = db_query('SELECT title, nid, vid FROM {node} WHERE nid = :nid', array(':nid' => $linknid), array('target' => 'slave'))->fetchObject();
+                $node = db_query('SELECT title, nid, vid FROM {node} WHERE nid = :nid', array(':nid' => $linknid), array('target' => 'replica'))->fetchObject();
                 $link = TRUE;
                 $linktitle = $node->title;
               }
@@ -779,7 +785,7 @@ function search_index($sid, $module, $text) {
   $result = db_query("SELECT nid, caption FROM {search_node_links} WHERE sid = :sid AND type = :type", array(
     ':sid' => $sid,
     ':type' => $module
-  ), array('target' => 'slave'));
+  ), array('target' => 'replica'));
   $links = array();
   foreach ($result as $link) {
     $links[$link->nid] = $link->caption;
@@ -846,7 +852,7 @@ function search_touch_node($nid) {
  */
 function search_node_update_index(Node $node) {
   // Transplant links to a node into the target node.
-  $result = db_query("SELECT caption FROM {search_node_links} WHERE nid = :nid", array(':nid' => $node->nid), array('target' => 'slave'));
+  $result = db_query("SELECT caption FROM {search_node_links} WHERE nid = :nid", array(':nid' => $node->nid), array('target' => 'replica'));
   $output = array();
   foreach ($result as $link) {
     $output[] = $link->caption;
@@ -985,8 +991,8 @@ function search_expression_insert($expression, $option, $value = NULL) {
  *
  * If your module needs to provide a more complicated search form, then you need
  * to implement it yourself without hook_search_info(). In that case, you should
- * define it as a local task (tab) under the /search page (e.g. /search/mymodule)
- * so that users know where to find it.
+ * define it as a local task (tab) under the /search page (e.g.
+ * /search/my_module), so that users know where to find it.
  */
 
 /**
@@ -994,8 +1000,8 @@ function search_expression_insert($expression, $option, $value = NULL) {
  *
  * @param $action
  *   Form action. Defaults to "search/$path", where $path is the search path
- *   associated with the module in its hook_search_info(). This will be
- *   run through url().
+ *   associated with the module in its hook_search_info(). This will be run
+ *   through url().
  * @param $keys
  *   The search string entered by the user, containing keywords for the search.
  * @param $module
@@ -1036,6 +1042,9 @@ function search_form($form, &$form_state, $action = '', $keys = '', $module = NU
   $form_state['action'] = $action;
   $form['module'] = array('#type' => 'value', '#value' => $module);
   $form['basic'] = array('#type' => 'container', '#attributes' => array('class' => array('container-inline')));
+
+  // This field is not required because it may be populated by the advanced
+  // search fields provided by other modules (such as node module).
   $form['basic']['keys'] = array(
     '#type' => 'search',
     '#title' => $prompt,
@@ -1046,7 +1055,8 @@ function search_form($form, &$form_state, $action = '', $keys = '', $module = NU
   // processed_keys is used to coordinate keyword passing between other forms
   // that hook into the basic search form.
   $form['basic']['processed_keys'] = array('#type' => 'value', '#value' => '');
-  $form['basic']['submit'] = array('#type' => 'submit', '#value' => t('Search'));
+  $form['basic']['actions'] = array('#type' => 'actions');
+  $form['basic']['actions']['submit'] = array('#type' => 'submit', '#value' => t('Search'));
 
   return $form;
 }
@@ -1058,13 +1068,15 @@ function search_form($form, &$form_state, $action = '', $keys = '', $module = NU
  * @see search_box_form_submit()
  */
 function search_box($form, &$form_state, $form_id) {
+  // The #required property is not set here, so that the user is taken to the
+  // search page before any error is shown.
   $form[$form_id] = array(
     '#type' => 'search',
     '#title' => t('Search'),
     '#title_display' => 'invisible',
     '#size' => 15,
     '#default_value' => '',
-    '#attributes' => array('title' => t('Enter the terms you wish to search for.')),
+    '#attributes' => array('title' => t('Enter the keywords you wish to search for.')),
   );
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array('#type' => 'submit', '#value' => t('Search'));
@@ -1087,10 +1099,8 @@ function search_box_form_submit($form, &$form_state) {
 
   // Check to see if the form was submitted empty.
   // If it is empty, display an error message.
-  // (This method is used instead of setting #required to TRUE for this field
-  // because that results in a confusing error message.  It would say a plain
-  // "field is required" because the search keywords field has no title.
-  // The error message would also complain about a missing #title field.)
+  // This method is used instead of the #required property so that the user
+  // will be taken to the search page before the error is shown.
   if ($form_state['values']['search_block_form'] == '') {
     form_set_error('keys', t('Please enter some keywords.'));
   }
@@ -1417,4 +1427,94 @@ function search_config_info() {
     'group' => t('Configuration'),
   );
   return $prefixes;
+}
+
+/**
+ * Gets stats for total and remaining items to be indexed.
+ *
+ * @param array $modules
+ *  An array of module names whose index stats we are getting.
+ *
+ * @return array
+ *  An array with the following keys:
+ *  - remaining: The number of remaining items to be indexed.
+ *  - total: The total number of indexable items.
+ */
+function search_get_stats($modules = array()) {
+  if (empty($module)) {
+    $modules = config_get('search.settings', 'search_active_modules');
+  }
+  $remaining = 0;
+  $total = 0;
+  foreach ($modules as $module) {
+    if ($status = module_invoke($module, 'search_status')) {
+      $remaining += $status['remaining'];
+      $total += $status['total'];
+    }
+  }
+
+  return array(
+    'remaining' => $remaining,
+    'total' => $total,
+  );
+}
+
+/**
+ * Batch operation to rebuild the search index.
+ *
+ * @see search_reindex_confirm()
+ * @see search_reindex_confirm_submit()
+ */
+function search_reindex_batch($passes_needed, $search_active_modules, &$context) {
+  if (!isset($context['sandbox']['current_pass'])) {
+    $context['sandbox']['current_pass'] = 0;
+  }
+
+  // Invoke hook_update_index for all search active modules.
+  if ($context['sandbox']['current_pass'] < $passes_needed) {
+    // Register a shutdown function to ensure that search_total is up-to-date.
+    backdrop_register_shutdown_function('search_update_totals');
+    foreach ($search_active_modules as $module) {
+      module_invoke($module, 'update_index');
+    }
+    $context['sandbox']['current_pass']++;
+    $context['message'] = t('Now processing pass %pass of %needed', array('%pass' => $context['sandbox']['current_pass'], '%needed' => $passes_needed));
+    $context['finished'] = $context['sandbox']['current_pass'] / $passes_needed;
+  }
+}
+
+/**
+ * Batch 'finished' callback for rebuilding the search index.
+ *
+ * @see search_reindex_batch()
+ */
+function search_reindex_batch_finished($success, $results, $operations) {
+  if ($success) {
+    $config = config('search.settings');
+    // Collect some stats
+    $remaining = 0;
+    $total = 0;
+    foreach ($config->get('search_active_modules') as $module) {
+      if ($status = module_invoke($module, 'search_status')) {
+        $remaining += $status['remaining'];
+        $total += $status['total'];
+      }
+    }
+    $count = format_plural($remaining, 'There is 1 item left to index.', 'There are @count items left to index.');
+    $percentage = ((int)min(100, 100 * ($total - $remaining) / max(1, $total))) . '%';
+    $message = '<p><strong>' . t('%percentage of the site has been indexed.', array('%percentage' => $percentage)) . ' ' . $count . '</strong></p>';
+    backdrop_set_message($message);
+  }
+  else {
+    // An error occurred.
+    $error_operation = reset($operations);
+    backdrop_set_message(
+      t('An error occurred while processing @operation with arguments : @args',
+        array(
+          '@operation' => $error_operation[0],
+          '@args' => print_r($error_operation[0], TRUE),
+        )
+      )
+    );
+  }
 }

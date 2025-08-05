@@ -1099,14 +1099,6 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     '#access' => empty($view->locked),
   );
 
-  if (empty($view->changed)) {
-    $form['actions']['#attributes'] = array(
-      'class' => array(
-        'js-hide',
-      ),
-    );
-  }
-
   $form['actions']['save'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
@@ -1114,6 +1106,7 @@ function views_ui_edit_form($form, &$form_state, $view, $display_id = NULL) {
     '#validate' => array('views_ui_edit_view_form_validate'),
     '#submit' => array('views_ui_edit_view_form_submit'),
   );
+
   $form['actions']['cancel'] = array(
     '#type' => 'submit',
     '#value' => t('Cancel'),
@@ -1570,7 +1563,7 @@ function views_ui_edit_page_display_tabs($view, $display_id = NULL) {
  */
 function views_ui_show_default_display($view) {
   // Always show the default display for advanced users who prefer that mode.
-  $advanced_mode = config_get('views_ui.settings', 'show_master_display');
+  $advanced_mode = config_get('views_ui.settings', 'show_default_display');
   // For other users, show the default display only if there are no others, and
   // hide it if there's at least one "real" display.
   $additional_displays = (count($view->display) == 1);
@@ -1620,7 +1613,7 @@ function views_ui_get_display_tab_details($view, $display) {
   $plugin = views_fetch_plugin_data('display', $view->display[$display->id]->display_plugin);
   $is_display_deleted = !empty($display->deleted);
   $is_deletable = empty($plugin['no remove']);
-  // The master display cannot be cloned.
+  // The default display cannot be cloned.
   $is_default = $display->id == 'default';
   // @todo: Figure out why get_option doesn't work here.
   $is_enabled = $display->handler->get_option('enabled');
@@ -2149,10 +2142,9 @@ function views_ui_edit_view_form_submit($form, &$form_state) {
 function views_ui_edit_view_form_cancel($form, &$form_state) {
   // Remove this view from cache so configurations will be lost.
   tempstore_clear('views.view', $form_state['view']->name);
+  backdrop_set_message(t('Any changes to the %name view have been discarded.', array('%name' => $form_state['view']->get_human_name())), 'info');
   if (empty($form['view']->vid)) {
-    // I seem to have to backdrop_goto here because I can't get fapi to
-    // honor the redirect target. Not sure what I screwed up here.
-    backdrop_goto('admin/structure/views');
+    $form_state['redirect'] = 'admin/structure/views';
   }
 }
 
@@ -2503,7 +2495,7 @@ function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = 
   // Finally, we never want these cached -- our object cache does that for us.
   $form['#no_cache'] = TRUE;
 
-  // If this isn't an ajaxy form, then we want to set the title.
+  // If this isn't an AJAX form, then we want to set the title.
   if (!empty($form['#title'])) {
     backdrop_set_title($form['#title']);
   }
@@ -2929,7 +2921,7 @@ function views_ui_ajax_form($js, $key, $view, $display_id = '') {
   // Automatically remove the form cache if it is set and the key does
   // not match. This way navigating away from the form without hitting
   // update will work.
-  if (isset($view->form_cache) && $view->form_cache['key'] != $key) {
+  if (isset($view->form_cache) && $key !== 0 && $view->form_cache['key'] != $key) {
     unset($view->form_cache);
   }
 
@@ -3525,6 +3517,7 @@ function views_ui_rearrange_filter_form($form, &$form_state) {
       '#attributes' => array(
         'class' => array('warning-on-change'),
       ),
+      '#title_display' => 'before',
     );
 
     $form['remove_groups'][$id] = array(); // to prevent a notice
@@ -3774,86 +3767,111 @@ function views_ui_add_item_form($form, &$form_state) {
   // Add the display override dropdown.
   views_ui_standard_display_dropdown($form, $form_state, $section);
 
-  // Figure out all the base tables allowed based upon what the relationships provide.
+  // Figure out base tables allowed based upon what the relationships provide.
   $base_tables = $view->get_base_tables();
-  $options = views_fetch_fields(array_keys($base_tables), $type, $display->handler->use_group_by());
+  $fields = views_fetch_fields(array_keys($base_tables), $type, $display->handler->use_group_by());
 
-  if (!empty($options)) {
-    $form['options']['controls'] = array(
-      '#theme_wrappers' => array('container'),
-      '#id' => 'views-filterable-options-controls',
-      '#attributes' => array('class' => array('container-inline')),
+  $form['options']['controls'] = array(
+    '#theme_wrappers' => array('container'),
+    '#id' => 'views-filterable-options-controls',
+    '#attributes' => array('class' => array('container-inline')),
+  );
+  $form['options']['controls']['options_search'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Search'),
+  );
+
+  $form['options']['controls']['group'] = array(
+    '#type' => 'select',
+    '#title' => t('Filter'),
+    '#options' => array(),
+    '#empty_value' => 'all',
+    '#empty_option' => t('- All -'),
+  );
+
+  $form['options']['name'] = array(
+    '#prefix' => '<div class="views-radio-box form-checkboxes views-filterable-options">',
+    '#suffix' => '</div>',
+    '#tree' => TRUE,
+  );
+
+  // Build the table header.
+  $header = array(
+    'title' => array('data' => t('Title'), 'sort' => 'asc'),
+    'group' => array('data' => t('Category'), 'sort' => 'asc'),
+    'help' => array('data' => t('Description')),
+  );
+  $groups = array();
+  foreach ($fields as $key => $field) {
+    $group = preg_replace('/[^a-z0-9]/', '-', strtolower($field['group']));
+    $groups[$group] = $field['group'];
+    $fields[$key]['#attributes'] = array(
+      'class' => array(
+        'views-filterable-option',
+        $group,
+      ),
     );
-    $form['options']['controls']['options_search'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Search'),
+    $fields[$key]['help'] = array(
+      'data' => $field['help'],
+      'class' => array('description'),
     );
-
-    $groups = array('all' => t('- All -'));
-    $form['options']['controls']['group'] = array(
-      '#type' => 'select',
-      '#title' => t('Filter'),
-      '#options' => array(),
+    // Here we generate what will be the ID of the checkbox for this $key.
+    // This allows us to tie the label to the checkbox for better accessibility.
+    // We can't use backdrop_html_id() because it would generate a unique ID
+    // and we need this to match the ID that is generated separately for the
+    // checkbox.
+    $checkbox_id = backdrop_html_class('edit-name-fields-' . $key);
+    $fields[$key]['title'] = array(
+      'data' => '<label for="' . $checkbox_id . '">' . $field['title'] . '</label>',
+      'class' => array('title'),
     );
-
-    $form['options']['name'] = array(
-      '#prefix' => '<div class="views-radio-box form-checkboxes views-filterable-options">',
-      '#suffix' => '</div>',
-      '#tree' => TRUE,
-      '#default_value' => 'all',
+    $fields[$key]['group'] = array(
+      'data' => $field['group'],
+      'class' => array('group'),
     );
-
-    // Group options first to simplify the DOM objects that Views
-    // dependent JS will act upon.
-    $grouped_options = array();
-    foreach ($options as $key => $option) {
-      $group = preg_replace('/[^a-z0-9]/', '-', strtolower($option['group']));
-      $groups[$group] = $option['group'];
-      $grouped_options[$group][$key] = $option;
-      if (!empty($option['aliases']) && is_array($option['aliases'])) {
-        foreach ($option['aliases'] as $id => $alias) {
-          if (empty($alias['base']) || !empty($base_tables[$alias['base']])) {
-            $copy = $option;
-            $copy['group'] = $alias['group'];
-            $copy['title'] = $alias['title'];
-            if (isset($alias['help'])) {
-              $copy['help'] = $alias['help'];
-            }
-
-            $group = preg_replace('/[^a-z0-9]/', '-', strtolower($copy['group']));
-            $groups[$group] = $copy['group'];
-            $grouped_options[$group][$key . '$' . $id] = $copy;
+    if (!empty($field['aliases']) && is_array($field['aliases'])) {
+      foreach ($field['aliases'] as $id => $alias) {
+        if (empty($alias['base']) || !empty($base_tables[$alias['base']])) {
+          $copy = $field;
+          $groups[$group] = $alias['group'];
+          $copy['group'] = array(
+            'data' => $alias['group'],
+            'class' => array('group'),
+          );
+          $copy['title'] = array(
+            'data' => $alias['title'],
+            'class' => array('title'),
+          );
+          if (isset($alias['help'])) {
+            $copy['help'] = array(
+              'data' => $alias['help'],
+              'class' => array('description'),
+            );
           }
+          $group = preg_replace('/[^a-z0-9]/', '-', strtolower($copy['group']['data']));
+          $fields[$key . '$' . $id] = $copy;
+          $fields[$key . '$' . $id]['#attributes'] = array(
+            'class' => array(
+              'views-filterable-option',
+              $group,
+            ),
+          );
         }
       }
     }
-
-    foreach ($grouped_options as $group => $group_options) {
-      $form['options']['name'][$group . '_start']['#markup'] = '<div class="views-filterable-group views-filterable-group-' . $group . '">';
-      $zebra = 0;
-      foreach ($group_options as $key => $option) {
-        $zebra_class = ($zebra % 2) ? 'odd' : 'even';
-        $form['options']['name'][$key] = array(
-          '#type' => 'checkbox',
-          '#title' => t('!group: !field', array('!group' => check_plain($option['group']), '!field' => check_plain($option['title']))),
-          '#description' => filter_xss_admin($option['help']),
-          '#return_value' => $key,
-          '#prefix' => "<div class='$zebra_class filterable-option'>",
-          '#suffix' => '</div>',
-        );
-        $zebra++;
-      }
-      $form['options']['name'][$group . '_end']['#markup'] = '</div>';
-    }
-
-    $form['options']['controls']['group']['#options'] = $groups;
   }
-  else {
-    $form['options']['markup'] = array(
-      '#markup' => '<div class="form-item">' . t('There are no @types available to add.', array('@types' =>  $ltitle)) . '</div>',
-    );
-  }
-  // Add a div to show the selected items
+  $form['options']['name']['fields'] = array(
+    '#type' => 'tableselect',
+    '#header' => $header,
+    '#options' => $fields,
+    '#empty' => t('There are no @types available to add.', array(
+      '@types' => $ltitle,
+    )),
+    '#js_select' => FALSE,
+  );
+  $form['options']['controls']['group']['#options'] = $groups;
+
+  // Add a div to show the selected items.
   $form['selected'] = array(
     '#type' => 'item',
     '#markup' => '<div class="views-selected-options"></div>',
@@ -3900,9 +3918,9 @@ function views_ui_add_item_form_submit($form, &$form_state) {
     $display->handler->set_override($section);
   }
 
-  if (!empty($form_state['values']['name']) && is_array($form_state['values']['name'])) {
+  if (!empty($form_state['values']['name']['fields']) && is_array($form_state['values']['name']['fields'])) {
     // Loop through each of the items that were checked and add them to the view.
-    foreach (array_keys(array_filter($form_state['values']['name'])) as $field) {
+    foreach (array_keys(array_filter($form_state['values']['name']['fields'])) as $field) {
       list($table, $field) = explode('.', $field, 2);
 
       if ($cut = strpos($field, '$')) {
@@ -4494,31 +4512,43 @@ function views_ui_admin_settings_basic() {
   $form['#attached']['css'] = views_ui_get_admin_css();
   $config = config('views_ui.settings');
 
+  $form['wizard'] = array(
+    '#type' => 'fieldset',
+    '#title' => t("'Add view' wizard"),
+  );
+  $form['wizard']['wizard_default_display'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Display types to include by default'),
+    '#description' => t("These display types will be selected by default when a new view is created using the '!add_view' wizard.", array('!add_view' => l(t('Add View'), 'admin/structure/views/add'))),
+    '#options' => array(
+      'page' => t('Page'),
+      'block' => t('Block'),
+    ),
+    '#default_value' => $config->get('wizard_default_display'),
+  );
+
+  $form['basic'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Views UI settings'),
+  );
+  $form['basic']['show_default_display'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Always show the <em>Default</em> display'),
+    '#description' => t('Show the <em>Default</em> (i.e. default) display, which is otherwise hidden.'),
+    '#default_value' => $config->get('show_default_display'),
+  );
+  $form['basic']['display_embed'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow <em>embed</em> displays to be created via the UI'),
+    '#description' => t('Enables the <em>embed</em> type of display. Embed displays can be used in code via <a href="@api_link"><code>views_embed_view()</code></a>. Embedded displays will still work even if this setting is disabled.', array('@api_link' => url('https://docs.backdropcms.org/api/backdrop/core%21modules%21views%21views.module/function/views_embed_view'))),
+    '#default_value' => $config->get('display_embed'),
+  );
   $options = array();
   foreach (list_themes() as $name => $theme) {
     if ($theme->status) {
       $options[$name] = $theme->info['name'];
     }
   }
-
-  // This is not currently a fieldset but we may want it to be later, so this
-  // will make it easier to change if we do.
-  $form['basic'] = array();
-
-  $form['basic']['show_master_display'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Always show the <em>Master</em> display'),
-    '#description' => t('Show the <em>Master</em> (i.e. default) display, which is otherwise hidden.'),
-    '#default_value' => $config->get('show_master_display'),
-  );
-
-  $form['basic']['display_embed'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Allow <em>embed</em> displays to be created via the UI'),
-    '#description' => t('Enables the <em>embed</em> type of display. Embed displays can be used in code via <a href="@api_link"><code>views_embed_view()</code></a>. Embedded displays will still work even if this setting is disabled.', array('@api_link' => url('https://api.backdropcms.org/api/backdrop/core%21modules%21views%21views.module/function/views_embed_view'))),
-    '#default_value' => $config->get('display_embed'),
-  );
-
   $form['basic']['custom_theme'] = array(
     '#type' => 'select',
     '#title' => t('Custom admin theme for the Views UI'),
@@ -4526,7 +4556,6 @@ function views_ui_admin_settings_basic() {
     '#default_value' => $config->get('custom_theme'),
     '#description' => t('In some cases you might want to select a different admin theme for the Views UI.')
   );
-
   $form['basic']['exposed_filter_any_label'] = array(
     '#type' => 'select',
     '#title' => t('Label for "Any" value on non-required single-select exposed filters'),
@@ -4538,26 +4567,22 @@ function views_ui_admin_settings_basic() {
     '#type' => 'fieldset',
     '#title' => t('Live preview settings'),
   );
-
   $form['live_preview']['always_live_preview'] = array(
     '#type' => 'checkbox',
     '#title' => t('Automatically update preview on changes'),
     '#default_value' => $config->get('always_live_preview'),
   );
-
   $form['live_preview']['show_preview_information'] = array(
     '#type' => 'checkbox',
     '#title' => t('Show information and statistics about the view during live preview'),
     '#default_value' => $config->get('show_preview_information'),
   );
-
   // Set a common variable used for #states on the following elements.
   $preview_checked = array(
     'visible' => array(
       ':input[name="show_preview_information"]' => array('checked' => TRUE),
     ),
   );
-
   $form['live_preview']['show_sql_query_where'] = array(
     '#type' => 'radios',
     '#title' => t('Statistics location'),
@@ -4568,7 +4593,6 @@ function views_ui_admin_settings_basic() {
     '#default_value' => $config->get('show_sql_query_where'),
     '#states' => $preview_checked,
   );
-
   $form['live_preview']['show_sql_query'] = array(
     '#type' => 'checkbox',
     '#title' => t('Show the SQL query'),
@@ -4581,7 +4605,6 @@ function views_ui_admin_settings_basic() {
     '#default_value' => $config->get('show_performance_statistics'),
     '#states' => $preview_checked,
   );
-
   $form['live_preview']['show_additional_queries'] = array(
     '#type' => 'checkbox',
     '#title' => t('Show other queries run during render during live preview'),
@@ -4858,7 +4881,7 @@ function _views_sort_types($a, $b) {
  * @todo Remove this function once configuring the display title is possible.
  */
 function views_ui_get_display_label($view, $display_id, $check_changed = TRUE) {
-  $title = $display_id == 'default' ? t('Master') : $view->display[$display_id]->display_title;
+  $title = $display_id == 'default' ? t('Default') : $view->display[$display_id]->display_title;
   $title = views_ui_truncate($title, 25);
 
   if ($check_changed && !empty($view->changed_display[$display_id])) {

@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Archiver implementations provided by the system module.
