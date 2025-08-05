@@ -4688,28 +4688,29 @@ function system_settings_form_submit($form, &$form_state) {
  * bucket name will be used for that element and any child elements in the
  * form.
  *
- * @param $form
+ * @param array $form
  *   An associative array containing the structure of a portion of the form.
- * @param &$form_state
+ * @param array &$form_state
  *   A keyed array containing the current state of the form.
- * @param $inherited_bucket
+ * @param string $inherited_bucket
  *   The name of the bucket to use if $form['#config'] is not set.
- * @param $configs
+ * @param array $configs
  *   A keyed array that will contain the form values sorted by CMI bucket when
  *   the function returns.  Defaults to an empty array.
- * @return
- *    Returns an array where the keys are the names of the CMI buckets (e.g.,
- *    system.settings) and the values are key => value arrays of the settings
- *    for each bucket.
+ * @return array
+ *   Returns an array where the keys are the names of the CMI buckets (e.g.,
+ *   system.settings) and the values are key => value arrays of the settings
+ *   for each bucket.
  */
-function _system_sort_form_values_by_config($form, &$form_state, $inherited_bucket, $configs = array()) {
+function _system_sort_form_values_by_config(array $form, array &$form_state, $inherited_bucket, array $configs = array()) {
   foreach (element_children($form) as $key) {
     $form_fragment = $form[$key];
 
     // Specific elements or groups of elements can specify a bucket.
     $bucket = empty($form_fragment['#config']) ? $inherited_bucket : $form_fragment['#config'];
-    // Save this element, if the value is present.
-    if (array_key_exists($key, $form_state['values'])) {
+    // Save this element, if the value is present and the '#config' value for
+    // the fragment is not FALSE.
+    if (array_key_exists($key, $form_state['values']) && $bucket !== FALSE) {
       $configs[$bucket][$key] = $form_state['values'][$key];
     }
     // Descend into subgroups.
