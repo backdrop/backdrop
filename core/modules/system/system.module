@@ -4708,7 +4708,7 @@ function _system_sort_form_values_by_config(array $form, array &$form_state, $in
 
     // If the '#config' value for the fragment is FALSE, remove the value from
     // the form_state['values'] array.
-    if ($form_fragment['#config'] === FALSE) {
+    if (($form_fragment['#config'] ?? NULL) === FALSE) {
       unset($form_state['values'][$key]);
     }
     // Specific elements or groups of elements can specify a bucket.
