@@ -4706,11 +4706,15 @@ function _system_sort_form_values_by_config(array $form, array &$form_state, $in
   foreach (element_children($form) as $key) {
     $form_fragment = $form[$key];
 
+    // If the '#config' value for the fragment is FALSE, remove the value from
+    // the form_state['values'] array.
+    if ($form_fragment['#config'] === FALSE) {
+      unset($form_state['values'][$key]);
+    }
     // Specific elements or groups of elements can specify a bucket.
     $bucket = empty($form_fragment['#config']) ? $inherited_bucket : $form_fragment['#config'];
-    // Save this element, if the value is present and the '#config' value for
-    // the fragment is not FALSE.
-    if (array_key_exists($key, $form_state['values']) && $bucket !== FALSE) {
+    // Save this element, if the value is present.
+    if (array_key_exists($key, $form_state['values'])) {
       $configs[$bucket][$key] = $form_state['values'][$key];
     }
     // Descend into subgroups.
