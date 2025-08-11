@@ -4228,7 +4228,7 @@ function hook_mailsystem_info() {
  * @param array $theme_options
  *   Reference to an array containing information about the mail theme options.
  */
-function hook_mail_theme_options_alter(&$theme_options) {
+function hook_mail_theme_options_alter(array &$theme_options) {
   unset($theme_options['seven']);
   $theme_options['domain'] = t('Domain');
 }
@@ -4239,7 +4239,7 @@ function hook_mail_theme_options_alter(&$theme_options) {
  * @param string $mail_theme
  *   Reference the mail theme key.
  * @param string $original_mail_theme
- *   The original mail theme
+ *   The original mail theme.
  */
 function system_mail_theme($mail_theme, $original_mail_theme) {
   global $theme_key;

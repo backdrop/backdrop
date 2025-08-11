@@ -3904,15 +3904,15 @@ function system_mail($key, &$message, $params) {
  * @return array
  *   Array of mailsystem definitions keyed by the module.
  */
-function system_get_mailsystems() {
-  $mailsystems = &backdrop_static(__FUNCTION__);
-  if (!isset($mailsystems)) {
-    $mailsystems = array();
+function system_get_mailsystem_definitions() {
+  $mailsystem_definitions = &backdrop_static(__FUNCTION__);
+  if (!isset($mailsystem_definitions)) {
+    $mailsystem_definitions = array();
     foreach (module_implements('mailsystem_info') as $module) {
-      $mailsystems[$module] = module_invoke($module, 'mailsystem_info');
+      $mailsystem_definitions[$module] = module_invoke($module, 'mailsystem_info');
     }
   }
-  return $mailsystems;
+  return $mailsystem_definitions;
 }
 
 /**
@@ -3947,21 +3947,21 @@ function system_mailsystem_info() {
  *
  * @return MailSystemInterface
  *
- * @see backdrop_mail_system().
+ * @see backdrop_mail_system()
  */
 function _system_delegate_get_mailsystem($module, $key, $action) {
   $instances = &backdrop_static(__FUNCTION__, array());
 
-  $config_mailsystem = config('mailsystem.settings');
+  $config_mail = config('system.mail');
   // Try to use custom settings defined for the message's module and key.
-  $settings = $config_mailsystem->get('mailsystem_delegate.' . $module . '_' . $key);
+  $settings = $config_mail->get('mailsystem_delegate.' . $module . '_' . $key);
   if ($settings === NULL) {
     // Try to use custom settings defined for the message's module.
-    $settings = $config_mailsystem->get('mailsystem_delegate.' . $module);
+    $settings = $config_mail->get('mailsystem_delegate.' . $module);
   }
   if ($settings === NULL) {
     // Try to use the configured site-wide default mail system settings.
-    $settings = $config_mailsystem->get('mailsystem_delegate.' . 'default-system');
+    $settings = $config_mail->get('mailsystem_delegate.default-system');
   }
 
   // Use the class configured for the given action.
@@ -3984,7 +3984,10 @@ function _system_delegate_get_mailsystem($module, $key, $action) {
       $instances[$class] = new $class();
     }
     else {
-      throw new Exception(t('Class %class does not implement interface %interface', array('%class' => $class, '%interface' => 'MailSystemInterface')));
+      throw new Exception(t('Class %class does not implement interface %interface', array(
+        '%class' => $class,
+        '%interface' => 'MailSystemInterface',
+      )));
     }
   }
   return $instances[$class];
@@ -4006,7 +4009,7 @@ function system_get_mailsystem_classes() {
   if (!isset($mailsystem_classes)) {
     $mailsystem_classes = array();
     // Get the definitions from the hook implementations.
-    foreach (system_get_mailsystems() as $hook) {
+    foreach (system_get_mailsystem_definitions() as $hook) {
       foreach ($hook as $info) {
         $mailsystem_classes['labels'][$info['class']] = $info['label'];
         $mailsystem_classes['descriptions'][$info['class']] = $info['description'];
@@ -4117,7 +4120,7 @@ function system_mailsystem_set(array $setting) {
   $config_mail = config('system.mail');
   foreach ($setting as $key => $class) {
     if (is_array($class)) {
-      // Save the settings for the delegater-class into a variable.
+      // Save the settings for the delegate class into a variable.
       $config_mail->set('mailsystem_delegate.' . $key, $class);
       $config_mail->set($key, 'MailsystemDelegateMailSystem');
     } else {
@@ -4137,10 +4140,7 @@ function system_mailsystem_set(array $setting) {
  *   a module and associated MailSystemInterface class that are being disabled.
  *   - $module is the machine-readable module name.
  *   - $class is a class that implements MailSystemInterface.
- *
- * If $class is empty, only the $module entry is removed.
- * @param string $class
- *   The name of the class to be removed, if any.
+ *   If $class is empty, only the $module entry is removed.
  */
 function system_mailsystem_clear(array $setting) {
   $config_mail = config('system.mail');

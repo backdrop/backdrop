@@ -739,14 +739,14 @@ function system_mail_theme_registry_alter(&$theme_registry) {
   $recursion_prevention = TRUE;
   $mail_theme = system_get_mail_theme();
 
-  // Only take action if the mailsystem theme is not the current theme.
+  // Only take action if the mail theme is not the current theme.
   if ($mail_theme != $theme_key) {
     $themes = list_themes();
-    // Get the mailsystem theme to be used for rendering emails.
+    // Get the mail theme to be used for rendering emails.
     if (isset($themes[$mail_theme])) {
       $theme = clone $themes[$mail_theme];
       if (isset($theme)) {
-        // Swap to the mailsystem theme
+        // Swap to the mail theme.
         $old_theme = $theme_key;
         system_mail_swap_theme($mail_theme);
 
@@ -800,7 +800,7 @@ function system_mail_theme_registry_alter(&$theme_registry) {
           }
         }
 
-        // Swap back to the original theme
+        // Swap back to the original theme.
         system_mail_swap_theme($old_theme);
       }
     }
@@ -810,19 +810,21 @@ function system_mail_theme_registry_alter(&$theme_registry) {
 
 /**
  * Helper to swap themes safely for use by system_mail_theme_registry_alter().
+ *
+ * @param string $new_theme
  */
 function system_mail_swap_theme($new_theme) {
-  // Make sure the theme exists
+  // Make sure the theme exists.
   $themes = list_themes();
   if (empty($themes[$new_theme])) {
     return;
   }
 
-  // Both theme/theme_key are set to the new theme
+  // Both theme/theme_key are set to the new theme.
   global $theme, $theme_key;
   $theme = $theme_key = $new_theme;
 
-  // Create the base_theme_info
+  // Create the base_theme_info.
   global $base_theme_info;
   $base_theme = array();
   $ancestor = $theme;
@@ -832,13 +834,13 @@ function system_mail_swap_theme($new_theme) {
   }
   $base_theme_info = array_reverse($base_theme);
 
-  // Some other theme related globals
+  // Some other theme related globals.
   global $theme_engine, $theme_info, $theme_path;
   $theme_engine = $themes[$theme]->engine;
   $theme_info = $themes[$theme];
   $theme_path = dirname($themes[$theme]->filename);
 
-  // We need to reset the backdrop_alter and module_implements statics
+  // We need to reset the backdrop_alter and module_implements statics.
   backdrop_static_reset('backdrop_alter');
   backdrop_static_reset('module_implements');
 }

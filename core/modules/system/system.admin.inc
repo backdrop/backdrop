@@ -3287,11 +3287,11 @@ function system_mailsystem_settings() {
   backdrop_alter('mail_theme_options', $theme_options);
 
   $form['mailsystem']['mail_theme'] = array(
-      '#type' => 'select',
-      '#title' => t('Theme to render rich text emails'),
-      '#description' => t('Select the theme that will be used to render rich text emails. This can be either the current theme, the default theme, the domain theme or any active theme.'),
-      '#options' => $theme_options,
-      '#default_value' => config_get('system.mail', 'mail_theme'),
+    '#type' => 'select',
+    '#title' => t('Theme to render rich text emails'),
+    '#description' => t('Select the theme that will be used to render rich text emails. This can be either the current theme, the default theme, the domain theme or any active theme.'),
+    '#options' => $theme_options,
+    '#default_value' => config_get('system.mail', 'mail_theme'),
   );
 
   $form['mailsystem']['default-system'] = array(
@@ -3412,7 +3412,7 @@ function system_admin_add_setting_validate($fieldset, &$form_state) {
   $id = $module;
   if (!empty($key)) {
     $id .= '_' . $key;
-   }
+  }
 
   $mail_system = mailsystem_get();
   if (isset($mail_system[$id])) {
@@ -3440,8 +3440,10 @@ function system_admin_add_mailsystem_setting_submit($form, &$form_state) {
  */
 function system_admin_remove_mailsystem_setting_submit($form, &$form_state) {
   $parents = $form_state['triggering_element']['#parents'];
-  array_pop($parents); // submit
-  $id = array_pop($parents); // fieldset
+  // Remove submit key.
+  array_pop($parents);
+  // Get the fieldset.
+  $id = array_pop($parents);
 
   system_mailsystem_clear(array($id => $id));
 
@@ -3461,7 +3463,7 @@ function system_admin_mailsystem_settings_submit($form, &$form_state) {
 
   // Combine the default and the custom settings arrays.
   $settings = array(
-    'default-system' => $form_state['values']['mailsystem']['default-system']
+    'default-system' => $form_state['values']['mailsystem']['default-system'],
   );
   if (isset($form_state['values']['mailsystem']['custom-settings'])) {
     $settings += $form_state['values']['mailsystem']['custom-settings'];
