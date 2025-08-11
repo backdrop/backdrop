@@ -3991,10 +3991,15 @@ function _system_delegate_get_mailsystem($module, $key, $action) {
 }
 
 /**
- * Returns a list of classes which implement MailSystemInterface.
+ * Returns a list of mailsystem classes.
  *
- * This method assumes that all classes which implement MailSystemInterface
- * have filenames containing '.mail.' or class names containing 'MailSystem'.
+ * It first includes the results of hook_mailsystem_info and then fallbacks to
+ * a list of all classes which are not defined in the hook but which implement
+ * MailSystemInterface and uses the module name as the label and module
+ * description.
+ *
+ * @return array
+ *   A list of mailsystem classes.
  */
 function system_get_mailsystem_classes() {
   $mailsystem_classes = &backdrop_static(__FUNCTION__);
@@ -4002,9 +4007,9 @@ function system_get_mailsystem_classes() {
     $mailsystem_classes = array();
     // Get the definitions from the hook implementations.
     foreach (system_get_mailsystems() as $hook) {
-      foreach ($hook as $classinfo) {
-        $mailsystem_classes['labels'][$classinfo['class']] = $classinfo['label'];
-        $mailsystem_classes['descriptions'][$classinfo['class']] = $classinfo['description'];
+      foreach ($hook as $info) {
+        $mailsystem_classes['labels'][$info['class']] = $info['label'];
+        $mailsystem_classes['descriptions'][$info['class']] = $info['description'];
       }
     }
 
@@ -4016,22 +4021,22 @@ function system_get_mailsystem_classes() {
         // Use the hook for system so can skip that here.
         continue;
       }
-      $modulepath = BACKDROP_ROOT . '/' . backdrop_get_path('module', $module);
+      $module_path = BACKDROP_ROOT . '/' . backdrop_get_path('module', $module);
       $implements = $function();
-      foreach ($implements as $classname => $path) {
-        if (!strpos($classname, 'Delegate')
-          && (strpos($classname, 'MailSystem') || strpos($path, '.mail.'))) {
-          $mailsystem_class_info[$classname] = system_get_mailsystem_class_info($classname, $module);
+      foreach ($implements as $class => $path) {
+        if (!strpos($class, 'Delegate')
+          && (strpos($class, 'MailSystem') || strpos($path, '.mail.'))) {
+          $mailsystem_class_info[$class] = system_get_mailsystem_class_info($class, $module);
 
-          if (file_exists($modulepath . '/' . $path)) {
-            $interfaces = class_implements($classname);
+          if (file_exists($module_path . '/' . $path)) {
+            $interfaces = class_implements($class);
             if (isset($interfaces['MailSystemInterface'])) {
-              if (!isset($mailsystem_classes['labels'][$classname])) {
-                $mailsystem_classes['labels'][$classname] = $mailsystem_class_info[$classname]['label'];
-                watchdog('mailsystem', 'The class %classname should be defined in <code>hook_mailsystem_info</code> to avoid needing to guess the purpose of the class.', array('%classname' => $classname), WATCHDOG_DEPRECATED);
+              if (!isset($mailsystem_classes['labels'][$class])) {
+                $mailsystem_classes['labels'][$class] = $mailsystem_class_info[$class]['label'];
+                watchdog('mailsystem', 'The class %class should be defined in <code>hook_mailsystem_info</code> to avoid needing to guess the purpose of the class.', array('%class' => $class), WATCHDOG_DEPRECATED);
               }
-              if (!isset($mailsystem_classes['descriptions'][$classname])) {
-                $mailsystem_classes['descriptions'][$classname] = $mailsystem_class_info[$classname]['description'];
+              if (!isset($mailsystem_classes['descriptions'][$class])) {
+                $mailsystem_classes['descriptions'][$class] = $mailsystem_class_info[$class]['description'];
               }
             }
           }
@@ -4049,15 +4054,13 @@ function system_get_mailsystem_classes() {
  * Get the mailsystem class label.
  * Use the module name and description.
  *
- * @param $classname
+ * @param string $class
  *   The name of the class.
- * @param $module
+ * @param string $module
  *   The module name.
  * @return An array of label and description.
- *
- * @todo Create a new hook so modules can specify the info directly.
  */
-function system_get_mailsystem_class_info($classname, $module) {
+function system_get_mailsystem_class_info($class, $module) {
   $module_info = system_get_info('module', $module);
   $mail_class_info = array(
     'label' => $module_info['name'],
@@ -4114,7 +4117,7 @@ function system_mailsystem_set(array $setting) {
   $config_mail = config('system.mail');
   foreach ($setting as $key => $class) {
     if (is_array($class)) {
-      // Save the settings for our delegateer-class into a variable
+      // Save the settings for the delegater-class into a variable.
       $config_mail->set('mailsystem_delegate.' . $key, $class);
       $config_mail->set($key, 'MailsystemDelegateMailSystem');
     } else {
@@ -4126,17 +4129,17 @@ function system_mailsystem_set(array $setting) {
 }
 
 /**
- * Helps other modules safely remove their settings from mail_system.  This
+ * Helps other modules safely remove their settings from mail_system. This
  * function should be called from the other module's hook_disable() function.
  *
- * @param $setting  An associative array ($module => $classname) describing
- * a module and associated MailSystemInterface class that are being disabled.
+ * @param array $setting
+ *   An associative array ($module => $class) describing
+ *   a module and associated MailSystemInterface class that are being disabled.
  *   - $module is the machine-readable module name.
- *   - $classname is a class that implements MailSystemInterface.
+ *   - $class is a class that implements MailSystemInterface.
  *
- * If $classname is empty, only the $module entry is removed.
- *
- * @param $class
+ * If $class is empty, only the $module entry is removed.
+ * @param string $class
  *   The name of the class to be removed, if any.
  */
 function system_mailsystem_clear(array $setting) {
@@ -4173,7 +4176,7 @@ function system_get_mail_theme() {
       break;
   }
 
-  backdrop_alter('mailtheme', $mail_theme, $original_mail_theme);
+  backdrop_alter('mail_theme', $mail_theme, $original_mail_theme);
   return $mail_theme;
 }
 

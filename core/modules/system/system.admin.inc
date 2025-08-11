@@ -3264,8 +3264,8 @@ function system_mailsystem_settings() {
     '#tree' => TRUE,
   );
   $class_info = '<ul>';
-  foreach ($delivery_classes['descriptions'] as $classname => $description) {
-    $class_info .= '<li><strong>' . $delivery_classes['labels'][$classname] . '</strong>: ';
+  foreach ($delivery_classes['descriptions'] as $class => $description) {
+    $class_info .= '<li><strong>' . $delivery_classes['labels'][$class] . '</strong>: ';
     $class_info .= $description . '</li>';
   }
   $class_info .= '</ul>';
@@ -3284,7 +3284,7 @@ function system_mailsystem_settings() {
       $theme_options[$name] = $theme->info['name'];
     }
   }
-  backdrop_alter('mailtheme_options', $theme_options);
+  backdrop_alter('mail_theme_options', $theme_options);
 
   $form['mailsystem']['mail_theme'] = array(
       '#type' => 'select',
@@ -3529,7 +3529,7 @@ function system_admin_get_mail_delivery_classes() {
  *
  * @todo: Currently we consider all classes capable of both mail delivery and
  * formatting. If required in the future the mechanism could be extended such
- * that specific classes only serve either as formatter or delivery-system if
+ * that specific classes only serve either as formatter or delivery-system, if
  * appropriate.
  *
  * @return array
