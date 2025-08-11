@@ -3803,6 +3803,50 @@ function system_update_1102() {
 }
 
 /**
+ * Uninstall the mailsystem contrib module, now part of core.
+ *
+ * @todo move before 1103
+ */
+function system_update_1103() {
+  $module = db_query("SELECT name FROM {system} WHERE name = 'mailsystem' AND type = 'module'")->fetchField();
+  if ($module) {
+    $path = backdrop_get_path('module', 'mailsystem');
+    backdrop_set_message(t('The contributed module <em>Mail System</em> has been located at %path. The module has been disabled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    // Remove the entry for the Mail System module from the system table.
+    db_query("DELETE FROM {system} WHERE name = 'mailsystem' AND type = 'module'");
+  }
+  else {
+    return t('<em>Mail System</em> module not found. Nothing to be done.');
+  }
+}
+
+/**
+ * Migrate Mailsystem settings into core.
+ */
+function system_update_1104() {
+  $config_mail = config('system.mail');
+  $config_mailsystem = config('mailsystem.settings');
+  $config_mail->set('mailsystem_delegate', $config_mailsystem->get('mailsystem_delegate'));
+  $config_mail->set('mail_theme', $config_mailsystem->get('mail_theme'));
+  $config_mail->save();
+}
+
+/**
+ * Migrate Mailsystem settings into core part 2.
+ */
+function system_update_1105() {
+  $config_mail = config('system.mail');
+  $data = $config_mail->getData();
+  foreach ($data as $key => $value) {
+    if ($value == 'MailsystemDelegateMailSystem') {
+      $config_mail->set($key, 'DelegateMailSystem');
+    }
+  }
+
+  $config_mail->save();
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

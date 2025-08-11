@@ -204,6 +204,16 @@ function system_permission() {
       'title' => t('Flush caches'),
       'description' => t('Provides access to manually flush caches.'),
     ),
+    'administer mailsystem' => array(
+      'title' => t('Administer Mail System'),
+      'description' => t(
+        'Select the default, per-module, and per-mailing <a href="!interface"><code>@interface</code></a> to use for formatting and sending email messages.',
+        array(
+          '!interface' => url('https://api.backdropcms.org/api/backdrop/core%21includes%21mail.inc/interface/MailSystemInterface/1'),
+          '@interface' => 'MailSystemInterface',
+        )
+      ),
+    ),
   );
 
   return $permissions;
@@ -982,6 +992,14 @@ function system_menu() {
     'access arguments' => array('administer site configuration'),
     'file' => 'system.admin.inc',
     'weight' => -20,
+  );
+  $items['admin/config/system/mailsystem'] = array(
+    'title' => 'Mail System',
+    'description' => 'Configure per-module Mail System settings.',
+    'page callback' => 'backdrop_get_form',
+    'page arguments' => array('system_mailsystem_settings'),
+    'access arguments' => array('administer mailsystem'),
+    'file' => 'system.admin.inc',
   );
   $items['admin/config/system/cron'] = array(
     'title' => 'Cron',
@@ -3577,12 +3595,12 @@ function confirm_form($form, $question, $path, $description = NULL, $yes = NULL,
  * $output = backdrop_get_form('system_jump_menu', $targets, $options);
  * @endcode
  *
- * @param $select
+ * @param array $select
  *   An array suitable for use as the #options. The keys will be the direct
  *   URLs that will be jumped to, so you absolutely must encode these using
  *   url() in order for them to work reliably.
  *
- * @param $options
+ * @param array $options
  *   $options may be an array with the following options:
  *   - 'title': The text to display for the #title attribute.
  *   - 'description': The text to display for the #description attribute.
@@ -3881,6 +3899,285 @@ function system_mail($key, &$message, $params) {
 }
 
 /**
+ * Retrieves a list of all mailsystem definitions.
+ *
+ * @return array
+ *   Array of mailsystem definitions keyed by the module.
+ */
+function system_get_mailsystems() {
+  $mailsystems = &backdrop_static(__FUNCTION__);
+  if (!isset($mailsystems)) {
+    $mailsystems = array();
+    foreach (module_implements('mailsystem_info') as $module) {
+      $mailsystems[$module] = module_invoke($module, 'mailsystem_info');
+    }
+  }
+  return $mailsystems;
+}
+
+/**
+ * Implements hook_mailsystem_info().
+ */
+function system_mailsystem_info() {
+  return array(
+    'default' => array(
+      'label' => 'Default',
+      'description' => t('The default Backdrop mail backend using PHP\'s mail function.'),
+      'class' => 'DefaultMailSystem',
+    ),
+    'testing' => array(
+      'label' => t('Testing'),
+      'description' => t('A mail sending implementation that captures sent messages to a variable.'),
+      'class' => 'TestingMailSystem',
+    ),
+  );
+}
+
+/**
+ * Returns an MailSystemInterface class instance for a given action.
+ *
+ * @param string $module
+ *   The machine-readable module name.
+ * @param string $key
+ *   The email key.
+ * @param string $action
+ *   The name of the MailSystemInterface method to be invoked. Should be one of:
+ *   - format: Format a message composed by backdrop_mail() prior to sending.
+ *   - mail: Send a message composed by backdrop_mail().
+ *
+ * @return MailSystemInterface
+ *
+ * @see backdrop_mail_system().
+ */
+function _system_delegate_get_mailsystem($module, $key, $action) {
+  $instances = &backdrop_static(__FUNCTION__, array());
+
+  $config_mailsystem = config('mailsystem.settings');
+  // Try to use custom settings defined for the message's module and key.
+  $settings = $config_mailsystem->get('mailsystem_delegate.' . $module . '_' . $key);
+  if ($settings === NULL) {
+    // Try to use custom settings defined for the message's module.
+    $settings = $config_mailsystem->get('mailsystem_delegate.' . $module);
+  }
+  if ($settings === NULL) {
+    // Try to use the configured site-wide default mail system settings.
+    $settings = $config_mailsystem->get('mailsystem_delegate.' . 'default-system');
+  }
+
+  // Use the class configured for the given action.
+  if ($settings && isset($settings[$action])) {
+    $class = $settings[$action];
+  }
+  else {
+    $config_mail = config('system.mail');
+    $class = $config_mail->get('default-system');
+
+    // Fallback to backdrop default in order to prevent an infinite recursion.
+    if ($class == 'MailsystemDelegateMailSystem') {
+      $class = 'DefaultMailSystem';
+    }
+  }
+
+  if (empty($instances[$class])) {
+    $interfaces = class_implements($class);
+    if (isset($interfaces['MailSystemInterface'])) {
+      $instances[$class] = new $class();
+    }
+    else {
+      throw new Exception(t('Class %class does not implement interface %interface', array('%class' => $class, '%interface' => 'MailSystemInterface')));
+    }
+  }
+  return $instances[$class];
+}
+
+/**
+ * Returns a list of classes which implement MailSystemInterface.
+ *
+ * This method assumes that all classes which implement MailSystemInterface
+ * have filenames containing '.mail.' or class names containing 'MailSystem'.
+ */
+function system_get_mailsystem_classes() {
+  $mailsystem_classes = &backdrop_static(__FUNCTION__);
+  if (!isset($mailsystem_classes)) {
+    $mailsystem_classes = array();
+    // Get the definitions from the hook implementations.
+    foreach (system_get_mailsystems() as $hook) {
+      foreach ($hook as $classinfo) {
+        $mailsystem_classes['labels'][$classinfo['class']] = $classinfo['label'];
+        $mailsystem_classes['descriptions'][$classinfo['class']] = $classinfo['description'];
+      }
+    }
+
+    // Fallback to attempting to build the definitions from modules that
+    // have classes that implements MailSystemInterface.
+    foreach (module_implements('autoload_info') as $module) {
+      $function = $module . '_autoload_info';
+      if ($module == 'system') {
+        // Use the hook for system so can skip that here.
+        continue;
+      }
+      $modulepath = BACKDROP_ROOT . '/' . backdrop_get_path('module', $module);
+      $implements = $function();
+      foreach ($implements as $classname => $path) {
+        if (!strpos($classname, 'Delegate')
+          && (strpos($classname, 'MailSystem') || strpos($path, '.mail.'))) {
+          $mailsystem_class_info[$classname] = system_get_mailsystem_class_info($classname, $module);
+
+          if (file_exists($modulepath . '/' . $path)) {
+            $interfaces = class_implements($classname);
+            if (isset($interfaces['MailSystemInterface'])) {
+              if (!isset($mailsystem_classes['labels'][$classname])) {
+                $mailsystem_classes['labels'][$classname] = $mailsystem_class_info[$classname]['label'];
+                watchdog('mailsystem', 'The class %classname should be defined in <code>hook_mailsystem_info</code> to avoid needing to guess the purpose of the class.', array('%classname' => $classname), WATCHDOG_DEPRECATED);
+              }
+              if (!isset($mailsystem_classes['descriptions'][$classname])) {
+                $mailsystem_classes['descriptions'][$classname] = $mailsystem_class_info[$classname]['description'];
+              }
+            }
+          }
+        }
+      }
+    }
+
+    asort($mailsystem_classes['labels']);
+    ksort($mailsystem_classes['descriptions']);
+  }
+  return $mailsystem_classes;
+}
+
+/**
+ * Get the mailsystem class label.
+ * Use the module name and description.
+ *
+ * @param $classname
+ *   The name of the class.
+ * @param $module
+ *   The module name.
+ * @return An array of label and description.
+ *
+ * @todo Create a new hook so modules can specify the info directly.
+ */
+function system_get_mailsystem_class_info($classname, $module) {
+  $module_info = system_get_info('module', $module);
+  $mail_class_info = array(
+    'label' => $module_info['name'],
+    'description' => t($module_info['description']),
+  );
+  return $mail_class_info;
+}
+
+/**
+ * Returns a list of module delegations.
+ *
+ * @return array
+ *   An associative array ($id => $value) where:
+ *   - $id is the machine-readable module name optionally followed by '_'
+ *     and a key.
+ *   - $value is an associative array whose keys are the names of methods
+ *     defined by MailSystemInterface and whose values are the names of
+ *     the class to use for that method.
+ */
+function system_read_mailsystem_settings() {
+  $config_mail = config('system.mail');
+
+  $settings = array();
+  foreach ($config_mail->get() as $id => $class) {
+    if ($class == 'MailsystemDelegateMailSystem') {
+      $settings[$id] = $config_mail->get('mailsystem_delegate.' . $id);
+    }
+    else {
+      $settings[$id]['mail'] = $class;
+      $settings[$id]['format'] = $class;
+    }
+  }
+
+  return $settings;
+}
+
+/**
+ * Helps other modules safely set their own key within mail_system. This
+ * function should be called from hook_enable() implementations.
+ *
+ * @param array $setting
+ *   An associative array ($id => $value) where:
+ *   - $id is the machine-readable module name optionally followed by '_'
+ *     and a key.
+ *   - $value is one of
+ *     - (string) The name of a class that implements MailSystemInterface.
+ *     - (array) An associative array whose keys are the names of methods
+ *       defined by MailSystemInterface and whose values are the names of
+ *       the class to use for that method.
+ *
+ * @see backdrop_mail()
+ */
+function system_mailsystem_set(array $setting) {
+  $config_mail = config('system.mail');
+  foreach ($setting as $key => $class) {
+    if (is_array($class)) {
+      // Save the settings for our delegateer-class into a variable
+      $config_mail->set('mailsystem_delegate.' . $key, $class);
+      $config_mail->set($key, 'MailsystemDelegateMailSystem');
+    } else {
+      $config_mail->clear('mailsystem_delegate.' . $key);
+      $config_mail->set($key, $class);
+    }
+  }
+  $config_mail->save();
+}
+
+/**
+ * Helps other modules safely remove their settings from mail_system.  This
+ * function should be called from the other module's hook_disable() function.
+ *
+ * @param $setting  An associative array ($module => $classname) describing
+ * a module and associated MailSystemInterface class that are being disabled.
+ *   - $module is the machine-readable module name.
+ *   - $classname is a class that implements MailSystemInterface.
+ *
+ * If $classname is empty, only the $module entry is removed.
+ *
+ * @param $class
+ *   The name of the class to be removed, if any.
+ */
+function system_mailsystem_clear(array $setting) {
+  $config_mail = config('system.mail');
+  foreach (array_keys($setting) as $key) {
+    $config_mail->clear($key);
+    $config_mail->clear('mailsystem_delegate.' . $key);
+  }
+  $config_mail->save();
+}
+
+/**
+* Implements hook_theme_registry_alter().
+*/
+function system_theme_registry_alter(&$theme_registry) {
+  module_load_include('inc', 'system', 'system.theme');
+  return system_mail_theme_registry_alter($theme_registry);
+}
+
+/**
+ * Retrieves the key of the theme used to render the emails.
+ *
+ * @return string
+ */
+function system_get_mail_theme() {
+  global $theme_key;
+  $original_mail_theme = config_get('system.mail', 'mail_theme');
+  switch ($original_mail_theme) {
+    case 'default':
+      $mail_theme = config_get('system.core', 'theme_default');
+      break;
+    case 'current':
+      $mail_theme = $theme_key;
+      break;
+  }
+
+  backdrop_alter('mailtheme', $mail_theme, $original_mail_theme);
+  return $mail_theme;
+}
+
+/**
  * Generate an array of time zones and their local time&date.
  *
  * @param $blank
@@ -4163,6 +4460,7 @@ function system_autoload_info() {
     'ArchiverZip' => 'system.archiver.inc',
     'DefaultMailSystem' => 'system.mail.inc',
     'TestingMailSystem' => 'system.mail.inc',
+    'DelegateMailSystem' => 'system.mail.inc',
     'BackdropQueue' => 'system.queue.inc',
     'BackdropQueueInterface' => 'system.queue.inc',
     'BackdropReliableQueueInterface' => 'system.queue.inc',

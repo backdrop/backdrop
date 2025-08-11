@@ -300,18 +300,18 @@ interface MailSystemInterface {
   /**
    * Format a message composed by backdrop_mail() prior sending.
    *
-   * @param $message
+   * @param array $message
    *   A message array, as described in hook_mail_alter().
    *
-   * @return
+   * @return array
    *   The formatted $message.
    */
-   public function format(array $message);
+  public function format(array $message);
 
   /**
    * Send a message composed by backdrop_mail().
    *
-   * @param $message
+   * @param array $message
    *   Message array with at least the following elements:
    *   - id: A unique identifier of the email type. Examples: 'contact_user_copy',
    *     'user_password_reset'.
@@ -330,10 +330,10 @@ interface MailSystemInterface {
    *      defined by one of the other parameters.  PHP's mail() looks for Cc
    *      and Bcc headers and sends the mail to addresses in these headers too.
    *
-   * @return
+   * @return bool
    *   TRUE if the mail was successfully accepted for delivery, otherwise FALSE.
    */
-   public function mail(array $message);
+  public function mail(array $message);
 }
 
 /**
