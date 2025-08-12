@@ -993,11 +993,11 @@ function system_menu() {
     'file' => 'system.admin.inc',
     'weight' => -20,
   );
-  $items['admin/config/system/mailsystem'] = array(
-    'title' => 'Mail System',
+  $items['admin/config/system/mail_system'] = array(
+    'title' => 'Mail System Settings',
     'description' => 'Configure per-module Mail System settings.',
     'page callback' => 'backdrop_get_form',
-    'page arguments' => array('system_mailsystem_settings'),
+    'page arguments' => array('system_mail_system_settings'),
     'access arguments' => array('administer mailsystem'),
     'file' => 'system.admin.inc',
   );
@@ -3899,20 +3899,20 @@ function system_mail($key, &$message, $params) {
 }
 
 /**
- * Retrieves a list of all mailsystem definitions.
+ * Retrieves a list of all mail_system definitions.
  *
  * @return array
- *   Array of mailsystem definitions keyed by the module.
+ *   Array of mail_system definitions keyed by the module.
  */
-function system_get_mailsystem_definitions() {
-  $mailsystem_definitions = &backdrop_static(__FUNCTION__);
-  if (!isset($mailsystem_definitions)) {
-    $mailsystem_definitions = array();
+function system_get_mail_system_definitions() {
+  $mail_system_definitions = &backdrop_static(__FUNCTION__);
+  if (!isset($mail_system_definitions)) {
+    $mail_system_definitions = array();
     foreach (module_implements('mailsystem_info') as $module) {
-      $mailsystem_definitions[$module] = module_invoke($module, 'mailsystem_info');
+      $mail_system_definitions[$module] = module_invoke($module, 'mailsystem_info');
     }
   }
-  return $mailsystem_definitions;
+  return $mail_system_definitions;
 }
 
 /**
@@ -3934,7 +3934,7 @@ function system_mailsystem_info() {
 }
 
 /**
- * Returns a list of mailsystem classes.
+ * Returns a list of mail_system classes.
  *
  * It first includes the results of hook_mailsystem_info and then fallbacks to
  * a list of all classes which are not defined in the hook but which implement
@@ -3942,17 +3942,17 @@ function system_mailsystem_info() {
  * description.
  *
  * @return array
- *   A list of mailsystem classes.
+ *   A list of mail_system classes.
  */
-function system_get_mailsystem_classes() {
-  $mailsystem_classes = &backdrop_static(__FUNCTION__);
-  if (!isset($mailsystem_classes)) {
-    $mailsystem_classes = array();
+function system_get_mail_system_classes() {
+  $mail_system_classes = &backdrop_static(__FUNCTION__);
+  if (!isset($mail_system_classes)) {
+    $mail_system_classes = array();
     // Get the definitions from the hook implementations.
-    foreach (system_get_mailsystem_definitions() as $hook) {
+    foreach (system_get_mail_system_definitions() as $hook) {
       foreach ($hook as $info) {
-        $mailsystem_classes['labels'][$info['class']] = $info['label'];
-        $mailsystem_classes['descriptions'][$info['class']] = $info['description'];
+        $mail_system_classes['labels'][$info['class']] = $info['label'];
+        $mail_system_classes['descriptions'][$info['class']] = $info['description'];
       }
     }
 
@@ -3969,17 +3969,17 @@ function system_get_mailsystem_classes() {
       foreach ($implements as $class => $path) {
         if (!strpos($class, 'Delegate')
           && (strpos($class, 'MailSystem') || strpos($path, '.mail.'))) {
-          $mailsystem_class_info[$class] = system_get_mailsystem_class_info($class, $module);
+          $mail_system_class_info[$class] = system_get_mail_system_class_info($class, $module);
 
           if (file_exists($module_path . '/' . $path)) {
             $interfaces = class_implements($class);
             if (isset($interfaces['MailSystemInterface'])) {
-              if (!isset($mailsystem_classes['labels'][$class])) {
-                $mailsystem_classes['labels'][$class] = $mailsystem_class_info[$class]['label'];
-                watchdog('mailsystem', 'The class %class should be defined in <code>hook_mailsystem_info</code> to avoid needing to guess the purpose of the class.', array('%class' => $class), WATCHDOG_DEPRECATED);
+              if (!isset($mail_system_classes['labels'][$class])) {
+                $mail_system_classes['labels'][$class] = $mail_system_class_info[$class]['label'];
+                watchdog('mail_system', 'The class %class should be defined in <code>hook_mailsystem_info</code> to avoid needing to guess the purpose of the class.', array('%class' => $class), WATCHDOG_DEPRECATED);
               }
-              if (!isset($mailsystem_classes['descriptions'][$class])) {
-                $mailsystem_classes['descriptions'][$class] = $mailsystem_class_info[$class]['description'];
+              if (!isset($mail_system_classes['descriptions'][$class])) {
+                $mail_system_classes['descriptions'][$class] = $mail_system_class_info[$class]['description'];
               }
             }
           }
@@ -3987,14 +3987,14 @@ function system_get_mailsystem_classes() {
       }
     }
 
-    asort($mailsystem_classes['labels']);
-    ksort($mailsystem_classes['descriptions']);
+    asort($mail_system_classes['labels']);
+    ksort($mail_system_classes['descriptions']);
   }
-  return $mailsystem_classes;
+  return $mail_system_classes;
 }
 
 /**
- * Get the mailsystem class label.
+ * Get the mail_system class label.
  * Use the module name and description.
  *
  * @param string $class
@@ -4003,33 +4003,13 @@ function system_get_mailsystem_classes() {
  *   The module name.
  * @return An array of label and description.
  */
-function system_get_mailsystem_class_info($class, $module) {
+function system_get_mail_system_class_info($class, $module) {
   $module_info = system_get_info('module', $module);
   $mail_class_info = array(
     'label' => $module_info['name'],
     'description' => t($module_info['description']),
   );
   return $mail_class_info;
-}
-
-/**
- * Returns a list of module delegations.
- *
- * @return array
- *   An associative array ($id => $value) where:
- *   - $id is the machine-readable module name optionally followed by '_'
- *     and a key.
- *   - $value is an associative array whose keys are the names of methods
- *     defined by MailSystemInterface and whose values are the names of
- *     the class to use for that method.
- */
-function system_read_mailsystem_settings() {
-  $config_mail = config('system.mail');
-
-  $settings = $config_mail->getData();
-  unset($settings['mail_theme']);
-
-  return $settings;
 }
 
 /**
@@ -4048,10 +4028,10 @@ function system_read_mailsystem_settings() {
  *
  * @see backdrop_mail()
  */
-function system_mailsystem_set(array $setting) {
+function system_mail_system_set(array $setting) {
   $config_mail = config('system.mail');
   foreach ($setting as $key => $class) {
-    $config_mail->set($key, $class);
+    $config_mail->set('mail_system.' . $key, $class);
   }
   $config_mail->save();
 }
@@ -4067,10 +4047,10 @@ function system_mailsystem_set(array $setting) {
  *   - $class is a class that implements MailSystemInterface.
  *   If $class is empty, only the $module entry is removed.
  */
-function system_mailsystem_clear(array $setting) {
+function system_mail_system_clear(array $setting) {
   $config_mail = config('system.mail');
   foreach (array_keys($setting) as $key) {
-    $config_mail->clear($key);
+    $config_mail->clear('mail_system.' . $key);
   }
   $config_mail->save();
 }

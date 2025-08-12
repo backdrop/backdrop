@@ -1,8 +1,10 @@
 {
     "_config_name": "system.mail",
     "mail_theme": "current",
-    "default-system": {
-        "mail": "DefaultMailSystem",
-        "format": "DefaultMailSystem"
+    "mail_system": {
+        "default-system": {
+            "mail": "DefaultMailSystem",
+            "format": "DefaultMailSystem"
+        }
     }
 }

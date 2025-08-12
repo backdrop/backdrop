@@ -273,14 +273,14 @@ function backdrop_mail_system($module, $key, $action = NULL) {
   $config = config('system.mail');
 
   // Try to use custom settings defined for the message's module and key.
-  $settings = $config->get($module . '_' . $key);
+  $settings = $config->get('mail_system.' . $module . '_' . $key);
   if ($settings === NULL) {
     // Try to use custom settings defined for the message's module.
-    $settings = $config->get($module);
+    $settings = $config->get('mail_system.' . $module);
   }
   if ($settings === NULL) {
     // Try to use the configured site-wide default mail system settings.
-    $settings = $config->get('default-system');
+    $settings = $config->get('mail_system.default-system');
   }
 
   // Use the class configured for the given action.

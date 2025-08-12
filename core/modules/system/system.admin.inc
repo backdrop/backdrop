@@ -3241,9 +3241,9 @@ function system_transliterate_ajax_access() {
 }
 
 /**
- * Form constructor for the mailsystem settings form.
+ * Form constructor for the mail_system settings form.
  */
-function system_mailsystem_settings() {
+function system_mail_system_settings() {
   $args = array(
     '!hook_mail' => 'https://api.backdropcms.org/api/backdrop/core%21modules%21system%21system.api.php/function/hook_mail/1',
     '@mail' => 'mail()',
@@ -3251,12 +3251,12 @@ function system_mailsystem_settings() {
     '@default_class' => 'DefaultMailSystem',
   );
 
-  $mail_system = system_read_mailsystem_settings();
+  $mail_system = config_get('system.mail', 'mail_system');
   $delivery_classes = system_admin_get_mail_delivery_classes();
   $formatter_classes = system_admin_get_mail_formatter_classes();
   $mail_modules = system_admin_get_mail_modules();
 
-  $form['mailsystem'] = array(
+  $form['mail_system'] = array(
     '#type' => 'fieldset',
     '#title' => t('Mail System Settings'),
     '#description' => t('Backdrop provides a default method for formatting and delivering emails across the site. The default method formats the emails as plain text and delivers the emails using PHP\'s mail function. Contributed modules may provide additional methods for formatting, delivering, or both. For instance, a module can provide formatting as rich-text emails with images and attachments. Or a module can integrate with a more robust third-party email service for delivering the emails.'),
@@ -3269,7 +3269,7 @@ function system_mailsystem_settings() {
     $class_info .= $description . '</li>';
   }
   $class_info .= '</ul>';
-  $form['mailsystem']['modules'] = array(
+  $form['mail_system']['modules'] = array(
     '#type' => 'help',
     '#markup' => t('You can choose from any of the following enabled modules which implement email functionality:') . $class_info,
   );
@@ -3286,7 +3286,7 @@ function system_mailsystem_settings() {
   }
   backdrop_alter('mail_theme_options', $theme_options);
 
-  $form['mailsystem']['mail_theme'] = array(
+  $form['mail_system']['mail_theme'] = array(
     '#type' => 'select',
     '#title' => t('Theme to render rich text emails'),
     '#description' => t('Select the theme that will be used to render rich text emails. This can be either the current theme, the default theme, the domain theme or any active theme.'),
@@ -3294,18 +3294,18 @@ function system_mailsystem_settings() {
     '#default_value' => config_get('system.mail', 'mail_theme'),
   );
 
-  $form['mailsystem']['default-system'] = array(
+  $form['mail_system']['default-system'] = array(
     '#type' => 'fieldset',
     '#title' => t('Site-wide default mail system'),
   );
-  $form['mailsystem']['default-system']['mail'] = array(
+  $form['mail_system']['default-system']['mail'] = array(
     '#type' => 'select',
     '#title' => t('Delivery'),
     '#options' => $delivery_classes['labels'],
     '#default_value' => $mail_system['default-system']['mail'],
     '#description' => t('Class used to send the mail'),
   );
-  $form['mailsystem']['default-system']['format'] = array(
+  $form['mail_system']['default-system']['format'] = array(
     '#type' => 'select',
     '#title' => t('Formatting'),
     '#options' => $formatter_classes['labels'],
@@ -3313,79 +3313,76 @@ function system_mailsystem_settings() {
     '#description' => t('Class used to format the body of the mail'),
   );
 
-  unset($mail_system['mail_theme']);
-  unset($mail_system['default-system']);
-
-  $form['mailsystem']['custom-settings'] = array(
+  $form['mail_system']['custom-settings'] = array(
     '#type' => 'fieldset',
     '#title' => 'Custom settings',
     '#description' => t('Optionally set formatting and delivery methods for each module that sends out email, for example, event calendar notifications or contact form emails. Each module that sends out emails sets an identifier, and can further set one or more optional keys for finer-grained email settings. To decide which methods to use, Backdrop goes from the specific to the general. If no specific identifiers are set up then the site-wide default is used. The search order: <ol><li>The methods associated with the module and key, if any.</li><li>The method associated with the module, if any.</li><li>The site-wide defaults.</li></ol> For more technical information see <a href="!default_class"><code>@default_class</code></a> and <a href="!hook_mail"><code>hook_mail</code></a>.', $args),
   );
   foreach ($mail_system as $id => $settings) {
-    $form['mailsystem']['custom-settings'][$id] = array(
+    $form['mail_system']['custom-settings'][$id] = array(
       '#type' => 'fieldset',
       '#title' => t('Custom settings for mail-id %id', array('%id' => $id)),
     );
-    $form['mailsystem']['custom-settings'][$id]['mail'] = array(
+    $form['mail_system']['custom-settings'][$id]['mail'] = array(
       '#type' => 'select',
       '#title' => t('Delivery'),
       '#options' => $delivery_classes['labels'],
       '#default_value' => $settings['mail'],
       '#description' => t('Class used to send the mail'),
     );
-    $form['mailsystem']['custom-settings'][$id]['format'] = array(
+    $form['mail_system']['custom-settings'][$id]['format'] = array(
       '#type' => 'select',
       '#title' => t('Formatting'),
       '#options' => $formatter_classes['labels'],
       '#default_value' => $settings['format'],
       '#description' => t('Class used to format the body of the mail'),
     );
-    $form['mailsystem']['custom-settings'][$id]['submit'] = array(
+    $form['mail_system']['custom-settings'][$id]['submit'] = array(
       '#type' => 'submit',
       '#value' => t('Remove custom settings for mail-id @id', array('@id' => $id)),
-      '#submit' => array('system_admin_remove_mailsystem_setting_submit'),
+      '#submit' => array('system_admin_remove_mail_system_setting_submit'),
       '#limit_validation_errors' => array(
-        array('mailsystem', $id),
+        array('mail_system', $id),
       ),
     );
   }
 
-  $form['mailsystem']['add-custom-settings'] = array(
+  $form['mail_system']['add-custom-settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Add custom settings'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
-    '#element_validate' => array('system_admin_add_mailsystem_setting_validate'),
+    '#element_validate' => array('system_admin_add_mail_system_setting_validate'),
   );
-  $form['mailsystem']['add-custom-settings']['module'] = array(
+  $form['mail_system']['add-custom-settings']['module'] = array(
     '#type' => 'select',
     '#title' => t('Module'),
     '#options' => $mail_modules,
   );
-  $form['mailsystem']['add-custom-settings']['key'] = array(
+  $form['mail_system']['add-custom-settings']['key'] = array(
     '#type' => 'textfield',
     '#title' => t('Key'),
     '#size' => 30,
     '#description' => t('An optional key which further specifies the mail in question. You may have to examine the source code of the <a href="!hook_mail">hook_mail</a> implementation of the module in question in order to find an appropriate value', $args),
   );
-  $form['mailsystem']['add-custom-settings']['mail'] = array(
+  $form['mail_system']['add-custom-settings']['mail'] = array(
     '#type' => 'select',
     '#title' => t('Delivery'),
     '#options' => $delivery_classes['labels'],
     '#description' => t('Class used to send the mail'),
   );
-  $form['mailsystem']['add-custom-settings']['format'] = array(
+  $form['mail_system']['add-custom-settings']['format'] = array(
     '#type' => 'select',
     '#title' => t('Formatting'),
     '#options' => $formatter_classes['labels'],
     '#description' => t('Class used to format the body of the mail'),
   );
-  $form['mailsystem']['add-custom-settings']['submit'] = array(
+  $form['mail_system']['add-custom-settings']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Add custom settings'),
-    '#submit' => array('system_admin_add_mailsystem_setting_submit'),
+    '#submit' => array('system_admin_add_mail_system_setting_submit'),
     '#limit_validation_errors' => array(
-      array('mailsystem', 'add-custom-settings'),
+      array('mail_system', 'add-custom-settings'),
     ),
   );
   $form['submit'] = array(
@@ -3396,13 +3393,13 @@ function system_mailsystem_settings() {
 }
 
 /**
- * Form validation handler for mailsystem settings form.
+ * Form validation handler for mail_system settings form.
  *
  * Add an additional custom setting for a module/key.
  */
-function system_admin_add_mailsystem_setting_validate($fieldset, &$form_state) {
+function system_admin_add_mail_system_setting_validate($fieldset, &$form_state) {
   // Only perform this validation if we're adding a custom setting.
-  if (!isset($form_state['submit_handlers']) || !in_array('system_admin_add_mailsystem_setting_submit', $form_state['submit_handlers'])) {
+  if (!isset($form_state['submit_handlers']) || !in_array('system_admin_add_mail_system_setting_submit', $form_state['submit_handlers'])) {
     return;
   }
 
@@ -3413,7 +3410,7 @@ function system_admin_add_mailsystem_setting_validate($fieldset, &$form_state) {
     $id .= '_' . $key;
   }
 
-  $mail_system = system_read_mailsystem_settings();
+  $mail_system = config_get('system.mail', 'mail_system');
   if (isset($mail_system[$id])) {
     form_error($fieldset['module'], t('A setting already exists for this combination of module and key'));
   }
@@ -3424,8 +3421,8 @@ function system_admin_add_mailsystem_setting_validate($fieldset, &$form_state) {
 /**
  * Form API submit callback: Add an additional custom setting for a module/key.
  */
-function system_admin_add_mailsystem_setting_submit($form, &$form_state) {
-  $values = $form_state['values']['mailsystem']['add-custom-settings'];
+function system_admin_add_mail_system_setting_submit($form, &$form_state) {
+  $values = $form_state['values']['mail_system']['add-custom-settings'];
 
   $id = $form_state['new_settings_id'];
   system_admin_save_custom_mail_setting($id, $values);
@@ -3437,14 +3434,14 @@ function system_admin_add_mailsystem_setting_submit($form, &$form_state) {
 /**
  * Form API submit callback: Remove a custom setting.
  */
-function system_admin_remove_mailsystem_setting_submit($form, &$form_state) {
+function system_admin_remove_mail_system_setting_submit($form, &$form_state) {
   $parents = $form_state['triggering_element']['#parents'];
   // Remove submit key.
   array_pop($parents);
   // Get the fieldset.
   $id = array_pop($parents);
 
-  system_mailsystem_clear(array($id => $id));
+  system_mail_system_clear(array($id => $id));
 
   backdrop_set_message(t('Removed custom setting for mail-id %id',
     array('%id' => $id)));
@@ -3453,19 +3450,19 @@ function system_admin_remove_mailsystem_setting_submit($form, &$form_state) {
 /**
  * Form API submit callback: save settings.
  */
-function system_mailsystem_settings_submit($form, &$form_state) {
-  config_set('system.mail', 'mail_theme', $form_state['values']['mailsystem']['mail_theme']);
+function system_mail_system_settings_submit($form, &$form_state) {
+  config_set('system.mail', 'mail_theme', $form_state['values']['mail_system']['mail_theme']);
   // Rebuild the theme registry to make changes needed by theme rendering.
   backdrop_theme_rebuild();
-  unset($form_state['values']['mailsystem']['mail_theme']);
-  unset($form_state['values']['mailsystem']['add-custom-settings']);
+  unset($form_state['values']['mail_system']['mail_theme']);
+  unset($form_state['values']['mail_system']['add-custom-settings']);
 
   // Combine the default and the custom settings arrays.
   $settings = array(
-    'default-system' => $form_state['values']['mailsystem']['default-system'],
+    'default-system' => $form_state['values']['mail_system']['default-system'],
   );
-  if (isset($form_state['values']['mailsystem']['custom-settings'])) {
-    $settings += $form_state['values']['mailsystem']['custom-settings'];
+  if (isset($form_state['values']['mail_system']['custom-settings'])) {
+    $settings += $form_state['values']['mail_system']['custom-settings'];
   }
 
   foreach ($settings as $id => $values) {
@@ -3481,7 +3478,7 @@ function system_mailsystem_settings_submit($form, &$form_state) {
  */
 function system_admin_save_custom_mail_setting($id, $values) {
   $config_mail = config('system.mail');
-  $config_mail->set($id, array(
+  $config_mail->set('mail_system.' . $id, array(
     'mail' => $values['mail'],
     'format' => $values['format'],
   ));
@@ -3516,7 +3513,7 @@ function system_admin_get_mail_modules() {
  *   List of the names of classes implementing MailSystemInterface.
  */
 function system_admin_get_mail_delivery_classes() {
-  $delivery_classes = system_get_mailsystem_classes();
+  $delivery_classes = system_get_mail_system_classes();
   unset($delivery_classes['DelegateMailSystem']);
   return $delivery_classes;
 }

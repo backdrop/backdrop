@@ -16,7 +16,10 @@ class MailTestCase extends BackdropWebTestCase implements MailSystemInterface {
     parent::setUp(array('simpletest'));
 
     // Set MailTestCase (i.e. this class) as the SMTP library
-    config_set('system.mail', 'default-system', 'MailTestCase');
+    config_set('system.mail', 'mail_system.default-system', array(
+      'mail' => 'MailTestCase',
+      'format' => 'MailTestCase',
+    ));
   }
 
   /**
