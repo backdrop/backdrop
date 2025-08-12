@@ -3315,7 +3315,6 @@ function system_mailsystem_settings() {
 
   unset($mail_system['mail_theme']);
   unset($mail_system['default-system']);
-  unset($mail_system['mailsystem_delegate']);
 
   $form['mailsystem']['custom-settings'] = array(
     '#type' => 'fieldset',
@@ -3401,7 +3400,7 @@ function system_mailsystem_settings() {
  *
  * Add an additional custom setting for a module/key.
  */
-function system_admin_add_setting_validate($fieldset, &$form_state) {
+function system_admin_add_mailsystem_setting_validate($fieldset, &$form_state) {
   // Only perform this validation if we're adding a custom setting.
   if (!isset($form_state['submit_handlers']) || !in_array('system_admin_add_mailsystem_setting_submit', $form_state['submit_handlers'])) {
     return;
@@ -3414,7 +3413,7 @@ function system_admin_add_setting_validate($fieldset, &$form_state) {
     $id .= '_' . $key;
   }
 
-  $mail_system = mailsystem_get();
+  $mail_system = system_read_mailsystem_settings();
   if (isset($mail_system[$id])) {
     form_error($fieldset['module'], t('A setting already exists for this combination of module and key'));
   }
@@ -3454,7 +3453,7 @@ function system_admin_remove_mailsystem_setting_submit($form, &$form_state) {
 /**
  * Form API submit callback: save settings.
  */
-function system_admin_mailsystem_settings_submit($form, &$form_state) {
+function system_mailsystem_settings_submit($form, &$form_state) {
   config_set('system.mail', 'mail_theme', $form_state['values']['mailsystem']['mail_theme']);
   // Rebuild the theme registry to make changes needed by theme rendering.
   backdrop_theme_rebuild();
@@ -3481,16 +3480,12 @@ function system_admin_mailsystem_settings_submit($form, &$form_state) {
  * Helper function. Writes the setting values for a given mail-id.
  */
 function system_admin_save_custom_mail_setting($id, $values) {
-  if ($values['format'] != $values['mail']) {
-    $value = array(
-      'mail' => $values['mail'],
-      'format' => $values['format'],
-    );
-  }
-  else {
-    $value = $values['mail'];
-  }
-  system_mailsystem_set(array($id => $value));
+  $config_mail = config('system.mail');
+  $config_mail->set($id, array(
+    'mail' => $values['mail'],
+    'format' => $values['format'],
+  ));
+  $config_mail->save();
 }
 
 /**

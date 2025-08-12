@@ -167,7 +167,7 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
   backdrop_alter('mail', $message);
 
   // Retrieve the responsible implementation for this message.
-  $system = backdrop_mail_system($module, $key);
+  $system = backdrop_mail_system($module, $key, 'format');
 
   // Format the message body.
   $message = $system->format($message);
@@ -182,6 +182,8 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
     }
     // Sending was originally requested and was not canceled.
     else {
+      // A different implementation can be used for sending versus formatting.
+      $system = backdrop_mail_system($module, $key, 'mail');
       $message['result'] = $system->mail($message);
       // Log errors.
       if (!$message['result']) {
@@ -249,36 +251,42 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
  * sending or for sending via a remote gateway so as to reduce the load
  * on the local server.
  *
- * @param $module
+ * @param string $module
  *   The module name which was used by backdrop_mail() to invoke hook_mail().
- * @param $key
+ * @param string $key
  *   A key to identify the email sent. The final email ID for the email
  *   alter hook in backdrop_mail() would have been {$module}_{$key}.
+ * @param string|null $action
+ *   Optional. The name of the MailSystemInterface method to be invoked. Should
+ *   be one of:
+ *   - format: Format a message composed by backdrop_mail() prior to sending.
+ *   - mail: Send a message composed by backdrop_mail().
+ *   - null: Will default to DefaultMailSystem class.
  *
  * @return MailSystemInterface
  *
  * @throws Exception
  */
-function backdrop_mail_system($module, $key) {
+function backdrop_mail_system($module, $key, $action = NULL) {
   $instances = &backdrop_static(__FUNCTION__, array());
-
-  $id = $module . '_' . $key;
 
   $config = config('system.mail');
 
-  // Look for overrides for the default class, starting from the most specific
-  // id, and falling back to the module name.
-  if ($config->get($id) !== NULL) {
-    $class = $config->get($id);
+  // Try to use custom settings defined for the message's module and key.
+  $settings = $config->get($module . '_' . $key);
+  if ($settings === NULL) {
+    // Try to use custom settings defined for the message's module.
+    $settings = $config->get($module);
   }
-  elseif ($config->get($module) !== NULL) {
-    $class = $config->get($module);
+  if ($settings === NULL) {
+    // Try to use the configured site-wide default mail system settings.
+    $settings = $config->get('default-system');
   }
-  elseif ($config->get('default-system') !== NULL) {
-    $class = $config->get('default-system');
-  }
-  else {
-    $class = 'DefaultMailSystem';
+
+  // Use the class configured for the given action.
+  $class = 'DefaultMailSystem';
+  if ($settings && isset($settings[$action])) {
+    $class = $settings[$action];
   }
 
   if (empty($instances[$class])) {
@@ -287,7 +295,10 @@ function backdrop_mail_system($module, $key) {
       $instances[$class] = new $class();
     }
     else {
-      throw new Exception(t('Class %class does not implement interface %interface', array('%class' => $class, '%interface' => 'MailSystemInterface')));
+      throw new Exception(t('Class %class does not implement interface %interface', array(
+        '%class' => $class,
+        '%interface' => 'MailSystemInterface',
+      )));
     }
   }
   return $instances[$class];

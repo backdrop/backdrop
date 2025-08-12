@@ -1,11 +1,8 @@
 {
     "_config_name": "system.mail",
     "mail_theme": "current",
-    "default-system": "DelegateMailSystem",
-    "mailsystem_delegate": {
-        "default-system": {
-            "mail": "DefaultMailSystem",
-            "format": "DefaultMailSystem"
-        }
+    "default-system": {
+        "mail": "DefaultMailSystem",
+        "format": "DefaultMailSystem"
     }
 }

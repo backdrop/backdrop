@@ -3934,66 +3934,6 @@ function system_mailsystem_info() {
 }
 
 /**
- * Returns an MailSystemInterface class instance for a given action.
- *
- * @param string $module
- *   The machine-readable module name.
- * @param string $key
- *   The email key.
- * @param string $action
- *   The name of the MailSystemInterface method to be invoked. Should be one of:
- *   - format: Format a message composed by backdrop_mail() prior to sending.
- *   - mail: Send a message composed by backdrop_mail().
- *
- * @return MailSystemInterface
- *
- * @see backdrop_mail_system()
- */
-function _system_delegate_get_mailsystem($module, $key, $action) {
-  $instances = &backdrop_static(__FUNCTION__, array());
-
-  $config_mail = config('system.mail');
-  // Try to use custom settings defined for the message's module and key.
-  $settings = $config_mail->get('mailsystem_delegate.' . $module . '_' . $key);
-  if ($settings === NULL) {
-    // Try to use custom settings defined for the message's module.
-    $settings = $config_mail->get('mailsystem_delegate.' . $module);
-  }
-  if ($settings === NULL) {
-    // Try to use the configured site-wide default mail system settings.
-    $settings = $config_mail->get('mailsystem_delegate.default-system');
-  }
-
-  // Use the class configured for the given action.
-  if ($settings && isset($settings[$action])) {
-    $class = $settings[$action];
-  }
-  else {
-    $config_mail = config('system.mail');
-    $class = $config_mail->get('default-system');
-
-    // Fallback to backdrop default in order to prevent an infinite recursion.
-    if ($class == 'MailsystemDelegateMailSystem') {
-      $class = 'DefaultMailSystem';
-    }
-  }
-
-  if (empty($instances[$class])) {
-    $interfaces = class_implements($class);
-    if (isset($interfaces['MailSystemInterface'])) {
-      $instances[$class] = new $class();
-    }
-    else {
-      throw new Exception(t('Class %class does not implement interface %interface', array(
-        '%class' => $class,
-        '%interface' => 'MailSystemInterface',
-      )));
-    }
-  }
-  return $instances[$class];
-}
-
-/**
  * Returns a list of mailsystem classes.
  *
  * It first includes the results of hook_mailsystem_info and then fallbacks to
@@ -4086,16 +4026,8 @@ function system_get_mailsystem_class_info($class, $module) {
 function system_read_mailsystem_settings() {
   $config_mail = config('system.mail');
 
-  $settings = array();
-  foreach ($config_mail->get() as $id => $class) {
-    if ($class == 'MailsystemDelegateMailSystem') {
-      $settings[$id] = $config_mail->get('mailsystem_delegate.' . $id);
-    }
-    else {
-      $settings[$id]['mail'] = $class;
-      $settings[$id]['format'] = $class;
-    }
-  }
+  $settings = $config_mail->getData();
+  unset($settings['mail_theme']);
 
   return $settings;
 }
@@ -4119,14 +4051,7 @@ function system_read_mailsystem_settings() {
 function system_mailsystem_set(array $setting) {
   $config_mail = config('system.mail');
   foreach ($setting as $key => $class) {
-    if (is_array($class)) {
-      // Save the settings for the delegate class into a variable.
-      $config_mail->set('mailsystem_delegate.' . $key, $class);
-      $config_mail->set($key, 'MailsystemDelegateMailSystem');
-    } else {
-      $config_mail->clear('mailsystem_delegate.' . $key);
-      $config_mail->set($key, $class);
-    }
+    $config_mail->set($key, $class);
   }
   $config_mail->save();
 }
@@ -4146,7 +4071,6 @@ function system_mailsystem_clear(array $setting) {
   $config_mail = config('system.mail');
   foreach (array_keys($setting) as $key) {
     $config_mail->clear($key);
-    $config_mail->clear('mailsystem_delegate.' . $key);
   }
   $config_mail->save();
 }
