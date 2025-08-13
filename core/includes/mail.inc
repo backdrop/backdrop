@@ -299,7 +299,7 @@ function backdrop_mail_system($module, $key, $action = NULL) {
 
     // Use the class configured for the given action. Default to the first class
     // defined.
-    if ($settings) {
+    if ($settings && is_array($settings)) {
       $class = reset($settings);
       if (isset($settings[$action])) {
         $class = $settings[$action];
