@@ -772,6 +772,28 @@ function system_requirements($phase) {
     }
   }
 
+  if ($phase == 'runtime') {
+    if (module_exists('mailsystem')) {
+      $files = system_rebuild_module_data();
+      $dependency_exists = FALSE;
+      foreach ($files as $module => $file) {
+        foreach ($files->info['dependencies'] as $dependency) {
+          if (strpos($dependency, 'mailsystem') !== FALSE) {
+            $dependency_exists = TRUE;
+          }
+        }
+      }
+      if (!$dependency_exists) {
+        $requirements['mailsystem'] = array(
+          'title' => $t('Mail System'),
+          'value' => $t('Enabled'),
+          'severity' => REQUIREMENT_WARNING,
+          'description' => $t('Mail System is currently enabled, and should be disabled because the functionality has been incorporated into core, and no other modules depend on it.'),
+        );
+      }
+    }
+  }
+
   return $requirements;
 }
 

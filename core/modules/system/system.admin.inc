@@ -3318,6 +3318,7 @@ function system_mail_system_settings() {
     '#title' => 'Custom settings',
     '#description' => t('Optionally set formatting and delivery methods for each module that sends out email, for example, event calendar notifications or contact form emails. Each module that sends out emails sets an identifier, and can further set one or more optional keys for finer-grained email settings. To decide which methods to use, Backdrop goes from the specific to the general. If no specific identifiers are set up then the site-wide default is used. The search order: <ol><li>The methods associated with the module and key, if any.</li><li>The method associated with the module, if any.</li><li>The site-wide defaults.</li></ol> For more technical information see <a href="!default_class"><code>@default_class</code></a> and <a href="!hook_mail"><code>hook_mail</code></a>.', $args),
   );
+  unset($mail_system['default-system']);
   foreach ($mail_system as $id => $settings) {
     $form['mail_system']['custom-settings'][$id] = array(
       '#type' => 'fieldset',
