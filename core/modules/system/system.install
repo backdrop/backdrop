@@ -3842,6 +3842,7 @@ function system_update_1104() {
   else {
     // Mail System wasn't used but custom mail systems might have been set so
     // convert those to the new format.
+    // Keep those set to the delegate class for backwards-compatibility.
     $data = $config_mail->getData();
     foreach ($data as $key => $value) {
       if ($value == 'MailsystemDelegateMailSystem') {
@@ -3851,6 +3852,7 @@ function system_update_1104() {
         'mail' => $value,
         'format' => $value,
       ));
+      $config_mail->clear($key);
     }
   }
 

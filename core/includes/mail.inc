@@ -272,21 +272,35 @@ function backdrop_mail_system($module, $key, $action = NULL) {
 
   $config = config('system.mail');
 
-  // Try to use custom settings defined for the message's module and key.
-  $settings = $config->get('mail_system.' . $module . '_' . $key);
-  if ($settings === NULL) {
-    // Try to use custom settings defined for the message's module.
-    $settings = $config->get('mail_system.' . $module);
+  $id = $module . '_' . $key;
+
+  // For backwards-compatibility, check for old location of the mail system
+  // starting from the most specific id, and falling back to the module name.
+  if ($config->get($id) !== NULL) {
+    $class = $config->get($id);
   }
-  if ($settings === NULL) {
-    // Try to use the configured site-wide default mail system settings.
-    $settings = $config->get('mail_system.default-system');
+  elseif ($config->get($module) !== NULL) {
+    $class = $config->get($module);
+  }
+  elseif ($config->get('default-system') !== NULL) {
+    $class = $config->get('default-system');
   }
 
-  // Use the class configured for the given action.
-  $class = 'DefaultMailSystem';
-  if ($settings && isset($settings[$action])) {
-    $class = $settings[$action];
+  // If not using a delegate class, use the new mail system structure.
+  if ($class != 'MailsystemDelegateMailSystem') {
+    $settings = $config->get('mail_system.' . $id);
+    if ($settings === NULL) {
+      $settings = $config->get('mail_system.' . $module);
+    }
+    if ($settings === NULL) {
+      $settings = $config->get('mail_system.default-system');
+    }
+
+    // Use the class configured for the given action.
+    $class = 'DefaultMailSystem';
+    if ($settings && isset($settings[$action])) {
+      $class = $settings[$action];
+    }
   }
 
   if (empty($instances[$class])) {
