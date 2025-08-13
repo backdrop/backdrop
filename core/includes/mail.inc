@@ -276,7 +276,7 @@ function backdrop_mail_system($module, $key, $action = NULL) {
 
   // For backwards-compatibility, check for old location of the mail system
   // starting from the most specific id, and falling back to the module name.
-  $class = 'DefaultMailSystem';
+  $class = NULL;
   if ($config->get($id) !== NULL) {
     $class = $config->get($id);
   }
@@ -297,9 +297,13 @@ function backdrop_mail_system($module, $key, $action = NULL) {
       $settings = $config->get('mail_system.default-system');
     }
 
-    // Use the class configured for the given action.
-    if ($settings && isset($settings[$action])) {
-      $class = $settings[$action];
+    // Use the class configured for the given action. Default to the first class
+    // defined.
+    if ($settings) {
+      $class = reset($settings);
+      if (isset($settings[$action])) {
+        $class = $settings[$action];
+      }
     }
   }
 

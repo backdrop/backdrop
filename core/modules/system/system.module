@@ -4367,7 +4367,6 @@ function system_autoload_info() {
     'ArchiverZip' => 'system.archiver.inc',
     'DefaultMailSystem' => 'system.mail.inc',
     'TestingMailSystem' => 'system.mail.inc',
-    'DelegateMailSystem' => 'system.mail.inc',
     'BackdropQueue' => 'system.queue.inc',
     'BackdropQueueInterface' => 'system.queue.inc',
     'BackdropReliableQueueInterface' => 'system.queue.inc',
