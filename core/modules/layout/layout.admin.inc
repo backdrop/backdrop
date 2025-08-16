@@ -73,7 +73,7 @@ function layout_list_page() {
         $path_link = t('System path: ') . check_plain($path);
       }
       $class = array();
-      if (!$page_callbacks[$path]) {
+      if (empty($page_callbacks[$path])) {
         $class[] = 'missing-path';
         $path_link .= ' <span class="path-parenthetical">(' . t('missing callback') . ')</span>';
       }

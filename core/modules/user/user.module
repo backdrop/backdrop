@@ -142,6 +142,7 @@ function user_entity_info() {
       'entity keys' => array(
         'id' => 'uid',
       ),
+      'label callback' => 'user_format_name',
       'bundles' => array(
         'user' => array(
           'label' => t('User account'),
