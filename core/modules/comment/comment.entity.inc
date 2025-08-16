@@ -117,13 +117,6 @@ class Comment extends Entity {
   }
 
   /**
-   * Implements EntityInterface::label().
-   */
-  public function label() {
-    return $this->subject;
-  }
-
-  /**
    * Implements EntityInterface::uri().
    */
   public function uri() {
