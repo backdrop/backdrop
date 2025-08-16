@@ -279,6 +279,24 @@ abstract class Entity extends stdClass implements EntityInterface {
   }
 
   /**
+   * Implements EntityInterface::label().
+   *
+   * @return string|null
+   *   The label of the entity, or NULL if there is no label defined.
+   */
+  public function label() {
+    $entity_info = entity_get_info($this->entityType());
+    $label = NULL;
+    if (isset($entity_info['label callback'])) {
+      $label = call_user_func($entity_info['label callback'], $this);
+    }
+    else if (isset($entity_info['entity keys']['label']))  {
+      $label = $this->{$entity_info['entity keys']['label']};
+    }
+    return $label;
+  }
+
+  /**
    * Implements EntityInterface::createAccess().
    */
   public static function createAccess($bundle = NULL, $account = NULL) {
