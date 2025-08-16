@@ -1010,6 +1010,7 @@ function backdrop_merged_modules() {
     'field_formatter_settings', // Backdrop 1.13.0.
     'imagecache_token', // Backdrop 1.17.0.
     'fast_token_browser', // Backdrop 1.30.0.
+    'book_cache', // Backdrop 1.32.0.
   );
 }
 
