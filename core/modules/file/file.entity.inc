@@ -125,13 +125,6 @@ class File extends Entity {
   }
 
   /**
-   * Implements EntityInterface::label().
-   */
-  public function label() {
-    return $this->filename;
-  }
-
-  /**
    * Implements EntityInterface::uri().
    */
   public function uri() {

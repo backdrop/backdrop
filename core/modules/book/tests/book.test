@@ -79,7 +79,7 @@ class BookTestCase extends BackdropWebTestCase {
     // Create new book.
     $this->backdropLogin($this->book_author);
 
-    $this->book = $this->createBookNode('new');
+    $this->book = $this->createBookNode('new', NULL, TRUE);
     $book = $this->book;
 
     /*
@@ -115,12 +115,17 @@ class BookTestCase extends BackdropWebTestCase {
 
     // Check that book pages display along with the correct outlines and
     // previous/next links.
-    $this->checkBookNode($book, array($nodes[0], $nodes[3], $nodes[4]), FALSE, FALSE, $nodes[0], array());
-    $this->checkBookNode($nodes[0], array($nodes[1], $nodes[2]), $book, $book, $nodes[1], array($book));
-    $this->checkBookNode($nodes[1], NULL, $nodes[0], $nodes[0], $nodes[2], array($book, $nodes[0]));
-    $this->checkBookNode($nodes[2], NULL, $nodes[1], $nodes[0], $nodes[3], array($book, $nodes[0]));
-    $this->checkBookNode($nodes[3], NULL, $nodes[2], $book, $nodes[4], array($book));
-    $this->checkBookNode($nodes[4], NULL, $nodes[3], $book, FALSE, array($book));
+    $outline = array($nodes[0], $nodes[3], $nodes[4]);
+    $this->checkBookNode($book, $outline, FALSE, FALSE, $nodes[0], array());
+    $outline = array($nodes[1], $nodes[2]);
+    $breadcrumb = array($book);
+    $this->checkBookNode($nodes[0], $outline, $book, $book, $nodes[1], $breadcrumb);
+    $breadcrumb = array($book, $nodes[0]);
+    $this->checkBookNode($nodes[1], NULL, $nodes[0], $nodes[0], $nodes[2], $breadcrumb);
+    $this->checkBookNode($nodes[2], NULL, $nodes[1], $nodes[0], $nodes[3], $breadcrumb);
+    $breadcrumb = array($book);
+    $this->checkBookNode($nodes[3], NULL, $nodes[2], $book, $nodes[4], $breadcrumb);
+    $this->checkBookNode($nodes[4], NULL, $nodes[3], $book, FALSE, $breadcrumb);
 
     $this->backdropLogout();
 
@@ -143,13 +148,73 @@ class BookTestCase extends BackdropWebTestCase {
   }
 
   /**
+   * Tests book cache functionality through node interfaces.
+   */
+  public function testBookNavigationCache() {
+    // Create new book.
+    $nodes = $this->createBook();
+    $book = $this->book;
+
+    $this->backdropLogin($this->book_author);
+
+    // Check that book pages display along with the correct outlines and
+    // previous/next links.
+    $outline = array($nodes[0], $nodes[3], $nodes[4]);
+    $this->checkBookNode($book, $outline, FALSE, FALSE, $nodes[0], array());
+    $outline = array($nodes[1], $nodes[2]);
+    $breadcrumb = array($book);
+    $this->checkBookNode($nodes[0], $outline, $book, $book, $nodes[1], $breadcrumb);
+    $breadcrumb = array($book, $nodes[0]);
+    $this->checkBookNode($nodes[1], NULL, $nodes[0], $nodes[0], $nodes[2], $breadcrumb);
+    $this->checkBookNode($nodes[2], NULL, $nodes[1], $nodes[0], $nodes[3], $breadcrumb);
+    $breadcrumb = array($book);
+    $this->checkBookNode($nodes[3], NULL, $nodes[2], $book, $nodes[4], $breadcrumb);
+    $this->checkBookNode($nodes[4], NULL, $nodes[3], $book, FALSE, $breadcrumb);
+
+    // // Add a book page and check for flushed navigation cache and updated
+    // outlines.
+    $node5 = $this->createBookNode($book->nid);
+    debug('node 5 added');
+
+    $outline = array($nodes[0], $nodes[3], $nodes[4], $node5);
+    $this->checkBookNode($book, $outline, FALSE, FALSE, $nodes[0], array());
+    $outline = array($nodes[1], $nodes[2]);
+    $breadcrumb = array($book);
+    $this->checkBookNode($nodes[0], $outline, $book, $book, $nodes[1], $breadcrumb);
+    $breadcrumb = array($book, $nodes[0]);
+    $this->checkBookNode($nodes[1], NULL, $nodes[0], $nodes[0], $nodes[2], $breadcrumb);
+    $this->checkBookNode($nodes[2], NULL, $nodes[1], $nodes[0], $nodes[3], $breadcrumb);
+    $breadcrumb = array($book);
+    $this->checkBookNode($nodes[3], NULL, $nodes[2], $book, $nodes[4], $breadcrumb);
+    $this->checkBookNode($nodes[4], NULL, $nodes[3], $book, $node5, $breadcrumb);
+    $this->checkBookNode($node5, NULL, $nodes[4], $book, FALSE, $breadcrumb);
+
+    // Delete a book page and check for flushed navigation cache and updated
+    // outlines.
+    $nodes[3]->delete();
+    debug('node 3 deleted');
+
+    $outline = array($nodes[0], $nodes[4], $node5);
+    $this->checkBookNode($book, $outline, FALSE, FALSE, $nodes[0], array());
+    $outline = array($nodes[1], $nodes[2]);
+    $breadcrumb = array($book);
+    $this->checkBookNode($nodes[0], $outline, $book, $book, $nodes[1], $breadcrumb);
+    $breadcrumb = array($book, $nodes[0]);
+    $this->checkBookNode($nodes[1], NULL, $nodes[0], $nodes[0], $nodes[2], $breadcrumb);
+    $this->checkBookNode($nodes[2], NULL, $nodes[1], $nodes[0], $nodes[4], $breadcrumb);
+    $breadcrumb = array($book);
+    $this->checkBookNode($nodes[4], NULL, $nodes[2], $book, $node5, $breadcrumb);
+    $this->checkBookNode($node5, NULL, $nodes[4], $book, FALSE, $breadcrumb);
+  }
+
+  /**
    * Checks the outline of sub-pages; previous, up, and next.
    *
    * Also checks the printer friendly version of the outline.
    *
    * @param Node $node
    *   Node to check.
-   * @param array|null $nodes
+   * @param Node[]|null $outline
    *   Nodes that should be in outline.
    * @param Node|false $previous
    *   (optional) Previous link node. Defaults to FALSE.
@@ -160,15 +225,15 @@ class BookTestCase extends BackdropWebTestCase {
    * @param array $breadcrumb
    *   The nodes that should be displayed in the breadcrumb.
    */
-  protected function checkBookNode(Node $node, $nodes, $previous = FALSE, $up = FALSE, $next = FALSE, array $breadcrumb = array()) {
+  protected function checkBookNode(Node $node, $outline, $previous = FALSE, $up = FALSE, $next = FALSE, array $breadcrumb = array()) {
     // $number does not use backdrop_static as it should not be reset
     // since it uniquely identifies each call to checkBookNode().
     static $number = 0;
     $this->backdropGet('node/' . $node->nid);
 
     // Check outline structure.
-    if ($nodes !== NULL) {
-      $this->assertPattern($this->generateOutlinePattern($nodes), format_string('Node %number outline confirmed.', array('%number' => $number)));
+    if ($outline !== NULL) {
+      $this->assertPattern($this->generateOutlinePattern($outline), format_string('Node %number outline confirmed.', array('%number' => $number)));
     }
     else {
       $this->pass(format_string('Node %number does not have outline.', array('%number' => $number)));
@@ -249,14 +314,20 @@ class BookTestCase extends BackdropWebTestCase {
    *   A book node ID or set to 'new' to create a new book.
    * @param int|null $parent
    *   (optional) Parent book reference ID. Defaults to NULL.
+   * @param bool $reset
+   *   Reset the numbering.
    *
    * @return Node
    *   The created book node.
    */
-  protected function createBookNode($book_nid, $parent = NULL) {
+  protected function createBookNode($book_nid, $parent = NULL, $reset = FALSE) {
     // $number does not use backdrop_static as it should not be reset
     // since it uniquely identifies each call to createBookNode().
     static $number = 0; // Used to ensure that when sorted nodes stay in same order.
+
+    if ($reset) {
+      $number = 0;
+    }
 
     $edit = array();
     $langcode = LANGUAGE_NONE;
