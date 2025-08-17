@@ -978,7 +978,7 @@ function path_is_alias_reserved($alias, $source, $langcode = LANGUAGE_NONE) {
   // Language neutral would always collide, an alias with language only collides
   // with the same language or language neutral.
   if ($langcode != LANGUAGE_NONE) {
-    $query->condition('langcode', array($language, LANGUAGE_NONE), 'IN');
+    $query->condition('langcode', array($langcode, LANGUAGE_NONE), 'IN');
   }
   $is_existing_alias = $query->countQuery()->execute()->fetchField();
 
