@@ -972,12 +972,15 @@ function path_form_element_validate($element, &$form_state, $complete_form) {
  *   it does not match any reserved paths.
  */
 function path_is_alias_reserved($alias, $source, $langcode = LANGUAGE_NONE) {
-  $is_existing_alias = (bool) db_query_range("SELECT pid FROM {url_alias} WHERE source <> :source AND alias = :alias AND langcode IN (:language, :language_none) ORDER BY langcode DESC, pid DESC", 0, 1, array(
-    ':source' => $source,
-    ':alias' => $alias,
-    ':language' => $langcode,
-    ':language_none' => LANGUAGE_NONE,
-  ))->fetchField();
+  $query = db_select('url_alias')
+    ->condition('source', $source, '<>')
+    ->condition('alias', $alias);
+  // Language neutral would always collide, an alias with language only collides
+  // with the same language or language neutral.
+  if ($langcode != LANGUAGE_NONE) {
+    $query->condition('langcode', array($language, LANGUAGE_NONE), 'IN');
+  }
+  $is_existing_alias = $query->countQuery()->execute()->fetchField();
 
   if ($is_existing_alias) {
     return TRUE;
