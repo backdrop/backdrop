@@ -940,15 +940,8 @@ function path_form_element_validate($element, &$form_state, $complete_form) {
     $path = $form_state['values']['path'];
 
     // Ensure that the submitted alias does not exist yet.
-    $query = db_select('url_alias')
-      ->condition('alias', $path['alias'])
-      ->condition('langcode', $path['langcode']);
-    if (!empty($path['source'])) {
-      $query->condition('source', $path['source'], '<>');
-    }
-    $query->addExpression('1');
-    $query->range(0, 1);
-    if ($query->execute()->fetchField()) {
+    $existing_alias = path_is_alias_reserved($path['alias'], $path['source'], $path['langcode']);
+    if ($existing_alias) {
       form_error($element, t('The alias is already in use.'));
     }
   }
