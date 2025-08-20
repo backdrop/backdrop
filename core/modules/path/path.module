@@ -519,7 +519,7 @@ function path_entity_update(Entity $entity) {
       // hook_entity_update() fires second, we have to include it directly here.
       if ($entity->entityType() === 'taxonomy_term') {
         // Generate new aliases for all children as well.
-        foreach (taxonomy_get_tree($entity->vocabulary, $entity->tid, NULL, TRUE) as $subterm) {
+        foreach (taxonomy_term_load_children($entity->tid, $entity->vocabulary) as $subterm) {
           path_save_automatic_entity_alias($subterm);
         }
       }
