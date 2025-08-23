@@ -167,7 +167,7 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
   backdrop_alter('mail', $message);
 
   // Retrieve the responsible implementation for this message.
-  $system = backdrop_mail_system($module, $key);
+  $system = backdrop_mail_system($module, $key, 'format');
 
   // Format the message body.
   $message = $system->format($message);
@@ -182,6 +182,8 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
     }
     // Sending was originally requested and was not canceled.
     else {
+      // A different implementation can be used for sending versus formatting.
+      $system = backdrop_mail_system($module, $key, 'mail');
       $message['result'] = $system->mail($message);
       // Log errors.
       if (!$message['result']) {
@@ -249,25 +251,32 @@ function backdrop_mail($module, $key, $to, $language, $params = array(), $reply 
  * sending or for sending via a remote gateway so as to reduce the load
  * on the local server.
  *
- * @param $module
+ * @param string $module
  *   The module name which was used by backdrop_mail() to invoke hook_mail().
- * @param $key
+ * @param string $key
  *   A key to identify the email sent. The final email ID for the email
  *   alter hook in backdrop_mail() would have been {$module}_{$key}.
+ * @param string|null $action
+ *   Optional. The name of the MailSystemInterface method to be invoked. Should
+ *   be one of:
+ *   - format: Format a message composed by backdrop_mail() prior to sending.
+ *   - mail: Send a message composed by backdrop_mail().
+ *   - null: Will default to DefaultMailSystem class.
  *
  * @return MailSystemInterface
  *
  * @throws Exception
  */
-function backdrop_mail_system($module, $key) {
+function backdrop_mail_system($module, $key, $action = NULL) {
   $instances = &backdrop_static(__FUNCTION__, array());
-
-  $id = $module . '_' . $key;
 
   $config = config('system.mail');
 
-  // Look for overrides for the default class, starting from the most specific
-  // id, and falling back to the module name.
+  $id = $module . '_' . $key;
+
+  // For backwards-compatibility, check for old location of the mail system
+  // starting from the most specific id, and falling back to the module name.
+  $class = NULL;
   if ($config->get($id) !== NULL) {
     $class = $config->get($id);
   }
@@ -277,8 +286,25 @@ function backdrop_mail_system($module, $key) {
   elseif ($config->get('default-system') !== NULL) {
     $class = $config->get('default-system');
   }
-  else {
-    $class = 'DefaultMailSystem';
+
+  // If not using a delegate class, use the new mail system structure.
+  if ($class != 'MailsystemDelegateMailSystem') {
+    $settings = $config->get('mail_system.' . $id);
+    if ($settings === NULL) {
+      $settings = $config->get('mail_system.' . $module);
+    }
+    if ($settings === NULL) {
+      $settings = $config->get('mail_system.default-system');
+    }
+
+    // Use the class configured for the given action. Default to the first class
+    // defined.
+    if ($settings && is_array($settings)) {
+      $class = reset($settings);
+      if (isset($settings[$action])) {
+        $class = $settings[$action];
+      }
+    }
   }
 
   if (empty($instances[$class])) {
@@ -287,7 +313,10 @@ function backdrop_mail_system($module, $key) {
       $instances[$class] = new $class();
     }
     else {
-      throw new Exception(t('Class %class does not implement interface %interface', array('%class' => $class, '%interface' => 'MailSystemInterface')));
+      throw new Exception(t('Class %class does not implement interface %interface', array(
+        '%class' => $class,
+        '%interface' => 'MailSystemInterface',
+      )));
     }
   }
   return $instances[$class];
@@ -300,18 +329,18 @@ interface MailSystemInterface {
   /**
    * Format a message composed by backdrop_mail() prior sending.
    *
-   * @param $message
+   * @param array $message
    *   A message array, as described in hook_mail_alter().
    *
-   * @return
+   * @return array
    *   The formatted $message.
    */
-   public function format(array $message);
+  public function format(array $message);
 
   /**
    * Send a message composed by backdrop_mail().
    *
-   * @param $message
+   * @param array $message
    *   Message array with at least the following elements:
    *   - id: A unique identifier of the email type. Examples: 'contact_user_copy',
    *     'user_password_reset'.
@@ -330,10 +359,10 @@ interface MailSystemInterface {
    *      defined by one of the other parameters.  PHP's mail() looks for Cc
    *      and Bcc headers and sends the mail to addresses in these headers too.
    *
-   * @return
+   * @return bool
    *   TRUE if the mail was successfully accepted for delivery, otherwise FALSE.
    */
-   public function mail(array $message);
+  public function mail(array $message);
 }
 
 /**

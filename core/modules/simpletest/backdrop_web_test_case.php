@@ -1810,7 +1810,10 @@ class BackdropWebTestCase extends BackdropTestCase {
     $language_url = $language = language_default();
 
     // Use the test mail class instead of the default mail handler class.
-    config_set('system.mail', 'default-system', 'TestingMailSystem');
+    config_set('system.mail', 'mail_system.default-system', array(
+      'mail' => 'TestingMailSystem',
+      'format' => 'TestingMailSystem',
+    ));
 
     // Disable news checking against BackdropCMS.org.
     $dashboard_config = config('dashboard.settings');

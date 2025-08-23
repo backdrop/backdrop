@@ -4196,6 +4196,66 @@ function hook_filetransfer_info_alter(&$filetransfer_info) {
 }
 
 /**
+ * Provide mail system definitions.
+ *
+ * Supported keys:
+ * - label: The human readable label, shown in the UI.
+ * - description: The human readable description, shown in the UI.
+ * - class: The class name.
+ *
+ * @return array
+ *   Array of mail system definitions with label, description and indexed
+ *   by the class name.
+ */
+function hook_mailsystem_info() {
+  return array(
+    'default' => array(
+      'label' => 'Default',
+      'description' => t('The default Backdrop mail backend using PHP\'s mail function.'),
+      'class' => 'DefaultMailSystem',
+    ),
+    'testing' => array(
+      'label' => t('Testing'),
+      'description' => t('A mail sending implementation that captures sent messages to a variable.'),
+      'class' => 'TestingMailSystem',
+    ),
+  );
+}
+
+/**
+ * Alter the mail theme options.
+ *
+ * @param array $theme_options
+ *   Reference to an array containing information about the mail theme options.
+ */
+function hook_mail_theme_options_alter(array &$theme_options) {
+  unset($theme_options['seven']);
+  $theme_options['domain'] = t('Domain');
+}
+
+/**
+ * Alter the mail theme key.
+ *
+ * @param string $mail_theme
+ *   Reference the mail theme key.
+ * @param string $original_mail_theme
+ *   The original mail theme.
+ */
+function system_mail_theme($mail_theme, $original_mail_theme) {
+  global $theme_key;
+  if ($original_mail_theme == 'domain') {
+    // Fetch the theme for the current domain.
+    if (module_exists('domain_theme')) {
+      // Assign the selected theme, based on the active domain.
+      global $_domain;
+      $domain_theme = domain_theme_lookup($_domain['domain_id']);
+      // The above returns -1 on failure.
+      $mail_theme = ($domain_theme != -1) ? $domain_theme['theme'] : $theme_key;
+    }
+  }
+}
+
+/**
  * @} End of "addtogroup hooks".
  */
 

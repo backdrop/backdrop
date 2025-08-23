@@ -11,11 +11,7 @@ class DefaultMailSystem implements MailSystemInterface {
   /**
    * Concatenate and wrap the email body for plain-text mails.
    *
-   * @param $message
-   *   A message array, as described in hook_mail_alter().
-   *
-   * @return
-   *   The formatted $message.
+   * {@inheritdoc}
    */
   public function format(array $message) {
     // Join the body array into one string.
@@ -33,10 +29,7 @@ class DefaultMailSystem implements MailSystemInterface {
    * @see http://php.net/manual/function.mail.php
    * @see backdrop_mail()
    *
-   * @param $message
-   *   A message array, as described in hook_mail_alter().
-   * @return
-   *   TRUE if the mail was successfully accepted, otherwise FALSE.
+   * {@inheritdoc}
    */
   public function mail(array $message) {
     // If 'Return-Path' isn't already set in php.ini, we pass it separately
@@ -149,8 +142,7 @@ class TestingMailSystem extends DefaultMailSystem implements MailSystemInterface
   /**
    * Accept an email message and store it in a variable.
    *
-   * @param $message
-   *   An email message.
+   * {@inheritdoc}
    */
   public function mail(array $message) {
     $captured_emails = state_get('test_email_collector', array());

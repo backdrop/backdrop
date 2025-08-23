@@ -772,6 +772,28 @@ function system_requirements($phase) {
     }
   }
 
+  if ($phase == 'runtime') {
+    if (module_exists('mailsystem')) {
+      $files = system_rebuild_module_data();
+      $dependency_exists = FALSE;
+      foreach ($files as $module => $file) {
+        foreach ($files->info['dependencies'] as $dependency) {
+          if (strpos($dependency, 'mailsystem') !== FALSE) {
+            $dependency_exists = TRUE;
+          }
+        }
+      }
+      if (!$dependency_exists) {
+        $requirements['mailsystem'] = array(
+          'title' => $t('Mail System'),
+          'value' => $t('Enabled'),
+          'severity' => REQUIREMENT_WARNING,
+          'description' => $t('Mail System is currently enabled, and should be disabled because the functionality has been incorporated into core, and no other modules depend on it.'),
+        );
+      }
+    }
+  }
+
   return $requirements;
 }
 
@@ -3800,6 +3822,63 @@ function system_update_1102() {
     $config->set('login_admin_theme', 1);
     $config->save();
   }
+}
+
+/**
+ * Uninstall Simple Mail System which has equivalent functionality to core.
+ */
+function system_update_1103() {
+  $module = db_query("SELECT name FROM {system} WHERE name = 'simple_mailsystem' AND type = 'module'")->fetchField();
+  if ($module) {
+    $path = backdrop_get_path('module', 'simple_mailsystem');
+    backdrop_set_message(t('The contributed module <em>Simple Mail System</em> has been located at %path. The module has been disabled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    // Remove the entry for the Simple Mail System module from the system table.
+    db_query("DELETE FROM {system} WHERE name = 'simple_mailsystem' AND type = 'module'");
+    return;
+  }
+
+  return t('<em>Simple Mail System</em> module not found. Nothing to be done.');
+}
+
+/**
+ * Update mail system settings.
+ */
+function system_update_1104() {
+  $config_mail = config('system.mail');
+  // Set required defaults.
+  $config_mail->set('mail_theme', 'current');
+  $config_mail->set('mail_system.default-system', array(
+    'mail' => 'DefaultMailSystem',
+    'format' => 'DefaultMailSystem',
+  ));
+
+  // If Mail System module was installed, migrate those settings.
+  $config_mailsystem = config('mailsystem.settings');
+  if (!$config_mailsystem->isNew()) {
+    $config_mail->set('mail_theme', $config_mailsystem->get('mailsystem_theme'));
+    $data = $config_mailsystem->get('mailsystem_delegate');
+    foreach($data as $key => $value) {
+      $config_mail->set('mail_system.' . $key, $value);
+    }
+  }
+  else {
+    // Mail System wasn't used but custom mail systems might have been set so
+    // convert those to the new format.
+    // Keep those set to the delegate class for backwards-compatibility.
+    $data = $config_mail->getData();
+    foreach ($data as $key => $value) {
+      if ($value == 'MailsystemDelegateMailSystem') {
+        continue;
+      }
+      $config_mail->set('mail_system.' . $key, array(
+        'mail' => $value,
+        'format' => $value,
+      ));
+      $config_mail->clear($key);
+    }
+  }
+
+  $config_mail->save();
 }
 
 /**
