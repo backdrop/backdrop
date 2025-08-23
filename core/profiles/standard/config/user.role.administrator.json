@@ -1,0 +1,8 @@
+{
+    "_config_name": "user.role.administrator",
+    "name": "administrator",
+    "label": "Administrator",
+    "description": "Can manage content and configuration, including the ability to assign roles.",
+    "weight": 3,
+    "permissions": []
+}

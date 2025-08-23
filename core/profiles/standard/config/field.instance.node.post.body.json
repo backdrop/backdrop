@@ -1,0 +1,45 @@
+{
+    "_config_name": "field.instance.node.post.body",
+    "field_name": "body",
+    "entity_type": "node",
+    "bundle": "post",
+    "label": "Body",
+    "widget": {
+        "type": "text_textarea_with_summary",
+        "settings": {
+            "rows": 10,
+            "summary_rows": 5
+        },
+        "weight": -4,
+        "module": "text"
+    },
+    "settings": {
+        "display_summary": true,
+        "text_processing": 1,
+        "allowed_formats": [],
+        "user_register_form": false
+    },
+    "display": {
+        "default": {
+            "label": "hidden",
+            "type": "text_default",
+            "settings": [],
+            "module": "text",
+            "weight": 0
+        },
+        "teaser": {
+            "label": "hidden",
+            "type": "text_summary_or_trimmed",
+            "settings": {
+                "trim_length": 600
+            },
+            "module": "text",
+            "weight": 0
+        }
+    },
+    "description": "",
+    "required": 0,
+    "deleted": 0,
+    "default_value": null,
+    "default_value_function": null
+}

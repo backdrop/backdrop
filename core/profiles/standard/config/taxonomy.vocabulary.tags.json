@@ -1,0 +1,9 @@
+{
+    "_config_name": "taxonomy.vocabulary.tags",
+    "name": "Tags",
+    "machine_name": "tags",
+    "description": "Use tags to group posts on similar topics into categories.",
+    "hierarchy": 0,
+    "language": 0,
+    "weight": 0
+}
