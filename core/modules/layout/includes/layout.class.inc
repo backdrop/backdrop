@@ -729,6 +729,7 @@ class Layout {
     foreach ($new_regions as $new_region_name) {
       $new_positions[$new_region_name] = array();
     }
+    $this->setRefugeRegionFromTemplateInfo($new_layout_template_info);
 
     // Do the mapping in the order provided (if any).
     if ($region_mapping) {
@@ -756,6 +757,7 @@ class Layout {
           }
           elseif ($new_region_name === '') {
             $this->orphaned_blocks[] = $uuid;
+            $new_positions[$this->refuge_region][] = $uuid;
           }
           else {
             unset($this->content[$uuid]);
@@ -764,19 +766,88 @@ class Layout {
       }
     }
 
-    // Assign orphan blocks to the default or last region, if the former doesn't
-    // exist.
     if (!empty($this->orphaned_blocks)) {
-      end($new_positions);
-      $this->refuge_region = !empty($new_layout_template_info['default region']) ? $new_layout_template_info['default region'] : key($new_positions);
-      foreach ($this->orphaned_blocks as $uuid) {
-        $new_positions[$this->refuge_region][] = $uuid;
-      }
+      $this->setOrphanedBlockMessage();
     }
 
     $this->layout_template = $layout_name;
     $this->positions = $new_positions;
     module_invoke_all('layout_template_change', $this, $old_layout_template_info['name']);
+  }
+
+  /**
+   * Set a Refuge Region for orphan blocks.
+   *
+   * @param array $template_info
+   *   The template info as loaded by layout_get_layout_template_info().
+   */
+  protected function setRefugeRegionFromTemplateInfo(array $template_info) {
+    // First check for a default region defined by the layout template.
+    if (!empty($template_info['default region'])) {
+      $this->refuge_region  = $template_info['default region'];
+    }
+    // Then check for a region named "content".
+    elseif (array_key_exists('content', $template_info['regions'])) {
+      $this->refuge_region = 'content';
+    }
+    // Finally, default to the last region defined by the layout template.
+    else {
+      end($template_info['regions']);
+      $this->refuge_region = key($template_info['regions']);
+    }
+  }
+
+  /**
+   * Set a message about orphan blocks being moved to the refuge region.
+   */
+  protected function setOrphanedBlockMessage() {
+    $orphaned_blocks_titles = array();
+    $layout_template_info = layout_get_layout_template_info($this->layout_template);
+    foreach ($this->orphaned_blocks as $uuid) {
+      $orphaned_blocks_titles[] = $this->content[$uuid]->getAdminTitle();
+    }
+    $message = t('The following blocks have been reassigned to the %new_region region. The regions they were placed in previously do not exist in the new layout template. You can move them to more appropriate regions:', array(
+      '%new_region' => $layout_template_info['regions'][$this->refuge_region]));
+    $message .= theme('item_list', array('items' => $orphaned_blocks_titles));
+    backdrop_set_message($message, 'warning');
+  }
+
+  /**
+   * Copy blocks from the Default layout into this layout.
+   */
+  public function setDefaultBlocks() {
+    if (!empty($this->is_new)) {
+      // Get the default layout.
+      $default_layout_name = path_is_admin($this->getPath()) ? 'admin_default' : 'default';
+      $default_layout = layout_load($default_layout_name);
+      // Get the template being used by this layout.
+      $template_info = layout_get_layout_template_info($this->layout_template);
+      // Copy the blocks.
+      $this->setRefugeRegionFromTemplateInfo($template_info);
+      foreach ($default_layout->positions as $region => $region_block_list) {
+        foreach ($region_block_list as $uuid) {
+          if (isset($default_layout->content[$uuid])) {
+            $block = $default_layout->content[$uuid];
+            $new_block = $block->getClone();
+            // Only add the block from the default if required contexts are
+            // present for each block.
+            if ($this->hasContexts($new_block->getRequiredContexts())) {
+              if (array_key_exists($region, $template_info['regions'])) {
+                $this->positions[$region][] = $new_block->uuid;
+              }
+              else {
+                $this->positions[$this->refuge_region][] = $new_block->uuid;
+                $this->orphaned_blocks[] = $new_block->uuid;
+              }
+              $this->content[$new_block->uuid] = $new_block;
+            }
+          }
+        }
+      }
+      if (!empty($this->orphaned_blocks) && empty($this->is_new)) {
+        $this->setOrphanedBlockMessage();
+      }
+    }
   }
 
   /**
@@ -929,7 +1000,7 @@ class Layout {
         }
       }
     }
-    
+
     return empty(array_filter($context_counts));
   }
 
