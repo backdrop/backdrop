@@ -28,6 +28,33 @@ function standard_install() {
         'scheme' => 'public',
         'directory' => 'inline-images',
       ),
+      'plugins' => array(
+        'style' => array( 
+          'style_list' => array(
+            array(
+              'name' => 'Blue text',
+              'element' => 'span',
+              'attributes' => array(
+                'class' => 'blue',
+              ),
+            ),
+            array(
+              'name' => 'Red text',
+              'element' => 'span',
+              'attributes' => array(
+                'class' => 'red',
+              ),
+            ),
+            array(
+              'name' => 'Green text',
+              'element' => 'span',
+              'attributes' => array(
+                'class' => 'green',
+              ),
+            ),
+          ),
+        ),
+      ),
     ),
     'filters' => array(
       'filter_url' => array(
@@ -37,6 +64,9 @@ function standard_install() {
       'filter_html' => array(
         'weight' => 1,
         'status' => 1,
+        'settings' => array(
+          'allowed_html' => '<a> <em> <strong> <cite> <blockquote> <code> <ul> <ol> <li> <dl> <dt> <dd> <h3> <h4> <h5> <p> <span> <img> <figure> <figcaption>',
+        )
       ),
       // Line break filter.
       'filter_autop' => array(

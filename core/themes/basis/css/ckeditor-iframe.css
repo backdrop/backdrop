@@ -1,0 +1,21 @@
+/** 
+ * CKEditor Styles
+ * These should also be listed elsewhere in the theme.
+ * See example: css/skin.css
+ */
+
+span.red {
+  color: red;
+}
+
+span.blue {
+  color: blue;
+}
+
+span.green {
+  color: green;
+}
+
+span.yellow { 
+  color: yellow;
+}
