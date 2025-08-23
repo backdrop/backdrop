@@ -21,7 +21,7 @@ abstract class ViewsPluginStyleTestBase extends ViewsSqlTest {
   /**
    * Stores a view output in the elements.
    */
-  function storeViewPreview($output) {
+  protected function storeViewPreview($output) {
     $htmlDom = new DOMDocument();
     @$htmlDom->loadHTML($output);
     if ($htmlDom) {

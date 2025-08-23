@@ -12,7 +12,7 @@ class MailTestCase extends BackdropWebTestCase implements MailSystemInterface {
    */
   private static $sent_message;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('simpletest'));
 
     // Set MailTestCase (i.e. this class) as the SMTP library
@@ -22,7 +22,7 @@ class MailTestCase extends BackdropWebTestCase implements MailSystemInterface {
   /**
    * Assert that the pluggable mail system is functional.
    */
-  function testPluggableFramework() {
+  public function testPluggableFramework() {
     global $language;
 
     // Use MailTestCase for sending a message.
@@ -37,7 +37,7 @@ class MailTestCase extends BackdropWebTestCase implements MailSystemInterface {
    *
    * @see simpletest_mail_alter()
    */
-  function testCancelMessage() {
+  public function testCancelMessage() {
     global $language;
 
     // Reset the class variable holding a copy of the last sent message.
@@ -87,7 +87,7 @@ class BackdropHtmlToTextTestCase extends BackdropWebTestCase {
    *   An HTML representation of the text string that, when displayed in a
    *   browser, represents the PHP source code equivalent of $text.
    */
-  function stringToHtml($text) {
+  protected function stringToHtml($text) {
     return '"' .
       str_replace(
         array("\n", ' '),
@@ -109,7 +109,7 @@ class BackdropHtmlToTextTestCase extends BackdropWebTestCase {
    *   (optional) An array of allowed tags, or NULL to default to the full
    *   set of tags supported by backdrop_html_to_text().
    */
-  function assertHtmlToText($html, $text, $message, $allowed_tags = NULL) {
+  protected function assertHtmlToText($html, $text, $message, $allowed_tags = NULL) {
     preg_match_all('/<([a-z0-6]+)/', backdrop_strtolower($html), $matches);
     $tested_tags = implode(', ', array_unique($matches[1]));
     $message .= ' (' . $tested_tags . ')';
@@ -128,7 +128,7 @@ class BackdropHtmlToTextTestCase extends BackdropWebTestCase {
   /**
    * Test all supported tags of backdrop_html_to_text().
    */
-  function testTags() {
+  public function testTags() {
     global $base_path, $base_url;
     $tests = array(
       // @todo Trailing linefeeds should be trimmed.
@@ -224,7 +224,7 @@ class BackdropHtmlToTextTestCase extends BackdropWebTestCase {
   /**
    * Test $allowed_tags argument of backdrop_html_to_text().
    */
-  function testBackdropHtmlToTextArgs() {
+  public function testBackdropHtmlToTextArgs() {
     // The second parameter of backdrop_html_to_text() overrules the allowed tags.
     $this->assertHtmlToText(
       'Backdrop <b>Backdrop</b> Backdrop',
@@ -257,7 +257,7 @@ class BackdropHtmlToTextTestCase extends BackdropWebTestCase {
   /**
    * Tests that backdrop_wrap_mail() removes trailing whitespace before newlines.
    */
-  function testBackdropHtmltoTextRemoveTrailingWhitespace() {
+  public function testBackdropHtmltoTextRemoveTrailingWhitespace() {
     $text = "Hi there! \nFoo Bar";
     $mail_lines = explode("\n", backdrop_wrap_mail($text));
     $this->assertNotEqual(" ", substr($mail_lines[0], -1), 'Trailing whitespace removed.');
@@ -269,7 +269,7 @@ class BackdropHtmlToTextTestCase extends BackdropWebTestCase {
    * RFC 3676 says, "This is a special case; an (optionally quoted or quoted and
    * stuffed) line consisting of DASH DASH SP is neither fixed nor flowed."
    */
-  function testBackdropHtmltoTextUsenetSignature() {
+  public function testBackdropHtmltoTextUsenetSignature() {
     $text = "Hi there!\n-- \nFoo Bar";
     $mail_lines = explode("\n", backdrop_wrap_mail($text));
     $this->assertEqual("-- ", $mail_lines[1], 'Trailing whitespace not removed for dash-dash-space signatures.');
@@ -282,7 +282,7 @@ class BackdropHtmlToTextTestCase extends BackdropWebTestCase {
   /**
    * Test that whitespace is collapsed.
    */
-  function testBackdropHtmltoTextCollapsesWhitespace() {
+  public function testBackdropHtmltoTextCollapsesWhitespace() {
     $input = "<p>Backdrop  Backdrop\n\nBackdrop<pre>Backdrop  Backdrop\n\nBackdrop</pre>Backdrop  Backdrop\n\nBackdrop</p>";
     // @todo The whitespace should be collapsed.
     $collapsed = "Backdrop  Backdrop\n\nBackdropBackdrop  Backdrop\n\nBackdropBackdrop  Backdrop\n\nBackdrop\n\n";
@@ -298,7 +298,7 @@ class BackdropHtmlToTextTestCase extends BackdropWebTestCase {
    * Test that text separated by block-level tags in HTML get separated by
    * (at least) a newline in the plaintext version.
    */
-  function testBackdropHtmlToTextBlockTagToNewline() {
+  public function testBackdropHtmlToTextBlockTagToNewline() {
     $input = '[text]'
       . '<blockquote>[blockquote]</blockquote>'
       . '<br />[br]'
@@ -348,7 +348,7 @@ class BackdropHtmlToTextTestCase extends BackdropWebTestCase {
   /**
    * Test that headers are properly separated from surrounding text.
    */
-  function testHeaderSeparation() {
+  public function testHeaderSeparation() {
     $html = 'Backdrop<h1>Backdrop</h1>Backdrop';
     // @todo There should be more space above the header than below it.
     $text = "Backdrop\n======== BACKDROP ============================================================\n\nBackdrop\n";
@@ -373,7 +373,7 @@ class BackdropHtmlToTextTestCase extends BackdropWebTestCase {
   /**
    * Test that footnote references are properly generated.
    */
-  function testFootnoteReferences() {
+  public function testFootnoteReferences() {
     global $base_path, $base_url;
     $source = '<a href="http://www.example.com/node/1">Host and path</a>'
       . '<br /><a href="http://www.example.com">Host, no path</a>'
@@ -398,7 +398,7 @@ class BackdropHtmlToTextTestCase extends BackdropWebTestCase {
    * Test that combinations of paragraph breaks, line breaks, linefeeds,
    * and spaces are properly handled.
    */
-  function testBackdropHtmlToTextParagraphs() {
+  public function testBackdropHtmlToTextParagraphs() {
     $tests = array();
     $tests[] = array(
         'html' => "<p>line 1<br />\nline 2<br />line 3\n<br />line 4</p><p>paragraph</p>",
@@ -427,7 +427,7 @@ class BackdropHtmlToTextTestCase extends BackdropWebTestCase {
    * RFC 821 says, "The maximum total length of a text line including the
    * <CRLF> is 1000 characters."
    */
-  function testVeryLongLineWrap() {
+  public function testVeryLongLineWrap() {
     $input = 'Backdrop<br /><p>' . str_repeat('x', 2100) . '</p><br />Backdrop';
     $output = backdrop_html_to_text($input);
     // This awkward construct comes from includes/mail.inc lines 8-13.

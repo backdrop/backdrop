@@ -12,7 +12,7 @@ class TaxonomyWebTestCase extends BackdropWebTestCase {
   /**
    * Returns a new vocabulary with random properties.
    */
-  function createVocabulary() {
+  protected function createVocabulary() {
     // Create a vocabulary.
     $vocabulary = new TaxonomyVocabulary(array(
       'name' => $this->randomName(),
@@ -27,7 +27,7 @@ class TaxonomyWebTestCase extends BackdropWebTestCase {
   /**
    * Returns a new term with random properties in the given vocabulary.
    */
-  function createTerm($vocabulary) {
+  protected function createTerm($vocabulary) {
     $term = entity_create('taxonomy_term', array(
       'name' => $this->randomName(),
       'description' => $this->randomName(),
@@ -56,7 +56,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
    */
   protected $vocabulary;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
     $this->admin_user = $this->backdropCreateUser(array('administer taxonomy'));
     $this->backdropLogin($this->admin_user);
@@ -66,7 +66,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
   /**
    * Create, configure and delete a vocabulary via the user interface.
    */
-  function testVocabularyInterface() {
+  public function testVocabularyInterface() {
     // Visit the main taxonomy administration page.
     $this->backdropGet('admin/structure/taxonomy');
 
@@ -141,7 +141,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
   /**
    * Tests that vocabulary permissions are correctly set from the Taxonomy UI.
    */
-  function testVocabularyPermissions() {
+  public function testVocabularyPermissions() {
     // Create admin user.
     $admin_user = $this->backdropCreateUser(array(
       'administer taxonomy',
@@ -229,7 +229,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
   /**
    * Test the vocabulary overview with no vocabularies.
    */
-  function testTaxonomyAdminNoVocabularies() {
+  public function testTaxonomyAdminNoVocabularies() {
     // Delete all vocabularies.
     $vocabularies = taxonomy_vocabulary_load_multiple(FALSE);
     foreach ($vocabularies as $key => $vocabulary) {
@@ -245,7 +245,7 @@ class TaxonomyVocabularyFunctionalTest extends TaxonomyWebTestCase {
   /**
    * Deleting a vocabulary.
    */
-  function testTaxonomyAdminDeletingVocabulary() {
+  public function testTaxonomyAdminDeletingVocabulary() {
     // Create a vocabulary.
     $vocabulary_name = backdrop_strtolower($this->randomName());
     $edit = array(
@@ -279,7 +279,7 @@ class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
    */
   protected $vocabulary;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('taxonomy', 'field_test');
     $admin_user = $this->backdropCreateUser(array('create post content', 'administer taxonomy'));
     $this->backdropLogin($admin_user);
@@ -289,7 +289,7 @@ class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
   /**
    * Test deleting a taxonomy that contains terms.
    */
-  function testTaxonomyVocabularyDeleteWithTerms() {
+  public function testTaxonomyVocabularyDeleteWithTerms() {
     // Delete any existing vocabularies.
     foreach (taxonomy_vocabulary_load_multiple(FALSE) as $vocabulary) {
       taxonomy_vocabulary_delete($vocabulary->machine_name);
@@ -323,7 +323,7 @@ class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
   /**
    * Ensure that the vocabulary static reset works correctly.
    */
-  function testTaxonomyVocabularyLoadStaticReset() {
+  public function testTaxonomyVocabularyLoadStaticReset() {
     $original_vocabulary = taxonomy_vocabulary_load($this->vocabulary->machine_name);
     $this->assertTrue(is_object($original_vocabulary), 'Vocabulary loaded successfully.');
     $this->assertEqual($this->vocabulary->name, $original_vocabulary->name, 'Vocabulary loaded successfully.');
@@ -348,7 +348,7 @@ class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
   /**
    * Tests for loading multiple vocabularies.
    */
-  function testTaxonomyVocabularyLoadMultiple() {
+  public function testTaxonomyVocabularyLoadMultiple() {
 
     // Delete any existing vocabularies.
     foreach (taxonomy_vocabulary_load_multiple(FALSE) as $vocabulary) {
@@ -381,7 +381,7 @@ class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
   /**
    * Test uninstall and reinstall of the taxonomy module.
    */
-  function testUninstallReinstall() {
+  public function testUninstallReinstall() {
     // Fields and field instances attached to taxonomy term bundles should be
     // removed when the module is uninstalled.
     $field_name = backdrop_strtolower($this->randomName() . '_field_name');
@@ -437,7 +437,7 @@ class TaxonomyVocabularyUnitTest extends TaxonomyWebTestCase {
  * Unit tests for taxonomy term functions.
  */
 class TaxonomyTermUnitTest extends TaxonomyWebTestCase {
-  function testTermDelete() {
+  public function testTermDelete() {
     $vocabulary = $this->createVocabulary();
     $valid_term = $this->createTerm($vocabulary);
     // Delete a valid term.
@@ -452,7 +452,7 @@ class TaxonomyTermUnitTest extends TaxonomyWebTestCase {
   /**
    * Test a taxonomy with terms that have multiple parents of different depths.
    */
-  function testTaxonomyVocabularyTree() {
+  public function testTaxonomyVocabularyTree() {
     // Create a new vocabulary with 6 terms.
     $vocabulary = $this->createVocabulary();
     $term = array();
@@ -514,7 +514,7 @@ class TaxonomyLegacyTestCase extends TaxonomyWebTestCase {
    */
   protected $admin_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('taxonomy');
     $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'administer nodes', 'bypass node access'));
     $this->backdropLogin($this->admin_user);
@@ -523,7 +523,7 @@ class TaxonomyLegacyTestCase extends TaxonomyWebTestCase {
   /**
    * Test taxonomy functionality with nodes prior to 1970.
    */
-  function testTaxonomyLegacyNode() {
+  public function testTaxonomyLegacyNode() {
     // Posts a post with a taxonomy term and a date prior to 1970.
     $langcode = LANGUAGE_NONE;
     $edit = array();
@@ -561,7 +561,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
    */
   protected $instance;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('taxonomy');
     $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'bypass node access'));
     $this->backdropLogin($this->admin_user);
@@ -601,7 +601,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
   /**
    * Test terms in a single and multiple hierarchy.
    */
-  function testTaxonomyTermHierarchy() {
+  public function testTaxonomyTermHierarchy() {
     // Create two taxonomy terms.
     $term1 = $this->createTerm($this->vocabulary);
     $term2 = $this->createTerm($this->vocabulary);
@@ -640,7 +640,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
    *
    * Save & edit a node and assert that taxonomy terms are saved/loaded properly.
    */
-  function testTaxonomyNode() {
+  public function testTaxonomyNode() {
     // Create two taxonomy terms.
     $term1 = $this->createTerm($this->vocabulary);
     $term2 = $this->createTerm($this->vocabulary);
@@ -669,7 +669,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
   /**
    * Test term creation with a free-tagging vocabulary from the node form.
    */
-  function testNodeTermCreationAndDeletion() {
+  public function testNodeTermCreationAndDeletion() {
     // Enable tags in the vocabulary.
     $instance = $this->instance;
     $instance['widget'] = array('type' => 'taxonomy_autocomplete');
@@ -762,7 +762,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
   /**
    * Save, edit and delete a term using the user interface.
    */
-  function testTermInterface() {
+  public function testTermInterface() {
     $edit = array(
       'name' => $this->randomName(12),
       'description[value]' => $this->randomName(100),
@@ -834,7 +834,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
   /**
    * Save, edit and delete a term using the user interface.
    */
-  function testTermReorder() {
+  public function testTermReorder() {
     $this->createTerm($this->vocabulary);
     $this->createTerm($this->vocabulary);
     $this->createTerm($this->vocabulary);
@@ -893,7 +893,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
   /**
    * Test saving a term with multiple parents through the UI.
    */
-  function testTermMultipleParentsInterface() {
+  public function testTermMultipleParentsInterface() {
     // Add a new term to the vocabulary so that we can have multiple parents.
     $parent = $this->createTerm($this->vocabulary);
 
@@ -922,7 +922,7 @@ class TaxonomyTermTestCase extends TaxonomyWebTestCase {
   /**
    * Test taxonomy_term_load_multiple_by_name().
    */
-  function testTaxonomyGetTermByName() {
+  public function testTaxonomyGetTermByName() {
     $term = $this->createTerm($this->vocabulary);
 
     // Load the term with the exact name.
@@ -1023,7 +1023,7 @@ class TaxonomyRSSTestCase extends TaxonomyWebTestCase {
    */
   protected $instance;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('taxonomy');
     $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'bypass node access', 'administer content types', 'administer fields', 'administer view modes'));
     $this->backdropLogin($this->admin_user);
@@ -1065,7 +1065,7 @@ class TaxonomyRSSTestCase extends TaxonomyWebTestCase {
    *
    * Create a node and assert that taxonomy terms appear in rss.xml.
    */
-  function testTaxonomyRSS() {
+  public function testTaxonomyRSS() {
     // Create two taxonomy terms.
     $term1 = $this->createTerm($this->vocabulary);
 
@@ -1148,7 +1148,7 @@ class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
    */
   protected $instance_2;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('taxonomy');
 
     // Create an administrative user.
@@ -1222,7 +1222,7 @@ class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
   /**
    * Tests that the taxonomy index is maintained properly.
    */
-  function testTaxonomyIndex() {
+  public function testTaxonomyIndex() {
     // Create terms in the vocabulary.
     $term_1 = $this->createTerm($this->vocabulary);
     $term_2 = $this->createTerm($this->vocabulary);
@@ -1332,7 +1332,7 @@ class TaxonomyTermIndexTestCase extends TaxonomyWebTestCase {
   /**
    * Tests that there is a link to the parent term on the child term page.
    */
-  function testTaxonomyTermHierarchyBreadcrumbs() {
+  public function testTaxonomyTermHierarchyBreadcrumbs() {
     // Create two taxonomy terms and set term2 as the parent of term1.
     $term1 = $this->createTerm($this->vocabulary);
     $term2 = $this->createTerm($this->vocabulary);
@@ -1356,7 +1356,7 @@ class TaxonomyLoadMultipleUnitTest extends TaxonomyWebTestCase {
    */
   protected $taxonomy_admin;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
     $this->taxonomy_admin = $this->backdropCreateUser(array('administer taxonomy'));
     $this->backdropLogin($this->taxonomy_admin);
@@ -1366,7 +1366,7 @@ class TaxonomyLoadMultipleUnitTest extends TaxonomyWebTestCase {
    * Create a vocabulary and some taxonomy terms, ensuring they're loaded
    * correctly using taxonomy_term_load_multiple().
    */
-  function testTaxonomyTermMultipleLoad() {
+  public function testTaxonomyTermMultipleLoad() {
     // Create a vocabulary.
     $vocabulary = $this->createVocabulary();
 
@@ -1414,7 +1414,7 @@ class TaxonomyLoadMultipleUnitTest extends TaxonomyWebTestCase {
  * Tests for taxonomy hook invocation.
  */
 class TaxonomyHooksTestCase extends TaxonomyWebTestCase {
-  function setUp() {
+  public function setUp() {
     parent::setUp('taxonomy', 'taxonomy_test');
     module_load_include('inc', 'taxonomy', 'includes/taxonomy.pages');
     $taxonomy_admin = $this->backdropCreateUser(array('administer taxonomy'));
@@ -1427,7 +1427,7 @@ class TaxonomyHooksTestCase extends TaxonomyWebTestCase {
    *
    * @see taxonomy_test.module
    */
-  function testTaxonomyTermHooks() {
+  public function testTaxonomyTermHooks() {
     $vocabulary = $this->createVocabulary();
 
     // Create a term with one antonym.
@@ -1482,7 +1482,7 @@ class TaxonomyTermFieldTestCase extends TaxonomyWebTestCase {
    */
   protected $field;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('field_test');
 
     $web_user = $this->backdropCreateUser(array('access field_test content', 'administer field_test content', 'administer taxonomy'));
@@ -1523,7 +1523,7 @@ class TaxonomyTermFieldTestCase extends TaxonomyWebTestCase {
   /**
    * Test term field validation.
    */
-  function testTaxonomyTermFieldValidation() {
+  public function testTaxonomyTermFieldValidation() {
     // Test valid and invalid values with field_attach_validate().
     $langcode = LANGUAGE_NONE;
     $entity = field_test_create_entity();
@@ -1552,7 +1552,7 @@ class TaxonomyTermFieldTestCase extends TaxonomyWebTestCase {
   /**
    * Test widgets.
    */
-  function testTaxonomyTermFieldWidgets() {
+  public function testTaxonomyTermFieldWidgets() {
     // Create a term in the vocabulary.
     $term = $this->createTerm($this->vocabulary);
 
@@ -1603,7 +1603,7 @@ class TaxonomyTermFieldMultipleVocabularyTestCase extends TaxonomyWebTestCase {
    */
   protected $field;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('field_test');
 
     $web_user = $this->backdropCreateUser(array('access field_test content', 'administer field_test content', 'administer taxonomy'));
@@ -1650,7 +1650,7 @@ class TaxonomyTermFieldMultipleVocabularyTestCase extends TaxonomyWebTestCase {
   /**
    * Tests term reference field and widget with multiple vocabularies.
    */
-  function testTaxonomyTermFieldMultipleVocabularies() {
+  public function testTaxonomyTermFieldMultipleVocabularies() {
     // Create a term in each vocabulary.
     $term1 = $this->createTerm($this->vocabulary1);
     $term2 = $this->createTerm($this->vocabulary2);
@@ -1733,7 +1733,7 @@ class TaxonomyTokenReplaceTestCase extends TaxonomyWebTestCase {
    */
   protected $instance;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
     $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'bypass node access'));
     $this->backdropLogin($this->admin_user);
@@ -1774,7 +1774,7 @@ class TaxonomyTokenReplaceTestCase extends TaxonomyWebTestCase {
   /**
    * Creates some terms and a node, then tests the tokens generated from them.
    */
-  function testTaxonomyTokenReplacement() {
+  public function testTaxonomyTokenReplacement() {
     global $language;
 
     // Create two taxonomy terms.
@@ -1881,7 +1881,7 @@ class TaxonomyLanguageFunctionalTest extends TaxonomyWebTestCase {
    */
   protected $vocabulary;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('node', 'language');
     $this->admin_user = $this->backdropCreateUser(array('administer taxonomy', 'bypass node access', 'administer languages', 'administer content types', 'administer fields'));
     $this->backdropLogin($this->admin_user);
@@ -1911,7 +1911,7 @@ class TaxonomyLanguageFunctionalTest extends TaxonomyWebTestCase {
   /**
    * Create, configure and delete a vocabulary via the user interface.
    */
-  function testVocabularyLanguageInterface() {
+  public function testVocabularyLanguageInterface() {
     // Configure the vocabulary.
     $this->backdropGet('admin/structure/taxonomy');
     $this->clickLink(t('Configure'));
@@ -1928,7 +1928,7 @@ class TaxonomyLanguageFunctionalTest extends TaxonomyWebTestCase {
   /**
    * Test term creation with a free-tagging vocabulary from the node form.
    */
-  function testNodeTermLanguageCreation() {
+  public function testNodeTermLanguageCreation() {
     // Configure the vocabulary.
     $this->backdropGet('admin/structure/taxonomy');
     $this->clickLink(t('Configure'));
@@ -1988,7 +1988,7 @@ class TaxonomyLanguageFunctionalTest extends TaxonomyWebTestCase {
 class TaxonomyThemeTestCase extends TaxonomyWebTestCase {
   protected $profile = 'testing';
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('taxonomy');
 
     // Make sure we are using distinct default and administrative themes for
@@ -2005,7 +2005,7 @@ class TaxonomyThemeTestCase extends TaxonomyWebTestCase {
   /**
    * Test the theme used when adding, viewing and editing taxonomy terms.
    */
-  function testTaxonomyTermThemes() {
+  public function testTaxonomyTermThemes() {
     // Adding a term to a vocabulary is considered an administrative action and
     // should use the administrative theme.
     $vocabulary = $this->createVocabulary();
@@ -2039,7 +2039,7 @@ class TaxonomyEFQTestCase extends TaxonomyWebTestCase {
    */
   protected $vocabulary;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
     $this->admin_user = $this->backdropCreateUser(array('administer taxonomy'));
     $this->backdropLogin($this->admin_user);
@@ -2049,7 +2049,7 @@ class TaxonomyEFQTestCase extends TaxonomyWebTestCase {
   /**
    * Tests that a basic taxonomy EntityFieldQuery works.
    */
-  function testTaxonomyEFQ() {
+  public function testTaxonomyEFQ() {
     $terms = array();
     for ($i = 0; $i < 5; $i++) {
       $term = $this->createTerm($this->vocabulary);

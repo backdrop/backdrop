@@ -44,7 +44,7 @@ class ViewsHandlerFilterMultipleTest extends ViewsSqlTest {
   /**
    * Tests combining an exposed filter with a non-exposed one.
    */
-  function testMultipleFilters() {
+  public function testMultipleFilters() {
     $term = $this->viewsCreateTerm('tags');
 
     $node1 = $this->backdropCreateNode(array('type' => 'post', 'created' => REQUEST_TIME));

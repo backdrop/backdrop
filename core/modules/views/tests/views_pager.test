@@ -297,7 +297,7 @@ class ViewsPagerTest extends ViewsSqlTest {
     $this->assertEqual(count($view->result), 11);
   }
 
-  function viewPagerFullZeroItemsPerPage() {
+  protected function viewPagerFullZeroItemsPerPage() {
     $view = new view;
     $view->name = 'view_pager_full_zero_items_per_page';
     $view->description = '';
@@ -337,7 +337,7 @@ class ViewsPagerTest extends ViewsSqlTest {
     return $view;
   }
 
-  function viewsPagerFull() {
+  protected function viewsPagerFull() {
     $view = new view;
     $view->name = 'test_pager_full';
     $view->description = '';
@@ -363,7 +363,7 @@ class ViewsPagerTest extends ViewsSqlTest {
     return $view;
   }
 
-  function viewsPagerFullFields() {
+  protected function viewsPagerFullFields() {
     $view = new view;
     $view->name = 'test_pager_full';
     $view->description = '';
@@ -429,7 +429,7 @@ class ViewsPagerTest extends ViewsSqlTest {
   /**
    * Test the api functions on the view object.
    */
-  function testPagerApi() {
+  public function testPagerApi() {
     $view = $this->viewsPagerFull();
     // On the first round don't initialize the pager.
 

@@ -17,14 +17,14 @@ class SearchMatchTestCase extends BackdropWebTestCase {
   /**
    * Implementation setUp().
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp('search');
   }
 
   /**
    * Test search indexing.
    */
-  function testMatching() {
+  public function testMatching() {
     $this->_setup();
     $this->_testQueries();
   }
@@ -32,7 +32,7 @@ class SearchMatchTestCase extends BackdropWebTestCase {
   /**
    * Set up a small index of items to test against.
    */
-  function _setup() {
+  private function _setup() {
     config_set('search.settings', 'search_minimum_word_size', 3);
 
     for ($i = 1; $i <= 7; ++$i) {
@@ -64,7 +64,7 @@ class SearchMatchTestCase extends BackdropWebTestCase {
    *   6  enim am minim veniam es cillum
    *   7  am minim veniam es cillum dolore eu
    */
-  function getText($n) {
+  protected function getText($n) {
     $words = explode(' ', "Ipsum dolore sit am. Ut enim am minim veniam. Es cillum dolore eu.");
     return implode(' ', array_slice($words, $n - 1, $n));
   }
@@ -79,7 +79,7 @@ class SearchMatchTestCase extends BackdropWebTestCase {
    *   11 came over from germany
    *   12 over from germany swimming
    */
-  function getText2($n) {
+  protected function getText2($n) {
     $words = explode(' ', "Dear King Philip came over from Germany swimming.");
     return implode(' ', array_slice($words, $n - 1, $n));
   }
@@ -87,7 +87,7 @@ class SearchMatchTestCase extends BackdropWebTestCase {
   /**
    * Run predefine queries looking for indexed terms.
    */
-  function _testQueries() {
+  private function _testQueries() {
     /*
       Note: OR queries that include short words in OR groups are only accepted
       if the ORed terms are ANDed with at least one long word in the rest of the query.
@@ -199,7 +199,7 @@ class SearchMatchTestCase extends BackdropWebTestCase {
    *
    * Verify if a query produces the correct results.
    */
-  function _testQueryMatching($query, $set, $results) {
+  private function _testQueryMatching($query, $set, $results) {
     // Get result IDs.
     $found = array();
     foreach ($set as $item) {
@@ -217,7 +217,7 @@ class SearchMatchTestCase extends BackdropWebTestCase {
    *
    * Verify if a query produces normalized, monotonous scores.
    */
-  function _testQueryScores($query, $set, $results) {
+  private function _testQueryScores($query, $set, $results) {
     // Get result scores.
     $scores = array();
     foreach ($set as $item) {
@@ -240,7 +240,7 @@ class SearchMatchTestCase extends BackdropWebTestCase {
 class SearchPageText extends BackdropWebTestCase {
   protected $searching_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('search');
 
     // Create user.
@@ -250,7 +250,7 @@ class SearchPageText extends BackdropWebTestCase {
   /**
    * Tests the failed search text, and various other text on the search page.
    */
-  function testSearchText() {
+  public function testSearchText() {
     $this->backdropLogin($this->searching_user);
     $this->backdropGet('search/node');
     $this->assertText(t('Enter your keywords'));
@@ -299,7 +299,7 @@ class SearchPageText extends BackdropWebTestCase {
 class SearchAdvancedSearchForm extends BackdropWebTestCase {
   protected $node;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('search');
     // Create and login user.
     $test_user = $this->backdropCreateUser(array('access content', 'search content', 'use advanced search', 'administer nodes'));
@@ -322,7 +322,7 @@ class SearchAdvancedSearchForm extends BackdropWebTestCase {
    * Test using the search form with GET and POST queries.
    * Test using the advanced search form to limit search to nodes of type "Page".
    */
-  function testNodeType() {
+  public function testNodeType() {
     $this->assertTrue($this->node->type == 'page', 'Node type is Page.');
 
     // Assert that the dummy title doesn't equal the real title.
@@ -358,11 +358,11 @@ class SearchRankingTestCase extends BackdropWebTestCase {
   /**
    * Implementation setUp().
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp('search', 'comment');
   }
 
-  function testRankings() {
+  public function testRankings() {
     // Login with sufficient privileges.
     $this->backdropLogin($this->backdropCreateUser(array('skip comment approval', 'create page content')));
 
@@ -428,7 +428,7 @@ class SearchRankingTestCase extends BackdropWebTestCase {
   /**
    * Test rankings of HTML tags.
    */
-  function testHTMLRankings() {
+  public function testHTMLRankings() {
     // Login with sufficient privileges.
     $this->backdropLogin($this->backdropCreateUser(array('create page content')));
 
@@ -512,7 +512,7 @@ class SearchRankingTestCase extends BackdropWebTestCase {
    *
    * See issue http://drupal.org/node/771596
    */
-  function testDoubleRankings() {
+  public function testDoubleRankings() {
     // Login with sufficient privileges.
     $this->backdropLogin($this->backdropCreateUser(array('skip comment approval', 'create page content')));
 
@@ -551,7 +551,7 @@ class SearchRankingTestCase extends BackdropWebTestCase {
  * Tests the rendering of the search block.
  */
 class SearchBlockTestCase extends BackdropWebTestCase {
-  function setUp() {
+  public function setUp() {
     parent::setUp('search');
 
     // Create and log user in.
@@ -562,7 +562,7 @@ class SearchBlockTestCase extends BackdropWebTestCase {
   /**
    * Test that the search block form works correctly.
    */
-  function testBlock() {
+  public function testBlock() {
     // Add the search block to the default layout.
     $layout = layout_load('default');
     $layout->addBlock('search', 'form', 'content');
@@ -623,14 +623,14 @@ class SearchBlockTestCase extends BackdropWebTestCase {
  * Tests that searching for a phrase gets the correct page count.
  */
 class SearchExactTestCase extends BackdropWebTestCase {
-  function setUp() {
+  public function setUp() {
     parent::setUp('search');
   }
 
   /**
    * Tests that the correct number of pager links are found for both keywords and phrases.
    */
-  function testExactQuery() {
+  public function testExactQuery() {
     // Login with sufficient privileges.
     $this->backdropLogin($this->backdropCreateUser(array('create page content', 'search content')));
 
@@ -694,7 +694,7 @@ class SearchCommentTestCase extends BackdropWebTestCase {
    */
   protected $node;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('comment', 'search');
 
     // Disable cache.
@@ -757,7 +757,7 @@ class SearchCommentTestCase extends BackdropWebTestCase {
   /**
    * Verify that comments are rendered using proper format in search results.
    */
-  function testSearchResultsComment() {
+  public function testSearchResultsComment() {
     $comment_body = 'Test comment body';
 
     // Allow anonymous users to search content.
@@ -819,7 +819,7 @@ class SearchCommentTestCase extends BackdropWebTestCase {
   /**
    * Verify access rules for comment indexing with different permissions.
    */
-  function testSearchResultsCommentAccess() {
+  public function testSearchResultsCommentAccess() {
     $comment_body = 'Test comment body';
     $this->comment_subject = 'Test comment subject';
     $roles = array_diff($this->admin_user->roles, array(BACKDROP_AUTHENTICATED_ROLE));
@@ -876,7 +876,7 @@ class SearchCommentTestCase extends BackdropWebTestCase {
   /**
    * Set permissions for role.
    */
-  function setRolePermissions($role_name, $access_comments = FALSE, $search_content = TRUE) {
+  protected function setRolePermissions($role_name, $access_comments = FALSE, $search_content = TRUE) {
     $permissions = array(
       'access comments' => $access_comments,
       'search content' => $search_content,
@@ -887,7 +887,7 @@ class SearchCommentTestCase extends BackdropWebTestCase {
   /**
    * Update search index and search for comment.
    */
-  function assertCommentAccess($message, $assume_access = FALSE) {
+  protected function assertCommentAccess($message, $assume_access = FALSE) {
     // Invoke search index update.
     search_touch_node($this->node->nid);
     $this->cronRun();
@@ -906,7 +906,7 @@ class SearchCommentTestCase extends BackdropWebTestCase {
   /**
    * Verify that 'Add comment' does not appear in search results or index.
    */
-  function testAddNewComment() {
+  public function testAddNewComment() {
     // Create a node with a short body.
     $settings = array(
       'type' => 'post',
@@ -947,7 +947,7 @@ class SearchCommentTestCase extends BackdropWebTestCase {
  * @see http://drupal.org/node/419388 (issue)
  */
 class SearchExpressionInsertExtractTestCase extends BackdropUnitTestCase {
-  function setUp() {
+  public function setUp() {
     backdrop_load('module', 'search');
     parent::setUp();
   }
@@ -955,7 +955,7 @@ class SearchExpressionInsertExtractTestCase extends BackdropUnitTestCase {
   /**
    * Tests search_expression_insert() and search_expression_extract().
    */
-  function testInsertExtract() {
+  public function testInsertExtract() {
     $base_expression = "mykeyword";
     // Build an array of option, value, what should be in the expression, what
     // should be retrieved from expression.
@@ -1008,7 +1008,7 @@ class SearchCommentCountToggleTestCase extends BackdropWebTestCase {
   protected $searching_user;
   protected $searchable_nodes;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('search');
 
     // Create searching user.
@@ -1050,7 +1050,7 @@ class SearchCommentCountToggleTestCase extends BackdropWebTestCase {
    * Verify that comment count displays correctly based on comment status of
    * node.
    */
-  function testSearchCommentCountToggle() {
+  public function testSearchCommentCountToggle() {
     // Search for the nodes by string in the node body.
     $edit = array(
       'search_block_form' => "'SearchCommentToggleTestCase'",
@@ -1090,7 +1090,7 @@ class SearchSimplifyTestCase extends BackdropWebTestCase {
   /**
    * Tests that all Unicode characters simplify correctly.
    */
-  function testSearchSimplifyUnicode() {
+  public function testSearchSimplifyUnicode() {
     // This test uses a file that was constructed so that the even lines are
     // boundary characters, and the odd lines are valid word characters. (It
     // was generated as a sequence of all the Unicode characters, and then the
@@ -1142,7 +1142,7 @@ class SearchSimplifyTestCase extends BackdropWebTestCase {
   /**
    * Tests that search_simplify() does the right thing with punctuation.
    */
-  function testSearchSimplifyPunctuation() {
+  public function testSearchSimplifyPunctuation() {
     $cases = array(
       array('20.03/94-28,876', '20039428876', 'Punctuation removed from numbers'),
       array('great...backdrop--module', 'great backdrop module', 'Multiple dot and dashes are word boundaries'),
@@ -1168,7 +1168,7 @@ class SearchKeywordsConditions extends BackdropWebTestCase {
    */
   protected $searching_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('search', 'search_extra_type');
     // Create searching user.
     $this->searching_user = $this->backdropCreateUser(array('search content', 'access content', 'access comments', 'skip comment approval'));
@@ -1182,7 +1182,7 @@ class SearchKeywordsConditions extends BackdropWebTestCase {
   /**
    * Verify the keywords are captured and conditions respected.
    */
-  function testSearchKeywordsConditions() {
+  public function testSearchKeywordsConditions() {
     // No keys, not conditions - no results.
     $this->backdropGet('search/dummy_path');
     $this->assertNoText('Dummy search snippet to display');
@@ -1214,7 +1214,7 @@ class SearchNumbersTestCase extends BackdropWebTestCase {
   protected $numbers;
   protected $nodes;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('search');
 
     $this->test_user = $this->backdropCreateUser(array('search content', 'access content', 'administer nodes', 'access site reports'));
@@ -1259,7 +1259,7 @@ class SearchNumbersTestCase extends BackdropWebTestCase {
   /**
    * Tests that all the numbers can be searched.
    */
-  function testNumberSearching() {
+  public function testNumberSearching() {
     $types = array_keys($this->numbers);
 
     foreach ($types as $type) {
@@ -1294,7 +1294,7 @@ class SearchNumberMatchingTestCase extends BackdropWebTestCase {
   protected $numbers;
   protected $nodes;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('search');
 
     $this->test_user = $this->backdropCreateUser(array('search content', 'access content', 'administer nodes', 'access site reports'));
@@ -1332,7 +1332,7 @@ class SearchNumberMatchingTestCase extends BackdropWebTestCase {
   /**
    * Tests that all the numbers can be searched.
    */
-  function testNumberSearching() {
+  public function testNumberSearching() {
     for ($i = 0; $i < count($this->numbers); $i++) {
       $node = $this->nodes[$i];
 
@@ -1368,7 +1368,7 @@ class SearchConfigSettingsForm extends BackdropWebTestCase {
   public $search_user;
   public $search_node;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('search', 'search_extra_type');
 
     // Login as a user that can create and search content.
@@ -1401,7 +1401,7 @@ class SearchConfigSettingsForm extends BackdropWebTestCase {
   /**
    * Verify the search settings form.
    */
-  function testSearchSettingsPage() {
+  public function testSearchSettingsPage() {
 
     // Test that the settings form displays the correct count of items left to index.
     $this->backdropGet('admin/config/search/settings');
@@ -1462,7 +1462,7 @@ class SearchConfigSettingsForm extends BackdropWebTestCase {
   /**
    * Verify that you can disable individual search modules.
    */
-  function testSearchModuleDisabling() {
+  public function testSearchModuleDisabling() {
     // Array of search modules to test: 'path' is the search path, 'title' is
     // the tab title, 'keys' are the keywords to search for, and 'text' is
     // the text to assert is on the results page.
@@ -1551,7 +1551,7 @@ class SearchConfigSettingsForm extends BackdropWebTestCase {
   /**
    * Verify enabling/disabling of certain node types.
    */
-  function testSearchNodeTypes() {
+  public function testSearchNodeTypes() {
     $new_type1 = $this->backdropCreateContentType();
     $new_type2 = $this->backdropCreateContentType();
     $new_type3 = $this->backdropCreateContentType();
@@ -1625,7 +1625,7 @@ class SearchConfigSettingsForm extends BackdropWebTestCase {
  * Tests the search_excerpt() function.
  */
 class SearchExcerptTestCase extends BackdropWebTestCase {
-  function setUp() {
+  public function setUp() {
     parent::setUp('search');
   }
 
@@ -1638,7 +1638,7 @@ class SearchExcerptTestCase extends BackdropWebTestCase {
    * contains either highlighted keywords or the original marked
    * up string if no keywords matched the string.
    */
-  function testSearchExcerpt() {
+  public function testSearchExcerpt() {
     // Make some text with entities and tags.
     $text = 'The <strong>quick</strong> <a href="#">brown</a> fox &amp; jumps <h2>over</h2> the lazy dog';
     // Note: The search_excerpt() function adds some extra spaces -- not
@@ -1673,7 +1673,7 @@ class SearchExcerptTestCase extends BackdropWebTestCase {
    * search_simplify(). This test passes keywords that match simplified words
    * and compares them with strings that contain the original unsimplified word.
    */
-  function testSearchExcerptSimplified() {
+  public function testSearchExcerptSimplified() {
     $lorem1 = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Etiam vitae arcu at leo cursus laoreet. Curabitur dui tortor, adipiscing malesuada tempor in, bibendum ac diam. Cras non tellus a libero pellentesque condimentum. What is a foobar? Suspendisse ac lacus libero. Ut non est vel nisl faucibus interdum nec sed leo. Pellentesque sem risus, vulputate eu semper eget, auctor in libero.';
     $lorem2 = 'Ut fermentum est vitae metus convallis scelerisque. Phasellus pellentesque rhoncus tellus, eu dignissim purus posuere id. Quisque eu fringilla ligula. Morbi ullamcorper, lorem et mattis egestas, tortor neque pretium velit, eget eleifend odio turpis eu purus. Donec vitae metus quis leo pretium tincidunt a pulvinar sem. Morbi adipiscing laoreet mauris vel placerat. Nullam elementum, nisl sit amet scelerisque malesuada, dolor nunc hendrerit quam, eu ultrices erat est in orci.';
 
@@ -1720,7 +1720,7 @@ class SearchExcerptTestCase extends BackdropWebTestCase {
  * Test the CJK tokenizer.
  */
 class SearchTokenizerTestCase extends BackdropWebTestCase {
-  function setUp() {
+  public function setUp() {
     parent::setUp('search');
   }
 
@@ -1732,7 +1732,7 @@ class SearchTokenizerTestCase extends BackdropWebTestCase {
    * character classes are tokenized properly. See PREG_CLASS_CKJ for more
    * information.
    */
-  function testTokenizer() {
+  public function testTokenizer() {
     // Set the minimum word size to 1 (to split all CJK characters) and make
     // sure CJK tokenizing is turned on.
     config('search.settings')
@@ -1820,7 +1820,7 @@ class SearchTokenizerTestCase extends BackdropWebTestCase {
    * This is just a sanity check - it verifies that strings of letters are
    * not tokenized.
    */
-  function testNoTokenizer() {
+  public function testNoTokenizer() {
     // Set the minimum word size to 1 (to split all CJK characters) and make
     // sure CJK tokenizing is turned on.
     config('search.settings')
@@ -1842,7 +1842,7 @@ class SearchTokenizerTestCase extends BackdropWebTestCase {
    * converts a number to the corresponding unicode character. Adapted from
    * functions supplied in comments on several functions on php.net.
    */
-  function code2utf($num) {
+  protected function code2utf($num) {
     if ($num < 128) {
       return chr($num);
     }
@@ -1877,7 +1877,7 @@ class SearchEmbedForm extends BackdropWebTestCase {
    */
   public $submit_count = 0;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('search', 'search_embedded_form');
 
     // Create a user and a node, and update the search index.
@@ -1897,7 +1897,7 @@ class SearchEmbedForm extends BackdropWebTestCase {
   /**
    * Tests that the embedded form appears and can be submitted.
    */
-  function testEmbeddedForm() {
+  public function testEmbeddedForm() {
     // First verify we can submit the form from the module's page.
     $this->backdropPost('search_embedded_form',
       array('name' => 'John'),'Send away');
@@ -1934,7 +1934,7 @@ class SearchEmbedForm extends BackdropWebTestCase {
 class SearchPageOverride extends BackdropWebTestCase {
   public $search_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('search', 'search_extra_type');
 
     // Login as a user that can create and search content.
@@ -1946,7 +1946,7 @@ class SearchPageOverride extends BackdropWebTestCase {
     menu_rebuild();
   }
 
-  function testSearchPageHook() {
+  public function testSearchPageHook() {
     $keys = 'bike shed ' . $this->randomName();
     $this->backdropGet("search/dummy_path/{$keys}");
     $this->assertText('Dummy search snippet', 'Dummy search snippet is shown');
@@ -1961,7 +1961,7 @@ class SearchLanguageTestCase extends BackdropWebTestCase {
   /**
    * Implementation setUp().
    */
-  function setUp() {
+  public function setUp() {
     parent::setUp('search', 'locale');
 
     // Create and login user.
@@ -1969,7 +1969,7 @@ class SearchLanguageTestCase extends BackdropWebTestCase {
     $this->backdropLogin($test_user);
   }
 
-  function testLanguages() {
+  public function testLanguages() {
     // Check that there are initially no languages displayed.
     $this->backdropGet('search/node');
     $this->assertNoText(t('Languages'), 'No languages to choose from.');
@@ -2017,7 +2017,7 @@ class SearchLanguageTestCase extends BackdropWebTestCase {
 class SearchNodeAccessTest extends BackdropWebTestCase {
   public $test_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('search', 'node_access_test');
     node_access_rebuild();
 
@@ -2029,7 +2029,7 @@ class SearchNodeAccessTest extends BackdropWebTestCase {
   /**
    * Tests that search works with punctuation and HTML entities.
    */
-  function testPhraseSearchPunctuation() {
+  public function testPhraseSearchPunctuation() {
     $node = $this->backdropCreateNode(array('body' => array(LANGUAGE_NONE => array(array('value' => "The bunny's ears were fuzzy.")))));
     $node2 = $this->backdropCreateNode(array('body' => array(LANGUAGE_NONE => array(array('value' => 'Dignissim Aliquam &amp; Quieligo meus natu quae quia te. Damnum&copy; erat&mdash; neo pneum. Facilisi feugiat ibidem ratis.')))));
 
@@ -2062,7 +2062,7 @@ class SearchNodeAccessTest extends BackdropWebTestCase {
  * Tests searching with locale values set.
  */
 class SearchSetLocaleTest extends BackdropWebTestCase {
-  function setUp() {
+  public function setUp() {
     parent::setUp('search');
 
     // Create a simple node so something will be put in the index.

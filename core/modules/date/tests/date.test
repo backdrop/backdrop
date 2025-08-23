@@ -47,7 +47,7 @@ class DateUITestCase extends DateFieldBasic {
     $this->deleteDateField($label);
   }
 
-  function dateForm($options) {
+  protected function dateForm($options) {
     // Tests that date field functions properly.
     $edit = array();
     $edit['title'] = $this->randomName(8);

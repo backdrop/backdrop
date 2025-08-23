@@ -132,7 +132,7 @@ class DateViewsTestCase extends DateFieldBasic {
   /**
    * Clear all views caches and static caches which are required for the patch.
    */
-  function clearViewsCaches() {
+  protected function clearViewsCaches() {
     // Reset views data cache.
     backdrop_static_reset('_views_fetch_data_cache');
     backdrop_static_reset('_views_fetch_data_recursion_protected');

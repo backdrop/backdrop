@@ -15,7 +15,7 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
    */
   protected $admin_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('contact');
 
     // Create and login administrative user.
@@ -26,7 +26,7 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
   /**
    * Tests configuration options and the site-wide contact form.
    */
-  function testSiteWideContact() {
+  public function testSiteWideContact() {
     $flood_limit = 3;
     $edit = array(
       'contact_threshold_limit' => $flood_limit,
@@ -186,7 +186,7 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
   /**
   * Tests auto-reply on the site-wide contact form.
   */
-  function testAutoReply() {
+  public function testAutoReply() {
     // Set up three categories, 2 with an auto-reply and one without.
     $foo_autoreply = $this->randomName(40);
     $bar_autoreply = $this->randomName(40);
@@ -233,7 +233,7 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
    * @param boolean $selected
    *   Boolean indicating whether the category should be selected by default.
    */
-  function addCategory($category, $recipients, $reply, $selected) {
+  protected function addCategory($category, $recipients, $reply, $selected) {
     $edit = array();
     $edit['category'] = $category;
     $edit['recipients'] = $recipients;
@@ -255,7 +255,7 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
    * @param boolean $selected
    *   Boolean indicating whether the category should be selected by default.
    */
-  function updateCategory($categories, $category, $recipients, $reply, $selected) {
+  protected function updateCategory($categories, $category, $recipients, $reply, $selected) {
     $category_id = $categories[array_rand($categories)];
     $edit = array();
     $edit['category'] = $category;
@@ -280,7 +280,7 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
    * @param string $message
    *   The message body.
    */
-  function submitContact($name, $mail, $subject, $cid, $message) {
+  protected function submitContact($name, $mail, $subject, $cid, $message) {
     $edit = array();
     $edit['name'] = $name;
     $edit['mail'] = $mail;
@@ -293,7 +293,7 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
   /**
    * Deletes all categories.
    */
-  function deleteCategories() {
+  protected function deleteCategories() {
     $category_ids = $this->getCategories();
     foreach ($category_ids as $cid) {
       $category = contact_load($cid);
@@ -309,7 +309,7 @@ class ContactSitewideTestCase extends BackdropWebTestCase {
    * @return array
    *   A list of the category IDs.
    */
-  function getCategories() {
+  protected function getCategories() {
     $config_data = contact_config_data();
     $categories = $config_data['categories'];
     foreach ($categories as $cat) {
@@ -329,7 +329,7 @@ class ContactPersonalTestCase extends BackdropWebTestCase {
   private $web_user;
   private $contact_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp('contact');
 
     // Create an admin user.
@@ -345,7 +345,7 @@ class ContactPersonalTestCase extends BackdropWebTestCase {
   /**
    * Tests access to the personal contact form.
    */
-  function testPersonalContactAccess() {
+  public function testPersonalContactAccess() {
     // Test allowed access to user with contact form enabled.
     $this->backdropLogin($this->web_user);
     $this->backdropGet('user/' . $this->contact_user->uid . '/contact');
@@ -431,7 +431,7 @@ class ContactPersonalTestCase extends BackdropWebTestCase {
   /**
    * Tests the personal contact form flood protection.
    */
-  function testPersonalContactFlood() {
+  public function testPersonalContactFlood() {
     $flood_limit = 3;
     $config = config('contact.settings');
     $config->set('contact_threshold_limit', $flood_limit);

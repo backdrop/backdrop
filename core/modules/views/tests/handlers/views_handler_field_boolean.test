@@ -10,7 +10,7 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * Tests the core views_handler_field_boolean handler.
  */
 class ViewsHandlerFieldBooleanTest extends ViewsSqlTest {
-  function dataSet() {
+  protected function dataSet() {
     // Use default dataset but remove the age from john and paul
     $data = parent::dataSet();
     $data[0]['age'] = 0;
@@ -18,7 +18,7 @@ class ViewsHandlerFieldBooleanTest extends ViewsSqlTest {
     return $data;
   }
 
-  function viewsData() {
+  protected function viewsData() {
     $data = parent::viewsData();
     $data['views_test']['age']['field']['handler'] = 'views_handler_field_boolean';
     return $data;

@@ -3,7 +3,7 @@
  * Perform early bootstrap tests.
  */
 class EarlyBootstrapTestCase extends BackdropWebTestCase {
-  function setUp() {
+  public function setUp() {
     parent::setUp('boot_test_1', 'boot_test_2');
   }
 

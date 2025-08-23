@@ -8,7 +8,7 @@
  * Ajax Test.
  */
 class AJAXTestCase extends BackdropWebTestCase {
-  function setUp() {
+  public function setUp() {
     $modules = func_get_args();
     if (isset($modules[0]) && is_array($modules[0])) {
       $modules = $modules[0];
@@ -75,7 +75,7 @@ class AJAXFrameworkTestCase extends AJAXTestCase {
    *   and JavaScript files to be loaded by the page. See
    *   http://drupal.org/node/561858.
    */
-  function testAJAXRender() {
+  public function testAJAXRender() {
     $commands = $this->backdropGetAJAX('ajax-test/render');
 
     // Verify that there is a command to load settings added with
@@ -90,7 +90,7 @@ class AJAXFrameworkTestCase extends AJAXTestCase {
   /**
    * Test behavior of ajax_render_error().
    */
-  function testAJAXRenderError() {
+  public function testAJAXRenderError() {
     // Verify default error message.
     $commands = $this->backdropGetAJAX('ajax-test/render-error');
     $expected = array(
@@ -114,7 +114,7 @@ class AJAXFrameworkTestCase extends AJAXTestCase {
   /**
    * Test that new JavaScript and CSS files added during an AJAX request are returned.
    */
-  function testLazyLoad() {
+  public function testLazyLoad() {
     $expected = array(
       'setting_name' => 'ajax_forms_test_lazy_load_form_submit',
       'setting_value' => 'executed',
@@ -183,7 +183,7 @@ class AJAXFrameworkTestCase extends AJAXTestCase {
   /**
    * Tests that overridden CSS files are not added during lazy load.
    */
-  function testLazyLoadOverriddenCSS() {
+  public function testLazyLoadOverriddenCSS() {
     // The test theme overrides system.css without an implementation,
     // thereby removing it.
     theme_enable(array('test_theme'));
@@ -209,7 +209,7 @@ class AJAXCommandsTestCase extends AJAXTestCase {
   /**
    * Test the various Ajax Commands.
    */
-  function testAJAXCommands() {
+  public function testAJAXCommands() {
     $form_path = 'ajax_forms_test_ajax_commands_form';
     $web_user = $this->backdropCreateUser(array('access content'));
     $this->backdropLogin($web_user);
@@ -365,7 +365,7 @@ class AJAXFormValuesTestCase extends AJAXTestCase {
    */
   protected $web_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     $this->web_user = $this->backdropCreateUser(array('access content'));
@@ -375,7 +375,7 @@ class AJAXFormValuesTestCase extends AJAXTestCase {
   /**
    * Create a simple form, then POST to system/ajax to change to it.
    */
-  function testSimpleAJAXFormValue() {
+  public function testSimpleAJAXFormValue() {
     // Verify form values of a select element.
     foreach (array('red', 'green', 'blue') as $item) {
       $edit = array(
@@ -414,7 +414,7 @@ class AJAXMultiFormTestCase extends AJAXTestCase {
    */
   protected $web_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('form_test'));
 
     // Create a multi-valued field for 'page' nodes to use for Ajax testing.
@@ -440,7 +440,7 @@ class AJAXMultiFormTestCase extends AJAXTestCase {
   /**
    * Test that a page with the 'page_node_form' included twice works correctly.
    */
-  function testMultiForm() {
+  public function testMultiForm() {
     // HTML IDs for elements within the field are potentially modified with
     // each Ajax submission, but these variables are stable and help target the
     // desired elements.
@@ -561,7 +561,7 @@ class AJAXElementValidation extends AJAXTestCase {
    * filled in, and we want to see if the activation of the "driver_text"
    * Ajax-enabled field fails due to the required field being empty.
    */
-  function testAJAXElementValidation() {
+  public function testAJAXElementValidation() {
     $web_user = $this->backdropCreateUser();
     $edit = array('driver_text' => t('some dumb text'));
 
@@ -584,7 +584,7 @@ class AJAXDialogTest extends AJAXTestCase {
    */
   protected $web_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp();
 
     $this->web_user = $this->backdropCreateUser(array('access content'));
@@ -594,7 +594,7 @@ class AJAXDialogTest extends AJAXTestCase {
   /**
    * Test sending non-JS and AJAX requests to open and manipulate modals.
    */
-  function testDialog() {
+  public function testDialog() {
     // Ensure the elements render without notices or exceptions.
     $this->backdropGet('ajax-test/dialog');
 

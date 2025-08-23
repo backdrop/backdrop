@@ -86,7 +86,7 @@ class CommentViewsHandlerArgumentUserUidTest extends ViewsSqlTest {
     $this->postComment($this->node_user_commented);
   }
 
-  function testCommentUserUidTest() {
+  public function testCommentUserUidTest() {
     $view = $this->view_comment_user_uid();
 
 
@@ -104,7 +104,7 @@ class CommentViewsHandlerArgumentUserUidTest extends ViewsSqlTest {
     $this->assertIdenticalResultset($view, $resultset, $this->column_map);
   }
 
-  function view_comment_user_uid() {
+  private function view_comment_user_uid() {
     $view = new view;
     $view->name = 'test_comment_user_uid';
     $view->description = '';

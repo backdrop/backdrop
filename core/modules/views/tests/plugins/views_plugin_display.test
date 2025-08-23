@@ -13,7 +13,7 @@ class ViewsPluginDisplayTestCase extends ViewsSqlTest {
   /**
    * Tests the overriding of filter_groups.
    */
-  function testFilterGroupsOverriding() {
+  public function testFilterGroupsOverriding() {
     $view = $this->viewFilterGroupsUpdating();
     $view->init_display();
 
@@ -29,7 +29,7 @@ class ViewsPluginDisplayTestCase extends ViewsSqlTest {
    * @see testFilterGroupsOverriding
    * @return view
    */
-  function viewFilterGroupsOverriding() {
+  protected function viewFilterGroupsOverriding() {
     $view = new view();
     $view->name = 'test_filter_group_override';
     $view->description = '';
@@ -79,7 +79,7 @@ class ViewsPluginDisplayTestCase extends ViewsSqlTest {
    * @see http://drupal.org/node/1259608
    * @see views_plugin_display::init()
    */
-  function testFilterGroupsUpdating() {
+  public function testFilterGroupsUpdating() {
     $view = $this->viewFilterGroupsUpdating();
     $view->init_display();
 
@@ -94,7 +94,7 @@ class ViewsPluginDisplayTestCase extends ViewsSqlTest {
    *
    * @return view
    */
-  function viewFilterGroupsUpdating() {
+  protected function viewFilterGroupsUpdating() {
     $view = new view();
     $view->name = 'test_filter_groups';
     $view->description = '';

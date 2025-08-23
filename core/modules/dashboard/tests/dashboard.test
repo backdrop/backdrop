@@ -11,7 +11,7 @@ class DashboardTest extends BackdropWebTestCase {
   protected $profile = 'testing';
   protected $admin_user;
 
-  function setUp() {
+  public function setUp() {
     parent::setUp(array('layout', 'layout_test', 'taxonomy', 'comment', 'node', 'dashboard', 'menu'));
 
     $this->backdropCreateContentType(array(
@@ -76,7 +76,7 @@ class DashboardTest extends BackdropWebTestCase {
   /**
    * Test the dashboard layout.
    */
-  function testDashboardLayout() {
+  public function testDashboardLayout() {
     $this->backdropGet('admin/dashboard');
 
     // The welcome to Backdrop block was found.

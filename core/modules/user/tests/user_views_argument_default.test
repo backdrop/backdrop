@@ -33,7 +33,7 @@ class UserViewsArgumentDefault extends ViewsSqlTest {
     backdrop_save_session(TRUE);
   }
 
-  function view_plugin_argument_default_current_user() {
+  private function view_plugin_argument_default_current_user() {
     $view = new view;
     $view->name = 'test_plugin_argument_default_current_user';
     $view->description = '';

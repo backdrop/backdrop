@@ -239,7 +239,7 @@ class InstallerTestUploadCase extends BackdropWebTestCase {
   /**
    * Ensures that archiver extensions are properly merged in the UI.
    */
-  function testFileNameExtensionMerging() {
+  public function testFileNameExtensionMerging() {
     $this->backdropGet('admin/installer/manual');
     // Make sure the bogus extension supported by installer_test.module is there.
     $this->assertPattern('/file extensions are supported:.*installer-test-extension/', "Found 'installer-test-extension' extension");
@@ -250,7 +250,7 @@ class InstallerTestUploadCase extends BackdropWebTestCase {
   /**
    * Checks the messages on Update Manager pages when missing a security update.
    */
-  function testUpdateManagerCoreSecurityUpdateMessages() {
+  public function testUpdateManagerCoreSecurityUpdateMessages() {
     $config = config('update.settings');
     $setting = array(
       '#all' => array(

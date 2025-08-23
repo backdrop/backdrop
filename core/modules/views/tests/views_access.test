@@ -50,7 +50,7 @@ class ViewsAccessTest extends ViewsSqlTest {
     views_fetch_plugin_data(NULL, NULL, TRUE);
   }
 
-  function viewsPlugins() {
+  protected function viewsPlugins() {
     $plugins = array(
       'access' =>  array(
         'test_static' => array(
@@ -74,7 +74,7 @@ class ViewsAccessTest extends ViewsSqlTest {
   /**
    * Tests none access plugin.
    */
-  function testAccessNone() {
+  public function testAccessNone() {
     $view = $this->view_access_none();
 
     $view->set_display('default');
@@ -87,7 +87,7 @@ class ViewsAccessTest extends ViewsSqlTest {
   /**
    * Tests perm access plugin.
    */
-  function testAccessPerm() {
+  public function testAccessPerm() {
     $view = $this->view_access_perm();
 
     $view->set_display('default');
@@ -101,7 +101,7 @@ class ViewsAccessTest extends ViewsSqlTest {
   /**
    * Tests role access plugin.
    */
-  function testAccessRole() {
+  public function testAccessRole() {
     $view = $this->view_access_role();
 
     $view->set_display('default');
@@ -119,7 +119,7 @@ class ViewsAccessTest extends ViewsSqlTest {
   /**
    * Tests static access check.
    */
-  function testStaticAccessPlugin() {
+  public function testStaticAccessPlugin() {
     $view = $this->view_access_static();
 
     $view->set_display('default');
@@ -146,7 +146,7 @@ class ViewsAccessTest extends ViewsSqlTest {
   /**
    * Tests dynamic access plugin.
    */
-  function testDynamicAccessPlugin() {
+  public function testDynamicAccessPlugin() {
     $view = $this->view_access_dynamic();
     $argument1 = $this->randomName();
     $argument2 = $this->randomName();
@@ -177,7 +177,7 @@ class ViewsAccessTest extends ViewsSqlTest {
     $this->assertTrue(views_access($expected_hook_menu, $argument1, $argument2));
   }
 
-  function view_access_none() {
+  private function view_access_none() {
     $view = new view;
     $view->name = 'test_access_none';
     $view->description = '';
@@ -200,7 +200,7 @@ class ViewsAccessTest extends ViewsSqlTest {
     return $view;
   }
 
-  function view_access_perm() {
+  private function view_access_perm() {
     $view = new view;
     $view->name = 'test_access_perm';
     $view->description = '';
@@ -224,7 +224,7 @@ class ViewsAccessTest extends ViewsSqlTest {
     return $view;
   }
 
-  function view_access_role() {
+  private function view_access_role() {
     $view = new view;
     $view->name = 'test_access_role';
     $view->description = '';
@@ -250,7 +250,7 @@ class ViewsAccessTest extends ViewsSqlTest {
     return $view;
   }
 
-  function view_access_dynamic() {
+  private function view_access_dynamic() {
     $view = new view;
     $view->name = 'test_access_dynamic';
     $view->description = '';
@@ -276,7 +276,7 @@ class ViewsAccessTest extends ViewsSqlTest {
     return $view;
   }
 
-  function view_access_static() {
+  private function view_access_static() {
     $view = new view;
     $view->name = 'test_access_static';
     $view->description = '';

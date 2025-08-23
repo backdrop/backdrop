@@ -12,7 +12,7 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * @see views_handler_field_user_name
  */
 class UserViewsHandlerFieldNameTest extends ViewsSqlTest {
-  function testUserName() {
+  public function testUserName() {
     $view = $this->view_user_name();
     $view->init_display();
     $this->executeView($view);
@@ -47,7 +47,7 @@ class UserViewsHandlerFieldNameTest extends ViewsSqlTest {
     $this->assertIdentical($render, $anon_name , 'For user0 it should use the configured anonymous text, if overwrite_anonymous is checked.');
   }
 
-  function view_user_name() {
+  private function view_user_name() {
     $view = new view;
     $view->name = 'test_views_handler_field_user_name';
     $view->description = '';

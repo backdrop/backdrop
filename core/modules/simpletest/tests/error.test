@@ -4,14 +4,14 @@
  * Tests Backdrop error and exception handlers.
  */
 class BackdropErrorHandlerUnitTest extends BackdropWebTestCase {
-  function setUp() {
+  public function setUp() {
     parent::setUp('error_test');
   }
 
   /**
    * Test the error handler.
    */
-  function testErrorHandler() {
+  public function testErrorHandler() {
     $config = config('system.core');
     $error_notice = array(
       '%type' => 'Notice',
@@ -60,7 +60,7 @@ class BackdropErrorHandlerUnitTest extends BackdropWebTestCase {
   /**
    * Test the exception handler.
    */
-  function testExceptionHandler() {
+  public function testExceptionHandler() {
     $config = config('system.core');
     $error_exception = array(
       '%type' => 'Exception',
@@ -97,7 +97,7 @@ class BackdropErrorHandlerUnitTest extends BackdropWebTestCase {
   /**
    * Helper function: assert that the error message is found.
    */
-  function assertErrorMessage(array $error) {
+  protected function assertErrorMessage(array $error) {
     $message = t('%type: !message in %function (line ', $error);
     $this->assertRaw($message, format_string('Found error message: !message.', array('!message' => $message)));
   }
@@ -105,7 +105,7 @@ class BackdropErrorHandlerUnitTest extends BackdropWebTestCase {
   /**
    * Helper function: assert that the error message is not found.
    */
-  function assertNoErrorMessage(array $error) {
+  protected function assertNoErrorMessage(array $error) {
     $message = t('%type: !message in %function (line ', $error);
     $this->assertNoRaw($message, format_string('Did not find error message: !message.', array('!message' => $message)));
   }

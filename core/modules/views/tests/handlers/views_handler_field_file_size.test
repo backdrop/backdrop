@@ -12,7 +12,7 @@ require_once BACKDROP_ROOT . '/core/modules/views/tests/views_query.test';
  * @see CommonXssUnitTest
  */
 class ViewsHandlerTestFileSize extends ViewsSqlTest {
-  function dataSet() {
+  protected function dataSet() {
     $data = parent::dataSet();
     $data[0]['age'] = 0;
     $data[1]['age'] = 10;
@@ -22,7 +22,7 @@ class ViewsHandlerTestFileSize extends ViewsSqlTest {
     return $data;
   }
 
-  function viewsData() {
+  protected function viewsData() {
     $data = parent::viewsData();
     $data['views_test']['age']['field']['handler'] = 'views_handler_field_file_size';
 

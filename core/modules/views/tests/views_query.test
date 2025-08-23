@@ -173,7 +173,7 @@ abstract class ViewsSqlTest extends ViewsTestCase {
    * @TODO
    *   Convert existing setUp functions.
    */
-  function enableViewsUi() {
+  protected function enableViewsUi() {
     module_enable(array('views_ui'));
     // @TODO Figure out why it's required to clear the cache here.
     views_get_all_views(TRUE);
