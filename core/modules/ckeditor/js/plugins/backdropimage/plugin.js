@@ -1,6 +1,6 @@
 /**
  * @file
- * Backdrop Image plugin.
+ * Backdrop CKEditor 4 Image plugin.
  *
  * This alters the existing CKEditor image2 widget plugin to:
  * - require a data-file-id attribute (which Backdrop uses to track where images
@@ -70,7 +70,7 @@ CKEDITOR.plugins.add('backdropimage', {
       // (http://docs.ckeditor.com/#!/guide/dev_styles-section-widget-styles).
       // Is applied to whatever the main element of the widget is (<figure> or
       // <img>). The classes in image2_captionedClass are always added due to
-      // a bug in CKEditor. In the case of drupalimage, we don't ever want to
+      // a bug in CKEditor. In the case of backdropimage, we don't ever want to
       // add that class, because the widget template already contains it.
       // @see http://dev.ckeditor.com/ticket/13888
       // @see https://www.drupal.org/node/2268941
@@ -393,7 +393,7 @@ function clipboardIntegration(editor) {
 
     // Handle images which are available in the dataTransfer.
     fileTools.addUploadWidget(editor, 'backdropimage', {
-      supportedTypes: /image\/(jpeg|png|gif)/,
+      supportedTypes: new RegExp(editor.config.backdrop.supportedTypesRegexp, 'i'),
       uploadUrl: uploadUrl,
       fileToElement: function() {
         var img = new CKEDITOR.dom.element('img');

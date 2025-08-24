@@ -59,6 +59,15 @@ class User extends Entity implements UserInterface {
   public $created;
 
   /**
+   * The timestamp when the user was changed.
+   *
+   * @var integer
+   *
+   * @since 1.25.0 Property added.
+   */
+  public $changed;
+
+  /**
    * The timestamp when the user last accessed the site. A value of 0 means the
    * user has never accessed the site.
    *
@@ -138,13 +147,6 @@ class User extends Entity implements UserInterface {
    */
   public function entityType() {
     return 'user';
-  }
-
-  /**
-   * Implements EntityInterface::label().
-   */
-  public function label() {
-    return user_format_name($this);
   }
 
   /**
@@ -322,6 +324,8 @@ class UserStorageController extends EntityDatabaseStorageController {
     if (!isset($values['created'])) {
       $values['created'] = REQUEST_TIME;
     }
+    $values['changed'] = REQUEST_TIME;
+
     // Users always have the authenticated user role.
     $values['roles'][] = BACKDROP_AUTHENTICATED_ROLE;
 
@@ -349,6 +353,9 @@ class UserStorageController extends EntityDatabaseStorageController {
    *   The user entity about to be saved.
    */
   protected function preSave(EntityInterface $entity) {
+    // Save current time as last changed time.
+    $entity->changed = REQUEST_TIME;
+
     // Update the user password if it has changed.
     $new_pass = isset($entity->pass) && strlen(trim($entity->pass)) > 0 ? trim($entity->pass) : NULL;
     if ($entity->isNew() || !is_null($new_pass) && $new_pass !== $entity->original->pass) {
@@ -438,7 +445,6 @@ class UserStorageController extends EntityDatabaseStorageController {
    *   The user entity that has just been saved.
    */
   protected function postSave(EntityInterface $entity, $update) {
-
     if ($update) {
       // If the password has been changed, delete all open sessions for the
       // user and recreate the current one.
@@ -535,7 +541,7 @@ class UserStorageController extends EntityDatabaseStorageController {
 
     $view = array();
     foreach ($accounts as $account) {
-      /* @var User $account */
+      /** @var User $account */
       // Retrieve all profile fields and attach to $account->content.
       $this->buildContent($account, $view_mode, $langcode);
 
@@ -544,7 +550,7 @@ class UserStorageController extends EntityDatabaseStorageController {
       unset($account->content);
 
       $build += array(
-        '#theme' => 'user_profile__' . $view_mode,
+        '#theme' => 'user_profile',
         '#account' => $account,
         '#view_mode' => $view_mode,
         '#language' => $langcode,

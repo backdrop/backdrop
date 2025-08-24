@@ -27,6 +27,28 @@ function image_gd_settings() {
 }
 
 /**
+ * Retrieve supported extensions for the GD2 toolkit.
+ *
+ * @since 1.25.0 Function added.
+ */
+function image_gd_supported_extensions() {
+  $supported_extensions = array('png', 'gif', 'jpg', 'jpeg');
+  if (defined('IMAGETYPE_WEBP')) {
+    $gd_info = gd_info();
+    if (isset($gd_info['WebP Support']) && $gd_info['WebP Support'] == TRUE) {
+      // Extend supported extensions, as the PHP and GD versions support WebP.
+      // IMAGETYPE_WEBP and getimagesize() WebP support were both added in
+      // PHP 7.1.0.
+      // @see https://www.php.net/manual/en/image.constants.php
+      // @see https://www.php.net/manual/en/function.getimagesize.php
+      $supported_extensions[] = 'webp';
+    }
+  }
+
+  return $supported_extensions;
+}
+
+/**
  * Verify GD2 settings (that the right version is actually installed).
  *
  * @return
@@ -339,17 +361,13 @@ function image_gd_get_info(stdClass $image) {
   $data = @getimagesize($image->source);
 
   if (isset($data) && is_array($data)) {
-    $extensions = array('1' => 'gif', '2' => 'jpg', '3' => 'png');
-    if (defined('IMAGETYPE_WEBP')) {
-      $gd_info = gd_info();
-      if (isset($gd_info['WebP Support']) && $gd_info['WebP Support'] == TRUE) {
-        // Extend mapping of constants to extensions, as the PHP and GD
-        // versions support WebP.
-        // @see https://www.php.net/manual/en/image.constants.php
-        $extensions['18'] = 'webp';
-      }
-    }
-    $extension = isset($extensions[$data[2]]) ?  $extensions[$data[2]] : '';
+    $supported_extensions = image_get_supported_extensions();
+    // Only extensions that exist in GD.
+    $extension = image_type_to_extension($data[2], FALSE) ?: '';
+    // Only extensions supported by Backdrop at this time.
+    $extension = in_array($extension, $supported_extensions) ? $extension : '';
+    // Treat jpeg as jpg.
+    $extension = $extension == 'jpeg' ? 'jpg' : $extension;
     $details = array(
       'width'     => $data[0],
       'height'    => $data[1],

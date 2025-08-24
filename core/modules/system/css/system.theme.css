@@ -92,7 +92,6 @@ tr.odd .form-item,
 tr.even .form-item {
   margin-top: 0;
   margin-bottom: 0;
-  white-space: nowrap;
 }
 .form-item .description {
   font-size: 0.85em;
@@ -104,6 +103,9 @@ label {
 label.option {
   display: inline;
   font-weight: normal;
+}
+.form-item-description-enable label.option {
+  font-weight: bold;
 }
 .form-checkboxes .form-item,
 .form-radios .form-item {
@@ -126,7 +128,6 @@ input.form-radio {
   color: #234600;
   background-color: #e6f2ba;
   padding: 0 0.4em;
-  -moz-border-radius: 3px;
   border-radius: 3px;
 }
 abbr.form-required,
@@ -289,7 +290,6 @@ th.checkbox {
  * @see progress.js
  */
 .progress .filled {
-  -webkit-transition: width .4s;
   transition: width .4s;
   will-change: width;
 }

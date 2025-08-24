@@ -52,7 +52,7 @@ class views_plugin_display extends views_plugin {
           $this->extender[$extender] = $plugin;
         }
         else {
-          watchdog('views', 'Invalid display extender @extender', array('@handler' => $extender));
+          watchdog('views', 'Invalid display extender @extender', array('@extender' => $extender));
         }
       }
     }
@@ -145,9 +145,9 @@ class views_plugin_display extends views_plugin {
     }
 
 
-    // Plugable headers, footer and empty texts are
-    // not compatible with previous version of views
-    // This code converts old values into a configured handler for each area
+    // Pluggable headers, footer and empty texts are not compatible with
+    // previous version of views. This code converts old values into a
+    // configured handler for each area.
     foreach (array('header', 'footer', 'empty') as $area) {
       $converted = FALSE;
       if (isset($this->options[$area]) && !is_array($this->options[$area])) {
@@ -467,6 +467,7 @@ class views_plugin_display extends views_plugin {
       'defaults' => array(
         'default' => array(
           'access' => TRUE,
+          'access_options' => TRUE,
           'cache' => TRUE,
           'query' => TRUE,
           'title' => TRUE,
@@ -2557,7 +2558,7 @@ class views_plugin_display extends views_plugin {
   function render_filters() { }
 
   /**
-   * Not all display plugins will suppert pager rendering.
+   * Not all display plugins will support pager rendering.
    */
   function render_pager() {
     return TRUE;
@@ -2926,7 +2927,7 @@ class views_plugin_display extends views_plugin {
    * The result should contain of an array with
    *   - filter value present: The title of the fieldset in the argument
    *     where you can configure what should be done with a given argument.
-   *   - filter value not present: The tiel of the fieldset in the argument
+   *   - filter value not present: The title of the fieldset in the argument
    *     where you can configure what should be done if the argument does not
    *     exist.
    *   - description: A description about how arguments comes to the display.

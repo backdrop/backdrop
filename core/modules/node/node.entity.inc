@@ -200,13 +200,6 @@ class Node extends Entity {
   }
 
   /**
-   * Implements EntityInterface::label().
-   */
-  public function label() {
-    return $this->title;
-  }
-
-  /**
    * Implements EntityInterface::uri().
    */
   public function uri() {
@@ -352,18 +345,12 @@ class Node extends Entity {
         $query->condition($nids);
         $query->range(0, 1);
 
-        $grants = db_or();
-        foreach (node_access_grants($op, $account) as $realm => $gids) {
-          foreach ($gids as $gid) {
-            $grants->condition(db_and()
-              ->condition('gid', $gid)
-              ->condition('realm', $realm)
-            );
-          }
-        }
+        $grants = node_add_node_grants_to_query(node_access_grants($op, $account));
+
         if (count($grants) > 0) {
           $query->condition($grants);
         }
+
         $result = (bool) $query
           ->execute()
           ->fetchField();
@@ -444,8 +431,8 @@ class NodeStorageController extends EntityDatabaseStorageController {
       foreach ($entities as $id => $entity) {
         $this->invokeHook('delete', $entity);
       }
-      // Ignore slave server temporarily.
-      db_ignore_slave();
+      // Ignore replica server temporarily.
+      db_ignore_replica();
     }
     catch (Exception $e) {
       $transaction->rollback();
@@ -492,14 +479,16 @@ class NodeStorageController extends EntityDatabaseStorageController {
         $this->saveRevision($entity);
       }
 
-      // Reset general caches, but keep caches specific to certain entities.
-      $this->resetCache($op == 'update' ? array($entity->{$this->idKey}): array());
+      // Reset the persistent and static cache for this node.
+      if ($op == 'update') {
+        $this->resetCache(array($entity->{$this->idKey}));
+      }
 
       $this->postSave($entity, $op == 'update');
       $this->invokeHook($op, $entity);
 
-      // Ignore slave server temporarily.
-      db_ignore_slave();
+      // Ignore replica server temporarily.
+      db_ignore_replica();
       unset($entity->original);
 
       return $return;
@@ -739,13 +728,17 @@ class NodeStorageController extends EntityDatabaseStorageController {
       '#attributes' => array('class' => array('links', 'inline')),
     );
     if ($view_mode == 'teaser') {
-      $node_title_stripped = strip_tags($node->title);
-      $links['node-readmore'] = array(
-        'title' => t('Read more<span class="element-invisible"> about @title</span>', array('@title' => $node_title_stripped)),
-        'href' => 'node/' . $node->nid,
-        'html' => TRUE,
-        'attributes' => array('rel' => 'tag', 'title' => $node_title_stripped),
-      );
+      $type = node_type_get_type($node);
+      // Don't add the "read more" link to the node if the type has a hidden path.
+      if (!($type->settings['hidden_path'] && !user_access('view hidden paths'))) {
+        $node_title_stripped = strip_tags($node->title);
+        $links['node-readmore'] = array(
+          'title' => t('Read more<span class="element-invisible"> about @title</span>', array('@title' => $node_title_stripped)),
+          'href' => 'node/' . $node->nid,
+          'html' => TRUE,
+          'attributes' => array('rel' => 'tag', 'title' => $node_title_stripped),
+        );
+      }
     }
     $node->content['links']['node'] = array(
       '#theme' => 'links__node__node',
@@ -771,7 +764,7 @@ class NodeStorageController extends EntityDatabaseStorageController {
 
     $view = array();
     foreach ($nodes as $node) {
-      /* @var Node $node */
+      /** @var Node $node */
       if (isset($node->preview) && ($node->preview == 'Preview')) {
         backdrop_set_message(t('This is a preview. Links within the page are disabled.'), 'warning', FALSE);
         backdrop_set_message(t('<strong>Changes are stored temporarily</strong>. Click <em>Save</em> to make your changes permanent, or click <em>Back to content editing</em> to make additional changes.'), 'warning', FALSE);
@@ -785,7 +778,7 @@ class NodeStorageController extends EntityDatabaseStorageController {
       unset($node->content);
 
       $build += array(
-        '#theme' => 'node__' . $node->type . '__' . $view_mode,
+        '#theme' => 'node',
         '#node' => $node,
         '#view_mode' => $view_mode,
         '#langcode' => $langcode,

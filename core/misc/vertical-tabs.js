@@ -75,19 +75,19 @@ Backdrop.verticalTab = function (settings) {
   var self = this;
   $.extend(this, settings, Backdrop.theme('verticalTab', settings));
 
-  this.link.click(function () {
+  this.link.on('click', function () {
     self.focus();
     return false;
   });
 
-  this.fieldset.children('legend').click(function () {
+  this.fieldset.children('legend').on('click', function () {
     self.focus();
     return false;
   });
 
   // Keyboard events added:
   // Pressing the Enter key will open the tab pane.
-  this.link.keydown(function(event) {
+  this.link.on('keydown', function(event) {
     if (event.keyCode == 13) {
       self.focus();
       // Set focus on the first input field of the visible fieldset/tab pane.
@@ -102,7 +102,7 @@ Backdrop.verticalTab = function (settings) {
   $legend.addClass('vertical-tab-link');
 
   this.fieldset
-    .bind('summaryUpdated', function () {
+    .on('summaryUpdated', function () {
       self.updateSummary();
     })
     .trigger('summaryUpdated');

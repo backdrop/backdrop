@@ -10,6 +10,11 @@
 function block_admin_list() {
   $custom_blocks_info = block_block_info();
 
+  $help_text = array(
+    '#theme' => 'help',
+    '#markup' => t('These reusable blocks are available to be placed in any layout in the <a href="@link">Layouts</a> page.', array('@link' => url('admin/structure/layouts'))),
+  );
+
   $header = array(
     t('Block'),
     array('data' => t('Description'), 'class' => array('priority-low')),
@@ -45,7 +50,7 @@ function block_admin_list() {
         'title' => t('Export'),
         'href' => 'admin/config/development/configuration/single/export',
         'query' => array(
-          'group' => 'Custom Blocks',
+          'group' => 'Custom blocks',
           'name' => 'block.custom.' . $delta,
         ),
       );
@@ -59,12 +64,14 @@ function block_admin_list() {
     $rows[] = $row;
   }
 
-  return array(
+  $block_admin_list = array(
     '#theme' => 'table__block_admin_list',
-    '#rows' => $rows,
     '#header' => $header,
-    '#empty' => t('No custom blocks have been created yet.'),
+    '#rows' => $rows,
+    '#empty' => t('No reusable custom blocks have been created yet.'),
   );
+
+  return array('help_text' => $help_text, 'block_admin_list' => $block_admin_list);
 }
 
 /**
@@ -109,7 +116,7 @@ function block_admin_configure($form, &$form_state, $delta = NULL) {
     backdrop_set_title(t("'%name' block", array('%name' => $custom_block['info'])), PASS_THROUGH);
   }
   else {
-    backdrop_set_title(t('Add custom block'));
+    backdrop_set_title(t('Add reusable custom block'));
   }
 
   // Set title for translate block form.

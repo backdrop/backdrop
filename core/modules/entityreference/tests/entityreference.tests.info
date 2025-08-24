@@ -21,3 +21,9 @@ name = Entity Reference field
 description = Tests for the entity reference field formatters and widgets.
 group = Entity Reference
 file = entityreference.field.test
+
+[EntityReferenceFormTestCase]
+name = Entity Reference Form
+description = Tests Entity Reference form widgets.
+group = Entity Reference
+file = entityreference.form.test

@@ -43,10 +43,39 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   // Record if image uploading is requested by the calling element.
   $element_supports_uploads = !isset($form_state['input']['dialogOptions']['uploads']) || (bool) $form_state['input']['dialogOptions']['uploads'];
 
+  // Populate defaults.
+  $values = array(
+    'src' => '',
+    'data-file-id' => NULL,
+    'alt' => '',
+    'width' => '',
+    'height' => '',
+    'data-align' => 'none',
+    'data-has-caption' => 'false',
+  );
   // Pull in any default values set by the editor.
-  $values = array();
   if (isset($form_state['input']['editor_object'])) {
-    $values = $form_state['input']['editor_object'];
+    $values = array_merge($values, $form_state['input']['editor_object']);
+  }
+  // Store original values for reference.
+  $values['previous_width'] = $values['width'];
+  $values['previous_height'] = $values['height'];
+
+  // Determine the style from path - this does not work with SVG, as those get
+  // always served from their original path.
+  $image_style_default = NULL;
+  if (!empty($values['src']) && strpos($values['src'], 'styles/') > 0) {
+    $path_parts = explode('/', $values['src']);
+    $before_style = array_search('styles', $path_parts);
+    $image_style_default = $path_parts[$before_style + 1];
+  }
+
+  // If an image style is set, remove the width and height, which do not apply
+  // to image styles (they reset on save). This also lets images take on their
+  // original dimensions if setting back to the original image.
+  if (isset($image_style_default)) {
+    $values['width'] = '';
+    $values['height'] = '';
   }
 
   // Set the dialog title and submit button label.
@@ -69,6 +98,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     'dimensions' => array('max_width' => '', 'max_height' => ''),
     'max_size' => NULL,
     'scheme' => 'public',
+    'alt_required' => FALSE,
     'directory' => 'inline-images',
   );
 
@@ -88,7 +118,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#upload_location' => $upload_settings['scheme'] . '://' . $upload_settings['directory'],
     '#default_value' => $fid ? $fid : NULL,
     '#upload_validators' => array(
-      'file_validate_extensions' => array('gif png jpg jpeg'),
+      'file_validate_extensions' => array(implode(' ', image_get_supported_extensions())),
       'file_validate_image_orientation' => array($orientation),
       'file_validate_size' => array($max_filesize),
       'file_validate_image_resolution' => array($max_dimensions),
@@ -107,13 +137,13 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#type' => 'textfield',
     '#element_validate' => array('_filter_format_editor_link_url_validate'),
     '#placeholder' => '/example/image.jpg',
-    '#default_value' => isset($values['src']) ? $values['src'] : NULL,
+    '#default_value' => $values['src'],
     '#parents' => array('attributes', 'src'),
     '#wrapper_attributes' => array(
       'data-editor-image-toggle' => t('Select from library'),
     ),
     '#weight' => -8,
-    '#maxlength' => 256,
+    '#maxlength' => 2048,
   );
 
   // If no current value or an existing file exists, default to showing
@@ -125,19 +155,52 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   $form['alt'] = array(
     '#title' => t('Alternative text'),
     '#type' => 'textfield',
-    '#default_value' => isset($values['alt']) ? $values['alt'] : NULL,
+    '#default_value' => $values['alt'],
+    '#description' => t('The alt attribute may be used by screen readers, search engines, and when the image cannot be loaded.'),
     '#parents' => array('attributes', 'alt'),
+    '#required' => $upload_settings['alt_required'],
   );
+
+  $use_image_styles = !empty($format->editor_settings['image_styles']['status']) && module_exists('image');
+
+  $available_style_options = array();
+  if ($use_image_styles) {
+    $all_image_styles = image_style_options(FALSE, PASS_THROUGH);
+    foreach ($format->editor_settings['image_styles']['list'] as $key => $value) {
+      if ($key === '' && $value !== 0) {
+        $available_style_options[$key] = t('None (original image)');
+      }
+      elseif (!empty($value) && array_key_exists($key, $all_image_styles)) {
+        $available_style_options[$key] = $all_image_styles[$key];
+      }
+    }
+  }
+  // If the image style list is empty (the image styles may no longer exist),
+  // fallback to the normal no image style behavior.
+  $use_image_styles = !empty($available_style_options);
+  $form['image_style'] = array(
+    '#title' => t('Image style'),
+    '#type' => 'select',
+    '#options' => $available_style_options,
+    '#default_value' => $image_style_default,
+    '#access' => $use_image_styles,
+  );
+
   $form['size'] = array(
     '#title' => t('Image size'),
     '#wrapper_attributes' => array('class' => array('editor-image-size')),
-    '#theme_wrappers' => array('form_element'),
+    '#type' => 'item',
+    '#states' => array(
+      'visible' => array(
+        ':input[name="image_style"]' => array('value' => ''),
+      ),
+    ),
   );
   $form['size']['width'] = array(
     '#title' => t('Width'),
     '#title_display' => 'attribute',
     '#type' => 'number',
-    '#default_value' => !empty($values['width']) ? $values['width'] : '',
+    '#default_value' => $values['width'],
     '#max' => 99999,
     '#attributes' => array('placeholder' => t('width')),
     '#parents' => array('attributes', 'width'),
@@ -147,16 +210,26 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
     '#title' => t('Height'),
     '#title_display' => 'attribute',
     '#type' => 'number',
-    '#default_value' => !empty($values['height']) ? $values['height'] : '',
+    '#default_value' => $values['height'],
     '#max' => 99999,
     '#attributes' => array('placeholder' => t('height')),
     '#parents' => array('attributes', 'height'),
-    '#field_suffix' => ' ' . t('pixels')
+    '#field_suffix' => ' ' . t('pixels'),
   );
+  // Original values used for reference in submit handler.
+  $form['size']['previous_width'] = array(
+    '#type' => 'value',
+    '#value' => $values['previous_width'],
+  );
+  $form['size']['previous_height'] = array(
+    '#type' => 'value',
+    '#value' => $values['previous_height'],
+  );
+
   $form['align'] = array(
     '#title' => t('Align'),
     '#type' => 'radios',
-    '#default_value' => isset($values['data-align']) ? $values['data-align'] : 'none',
+    '#default_value' => $values['data-align'],
     '#options' => array(
       'none' => t('None'),
       'left' => t('Left'),
@@ -170,7 +243,7 @@ function filter_format_editor_image_form($form, &$form_state, $format) {
   $form['caption'] = array(
     '#title' => t('Add a caption'),
     '#type' => 'checkbox',
-    '#default_value' => (isset($values['data-has-caption']) && strcmp($values['data-has-caption'], 'false') !== 0) ? (bool) $values['data-has-caption'] : FALSE,
+    '#default_value' => (strcmp($values['data-has-caption'], 'false') !== 0) ? (bool) $values['data-has-caption'] : FALSE,
     '#parents' => array('attributes', 'data-has-caption'),
     '#access' => !empty($format->filters['filter_image_caption']->status),
   );
@@ -235,20 +308,67 @@ function _filter_image_library_ajax() {
  * Submit handler for filter_format_editor_image_form().
  */
 function filter_format_editor_image_form_submit($form, &$form_state) {
-  // Convert any uploaded files from the FID values to the src attribute.
-  if (!empty($form_state['values']['fid'])) {
+  // Determine the file either from fid (when upload is enabled) or from src
+  // attribute (if image upload in editor is disabled).
+  $file = NULL;
+  $fid = 0;
+  $attributes = $form_state['values']['attributes'] ?? array();
+  if (!empty($form_state['values']['fid']) && empty($attributes['src'])) {
+    $file = file_load($form_state['values']['fid']);
     $fid = $form_state['values']['fid'];
-    $file = file_load($fid);
-
-    // Try to make a local path if possible for better portability.
-    $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
-    $url = file_create_url($file->uri);
-    $url = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
-
-    $form_state['values']['attributes']['src'] = $url;
-    $form_state['values']['attributes']['data-file-id'] = $fid;
     unset($form_state['values']['fid']);
   }
+  elseif (!empty($attributes['src'])) {
+    $fid = _filter_get_file_id($attributes['src']);
+    if ($fid) {
+      $file = file_load($fid);
+      unset($attributes['src']);
+    }
+  }
+  if (!empty($file)) {
+    // Try to make a local path if possible for better portability.
+    $absolute_path = parse_url($GLOBALS['base_url'], PHP_URL_PATH) . '/';
+
+    if (empty($form_state['values']['image_style'])) {
+      $url = file_create_url($file->uri);
+      if (empty($attributes['width']) && empty($attributes['height'])) {
+        $attributes['width'] = $file->width;
+        $attributes['height'] = $file->height;
+      }
+    }
+    else {
+      $style_name = $form_state['values']['image_style'];
+      $style_changed = $form['image_style']['#default_value'] != $style_name;
+      $url = image_style_url($style_name, $file->uri);
+      if ($style_changed) {
+        $dimensions = array('width' => '', 'height' => '');
+        // Although the editor could determine dimensions, this would not work
+        // with SVG.
+        if (!empty($file->width)) {
+          $dimensions = array(
+            'width' => $file->width,
+            'height' => $file->height,
+          );
+          image_style_transform_dimensions($style_name, $dimensions);
+        }
+        $attributes['width'] = $dimensions['width'];
+        $attributes['height'] = $dimensions['height'];
+      }
+      elseif (empty($form_state['values']['attributes']['src']) && !empty($form_state['values']['previous_width'])) {
+        // Style did not change, no new file selected, previous dimensions
+        // exist, so re-use them. That way manually resized images with styles
+        // keep adapted dimensions.
+        $attributes['width'] = $form_state['values']['previous_width'];
+        $attributes['height'] = $form_state['values']['previous_height'];
+      }
+    }
+    $url = str_replace($GLOBALS['base_url'] . '/', $absolute_path, $url);
+
+    $attributes['src'] = $url;
+    $attributes['data-file-id'] = $fid;
+  }
+
+  $form_state['values']['attributes'] = $attributes;
 }
 
 /**
@@ -290,7 +410,7 @@ function filter_format_editor_link_form($form, &$form_state, $format) {
       'data-editor-image-toggle' => t('Link to existing content'),
     ),
     '#weight' => -10,
-    '#maxlength' => 256,
+    '#maxlength' => 2048,
     '#autocomplete_path' => 'path-autocomplete',
     '#description' => t('Start typing to see a list of suggestions, enter the relative path to another page, or enter an external URL.<br>Examples: <em>About Us</em>, <em>/about</em>, or <em>http://backdropcms.org</em>'),
   );
@@ -461,9 +581,7 @@ function filter_format_editor_link_form_submit($form, &$form_state) {
     }
   }
   else {
-    // Modify references to other URIs if not an external link.
-    $url = (substr($uri, 0, 4) == 'http') ? $uri : substr(base_path(), 0, -1) . $uri;
-    $form_state['values']['attributes']['href'] = $url;
+    $form_state['values']['attributes']['href'] = $uri;
     // Remove any reference to a data file.
     unset($form_state['values']['fid']);
     $form_state['values']['attributes']['data-file-id'] = NULL;
@@ -502,8 +620,19 @@ function filter_format_editor_dialog_save($form, &$form_state) {
     $error_messages = theme('status_messages');
     $rendered_form = backdrop_render($form);
     $commands[] = ajax_command_remove('.editor-dialog .messages');
-    $commands[] = ajax_command_replace('.editor-dialog form', $rendered_form);
+    $commands[] = ajax_command_replace('.editor-dialog form.filter-format-editor-image-form', $rendered_form);
     $commands[] = ajax_command_prepend('.editor-dialog .ui-dialog-content', $error_messages);
+    // Check whether this is an image upload, a library selection, or a link to
+    // another non-library file. Note that classes "first" and "last" are
+    // dynamically assigned, so are not consistently on the same link.
+    if (empty($form_state['input']['fid']['fid'])) {
+      // Custom link to a non-library file.
+      $commands[] = ajax_command_invoke('.editor-dialog form.filter-format-editor-image-form a.last', 'click');
+    }
+    else {
+      // Library file has been selected.
+      $commands[] = ajax_command_invoke('.editor-dialog form.filter-format-editor-image-form a.first', 'click');
+    }
   }
   else {
     $commands[] = array(
@@ -560,6 +689,7 @@ function _filter_format_editor_link_url_validate(&$element, &$form_state) {
  * internal alias.
  *
  * @param string $url
+ *   A URL before it is cleaned-up.
  *
  * @return string
  *   A cleaned-up URL that is either a properly formatted external URL or an
@@ -587,7 +717,7 @@ function _filter_cleanup_url($url) {
   // - adding extra prefixes if being re-edited;
   // - a url getting double-encoded;
   // - or domains with relative protocols.
-  // E.g. /fr/node/1, //domain.tld
+  // E.g. /fr/node/1, //domain.tld.
   if (substr($url, 0, 1) == '/') {
     return $url;
   }
@@ -610,7 +740,7 @@ function _filter_cleanup_url($url) {
  * @return string
  *   The URL with the protocol prepended if needed.
  *
- * @see link_cleanup_url().
+ * @see link_cleanup_url()
  */
 function _filter_create_valid_external_url($url) {
   // Skip if it's already a valid external URL with a protocol.
@@ -638,6 +768,7 @@ function _filter_create_valid_external_url($url) {
  * all external URLs even if they have dangerous protocols.
  *
  * @param string $url
+ *   The URL entered by the user.
  *
  * @return bool
  *   TRUE if URL has protocol.
@@ -656,20 +787,25 @@ function _filter_url_has_protocol($url) {
 function _filter_get_file_id($href) {
   $result = 0;
 
-  // Check URI for valid file scheme.
-  if (!file_valid_uri($href)){
+  // Make sure this is a file, either in public or in private path.
+  global $base_path;
+  $public_path = config_get('system.core', 'file_public_path');
+  // Private files have "system/files/" in their URL.
+  // @see BackdropPrivateStreamWrapper::getExternalUrl()
+  $pattern = '#^' . $base_path . '(\?q=)?(' . $public_path . '|system/files/)#';
+  if (preg_match($pattern, $href) === FALSE) {
     return $result;
   }
 
   // Extract file name and directory from $href.
   $pos = strrpos($href, "/");
-  $filename = substr($href,$pos + 1);
+  $filename = substr($href, $pos + 1);
 
   // Now find this file name in uri field to get fid.
   if (!empty($filename)) {
     $results = db_select('file_managed')
       ->fields('file_managed', array('fid', 'uri'))
-      ->condition('uri', '%' . $filename, 'LIKE')
+      ->condition('uri', '%/' . $filename, 'LIKE')
       ->orderBy('fid', 'DESC')
       ->execute();
 

@@ -17,10 +17,11 @@ function image_field_info() {
         'default_image' => '',
       ),
       'instance_settings' => array(
-        'file_extensions' => 'png gif jpg jpeg',
+        'file_extensions' => implode(' ', image_get_supported_extensions()),
         'file_directory' => '',
         'max_filesize' => '',
-        'alt_field' => 0,
+        'alt_field' => 1,
+        'alt_field_required' => 0,
         'title_field' => 0,
         'max_dimensions' => '',
         'min_dimensions' => '',
@@ -68,7 +69,7 @@ function image_field_settings_form($field, $instance) {
     $form['default_image']['file']['#description'] .= '<br />' . t('Current image: !link', array('!link' => $link));
 
     $form['default_image']['remove'] = array(
-      '#type' => t('checkbox'),
+      '#type' => 'checkbox',
       '#title' => t('Remove default image'),
     );
   }
@@ -99,7 +100,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#weight' => 4.1,
     '#field_prefix' => '<div class="container-inline">',
     '#field_suffix' => '</div>',
-    '#description' => t('The maximum allowed image dimensions expressed as <code>WIDTH</code> x <code>HEIGHT</code>. Leave blank for no restriction. If a larger image is uploaded, it will be resized to reflect the given width and height. Resizing images on upload will cause the loss of <a href="http://en.wikipedia.org/wiki/Exchangeable_image_file_format">EXIF data</a> in the image.'),
+    '#description' => t('Images larger than these dimensions (width × height) will be resized to these limits. This will cause the loss of <a href="http://en.wikipedia.org/wiki/Exchangeable_image_file_format">EXIF data</a> in the image. Leave blank for no restriction.'),
   );
   $form['max_dimensions']['x'] = array(
     '#type' => 'number',
@@ -108,7 +109,8 @@ function image_field_instance_settings_form($field, $instance) {
     '#default_value' => $max_dimensions[0],
     '#min' => 0,
     '#max' => 100000,
-    '#field_suffix' => ' x ',
+    '#field_suffix' => ' × ',
+    '#placeholder' => t('Width'),
   );
   $form['max_dimensions']['y'] = array(
     '#type' => 'number',
@@ -118,6 +120,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#min' => 0,
     '#max' => 100000,
     '#field_suffix' => ' ' . t('pixels'),
+    '#placeholder' => t('Height'),
   );
 
   $min_dimensions = explode('x', $settings['min_dimensions']) + array('', '');
@@ -130,7 +133,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#weight' => 4.2,
     '#field_prefix' => '<div class="container-inline">',
     '#field_suffix' => '</div>',
-    '#description' => t('The minimum allowed image dimensions expressed as <code>WIDTH</code> x <code>HEIGHT</code>. Leave blank for no restriction. If a smaller image is uploaded, it will be rejected.'),
+    '#description' => t('Images smaller than these dimensions (width × height) will be rejected. Leave blank for no restriction. '),
   );
   $form['min_dimensions']['x'] = array(
     '#type' => 'number',
@@ -139,7 +142,8 @@ function image_field_instance_settings_form($field, $instance) {
     '#default_value' => $min_dimensions[0],
     '#min' => 0,
     '#max' => 100000,
-    '#field_suffix' => ' x ',
+    '#field_suffix' => ' × ',
+    '#placeholder' => t('Width'),
   );
   $form['min_dimensions']['y'] = array(
     '#type' => 'number',
@@ -149,6 +153,7 @@ function image_field_instance_settings_form($field, $instance) {
     '#min' => 0,
     '#max' => 100000,
     '#field_suffix' => ' ' . t('pixels'),
+    '#placeholder' => t('Height'),
   );
 
   // Remove the description option.
@@ -162,18 +167,31 @@ function image_field_instance_settings_form($field, $instance) {
     '#description' => t('The alt attribute may be used by search engines, screen readers, and when the image cannot be loaded.'),
     '#weight' => 10,
   );
+  $form['alt_field_required'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('<em>Alt</em> field required'),
+    '#default_value' => !isset($settings['alt_field_required']) ? 0 : $settings['alt_field_required'],
+    '#description' => t('Requiring alternative text is strongly encouraged to improve accessibility.'),
+    '#indentation' => 1,
+    '#weight' => 11,
+    '#states' => array(
+      'visible' => array(
+        'input[name="instance[settings][alt_field]"]' => array('checked' => TRUE),
+      ),
+    ),
+  );
   $form['title_field'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable <em>Title</em> field'),
     '#default_value' => $settings['title_field'],
-    '#description' => t('The title attribute is used as a tooltip when the mouse hovers over the image.'),
-    '#weight' => 11,
+    '#description' => t('The title attribute is used as a tooltip when the mouse hovers over the image. Enabling this field is not recommended, as it can cause problems with screen readers.'),
+    '#weight' => 12,
   );
   $form['orientate'] = array(
     '#type' => 'checkbox',
     '#title' => t('Enable image re-orientation'),
     '#default_value' => $settings['orientate'],
-    '#weight' => 12,
+    '#weight' => 13,
     '#description' => t('If EXIF data indicates the need, the image will be rotated appropriately before being saved.'),
   );
   // Add a second line of description.
@@ -195,7 +213,7 @@ function image_field_instance_settings_form($field, $instance) {
     $form['default_image']['file']['#description'] .= '<br />' . t('Current image: !link', array('!link' => $link));
 
     $form['default_image']['remove'] = array(
-      '#type' => t('checkbox'),
+      '#type' => 'checkbox',
       '#title' => t('Remove default image'),
     );
   }
@@ -207,8 +225,10 @@ function image_field_instance_settings_form($field, $instance) {
  * Element validate handler for image_field_instance_settings_form().
  */
 function image_field_instance_settings_form_validate($element, &$form_state, $complete_form) {
-  $min_dimensions = explode('x', $form_state['values']['instance']['settings']['min_dimensions']) + array('', '');
-  $max_dimensions = explode('x', $form_state['values']['instance']['settings']['max_dimensions']) + array('', '');
+  $min = $form_state['values']['instance']['settings']['min_dimensions'];
+  $max = $form_state['values']['instance']['settings']['max_dimensions'];
+  $min_dimensions = explode('x', $min) + array('', '');
+  $max_dimensions = explode('x', $max) + array('', '');
 
   $min_dimensions_x = (int) $min_dimensions[0];
   $min_dimensions_y = (int) $min_dimensions[1];
@@ -436,7 +456,7 @@ function image_field_widget_form(&$form, &$form_state, $field, $instance, $langc
     }
 
     // If not using custom extension validation, ensure this is an image.
-    $supported_extensions = array('png', 'gif', 'jpg', 'jpeg');
+    $supported_extensions = image_get_supported_extensions();
     backdrop_alter('image_supported_extensions', $supported_extensions);
     $extensions = isset($elements[$delta]['#upload_validators']['file_validate_extensions'][0]) ? $elements[$delta]['#upload_validators']['file_validate_extensions'][0] : implode(' ', $supported_extensions);
     $extensions = array_intersect(explode(' ', $extensions), $supported_extensions);
@@ -542,29 +562,82 @@ function image_field_widget_process($element, &$form_state, $form) {
     '#access' => (bool) $item['fid'] && $settings['title_field'],
   );
 
+  if ($settings['alt_field_required']) {
+    // Adding #required directly to the element would trigger unnecessary
+    // validation errors when uploading the image before submitting the form.
+    // Rather than adding manual markup to the #title to mimic the required
+    // asterisk indication, we are adding an element #pre_render attribute,
+    // and then adding the #required property to the function that it calls.
+    // That way, it is rendered, but it doesn't actually trigger any validation.
+    $element['alt']['#pre_render'] = array('_image_field_widget_alt_pre_render');
+    $element['alt']['#element_validate'] = array('_image_field_widget_alt_validate');
+    // Pass the alt required status as a data-* attribute on the form element,
+    // in case other modules need access to it.
+    $element['alt']['#attributes'] = array('data-alt-required' => 'true');
+  }
+
   return $element;
+}
+
+/**
+ * Pre-render callback for alt field.
+ *
+ * Mark a field as #required for display only.
+ */
+function _image_field_widget_alt_pre_render($element) {
+  $element['#required'] = TRUE;
+  return $element;
+}
+
+/**
+ * Validate callback for alt field.
+ *
+ * This is separated in a validate function instead of a #required flag to avoid
+ * being validated on the process callback.
+ */
+function _image_field_widget_alt_validate($element, &$form_state) {
+  // Only do validation if the function is triggered from other places than
+  // the image process form.
+  if (isset($form_state['triggering_element']['#submit']) && !in_array('file_managed_file_submit', $form_state['triggering_element']['#submit'])) {
+    // If the image is not there, we do not check for empty values.
+    $parents = $element['#parents'];
+    $field = array_pop($parents);
+    $image_field = backdrop_array_get_nested_value($form_state['input'], $parents);
+    if ($image_field == NULL) {
+      $image_field = array();
+    }
+    // We check for the array key, so that it can be NULL (like if the user
+    // submits the form without using the "upload" button).
+    if (!array_key_exists($field, $image_field)) {
+      return;
+    }
+    // Check if the field is left empty.
+    elseif (empty($image_field[$field])) {
+      form_error($element, t('The %title field is required.', array('%title' => $element['#title'])));
+      return;
+    }
+  }
 }
 
 /**
  * Implements hook_field_formatter_info().
  */
 function image_field_formatter_info() {
-  $formatters = array(
-    'image' => array(
-      'label' => t('Image'),
-      'field types' => array('image'),
-      'settings' => array(
-        'image_style' => '',
-        'image_link' => '',
-        'image_float' => '',
-        'image_load' => 'auto',
-      ),
-	  'description' => t('Format the file as an image. The image can be displayed using an image style and can optionally be linked to the image file itself or its parent content.'),
-	  'file formatter' => array(
-        'mime types' => array('image/*'),
-      ),
+  $image_formatter = array(
+    'label' => t('Image'),
+    'field types' => array('image'),
+    'settings' => array(
+      'image_style' => '',
+      'image_link' => '',
+      'image_float' => '',
+      'image_load' => 'auto',
+    ),
+    'description' => t('Format the file as an image. The image can be displayed using an image style and can optionally be linked to the image file itself or its parent content.'),
+    'file formatter' => array(
+      'mime types' => array('image/*'),
     ),
   );
+  $formatters['image'] = $image_formatter;
 
   return $formatters;
 }
@@ -687,26 +760,29 @@ function image_field_formatter_view($entity_type, $entity, $field, $instance, $l
   }
 
   foreach ($items as $delta => $item) {
-    // Add class for floating the image
-    if (!empty($display['settings']['image_float'])) {
-      $item['attributes']['class'][] = 'align-' . $display['settings']['image_float'];
-    }
+    if (!empty($item)) {
+      // Add class for floating the image.
+      if (!empty($display['settings']['image_float'])) {
+        $item['attributes']['class'][] = 'align-' . $display['settings']['image_float'];
+      }
 
-    if (!empty($display['settings']['image_load'])) {
-      // Although available in Chromium, the 'auto' value is not mentioned in
-      // the specification. Since it may be subject to change, we recommend not
-      // to use it until it gets officially included.
-      if ($display['settings']['image_load'] != 'auto') {
-        $item['attributes']['loading'] = $display['settings']['image_load'];
+      if (!empty($display['settings']['image_load'])) {
+        // Although available in Chromium, the 'auto' value is not mentioned in
+        // the specification. Since it may be subject to change, we recommend
+        // not to use it until it gets officially included.
+        if ($display['settings']['image_load'] != 'auto') {
+          $item['attributes']['loading'] = $display['settings']['image_load'];
+        }
+      }
+
+      if (isset($link_file)) {
+        $uri = array(
+          'path' => file_create_url($item['uri']),
+          'options' => array(),
+        );
       }
     }
 
-    if (isset($link_file)) {
-      $uri = array(
-        'path' => file_create_url($item['uri']),
-        'options' => array(),
-      );
-    }
     $element[$delta] = array(
       '#theme' => 'image_formatter',
       '#item' => $item,

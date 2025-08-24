@@ -149,8 +149,8 @@ function path_clean_string($string, array $options = array()) {
       '—' => '-', // Em dash.
     );
     foreach ($fancy_character_map as $fancy_character => $simple_character) {
-      if (!isset($cache['punctuation'][$fancy_character])) {
-        $cache['punctuation'][$fancy_character] =  $cache['punctuation'][$simple_character];
+      if (!isset($cache['punctuation'][$fancy_character]) && isset($cache['punctuation'][$simple_character])) {
+        $cache['punctuation'][$fancy_character] = $cache['punctuation'][$simple_character];
       }
     }
 
@@ -172,7 +172,7 @@ function path_clean_string($string, array $options = array()) {
     unset($config);
   }
 
-  // Empty strings do not need any proccessing.
+  // Empty strings do not need any processing.
   if ($string === '' || $string === NULL) {
     return '';
   }
@@ -321,7 +321,7 @@ function path_clean_alias($alias) {
   // Trim duplicate, leading, and trailing separators. Do this before cleaning
   // backslashes since a pattern like "[token1]/[token2]-[token3]/[token4]"
   // could end up like "value1/-/value2" and if backslashes were cleaned first
-  // this would result in a duplicate blackslash.
+  // this would result in a duplicate backslash.
   $output = _path_clean_separators($output);
 
   // Trim duplicate, leading, and trailing backslashes.

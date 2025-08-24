@@ -106,8 +106,14 @@ function _vocabulary_get_operations($vocabulary) {
       'title' => t('Manage displays'),
       'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/display',
       'weight' => 10,
-      );
-    }
+    );
+  }
+  if (user_access('administer layouts')) {
+    $links['taxonomy_layouts'] = array(
+      'title' => t('Manage layout'),
+      'href' => 'admin/structure/taxonomy/' . $vocabulary->machine_name . '/layouts',
+    );
+  }
   if (module_exists('config') && user_access('synchronize configuration')) {
     $links['export'] = array(
       'title' => t('Export'),
@@ -135,7 +141,7 @@ function _vocabulary_get_operations($vocabulary) {
  * @see taxonomy_form_vocabulary_submit()
  * @see taxonomy_form_vocabulary_validate()
  */
-function taxonomy_form_vocabulary($form, &$form_state, TaxonomyVocabulary $vocabulary = NULL) {
+function taxonomy_form_vocabulary($form, &$form_state, ?TaxonomyVocabulary $vocabulary = NULL) {
   // During initial form build, add the entity to the form state for use
   // during form building and processing. During a rebuild, use what is in the
   // form state.
@@ -308,6 +314,7 @@ function taxonomy_vocabulary_form_permissions($vocabulary) {
     );
     $form['role_names'][$role_name] = array(
       '#markup' => check_plain($role->label),
+      '#description' => filter_xss_admin($role->description),
       '#tree' => TRUE,
     );
   }
@@ -356,7 +363,9 @@ function taxonomy_form_vocabulary_submit($form, &$form_state) {
   $vocabulary = $form_state['vocabulary'];
   form_state_values_clean($form_state);
   foreach ($form_state['values'] as $key => $value) {
-    $vocabulary->$key = $value;
+    if (property_exists($vocabulary, $key)) {
+      $vocabulary->$key = $value;
+    }
   }
 
   // Prevent leading and trailing spaces in vocabulary names.
@@ -490,10 +499,10 @@ function taxonomy_overview_terms($form, &$form_state, TaxonomyVocabulary $vocabu
     // Do not let a term start the page that is not at the root.
     if (isset($term->depth) && ($term->depth > 0) && !isset($back_step)) {
       $back_step = 0;
-      while ($pterm = prev($tree)) {
+      while ($previous_term = prev($tree)) {
         $before_entries--;
         $back_step++;
-        if ($pterm->depth == 0) {
+        if ($previous_term->depth == 0) {
           prev($tree);
           continue 2; // Jump back to the start of the root level parent.
        }
@@ -756,7 +765,7 @@ function taxonomy_overview_terms_submit($form, &$form_state) {
   // Save all updated terms.
   foreach ($changed_terms as $changed) {
     $term = (object) $changed;
-    // Update term_hierachy and term_data directly since we don't have a
+    // Update term_hierarchy and term_data directly since we don't have a
     // fully populated term object to save.
     db_update('taxonomy_term_hierarchy')
       ->fields(array('parent' => $term->parent))
@@ -791,7 +800,7 @@ function taxonomy_overview_terms_submit($form, &$form_state) {
  * @see taxonomy_form_term_validate()
  * @see taxonomy_form_term_submit()
  */
-function taxonomy_form_term($form, &$form_state, TaxonomyTerm $term = NULL, TaxonomyVocabulary $vocabulary = NULL) {
+function taxonomy_form_term($form, &$form_state, ?TaxonomyTerm $term = NULL, ?TaxonomyVocabulary $vocabulary = NULL) {
   // Load the vocabulary from the term, if not already provided.
   if (!isset($vocabulary) && isset($term->vocabulary)) {
     $vocabulary = taxonomy_vocabulary_load($term->vocabulary);

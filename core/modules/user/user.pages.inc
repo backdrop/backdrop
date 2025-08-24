@@ -21,6 +21,28 @@ function user_autocomplete($string = '') {
 }
 
 /**
+ * Menu callback for reset password form.
+ *
+ * @since 1.23.1 Replaces user_pass() as menu callback.
+ *
+ * @see user_pass()
+ */
+function user_pass_page() {
+  backdrop_set_title(t('Reset password'));
+  $user_password_form = backdrop_get_form('user_pass');
+
+  // If user is logged in, always display with tabs appearance.
+  if (user_is_logged_in()) {
+    $output = $user_password_form;
+  }
+  else {
+    $output = user_login_page_wrapper($user_password_form);
+  }
+
+  return $output;
+}
+
+/**
  * Form builder; request a password reset.
  *
  * @ingroup forms
@@ -30,8 +52,6 @@ function user_autocomplete($string = '') {
 function user_pass() {
   global $user;
 
-  backdrop_set_title(t('Reset password'));
-
   $form['name'] = array(
     '#type' => 'textfield',
     '#title' => t('Username or email address'),
@@ -40,16 +60,21 @@ function user_pass() {
     '#required' => TRUE,
     '#default_value' => isset($_GET['name']) ? $_GET['name'] : '',
     '#attributes' => array(
-      'autofocus' => 'autofocus',
+      // Add attributes to field to prevent spell-jacking and unwanted
+      // automatic changes caused by the browser.
+      'autocapitalize' => 'none',
+      'autocorrect' => 'off',
+      'spellcheck' => 'false',
     ),
   );
+
   // Allow logged in users to request this also.
   if ($user->uid > 0) {
     $form['name']['#type'] = 'value';
     $form['name']['#value'] = $user->mail;
     $form['mail'] = array(
       '#prefix' => '<p>',
-      '#markup' =>  t('Password reset instructions will be mailed to %email. You must log out to use the password reset link in the email.', array('%email' => $user->mail)),
+      '#markup' => t('Password reset instructions will be mailed to %email. You must log out to use the password reset link in the email.', array('%email' => $user->mail)),
       '#suffix' => '</p>',
     );
   }
@@ -126,7 +151,8 @@ function user_pass_submit($form, &$form_state) {
 }
 
 /**
- * Menu callback; process one time login link and redirects to the user page on success.
+ * Menu callback; process one time login link and redirects to the user page on
+ * success.
  *
  * @param int $uid
  *   User ID for the user who would like their password reset.
@@ -143,28 +169,45 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
   // When processing the one-time login link, we have to make sure that a user
   // isn't already logged in.
   if ($user->uid) {
-    // The existing user is already logged in.
+    // The existing user is already logged in. Log them out and reload the
+    // current page so the password reset process can continue.
     if ($user->uid == $uid) {
-      backdrop_set_message(t('You are logged in as %user. <a href="!user_edit">Change your password.</a>', array('%user' => $user->name, '!user_edit' => url("user/$user->uid/edit"))));
+      // Preserve the current destination (if any) and ensure the redirect goes
+      // back to the current page; any custom destination set in
+      // hook_user_logout() and intended for regular logouts would not be
+      // appropriate here.
+      $destination = array();
+      if (isset($_GET['destination'])) {
+        $destination = backdrop_get_destination();
+      }
+      user_logout_current_user();
+      unset($_GET['destination']);
+      backdrop_goto(current_path(), array('query' => backdrop_get_query_parameters() + $destination));
     }
     // A different user is already logged in on the computer.
     else {
       $reset_link_account = user_load($uid);
-      if (!empty($reset_link_account)) {
-        backdrop_set_message(t('Another user (%other_user) is already logged into the site on this computer, but you tried to use a reset password link for user %resetting_user. Please <a href="!logout">logout</a> and try using the link again.',
-          array('%other_user' => $user->name, '%resetting_user' => $reset_link_account->name, '!logout' => url('user/logout'))), 'warning');
+      $is_valid = FALSE;
+      if (!empty($reset_link_account) && $timestamp >= $reset_link_account->login && $timestamp <= REQUEST_TIME) {
+        if ($hashed_pass == user_pass_rehash($reset_link_account->pass, $timestamp, $reset_link_account->login, $reset_link_account->uid, $reset_link_account->mail)) {
+          $is_valid = TRUE;
+        }
+      }
+      if ($is_valid) {
+        backdrop_set_message(t('You cannot use a password reset link while logged into the site. Please <a href="!logout">logout</a> and try using the link again.',
+          array('!logout' => url('user/logout'))), 'warning');
       } else {
         // Invalid one-time link specifies an unknown user.
         backdrop_set_message(t('The one-time login link you clicked is invalid.'), 'error');
       }
+      backdrop_goto();
     }
-    backdrop_goto();
   }
   else {
     // Time out, in seconds, until login URL expires.
     $timeout = config_get('system.core', 'user_password_reset_timeout');
     $current = REQUEST_TIME;
-    // Some redundant checks for extra security ?
+    // Some redundant checks for extra security?
     $users = user_load_multiple(array($uid), array('status' => '1'));
     if ($timestamp <= $current && $account = reset($users)) {
       // No time out for first time login.
@@ -172,12 +215,28 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
         backdrop_set_message(t('You have tried to use a reset password link that has expired. Please request a new one using the form below.'), 'error');
         backdrop_goto('user/password');
       }
-      elseif ($account->uid && $timestamp >= $account->login && $timestamp <= $current && hash_equals($hashed_pass, user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid))) {
+      elseif ($account->uid && $timestamp >= $account->login && $timestamp <= $current && hash_equals($hashed_pass, user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid, $account->mail))) {
+        if (config_get('user.flood', 'flood_uid_only')) {
+          // Clear flood events based on the uid only if configured.
+          $identifier = $account->uid;
+        }
+        else {
+          // The default identifier is a combination of uid and IP address.
+          $identifier = $account->uid . '-' . ip_address();
+        }
+        // Only clear the user specific flood events. We cannot clear the more
+        // broad IP address flood events because that would open a
+        // vulnerability where an attacker with a valid account could use that
+        // to brute force other accounts.
+        flood_clear_event('failed_login_attempt_user', $identifier);
+
         if ($immediate_login) {
           $user = $account;
           user_login_finalize();
           // Clear any password reset flood events for this user.
           flood_clear_event('pass_reset_user', $account->uid);
+          // Clear any failed password validation flood events for this user.
+          flood_clear_event('failed_pass_validation_user', $account->uid);
           backdrop_set_message(t('You have used your one-time log-in link and are now logged-in.'));
           watchdog('user', 'User %name used one-time password reset link at time %timestamp.', array('%name' => $account->name, '%timestamp' => format_date(REQUEST_TIME, 'long')));
           backdrop_goto();
@@ -216,11 +275,14 @@ function user_pass_reset_form($form, &$form_state, $account) {
     $description = _user_password_policy_help();
   }
   $form['message'] = array(
-    '#markup' => t('<p>Please enter a new password to access your account.</p>'),
+    '#markup' => '<p>' . t('Please enter a new password to access your account.') . '</p>',
   );
   $form['pass'] = array(
-    '#type' => 'password_confirm',
+    '#type' => 'password',
+    '#title' => t('New password'),
     '#required' => TRUE,
+    '#password_toggle' => TRUE,
+    '#password_strength' => TRUE,
     '#description' => $description,
   );
   $form['actions'] = array(
@@ -256,6 +318,14 @@ function user_pass_reset_form_submit($form, &$form_state) {
  * Menu callback; logs the current user out, and redirects to the home page.
  */
 function user_logout() {
+  user_logout_current_user();
+  backdrop_goto();
+}
+
+/**
+ * Logs the current user out.
+ */
+function user_logout_current_user() {
   global $user;
 
   watchdog('user', 'Session closed for %name.', array('%name' => $user->name));
@@ -269,8 +339,6 @@ function user_logout() {
 
   // Destroy the current session, and reset $user to the anonymous user.
   session_destroy();
-
-  backdrop_goto();
 }
 
 /**
@@ -521,19 +589,19 @@ function user_cancel_methods() {
   $anonymous_name = $site_config->get('anonymous');
   $methods = array(
     'user_cancel_block' => array(
-      'title' => t('Disable the account and keep its content.'),
+      'title' => t('Disable the account and keep its content'),
       'description' => t('Your account will be blocked and you will no longer be able to log in. All of your content will remain attributed to your user name.'),
     ),
     'user_cancel_block_unpublish' => array(
-      'title' => t('Disable the account and unpublish its content.'),
+      'title' => t('Disable the account and unpublish its content'),
       'description' => t('Your account will be blocked and you will no longer be able to log in. All of your content will be hidden from everyone but administrators.'),
     ),
     'user_cancel_reassign' => array(
-      'title' => t('Delete the account and make its content belong to the %anonymous-name user.', array('%anonymous-name' => $anonymous_name)),
+      'title' => t('Delete the account and make its content belong to the %anonymous-name user', array('%anonymous-name' => $anonymous_name)),
       'description' => t('Your account will be removed and all account information deleted. All of your content will be assigned to the %anonymous-name user.', array('%anonymous-name' => $anonymous_name)),
     ),
     'user_cancel_delete' => array(
-      'title' => t('Delete the account and its content.'),
+      'title' => t('Delete the account and its content'),
       'description' => t('Your account will be removed and all account information deleted. All of your content will also be deleted.'),
       'access' => user_access('administer users'),
     ),
@@ -570,7 +638,7 @@ function user_cancel_confirm($account, $timestamp = 0, $hashed_pass = '') {
   // Basic validation of arguments.
   if (isset($account->data['user_cancel_method']) && !empty($timestamp) && !empty($hashed_pass)) {
     // Validate expiration and hashed password/login.
-    if ($timestamp <= $current && $current - $timestamp < $timeout && $account->uid && $timestamp >= $account->login && hash_equals($hashed_pass, user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid))) {
+    if ($timestamp <= $current && $current - $timestamp < $timeout && $account->uid && $timestamp >= $account->login && hash_equals($hashed_pass, user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid, $account->mail))) {
       $edit = array(
         'user_cancel_notify' => isset($account->data['user_cancel_notify']) ? $account->data['user_cancel_notify'] : config_get('system.core', 'user_mail_status_canceled_notify'),
       );

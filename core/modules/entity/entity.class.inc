@@ -66,10 +66,10 @@ interface EntityInterface {
   /**
    * Returns the URI elements of the entity.
    *
-   * @return
+   * @return array
    *   An array containing the 'path' and 'options' keys used to build the URI
-   *   of the entity, and matching the signature of url(). NULL if the entity
-   *   has no URI of its own.
+   *   of the entity, and matching the signature of url(). An empty array if the
+   *   entity has no URI of its own.
    */
   public function uri();
 
@@ -142,7 +142,7 @@ interface EntityInterface {
    * @param string|NULL $langcode
    * @param bool|NULL $page
    *   (optional) If set will control if the entity is rendered: if TRUE
-   *   the entity will be rendered without its title, so that it can be embeded
+   *   the entity will be rendered without its title, so that it can be embedded
    *   in another context. If FALSE the entity will be displayed with its title
    *   in a mode suitable for lists.
    *   If unset, the page mode will be enabled if the current path is the URI
@@ -276,6 +276,24 @@ abstract class Entity extends stdClass implements EntityInterface {
    */
   public function bundle() {
     return $this->entityType();
+  }
+
+  /**
+   * Implements EntityInterface::label().
+   *
+   * @return string|null
+   *   The label of the entity, or NULL if there is no label defined.
+   */
+  public function label() {
+    $entity_info = entity_get_info($this->entityType());
+    $label = NULL;
+    if (isset($entity_info['label callback'])) {
+      $label = call_user_func($entity_info['label callback'], $this);
+    }
+    else if (isset($entity_info['entity keys']['label']))  {
+      $label = $this->{$entity_info['entity keys']['label']};
+    }
+    return $label;
   }
 
   /**

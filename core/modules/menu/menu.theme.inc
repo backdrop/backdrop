@@ -83,18 +83,11 @@ function theme_menu_overview_form($variables) {
     }
   }
 
-  if (empty($rows)) {
-    $rows[] = array(
-      array(
-        'data' => $form['#empty_text'],
-        'colspan' => count($header),
-      ),
-    );
-  }
   $output .= theme('table', array(
     'header' => $header,
     'rows' => $rows,
     'attributes' => array('id' => 'menu-overview'),
+    'empty' => t('There are no menu links yet. <a href="@link">Add link</a>.', array('@link' => url('admin/structure/menu/manage/' . $form['#menu']['menu_name'] . '/add'))),
   ));
   $output .= backdrop_render_children($form);
   return $output;

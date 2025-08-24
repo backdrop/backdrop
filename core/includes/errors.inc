@@ -25,11 +25,15 @@ function backdrop_error_levels() {
     E_USER_ERROR => array('User error', WATCHDOG_ERROR),
     E_USER_WARNING => array('User warning', WATCHDOG_WARNING),
     E_USER_NOTICE => array('User notice', WATCHDOG_NOTICE),
-    E_STRICT => array('Strict warning', WATCHDOG_DEBUG),
     E_RECOVERABLE_ERROR => array('Recoverable fatal error', WATCHDOG_ERROR),
     E_DEPRECATED => array('Deprecated function', WATCHDOG_DEBUG),
     E_USER_DEPRECATED => array('User deprecated function', WATCHDOG_DEBUG),
   );
+  // E_STRICT was removed from PHP 8.4 and higher, but still exists in older
+  // versions.
+  if (version_compare(PHP_VERSION, '8.4.0') < 0) {
+    $types[E_STRICT] = array('Strict warning', WATCHDOG_DEBUG);
+  }
 
   return $types;
 }
@@ -107,8 +111,8 @@ function _backdrop_decode_exception($exception) {
       // We remove that call.
       array_shift($backtrace);
     }
-    if (isset($exception->query_string, $exception->args)) {
-      $message .= ": " . $exception->query_string . "; " . print_r($exception->args, TRUE);
+    if (isset($exception->errorInfo['query_string'], $exception->errorInfo['args'])) {
+      $message .= ": " . $exception->errorInfo['query_string'] . "; " . print_r($exception->errorInfo['args'], TRUE);
     }
   }
   $caller = _backdrop_get_last_caller($backtrace);

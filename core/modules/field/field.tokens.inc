@@ -99,7 +99,7 @@ function field_pre_render_token(&$elements) {
   unset($elements['#states']);
   unset($elements['#attached']);
 
-  // Prevent multi-value fields from appearing smooshed together by appending
+  // Prevent multi-value fields from appearing collapsed together by appending
   // a join suffix to all but the last value.
   $deltas = element_get_visible_children($elements);
   $count = count($deltas);
@@ -150,8 +150,8 @@ function _field_token_info($field_name = NULL) {
 
             // Find which label is most commonly used.
             foreach ($field['bundles'][$entity_type] as $bundle) {
-              // Field information will included fields attached to disabled
-              // bundles, so check that the bundle exists before provided a
+              // Field information will include fields attached to disabled
+              // bundles, so check that the bundle exists before providing a
               // token for it.
               // @see http://drupal.org/node/1252566
               if (!isset($entity_info[$entity_type]['bundles'][$bundle])) {

@@ -6,6 +6,9 @@
  * Although Basis itself does not provide any settings, we use this file to
  * inform the user that the module supports color schemes if the Color module
  * is enabled.
+ *
+ * @var array $form
+ *   Modifications to this variable affect the contents of the theme form.
  */
 
 if (module_exists('color')) {

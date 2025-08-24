@@ -30,7 +30,7 @@ Backdrop.fieldUIFieldOverview = {
     $('.field-type-select', table).each(function () {
       this.targetSelect = $('.widget-type-select', $(this).closest('tr'));
 
-      $(this).bind('change keyup', function () {
+      $(this).on('change keyup', function () {
         var selectedFieldType = this.options[this.selectedIndex].value;
         var options = (selectedFieldType in widgetTypes ? widgetTypes[selectedFieldType] : []);
         var widgetDefault = null;
@@ -40,7 +40,7 @@ Backdrop.fieldUIFieldOverview = {
         this.targetSelect.fieldUIPopulateOptions(options, null, widgetDefault);
       });
 
-      // Trigger change on initial pageload to get the right widget options
+      // Trigger change on initial page load to get the right widget options
       // when field type comes pre-selected (on failed validation).
       $(this).trigger('change', false);
     });
@@ -51,11 +51,11 @@ Backdrop.fieldUIFieldOverview = {
       this.targetTextfield = $('.label-textfield', $(this).closest('tr'));
       this.targetTextfield
         .data('field_ui_edited', false)
-        .bind('keyup', function (e) {
+        .on('keyup', function (e) {
           $(this).data('field_ui_edited', $(this).val() != '');
         });
 
-      $(this).bind('change keyup', function (e, updateText) {
+      $(this).on('change keyup', function (e, updateText) {
         updateText = (typeof updateText === 'undefined' ? true : updateText);
         var selectedField = this.options[this.selectedIndex].value;
         var selectedFieldType = (selectedField in fields ? fields[selectedField].type : null);
@@ -75,7 +75,7 @@ Backdrop.fieldUIFieldOverview = {
         }
       });
 
-      // Trigger change on initial pageload to get the right widget options
+      // Trigger change on initial page load to get the right widget options
       // and label when field type comes pre-selected (on failed validation).
       $(this).trigger('change', false);
     });
@@ -258,7 +258,7 @@ Backdrop.fieldUIOverview = {
 
       // Fire the Ajax update.
       $('input[name=refresh_rows]').val(rowNames.join(' '));
-      $('input#edit-refresh').mousedown();
+      $('input#edit-refresh').trigger('mousedown');
 
       // Disabled elements do not appear in POST ajax data, so we mark the
       // elements disabled only after firing the request.
@@ -291,7 +291,7 @@ Backdrop.fieldUIDisplayOverview.field = function (row, data) {
 
   // Attach change listener to the 'formatter type' select.
   this.$formatSelect = $('select.field-formatter-type', row);
-  this.$formatSelect.change(Backdrop.fieldUIOverview.onChange);
+  this.$formatSelect.on('change', Backdrop.fieldUIOverview.onChange);
 
   return this;
 };
