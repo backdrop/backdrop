@@ -69,6 +69,7 @@ function node_add($type) {
   global $user;
 
   $types = node_type_get_types();
+  /** @var Node $node */
   $node = entity_create('node', array(
     'uid' => $user->uid,
     'name' => (isset($user->name) ? $user->name : ''),

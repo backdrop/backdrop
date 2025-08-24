@@ -3803,6 +3803,42 @@ function system_update_1102() {
 }
 
 /**
+ * Create system.extensions config and populate with enabled modules and themes.
+ */
+function system_update_1103() {
+  $result = db_query("SELECT name, status, type, schema_version, info FROM {system} ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+  $modules = [];
+  $themes = [];
+  foreach ($result as $row) {
+    $extension = (array) $row;
+    $extension['info'] = unserialize($extension['info']);
+
+    if ($extension['type'] === 'module') {
+      // Do not include hidden modules in the list.
+      if (!empty($extension['info']['hidden'])) {
+        continue;
+      }
+      // Do not include uninstalled modules in the list.
+      if ($extension['schema_version'] == -1) {
+        continue;
+      }
+
+      $modules[$extension['name']] = (bool) $extension['status'];
+    }
+
+    // Only add enabled themes to the list.
+    if ($extension['type'] === 'theme' && $extension['status']) {
+      $themes[$extension['name']] = (bool) $extension['status'];
+    }
+  }
+
+  $config = config('system.extensions');
+  $config->set('modules', $modules);
+  $config->set('themes', $themes);
+  $config->save();
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

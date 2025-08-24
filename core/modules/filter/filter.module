@@ -232,7 +232,7 @@ function filter_config_info() {
 /**
  * Implements hook_config_data_validate().
  */
-function filter_config_data_validate(Config $config, array $config_info) {
+function filter_config_data_validate(Config $config, ?array $config_info) {
   if (strpos($config->getName(), 'filter.format.') === 0) {
     $filters = $config->get('filters');
     $all_filter_info = filter_get_filters();

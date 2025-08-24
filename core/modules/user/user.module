@@ -3119,6 +3119,7 @@ function user_build_filter_query(SelectQuery $query) {
     // the authenticated role. If so, then all users would be listed, and we can
     // skip adding it to the filter query.
     if ($key == 'permission') {
+      /** @var User $account */
       $account = entity_create('user', array());
       $account->uid = 'user_filter';
       $account->roles = array(BACKDROP_AUTHENTICATED_ROLE);
