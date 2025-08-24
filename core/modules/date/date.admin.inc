@@ -558,10 +558,6 @@ function _date_field_settings_form($field, $instance, $has_data) {
   }
   $tz_handling = $settings['tz_handling'];
 
-  $description = '';
-  if ($has_data) {
-    $description = t('Changing date granularity will affect only new or updated content.');
-  }
   $options = date_granularity_names();
   $checkbox_year = array(
     '#type' => 'checkbox',
@@ -579,15 +575,14 @@ function _date_field_settings_form($field, $instance, $has_data) {
     '#attributes' => array(
       'class' => array('container-inline'),
     ),
-    '#description' => $description,
+    '#description' => $has_data ? t('Changing date granularity will affect only new or updated content.') : '',
     'year' => $checkbox_year,
   );
 
-  $description = t('End dates are used to collect duration, e.g. allow an event to start on September 15, and end on September 16.');
   $form['enddate_get'] = array(
     '#type' => 'checkbox',
     '#title' => t('Collect an end date'),
-    '#description' => $description,
+    '#description' => t('End dates are used to collect duration, e.g. allow an event to start on September 15, and end on September 16.'),
     '#default_value' => (empty($settings['todate']) ? FALSE : TRUE),
     '#disabled' => $has_data,
   );
@@ -602,30 +597,12 @@ function _date_field_settings_form($field, $instance, $has_data) {
       ),
     ),
   );
-  $description = t('Select the timezone handling method for this date field.');
-  $form['tz_handling'] = array(
-    '#type' => 'select',
-    '#title' => t('Time zone handling'),
-    '#default_value' => $tz_handling,
-    '#options' => date_timezone_handling_options(),
-    '#description' => $description,
-    '#attached' => array(
-      'js' => array(backdrop_get_path('module', 'date') . '/js/date.admin.js'),
-    ),
-  );
-  // Force this value to hidden because we don't want to allow it to be changed
-  // right now, but allow it to be a variable if needed.
-  $form['timezone_db'] = array(
-    '#type' => 'hidden',
-    '#value' => date_get_timezone_db($tz_handling),
-  );
 
   $form['cache_enabled'] = array(
     '#type' => 'checkbox',
     '#title' => t('Cache dates'),
     '#description' => t('Create and cache date objects when date fields are loaded, rather than when they are displayed. This can help to improve performance.'),
     '#default_value' => !empty($settings['cache_enabled']),
-    '#weight' => 10,
   );
   $form['cache_count'] = array(
     '#type' => 'textfield',
@@ -633,7 +610,6 @@ function _date_field_settings_form($field, $instance, $has_data) {
     '#default_value' => (isset($settings['cache_count'])) ? $settings['cache_count'] : 4,
     '#description' => t("If set to '0', all date values on every entity will be cached. Note that caching every date on fields that may have a large number of multiple or repeating values may create a significant performance penalty when the cache is cleared. The suggested setting for multiple value and repeating fields is no more than 4 values per field."),
     '#size' => 3,
-    '#weight' => 11,
     '#states' => array(
       'visible' => array(
         'input[name="field[settings][cache_enabled]"]' => array(
@@ -641,6 +617,23 @@ function _date_field_settings_form($field, $instance, $has_data) {
         ),
       ),
     ),
+  );
+
+  $form['tz_handling'] = array(
+    '#type' => 'radios',
+    '#title' => t('Time zone handling method'),
+    '#default_value' => $tz_handling,
+    '#options' => date_timezone_handling_options(),
+    '#attached' => array(
+      'js' => array(backdrop_get_path('module', 'date') . '/js/date.admin.js'),
+    ),
+  );
+  $form['tz_handling'] += date_timezone_handling_options_descriptions();
+  // Force this value to hidden because we don't want to allow it to be changed
+  // right now, but allow it to be a variable if needed.
+  $form['timezone_db'] = array(
+    '#type' => 'hidden',
+    '#value' => date_get_timezone_db($tz_handling),
   );
 
   $context = array(
@@ -700,18 +693,65 @@ function date_field_settings_validate(&$form, &$form_state) {
  * Timezone handling options.
  *
  * The 'none' option will do no timezone conversions and will store and display
- * dates exactly as entered useful in locales or situations where timezone
+ * dates exactly as entered. Useful in locales or situations where timezone
  * conversions are not working reliably, for dates with no times, for historical
  * dates where timezones are irrelevant, or anytime conversion is unnecessary or
  * undesirable.
  */
 function date_timezone_handling_options() {
   return array(
-    'site' => t("Site's time zone"),
-    'date' => t("Date's time zone"),
-    'user' => t("User's time zone"),
-    'utc'  => 'UTC',
-    'none' => t('No time zone conversion'),
+    'site' => t("Site's default time zone"),
+    'date' => t('Allow selecting a time zone when entering a date'),
+    'user' => t('User account preferred time zone'),
+    'utc'  => t('UTC'),
+    'none' => t('No time zone conversion (store and display dates exactly as entered)'),
   );
 }
 
+/**
+ * Descriptions for the timezone handling options.
+ *
+ * @see date_timezone_handling_options()
+ * @see _date_field_settings_form()
+ *
+ * @since 1.28.1 Function added.
+ */
+function date_timezone_handling_options_descriptions() {
+  $system_date = config('system.date');
+  $date_default_timezone = $system_date->get('default_timezone');
+  $configurable_timezones = $system_date->get('user_configurable_timezones');
+
+  $zones = system_time_zones();
+  $default_timezone = isset($date_default_timezone) ? $zones[$date_default_timezone] : date_default_timezone_get();
+
+  $regional_settings_path = 'admin/config/regional/settings';
+  $regional_settings_access = user_access('administer site configuration');
+  // Only render the "Regional settings" text as a link if the user has
+  // permission to configure site settings. Otherwise just the title of the page
+  // wrapped in double quotes.
+  $regional_settings = $regional_settings_access ? l(t('Regional settings'), 'admin/config/regional/settings', array('attributes' => array('target' => '_blank'))) : t('"Regional settings"');
+
+  return array(
+    'site' => array(
+      '#description' => t('Use the "Default time zone" setting, as configured in the !regional_settings. <br> <strong>Currently set to</strong>: @setting', array(
+        '!regional_settings' => $regional_settings,
+        '@setting' => $default_timezone,
+      )),
+    ),
+    'date' => array(
+      '#description' => t('Exposes a timezone selection menu in the form widget for this field. The timezone in that menu defaults to UTC.'),
+    ),
+    'user' => array(
+      '#description' => t('Uses the time zone configured in the "Region and language" setting of each user account. <br> This option requires the "Users may set their own time zone" setting to be enabled in the !regional_settings configuration (<strong>currently @status</strong>).', array(
+        '!regional_settings' => $regional_settings,
+        '@status' => $configurable_timezones ? t('enabled') : t('disabled'),
+      )),
+    ),
+    'utc'  => array(
+      '#description' => t('<a href="https://en.wikipedia.org/wiki/Coordinated_Universal_Time" target="_blank">Coordinated Universal Time (UTC)</a> is the primary time standard globally used to regulate clocks and time.'),
+    ),
+    'none' => array(
+      '#description' => t('Useful in situations where timezone conversions are not working reliably, for dates with no times, for historical dates where timezones are irrelevant, or anytime conversion is unnecessary or undesirable.'),
+    ),
+  );
+}
