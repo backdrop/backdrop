@@ -215,7 +215,7 @@ function path_admin_form_delete_submit($form, &$form_state) {
  *   Array of language codes.
  *
  * @return string
- *   Comma separated language names or codes, if language got removed.
+ *   Comma separated language names (or codes, if the language name is unknown).
  */
 function _path_get_language_names(array $language_codes) {
   $languages = array();
