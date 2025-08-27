@@ -2527,6 +2527,23 @@ class LocaleUrlRewritingTest extends BackdropWebTestCase {
     $url = url($url, array('language' => $language));
     $this->assertEqual($url, '/fr/node', 'The URL is not rewritten again.');
   }
+
+  /**
+   * Check that rewriting a URL that is a public file url does not prefix
+   * the current langcode.
+   */
+  public function testPublicFileUrlPrefixRewriting() {
+    // Create a URL pointing to a public file.
+    $public_path = config_get('system.core', 'file_public_path');
+    $file_url = '/' . $public_path . '/test.pdf';
+    $languages = language_list();
+    $language = $languages['fr'];
+    $url = url($file_url, array('language' => $language));
+
+    // Check that the URL is rewritten correctly, meaning it should not have
+    // the language prefix added.
+    $this->assertEqual($url, $file_url);
+  }
 }
 
 /**

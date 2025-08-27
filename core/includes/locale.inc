@@ -487,6 +487,10 @@ function locale_language_url_rewrite_url(&$path, &$options) {
         $prefixes = locale_language_negotiation_url_prefixes();
         if (!empty($prefixes[$options['language']->langcode])) {
           $path = ltrim((string) $path, '/');
+          $public_path = config_get('system.core', 'file_public_path');
+          if (substr($path, 0, strlen($public_path)) == $public_path) {
+            break;
+          }
           $prefix = $prefixes[$options['language']->langcode] . '/';
           $options['prefix'] = $prefix;
           if (substr($path, 0, strlen($prefix)) == $prefix) {
