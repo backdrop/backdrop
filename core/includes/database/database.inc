@@ -2218,6 +2218,9 @@ interface DatabaseStatementInterface extends Traversable {
    * See http://php.net/manual/pdo.constants.php for the definition of the
    * constants used.
    *
+   * Commented out to ensure compatibility of PDOStatement::setFetchMode()
+   * between PHP 7 and 8. See https://github.com/backdrop/backdrop-issues/issues/6954
+   *
    * @param int $mode
    *   One of the PDO::FETCH_* constants.
    * @param int|string|object|null $a1
@@ -2229,7 +2232,7 @@ interface DatabaseStatementInterface extends Traversable {
    *   If $mode is PDO::FETCH_CLASS, the optional arguments to pass to the
    *   constructor.
    */
-  public function setFetchMode(int $mode, $a1 = NULL, ?array $a2 = NULL);
+  // public function setFetchMode(int $mode, $a1 = NULL, ?array $a2 = NULL);
 
   /**
    * Fetches the next row from a result set.
