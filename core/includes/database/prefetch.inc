@@ -243,7 +243,7 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
   /**
    * @see PDOStatement::setFetchMode()
    */
-  public function setFetchMode($fetchStyle, $a2 = NULL, $a3 = NULL) {
+  public function setFetchMode(int $fetchStyle, $a2 = NULL, ?array $a3 = NULL) {
     $this->defaultFetchStyle = $fetchStyle;
     switch ($fetchStyle) {
       case PDO::FETCH_CLASS:
@@ -384,7 +384,7 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
   /**
    * {@inheritdoc}
    */
-  public function fetch($fetch_style = NULL, $cursor_orientation = PDO::FETCH_ORI_NEXT, $cursor_offset = NULL) {
+  public function fetch(int $fetch_style = PDO::FETCH_DEFAULT, int $cursor_orientation = PDO::FETCH_ORI_NEXT, int $cursor_offset = 0) {
     if (isset($this->currentRow)) {
       // Set the fetch parameter.
       $this->fetchStyle = isset($fetch_style) ? $fetch_style : $this->defaultFetchStyle;
@@ -430,7 +430,7 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
   /**
    * {@inheritdoc}
    */
-  public function fetchObject($class_name = NULL, $constructor_args = array()) {
+  public function fetchObject(?string $class_name = NULL, array $constructor_args = array()) {
     if (isset($this->currentRow)) {
       if (!isset($class_name)) {
         // Directly cast to an object to avoid a function call.
@@ -472,7 +472,7 @@ class DatabaseStatementPrefetch implements Iterator, DatabaseStatementInterface 
   /**
    * {@inheritdoc}
    */
-  public function fetchAll($fetch_style = NULL, $fetch_column = NULL, $constructor_args = array()) {
+  public function fetchAll(int $fetch_style = PDO::FETCH_DEFAULT, $fetch_column = NULL, ?array $constructor_args = array()) {
     $this->fetchStyle = isset($fetch_style) ? $fetch_style : $this->defaultFetchStyle;
     $this->fetchOptions = $this->defaultFetchOptions;
     if (isset($fetch_column)) {

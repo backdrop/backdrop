@@ -631,6 +631,25 @@ abstract class DatabaseConnection {
   }
 
   /**
+   * Provides a pass-through to the PDO errorInfo method.
+   *
+   * In adding support for PHP 8, the Backdrop DatabaseConnection no longer
+   * directly extends the PHP PDO object. A side-effect is that calls
+   * to PDO methods no longer worked. This provides a pass-through
+   * to this method.
+   *
+   * @return array
+   *   - SQLSTATE error code
+   *   - error code
+   *   - error message
+   *
+   * @since 1.32.0
+   */
+  public function errorInfo() {
+    return $this->pdo->errorInfo();
+  }
+
+  /**
    * Creates the appropriate sequence name for a given table and serial field.
    *
    * This information is exposed to all database drivers, although it is only
@@ -2199,18 +2218,18 @@ interface DatabaseStatementInterface extends Traversable {
    * See http://php.net/manual/pdo.constants.php for the definition of the
    * constants used.
    *
-   * @param $mode
+   * @param int $mode
    *   One of the PDO::FETCH_* constants.
-   * @param $a1
+   * @param int|string|object|null $a1
    *   An option depending of the fetch mode specified by $mode:
    *   - for PDO::FETCH_COLUMN, the index of the column to fetch
    *   - for PDO::FETCH_CLASS, the name of the class to create
    *   - for PDO::FETCH_INTO, the object to add the data to
-   * @param $a2
+   * @param array|null $a2
    *   If $mode is PDO::FETCH_CLASS, the optional arguments to pass to the
    *   constructor.
    */
-  // public function setFetchMode($mode, $a1 = NULL, $a2 = array());
+  public function setFetchMode(int $mode, $a1 = NULL, ?array $a2 = NULL);
 
   /**
    * Fetches the next row from a result set.
@@ -2218,18 +2237,18 @@ interface DatabaseStatementInterface extends Traversable {
    * See http://php.net/manual/pdo.constants.php for the definition of the
    * constants used.
    *
-   * @param $mode
+   * @param int $mode
    *   One of the PDO::FETCH_* constants.
    *   Default to what was specified by setFetchMode().
-   * @param $cursor_orientation
+   * @param int $cursor_orientation
    *   Not implemented in all database drivers, don't use.
-   * @param $cursor_offset
+   * @param int $cursor_offset
    *   Not implemented in all database drivers, don't use.
    *
    * @return mixed
    *   A result, formatted according to $mode.
    */
-  // public function fetch($mode = NULL, $cursor_orientation = NULL, $cursor_offset = NULL);
+  public function fetch(int $mode = PDO::FETCH_DEFAULT, int $cursor_orientation = PDO::FETCH_ORI_NEXT, int $cursor_offset = 0);
 
   /**
    * Returns a single field from the next record of a result set.
@@ -2247,8 +2266,16 @@ interface DatabaseStatementInterface extends Traversable {
    *
    * The object will be of the class specified by
    * DatabaseStatementInterface::setFetchMode() or stdClass if not specified.
+   *
+   * @param string|null $class
+   *   Name of the created class or NULL to use the default.
+   * @param array $constructorArgs
+   *   Optional arguments to pass to the constructor.
+   *
+   * @return object|false
+   *   An object, or FALSE if there is no next row.
    */
-  // public function fetchObject();
+  public function fetchObject(?string $class = 'stdClass', array $constructorArgs = array());
 
   /**
    * Fetches the next row and returns it as an associative array.
@@ -2267,15 +2294,15 @@ interface DatabaseStatementInterface extends Traversable {
    *
    * @param int $mode
    *   One of the PDO::FETCH_* constants.
-   * @param int $column_index
+   * @param int|string|callable|null $column_index
    *   If $mode is PDO::FETCH_COLUMN, the index of the column to fetch.
-   * @param array $constructor_arguments
+   * @param array|null $constructor_arguments
    *   If $mode is PDO::FETCH_CLASS, the arguments to pass to the constructor.
    *
    * @return array
    *   An array of results.
    */
-  // function fetchAll($mode = NULL, $column_index = NULL, array $constructor_arguments);
+  public function fetchAll(int $mode = PDO::FETCH_DEFAULT, $column_index = NULL, ?array $constructor_arguments = array());
 
   /**
    * Returns an entire single column of a result set as an indexed array.
@@ -2497,14 +2524,14 @@ class DatabaseStatementEmpty implements Iterator, DatabaseStatementInterface {
   /**
    * {@inheritdoc}
    */
-  public function setFetchMode($mode, $a1 = NULL, $a2 = array()) {
+  public function setFetchMode(int $mode, $a1 = NULL, ?array $a2 = array()) {
     return NULL;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function fetch($mode = NULL, $cursor_orientation = NULL, $cursor_offset = NULL) {
+  public function fetch(int $mode = PDO::FETCH_DEFAULT, $cursor_orientation = PDO::FETCH_ORI_NEXT, int $cursor_offset = 0) {
     return NULL;
   }
 
@@ -2518,7 +2545,7 @@ class DatabaseStatementEmpty implements Iterator, DatabaseStatementInterface {
   /**
    * {@inheritdoc}
    */
-  public function fetchObject() {
+  public function fetchObject(?string $class = 'stdClass', array $constructorArgs = array()) {
     return NULL;
   }
 
@@ -2532,7 +2559,7 @@ class DatabaseStatementEmpty implements Iterator, DatabaseStatementInterface {
   /**
    * {@inheritdoc}
    */
-  public function fetchAll($mode = NULL, $column_index = NULL, $constructor_arguments = array()) {
+  public function fetchAll(int $mode = PDO::FETCH_DEFAULT, $column_index = NULL, ?array $constructor_arguments = array()) {
     return array();
   }
 
