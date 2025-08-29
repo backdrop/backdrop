@@ -3839,6 +3839,27 @@ function system_update_1103() {
 }
 
 /**
+ * Update existing Views with grid display to be unresponsive.
+ */
+function system_update_1104() {
+  $views = config_get_names_with_prefix('views.view.');
+  foreach ($views as $view) {
+    $config = config($view);
+    foreach ($config->get('display') as $display_name => $display) {
+      if (isset($display['display_options']['style_plugin']) && $display['display_options']['style_plugin'] == 'grid') {
+        // Set unresponsive to keep it backwards-compatible.
+        $unresponsive = $config->get('display.' . $display_name . '.display_options.style_options.unresponsive');
+        if ($unresponsive == NULL) {
+          $config->set('display.' . $display_name . '.display_options.style_options.unresponsive', 1);
+          $config->save();
+        }
+      }
+    }
+  }
+  cache_clear_all();
+}
+
+/**
  * @} End of "defgroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */
