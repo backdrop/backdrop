@@ -62,6 +62,15 @@
  *       omitted if this entity type exposes a single bundle (all entities have
  *       the same collection of fields). The name of this single bundle will be
  *       the same as the entity type.
+ *      - label: The name of the property that contains the label for the entity.
+ *       This property is used in the core entity class's label method. The label
+ *       can be overridden by setting a 'label callback' on the entity which the
+ *       core entity class will call instead if it's set.
+ *   - label callback: The name of a function that will be called to override the
+ *     label property set in 'entity keys'. By default the core entity class will
+ *     use the default label method and the label property set in 'entity keys'
+ *     to set the entity's label. The argument passed to 'label callback' is the
+ *     entity object.
  *   - bundle keys: An array describing how the Field API can extract the
  *     information it needs from the bundle objects for this type (e.g
  *     $vocabulary objects for terms; not applicable for nodes). This entry can
@@ -117,6 +126,8 @@
  *
  * @see entity_load()
  * @see hook_entity_info_alter()
+ *
+ * @since 1.32.0 The "label callback" key was restored.
  */
 function hook_entity_info() {
   $return = array(
@@ -134,6 +145,7 @@ function hook_entity_info() {
         'id' => 'nid',
         'revision' => 'vid',
         'bundle' => 'type',
+        'label' => 'title',
       ),
       'bundle keys' => array(
         'bundle' => 'type',

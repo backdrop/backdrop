@@ -114,6 +114,11 @@ function user_theme() {
     'user_simplified_page' => array(
       'variables' => array('form' => array(), 'links' => array()),
       'template' => 'templates/user-simplified-page',
+      'attached' => array(
+        'css' => array(
+          backdrop_get_path('module', 'user') . '/css/user-simplified-page.css' => array(),
+        ),
+      ),
     ) + $base,
     'user_links_page' => array(
       'variables' => array('form' => array(), 'links' => array()),
@@ -137,6 +142,7 @@ function user_entity_info() {
       'entity keys' => array(
         'id' => 'uid',
       ),
+      'label callback' => 'user_format_name',
       'bundles' => array(
         'user' => array(
           'label' => t('User account'),
@@ -572,7 +578,7 @@ function user_is_blocked($name) {
  *
  * @param string $role_name
  *   A string representing the role name.
- * @param User $account
+ * @param User|null $account
  *   (optional) A user account. Defaults to the current user.
  *
  * @return bool
@@ -580,7 +586,7 @@ function user_is_blocked($name) {
  *
  * @since 1.14.0 First parameter changed from $rid to $role_name.
  */
-function user_has_role($role_name, User $account = NULL) {
+function user_has_role($role_name, ?User $account = NULL) {
   if (!$account) {
     $account = $GLOBALS['user'];
   }
@@ -860,10 +866,11 @@ function user_account_form(&$form, &$form_state) {
       '#password_strength' => TRUE,
     );
     // To skip the current password field, the user must have logged in via a
-    // one-time link and have the token in the URL. Store this in $form_state
-    // so it persists even on subsequent Ajax requests.
+    // one-time link and have the token in the URL. Store this in $form_state,
+    // so it persists even on subsequent AJAX requests.
     if (!isset($form_state['user_pass_reset'])) {
-      $form_state['user_pass_reset'] = isset($_SESSION['pass_reset_' . $account->uid]) && isset($_GET['pass-reset-token']) && ($_GET['pass-reset-token'] == $_SESSION['pass_reset_' . $account->uid]);
+      $session_key = 'pass_reset_' . $account->uid;
+      $form_state['user_pass_reset'] = isset($_SESSION[$session_key]) && isset($_GET['pass-reset-token']) && hash_equals($_SESSION[$session_key], $_GET['pass-reset-token']);
     }
     $protected_values = array();
     $current_pass_description = '';
@@ -1835,11 +1842,14 @@ function user_admin_paths() {
  * Implements hook_user_login_paths().
  */
 function user_user_login_paths() {
-  return array(
+  $paths = array(
     'user/login' => TRUE,
     'user/password' => TRUE,
-    'user/register' => TRUE,
   );
+  if (config_get('system.core', 'user_register') != USER_REGISTER_ADMINISTRATORS_ONLY) {
+    $paths['user/register'] = TRUE;
+  }
+  return $paths;
 }
 
 /**
@@ -1855,6 +1865,9 @@ function user_custom_theme() {
   }
   $user_login_appearance = config_get('system.core', 'user_login_appearance');
   if ($user_login_appearance == 'simplified') {
+    if (!backdrop_valid_path(current_path(), TRUE)) {
+      return NULL;
+    }
     $login_theme = config_get('system.core', 'login_admin_theme');
     if ($login_theme) {
       $login_theme = config_get('system.core', 'admin_theme');
@@ -2618,7 +2631,7 @@ function user_delete_multiple(array $uids) {
       watchdog_exception('user', $e);
       throw $e;
     }
-    entity_get_controller('user')->resetCache();
+    entity_get_controller('user')->resetCache($uids);
   }
 }
 
@@ -3107,6 +3120,7 @@ function user_build_filter_query(SelectQuery $query) {
     // the authenticated role. If so, then all users would be listed, and we can
     // skip adding it to the filter query.
     if ($key == 'permission') {
+      /** @var User $account */
       $account = entity_create('user', array());
       $account->uid = 'user_filter';
       $account->roles = array(BACKDROP_AUTHENTICATED_ROLE);

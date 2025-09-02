@@ -662,16 +662,6 @@ abstract class DatabaseTasks {
       '#description' => st('If your database server is listening to a non-standard port, enter its number.'),
     );
 
-    $form['advanced_options']['charset'] = array(
-      '#type' => 'hidden',
-      '#default_value' => empty($database['charset']) ? 'utf8mb4' : $database['charset'],
-    );
-
-    $form['advanced_options']['collation'] = array(
-      '#type' => 'hidden',
-      '#default_value' => empty($database['collation']) ? 'utf8mb4_general_ci' : $database['collation'],
-    );
-
     return $form;
   }
 
@@ -1092,6 +1082,7 @@ function backdrop_uninstall_modules($module_list = array(), $uninstall_dependent
     $module_list = array_keys($module_list);
   }
 
+  $system_extensions_config = config('system.extensions');
   foreach ($module_list as $module) {
     // Uninstall the module.
     module_load_install($module);
@@ -1099,9 +1090,15 @@ function backdrop_uninstall_modules($module_list = array(), $uninstall_dependent
     config_uninstall_config($module);
     backdrop_uninstall_schema($module);
 
+    // Remove the module from the system.extensions config.
+    $system_extensions_config->clear('modules.' . $module);
+
     watchdog('system', '%module module uninstalled.', array('%module' => $module), WATCHDOG_INFO);
     backdrop_set_installed_schema_version($module, SCHEMA_UNINSTALLED);
   }
+
+  // Save the new list of extensions with the modules removed.
+  $system_extensions_config->save();
 
   if (!empty($module_list)) {
     // Let other modules react.

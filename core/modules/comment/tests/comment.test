@@ -556,6 +556,8 @@ class CommentInterfaceTest extends CommentHelperCase {
 
     // Create a new comment. This helper function may be run with different
     // comment settings so use comment_save() to avoid complex setup.
+
+    /** @var Comment $comment */
     $comment = entity_create('comment', array(
       'cid' => NULL,
       'nid' => $this->node->nid,
@@ -611,6 +613,7 @@ class CommentInterfaceTest extends CommentHelperCase {
       $node = $this->backdropCreateNode(array('type' => 'post', 'uid' => $case['node_uid']));
 
       // Add a comment.
+      /** @var Comment $comment */
       $comment = entity_create('comment', array(
         'nid' => $node->nid,
         'uid' => $case['comment_uid'],
@@ -896,6 +899,7 @@ class CommentInterfaceTest extends CommentHelperCase {
       if ($info['comment count']) {
         // Create a comment via CRUD API functionality, since
         // $this->postComment() relies on actual user permissions.
+        /** @var Comment $comment */
         $comment = entity_create('comment', array(
           'cid' => NULL,
           'nid' => $this->node->nid,
@@ -1687,6 +1691,7 @@ class CommentApprovalTest extends CommentHelperCase {
     // Get unapproved comment id.
     $this->backdropLogin($this->admin_user);
     $anonymous_comment4 = $this->getUnapprovedComment($subject);
+    /** @var Comment $anonymous_comment4 */
     $anonymous_comment4 = entity_create('comment', array('id' => $anonymous_comment4, 'subject' => $subject, 'comment' => $body));
     $this->backdropLogout();
 
@@ -1753,6 +1758,7 @@ class CommentApprovalTest extends CommentHelperCase {
     // Get unapproved comment id.
     $this->backdropLogin($this->admin_user);
     $anonymous_comment4 = $this->getUnapprovedComment($subject);
+    /** @var Comment $anonymous_comment4 */
     $anonymous_comment4 = entity_create('comment', array('id' => $anonymous_comment4, 'subject' => $subject, 'comment' => $body));
     $this->backdropLogout();
 

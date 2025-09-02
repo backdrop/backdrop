@@ -487,7 +487,8 @@ function file_entity_info() {
       'entity class' => 'File',
       'entity keys' => array(
         'id' => 'fid',
-        'bundle' => 'type'
+        'bundle' => 'type',
+        'label' => 'filename',
       ),
       'bundle keys' => array(
         'bundle' => 'type'
@@ -598,6 +599,10 @@ function file_file_formatter_info() {
   // Allow file field formatters to be reused for displaying the file entity's
   // file pseudo-field.
   foreach (field_info_formatter_types() as $key => $formatter) {
+    // Filter out unrelated field formatters from core or contrib.
+    if (!isset($formatter['file formatter']) && $formatter['module'] != 'file') {
+      continue;
+    }
     if (array_intersect($formatter['field types'], array('file', 'image'))) {
       $key = 'file_field_' . $key;
       $formatters[$key] = array(
@@ -1984,11 +1989,13 @@ function file_icon_map(File $file) {
     // Word document types.
     case 'application/msword':
     case 'application/vnd.ms-word.document.macroEnabled.12':
+    case 'application/vnd.ms-word.template.macroEnabled.12':
     case 'application/vnd.oasis.opendocument.text':
     case 'application/vnd.oasis.opendocument.text-template':
     case 'application/vnd.oasis.opendocument.text-master':
     case 'application/vnd.oasis.opendocument.text-web':
     case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
+    case 'application/vnd.openxmlformats-officedocument.wordprocessingml.template':
     case 'application/vnd.stardivision.writer':
     case 'application/vnd.sun.xml.writer':
     case 'application/vnd.sun.xml.writer.template':
@@ -2003,9 +2010,11 @@ function file_icon_map(File $file) {
     // Spreadsheet document types.
     case 'application/vnd.ms-excel':
     case 'application/vnd.ms-excel.sheet.macroEnabled.12':
+    case 'application/vnd.ms-excel.sheet.binary.macroEnabled.12':
     case 'application/vnd.oasis.opendocument.spreadsheet':
     case 'application/vnd.oasis.opendocument.spreadsheet-template':
     case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
+    case 'application/vnd.openxmlformats-officedocument.spreadsheetml.template':
     case 'application/vnd.stardivision.calc':
     case 'application/vnd.sun.xml.calc':
     case 'application/vnd.sun.xml.calc.template':
@@ -2019,9 +2028,12 @@ function file_icon_map(File $file) {
     // Presentation document types.
     case 'application/vnd.ms-powerpoint':
     case 'application/vnd.ms-powerpoint.presentation.macroEnabled.12':
+    case 'application/vnd.ms-powerpoint.slideshow.macroEnabled.12':
     case 'application/vnd.oasis.opendocument.presentation':
     case 'application/vnd.oasis.opendocument.presentation-template':
     case 'application/vnd.openxmlformats-officedocument.presentationml.presentation':
+    case 'application/vnd.openxmlformats-officedocument.presentationml.template':
+    case 'application/vnd.openxmlformats-officedocument.presentationml.slideshow':
     case 'application/vnd.stardivision.impress':
     case 'application/vnd.sun.xml.impress':
     case 'application/vnd.sun.xml.impress.template':

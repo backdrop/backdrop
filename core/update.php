@@ -29,8 +29,8 @@ chdir(BACKDROP_ROOT);
 // The minimum version is specified explicitly, as BACKDROP_MINIMUM_PHP is not
 // yet available. It is defined in bootstrap.inc, but it is not possible to
 // load that file yet as it would cause a fatal error on older versions of PHP.
-if (version_compare(PHP_VERSION, '5.6.0') < 0) {
-  print 'Your PHP installation is too old. Backdrop CMS requires at least PHP 5.6.0. See the <a href="https://backdropcms.org/guide/requirements">System Requirements</a> page for more information.';
+if (version_compare(PHP_VERSION, '7.1.0') < 0) {
+  print 'Your PHP installation is too old. Backdrop CMS requires at least PHP 7.1.0. See the <a href="https://backdropcms.org/guide/requirements">System Requirements</a> page for more information.';
   exit;
 }
 
@@ -149,9 +149,8 @@ function update_script_selection_form($form, &$form_state) {
     '#value' => t('Apply pending updates'),
   );
   $form['actions']['cancel'] = array(
-    '#type' => 'link',
-    '#href' => $_SERVER['SCRIPT_NAME'],
-    '#title' => t('Cancel'),
+    '#type' => 'markup',
+    '#markup' => '<a href="' . $_SERVER['SCRIPT_NAME'] . '">' . t('Cancel') . '</a>',
   );
 
   return $form;
@@ -268,6 +267,7 @@ function update_results_page() {
     }
   }
 
+  unset($_SESSION['update_initialized']);
   unset($_SESSION['update_results']);
   unset($_SESSION['update_success']);
 
@@ -363,13 +363,12 @@ function update_backup_form($form, &$form_state) {
 
   $query = backdrop_get_query_parameters();
   $query['op'] = 'selection';
+  // Low level URL building to avoid problems with language prefix on
+  // multilingual sites.
+  $skip_url = $_SERVER['SCRIPT_NAME'] . '?' . backdrop_http_build_query($query);
   $form['actions']['continue'] = array(
-    '#type' => 'link',
-    '#href' => $_SERVER['SCRIPT_NAME'],
-    '#options' => array(
-      'query' => $query,
-    ),
-    '#title' => t('Skip backup'),
+    '#type' => 'markup',
+    '#markup' => '<a href="' . $skip_url . '">' . t('Skip backup') . '</a>',
   );
 
   return $form;
@@ -610,6 +609,7 @@ if (update_access_allowed()) {
       break;
 
     case 'check_updates':
+      $_SESSION['update_initialized'] = TRUE;
       $update_count = update_get_update_count();
       if ($update_count === 0) {
         backdrop_set_message(t('No pending updates.') . ' ' . t('All caches cleared.'));

@@ -58,13 +58,18 @@
         }
       }
 
-      // Convert the plugin list from strings to variable names. Each CKEditor
-      // plugin is located under "CKEditor5.[packageName].[moduleName]". So
-      // we convert the list of strings to match the expected variable name.
+      // Convert the plugin list from strings to variable names.
       editorSettings.plugins = [];
       editorSettings.pluginList.forEach(function(pluginItem) {
         const [packageName,moduleName] = pluginItem.split('.');
-        if (typeof CKEditor5[packageName] != 'undefined') {
+        // In UMD builds, native plugins are direct children of the global
+        // CKEditor object, this has changed compared to DLL.
+        if (typeof CKEditor5[moduleName] != 'undefined' && CKEditor5[moduleName].hasOwnProperty('pluginName')) {
+          editorSettings.plugins.push(CKEditor5[moduleName]);
+        }
+        // Backwards compatible to how plugins were defined for DLL - and how
+        // existing custom plugins still define it.
+        else if (typeof CKEditor5[packageName] != 'undefined') {
           editorSettings.plugins.push(CKEditor5[packageName][moduleName]);
         }
       });
@@ -74,7 +79,7 @@
       element.ckeditor5Processed = true;
 
       const beforeAttachValue = element.value;
-      CKEditor5.editorClassic.ClassicEditor
+      CKEditor5.ClassicEditor
         .create(element, editorSettings)
         .then(editor => {
           Backdrop.ckeditor5.setEditorOffset(editor);
@@ -82,7 +87,7 @@
           Backdrop.ckeditor5.watchEditorChanges(editor, element);
           Backdrop.ckeditor5.trackActiveEditor(editor);
           element.ckeditor5AttachedEditor = editor;
-          const valueModified = Backdrop.ckeditor5.checkValueModified(beforeAttachValue, editor.getData());
+          const valueModified = Backdrop.ckeditor5.checkValueModified(beforeAttachValue, editor.getData({ skipListItemIds: true }));
           if (valueModified && !Backdrop.ckeditor5.bypassContentWarning) {
             Backdrop.ckeditor5.detachWithWarning(element, format, beforeAttachValue);
           }
@@ -111,7 +116,7 @@
 
       // CKEditor 5 does not pretty-print HTML source. Format the source
       // before saving it into the source field.
-      let newData = editor.getData();
+      let newData = editor.getData({ skipListItemIds: true });
       newData = Backdrop.ckeditor5.formatHtml(newData);
 
       // Destroy the instance if fully detaching.
@@ -134,7 +139,7 @@
       if (editor) {
         const debouncedCallback = Backdrop.debounce(callback, 400);
         editor.model.document.on('change:data', function() {
-          debouncedCallback(editor.getData());
+          debouncedCallback(editor.getData({ skipListItemIds: true }));
         });
       }
       return !!editor;
@@ -277,7 +282,7 @@
       // Create a debounced callback that only fires intermittently, since
       // editor changes can happen on every key up.
       const updateValue = Backdrop.debounce(() => {
-        const newData = editor.getData();
+        const newData = editor.getData({ skipListItemIds: true });
         element.value = Backdrop.ckeditor5.formatHtml(newData);
       }, 1000);
       editor.model.document.on('change:data', updateValue);
@@ -321,13 +326,20 @@
      *   Returns true if values have been modified, false if unchanged.
      */
     checkValueModified: function (beforeAttachValue, afterAttachValue) {
+      // Create a sandboxed document within an iframe.
+      const sandboxIframe = document.createElement('iframe');
+      sandboxIframe.setAttribute('sandbox', 'allow-same-origin');
+      sandboxIframe.srcdoc = "<!doctype html>";
+      document.body.append(sandboxIframe);
+      const sandboxDocument = sandboxIframe.contentDocument;
+
       // Pass the before value through elementGetHtml() to standardize
       // attribute order and self-closing tags. For example, two <img> tags with
       // src, width, and height attributes should be equal, even if one uses the
       // order height, src, width. Similarly, <hr /> and <hr> should be
       // considered the same. Passing in an out of the DOM makes these two
       // values use the same order and tag closing.
-      const beforeElement = document.createElement('template');
+      const beforeElement = sandboxDocument.createElement('template');
       beforeElement.innerHTML = beforeAttachValue;
       beforeAttachValue = Backdrop.ckeditor5.elementGetHtml(beforeElement.content);
 
@@ -335,9 +347,9 @@
       // formatHtml(). Wrap both strings with a temporary <div> tag, to allow
       // childNodes (which is used later when comparing the two strings) to work
       // on them.
-      const formattedBeforeValue = document.createElement('div');
+      const formattedBeforeValue = sandboxDocument.createElement('div');
       formattedBeforeValue.innerHTML = Backdrop.ckeditor5.formatHtml(beforeAttachValue);
-      const formattedAfterValue = document.createElement('div');
+      const formattedAfterValue = sandboxDocument.createElement('div');
       formattedAfterValue.innerHTML = Backdrop.ckeditor5.formatHtml(afterAttachValue);
 
       // Get all Nodes for each string.
@@ -347,6 +359,7 @@
       // If the number of Nodes differs, then the values have been modified.
       // Bail early in that case.
       if (formattedBeforeValueNodes.length !== formattedAfterValueNodes.length) {
+        sandboxIframe.remove();
         return true;
       }
 
@@ -364,6 +377,7 @@
           if (!formattedBeforeValueNodes[i].isEqualNode(formattedAfterValueNodes[i])) {
             // Bail on the first pair of Nodes that is found to have different
             // attributes/values regardless of their order.
+            sandboxIframe.remove();
             return true;
           }
         }
@@ -371,6 +385,7 @@
 
       // If all previous checks for modified values failed, assume that the two
       // strings have not been modified.
+      sandboxIframe.remove();
       return false;
     },
 

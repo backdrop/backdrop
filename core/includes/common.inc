@@ -483,18 +483,18 @@ function backdrop_get_feeds($delimiter = "\n") {
 /**
  * Processes a URL query parameter array to remove unwanted elements.
  *
- * @param $query
+ * @param array|null $query
  *   (optional) An array to be processed. Defaults to $_GET.
- * @param $exclude
+ * @param array $exclude
  *   (optional) A list of $query array keys to remove. Use "parent[child]" to
  *   exclude nested items. Defaults to array('q').
- * @param $parent
+ * @param string $parent
  *   Internal use only. Used to build the $query array key for nested items.
  *
- * @return
+ * @return array
  *   An array containing query parameters, which can be used for url().
  */
-function backdrop_get_query_parameters(array $query = NULL, array $exclude = array('q'), $parent = '') {
+function backdrop_get_query_parameters(?array $query = NULL, array $exclude = array('q'), $parent = '') {
   // Set defaults, if none given.
   if (!isset($query)) {
     $query = $_GET;
@@ -965,7 +965,7 @@ function backdrop_http_request($url, array $options = array()) {
   $alternate_http_system = &backdrop_static('__FUNCTION__');
   if (!isset($alternate_http_system)) {
     $class = settings_get('http_system');
-    /* @var BackdropHTTPSystemInterface $alternate_http_system */
+    /** @var BackdropHTTPSystemInterface $alternate_http_system */
     $alternate_http_system = $class ? new $class() : FALSE;
   }
   if ($alternate_http_system) {
@@ -1745,7 +1745,7 @@ function tempstore_clear_all($collection) {
  * @{
  * Functions to sanitize values.
  *
- * See http://drupal.org/writing-secure-code for information
+ * See https://docs.backdropcms.org/documentation/writing-secure-code for information
  * on writing secure code.
  */
 
@@ -1901,6 +1901,67 @@ function filter_xss($string, $allowed_tags = NULL) {
 }
 
 /**
+ * Sanitizes attributes.
+ *
+ * @param array $attributes
+ *   Attribute values as key => value format.
+ *
+ * @return array
+ *   Sanitized attributes.
+ */
+function filter_xss_attributes(array $attributes) {
+  $new_attributes = array();
+  foreach ($attributes as $name => $value) {
+    // The attribute name should be a single attribute, but there is the
+    // possibility that the name is corrupt. Core's _filter_xss_attributes() can
+    // cleanly handle sanitizing 'selected href="http://example.com" so we
+    // provide an allowance for cases where the attribute array is malformed.
+    // For example given a name of 'selected href' and a value of
+    // http://example.com we split this into two separate attributes, with the
+    // value assigned to the last attribute name.
+    // Explode the attribute name if a space exists.
+    $names = array_filter(explode(' ', $name));
+    if (count($names) === 0) {
+      // Empty attribute names.
+      continue;
+    }
+    // Valueless attributes set the name to the value.
+    $with_values = array_combine($names, $names);
+    // Convert the attribute array to a string. If there is only one attribute
+    // this simply creates a new attribute with a single key-value pair.
+    $last_name = end($names);
+    $with_values[$last_name] = $value;
+    $attribute_string = '';
+    // Convert class arrays to a string.
+    if (isset($with_values['class']) && is_array($with_values['class'])) {
+      $with_values['class'] = implode(' ', $with_values['class']);
+    }
+    foreach ($with_values as $valued_attribute => $valued_value) {
+      $attribute_string .= $valued_attribute . '="' . $valued_value . '" ';
+    }
+
+    // Filter the attributes.
+    $safe = _filter_xss_attributes($attribute_string);
+    $safe = array_map(function ($value) {
+      return html_entity_decode($value, ENT_QUOTES, 'UTF-8');
+    }, $safe);
+    if (array_key_exists('class', $safe)) {
+      // The class attribute is expected to be an array.
+      $safe['class'] = explode(' ', $safe['class']);
+    }
+    // Special case for boolean values which are unique to valueless
+    // attributes.
+    if (array_key_exists($last_name, $safe) && is_bool($value)) {
+      $safe[$last_name] = $value;
+    }
+    // Add the safe attributes to the new list.
+    $new_attributes += array_intersect_key($safe, $with_values);
+  }
+
+  return $new_attributes;
+}
+
+/**
  * List of the default tags allowed by filter_xss().
  */
 function _filter_xss_allowed_tags() {
@@ -1980,7 +2041,12 @@ function _filter_xss_split($m, $store = FALSE) {
   $xhtml_slash = $count ? ' /' : '';
 
   // Clean up attributes.
-  $attr2 = implode(' ', _filter_xss_attributes($attrlist));
+  $attr2 = '';
+  $cleaned_attributes = _filter_xss_attributes($attrlist);
+  foreach ($cleaned_attributes as $attribute_name => $attribute_value) {
+    $attr2 .= $attribute_name . '="' . $attribute_value . '" ';
+  }
+  $attr2 = trim($attr2);
   $attr2 = preg_replace('/[<>]/', '', $attr2);
   $attr2 = strlen($attr2) ? ' ' . $attr2 : '';
 
@@ -1990,101 +2056,126 @@ function _filter_xss_split($m, $store = FALSE) {
 /**
  * Processes a string of HTML attributes.
  *
- * @return
- *   Cleaned up version of the HTML attributes.
+ * @param string $attributes
+ *   A space-separated list of attributes, such as 'class="foo bar" foo="bar"'.
+ *
+ * @return array
+ *   Cleaned up version of the HTML attributes as an array.
  */
-function _filter_xss_attributes($attr) {
-  $attrarr = array();
-  $skip = FALSE;
+function _filter_xss_attributes($attributes) {
+  $attributes_array = array();
   $mode = 0;
-  $attrname = '';
+  $attribute_name = '';
+  $skip = FALSE;
+  $skip_protocol_filtering = FALSE;
 
-  while (strlen($attr) != 0) {
+  while (strlen($attributes) != 0) {
     // Was the last operation successful?
     $working = 0;
 
     switch ($mode) {
       case 0:
         // Attribute name, href for instance.
-        if (preg_match('/^([-a-zA-Z]+)/', $attr, $match)) {
-          $attrname = strtolower($match[1]);
+        if (preg_match('/^([-a-zA-Z]+)/', $attributes, $match)) {
+          $attribute_name = strtolower($match[1]);
           $skip = (
-            $attrname == 'style' ||
-            substr($attrname, 0, 2) == 'on' ||
-            substr($attrname, 0, 1) == '-' ||
+            $attribute_name == 'style' ||
+            substr($attribute_name, 0, 2) == 'on' ||
+            substr($attribute_name, 0, 1) == '-' ||
             // Ignore long attributes to avoid unnecessary processing overhead.
-            strlen($attrname) > 96
+            strlen($attribute_name) > 96
           );
+          // Values for attributes of type URI should be filtered for
+          // potentially malicious protocols (for example, an href-attribute
+          // starting with "javascript:"). However, for some non-URI
+          // attributes performing this filtering causes valid and safe data
+          // to be mangled. We prevent this by skipping protocol filtering on
+          // such attributes.
+          // @see backdrop_strip_dangerous_protocols()
+          // @see http://www.w3.org/TR/html4/index/attributes.html
+          $skip_protocol_filtering = (strpos($attribute_name, 'data-') === 0) || in_array($attribute_name, array(
+            'title',
+            'alt',
+            'rel',
+            'property',
+            'class',
+            'datetime',
+          ));
+
           $working = $mode = 1;
-          $attr = preg_replace('/^[-a-zA-Z]+/', '', $attr);
+          $attributes = preg_replace('/^[-a-zA-Z][-a-zA-Z0-9]*/', '', $attributes);
         }
         break;
 
       case 1:
         // Equals sign or valueless ("selected").
-        if (preg_match('/^\s*=\s*/', $attr)) {
-          $working = 1; $mode = 2;
-          $attr = preg_replace('/^\s*=\s*/', '', $attr);
+        if (preg_match('/^\s*=\s*/', $attributes)) {
+          $mode = 2;
+          $working = 1;
+          $attributes = preg_replace('/^\s*=\s*/', '', $attributes);
           break;
         }
 
-        if (preg_match('/^\s+/', $attr)) {
-          $working = 1; $mode = 0;
+        if (preg_match('/^\s+/', $attributes)) {
+          $mode = 0;
+          $working = 1;
           if (!$skip) {
-            $attrarr[] = $attrname;
+            $attributes_array[$attribute_name] = $attribute_name;
           }
-          $attr = preg_replace('/^\s+/', '', $attr);
+          $attributes = preg_replace('/^\s+/', '', $attributes);
         }
         break;
 
       case 2:
         // Attribute value, a URL after href= for instance.
-        if (preg_match('/^"([^"]*)"(\s+|$)/', $attr, $match)) {
+        if (preg_match('/^"([^"]*)"(\s+|$)/', $attributes, $match)) {
           // Prevent filtering for some attribute values, where performing
           // the filtering would cause valid and safe data to be mangled.
-          if (strpos($attrname, 'data-') === 0 || $attrname == 'alt' || $attrname == 'title') {
-            $thisval = $match[1];
+          if ($skip_protocol_filtering) {
+            $value = $match[1];
           }
           // Strip bad protocols from all other attributes, e.g. href, src.
           else {
-            $thisval = filter_xss_bad_protocol($match[1]);
+            $value = filter_xss_bad_protocol($match[1]);
           }
 
           if (!$skip) {
-            $attrarr[] = "$attrname=\"$thisval\"";
+            $attributes_array[$attribute_name] = $value;
           }
-          $working = 1;
           $mode = 0;
-          $attr = preg_replace('/^"[^"]*"(\s+|$)/', '', $attr);
+          $working = 1;
+          $attributes = preg_replace('/^"[^"]*"(\s+|$)/', '', $attributes);
           break;
         }
 
-        if (preg_match("/^'([^']*)'(\s+|$)/", $attr, $match)) {
-          $thisval = filter_xss_bad_protocol($match[1]);
+        if (preg_match("/^'([^']*)'(\s+|$)/", $attributes, $match)) {
+          $mode = 0;
+          $working = 1;
+          $value = filter_xss_bad_protocol($match[1]);
 
           if (!$skip) {
-            $attrarr[] = "$attrname='$thisval'";
+            $attributes_array[$attribute_name] = $value;
           }
-          $working = 1; $mode = 0;
-          $attr = preg_replace("/^'[^']*'(\s+|$)/", '', $attr);
+          $attributes = preg_replace("/^'[^']*'(\s+|$)/", '', $attributes);
           break;
         }
 
-        if (preg_match("%^([^\s\"']+)(\s+|$)%", $attr, $match)) {
-          $thisval = filter_xss_bad_protocol($match[1]);
+        if (preg_match("%^([^\s\"']+)(\s+|$)%", $attributes, $match)) {
+          $mode = 0;
+          $working = 1;
+          $value = filter_xss_bad_protocol($match[1]);
 
           if (!$skip) {
-            $attrarr[] = "$attrname=\"$thisval\"";
+            $attributes_array[$attribute_name] = $value;
           }
-          $working = 1; $mode = 0;
-          $attr = preg_replace("%^[^\s\"']+(\s+|$)%", '', $attr);
+          $attributes = preg_replace("%^[^\s\"']+(\s+|$)%", '', $attributes);
         }
         break;
     }
 
     if ($working == 0) {
-      // Not well formed; remove and try again.
-      $attr = preg_replace('/
+      // Not well-formed; remove and try again.
+      $attributes = preg_replace('/
         ^
         (
         "[^"]*("|$)     # - a string that starts with a double quote, up until the next double quote or the end of the string
@@ -2094,16 +2185,16 @@ function _filter_xss_attributes($attr) {
         \S              # - a non-whitespace character
         )*              # any number of the above three
         \s*             # any number of whitespaces
-        /x', '', $attr);
+        /x', '', $attributes);
       $mode = 0;
     }
   }
 
   // The attribute list ends with a valueless attribute like "selected".
   if ($mode == 1 && !$skip) {
-    $attrarr[] = $attrname;
+    $attributes_array[] = $attribute_name;
   }
-  return $attrarr;
+  return $attributes_array;
 }
 
 /**
@@ -2529,16 +2620,16 @@ function format_date($timestamp, $date_format_name = 'medium', $pattern = '', $t
  *
  * Callback for preg_replace_callback() within format_date().
  *
- * @param array $matches
+ * @param array|null $matches
  *   The array of matches as found by preg_replace_callback().
- * @param string $new_langcode
+ * @param string|null $new_langcode
  *   Sets the internal langcode to be used. Set the langcode prior to calling
  *   preg_replace_callback().
  *
  * @return string
  *   The date from $matches as a translated string.
  */
-function _format_date_callback(array $matches = NULL, $new_langcode = NULL) {
+function _format_date_callback(?array $matches = NULL, $new_langcode = NULL) {
   // We cache translations to avoid redundant and rather costly calls to t().
   static $cache, $langcode;
 
@@ -3388,7 +3479,7 @@ function backdrop_add_html_head_link($attributes, $header = FALSE) {
 /**
  * Constructs an array of the defaults that are used for styles items.
  *
- * @param array|null $data
+ * @param string|null $data
  *   (optional) The default data parameter for the style item array.
  *
  * @see backdrop_get_css()
@@ -3441,7 +3532,7 @@ function backdrop_css_defaults($data = NULL) {
  * Non-preprocessed files should only be added to the page when they are
  * actually needed.
  *
- * @param array|null $data
+ * @param string|null $data
  *   (optional) The stylesheet data to be added, depending on what is passed
  *   through to the $options['type'] parameter:
  *   - 'file': The path to the CSS file relative to the base_path(), or a
@@ -4573,7 +4664,7 @@ function backdrop_region_class($region) {
  * Non-preprocessed files should only be added to the page when they are
  * actually needed.
  *
- * @param $data
+ * @param string|null $data
  *   (optional) If given, the value depends on the $options parameter, or
  *   $options['type'] if $options is passed as an associative array:
  *   - 'file': Path to the file relative to base_path().
@@ -4587,7 +4678,7 @@ function backdrop_region_class($region) {
  *     the Backdrop.settings namespace. Settings within the same namespace will
  *     be recursively merged together unless a "key" option is specified in the
  *     $options array.
- * @param $options
+ * @param string|array|null $options
  *   (optional) A string defining the type of JavaScript that is being added in
  *   the $data parameter ('file'/'setting'/'inline'/'external'), or an
  *   associative array.
@@ -8751,7 +8842,7 @@ function backdrop_explode_tags($tags) {
     return array();
   }
   // This regexp allows the following types of user input:
-  // this, "somecompany, llc", "and ""this"" w,o.rks", foo bar
+  // this, "some company, llc", "and ""this"" w,o.rks", foo bar
   $regexp = '%(?:^|,\ *)("(?>[^"]*)(?>""[^"]* )*"|(?: [^",]*))%x';
   preg_match_all($regexp, $tags, $matches);
   $typed_tags = array_unique($matches[1]);

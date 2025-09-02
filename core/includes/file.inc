@@ -317,7 +317,7 @@ function file_stream_wrapper_get_instance_by_uri($uri) {
 
   $class = file_stream_wrapper_get_class($scheme);
   if (class_exists($class)) {
-    /* @var BackdropStreamWrapperInterface $instance */
+    /** @var BackdropStreamWrapperInterface $instance */
     $instance = new $class();
     $instance->setUri($uri);
     return $instance;
@@ -350,7 +350,7 @@ function file_stream_wrapper_get_instance_by_uri($uri) {
 function file_stream_wrapper_get_instance_by_scheme($scheme) {
   $class = file_stream_wrapper_get_class($scheme);
   if (class_exists($class)) {
-    /* @var BackdropStreamWrapperInterface $instance */
+    /** @var BackdropStreamWrapperInterface $instance */
     $instance = new $class();
     $instance->setUri($scheme . '://');
     return $instance;
@@ -1594,7 +1594,7 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
       'filesize' => $uploaded_files['files']['size'][$form_field_name][$i],
     );
     $values['filemime'] = file_get_mimetype($values['filename']);
-    $file = new File($values);
+    $file = entity_create('file', $values);
 
     $extensions = '';
     if (isset($validators['file_validate_extensions'])) {
@@ -2084,6 +2084,7 @@ function file_validate_svg(File $file) {
         '//svg:foreignobject',
         '//svg:script',
         '//html:iframe',
+        '//svg:set',
         // @see https://developer.mozilla.org/en-US/docs/Web/SVG/Attribute
         '//@*[starts-with(name(), "on")]',
         '//svg:a[starts-with(normalize-space(@href), "javascript:")]',
@@ -2146,7 +2147,8 @@ function file_save_data($data, $destination = NULL, $replace = FILE_EXISTS_RENAM
 
   if ($uri = file_unmanaged_save_data($data, $destination, $replace)) {
     // Create a file entity.
-    $file = new File(array(
+    /** @var File $file */
+    $file = entity_create('file', array(
       'uri' => $uri,
       'uid' => $user->uid,
       'status' => FILE_STATUS_PERMANENT,
