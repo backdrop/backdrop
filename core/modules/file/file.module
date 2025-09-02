@@ -1804,6 +1804,12 @@ function file_managed_file_browser_open($form, $form_state) {
     }
   }
 
+  // Add JQuery UI selectable to allow drag and drop selection if the field
+  // cardinality is set to multple.
+  if ($element['#multiple']) {
+    Backdrop_add_library('system', 'ui.selectable');
+  }
+
   $submit_form = backdrop_get_form('file_managed_file_browser_form');
 
   $title = t('Select from Image Library');
@@ -1824,6 +1830,7 @@ function file_managed_file_browser_open($form, $form_state) {
   $settings = array(
     'file' => array(
       'browser' => array(
+        'fileMultiple' => $element['#multiple'],
         'selectedFid' => NULL,
         'currentFidElement' => '[name="' . $element['fid']['#name'] . '"]',
       ),

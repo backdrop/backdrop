@@ -174,9 +174,18 @@ Backdrop.file = Backdrop.file || {
    */
   dialogOpenEvent: function(e, dialog, $element, settings) {
     var $browserContainer = $element.find(".file-browser");
+    var $viewContent = $element.find(".view-content");
+    var fileMultiple = $(Backdrop.settings.file.browser.fileMultiple);
+    if (fileMultiple) {
+      $viewContent.selectable({
+        classes: {
+          "ui-selected": "image-library-image-selected"
+        }
+      });
+    }
     $browserContainer.once('file-browser').on('click', '[data-fid]', function () {
       var $selectedElement = $(this);
-      if ($selectedElement.is('img')) {
+      if ($selectedElement.is('img') && !fileMultiple) {
         $browserContainer.find('.image-library-image-selected').removeClass('image-library-image-selected');
         $selectedElement.parent('.image-library-choose-file').addClass('image-library-image-selected');
       }
