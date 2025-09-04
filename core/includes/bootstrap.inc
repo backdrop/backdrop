@@ -1772,6 +1772,13 @@ function backdrop_page_header() {
     'X-Content-Type-Options' => 'nosniff',
     'ETag' => '"' . REQUEST_TIME . '"',
   );
+  // Instruct proxies to never cache content for authenticated by attaching
+  // "private". A non-empty $_SESSION variable could be caused by status
+  // messages after form submissions. Still keep "no-cache, must-revalidate" to
+  // instruct browsers.
+  if ($GLOBALS['user']->uid || !empty($_SESSION)) {
+    $default_headers['Cache-Control'] = 'no-cache, must-revalidate, private';
+  }
   backdrop_send_headers($default_headers);
   return TRUE;
 }
