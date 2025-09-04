@@ -311,7 +311,7 @@ class BootstrapPageCacheTestCase extends BackdropWebTestCase {
     $this->backdropGet('system-test/set-header', array('query' => array('name' => 'Foo', 'value' => 'bar')), $headers);
     $this->assertFalse($this->backdropGetHeader('X-Backdrop-Cache'), 'Caching was bypassed.');
     $this->assertTrue(strpos($this->backdropGetHeader('Vary'), 'Cookie') === FALSE, 'Vary: Cookie header was not sent.');
-    $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'no-cache, must-revalidate', 'Cache-Control header was sent.');
+    $this->assertEqual($this->backdropGetHeader('Cache-Control'), 'no-cache, must-revalidate, private', 'Cache-Control header was sent.');
     $this->assertEqual($this->backdropGetHeader('Expires'), 'Fri, 16 Jan 2015 07:50:00 GMT', 'Expires header was sent.');
     $this->assertEqual($this->backdropGetHeader('Foo'), 'bar', 'Custom header was sent.');
     $this->backdropLogout();
