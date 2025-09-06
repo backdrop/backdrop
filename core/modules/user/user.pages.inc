@@ -319,7 +319,12 @@ function user_pass_reset_form_submit($form, &$form_state) {
  */
 function user_logout() {
   user_logout_current_user();
-  backdrop_goto();
+  // We can not rely on Etag alone to prevent browsers from re-using the
+  // authenticated home page after logout, as that header may have been stripped
+  // by a shared cache (like a proxy).
+  // @see backdrop_page_header()
+  $query = array('logout' => 'success');
+  backdrop_goto('', array('query' => $query));
 }
 
 /**
