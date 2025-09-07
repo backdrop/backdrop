@@ -1501,24 +1501,32 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
   // Find the current value of this field. The FID property can be a single
   // File ID, or multiple file IDs, which are separated by a space.
   $fids = array();
-  if (!empty($input['fid'])) {
-    $fids = $element['#multiple'] ? explode(' ', $input['fid']) : array($input['fid']);
+  $force_default = FALSE;
+
+  $form_state_fid = $form_state['values'];
+
+  foreach ($element['#parents'] as $parent) {
+    $form_state_fid = isset($form_state_fid[$parent]) ? $form_state_fid[$parent] : 0;
   }
 
-  $force_default = FALSE;
+  if ($element['#extended'] && isset($form_state_fid['fid'])) {
+    $fid = $form_state_fid['fid'];
+  }
+  elseif (is_numeric($form_state_fid)) {
+    $fid = $form_state_fid;
+  }
+  $fids = $fid ? (array) $fid : 0;
 
   // Process any input and save new uploads.
   if ($input !== FALSE) {
+    $fids = [];
+    // Todo: Figure how to replace $input['fid'] with $input['fids'].
+    $input['fid'] = $element['#multiple'] ? explode(' ', $input['fid']) : $input['fid'];
     $return = $input;
 
     // Uploads take priority over all other values.
     if ($file_data = file_managed_file_save_upload($element)) {
-      if ($element['#multiple']) {
-        $fids = array_merge($fids, array_keys($file_data));
-      }
-      else {
-        $fids = array_keys($file_data);
-      }
+      $fids = array_keys($file_data);
     }
     else {
       // Check for #filefield_value_callback values.
@@ -1533,30 +1541,32 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
       // If a FID was submitted, load the file (and check access if it's not a
       // public file) to confirm it exists and that the current user has access
       // to it.
-      if (isset($input['fid']) && ($file = file_load($input['fid']))) {
-        if ((file_uri_scheme($file->uri) != 'public') && !file_download_access($file->uri)) {
-          $force_default = TRUE;
-        }
-        // Temporary files that belong to other users should never be allowed.
-        elseif ($file->status != FILE_STATUS_PERMANENT) {
-          if ($GLOBALS['user']->uid && $file->uid != $GLOBALS['user']->uid) {
+      if (isset($input['fid']) && ($files = file_load_multiple($input['fid']))) {
+        foreach ($files as $file) {
+          if ((file_uri_scheme($file->uri) != 'public') && !file_download_access($file->uri)) {
             $force_default = TRUE;
           }
-          // Since file ownership can't be determined for anonymous users, they
-          // are not allowed to reuse temporary files at all. But they do need
-          // to be able to reuse their own files from earlier submissions of
-          // the same form, so to allow that, check for the token added by
-          // file_managed_file_process().
-          elseif (!$GLOBALS['user']->uid) {
-            $token = backdrop_array_get_nested_value($form_state['input'], array_merge($element['#parents'], array('fid_token')));
-            if ($token !== backdrop_hmac_base64('file-' . $file->fid, backdrop_get_private_key() . backdrop_get_hash_salt())) {
+          // Temporary files that belong to other users should never be allowed.
+          elseif ($file->status != FILE_STATUS_PERMANENT) {
+            if ($GLOBALS['user']->uid && $file->uid != $GLOBALS['user']->uid) {
               $force_default = TRUE;
             }
+            // Since file ownership can't be determined for anonymous users, they
+            // are not allowed to reuse temporary files at all. But they do need
+            // to be able to reuse their own files from earlier submissions of
+            // the same form, so to allow that, check for the token added by
+            // file_managed_file_process().
+            elseif (!$GLOBALS['user']->uid) {
+              $token = backdrop_array_get_nested_value($form_state['input'], array_merge($element['#parents'], array('fid_token')));
+              if ($token !== backdrop_hmac_base64('file-' . $file->fid, backdrop_get_private_key() . backdrop_get_hash_salt())) {
+                $force_default = TRUE;
+              }
+            }
           }
-        }
-        // If all checks pass, allow the file to be changed.
-        if (!$force_default) {
-          $fids[] = $file->fid;
+          // If all checks pass, allow the file to be changed.
+          if (!$force_default) {
+            $fids[] = $file->fid;
+          }
         }
       }
     }
@@ -1901,7 +1911,7 @@ function file_managed_file_browser_submit($form, &$form_state) {
     $settings = array(
       'file' => array(
         'browser' => array(
-          'selectedFid' => (int) $form_state['values']['fid'],
+          'selectedFid' => (string) $form_state['values']['fid'],
         ),
       ),
     );
