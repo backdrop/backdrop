@@ -1515,13 +1515,13 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
   elseif (is_numeric($form_state_fid)) {
     $fid = $form_state_fid;
   }
-  $fids = $fid ? (array) $fid : 0;
+  $fids = $fid ? (array) $fid : array();
 
   // Process any input and save new uploads.
   if ($input !== FALSE) {
     $fids = [];
     // Todo: Figure how to replace $input['fid'] with $input['fids'].
-    $input['fid'] = $element['#multiple'] ? explode(' ', $input['fid']) : $input['fid'];
+    $input['fid'] = $element['#multiple'] ? explode(' ', $input['fid']) : array($input['fid']);
     $return = $input;
 
     // Uploads take priority over all other values.
