@@ -358,7 +358,7 @@ function file_menu() {
     'type' => MENU_CALLBACK,
   );
   $items['file/add'] = array(
-    'title' => 'Add a file',
+    'title' => 'Add files',
     'page callback' => 'backdrop_get_form',
     'page arguments' => array('file_add_form'),
     'access arguments' => array('create files'),
