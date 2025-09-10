@@ -1509,6 +1509,7 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
     $form_state_fid = isset($form_state_fid[$parent]) ? $form_state_fid[$parent] : 0;
   }
 
+  $fid = NULL;
   if ($element['#extended'] && isset($form_state_fid['fid'])) {
     $fid = $form_state_fid['fid'];
   }

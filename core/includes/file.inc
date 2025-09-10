@@ -1543,6 +1543,15 @@ function file_save_upload($form_field_name, $validators = array(), $destination 
     if (isset($delta)) {
       return $upload_cache[$form_field_name][$delta];
     }
+    else {
+      $return_file_cache = [];
+      foreach ($_FILES['files']['name'][$form_field_name] as $file_index => $cache_file_name) {
+        if (isset($upload_cache[$form_field_name][$file_index])) {
+          $return_file_cache[] = $upload_cache[$form_field_name][$file_index];
+        }
+      }
+      return $return_file_cache;
+    }
   }
 
   // Prepare uploaded files info so that single and multiple value uploads can
