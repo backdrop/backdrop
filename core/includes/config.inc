@@ -1426,29 +1426,32 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    * {@inheritdoc}
    */
   public function read($name) {
-    if (!$this->exists($name)) {
-      return FALSE;
-    }
-    $data = db_select($this->table, 'c', array('target' => $this->database))
-      ->fields('c', array('data'))
-      ->condition('c.name', $name)
-      ->execute()
-      ->fetchField();
-    try {
-      $data = $this->decode($data);
-      // Remove the config name from the read configuration.
-      if (isset($data['_config_name'])) {
-        unset($data['_config_name']);
+    $data = &backdrop_static(__FUNCTION__);
+    if (!isset($data) || !isset($data[$name])) {
+      if (!$this->exists($name)) {
+        return FALSE;
+      }
+      $data[$name] = db_select($this->table, 'c', array('target' => $this->database))
+        ->fields('c', array('data'))
+        ->condition('c.name', $name)
+        ->execute()
+        ->fetchField();
+      try {
+        $data[$name] = $this->decode($data[$name]);
+        // Remove the config name from the read configuration.
+        if (isset($data[$name]['_config_name'])) {
+          unset($data[$name]['_config_name']);
+        }
+      }
+      // If an error occurs, catch and rethrow with the file name in the message.
+      catch (ConfigStorageException $e) {
+        throw new ConfigStorageReadException(format_string("The configuration file \"@filename\" is not properly formatted JSON.\n\nContents:\n<pre>@contents</pre>\n", array(
+          '@filename' => $name,
+          '@contents' => $data[$name],
+        )));
       }
     }
-    // If an error occurs, catch and rethrow with the file name in the message.
-    catch (ConfigStorageException $e) {
-      throw new ConfigStorageReadException(format_string("The configuration file \"@filename\" is not properly formatted JSON.\n\nContents:\n<pre>@contents</pre>\n", array(
-        '@filename' => $name,
-        '@contents' => $data,
-      )));
-    }
-    return $data;
+    return $data[$name];
   }
 
   /**
@@ -1708,25 +1711,28 @@ class ConfigFileStorage implements ConfigStorageInterface {
    * {@inheritdoc}
    */
   public function read($name) {
-    if (!$this->exists($name)) {
-      return FALSE;
-    }
-    $data = file_get_contents($this->getFilePath($name));
-    try {
-      $data = $this->decode($data);
-      // Remove the config name from the read configuration.
-      if (isset($data['_config_name'])) {
-        unset($data['_config_name']);
+    $data = &backdrop_static(__FUNCTION__);
+    if (!isset($data) || !isset($data[$name])) {
+      if (!$this->exists($name)) {
+        return FALSE;
+      }
+      $data[$name] = file_get_contents($this->getFilePath($name));
+      try {
+        $data[$name] = $this->decode($data[$name]);
+        // Remove the config name from the read configuration.
+        if (isset($data[$name]['_config_name'])) {
+          unset($data[$name]['_config_name']);
+        }
+      }
+      // If an error occurs, catch and rethrow with the file name in the message.
+      catch (ConfigStorageException $e) {
+        throw new ConfigStorageReadException(format_string("The configuration file \"@filename\" is not properly formatted JSON.\n\nContents:\n<pre>@contents</pre>\n", array(
+          '@filename' => $name,
+          '@contents' => $data[$name],
+        )));
       }
     }
-    // If an error occurs, catch and rethrow with the file name in the message.
-    catch (ConfigStorageException $e) {
-      throw new ConfigStorageReadException(format_string("The configuration file \"@filename\" is not properly formatted JSON.\n\nContents:\n<pre>@contents</pre>\n", array(
-        '@filename' => $name,
-        '@contents' => $data,
-      )));
-    }
-    return $data;
+    return $data[$name];
   }
 
   /**
