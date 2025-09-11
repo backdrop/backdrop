@@ -1261,6 +1261,9 @@ function file_update_1010() {
 function file_update_1011() {
   $config = config('file.type.document');
   $mimetypes = $config->get('mimetypes');
+  if (!is_array($mimetypes)) {
+    $mimetypes = array();
+  }
   $mimetypes = array_merge($mimetypes, array(
     'application/vnd.apple.keynote',
     'application/vnd.apple.numbers',
