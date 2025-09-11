@@ -2936,7 +2936,7 @@ class FileAdminTestCase extends FileTestHelper {
     }
 
     // Add a second usage for the last file.
-    $edit[$field_name . '[und][0][fids]'] = $fid;
+    $edit[$field_name . '[und][0][fid]'] = $fid;
     $this->backdropPost('node/' . $nid . '/edit', $edit, 'Save');
 
     $files_list = array();
