@@ -1427,7 +1427,7 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    */
   public function read($name) {
     $data = &backdrop_static(__FUNCTION__);
-    if (!isset($data) || !isset($data[$name])) {
+    if (!isset($data) || empty($data[$name])) {
       if (!$this->exists($name)) {
         return FALSE;
       }
@@ -1712,7 +1712,7 @@ class ConfigFileStorage implements ConfigStorageInterface {
    */
   public function read($name) {
     $data = &backdrop_static(__FUNCTION__);
-    if (!isset($data) || !isset($data[$name])) {
+    if (!isset($data) || empty($data[$name])) {
       if (!$this->exists($name)) {
         return FALSE;
       }
