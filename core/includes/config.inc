@@ -1426,9 +1426,8 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    * {@inheritdoc}
    */
   public function read($name) {
-    global $config;
     $data = &backdrop_static(__FUNCTION__);
-    if (empty($config) || !isset($data) || empty($data[$name])) {
+    if (empty($GLOBALS['config'][$name]) || !isset($data) || empty($data[$name])) {
       if (!$this->exists($name)) {
         return FALSE;
       }
@@ -1712,9 +1711,8 @@ class ConfigFileStorage implements ConfigStorageInterface {
    * {@inheritdoc}
    */
   public function read($name) {
-    global $config;
     $data = &backdrop_static(__FUNCTION__);
-    if (empty($config) || !isset($data) || empty($data[$name])) {
+    if (empty($GLOBALS['config'][$name]) || !isset($data) || empty($data[$name])) {
       if (!$this->exists($name)) {
         return FALSE;
       }
