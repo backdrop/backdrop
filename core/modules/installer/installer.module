@@ -179,6 +179,11 @@ function installer_theme($existing, $type, $theme, $path) {
     'installer_browser_list' => array(
       'variables' => array('projects_list' => NULL, 'type' => NULL),
       'template' => 'templates/installer-list',
+      'attached' => array(
+        'css' => array(
+          backdrop_get_path('module', 'installer') . '/css/installer.css' => array(),
+        ),
+      ),
     ) + $base,
     // Template for block.
     'installer_browser_block' => array(

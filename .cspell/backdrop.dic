@@ -132,6 +132,7 @@ Fastly
 feedburner
 fetchmode
 fffffg
+fieldable
 Fieldby
 fieldlabel
 fieldsql
@@ -253,6 +254,7 @@ mercredi
 merlinofchaos
 metacharacters
 meus
+mdhash
 microweights
 milli
 mimeheaders
@@ -316,6 +318,7 @@ Nmedi
 noaccess
 noajax
 nocache
+nodata
 nodeapi
 nongranularity
 nonmodal
@@ -377,6 +380,7 @@ PRNG
 propertyname
 Punycode
 queryor
+querystring
 quicktime
 Quieligo
 rawurlencoded
@@ -389,6 +393,7 @@ realelement
 refclass
 referencable
 Referencable
+renderable
 reparent
 reparented
 reparenting
@@ -506,10 +511,12 @@ unmunging
 unnested
 unpackage
 unpermissioned
+unpromote
 unpromoted
 unrendered
 unsetting
 unshortened
+unsticky
 uploadimage
 uploadwidget
 USERAGENT

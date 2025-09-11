@@ -276,7 +276,7 @@ function layout_entity_admin_add_form(array $form, array &$form_state, $entity_t
   // conditions that might be in place at the same path.
   $lowest_weight = count($entity_layouts['all']);
   foreach ($entity_layouts['all'] as $entity_layout) {
-    /* @var Layout $entity_layout */
+    /** @var Layout $entity_layout */
     if ($entity_layout->weight < $lowest_weight) {
       $lowest_weight = $entity_layout->weight;
     }
@@ -334,7 +334,7 @@ function layout_entity_admin_add_form_validate($form, &$form_state) {
  * Submit handler for layout_entity_admin_add_form().
  */
 function layout_entity_admin_add_form_submit($form, &$form_state) {
-  /* @var Layout $layout */
+  /** @var Layout $layout */
   $layout = $form_state['layout'];
   if (isset($_SESSION['layout_new_name'])) {
     unset($_SESSION['layout_new_name']);

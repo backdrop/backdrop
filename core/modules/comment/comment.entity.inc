@@ -117,13 +117,6 @@ class Comment extends Entity {
   }
 
   /**
-   * Implements EntityInterface::label().
-   */
-  public function label() {
-    return $this->subject;
-  }
-
-  /**
    * Implements EntityInterface::uri().
    */
   public function uri() {
@@ -494,7 +487,7 @@ class CommentStorageController extends EntityDatabaseStorageController {
 
     $view = array();
     foreach ($comments as $comment) {
-      /* @var Comment $comment */
+      /** @var Comment $comment */
       // Populate $comment->content with a render() array.
       $this->buildContent($comment, $view_mode, $langcode);
 

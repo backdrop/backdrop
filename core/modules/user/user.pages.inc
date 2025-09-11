@@ -29,7 +29,17 @@ function user_autocomplete($string = '') {
  */
 function user_pass_page() {
   backdrop_set_title(t('Reset password'));
-  return backdrop_get_form('user_pass');
+  $user_password_form = backdrop_get_form('user_pass');
+
+  // If user is logged in, always display with tabs appearance.
+  if (user_is_logged_in()) {
+    $output = $user_password_form;
+  }
+  else {
+    $output = user_login_page_wrapper($user_password_form);
+  }
+
+  return $output;
 }
 
 /**
@@ -197,7 +207,7 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
     // Time out, in seconds, until login URL expires.
     $timeout = config_get('system.core', 'user_password_reset_timeout');
     $current = REQUEST_TIME;
-    // Some redundant checks for extra security ?
+    // Some redundant checks for extra security?
     $users = user_load_multiple(array($uid), array('status' => '1'));
     if ($timestamp <= $current && $account = reset($users)) {
       // No time out for first time login.
@@ -205,7 +215,7 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
         backdrop_set_message(t('You have tried to use a reset password link that has expired. Please request a new one using the form below.'), 'error');
         backdrop_goto('user/password');
       }
-      elseif ($account->uid && $timestamp >= $account->login && $timestamp <= $current && $hashed_pass == user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid, $account->mail)) {
+      elseif ($account->uid && $timestamp >= $account->login && $timestamp <= $current && hash_equals($hashed_pass, user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid, $account->mail))) {
         if (config_get('user.flood', 'flood_uid_only')) {
           // Clear flood events based on the uid only if configured.
           $identifier = $account->uid;
@@ -225,6 +235,8 @@ function user_pass_reset($uid, $timestamp, $hashed_pass, $immediate_login = FALS
           user_login_finalize();
           // Clear any password reset flood events for this user.
           flood_clear_event('pass_reset_user', $account->uid);
+          // Clear any failed password validation flood events for this user.
+          flood_clear_event('failed_pass_validation_user', $account->uid);
           backdrop_set_message(t('You have used your one-time log-in link and are now logged-in.'));
           watchdog('user', 'User %name used one-time password reset link at time %timestamp.', array('%name' => $account->name, '%timestamp' => format_date(REQUEST_TIME, 'long')));
           backdrop_goto();
@@ -263,11 +275,14 @@ function user_pass_reset_form($form, &$form_state, $account) {
     $description = _user_password_policy_help();
   }
   $form['message'] = array(
-    '#markup' => t('<p>Please enter a new password to access your account.</p>'),
+    '#markup' => '<p>' . t('Please enter a new password to access your account.') . '</p>',
   );
   $form['pass'] = array(
-    '#type' => 'password_confirm',
+    '#type' => 'password',
+    '#title' => t('New password'),
     '#required' => TRUE,
+    '#password_toggle' => TRUE,
+    '#password_strength' => TRUE,
     '#description' => $description,
   );
   $form['actions'] = array(
@@ -571,7 +586,7 @@ function user_cancel_confirm_form_submit($form, &$form_state) {
  */
 function user_cancel_methods() {
   $site_config = config('system.core');
-  $anonymous_name = $site_config->get('anonymous');
+  $anonymous_name = $site_config->getTranslated('anonymous');
   $methods = array(
     'user_cancel_block' => array(
       'title' => t('Disable the account and keep its content'),
@@ -623,7 +638,7 @@ function user_cancel_confirm($account, $timestamp = 0, $hashed_pass = '') {
   // Basic validation of arguments.
   if (isset($account->data['user_cancel_method']) && !empty($timestamp) && !empty($hashed_pass)) {
     // Validate expiration and hashed password/login.
-    if ($timestamp <= $current && $current - $timestamp < $timeout && $account->uid && $timestamp >= $account->login && $hashed_pass == user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid, $account->mail)) {
+    if ($timestamp <= $current && $current - $timestamp < $timeout && $account->uid && $timestamp >= $account->login && hash_equals($hashed_pass, user_pass_rehash($account->pass, $timestamp, $account->login, $account->uid, $account->mail))) {
       $edit = array(
         'user_cancel_notify' => isset($account->data['user_cancel_notify']) ? $account->data['user_cancel_notify'] : config_get('system.core', 'user_mail_status_canceled_notify'),
       );

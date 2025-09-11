@@ -125,13 +125,6 @@ class File extends Entity {
   }
 
   /**
-   * Implements EntityInterface::label().
-   */
-  public function label() {
-    return $this->filename;
-  }
-
-  /**
    * Implements EntityInterface::uri().
    */
   public function uri() {
@@ -379,7 +372,7 @@ class FileStorageController extends EntityDatabaseStorageController {
 
     $view = array();
     foreach ($files as $file) {
-      /* @var File $file */
+      /** @var File $file */
       // Populate $file->content with a render() array.
       $this->buildContent($file, $view_mode, $langcode);
 

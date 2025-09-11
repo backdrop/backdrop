@@ -471,6 +471,20 @@ abstract class DatabaseConnection {
   }
 
   /**
+   * Get the list of table prefixes used by this database connection.
+   *
+   * @return array
+   *   An array of all prefixes, with the key being the table name and the value
+   *   being the prefix. The special key "default" applies to all tables not
+   *   specifically prefixed.
+   *
+   * @since 1.30.0 Method added.
+   */
+  function getPrefixes() {
+    return $this->prefixes;
+  }
+
+  /**
    * Appends a database prefix to all tables in a query.
    *
    * Queries sent to Backdrop should wrap all table names in curly brackets.
@@ -1560,14 +1574,14 @@ abstract class Database {
       // Every target already active for this connection key needs to have the
       // logging object associated with it.
       if (!empty(self::$connections[$key])) {
-        /* @var DatabaseConnection $connection */
+        /** @var DatabaseConnection $connection */
         foreach (self::$connections[$key] as $connection) {
           $connection->setLogger(self::$logs[$key]);
         }
       }
     }
 
-    /* @var DatabaseLog $logger */
+    /** @var DatabaseLog $logger */
     $logger = self::$logs[$key];
     $logger->start($logging_key);
     return self::$logs[$key];
@@ -1596,7 +1610,7 @@ abstract class Database {
       return NULL;
     }
 
-    /* @var DatabaseLog $logger */
+    /** @var DatabaseLog $logger */
     $logger = self::$logs[$key];
     $queries = $logger->get($logging_key);
     $logger->end($logging_key);
@@ -1855,7 +1869,7 @@ abstract class Database {
     $driver_class = 'DatabaseConnection_' . $driver;
     require_once BACKDROP_ROOT . '/core/includes/database/' . $driver . '/database.inc';
 
-    /* @var DatabaseConnection $new_connection */
+    /** @var DatabaseConnection $new_connection */
     $new_connection = new $driver_class(self::$databaseInfo[$key][$target]);
     $new_connection->setTarget($target);
     $new_connection->setKey($key);

@@ -38,6 +38,7 @@ function backdrop_class_list() {
     'DatabaseTaskException' => $path . 'install.inc',
     'MailSystemInterface' => $path . 'mail.inc',
     'PagerDefault' => $path . 'pager.class.inc',
+    'BackdropSessionHandler' => $path . 'session.inc',
     'BackdropLocalStreamWrapper' => $path . 'stream_wrappers.inc',
     'BackdropPublicStreamWrapper' => $path . 'stream_wrappers.inc',
     'BackdropPrivateStreamWrapper' => $path . 'stream_wrappers.inc',
@@ -95,6 +96,12 @@ function backdrop_class_list() {
     'SelectQuery' => $path . 'database/select.inc',
     'QueryExtendableInterface' => $path . 'database/select.inc',
     'SelectQueryInterface' => $path . 'database/select.inc',
+
+    'Backup' => $path . 'backup/backup.class.inc',
+    'BackupConfig' => $path . 'backup/backup.config.inc',
+    'BackupDatabase' => $path . 'backup/backup.database.inc',
+    'BackupFile' => $path . 'backup/backup.file.inc',
+    'BackupMySql' => $path . 'backup/backup.mysql.inc',
 
     'DatabaseConnection_mysql' => $path . 'database/mysql/database.inc',
     'DatabaseTasks_mysql' => $path . 'database/mysql/install.inc',
