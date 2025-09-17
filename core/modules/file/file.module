@@ -1506,7 +1506,7 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
   $form_state_fid = $form_state['values'];
 
   foreach ($element['#parents'] as $parent) {
-    $form_state_fid = isset($form_state_fid[$parent]) ? $form_state_fid[$parent] : 0;
+    $form_state_fid = isset($form_state_fid[$parent]) ? $form_state_fid[$parent] : array();
   }
 
   $fid = NULL;
@@ -1577,7 +1577,7 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
   // default value.
   if ($input === FALSE || $force_default) {
     if ($element['#extended']) {
-      $default_fids = isset($element['#default_value']['fid']) ? $element['#default_value']['fid'] : '';
+      $default_fids = isset($element['#default_value']['fid']) ? $element['#default_value']['fid'] : array();
     }
     else {
       $default_fids = isset($element['#default_value']) ? $element['#default_value'] : '';
@@ -1641,8 +1641,12 @@ function file_managed_file_validate(&$element, &$form_state) {
   }
 
   // Consolidate the array value of this field to only FIDs.
+  $element_value = $element['fid']['#value'] ? explode(' ', $element['fid']['#value']) : array();
   if (!$element['#extended']) {
-    form_set_value($element, $element['fid']['#value'], $form_state);
+    form_set_value($element, $element_value, $form_state);
+  }
+  else {
+    form_set_value($element, array('fid' => $element_value), $form_state);
   }
 }
 
@@ -1779,13 +1783,13 @@ function file_managed_file_save_upload($element) {
  */
 function file_managed_file_pre_render($element) {
   // If we already have a file, we don't want to show the upload controls.
-  if (!empty($element['#value']['fid'])) {
+  if (!empty($element['#value']['fid']) && !$element['#multiple']) {
     $element['upload']['#access'] = FALSE;
     $element['upload_button']['#access'] = FALSE;
     $element['browse_button']['#access'] = FALSE;
   }
   // If we don't already have a file, there is nothing to remove.
-  else {
+  elseif (empty($element['#value']['fid'])) {
     $element['remove_button']['#access'] = FALSE;
   }
   return $element;

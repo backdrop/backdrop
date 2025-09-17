@@ -605,7 +605,8 @@ class FileManagedFileElementTestCase extends FileTestHelper {
 
     // Perform the tests with all permutations of $form['#tree'],
     // $element['#extended'], and $element['#multiple'].
-    $test_file = $this->getTestFile('text');    foreach (array(0, 1) as $tree) {
+    $test_file = $this->getTestFile('text');
+    foreach (array(0, 1) as $tree) {
       foreach (array(0, 1) as $extended) {
         foreach (array(0, 1) as $multiple) {
           $path = 'file/test/' . $tree . '/' . $extended . '/' . $multiple;
@@ -619,8 +620,9 @@ class FileManagedFileElementTestCase extends FileTestHelper {
           // Submit with a file, but with an invalid form token. Ensure the file
           // was not saved.
           $last_fid_prior = $this->getLastFileId();
+          $files_field_field = $multiple ? 'files[' . $input_base_name . '][]' : 'files[' . $input_base_name . ']';
           $edit = array(
-            'files[' . $input_base_name . ']' => backdrop_realpath($test_file->uri),
+            $files_field_field => backdrop_realpath($test_file->uri),
             'form_token' => 'invalid token',
           );
           $this->backdropPost($path, $edit, t('Save'));
@@ -701,36 +703,36 @@ class FileManagedFileElementTestCase extends FileTestHelper {
         }
       }
 
-    // The multiple file upload has additional conditions that need checking.
-    $path = 'file/test/1/1/1';
-    $edit = array('files[nested_file][]' => backdrop_realpath($test_file->uri));
-    $fid_list = array();
+      // The multiple file upload has additional conditions that need checking.
+      $path = 'file/test/1/1/1';
+      $edit = array('files[nested_file][]' => backdrop_realpath($test_file->uri));
+      $fid_list = array();
 
-    $this->backdropGet($path);
+      $this->backdropGet($path);
 
-    // Add a single file to the upload field.
-    $this->backdropPost(NULL, $edit, t('Upload'));
-    $fid_list[] = $this->getLastFileId();
-    $this->assertFieldByXpath('//input[@name="nested[file][file_' . $fid_list[0] . '][selected]"]', NULL, 'First file successfully uploaded to multiple file element.');
+      // Add a single file to the upload field.
+      $this->backdropPost(NULL, $edit, t('Upload'));
+      $fid_list[] = $this->getLastFileId();
+      $this->assertFieldByXpath('//input[@name="nested[file][file_' . $fid_list[0] . '][selected]"]', NULL, 'First file successfully uploaded to multiple file element.');
 
-    // Add another file to the same upload field.
-    $this->backdropPost(NULL, $edit, t('Upload'));
-    $fid_list[] = $this->getLastFileId();
-    $this->assertFieldByXpath('//input[@name="nested[file][file_' . $fid_list[1] . '][selected]"]', NULL, 'Second file successfully uploaded to multiple file element.');
+      // Add another file to the same upload field.
+      $this->backdropPost(NULL, $edit, t('Upload'));
+      $fid_list[] = $this->getLastFileId();
+      $this->assertFieldByXpath('//input[@name="nested[file][file_' . $fid_list[1] . '][selected]"]', NULL, 'Second file successfully uploaded to multiple file element.');
 
-    // Save the entire form.
-    $this->backdropPost(NULL, array(), t('Save'));
-    $this->assertRaw(t('The file ids are %fids.', array('%fids' => implode(',', $fid_list))), t('Two files saved into a single multiple file element.'));
+      // Save the entire form.
+      $this->backdropPost(NULL, array(), t('Save'));
+      $this->assertRaw(t('The file ids are %fids.', array('%fids' => implode(',', $fid_list))), t('Two files saved into a single multiple file element.'));
 
-    // Delete only the first file.
-    $edit = array(
-      'nested[file][file_' . $fid_list[0] . '][selected]' => '1',
-    );
-    $this->backdropPost($path . '/' . implode(',', $fid_list), $edit, t('Remove selected'));
+      // Delete only the first file.
+      $edit = array(
+        'nested[file][file_' . $fid_list[0] . '][selected]' => '1',
+      );
+      $this->backdropPost($path . '/' . implode(',', $fid_list), $edit, t('Remove selected'));
 
-    // Check that the first file has been deleted but not the second.
-    $this->assertNoFieldByXpath('//input[@name="nested[file][file_' . $fid_list[0] . '][selected]"]', NULL, 'An individual file can be deleted from a multiple file element.');
-    $this->assertFieldByXpath('//input[@name="nested[file][file_' . $fid_list[1] . '][selected]"]', NULL, 'Second individual file not deleted when the first file is deleted from a multiple file element.');
+      // Check that the first file has been deleted but not the second.
+      $this->assertNoFieldByXpath('//input[@name="nested[file][file_' . $fid_list[0] . '][selected]"]', NULL, 'An individual file can be deleted from a multiple file element.');
+      $this->assertFieldByXpath('//input[@name="nested[file][file_' . $fid_list[1] . '][selected]"]', NULL, 'Second individual file not deleted when the first file is deleted from a multiple file element.');
     }
   }
 

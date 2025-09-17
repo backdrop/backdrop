@@ -41,7 +41,7 @@ function file_module_test_form($form, &$form_state, $tree = TRUE, $extended = TR
   );
   if ($default_fids) {
     $default_fids = explode(',', $default_fids);
-    $form['nested']['file']['#default_value'] = $extended ? array('fids' => $default_fids) : $default_fids;
+    $form['nested']['file']['#default_value'] = $extended ? array('fid' => $default_fids) : $default_fids;
   }
 
   $form['textfield'] = array(
@@ -69,10 +69,11 @@ function file_module_test_form_submit($form, &$form_state) {
   }
 
   if ($form['nested']['file']['#extended']) {
-    $uploads = $uploads['fids'];
+    $uploads = $uploads['fid'];
   }
 
   $fids = array();
+  debug($form_state['values']);
   foreach ($uploads as $fid) {
     $fids[] = $fid;
   }
