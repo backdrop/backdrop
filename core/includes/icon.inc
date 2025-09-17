@@ -105,6 +105,9 @@ function icon_get_path($icon_name, $immutable = FALSE) {
     return $icon_paths[$immutable_type][$icon_name];
   }
 
+  // Could be called where the theme is not yet available.
+  backdrop_theme_initialize();
+
   // Normal search order searches themes, then modules, then core.
   $search_functions = array(
     '_icon_from_theme',
