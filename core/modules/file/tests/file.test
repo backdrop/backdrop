@@ -722,7 +722,7 @@ class FileManagedFileElementTestCase extends FileTestHelper {
 
       // Save the entire form.
       $this->backdropPost(NULL, array(), t('Save'));
-      $this->assertRaw(t('The file ids are %fids.', array('%fids' => implode(',', $fid_list))), t('Two files saved into a single multiple file element.'));
+      $this->assertRaw(t('The file ids are %fids.', array('%fids' => implode(',', array_reverse($fid_list)))), t('Two files saved into a single multiple file element.'));
 
       // Delete only the first file.
       $edit = array(

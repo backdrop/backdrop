@@ -1513,61 +1513,59 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
   if ($element['#extended'] && isset($form_state_fid['fid'])) {
     $fid = $form_state_fid['fid'];
   }
-  elseif (is_numeric($form_state_fid)) {
+  // elseif (is_numeric($form_state_fid)) {
+  elseif (!empty($form_state_fid)) {
     $fid = $form_state_fid;
   }
-  $fids = $fid ? (array) $fid : array();
+  $fids = !empty($fid) ? (array) $fid : array();
 
   // Process any input and save new uploads.
-  if ($input !== FALSE) {
-    $fids = [];
-    // Todo: Figure how to replace $input['fid'] with $input['fids'].
-    $input['fid'] = $element['#multiple'] ? explode(' ', $input['fid']) : array($input['fid']);
+  if ($input !== FALSE && !is_null($input['fid'])) {
+    $input_fids = !empty($input['fid']) ? explode(' ', $input['fid']) : array();
+    $input['fid'] = $element['#multiple'] ? $input_fids : array($input['fid']);
     $return = $input;
 
     // Uploads take priority over all other values.
     if ($file_data = file_managed_file_save_upload($element)) {
       $fids = array_keys($file_data);
     }
-    else {
-      // Check for #filefield_value_callback values.
-      // Because Form API does not allow multiple #value_callback values like it
-      // does for #element_validate and #process, this fills the missing
-      // functionality to allow File fields to be extended through Form API.
-      if (isset($element['#file_value_callbacks'])) {
-        foreach ($element['#file_value_callbacks'] as $callback) {
-          $callback($element, $input, $form_state);
-        }
+    // Check for #filefield_value_callback values.
+    // Because Form API does not allow multiple #value_callback values like it
+    // does for #element_validate and #process, this fills the missing
+    // functionality to allow File fields to be extended through Form API.
+    if (isset($element['#file_value_callbacks'])) {
+      foreach ($element['#file_value_callbacks'] as $callback) {
+        $callback($element, $input, $form_state);
       }
-      // If a FID was submitted, load the file (and check access if it's not a
-      // public file) to confirm it exists and that the current user has access
-      // to it.
-      if (isset($input['fid']) && ($files = file_load_multiple($input['fid']))) {
-        foreach ($files as $file) {
-          if ((file_uri_scheme($file->uri) != 'public') && !file_download_access($file->uri)) {
+    }
+    // If a FID was submitted, load the file (and check access if it's not a
+    // public file) to confirm it exists and that the current user has access
+    // to it.
+    if (!empty($input['fid']) && ($files = file_load_multiple($input['fid']))) {
+      foreach ($files as $file) {
+        if ((file_uri_scheme($file->uri) != 'public') && !file_download_access($file->uri)) {
+          $force_default = TRUE;
+        }
+        // Temporary files that belong to other users should never be allowed.
+        elseif ($file->status != FILE_STATUS_PERMANENT) {
+          if ($GLOBALS['user']->uid && $file->uid != $GLOBALS['user']->uid) {
             $force_default = TRUE;
           }
-          // Temporary files that belong to other users should never be allowed.
-          elseif ($file->status != FILE_STATUS_PERMANENT) {
-            if ($GLOBALS['user']->uid && $file->uid != $GLOBALS['user']->uid) {
+          // Since file ownership can't be determined for anonymous users, they
+          // are not allowed to reuse temporary files at all. But they do need
+          // to be able to reuse their own files from earlier submissions of
+          // the same form, so to allow that, check for the token added by
+          // file_managed_file_process().
+          elseif (!$GLOBALS['user']->uid) {
+            $token = backdrop_array_get_nested_value($form_state['input'], array_merge($element['#parents'], array('fid_token')));
+            if ($token !== backdrop_hmac_base64('file-' . $file->fid, backdrop_get_private_key() . backdrop_get_hash_salt())) {
               $force_default = TRUE;
             }
-            // Since file ownership can't be determined for anonymous users, they
-            // are not allowed to reuse temporary files at all. But they do need
-            // to be able to reuse their own files from earlier submissions of
-            // the same form, so to allow that, check for the token added by
-            // file_managed_file_process().
-            elseif (!$GLOBALS['user']->uid) {
-              $token = backdrop_array_get_nested_value($form_state['input'], array_merge($element['#parents'], array('fid_token')));
-              if ($token !== backdrop_hmac_base64('file-' . $file->fid, backdrop_get_private_key() . backdrop_get_hash_salt())) {
-                $force_default = TRUE;
-              }
-            }
           }
-          // If all checks pass, allow the file to be changed.
-          if (!$force_default) {
-            $fids[] = $file->fid;
-          }
+        }
+        // If all checks pass, allow the file to be changed.
+        if (!$force_default) {
+          $fids[] = $file->fid;
         }
       }
     }
@@ -1585,7 +1583,6 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
 
     // Confirm that the file exists when used as a default value.
     if (!empty($default_fids)) {
-      $fids = array();
       if (!is_array($default_fids)) {
         $default_fids = explode(' ', $default_fids);
       }
@@ -1699,7 +1696,7 @@ function file_managed_file_submit($form, &$form_state) {
     // when the managed_file element is part of a field widget.
     // $form_state['input'] must be updated so that file_managed_file_value()
     // has correct information during the rebuild.
-    form_set_value($element['fid'], $fids, $form_state);
+    form_set_value($element, $fids, $form_state);
     backdrop_array_set_nested_value($form_state['input'], $element['fid']['#parents'], $fids);
   }
 
