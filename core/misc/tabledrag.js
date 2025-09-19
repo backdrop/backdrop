@@ -206,7 +206,7 @@ Backdrop.tableDrag.prototype.addColspanClass = function(columnIndex) {
     });
     if (index > 0) {
       cell = cells.filter(':nth-child(' + index + ')');
-      if (cell[0].colSpan && cell[0].colSpan > 1) {
+      if (cell[0] != null && cell[0] != undefined && cell[0].colSpan && cell[0].colSpan > 1) {
         // If this cell has a colspan, mark it so we can reduce the colspan.
         cell.addClass('tabledrag-has-colspan');
       }
