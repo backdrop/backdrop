@@ -546,7 +546,7 @@ class FileTaxonomyTermTestCase extends BackdropWebTestCase {
     $fid = $term->{$field_name}[LANGUAGE_NONE][0]['fid'];
     // Check that the uploaded file is present on the edit form.
     $this->backdropGet("taxonomy/term/$tid/edit");
-    $file_input_name = $field_name . '[' . LANGUAGE_NONE . '][0][fids]';
+    $file_input_name = $field_name . '[' . LANGUAGE_NONE . '][0][fid]';
     $this->assertFieldByXpath('//input[@type="hidden" and @name="' . $file_input_name . '"]', $fid, 'File is attached on edit form.');
     // Edit the term and change name without changing the file.
     $edit = array(
@@ -555,7 +555,7 @@ class FileTaxonomyTermTestCase extends BackdropWebTestCase {
     $this->backdropPost("taxonomy/term/$tid/edit", $edit, t('Save'));
     // Check that the uploaded file is still present on the edit form.
     $this->backdropGet("taxonomy/term/$tid/edit");
-    $file_input_name = $field_name . '[' . LANGUAGE_NONE . '][0][fids]';
+    $file_input_name = $field_name . '[' . LANGUAGE_NONE . '][0][fid]';
     $this->assertFieldByXpath('//input[@type="hidden" and @name="' . $file_input_name . '"]', $fid, 'File is attached on edit form.');
     // Load term while resetting the cache.
     $terms = entity_load('taxonomy_term', array($tid), array(), TRUE);
@@ -1829,7 +1829,7 @@ class FilePrivateTestCase extends FileTestHelper {
     // that access is still denied.
     $edit = array();
     $edit['title'] = $this->randomName(8);
-    $edit[$field_name . '[' . LANGUAGE_NONE . '][0][fids]'] = $node_file->fid;
+    $edit[$field_name . '[' . LANGUAGE_NONE . '][0][fid]'] = $node_file->fid;
     $this->backdropPost('node/add/page', $edit, t('Save'));
     $new_node = $this->backdropGetNodeByTitle($edit['title']);
     $this->assertTrue(!empty($new_node), 'Node was created.');

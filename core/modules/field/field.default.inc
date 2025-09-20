@@ -44,11 +44,10 @@ function field_default_extract_form_values($entity_type, $entity, $field, $insta
     // single fid, as field expects single value.
     $new_values = array();
     foreach ($values as &$value) {
-      if (isset($value['fids'])) {
-        foreach ($value['fids'] as $fid) {
+      if (isset($value['fid'])) {
+        foreach ($value['fid'] as $fid) {
           $new_value = $value;
           $new_value['fid'] = $fid;
-          unset($new_value['fids']);
           $new_values[] = $new_value;
         }
       }
