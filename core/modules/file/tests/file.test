@@ -2419,7 +2419,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
 
     // Step 1: Upload a basic document file.
     $edit = array();
-    $edit['files[upload]'] = backdrop_realpath($test_file->uri);
+    $edit['files[upload][]'] = backdrop_realpath($test_file->uri);
     $this->backdropPost('file/add', $edit, t('Next'));
 
     // Step 2: File type selection.
@@ -2447,7 +2447,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
 
     // Step 1: Upload a basic document file.
     $edit = array();
-    $edit['files[upload]'] = backdrop_realpath($test_file->uri);
+    $edit['files[upload][]'] = backdrop_realpath($test_file->uri);
     $this->backdropPost('file/add', $edit, t('Next'));
 
     // Step 3: Scheme selection.
@@ -2478,7 +2478,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
 
     // Step 1: Upload a basic document file.
     $edit = array();
-    $edit['files[upload]'] = backdrop_realpath($test_file->uri);
+    $edit['files[upload][]'] = backdrop_realpath($test_file->uri);
     $this->backdropPost('file/add', $edit, t('Next'));
 
     // After the file is uploaded but before the file is saved to its final
@@ -2550,7 +2550,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
 
     // Upload a basic image file.
     $edit = array();
-    $edit['files[upload]'] = backdrop_realpath($test_file->uri);
+    $edit['files[upload][]'] = backdrop_realpath($test_file->uri);
     $this->backdropPost('file/add', $edit, t('Next'));
 
     // Enter values into the attached fields.
@@ -2618,7 +2618,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
       // Step 0: Upload a basic image file.
       debug('Step 0: Upload a basic image file.');
       $edit = array();
-      $edit['files[upload]'] = backdrop_realpath($test_file->uri);
+      $edit['files[upload][]'] = backdrop_realpath($test_file->uri);
       $this->backdropPost('file/add', $edit, t('Next'));
 
       $debug_i++;
