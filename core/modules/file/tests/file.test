@@ -2395,7 +2395,7 @@ class FileUploadWizardTestCase extends FileTestHelper {
 
     // Step 1: Upload a basic document file.
     $edit = array();
-    $edit['files[upload]'] = backdrop_realpath($test_file->uri);
+    $edit['files[upload][]'] = backdrop_realpath($test_file->uri);
     $this->backdropPost('file/add', $edit, t('Next'));
 
     // Check that the file exists in the database.
@@ -2800,7 +2800,7 @@ class FileUploadSvgTestCase extends FileTestHelper {
 
       // Upload an SVG file.
       $edit = array();
-      $edit['files[upload]'] = backdrop_realpath($filepath);
+      $edit['files[upload][]'] = backdrop_realpath($filepath);
       $this->backdropPost('file/add', $edit, t('Next'));
 
       // Check that the file exists in the database.

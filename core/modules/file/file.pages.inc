@@ -46,7 +46,7 @@ function file_add_form($form, &$form_state, $options = array()) {
         '#upload_validators' => file_get_upload_validators($options),
         '#progress_indicator' => 'bar',
         '#pre_render' => array('file_managed_file_pre_render', 'file_upload_validators_pre_render'),
-        '#default_value' => isset($form_state['storage']['upload']) ? $form_state['storage']['upload'] : NULL,
+        '#default_value' => isset($form_state['storage']['upload']) ? $form_state['storage']['upload'] : array(),
       );
 
       $form['actions']['next'] = array(
@@ -230,7 +230,7 @@ function file_get_filetype_candidates(File $file, $selected_files = array()) {
  * Submit handler for the add file form.
  */
 function file_add_form_submit($form, &$form_state) {
-  $fids = explode(' ', $form_state['values']['upload']);
+  $fids = $form_state['values']['upload'];
   $multiple = FALSE;
 
   // Only use the wizard if only one file was uploaded.
