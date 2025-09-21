@@ -200,13 +200,6 @@ class Node extends Entity {
   }
 
   /**
-   * Implements EntityInterface::label().
-   */
-  public function label() {
-    return $this->title;
-  }
-
-  /**
    * Implements EntityInterface::uri().
    */
   public function uri() {

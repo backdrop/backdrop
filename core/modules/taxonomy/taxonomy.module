@@ -96,6 +96,7 @@ function taxonomy_entity_info() {
       'entity keys' => array(
         'id' => 'tid',
         'bundle' => 'vocabulary',
+        'label' => 'name',
       ),
       'bundle keys' => array(
         'bundle' => 'machine_name',
@@ -2016,6 +2017,7 @@ function taxonomy_language_delete($language) {
 function taxonomy_field_presave($entity_type, $entity, $field, $instance, $langcode, &$items) {
   foreach ($items as $delta => $item) {
     if ($item['tid'] == 'autocreate') {
+      /** @var TaxonomyTerm $term */
       $term = entity_create('taxonomy_term', $item);
       unset($term->tid);
       taxonomy_term_save($term);
