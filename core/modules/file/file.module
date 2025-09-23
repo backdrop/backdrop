@@ -1576,9 +1576,11 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
   if ($input === FALSE || $force_default) {
     if ($element['#extended']) {
       $default_fids = isset($element['#default_value']['fid']) ? $element['#default_value']['fid'] : array();
+      $return = isset($element['#default_value']) ? $element['#default_value'] : array('fid' => 0);
     }
     else {
       $default_fids = isset($element['#default_value']) ? $element['#default_value'] : '';
+      $return = array('fid' => 0);
     }
 
     // Confirm that the file exists when used as a default value.
