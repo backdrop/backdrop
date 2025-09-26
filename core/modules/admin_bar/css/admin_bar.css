@@ -400,8 +400,10 @@ tr.admin-bar-tweak-permissions-processed td.module {
 
 /* On small screens, expand children straight down instead of side-to-side. */
 @media only screen and (max-width: 500px) {
-  #admin-bar-menu .dropdown.expanded .dropdown.expanded {
-    position: inherit;
-    margin: 0;
+  @media (hover: none) {
+    #admin-bar-menu .dropdown.expanded .dropdown.expanded {
+      position: inherit;
+      margin: 0;
+    }
   }
 }
