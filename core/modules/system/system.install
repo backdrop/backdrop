@@ -483,6 +483,11 @@ function system_requirements($phase) {
       $updates = backdrop_get_schema_versions($module);
       if ($updates !== FALSE) {
         $current_schema = backdrop_get_installed_schema_version($module);
+        // Special case: modules installed in Drupal 6, that did not receive any
+        // update in Drupal 7, but have updates available in Backdrop.
+        if ($current_schema >= 6000 && $current_schema < 7000) {
+          $current_schema = 0;
+        }
         $latest_schema = end($updates);
         if ($current_schema < $latest_schema) {
           $update_link = base_path() . 'core/update.php';

@@ -767,6 +767,13 @@ function update_get_update_list() {
         $schema_version -= 7000;
       }
 
+      // Some modules, like the Book module, never received any update during
+      // Drupal 7. But they might have been installed in Drupal 6.
+      if ($schema_version >= 6000) {
+        // If they got installed in Drupal 7, their schema version would be 0.
+        $schema_version = 0;
+      }
+
       foreach ($updates as $update) {
         // Reduce update versions by 7000 for legacy update comparisons. Note
         // that the original update version is still queued for execution.
