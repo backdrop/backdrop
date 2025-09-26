@@ -326,6 +326,10 @@
   padding: 0.5em 2em 0.5em 1em; /* LTR */
   width: 100%;
   box-sizing: border-box;
+  /* Reinforce the admin bar font so the search input is unaffected by the
+  theme. */
+  font: inherit;
+  line-height: 1.15;
 }
 [dir="rtl"] #admin-bar .admin-bar-search input {
   background-position: left 0.5em center;
