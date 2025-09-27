@@ -3409,10 +3409,13 @@ function system_update_1078() {
 
 /**
  * Clear the cache to reset allowlist settings.
+ * 
+ * This update has been removed because it causes a regression when later update
+ * hooks create cache tables.
+ *  
+ * @see https://github.com/backdrop/backdrop-issues/issues/6974
  */
-function system_update_1079() {
-  backdrop_flush_all_caches();
-}
+function system_update_1079() {}
 
 /**
  * Set homepage to 'user' if blank to match previous behavior.
