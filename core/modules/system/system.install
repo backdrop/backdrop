@@ -3415,7 +3415,9 @@ function system_update_1078() {
  *  
  * @see https://github.com/backdrop/backdrop-issues/issues/6974
  */
-function system_update_1079() {}
+function system_update_1079() {
+  // This update has been removed.
+}
 
 /**
  * Set homepage to 'user' if blank to match previous behavior.
