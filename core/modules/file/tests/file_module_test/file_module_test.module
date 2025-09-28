@@ -73,7 +73,6 @@ function file_module_test_form_submit($form, &$form_state) {
   }
 
   $fids = array();
-  debug($form_state['values']);
   foreach ($uploads as $fid) {
     $fids[] = $fid;
   }
