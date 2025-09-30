@@ -5,7 +5,7 @@ FILES=$(git diff 1.x --name-only --diff-filter=AM | grep -E '(php|inc|module|ins
 
 echo $FILES | while read FILENAME
 do
-  phpcs -nq --basepath=../.. --standard=../../../phpcs/Backdrop --report=json $FILENAME
+  phpcs -nq --basepath=. --standard=../phpcs/Backdrop --report=json $FILENAME
 done
 
 exit 0
