@@ -31,12 +31,10 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: thenabeel/action-phpcs@v8
-        with:
-          files: "**.php,**.inc,**.module,**.install,**.profile,**.test"
-          standard: ../phpcs/Backdrop
-          fail_on_warnings: false
-          scope: file
+      - name: Run phpcs on changed files
+        run: |
+          chmod 700 .github/misc/phpcs-changed-only.sh
+          .github/misc/phpcs-changed-only.sh
 
   spellcheck:
     name: Check spelling
