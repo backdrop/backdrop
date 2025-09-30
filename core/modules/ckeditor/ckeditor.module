@@ -10,6 +10,7 @@ define('CKEDITOR_VERSION', '4.22.1');
  * Implements hook_menu().
  */
 function ckeditor_menu() {
+  //and do it wrong
   $items['ckeditor/upload/image/%filter_format'] = array(
     'title' => 'Upload image',
     'page callback' => 'ckeditor_image_upload',
