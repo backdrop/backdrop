@@ -10,6 +10,7 @@ define('CKEDITOR5_VERSION', '46.0.3');
  * Implements hook_menu().
  */
 function ckeditor5_menu() {
+  //another bad comment.
   $items['ckeditor5/upload/image/%filter_format'] = array(
     'title' => 'Upload image',
     'page callback' => 'ckeditor5_image_upload',
