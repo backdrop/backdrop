@@ -33,8 +33,6 @@ jobs:
 
       - name: Run phpcs on changed files
         run: |
-          git diff origin/1.x HEAD
-          git diff upstream/1.x HEAD
           chmod 700 .github/misc/phpcs-changed-only.sh
           .github/misc/phpcs-changed-only.sh
 
