@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           repository: backdrop-ops/phpcs
-          ref: 1.0.0-beta1
+          ref: 1.1.0
           path: phpcs
 
       - name: Move standard outside current dir
@@ -31,11 +31,12 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: thenabeel/action-phpcs@v8
-        with:
-          files: "**.php,**.inc,**.module,**.install,**.profile,**.test"
-          standard: ../phpcs/Backdrop
-          fail_on_warnings: false
+      - name: Run phpcs on changed files
+        run: |
+          git diff origin/1.x HEAD
+          git diff upstream/1.x HEAD
+          chmod 700 .github/misc/phpcs-changed-only.sh
+          .github/misc/phpcs-changed-only.sh
 
   spellcheck:
     name: Check spelling
