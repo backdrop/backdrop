@@ -1667,7 +1667,12 @@ function file_managed_file_submit($form, &$form_state) {
   // Button was clicked. Action is needed here for the remove button, because we
   // only remove files in response to the remove button being clicked.
   if ($button_key == 'remove_button') {
-    $fids = array_keys($element['#files']);
+    if (!is_array($element['#files'])) {
+      $fids = array($element['#files']);
+    }
+    else {
+      $fids = array_keys($element['#files']);
+    }
     // Get files that will be removed.
     if ($element['#multiple']) {
       $remove_fids = array();

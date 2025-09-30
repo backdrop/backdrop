@@ -73,8 +73,11 @@ function file_module_test_form_submit($form, &$form_state) {
   }
 
   $fids = array();
-  foreach ($uploads as $fid) {
-    $fids[] = $fid;
+  if ($uploads) {
+    $uploads = is_array($uploads) ? $uploads : array($uploads);
+    foreach ($uploads as $fid) {
+      $fids[] = $fid;
+    }
   }
 
   backdrop_set_message(t('The file ids are %fids.', array('%fids' => implode(',', $fids))));

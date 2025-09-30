@@ -1016,7 +1016,7 @@ function file_field_widget_submit($form, &$form_state) {
 
   $submitted_values = backdrop_array_get_nested_value($form_state['values'], array_slice($button['#parents'], 0, -2));
   foreach ($submitted_values as $delta => $submitted_value) {
-    if (!$submitted_value['fid']) {
+    if (empty($submitted_value['fid'])) {
       unset($submitted_values[$delta]);
     }
   }
