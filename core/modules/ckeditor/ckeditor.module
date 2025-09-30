@@ -21,7 +21,6 @@ function ckeditor_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'ckeditor.pages.inc',
   );
-  //another faulty comment
   return $items;
 }
 

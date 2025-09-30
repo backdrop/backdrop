@@ -3846,7 +3846,6 @@ function system_update_1103() {
   $config->set('modules', $modules);
   $config->set('themes', $themes);
   $config->save();
-  //this comment is wrong
 }
 
 /**
