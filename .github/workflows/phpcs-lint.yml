@@ -27,12 +27,13 @@ jobs:
         run: mv phpcs ..
 
       - name: Checkout code with full depth
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
       - name: Run phpcs on changed files
         run: |
+          git branch
           chmod 700 .github/misc/phpcs-changed-only.sh
           .github/misc/phpcs-changed-only.sh
 
