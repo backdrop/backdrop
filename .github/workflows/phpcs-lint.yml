@@ -39,7 +39,10 @@ jobs:
 
       - name: On failure add report to job summary
         if: ${{ failure() }}
-        run: cat /tmp/phpcs_summary >> $GITHUB_STEP_SUMMARY
+        run: |
+          echo '```' >> $GITHUB_STEP_SUMMARY
+          cat /tmp/phpcs_summary >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
 
   spellcheck:
     name: Check spelling
