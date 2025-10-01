@@ -318,9 +318,17 @@ function image_gd_create_tmp(stdClass $image, $width, $height) {
     $transparent = imagecolortransparent($image->resource);
 
     if ($transparent >= 0) {
-      // The original must have a transparent color, allocate to the new image.
-      $transparent_color = imagecolorsforindex($image->resource, $transparent);
-      $transparent = imagecolorallocate($res, $transparent_color['red'], $transparent_color['green'], $transparent_color['blue']);
+      // The original must have a transparent color, try to allocate to the new
+      // image if we can.
+      if (imagecolorstotal($image->resource) >= 255) {
+        // We've used up all available palette slots so we won't allocate a new
+        // one.
+        $transparent = imagecolorclosest($res, 255, 255, 255);
+      }
+      else {
+        $transparent_color = imagecolorsforindex($image->resource, $transparent);
+        $transparent = imagecolorallocate($res, $transparent_color['red'], $transparent_color['green'], $transparent_color['blue']);
+      }
 
       // Flood with our new transparent color.
       imagefill($res, 0, 0, $transparent);
