@@ -12,7 +12,8 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1'
-          tools: phpcs
+          tools: none, phpcs, cs2pr
+          coverage: none
 
       # The checkout action refuses to put it outside, so we have to do it in
       # two steps.

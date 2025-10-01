@@ -11,7 +11,7 @@ then
   exit 0
 fi
 
-phpcs -nq --basepath=. --standard=../phpcs/Backdrop --report=.github/misc/Github.php --file-list=$TMPFILE
+phpcs -nq --basepath=. --standard=../phpcs/Backdrop --report=checkstyle --file-list=$TMPFILE | cs2pr
 # Otherwise we get the exit code from rm.
 FINALEXIT=$?
 
