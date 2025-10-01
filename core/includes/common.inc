@@ -1,5 +1,4 @@
 <?php
-// A huge file with lots of violations. Now yet another one.
 /**
  * @file
  * Common functions that many Backdrop modules will need to reference.
@@ -9227,6 +9226,7 @@ function backdrop_get_updaters() {
  * @see hook_filetransfer_info_alter()
  */
 function backdrop_get_filetransfer_info() {
+  // there seems to be an annotation display limit in GH.
   $info = &backdrop_static(__FUNCTION__);
   if (!isset($info)) {
     // Since we have to manually set the 'file path' default for each
