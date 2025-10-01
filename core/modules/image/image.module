@@ -31,7 +31,6 @@ require_once BACKDROP_ROOT . '/core/modules/image/image.field.inc';
  * Implements hook_menu().
  */
 function image_menu() {
-// Bad indent and comment
   $items = array();
 
   // Generate image derivatives of publicly available files.

@@ -1,4 +1,5 @@
 <?php
+// A huge file with lots of violations. Now yet another one.
 /**
  * @file
  * Common functions that many Backdrop modules will need to reference.
