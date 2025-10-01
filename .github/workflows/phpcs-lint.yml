@@ -37,6 +37,10 @@ jobs:
           chmod 700 .github/misc/phpcs-changed-only.sh
           .github/misc/phpcs-changed-only.sh
 
+      - name: On failure add report to job summary
+        if: ${{ failure() }}
+        run: cat /tmp/phpcs_summary >> $GITHUB_STEP_SUMMARY
+
   spellcheck:
     name: Check spelling
     runs-on: ubuntu-latest
