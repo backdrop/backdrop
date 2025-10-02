@@ -524,6 +524,7 @@ class PagePreviewTestCase extends BackdropWebTestCase {
     taxonomy_vocabulary_save($vocabulary);
 
     // Add a term to the vocabulary.
+    /** @var TaxonomyTerm $term */
     $term = entity_create('taxonomy_term', array(
       'name' => $this->randomName(),
       'description' => $this->randomName(),
@@ -1942,6 +1943,7 @@ class NodeSaveTestCase extends BackdropWebTestCase {
    */
   function testDeterminingChanges() {
     // Initial creation.
+    /** @var Node $node */
     $node = entity_create('node', array(
       'uid' => $this->web_user->uid,
       'type' => 'post',
@@ -2237,8 +2239,8 @@ class NodeTypeTestCase extends BackdropWebTestCase {
     $this->assertFalse(node_type_has_content('post'), 'The post node type has no content associated with it.');
 
     // Create a post.
-    $node = new Node();
-    $node->type = 'post';
+    /** @var Node $node */
+    $node = entity_create('node', array('type' => 'post'));
     node_object_prepare($node);
     $node->title = 'A new post';
     node_save($node);
@@ -3544,6 +3546,7 @@ class NodeAccessPagerTestCase extends BackdropWebTestCase {
 
     // Create 60 comments.
     for ($i = 0; $i < 60; $i++) {
+      /** @var Comment $comment */
       $comment = entity_create('comment', array(
         'uid' => $this->web_user->uid,
         'nid' => $node->nid,

@@ -213,6 +213,11 @@ function hook_user_presave($account) {
   // Make sure that our form value 'my_module_foo' is stored as
   // 'my_module_bar' in the 'data' (serialized) column.
   if (isset($account->my_module_foo)) {
+    // If the data (serialized) column is NULL or FALSE initiate the array
+    // first.
+    if (!$account->data) {
+      $account->data = array();
+    }
     $account->data['my_module_bar'] = $account->my_module_foo;
   }
 }
