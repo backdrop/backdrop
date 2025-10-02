@@ -28,6 +28,7 @@ class TaxonomyWebTestCase extends BackdropWebTestCase {
    * Returns a new term with random properties in the given vocabulary.
    */
   function createTerm($vocabulary) {
+    /** @var TaxonomyTerm $term */
     $term = entity_create('taxonomy_term', array(
       'name' => $this->randomName(),
       'description' => $this->randomName(),

@@ -87,7 +87,7 @@
           Backdrop.ckeditor5.watchEditorChanges(editor, element);
           Backdrop.ckeditor5.trackActiveEditor(editor);
           element.ckeditor5AttachedEditor = editor;
-          const valueModified = Backdrop.ckeditor5.checkValueModified(beforeAttachValue, editor.getData());
+          const valueModified = Backdrop.ckeditor5.checkValueModified(beforeAttachValue, editor.getData({ skipListItemIds: true }));
           if (valueModified && !Backdrop.ckeditor5.bypassContentWarning) {
             Backdrop.ckeditor5.detachWithWarning(element, format, beforeAttachValue);
           }
@@ -116,7 +116,7 @@
 
       // CKEditor 5 does not pretty-print HTML source. Format the source
       // before saving it into the source field.
-      let newData = editor.getData();
+      let newData = editor.getData({ skipListItemIds: true });
       newData = Backdrop.ckeditor5.formatHtml(newData);
 
       // Destroy the instance if fully detaching.
@@ -139,7 +139,7 @@
       if (editor) {
         const debouncedCallback = Backdrop.debounce(callback, 400);
         editor.model.document.on('change:data', function() {
-          debouncedCallback(editor.getData());
+          debouncedCallback(editor.getData({ skipListItemIds: true }));
         });
       }
       return !!editor;
@@ -282,7 +282,7 @@
       // Create a debounced callback that only fires intermittently, since
       // editor changes can happen on every key up.
       const updateValue = Backdrop.debounce(() => {
-        const newData = editor.getData();
+        const newData = editor.getData({ skipListItemIds: true });
         element.value = Backdrop.ckeditor5.formatHtml(newData);
       }, 1000);
       editor.model.document.on('change:data', updateValue);

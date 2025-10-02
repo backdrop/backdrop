@@ -288,28 +288,57 @@ function config_install_default_config($project, $config_name = NULL) {
     }
   }
   $project_config_dir = $project_path . '/config';
-  if (is_dir($project_config_dir)) {
-    $storage = new ConfigFileStorage($project_config_dir);
-    $files = glob($project_config_dir . '/*.json');
-    foreach ($files as $file) {
-      // Load config data into the active store and write it out to the
-      // file system in the Backdrop config directory. Note the config name
-      // needs to be the same as the file name WITHOUT the extension.
-      $parts = explode('/', $file);
-      $file = array_pop($parts);
-      $file_config_name = str_replace('.json', '', $file);
-      if (is_null($config_name) || $file_config_name === $config_name) {
-        $data = $storage->read($file_config_name);
-        $config = config($file_config_name);
-        // We only create new configs, and do not overwrite existing ones.
-        if ($config->isNew()) {
-          $config->setData($data);
-          module_invoke_all('config_create', $config);
-          $config->save();
-        }
+  $storage = new ConfigFileStorage($project_config_dir);
+
+  $default_config_names = config_get_default_config_names($project);
+  foreach ($default_config_names as $default_config_name) {
+    // Load config data into the active store and write it out to the
+    // file system in the Backdrop config directory. Note the config name
+    // needs to be the same as the file name WITHOUT the extension.
+    if (is_null($config_name) || $default_config_name === $config_name) {
+      $data = $storage->read($default_config_name);
+      $config = config($default_config_name);
+      // We only create new configs, and do not overwrite existing ones.
+      if ($config->isNew()) {
+        $config->setData($data);
+        module_invoke_all('config_create', $config);
+        $config->save();
       }
     }
   }
+}
+
+/**
+ * Gets the name of config files provided by a module or theme.
+ *
+ * @param $project
+ *   The name of the project for which config names should be returned.
+ *
+ * @return string[]
+ *   An unindexed array of config names, without the .json extension.
+ *
+ * @since 1.31.0 Function added.
+ */
+function config_get_default_config_names($project) {
+  $project_path = NULL;
+  foreach (array('module', 'theme') as $project_type) {
+    if ($project_path = backdrop_get_path($project_type, $project)) {
+      break;
+    }
+  }
+
+  $config_names = array();
+  $project_config_dir = $project_path . '/config';
+  if (is_dir($project_config_dir)) {
+    $files = glob($project_config_dir . '/*.json');
+    foreach ($files as $file) {
+      $parts = explode('/', $file);
+      $file = array_pop($parts);
+      $config_names[] = str_replace('.json', '', $file);
+    }
+  }
+
+  return $config_names;
 }
 
 /**
@@ -583,7 +612,12 @@ class Config {
    */
   public function validateData() {
     if (!$this->validated) {
+      // Get config info if available. This may not be present if the providing
+      // module is being enabled at the same time.
       $config_info = config_get_info($this->getName());
+      if (!$config_info) {
+        $config_info = NULL;
+      }
       module_invoke_all('config_data_validate', $this, $config_info);
       $this->validated = TRUE;
     }
