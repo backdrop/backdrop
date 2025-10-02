@@ -101,7 +101,10 @@ class PathTestCase extends BackdropWebTestCase {
     $this->backdropPost('admin/config/urls/path/add', $edit, t('Save URL alias'));
 
     // Confirm no duplicate was created.
-    $this->assertRaw(t('The alias %alias is already in use in this language.', array('%alias' => $edit['alias'])), 'Attempt to move alias was rejected.');
+    $this->assertRaw(t('The alias %alias conflicts with existing alias(es) for %languages.', array(
+      '%alias' => $edit['alias'],
+      '%languages' => 'language neutral',
+    )), 'Attempt to move alias was rejected.');
 
     // Delete alias.
     $this->backdropPost('admin/config/urls/path/edit/' . $pid, array(), t('Delete'));

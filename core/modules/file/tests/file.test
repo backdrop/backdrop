@@ -92,7 +92,8 @@ class FileTestHelper extends BackdropWebTestCase {
     file_put_contents($filepath, $settings['contents']);
     $this->assertTrue(is_file($filepath), t('The test file exists on the disk.'), 'Create test file');
 
-    $file = new File();
+    /** @var File $file */
+    $file = entity_create('file', array());
     $file->uri = $filepath;
     $file->filename = backdrop_basename($file->uri);
     $file->filemime = $settings['filemime'];
@@ -2115,11 +2116,13 @@ class FileFileTypeClassificationTestCase extends BackdropWebTestCase {
   function testFileTypeClassification() {
     // Get test text and image files.
     $file = current($this->backdropGetTestFiles('text'));
-    $text_file =  new File((array) $file);
+    /** @var File $text_file */
+    $text_file = entity_create('file', (array) $file);
     file_save($text_file);
 
     $file = current($this->backdropGetTestFiles('image'));
-    $image_file =  new File((array) $file);
+    /** @var File $image_file */
+    $image_file = entity_create('file', (array) $file);
     file_save($image_file);
 
     // The classification process should assign a file type to any file whose
@@ -2180,7 +2183,8 @@ class FileUnitTestCase extends FileTestHelper {
     $file = $this->getTestFile('text');
     $file->uid = 1;
     $file->status = FILE_STATUS_PERMANENT;
-    $file = new File((array) $file);
+    /** @var File $file */
+    $file = entity_create('file', (array) $file);
     file_save($file);
 
     // Test entity ID, revision ID, and bundle.
@@ -2198,13 +2202,15 @@ class FileUnitTestCase extends FileTestHelper {
   function testImageDimensions() {
     // Test hook_file_insert().
     $file = current($this->backdropGetTestFiles('image'));
-    $image_file = new File((array) $file);
+    /** @var File $image_file */
+    $image_file = entity_create('file', (array) $file);
     file_save($image_file);
     $this->assertTrue(isset($image_file->metadata['height']), 'Image height retrieved on file_save() for an image file.');
     $this->assertTrue(isset($image_file->metadata['width']), 'Image width retrieved on file_save() for an image file.');
 
     $file = current($this->backdropGetTestFiles('text'));
-    $text_file = new File((array) $file);
+    /** @var File $text_file */
+    $text_file = entity_create('file', (array) $file);
     file_save($text_file);
     $this->assertFalse(isset($text_file->metadata['height']), 'No image height retrieved on file_save() for an text file.');
     $this->assertFalse(isset($text_file->metadata['width']), 'No image width retrieved on file_save() for an text file.');
@@ -3741,7 +3747,8 @@ class FileAccessFunctionsAlignedTestCase extends BackdropWebTestCase {
     }
     file_put_contents($filepath, $this->randomName(15));
 
-    $file = new File();
+    /** @var File $file */
+    $file = entity_create('file', array());
     $file->uri = $filepath;
     $file->filename = $filename;
     $file->filemime = 'text/plain';

@@ -164,6 +164,7 @@ class ViewsUIWizardDefaultViewsTestCase extends ViewsUIWizardHelper {
     $this->backdropPost('admin/structure/views/view/taxonomy_term/configure/page', array(), t('Save'));
 
     // Add a term so we can visit this page to test the view.
+    /** @var TaxonomyTerm $term */
     $term = entity_create('taxonomy_term', array(
       'name' => $this->randomName(),
       'description' => $this->randomName(),
@@ -672,6 +673,7 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
    */
   function createCommentAndGetPath() {
     $node = $this->backdropCreateNode();
+    /** @var Comment $comment */
     $comment = entity_create('comment', array(
       'cid' => NULL,
       'nid' => $node->nid,
@@ -696,6 +698,7 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
     ));
     taxonomy_vocabulary_save($vocabulary);
 
+    /** @var TaxonomyTerm $term */
     $term = entity_create('taxonomy_term', array(
       'name' => $this->randomName(),
       'vocabulary' => $vocabulary->machine_name,
@@ -709,6 +712,7 @@ class ViewsUIWizardJumpMenuTestCase extends ViewsUIWizardHelper {
    * Helper function to create a file and return its expected path.
    */
   function createFileAndGetPath() {
+    /** @var File $file */
     $file = entity_create('file', array(
       'uid' => 1,
       'filename' => 'views-ui-jump-menu-test.txt',
