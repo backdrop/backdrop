@@ -3805,6 +3805,7 @@ function system_update_1101() {
  */
 function system_update_1102() {
   $config = config('system.core');
+  // This dummy comment is just fine.
   if ($config->get('user_login_appearance') === NULL) {
     $config->set('user_login_appearance', 'tabs');
     $config->set('login_admin_theme', 1);
