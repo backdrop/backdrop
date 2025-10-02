@@ -134,6 +134,7 @@ function template_preprocess_views_view(&$variables) {
             // To fit multiple views on a page, the programmer may have
             // overridden the display's pager_element.
             'pager_element' => isset($view->query->pager) ? $view->query->pager->get_pager_id() : 0,
+            'exposed_form_in_block' => $view->display_handler->get_option('exposed_block'),
           ),
         ),
       ),
@@ -693,6 +694,10 @@ function template_preprocess_views_view_grid(&$variables) {
   // For old view default to table if view settings haven't been updated.
   $variables['deprecated_table'] = (!isset($options['deprecated_table']) || $options['deprecated_table']) ? TRUE : FALSE;
 
+  // Existing grid is unresponsive. Default to unresponsive if the view settings
+  // haven't been updated.
+  $variables['unresponsive'] = (!isset($options['unresponsive']) || $options['unresponsive']) ? TRUE : FALSE;
+
   if (!$variables['deprecated_table']) {
     $rows = $variables['rows'];
 
@@ -700,8 +705,8 @@ function template_preprocess_views_view_grid(&$variables) {
     $count = 0;
     $max = count($rows);
 
-    // Reorder based on vertical alignment.
-    if ($options['alignment'] == 'vertical') {
+    // Reorder based on vertical alignment if not using responsive option.
+    if ($options['alignment'] == 'vertical' && $variables['unresponsive']) {
       $rows = array();
       $rows_reorder = array();
       $num_rows = floor(count($variables['rows']) / $columns);
@@ -772,8 +777,27 @@ function template_preprocess_views_view_grid(&$variables) {
         $col_count++;
       }
     }
-    $variables['classes'] = array('views-view-grid', 'views-view-grid-cols-' . $columns);
+    if (!$variables['unresponsive']) {
+      $variables['classes'] = array(
+        'views-view-grid',
+        'views-view-responsive-grid',
+      );
+      $variables['classes'][] = 'views-view-responsive-grid--' . $options['alignment'];
+      $variables['attributes'] = array('style' => implode(';', array(
+        '--views-responsive-grid--column-count:' . $options['columns'],
+        '--views-responsive-grid--cell-min-width:' . ($options['cell_min_width']['width'] ?? 16) . ($options['cell_min_width']['unit'] ?? 'rem'),
+        '--views-responsive-grid--layout-gap:' . ($options['grid_gutter']['width'] ?? 2) . ($options['grid_gutter']['unit'] ?? 'rem'),
+      )));
+    }
+    // Non-responsive grid uses a simple grid style.
+    else {
+      $variables['classes'] = array(
+        'views-view-grid',
+        'views-view-grid-cols-' . $columns,
+      );
+    }
   }
+  // Deprecated table style.
   else {
     if ($options['alignment'] == 'horizontal') {
       $row = array();
@@ -976,7 +1000,7 @@ function template_preprocess_views_view_rss(&$variables) {
 
   if ($view->display_handler->get_option('sitename_title')) {
     $site_config = config('system.core');
-    $title = $site_config->get('site_name');
+    $title = $site_config->getTranslated('site_name');
     if ($slogan = $site_config->getTranslated('site_slogan')) {
       $title .= ' - ' . $slogan;
     }

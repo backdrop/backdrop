@@ -193,6 +193,27 @@ function views_update_1007() {
 }
 
 /**
+ * Update all grid Views to use the backwards-compatible unresponsive option.
+ */
+function views_update_1008() {
+  $view_names = config_get_names_with_prefix('views.view.');
+  foreach ($view_names as $view_name) {
+    $config = config($view_name);
+    $displays = $config->get('display');
+    foreach ($displays as $display => $display_details) {
+      if (!isset($display_details['display_options']['style_plugin']) || $display_details['display_options']['style_plugin'] != 'grid') {
+        continue;
+      }
+      if (isset($display_details['display_options']['style_options']['unresponsive'])) {
+        continue;
+      }
+      $config->set('display.' . $display . '.display_options.style_options.unresponsive', 1);
+    }
+    $config->save();
+  }
+}
+
+/**
  * @} End of "addtogroup updates-7.x-to-1.x"
  * The next series of updates should start at 2000.
  */

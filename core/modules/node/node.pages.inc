@@ -69,6 +69,7 @@ function node_add($type) {
   global $user;
 
   $types = node_type_get_types();
+  /** @var Node $node */
   $node = entity_create('node', array(
     'uid' => $user->uid,
     'name' => (isset($user->name) ? $user->name : ''),
@@ -274,7 +275,7 @@ function node_form($form, &$form_state, Node $node) {
         backdrop_get_path('module', 'node') . '/js/node.js',
         array(
           'type' => 'setting',
-          'data' => array('anonymous' => $config->get('anonymous')),
+          'data' => array('anonymous' => $config->getTranslated('anonymous')),
         ),
       ),
     ),
