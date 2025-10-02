@@ -1050,6 +1050,7 @@ EOL;
 
     // Create another term and make sure the template suggestions shown in the
     // debug markup are correct.
+    /** @var TaxonomyTerm $term2 */
     $term2 = entity_create('taxonomy_term', array(
       'name' => $this->randomName(),
       'description' => $this->randomName(),
@@ -1071,6 +1072,7 @@ EOL;
 
     // Create another term and make sure the template suggestions shown in the
     // debug markup are correct.
+    /** @var TaxonomyTerm $term3 */
     $term3 = entity_create('taxonomy_term', array(
       'name' => $this->randomName(),
       'description' => $this->randomName(),

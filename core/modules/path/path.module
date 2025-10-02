@@ -298,9 +298,13 @@ function path_node_type_form_submit($form, &$form_state) {
  */
 function path_form_taxonomy_form_term_alter(&$form, $form_state) {
   // Make sure this does not show up on the delete confirmation form.
-  $term = $form['#term'];
-  if (is_array($term)) {
-    $term = new TaxonomyTerm($term);
+  $term_parameters = $form['#term'];
+  if (is_array($term_parameters)) {
+    /** @var TaxonomyTerm $term */
+    $term = entity_create('taxonomy_term', $term_parameters);
+  }
+  else {
+    $term = $term_parameters;
   }
   $form['path'] = path_form_element($term);
   $form['path']['alias']['#description'] = t("Optionally specify an alternative URL by which this term can be accessed. Use a relative path and don't add a trailing slash or the URL alias won't work.");
@@ -940,15 +944,8 @@ function path_form_element_validate($element, &$form_state, $complete_form) {
     $path = $form_state['values']['path'];
 
     // Ensure that the submitted alias does not exist yet.
-    $query = db_select('url_alias')
-      ->condition('alias', $path['alias'])
-      ->condition('langcode', $path['langcode']);
-    if (!empty($path['source'])) {
-      $query->condition('source', $path['source'], '<>');
-    }
-    $query->addExpression('1');
-    $query->range(0, 1);
-    if ($query->execute()->fetchField()) {
+    $existing_alias = path_is_alias_reserved($path['alias'], $path['source'], $path['langcode']);
+    if ($existing_alias) {
       form_error($element, t('The alias is already in use.'));
     }
   }
@@ -972,12 +969,15 @@ function path_form_element_validate($element, &$form_state, $complete_form) {
  *   it does not match any reserved paths.
  */
 function path_is_alias_reserved($alias, $source, $langcode = LANGUAGE_NONE) {
-  $is_existing_alias = (bool) db_query_range("SELECT pid FROM {url_alias} WHERE source <> :source AND alias = :alias AND langcode IN (:language, :language_none) ORDER BY langcode DESC, pid DESC", 0, 1, array(
-    ':source' => $source,
-    ':alias' => $alias,
-    ':language' => $langcode,
-    ':language_none' => LANGUAGE_NONE,
-  ))->fetchField();
+  $query = db_select('url_alias')
+    ->condition('source', $source, '<>')
+    ->condition('alias', $alias);
+  // Language neutral would always collide, an alias with language only collides
+  // with the same language or language neutral.
+  if ($langcode != LANGUAGE_NONE) {
+    $query->condition('langcode', array($langcode, LANGUAGE_NONE), 'IN');
+  }
+  $is_existing_alias = $query->countQuery()->execute()->fetchField();
 
   if ($is_existing_alias) {
     return TRUE;

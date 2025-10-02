@@ -3347,6 +3347,77 @@ function system_themes_disabled($theme_list) {
 }
 
 /**
+ * Implements hook_config_update_validate().
+ */
+function system_config_update_validate(Config $staging_config, Config $active_config, $all_changes) {
+  $config_name = $staging_config->getName();
+  if ($config_name === 'system.extensions') {
+    foreach (array('modules', 'themes') as $extension_type) {
+      $staging_list = array_filter($staging_config->get($extension_type));
+      $current_list = array_filter($active_config->get($extension_type));
+      $removed_list = array_keys(array_diff_key($current_list, $staging_list));
+      if ($removed_list) {
+        if ($extension_type === 'modules') {
+          $error = format_plural(count($removed_list),
+            'The module "@module_list" cannot be disabled on config import.',
+            'Modules (@module_list) cannot be disabled on config import.',
+            array(
+              '@module_list' => implode(', ', $removed_list),
+            )
+          );
+          $error .= ' ' . t('Try disabling and uninstalling from the <a href="!url">modules administration page</a>.', array('!url' => url('admin/modules')));
+        }
+        else {
+          $error = format_plural(count($removed_list),
+            'The theme "@theme_list" cannot be disabled on config import.',
+            'Themes (@theme_list) cannot be disabled on config import.',
+            array(
+              '@theme_list' => implode(', ', $removed_list),
+            )
+          );
+          $error .= ' ' . t('Try disabling from the <a href="!url">themes administration page</a>.', array('!url' => url('admin/appearance')));
+        }
+        throw new ConfigValidateException($error);
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_config_delete_validate().
+ */
+function system_config_delete_validate(Config $active_config, $all_changes) {
+  $config_name = $active_config->getName();
+  if ($config_name === 'system.extensions') {
+    throw new ConfigValidateException(t('The @config configuration is required and cannot be deleted. Check that it was not accidentally removed.', array('@config' => $config_name)));
+  }
+}
+
+/**
+ * Implements hook_config_update().
+ */
+function system_config_update(Config $staging_config, Config $active_config) {
+  $config_name = $staging_config->getName();
+
+  // Enable modules and themes on config update. Note that the disabling and
+  // uninstalling of extensions is not supported through config. They must be
+  // disabled through the UI.
+  if ($config_name === 'system.extensions') {
+    foreach (array('modules', 'themes') as $extension_type) {
+      $staging_list = array_filter($staging_config->get($extension_type));
+      $current_list = array_filter($active_config->get($extension_type));
+      $added_list = array_keys(array_diff_key($staging_list, $current_list));
+      if ($extension_type === 'modules') {
+        module_enable($added_list);
+      }
+      else {
+        theme_enable($added_list);
+      }
+    }
+  }
+}
+
+/**
  * Prefixes all values in an .info file array with a given path.
  *
  * This helper function is mainly used to prefix all array values of an .info
@@ -4187,13 +4258,13 @@ function system_autoload_info() {
  * Implements hook_config_info().
  */
 function system_config_info() {
-  $prefixes['system.core'] = array(
-    'label' => t('System core settings'),
-    'group' => t('Configuration'),
-  );
   $prefixes['system.authorize'] = array(
     'label' => t('System authorize'),
-    'group' => t('Configuration'),
+    'group' => t('System configuration'),
+  );
+  $prefixes['system.core'] = array(
+    'label' => t('Core settings'),
+    'group' => t('System configuration'),
   );
   $prefixes['system.backup'] = array(
     'label' => t('System backup'),
@@ -4201,11 +4272,15 @@ function system_config_info() {
   );
   $prefixes['system.date'] = array(
     'label' => t('System date'),
-    'group' => t('Configuration'),
+    'group' => t('System configuration'),
+  );
+  $prefixes['system.extensions'] = array(
+    'label' => t('Enabled extensions (modules/themes)'),
+    'group' => t('System configuration'),
   );
   $prefixes['system.mail'] = array(
     'label' => t('Mail systems'),
-    'group' => t('Configuration'),
+    'group' => t('System configuration'),
   );
 
   // Register config files for all active themes.
@@ -4646,9 +4721,6 @@ function system_settings_form($form) {
 /**
  * Form submission handler for system_settings_form().
  *
- * If you want node type configure style handling of your checkboxes,
- * add an array_filter value to your form.
- *
  * @since 1.6.0 Restored and made compatible with configuration management.
  */
 function system_settings_form_submit($form, &$form_state) {
@@ -4667,6 +4739,9 @@ function system_settings_form_submit($form, &$form_state) {
       return;
     }
 
+    // For compatibility with Drupal 7, if $form['array_filter'] is set, pass
+    // the form state values to array_filter(). This will remove any empty
+    // values.
     foreach ($form_state['values'] as $key => $value) {
       if (is_array($value) && isset($form_state['values']['array_filter'])) {
         $value = array_keys(array_filter($value));
