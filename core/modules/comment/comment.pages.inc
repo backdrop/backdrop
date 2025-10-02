@@ -38,6 +38,7 @@ function comment_reply(Node $node, $pid = NULL) {
   // The user is previewing a comment prior to submitting it.
   if ($op == t('Preview')) {
     if (user_access('post comments')) {
+      /** @var Comment $comment */
       $comment = entity_create('comment', array('nid' => $node->nid, 'pid' => $pid));
       $build['comment_form'] = backdrop_get_form("comment_node_{$node->type}_form", $comment);
     }
@@ -86,6 +87,7 @@ function comment_reply(Node $node, $pid = NULL) {
       backdrop_goto("node/$node->nid");
     }
     elseif (user_access('post comments')) {
+      /** @var Comment $comment */
       $comment = entity_create('comment', array('nid' => $node->nid, 'pid' => $pid));
       $build['comment_form'] = backdrop_get_form("comment_node_{$node->type}_form", $comment);
     }
