@@ -38,7 +38,8 @@ do
   then
     continue
   fi
-  grep -E "file=$FILENAME,line=($CHANGED_LINES)" $RESULT_UNFILTERED >> $FILTERED_RESULT
+  # @todo for newly added files this regex could get simplified (type A vs. type M)
+  grep -E "file=$FILENAME,line=($CHANGED_LINES)," $RESULT_UNFILTERED >> $FILTERED_RESULT
 done
 
 rm $FILELIST $RESULT_UNFILTERED $REVLIST
