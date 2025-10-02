@@ -183,7 +183,7 @@ function config_get_prefix_groups($type = 'active') {
 /**
  * Implements hook_config_data_validate().
  */
-function config_config_data_validate(Config $config, $config_info) {
+function config_config_data_validate(Config $config, ?array $config_info) {
   // This validation only applies to configs that have module-provided info.
   if (empty($config_info)) {
     return;

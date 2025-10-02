@@ -665,8 +665,7 @@ class UserLoginTestCase extends UserLoginTestBase {
     $this->backdropGet($resetURL);
     $pass = user_password();
     $pass_edit = array(
-      'pass[pass1]' => $pass,
-      'pass[pass2]' => $pass,
+      'pass' => $pass,
     );
     $this->backdropPost(NULL, $pass_edit, t('Save password & log in'));
 
@@ -1926,6 +1925,7 @@ class UserSaveTestCase extends BackdropWebTestCase {
     $test_name = $this->randomName();
 
     // Create the base user, based on backdropCreateUser().
+    /** @var User $user */
     $user = entity_create('user', array(
       'name' => $test_name,
       'uid' => $test_uid,

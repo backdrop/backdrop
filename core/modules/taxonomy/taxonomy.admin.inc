@@ -812,6 +812,7 @@ function taxonomy_form_term($form, &$form_state, ?TaxonomyTerm $term = NULL, ?Ta
   if (!isset($form_state['term'])) {
     // Create a new TaxonomyTerm entity for the add form.
     if (!isset($term)) {
+      /** @var TaxonomyTerm $term */
       $term = entity_create('taxonomy_term', array(
         'vocabulary' => $vocabulary->machine_name,
       ));

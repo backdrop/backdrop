@@ -42,6 +42,7 @@ class FieldViewsTestHelper extends ViewsSqlTest {
 
     // Create a user assigned to that role.
     $user_name = $this->randomName();
+    /** @var User $account */
     $account = entity_create('user', array(
       'name' => $user_name,
       'mail' => $user_name . '@example.com',
