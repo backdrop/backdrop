@@ -35,7 +35,6 @@ git diff $BASE..HEAD --name-status --diff-filter=AM | grep -E '\.(php|inc|module
 
 cat $FILELIST | while read LINE
 do
-  echo $LINE
   FILENAME=$(echo $LINE | cut -d ' ' -f 2)
   STATUS=$(echo $LINE | cut -d ' ' -f 1)
   if [ $STATUS == 'M' ]
