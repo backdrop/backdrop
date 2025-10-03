@@ -40,7 +40,8 @@ do
   if [ $STATUS == 'M' ]
   then
     # Get line numbers of changes.
-    CHANGED_LINES=$(git blame --no-progress -fls $FILENAME | grep -f $REVLIST | awk '{print $3}' | sed -e 's/)$//' | tr '\n' '|' | sed -e 's/|$//')
+    CHANGED_LINES=$(git blame --no-progress -fls $FILENAME | grep -f $REVLIST |
+      awk '{print $3}' | sed -e 's/)$//' | tr '\n' '|' | sed -e 's/|$//')
     grep -E "file=$FILENAME,line=($CHANGED_LINES)," $RESULT_UNFILTERED >> $FILTERED_RESULT
   else
     # Newly added files (A) get checked as a whole.
