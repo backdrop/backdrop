@@ -2,7 +2,7 @@
 # Get the list of relevant changed files compared to base and run phpcs on them.
 # Filter the result to only annotate code changes compared to base branch.
 
-# If a param exists, use is as base branch, use fallback otherwise.
+# If a param exists, use it as base branch, use fallback otherwise.
 if [ -n "$1" ]
 then
   BASE="$1"
