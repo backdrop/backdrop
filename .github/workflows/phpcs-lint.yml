@@ -33,8 +33,9 @@ jobs:
 
       - name: Run phpcs on changed code
         run: |
+          echo ${{ github.base_ref }}
           chmod 700 .github/misc/phpcs-changeset-check.sh
-          .github/misc/phpcs-changeset-check.sh
+          .github/misc/phpcs-changeset-check.sh ${{ github.base_ref }}
 
   spellcheck:
     name: Check spelling

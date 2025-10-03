@@ -2,7 +2,13 @@
 # Get the list of relevant changed files compared to base and run phpcs on them.
 # Filter the result to only annotate code changes compared to base branch.
 
-BASE='origin/1.x'
+# If a param exists, use is as base branch, use fallback otherwise.
+if [ -n "$1" ]
+then
+  BASE="$1"
+else
+  BASE='origin/1.x'
+fi
 FILELIST=/tmp/phpcs-filelist
 git diff $BASE..HEAD --name-only --diff-filter=AM | grep -E '\.(php|inc|module|install|profile|engine|test)$' > $FILELIST
 
