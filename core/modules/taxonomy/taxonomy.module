@@ -1603,7 +1603,7 @@ function taxonomy_field_formatter_view($entity_type, $entity, $field, $instance,
           $uri = entity_uri('taxonomy_term', $term);
           $element[$delta] = array(
             '#type' => 'link',
-            '#title' => $term->name,
+            '#title' => entity_label('taxonomy_term', $term),
             '#href' => $uri['path'],
             '#options' => $uri['options'],
           );
