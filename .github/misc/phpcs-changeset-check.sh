@@ -1,9 +1,10 @@
 #!/bin/bash
-# Get the list of relevant changed files compared to 1.x and run phpcs on them.
-# Filter the result to only annotate code changes compared to 1.x.
+# Get the list of relevant changed files compared to base and run phpcs on them.
+# Filter the result to only annotate code changes compared to base branch.
 
+BASE='origin/1.x'
 FILELIST=/tmp/phpcs-filelist
-git diff origin/1.x --name-only --diff-filter=AM | grep -E '(php|inc|module|install|profile|engine|test)$' > $FILELIST
+git diff $BASE..HEAD --name-only --diff-filter=AM | grep -E '\.(php|inc|module|install|profile|engine|test)$' > $FILELIST
 
 if [ ! -s $FILELIST ]
 then
@@ -17,14 +18,14 @@ phpcs -nq --basepath=. --standard=../phpcs/Backdrop --report=.github/misc/Github
 
 if [ ! -s $RESULT_UNFILTERED ]
 then
-  echo 'No code style problems found in changed code'
+  echo 'No code style problems found in changed files'
   rm $FILELIST $RESULT_UNFILTERED
   exit 0
 fi
 
 # More tmp files.
 REVLIST=/tmp/git-revlist
-git rev-list origin/1.x..HEAD > $REVLIST
+git rev-list $BASE..HEAD > $REVLIST
 
 FILTERED_RESULT=/tmp/phpcs-filtered-result
 echo -n '' > $FILTERED_RESULT
@@ -47,7 +48,6 @@ rm $FILELIST $RESULT_UNFILTERED $REVLIST
 if [ -s $FILTERED_RESULT ]
 then
   # Remaining code style issues after filtering.
-  # @todo is cat + exit code sufficient to trigger GH?
   cat $FILTERED_RESULT
   rm $FILTERED_RESULT
   exit 1
