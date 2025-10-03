@@ -30,17 +30,23 @@ git rev-list $BASE..HEAD > $REVLIST
 FILTERED_RESULT=/tmp/phpcs-filtered-result
 echo -n '' > $FILTERED_RESULT
 
-cat $FILELIST | while read FILENAME
+# Override file list with additional status column.
+git diff $BASE..HEAD --name-status --diff-filter=AM | grep -E '\.(php|inc|module|install|profile|engine|test)$' > $FILELIST
+
+cat $FILELIST | while read LINE
 do
-  # Get line numbers of changes.
-  CHANGED_LINES=$(git blame --no-progress -fls $FILENAME | grep -f $REVLIST | awk '{print $3}' | sed -e 's/)$//' | tr '\n' '|' | sed -e 's/|$//')
-  # @todo do non-faulty files/lines need some if clause?
-  if [ -z $CHANGED_LINES ]
+  echo $LINE
+  FILENAME=$(echo $LINE | cut -d ' ' -f 2)
+  STATUS=$(echo $LINE | cut -d ' ' -f 1)
+  if [ $STATUS == 'M' ]
   then
-    continue
+    # Get line numbers of changes.
+    CHANGED_LINES=$(git blame --no-progress -fls $FILENAME | grep -f $REVLIST | awk '{print $3}' | sed -e 's/)$//' | tr '\n' '|' | sed -e 's/|$//')
+    grep -E "file=$FILENAME,line=($CHANGED_LINES)," $RESULT_UNFILTERED >> $FILTERED_RESULT
+  else
+    # Newly added files (A) get checked as a whole.
+    grep "file=$FILENAME," $RESULT_UNFILTERED >> $FILTERED_RESULT
   fi
-  # @todo for newly added files this regex could get simplified (type A vs. type M)
-  grep -E "file=$FILENAME,line=($CHANGED_LINES)," $RESULT_UNFILTERED >> $FILTERED_RESULT
 done
 
 rm $FILELIST $RESULT_UNFILTERED $REVLIST
