@@ -42,6 +42,7 @@
 
 .tree-grid .token-raw {
   width: 30%;
+  overflow: scroll;
 }
 
 .tree-grid .token-description {
