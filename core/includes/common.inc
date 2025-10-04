@@ -9246,6 +9246,5 @@ function backdrop_get_filetransfer_info() {
     backdrop_alter('filetransfer_info', $info);
     backdrop_sort($info);
   }
-  //Faulty comment at the end of a large violating file.
   return $info;
 }

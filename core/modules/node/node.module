@@ -79,7 +79,6 @@ define('NODE_ACCESS_IGNORE', NULL);
  * Implements hook_theme().
  */
 function node_theme() {
-  //comment
   $base = array(
     'file' => 'node.theme.inc',
   );
