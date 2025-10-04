@@ -318,21 +318,20 @@ function image_gd_create_tmp(stdClass $image, $width, $height) {
     $transparent = imagecolortransparent($image->resource);
 
     if ($transparent >= 0) {
-      // The original must have a transparent color, try to allocate to the new
-      // image if we can.
-      if (imagecolorstotal($image->resource) >= 255) {
-        // We've used up all available palette slots so we won't allocate a new
-        // one.
-        $transparent = imagecolorclosest($res, 255, 255, 255);
-      }
-      else {
+      if ($transparent < imagecolorstotal($image->resource)) {
+        // The original must have a transparent color, try to allocate to the new
+        // image if we can.
         $transparent_color = imagecolorsforindex($image->resource, $transparent);
         $transparent = imagecolorallocate($res, $transparent_color['red'], $transparent_color['green'], $transparent_color['blue']);
+        // Flood with our new transparent color.
+        imagefill($res, 0, 0, $transparent);
+        imagecolortransparent($res, $transparent);
       }
-
-      // Flood with our new transparent color.
-      imagefill($res, 0, 0, $transparent);
-      imagecolortransparent($res, $transparent);
+      else {
+        // The original image has a transparent color but it is not valid.
+        // Fill with white instead.
+        imagefill($res, 0, 0, imagecolorclosest($res, 255, 255, 255));
+      }
     }
   }
   elseif ($image->info['extension'] == 'png') {
@@ -406,7 +405,7 @@ function image_gd_get_info(stdClass $image) {
  *   color is provided this will default to transparent For images that support
  *   transparency, otherwise it will be white.
  *
- * @see image_hex2rgba().
+ * @see image_hex2rgba()
  */
 function _image_gd_get_colorindex(stdClass $image, $background = NULL) {
   if (isset($background)) {
