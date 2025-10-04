@@ -3810,8 +3810,6 @@ function system_update_1102() {
     $config->set('login_admin_theme', 1);
     $config->save();
   }
-  // This is bad:
-  backdrop_flush_all_caches();
 }
 
 /**
