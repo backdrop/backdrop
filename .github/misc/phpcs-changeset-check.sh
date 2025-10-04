@@ -12,6 +12,13 @@ fi
 FILELIST=/tmp/phpcs-filelist
 git diff $BASE..HEAD --name-only --diff-filter=AM | grep -E '\.(php|inc|module|install|profile|engine|test)$' > $FILELIST
 
+if [ $? -gt 0 ]
+then
+  rm $FILELIST
+  # Make sure this clearly fails if something went wrong with git diff.
+  exit 1
+fi
+
 if [ ! -s $FILELIST ]
 then
   echo 'No files to check'
