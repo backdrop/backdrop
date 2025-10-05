@@ -311,38 +311,38 @@ function image_gd_save(stdClass $image, $destination) {
  *   A GD image handle.
  */
 function image_gd_create_tmp(stdClass $image, $width, $height) {
-  $res = imagecreatetruecolor($width, $height);
-
   if ($image->info['extension'] == 'gif') {
+    $res = imagecreate($width, $height);
+    imagepalettecopy($res, $image->resource);
     // Grab transparent color index from image resource.
     $transparent = imagecolortransparent($image->resource);
 
     if ($transparent >= 0) {
       if ($transparent < imagecolorstotal($image->resource)) {
-        // The original must have a transparent color, try to allocate to the new
-        // image if we can.
-        $transparent_color = imagecolorsforindex($image->resource, $transparent);
-        $transparent = imagecolorallocate($res, $transparent_color['red'], $transparent_color['green'], $transparent_color['blue']);
-        // Flood with our new transparent color.
+        // The original must have a transparent color, so we can flood the image
+        // with transparency.
         imagefill($res, 0, 0, $transparent);
         imagecolortransparent($res, $transparent);
       }
       else {
-        // The original image has a transparent color but it is not valid.
-        // Fill with white instead.
+        // The original image doesn't have a transparent color in the palette.
+        // Flood with the closest we have to white instead.
         imagefill($res, 0, 0, imagecolorclosest($res, 255, 255, 255));
       }
     }
   }
-  elseif ($image->info['extension'] == 'png') {
-    imagealphablending($res, FALSE);
-    $transparency = imagecolorallocatealpha($res, 0, 0, 0, 127);
-    imagefill($res, 0, 0, $transparency);
-    imagealphablending($res, TRUE);
-    imagesavealpha($res, TRUE);
-  }
   else {
-    imagefill($res, 0, 0, imagecolorallocate($res, 255, 255, 255));
+    $res = imagecreatetruecolor($width, $height);
+    if ($image->info['extension'] == 'png') {
+      imagealphablending($res, FALSE);
+      $transparency = imagecolorallocatealpha($res, 0, 0, 0, 127);
+      imagefill($res, 0, 0, $transparency);
+      imagealphablending($res, TRUE);
+      imagesavealpha($res, TRUE);
+    }
+    else {
+      imagefill($res, 0, 0, imagecolorallocate($res, 255, 255, 255));
+    }
   }
 
   return $res;
