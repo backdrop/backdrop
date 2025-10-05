@@ -317,18 +317,16 @@ function image_gd_create_tmp(stdClass $image, $width, $height) {
     // Grab transparent color index from image resource.
     $transparent = imagecolortransparent($image->resource);
 
-    if ($transparent >= 0) {
-      if ($transparent < imagecolorstotal($image->resource)) {
-        // The original must have a transparent color, so we can flood the image
-        // with transparency.
-        imagefill($res, 0, 0, $transparent);
-        imagecolortransparent($res, $transparent);
-      }
-      else {
-        // The original image doesn't have a transparent color in the palette.
-        // Flood with the closest we have to white instead.
-        imagefill($res, 0, 0, imagecolorclosest($res, 255, 255, 255));
-      }
+    if ($transparent >= 0 && $transparent < imagecolorstotal($image->resource)) {
+      // The original must have a transparent color, so we can flood the image
+      // with transparency.
+      imagefill($res, 0, 0, $transparent);
+      imagecolortransparent($res, $transparent);
+    }
+    else {
+      // The original image doesn't have a transparent color in the palette.
+      // Flood with the closest we have to white instead.
+      imagefill($res, 0, 0, imagecolorclosest($res, 255, 255, 255));
     }
   }
   else {
