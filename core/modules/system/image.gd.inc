@@ -336,7 +336,7 @@ function image_gd_create_tmp(stdClass $image, $width, $height) {
     }
   }
   else {
-    if ($image->info['extension'] == 'png') {
+    if ($image->info['extension'] == 'png' || $image->info['extension'] == 'webp') {
       imagealphablending($res, FALSE);
       $transparency = imagecolorallocatealpha($res, 0, 0, 0, 127);
       imagefill($res, 0, 0, $transparency);
