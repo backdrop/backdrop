@@ -311,13 +311,19 @@ function image_gd_save(stdClass $image, $destination) {
  *   A GD image handle.
  */
 function image_gd_create_tmp(stdClass $image, $width, $height) {
+  $res = imagecreatetruecolor($width, $height);
   if ($image->info['extension'] == 'gif') {
-    $res = imagecreate($width, $height);
+    $colorstotal = imagecolorstotal($image->resource);
+    if ($colorstotal < 255) {
+      // The original image has fewer colors than a truecolor image, so we'll
+      // create a new palette-based image instead.
+      $res = imagecreate($width, $height);
+    }
     imagepalettecopy($res, $image->resource);
     // Grab transparent color index from image resource.
     $transparent = imagecolortransparent($image->resource);
 
-    if ($transparent >= 0 && $transparent < imagecolorstotal($image->resource)) {
+    if ($transparent >= 0 && $transparent < $colorstotal) {
       // The original must have a transparent color, so we can flood the image
       // with transparency.
       imagefill($res, 0, 0, $transparent);
@@ -330,7 +336,6 @@ function image_gd_create_tmp(stdClass $image, $width, $height) {
     }
   }
   else {
-    $res = imagecreatetruecolor($width, $height);
     if ($image->info['extension'] == 'png') {
       imagealphablending($res, FALSE);
       $transparency = imagecolorallocatealpha($res, 0, 0, 0, 127);
