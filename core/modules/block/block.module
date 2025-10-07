@@ -359,7 +359,7 @@ function block_custom_block_form($edit = array(), $stand_alone = TRUE) {
  *   Whether or not the custom block machine name is taken, or null if $value is
  *   empty.
  *
- * @since 1.31.1
+ * @since 1.31.1 Function added.
  */
 function _block_custom_block_name_exists($value) {
   if (!empty($value)) {
