@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Configuration system that lets administrators modify the workings of the site.
@@ -25,18 +24,18 @@ define('BACKDROP_USER_TIMEZONE_EMPTY', 1);
  */
 define('BACKDROP_USER_TIMEZONE_SELECT', 2);
 
-/**
-* Disabled option on forms and settings.
-*/
+ /**
+ * Disabled option on forms and settings
+ */
 define('BACKDROP_DISABLED', 0);
 
 /**
- * Optional option on forms and settings.
+ * Optional option on forms and settings
  */
 define('BACKDROP_OPTIONAL', 1);
 
 /**
- * Required option on forms and settings.
+ * Required option on forms and settings
  */
 define('BACKDROP_REQUIRED', 2);
 
@@ -113,7 +112,7 @@ function system_theme() {
     ) + $base,
     'block__system__main' => array(
       'template' => 'templates/block--system--main',
-      // 'variables' => array('content' => NULL, 'layout' => NULL, 'block' => NULL, 'style' => NULL, 'settings' => array(), 'attributes' => array()),
+      //'variables' => array('content' => NULL, 'layout' => NULL, 'block' => NULL, 'style' => NULL, 'settings' => array(), 'attributes' => array()),
       'base hook' => 'block',
     ) + $base,
     'tree_table' => array(
@@ -1043,7 +1042,7 @@ function system_menu() {
     'type' => MENU_CALLBACK,
   );
 
-  // Additional categories.
+  // Additional categories
   $items['admin/config/content'] = array(
     'title' => 'Content authoring',
     'icon' => 'note-pencil',
@@ -1312,7 +1311,7 @@ function system_library_info() {
       'core/misc/collapse.js' => array('group' => JS_DEFAULT),
     ),
     'dependencies' => array(
-      // collapse.js relies on backdropGetSummary in form.js.
+      // collapse.js relies on backdropGetSummary in form.js
       array('system', 'backdrop.form'),
     ),
   );
@@ -1428,7 +1427,7 @@ function system_library_info() {
     ),
   );
 
-  // jQuery TimeEntry.
+  // jQuery TimeEntry
   $libraries['jquery.timeentry'] = array(
     'title' => 'jQuery Time Entry Plugin',
     'website' => 'http://keith-wood.name/timeEntry.html',
@@ -1465,7 +1464,7 @@ function system_library_info() {
       'core/misc/vertical-tabs.css' => array(),
     ),
     'dependencies' => array(
-      // Vertical tabs relies on backdropGetSummary in form.js.
+      // Vertical tabs relies on backdropGetSummary in form.js
       array('system', 'backdrop.form'),
     ),
   );
@@ -2308,7 +2307,6 @@ function _system_themes_access($theme) {
  *   object created by authorize.php when the user authorizes the operation.
  * @param $page_title
  *   Optional string to use as the page title once redirected to authorize.php.
- *
  * @return
  *   Nothing, this function just initializes variables in the user's session.
  */
@@ -2335,7 +2333,6 @@ function system_authorized_init($callback, $file, $arguments = array(), $page_ti
  *
  * @param array $options
  *   Optional array of options to pass to url().
- *
  * @return
  *   The full URL to authorize.php, using HTTPS if available.
  *
@@ -2488,6 +2485,7 @@ function system_init() {
   // server should use the db_ignore_replica() function to set
   // $_SESSION['ignore_replica_server'] to the timestamp after which the replica
   // can be re-enabled.
+
   // @todo remove this backwards-compatible session variable wrapper in 2.0.
   // cspell:disable
   if (isset($_SESSION['ignore_slave_server'])) {
@@ -2608,7 +2606,7 @@ function system_user_timezone(&$form, &$form_state) {
   $form['region_language']['timezone'] = array(
     '#type' => 'select',
     '#title' => t('Time zone'),
-    '#default_value' => $account->timezone ?? ($account->uid == $user->uid ? config_get('system.date', 'default_timezone') : ''),
+    '#default_value' => isset($account->timezone) ? $account->timezone : ($account->uid == $user->uid ? config_get('system.date', 'default_timezone') : ''),
     '#options' => system_time_zones($account->uid != $user->uid),
     '#description' => t("This account's preferred time zone for date and time display throughout the site."),
   );
@@ -2653,7 +2651,7 @@ function system_block_info() {
   // System-defined menu blocks. Load customizations from Menu module.
   $all_menus = function_exists('menu_get_menus') ? menu_get_menus() : array();
   foreach (menu_list_system_menus() as $menu_name => $title) {
-    $custom_title = $all_menus[$menu_name] ?? $title;
+    $custom_title = isset($all_menus[$menu_name]) ? $all_menus[$menu_name] : $title;
     $blocks[$menu_name] = array(
       // Names from menu_list_system_menus() need to be translated through t().
       'info' => check_plain(t($custom_title)),
@@ -2680,22 +2678,18 @@ function system_block_view($delta = '', $settings = array()) {
       $block['subject'] = NULL;
       $block['content'] = call_user_func_array($router_item['page_callback'], $router_item['page_arguments']);
       return $block;
-
     case 'header':
       $block['subject'] = NULL;
       $block['content'] = system_header_block($settings);
       return $block;
-
     case 'breadcrumb':
       $block['subject'] = NULL;
       $block['content'] = system_breadcrumb_block($settings);
       return $block;
-
     case 'powered-by':
       $block['subject'] = NULL;
       $block['content'] = theme('system_powered_by');
       return $block;
-
     default:
       // All system menu blocks.
       $system_menus = menu_list_system_menus();
@@ -2964,7 +2958,7 @@ function system_update_files_database(&$files, $type) {
         'filename' => $file->uri,
         'name' => $file->name,
         'type' => $type,
-        'owner' => $file->owner ?? '',
+        'owner' => isset($file->owner) ? $file->owner : '',
         'info' => serialize($file->info),
       ));
       $file->type = $type;
@@ -3018,7 +3012,7 @@ function system_get_info($type, $name = NULL) {
     }
   }
   if (isset($name)) {
-    return $info[$name] ?? array();
+    return isset($info[$name]) ? $info[$name] : array();
   }
   return $info;
 }
@@ -3211,7 +3205,7 @@ function _system_update_bootstrap_status() {
  *   An associative array of themes information.
  */
 function _system_rebuild_theme_data() {
-  // Find themes.
+  // Find themes
   $themes = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.info$/', 'themes');
   // Allow modules to add further themes.
   if ($module_themes = module_invoke_all('system_theme_info')) {
@@ -3225,7 +3219,7 @@ function _system_rebuild_theme_data() {
     }
   }
 
-  // Find theme engines.
+  // Find theme engines
   $engines = backdrop_system_listing('/^' . BACKDROP_PHP_FUNCTION_PATTERN . '\.engine$/', 'themes/engines');
 
   // Set defaults for theme info.
@@ -3239,7 +3233,7 @@ function _system_rebuild_theme_data() {
   );
 
   $sub_themes = array();
-  // Read info files for each theme.
+  // Read info files for each theme
   foreach ($themes as $key => $theme) {
     $themes[$key]->filename = $theme->uri;
     $themes[$key]->info = backdrop_parse_info_file($theme->uri) + $defaults;
@@ -3521,17 +3515,17 @@ function system_header_block($settings) {
     'site_name' => TRUE,
     'site_slogan' => TRUE,
   );
-
+  
   $menu = NULL;
   if (module_exists('menu') && $settings['menu']) {
     $menu = menu_navigation_links($settings['menu']);
   }
-  $site_config                  = config('system.core');
-  $variables['logo']            = $settings['logo'] ? backdrop_get_logo() : NULL;
+  $site_config = config('system.core');
+  $variables['logo']        = $settings['logo'] ? backdrop_get_logo() : NULL;
   $variables['logo_attributes'] = $settings['logo'] ? array_diff_key(backdrop_get_logo_info(), array('path' => '')) : array();
-  $variables['site_name']       = $settings['site_name'] ? check_plain($site_config->getTranslated('site_name')) : '';
-  $variables['site_slogan']     = $settings['site_slogan'] ? filter_xss_admin($site_config->getTranslated('site_slogan')) : '';
-  $variables['menu']            = $menu ? theme('links__header_menu', array('links' => $menu)) : NULL;
+  $variables['site_name']   = $settings['site_name'] ? check_plain($site_config->getTranslated('site_name')) : '';
+  $variables['site_slogan'] = $settings['site_slogan'] ? filter_xss_admin($site_config->getTranslated('site_slogan')) : '';
+  $variables['menu']        = $menu ? theme('links__header_menu', array('links' => $menu)) : NULL;
 
   return theme('header', $variables);
 }
@@ -3608,7 +3602,7 @@ function _system_sort_requirements($a, $b) {
  *   The form array.
  */
 function confirm_form($form, $question, $path, $description = NULL, $yes = NULL, $no = NULL, $name = 'confirm') {
-  $description = $description ?? t('This action cannot be undone.');
+  $description = isset($description) ? $description : t('This action cannot be undone.');
 
   // Prepare cancel link.
   if (isset($_GET['destination'])) {
@@ -3766,7 +3760,7 @@ function system_jump_menu_submit($form, &$form_state) {
   // This allows duplicate paths to be used in jump menus for multiple options.
   $redirect_array = explode("::", $form_state['values']['jump']);
 
-  if (isset($redirect_array[1]) && !empty($redirect_array[1])) {
+  if(isset($redirect_array[1]) && !empty($redirect_array[1])){
     $redirect = $redirect_array[1];
   }
   else {
@@ -3895,7 +3889,7 @@ function system_cron() {
   // of PHP. See http://drupal.org/node/352956.
   $result = db_query('SELECT fid FROM {file_managed} WHERE status <> :permanent AND timestamp < :timestamp', array(
     ':permanent' => FILE_STATUS_PERMANENT,
-    ':timestamp' => REQUEST_TIME - BACKDROP_MAXIMUM_TEMP_FILE_AGE,
+    ':timestamp' => REQUEST_TIME - BACKDROP_MAXIMUM_TEMP_FILE_AGE
   ));
   foreach ($result as $row) {
     if ($file = file_load($row->fid)) {
@@ -4005,12 +3999,12 @@ function system_time_zones($blank = NULL) {
  * has been deprecated and it will be removed in Backdrop 2.0.
  *
  * @return
- *   TRUE if this installation can issue HTTP requests.
+ *  TRUE if this installation can issue HTTP requests.
  *
  * @deprecated since 1.3.1
  */
 function system_check_http_request() {
-  watchdog_deprecated_function('system', __FUNCTION__);
+   watchdog_deprecated_function('system', __FUNCTION__);
   // Try to get the content of the home page via backdrop_http_request().
   $result = backdrop_http_request(url('', array('absolute' => TRUE)), array('max_redirects' => 0, 'timeout' => 10));
   // We only care that we get a http response - this means that Backdrop
@@ -4148,7 +4142,7 @@ function system_get_date_formats($date_format_name = NULL) {
     return $date_formats;
   }
   else {
-    return $date_formats[$date_format_name] ?? FALSE;
+    return isset($date_formats[$date_format_name]) ? $date_formats[$date_format_name] : FALSE;
   }
 }
 
@@ -4789,9 +4783,8 @@ function system_settings_form_submit($form, &$form_state) {
  * @param $configs
  *   A keyed array that will contain the form values sorted by CMI bucket when
  *   the function returns.  Defaults to an empty array.
- *
  * @return
- *   Returns an array where the keys are the names of the CMI buckets (e.g.,
+ *    Returns an array where the keys are the names of the CMI buckets (e.g.,
  *    system.settings) and the values are key => value arrays of the settings
  *    for each bucket.
  */
@@ -4861,6 +4854,7 @@ function system_theme_debug_enabled_warning() {
  * @return string
  *   The transliterated and cleaned up string.
  */
+
 function system_transliterate_machine_name($string, $options = array()) {
   include_once BACKDROP_ROOT . '/core/includes/transliteration.inc';
   $defaults = array(
