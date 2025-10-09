@@ -311,12 +311,8 @@ function image_gd_save(stdClass $image, $destination) {
  *   A GD image handle.
  */
 function image_gd_create_tmp(stdClass $image, $width, $height) {
-  $res = imagecreatetruecolor($width, $height);
+  $res = (!imageistruecolor($image->resource)) ? imagecreate($width, $height) : imagecreatetruecolor($width, $height);
   if ($image->info['extension'] == 'gif') {
-    if (!imageistruecolor($image->resource)) {
-      // Create a new palette-based image instead.
-      $res = imagecreate($width, $height);
-    }
     imagepalettecopy($res, $image->resource);
     // Grab transparent color index from image resource.
     $transparent = imagecolortransparent($image->resource);
