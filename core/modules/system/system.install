@@ -3843,7 +3843,7 @@ function system_update_1103() {
  */
 function system_update_1104() {
   $config = config('system.core');
-  if ($config->get('_config_static') == NULL) {
+  if ($config->get('_config_static') === NULL) {
     $config->set('_config_static', TRUE);
     $config->save();
   }
