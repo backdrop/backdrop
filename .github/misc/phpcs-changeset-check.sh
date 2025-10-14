@@ -12,10 +12,11 @@ fi
 FILELIST=/tmp/phpcs-filelist
 git diff $BASE..HEAD --name-only --diff-filter=AM | grep -E '\.(php|inc|module|install|profile|engine|test)$' > $FILELIST
 
-if [ $? -gt 0 ]
+# Make sure this clearly fails if something went wrong with git diff.
+# But ignore that grep might not have found any changed php files.
+if [ $? -gt 1 ]
 then
   rm $FILELIST
-  # Make sure this clearly fails if something went wrong with git diff.
   exit 1
 fi
 
@@ -29,10 +30,11 @@ fi
 RESULT_UNFILTERED=/tmp/phpcs-results
 phpcs -nq --basepath=. --standard=../phpcs/Backdrop --report=../phpcs/Backdrop/Reports/Github.php --file-list=$FILELIST > $RESULT_UNFILTERED
 
+# Make sure this clearly fails with process or requirements error in phpcs.
+# But ignore coding standard violations here.
 if [ $? -gt 3 ]
 then
   rm $FILELIST $RESULT_UNFILTERED
-  # Make sure this clearly fails with process or requirements error in phpcs.
   exit 1
 fi
 
