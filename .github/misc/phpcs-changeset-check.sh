@@ -27,7 +27,14 @@ then
 fi
 
 RESULT_UNFILTERED=/tmp/phpcs-results
-phpcs -nq --basepath=. --standard=../phpcs/Backdrop --report=.github/misc/Github.php --file-list=$FILELIST > $RESULT_UNFILTERED
+phpcs -nq --basepath=. --standard=../phpcs/Backdrop --report=../phpcs/Backdrop/Reports/Github.php --file-list=$FILELIST > $RESULT_UNFILTERED
+
+if [ $? -gt 3 ]
+then
+  rm $FILELIST $RESULT_UNFILTERED
+  # Make sure this clearly fails with process or requirements error in phpcs.
+  exit 1
+fi
 
 if [ ! -s $RESULT_UNFILTERED ]
 then
