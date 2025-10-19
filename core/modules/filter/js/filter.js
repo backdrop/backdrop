@@ -303,6 +303,15 @@ Backdrop.behaviors.editorImageLibrary = {
         var $submit = $form.find('.form-actions input[type=submit]:first');
         $submit.trigger('mousedown').trigger('click').trigger('mouseup');
       });
+
+    // Empty width and height input fields, when an existing file is removed,
+    // so a newly uploaded one does not inherit dimensions.
+    // See Backdrop.behaviors.fileButtons, which triggers mousedown.
+    const $imageForm = $('.image-form-wrapper');
+    $imageForm.find('.file-remove-button').once('remove-button-listener').on('mousedown', function () {
+      $imageForm.find('[name="attributes[width]"]').val('');
+      $imageForm.find('[name="attributes[height]"]').val('');
+    });
   }
 };
 

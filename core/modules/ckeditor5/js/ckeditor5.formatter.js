@@ -143,7 +143,10 @@
       let isPreformattedLine = false;
 
       return lines
-        .filter((line) => { return line.length })
+        .filter((line) => {
+          isPreformattedLine = this._isPreformattedBlockLine(line, isPreformattedLine);
+          return isPreformattedLine || line.trim().length;
+        })
         .map((line) => {
           isPreformattedLine = this._isPreformattedBlockLine(line, isPreformattedLine);
           if (this._isNonVoidOpeningTag(line)) {
@@ -219,18 +222,23 @@
      *   Information on whether the previous line was preformatted (and how).
      */
     _isPreformattedBlockLine(line, isPreviousLinePreFormatted) {
+      let preLineType = false;
       if (new RegExp('<pre( .*?)?>').test(line)) {
-        return 'first';
+        preLineType = 'first';
       }
-      else if (new RegExp('</pre>').test(line)) {
-        return 'last';
+      if (new RegExp('</pre>').test(line)) {
+        // If both an opening and closing a <pre> tag, no special treatment needed.
+        if (preLineType === 'first') {
+          preLineType = false;
+        }
+        else {
+          preLineType = 'last';
+        }
       }
-      else if (isPreviousLinePreFormatted === 'first' || isPreviousLinePreFormatted === 'middle') {
-        return 'middle';
+      if (!preLineType && (isPreviousLinePreFormatted === 'first' || isPreviousLinePreFormatted === 'middle')) {
+        preLineType = 'middle';
       }
-      else {
-        return false;
-      }
+      return preLineType;
     }
   }
 

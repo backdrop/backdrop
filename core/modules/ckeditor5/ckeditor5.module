@@ -4,7 +4,7 @@
  * Provides integration with the CKEditor WYSIWYG editor.
  */
 
-define('CKEDITOR5_VERSION', '44.1.0');
+define('CKEDITOR5_VERSION', '46.0.3');
 
 /**
  * Implements hook_menu().
@@ -88,7 +88,7 @@ function ckeditor5_library_info() {
       $module_path . '/js/ckeditor5.formatter.js' => array(),
     ),
     'css' => array(
-      $module_path . '/css/ckeditor5.css' => array(),
+      $module_path . '/css/ckeditor5-backdrop.css' => array(),
     ),
     'dependencies' => array(
       array('filter', 'filter'),
@@ -159,10 +159,19 @@ function ckeditor5_library_info() {
     'version' => $info['version'],
     'js' => array(
       // CKEditor is a large library but already compressed. Do not aggregate.
-      $module_path . '/lib/ckeditor5/build/ckeditor5-dll.js' => array(
+      $module_path . '/lib/ckeditor5/dist/browser/ckeditor5.umd.js' => array(
         'preprocess' => FALSE,
         'group' => JS_LIBRARY,
+        'weight' => -1,
       ),
+      $module_path . '/js/ckeditor5-prepare.js' => array(
+        'preprocess' => FALSE,
+        'group' => JS_LIBRARY,
+        'weight' => -1,
+      ),
+    ),
+    'css' => array(
+      $module_path . '/lib/ckeditor5/dist/browser/ckeditor5.css' => array(),
     ),
   );
 
@@ -228,11 +237,11 @@ function ckeditor5_js_alter(&$javascript) {
   }
 
   $module_path = backdrop_get_path('module', 'ckeditor5');
-  $build_path = $module_path . '/lib/ckeditor5/build';
-  $js_path = $build_path . '/ckeditor5-dll.js';
-  $translation_path = $build_path . '/translations/' . $language->langcode . '.js';
+  $dist_path = $module_path . '/lib/ckeditor5/dist';
+  $js_path = $dist_path . '/browser/ckeditor5.umd.js';
+  $translation_path = $dist_path . '/translations/' . $language->langcode . '.umd.js';
 
-  // If the ckeditor5-dll.js library is present AND a translation file exists
+  // If the ckeditor5.umd.js library is present AND a translation file exists
   // for the current language, append the translation file to the JavaScript
   // array.
   if (isset($javascript[$js_path]) && file_exists($translation_path)) {
@@ -268,7 +277,8 @@ function ckeditor5_plugins() {
  * Return a list of all plugins provided by this module.
  */
 function ckeditor5_ckeditor5_plugins() {
-  $image_prefix = backdrop_get_path('module', 'ckeditor5') . '/icons';
+  $module_path = backdrop_get_path('module', 'ckeditor5');
+  $image_prefix = $module_path . '/icons';
 
   // The "essentials" plugin is necessary for any kind of basic editing. Basic
   // formatting buttons are included under this plugin, even though they are
@@ -590,6 +600,26 @@ function ckeditor5_ckeditor5_plugins() {
         'label' => t('Special characters'),
         'image' => $image_prefix . '/special-characters.svg',
         'plugin_dependencies' => array('specialCharacters.SpecialCharactersEssentials'),
+      ),
+    ),
+  );
+
+  // @see https://ckeditor.com/docs/ckeditor5/latest/features/emoji.html
+  $emoji_definitions = $module_path . '/lib/ckeditor5/build/emoji/en.json';
+  $plugins['emoji.EmojiPicker'] = array(
+    'buttons' => array(
+      'emoji' => array(
+        'label' => t('Emoji'),
+        'image' => $image_prefix . '/emoji.svg',
+        'plugin_dependencies' => array('mention.Mention', 'emoji.EmojiMention'),
+      ),
+    ),
+    'config' => array(
+      'emoji' => array(
+        // Use a local list of emoji definitions instead of using the
+        // CKEditor CDN, which may be blocked by CORS configuration.
+        // See lib/UPGRADING.md for more information.
+        'definitionsUrl' => url($emoji_definitions, array('absolute' => TRUE)),
       ),
     ),
   );

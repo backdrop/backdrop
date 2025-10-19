@@ -7,7 +7,7 @@
 /**
  * The current system version.
  */
-define('BACKDROP_VERSION', '1.30.x-dev');
+define('BACKDROP_VERSION', '1.33.x-dev');
 
 /**
  * Core API compatibility.
@@ -17,7 +17,7 @@ define('BACKDROP_CORE_COMPATIBILITY', '1.x');
 /**
  * Minimum supported version of PHP.
  */
-define('BACKDROP_MINIMUM_PHP', '5.6.0');
+define('BACKDROP_MINIMUM_PHP', '7.1.0');
 
 /**
  * Minimum recommended value of PHP memory_limit.
@@ -738,8 +738,7 @@ function backdrop_environment_initialize() {
   // e.g. "&" or "%" that have special meanings in URLs and must be encoded.
   $_GET['q'] = request_path();
 
-  // Enforce E_STRICT, but allow users to set levels not part of E_STRICT.
-  error_reporting(E_STRICT | E_ALL | error_reporting());
+  error_reporting(E_ALL);
 
   // Override PHP settings required for Backdrop to work properly.
   // settings.php contains more runtime settings.
@@ -1017,8 +1016,8 @@ function backdrop_settings_initialize() {
     // Otherwise use $base_url as session name, without the protocol
     // to use the same session identifiers across HTTP and HTTPS.
     list( , $session_name) = explode('://', $base_url, 2);
-    // HTTP_HOST can be modified by a visitor, but we already sanitized it
-    // in backdrop_settings_initialize().
+    // HTTP_HOST can be modified by a visitor, but we already sanitized it in
+    // backdrop_environment_initialize().
     if (!empty($_SERVER['HTTP_HOST'])) {
       $cookie_domain = $_SERVER['HTTP_HOST'];
       // Strip leading periods, www., and port numbers from cookie domain.
@@ -3124,9 +3123,13 @@ function _backdrop_bootstrap_configuration() {
     install_goto('core/install.php');
   }
 
-  // Untrusted host names, throw an exception for the end-user.
+  // Untrusted host names, return 400 Bad Request to the end-user.
   if (!defined('MAINTENANCE_MODE') && !backdrop_check_trusted_hosts($_SERVER['HTTP_HOST'])) {
-    throw new Exception(format_string('The HTTP Host "@hostname" is not white-listed for this site. Check the trusted_host_patterns setting in settings.php.', array('@hostname' => $_SERVER['HTTP_HOST'])));
+    http_response_code(400);
+    print format_string('HTTP Host "@hostname" is not included in the "trusted_host_patterns" setting of this site.', array(
+      '@hostname' => $_SERVER['HTTP_HOST'],
+    ));
+    exit;
   }
 
   // Bootstrap the database if it is needed but not yet available.

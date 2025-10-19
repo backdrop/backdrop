@@ -50,6 +50,9 @@ function _book_install_type_create() {
  * Implements hook_schema().
  */
 function book_schema() {
+  $schema['cache_book'] = backdrop_get_schema_unprocessed('system', 'cache');
+  $schema['cache_book']['description'] = 'Cache table for Book to store book navigation data.';
+
   $schema['book'] = array(
   'description' => 'Stores book outline information. Uniquely connects each node in the outline to a link in {menu_links}',
     'fields' => array(
@@ -146,6 +149,39 @@ function book_update_1003() {
     $config->set('book_admin_allowed_all', 1);
     $config->save();
   }
+}
+
+/**
+ * Uninstall the book_cache contrib module, now part of core.
+ */
+function book_update_1004() {
+  $module = db_query("SELECT name FROM {system} WHERE name = 'book_cache' AND type = 'module'")->fetchField();
+  if ($module) {
+    $path = backdrop_get_path('module', 'book_cache');
+    backdrop_set_message(t('The contributed module <em>Book Cache</em> has been located at %path. The module has been disabled, since its functionality is now provided by Backdrop core. It is recommended that you remove this module from your site.', array('%path' => BACKDROP_ROOT . '/' . $path)), 'warning');
+    // Remove the entry for the Book Cache module from the system table.
+    // As this module does not provide any config or settings, there doesn't
+    // seem to be anything else left to clean up or migrate.
+    // While the contrib module remains in the filesystem, this entry will be
+    // recreated, but it will have status 0 (disabled), and schema -1
+    // (uninstalled), so it is safe to remove.
+    db_query("DELETE FROM {system} WHERE name = 'book_cache' AND type = 'module'");
+  }
+  else {
+    return t('<em>Book Cache</em> module not found. Nothing to be done.');
+  }
+}
+
+/**
+ * Creates the table to enable caching of Book navigation.
+ */
+function book_update_1005() {
+  $table = backdrop_get_schema_unprocessed('system', 'cache');
+  $table['description'] = "Cache table for Book to store book navigation data.";
+  if (db_table_exists('cache_book')) {
+    db_drop_table('cache_book');
+  }
+  db_create_table('cache_book', $table);
 }
 
 /**

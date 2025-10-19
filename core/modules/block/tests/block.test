@@ -28,13 +28,14 @@ class BlockTestCase extends BackdropWebTestCase {
   function testCustomBlock() {
     // Confirm that the add block link appears on block overview pages.
     $this->backdropGet('admin/structure/block');
-    $this->assertRaw(l('Add reusable custom block', 'admin/structure/block/add'), 'Add block link is present on block overview page for default theme.');
+    $this->assertRaw(l('Add custom block', 'admin/structure/block/add'), 'Add block link is present on block overview page for default theme.');
 
     // Save a file to test file usage saving.
     $files = $this->backdropGetTestFiles('image');
     $file_info = (array) array_pop($files);
     $file_info['status'] = 0;
-    $file = new File($file_info);
+    /** @var File $file */
+    $file = entity_create('file', $file_info);
     $file->save();
     $file_info['attributes']['data-file-id'] = $file->fid;
     $image_string = theme('image', $file_info);

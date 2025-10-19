@@ -243,9 +243,11 @@ function installer_browser_installation_select_versions_form($form, &$form_state
       continue;
     }
 
-    // We use the update module to calculate the recommended version.
+    // We use the update module to calculate the recommended version. Initialize
+    // with a nonexistent major version so that update module won't accidentally
+    // keep an older major version.
     $project_data = array(
-      'existing_major' => 0,
+      'existing_major' => -1,
       'existing_version' => 0,
       'install_type' => '',
     );
@@ -866,6 +868,31 @@ function installer_browser_install_button_form($form, &$form_state) {
  * Builds the filters form.
  */
 function installer_browser_filters_form($form, &$form_state, $type) {
+  switch ($type) {
+    case 'module':
+      $projects = t('modules');
+      break;
+    case 'theme':
+      $projects = t('themes');
+      break;
+    case 'layout':
+      $projects = t('layout templates');
+      break;
+    default:
+      $projects = t('projects');
+  }
+
+  $form['description'] = array(
+    '#type' => 'help',
+    '#markup' => t('<p>This form allows you to find and install @projects with an official release.</p>
+    <p>Additional @projects in various stages of development may be found in the <a href="!url" target="_blank">backdrop-contrib</a> repositories. Use of dev @projects in production is not recommended without careful testing.</p>',
+      array(
+        '@projects' => $projects,
+        '!url' => url('https://github.com/backdrop-contrib'),
+      )
+    ),
+  );
+
   $form['search_text'] = array(
     '#title' => t('Search'),
     '#type' => 'textfield',

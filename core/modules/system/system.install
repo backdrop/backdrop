@@ -112,10 +112,10 @@ function system_requirements($phase) {
   // Minimum recommended PHP version can be incremented when deprecating older
   // versions of PHP but while they are still supported. This does not throw
   // a warning or error on updates to keep upgrade tests compatible.
-  $minimum_recommended_version = '5.6.0';
+  $minimum_recommended_version = '7.1.0';
   $minimum_warning = $t('Your PHP installation is too old. Backdrop requires at least PHP %version.', array('%version' => $minimum_recommended_version));
   if (version_compare($phpversion, $minimum_recommended_version) < 0) {
-    $requirements['php']['description'] = $minimum_warning . ' ' . l(t('Read about the minimum version increase'), 'https://backdropcms.org/news/backdrop-cms-drops-support-for-php-versions-prior-to-56') . '.';
+    $requirements['php']['description'] = $minimum_warning . ' ' . l(t('Read about the minimum version increase'), 'https://backdropcms.org/news/backdrop-cms-drops-support-for-php-versions-prior-to-71') . '.';
     $requirements['php']['severity'] = $phase === 'runtime' ? REQUIREMENT_ERROR : REQUIREMENT_INFO;
   }
 
@@ -234,7 +234,7 @@ function system_requirements($phase) {
   else {
     // Database information.
     $class = 'DatabaseTasks_' . Database::getConnection()->driver();
-    /* @var DatabaseTasks $tasks */
+    /** @var DatabaseTasks $tasks */
     $tasks = new $class();
     $dbinfo = $t('!system version !version', array('!system' => $tasks->name(), '!version' => Database::getConnection()->version()));
     $requirements['database_system'] = array(
@@ -483,6 +483,11 @@ function system_requirements($phase) {
       $updates = backdrop_get_schema_versions($module);
       if ($updates !== FALSE) {
         $current_schema = backdrop_get_installed_schema_version($module);
+        // Special case: modules installed in Drupal 6, that did not receive any
+        // update in Drupal 7, but have updates available in Backdrop.
+        if ($current_schema >= 6000 && $current_schema < 7000) {
+          $current_schema = 0;
+        }
         $latest_schema = end($updates);
         if ($current_schema < $latest_schema) {
           $update_link = base_path() . 'core/update.php';
@@ -3409,9 +3414,14 @@ function system_update_1078() {
 
 /**
  * Clear the cache to reset allowlist settings.
+ * 
+ * This update has been removed because it causes a regression when later update
+ * hooks create cache tables.
+ *  
+ * @see https://github.com/backdrop/backdrop-issues/issues/6974
  */
 function system_update_1079() {
-  backdrop_flush_all_caches();
+  // This update has been removed.
 }
 
 /**
@@ -3800,6 +3810,42 @@ function system_update_1102() {
     $config->set('login_admin_theme', 1);
     $config->save();
   }
+}
+
+/**
+ * Create system.extensions config and populate with enabled modules and themes.
+ */
+function system_update_1103() {
+  $result = db_query("SELECT name, status, type, schema_version, info FROM {system} ORDER BY name ASC")->fetchAll(PDO::FETCH_ASSOC);
+  $modules = [];
+  $themes = [];
+  foreach ($result as $row) {
+    $extension = (array) $row;
+    $extension['info'] = unserialize($extension['info']);
+
+    if ($extension['type'] === 'module') {
+      // Do not include hidden modules in the list.
+      if (!empty($extension['info']['hidden'])) {
+        continue;
+      }
+      // Do not include uninstalled modules in the list.
+      if ($extension['schema_version'] == -1) {
+        continue;
+      }
+
+      $modules[$extension['name']] = (bool) $extension['status'];
+    }
+
+    // Only add enabled themes to the list.
+    if ($extension['type'] === 'theme' && $extension['status']) {
+      $themes[$extension['name']] = (bool) $extension['status'];
+    }
+  }
+
+  $config = config('system.extensions');
+  $config->set('modules', $modules);
+  $config->set('themes', $themes);
+  $config->save();
 }
 
 /**
