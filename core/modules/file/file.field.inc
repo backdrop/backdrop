@@ -794,10 +794,10 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
     $elements['#file_upload_description'] = theme('file_upload_help', array('description' => '', 'upload_validators' => $elements[0]['#upload_validators']));
   }
 
-  // Add file field entity fields.
+  // Add file entity fields.
   if (array_key_exists($instance['widget']['type'], file_field_inline_fields_widgets())) {
-    foreach (element_children($element) as $key) {
-      $element[$key] = file_field_widget_inline_fields($element[$key], $form_state, $instance);
+    foreach (element_children($elements) as $key) {
+      $elements[$key] = file_field_widget_inline_fields($elements[$key], $form_state, $instance);
     }
   }
 
@@ -814,11 +814,6 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
  * @return array
  */
 function file_field_widget_inline_fields($element, &$form_state, $instance) {
-  // We need to add #process callback due to 2 reasons:
-  // 1. Entire $form is not available in hook_field_widget_form_alter().
-  // 2. Walkaround on Backdrop core bug. We need to change how file widget submit
-  //    callback searches for the submitted values.
-  //    See: http://drupal.org/node/1468686
   $element['#process'] = array_merge($element['#process'], array('file_field_inline_fields_widget_process'));
 
   // Only act on entity forms, and when a file has been uploaded.
@@ -840,7 +835,7 @@ function file_field_widget_inline_fields($element, &$form_state, $instance) {
     return $element;
   }
 
-  // The File Entity module adds some extra requirements that will not be added
+  // File Entity adds some extra requirements that will not be added
   // by the Plupload module, so manually append all values from the file_managed
   // table to the $file object.
   if (!isset($file->type)) {
@@ -1034,19 +1029,13 @@ function file_field_widget_process($element, &$form_state, $form) {
 }
 
 /**
- * An element #process callback for the file field widget.
+ * Render API callback: Processes a file_generic field element.
+ *
+ * Expands the file_generic type to include the file entity fields.
+ *
+ * This function is assigned as a #process callback in file_field_widget_inline_fields().
  */
 function file_field_inline_fields_widget_process($element, &$form_state, &$form) {
-  // Walkaround on Backdrop core bug.
-  // See: http://drupal.org/node/1468686
-  foreach (array('upload_button', 'remove_button') as $key) {
-    foreach ($element[$key]['#submit'] as $delta => $submit) {
-      if ($submit == 'file_field_widget_submit') {
-        $element[$key]['#submit'][$delta] = 'file_field_inline_fields_widget_submit';
-      }
-    }
-  }
-
   // Only act on entity forms, and when a file has been uploaded.
   if (empty($element['fid']['#value']) || !isset($element['#entity_type']) || !isset($element['#field_name'])) {
     return $element;
@@ -1069,6 +1058,8 @@ function file_field_inline_fields_widget_process($element, &$form_state, &$form)
  * An element #element_validate callback for the file entity.
  *
  * Saves the file entity field values.
+ *
+ * @see file_field_inline_fields_widget_process()
  */
 function file_field_file_entity_inline_submit($form, &$form_state) {
   if (!isset($form_state['values']['files'])) {
@@ -1161,48 +1152,6 @@ function _file_field_get_description_from_element($element) {
  * @see file_field_widget_process()
  */
 function file_field_widget_submit($form, &$form_state) {
-  // During the form rebuild, file_field_widget_form() will create field item
-  // widget elements using re-indexed deltas, so clear out $form_state['input']
-  // to avoid a mismatch between old and new deltas. The rebuilt elements will
-  // have #default_value set appropriately for the current state of the field,
-  // so nothing is lost in doing this.
-  $parents = array_slice($form_state['triggering_element']['#parents'], 0, -2);
-  backdrop_array_set_nested_value($form_state['input'], $parents, NULL);
-
-  $button = $form_state['triggering_element'];
-
-  // Go one level up in the form, to the widgets container.
-  $element = backdrop_array_get_nested_value($form, array_slice($button['#array_parents'], 0, -1));
-  $field_name = $element['#field_name'];
-  $langcode = $element['#language'];
-  $parents = $element['#field_parents'];
-
-  $submitted_values = backdrop_array_get_nested_value($form_state['values'], array_slice($button['#parents'], 0, -2));
-  foreach ($submitted_values as $delta => $submitted_value) {
-    if (!$submitted_value['fid']) {
-      unset($submitted_values[$delta]);
-    }
-  }
-
-  // Re-index deltas after removing empty items.
-  $submitted_values = array_values($submitted_values);
-
-  // Update form_state values.
-  backdrop_array_set_nested_value($form_state['values'], array_slice($button['#parents'], 0, -2), $submitted_values);
-
-  // Update items.
-  $field_state = field_form_get_state($parents, $field_name, $langcode, $form_state);
-  $field_state['items'] = $submitted_values;
-  field_form_set_state($parents, $field_name, $langcode, $form_state, $field_state);
-}
-
-/**
- * Fixed file_field_widget_submit(). See: http://drupal.org/node/1468686
- *
- * @see file_field_inline_fields_widget_process()
- * @see file_field_widget_submit()
- */
-function file_field_inline_fields_widget_submit($form, &$form_state) {
   // During the form rebuild, file_field_widget_form() will create field item
   // widget elements using re-indexed deltas, so clear out $form_state['input']
   // to avoid a mismatch between old and new deltas. The rebuilt elements will
