@@ -14,7 +14,7 @@ function image_field_info() {
       'description' => t('This field stores the ID of an image file as an integer value.'),
       'settings' => array(
         'uri_scheme' => config_get('system.core', 'file_default_scheme'),
-        'default_image' => array(),
+        'default_image' => '',
       ),
       'instance_settings' => array(
         'file_extensions' => implode(' ', image_get_supported_extensions()),
@@ -25,7 +25,7 @@ function image_field_info() {
         'title_field' => 0,
         'max_dimensions' => '',
         'min_dimensions' => '',
-        'default_image' => array(),
+        'default_image' => '',
         'orientate' => 0,
       ),
       'default_widget' => 'image_image',

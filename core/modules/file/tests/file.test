@@ -166,7 +166,8 @@ class FileTestHelper extends BackdropWebTestCase {
    *   File type.
    * @param mixed $size
    *   File size.
-   * @return EntityInterface
+   * @return File
+   *   The created file entity.
    */
   function getTestFile($type_name, $size = NULL) {
     // Get a file to upload.
@@ -174,8 +175,11 @@ class FileTestHelper extends BackdropWebTestCase {
 
     // Add a filesize property to files as would be read by file_load().
     $file->filesize = filesize($file->uri);
+    $file->status = FILE_STATUS_PERMANENT;
 
-    return entity_create('file', (array) $file);
+    /** @var File $file_entity */
+    $file_entity = entity_create('file', (array) $file);
+    return $file_entity;
   }
 
   /**

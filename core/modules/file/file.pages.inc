@@ -230,13 +230,14 @@ function file_get_filetype_candidates(File $file, $selected_files = array()) {
  * Submit handler for the add file form.
  */
 function file_add_form_submit($form, &$form_state) {
+  $fids = (array) $form_state['values']['upload'];
   if ($form['#step'] === 1) {
-    $form_state['storage']['file_count'] = count($form_state['values']['upload']);
+    $form_state['storage']['file_count'] = count($fids);
   }
-  $multiple = FALSE;
 
   // Only use the wizard if only one file was uploaded.
   if ($form_state['storage']['file_count'] === 1) {
+    $multiple = FALSE;
     $config = config('file.settings');
     $form_state['storage'] = isset($form_state['storage']) ? $form_state['storage'] : array();
     $form_state['storage'] = array_merge($form_state['storage'], $form_state['values']);
@@ -261,7 +262,7 @@ function file_add_form_submit($form, &$form_state) {
     foreach ($steps_to_check as $step) {
       // Check if we can skip step 2 and 3.
       if (($form['#step'] == $step - 1 && $triggered_next) || ($form['#step'] == $step + 1 && $triggered_previous)) {
-        $file = file_load($form_state['storage']['upload'][0]);
+        $file = file_load($form_state['values']['upload']);
         if ($step == 2) {
           // Check if we can skip step 2.
           $candidates = file_get_filetype_candidates($file, $selected_files);
@@ -317,7 +318,7 @@ function file_add_form_submit($form, &$form_state) {
 
     // We have the filetype, check if we can skip step 4.
     if ($form['#step'] == 3 && $triggered_next) {
-      $file = file_load($form_state['storage']['upload'][0]);
+      $file = file_load($form_state['storage']['upload']);
       $form_state['file'] = $file;
       if (!field_info_instances('file', $form_state['storage']['type'])) {
         // This filetype doesn't have fields, save the file.
@@ -347,7 +348,7 @@ function file_add_form_submit($form, &$form_state) {
   }
 
   if ($save) {
-    foreach ($form_state['storage']['upload'] as $fid) {
+    foreach ($fids as $fid) {
       $file = file_load($fid);
       if ($file) {
         $file->type = $multiple ? FILE_TYPE_NONE : $form_state['storage']['type'];
@@ -711,7 +712,7 @@ function file_manage_form_submit($form, &$form_state) {
 /*
   //* @var File $temporary_upload /
   $temporary_upload = $form_state['values']['replace_upload'] ? file_load($form_state['values']['replace_upload'][0]) : NULL;
- */ 
+ */
   /** @var File $temporary_upload */
   $temporary_upload = $form_state['values']['replace_upload'] ? file_load($form_state['values']['replace_upload'][0]) : NULL;
   $orphaned_uri = '';

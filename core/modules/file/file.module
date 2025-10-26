@@ -1290,17 +1290,13 @@ function file_managed_file_process($element, &$form_state, $form) {
   // This parent list is used as a prefix on the name attribute of sub-elements.
   $parents_prefix = implode('_', $element['#parents']);
 
-  if (!empty($element['#value']['fid'])) {
-    $fids = $element['#value']['fid'];
-  }
-  else {
-    $fids = $element['#multiple'] ? array() : 0;
-  }
+  // Whether FID is a single file ID or multiple, convert to an array of file
+  // IDs for consistent operation within this process function.
+  $fids = !empty($element['#value']['fid']) ? (array) $element['#value']['fid'] : array();
 
   // Set some default element properties.
   $element['#progress_indicator'] = empty($element['#progress_indicator']) ? 'none' : $element['#progress_indicator'];
-  $load_fids = $element['#multiple'] ? $fids : array($fids);
-  $element['#files'] = !empty($load_fids) ? file_load_multiple($load_fids) : FALSE;
+  $element['#files'] = !empty($fids) ? file_load_multiple($fids) : FALSE;
   $element['#tree'] = TRUE;
 
   // Token here is not generated with backdrop_token() as it does not need to
@@ -1377,9 +1373,10 @@ function file_managed_file_process($element, &$form_state, $form) {
     ),
   );
 
+  // If multiple upload, FID is an array. If single-upload, it is a single ID.
   $element['fid'] = array(
     '#type' => 'hidden',
-    '#value' => $element['#multiple'] ? implode(' ', $fids) : $fids,
+    '#value' => $element['#multiple'] ? reset($fids) : $fids,
   );
 
   // Legacy server-side progress bar support. If not available, client-side
@@ -1432,7 +1429,7 @@ function file_managed_file_process($element, &$form_state, $form) {
   // Indicate that $element['#title'] should be used as the HTML label for the
   // file upload field.
   $element['#label_for'] = backdrop_html_id('edit-' . implode('-', array_merge($element['#parents'], array('upload'))));
-  
+
   if (!empty($fids) && $element['#files']) {
     foreach ($element['#files'] as $delta => $file) {
       if ($element['#multiple']) {
@@ -1500,11 +1497,10 @@ function file_managed_file_process($element, &$form_state, $form) {
 function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) {
   // Find the current value of this field. The FID property can be a single
   // File ID, or multiple file IDs, which are separated by a space.
-  $fids = array();
   $force_default = FALSE;
 
+  // Drill down the form state to find the current element value.
   $form_state_fid = $form_state['values'];
-
   foreach ($element['#parents'] as $parent) {
     $form_state_fid = isset($form_state_fid[$parent]) ? $form_state_fid[$parent] : array();
   }
@@ -1513,23 +1509,25 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
   if ($element['#extended'] && isset($form_state_fid['fid'])) {
     $fid = $form_state_fid['fid'];
   }
-  // elseif (is_numeric($form_state_fid)) {
   elseif (!empty($form_state_fid)) {
     $fid = $form_state_fid;
   }
   $fids = !empty($fid) ? (array) $fid : array();
 
   // Process any input and save new uploads.
-  if ($input !== FALSE && !is_null($input['fid'])) {
-    $input_fids = !empty($input['fid']) ? explode(' ', $input['fid']) : array();
-    $input['fid'] = $element['#multiple'] ? $input_fids : array($input['fid']);
+  if ($input !== FALSE && isset($input['fid'])) {
     $return = $input;
 
     // Uploads take priority over all other values.
     if ($file_data = file_managed_file_save_upload($element)) {
-      $fids = array_keys($file_data);
+      if (is_array($file_data)) {
+        $fids = array_keys($file_data);
+      }
+      else {
+        $fids = array($file_data->fid);
+      }
     }
-    // Check for #filefield_value_callback values.
+    // Check for #file_value_callback values.
     // Because Form API does not allow multiple #value_callback values like it
     // does for #element_validate and #process, this fills the missing
     // functionality to allow File fields to be extended through Form API.
@@ -1541,7 +1539,8 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
     // If a FID was submitted, load the file (and check access if it's not a
     // public file) to confirm it exists and that the current user has access
     // to it.
-    if (!empty($input['fid']) && ($files = file_load_multiple($input['fid']))) {
+    $input_fids = !empty($input['fid']) ? (array) $input['fid'] : array();
+    if (!empty($input_fids) && ($files = file_load_multiple($input_fids))) {
       foreach ($files as $file) {
         if ((file_uri_scheme($file->uri) != 'public') && !file_download_access($file->uri)) {
           $force_default = TRUE;
@@ -1575,23 +1574,16 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
   // default value.
   if ($input === FALSE || $force_default) {
     if ($element['#extended']) {
-      $default_fids = isset($element['#default_value']['fid']) ? $element['#default_value']['fid'] : array();
-      $return = isset($element['#default_value']) ? $element['#default_value'] : array('fid' => 0);
+      $default_fid = $element['#default_value']['fid'] ?? array();
     }
     else {
-      $default_fids = isset($element['#default_value']) ? $element['#default_value'] : '';
-      $return = array('fid' => 0);
+      $default_fid = $element['#default_value'] ?? '';
     }
 
     // Confirm that the file exists when used as a default value.
-    if (!empty($default_fids)) {
-      if (!is_array($default_fids)) {
-        $default_fids = explode(' ', $default_fids);
-      }
-      foreach ($default_fids as $key => $fid) {
-        if ($file = file_load($fid)) {
-          $fids[] = $file->fid;
-        }
+    if (!empty($default_fid)) {
+      if ($file = file_load($default_fid)) {
+        $fids[] = $file->fid;
       }
     }
   }
@@ -1601,7 +1593,7 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
     $return['fid'] = $fids;
   }
   else {
-    $return['fid'] = $fids ? reset($fids) : FALSE;
+    $return['fid'] = $fids ? reset($fids) : NULL;
   }
 
   return $return;
@@ -1619,7 +1611,7 @@ function file_managed_file_validate(&$element, &$form_state) {
   // item were to be deleted.
   $clicked_button = end($form_state['triggering_element']['#parents']);
   if ($clicked_button != 'remove_button' && !empty($element['fid']['#value'])) {
-    $fids = $element['#multiple'] ? explode(' ', $element['fid']['#value']) : array($element['fid']['#value']);
+    $fids = $element['#multiple'] ? $element['fid']['#value'] : (array) $element['fid']['#value'];
     foreach ($fids as $fid) {
       if ($file = file_load($fid)) {
         if ($file->status == FILE_STATUS_PERMANENT) {
@@ -1640,13 +1632,9 @@ function file_managed_file_validate(&$element, &$form_state) {
     form_error($element['upload'], t('!name field is required.', array('!name' => $element['#title'])));
   }
 
-  // Consolidate the array value of this field to only FIDs.
-  $element_value = $element['fid']['#value'] ? explode(' ', $element['fid']['#value']) : array();
+  // Consolidate the array value of this field to only the FID value.
   if (!$element['#extended']) {
-    form_set_value($element, $element['#multiple'] ? $element_value : reset($element_value), $form_state);
-  }
-  else {
-    form_set_value($element['fid'], $element_value, $form_state);
+    form_set_value($element, $element['fid']['#value'], $form_state);
   }
 }
 
@@ -1723,9 +1711,9 @@ function file_managed_file_submit($form, &$form_state) {
  * @param $element
  *   The Form API element whose values are being saved.
  *
- * @return
- *   An array of file entities for each file that was saved, keyed by its file
- *   ID, or FALSE if no files were saved.
+ * @return File[]|File|false
+ *   A file object if a new file was uploaded, or an array of file objects if
+ *   multiple files were uploaded. FALSE if no files were uploaded.
  */
 function file_managed_file_save_upload($element) {
   $upload_name = implode('_', $element['#parents']);
@@ -1750,16 +1738,17 @@ function file_managed_file_save_upload($element) {
       return array();
     }
 
-    // Value callback expects FIDs to be keys.
+    // If multiple files were saved, $files is an array that needs to be keyed
+    // by file ID.
     if (is_array($files)) {
       $files = array_filter($files);
+      $fids = array_map(function($file) {
+        return $file->fid;
+      }, $files);
+      $files = array_combine($fids, $files);
     }
-    else {
-      $files = array($files);
-    }
-    $fids = array_map(function($file) { return $file->fid; }, $files);
 
-    return empty($files) ? array() : array_combine($fids, $files);
+    return $files;
   }
 
   return array();

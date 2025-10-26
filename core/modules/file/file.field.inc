@@ -647,7 +647,7 @@ function file_field_widget_settings_form($field, $instance) {
 function file_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
 
   $defaults = array(
-    'fid' => 0,
+    'fid' => NULL,
     'display' => !empty($field['settings']['display_default']),
     'description' => '',
   );
@@ -798,7 +798,7 @@ function file_field_widget_value($element, $input, $form_state) {
 
   // Ensure that all the required properties are returned even if empty.
   $return += array(
-    'fid' => array(),
+    'fid' => NULL,
     'display' => 1,
     'description' => '',
   );
@@ -1022,7 +1022,7 @@ function file_field_widget_submit($form, &$form_state) {
   }
 
   // If there are more files uploaded via the same widget, we have to separate
-  // them, as we display each file in it's own widget.
+  // them, as we display each file in its own widget.
   $new_values = array();
   foreach ($submitted_values as $delta => $submitted_value) {
     if (is_array($submitted_value['fid'])) {
