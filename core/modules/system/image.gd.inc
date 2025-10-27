@@ -311,20 +311,20 @@ function image_gd_save(stdClass $image, $destination) {
  *   A GD image handle.
  */
 function image_gd_create_tmp(stdClass $image, $width, $height) {
-  $res = (!imageistruecolor($image->resource)) ? imagecreate($width, $height) : imagecreatetruecolor($width, $height);
+  $res = imagecreatetruecolor($width, $height);
   if ($image->info['extension'] == 'gif') {
-    imagepalettecopy($res, $image->resource);
-    // Grab transparent color index from image resource.
+    // Check if the original gif has transparency.
     $transparent = imagecolortransparent($image->resource);
-    $colors_total = imagecolorstotal($image->resource);
-    if ($transparent >= 0 && $transparent < $colors_total) {
-      // The original must have a transparent color, so we can flood the image
-      // with transparency.
-      imagefill($res, 0, 0, $transparent);
+    if ($transparent >= 0) {
+      // Convert to truecolor for easier transparency handling.
+      imagepalettetotruecolor($image->resource);
+      $transparent = imagecolortransparent($image->resource);
+      // As both are truecolor, we can use the same index now.
       imagecolortransparent($res, $transparent);
+      imagefill($res, 0, 0, $transparent);
     }
     else {
-      // The original image doesn't have a transparent color in the palette.
+      // The original image doesn't have a transparent color set.
       // Flood with the closest we have to white instead.
       imagefill($res, 0, 0, imagecolorclosest($res, 255, 255, 255));
     }
