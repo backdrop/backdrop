@@ -183,8 +183,22 @@ abbr.ajax-changed {
   text-align: left;
 }
 .more-help-link a {
-  background: url(../../../misc/help.png) 0 50% no-repeat; /* LTR */
-  padding: 1px 0 1px 20px; /* LTR */
+  /* background: url(../../../misc/help.png) 0 50% no-repeat; /* LTR */
+  /* padding: 1px 0 1px 20px; /* LTR */
+}
+.more-help-link a:before {
+  color: #ffffff;
+  background: #c5c5c5;
+  content: '?';
+  display: inline-block;
+  width: 1.3em;
+  height: 0.8em;
+  margin: 0 0.4em 0 0;
+  border-radius: 50%;
+  font-size: 0.8em;
+  font-weight: 600;
+  text-align: center;
+  padding-bottom: 0.5em;
 }
 [dir="rtl"] .more-help-link a {
   background-position: 100% 50%;
