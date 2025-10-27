@@ -2349,6 +2349,10 @@ function system_urls_settings($form, &$form_state) {
  * @see system_get_requirements().
  */
 function system_status($check = FALSE) {
+  // Show a warning if zip PHP extension not loaded.
+  module_load_include('inc', 'installer', 'installer.browser');
+  installer_browser_check_zip_loaded();
+
   // Load .install files
   include_once BACKDROP_ROOT . '/core/includes/install.inc';
   $requirements = system_get_requirements();

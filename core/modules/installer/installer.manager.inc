@@ -63,6 +63,11 @@ function installer_manager_update_form($form, $form_state) {
 
   $available = update_get_available(TRUE);
 
+  // Show a warning if zip PHP extension not loaded, but allow to browse and
+  // select available releases. Install blocked on downloading updates page.
+  module_load_include('inc', 'installer', 'installer.browser');
+  installer_browser_check_zip_loaded();
+
   // Run some basic health checks, and show messages/warnings accordingly.
   $settings_link = url('admin/reports/updates/settings');
   $update_config = config('update.settings');
