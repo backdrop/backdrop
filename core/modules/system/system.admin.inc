@@ -999,7 +999,9 @@ function system_modules_submit($form, &$form_state) {
       foreach (array_keys($files[$name]->requires) as $required) {
         if (empty($modules[$required]['enabled'])) {
           if (isset($files[$required])) {
-            $dependencies[] = $files[$required]->info['name'];
+            if (!$files[$required]->status) {
+              $dependencies[] = $files[$required]->info['name'];
+            }
             $modules[$required]['enabled'] = TRUE;
           }
           else {
