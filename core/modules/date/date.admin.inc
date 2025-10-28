@@ -207,7 +207,7 @@ function _date_field_instance_settings_form($field, $instance) {
     '#fieldset' => 'default_values',
   );
 
-  $description = t("Describe a time by reference to the current day, like '+90 days' (90 days from the day the field is created) or '+1 Saturday' (the next Saturday). See !strtotime for more details.", array('!strtotime' => l(t('strtotime'), 'http://www.php.net/manual/en/function.strtotime.php')));
+  $description = t("Describe a time by reference to the current day, like '+90 days' (90 days from the day the field is created) or '+1 Saturday' (the next Saturday). See !strtotime for more details.", array('!strtotime' => l(t('strtotime'), 'https://www.php.net/manual/function.strtotime.php')));
   $form['default_value_code'] = array(
     '#type' => 'textfield',
     '#title' => t('Relative default value'),
@@ -333,7 +333,7 @@ function _date_field_widget_settings_form($field, $instance) {
       '#type' => 'textfield',
       '#title' => t('Custom input format'),
       '#default_value' => $settings['input_format_custom'],
-      '#description' => t('Override the input format selected above. Define a php date format string like "m-d-Y H:i" (see <a href="http://php.net/date">http://php.net/date</a> for more details).'),
+      '#description' => t('Override the input format selected above. Define a php date format string like "m-d-Y H:i" (see the <a href="https://www.php.net/manual/datetime.format.php#refsect1-datetime.format-parameters">PHP manual</a> for more details).'),
       '#weight' => 5,
       '#fieldset' => 'date_format',
       '#attributes' => array('class' => array('indent')),
@@ -714,4 +714,3 @@ function date_timezone_handling_options() {
     'none' => t('No time zone conversion'),
   );
 }
-
