@@ -2581,6 +2581,14 @@ function backdrop_get_title() {
     $title = check_plain(menu_get_active_title());
   }
 
+  // If title is empty, check the current layout.
+  if (empty($title)) {
+    $layout = layout_get_layout_by_path();
+    if (isset($layout->settings['title'])) {
+      $title = check_plain($layout->settings['title']);
+    }
+  }
+
   return $title;
 }
 
