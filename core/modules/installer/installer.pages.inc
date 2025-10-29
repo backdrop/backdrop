@@ -7,10 +7,10 @@
 /**
  * Page to display the projects.
  *
- * @param $type
+ * @param string $type
  *   Type of project to view. Must be one of 'module', 'theme' or 'layout'.
  *
- * @return
+ * @return array
  *   Themed list of the projects.
  */
 function installer_browser_page($type) {
@@ -29,7 +29,7 @@ function installer_browser_page($type) {
     }
   }
 
-  switch($type) {
+  switch ($type) {
     case 'layout':
       backdrop_set_title(t('Install layout templates'));
       break;
@@ -128,7 +128,10 @@ function installer_browser_page($type) {
         '@start' => $start, '@finish' => $finish, '@total' => $total)),
     ),
     'installer_browser_list' => array(
-      '#markup' => theme('installer_browser_list', array('projects_list' => $list, 'type' => $type)),
+      '#markup' => theme('installer_browser_list', array(
+        'projects_list' => $list,
+        'type' => $type,
+      )),
       '#weight' => 10,
     ),
     'pager' => array(
@@ -143,10 +146,10 @@ function installer_browser_page($type) {
 /**
  * Page to display individual projects in a modal.
  *
- * @param $project
+ * @param string $project
  *   The short name of the project to be displayed in the modal.
  *
- * @return
+ * @return array
  *   Render array of a themed project.
  */
 function installer_browser_project_display($project) {
@@ -189,7 +192,10 @@ function installer_browser_installation_page($op) {
     default:
       return MENU_NOT_FOUND;
   }
-  return theme('installer_browser_install', array('current_task' => $op, 'main_content' => backdrop_render($content)));
+  return theme('installer_browser_install', array(
+    'current_task' => $op,
+    'main_content' => backdrop_render($content),
+  ));
 }
 
 /**
@@ -200,7 +206,7 @@ function installer_browser_installation_page($op) {
  */
 function installer_browser_installation_select_versions_page() {
   module_load_include('inc', 'installer', 'installer.browser');
-  // Show a form that lets the user select which version of the projects to install
+  // Show a form that lets the user select which version of the projects to install.
   $queued_projects = installer_browser_get_queued_projects();
 
   return backdrop_get_form('installer_browser_installation_select_versions_form', $queued_projects);
@@ -209,7 +215,7 @@ function installer_browser_installation_select_versions_page() {
 /**
  * Form builder for the select versions form.
  *
- * @param $projects
+ * @param array $projects
  *   An array of projects selected for install, keyed by project name.
  */
 function installer_browser_installation_select_versions_form($form, &$form_state, $projects) {
@@ -261,13 +267,19 @@ function installer_browser_installation_select_versions_form($form, &$form_state
         '@project' => $project['title'],
         '@version' => $release['version'],
         '@date' => format_date($release['date'], 'custom', 'M j, Y'),
-        ));
+      ));
       if (isset($release['terms']['Release type']) && !empty($release['terms']['Release type'])) {
         $release_title .= check_plain(" (" . implode(', ', $release['terms']['Release type']) . ")");
       }
       $releases_list[$version] = $release_title;
       if (isset($release['release_link'])) {
-        $releases_list[$version] .= ' (' . l(t('release notes'), $release['release_link'], array('attributes' => array('title' => t('Release notes for @project_title', array('@project_title' => $project['title'])), 'target' => '_blank'))) . ')';
+        $releases_list[$version] .= ' (' . l(t('release notes'), $release['release_link'],
+        array('attributes' => array(
+          'title' => t('Release notes for @project_title', array(
+            '@project_title' => $project['title'],
+          )),
+          'target' => '_blank',
+        ))) . ')';
       }
     }
 
@@ -448,7 +460,10 @@ function installer_browser_installation_select_versions_form_submit($form, &$for
   $queued_releases = installer_browser_get_queued_releases();
   $operations = array();
   foreach ($queued_releases as $release_name => $project) {
-    $operations[] = array('_installer_browser_batch_install_release', array($release_name, $project));
+    $operations[] = array(
+      '_installer_browser_batch_install_release',
+      array($release_name, $project),
+    );
   }
   $batch = array(
     'operations' => $operations,
@@ -535,7 +550,9 @@ function installer_browser_installation_theme_form($form, &$form_state, $project
 
   $form['instructions'] = array(
     '#type' => 'item',
-    '#markup' => t('The themes you selected have been successfully installed. You may enable installed themes here or on the main !themes page. ', array('!themes' => l(t('Themes'), 'admin/appearance')))
+    '#markup' => t('The themes you selected have been successfully installed. You may enable installed themes here or on the main !themes page. ',
+      array('!themes' => l(t('Themes'), 'admin/appearance'))
+    ),
   );
 
   $theme_default = config_get('system.core', 'theme_default');
@@ -630,7 +647,7 @@ function installer_browser_installation_theme_set($form, &$form_state) {
   if (!empty($themes[$theme])) {
     // Enable the theme if it is currently disabled.
     if (empty($themes[$theme]->status)) {
-     theme_enable(array($theme));
+      theme_enable(array($theme));
     }
     // Set the default theme.
     config_set('system.core', 'theme_default', $theme);
@@ -641,7 +658,7 @@ function installer_browser_installation_theme_set($form, &$form_state) {
 /**
  * Form builder for the select versions form.
  *
- * @param $projects
+ * @param array $projects
  *   An array of projects selected for install, keyed by project name.
  */
 function installer_browser_installation_enable_form($form, &$form_state, $projects) {
@@ -972,14 +989,14 @@ function installer_browser_get_sort_widget($sort_options, $current_order, $curre
   return theme('item_list', array(
     'items' => $sort_list,
     'type' => 'ul',
-    'attributes' => array('class' => array('installer-browser-sort-list', 'clearfix'))
+    'attributes' => array('class' => array('installer-browser-sort-list', 'clearfix')),
   ));
 }
 
 /**
  * Returns a list of sort options.
  *
- * @param $full
+ * @param boolean $full
  *   Set this to TRUE if you want to get all of the supported sort methods.
  *
  * @return array
@@ -991,16 +1008,44 @@ function installer_browser_get_sort_widget($sort_options, $current_order, $curre
  */
 function installer_browser_get_sort_options($full = FALSE) {
   $sort_options = array(
-    'score' => array('method' => 'score', 'label' => t('Relevance'), 'default_sort' => 'desc'),
-    'usage' => array('method' => 'usage', 'label' => t('Most installed'), 'default_sort' => 'desc'),
-    'title' => array('method' => 'title', 'label' => t('Title'), 'default_sort' => 'asc'),
-    'latest_release' => array('method' => 'latest_release', 'label' => t('Latest release'), 'default_sort' => 'desc'),
+    'score' => array(
+      'method' => 'score',
+      'label' => t('Relevance'),
+      'default_sort' => 'desc',
+    ),
+    'usage' => array(
+      'method' => 'usage',
+      'label' => t('Most installed'),
+      'default_sort' => 'desc',
+    ),
+    'title' => array(
+      'method' => 'title',
+      'label' => t('Title'),
+      'default_sort' => 'asc',
+    ),
+    'latest_release' => array(
+      'method' => 'latest_release',
+      'label' => t('Latest release'),
+      'default_sort' => 'desc',
+    ),
   );
 
   if ($full) {
-    $sort_options['type'] = array('method' => 'type', 'label' => t('Type'), 'default_sort' => 'asc');
-    $sort_options['created'] = array('method' => 'created', 'label' => t('Date created'), 'default_sort' => 'asc');
-    $sort_options['latest_activity'] = array('method' => 'latest_activity', 'label' => t('Latest build'), 'default_sort' => 'desc');
+    $sort_options['type'] = array(
+      'method' => 'type',
+      'label' => t('Type'),
+      'default_sort' => 'asc',
+    );
+    $sort_options['created'] = array(
+      'method' => 'created',
+      'label' => t('Date created'),
+      'default_sort' => 'asc',
+    );
+    $sort_options['latest_activity'] = array(
+      'method' => 'latest_activity',
+      'label' => t('Latest build'),
+      'default_sort' => 'desc',
+    );
   }
 
   return $sort_options;
