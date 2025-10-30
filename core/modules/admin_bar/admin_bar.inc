@@ -620,14 +620,17 @@ function admin_bar_links_account() {
       'icon' => 'user-circle-fill',
     ),
   );
-  $links['logout'] = array(
+  $links['account']['edit'] = array(
+    '#title' => t('Edit account'),
+    '#weight' => 5,
+    '#attributes' => array('class' => array('admin-bar-edit-account')),
+    '#href' => 'user/' . $GLOBALS['user']->uid . '/edit',
+  );
+  $links['account']['logout'] = array(
     '#title' => t('Log out'),
-    '#weight' => 51,
+    '#weight' => 10,
     '#attributes' => array('class' => array('admin-bar-logout')),
     '#href' => 'user/logout',
-    '#options' => array(
-      'icon' => 'sign-out-fill',
-    ),
   );
   return $links;
 }
