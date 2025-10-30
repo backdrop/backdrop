@@ -127,7 +127,9 @@ Backdrop.behaviors.filterFieldsetSummaries = {
       var $input_element = $(element).find('input.filterEditors-processed');
 
       if ($select_list.length) {
-        summary = $select_list.text();
+        // Encode HTML entities in text format name.
+        // @see http://debuggable.com/posts/encode-html-entities-with-jquery:480f4dd6-13cc-4ce9-8071-4710cbdd56cb
+        summary = $('<div/>').text($select_list.text()).html();
       }
       else if ($input_element.length) {
         summary = $input_element.attr('data-text-format-name');
