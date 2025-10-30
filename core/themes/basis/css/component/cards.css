@@ -56,12 +56,7 @@
   background: #789fb5;
 }
 .view-promoted-cards .views-field-field-image img {
-  max-width: 6rem;
-  height: auto;
   vertical-align: middle;
-  display: block;
-  margin: 0 auto;
-  padding: 4rem 0;
 }
 @media (min-width: 48em) {
   .block-views-promoted-cards-block .views-view-grid-cols-3 {
