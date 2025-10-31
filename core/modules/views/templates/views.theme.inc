@@ -1180,7 +1180,7 @@ function theme_views_mini_pager($variables) {
   if ($pager_total[$element] > 1) {
     $li_previous = theme('pager_previous',
       array(
-        'text' => isset($tags[1]) ? $tags[1] : t('‹‹'),
+        'text' => isset($tags[1]) ? $tags[1] : t('‹'),
         'element' => $element,
         'interval' => 1,
         'parameters' => $parameters,
@@ -1189,7 +1189,7 @@ function theme_views_mini_pager($variables) {
 
     $li_next = theme('pager_next',
       array(
-        'text' => isset($tags[3]) ? $tags[3] : t('››'),
+        'text' => isset($tags[3]) ? $tags[3] : t('›'),
         'element' => $element,
         'interval' => 1,
         'parameters' => $parameters,
