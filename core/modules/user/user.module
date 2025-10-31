@@ -1047,7 +1047,7 @@ function user_account_form(&$form, &$form_state) {
   if ($config->get('user_configurable_timezones')) {
     $show_timezone = !$register || $config->get('user_default_timezone') == BACKDROP_USER_TIMEZONE_SELECT;
   }
-  $show_languages = module_exists('locale') && language_multilingual() && $admin_users;
+  $show_languages = module_exists('locale') && language_multilingual() && (!$register || $admin_users);
   $form['region_language'] = array(
     '#type' => 'fieldset',
     '#title' => t('Region and language'),
