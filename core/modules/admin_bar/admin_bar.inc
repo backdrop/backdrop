@@ -626,12 +626,25 @@ function admin_bar_links_account() {
     '#attributes' => array('class' => array('admin-bar-edit-account')),
     '#href' => 'user/' . $GLOBALS['user']->uid . '/edit',
   );
-  $links['account']['logout'] = array(
-    '#title' => t('Log out'),
-    '#weight' => 10,
-    '#attributes' => array('class' => array('admin-bar-logout')),
-    '#href' => 'user/logout',
-  );
+  if (config_get('admin_bar.settings', 'logout_link_location') == 'sub_menu') {
+    $links['account']['logout'] = array(
+      '#title' => t('Log out'),
+      '#weight' => 10,
+      '#attributes' => array('class' => array('admin-bar-logout')),
+      '#href' => 'user/logout',
+    );
+  }
+  else {
+    $links['logout'] = array(
+      '#title' => t('Log out'),
+      '#weight' => 51,
+      '#attributes' => array('class' => array('admin-bar-logout')),
+      '#href' => 'user/logout',
+      '#options' => array(
+        'icon' => 'sign-out-fill',
+      ),
+    );
+  }
   return $links;
 }
 
@@ -851,6 +864,16 @@ function admin_bar_theme_settings() {
       'bottom' => t('Bottom'),
     ),
     '#description' => t('Where to display local action links (e.g. "<em>Add [something]</em>") within their respective sub-menus.'),
+  );
+  $form['settings']['logout_link_location'] = array(
+    '#type' => 'radios',
+    '#title' => t("Location of the user 'log out' link"),
+    '#description' => t("Where the user 'log out' link should be displayed in relation to the user account link."),
+    '#default_value' => $config->get('logout_link_location'),
+    '#options' => array(
+      'sibling' => t('Next to the user account link (top-level)'),
+      'sub_menu' => t('Under the user account link (sub-menu)'),
+    ),
   );
 
   $form['components'] = array(
