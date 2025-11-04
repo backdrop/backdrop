@@ -61,6 +61,8 @@ Backdrop.behaviors.permissionsFilter = {
     }
 
     if ($form.length) {
+      // Set focus on search input only, if no hash requires jumping to a
+      // specific item on page.
       if (window.location.hash === '') {
         $input.trigger('focus');
       }
