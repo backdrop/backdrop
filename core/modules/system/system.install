@@ -1216,7 +1216,7 @@ function system_schema() {
   $schema['menu_links'] = array(
     'description' => 'Contains the individual links within a menu.',
     'fields' => array(
-     'menu_name' => array(
+      'menu_name' => array(
         'description' => "The menu name. All links with the same menu name (such as 'main-menu') are part of the same menu.",
         'type' => 'varchar',
         'length' => 32,
@@ -1251,7 +1251,7 @@ function system_schema() {
         'default' => '',
       ),
       'link_title' => array(
-      'description' => 'The text displayed for the link, which may be modified by a title callback stored in {menu_router}.',
+        'description' => 'The text displayed for the link, which may be modified by a title callback stored in {menu_router}.',
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
@@ -1489,7 +1489,7 @@ function system_schema() {
         'unsigned' => TRUE,
         'not null' => TRUE,
       ),
-     ),
+    ),
     'primary key' => array('value'),
   );
 
@@ -2104,7 +2104,7 @@ function system_update_1018() {
   $config = config('system.authorize');
   $config->set('filetransfer_default', update_variable_get('authorize_filetransfer_default', ''));
   $settings = db_query("SELECT name, value FROM {variable} WHERE name LIKE 'authorize_filetransfer_connection_settings_%'");
-  foreach ($settings as $row)  {
+  foreach ($settings as $row) {
     $row = unserialize($row);
     $config->set('authorize_filetransfer_connection_settings_' . $row[0], $row[1]);
   }
@@ -2415,7 +2415,7 @@ function system_update_1025() {
     ),
     'content' => array(
       '84c43df4-1165-4faf-8700-c362a7153c0b' => array(
-      'plugin' => 'system:header',
+        'plugin' => 'system:header',
         'data' => array(
           'module' => 'system',
           'delta' => 'header',
@@ -3846,6 +3846,17 @@ function system_update_1103() {
   $config->set('modules', $modules);
   $config->set('themes', $themes);
   $config->save();
+}
+
+/**
+ * Ensure system.core uses _config_static for better performance.
+ */
+function system_update_1104() {
+  $config = config('system.core');
+  if ($config->get('_config_static') === NULL) {
+    $config->set('_config_static', TRUE);
+    $config->save();
+  }
 }
 
 /**
