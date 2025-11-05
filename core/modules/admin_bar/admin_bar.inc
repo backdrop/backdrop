@@ -867,8 +867,8 @@ function admin_bar_theme_settings() {
   );
   $form['settings']['logout_link_location'] = array(
     '#type' => 'radios',
-    '#title' => t("Location of the user 'log out' link"),
-    '#description' => t("Where the user 'log out' link should be displayed in relation to the user account link."),
+    '#title' => t("Location of the 'Log out' link"),
+    '#description' => t("Where the user 'Log out' link should be displayed in relation to the user account link."),
     '#default_value' => $config->get('logout_link_location'),
     '#options' => array(
       'sibling' => t('Next to the user account link (top-level)'),
