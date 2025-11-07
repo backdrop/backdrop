@@ -3346,9 +3346,9 @@ class NodeTokenReplaceTestCase extends BackdropWebTestCase {
     $tests['[node:type]'] = 'post';
     $tests['[node:type-name]'] = 'Post';
     $tests['[node:title]'] = check_plain($node->title);
-    $tests['[node:body]'] = _text_sanitize($instance, $node->langcode, $node->body[$node->langcode][0], 'value');
-    $tests['[node:summary]'] = _text_sanitize($instance, $node->langcode, $node->body[$node->langcode][0], 'summary');
-    $tests['[node:langcode]'] = check_plain($node->langcode);
+    $tests['[node:body]'] = _text_sanitize($instance, $node->langcode(), $node->body[$node->langcode()][0], 'value');
+    $tests['[node:summary]'] = _text_sanitize($instance, $node->langcode(), $node->body[$node->langcode()][0], 'summary');
+    $tests['[node:langcode]'] = check_plain($node->langcode());
     $tests['[node:url]'] = url('node/' . $node->nid, $url_options);
     $tests['[node:edit-url]'] = url('node/' . $node->nid . '/edit', $url_options);
     $tests['[node:author]'] = check_plain(user_format_name($account));
@@ -3367,9 +3367,9 @@ class NodeTokenReplaceTestCase extends BackdropWebTestCase {
 
     // Generate and test unsanitized tokens.
     $tests['[node:title]'] = $node->title;
-    $tests['[node:body]'] = $node->body[$node->langcode][0]['value'];
-    $tests['[node:summary]'] = $node->body[$node->langcode][0]['summary'];
-    $tests['[node:langcode]'] = $node->langcode;
+    $tests['[node:body]'] = $node->body[$node->langcode()][0]['value'];
+    $tests['[node:summary]'] = $node->body[$node->langcode()][0]['summary'];
+    $tests['[node:langcode]'] = $node->langcode();
     $tests['[node:author:name]'] = user_format_name($account);
 
     foreach ($tests as $input => $expected) {
@@ -3388,7 +3388,7 @@ class NodeTokenReplaceTestCase extends BackdropWebTestCase {
 
     // Generate and test sanitized token - use full body as expected value.
     $tests = array();
-    $tests['[node:summary]'] = _text_sanitize($instance, $node->langcode, $node->body[$node->langcode][0], 'value');
+    $tests['[node:summary]'] = _text_sanitize($instance, $node->langcode(), $node->body[$node->langcode()][0], 'value');
 
     // Test to make sure that we generated something for each token.
     $this->assertFalse(in_array(0, array_map('strlen', $tests)), 'No empty tokens generated for node without a summary.');
@@ -3399,7 +3399,7 @@ class NodeTokenReplaceTestCase extends BackdropWebTestCase {
     }
 
     // Generate and test unsanitized tokens.
-    $tests['[node:summary]'] = $node->body[$node->langcode][0]['value'];
+    $tests['[node:summary]'] = $node->body[$node->langcode()][0]['value'];
 
     foreach ($tests as $input => $expected) {
       $output = token_replace($input, array('node' => $node), array('language' => $language, 'sanitize' => FALSE));

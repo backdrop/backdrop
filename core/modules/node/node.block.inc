@@ -103,7 +103,7 @@ class NodeBlock extends Block {
 
     $node = node_load($this->settings['nid']);
 
-    if (!empty($node->tnid) && !empty($node->langcode)) {
+    if (!empty($node->tnid) && !empty($node->langcode())) {
       $translations = translation_node_get_translations($node->tnid);
 
       foreach ($translations as $code => $translation) {

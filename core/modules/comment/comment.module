@@ -1973,7 +1973,7 @@ function comment_form($form, &$form_state, $comment) {
 
   // If a content type has multilingual support we set the comment to inherit the
   // content language. Otherwise mark the comment as language neutral.
-  $comment_langcode = $comment->langcode;
+  $comment_langcode = $comment->langcode();
   if (($comment_langcode == LANGUAGE_NONE) && $node_type->settings['language']) {
     $comment_langcode = $language_content->langcode;
   }
@@ -2172,8 +2172,13 @@ function comment_submit($comment) {
     // 2) Strip out all HTML tags
     // 3) Convert entities back to plain-text.
     $comment_text = '';
-    if (isset($comment->comment_body) && !empty($comment->comment_body[LANGUAGE_NONE][0])) {
-      $comment_body = $comment->comment_body[LANGUAGE_NONE][0];
+    $field = field_info_field('comment_body');
+    $langcode = LANGUAGE_NONE;
+    if ($field && $comment->langcode() != NULL && field_is_translatable('comment', $field)) {
+      $langcode = $comment->langcode();
+    }
+    if (isset($comment->comment_body) && !empty($comment->comment_body[$langcode][0])) {
+      $comment_body = $comment->comment_body[$langcode][0];
       if (isset($comment_body['format'])) {
         $comment_text = check_markup($comment_body['value'], $comment_body['format']);
       }

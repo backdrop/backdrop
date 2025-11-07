@@ -421,7 +421,10 @@ function path_generate_entity_alias(Entity $entity, $source = NULL, $langcode = 
     $source = $uri['path'];
   }
   if (!isset($langcode)) {
-    $langcode = isset($entity->langcode) ? $entity->langcode : LANGUAGE_NONE;
+    $langcode = $entity->langcode();
+    if ($langcode == NULL) {
+      $langcode = LANGUAGE_NONE;
+    }
   }
 
   // Retrieve and apply the pattern for this content type.
@@ -509,7 +512,10 @@ function path_generate_entity_alias(Entity $entity, $source = NULL, $langcode = 
  *   The path array saved into the database or FALSE if the path was not saved.
  */
 function path_save_automatic_entity_alias(Entity $entity) {
-  $langcode = isset($entity->langcode) ? $entity->langcode : LANGUAGE_NONE;
+  $langcode = $entity->langcode();
+  if ($langcode == NULL) {
+    $langcode = LANGUAGE_NONE;
+  }
   $uri = $entity->uri();
   $path = FALSE;
   if ($alias = path_generate_entity_alias($entity, $uri['path'], $langcode)) {

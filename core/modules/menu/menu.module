@@ -596,7 +596,7 @@ function menu_node_save(Node $node) {
     elseif (trim($link['link_title'])) {
       $link['link_title'] = trim($link['link_title']);
       $link['link_path'] = "node/$node->nid";
-      $link['langcode'] = $node->langcode;
+      $link['langcode'] = $node->langcode();
       if (trim($link['description'])) {
         $link['options']['attributes']['title'] = trim($link['description']);
       }
@@ -656,7 +656,7 @@ function menu_node_prepare(Node $node) {
     }
     // Set the dummy item langcode to the same language as the node.
     if (module_exists('language') && empty($item)) {
-      $item['langcode'] = $node->langcode;
+      $item['langcode'] = $node->langcode();
     }
     // Set default values.
     $node->menu = $item + array(
