@@ -146,6 +146,7 @@ Backdrop.adminBar.behaviors.adminBarMarginTop(document, Backdrop.settings);
  */
 Backdrop.adminBar.behaviors.positionFixed = function (context, settings, $adminBar) {
   if (settings.admin_bar.position_fixed) {
+    $('html').addClass('admin-bar-fixed');
     $adminBar.addClass('admin-bar-position-fixed');
     $adminBar.css('position', 'fixed');
 
