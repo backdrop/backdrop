@@ -227,7 +227,7 @@ table.sticky-header {
   z-index: 9;
 }
 table.sticky-enabled :target {
-  scroll-margin-top: 2.7em;
+  scroll-margin-top: 2.7rem;
 }
 
 /**

@@ -19,7 +19,7 @@ html.admin-bar-fixed :target {
   scroll-margin-top: var(--admin-bar-height);
 }
 html.admin-bar-fixed table.sticky-enabled :target {
-  scroll-margin-top: 5em;
+  scroll-margin-top: 5rem;
 }
 
 #admin-bar {
