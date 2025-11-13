@@ -792,7 +792,7 @@ class Layout {
     // exist.
     if (!empty($this->orphaned_blocks)) {
       end($new_positions);
-      $this->refuge_region = !empty($new_layout_template_info['default region']) ? $new_layout_template_info['default region'] : key($new_positions);
+      $this->refuge_region = (!empty($new_layout_template_info['default region'])) ? $new_layout_template_info['default region'] : key($new_positions);
       foreach ($this->orphaned_blocks as $uuid) {
         $new_positions[$this->refuge_region][] = $uuid;
       }
@@ -800,7 +800,10 @@ class Layout {
 
     $this->layout_template = $layout_template_name;
     $this->positions = $new_positions;
-    module_invoke_all('layout_template_change', $this, $old_layout_template_info['name']);
+    if ($this->layout_template_type === 'layout') {
+      module_invoke_all('layout_template_change', $this, $old_layout_template_info['name']);
+    }
+
   }
 
   /**

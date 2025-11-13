@@ -1713,14 +1713,18 @@ function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE
         $init[$name]['title'] = $init[$name]['name'];
         $init[$name]['name'] = $name;
       }
+      $info = _layout_get_all_info('layout_template', $init);
+      // Account for implementations of the deprecated hook_layout_info().
+      $info = _layout_get_all_info('layout', $info);
     }
-    $info = _layout_get_all_info('layout_template', $init);
-    // Account for implementations of the deprecated hook_layout_info().
-    $info = _layout_get_all_info('layout', $info);
+    else {
+      $info = layout_layout_template_info($layout_template_type);
+    }
 
     // Populate defaults.
     foreach ($info as $name => $layout_template_info) {
       $info[$name] += array(
+        'name' => $name,
         'hidden' => FALSE,
         'preview' => 'preview.png',
         'default region' => 'content',
@@ -1730,7 +1734,7 @@ function layout_get_layout_template_info($template_name = NULL, $rebuild = FALSE
           'all' => array(str_replace('_', '-', $name) . '.css'),
         ),
       );
-      if (!isset($info[$name]['template'])) {
+      if (isset($layout_template_info['path']) && !isset($info[$name]['template'])) {
         $template_path = BACKDROP_ROOT . '/' . $layout_template_info['path'] . '/layout--' . str_replace('_', '-', $name) . '.tpl.php';
 
         if (is_file($template_path)) {
@@ -2502,11 +2506,11 @@ function layout_flexible_template_machine_name_exists($value) {
 /**
  * Implements hook_layout_template_info().
  */
-function layout_layout_template_info() {
+function layout_layout_template_info($flexible_template_type = 'flexible') {
   $layouts = array();
   $styles = layout_flexible_row_styles();
 
-  $flexible_templates = layout_flexible_template_load_all('flexible');
+  $flexible_templates = layout_flexible_template_load_all($flexible_template_type);
   foreach ($flexible_templates as $flexible_template) {
     $layouts[$flexible_template->name] = array(
       'title' => $flexible_template->title,
