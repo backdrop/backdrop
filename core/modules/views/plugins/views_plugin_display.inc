@@ -841,7 +841,7 @@ class views_plugin_display extends views_plugin {
    */
   function get_plugin($type = 'style', $name = NULL) {
     static $cache = array();
-    if (!isset($cache[$type][$name])) {
+    if (!isset($name) || !isset($cache[$type][$name])) {
       switch ($type) {
         case 'style':
         case 'row':
