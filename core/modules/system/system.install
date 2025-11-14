@@ -479,6 +479,7 @@ function system_requirements($phase) {
     );
 
     // Check installed modules.
+    $modules_update_required = array();
     foreach (module_list() as $module) {
       $updates = backdrop_get_schema_versions($module);
       if ($updates !== FALSE) {
@@ -490,13 +491,17 @@ function system_requirements($phase) {
         }
         $latest_schema = end($updates);
         if ($current_schema < $latest_schema) {
-          $update_link = base_path() . 'core/update.php';
-          $requirements['update']['severity'] = REQUIREMENT_ERROR;
-          $requirements['update']['value'] = $t('Out of date (<a href="@update">Run site updates</a>)', array('@update' => $update_link));
-          $requirements['update']['description'] = $t('Some modules have database schema updates to install. You should run the <a href="@update">site update script</a> immediately.', array('@update' => $update_link));
-          break;
+          // Add the module with the latest schema to a list.
+          $modules_update_required[] = $module . ' (' . $latest_schema . ')';
         }
       }
+    }
+    if (!empty($modules_update_required)) {
+      $update_link = base_path() . 'core/update.php';
+      $requirements['update']['severity'] = REQUIREMENT_ERROR;
+      $requirements['update']['value'] = $t('Out of date (<a href="@update">Run site updates</a>)', array('@update' => $update_link));
+      $modules_update_required_list = theme('item_list', array('items' => $modules_update_required));
+      $requirements['update']['description'] = $t('The modules listed below have database schema updates to install. You should run the <a href="@update">site update script</a> immediately.', array('@update' => $update_link)) . $modules_update_required_list;
     }
   }
 
