@@ -176,7 +176,8 @@ function backdrop_get_installed_schema_version($module, $reset = FALSE, $array =
     return $versions;
   }
   else {
-    return isset($versions[$module]) ? $versions[$module] : SCHEMA_UNINSTALLED;
+    // @todo why is $module NULL in so many functional tests?
+    return ($module && isset($versions[$module])) ? $versions[$module] : SCHEMA_UNINSTALLED;
   }
 }
 
