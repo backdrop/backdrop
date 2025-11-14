@@ -810,7 +810,7 @@ function filter_formats($account = NULL, $include_disabled = FALSE) {
           $filter_format->filters[$filter_name] = (object) $filter;
         }
         // Populate defaults for the editor associated with this format.
-        if (isset($all_editor_info[$filter_format->editor]['default settings'])) {
+        if (!empty($filter_format->editor) && isset($all_editor_info[$filter_format->editor]['default settings'])) {
           $filter_format->editor_settings += $all_editor_info[$filter_format->editor]['default settings'];
         }
 
