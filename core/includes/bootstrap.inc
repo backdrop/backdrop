@@ -4285,7 +4285,7 @@ function backdrop_autoload($class) {
 function &backdrop_static($name, $default_value = NULL, $reset = FALSE) {
   static $data = array(), $default = array();
   // First check if dealing with a previously defined static variable.
-  if (isset($data[$name]) || array_key_exists($name, $data)) {
+  if ($name && (isset($data[$name]) || array_key_exists($name, $data))) {
     // Non-NULL $name and both $data[$name] and $default[$name] statics exist.
     if ($reset) {
       // Reset pre-existing static variable to its default value.
