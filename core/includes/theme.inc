@@ -65,6 +65,10 @@ function backdrop_theme_access($theme) {
   }
   else {
     $themes = list_themes();
+    // @todo seems to be caused by the Layout module?
+    if (empty($theme)) {
+      return FALSE;
+    }
     return isset($themes[$theme]) && _backdrop_theme_access($themes[$theme]);
   }
 }

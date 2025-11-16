@@ -695,7 +695,9 @@ class Layout {
       return $this->menu_item->path;
     }
     else {
-      return $this->path;
+      // @todo casting might be a bad idea here because of NULL value for
+      // default admin layoout.
+      return (string) $this->path;
     }
   }
 
