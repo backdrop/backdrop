@@ -695,9 +695,11 @@ class Layout {
       return $this->menu_item->path;
     }
     else {
-      // @todo casting might be a bad idea here because of NULL value for
-      // default admin layoout.
-      return (string) $this->path;
+      // @todo this method return NULL for default admin theme, but lots of code
+      // relies on it being a string. We can not cast to string.
+      // The doc block's misleading. Needs feedback.
+      // @see LayoutPathTest
+      return $this->path;
     }
   }
 
