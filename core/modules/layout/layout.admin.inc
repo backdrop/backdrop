@@ -19,12 +19,13 @@ function layout_list_page() {
   $admin_path_groups = array();
   foreach ($layouts as $layout) {
     $path = $layout->getPath();
+    $path_key = (string) $path;
     // Admin layouts are to be added to the bottom of the list.
     if (path_is_admin($path)) {
-      $admin_path_groups[$path][$layout->name] = $layout;
+      $admin_path_groups[$path_key][$layout->name] = $layout;
     }
     else {
-      $path_groups[$path][$layout->name] = $layout;
+      $path_groups[$path_key][$layout->name] = $layout;
     }
     // Build a list of all layout paths to check callbacks for.
     if ($path && !in_array($path, $layout_paths)) {
