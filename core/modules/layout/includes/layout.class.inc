@@ -38,7 +38,7 @@ class Layout {
    * The layout path must match the provided menu item path. Set and get this
    * variable's value with Layout::getPath() and Layout::setPath().
    *
-   * @var string
+   * @var string|null
    */
   private $path;
 
@@ -688,17 +688,13 @@ class Layout {
   /**
    * Return a layout's path based on its assigned menu item.
    *
-   * @return string
+   * @return string|null
    */
   function getPath() {
     if ($this->menu_item) {
       return $this->menu_item->path;
     }
     else {
-      // @todo this method return NULL for default admin theme, but lots of code
-      // relies on it being a string. We can not cast to string.
-      // The doc block's misleading. Needs feedback.
-      // @see LayoutPathTest
       return $this->path;
     }
   }
