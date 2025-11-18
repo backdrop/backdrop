@@ -2022,6 +2022,8 @@ function layout_condition_add_form($form, &$form_state, ?Layout $layout = NULL, 
   $form_state['block'] = $block;
   $form_state['menu_item'] = $menu_item;
   $form_state['condition_id'] = $condition_id;
+  // It could be null, but we still need it as array key for newly created.
+  $condition_id_key = (string) $condition_id;
 
   // Condition position may be a zero-value. Use a clear variable for checking
   // the add vs. configure existing status.
@@ -2045,7 +2047,7 @@ function layout_condition_add_form($form, &$form_state, ?Layout $layout = NULL, 
       $form['#title'] = t('Configure visibility condition');
     }
     $help = t('Restrict access to all layouts at this path.');
-    $handler = isset($menu_item->conditions[$condition_id]) ? $menu_item->conditions[$condition_id] : NULL;
+    $handler = isset($menu_item->conditions[$condition_id_key]) ? $menu_item->conditions[$condition_id_key] : NULL;
   }
   elseif (isset($block)) {
     $form['#redirect'] = 'admin/structure/layouts/manage/' . $layout->name;
@@ -2056,7 +2058,7 @@ function layout_condition_add_form($form, &$form_state, ?Layout $layout = NULL, 
       $form['#title'] = t('Configure visibility condition for "!title" block', array('!title' => $block->getAdminTitle()));
     }
     $help = t('Limit the situations in which this block will be shown.');
-    $handler = isset($block->conditions[$condition_id]) ? $block->conditions[$condition_id] : NULL;
+    $handler = isset($block->conditions[$condition_id_key]) ? $block->conditions[$condition_id_key] : NULL;
   }
   else {
     $form['#redirect'] = 'admin/structure/layouts/manage/' . $layout->name . '/configure';
@@ -2067,7 +2069,7 @@ function layout_condition_add_form($form, &$form_state, ?Layout $layout = NULL, 
       $form['#title'] = t('Configure visibility condition for "@title" layout', array('@title' => $layout->title));
     }
     $help = t('Limit the situations in which this layout will apply.');
-    $handler = isset($layout->conditions[$condition_id]) ? $layout->conditions[$condition_id] : NULL;
+    $handler = isset($layout->conditions[$condition_id_key]) ? $layout->conditions[$condition_id_key] : NULL;
   }
   $form['help'] = array(
     '#type' => 'help',
