@@ -592,7 +592,7 @@ class views_handler extends views_object {
   function get_join() {
     // get the join from this table that links back to the base table.
     // Determine the primary table to seek
-    if (empty($this->query->relationships[$this->relationship])) {
+    if (empty($this->relationship) || empty($this->query->relationships[$this->relationship])) {
       $base_table = $this->query->base_table;
     }
     else {
