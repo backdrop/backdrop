@@ -480,10 +480,10 @@ function path_delete($criteria) {
  * both administrative and non-administrative patterns, it is considered
  * non-administrative.
  *
- * @param $path
+ * @param string|null $path
  *   A Backdrop path.
  *
- * @return
+ * @return bool
  *   TRUE if the path is administrative, FALSE otherwise.
  *
  * @see path_get_admin_paths()
@@ -492,6 +492,10 @@ function path_delete($criteria) {
  */
 function path_is_admin($path) {
   $path_map = &backdrop_static(__FUNCTION__);
+  // This function is supposed to also handle NULL as param.
+  if (!$path) {
+    return FALSE;
+  }
   if (!isset($path_map['admin'][$path])) {
     $patterns = path_get_admin_paths();
     $path_map['admin'][$path] = backdrop_match_path($path, $patterns['admin']);
