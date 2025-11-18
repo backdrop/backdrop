@@ -700,8 +700,8 @@ class views_many_to_one_helper {
     // to create a new relationship to use.
     $relationship = $this->handler->relationship;
 
-    // Determine the primary table to seek
-    if (empty($this->handler->query->relationships[$relationship])) {
+    // Determine the primary table to seek.
+    if (!$relationship || empty($this->handler->query->relationships[$relationship])) {
       $base_table = $this->handler->query->base_table;
     }
     else {
