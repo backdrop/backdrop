@@ -2362,7 +2362,7 @@ function node_page_view(Node $node) {
   // If there is a menu link to this node, the link becomes the last part
   // of the active trail, and the link name becomes the page title.
   // Thus, we must explicitly set the page title to be the node title.
-  backdrop_set_title($node->title);
+  backdrop_set_title($node->label());
   // Set the node path as the canonical URL to prevent duplicate content.
   $uri = entity_uri('node', $node);
   $canonical_secure = config_get('system.core', 'canonical_secure') ? TRUE : FALSE;

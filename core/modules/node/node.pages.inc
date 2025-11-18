@@ -626,7 +626,7 @@ function node_preview($node_tempstore_id, $node_type) {
 
   // Property so we can manipulate $page in template_preprocess_node.
   if ($view_mode == 'full' || $view_mode == 'default') {
-    backdrop_set_title($node->title);
+    backdrop_set_title($node->label());
     $node->in_preview = TRUE;
   }
 
