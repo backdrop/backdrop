@@ -881,9 +881,9 @@ function taxonomy_vocabulary_get_names() {
  * Finds all parents of a given term ID.
  *
  * @param int|string|null $tid
- *   A taxonomy term ID or null, when creating a new one.
+ *   Numeric taxonomy term ID or null, when creating a new one.
  *
- * @return
+ * @return array
  *   An array of term objects which are the parents of the term $tid, or an
  *   empty array if parents are not found.
  */
