@@ -64,7 +64,6 @@ class DatabaseConnection_mysql extends DatabaseConnection {
     $connection_options += array(
       'pdo' => array(),
     );
-    // @todo which version do runners actually report?
     if (version_compare(PHP_VERSION, '8.4.99') > 0) {
       $connection_options['pdo'] += array(
         // Make sure MySQL returns all matched rows on update queries including
