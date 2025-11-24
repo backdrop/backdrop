@@ -162,10 +162,10 @@ class LayoutFlexibleTemplate {
    * Delete this layout template.
    */
   function delete() {
-    config('layout.flexible.' . $this->name)->delete();
+    config('layout.' . $this->layout_template_type . '.' . $this->name)->delete();
 
     layout_reset_caches();
-    layout_flexible_reset_caches();
+    layout_flexible_reset_caches($this->layout_template_type);
     backdrop_theme_rebuild();
   }
 }
