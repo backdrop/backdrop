@@ -1198,6 +1198,21 @@ function layout_load_multiple($layout_names, $skip_menu_items = FALSE) {
     }
   }
 
+  // Load menu items for additional paths.
+  foreach ($loaded_layouts as $loaded_layout) {
+    if (!empty($loaded_layout->additional_paths) && !$skip_menu_items) {
+      foreach ($loaded_layout->additional_paths as $additional_path) {
+        if (isset($menu_items[$additional_path])) {
+          $loaded_layouts[$layout_name]->additional_menu_items[$additional_path] = $menu_items[$additional_path];
+        }
+        elseif ($menu_item = layout_menu_item_load_multiple_by_path($additional_path)) {
+        dpm($menu_item);
+          $loaded_layouts[$layout_name]->additional_menu_items[$additional_path] = $menu_item;
+        }
+      }
+    }
+  }
+
   // Return the requested layouts.
   $layouts = array();
 
@@ -1290,7 +1305,7 @@ function layout_load_multiple_by_path($path, $skip_menu_items = NULL) {
     }
 
     $layouts = layout_load_multiple($layout_names, $skip_menu_items);
-    $layouts = layout_load_multiple_by_additional_path($layouts, $path);
+    // $layouts = layout_load_multiple_by_additional_path($layouts, $path);
     cache('layout_path')->set($path, $layouts);
   }
 
@@ -1459,6 +1474,13 @@ function layout_get_path_layout_names($path) {
     foreach ($configs as $layout_name => $config) {
       if (isset($config['path'])) {
         $path_map[$config['path']][] = $layout_name;
+      }
+      if (isset($config['settings']['additional_paths'])) {
+        foreach ($config['settings']['additional_paths'] as $additional_path) {
+          if (!empty($additional_path)) {
+            $path_map[$additional_path][] = $layout_name;
+          }
+        }
       }
     }
   }
@@ -2832,6 +2854,7 @@ function layout_load_multiple_by_additional_path($layouts, $path) {
         $position = $context->position;
         $new_position = $placeholder_map[$position];
         if ($position != $new_position) {
+      dpm($contexts);
           $context->position = $new_position;
           $altered_contexts[$new_position] = $context;
           $layout->clearContexts($position);
@@ -2839,6 +2862,7 @@ function layout_load_multiple_by_additional_path($layouts, $path) {
       }
     }
     foreach ($altered_contexts as $position => $context) {
+      dpm($context);
       $layout->setContexts($position, $context);
     }
   }

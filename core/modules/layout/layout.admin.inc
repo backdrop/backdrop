@@ -491,18 +491,87 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#access' => !$layout->isDefault(),
     '#description' => $path_matches_description . t('Use the percent symbol ("%") to indicate a placeholder in the path.') . $toggle . $description_list,
   );
+  $form['additional_paths_wrapper'] = array(
+    '#type' => 'container',
+    '#prefix' => '<div id="edit-book-plid-wrapper">',
+    '#suffix' => '</div>',
+  );
+  if (empty($form_state['additional_paths'])) {
+    $form_state['additional_paths'] = $layout->additional_paths;
+  }
+  foreach ($form_state['additional_paths'] as $i => $additional_path) {
+    $form['additional_paths_wrapper']['additional_paths_container'.$i] = array(
+      '#type' => 'container',
+        '#attributes' => array(
+          'class' => array('container-inline', 'fieldset-no-legend')
+        ),
+    );
+    $form['additional_paths_wrapper']['additional_paths_container'.$i]['additional_path'] = array(
+      '#title' => '',
+      '#parents' => array('additional_paths', 'additional_path'.$i),
+      '#field_prefix' => url('', array('absolute' => TRUE)),
+      '#type' => 'textfield',
+      '#default_value' => $additional_path,
+      '#attributes' => array(
+        'data-layout-additional-path' => 'true',
+        'class' => array('data-layout-additional-path')
+      ),
+    );
+    $form['additional_paths_wrapper']['additional_paths_container'.$i]['additional_path_remove'] = array(
+      '#title' => 'Remove',
+      '#type' => 'submit',
+      '#name' => 'additional_path_remove'.$i,
+      '#value' => t('Remove'),
+      '#attributes' => array(
+        'data-layout-additional-path-remove' => $i,
+      ),
+      '#ajax' => array(
+        // doctodo
+        'callback' => 'layout_settings_form_add_additional_paths_ajax',
+        'wrapper' => 'edit-book-plid-wrapper',
+      ),
+      '#submit' => array(
+        // doctodo
+        'layout_settings_form_update_layout',
+        'layout_settings_form_additional_path_remove',
+        // 'layout_settings_form_add_additional_paths',
+      ),
+    );
+  }
+  $form['add_additional_paths'] = array(
+    '#theme' => 'layout_action_links',
+  );
+  $form['add_additional_paths']['add'] = array(
+    '#type' => 'submit',
+    '#value' => t('Add path'),
+    '#attributes' => array('class' => array('layout-link-button', 'layout-additional-paths-add')),
+    '#validate' => array(),
+    '#submit' => array(
+      // doctodo
+      'layout_settings_form_update_layout',
+      'layout_settings_form_add_additional_paths',
+    ),
+    '#ajax' => array(
+      // doctodo
+      'callback' => 'layout_settings_form_add_additional_paths_ajax',
+      'wrapper' => 'edit-book-plid-wrapper',
+    ),
+  );
 
   $form['path_update'] = array(
     '#type' => 'submit',
     '#value' => t('Check path'),
     '#validate' => array(
+      // doctodo
       'layout_settings_form_validate',
     ),
     '#submit' => array(
+      // doctodo
       'layout_settings_form_update_layout',
       'layout_settings_form_path_rebuild',
     ),
     '#ajax' => array(
+      // doctodo
       'callback' => 'layout_settings_form_path_ajax',
       'disable' => FALSE,
       'progress' => 'none',
@@ -589,10 +658,18 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
 
   foreach ($contexts as $context_key => $layout_context) {
     if ($layout_context->usageType !== LayoutContext::USAGE_TYPE_SYSTEM) {
+            
       // Contexts that are locked to a particular position (such as node/%).
       if ($layout_context->position && $layout_context->required) {
+        if (strpos($context_key, 'ap_') === 0) {
+          $tstr = explode('ap_', $context_key, 2);
+          $str_path = $tstr[1];
+        }
+        else {
+          $str_path = $layout->getPath();
+        }
         $form['context_wrapper']['context']['required'][$context_key]['summary'] = array(
-          '#markup' => $layout_context->getAdminSummary($layout->getPath()),
+          '#markup' => $layout_context->getAdminSummary($str_path),
         );
         if ($layout_context->locked) {
           $form['context_wrapper']['context']['required'][$context_key]['plugin'] = array(
@@ -808,12 +885,6 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     t('Login: <code>user/register</code> if primary path is <code>user/login</code>'),
   );
   $description_additional_list = '<div class="layout-additional-paths-examples">' . t('Some common examples of additional paths include:') . theme('item_list', array('items' => $description_additional_items)) . '</div>';
-  $form['additional_paths'] = array(
-    '#type' => 'textarea',
-    '#title' => t('Additional paths'),
-    '#description' => t('Optionally, specify one or more additional paths to be handled by this layout (in addition to the primary path above). These paths must already be provided by the system or another module. If an additional path contains a placeholder it must be a child path of the primary path.') . $toggle_additional . $description_additional_list,
-    '#default_value' => $default_value,
-  );
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
@@ -903,8 +974,8 @@ function layout_settings_form_validate(&$form, &$form_state) {
   $layout->additional_paths = array();
   if (isset($form_state['values']['additional_paths'])) {
     $num_placeholders = count(_layout_placeholder_positions($path));
-    $additional_paths = explode("\n", $form_state['values']['additional_paths']);
-    foreach ($additional_paths as $additional_path){
+    //$additional_paths = explode("\n", $form_state['values']['additional_paths']);
+    foreach ($form_state['values']['additional_paths'] as $additional_path){
       $additional_path = trim($additional_path);
       if (!empty($additional_path)) {
         $layout_provides_path = layout_provides_path($additional_path);
@@ -917,7 +988,9 @@ function layout_settings_form_validate(&$form, &$form_state) {
         }
         switch (TRUE) {
           case ($num_placeholders != $num_additional_placeholders):
+/*
             // For example, it cannot have "node/%" nor "node".
+            // doctodo change the error element to the wrapper.
             form_set_error('additional_paths', t('Additional path %path should have the same number of placeholders as primary path %primary_path.',
               array(
                 '%path' => $additional_path,
@@ -951,7 +1024,8 @@ function layout_settings_form_validate(&$form, &$form_state) {
               )
             ));
             break;
-          case (!$router_item_path && strpos($additional_path, '%') === FALSE):
+ */          
+/*           case (!$router_item_path && strpos($additional_path, '%') === FALSE):
             // E.g. Only allow "pages/2" if the router item exists. But allow
             // "node/%/edit" to pass.
             form_set_error('additional_paths', t('Additional path %path cannot be used as an additional path. It does not exist in the system.',
@@ -960,15 +1034,48 @@ function layout_settings_form_validate(&$form, &$form_state) {
               )
             ));
             break;
+ */
           case (_layout_set_message_on_path_error($form, 'additional_paths', $additional_path)):
             break;
           default:
-            $layout->additional_paths[] = $additional_path;
+            // $layout->additional_paths[] = $additional_path;
             break;
         }
       }
     }
   }
+}
+
+/**
+ * Submit handler for layout_settings_form().
+ *
+ * Updates available contexts and information about path matching.
+ */
+function layout_settings_form_additional_path_remove($form, &$form_state) {
+  if ($form_state['clicked_button']['#value'] == t('Remove')) {
+    $key = $form_state['clicked_button']['#attributes']['data-layout-additional-path-remove'];
+    unset($form_state['additional_paths'][$key]);
+  }
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * Submit handler for layout_settings_form().
+ *
+ * Updates available contexts and information about path matching.
+ */
+function layout_settings_form_add_additional_paths($form, &$form_state) {
+  $form_state['additional_paths'][] = '';
+  $form_state['rebuild'] = TRUE;
+}
+
+/**
+ * Submit handler for layout_settings_form().
+ *
+ * Updates available contexts and information about path matching.
+ */
+function layout_settings_form_add_additional_paths_ajax($form, &$form_state) {
+  return $form['additional_paths_wrapper'];
 }
 
 /**
@@ -1077,6 +1184,26 @@ function layout_settings_form_update_layout($form, &$form_state) {
   if (isset($form_state['values']['path'])) {
     $layout->setPath($form_state['values']['path']);
   }
+  // This function runs multiple times on keyup if one is typing in the path
+  // or additional path fields.
+  // dpm($form_state['values']);
+  $layout->additional_paths = array();
+  $layout_contexts = $layout->getContexts();
+  if (!empty($form_state['values']['additional_paths'])) {
+    foreach ($form_state['values']['additional_paths'] as $additional_path){
+      $layout->additional_paths[] = $additional_path;
+      // Delete additional_path contexts if the path doesnt exist.
+    }
+  }
+  foreach ($layout_contexts as $context_key => $layout_context) {
+    if (strpos($context_key, 'ap_') === 0) {
+      $tstr = explode('ap_', $context_key, 2);
+      $str_path = $tstr[1];
+      if (!empty($str_path) && !in_array($str_path, $form_state['values']['additional_paths'])) {
+        $layout->clearContexts($context_key);
+      }
+    }
+  }
 
   // Update contexts.
   // @todo: Provide methods/API for setting menu item arguments.
@@ -1084,7 +1211,7 @@ function layout_settings_form_update_layout($form, &$form_state) {
     $plugin_counts = array();
     $arguments = array();
 
-    foreach ($layout->getContexts() as $position => $layout_context) {
+    foreach ($layout_contexts as $position => $layout_context) {
       if (isset($form_state['values']['context']['required'][$position]['plugin'])) {
         $argument_config = $form_state['values']['context']['required'][$position];
         $plugin = $argument_config['plugin'];
@@ -1218,6 +1345,12 @@ function layout_settings_form_save_submit($form, &$form_state) {
           }
         }
       }
+    }
+  }
+
+  if (!empty($form_state['values']['additional_paths'])) {
+    foreach ($form_state['values']['additional_paths'] as $additional_path){
+      $layout->setAdditionalMenuItems($additional_path);
     }
   }
 

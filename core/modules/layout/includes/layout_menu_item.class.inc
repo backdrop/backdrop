@@ -155,6 +155,7 @@ class LayoutMenuItem {
    * Save a menu item configuration.
    */
   function save() {
+    dpm('miscalled');
     // Convert all properties to an array.
     $data = array(
       'name' => $this->name,

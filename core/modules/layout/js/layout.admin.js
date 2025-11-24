@@ -49,10 +49,11 @@ Backdrop.behaviors.layoutConfigure = {
       e.stopPropagation();
     };
 
-    var $form = $('.layout-settings-form').once('layout-settings');
+    var $form = $('.layout-settings-form');
     if ($form.length && Backdrop.ajax) {
       var ajax = Backdrop.ajax['edit-path-update'];
       var updateContexts = function() {
+        console.log('update triggered');
         // Cancel existing AJAX requests and start a new one.
         for (var n = 0; n < ajax.currentRequests.length; n++) {
           ajax.currentRequests[n].abort();
@@ -67,7 +68,7 @@ Backdrop.behaviors.layoutConfigure = {
       };
       // Update contexts after a slight typing delay.
       var timer = 0;
-      $('input[name="path"]').on('keyup', function(e) {
+      $('input[name="path"], input[data-layout-additional-path]').on('keyup', function(e) {
         clearTimeout(timer);
         timer = setTimeout(updateContexts, 200);
       });
