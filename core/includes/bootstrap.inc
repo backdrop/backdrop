@@ -2304,7 +2304,7 @@ function watchdog_deprecated_function($type, $func, $link = NULL) {
  * @param string|null $message
  *   The message to store in the log. If empty, a text that contains all useful
  *   information about the passed-in exception is used.
- * @param array $variables
+ * @param array|null $variables
  *   Array of variables to replace in the message on display. Defaults to the
  *   return value of _backdrop_decode_exception().
  * @param int $severity
@@ -2315,7 +2315,7 @@ function watchdog_deprecated_function($type, $func, $link = NULL) {
  * @see watchdog()
  * @see _backdrop_decode_exception()
  */
-function watchdog_exception($type, Exception $exception, $message = NULL, array $variables = array(), $severity = WATCHDOG_ERROR, $link = NULL) {
+function watchdog_exception($type, Exception $exception, $message = NULL, ?array $variables = array(), $severity = WATCHDOG_ERROR, $link = NULL) {
 
   // Return early if not logging this severity level.
   if (!watchdog_severity_enabled($severity)) {
@@ -2390,7 +2390,7 @@ function watchdog_severity_enabled($severity = WATCHDOG_NOTICE) {
  *   message should be added by using placeholder strings alongside
  *   the variables argument to declare the value of the placeholders.
  *   See t() for documentation on how $message and $variables interact.
- * @param array $variables
+ * @param array|null $variables
  *   Array of variables to replace in the message on display or
  *   NULL if message is already translated or not possible to
  *   translate.
@@ -2412,7 +2412,7 @@ function watchdog_severity_enabled($severity = WATCHDOG_NOTICE) {
  * @see watchdog_severity_levels()
  * @see hook_watchdog()
  */
-function watchdog($type, $message, array $variables = array(), $severity = WATCHDOG_NOTICE, $link = NULL) {
+function watchdog($type, $message, ?array $variables = array(), $severity = WATCHDOG_NOTICE, $link = NULL) {
   global $user, $base_root;
 
   static $in_error_state = FALSE;
