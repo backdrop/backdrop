@@ -3114,7 +3114,7 @@ function _backdrop_error_handler(int $error_level, string $message, string $file
  * @param Exception|Error $exception
  *   The exception object that was thrown.
  */
-function _backdrop_exception_handler($exception) {
+function _backdrop_exception_handler(Exception $exception) {
   require_once BACKDROP_ROOT . '/core/includes/errors.inc';
 
   try {
@@ -3461,7 +3461,7 @@ function _backdrop_bootstrap_sanitize_request() {
  *
  * @param array $input
  *   The input data array from a request to be sanitized.
- * @param string[] $allowlist
+ * @param array $allowlist
  *   Allowed list of input keys that are considered acceptable.
  *
  * @return array
