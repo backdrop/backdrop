@@ -3091,10 +3091,10 @@ function _backdrop_error_handler($error_level, $message, $filename, $line) {
  * always fatal: the execution of the script will stop as soon as the exception
  * handler exits.
  *
- * @param Exception $exception
+ * @param Exception|Error $exception
  *   The exception object that was thrown.
  */
-function _backdrop_exception_handler(Exception $exception) {
+function _backdrop_exception_handler(Exception|Error $exception) {
   require_once BACKDROP_ROOT . '/core/includes/errors.inc';
 
   try {
@@ -3440,7 +3440,7 @@ function _backdrop_bootstrap_sanitize_request() {
  *
  * @param array $input
  *   The input data array from a request to be sanitized.
- * @param array $allowlist
+ * @param string[] $allowlist
  *   Allowed list of input keys that are considered acceptable.
  *
  * @return array
@@ -3513,6 +3513,10 @@ function backdrop_valid_test_ua() {
 
 /**
  * Generates a user agent string with a HMAC and timestamp for simpletest.
+ *
+ * @param string $prefix
+ *
+ * @return string
  */
 function backdrop_generate_test_ua($prefix) {
   static $key;
@@ -3572,6 +3576,8 @@ function fast_404() {
 
 /**
  * Returns TRUE if a Backdrop installation is currently being attempted.
+ *
+ * @return bool
  */
 function backdrop_installation_attempted() {
   return defined('MAINTENANCE_MODE') && MAINTENANCE_MODE == 'install';
@@ -3598,6 +3604,8 @@ function backdrop_installation_attempted() {
  * Use t() if your code will never run during the Backdrop installation phase.
  * Use st() if your code will only run during installation and never any other
  * time. Use get_t() if your code could run in either circumstance.
+ *
+ * @return string
  *
  * @see t()
  * @see st()
@@ -3686,7 +3694,7 @@ function language_multilingual() {
  *   (optional) Whether the option_list labels should use the native name
  *   instead of the English language name. Only applies if $option_list is TRUE.
  *
- * @return array
+ * @return (object|string)[]
  *   An associative array of languages, keyed by the language code.
  *
  * @since 1.18.2 Added $native_names parameter.
