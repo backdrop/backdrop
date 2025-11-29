@@ -1373,10 +1373,11 @@ function file_managed_file_process($element, &$form_state, $form) {
     ),
   );
 
-  // If multiple upload, FID is an array. If single-upload, it is a single ID.
+  // If multiple upload, FID is a list of IDs concatenated by a comma. If
+  // single-upload, it is a single ID.
   $element['fid'] = array(
     '#type' => 'hidden',
-    '#value' => $element['#multiple'] ? reset($fids) : $fids,
+    '#value' => $element['#multiple'] ? implode(',', $fids) : reset($fids),
   );
 
   // Legacy server-side progress bar support. If not available, client-side
@@ -1512,7 +1513,14 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
   elseif (!empty($form_state_fid)) {
     $fid = $form_state_fid;
   }
-  $fids = !empty($fid) ? (array) $fid : array();
+
+  // Convert the FID value to an array of FIDs.
+  if ($element['#multiple'] && is_string($fid)) {
+    $fids = explode(',', $fid);
+  }
+  else {
+    $fids = !empty($fid) ? (array) $fid : array();
+  }
 
   // Process any input and save new uploads.
   if ($input !== FALSE && isset($input['fid'])) {
@@ -1575,9 +1583,11 @@ function file_managed_file_value(&$element, $input = FALSE, $form_state = NULL) 
   if ($input === FALSE || $force_default) {
     if ($element['#extended']) {
       $default_fid = $element['#default_value']['fid'] ?? array();
+      $return = isset($element['#default_value']) ? $element['#default_value'] : array();
     }
     else {
       $default_fid = $element['#default_value'] ?? '';
+      $return = array();
     }
 
     // Confirm that the file exists when used as a default value.

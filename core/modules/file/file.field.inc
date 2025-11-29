@@ -648,7 +648,7 @@ function file_field_widget_form(&$form, &$form_state, $field, $instance, $langco
 
   $defaults = array(
     'fid' => NULL,
-    'display' => !empty($field['settings']['display_default']),
+    'display' => empty($field['settings']['display_default']) ? 0 : 1,
     'description' => '',
   );
 

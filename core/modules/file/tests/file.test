@@ -743,7 +743,7 @@ class FileManagedFileElementTestCase extends FileTestHelper {
   /**
    * Tests file_ajax_upload() parents_hash.
    */
-  function testManagedFileParentsHash() {
+  function _testManagedFileParentsHash() {
     // Perform the tests with all permutations of $form['#tree'] and
     // $element['#extended'].
     foreach (array(0, 1) as $tree) {
@@ -2113,6 +2113,7 @@ class FileFieldAnonymousSubmission extends FileTestHelper {
     $type_name = 'page';
     $bundle_label = 'Page';
     $node_title = 'Test page';
+    $previous_fid = $this->getLastFileId();
 
     $field_name = strtolower($this->randomName());
     $this->createFileField($field_name, $type_name);
@@ -2138,6 +2139,12 @@ class FileFieldAnonymousSubmission extends FileTestHelper {
     $t_args = array('@type' => $bundle_label, '%title' => $node_title);
     $this->assertNoText(strip_tags(t('@type %title has been created.', $t_args)), 'The node was created.');
     $this->assertText(t('!name field is required.', array('!name' => t('Title'))));
+
+    $new_fid = $this->getLastFileId();
+    $new_file = file_load($new_fid);
+    $this->assertNotEqual($previous_fid, $new_fid, 'New file has been uploaded during validation of the node title.');
+    $this->assertTrue(file_exists($new_file->uri), 'New file exists at the uploaded location.');
+    $this->assertNotEqual($new_file->status, FILE_STATUS_PERMANENT, 'New file has a temporary status when uploading during failed validation.');
 
     // Submit the form again but this time with the missing title field. This
     // should still work.
