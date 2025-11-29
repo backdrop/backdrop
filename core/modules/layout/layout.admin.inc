@@ -493,10 +493,10 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
   );
   $form['additional_paths_wrapper'] = array(
     '#type' => 'container',
-    '#prefix' => '<div id="edit-book-plid-wrapper">',
+    '#prefix' => '<div id="layout-additional-paths-wrapper">',
     '#suffix' => '</div>',
   );
-  if (empty($form_state['additional_paths'])) {
+  if (!isset($form_state['additional_paths'])) {
     $form_state['additional_paths'] = $layout->additional_paths;
   }
   foreach ($form_state['additional_paths'] as $i => $additional_path) {
@@ -508,12 +508,12 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     );
     $form['additional_paths_wrapper']['additional_paths_container'.$i]['additional_path'] = array(
       '#title' => '',
-      '#parents' => array('additional_paths', 'additional_path'.$i),
+      '#parents' => array('additional_paths', $i),
       '#field_prefix' => url('', array('absolute' => TRUE)),
       '#type' => 'textfield',
       '#default_value' => $additional_path,
       '#attributes' => array(
-        'data-layout-additional-path' => 'true',
+        'data-layout-additional-path' => 'add',
         'class' => array('data-layout-additional-path')
       ),
     );
@@ -522,18 +522,22 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
       '#type' => 'submit',
       '#name' => 'additional_path_remove'.$i,
       '#value' => t('Remove'),
+      '#validate' => array(
+        // doctodo
+        'layout_settings_form_validate',
+      ),
       '#attributes' => array(
         'data-layout-additional-path-remove' => $i,
       ),
       '#ajax' => array(
         // doctodo
         'callback' => 'layout_settings_form_add_additional_paths_ajax',
-        'wrapper' => 'edit-book-plid-wrapper',
+        // 'wrapper' => 'layout-additional-paths-wrapper',
       ),
       '#submit' => array(
         // doctodo
-        'layout_settings_form_update_layout',
         'layout_settings_form_additional_path_remove',
+        'layout_settings_form_update_layout',
         // 'layout_settings_form_add_additional_paths',
       ),
     );
@@ -554,7 +558,7 @@ function layout_settings_form($form, &$form_state, Layout $layout) {
     '#ajax' => array(
       // doctodo
       'callback' => 'layout_settings_form_add_additional_paths_ajax',
-      'wrapper' => 'edit-book-plid-wrapper',
+      'wrapper' => 'layout-additional-paths-wrapper',
     ),
   );
 
@@ -971,11 +975,18 @@ function layout_settings_form_validate(&$form, &$form_state) {
     }
   }
 
+
+  // $form_state['additional_paths'] = $form_state['values']['additional_paths'];
+  if ($form_state['clicked_button']['#value'] == t('Remove')) {
+    $key = $form_state['clicked_button']['#attributes']['data-layout-additional-path-remove'];
+    unset($form_state['additional_paths'][$key]);
+  }
+
   $layout->additional_paths = array();
   if (isset($form_state['values']['additional_paths'])) {
     $num_placeholders = count(_layout_placeholder_positions($path));
     //$additional_paths = explode("\n", $form_state['values']['additional_paths']);
-    foreach ($form_state['values']['additional_paths'] as $additional_path){
+    foreach ($form_state['values']['additional_paths'] as $key => $additional_path){
       $additional_path = trim($additional_path);
       if (!empty($additional_path)) {
         $layout_provides_path = layout_provides_path($additional_path);
@@ -1038,7 +1049,7 @@ function layout_settings_form_validate(&$form, &$form_state) {
           case (_layout_set_message_on_path_error($form, 'additional_paths', $additional_path)):
             break;
           default:
-            // $layout->additional_paths[] = $additional_path;
+            $form_state['additional_paths'][$key] = $additional_path;
             break;
         }
       }
@@ -1075,7 +1086,12 @@ function layout_settings_form_add_additional_paths($form, &$form_state) {
  * Updates available contexts and information about path matching.
  */
 function layout_settings_form_add_additional_paths_ajax($form, &$form_state) {
-  return $form['additional_paths_wrapper'];
+  $commands[] = ajax_command_html('#layout-additional-paths-wrapper', backdrop_render($form['additional_paths_wrapper']));
+  $commands[] = ajax_command_html('#layout-contexts', backdrop_render($form['context_wrapper']));
+  return array(
+    '#type' => 'ajax',
+    '#commands' => $commands,
+  );
 }
 
 /**
@@ -1186,20 +1202,19 @@ function layout_settings_form_update_layout($form, &$form_state) {
   }
   // This function runs multiple times on keyup if one is typing in the path
   // or additional path fields.
-  // dpm($form_state['values']);
   $layout->additional_paths = array();
-  $layout_contexts = $layout->getContexts();
-  if (!empty($form_state['values']['additional_paths'])) {
-    foreach ($form_state['values']['additional_paths'] as $additional_path){
+  if (!empty($form_state['additional_paths'])) {
+    foreach ($form_state['additional_paths'] as $additional_path){
       $layout->additional_paths[] = $additional_path;
-      // Delete additional_path contexts if the path doesnt exist.
     }
   }
+
+  $layout_contexts = $layout->getContexts();
   foreach ($layout_contexts as $context_key => $layout_context) {
     if (strpos($context_key, 'ap_') === 0) {
       $tstr = explode('ap_', $context_key, 2);
       $str_path = $tstr[1];
-      if (!empty($str_path) && !in_array($str_path, $form_state['values']['additional_paths'])) {
+      if (!empty($str_path) && !in_array($str_path, $form_state['additional_paths'])) {
         $layout->clearContexts($context_key);
       }
     }

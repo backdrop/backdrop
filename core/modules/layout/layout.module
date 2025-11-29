@@ -1206,7 +1206,6 @@ function layout_load_multiple($layout_names, $skip_menu_items = FALSE) {
           $loaded_layouts[$layout_name]->additional_menu_items[$additional_path] = $menu_items[$additional_path];
         }
         elseif ($menu_item = layout_menu_item_load_multiple_by_path($additional_path)) {
-        dpm($menu_item);
           $loaded_layouts[$layout_name]->additional_menu_items[$additional_path] = $menu_item;
         }
       }
@@ -2854,7 +2853,6 @@ function layout_load_multiple_by_additional_path($layouts, $path) {
         $position = $context->position;
         $new_position = $placeholder_map[$position];
         if ($position != $new_position) {
-      dpm($contexts);
           $context->position = $new_position;
           $altered_contexts[$new_position] = $context;
           $layout->clearContexts($position);
@@ -2862,7 +2860,6 @@ function layout_load_multiple_by_additional_path($layouts, $path) {
       }
     }
     foreach ($altered_contexts as $position => $context) {
-      dpm($context);
       $layout->setContexts($position, $context);
     }
   }

@@ -245,7 +245,7 @@ class Layout {
     );
 
     // Load additional paths..
-    $this->additional_paths = $this->settings['additional_paths'];
+    $this->additional_paths = $this->settings['additional_paths']?:array();
 
     // Adjust for the renaming of "layout" to "layout_template".
     // See https://github.com/backdrop/backdrop-issues/issues/998
@@ -415,22 +415,17 @@ class Layout {
     }
 
     if (!empty($this->additional_menu_items)) {
-      dpm($this->additional_menu_items);
       $all_menu_items = layout_menu_item_load_all();
       foreach ($this->additional_paths as $path) {
-      dpm($this->additional_menu_items);
         if ((layout_provides_path($path) === FALSE) && menu_get_item($path)) {
-      dpm($this->additional_menu_items);
           if (isset($this->additional_menu_items[$path])) {
             $this->additional_menu_items[$path]->delete();
           }
         }
         else {
-      dpm($this->additional_menu_items);
           if (isset($this->additional_menu_items[$path])) {
             if (!isset($all_menu_items[$path])) {
               $menu_item = $this->additional_menu_items[$path];
-      dpm($menu_item);
               $menu_item->save();
             }
           }
@@ -711,9 +706,7 @@ class Layout {
       // If this layout doesn't have a menu item, make one. If the path is
       // provided by another module, no menu item is necessary.
       elseif (layout_provides_path($path) === NULL) {
-        dpm('onei');
         if (empty($this->menu_item)) {
-          dpm('threei');
           $menu_item_settings = array(
             'path' => $path,
             'name' => $this->name,
@@ -721,12 +714,10 @@ class Layout {
           $this->menu_item = new LayoutMenuItem($menu_item_settings);
         }
         else {
-          dpm('fouri');
           $this->menu_item->path = $path;
         }
       }
       else {
-        dpm('twoi');
         if ($this->menu_item) {
           $this->menu_item->delete();
         }
@@ -762,9 +753,7 @@ class Layout {
       // If this layout doesn't have a menu item, make one. If the path is
       // provided by another module, no menu item is necessary.
       elseif (layout_provides_path($path) === NULL) {
-        dpm('onei');
         if (!isset($this->additional_menu_items[$path])) {
-          dpm('threei');
           $menu_item_settings = array(
             'path' => $path,
             'name' => $this->name . '_' . system_transliterate_machine_name($path),
@@ -772,12 +761,10 @@ class Layout {
           $this->additional_menu_items[$path] = new LayoutMenuItem($menu_item_settings);
         }
         else {
-          dpm('fouri');
           $this->additional_menu_items[$path]->path = $path;
         }
       }
       else {
-        dpm('twoi');
         if ($this->additional_menu_items[$path]) {
           $this->additional_menu_items[$path]->delete();
           unset($this->additional_menu_items[$path]);
@@ -933,7 +920,6 @@ class Layout {
     // Always rebuild additional_paths contexts to prevent stale contexts on
     // the layout settings form.
     foreach ($this->contexts as $key => $ap) {
-      dpm('why');
       if (substr($key, 0, 3) === 'ap_') {
         unset($this->contexts[$key]);
       }
@@ -947,7 +933,6 @@ class Layout {
         }
       }
     }
-    dpm($this, 'lc');
 
     // Load contexts from relationships.
     if ($include_types & LayoutContext::USAGE_TYPE_RELATIONSHIP) {

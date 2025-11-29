@@ -53,7 +53,6 @@ Backdrop.behaviors.layoutConfigure = {
     if ($form.length && Backdrop.ajax) {
       var ajax = Backdrop.ajax['edit-path-update'];
       var updateContexts = function() {
-        console.log('update triggered');
         // Cancel existing AJAX requests and start a new one.
         for (var n = 0; n < ajax.currentRequests.length; n++) {
           ajax.currentRequests[n].abort();
@@ -61,14 +60,14 @@ Backdrop.behaviors.layoutConfigure = {
         }
         $('input[data-layout-path-update]').triggerHandler('mousedown');
 
-      // (Re)install placeholder examples toggle handler.
-      $('a.layout-placeholder-examples-toggle').on('click', examples_toggle_handler);
-      $('a.layout-additional-paths-examples-toggle').on('click', examples_toggle_handler);
+        // (Re)install placeholder examples toggle handler.
+        $('a.layout-placeholder-examples-toggle').on('click', examples_toggle_handler);
+        $('a.layout-additional-paths-examples-toggle').on('click', examples_toggle_handler);
 
       };
       // Update contexts after a slight typing delay.
       var timer = 0;
-      $('input[name="path"], input[data-layout-additional-path]').on('keyup', function(e) {
+      $('input.data-layout-additional-path, input[name="path"]').off('keyup').on('keyup', function(e) {
         clearTimeout(timer);
         timer = setTimeout(updateContexts, 200);
       });
