@@ -26,7 +26,7 @@ $database = array(
  *
  * By default configuration will be stored in the filesystem, using the
  * directories specified in the $config_directories setting. Optionally,
- * configuration can be store in the database instead of the filesystem.
+ * configuration can be stored in the database instead of the filesystem.
  * Switching this option on a live site is not currently supported without some
  * manual work.
  *

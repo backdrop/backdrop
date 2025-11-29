@@ -915,7 +915,7 @@ function installer_manager_download_project($url, $is_installer = FALSE) {
 
     if ($is_installer) {
       // Initialize some variables in the Batch API $context array.
-      /* @var Updater $updater */
+      /** @var Updater $updater */
       $updater = new $updater_name($project_realpath);
 
       try {

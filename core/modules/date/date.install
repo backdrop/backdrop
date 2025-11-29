@@ -13,6 +13,7 @@ function date_field_schema($field) {
     case 'datestamp':
       $db_columns['value'] = array(
         'type' => 'int',
+        'size' => 'big',
         'not null' => FALSE,
         'sortable' => TRUE,
         'views' => TRUE,
@@ -116,6 +117,26 @@ function date_update_1002() {
       db_delete('field_revision_' . $field_name)
         ->isNull($field_name . '_value')
         ->execute();
+    }
+  }
+}
+
+/**
+ * Update datestamp field schema to use 'big' integers.
+ */
+function date_update_1003() {
+  $fields = field_read_fields(array('type' => 'datestamp'));
+  foreach ($fields as $field_name => $field) {
+    $timestamp_columns = array_intersect_key($field['columns'], backdrop_map_assoc(array('value', 'value2')));
+    foreach ($timestamp_columns as $column_name => $schema) {
+      $schema['size'] = 'big';
+      $column = $field_name . '_' . $column_name;
+      if (db_table_exists('field_data_' . $field_name)) {
+        db_change_field('field_data_' . $field_name, $column, $column, $schema);
+      }
+      if (db_table_exists('field_revision_' . $field_name)) {
+        db_change_field('field_revision_' . $field_name, $column, $column, $schema);
+      }
     }
   }
 }

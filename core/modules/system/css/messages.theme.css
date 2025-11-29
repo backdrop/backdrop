@@ -70,7 +70,7 @@
   color: #234600;
 }
 div.messages.status:before {
-  background-image: url(../../../misc/message-32-ok.png);
+  background-image: url(../../../misc/message-ok.svg);
   background-color: #cfde56;
 }
 
@@ -82,7 +82,7 @@ div.messages.status:before {
   color: #525252;
 }
 div.messages.warning:before {
-  background-image: url(../../../misc/message-32-warning.png);
+  background-image: url(../../../misc/message-warning.svg);
   background-color: #fce400;
 }
 
@@ -94,7 +94,7 @@ div.messages.warning:before {
   color: #9c1d0d;
 }
 div.messages.error:before {
-  background-image: url(../../../misc/message-32-error.png);
+  background-image: url(../../../misc/message-error.svg);
   background-color: #ee3d23;
 }
 
@@ -106,22 +106,8 @@ div.messages.error:before {
   color: #004570;
 }
 div.messages.info:before {
-  background-image: url(../../../misc/message-32-info.png);
+  background-image: url(../../../misc/message-info.svg);
   background-color: #0074bd;
-}
-
-/* SVG overrides */
-div.messages.status:before {
-  background-image: linear-gradient(transparent, transparent), url(../../../misc/message-ok.svg);
-}
-div.messages.warning:before {
-  background-image: linear-gradient(transparent, transparent), url(../../../misc/message-warning.svg);
-}
-div.messages.error:before {
-  background-image: linear-gradient(transparent, transparent), url(../../../misc/message-error.svg);
-}
-div.messages.info:before {
-  background-image: linear-gradient(transparent, transparent), url(../../../misc/message-info.svg);
 }
 
 /* Dismiss buttons */
