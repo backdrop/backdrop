@@ -3094,7 +3094,7 @@ function _backdrop_error_handler($error_level, $message, $filename, $line) {
  * @param Exception|Error $exception
  *   The exception object that was thrown.
  */
-function _backdrop_exception_handler(Exception|Error $exception) {
+function _backdrop_exception_handler($exception) {
   require_once BACKDROP_ROOT . '/core/includes/errors.inc';
 
   try {
