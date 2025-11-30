@@ -245,7 +245,7 @@ class Layout {
     );
 
     // Load additional paths..
-    $this->additional_paths = $this->settings['additional_paths']?:array();
+    $this->additional_paths = isset($this->settings['additional_paths'])? $this->settings['additional_paths'] : array();
 
     // Adjust for the renaming of "layout" to "layout_template".
     // See https://github.com/backdrop/backdrop-issues/issues/998
