@@ -987,16 +987,16 @@ function layout_settings_form_validate(&$form, &$form_state) {
     $num_placeholders = count(_layout_placeholder_positions($path));
     //$additional_paths = explode("\n", $form_state['values']['additional_paths']);
     foreach ($form_state['values']['additional_paths'] as $key => $additional_path){
-      $additional_path = trim($additional_path);
+      ///$additional_path = trim($additional_path);
       if (!empty($additional_path)) {
         $layout_provides_path = layout_provides_path($additional_path);
         $router_item = menu_get_item($additional_path);
         $router_item_path = $router_item ? (string) $router_item['path'] : '';
         $num_additional_placeholders = count(_layout_placeholder_positions($additional_path));
         $alias = NULL;
-        if (strpos($additional_path, '%') === FALSE) {
-          $alias = db_query('SELECT * FROM {url_alias} WHERE alias = :path', array(':path' => $additional_path))->fetchObject();
-        }
+        // if (strpos($additional_path, '%') === FALSE) {
+          // $alias = db_query('SELECT * FROM {url_alias} WHERE alias = :path', array(':path' => $additional_path))->fetchObject();
+        // }
         switch (TRUE) {
           case ($num_placeholders != $num_additional_placeholders):
 /*
@@ -1045,9 +1045,9 @@ function layout_settings_form_validate(&$form, &$form_state) {
               )
             ));
             break;
- */
           case (_layout_set_message_on_path_error($form, 'additional_paths', $additional_path)):
             break;
+ */
           default:
             $form_state['additional_paths'][$key] = $additional_path;
             break;
