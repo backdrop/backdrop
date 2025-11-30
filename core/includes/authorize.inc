@@ -167,7 +167,7 @@ function _authorize_filetransfer_connection_settings($backend) {
  *
  * @param array $element
  *   Reference to the Form API form element we're operating on.
- * @param string $key
+ * @param string|null $key
  *   The key for our current form element, if any.
  * @param array $defaults
  *   The default settings for the file transfer backend we're operating on.
