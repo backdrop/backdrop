@@ -985,7 +985,7 @@ function ajax_command_replace($selector, $html, $settings = NULL) {
  *   an #ajax form element then this value can be NULL.
  * @param string $html
  *   The data to use with the jQuery html() method.
- * @param array $settings
+ * @param array|null $settings
  *   An optional array of settings that will be used for this command only.
  *
  * @return array
@@ -993,7 +993,7 @@ function ajax_command_replace($selector, $html, $settings = NULL) {
  *
  * @see http://docs.jquery.com/Attributes/html#val
  */
-function ajax_command_html($selector, $html, array $settings = NULL) {
+function ajax_command_html($selector, $html, ?array $settings = NULL) {
   return array(
     'command' => 'insert',
     'method' => 'html',
