@@ -11,7 +11,7 @@
  * Classes implementing BackdropCacheInterface can register themselves both as a
  * default implementation and for specific bins.
  *
- * @param $bin
+ * @param string $bin
  *   The cache bin for which the cache object should be returned, defaults to
  *   'cache'.
  *
@@ -52,7 +52,7 @@ function cache($bin = 'cache') {
  *   "update", "views", and "views_data". Bin names may include the prefix of
  *   "cache_", but it is stripped out before execution.
  *
- * @return
+ * @return array|object|false
  *   The cache or FALSE on failure.
  */
 function cache_get($cid, $bin = 'cache') {
@@ -62,17 +62,17 @@ function cache_get($cid, $bin = 'cache') {
 /**
  * Returns data from the persistent cache when given an array of cache IDs.
  *
- * @param $cids
+ * @param array $cids
  *   An array of cache IDs for the data to retrieve. This is passed by
  *   reference, and will have the IDs successfully returned from cache
  *   removed.
- * @param $bin
+ * @param string $bin
  *   The cache bin from which data should be retrieved. Valid core values are
  *   "cache", "bootstrap", "field", "filter", "form", "menu", "page", "path",
  *   "update", "views", and "views_data". Bin names may include the prefix of
  *   "cache_", but it is stripped out before execution
  *
- * @return
+ * @return array
  *   An array of the items successfully returned from cache indexed by cid.
  */
 function cache_get_multiple(array &$cids, $bin = 'cache') {
@@ -201,7 +201,7 @@ function cache_clear_all($cid = NULL, $bin = NULL, $wildcard = FALSE) {
  * @param string $bin
  *   The cache bin to check.
  *
- * @return
+ * @return bool
  *   TRUE if the cache bin specified is empty.
  */
 function cache_is_empty($bin) {
@@ -256,7 +256,7 @@ interface BackdropCacheInterface {
    * @param string $cid
    *   The cache ID of the data to retrieve.
    *
-   * @return
+   * @return array|object|false
    *   The cache or FALSE on failure.
    */
   function get($cid);
@@ -269,7 +269,7 @@ interface BackdropCacheInterface {
    *   reference, and will have the IDs successfully returned from cache
    *   removed.
    *
-   * @return
+   * @return array
    *   An array of the items successfully returned from cache indexed by cid.
    */
    function getMultiple(array &$cids);
@@ -312,7 +312,7 @@ interface BackdropCacheInterface {
   /**
    * Deletes multiple items from the cache.
    *
-   * @param $cids
+   * @param array $cids
    *   An array of $cids to delete.
    */
   function deleteMultiple(Array $cids);
@@ -341,7 +341,7 @@ interface BackdropCacheInterface {
    * A cache bin is considered empty if it does not contain any valid data for
    * any cache ID.
    *
-   * @return
+   * @return bool
    *   TRUE if the cache bin specified is empty.
    */
   function isEmpty();
@@ -363,7 +363,7 @@ class BackdropNullCache implements BackdropCacheInterface {
   /**
    * Constructs a BackdropNullCache object.
    *
-   * @param $bin
+   * @param string $bin
    *   The cache bin for which the object is created.
    */
   function __construct($bin) {}
@@ -432,6 +432,10 @@ class BackdropNullCache implements BackdropCacheInterface {
  * cached data. Each cache bin corresponds to a database table by the same name.
  */
 class BackdropDatabaseCache implements BackdropCacheInterface {
+
+  /**
+   * @var string
+   */
   protected $bin;
 
   /**
@@ -496,10 +500,10 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
    * Checks that items are either permanent or did not expire, and unserializes
    * data as appropriate.
    *
-   * @param $cache
+   * @param array|object $cache
    *   An item loaded from BackdropCacheInterface::get() or BackdropCacheInterface::getMultiple().
    *
-   * @return stdClass|FALSE
+   * @return object|false
    *   The item with data unserialized as appropriate or FALSE if there is no
    *   valid item to load.
    */

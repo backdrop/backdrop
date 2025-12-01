@@ -311,7 +311,7 @@ function config_install_default_config($project, $config_name = NULL) {
 /**
  * Gets the name of config files provided by a module or theme.
  *
- * @param $project
+ * @param string $project
  *   The name of the project for which config names should be returned.
  *
  * @return string[]
@@ -747,6 +747,8 @@ class Config {
    * @param string $key
    *   The string that maps to a key with the configuration data.
    *
+   * @return mixed
+   *
    *   A key may be overridden at any level, for example if
    *   $key === 'foo.bar.key1', the matched value could be provided by an
    *   override from 'foo.bar.key1', 'foo.bar', or 'foo'. In settings.php any of
@@ -831,7 +833,7 @@ class Config {
    *   - 'context' (defaults to the empty context): The context the source string
    *     belongs to.
    *
-   * @return string|NULL
+   * @return string|null
    *   The translated data that was requested.
    *
    * @see t()
