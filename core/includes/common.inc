@@ -1988,7 +1988,7 @@ function _filter_xss_allowed_tags() {
  * Human-readable list of the default tags allowed by filter_xss(), for display
  * in help texts.
  *
- * @param string
+ * @return string
  */
 function _filter_xss_display_allowed_tags() {
   return '<' . implode('> <', _filter_xss_allowed_tags()) . '>';
@@ -2259,7 +2259,7 @@ function filter_xss_bad_protocol($string, $decode = TRUE) {
  *
  * @param string $title
  * @param string $link
- * @param string description
+ * @param string $description
  * @param string $items
  * @param string|null $langcode
  * @param array $args
@@ -3990,7 +3990,7 @@ function backdrop_aggregate_css(&$css_groups) {
  * this function to work correctly even if modules have implemented custom
  * logic for grouping and aggregating files.
  *
- * @param array $element
+ * @param array $elements
  *   A render array containing:
  *   - '#items': The CSS items as returned by backdrop_add_css() and altered by
  *     backdrop_get_css().
@@ -4454,7 +4454,7 @@ function backdrop_clear_css_cache() {
  * - backdrop_clear_css_cache()
  * - backdrop_clear_js_cache()
  *
- * @param string $string
+ * @param string $uri
  */
 function backdrop_delete_file_if_stale($uri) {
   // Default stale file threshold is 30 days.
@@ -5044,7 +5044,7 @@ function backdrop_get_js($scope = 'header', $javascript = NULL, $skip_alter = FA
  * this function to work correctly even if modules have implemented custom
  * logic for grouping and aggregating files.
  *
- * @param array $element
+ * @param array $elements
  *   A render array containing:
  *   - #items: The JavaScript items as returned by backdrop_add_js() and
  *     altered by backdrop_get_js().
@@ -6669,7 +6669,7 @@ function backdrop_pre_render_conditional_comments($elements) {
  *
  * Doing so during pre_render gives modules a chance to alter the link parts.
  *
- * @param array $elements
+ * @param array $element
  *   A structured array whose keys form the arguments to l():
  *   - #title: The link text to pass as argument to l().
  *   - #href: The URL path component to pass as argument to l().
