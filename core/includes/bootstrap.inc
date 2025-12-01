@@ -4299,11 +4299,12 @@ function backdrop_autoload($class) {
  * }
  * @endcode
  *
- * @param string $name
+ * @param string|null $name
  *   Globally unique name for the variable. For a function with only one static,
  *   variable, the function name (e.g. via the PHP magic __FUNCTION__ constant)
  *   is recommended. For a function with multiple static variables add a
  *   distinguishing suffix to the function name for each one.
+ *   Note that NULL is for internal use in backdrop_static_reset() only.
  * @param mixed $default_value
  *   Optional default value.
  * @param bool $reset
