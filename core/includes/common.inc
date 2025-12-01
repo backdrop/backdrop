@@ -2294,7 +2294,7 @@ function format_rss_channel($title, $link, $description, $items, $langcode = NUL
  *
  * @param string $title
  * @param string $link
- * @param string description
+ * @param string $description
  * @param array $args
  *
  * @return string
