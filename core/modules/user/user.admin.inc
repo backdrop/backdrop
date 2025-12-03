@@ -464,6 +464,13 @@ function user_login_settings_submit($form, &$form_state) {
 /**
  * Menu callback: administer permissions.
  *
+ * @param array $form
+ *   Form API form basic definition.
+ * @param array $form_state
+ *   Form API form state definition.
+ * @param string|null $role_name
+ *   Name of a role to edit only this role's permissions, or null for all.
+ *
  * @ingroup forms
  * @see user_admin_permissions_submit()
  * @see theme_user_admin_permissions()
@@ -472,7 +479,7 @@ function user_admin_permissions($form, $form_state, $role_name = NULL) {
 
   // Retrieve role names for columns.
   $roles = user_roles(FALSE, NULL, TRUE);
-  if (isset($roles[$role_name])) {
+  if ($role_name && isset($roles[$role_name])) {
     $roles = array($role_name => $roles[$role_name]);
   }
   $form['roles'] = array(

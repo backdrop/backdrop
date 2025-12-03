@@ -397,3 +397,13 @@ tr.admin-bar-tweak-permissions-processed td.module {
 #admin-bar .admin-bar-alert .error-label {
   display: none;
 }
+
+/* On small screens, expand children straight down instead of side-to-side. */
+@media only screen and (max-width: 500px) {
+  @media (hover: none) {
+    #admin-bar-menu .dropdown.expanded .dropdown.expanded {
+      position: inherit;
+      margin: 0;
+    }
+  }
+}
