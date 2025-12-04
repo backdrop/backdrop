@@ -1205,8 +1205,8 @@ function layout_load_multiple($layout_names, $skip_menu_items = FALSE) {
         if (isset($menu_items[$additional_path])) {
           $loaded_layouts[$layout_name]->additional_menu_items[$additional_path] = $menu_items[$additional_path];
         }
-        elseif ($menu_item = layout_menu_item_load_multiple_by_path($additional_path)) {
-          $loaded_layouts[$layout_name]->additional_menu_items[$additional_path] = $menu_item;
+        elseif ($additional_path_menu_item = layout_menu_item_load_multiple_by_path($additional_path)) {
+          $loaded_layouts[$layout_name]->additional_menu_items[$additional_path] = $additional_path_menu_item;
         }
       }
     }
