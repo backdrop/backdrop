@@ -1709,7 +1709,7 @@ function tempstore_get(string $collection, string $name) {
  * @param int $expire
  *   The UNIX timestamp at which this value can be deleted.
  */
-function tempstore_set(string $collection, string $name, array|object $value, int $expire) {
+function tempstore_set(string $collection, string $name, $value, int $expire) {
   tempstore_clear($collection, $name);
   db_insert('tempstore')
     ->fields(array(
@@ -4931,7 +4931,7 @@ function backdrop_add_js($data = NULL, $options = NULL) {
  * @see backdrop_get_js()
  * @see backdrop_add_js()
  */
-function backdrop_js_defaults(string|array|null $data = NULL) {
+function backdrop_js_defaults($data = NULL) {
   return array(
     'type' => 'file',
     'group' => JS_DEFAULT,
@@ -5935,13 +5935,13 @@ function backdrop_clear_js_cache() {
  *   readable by humans, or emulates this functionality if running an older
  *   version of PHP.
  *
- * @return string|FALSE
+ * @return string|false
  *   The given $var encoded as a JSON string or FALSE on failure.
  *
  * @see backdrop_json_decode()
  * @ingroup php_wrappers
  */
-function backdrop_json_encode($var, $pretty_print = FALSE) {
+function backdrop_json_encode($var, bool $pretty_print = FALSE) {
   if ($pretty_print) {
     return json_encode($var, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
   }
@@ -6052,7 +6052,7 @@ function backdrop_json_format(string $json) {
  *
  * @deprecated since 1.22.0
  */
-function backdrop_json_decode_unicode(array|string $json) {
+function backdrop_json_decode_unicode($json) {
   watchdog_deprecated_function('common', __FUNCTION__);
   // Convert escaped characters, such as \u00e9 to the unescaped version (é).
   // See http://stackoverflow.com/questions/2934563/how-to-decode-unicode-escape-sequences-like-u00ed-to-proper-utf-8-encoded-cha
@@ -6871,7 +6871,7 @@ function backdrop_pre_render_dropbutton($element) {
  * @return string
  *   The rendered full HTML page.
  */
-function backdrop_render_page(string|array $page) {
+function backdrop_render_page($page) {
   return theme('page', array('page' => render($page)));
 }
 
@@ -7104,7 +7104,7 @@ function backdrop_render_children(array &$element, ?array $children_keys = NULL)
  * @see show()
  * @see hide()
  */
-function render(array|string|null &$element) {
+function render(&$element) {
   if (is_array($element)) {
     show($element);
     return backdrop_render($element);
@@ -8521,7 +8521,7 @@ function backdrop_schema_fields_sql(string $table, ?string $prefix = NULL) {
  *   If the record insert or update failed, returns FALSE. If it succeeded,
  *   returns SAVED_NEW or SAVED_UPDATED, depending on the operation performed.
  */
-function backdrop_write_record(string $table, object|array &$record, string|array $primary_keys = array()) {
+function backdrop_write_record(string $table, &$record, $primary_keys = array()) {
   // Standardize $primary_keys to an array.
   if (is_string($primary_keys)) {
     $primary_keys = array($primary_keys);
