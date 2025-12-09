@@ -1542,7 +1542,7 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
   /**
    * {@inheritdoc}
    */
-  public function encode($data) {
+  public function encode(array $data) {
     $contents = backdrop_json_encode($data, TRUE);
     if ($contents === FALSE) {
       throw new ConfigStorageException(t('The configuration string could not be parsed.'));
@@ -1802,7 +1802,7 @@ class ConfigFileStorage implements ConfigStorageInterface {
   /**
    * {@inheritdoc}
    */
-  public function encode($data) {
+  public function encode(array $data) {
     $contents = backdrop_json_encode($data, TRUE);
     if ($contents === FALSE) {
       throw new ConfigStorageException(t('The configuration string could not be parsed.'));
