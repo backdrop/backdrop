@@ -451,7 +451,7 @@ abstract class BackdropCacheArray implements ArrayAccess {
    * @param bool $lock
    *   Whether to acquire a lock before writing to cache.
    */
-  protected function set($data, $lock = TRUE) {
+  protected function set(array $data, $lock = TRUE) {
     // Lock cache writes to help avoid stampedes.
     // To implement locking for cache misses, override __construct().
     $lock_name = $this->cid . ':' . $this->bin;
@@ -869,7 +869,6 @@ function backdrop_settings_initialize() {
   // - $database as an simple array.
   // - $databases as a multi-level nested array.
   // Both the simplified syntaxes are converted to the larger $databases array.
-
   // First option: the database connection settings have been provided in the
   // form of a connection string. This was the default format in versions prior
   // to Backdrop 1.30.0:
@@ -943,7 +942,7 @@ function backdrop_settings_initialize() {
       foreach ($server_settings as $key => $value) {
         // One level of depth should be enough for $settings and $databases.
         if ($key == 'settings') {
-          foreach($value as $settings_key => $settings_value) {
+          foreach ($value as $settings_key => $settings_value) {
             $settings[$settings_key] = $settings_value;
           }
         }
@@ -1467,7 +1466,8 @@ function state_del(string $name) {
 function backup_get_backup_directory() {
   $backup_directory = settings_get('backup_directory', '');
 
-  // For test runs, specify a specific sub-directory. See BackdropWebTestBase::setUp().
+  // For test runs, specify a specific sub-directory.
+  // See BackdropWebTestBase::setUp().
   if ($test_prefix = backdrop_valid_test_ua()) {
     $backup_directory = conf_path() . '/files/simpletest/' . substr($test_prefix, 10) . '/backups';
   }
@@ -1786,6 +1786,7 @@ function backdrop_page_header() {
  * waiting for PHP to finish execution.
  *
  * @param int $content_length
+ *   The size, in bytes, of the message body.
  */
 function backdrop_set_length_headers($content_length) {
   // Set the total content length.
@@ -1808,6 +1809,7 @@ function backdrop_set_length_headers($content_length) {
  * response is sent.
  *
  * @param object $cache
+ *   A cache entry object to be used in the response.
  */
 function backdrop_serve_page_from_cache(object $cache) {
   $page_content = $cache->data['body'];
@@ -2829,12 +2831,13 @@ function backdrop_array_merge_deep() {
  * - backdrop_array_merge_deep_array($arrays_to_merge);
  *
  * @param array $arrays
+ *   Arrays to be merged.
  *
  * @return array
  *
  * @see backdrop_array_merge_deep()
  */
-function backdrop_array_merge_deep_array($arrays) {
+function backdrop_array_merge_deep_array(array $arrays) {
   $result = array();
 
   foreach ($arrays as $array) {
@@ -3037,7 +3040,8 @@ function backdrop_bootstrap_is_installed() {
       // $GLOBALS['databases'] variable.
       Database::getConnection('default');
     }
-    catch (Exception $e) {}
+    catch (Exception $e) {
+    }
   }
 
   if (empty($GLOBALS['databases'])) {
@@ -3363,7 +3367,8 @@ function _backdrop_bootstrap_variables() {
     }
   }
 
-  // Load variables from the database, but do not overwrite variables set in settings.php.
+  // Load variables from the database, but do not overwrite variables set in
+  // settings.php.
   $conf = variable_initialize(isset($conf) ? $conf : array());
 }
 
@@ -3531,8 +3536,10 @@ function backdrop_valid_test_ua() {
  * Generates a user agent string with a HMAC and timestamp for simpletest.
  *
  * @param string $prefix
+ *   String to be prefixed to the user agent string.
  *
  * @return string
+ *   User agent string.
  */
 function backdrop_generate_test_ua($prefix) {
   static $key;
@@ -3840,7 +3847,8 @@ function language_default() {
     try {
       $default_langcode = config_get('system.core', 'language_default');
     }
-    catch (ConfigException $e) {}
+    catch (ConfigException $e) {
+    }
     if (empty($default_langcode)) {
       $default_langcode = 'en';
     }
@@ -4534,7 +4542,8 @@ function _backdrop_shutdown_function() {
     try {
       watchdog('system', $message, array(), WATCHDOG_CRITICAL);
     }
-    catch (Exception $e) {}
+    catch (Exception $e) {
+    }
   }
 }
 
