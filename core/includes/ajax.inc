@@ -1018,7 +1018,7 @@ function ajax_command_html($selector, $html, ?array $settings = NULL) {
  *   an #ajax form element then this value can be NULL.
  * @param string $html
  *   The data to use with the jQuery prepend() method.
- * @param array $settings
+ * @param array|null $settings
  *   An optional array of settings that will be used for this command only.
  *
  * @return array
@@ -1051,7 +1051,7 @@ function ajax_command_prepend($selector, $html, ?array $settings = NULL) {
  *   an #ajax form element then this value can be NULL.
  * @param string $html
  *   The data to use with the jQuery append() method.
- * @param array $settings
+ * @param array|null $settings
  *   An optional array of settings that will be used for this command only.
  *
  * @return array
@@ -1084,7 +1084,7 @@ function ajax_command_append($selector, $html, ?array $settings = NULL) {
  *   an #ajax form element then this value can be NULL.
  * @param string $html
  *   The data to use with the jQuery after() method.
- * @param array $settings
+ * @param array|null $settings
  *   An optional array of settings that will be used for this command only.
  *
  * @return array
@@ -1117,7 +1117,7 @@ function ajax_command_after($selector, $html, ?array $settings = NULL) {
  *   an #ajax form element then this value can be NULL.
  * @param string $html
  *   The data to use with the jQuery before() method.
- * @param array $settings
+ * @param array|null $settings
  *   An optional array of settings that will be used for this command only.
  *
  * @return array
