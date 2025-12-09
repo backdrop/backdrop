@@ -24,7 +24,8 @@
  *
  */
 function config($config_file, $type = 'active') {
-  // Use the advanced backdrop_static() pattern, since this is called very often.
+  // Use the advanced backdrop_static() pattern, since this is called very
+  // often.
   static $backdrop_static_fast;
   if (!isset($backdrop_static_fast)) {
     $backdrop_static_fast['loaded_configs'] = &backdrop_static(__FUNCTION__);
@@ -120,7 +121,8 @@ function config_get($config_file, $option = NULL) {
 }
 
 /**
- * A shortcut function to load and retrieve a single translated value from a config file.
+ * A shortcut function to load and retrieve a single translated value from a
+ * config file.
  *
  * @param string $config_file
  *   The name of the configuration object to retrieve. The name corresponds to
@@ -141,14 +143,14 @@ function config_get($config_file, $option = NULL) {
  *     belongs to.
  *
  * @return string
- *   The translated contents of the requested config option. Returns default if no
- *   translation is found. Returns NULL if the specified option was not found in
- *   the file at all or if not a string.
+ *   The translated contents of the requested config option. Returns default if
+ *   no translation is found. Returns NULL if the specified option was not found
+ *   in the file at all or if not a string.
  *
  * @see t()
  * @see config_get()
  */
-function config_get_translated($config_file, $option = NULL, $args = array(), $options = array()) {
+function config_get_translated($config_file, $option = NULL, array $args = array(), array $options = array()) {
   $config = config($config_file);
   return $config->getTranslated($option, $args, $options);
 }
@@ -196,7 +198,7 @@ function config_set($config_file, $option, $value) {
  * @param array $options
  *   A keyed array of configuration option names mapping their values.
  */
-function config_set_multiple($config_file, $options) {
+function config_set_multiple($config_file, array $options) {
   $config = config($config_file);
   $config->setMultiple($options);
   $config->save();
@@ -264,7 +266,7 @@ function config_get_names_with_prefix($prefix, $type = 'active') {
  * @return array
  *   An array containing matching configuration objects.
  */
-function config_load_multiple($names, $type = 'active') {
+function config_load_multiple(array $names, $type = 'active') {
   $storage = config_get_config_storage($type);
   return $storage->readMultiple($names);
 }
@@ -820,8 +822,9 @@ class Config {
    *   A key of 'foo.bar' would return the string 'baz'. However, a key of 'foo'
    *   would return array('bar' => 'baz').
    *   If no key is specified, then an empty string is returned.
-   *   If the key is not 'translatable' key then the original string is returned.
-   *   If the key's value is not a string then an empty string is returned.
+   *   If the key is not 'translatable' key then the original string is
+   *   returned. If the key's value is not a string then an empty string is
+   *   returned.
    *
    * @param array $args
    *   An associative array of replacements to make. Replacements are made in
@@ -830,8 +833,8 @@ class Config {
    *   An associative array of additional options, with the following elements:
    *   - 'langcode' (defaults to the current language): The language code to
    *     translate to a language other than what is used to display the page.
-   *   - 'context' (defaults to the empty context): The context the source string
-   *     belongs to.
+   *   - 'context' (defaults to the empty context): The context the source
+   *     string belongs to.
    *
    * @return string|null
    *   The translated data that was requested.
@@ -839,7 +842,7 @@ class Config {
    * @see t()
    * @see get()
    */
-  public function getTranslated($key = '', $args = array(), $options = array()) {
+  public function getTranslated($key = '', array $args = array(), array $options = array()) {
     if (empty($key)) {
       return NULL;
     }
@@ -918,7 +921,7 @@ class Config {
    * @return Config
    *   The configuration object.
    */
-  public function set($key, $value, $include_overridden_value = FALSE) {
+  public function set($key, $value, bool $include_overridden_value = FALSE) {
     // If setting a value that matches an override-provided one, don't actually
     // write it to config.
     $override_value = $this->getOverride($key);
@@ -961,7 +964,7 @@ class Config {
    * @return Config
    *   The configuration object.
    */
-  public function setMultiple($options) {
+  public function setMultiple(array $options) {
     foreach ($options as $key => $value) {
       $this->set($key, $value);
     }
@@ -1141,7 +1144,7 @@ interface ConfigStorageInterface {
   /**
    * Reads configuration data from the storage.
    *
-   * @param array $name
+   * @param array $names
    *   List of names of the configuration objects to load.
    *
    * @throws ConfigStorageException
@@ -1211,7 +1214,7 @@ interface ConfigStorageInterface {
    * @return string
    *   The encoded configuration data.
    */
-  public function encode($data);
+  public function encode(array $data);
 
   /**
    * Decodes configuration data from the storage-specific format.
@@ -1350,8 +1353,10 @@ class ConfigDatabaseStorage implements ConfigStorageInterface {
    *   string has a format of db://<database connection>/<database table>.
    *
    *   Examples:
+   *   @code
    *   - db://default/config_active
    *   - db://second_database/config_staging
+   *   @endcode
    *
    * @throws ConfigStorageException
    */
@@ -1864,7 +1869,10 @@ class ConfigFileStorage implements ConfigStorageInterface {
       }
     }
     catch (\Exception $e) {
-      watchdog('config', 'Could not extract the archive @uri: @error', array('@uri' => $file_uri, '@error' => $e->getMessage()), WATCHDOG_ERROR);
+      watchdog('config', 'Could not extract the archive @uri: @error', array(
+        '@uri' => $file_uri,
+        '@error' => $e->getMessage(),
+      ), WATCHDOG_ERROR);
       throw new ConfigStorageException($e->getMessage(), 0, $e);
     }
     return TRUE;

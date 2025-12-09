@@ -70,7 +70,7 @@ function cache_get($cid, $bin = 'cache') {
  *   The cache bin from which data should be retrieved. Valid core values are
  *   "cache", "bootstrap", "field", "filter", "form", "menu", "page", "path",
  *   "update", "views", and "views_data". Bin names may include the prefix of
- *   "cache_", but it is stripped out before execution
+ *   "cache_", but it is stripped out before execution.
  *
  * @return array
  *   An array of the items successfully returned from cache indexed by cid.
@@ -110,7 +110,7 @@ function cache_get_multiple(array &$cids, $bin = 'cache') {
  *   The cache bin in which data should be stored. Valid core values are
  *   "cache", "bootstrap", "field", "filter", "form", "menu", "page", "path",
  *   "update", "views", and "views_data". Bin names may include the prefix of
- *   "cache_", but it is stripped out before execution
+ *   "cache_", but it is stripped out before execution.
  * @param int $expire
  *   (optional) Controls the maximum lifetime of this cache entry. Note that
  *   caches might be subject to clearing at any time, so this setting does not
@@ -259,7 +259,7 @@ interface BackdropCacheInterface {
    * @return array|object|false
    *   The cache or FALSE on failure.
    */
-  function get($cid);
+  public function get($cid);
 
   /**
    * Returns data from the persistent cache when given an array of cache IDs.
@@ -272,7 +272,7 @@ interface BackdropCacheInterface {
    * @return array
    *   An array of the items successfully returned from cache indexed by cid.
    */
-   function getMultiple(array &$cids);
+  public function getMultiple(array &$cids);
 
   /**
    * Stores data in the persistent cache.
@@ -299,15 +299,15 @@ interface BackdropCacheInterface {
    *   - A Unix timestamp: Indicates that the item should be kept at least until
    *     the given time, after which it behaves like CACHE_TEMPORARY.
    */
-  function set($cid, $data, $expire = CACHE_PERMANENT);
+  public function set($cid, $data, $expire = CACHE_PERMANENT);
 
   /**
    * Deletes an item from the cache.
    *
    * @param string $cid
-   *    The cache ID to delete.
+   *   The cache ID to delete.
    */
-  function delete($cid);
+  public function delete($cid);
 
   /**
    * Deletes multiple items from the cache.
@@ -315,7 +315,7 @@ interface BackdropCacheInterface {
    * @param array $cids
    *   An array of $cids to delete.
    */
-  function deleteMultiple(Array $cids);
+  public function deleteMultiple(array $cids);
 
   /**
    * Deletes items from the cache using a wildcard prefix.
@@ -323,17 +323,17 @@ interface BackdropCacheInterface {
    * @param string $prefix
    *   A wildcard prefix.
    */
-  function deletePrefix($prefix);
+  public function deletePrefix($prefix);
 
   /**
    * Flushes all cache items in a bin.
    */
-  function flush();
+  public function flush();
 
   /**
    * Performs garbage collection on a cache bin. Removing expired items.
    */
-  function garbageCollection();
+  public function garbageCollection();
 
   /**
    * Checks if a cache bin is empty.
@@ -344,7 +344,7 @@ interface BackdropCacheInterface {
    * @return bool
    *   TRUE if the cache bin specified is empty.
    */
-  function isEmpty();
+  public function isEmpty();
 }
 
 /**
@@ -366,61 +366,61 @@ class BackdropNullCache implements BackdropCacheInterface {
    * @param string $bin
    *   The cache bin for which the object is created.
    */
-  function __construct($bin) {}
+  public function __construct($bin) {}
 
   /**
    * Implements BackdropCacheInterface::get().
    */
-  function get($cid) {
+  public function get($cid) {
     return FALSE;
   }
 
   /**
    * Implements BackdropCacheInterface::getMultiple().
    */
-  function getMultiple(array &$cids) {
+  public function getMultiple(array &$cids) {
     return array();
   }
 
   /**
    * Implements BackdropCacheInterface::set().
    */
-  function set($cid, $data, $expire = CACHE_PERMANENT) {}
+  public function set($cid, $data, $expire = CACHE_PERMANENT) {}
 
   /**
    * Implements BackdropCacheInterface::delete().
    */
-  function delete($cid) {}
+  public function delete($cid) {}
 
   /**
    * Implements BackdropCacheInterface::deleteMultiple().
    */
-  function deleteMultiple(array $cids) {}
+  public function deleteMultiple(array $cids) {}
 
   /**
    * Implements BackdropCacheInterface::deletePrefix().
    */
-  function deletePrefix($prefix) {}
+  public function deletePrefix($prefix) {}
 
   /**
    * Implements BackdropCacheInterface::flush().
    */
-  function flush() {}
+  public function flush() {}
 
   /**
    * Implements BackdropCacheInterface::expire().
    */
-  function expire() {}
+  public function expire() {}
 
   /**
    * Implements BackdropCacheInterface::garbageCollection().
    */
-  function garbageCollection() {}
+  public function garbageCollection() {}
 
   /**
    * Implements BackdropCacheInterface::isEmpty().
    */
-  function isEmpty() {
+  public function isEmpty() {
     return TRUE;
   }
 }
@@ -428,8 +428,9 @@ class BackdropNullCache implements BackdropCacheInterface {
 /**
  * Defines a default cache implementation.
  *
- * This is Backdrop's default cache implementation. It uses the database to store
- * cached data. Each cache bin corresponds to a database table by the same name.
+ * This is Backdrop's default cache implementation. It uses the database to
+ * store cached data. Each cache bin corresponds to a database table by the same
+ * name.
  */
 class BackdropDatabaseCache implements BackdropCacheInterface {
 
@@ -441,7 +442,7 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
   /**
    * Constructs a new BackdropDatabaseCache object.
    */
-  function __construct($bin) {
+  public function __construct($bin) {
     // All cache tables should be prefixed with 'cache_', except for the
     // default 'cache' bin.
     if ($bin != 'cache') {
@@ -458,7 +459,7 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
   /**
    * Implements BackdropCacheInterface::get().
    */
-  function get($cid) {
+  public function get($cid) {
     $cids = array($cid);
     $cache = $this->getMultiple($cids);
     return reset($cache);
@@ -467,7 +468,7 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
   /**
    * Implements BackdropCacheInterface::getMultiple().
    */
-  function getMultiple(array &$cids) {
+  public function getMultiple(array &$cids) {
     try {
       // When serving cached pages, the overhead of using db_select() was found
       // to add around 30% overhead to the request. Since $this->bin is a
@@ -501,7 +502,8 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
    * data as appropriate.
    *
    * @param array|object $cache
-   *   An item loaded from BackdropCacheInterface::get() or BackdropCacheInterface::getMultiple().
+   *   An item loaded from BackdropCacheInterface::get() or
+   *   BackdropCacheInterface::getMultiple().
    *
    * @return object|false
    *   The item with data unserialized as appropriate or FALSE if there is no
@@ -522,7 +524,7 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
   /**
    * Implements BackdropCacheInterface::set().
    */
-  function set($cid, $data, $expire = CACHE_PERMANENT) {
+  public function set($cid, $data, $expire = CACHE_PERMANENT) {
     $fields = array(
       'serialized' => 0,
       'created' => REQUEST_TIME,
@@ -551,16 +553,16 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
   /**
    * Implements BackdropCacheInterface::delete().
    */
-  function delete($cid) {
+  public function delete($cid) {
     db_delete($this->bin)
       ->condition('cid', $cid)
       ->execute();
   }
 
   /**
- * Implements BackdropCacheInterface::deleteMultiple().
- */
-  function deleteMultiple(array $cids) {
+   * Implements BackdropCacheInterface::deleteMultiple().
+   */
+  public function deleteMultiple(array $cids) {
     // Delete in chunks when a large array is passed.
     do {
       db_delete($this->bin)
@@ -573,7 +575,7 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
   /**
    * Implements BackdropCacheInterface::deletePrefix().
    */
-  function deletePrefix($prefix) {
+  public function deletePrefix($prefix) {
     db_delete($this->bin)
       ->condition('cid', db_like($prefix) . '%', 'LIKE')
       ->execute();
@@ -582,14 +584,14 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
   /**
    * Implements BackdropCacheInterface::flush().
    */
-  function flush() {
+  public function flush() {
     db_truncate($this->bin)->execute();
   }
 
   /**
    * Implements BackdropCacheInterface::garbageCollection().
    */
-  function garbageCollection() {
+  public function garbageCollection() {
     db_delete($this->bin)
       ->condition('expire', CACHE_PERMANENT, '<>')
       ->condition('expire', REQUEST_TIME, '<')
@@ -599,7 +601,7 @@ class BackdropDatabaseCache implements BackdropCacheInterface {
   /**
    * Implements BackdropCacheInterface::isEmpty().
    */
-  function isEmpty() {
+  public function isEmpty() {
     $this->garbageCollection();
     $query = db_select($this->bin);
     $query->addExpression('1');
