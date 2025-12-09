@@ -424,7 +424,7 @@ abstract class BackdropCacheArray implements ArrayAccess {
    *   not, defaults to TRUE. When called with $persist = FALSE the offset will
    *   be un-flagged so that it will not be written at the end of the request.
    */
-  protected function persist(string $offset, bool $persist = TRUE) {
+  protected function persist($offset, bool $persist = TRUE) {
     $this->keysToPersist[$offset] = $persist;
   }
 
@@ -441,7 +441,7 @@ abstract class BackdropCacheArray implements ArrayAccess {
    * @return string|null
    *   The value of the offset, or NULL if no value was found.
    */
-  abstract protected function resolveCacheMiss(string $offset);
+  abstract protected function resolveCacheMiss($offset);
 
   /**
    * Writes a value to the persistent cache immediately.
