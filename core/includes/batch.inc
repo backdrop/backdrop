@@ -23,7 +23,7 @@
  * @return array|false
  *   An array representing the batch, or FALSE if no batch was found.
  */
-function batch_load(int $id) {
+function batch_load($id) {
   $batch = db_query("SELECT batch FROM {batch} WHERE bid = :bid AND token = :token", array(
     ':bid' => $id,
     ':token' => backdrop_get_token($id),
@@ -368,7 +368,7 @@ function _batch_process() {
  *
  * @see _batch_process()
  */
-function _batch_api_percentage(int $total, $current) {
+function _batch_api_percentage($total, $current) {
   if (!$total || $total == $current) {
     // If $total doesn't evaluate as true or is equal to the current set, then
     // we're finished, and we can return "100".

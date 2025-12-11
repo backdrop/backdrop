@@ -49,7 +49,7 @@ function backup_class_list() {
  *   settings.php. If multiple classes match the target, the last class in the
  *   list takes priority.
  */
-function backup_get_handler_name(string $target) {
+function backup_get_handler_name($target) {
   $class_list = array_reverse(backup_class_list(), TRUE);
   foreach ($class_list as $class_name => $class_path) {
     if (is_subclass_of($class_name, 'Backup')) {
@@ -516,7 +516,7 @@ function backup_prepare($backup_target_name, $backup_target, array &$backup_sett
  * @return BackupFile|false
  *   The BackupFile referencing the newly created backup.
  */
-function backup_execute(string $backup_target_name, string $backup_target, array $backup_settings) {
+function backup_execute($backup_target_name, $backup_target, array $backup_settings) {
   // Safety check that backup target has an associate backup handler.
   $backup_class = backup_get_handler_name($backup_target);
   if (!is_subclass_of($backup_class, 'Backup')) {
@@ -567,7 +567,7 @@ function backup_execute(string $backup_target_name, string $backup_target, array
  * @return int
  *   The number of backups removed.
  */
-function backup_limit_cleanup(int $backup_limit) {
+function backup_limit_cleanup($backup_limit) {
   $backups = backup_directory_list();
 
   if ($backup_limit <= 1) {
@@ -600,7 +600,7 @@ function backup_limit_cleanup(int $backup_limit) {
  * @return bool
  *   TRUE if the backup was deleted, FALSE on failure.
  */
-function backup_delete(string $backup_name) {
+function backup_delete($backup_name) {
   // Validate that the backup exists within the backup directory. This prevents
   // deleting any kind of file with this function other than a backup.
   $backups = backup_directory_list();
@@ -661,7 +661,7 @@ function backup_restore_prepare($backup_file, $restore_target, array &$backup_se
  * @return bool
  *   TRUE if the restore was successful, FALSE on failure.
  */
-function backup_restore_execute(string $restore_target_name, string $restore_target, string $backup_directory, array $backup_settings) {
+function backup_restore_execute($restore_target_name, $restore_target, $backup_directory, array $backup_settings) {
   // Safety check that restore target has an associate backup handler.
   $backup_class = backup_get_handler_name($restore_target);
   if (!is_subclass_of($backup_class, 'Backup', TRUE)) {
