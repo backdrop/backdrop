@@ -3422,8 +3422,9 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     $flexible_layout_configure_link = 'admin/structure/layouts/settings/flexible-template/' . $template_machine_name1 . '/configure';
     $this->backdropGet($flexible_layout_configure_link);
     // Check for the default three rows.
-    $rows = $this->xpath("//*[@id=:id]//*[contains(@id, :row_id)]", array(
-      ':id' => 'layout-flexible-edit-main', ':row_id' => 'flexible-row',
+    $rows = $this->xpath("//*[@id=:id]//*[contains(@class, :row_class)]", array(
+      ':id' => 'layout-flexible-content',
+      ':row_class' => 'l-flexible-row',
     ));
     $this->assertEqual(count($rows), 3, 'Three rows are found in the template');
 
@@ -3505,8 +3506,9 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, $edit, t('Save configuration'));
     $this->backdropPost(NULL, array(), t('Save layout template'));
 
-    $row_count = $this->xpath("//*[@id=:id]//*[contains(@id, :row_id)]", array(
-      ':id' => 'layout-flexible-edit-main', ':row_id' => 'flexible-row',
+    $row_count = $this->xpath("//*[@id=:id]//*[contains(@class, :row_class)]", array(
+      ':id' => 'layout-flexible-content',
+      ':row_class' => 'l-flexible-row',
     ));
     $this->assertEqual(count($row_count), 4, 'Four rows are found in the template');
 
@@ -3629,8 +3631,9 @@ class LayoutFlexibleTemplateTest extends BackdropWebTestCase {
     $this->backdropPost(NULL, array(), t('Save layout template'));
 
     // Check for the default three rows.
-    $rows = $this->xpath("//*[@id=:id]//*[contains(@id, :row_id)]", array(
-      ':id' => 'layout-flexible-edit-main', ':row_id' => 'flexible-row',
+    $rows = $this->xpath("//*[@id=:id]//*[contains(@class, :row_class)]", array(
+      ':id' => 'layout-flexible-content',
+      ':row_class' => 'l-flexible-row',
     ));
     $this->assertEqual(count($rows), 3, 'Three rows are found in the template');
 

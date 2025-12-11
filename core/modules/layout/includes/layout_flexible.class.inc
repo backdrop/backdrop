@@ -79,7 +79,9 @@ class LayoutFlexibleTemplate {
     if ($this->is_full_page === NULL) {
       $this->is_full_page = TRUE;
     }
-    $this->layout_template_type = ($this->layout_template_type === NULL) ? 'flexible' : _layout_check_template_type($this->layout_template_type);
+
+    $this->layout_template_type = ($this->layout_template_type === NULL) ? 'flexible' : $this->layout_template_type;
+    _layout_check_template_type($this->layout_template_type);
 
     if (empty($this->rows)) {
       $uuid = new Uuid();
@@ -136,6 +138,7 @@ class LayoutFlexibleTemplate {
   function save() {
     $data = array(
       'name' => $this->name,
+      'layout_template_type' => $this->layout_template_type,
       'title' => $this->title,
       'description' => $this->description,
       'rows' => $this->rows,
