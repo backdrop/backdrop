@@ -2683,7 +2683,8 @@ class LayoutBlockTextTest extends BackdropWebTestCase {
     $files = $this->backdropGetTestFiles('image');
     $file_info = (array) array_pop($files);
     $file_info['status'] = 0;
-    $file = new File($file_info);
+    /** @var File $file */
+    $file = entity_create('file', $file_info);
     $file->save();
     $fid = $file->fid;
     $file_info['attributes']['data-file-id'] = $fid;

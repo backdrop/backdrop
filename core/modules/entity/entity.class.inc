@@ -279,6 +279,24 @@ abstract class Entity extends stdClass implements EntityInterface {
   }
 
   /**
+   * Implements EntityInterface::label().
+   *
+   * @return string|null
+   *   The label of the entity, or NULL if there is no label defined.
+   */
+  public function label() {
+    $entity_info = entity_get_info($this->entityType());
+    $label = NULL;
+    if (isset($entity_info['label callback'])) {
+      $label = call_user_func($entity_info['label callback'], $this);
+    }
+    else if (isset($entity_info['entity keys']['label']))  {
+      $label = $this->{$entity_info['entity keys']['label']};
+    }
+    return $label;
+  }
+
+  /**
    * Implements EntityInterface::createAccess().
    */
   public static function createAccess($bundle = NULL, $account = NULL) {
@@ -319,8 +337,10 @@ abstract class Entity extends stdClass implements EntityInterface {
    * Implements EntityInterface::view().
    */
   public function view($view_mode = 'full', $langcode = NULL, $page = NULL) {
-    $view = entity_get_controller($this->entityType())->view(array($this->id() => $this), $view_mode, $langcode, $page);
-    return $view[$this->entityType()][$this->id()];
+    // It is null for newly created, but we need it as array key.
+    $id = (string) $this->id();
+    $view = entity_get_controller($this->entityType())->view(array($id => $this), $view_mode, $langcode, $page);
+    return $view[$this->entityType()][$id];
   }
 
   /**

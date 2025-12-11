@@ -1165,7 +1165,8 @@ class BackdropWebTestCase extends BackdropTestCase {
     );
     $settings['body'][$settings['langcode']][0] += $body;
 
-    $node = new Node($settings);
+    /** @var Node $node */
+    $node = entity_create('node', $settings);
     $node->save();
 
     // Small hack to link revisions to our test user.
@@ -1338,6 +1339,7 @@ class BackdropWebTestCase extends BackdropTestCase {
       $edit['roles'] = array($role_name);
     }
 
+    /** @var User $account */
     $account = entity_create('user', $edit);
     $account->save();
 
@@ -2154,7 +2156,9 @@ class BackdropWebTestCase extends BackdropTestCase {
    */
   protected function curlClose() {
     if (isset($this->curlHandle)) {
-      curl_close($this->curlHandle);
+      if (version_compare(PHP_VERSION, '8.0') < 0) {
+        curl_close($this->curlHandle);
+      }
       unset($this->curlHandle);
     }
   }

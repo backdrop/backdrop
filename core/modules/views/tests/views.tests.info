@@ -40,6 +40,12 @@ description = Tests pluggable caching for views.
 group = Views Plugins
 file = views_cache.test
 
+[ViewsClickSortTest]
+name = Click sort
+description = Test views table click sort in combination with regular sort.
+group = Views
+file = views_click_sort.test
+
 [ViewsExposedFormTest]
 name = Exposed forms
 description = Test exposed forms functionality.

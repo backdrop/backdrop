@@ -55,13 +55,14 @@ function hook_config_info() {
  *
  * @param Config $config
  *   The configuration object for the settings about to be saved.
- * @param array $config_info
+ * @param array|NULL $config_info
  *   The information about the configuration being imported, as provided by
- *   hook_config_info().
+ *   hook_config_info(). This information may not be available if creating a
+ *   config for a module that is not yet enabled.
  *
  * @throws ConfigValidateException
  */
-function hook_config_data_validate(Config $config, array $config_info) {
+function hook_config_data_validate(Config $config, ?array $config_info) {
   if ($config->getName() === 'my_module.settings') {
     if (!module_exists($config->get('module'))) {
       throw new ConfigValidateException(t('The configuration "@file" could not be imported because the module "@module" is not enabled.', array('@file' => $config->getName(), '@module' => $config->get('module'))));
@@ -86,7 +87,7 @@ function hook_config_data_validate(Config $config, array $config_info) {
  *
  * @throws ConfigValidateException
  */
-function hook_config_create_validate(Config $staging_config, $all_changes) {
+function hook_config_create_validate(Config $staging_config, ?array $all_changes) {
   if ($staging_config->getName() === 'my_module.settings') {
     // Ensure that the name key is no longer than 64 characters.
     if (strlen($staging_config->get('name')) > 64) {
@@ -114,7 +115,7 @@ function hook_config_create_validate(Config $staging_config, $all_changes) {
  *
  * @throws ConfigValidateException
  */
-function hook_config_update_validate(Config $staging_config, Config $active_config, $all_changes) {
+function hook_config_update_validate(Config $staging_config, Config $active_config, ?array $all_changes) {
   if ($staging_config->getName() === 'my_module.settings') {
     // Ensure that the name key is no longer than 64 characters.
     if (strlen($staging_config->get('name')) > 64) {
@@ -140,7 +141,7 @@ function hook_config_update_validate(Config $staging_config, Config $active_conf
  *
  * @throws ConfigValidateException
  */
-function hook_config_delete_validate(Config $active_config, $all_changes) {
+function hook_config_delete_validate(Config $active_config, ?array $all_changes) {
   if (strpos($active_config->getName(), 'image.style') === 0) {
     // Check if another configuration depends on this configuration.
     if (!isset($all_changes['my_module.settings']) || $all_changes['my_module.settings'] !== 'delete') {

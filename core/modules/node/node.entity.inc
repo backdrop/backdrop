@@ -200,13 +200,6 @@ class Node extends Entity {
   }
 
   /**
-   * Implements EntityInterface::label().
-   */
-  public function label() {
-    return $this->title;
-  }
-
-  /**
    * Implements EntityInterface::uri().
    */
   public function uri() {
@@ -708,9 +701,11 @@ class NodeStorageController extends EntityDatabaseStorageController {
 
     // Remove previously built content, if exists.
     $node->content = array();
+    // It is null for newly created, but we need it as array key.
+    $nid = (string) $node->id();
 
     // Allow modules to change the display mode.
-    $view_mode = key(entity_view_mode_prepare('node', array($node->nid => $node), $view_mode, $langcode));
+    $view_mode = key(entity_view_mode_prepare('node', array($nid => $node), $view_mode, $langcode));
 
     // The 'view' hook can be implemented to overwrite the default function
     // to display nodes.
@@ -722,8 +717,8 @@ class NodeStorageController extends EntityDatabaseStorageController {
     // In case of a multiple view, node_view_multiple() already ran the
     // 'prepare_view' step. An internal flag prevents the operation from running
     // twice.
-    field_attach_prepare_view('node', array($node->nid => $node), $view_mode, $langcode);
-    entity_prepare_view('node', array($node->nid => $node));
+    field_attach_prepare_view('node', array($nid => $node), $view_mode, $langcode);
+    entity_prepare_view('node', array($nid => $node));
     $node->content += field_attach_view('node', $node, $view_mode, $langcode);
 
     // Always display a read more link on teasers because we have no way
@@ -803,7 +798,9 @@ class NodeStorageController extends EntityDatabaseStorageController {
       // Allow modules to modify the structured node.
       $type = 'node';
       backdrop_alter(array('node_view', 'entity_view'), $build, $type);
-      $view[$type][$node->id()] = $build;
+      // It is null for newly created, but we need it as array key.
+      $nid = (string) $node->id();
+      $view[$type][$nid] = $build;
     }
 
     return $view;

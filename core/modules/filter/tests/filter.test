@@ -2288,6 +2288,7 @@ class FilterFileUsageTest extends BackdropWebTestCase {
    * Tests file usages are tracked in creating, updating, and deleting content.
    */
   function testFilterEntityHooks() {
+    /** @var File $image */
     $image = entity_create('file', array());
     $image->uri = 'core/misc/favicon.ico';
     $image->filename = 'favicon.ico';
@@ -2295,7 +2296,8 @@ class FilterFileUsageTest extends BackdropWebTestCase {
     $this->assertIdentical(array(), file_usage_list($image), 'The image has zero usages.');
 
     // Test filter_entity_insert(): increment.
-    $node = new Node(array(
+    /** @var Node $node */
+    $node = entity_create('node', array(
       'type' => 'page',
       'title' => 'test',
       'uid' => 0,

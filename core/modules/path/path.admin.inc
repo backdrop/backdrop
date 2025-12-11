@@ -209,6 +209,33 @@ function path_admin_form_delete_submit($form, &$form_state) {
 }
 
 /**
+ * Get language names from codes and concatenate to string.
+ *
+ * @param array $language_codes
+ *   Array of language codes.
+ *
+ * @return string
+ *   Comma separated language names (or codes, if the language name is unknown).
+ */
+function _path_get_language_names(array $language_codes) {
+  $languages = array();
+  foreach ($language_codes as $code) {
+    if ($code == LANGUAGE_NONE) {
+      $languages[] = t('language neutral');
+    }
+    else {
+      if ($language = language_load($code)) {
+        $languages[] = $language->name;
+      }
+      else {
+        $languages[] = $code;
+      }
+    }
+  }
+  return implode(', ', $languages);
+}
+
+/**
  * Form validation handler for path_admin_form().
  *
  * @see path_admin_form_submit()
@@ -223,18 +250,25 @@ function path_admin_form_validate($form, &$form_state) {
   // languages.
   $langcode = isset($form_state['values']['langcode']) ? $form_state['values']['langcode'] : LANGUAGE_NONE;
 
-  $has_alias = db_query("SELECT COUNT(alias) FROM {url_alias} WHERE pid <> :pid AND alias = :alias AND langcode = :langcode", array(
-      ':pid' => $pid,
-      ':alias' => $alias,
-      ':langcode' => $langcode,
-    ))
-    ->fetchField();
+  $query = db_select('url_alias', 'ua')
+    ->fields('ua', array('langcode'))
+    ->condition('pid', $pid, '<>')
+    ->condition('alias', $alias);
+  if ($langcode != LANGUAGE_NONE) {
+    $query->condition('langcode', array($langcode, LANGUAGE_NONE), 'IN');
+  }
+  $existing = $query->execute()->fetchCol();
 
-  if ($has_alias) {
-    form_set_error('alias', t('The alias %alias is already in use in this language.', array('%alias' => $alias)));
+  if (count($existing)) {
+    form_set_error('alias', t('The alias %alias conflicts with existing alias(es) for %languages.', array(
+      '%alias' => $alias,
+      '%languages' => _path_get_language_names($existing),
+    )));
   }
   if (!backdrop_valid_path($source)) {
-    form_set_error('source', t('The path <code>@link_path</code> is either invalid or you do not have access to it.', array('@link_path' => $source)));
+    form_set_error('source', t('The path <code>@link_path</code> is either invalid or you do not have access to it.', array(
+      '@link_path' => $source,
+    )));
   }
 }
 
