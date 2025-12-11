@@ -79,12 +79,7 @@ class LayoutFlexibleTemplate {
     if ($this->is_full_page === NULL) {
       $this->is_full_page = TRUE;
     }
-    if ($this->layout_template_type === NULL) {
-      $this->layout_template_type = 'flexible';
-    }
-    else {
-      _layout_check_template_type($this->layout_template_type);
-    }
+    $this->layout_template_type = ($this->layout_template_type === NULL) ? 'flexible' : _layout_check_template_type($this->layout_template_type);
 
     if (empty($this->rows)) {
       $uuid = new Uuid();
