@@ -1539,7 +1539,7 @@ function backdrop_page_get_cache($check_only = FALSE, $return_stale = FALSE) {
  * @return bool
  *   TRUE if the current page can be cached, FALSE otherwise.
  */
-function backdrop_page_is_cacheable(?bool $allow_caching = NULL) {
+function backdrop_page_is_cacheable($allow_caching = NULL) {
   $allow_caching_static = &backdrop_static(__FUNCTION__, TRUE);
   if (isset($allow_caching)) {
     $allow_caching_static = $allow_caching;
@@ -2588,7 +2588,7 @@ function backdrop_get_messages($type = NULL, $clear_queue = TRUE) {
  *   TRUE if messages should be shown on the current page. FALSE if the messages
  *   should be queued until the next page request.
  */
-function backdrop_show_messages(?bool $show = NULL) {
+function backdrop_show_messages($show = NULL) {
   $value = &backdrop_static(__FUNCTION__, TRUE);
   if (isset($show)) {
     $value = $show;
@@ -4455,7 +4455,7 @@ function backdrop_is_dialog() {
  *   TRUE if the request is in background mode. FALSE if in a normal page
  *   request and output has not yet started.
  */
-function backdrop_is_background(?bool $is_background = NULL) {
+function backdrop_is_background($is_background = NULL) {
   static $static = FALSE;
   if (isset($is_background) && $is_background === TRUE) {
     $static = $is_background;
