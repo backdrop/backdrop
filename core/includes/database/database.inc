@@ -480,7 +480,7 @@ abstract class DatabaseConnection {
    *
    * @since 1.30.0 Method added.
    */
-  function getPrefixes() {
+  public function getPrefixes() {
     return $this->prefixes;
   }
 

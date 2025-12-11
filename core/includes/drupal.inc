@@ -258,7 +258,8 @@ function drupal_set_title($title = NULL, $output = CHECK_PLAIN) {
 }
 
 /**
- * Returns a URL-safe, base64 encoded string of highly randomized bytes (over the full 8-bit range).
+ * Returns a URL-safe, base64 encoded string of highly randomized bytes (over
+ * the full 8-bit range).
  *
  * @deprecated since 1.0.0
  * @see backdrop_random_key()
@@ -314,7 +315,8 @@ function drupal_hash_base64($data) {
  * @see backdrop_array_merge_deep()
  */
 function drupal_array_merge_deep() {
-  $args = func_get_args(); // pass $args to function
+  // Pass $args to function.
+  $args = func_get_args();
   return call_user_func_array('backdrop_array_merge_deep', $args);
 }
 
@@ -916,7 +918,13 @@ function drupal_delete_file_if_stale($uri) {
  * @deprecated since 1.0.0
  * @see backdrop_clean_css_identifier()
  */
-function drupal_clean_css_identifier($identifier, $filter = array(' ' => '-', '_' => '-', '/' => '-', '[' => '-', ']' => '')) {
+function drupal_clean_css_identifier($identifier, $filter = array(
+  ' ' => '-',
+  '_' => '-',
+  '/' => '-',
+  '[' => '-',
+  ']' => '',
+)) {
   return backdrop_clean_css_identifier($identifier, $filter);
 }
 
@@ -981,7 +989,8 @@ function drupal_get_js($scope = 'header', $javascript = NULL, $skip_alter = FALS
 }
 
 /**
- * #pre_render callback to add the elements needed for JavaScript tags to be rendered.
+ * #pre_render callback to add the elements needed for JavaScript tags to be
+ * rendered.
  *
  * @deprecated since 1.0.0
  * @see backdrop_pre_render_scripts()
@@ -1728,7 +1737,8 @@ function file_create_htaccess($directory, $private = TRUE, $force_overwrite = FA
  */
 function drupal_get_form() {
   watchdog_deprecated_function('drupal', __FUNCTION__);
-  $args = func_get_args(); // pass $args to form function
+  // Pass $args to form function.
+  $args = func_get_args();
   return call_user_func_array('backdrop_get_form', $args);
 }
 
@@ -2587,7 +2597,12 @@ function system_get_date_types($type = NULL) {
  * @deprecated since 1.0.0
  * @since 1.13.1 Function added.
  */
-function views_clean_css_identifier($identifier, $filter = array(' ' => '-', '/' => '-', '[' => '-', ']' => '')) {
+function views_clean_css_identifier($identifier, $filter = array(
+  ' ' => '-',
+  '/' => '-',
+  '[' => '-',
+  ']' => '',
+)) {
   watchdog_deprecated_function('drupal', __FUNCTION__);
   backdrop_clean_css_identifier($identifier, $filter);
 }

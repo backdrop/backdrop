@@ -34,7 +34,7 @@ class BackdropDateTime extends DateTime {
     'hour',
     'minute',
     'second',
-    'timezone'
+    'timezone',
   );
 
   /**
@@ -155,7 +155,8 @@ class BackdropDateTime extends DateTime {
       if (preg_match('/[a-zA-Z]/', $tz->getName())) {
         $this->setTimezone($tz);
       }
-      // We have no information about the timezone so must fallback to a default.
+      // We have no information about the timezone so must fallback to a
+      // default.
       else {
         $this->setTimezone(new DateTimeZone("UTC"));
         $this->errors['timezone'] = t('No valid timezone name was provided.');
@@ -216,7 +217,7 @@ class BackdropDateTime extends DateTime {
    *   This object with the timezone updated.
    */
   #[\ReturnTypeWillChange]
-  public function setTimezone($timezone, $force = FALSE) {
+  public function setTimezone(DateTimeZone $timezone, $force = FALSE) {
     if (!$this->hasTime() || !$this->hasGranularity('timezone') || $force) {
       // This has no time or timezone granularity, so timezone doesn't mean
       // much. We set the timezone using the method, which will change the
@@ -331,12 +332,12 @@ class BackdropDateTime extends DateTime {
     if (!$true && $granularity) {
       foreach ((array) $granularity as $part) {
         if (!$this->hasGranularity($part) && in_array($part, array(
-              'second',
-              'minute',
-              'hour',
-              'day',
-              'month',
-              'year')
+          'second',
+          'minute',
+          'hour',
+          'day',
+          'month',
+          'year')
           )) {
           switch ($part) {
             case 'second':
@@ -389,7 +390,7 @@ class BackdropDateTime extends DateTime {
    * @param array $granularity
    *   An array of date parts.
    */
-  public function limitGranularity($granularity) {
+  public function limitGranularity(array $granularity) {
     foreach ($this->granularity as $key => $val) {
       if ($val != 'timezone' && !in_array($val, $granularity)) {
         unset($this->granularity[$key]);
@@ -653,7 +654,7 @@ class BackdropDateTime extends DateTime {
    * @return string
    *   The date formatted as an ISO-8601 string.
    */
-  public function toISO($arr, $full = FALSE) {
+  public function toISO(array $arr, $full = FALSE) {
     // Add empty values to avoid errors. The empty values must create a valid
     // date or we will get date slippage, i.e. a value of 2011-00-00 will get
     // interpreted as November of 2010 by PHP.
@@ -790,7 +791,7 @@ class BackdropDateTime extends DateTime {
    * @return array
    *   An array of error messages, keyed by date part.
    */
-  public function arrayErrors($arr) {
+  public function arrayErrors(array $arr) {
     $errors = array();
     $now = date_now();
     $default_month = !empty($arr['month']) ? $arr['month'] : $now->format('n');

@@ -9,37 +9,90 @@
  * @{
  */
 
-// bootstrap.inc
+/**
+ * @see bootstrap.inc
+ */
 abstract class DrupalCacheArray extends BackdropCacheArray {}
+
+/**
+ * @see bootstrap.inc
+ */
 class DrupalUpdateException extends BackdropUpdateException {}
 
-// cache-install.inc
+/**
+ * @see cache-install.inc
+ */
 class DrupalFakeCache extends BackdropFakeCache {}
 
-// cache.inc
+/**
+ * @see cache.inc
+ */
 class DrupalDatabaseCache extends BackdropDatabaseCache {}
+
+/**
+ * @see cache.inc
+ */
 class DrupalNullCache extends BackdropNullCache {}
 
-// stream_wrappers.inc
+/**
+ * @see stream_wrappers.inc
+ */
 abstract class DrupalLocalStreamWrapper extends BackdropLocalStreamWrapper {}
+
+/**
+ * @see stream_wrappers.inc
+ */
 class DrupalPublicStreamWrapper extends BackdropPublicStreamWrapper {}
+
+/**
+ * @see stream_wrappers.inc
+ */
 class DrupalPrivateStreamWrapper extends BackdropPrivateStreamWrapper {}
+
+/**
+ * @see stream_wrappers.inc
+ */
 class DrupalTemporaryStreamWrapper extends BackdropTemporaryStreamWrapper {}
+
+/**
+ * @see stream_wrappers.inc
+ */
 interface DrupalStreamWrapperInterface extends BackdropStreamWrapperInterface {}
 
-// updater.inc
+/**
+ * @see updater.inc
+ */
 interface DrupalUpdaterInterface extends BackdropUpdaterInterface {}
-
-// system.queue.inc
+/**
+ * @see system.queue.inc
+ */
 class DrupalQueue extends BackdropQueue {}
+
+/**
+ * @see system.queue.inc
+ */
 interface DrupalQueueInterface extends BackdropQueueInterface {}
+
+/**
+ * @see system.queue.inc
+ */
 interface DrupalReliableQueueInterface extends BackdropReliableQueueInterface {}
 
-// backdrop_web_test_case.php
+/**
+ * @see backdrop_web_test_case.php
+ */
 abstract class DrupalTestCase extends BackdropTestCase {}
+
+/**
+ * @see backdrop_web_test_case.php
+ */
 class DrupalUnitTestCase extends BackdropUnitTestCase {}
+
+/**
+ * @see backdrop_web_test_case.php
+ */
 class DrupalWebTestCase extends BackdropWebTestCase {
-  function drupalGetNodeByTitle($title, $reset) {
+  public function drupalGetNodeByTitle($title, $reset) {
     return $this->backdropGetNodeByTitle($title, $reset);
   }
   protected function drupalCreateNode($settings = array()) {
@@ -107,8 +160,17 @@ class DrupalWebTestCase extends BackdropWebTestCase {
   }
 }
 
-// entity.controller.inc
+/**
+ * Base entity controller.
+ *
+ * @see entity.controller.inc
+ */
 class DrupalDefaultEntityController extends DefaultEntityController {}
+/**
+ * Common entity controller.
+ *
+ * @see entity.controller.inc
+ */
 interface DrupalEntityControllerInterface extends EntityControllerInterface {}
 
 /**
