@@ -1451,13 +1451,13 @@ function date_range_valid($string) {
  *
  * @param string $string
  *   A min and max year string like '-3:+1'.
- * @param object|null $date
+ * @param object|string|null $date
  *   (optional) A date object. Defaults to NULL.
  *
  * @return array
  *   A numerically indexed array, containing a start and end year.
  */
-function date_range_years($string, ?object $date = NULL) {
+function date_range_years($string, $date = NULL) {
   $this_year = date_format(date_now(), 'Y');
   list($start_year, $end_year) = explode(':', $string);
 
@@ -1647,13 +1647,13 @@ function date_increment_round(&$date, $increment) {
 /**
  * Determines if a date object is valid.
  *
- * @param object|null $date
+ * @param BackdropDateTime|null $date
  *   The date object to check.
  *
  * @return bool
  *   TRUE if the date is a valid date object, FALSE otherwise.
  */
-function date_is_date(?object $date) {
+function date_is_date(?BackdropDateTime $date) {
   if (empty($date) || !is_object($date) || !empty($date->errors)) {
     return FALSE;
   }
