@@ -704,7 +704,7 @@ function hook_field_prepare_translation($entity_type, $entity, $field, $instance
  *   TRUE if $field's type considers $item not to contain any data;
  *   FALSE otherwise.
  */
-function hook_field_is_empty($item, $field) {
+function hook_field_is_empty($item, $field, $instance) {
   if (empty($item['value']) && (string) $item['value'] !== '0') {
     return TRUE;
   }
