@@ -237,7 +237,7 @@ function text_field_is_empty($item, $field, $instance) {
  *
  * @param array $item
  *   Values from text field.
- * $param array $instance
+ * @param array $instance
  *   Field API instance definition.
  *
  * @return bool
