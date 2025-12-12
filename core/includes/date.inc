@@ -608,7 +608,7 @@ function date_timezone_abbr($refresh = FALSE) {
  * Translates formatted date results, unlike PHP function date_format().
  * Should only be used for display, not input, because it can't be parsed.
  *
- * @param object|null $date
+ * @param BackdropDateTime|null $date
  *   A date object.
  * @param string $type
  *   (optional) The date format to use. Can be 'small', 'medium' or 'large' for
@@ -626,7 +626,7 @@ function date_timezone_abbr($refresh = FALSE) {
  *
  * @see format_date()
  */
-function date_format_date(?object $date, $type = 'medium', $format = '', $langcode = NULL) {
+function date_format_date(?BackdropDateTime $date, $type = 'medium', $format = '', $langcode = NULL) {
   if (empty($date)) {
     return '';
   }
@@ -724,7 +724,7 @@ function date_format_date(?object $date, $type = 'medium', $format = '', $langco
 /**
  * Formats a time interval with granularity, including past and future context.
  *
- * @param object|null $date
+ * @param BackdropDateTime|null $date
  *   The current date object.
  * @param int $granularity
  *   (optional) Number of units to display in the string. Defaults to 2.
@@ -734,7 +734,7 @@ function date_format_date(?object $date, $type = 'medium', $format = '', $langco
  *
  * @see format_interval()
  */
-function date_format_interval(?object $date, $granularity = 2, $display_ago = TRUE) {
+function date_format_interval(?BackdropDateTime $date, $granularity = 2, $display_ago = TRUE) {
   // If no date is sent, then return nothing.
   if (empty($date)) {
     return NULL;
@@ -822,7 +822,7 @@ function date_default_timezone($check_user = TRUE) {
  *   (optional) Whether or not to check for a user-configured timezone.
  *   Defaults to TRUE.
  *
- * @return object
+ * @return DateTimeZone
  *   The default timezone for a user, if available, otherwise the site.
  */
 function date_default_timezone_object($check_user = TRUE) {
@@ -842,7 +842,7 @@ function date_days_in_month($year, $month) {
 /**
  * Identifies the number of days in a year for a date.
  *
- * @param mixed $date
+ * @param BackdropDateTime|string|null $date
  *   (optional) The current date object, or a date string. Defaults to NULL.
  *
  * @return int
@@ -1451,7 +1451,7 @@ function date_range_valid($string) {
  *
  * @param string $string
  *   A min and max year string like '-3:+1'.
- * @param object|string|null $date
+ * @param BackdropDateTime|string|null $date
  *   (optional) A date object. Defaults to NULL.
  *
  * @return array
@@ -1647,13 +1647,13 @@ function date_increment_round(&$date, $increment) {
 /**
  * Determines if a date object is valid.
  *
- * @param BackdropDateTime|null $date
+ * @param mixed $date
  *   The date object to check.
  *
  * @return bool
  *   TRUE if the date is a valid date object, FALSE otherwise.
  */
-function date_is_date(?BackdropDateTime $date) {
+function date_is_date($date) {
   if (empty($date) || !is_object($date) || !empty($date->errors)) {
     return FALSE;
   }
