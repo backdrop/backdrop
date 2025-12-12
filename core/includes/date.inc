@@ -753,7 +753,7 @@ function date_format_interval(?object $date, $granularity = 2, $display_ago = TR
 /**
  * A date object for the current time.
  *
- * @param object|null $timezone
+ * @param string|null $timezone
  *   (optional) Optionally force time to a specific timezone, defaults to user
  *   timezone, if set, otherwise site timezone. Defaults to NULL.
  *
@@ -763,7 +763,7 @@ function date_format_interval(?object $date, $granularity = 2, $display_ago = TR
  * @return BackdropDateTime
  *   The current time as a date object.
  */
-function date_now(?object $timezone = NULL, $reset = FALSE) {
+function date_now($timezone = NULL, $reset = FALSE) {
   $now = &backdrop_static(__FUNCTION__ . $timezone);
 
   if (!isset($now) || $reset) {
